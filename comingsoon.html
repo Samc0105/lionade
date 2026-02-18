@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Lionade — Study Like It's Your Job</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Syne:wght@400;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --gold: #4A90D9;
+      --gold-light: #7AB8F5;
+      --gold-dim: #1E3A5F;
+      --black: #04080F;
+      --dark: #080E1A;
+      --dark2: #0D1526;
+      --white: #EEF4FF;
+      --grey: #7A8FA6;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--black);
+      color: var(--white);
+      font-family: 'Syne', sans-serif;
+      overflow-x: hidden;
+      cursor: none;
+    }
+
+    /* Custom cursor */
+    .cursor {
+      width: 12px; height: 12px;
+      background: var(--gold);
+      border-radius: 50%;
+      position: fixed; top: 0; left: 0;
+      pointer-events: none;
+      z-index: 9999;
+      transition: transform 0.1s ease;
+      mix-blend-mode: difference;
+    }
+    .cursor-ring {
+      width: 36px; height: 36px;
+      border: 1.5px solid var(--gold);
+      border-radius: 50%;
+      position: fixed; top: 0; left: 0;
+      pointer-events: none;
+      z-index: 9998;
+      transition: transform 0.18s ease, width 0.2s, height 0.2s;
+      opacity: 0.6;
+    }
+
+    /* Noise overlay */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+      opacity: 0.035;
+      pointer-events: none;
+      z-index: 1000;
+    }
+
+    /* NAV */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 24px 48px;
+      z-index: 100;
+      background: linear-gradient(to bottom, rgba(8,8,8,0.9), transparent);
+    }
+    .nav-logo {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 28px;
+      letter-spacing: 3px;
+      color: var(--gold);
+    }
+    .nav-tag {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      color: var(--gold-dim);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    /* HERO */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      padding: 120px 24px 80px;
+      text-align: center;
+      overflow: hidden;
+    }
+
+    /* Animated gold orbs */
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      pointer-events: none;
+      animation: drift 8s ease-in-out infinite;
+    }
+    .orb1 {
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(74,144,217,0.15), transparent 70%);
+      top: -100px; left: -100px;
+      animation-delay: 0s;
+    }
+    .orb2 {
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, rgba(74,144,217,0.1), transparent 70%);
+      bottom: -50px; right: -50px;
+      animation-delay: -4s;
+    }
+    .orb3 {
+      width: 300px; height: 300px;
+      background: radial-gradient(circle, rgba(122,184,245,0.08), transparent 70%);
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      animation-delay: -2s;
+    }
+    @keyframes drift {
+      0%, 100% { transform: translate(0,0) scale(1); }
+      33% { transform: translate(30px, -20px) scale(1.05); }
+      66% { transform: translate(-20px, 30px) scale(0.95); }
+    }
+
+    /* Grid lines */
+    .grid-lines {
+      position: absolute; inset: 0;
+      background-image:
+        linear-gradient(rgba(74,144,217,0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(74,144,217,0.05) 1px, transparent 1px);
+      background-size: 60px 60px;
+      pointer-events: none;
+    }
+
+    /* Ticker tape */
+    .ticker-wrap {
+      position: absolute; top: 88px; left: 0; right: 0;
+      overflow: hidden;
+      border-top: 1px solid rgba(74,144,217,0.15);
+      border-bottom: 1px solid rgba(74,144,217,0.15);
+      background: rgba(74,144,217,0.04);
+      padding: 8px 0;
+    }
+    .ticker {
+      display: flex; gap: 0;
+      animation: ticker 20s linear infinite;
+      white-space: nowrap;
+    }
+    .ticker span {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 3px;
+      color: var(--gold-dim);
+      text-transform: uppercase;
+      padding: 0 40px;
+    }
+    .ticker span.accent { color: var(--gold); }
+    @keyframes ticker {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+
+    /* Hero badge */
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(74,144,217,0.08);
+      border: 1px solid rgba(74,144,217,0.25);
+      padding: 8px 20px;
+      border-radius: 100px;
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 2px;
+      color: var(--gold);
+      text-transform: uppercase;
+      margin-bottom: 32px;
+      animation: fadeUp 0.8s ease both;
+    }
+    .hero-badge::before {
+      content: '';
+      width: 6px; height: 6px;
+      background: var(--gold);
+      border-radius: 50%;
+      animation: pulse 2s ease infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.8); }
+    }
+
+    /* Hero headline */
+    .hero-headline {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(72px, 14vw, 180px);
+      line-height: 0.9;
+      letter-spacing: 2px;
+      color: var(--white);
+      animation: fadeUp 0.8s ease 0.1s both;
+      position: relative;
+    }
+    .hero-headline .gold { color: var(--gold); }
+    .hero-headline .outline {
+      -webkit-text-stroke: 2px var(--gold);
+      color: transparent;
+    }
+
+    /* Subheadline */
+    .hero-sub {
+      font-size: clamp(16px, 2.5vw, 22px);
+      font-weight: 400;
+      color: var(--grey);
+      max-width: 560px;
+      line-height: 1.6;
+      margin: 24px auto 0;
+      animation: fadeUp 0.8s ease 0.2s both;
+    }
+    .hero-sub strong { color: var(--white); font-weight: 700; }
+
+    /* Stats row */
+    .stats-row {
+      display: flex; gap: 48px;
+      margin: 48px auto 0;
+      animation: fadeUp 0.8s ease 0.3s both;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .stat {
+      text-align: center;
+    }
+    .stat-num {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 42px;
+      color: var(--gold);
+      line-height: 1;
+    }
+    .stat-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 2px;
+      color: var(--grey);
+      text-transform: uppercase;
+      margin-top: 4px;
+    }
+
+    /* Divider */
+    .stat-divider {
+      width: 1px;
+      background: rgba(240,180,41,0.2);
+      align-self: stretch;
+    }
+
+    /* Email form */
+    .form-wrap {
+      margin: 56px auto 0;
+      width: 100%;
+      max-width: 520px;
+      animation: fadeUp 0.8s ease 0.4s both;
+    }
+    .form-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 2px;
+      color: var(--gold-dim);
+      text-transform: uppercase;
+      margin-bottom: 12px;
+      display: block;
+    }
+    .form-row {
+      display: flex;
+      background: var(--dark2);
+      border: 1px solid rgba(240,180,41,0.2);
+      border-radius: 4px;
+      overflow: hidden;
+      transition: border-color 0.2s;
+    }
+    .form-row:focus-within {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px rgba(240,180,41,0.08);
+    }
+    .form-row input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      padding: 16px 20px;
+      color: var(--white);
+      font-family: 'Syne', sans-serif;
+      font-size: 15px;
+    }
+    .form-row input::placeholder { color: rgba(255,255,255,0.2); }
+    .form-row button {
+      background: var(--gold);
+      color: var(--black);
+      border: none;
+      padding: 16px 28px;
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 18px;
+      letter-spacing: 2px;
+      cursor: none;
+      transition: background 0.2s, transform 0.1s;
+      white-space: nowrap;
+    }
+    .form-row button:hover { background: var(--gold-light); }
+    .form-row button:active { transform: scale(0.98); }
+
+    .form-note {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      color: rgba(255,255,255,0.2);
+      margin-top: 10px;
+      letter-spacing: 1px;
+    }
+
+    /* Success state */
+    .success-msg {
+      display: none;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 24px;
+      background: rgba(240,180,41,0.08);
+      border: 1px solid rgba(240,180,41,0.3);
+      border-radius: 4px;
+      font-family: 'DM Mono', monospace;
+      font-size: 13px;
+      color: var(--gold);
+      letter-spacing: 1px;
+    }
+    .success-msg.show { display: flex; }
+
+    /* HOW IT WORKS */
+    .section {
+      padding: 120px 48px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .section-tag {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 3px;
+      color: var(--gold);
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+    .section-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(48px, 7vw, 96px);
+      line-height: 0.95;
+      color: var(--white);
+      margin-bottom: 64px;
+    }
+    .section-title span { color: var(--gold); }
+
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 2px;
+    }
+    .step {
+      background: var(--dark);
+      padding: 40px 32px;
+      position: relative;
+      overflow: hidden;
+      transition: background 0.3s;
+    }
+    .step:hover { background: var(--dark2); }
+    .step::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(to right, var(--gold), transparent);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .step:hover::before { opacity: 1; }
+
+    .step-num {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 72px;
+      color: rgba(240,180,41,0.1);
+      line-height: 1;
+      margin-bottom: 16px;
+      transition: color 0.3s;
+    }
+    .step:hover .step-num { color: rgba(240,180,41,0.2); }
+    .step-icon { font-size: 28px; margin-bottom: 16px; }
+    .step-title {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 20px;
+      color: var(--white);
+      margin-bottom: 12px;
+    }
+    .step-desc {
+      font-size: 14px;
+      color: var(--grey);
+      line-height: 1.7;
+    }
+    .step-desc strong { color: var(--gold); }
+
+    /* FEATURES */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2px;
+    }
+    .feature {
+      padding: 40px 36px;
+      background: var(--dark);
+      border-left: 2px solid transparent;
+      transition: border-color 0.3s, background 0.3s;
+    }
+    .feature:hover {
+      background: var(--dark2);
+      border-left-color: var(--gold);
+    }
+    .feature-emoji { font-size: 32px; margin-bottom: 20px; display: block; }
+    .feature-title {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 18px;
+      color: var(--white);
+      margin-bottom: 10px;
+    }
+    .feature-desc {
+      font-size: 14px;
+      color: var(--grey);
+      line-height: 1.7;
+    }
+
+    /* BIG CTA */
+    .cta-section {
+      padding: 120px 48px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .cta-section::before {
+      content: 'LIONADE';
+      position: absolute;
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 300px;
+      color: rgba(240,180,41,0.03);
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      white-space: nowrap;
+      letter-spacing: 20px;
+    }
+    .cta-headline {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(56px, 10vw, 130px);
+      line-height: 0.95;
+      position: relative;
+    }
+    .cta-headline .line2 { color: var(--gold); }
+
+    /* FOOTER */
+    footer {
+      border-top: 1px solid rgba(240,180,41,0.1);
+      padding: 32px 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .footer-logo {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 24px;
+      color: var(--gold);
+      letter-spacing: 3px;
+    }
+    .footer-text {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      color: rgba(255,255,255,0.2);
+      letter-spacing: 1px;
+    }
+    .footer-origin {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      color: var(--gold-dim);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    /* Animations */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(40px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: var(--black); }
+    ::-webkit-scrollbar-thumb { background: var(--gold-dim); border-radius: 2px; }
+
+    @media (max-width: 600px) {
+      nav { padding: 20px 24px; }
+      .section { padding: 80px 24px; }
+      .cta-section { padding: 80px 24px; }
+      footer { padding: 24px; flex-direction: column; text-align: center; }
+      .stat-divider { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="cursor" id="cursor"></div>
+  <div class="cursor-ring" id="cursorRing"></div>
+
+  <!-- NAV -->
+  <nav>
+    <div class="nav-logo">LIONADE</div>
+    <div class="nav-tag">Coming Soon — 2026</div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="orb orb1"></div>
+    <div class="orb orb2"></div>
+    <div class="orb orb3"></div>
+    <div class="grid-lines"></div>
+
+    <!-- Ticker -->
+    <div class="ticker-wrap">
+      <div class="ticker">
+        <span>Study Hard</span><span class="accent">💰 Get Paid</span>
+        <span>Daily Grind</span><span class="accent">🔥 Real Rewards</span>
+        <span>Clock In</span><span class="accent">🦁 Level Up</span>
+        <span>Your Knowledge</span><span class="accent">⚡ Your Check</span>
+        <span>Study Hard</span><span class="accent">💰 Get Paid</span>
+        <span>Daily Grind</span><span class="accent">🔥 Real Rewards</span>
+        <span>Clock In</span><span class="accent">🦁 Level Up</span>
+        <span>Your Knowledge</span><span class="accent">⚡ Your Check</span>
+      </div>
+    </div>
+
+    <div class="hero-badge">🦁 Born from a grind · Built for everyone</div>
+
+    <h1 class="hero-headline">
+      STUDY<br>
+      <span class="gold">LIKE IT'S</span><br>
+      <span class="outline">YOUR JOB</span>
+    </h1>
+
+    <p class="hero-sub">
+      You already put in the hours. <strong>Now get paid for them.</strong><br>
+      Lionade is the platform that rewards your grind — daily quizzes, real competition, and actual cash for your knowledge.
+    </p>
+
+    <div class="stats-row">
+      <div class="stat">
+        <div class="stat-num">∞</div>
+        <div class="stat-label">Subjects</div>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat">
+        <div class="stat-num">$0</div>
+        <div class="stat-label">To Join</div>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat">
+        <div class="stat-num">1V1</div>
+        <div class="stat-label">Duels</div>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat">
+        <div class="stat-num">🔥</div>
+        <div class="stat-label">Daily Streaks</div>
+      </div>
+    </div>
+
+    <!-- EMAIL FORM -->
+    <div class="form-wrap">
+      <span class="form-label">Join the waitlist — be first in line</span>
+      <div class="form-row" id="formRow">
+        <input type="email" id="emailInput" placeholder="your@email.com" />
+        <button onclick="handleSubmit()">LOCK IN</button>
+      </div>
+      <div class="success-msg" id="successMsg">
+        ✅ You're on the list. We'll hit you when we drop. 🦁
+      </div>
+      <p class="form-note">No spam. No cap. Just early access.</p>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="section">
+    <div class="reveal">
+      <p class="section-tag">// How It Works</p>
+      <h2 class="section-title">YOUR DAILY<br><span>GRIND</span></h2>
+    </div>
+    <div class="steps reveal">
+      <div class="step">
+        <div class="step-num">01</div>
+        <div class="step-icon">🎯</div>
+        <div class="step-title">Clock In Daily</div>
+        <div class="step-desc">Open Lionade and start your <strong>Daily Grind</strong> — AI-generated quizzes in your subject. Every correct answer adds to your streak and your bag.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">02</div>
+        <div class="step-icon">⚔️</div>
+        <div class="step-title">Duel & Compete</div>
+        <div class="step-desc">Challenge anyone to a <strong>1v1 match</strong> or enter weekly team tournaments. The more you win, the higher you climb — and the more you earn.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">03</div>
+        <div class="step-icon">💰</div>
+        <div class="step-title">Stack Rewards</div>
+        <div class="step-desc">Top performers earn <strong>real rewards</strong>. Coins, badges, and eventually real cash payouts — because your study time is worth something.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">04</div>
+        <div class="step-icon">🏆</div>
+        <div class="step-title">Get Promoted</div>
+        <div class="step-desc">Rank up high enough and <strong>unlock tutoring</strong> — set your rate, help others, and earn a second income stream from your knowledge.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section class="section" style="padding-top: 0;">
+    <div class="reveal">
+      <p class="section-tag">// What You Get</p>
+      <h2 class="section-title">BUILT<br><span>DIFFERENT</span></h2>
+    </div>
+    <div class="features-grid reveal">
+      <div class="feature">
+        <span class="feature-emoji">🤖</span>
+        <div class="feature-title">AI-Powered Questions</div>
+        <div class="feature-desc">Every quiz adapts to your level in real time. The harder you grind, the harder it gets — and the more you earn.</div>
+      </div>
+      <div class="feature">
+        <span class="feature-emoji">📚</span>
+        <div class="feature-title">Every Subject Covered</div>
+        <div class="feature-desc">Math, Science, Languages, SAT/ACT, Coding, Finance, AWS, CompTIA and more. If it can be tested, it's in Lionade.</div>
+      </div>
+      <div class="feature">
+        <span class="feature-emoji">🔥</span>
+        <div class="feature-title">Streak Culture</div>
+        <div class="feature-desc">Your streak is your attendance record. Maintain it, flex it, and watch your rewards multiply the longer you stay consistent.</div>
+      </div>
+      <div class="feature">
+        <span class="feature-emoji">👥</span>
+        <div class="feature-title">Team Leagues</div>
+        <div class="feature-desc">Form a squad with your friends and go head-to-head against other teams in weekly tournaments with prize pools on the line.</div>
+      </div>
+      <div class="feature">
+        <span class="feature-emoji">🌍</span>
+        <div class="feature-title">For Everyone</div>
+        <div class="feature-desc">Whether you're 16 prepping for the SAT or 35 chasing a cloud cert — Lionade works for every learner at every stage.</div>
+      </div>
+      <div class="feature">
+        <span class="feature-emoji">📱</span>
+        <div class="feature-title">Web First</div>
+        <div class="feature-desc">No app download needed. Open your browser, clock in, and start grinding. Available anywhere, anytime.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- BIG CTA -->
+  <section class="cta-section">
+    <h2 class="cta-headline reveal">
+      STOP<br>
+      STUDYING<br>
+      <span class="line2">FOR FREE.</span>
+    </h2>
+    <div class="form-wrap reveal" style="margin-top: 48px;">
+      <div class="form-row" id="formRow2">
+        <input type="email" id="emailInput2" placeholder="Drop your email, get early access" />
+        <button onclick="handleSubmit2()">LOCK IN</button>
+      </div>
+      <div class="success-msg" id="successMsg2">
+        ✅ You're on the list. We'll hit you when we drop. 🦁
+      </div>
+      <p class="form-note">Free to join · No credit card · No cap</p>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-logo">LIONADE</div>
+    <div class="footer-origin">🦁 Where champions are made — 2026</div>
+    <div class="footer-text">© 2026 getlionade.com · All rights reserved</div>
+  </footer>
+
+  <script>
+    // Custom cursor
+    const cursor = document.getElementById('cursor');
+    const ring = document.getElementById('cursorRing');
+    let mx = 0, my = 0, rx = 0, ry = 0;
+
+    document.addEventListener('mousemove', e => {
+      mx = e.clientX; my = e.clientY;
+      cursor.style.transform = `translate(${mx - 6}px, ${my - 6}px)`;
+    });
+
+    function animateRing() {
+      rx += (mx - rx - 18) * 0.15;
+      ry += (my - ry - 18) * 0.15;
+      ring.style.transform = `translate(${rx}px, ${ry}px)`;
+      requestAnimationFrame(animateRing);
+    }
+    animateRing();
+
+    document.querySelectorAll('button, a, input').forEach(el => {
+      el.addEventListener('mouseenter', () => {
+        cursor.style.transform += ' scale(1.8)';
+        ring.style.width = '50px';
+        ring.style.height = '50px';
+      });
+      el.addEventListener('mouseleave', () => {
+        ring.style.width = '36px';
+        ring.style.height = '36px';
+      });
+    });
+
+    // Scroll reveal
+    const reveals = document.querySelectorAll('.reveal');
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach((e, i) => {
+        if (e.isIntersecting) {
+          setTimeout(() => e.target.classList.add('visible'), i * 80);
+        }
+      });
+    }, { threshold: 0.1 });
+    reveals.forEach(el => observer.observe(el));
+
+    // Form handlers
+    function handleSubmit() {
+      const email = document.getElementById('emailInput').value;
+      if (!email || !email.includes('@')) {
+        document.getElementById('emailInput').style.borderBottom = '1px solid red';
+        return;
+      }
+      document.getElementById('formRow').style.display = 'none';
+      document.getElementById('successMsg').classList.add('show');
+    }
+
+    function handleSubmit2() {
+      const email = document.getElementById('emailInput2').value;
+      if (!email || !email.includes('@')) return;
+      document.getElementById('formRow2').style.display = 'none';
+      document.getElementById('successMsg2').classList.add('show');
+    }
+
+    // Enter key support
+    document.getElementById('emailInput').addEventListener('keydown', e => {
+      if (e.key === 'Enter') handleSubmit();
+    });
+    document.getElementById('emailInput2').addEventListener('keydown', e => {
+      if (e.key === 'Enter') handleSubmit2();
+    });
+  </script>
+</body>
+</html>
