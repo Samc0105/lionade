@@ -75,6 +75,7 @@
 - Compete rank strip uses mock values (0 wins, unranked).
 
 ## Recent Changes
+- **CSS/styling fix**: Removed duplicate CSP headers from `next.config.js` (middleware.ts already handles them). Duplicate CSP headers caused browsers to block inline styles in dev mode, resulting in unstyled HTML. Security headers now live only in `middleware.ts`.
 - UI + features pass: Dashboard as performance center, Learn with Ninny, Compete with rank strip.
 - Nav + UI cleanup: slim nav, 3 tabs, avatar dropdown, /learn + /compete hub pages.
 - Security layers: rate limiting, input sanitization, brute force protection, session expiry, security headers.
