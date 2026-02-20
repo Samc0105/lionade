@@ -519,6 +519,106 @@
       footer { padding: 24px; flex-direction: column; text-align: center; }
       .stat-divider { display: none; }
     }
+
+    /* DevOps modal */
+    #devops-modal {
+      position: fixed; inset: 0; z-index: 10000;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(6px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+    #devops-modal.open { display: flex; }
+    .devops-box {
+      background: #0D1526;
+      border: 1px solid rgba(74, 144, 217, 0.25);
+      border-radius: 8px;
+      padding: 40px 36px;
+      width: 100%;
+      max-width: 400px;
+      margin: 24px;
+    }
+    .devops-tag {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 3px;
+      color: rgba(74, 144, 217, 0.5);
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+    .devops-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 30px;
+      letter-spacing: 2px;
+      color: var(--white);
+      margin-bottom: 28px;
+    }
+    #devops-pw-input {
+      width: 100%;
+      background: #080E1A;
+      border: 1px solid rgba(74, 144, 217, 0.2);
+      border-radius: 4px;
+      padding: 14px 16px;
+      color: var(--white);
+      font-family: 'Syne', sans-serif;
+      font-size: 15px;
+      outline: none;
+      margin-bottom: 12px;
+      transition: border-color 0.2s;
+    }
+    #devops-pw-input:focus { border-color: rgba(74, 144, 217, 0.6); }
+    #devops-pw-input::placeholder { color: rgba(255,255,255,0.2); }
+    #devops-submit {
+      width: 100%;
+      background: var(--gold);
+      color: var(--black);
+      border: none;
+      padding: 14px;
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 18px;
+      letter-spacing: 2px;
+      border-radius: 4px;
+      cursor: none;
+      transition: background 0.2s;
+    }
+    #devops-submit:hover { background: var(--gold-light); }
+    #devops-error {
+      display: none;
+      margin-top: 14px;
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      color: #ef4444;
+      letter-spacing: 2px;
+      text-align: center;
+      text-transform: uppercase;
+    }
+    #devops-success {
+      display: none;
+      margin-top: 14px;
+      text-align: center;
+    }
+    .devops-granted {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      color: var(--gold);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+    }
+    .devops-enter-btn {
+      display: inline-block;
+      background: var(--gold);
+      color: var(--black);
+      text-decoration: none;
+      padding: 14px 36px;
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 20px;
+      letter-spacing: 2px;
+      border-radius: 4px;
+      transition: background 0.2s;
+    }
+    .devops-enter-btn:hover { background: var(--gold-light); }
   </style>
 </head>
 <body>
@@ -702,6 +802,26 @@
     <div class="footer-text">© 2026 getlionade.com · All rights reserved</div>
   </footer>
 
+  <!-- Hidden trigger — looks like a copyright line -->
+  <div style="text-align:center; padding:10px; background:var(--black);">
+    <span id="devops-trigger" style="font-family:'DM Mono',monospace; font-size:10px; color:rgba(255,255,255,0.08); letter-spacing:1px; user-select:none;">© 2026 Lionade</span>
+  </div>
+
+  <!-- DevOps access modal -->
+  <div id="devops-modal">
+    <div class="devops-box">
+      <div class="devops-tag">// Internal Access</div>
+      <div class="devops-title">DEVOPS LOGIN</div>
+      <input id="devops-pw-input" type="password" placeholder="Enter password" autocomplete="off" />
+      <button id="devops-submit" onclick="devopsSubmit()">SUBMIT</button>
+      <div id="devops-error">Access Denied</div>
+      <div id="devops-success">
+        <div class="devops-granted">✓ Access Granted</div>
+        <a class="devops-enter-btn" href="http://localhost:3000">ENTER BETA</a>
+      </div>
+    </div>
+  </div>
+
   <script>
     // Custom cursor
     const cursor = document.getElementById('cursor');
@@ -769,6 +889,65 @@
     document.getElementById('emailInput2').addEventListener('keydown', e => {
       if (e.key === 'Enter') handleSubmit2();
     });
+
+    // DevOps hidden access — 5 rapid clicks on the copyright trigger
+    (function () {
+      const trigger = document.getElementById('devops-trigger');
+      const modal = document.getElementById('devops-modal');
+      let clicks = 0;
+      let resetTimer = null;
+
+      trigger.addEventListener('click', function () {
+        clicks++;
+        clearTimeout(resetTimer);
+        if (clicks >= 5) {
+          clicks = 0;
+          openDevOpsModal();
+        } else {
+          resetTimer = setTimeout(function () { clicks = 0; }, 1500);
+        }
+      });
+
+      // Close on backdrop click
+      modal.addEventListener('click', function (e) {
+        if (e.target === modal) closeDevOpsModal();
+      });
+
+      // Keyboard support inside the modal
+      document.getElementById('devops-pw-input').addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') devopsSubmit();
+        if (e.key === 'Escape') closeDevOpsModal();
+      });
+    })();
+
+    function openDevOpsModal() {
+      const modal = document.getElementById('devops-modal');
+      document.getElementById('devops-pw-input').value = '';
+      document.getElementById('devops-pw-input').style.display = '';
+      document.getElementById('devops-submit').style.display = '';
+      document.getElementById('devops-error').style.display = 'none';
+      document.getElementById('devops-success').style.display = 'none';
+      modal.classList.add('open');
+      setTimeout(function () { document.getElementById('devops-pw-input').focus(); }, 80);
+    }
+
+    function closeDevOpsModal() {
+      document.getElementById('devops-modal').classList.remove('open');
+    }
+
+    function devopsSubmit() {
+      const val = document.getElementById('devops-pw-input').value;
+      if (val === 'LionadeDevOps2026') {
+        document.getElementById('devops-pw-input').style.display = 'none';
+        document.getElementById('devops-submit').style.display = 'none';
+        document.getElementById('devops-error').style.display = 'none';
+        document.getElementById('devops-success').style.display = 'block';
+      } else {
+        document.getElementById('devops-error').style.display = 'block';
+        document.getElementById('devops-pw-input').value = '';
+        setTimeout(closeDevOpsModal, 1500);
+      }
+    }
   </script>
 </body>
 </html>
