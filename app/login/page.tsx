@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth";
 import type { SignupExtra } from "@/lib/auth";
+import { supabase } from "@/lib/supabase";
 import Link from "next/link";
 
 type Tab = "login" | "signup";
@@ -53,6 +54,8 @@ const STEPS = [
   { n: 3, label: "Goals" },
 ];
 
+const RESERVED_USERNAMES = ["admin", "root", "lionade", "support", "help", "ninny"];
+
 // Max date of birth = 13 years ago today
 const maxDob = (() => {
   const d = new Date();
@@ -73,6 +76,16 @@ export default function LoginPage() {
   const [tab, setTab] = useState<Tab>("login");
   const [step, setStep] = useState(1);
 
+  // Detect email verification redirect synchronously to avoid race with auth state
+  const [showVerifiedBanner] = useState(() => {
+    if (typeof window === "undefined") return false;
+    const hash = window.location.hash;
+    const params = new URLSearchParams(window.location.search);
+    const isVerified = hash.includes("type=signup") || params.get("type") === "signup";
+    if (isVerified) window.history.replaceState(null, "", window.location.pathname);
+    return isVerified;
+  });
+
   // Login fields
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
@@ -81,6 +94,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [firstName, setFirstName] = useState("");
   const [dob, setDob] = useState("");
   const [educationLevel, setEducationLevel] = useState("");
@@ -90,17 +104,53 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [signupSuccess, setSignupSuccess] = useState(false);
+  const [usernameStatus, setUsernameStatus] = useState<"idle" | "checking" | "available" | "taken">("idle");
 
+  // Password strength checks
+  const pwChecks = {
+    length: password.length >= 8,
+    upper: /[A-Z]/.test(password),
+    lower: /[a-z]/.test(password),
+    number: /[0-9]/.test(password),
+    special: /[!@#$%^&*]/.test(password),
+  };
+  const pwStrong = Object.values(pwChecks).every(Boolean);
+  const passwordsMatch = confirmPassword === "" || password === confirmPassword;
+
+  // Redirect if already logged in — delay 2.5s when showing verified banner so user sees it
   useEffect(() => {
-    if (!isLoading && user) router.replace("/dashboard");
-  }, [user, isLoading, router]);
+    if (!isLoading && user) {
+      if (showVerifiedBanner) {
+        const t = setTimeout(() => router.replace("/dashboard"), 2500);
+        return () => clearTimeout(t);
+      } else {
+        router.replace("/dashboard");
+      }
+    }
+  }, [user, isLoading, router, showVerifiedBanner]);
+
+  // Username availability check — debounced 500ms
+  useEffect(() => {
+    if (username.length < 3) { setUsernameStatus("idle"); return; }
+    if (RESERVED_USERNAMES.includes(username)) { setUsernameStatus("taken"); return; }
+    setUsernameStatus("checking");
+    const timer = setTimeout(async () => {
+      const { data } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("username", username)
+        .maybeSingle();
+      setUsernameStatus(data ? "taken" : "available");
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [username]);
 
   if (isLoading) return (
     <div className="min-h-screen bg-navy flex items-center justify-center">
       <div className="w-10 h-10 rounded-full border-2 border-electric border-t-transparent animate-spin" />
     </div>
   );
-  if (user) return null;
+  if (user && !showVerifiedBanner) return null;
 
   // ── Login submit ──────────────────────────────────────
   const handleLogin = async (e: React.FormEvent) => {
@@ -114,7 +164,6 @@ export default function LoginPage() {
       setError(err.includes("Invalid") ? "Wrong email or password" : err);
       setSubmitting(false);
     } else {
-      console.log("[Login] Success — redirecting to /dashboard");
       router.replace("/dashboard");
     }
   };
@@ -127,8 +176,13 @@ export default function LoginPage() {
       if (!email.includes("@")) { setError("Enter a valid email address"); return false; }
       if (!username.trim()) { setError("Username is required"); return false; }
       if (username.trim().length < 3) { setError("Username must be at least 3 characters"); return false; }
+      if (RESERVED_USERNAMES.includes(username.trim())) { setError("That username is not available"); return false; }
+      if (usernameStatus === "taken") { setError("That username is already taken"); return false; }
+      if (usernameStatus === "checking") { setError("Please wait — checking username availability"); return false; }
       if (!password) { setError("Password is required"); return false; }
-      if (password.length < 6) { setError("Password must be at least 6 characters"); return false; }
+      if (!pwStrong) { setError("Password doesn't meet all requirements"); return false; }
+      if (!confirmPassword) { setError("Please confirm your password"); return false; }
+      if (password !== confirmPassword) { setError("Passwords do not match"); return false; }
     }
     if (step === 2) {
       if (!firstName.trim()) { setError("First name is required"); return false; }
@@ -167,7 +221,12 @@ export default function LoginPage() {
       studyGoal,
       referralSource,
     };
-    const { error: err } = await signup(email.trim(), username.trim(), password, extra);
+    const { error: err } = await signup(
+      email.trim().toLowerCase(),
+      username.trim().toLowerCase(),
+      password,
+      extra
+    );
     if (err) {
       setError(err);
       setSubmitting(false);
@@ -178,10 +237,11 @@ export default function LoginPage() {
 
   const resetSignup = () => {
     setStep(1);
-    setEmail(""); setUsername(""); setPassword("");
+    setEmail(""); setUsername(""); setPassword(""); setConfirmPassword("");
     setFirstName(""); setDob(""); setEducationLevel("");
     setStudyGoal(""); setReferralSource("");
     setError(""); setSignupSuccess(false);
+    setUsernameStatus("idle");
   };
 
   // ─────────────────────────────────────────────────────
@@ -198,6 +258,17 @@ export default function LoginPage() {
         style={{ background: "radial-gradient(circle, #F0B429 0%, transparent 70%)" }} />
 
       <div className="relative z-10 w-full max-w-md animate-slide-up">
+
+        {/* Email verified banner */}
+        {showVerifiedBanner && (
+          <div className="mb-4 flex items-center gap-3 px-4 py-3.5 rounded-xl bg-green-400/10 border border-green-400/30 animate-slide-up">
+            <span className="text-green-400 text-lg leading-none">✓</span>
+            <p className="text-green-400 text-sm font-semibold">
+              Email verified! You can now log in.
+            </p>
+          </div>
+        )}
+
         {/* Logo */}
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-3 group">
@@ -252,8 +323,15 @@ export default function LoginPage() {
                 <form onSubmit={handleLogin} className="space-y-4">
                   <div>
                     <label className={labelCls}>Email</label>
-                    <input type="email" value={loginEmail} onChange={(e) => setLoginEmail(e.target.value)}
-                      placeholder="you@example.com" autoComplete="email" className={inputCls} />
+                    <input
+                      type="email"
+                      value={loginEmail}
+                      onChange={(e) => setLoginEmail(e.target.value)}
+                      placeholder="you@example.com"
+                      autoComplete="email"
+                      autoFocus={showVerifiedBanner}
+                      className={inputCls}
+                    />
                   </div>
                   <div>
                     <label className={labelCls}>Password</label>
@@ -303,18 +381,67 @@ export default function LoginPage() {
                         <input type="email" value={email} onChange={(e) => setEmail(e.target.value)}
                           placeholder="you@example.com" autoComplete="email" className={inputCls} />
                       </div>
+
+                      {/* Username with live availability */}
                       <div>
                         <label className={labelCls}>Username</label>
-                        <input type="text" value={username}
-                          onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ""))}
-                          placeholder="your_handle" autoComplete="username" className={inputCls} />
+                        <div className="relative">
+                          <input
+                            type="text"
+                            value={username}
+                            onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ""))}
+                            placeholder="your_handle"
+                            autoComplete="username"
+                            className={inputCls + " pr-28"}
+                          />
+                          {usernameStatus === "checking" && (
+                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-cream/40 text-xs">Checking...</span>
+                          )}
+                          {usernameStatus === "available" && (
+                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-green-400 text-xs font-semibold">✓ Available</span>
+                          )}
+                          {usernameStatus === "taken" && (
+                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-red-400 text-xs font-semibold">✗ Taken</span>
+                          )}
+                        </div>
                         <p className="text-cream/25 text-xs mt-1.5">Lowercase letters, numbers, underscores only</p>
                       </div>
+
+                      {/* Password with strength checklist */}
                       <div>
                         <label className={labelCls}>Password</label>
                         <input type="password" value={password} onChange={(e) => setPassword(e.target.value)}
-                          placeholder="Min. 6 characters" autoComplete="new-password" className={inputCls} />
+                          placeholder="Min. 8 characters" autoComplete="new-password" className={inputCls} />
+                        {password.length > 0 && (
+                          <div className="mt-2.5 space-y-1.5 px-1">
+                            <PwCheck ok={pwChecks.length} label="At least 8 characters" />
+                            <PwCheck ok={pwChecks.upper} label="One uppercase letter" />
+                            <PwCheck ok={pwChecks.lower} label="One lowercase letter" />
+                            <PwCheck ok={pwChecks.number} label="One number" />
+                            <PwCheck ok={pwChecks.special} label="One special character (!@#$%^&*)" />
+                          </div>
+                        )}
                       </div>
+
+                      {/* Confirm password with live match indicator */}
+                      <div>
+                        <label className={labelCls}>Confirm Password</label>
+                        <input
+                          type="password"
+                          value={confirmPassword}
+                          onChange={(e) => setConfirmPassword(e.target.value)}
+                          placeholder="Re-enter your password"
+                          autoComplete="new-password"
+                          className={inputCls}
+                        />
+                        {confirmPassword.length > 0 && !passwordsMatch && (
+                          <p className="text-red-400 text-xs font-semibold mt-1.5">Passwords do not match</p>
+                        )}
+                        {confirmPassword.length > 0 && passwordsMatch && (
+                          <p className="text-green-400 text-xs font-semibold mt-1.5">✓ Passwords match</p>
+                        )}
+                      </div>
+
                       {error && <ErrorBox msg={error} />}
                       <button onClick={nextStep} type="button"
                         className="w-full py-3.5 rounded-xl font-bold text-sm bg-electric text-white hover:bg-electric/90 transition-all duration-200 shadow-lg shadow-electric/20 mt-2">
@@ -451,6 +578,15 @@ export default function LoginPage() {
 }
 
 // ── Small helpers ─────────────────────────────────────
+
+function PwCheck({ ok, label }: { ok: boolean; label: string }) {
+  return (
+    <div className={`flex items-center gap-2 text-xs font-medium transition-colors duration-200 ${ok ? "text-green-400" : "text-red-400"}`}>
+      <span className="w-3 flex-shrink-0">{ok ? "✓" : "✗"}</span>
+      <span>{label}</span>
+    </div>
+  );
+}
 
 function ErrorBox({ msg }: { msg: string }) {
   return (

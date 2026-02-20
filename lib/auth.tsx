@@ -201,6 +201,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       email,
       password,
       options: {
+        emailRedirectTo: "https://app.getlionade.com/login",
         data: {
           username: username.trim(),
           display_name: extra?.firstName ?? username.trim(),
