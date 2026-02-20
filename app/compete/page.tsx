@@ -35,18 +35,60 @@ export default function CompetePage() {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
           {/* Header */}
-          <div className="mb-8 animate-slide-up">
+          <div className="mb-6 animate-slide-up">
             <h1 className="font-bebas text-4xl sm:text-5xl text-cream tracking-wider">COMPETE</h1>
             <p className="text-cream/40 text-sm mt-1">Test yourself against others. Climb the ranks.</p>
           </div>
 
-          {/* Tiles grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            {COMPETE_TILES.map((tile) => (
+          {/* ═══ Rank Summary Strip ═══ */}
+          <div className="card mb-8 animate-slide-up" style={{ animationDelay: "0.05s" }}>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-lg bg-electric/10 border border-electric/20 flex items-center justify-center flex-shrink-0">
+                  <span className="text-base">&#x1F3C5;</span>
+                </div>
+                <div>
+                  <p className="font-bebas text-xl text-cream leading-none">Unranked</p>
+                  <p className="text-cream/40 text-[10px] font-semibold uppercase tracking-widest">Your Rank</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-lg bg-green-500/10 border border-green-500/20 flex items-center justify-center flex-shrink-0">
+                  <span className="text-base">&#x2705;</span>
+                </div>
+                <div>
+                  <p className="font-bebas text-xl text-green-400 leading-none">0</p>
+                  <p className="text-cream/40 text-[10px] font-semibold uppercase tracking-widest">Wins</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-lg bg-orange-500/10 border border-orange-500/20 flex items-center justify-center flex-shrink-0">
+                  <span className="text-base">&#x1F525;</span>
+                </div>
+                <div>
+                  <p className="font-bebas text-xl text-orange-400 leading-none">0</p>
+                  <p className="text-cream/40 text-[10px] font-semibold uppercase tracking-widest">Win Streak</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-lg bg-gold/10 border border-gold/20 flex items-center justify-center flex-shrink-0">
+                  <span className="text-base">&#x1F3AF;</span>
+                </div>
+                <div>
+                  <p className="font-bebas text-xl text-gold leading-none">Top 10%</p>
+                  <p className="text-cream/40 text-[10px] font-semibold uppercase tracking-widest">Goal</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* ═══ Mode Tiles ═══ */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+            {COMPETE_TILES.map((tile, i) => (
               <Link key={tile.title} href={tile.href}>
                 <div
-                  className="relative card-hover p-6 rounded-xl group cursor-pointer h-full"
-                  style={{ borderColor: `${tile.accent}30` }}
+                  className="relative card-hover p-6 rounded-xl group cursor-pointer h-full animate-slide-up"
+                  style={{ borderColor: `${tile.accent}30`, animationDelay: `${0.1 + i * 0.05}s` }}
                 >
                   {tile.comingSoon && (
                     <span className="absolute top-4 right-4 text-[10px] font-bold uppercase tracking-widest
@@ -65,6 +107,26 @@ export default function CompetePage() {
                 </div>
               </Link>
             ))}
+          </div>
+
+          {/* ═══ Weekly Tournament (Coming Soon) ═══ */}
+          <div className="animate-slide-up" style={{ animationDelay: "0.25s" }}>
+            <div className="relative card p-6 rounded-xl" style={{ borderColor: "#9B59B630" }}>
+              <span className="absolute top-4 right-4 text-[10px] font-bold uppercase tracking-widest
+                px-2 py-0.5 rounded-full border text-cream/50"
+                style={{ borderColor: "#9B59B640", background: "#9B59B615" }}>
+                Soon
+              </span>
+              <div className="flex items-center gap-4">
+                <span className="text-4xl">&#x1F3C6;</span>
+                <div className="flex-1">
+                  <p className="font-bebas text-2xl tracking-wider" style={{ color: "#9B59B6" }}>Weekly Tournament</p>
+                  <p className="text-cream/50 text-sm mt-0.5">
+                    Compete in a week-long bracket against other players. Top 3 earn exclusive badges and coin prizes.
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>

@@ -8,9 +8,9 @@
 - **Avatar dropdown menu** with Profile, Badges, Wallet/Rewards, Settings, Help/Support, Log Out.
 - **Mobile bottom nav** (Home, Learn, Compete) replaces hamburger menu.
 - **CTA "Clock In" button** in nav bar routes to /quiz.
-- Dashboard with stats strip, subject mastery, recent activity, and leaderboard preview.
-- `/learn` hub page with tiles: Daily Quiz, Subjects, Practice Sets, Library.
-- `/compete` hub page with tiles: Duel, Blitz (coming soon), Leaderboard.
+- **Dashboard** = performance command center: stats strip, Today's Plan, Subject Progress, Study History, Lionade Insight (Ninny placeholder). No duplicated navigation tiles.
+- **Learn** = 4 sections: Quick Practice (Daily Quiz), Structured Learning (Subjects), Focus Mode (Practice Sets), AI Study Mode (Study With Ninny — coming soon modal).
+- **Compete** = rank summary strip + 3 mode tiles (Duel, Blitz, Leaderboard) + Weekly Tournament placeholder.
 - Daily quiz flow with timed questions, scoring, and Supabase session persistence.
 - Duel flow with invite + simulated opponent and best-effort Supabase duel record.
 - Leaderboard page (weekly/all-time toggle UI) pulling from Supabase.
@@ -21,9 +21,9 @@
 - `app/layout.tsx` — Root layout, fonts, global providers, navbar.
 - `app/page.tsx` — Coming soon page + hidden DevOps access gate.
 - `app/login/page.tsx` — Login + signup UI and validation.
-- `app/dashboard/page.tsx` — Main authenticated hub (stats strip, quick action tiles).
-- `app/learn/page.tsx` — Learn hub with category tiles.
-- `app/compete/page.tsx` — Compete hub with category tiles.
+- `app/dashboard/page.tsx` — Performance command center (stats, today's plan, subjects, history, insight).
+- `app/learn/page.tsx` — Learn hub with 4 sections + Ninny modal.
+- `app/compete/page.tsx` — Compete hub with rank strip + mode tiles + tournament.
 - `app/quiz/page.tsx` — Quiz runtime, scoring, persistence.
 - `app/duel/page.tsx` — Duel UX (currently simulated opponent).
 - `app/leaderboard/page.tsx` — Rankings UI.
@@ -39,29 +39,30 @@
 - `middleware.ts` — Rate limiting + security headers middleware.
 - `components/*` — Shared UI pieces (ProtectedRoute, QuizCard, etc.).
 
-## Nav + UI Cleanup (Latest)
+## Page Roles (Information Architecture)
+- **Dashboard** = "How am I doing?" — personal performance, stats, progress, insights
+- **Learn** = "How do I improve?" — quiz, subjects, practice, AI study
+- **Compete** = "How do I prove myself?" — duels, blitz, leaderboard, tournaments
+- No duplicated navigation tiles between pages.
+
+## UI + Features Pass (Latest)
 ### What Changed
-- **Navbar**: Slimmer (h-12), only 3 tabs (Dashboard/Learn/Compete), "Clock In" CTA button, smaller pill-style coin/streak indicators with hover tooltips, avatar dropdown with 6 menu items, closes on outside click/escape/item select.
-- **Mobile**: Bottom nav bar (Home/Learn/Compete) instead of hamburger. Logo + CTA + avatar in top bar.
-- **Dashboard**: 4 stat cards replaced with single stats strip. Welcome message restructured with subtitle. Quick Actions changed to 3 big tiles (Learn/Compete/Library).
-- **New pages**: `/learn` (4 tiles) and `/compete` (3 tiles) hub pages created.
-- **Routing**: /quiz, /duel, /leaderboard still work directly. Just removed from top nav, accessible from hub pages.
+- **Dashboard**: Removed Learn/Compete/Library navigation tiles. Added 5 sections: Performance Snapshot (stats strip + micro insights), Today's Plan (daily challenge CTA), Subject Progress (progress bars + Continue buttons), Study History (recent sessions from DB or mock), Lionade Insight (Ninny placeholder with AI tips).
+- **Learn**: Reorganized into 4 sections with headings: Quick Practice (Daily Quiz), Structured Learning (Subjects), Focus Mode (Practice Sets), AI Study Mode (Study With Ninny). Ninny card has "Upload Material" and "Tell Ninny What to Study" buttons that open coming soon modals.
+- **Compete**: Added rank summary strip (rank, wins, win streak, top 10% goal). Added Weekly Tournament (Soon) placeholder tile. Kept Duel/Blitz/Leaderboard tiles.
+- No nav/routing changes needed (previous pass already set up correctly).
 
 ### Files Touched
-- `components/Navbar.tsx` — Full rewrite
-- `app/dashboard/page.tsx` — Redesigned layout
-- `app/learn/page.tsx` — New file
-- `app/compete/page.tsx` — New file
+- `app/dashboard/page.tsx` — Full rewrite as performance command center
+- `app/learn/page.tsx` — Reorganized with 4 sections + Ninny modal
+- `app/compete/page.tsx` — Added rank strip + tournament placeholder
 
 ### How to Test
-1. Log in and verify top nav shows only Dashboard | Learn | Compete + "Clock In" button.
-2. Click avatar — dropdown should show Profile, Badges, Wallet/Rewards, Settings, Help/Support, Log Out.
-3. Click outside dropdown / press Escape — should close.
-4. Navigate to /learn — should show 4 tiles (Daily Quiz, Subjects, Practice Sets, Library).
-5. Navigate to /compete — should show 3 tiles (Duel, Blitz, Leaderboard).
-6. Dashboard should show single stats strip (not 4 separate cards) and 3 quick action tiles.
-7. On mobile: bottom nav with Home/Learn/Compete. No hamburger menu.
-8. Direct routes (/quiz, /duel, /leaderboard, /profile) should still work.
+1. **Dashboard**: Should show stats strip with micro insights, Today's Plan card, Subject Progress bars with Continue buttons, Recent Sessions list, Lionade Insight panel. No Learn/Compete/Library tiles.
+2. **Learn**: Should show 4 section headings (Quick Practice, Structured Learning, Focus Mode, AI Study Mode). Study With Ninny card should have 2 buttons. Clicking either opens a modal with "Coming soon" text and a "Got it" dismiss button.
+3. **Compete**: Should show rank summary strip at top (4 stats), 3 mode tiles (Duel/Blitz/Leaderboard), Weekly Tournament card at bottom.
+4. All existing routes (/quiz, /duel, /leaderboard, /profile) still work.
+5. Mobile: no overflow, bottom nav works, no horizontal scroll.
 
 ## Known Issues / Tech Debt
 - Duel uses `QUIZ_QUESTIONS` + `MOCK_USERS` (not real opponent matchmaking or DB-backed questions).
@@ -69,17 +70,18 @@
 - Client-side `incrementCoins`/`incrementXP` in `lib/db.ts` is unsafe for production (should be RPC/secure server-side).
 - Quiz relies on client-side timers; no server validation of answers or time.
 - Several UI utilities (`formatCoins`, level calc, subject icons/colors) live in `lib/mockData.ts` with other mock data.
-- Blitz mode is a placeholder (coming soon).
-- Library is a placeholder (links to /learn for now).
+- Blitz mode, Library, Study With Ninny, Weekly Tournament are placeholders (coming soon).
+- Dashboard micro insights and Lionade Insight tips are mock text.
+- Compete rank strip uses mock values (0 wins, unranked).
 
 ## Recent Changes
-- Nav + UI cleanup: slim nav, 3 tabs, avatar dropdown, /learn + /compete hub pages, dashboard stats strip.
+- UI + features pass: Dashboard as performance center, Learn with Ninny, Compete with rank strip.
+- Nav + UI cleanup: slim nav, 3 tabs, avatar dropdown, /learn + /compete hub pages.
 - Security layers: rate limiting, input sanitization, brute force protection, session expiry, security headers.
-- Replaced `/` with a coming soon page and added a hidden DevOps password gate.
 
 ## Next 5 High-Impact Tasks (Ranked)
-1. Replace mock duel opponents/questions with real Supabase-backed matchmaking + questions.
-2. Move coin/XP awarding to secure server-side RPC (or Supabase function) with validation.
-3. Implement proper leaderboard scopes (weekly vs all-time) and add server aggregation.
+1. Build Ninny AI study mode (upload material, generate flashcards/questions).
+2. Replace mock duel opponents/questions with real Supabase-backed matchmaking.
+3. Move coin/XP awarding to secure server-side RPC with validation.
 4. Build out Blitz mode (speed round gameplay).
-5. Add basic analytics + error logging for auth/quiz/duel flows.
+5. Implement weekly tournament system with bracket and rewards.
