@@ -1,0 +1,481 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/lib/auth";
+import type { SignupExtra } from "@/lib/auth";
+import Link from "next/link";
+
+type Tab = "login" | "signup";
+
+const EDUCATION_LEVELS = [
+  "Middle School",
+  "High School Freshman",
+  "High School Sophomore",
+  "High School Junior",
+  "High School Senior",
+  "College Freshman",
+  "College Sophomore",
+  "College Junior",
+  "College Senior",
+  "Graduate Student",
+  "Working Professional",
+  "Self Taught / Independent Learner",
+  "Other",
+];
+
+const STUDY_GOALS = [
+  "Improve my grades",
+  "Prepare for SAT / ACT / GRE",
+  "Study for certifications (AWS, CompTIA, etc.)",
+  "Learn coding and tech skills",
+  "Study for professional exams (CPA, Bar, MCAT)",
+  "General knowledge and self improvement",
+  "Compete and win rewards",
+  "Other",
+];
+
+const REFERRAL_SOURCES = [
+  "TikTok",
+  "Instagram",
+  "Twitter / X",
+  "YouTube",
+  "Reddit",
+  "Friend or family",
+  "Google search",
+  "School or teacher",
+  "Other",
+];
+
+const STEPS = [
+  { n: 1, label: "Account" },
+  { n: 2, label: "About You" },
+  { n: 3, label: "Goals" },
+];
+
+// Max date of birth = 13 years ago today
+const maxDob = (() => {
+  const d = new Date();
+  d.setFullYear(d.getFullYear() - 13);
+  return d.toISOString().split("T")[0];
+})();
+
+const inputCls =
+  "w-full bg-white/5 border border-electric/20 rounded-xl px-4 py-3.5 text-cream placeholder-cream/25 text-sm font-medium focus:outline-none focus:border-electric focus:bg-electric/5 transition-all";
+const selectCls =
+  "w-full bg-[#0a1020] border border-electric/20 rounded-xl px-4 py-3.5 text-cream text-sm font-medium focus:outline-none focus:border-electric transition-all appearance-none cursor-pointer";
+const labelCls = "block text-cream/60 text-xs font-bold uppercase tracking-widest mb-2";
+
+export default function LoginPage() {
+  const { user, isLoading, login, signup } = useAuth();
+  const router = useRouter();
+
+  const [tab, setTab] = useState<Tab>("login");
+  const [step, setStep] = useState(1);
+
+  // Login fields
+  const [loginEmail, setLoginEmail] = useState("");
+  const [loginPassword, setLoginPassword] = useState("");
+
+  // Signup fields
+  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [dob, setDob] = useState("");
+  const [educationLevel, setEducationLevel] = useState("");
+  const [studyGoal, setStudyGoal] = useState("");
+  const [referralSource, setReferralSource] = useState("");
+
+  const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [signupSuccess, setSignupSuccess] = useState(false);
+
+  useEffect(() => {
+    if (!isLoading && user) router.replace("/dashboard");
+  }, [user, isLoading, router]);
+
+  if (isLoading) return (
+    <div className="min-h-screen bg-navy flex items-center justify-center">
+      <div className="w-10 h-10 rounded-full border-2 border-electric border-t-transparent animate-spin" />
+    </div>
+  );
+  if (user) return null;
+
+  // ── Login submit ──────────────────────────────────────
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    if (!loginEmail.trim()) { setError("Email is required"); return; }
+    if (!loginPassword) { setError("Password is required"); return; }
+    setSubmitting(true);
+    const { error: err } = await login(loginEmail.trim(), loginPassword);
+    if (err) {
+      setError(err.includes("Invalid") ? "Wrong email or password" : err);
+      setSubmitting(false);
+    } else {
+      console.log("[Login] Success — redirecting to /dashboard");
+      router.replace("/dashboard");
+    }
+  };
+
+  // ── Signup step validation ────────────────────────────
+  const validateStep = (): boolean => {
+    setError("");
+    if (step === 1) {
+      if (!email.trim()) { setError("Email is required"); return false; }
+      if (!email.includes("@")) { setError("Enter a valid email address"); return false; }
+      if (!username.trim()) { setError("Username is required"); return false; }
+      if (username.trim().length < 3) { setError("Username must be at least 3 characters"); return false; }
+      if (!password) { setError("Password is required"); return false; }
+      if (password.length < 6) { setError("Password must be at least 6 characters"); return false; }
+    }
+    if (step === 2) {
+      if (!firstName.trim()) { setError("First name is required"); return false; }
+      if (!dob) { setError("Date of birth is required"); return false; }
+      const dobDate = new Date(dob);
+      const minAge = new Date();
+      minAge.setFullYear(minAge.getFullYear() - 13);
+      if (dobDate > minAge) { setError("You must be at least 13 years old to sign up"); return false; }
+      if (!educationLevel) { setError("Please select your education level"); return false; }
+    }
+    if (step === 3) {
+      if (!studyGoal) { setError("Please select a primary study goal"); return false; }
+      if (!referralSource) { setError("Please tell us how you heard about us"); return false; }
+    }
+    return true;
+  };
+
+  const nextStep = () => {
+    if (!validateStep()) return;
+    setStep((s) => s + 1);
+  };
+
+  const prevStep = () => {
+    setError("");
+    setStep((s) => s - 1);
+  };
+
+  // ── Final signup submit ───────────────────────────────
+  const handleSignup = async () => {
+    if (!validateStep()) return;
+    setSubmitting(true);
+    const extra: SignupExtra = {
+      firstName: firstName.trim(),
+      dateOfBirth: dob,
+      educationLevel,
+      studyGoal,
+      referralSource,
+    };
+    const { error: err } = await signup(email.trim(), username.trim(), password, extra);
+    if (err) {
+      setError(err);
+      setSubmitting(false);
+    } else {
+      setSignupSuccess(true);
+    }
+  };
+
+  const resetSignup = () => {
+    setStep(1);
+    setEmail(""); setUsername(""); setPassword("");
+    setFirstName(""); setDob(""); setEducationLevel("");
+    setStudyGoal(""); setReferralSource("");
+    setError(""); setSignupSuccess(false);
+  };
+
+  // ─────────────────────────────────────────────────────
+  return (
+    <div className="min-h-screen bg-navy flex items-center justify-center px-4 relative overflow-hidden py-8">
+      {/* Background */}
+      <div className="absolute inset-0 opacity-30" style={{
+        backgroundImage: "linear-gradient(rgba(74,144,217,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(74,144,217,0.08) 1px, transparent 1px)",
+        backgroundSize: "40px 40px",
+      }} />
+      <div className="absolute top-1/4 left-1/3 w-80 h-80 rounded-full blur-3xl opacity-15 pointer-events-none"
+        style={{ background: "radial-gradient(circle, #4A90D9 0%, transparent 70%)" }} />
+      <div className="absolute bottom-1/4 right-1/3 w-64 h-64 rounded-full blur-3xl opacity-10 pointer-events-none"
+        style={{ background: "radial-gradient(circle, #F0B429 0%, transparent 70%)" }} />
+
+      <div className="relative z-10 w-full max-w-md animate-slide-up">
+        {/* Logo */}
+        <div className="text-center mb-8">
+          <Link href="/" className="inline-flex items-center gap-3 group">
+            <div className="w-10 h-10 rounded-xl bg-electric flex items-center justify-center shadow-lg shadow-electric/40">
+              <span className="text-white font-bebas text-xl leading-none">L</span>
+            </div>
+            <span className="font-bebas text-3xl tracking-wider text-cream group-hover:text-electric transition-colors">
+              LIONADE
+            </span>
+          </Link>
+          <p className="text-cream/40 text-sm mt-3">
+            {signupSuccess ? "One more step!" : tab === "login" ? "Welcome back. Your streak is waiting." : "Join 50K students already grinding."}
+          </p>
+        </div>
+
+        {/* ── Signup success ── */}
+        {signupSuccess ? (
+          <div className="rounded-2xl p-8 border border-green-400/30 text-center"
+            style={{ background: "linear-gradient(135deg, #0a1020 0%, #060c18 100%)" }}>
+            <div className="text-6xl mb-4">📬</div>
+            <h2 className="font-bebas text-3xl text-green-400 tracking-wider mb-3">Check Your Email</h2>
+            <p className="text-cream/60 text-sm leading-relaxed mb-6">
+              We sent a confirmation link to{" "}
+              <span className="text-electric font-semibold">{email}</span>.
+              Click it to activate your account, then come back and log in.
+            </p>
+            <button onClick={() => { setTab("login"); resetSignup(); }} className="btn-primary w-full py-3">
+              Go to Log In
+            </button>
+          </div>
+
+        ) : (
+          <div className="rounded-2xl border border-electric/20 overflow-hidden"
+            style={{ background: "linear-gradient(135deg, #0a1020 0%, #060c18 100%)" }}>
+
+            {/* Tab switcher */}
+            <div className="flex gap-1 bg-white/5 p-1.5 m-4 rounded-xl">
+              {(["login", "signup"] as Tab[]).map((t) => (
+                <button key={t}
+                  onClick={() => { setTab(t); setError(""); setStep(1); }}
+                  className={`flex-1 py-2.5 rounded-lg text-sm font-bold transition-all duration-200
+                    ${tab === t ? "bg-electric text-white shadow-lg shadow-electric/30" : "text-cream/50 hover:text-cream"}`}>
+                  {t === "login" ? "Log In" : "Sign Up"}
+                </button>
+              ))}
+            </div>
+
+            <div className="px-6 pb-6">
+
+              {/* ── LOGIN FORM ── */}
+              {tab === "login" && (
+                <form onSubmit={handleLogin} className="space-y-4">
+                  <div>
+                    <label className={labelCls}>Email</label>
+                    <input type="email" value={loginEmail} onChange={(e) => setLoginEmail(e.target.value)}
+                      placeholder="you@example.com" autoComplete="email" className={inputCls} />
+                  </div>
+                  <div>
+                    <label className={labelCls}>Password</label>
+                    <input type="password" value={loginPassword} onChange={(e) => setLoginPassword(e.target.value)}
+                      placeholder="••••••••" autoComplete="current-password" className={inputCls} />
+                  </div>
+                  {error && <ErrorBox msg={error} />}
+                  <button type="submit" disabled={submitting}
+                    className="w-full py-4 rounded-xl font-bold text-base mt-2 disabled:opacity-60 disabled:cursor-not-allowed transition-all duration-200"
+                    style={{ background: submitting ? "#4A90D960" : "linear-gradient(135deg, #F0B429 0%, #B8960C 50%, #F0B429 100%)", color: "#04080F", boxShadow: submitting ? "none" : "0 4px 20px rgba(240,180,41,0.35)" }}>
+                    {submitting ? <Spinner label="Logging in..." /> : "🚀 Log In & Grind"}
+                  </button>
+                </form>
+              )}
+
+              {/* ── SIGNUP FORM ── */}
+              {tab === "signup" && (
+                <div>
+                  {/* Progress indicator */}
+                  <div className="flex items-center gap-2 mb-6">
+                    {STEPS.map((s, i) => (
+                      <div key={s.n} className="flex items-center gap-2 flex-1">
+                        <div className="flex flex-col items-center gap-1 flex-1">
+                          <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300
+                            ${step > s.n ? "bg-green-500 text-white" : step === s.n ? "bg-electric text-white shadow-lg shadow-electric/40" : "bg-white/10 text-cream/40"}`}>
+                            {step > s.n ? "✓" : s.n}
+                          </div>
+                          <span className={`text-xs font-semibold transition-colors duration-200
+                            ${step === s.n ? "text-electric" : step > s.n ? "text-green-400" : "text-cream/30"}`}>
+                            {s.label}
+                          </span>
+                        </div>
+                        {i < STEPS.length - 1 && (
+                          <div className={`h-0.5 flex-1 mb-4 rounded-full transition-all duration-300
+                            ${step > s.n ? "bg-green-500" : "bg-white/10"}`} />
+                        )}
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Step 1: Account */}
+                  {step === 1 && (
+                    <div className="space-y-4 animate-slide-up">
+                      <p className="text-cream/40 text-xs mb-4">Create your login credentials</p>
+                      <div>
+                        <label className={labelCls}>Email</label>
+                        <input type="email" value={email} onChange={(e) => setEmail(e.target.value)}
+                          placeholder="you@example.com" autoComplete="email" className={inputCls} />
+                      </div>
+                      <div>
+                        <label className={labelCls}>Username</label>
+                        <input type="text" value={username}
+                          onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ""))}
+                          placeholder="your_handle" autoComplete="username" className={inputCls} />
+                        <p className="text-cream/25 text-xs mt-1.5">Lowercase letters, numbers, underscores only</p>
+                      </div>
+                      <div>
+                        <label className={labelCls}>Password</label>
+                        <input type="password" value={password} onChange={(e) => setPassword(e.target.value)}
+                          placeholder="Min. 6 characters" autoComplete="new-password" className={inputCls} />
+                      </div>
+                      {error && <ErrorBox msg={error} />}
+                      <button onClick={nextStep} type="button"
+                        className="w-full py-3.5 rounded-xl font-bold text-sm bg-electric text-white hover:bg-electric/90 transition-all duration-200 shadow-lg shadow-electric/20 mt-2">
+                        Next — About You →
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Step 2: About You */}
+                  {step === 2 && (
+                    <div className="space-y-4 animate-slide-up">
+                      <p className="text-cream/40 text-xs mb-4">Tell us a little about yourself</p>
+                      <div>
+                        <label className={labelCls}>First Name</label>
+                        <input type="text" value={firstName} onChange={(e) => setFirstName(e.target.value)}
+                          placeholder="First name" autoComplete="given-name" className={inputCls} />
+                      </div>
+                      <div>
+                        <label className={labelCls}>Date of Birth</label>
+                        <input type="date" value={dob} onChange={(e) => setDob(e.target.value)}
+                          max={maxDob}
+                          className={inputCls + " [color-scheme:dark]"} />
+                        <p className="text-cream/25 text-xs mt-1.5">Must be at least 13 years old</p>
+                      </div>
+                      <div>
+                        <label className={labelCls}>Education Level</label>
+                        <div className="relative">
+                          <select value={educationLevel} onChange={(e) => setEducationLevel(e.target.value)}
+                            className={selectCls}>
+                            <option value="" disabled>Select your level...</option>
+                            {EDUCATION_LEVELS.map((l) => <option key={l} value={l}>{l}</option>)}
+                          </select>
+                          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-cream/40 pointer-events-none">▾</span>
+                        </div>
+                      </div>
+                      {error && <ErrorBox msg={error} />}
+                      <div className="flex gap-3 mt-2">
+                        <button onClick={prevStep} type="button"
+                          className="flex-1 py-3.5 rounded-xl font-bold text-sm border border-electric/30 text-cream/70 hover:text-cream hover:border-electric/60 transition-all duration-200">
+                          ← Back
+                        </button>
+                        <button onClick={nextStep} type="button"
+                          className="flex-[2] py-3.5 rounded-xl font-bold text-sm bg-electric text-white hover:bg-electric/90 transition-all duration-200 shadow-lg shadow-electric/20">
+                          Next — Your Goals →
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Step 3: Goals + Summary */}
+                  {step === 3 && (
+                    <div className="space-y-4 animate-slide-up">
+                      <p className="text-cream/40 text-xs mb-4">Almost done — set your goals</p>
+                      <div>
+                        <label className={labelCls}>Primary Study Goal</label>
+                        <div className="relative">
+                          <select value={studyGoal} onChange={(e) => setStudyGoal(e.target.value)}
+                            className={selectCls}>
+                            <option value="" disabled>What brings you here?</option>
+                            {STUDY_GOALS.map((g) => <option key={g} value={g}>{g}</option>)}
+                          </select>
+                          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-cream/40 pointer-events-none">▾</span>
+                        </div>
+                      </div>
+                      <div>
+                        <label className={labelCls}>How Did You Hear About Us?</label>
+                        <div className="relative">
+                          <select value={referralSource} onChange={(e) => setReferralSource(e.target.value)}
+                            className={selectCls}>
+                            <option value="" disabled>Select a source...</option>
+                            {REFERRAL_SOURCES.map((r) => <option key={r} value={r}>{r}</option>)}
+                          </select>
+                          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-cream/40 pointer-events-none">▾</span>
+                        </div>
+                      </div>
+
+                      {/* Summary card */}
+                      {studyGoal && referralSource && (
+                        <div className="rounded-xl border border-electric/20 p-4 space-y-2 mt-2"
+                          style={{ background: "rgba(74,144,217,0.05)" }}>
+                          <p className="text-electric text-xs font-bold uppercase tracking-widest mb-3">Your Account Summary</p>
+                          <SummaryRow icon="📧" label="Email" value={email} />
+                          <SummaryRow icon="🎮" label="Username" value={`@${username}`} />
+                          <SummaryRow icon="👤" label="Name" value={firstName} />
+                          <SummaryRow icon="🎓" label="Education" value={educationLevel} />
+                          <SummaryRow icon="🎯" label="Goal" value={studyGoal} />
+                          <SummaryRow icon="📣" label="Via" value={referralSource} />
+                        </div>
+                      )}
+
+                      {error && <ErrorBox msg={error} />}
+                      <div className="flex gap-3 mt-2">
+                        <button onClick={prevStep} type="button"
+                          className="flex-1 py-3.5 rounded-xl font-bold text-sm border border-electric/30 text-cream/70 hover:text-cream hover:border-electric/60 transition-all duration-200">
+                          ← Back
+                        </button>
+                        <button onClick={handleSignup} type="button" disabled={submitting}
+                          className="flex-[2] py-3.5 rounded-xl font-bold text-sm disabled:opacity-60 disabled:cursor-not-allowed transition-all duration-200"
+                          style={{ background: "linear-gradient(135deg, #F0B429 0%, #B8960C 50%, #F0B429 100%)", color: "#04080F", boxShadow: "0 4px 20px rgba(240,180,41,0.35)" }}>
+                          {submitting ? <Spinner label="Creating account..." /> : "🔥 Create Account"}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Switch tab hint */}
+              <p className="text-center text-cream/30 text-sm mt-5">
+                {tab === "login" ? (
+                  <>No account?{" "}
+                    <button onClick={() => { setTab("signup"); setError(""); }} className="text-electric font-semibold hover:text-electric/80">
+                      Sign up free →
+                    </button>
+                  </>
+                ) : (
+                  <>Already grinding?{" "}
+                    <button onClick={() => { setTab("login"); setError(""); setStep(1); }} className="text-electric font-semibold hover:text-electric/80">
+                      Log in →
+                    </button>
+                  </>
+                )}
+              </p>
+            </div>
+          </div>
+        )}
+
+        <p className="text-center text-cream/20 text-xs mt-5">
+          By signing up, you agree to study harder than yesterday.
+        </p>
+      </div>
+    </div>
+  );
+}
+
+// ── Small helpers ─────────────────────────────────────
+
+function ErrorBox({ msg }: { msg: string }) {
+  return (
+    <div className="flex items-center gap-2 px-4 py-3 rounded-xl bg-red-400/10 border border-red-400/30 animate-slide-up">
+      <span className="text-sm flex-shrink-0">⚠️</span>
+      <p className="text-red-400 text-sm font-semibold">{msg}</p>
+    </div>
+  );
+}
+
+function Spinner({ label }: { label: string }) {
+  return (
+    <span className="flex items-center justify-center gap-2">
+      <span className="w-4 h-4 rounded-full border-2 border-current border-t-transparent animate-spin" />
+      {label}
+    </span>
+  );
+}
+
+function SummaryRow({ icon, label, value }: { icon: string; label: string; value: string }) {
+  return (
+    <div className="flex items-center gap-2 text-sm">
+      <span className="text-base w-5">{icon}</span>
+      <span className="text-cream/40 w-20 text-xs font-semibold">{label}</span>
+      <span className="text-cream/80 text-xs truncate">{value}</span>
+    </div>
+  );
+}
