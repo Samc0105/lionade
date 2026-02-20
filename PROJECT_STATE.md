@@ -1,7 +1,7 @@
 # Project State: Lionade
 
 ## Current Features
-- Marketing landing page with product pitch and CTAs.
+- Coming soon landing page at `/` with hidden DevOps access gate (5-click copyright).
 - Auth flow (login + multi-step signup) backed by Supabase auth.
 - Authenticated app shell with navbar, coin/streak display, and route protection.
 - Dashboard with stats, subject mastery, recent activity, and leaderboard preview.
@@ -12,7 +12,7 @@
 
 ## Files/Dirs That Matter Most
 - `app/layout.tsx` — Root layout, fonts, global providers, navbar.
-- `app/page.tsx` — Landing page content/marketing.
+- `app/page.tsx` — Coming soon page + hidden DevOps access gate.
 - `app/login/page.tsx` — Login + signup UI and validation.
 - `app/dashboard/page.tsx` — Main authenticated hub.
 - `app/quiz/page.tsx` — Quiz runtime, scoring, persistence.
@@ -28,10 +28,14 @@
 
 ## Known Issues / Tech Debt
 - Duel uses `QUIZ_QUESTIONS` + `MOCK_USERS` (not real opponent matchmaking or DB-backed questions).
-- `leaderboard` filter toggle does not change data source (always `getLeaderboard`).
+- Leaderboard filter toggle does not change data source (always `getLeaderboard`).
 - Client-side `incrementCoins`/`incrementXP` in `lib/db.ts` is unsafe for production (should be RPC/secure server-side).
 - Quiz relies on client-side timers; no server validation of answers or time.
 - Several UI utilities (`formatCoins`, level calc, subject icons/colors) live in `lib/mockData.ts` with other mock data.
+
+## Recent Changes
+- Replaced `/` with a coming soon page and added a hidden DevOps password gate.
+- DevOps success path uses same-domain `/dashboard` instead of any localhost redirects.
 
 ## Next 5 High-Impact Tasks (Ranked)
 1. Replace mock duel opponents/questions with real Supabase-backed matchmaking + questions.
