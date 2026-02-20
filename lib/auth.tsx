@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { supabase } from "@/lib/supabase";
+import { sanitizeEmail, sanitizePassword, sanitizeUsername, sanitizeText } from "@/lib/sanitize";
 import type { Session } from "@supabase/supabase-js";
 
 export interface AuthUser {
@@ -115,6 +116,22 @@ async function syncProfile(userId: string, email: string, metadata: Record<strin
   return null;
 }
 
+const INACTIVITY_LIMIT_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
+const LAST_ACTIVE_KEY = "lionade_last_active";
+
+function updateLastActive() {
+  if (typeof window !== "undefined") {
+    localStorage.setItem(LAST_ACTIVE_KEY, Date.now().toString());
+  }
+}
+
+function isSessionExpiredByInactivity(): boolean {
+  if (typeof window === "undefined") return false;
+  const last = localStorage.getItem(LAST_ACTIVE_KEY);
+  if (!last) return false;
+  return Date.now() - parseInt(last, 10) > INACTIVITY_LIMIT_MS;
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [session, setSession] = useState<Session | null>(null);
@@ -147,6 +164,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           return;
         }
 
+        // Check 30-day inactivity — sign out if exceeded
+        if (isSessionExpiredByInactivity()) {
+          console.log("[Auth] Session expired due to 30-day inactivity — signing out");
+          await supabase.auth.signOut();
+          setUser(null);
+          setSession(null);
+          setIsLoading(false);
+          return;
+        }
+
+        updateLastActive();
+
         // Set a basic user IMMEDIATELY from session metadata — no DB call
         // This unblocks the login redirect right away
         const basicUser = buildBasicUser(
@@ -176,10 +205,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const login = async (email: string, password: string): Promise<{ error?: string }> => {
-    console.log("[Auth] login() called for", email);
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    const cleanEmail = sanitizeEmail(email);
+    const cleanPassword = sanitizePassword(password);
+
+    // Check brute-force lock before attempting sign-in
+    try {
+      const lockRes = await fetch(`/api/auth/check-lock?email=${encodeURIComponent(cleanEmail)}`);
+      const lockData = await lockRes.json();
+      if (lockData.locked) {
+        return { error: "Account temporarily locked due to too many failed attempts. Try again in 15 minutes." };
+      }
+    } catch {
+      // Fail open — allow login if the check endpoint is unreachable
+    }
+
+    console.log("[Auth] login() called for", cleanEmail);
+    const { data, error } = await supabase.auth.signInWithPassword({ email: cleanEmail, password: cleanPassword });
     console.log("[Auth] signInWithPassword result — error:", error?.message ?? "none", "user:", data?.user?.id ?? "none");
+
+    // Record the attempt (fire-and-forget, don't block login flow)
+    fetch("/api/auth/record-attempt", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: cleanEmail, success: !error }),
+    }).catch(() => null);
+
     if (error) return { error: error.message };
+    updateLastActive();
     return {};
   };
 
@@ -189,6 +241,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     password: string,
     extra?: SignupExtra
   ): Promise<{ error?: string }> => {
+    // Sanitize all inputs before processing
+    email    = sanitizeEmail(email);
+    username = sanitizeUsername(username);
+    password = sanitizePassword(password);
+    if (extra?.firstName) extra.firstName = sanitizeText(extra.firstName, 50);
+
     const { data: existing } = await supabase
       .from("profiles")
       .select("id")
@@ -237,6 +295,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = async () => {
     console.log("[Auth] logout()");
+    if (typeof window !== "undefined") {
+      localStorage.removeItem(LAST_ACTIVE_KEY);
+    }
     await supabase.auth.signOut();
     setUser(null);
     setSession(null);
