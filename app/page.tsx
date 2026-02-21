@@ -11,9 +11,17 @@ export default function ComingSoonPage() {
   const [error, setError] = useState(false);
   const [success, setSuccess] = useState(false);
 
+  // Waitlist state
+  const [waitlistEmail, setWaitlistEmail] = useState("");
+  const [waitlistStatus, setWaitlistStatus] = useState<
+    "idle" | "loading" | "success" | "error" | "duplicate"
+  >("idle");
+  const [waitlistMsg, setWaitlistMsg] = useState("");
+
   const clickCountRef = useRef(0);
   const resetTimerRef = useRef<number | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const waitlistInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     if (modalOpen && inputRef.current) {
@@ -61,6 +69,41 @@ export default function ComingSoonPage() {
     }, 1200);
   };
 
+  const handleWaitlistSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const email = waitlistEmail.trim().toLowerCase();
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setWaitlistStatus("error");
+      setWaitlistMsg("Please enter a valid email address.");
+      return;
+    }
+
+    setWaitlistStatus("loading");
+    try {
+      const res = await fetch("/api/waitlist", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, source: "landing" }),
+      });
+      const data = await res.json();
+
+      if (res.ok) {
+        setWaitlistStatus("success");
+        setWaitlistMsg(data.message || "You're on the waitlist!");
+        setWaitlistEmail("");
+      } else if (res.status === 409) {
+        setWaitlistStatus("duplicate");
+        setWaitlistMsg(data.error || "You're already on the waitlist!");
+      } else {
+        setWaitlistStatus("error");
+        setWaitlistMsg(data.error || "Something went wrong. Please try again.");
+      }
+    } catch {
+      setWaitlistStatus("error");
+      setWaitlistMsg("Something went wrong. Please try again.");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-navy text-cream overflow-hidden relative">
       <div className="absolute inset-0 grid-bg opacity-60" />
@@ -71,7 +114,7 @@ export default function ComingSoonPage() {
 
       <main className="relative z-10 flex min-h-screen flex-col items-center justify-center px-6 text-center">
         <div className="inline-flex items-center gap-2 border border-electric/30 bg-electric/10 rounded-full px-5 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-electric mb-8">
-          Coming Soon · 2026
+          Coming Soon &middot; 2026
         </div>
 
         <h1 className="font-bebas text-[clamp(3.5rem,12vw,9.5rem)] leading-[0.9] tracking-[0.08em] text-cream">
@@ -85,17 +128,59 @@ export default function ComingSoonPage() {
           and real payouts for your knowledge. We&apos;re opening soon.
         </p>
 
-        <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
-          <button className="btn-gold px-10 py-3 text-sm sm:text-base">Join the Waitlist</button>
-          <button className="btn-outline px-8 py-3 text-sm sm:text-base">Get Notified</button>
-        </div>
+        {/* Waitlist Form */}
+        <form
+          onSubmit={handleWaitlistSubmit}
+          className="mt-10 flex flex-col sm:flex-row items-center gap-3 w-full max-w-md"
+        >
+          <input
+            ref={waitlistInputRef}
+            type="email"
+            value={waitlistEmail}
+            onChange={(e) => {
+              setWaitlistEmail(e.target.value);
+              if (waitlistStatus !== "idle" && waitlistStatus !== "loading") {
+                setWaitlistStatus("idle");
+              }
+            }}
+            placeholder="you@email.com"
+            className="w-full sm:flex-1 px-5 py-3 rounded-lg border border-electric/20 bg-[#0a1020]
+              text-sm text-cream placeholder-cream/30 focus:outline-none focus:border-electric
+              transition-colors"
+            disabled={waitlistStatus === "loading"}
+          />
+          <button
+            type="submit"
+            disabled={waitlistStatus === "loading"}
+            className="btn-gold px-8 py-3 text-sm sm:text-base w-full sm:w-auto disabled:opacity-60"
+          >
+            {waitlistStatus === "loading" ? "Joining..." : "Join the Waitlist"}
+          </button>
+        </form>
+
+        {/* Status Messages */}
+        {waitlistStatus === "success" && (
+          <p className="mt-4 text-sm text-green-400 font-semibold animate-slide-up">
+            {waitlistMsg}
+          </p>
+        )}
+        {waitlistStatus === "duplicate" && (
+          <p className="mt-4 text-sm text-electric font-semibold animate-slide-up">
+            {waitlistMsg}
+          </p>
+        )}
+        {waitlistStatus === "error" && (
+          <p className="mt-4 text-sm text-red-400 font-semibold animate-slide-up">
+            {waitlistMsg}
+          </p>
+        )}
 
         <div className="mt-12 grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-3xl w-full">
           {[
-            { label: "Subjects", value: "∞" },
+            { label: "Subjects", value: "\u221E" },
             { label: "To Join", value: "$0" },
             { label: "Duels", value: "1v1" },
-            { label: "Daily Streaks", value: "🔥" },
+            { label: "Daily Streaks", value: "\uD83D\uDD25" },
           ].map((stat) => (
             <div key={stat.label} className="card text-center py-4">
               <p className="font-bebas text-3xl text-electric leading-none">{stat.value}</p>
@@ -106,7 +191,7 @@ export default function ComingSoonPage() {
       </main>
 
       <footer className="relative z-10 border-t border-electric/10 py-8 px-6 text-center">
-        <p className="text-cream/30 text-xs">getlionade.com · all rights reserved</p>
+        <p className="text-cream/30 text-xs">getlionade.com &middot; all rights reserved</p>
       </footer>
 
       <div className="relative z-10 text-center pb-6">
@@ -116,7 +201,7 @@ export default function ComingSoonPage() {
           className="text-[10px] font-mono tracking-[0.2em] text-cream/10 hover:text-cream/30 transition-colors"
           aria-label="Copyright"
         >
-          © 2026 Lionade
+          &copy; 2026 Lionade
         </button>
       </div>
 

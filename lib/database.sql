@@ -344,3 +344,24 @@ INSERT INTO questions (id, subject, question, options, correct_answer, difficult
 ('cert10','Certifications','What does DNS stand for?','["Dynamic Network System","Domain Name System","Direct Network Service","Data Node Server"]',1,'easy',15,NULL)
 
 ON CONFLICT (id) DO NOTHING;
+
+-- ============================================================
+-- WAITLIST
+-- ============================================================
+CREATE TABLE IF NOT EXISTS waitlist (
+  id         UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  email      TEXT UNIQUE NOT NULL,
+  source     TEXT,
+  referrer   TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_waitlist_email ON waitlist(email);
+CREATE INDEX IF NOT EXISTS idx_waitlist_created_at ON waitlist(created_at DESC);
+
+ALTER TABLE waitlist ENABLE ROW LEVEL SECURITY;
+
+-- Waitlist: only service role can insert/read (via API route)
+CREATE POLICY "waitlist_service_only" ON waitlist
+  FOR ALL USING (false)
+  WITH CHECK (false);

@@ -37,6 +37,7 @@ export default function CompetePage() {
           {/* Header */}
           <div className="mb-6 animate-slide-up">
             <h1 className="font-bebas text-4xl sm:text-5xl text-cream tracking-wider">COMPETE</h1>
+            <div className="periodic-shimmer h-[2px] w-24 rounded-full mt-2 mb-1" />
             <p className="text-cream/40 text-sm mt-1">Test yourself against others. Climb the ranks.</p>
           </div>
 
@@ -84,34 +85,43 @@ export default function CompetePage() {
 
           {/* ═══ Mode Tiles ═══ */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-            {COMPETE_TILES.map((tile, i) => (
-              <Link key={tile.title} href={tile.href}>
-                <div
-                  className="relative card-hover p-6 rounded-xl group cursor-pointer h-full animate-slide-up"
-                  style={{ borderColor: `${tile.accent}30`, animationDelay: `${0.1 + i * 0.05}s` }}
-                >
-                  {tile.comingSoon && (
-                    <span className="absolute top-4 right-4 text-[10px] font-bold uppercase tracking-widest
-                      px-2 py-0.5 rounded-full border text-cream/50"
-                      style={{ borderColor: `${tile.accent}40`, background: `${tile.accent}15` }}>
-                      Soon
+            {COMPETE_TILES.map((tile, i) => {
+              const idleClass = i === 0 ? "idle-tilt" : i === 1 ? "idle-pulse" : "idle-shimmer";
+              const idleDelay = i === 0 ? "0s" : i === 1 ? "1s" : "0.5s";
+              return (
+                <Link key={tile.title} href={tile.href}>
+                  <div
+                    className="relative card-hover hover-anim p-6 rounded-xl group cursor-pointer h-full animate-slide-up"
+                    style={{ borderColor: `${tile.accent}30`, animationDelay: `${0.1 + i * 0.05}s` }}
+                  >
+                    {tile.comingSoon && (
+                      <span className="absolute top-4 right-4 text-[10px] font-bold uppercase tracking-widest
+                        px-2 py-0.5 rounded-full border text-cream/50"
+                        style={{ borderColor: `${tile.accent}40`, background: `${tile.accent}15` }}>
+                        Soon
+                      </span>
+                    )}
+                    <span
+                      className={`text-4xl group-hover:scale-110 transition-transform duration-300 inline-block mb-3 ${idleClass}`}
+                      style={{ animationDelay: idleDelay }}
+                    >
+                      {tile.icon}
                     </span>
-                  )}
-                  <span className="text-4xl group-hover:scale-110 transition-transform duration-300 inline-block mb-3">
-                    {tile.icon}
-                  </span>
-                  <p className="font-bebas text-2xl tracking-wider mb-1" style={{ color: tile.accent }}>
-                    {tile.title}
-                  </p>
-                  <p className="text-cream/50 text-sm leading-relaxed">{tile.desc}</p>
-                </div>
-              </Link>
-            ))}
+                    <p className="font-bebas text-2xl tracking-wider mb-1" style={{ color: tile.accent }}>
+                      {tile.title}
+                    </p>
+                    <p className="text-cream/50 text-sm leading-relaxed">{tile.desc}</p>
+                  </div>
+                </Link>
+              );
+            })}
           </div>
 
           {/* ═══ Weekly Tournament (Coming Soon) ═══ */}
           <div className="animate-slide-up" style={{ animationDelay: "0.25s" }}>
-            <div className="relative card p-6 rounded-xl" style={{ borderColor: "#9B59B630" }}>
+            <div className="relative card p-6 rounded-xl overflow-hidden" style={{ borderColor: "#9B59B630" }}>
+              {/* Slow gradient shimmer overlay */}
+              <div className="absolute inset-0 idle-shimmer-bar pointer-events-none" />
               <span className="absolute top-4 right-4 text-[10px] font-bold uppercase tracking-widest
                 px-2 py-0.5 rounded-full border text-cream/50"
                 style={{ borderColor: "#9B59B640", background: "#9B59B615" }}>
