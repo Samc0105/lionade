@@ -103,10 +103,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Send welcome email via Resend (skip if key not configured)
+    // Send welcome email via Resend
     const resend = getResend();
-    if (resend && process.env.EMAIL_FROM) {
-      const { error: emailError } = await resend.emails.send({
+    if (!resend) {
+      console.warn("[waitlist] RESEND_API_KEY is not set — skipping welcome email for:", email);
+    } else if (!process.env.EMAIL_FROM) {
+      console.warn("[waitlist] EMAIL_FROM is not set — skipping welcome email for:", email);
+    } else {
+      const { data: emailData, error: emailError } = await resend.emails.send({
         from: process.env.EMAIL_FROM,
         to: email,
         replyTo: "lionade@gmail.com",
@@ -115,7 +119,9 @@ export async function POST(request: NextRequest) {
       });
 
       if (emailError) {
-        console.error("Resend email error:", emailError);
+        console.error("[waitlist] Resend email failed:", JSON.stringify(emailError));
+      } else {
+        console.log("[waitlist] Welcome email sent:", emailData?.id, "to:", email);
       }
     }
 
