@@ -68,6 +68,11 @@ function getWelcomeHtml(email: string): string {
 }
 
 export async function POST(request: NextRequest) {
+  const apiKey = process.env.RESEND_API_KEY;
+  const emailFrom = process.env.EMAIL_FROM;
+  console.log("[waitlist] ENV CHECK — RESEND_API_KEY:", apiKey ? `${apiKey.substring(0, 5)}... (${apiKey.length} chars)` : "MISSING");
+  console.log("[waitlist] ENV CHECK — EMAIL_FROM:", emailFrom ?? "MISSING");
+
   try {
     const body = await request.json();
     const email = typeof body.email === "string" ? body.email.trim().toLowerCase() : "";
