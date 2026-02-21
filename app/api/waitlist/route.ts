@@ -2,7 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
 import { supabaseAdmin } from "@/lib/supabase-server";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+function getResend() {
+  if (!process.env.RESEND_API_KEY) return null;
+  return new Resend(process.env.RESEND_API_KEY);
+}
 
 function isValidEmail(email: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) && email.length <= 320;
@@ -100,18 +103,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Send welcome email via Resend
-    const { error: emailError } = await resend.emails.send({
-      from: process.env.EMAIL_FROM!,
-      to: email,
-      replyTo: "lionade@gmail.com",
-      subject: "Welcome to Lionade 👋",
-      html: getWelcomeHtml(email),
-    });
+    // Send welcome email via Resend (skip if key not configured)
+    const resend = getResend();
+    if (resend && process.env.EMAIL_FROM) {
+      const { error: emailError } = await resend.emails.send({
+        from: process.env.EMAIL_FROM,
+        to: email,
+        replyTo: "lionade@gmail.com",
+        subject: "Welcome to Lionade 👋",
+        html: getWelcomeHtml(email),
+      });
 
-    if (emailError) {
-      // Email failed but sign-up succeeded — don't fail the request
-      console.error("Resend email error:", emailError);
+      if (emailError) {
+        console.error("Resend email error:", emailError);
+      }
     }
 
     return NextResponse.json(
