@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth";
 import { getRecentActivity, getSubjectStats, getQuizHistory } from "@/lib/db";
@@ -15,12 +15,8 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 
 function ActivityIcon(type: string) {
   const map: Record<string, string> = {
-    quiz_reward: "\u2705",
-    duel_win: "\u2694\uFE0F",
-    duel_loss: "\u{1F480}",
-    streak_bonus: "\u{1F525}",
-    badge_bonus: "\u{1F396}\uFE0F",
-    signup_bonus: "\u{1F389}",
+    quiz_reward: "\u2705", duel_win: "\u2694\uFE0F", duel_loss: "\u{1F480}",
+    streak_bonus: "\u{1F525}", badge_bonus: "\u{1F396}\uFE0F", signup_bonus: "\u{1F389}",
   };
   return map[type] ?? "\u{1FA99}";
 }
@@ -40,6 +36,64 @@ function getGreeting(): string {
   return "One more win before midnight.";
 }
 
+/* ── Rotating Widget Carousel ── */
+function RotatingCarousel({ children }: { children: React.ReactNode[] }) {
+  const trackRef = useRef<HTMLDivElement>(null);
+  const [paused, setPaused] = useState(false);
+
+  useEffect(() => {
+    const track = trackRef.current;
+    if (!track) return;
+    let pos = 0;
+    let raf: number;
+    const speed = 0.5;
+
+    function animate() {
+      if (!paused) {
+        pos -= speed;
+        const halfWidth = track!.scrollWidth / 2;
+        if (Math.abs(pos) >= halfWidth) pos = 0;
+        track!.style.transform = `translateX(${pos}px)`;
+      }
+      raf = requestAnimationFrame(animate);
+    }
+    raf = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(raf);
+  }, [paused]);
+
+  return (
+    <div className="overflow-hidden -mx-4 px-4 sm:mx-0 sm:px-0"
+      onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)}>
+      <div ref={trackRef} className="flex gap-3 will-change-transform" style={{ width: "max-content" }}>
+        {children}
+        {children}
+      </div>
+    </div>
+  );
+}
+
+/* ── Circular stat widget ── */
+function CircleStat({ value, label, icon, color, size = 90 }: {
+  value: string; label: string; icon: string; color: string; size?: number;
+}) {
+  return (
+    <div className="flex flex-col items-center gap-1.5 group">
+      <div className="relative rounded-full flex items-center justify-center transition-transform duration-300 group-hover:scale-105"
+        style={{ width: size, height: size, background: `linear-gradient(135deg, ${color}15, ${color}08)`, border: `1.5px solid ${color}25`, boxShadow: `0 0 20px ${color}08` }}>
+        <div className="text-center">
+          <span className="text-sm block mb-0.5">{icon}</span>
+          <span className="font-bebas text-lg leading-none" style={{ color }}>{value}</span>
+        </div>
+        {/* Orbiting dot */}
+        <div className="absolute inset-0 rounded-full" style={{ animation: "orbit-stat 8s linear infinite" }}>
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full" style={{ background: color, boxShadow: `0 0 6px ${color}` }} />
+        </div>
+      </div>
+      <span className="text-cream/30 text-[9px] font-mono tracking-wider uppercase">{label}</span>
+    </div>
+  );
+}
+
 export default function DashboardPage() {
   const { user, refreshUser } = useAuth();
   const [activity, setActivity] = useState<
@@ -48,10 +102,10 @@ export default function DashboardPage() {
   const [subjectStats, setSubjectStats] = useState<
     { subject: string; questionsAnswered: number; correctAnswers: number; coinsEarned: number }[]
   >([]);
-  const [quizHistory, setQuizHistory] = useState<
+  const [, setQuizHistory] = useState<
     { id: string; subject: string; total_questions: number; correct_answers: number; coins_earned: number; completed_at: string }[]
   >([]);
-  const [loadingData, setLoadingData] = useState(true);
+  const [, setLoadingData] = useState(true);
   const [dailyDone] = useState(false);
   const [xpMounted, setXpMounted] = useState(false);
 
@@ -70,7 +124,6 @@ export default function DashboardPage() {
     refreshUser();
   }, [user?.id]);
 
-  /* Animate XP bar fill on mount */
   useEffect(() => {
     const t = setTimeout(() => setXpMounted(true), 200);
     return () => clearTimeout(t);
@@ -84,364 +137,215 @@ export default function DashboardPage() {
     .filter((a) => new Date(a.created_at).toDateString() === new Date().toDateString())
     .reduce((sum, a) => sum + (a.amount > 0 ? a.amount : 0), 0);
   const displaySubjects = subjectStats.length > 0 ? subjectStats : MOCK_SUBJECTS;
-  const today = new Date().toLocaleDateString("en-US", {
-    weekday: "long",
-    month: "long",
-    day: "numeric",
-  });
+  const today = new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
+
+  const cardShapes = [
+    "rounded-[24px]",
+    "rounded-tl-[32px] rounded-br-[32px] rounded-tr-[8px] rounded-bl-[8px]",
+    "rounded-[24px]",
+    "rounded-tr-[32px] rounded-bl-[32px] rounded-tl-[8px] rounded-br-[8px]",
+    "rounded-[24px]",
+  ];
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-navy pt-16 pb-20 md:pb-8">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <style jsx global>{`
+        @keyframes orbit-stat {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+        @keyframes slide-up {
+          from { opacity: 0; transform: translateY(20px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-slide-up {
+          animation: slide-up 0.5s ease both;
+        }
+      `}</style>
+
+      <div className="min-h-screen bg-navy pt-16 pb-20 md:pb-8 relative overflow-hidden">
+        {/* Background floating shapes */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden" aria-hidden="true">
+          <div className="geo-float absolute" style={{ top: "10%", right: "5%", animationDuration: "16s" }}>
+            <div style={{ width: 20, height: 20, border: "1px solid rgba(74,144,217,0.08)", transform: "rotate(45deg)" }} />
+          </div>
+          <div className="geo-spin absolute" style={{ bottom: "20%", left: "3%", animationDuration: "22s" }}>
+            <div style={{ width: 30, height: 30, border: "1px solid rgba(255,215,0,0.06)", borderRadius: "50%" }} />
+          </div>
+          <div className="geo-float absolute" style={{ top: "50%", right: "8%", animationDelay: "-5s", animationDuration: "14s" }}>
+            <svg width="18" height="16" viewBox="0 0 18 16"><polygon points="9,0 18,16 0,16" fill="none" stroke="rgba(74,144,217,0.06)" strokeWidth="1" /></svg>
+          </div>
+        </div>
+
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 relative z-10">
+
           {/* ═══ 1) Hero Header ═══ */}
           <div className="mb-6 animate-slide-up">
             <div className="flex items-start justify-between gap-4">
               <div>
                 <h1 className="font-bebas text-3xl sm:text-4xl text-cream tracking-wider leading-tight">
-                  Welcome back,{" "}
-                  <span className="text-electric">{user.username}</span>
+                  Welcome back, <span className="text-electric">{user.username}</span>
                 </h1>
                 <p className="text-cream/40 text-sm mt-1">{getGreeting()}</p>
               </div>
               <div className="hidden sm:flex flex-col items-end gap-1.5 flex-shrink-0">
                 <p className="text-cream/25 text-xs">{today}</p>
-                <span
-                  className="inline-flex items-center gap-1.5 text-[11px] font-semibold
-                    px-3 py-1 rounded-full bg-electric/10 text-electric/80 border border-electric/15"
-                >
-                  <span className="w-1.5 h-1.5 rounded-full bg-electric animate-pulse-glow" />
+                <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold px-3 py-1 rounded-full bg-electric/10 text-electric/80 border border-electric/15">
+                  <span className="w-1.5 h-1.5 rounded-full bg-electric animate-pulse" />
                   Ready to study
                 </span>
               </div>
             </div>
           </div>
 
-          {/* ═══ 2) Stat Pills ═══ */}
-          <div
-            className="flex flex-wrap gap-2.5 mb-6 animate-slide-up"
-            style={{ animationDelay: "0.05s" }}
-          >
-            <div
-              className="flex items-center gap-2 px-3.5 py-2 rounded-full
-                bg-white/[0.03] hover:bg-white/[0.06] hover:-translate-y-[1px] hover:brightness-110
-                transition-all duration-200 ease-out border border-white/[0.06]"
-            >
-              <span className="text-sm">&#x1FA99;</span>
-              <span className="font-bebas text-lg text-gold leading-none">
-                {formatCoins(user.coins)}
-              </span>
-              <span className="text-cream/25 text-[10px]">+{todayCoins} today</span>
-            </div>
-
-            <div
-              className="flex items-center gap-2 px-3.5 py-2 rounded-full
-                bg-white/[0.03] hover:bg-white/[0.06] hover:-translate-y-[1px] hover:brightness-110
-                transition-all duration-200 ease-out border border-white/[0.06]"
-            >
-              <span className="text-sm">&#x1F525;</span>
-              <span className="font-bebas text-lg text-orange-400 leading-none">
-                {user.streak}
-              </span>
-              <span className="text-cream/25 text-[10px]">
-                Best: {user.streak} days
-              </span>
-            </div>
-
-            <div
-              className="flex items-center gap-2 px-3.5 py-2 rounded-full
-                bg-white/[0.03] hover:bg-white/[0.06] hover:-translate-y-[1px] hover:brightness-110
-                transition-all duration-200 ease-out border border-white/[0.06]"
-            >
-              <span className="text-sm">&#x26A1;</span>
-              <span className="font-bebas text-lg text-electric leading-none">
-                Lvl {level}
-              </span>
-              <span className="text-cream/25 text-[10px]">{xpToNext} XP to next</span>
-            </div>
-
-            <div
-              className="flex items-center gap-2 px-3.5 py-2 rounded-full
-                bg-white/[0.03] hover:bg-white/[0.06] hover:-translate-y-[1px] hover:brightness-110
-                transition-all duration-200 ease-out border border-white/[0.06]"
-            >
-              <span className="text-sm">&#x1F4DA;</span>
-              <span className="font-bebas text-lg text-cream leading-none">
-                {displaySubjects.length}
-              </span>
-              <span className="text-cream/25 text-[10px]">
-                {displaySubjects.length} active
-              </span>
-            </div>
+          {/* ═══ 2) Circular Stats Row ═══ */}
+          <div className="flex justify-center sm:justify-start gap-6 sm:gap-8 mb-8 animate-slide-up" style={{ animationDelay: "0.05s" }}>
+            <CircleStat icon="&#x1FA99;" value={formatCoins(user.coins)} label={`+${todayCoins} today`} color="#FFD700" />
+            <CircleStat icon="&#x1F525;" value={String(user.streak)} label="day streak" color="#E67E22" />
+            <CircleStat icon="&#x26A1;" value={`Lv${level}`} label={`${xpToNext} xp left`} color="#4A90D9" />
+            <CircleStat icon="&#x1F4DA;" value={String(displaySubjects.length)} label="subjects" color="#9B59B6" />
           </div>
 
-          {/* ═══ 3) XP Progress (thicker, animated fill) ═══ */}
-          <div
-            className="mb-8 animate-slide-up"
-            style={{ animationDelay: "0.08s" }}
-          >
+          {/* ═══ 3) XP Progress ═══ */}
+          <div className="mb-8 animate-slide-up" style={{ animationDelay: "0.08s" }}>
             <div className="flex items-center justify-between mb-1.5">
               <div className="flex items-center gap-2">
-                <span className="text-cream/50 text-xs font-semibold">
-                  Level {level}
-                </span>
-                <span className="text-cream/20 text-[10px]">
-                  {currentXp.toLocaleString()} / {XP_PER_LEVEL.toLocaleString()} XP
-                </span>
+                <span className="text-cream/50 text-xs font-semibold">Level {level}</span>
+                <span className="text-cream/20 text-[10px]">{currentXp.toLocaleString()} / {XP_PER_LEVEL.toLocaleString()} XP</span>
               </div>
-              <span className="text-cream/25 text-[10px]">
-                {progress.toFixed(0)}% &bull; {xpToNext} XP to Level {level + 1}
-              </span>
+              <span className="text-cream/25 text-[10px]">{progress.toFixed(0)}% &bull; {xpToNext} XP to Level {level + 1}</span>
             </div>
-            <div className="w-full h-3 bg-white/[0.06] rounded-full overflow-hidden">
-              <div
-                className="h-full rounded-full transition-all duration-700 ease-out"
-                style={{
-                  width: xpMounted ? `${Math.max(progress, 2)}%` : "0%",
-                  background: "linear-gradient(90deg, #2D6BB5, #4A90D9, #6AABF0)",
-                  boxShadow: "0 0 10px #4A90D950",
-                }}
-              />
+            <div className="w-full h-3 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.04)" }}>
+              <div className="h-full rounded-full transition-all duration-700 ease-out"
+                style={{ width: xpMounted ? `${Math.max(progress, 2)}%` : "0%", background: "linear-gradient(90deg, #2D6BB5, #4A90D9, #6AABF0)", boxShadow: "0 0 10px #4A90D950" }} />
             </div>
           </div>
 
-          {/* ═══ 4) Mission Hero (centerpiece) ═══ */}
-          <div
-            className="rounded-2xl p-6 sm:p-8 mb-8 animate-slide-up relative overflow-hidden
-              transition-all duration-300 hover:brightness-[1.03] idle-glow-mission periodic-pulse"
-            style={{
-              background:
-                "linear-gradient(135deg, #0d1528 0%, #0a1020 50%, #0d1528 100%)",
-              boxShadow:
-                "0 0 0 1px rgba(74,144,217,0.1), 0 8px 32px rgba(0,0,0,0.3)",
-              animationDelay: "0.1s",
-            }}
-          >
-            {/* Decorative accent */}
-            <div
-              className="absolute top-0 right-0 w-56 h-56 rounded-full pointer-events-none"
-              style={{
-                background:
-                  "radial-gradient(circle, rgba(74,144,217,0.06), transparent 70%)",
-              }}
-            />
+          {/* ═══ 4) Mission Hero ═══ */}
+          <div className="rounded-tl-[32px] rounded-br-[32px] rounded-tr-[12px] rounded-bl-[12px] p-6 sm:p-8 mb-8 animate-slide-up relative overflow-hidden transition-all duration-300 hover:scale-[1.01]"
+            style={{ background: "linear-gradient(135deg, #0d1528 0%, #0a1020 50%, #0d1528 100%)", boxShadow: "0 0 0 1px rgba(74,144,217,0.1), 0 8px 32px rgba(0,0,0,0.3)", animationDelay: "0.1s" }}>
+            {/* Decorative orb */}
+            <div className="absolute top-0 right-0 w-56 h-56 rounded-full pointer-events-none" style={{ background: "radial-gradient(circle, rgba(255,215,0,0.04), transparent 70%)" }} />
+            {/* Accent line */}
+            <div className="absolute top-0 left-0 right-0 h-[2px]" style={{ background: "linear-gradient(90deg, #FFD700, #4A90D9, transparent)" }} />
 
             <div className="relative flex items-start gap-5">
-              <div
-                className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gold/10 flex items-center justify-center flex-shrink-0"
-                style={{ boxShadow: "0 0 24px rgba(255,215,0,0.06)" }}
-              >
+              <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-gold/10 flex items-center justify-center flex-shrink-0"
+                style={{ boxShadow: "0 0 24px rgba(255,215,0,0.06)" }}>
                 <span className="text-3xl sm:text-4xl">&#x1F3AF;</span>
               </div>
               <div className="flex-1 min-w-0">
-                <p className="font-bebas text-2xl sm:text-3xl text-cream tracking-wider">
-                  TODAY&apos;S MISSION
-                </p>
-                <p className="text-cream/70 text-sm sm:text-base mt-0.5">
-                  Complete Daily Quiz
-                </p>
-                <p className="text-cream/30 text-xs mt-1">
-                  Earn +10 coins &bull; Protect your streak
-                </p>
-
+                <p className="font-bebas text-2xl sm:text-3xl text-cream tracking-wider">TODAY&apos;S MISSION</p>
+                <p className="text-cream/70 text-sm sm:text-base mt-0.5">Complete Daily Quiz</p>
+                <p className="text-cream/30 text-xs mt-1">Earn +10 coins &bull; Protect your streak</p>
                 <div className="flex flex-wrap items-center gap-4 mt-5">
                   <Link href="/quiz">
-                    <button
-                      className="font-syne font-bold text-sm px-6 py-2.5 rounded-lg transition-all duration-200
-                        active:scale-95 text-navy bg-electric hover:bg-electric-light cta-pulse"
-                    >
+                    <button className="gold-btn px-6 py-2.5 rounded-full font-syne font-bold text-sm text-navy">
                       {dailyDone ? "Practice a Subject" : "Start Daily Quiz"}
                     </button>
                   </Link>
                   <div className="flex items-center gap-2">
-                    <span className="text-cream/25 text-xs font-semibold">
-                      {dailyDone ? "1" : "0"}/1
-                    </span>
-                    <span className="text-cream/15 text-[10px]">
-                      &bull; Resets in 14h
-                    </span>
+                    <span className="text-cream/25 text-xs font-semibold">{dailyDone ? "1" : "0"}/1</span>
+                    <span className="text-cream/15 text-[10px]">&bull; Resets in 14h</span>
                   </div>
                 </div>
-
-                <p className="text-cream/15 text-[10px] mt-3">
-                  Coins will unlock rewards soon.
-                </p>
               </div>
             </div>
           </div>
 
-          {/* ═══ 5) Continue Shelf ═══ */}
-          <div
-            className="mb-8 animate-slide-up"
-            style={{ animationDelay: "0.15s" }}
-          >
-            <h2 className="font-bebas text-lg text-cream tracking-wider mb-3">
-              CONTINUE
-            </h2>
-            <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 scrollbar-hide">
-              {/* Daily Quiz card */}
-              {!dailyDone && (
-                <Link href="/quiz" className="flex-shrink-0">
-                  <div
-                    className="w-36 rounded-xl p-3.5 transition-all duration-200 ease-out
-                      hover:brightness-110 hover:-translate-y-1 hover:scale-[1.03]"
-                    style={{
-                      background:
-                        "linear-gradient(135deg, rgba(74,144,217,0.1) 0%, rgba(74,144,217,0.04) 100%)",
-                      border: "1px solid rgba(74,144,217,0.12)",
-                    }}
-                  >
-                    <span className="text-2xl">&#x1F9E0;</span>
-                    <p className="font-semibold text-cream text-xs mt-2">
-                      Daily Quiz
-                    </p>
-                    <p className="text-cream/25 text-[10px] mt-0.5">
-                      10 questions
-                    </p>
-                  </div>
-                </Link>
-              )}
-
-              {/* Subject cards */}
-              {displaySubjects.slice(0, 4).map((stat) => {
-                const accuracy =
-                  stat.questionsAnswered > 0
-                    ? Math.round(
-                        (stat.correctAnswers / stat.questionsAnswered) * 100
-                      )
-                    : 0;
-                const icon =
-                  SUBJECT_ICONS[
-                    stat.subject as keyof typeof SUBJECT_ICONS
-                  ] ?? "\u{1F4DA}";
-                const color =
-                  SUBJECT_COLORS[
-                    stat.subject as keyof typeof SUBJECT_COLORS
-                  ] ?? "#4A90D9";
-                return (
-                  <Link
-                    key={stat.subject}
-                    href="/learn"
-                    className="flex-shrink-0"
-                  >
-                    <div
-                      className="w-36 rounded-xl p-3.5 transition-all duration-200 ease-out
-                        hover:brightness-110 hover:-translate-y-1 hover:scale-[1.03]"
-                      style={{
-                        background: `linear-gradient(135deg, ${color}12 0%, ${color}06 100%)`,
-                        border: `1px solid ${color}15`,
-                      }}
-                    >
-                      <span className="text-2xl">{icon}</span>
-                      <p className="font-semibold text-cream text-xs mt-2">
-                        {stat.subject}
-                      </p>
+          {/* ═══ 5) Continue — Infinite Rotating Carousel ═══ */}
+          <div className="mb-8 animate-slide-up" style={{ animationDelay: "0.15s" }}>
+            <h2 className="font-bebas text-lg text-cream tracking-wider mb-3">CONTINUE</h2>
+            <RotatingCarousel>
+              {[
+                ...(!dailyDone ? [{
+                  subject: "Daily Quiz", icon: "\uD83E\uDDE0", color: "#4A90D9",
+                  accuracy: null, href: "/quiz",
+                }] : []),
+                ...displaySubjects.slice(0, 5).map((stat) => ({
+                  subject: stat.subject,
+                  icon: SUBJECT_ICONS[stat.subject as keyof typeof SUBJECT_ICONS] ?? "\u{1F4DA}",
+                  color: SUBJECT_COLORS[stat.subject as keyof typeof SUBJECT_COLORS] ?? "#4A90D9",
+                  accuracy: stat.questionsAnswered > 0 ? Math.round((stat.correctAnswers / stat.questionsAnswered) * 100) : 0,
+                  href: "/learn",
+                })),
+              ].map((item, i) => (
+                <Link key={`${item.subject}-${i}`} href={item.href} className="flex-shrink-0">
+                  <div className={`w-36 p-3.5 transition-all duration-300 hover:scale-105 hover:-translate-y-1 ${
+                    i % 3 === 0 ? "rounded-[20px]" : i % 3 === 1 ? "rounded-tl-[28px] rounded-br-[28px] rounded-tr-[6px] rounded-bl-[6px]" : "rounded-full"
+                  }`} style={{ background: `linear-gradient(135deg, ${item.color}12 0%, ${item.color}06 100%)`, border: `1px solid ${item.color}18` }}>
+                    <span className="text-2xl block">{item.icon}</span>
+                    <p className="font-semibold text-cream text-xs mt-2">{item.subject}</p>
+                    {item.accuracy !== null ? (
                       <div className="flex items-center gap-1.5 mt-1.5">
                         <div className="flex-1 h-1 bg-white/[0.06] rounded-full overflow-hidden">
-                          <div
-                            className="h-full rounded-full"
-                            style={{
-                              width: `${accuracy}%`,
-                              background: color,
-                            }}
-                          />
+                          <div className="h-full rounded-full" style={{ width: `${item.accuracy}%`, background: item.color }} />
                         </div>
-                        <span className="text-cream/35 text-[9px]">
-                          {accuracy}%
-                        </span>
+                        <span className="text-cream/35 text-[9px]">{item.accuracy}%</span>
                       </div>
-                    </div>
-                  </Link>
-                );
-              })}
-            </div>
+                    ) : (
+                      <p className="text-cream/25 text-[10px] mt-0.5">10 questions</p>
+                    )}
+                  </div>
+                </Link>
+              ))}
+            </RotatingCarousel>
           </div>
 
           {/* ═══ 6) Two-Column Lower ═══ */}
           <div className="grid lg:grid-cols-3 gap-6">
-            {/* Left: Subjects */}
-            <div
-              className="lg:col-span-2 animate-slide-up"
-              style={{ animationDelay: "0.2s" }}
-            >
-              <h2 className="font-bebas text-lg text-cream tracking-wider mb-3">
-                YOUR SUBJECTS
-              </h2>
-              <div className="space-y-0.5">
-                {displaySubjects.slice(0, 6).map((stat) => {
-                  const accuracy =
-                    stat.questionsAnswered > 0
-                      ? Math.round(
-                          (stat.correctAnswers / stat.questionsAnswered) * 100
-                        )
-                      : 0;
-                  const icon =
-                    SUBJECT_ICONS[
-                      stat.subject as keyof typeof SUBJECT_ICONS
-                    ] ?? "\u{1F4DA}";
+
+            {/* Left: Subjects as cards */}
+            <div className="lg:col-span-2 animate-slide-up" style={{ animationDelay: "0.2s" }}>
+              <h2 className="font-bebas text-lg text-cream tracking-wider mb-3">YOUR SUBJECTS</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {displaySubjects.slice(0, 6).map((stat, i) => {
+                  const accuracy = stat.questionsAnswered > 0 ? Math.round((stat.correctAnswers / stat.questionsAnswered) * 100) : 0;
+                  const icon = SUBJECT_ICONS[stat.subject as keyof typeof SUBJECT_ICONS] ?? "\u{1F4DA}";
+                  const color = SUBJECT_COLORS[stat.subject as keyof typeof SUBJECT_COLORS] ?? "#4A90D9";
                   return (
-                    <div
-                      key={stat.subject}
-                      className="flex items-center gap-3 py-3 px-4 rounded-xl
-                        hover:bg-white/[0.03] transition-all duration-200 ease-out"
-                    >
-                      <span className="text-lg flex-shrink-0">{icon}</span>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="font-semibold text-cream text-sm">
-                            {stat.subject}
-                          </span>
-                          <span className="text-cream/40 text-xs">
-                            {accuracy}%
-                          </span>
+                    <Link key={stat.subject} href="/learn">
+                      <div className={`tilt-card group p-4 transition-all duration-300 hover:scale-[1.02] ${cardShapes[i % cardShapes.length]}`}
+                        style={{ background: `linear-gradient(135deg, ${color}08 0%, #080E1A 100%)`, border: `1px solid ${color}15` }}>
+                        {/* Top accent */}
+                        <div className="absolute top-0 left-0 right-0 h-[2px] opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                          style={{ background: `linear-gradient(90deg, ${color}, transparent)` }} />
+
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
+                            style={{ background: `${color}12`, border: `1px solid ${color}20` }}>
+                            <span className="text-lg">{icon}</span>
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between mb-1">
+                              <span className="font-semibold text-cream text-sm">{stat.subject}</span>
+                              <span className="text-xs font-mono" style={{ color }}>{accuracy}%</span>
+                            </div>
+                            <div className="w-full h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
+                              <div className="h-full rounded-full transition-all duration-700" style={{ width: `${accuracy}%`, background: `linear-gradient(90deg, ${color}80, ${color})` }} />
+                            </div>
+                          </div>
                         </div>
-                        <div className="w-full h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
-                          <div
-                            className="h-full rounded-full transition-all duration-700"
-                            style={{
-                              width: `${accuracy}%`,
-                              background:
-                                accuracy >= 80
-                                  ? "#2ECC71"
-                                  : accuracy >= 60
-                                  ? "#E67E22"
-                                  : "#E74C3C",
-                            }}
-                          />
+
+                        <div className="flex items-center justify-between mt-3">
+                          <span className="text-cream/25 text-[10px]">{stat.questionsAnswered} answered</span>
+                          <span className="text-cream/25 text-[10px]">{formatCoins(stat.coinsEarned)} coins</span>
                         </div>
                       </div>
-                      <Link href="/learn" className="flex-shrink-0">
-                        <button
-                          className="text-electric text-xs font-semibold hover:text-electric-light
-                            transition-colors px-2 py-1 rounded hover:bg-electric/5"
-                        >
-                          Continue
-                        </button>
-                      </Link>
-                    </div>
+                    </Link>
                   );
                 })}
               </div>
             </div>
 
-            {/* Right: This Week + Activity + Ninny */}
-            <div className="space-y-6">
-              {/* This Week (gamification tease) */}
-              <div
-                className="animate-slide-up"
-                style={{ animationDelay: "0.18s" }}
-              >
-                <h2 className="font-bebas text-lg text-cream tracking-wider mb-3">
-                  THIS WEEK
-                </h2>
-                <div
-                  className="rounded-xl p-4 space-y-2.5"
-                  style={{
-                    background:
-                      "linear-gradient(135deg, #0d1528 0%, #0a1020 100%)",
-                    border: "1px solid rgba(74,144,217,0.08)",
-                  }}
-                >
+            {/* Right sidebar */}
+            <div className="space-y-5">
+
+              {/* This Week */}
+              <div className="animate-slide-up" style={{ animationDelay: "0.18s" }}>
+                <h2 className="font-bebas text-lg text-cream tracking-wider mb-3">THIS WEEK</h2>
+                <div className="rounded-[20px] p-4 space-y-2.5"
+                  style={{ background: "linear-gradient(135deg, #0d1528 0%, #0a1020 100%)", border: "1px solid rgba(74,144,217,0.08)" }}>
                   <div className="flex items-center justify-between">
                     <span className="text-cream/40 text-xs">Your rank</span>
                     <span className="text-cream/20 text-xs font-semibold">&mdash; (soon)</span>
@@ -450,74 +354,38 @@ export default function DashboardPage() {
                     <span className="text-cream/40 text-xs">Top player</span>
                     <span className="text-cream/20 text-xs font-semibold">&mdash; (soon)</span>
                   </div>
-                  <p className="text-cream/15 text-[10px] pt-1">
-                    Win duels to climb the leaderboard.
-                  </p>
+                  <p className="text-cream/15 text-[10px] pt-1">Win duels to climb the leaderboard.</p>
                 </div>
               </div>
 
               {/* Recent Activity */}
-              <div
-                className="animate-slide-up"
-                style={{ animationDelay: "0.22s" }}
-              >
-                <h2 className="font-bebas text-lg text-cream tracking-wider mb-3">
-                  RECENT ACTIVITY
-                </h2>
+              <div className="animate-slide-up" style={{ animationDelay: "0.22s" }}>
+                <h2 className="font-bebas text-lg text-cream tracking-wider mb-3">RECENT ACTIVITY</h2>
                 {activity.length > 0 ? (
-                  <div className="space-y-0.5">
+                  <div className="space-y-1">
                     {activity.map((item, i) => (
-                      <div
-                        key={i}
-                        className="flex items-center gap-3 py-2.5 px-3 rounded-lg
-                          hover:bg-white/[0.03] transition-all duration-200 ease-out"
-                      >
-                        <span className="text-lg flex-shrink-0">
-                          {ActivityIcon(item.type)}
-                        </span>
+                      <div key={i} className={`flex items-center gap-3 py-2.5 px-3 transition-all duration-200 hover:bg-white/[0.03] ${
+                        i % 2 === 0 ? "rounded-[16px]" : "rounded-tl-[20px] rounded-br-[20px] rounded-tr-[6px] rounded-bl-[6px]"
+                      }`}>
+                        <span className="text-lg flex-shrink-0">{ActivityIcon(item.type)}</span>
                         <div className="flex-1 min-w-0">
-                          <p className="text-cream text-xs font-semibold truncate">
-                            {item.description ?? item.type.replace(/_/g, " ")}
-                          </p>
-                          <p className="text-cream/25 text-[10px]">
-                            {new Date(item.created_at).toLocaleDateString(
-                              "en-US",
-                              { month: "short", day: "numeric" }
-                            )}
-                          </p>
+                          <p className="text-cream text-xs font-semibold truncate">{item.description ?? item.type.replace(/_/g, " ")}</p>
+                          <p className="text-cream/25 text-[10px]">{new Date(item.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</p>
                         </div>
-                        <span
-                          className={`text-xs font-bold flex-shrink-0 ${
-                            item.amount > 0 ? "text-gold" : "text-red-400"
-                          }`}
-                        >
+                        <span className={`text-xs font-bold flex-shrink-0 ${item.amount > 0 ? "text-gold" : "text-red-400"}`}>
                           {item.amount > 0 ? `+${item.amount}` : item.amount}
                         </span>
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <div
-                    className="rounded-xl p-6 text-center"
-                    style={{
-                      background:
-                        "linear-gradient(135deg, rgba(13,21,40,0.5) 0%, rgba(10,16,32,0.5) 100%)",
-                      border: "1px solid rgba(74,144,217,0.06)",
-                    }}
-                  >
+                  <div className="rounded-[20px] p-6 text-center"
+                    style={{ background: "linear-gradient(135deg, rgba(13,21,40,0.5) 0%, rgba(10,16,32,0.5) 100%)", border: "1px solid rgba(74,144,217,0.06)" }}>
                     <span className="text-3xl block mb-2">&#x1FA99;</span>
-                    <p className="font-bebas text-base text-cream/50 tracking-wider">
-                      No activity yet
-                    </p>
-                    <p className="text-cream/25 text-xs mt-1 mb-4 leading-relaxed">
-                      Take your first quiz to start tracking progress.
-                    </p>
+                    <p className="font-bebas text-base text-cream/50 tracking-wider">No activity yet</p>
+                    <p className="text-cream/25 text-xs mt-1 mb-4 leading-relaxed">Take your first quiz to start tracking progress.</p>
                     <Link href="/quiz">
-                      <button
-                        className="font-syne font-semibold text-xs px-4 py-2 rounded-lg
-                          transition-all duration-200 active:scale-95
-                          border border-electric/30 text-electric hover:bg-electric/10"
-                      >
+                      <button className="font-syne font-semibold text-xs px-4 py-2 rounded-full transition-all duration-200 active:scale-95 border border-electric/30 text-electric hover:bg-electric/10">
                         Start Quiz
                       </button>
                     </Link>
@@ -526,61 +394,29 @@ export default function DashboardPage() {
               </div>
 
               {/* Ninny's Notes */}
-              <div
-                className="animate-slide-up"
-                style={{ animationDelay: "0.26s" }}
-              >
-                <h2 className="font-bebas text-lg text-cream tracking-wider mb-3">
-                  NINNY&apos;S NOTES
-                </h2>
-                <div
-                  className="rounded-xl p-4 idle-glow-ninny"
-                  style={{
-                    background:
-                      "linear-gradient(135deg, #0d1528 0%, #0a1020 100%)",
-                    border: "1px solid rgba(74,144,217,0.08)",
-                  }}
-                >
+              <div className="animate-slide-up" style={{ animationDelay: "0.26s" }}>
+                <h2 className="font-bebas text-lg text-cream tracking-wider mb-3">NINNY&apos;S NOTES</h2>
+                <div className="rounded-tl-[24px] rounded-br-[24px] rounded-tr-[8px] rounded-bl-[8px] p-4 idle-glow-ninny"
+                  style={{ background: "linear-gradient(135deg, #0d1528 0%, #0a1020 100%)", border: "1px solid rgba(74,144,217,0.08)" }}>
                   <div className="space-y-2.5 mb-4">
                     <div className="flex items-start gap-2">
-                      <span className="text-electric text-[10px] mt-0.5 flex-shrink-0">
-                        &#x25CF;
-                      </span>
-                      <p className="text-cream/50 text-xs leading-relaxed">
-                        You perform better in the morning. Try studying before
-                        noon.
-                      </p>
+                      <span className="text-electric text-[10px] mt-0.5 flex-shrink-0">&#x25CF;</span>
+                      <p className="text-cream/50 text-xs leading-relaxed">You perform better in the morning. Try studying before noon.</p>
                     </div>
                     <div className="flex items-start gap-2">
-                      <span className="text-electric text-[10px] mt-0.5 flex-shrink-0">
-                        &#x25CF;
-                      </span>
-                      <p className="text-cream/50 text-xs leading-relaxed">
-                        Science accuracy up 12% this week. Keep it up.
-                      </p>
+                      <span className="text-electric text-[10px] mt-0.5 flex-shrink-0">&#x25CF;</span>
+                      <p className="text-cream/50 text-xs leading-relaxed">Science accuracy up 12% this week. Keep it up.</p>
                     </div>
                   </div>
-
                   <div className="flex flex-wrap gap-2 mb-3">
-                    <button
-                      disabled
-                      className="text-[11px] font-semibold py-1.5 px-3 rounded-lg
-                        border border-electric/15 text-cream/25 bg-white/[0.03] cursor-not-allowed"
-                    >
+                    <button disabled className="text-[11px] font-semibold py-1.5 px-3 rounded-full border border-electric/15 text-cream/25 bg-white/[0.03] cursor-not-allowed">
                       Review Weak Spot (Soon)
                     </button>
-                    <button
-                      disabled
-                      className="text-[11px] font-semibold py-1.5 px-3 rounded-lg
-                        border border-electric/15 text-cream/25 bg-white/[0.03] cursor-not-allowed"
-                    >
+                    <button disabled className="text-[11px] font-semibold py-1.5 px-3 rounded-full border border-electric/15 text-cream/25 bg-white/[0.03] cursor-not-allowed">
                       Ask Ninny (Soon)
                     </button>
                   </div>
-
-                  <p className="text-cream/15 text-[10px] italic">
-                    Ninny is analyzing your progress&hellip;
-                  </p>
+                  <p className="text-cream/15 text-[10px] italic">Ninny is analyzing your progress&hellip;</p>
                 </div>
               </div>
             </div>

@@ -598,7 +598,7 @@ export default function ComingSoonPage() {
       {/* ─── DevOps Secret Trigger ─── */}
       <div className="text-center py-2.5 bg-[#04080F]">
         <button id="devops-trigger" onClick={handleSecretClick}
-          className="font-mono text-[10px] tracking-[1px] text-white/[0.08] hover:text-white/20 transition-colors select-none">
+          className="font-mono text-[10px] tracking-[1px] text-white/[0.08] select-none cursor-default">
           &copy; 2026 Lionade
         </button>
       </div>
