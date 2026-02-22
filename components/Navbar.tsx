@@ -27,9 +27,10 @@ export default function Navbar() {
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const isLanding = pathname === "/";
+  const isComingSoon = pathname === "/";
+  const isLanding = pathname === "/home";
   const isLogin = pathname === "/login";
-  const showAppNav = !!user && !isLanding && !isLogin;
+  const showAppNav = !!user && !isComingSoon && !isLanding && !isLogin;
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -68,6 +69,9 @@ export default function Navbar() {
     return pathname === href;
   };
 
+  // Hide navbar entirely on coming soon page (it has its own top bar)
+  if (isComingSoon) return null;
+
   return (
     <>
       <nav
@@ -77,7 +81,7 @@ export default function Navbar() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-12">
             {/* Logo */}
-            <Link href={user ? "/dashboard" : "/"} className="flex items-center gap-2 group">
+            <Link href="/" className="flex items-center gap-2 group">
               <div className="w-7 h-7 rounded-lg bg-electric flex items-center justify-center
                 shadow-lg shadow-electric/40 group-hover:shadow-electric/60 transition-all duration-300">
                 <span className="text-white font-bebas text-base leading-none">L</span>
@@ -111,7 +115,7 @@ export default function Navbar() {
             )}
 
             {/* Landing links (not logged in) */}
-            {isLanding && !user && (
+            {isLanding && (
               <div className="hidden md:flex items-center gap-1">
                 {[
                   { href: "#how-it-works", label: "How It Works" },
@@ -225,8 +229,8 @@ export default function Navbar() {
                 </>
               )}
 
-              {/* Not logged in */}
-              {!user && !isLogin && (
+              {/* Not logged in — show on /home and other non-login pages, hide on coming soon (has its own top bar) */}
+              {!user && !isLogin && !isComingSoon && (
                 <div className="flex items-center gap-2">
                   <Link href="/login"
                     className="hidden sm:block btn-outline text-sm py-1.5 px-4">

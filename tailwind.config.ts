@@ -28,6 +28,7 @@ const config: Config = {
       fontFamily: {
         bebas: ["var(--font-bebas)", "sans-serif"],
         syne: ["var(--font-syne)", "sans-serif"],
+        mono: ["var(--font-dm-mono)", "monospace"],
       },
       keyframes: {
         "coin-fly": {

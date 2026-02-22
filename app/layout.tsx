@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Bebas_Neue, Syne } from "next/font/google";
+import { Bebas_Neue, Syne, DM_Mono } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import AuthProviderWrapper from "@/components/AuthProviderWrapper";
@@ -18,6 +18,13 @@ const syne = Syne({
   display: "swap",
 });
 
+const dmMono = DM_Mono({
+  variable: "--font-dm-mono",
+  subsets: ["latin"],
+  weight: ["400", "500"],
+  display: "swap",
+});
+
 export const metadata: Metadata = {
   title: "Lionade — Study Like It's Your Job",
   description:
@@ -31,7 +38,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${bebasNeue.variable} ${syne.variable}`}>
+    <html lang="en" className={`${bebasNeue.variable} ${syne.variable} ${dmMono.variable}`}>
       <body className="bg-navy text-cream font-syne antialiased">
         <AuthProviderWrapper>
           <Navbar />
