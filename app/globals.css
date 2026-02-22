@@ -282,13 +282,103 @@ body {
 .periodic-glow { animation: periodicGlow 15s ease-in-out infinite; }
 .periodic-shimmer { background: linear-gradient(90deg, transparent 0%, rgba(74,144,217,0.15) 50%, transparent 100%); background-size: 200% 100%; animation: periodicShimmer 16s ease-in-out infinite; }
 
+/* ── Feature orbit ── */
+@keyframes orbit-rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+@keyframes orbit-counter-rotate {
+  from { transform: translate(-50%, -50%) rotate(0deg); }
+  to { transform: translate(-50%, -50%) rotate(-360deg); }
+}
+@keyframes orbit-center-counter {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(-360deg); }
+}
+
+.feature-orbit {
+  animation: orbit-rotate 75s linear infinite;
+  transform-origin: center center;
+}
+.feature-orbit:hover {
+  animation-play-state: paused;
+}
+.feature-orbit-node {
+  animation: orbit-counter-rotate 75s linear infinite;
+}
+.feature-orbit:hover .feature-orbit-node {
+  animation-play-state: paused;
+}
+.feature-orbit-center {
+  animation: orbit-center-counter 75s linear infinite;
+}
+.feature-orbit:hover .feature-orbit-center {
+  animation-play-state: paused;
+}
+
+/* ── 3D Flip Cards ── */
+.flip-card {
+  perspective: 800px;
+  cursor: pointer;
+}
+.flip-card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.6s ease;
+  transform-style: preserve-3d;
+}
+.flip-card:hover .flip-card-inner {
+  transform: rotateY(180deg);
+}
+.flip-card-face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+.flip-card-back {
+  transform: rotateY(180deg);
+}
+
+/* ── Orbit ring dash animation ── */
+@keyframes dash-spin {
+  from { stroke-dashoffset: 0; }
+  to { stroke-dashoffset: -50; }
+}
+
+/* ── Watermark lightning flash ── */
+@keyframes watermark-flash {
+  0%, 80%   { color: rgba(74,144,217,0.03); text-shadow: none; }
+  82%       { color: rgba(234,179,8,0.35); text-shadow: 0 0 20px rgba(234,179,8,0.6), 0 0 40px rgba(234,179,8,0.3); }
+  84%       { color: rgba(74,144,217,0.03); text-shadow: none; }
+  86%       { color: rgba(234,179,8,0.4); text-shadow: 0 0 25px rgba(234,179,8,0.7), 0 0 50px rgba(234,179,8,0.35); }
+  88%       { color: rgba(74,144,217,0.03); text-shadow: none; }
+  90%       { color: rgba(234,179,8,0.5); text-shadow: 0 0 30px rgba(234,179,8,0.8), 0 0 60px rgba(234,179,8,0.4), 0 0 80px rgba(234,179,8,0.2); }
+  95%       { color: rgba(234,179,8,0.15); text-shadow: 0 0 10px rgba(234,179,8,0.3); }
+  100%      { color: rgba(74,144,217,0.03); text-shadow: none; }
+}
+.watermark-flash {
+  animation: watermark-flash 12s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .cta-pulse, .animate-slide-up, .coin-particle, .pulse-ring,
   .idle-float, .idle-pulse, .idle-tilt, .idle-shimmer,
   .idle-shimmer-bar, .idle-glow-mission, .idle-glow-ninny,
   .periodic-pulse, .periodic-glow, .periodic-shimmer,
-  .geo-float, .geo-spin, .wireframe-sphere, .gold-btn::after {
+  .geo-float, .geo-spin, .wireframe-sphere, .gold-btn::after,
+  .feature-orbit, .feature-orbit-node, .feature-orbit-center,
+  .watermark-flash {
     animation: none !important;
   }
+  .feature-orbit-node { transform: translate(-50%, -50%) !important; }
+  .feature-orbit-center { transform: none !important; }
   .hover-anim { transition: none !important; }
 }
