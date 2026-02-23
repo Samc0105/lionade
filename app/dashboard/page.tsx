@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth";
 import { getRecentActivity, getSubjectStats, getQuizHistory } from "@/lib/db";
@@ -36,35 +36,11 @@ function getGreeting(): string {
   return "One more win before midnight.";
 }
 
-/* ── Rotating Widget Carousel ── */
-function RotatingCarousel({ children }: { children: React.ReactNode[] }) {
-  const trackRef = useRef<HTMLDivElement>(null);
-  const [paused, setPaused] = useState(false);
-
-  useEffect(() => {
-    const track = trackRef.current;
-    if (!track) return;
-    let pos = 0;
-    let raf: number;
-    const speed = 0.5;
-
-    function animate() {
-      if (!paused) {
-        pos -= speed;
-        const halfWidth = track!.scrollWidth / 2;
-        if (Math.abs(pos) >= halfWidth) pos = 0;
-        track!.style.transform = `translateX(${pos}px)`;
-      }
-      raf = requestAnimationFrame(animate);
-    }
-    raf = requestAnimationFrame(animate);
-    return () => cancelAnimationFrame(raf);
-  }, [paused]);
-
+/* ── Infinite Scroll Carousel ── */
+function InfiniteCarousel({ children }: { children: React.ReactNode[] }) {
   return (
-    <div className="overflow-hidden -mx-4 px-4 sm:mx-0 sm:px-0"
-      onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)}>
-      <div ref={trackRef} className="flex gap-3 will-change-transform" style={{ width: "max-content" }}>
+    <div className="overflow-hidden -mx-4 px-4 sm:mx-0 sm:px-0">
+      <div className="infinite-scroll-track flex gap-3" style={{ width: "max-content" }}>
         {children}
         {children}
       </div>
@@ -161,6 +137,16 @@ export default function DashboardPage() {
         .animate-slide-up {
           animation: slide-up 0.5s ease both;
         }
+        @keyframes infiniteScroll {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+        .infinite-scroll-track {
+          animation: infiniteScroll 25s linear infinite;
+        }
+        .infinite-scroll-track:hover {
+          animation-play-state: paused;
+        }
       `}</style>
 
       <div className="min-h-screen bg-navy pt-16 pb-20 md:pb-8 relative overflow-hidden">
@@ -256,40 +242,37 @@ export default function DashboardPage() {
           {/* ═══ 5) Continue — Infinite Rotating Carousel ═══ */}
           <div className="mb-8 animate-slide-up" style={{ animationDelay: "0.15s" }}>
             <h2 className="font-bebas text-lg text-cream tracking-wider mb-3">CONTINUE</h2>
-            <RotatingCarousel>
+            <InfiniteCarousel>
               {[
                 ...(!dailyDone ? [{
                   subject: "Daily Quiz", icon: "\uD83E\uDDE0", color: "#4A90D9",
-                  accuracy: null, href: "/quiz",
+                  accuracy: null as number | null,
                 }] : []),
                 ...displaySubjects.slice(0, 5).map((stat) => ({
                   subject: stat.subject,
                   icon: SUBJECT_ICONS[stat.subject as keyof typeof SUBJECT_ICONS] ?? "\u{1F4DA}",
                   color: SUBJECT_COLORS[stat.subject as keyof typeof SUBJECT_COLORS] ?? "#4A90D9",
                   accuracy: stat.questionsAnswered > 0 ? Math.round((stat.correctAnswers / stat.questionsAnswered) * 100) : 0,
-                  href: "/learn",
                 })),
               ].map((item, i) => (
-                <Link key={`${item.subject}-${i}`} href={item.href} className="flex-shrink-0">
-                  <div className={`w-36 p-3.5 transition-all duration-300 hover:scale-105 hover:-translate-y-1 ${
-                    i % 3 === 0 ? "rounded-[20px]" : i % 3 === 1 ? "rounded-tl-[28px] rounded-br-[28px] rounded-tr-[6px] rounded-bl-[6px]" : "rounded-full"
-                  }`} style={{ background: `linear-gradient(135deg, ${item.color}12 0%, ${item.color}06 100%)`, border: `1px solid ${item.color}18` }}>
-                    <span className="text-2xl block">{item.icon}</span>
-                    <p className="font-semibold text-cream text-xs mt-2">{item.subject}</p>
-                    {item.accuracy !== null ? (
-                      <div className="flex items-center gap-1.5 mt-1.5">
-                        <div className="flex-1 h-1 bg-white/[0.06] rounded-full overflow-hidden">
-                          <div className="h-full rounded-full" style={{ width: `${item.accuracy}%`, background: item.color }} />
-                        </div>
-                        <span className="text-cream/35 text-[9px]">{item.accuracy}%</span>
+                <div key={`${item.subject}-${i}`} className={`flex-shrink-0 w-36 p-3.5 select-none ${
+                  i % 3 === 0 ? "rounded-[20px]" : i % 3 === 1 ? "rounded-tl-[28px] rounded-br-[28px] rounded-tr-[6px] rounded-bl-[6px]" : "rounded-full"
+                }`} style={{ background: `linear-gradient(135deg, ${item.color}12 0%, ${item.color}06 100%)`, border: `1px solid ${item.color}18` }}>
+                  <span className="text-2xl block">{item.icon}</span>
+                  <p className="font-semibold text-cream text-xs mt-2">{item.subject}</p>
+                  {item.accuracy !== null ? (
+                    <div className="flex items-center gap-1.5 mt-1.5">
+                      <div className="flex-1 h-1 bg-white/[0.06] rounded-full overflow-hidden">
+                        <div className="h-full rounded-full" style={{ width: `${item.accuracy}%`, background: item.color }} />
                       </div>
-                    ) : (
-                      <p className="text-cream/25 text-[10px] mt-0.5">10 questions</p>
-                    )}
-                  </div>
-                </Link>
+                      <span className="text-cream/35 text-[9px]">{item.accuracy}%</span>
+                    </div>
+                  ) : (
+                    <p className="text-cream/25 text-[10px] mt-0.5">10 questions</p>
+                  )}
+                </div>
               ))}
-            </RotatingCarousel>
+            </InfiniteCarousel>
           </div>
 
           {/* ═══ 6) Two-Column Lower ═══ */}

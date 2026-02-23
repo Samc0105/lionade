@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth";
 
@@ -65,17 +65,6 @@ const TICKER_ITEMS = [
   { text: "Daily Grind", accent: false }, { text: "\uD83D\uDD25 Real Rewards", accent: true },
 ];
 
-/* ── Reusable SVG shapes ── */
-function WaveDivider({ flip = false, color = "rgba(74,144,217,0.08)" }: { flip?: boolean; color?: string }) {
-  return (
-    <div className="wave-divider" style={flip ? { transform: "rotate(180deg)" } : {}}>
-      <svg viewBox="0 0 1440 100" preserveAspectRatio="none" style={{ height: "60px" }}>
-        <path d="M0,40 C360,100 720,0 1080,60 C1260,80 1380,20 1440,40 L1440,100 L0,100 Z" fill={color} />
-      </svg>
-    </div>
-  );
-}
-
 function FloatingShapes() {
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
@@ -110,6 +99,37 @@ function FloatingShapes() {
       <div className="geo-float" style={{ top: "50%", left: "20%", animationDelay: "-9s", animationDuration: "15s" }}>
         <div style={{ width: 8, height: 8, borderRadius: "50%", background: "rgba(74,144,217,0.12)" }} />
       </div>
+    </div>
+  );
+}
+
+function StarField() {
+  const stars = useMemo(() => {
+    // Seeded PRNG to avoid hydration mismatch
+    let seed = 42;
+    const rand = () => { seed = (seed * 16807 + 0) % 2147483647; return (seed - 1) / 2147483646; };
+    return Array.from({ length: 80 }, (_, i) => ({
+      id: i,
+      x: rand() * 100,
+      y: rand() * 100,
+      size: 1 + rand() * 2,
+      delay: rand() * 5,
+      duration: 3 + rand() * 4,
+    }));
+  }, []);
+
+  return (
+    <div className="fixed inset-0 z-0 pointer-events-none" aria-hidden="true">
+      {stars.map((s) => (
+        <div key={s.id} className="star" style={{
+          left: `${s.x}%`,
+          top: `${s.y}%`,
+          width: s.size,
+          height: s.size,
+          animationDelay: `${s.delay}s`,
+          animationDuration: `${s.duration}s`,
+        }} />
+      ))}
     </div>
   );
 }
@@ -243,8 +263,25 @@ export default function ComingSoonPage() {
   return (
     <div className="min-h-screen bg-[#04080F] text-[#EEF4FF] overflow-x-hidden relative">
 
+      {/* Star field — fixed behind everything */}
+      <StarField />
+
       {/* Global floating shapes */}
       <FloatingShapes />
+
+      {/* Nebula clouds — subtle atmospheric color */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
+        {/* Cloud 1: blue — hero area */}
+        <div className="absolute" style={{ top: "5%", left: "30%", width: 600, height: 400, borderRadius: "50%", background: "radial-gradient(circle, rgba(74,144,217,0.06), transparent 70%)", filter: "blur(70px)" }} />
+        {/* Cloud 2: blue — near orbital section, left */}
+        <div className="absolute" style={{ top: "30%", left: "5%", width: 500, height: 350, borderRadius: "50%", background: "radial-gradient(circle, rgba(74,144,217,0.05), transparent 70%)", filter: "blur(80px)" }} />
+        {/* Cloud 3: gold — near orbital section, right */}
+        <div className="absolute" style={{ top: "35%", right: "5%", width: 450, height: 300, borderRadius: "50%", background: "radial-gradient(circle, rgba(255,215,0,0.04), transparent 70%)", filter: "blur(70px)" }} />
+        {/* Cloud 4: blue — subjects area */}
+        <div className="absolute" style={{ top: "60%", left: "40%", width: 550, height: 350, borderRadius: "50%", background: "radial-gradient(circle, rgba(74,144,217,0.05), transparent 70%)", filter: "blur(75px)" }} />
+        {/* Cloud 5: gold aurora — bottom CTA */}
+        <div className="absolute" style={{ bottom: "2%", left: "20%", width: 700, height: 300, borderRadius: "50%", background: "radial-gradient(circle, rgba(255,215,0,0.04), transparent 70%)", filter: "blur(60px)" }} />
+      </div>
 
       {/* ─── Nav ─── */}
       <nav className="fixed top-0 left-0 right-0 z-[100] flex items-center justify-between px-6 sm:px-12 py-6"
@@ -352,9 +389,6 @@ export default function ComingSoonPage() {
         </div>
       </section>
 
-      {/* Wave → How It Works */}
-      <WaveDivider color="rgba(74,144,217,0.05)" />
-
       {/* ═══════════════════ HOW IT WORKS ═══════════════════ */}
       <section id="how-it-works" className="max-w-[1100px] mx-auto px-6 sm:px-12 py-20 sm:py-28 relative">
         <div className="reveal">
@@ -372,9 +406,6 @@ export default function ComingSoonPage() {
           {STEPS.map((step, idx) => <StepCard key={step.num} step={step} idx={idx} />)}
         </div>
       </section>
-
-      {/* Wave → Features */}
-      <WaveDivider flip color="rgba(255,215,0,0.03)" />
 
       {/* ═══════════════════ FEATURES — ORBITAL ═══════════════════ */}
       <section className="max-w-[1100px] mx-auto px-6 sm:px-12 py-20 sm:py-28">
@@ -505,9 +536,6 @@ export default function ComingSoonPage() {
         </div>
       </section>
 
-      {/* Wave → Sneak Peek */}
-      <WaveDivider color="rgba(74,144,217,0.04)" />
-
       {/* ═══════════════════ SNEAK PEEK ═══════════════════ */}
       <section className="max-w-[1100px] mx-auto px-6 sm:px-12 py-20 sm:py-28">
         <div className="reveal">
@@ -549,9 +577,6 @@ export default function ComingSoonPage() {
         </div>
       </section>
 
-      {/* Wave → Subjects */}
-      <WaveDivider flip color="rgba(255,215,0,0.03)" />
-
       {/* ═══════════════════ SUBJECTS ═══════════════════ */}
       <section className="max-w-[1100px] mx-auto px-6 sm:px-12 py-20 sm:py-28">
         <div className="reveal">
@@ -592,9 +617,6 @@ export default function ComingSoonPage() {
         </div>
       </section>
 
-      {/* Wave → Roadmap */}
-      <WaveDivider color="rgba(74,144,217,0.04)" />
-
       {/* ═══════════════════ ROADMAP ═══════════════════ */}
       <section className="max-w-[1100px] mx-auto px-6 sm:px-12 py-20 sm:py-28">
         <div className="reveal">
@@ -634,9 +656,6 @@ export default function ComingSoonPage() {
         </div>
       </section>
 
-      {/* Wave → FAQ */}
-      <WaveDivider flip color="rgba(255,215,0,0.03)" />
-
       {/* ═══════════════════ FAQ ═══════════════════ */}
       <section className="max-w-[1100px] mx-auto px-6 sm:px-12 py-20 sm:py-28">
         <div className="reveal">
@@ -659,9 +678,6 @@ export default function ComingSoonPage() {
           ))}
         </div>
       </section>
-
-      {/* Wave → CTA */}
-      <WaveDivider color="rgba(255,215,0,0.04)" />
 
       {/* ═══════════════════ BIG CTA ═══════════════════ */}
       <section className="py-24 sm:py-32 px-6 text-center relative overflow-hidden">
@@ -706,7 +722,7 @@ export default function ComingSoonPage() {
       </section>
 
       {/* ─── Footer ─── */}
-      <footer className="border-t border-electric/10 px-6 sm:px-12 py-8 flex items-center justify-between flex-wrap gap-4">
+      <footer className="px-6 sm:px-12 py-8 flex items-center justify-between flex-wrap gap-4">
         <span className="font-bebas text-[24px] tracking-[3px] text-electric">LIONADE</span>
         <span className="font-mono text-[10px] tracking-[2px] uppercase text-[#8899A6]">Where champions are made &mdash; 2026</span>
         <span className="font-mono text-[11px] tracking-[1px] text-[#8899A6]">&copy; 2026 getlionade.com &middot; All rights reserved</span>
@@ -726,7 +742,7 @@ export default function ComingSoonPage() {
           onClick={(e) => { if (e.target === e.currentTarget) closeModal(); }}>
           <div className="bg-[#0D1526] border border-electric/25 rounded-2xl p-10 w-full max-w-[400px] mx-6">
             <p className="font-mono text-[10px] tracking-[3px] uppercase text-electric/50 mb-3.5">// Internal Access</p>
-            <h2 className="font-bebas text-[30px] tracking-[2px] text-[#EEF4FF] mb-7">DEVOPS LOGIN</h2>
+            <h2 className="font-bebas text-[30px] tracking-[2px] text-[#EEF4FF] mb-7">ADMIN LOGIN</h2>
             {!success && (
               <>
                 <input ref={inputRef} type="password" value={pw}

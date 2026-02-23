@@ -368,8 +368,21 @@ body {
   animation: watermark-flash 12s ease-in-out infinite;
 }
 
+/* ── Star field ── */
+@keyframes twinkle {
+  0%, 100% { opacity: 0.8; }
+  50% { opacity: 0.15; }
+}
+.star {
+  position: absolute;
+  background: #fff;
+  border-radius: 50%;
+  will-change: opacity;
+  animation: twinkle 4s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .cta-pulse, .animate-slide-up, .coin-particle, .pulse-ring,
+  .star, .cta-pulse, .animate-slide-up, .coin-particle, .pulse-ring,
   .idle-float, .idle-pulse, .idle-tilt, .idle-shimmer,
   .idle-shimmer-bar, .idle-glow-mission, .idle-glow-ninny,
   .periodic-pulse, .periodic-glow, .periodic-shimmer,
