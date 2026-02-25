@@ -7,7 +7,7 @@ const LINKS = [
   { href: "/about", label: "About" },
   { href: "/privacy", label: "Privacy" },
   { href: "/terms", label: "Terms" },
-  { href: "mailto:support@getlionade.com", label: "Contact" },
+  { href: "/contact", label: "Contact" },
 ];
 
 export default function Footer() {
