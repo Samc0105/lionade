@@ -639,6 +639,15 @@ body {
   transform: rotate(-45deg);
 }
 
+/* Demo page logo icon glow */
+.demo-logo-glow {
+  animation: demo-icon-breathe 3s ease-in-out infinite;
+}
+@keyframes demo-icon-breathe {
+  0%, 100% { filter: drop-shadow(0 0 6px rgba(0, 212, 255, 0.3)); }
+  50%      { filter: drop-shadow(0 0 14px rgba(0, 212, 255, 0.7)); }
+}
+
 /* Navbar logo glow + shimmer */
 .logo-glow {
   animation: logo-breathe 3s ease-in-out infinite;
@@ -675,7 +684,7 @@ body {
   .hex-pulse, .tier-active, .legend-bar-bg, .legend-text,
   .legend-sparkle::after, .legend-sparkle::before,
   .chrome-text, .gold-shimmer-wrap::after, .gold-particle,
-  .logo-glow, .logo-shimmer {
+  .logo-glow, .logo-shimmer, .demo-logo-glow {
     animation: none !important;
   }
   .feature-orbit-node { transform: translate(-50%, -50%) !important; }

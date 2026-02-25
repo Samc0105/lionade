@@ -174,13 +174,10 @@ export default function DemoPage() {
             href="/"
             className="inline-flex items-center gap-3 group"
           >
-            <div className="w-10 h-10 rounded-xl bg-electric flex items-center justify-center shadow-lg shadow-electric/40">
-              <span className="text-white font-bebas text-xl leading-none">
-                L
-              </span>
-            </div>
-            <span className="font-bebas text-3xl tracking-wider text-cream group-hover:text-electric transition-colors">
+            <img src="/logo-icon.png" alt="Lionade" className="h-12 rounded-lg demo-logo-glow" />
+            <span className="font-bebas text-2xl font-bold tracking-wider text-cream relative overflow-hidden">
               LIONADE
+              <span className="logo-shimmer" />
             </span>
           </Link>
         </div>
