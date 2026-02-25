@@ -170,15 +170,8 @@ export default function DemoPage() {
       <div className="relative z-10 w-full max-w-lg animate-slide-up">
         {/* Logo */}
         <div className="text-center mb-8">
-          <Link
-            href="/"
-            className="inline-flex items-center gap-3 group"
-          >
-            <img src="/logo-icon.png" alt="Lionade" className="h-12 rounded-lg demo-logo-glow" />
-            <span className="font-bebas text-2xl font-bold tracking-wider text-cream relative overflow-hidden">
-              LIONADE
-              <span className="logo-shimmer" />
-            </span>
+          <Link href="/">
+            <img src="/logo-icon.png" alt="Lionade" className="h-20 rounded-xl demo-logo-glow mx-auto" />
           </Link>
         </div>
 
