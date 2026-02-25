@@ -149,6 +149,9 @@ export default function ContactPage() {
             >
               {sending ? "Sending..." : "Send Message"}
             </button>
+            <p className="text-cream/30 text-xs text-center mt-4 leading-relaxed">
+              Lionade requires help from the community to run smoothly, feedback on any parts of our website are greatly appreciated to help make Lionade run soundly and safely. 😊
+            </p>
           </div>
         )}
       </div>

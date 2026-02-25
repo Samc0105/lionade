@@ -19,11 +19,6 @@ const SECTIONS = [
     body: "Lionade looks to completely redefine the way studying is done. Lionade aims to reward discipline and focus in a measurable way with active compensation for investing your time in self improvement, thus giving top performers real-world success.",
     icon: "\uD83D\uDE80",
   },
-  {
-    title: "HOW CAN WE HELP?",
-    body: "Lionade requires help from the community to run smoothly, feedback on any parts of our website are greatly appreciated to help make Lionade run soundly and safely. \uD83D\uDE0A",
-    icon: "\uD83D\uDCAC",
-  },
 ];
 
 export default function AboutPage() {
