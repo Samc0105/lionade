@@ -93,18 +93,21 @@ export default function DemoPage() {
   // ── Timer countdown ────────────────────────────────────────
   useEffect(() => {
     if (phase !== "quiz" || locked) return;
-
-    if (timeLeft <= 0) {
-      // Time's up — lock and show correct, then advance
-      setLocked(true);
-      setShowCorrect(true);
-      const t = setTimeout(advance, 1200);
-      return () => clearTimeout(t);
-    }
+    if (timeLeft <= 0) return; // handled by timeout effect below
 
     const interval = setInterval(() => setTimeLeft((t) => t - 1), 1000);
     return () => clearInterval(interval);
-  }, [phase, timeLeft, locked, advance]);
+  }, [phase, timeLeft, locked]);
+
+  // ── Time's up — auto-advance after showing feedback ───────
+  useEffect(() => {
+    if (phase !== "quiz" || locked || timeLeft > 0) return;
+    setLocked(true);
+    setShowCorrect(true);
+    const t = setTimeout(advance, 1500);
+    return () => clearTimeout(t);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phase, timeLeft]);
 
   // ── Handle answer selection ────────────────────────────────
   const handleSelect = (idx: number) => {
@@ -171,7 +174,7 @@ export default function DemoPage() {
         {/* Logo */}
         <div className="text-center mb-8">
           <Link href="/">
-            <img src="/logo-icon.png" alt="Lionade" className="h-20 rounded-xl demo-logo-glow mx-auto" />
+            <img src="/logo-full.png" alt="Lionade" className="h-[120px] rounded-xl demo-logo-glow mx-auto" />
           </Link>
         </div>
 
