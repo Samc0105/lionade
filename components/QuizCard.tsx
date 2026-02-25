@@ -23,12 +23,14 @@ export default function QuizCard({
   const [revealed, setRevealed] = useState(false);
   const [timeLeft, setTimeLeft] = useState(timeLimit);
   const [showCoin, setShowCoin] = useState(false);
+  const [advanceTimer, setAdvanceTimer] = useState<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     setSelected(null);
     setRevealed(false);
     setTimeLeft(timeLimit);
     setShowCoin(false);
+    setAdvanceTimer(null);
   }, [question.id, timeLimit]);
 
   useEffect(() => {
@@ -56,10 +58,19 @@ export default function QuizCard({
     const isCorrect = index === question.correctAnswer;
     if (isCorrect) setShowCoin(true);
 
-    setTimeout(() => {
+    const t = setTimeout(() => {
       onAnswer(index, isCorrect, timeLeft);
       setShowCoin(false);
-    }, 1400);
+    }, question.explanation ? 3000 : 1400);
+    setAdvanceTimer(t);
+  };
+
+  const handleSkip = () => {
+    if (!revealed) return;
+    if (advanceTimer) clearTimeout(advanceTimer);
+    const isCorrect = (selected ?? -1) === question.correctAnswer;
+    onAnswer(selected ?? -1, isCorrect, timeLeft);
+    setShowCoin(false);
   };
 
   const timerPercent = (timeLeft / timeLimit) * 100;
@@ -187,12 +198,21 @@ export default function QuizCard({
         })}
       </div>
 
-      {/* Explanation */}
+      {/* Explanation + Next */}
       {revealed && question.explanation && (
-        <div className="mt-4 p-4 rounded-xl border border-electric/30 bg-electric/5 animate-slide-up">
-          <p className="text-sm text-electric font-semibold mb-1">Explanation</p>
-          <p className="text-cream/70 text-sm">{question.explanation}</p>
+        <div className="mt-4 p-4 rounded-xl border border-electric/20 bg-electric/5 animate-slide-up">
+          <div className="flex items-start gap-2.5">
+            <span className="text-lg flex-shrink-0">💡</span>
+            <p className="text-cream/70 text-sm leading-relaxed">{question.explanation}</p>
+          </div>
         </div>
+      )}
+
+      {revealed && (
+        <button onClick={handleSkip}
+          className="mt-4 w-full py-3 rounded-xl border border-electric/30 text-electric text-sm font-bold hover:bg-electric/10 transition-all">
+          Next →
+        </button>
       )}
     </div>
   );

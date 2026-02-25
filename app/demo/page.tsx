@@ -10,6 +10,7 @@ interface DemoQuestion {
   options: string[];
   correctAnswer: number;
   subject: string;
+  explanation: string;
 }
 
 const DEMO_QUESTIONS: DemoQuestion[] = [
@@ -18,6 +19,7 @@ const DEMO_QUESTIONS: DemoQuestion[] = [
     options: ["Nucleus", "Ribosome", "Mitochondria", "Golgi apparatus"],
     correctAnswer: 2,
     subject: "Science",
+    explanation: "Mitochondria produce ATP, the energy currency that powers cellular functions.",
   },
   {
     question: "What does CPU stand for?",
@@ -29,18 +31,21 @@ const DEMO_QUESTIONS: DemoQuestion[] = [
     ],
     correctAnswer: 0,
     subject: "Tech",
+    explanation: "The Central Processing Unit is the primary component that executes instructions in a computer.",
   },
   {
     question: "Which planet is known as the Red Planet?",
     options: ["Venus", "Jupiter", "Mars", "Saturn"],
     correctAnswer: 2,
     subject: "Science",
+    explanation: "Mars appears red due to iron oxide (rust) on its surface, earning it the nickname the Red Planet.",
   },
   {
-    question: "What is the value of pi (π) rounded to two decimal places?",
+    question: "What is the value of pi (\u03C0) rounded to two decimal places?",
     options: ["3.12", "3.14", "3.16", "3.18"],
     correctAnswer: 1,
     subject: "Math",
+    explanation: "Pi (\u03C0) is the ratio of a circle's circumference to its diameter, approximately 3.14159.",
   },
   {
     question: "Who painted the Mona Lisa?",
@@ -52,6 +57,7 @@ const DEMO_QUESTIONS: DemoQuestion[] = [
     ],
     correctAnswer: 2,
     subject: "General",
+    explanation: "Leonardo da Vinci painted the Mona Lisa between 1503 and 1519. It now hangs in the Louvre in Paris.",
   },
 ];
 
@@ -104,20 +110,29 @@ export default function DemoPage() {
     if (phase !== "quiz" || locked || timeLeft > 0) return;
     setLocked(true);
     setShowCorrect(true);
-    const t = setTimeout(advance, 1500);
+    const t = setTimeout(advance, 3000);
     return () => clearTimeout(t);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase, timeLeft]);
 
   // ── Handle answer selection ────────────────────────────────
+  const [advanceTimer, setAdvanceTimer] = useState<ReturnType<typeof setTimeout> | null>(null);
+
   const handleSelect = (idx: number) => {
     if (locked) return;
     setSelected(idx);
     setLocked(true);
     setShowCorrect(true);
 
-    // Auto-advance after a brief reveal
-    setTimeout(advance, 1200);
+    // Auto-advance after reading explanation
+    const t = setTimeout(advance, 3000);
+    setAdvanceTimer(t);
+  };
+
+  const handleSkip = () => {
+    if (!locked) return;
+    if (advanceTimer) clearTimeout(advanceTimer);
+    advance();
   };
 
   // ── Calculate results ──────────────────────────────────────
@@ -133,6 +148,7 @@ export default function DemoPage() {
     setLocked(false);
     setAnswers([]);
     setShowCorrect(false);
+    setAdvanceTimer(null);
   };
 
   // ── Timer color ────────────────────────────────────────────
@@ -376,6 +392,28 @@ export default function DemoPage() {
                 );
               })}
             </div>
+
+            {/* Explanation */}
+            {showCorrect && question.explanation && (
+              <div className="px-6 pb-3 animate-slide-up">
+                <div className="p-3.5 rounded-xl border border-electric/20 bg-electric/5">
+                  <div className="flex items-start gap-2.5">
+                    <span className="text-lg flex-shrink-0">💡</span>
+                    <p className="text-cream/70 text-sm leading-relaxed">{question.explanation}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Next button */}
+            {showCorrect && (
+              <div className="px-6 pb-6">
+                <button onClick={handleSkip}
+                  className="w-full py-3 rounded-xl border border-electric/30 text-electric text-sm font-bold hover:bg-electric/10 transition-all">
+                  Next →
+                </button>
+              </div>
+            )}
           </div>
         )}
 

@@ -392,30 +392,42 @@ export default function QuizPage() {
 
           {/* ── Difficulty Selector ── */}
           <div className="animate-slide-up mb-8" style={{ animationDelay: "0.08s" }}>
-            <div className="flex items-center gap-3 justify-center">
+            <div className="grid grid-cols-3 gap-3">
               {([
-                { d: "easy" as Difficulty, label: "Easy", color: "#22C55E", pulseClass: "difficulty-pulse-green" },
-                { d: "medium" as Difficulty, label: "Medium", color: "#EAB308", pulseClass: "difficulty-pulse-yellow" },
-                { d: "hard" as Difficulty, label: "Hard", color: "#EF4444", pulseClass: "difficulty-pulse-red" },
-              ]).map(({ d, label, color, pulseClass }) => (
+                { d: "easy" as Difficulty, label: "Beginner", icon: "\uD83D\uDFE2", color: "#22C55E", desc: "Fundamentals and basics", mult: "1x" },
+                { d: "medium" as Difficulty, label: "Intermediate", icon: "\uD83D\uDFE1", color: "#EAB308", desc: "Deeper concepts and application", mult: "1.5x" },
+                { d: "hard" as Difficulty, label: "Advanced", icon: "\uD83D\uDD34", color: "#EF4444", desc: "Expert-level challenges", mult: "2x" },
+              ]).map(({ d, label, icon, color, desc, mult }) => (
                 <button
                   key={d}
                   onClick={() => setDifficulty(d)}
-                  className={`px-5 py-2 rounded-xl font-bebas text-lg tracking-wider transition-all duration-300 border cursor-pointer ${difficulty === d ? pulseClass : ""}`}
+                  className="relative p-4 rounded-2xl border-2 transition-all duration-300 text-left cursor-pointer hover:-translate-y-0.5"
                   style={{
-                    background: difficulty === d ? `${color}20` : "transparent",
+                    background: difficulty === d
+                      ? `linear-gradient(135deg, ${color}15 0%, ${color}05 100%)`
+                      : "linear-gradient(135deg, #0a1020 0%, #060c18 100%)",
                     borderColor: difficulty === d ? color : "#ffffff10",
-                    color: difficulty === d ? color : "#ffffff25",
-                    opacity: difficulty === d ? 1 : 0.5,
+                    boxShadow: difficulty === d ? `0 0 20px ${color}30, 0 0 40px ${color}10` : "none",
                   }}
                 >
-                  {label}
+                  <span className="text-2xl block mb-2">{icon}</span>
+                  <p className="font-bebas text-lg tracking-wider" style={{ color: difficulty === d ? color : "#ffffff60" }}>
+                    {label}
+                  </p>
+                  <p className="text-cream/40 text-[11px] leading-tight mt-1">{desc}</p>
+                  <span
+                    className="inline-block mt-2 text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full"
+                    style={{
+                      background: `${color}15`,
+                      border: `1px solid ${color}30`,
+                      color: difficulty === d ? color : `${color}80`,
+                    }}
+                  >
+                    {mult} coins
+                  </span>
                 </button>
               ))}
             </div>
-            <p className="text-cream/30 text-xs text-center mt-2 font-syne">
-              Harder difficulty = more coins per correct answer
-            </p>
           </div>
 
           {/* ── Recommendations ── */}
