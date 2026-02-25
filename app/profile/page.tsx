@@ -17,7 +17,7 @@ import Link from "next/link";
 type Section =
   | "overview" | "edit-profile" | "avatar"
   | "personalization" | "privacy" | "security"
-  | "activity" | "notifications";
+  | "activity" | "notifications" | "about";
 
 // ── Constants ─────────────────────────────────────────
 const EMOJI_CATEGORIES: { label: string; emojis: string[] }[] = [
@@ -40,6 +40,42 @@ const COLOR_AVATARS = [
   { bg: "#009688", text: "#fff" }, { bg: "#795548", text: "#fff" },
   { bg: "#3F51B5", text: "#fff" }, { bg: "#FF9800", text: "#fff" },
   { bg: "#CDDC39", text: "#04080F" }, { bg: "#04080F", text: "#4A90D9" },
+];
+
+const ADVENTURER_SKIN_TONES = [
+  { label: "Light",       value: "f2d3b1" },
+  { label: "Fair",        value: "ecad80" },
+  { label: "Medium",      value: "d08b5b" },
+  { label: "Tan",         value: "ae5d29" },
+  { label: "Brown",       value: "794108" },
+  { label: "Dark",        value: "613407" },
+];
+
+const ADVENTURER_HAIR_STYLES = [
+  "short01", "short02", "short03", "short04", "short05",
+  "long01", "long02", "long03", "long04", "long05",
+];
+
+const ADVENTURER_HAIR_COLORS = [
+  { label: "Black",    value: "0e0e0e" },
+  { label: "Brown",    value: "6a4e35" },
+  { label: "Auburn",   value: "a55728" },
+  { label: "Blonde",   value: "e8d5b7" },
+  { label: "Red",      value: "c93305" },
+  { label: "Platinum", value: "d6c4c2" },
+  { label: "Blue",     value: "4A90D9" },
+  { label: "Purple",   value: "9B59B6" },
+];
+
+const ADVENTURER_BG_COLORS = [
+  { label: "Navy",     value: "04080F" },
+  { label: "Electric", value: "4A90D9" },
+  { label: "Gold",     value: "F0B429" },
+  { label: "Green",    value: "2ECC71" },
+  { label: "Red",      value: "E74C3C" },
+  { label: "Purple",   value: "9B59B6" },
+  { label: "Teal",     value: "1ABC9C" },
+  { label: "Slate",    value: "607D8B" },
 ];
 
 const EDUCATION_LEVELS = [
@@ -67,6 +103,7 @@ const NAV: { key: Section; label: string; icon: string }[] = [
   { key: "security",        label: "Security",          icon: "🛡️" },
   { key: "activity",        label: "Activity History",  icon: "📅" },
   { key: "notifications",   label: "Notifications",     icon: "🔔" },
+  { key: "about",           label: "About Lionade",     icon: "🦁" },
 ];
 
 // ── Main Page ──────────────────────────────────────────
@@ -193,6 +230,7 @@ export default function ProfilePage() {
               {section === "security"        && <SecuritySection {...sharedProps} />}
               {section === "activity"        && <ActivitySection {...sharedProps} />}
               {section === "notifications"   && <NotificationsSection />}
+              {section === "about"           && <AboutLionadeSection />}
             </main>
           </div>
         </div>
@@ -488,12 +526,23 @@ function EditProfileSection({ user, refreshUser }: SharedProps) {
 
 // ── AVATAR & APPEARANCE ───────────────────────────────
 function AvatarSection({ user, refreshUser }: SharedProps) {
-  const [tab, setTab] = useState<"emoji"|"color"|"upload">("emoji");
+  const [tab, setTab] = useState<"emoji"|"color"|"upload"|"create">("emoji");
   const [emojiCat, setEmojiCat] = useState(0);
   const [selected, setSelected] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState<{msg: string; err: boolean}|null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+
+  // Create Avatar state
+  const [avSkin, setAvSkin] = useState(ADVENTURER_SKIN_TONES[0].value);
+  const [avHair, setAvHair] = useState(ADVENTURER_HAIR_STYLES[0]);
+  const [avHairColor, setAvHairColor] = useState(ADVENTURER_HAIR_COLORS[1].value);
+  const [avBg, setAvBg] = useState(ADVENTURER_BG_COLORS[1].value);
+
+  const buildAdventurerUrl = (skin: string, hair: string, hairColor: string, bg: string) =>
+    `https://api.dicebear.com/9.x/adventurer/svg?seed=${encodeURIComponent(user.username)}&skinColor=${skin}&hair=${hair}&hairColor=${hairColor}&backgroundColor=${bg}`;
+
+  const adventurerPreview = buildAdventurerUrl(avSkin, avHair, avHairColor, avBg);
 
   const saveAvatar = async (url: string) => {
     setSaving(true);
@@ -563,14 +612,83 @@ function AvatarSection({ user, refreshUser }: SharedProps) {
 
       {/* Tabs */}
       <div className="flex gap-1 bg-white/5 p-1 rounded-xl border border-electric/10">
-        {(["emoji","color","upload"] as const).map(t => (
-          <button key={t} onClick={() => setTab(t)}
+        {(["create","emoji","color","upload"] as const).map(t => (
+          <button key={t} onClick={() => { setTab(t); if (t === "create") setSelected(adventurerPreview); }}
             className={`flex-1 py-2 rounded-lg text-sm font-bold transition-all capitalize
               ${tab === t ? "bg-electric text-white shadow-lg shadow-electric/30" : "text-cream/50 hover:text-cream"}`}>
-            {t === "emoji" ? "🎭 Emoji" : t === "color" ? "🎨 Color" : "📸 Upload"}
+            {t === "create" ? "✨ Create" : t === "emoji" ? "🎭 Emoji" : t === "color" ? "🎨 Color" : "📸 Upload"}
           </button>
         ))}
       </div>
+
+      {/* Create Avatar tab */}
+      {tab === "create" && (
+        <Card>
+          {/* Live preview */}
+          <div className="flex justify-center mb-6">
+            <div className="w-28 h-28 rounded-full overflow-hidden border-4 border-electric/50"
+              style={{ boxShadow: "0 0 30px #4A90D940" }}>
+              <img src={adventurerPreview} alt="avatar preview" className="w-full h-full object-cover" />
+            </div>
+          </div>
+
+          {/* Skin Tone */}
+          <div className="mb-5">
+            <p className="text-cream/50 text-xs font-bold uppercase tracking-widest mb-2">Skin Tone</p>
+            <div className="flex gap-2">
+              {ADVENTURER_SKIN_TONES.map(s => (
+                <button key={s.value} onClick={() => { setAvSkin(s.value); setSelected(buildAdventurerUrl(s.value, avHair, avHairColor, avBg)); }}
+                  className={`w-10 h-10 rounded-full transition-all hover:scale-110 ${avSkin === s.value ? "ring-2 ring-electric ring-offset-2 ring-offset-[#060c18] scale-110" : ""}`}
+                  style={{ background: `#${s.value}` }}
+                  title={s.label} />
+              ))}
+            </div>
+          </div>
+
+          {/* Hair Style */}
+          <div className="mb-5">
+            <p className="text-cream/50 text-xs font-bold uppercase tracking-widest mb-2">Hair Style</p>
+            <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin">
+              {ADVENTURER_HAIR_STYLES.map(h => {
+                const previewUrl = `https://api.dicebear.com/9.x/adventurer/svg?seed=${encodeURIComponent(user.username)}&skinColor=${avSkin}&hair=${h}&hairColor=${avHairColor}&backgroundColor=${avBg}&size=64`;
+                return (
+                  <button key={h} onClick={() => { setAvHair(h); setSelected(buildAdventurerUrl(avSkin, h, avHairColor, avBg)); }}
+                    className={`w-14 h-14 rounded-xl overflow-hidden flex-shrink-0 transition-all hover:scale-105 border-2
+                      ${avHair === h ? "border-electric shadow-lg shadow-electric/30" : "border-white/10 hover:border-white/20"}`}>
+                    <img src={previewUrl} alt={h} className="w-full h-full object-cover" />
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Hair Color */}
+          <div className="mb-5">
+            <p className="text-cream/50 text-xs font-bold uppercase tracking-widest mb-2">Hair Color</p>
+            <div className="flex gap-2">
+              {ADVENTURER_HAIR_COLORS.map(c => (
+                <button key={c.value} onClick={() => { setAvHairColor(c.value); setSelected(buildAdventurerUrl(avSkin, avHair, c.value, avBg)); }}
+                  className={`w-10 h-10 rounded-full transition-all hover:scale-110 ${avHairColor === c.value ? "ring-2 ring-electric ring-offset-2 ring-offset-[#060c18] scale-110" : ""}`}
+                  style={{ background: `#${c.value}` }}
+                  title={c.label} />
+              ))}
+            </div>
+          </div>
+
+          {/* Background Color */}
+          <div>
+            <p className="text-cream/50 text-xs font-bold uppercase tracking-widest mb-2">Background Color</p>
+            <div className="flex gap-2">
+              {ADVENTURER_BG_COLORS.map(c => (
+                <button key={c.value} onClick={() => { setAvBg(c.value); setSelected(buildAdventurerUrl(avSkin, avHair, avHairColor, c.value)); }}
+                  className={`w-10 h-10 rounded-full transition-all hover:scale-110 ${avBg === c.value ? "ring-2 ring-electric ring-offset-2 ring-offset-[#060c18] scale-110" : ""}`}
+                  style={{ background: `#${c.value}`, border: c.value === "04080F" ? "2px solid rgba(74,144,217,0.3)" : "none" }}
+                  title={c.label} />
+              ))}
+            </div>
+          </div>
+        </Card>
+      )}
 
       {/* Emoji tab */}
       {tab === "emoji" && (
@@ -1108,6 +1226,29 @@ function NotificationsSection() {
         style={{ background: "linear-gradient(135deg, #F0B429 0%, #B8960C 50%, #F0B429 100%)", color: "#04080F", boxShadow: "0 4px 15px rgba(240,180,41,0.3)" }}>
         💾 Save Notification Settings
       </button>
+    </div>
+  );
+}
+
+// ── ABOUT LIONADE ─────────────────────────────────────────
+function AboutLionadeSection() {
+  const sections = [
+    { title: "OUR MISSION", icon: "🎯", body: "Lionade was built to give back to students. Oftentimes students work hard and burn out with little recognition. Lionade was built by students for other students. We allow all learners \u2014 novice or advanced \u2014 to be seen, valued, and acknowledged. We reward growth and achievement in a tangible way, empowering students with not just recognition but true support." },
+    { title: "ABOUT US", icon: "🤝", body: "Created by a team of ambitious students looking for a way to revolutionize studying. Lionade is the platform we wish existed before us. We look to give back to a community that already gives so much, and further self improvement around the world." },
+    { title: "OUR VISION", icon: "🚀", body: "Lionade aims to completely redefine the way studying is done \u2014 rewarding discipline and focus in a measurable way with active compensation for investing your time in self improvement, giving top performers real-world success." },
+  ];
+  return (
+    <div className="space-y-6 animate-slide-up">
+      <SectionHead title="ABOUT LIONADE" sub="Our mission, story, and vision" />
+      {sections.map((s) => (
+        <Card key={s.title}>
+          <div className="flex items-center gap-3 mb-3">
+            <span className="text-2xl">{s.icon}</span>
+            <h3 className="font-bebas text-xl tracking-wider text-electric">{s.title}</h3>
+          </div>
+          <p className="text-cream/70 text-sm leading-relaxed">{s.body}</p>
+        </Card>
+      ))}
     </div>
   );
 }

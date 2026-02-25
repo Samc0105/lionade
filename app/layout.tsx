@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Bebas_Neue, Syne, DM_Mono } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 import AuthProviderWrapper from "@/components/AuthProviderWrapper";
 
 const bebasNeue = Bebas_Neue({
@@ -43,6 +44,7 @@ export default function RootLayout({
         <AuthProviderWrapper>
           <Navbar />
           <main>{children}</main>
+          <Footer />
         </AuthProviderWrapper>
       </body>
     </html>
