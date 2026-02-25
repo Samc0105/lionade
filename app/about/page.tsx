@@ -5,19 +5,19 @@ import BackButton from "@/components/BackButton";
 
 const SECTIONS = [
   {
-    title: "OUR MISSION",
-    body: "Lionade was built to give back to students. Oftentimes students work hard and burn out with little recognition. Lionade was built by students for other students. We allow all learners \u2014 novice or advanced \u2014 to be seen, valued, and acknowledged. We reward growth and achievement in a tangible way, empowering students with not just recognition but true support.",
-    icon: "\uD83C\uDFAF",
-  },
-  {
     title: "ABOUT US",
-    body: "Created by a team of ambitious students looking for a way to revolutionize studying. Lionade is the platform we wish existed before us. We look to give back to a community that already gives so much, and further self improvement around the world.",
+    body: "Created by a team of ambitious students looking for a way to revolutionize studying. Lionade was created as a platform we wish existed before us. We look to give back to a community that already gives to Lionade and further self improvement around the world.",
     icon: "\uD83E\uDD1D",
   },
   {
     title: "OUR VISION",
-    body: "Lionade aims to completely redefine the way studying is done \u2014 rewarding discipline and focus in a measurable way with active compensation for investing your time in self improvement, giving top performers real-world success.",
+    body: "Lionade looks to completely redefine the way studying is done. Lionade aims to reward discipline and focus in a measurable way with active compensation for investing your time in self improvement, thus giving top performers real-world success.",
     icon: "\uD83D\uDE80",
+  },
+  {
+    title: "HOW CAN WE HELP?",
+    body: "Lionade requires help from the community to run smoothly, feedback on any parts of our website are greatly appreciated to help make Lionade run soundly and safely. \uD83D\uDE0A",
+    icon: "\uD83D\uDCAC",
   },
 ];
 
