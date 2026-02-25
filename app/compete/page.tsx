@@ -6,15 +6,15 @@ import BackButton from "@/components/BackButton";
 
 /* ── Tier definitions (bottom → top) ── */
 const TIERS = [
-  { name: "BRONZE", color: "#CD7F32", range: "0–99 wins", tagline: "Freshman", icon: "🥉" },
-  { name: "SILVER", color: "#C0C0C0", range: "100–249 wins", tagline: "Scholar", icon: "🥈" },
-  { name: "GOLD", color: "#FFD700", range: "250–499 wins", tagline: "Honor Roll", icon: "🥇" },
-  { name: "PLATINUM", color: "#00CED1", range: "500–999 wins", tagline: "Dean's List", icon: "💎" },
-  { name: "DIAMOND", color: "#B9F2FF", range: "1,000–1,999 wins", tagline: "Valedictorian", icon: "💠" },
-  { name: "ONYX", color: "#1A1A2E", textColor: "#C0C0D0", glowColor: "#C0C0D0", range: "2,000–3,499 wins", tagline: "Prodigy", icon: "🖤" },
-  { name: "RUBY", color: "#E0115F", range: "3,500–4,999 wins", tagline: "Olympiad", icon: "❤️‍🔥" },
-  { name: "EMERALD", color: "#50C878", range: "5,000–7,499 wins", tagline: "Mastermind", icon: "👑" },
-  { name: "LEGEND", color: "legend", range: "7,500+ wins", tagline: "Immortal", icon: "⚡" },
+  { name: "BRONZE", color: "#CD7F32", range: "0–99 wins", tagline: "Freshman", icon: "🥉", image: "/bronze.png" },
+  { name: "SILVER", color: "#C0C0C0", range: "100–249 wins", tagline: "Scholar", icon: "🥈", image: "/silver.png" },
+  { name: "GOLD", color: "#FFD700", range: "250–499 wins", tagline: "Honor Roll", icon: "🥇", image: "/gold.png" },
+  { name: "PLATINUM", color: "#00CED1", range: "500–999 wins", tagline: "Dean's List", icon: "💎", image: "/platinum.png" },
+  { name: "DIAMOND", color: "#B9F2FF", range: "1,000–1,999 wins", tagline: "Valedictorian", icon: "💠", image: "/diamond.png" },
+  { name: "ONYX", color: "#1A1A2E", textColor: "#C0C0D0", glowColor: "#C0C0D0", range: "2,000–3,499 wins", tagline: "Prodigy", icon: "🖤", image: "/onix.png" },
+  { name: "RUBY", color: "#E0115F", range: "3,500–4,999 wins", tagline: "Olympiad", icon: "❤️‍🔥", image: "/ruby.png" },
+  { name: "EMERALD", color: "#50C878", range: "5,000–7,499 wins", tagline: "Mastermind", icon: "👑", image: "/emerald.png" },
+  { name: "LEGEND", color: "legend", range: "7,500+ wins", tagline: "Immortal", icon: "⚡", image: "/legend.png" },
 ];
 
 const TIER_WIDTHS = ["32%", "40%", "48%", "56%", "64%", "72%", "80%", "90%", "100%"];
@@ -485,9 +485,20 @@ export default function CompetePage() {
                           opacity: isLocked ? 0.4 : 1,
                         } as React.CSSProperties}
                       >
-                        <span className="text-lg sm:text-xl flex-shrink-0">
-                          {isLocked ? "🔒" : tier.icon}
-                        </span>
+                        <div className="relative flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center">
+                          {isLocked ? (
+                            <span className="text-lg sm:text-xl opacity-40">🔒</span>
+                          ) : (
+                            <div className="gem-shimmer" style={{ "--gem-color": tierColor } as React.CSSProperties}>
+                              <img
+                                src={tier.image}
+                                alt={tier.name}
+                                className="w-10 h-10 sm:w-12 sm:h-12 object-contain"
+                              />
+                              <div className="gem-sweep" />
+                            </div>
+                          )}
+                        </div>
 
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2">

@@ -670,6 +670,32 @@ body {
   100%    { transform: translateX(150%); }
 }
 
+/* ── Gemstone image shimmer + glow ── */
+@keyframes gem-glow {
+  0%, 100% { filter: drop-shadow(0 0 4px var(--gem-color, #FFD700)) brightness(1); }
+  50%      { filter: drop-shadow(0 0 12px var(--gem-color, #FFD700)) drop-shadow(0 0 20px var(--gem-color, #FFD700)) brightness(1.15); }
+}
+@keyframes gem-light-sweep {
+  0%, 70% { transform: translateX(-150%) skewX(-20deg); }
+  100%    { transform: translateX(250%) skewX(-20deg); }
+}
+.gem-shimmer {
+  animation: gem-glow 3s ease-in-out infinite;
+  position: relative;
+  display: inline-block;
+}
+.gem-sweep {
+  position: absolute;
+  inset: -2px;
+  background: linear-gradient(105deg, transparent 35%, rgba(255,255,255,0.35) 45%, rgba(255,255,255,0.5) 50%, rgba(255,255,255,0.35) 55%, transparent 65%);
+  transform: translateX(-150%) skewX(-20deg);
+  animation: gem-light-sweep 4s ease-in-out infinite;
+  pointer-events: none;
+  border-radius: 4px;
+  mix-blend-mode: overlay;
+  overflow: hidden;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .star, .cta-pulse, .animate-slide-up, .coin-particle, .pulse-ring,
     .difficulty-pulse-green, .difficulty-pulse-yellow, .difficulty-pulse-red,
@@ -684,7 +710,8 @@ body {
   .hex-pulse, .tier-active, .legend-bar-bg, .legend-text,
   .legend-sparkle::after, .legend-sparkle::before,
   .chrome-text, .gold-shimmer-wrap::after, .gold-particle,
-  .logo-glow, .logo-shimmer, .demo-logo-glow {
+  .logo-glow, .logo-shimmer, .demo-logo-glow,
+  .gem-shimmer, .gem-sweep {
     animation: none !important;
   }
   .feature-orbit-node { transform: translate(-50%, -50%) !important; }
