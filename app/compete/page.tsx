@@ -6,15 +6,15 @@ import BackButton from "@/components/BackButton";
 
 /* ── Tier definitions (bottom → top) ── */
 const TIERS = [
-  { name: "BRONZE", color: "#CD7F32", range: "0–99 wins", tagline: "Just Getting Started", icon: "🥉" },
-  { name: "SILVER", color: "#C0C0C0", range: "100–249 wins", tagline: "Getting Dangerous", icon: "🥈" },
-  { name: "GOLD", color: "#FFD700", range: "250–499 wins", tagline: "Certified Grinder", icon: "🥇" },
-  { name: "PLATINUM", color: "#00CED1", range: "500–999 wins", tagline: "Elite Status", icon: "💎" },
-  { name: "DIAMOND", color: "#B9F2FF", range: "1,000–1,999 wins", tagline: "Top Tier", icon: "💠" },
-  { name: "ONYX", color: "#1A1A2E", textColor: "#C0C0D0", glowColor: "#C0C0D0", range: "2,000–3,499 wins", tagline: "Untouchable", icon: "🖤" },
-  { name: "RUBY", color: "#E0115F", range: "3,500–4,999 wins", tagline: "Feared", icon: "❤️‍🔥" },
-  { name: "EMERALD", color: "#50C878", range: "5,000–7,499 wins", tagline: "Royalty", icon: "👑" },
-  { name: "LEGEND", color: "legend", range: "7,500+ wins", tagline: "The Final Form", icon: "⚡" },
+  { name: "BRONZE", color: "#CD7F32", range: "0–99 wins", tagline: "Freshman", icon: "🥉" },
+  { name: "SILVER", color: "#C0C0C0", range: "100–249 wins", tagline: "Scholar", icon: "🥈" },
+  { name: "GOLD", color: "#FFD700", range: "250–499 wins", tagline: "Honor Roll", icon: "🥇" },
+  { name: "PLATINUM", color: "#00CED1", range: "500–999 wins", tagline: "Dean's List", icon: "💎" },
+  { name: "DIAMOND", color: "#B9F2FF", range: "1,000–1,999 wins", tagline: "Valedictorian", icon: "💠" },
+  { name: "ONYX", color: "#1A1A2E", textColor: "#C0C0D0", glowColor: "#C0C0D0", range: "2,000–3,499 wins", tagline: "Prodigy", icon: "🖤" },
+  { name: "RUBY", color: "#E0115F", range: "3,500–4,999 wins", tagline: "Olympiad", icon: "❤️‍🔥" },
+  { name: "EMERALD", color: "#50C878", range: "5,000–7,499 wins", tagline: "Mastermind", icon: "👑" },
+  { name: "LEGEND", color: "legend", range: "7,500+ wins", tagline: "Immortal", icon: "⚡" },
 ];
 
 const TIER_WIDTHS = ["32%", "40%", "48%", "56%", "64%", "72%", "80%", "90%", "100%"];
