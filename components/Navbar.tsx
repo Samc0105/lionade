@@ -82,15 +82,9 @@ export default function Navbar() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-12">
             {/* Logo */}
-            <Link href="/" className="flex items-center gap-2 group">
-              <div className="w-7 h-7 rounded-lg bg-electric flex items-center justify-center
-                shadow-lg shadow-electric/40 group-hover:shadow-electric/60 transition-all duration-300">
-                <span className="text-white font-bebas text-base leading-none">L</span>
-              </div>
-              <span className="font-bebas text-xl tracking-wider text-cream group-hover:text-electric
-                transition-colors duration-300 hidden sm:block">
-                LIONADE
-              </span>
+            <Link href="/dashboard" className="flex items-center">
+              <img src="/logo-icon.png" alt="Lionade" className="h-8 rounded-md sm:hidden" />
+              <img src="/logo-full.png" alt="Lionade" className="h-9 rounded-md hidden sm:block" />
             </Link>
 
             {/* Desktop Tabs — Dashboard | Learn | Compete */}
