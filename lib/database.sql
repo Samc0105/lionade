@@ -18,6 +18,10 @@ CREATE TABLE IF NOT EXISTS profiles (
   max_streak   INTEGER NOT NULL DEFAULT 0,
   xp           INTEGER NOT NULL DEFAULT 0,
   level        INTEGER NOT NULL DEFAULT 1,
+  goal_type          TEXT,
+  selected_subjects  JSONB,
+  daily_target       INTEGER,
+  onboarding_completed BOOLEAN NOT NULL DEFAULT FALSE,
   created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at   TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
@@ -205,13 +209,14 @@ CREATE POLICY "coin_transactions_owner" ON coin_transactions FOR ALL USING (auth
 CREATE OR REPLACE FUNCTION handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
-  INSERT INTO profiles (id, username, display_name, avatar_url, coins)
+  INSERT INTO profiles (id, username, display_name, avatar_url, coins, onboarding_completed)
   VALUES (
     NEW.id,
     COALESCE(NEW.raw_user_meta_data->>'username', split_part(NEW.email, '@', 1)),
     COALESCE(NEW.raw_user_meta_data->>'display_name', split_part(NEW.email, '@', 1)),
     'https://api.dicebear.com/7.x/avataaars/svg?seed=' || encode(NEW.id::text::bytea, 'base64') || '&backgroundColor=4A90D9',
-    100  -- signup bonus coins
+    100,   -- signup bonus coins
+    FALSE  -- onboarding not yet completed
   );
 
   -- Log signup bonus
