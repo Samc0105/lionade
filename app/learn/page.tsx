@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import BackButton from "@/components/BackButton";
 import { getQuizHistory, getLeaderboard } from "@/lib/db";
 import { LEADERBOARD_ENTRIES, SUBJECT_ICONS, SUBJECT_COLORS, formatCoins } from "@/lib/mockData";
 import type { Subject } from "@/types";
@@ -312,6 +313,7 @@ export default function LearnPage() {
     <ProtectedRoute>
       <div className="min-h-screen bg-navy pt-16 pb-20 md:pb-8">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <BackButton />
 
           {/* ── 1. Greeting + Daily Quote ── */}
           <div className="text-center mb-8 animate-slide-up">

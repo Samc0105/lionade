@@ -42,10 +42,6 @@ function buildAuthUser(profile: {
   username: string;
   display_name: string | null;
   avatar_url: string | null;
-  coins: number;
-  streak: number;
-  xp: number;
-  level: number;
 }, email: string): AuthUser {
   return {
     id: profile.id,
@@ -53,10 +49,10 @@ function buildAuthUser(profile: {
     username: profile.username,
     displayName: profile.display_name ?? profile.username,
     avatar: profile.avatar_url ?? `https://api.dicebear.com/7.x/avataaars/svg?seed=${profile.username}&backgroundColor=4A90D9`,
-    coins: profile.coins,
-    streak: profile.streak,
-    xp: profile.xp,
-    level: profile.level,
+    coins: 0,
+    streak: 0,
+    xp: 0,
+    level: 1,
   };
 }
 
@@ -84,13 +80,22 @@ async function syncProfile(userId: string, email: string, metadata: Record<strin
 
   console.log("[Auth] syncProfile: upserting for", userId, username);
 
+  // Check if profile exists first — only set onboarding_completed on INSERT
+  const { data: existing } = await supabase
+    .from("profiles")
+    .select("id")
+    .eq("id", userId)
+    .maybeSingle();
+
+  const upsertData: Record<string, unknown> = { id: userId, username, display_name: username };
+  if (!existing) {
+    upsertData.onboarding_completed = false;
+  }
+
   const upsertPromise = supabase
     .from("profiles")
-    .upsert(
-      { id: userId, username, display_name: username },
-      { onConflict: "id", ignoreDuplicates: false }
-    )
-    .select("id, username, display_name, avatar_url, coins, streak, xp, level")
+    .upsert(upsertData, { onConflict: "id", ignoreDuplicates: false })
+    .select("id, username, display_name, avatar_url")
     .single();
 
   const timeoutPromise = new Promise<null>((resolve) =>
@@ -103,7 +108,7 @@ async function syncProfile(userId: string, email: string, metadata: Record<strin
   try {
     const result = await Promise.race([upsertPromise, timeoutPromise]);
     if (result?.data) {
-      console.log("[Auth] syncProfile: got DB profile", result.data.username, result.data.coins);
+      console.log("[Auth] syncProfile: got DB profile", result.data.username);
       return buildAuthUser(result.data, email);
     }
     if (result?.error) {
@@ -274,17 +279,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     if (error) return { error: error.message };
 
-    // Eagerly write extra fields to profiles table (best-effort, non-blocking)
+    // Eagerly write profile row — only use columns that exist in the table
     if (data.user) {
       supabase.from("profiles").upsert({
         id: data.user.id,
         username: username.trim(),
         display_name: extra?.firstName ?? username.trim(),
-        first_name: extra?.firstName ?? null,
-        date_of_birth: extra?.dateOfBirth ?? null,
-        education_level: extra?.educationLevel ?? null,
         study_goal: extra?.studyGoal ?? null,
-        referral_source: extra?.referralSource ?? null,
+        onboarding_completed: false,
       }, { onConflict: "id" }).then(({ error: e }) => {
         if (e) console.warn("[Auth] signup profile upsert:", e.message);
       });

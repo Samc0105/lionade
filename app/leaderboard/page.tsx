@@ -5,6 +5,7 @@ import { useAuth } from "@/lib/auth";
 import { getLeaderboard } from "@/lib/db";
 import { formatCoins } from "@/lib/mockData";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import BackButton from "@/components/BackButton";
 
 type Filter = "weekly" | "alltime";
 
@@ -45,6 +46,7 @@ export default function LeaderboardPage() {
     <ProtectedRoute>
       <div className="min-h-screen bg-navy pt-20">
         <div className="max-w-3xl mx-auto px-4 py-10">
+          <BackButton />
 
           {/* Header */}
           <div className="text-center mb-10 animate-slide-up">

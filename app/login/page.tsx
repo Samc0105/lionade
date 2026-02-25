@@ -120,12 +120,21 @@ export default function LoginPage() {
   // Redirect if already logged in — delay 2.5s when showing verified banner so user sees it
   useEffect(() => {
     if (!isLoading && user) {
-      if (showVerifiedBanner) {
-        const t = setTimeout(() => router.replace("/dashboard"), 2500);
-        return () => clearTimeout(t);
-      } else {
-        router.replace("/dashboard");
-      }
+      const checkOnboarding = async () => {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("onboarding_completed")
+          .eq("id", user.id)
+          .maybeSingle();
+        const dest = profile?.onboarding_completed ? "/dashboard" : "/onboarding?step=2";
+        if (showVerifiedBanner) {
+          const t = setTimeout(() => router.replace(dest), 2500);
+          return () => clearTimeout(t);
+        } else {
+          router.replace(dest);
+        }
+      };
+      checkOnboarding();
     }
   }, [user, isLoading, router, showVerifiedBanner]);
 
@@ -164,6 +173,19 @@ export default function LoginPage() {
       setError(err.includes("Invalid") ? "Wrong email or password" : err);
       setSubmitting(false);
     } else {
+      // Check if onboarding is completed
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("onboarding_completed")
+          .eq("id", session.user.id)
+          .maybeSingle();
+        if (!profile?.onboarding_completed) {
+          router.replace("/onboarding?step=2");
+          return;
+        }
+      }
       router.replace("/dashboard");
     }
   };
@@ -233,6 +255,13 @@ export default function LoginPage() {
     } else {
       setSignupSuccess(true);
     }
+  };
+
+  const handleGoogleAuth = async () => {
+    await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: window.location.origin + "/onboarding" },
+    });
   };
 
   const resetSignup = () => {
@@ -321,6 +350,21 @@ export default function LoginPage() {
               {/* ── LOGIN FORM ── */}
               {tab === "login" && (
                 <form onSubmit={handleLogin} className="space-y-4">
+                  {/* Google OAuth */}
+                  <button
+                    type="button"
+                    onClick={handleGoogleAuth}
+                    className="w-full flex items-center justify-center gap-3 py-3.5 rounded-xl font-semibold text-sm transition-all duration-200 bg-white text-gray-700 hover:bg-gray-100 active:scale-[0.98] shadow-sm"
+                  >
+                    <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59a14.5 14.5 0 0 1 0-9.18l-7.98-6.19a24.0 24.0 0 0 0 0 21.56l7.98-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+                    Continue with Google
+                  </button>
+                  {/* Divider */}
+                  <div className="flex items-center gap-3">
+                    <div className="flex-1 h-px bg-cream/10" />
+                    <span className="text-cream/30 text-xs font-medium">or</span>
+                    <div className="flex-1 h-px bg-cream/10" />
+                  </div>
                   <div>
                     <label className={labelCls}>Email</label>
                     <input
@@ -375,6 +419,21 @@ export default function LoginPage() {
                   {/* Step 1: Account */}
                   {step === 1 && (
                     <div className="space-y-4 animate-slide-up">
+                      {/* Google OAuth */}
+                      <button
+                        type="button"
+                        onClick={handleGoogleAuth}
+                        className="w-full flex items-center justify-center gap-3 py-3.5 rounded-xl font-semibold text-sm transition-all duration-200 bg-white text-gray-700 hover:bg-gray-100 active:scale-[0.98] shadow-sm"
+                      >
+                        <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59a14.5 14.5 0 0 1 0-9.18l-7.98-6.19a24.0 24.0 0 0 0 0 21.56l7.98-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+                        Continue with Google
+                      </button>
+                      {/* Divider */}
+                      <div className="flex items-center gap-3">
+                        <div className="flex-1 h-px bg-cream/10" />
+                        <span className="text-cream/30 text-xs font-medium">or</span>
+                        <div className="flex-1 h-px bg-cream/10" />
+                      </div>
                       <p className="text-cream/40 text-xs mb-4">Create your login credentials</p>
                       <div>
                         <label className={labelCls}>Email</label>
@@ -572,6 +631,23 @@ export default function LoginPage() {
         <p className="text-center text-cream/20 text-xs mt-5">
           By signing up, you agree to study harder than yesterday.
         </p>
+
+        {/* Demo quiz CTA */}
+        {!signupSuccess && (
+          <div className="mt-6 text-center">
+            <p className="text-cream/25 text-[10px] font-bold uppercase tracking-[0.2em] mb-2.5">
+              Not ready to sign up?
+            </p>
+            <Link
+              href="/demo"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl border border-electric/20 text-cream/60 text-sm font-semibold hover:text-electric hover:border-electric/50 hover:bg-electric/5 transition-all duration-200"
+            >
+              <span className="text-base">🧠</span>
+              Try a Sample Quiz
+              <span className="text-cream/30">&#8594;</span>
+            </Link>
+          </div>
+        )}
       </div>
     </div>
   );

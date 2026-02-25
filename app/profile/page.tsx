@@ -9,6 +9,7 @@ import {
 } from "@/lib/db";
 import { getLevelProgress, formatCoins, SUBJECT_ICONS } from "@/lib/mockData";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import BackButton from "@/components/BackButton";
 import BadgeCard from "@/components/BadgeCard";
 import Link from "next/link";
 
@@ -120,6 +121,7 @@ export default function ProfilePage() {
     <ProtectedRoute>
       <div className="min-h-screen bg-navy pt-16">
         <div className="max-w-7xl mx-auto px-4 py-6">
+          <BackButton />
 
           {/* Mobile header */}
           <div className="flex items-center justify-between mb-4 md:hidden">

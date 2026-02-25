@@ -30,7 +30,8 @@ export default function Navbar() {
   const isComingSoon = pathname === "/";
   const isLanding = pathname === "/home";
   const isLogin = pathname === "/login";
-  const showAppNav = !!user && !isComingSoon && !isLanding && !isLogin;
+  const isOnboarding = pathname === "/onboarding";
+  const showAppNav = !!user && !isComingSoon && !isLanding && !isLogin && !isOnboarding;
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -69,8 +70,8 @@ export default function Navbar() {
     return pathname === href;
   };
 
-  // Hide navbar entirely on coming soon page (it has its own top bar)
-  if (isComingSoon) return null;
+  // Hide navbar entirely on coming soon page and onboarding
+  if (isComingSoon || isOnboarding) return null;
 
   return (
     <>

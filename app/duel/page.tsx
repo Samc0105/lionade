@@ -8,6 +8,7 @@ import DuelInvite from "@/components/DuelInvite";
 import CoinAnimation from "@/components/CoinAnimation";
 import { useAuth } from "@/lib/auth";
 import { useRouter } from "next/navigation";
+import BackButton from "@/components/BackButton";
 
 type DuelPhase = "invite" | "countdown" | "battle" | "results";
 
@@ -188,6 +189,7 @@ export default function DuelPage() {
     return (
       <div className="min-h-screen bg-navy pt-20">
         <div className="max-w-5xl mx-auto px-4 py-12">
+          <BackButton />
           {/* Header */}
           <div className="text-center mb-12 animate-slide-up">
             <span className="inline-flex items-center gap-2 bg-red-500/10 border border-red-500/30

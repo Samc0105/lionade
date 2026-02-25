@@ -8,6 +8,7 @@ import QuizCard from "@/components/QuizCard";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth";
 import { useRouter } from "next/navigation";
+import BackButton from "@/components/BackButton";
 
 const QUIZ_CARD_COLORS: Record<Subject, string> = {
   Math: "#EF4444",
@@ -337,6 +338,7 @@ export default function QuizPage() {
     return (
       <div className="min-h-screen bg-navy pt-20">
         <div className="max-w-4xl mx-auto px-4 py-12">
+          <BackButton />
           <div className="text-center mb-8 animate-slide-up">
             <span className="inline-flex items-center gap-2 bg-electric/10 border border-electric/30 rounded-full px-4 py-1.5 text-electric text-sm font-semibold mb-6">
               &#x26A1; Daily Quiz
@@ -392,19 +394,19 @@ export default function QuizPage() {
           <div className="animate-slide-up mb-8" style={{ animationDelay: "0.08s" }}>
             <div className="flex items-center gap-3 justify-center">
               {([
-                { d: "easy" as Difficulty, label: "Easy", color: "#22C55E" },
-                { d: "medium" as Difficulty, label: "Medium", color: "#EAB308" },
-                { d: "hard" as Difficulty, label: "Hard", color: "#EF4444" },
-              ]).map(({ d, label, color }) => (
+                { d: "easy" as Difficulty, label: "Easy", color: "#22C55E", pulseClass: "difficulty-pulse-green" },
+                { d: "medium" as Difficulty, label: "Medium", color: "#EAB308", pulseClass: "difficulty-pulse-yellow" },
+                { d: "hard" as Difficulty, label: "Hard", color: "#EF4444", pulseClass: "difficulty-pulse-red" },
+              ]).map(({ d, label, color, pulseClass }) => (
                 <button
                   key={d}
                   onClick={() => setDifficulty(d)}
-                  className="px-5 py-2 rounded-xl font-bebas text-lg tracking-wider transition-all duration-200 border cursor-pointer"
+                  className={`px-5 py-2 rounded-xl font-bebas text-lg tracking-wider transition-all duration-300 border cursor-pointer ${difficulty === d ? pulseClass : ""}`}
                   style={{
                     background: difficulty === d ? `${color}20` : "transparent",
-                    borderColor: difficulty === d ? `${color}60` : "#ffffff15",
-                    color: difficulty === d ? color : "#ffffff40",
-                    boxShadow: difficulty === d ? `0 0 15px ${color}15` : "none",
+                    borderColor: difficulty === d ? color : "#ffffff10",
+                    color: difficulty === d ? color : "#ffffff25",
+                    opacity: difficulty === d ? 1 : 0.5,
                   }}
                 >
                   {label}

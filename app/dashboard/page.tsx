@@ -12,6 +12,7 @@ import {
   XP_PER_LEVEL,
 } from "@/lib/mockData";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import BackButton from "@/components/BackButton";
 
 function ActivityIcon(type: string) {
   const map: Record<string, string> = {
@@ -164,6 +165,7 @@ export default function DashboardPage() {
         </div>
 
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 relative z-10">
+          <BackButton />
 
           {/* ═══ 1) Hero Header ═══ */}
           <div className="mb-6 animate-slide-up">
