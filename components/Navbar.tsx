@@ -83,8 +83,14 @@ export default function Navbar() {
           <div className="flex items-center justify-between h-12">
             {/* Logo */}
             <Link href="/dashboard" className="flex items-center">
-              <img src="/logo-icon.png" alt="Lionade" className="h-8 rounded-md sm:hidden" />
-              <img src="/logo-full.png" alt="Lionade" className="h-9 rounded-md hidden sm:block" />
+              <div className="relative overflow-hidden rounded-md logo-glow sm:hidden">
+                <img src="/logo-icon.png" alt="Lionade" className="h-8 rounded-md relative z-10" />
+                <div className="logo-shimmer" />
+              </div>
+              <div className="relative overflow-hidden rounded-md logo-glow hidden sm:block">
+                <img src="/logo-full.png" alt="Lionade" className="h-9 rounded-md relative z-10" />
+                <div className="logo-shimmer" />
+              </div>
             </Link>
 
             {/* Desktop Tabs — Dashboard | Learn | Compete */}

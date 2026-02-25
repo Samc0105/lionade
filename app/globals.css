@@ -639,6 +639,28 @@ body {
   transform: rotate(-45deg);
 }
 
+/* Navbar logo glow + shimmer */
+.logo-glow {
+  animation: logo-breathe 3s ease-in-out infinite;
+}
+@keyframes logo-breathe {
+  0%, 100% { box-shadow: 0 0 4px rgba(0, 212, 255, 0.15), 0 0 10px rgba(0, 102, 255, 0.08); }
+  50%      { box-shadow: 0 0 8px rgba(0, 212, 255, 0.3), 0 0 20px rgba(0, 102, 255, 0.15); }
+}
+.logo-shimmer {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  pointer-events: none;
+  background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.12) 45%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0.12) 55%, transparent 60%);
+  transform: translateX(-150%);
+  animation: logo-sweep 5s ease-in-out infinite;
+}
+@keyframes logo-sweep {
+  0%, 80% { transform: translateX(-150%); }
+  100%    { transform: translateX(150%); }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .star, .cta-pulse, .animate-slide-up, .coin-particle, .pulse-ring,
     .difficulty-pulse-green, .difficulty-pulse-yellow, .difficulty-pulse-red,
@@ -652,7 +674,8 @@ body {
   .energy-line-active::after, .energy-line-active::before,
   .hex-pulse, .tier-active, .legend-bar-bg, .legend-text,
   .legend-sparkle::after, .legend-sparkle::before,
-  .chrome-text, .gold-shimmer-wrap::after, .gold-particle {
+  .chrome-text, .gold-shimmer-wrap::after, .gold-particle,
+  .logo-glow, .logo-shimmer {
     animation: none !important;
   }
   .feature-orbit-node { transform: translate(-50%, -50%) !important; }
