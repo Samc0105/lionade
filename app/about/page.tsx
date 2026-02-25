@@ -5,6 +5,11 @@ import BackButton from "@/components/BackButton";
 
 const SECTIONS = [
   {
+    title: "OUR MISSION",
+    body: "Lionade was an app built to give back to students, oftentimes it feels as if students are working hard and burning out with little to no recognition from parents, mentors, coaches, and teachers. Lionade was built by students for other students. Lionade allows all learners no matter how novice or advanced to be seen, valued and acknowledged. The website rewards growth and achievement by giving back to students in a tangible way empowering students with not just recognition but with true support.",
+    icon: "\uD83C\uDFAF",
+  },
+  {
     title: "ABOUT US",
     body: "Created by a team of ambitious students looking for a way to revolutionize studying. Lionade was created as a platform we wish existed before us. We look to give back to a community that already gives to Lionade and further self improvement around the world.",
     icon: "\uD83E\uDD1D",
@@ -36,7 +41,7 @@ export default function AboutPage() {
           />
           <h1 className="font-bebas text-5xl sm:text-6xl tracking-wider">
             <span className="bg-gradient-to-r from-electric via-[#6AABF0] to-gold bg-clip-text text-transparent">
-              ABOUT LIONADE
+              LIONADE&apos;S PURPOSE
             </span>
           </h1>
           <p className="text-cream/40 text-sm mt-3 max-w-md mx-auto">
