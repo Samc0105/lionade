@@ -526,6 +526,24 @@ body {
   pointer-events: none;
 }
 
+/* ── Prize pool sparkle dots ── */
+@keyframes prize-sparkle-pulse {
+  0%, 100% { opacity: 0; transform: scale(0.5); }
+  50%      { opacity: 0.8; transform: scale(1.2); }
+}
+.prize-sparkle {
+  animation: prize-sparkle-pulse 3.5s ease-in-out infinite;
+}
+
+/* ── Prize pool coin ── */
+@keyframes prize-coin-float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-4px); }
+}
+.prize-coin {
+  animation: prize-coin-float 4s ease-in-out infinite;
+}
+
 /* ── Energy flow line connecting hex stats ── */
 @keyframes energy-particle-flow {
   0% { left: -12px; }
@@ -720,7 +738,7 @@ body {
   .legend-sparkle::after, .legend-sparkle::before,
   .chrome-text, .gold-shimmer-wrap::after, .gold-particle,
   .logo-glow, .logo-shimmer, .demo-logo-glow,
-  .gem-shimmer, .tier-bar-shine {
+  .gem-shimmer, .tier-bar-shine, .prize-sparkle, .prize-coin {
     animation: none !important;
   }
   .feature-orbit-node { transform: translate(-50%, -50%) !important; }

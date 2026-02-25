@@ -52,44 +52,65 @@ export default function CompetePage() {
 
           {/* ═══ 1. PRIZE POOL BANNER ═══ */}
           <div className="animate-slide-up mb-10" style={{ animationDelay: "0s" }}>
-            <div className="relative overflow-hidden rounded-2xl clip-banner"
+            <div className="relative overflow-hidden rounded-2xl"
               style={{
-                background: "linear-gradient(135deg, #1a1400 0%, #0f0a00 30%, #080600 60%, #04080F 100%)",
-                border: "1px solid rgba(255,215,0,0.2)",
-                boxShadow: "0 0 40px rgba(255,215,0,0.08), inset 0 1px 0 rgba(255,215,0,0.1)",
+                background: "linear-gradient(160deg, #0c1020 0%, #080c18 40%, #0a0e1a 70%, #0c1020 100%)",
+                border: "1px solid rgba(255,215,0,0.12)",
+                boxShadow: "0 0 60px rgba(255,215,0,0.04), 0 0 1px rgba(255,215,0,0.15), inset 0 1px 0 rgba(255,215,0,0.06)",
               }}>
-              {/* Gold particles */}
-              <div className="absolute inset-0 overflow-hidden pointer-events-none">
+              {/* Top gold accent line */}
+              <div className="absolute top-0 left-0 right-0 h-[1px]"
+                style={{ background: "linear-gradient(90deg, transparent 10%, rgba(255,215,0,0.25) 50%, transparent 90%)" }} />
+
+              {/* Subtle corner radial glows */}
+              <div className="absolute top-0 left-0 w-48 h-48 pointer-events-none"
+                style={{ background: "radial-gradient(circle at 0% 0%, rgba(255,215,0,0.04) 0%, transparent 70%)" }} />
+              <div className="absolute bottom-0 right-0 w-48 h-48 pointer-events-none"
+                style={{ background: "radial-gradient(circle at 100% 100%, rgba(255,215,0,0.03) 0%, transparent 70%)" }} />
+
+              {/* Sparkle dots */}
+              <div className="absolute inset-0 pointer-events-none overflow-hidden">
                 {[
-                  { left: "10%", bottom: "20%", delay: "0s", dur: "3.5s" },
-                  { left: "25%", bottom: "10%", delay: "0.8s", dur: "4s" },
-                  { left: "45%", bottom: "15%", delay: "1.5s", dur: "3.2s" },
-                  { left: "60%", bottom: "25%", delay: "0.3s", dur: "4.5s" },
-                  { left: "75%", bottom: "12%", delay: "2s", dur: "3.8s" },
-                  { left: "88%", bottom: "18%", delay: "1.2s", dur: "4.2s" },
-                  { left: "35%", bottom: "30%", delay: "2.5s", dur: "3s" },
-                  { left: "55%", bottom: "5%", delay: "0.6s", dur: "4.8s" },
-                ].map((p, i) => (
-                  <div key={i} className="gold-particle"
-                    style={{ left: p.left, bottom: p.bottom, animationDelay: p.delay, animationDuration: p.dur }} />
+                  { top: "18%", left: "12%", size: 2, delay: "0s" },
+                  { top: "25%", left: "82%", size: 1.5, delay: "1.5s" },
+                  { top: "65%", left: "22%", size: 1.5, delay: "3s" },
+                  { top: "40%", left: "90%", size: 2, delay: "0.8s" },
+                  { top: "72%", left: "75%", size: 1.5, delay: "2.2s" },
+                  { top: "15%", left: "55%", size: 1, delay: "4s" },
+                ].map((s, i) => (
+                  <div key={i} className="absolute rounded-full prize-sparkle"
+                    style={{
+                      top: s.top, left: s.left,
+                      width: s.size, height: s.size,
+                      background: "#FFD700",
+                      boxShadow: "0 0 4px #FFD700, 0 0 8px rgba(255,215,0,0.4)",
+                      animationDelay: s.delay,
+                    }} />
                 ))}
               </div>
 
               <div className="relative px-6 py-10 sm:py-14 text-center">
-                <div className="gold-shimmer-wrap">
-                  <p className="gold-text glow-gold font-bebas text-6xl sm:text-8xl tracking-wider leading-none">
-                    🪙 50,000
-                  </p>
+                {/* Coin icon */}
+                <div className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 rounded-full mb-4 prize-coin"
+                  style={{
+                    background: "linear-gradient(145deg, #FFD700 0%, #B8960C 40%, #806515 70%, #FFD700 100%)",
+                    boxShadow: "0 4px 20px rgba(255,215,0,0.25), 0 1px 3px rgba(0,0,0,0.5), inset 0 2px 4px rgba(255,255,255,0.3), inset 0 -2px 4px rgba(0,0,0,0.2)",
+                  }}>
+                  <span className="font-bebas text-2xl sm:text-3xl text-[#3a2800]" style={{ textShadow: "0 1px 0 rgba(255,255,255,0.3)" }}>$</span>
                 </div>
-                <p className="font-bebas text-2xl sm:text-4xl text-cream tracking-[0.2em] mt-2">
+
+                <p className="gold-text glow-gold font-bebas text-6xl sm:text-8xl tracking-wider leading-none">
+                  50,000
+                </p>
+                <p className="font-bebas text-2xl sm:text-4xl text-cream/80 tracking-[0.2em] mt-2">
                   MONTHLY COIN POOL
                 </p>
-                <p className="text-cream/50 text-sm mt-3 max-w-md mx-auto">
+                <p className="text-cream/40 text-sm mt-3 max-w-md mx-auto">
                   Top 20 verified players split the pot every month.
                 </p>
 
                 {/* Prize breakdown */}
-                <div className="flex flex-wrap justify-center gap-x-3 gap-y-1.5 mt-5 text-cream/50 text-xs font-semibold uppercase tracking-wider">
+                <div className="flex flex-wrap justify-center gap-x-3 gap-y-1.5 mt-6 text-cream/50 text-xs font-semibold uppercase tracking-wider">
                   <span className="text-gold/80">🥇 1st — 25%</span>
                   <span className="text-cream/15">|</span>
                   <span className="text-cream/60">🥈 2nd — 15%</span>
@@ -102,11 +123,11 @@ export default function CompetePage() {
                 </div>
 
                 {/* Verified badge */}
-                <div className="mt-5 inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-green-500/30 bg-green-500/10 text-green-400 text-[10px] font-bold uppercase tracking-widest">
+                <div className="mt-6 inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-green-500/20 bg-green-500/[0.06] text-green-400/80 text-[10px] font-bold uppercase tracking-widest">
                   <span>✅</span> Verified players eligible for bonus rewards
                 </div>
 
-                <p className="text-cream/25 text-xs mt-4">
+                <p className="text-cream/20 text-xs mt-4">
                   Coin rewards active at launch. Cash payouts begin V2 — December 2026.
                 </p>
               </div>
