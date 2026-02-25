@@ -49,7 +49,7 @@ export default function ContactPage() {
 
   return (
     <div className="min-h-screen bg-navy pt-20 pb-16">
-      <div className="max-w-2xl mx-auto px-4 py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <BackButton />
 
         <div className="text-center mb-10 animate-slide-up">

@@ -312,7 +312,7 @@ export default function LearnPage() {
   return (
     <ProtectedRoute>
       <div className="min-h-screen bg-navy pt-16 pb-20 md:pb-8">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <BackButton />
 
           {/* ── 1. Greeting + Daily Quote ── */}

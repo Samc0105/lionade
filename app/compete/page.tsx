@@ -47,7 +47,7 @@ export default function CompetePage() {
         <div className="absolute top-[60%] left-[50%] w-[600px] h-[600px] -translate-x-1/2 rounded-full pointer-events-none opacity-[0.03]"
           style={{ background: "radial-gradient(circle, #A855F7 0%, transparent 70%)" }} />
 
-        <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <BackButton />
 
           {/* ═══ 1. PRIZE POOL BANNER ═══ */}
