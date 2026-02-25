@@ -17,7 +17,7 @@ const TIERS = [
   { name: "LEGEND", color: "legend", range: "7,500+ wins", tagline: "Immortal", icon: "⚡", image: "/legend.png" },
 ];
 
-const TIER_WIDTHS = ["32%", "40%", "48%", "56%", "64%", "72%", "80%", "90%", "100%"];
+const TIER_WIDTHS = ["40%", "48%", "54%", "60%", "68%", "76%", "84%", "92%", "100%"];
 
 /* ── Hex stat config ── */
 const HEX_STATS = [
@@ -27,7 +27,7 @@ const HEX_STATS = [
   { label: "Goal", value: "Top 10%", color: "#4A90D9", achieved: false },
 ];
 
-const CURRENT_TIER_INDEX = 0;
+const CURRENT_TIER_INDEX = 8;
 const DISPLAY_NAME = "Player";
 
 export default function CompetePage() {
@@ -440,7 +440,7 @@ export default function CompetePage() {
             <h2 className="font-bebas text-3xl text-cream tracking-wider text-center mb-6">
               RANKING TIERS
             </h2>
-            <div className="max-w-xl mx-auto space-y-2.5">
+            <div className="max-w-3xl mx-auto space-y-2.5">
               {tiersTopDown.map((tier, displayIdx) => {
                 const origIdx = TIERS.length - 1 - displayIdx;
                 const isLegend = tier.name === "LEGEND";
@@ -485,17 +485,16 @@ export default function CompetePage() {
                           opacity: isLocked ? 0.4 : 1,
                         } as React.CSSProperties}
                       >
-                        <div className="relative flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center">
+                        <div className="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center">
                           {isLocked ? (
-                            <span className="text-lg sm:text-xl opacity-40">🔒</span>
+                            <span className="text-lg sm:text-xl">🔒</span>
                           ) : (
-                            <div className="gem-shimmer" style={{ "--gem-color": tierColor } as React.CSSProperties}>
+                            <div className="gem-shimmer w-10 h-10 sm:w-12 sm:h-12" style={{ "--gem-color": tierColor } as React.CSSProperties}>
                               <img
                                 src={tier.image}
-                                alt={tier.name}
+                                alt={tier.tagline}
                                 className="w-10 h-10 sm:w-12 sm:h-12 object-contain"
                               />
-                              <div className="gem-sweep" />
                             </div>
                           )}
                         </div>
@@ -504,7 +503,7 @@ export default function CompetePage() {
                           <div className="flex items-center gap-2">
                             <span className={`font-bebas text-sm sm:text-base tracking-wider ${isLocked ? "text-gray-600" : isLegend ? "legend-text" : ""}`}
                               style={!isLocked && !isLegend ? { color: textColor } : undefined}>
-                              {tier.name}
+                              {tier.tagline.toUpperCase()}
                             </span>
                             {isCurrent && (
                               <span className="text-[8px] font-bold uppercase tracking-widest text-cream/50 bg-cream/[0.07] px-2 py-0.5 rounded-md">
@@ -512,14 +511,19 @@ export default function CompetePage() {
                               </span>
                             )}
                           </div>
-                          <p className={`text-[9px] sm:text-[10px] ${isLocked ? "text-gray-700" : "text-cream/25"} leading-tight`}>
-                            {tier.tagline}
-                          </p>
                         </div>
 
                         <span className={`font-bebas text-[10px] sm:text-xs tracking-wider flex-shrink-0 ${isLocked ? "text-gray-700" : "text-cream/30"}`}>
                           {tier.range}
                         </span>
+
+                        {/* Shine sweep across entire bar */}
+                        {!isLocked && (
+                          <div
+                            className="tier-bar-shine"
+                            style={{ "--shine-color": `${tierColor}` } as React.CSSProperties}
+                          />
+                        )}
 
                         {/* Hover tooltip */}
                         <div className="absolute left-1/2 -translate-x-1/2 -top-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-20">

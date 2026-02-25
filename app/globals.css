@@ -670,30 +670,39 @@ body {
   100%    { transform: translateX(150%); }
 }
 
-/* ── Gemstone image shimmer + glow ── */
-@keyframes gem-glow {
-  0%, 100% { filter: drop-shadow(0 0 4px var(--gem-color, #FFD700)) brightness(1); }
-  50%      { filter: drop-shadow(0 0 12px var(--gem-color, #FFD700)) drop-shadow(0 0 20px var(--gem-color, #FFD700)) brightness(1.15); }
-}
-@keyframes gem-light-sweep {
-  0%, 70% { transform: translateX(-150%) skewX(-20deg); }
-  100%    { transform: translateX(250%) skewX(-20deg); }
+/* ── Gemstone image breathing glow ── */
+@keyframes gem-breathe {
+  0%, 100% { filter: drop-shadow(0 0 4px var(--gem-color, #FFD700)) drop-shadow(0 0 8px var(--gem-color, #FFD700)); }
+  50%      { filter: drop-shadow(0 0 8px var(--gem-color, #FFD700)) drop-shadow(0 0 18px var(--gem-color, #FFD700)); }
 }
 .gem-shimmer {
-  animation: gem-glow 3s ease-in-out infinite;
   position: relative;
-  display: inline-block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: gem-breathe 2.5s ease-in-out infinite;
 }
-.gem-sweep {
+
+/* ── Tier bar shine sweep (full width, fades near end) ── */
+@keyframes tier-bar-sweep {
+  0%   { left: -20%; opacity: 0; }
+  3%   { opacity: 1; }
+  12%  { opacity: 1; }
+  15%  { left: 90%; opacity: 0; }
+  100% { left: 90%; opacity: 0; }
+}
+.tier-bar-shine {
   position: absolute;
-  inset: -2px;
-  background: linear-gradient(105deg, transparent 35%, rgba(255,255,255,0.35) 45%, rgba(255,255,255,0.5) 50%, rgba(255,255,255,0.35) 55%, transparent 65%);
-  transform: translateX(-150%) skewX(-20deg);
-  animation: gem-light-sweep 4s ease-in-out infinite;
+  top: 0;
+  bottom: 0;
+  width: 25%;
+  left: -20%;
+  opacity: 0;
+  background: linear-gradient(90deg, transparent 0%, var(--shine-color, #FFD700)15 30%, var(--shine-color, #FFD700)30 50%, var(--shine-color, #FFD700)15 70%, transparent 100%);
+  animation: tier-bar-sweep 13s ease-in-out infinite;
   pointer-events: none;
-  border-radius: 4px;
-  mix-blend-mode: overlay;
-  overflow: hidden;
+  z-index: 5;
+  border-radius: inherit;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -711,7 +720,7 @@ body {
   .legend-sparkle::after, .legend-sparkle::before,
   .chrome-text, .gold-shimmer-wrap::after, .gold-particle,
   .logo-glow, .logo-shimmer, .demo-logo-glow,
-  .gem-shimmer, .gem-sweep {
+  .gem-shimmer, .tier-bar-shine {
     animation: none !important;
   }
   .feature-orbit-node { transform: translate(-50%, -50%) !important; }
