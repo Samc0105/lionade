@@ -88,7 +88,7 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
 
   if (isLoading && !timedOut) {
     return (
-      <div className="min-h-screen bg-navy flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
           <div className="w-12 h-12 rounded-full border-2 border-electric border-t-transparent animate-spin" />
           <p className="font-bebas text-2xl text-electric tracking-widest">LOADING...</p>
@@ -99,7 +99,7 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-navy flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
           <div className="w-12 h-12 rounded-full border-2 border-electric border-t-transparent animate-spin" />
           <p className="font-bebas text-2xl text-electric tracking-widest">LOADING...</p>
@@ -110,7 +110,7 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
 
   if (status !== "pass") {
     return (
-      <div className="min-h-screen bg-navy flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
           <div className="w-12 h-12 rounded-full border-2 border-electric border-t-transparent animate-spin" />
           <p className="font-bebas text-2xl text-electric tracking-widest">LOADING...</p>

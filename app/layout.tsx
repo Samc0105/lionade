@@ -40,7 +40,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${bebasNeue.variable} ${syne.variable} ${dmMono.variable}`}>
-      <body className="bg-navy text-cream font-syne antialiased">
+      <body className="text-cream font-syne antialiased">
         <AuthProviderWrapper>
           <Navbar />
           <main>{children}</main>

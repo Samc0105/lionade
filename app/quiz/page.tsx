@@ -336,7 +336,7 @@ export default function QuizPage() {
     const activeCategory = CATEGORIES.find((c) => c.id === expandedCategory);
 
     return (
-      <div className="min-h-screen bg-navy pt-20">
+      <div className="min-h-screen pt-20">
         <div className="max-w-4xl mx-auto px-4 py-12">
           <BackButton />
           <div className="text-center mb-8 animate-slide-up">
@@ -644,7 +644,7 @@ export default function QuizPage() {
   // ── Loading ───────────────────────────────────────────────
   if (phase === "loading") {
     return (
-      <div className="min-h-screen bg-navy flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 rounded-full border-2 border-electric border-t-transparent animate-spin mx-auto mb-4" />
           <p className="font-bebas text-2xl text-electric tracking-widest">LOADING QUESTIONS...</p>
@@ -671,7 +671,7 @@ export default function QuizPage() {
     };
 
     return (
-      <div className="min-h-screen bg-navy pt-20">
+      <div className="min-h-screen pt-20">
         <div className="max-w-3xl mx-auto px-4 py-8">
           <div className="flex items-center justify-between mb-8">
             <div className="flex items-center gap-3">
@@ -725,7 +725,7 @@ export default function QuizPage() {
   if (phase === "results") {
     const rank = getRank(accuracy);
     return (
-      <div className="min-h-screen bg-navy pt-20">
+      <div className="min-h-screen pt-20">
         <div className="max-w-2xl mx-auto px-4 py-12 text-center">
           <div className="inline-flex flex-col items-center justify-center w-32 h-32 rounded-full border-4 mb-8 animate-slide-up"
             style={{ borderColor: rank.color, background: `radial-gradient(circle, ${rank.color}20 0%, transparent 70%)`, boxShadow: `0 0 40px ${rank.color}40` }}>

@@ -228,7 +228,7 @@ export default function OnboardingPage() {
   /* ── Loading / guard states ─────────────────────────────────── */
   if (isLoading || !ready) {
     return (
-      <div className="min-h-screen bg-navy flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
           <div className="w-12 h-12 rounded-full border-2 border-electric border-t-transparent animate-spin" />
           <p className="font-bebas text-xl text-cream/40 tracking-wider">LOADING</p>
@@ -239,7 +239,7 @@ export default function OnboardingPage() {
 
   /* ── Render ─────────────────────────────────────────────────── */
   return (
-    <div className="min-h-screen bg-navy flex items-center justify-center px-4 relative overflow-hidden py-8">
+    <div className="min-h-screen flex items-center justify-center px-4 relative overflow-hidden py-8">
       {/* Background grid */}
       <div
         className="absolute inset-0 opacity-30 pointer-events-none"

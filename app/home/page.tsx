@@ -30,7 +30,7 @@ export default function ProductLandingPage() {
   if (isLoading || user || checking || !hasAccess) return null;
 
   return (
-    <div className="min-h-screen bg-navy text-cream overflow-hidden relative">
+    <div className="min-h-screen text-cream overflow-hidden relative">
       <div className="absolute inset-0 grid-bg opacity-60" />
       <div className="absolute -top-32 -left-32 w-96 h-96 rounded-full blur-3xl"
         style={{ background: "radial-gradient(circle, rgba(74,144,217,0.18), transparent 70%)" }} />

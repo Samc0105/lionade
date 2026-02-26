@@ -163,7 +163,7 @@ export default function DemoPage() {
 
   // ─────────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen bg-navy flex items-center justify-center px-4 relative overflow-hidden pt-20 pb-8">
+    <div className="min-h-screen flex items-center justify-center px-4 relative overflow-hidden pt-20 pb-8">
       {/* Background grid */}
       <div
         className="absolute inset-0 opacity-30"

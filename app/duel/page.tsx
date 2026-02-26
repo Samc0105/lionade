@@ -187,7 +187,7 @@ export default function DuelPage() {
   // ── Phase: Invite ──────────────────────────────────────────────────────────
   if (phase === "invite") {
     return (
-      <div className="min-h-screen bg-navy pt-20">
+      <div className="min-h-screen pt-20">
         <div className="max-w-5xl mx-auto px-4 py-12">
           <BackButton />
           {/* Header */}
@@ -232,7 +232,7 @@ export default function DuelPage() {
   // ── Phase: Countdown ───────────────────────────────────────────────────────
   if (phase === "countdown") {
     return (
-      <div className="min-h-screen bg-navy flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="flex items-center justify-center gap-8 mb-12">
             <div className="flex flex-col items-center">
@@ -276,7 +276,7 @@ export default function DuelPage() {
     const timerColor = timerPct > 50 ? "#4A90D9" : timerPct > 25 ? "#E67E22" : "#E74C3C";
 
     return (
-      <div className="min-h-screen bg-navy pt-20">
+      <div className="min-h-screen pt-20">
         <div className="max-w-4xl mx-auto px-4 py-6">
 
           {/* Scoreboard */}
@@ -423,7 +423,7 @@ export default function DuelPage() {
     const coinsEarned = iWon ? 750 : isTie ? 200 : 100;
 
     return (
-      <div className="min-h-screen bg-navy pt-20">
+      <div className="min-h-screen pt-20">
         <div className="max-w-2xl mx-auto px-4 py-12 text-center">
           {/* Result */}
           <div className="mb-8 animate-slide-up">

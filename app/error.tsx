@@ -14,7 +14,7 @@ export default function Error({
   }, [error]);
 
   return (
-    <div className="min-h-screen bg-navy flex items-center justify-center px-6">
+    <div className="min-h-screen flex items-center justify-center px-6">
       <div className="text-center max-w-md">
         <span className="text-5xl block mb-4">&#x26A0;&#xFE0F;</span>
         <h2 className="font-bebas text-3xl text-cream tracking-wider mb-2">

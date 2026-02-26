@@ -155,7 +155,7 @@ export default function LoginPage() {
   }, [username]);
 
   if (isLoading) return (
-    <div className="min-h-screen bg-navy flex items-center justify-center">
+    <div className="min-h-screen flex items-center justify-center">
       <div className="w-10 h-10 rounded-full border-2 border-electric border-t-transparent animate-spin" />
     </div>
   );
@@ -275,7 +275,7 @@ export default function LoginPage() {
 
   // ─────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen bg-navy flex items-center justify-center px-4 relative overflow-hidden py-8">
+    <div className="min-h-screen flex items-center justify-center px-4 relative overflow-hidden py-8">
       {/* Background */}
       <div className="absolute inset-0 opacity-30" style={{
         backgroundImage: "linear-gradient(rgba(74,144,217,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(74,144,217,0.08) 1px, transparent 1px)",
