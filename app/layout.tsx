@@ -4,6 +4,7 @@ import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import AuthProviderWrapper from "@/components/AuthProviderWrapper";
+import SpaceBackground from "@/components/SpaceBackground";
 
 const bebasNeue = Bebas_Neue({
   variable: "--font-bebas",
@@ -41,11 +42,14 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${bebasNeue.variable} ${syne.variable} ${dmMono.variable}`}>
       <body className="text-cream font-syne antialiased">
-        <AuthProviderWrapper>
-          <Navbar />
-          <main>{children}</main>
-          <Footer />
-        </AuthProviderWrapper>
+        <SpaceBackground />
+        <div className="relative z-10">
+          <AuthProviderWrapper>
+            <Navbar />
+            <main>{children}</main>
+            <Footer />
+          </AuthProviderWrapper>
+        </div>
       </body>
     </html>
   );

@@ -30,34 +30,6 @@ body {
 /* ── Space / interstellar background ── */
 body {
   background-color: #060612;
-  background-image:
-    /* Stars — tiny dots */
-    radial-gradient(1px 1px at 10% 15%, rgba(255,255,255,0.5) 50%, transparent 50%),
-    radial-gradient(1px 1px at 25% 42%, rgba(255,255,255,0.35) 50%, transparent 50%),
-    radial-gradient(1.5px 1.5px at 47% 8%, rgba(180,210,255,0.5) 50%, transparent 50%),
-    radial-gradient(1px 1px at 62% 33%, rgba(255,255,255,0.3) 50%, transparent 50%),
-    radial-gradient(1px 1px at 78% 62%, rgba(255,255,255,0.45) 50%, transparent 50%),
-    radial-gradient(1.5px 1.5px at 88% 18%, rgba(180,210,255,0.4) 50%, transparent 50%),
-    radial-gradient(1px 1px at 5% 68%, rgba(255,255,255,0.3) 50%, transparent 50%),
-    radial-gradient(1px 1px at 33% 78%, rgba(255,255,255,0.25) 50%, transparent 50%),
-    radial-gradient(1.5px 1.5px at 55% 52%, rgba(180,210,255,0.45) 50%, transparent 50%),
-    radial-gradient(1px 1px at 72% 88%, rgba(255,255,255,0.35) 50%, transparent 50%),
-    radial-gradient(1px 1px at 15% 92%, rgba(255,255,255,0.3) 50%, transparent 50%),
-    radial-gradient(1px 1px at 42% 28%, rgba(255,255,255,0.2) 50%, transparent 50%),
-    radial-gradient(1.5px 1.5px at 92% 45%, rgba(180,210,255,0.35) 50%, transparent 50%),
-    radial-gradient(1px 1px at 68% 5%, rgba(255,255,255,0.3) 50%, transparent 50%),
-    radial-gradient(1px 1px at 82% 95%, rgba(255,255,255,0.25) 50%, transparent 50%),
-    radial-gradient(1px 1px at 38% 58%, rgba(255,255,255,0.3) 50%, transparent 50%),
-    radial-gradient(1.5px 1.5px at 3% 38%, rgba(180,210,255,0.3) 50%, transparent 50%),
-    radial-gradient(1px 1px at 95% 72%, rgba(255,255,255,0.4) 50%, transparent 50%),
-    radial-gradient(2px 2px at 20% 5%, rgba(255,255,255,0.6) 50%, transparent 50%),
-    radial-gradient(1px 1px at 50% 90%, rgba(255,255,255,0.35) 50%, transparent 50%),
-    radial-gradient(1.5px 1.5px at 85% 40%, rgba(180,210,255,0.5) 50%, transparent 50%),
-    /* Nebula blobs */
-    radial-gradient(600px 500px at 85% 15%, rgba(88, 28, 135, 0.15) 0%, transparent 70%),
-    radial-gradient(500px 450px at 10% 80%, rgba(30, 58, 138, 0.12) 0%, transparent 70%),
-    radial-gradient(400px 350px at 50% 50%, rgba(13, 78, 87, 0.08) 0%, transparent 70%);
-  background-attachment: fixed;
 }
 
 /* Custom scrollbar */
@@ -730,7 +702,55 @@ body {
   border-radius: inherit;
 }
 
+/* ── Space background animations ── */
+@keyframes space-twinkle {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 1; }
+}
+.space-twinkle {
+  animation: space-twinkle 3s ease-in-out infinite;
+}
+
+@keyframes shooting-star {
+  0% { transform: translate(0, 0) rotate(-35deg); opacity: 0; }
+  3% { opacity: 1; }
+  6% { transform: translate(300px, 200px) rotate(-35deg); opacity: 0; }
+  100% { opacity: 0; }
+}
+.shooting-star {
+  position: absolute;
+  top: 12%;
+  left: 70%;
+  width: 80px;
+  height: 1.5px;
+  background: linear-gradient(90deg, rgba(255,255,255,0.8), transparent);
+  border-radius: 1px;
+  opacity: 0;
+  animation: shooting-star 12s linear infinite;
+  animation-delay: 3s;
+}
+
+@keyframes shooting-star-2 {
+  0% { transform: translate(0, 0) rotate(-25deg); opacity: 0; }
+  2% { opacity: 1; }
+  5% { transform: translate(250px, 120px) rotate(-25deg); opacity: 0; }
+  100% { opacity: 0; }
+}
+.shooting-star-2 {
+  position: absolute;
+  top: 35%;
+  left: 15%;
+  width: 60px;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(180,210,255,0.7), transparent);
+  border-radius: 1px;
+  opacity: 0;
+  animation: shooting-star-2 15s linear infinite;
+  animation-delay: 8s;
+}
+
 @media (prefers-reduced-motion: reduce) {
+  .space-twinkle, .shooting-star, .shooting-star-2,
   .star, .cta-pulse, .animate-slide-up, .coin-particle, .pulse-ring,
     .difficulty-pulse-green, .difficulty-pulse-yellow, .difficulty-pulse-red,
   .idle-float, .idle-pulse, .idle-tilt, .idle-shimmer,
