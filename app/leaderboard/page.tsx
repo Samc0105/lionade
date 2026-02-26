@@ -44,7 +44,7 @@ export default function LeaderboardPage() {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-navy pt-20">
+      <div className="min-h-screen pt-20">
         <div className="max-w-3xl mx-auto px-4 py-10">
           <BackButton />
 

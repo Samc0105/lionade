@@ -156,7 +156,7 @@ export default function ProfilePage() {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-navy pt-16">
+      <div className="min-h-screen pt-16">
         <div className="max-w-7xl mx-auto px-4 py-6">
           <BackButton />
 

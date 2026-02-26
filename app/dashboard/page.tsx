@@ -150,7 +150,7 @@ export default function DashboardPage() {
         }
       `}</style>
 
-      <div className="min-h-screen bg-navy pt-16 pb-20 md:pb-8 relative overflow-hidden">
+      <div className="min-h-screen pt-16 pb-20 md:pb-8 relative overflow-hidden">
         {/* Background floating shapes */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden" aria-hidden="true">
           <div className="geo-float absolute" style={{ top: "10%", right: "5%", animationDuration: "16s" }}>

@@ -4,7 +4,7 @@ import BackButton from "@/components/BackButton";
 
 export default function PrivacyPage() {
   return (
-    <div className="min-h-screen bg-navy pt-20 pb-16">
+    <div className="min-h-screen pt-20 pb-16">
       <div className="max-w-2xl mx-auto px-4 py-12">
         <BackButton />
         <div className="text-center mb-10 animate-slide-up">
