@@ -30,6 +30,49 @@ export async function updateProfile(userId: string, updates: {
 
 // ── Questions ─────────────────────────────────────────────────
 
+// Difficulty mapping: UI uses easy/medium/hard, DB uses beginner/intermediate/advanced
+const DIFFICULTY_DB_MAP: Record<string, string> = {
+  easy: "beginner",
+  medium: "intermediate",
+  hard: "advanced",
+};
+
+/** Fetch 10 random questions WITHOUT correct_answer (anti-cheat) */
+export async function getQuizQuestions(subject: Subject, difficulty: string): Promise<{
+  id: string;
+  subject: string;
+  question: string;
+  options: string[];
+  difficulty: string;
+}[]> {
+  const dbDifficulty = DIFFICULTY_DB_MAP[difficulty] || difficulty;
+  const { data, error } = await supabase
+    .from("questions")
+    .select("id, subject, question, options, difficulty")
+    .eq("subject", subject)
+    .eq("difficulty", dbDifficulty)
+    .limit(50);
+  if (error) throw error;
+  // Shuffle and take 10
+  const shuffled = (data ?? []).sort(() => Math.random() - 0.5).slice(0, 10);
+  return shuffled.map(q => ({ ...q, options: q.options as string[] }));
+}
+
+/** Fetch correct answer + explanation for a single question (called after user answers) */
+export async function checkAnswer(questionId: string): Promise<{
+  correct_answer: number;
+  explanation: string | null;
+}> {
+  const { data, error } = await supabase
+    .from("questions")
+    .select("correct_answer, explanation")
+    .eq("id", questionId)
+    .single();
+  if (error) throw error;
+  return { correct_answer: Number(data.correct_answer), explanation: data.explanation };
+}
+
+/** Legacy: fetch questions with answers (used by existing code like getQuestions) */
 export async function getQuestions(subject: Subject): Promise<{
   id: string;
   subject: string;
@@ -42,12 +85,16 @@ export async function getQuestions(subject: Subject): Promise<{
 }[]> {
   const { data, error } = await supabase
     .from("questions")
-    .select("id, subject, question, options, correct_answer, difficulty, coin_reward, explanation")
+    .select("id, subject, question, options, correct_answer, difficulty, explanation")
     .eq("subject", subject)
-    .eq("is_active", true)
     .limit(10);
   if (error) throw error;
-  return (data ?? []).map(q => ({ ...q, options: q.options as string[] }));
+  return (data ?? []).map(q => ({
+    ...q,
+    options: q.options as string[],
+    correct_answer: Number(q.correct_answer),
+    coin_reward: 10,
+  }));
 }
 
 // ── Quiz Sessions ─────────────────────────────────────────────
@@ -386,6 +433,22 @@ export async function getSubjectStats(userId: string) {
   }
 
   return Object.entries(stats).map(([subject, s]) => ({ subject, ...s }));
+}
+
+// ── Daily Progress ───────────────────────────────────────────
+
+export async function getDailyProgress(userId: string): Promise<{
+  questions_answered: number;
+  coins_earned: number;
+}> {
+  const today = new Date().toISOString().split("T")[0];
+  const { data } = await supabase
+    .from("daily_activity")
+    .select("questions_answered, coins_earned")
+    .eq("user_id", userId)
+    .eq("date", today)
+    .maybeSingle();
+  return data ?? { questions_answered: 0, coins_earned: 0 };
 }
 
 // ── Increment helper (server-side safe) ───────────────────────

@@ -1,24 +1,14 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { Subject } from "@/types";
 import { SUBJECT_ICONS, SUBJECT_COLORS, formatCoins } from "@/lib/mockData";
-import { getQuestions, saveQuizSession, saveUserAnswer, incrementCoins, incrementXP, getSubjectStats, getQuizHistory } from "@/lib/db";
+import { getQuizQuestions, checkAnswer, saveQuizSession, saveUserAnswer, getSubjectStats, getQuizHistory } from "@/lib/db";
 import QuizCard from "@/components/QuizCard";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth";
 import { useRouter } from "next/navigation";
 import BackButton from "@/components/BackButton";
-
-const QUIZ_CARD_COLORS: Record<Subject, string> = {
-  Math: "#EF4444",
-  Science: "#22C55E",
-  Languages: "#3B82F6",
-  "SAT/ACT": "#A855F7",
-  Coding: "#6B7280",
-  Finance: "#EAB308",
-  Certifications: "#F97316",
-};
 
 interface Topic {
   name: string;
@@ -118,23 +108,21 @@ const CATEGORIES: Category[] = [
 type Phase = "select" | "loading" | "quiz" | "results";
 type Difficulty = "easy" | "medium" | "hard";
 
-interface DbQuestion {
+const DIFFICULTY_MULTIPLIER: Record<Difficulty, number> = { easy: 1, medium: 1.5, hard: 2 };
+
+interface QuizQuestion {
   id: string;
   subject: string;
   question: string;
   options: string[];
-  correct_answer: number;
   difficulty: string;
-  coin_reward: number;
-  explanation: string | null;
 }
 
-interface QuizState {
-  correct: number;
-  wrong: number;
-  totalCoins: number;
-  xpEarned: number;
-  answers: { questionId: string; selected: number; correct: boolean; timeLeft: number }[];
+interface AnswerRecord {
+  questionId: string;
+  selected: number;
+  correct: boolean;
+  timeLeft: number;
 }
 
 interface SubjectStatEntry {
@@ -159,25 +147,26 @@ export default function QuizPage() {
 
   const [phase, setPhase] = useState<Phase>("select");
   const [subject, setSubject] = useState<Subject | null>(null);
-  const [questions, setQuestions] = useState<DbQuestion[]>([]);
+  const [questions, setQuestions] = useState<QuizQuestion[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [sessionId, setSessionId] = useState<string | null>(null);
-  const [quizState, setQuizState] = useState<QuizState>({
-    correct: 0, wrong: 0, totalCoins: 0, xpEarned: 0, answers: [],
-  });
+  const [answers, setAnswers] = useState<AnswerRecord[]>([]);
+  const [totalCoins, setTotalCoins] = useState(0);
+  const [totalXp, setTotalXp] = useState(0);
 
-  // New state for select phase enhancements
   const [blitzMode, setBlitzMode] = useState(false);
   const [difficulty, setDifficulty] = useState<Difficulty>("medium");
   const [subjectStats, setSubjectStats] = useState<SubjectStatEntry[]>([]);
   const [quizHistory, setQuizHistory] = useState<QuizHistoryEntry[]>([]);
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
 
+  // Anti-cheat: result comes back from server after user selects
+  const [currentResult, setCurrentResult] = useState<{ correctIndex: number; explanation: string | null } | null>(null);
+  const advanceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   useEffect(() => {
     if (!isLoading && !user) router.replace("/login");
   }, [user, isLoading, router]);
 
-  // Fetch stats on mount
   useEffect(() => {
     if (!user) return;
     getSubjectStats(user.id).then(setSubjectStats).catch(() => {});
@@ -186,104 +175,146 @@ export default function QuizPage() {
 
   if (isLoading || !user) return null;
 
+  const diffMult = DIFFICULTY_MULTIPLIER[difficulty];
+  const blitzMult = blitzMode ? 2 : 1;
+
   const startQuiz = async (s: Subject) => {
     setSubject(s);
     setPhase("loading");
     try {
-      const qs = await getQuestions(s);
+      const qs = await getQuizQuestions(s, difficulty);
       if (qs.length === 0) {
-        alert("No questions available for this subject yet. Try another!");
+        alert("No questions available for this subject + difficulty yet. Try another!");
         setPhase("select");
         return;
       }
       setQuestions(qs);
       setCurrentIndex(0);
-      setQuizState({ correct: 0, wrong: 0, totalCoins: 0, xpEarned: 0, answers: [] });
+      setAnswers([]);
+      setTotalCoins(0);
+      setTotalXp(0);
+      setCurrentResult(null);
       setPhase("quiz");
     } catch {
       setPhase("select");
     }
   };
 
-  const handleAnswer = useCallback(
-    async (answerIndex: number, isCorrect: boolean, timeLeft: number) => {
+  const handleSelect = useCallback(
+    async (answerIndex: number, timeLeft: number) => {
+      // Skip signal from QuizCard "Next" button
+      if (answerIndex === -99) {
+        if (advanceTimerRef.current) clearTimeout(advanceTimerRef.current);
+        advanceToNext();
+        return;
+      }
+
       const q = questions[currentIndex];
-      const speedBonus = timeLeft > 12 ? 10 : timeLeft > 8 ? 5 : 0;
-      const baseCoins = isCorrect ? q.coin_reward + speedBonus : 0;
-      const coinsEarned = blitzMode ? baseCoins * 2 : baseCoins;
-      const xp = isCorrect ? q.coin_reward * 2 : 5;
 
-      const newAnswers = [
-        ...quizState.answers,
-        { questionId: q.id, selected: answerIndex, correct: isCorrect, timeLeft },
-      ];
+      // Fetch correct answer from server (anti-cheat)
+      try {
+        const { correct_answer, explanation } = await checkAnswer(q.id);
+        const isCorrect = answerIndex === correct_answer;
 
-      setQuizState((prev) => ({
-        correct: prev.correct + (isCorrect ? 1 : 0),
-        wrong: prev.wrong + (isCorrect ? 0 : 1),
-        totalCoins: prev.totalCoins + coinsEarned,
-        xpEarned: prev.xpEarned + xp,
-        answers: newAnswers,
-      }));
+        // Calculate rewards
+        const coinReward = isCorrect ? Math.round(1 * diffMult * blitzMult) : 0;
+        const xpReward = isCorrect ? Math.round(10 * diffMult * blitzMult) : 0;
 
-      const isLast = currentIndex + 1 >= questions.length;
+        const newAnswer: AnswerRecord = { questionId: q.id, selected: answerIndex, correct: isCorrect, timeLeft };
+        const updatedAnswers = [...answers, newAnswer];
+        setAnswers(updatedAnswers);
+        setTotalCoins((prev) => prev + coinReward);
+        setTotalXp((prev) => prev + xpReward);
+        setCurrentResult({ correctIndex: correct_answer, explanation });
 
-      setTimeout(async () => {
-        if (isLast) {
-          // Save session to Supabase
-          const totalCoins = quizState.totalCoins + coinsEarned;
-          const totalXp = quizState.xpEarned + xp;
-          const totalCorrect = quizState.correct + (isCorrect ? 1 : 0);
-
-          try {
-            const session = await saveQuizSession({
-              user_id: user.id,
-              subject: subject!,
-              total_questions: questions.length,
-              correct_answers: totalCorrect,
-              coins_earned: totalCoins,
-              xp_earned: totalXp,
-              streak_bonus: false,
-            });
-            setSessionId(session.id);
-
-            // Save individual answers
-            await Promise.all(newAnswers.map(a =>
-              saveUserAnswer({
-                session_id: session.id,
-                question_id: a.questionId,
-                selected_answer: a.selected,
-                is_correct: a.correct,
-                time_left: a.timeLeft,
-              }).catch(() => {})
-            ));
-
-            await refreshUser();
-          } catch (err) {
-            console.error("Failed to save session", err);
-          }
-
-          setPhase("results");
-        } else {
-          setCurrentIndex((prev) => prev + 1);
-        }
-      }, 1600);
+        // Auto-advance after delay
+        const delay = explanation ? 3000 : 1400;
+        advanceTimerRef.current = setTimeout(() => {
+          advanceAfterAnswer(updatedAnswers);
+        }, delay);
+      } catch (err) {
+        console.error("Failed to check answer", err);
+      }
     },
-    [currentIndex, questions, quizState, subject, user.id, refreshUser, blitzMode]
+    [currentIndex, questions, answers, diffMult, blitzMult]
   );
+
+  function advanceToNext() {
+    const isLast = currentIndex + 1 >= questions.length;
+    if (isLast) {
+      finishQuiz(answers);
+    } else {
+      setCurrentIndex((prev) => prev + 1);
+      setCurrentResult(null);
+    }
+  }
+
+  function advanceAfterAnswer(updatedAnswers: AnswerRecord[]) {
+    const isLast = currentIndex + 1 >= questions.length;
+    if (isLast) {
+      finishQuiz(updatedAnswers);
+    } else {
+      setCurrentIndex((prev) => prev + 1);
+      setCurrentResult(null);
+    }
+  }
+
+  async function finishQuiz(finalAnswers: AnswerRecord[]) {
+    const correctCount = finalAnswers.filter((a) => a.correct).length;
+    let coins = finalAnswers.reduce((sum, a) => sum + (a.correct ? Math.round(1 * diffMult * blitzMult) : 0), 0);
+    const xp = finalAnswers.reduce((sum, a) => sum + (a.correct ? Math.round(10 * diffMult * blitzMult) : 0), 0);
+
+    // Perfect score bonus
+    if (correctCount === questions.length && questions.length === 10) {
+      coins += 5;
+    }
+
+    setTotalCoins(coins);
+    setTotalXp(xp);
+
+    try {
+      const session = await saveQuizSession({
+        user_id: user!.id,
+        subject: subject!,
+        total_questions: questions.length,
+        correct_answers: correctCount,
+        coins_earned: coins,
+        xp_earned: xp,
+        streak_bonus: false,
+      });
+
+      await Promise.all(finalAnswers.map((a) =>
+        saveUserAnswer({
+          session_id: session.id,
+          question_id: a.questionId,
+          selected_answer: a.selected,
+          is_correct: a.correct,
+          time_left: a.timeLeft,
+        }).catch(() => {})
+      ));
+
+      await refreshUser();
+    } catch (err) {
+      console.error("Failed to save session", err);
+    }
+
+    setPhase("results");
+  }
 
   const restartQuiz = () => {
     setPhase("select");
     setSubject(null);
     setQuestions([]);
     setCurrentIndex(0);
-    setSessionId(null);
-    setQuizState({ correct: 0, wrong: 0, totalCoins: 0, xpEarned: 0, answers: [] });
+    setAnswers([]);
+    setTotalCoins(0);
+    setTotalXp(0);
+    setCurrentResult(null);
   };
 
-  const accuracy = quizState.answers.length > 0
-    ? Math.round((quizState.correct / quizState.answers.length) * 100)
-    : 0;
+  const correctCount = answers.filter((a) => a.correct).length;
+  const wrongCount = answers.filter((a) => !a.correct).length;
+  const accuracy = answers.length > 0 ? Math.round((correctCount / answers.length) * 100) : 0;
 
   const getRank = (acc: number) => {
     if (acc === 100) return { label: "PERFECT", icon: "\u{1F48E}", color: "#FFD700" };
@@ -292,12 +323,8 @@ export default function QuizPage() {
     return { label: "KEEP GRINDING", icon: "\u{1F4AA}", color: "#E67E22" };
   };
 
-  // Helper: get stats for a subject
-  const getStatForSubject = (s: Subject) => {
-    return subjectStats.find((st) => st.subject === s);
-  };
+  const getStatForSubject = (s: Subject) => subjectStats.find((st) => st.subject === s);
 
-  // Compute recommendations based on categories/topics
   const recommendations: { category: Category; topic: Topic; reason: string }[] = [];
   for (const cat of CATEGORIES) {
     if (recommendations.length >= 2) break;
@@ -306,7 +333,7 @@ export default function QuizPage() {
       const stat = getStatForSubject(topic.subject);
       if (!stat) {
         recommendations.push({ category: cat, topic, reason: `You haven\u2019t tried ${topic.subject} yet \u2014 start with ${topic.name}!` });
-        break; // one recommendation per category max
+        break;
       } else if (stat.questionsAnswered > 0) {
         const acc = Math.round((stat.correctAnswers / stat.questionsAnswered) * 100);
         if (acc < 60) {
@@ -317,7 +344,6 @@ export default function QuizPage() {
     }
   }
 
-  // Quick stats computation
   const totalQuizzes = quizHistory.length;
   const totalCorrectAll = quizHistory.reduce((s, h) => s + h.correct_answers, 0);
   const totalQuestionsAll = quizHistory.reduce((s, h) => s + h.total_questions, 0);
@@ -329,7 +355,10 @@ export default function QuizPage() {
   }
   const favoriteSubject = Object.entries(subjectCounts).sort(([, a], [, b]) => b - a)[0]?.[0] ?? "None yet";
 
-  const timerLimit = blitzMode ? 10 : 20;
+  const timerLimit = blitzMode ? 10 : 15;
+
+  // Coin reward display for current question
+  const currentCoinReward = Math.round(1 * diffMult * blitzMult);
 
   // ── Select ────────────────────────────────────────────────
   if (phase === "select") {
@@ -364,28 +393,16 @@ export default function QuizPage() {
             >
               <span className="text-3xl">&#x26A1;</span>
               <div className="flex-1">
-                <p className="font-bebas text-xl text-[#EAB308] tracking-wider">
-                  BLITZ MODE
-                </p>
-                <p className="text-cream/40 text-xs font-syne">
-                  2x Coins, Shorter Timer (10s)
-                </p>
+                <p className="font-bebas text-xl text-[#EAB308] tracking-wider">BLITZ MODE</p>
+                <p className="text-cream/40 text-xs font-syne">2x Coins & XP, Shorter Timer (10s)</p>
               </div>
               {blitzMode && (
                 <span className="text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full bg-[#EAB308]/20 border border-[#EAB308]/40 text-[#EAB308]">
                   Active
                 </span>
               )}
-              <div
-                className="w-12 h-7 rounded-full relative transition-all duration-300"
-                style={{
-                  background: blitzMode ? "#EAB308" : "#ffffff15",
-                }}
-              >
-                <div
-                  className="absolute top-1 w-5 h-5 rounded-full bg-white transition-all duration-300"
-                  style={{ left: blitzMode ? "24px" : "4px" }}
-                />
+              <div className="w-12 h-7 rounded-full relative transition-all duration-300" style={{ background: blitzMode ? "#EAB308" : "#ffffff15" }}>
+                <div className="absolute top-1 w-5 h-5 rounded-full bg-white transition-all duration-300" style={{ left: blitzMode ? "24px" : "4px" }} />
               </div>
             </button>
           </div>
@@ -411,17 +428,11 @@ export default function QuizPage() {
                   }}
                 >
                   <span className="text-2xl block mb-2">{icon}</span>
-                  <p className="font-bebas text-lg tracking-wider" style={{ color: difficulty === d ? color : "#ffffff60" }}>
-                    {label}
-                  </p>
+                  <p className="font-bebas text-lg tracking-wider" style={{ color: difficulty === d ? color : "#ffffff60" }}>{label}</p>
                   <p className="text-cream/40 text-[11px] leading-tight mt-1">{desc}</p>
                   <span
                     className="inline-block mt-2 text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full"
-                    style={{
-                      background: `${color}15`,
-                      border: `1px solid ${color}30`,
-                      color: difficulty === d ? color : `${color}80`,
-                    }}
+                    style={{ background: `${color}15`, border: `1px solid ${color}30`, color: difficulty === d ? color : `${color}80` }}
                   >
                     {mult} coins
                   </span>
@@ -433,9 +444,7 @@ export default function QuizPage() {
           {/* ── Recommendations ── */}
           {recommendations.length > 0 && !expandedCategory && (
             <div className="mb-8 animate-slide-up" style={{ animationDelay: "0.1s" }}>
-              <h2 className="font-bebas text-lg text-cream tracking-wider mb-3">
-                RECOMMENDED FOR YOU
-              </h2>
+              <h2 className="font-bebas text-lg text-cream tracking-wider mb-3">RECOMMENDED FOR YOU</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {recommendations.map((rec) => {
                   const color = rec.category.color;
@@ -444,22 +453,13 @@ export default function QuizPage() {
                       key={rec.topic.name}
                       onClick={() => startQuiz(rec.topic.subject)}
                       className="flex items-center gap-3 p-4 rounded-2xl border text-left transition-all duration-300 hover:-translate-y-0.5 cursor-pointer"
-                      style={{
-                        background: `linear-gradient(135deg, ${color}10 0%, #060c18 100%)`,
-                        borderColor: `${color}30`,
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.boxShadow = `0 0 20px ${color}20`;
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.boxShadow = "none";
-                      }}
+                      style={{ background: `linear-gradient(135deg, ${color}10 0%, #060c18 100%)`, borderColor: `${color}30` }}
+                      onMouseEnter={(e) => { e.currentTarget.style.boxShadow = `0 0 20px ${color}20`; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.boxShadow = "none"; }}
                     >
                       <span className="text-3xl">{rec.category.icon}</span>
                       <div>
-                        <p className="font-bebas text-lg tracking-wider" style={{ color }}>
-                          {rec.topic.name}
-                        </p>
+                        <p className="font-bebas text-lg tracking-wider" style={{ color }}>{rec.topic.name}</p>
                         <p className="text-cream/40 text-xs font-syne">{rec.reason}</p>
                       </div>
                     </button>
@@ -469,7 +469,7 @@ export default function QuizPage() {
             </div>
           )}
 
-          {/* ── Category Grid (no category expanded) ── */}
+          {/* ── Category Grid ── */}
           {!expandedCategory && (
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
               {CATEGORIES.map((cat, i) => (
@@ -482,22 +482,12 @@ export default function QuizPage() {
                     border: `1px solid ${cat.color}30`,
                     background: `linear-gradient(135deg, ${cat.color}08 0%, #060c18 100%)`,
                   }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.boxShadow = `0 0 25px ${cat.color}20, 0 8px 32px ${cat.color}10`;
-                    e.currentTarget.style.borderColor = `${cat.color}60`;
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.boxShadow = "none";
-                    e.currentTarget.style.borderColor = `${cat.color}30`;
-                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.boxShadow = `0 0 25px ${cat.color}20, 0 8px 32px ${cat.color}10`; e.currentTarget.style.borderColor = `${cat.color}60`; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.boxShadow = "none"; e.currentTarget.style.borderColor = `${cat.color}30`; }}
                 >
-                  <span className="text-4xl block mb-3 group-hover:scale-110 transition-transform duration-300">
-                    {cat.icon}
-                  </span>
+                  <span className="text-4xl block mb-3 group-hover:scale-110 transition-transform duration-300">{cat.icon}</span>
                   <p className="font-bebas text-xl text-cream tracking-wider">{cat.name}</p>
-                  <p className="text-xs mt-1" style={{ color: `${cat.color}cc` }}>
-                    {cat.topics.length} topics
-                  </p>
+                  <p className="text-xs mt-1" style={{ color: `${cat.color}cc` }}>{cat.topics.length} topics</p>
                 </button>
               ))}
             </div>
@@ -506,28 +496,16 @@ export default function QuizPage() {
           {/* ── Expanded Subtopic View ── */}
           {activeCategory && (
             <div className="mb-10 animate-slide-up">
-              {/* Back button */}
-              <button
-                onClick={() => setExpandedCategory(null)}
-                className="flex items-center gap-2 text-cream/50 hover:text-cream transition-colors mb-6 cursor-pointer font-syne text-sm"
-              >
+              <button onClick={() => setExpandedCategory(null)} className="flex items-center gap-2 text-cream/50 hover:text-cream transition-colors mb-6 cursor-pointer font-syne text-sm">
                 <span>&larr;</span> Back to Categories
               </button>
-
-              {/* Category header */}
               <div className="flex items-center gap-4 mb-6">
                 <span className="text-5xl">{activeCategory.icon}</span>
                 <div>
-                  <h2 className="font-bebas text-3xl tracking-wider" style={{ color: activeCategory.color }}>
-                    {activeCategory.name}
-                  </h2>
-                  <p className="text-cream/40 text-sm font-syne">
-                    {activeCategory.topics.length} topics available
-                  </p>
+                  <h2 className="font-bebas text-3xl tracking-wider" style={{ color: activeCategory.color }}>{activeCategory.name}</h2>
+                  <p className="text-cream/40 text-sm font-syne">{activeCategory.topics.length} topics available</p>
                 </div>
               </div>
-
-              {/* Subtopic grid */}
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                 {activeCategory.topics.map((topic, i) => {
                   const color = activeCategory.color;
@@ -543,55 +521,26 @@ export default function QuizPage() {
                       })()
                     : null;
                   const subjectAccuracy = stat && stat.questionsAnswered > 0
-                    ? Math.round((stat.correctAnswers / stat.questionsAnswered) * 100)
-                    : 0;
+                    ? Math.round((stat.correctAnswers / stat.questionsAnswered) * 100) : 0;
 
                   return (
                     <button
                       key={topic.name}
                       onClick={() => startQuiz(topic.subject)}
                       className="group relative p-5 rounded-2xl border transition-all duration-300 hover:-translate-y-1 text-left animate-slide-up cursor-pointer"
-                      style={{
-                        animationDelay: `${i * 0.05}s`,
-                        border: `1px solid ${color}30`,
-                        background: `linear-gradient(135deg, ${color}08 0%, #060c18 100%)`,
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.boxShadow = `0 0 25px ${color}20, 0 8px 32px ${color}10`;
-                        e.currentTarget.style.borderColor = `${color}60`;
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.boxShadow = "none";
-                        e.currentTarget.style.borderColor = `${color}30`;
-                      }}
+                      style={{ animationDelay: `${i * 0.05}s`, border: `1px solid ${color}30`, background: `linear-gradient(135deg, ${color}08 0%, #060c18 100%)` }}
+                      onMouseEnter={(e) => { e.currentTarget.style.boxShadow = `0 0 25px ${color}20, 0 8px 32px ${color}10`; e.currentTarget.style.borderColor = `${color}60`; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.boxShadow = "none"; e.currentTarget.style.borderColor = `${color}30`; }}
                     >
                       <p className="font-bebas text-xl text-cream tracking-wider mb-1">{topic.name}</p>
-                      <span
-                        className="inline-block text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full mb-3"
-                        style={{
-                          background: `${color}15`,
-                          border: `1px solid ${color}30`,
-                          color: `${color}cc`,
-                        }}
-                      >
-                        {topic.subject}
-                      </span>
-
-                      {/* Per-topic stats (from mapped subject) */}
+                      <span className="inline-block text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full mb-3"
+                        style={{ background: `${color}15`, border: `1px solid ${color}30`, color: `${color}cc` }}>{topic.subject}</span>
                       <div className="pt-3 border-t border-white/5">
                         {bestScore ? (
                           <>
-                            <p className="text-cream/50 text-[11px]">
-                              Best: <span className="font-bold text-cream/70">{bestScore.correct}/{bestScore.total}</span>
-                            </p>
+                            <p className="text-cream/50 text-[11px]">Best: <span className="font-bold text-cream/70">{bestScore.correct}/{bestScore.total}</span></p>
                             <div className="w-full h-1.5 bg-white/5 rounded-full mt-1.5 overflow-hidden">
-                              <div
-                                className="h-full rounded-full transition-all duration-500"
-                                style={{
-                                  width: `${subjectAccuracy}%`,
-                                  background: color,
-                                }}
-                              />
+                              <div className="h-full rounded-full transition-all duration-500" style={{ width: `${subjectAccuracy}%`, background: color }} />
                             </div>
                           </>
                         ) : (
@@ -607,9 +556,7 @@ export default function QuizPage() {
 
           {/* ── Quick Stats ── */}
           <div className="animate-slide-up" style={{ animationDelay: "0.5s" }}>
-            <h2 className="font-bebas text-lg text-cream tracking-wider mb-3">
-              QUICK STATS
-            </h2>
+            <h2 className="font-bebas text-lg text-cream tracking-wider mb-3">QUICK STATS</h2>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               {[
                 { label: "Quizzes", value: totalQuizzes.toString(), icon: "\u{1F4CA}", color: "#4A90D9" },
@@ -617,21 +564,11 @@ export default function QuizPage() {
                 { label: "Favorite", value: favoriteSubject, icon: "\u{2B50}", color: "#A855F7" },
                 { label: "Coins Earned", value: formatCoins(totalCoinsEarned), icon: "\u{1FA99}", color: "#FFD700" },
               ].map((stat) => (
-                <div
-                  key={stat.label}
-                  className="p-4 rounded-2xl border text-center"
-                  style={{
-                    background: `linear-gradient(135deg, ${stat.color}08 0%, #060c18 100%)`,
-                    borderColor: `${stat.color}20`,
-                  }}
-                >
+                <div key={stat.label} className="p-4 rounded-2xl border text-center"
+                  style={{ background: `linear-gradient(135deg, ${stat.color}08 0%, #060c18 100%)`, borderColor: `${stat.color}20` }}>
                   <span className="text-2xl block mb-1">{stat.icon}</span>
-                  <p className="font-bebas text-2xl leading-none" style={{ color: stat.color }}>
-                    {stat.value}
-                  </p>
-                  <p className="text-cream/40 text-[10px] uppercase tracking-wider mt-1">
-                    {stat.label}
-                  </p>
+                  <p className="font-bebas text-2xl leading-none" style={{ color: stat.color }}>{stat.value}</p>
+                  <p className="text-cream/40 text-[10px] uppercase tracking-wider mt-1">{stat.label}</p>
                 </div>
               ))}
             </div>
@@ -658,18 +595,6 @@ export default function QuizPage() {
     const q = questions[currentIndex];
     const subjectColor = SUBJECT_COLORS[subject];
 
-    // Convert DB question to component format
-    const questionForCard = {
-      id: q.id,
-      subject: q.subject as Subject,
-      question: q.question,
-      options: q.options,
-      correctAnswer: q.correct_answer,
-      difficulty: q.difficulty as "easy" | "medium" | "hard",
-      coinReward: blitzMode ? q.coin_reward * 2 : q.coin_reward,
-      explanation: q.explanation ?? undefined,
-    };
-
     return (
       <div className="min-h-screen pt-20">
         <div className="max-w-3xl mx-auto px-4 py-8">
@@ -691,7 +616,7 @@ export default function QuizPage() {
                       style={{
                         width: i === currentIndex ? "20px" : "8px",
                         background: i < currentIndex
-                          ? (quizState.answers[i]?.correct ? "#2ECC71" : "#E74C3C")
+                          ? (answers[i]?.correct ? "#2ECC71" : "#E74C3C")
                           : i === currentIndex ? subjectColor : "#4A90D920",
                       }} />
                   ))}
@@ -699,22 +624,24 @@ export default function QuizPage() {
               </div>
             </div>
             <div className="flex items-center gap-3 text-sm">
-              <span className="text-green-400 font-bold">{quizState.correct} &#x2713;</span>
-              <span className="text-red-400 font-bold">{quizState.wrong} &#x2717;</span>
+              <span className="text-green-400 font-bold">{correctCount} &#x2713;</span>
+              <span className="text-red-400 font-bold">{wrongCount} &#x2717;</span>
               <div className="flex items-center gap-1.5 bg-gold/10 border border-gold/30 rounded-full px-3 py-1">
                 <span>&#x1FA99;</span>
-                <span className="font-bebas text-lg text-gold">{quizState.totalCoins}</span>
+                <span className="font-bebas text-lg text-gold">{totalCoins}</span>
               </div>
             </div>
           </div>
 
           <QuizCard
             key={q.id}
-            question={questionForCard}
+            question={q}
             questionNumber={currentIndex + 1}
             totalQuestions={questions.length}
             timeLimit={timerLimit}
-            onAnswer={handleAnswer}
+            coinReward={currentCoinReward}
+            onSelect={handleSelect}
+            result={currentResult}
           />
         </div>
       </div>
@@ -740,10 +667,10 @@ export default function QuizPage() {
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
             {[
-              { icon: "\u2705", label: "Correct", value: quizState.correct, color: "text-green-400" },
-              { icon: "\u274C", label: "Wrong",   value: quizState.wrong,   color: "text-red-400" },
-              { icon: "\u{1FA99}", label: "Coins",   value: quizState.totalCoins, color: "text-gold" },
-              { icon: "\u26A1", label: "XP",      value: quizState.xpEarned, color: "text-electric" },
+              { icon: "\u2705", label: "Correct", value: correctCount, color: "text-green-400" },
+              { icon: "\u274C", label: "Wrong",   value: wrongCount,   color: "text-red-400" },
+              { icon: "\u{1FA99}", label: "Coins",   value: totalCoins, color: "text-gold" },
+              { icon: "\u26A1", label: "XP",      value: totalXp, color: "text-electric" },
             ].map((s) => (
               <div key={s.label} className="stat-box py-5">
                 <span className="text-2xl">{s.icon}</span>
@@ -756,7 +683,7 @@ export default function QuizPage() {
           <div className="card mb-6 text-left">
             <h3 className="font-bebas text-xl text-cream tracking-wider mb-3">ANSWER BREAKDOWN</h3>
             <div className="flex gap-1 mb-3">
-              {quizState.answers.map((a, i) => (
+              {answers.map((a, i) => (
                 <div key={i} className="flex-1 h-8 rounded flex items-center justify-center text-xs font-bold"
                   style={{ background: a.correct ? "#2ECC7130" : "#E74C3C30", border: `1px solid ${a.correct ? "#2ECC71" : "#E74C3C"}` }}>
                   {a.correct ? "\u2713" : "\u2717"}
