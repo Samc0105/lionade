@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { User, Subject, Question } from "@/types";
-import { QUIZ_QUESTIONS, SUBJECT_ICONS } from "@/lib/mockData";
+import { SUBJECT_ICONS } from "@/lib/mockData";
 import { createDuel, completeDuel, getQuestions } from "@/lib/db";
 import DuelInvite from "@/components/DuelInvite";
 import CoinAnimation from "@/components/CoinAnimation";
@@ -79,10 +79,26 @@ export default function DuelPage() {
     return () => clearInterval(timer);
   }, [phase, revealed, currentQ]);
 
-  const handleStartDuel = async (opp: User, sub: Subject) => {
+  const handleStartDuel = async (opp: User, sub: Subject): Promise<void> => {
     setOpponent(opp);
     setSubject(sub);
-    setQuestions(QUIZ_QUESTIONS[sub]);
+    // Fetch real questions from DB
+    try {
+      const dbQuestions = await getQuestions(sub);
+      const mapped = dbQuestions.map(q => ({
+        id: q.id,
+        subject: q.subject as Subject,
+        question: q.question,
+        options: q.options,
+        correctAnswer: q.correct_answer,
+        difficulty: (q.difficulty === "beginner" ? "easy" : q.difficulty === "intermediate" ? "medium" : "hard") as import("@/types").Difficulty,
+        coinReward: q.coin_reward,
+        explanation: q.explanation ?? undefined,
+      }));
+      setQuestions(mapped);
+    } catch {
+      return; // Can't start duel without questions
+    }
     setScore({ challenger: 0, opponent: 0 });
     setAnswers([]);
     setCurrentQ(0);

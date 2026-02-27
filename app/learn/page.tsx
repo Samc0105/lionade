@@ -6,7 +6,7 @@ import { useAuth } from "@/lib/auth";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import BackButton from "@/components/BackButton";
 import { getQuizHistory, getLeaderboard } from "@/lib/db";
-import { LEADERBOARD_ENTRIES, SUBJECT_ICONS, SUBJECT_COLORS, formatCoins } from "@/lib/mockData";
+import { SUBJECT_ICONS, SUBJECT_COLORS, formatCoins } from "@/lib/mockData";
 import type { Subject } from "@/types";
 
 /* ── Ninny Modal ────────────────────────────────────────────── */
@@ -262,37 +262,8 @@ export default function LearnPage() {
 
     // Fetch leaderboard
     getLeaderboard(3)
-      .then((lb) => {
-        if (lb.length > 0) {
-          setLeaderboard(lb);
-        } else {
-          // Fallback to mock data
-          setLeaderboard(
-            LEADERBOARD_ENTRIES.slice(0, 3).map((e) => ({
-              rank: e.rank,
-              user_id: e.user.id,
-              username: e.user.username,
-              avatar_url: null,
-              level: e.user.level,
-              streak: e.streak,
-              coins_this_week: e.coinsThisWeek,
-            }))
-          );
-        }
-      })
-      .catch(() => {
-        setLeaderboard(
-          LEADERBOARD_ENTRIES.slice(0, 3).map((e) => ({
-            rank: e.rank,
-            user_id: e.user.id,
-            username: e.user.username,
-            avatar_url: null,
-            level: e.user.level,
-            streak: e.streak,
-            coins_this_week: e.coinsThisWeek,
-          }))
-        );
-      });
+      .then((lb) => setLeaderboard(lb))
+      .catch(() => {});
   }, [user]);
 
   const handleCard = (card: (typeof CARDS)[number]) => {

@@ -2,10 +2,17 @@
 
 import { useState } from "react";
 import { User, Subject } from "@/types";
-import { MOCK_USERS } from "@/lib/mockData";
 import { SUBJECT_ICONS } from "@/lib/mockData";
 
 const SUBJECTS: Subject[] = ["Math", "Science", "Languages", "SAT/ACT", "Coding", "Finance", "Certifications"];
+
+const FAKE_OPPONENTS: User[] = [
+  { id: "bot-1", username: "StudyBot_Alex", displayName: "Alex", avatar: "https://api.dicebear.com/7.x/adventurer/svg?seed=alex", coins: 2400, streak: 7, maxStreak: 12, xp: 5200, level: 6, badges: [], subjectStats: [], joinedAt: "2024-01-01" },
+  { id: "bot-2", username: "QuizMaster_99", displayName: "Jordan", avatar: "https://api.dicebear.com/7.x/adventurer/svg?seed=jordan", coins: 3100, streak: 11, maxStreak: 15, xp: 7800, level: 8, badges: [], subjectStats: [], joinedAt: "2024-01-01" },
+  { id: "bot-3", username: "BrainiacSam", displayName: "Sam", avatar: "https://api.dicebear.com/7.x/adventurer/svg?seed=sam", coins: 1800, streak: 3, maxStreak: 9, xp: 3400, level: 4, badges: [], subjectStats: [], joinedAt: "2024-01-01" },
+  { id: "bot-4", username: "CoinHunter_X", displayName: "Taylor", avatar: "https://api.dicebear.com/7.x/adventurer/svg?seed=taylor", coins: 4200, streak: 14, maxStreak: 20, xp: 9100, level: 10, badges: [], subjectStats: [], joinedAt: "2024-01-01" },
+  { id: "bot-5", username: "NightOwl_Dev", displayName: "Riley", avatar: "https://api.dicebear.com/7.x/adventurer/svg?seed=riley", coins: 2700, streak: 5, maxStreak: 11, xp: 4600, level: 5, badges: [], subjectStats: [], joinedAt: "2024-01-01" },
+];
 
 interface DuelInviteProps {
   onStartDuel: (opponent: User, subject: Subject) => void;
@@ -16,7 +23,7 @@ export default function DuelInvite({ onStartDuel }: DuelInviteProps) {
   const [selectedSubject, setSelectedSubject] = useState<Subject | null>(null);
   const [step, setStep] = useState<"opponent" | "subject" | "confirm">("opponent");
 
-  const opponents = MOCK_USERS.slice(1, 6);
+  const opponents = FAKE_OPPONENTS;
 
   const handleStart = () => {
     if (selectedOpponent && selectedSubject) {
@@ -133,7 +140,7 @@ export default function DuelInvite({ onStartDuel }: DuelInviteProps) {
             {/* You */}
             <div className="flex flex-col items-center gap-2">
               <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-electric">
-                <img src={MOCK_USERS[0].avatar} alt="You" className="w-full h-full object-cover bg-navy-50" />
+                <img src="https://api.dicebear.com/7.x/adventurer/svg?seed=you" alt="You" className="w-full h-full object-cover bg-navy-50" />
               </div>
               <p className="text-sm font-bold text-electric">You</p>
             </div>

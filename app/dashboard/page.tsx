@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth";
-import { getRecentActivity, getSubjectStats, getQuizHistory } from "@/lib/db";
+import { getRecentActivity, getSubjectStats, getQuizHistory, getDailyProgress } from "@/lib/db";
 import {
   getLevelProgress,
   formatCoins,
@@ -22,13 +22,6 @@ function ActivityIcon(type: string) {
   return map[type] ?? "\u{1FA99}";
 }
 
-const MOCK_SUBJECTS = [
-  { subject: "Math", questionsAnswered: 120, correctAnswers: 96, coinsEarned: 2880 },
-  { subject: "Science", questionsAnswered: 85, correctAnswers: 68, coinsEarned: 1700 },
-  { subject: "Coding", questionsAnswered: 60, correctAnswers: 51, coinsEarned: 1530 },
-  { subject: "Finance", questionsAnswered: 45, correctAnswers: 38, coinsEarned: 1140 },
-  { subject: "Languages", questionsAnswered: 30, correctAnswers: 21, coinsEarned: 630 },
-];
 
 function getGreeting(): string {
   const h = new Date().getHours();
@@ -83,7 +76,7 @@ export default function DashboardPage() {
     { id: string; subject: string; total_questions: number; correct_answers: number; coins_earned: number; completed_at: string }[]
   >([]);
   const [, setLoadingData] = useState(true);
-  const [dailyDone] = useState(false);
+  const [dailyProgress, setDailyProgress] = useState({ questions_answered: 0, coins_earned: 0 });
   const [xpMounted, setXpMounted] = useState(false);
 
   useEffect(() => {
@@ -92,10 +85,12 @@ export default function DashboardPage() {
       getRecentActivity(user.id, 5).catch(() => []),
       getSubjectStats(user.id).catch(() => []),
       getQuizHistory(user.id, 5).catch(() => []),
-    ]).then(([act, stats, history]) => {
+      getDailyProgress(user.id).catch(() => ({ questions_answered: 0, coins_earned: 0 })),
+    ]).then(([act, stats, history, daily]) => {
       setActivity(act);
       setSubjectStats(stats);
       setQuizHistory(history);
+      setDailyProgress(daily);
       setLoadingData(false);
     });
     refreshUser();
@@ -113,7 +108,8 @@ export default function DashboardPage() {
   const todayCoins = activity
     .filter((a) => new Date(a.created_at).toDateString() === new Date().toDateString())
     .reduce((sum, a) => sum + (a.amount > 0 ? a.amount : 0), 0);
-  const displaySubjects = subjectStats.length > 0 ? subjectStats : MOCK_SUBJECTS;
+  const displaySubjects = subjectStats;
+  const dailyDone = dailyProgress.questions_answered > 0;
   const today = new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
 
   const cardShapes = [
