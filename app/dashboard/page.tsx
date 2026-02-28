@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth";
-import { getSubjectStats, getQuizHistory, getDailyProgress } from "@/lib/db";
+import { getSubjectStats, getQuizHistory, getDailyProgress, getUserAchievements, getBestScores, getLeaderboard } from "@/lib/db";
 import {
   getLevelProgress,
   formatCoins,
@@ -78,6 +78,9 @@ export default function DashboardPage() {
   const [, setLoadingData] = useState(true);
   const [dailyProgress, setDailyProgress] = useState({ questions_answered: 0, coins_earned: 0 });
   const [xpMounted, setXpMounted] = useState(false);
+  const [achievements, setAchievements] = useState<{ achievement_key: string; unlocked_at: string }[]>([]);
+  const [bestScores, setBestScores] = useState<Record<string, { best: number; total: number }>>({});
+  const [leaderboard, setLeaderboard] = useState<{ rank: number; user_id: string; username: string; coins_this_week: number }[]>([]);
 
   useEffect(() => {
     if (!user) return;
@@ -85,13 +88,20 @@ export default function DashboardPage() {
       getSubjectStats(user.id).catch(() => []),
       getQuizHistory(user.id, 5).catch(() => []),
       getDailyProgress(user.id).catch(() => ({ questions_answered: 0, coins_earned: 0 })),
-    ]).then(([stats, history, daily]) => {
+      getUserAchievements(user.id).catch(() => []),
+      getBestScores(user.id).catch(() => ({})),
+      getLeaderboard(5).catch(() => []),
+    ]).then(([stats, history, daily, achs, bests, lb]) => {
       console.log("[Dashboard] subjectStats:", stats);
       console.log("[Dashboard] recentQuizzes:", history);
       console.log("[Dashboard] dailyProgress:", daily);
+      console.log("[Dashboard] achievements:", achs);
       setSubjectStats(stats);
       setRecentQuizzes(history);
       setDailyProgress(daily);
+      setAchievements(achs);
+      setBestScores(bests);
+      setLeaderboard(lb);
       setLoadingData(false);
     });
     refreshUser();
@@ -405,6 +415,32 @@ export default function DashboardPage() {
                     </Link>
                   </div>
                 )}
+              </div>
+
+              {/* Achievements */}
+              <div className="animate-slide-up" style={{ animationDelay: "0.24s" }}>
+                <h2 className="font-bebas text-lg text-cream tracking-wider mb-3">ACHIEVEMENTS <span className="text-cream/25 text-xs font-mono">{achievements.length}/8</span></h2>
+                <div className="grid grid-cols-4 gap-2">
+                  {[
+                    { key: "first_quiz", emoji: "\u{1F680}", name: "First Steps" },
+                    { key: "perfect_score", emoji: "\u{1F4AF}", name: "Perfectionist" },
+                    { key: "streak_3", emoji: "\u{1F525}", name: "On Fire" },
+                    { key: "streak_7", emoji: "\u{1F4AA}", name: "Dedicated" },
+                    { key: "coins_100", emoji: "\u{1FA99}", name: "Coin Collector" },
+                    { key: "coins_500", emoji: "\u{1F4B0}", name: "Big Saver" },
+                    { key: "quizzes_10", emoji: "\u{1F3C6}", name: "Quiz Master" },
+                    { key: "quizzes_50", emoji: "\u{1F393}", name: "Scholar" },
+                  ].map((ach) => {
+                    const unlocked = achievements.some(a => a.achievement_key === ach.key);
+                    return (
+                      <div key={ach.key} className="flex flex-col items-center p-2 rounded-xl transition-all duration-200"
+                        style={{ background: unlocked ? "rgba(255,215,0,0.06)" : "rgba(255,255,255,0.02)", border: unlocked ? "1px solid rgba(255,215,0,0.15)" : "1px solid rgba(255,255,255,0.04)", boxShadow: unlocked ? "0 0 12px rgba(255,215,0,0.1)" : "none" }}>
+                        <span className={`text-lg ${unlocked ? "" : "grayscale opacity-30"}`}>{unlocked ? ach.emoji : "\u{1F512}"}</span>
+                        <span className={`text-[8px] mt-1 text-center leading-tight ${unlocked ? "text-cream/60" : "text-cream/20"}`}>{ach.name}</span>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
 
               {/* Ninny's Notes */}

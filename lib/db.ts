@@ -476,6 +476,44 @@ export async function getDailyProgress(userId: string): Promise<{
   return data ?? { questions_answered: 0, coins_earned: 0 };
 }
 
+// ── Achievements ──────────────────────────────────────────────
+
+export async function getUserAchievements(userId: string): Promise<{ achievement_key: string; unlocked_at: string }[]> {
+  const { data, error } = await supabase
+    .from("achievements")
+    .select("achievement_key, unlocked_at")
+    .eq("user_id", userId)
+    .order("unlocked_at", { ascending: false });
+
+  if (error) {
+    console.warn("[getUserAchievements] Error:", error.message);
+    return [];
+  }
+  return data ?? [];
+}
+
+// ── Best Scores Per Subject ───────────────────────────────────
+
+export async function getBestScores(userId: string): Promise<Record<string, { best: number; total: number }>> {
+  const { data, error } = await supabase
+    .from("quiz_sessions")
+    .select("subject, correct_answers, total_questions")
+    .eq("user_id", userId);
+
+  if (error) {
+    console.warn("[getBestScores] Error:", error.message);
+    return {};
+  }
+
+  const best: Record<string, { best: number; total: number }> = {};
+  for (const row of data ?? []) {
+    if (!best[row.subject] || row.correct_answers > best[row.subject].best) {
+      best[row.subject] = { best: row.correct_answers, total: row.total_questions };
+    }
+  }
+  return best;
+}
+
 // ── Increment helper (server-side safe) ───────────────────────
 
 export async function incrementCoins(userId: string, amount: number) {
