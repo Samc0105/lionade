@@ -476,6 +476,56 @@ export async function getDailyProgress(userId: string): Promise<{
   return data ?? { questions_answered: 0, coins_earned: 0 };
 }
 
+// ── Recent Topics (for Continue section) ──────────────────────
+
+export async function getRecentTopics(userId: string, limit = 8): Promise<{
+  topic: string;
+  subject: string;
+  correct_answers: number;
+  total_questions: number;
+  completed_at: string;
+}[]> {
+  // Get recent sessions with their questions' topics
+  const { data: sessions, error } = await supabase
+    .from("quiz_sessions")
+    .select("id, subject, correct_answers, total_questions, completed_at")
+    .eq("user_id", userId)
+    .order("completed_at", { ascending: false })
+    .limit(20);
+
+  if (error || !sessions?.length) return [];
+
+  // For each session, get the topic from the first answered question
+  const results: { topic: string; subject: string; correct_answers: number; total_questions: number; completed_at: string }[] = [];
+  const seenTopics = new Set<string>();
+
+  for (const session of sessions) {
+    if (results.length >= limit) break;
+
+    const { data: answers } = await supabase
+      .from("user_answers")
+      .select("questions(topic)")
+      .eq("session_id", session.id)
+      .limit(1);
+
+    const topic = (answers?.[0]?.questions as unknown as { topic: string } | null)?.topic ?? null;
+    const label = topic || session.subject;
+
+    if (seenTopics.has(label)) continue;
+    seenTopics.add(label);
+
+    results.push({
+      topic: label,
+      subject: session.subject,
+      correct_answers: session.correct_answers,
+      total_questions: session.total_questions,
+      completed_at: session.completed_at,
+    });
+  }
+
+  return results;
+}
+
 // ── Achievements ──────────────────────────────────────────────
 
 export async function getUserAchievements(userId: string): Promise<{ achievement_key: string; unlocked_at: string }[]> {

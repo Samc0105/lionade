@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth";
-import { getSubjectStats, getQuizHistory, getDailyProgress, getUserAchievements, getBestScores, getLeaderboard } from "@/lib/db";
+import { getSubjectStats, getQuizHistory, getDailyProgress, getUserAchievements, getBestScores, getLeaderboard, getRecentTopics } from "@/lib/db";
 import {
   getLevelProgress,
   formatCoins,
@@ -31,18 +31,6 @@ function getGreeting(): string {
   if (h < 12) return "Let\u2019s build momentum.";
   if (h < 18) return "Keep the streak alive.";
   return "One more win before midnight.";
-}
-
-/* ── Infinite Scroll Carousel ── */
-function InfiniteCarousel({ children }: { children: React.ReactNode[] }) {
-  return (
-    <div className="overflow-hidden -mx-4 px-4 sm:mx-0 sm:px-0">
-      <div className="infinite-scroll-track flex gap-3" style={{ width: "max-content" }}>
-        {children}
-        {children}
-      </div>
-    </div>
-  );
 }
 
 /* ── Circular stat widget ── */
@@ -81,6 +69,7 @@ export default function DashboardPage() {
   const [achievements, setAchievements] = useState<{ achievement_key: string; unlocked_at: string }[]>([]);
   const [bestScores, setBestScores] = useState<Record<string, { best: number; total: number }>>({});
   const [leaderboard, setLeaderboard] = useState<{ rank: number; user_id: string; username: string; coins_this_week: number }[]>([]);
+  const [recentTopics, setRecentTopics] = useState<{ topic: string; subject: string; correct_answers: number; total_questions: number; completed_at: string }[]>([]);
 
   useEffect(() => {
     if (!user) return;
@@ -91,17 +80,20 @@ export default function DashboardPage() {
       getUserAchievements(user.id).catch(() => []),
       getBestScores(user.id).catch(() => ({})),
       getLeaderboard(5).catch(() => []),
-    ]).then(([stats, history, daily, achs, bests, lb]) => {
+      getRecentTopics(user.id, 6).catch(() => []),
+    ]).then(([stats, history, daily, achs, bests, lb, topics]) => {
       console.log("[Dashboard] subjectStats:", stats);
       console.log("[Dashboard] recentQuizzes:", history);
       console.log("[Dashboard] dailyProgress:", daily);
       console.log("[Dashboard] achievements:", achs);
+      console.log("[Dashboard] recentTopics:", topics);
       setSubjectStats(stats);
       setRecentQuizzes(history);
       setDailyProgress(daily);
       setAchievements(achs);
       setBestScores(bests);
       setLeaderboard(lb);
+      setRecentTopics(topics);
       setLoadingData(false);
     });
     refreshUser();
@@ -143,16 +135,6 @@ export default function DashboardPage() {
         }
         .animate-slide-up {
           animation: slide-up 0.5s ease both;
-        }
-        @keyframes infiniteScroll {
-          0% { transform: translateX(0); }
-          100% { transform: translateX(-50%); }
-        }
-        .infinite-scroll-track {
-          animation: infiniteScroll 25s linear infinite;
-        }
-        .infinite-scroll-track:hover {
-          animation-play-state: paused;
         }
       `}</style>
 
@@ -279,40 +261,42 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* ═══ 5) Continue — Infinite Rotating Carousel ═══ */}
+          {/* ═══ 5) Continue ═══ */}
           <div className="mb-8 animate-slide-up" style={{ animationDelay: "0.15s" }}>
             <h2 className="font-bebas text-lg text-cream tracking-wider mb-3">CONTINUE</h2>
-            <InfiniteCarousel>
-              {[
-                ...(!dailyDone ? [{
-                  subject: "Daily Quiz", icon: "\uD83E\uDDE0", color: "#4A90D9",
-                  accuracy: null as number | null,
-                }] : []),
-                ...displaySubjects.slice(0, 5).map((stat) => ({
-                  subject: stat.subject,
-                  icon: SUBJECT_ICONS[stat.subject as keyof typeof SUBJECT_ICONS] ?? "\u{1F4DA}",
-                  color: SUBJECT_COLORS[stat.subject as keyof typeof SUBJECT_COLORS] ?? "#4A90D9",
-                  accuracy: stat.questionsAnswered > 0 ? Math.round((stat.correctAnswers / stat.questionsAnswered) * 100) : 0,
-                })),
-              ].map((item, i) => (
-                <div key={`${item.subject}-${i}`} className={`flex-shrink-0 w-36 p-3.5 select-none ${
-                  i % 3 === 0 ? "rounded-[20px]" : i % 3 === 1 ? "rounded-tl-[28px] rounded-br-[28px] rounded-tr-[6px] rounded-bl-[6px]" : "rounded-full"
-                }`} style={{ background: `linear-gradient(135deg, ${item.color}12 0%, ${item.color}06 100%)`, border: `1px solid ${item.color}18` }}>
-                  <span className="text-2xl block">{item.icon}</span>
-                  <p className="font-semibold text-cream text-xs mt-2">{item.subject}</p>
-                  {item.accuracy !== null ? (
-                    <div className="flex items-center gap-1.5 mt-1.5">
-                      <div className="flex-1 h-1 bg-white/[0.06] rounded-full overflow-hidden">
-                        <div className="h-full rounded-full" style={{ width: `${item.accuracy}%`, background: item.color }} />
-                      </div>
-                      <span className="text-cream/35 text-[9px]">{item.accuracy}%</span>
-                    </div>
-                  ) : (
+            <div className="flex flex-wrap gap-3">
+              {!dailyDone && (
+                <Link href="/quiz">
+                  <div className="w-36 p-3.5 rounded-[20px] transition-all duration-200 hover:scale-[1.03]"
+                    style={{ background: "linear-gradient(135deg, #4A90D912 0%, #4A90D906 100%)", border: "1px solid #4A90D918" }}>
+                    <span className="text-2xl block">{"\u{1F9E0}"}</span>
+                    <p className="font-semibold text-cream text-xs mt-2">Daily Quiz</p>
                     <p className="text-cream/25 text-[10px] mt-0.5">10 questions</p>
-                  )}
-                </div>
-              ))}
-            </InfiniteCarousel>
+                  </div>
+                </Link>
+              )}
+              {recentTopics.slice(0, 5).map((item, i) => {
+                const color = SUBJECT_COLORS[item.subject as keyof typeof SUBJECT_COLORS] ?? "#4A90D9";
+                const icon = SUBJECT_ICONS[item.subject as keyof typeof SUBJECT_ICONS] ?? "\u{1F4DA}";
+                const accuracy = item.total_questions > 0 ? Math.round((item.correct_answers / item.total_questions) * 100) : 0;
+                const shapes = ["rounded-[20px]", "rounded-tl-[28px] rounded-br-[28px] rounded-tr-[6px] rounded-bl-[6px]", "rounded-[20px]"];
+                return (
+                  <Link key={item.topic} href="/quiz">
+                    <div className={`w-36 p-3.5 transition-all duration-200 hover:scale-[1.03] ${shapes[i % shapes.length]}`}
+                      style={{ background: `linear-gradient(135deg, ${color}12 0%, ${color}06 100%)`, border: `1px solid ${color}18` }}>
+                      <span className="text-2xl block">{icon}</span>
+                      <p className="font-semibold text-cream text-xs mt-2">{item.topic}</p>
+                      <div className="flex items-center gap-1.5 mt-1.5">
+                        <div className="flex-1 h-1 bg-white/[0.06] rounded-full overflow-hidden">
+                          <div className="h-full rounded-full" style={{ width: `${accuracy}%`, background: color }} />
+                        </div>
+                        <span className="text-cream/35 text-[9px]">{accuracy}%</span>
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
           </div>
 
           {/* ═══ 6) Two-Column Lower ═══ */}
