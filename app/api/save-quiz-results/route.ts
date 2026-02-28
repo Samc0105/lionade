@@ -182,7 +182,46 @@ export async function POST(req: NextRequest) {
       else console.log("[save-quiz-results] Step 5 streak:", currentStreak, "→", newStreak);
     }
 
-    // 6. Return final profile
+    // 6. Achievement checking
+    console.log("[save-quiz-results] Step 6: Checking achievements...");
+    try {
+      const [{ count: quizCount }, { data: updatedProfile }] = await Promise.all([
+        supabaseAdmin.from("quiz_sessions").select("id", { count: "exact", head: true }).eq("user_id", userId),
+        supabaseAdmin.from("profiles").select("coins, streak").eq("id", userId).single(),
+      ]);
+
+      const totalQuizzes = quizCount ?? 0;
+      const currentCoins = updatedProfile?.coins ?? 0;
+      const currentStreak = updatedProfile?.streak ?? 0;
+
+      const achievementsToCheck = [
+        { key: "first_quiz", condition: totalQuizzes >= 1 },
+        { key: "perfect_score", condition: correctAnswers === totalQuestions && totalQuestions === 10 },
+        { key: "streak_3", condition: currentStreak >= 3 },
+        { key: "streak_7", condition: currentStreak >= 7 },
+        { key: "coins_100", condition: currentCoins >= 100 },
+        { key: "coins_500", condition: currentCoins >= 500 },
+        { key: "quizzes_10", condition: totalQuizzes >= 10 },
+        { key: "quizzes_50", condition: totalQuizzes >= 50 },
+      ];
+
+      const toAward = achievementsToCheck
+        .filter(a => a.condition)
+        .map(a => ({ user_id: userId, achievement_key: a.key, unlocked_at: new Date().toISOString() }));
+
+      if (toAward.length > 0) {
+        const { error: achErr } = await supabaseAdmin
+          .from("achievements")
+          .upsert(toAward, { onConflict: "user_id,achievement_key", ignoreDuplicates: true });
+        if (achErr) console.warn("[save-quiz-results] Step 6 achievements WARN:", achErr.message);
+        else console.log("[save-quiz-results] Step 6 OK — checked", toAward.length, "achievements");
+      }
+    } catch (achException) {
+      // Non-fatal — achievements table might not exist yet
+      console.warn("[save-quiz-results] Step 6 WARN (non-fatal):", achException);
+    }
+
+    // 7. Return final profile
     const { data: finalProfile } = await supabaseAdmin
       .from("profiles")
       .select("coins, xp, streak, level")
