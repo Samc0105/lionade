@@ -87,6 +87,9 @@ export default function DashboardPage() {
       getQuizHistory(user.id, 5).catch(() => []),
       getDailyProgress(user.id).catch(() => ({ questions_answered: 0, coins_earned: 0 })),
     ]).then(([act, stats, history, daily]) => {
+      console.log("[Dashboard] activity:", act);
+      console.log("[Dashboard] subjectStats:", stats);
+      console.log("[Dashboard] dailyProgress:", daily);
       setActivity(act);
       setSubjectStats(stats);
       setQuizHistory(history);
@@ -103,6 +106,7 @@ export default function DashboardPage() {
 
   if (!user) return null;
 
+  console.log("[Dashboard] user:", { coins: user.coins, xp: user.xp, streak: user.streak, level: user.level });
   const { level, progress, xpToNext } = getLevelProgress(user.xp);
   const currentXp = user.xp % XP_PER_LEVEL;
   const todayCoins = activity

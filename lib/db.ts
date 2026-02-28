@@ -108,13 +108,18 @@ export async function saveQuizSession(session: {
   xp_earned: number;
   streak_bonus: boolean;
 }): Promise<{ id: string; user_id: string; subject: string; total_questions: number; correct_answers: number; coins_earned: number; xp_earned: number; streak_bonus: boolean; completed_at: string }> {
+  console.log("[saveQuizSession] Inserting session:", session);
   const { data: rawSession, error } = await supabase
     .from("quiz_sessions")
     .insert(session)
     .select()
     .single();
-  if (error) throw error;
+  if (error) {
+    console.error("[saveQuizSession] Insert error:", error.message);
+    throw error;
+  }
   const data = rawSession as unknown as { id: string; user_id: string; subject: string; total_questions: number; correct_answers: number; coins_earned: number; xp_earned: number; streak_bonus: boolean; completed_at: string };
+  console.log("[saveQuizSession] Session saved:", data.id);
 
   // Award coins and XP to profile manually
   await incrementCoins(session.user_id, session.coins_earned);
@@ -122,13 +127,14 @@ export async function saveQuizSession(session: {
 
   // Log coin transaction
   if (session.coins_earned > 0) {
-    await supabase.from("coin_transactions").insert({
+    const { error: txnError } = await supabase.from("coin_transactions").insert({
       user_id: session.user_id,
       amount: session.coins_earned,
       type: "quiz_reward",
       reference_id: data.id,
       description: `${session.subject} quiz — ${session.correct_answers}/${session.total_questions} correct`,
     });
+    if (txnError) console.error("[saveQuizSession] coin_transactions error:", txnError.message);
   }
 
   // Update streak / daily activity
@@ -454,31 +460,47 @@ export async function getDailyProgress(userId: string): Promise<{
 // ── Increment helper (server-side safe) ───────────────────────
 
 export async function incrementCoins(userId: string, amount: number) {
-  const { data } = await supabase
+  const { data, error: fetchErr } = await supabase
     .from("profiles")
     .select("coins")
     .eq("id", userId)
     .single();
 
+  if (fetchErr) {
+    console.error("[incrementCoins] Fetch error:", fetchErr.message);
+    return;
+  }
+
   if (data) {
-    await supabase
+    const newCoins = (data.coins ?? 0) + amount;
+    const { error: updateErr } = await supabase
       .from("profiles")
-      .update({ coins: data.coins + amount })
+      .update({ coins: newCoins })
       .eq("id", userId);
+    if (updateErr) console.error("[incrementCoins] Update error:", updateErr.message);
+    else console.log("[incrementCoins]", data.coins, "→", newCoins);
   }
 }
 
 export async function incrementXP(userId: string, amount: number) {
-  const { data } = await supabase
+  const { data, error: fetchErr } = await supabase
     .from("profiles")
     .select("xp")
     .eq("id", userId)
     .single();
 
+  if (fetchErr) {
+    console.error("[incrementXP] Fetch error:", fetchErr.message);
+    return;
+  }
+
   if (data) {
-    await supabase
+    const newXp = (data.xp ?? 0) + amount;
+    const { error: updateErr } = await supabase
       .from("profiles")
-      .update({ xp: data.xp + amount })
+      .update({ xp: newXp })
       .eq("id", userId);
+    if (updateErr) console.error("[incrementXP] Update error:", updateErr.message);
+    else console.log("[incrementXP]", data.xp, "→", newXp);
   }
 }

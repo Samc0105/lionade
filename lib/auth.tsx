@@ -42,17 +42,22 @@ function buildAuthUser(profile: {
   username: string;
   display_name: string | null;
   avatar_url: string | null;
+  coins?: number;
+  streak?: number;
+  xp?: number;
 }, email: string): AuthUser {
+  const xp = profile.xp ?? 0;
+  const level = Math.floor(xp / 1000) + 1;
   return {
     id: profile.id,
     email,
     username: profile.username,
     displayName: profile.display_name ?? profile.username,
     avatar: profile.avatar_url ?? `https://api.dicebear.com/7.x/avataaars/svg?seed=${profile.username}&backgroundColor=4A90D9`,
-    coins: 0,
-    streak: 0,
-    xp: 0,
-    level: 1,
+    coins: profile.coins ?? 0,
+    streak: profile.streak ?? 0,
+    xp,
+    level,
   };
 }
 
@@ -95,7 +100,7 @@ async function syncProfile(userId: string, email: string, metadata: Record<strin
   const upsertPromise = supabase
     .from("profiles")
     .upsert(upsertData, { onConflict: "id", ignoreDuplicates: false })
-    .select("id, username, display_name, avatar_url")
+    .select("id, username, display_name, avatar_url, coins, streak, xp")
     .single();
 
   const timeoutPromise = new Promise<null>((resolve) =>
