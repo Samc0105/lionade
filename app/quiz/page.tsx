@@ -3,7 +3,7 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { Subject } from "@/types";
 import { SUBJECT_ICONS, SUBJECT_COLORS, formatCoins } from "@/lib/mockData";
-import { getQuizQuestions, checkAnswer, saveQuizSession, saveUserAnswer, getSubjectStats, getQuizHistory } from "@/lib/db";
+import { getQuizQuestions, checkAnswer, getSubjectStats, getQuizHistory } from "@/lib/db";
 import QuizCard from "@/components/QuizCard";
 import { useAuth } from "@/lib/auth";
 import { useRouter } from "next/navigation";
@@ -276,34 +276,40 @@ export default function QuizPage() {
     setTotalCoins(coins);
     setTotalXp(xp);
 
-    console.log("[Quiz] finishQuiz called — user:", user!.id, "coins:", coins, "xp:", xp, "correct:", correctCount);
+    console.log("[Quiz] finishQuiz — user:", user!.id, "coins:", coins, "xp:", xp, "correct:", correctCount, "/", questions.length);
+
     try {
-      const session = await saveQuizSession({
-        user_id: user!.id,
-        subject: subject!,
-        total_questions: questions.length,
-        correct_answers: correctCount,
-        coins_earned: coins,
-        xp_earned: xp,
-        streak_bonus: false,
+      const res = await fetch("/api/save-quiz-results", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: user!.id,
+          subject: subject!,
+          totalQuestions: questions.length,
+          correctAnswers: correctCount,
+          coinsEarned: coins,
+          xpEarned: xp,
+          answers: finalAnswers.map((a) => ({
+            questionId: a.questionId,
+            selected: a.selected,
+            isCorrect: a.correct,
+            timeLeft: a.timeLeft,
+          })),
+        }),
       });
-      console.log("[Quiz] saveQuizSession succeeded, session id:", session.id);
 
-      await Promise.all(finalAnswers.map((a) =>
-        saveUserAnswer({
-          session_id: session.id,
-          question_id: a.questionId,
-          selected_answer: a.selected,
-          is_correct: a.correct,
-          time_left: a.timeLeft,
-        }).catch((err) => console.error("[Quiz] saveUserAnswer failed:", err))
-      ));
+      const data = await res.json();
+      console.log("[Quiz] API response:", data);
 
-      console.log("[Quiz] Calling refreshUser...");
-      await refreshUser();
-      console.log("[Quiz] refreshUser completed");
+      if (data.success) {
+        console.log("[Quiz] Saved! Refreshing user...");
+        await refreshUser();
+        console.log("[Quiz] User refreshed — coins:", user?.coins);
+      } else {
+        console.error("[Quiz] API error:", data.error);
+      }
     } catch (err) {
-      console.error("[Quiz] FAILED to save session:", err);
+      console.error("[Quiz] Failed to call save-quiz-results API:", err);
     }
 
     setPhase("results");
