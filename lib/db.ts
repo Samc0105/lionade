@@ -569,6 +569,85 @@ export async function getBestScores(userId: string): Promise<Record<string, { be
   return best;
 }
 
+// ── Bounties ──────────────────────────────────────────────────
+
+export interface Bounty {
+  id: string;
+  title: string;
+  description: string;
+  type: "daily" | "weekly";
+  requirement_type: string;
+  requirement_value: number;
+  requirement_subject: string | null;
+  requirement_difficulty: string | null;
+  coin_reward: number;
+  xp_reward: number;
+}
+
+export interface UserBounty {
+  bounty_id: string;
+  progress: number;
+  completed: boolean;
+  claimed: boolean;
+}
+
+export async function getActiveBounties(): Promise<Bounty[]> {
+  const { data, error } = await supabase
+    .from("bounties")
+    .select("id, title, description, type, requirement_type, requirement_value, requirement_subject, requirement_difficulty, coin_reward, xp_reward")
+    .eq("active", true);
+  if (error) { console.warn("[getActiveBounties]", error.message); return []; }
+  return (data ?? []) as Bounty[];
+}
+
+export async function getUserBountyProgress(userId: string): Promise<UserBounty[]> {
+  const { data, error } = await supabase
+    .from("user_bounties")
+    .select("bounty_id, progress, completed, claimed")
+    .eq("user_id", userId);
+  if (error) { console.warn("[getUserBountyProgress]", error.message); return []; }
+  return (data ?? []) as UserBounty[];
+}
+
+// ── Daily Bets ────────────────────────────────────────────────
+
+export interface ActiveBet {
+  id: string;
+  coins_staked: number;
+  target_score: number;
+  target_total: number;
+  subject: string | null;
+  won: boolean | null;
+  coins_won: number;
+  resolved_at: string | null;
+}
+
+export async function getActiveBet(userId: string): Promise<ActiveBet | null> {
+  const { data, error } = await supabase
+    .from("daily_bets")
+    .select("id, coins_staked, target_score, target_total, subject, won, coins_won, resolved_at")
+    .eq("user_id", userId)
+    .is("resolved_at", null)
+    .order("placed_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (error) { console.warn("[getActiveBet]", error.message); return null; }
+  return data as ActiveBet | null;
+}
+
+export async function getLastResolvedBet(userId: string): Promise<ActiveBet | null> {
+  const { data, error } = await supabase
+    .from("daily_bets")
+    .select("id, coins_staked, target_score, target_total, subject, won, coins_won, resolved_at")
+    .eq("user_id", userId)
+    .not("resolved_at", "is", null)
+    .order("resolved_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (error) return null;
+  return data as ActiveBet | null;
+}
+
 // ── Increment helper (server-side safe) ───────────────────────
 
 export async function incrementCoins(userId: string, amount: number) {

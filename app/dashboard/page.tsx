@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth";
-import { getSubjectStats, getQuizHistory, getDailyProgress, getUserAchievements, getBestScores, getLeaderboard, getRecentTopics } from "@/lib/db";
+import { getSubjectStats, getQuizHistory, getDailyProgress, getUserAchievements, getBestScores, getLeaderboard, getRecentTopics, getActiveBounties, getUserBountyProgress, getActiveBet, getLastResolvedBet } from "@/lib/db";
+import type { Bounty, UserBounty, ActiveBet } from "@/lib/db";
 import {
   getLevelProgress,
   formatCoins,
@@ -70,6 +71,13 @@ export default function DashboardPage() {
   const [bestScores, setBestScores] = useState<Record<string, { best: number; total: number }>>({});
   const [leaderboard, setLeaderboard] = useState<{ rank: number; user_id: string; username: string; coins_this_week: number }[]>([]);
   const [recentTopics, setRecentTopics] = useState<{ topic: string; subject: string; correct_answers: number; total_questions: number; completed_at: string }[]>([]);
+  const [bounties, setBounties] = useState<Bounty[]>([]);
+  const [userBounties, setUserBounties] = useState<UserBounty[]>([]);
+  const [activeBet, setActiveBet] = useState<ActiveBet | null>(null);
+  const [lastBet, setLastBet] = useState<ActiveBet | null>(null);
+  const [betStake, setBetStake] = useState(10);
+  const [betTarget, setBetTarget] = useState(8);
+  const [placingBet, setPlacingBet] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -81,12 +89,11 @@ export default function DashboardPage() {
       getBestScores(user.id).catch(() => ({})),
       getLeaderboard(5).catch(() => []),
       getRecentTopics(user.id, 6).catch(() => []),
-    ]).then(([stats, history, daily, achs, bests, lb, topics]) => {
-      console.log("[Dashboard] subjectStats:", stats);
-      console.log("[Dashboard] recentQuizzes:", history);
-      console.log("[Dashboard] dailyProgress:", daily);
-      console.log("[Dashboard] achievements:", achs);
-      console.log("[Dashboard] recentTopics:", topics);
+      getActiveBounties().catch(() => []),
+      getUserBountyProgress(user.id).catch(() => []),
+      getActiveBet(user.id).catch(() => null),
+      getLastResolvedBet(user.id).catch(() => null),
+    ]).then(([stats, history, daily, achs, bests, lb, topics, bnts, ubProgress, abet, lbet]) => {
       setSubjectStats(stats);
       setRecentQuizzes(history);
       setDailyProgress(daily);
@@ -94,6 +101,10 @@ export default function DashboardPage() {
       setBestScores(bests);
       setLeaderboard(lb);
       setRecentTopics(topics);
+      setBounties(bnts);
+      setUserBounties(ubProgress);
+      setActiveBet(abet);
+      setLastBet(lbet);
       setLoadingData(false);
     });
     refreshUser();
@@ -105,6 +116,39 @@ export default function DashboardPage() {
   }, []);
 
   if (!user) return null;
+
+  const claimBounty = async (bountyId: string) => {
+    const res = await fetch("/api/claim-bounty", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId: user.id, bountyId }),
+    });
+    if (res.ok) {
+      setUserBounties(prev => prev.map(ub => ub.bounty_id === bountyId ? { ...ub, claimed: true } : ub));
+      await refreshUser();
+    }
+  };
+
+  const placeBet = async () => {
+    if (placingBet || user.coins < betStake) return;
+    setPlacingBet(true);
+    try {
+      const res = await fetch("/api/place-bet", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: user.id, coinsStaked: betStake, targetScore: betTarget }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setActiveBet(data.bet);
+        await refreshUser();
+      }
+    } finally {
+      setPlacingBet(false);
+    }
+  };
+
+  const BET_MULTIPLIERS: Record<number, number> = { 7: 1.5, 8: 2, 9: 3, 10: 5 };
 
   console.log("[Dashboard] user:", { coins: user.coins, xp: user.xp, streak: user.streak, level: user.level });
   const { level, progress, xpToNext } = getLevelProgress(user.xp);
@@ -287,6 +331,110 @@ export default function DashboardPage() {
                 );
               })}
             </div>
+          </div>
+
+          {/* ═══ 5b) Bounty Board ═══ */}
+          <div className="mb-8 animate-slide-up" style={{ animationDelay: "0.17s" }}>
+            <h2 className="font-bebas text-lg text-cream tracking-wider mb-3">BOUNTY BOARD</h2>
+
+            {/* Daily Bounties */}
+            {bounties.filter(b => b.type === "daily").length > 0 && (
+              <div className="mb-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-gold text-xs font-semibold">DAILY</span>
+                  <span className="text-cream/20 text-[10px]">Resets at midnight</span>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {bounties.filter(b => b.type === "daily").map((bounty) => {
+                    const ub = userBounties.find(u => u.bounty_id === bounty.id);
+                    const progress = ub?.progress ?? 0;
+                    const pct = Math.min((progress / bounty.requirement_value) * 100, 100);
+                    const completed = ub?.completed ?? false;
+                    const claimed = ub?.claimed ?? false;
+                    return (
+                      <div key={bounty.id} className="rounded-[20px] p-4 relative overflow-hidden transition-all duration-200 hover:scale-[1.02]"
+                        style={{ background: "linear-gradient(135deg, #0d1528 0%, #0a1020 100%)", border: completed && !claimed ? "1px solid rgba(255,215,0,0.3)" : "1px solid rgba(255,215,0,0.1)", boxShadow: completed && !claimed ? "0 0 16px rgba(255,215,0,0.1)" : "none" }}>
+                        <div className="absolute top-0 left-0 right-0 h-[2px]" style={{ background: "linear-gradient(90deg, #FFD700, transparent)" }} />
+                        <p className="font-semibold text-cream text-sm">{bounty.title}</p>
+                        <p className="text-cream/40 text-[11px] mt-0.5 leading-relaxed">{bounty.description}</p>
+                        <div className="flex items-center gap-3 mt-2">
+                          <span className="text-gold text-[10px] font-bold">+{bounty.coin_reward} &#x1FA99;</span>
+                          <span className="text-electric text-[10px] font-bold">+{bounty.xp_reward} XP</span>
+                        </div>
+                        <div className="mt-3">
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="text-cream/30 text-[10px]">{progress}/{bounty.requirement_value}</span>
+                            {claimed && <span className="text-gold text-[10px] font-bold">Claimed &#x2714;</span>}
+                          </div>
+                          <div className="w-full h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.06)" }}>
+                            <div className="h-full rounded-full transition-all duration-700" style={{ width: `${pct}%`, background: claimed ? "rgba(255,215,0,0.3)" : "linear-gradient(90deg, #FFD700, #FFA500)" }} />
+                          </div>
+                        </div>
+                        {completed && !claimed && (
+                          <button onClick={() => claimBounty(bounty.id)} className="mt-3 w-full py-2 rounded-full text-xs font-bold text-navy transition-all duration-200 active:scale-95"
+                            style={{ background: "linear-gradient(90deg, #FFD700, #FFA500)", boxShadow: "0 0 16px rgba(255,215,0,0.3)" }}>
+                            Claim Reward
+                          </button>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Weekly Bounties */}
+            {bounties.filter(b => b.type === "weekly").length > 0 && (
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-[#9B59B6] text-xs font-semibold">WEEKLY</span>
+                  <span className="text-cream/20 text-[10px]">Resets every Monday</span>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {bounties.filter(b => b.type === "weekly").map((bounty) => {
+                    const ub = userBounties.find(u => u.bounty_id === bounty.id);
+                    const progress = ub?.progress ?? 0;
+                    const pct = Math.min((progress / bounty.requirement_value) * 100, 100);
+                    const completed = ub?.completed ?? false;
+                    const claimed = ub?.claimed ?? false;
+                    return (
+                      <div key={bounty.id} className="rounded-[20px] p-4 relative overflow-hidden transition-all duration-200 hover:scale-[1.02]"
+                        style={{ background: "linear-gradient(135deg, #0d1528 0%, #0a1020 100%)", border: completed && !claimed ? "1px solid rgba(155,89,182,0.3)" : "1px solid rgba(155,89,182,0.1)", boxShadow: completed && !claimed ? "0 0 16px rgba(155,89,182,0.1)" : "none" }}>
+                        <div className="absolute top-0 left-0 right-0 h-[2px]" style={{ background: "linear-gradient(90deg, #9B59B6, transparent)" }} />
+                        <p className="font-semibold text-cream text-sm">{bounty.title}</p>
+                        <p className="text-cream/40 text-[11px] mt-0.5 leading-relaxed">{bounty.description}</p>
+                        <div className="flex items-center gap-3 mt-2">
+                          <span className="text-gold text-[10px] font-bold">+{bounty.coin_reward} &#x1FA99;</span>
+                          <span className="text-electric text-[10px] font-bold">+{bounty.xp_reward} XP</span>
+                        </div>
+                        <div className="mt-3">
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="text-cream/30 text-[10px]">{progress}/{bounty.requirement_value}</span>
+                            {claimed && <span className="text-[#9B59B6] text-[10px] font-bold">Claimed &#x2714;</span>}
+                          </div>
+                          <div className="w-full h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.06)" }}>
+                            <div className="h-full rounded-full transition-all duration-700" style={{ width: `${pct}%`, background: claimed ? "rgba(155,89,182,0.3)" : "linear-gradient(90deg, #9B59B6, #8E44AD)" }} />
+                          </div>
+                        </div>
+                        {completed && !claimed && (
+                          <button onClick={() => claimBounty(bounty.id)} className="mt-3 w-full py-2 rounded-full text-xs font-bold text-white transition-all duration-200 active:scale-95"
+                            style={{ background: "linear-gradient(90deg, #9B59B6, #8E44AD)", boxShadow: "0 0 16px rgba(155,89,182,0.3)" }}>
+                            Claim Reward
+                          </button>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {bounties.length === 0 && (
+              <div className="rounded-[20px] p-6 text-center" style={{ background: "linear-gradient(135deg, rgba(13,21,40,0.5), rgba(10,16,32,0.5))", border: "1px solid rgba(255,215,0,0.06)" }}>
+                <span className="text-3xl block mb-2">&#x1F3AF;</span>
+                <p className="text-cream/30 text-xs">No bounties available right now. Check back soon!</p>
+              </div>
+            )}
           </div>
 
           {/* ═══ 6) Two-Column Lower ═══ */}
