@@ -185,10 +185,28 @@ export default function DashboardPage() {
           {/* ═══ 2) Circular Stats Row ═══ */}
           <div className="flex justify-center sm:justify-start gap-6 sm:gap-8 mb-8 animate-slide-up" style={{ animationDelay: "0.05s" }}>
             <CircleStat icon="&#x1FA99;" value={formatCoins(user.coins)} label={`+${todayCoins} today`} color="#FFD700" />
-            <CircleStat icon="&#x1F525;" value={String(user.streak)} label="day streak" color="#E67E22" />
+            <div className="flex flex-col items-center gap-1.5 group">
+              <div className={`relative rounded-full flex items-center justify-center transition-transform duration-300 group-hover:scale-105 ${user.streak >= 1 ? "streak-fire-glow" : ""}`}
+                style={{ width: 90, height: 90, background: `linear-gradient(135deg, #E67E2215, #E67E2208)`, border: `1.5px solid #E67E2225`, boxShadow: user.streak >= 1 ? `0 0 ${12 + Math.min(user.streak, 10) * 3}px rgba(230,126,34,${0.15 + Math.min(user.streak, 10) * 0.04})` : `0 0 20px #E67E2208` }}>
+                <div className="text-center">
+                  <span className="text-sm block mb-0.5">{user.streak >= 1 ? "\u{1F525}" : "\u{1F525}"}</span>
+                  <span className="font-bebas text-lg leading-none" style={{ color: "#E67E22" }}>{String(user.streak)}</span>
+                </div>
+                <div className="absolute inset-0 rounded-full" style={{ animation: "orbit-stat 8s linear infinite" }}>
+                  <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full" style={{ background: "#E67E22", boxShadow: `0 0 6px #E67E22` }} />
+                </div>
+              </div>
+              <span className="text-cream/30 text-[9px] font-mono tracking-wider uppercase">day streak</span>
+            </div>
             <CircleStat icon="&#x26A1;" value={`Lv${level}`} label={`${xpToNext} xp left`} color="#4A90D9" />
             <CircleStat icon="&#x1F4DA;" value={String(displaySubjects.length)} label="subjects" color="#9B59B6" />
           </div>
+          {user.streak >= 3 && (
+            <div className="mb-6 animate-slide-up flex items-center gap-2 px-4 py-2.5 rounded-full w-fit mx-auto sm:mx-0" style={{ background: "linear-gradient(135deg, rgba(230,126,34,0.12), rgba(255,215,0,0.08))", border: "1px solid rgba(230,126,34,0.2)" }}>
+              <span className="text-base streak-fire-glow">{"\u{1F525}"}</span>
+              <span className="text-cream/80 text-xs font-semibold">You&apos;re on fire! {user.streak}-day streak</span>
+            </div>
+          )}
 
           {/* ═══ 3) XP Progress ═══ */}
           <div className="mb-8 animate-slide-up" style={{ animationDelay: "0.08s" }}>
