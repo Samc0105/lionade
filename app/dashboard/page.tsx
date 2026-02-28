@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth";
-import { getRecentActivity, getSubjectStats, getQuizHistory, getDailyProgress } from "@/lib/db";
+import { getSubjectStats, getQuizHistory, getDailyProgress } from "@/lib/db";
 import {
   getLevelProgress,
   formatCoins,
@@ -14,14 +14,17 @@ import {
 import ProtectedRoute from "@/components/ProtectedRoute";
 import BackButton from "@/components/BackButton";
 
-function ActivityIcon(type: string) {
-  const map: Record<string, string> = {
-    quiz_reward: "\u2705", duel_win: "\u2694\uFE0F", duel_loss: "\u{1F480}",
-    streak_bonus: "\u{1F525}", badge_bonus: "\u{1F396}\uFE0F", signup_bonus: "\u{1F389}",
-  };
-  return map[type] ?? "\u{1FA99}";
+function timeAgo(dateStr: string): string {
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return "just now";
+  if (mins < 60) return `${mins} min ago`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  if (days < 7) return `${days}d ago`;
+  return new Date(dateStr).toLocaleDateString("en-US", { month: "short", day: "numeric" });
 }
-
 
 function getGreeting(): string {
   const h = new Date().getHours();
@@ -66,14 +69,11 @@ function CircleStat({ value, label, icon, color, size = 90 }: {
 
 export default function DashboardPage() {
   const { user, refreshUser } = useAuth();
-  const [activity, setActivity] = useState<
-    { amount: number; type: string; description: string | null; created_at: string }[]
+  const [recentQuizzes, setRecentQuizzes] = useState<
+    { id: string; subject: string; total_questions: number; correct_answers: number; coins_earned: number; completed_at: string }[]
   >([]);
   const [subjectStats, setSubjectStats] = useState<
     { subject: string; questionsAnswered: number; correctAnswers: number; coinsEarned: number }[]
-  >([]);
-  const [, setQuizHistory] = useState<
-    { id: string; subject: string; total_questions: number; correct_answers: number; coins_earned: number; completed_at: string }[]
   >([]);
   const [, setLoadingData] = useState(true);
   const [dailyProgress, setDailyProgress] = useState({ questions_answered: 0, coins_earned: 0 });
@@ -82,17 +82,15 @@ export default function DashboardPage() {
   useEffect(() => {
     if (!user) return;
     Promise.all([
-      getRecentActivity(user.id, 5).catch(() => []),
       getSubjectStats(user.id).catch(() => []),
       getQuizHistory(user.id, 5).catch(() => []),
       getDailyProgress(user.id).catch(() => ({ questions_answered: 0, coins_earned: 0 })),
-    ]).then(([act, stats, history, daily]) => {
-      console.log("[Dashboard] activity:", act);
+    ]).then(([stats, history, daily]) => {
       console.log("[Dashboard] subjectStats:", stats);
+      console.log("[Dashboard] recentQuizzes:", history);
       console.log("[Dashboard] dailyProgress:", daily);
-      setActivity(act);
       setSubjectStats(stats);
-      setQuizHistory(history);
+      setRecentQuizzes(history);
       setDailyProgress(daily);
       setLoadingData(false);
     });
@@ -109,9 +107,7 @@ export default function DashboardPage() {
   console.log("[Dashboard] user:", { coins: user.coins, xp: user.xp, streak: user.streak, level: user.level });
   const { level, progress, xpToNext } = getLevelProgress(user.xp);
   const currentXp = user.xp % XP_PER_LEVEL;
-  const todayCoins = activity
-    .filter((a) => new Date(a.created_at).toDateString() === new Date().toDateString())
-    .reduce((sum, a) => sum + (a.amount > 0 ? a.amount : 0), 0);
+  const todayCoins = dailyProgress.coins_earned;
   const displaySubjects = subjectStats;
   const dailyDone = dailyProgress.questions_answered > 0;
   const today = new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
@@ -346,20 +342,21 @@ export default function DashboardPage() {
               {/* Recent Activity */}
               <div className="animate-slide-up" style={{ animationDelay: "0.22s" }}>
                 <h2 className="font-bebas text-lg text-cream tracking-wider mb-3">RECENT ACTIVITY</h2>
-                {activity.length > 0 ? (
+                {recentQuizzes.length > 0 ? (
                   <div className="space-y-1">
-                    {activity.map((item, i) => (
-                      <div key={i} className={`flex items-center gap-3 py-2.5 px-3 transition-all duration-200 hover:bg-white/[0.03] ${
+                    {recentQuizzes.map((quiz, i) => (
+                      <div key={quiz.id} className={`flex items-center gap-3 py-2.5 px-3 transition-all duration-200 hover:bg-white/[0.03] ${
                         i % 2 === 0 ? "rounded-[16px]" : "rounded-tl-[20px] rounded-br-[20px] rounded-tr-[6px] rounded-bl-[6px]"
                       }`}>
-                        <span className="text-lg flex-shrink-0">{ActivityIcon(item.type)}</span>
+                        <span className="text-lg flex-shrink-0">{SUBJECT_ICONS[quiz.subject as keyof typeof SUBJECT_ICONS] ?? "\u{1F4DA}"}</span>
                         <div className="flex-1 min-w-0">
-                          <p className="text-cream text-xs font-semibold truncate">{item.description ?? item.type.replace(/_/g, " ")}</p>
-                          <p className="text-cream/25 text-[10px]">{new Date(item.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</p>
+                          <p className="text-cream text-xs font-semibold truncate">{quiz.subject}</p>
+                          <p className="text-cream/25 text-[10px]">{timeAgo(quiz.completed_at)}</p>
                         </div>
-                        <span className={`text-xs font-bold flex-shrink-0 ${item.amount > 0 ? "text-gold" : "text-red-400"}`}>
-                          {item.amount > 0 ? `+${item.amount}` : item.amount}
-                        </span>
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                          <span className="text-xs font-mono text-cream/60">{quiz.correct_answers}/{quiz.total_questions}</span>
+                          <span className="text-xs font-bold text-gold">+{quiz.coins_earned}</span>
+                        </div>
                       </div>
                     ))}
                   </div>
