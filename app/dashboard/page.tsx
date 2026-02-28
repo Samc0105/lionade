@@ -333,7 +333,136 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* ═══ 5b) Bounty Board ═══ */}
+          {/* ═══ 5b) Daily Bet ═══ */}
+          <div className="mb-8 animate-slide-up" style={{ animationDelay: "0.16s" }}>
+            <h2 className="font-bebas text-lg text-cream tracking-wider mb-3">DAILY BET</h2>
+            <div className="rounded-tl-[28px] rounded-br-[28px] rounded-tr-[10px] rounded-bl-[10px] p-5 relative overflow-hidden"
+              style={{ background: "linear-gradient(135deg, #0d1528 0%, #0a1020 100%)", border: "1px solid rgba(255,215,0,0.1)", boxShadow: "0 0 24px rgba(255,215,0,0.04)" }}>
+              <div className="absolute top-0 left-0 right-0 h-[2px]" style={{ background: "linear-gradient(90deg, #FFD700, #FFA500, transparent)" }} />
+
+              {activeBet ? (
+                <div>
+                  <div className="flex items-center gap-3 mb-3">
+                    <span className="text-2xl">&#x1F3B0;</span>
+                    <div>
+                      <p className="text-cream text-sm font-semibold">Bet Active</p>
+                      <p className="text-cream/40 text-[11px]">Score {activeBet.target_score}/{activeBet.target_total} on your next quiz to win!</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full" style={{ background: "rgba(255,215,0,0.08)", border: "1px solid rgba(255,215,0,0.15)" }}>
+                      <span className="text-gold text-xs font-bold">{activeBet.coins_staked} &#x1FA99;</span>
+                      <span className="text-cream/30 text-[10px]">staked</span>
+                    </div>
+                    <span className="text-cream/20 text-lg">&rarr;</span>
+                    <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full" style={{ background: "rgba(74,144,217,0.08)", border: "1px solid rgba(74,144,217,0.15)" }}>
+                      <span className="text-electric text-xs font-bold">{Math.floor(activeBet.coins_staked * (BET_MULTIPLIERS[activeBet.target_score] ?? 1))} &#x1FA99;</span>
+                      <span className="text-cream/30 text-[10px]">potential</span>
+                    </div>
+                  </div>
+                </div>
+              ) : lastBet && lastBet.resolved_at ? (
+                <div>
+                  <div className="flex items-center gap-3 mb-3">
+                    <span className="text-2xl">{lastBet.won ? "&#x1F389;" : "&#x1F614;"}</span>
+                    <div>
+                      <p className={`text-sm font-semibold ${lastBet.won ? "text-gold" : "text-cream/50"}`}>
+                        {lastBet.won ? `YOU WON ${lastBet.coins_won} COINS!` : `Lost ${lastBet.coins_staked} coins`}
+                      </p>
+                      <p className="text-cream/30 text-[10px]">Place another bet below</p>
+                    </div>
+                  </div>
+                  {/* Show bet form below */}
+                  <div className="border-t border-white/[0.06] pt-3 mt-2">
+                    <div className="flex flex-wrap items-center gap-3">
+                      <div>
+                        <span className="text-cream/30 text-[10px] block mb-1">Stake</span>
+                        <div className="flex gap-1.5">
+                          {[10, 25, 50].map(amt => (
+                            <button key={amt} onClick={() => setBetStake(amt)}
+                              className={`px-3 py-1.5 rounded-full text-[11px] font-bold transition-all duration-200 ${betStake === amt ? "text-navy" : "text-cream/50 hover:text-cream/70"}`}
+                              style={betStake === amt ? { background: "linear-gradient(90deg, #FFD700, #FFA500)", boxShadow: "0 0 8px rgba(255,215,0,0.3)" } : { background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)" }}>
+                              {amt} &#x1FA99;
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                      <div>
+                        <span className="text-cream/30 text-[10px] block mb-1">Target</span>
+                        <div className="flex gap-1.5">
+                          {[7, 8, 9, 10].map(t => (
+                            <button key={t} onClick={() => setBetTarget(t)}
+                              className={`px-2.5 py-1.5 rounded-full text-[11px] font-bold transition-all duration-200 ${betTarget === t ? "text-navy" : "text-cream/50 hover:text-cream/70"}`}
+                              style={betTarget === t ? { background: "linear-gradient(90deg, #4A90D9, #6AABF0)", boxShadow: "0 0 8px rgba(74,144,217,0.3)" } : { background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)" }}>
+                              {t}/10
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="flex flex-col items-center">
+                        <span className="text-cream/30 text-[10px] block mb-1">Win</span>
+                        <span className="text-gold text-sm font-bold">{Math.floor(betStake * (BET_MULTIPLIERS[betTarget] ?? 1))} &#x1FA99;</span>
+                        <span className="text-cream/20 text-[9px]">{BET_MULTIPLIERS[betTarget]}x</span>
+                      </div>
+                    </div>
+                    <button onClick={placeBet} disabled={placingBet || user.coins < betStake}
+                      className="mt-3 w-full py-2.5 rounded-full text-xs font-bold transition-all duration-200 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed"
+                      style={{ background: user.coins >= betStake ? "linear-gradient(90deg, #FFD700, #FFA500)" : "rgba(255,255,255,0.06)", color: user.coins >= betStake ? "#0a1020" : "rgba(255,255,255,0.3)", boxShadow: user.coins >= betStake ? "0 0 16px rgba(255,215,0,0.2)" : "none" }}>
+                      {placingBet ? "Placing..." : user.coins < betStake ? "Not enough coins" : `Place Bet — ${betStake} coins`}
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div>
+                  <div className="flex items-center gap-3 mb-3">
+                    <span className="text-2xl">&#x1F3B0;</span>
+                    <div>
+                      <p className="text-cream text-sm font-semibold">Bet on Yourself</p>
+                      <p className="text-cream/40 text-[11px]">Stake coins, hit your target score, win big</p>
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-3">
+                    <div>
+                      <span className="text-cream/30 text-[10px] block mb-1">Stake</span>
+                      <div className="flex gap-1.5">
+                        {[10, 25, 50].map(amt => (
+                          <button key={amt} onClick={() => setBetStake(amt)}
+                            className={`px-3 py-1.5 rounded-full text-[11px] font-bold transition-all duration-200 ${betStake === amt ? "text-navy" : "text-cream/50 hover:text-cream/70"}`}
+                            style={betStake === amt ? { background: "linear-gradient(90deg, #FFD700, #FFA500)", boxShadow: "0 0 8px rgba(255,215,0,0.3)" } : { background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)" }}>
+                            {amt} &#x1FA99;
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    <div>
+                      <span className="text-cream/30 text-[10px] block mb-1">Target</span>
+                      <div className="flex gap-1.5">
+                        {[7, 8, 9, 10].map(t => (
+                          <button key={t} onClick={() => setBetTarget(t)}
+                            className={`px-2.5 py-1.5 rounded-full text-[11px] font-bold transition-all duration-200 ${betTarget === t ? "text-navy" : "text-cream/50 hover:text-cream/70"}`}
+                            style={betTarget === t ? { background: "linear-gradient(90deg, #4A90D9, #6AABF0)", boxShadow: "0 0 8px rgba(74,144,217,0.3)" } : { background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)" }}>
+                            {t}/10
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="flex flex-col items-center">
+                      <span className="text-cream/30 text-[10px] block mb-1">Win</span>
+                      <span className="text-gold text-sm font-bold">{Math.floor(betStake * (BET_MULTIPLIERS[betTarget] ?? 1))} &#x1FA99;</span>
+                      <span className="text-cream/20 text-[9px]">{BET_MULTIPLIERS[betTarget]}x</span>
+                    </div>
+                  </div>
+                  <button onClick={placeBet} disabled={placingBet || user.coins < betStake}
+                    className="mt-3 w-full py-2.5 rounded-full text-xs font-bold transition-all duration-200 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed"
+                    style={{ background: user.coins >= betStake ? "linear-gradient(90deg, #FFD700, #FFA500)" : "rgba(255,255,255,0.06)", color: user.coins >= betStake ? "#0a1020" : "rgba(255,255,255,0.3)", boxShadow: user.coins >= betStake ? "0 0 16px rgba(255,215,0,0.2)" : "none" }}>
+                    {placingBet ? "Placing..." : user.coins < betStake ? "Not enough coins" : `Place Bet — ${betStake} coins`}
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* ═══ 5c) Bounty Board ═══ */}
           <div className="mb-8 animate-slide-up" style={{ animationDelay: "0.17s" }}>
             <h2 className="font-bebas text-lg text-cream tracking-wider mb-3">BOUNTY BOARD</h2>
 
