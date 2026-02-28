@@ -368,20 +368,43 @@ export default function DashboardPage() {
             {/* Right sidebar */}
             <div className="space-y-5">
 
-              {/* This Week */}
+              {/* This Week — Leaderboard */}
               <div className="animate-slide-up" style={{ animationDelay: "0.18s" }}>
                 <h2 className="font-bebas text-lg text-cream tracking-wider mb-3">THIS WEEK</h2>
-                <div className="rounded-[20px] p-4 space-y-2.5"
+                <div className="rounded-[20px] p-4 space-y-2"
                   style={{ background: "linear-gradient(135deg, #0d1528 0%, #0a1020 100%)", border: "1px solid rgba(74,144,217,0.08)" }}>
-                  <div className="flex items-center justify-between">
-                    <span className="text-cream/40 text-xs">Your rank</span>
-                    <span className="text-cream/20 text-xs font-semibold">&mdash; (soon)</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-cream/40 text-xs">Top player</span>
-                    <span className="text-cream/20 text-xs font-semibold">&mdash; (soon)</span>
-                  </div>
-                  <p className="text-cream/15 text-[10px] pt-1">Win duels to climb the leaderboard.</p>
+                  {leaderboard.length > 0 ? (
+                    <>
+                      {leaderboard.slice(0, 3).map((entry) => {
+                        const medal = entry.rank === 1 ? "\u{1F947}" : entry.rank === 2 ? "\u{1F948}" : "\u{1F949}";
+                        const isMe = entry.user_id === user.id;
+                        return (
+                          <div key={entry.user_id} className={`flex items-center gap-2.5 py-1.5 px-2 rounded-lg ${isMe ? "bg-electric/8" : ""}`}>
+                            <span className="text-sm">{medal}</span>
+                            <span className={`text-xs flex-1 truncate ${isMe ? "text-electric font-semibold" : "text-cream/60"}`}>
+                              {entry.username}{isMe ? " (you)" : ""}
+                            </span>
+                            <span className="text-[10px] font-mono text-gold">{formatCoins(entry.coins_this_week)}</span>
+                          </div>
+                        );
+                      })}
+                      {(() => {
+                        const myRank = leaderboard.find(e => e.user_id === user.id);
+                        if (myRank && myRank.rank > 3) {
+                          return (
+                            <div className="flex items-center gap-2.5 py-1.5 px-2 rounded-lg bg-electric/8 mt-1 border-t border-white/[0.04]">
+                              <span className="text-cream/40 text-[10px] font-mono w-5 text-center">#{myRank.rank}</span>
+                              <span className="text-xs flex-1 text-electric font-semibold truncate">{myRank.username} (you)</span>
+                              <span className="text-[10px] font-mono text-gold">{formatCoins(myRank.coins_this_week)}</span>
+                            </div>
+                          );
+                        }
+                        return null;
+                      })()}
+                    </>
+                  ) : (
+                    <p className="text-cream/20 text-xs text-center py-2">No activity this week yet.</p>
+                  )}
                 </div>
               </div>
 
