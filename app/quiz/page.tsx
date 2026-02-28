@@ -276,40 +276,49 @@ export default function QuizPage() {
     setTotalCoins(coins);
     setTotalXp(xp);
 
-    console.log("[Quiz] finishQuiz — user:", user!.id, "coins:", coins, "xp:", xp, "correct:", correctCount, "/", questions.length);
+    console.log("[Quiz] ===== finishQuiz =====");
+    console.log("[Quiz] userId:", user!.id);
+    console.log("[Quiz] subject:", subject);
+    console.log("[Quiz] correct:", correctCount, "/", questions.length);
+    console.log("[Quiz] coins:", coins, "xp:", xp);
+    console.log("[Quiz] difficulty:", difficulty, "blitz:", blitzMode);
 
     try {
+      const payload = {
+        userId: user!.id,
+        subject: subject!,
+        totalQuestions: questions.length,
+        correctAnswers: correctCount,
+        coinsEarned: coins,
+        xpEarned: xp,
+        answers: finalAnswers.map((a) => ({
+          questionId: a.questionId,
+          selected: a.selected,
+          isCorrect: a.correct,
+          timeLeft: a.timeLeft,
+        })),
+      };
+      console.log("[Quiz] Sending to /api/save-quiz-results:", JSON.stringify(payload).slice(0, 300));
+
       const res = await fetch("/api/save-quiz-results", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          userId: user!.id,
-          subject: subject!,
-          totalQuestions: questions.length,
-          correctAnswers: correctCount,
-          coinsEarned: coins,
-          xpEarned: xp,
-          answers: finalAnswers.map((a) => ({
-            questionId: a.questionId,
-            selected: a.selected,
-            isCorrect: a.correct,
-            timeLeft: a.timeLeft,
-          })),
-        }),
+        body: JSON.stringify(payload),
       });
 
+      console.log("[Quiz] Response status:", res.status);
       const data = await res.json();
-      console.log("[Quiz] API response:", data);
+      console.log("[Quiz] Response body:", JSON.stringify(data));
 
       if (data.success) {
         console.log("[Quiz] Saved! Refreshing user...");
         await refreshUser();
-        console.log("[Quiz] User refreshed — coins:", user?.coins);
+        console.log("[Quiz] User refreshed");
       } else {
-        console.error("[Quiz] API error:", data.error);
+        console.error("[Quiz] API returned error:", data.error);
       }
     } catch (err) {
-      console.error("[Quiz] Failed to call save-quiz-results API:", err);
+      console.error("[Quiz] fetch() failed:", err);
     }
 
     setPhase("results");

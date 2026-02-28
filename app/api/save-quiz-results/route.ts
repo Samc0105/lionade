@@ -1,7 +1,39 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
 
+// GET — health check so we can verify the route + supabaseAdmin work
+export async function GET() {
+  console.log("[save-quiz-results] GET health check hit");
+  console.log("[save-quiz-results] SUPABASE_SECRET_KEY present:", !!process.env.SUPABASE_SECRET_KEY);
+  console.log("[save-quiz-results] SUPABASE_SECRET_KEY length:", process.env.SUPABASE_SECRET_KEY?.length ?? 0);
+
+  try {
+    const { count, error } = await supabaseAdmin
+      .from("profiles")
+      .select("id", { count: "exact", head: true });
+
+    if (error) {
+      console.error("[save-quiz-results] Health check DB error:", error.message);
+      return NextResponse.json({ ok: false, error: error.message });
+    }
+
+    console.log("[save-quiz-results] Health check OK — profiles count:", count);
+    return NextResponse.json({ ok: true, profileCount: count });
+  } catch (err) {
+    console.error("[save-quiz-results] Health check exception:", err);
+    return NextResponse.json({ ok: false, error: String(err) });
+  }
+}
+
 export async function POST(req: NextRequest) {
+  console.log("[save-quiz-results] ===== POST received =====");
+
+  // Verify env
+  if (!process.env.SUPABASE_SECRET_KEY) {
+    console.error("[save-quiz-results] SUPABASE_SECRET_KEY is missing!");
+    return NextResponse.json({ error: "Server misconfigured — missing service key" }, { status: 500 });
+  }
+
   try {
     const body = await req.json();
     const {
@@ -14,13 +46,15 @@ export async function POST(req: NextRequest) {
       answers, // array of { questionId, selected, isCorrect, timeLeft }
     } = body;
 
-    console.log("[save-quiz-results] Received:", { userId, subject, totalQuestions, correctAnswers, coinsEarned, xpEarned });
+    console.log("[save-quiz-results] Payload:", JSON.stringify({ userId, subject, totalQuestions, correctAnswers, coinsEarned, xpEarned, answersCount: answers?.length ?? 0 }));
 
     if (!userId || !subject) {
+      console.error("[save-quiz-results] Missing userId or subject");
       return NextResponse.json({ error: "Missing userId or subject" }, { status: 400 });
     }
 
     // 1. Insert quiz session
+    console.log("[save-quiz-results] Step 1: Inserting quiz_sessions...");
     const { data: session, error: sessionErr } = await supabaseAdmin
       .from("quiz_sessions")
       .insert({
@@ -36,13 +70,14 @@ export async function POST(req: NextRequest) {
       .single();
 
     if (sessionErr) {
-      console.error("[save-quiz-results] quiz_sessions insert error:", sessionErr.message);
+      console.error("[save-quiz-results] FAILED quiz_sessions insert:", sessionErr.message, sessionErr.details, sessionErr.hint);
       return NextResponse.json({ error: "Failed to save quiz session: " + sessionErr.message }, { status: 500 });
     }
-    console.log("[save-quiz-results] quiz_sessions inserted:", session.id);
+    console.log("[save-quiz-results] Step 1 OK — session id:", session.id);
 
-    // 2. Save individual answers (non-blocking)
+    // 2. Save individual answers
     if (answers && Array.isArray(answers) && answers.length > 0) {
+      console.log("[save-quiz-results] Step 2: Inserting", answers.length, "user_answers...");
       const answerRows = answers.map((a: { questionId: string; selected: number; isCorrect: boolean; timeLeft: number }) => ({
         session_id: session.id,
         question_id: a.questionId,
@@ -51,11 +86,14 @@ export async function POST(req: NextRequest) {
         time_left: a.timeLeft,
       }));
       const { error: answersErr } = await supabaseAdmin.from("user_answers").insert(answerRows);
-      if (answersErr) console.error("[save-quiz-results] user_answers insert error:", answersErr.message);
-      else console.log("[save-quiz-results] user_answers inserted:", answerRows.length, "rows");
+      if (answersErr) console.error("[save-quiz-results] Step 2 FAILED:", answersErr.message, answersErr.details);
+      else console.log("[save-quiz-results] Step 2 OK —", answerRows.length, "answers saved");
+    } else {
+      console.log("[save-quiz-results] Step 2: No answers to save");
     }
 
     // 3. Update profile: add coins and xp
+    console.log("[save-quiz-results] Step 3: Fetching profile for", userId);
     const { data: profile, error: profileFetchErr } = await supabaseAdmin
       .from("profiles")
       .select("coins, xp, streak, max_streak")
@@ -63,39 +101,42 @@ export async function POST(req: NextRequest) {
       .single();
 
     if (profileFetchErr) {
-      console.error("[save-quiz-results] profile fetch error:", profileFetchErr.message);
+      console.error("[save-quiz-results] Step 3 FAILED — profile fetch:", profileFetchErr.message);
       return NextResponse.json({ error: "Failed to fetch profile: " + profileFetchErr.message }, { status: 500 });
     }
+    console.log("[save-quiz-results] Step 3 — current profile:", JSON.stringify(profile));
 
     const newCoins = (profile.coins ?? 0) + coinsEarned;
     const newXp = (profile.xp ?? 0) + xpEarned;
-    // Level is auto-calculated by DB trigger on xp update
 
+    console.log("[save-quiz-results] Step 3: Updating profile — coins:", profile.coins, "→", newCoins, "xp:", profile.xp, "→", newXp);
     const { error: profileUpdateErr } = await supabaseAdmin
       .from("profiles")
       .update({ coins: newCoins, xp: newXp })
       .eq("id", userId);
 
     if (profileUpdateErr) {
-      console.error("[save-quiz-results] profile update error:", profileUpdateErr.message);
+      console.error("[save-quiz-results] Step 3 FAILED — profile update:", profileUpdateErr.message);
       return NextResponse.json({ error: "Failed to update profile: " + profileUpdateErr.message }, { status: 500 });
     }
-    console.log("[save-quiz-results] profile updated: coins", profile.coins, "→", newCoins, "xp", profile.xp, "→", newXp);
+    console.log("[save-quiz-results] Step 3 OK — profile updated");
 
     // 4. Log coin transaction
     if (coinsEarned > 0) {
+      console.log("[save-quiz-results] Step 4: Logging coin transaction...");
       const { error: txnErr } = await supabaseAdmin.from("coin_transactions").insert({
         user_id: userId,
         amount: coinsEarned,
         type: "quiz_reward",
-        reference_id: session.id,
+        reference_id: String(session.id),
         description: `${subject} quiz — ${correctAnswers}/${totalQuestions} correct`,
       });
-      if (txnErr) console.error("[save-quiz-results] coin_transactions error:", txnErr.message);
-      else console.log("[save-quiz-results] coin_transaction logged:", coinsEarned);
+      if (txnErr) console.error("[save-quiz-results] Step 4 FAILED:", txnErr.message);
+      else console.log("[save-quiz-results] Step 4 OK — coin_transaction logged:", coinsEarned);
     }
 
     // 5. Upsert daily_activity + update streak
+    console.log("[save-quiz-results] Step 5: Daily activity + streak...");
     const today = new Date().toISOString().split("T")[0];
 
     const { data: existingDaily } = await supabaseAdmin
@@ -114,8 +155,8 @@ export async function POST(req: NextRequest) {
           streak_maintained: true,
         })
         .eq("id", existingDaily.id);
-      if (dailyUpdateErr) console.error("[save-quiz-results] daily_activity update error:", dailyUpdateErr.message);
-      else console.log("[save-quiz-results] daily_activity updated for today");
+      if (dailyUpdateErr) console.error("[save-quiz-results] Step 5 FAILED daily update:", dailyUpdateErr.message);
+      else console.log("[save-quiz-results] Step 5 OK — daily_activity updated");
     } else {
       const { error: dailyInsertErr } = await supabaseAdmin.from("daily_activity").insert({
         user_id: userId,
@@ -124,10 +165,10 @@ export async function POST(req: NextRequest) {
         coins_earned: coinsEarned,
         streak_maintained: true,
       });
-      if (dailyInsertErr) console.error("[save-quiz-results] daily_activity insert error:", dailyInsertErr.message);
-      else console.log("[save-quiz-results] daily_activity inserted for today");
+      if (dailyInsertErr) console.error("[save-quiz-results] Step 5 FAILED daily insert:", dailyInsertErr.message);
+      else console.log("[save-quiz-results] Step 5 OK — daily_activity inserted");
 
-      // Streak logic: check if yesterday had activity
+      // Streak logic
       const yesterday = new Date();
       yesterday.setDate(yesterday.getDate() - 1);
       const yesterdayStr = yesterday.toISOString().split("T")[0];
@@ -147,18 +188,19 @@ export async function POST(req: NextRequest) {
         .from("profiles")
         .update({ streak: newStreak, max_streak: newMaxStreak })
         .eq("id", userId);
-      if (streakErr) console.error("[save-quiz-results] streak update error:", streakErr.message);
-      else console.log("[save-quiz-results] streak:", currentStreak, "→", newStreak);
+      if (streakErr) console.error("[save-quiz-results] Step 5 FAILED streak:", streakErr.message);
+      else console.log("[save-quiz-results] Step 5 OK — streak:", currentStreak, "→", newStreak);
     }
 
-    // 6. Fetch final profile to return updated values
+    // 6. Fetch final profile to return
+    console.log("[save-quiz-results] Step 6: Fetching final profile...");
     const { data: finalProfile } = await supabaseAdmin
       .from("profiles")
       .select("coins, xp, streak, level")
       .eq("id", userId)
       .single();
 
-    console.log("[save-quiz-results] DONE. Final profile:", finalProfile);
+    console.log("[save-quiz-results] ===== DONE =====", JSON.stringify(finalProfile));
 
     return NextResponse.json({
       success: true,
@@ -166,7 +208,7 @@ export async function POST(req: NextRequest) {
       profile: finalProfile,
     });
   } catch (err) {
-    console.error("[save-quiz-results] Unexpected error:", err);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    console.error("[save-quiz-results] UNEXPECTED ERROR:", err);
+    return NextResponse.json({ error: "Internal server error: " + String(err) }, { status: 500 });
   }
 }
