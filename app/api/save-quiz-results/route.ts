@@ -221,7 +221,161 @@ export async function POST(req: NextRequest) {
       console.warn("[save-quiz-results] Step 6 WARN (non-fatal):", achException);
     }
 
-    // 7. Return final profile
+    // 7. Bounty progress checking
+    console.log("[save-quiz-results] Step 7: Checking bounties...");
+    try {
+      const { data: activeBounties } = await supabaseAdmin
+        .from("bounties")
+        .select("id, requirement_type, requirement_value, requirement_subject, requirement_difficulty")
+        .eq("active", true);
+
+      if (activeBounties && activeBounties.length > 0) {
+        for (const bounty of activeBounties) {
+          let progress = 0;
+          let completed = false;
+
+          switch (bounty.requirement_type) {
+            case "min_score": {
+              if (correctAnswers >= bounty.requirement_value) {
+                progress = bounty.requirement_value;
+                completed = true;
+              } else {
+                progress = correctAnswers;
+              }
+              break;
+            }
+            case "quiz_count": {
+              // Count quizzes today (or this week for weekly)
+              const since = new Date();
+              since.setHours(0, 0, 0, 0);
+              const { count } = await supabaseAdmin
+                .from("quiz_sessions")
+                .select("id", { count: "exact", head: true })
+                .eq("user_id", userId)
+                .gte("completed_at", since.toISOString())
+                .match(bounty.requirement_subject ? { subject: bounty.requirement_subject } : {});
+              progress = count ?? 0;
+              completed = progress >= bounty.requirement_value;
+              break;
+            }
+            case "perfect_score": {
+              if (correctAnswers === totalQuestions && totalQuestions >= 10) {
+                progress = 1;
+                completed = true;
+              }
+              break;
+            }
+            case "blitz_score": {
+              if (body.blitzMode && correctAnswers >= bounty.requirement_value) {
+                progress = bounty.requirement_value;
+                completed = true;
+              }
+              break;
+            }
+            case "advanced_quiz": {
+              if (body.difficulty === "advanced") {
+                progress = 1;
+                completed = true;
+              }
+              break;
+            }
+            default:
+              continue;
+          }
+
+          // Upsert user_bounty
+          const { data: existing } = await supabaseAdmin
+            .from("user_bounties")
+            .select("id, progress, completed")
+            .eq("user_id", userId)
+            .eq("bounty_id", bounty.id)
+            .maybeSingle();
+
+          if (existing) {
+            const newProgress = Math.max(existing.progress, progress);
+            const nowCompleted = existing.completed || completed;
+            if (newProgress !== existing.progress || nowCompleted !== existing.completed) {
+              await supabaseAdmin
+                .from("user_bounties")
+                .update({
+                  progress: newProgress,
+                  completed: nowCompleted,
+                  ...(nowCompleted && !existing.completed ? { completed_at: new Date().toISOString() } : {}),
+                })
+                .eq("id", existing.id);
+            }
+          } else {
+            await supabaseAdmin.from("user_bounties").insert({
+              user_id: userId,
+              bounty_id: bounty.id,
+              progress,
+              completed,
+              ...(completed ? { completed_at: new Date().toISOString() } : {}),
+            });
+          }
+        }
+        console.log("[save-quiz-results] Step 7 OK — bounties checked");
+      }
+    } catch (bountyErr) {
+      console.warn("[save-quiz-results] Step 7 WARN (non-fatal):", bountyErr);
+    }
+
+    // 8. Resolve active daily bet
+    console.log("[save-quiz-results] Step 8: Resolving daily bet...");
+    try {
+      const { data: activeBet } = await supabaseAdmin
+        .from("daily_bets")
+        .select("id, coins_staked, target_score, target_total")
+        .eq("user_id", userId)
+        .is("resolved_at", null)
+        .maybeSingle();
+
+      if (activeBet) {
+        const won = correctAnswers >= activeBet.target_score;
+        const multipliers: Record<number, number> = { 7: 1.5, 8: 2, 9: 3, 10: 5 };
+        const coinsWon = won ? Math.floor(activeBet.coins_staked * (multipliers[activeBet.target_score] ?? 1)) : 0;
+
+        await supabaseAdmin
+          .from("daily_bets")
+          .update({
+            actual_score: correctAnswers,
+            won,
+            coins_won: coinsWon,
+            resolved_at: new Date().toISOString(),
+          })
+          .eq("id", activeBet.id);
+
+        if (won) {
+          // Award winnings
+          const { data: betProfile } = await supabaseAdmin
+            .from("profiles")
+            .select("coins")
+            .eq("id", userId)
+            .single();
+
+          if (betProfile) {
+            await supabaseAdmin
+              .from("profiles")
+              .update({ coins: betProfile.coins + coinsWon })
+              .eq("id", userId);
+          }
+
+          await supabaseAdmin.from("coin_transactions").insert({
+            user_id: userId,
+            amount: coinsWon,
+            type: "bet_won",
+            reference_id: activeBet.id,
+            description: `Won bet: ${correctAnswers}/${totalQuestions} (target ${activeBet.target_score})`,
+          });
+        }
+
+        console.log("[save-quiz-results] Step 8 OK — bet resolved:", won ? "WON" : "LOST", coinsWon);
+      }
+    } catch (betErr) {
+      console.warn("[save-quiz-results] Step 8 WARN (non-fatal):", betErr);
+    }
+
+    // 9. Return final profile
     const { data: finalProfile } = await supabaseAdmin
       .from("profiles")
       .select("coins, xp, streak, level")
