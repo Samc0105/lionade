@@ -749,6 +749,16 @@ body {
   animation-delay: 8s;
 }
 
+/* Coin burst particles — fly outward then fade */
+@keyframes coin-burst {
+  0% { transform: translate(0, 0) scale(1); opacity: 1; }
+  60% { opacity: 0.8; }
+  100% { transform: translate(var(--burst-x), var(--burst-y)) scale(0); opacity: 0; }
+}
+.coin-burst-particle {
+  animation: coin-burst 0.9s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .space-twinkle, .shooting-star, .shooting-star-2,
   .star, .cta-pulse, .animate-slide-up, .coin-particle, .pulse-ring,
@@ -765,7 +775,8 @@ body {
   .legend-sparkle::after, .legend-sparkle::before,
   .chrome-text, .gold-shimmer-wrap::after, .gold-particle,
   .logo-glow, .logo-shimmer, .demo-logo-glow,
-  .gem-shimmer, .tier-bar-shine, .prize-sparkle, .prize-coin {
+  .gem-shimmer, .tier-bar-shine, .prize-sparkle, .prize-coin,
+  .coin-burst-particle {
     animation: none !important;
   }
   .feature-orbit-node { transform: translate(-50%, -50%) !important; }

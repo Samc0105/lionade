@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback, useEffect, useRef, useMemo } from "react";
 import { Subject } from "@/types";
 import { SUBJECT_ICONS, SUBJECT_COLORS, formatCoins } from "@/lib/mockData";
 import { getQuizQuestions, checkAnswer, getSubjectStats, getQuizHistory } from "@/lib/db";
@@ -142,6 +142,70 @@ interface QuizHistoryEntry {
   correct_answers: number;
   coins_earned: number;
   completed_at: string;
+}
+
+/** Animated counting number — counts from 0 to `end` over `duration` ms */
+function useCountUp(end: number, duration: number, delay: number = 0) {
+  const [value, setValue] = useState(0);
+  useEffect(() => {
+    if (end === 0) { setValue(0); return; }
+    const timeout = setTimeout(() => {
+      const start = performance.now();
+      const tick = (now: number) => {
+        const elapsed = now - start;
+        const progress = Math.min(elapsed / duration, 1);
+        // Ease-out cubic for satisfying deceleration
+        const eased = 1 - Math.pow(1 - progress, 3);
+        setValue(Math.round(eased * end));
+        if (progress < 1) requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+    }, delay);
+    return () => clearTimeout(timeout);
+  }, [end, duration, delay]);
+  return value;
+}
+
+/** Gold coin particles that burst outward */
+function CoinBurst({ count }: { count: number }) {
+  const particles = useMemo(() => {
+    if (count === 0) return [];
+    const total = Math.min(count * 3, 24);
+    return Array.from({ length: total }, (_, i) => {
+      const angle = (i / total) * 360 + (Math.random() * 30 - 15);
+      const distance = 60 + Math.random() * 80;
+      const size = 6 + Math.random() * 10;
+      const delay = Math.random() * 0.3;
+      const dx = Math.cos((angle * Math.PI) / 180) * distance;
+      const dy = Math.sin((angle * Math.PI) / 180) * distance;
+      return { dx, dy, size, delay, id: i };
+    });
+  }, [count]);
+
+  if (count === 0) return null;
+
+  return (
+    <div className="absolute inset-0 pointer-events-none overflow-visible">
+      {particles.map((p) => (
+        <div
+          key={p.id}
+          className="absolute left-1/2 top-1/2 rounded-full coin-burst-particle"
+          style={{
+            width: p.size,
+            height: p.size,
+            marginLeft: -p.size / 2,
+            marginTop: -p.size / 2,
+            background: `radial-gradient(circle, #FFD700, #B8860B)`,
+            boxShadow: "0 0 6px #FFD70080",
+            // @ts-expect-error CSS custom properties
+            "--burst-x": `${p.dx}px`,
+            "--burst-y": `${p.dy}px`,
+            animationDelay: `${p.delay}s`,
+          }}
+        />
+      ))}
+    </div>
+  );
 }
 
 export default function QuizPage() {
@@ -674,217 +738,265 @@ export default function QuizPage() {
 
   // ── Results ───────────────────────────────────────────────
   if (phase === "results") {
-    const rank = getRank(accuracy);
-    const mistakes = answers.filter((a) => !a.correct);
+    return <ResultsScreen
+      answers={answers}
+      totalCoins={totalCoins}
+      totalXp={totalXp}
+      accuracy={accuracy}
+      correctCount={correctCount}
+      wrongCount={wrongCount}
+      subject={subject}
+      blitzMode={blitzMode}
+      showMistakes={showMistakes}
+      setShowMistakes={setShowMistakes}
+      router={router}
+    />;
+  }
 
-    return (
-      <div className="min-h-screen pt-20">
-        <div className="max-w-2xl mx-auto px-4 py-12 text-center">
-          {/* Rank Badge */}
-          <div
-            className="inline-flex flex-col items-center justify-center w-32 h-32 rounded-full mb-8 animate-slide-up"
-            style={{
-              background: `radial-gradient(circle, ${rank.color}18 0%, transparent 70%)`,
-              boxShadow: `0 0 60px ${rank.color}25, inset 0 0 30px ${rank.color}10`,
-              border: `2px solid ${rank.color}40`,
-            }}
-          >
-            <span className="text-5xl">{rank.icon}</span>
-          </div>
 
-          <h1 className="font-bebas text-6xl text-cream tracking-wider mb-2 animate-slide-up" style={{ animationDelay: "0.05s" }}>
-            {rank.label}
-          </h1>
-          <p className="text-cream/40 text-base mb-10 animate-slide-up" style={{ animationDelay: "0.08s" }}>
-            {subject} Quiz Complete
-            {blitzMode && <span className="text-[#EAB308] ml-2">&#x26A1; Blitz</span>}
-          </p>
+  return null;
+}
 
-          {/* Glass Stat Cards */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8 animate-slide-up" style={{ animationDelay: "0.12s" }}>
-            {[
-              { icon: "\u2705", label: "Correct", value: correctCount, accent: "#2ECC71" },
-              { icon: "\u274C", label: "Wrong", value: wrongCount, accent: "#E74C3C" },
-              { icon: "\u{1FA99}", label: "Coins", value: totalCoins, accent: "#FFD700" },
-              { icon: "\u26A1", label: "XP", value: totalXp, accent: "#4A90D9" },
-            ].map((s) => (
+/* ═══════════════════════════════════════════════════════════════
+   Results Screen — with animated counters + coin burst
+   ═══════════════════════════════════════════════════════════════ */
+
+function ResultsScreen({
+  answers, totalCoins, totalXp, accuracy, correctCount, wrongCount,
+  subject, blitzMode, showMistakes, setShowMistakes, router,
+}: {
+  answers: AnswerRecord[];
+  totalCoins: number;
+  totalXp: number;
+  accuracy: number;
+  correctCount: number;
+  wrongCount: number;
+  subject: Subject | null;
+  blitzMode: boolean;
+  showMistakes: boolean;
+  setShowMistakes: (v: boolean) => void;
+  router: ReturnType<typeof useRouter>;
+}) {
+  const getRank = (acc: number) => {
+    if (acc === 100) return { label: "PERFECT", icon: "\u{1F48E}", color: "#FFD700" };
+    if (acc >= 80)  return { label: "ELITE",   icon: "\u{1F525}", color: "#4A90D9" };
+    if (acc >= 60)  return { label: "SOLID",   icon: "\u{1F44D}", color: "#2ECC71" };
+    return { label: "KEEP GRINDING", icon: "\u{1F4AA}", color: "#E67E22" };
+  };
+
+  const rank = getRank(accuracy);
+  const mistakes = answers.filter((a) => !a.correct);
+
+  // Animated counters — staggered delays for dramatic reveal
+  const animCoins = useCountUp(totalCoins, 1200, 600);
+  const animXp = useCountUp(totalXp, 1200, 800);
+  const animCorrect = useCountUp(correctCount, 800, 400);
+  const animWrong = useCountUp(wrongCount, 800, 500);
+  const animAccuracy = useCountUp(accuracy, 1000, 1000);
+
+  // Coin burst triggers after a short delay
+  const [showBurst, setShowBurst] = useState(false);
+  useEffect(() => {
+    const t = setTimeout(() => setShowBurst(true), 500);
+    return () => clearTimeout(t);
+  }, []);
+
+  // Glow pulse on coins card when count finishes
+  const [coinGlow, setCoinGlow] = useState(false);
+  useEffect(() => {
+    const t = setTimeout(() => setCoinGlow(true), 1800);
+    return () => clearTimeout(t);
+  }, []);
+
+  return (
+    <div className="min-h-screen pt-20">
+      <div className="max-w-2xl mx-auto px-4 py-12 text-center">
+        {/* Rank Badge */}
+        <div
+          className="inline-flex flex-col items-center justify-center w-32 h-32 rounded-full mb-8 animate-slide-up"
+          style={{
+            background: `radial-gradient(circle, ${rank.color}18 0%, transparent 70%)`,
+            boxShadow: `0 0 60px ${rank.color}25, inset 0 0 30px ${rank.color}10`,
+            border: `2px solid ${rank.color}40`,
+          }}
+        >
+          <span className="text-5xl">{rank.icon}</span>
+        </div>
+
+        <h1 className="font-bebas text-6xl text-cream tracking-wider mb-2 animate-slide-up" style={{ animationDelay: "0.05s" }}>
+          {rank.label}
+        </h1>
+        <p className="text-cream/40 text-base mb-10 animate-slide-up" style={{ animationDelay: "0.08s" }}>
+          {subject} Quiz Complete
+          {blitzMode && <span className="text-[#EAB308] ml-2">&#x26A1; Blitz</span>}
+        </p>
+
+        {/* Glass Stat Cards — with animated counters */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8 animate-slide-up" style={{ animationDelay: "0.12s" }}>
+          {[
+            { icon: "\u2705", label: "Correct", value: animCorrect, accent: "#2ECC71", isCoin: false },
+            { icon: "\u274C", label: "Wrong", value: animWrong, accent: "#E74C3C", isCoin: false },
+            { icon: "\u{1FA99}", label: "Coins", value: animCoins, accent: "#FFD700", isCoin: true },
+            { icon: "\u26A1", label: "XP", value: animXp, accent: "#4A90D9", isCoin: false },
+          ].map((s) => (
+            <div
+              key={s.label}
+              className="relative rounded-2xl p-5 text-center backdrop-blur-xl overflow-visible"
+              style={{
+                background: "rgba(255,255,255,0.04)",
+                border: `1px solid ${s.isCoin && coinGlow ? "rgba(255,215,0,0.35)" : "rgba(255,255,255,0.10)"}`,
+                boxShadow: s.isCoin && coinGlow
+                  ? "0 0 30px rgba(255,215,0,0.15), 0 4px 24px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.06)"
+                  : "0 4px 24px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.06)",
+                transition: "border-color 0.6s, box-shadow 0.6s",
+              }}
+            >
+              {/* Coin burst particles */}
+              {s.isCoin && showBurst && <CoinBurst count={totalCoins} />}
+
+              <span className="text-2xl block mb-2">{s.icon}</span>
+              <p className="font-bebas text-4xl leading-none" style={{ color: s.accent }}>
+                {s.isCoin ? `+${s.value}` : s.value}
+              </p>
+              <p className="text-cream/35 text-[11px] uppercase tracking-wider mt-1.5">{s.label}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Glass Answer Breakdown */}
+        <div
+          className="rounded-2xl p-5 mb-8 text-left backdrop-blur-xl animate-slide-up"
+          style={{
+            animationDelay: "0.18s",
+            background: "rgba(255,255,255,0.04)",
+            border: "1px solid rgba(255,255,255,0.10)",
+            boxShadow: "0 4px 24px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.06)",
+          }}
+        >
+          <h3 className="font-bebas text-xl text-cream tracking-wider mb-4">ANSWER BREAKDOWN</h3>
+          <div className="flex gap-1.5 mb-4">
+            {answers.map((a, i) => (
               <div
-                key={s.label}
-                className="relative rounded-2xl p-5 text-center backdrop-blur-xl overflow-hidden"
+                key={i}
+                className="flex-1 h-9 rounded-lg flex items-center justify-center text-xs font-bold backdrop-blur-sm"
                 style={{
-                  background: "rgba(255,255,255,0.04)",
-                  border: "1px solid rgba(255,255,255,0.10)",
-                  boxShadow: "0 4px 24px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.06)",
+                  background: a.correct ? "rgba(46,204,113,0.12)" : "rgba(231,76,60,0.12)",
+                  border: `1px solid ${a.correct ? "rgba(46,204,113,0.35)" : "rgba(231,76,60,0.35)"}`,
+                  color: a.correct ? "#2ECC71" : "#E74C3C",
                 }}
               >
-                <span className="text-2xl block mb-2">{s.icon}</span>
-                <p className="font-bebas text-4xl leading-none" style={{ color: s.accent }}>{s.value}</p>
-                <p className="text-cream/35 text-[11px] uppercase tracking-wider mt-1.5">{s.label}</p>
+                {a.correct ? "\u2713" : "\u2717"}
               </div>
             ))}
           </div>
+          <div className="flex justify-between items-center">
+            <span className="text-cream/40 text-sm">Accuracy</span>
+            <span className="font-bebas text-2xl" style={{ color: rank.color }}>{animAccuracy}%</span>
+          </div>
+          <div className="w-full h-2 bg-white/[0.06] rounded-full mt-2.5 overflow-hidden">
+            <div
+              className="h-full rounded-full transition-all duration-1000"
+              style={{ width: `${animAccuracy}%`, background: `linear-gradient(90deg, ${rank.color}cc, ${rank.color})` }}
+            />
+          </div>
+        </div>
 
-          {/* Glass Answer Breakdown */}
-          <div
-            className="rounded-2xl p-5 mb-8 text-left backdrop-blur-xl animate-slide-up"
+        {/* Glass Buttons */}
+        <div className="flex flex-col sm:flex-row gap-3 animate-slide-up" style={{ animationDelay: "0.24s" }}>
+          <button
+            onClick={() => router.push("/learn")}
+            className="flex-1 py-3.5 rounded-xl font-syne font-bold text-sm text-cream/90 transition-all duration-200 hover:brightness-125 active:scale-[0.98] backdrop-blur-xl cursor-pointer"
             style={{
-              animationDelay: "0.18s",
-              background: "rgba(255,255,255,0.04)",
-              border: "1px solid rgba(255,255,255,0.10)",
-              boxShadow: "0 4px 24px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.06)",
+              background: "rgba(255,255,255,0.06)",
+              border: "1px solid rgba(255,255,255,0.12)",
+              boxShadow: "0 2px 12px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.06)",
             }}
           >
-            <h3 className="font-bebas text-xl text-cream tracking-wider mb-4">ANSWER BREAKDOWN</h3>
-            <div className="flex gap-1.5 mb-4">
-              {answers.map((a, i) => (
+            New Quiz
+          </button>
+          <button
+            onClick={() => setShowMistakes(!showMistakes)}
+            disabled={mistakes.length === 0}
+            className="flex-1 py-3.5 rounded-xl font-syne font-bold text-sm transition-all duration-200 hover:brightness-125 active:scale-[0.98] backdrop-blur-xl cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+            style={{
+              background: mistakes.length > 0 ? "rgba(231,76,60,0.10)" : "rgba(255,255,255,0.04)",
+              border: `1px solid ${mistakes.length > 0 ? "rgba(231,76,60,0.25)" : "rgba(255,255,255,0.08)"}`,
+              color: mistakes.length > 0 ? "#E74C3C" : "rgba(255,255,255,0.3)",
+              boxShadow: "0 2px 12px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.04)",
+            }}
+          >
+            {showMistakes ? "Hide Mistakes" : `Review Mistakes${mistakes.length > 0 ? ` (${mistakes.length})` : ""}`}
+          </button>
+          <button
+            onClick={() => router.push("/dashboard")}
+            className="flex-1 py-3.5 rounded-xl font-syne font-bold text-sm text-cream/90 transition-all duration-200 hover:brightness-125 active:scale-[0.98] backdrop-blur-xl cursor-pointer"
+            style={{
+              background: "rgba(255,255,255,0.06)",
+              border: "1px solid rgba(255,255,255,0.12)",
+              boxShadow: "0 2px 12px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.06)",
+            }}
+          >
+            Dashboard
+          </button>
+        </div>
+
+        {/* Review Mistakes */}
+        {showMistakes && mistakes.length > 0 && (
+          <div className="mt-8 space-y-4 text-left animate-slide-up">
+            <h3 className="font-bebas text-xl text-cream tracking-wider text-center mb-2">REVIEW MISTAKES</h3>
+            {mistakes.map((m) => {
+              const optionLabels = ["A", "B", "C", "D"];
+              return (
                 <div
-                  key={i}
-                  className="flex-1 h-9 rounded-lg flex items-center justify-center text-xs font-bold backdrop-blur-sm"
+                  key={m.questionId}
+                  className="rounded-2xl p-5 backdrop-blur-xl"
                   style={{
-                    background: a.correct ? "rgba(46,204,113,0.12)" : "rgba(231,76,60,0.12)",
-                    border: `1px solid ${a.correct ? "rgba(46,204,113,0.35)" : "rgba(231,76,60,0.35)"}`,
-                    color: a.correct ? "#2ECC71" : "#E74C3C",
+                    background: "rgba(255,255,255,0.04)",
+                    border: "1px solid rgba(255,255,255,0.10)",
+                    boxShadow: "0 4px 24px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.06)",
                   }}
                 >
-                  {a.correct ? "\u2713" : "\u2717"}
-                </div>
-              ))}
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-cream/40 text-sm">Accuracy</span>
-              <span className="font-bebas text-2xl" style={{ color: rank.color }}>{accuracy}%</span>
-            </div>
-            <div className="w-full h-2 bg-white/[0.06] rounded-full mt-2.5 overflow-hidden">
-              <div
-                className="h-full rounded-full transition-all duration-1000"
-                style={{ width: `${accuracy}%`, background: `linear-gradient(90deg, ${rank.color}cc, ${rank.color})` }}
-              />
-            </div>
-          </div>
-
-          {/* Glass Buttons */}
-          <div className="flex flex-col sm:flex-row gap-3 animate-slide-up" style={{ animationDelay: "0.24s" }}>
-            <button
-              onClick={() => router.push("/learn")}
-              className="flex-1 py-3.5 rounded-xl font-syne font-bold text-sm text-cream/90 transition-all duration-200 hover:brightness-125 active:scale-[0.98] backdrop-blur-xl cursor-pointer"
-              style={{
-                background: "rgba(255,255,255,0.06)",
-                border: "1px solid rgba(255,255,255,0.12)",
-                boxShadow: "0 2px 12px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.06)",
-              }}
-            >
-              New Quiz
-            </button>
-            <button
-              onClick={() => setShowMistakes(!showMistakes)}
-              disabled={mistakes.length === 0}
-              className="flex-1 py-3.5 rounded-xl font-syne font-bold text-sm transition-all duration-200 hover:brightness-125 active:scale-[0.98] backdrop-blur-xl cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
-              style={{
-                background: mistakes.length > 0 ? "rgba(231,76,60,0.10)" : "rgba(255,255,255,0.04)",
-                border: `1px solid ${mistakes.length > 0 ? "rgba(231,76,60,0.25)" : "rgba(255,255,255,0.08)"}`,
-                color: mistakes.length > 0 ? "#E74C3C" : "rgba(255,255,255,0.3)",
-                boxShadow: "0 2px 12px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.04)",
-              }}
-            >
-              {showMistakes ? "Hide Mistakes" : `Review Mistakes${mistakes.length > 0 ? ` (${mistakes.length})` : ""}`}
-            </button>
-            <button
-              onClick={() => router.push("/dashboard")}
-              className="flex-1 py-3.5 rounded-xl font-syne font-bold text-sm text-cream/90 transition-all duration-200 hover:brightness-125 active:scale-[0.98] backdrop-blur-xl cursor-pointer"
-              style={{
-                background: "rgba(255,255,255,0.06)",
-                border: "1px solid rgba(255,255,255,0.12)",
-                boxShadow: "0 2px 12px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.06)",
-              }}
-            >
-              Dashboard
-            </button>
-          </div>
-
-          {/* Review Mistakes Section */}
-          {showMistakes && mistakes.length > 0 && (
-            <div className="mt-8 space-y-4 text-left animate-slide-up">
-              <h3 className="font-bebas text-xl text-cream tracking-wider text-center mb-2">REVIEW MISTAKES</h3>
-              {mistakes.map((m, i) => {
-                const optionLabels = ["A", "B", "C", "D"];
-                return (
-                  <div
-                    key={m.questionId}
-                    className="rounded-2xl p-5 backdrop-blur-xl"
-                    style={{
-                      background: "rgba(255,255,255,0.04)",
-                      border: "1px solid rgba(255,255,255,0.10)",
-                      boxShadow: "0 4px 24px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.06)",
-                    }}
-                  >
-                    <p className="text-cream/30 text-xs font-bold uppercase tracking-widest mb-2">
-                      Question {answers.indexOf(m) + 1}
-                    </p>
-                    <p className="text-cream font-syne font-semibold text-sm leading-relaxed mb-4">
-                      {m.questionText}
-                    </p>
-
-                    <div className="space-y-2 mb-4">
-                      {m.options.map((opt, oi) => {
-                        const isUserPick = oi === m.selected;
-                        const isCorrectOpt = oi === m.correctIndex;
-
-                        let bg = "rgba(255,255,255,0.02)";
-                        let border = "rgba(255,255,255,0.06)";
-                        let textColor = "rgba(238,244,255,0.35)";
-
-                        if (isCorrectOpt) {
-                          bg = "rgba(46,204,113,0.10)";
-                          border = "rgba(46,204,113,0.30)";
-                          textColor = "#2ECC71";
-                        } else if (isUserPick) {
-                          bg = "rgba(231,76,60,0.10)";
-                          border = "rgba(231,76,60,0.30)";
-                          textColor = "#E74C3C";
-                        }
-
-                        return (
-                          <div
-                            key={oi}
-                            className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm"
-                            style={{ background: bg, border: `1px solid ${border}`, color: textColor }}
-                          >
-                            <span className="font-bebas text-base w-6 text-center flex-shrink-0">
-                              {isCorrectOpt ? "\u2713" : isUserPick ? "\u2717" : optionLabels[oi]}
-                            </span>
-                            <span className={isCorrectOpt || isUserPick ? "font-semibold" : ""}>{opt}</span>
-                            {isUserPick && !isCorrectOpt && (
-                              <span className="ml-auto text-[10px] uppercase tracking-widest opacity-60">Your answer</span>
-                            )}
-                            {isCorrectOpt && (
-                              <span className="ml-auto text-[10px] uppercase tracking-widest opacity-60">Correct</span>
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
-
-                    {m.explanation && (
-                      <div
-                        className="flex items-start gap-2.5 p-3.5 rounded-xl"
-                        style={{
-                          background: "rgba(74,144,217,0.06)",
-                          border: "1px solid rgba(74,144,217,0.15)",
-                        }}
-                      >
-                        <span className="text-base flex-shrink-0">&#x1F4A1;</span>
-                        <p className="text-cream/60 text-sm leading-relaxed">{m.explanation}</p>
-                      </div>
-                    )}
+                  <p className="text-cream/30 text-xs font-bold uppercase tracking-widest mb-2">
+                    Question {answers.indexOf(m) + 1}
+                  </p>
+                  <p className="text-cream font-syne font-semibold text-sm leading-relaxed mb-4">
+                    {m.questionText}
+                  </p>
+                  <div className="space-y-2 mb-4">
+                    {m.options.map((opt, oi) => {
+                      const isUserPick = oi === m.selected;
+                      const isCorrectOpt = oi === m.correctIndex;
+                      let bg = "rgba(255,255,255,0.02)";
+                      let border = "rgba(255,255,255,0.06)";
+                      let textColor = "rgba(238,244,255,0.35)";
+                      if (isCorrectOpt) { bg = "rgba(46,204,113,0.10)"; border = "rgba(46,204,113,0.30)"; textColor = "#2ECC71"; }
+                      else if (isUserPick) { bg = "rgba(231,76,60,0.10)"; border = "rgba(231,76,60,0.30)"; textColor = "#E74C3C"; }
+                      return (
+                        <div key={oi} className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm"
+                          style={{ background: bg, border: `1px solid ${border}`, color: textColor }}>
+                          <span className="font-bebas text-base w-6 text-center flex-shrink-0">
+                            {isCorrectOpt ? "\u2713" : isUserPick ? "\u2717" : optionLabels[oi]}
+                          </span>
+                          <span className={isCorrectOpt || isUserPick ? "font-semibold" : ""}>{opt}</span>
+                          {isUserPick && !isCorrectOpt && <span className="ml-auto text-[10px] uppercase tracking-widest opacity-60">Your answer</span>}
+                          {isCorrectOpt && <span className="ml-auto text-[10px] uppercase tracking-widest opacity-60">Correct</span>}
+                        </div>
+                      );
+                    })}
                   </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
+                  {m.explanation && (
+                    <div className="flex items-start gap-2.5 p-3.5 rounded-xl"
+                      style={{ background: "rgba(74,144,217,0.06)", border: "1px solid rgba(74,144,217,0.15)" }}>
+                      <span className="text-base flex-shrink-0">&#x1F4A1;</span>
+                      <p className="text-cream/60 text-sm leading-relaxed">{m.explanation}</p>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
-    );
-  }
-
-  return null;
+    </div>
+  );
 }
