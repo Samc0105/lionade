@@ -217,9 +217,9 @@ export default function DashboardPage() {
               </div>
               <span className="text-cream/25 text-[10px]">{progress.toFixed(0)}% &bull; {xpToNext} XP to Level {level + 1}</span>
             </div>
-            <div className="w-full h-3 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.04)" }}>
-              <div className="h-full rounded-full transition-all duration-700 ease-out"
-                style={{ width: xpMounted ? `${Math.max(progress, 2)}%` : "0%", background: "linear-gradient(90deg, #2D6BB5, #4A90D9, #6AABF0)", boxShadow: "0 0 10px #4A90D950" }} />
+            <div className="w-full h-3 rounded-full overflow-hidden relative" style={{ background: "rgba(255,255,255,0.04)" }}>
+              <div className="h-full rounded-full xp-bar-fill"
+                style={{ width: xpMounted ? `${Math.max(progress, 2)}%` : "0%", background: "linear-gradient(90deg, #2D6BB5, #4A90D9, #6AABF0, #9B59B6)", boxShadow: "0 0 12px rgba(74,144,217,0.5), 0 0 24px rgba(155,89,182,0.2)", transition: "width 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)" }} />
             </div>
           </div>
 

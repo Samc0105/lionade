@@ -749,6 +749,15 @@ body {
   animation-delay: 8s;
 }
 
+/* ── XP bar glow pulse ── */
+@keyframes xp-bar-glow {
+  0%, 100% { box-shadow: 0 0 12px rgba(74,144,217,0.5), 0 0 24px rgba(155,89,182,0.2); }
+  50% { box-shadow: 0 0 18px rgba(74,144,217,0.7), 0 0 36px rgba(155,89,182,0.35); }
+}
+.xp-bar-fill {
+  animation: xp-bar-glow 3s ease-in-out infinite;
+}
+
 /* ── Streak fire glow ── */
 @keyframes streak-fire-glow {
   0%, 100% { box-shadow: 0 0 12px rgba(230,126,34,0.3), 0 0 4px rgba(255,165,0,0.2); }
@@ -785,6 +794,7 @@ body {
   .chrome-text, .gold-shimmer-wrap::after, .gold-particle,
   .logo-glow, .logo-shimmer, .demo-logo-glow,
   .gem-shimmer, .tier-bar-shine, .prize-sparkle, .prize-coin,
+  .xp-bar-fill,
   .streak-fire-glow,
   .coin-burst-particle {
     animation: none !important;
