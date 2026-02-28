@@ -222,15 +222,29 @@ export default function DashboardPage() {
                 <p className="font-bebas text-2xl sm:text-3xl text-cream tracking-wider">TODAY&apos;S MISSION</p>
                 <p className="text-cream/70 text-sm sm:text-base mt-0.5">Complete Daily Quiz</p>
                 <p className="text-cream/30 text-xs mt-1">Earn +10 coins &bull; Protect your streak</p>
-                <div className="flex flex-wrap items-center gap-4 mt-5">
+                {/* Daily progress bar */}
+                <div className="mt-4">
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="text-cream/50 text-[11px] font-semibold">Questions today</span>
+                    <span className="text-cream/40 text-[11px] font-mono">{dailyProgress.questions_answered}/10</span>
+                  </div>
+                  <div className="w-full h-2.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.06)" }}>
+                    <div className="h-full rounded-full transition-all duration-1000 ease-out daily-progress-bar"
+                      style={{ width: xpMounted ? `${Math.min((dailyProgress.questions_answered / 10) * 100, 100)}%` : "0%", background: "linear-gradient(90deg, #FFD700, #FFA500)", boxShadow: dailyProgress.questions_answered > 0 ? "0 0 8px rgba(255,215,0,0.4)" : "none" }} />
+                  </div>
+                  {dailyProgress.questions_answered >= 10 && (
+                    <p className="text-gold text-[10px] font-semibold mt-1">&#x2728; Daily goal complete!</p>
+                  )}
+                </div>
+                <div className="flex flex-wrap items-center gap-4 mt-4">
                   <Link href="/quiz">
                     <button className="gold-btn px-6 py-2.5 rounded-full font-syne font-bold text-sm text-navy">
                       {dailyDone ? "Practice a Subject" : "Start Daily Quiz"}
                     </button>
                   </Link>
                   <div className="flex items-center gap-2">
-                    <span className="text-cream/25 text-xs font-semibold">{dailyDone ? "1" : "0"}/1</span>
-                    <span className="text-cream/15 text-[10px]">&bull; Resets in 14h</span>
+                    <span className="text-cream/25 text-xs font-semibold">{dailyProgress.questions_answered >= 10 ? "10" : dailyProgress.questions_answered}/10</span>
+                    <span className="text-cream/15 text-[10px]">&bull; +{dailyProgress.coins_earned} coins earned</span>
                   </div>
                 </div>
               </div>
