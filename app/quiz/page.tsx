@@ -5,7 +5,6 @@ import { Subject } from "@/types";
 import { SUBJECT_ICONS, SUBJECT_COLORS, formatCoins } from "@/lib/mockData";
 import { getQuizQuestions, checkAnswer, saveQuizSession, saveUserAnswer, getSubjectStats, getQuizHistory } from "@/lib/db";
 import QuizCard from "@/components/QuizCard";
-import Link from "next/link";
 import { useAuth } from "@/lib/auth";
 import { useRouter } from "next/navigation";
 import BackButton from "@/components/BackButton";
@@ -123,6 +122,10 @@ interface AnswerRecord {
   selected: number;
   correct: boolean;
   timeLeft: number;
+  questionText: string;
+  options: string[];
+  correctIndex: number;
+  explanation: string | null;
 }
 
 interface SubjectStatEntry {
@@ -162,6 +165,7 @@ export default function QuizPage() {
   // Anti-cheat: result comes back from server after user selects
   const [currentResult, setCurrentResult] = useState<{ correctIndex: number; explanation: string | null } | null>(null);
   const advanceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [showMistakes, setShowMistakes] = useState(false);
 
   useEffect(() => {
     if (!isLoading && !user) router.replace("/login");
@@ -220,7 +224,7 @@ export default function QuizPage() {
         const coinReward = isCorrect ? Math.round(1 * diffMult * blitzMult) : 0;
         const xpReward = isCorrect ? Math.round(10 * diffMult * blitzMult) : 0;
 
-        const newAnswer: AnswerRecord = { questionId: q.id, selected: answerIndex, correct: isCorrect, timeLeft };
+        const newAnswer: AnswerRecord = { questionId: q.id, selected: answerIndex, correct: isCorrect, timeLeft, questionText: q.question, options: q.options, correctIndex: correct_answer, explanation };
         const updatedAnswers = [...answers, newAnswer];
         setAnswers(updatedAnswers);
         setTotalCoins((prev) => prev + coinReward);
@@ -310,6 +314,7 @@ export default function QuizPage() {
     setTotalCoins(0);
     setTotalXp(0);
     setCurrentResult(null);
+    setShowMistakes(false);
   };
 
   const correctCount = answers.filter((a) => a.correct).length;
@@ -651,59 +656,212 @@ export default function QuizPage() {
   // ── Results ───────────────────────────────────────────────
   if (phase === "results") {
     const rank = getRank(accuracy);
+    const mistakes = answers.filter((a) => !a.correct);
+
     return (
       <div className="min-h-screen pt-20">
         <div className="max-w-2xl mx-auto px-4 py-12 text-center">
-          <div className="inline-flex flex-col items-center justify-center w-32 h-32 rounded-full border-4 mb-8 animate-slide-up"
-            style={{ borderColor: rank.color, background: `radial-gradient(circle, ${rank.color}20 0%, transparent 70%)`, boxShadow: `0 0 40px ${rank.color}40` }}>
+          {/* Rank Badge */}
+          <div
+            className="inline-flex flex-col items-center justify-center w-32 h-32 rounded-full mb-8 animate-slide-up"
+            style={{
+              background: `radial-gradient(circle, ${rank.color}18 0%, transparent 70%)`,
+              boxShadow: `0 0 60px ${rank.color}25, inset 0 0 30px ${rank.color}10`,
+              border: `2px solid ${rank.color}40`,
+            }}
+          >
             <span className="text-5xl">{rank.icon}</span>
           </div>
 
-          <h1 className="font-bebas text-6xl text-cream tracking-wider mb-2">{rank.label}</h1>
-          <p className="text-cream/50 text-base mb-8">
+          <h1 className="font-bebas text-6xl text-cream tracking-wider mb-2 animate-slide-up" style={{ animationDelay: "0.05s" }}>
+            {rank.label}
+          </h1>
+          <p className="text-cream/40 text-base mb-10 animate-slide-up" style={{ animationDelay: "0.08s" }}>
             {subject} Quiz Complete
-            {blitzMode && <span className="text-[#EAB308] ml-2">&#x26A1; Blitz Mode</span>}
+            {blitzMode && <span className="text-[#EAB308] ml-2">&#x26A1; Blitz</span>}
           </p>
 
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
+          {/* Glass Stat Cards */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8 animate-slide-up" style={{ animationDelay: "0.12s" }}>
             {[
-              { icon: "\u2705", label: "Correct", value: correctCount, color: "text-green-400" },
-              { icon: "\u274C", label: "Wrong",   value: wrongCount,   color: "text-red-400" },
-              { icon: "\u{1FA99}", label: "Coins",   value: totalCoins, color: "text-gold" },
-              { icon: "\u26A1", label: "XP",      value: totalXp, color: "text-electric" },
+              { icon: "\u2705", label: "Correct", value: correctCount, accent: "#2ECC71" },
+              { icon: "\u274C", label: "Wrong", value: wrongCount, accent: "#E74C3C" },
+              { icon: "\u{1FA99}", label: "Coins", value: totalCoins, accent: "#FFD700" },
+              { icon: "\u26A1", label: "XP", value: totalXp, accent: "#4A90D9" },
             ].map((s) => (
-              <div key={s.label} className="stat-box py-5">
-                <span className="text-2xl">{s.icon}</span>
-                <p className={`font-bebas text-4xl leading-none ${s.color}`}>{s.value}</p>
-                <p className="text-cream/40 text-xs">{s.label}</p>
+              <div
+                key={s.label}
+                className="relative rounded-2xl p-5 text-center backdrop-blur-xl overflow-hidden"
+                style={{
+                  background: "rgba(255,255,255,0.04)",
+                  border: "1px solid rgba(255,255,255,0.10)",
+                  boxShadow: "0 4px 24px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.06)",
+                }}
+              >
+                <span className="text-2xl block mb-2">{s.icon}</span>
+                <p className="font-bebas text-4xl leading-none" style={{ color: s.accent }}>{s.value}</p>
+                <p className="text-cream/35 text-[11px] uppercase tracking-wider mt-1.5">{s.label}</p>
               </div>
             ))}
           </div>
 
-          <div className="card mb-6 text-left">
-            <h3 className="font-bebas text-xl text-cream tracking-wider mb-3">ANSWER BREAKDOWN</h3>
-            <div className="flex gap-1 mb-3">
+          {/* Glass Answer Breakdown */}
+          <div
+            className="rounded-2xl p-5 mb-8 text-left backdrop-blur-xl animate-slide-up"
+            style={{
+              animationDelay: "0.18s",
+              background: "rgba(255,255,255,0.04)",
+              border: "1px solid rgba(255,255,255,0.10)",
+              boxShadow: "0 4px 24px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.06)",
+            }}
+          >
+            <h3 className="font-bebas text-xl text-cream tracking-wider mb-4">ANSWER BREAKDOWN</h3>
+            <div className="flex gap-1.5 mb-4">
               {answers.map((a, i) => (
-                <div key={i} className="flex-1 h-8 rounded flex items-center justify-center text-xs font-bold"
-                  style={{ background: a.correct ? "#2ECC7130" : "#E74C3C30", border: `1px solid ${a.correct ? "#2ECC71" : "#E74C3C"}` }}>
+                <div
+                  key={i}
+                  className="flex-1 h-9 rounded-lg flex items-center justify-center text-xs font-bold backdrop-blur-sm"
+                  style={{
+                    background: a.correct ? "rgba(46,204,113,0.12)" : "rgba(231,76,60,0.12)",
+                    border: `1px solid ${a.correct ? "rgba(46,204,113,0.35)" : "rgba(231,76,60,0.35)"}`,
+                    color: a.correct ? "#2ECC71" : "#E74C3C",
+                  }}
+                >
                   {a.correct ? "\u2713" : "\u2717"}
                 </div>
               ))}
             </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-cream/50">Accuracy</span>
+            <div className="flex justify-between items-center">
+              <span className="text-cream/40 text-sm">Accuracy</span>
               <span className="font-bebas text-2xl" style={{ color: rank.color }}>{accuracy}%</span>
             </div>
-            <div className="w-full h-2 bg-white/10 rounded-full mt-2 overflow-hidden">
-              <div className="h-full rounded-full transition-all duration-1000" style={{ width: `${accuracy}%`, background: rank.color }} />
+            <div className="w-full h-2 bg-white/[0.06] rounded-full mt-2.5 overflow-hidden">
+              <div
+                className="h-full rounded-full transition-all duration-1000"
+                style={{ width: `${accuracy}%`, background: `linear-gradient(90deg, ${rank.color}cc, ${rank.color})` }}
+              />
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-3">
-            <button onClick={restartQuiz} className="btn-outline flex-1 py-3">&#x1F504; New Quiz</button>
-            <Link href="/duel" className="flex-1"><button className="btn-primary w-full py-3">&#x2694;&#xFE0F; Duel</button></Link>
-            <Link href="/dashboard" className="flex-1"><button className="btn-gold w-full py-3">&#x1F3E0; Dashboard</button></Link>
+          {/* Glass Buttons */}
+          <div className="flex flex-col sm:flex-row gap-3 animate-slide-up" style={{ animationDelay: "0.24s" }}>
+            <button
+              onClick={() => router.push("/learn")}
+              className="flex-1 py-3.5 rounded-xl font-syne font-bold text-sm text-cream/90 transition-all duration-200 hover:brightness-125 active:scale-[0.98] backdrop-blur-xl cursor-pointer"
+              style={{
+                background: "rgba(255,255,255,0.06)",
+                border: "1px solid rgba(255,255,255,0.12)",
+                boxShadow: "0 2px 12px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.06)",
+              }}
+            >
+              New Quiz
+            </button>
+            <button
+              onClick={() => setShowMistakes(!showMistakes)}
+              disabled={mistakes.length === 0}
+              className="flex-1 py-3.5 rounded-xl font-syne font-bold text-sm transition-all duration-200 hover:brightness-125 active:scale-[0.98] backdrop-blur-xl cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+              style={{
+                background: mistakes.length > 0 ? "rgba(231,76,60,0.10)" : "rgba(255,255,255,0.04)",
+                border: `1px solid ${mistakes.length > 0 ? "rgba(231,76,60,0.25)" : "rgba(255,255,255,0.08)"}`,
+                color: mistakes.length > 0 ? "#E74C3C" : "rgba(255,255,255,0.3)",
+                boxShadow: "0 2px 12px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.04)",
+              }}
+            >
+              {showMistakes ? "Hide Mistakes" : `Review Mistakes${mistakes.length > 0 ? ` (${mistakes.length})` : ""}`}
+            </button>
+            <button
+              onClick={() => router.push("/dashboard")}
+              className="flex-1 py-3.5 rounded-xl font-syne font-bold text-sm text-cream/90 transition-all duration-200 hover:brightness-125 active:scale-[0.98] backdrop-blur-xl cursor-pointer"
+              style={{
+                background: "rgba(255,255,255,0.06)",
+                border: "1px solid rgba(255,255,255,0.12)",
+                boxShadow: "0 2px 12px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.06)",
+              }}
+            >
+              Dashboard
+            </button>
           </div>
+
+          {/* Review Mistakes Section */}
+          {showMistakes && mistakes.length > 0 && (
+            <div className="mt-8 space-y-4 text-left animate-slide-up">
+              <h3 className="font-bebas text-xl text-cream tracking-wider text-center mb-2">REVIEW MISTAKES</h3>
+              {mistakes.map((m, i) => {
+                const optionLabels = ["A", "B", "C", "D"];
+                return (
+                  <div
+                    key={m.questionId}
+                    className="rounded-2xl p-5 backdrop-blur-xl"
+                    style={{
+                      background: "rgba(255,255,255,0.04)",
+                      border: "1px solid rgba(255,255,255,0.10)",
+                      boxShadow: "0 4px 24px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.06)",
+                    }}
+                  >
+                    <p className="text-cream/30 text-xs font-bold uppercase tracking-widest mb-2">
+                      Question {answers.indexOf(m) + 1}
+                    </p>
+                    <p className="text-cream font-syne font-semibold text-sm leading-relaxed mb-4">
+                      {m.questionText}
+                    </p>
+
+                    <div className="space-y-2 mb-4">
+                      {m.options.map((opt, oi) => {
+                        const isUserPick = oi === m.selected;
+                        const isCorrectOpt = oi === m.correctIndex;
+
+                        let bg = "rgba(255,255,255,0.02)";
+                        let border = "rgba(255,255,255,0.06)";
+                        let textColor = "rgba(238,244,255,0.35)";
+
+                        if (isCorrectOpt) {
+                          bg = "rgba(46,204,113,0.10)";
+                          border = "rgba(46,204,113,0.30)";
+                          textColor = "#2ECC71";
+                        } else if (isUserPick) {
+                          bg = "rgba(231,76,60,0.10)";
+                          border = "rgba(231,76,60,0.30)";
+                          textColor = "#E74C3C";
+                        }
+
+                        return (
+                          <div
+                            key={oi}
+                            className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm"
+                            style={{ background: bg, border: `1px solid ${border}`, color: textColor }}
+                          >
+                            <span className="font-bebas text-base w-6 text-center flex-shrink-0">
+                              {isCorrectOpt ? "\u2713" : isUserPick ? "\u2717" : optionLabels[oi]}
+                            </span>
+                            <span className={isCorrectOpt || isUserPick ? "font-semibold" : ""}>{opt}</span>
+                            {isUserPick && !isCorrectOpt && (
+                              <span className="ml-auto text-[10px] uppercase tracking-widest opacity-60">Your answer</span>
+                            )}
+                            {isCorrectOpt && (
+                              <span className="ml-auto text-[10px] uppercase tracking-widest opacity-60">Correct</span>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {m.explanation && (
+                      <div
+                        className="flex items-start gap-2.5 p-3.5 rounded-xl"
+                        style={{
+                          background: "rgba(74,144,217,0.06)",
+                          border: "1px solid rgba(74,144,217,0.15)",
+                        }}
+                      >
+                        <span className="text-base flex-shrink-0">&#x1F4A1;</span>
+                        <p className="text-cream/60 text-sm leading-relaxed">{m.explanation}</p>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
     );
