@@ -352,7 +352,11 @@ export default function DashboardPage() {
 
                         <div className="flex items-center justify-between mt-3">
                           <span className="text-cream/25 text-[10px]">{stat.questionsAnswered} answered</span>
-                          <span className="text-cream/25 text-[10px]">{formatCoins(stat.coinsEarned)} coins</span>
+                          {bestScores[stat.subject] ? (
+                            <span className="text-[10px] font-semibold" style={{ color }}>Best: {bestScores[stat.subject].best}/{bestScores[stat.subject].total}</span>
+                          ) : (
+                            <span className="text-cream/20 text-[10px]">No attempts yet</span>
+                          )}
                         </div>
                       </div>
                     </Link>
