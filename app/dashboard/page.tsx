@@ -265,17 +265,7 @@ export default function DashboardPage() {
           <div className="mb-8 animate-slide-up" style={{ animationDelay: "0.15s" }}>
             <h2 className="font-bebas text-lg text-cream tracking-wider mb-3">CONTINUE</h2>
             <div className="flex flex-wrap gap-3">
-              {!dailyDone && (
-                <Link href="/quiz">
-                  <div className="w-36 p-3.5 rounded-[20px] transition-all duration-200 hover:scale-[1.03]"
-                    style={{ background: "linear-gradient(135deg, #4A90D912 0%, #4A90D906 100%)", border: "1px solid #4A90D918" }}>
-                    <span className="text-2xl block">{"\u{1F9E0}"}</span>
-                    <p className="font-semibold text-cream text-xs mt-2">Daily Quiz</p>
-                    <p className="text-cream/25 text-[10px] mt-0.5">10 questions</p>
-                  </div>
-                </Link>
-              )}
-              {recentTopics.slice(0, 5).map((item, i) => {
+              {recentTopics.slice(0, 6).map((item, i) => {
                 const color = SUBJECT_COLORS[item.subject as keyof typeof SUBJECT_COLORS] ?? "#4A90D9";
                 const icon = SUBJECT_ICONS[item.subject as keyof typeof SUBJECT_ICONS] ?? "\u{1F4DA}";
                 const accuracy = item.total_questions > 0 ? Math.round((item.correct_answers / item.total_questions) * 100) : 0;
