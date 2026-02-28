@@ -1,17 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
 
-// GET — health check: verify supabaseAdmin connection
+// GET — health check
 export async function GET() {
-  try {
-    const { count, error } = await supabaseAdmin
-      .from("profiles")
-      .select("id", { count: "exact", head: true });
-    if (error) return NextResponse.json({ ok: false, error: error.message });
-    return NextResponse.json({ ok: true, profileCount: count });
-  } catch (err) {
-    return NextResponse.json({ ok: false, error: String(err) });
-  }
+  const { count, error } = await supabaseAdmin
+    .from("profiles")
+    .select("id", { count: "exact", head: true });
+  if (error) return NextResponse.json({ ok: false, error: error.message });
+  return NextResponse.json({ ok: true, profiles: count });
 }
 
 export async function POST(req: NextRequest) {
