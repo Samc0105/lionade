@@ -509,7 +509,12 @@ export async function getRecentTopics(userId: string, limit = 8): Promise<{
       .limit(1);
 
     const topic = (answers?.[0]?.questions as unknown as { topic: string } | null)?.topic ?? null;
-    const label = topic || session.subject;
+
+    // Skip sessions with no topic — don't fall back to generic subject
+    if (!topic) continue;
+
+    // Capitalize first letter
+    const label = topic.charAt(0).toUpperCase() + topic.slice(1);
 
     if (seenTopics.has(label)) continue;
     seenTopics.add(label);
