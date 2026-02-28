@@ -276,6 +276,7 @@ export default function QuizPage() {
     setTotalCoins(coins);
     setTotalXp(xp);
 
+    console.log("[Quiz] finishQuiz called — user:", user!.id, "coins:", coins, "xp:", xp, "correct:", correctCount);
     try {
       const session = await saveQuizSession({
         user_id: user!.id,
@@ -286,6 +287,7 @@ export default function QuizPage() {
         xp_earned: xp,
         streak_bonus: false,
       });
+      console.log("[Quiz] saveQuizSession succeeded, session id:", session.id);
 
       await Promise.all(finalAnswers.map((a) =>
         saveUserAnswer({
@@ -294,12 +296,14 @@ export default function QuizPage() {
           selected_answer: a.selected,
           is_correct: a.correct,
           time_left: a.timeLeft,
-        }).catch(() => {})
+        }).catch((err) => console.error("[Quiz] saveUserAnswer failed:", err))
       ));
 
+      console.log("[Quiz] Calling refreshUser...");
       await refreshUser();
+      console.log("[Quiz] refreshUser completed");
     } catch (err) {
-      console.error("Failed to save session", err);
+      console.error("[Quiz] FAILED to save session:", err);
     }
 
     setPhase("results");

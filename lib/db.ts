@@ -151,23 +151,33 @@ export async function saveUserAnswer(answer: {
   time_left: number;
 }) {
   const { error } = await supabase.from("user_answers").insert(answer);
-  if (error) throw error;
+  if (error) {
+    console.error("[saveUserAnswer] Error:", error.message, error.details);
+    throw error;
+  }
+  console.log("[saveUserAnswer] Saved answer for question:", answer.question_id);
 }
 
 // ── Streak / Daily Activity ───────────────────────────────────
 
 async function upsertDailyActivity(userId: string, coinsEarned: number, questionsAnswered: number) {
   const today = new Date().toISOString().split("T")[0];
+  console.log("[upsertDailyActivity] userId:", userId, "date:", today);
 
-  const { data: existing } = await supabase
+  const { data: existing, error: fetchErr } = await supabase
     .from("daily_activity")
     .select("*")
     .eq("user_id", userId)
     .eq("date", today)
     .maybeSingle();
 
+  if (fetchErr) {
+    console.error("[upsertDailyActivity] Fetch error:", fetchErr.message);
+    return;
+  }
+
   if (existing) {
-    await supabase
+    const { error: updateErr } = await supabase
       .from("daily_activity")
       .update({
         questions_answered: existing.questions_answered + questionsAnswered,
@@ -175,14 +185,21 @@ async function upsertDailyActivity(userId: string, coinsEarned: number, question
         streak_maintained: true,
       })
       .eq("id", existing.id);
+    if (updateErr) console.error("[upsertDailyActivity] Update error:", updateErr.message);
+    else console.log("[upsertDailyActivity] Updated existing row");
   } else {
-    await supabase.from("daily_activity").insert({
+    const { error: insertErr } = await supabase.from("daily_activity").insert({
       user_id: userId,
       date: today,
       questions_answered: questionsAnswered,
       coins_earned: coinsEarned,
       streak_maintained: true,
     });
+    if (insertErr) {
+      console.error("[upsertDailyActivity] Insert error:", insertErr.message);
+      return;
+    }
+    console.log("[upsertDailyActivity] Inserted new row");
 
     // Check if yesterday had activity to continue streak
     const yesterday = new Date();
@@ -204,11 +221,13 @@ async function upsertDailyActivity(userId: string, coinsEarned: number, question
 
     if (profile) {
       const newStreak = yesterdayActivity?.streak_maintained ? profile.streak + 1 : 1;
-      const newMax = Math.max(newStreak, profile.max_streak);
-      await supabase
+      const newMax = Math.max(newStreak, profile.max_streak ?? 0);
+      const { error: streakErr } = await supabase
         .from("profiles")
         .update({ streak: newStreak, max_streak: newMax })
         .eq("id", userId);
+      if (streakErr) console.error("[upsertDailyActivity] Streak update error:", streakErr.message);
+      else console.log("[upsertDailyActivity] Streak:", profile.streak, "→", newStreak);
     }
   }
 }

@@ -113,7 +113,7 @@ async function syncProfile(userId: string, email: string, metadata: Record<strin
   try {
     const result = await Promise.race([upsertPromise, timeoutPromise]);
     if (result?.data) {
-      console.log("[Auth] syncProfile: got DB profile", result.data.username);
+      console.log("[Auth] syncProfile: got DB profile", result.data.username, "coins:", result.data.coins, "xp:", result.data.xp, "streak:", result.data.streak);
       return buildAuthUser(result.data, email);
     }
     if (result?.error) {
@@ -150,12 +150,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const refreshUser = async () => {
     const { data: { session: sess } } = await supabase.auth.getSession();
     if (!sess?.user) return;
-    const profile = await syncProfile(
-      sess.user.id,
-      sess.user.email ?? "",
-      sess.user.user_metadata ?? {}
-    );
-    if (profile) setUser(profile);
+    const email = sess.user.email ?? "";
+
+    // Just SELECT the profile — don't upsert on refresh
+    const { data: profile, error } = await supabase
+      .from("profiles")
+      .select("id, username, display_name, avatar_url, coins, streak, xp")
+      .eq("id", sess.user.id)
+      .single();
+
+    if (error) {
+      console.error("[Auth] refreshUser: select error:", error.message);
+      return;
+    }
+    if (profile) {
+      console.log("[Auth] refreshUser: coins:", profile.coins, "xp:", profile.xp, "streak:", profile.streak);
+      setUser(buildAuthUser(profile, email));
+    }
   };
 
   useEffect(() => {
@@ -201,8 +212,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         syncProfile(sess.user.id, sess.user.email ?? "", sess.user.user_metadata ?? {})
           .then((profile) => {
             if (profile) {
-              console.log("[Auth] Updated user from DB profile:", profile.coins, "coins");
+              console.log("[Auth] Updated user from DB profile — coins:", profile.coins, "xp:", profile.xp, "streak:", profile.streak);
               setUser(profile);
+            } else {
+              console.warn("[Auth] syncProfile returned null — user stays at defaults");
             }
           });
       }
