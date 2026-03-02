@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/lib/supabase";
 import {
@@ -609,12 +609,11 @@ function EditProfileSection({ user, refreshUser }: SharedProps) {
 
 // ── AVATAR & APPEARANCE ───────────────────────────────
 function AvatarSection({ user, refreshUser }: SharedProps) {
-  const [tab, setTab] = useState<"emoji"|"color"|"upload"|"create">("emoji");
+  const [tab, setTab] = useState<"emoji"|"color"|"create">("emoji");
   const [emojiCat, setEmojiCat] = useState(0);
   const [selected, setSelected] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState<{msg: string; err: boolean}|null>(null);
-  const fileRef = useRef<HTMLInputElement>(null);
 
   // Create Avatar state
   const [avSkin, setAvSkin] = useState(ADVENTURER_SKIN_TONES[0].value);
@@ -652,24 +651,6 @@ function AvatarSection({ user, refreshUser }: SharedProps) {
     setSelected(url);
   };
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setSaving(true);
-    const ext = file.name.split(".").pop();
-    const path = `avatars/${user.id}.${ext}`;
-    const { error: uploadError } = await supabase.storage
-      .from("avatars")
-      .upload(path, file, { upsert: true });
-    if (uploadError) {
-      setToast({ msg: "Upload failed: " + uploadError.message, err: true });
-      setSaving(false);
-      return;
-    }
-    const { data: urlData } = supabase.storage.from("avatars").getPublicUrl(path);
-    await saveAvatar(urlData.publicUrl);
-  };
-
   return (
     <div className="space-y-6 animate-slide-up">
       <SectionHead title="AVATAR & APPEARANCE" sub="Choose how you look to the world" />
@@ -694,12 +675,12 @@ function AvatarSection({ user, refreshUser }: SharedProps) {
       {toast && <SaveToast msg={toast.msg} isError={toast.err} />}
 
       {/* Tabs */}
-      <div className="flex gap-1 bg-white/5 p-1 rounded-xl border border-electric/10">
-        {(["create","emoji","color","upload"] as const).map(t => (
+      <div className="flex gap-1 bg-white/5 p-1 rounded-xl border border-electric/10 max-w-md mx-auto">
+        {(["create","emoji","color"] as const).map(t => (
           <button key={t} onClick={() => { setTab(t); if (t === "create") setSelected(adventurerPreview); }}
-            className={`flex-1 py-2 rounded-lg text-sm font-bold transition-all capitalize
+            className={`flex-1 py-2 rounded-lg text-sm font-bold transition-all capitalize text-center
               ${tab === t ? "bg-electric text-white shadow-lg shadow-electric/30" : "text-cream/50 hover:text-cream"}`}>
-            {t === "create" ? "✨ Create" : t === "emoji" ? "🎭 Emoji" : t === "color" ? "🎨 Color" : "📸 Upload"}
+            {t === "create" ? "✨ Create" : t === "emoji" ? "🎭 Emoji" : "🎨 Color"}
           </button>
         ))}
       </div>
@@ -825,21 +806,6 @@ function AvatarSection({ user, refreshUser }: SharedProps) {
       )}
 
       {/* Upload tab */}
-      {tab === "upload" && (
-        <Card>
-          <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFileUpload} />
-          <div className="text-center py-8">
-            <div className="text-5xl mb-4">📸</div>
-            <p className="text-cream font-bold mb-2">Upload a Photo</p>
-            <p className="text-cream/40 text-sm mb-6">JPG, PNG or WebP · Max 5MB</p>
-            <button onClick={() => fileRef.current?.click()} disabled={saving}
-              className="px-8 py-3 rounded-xl font-bold text-sm bg-electric text-white disabled:opacity-60">
-              {saving ? "Uploading..." : "Choose File"}
-            </button>
-            <p className="text-cream/20 text-xs mt-4">Requires an "avatars" storage bucket in Supabase with public access</p>
-          </div>
-        </Card>
-      )}
     </div>
   );
 }
