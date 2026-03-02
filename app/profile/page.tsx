@@ -412,8 +412,11 @@ function EditProfileSection({ user, refreshUser }: SharedProps) {
   const [usernameStatus, setUsernameStatus] = useState<"idle"|"checking"|"available"|"taken">("idle");
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState<{msg: string; err: boolean}|null>(null);
+  const [usernameLocked, setUsernameLocked] = useState(false);
+  const [usernameUnlockDate, setUsernameUnlockDate] = useState<string|null>(null);
+  const [showConfirm, setShowConfirm] = useState(false);
 
-  // Load current profile data
+  // Load current profile data + username change cooldown
   useEffect(() => {
     supabase.from("profiles").select("*").eq("id", user.id).single()
       .then(({ data }) => {
@@ -423,27 +426,70 @@ function EditProfileSection({ user, refreshUser }: SharedProps) {
         if (data.education_level) setEducation(data.education_level);
         if (data.study_goal)     setStudyGoal(data.study_goal);
       });
+
+    // Check last username change
+    supabase.from("username_changes")
+      .select("changed_at")
+      .eq("user_id", user.id)
+      .order("changed_at", { ascending: false })
+      .limit(1)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data) {
+          const daysSince = (Date.now() - new Date(data.changed_at).getTime()) / (1000 * 60 * 60 * 24);
+          if (daysSince < 365) {
+            setUsernameLocked(true);
+            const nextDate = new Date(new Date(data.changed_at).getTime() + 365 * 24 * 60 * 60 * 1000);
+            setUsernameUnlockDate(nextDate.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }));
+          }
+        }
+      });
   }, [user.id]);
 
   // Username availability debounce
   useEffect(() => {
+    if (usernameLocked) return;
     if (username === user.username) { setUsernameStatus("idle"); return; }
     if (username.length < 3) { setUsernameStatus("idle"); return; }
     if (RESERVED.includes(username)) { setUsernameStatus("taken"); return; }
     setUsernameStatus("checking");
     const t = setTimeout(async () => {
-      const { data } = await supabase.from("profiles").select("id").eq("username", username).maybeSingle();
+      const { data } = await supabase.from("profiles").select("id").eq("username", username).neq("id", user.id).maybeSingle();
       setUsernameStatus(data ? "taken" : "available");
     }, 500);
     return () => clearTimeout(t);
-  }, [username]);
+  }, [username, usernameLocked]);
 
   const handleSave = async () => {
-    if (usernameStatus === "taken") { setToast({ msg: "Username is taken", err: true }); return; }
+    if (usernameStatus === "taken") { setToast({ msg: "Username already taken", err: true }); return; }
     if (usernameStatus === "checking") { setToast({ msg: "Wait for username check", err: true }); return; }
+
+    // If username changed, show confirmation first
+    const usernameChanged = username.trim().toLowerCase() !== user.username && !usernameLocked;
+    if (usernameChanged && !showConfirm) {
+      setShowConfirm(true);
+      return;
+    }
+    setShowConfirm(false);
     setSaving(true);
+
+    // If username changed, use the server API route
+    if (usernameChanged) {
+      const res = await fetch("/api/change-username", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: user.id, newUsername: username.trim().toLowerCase() }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setToast({ msg: data.error ?? "Failed to change username", err: true });
+        setSaving(false);
+        return;
+      }
+    }
+
+    // Save other profile fields (excluding username — handled above)
     const updates: Record<string, string> = {
-      username: username.trim().toLowerCase(),
       display_name: firstName.trim(),
       bio: bio.trim(),
       education_level: education,
@@ -453,10 +499,14 @@ function EditProfileSection({ user, refreshUser }: SharedProps) {
     if (error) {
       setToast({ msg: error.message, err: true });
     } else {
-      // Sync auth metadata
-      await supabase.auth.updateUser({ data: { username: updates.username, display_name: updates.display_name } });
+      await supabase.auth.updateUser({ data: { display_name: updates.display_name } });
       await refreshUser();
       setToast({ msg: "Profile saved!", err: false });
+      if (usernameChanged) {
+        setUsernameLocked(true);
+        const nextDate = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
+        setUsernameUnlockDate(nextDate.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }));
+      }
     }
     setSaving(false);
     setTimeout(() => setToast(null), 3000);
@@ -465,6 +515,33 @@ function EditProfileSection({ user, refreshUser }: SharedProps) {
   return (
     <div className="space-y-6 animate-slide-up">
       <SectionHead title="EDIT PROFILE" sub="Update your public profile information" />
+
+      {/* Username change confirmation modal */}
+      {showConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="rounded-2xl border border-electric/20 p-6 max-w-md w-full mx-4"
+            style={{ background: "linear-gradient(135deg, #0a1020 0%, #060c18 100%)" }}>
+            <h3 className="font-bebas text-2xl text-cream tracking-wider mb-2">CONFIRM USERNAME CHANGE</h3>
+            <p className="text-cream/60 text-sm mb-4 leading-relaxed">
+              You can only change your username <span className="text-gold font-semibold">once per year</span>. Are you sure you want to change from{" "}
+              <span className="text-electric font-semibold">@{user.username}</span> to{" "}
+              <span className="text-electric font-semibold">@{username.trim().toLowerCase()}</span>?
+            </p>
+            <div className="flex gap-3">
+              <button onClick={() => setShowConfirm(false)}
+                className="flex-1 py-3 rounded-xl border border-electric/20 text-cream/60 text-sm font-bold hover:bg-white/5 transition-all">
+                Cancel
+              </button>
+              <button onClick={handleSave}
+                className="flex-1 py-3 rounded-xl font-bold text-sm text-navy transition-all"
+                style={{ background: "linear-gradient(135deg, #F0B429 0%, #B8960C 50%, #F0B429 100%)", boxShadow: "0 4px 15px rgba(240,180,41,0.3)" }}>
+                Confirm Change
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <Card>
         <div className="space-y-5">
           <div>
@@ -478,12 +555,18 @@ function EditProfileSection({ user, refreshUser }: SharedProps) {
             <div className="relative">
               <input value={username}
                 onChange={e => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ""))}
-                placeholder="your_handle" className={inputCls + " pr-28"} />
-              {usernameStatus === "checking" && <span className="absolute right-3 top-1/2 -translate-y-1/2 text-cream/40 text-xs">Checking...</span>}
-              {usernameStatus === "available" && <span className="absolute right-3 top-1/2 -translate-y-1/2 text-green-400 text-xs font-semibold">✓ Available</span>}
-              {usernameStatus === "taken"     && <span className="absolute right-3 top-1/2 -translate-y-1/2 text-red-400 text-xs font-semibold">✗ Taken</span>}
+                placeholder="your_handle"
+                disabled={usernameLocked}
+                className={inputCls + " pr-28" + (usernameLocked ? " opacity-50 cursor-not-allowed" : "")} />
+              {!usernameLocked && usernameStatus === "checking" && <span className="absolute right-3 top-1/2 -translate-y-1/2 text-cream/40 text-xs">Checking...</span>}
+              {!usernameLocked && usernameStatus === "available" && <span className="absolute right-3 top-1/2 -translate-y-1/2 text-green-400 text-xs font-semibold">✓ Available</span>}
+              {!usernameLocked && usernameStatus === "taken"     && <span className="absolute right-3 top-1/2 -translate-y-1/2 text-red-400 text-xs font-semibold">✗ Taken</span>}
             </div>
-            <p className="text-cream/25 text-xs mt-1">Lowercase letters, numbers, underscores only</p>
+            {usernameLocked && usernameUnlockDate ? (
+              <p className="text-amber-400/70 text-xs mt-1">You can change your username again on {usernameUnlockDate}</p>
+            ) : (
+              <p className="text-cream/25 text-xs mt-1">Usernames can only be changed once per year</p>
+            )}
           </div>
 
           <div>
