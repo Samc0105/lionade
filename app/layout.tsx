@@ -5,6 +5,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import AuthProviderWrapper from "@/components/AuthProviderWrapper";
 import SpaceBackground from "@/components/SpaceBackground";
+import ThemeProvider from "@/components/ThemeProvider";
 
 const bebasNeue = Bebas_Neue({
   variable: "--font-bebas",
@@ -40,16 +41,21 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${bebasNeue.variable} ${syne.variable} ${dmMono.variable}`}>
+    <html lang="en" className={`${bebasNeue.variable} ${syne.variable} ${dmMono.variable}`} suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: `(function(){try{var d=document.documentElement;d.dataset.theme=localStorage.getItem("theme")||"dark";d.dataset.fontSize=localStorage.getItem("fontSize")||"medium";d.dataset.layout=localStorage.getItem("layout")||"expanded"}catch(e){}})()` }} />
+      </head>
       <body className="text-cream font-syne antialiased">
-        <SpaceBackground />
-        <div className="relative z-10">
-          <AuthProviderWrapper>
-            <Navbar />
-            <main>{children}</main>
-            <Footer />
-          </AuthProviderWrapper>
-        </div>
+        <ThemeProvider>
+          <SpaceBackground />
+          <div className="relative z-10">
+            <AuthProviderWrapper>
+              <Navbar />
+              <main>{children}</main>
+              <Footer />
+            </AuthProviderWrapper>
+          </div>
+        </ThemeProvider>
       </body>
     </html>
   );

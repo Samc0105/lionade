@@ -28,6 +28,43 @@ export async function updateProfile(userId: string, updates: {
   return data;
 }
 
+// ── Preferences ──────────────────────────────────────────────
+
+export type UserPreferences = {
+  theme: "dark" | "light";
+  font_size: "small" | "medium" | "large";
+  dashboard_layout: "compact" | "expanded";
+  preferred_subjects: string[];
+};
+
+const DEFAULT_PREFERENCES: UserPreferences = {
+  theme: "dark",
+  font_size: "medium",
+  dashboard_layout: "expanded",
+  preferred_subjects: [],
+};
+
+export async function getPreferences(userId: string): Promise<UserPreferences> {
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("preferences")
+    .eq("id", userId)
+    .single();
+  if (error) throw error;
+  return { ...DEFAULT_PREFERENCES, ...(data?.preferences as Partial<UserPreferences> | null) };
+}
+
+export async function updatePreferences(userId: string, prefs: Partial<UserPreferences>) {
+  const current = await getPreferences(userId);
+  const merged = { ...current, ...prefs };
+  const { error } = await supabase
+    .from("profiles")
+    .update({ preferences: merged })
+    .eq("id", userId);
+  if (error) throw error;
+  return merged;
+}
+
 // ── Questions ─────────────────────────────────────────────────
 
 // Difficulty mapping: UI uses easy/medium/hard, DB uses beginner/intermediate/advanced

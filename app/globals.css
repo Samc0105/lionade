@@ -777,6 +777,67 @@ body {
   animation: coin-burst 0.9s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
 }
 
+/* ── Font size scaling ── */
+html[data-font-size="small"] { font-size: 14px; }
+html[data-font-size="medium"] { font-size: 16px; }
+html[data-font-size="large"] { font-size: 18px; }
+
+/* ── Compact dashboard layout ── */
+html[data-layout="compact"] .dash-section { margin-bottom: 1rem; }
+html[data-layout="compact"] .dash-card { padding: 1rem; }
+html[data-layout="compact"] .dash-grid { gap: 1rem; }
+
+/* ── Light theme ── */
+html[data-theme="light"] body {
+  background-color: #F5F7FA;
+  color: #1A1A2E;
+}
+html[data-theme="light"] .text-cream { color: #1A1A2E; }
+html[data-theme="light"] .text-cream\/40,
+html[data-theme="light"] .text-cream\/50,
+html[data-theme="light"] .text-cream\/60 { color: #4A4A6A; }
+html[data-theme="light"] .text-cream\/25,
+html[data-theme="light"] .text-cream\/30 { color: #8888A8; }
+
+html[data-theme="light"] .card {
+  background: #FFFFFF;
+  border-color: #D0D5DD;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+html[data-theme="light"] .card-dark {
+  background: #FFFFFF;
+  border-color: #D0D5DD;
+}
+html[data-theme="light"] .card-hover:hover {
+  border-color: #4A90D9;
+  box-shadow: 0 4px 12px rgba(74,144,217,0.12);
+}
+
+html[data-theme="light"] .bg-white\/5,
+html[data-theme="light"] .bg-white\/10 {
+  background-color: rgba(0,0,0,0.04);
+}
+html[data-theme="light"] .border-white\/10,
+html[data-theme="light"] .border-white\/20 {
+  border-color: #D0D5DD;
+}
+
+/* Light mode scrollbar */
+html[data-theme="light"] ::-webkit-scrollbar-track { background: #F0F0F0; }
+html[data-theme="light"] ::-webkit-scrollbar-thumb { background: #4A90D9; }
+html[data-theme="light"] ::selection { background: #4A90D940; color: #1A1A2E; }
+
+/* Hide space background in light mode */
+html[data-theme="light"] .space-bg-container { display: none; }
+
+/* Light mode input overrides */
+html[data-theme="light"] input,
+html[data-theme="light"] select,
+html[data-theme="light"] textarea {
+  color: #1A1A2E;
+}
+html[data-theme="light"] input::placeholder { color: #8888A8; }
+
 @media (prefers-reduced-motion: reduce) {
   .space-twinkle, .shooting-star, .shooting-star-2,
   .star, .cta-pulse, .animate-slide-up, .coin-particle, .pulse-ring,

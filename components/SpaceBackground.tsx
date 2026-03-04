@@ -38,7 +38,7 @@ export default function SpaceBackground() {
   }, []);
 
   return (
-    <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+    <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden space-bg-container">
       {/* Nebula blobs */}
       <div
         className="absolute"
