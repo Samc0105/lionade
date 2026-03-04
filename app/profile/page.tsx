@@ -6,7 +6,9 @@ import { supabase } from "@/lib/supabase";
 import {
   getAllBadges, getUserBadges, getSubjectStats,
   getQuizHistory, getRecentActivity,
+  getPreferences, updatePreferences,
 } from "@/lib/db";
+import type { UserPreferences } from "@/lib/db";
 import { getLevelProgress, formatCoins, SUBJECT_ICONS } from "@/lib/mockData";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import BackButton from "@/components/BackButton";
@@ -813,27 +815,75 @@ function AvatarSection({ user, refreshUser }: SharedProps) {
 // ── PERSONALIZATION ────────────────────────────────────
 function PersonalizationSection({ user }: SharedProps) {
   const SUBJECTS = ["Math","Science","Languages","SAT/ACT","Coding","Finance","Certifications"];
-  const [theme, setTheme] = useState(() => localStorage.getItem("theme") ?? "dark-navy");
-  const [fontSize, setFontSize] = useState(() => localStorage.getItem("fontSize") ?? "medium");
-  const [layout, setLayout] = useState(() => localStorage.getItem("layout") ?? "expanded");
-  const [prefSubjects, setPrefSubjects] = useState<string[]>(() => JSON.parse(localStorage.getItem("prefSubjects") ?? "[]"));
-  const [reminderEnabled, setReminderEnabled] = useState(() => localStorage.getItem("reminderEnabled") === "true");
-  const [reminderTime, setReminderTime] = useState(() => localStorage.getItem("reminderTime") ?? "09:00");
+  const [theme, setTheme] = useState<"dark" | "light">("dark");
+  const [fontSize, setFontSize] = useState<"small" | "medium" | "large">("medium");
+  const [layout, setLayout] = useState<"compact" | "expanded">("expanded");
+  const [prefSubjects, setPrefSubjects] = useState<string[]>([]);
   const [saved, setSaved] = useState(false);
+  const [loaded, setLoaded] = useState(false);
 
-  const save = () => {
-    localStorage.setItem("theme", theme);
-    localStorage.setItem("fontSize", fontSize);
-    localStorage.setItem("layout", layout);
-    localStorage.setItem("prefSubjects", JSON.stringify(prefSubjects));
-    localStorage.setItem("reminderEnabled", String(reminderEnabled));
-    localStorage.setItem("reminderTime", reminderTime);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
+  // Load prefs: localStorage first (instant), then Supabase (source of truth)
+  useEffect(() => {
+    // Instant from localStorage
+    setTheme((localStorage.getItem("theme") as any) || "dark");
+    setFontSize((localStorage.getItem("fontSize") as any) || "medium");
+    setLayout((localStorage.getItem("layout") as any) || "expanded");
+    try { setPrefSubjects(JSON.parse(localStorage.getItem("prefSubjects") ?? "[]")); } catch { /* */ }
+
+    // Then sync from Supabase
+    if (user?.id) {
+      getPreferences(user.id).then(p => {
+        setTheme(p.theme);
+        setFontSize(p.font_size);
+        setLayout(p.dashboard_layout);
+        setPrefSubjects(p.preferred_subjects);
+        // Update localStorage to match Supabase
+        localStorage.setItem("theme", p.theme);
+        localStorage.setItem("fontSize", p.font_size);
+        localStorage.setItem("layout", p.dashboard_layout);
+        localStorage.setItem("prefSubjects", JSON.stringify(p.preferred_subjects));
+        applyToDOM(p.theme, p.font_size, p.dashboard_layout);
+        setLoaded(true);
+      }).catch(() => setLoaded(true));
+    } else {
+      setLoaded(true);
+    }
+  }, [user?.id]);
+
+  const applyToDOM = (t: string, fs: string, l: string) => {
+    const el = document.documentElement;
+    el.dataset.theme = t;
+    el.dataset.fontSize = fs;
+    el.dataset.layout = l;
   };
 
-  const toggleSubject = (s: string) =>
-    setPrefSubjects(prev => prev.includes(s) ? prev.filter(x => x !== s) : [...prev, s]);
+  const autoSave = (updates: Partial<UserPreferences>) => {
+    // Apply locally immediately
+    const newTheme = updates.theme ?? theme;
+    const newFs = updates.font_size ?? fontSize;
+    const newLayout = updates.dashboard_layout ?? layout;
+    const newSubjects = updates.preferred_subjects ?? prefSubjects;
+
+    if (updates.theme !== undefined) { setTheme(updates.theme); localStorage.setItem("theme", updates.theme); }
+    if (updates.font_size !== undefined) { setFontSize(updates.font_size); localStorage.setItem("fontSize", updates.font_size); }
+    if (updates.dashboard_layout !== undefined) { setLayout(updates.dashboard_layout); localStorage.setItem("layout", updates.dashboard_layout); }
+    if (updates.preferred_subjects !== undefined) { setPrefSubjects(updates.preferred_subjects); localStorage.setItem("prefSubjects", JSON.stringify(updates.preferred_subjects)); }
+
+    applyToDOM(newTheme, newFs, newLayout);
+
+    // Save to Supabase in background
+    if (user?.id) {
+      updatePreferences(user.id, updates).then(() => {
+        setSaved(true);
+        setTimeout(() => setSaved(false), 1500);
+      }).catch(() => {});
+    }
+  };
+
+  const toggleSubject = (s: string) => {
+    const next = prefSubjects.includes(s) ? prefSubjects.filter(x => x !== s) : [...prefSubjects, s];
+    autoSave({ preferred_subjects: next });
+  };
 
   return (
     <div className="space-y-6 animate-slide-up">
@@ -841,19 +891,21 @@ function PersonalizationSection({ user }: SharedProps) {
 
       <Card>
         <h3 className="font-bebas text-lg text-cream tracking-wider mb-4">THEME</h3>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          {[
-            { id: "dark-navy",   label: "Dark Navy",   bg: "#04080F", accent: "#4A90D9" },
-            { id: "pure-black",  label: "Pure Black",  bg: "#000000", accent: "#4A90D9" },
-            { id: "dark-purple", label: "Dark Purple", bg: "#0D0A1A", accent: "#9B59B6" },
-            { id: "dark-green",  label: "Dark Green",  bg: "#071A0D", accent: "#2ECC71" },
-          ].map(t => (
-            <button key={t.id} onClick={() => setTheme(t.id)}
-              className={`p-4 rounded-xl border-2 text-sm font-bold transition-all
-                ${theme === t.id ? "border-electric text-electric" : "border-white/10 text-cream/50 hover:border-white/20"}`}
-              style={{ background: t.bg }}>
-              <div className="w-full h-6 rounded-lg mb-2" style={{ background: t.accent, opacity: 0.8 }} />
+        <div className="grid grid-cols-2 gap-3">
+          {([
+            { id: "dark" as const, label: "Dark", bg: "#04080F", accent: "#4A90D9", desc: "Space interstellar" },
+            { id: "light" as const, label: "Light", bg: "#F5F7FA", accent: "#4A90D9", desc: "Clean & minimal" },
+          ]).map(t => (
+            <button key={t.id} onClick={() => autoSave({ theme: t.id })}
+              className={`p-4 rounded-xl border-2 text-sm font-bold transition-all text-left
+                ${theme === t.id ? "border-electric shadow-lg shadow-electric/10" : "border-white/10 hover:border-white/20"}`}
+              style={{ background: t.bg, color: t.id === "light" ? "#1A1A2E" : "#EEF4FF" }}>
+              <div className="w-full h-8 rounded-lg mb-2 flex items-center gap-1.5 px-2" style={{ background: t.id === "dark" ? "#060c18" : "#FFFFFF", border: `1px solid ${t.id === "dark" ? "#4A90D920" : "#D0D5DD"}` }}>
+                <div className="w-3 h-3 rounded-full" style={{ background: t.accent }} />
+                <div className="flex-1 h-1.5 rounded-full" style={{ background: t.id === "dark" ? "#ffffff15" : "#00000010" }} />
+              </div>
               {t.label}
+              <span className="block text-xs mt-0.5 font-normal opacity-50">{t.desc}</span>
             </button>
           ))}
         </div>
@@ -862,12 +914,16 @@ function PersonalizationSection({ user }: SharedProps) {
       <Card>
         <h3 className="font-bebas text-lg text-cream tracking-wider mb-4">FONT SIZE</h3>
         <div className="flex gap-3">
-          {["small","medium","large"].map(f => (
-            <button key={f} onClick={() => setFontSize(f)}
-              className={`flex-1 py-3 rounded-xl border font-bold capitalize transition-all
-                ${fontSize === f ? "border-electric bg-electric/20 text-electric" : "border-white/10 text-cream/50 hover:border-white/20"}`}>
-              {f === "small" ? "A" : f === "medium" ? "A" : "A"}
-              <span className="block text-xs mt-0.5 font-normal normal-case">{f}</span>
+          {([
+            { id: "small" as const, label: "Small", size: "text-sm" },
+            { id: "medium" as const, label: "Medium", size: "text-base" },
+            { id: "large" as const, label: "Large", size: "text-lg" },
+          ]).map(f => (
+            <button key={f.id} onClick={() => autoSave({ font_size: f.id })}
+              className={`flex-1 py-3 rounded-xl border font-bold transition-all
+                ${fontSize === f.id ? "border-electric bg-electric/20 text-electric" : "border-white/10 text-cream/50 hover:border-white/20"}`}>
+              <span className={f.size}>A</span>
+              <span className="block text-xs mt-0.5 font-normal normal-case">{f.label}</span>
             </button>
           ))}
         </div>
@@ -876,11 +932,14 @@ function PersonalizationSection({ user }: SharedProps) {
       <Card>
         <h3 className="font-bebas text-lg text-cream tracking-wider mb-4">DASHBOARD LAYOUT</h3>
         <div className="flex gap-3">
-          {["compact","expanded"].map(l => (
-            <button key={l} onClick={() => setLayout(l)}
+          {([
+            { id: "compact" as const, icon: "\u229F", label: "Compact" },
+            { id: "expanded" as const, icon: "\u229E", label: "Expanded" },
+          ]).map(l => (
+            <button key={l.id} onClick={() => autoSave({ dashboard_layout: l.id })}
               className={`flex-1 py-3 rounded-xl border font-bold capitalize transition-all
-                ${layout === l ? "border-electric bg-electric/20 text-electric" : "border-white/10 text-cream/50 hover:border-white/20"}`}>
-              {l === "compact" ? "⊟" : "⊞"} {l}
+                ${layout === l.id ? "border-electric bg-electric/20 text-electric" : "border-white/10 text-cream/50 hover:border-white/20"}`}>
+              {l.icon} {l.label}
             </button>
           ))}
         </div>
@@ -894,36 +953,13 @@ function PersonalizationSection({ user }: SharedProps) {
             <button key={s} onClick={() => toggleSubject(s)}
               className={`px-4 py-2 rounded-full text-sm font-bold transition-all
                 ${prefSubjects.includes(s) ? "bg-electric/20 text-electric border border-electric/40" : "bg-white/5 text-cream/50 border border-white/10 hover:border-white/20"}`}>
-              {prefSubjects.includes(s) ? "✓ " : ""}{s}
+              {prefSubjects.includes(s) ? "\u2713 " : ""}{s}
             </button>
           ))}
         </div>
       </Card>
 
-      <Card>
-        <h3 className="font-bebas text-lg text-cream tracking-wider mb-4">STUDY REMINDER</h3>
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <p className="text-cream text-sm font-semibold">Daily Reminder</p>
-            <p className="text-cream/40 text-xs">Get notified to keep your streak</p>
-          </div>
-          <Toggle checked={reminderEnabled} onChange={setReminderEnabled} />
-        </div>
-        {reminderEnabled && (
-          <div>
-            <label className={labelCls}>Reminder Time</label>
-            <input type="time" value={reminderTime} onChange={e => setReminderTime(e.target.value)}
-              className={inputCls + " [color-scheme:dark]"} />
-          </div>
-        )}
-      </Card>
-
-      {saved && <SaveToast msg="Preferences saved!" />}
-      <button onClick={save}
-        className="w-full py-3.5 rounded-xl font-bold text-sm"
-        style={{ background: "linear-gradient(135deg, #F0B429 0%, #B8960C 50%, #F0B429 100%)", color: "#04080F", boxShadow: "0 4px 15px rgba(240,180,41,0.3)" }}>
-        💾 Save Preferences
-      </button>
+      {saved && <SaveToast msg="Saved!" />}
     </div>
   );
 }

@@ -78,6 +78,11 @@ export default function DashboardPage() {
   const [betStake, setBetStake] = useState(10);
   const [betTarget, setBetTarget] = useState(8);
   const [placingBet, setPlacingBet] = useState(false);
+  const [dashLayout, setDashLayout] = useState<"compact" | "expanded">("expanded");
+
+  useEffect(() => {
+    setDashLayout((localStorage.getItem("layout") as "compact" | "expanded") || "expanded");
+  }, []);
 
   useEffect(() => {
     if (!user) return;
@@ -158,6 +163,11 @@ export default function DashboardPage() {
   const dailyDone = dailyProgress.questions_answered > 0;
   const today = new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
 
+  const isCompact = dashLayout === "compact";
+  const sectionMb = isCompact ? "mb-4" : "mb-8";
+  const sectionMbSm = isCompact ? "mb-3" : "mb-6";
+  const gridGap = isCompact ? "gap-4" : "gap-6";
+
   const cardShapes = [
     "rounded-[24px]",
     "rounded-tl-[32px] rounded-br-[32px] rounded-tr-[8px] rounded-bl-[8px]",
@@ -219,7 +229,7 @@ export default function DashboardPage() {
           </div>
 
           {/* ═══ 2) Circular Stats Row ═══ */}
-          <div className="flex justify-center sm:justify-start gap-6 sm:gap-8 mb-8 animate-slide-up" style={{ animationDelay: "0.05s" }}>
+          <div className={`flex justify-center sm:justify-start gap-6 sm:gap-8 ${sectionMb} animate-slide-up`} style={{ animationDelay: "0.05s" }}>
             <CircleStat icon="&#x1FA99;" value={formatCoins(user.coins)} label={`+${todayCoins} today`} color="#FFD700" />
             <div className="flex flex-col items-center gap-1.5 group">
               <div className={`relative rounded-full flex items-center justify-center transition-transform duration-300 group-hover:scale-105 ${user.streak >= 1 ? "streak-fire-glow" : ""}`}
@@ -245,7 +255,7 @@ export default function DashboardPage() {
           )}
 
           {/* ═══ 3) XP Progress ═══ */}
-          <div className="mb-8 animate-slide-up" style={{ animationDelay: "0.08s" }}>
+          <div className={`${sectionMb} animate-slide-up`} style={{ animationDelay: "0.08s" }}>
             <div className="flex items-center justify-between mb-1.5">
               <div className="flex items-center gap-2">
                 <span className="text-cream/50 text-xs font-semibold">Level {level}</span>
@@ -260,7 +270,7 @@ export default function DashboardPage() {
           </div>
 
           {/* ═══ 4) Mission Hero ═══ */}
-          <div className="rounded-tl-[32px] rounded-br-[32px] rounded-tr-[12px] rounded-bl-[12px] p-6 sm:p-8 mb-8 animate-slide-up relative overflow-hidden transition-all duration-300 hover:scale-[1.01]"
+          <div className={`rounded-tl-[32px] rounded-br-[32px] rounded-tr-[12px] rounded-bl-[12px] ${isCompact ? "p-4 sm:p-5" : "p-6 sm:p-8"} ${sectionMb} animate-slide-up relative overflow-hidden transition-all duration-300 hover:scale-[1.01]`}
             style={{ background: "linear-gradient(135deg, #0d1528 0%, #0a1020 50%, #0d1528 100%)", boxShadow: "0 0 0 1px rgba(74,144,217,0.1), 0 8px 32px rgba(0,0,0,0.3)", animationDelay: "0.1s" }}>
             {/* Decorative orb */}
             <div className="absolute top-0 right-0 w-56 h-56 rounded-full pointer-events-none" style={{ background: "radial-gradient(circle, rgba(255,215,0,0.04), transparent 70%)" }} />
@@ -306,7 +316,7 @@ export default function DashboardPage() {
           </div>
 
           {/* ═══ 5) Continue ═══ */}
-          <div className="mb-8 animate-slide-up" style={{ animationDelay: "0.15s" }}>
+          <div className={`${sectionMb} animate-slide-up`} style={{ animationDelay: "0.15s" }}>
             <h2 className="font-bebas text-lg text-cream tracking-wider mb-3">CONTINUE</h2>
             <div className="flex flex-wrap gap-3">
               {recentTopics.slice(0, 6).map((item, i) => {
@@ -334,7 +344,7 @@ export default function DashboardPage() {
           </div>
 
           {/* ═══ 5b) Daily Bet ═══ */}
-          <div className="mb-8 animate-slide-up" style={{ animationDelay: "0.16s" }}>
+          <div className={`${sectionMb} animate-slide-up`} style={{ animationDelay: "0.16s" }}>
             <h2 className="font-bebas text-lg text-cream tracking-wider mb-3">DAILY BET</h2>
             <div className="rounded-tl-[28px] rounded-br-[28px] rounded-tr-[10px] rounded-bl-[10px] p-5 relative overflow-hidden"
               style={{ background: "linear-gradient(135deg, #0d1528 0%, #0a1020 100%)", border: "1px solid rgba(255,215,0,0.1)", boxShadow: "0 0 24px rgba(255,215,0,0.04)" }}>
@@ -463,7 +473,7 @@ export default function DashboardPage() {
           </div>
 
           {/* ═══ 5c) Bounty Board ═══ */}
-          <div className="mb-8 animate-slide-up" style={{ animationDelay: "0.17s" }}>
+          <div className={`${sectionMb} animate-slide-up`} style={{ animationDelay: "0.17s" }}>
             <h2 className="font-bebas text-lg text-cream tracking-wider mb-3">BOUNTY BOARD</h2>
 
             {/* Daily Bounties */}
@@ -567,7 +577,7 @@ export default function DashboardPage() {
           </div>
 
           {/* ═══ 6) Two-Column Lower ═══ */}
-          <div className="grid lg:grid-cols-3 gap-6">
+          <div className={`grid lg:grid-cols-3 ${gridGap}`}>
 
             {/* Left: Subjects as cards */}
             <div className="lg:col-span-2 animate-slide-up" style={{ animationDelay: "0.2s" }}>
