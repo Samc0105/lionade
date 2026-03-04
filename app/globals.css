@@ -782,14 +782,9 @@ html[data-font-size="small"] { font-size: 14px; }
 html[data-font-size="medium"] { font-size: 16px; }
 html[data-font-size="large"] { font-size: 18px; }
 
-/* ── Compact dashboard layout ── */
-html[data-layout="compact"] .dash-section { margin-bottom: 1rem; }
-html[data-layout="compact"] .dash-card { padding: 1rem; }
-html[data-layout="compact"] .dash-grid { gap: 1rem; }
-
 /* ── Light theme ── */
 html[data-theme="light"] body {
-  background-color: #F5F7FA;
+  background-color: #e0f2fe;
   color: #1A1A2E;
 }
 html[data-theme="light"] .text-cream { color: #1A1A2E; }
@@ -800,17 +795,17 @@ html[data-theme="light"] .text-cream\/25,
 html[data-theme="light"] .text-cream\/30 { color: #8888A8; }
 
 html[data-theme="light"] .card {
-  background: #FFFFFF;
-  border-color: #D0D5DD;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  background: rgba(255,255,255,0.7);
+  border-color: #bae6fd;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
 }
 html[data-theme="light"] .card-dark {
-  background: #FFFFFF;
-  border-color: #D0D5DD;
+  background: rgba(255,255,255,0.7);
+  border-color: #bae6fd;
 }
 html[data-theme="light"] .card-hover:hover {
-  border-color: #4A90D9;
-  box-shadow: 0 4px 12px rgba(74,144,217,0.12);
+  border-color: #3b82f6;
+  box-shadow: 0 4px 12px rgba(59,130,246,0.12);
 }
 
 html[data-theme="light"] .bg-white\/5,
@@ -819,13 +814,13 @@ html[data-theme="light"] .bg-white\/10 {
 }
 html[data-theme="light"] .border-white\/10,
 html[data-theme="light"] .border-white\/20 {
-  border-color: #D0D5DD;
+  border-color: #bae6fd;
 }
 
 /* Light mode scrollbar */
-html[data-theme="light"] ::-webkit-scrollbar-track { background: #F0F0F0; }
-html[data-theme="light"] ::-webkit-scrollbar-thumb { background: #4A90D9; }
-html[data-theme="light"] ::selection { background: #4A90D940; color: #1A1A2E; }
+html[data-theme="light"] ::-webkit-scrollbar-track { background: #dbeafe; }
+html[data-theme="light"] ::-webkit-scrollbar-thumb { background: #3b82f6; }
+html[data-theme="light"] ::selection { background: #3b82f640; color: #1A1A2E; }
 
 /* Hide space background in light mode */
 html[data-theme="light"] .space-bg-container { display: none; }

@@ -33,14 +33,12 @@ export async function updateProfile(userId: string, updates: {
 export type UserPreferences = {
   theme: "dark" | "light";
   font_size: "small" | "medium" | "large";
-  dashboard_layout: "compact" | "expanded";
   preferred_subjects: string[];
 };
 
 const DEFAULT_PREFERENCES: UserPreferences = {
   theme: "dark",
   font_size: "medium",
-  dashboard_layout: "expanded",
   preferred_subjects: [],
 };
 
