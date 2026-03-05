@@ -817,61 +817,42 @@ function PersonalizationSection({ user }: SharedProps) {
   const SUBJECTS = ["Math","Science","Languages","SAT/ACT","Coding","Finance","Certifications"];
   const [theme, setTheme] = useState<"dark" | "light">("dark");
   const [fontSize, setFontSize] = useState<"small" | "medium" | "large">("medium");
-  const [layout, setLayout] = useState<"compact" | "expanded">("expanded");
   const [prefSubjects, setPrefSubjects] = useState<string[]>([]);
   const [saved, setSaved] = useState(false);
-  const [loaded, setLoaded] = useState(false);
 
   // Load prefs: localStorage first (instant), then Supabase (source of truth)
   useEffect(() => {
-    // Instant from localStorage
     setTheme((localStorage.getItem("theme") as any) || "dark");
     setFontSize((localStorage.getItem("fontSize") as any) || "medium");
-    setLayout((localStorage.getItem("layout") as any) || "expanded");
     try { setPrefSubjects(JSON.parse(localStorage.getItem("prefSubjects") ?? "[]")); } catch { /* */ }
 
-    // Then sync from Supabase
     if (user?.id) {
       getPreferences(user.id).then(p => {
         setTheme(p.theme);
         setFontSize(p.font_size);
-        setLayout(p.dashboard_layout);
         setPrefSubjects(p.preferred_subjects);
-        // Update localStorage to match Supabase
         localStorage.setItem("theme", p.theme);
         localStorage.setItem("fontSize", p.font_size);
-        localStorage.setItem("layout", p.dashboard_layout);
         localStorage.setItem("prefSubjects", JSON.stringify(p.preferred_subjects));
-        applyToDOM(p.theme, p.font_size, p.dashboard_layout);
-        setLoaded(true);
-      }).catch(() => setLoaded(true));
-    } else {
-      setLoaded(true);
+        const el = document.documentElement;
+        el.dataset.theme = p.theme;
+        el.dataset.fontSize = p.font_size;
+      }).catch(() => {});
     }
   }, [user?.id]);
 
-  const applyToDOM = (t: string, fs: string, l: string) => {
-    const el = document.documentElement;
-    el.dataset.theme = t;
-    el.dataset.fontSize = fs;
-    el.dataset.layout = l;
-  };
-
   const autoSave = (updates: Partial<UserPreferences>) => {
-    // Apply locally immediately
     const newTheme = updates.theme ?? theme;
     const newFs = updates.font_size ?? fontSize;
-    const newLayout = updates.dashboard_layout ?? layout;
-    const newSubjects = updates.preferred_subjects ?? prefSubjects;
 
     if (updates.theme !== undefined) { setTheme(updates.theme); localStorage.setItem("theme", updates.theme); }
     if (updates.font_size !== undefined) { setFontSize(updates.font_size); localStorage.setItem("fontSize", updates.font_size); }
-    if (updates.dashboard_layout !== undefined) { setLayout(updates.dashboard_layout); localStorage.setItem("layout", updates.dashboard_layout); }
     if (updates.preferred_subjects !== undefined) { setPrefSubjects(updates.preferred_subjects); localStorage.setItem("prefSubjects", JSON.stringify(updates.preferred_subjects)); }
 
-    applyToDOM(newTheme, newFs, newLayout);
+    const el = document.documentElement;
+    el.dataset.theme = newTheme;
+    el.dataset.fontSize = newFs;
 
-    // Save to Supabase in background
     if (user?.id) {
       updatePreferences(user.id, updates).then(() => {
         setSaved(true);
@@ -891,23 +872,62 @@ function PersonalizationSection({ user }: SharedProps) {
 
       <Card>
         <h3 className="font-bebas text-lg text-cream tracking-wider mb-4">THEME</h3>
-        <div className="grid grid-cols-2 gap-3">
-          {([
-            { id: "dark" as const, label: "Dark", bg: "#04080F", accent: "#4A90D9", desc: "Space interstellar" },
-            { id: "light" as const, label: "Light", bg: "#F5F7FA", accent: "#4A90D9", desc: "Clean & minimal" },
-          ]).map(t => (
-            <button key={t.id} onClick={() => autoSave({ theme: t.id })}
-              className={`p-4 rounded-xl border-2 text-sm font-bold transition-all text-left
-                ${theme === t.id ? "border-electric shadow-lg shadow-electric/10" : "border-white/10 hover:border-white/20"}`}
-              style={{ background: t.bg, color: t.id === "light" ? "#1A1A2E" : "#EEF4FF" }}>
-              <div className="w-full h-8 rounded-lg mb-2 flex items-center gap-1.5 px-2" style={{ background: t.id === "dark" ? "#060c18" : "#FFFFFF", border: `1px solid ${t.id === "dark" ? "#4A90D920" : "#D0D5DD"}` }}>
-                <div className="w-3 h-3 rounded-full" style={{ background: t.accent }} />
-                <div className="flex-1 h-1.5 rounded-full" style={{ background: t.id === "dark" ? "#ffffff15" : "#00000010" }} />
+        <div className="grid grid-cols-2 gap-4">
+          {/* Dark theme card */}
+          <button onClick={() => autoSave({ theme: "dark" })}
+            className={`relative p-5 rounded-2xl border-2 text-left transition-all duration-300
+              ${theme === "dark"
+                ? "border-blue-500 shadow-[0_0_20px_rgba(59,130,246,0.25)]"
+                : "border-white/10 opacity-60 hover:opacity-80 hover:border-white/20"}`}
+            style={{ background: "#0f172a" }}>
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-10 h-10 rounded-full flex items-center justify-center"
+                style={{ background: "linear-gradient(135deg, #1e293b, #0f172a)", border: "1px solid rgba(59,130,246,0.3)" }}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#93c5fd" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+                </svg>
               </div>
-              {t.label}
-              <span className="block text-xs mt-0.5 font-normal opacity-50">{t.desc}</span>
-            </button>
-          ))}
+              <div>
+                <p className="font-bold text-sm text-white">Dark</p>
+                <p className="text-[11px] text-blue-300/50">Space interstellar</p>
+              </div>
+            </div>
+            <div className="rounded-xl p-2.5 flex items-center gap-2" style={{ background: "#060c18", border: "1px solid rgba(59,130,246,0.1)" }}>
+              <div className="w-2 h-2 rounded-full bg-blue-500" />
+              <div className="flex-1 h-1 rounded-full bg-white/5" />
+              <div className="w-2 h-2 rounded-full bg-yellow-500/60" />
+            </div>
+          </button>
+
+          {/* Light theme card */}
+          <button onClick={() => autoSave({ theme: "light" })}
+            className={`relative p-5 rounded-2xl border-2 text-left transition-all duration-300
+              ${theme === "light"
+                ? "border-blue-500 shadow-[0_0_20px_rgba(59,130,246,0.25)]"
+                : "border-white/10 opacity-60 hover:opacity-80 hover:border-white/20"}`}
+            style={{ background: "#dbeafe" }}>
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-10 h-10 rounded-full flex items-center justify-center"
+                style={{ background: "linear-gradient(135deg, #bfdbfe, #dbeafe)", border: "1px solid rgba(59,130,246,0.25)" }}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="5" />
+                  <line x1="12" y1="1" x2="12" y2="3" /><line x1="12" y1="21" x2="12" y2="23" />
+                  <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" /><line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+                  <line x1="1" y1="12" x2="3" y2="12" /><line x1="21" y1="12" x2="23" y2="12" />
+                  <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" /><line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+                </svg>
+              </div>
+              <div>
+                <p className="font-bold text-sm text-slate-800">Light</p>
+                <p className="text-[11px] text-slate-400">Clean & minimal</p>
+              </div>
+            </div>
+            <div className="rounded-xl p-2.5 flex items-center gap-2" style={{ background: "rgba(255,255,255,0.7)", border: "1px solid #bae6fd" }}>
+              <div className="w-2 h-2 rounded-full bg-blue-500" />
+              <div className="flex-1 h-1 rounded-full bg-slate-200" />
+              <div className="w-2 h-2 rounded-full bg-yellow-500/60" />
+            </div>
+          </button>
         </div>
       </Card>
 
@@ -924,22 +944,6 @@ function PersonalizationSection({ user }: SharedProps) {
                 ${fontSize === f.id ? "border-electric bg-electric/20 text-electric" : "border-white/10 text-cream/50 hover:border-white/20"}`}>
               <span className={f.size}>A</span>
               <span className="block text-xs mt-0.5 font-normal normal-case">{f.label}</span>
-            </button>
-          ))}
-        </div>
-      </Card>
-
-      <Card>
-        <h3 className="font-bebas text-lg text-cream tracking-wider mb-4">DASHBOARD LAYOUT</h3>
-        <div className="flex gap-3">
-          {([
-            { id: "compact" as const, icon: "\u229F", label: "Compact" },
-            { id: "expanded" as const, icon: "\u229E", label: "Expanded" },
-          ]).map(l => (
-            <button key={l.id} onClick={() => autoSave({ dashboard_layout: l.id })}
-              className={`flex-1 py-3 rounded-xl border font-bold capitalize transition-all
-                ${layout === l.id ? "border-electric bg-electric/20 text-electric" : "border-white/10 text-cream/50 hover:border-white/20"}`}>
-              {l.icon} {l.label}
             </button>
           ))}
         </div>

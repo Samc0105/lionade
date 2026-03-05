@@ -43,7 +43,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${bebasNeue.variable} ${syne.variable} ${dmMono.variable}`} suppressHydrationWarning>
       <head>
-        <script dangerouslySetInnerHTML={{ __html: `(function(){try{var d=document.documentElement;d.dataset.theme=localStorage.getItem("theme")||"dark";d.dataset.fontSize=localStorage.getItem("fontSize")||"medium";d.dataset.layout=localStorage.getItem("layout")||"expanded"}catch(e){}})()` }} />
+        <script dangerouslySetInnerHTML={{ __html: `(function(){try{var d=document.documentElement;d.dataset.theme=localStorage.getItem("theme")||"dark";d.dataset.fontSize=localStorage.getItem("fontSize")||"medium"}catch(e){}})()` }} />
       </head>
       <body className="text-cream font-syne antialiased">
         <ThemeProvider>
