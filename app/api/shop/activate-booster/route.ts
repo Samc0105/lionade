@@ -84,3 +84,35 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: String(err) }, { status: 500 });
   }
 }
+
+// PATCH — consume a booster (decrement uses_remaining, delete if 0)
+export async function PATCH(req: NextRequest) {
+  try {
+    const { boosterId } = await req.json();
+    if (!boosterId) {
+      return NextResponse.json({ error: "Missing boosterId" }, { status: 400 });
+    }
+
+    const { data: booster } = await supabaseAdmin
+      .from("active_boosters")
+      .select("id, uses_remaining")
+      .eq("id", boosterId)
+      .single();
+
+    if (!booster) {
+      return NextResponse.json({ error: "Booster not found" }, { status: 404 });
+    }
+
+    const newUses = booster.uses_remaining - 1;
+    if (newUses <= 0) {
+      await supabaseAdmin.from("active_boosters").delete().eq("id", booster.id);
+    } else {
+      await supabaseAdmin.from("active_boosters").update({ uses_remaining: newUses }).eq("id", booster.id);
+    }
+
+    return NextResponse.json({ success: true });
+  } catch (err) {
+    console.error("[shop/activate-booster PATCH]", err);
+    return NextResponse.json({ error: String(err) }, { status: 500 });
+  }
+}

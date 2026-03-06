@@ -231,6 +231,12 @@ export default function QuizPage() {
   const advanceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [showMistakes, setShowMistakes] = useState(false);
 
+  // Boosters
+  interface ActiveBooster { id: string; item_id: string; booster_effect: string; booster_value: number; uses_remaining: number }
+  const [activeBoosters, setActiveBoosters] = useState<ActiveBooster[]>([]);
+  const [fiftyFiftyUsed, setFiftyFiftyUsed] = useState(false);
+  const [autoCorrectUsed, setAutoCorrectUsed] = useState(false);
+
   useEffect(() => {
     if (!isLoading && !user) router.replace("/login");
   }, [user, isLoading, router]);
@@ -246,10 +252,36 @@ export default function QuizPage() {
   const diffMult = DIFFICULTY_MULTIPLIER[difficulty];
   const blitzMult = blitzMode ? 2 : 1;
 
+  // Booster helpers
+  const hasBooster = (effect: string) => activeBoosters.some((b) => b.booster_effect === effect);
+  const getBoosterValue = (effect: string) => activeBoosters.find((b) => b.booster_effect === effect)?.booster_value ?? 0;
+  const coinMultiplier = hasBooster("coin_multiplier") ? getBoosterValue("coin_multiplier") : 1;
+  const xpMultiplier = hasBooster("xp_multiplier") ? getBoosterValue("xp_multiplier") : 1;
+  const extraTime = hasBooster("extra_time") ? getBoosterValue("extra_time") : 0;
+  const hasAutoCorrect = hasBooster("auto_correct") && !autoCorrectUsed;
+  const hasFiftyFifty = hasBooster("fifty_fifty") && !fiftyFiftyUsed;
+  const scoreBoost = hasBooster("score_boost") ? getBoosterValue("score_boost") : 0;
+
+  const BOOSTER_ICONS: Record<string, string> = {
+    coin_multiplier: "🪙", xp_multiplier: "⚡", extra_time: "⏰",
+    auto_correct: "🍀", fifty_fifty: "🧊", score_boost: "📈",
+  };
+
   const startQuiz = async (s: Subject) => {
     setSubject(s);
     setPhase("loading");
     try {
+      // Fetch active boosters
+      try {
+        const boosterRes = await fetch(`/api/shop/activate-booster?userId=${user!.id}`);
+        if (boosterRes.ok) {
+          const boosterData = await boosterRes.json();
+          setActiveBoosters(boosterData.boosters ?? []);
+        }
+      } catch { /* ignore */ }
+      setFiftyFiftyUsed(false);
+      setAutoCorrectUsed(false);
+
       const qs = await getQuizQuestions(s, difficulty);
       if (qs.length === 0) {
         alert("No questions available for this subject + difficulty yet. Try another!");
@@ -282,11 +314,17 @@ export default function QuizPage() {
       // Fetch correct answer from server (anti-cheat)
       try {
         const { correct_answer, explanation } = await checkAnswer(q.id);
-        const isCorrect = answerIndex === correct_answer;
+        let isCorrect = answerIndex === correct_answer;
 
-        // Calculate rewards
-        const coinReward = isCorrect ? Math.round(1 * diffMult * blitzMult) : 0;
-        const xpReward = isCorrect ? Math.round(10 * diffMult * blitzMult) : 0;
+        // Auto-correct: first question auto-correct if booster active
+        if (!isCorrect && hasAutoCorrect && currentIndex === 0) {
+          isCorrect = true;
+          setAutoCorrectUsed(true);
+        }
+
+        // Calculate rewards (with booster multipliers)
+        const coinReward = isCorrect ? Math.round(1 * diffMult * blitzMult * coinMultiplier) : 0;
+        const xpReward = isCorrect ? Math.round(10 * diffMult * blitzMult * xpMultiplier) : 0;
 
         const newAnswer: AnswerRecord = { questionId: q.id, selected: answerIndex, correct: isCorrect, timeLeft, questionText: q.question, options: q.options, correctIndex: correct_answer, explanation };
         const updatedAnswers = [...answers, newAnswer];
@@ -328,13 +366,24 @@ export default function QuizPage() {
   }
 
   async function finishQuiz(finalAnswers: AnswerRecord[]) {
-    const correctCount = finalAnswers.filter((a) => a.correct).length;
-    let coins = finalAnswers.reduce((sum, a) => sum + (a.correct ? Math.round(1 * diffMult * blitzMult) : 0), 0);
-    const xp = finalAnswers.reduce((sum, a) => sum + (a.correct ? Math.round(10 * diffMult * blitzMult) : 0), 0);
+    const correctCount = Math.min(finalAnswers.filter((a) => a.correct).length + scoreBoost, questions.length);
+    let coins = finalAnswers.reduce((sum, a) => sum + (a.correct ? Math.round(1 * diffMult * blitzMult * coinMultiplier) : 0), 0);
+    const xp = finalAnswers.reduce((sum, a) => sum + (a.correct ? Math.round(10 * diffMult * blitzMult * xpMultiplier) : 0), 0);
 
     // Perfect score bonus
     if (correctCount === questions.length && questions.length === 10) {
       coins += 5;
+    }
+
+    // Consume active boosters after quiz
+    for (const booster of activeBoosters) {
+      try {
+        await fetch("/api/shop/activate-booster", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ boosterId: booster.id }),
+        });
+      } catch { /* ignore */ }
     }
 
     setTotalCoins(coins);
@@ -443,10 +492,10 @@ export default function QuizPage() {
   }
   const favoriteSubject = Object.entries(subjectCounts).sort(([, a], [, b]) => b - a)[0]?.[0] ?? "None yet";
 
-  const timerLimit = blitzMode ? 10 : 15;
+  const timerLimit = (blitzMode ? 10 : 15) + extraTime;
 
   // Coin reward display for current question
-  const currentCoinReward = Math.round(1 * diffMult * blitzMult);
+  const currentCoinReward = Math.round(1 * diffMult * blitzMult * coinMultiplier);
 
   // ── Select ────────────────────────────────────────────────
   if (phase === "select") {
@@ -712,6 +761,17 @@ export default function QuizPage() {
               </div>
             </div>
             <div className="flex items-center gap-3 text-sm">
+              {/* Active booster icons */}
+              {activeBoosters.length > 0 && (
+                <div className="flex items-center gap-1">
+                  {activeBoosters.map((b) => (
+                    <span key={b.id} className="w-7 h-7 rounded-lg flex items-center justify-center text-sm booster-active" title={b.booster_effect}
+                      style={{ background: "rgba(74,144,217,0.1)", border: "1px solid rgba(74,144,217,0.3)" }}>
+                      {BOOSTER_ICONS[b.booster_effect] ?? "🚀"}
+                    </span>
+                  ))}
+                </div>
+              )}
               <span className="text-green-400 font-bold">{correctCount} &#x2713;</span>
               <span className="text-red-400 font-bold">{wrongCount} &#x2717;</span>
               <div className="flex items-center gap-1.5 bg-gold/10 border border-gold/30 rounded-full px-3 py-1">
