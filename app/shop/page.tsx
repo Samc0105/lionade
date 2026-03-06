@@ -363,9 +363,6 @@ export default function ShopPage() {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => { setMounted(true); }, []);
-  useEffect(() => {
-    if (!isLoading && !user) router.replace("/login");
-  }, [user, isLoading, router]);
 
   // Load inventory
   const loadInventory = useCallback(async () => {
@@ -381,7 +378,9 @@ export default function ShopPage() {
 
   useEffect(() => { loadInventory(); }, [loadInventory]);
 
-  if (isLoading || !user) return null;
+  if (isLoading) return null;
+
+  const userCoins = user?.coins ?? 0;
 
   const countdown = getWeeklyCountdown();
   const ownedIds = new Set(inventory.map((i) => i.itemId));
@@ -389,7 +388,7 @@ export default function ShopPage() {
   const getQuantity = (id: string) => getOwned(id)?.quantity ?? 0;
 
   const handlePurchase = async () => {
-    if (!confirmItem || purchasing) return;
+    if (!confirmItem || purchasing || !user) return;
     setPurchasing(true);
     try {
       const totalPrice = confirmItem.item.price * confirmItem.quantity;
@@ -421,6 +420,7 @@ export default function ShopPage() {
   };
 
   const handleEquip = async (itemId: string) => {
+    if (!user) return;
     try {
       await fetch("/api/shop/equip", {
         method: "POST",
@@ -462,6 +462,8 @@ export default function ShopPage() {
   const allItems = [...COSMETIC_ITEMS, ...BOOSTER_ITEMS, ...FEATURED_ITEMS];
   const findItem = (id: string) => allItems.find((i) => i.id === id);
 
+  const requireLogin = () => { if (!user) { router.push("/login"); return true; } return false; };
+
   return (
     <div className="min-h-screen pt-16 pb-24 md:pb-12">
       {/* Purchase burst effect */}
@@ -474,7 +476,7 @@ export default function ShopPage() {
           quantity={confirmItem.quantity}
           onConfirm={handlePurchase}
           onCancel={() => setConfirmItem(null)}
-          userCoins={user.coins}
+          userCoins={userCoins}
         />
       )}
 
@@ -494,7 +496,7 @@ export default function ShopPage() {
           <div className="inline-flex items-center gap-2 mt-4 px-5 py-2 rounded-full"
             style={{ background: "rgba(255,215,0,0.08)", border: "1px solid rgba(255,215,0,0.2)" }}>
             <span className="text-lg">🪙</span>
-            <span className="font-bebas text-3xl text-gold tracking-wider">{formatCoins(user.coins)}</span>
+            <span className="font-bebas text-3xl text-gold tracking-wider">{formatCoins(userCoins)}</span>
             <span className="text-cream/30 text-xs ml-1">coins</span>
           </div>
         </div>
@@ -536,7 +538,7 @@ export default function ShopPage() {
                   key={item.id}
                   item={item}
                   owned={ownedIds.has(item.id)}
-                  onBuy={() => setConfirmItem({ item, quantity: 1 })}
+                  onBuy={() => { if (!requireLogin()) setConfirmItem({ item, quantity: 1 }); }}
                 />
               ))}
             </div>
@@ -565,8 +567,8 @@ export default function ShopPage() {
                   key={item.id}
                   item={item}
                   owned={ownedIds.has(item.id)}
-                  canAfford={user.coins >= item.price}
-                  onBuy={() => setConfirmItem({ item, quantity: 1 })}
+                  canAfford={userCoins >= item.price}
+                  onBuy={() => { if (!requireLogin()) setConfirmItem({ item, quantity: 1 }); }}
                 />
               ))}
             </div>
@@ -582,8 +584,8 @@ export default function ShopPage() {
                   key={item.id}
                   item={item}
                   quantityOwned={getQuantity(item.id)}
-                  canAfford={user.coins >= item.price}
-                  onBuy={(qty) => setConfirmItem({ item, quantity: qty })}
+                  canAfford={userCoins >= item.price}
+                  onBuy={(qty) => { if (!requireLogin()) setConfirmItem({ item, quantity: qty }); }}
                 />
               ))}
             </div>

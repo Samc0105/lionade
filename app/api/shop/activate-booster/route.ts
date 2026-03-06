@@ -8,9 +8,8 @@ export async function GET(req: NextRequest) {
 
   const { data: boosters, error } = await supabaseAdmin
     .from("active_boosters")
-    .select("id, item_id, booster_effect, booster_value, uses_remaining, activated_at")
-    .eq("user_id", userId)
-    .gt("uses_remaining", 0);
+    .select("*")
+    .eq("user_id", userId);
 
   if (error) {
     // Table might not exist yet
@@ -18,7 +17,19 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ boosters: [] });
   }
 
-  return NextResponse.json({ boosters: boosters ?? [] });
+  // Filter to active boosters and normalize column names
+  const active = (boosters ?? [])
+    .filter((b: Record<string, unknown>) => ((b.uses_remaining as number) ?? 0) > 0)
+    .map((b: Record<string, unknown>) => ({
+      id: b.id,
+      item_id: b.item_id,
+      booster_effect: b.booster_effect ?? b.effect ?? "",
+      booster_value: b.booster_value ?? b.value ?? 1,
+      uses_remaining: b.uses_remaining ?? 0,
+      activated_at: b.activated_at ?? b.created_at ?? null,
+    }));
+
+  return NextResponse.json({ boosters: active });
 }
 
 // POST — activate a booster from inventory

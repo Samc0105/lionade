@@ -8,7 +8,7 @@ export async function GET(req: NextRequest) {
 
   const { data: inventory, error } = await supabaseAdmin
     .from("user_inventory")
-    .select("item_id, quantity, equipped, acquired_at")
+    .select("*")
     .eq("user_id", userId);
 
   if (error) {
@@ -18,11 +18,11 @@ export async function GET(req: NextRequest) {
   }
 
   return NextResponse.json({
-    inventory: (inventory ?? []).map((row) => ({
+    inventory: (inventory ?? []).map((row: Record<string, unknown>) => ({
       itemId: row.item_id,
-      quantity: row.quantity,
-      equipped: row.equipped,
-      acquiredAt: row.acquired_at,
+      quantity: row.quantity ?? 1,
+      equipped: row.equipped ?? false,
+      acquiredAt: row.created_at ?? row.acquired_at ?? null,
     })),
   });
 }
@@ -90,7 +90,7 @@ export async function POST(req: NextRequest) {
           .update({ quantity: existingBooster.quantity + (quantity ?? 1) })
           .eq("id", existingBooster.id);
       } else {
-        await supabaseAdmin.from("user_inventory").insert({
+        const { error: insertErr } = await supabaseAdmin.from("user_inventory").insert({
           user_id: userId,
           item_id: itemId,
           item_type: itemType,
@@ -98,9 +98,10 @@ export async function POST(req: NextRequest) {
           equipped: false,
           rarity,
         });
+        if (insertErr) console.warn("[shop/purchase] inventory insert:", insertErr.message);
       }
     } else {
-      await supabaseAdmin.from("user_inventory").insert({
+      const { error: insertErr } = await supabaseAdmin.from("user_inventory").insert({
         user_id: userId,
         item_id: itemId,
         item_type: itemType,
@@ -108,15 +109,18 @@ export async function POST(req: NextRequest) {
         equipped: false,
         rarity,
       });
+      if (insertErr) console.warn("[shop/purchase] inventory insert:", insertErr.message);
     }
 
-    // 5. Log purchase in coin_transactions
-    await supabaseAdmin.from("coin_transactions").insert({
-      user_id: userId,
-      amount: -price,
-      type: "shop_purchase",
-      description: `Purchased ${itemName ?? itemId}${quantity > 1 ? ` x${quantity}` : ""}`,
-    });
+    // 5. Log purchase in coin_transactions (non-fatal)
+    try {
+      await supabaseAdmin.from("coin_transactions").insert({
+        user_id: userId,
+        amount: -price,
+        type: "shop_purchase",
+        description: `Purchased ${itemName ?? itemId}${quantity > 1 ? ` x${quantity}` : ""}`,
+      });
+    } catch { /* non-fatal */ }
 
     // 6. Log in purchase_history
     try {
