@@ -6,6 +6,7 @@ import { SUBJECT_ICONS, SUBJECT_COLORS, formatCoins } from "@/lib/mockData";
 import { getQuizQuestions, checkAnswer, getSubjectStats, getQuizHistory } from "@/lib/db";
 import QuizCard from "@/components/QuizCard";
 import { useAuth } from "@/lib/auth";
+import { mutateUserStats } from "@/lib/hooks";
 import { useRouter } from "next/navigation";
 import BackButton from "@/components/BackButton";
 
@@ -426,6 +427,7 @@ export default function QuizPage() {
       if (data.success) {
         console.log("[Quiz] Saved! Refreshing user...");
         await refreshUser();
+        mutateUserStats(user!.id);
         console.log("[Quiz] User refreshed");
       } else {
         console.error("[Quiz] API returned error:", data.error);

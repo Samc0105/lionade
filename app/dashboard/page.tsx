@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth";
+import { useUserStats } from "@/lib/hooks";
 import { getSubjectStats, getQuizHistory, getDailyProgress, getUserAchievements, getBestScores, getLeaderboard, getRecentTopics, getActiveBounties, getUserBountyProgress, getActiveBet, getLastResolvedBet } from "@/lib/db";
 import type { Bounty, UserBounty, ActiveBet } from "@/lib/db";
 import {
@@ -58,6 +59,7 @@ function CircleStat({ value, label, icon, color, size = 90 }: {
 
 export default function DashboardPage() {
   const { user, refreshUser } = useAuth();
+  const { stats } = useUserStats(user?.id);
   const [recentQuizzes, setRecentQuizzes] = useState<
     { id: string; subject: string; total_questions: number; correct_answers: number; coins_earned: number; completed_at: string }[]
   >([]);
@@ -107,7 +109,6 @@ export default function DashboardPage() {
       setLastBet(lbet);
       setLoadingData(false);
     });
-    refreshUser();
   }, [user?.id]);
 
   useEffect(() => {
@@ -130,7 +131,7 @@ export default function DashboardPage() {
   };
 
   const placeBet = async () => {
-    if (placingBet || user.coins < betStake) return;
+    if (placingBet || coins < betStake) return;
     setPlacingBet(true);
     try {
       const res = await fetch("/api/place-bet", {
@@ -150,9 +151,13 @@ export default function DashboardPage() {
 
   const BET_MULTIPLIERS: Record<number, number> = { 7: 1.5, 8: 2, 9: 3, 10: 5 };
 
-  console.log("[Dashboard] user:", { coins: user.coins, xp: user.xp, streak: user.streak, level: user.level });
-  const { level, progress, xpToNext } = getLevelProgress(user.xp);
-  const currentXp = user.xp % XP_PER_LEVEL;
+  const coins = stats?.coins ?? user.coins;
+  const streak = stats?.streak ?? user.streak;
+  const xp = stats?.xp ?? user.xp;
+  const userLevel = stats?.level ?? user.level;
+  console.log("[Dashboard] user:", { coins, xp, streak, level: userLevel });
+  const { level, progress, xpToNext } = getLevelProgress(xp);
+  const currentXp = xp % XP_PER_LEVEL;
   const todayCoins = dailyProgress.coins_earned;
   const displaySubjects = subjectStats;
   const dailyDone = dailyProgress.questions_answered > 0;
@@ -220,13 +225,13 @@ export default function DashboardPage() {
 
           {/* ═══ 2) Circular Stats Row ═══ */}
           <div className="flex justify-center sm:justify-start gap-6 sm:gap-8 mb-8 animate-slide-up" style={{ animationDelay: "0.05s" }}>
-            <CircleStat icon="&#x1FA99;" value={formatCoins(user.coins)} label={`+${todayCoins} today`} color="#FFD700" />
+            <CircleStat icon="&#x1FA99;" value={formatCoins(coins)} label={`+${todayCoins} today`} color="#FFD700" />
             <div className="flex flex-col items-center gap-1.5 group">
-              <div className={`relative rounded-full flex items-center justify-center transition-transform duration-300 group-hover:scale-105 ${user.streak >= 1 ? "streak-fire-glow" : ""}`}
-                style={{ width: 90, height: 90, background: `linear-gradient(135deg, #E67E2215, #E67E2208)`, border: `1.5px solid #E67E2225`, boxShadow: user.streak >= 1 ? `0 0 ${12 + Math.min(user.streak, 10) * 3}px rgba(230,126,34,${0.15 + Math.min(user.streak, 10) * 0.04})` : `0 0 20px #E67E2208` }}>
+              <div className={`relative rounded-full flex items-center justify-center transition-transform duration-300 group-hover:scale-105 ${streak >= 1 ? "streak-fire-glow" : ""}`}
+                style={{ width: 90, height: 90, background: `linear-gradient(135deg, #E67E2215, #E67E2208)`, border: `1.5px solid #E67E2225`, boxShadow: streak >= 1 ? `0 0 ${12 + Math.min(streak, 10) * 3}px rgba(230,126,34,${0.15 + Math.min(streak, 10) * 0.04})` : `0 0 20px #E67E2208` }}>
                 <div className="text-center">
-                  <span className="text-sm block mb-0.5">{user.streak >= 1 ? "\u{1F525}" : "\u{1F525}"}</span>
-                  <span className="font-bebas text-lg leading-none" style={{ color: "#E67E22" }}>{String(user.streak)}</span>
+                  <span className="text-sm block mb-0.5">{streak >= 1 ? "\u{1F525}" : "\u{1F525}"}</span>
+                  <span className="font-bebas text-lg leading-none" style={{ color: "#E67E22" }}>{String(streak)}</span>
                 </div>
                 <div className="absolute inset-0 rounded-full" style={{ animation: "orbit-stat 8s linear infinite" }}>
                   <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full" style={{ background: "#E67E22", boxShadow: `0 0 6px #E67E22` }} />
@@ -237,10 +242,10 @@ export default function DashboardPage() {
             <CircleStat icon="&#x26A1;" value={`Lv${level}`} label={`${xpToNext} xp left`} color="#4A90D9" />
             <CircleStat icon="&#x1F4DA;" value={String(displaySubjects.length)} label="subjects" color="#9B59B6" />
           </div>
-          {user.streak >= 3 && (
+          {streak >= 3 && (
             <div className="mb-6 animate-slide-up flex items-center gap-2 px-4 py-2.5 rounded-full w-fit mx-auto sm:mx-0" style={{ background: "linear-gradient(135deg, rgba(230,126,34,0.12), rgba(255,215,0,0.08))", border: "1px solid rgba(230,126,34,0.2)" }}>
               <span className="text-base streak-fire-glow">{"\u{1F525}"}</span>
-              <span className="text-cream/80 text-xs font-semibold">You&apos;re on fire! {user.streak} streak</span>
+              <span className="text-cream/80 text-xs font-semibold">You&apos;re on fire! {streak} streak</span>
             </div>
           )}
 
@@ -405,10 +410,10 @@ export default function DashboardPage() {
                         <span className="text-cream/20 text-[9px]">{BET_MULTIPLIERS[betTarget]}x</span>
                       </div>
                     </div>
-                    <button onClick={placeBet} disabled={placingBet || user.coins < betStake}
+                    <button onClick={placeBet} disabled={placingBet || coins < betStake}
                       className="mt-3 w-full py-2.5 rounded-full text-xs font-bold transition-all duration-200 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed"
-                      style={{ background: user.coins >= betStake ? "linear-gradient(90deg, #FFD700, #FFA500)" : "rgba(255,255,255,0.06)", color: user.coins >= betStake ? "#0a1020" : "rgba(255,255,255,0.3)", boxShadow: user.coins >= betStake ? "0 0 16px rgba(255,215,0,0.2)" : "none" }}>
-                      {placingBet ? "Placing..." : user.coins < betStake ? "Not enough coins" : `Place Bet — ${betStake} coins`}
+                      style={{ background: coins >= betStake ? "linear-gradient(90deg, #FFD700, #FFA500)" : "rgba(255,255,255,0.06)", color: coins >= betStake ? "#0a1020" : "rgba(255,255,255,0.3)", boxShadow: coins >= betStake ? "0 0 16px rgba(255,215,0,0.2)" : "none" }}>
+                      {placingBet ? "Placing..." : coins < betStake ? "Not enough coins" : `Place Bet — ${betStake} coins`}
                     </button>
                   </div>
                 </div>
@@ -452,10 +457,10 @@ export default function DashboardPage() {
                       <span className="text-cream/20 text-[9px]">{BET_MULTIPLIERS[betTarget]}x</span>
                     </div>
                   </div>
-                  <button onClick={placeBet} disabled={placingBet || user.coins < betStake}
+                  <button onClick={placeBet} disabled={placingBet || coins < betStake}
                     className="mt-3 w-full py-2.5 rounded-full text-xs font-bold transition-all duration-200 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed"
-                    style={{ background: user.coins >= betStake ? "linear-gradient(90deg, #FFD700, #FFA500)" : "rgba(255,255,255,0.06)", color: user.coins >= betStake ? "#0a1020" : "rgba(255,255,255,0.3)", boxShadow: user.coins >= betStake ? "0 0 16px rgba(255,215,0,0.2)" : "none" }}>
-                    {placingBet ? "Placing..." : user.coins < betStake ? "Not enough coins" : `Place Bet — ${betStake} coins`}
+                    style={{ background: coins >= betStake ? "linear-gradient(90deg, #FFD700, #FFA500)" : "rgba(255,255,255,0.06)", color: coins >= betStake ? "#0a1020" : "rgba(255,255,255,0.3)", boxShadow: coins >= betStake ? "0 0 16px rgba(255,215,0,0.2)" : "none" }}>
+                    {placingBet ? "Placing..." : coins < betStake ? "Not enough coins" : `Place Bet — ${betStake} coins`}
                   </button>
                 </div>
               )}

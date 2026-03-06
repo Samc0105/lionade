@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/lib/auth";
+import { useUserStats } from "@/lib/hooks";
 import { formatCoins } from "@/lib/mockData";
 
 const NAV_LINKS = [
@@ -25,6 +26,7 @@ export default function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
   const { user, logout } = useAuth();
+  const { stats } = useUserStats(user?.id);
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -145,7 +147,7 @@ export default function Navbar() {
                     rounded-full px-2.5 py-1 cursor-default group relative">
                     <span className="text-sm">&#x1FA99;</span>
                     <span className="font-bebas text-base text-gold tracking-wider leading-none">
-                      {formatCoins(user.coins)}
+                      {formatCoins(stats?.coins ?? user.coins)}
                     </span>
                     <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 px-2 py-1 rounded bg-navy-100
                       border border-electric/20 text-xs text-cream/70 opacity-0 group-hover:opacity-100
@@ -159,7 +161,7 @@ export default function Navbar() {
                     rounded-full px-2.5 py-1 cursor-default group relative">
                     <span className="text-sm">&#x1F525;</span>
                     <span className="font-bebas text-base text-orange-400 tracking-wider leading-none">
-                      {user.streak}
+                      {stats?.streak ?? user.streak}
                     </span>
                     <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 px-2 py-1 rounded bg-navy-100
                       border border-electric/20 text-xs text-cream/70 opacity-0 group-hover:opacity-100
@@ -199,7 +201,7 @@ export default function Navbar() {
                         {/* User info header */}
                         <div className="px-4 py-2.5 border-b border-electric/10">
                           <p className="text-cream font-bold text-sm">{user.username}</p>
-                          <p className="text-cream/40 text-xs">Level {user.level}</p>
+                          <p className="text-cream/40 text-xs">Level {stats?.level ?? user.level}</p>
                         </div>
 
                         {/* Menu items */}
