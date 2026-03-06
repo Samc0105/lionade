@@ -10,6 +10,7 @@ const NAV_LINKS = [
   { href: "/dashboard", label: "Dashboard" },
   { href: "/learn", label: "Learn" },
   { href: "/compete", label: "Compete" },
+  { href: "/shop", label: "Shop" },
 ];
 
 const DROPDOWN_ITEMS = [
@@ -67,6 +68,7 @@ export default function Navbar() {
     if (href === "/dashboard") return pathname === "/dashboard";
     if (href === "/learn") return pathname === "/learn" || pathname === "/quiz";
     if (href === "/compete") return pathname === "/compete" || pathname === "/duel" || pathname === "/leaderboard";
+    if (href === "/shop") return pathname === "/shop";
     return pathname === href;
   };
 
@@ -260,6 +262,7 @@ export default function Navbar() {
               { href: "/dashboard", label: "Home", icon: "\u{1F3E0}" },
               { href: "/learn", label: "Learn", icon: "\u{1F4DA}" },
               { href: "/compete", label: "Compete", icon: "\u2694\uFE0F" },
+              { href: "/shop", label: "Shop", icon: "\u{1F6CD}\uFE0F" },
             ].map((item) => {
               const active = isTabActive(item.href);
               return (
