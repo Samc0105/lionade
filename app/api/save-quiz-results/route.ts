@@ -125,8 +125,8 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // 5. Daily activity + streak
-    console.log("[save-quiz-results] Step 5: Daily activity...");
+    // 5. Daily activity + streak (quiz-count based: 1 streak per 5 quizzes completed)
+    console.log("[save-quiz-results] Step 5: Daily activity + streak...");
     const today = new Date().toISOString().split("T")[0];
 
     const { data: existingDaily } = await supabaseAdmin
@@ -157,30 +157,23 @@ export async function POST(req: NextRequest) {
       });
       if (dailyErr) console.warn("[save-quiz-results] Step 5 daily insert WARN:", dailyErr.message);
       else console.log("[save-quiz-results] Step 5 OK — daily inserted");
-
-      // Streak logic
-      const yesterday = new Date();
-      yesterday.setDate(yesterday.getDate() - 1);
-      const yesterdayStr = yesterday.toISOString().split("T")[0];
-
-      const { data: yesterdayActivity } = await supabaseAdmin
-        .from("daily_activity")
-        .select("streak_maintained")
-        .eq("user_id", userId)
-        .eq("date", yesterdayStr)
-        .maybeSingle();
-
-      const currentStreak = profile.streak ?? 0;
-      const newStreak = yesterdayActivity?.streak_maintained ? currentStreak + 1 : 1;
-      const newMaxStreak = Math.max(newStreak, profile.max_streak ?? 0);
-
-      const { error: streakErr } = await supabaseAdmin
-        .from("profiles")
-        .update({ streak: newStreak, max_streak: newMaxStreak })
-        .eq("id", userId);
-      if (streakErr) console.warn("[save-quiz-results] Step 5 streak WARN:", streakErr.message);
-      else console.log("[save-quiz-results] Step 5 streak:", currentStreak, "→", newStreak);
     }
+
+    // Streak logic: 1 streak per 5 quizzes completed (total lifetime)
+    const { count: totalQuizCount } = await supabaseAdmin
+      .from("quiz_sessions")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", userId);
+
+    const newStreak = Math.floor((totalQuizCount ?? 0) / 5);
+    const newMaxStreak = Math.max(newStreak, profile.max_streak ?? 0);
+
+    const { error: streakErr } = await supabaseAdmin
+      .from("profiles")
+      .update({ streak: newStreak, max_streak: newMaxStreak })
+      .eq("id", userId);
+    if (streakErr) console.warn("[save-quiz-results] Step 5 streak WARN:", streakErr.message);
+    else console.log("[save-quiz-results] Step 5 streak: quizzes=", totalQuizCount, "→ streak=", newStreak);
 
     // 6. Achievement checking
     console.log("[save-quiz-results] Step 6: Checking achievements...");
