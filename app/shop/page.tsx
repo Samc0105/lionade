@@ -46,10 +46,10 @@ interface OwnedItem {
 
 // ── Rarity config ──
 const RARITY_COLORS: Record<Rarity, { border: string; glow: string; bg: string; text: string; badge: string }> = {
-  common:    { border: "border-gray-500/40",    glow: "shop-glow-common",    bg: "bg-gray-500/8",   text: "text-gray-400",   badge: "bg-gray-500/20 text-gray-300" },
-  rare:      { border: "border-blue-500/40",    glow: "shop-glow-rare",      bg: "bg-blue-500/8",   text: "text-blue-400",   badge: "bg-blue-500/20 text-blue-300" },
-  epic:      { border: "border-purple-500/40",  glow: "shop-glow-epic",      bg: "bg-purple-500/8", text: "text-purple-400", badge: "bg-purple-500/20 text-purple-300" },
-  legendary: { border: "border-yellow-500/40",  glow: "shop-glow-legendary", bg: "bg-yellow-500/8", text: "text-yellow-400", badge: "bg-yellow-500/20 text-yellow-300" },
+  common: { border: "border-gray-500/40", glow: "shop-glow-common", bg: "bg-gray-500/8", text: "text-gray-400", badge: "bg-gray-500/20 text-gray-300" },
+  rare: { border: "border-blue-500/40", glow: "shop-glow-rare", bg: "bg-blue-500/8", text: "text-blue-400", badge: "bg-blue-500/20 text-blue-300" },
+  epic: { border: "border-purple-500/40", glow: "shop-glow-epic", bg: "bg-purple-500/8", text: "text-purple-400", badge: "bg-purple-500/20 text-purple-300" },
+  legendary: { border: "border-yellow-500/40", glow: "shop-glow-legendary", bg: "bg-yellow-500/8", text: "text-yellow-400", badge: "bg-yellow-500/20 text-yellow-300" },
 };
 
 // ══════════════════════════════════════════
@@ -134,9 +134,11 @@ function PurchaseBurst({ onDone }: { onDone: () => void }) {
     <div className="fixed inset-0 z-[200] pointer-events-none flex items-center justify-center">
       {particles.map((p) => (
         <div key={p.id} className="absolute rounded-full coin-burst-particle"
-          style={{ width: p.size, height: p.size, background: "#FFD700", boxShadow: "0 0 6px #FFD700, 0 0 12px rgba(255,215,0,0.5)",
+          style={{
+            width: p.size, height: p.size, background: "#FFD700", boxShadow: "0 0 6px #FFD700, 0 0 12px rgba(255,215,0,0.5)",
             // @ts-expect-error CSS custom properties
-            "--burst-x": `${p.dx}px`, "--burst-y": `${p.dy}px`, animationDelay: `${p.delay}s` }} />
+            "--burst-x": `${p.dx}px`, "--burst-y": `${p.dy}px`, animationDelay: `${p.delay}s`
+          }} />
       ))}
     </div>
   );
@@ -592,7 +594,8 @@ export default function ShopPage() {
                       <div className="mb-8">
                         <h3 className="font-bebas text-xl text-cream/60 tracking-wider mb-4 flex items-center gap-2"><span>🎨</span> Cosmetics</h3>
                         <div className="space-y-2">
-                          {ownedCosmetics.map((owned) => { const item = findItem(owned.itemId); if (!item) return null;
+                          {ownedCosmetics.map((owned) => {
+                            const item = findItem(owned.itemId); if (!item) return null;
                             return <InventoryItem key={owned.itemId} item={item} owned={owned} onEquip={() => handleEquip(owned.itemId)} />;
                           })}
                         </div>
@@ -602,8 +605,9 @@ export default function ShopPage() {
                       <div>
                         <h3 className="font-bebas text-xl text-cream/60 tracking-wider mb-4 flex items-center gap-2"><span>🚀</span> Boosters</h3>
                         <div className="space-y-2">
-                          {ownedBoosters.map((owned) => { const item = findItem(owned.itemId); if (!item) return null;
-                            return <InventoryItem key={owned.itemId} item={item} owned={owned} onEquip={() => {}} />;
+                          {ownedBoosters.map((owned) => {
+                            const item = findItem(owned.itemId); if (!item) return null;
+                            return <InventoryItem key={owned.itemId} item={item} owned={owned} onEquip={() => { }} />;
                           })}
                         </div>
                       </div>
