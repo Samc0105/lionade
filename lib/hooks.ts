@@ -6,12 +6,13 @@ interface UserStats {
   streak: number;
   xp: number;
   level: number;
+  avatar: string | null;
 }
 
 async function fetchUserStats(userId: string): Promise<UserStats> {
   const { data, error } = await supabase
     .from("profiles")
-    .select("coins, streak, xp")
+    .select("coins, streak, xp, avatar_url")
     .eq("id", userId)
     .single();
 
@@ -23,6 +24,7 @@ async function fetchUserStats(userId: string): Promise<UserStats> {
     streak: data.streak ?? 0,
     xp,
     level: Math.floor(xp / 1000) + 1,
+    avatar: data.avatar_url ?? null,
   };
 }
 

@@ -185,11 +185,12 @@ export default function Navbar() {
                       onClick={() => setShowDropdown(!showDropdown)}
                       className="w-8 h-8 rounded-full border-2 border-electric/40 overflow-hidden
                         hover:border-electric transition-colors duration-200 cursor-pointer flex-shrink-0"
+                      style={{ backgroundColor: "rgba(74, 144, 217, 0.25)" }}
                     >
                       <img
-                        src={user.avatar}
+                        src={stats?.avatar ?? user.avatar}
                         alt={user.username}
-                        className="w-full h-full object-cover bg-navy-50"
+                        className="w-full h-full object-cover"
                       />
                     </button>
 
