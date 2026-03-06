@@ -54,7 +54,7 @@ export default function StreakCounter({ streak, size = "md", showLabel = true }:
 
       {showLabel && (
         <span className={`${classes.label} text-cream/50 font-semibold uppercase tracking-widest`}>
-          Day Streak
+          Quiz Streak
         </span>
       )}
     </div>

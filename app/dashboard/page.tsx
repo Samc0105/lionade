@@ -232,7 +232,7 @@ export default function DashboardPage() {
                   <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full" style={{ background: "#E67E22", boxShadow: `0 0 6px #E67E22` }} />
                 </div>
               </div>
-              <span className="text-cream/30 text-[9px] font-mono tracking-wider uppercase">day streak</span>
+              <span className="text-cream/30 text-[9px] font-mono tracking-wider uppercase">quiz streak</span>
             </div>
             <CircleStat icon="&#x26A1;" value={`Lv${level}`} label={`${xpToNext} xp left`} color="#4A90D9" />
             <CircleStat icon="&#x1F4DA;" value={String(displaySubjects.length)} label="subjects" color="#9B59B6" />
@@ -240,7 +240,7 @@ export default function DashboardPage() {
           {user.streak >= 3 && (
             <div className="mb-6 animate-slide-up flex items-center gap-2 px-4 py-2.5 rounded-full w-fit mx-auto sm:mx-0" style={{ background: "linear-gradient(135deg, rgba(230,126,34,0.12), rgba(255,215,0,0.08))", border: "1px solid rgba(230,126,34,0.2)" }}>
               <span className="text-base streak-fire-glow">{"\u{1F525}"}</span>
-              <span className="text-cream/80 text-xs font-semibold">You&apos;re on fire! {user.streak}-day streak</span>
+              <span className="text-cream/80 text-xs font-semibold">You&apos;re on fire! {user.streak} streak</span>
             </div>
           )}
 
@@ -275,12 +275,12 @@ export default function DashboardPage() {
               <div className="flex-1 min-w-0">
                 <p className="font-bebas text-2xl sm:text-3xl text-cream tracking-wider">TODAY&apos;S MISSION</p>
                 <p className="text-cream/70 text-sm sm:text-base mt-0.5">Complete Daily Quiz</p>
-                <p className="text-cream/30 text-xs mt-1">Earn +10 coins &bull; Protect your streak</p>
+                <p className="text-cream/30 text-xs mt-1">Earn +10 coins &bull; Build your streak</p>
                 {/* Daily progress bar */}
                 <div className="mt-4">
                   <div className="flex items-center justify-between mb-1.5">
                     <span className="text-cream/50 text-[11px] font-semibold">Questions today</span>
-                    <span className="text-cream/40 text-[11px] font-mono">{dailyProgress.questions_answered}/10</span>
+                    <span className="text-cream/40 text-[11px] font-mono">{Math.min(dailyProgress.questions_answered, 10)}/10</span>
                   </div>
                   <div className="w-full h-2.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.06)" }}>
                     <div className="h-full rounded-full transition-all duration-1000 ease-out daily-progress-bar"
