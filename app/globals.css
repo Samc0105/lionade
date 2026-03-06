@@ -833,6 +833,110 @@ html[data-theme="light"] textarea {
 }
 html[data-theme="light"] input::placeholder { color: #8888A8; }
 
+/* ── Shop: The Lion's Den ── */
+
+/* Shop title gold glow */
+.shop-title-glow {
+  background: linear-gradient(135deg, #FFD700 0%, #FFA500 30%, #FFD700 50%, #FFEC80 70%, #FFD700 100%);
+  background-size: 300% 300%;
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shop-title-shift 4s ease-in-out infinite;
+  filter: drop-shadow(0 0 20px rgba(255,215,0,0.3)) drop-shadow(0 4px 8px rgba(0,0,0,0.5));
+}
+@keyframes shop-title-shift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+/* Rarity glows */
+@keyframes shop-glow-common-anim {
+  0%, 100% { box-shadow: 0 0 8px rgba(156,163,175,0.15), inset 0 0 20px rgba(156,163,175,0.02); }
+  50% { box-shadow: 0 0 16px rgba(156,163,175,0.25), inset 0 0 30px rgba(156,163,175,0.04); }
+}
+@keyframes shop-glow-rare-anim {
+  0%, 100% { box-shadow: 0 0 12px rgba(59,130,246,0.25), 0 0 4px rgba(59,130,246,0.15), inset 0 0 25px rgba(59,130,246,0.03); }
+  50% { box-shadow: 0 0 24px rgba(59,130,246,0.4), 0 0 8px rgba(59,130,246,0.25), inset 0 0 35px rgba(59,130,246,0.05); }
+}
+@keyframes shop-glow-epic-anim {
+  0%, 100% { box-shadow: 0 0 12px rgba(168,85,247,0.3), 0 0 4px rgba(168,85,247,0.2), inset 0 0 25px rgba(168,85,247,0.03); }
+  50% { box-shadow: 0 0 28px rgba(168,85,247,0.5), 0 0 10px rgba(168,85,247,0.3), inset 0 0 40px rgba(168,85,247,0.06); }
+}
+@keyframes shop-glow-legendary-anim {
+  0%, 100% { box-shadow: 0 0 15px rgba(255,215,0,0.35), 0 0 6px rgba(255,165,0,0.25), inset 0 0 30px rgba(255,215,0,0.04); }
+  50% { box-shadow: 0 0 35px rgba(255,215,0,0.6), 0 0 12px rgba(255,165,0,0.4), inset 0 0 50px rgba(255,215,0,0.08); }
+}
+.shop-glow-common    { animation: shop-glow-common-anim 3.5s ease-in-out infinite; }
+.shop-glow-rare      { animation: shop-glow-rare-anim 3s ease-in-out infinite; }
+.shop-glow-epic      { animation: shop-glow-epic-anim 2.8s ease-in-out infinite; }
+.shop-glow-legendary { animation: shop-glow-legendary-anim 2.5s ease-in-out infinite; }
+
+/* Shop tilt card */
+.shop-tilt-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transform-style: preserve-3d;
+}
+.shop-tilt-card:hover {
+  transform: perspective(800px) rotateX(2deg) rotateY(-3deg) scale(1.02);
+}
+
+/* Floating animation for featured items */
+@keyframes shop-item-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+.shop-item-float {
+  animation: shop-item-float 5s ease-in-out infinite;
+}
+
+/* Icon shimmer */
+@keyframes shop-icon-shimmer {
+  0%, 100% { filter: drop-shadow(0 0 4px rgba(255,255,255,0.1)); }
+  50% { filter: drop-shadow(0 0 10px rgba(255,255,255,0.3)); }
+}
+.shop-item-icon {
+  animation: shop-icon-shimmer 4s ease-in-out infinite;
+}
+
+/* Buy button pulse */
+@keyframes shop-btn-pulse-anim {
+  0%, 100% { box-shadow: 0 0 16px rgba(255,215,0,0.3), 0 0 6px rgba(255,165,0,0.2); }
+  50% { box-shadow: 0 0 28px rgba(255,215,0,0.55), 0 0 12px rgba(255,165,0,0.35); }
+}
+.shop-btn-pulse:hover {
+  animation: shop-btn-pulse-anim 1.2s ease-in-out infinite;
+}
+
+/* Legendary animated border */
+.shop-legendary-border {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1.5px;
+  background: linear-gradient(135deg, #FFD700, #FFA500, #FFD700, #FFEC80, #FFD700);
+  background-size: 400% 400%;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: shop-legendary-border-shift 3s linear infinite;
+  pointer-events: none;
+  z-index: 1;
+}
+@keyframes shop-legendary-border-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Booster active indicator */
+@keyframes booster-active-pulse {
+  0%, 100% { box-shadow: 0 0 4px rgba(74,144,217,0.3); }
+  50% { box-shadow: 0 0 12px rgba(74,144,217,0.6), 0 0 24px rgba(74,144,217,0.2); }
+}
+.booster-active {
+  animation: booster-active-pulse 2s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .space-twinkle, .shooting-star, .shooting-star-2,
   .star, .cta-pulse, .animate-slide-up, .coin-particle, .pulse-ring,
@@ -852,7 +956,11 @@ html[data-theme="light"] input::placeholder { color: #8888A8; }
   .gem-shimmer, .tier-bar-shine, .prize-sparkle, .prize-coin,
   .xp-bar-fill,
   .streak-fire-glow,
-  .coin-burst-particle {
+  .coin-burst-particle,
+  .shop-title-glow, .shop-glow-common, .shop-glow-rare,
+  .shop-glow-epic, .shop-glow-legendary, .shop-item-float,
+  .shop-item-icon, .shop-btn-pulse:hover,
+  .shop-legendary-border, .booster-active {
     animation: none !important;
   }
   .feature-orbit-node { transform: translate(-50%, -50%) !important; }
