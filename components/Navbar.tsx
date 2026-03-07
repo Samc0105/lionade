@@ -198,18 +198,18 @@ export default function Navbar() {
               {showAppNav && user && (
                 <>
                   {/* Coin Pill */}
-                  <div className="hidden sm:flex items-center gap-1.5 bg-gold/10 border border-gold/20
-                    rounded-full px-2.5 py-1 cursor-default group relative">
-                    <img src="/fangs.png" alt="Fangs" className="w-6 h-6 object-contain" />
+                  <Link href="/wallet" className="hidden sm:flex items-center gap-1.5 bg-gold/10 border border-gold/20
+                    rounded-full px-2.5 py-1 cursor-pointer group relative hover:bg-gold/15 transition-colors">
+                    <img src="/fangs.png" alt="Fangs" className="w-5 h-5 object-contain" />
                     <span className="font-bebas text-base text-gold tracking-wider leading-none">
                       {stats ? formatCoins(stats.coins) : user.statsLoaded ? formatCoins(user.coins) : <StatSkeleton />}
                     </span>
                     <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 px-2 py-1 rounded bg-navy-100
                       border border-electric/20 text-xs text-cream/70 opacity-0 group-hover:opacity-100
                       transition-opacity duration-200 pointer-events-none whitespace-nowrap">
-                      Coins
+                      Wallet
                     </div>
-                  </div>
+                  </Link>
 
                   {/* Streak Pill */}
                   <button

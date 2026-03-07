@@ -226,7 +226,9 @@ export default function DashboardPage() {
 
           {/* ═══ 2) Circular Stats Row ═══ */}
           <div className="flex justify-center sm:justify-start gap-6 sm:gap-8 mb-8 animate-slide-up" style={{ animationDelay: "0.05s" }}>
-            <CircleStat icon={<img src="/fangs.png" alt="Fangs" className="w-5 h-5 object-contain mx-auto" />} value={statsReady ? formatCoins(coins) : "\u2014"} label={`+${todayCoins} today`} color="#FFD700" />
+            <Link href="/wallet">
+              <CircleStat icon={<img src="/fangs.png" alt="Fangs" className="w-5 h-5 object-contain mx-auto" />} value={statsReady ? formatCoins(coins) : "\u2014"} label={`+${todayCoins} today`} color="#FFD700" />
+            </Link>
             <div className="flex flex-col items-center gap-1.5 group">
               <div className={`relative rounded-full flex items-center justify-center transition-transform duration-300 group-hover:scale-105 ${streak >= 1 ? "streak-fire-glow" : ""}`}
                 style={{ width: 90, height: 90, background: `linear-gradient(135deg, #E67E2215, #E67E2208)`, border: `1.5px solid #E67E2225`, boxShadow: streak >= 1 ? `0 0 ${12 + Math.min(streak, 10) * 3}px rgba(230,126,34,${0.15 + Math.min(streak, 10) * 0.04})` : `0 0 20px #E67E2208` }}>
