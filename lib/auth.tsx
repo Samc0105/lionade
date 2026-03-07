@@ -15,6 +15,8 @@ export interface AuthUser {
   streak: number;
   xp: number;
   level: number;
+  /** true once stats have been loaded from DB (not just defaults) */
+  statsLoaded: boolean;
 }
 
 export interface SignupExtra {
@@ -58,6 +60,7 @@ function buildAuthUser(profile: {
     streak: profile.streak ?? 0,
     xp,
     level,
+    statsLoaded: true,
   };
 }
 
@@ -75,6 +78,7 @@ function buildBasicUser(userId: string, email: string, metadata: Record<string, 
     streak: 0,
     xp: 0,
     level: 1,
+    statsLoaded: false,
   };
 }
 
@@ -215,7 +219,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               console.log("[Auth] Updated user from DB profile — coins:", profile.coins, "xp:", profile.xp, "streak:", profile.streak);
               setUser(profile);
             } else {
-              console.warn("[Auth] syncProfile returned null — user stays at defaults");
+              console.warn("[Auth] syncProfile returned null — marking statsLoaded anyway");
+              setUser(prev => prev ? { ...prev, statsLoaded: true } : prev);
             }
           });
       }

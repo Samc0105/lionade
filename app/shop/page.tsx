@@ -8,7 +8,7 @@ import { formatCoins } from "@/lib/mockData";
 // ── Types ──
 type Rarity = "common" | "rare" | "epic" | "legendary";
 type ItemType = "frame" | "background" | "name_color" | "banner" | "booster";
-type BoosterEffect = "coin_multiplier" | "xp_multiplier" | "extra_time" | "auto_correct" | "fifty_fifty" | "score_boost";
+type BoosterEffect = "coin_multiplier" | "xp_multiplier" | "extra_time" | "auto_correct" | "fifty_fifty" | "score_boost" | "streak_shield";
 type Tab = "featured" | "cosmetics" | "boosters" | "inventory";
 type CosmeticSub = "frames" | "backgrounds" | "name_colors" | "banners";
 type StoreMode = "coins" | "premium";
@@ -85,7 +85,7 @@ const COSMETIC_ITEMS: ShopItem[] = [
 const BOOSTER_ITEMS: ShopItem[] = [
   { id: "boost_coin_rush", name: "Coin Rush", description: "2x coins earned on your next quiz", type: "booster", rarity: "rare", price: 75, icon: "🪙", boosterEffect: "coin_multiplier", boosterValue: 2, boosterDuration: 1 },
   { id: "boost_xp_surge", name: "XP Surge", description: "2x XP earned on your next quiz", type: "booster", rarity: "rare", price: 75, icon: "⚡", boosterEffect: "xp_multiplier", boosterValue: 2, boosterDuration: 1 },
-  { id: "boost_streak_shield", name: "Streak Shield", description: "Protects your streak for one missed day", type: "booster", rarity: "epic", price: 150, icon: "🛡️", boosterEffect: "score_boost", boosterValue: 0, boosterDuration: 1 },
+  { id: "boost_streak_shield", name: "Streak Shield", description: "Protects your streak for one missed day", type: "booster", rarity: "epic", price: 150, icon: "🛡️", boosterEffect: "streak_shield", boosterValue: 0, boosterDuration: 1 },
   { id: "boost_double_down", name: "Double Down", description: "Double coins AND XP on next quiz", type: "booster", rarity: "epic", price: 200, icon: "🎲", boosterEffect: "coin_multiplier", boosterValue: 2, boosterDuration: 1 },
   { id: "boost_lucky_start", name: "Lucky Start", description: "First question auto-correct", type: "booster", rarity: "rare", price: 100, icon: "🍀", boosterEffect: "auto_correct", boosterValue: 1, boosterDuration: 1 },
   { id: "boost_time_warp", name: "Time Warp", description: "+10 seconds per question", type: "booster", rarity: "common", price: 40, icon: "⏰", boosterEffect: "extra_time", boosterValue: 10, boosterDuration: 1 },

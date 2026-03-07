@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth";
+import { useUserStats } from "@/lib/hooks";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import BackButton from "@/components/BackButton";
 import { getQuizHistory, getLeaderboard } from "@/lib/db";
@@ -237,6 +238,7 @@ interface LeaderboardEntry {
 export default function LearnPage() {
   const router = useRouter();
   const { user } = useAuth();
+  const { stats } = useUserStats(user?.id);
   const [showNinny, setShowNinny] = useState(false);
   const [showPractice, setShowPractice] = useState(false);
   const [quizHistory, setQuizHistory] = useState<QuizHistoryEntry[]>([]);
@@ -317,7 +319,7 @@ export default function LearnPage() {
                 <span className="text-2xl">&#x1F525;</span>
                 <div>
                   <p className="font-bebas text-3xl text-[#F97316] leading-none">
-                    {user.streak}
+                    {stats?.streak ?? user.streak}
                   </p>
                   <p className="text-cream/40 text-[10px] uppercase tracking-wider">
                     Streak
@@ -337,7 +339,7 @@ export default function LearnPage() {
                 <span className="text-2xl">&#x26A1;</span>
                 <div>
                   <p className="font-bebas text-3xl text-electric leading-none">
-                    {user.xp.toLocaleString()}
+                    {(stats?.xp ?? user.xp).toLocaleString()}
                   </p>
                   <p className="text-cream/40 text-[10px] uppercase tracking-wider">
                     XP
@@ -357,7 +359,7 @@ export default function LearnPage() {
                 <span className="text-2xl">&#x1FA99;</span>
                 <div>
                   <p className="font-bebas text-3xl text-gold leading-none">
-                    {user.coins.toLocaleString()}
+                    {(stats?.coins ?? user.coins).toLocaleString()}
                   </p>
                   <p className="text-cream/40 text-[10px] uppercase tracking-wider">
                     Coins
@@ -368,7 +370,7 @@ export default function LearnPage() {
           )}
 
           {/* Streak === 0 message */}
-          {user && user.streak === 0 && (
+          {user && (stats?.streak ?? user.streak) === 0 && stats && (
             <p
               className="text-center text-[#F97316] text-sm font-syne -mt-4 mb-6 animate-slide-up"
               style={{ animationDelay: "0.08s" }}

@@ -159,13 +159,66 @@ export async function POST(req: NextRequest) {
       else console.log("[save-quiz-results] Step 5 OK — daily inserted");
     }
 
-    // Streak logic: 1 streak per 5 quizzes completed (total lifetime)
-    const { count: totalQuizCount } = await supabaseAdmin
-      .from("quiz_sessions")
-      .select("id", { count: "exact", head: true })
-      .eq("user_id", userId);
+    // Streak logic: 36-hour window daily streak
+    const alreadyMaintained = existingDaily && existingDaily.questions_answered > totalQuestions;
+    // ^ If daily_activity already existed before our update, streak was already maintained today
 
-    const newStreak = Math.floor((totalQuizCount ?? 0) / 5);
+    let newStreak = profile.streak ?? 0;
+
+    if (!alreadyMaintained) {
+      // Fetch the user's most recent quiz BEFORE this one
+      const { data: prevQuiz } = await supabaseAdmin
+        .from("quiz_sessions")
+        .select("completed_at")
+        .eq("user_id", userId)
+        .neq("id", session.id)
+        .order("completed_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (!prevQuiz) {
+        // First ever quiz — start streak at 1
+        newStreak = 1;
+      } else {
+        const lastQuizTime = new Date(prevQuiz.completed_at).getTime();
+        const hoursSince = (Date.now() - lastQuizTime) / (1000 * 60 * 60);
+
+        if (hoursSince <= 36) {
+          // Within 36h window — increment streak (once per day)
+          newStreak = (profile.streak ?? 0) + 1;
+        } else {
+          // Streak broken — check for streak shield
+          const { data: shield } = await supabaseAdmin
+            .from("active_boosters")
+            .select("id, uses_remaining")
+            .eq("user_id", userId)
+            .eq("booster_effect", "streak_shield")
+            .limit(1)
+            .maybeSingle();
+
+          if (shield) {
+            // Consume streak shield — keep streak
+            if (shield.uses_remaining && shield.uses_remaining > 1) {
+              await supabaseAdmin
+                .from("active_boosters")
+                .update({ uses_remaining: shield.uses_remaining - 1 })
+                .eq("id", shield.id);
+            } else {
+              await supabaseAdmin
+                .from("active_boosters")
+                .delete()
+                .eq("id", shield.id);
+            }
+            newStreak = (profile.streak ?? 0) + 1;
+            console.log("[save-quiz-results] Step 5 streak shield consumed");
+          } else {
+            // No shield — reset to 1
+            newStreak = 1;
+          }
+        }
+      }
+    }
+
     const newMaxStreak = Math.max(newStreak, profile.max_streak ?? 0);
 
     const { error: streakErr } = await supabaseAdmin
@@ -173,7 +226,7 @@ export async function POST(req: NextRequest) {
       .update({ streak: newStreak, max_streak: newMaxStreak })
       .eq("id", userId);
     if (streakErr) console.warn("[save-quiz-results] Step 5 streak WARN:", streakErr.message);
-    else console.log("[save-quiz-results] Step 5 streak: quizzes=", totalQuizCount, "→ streak=", newStreak);
+    else console.log("[save-quiz-results] Step 5 streak: → streak=", newStreak);
 
     // 6. Achievement checking
     console.log("[save-quiz-results] Step 6: Checking achievements...");
