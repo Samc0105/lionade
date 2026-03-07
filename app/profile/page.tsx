@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { useAuth } from "@/lib/auth";
-import { useUserStats } from "@/lib/hooks";
+import { useUserStats, mutateUserStats } from "@/lib/hooks";
 import { supabase } from "@/lib/supabase";
 import {
   getAllBadges, getUserBadges, getSubjectStats,
@@ -23,27 +23,21 @@ type Section =
   | "activity" | "notifications" | "about";
 
 // ── Constants ─────────────────────────────────────────
-const EMOJI_CATEGORIES: { label: string; emojis: string[] }[] = [
-  { label: "Animals", emojis: ["🦁","🐯","🐻","🐼","🦊","🐺","🦅","🦋","🐬","🦈","🐙","🦎","🐲","🦄","🦓","🐘","🦒","🐆","🦜","🦚"] },
-  { label: "Food",    emojis: ["🍕","🍔","🌮","🍜","🍣","🍩","🎂","🍦","🧁","🍫","🍎","🍊","🍋","🍇","🍓","🥑","🧋","🍺","🍉","🥝"] },
-  { label: "Sports",  emojis: ["⚽","🏀","🏈","⚾","🎾","🏐","🎱","🏓","⛳","🥊","🏆","🎯","🎿","🏋️","🤺","🥋","🏄","🚴","🤼","🎖️"] },
-  { label: "Space",   emojis: ["🚀","🌟","⭐","🌙","☀️","🌍","🪐","💫","🛸","🌌","☄️","🌠","🔭","🌑","🌒","🌕","🌞","🌛","🌜","🌝"] },
-  { label: "Fantasy", emojis: ["🐉","🧙","🧝","🧚","🦸","🧜","🔮","🪄","✨","🗡️","🛡️","👑","💎","🏰","🧿","🪬","🌀","🔯","⚗️","🧬"] },
-  { label: "Faces",   emojis: ["😎","🤩","🥳","😏","🤓","🤯","🥶","🤠","👻","🎭","💀","🤖","👾","🎃","🦸","💪","👑","🔥","💯","⚡"] },
+const DICEBEAR_STYLES = [
+  { id: "avataaars",    label: "Characters" },
+  { id: "bottts",       label: "Robots" },
+  { id: "pixel-art",    label: "Pixel" },
+  { id: "lorelei",      label: "Artistic" },
+  { id: "fun-emoji",    label: "Emoji" },
+  { id: "micah",        label: "Minimal" },
+  { id: "adventurer",   label: "Adventure" },
+  { id: "croodles",     label: "Doodles" },
+  { id: "notionists",   label: "Notion" },
+  { id: "open-peeps",   label: "Peeps" },
 ];
 
-const COLOR_AVATARS = [
-  { bg: "#4A90D9", text: "#fff" }, { bg: "#FFD700", text: "#04080F" },
-  { bg: "#2ECC71", text: "#fff" }, { bg: "#E74C3C", text: "#fff" },
-  { bg: "#9B59B6", text: "#fff" }, { bg: "#1ABC9C", text: "#fff" },
-  { bg: "#E67E22", text: "#fff" }, { bg: "#E91E63", text: "#fff" },
-  { bg: "#00BCD4", text: "#fff" }, { bg: "#FF5722", text: "#fff" },
-  { bg: "#607D8B", text: "#fff" }, { bg: "#8BC34A", text: "#fff" },
-  { bg: "#673AB7", text: "#fff" }, { bg: "#F44336", text: "#fff" },
-  { bg: "#009688", text: "#fff" }, { bg: "#795548", text: "#fff" },
-  { bg: "#3F51B5", text: "#fff" }, { bg: "#FF9800", text: "#fff" },
-  { bg: "#CDDC39", text: "#04080F" }, { bg: "#04080F", text: "#4A90D9" },
-];
+const DEFAULT_SEEDS = ["alpha","bravo","charlie","delta","echo","foxtrot","gamma","hotel","india","juliet","kilo","lima"];
+
 
 const ADVENTURER_SKIN_TONES = [
   { label: "Light",       value: "f2d3b1" },
@@ -82,17 +76,11 @@ const ADVENTURER_BG_COLORS = [
 ];
 
 const EDUCATION_LEVELS = [
-  "Middle School","High School Freshman","High School Sophomore",
-  "High School Junior","High School Senior","College Freshman",
-  "College Sophomore","College Junior","College Senior",
-  "Graduate Student","Working Professional","Self Taught / Independent Learner","Other",
+  "Middle School","High School","Undergraduate","Graduate","Self-Taught",
 ];
 
 const STUDY_GOALS = [
-  "Improve my grades","Prepare for SAT / ACT / GRE",
-  "Study for certifications (AWS, CompTIA, etc.)","Learn coding and tech skills",
-  "Study for professional exams (CPA, Bar, MCAT)","General knowledge and self improvement",
-  "Compete and win rewards","Other",
+  "Improve Grades","Test Prep","Learn for Fun","Career Growth","Competition Prep",
 ];
 
 const RESERVED = ["admin","root","lionade","support","help","ninny"];
@@ -435,10 +423,10 @@ function EditProfileSection({ user, refreshUser }: SharedProps) {
     supabase.from("profiles").select("*").eq("id", user.id).single()
       .then(({ data }) => {
         if (!data) return;
-        if (data.first_name)     setFirstName(data.first_name);
-        if (data.bio)            setBio(data.bio);
+        if (data.display_name)    setFirstName(data.display_name);
+        if (data.bio)             setBio(data.bio);
         if (data.education_level) setEducation(data.education_level);
-        if (data.study_goal)     setStudyGoal(data.study_goal);
+        if (data.study_goal)      setStudyGoal(data.study_goal);
       });
 
     // Check last username change
@@ -515,7 +503,8 @@ function EditProfileSection({ user, refreshUser }: SharedProps) {
     } else {
       await supabase.auth.updateUser({ data: { display_name: updates.display_name } });
       await refreshUser();
-      setToast({ msg: "Profile saved!", err: false });
+      mutateUserStats(user.id);
+      setToast({ msg: "Profile updated!", err: false });
       if (usernameChanged) {
         setUsernameLocked(true);
         const nextDate = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
@@ -584,7 +573,7 @@ function EditProfileSection({ user, refreshUser }: SharedProps) {
           </div>
 
           <div>
-            <label className={labelCls}>Bio <span className="text-cream/30 normal-case font-normal">({bio.length}/150)</span></label>
+            <label className={labelCls}>Bio <span className={`normal-case font-normal ${bio.length >= 140 ? "text-red-400" : "text-cream/30"}`}>({bio.length}/150)</span></label>
             <textarea value={bio} onChange={e => setBio(e.target.value.slice(0, 150))}
               placeholder="Tell the world who you are..." rows={3}
               className={inputCls + " resize-none"} />
@@ -610,10 +599,11 @@ function EditProfileSection({ user, refreshUser }: SharedProps) {
 
           {toast && <SaveToast msg={toast.msg} isError={toast.err} />}
 
-          <button onClick={handleSave} disabled={saving}
-            className="w-full py-3.5 rounded-xl font-bold text-sm disabled:opacity-60 transition-all"
+          <button onClick={handleSave} disabled={saving || usernameStatus === "checking"}
+            className="w-full py-3.5 rounded-xl font-bold text-sm disabled:opacity-60 transition-all flex items-center justify-center gap-2"
             style={{ background: "linear-gradient(135deg, #F0B429 0%, #B8960C 50%, #F0B429 100%)", color: "#04080F", boxShadow: "0 4px 15px rgba(240,180,41,0.3)" }}>
-            {saving ? "Saving..." : "💾 Save Changes"}
+            {saving && <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>}
+            {saving ? "Saving..." : "Save Changes"}
           </button>
         </div>
       </Card>
@@ -623,9 +613,10 @@ function EditProfileSection({ user, refreshUser }: SharedProps) {
 
 // ── AVATAR & APPEARANCE ───────────────────────────────
 function AvatarSection({ user, refreshUser }: SharedProps) {
-  const [tab, setTab] = useState<"emoji"|"color"|"create">("emoji");
-  const [emojiCat, setEmojiCat] = useState(0);
-  const [selected, setSelected] = useState<string | null>(null);
+  const [tab, setTab] = useState<"styles"|"create">("styles");
+  const [selectedStyle, setSelectedStyle] = useState(DICEBEAR_STYLES[0].id);
+  const [seeds, setSeeds] = useState(DEFAULT_SEEDS);
+  const [selectedSeed, setSelectedSeed] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState<{msg: string; err: boolean}|null>(null);
 
@@ -640,12 +631,34 @@ function AvatarSection({ user, refreshUser }: SharedProps) {
 
   const adventurerPreview = buildAdventurerUrl(avSkin, avHair, avHairColor, avBg);
 
+  // Build the preview URL for styles tab
+  const previewUrl = useMemo(() => {
+    if (tab === "styles" && selectedSeed) {
+      return `https://api.dicebear.com/7.x/${selectedStyle}/svg?seed=${selectedSeed}`;
+    }
+    if (tab === "create") return adventurerPreview;
+    return null;
+  }, [tab, selectedStyle, selectedSeed, adventurerPreview]);
+
+  // What the user currently has saved
+  const currentAvatarUrl = user.avatar;
+
+  // Determine if the current selection differs from saved
+  const hasChange = (tab === "styles" && previewUrl && previewUrl !== currentAvatarUrl)
+    || (tab === "create" && adventurerPreview !== currentAvatarUrl);
+
+  // Style label for display
+  const currentStyleLabel = selectedSeed
+    ? DICEBEAR_STYLES.find(s => s.id === selectedStyle)?.label ?? selectedStyle
+    : null;
+
   const saveAvatar = async (url: string) => {
     setSaving(true);
     const { error } = await supabase.from("profiles").update({ avatar_url: url }).eq("id", user.id);
     if (!error) {
       await supabase.auth.updateUser({ data: { avatar_url: url } });
       await refreshUser();
+      mutateUserStats(user.id);
       setToast({ msg: "Avatar updated!", err: false });
     } else {
       setToast({ msg: error.message, err: true });
@@ -654,34 +667,50 @@ function AvatarSection({ user, refreshUser }: SharedProps) {
     setTimeout(() => setToast(null), 3000);
   };
 
-  const handleEmojiSelect = (emoji: string) => {
-    const url = `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(emoji)}&backgroundColor=4A90D9`;
-    setSelected(url);
+  const handleSaveClick = () => {
+    if (tab === "styles" && previewUrl) {
+      saveAvatar(previewUrl);
+    } else if (tab === "create") {
+      saveAvatar(adventurerPreview);
+    }
   };
 
-  const handleColorSelect = (color: { bg: string; text: string }) => {
-    const bg = color.bg.replace("#", "");
-    const url = `https://api.dicebear.com/7.x/initials/svg?seed=${user.username}&backgroundColor=${bg}&textColor=ffffff&fontSize=40`;
-    setSelected(url);
+  const randomizeSeeds = () => {
+    const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
+    const newSeeds = Array.from({ length: 12 }, () => {
+      const len = 4 + Math.floor(Math.random() * 5);
+      return Array.from({ length: len }, () => chars[Math.floor(Math.random() * chars.length)]).join("");
+    });
+    setSeeds(newSeeds);
+    setSelectedSeed(null);
   };
 
   return (
     <div className="space-y-6 animate-slide-up">
       <SectionHead title="AVATAR & APPEARANCE" sub="Choose how you look to the world" />
 
-      {/* Current avatar */}
+      {/* Current avatar preview */}
       <Card className="flex items-center gap-5">
-        <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-electric/50 flex-shrink-0">
-          <img src={selected ?? user.avatar} alt="preview" className="w-full h-full object-cover" />
+        <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-electric/50 flex-shrink-0"
+          style={{ boxShadow: "0 0 15px #4A90D940" }}>
+          <img src={previewUrl ?? currentAvatarUrl} alt="preview" className="w-full h-full object-cover" />
         </div>
-        <div>
-          <p className="text-cream font-bold">Current Avatar</p>
-          <p className="text-cream/40 text-sm mt-0.5">Pick a new one below, then save</p>
+        <div className="min-w-0">
+          <p className="text-cream font-bold">
+            {hasChange ? "Preview" : "Current Avatar"}
+          </p>
+          {tab === "styles" && selectedSeed ? (
+            <p className="text-cream/40 text-sm mt-0.5 truncate">{currentStyleLabel} &middot; {selectedSeed}</p>
+          ) : (
+            <p className="text-cream/40 text-sm mt-0.5">Pick a new one below, then save</p>
+          )}
         </div>
-        {selected && selected !== user.avatar && (
-          <button onClick={() => saveAvatar(selected!)} disabled={saving}
-            className="ml-auto px-5 py-2.5 rounded-xl font-bold text-sm bg-electric text-white disabled:opacity-60">
-            {saving ? "Saving..." : "✓ Save Avatar"}
+        {hasChange && (
+          <button onClick={handleSaveClick} disabled={saving}
+            className="ml-auto px-5 py-2.5 rounded-xl font-bold text-sm disabled:opacity-60 flex items-center gap-2 flex-shrink-0 transition-all"
+            style={{ background: "linear-gradient(135deg, #F0B429 0%, #B8960C 50%, #F0B429 100%)", color: "#04080F", boxShadow: "0 4px 15px rgba(240,180,41,0.3)" }}>
+            {saving && <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>}
+            {saving ? "Saving..." : "Save Avatar"}
           </button>
         )}
       </Card>
@@ -690,14 +719,54 @@ function AvatarSection({ user, refreshUser }: SharedProps) {
 
       {/* Tabs */}
       <div className="flex gap-1 bg-white/5 p-1 rounded-xl border border-electric/10 max-w-md mx-auto">
-        {(["create","emoji","color"] as const).map(t => (
-          <button key={t} onClick={() => { setTab(t); if (t === "create") setSelected(adventurerPreview); }}
-            className={`flex-1 py-2 rounded-lg text-sm font-bold transition-all capitalize text-center
+        {(["styles","create"] as const).map(t => (
+          <button key={t} onClick={() => setTab(t)}
+            className={`flex-1 py-2 rounded-lg text-sm font-bold transition-all text-center
               ${tab === t ? "bg-electric text-white shadow-lg shadow-electric/30" : "text-cream/50 hover:text-cream"}`}>
-            {t === "create" ? "✨ Create" : t === "emoji" ? "🎭 Emoji" : "🎨 Color"}
+            {t === "styles" ? "🎭 Styles" : "✨ Create"}
           </button>
         ))}
       </div>
+
+      {/* Styles tab — DiceBear style picker */}
+      {tab === "styles" && (
+        <Card>
+          {/* Style category pills — horizontal scroll */}
+          <div className="flex gap-2 overflow-x-auto pb-3 scrollbar-thin mb-5">
+            {DICEBEAR_STYLES.map(s => (
+              <button key={s.id} onClick={() => { setSelectedStyle(s.id); setSelectedSeed(null); }}
+                className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all flex-shrink-0 whitespace-nowrap
+                  ${selectedStyle === s.id
+                    ? "bg-electric/20 text-electric border border-electric/40"
+                    : "text-cream/40 hover:text-cream hover:bg-white/5 border border-transparent"}`}>
+                {s.label}
+              </button>
+            ))}
+          </div>
+
+          {/* 4×3 avatar grid */}
+          <div className="grid grid-cols-4 gap-3 mb-5">
+            {seeds.map(seed => {
+              const url = `https://api.dicebear.com/7.x/${selectedStyle}/svg?seed=${seed}`;
+              const isActive = selectedSeed === seed;
+              return (
+                <button key={seed} onClick={() => setSelectedSeed(seed)}
+                  className={`aspect-square rounded-2xl overflow-hidden transition-all hover:scale-105 border-2
+                    ${isActive ? "border-amber-400 shadow-lg shadow-amber-400/20 scale-105" : "border-white/10 hover:border-white/20"}`}
+                  style={{ background: "rgba(10,16,32,0.6)" }}>
+                  <img src={url} alt={seed} className="w-full h-full object-cover p-2" loading="lazy" />
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Randomize button */}
+          <button onClick={randomizeSeeds}
+            className="w-full py-3 rounded-xl border border-electric/20 text-cream/70 text-sm font-bold hover:bg-white/5 hover:text-cream transition-all flex items-center justify-center gap-2">
+            <span className="text-lg">🎲</span> Randomize
+          </button>
+        </Card>
+      )}
 
       {/* Create Avatar tab */}
       {tab === "create" && (
@@ -715,7 +784,7 @@ function AvatarSection({ user, refreshUser }: SharedProps) {
             <p className="text-cream/50 text-xs font-bold uppercase tracking-widest mb-2">Skin Tone</p>
             <div className="flex gap-2">
               {ADVENTURER_SKIN_TONES.map(s => (
-                <button key={s.value} onClick={() => { setAvSkin(s.value); setSelected(buildAdventurerUrl(s.value, avHair, avHairColor, avBg)); }}
+                <button key={s.value} onClick={() => setAvSkin(s.value)}
                   className={`w-10 h-10 rounded-full transition-all hover:scale-110 ${avSkin === s.value ? "ring-2 ring-electric ring-offset-2 ring-offset-[#060c18] scale-110" : ""}`}
                   style={{ background: `#${s.value}` }}
                   title={s.label} />
@@ -728,12 +797,12 @@ function AvatarSection({ user, refreshUser }: SharedProps) {
             <p className="text-cream/50 text-xs font-bold uppercase tracking-widest mb-2">Hair Style</p>
             <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin">
               {ADVENTURER_HAIR_STYLES.map(h => {
-                const previewUrl = `https://api.dicebear.com/9.x/adventurer/svg?seed=${encodeURIComponent(user.username)}&skinColor=${avSkin}&hair=${h}&hairColor=${avHairColor}&backgroundColor=${avBg}&size=64`;
+                const hairPreviewUrl = `https://api.dicebear.com/9.x/adventurer/svg?seed=${encodeURIComponent(user.username)}&skinColor=${avSkin}&hair=${h}&hairColor=${avHairColor}&backgroundColor=${avBg}&size=64`;
                 return (
-                  <button key={h} onClick={() => { setAvHair(h); setSelected(buildAdventurerUrl(avSkin, h, avHairColor, avBg)); }}
+                  <button key={h} onClick={() => setAvHair(h)}
                     className={`w-14 h-14 rounded-xl overflow-hidden flex-shrink-0 transition-all hover:scale-105 border-2
                       ${avHair === h ? "border-electric shadow-lg shadow-electric/30" : "border-white/10 hover:border-white/20"}`}>
-                    <img src={previewUrl} alt={h} className="w-full h-full object-cover" />
+                    <img src={hairPreviewUrl} alt={h} className="w-full h-full object-cover" />
                   </button>
                 );
               })}
@@ -745,7 +814,7 @@ function AvatarSection({ user, refreshUser }: SharedProps) {
             <p className="text-cream/50 text-xs font-bold uppercase tracking-widest mb-2">Hair Color</p>
             <div className="flex gap-2">
               {ADVENTURER_HAIR_COLORS.map(c => (
-                <button key={c.value} onClick={() => { setAvHairColor(c.value); setSelected(buildAdventurerUrl(avSkin, avHair, c.value, avBg)); }}
+                <button key={c.value} onClick={() => setAvHairColor(c.value)}
                   className={`w-10 h-10 rounded-full transition-all hover:scale-110 ${avHairColor === c.value ? "ring-2 ring-electric ring-offset-2 ring-offset-[#060c18] scale-110" : ""}`}
                   style={{ background: `#${c.value}` }}
                   title={c.label} />
@@ -758,7 +827,7 @@ function AvatarSection({ user, refreshUser }: SharedProps) {
             <p className="text-cream/50 text-xs font-bold uppercase tracking-widest mb-2">Background Color</p>
             <div className="flex gap-2">
               {ADVENTURER_BG_COLORS.map(c => (
-                <button key={c.value} onClick={() => { setAvBg(c.value); setSelected(buildAdventurerUrl(avSkin, avHair, avHairColor, c.value)); }}
+                <button key={c.value} onClick={() => setAvBg(c.value)}
                   className={`w-10 h-10 rounded-full transition-all hover:scale-110 ${avBg === c.value ? "ring-2 ring-electric ring-offset-2 ring-offset-[#060c18] scale-110" : ""}`}
                   style={{ background: `#${c.value}`, border: c.value === "04080F" ? "2px solid rgba(74,144,217,0.3)" : "none" }}
                   title={c.label} />
@@ -767,59 +836,6 @@ function AvatarSection({ user, refreshUser }: SharedProps) {
           </div>
         </Card>
       )}
-
-      {/* Emoji tab */}
-      {tab === "emoji" && (
-        <Card>
-          {/* Category tabs */}
-          <div className="flex gap-1 mb-4 flex-wrap">
-            {EMOJI_CATEGORIES.map((cat, i) => (
-              <button key={cat.label} onClick={() => setEmojiCat(i)}
-                className={`px-3 py-1 rounded-full text-xs font-bold transition-all
-                  ${emojiCat === i ? "bg-electric/20 text-electric border border-electric/40" : "text-cream/40 hover:text-cream hover:bg-white/5"}`}>
-                {cat.label}
-              </button>
-            ))}
-          </div>
-          <div className="grid grid-cols-10 gap-1.5">
-            {EMOJI_CATEGORIES[emojiCat].emojis.map((emoji) => {
-              const url = `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(emoji)}&backgroundColor=4A90D9`;
-              const isSelected = selected === url;
-              return (
-                <button key={emoji} onClick={() => handleEmojiSelect(emoji)}
-                  className={`text-2xl w-full aspect-square flex items-center justify-center rounded-xl transition-all hover:scale-110
-                    ${isSelected ? "ring-2 ring-gold bg-gold/10" : "hover:bg-white/10"}`}>
-                  {emoji}
-                </button>
-              );
-            })}
-          </div>
-        </Card>
-      )}
-
-      {/* Color tab */}
-      {tab === "color" && (
-        <Card>
-          <p className="text-cream/40 text-sm mb-4">Your username initial in different color combos</p>
-          <div className="grid grid-cols-5 sm:grid-cols-10 gap-2">
-            {COLOR_AVATARS.map((color, i) => {
-              const bg = color.bg.replace("#", "");
-              const url = `https://api.dicebear.com/7.x/initials/svg?seed=${user.username}&backgroundColor=${bg}&textColor=ffffff&fontSize=40`;
-              const isSelected = selected === url;
-              return (
-                <button key={i} onClick={() => handleColorSelect(color)}
-                  className={`w-full aspect-square rounded-xl flex items-center justify-center font-bebas text-xl font-bold transition-all hover:scale-110
-                    ${isSelected ? "ring-2 ring-gold scale-110" : ""}`}
-                  style={{ background: color.bg, color: color.text }}>
-                  {user.username[0]?.toUpperCase()}
-                </button>
-              );
-            })}
-          </div>
-        </Card>
-      )}
-
-      {/* Upload tab */}
     </div>
   );
 }
@@ -911,33 +927,31 @@ function PersonalizationSection({ user }: SharedProps) {
             </div>
           </button>
 
-          {/* Light theme card */}
+          {/* Light theme card — sakura spring */}
           <button onClick={() => autoSave({ theme: "light" })}
-            className={`relative p-5 rounded-2xl border-2 text-left transition-all duration-300
+            className={`relative p-5 rounded-2xl border-2 text-left transition-all duration-300 overflow-hidden
               ${theme === "light"
-                ? "border-blue-500 shadow-[0_0_20px_rgba(59,130,246,0.25)]"
+                ? "border-pink-300 shadow-[0_0_20px_rgba(244,114,182,0.25)]"
                 : "border-white/10 opacity-60 hover:opacity-80 hover:border-white/20"}`}
-            style={{ background: "#dbeafe" }}>
+            style={{ background: "#fffdf7" }}>
+            {/* Mini floating petals in preview */}
+            <span className="absolute top-2 right-4 text-[10px] opacity-40 pointer-events-none">🌸</span>
+            <span className="absolute top-6 right-10 text-[8px] opacity-30 pointer-events-none">❀</span>
+            <span className="absolute bottom-3 left-6 text-[9px] opacity-25 pointer-events-none">✿</span>
             <div className="flex items-center gap-3 mb-3">
               <div className="w-10 h-10 rounded-full flex items-center justify-center"
-                style={{ background: "linear-gradient(135deg, #bfdbfe, #dbeafe)", border: "1px solid rgba(59,130,246,0.25)" }}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="12" cy="12" r="5" />
-                  <line x1="12" y1="1" x2="12" y2="3" /><line x1="12" y1="21" x2="12" y2="23" />
-                  <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" /><line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
-                  <line x1="1" y1="12" x2="3" y2="12" /><line x1="21" y1="12" x2="23" y2="12" />
-                  <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" /><line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
-                </svg>
+                style={{ background: "linear-gradient(135deg, #fce7f3, #fde68a)", border: "1px solid rgba(244,114,182,0.3)" }}>
+                <span className="text-lg">🌸</span>
               </div>
               <div>
-                <p className="font-bold text-sm text-slate-800">Light</p>
-                <p className="text-[11px] text-slate-400">Clean & minimal</p>
+                <p className="font-bold text-sm" style={{ color: "#1a1a1a" }}>Spring</p>
+                <p className="text-[11px]" style={{ color: "#d97706" }}>Sakura & gold</p>
               </div>
             </div>
-            <div className="rounded-xl p-2.5 flex items-center gap-2" style={{ background: "rgba(255,255,255,0.7)", border: "1px solid #bae6fd" }}>
-              <div className="w-2 h-2 rounded-full bg-blue-500" />
-              <div className="flex-1 h-1 rounded-full bg-slate-200" />
-              <div className="w-2 h-2 rounded-full bg-yellow-500/60" />
+            <div className="rounded-xl p-2.5 flex items-center gap-2" style={{ background: "#ffffff", border: "1px solid #fde8f0" }}>
+              <div className="w-2 h-2 rounded-full" style={{ background: "#f9a8d4" }} />
+              <div className="flex-1 h-1 rounded-full" style={{ background: "#fde8f0" }} />
+              <div className="w-2 h-2 rounded-full" style={{ background: "#f59e0b" }} />
             </div>
           </button>
         </div>

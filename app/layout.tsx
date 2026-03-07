@@ -5,6 +5,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import AuthProviderWrapper from "@/components/AuthProviderWrapper";
 import SpaceBackground from "@/components/SpaceBackground";
+import SakuraPetals from "@/components/SakuraPetals";
 import ThemeProvider from "@/components/ThemeProvider";
 
 const bebasNeue = Bebas_Neue({
@@ -43,11 +44,12 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${bebasNeue.variable} ${syne.variable} ${dmMono.variable}`} suppressHydrationWarning>
       <head>
-        <script dangerouslySetInnerHTML={{ __html: `(function(){try{var d=document.documentElement;d.dataset.theme=localStorage.getItem("theme")||"dark";d.dataset.fontSize=localStorage.getItem("fontSize")||"medium"}catch(e){}})()` }} />
+        <script dangerouslySetInnerHTML={{ __html: `(function(){try{var d=document.documentElement;var t=localStorage.getItem("theme")||"dark";d.dataset.theme=t;d.dataset.fontSize=localStorage.getItem("fontSize")||"medium";if(t==="light")d.classList.add("light")}catch(e){}})()` }} />
       </head>
       <body className="text-cream font-syne antialiased">
         <ThemeProvider>
           <SpaceBackground />
+          <SakuraPetals />
           <div className="relative z-10">
             <AuthProviderWrapper>
               <Navbar />
