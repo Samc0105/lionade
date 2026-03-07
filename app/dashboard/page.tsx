@@ -37,7 +37,7 @@ function getGreeting(): string {
 
 /* ── Circular stat widget ── */
 function CircleStat({ value, label, icon, color, size = 90 }: {
-  value: string; label: string; icon: string; color: string; size?: number;
+  value: string; label: string; icon: React.ReactNode; color: string; size?: number;
 }) {
   return (
     <div className="flex flex-col items-center gap-1.5 group">
@@ -226,7 +226,7 @@ export default function DashboardPage() {
 
           {/* ═══ 2) Circular Stats Row ═══ */}
           <div className="flex justify-center sm:justify-start gap-6 sm:gap-8 mb-8 animate-slide-up" style={{ animationDelay: "0.05s" }}>
-            <CircleStat icon="&#x1FA99;" value={statsReady ? formatCoins(coins) : "\u2014"} label={`+${todayCoins} today`} color="#FFD700" />
+            <CircleStat icon={<img src="/fangs.png" alt="Fangs" className="w-5 h-5 object-contain mx-auto" />} value={statsReady ? formatCoins(coins) : "\u2014"} label={`+${todayCoins} today`} color="#FFD700" />
             <div className="flex flex-col items-center gap-1.5 group">
               <div className={`relative rounded-full flex items-center justify-center transition-transform duration-300 group-hover:scale-105 ${streak >= 1 ? "streak-fire-glow" : ""}`}
                 style={{ width: 90, height: 90, background: `linear-gradient(135deg, #E67E2215, #E67E2208)`, border: `1.5px solid #E67E2225`, boxShadow: streak >= 1 ? `0 0 ${12 + Math.min(streak, 10) * 3}px rgba(230,126,34,${0.15 + Math.min(streak, 10) * 0.04})` : `0 0 20px #E67E2208` }}>
@@ -357,12 +357,12 @@ export default function DashboardPage() {
                   </div>
                   <div className="flex items-center gap-4">
                     <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full" style={{ background: "rgba(255,215,0,0.08)", border: "1px solid rgba(255,215,0,0.15)" }}>
-                      <span className="text-gold text-xs font-bold">{activeBet.coins_staked} &#x1FA99;</span>
+                      <span className="text-gold text-xs font-bold flex items-center gap-0.5">{activeBet.coins_staked} <img src="/fangs.png" alt="Fangs" className="w-4 h-4 object-contain inline" /></span>
                       <span className="text-cream/30 text-[10px]">staked</span>
                     </div>
                     <span className="text-cream/20 text-lg">&rarr;</span>
                     <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full" style={{ background: "rgba(74,144,217,0.08)", border: "1px solid rgba(74,144,217,0.15)" }}>
-                      <span className="text-electric text-xs font-bold">{Math.floor(activeBet.coins_staked * (BET_MULTIPLIERS[activeBet.target_score] ?? 1))} &#x1FA99;</span>
+                      <span className="text-electric text-xs font-bold flex items-center gap-0.5">{Math.floor(activeBet.coins_staked * (BET_MULTIPLIERS[activeBet.target_score] ?? 1))} <img src="/fangs.png" alt="Fangs" className="w-4 h-4 object-contain inline" /></span>
                       <span className="text-cream/30 text-[10px]">potential</span>
                     </div>
                   </div>
@@ -388,7 +388,7 @@ export default function DashboardPage() {
                             <button key={amt} onClick={() => setBetStake(amt)}
                               className={`px-3 py-1.5 rounded-full text-[11px] font-bold transition-all duration-200 ${betStake === amt ? "text-navy" : "text-cream/50 hover:text-cream/70"}`}
                               style={betStake === amt ? { background: "linear-gradient(90deg, #FFD700, #FFA500)", boxShadow: "0 0 8px rgba(255,215,0,0.3)" } : { background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)" }}>
-                              {amt} &#x1FA99;
+                              {amt} <img src="/fangs.png" alt="Fangs" className="w-4 h-4 object-contain inline" />
                             </button>
                           ))}
                         </div>
@@ -407,7 +407,7 @@ export default function DashboardPage() {
                       </div>
                       <div className="flex flex-col items-center">
                         <span className="text-cream/30 text-[10px] block mb-1">Win</span>
-                        <span className="text-gold text-sm font-bold">{Math.floor(betStake * (BET_MULTIPLIERS[betTarget] ?? 1))} &#x1FA99;</span>
+                        <span className="text-gold text-sm font-bold">{Math.floor(betStake * (BET_MULTIPLIERS[betTarget] ?? 1))} <img src="/fangs.png" alt="Fangs" className="w-4 h-4 object-contain inline" /></span>
                         <span className="text-cream/20 text-[9px]">{BET_MULTIPLIERS[betTarget]}x</span>
                       </div>
                     </div>
@@ -435,7 +435,7 @@ export default function DashboardPage() {
                           <button key={amt} onClick={() => setBetStake(amt)}
                             className={`px-3 py-1.5 rounded-full text-[11px] font-bold transition-all duration-200 ${betStake === amt ? "text-navy" : "text-cream/50 hover:text-cream/70"}`}
                             style={betStake === amt ? { background: "linear-gradient(90deg, #FFD700, #FFA500)", boxShadow: "0 0 8px rgba(255,215,0,0.3)" } : { background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)" }}>
-                            {amt} &#x1FA99;
+                            {amt} <img src="/fangs.png" alt="Fangs" className="w-4 h-4 object-contain inline" />
                           </button>
                         ))}
                       </div>
@@ -454,7 +454,7 @@ export default function DashboardPage() {
                     </div>
                     <div className="flex flex-col items-center">
                       <span className="text-cream/30 text-[10px] block mb-1">Win</span>
-                      <span className="text-gold text-sm font-bold">{Math.floor(betStake * (BET_MULTIPLIERS[betTarget] ?? 1))} &#x1FA99;</span>
+                      <span className="text-gold text-sm font-bold">{Math.floor(betStake * (BET_MULTIPLIERS[betTarget] ?? 1))} <img src="/fangs.png" alt="Fangs" className="w-4 h-4 object-contain inline" /></span>
                       <span className="text-cream/20 text-[9px]">{BET_MULTIPLIERS[betTarget]}x</span>
                     </div>
                   </div>
@@ -493,7 +493,7 @@ export default function DashboardPage() {
                         <p className="font-semibold text-cream text-sm">{bounty.title}</p>
                         <p className="text-cream/40 text-[11px] mt-0.5 leading-relaxed">{bounty.description}</p>
                         <div className="flex items-center gap-3 mt-2">
-                          <span className="text-gold text-[10px] font-bold">+{bounty.coin_reward} &#x1FA99;</span>
+                          <span className="text-gold text-[10px] font-bold">+{bounty.coin_reward} <img src="/fangs.png" alt="Fangs" className="w-4 h-4 object-contain inline" /></span>
                           <span className="text-electric text-[10px] font-bold">+{bounty.xp_reward} XP</span>
                         </div>
                         <div className="mt-3">
@@ -539,7 +539,7 @@ export default function DashboardPage() {
                         <p className="font-semibold text-cream text-sm">{bounty.title}</p>
                         <p className="text-cream/40 text-[11px] mt-0.5 leading-relaxed">{bounty.description}</p>
                         <div className="flex items-center gap-3 mt-2">
-                          <span className="text-gold text-[10px] font-bold">+{bounty.coin_reward} &#x1FA99;</span>
+                          <span className="text-gold text-[10px] font-bold">+{bounty.coin_reward} <img src="/fangs.png" alt="Fangs" className="w-4 h-4 object-contain inline" /></span>
                           <span className="text-electric text-[10px] font-bold">+{bounty.xp_reward} XP</span>
                         </div>
                         <div className="mt-3">
@@ -689,7 +689,7 @@ export default function DashboardPage() {
                 ) : (
                   <div className="rounded-[20px] p-6 text-center"
                     style={{ background: "linear-gradient(135deg, rgba(13,21,40,0.5) 0%, rgba(10,16,32,0.5) 100%)", border: "1px solid rgba(74,144,217,0.06)" }}>
-                    <span className="text-3xl block mb-2">&#x1FA99;</span>
+                    <img src="/fangs.png" alt="Fangs" className="w-8 h-8 object-contain mx-auto mb-2" />
                     <p className="font-bebas text-base text-cream/50 tracking-wider">No activity yet</p>
                     <p className="text-cream/25 text-xs mt-1 mb-4 leading-relaxed">Take your first quiz to start tracking progress.</p>
                     <Link href="/quiz">

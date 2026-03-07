@@ -1,5 +1,7 @@
+import React from "react";
+
 interface StatCardProps {
-  icon: string;
+  icon: React.ReactNode;
   value: string;
   label: string;
   insight: string;

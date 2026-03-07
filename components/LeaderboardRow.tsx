@@ -116,7 +116,7 @@ export default function LeaderboardRow({
       {/* Coins This Week */}
       <div className="text-right flex-shrink-0">
         <div className="flex items-center gap-1.5 justify-end">
-          <span className="text-sm">🪙</span>
+          <img src="/fangs.png" alt="Fangs" className="w-4 h-4 object-contain" />
           <span
             className={`font-bebas text-xl leading-none
               ${entry.rank === 1 ? "text-gold glow-gold" : "text-cream"}`}

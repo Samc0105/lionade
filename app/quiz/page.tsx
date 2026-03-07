@@ -264,7 +264,7 @@ export default function QuizPage() {
   const scoreBoost = hasBooster("score_boost") ? getBoosterValue("score_boost") : 0;
 
   const BOOSTER_ICONS: Record<string, string> = {
-    coin_multiplier: "🪙", xp_multiplier: "⚡", extra_time: "⏰",
+    coin_multiplier: "💰", xp_multiplier: "⚡", extra_time: "⏰",
     auto_correct: "🍀", fifty_fifty: "🧊", score_boost: "📈",
   };
 
@@ -777,7 +777,7 @@ export default function QuizPage() {
               <span className="text-green-400 font-bold">{correctCount} &#x2713;</span>
               <span className="text-red-400 font-bold">{wrongCount} &#x2717;</span>
               <div className="flex items-center gap-1.5 bg-gold/10 border border-gold/30 rounded-full px-3 py-1">
-                <span>&#x1FA99;</span>
+                <img src="/fangs.png" alt="Fangs" className="w-5 h-5 object-contain" />
                 <span className="font-bebas text-lg text-gold">{totalCoins}</span>
               </div>
             </div>

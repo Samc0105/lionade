@@ -1530,16 +1530,47 @@ body {
 
   0%,
   100% {
-    box-shadow: 0 0 12px rgba(230, 126, 34, 0.3), 0 0 4px rgba(255, 165, 0, 0.2);
+    filter: drop-shadow(0 0 6px rgba(230, 126, 34, 0.4)) drop-shadow(0 0 2px rgba(255, 165, 0, 0.3));
   }
 
   50% {
-    box-shadow: 0 0 24px rgba(230, 126, 34, 0.5), 0 0 8px rgba(255, 165, 0, 0.35), 0 0 40px rgba(255, 215, 0, 0.15);
+    filter: drop-shadow(0 0 12px rgba(230, 126, 34, 0.6)) drop-shadow(0 0 4px rgba(255, 165, 0, 0.4));
   }
 }
 
 .streak-fire-glow {
   animation: streak-fire-glow 2s ease-in-out infinite;
+}
+
+/* ── Profile dropdown animations ── */
+@keyframes dropdown-menu-in {
+  from { opacity: 0; transform: scaleY(0.6) scaleX(0.95); }
+  to   { opacity: 1; transform: scaleY(1) scaleX(1); }
+}
+@keyframes dropdown-menu-out {
+  from { opacity: 1; transform: scaleY(1) scaleX(1); }
+  to   { opacity: 0; transform: scaleY(0.6) scaleX(0.95); }
+}
+@keyframes dropdown-item-in {
+  from { opacity: 0; transform: translateX(12px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes dropdown-item-out {
+  from { opacity: 1; transform: translateX(0); }
+  to   { opacity: 0; transform: translateX(8px); }
+}
+.dropdown-menu-enter {
+  animation: dropdown-menu-in 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+.dropdown-menu-exit {
+  animation: dropdown-menu-out 0.18s ease-in forwards;
+}
+.dropdown-item-enter {
+  opacity: 0;
+  animation: dropdown-item-in 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+.dropdown-item-exit {
+  animation: dropdown-item-out 0.12s ease-in forwards;
 }
 
 /* Coin burst particles — fly outward then fade */
@@ -2043,7 +2074,11 @@ html[data-theme="light"] input::placeholder {
   .shop-epic-border-premium,
   .premium-icon-glow,
   .premium-coming-soon-pulse,
-  .premium-card {
+  .premium-card,
+  .dropdown-menu-enter,
+  .dropdown-menu-exit,
+  .dropdown-item-enter,
+  .dropdown-item-exit {
     animation: none !important;
   }
 

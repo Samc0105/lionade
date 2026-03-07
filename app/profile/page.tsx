@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useAuth } from "@/lib/auth";
+import { useUserStats } from "@/lib/hooks";
 import { supabase } from "@/lib/supabase";
 import {
   getAllBadges, getUserBadges, getSubjectStats,
@@ -111,6 +112,7 @@ const NAV: { key: Section; label: string; icon: string }[] = [
 // ── Main Page ──────────────────────────────────────────
 export default function ProfilePage() {
   const { user, refreshUser } = useAuth();
+  const { stats } = useUserStats(user?.id);
   const [section, setSection] = useState<Section>("overview");
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -143,7 +145,13 @@ export default function ProfilePage() {
 
   if (!user) return null;
 
-  const { level, progress, xpToNext } = getLevelProgress(user.xp);
+  // Use SWR-cached stats to prevent flash-of-zero
+  const coins = stats?.coins ?? user.coins;
+  const streak = stats?.streak ?? user.streak;
+  const xp = stats?.xp ?? user.xp;
+  const avatarUrl = stats?.avatar ?? user.avatar;
+  const statsReady = !!stats || user.statsLoaded;
+  const { level, progress, xpToNext } = getLevelProgress(xp);
   const totalQuestions = subjectStats.reduce((s: number, r: any) => s + r.questionsAnswered, 0);
   const totalCorrect = subjectStats.reduce((s: number, r: any) => s + r.correctAnswers, 0);
   const accuracy = totalQuestions > 0 ? Math.round((totalCorrect / totalQuestions) * 100) : 0;
@@ -151,6 +159,7 @@ export default function ProfilePage() {
 
   const sharedProps = {
     user, level, progress, xpToNext,
+    coins, streak, xp, avatarUrl, statsReady,
     allBadges, earnedBadges, subjectStats, quizHistory, activity,
     loading, accuracy, totalQuestions, totalCorrect, duelsWon,
     refreshUser,
@@ -166,7 +175,7 @@ export default function ProfilePage() {
           <div className="flex items-center justify-between mb-4 md:hidden">
             <div className="flex items-center gap-3">
               <div className="w-9 h-9 rounded-full overflow-hidden border-2 border-electric/50">
-                <img src={user.avatar} alt={user.username} className="w-full h-full object-cover" />
+                <img src={avatarUrl} alt={user.username} className="w-full h-full object-cover" />
               </div>
               <span className="font-bebas text-xl text-cream tracking-wider">
                 {NAV.find(n => n.key === section)?.label}
@@ -189,19 +198,19 @@ export default function ProfilePage() {
                   <div className="relative w-20 h-20 mx-auto mb-3">
                     <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-electric/50"
                       style={{ boxShadow: "0 0 20px #4A90D940" }}>
-                      <img src={user.avatar} alt={user.username} className="w-full h-full object-cover" />
+                      <img src={avatarUrl} alt={user.username} className="w-full h-full object-cover" />
                     </div>
                     <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full border-2 border-navy
                       flex items-center justify-center font-bebas text-xs text-white"
                       style={{ background: "#4A90D9" }}>{level}</div>
                   </div>
                   <p className="font-bebas text-xl text-cream tracking-wider">@{user.username}</p>
-                  <p className="text-cream/40 text-xs mt-0.5">Level {level} · {formatCoins(user.coins)} coins</p>
+                  <p className="text-cream/40 text-xs mt-0.5">Level {level} · {formatCoins(coins)} coins</p>
                   <div className="mt-3 w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
-                    <div className="h-full rounded-full"
-                      style={{ width: `${progress}%`, background: "linear-gradient(90deg, #2D6BB5, #4A90D9)" }} />
+                    <div className="h-full rounded-full transition-all duration-500"
+                      style={{ width: statsReady ? `${progress}%` : "0%", background: "linear-gradient(90deg, #2D6BB5, #4A90D9)" }} />
                   </div>
-                  <p className="text-cream/30 text-xs mt-1">{xpToNext} XP to Level {level + 1}</p>
+                  <p className="text-cream/30 text-xs mt-1">{statsReady ? `${xpToNext} XP to Level ${level + 1}` : ""}</p>
                 </div>
 
                 {/* Nav */}
@@ -244,6 +253,7 @@ export default function ProfilePage() {
 // ── Shared prop type ──────────────────────────────────
 type SharedProps = {
   user: any; level: number; progress: number; xpToNext: number;
+  coins: number; streak: number; xp: number; avatarUrl: string; statsReady: boolean;
   allBadges: any[]; earnedBadges: any[]; subjectStats: any[];
   quizHistory: any[]; activity: any[];
   loading: boolean; accuracy: number; totalQuestions: number;
@@ -283,7 +293,7 @@ const inputCls = "w-full bg-white/5 border border-electric/20 rounded-xl px-4 py
 const labelCls = "block text-cream/50 text-xs font-bold uppercase tracking-widest mb-1.5";
 
 // ── OVERVIEW ───────────────────────────────────────────
-function OverviewSection({ user, level, progress, xpToNext, earnedBadges, allBadges, subjectStats, quizHistory, activity, loading, accuracy, totalQuestions, totalCorrect, duelsWon, refreshUser }: SharedProps) {
+function OverviewSection({ user, level, progress, xpToNext, coins, streak, xp, avatarUrl, statsReady, earnedBadges, allBadges, subjectStats, quizHistory, activity, loading, accuracy, totalQuestions, totalCorrect, duelsWon, refreshUser }: SharedProps) {
   const lockedBadges = allBadges.filter(b => !earnedBadges.some((e: any) => e.id === b.id));
 
   return (
@@ -295,7 +305,7 @@ function OverviewSection({ user, level, progress, xpToNext, earnedBadges, allBad
         <div className="relative z-10 flex flex-col sm:flex-row items-center sm:items-start gap-6">
           <div className="w-24 h-24 rounded-full overflow-hidden border-4 flex-shrink-0"
             style={{ borderColor: "#4A90D9", boxShadow: "0 0 25px #4A90D960" }}>
-            <img src={user.avatar} alt={user.username} className="w-full h-full object-cover" />
+            <img src={avatarUrl} alt={user.username} className="w-full h-full object-cover" />
           </div>
           <div className="flex-1 text-center sm:text-left">
             <h1 className="font-bebas text-4xl text-cream tracking-wider">{user.username}</h1>
@@ -303,11 +313,11 @@ function OverviewSection({ user, level, progress, xpToNext, earnedBadges, allBad
             <div className="mb-4">
               <div className="flex justify-between text-xs text-cream/40 mb-1">
                 <span>Level {level}</span>
-                <span>{xpToNext} XP to Level {level + 1}</span>
+                <span>{statsReady ? `${xpToNext} XP to Level ${level + 1}` : ""}</span>
               </div>
               <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden">
                 <div className="h-full rounded-full transition-all duration-500"
-                  style={{ width: `${progress}%`, background: "linear-gradient(90deg, #2D6BB5, #4A90D9, #6AABF0)", boxShadow: "0 0 10px #4A90D960" }} />
+                  style={{ width: statsReady ? `${progress}%` : "0%", background: "linear-gradient(90deg, #2D6BB5, #4A90D9, #6AABF0)", boxShadow: "0 0 10px #4A90D960" }} />
               </div>
             </div>
           </div>
@@ -317,16 +327,18 @@ function OverviewSection({ user, level, progress, xpToNext, earnedBadges, allBad
       {/* Stats grid */}
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
         {[
-          { icon: "🪙", label: "Total Coins",        value: formatCoins(user.coins),          color: "text-gold" },
-          { icon: "🔥", label: "Day Streak",         value: `${user.streak}`,                 color: "text-orange-400" },
-          { icon: "⚡", label: "Total XP",           value: user.xp.toLocaleString(),         color: "text-electric" },
-          { icon: "📝", label: "Quizzes Completed",  value: quizHistory.length.toString(),    color: "text-cream" },
-          { icon: "⚔️", label: "Duels Won",          value: duelsWon.toString(),              color: "text-purple-400" },
-          { icon: "📚", label: "Subjects Mastered",  value: subjectStats.length.toString(),   color: "text-green-400" },
+          { icon: "fang", label: "Total Coins",        value: statsReady ? formatCoins(coins) : null,          color: "text-gold" },
+          { icon: "🔥", label: "Day Streak",         value: statsReady ? `${streak}` : null,                 color: "text-orange-400" },
+          { icon: "⚡", label: "Total XP",           value: statsReady ? xp.toLocaleString() : null,         color: "text-electric" },
+          { icon: "📝", label: "Quizzes Completed",  value: !loading ? quizHistory.length.toString() : null, color: "text-cream" },
+          { icon: "⚔️", label: "Duels Won",          value: !loading ? duelsWon.toString() : null,           color: "text-purple-400" },
+          { icon: "📚", label: "Subjects Mastered",  value: !loading ? subjectStats.length.toString() : null, color: "text-green-400" },
         ].map((s) => (
           <Card key={s.label} className="text-center !p-4">
-            <span className="text-2xl block mb-1">{s.icon}</span>
-            <p className={`font-bebas text-2xl leading-none ${s.color}`}>{s.value}</p>
+            {s.icon === "fang" ? <img src="/fangs.png" alt="Fangs" className="w-7 h-7 object-contain mx-auto mb-1" /> : <span className="text-2xl block mb-1">{s.icon}</span>}
+            {s.value !== null
+              ? <p className={`font-bebas text-2xl leading-none ${s.color}`}>{s.value}</p>
+              : <div className="w-12 h-7 bg-white/10 rounded-lg animate-pulse mx-auto" />}
             <p className="text-cream/40 text-xs mt-1">{s.label}</p>
           </Card>
         ))}

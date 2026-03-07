@@ -24,7 +24,7 @@ export default function CoinAnimation({ trigger, amount = 3, onComplete }: CoinA
     const newCoins: Coin[] = Array.from({ length: Math.min(amount, 8) }, (_, i) => ({
       id: Date.now() + i,
       x: Math.random() * 120 - 60,
-      emoji: "🪙",
+      emoji: "fang",
     }));
 
     setCoins(newCoins);
@@ -55,7 +55,7 @@ export default function CoinAnimation({ trigger, amount = 3, onComplete }: CoinA
             animationDuration: `${0.7 + Math.random() * 0.3}s`,
           }}
         >
-          {coin.emoji}
+          <img src="/fangs.png" alt="Fangs" className="w-6 h-6 object-contain" />
         </div>
       ))}
 

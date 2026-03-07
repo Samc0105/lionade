@@ -18,12 +18,20 @@ const NAV_LINKS = [
   { href: "/shop", label: "Shop" },
 ];
 
+// SVG icon components for dropdown
+function IconUser() { return <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>; }
+function IconMedal() { return <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M7.21 15 2.66 7.14a2 2 0 0 1 .13-2.2L4.4 2.8A2 2 0 0 1 6 2h12a2 2 0 0 1 1.6.8l1.6 2.14a2 2 0 0 1 .14 2.2L16.79 15"/><path d="M11 12 5.12 2.2"/><path d="m13 12 5.88-9.8"/><circle cx="12" cy="17" r="5"/><path d="M12 18v-2h-.5"/></svg>; }
+function IconWallet() { return <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg>; }
+function IconSettings() { return <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>; }
+function IconHelp() { return <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>; }
+function IconLogOut() { return <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>; }
+
 const DROPDOWN_ITEMS = [
-  { href: "/profile", label: "Profile", icon: "\u{1F464}" },
-  { href: "/profile?section=overview", label: "Badges", icon: "\u{1F396}\uFE0F" },
-  { href: "/profile?section=personalization", label: "Wallet / Rewards", icon: "\u{1FA99}" },
-  { href: "/profile?section=security", label: "Settings", icon: "\u2699\uFE0F" },
-  { href: "/profile?section=notifications", label: "Help / Support", icon: "\u2753" },
+  { href: "/profile", label: "Profile", Icon: IconUser, color: "rgba(74,144,217,0.15)", textColor: "text-electric" },
+  { href: "/badges", label: "Badges", Icon: IconMedal, color: "rgba(251,191,36,0.15)", textColor: "text-amber-400" },
+  { href: "/wallet", label: "Wallet / Rewards", Icon: IconWallet, color: "rgba(168,85,247,0.15)", textColor: "text-purple-400" },
+  { href: "/settings", label: "Settings", Icon: IconSettings, color: "rgba(156,163,175,0.15)", textColor: "text-gray-400" },
+  { href: "/contact", label: "Help / Support", Icon: IconHelp, color: "rgba(34,197,94,0.15)", textColor: "text-green-400" },
 ];
 
 export default function Navbar() {
@@ -33,6 +41,20 @@ export default function Navbar() {
   const { stats } = useUserStats(user?.id);
   const { streakInfo } = useStreakInfo(user?.id);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [dropdownClosing, setDropdownClosing] = useState(false);
+
+  const closeDropdown = () => {
+    setDropdownClosing(true);
+    setTimeout(() => {
+      setShowDropdown(false);
+      setDropdownClosing(false);
+    }, 200);
+  };
+
+  const toggleDropdown = () => {
+    if (showDropdown) closeDropdown();
+    else setShowDropdown(true);
+  };
   const [showStreakModal, setShowStreakModal] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -46,7 +68,7 @@ export default function Navbar() {
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
-        setShowDropdown(false);
+        closeDropdown();
       }
     }
     if (showDropdown) {
@@ -59,7 +81,7 @@ export default function Navbar() {
   useEffect(() => {
     function handleEscape(e: KeyboardEvent) {
       if (e.key === "Escape") {
-        setShowDropdown(false);
+        closeDropdown();
         setShowStreakModal(false);
       }
     }
@@ -178,7 +200,7 @@ export default function Navbar() {
                   {/* Coin Pill */}
                   <div className="hidden sm:flex items-center gap-1.5 bg-gold/10 border border-gold/20
                     rounded-full px-2.5 py-1 cursor-default group relative">
-                    <span className="text-sm">&#x1FA99;</span>
+                    <img src="/fangs.png" alt="Fangs" className="w-6 h-6 object-contain" />
                     <span className="font-bebas text-base text-gold tracking-wider leading-none">
                       {stats ? formatCoins(stats.coins) : user.statsLoaded ? formatCoins(user.coins) : <StatSkeleton />}
                     </span>
@@ -218,7 +240,7 @@ export default function Navbar() {
                   {/* Avatar + Dropdown */}
                   <div className="relative" ref={dropdownRef}>
                     <button
-                      onClick={() => setShowDropdown(!showDropdown)}
+                      onClick={toggleDropdown}
                       className="w-8 h-8 rounded-full border-2 border-electric/40 overflow-hidden
                         hover:border-electric transition-colors duration-200 cursor-pointer flex-shrink-0"
                       style={{ backgroundColor: "rgba(74, 144, 217, 0.25)" }}
@@ -232,39 +254,65 @@ export default function Navbar() {
 
                     {showDropdown && (
                       <div
-                        className="absolute right-0 top-11 w-52 rounded-xl border border-electric/20 py-1 z-50 shadow-xl"
-                        style={{ background: "#060c18" }}
+                        className={`absolute right-0 top-12 min-w-[240px] rounded-2xl border border-white/10 p-2 z-50
+                          backdrop-blur-xl origin-top-right
+                          ${dropdownClosing ? "dropdown-menu-exit" : "dropdown-menu-enter"}`}
+                        style={{
+                          background: "rgba(0,0,0,0.6)",
+                          boxShadow: "0 0 20px rgba(251,191,36,0.12), 0 8px 32px rgba(0,0,0,0.5)",
+                        }}
                       >
                         {/* User info header */}
-                        <div className="px-4 py-2.5 border-b border-electric/10">
-                          <p className="text-cream font-bold text-sm">{user.username}</p>
-                          <p className="text-cream/40 text-xs">
-                            {stats ? `Level ${stats.level}` : user.statsLoaded ? `Level ${user.level}` : <StatSkeleton width="w-12" />}
-                          </p>
+                        <div className={`flex items-center gap-3 px-3 py-3 mb-1 border-b border-white/10
+                          ${dropdownClosing ? "dropdown-item-exit" : "dropdown-item-enter"}`}
+                          style={{ animationDelay: dropdownClosing ? "0ms" : "0ms" }}>
+                          <div className="w-9 h-9 rounded-full overflow-hidden border-2 border-electric/40 flex-shrink-0">
+                            <img src={stats?.avatar ?? user.avatar} alt="" className="w-full h-full object-cover" />
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-cream font-bold text-sm truncate">{user.username}</p>
+                            <p className="text-amber-400/80 text-[11px] font-semibold">
+                              {stats ? `Level ${stats.level}` : user.statsLoaded ? `Level ${user.level}` : <StatSkeleton width="w-12" />}
+                            </p>
+                          </div>
                         </div>
 
                         {/* Menu items */}
-                        {DROPDOWN_ITEMS.map((item) => (
+                        {DROPDOWN_ITEMS.map((item, i) => (
                           <Link
                             key={item.label}
                             href={item.href}
-                            onClick={() => setShowDropdown(false)}
+                            onClick={closeDropdown}
                           >
-                            <div className="px-4 py-2.5 text-cream/70 text-sm hover:text-cream hover:bg-white/5 transition-colors flex items-center gap-2.5">
-                              <span className="text-base w-5 text-center">{item.icon}</span>
-                              {item.label}
+                            <div
+                              className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-cream/70
+                                hover:text-cream hover:bg-white/[0.08] transition-all duration-200 cursor-pointer
+                                ${dropdownClosing ? "dropdown-item-exit" : "dropdown-item-enter"}`}
+                              style={{ animationDelay: dropdownClosing ? "0ms" : `${(i + 1) * 50}ms` }}
+                            >
+                              <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+                                style={{ background: item.color }}>
+                                <span className={item.textColor}><item.Icon /></span>
+                              </div>
+                              <span className="font-medium">{item.label}</span>
                             </div>
                           </Link>
                         ))}
 
                         {/* Divider + Logout */}
-                        <div className="border-t border-electric/10 mt-1">
+                        <div className="border-t border-white/10 mt-1 pt-1">
                           <button
                             onClick={handleLogout}
-                            className="w-full text-left px-4 py-2.5 text-red-400 text-sm hover:bg-red-400/5 transition-colors flex items-center gap-2.5"
+                            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-red-400
+                              hover:bg-red-500/10 transition-all duration-200
+                              ${dropdownClosing ? "dropdown-item-exit" : "dropdown-item-enter"}`}
+                            style={{ animationDelay: dropdownClosing ? "0ms" : `${(DROPDOWN_ITEMS.length + 1) * 50}ms` }}
                           >
-                            <span className="text-base w-5 text-center">&#x1F6AA;</span>
-                            Log Out
+                            <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+                              style={{ background: "rgba(239,68,68,0.12)" }}>
+                              <IconLogOut />
+                            </div>
+                            <span className="font-medium">Log Out</span>
                           </button>
                         </div>
                       </div>

@@ -255,8 +255,8 @@ export default function CompetePage() {
                     Challenge anyone to a head-to-head battle. Same 10 questions. 15 seconds each.
                     Speed bonus for fast answers. Winner takes the wagered coins.
                   </p>
-                  <p className="text-cream/30 text-xs mb-6">
-                    🪙 Wager: 10–100 coins
+                  <p className="text-cream/30 text-xs mb-6 flex items-center justify-center gap-1">
+                    <img src="/fangs.png" alt="Fangs" className="w-4 h-4 object-contain" /> Wager: 10–100 coins
                   </p>
                   <div className="flex flex-wrap gap-3 mb-6">
                     <Link href="/duel" className="btn-gold text-sm px-6 py-3 rounded-xl">

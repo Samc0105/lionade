@@ -286,7 +286,7 @@ export default function ComingSoonPage() {
       {/* ─── Nav ─── */}
       <nav className="fixed top-0 left-0 right-0 z-[100] flex items-center justify-between px-6 sm:px-12 py-6"
         style={{ background: "linear-gradient(to bottom, rgba(4,8,15,0.95), transparent)" }}>
-        <span className="font-bebas text-[28px] tracking-[3px] text-electric">LIONADE</span>
+        <img src="/logo-full.png" alt="Lionade" className="h-9 rounded-md" />
         <span className="font-mono text-[11px] tracking-[2px] uppercase text-[#94A3B8]">Coming Soon &mdash; 2026</span>
       </nav>
 
@@ -723,7 +723,7 @@ export default function ComingSoonPage() {
 
       {/* ─── Footer ─── */}
       <footer className="px-6 sm:px-12 py-8 flex items-center justify-between flex-wrap gap-4">
-        <span className="font-bebas text-[24px] tracking-[3px] text-electric">LIONADE</span>
+        <img src="/logo-full.png" alt="Lionade" className="h-8 rounded-md" />
         <span className="font-mono text-[10px] tracking-[2px] uppercase text-[#8899A6]">Where champions are made &mdash; 2026</span>
         <span className="font-mono text-[11px] tracking-[1px] text-[#8899A6]">&copy; 2026 getlionade.com &middot; All rights reserved</span>
       </footer>
