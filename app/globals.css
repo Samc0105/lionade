@@ -11,6 +11,29 @@ html {
 :root {
   --font-bebas: 'Bebas Neue', sans-serif;
   --font-syne: 'Syne', sans-serif;
+
+  /* ── Theme variables (dark defaults) ── */
+  --bg-page: #04080F;
+  --bg-card: rgba(255, 255, 255, 0.05);
+  --card-border: rgba(255, 255, 255, 0.1);
+  --card-shadow: none;
+  --text-primary: #EEF4FF;
+  --text-secondary: rgba(238, 244, 255, 0.6);
+  --text-muted: rgba(238, 244, 255, 0.4);
+  --nav-text: rgba(238, 244, 255, 0.6);
+  --nav-text-hover: #EEF4FF;
+  --nav-text-active: #4A90D9;
+  --nav-bg: transparent;
+  --nav-border: transparent;
+  --accent-primary: #4A90D9;
+  --accent-primary-bg: rgba(74, 144, 217, 0.15);
+  --accent-gold: #FFD700;
+  --accent-gold-dark: #B8960C;
+  --dropdown-bg: rgba(0, 0, 0, 0.6);
+  --dropdown-border: rgba(255, 255, 255, 0.1);
+  --input-bg: rgba(255, 255, 255, 0.05);
+  --input-border: rgba(255, 255, 255, 0.1);
+  --sidebar-bg: linear-gradient(135deg, #0a1020 0%, #060c18 100%);
 }
 
 * {
@@ -1642,327 +1665,235 @@ html:not([data-theme]) .sakura-container {
 
 /* ══════════════════════════════════════════════════════════════════════
    LIGHT THEME — spring / sakura aesthetic
-   Uses .light class on <html> for high specificity + !important
+   CSS variable overrides (no !important — specificity wins naturally)
    ══════════════════════════════════════════════════════════════════════ */
 
-/* ─ CSS variables for light theme ─ */
+/* ─ Light theme variable overrides ─ */
 html.light {
-  --card-bg: #ffffff;
+  --bg-page: #fffdf7;
+  --bg-card: #ffffff;
   --card-border: #fde68a;
   --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
   --text-primary: #1a1a1a;
   --text-secondary: #6b7280;
   --text-muted: #9ca3af;
-  --bg-page: #fffdf7;
+  --nav-text: #d97706;
+  --nav-text-hover: #f59e0b;
+  --nav-text-active: #d97706;
+  --nav-bg: rgba(255, 253, 247, 0.95);
+  --nav-border: #e5e5e5;
+  --accent-primary: #f59e0b;
+  --accent-primary-bg: rgba(245, 158, 11, 0.1);
   --accent-gold: #f59e0b;
   --accent-gold-dark: #d97706;
+  --dropdown-bg: #fffdf7;
+  --dropdown-border: #fde68a;
+  --input-bg: #ffffff;
+  --input-border: #d4d4d4;
+  --sidebar-bg: #ffffff;
 }
 
 /* ─ Page base ─ */
 html.light body {
-  background-color: var(--bg-page) !important;
-  color: var(--text-primary) !important;
+  background-color: var(--bg-page);
+  color: var(--text-primary);
 }
 
 /* ══ TEXT OVERRIDES ══ */
 
-/* Cream text → charcoal */
-html.light .text-cream { color: var(--text-primary) !important; }
+html.light .text-cream { color: var(--text-primary); }
 
 html.light .text-cream\/40,
 html.light .text-cream\/50,
-html.light .text-cream\/60 { color: #525252 !important; }
+html.light .text-cream\/60 { color: #525252; }
 
 html.light .text-cream\/70,
-html.light .text-cream\/80 { color: #374151 !important; }
+html.light .text-cream\/80 { color: #374151; }
 
 html.light .text-cream\/25,
-html.light .text-cream\/30 { color: var(--text-muted) !important; }
+html.light .text-cream\/30 { color: var(--text-muted); }
 
 html.light .text-cream\/10,
 html.light .text-cream\/15,
-html.light .text-cream\/20 { color: #b0b0b0 !important; }
+html.light .text-cream\/20 { color: #b0b0b0; }
 
-html.light .text-cream\/35 { color: #737373 !important; }
+html.light .text-cream\/35 { color: #737373; }
 
 /* Electric blue → gold */
-html.light .text-electric { color: var(--accent-gold-dark) !important; }
-html.light .text-electric\/80 { color: var(--accent-gold-dark) !important; }
+html.light .text-electric { color: var(--accent-gold-dark); }
+html.light .text-electric\/80 { color: var(--accent-gold-dark); }
 
 /* Glow utilities → gold glow */
-html.light .glow-electric { text-shadow: 0 0 10px #f59e0b, 0 0 20px rgba(245,158,11,0.4) !important; }
-html.light .border-glow-electric { box-shadow: 0 0 0 1px #f59e0b, 0 0 15px rgba(245,158,11,0.25) !important; }
+html.light .glow-electric { text-shadow: 0 0 10px #f59e0b, 0 0 20px rgba(245,158,11,0.4); }
+html.light .border-glow-electric { box-shadow: 0 0 0 1px #f59e0b, 0 0 15px rgba(245,158,11,0.25); }
 html.light .electric-text {
-  background: linear-gradient(135deg, #d97706, #f59e0b) !important;
-  -webkit-background-clip: text !important;
-  background-clip: text !important;
+  background: linear-gradient(135deg, #d97706, #f59e0b);
+  -webkit-background-clip: text;
+  background-clip: text;
 }
 
 /* Gold text */
-html.light .text-gold { color: #d4a017 !important; }
+html.light .text-gold { color: #d4a017; }
 html.light .gold-text {
-  background: linear-gradient(135deg, #d4a017, #f59e0b) !important;
-  -webkit-background-clip: text !important;
-  background-clip: text !important;
-  -webkit-text-fill-color: transparent !important;
+  background: linear-gradient(135deg, #d4a017, #f59e0b);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
-/* Headings */
-html.light .font-bebas { color: var(--text-primary) !important; }
+/* Headings — use specificity, not !important */
+html.light .font-bebas { color: var(--text-primary); }
+html.light h1,
+html.light h2,
+html.light h3 { color: var(--text-primary); }
 
 /* Blue → gold text */
 html.light .text-blue-300,
 html.light .text-blue-400,
-html.light .text-blue-500 { color: var(--accent-gold-dark) !important; }
+html.light .text-blue-500 { color: var(--accent-gold-dark); }
 
 /* Gray text → readable */
 html.light .text-gray-300,
-html.light .text-gray-400 { color: var(--text-secondary) !important; }
+html.light .text-gray-400 { color: var(--text-secondary); }
+html.light .text-gray-500 { color: #4b5563; }
 
-html.light .text-gray-500 { color: #4b5563 !important; }
+/* Section labels */
+html.light .text-xs.uppercase,
+html.light .text-sm.uppercase { color: #d97706; }
+
+/* Stat / accent colors */
+html.light .text-yellow-400,
+html.light .text-amber-400 { color: #d97706; }
 
 /* ══ CARD / CONTAINER BACKGROUND OVERRIDES ══ */
 
-/* Tailwind transparent-white card backgrounds → solid white */
 html.light .bg-white\/5,
 html.light .bg-white\/10 {
-  background-color: var(--card-bg) !important;
-  border: 1px solid var(--card-border) !important;
-  box-shadow: var(--card-shadow) !important;
+  background-color: var(--bg-card);
+  border: 1px solid var(--card-border);
+  box-shadow: var(--card-shadow);
 }
 
 html.light .bg-white\/3,
 html.light .bg-white\/4 {
-  background-color: rgba(255, 255, 255, 0.7) !important;
+  background-color: rgba(255, 255, 255, 0.7);
 }
 
-/* Bracket-syntax transparent whites */
 html.light .bg-white\/\[0\.02\],
-html.light .bg-white\/\[0\.03\] {
-  background-color: rgba(0, 0, 0, 0.02) !important;
-}
-html.light .bg-white\/\[0\.06\] { background-color: #f0f0f0 !important; }
-html.light .bg-white\/\[0\.08\] { background-color: #ebebeb !important; }
+html.light .bg-white\/\[0\.03\] { background-color: rgba(0, 0, 0, 0.02); }
+html.light .bg-white\/\[0\.06\] { background-color: #f0f0f0; }
+html.light .bg-white\/\[0\.08\] { background-color: #ebebeb; }
 
-/* Dark overlays → light */
 html.light .bg-black\/40,
 html.light .bg-black\/50,
 html.light .bg-black\/60 {
-  background-color: rgba(255, 255, 255, 0.85) !important;
+  background-color: rgba(255, 255, 255, 0.85);
 }
 
-/* Custom card classes */
 html.light .card {
-  background: var(--card-bg) !important;
-  border-color: var(--card-border) !important;
-  box-shadow: var(--card-shadow) !important;
+  background: var(--bg-card);
+  border-color: var(--card-border);
+  box-shadow: var(--card-shadow);
 }
 html.light .card-dark {
-  background: var(--card-bg) !important;
-  border-color: var(--card-border) !important;
+  background: var(--bg-card);
+  border-color: var(--card-border);
 }
 html.light .card-hover:hover {
-  border-color: var(--accent-gold) !important;
-  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.12) !important;
+  border-color: var(--accent-gold);
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.12);
 }
 
-/* Tilt cards */
 html.light .tilt-card {
-  background: var(--card-bg) !important;
-  border: 1px solid var(--card-border) !important;
-  box-shadow: var(--card-shadow) !important;
+  background: var(--bg-card);
+  border: 1px solid var(--card-border);
+  box-shadow: var(--card-shadow);
 }
 html.light .tilt-card:hover {
-  box-shadow: 0 4px 16px rgba(245, 158, 11, 0.1) !important;
-  border-color: var(--accent-gold) !important;
+  box-shadow: 0 4px 16px rgba(245, 158, 11, 0.1);
+  border-color: var(--accent-gold);
 }
 
-/* Navy classes → white */
 html.light .bg-navy,
 html.light .bg-navy-50,
-html.light .bg-navy-100 { background-color: var(--bg-page) !important; }
+html.light .bg-navy-100 { background-color: var(--bg-page); }
 
 html.light .bg-\[#04080F\],
 html.light .bg-\[#060c18\],
-html.light .bg-\[#0a1020\] { background-color: var(--card-bg) !important; }
-
-/* ══ INLINE STYLE DARK BACKGROUNDS → WHITE ══ */
-/* Broad approach: match ANY dark hex starting with #0 followed by
-   lowercase hex chars — this covers all the dark navy/blue backgrounds
-   like #0a1020, #0d1528, #080E1A, #0c1020, #060c18, #04080F, etc.
-   We match per-character patterns since CSS can't do regex. */
-
-/* Every dark hex (luminance < 30) used across the app as inline bg */
-html.light [style*="#080600"],
-html.light [style*="#0d0303"],
-html.light [style*="#080410"],
-html.light [style*="#04080f"],
-html.light [style*="#04080F"],
-html.light [style*="#060612"],
-html.light [style*="#040818"],
-html.light [style*="#150505"],
-html.light [style*="#060a1a"],
-html.light [style*="#0a0a12"],
-html.light [style*="#0d0618"],
-html.light [style*="#0f0a00"],
-html.light [style*="#060c18"],
-html.light [style*="#0a0a14"],
-html.light [style*="#0d0620"],
-html.light [style*="#080c18"],
-html.light [style*="#080c1a"],
-html.light [style*="#080e1a"],
-html.light [style*="#080E1A"],
-html.light [style*="#0a0e18"],
-html.light [style*="#0d0d15"],
-html.light [style*="#0a0e1a"],
-html.light [style*="#120828"],
-html.light [style*="#1f0808"],
-html.light [style*="#081020"],
-html.light [style*="#150a1f"],
-html.light [style*="#0a1020"],
-html.light [style*="#0c1020"],
-html.light [style*="#0a1225"],
-html.light [style*="#0c1025"],
-html.light [style*="#0a1428"],
-html.light [style*="#12121f"],
-html.light [style*="#1a1400"],
-html.light [style*="#0d1526"],
-html.light [style*="#0D1526"],
-html.light [style*="#0d1528"],
-html.light [style*="#0f172a"],
-html.light [style*="#16161f"],
-html.light [style*="#1a1a25"],
-html.light [style*="#1A1A2E"] {
-  background: var(--card-bg) !important;
-  border: 1px solid var(--card-border) !important;
-  box-shadow: var(--card-shadow) !important;
-}
-
-/* Inline rgba dark backgrounds */
-html.light [style*="rgba(13,21,40"],
-html.light [style*="rgba(13, 21, 40"],
-html.light [style*="rgba(10,16,32"],
-html.light [style*="rgba(10, 16, 32"],
-html.light [style*="rgba(4,8,15"],
-html.light [style*="rgba(4, 8, 15"] {
-  background: rgba(255, 255, 255, 0.95) !important;
-  border: 1px solid var(--card-border) !important;
-  box-shadow: var(--card-shadow) !important;
-}
-
-/* Dark overlays (modals, dropdown backdrop) */
-html.light [style*="rgba(0,0,0,0.6)"],
-html.light [style*="rgba(0, 0, 0, 0.6)"],
-html.light [style*="rgba(0,0,0,0.9)"],
-html.light [style*="rgba(0, 0, 0, 0.9)"],
-html.light [style*="rgba(0,0,0,0.5)"],
-html.light [style*="rgba(0, 0, 0, 0.5)"] {
-  background: rgba(255, 255, 255, 0.95) !important;
-}
-
-/* Semi-transparent white backgrounds (dark mode tints → light equivalents) */
-html.light [style*="rgba(255,255,255,0.02)"],
-html.light [style*="rgba(255, 255, 255, 0.02)"] { background: #fafafa !important; }
-html.light [style*="rgba(255,255,255,0.04)"],
-html.light [style*="rgba(255, 255, 255, 0.04)"] { background: #f0f0f0 !important; }
-html.light [style*="rgba(255,255,255,0.06)"],
-html.light [style*="rgba(255, 255, 255, 0.06)"] { background: #f0f0f0 !important; }
-html.light [style*="rgba(255,255,255,0.08)"],
-html.light [style*="rgba(255, 255, 255, 0.08)"] { background: #f5f5f5 !important; }
+html.light .bg-\[#0a1020\] { background-color: var(--bg-card); }
 
 /* ══ BORDER OVERRIDES ══ */
 
-html.light .border-electric { border-color: var(--accent-gold) !important; }
+html.light .border-electric { border-color: var(--accent-gold); }
 
 html.light .border-electric\/10,
 html.light .border-electric\/20,
-html.light .border-electric\/30 { border-color: rgba(245, 158, 11, 0.2) !important; }
+html.light .border-electric\/30 { border-color: rgba(245, 158, 11, 0.2); }
 
 html.light .border-electric\/40,
-html.light .border-electric\/50 { border-color: rgba(245, 158, 11, 0.35) !important; }
+html.light .border-electric\/50 { border-color: rgba(245, 158, 11, 0.35); }
 
-html.light .border-white\/5 { border-color: #f0f0f0 !important; }
-html.light .border-white\/10 { border-color: #e5e5e5 !important; }
-html.light .border-white\/20 { border-color: #d4d4d4 !important; }
+html.light .border-white\/5 { border-color: #f0f0f0; }
+html.light .border-white\/10 { border-color: #e5e5e5; }
+html.light .border-white\/20 { border-color: #d4d4d4; }
 
 html.light .border-white\/\[0\.04\],
-html.light .border-white\/\[0\.06\] { border-color: #f0f0f0 !important; }
+html.light .border-white\/\[0\.06\] { border-color: #f0f0f0; }
 
-html.light .border-blue-500 { border-color: var(--accent-gold) !important; }
-
-/* Inline rgba blue borders/accents → gold */
-html.light [style*="rgba(74,144,217"],
-html.light [style*="rgba(74, 144, 217"] {
-  border-color: rgba(245, 158, 11, 0.15) !important;
-}
-/* Inline blue box-shadow → gold */
-html.light [style*="rgba(59,130,246"],
-html.light [style*="rgba(59, 130, 246"] {
-  border-color: rgba(245, 158, 11, 0.2) !important;
-}
+html.light .border-blue-500 { border-color: var(--accent-gold); }
 
 html.light .divide-white\/5 > :not([hidden]) ~ :not([hidden]) {
-  border-color: #f0f0f0 !important;
+  border-color: #f0f0f0;
 }
 
 /* ══ BACKGROUND ACCENT OVERRIDES ══ */
 
-/* Solid electric blue → gold */
-html.light .bg-electric { background-color: #f59e0b !important; }
+html.light .bg-electric { background-color: #f59e0b; }
 
 html.light .bg-electric\/8,
 html.light .bg-electric\/10,
-html.light .bg-electric\/15 { background-color: rgba(245, 158, 11, 0.1) !important; }
+html.light .bg-electric\/15 { background-color: rgba(245, 158, 11, 0.1); }
 
-html.light .bg-electric\/20 { background-color: #fde8f0 !important; }
+html.light .bg-electric\/20 { background-color: rgba(245, 158, 11, 0.15); }
 
 html.light .bg-blue-500,
-html.light .bg-blue-600 { background-color: var(--accent-gold) !important; }
+html.light .bg-blue-600 { background-color: var(--accent-gold); }
 
 html.light .shadow-electric\/30 {
-  --tw-shadow-color: rgba(245, 158, 11, 0.12) !important;
+  --tw-shadow-color: rgba(245, 158, 11, 0.12);
 }
 
 /* ══ BUTTONS ══ */
 
 html.light .btn-gold {
-  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
-  color: #ffffff !important;
-  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.25) !important;
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.25);
 }
 html.light .btn-outline {
-  border-color: var(--accent-gold) !important;
-  color: var(--accent-gold-dark) !important;
+  border-color: var(--accent-gold);
+  color: var(--accent-gold-dark);
 }
 html.light .btn-outline:hover {
-  background-color: rgba(245, 158, 11, 0.08) !important;
-  border-color: var(--accent-gold-dark) !important;
+  background-color: rgba(245, 158, 11, 0.08);
+  border-color: var(--accent-gold-dark);
 }
 html.light .btn-primary {
-  background-color: var(--accent-gold) !important;
-  color: #ffffff !important;
+  background-color: var(--accent-gold);
+  color: #ffffff;
 }
 
-/* ─ Glow → warm gold ─ */
 html.light .glow-gold {
-  box-shadow: 0 0 15px rgba(245, 158, 11, 0.2) !important;
+  box-shadow: 0 0 15px rgba(245, 158, 11, 0.2);
 }
 
 /* ══ NAVBAR ══ */
 
 html.light nav,
 html.light header {
-  background-color: rgba(255, 253, 247, 0.95) !important;
-  border-bottom: 1px solid #e5e5e5 !important;
-  backdrop-filter: blur(12px) !important;
-}
-
-/* Stat pills */
-html.light .bg-white\/5.rounded-full,
-html.light .bg-white\/10.rounded-full {
-  background-color: var(--card-bg) !important;
-  border: 1px solid rgba(245, 158, 11, 0.3) !important;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+  background-color: var(--nav-bg);
+  border-bottom: 1px solid var(--nav-border);
+  backdrop-filter: blur(12px);
 }
 
 /* ══ INPUTS ══ */
@@ -1970,24 +1901,42 @@ html.light .bg-white\/10.rounded-full {
 html.light input,
 html.light select,
 html.light textarea {
-  color: var(--text-primary) !important;
-  background-color: var(--card-bg) !important;
-  border-color: #d4d4d4 !important;
+  color: var(--text-primary);
+  background-color: var(--input-bg);
+  border-color: var(--input-border);
 }
 html.light input:focus,
 html.light select:focus,
 html.light textarea:focus {
-  border-color: var(--accent-gold) !important;
-  box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.15) !important;
+  border-color: var(--accent-gold);
+  box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.15);
 }
-html.light input::placeholder { color: var(--text-muted) !important; }
+html.light input::placeholder { color: var(--text-muted); }
 
-/* ══ MODALS & OVERLAYS ══ */
+/* ══ DROPDOWN / PROFILE MENU ══ */
 
 html.light .backdrop-blur-xl,
 html.light .backdrop-blur-sm {
-  background-color: rgba(255, 255, 255, 0.9) !important;
+  background-color: rgba(255, 255, 255, 0.9);
 }
+
+html.light .backdrop-blur-xl[class*="rounded-2xl"],
+html.light .dropdown-menu {
+  background: var(--dropdown-bg);
+  border: 1px solid var(--dropdown-border);
+}
+
+/* Dropdown item text — dark charcoal, not gold */
+html.light nav .backdrop-blur-xl a,
+html.light nav .backdrop-blur-xl span,
+html.light nav .backdrop-blur-xl p,
+html.light nav .backdrop-blur-xl button {
+  color: var(--text-primary);
+}
+/* Keep "Level X" amber */
+html.light nav .text-amber-400\/80 { color: #d97706; }
+/* Keep logout red */
+html.light nav .text-red-400 { color: #ef4444; }
 
 /* ══ SCROLLBAR ══ */
 
@@ -2002,55 +1951,9 @@ html.light ::selection {
   color: var(--text-primary);
 }
 
-/* ══ NAV TEXT — gold accent (top-level nav links only) ══ */
+/* ══ SPACE BG ══ */
 
-html.light nav > div > div > a { color: #d97706 !important; }
-html.light nav > div > div > a:hover { color: #f59e0b !important; }
-
-/* ══ DROPDOWN / PROFILE MENU ══ */
-/* Dropdown sits inside nav but needs its own text colors */
-
-html.light .backdrop-blur-xl[class*="rounded-2xl"],
-html.light .dropdown-menu {
-  background: #fffdf7 !important;
-  border: 1px solid #fde68a !important;
-}
-/* Dropdown item text — dark charcoal, not gold */
-html.light nav .backdrop-blur-xl a,
-html.light nav .backdrop-blur-xl span,
-html.light nav .backdrop-blur-xl p,
-html.light nav .backdrop-blur-xl button {
-  color: var(--text-primary) !important;
-}
-/* Keep "Level X" amber */
-html.light nav .text-amber-400\/80 { color: #d97706 !important; }
-/* Keep logout red */
-html.light nav .text-red-400 { color: #ef4444 !important; }
-
-/* ══ HEADINGS ══ */
-
-html.light h1,
-html.light h2,
-html.light h3 { color: var(--text-primary) !important; }
-
-/* Section labels (DAILY, WEEKLY, BOUNTY BOARD, etc.) */
-html.light .text-xs.uppercase,
-html.light .text-sm.uppercase { color: #d97706 !important; }
-
-/* ══ SECONDARY / SUBTITLE TEXT — warm brown instead of flat gray ══ */
-
-html.light .text-gray-300,
-html.light .text-gray-400,
-html.light .text-gray-500 { color: #92400e !important; }
-
-/* ══ STAT / ACCENT COLORS ══ */
-
-html.light .text-yellow-400,
-html.light .text-amber-400 { color: #d97706 !important; }
-
-/* ══ SPACE BG / SAKURA ══ */
-
-html.light .space-bg-container { display: none !important; }
+html.light .space-bg-container { display: none; }
 
 /* ── Shop: The Lion's Den ── */
 

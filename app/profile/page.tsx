@@ -179,7 +179,7 @@ export default function ProfilePage() {
             {/* ── Sidebar ── */}
             <aside className={`${sidebarOpen ? "flex" : "hidden"} md:flex flex-col w-64 flex-shrink-0`}>
               <div className="rounded-2xl border border-electric/20 overflow-hidden sticky top-20"
-                style={{ background: "linear-gradient(135deg, #0a1020 0%, #060c18 100%)" }}>
+                style={{ background: "var(--sidebar-bg)" }}>
 
                 {/* Profile mini card */}
                 <div className="p-6 border-b border-electric/10 text-center">
@@ -262,7 +262,7 @@ function SectionHead({ title, sub }: { title: string; sub?: string }) {
 function Card({ children, className = "" }: { children: React.ReactNode; className?: string }) {
   return (
     <div className={`rounded-2xl border border-electric/20 p-5 ${className}`}
-      style={{ background: "linear-gradient(135deg, #0a1020 0%, #060c18 100%)" }}>
+      style={{ background: "var(--sidebar-bg)" }}>
       {children}
     </div>
   );
@@ -865,6 +865,8 @@ function PersonalizationSection({ user }: SharedProps) {
         const el = document.documentElement;
         el.dataset.theme = p.theme;
         el.dataset.fontSize = p.font_size;
+        el.classList.toggle("light", p.theme === "light");
+        window.dispatchEvent(new Event("themechange"));
       }).catch(() => {});
     }
   }, [user?.id]);
@@ -880,6 +882,8 @@ function PersonalizationSection({ user }: SharedProps) {
     const el = document.documentElement;
     el.dataset.theme = newTheme;
     el.dataset.fontSize = newFs;
+    el.classList.toggle("light", newTheme === "light");
+    window.dispatchEvent(new Event("themechange"));
 
     if (user?.id) {
       updatePreferences(user.id, updates).then(() => {

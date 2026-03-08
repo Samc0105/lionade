@@ -164,8 +164,9 @@ export default function Navbar() {
                       className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-all duration-200
                         ${active
                           ? "bg-electric/15 text-electric"
-                          : "text-cream/60 hover:text-cream hover:bg-white/5"
+                          : "hover:bg-white/5"
                         }`}
+                      style={active ? {} : { color: "var(--nav-text)" }}
                     >
                       {link.label}
                     </Link>
@@ -185,7 +186,8 @@ export default function Navbar() {
                   <a
                     key={link.href}
                     href={link.href}
-                    className="px-3 py-1.5 rounded-lg text-sm font-semibold text-cream/60 hover:text-cream hover:bg-white/5 transition-all duration-200"
+                    className="px-3 py-1.5 rounded-lg text-sm font-semibold hover:bg-white/5 transition-all duration-200"
+                    style={{ color: "var(--nav-text)" }}
                   >
                     {link.label}
                   </a>
@@ -258,8 +260,9 @@ export default function Navbar() {
                           backdrop-blur-xl origin-top-right
                           ${dropdownClosing ? "dropdown-menu-exit" : "dropdown-menu-enter"}`}
                         style={{
-                          background: "rgba(0,0,0,0.6)",
-                          boxShadow: "0 0 20px rgba(251,191,36,0.12), 0 8px 32px rgba(0,0,0,0.5)",
+                          background: "var(--dropdown-bg)",
+                          border: "1px solid var(--dropdown-border)",
+                          boxShadow: "0 0 20px rgba(251,191,36,0.12), 0 8px 32px rgba(0,0,0,0.3)",
                         }}
                       >
                         {/* User info header */}
