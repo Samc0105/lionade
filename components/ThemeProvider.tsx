@@ -15,7 +15,7 @@ function applyTheme() {
 function isDarkColor(color: string): boolean {
   if (!color) return false;
   // Check all hex colors in the string (gradients have multiple)
-  const hexMatches = color.matchAll(/#([0-9a-f]{6})/gi);
+  const hexMatches = Array.from(color.matchAll(/#([0-9a-f]{6})/gi));
   for (const hex of hexMatches) {
     const r = parseInt(hex[1].slice(0, 2), 16);
     const g = parseInt(hex[1].slice(2, 4), 16);
