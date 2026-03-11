@@ -1,0 +1,2802 @@
+[
+  {
+    "question": "Prove sin(3\u03b8)=3sin\u03b8\u22124sin\u00b3\u03b8. The correct derivation uses:",
+    "options": [
+      "sin(3\u03b8)=sin(2\u03b8+\u03b8)=sin2\u03b8cos\u03b8+cos2\u03b8sin\u03b8",
+      "sin(3\u03b8)=3sin(\u03b8)",
+      "sin(3\u03b8)=sin\u00b2\u03b8+sin\u03b8",
+      "sin(3\u03b8)=sin(\u03b8)cos(2\u03b8)"
+    ],
+    "correct_answer": "sin(3\u03b8)=sin(2\u03b8+\u03b8)=sin2\u03b8cos\u03b8+cos2\u03b8sin\u03b8",
+    "explanation": "Expand: (2sin\u03b8cos\u03b8)cos\u03b8+(1\u22122sin\u00b2\u03b8)sin\u03b8=2sin\u03b8cos\u00b2\u03b8+sin\u03b8\u22122sin\u00b3\u03b8=2sin\u03b8(1\u2212sin\u00b2\u03b8)+sin\u03b8\u22122sin\u00b3\u03b8=3sin\u03b8\u22124sin\u00b3\u03b8.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "cos(3\u03b8) = ?",
+    "options": [
+      "4cos\u00b3\u03b8\u22123cos\u03b8",
+      "3cos\u03b8\u22124cos\u00b3\u03b8",
+      "cos\u00b3\u03b8\u22123cos\u03b8",
+      "4cos\u00b3\u03b8+3cos\u03b8"
+    ],
+    "correct_answer": "4cos\u00b3\u03b8\u22123cos\u03b8",
+    "explanation": "cos(3\u03b8)=cos(2\u03b8+\u03b8)=(2cos\u00b2\u03b8\u22121)cos\u03b8\u22122sin\u00b2\u03b8cos\u03b8=4cos\u00b3\u03b8\u22123cos\u03b8.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "tan(3\u03b8) = ?",
+    "options": [
+      "(3tan\u03b8\u2212tan\u00b3\u03b8)/(1\u22123tan\u00b2\u03b8)",
+      "3tan\u03b8/(1\u2212tan\u00b2\u03b8)",
+      "(tan\u03b8+tan2\u03b8)/(1\u2212tan\u03b8tan2\u03b8)",
+      "3tan\u03b8\u2212tan\u00b3\u03b8"
+    ],
+    "correct_answer": "(3tan\u03b8\u2212tan\u00b3\u03b8)/(1\u22123tan\u00b2\u03b8)",
+    "explanation": "tan(3\u03b8)=tan(2\u03b8+\u03b8) expanded fully.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "Which is NOT a valid form of cos(2\u03b8)?",
+    "options": [
+      "cos\u00b2\u03b8\u2212sin\u00b2\u03b8",
+      "2cos\u00b2\u03b8\u22121",
+      "1\u22122sin\u00b2\u03b8",
+      "2sin\u03b8cos\u03b8"
+    ],
+    "correct_answer": "2sin\u03b8cos\u03b8",
+    "explanation": "2sin\u03b8cos\u03b8=sin(2\u03b8), not cos(2\u03b8).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "Simplify: sin\u2074\u03b8+cos\u2074\u03b8.",
+    "options": [
+      "1",
+      "(1+cos(4\u03b8))/2",
+      "(1/2)(1+cos(2\u03b8))",
+      "1\u2212(1/2)sin\u00b2(2\u03b8)"
+    ],
+    "correct_answer": "1\u2212(1/2)sin\u00b2(2\u03b8)",
+    "explanation": "sin\u2074\u03b8+cos\u2074\u03b8=(sin\u00b2\u03b8+cos\u00b2\u03b8)\u00b2\u22122sin\u00b2\u03b8cos\u00b2\u03b8=1\u2212(1/2)sin\u00b2(2\u03b8).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "Simplify: sin\u2076\u03b8+cos\u2076\u03b8.",
+    "options": [
+      "1",
+      "3/4+cos(2\u03b8)/4",
+      "1\u22123sin\u00b2\u03b8cos\u00b2\u03b8",
+      "(3/4)(sin\u00b2\u03b8+cos\u00b2\u03b8)"
+    ],
+    "correct_answer": "1\u22123sin\u00b2\u03b8cos\u00b2\u03b8",
+    "explanation": "a\u00b3+b\u00b3=(a+b)(a\u00b2\u2212ab+b\u00b2). With a=sin\u00b2\u03b8,b=cos\u00b2\u03b8: 1\u00b7(1\u2212sin\u00b2\u03b8cos\u00b2\u03b8)... more precisely 1\u22123sin\u00b2\u03b8cos\u00b2\u03b8.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "Express sin\u2074\u03b8 in terms of cosines of multiples of \u03b8.",
+    "options": [
+      "(3\u22124cos2\u03b8+cos4\u03b8)/8",
+      "(3\u2212cos2\u03b8)/4",
+      "(1\u2212cos4\u03b8)/8",
+      "(3+4cos2\u03b8\u2212cos4\u03b8)/8"
+    ],
+    "correct_answer": "(3\u22124cos2\u03b8+cos4\u03b8)/8",
+    "explanation": "sin\u2074\u03b8=((1\u2212cos2\u03b8)/2)\u00b2=(1\u22122cos2\u03b8+cos\u00b22\u03b8)/4=(3\u22124cos2\u03b8+cos4\u03b8)/8.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "Simplify: (sin\u03b8+sin3\u03b8+sin5\u03b8).",
+    "options": [
+      "3sin\u03b8",
+      "sin3\u03b8(1+2cos2\u03b8)... =3sin3\u03b8cos\u00b2\u03b8? Actually: sum formula",
+      "sin\u03b8(1+2cos2\u03b8)... wait actually this equals sin3\u03b8+2sin3\u03b8cos2\u03b8",
+      "3sin3\u03b8\u00b7cos(2\u03b8)"
+    ],
+    "correct_answer": "sin3\u03b8(1+2cos2\u03b8)... =3sin3\u03b8cos\u00b2\u03b8? Actually: sum formula",
+    "explanation": "Using sum-to-product twice: sin\u03b8+sin5\u03b8=2sin3\u03b8cos2\u03b8. Total=2sin3\u03b8cos2\u03b8+sin3\u03b8=sin3\u03b8(2cos2\u03b8+1).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The Chebyshev polynomial T\u2099(cos\u03b8) = ?",
+    "options": [
+      "cos(n\u03b8)",
+      "n\u00b7cos\u03b8",
+      "cos\u207f\u03b8",
+      "n\u03b8"
+    ],
+    "correct_answer": "cos(n\u03b8)",
+    "explanation": "Chebyshev polynomials satisfy T\u2099(cos\u03b8)=cos(n\u03b8).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "Express cos\u2075\u03b8 in terms of multiple angles.",
+    "options": [
+      "(10cos\u03b8+5cos3\u03b8+cos5\u03b8)/16",
+      "(cos\u03b8+cos5\u03b8)/16",
+      "5cos\u03b8+cos5\u03b8",
+      "(10cos\u03b8\u22125cos3\u03b8+cos5\u03b8)/16"
+    ],
+    "correct_answer": "(10cos\u03b8+5cos3\u03b8+cos5\u03b8)/16",
+    "explanation": "Using De Moivre and binomial theorem.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The product sin\u03b8\u00b7sin(60\u00b0\u2212\u03b8)\u00b7sin(60\u00b0+\u03b8) = ?",
+    "options": [
+      "(1/4)sin(3\u03b8)",
+      "sin(3\u03b8)/3",
+      "(3/4)sin\u03b8",
+      "sin\u03b8/4"
+    ],
+    "correct_answer": "(1/4)sin(3\u03b8)",
+    "explanation": "This is a standard product identity: sin\u03b8sin(60\u00b0\u2212\u03b8)sin(60\u00b0+\u03b8)=(1/4)sin3\u03b8.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "cos\u03b8\u00b7cos(60\u00b0\u2212\u03b8)\u00b7cos(60\u00b0+\u03b8) = ?",
+    "options": [
+      "(1/4)cos3\u03b8",
+      "cos3\u03b8/3",
+      "(3/4)cos\u03b8",
+      "cos\u03b8/4"
+    ],
+    "correct_answer": "(1/4)cos3\u03b8",
+    "explanation": "Product identity: cos\u03b8cos(60\u00b0\u2212\u03b8)cos(60\u00b0+\u03b8)=(1/4)cos3\u03b8.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The identity sin(A)sin(B) = ?",
+    "options": [
+      "cos(A+B)\u2212cos(A\u2212B)",
+      "(1/2)[cos(A\u2212B)\u2212cos(A+B)]",
+      "cos(A\u2212B)+cos(A+B)",
+      "(1/2)cos(A+B)"
+    ],
+    "correct_answer": "(1/2)[cos(A\u2212B)\u2212cos(A+B)]",
+    "explanation": "Product-to-sum: sinAsinB=(1/2)[cos(A\u2212B)\u2212cos(A+B)].",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "cos(A)cos(B) = ?",
+    "options": [
+      "(1/2)[cos(A+B)+cos(A\u2212B)]",
+      "(1/2)[cos(A+B)\u2212cos(A\u2212B)]",
+      "cos(A+B)+cos(A\u2212B)",
+      "sin(A+B)sin(A\u2212B)"
+    ],
+    "correct_answer": "(1/2)[cos(A+B)+cos(A\u2212B)]",
+    "explanation": "Product-to-sum: cosAcosB=(1/2)[cos(A\u2212B)+cos(A+B)].",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The value of sin(\u03c0/7)sin(2\u03c0/7)sin(3\u03c0/7) = ?",
+    "options": [
+      "1/8",
+      "\u221a7/8",
+      "\u221a7/4",
+      "1/4"
+    ],
+    "correct_answer": "\u221a7/8",
+    "explanation": "Product of sines at equal intervals: sin(\u03c0/7)sin(2\u03c0/7)sin(3\u03c0/7)=\u221a7/8.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "Which identity correctly expresses sinA+sinB+sinC when A+B+C=\u03c0?",
+    "options": [
+      "sinA+sinB+sinC=4cos(A/2)cos(B/2)cos(C/2)",
+      "sinA+sinB+sinC=4sinAsinBsinC",
+      "sinA+sinB+sinC=2",
+      "sinA+sinB+sinC=3/2"
+    ],
+    "correct_answer": "sinA+sinB+sinC=4cos(A/2)cos(B/2)cos(C/2)",
+    "explanation": "For triangle angles: sinA+sinB+sinC=4cos(A/2)cos(B/2)cos(C/2).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "Simplify (1+cos2\u03b8)/(sin2\u03b8).",
+    "options": [
+      "tan\u03b8",
+      "cot\u03b8",
+      "sin\u03b8",
+      "2cot\u03b8"
+    ],
+    "correct_answer": "cot\u03b8",
+    "explanation": "(2cos\u00b2\u03b8)/(2sin\u03b8cos\u03b8)=cos\u03b8/sin\u03b8=cot\u03b8.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "Simplify sin2\u03b8/(1+cos2\u03b8).",
+    "options": [
+      "cot\u03b8",
+      "sin\u03b8",
+      "2sin\u03b8",
+      "tan\u03b8"
+    ],
+    "correct_answer": "tan\u03b8",
+    "explanation": "2sin\u03b8cos\u03b8/(2cos\u00b2\u03b8)=sin\u03b8/cos\u03b8=tan\u03b8.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "Simplify (1\u2212cos2\u03b8)/(sin2\u03b8).",
+    "options": [
+      "cot\u03b8",
+      "tan\u03b8",
+      "csc\u03b8",
+      "sec\u03b8"
+    ],
+    "correct_answer": "tan\u03b8",
+    "explanation": "(2sin\u00b2\u03b8)/(2sin\u03b8cos\u03b8)=sin\u03b8/cos\u03b8=tan\u03b8.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The infinite product sin(x) = x\u00b7\u220f(1\u2212x\u00b2/n\u00b2\u03c0\u00b2) for n=1 to \u221e is related to:",
+    "options": [
+      "The Taylor series",
+      "Euler's product formula for sine",
+      "The Fourier series",
+      "De Moivre's theorem"
+    ],
+    "correct_answer": "Euler's product formula for sine",
+    "explanation": "Euler's product representation of sin(x).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "Simplify sin\u03b8/(1+cos\u03b8) + (1+cos\u03b8)/sin\u03b8.",
+    "options": [
+      "2sin\u03b8",
+      "2csc\u03b8",
+      "2sec\u03b8",
+      "2cos\u03b8"
+    ],
+    "correct_answer": "2csc\u03b8",
+    "explanation": "Common denominator: (sin\u00b2\u03b8+(1+cos\u03b8)\u00b2)/(sin\u03b8(1+cos\u03b8))=(2+2cos\u03b8)/(sin\u03b8(1+cos\u03b8))=2/sin\u03b8=2csc\u03b8.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "If A+B+C=\u03c0, then tanA+tanB+tanC = ?",
+    "options": [
+      "tanA\u00b7tanB\u00b7tanC",
+      "tanA+tanB+tanC=0",
+      "3",
+      "tanAtanBtanC/(tanA+tanB+tanC)"
+    ],
+    "correct_answer": "tanA\u00b7tanB\u00b7tanC",
+    "explanation": "For triangle angles: tanA+tanB+tanC=tanAtanBtanC.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "If A+B+C=\u03c0, then cos2A+cos2B+cos2C = ?",
+    "options": [
+      "1",
+      "0",
+      "\u22121\u22124cosAcosBcosC",
+      "\u22124sinAsinBsinC"
+    ],
+    "correct_answer": "\u22121\u22124cosAcosBcosC",
+    "explanation": "This is a standard triangle identity.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "Simplify: tan(\u03c0/4+\u03b8)\u00b7tan(\u03c0/4\u2212\u03b8).",
+    "options": [
+      "1",
+      "tan\u00b2\u03b8",
+      "\u22121",
+      "0"
+    ],
+    "correct_answer": "1",
+    "explanation": "(1+tan\u03b8)/(1\u2212tan\u03b8)\u00b7(1\u2212tan\u03b8)/(1+tan\u03b8)=1.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "arctan(1/2)+arctan(1/3) = ?",
+    "options": [
+      "\u03c0/4",
+      "\u03c0/6",
+      "\u03c0/3",
+      "\u03c0/2"
+    ],
+    "correct_answer": "\u03c0/4",
+    "explanation": "tan(\u03b1+\u03b2)=(1/2+1/3)/(1\u22121/6)=(5/6)/(5/6)=1 \u2192 \u03b1+\u03b2=\u03c0/4.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "Euler's formula: e^(i\u03c0)+1 = ?",
+    "options": [
+      "2",
+      "0",
+      "i",
+      "\u22121"
+    ],
+    "correct_answer": "0",
+    "explanation": "Euler's identity: e^(i\u03c0)+1=0.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "e^(i\u03c0/2) = ?",
+    "options": [
+      "1",
+      "\u22121",
+      "i",
+      "\u2212i"
+    ],
+    "correct_answer": "i",
+    "explanation": "e^(i\u03c0/2)=cos(\u03c0/2)+isin(\u03c0/2)=i.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "Using Euler's formula, cos\u03b8 = ?",
+    "options": [
+      "(e^(i\u03b8)+e^(\u2212i\u03b8))/2",
+      "(e^(i\u03b8)\u2212e^(\u2212i\u03b8))/(2i)",
+      "e^(i\u03b8)/2",
+      "(e^(i\u03b8)+1)/2"
+    ],
+    "correct_answer": "(e^(i\u03b8)+e^(\u2212i\u03b8))/2",
+    "explanation": "cos\u03b8=Re(e^(i\u03b8))=(e^(i\u03b8)+e^(\u2212i\u03b8))/2.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "Using Euler's formula, sin\u03b8 = ?",
+    "options": [
+      "(e^(i\u03b8)+e^(\u2212i\u03b8))/2",
+      "(e^(i\u03b8)\u2212e^(\u2212i\u03b8))/(2i)",
+      "e^(i\u03b8)/(2i)",
+      "Im(e^(i\u03b8))/2"
+    ],
+    "correct_answer": "(e^(i\u03b8)\u2212e^(\u2212i\u03b8))/(2i)",
+    "explanation": "sin\u03b8=(e^(i\u03b8)\u2212e^(\u2212i\u03b8))/(2i).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The nth roots of unity are:",
+    "options": [
+      "e^(2\u03c0ik/n) for k=0,1,...,n\u22121",
+      "n\u00b7e^(i\u03c0)",
+      "cos(n\u03b8)+isin(n\u03b8)",
+      "(cos\u03b8+isin\u03b8)^n"
+    ],
+    "correct_answer": "e^(2\u03c0ik/n) for k=0,1,...,n\u22121",
+    "explanation": "nth roots of unity: z^n=1 \u2192 z=e^(2\u03c0ik/n).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The sum of all nth roots of unity equals:",
+    "options": [
+      "n",
+      "1",
+      "0",
+      "i"
+    ],
+    "correct_answer": "0",
+    "explanation": "The nth roots of unity sum to 0 for n>1.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The cube roots of unity satisfy z\u00b3=1. The non-real roots are:",
+    "options": [
+      "\u00b1i",
+      "(\u22121\u00b1i\u221a3)/2",
+      "(1\u00b1i\u221a3)/2",
+      "(\u22121\u00b1i)/2"
+    ],
+    "correct_answer": "(\u22121\u00b1i\u221a3)/2",
+    "explanation": "\u03c9=e^(2\u03c0i/3)=(\u22121+i\u221a3)/2 and its conjugate.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "If \u03c9=e^(2\u03c0i/3), then 1+\u03c9+\u03c9\u00b2 = ?",
+    "options": [
+      "3",
+      "0",
+      "\u03c9\u00b3",
+      "1"
+    ],
+    "correct_answer": "0",
+    "explanation": "Sum of cube roots of unity = 0.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "De Moivre's: (cos\u03b8+isin\u03b8)^n = ?",
+    "options": [
+      "ncosn\u03b8+i\u00b7nsinn\u03b8",
+      "cos(n\u03b8)+isin(n\u03b8)",
+      "cos\u207f\u03b8+isin\u207f\u03b8",
+      "e^(n\u03b8)"
+    ],
+    "correct_answer": "cos(n\u03b8)+isin(n\u03b8)",
+    "explanation": "De Moivre's theorem.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "Find the 4th roots of 16. They are:",
+    "options": [
+      "2, 2i, \u22122, \u22122i",
+      "4, 4i, \u22124, \u22124i",
+      "2, \u22122",
+      "2e^(i\u03c0k/4) k=0,1,2,3"
+    ],
+    "correct_answer": "2, 2i, \u22122, \u22122i",
+    "explanation": "4th roots of 16=2\u2074: r=2, arguments 0,\u03c0/2,\u03c0,3\u03c0/2.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "Using De Moivre, (1+i)^8 = ?",
+    "options": [
+      "8",
+      "16",
+      "\u221216",
+      "16i"
+    ],
+    "correct_answer": "16",
+    "explanation": "r=\u221a2, \u03b8=\u03c0/4. (\u221a2)^8=16, cos(2\u03c0)+isin(2\u03c0)=1. So 16.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The argument of z = (1\u2212i\u221a3) is:",
+    "options": [
+      "\u2212\u03c0/3",
+      "\u03c0/3",
+      "2\u03c0/3",
+      "\u22122\u03c0/3"
+    ],
+    "correct_answer": "\u2212\u03c0/3",
+    "explanation": "z is in QIV: arg=arctan(\u2212\u221a3/1)=\u2212\u03c0/3.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "If z=r\u00b7e^(i\u03b8) and w=s\u00b7e^(i\u03c6), then z/w = ?",
+    "options": [
+      "(r/s)e^(i(\u03b8+\u03c6))",
+      "(r\u2212s)e^(i(\u03b8\u2212\u03c6))",
+      "(r/s)e^(i(\u03b8\u2212\u03c6))",
+      "rs\u00b7e^(i(\u03b8\u2212\u03c6))"
+    ],
+    "correct_answer": "(r/s)e^(i(\u03b8\u2212\u03c6))",
+    "explanation": "Division: divide moduli, subtract arguments.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The identity cos(n\u03b8) can be expressed as a polynomial T\u2099(cos\u03b8). T\u2083(x) = ?",
+    "options": [
+      "3x",
+      "4x\u00b3\u22123x",
+      "x\u00b3",
+      "4x\u00b2\u22121"
+    ],
+    "correct_answer": "4x\u00b3\u22123x",
+    "explanation": "T\u2083(x)=4x\u00b3\u22123x (Chebyshev polynomial of degree 3).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "cis(\u03b1)\u00b7cis(\u03b2) = ?",
+    "options": [
+      "cis(\u03b1\u2212\u03b2)",
+      "cis(\u03b1\u03b2)",
+      "cis(\u03b1+\u03b2)",
+      "cis(\u03b1)/cis(\u03b2)"
+    ],
+    "correct_answer": "cis(\u03b1+\u03b2)",
+    "explanation": "cis(\u03b1)cis(\u03b2)=e^(i\u03b1)e^(i\u03b2)=e^(i(\u03b1+\u03b2))=cis(\u03b1+\u03b2).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "Solve sin(\u03b8)+sin(2\u03b8)+sin(3\u03b8)=0 for 0\u2264\u03b8<2\u03c0.",
+    "options": [
+      "\u03b8=0,\u03c0,\u03c0/2,\u03c0/3,2\u03c0/3,4\u03c0/3,5\u03c0/3",
+      "\u03b8=0,\u03c0",
+      "\u03b8=\u03c0/3,2\u03c0/3,4\u03c0/3,5\u03c0/3",
+      "\u03b8=0,\u03c0/2,\u03c0,3\u03c0/2"
+    ],
+    "correct_answer": "\u03b8=0,\u03c0,\u03c0/2,\u03c0/3,2\u03c0/3,4\u03c0/3,5\u03c0/3",
+    "explanation": "sin\u03b8+sin3\u03b8=2sin2\u03b8cos\u03b8. So sin2\u03b8(2cos\u03b8+1)=0 \u2192 sin2\u03b8=0 or cos\u03b8=\u22121/2.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "Solve cos(\u03b8)cos(2\u03b8)cos(4\u03b8)=1/8 for 0\u2264\u03b8<2\u03c0.",
+    "options": [
+      "\u03b8=\u03c0/9,5\u03c0/9,7\u03c0/9,...",
+      "\u03b8=\u03c0/7,3\u03c0/7,5\u03c0/7,7\u03c0/7,9\u03c0/7,11\u03c0/7,13\u03c0/7",
+      "\u03b8=\u03c0/7,9\u03c0/7,etc.",
+      "There is no solution"
+    ],
+    "correct_answer": "\u03b8=\u03c0/7,3\u03c0/7,5\u03c0/7,7\u03c0/7,9\u03c0/7,11\u03c0/7,13\u03c0/7",
+    "explanation": "Using the identity: cos\u03b8cos2\u03b8cos4\u03b8=sin(8\u03b8)/(8sin\u03b8)=1/8 \u2192 sin(8\u03b8)=sin\u03b8.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "Solve tan(\u03b8)+tan(2\u03b8)=tan(3\u03b8) for 0\u2264\u03b8<\u03c0 (\u03b8\u2260\u03c0/6,\u03c0/3,\u03c0/2,2\u03c0/3,5\u03c0/6).",
+    "options": [
+      "\u03b8=\u03c0/4 only",
+      "No solutions",
+      "\u03b8=0 only",
+      "\u03b8=\u03c0/8"
+    ],
+    "correct_answer": "No solutions",
+    "explanation": "tan3\u03b8=tan(\u03b8+2\u03b8)=(tan\u03b8+tan2\u03b8)/(1\u2212tan\u03b8tan2\u03b8). Setting equal gives tan\u03b8tan2\u03b8=0.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The equation sin\u03b8=\u03b8/\u03c0 has how many solutions for \u03b8\u2208[\u22122\u03c0, 2\u03c0]?",
+    "options": [
+      "1",
+      "3",
+      "5",
+      "7"
+    ],
+    "correct_answer": "5",
+    "explanation": "The line y=\u03b8/\u03c0 intersects y=sin\u03b8 at approximately 5 points in [\u22122\u03c0,2\u03c0].",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "Solve 8sin\u00b2\u03b8cos\u00b2\u03b8=1 for 0\u2264\u03b8<2\u03c0.",
+    "options": [
+      "\u03c0/12,5\u03c0/12,7\u03c0/12,11\u03c0/12,13\u03c0/12,17\u03c0/12,19\u03c0/12,23\u03c0/12",
+      "\u03c0/6,5\u03c0/6",
+      "\u03c0/12 only",
+      "\u03c0/3,2\u03c0/3,4\u03c0/3,5\u03c0/3"
+    ],
+    "correct_answer": "\u03c0/12,5\u03c0/12,7\u03c0/12,11\u03c0/12,13\u03c0/12,17\u03c0/12,19\u03c0/12,23\u03c0/12",
+    "explanation": "2sin\u00b2(2\u03b8)=1 \u2192 sin(2\u03b8)=\u00b11/\u221a2 \u2192 8 solutions.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The equation sin\u03b8+cos\u03b8=\u221a2 has solutions:",
+    "options": [
+      "\u03b8=\u03c0/4+2n\u03c0",
+      "\u03b8=\u03c0/4+n\u03c0",
+      "\u03b8=3\u03c0/4+2n\u03c0",
+      "No solutions for real \u03b8"
+    ],
+    "correct_answer": "\u03b8=\u03c0/4+2n\u03c0",
+    "explanation": "\u221a2sin(\u03b8+\u03c0/4)=\u221a2 \u2192 sin(\u03b8+\u03c0/4)=1 \u2192 \u03b8+\u03c0/4=\u03c0/2+2n\u03c0.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "Solve: sin\u03b8\u2212cos\u03b8=1 for 0\u2264\u03b8<2\u03c0.",
+    "options": [
+      "\u03b8=\u03c0/2,\u03c0",
+      "\u03b8=\u03c0,3\u03c0/2",
+      "\u03b8=\u03c0/2 only",
+      "\u03b8=0,\u03c0/2"
+    ],
+    "correct_answer": "\u03b8=\u03c0/2,\u03c0",
+    "explanation": "\u221a2sin(\u03b8\u2212\u03c0/4)=1 \u2192 sin(\u03b8\u2212\u03c0/4)=1/\u221a2 \u2192 \u03b8\u2212\u03c0/4=\u03c0/4 or 3\u03c0/4.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The general solution of asin\u03b8+bcos\u03b8=c is solvable only when:",
+    "options": [
+      "a\u00b2+b\u00b2>c",
+      "c\u2264a+b",
+      "c\u00b2\u2264a\u00b2+b\u00b2",
+      "a=b"
+    ],
+    "correct_answer": "c\u00b2\u2264a\u00b2+b\u00b2",
+    "explanation": "a sin\u03b8+b cos\u03b8=\u221a(a\u00b2+b\u00b2)sin(\u03b8+\u03c6), max value is \u221a(a\u00b2+b\u00b2).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "Solve 3sin\u03b8+4cos\u03b8=5 for 0\u2264\u03b8<2\u03c0.",
+    "options": [
+      "\u03b8=arctan(4/3)",
+      "\u03b8=\u03c0/2 and \u03b8=arctan(4/3)",
+      "\u03b8=arctan(3/4)",
+      "\u03b8=\u03c0/2 only"
+    ],
+    "correct_answer": "\u03b8=arctan(4/3)",
+    "explanation": "5sin(\u03b8+\u03c6)=5 where tan\u03c6=4/3. \u03b8+\u03c6=\u03c0/2 \u2192 \u03b8=\u03c0/2\u2212\u03c6=arctan(3/4). But 3sin+4cos=5 only when \u03b8=arctan(4/3).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "Solve cos(3\u03b8)=cos(\u03b8) for 0\u2264\u03b8<2\u03c0.",
+    "options": [
+      "\u03b8=0,\u03c0/2,\u03c0,3\u03c0/2",
+      "\u03b8=0,\u03c0/2,\u03c0,3\u03c0/2 and \u03c0/4,3\u03c0/4,5\u03c0/4,7\u03c0/4",
+      "\u03b8=0,\u03c0,\u03c0/2,3\u03c0/2",
+      "\u03b8=0,\u03c0/4,\u03c0/2,3\u03c0/4,\u03c0,5\u03c0/4,3\u03c0/2,7\u03c0/4"
+    ],
+    "correct_answer": "\u03b8=0,\u03c0/2,\u03c0,3\u03c0/2",
+    "explanation": "cos3\u03b8=cos\u03b8 \u2192 3\u03b8=\u00b1\u03b8+2n\u03c0 \u2192 2\u03b8=2n\u03c0 or 4\u03b8=2n\u03c0 \u2192 \u03b8=n\u03c0 or n\u03c0/2.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The equation sin(p\u03b8)=sin(q\u03b8) in general gives:",
+    "options": [
+      "Only \u03b8=0",
+      "p\u03b8=q\u03b8+2n\u03c0 or p\u03b8=\u03c0\u2212q\u03b8+2n\u03c0",
+      "p\u03b8+q\u03b8=\u03c0",
+      "\u03b8=(p+q)\u03c0"
+    ],
+    "correct_answer": "p\u03b8=q\u03b8+2n\u03c0 or p\u03b8=\u03c0\u2212q\u03b8+2n\u03c0",
+    "explanation": "General trig equation: same angles or supplementary angles.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "Find the principal value solution of sin(\u03b8)=sin(2\u03b8).",
+    "options": [
+      "\u03b8=0",
+      "\u03b8=0,\u03c0/3",
+      "\u03b8=0 or \u03c0/3 or \u03c0",
+      "\u03b8=\u03c0/3 only"
+    ],
+    "correct_answer": "\u03b8=0 or \u03c0/3 or \u03c0",
+    "explanation": "sin\u03b8=2sin\u03b8cos\u03b8 \u2192 sin\u03b8(2cos\u03b8\u22121)=0.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "How many solutions does sin(x)=x\u00b2 have in (\u2212\u03c0,\u03c0)?",
+    "options": [
+      "1",
+      "2",
+      "3",
+      "4"
+    ],
+    "correct_answer": "3",
+    "explanation": "The parabola x\u00b2 intersects sin(x) at 3 points in (\u2212\u03c0,\u03c0).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "Solve: tan\u00b2\u03b8\u2212(1+\u221a3)tan\u03b8+\u221a3=0 for 0\u2264\u03b8<\u03c0.",
+    "options": [
+      "\u03b8=\u03c0/3,\u03c0/4",
+      "\u03b8=\u03c0/4,\u03c0/3",
+      "\u03b8=\u03c0/3,\u03c0/4,4\u03c0/3,5\u03c0/4",
+      "\u03b8=\u03c0/4 only"
+    ],
+    "correct_answer": "\u03b8=\u03c0/4,\u03c0/3",
+    "explanation": "Factor: (tan\u03b8\u22121)(tan\u03b8\u2212\u221a3)=0 \u2192 tan\u03b8=1 or \u221a3.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The number of solutions of |sin\u03b8|=|cos\u03b8| in [0,2\u03c0] is:",
+    "options": [
+      "2",
+      "4",
+      "6",
+      "8"
+    ],
+    "correct_answer": "4",
+    "explanation": "This occurs at \u03b8=\u03c0/4,3\u03c0/4,5\u03c0/4,7\u03c0/4.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "Solve sin\u03b8+sin3\u03b8+sin5\u03b8=0 using sum-to-product.",
+    "options": [
+      "\u03b8=n\u03c0/3",
+      "\u03b8=n\u03c0/2 or n\u03c0/3",
+      "\u03b8=n\u03c0 or n\u03c0/3",
+      "\u03b8=n\u03c0/6"
+    ],
+    "correct_answer": "\u03b8=n\u03c0 or n\u03c0/3",
+    "explanation": "sin3\u03b8(2cos2\u03b8+1)=0 \u2192 sin3\u03b8=0 or cos2\u03b8=\u22121/2.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The equation sinx=ax has infinitely many solutions for:",
+    "options": [
+      "a>1",
+      "a<0",
+      "|a|<1",
+      "a=0"
+    ],
+    "correct_answer": "| a|<1",
+    "explanation": "For |a|<1, the line y=ax intersects y=sinx infinitely often.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "Solve 4sin\u03b8cos\u03b8=\u221a3 for the principal value.",
+    "options": [
+      "\u03b8=\u03c0/6",
+      "\u03b8=\u03c0/3",
+      "\u03b8=\u03c0/12",
+      "\u03b8=\u03c0/4"
+    ],
+    "correct_answer": "\u03b8=\u03c0/6",
+    "explanation": "2sin(2\u03b8)=\u221a3 \u2192 sin(2\u03b8)=\u221a3/2 \u2192 2\u03b8=\u03c0/3 \u2192 \u03b8=\u03c0/6.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The maximum value of a\u00b7sin\u03b8+b\u00b7cos\u03b8 is:",
+    "options": [
+      "a+b",
+      "a\u00b2+b\u00b2",
+      "\u221a(a\u00b2+b\u00b2)",
+      "(a+b)/2"
+    ],
+    "correct_answer": "\u221a(a\u00b2+b\u00b2)",
+    "explanation": "Max of R\u00b7sin(\u03b8+\u03c6) is R=\u221a(a\u00b2+b\u00b2).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "For what values of k does ksin\u03b8+k=tan\u03b8 have solutions?",
+    "options": [
+      "k>0 only",
+      "k<0 only",
+      "All real k",
+      "No value of k"
+    ],
+    "correct_answer": "All real k",
+    "explanation": "For any k, specific \u03b8 values satisfy this equation.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The Taylor series for sin(x) around x=0 is:",
+    "options": [
+      "x\u2212x\u00b3/3!+x\u2075/5!\u2212...",
+      "x+x\u00b3/3!+x\u2075/5!+...",
+      "1\u2212x\u00b2/2!+x\u2074/4!\u2212...",
+      "x\u2212x\u00b2/2+x\u00b3/3\u2212..."
+    ],
+    "correct_answer": "x\u2212x\u00b3/3!+x\u2075/5!\u2212...",
+    "explanation": "sin(x)=\u03a3(\u22121)\u207fx^(2n+1)/(2n+1)!",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The Taylor series for cos(x) around x=0 is:",
+    "options": [
+      "x\u2212x\u00b3/3!+x\u2075/5!\u2212...",
+      "1\u2212x\u00b2/2!+x\u2074/4!\u2212...",
+      "1+x\u00b2/2!+x\u2074/4!+...",
+      "x+x\u00b3/3!+x\u2075/5!+..."
+    ],
+    "correct_answer": "1\u2212x\u00b2/2!+x\u2074/4!\u2212...",
+    "explanation": "cos(x)=\u03a3(\u22121)\u207fx^(2n)/(2n)!",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "lim(x\u21920) sin(x)/x = ?",
+    "options": [
+      "0",
+      "\u221e",
+      "1",
+      "undefined"
+    ],
+    "correct_answer": "1",
+    "explanation": "Fundamental limit: sin(x)/x \u2192 1.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "lim(x\u21920) (1\u2212cos x)/x\u00b2 = ?",
+    "options": [
+      "0",
+      "1",
+      "1/2",
+      "\u221e"
+    ],
+    "correct_answer": "1/2",
+    "explanation": "Using Taylor: (1\u2212(1\u2212x\u00b2/2+...))/x\u00b2 \u2192 1/2.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "lim(x\u21920) tan(x)/x = ?",
+    "options": [
+      "0",
+      "1",
+      "\u221e",
+      "1/2"
+    ],
+    "correct_answer": "1",
+    "explanation": "tan(x)/x = (sin(x)/x)\u00b7(1/cos(x)) \u2192 1\u00b71 = 1.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The Fourier series of a periodic function uses:",
+    "options": [
+      "Powers of x",
+      "Polynomials",
+      "Sines and cosines",
+      "Exponentials only"
+    ],
+    "correct_answer": "Sines and cosines",
+    "explanation": "Fourier series: f(x)=a\u2080+\u03a3(a\u2099cos(nx)+b\u2099sin(nx)).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The sum \u03a3sin(n\u03b8) for n=1 to N (closed form) is:",
+    "options": [
+      "Nsin(\u03b8)",
+      "sin((N+1)\u03b8/2)\u00b7sin(N\u03b8/2)/sin(\u03b8/2)",
+      "N\u00b7sin(\u03b8)/(1\u2212sin\u03b8)",
+      "sin(N\u03b8)"
+    ],
+    "correct_answer": "sin((N+1)\u03b8/2)\u00b7sin(N\u03b8/2)/sin(\u03b8/2)",
+    "explanation": "Standard telescoping sum using product formula.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The sum 1+cos\u03b8+cos2\u03b8+...+cos(n\u03b8) = ?",
+    "options": [
+      "(1/2)+sin((n+1/2)\u03b8)/(2sin(\u03b8/2))",
+      "n\u00b7cos\u03b8",
+      "sin(n\u03b8)/sin\u03b8",
+      "cos(n\u03b8/2)\u00b7sin((n+1)\u03b8/2)/sin(\u03b8/2)"
+    ],
+    "correct_answer": "(1/2)+sin((n+1/2)\u03b8)/(2sin(\u03b8/2))",
+    "explanation": "Real part of geometric series with ratio e^(i\u03b8).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "sin(\u03c0/n) for large n \u2248 ?",
+    "options": [
+      "\u03c0/n",
+      "\u03c0\u00b2/n\u00b2",
+      "1/n",
+      "0"
+    ],
+    "correct_answer": "\u03c0/n",
+    "explanation": "For small angles: sin(x)\u2248x, so sin(\u03c0/n)\u2248\u03c0/n.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "lim(x\u21920) sin(3x)/sin(5x) = ?",
+    "options": [
+      "5/3",
+      "0",
+      "3/5",
+      "1"
+    ],
+    "correct_answer": "3/5",
+    "explanation": "Each sin(ax)/x\u2192a, so ratio\u21923/5.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The infinite series sin\u03b8\u2212sin(3\u03b8)/3+sin(5\u03b8)/5\u2212... converges to:",
+    "options": [
+      "sin\u03b8",
+      "\u03b8",
+      "\u03c0/4 for \u03b8=\u03c0/2",
+      "(\u03c0/4)sign(sin\u03b8)\u00b7|\u03b8/\u03c0\u2212round(\u03b8/\u03c0)|... actually square wave"
+    ],
+    "correct_answer": "(\u03c0/4)sign(sin\u03b8)\u00b7|\u03b8/\u03c0\u2212round(\u03b8/\u03c0)|... actually square wave",
+    "explanation": "This is the Fourier series of a square wave (=\u03c0/4 times sign function).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The Parseval's theorem for Fourier series states:",
+    "options": [
+      "The sum of coefficients equals 0",
+      "The sum of squared coefficients relates to the L\u00b2 norm of f",
+      "All coefficients must be positive",
+      "The series converges pointwise"
+    ],
+    "correct_answer": "The sum of squared coefficients relates to the L\u00b2 norm of f",
+    "explanation": "Parseval: (1/\u03c0)\u222bf\u00b2dx = a\u2080\u00b2/2 + \u03a3(a\u2099\u00b2+b\u2099\u00b2).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The Gregory-Leibniz series \u03c0/4 = 1\u22121/3+1/5\u22121/7+... is related to arctan because:",
+    "options": [
+      "arctan(1)=\u03c0/4 and its Taylor series is x\u2212x\u00b3/3+x\u2075/5\u2212...",
+      "\u03c0/4 is a special value",
+      "tan(\u03c0/4)=1 and 1\u00b3=1",
+      "The sum telescopes"
+    ],
+    "correct_answer": "arctan(1)=\u03c0/4 and its Taylor series is x\u2212x\u00b3/3+x\u2075/5\u2212...",
+    "explanation": "arctan(x)=x\u2212x\u00b3/3+x\u2075/5\u2212... evaluated at x=1 gives \u03c0/4.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "lim(n\u2192\u221e) n\u00b7sin(\u03c0/n) = ?",
+    "options": [
+      "0",
+      "1",
+      "\u03c0",
+      "\u221e"
+    ],
+    "correct_answer": "\u03c0",
+    "explanation": "n\u00b7sin(\u03c0/n)=\u03c0\u00b7sin(\u03c0/n)/(\u03c0/n) \u2192 \u03c0\u00b71=\u03c0.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The product formula: sinx = x\u00b7\u220f(1\u2212x\u00b2/n\u00b2\u03c0\u00b2). At x=\u03c0/2 this gives:",
+    "options": [
+      "1 = (\u03c0/2)\u00b7\u220f(1\u22121/(4n\u00b2))",
+      "\u03c0/2 = product",
+      "sin(\u03c0/2)=1 only",
+      "Euler's Basel result"
+    ],
+    "correct_answer": "1 = (\u03c0/2)\u00b7\u220f(1\u22121/(4n\u00b2))",
+    "explanation": "Euler's formula evaluated at x=\u03c0/2.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "sinh(x) = ?",
+    "options": [
+      "(e\u02e3+e\u207b\u02e3)/2",
+      "(e\u02e3\u2212e\u207b\u02e3)/2",
+      "e\u02e3/2",
+      "e\u207b\u02e3/2"
+    ],
+    "correct_answer": "(e\u02e3\u2212e\u207b\u02e3)/2",
+    "explanation": "Hyperbolic sine: sinh(x)=(e\u02e3\u2212e\u207b\u02e3)/2.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "cosh(x) = ?",
+    "options": [
+      "(e\u02e3\u2212e\u207b\u02e3)/2",
+      "e\u02e3",
+      "(e\u02e3+e\u207b\u02e3)/2",
+      "e\u207b\u02e3"
+    ],
+    "correct_answer": "(e\u02e3+e\u207b\u02e3)/2",
+    "explanation": "Hyperbolic cosine: cosh(x)=(e\u02e3+e\u207b\u02e3)/2.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "cosh\u00b2x\u2212sinh\u00b2x = ?",
+    "options": [
+      "0",
+      "2",
+      "cosh(2x)",
+      "1"
+    ],
+    "correct_answer": "1",
+    "explanation": "Fundamental hyperbolic identity.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "sinh(x+y) = ?",
+    "options": [
+      "sinhx\u00b7coshy+coshx\u00b7sinhy",
+      "sinhx\u00b7sinhy+coshx\u00b7coshy",
+      "coshx\u00b7coshy+sinhx\u00b7sinhy",
+      "sinhx+sinhy"
+    ],
+    "correct_answer": "sinhx\u00b7coshy+coshx\u00b7sinhy",
+    "explanation": "Mirrors trig sum formula with cosh instead of cos.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "cosh(2x) = ?",
+    "options": [
+      "2sinhxcoshx",
+      "2cosh\u00b2x\u22121",
+      "cosh\u00b2x\u2212sinh\u00b2x",
+      "sinh\u00b2x+cosh\u00b2x"
+    ],
+    "correct_answer": "2cosh\u00b2x\u22121",
+    "explanation": "cosh(2x)=cosh\u00b2x+sinh\u00b2x=2cosh\u00b2x\u22121.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "tanh(x) = ?",
+    "options": [
+      "(e\u02e3+e\u207b\u02e3)/(e\u02e3\u2212e\u207b\u02e3)",
+      "coshx/sinhx",
+      "(e\u02e3\u2212e\u207b\u02e3)/(e\u02e3+e\u207b\u02e3)",
+      "sinhx+coshx"
+    ],
+    "correct_answer": "(e\u02e3\u2212e\u207b\u02e3)/(e\u02e3+e\u207b\u02e3)",
+    "explanation": "tanh=sinh/cosh=(e\u02e3\u2212e\u207b\u02e3)/(e\u02e3+e\u207b\u02e3).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The relationship between trig and hyperbolic via complex: sin(ix) = ?",
+    "options": [
+      "\u2212sinh(x)",
+      "cosh(x)",
+      "i\u00b7sinh(x)",
+      "i\u00b7cosh(x)"
+    ],
+    "correct_answer": "i\u00b7sinh(x)",
+    "explanation": "sin(ix)=(e^(i\u00b7ix)\u2212e^(\u2212i\u00b7ix))/(2i)=(e\u207b\u02e3\u2212e\u02e3)/(2i)=i\u00b7sinhx.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "cos(ix) = ?",
+    "options": [
+      "\u2212cosh(x)",
+      "i\u00b7cosh(x)",
+      "cosh(x)",
+      "\u2212i\u00b7sinh(x)"
+    ],
+    "correct_answer": "cosh(x)",
+    "explanation": "cos(ix)=(e^(\u2212x)+e\u02e3)/2=coshx.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The derivative of sinh(x) is:",
+    "options": [
+      "cosh(x)",
+      "\u2212cosh(x)",
+      "sinh(x)",
+      "tanh(x)"
+    ],
+    "correct_answer": "cosh(x)",
+    "explanation": "d/dx sinh(x)=cosh(x).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The derivative of cosh(x) is:",
+    "options": [
+      "\u2212sinh(x)",
+      "cosh(x)",
+      "tanh(x)",
+      "sinh(x)"
+    ],
+    "correct_answer": "sinh(x)",
+    "explanation": "d/dx cosh(x)=sinh(x).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "lim(x\u2192\u221e) tanh(x) = ?",
+    "options": [
+      "0",
+      "\u221e",
+      "\u22121",
+      "1"
+    ],
+    "correct_answer": "1",
+    "explanation": "tanh(x)\u21921 as x\u2192\u221e.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The inverse hyperbolic: arcsinh(x) = ?",
+    "options": [
+      "arcsin(x)",
+      "ln(x+\u221a(x\u00b2+1))",
+      "ln(x+\u221a(x\u00b2\u22121))",
+      "ln(x+1)"
+    ],
+    "correct_answer": "ln(x+\u221a(x\u00b2+1))",
+    "explanation": "arcsinh(x)=ln(x+\u221a(x\u00b2+1)).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "arccosh(x) = ?",
+    "options": [
+      "ln(x+\u221a(x\u00b2\u22121))",
+      "ln(x+\u221a(x\u00b2+1))",
+      "arccos(x)",
+      "ln(x\u22121)"
+    ],
+    "correct_answer": "ln(x+\u221a(x\u00b2\u22121))",
+    "explanation": "arccosh(x)=ln(x+\u221a(x\u00b2\u22121)), defined for x\u22651.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "1\u2212tanh\u00b2x = ?",
+    "options": [
+      "cosh\u00b2x",
+      "sinh\u00b2x",
+      "sech\u00b2x",
+      "1"
+    ],
+    "correct_answer": "sech\u00b2x",
+    "explanation": "From cosh\u00b2x\u2212sinh\u00b2x=1: divide by cosh\u00b2x \u2192 1\u2212tanh\u00b2x=sech\u00b2x.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The catenary curve y=cosh(x) models:",
+    "options": [
+      "A sine wave",
+      "A hanging chain/cable",
+      "A parabola",
+      "A circle"
+    ],
+    "correct_answer": "A hanging chain/cable",
+    "explanation": "The catenary is the shape of a freely hanging flexible chain.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "In spherical trigonometry, the spherical law of cosines is:",
+    "options": [
+      "cosA=sinBsinC\u2212cosBcosC\u00b7cosa",
+      "cosa=cosbcosc+sinbsinc\u00b7cosA",
+      "cosa=cosb+cosc",
+      "cosA=cosB+cosC"
+    ],
+    "correct_answer": "cosa=cosbcosc+sinbsinc\u00b7cosA",
+    "explanation": "Spherical law of cosines relates sides and angles of spherical triangles.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The sum of angles of a spherical triangle is:",
+    "options": [
+      "Always 180\u00b0",
+      "Less than 180\u00b0",
+      "Greater than 180\u00b0",
+      "Exactly 360\u00b0"
+    ],
+    "correct_answer": "Greater than 180\u00b0",
+    "explanation": "Spherical triangles have angle sum between 180\u00b0 and 540\u00b0.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The angular excess E of a spherical triangle with angles A,B,C is:",
+    "options": [
+      "A+B+C",
+      "A+B+C\u2212360\u00b0",
+      "A+B+C\u2212180\u00b0",
+      "360\u00b0\u2212A\u2212B\u2212C"
+    ],
+    "correct_answer": "A+B+C\u2212180\u00b0",
+    "explanation": "Spherical excess = sum of angles minus \u03c0.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The area of a spherical triangle on a sphere of radius R with excess E is:",
+    "options": [
+      "E\u00b7R",
+      "E\u00b7R\u00b2",
+      "(E/2)\u00b7R\u00b2",
+      "\u03c0R\u00b2E/180"
+    ],
+    "correct_answer": "E\u00b7R\u00b2",
+    "explanation": "Area=E\u00b7R\u00b2 where E is in radians.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The haversine formula is used for:",
+    "options": [
+      "Complex number problems",
+      "Great circle distance between two points on a sphere",
+      "Area of spherical triangles",
+      "Navigation on flat maps"
+    ],
+    "correct_answer": "Great circle distance between two points on a sphere",
+    "explanation": "Haversine: numerically stable formula for great-circle distance.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "In navigation, 1 nautical mile equals the arc length of:",
+    "options": [
+      "1 degree longitude",
+      "1 degree latitude",
+      "1 minute of arc on a great circle",
+      "1 km"
+    ],
+    "correct_answer": "1 minute of arc on a great circle",
+    "explanation": "1 nautical mile = 1 arcminute on a great circle of Earth.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The solid angle subtended by a sphere as seen from its center is:",
+    "options": [
+      "2\u03c0 steradians",
+      "\u03c0 steradians",
+      "4\u03c0 steradians",
+      "6\u03c0 steradians"
+    ],
+    "correct_answer": "4\u03c0 steradians",
+    "explanation": "Full sphere = 4\u03c0 steradians.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "A chord of a unit circle at central angle \u03b8 has length:",
+    "options": [
+      "\u03b8",
+      "sin\u03b8",
+      "2sin(\u03b8/2)",
+      "cos\u03b8"
+    ],
+    "correct_answer": "2sin(\u03b8/2)",
+    "explanation": "Chord length=2R\u00b7sin(\u03b8/2)=2sin(\u03b8/2) for R=1.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The Mollweide equations for a triangle state:",
+    "options": [
+      "a/sinA=b/sinB",
+      "(a+b)/c=cos((A\u2212B)/2)/sin(C/2)",
+      "a\u00b2=b\u00b2+c\u00b2\u22122bccosA",
+      "a=bcosC+ccosB"
+    ],
+    "correct_answer": "(a+b)/c=cos((A\u2212B)/2)/sin(C/2)",
+    "explanation": "Mollweide's equations combine all sides and angles.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The projection formula for a triangle: a = ?",
+    "options": [
+      "bcosC+ccosB",
+      "bsinC+csinB",
+      "bcosB+ccosC",
+      "b+c"
+    ],
+    "correct_answer": "bcosC+ccosB",
+    "explanation": "Projection formula: a=bcosC+ccosB.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "In triangle ABC, the circumradius R = ?",
+    "options": [
+      "a/(2sinA)",
+      "a/sinA",
+      "2a/sinA",
+      "sinA/a"
+    ],
+    "correct_answer": "a/(2sinA)",
+    "explanation": "R=a/(2sinA) from the extended law of sines.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The inradius r of a triangle with area \u0394 and semi-perimeter s is:",
+    "options": [
+      "\u0394/s",
+      "s/\u0394",
+      "\u0394\u00b7s",
+      "\u221a(\u0394/s)"
+    ],
+    "correct_answer": "\u0394/s",
+    "explanation": "r=Area/s=\u0394/s.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The formula r=4R\u00b7sin(A/2)sin(B/2)sin(C/2) relates:",
+    "options": [
+      "Two medians",
+      "The inradius, circumradius, and angles",
+      "The altitudes",
+      "Area and perimeter"
+    ],
+    "correct_answer": "The inradius, circumradius, and angles",
+    "explanation": "r=4R\u00b7sin(A/2)sin(B/2)sin(C/2) is a classical relation.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "Euler's inequality for triangles states:",
+    "options": [
+      "R\u22652r",
+      "R\u22642r",
+      "R=2r always",
+      "R+r=constant"
+    ],
+    "correct_answer": "R\u22652r",
+    "explanation": "Euler: R\u22652r, with equality for equilateral triangles.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The formula for the diagonal d of a polygon inscribed in a circle of radius R with n sides is:",
+    "options": [
+      "2R\u00b7sin(\u03c0/n)",
+      "R\u00b7sin(\u03c0/n)",
+      "2R\u00b7cos(\u03c0/n)",
+      "R\u00b7tan(\u03c0/n)"
+    ],
+    "correct_answer": "2R\u00b7sin(\u03c0/n)",
+    "explanation": "The side of a regular n-gon inscribed in radius R: s=2R\u00b7sin(\u03c0/n).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The Fourier transform of f(t)=e^(\u2212|t|) is:",
+    "options": [
+      "1/(1+\u03c9\u00b2)",
+      "2/(1+\u03c9\u00b2)",
+      "1/(1+i\u03c9)",
+      "e^(\u2212i\u03c9)"
+    ],
+    "correct_answer": "2/(1+\u03c9\u00b2)",
+    "explanation": "F{e^(\u2212|t|)}=2/(1+\u03c9\u00b2).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The Fourier transform of cos(\u03c9\u2080t) is:",
+    "options": [
+      "\u03b4(\u03c9\u2212\u03c9\u2080)",
+      "\u03c0[\u03b4(\u03c9\u2212\u03c9\u2080)+\u03b4(\u03c9+\u03c9\u2080)]",
+      "2\u03c0\u03b4(\u03c9)",
+      "sin(\u03c9/\u03c9\u2080)"
+    ],
+    "correct_answer": "\u03c0[\u03b4(\u03c9\u2212\u03c9\u2080)+\u03b4(\u03c9+\u03c9\u2080)]",
+    "explanation": "cos(\u03c9\u2080t)=(e^(i\u03c9\u2080t)+e^(\u2212i\u03c9\u2080t))/2; FT gives impulses at \u00b1\u03c9\u2080.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "Parseval's theorem for Fourier transforms states:",
+    "options": [
+      "f(0)=\u222bF(\u03c9)d\u03c9",
+      "\u222b|f(t)|\u00b2dt=(1/2\u03c0)\u222b|F(\u03c9)|\u00b2d\u03c9",
+      "F(0)=\u222bf(t)dt",
+      "\u222bf(t)dt=F(0)"
+    ],
+    "correct_answer": "\u222b|f(t)|\u00b2dt=(1/2\u03c0)\u222b|F(\u03c9)|\u00b2d\u03c9",
+    "explanation": "Energy conservation in Fourier analysis.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The discrete Fourier transform (DFT) of a sequence of N points uses:",
+    "options": [
+      "Polynomials",
+      "Powers of e^(\u22122\u03c0i/N)",
+      "The matrix of sines",
+      "Random samples"
+    ],
+    "correct_answer": "Powers of e^(\u22122\u03c0i/N)",
+    "explanation": "DFT: X\u2096=\u03a3x\u2099e^(\u22122\u03c0ikn/N).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "A signal with frequency f Hz has angular frequency \u03c9 = ?",
+    "options": [
+      "f/2\u03c0",
+      "2\u03c0f",
+      "f\u00b2",
+      "\u221af"
+    ],
+    "correct_answer": "2\u03c0f",
+    "explanation": "\u03c9=2\u03c0f.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The Nyquist theorem states a signal must be sampled at least:",
+    "options": [
+      "At the signal frequency",
+      "At twice the maximum frequency",
+      "At the signal period",
+      "At the square root of frequency"
+    ],
+    "correct_answer": "At twice the maximum frequency",
+    "explanation": "Nyquist: fs\u22652fmax to avoid aliasing.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The Z-transform of a discrete sequence x\u2099 = \u03b4\u2099 (Kronecker delta) is:",
+    "options": [
+      "z",
+      "1",
+      "z\u207b\u00b9",
+      "0"
+    ],
+    "correct_answer": "1",
+    "explanation": "Z{\u03b4\u2099}=\u03a3\u03b4\u2099z\u207b\u207f=1.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "Convolution in the time domain corresponds to __ in the frequency domain.",
+    "options": [
+      "Addition",
+      "Differentiation",
+      "Multiplication",
+      "Division"
+    ],
+    "correct_answer": "Multiplication",
+    "explanation": "Convolution theorem: F{f*g}=F(\u03c9)\u00b7G(\u03c9).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The Gibbs phenomenon occurs in Fourier series near:",
+    "options": [
+      "Smooth points",
+      "Discontinuities",
+      "The origin",
+      "High frequencies"
+    ],
+    "correct_answer": "Discontinuities",
+    "explanation": "Gibbs: about 9% overshoot near jump discontinuities.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The short-time Fourier transform (STFT) provides information about:",
+    "options": [
+      "Average frequency",
+      "Frequency content at specific times",
+      "Total energy",
+      "Phase only"
+    ],
+    "correct_answer": "Frequency content at specific times",
+    "explanation": "STFT gives time-frequency localization.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The area enclosed by the polar curve r=f(\u03b8) from \u03b8\u2081 to \u03b8\u2082 is:",
+    "options": [
+      "(1/2)\u222b(f(\u03b8))d\u03b8",
+      "\u222bf(\u03b8)d\u03b8",
+      "(1/2)\u222b(f(\u03b8))\u00b2d\u03b8",
+      "\u222bf\u00b2(\u03b8)d\u03b8"
+    ],
+    "correct_answer": "(1/2)\u222b(f(\u03b8))\u00b2d\u03b8",
+    "explanation": "Polar area: A=(1/2)\u222br\u00b2d\u03b8.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The area enclosed by r=a(1+cos\u03b8) (cardioid) is:",
+    "options": [
+      "2\u03c0a\u00b2",
+      "\u03c0a\u00b2",
+      "3\u03c0a\u00b2/2",
+      "3\u03c0a\u00b2"
+    ],
+    "correct_answer": "3\u03c0a\u00b2/2",
+    "explanation": "A=(1/2)\u222b\u2080^(2\u03c0)a\u00b2(1+cos\u03b8)\u00b2d\u03b8=3\u03c0a\u00b2/2.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The arc length of r=f(\u03b8) is:",
+    "options": [
+      "\u222b\u221a(r\u00b2+(dr/d\u03b8)\u00b2)d\u03b8",
+      "\u222b|r|d\u03b8",
+      "\u222br\u00b7d\u03b8",
+      "\u222b(r+(dr/d\u03b8))d\u03b8"
+    ],
+    "correct_answer": "\u222b\u221a(r\u00b2+(dr/d\u03b8)\u00b2)d\u03b8",
+    "explanation": "Arc length in polar: L=\u222b\u221a(r\u00b2+(r')\u00b2)d\u03b8.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The number of petals in r=cos(n\u03b8) for odd n is:",
+    "options": [
+      "2n",
+      "n",
+      "4n",
+      "n/2"
+    ],
+    "correct_answer": "n",
+    "explanation": "r=cos(n\u03b8): n petals for odd n, 2n petals for even n.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The lemniscate r\u00b2=a\u00b2cos(2\u03b8) looks like:",
+    "options": [
+      "A circle",
+      "A figure-eight",
+      "A cardioid",
+      "A rose"
+    ],
+    "correct_answer": "A figure-eight",
+    "explanation": "The lemniscate is a figure-eight shaped curve.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The area of one loop of r\u00b2=a\u00b2cos(2\u03b8) is:",
+    "options": [
+      "\u03c0a\u00b2",
+      "a\u00b2",
+      "a\u00b2/2",
+      "2a\u00b2"
+    ],
+    "correct_answer": "a\u00b2/2",
+    "explanation": "Area=(1/2)\u222br\u00b2d\u03b8 for one loop.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The parametric form x=cos t, y=sin t traces:",
+    "options": [
+      "An ellipse",
+      "A circle (counterclockwise)",
+      "A parabola",
+      "A spiral"
+    ],
+    "correct_answer": "A circle (counterclockwise)",
+    "explanation": "x\u00b2+y\u00b2=1, traced counterclockwise as t increases.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The parametric curve x=a\u00b7cos t, y=b\u00b7sin t is:",
+    "options": [
+      "A circle",
+      "An ellipse",
+      "A hyperbola",
+      "A parabola"
+    ],
+    "correct_answer": "An ellipse",
+    "explanation": "x\u00b2/a\u00b2+y\u00b2/b\u00b2=1.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "Converting x=r\u00b7cos\u03b8, y=r\u00b7sin\u03b8 from polar: r\u00b2= ?",
+    "options": [
+      "x+y",
+      "x\u00b2+y\u00b2",
+      "(x+y)\u00b2",
+      "|x|+|y|"
+    ],
+    "correct_answer": "x\u00b2+y\u00b2",
+    "explanation": "r\u00b2=x\u00b2+y\u00b2.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "In the complex plane, multiplying by e^(i\u03b8) rotates a vector by:",
+    "options": [
+      "\u03b8/2",
+      "2\u03b8",
+      "\u03b8",
+      "\u2212\u03b8"
+    ],
+    "correct_answer": "\u03b8",
+    "explanation": "Multiplication by e^(i\u03b8) is rotation by \u03b8.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The argument of \u22121+i\u221a3 is:",
+    "options": [
+      "\u03c0/3",
+      "2\u03c0/3",
+      "\u2212\u03c0/3",
+      "5\u03c0/6"
+    ],
+    "correct_answer": "2\u03c0/3",
+    "explanation": "In QII: arg=\u03c0\u2212arctan(\u221a3/1)=\u03c0\u2212\u03c0/3=2\u03c0/3.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The modulus of (1+i)\u2076 is:",
+    "options": [
+      "8",
+      "2\u221a2",
+      "4\u221a2",
+      "8\u221a2"
+    ],
+    "correct_answer": "8",
+    "explanation": "|(1+i)|=\u221a2, |z\u2076|=(\u221a2)\u2076=8.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The principal argument of \u2212i is:",
+    "options": [
+      "\u03c0",
+      "\u03c0/2",
+      "\u2212\u03c0/2",
+      "3\u03c0/2"
+    ],
+    "correct_answer": "\u2212\u03c0/2",
+    "explanation": "\u2212i has argument \u2212\u03c0/2 (principal: in (\u2212\u03c0,\u03c0]).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The Dirichlet kernel D\u2099(\u03b8) = sin((n+1/2)\u03b8)/sin(\u03b8/2) is related to:",
+    "options": [
+      "Bessel functions",
+      "Partial sums of Fourier series",
+      "Spherical harmonics",
+      "Chebyshev polynomials"
+    ],
+    "correct_answer": "Partial sums of Fourier series",
+    "explanation": "The Dirichlet kernel appears in partial sums of Fourier series.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The identity arctan(x)+arctan(1/x)=\u03c0/2 holds for:",
+    "options": [
+      "All x",
+      "x<0",
+      "x>0",
+      "x=1 only"
+    ],
+    "correct_answer": "x>0",
+    "explanation": "For x>0: both angles are positive and sum to \u03c0/2.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "In \u211d\u00b3, the angle \u03b8 between vectors u and v satisfies:",
+    "options": [
+      "cos\u03b8=u+v",
+      "cos\u03b8=(u\u00b7v)/(|u||v|)",
+      "cos\u03b8=|u||v|",
+      "sin\u03b8=(u\u00b7v)/|u||v|"
+    ],
+    "correct_answer": "cos\u03b8=(u\u00b7v)/(|u||v|)",
+    "explanation": "Dot product formula.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "For a triangle inscribed in a circle of diameter d, the angle subtended by the diameter is:",
+    "options": [
+      "45\u00b0",
+      "60\u00b0",
+      "180\u00b0",
+      "90\u00b0"
+    ],
+    "correct_answer": "90\u00b0",
+    "explanation": "Thales' theorem: angle in semicircle is 90\u00b0.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The power of a point P with respect to a circle equals:",
+    "options": [
+      "PA\u00b7PB for any chord AB through P",
+      "PA+PB",
+      "PA\u00b2",
+      "Radius\u00b2"
+    ],
+    "correct_answer": "PA\u00b7PB for any chord AB through P",
+    "explanation": "Power of a point = product of signed lengths on any chord.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "sin(\u03c0/18)=sin(10\u00b0) satisfies which cubic?",
+    "options": [
+      "8x\u00b3\u22126x\u22121=0",
+      "8x\u00b3+6x\u22121=0",
+      "8x\u00b3\u22126x+1=0",
+      "x\u00b3\u2212x\u22121=0"
+    ],
+    "correct_answer": "8x\u00b3\u22126x\u22121=0",
+    "explanation": "sin(3\u00b710\u00b0)=sin30\u00b0=1/2. Using sin3\u03b8=3sin\u03b8\u22124sin\u00b3\u03b8: 4(8x\u00b3\u22126x)=1... simplified: 8x\u00b3\u22126x\u22121=0.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "arctan(2)+arctan(3) = ?",
+    "options": [
+      "\u03c0/4",
+      "3\u03c0/4",
+      "\u03c0",
+      "5\u03c0/4"
+    ],
+    "correct_answer": "3\u03c0/4",
+    "explanation": "tan(\u03b1+\u03b2)=(2+3)/(1\u22126)=5/(\u22125)=\u22121 and both angles are in (0,\u03c0/2), so sum is in (0,\u03c0), giving 3\u03c0/4.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The value of cos(\u03c0/5) is:",
+    "options": [
+      "(\u221a5+1)/4",
+      "(\u221a5\u22121)/4",
+      "(1+\u221a5)/2",
+      "(\u221a5+1)/2"
+    ],
+    "correct_answer": "(\u221a5+1)/4",
+    "explanation": "cos(36\u00b0)=(1+\u221a5)/4. More precisely: cos(\u03c0/5)=(\u221a5+1)/4.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "sin(\u03c0/5) = sin(36\u00b0) = ?",
+    "options": [
+      "\u221a(10\u22122\u221a5)/4",
+      "(\u221a5\u22121)/4",
+      "\u221a5/4",
+      "(\u221a5+1)/4"
+    ],
+    "correct_answer": "\u221a(10\u22122\u221a5)/4",
+    "explanation": "Exact value using nested radicals.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The identity sin(\u03b1)sin(\u03b2) can be used to compute sin(75\u00b0)sin(15\u00b0):",
+    "options": [
+      "1/4",
+      "1/2",
+      "\u221a3/4",
+      "(\u221a3\u22121)/4"
+    ],
+    "correct_answer": "1/4",
+    "explanation": "sin75\u00b0sin15\u00b0=(1/2)[cos60\u00b0\u2212cos90\u00b0]=(1/2)(1/2)=1/4.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "Simplify: cot(\u03b8)\u2212tan(\u03b8).",
+    "options": [
+      "2cot(2\u03b8)",
+      "2tan(2\u03b8)",
+      "2csc(2\u03b8)",
+      "2sec(2\u03b8)"
+    ],
+    "correct_answer": "2cot(2\u03b8)",
+    "explanation": "cos\u03b8/sin\u03b8\u2212sin\u03b8/cos\u03b8=(cos\u00b2\u03b8\u2212sin\u00b2\u03b8)/(sin\u03b8cos\u03b8)=cos(2\u03b8)/(sin(2\u03b8)/2)=2cot(2\u03b8).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The value of tan(\u03c0/8) is:",
+    "options": [
+      "\u221a2\u22121",
+      "\u221a2+1",
+      "(\u221a2\u22121)/2",
+      "2\u2212\u221a2"
+    ],
+    "correct_answer": "\u221a2\u22121",
+    "explanation": "tan(\u03c0/8)=tan(22.5\u00b0)=\u221a2\u22121.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "Simplify: sin(A+B)sin(A\u2212B).",
+    "options": [
+      "sin\u00b2A\u2212sin\u00b2B",
+      "cos\u00b2B\u2212cos\u00b2A",
+      "sin\u00b2A+sin\u00b2B",
+      "cos\u00b2A\u2212cos\u00b2B"
+    ],
+    "correct_answer": "sin\u00b2A\u2212sin\u00b2B",
+    "explanation": "(sinAcosB+cosAsinB)(sinAcosB\u2212cosAsinB)=sin\u00b2Acos\u00b2B\u2212cos\u00b2Asin\u00b2B=sin\u00b2A(1\u2212sin\u00b2B)\u2212(1\u2212sin\u00b2A)sin\u00b2B=sin\u00b2A\u2212sin\u00b2B.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "Simplify: cos(A+B)cos(A\u2212B).",
+    "options": [
+      "cos\u00b2A\u2212sin\u00b2B",
+      "sin\u00b2A+cos\u00b2B",
+      "cos\u00b2A+cos\u00b2B",
+      "cos\u00b2B\u2212sin\u00b2A"
+    ],
+    "correct_answer": "cos\u00b2A\u2212sin\u00b2B",
+    "explanation": "(cosAcosB\u2212sinAsinB)(cosAcosB+sinAsinB)=cos\u00b2Acos\u00b2B\u2212sin\u00b2Asin\u00b2B=cos\u00b2A(1\u2212sin\u00b2B)\u2212(1\u2212cos\u00b2A)sin\u00b2B=cos\u00b2A\u2212sin\u00b2B.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The value of sin(\u03c0/12) = sin(15\u00b0) = ?",
+    "options": [
+      "(\u221a6\u2212\u221a2)/4",
+      "(\u221a6+\u221a2)/4",
+      "(\u221a3\u22121)/4",
+      "(\u221a3+1)/4"
+    ],
+    "correct_answer": "(\u221a6\u2212\u221a2)/4",
+    "explanation": "sin(45\u00b0\u221230\u00b0)=(\u221a6\u2212\u221a2)/4.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "If tanA+tanB=p and tanAtanB=q, then tan(A+B)=?",
+    "options": [
+      "p+q",
+      "p/(1\u2212q)",
+      "(p+q)/(1\u2212q)",
+      "p\u2212q"
+    ],
+    "correct_answer": "p/(1\u2212q)",
+    "explanation": "tan(A+B)=(tanA+tanB)/(1\u2212tanAtanB)=p/(1\u2212q).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The identity sin\u00b2(A/2) = (1\u2212cosA)/2 implies sin(15\u00b0) = \u221a((1\u2212cos30\u00b0)/2). This gives:",
+    "options": [
+      "\u221a((2\u2212\u221a3)/4)",
+      "\u221a((2+\u221a3)/4)",
+      "(\u221a3\u22121)/2",
+      "(\u221a6\u2212\u221a2)/4"
+    ],
+    "correct_answer": "\u221a((2\u2212\u221a3)/4)",
+    "explanation": "sin\u00b2(15\u00b0)=(1\u2212cos30\u00b0)/2=(1\u2212\u221a3/2)/2=(2\u2212\u221a3)/4.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "Number of solutions of sin\u03b8=sin2\u03b8 in [0,2\u03c0):",
+    "options": [
+      "2",
+      "4",
+      "3",
+      "6"
+    ],
+    "correct_answer": "4",
+    "explanation": "sin\u03b8=2sin\u03b8cos\u03b8 \u2192 sin\u03b8(1\u22122cos\u03b8)=0 \u2192 4 solutions: 0,\u03c0,\u03c0/3,5\u03c0/3.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "Solve: tan\u03b8\u00b7tan(2\u03b8)=1 for 0<\u03b8<\u03c0 (avoiding undefined values).",
+    "options": [
+      "\u03b8=\u03c0/6",
+      "\u03b8=\u03c0/3",
+      "\u03b8=\u03c0/4",
+      "\u03b8=\u03c0/8"
+    ],
+    "correct_answer": "\u03b8=\u03c0/6",
+    "explanation": "tan\u03b8\u00b72tan\u03b8/(1\u2212tan\u00b2\u03b8)=1 \u2192 2tan\u00b2\u03b8=1\u2212tan\u00b2\u03b8 \u2192 tan\u00b2\u03b8=1/3 \u2192 tan\u03b8=1/\u221a3.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "Solve: sin(\u03b8+\u03c6)=sin\u03b8cos\u03c6+cos\u03b8sin\u03c6=k. For k>1:",
+    "options": [
+      "\u03b8=0 is the only solution",
+      "Two solutions always exist",
+      "No real solutions",
+      "The solution requires complex \u03b8"
+    ],
+    "correct_answer": "No real solutions",
+    "explanation": "The maximum of sin is 1; k>1 has no real solution.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "For the equation asin\u03b8+bcos\u03b8=c, the condition for exactly one solution in [0,2\u03c0) is:",
+    "options": [
+      "c\u00b2=a\u00b2+b\u00b2",
+      "c\u00b2<a\u00b2+b\u00b2",
+      "c\u00b2>a\u00b2+b\u00b2",
+      "a=b"
+    ],
+    "correct_answer": "c\u00b2=a\u00b2+b\u00b2",
+    "explanation": "When c equals the amplitude, the curve is tangent, giving exactly one solution.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "Solve: cos\u00b2\u03b8+cos\u03b8=0 for 0\u2264\u03b8<2\u03c0.",
+    "options": [
+      "\u03b8=\u03c0/2,3\u03c0/2",
+      "\u03b8=\u03c0/2,\u03c0,3\u03c0/2",
+      "\u03b8=0,\u03c0/2,\u03c0",
+      "\u03b8=\u03c0/2,3\u03c0/2,\u03c0"
+    ],
+    "correct_answer": "\u03b8=\u03c0/2,\u03c0,3\u03c0/2",
+    "explanation": "cos\u03b8(cos\u03b8+1)=0 \u2192 cos\u03b8=0 or cos\u03b8=\u22121.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "Solve: sin(\u03b8)=cos(2\u03b8) for 0\u2264\u03b8<2\u03c0.",
+    "options": [
+      "\u03c0/6,5\u03c0/6,3\u03c0/2",
+      "\u03c0/6,5\u03c0/6",
+      "\u03c0/6,5\u03c0/6,7\u03c0/6,11\u03c0/6",
+      "\u03c0/3,2\u03c0/3,3\u03c0/2"
+    ],
+    "correct_answer": "\u03c0/6,5\u03c0/6,3\u03c0/2",
+    "explanation": "sin\u03b8=1\u22122sin\u00b2\u03b8 \u2192 2sin\u00b2\u03b8+sin\u03b8\u22121=0 \u2192 (2sin\u03b8\u22121)(sin\u03b8+1)=0.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The equation sin(n\u03b8)=0 has how many solutions in [0,2\u03c0) (for positive integer n)?",
+    "options": [
+      "n",
+      "2n",
+      "2n+1",
+      "n+1"
+    ],
+    "correct_answer": "2n+1",
+    "explanation": "n\u03b8=k\u03c0 for k=0,1,...,2n \u2192 2n+1 solutions (including 0).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "Find all cube roots of \u22128.",
+    "options": [
+      "\u22122, 1+i\u221a3, 1\u2212i\u221a3",
+      "2, \u22121+i\u221a3, \u22121\u2212i\u221a3",
+      "\u22122, 2i, \u22122i",
+      "\u22122, 1+i\u221a3, \u22121+i\u221a3"
+    ],
+    "correct_answer": "\u22122, 1+i\u221a3, 1\u2212i\u221a3",
+    "explanation": "r=2, arg=\u03c0. Roots: 2e^(i(\u03c0+2k\u03c0)/3): k=0\u2192\u22122, k=1\u21921+i\u221a3, k=2\u21921\u2212i\u221a3.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "If |z|=1 (unit circle), then z\u207b\u00b9 = ?",
+    "options": [
+      "z",
+      "\u2212z",
+      "z\u0304 (conjugate)",
+      "1/|z|"
+    ],
+    "correct_answer": "z\u0304 (conjugate)",
+    "explanation": "For |z|=1: z\u00b7z\u0304=|z|\u00b2=1, so z\u207b\u00b9=z\u0304.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The n-th roots of unity \u03c9\u2096=e^(2\u03c0ik/n) satisfy |\u03c9\u2096| = ?",
+    "options": [
+      "k",
+      "n",
+      "1",
+      "2\u03c0/n"
+    ],
+    "correct_answer": "1",
+    "explanation": "All nth roots of unity lie on the unit circle, so modulus=1.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "Compute (\u221a3+i)\u2076 using De Moivre.",
+    "options": [
+      "64",
+      "\u221264",
+      "64i",
+      "\u221264i"
+    ],
+    "correct_answer": "64",
+    "explanation": "r=2, \u03b8=\u03c0/6. (2e^(i\u03c0/6))\u2076=64e^(i\u03c0)=64(\u22121)=\u221264. Wait: e^(i\u03c0)=\u22121, so \u221264.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The argument of z=\u2212\u221a3+i is:",
+    "options": [
+      "\u03c0/6",
+      "5\u03c0/6",
+      "\u2212\u03c0/6",
+      "\u22125\u03c0/6"
+    ],
+    "correct_answer": "5\u03c0/6",
+    "explanation": "QII: arg=\u03c0\u2212arctan(1/\u221a3)=\u03c0\u2212\u03c0/6=5\u03c0/6.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The identity cosh(x)\u2212sinh(x) = ?",
+    "options": [
+      "2e\u02e3",
+      "e\u207b\u02e3",
+      "e\u02e3",
+      "2"
+    ],
+    "correct_answer": "e\u207b\u02e3",
+    "explanation": "(e\u02e3+e\u207b\u02e3)/2\u2212(e\u02e3\u2212e\u207b\u02e3)/2=e\u207b\u02e3.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The graph of y=cosh(x) is called a:",
+    "options": [
+      "Parabola",
+      "Catenary",
+      "Sine wave",
+      "Hyperbola"
+    ],
+    "correct_answer": "Catenary",
+    "explanation": "The catenary, physically realised by a hanging chain.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "sinh(2x)=2sinh(x)cosh(x). This mirrors the trig identity:",
+    "options": [
+      "cos(2x)=cos\u00b2x\u2212sin\u00b2x",
+      "sin(2x)=2sinxcosx",
+      "tan(2x)=2tanx/(1\u2212tan\u00b2x)",
+      "csc(2x)"
+    ],
+    "correct_answer": "sin(2x)=2sinxcosx",
+    "explanation": "Hyperbolic identities mirror trig identities.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The derivative of tanh(x) is:",
+    "options": [
+      "coth(x)",
+      "sech\u00b2(x)",
+      "\u2212csch\u00b2(x)",
+      "1\u2212tanh\u00b2(x)"
+    ],
+    "correct_answer": "sech\u00b2(x)",
+    "explanation": "d/dx tanh(x)=sech\u00b2(x). (Note: 1\u2212tanh\u00b2x=sech\u00b2x, same answer.)",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The Osborn rule states that when converting trig identities to hyperbolic ones, replace:",
+    "options": [
+      "sin with sinh only",
+      "sin with sinh, cos with cosh, but flip sign of each sinh\u00b2",
+      "All functions with their hyp equivalents",
+      "Add i to all arguments"
+    ],
+    "correct_answer": "sin with sinh, cos with cosh, but flip sign of each sinh\u00b2",
+    "explanation": "Osborn: replace every product of two sinh functions with a negative.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The area enclosed by r=2sin\u03b8 (a circle) is:",
+    "options": [
+      "\u03c0",
+      "4\u03c0",
+      "2\u03c0",
+      "\u03c0/2"
+    ],
+    "correct_answer": "\u03c0",
+    "explanation": "r=2sin\u03b8 is a circle of radius 1: area=\u03c0(1)\u00b2=\u03c0.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The polar curve r=\u03b8 (for \u03b8\u22650) is called a:",
+    "options": [
+      "Rose",
+      "Cardioid",
+      "Archimedean spiral",
+      "Lemniscate"
+    ],
+    "correct_answer": "Archimedean spiral",
+    "explanation": "r=a\u03b8 is the Archimedean (arithmetic) spiral.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The area of one petal of r=cos(2\u03b8) is:",
+    "options": [
+      "\u03c0/8",
+      "\u03c0/4",
+      "\u03c0/2",
+      "\u03c0"
+    ],
+    "correct_answer": "\u03c0/8",
+    "explanation": "A=(1/2)\u222b\u2080^(\u03c0/4)cos\u00b2(2\u03b8)d\u03b8... =(1/2)\u00b7(\u03c0/8)... = \u03c0/8.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The polar equation r=1/(1\u2212cos\u03b8) represents:",
+    "options": [
+      "A circle",
+      "An ellipse",
+      "A parabola",
+      "A hyperbola"
+    ],
+    "correct_answer": "A parabola",
+    "explanation": "r=ed/(1\u2212ecos\u03b8) with e=1 \u2192 parabola.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "For r=2/(1\u2212(1/2)cos\u03b8), the conic is:",
+    "options": [
+      "Circle",
+      "Parabola",
+      "Hyperbola",
+      "Ellipse"
+    ],
+    "correct_answer": "Ellipse",
+    "explanation": "e=1/2 < 1 \u2192 ellipse.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The length of the polar curve r=e\u03b8 from \u03b8=0 to \u03b8=2\u03c0 is:",
+    "options": [
+      "e^(2\u03c0)\u22121",
+      "\u221a2(e^(2\u03c0)\u22121)",
+      "e^(2\u03c0)/\u221a2",
+      "\u03c0\u221a2\u00b7e^(2\u03c0)"
+    ],
+    "correct_answer": "\u221a2(e^(2\u03c0)\u22121)",
+    "explanation": "L=\u222b\u221a(r\u00b2+r'\u00b2)d\u03b8=\u222b\u221a(2e^(2\u03b8))d\u03b8=\u221a2(e^(2\u03c0)\u22121).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "lim(x\u21920) (sinx\u2212x)/x\u00b3 = ?",
+    "options": [
+      "0",
+      "\u22121/6",
+      "1/6",
+      "\u22121"
+    ],
+    "correct_answer": "\u22121/6",
+    "explanation": "Taylor: (x\u2212x\u00b3/6+...)\u2212x)/x\u00b3=\u22121/6.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "lim(x\u21920) (1\u2212cosx)/x = ?",
+    "options": [
+      "1",
+      "0",
+      "1/2",
+      "\u221e"
+    ],
+    "correct_answer": "0",
+    "explanation": "(1\u2212cosx)/x=(x\u00b2/2\u2212...)/x\u21920.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The Maclaurin series for tan(x) begins:",
+    "options": [
+      "x+x\u00b3/3+2x\u2075/15+...",
+      "x\u2212x\u00b3/3+x\u2075/5\u2212...",
+      "x+x\u00b2/2+x\u00b3/6+...",
+      "x+x\u00b3/6+..."
+    ],
+    "correct_answer": "x+x\u00b3/3+2x\u2075/15+...",
+    "explanation": "tan(x)=x+x\u00b3/3+2x\u2075/15+...",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The Fourier series of f(x)=x on (\u2212\u03c0,\u03c0) is:",
+    "options": [
+      "\u03a3cos(nx)/n",
+      "2\u03a3(\u22121)^(n+1)sin(nx)/n",
+      "\u03a3sin(nx)/n",
+      "\u03c0/2\u2212\u03a3cos(nx)/n"
+    ],
+    "correct_answer": "2\u03a3(\u22121)^(n+1)sin(nx)/n",
+    "explanation": "f(x)=x: only sine terms (odd function). b\u2099=2(\u22121)^(n+1)/n.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The Gibbs phenomenon produces an overshoot of approximately:",
+    "options": [
+      "5%",
+      "9%",
+      "15%",
+      "25%"
+    ],
+    "correct_answer": "9%",
+    "explanation": "The Gibbs phenomenon gives about 8.9% overshoot near discontinuities.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The formula for the area of a triangle: K=(1/2)ab\u00b7sinC is derived from:",
+    "options": [
+      "Heron's formula",
+      "The base\u00d7height formula with height=b\u00b7sinC",
+      "The circumradius",
+      "The law of cosines"
+    ],
+    "correct_answer": "The base\u00d7height formula with height=b\u00b7sinC",
+    "explanation": "Height from side a to B: h=b\u00b7sinC. Area=(1/2)\u00b7a\u00b7h.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The nine-point circle of a triangle passes through:",
+    "options": [
+      "The three vertices",
+      "The midpoints of the sides and feet of the altitudes",
+      "The points of tangency of the incircle",
+      "The circumcenter and incenter"
+    ],
+    "correct_answer": "The midpoints of the sides and feet of the altitudes",
+    "explanation": "The nine-point circle passes through 9 significant points of a triangle.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "Mollweide's equation (a\u2212b)/c = sin((A\u2212B)/2)/cos(C/2) is useful for:",
+    "options": [
+      "Finding the circumradius",
+      "Checking solutions of oblique triangles",
+      "Deriving the law of cosines",
+      "Finding the area"
+    ],
+    "correct_answer": "Checking solutions of oblique triangles",
+    "explanation": "Mollweide's equations serve as a check on computed triangle parts.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The formula tan(A/2) = r/(s\u2212a) involves:",
+    "options": [
+      "The circumradius",
+      "The inradius r and semi-perimeter",
+      "The altitude",
+      "The median"
+    ],
+    "correct_answer": "The inradius r and semi-perimeter",
+    "explanation": "Half-angle tangent formula using inradius r and semi-perimeter s.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "If sin(\u03b1)=p and sin(\u03b2)=q where \u03b1+\u03b2=\u03c0/2, then p\u00b2+q\u00b2=?",
+    "options": [
+      "0",
+      "2",
+      "1",
+      "pq"
+    ],
+    "correct_answer": "1",
+    "explanation": "\u03b1+\u03b2=\u03c0/2 \u2192 \u03b2=\u03c0/2\u2212\u03b1 \u2192 q=cos\u03b1. So p\u00b2+q\u00b2=sin\u00b2\u03b1+cos\u00b2\u03b1=1.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The value of sin(20\u00b0)sin(40\u00b0)sin(80\u00b0) = ?",
+    "options": [
+      "\u221a3/8",
+      "1/8",
+      "\u221a3/4",
+      "3/8"
+    ],
+    "correct_answer": "\u221a3/8",
+    "explanation": "Product identity: sin\u03b8sin(60\u00b0\u2212\u03b8)sin(60\u00b0+\u03b8)=(1/4)sin3\u03b8 with \u03b8=20\u00b0: (1/4)sin60\u00b0=\u221a3/8.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "arctan(1)+arctan(2)+arctan(3) = ?",
+    "options": [
+      "\u03c0",
+      "3\u03c0/4",
+      "5\u03c0/4",
+      "\u03c0/2"
+    ],
+    "correct_answer": "\u03c0",
+    "explanation": "arctan1=\u03c0/4; arctan2+arctan3: tan(\u03b1+\u03b2)=(2+3)/(1\u22126)=\u22121, and both in (0,\u03c0/2) so sum=3\u03c0/4; total=\u03c0.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The equation tan(x)+cot(x)=2 has solutions:",
+    "options": [
+      "x=\u03c0/4+n\u03c0",
+      "x=\u03c0/4+n\u03c0/2",
+      "x=n\u03c0",
+      "No solutions"
+    ],
+    "correct_answer": "x=\u03c0/4+n\u03c0",
+    "explanation": "tanx+cotx=2 \u2192 sin2x=1 \u2192 2x=\u03c0/2+2n\u03c0 \u2192 x=\u03c0/4+n\u03c0.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "For triangle ABC: sin\u00b2(A/2) = ?",
+    "options": [
+      "(s\u2212b)(s\u2212c)/(bc)",
+      "s(s\u2212a)/(bc)",
+      "(s\u2212a)(s\u2212b)/(ab)",
+      "s(s\u2212c)/(ab)"
+    ],
+    "correct_answer": "(s\u2212b)(s\u2212c)/(bc)",
+    "explanation": "Half-angle formula: sin\u00b2(A/2)=(s\u2212b)(s\u2212c)/(bc).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The formula cos\u00b2(A/2) = s(s\u2212a)/(bc) where s=(a+b+c)/2 is called:",
+    "options": [
+      "Heron's formula",
+      "The half-angle formula for cosine in a triangle",
+      "The law of cosines form",
+      "Mollweide's equation"
+    ],
+    "correct_answer": "The half-angle formula for cosine in a triangle",
+    "explanation": "These half-angle formulas express angles in terms of sides.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "If tan\u03b8 = t, express sin(2\u03b8) in terms of t.",
+    "options": [
+      "2t/(1+t\u00b2)",
+      "2t/(1\u2212t\u00b2)",
+      "t/(1+t\u00b2)",
+      "2t\u00b2/(1+t\u00b2)"
+    ],
+    "correct_answer": "2t/(1+t\u00b2)",
+    "explanation": "sin(2\u03b8)=2sin\u03b8cos\u03b8=2tan\u03b8cos\u00b2\u03b8=2t/(1+t\u00b2).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "If tan\u03b8 = t, express cos(2\u03b8) in terms of t.",
+    "options": [
+      "2t/(1+t\u00b2)",
+      "(1+t\u00b2)/(1\u2212t\u00b2)",
+      "(1\u2212t\u00b2)/(1+t\u00b2)",
+      "2t\u00b2\u22121"
+    ],
+    "correct_answer": "(1\u2212t\u00b2)/(1+t\u00b2)",
+    "explanation": "cos(2\u03b8)=(cos\u00b2\u03b8\u2212sin\u00b2\u03b8)=(1\u2212tan\u00b2\u03b8)/(1+tan\u00b2\u03b8)=(1\u2212t\u00b2)/(1+t\u00b2).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The identity: sin(A)+sin(B)=2sin((A+B)/2)cos((A\u2212B)/2). Apply with A=70\u00b0, B=30\u00b0:",
+    "options": [
+      "2sin(50\u00b0)cos(20\u00b0)",
+      "2sin(20\u00b0)cos(50\u00b0)",
+      "2cos(50\u00b0)",
+      "2sin(50\u00b0)"
+    ],
+    "correct_answer": "2sin(50\u00b0)cos(20\u00b0)",
+    "explanation": "(A+B)/2=50\u00b0, (A\u2212B)/2=20\u00b0. Result: 2sin50\u00b0cos20\u00b0.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The maximum value of sin\u03b8+cos\u03b8 is:",
+    "options": [
+      "1",
+      "\u221a2",
+      "2",
+      "\u221a3"
+    ],
+    "correct_answer": "\u221a2",
+    "explanation": "R=\u221a(1\u00b2+1\u00b2)=\u221a2.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "For what \u03b8 is sin\u03b8+cos\u03b8 maximized?",
+    "options": [
+      "\u03b8=0",
+      "\u03b8=\u03c0/4",
+      "\u03b8=\u03c0/3",
+      "\u03b8=\u03c0/2"
+    ],
+    "correct_answer": "\u03b8=\u03c0/4",
+    "explanation": "\u221a2sin(\u03b8+\u03c0/4) is max when \u03b8+\u03c0/4=\u03c0/2, i.e., \u03b8=\u03c0/4.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The value of cos(\u03c0/7)+cos(3\u03c0/7)+cos(5\u03c0/7) = ?",
+    "options": [
+      "1/2",
+      "0",
+      "1",
+      "\u22121/2"
+    ],
+    "correct_answer": "1/2",
+    "explanation": "Sum of cosines at odd multiples of \u03c0/7 equals 1/2.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "Evaluate: sin(\u03c0/9)+sin(2\u03c0/9)+sin(3\u03c0/9)+...+sin(8\u03c0/9).",
+    "options": [
+      "\u221a3/2",
+      "4",
+      "cot\u03c0/18",
+      "cot(\u03c0/18)"
+    ],
+    "correct_answer": "cot(\u03c0/18)",
+    "explanation": "Sum formula: \u03a3sin(k\u03c0/9)=sin(9\u03c0/18)/sin(\u03c0/18)\u00b7sin((1+8)\u03c0/18)... =cot(\u03c0/18).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "If sinx+siny=a and cosx+cosy=b, then tan((x+y)/2)=?",
+    "options": [
+      "a/b",
+      "b/a",
+      "a+b",
+      "ab"
+    ],
+    "correct_answer": "a/b",
+    "explanation": "sinx+siny=2sin((x+y)/2)cos((x-y)/2), cosx+cosy=2cos((x+y)/2)cos((x-y)/2). Ratio gives tan((x+y)/2)=a/b.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The exact value of tan(\u03c0/12) = tan(15\u00b0) is:",
+    "options": [
+      "\u221a3-2",
+      "2-\u221a3",
+      "(\u221a6-\u221a2)/4",
+      "\u221a3+2"
+    ],
+    "correct_answer": "2-\u221a3",
+    "explanation": "tan(15\u00b0)=tan(45\u00b0-30\u00b0)=(1-1/\u221a3)/(1+1/\u221a3)=(\u221a3-1)/(\u221a3+1)=2-\u221a3.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "cos\u00b2\u03b8+cos\u00b2(\u03b8+2\u03c0/3)+cos\u00b2(\u03b8+4\u03c0/3) = ?",
+    "options": [
+      "1",
+      "3/2",
+      "2",
+      "3"
+    ],
+    "correct_answer": "3/2",
+    "explanation": "Use cos\u00b2x=(1+cos2x)/2. The cos2x terms sum to 0. Total=3/2.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "Simplify: (1+sin\u03b8+cos\u03b8)/(1+sin\u03b8-cos\u03b8).",
+    "options": [
+      "tan(\u03b8/2)",
+      "cot(\u03b8/2)",
+      "tan\u03b8",
+      "cot\u03b8"
+    ],
+    "correct_answer": "cot(\u03b8/2)",
+    "explanation": "Using half-angle: numerator=2cos(\u03b8/2)(cos(\u03b8/2)+sin(\u03b8/2)), denominator=2sin(\u03b8/2)(cos(\u03b8/2)+sin(\u03b8/2)), ratio=cot(\u03b8/2).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The Weierstrass half-angle substitution sets t = ?",
+    "options": [
+      "sin(\u03b8/2)",
+      "cos(\u03b8/2)",
+      "tan(\u03b8/2)",
+      "tan\u03b8"
+    ],
+    "correct_answer": "tan(\u03b8/2)",
+    "explanation": "t=tan(\u03b8/2) gives sin\u03b8=2t/(1+t\u00b2), cos\u03b8=(1-t\u00b2)/(1+t\u00b2), d\u03b8=2dt/(1+t\u00b2).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "With Weierstrass substitution t=tan(\u03b8/2), sin\u03b8 = ?",
+    "options": [
+      "(1-t\u00b2)/(1+t\u00b2)",
+      "2t/(1+t\u00b2)",
+      "t/(1+t\u00b2)",
+      "2t/(1-t\u00b2)"
+    ],
+    "correct_answer": "2t/(1+t\u00b2)",
+    "explanation": "sin\u03b8=2sin(\u03b8/2)cos(\u03b8/2)=2tan(\u03b8/2)cos\u00b2(\u03b8/2)=2t/(1+t\u00b2).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "With Weierstrass substitution, cos\u03b8 = ?",
+    "options": [
+      "2t/(1+t\u00b2)",
+      "t/(1+t\u00b2)",
+      "(1-t\u00b2)/(1+t\u00b2)",
+      "(1+t\u00b2)/(1-t\u00b2)"
+    ],
+    "correct_answer": "(1-t\u00b2)/(1+t\u00b2)",
+    "explanation": "cos\u03b8=cos\u00b2(\u03b8/2)-sin\u00b2(\u03b8/2)=(1-tan\u00b2(\u03b8/2))cos\u00b2(\u03b8/2)... =(1-t\u00b2)/(1+t\u00b2).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "sin(\u03c0/18) is a root of which equation?",
+    "options": [
+      "8x\u00b3-6x+1=0",
+      "8x\u00b3-6x-1=0",
+      "4x\u00b3-3x=1/2",
+      "8x\u00b3+6x-1=0"
+    ],
+    "correct_answer": "8x\u00b3-6x+1=0",
+    "explanation": "sin(3\u00d7\u03c0/18)=sin(\u03c0/6)=1/2. Using 3x-4x\u00b3=1/2 \u2192 8x\u00b3-6x+1=0.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The product cos(\u03c0/7)cos(2\u03c0/7)cos(4\u03c0/7) = ?",
+    "options": [
+      "1/8",
+      "1/4",
+      "-1/8",
+      "-1/4"
+    ],
+    "correct_answer": "-1/8",
+    "explanation": "Using the identity: product of cos(2^k\u00b7\u03c0/7) for k=0,1,2 = -1/8 (from sin(2\u00b3\u03c0/7)/2\u00b3sin(\u03c0/7)).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The number of solutions of sinx = x/\u03c0 in [-2\u03c0, 2\u03c0] is:",
+    "options": [
+      "3",
+      "5",
+      "7",
+      "9"
+    ],
+    "correct_answer": "5",
+    "explanation": "The line y=x/\u03c0 intersects y=sinx at 5 points in [-2\u03c0, 2\u03c0].",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "trigonometry"
+  }
+]

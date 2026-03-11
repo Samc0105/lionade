@@ -58,20 +58,12 @@ interface StreakInfo {
 async function fetchStreakInfo(userId: string): Promise<StreakInfo> {
   const today = new Date().toISOString().split("T")[0];
 
-  const [quizRes, dailyRes, shieldRes] = await Promise.all([
+  const [profileRes, shieldRes] = await Promise.all([
     supabase
-      .from("quiz_sessions")
-      .select("completed_at")
-      .eq("user_id", userId)
-      .order("completed_at", { ascending: false })
-      .limit(1)
-      .maybeSingle(),
-    supabase
-      .from("daily_activity")
-      .select("questions_answered")
-      .eq("user_id", userId)
-      .eq("date", today)
-      .maybeSingle(),
+      .from("profiles")
+      .select("last_activity_at, daily_questions_completed, daily_reset_date")
+      .eq("id", userId)
+      .single(),
     supabase
       .from("active_boosters")
       .select("id")
@@ -80,19 +72,48 @@ async function fetchStreakInfo(userId: string): Promise<StreakInfo> {
       .limit(1),
   ]);
 
+  const profile = profileRes.data;
+  // If daily_reset_date is not today, the counter hasn't been reset yet — show 0
+  const questionsToday = Math.min(
+    profile?.daily_reset_date === today
+      ? (profile?.daily_questions_completed ?? 0)
+      : 0,
+    10
+  );
+
   return {
-    lastQuizAt: quizRes.data?.completed_at ?? null,
-    questionsToday: dailyRes.data?.questions_answered ?? 0,
+    lastQuizAt: profile?.last_activity_at ?? null,
+    questionsToday,
     hasStreakShield: (shieldRes.data?.length ?? 0) > 0,
   };
 }
 
 export function useStreakInfo(userId: string | undefined) {
-  const { data, error, isLoading } = useSWR(
+  const { data, error, isLoading, mutate: boundMutate } = useSWR(
     userId ? `streak-info/${userId}` : null,
     () => fetchStreakInfo(userId!),
     { revalidateOnFocus: true, dedupingInterval: 10000, keepPreviousData: true }
   );
 
-  return { streakInfo: data ?? null, error, isLoading };
+  return { streakInfo: data ?? null, error, isLoading, mutateStreakInfo: boundMutate };
+}
+
+/** Check if streak is expired (last_activity_at + 36h < now) */
+export function isStreakExpired(lastQuizAt: string | null): boolean {
+  if (!lastQuizAt) return false;
+  const expires = new Date(lastQuizAt).getTime() + 36 * 60 * 60 * 1000;
+  return Date.now() > expires;
+}
+
+/** Reset expired streak in Supabase — sets streak=0, clears activity fields */
+export async function resetExpiredStreak(userId: string): Promise<void> {
+  await supabase
+    .from("profiles")
+    .update({
+      streak: 0,
+      last_activity_at: null,
+      daily_questions_completed: 0,
+      daily_reset_date: null,
+    })
+    .eq("id", userId);
 }

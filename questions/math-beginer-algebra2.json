@@ -1,0 +1,452 @@
+[
+  {
+    "question": "What is the value of x in: x + 15 = 22?",
+    "options": ["5", "7", "37", "12"],
+    "correct_answer": "7",
+    "explanation": "Subtract 15 from both sides: x = 22 − 15 = 7.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "algebra"
+  },
+  {
+    "question": "Which of the following is an equation?",
+    "options": ["3x + 5", "7 − 2", "4x = 20", "x + y"],
+    "correct_answer": "4x = 20",
+    "explanation": "An equation contains an equal sign showing two expressions are equal. Only 4x = 20 has an equal sign.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "algebra"
+  },
+  {
+    "question": "What is the value of x · x when x = 6?",
+    "options": ["12", "36", "66", "6"],
+    "correct_answer": "36",
+    "explanation": "x · x means x², so substituting x = 6 gives 6 × 6 = 36.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "algebra"
+  },
+  {
+    "question": "Simplify: 10y − 4y",
+    "options": ["14y", "6y", "6", "40y"],
+    "correct_answer": "6y",
+    "explanation": "Subtract the coefficients of the like terms: 10 − 4 = 6, giving 6y.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "algebra"
+  },
+  {
+    "question": "What is the coefficient of y in the expression 3x + 8y − 2?",
+    "options": ["3", "8", "y", "-2"],
+    "correct_answer": "8",
+    "explanation": "The coefficient is the number directly multiplied by the variable. The number in front of y is 8.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "algebra"
+  },
+  {
+    "question": "Solve for m: m − 9 = −3",
+    "options": ["6", "-12", "12", "-6"],
+    "correct_answer": "6",
+    "explanation": "Add 9 to both sides: m = −3 + 9 = 6.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "algebra"
+  },
+  {
+    "question": "Evaluate: 5a − 2b when a = 3 and b = 1",
+    "options": ["13", "15", "11", "7"],
+    "correct_answer": "13",
+    "explanation": "Substitute: 5(3) − 2(1) = 15 − 2 = 13.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "algebra"
+  },
+  {
+    "question": "Which expression means 'half of a number increased by 9'?",
+    "options": ["x/2 + 9", "2x + 9", "9x/2", "(x + 9)/2"],
+    "correct_answer": "x/2 + 9",
+    "explanation": "'Half of a number' is x/2, and 'increased by 9' means adding 9, giving x/2 + 9.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "algebra"
+  },
+  {
+    "question": "Solve for x: 6x = −18",
+    "options": ["-3", "3", "-12", "12"],
+    "correct_answer": "-3",
+    "explanation": "Divide both sides by 6: x = −18 ÷ 6 = −3.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "algebra"
+  },
+  {
+    "question": "What is the opposite operation of multiplication?",
+    "options": ["Addition", "Subtraction", "Division", "Exponentiation"],
+    "correct_answer": "Division",
+    "explanation": "Division is the inverse of multiplication. To undo multiplying by a number, you divide by that number.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "algebra"
+  },
+  {
+    "question": "Expand: 4(3x + 2y)",
+    "options": ["12x + 2y", "12x + 8y", "7x + 6y", "12xy"],
+    "correct_answer": "12x + 8y",
+    "explanation": "Distribute 4 to each term: 4 · 3x = 12x and 4 · 2y = 8y, giving 12x + 8y.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "algebra"
+  },
+  {
+    "question": "Simplify: 3x + 7 + 2x − 3",
+    "options": ["5x + 10", "5x + 4", "6x + 4", "x + 4"],
+    "correct_answer": "5x + 4",
+    "explanation": "Combine like terms: 3x + 2x = 5x and 7 − 3 = 4, giving 5x + 4.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "algebra"
+  },
+  {
+    "question": "Solve for x: x/5 = −4",
+    "options": ["-20", "20", "-1", "1"],
+    "correct_answer": "-20",
+    "explanation": "Multiply both sides by 5: x = −4 × 5 = −20.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "algebra"
+  },
+  {
+    "question": "A number decreased by 6 equals twice that number. What is the number?",
+    "options": ["-6", "6", "3", "-3"],
+    "correct_answer": "-6",
+    "explanation": "Set up: x − 6 = 2x. Subtract x: −6 = x. So the number is −6.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "algebra"
+  },
+  {
+    "question": "What does 2(x + y) equal when x = 5 and y = −1?",
+    "options": ["8", "12", "10", "6"],
+    "correct_answer": "8",
+    "explanation": "Substitute: 2(5 + (−1)) = 2(4) = 8.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "algebra"
+  },
+  {
+    "question": "Which of the following shows the commutative property of addition?",
+    "options": ["a + b = b + a", "a(b + c) = ab + ac", "a + 0 = a", "(a + b) + c = a + (b + c)"],
+    "correct_answer": "a + b = b + a",
+    "explanation": "The commutative property of addition states that changing the order of addends does not change the sum.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "algebra"
+  },
+  {
+    "question": "Solve for x: 9 − x = 4",
+    "options": ["5", "13", "-5", "4"],
+    "correct_answer": "5",
+    "explanation": "Subtract 9 from both sides: −x = −5. Multiply by −1: x = 5.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "algebra"
+  },
+  {
+    "question": "Simplify: −3(x + 6)",
+    "options": ["-3x + 6", "-3x − 18", "-3x + 18", "3x − 18"],
+    "correct_answer": "-3x − 18",
+    "explanation": "Distribute −3 to each term: (−3)(x) = −3x and (−3)(6) = −18, giving −3x − 18.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "algebra"
+  },
+  {
+    "question": "If 4x = 3x + 9, what is x?",
+    "options": ["9", "3", "12", "-9"],
+    "correct_answer": "9",
+    "explanation": "Subtract 3x from both sides: x = 9.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "algebra"
+  },
+  {
+    "question": "What is the additive identity in algebra?",
+    "options": ["1", "0", "-1", "x"],
+    "correct_answer": "0",
+    "explanation": "The additive identity is 0 because adding 0 to any number gives that same number (a + 0 = a).",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "algebra"
+  },
+  {
+    "question": "Evaluate: (2x)² when x = 3",
+    "options": ["12", "18", "36", "9"],
+    "correct_answer": "36",
+    "explanation": "First compute 2x = 2(3) = 6, then square it: 6² = 36.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "algebra"
+  },
+  {
+    "question": "Simplify: 5(x − 1) + 3",
+    "options": ["5x − 2", "5x + 2", "5x − 8", "5x + 8"],
+    "correct_answer": "5x − 2",
+    "explanation": "Distribute: 5x − 5, then add 3: 5x − 5 + 3 = 5x − 2.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "algebra"
+  },
+  {
+    "question": "Solve for y: 2y + 8 = 3y − 1",
+    "options": ["7", "9", "-9", "-7"],
+    "correct_answer": "9",
+    "explanation": "Subtract 2y from both sides: 8 = y − 1. Add 1: y = 9.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "algebra"
+  },
+  {
+    "question": "What is the multiplicative identity?",
+    "options": ["0", "1", "-1", "x"],
+    "correct_answer": "1",
+    "explanation": "The multiplicative identity is 1 because multiplying any number by 1 gives that same number (a × 1 = a).",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "algebra"
+  },
+  {
+    "question": "A movie ticket costs x dollars. Four friends buy tickets and split a $6 popcorn equally. Each person pays $15 total. What is x?",
+    "options": ["13.50", "12", "9", "11"],
+    "correct_answer": "13.50",
+    "explanation": "Each person pays: x + 6/4 = 15, so x + 1.50 = 15, and x = 13.50.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "algebra"
+  },
+  {
+    "question": "Simplify: 2(a + 3) + 4(a − 1)",
+    "options": ["6a + 2", "6a + 10", "6a − 2", "8a + 2"],
+    "correct_answer": "6a + 2",
+    "explanation": "Distribute: 2a + 6 + 4a − 4. Combine like terms: 6a + 2.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "algebra"
+  },
+  {
+    "question": "Solve for x: −2x + 5 = 11",
+    "options": ["3", "-3", "8", "-8"],
+    "correct_answer": "-3",
+    "explanation": "Subtract 5: −2x = 6. Divide by −2: x = −3.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "algebra"
+  },
+  {
+    "question": "What is x + x · x when x = 4?",
+    "options": ["20", "32", "12", "24"],
+    "correct_answer": "20",
+    "explanation": "Order of operations: multiply first. x · x = 16, then x + 16 = 4 + 16 = 20.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "algebra"
+  },
+  {
+    "question": "Which expression represents 'the product of 7 and a number, decreased by 3'?",
+    "options": ["7(x − 3)", "7x − 3", "3 − 7x", "7 + x − 3"],
+    "correct_answer": "7x − 3",
+    "explanation": "'Product of 7 and a number' is 7x, and 'decreased by 3' means subtract 3, giving 7x − 3.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "algebra"
+  },
+  {
+    "question": "Solve for x: 3(x − 4) = 2x + 1",
+    "options": ["13", "11", "7", "5"],
+    "correct_answer": "13",
+    "explanation": "Distribute: 3x − 12 = 2x + 1. Subtract 2x: x − 12 = 1. Add 12: x = 13.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "algebra"
+  },
+  {
+    "question": "Simplify: 9x − 3(2x + 4)",
+    "options": ["3x − 12", "3x + 12", "15x − 12", "3x − 4"],
+    "correct_answer": "3x − 12",
+    "explanation": "Distribute: 9x − 6x − 12. Combine: 3x − 12.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "algebra"
+  },
+  {
+    "question": "If x = −2, what is the value of 3x² − x?",
+    "options": ["10", "14", "8", "16"],
+    "correct_answer": "14",
+    "explanation": "Substitute: 3(−2)² − (−2) = 3(4) + 2 = 12 + 2 = 14.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "algebra"
+  },
+  {
+    "question": "Solve for x: 10 − 2x = 4x",
+    "options": ["5/3", "10/3", "5", "2"],
+    "correct_answer": "5/3",
+    "explanation": "Add 2x to both sides: 10 = 6x. Divide by 6: x = 10/6 = 5/3.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "algebra"
+  },
+  {
+    "question": "How many terms are in the expression 4x² + 3x − 7 + x?",
+    "options": ["2", "3", "4", "5"],
+    "correct_answer": "4",
+    "explanation": "The four terms are 4x², 3x, −7, and x. Each part separated by + or − is a term.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "algebra"
+  },
+  {
+    "question": "Jake is twice as old as his sister. If Jake is 16, which equation finds his sister's age (s)?",
+    "options": ["s + 2 = 16", "2s = 16", "s/2 = 16", "s − 2 = 16"],
+    "correct_answer": "2s = 16",
+    "explanation": "Jake is twice his sister's age, so 2 × s = 16, written as 2s = 16. Solving gives s = 8.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "algebra"
+  },
+  {
+    "question": "Simplify: (x + 5) + (2x − 3)",
+    "options": ["3x + 2", "3x + 8", "x + 2", "2x + 2"],
+    "correct_answer": "3x + 2",
+    "explanation": "Remove parentheses and combine: x + 2x = 3x and 5 − 3 = 2, giving 3x + 2.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "algebra"
+  },
+  {
+    "question": "What is the degree of the term 6x³?",
+    "options": ["6", "3", "1", "18"],
+    "correct_answer": "3",
+    "explanation": "The degree of a term is the exponent on the variable. In 6x³, the exponent is 3.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "algebra"
+  },
+  {
+    "question": "Solve for x: x/2 + x/2 = 10",
+    "options": ["5", "10", "20", "2.5"],
+    "correct_answer": "10",
+    "explanation": "Combine the fractions: x/2 + x/2 = x. So x = 10.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "algebra"
+  },
+  {
+    "question": "Expand and simplify: (x + 3)(2)",
+    "options": ["2x + 3", "x + 6", "2x + 6", "2x + 5"],
+    "correct_answer": "2x + 6",
+    "explanation": "Multiply each term by 2: 2 · x = 2x and 2 · 3 = 6, giving 2x + 6.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "algebra"
+  },
+  {
+    "question": "Solve for p: 4p − 7 = 2p + 5",
+    "options": ["6", "-1", "1", "12"],
+    "correct_answer": "6",
+    "explanation": "Subtract 2p: 2p − 7 = 5. Add 7: 2p = 12. Divide by 2: p = 6.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "algebra"
+  },
+  {
+    "question": "Which expression is equivalent to −(x − 4)?",
+    "options": ["-x − 4", "-x + 4", "x − 4", "x + 4"],
+    "correct_answer": "-x + 4",
+    "explanation": "Distributing the negative sign: −1 · x = −x and −1 · (−4) = +4, giving −x + 4.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "algebra"
+  },
+  {
+    "question": "You have $50 and spend x dollars per day for 7 days. You have $8 left. What is x?",
+    "options": ["7", "6", "8", "5"],
+    "correct_answer": "6",
+    "explanation": "Set up: 50 − 7x = 8. Subtract 50: −7x = −42. Divide by −7: x = 6.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "algebra"
+  },
+  {
+    "question": "Simplify: 6(x + 1) − 2(3x − 5)",
+    "options": ["0x + 16", "12x − 4", "16", "0"],
+    "correct_answer": "16",
+    "explanation": "Distribute: 6x + 6 − 6x + 10. Combine: 0x + 16 = 16.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "algebra"
+  },
+  {
+    "question": "Evaluate: |−3x + 1| when x = 2",
+    "options": ["5", "-5", "7", "-7"],
+    "correct_answer": "5",
+    "explanation": "Substitute: |−3(2) + 1| = |−6 + 1| = |−5| = 5. Absolute value makes the result positive.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "algebra"
+  },
+  {
+    "question": "Solve for x: 5(x + 2) = 4(x + 3) + x",
+    "options": ["2", "No solution", "All real numbers", "-2"],
+    "correct_answer": "No solution",
+    "explanation": "Distribute: 5x + 10 = 4x + 12 + x → 5x + 10 = 5x + 12. Subtracting 5x gives 10 = 12, which is false, so there is no solution.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "algebra"
+  },
+  {
+    "question": "The perimeter of a square is 4x. What is the length of one side?",
+    "options": ["4x", "x", "x/4", "2x"],
+    "correct_answer": "x",
+    "explanation": "A square has 4 equal sides, so each side = perimeter ÷ 4 = 4x ÷ 4 = x.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "algebra"
+  },
+  {
+    "question": "Solve for x: 2(3x + 4) − 5 = 4x + 7",
+    "options": ["2", "4", "1", "3"],
+    "correct_answer": "2",
+    "explanation": "Distribute: 6x + 8 − 5 = 4x + 7 → 6x + 3 = 4x + 7. Subtract 4x: 2x + 3 = 7. Subtract 3: 2x = 4. Divide by 2: x = 2.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "algebra"
+  },
+  {
+    "question": "If 3(x − 2) + 4 = 2(x + 1), what is x?",
+    "options": ["4", "2", "0", "6"],
+    "correct_answer": "4",
+    "explanation": "Distribute: 3x − 6 + 4 = 2x + 2 → 3x − 2 = 2x + 2. Subtract 2x: x − 2 = 2. Add 2: x = 4.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "algebra"
+  },
+  {
+    "question": "The sum of two consecutive even numbers is 34. What are the numbers?",
+    "options": ["14 and 20", "16 and 18", "15 and 19", "12 and 22"],
+    "correct_answer": "16 and 18",
+    "explanation": "Let the numbers be x and x + 2. Then x + x + 2 = 34, so 2x = 32, x = 16. The numbers are 16 and 18.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "algebra"
+  },
+  {
+    "question": "Solve for x: (2x + 6)/3 = (x + 5)/2",
+    "options": ["3", "-3", "1", "9"],
+    "correct_answer": "3",
+    "explanation": "Cross-multiply: 2(2x + 6) = 3(x + 5) → 4x + 12 = 3x + 15. Subtract 3x: x + 12 = 15. Subtract 12: x = 3.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "algebra"
+  }
+]

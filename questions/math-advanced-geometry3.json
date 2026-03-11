@@ -1,0 +1,702 @@
+[
+  {
+    "question": "What is the area of the triangle formed by the lines y=0, x=5, and y=2x?",
+    "options": [
+      "12.5",
+      "25",
+      "50",
+      "10"
+    ],
+    "correct_answer": "25",
+    "explanation": "Intersection of x=5 and y=2x gives (5,10). Base=5, height=10. Area=(1/2)(5)(10)=25.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "A circle is inscribed in a triangle with sides 5, 12, and 13. What is its area?",
+    "options": [
+      "2π",
+      "4π",
+      "9π",
+      "16π"
+    ],
+    "correct_answer": "4π",
+    "explanation": "r=(a+b−c)/2=(5+12−13)/2=2. Area=πr²=4π.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "If a dilation centered at the origin has scale factor 3, what is the image of (2,−4)?",
+    "options": [
+      "(5,−1)",
+      "(6,−12)",
+      "(2/3,−4/3)",
+      "(6,12)"
+    ],
+    "correct_answer": "(6,−12)",
+    "explanation": "Multiply each coordinate by 3: (2×3, −4×3) = (6,−12).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the area enclosed by one arch of y=sin(x) above the x-axis?",
+    "options": [
+      "1",
+      "2",
+      "π",
+      "2π"
+    ],
+    "correct_answer": "2",
+    "explanation": "∫₀π sin(x)dx = [−cos(x)]₀π = −(−1)+1 = 2.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "In a circle with center O, chord AB has midpoint M. What is angle OMA?",
+    "options": [
+      "45°",
+      "60°",
+      "90°",
+      "120°"
+    ],
+    "correct_answer": "90°",
+    "explanation": "The line from the center to the midpoint of a chord is always perpendicular to the chord.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "A right circular cone has volume V and is cut by a plane parallel to the base at 1/3 the height from the apex. What volume is the smaller cone?",
+    "options": [
+      "V/3",
+      "V/9",
+      "V/27",
+      "V/81"
+    ],
+    "correct_answer": "V/27",
+    "explanation": "At 1/3 the height, the radius is also 1/3. V_small = (1/3)³ · V = V/27.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "Two tangent circles of radii 4 and 9 are enclosed by a third circle tangent to both. What is the radius of the enclosing circle?",
+    "options": [
+      "13",
+      "15",
+      "17",
+      "26"
+    ],
+    "correct_answer": "13",
+    "explanation": "The enclosing circle has radius = sum of the two radii = 4+9 = 13 when the two circles are internally tangent to it and externally tangent to each other.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the area of a circular segment with central angle 120° and radius 6?",
+    "options": [
+      "12π−9√3",
+      "6π−9√3",
+      "12π+9√3",
+      "6π+9√3"
+    ],
+    "correct_answer": "12π−9√3",
+    "explanation": "Sector=(120/360)π(36)=12π. Triangle=(1/2)(36)sin120°=18(√3/2)=9√3. Segment=12π−9√3.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "Find the equation of the circle through (0,0), (8,0), and (0,6).",
+    "options": [
+      "(x−4)²+(y−3)²=25",
+      "(x−3)²+(y−4)²=25",
+      "(x−4)²+(y−3)²=16",
+      "x²+y²=100"
+    ],
+    "correct_answer": "(x−4)²+(y−3)²=25",
+    "explanation": "From (0,0) and (8,0): h=4. From (0,0) and (0,6): k=3. r²=16+9=25.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the volume of the solid formed by rotating y=x² from x=0 to x=2 about the y-axis?",
+    "options": [
+      "4π",
+      "8π",
+      "16π/3",
+      "8π/3"
+    ],
+    "correct_answer": "8π",
+    "explanation": "Using the shell method: V=2π∫₀² x·x² dx=2π∫₀² x³ dx=2π[x⁴/4]₀²=2π(4)=8π.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "A regular icosahedron has how many faces, edges, and vertices?",
+    "options": [
+      "12F, 30E, 20V",
+      "20F, 30E, 12V",
+      "20F, 12E, 30V",
+      "30F, 20E, 12V"
+    ],
+    "correct_answer": "20F, 30E, 12V",
+    "explanation": "A regular icosahedron has 20 triangular faces, 30 edges, and 12 vertices. Euler: 20−30+12=2. ✓",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "In a right triangle with legs a and b and hypotenuse c, the altitude to the hypotenuse has length h. Express h in terms of a, b, c.",
+    "options": [
+      "ab/c",
+      "(a+b)/c",
+      "c/(ab)",
+      "√(ab)"
+    ],
+    "correct_answer": "ab/c",
+    "explanation": "Area = (1/2)ab = (1/2)ch → h = ab/c.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "A hexagonal pyramid has base edge 4 and height 9. What is its volume?",
+    "options": [
+      "72√3",
+      "108√3",
+      "216√3",
+      "36√3"
+    ],
+    "correct_answer": "72√3",
+    "explanation": "Base area = (3√3/2)(16) = 24√3. V = (1/3)(24√3)(9) = 72√3.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the distance between the foci of the ellipse x²/25+y²/9=1?",
+    "options": [
+      "4",
+      "6",
+      "8",
+      "10"
+    ],
+    "correct_answer": "8",
+    "explanation": "c²=a²−b²=25−9=16→c=4. Distance between foci=2c=8.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "A ladder 10 m long leans against a wall making a 60° angle with the ground. How high up the wall does it reach?",
+    "options": [
+      "5",
+      "5√2",
+      "5√3",
+      "8"
+    ],
+    "correct_answer": "5√3",
+    "explanation": "Height=10sin60°=10(√3/2)=5√3.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the area of the largest triangle inscribed in a semicircle of radius r?",
+    "options": [
+      "r²/2",
+      "r²",
+      "2r²",
+      "πr²/2"
+    ],
+    "correct_answer": "r²",
+    "explanation": "The largest triangle has base = diameter = 2r and height = r (vertex on the semicircle). Area = (1/2)(2r)(r) = r².",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "Two chords of a circle subtend arcs of 60° and 120° respectively. What is the ratio of their lengths?",
+    "options": [
+      "1:2",
+      "1:√2",
+      "1:√3",
+      "√3:2"
+    ],
+    "correct_answer": "1:√3",
+    "explanation": "Chord=2r·sin(arc/2). Ratio=sin30°/sin60°=(1/2)/(√3/2)=1/√3. So chord ratio=1:√3.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "A prism has a cross-section that is an equilateral triangle with side 6 and the prism height is 10. What is its total surface area?",
+    "options": [
+      "18√3+180",
+      "18√3+120",
+      "36√3+180",
+      "36√3+120"
+    ],
+    "correct_answer": "18√3+180",
+    "explanation": "Two triangular faces=2(9√3)=18√3. Three rectangular faces=3(6)(10)=180. TSA=18√3+180.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "In a circle of radius 13, a chord is 24 units long. What is the distance from the center to the chord?",
+    "options": [
+      "3",
+      "5",
+      "7",
+      "12"
+    ],
+    "correct_answer": "5",
+    "explanation": "Half-chord=12. Distance=√(169−144)=√25=5.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the area of the annulus between circles of radii 7 and 25, given that a chord of the larger circle tangent to the smaller has length 48?",
+    "options": [
+      "576π",
+      "625π",
+      "49π",
+      "576"
+    ],
+    "correct_answer": "576π",
+    "explanation": "Verify: half-chord=24. 25²−d²=576. d=7 ✓ (tangent to inner). Annulus=π(625−49)=576π.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "A cone and hemisphere share a base of radius 4, and the cone has height 3. What is the total volume?",
+    "options": [
+      "16π+128π/3",
+      "128π/3+16π",
+      "16π+128π/3",
+      "(176π)/3"
+    ],
+    "correct_answer": "(176π)/3",
+    "explanation": "Cone V=(1/3)π(16)(3)=16π=48π/3. Hemisphere V=(2/3)π(64)=128π/3. Total=176π/3.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the circumradius of an equilateral triangle with side 10?",
+    "options": [
+      "5√3/3",
+      "10√3/3",
+      "5√3",
+      "10√3"
+    ],
+    "correct_answer": "10√3/3",
+    "explanation": "R=s/√3=10/√3=10√3/3.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "A triangle has side lengths 15, 20, 25. What is its area?",
+    "options": [
+      "100",
+      "150",
+      "200",
+      "250"
+    ],
+    "correct_answer": "150",
+    "explanation": "It's a right triangle (15²+20²=225+400=625=25²). Area=(1/2)(15)(20)=150.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "The law of cosines states c²=?",
+    "options": [
+      "a²+b²−2ab·cosC",
+      "a²+b²+2ab·cosC",
+      "a²−b²+2ab·cosC",
+      "a²+b²−ab·cosC"
+    ],
+    "correct_answer": "a²+b²−2ab·cosC",
+    "explanation": "The law of cosines: c²=a²+b²−2ab·cosC, generalizing the Pythagorean theorem.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "Two circles of radii 5 and 8 have centers 15 apart. How many common tangent lines do they have?",
+    "options": [
+      "1",
+      "2",
+      "3",
+      "4"
+    ],
+    "correct_answer": "4",
+    "explanation": "Since d=15>5+8=13, the circles are separate (don't touch). Separate circles have 4 common tangents: 2 external and 2 internal.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "A sphere of radius 4 is inscribed in a cylinder. What is the cylinder's total surface area?",
+    "options": [
+      "48π",
+      "64π",
+      "96π",
+      "128π"
+    ],
+    "correct_answer": "96π",
+    "explanation": "Cylinder: r=4, h=8. TSA=2π(16)+2π(4)(8)=32π+64π=96π.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the angle between the two diagonals of a regular pentagon?",
+    "options": [
+      "36°",
+      "72°",
+      "108°",
+      "120°"
+    ],
+    "correct_answer": "108°",
+    "explanation": "Two diagonals of a regular pentagon that share a vertex form an angle of 108° (equal to each interior angle).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "A triangle has perimeter 24 and inradius 3. What is its area?",
+    "options": [
+      "24",
+      "36",
+      "48",
+      "72"
+    ],
+    "correct_answer": "36",
+    "explanation": "Area=r·s=3·12=36 (where s=perimeter/2=12).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the volume of a pentagonal prism with a regular pentagonal base of area 43.01 and height 12?",
+    "options": [
+      "258.06",
+      "516.12",
+      "774.18",
+      "1032.24"
+    ],
+    "correct_answer": "516.12",
+    "explanation": "V=base area×height=43.01×12=516.12.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "A chord divides a circle into arcs of 100° and 260°. An inscribed angle in the major arc intercepts the minor arc. What is the inscribed angle?",
+    "options": [
+      "50°",
+      "100°",
+      "130°",
+      "260°"
+    ],
+    "correct_answer": "50°",
+    "explanation": "An inscribed angle equals half its intercepted arc. The angle in the major arc intercepts the 100° minor arc: 100°/2=50°.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "In a parallelogram with sides 8 and 12 and one diagonal 10, find the other diagonal.",
+    "options": [
+      "2√79",
+      "√316",
+      "2√71",
+      "√284"
+    ],
+    "correct_answer": "2√79",
+    "explanation": "By the parallelogram law: d₁²+d₂²=2(a²+b²)→100+d₂²=2(64+144)=416→d₂²=316→d₂=2√79.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "The cross-section of a cylinder cut at 45° to its axis forms what shape?",
+    "options": [
+      "Circle",
+      "Ellipse",
+      "Parabola",
+      "Rectangle"
+    ],
+    "correct_answer": "Ellipse",
+    "explanation": "A plane cutting a cylinder at an angle to the axis (not perpendicular and not parallel) creates an ellipse.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "A right triangle has legs 20 and 21. What is the length of the altitude to the hypotenuse?",
+    "options": [
+      "420/29",
+      "20·21/29",
+      "Both A and B",
+      "20"
+    ],
+    "correct_answer": "Both A and B",
+    "explanation": "Hypotenuse=√(400+441)=√841=29. Altitude=ab/c=(20)(21)/29=420/29.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is Menelaus' theorem used for?",
+    "options": [
+      "Finding the area of a triangle",
+      "Determining collinearity of points on the sides of a triangle",
+      "Finding the circumradius",
+      "Constructing regular polygons"
+    ],
+    "correct_answer": "Determining collinearity of points on the sides of a triangle",
+    "explanation": "Menelaus' theorem provides a condition for three points, each on a side (or extension) of a triangle, to be collinear.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the area of a right triangle inscribed in a circle of radius 10 with one leg equal to 12?",
+    "options": [
+      "48",
+      "72",
+      "96",
+      "120"
+    ],
+    "correct_answer": "96",
+    "explanation": "Hypotenuse=diameter=20. Other leg=√(400−144)=√256=16. Area=(1/2)(12)(16)=96.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "A frustum of a cone has radii 3 and 6, height 4. What is its volume?",
+    "options": [
+      "84π",
+      "132π",
+      "252π",
+      "336π"
+    ],
+    "correct_answer": "84π",
+    "explanation": "V=(πh/3)(R²+Rr+r²)=(4π/3)(36+18+9)=(4π/3)(63)=84π.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the relationship between the inradius r, circumradius R, and the distance d between the incenter and circumcenter?",
+    "options": [
+      "d²=R²−2Rr",
+      "d²=R(R−2r)",
+      "Both A and B",
+      "d=R−r"
+    ],
+    "correct_answer": "Both A and B",
+    "explanation": "Euler's formula for the distance: d²=R(R−2r)=R²−2Rr. Both expressions are equivalent.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "A sphere of radius 5 has a cylindrical hole of radius 3 drilled through its center. What is the remaining volume?",
+    "options": [
+      "128π/3",
+      "256π/3",
+      "500π/3−90π",
+      "256π/3"
+    ],
+    "correct_answer": "256π/3",
+    "explanation": "Half-hole height=√(25−9)=4. Remaining=sphere vol−cylinder vol−2 cap vol=(500π/3)−π(9)(8)−2·πh²(3R−h)/3 where caps... Using Cavalieri: V=(4/3)π(4)³=256π/3. The result depends only on the half-length of the hole.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "A triangle has sides 13, 14, and 15. What is the length of the altitude to the side of length 14?",
+    "options": [
+      "10",
+      "12",
+      "84/7",
+      "168/14"
+    ],
+    "correct_answer": "12",
+    "explanation": "Area by Heron's=84. Altitude to side 14: (1/2)(14)(h)=84 → h=12.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "A circle is tangent to two sides of a right angle and to a circle of radius 2 centered at the vertex. What is its radius?",
+    "options": [
+      "2+2√2",
+      "2√2−2",
+      "2(√2+1)",
+      "Both A and C"
+    ],
+    "correct_answer": "Both A and C",
+    "explanation": "The tangent circle center is at (r,r). Distance from origin to center=r√2=r+2 → r(√2−1)=2 → r=2/(√2−1)=2(√2+1)=2+2√2.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the sum of the interior angles of a 100-sided polygon?",
+    "options": [
+      "17,640°",
+      "17,820°",
+      "18,000°",
+      "36,000°"
+    ],
+    "correct_answer": "17,640°",
+    "explanation": "Sum=(n−2)×180°=98×180°=17,640°.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "The ratio of the volume of a cone to the volume of the circumscribed cylinder (same base and height) is what?",
+    "options": [
+      "1:2",
+      "1:3",
+      "2:3",
+      "1:4"
+    ],
+    "correct_answer": "1:3",
+    "explanation": "Cone=(1/3)πr²h, cylinder=πr²h. Ratio=1:3.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "In a cyclic quadrilateral ABCD, angle A=80° and angle B=100°. What is angle C?",
+    "options": [
+      "80°",
+      "100°",
+      "120°",
+      "260°"
+    ],
+    "correct_answer": "100°",
+    "explanation": "Opposite angles are supplementary: A+C=180°→C=100°. And B+D=180°→D=80°.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "A sphere of radius R is circumscribed about a regular tetrahedron. Express the edge length in terms of R.",
+    "options": [
+      "R√6/3",
+      "R√(8/3)",
+      "2R√(2/3)",
+      "Both B and C"
+    ],
+    "correct_answer": "Both B and C",
+    "explanation": "Edge a=R√(8/3)=R·2√(2/3)=2R√(2/3). Both expressions are equivalent.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the area of the triangle with vertices at A(1,1), B(7,1), C(4,9)?",
+    "options": [
+      "18",
+      "24",
+      "30",
+      "36"
+    ],
+    "correct_answer": "24",
+    "explanation": "Base AB=6, height=9−1=8. Area=(1/2)(6)(8)=24.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "A semicircle has diameter AB=10. Point C is on the semicircle such that AC=6. What is BC?",
+    "options": [
+      "4",
+      "6",
+      "8",
+      "√64"
+    ],
+    "correct_answer": "8",
+    "explanation": "Angle ACB=90° (inscribed in semicircle). BC=√(100−36)=√64=8.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "If two medians of a triangle are perpendicular, and have lengths 12 and 16, what is the area of the triangle?",
+    "options": [
+      "64",
+      "96",
+      "128",
+      "192"
+    ],
+    "correct_answer": "128",
+    "explanation": "When two medians are perpendicular with lengths m₁ and m₂, area=(2/3)m₁m₂=(2/3)(12)(16)=128.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is Ceva's theorem condition for concurrent cevians AD, BE, CF in triangle ABC?",
+    "options": [
+      "(AF/FB)(BD/DC)(CE/EA)=1",
+      "AF·BD·CE=FB·DC·EA",
+      "Both A and B",
+      "(AF/FB)+(BD/DC)+(CE/EA)=1"
+    ],
+    "correct_answer": "Both A and B",
+    "explanation": "Ceva's theorem states (AF/FB)(BD/DC)(CE/EA)=1, which means AF·BD·CE=FB·DC·EA.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "A regular hexagonal prism has base edge 5 and height 12. What is its volume?",
+    "options": [
+      "75√3/2·12",
+      "450√3",
+      "900√3",
+      "150√3"
+    ],
+    "correct_answer": "450√3",
+    "explanation": "Base area=(3√3/2)(25)=75√3/2. Volume=(75√3/2)(12)=450√3.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "A cone has vertex angle 2α where sinα=3/5. If the slant height is 15, what is the lateral surface area?",
+    "options": [
+      "108π",
+      "135π",
+      "180π",
+      "225π"
+    ],
+    "correct_answer": "135π",
+    "explanation": "r=15sinα=15(3/5)=9. Lateral SA=πrl=π(9)(15)=135π.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  }
+]

@@ -931,31 +931,27 @@ function PersonalizationSection({ user }: SharedProps) {
             </div>
           </button>
 
-          {/* Light theme card — sakura spring */}
+          {/* Light theme card — savanna */}
           <button onClick={() => autoSave({ theme: "light" })}
             className={`relative p-5 rounded-2xl border-2 text-left transition-all duration-300 overflow-hidden
               ${theme === "light"
-                ? "border-pink-300 shadow-[0_0_20px_rgba(244,114,182,0.25)]"
+                ? "border-amber-400 shadow-[0_0_20px_rgba(245,158,11,0.25)]"
                 : "border-white/10 opacity-60 hover:opacity-80 hover:border-white/20"}`}
-            style={{ background: "#fffdf7" }}>
-            {/* Mini floating petals in preview */}
-            <span className="absolute top-2 right-4 text-[10px] opacity-40 pointer-events-none">🌸</span>
-            <span className="absolute top-6 right-10 text-[8px] opacity-30 pointer-events-none">❀</span>
-            <span className="absolute bottom-3 left-6 text-[9px] opacity-25 pointer-events-none">✿</span>
+            style={{ background: "linear-gradient(180deg, #FFFBF0, #FEF3C7)" }}>
             <div className="flex items-center gap-3 mb-3">
               <div className="w-10 h-10 rounded-full flex items-center justify-center"
-                style={{ background: "linear-gradient(135deg, #fce7f3, #fde68a)", border: "1px solid rgba(244,114,182,0.3)" }}>
-                <span className="text-lg">🌸</span>
+                style={{ background: "linear-gradient(135deg, #FEF3C7, #F59E0B)", border: "1px solid rgba(245,158,11,0.3)" }}>
+                <span className="text-lg">🦁</span>
               </div>
               <div>
-                <p className="font-bold text-sm" style={{ color: "#1a1a1a" }}>Spring</p>
-                <p className="text-[11px]" style={{ color: "#d97706" }}>Sakura & gold</p>
+                <p className="font-bold text-sm" style={{ color: "#1a1a1a" }}>Savanna</p>
+                <p className="text-[11px]" style={{ color: "#d97706" }}>Wild & golden</p>
               </div>
             </div>
-            <div className="rounded-xl p-2.5 flex items-center gap-2" style={{ background: "#ffffff", border: "1px solid #fde8f0" }}>
-              <div className="w-2 h-2 rounded-full" style={{ background: "#f9a8d4" }} />
-              <div className="flex-1 h-1 rounded-full" style={{ background: "#fde8f0" }} />
-              <div className="w-2 h-2 rounded-full" style={{ background: "#f59e0b" }} />
+            <div className="rounded-xl p-2.5 flex items-center gap-2" style={{ background: "#ffffff", border: "1px solid #fde68a" }}>
+              <div className="w-2 h-2 rounded-full" style={{ background: "#F59E0B" }} />
+              <div className="flex-1 h-1 rounded-full" style={{ background: "#FEF3C7" }} />
+              <div className="w-2 h-2 rounded-full" style={{ background: "#D97706" }} />
             </div>
           </button>
         </div>

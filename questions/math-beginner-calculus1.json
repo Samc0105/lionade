@@ -1,0 +1,2802 @@
+[
+  {
+    "question": "What is lim(x\u21922) of (x\u00b2 - 4)/(x - 2)?",
+    "options": [
+      "2",
+      "4",
+      "0",
+      "undefined"
+    ],
+    "correct_answer": "4",
+    "explanation": "Factor: (x-2)(x+2)/(x-2) = x+2. At x=2: 4.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is lim(x\u21920) of sin(x)/x?",
+    "options": [
+      "0",
+      "\u221e",
+      "1",
+      "undefined"
+    ],
+    "correct_answer": "1",
+    "explanation": "This is a fundamental limit: lim(x\u21920) sin(x)/x = 1.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is lim(x\u2192\u221e) of 1/x?",
+    "options": [
+      "1",
+      "\u221e",
+      "0",
+      "-1"
+    ],
+    "correct_answer": "0",
+    "explanation": "As x grows without bound, 1/x approaches 0.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is lim(x\u21923) of (x\u00b2 - 9)/(x - 3)?",
+    "options": [
+      "3",
+      "6",
+      "9",
+      "0"
+    ],
+    "correct_answer": "6",
+    "explanation": "Factor: (x-3)(x+3)/(x-3) = x+3. At x=3: 6.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is lim(x\u21921) of (x\u00b3 - 1)/(x - 1)?",
+    "options": [
+      "1",
+      "2",
+      "3",
+      "0"
+    ],
+    "correct_answer": "3",
+    "explanation": "Factor: (x\u00b2+x+1). At x=1: 3.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is lim(x\u2192\u221e) of (3x + 1)/(x + 2)?",
+    "options": [
+      "1",
+      "2",
+      "3",
+      "\u221e"
+    ],
+    "correct_answer": "3",
+    "explanation": "Divide by x: (3+1/x)/(1+2/x) \u2192 3.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is lim(x\u21920\u207a) of ln(x)?",
+    "options": [
+      "0",
+      "1",
+      "-\u221e",
+      "\u221e"
+    ],
+    "correct_answer": "-\u221e",
+    "explanation": "As x\u21920 from the right, ln(x) \u2192 -\u221e.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is lim(x\u2192\u221e) of e^(-x)?",
+    "options": [
+      "\u221e",
+      "1",
+      "0",
+      "-1"
+    ],
+    "correct_answer": "0",
+    "explanation": "Exponential decay: e^(-x) \u2192 0 as x \u2192 \u221e.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is lim(x\u21922) of (2x + 3)?",
+    "options": [
+      "5",
+      "6",
+      "7",
+      "8"
+    ],
+    "correct_answer": "7",
+    "explanation": "Direct substitution: 2(2) + 3 = 7.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is lim(x\u21924) of \u221ax?",
+    "options": [
+      "2",
+      "4",
+      "16",
+      "8"
+    ],
+    "correct_answer": "2",
+    "explanation": "Direct substitution: \u221a4 = 2.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is lim(x\u21920) of tan(x)/x?",
+    "options": [
+      "0",
+      "1",
+      "\u221e",
+      "-1"
+    ],
+    "correct_answer": "1",
+    "explanation": "Since tan(x) \u2248 x near 0, tan(x)/x \u2192 1.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is lim(x\u2192\u221e) of (5x\u00b2 + 1)/(x\u00b2 + 3)?",
+    "options": [
+      "1",
+      "3",
+      "5",
+      "\u221e"
+    ],
+    "correct_answer": "5",
+    "explanation": "Leading terms: 5x\u00b2/x\u00b2 = 5.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is lim(x\u2192-\u221e) of e^x?",
+    "options": [
+      "\u221e",
+      "-\u221e",
+      "0",
+      "1"
+    ],
+    "correct_answer": "0",
+    "explanation": "As x \u2192 -\u221e, e^x \u2192 0.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is lim(x\u21920) of x\u00b7sin(1/x)?",
+    "options": [
+      "1",
+      "0",
+      "\u221e",
+      "undefined"
+    ],
+    "correct_answer": "0",
+    "explanation": "|sin(1/x)| \u2264 1, so |x\u00b7sin(1/x)| \u2264 |x| \u2192 0.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is lim(x\u21925) of (x\u00b2 - 25)/(x - 5)?",
+    "options": [
+      "5",
+      "10",
+      "25",
+      "0"
+    ],
+    "correct_answer": "10",
+    "explanation": "Factor: (x-5)(x+5)/(x-5) = x+5. At x=5: 10.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is lim(x\u21920) of (e^x - 1)/x?",
+    "options": [
+      "0",
+      "\u221e",
+      "1",
+      "e"
+    ],
+    "correct_answer": "1",
+    "explanation": "By definition of the derivative of e^x at 0: limit = 1.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is lim(x\u2192\u221e) of (2x\u00b2 + 1)/(x\u00b2 + 1)?",
+    "options": [
+      "1",
+      "2",
+      "\u221e",
+      "0"
+    ],
+    "correct_answer": "2",
+    "explanation": "Leading coefficients: 2x\u00b2/x\u00b2 = 2.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is lim(x\u21922) of (x\u00b2 + 1)?",
+    "options": [
+      "3",
+      "4",
+      "5",
+      "6"
+    ],
+    "correct_answer": "5",
+    "explanation": "Direct substitution: 4 + 1 = 5.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is lim(x\u21920) of x/x?",
+    "options": [
+      "0",
+      "undefined",
+      "1",
+      "\u221e"
+    ],
+    "correct_answer": "1",
+    "explanation": "For x\u22600, x/x = 1 always.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is lim(x\u21921) of (x\u00b2 - 1)/(x - 1)?",
+    "options": [
+      "0",
+      "1",
+      "2",
+      "undefined"
+    ],
+    "correct_answer": "2",
+    "explanation": "Factor: (x-1)(x+1)/(x-1) = x+1. At x=1: 2.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is lim(x\u21920\u207a) of (1/x)?",
+    "options": [
+      "0",
+      "-\u221e",
+      "+\u221e",
+      "1"
+    ],
+    "correct_answer": "+\u221e",
+    "explanation": "As x \u2192 0 from the right, 1/x \u2192 +\u221e.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is lim(x\u2192\u221e) of sin(x)/x?",
+    "options": [
+      "1",
+      "\u221e",
+      "0",
+      "undefined"
+    ],
+    "correct_answer": "0",
+    "explanation": "Since |sin x| \u2264 1, |sin(x)/x| \u2264 1/|x| \u2192 0.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is lim(x\u21923) of (2x - 1)?",
+    "options": [
+      "4",
+      "5",
+      "6",
+      "7"
+    ],
+    "correct_answer": "5",
+    "explanation": "Direct substitution: 2(3) - 1 = 5.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is lim(x\u21920) of (1 - cos x)/x\u00b2?",
+    "options": [
+      "0",
+      "1",
+      "1/2",
+      "\u221e"
+    ],
+    "correct_answer": "1/2",
+    "explanation": "Using Taylor: cos x \u2248 1 - x\u00b2/2, so (1-cos x)/x\u00b2 \u2192 1/2.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is lim(x\u2192\u221e) of (x+1)/x?",
+    "options": [
+      "0",
+      "1",
+      "2",
+      "\u221e"
+    ],
+    "correct_answer": "1",
+    "explanation": "(x+1)/x = 1 + 1/x \u2192 1.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is lim(x\u21924) of (x - 4)/(\u221ax - 2)?",
+    "options": [
+      "0",
+      "2",
+      "4",
+      "8"
+    ],
+    "correct_answer": "4",
+    "explanation": "Multiply by (\u221ax+2): (x-4)(\u221ax+2)/(x-4) = \u221ax+2 \u2192 4.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is lim(x\u2192\u221e) of x/e^x?",
+    "options": [
+      "\u221e",
+      "1",
+      "0",
+      "e"
+    ],
+    "correct_answer": "0",
+    "explanation": "L'H\u00f4pital: 1/e^x \u2192 0.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "lim(x\u21922) of (x\u00b3 - 8)/(x - 2) = ?",
+    "options": [
+      "4",
+      "8",
+      "12",
+      "6"
+    ],
+    "correct_answer": "12",
+    "explanation": "Factor: (x-2)(x\u00b2+2x+4)/(x-2) = x\u00b2+2x+4. At x=2: 12.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is lim(x\u21920) of sin(3x)/x?",
+    "options": [
+      "1",
+      "3",
+      "0",
+      "\u221e"
+    ],
+    "correct_answer": "3",
+    "explanation": "sin(3x)/x = 3\u00b7sin(3x)/(3x) \u2192 3.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is lim(x\u2192\u221e) of ln(x)/x?",
+    "options": [
+      "\u221e",
+      "1",
+      "0",
+      "ln(\u221e)"
+    ],
+    "correct_answer": "0",
+    "explanation": "L'H\u00f4pital: (1/x)/1 = 1/x \u2192 0.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is lim(x\u21920) of x\u00b2/x?",
+    "options": [
+      "0",
+      "1",
+      "\u221e",
+      "x"
+    ],
+    "correct_answer": "0",
+    "explanation": "x\u00b2/x = x \u2192 0.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is lim(x\u2192\u221e) of 5?",
+    "options": [
+      "0",
+      "\u221e",
+      "5",
+      "undefined"
+    ],
+    "correct_answer": "5",
+    "explanation": "A constant function always equals that constant.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "lim(x\u21920) of (sin x)/x\u00b2 = ?",
+    "options": [
+      "0",
+      "1",
+      "\u221e",
+      "undefined"
+    ],
+    "correct_answer": "\u221e",
+    "explanation": "sin(x)/x\u00b2 = (sin x/x)\u00b7(1/x) \u2192 1\u00b7\u221e = \u221e.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is lim(x\u21921) of x^100?",
+    "options": [
+      "0",
+      "1",
+      "100",
+      "\u221e"
+    ],
+    "correct_answer": "1",
+    "explanation": "Direct substitution: 1^100 = 1.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is lim(x\u21920) of (x\u00b3 + 2x)/x?",
+    "options": [
+      "0",
+      "2",
+      "3",
+      "\u221e"
+    ],
+    "correct_answer": "2",
+    "explanation": "(x\u00b3+2x)/x = x\u00b2 + 2 \u2192 0 + 2 = 2.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "lim(x\u2192\u221e) of (3x\u00b3 + x)/(x\u00b3 - 1) = ?",
+    "options": [
+      "1",
+      "3",
+      "0",
+      "\u221e"
+    ],
+    "correct_answer": "3",
+    "explanation": "Leading terms: 3x\u00b3/x\u00b3 = 3.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is lim(x\u2192\u03c0) of sin(x)?",
+    "options": [
+      "1",
+      "-1",
+      "0",
+      "\u03c0"
+    ],
+    "correct_answer": "0",
+    "explanation": "sin(\u03c0) = 0.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is lim(x\u21920) of cos(x)?",
+    "options": [
+      "0",
+      "1",
+      "-1",
+      "undefined"
+    ],
+    "correct_answer": "1",
+    "explanation": "cos(0) = 1; cosine is continuous.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is lim(x\u2192e) of ln(x)?",
+    "options": [
+      "0",
+      "e",
+      "1",
+      "ln e"
+    ],
+    "correct_answer": "1",
+    "explanation": "ln(e) = 1.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is lim(x\u2192\u221e) of (2 + 3/x)?",
+    "options": [
+      "3",
+      "2",
+      "0",
+      "\u221e"
+    ],
+    "correct_answer": "2",
+    "explanation": "3/x \u2192 0, so 2 + 3/x \u2192 2.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is the derivative of f(x) = x\u00b3?",
+    "options": [
+      "x\u00b2",
+      "3x",
+      "3x\u00b2",
+      "x\u2074/4"
+    ],
+    "correct_answer": "3x\u00b2",
+    "explanation": "Power rule: d/dx(x\u207f) = nx\u207f\u207b\u00b9. d/dx(x\u00b3) = 3x\u00b2.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is the derivative of f(x) = 5x\u00b2?",
+    "options": [
+      "5x",
+      "10x",
+      "10x\u00b2",
+      "5"
+    ],
+    "correct_answer": "10x",
+    "explanation": "d/dx(5x\u00b2) = 5\u00b72x = 10x.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is the derivative of f(x) = sin(x)?",
+    "options": [
+      "\u2212sin(x)",
+      "cos(x)",
+      "\u2212cos(x)",
+      "tan(x)"
+    ],
+    "correct_answer": "cos(x)",
+    "explanation": "d/dx(sin x) = cos x.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is the derivative of f(x) = cos(x)?",
+    "options": [
+      "sin(x)",
+      "\u2212sin(x)",
+      "tan(x)",
+      "\u2212cos(x)"
+    ],
+    "correct_answer": "\u2212sin(x)",
+    "explanation": "d/dx(cos x) = \u2212sin x.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is the derivative of f(x) = e\u02e3?",
+    "options": [
+      "xe\u02e3\u207b\u00b9",
+      "e\u02e3",
+      "e",
+      "xe\u02e3"
+    ],
+    "correct_answer": "e\u02e3",
+    "explanation": "d/dx(e\u02e3) = e\u02e3 \u2014 it is its own derivative.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is the derivative of f(x) = ln(x)?",
+    "options": [
+      "1/x\u00b2",
+      "x",
+      "1/x",
+      "e^x"
+    ],
+    "correct_answer": "1/x",
+    "explanation": "d/dx(ln x) = 1/x.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is the derivative of a constant, f(x) = 7?",
+    "options": [
+      "7",
+      "0",
+      "1",
+      "7x"
+    ],
+    "correct_answer": "0",
+    "explanation": "The derivative of any constant is 0.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is the derivative of f(x) = x?",
+    "options": [
+      "x\u00b2/2",
+      "1",
+      "0",
+      "2x"
+    ],
+    "correct_answer": "1",
+    "explanation": "d/dx(x) = 1.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is the derivative of f(x) = \u221ax?",
+    "options": [
+      "1/(2\u221ax)",
+      "2\u221ax",
+      "\u221ax/2",
+      "1/\u221ax"
+    ],
+    "correct_answer": "1/(2\u221ax)",
+    "explanation": "\u221ax = x^(1/2), so derivative = (1/2)x^(-1/2) = 1/(2\u221ax).",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is the derivative of f(x) = 1/x?",
+    "options": [
+      "\u22121/x\u00b2",
+      "1/x\u00b2",
+      "ln(x)",
+      "\u2212x\u00b2"
+    ],
+    "correct_answer": "\u22121/x\u00b2",
+    "explanation": "1/x = x^(-1), derivative = \u2212x^(\u22122) = \u22121/x\u00b2.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is the derivative of f(x) = x\u2075?",
+    "options": [
+      "5x\u2074",
+      "4x\u2075",
+      "x\u2076/6",
+      "5x\u2075"
+    ],
+    "correct_answer": "5x\u2074",
+    "explanation": "Power rule: 5x\u2074.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is the derivative of f(x) = 3x + 2?",
+    "options": [
+      "3",
+      "2",
+      "5",
+      "3x"
+    ],
+    "correct_answer": "3",
+    "explanation": "d/dx(3x + 2) = 3.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is the derivative of f(x) = x\u00b2 + 3x?",
+    "options": [
+      "2x + 3",
+      "2x",
+      "x + 3",
+      "2x\u00b2"
+    ],
+    "correct_answer": "2x + 3",
+    "explanation": "d/dx(x\u00b2) + d/dx(3x) = 2x + 3.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is f'(x) if f(x) = 4x\u00b3 \u2212 2x?",
+    "options": [
+      "12x\u00b2 \u2212 2",
+      "4x\u00b2 \u2212 2",
+      "12x\u00b2 + 2",
+      "4x\u00b3 \u2212 2"
+    ],
+    "correct_answer": "12x\u00b2 \u2212 2",
+    "explanation": "d/dx(4x\u00b3) = 12x\u00b2, d/dx(\u22122x) = \u22122.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is the derivative of f(x) = tan(x)?",
+    "options": [
+      "sec\u00b2(x)",
+      "cot(x)",
+      "\u2212csc\u00b2(x)",
+      "sin(x)/cos\u00b2(x)"
+    ],
+    "correct_answer": "sec\u00b2(x)",
+    "explanation": "d/dx(tan x) = sec\u00b2(x).",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is f'(2) if f(x) = x\u2074?",
+    "options": [
+      "8",
+      "16",
+      "32",
+      "4"
+    ],
+    "correct_answer": "32",
+    "explanation": "f'(x) = 4x\u00b3. f'(2) = 4(8) = 32.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is the slope of f(x) = 2x\u00b2 at x = 3?",
+    "options": [
+      "6",
+      "9",
+      "12",
+      "18"
+    ],
+    "correct_answer": "12",
+    "explanation": "f'(x) = 4x. At x=3: 12.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "If f(x) = x\u00b2 \u2212 4, what is f'(2)?",
+    "options": [
+      "0",
+      "2",
+      "4",
+      "8"
+    ],
+    "correct_answer": "4",
+    "explanation": "f'(x) = 2x. f'(2) = 4.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is d/dx of (x\u00b2 + 1)?",
+    "options": [
+      "2x + 1",
+      "2x",
+      "x + 1",
+      "2"
+    ],
+    "correct_answer": "2x",
+    "explanation": "d/dx(x\u00b2) = 2x, d/dx(1) = 0.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is the derivative of f(x) = \u22123x\u00b2?",
+    "options": [
+      "\u22126x",
+      "\u22123x",
+      "6x",
+      "\u22126x\u00b2"
+    ],
+    "correct_answer": "\u22126x",
+    "explanation": "d/dx(\u22123x\u00b2) = \u22126x.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is d/dx of x\u2076?",
+    "options": [
+      "6x\u2075",
+      "5x\u2076",
+      "6x\u2076",
+      "x\u2077/7"
+    ],
+    "correct_answer": "6x\u2075",
+    "explanation": "Power rule: 6x\u2075.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is the derivative of f(x) = 7x?",
+    "options": [
+      "7x\u00b2",
+      "7",
+      "7/x",
+      "0"
+    ],
+    "correct_answer": "7",
+    "explanation": "d/dx(7x) = 7.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is the derivative of x\u00b2 + 5x + 6?",
+    "options": [
+      "2x + 5",
+      "2x + 6",
+      "x + 5",
+      "2x"
+    ],
+    "correct_answer": "2x + 5",
+    "explanation": "d/dx(x\u00b2) + d/dx(5x) + d/dx(6) = 2x + 5.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is d\u00b2/dx\u00b2 of x\u00b3?",
+    "options": [
+      "6x",
+      "3x\u00b2",
+      "x\u00b2",
+      "6"
+    ],
+    "correct_answer": "6x",
+    "explanation": "f'(x) = 3x\u00b2. f''(x) = 6x.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is the derivative of e^(2x)?",
+    "options": [
+      "e^(2x)",
+      "2e^(2x)",
+      "2xe^x",
+      "e^x"
+    ],
+    "correct_answer": "2e^(2x)",
+    "explanation": "Chain rule: 2e^(2x).",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is the derivative of ln(3x)?",
+    "options": [
+      "1/x",
+      "3/x",
+      "1/(3x)",
+      "ln(3)"
+    ],
+    "correct_answer": "1/x",
+    "explanation": "d/dx(ln(3x)) = 1/(3x)\u00b73 = 1/x.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is d/dx of (sin x + cos x)?",
+    "options": [
+      "cos x + sin x",
+      "cos x \u2212 sin x",
+      "\u2212sin x + cos x",
+      "\u2212cos x + sin x"
+    ],
+    "correct_answer": "cos x \u2212 sin x",
+    "explanation": "d/dx(sin x) = cos x, d/dx(cos x) = \u2212sin x.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is d/dx of sec(x)?",
+    "options": [
+      "sec(x)tan(x)",
+      "csc(x)cot(x)",
+      "\u2212csc\u00b2(x)",
+      "tan\u00b2(x)"
+    ],
+    "correct_answer": "sec(x)tan(x)",
+    "explanation": "d/dx(sec x) = sec(x)tan(x).",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is d/dx of csc(x)?",
+    "options": [
+      "\u2212csc(x)cot(x)",
+      "csc(x)cot(x)",
+      "sec(x)tan(x)",
+      "\u2212sec\u00b2(x)"
+    ],
+    "correct_answer": "\u2212csc(x)cot(x)",
+    "explanation": "d/dx(csc x) = \u2212csc(x)cot(x).",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is d/dx of cot(x)?",
+    "options": [
+      "csc\u00b2(x)",
+      "\u2212csc\u00b2(x)",
+      "sec\u00b2(x)",
+      "\u2212sec\u00b2(x)"
+    ],
+    "correct_answer": "\u2212csc\u00b2(x)",
+    "explanation": "d/dx(cot x) = \u2212csc\u00b2(x).",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is the derivative of f(x) = x^(1/3)?",
+    "options": [
+      "(1/3)x^(\u22122/3)",
+      "x^(\u22122/3)/3",
+      "3x^(\u22122/3)",
+      "(1/3)x^(2/3)"
+    ],
+    "correct_answer": "(1/3)x^(\u22122/3)",
+    "explanation": "Power rule: (1/3)x^(1/3\u22121).",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is f'(x) if f(x) = ln(x\u00b2)?",
+    "options": [
+      "2/x",
+      "1/x\u00b2",
+      "2x",
+      "2ln(x)"
+    ],
+    "correct_answer": "2/x",
+    "explanation": "ln(x\u00b2) = 2ln(x), so f'(x) = 2/x.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "At a local maximum, f'(x) = ?",
+    "options": [
+      "positive",
+      "negative",
+      "0",
+      "undefined"
+    ],
+    "correct_answer": "0",
+    "explanation": "At a local max or min, f'(x) = 0.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "If f'(x) > 0, the function is:",
+    "options": [
+      "decreasing",
+      "increasing",
+      "constant",
+      "concave down"
+    ],
+    "correct_answer": "increasing",
+    "explanation": "Positive derivative means the function is increasing.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "If f'(x) < 0, the function is:",
+    "options": [
+      "increasing",
+      "constant",
+      "decreasing",
+      "concave up"
+    ],
+    "correct_answer": "decreasing",
+    "explanation": "Negative derivative means the function is decreasing.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is the derivative of f(x) = (x+1)\u00b2?",
+    "options": [
+      "2(x+1)",
+      "2x+1",
+      "(x+1)",
+      "2x+2"
+    ],
+    "correct_answer": "2(x+1)",
+    "explanation": "Expand or chain rule: 2(x+1).",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is the derivative of f(x) = x\u00b2 \u00b7 2?",
+    "options": [
+      "2x \u00b7 2",
+      "4x",
+      "2x",
+      "x\u00b2"
+    ],
+    "correct_answer": "4x",
+    "explanation": "f(x) = 2x\u00b2, f'(x) = 4x.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "A horizontal tangent line occurs when:",
+    "options": [
+      "f'(x) = \u221e",
+      "f'(x) = 0",
+      "f(x) = 0",
+      "f''(x) = 0"
+    ],
+    "correct_answer": "f'(x) = 0",
+    "explanation": "Horizontal tangent means slope = 0.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is d/dx of (3x\u00b2 \u2212 x + 5)?",
+    "options": [
+      "6x \u2212 1",
+      "6x + 1",
+      "3x \u2212 1",
+      "6x"
+    ],
+    "correct_answer": "6x \u2212 1",
+    "explanation": "Differentiate term by term: 6x \u2212 1 + 0.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "Find f'(x) if f(x) = x\u2074 \u2212 3x\u00b2 + 1.",
+    "options": [
+      "4x\u00b3 \u2212 6x",
+      "4x\u00b3 \u2212 3",
+      "3x\u2074 \u2212 6x",
+      "4x\u00b3 \u2212 6"
+    ],
+    "correct_answer": "4x\u00b3 \u2212 6x",
+    "explanation": "d/dx(x\u2074) \u2212 d/dx(3x\u00b2) + d/dx(1) = 4x\u00b3 \u2212 6x.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is the slope of the tangent line to y = x\u00b2 at x = 1?",
+    "options": [
+      "1",
+      "2",
+      "4",
+      "0"
+    ],
+    "correct_answer": "2",
+    "explanation": "f'(x) = 2x. At x=1: slope = 2.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "Find f'(x) if f(x) = 2e\u02e3 \u2212 3x.",
+    "options": [
+      "2e\u02e3",
+      "2e\u02e3 \u2212 3",
+      "2e\u02e3 + 3",
+      "e\u02e3 \u2212 3"
+    ],
+    "correct_answer": "2e\u02e3 \u2212 3",
+    "explanation": "d/dx(2e\u02e3) = 2e\u02e3, d/dx(\u22123x) = \u22123.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is d/dx of (5ln x + x\u00b2)?",
+    "options": [
+      "5/x + 2x",
+      "5/x",
+      "5x + 2x",
+      "5 + 2x"
+    ],
+    "correct_answer": "5/x + 2x",
+    "explanation": "d/dx(5ln x) = 5/x, d/dx(x\u00b2) = 2x.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "f(x) = x\u00b3 \u2212 x. Find f'(1).",
+    "options": [
+      "1",
+      "2",
+      "3",
+      "0"
+    ],
+    "correct_answer": "2",
+    "explanation": "f'(x) = 3x\u00b2 \u2212 1. f'(1) = 3 \u2212 1 = 2.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is the second derivative of x\u2074?",
+    "options": [
+      "12x\u00b2",
+      "4x\u00b3",
+      "x\u00b2",
+      "24x"
+    ],
+    "correct_answer": "12x\u00b2",
+    "explanation": "f'=4x\u00b3, f''=12x\u00b2.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is d/dx of (x + 1/x)?",
+    "options": [
+      "1 \u2212 1/x\u00b2",
+      "1 + 1/x\u00b2",
+      "1/x",
+      "1"
+    ],
+    "correct_answer": "1 \u2212 1/x\u00b2",
+    "explanation": "d/dx(x) = 1, d/dx(1/x) = \u22121/x\u00b2.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is the derivative of f(x) = 4\u221ax?",
+    "options": [
+      "2/\u221ax",
+      "4/\u221ax",
+      "2\u221ax",
+      "1/(2\u221ax)"
+    ],
+    "correct_answer": "2/\u221ax",
+    "explanation": "4\u00b7(1/2)x^(\u22121/2) = 2x^(\u22121/2) = 2/\u221ax.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "Find the critical point of f(x) = x\u00b2 \u2212 6x.",
+    "options": [
+      "x = 3",
+      "x = \u22123",
+      "x = 6",
+      "x = 0"
+    ],
+    "correct_answer": "x = 3",
+    "explanation": "f'(x) = 2x \u2212 6 = 0 \u2192 x = 3.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is d/dx of (x\u207b\u00b3)?",
+    "options": [
+      "\u22123x\u207b\u2074",
+      "3x\u207b\u00b2",
+      "\u22123x\u207b\u00b2",
+      "x\u207b\u2074"
+    ],
+    "correct_answer": "\u22123x\u207b\u2074",
+    "explanation": "Power rule: d/dx(x\u207b\u00b3) = \u22123x\u207b\u2074.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "f(x) = x\u00b2 \u2212 4x + 3. Where is f'(x) = 0?",
+    "options": [
+      "x = 2",
+      "x = 1",
+      "x = 3",
+      "x = 4"
+    ],
+    "correct_answer": "x = 2",
+    "explanation": "f'(x) = 2x \u2212 4 = 0 \u2192 x = 2.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "Which function is its own derivative?",
+    "options": [
+      "x\u00b2",
+      "ln(x)",
+      "e\u02e3",
+      "sin(x)"
+    ],
+    "correct_answer": "e\u02e3",
+    "explanation": "d/dx(e\u02e3) = e\u02e3.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is velocity in calculus terms?",
+    "options": [
+      "Integral of acceleration",
+      "Derivative of position",
+      "Second derivative of distance",
+      "Area under position"
+    ],
+    "correct_answer": "Derivative of position",
+    "explanation": "v(t) = s'(t), derivative of position.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is acceleration in calculus terms?",
+    "options": [
+      "Integral of velocity",
+      "Derivative of velocity",
+      "Position squared",
+      "Limit of velocity"
+    ],
+    "correct_answer": "Derivative of velocity",
+    "explanation": "a(t) = v'(t) = s''(t).",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "If f(x) = sin x, what is f'(\u03c0/2)?",
+    "options": [
+      "1",
+      "0",
+      "\u22121",
+      "\u03c0/2"
+    ],
+    "correct_answer": "0",
+    "explanation": "f'(x) = cos x. cos(\u03c0/2) = 0.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is d/dx of (e\u02e3 + ln x)?",
+    "options": [
+      "e\u02e3 + 1/x",
+      "e\u02e3 + x",
+      "xe\u02e3 + ln x",
+      "e\u02e3\u00b7ln x"
+    ],
+    "correct_answer": "e\u02e3 + 1/x",
+    "explanation": "d/dx(e\u02e3) + d/dx(ln x) = e\u02e3 + 1/x.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is f''(x) if f(x) = sin(x)?",
+    "options": [
+      "cos(x)",
+      "sin(x)",
+      "\u2212sin(x)",
+      "\u2212cos(x)"
+    ],
+    "correct_answer": "\u2212sin(x)",
+    "explanation": "f'=cos x, f''=\u2212sin x.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is d/dx of x^(3/2)?",
+    "options": [
+      "(3/2)x^(1/2)",
+      "(1/2)x^(3/2)",
+      "(3/2)x^(2/3)",
+      "x^(1/2)"
+    ],
+    "correct_answer": "(3/2)x^(1/2)",
+    "explanation": "Power rule: (3/2)x^(1/2).",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is d/dx of (2x\u00b3 \u2212 5x\u00b2 + x)?",
+    "options": [
+      "6x\u00b2 \u2212 10x + 1",
+      "6x\u00b2 \u2212 10x",
+      "6x\u00b2 \u2212 5",
+      "2x\u00b2 \u2212 5x"
+    ],
+    "correct_answer": "6x\u00b2 \u2212 10x + 1",
+    "explanation": "Differentiate each term.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "If position is s(t) = t\u00b2, what is velocity at t = 3?",
+    "options": [
+      "3",
+      "6",
+      "9",
+      "12"
+    ],
+    "correct_answer": "6",
+    "explanation": "v(t) = s'(t) = 2t. At t=3: 6.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "f(x) = e\u02e3 \u2212 x. What is f'(0)?",
+    "options": [
+      "0",
+      "1",
+      "\u22121",
+      "e"
+    ],
+    "correct_answer": "0",
+    "explanation": "f'(x) = e\u02e3 \u2212 1. f'(0) = 1 \u2212 1 = 0.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is the derivative of x^(\u22121/2)?",
+    "options": [
+      "(\u22121/2)x^(\u22123/2)",
+      "(1/2)x^(1/2)",
+      "\u22122x^(3/2)",
+      "(\u22121/2)x^(1/2)"
+    ],
+    "correct_answer": "(\u22121/2)x^(\u22123/2)",
+    "explanation": "Power rule: (\u22121/2)x^(\u22123/2).",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is d/dx of (cos x \u2212 sin x)?",
+    "options": [
+      "\u2212sin x \u2212 cos x",
+      "sin x \u2212 cos x",
+      "cos x + sin x",
+      "\u2212sin x + cos x"
+    ],
+    "correct_answer": "\u2212sin x \u2212 cos x",
+    "explanation": "d/dx(cos x) = \u2212sin x, d/dx(\u2212sin x) = \u2212cos x.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "Concave up means:",
+    "options": [
+      "f' > 0",
+      "f'' > 0",
+      "f' decreasing",
+      "f is increasing"
+    ],
+    "correct_answer": "f'' > 0",
+    "explanation": "f'' > 0 means concave up.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "An inflection point occurs when:",
+    "options": [
+      "f'(x) = 0",
+      "f(x) = 0",
+      "f''(x) changes sign",
+      "f is discontinuous"
+    ],
+    "correct_answer": "f''(x) changes sign",
+    "explanation": "Inflection point: concavity changes, f'' changes sign.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is f'(x) if f(x) = ln(x\u00b2)?",
+    "options": [
+      "2/x",
+      "1/x",
+      "2ln(x)",
+      "2x"
+    ],
+    "correct_answer": "2/x",
+    "explanation": "ln(x\u00b2) = 2ln x, derivative = 2/x.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "d/dx of (x \u00b7 x) = ?",
+    "options": [
+      "x",
+      "x\u00b2",
+      "2x",
+      "1"
+    ],
+    "correct_answer": "2x",
+    "explanation": "x\u00b7x = x\u00b2, derivative = 2x.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is f'(x) if f(x) = x\u2070?",
+    "options": [
+      "0",
+      "1",
+      "x",
+      "undefined"
+    ],
+    "correct_answer": "0",
+    "explanation": "x\u2070 = 1 (constant), derivative = 0.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is the derivative of f(x) = 3?",
+    "options": [
+      "3x",
+      "0",
+      "3",
+      "1"
+    ],
+    "correct_answer": "0",
+    "explanation": "Derivative of any constant = 0.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "Find f'(x) if f(x) = \u221ax + x.",
+    "options": [
+      "1/(2\u221ax) + 1",
+      "1/(2\u221ax)",
+      "1 + \u221ax",
+      "2\u221ax + 1"
+    ],
+    "correct_answer": "1/(2\u221ax) + 1",
+    "explanation": "d/dx(\u221ax) + d/dx(x) = 1/(2\u221ax) + 1.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is d/dx of (1/x\u00b2)?",
+    "options": [
+      "\u22122/x\u00b3",
+      "2/x\u00b3",
+      "\u22121/x\u00b2",
+      "1/x\u00b3"
+    ],
+    "correct_answer": "\u22122/x\u00b3",
+    "explanation": "x^(\u22122), derivative = \u22122x^(\u22123) = \u22122/x\u00b3.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What does f'(a) represent geometrically?",
+    "options": [
+      "Area at x=a",
+      "Slope of tangent at x=a",
+      "Maximum of f",
+      "Value of f at a"
+    ],
+    "correct_answer": "Slope of tangent at x=a",
+    "explanation": "The derivative gives the slope of the tangent line.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "f(x) = 2x\u00b2 + 3x \u2212 1. Find f'(0).",
+    "options": [
+      "2",
+      "3",
+      "\u22121",
+      "0"
+    ],
+    "correct_answer": "3",
+    "explanation": "f'(x) = 4x + 3. f'(0) = 3.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is d/dx of (x^n)?",
+    "options": [
+      "nx^n",
+      "n\u00b7x^(n\u22121)",
+      "x^(n+1)",
+      "n\u00b7x^(n+1)"
+    ],
+    "correct_answer": "n\u00b7x^(n\u22121)",
+    "explanation": "Power rule: d/dx(x\u207f) = nx\u207f\u207b\u00b9.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "If f(x) = 5, then f'(3) = ?",
+    "options": [
+      "5",
+      "3",
+      "0",
+      "15"
+    ],
+    "correct_answer": "0",
+    "explanation": "Derivative of constant = 0.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is the notation Leibniz used for derivative?",
+    "options": [
+      "f'(x)",
+      "dy/dx",
+      "\u0394y/\u0394x",
+      "\u2202f"
+    ],
+    "correct_answer": "dy/dx",
+    "explanation": "Leibniz notation dy/dx.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "The limit definition of f'(x) is:",
+    "options": [
+      "lim(h\u21920)(f(x+h)\u2212f(x))/h",
+      "lim(x\u21920)f(x)/x",
+      "lim(h\u2192\u221e)(f(h)\u2212f(x))",
+      "lim(x\u2192a)f(x)"
+    ],
+    "correct_answer": "lim(h\u21920)(f(x+h)\u2212f(x))/h",
+    "explanation": "Derivative = limit of difference quotient.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "f(x) = x\u00b3 + 2x. Find f'(\u22121).",
+    "options": [
+      "1",
+      "\u22121",
+      "5",
+      "\u22125"
+    ],
+    "correct_answer": "5",
+    "explanation": "f'(x) = 3x\u00b2 + 2. f'(\u22121) = 3 + 2 = 5.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is d/dx of (10x\u2074)?",
+    "options": [
+      "40x\u00b3",
+      "10x\u00b3",
+      "40x\u2074",
+      "4x\u00b3"
+    ],
+    "correct_answer": "40x\u00b3",
+    "explanation": "d/dx(10x\u2074) = 40x\u00b3.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is d/dx of (e\u02e3 \u00b7 1)?",
+    "options": [
+      "e\u02e3 + 1",
+      "e\u02e3",
+      "xe\u02e3",
+      "e"
+    ],
+    "correct_answer": "e\u02e3",
+    "explanation": "e\u02e3 \u00b7 1 = e\u02e3, derivative = e\u02e3.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is \u222bx dx?",
+    "options": [
+      "x",
+      "x\u00b2",
+      "x\u00b2/2 + C",
+      "2x + C"
+    ],
+    "correct_answer": "x\u00b2/2 + C",
+    "explanation": "Power rule: \u222bx\u207f dx = x\u207f\u207a\u00b9/(n+1) + C.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is \u222b2x dx?",
+    "options": [
+      "x\u00b2/2 + C",
+      "x\u00b2 + C",
+      "2x\u00b2 + C",
+      "x + C"
+    ],
+    "correct_answer": "x\u00b2 + C",
+    "explanation": "\u222b2x dx = 2\u00b7x\u00b2/2 + C = x\u00b2 + C.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is \u222bcos(x) dx?",
+    "options": [
+      "\u2212cos(x) + C",
+      "sin(x) + C",
+      "\u2212sin(x) + C",
+      "tan(x) + C"
+    ],
+    "correct_answer": "sin(x) + C",
+    "explanation": "\u222bcos(x) dx = sin(x) + C.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is \u222bsin(x) dx?",
+    "options": [
+      "cos(x) + C",
+      "\u2212cos(x) + C",
+      "sin(x) + C",
+      "\u2212sin(x) + C"
+    ],
+    "correct_answer": "\u2212cos(x) + C",
+    "explanation": "\u222bsin(x) dx = \u2212cos(x) + C.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is \u222be\u02e3 dx?",
+    "options": [
+      "xe\u02e3 + C",
+      "e\u02e3 + C",
+      "e\u02e3\u207a\u00b9 + C",
+      "e^(x+1) + C"
+    ],
+    "correct_answer": "e\u02e3 + C",
+    "explanation": "\u222be\u02e3 dx = e\u02e3 + C.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is \u222b(1/x) dx?",
+    "options": [
+      "1/x\u00b2 + C",
+      "\u22121/x + C",
+      "ln|x| + C",
+      "e^x + C"
+    ],
+    "correct_answer": "ln|x| + C",
+    "explanation": "\u222b(1/x) dx = ln|x| + C.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is \u222b3 dx?",
+    "options": [
+      "3x\u00b2 + C",
+      "3x + C",
+      "3/x + C",
+      "0"
+    ],
+    "correct_answer": "3x + C",
+    "explanation": "\u222bk dx = kx + C.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is \u222bx\u00b2 dx?",
+    "options": [
+      "x\u00b3/3 + C",
+      "2x + C",
+      "x\u00b3 + C",
+      "3x\u00b2 + C"
+    ],
+    "correct_answer": "x\u00b3/3 + C",
+    "explanation": "Power rule: x\u00b3/3 + C.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "Evaluate \u222b\u2080\u00b9 x dx.",
+    "options": [
+      "0",
+      "1",
+      "1/2",
+      "2"
+    ],
+    "correct_answer": "1/2",
+    "explanation": "[x\u00b2/2]\u2080\u00b9 = 1/2.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "Evaluate \u222b\u2080\u00b2 3 dx.",
+    "options": [
+      "3",
+      "6",
+      "9",
+      "0"
+    ],
+    "correct_answer": "6",
+    "explanation": "3\u00b7(2\u22120) = 6.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is \u222bsec\u00b2(x) dx?",
+    "options": [
+      "tan(x) + C",
+      "sec(x) + C",
+      "2sec(x)tan(x) + C",
+      "cot(x) + C"
+    ],
+    "correct_answer": "tan(x) + C",
+    "explanation": "\u222bsec\u00b2(x) dx = tan(x) + C.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is \u222b(x\u00b3 + x) dx?",
+    "options": [
+      "x\u2074/4 + x\u00b2/2 + C",
+      "3x\u00b2 + 1 + C",
+      "x\u2074 + x\u00b2 + C",
+      "x\u00b3/3 + x + C"
+    ],
+    "correct_answer": "x\u2074/4 + x\u00b2/2 + C",
+    "explanation": "Integrate term by term.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "Evaluate \u222b\u2080\u00b9 x\u00b2 dx.",
+    "options": [
+      "1/2",
+      "1/3",
+      "1",
+      "2/3"
+    ],
+    "correct_answer": "1/3",
+    "explanation": "[x\u00b3/3]\u2080\u00b9 = 1/3.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is \u222b5x\u2074 dx?",
+    "options": [
+      "x\u2075 + C",
+      "5x\u2075 + C",
+      "20x\u00b3 + C",
+      "x\u2074/5 + C"
+    ],
+    "correct_answer": "x\u2075 + C",
+    "explanation": "\u222b5x\u2074 dx = x\u2075 + C.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What does C represent in an indefinite integral?",
+    "options": [
+      "The boundary",
+      "The constant of integration",
+      "The derivative",
+      "The slope"
+    ],
+    "correct_answer": "The constant of integration",
+    "explanation": "C represents any constant added to the antiderivative.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is \u222bx\u2074 dx?",
+    "options": [
+      "x\u2075/5 + C",
+      "4x\u00b3 + C",
+      "x\u2075 + C",
+      "5x\u2074 + C"
+    ],
+    "correct_answer": "x\u2075/5 + C",
+    "explanation": "Power rule for integration.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is \u222b0 dx?",
+    "options": [
+      "1 + C",
+      "x + C",
+      "C",
+      "0"
+    ],
+    "correct_answer": "C",
+    "explanation": "\u222b0 dx = C.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is \u222b(x + x\u00b2) dx?",
+    "options": [
+      "x\u00b2/2 + x\u00b3/3 + C",
+      "1 + 2x + C",
+      "x\u00b2 + x\u00b3 + C",
+      "x + 2x + C"
+    ],
+    "correct_answer": "x\u00b2/2 + x\u00b3/3 + C",
+    "explanation": "Integrate term by term.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "Evaluate \u222b\u2081\u00b2 x dx.",
+    "options": [
+      "3/2",
+      "1",
+      "2",
+      "1/2"
+    ],
+    "correct_answer": "3/2",
+    "explanation": "[x\u00b2/2]\u2081\u00b2 = 4/2 \u2212 1/2 = 3/2.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is \u222bsin(2x) dx?",
+    "options": [
+      "sin(2x) + C",
+      "sin(2x)/2 + C",
+      "2sin(2x) + C",
+      "\u2212cos(2x)/2 + C"
+    ],
+    "correct_answer": "\u2212cos(2x)/2 + C",
+    "explanation": "\u222bsin(ax)dx = \u2212cos(ax)/a + C.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "Evaluate \u222b\u2080\u00b3 x\u00b2 dx.",
+    "options": [
+      "9",
+      "3",
+      "27",
+      "27/3"
+    ],
+    "correct_answer": "9",
+    "explanation": "[x\u00b3/3]\u2080\u00b3 = 27/3 = 9.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is \u222b(2x + 1) dx?",
+    "options": [
+      "x\u00b2 + x + C",
+      "2x\u00b2 + x + C",
+      "x\u00b2 + 1 + C",
+      "2 + C"
+    ],
+    "correct_answer": "x\u00b2 + x + C",
+    "explanation": "\u222b2x dx + \u222b1 dx = x\u00b2 + x + C.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "Evaluate \u222b\u208b\u2081\u00b9 x dx.",
+    "options": [
+      "1",
+      "0",
+      "2",
+      "\u22121"
+    ],
+    "correct_answer": "0",
+    "explanation": "Odd function on symmetric interval: 0.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is \u222be^(3x) dx?",
+    "options": [
+      "3e^(3x) + C",
+      "e^(3x)/3 + C",
+      "e^(3x) + C",
+      "3xe^x + C"
+    ],
+    "correct_answer": "e^(3x)/3 + C",
+    "explanation": "\u222be^(ax) dx = e^(ax)/a + C.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is \u222bsec(x)tan(x) dx?",
+    "options": [
+      "sec\u00b2(x) + C",
+      "tan(x) + C",
+      "sec(x) + C",
+      "ln|sec x| + C"
+    ],
+    "correct_answer": "sec(x) + C",
+    "explanation": "d/dx(sec x) = sec(x)tan(x).",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is \u222b1/(1+x\u00b2) dx?",
+    "options": [
+      "ln(1+x\u00b2) + C",
+      "arctan(x) + C",
+      "arcsin(x) + C",
+      "1/(2x) + C"
+    ],
+    "correct_answer": "arctan(x) + C",
+    "explanation": "\u222b1/(1+x\u00b2)dx = arctan(x) + C.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is \u222b1/\u221a(1\u2212x\u00b2) dx?",
+    "options": [
+      "arcsin(x) + C",
+      "arccos(x) + C",
+      "arctan(x) + C",
+      "ln(1\u2212x\u00b2) + C"
+    ],
+    "correct_answer": "arcsin(x) + C",
+    "explanation": "\u222b1/\u221a(1\u2212x\u00b2)dx = arcsin(x) + C.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "Evaluate \u222b\u2080^(\u03c0/2) sin(x) dx.",
+    "options": [
+      "0",
+      "\u03c0/2",
+      "2",
+      "1"
+    ],
+    "correct_answer": "1",
+    "explanation": "[\u2212cos x]\u2080^(\u03c0/2) = 0 \u2212 (\u22121) = 1.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "Evaluate \u222b\u2081^e (1/x) dx.",
+    "options": [
+      "e",
+      "1",
+      "0",
+      "e\u22121"
+    ],
+    "correct_answer": "1",
+    "explanation": "[ln x]\u2081^e = 1 \u2212 0 = 1.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is \u222bcsc\u00b2(x) dx?",
+    "options": [
+      "csc(x)cot(x)+C",
+      "\u2212cot(x)+C",
+      "cot(x)+C",
+      "\u2212csc(x)+C"
+    ],
+    "correct_answer": "\u2212cot(x)+C",
+    "explanation": "d/dx(\u2212cot x) = csc\u00b2x.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is \u222b(e^x + 1) dx?",
+    "options": [
+      "e^x + x + C",
+      "e^x + C",
+      "e^x + 1 + C",
+      "xe^x + C"
+    ],
+    "correct_answer": "e^x + x + C",
+    "explanation": "\u222be^x dx + \u222b1 dx.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is the area under f(x) = 2 from x=0 to x=3?",
+    "options": [
+      "2",
+      "3",
+      "6",
+      "9"
+    ],
+    "correct_answer": "6",
+    "explanation": "\u222b\u2080\u00b3 2 dx = 6.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is \u222b(sin\u00b2x + cos\u00b2x) dx?",
+    "options": [
+      "0 + C",
+      "2x + C",
+      "x + C",
+      "sin(2x) + C"
+    ],
+    "correct_answer": "x + C",
+    "explanation": "sin\u00b2x + cos\u00b2x = 1, so \u222b1 dx = x + C.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "Evaluate \u222b\u2080\u00b9 (x\u00b2 \u2212 x) dx.",
+    "options": [
+      "1/6",
+      "\u22121/6",
+      "0",
+      "1/3"
+    ],
+    "correct_answer": "\u22121/6",
+    "explanation": "[x\u00b3/3 \u2212 x\u00b2/2]\u2080\u00b9 = 1/3 \u2212 1/2 = \u22121/6.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is \u222b\u221ax dx?",
+    "options": [
+      "2x^(3/2)/3 + C",
+      "x^(3/2) + C",
+      "1/(2\u221ax) + C",
+      "\u221ax/2 + C"
+    ],
+    "correct_answer": "2x^(3/2)/3 + C",
+    "explanation": "x^(1/2) \u2192 x^(3/2)/(3/2) = 2x^(3/2)/3 + C.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is \u222bx^(3/2) dx?",
+    "options": [
+      "(2/5)x^(5/2) + C",
+      "(3/2)x^(1/2) + C",
+      "x^(5/2) + C",
+      "(5/2)x^(5/2) + C"
+    ],
+    "correct_answer": "(2/5)x^(5/2) + C",
+    "explanation": "x^(3/2) \u2192 x^(5/2)/(5/2) = 2x^(5/2)/5 + C.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "Evaluate \u222b\u2080^\u03c0 sin(x) dx.",
+    "options": [
+      "0",
+      "\u03c0",
+      "2",
+      "1"
+    ],
+    "correct_answer": "2",
+    "explanation": "[\u2212cos x]\u2080^\u03c0 = 1 + 1 = 2.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is \u222bcos(3x) dx?",
+    "options": [
+      "sin(3x) + C",
+      "sin(3x)/3 + C",
+      "3sin(3x) + C",
+      "\u2212sin(3x)/3 + C"
+    ],
+    "correct_answer": "sin(3x)/3 + C",
+    "explanation": "\u222bcos(ax)dx = sin(ax)/a + C.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "Evaluate \u222b\u2080^(2\u03c0) sin(x) dx.",
+    "options": [
+      "2",
+      "0",
+      "4",
+      "\u03c0"
+    ],
+    "correct_answer": "0",
+    "explanation": "Sine over a full period integrates to 0.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is a definite integral used to find?",
+    "options": [
+      "Slope",
+      "Area under a curve",
+      "Rate of change",
+      "Maximum value"
+    ],
+    "correct_answer": "Area under a curve",
+    "explanation": "\u222b\u2090\u1d47 f(x)dx gives the net area.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "Evaluate \u222b\u2080\u00b9 1/\u221ax dx.",
+    "options": [
+      "2",
+      "1",
+      "\u221e",
+      "1/2"
+    ],
+    "correct_answer": "2",
+    "explanation": "[2\u221ax]\u2080\u00b9 = 2.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is \u222b(1/x\u00b2) dx?",
+    "options": [
+      "\u22121/x + C",
+      "1/x + C",
+      "ln|x| + C",
+      "\u22122/x\u00b3 + C"
+    ],
+    "correct_answer": "\u22121/x + C",
+    "explanation": "x^(\u22122) \u2192 x^(\u22121)/(\u22121) = \u22121/x + C.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "Evaluate \u222b\u2080\u00b9 e\u02e3 dx.",
+    "options": [
+      "e",
+      "e\u22121",
+      "1",
+      "e+1"
+    ],
+    "correct_answer": "e\u22121",
+    "explanation": "[e\u02e3]\u2080\u00b9 = e \u2212 1.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is \u222b(3x\u00b2 + 2x \u2212 1) dx?",
+    "options": [
+      "x\u00b3 + x\u00b2 \u2212 x + C",
+      "3x\u00b3 + x\u00b2 + C",
+      "6x + 2 + C",
+      "x\u00b3 + x\u00b2 + C"
+    ],
+    "correct_answer": "x\u00b3 + x\u00b2 \u2212 x + C",
+    "explanation": "Integrate term by term.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is the FTC? \u222b\u2090\u1d47 f(x)dx = ?",
+    "options": [
+      "F(a)\u2212F(b)",
+      "F(b)\u2212F(a)",
+      "f(b)\u2212f(a)",
+      "f'(b)\u2212f'(a)"
+    ],
+    "correct_answer": "F(b)\u2212F(a)",
+    "explanation": "Fundamental Theorem: \u222b\u2090\u1d47 f dx = F(b) \u2212 F(a).",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is \u222b\u2080\u00b2 x\u00b3 dx?",
+    "options": [
+      "4",
+      "8",
+      "16",
+      "2"
+    ],
+    "correct_answer": "4",
+    "explanation": "[x\u2074/4]\u2080\u00b2 = 16/4 = 4.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is \u222b(5x\u2074 \u2212 3x\u00b2) dx?",
+    "options": [
+      "x\u2075 \u2212 x\u00b3 + C",
+      "20x\u00b3 \u2212 6x + C",
+      "5x\u2075 \u2212 x\u00b3 + C",
+      "x\u2075 \u2212 3x\u00b3 + C"
+    ],
+    "correct_answer": "x\u2075 \u2212 x\u00b3 + C",
+    "explanation": "\u222b5x\u2074dx = x\u2075, \u222b3x\u00b2dx = x\u00b3.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is an antiderivative?",
+    "options": [
+      "Negative of a derivative",
+      "Function whose derivative is f",
+      "Limit of a function",
+      "Slope"
+    ],
+    "correct_answer": "Function whose derivative is f",
+    "explanation": "F is an antiderivative of f if F'(x) = f(x).",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "Evaluate \u222b\u2081^4 2x dx.",
+    "options": [
+      "8",
+      "15",
+      "16",
+      "12"
+    ],
+    "correct_answer": "15",
+    "explanation": "[x\u00b2]\u2081^4 = 16 \u2212 1 = 15.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is \u222be^(\u2212x) dx?",
+    "options": [
+      "\u2212e^(\u2212x) + C",
+      "e^(\u2212x) + C",
+      "\u2212e^x + C",
+      "1/e^x + C"
+    ],
+    "correct_answer": "\u2212e^(\u2212x) + C",
+    "explanation": "\u222be^(ax)dx = e^(ax)/a. Here a=\u22121.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "Which rule finds derivatives of polynomials?",
+    "options": [
+      "Chain rule",
+      "Product rule",
+      "Power rule",
+      "Quotient rule"
+    ],
+    "correct_answer": "Power rule",
+    "explanation": "Power rule: d/dx(x\u207f) = nx\u207f\u207b\u00b9.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What does the derivative represent geometrically?",
+    "options": [
+      "Area under curve",
+      "Slope of tangent line",
+      "Length of curve",
+      "Volume of solid"
+    ],
+    "correct_answer": "Slope of tangent line",
+    "explanation": "The derivative gives the slope of the tangent line.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "A critical point occurs when:",
+    "options": [
+      "f(x) = 0",
+      "f'(x) = 0 or undefined",
+      "f''(x) = 0",
+      "f is increasing"
+    ],
+    "correct_answer": "f'(x) = 0 or undefined",
+    "explanation": "Critical points: derivative is 0 or undefined.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What does integration find geometrically?",
+    "options": [
+      "Slope",
+      "Tangent line",
+      "Area",
+      "Rate of change"
+    ],
+    "correct_answer": "Area",
+    "explanation": "Integration finds the area under a curve.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "The Fundamental Theorem of Calculus connects:",
+    "options": [
+      "Limits and continuity",
+      "Differentiation and integration",
+      "Polynomials and exponentials",
+      "Algebra and geometry"
+    ],
+    "correct_answer": "Differentiation and integration",
+    "explanation": "FTC: differentiation and integration are inverse operations.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "Which notation represents the derivative of f?",
+    "options": [
+      "\u222bf dx",
+      "f'(x)",
+      "\u03a3f",
+      "f(x)dx"
+    ],
+    "correct_answer": "f'(x)",
+    "explanation": "f'(x) is the prime/Lagrange notation for derivative.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is the integral symbol?",
+    "options": [
+      "\u03a3",
+      "\u0394",
+      "\u222b",
+      "\u2202"
+    ],
+    "correct_answer": "\u222b",
+    "explanation": "\u222b is the integral sign, introduced by Leibniz.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "If f(x) = c (constant), then f'(x) = ?",
+    "options": [
+      "c",
+      "cx",
+      "1",
+      "0"
+    ],
+    "correct_answer": "0",
+    "explanation": "Derivative of any constant is 0.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is the second derivative test used for?",
+    "options": [
+      "Finding limits",
+      "Classifying critical points",
+      "Evaluating integrals",
+      "Finding asymptotes"
+    ],
+    "correct_answer": "Classifying critical points",
+    "explanation": "The second derivative test determines max or min.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "lim(h\u21920)[f(x+h)\u2212f(x)]/h defines:",
+    "options": [
+      "The integral",
+      "The derivative",
+      "A limit",
+      "Continuity"
+    ],
+    "correct_answer": "The derivative",
+    "explanation": "This is the limit definition of the derivative.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is the natural logarithm's base?",
+    "options": [
+      "2",
+      "10",
+      "e",
+      "\u03c0"
+    ],
+    "correct_answer": "e",
+    "explanation": "ln is base e \u2248 2.71828.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What does it mean for f to be continuous at x = a?",
+    "options": [
+      "f'(a) exists",
+      "lim(x\u2192a)f(x) = f(a)",
+      "f(a) = 0",
+      "f is differentiable at a"
+    ],
+    "correct_answer": "lim(x\u2192a)f(x) = f(a)",
+    "explanation": "Continuity: limit equals function value.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "Which function rule: d/dx(f\u00b7g) = f'g + fg'?",
+    "options": [
+      "Chain rule",
+      "Product rule",
+      "Quotient rule",
+      "Power rule"
+    ],
+    "correct_answer": "Product rule",
+    "explanation": "Product rule: (fg)' = f'g + fg'.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "Which function rule: d/dx(f/g) = (f'g\u2212fg')/g\u00b2?",
+    "options": [
+      "Chain rule",
+      "Product rule",
+      "Quotient rule",
+      "Power rule"
+    ],
+    "correct_answer": "Quotient rule",
+    "explanation": "Quotient rule: (f/g)' = (f'g\u2212fg')/g\u00b2.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "Which function rule: d/dx f(g(x)) = f'(g(x))\u00b7g'(x)?",
+    "options": [
+      "Chain rule",
+      "Product rule",
+      "Quotient rule",
+      "Power rule"
+    ],
+    "correct_answer": "Chain rule",
+    "explanation": "Chain rule for composite functions.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "f'(x) = 0 and f''(x) > 0 at x=a means:",
+    "options": [
+      "Local max",
+      "Local min",
+      "Inflection point",
+      "Discontinuity"
+    ],
+    "correct_answer": "Local min",
+    "explanation": "f'' > 0 at critical point \u2192 local minimum.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "f'(x) = 0 and f''(x) < 0 at x=a means:",
+    "options": [
+      "Local max",
+      "Local min",
+      "Inflection point",
+      "Saddle point"
+    ],
+    "correct_answer": "Local max",
+    "explanation": "f'' < 0 at critical point \u2192 local maximum.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is the average rate of change of f from a to b?",
+    "options": [
+      "f'(a)",
+      "[f(b)\u2212f(a)]/(b\u2212a)",
+      "f(b)/f(a)",
+      "f(a)+f(b)"
+    ],
+    "correct_answer": "[f(b)\u2212f(a)]/(b\u2212a)",
+    "explanation": "Average rate of change is the slope of the secant line.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "Rolle's Theorem requires f(a) = f(b) and f continuous/differentiable. It guarantees:",
+    "options": [
+      "f'(c) = 1",
+      "f'(c) = 0 for some c in (a,b)",
+      "f has a max at c",
+      "f is constant"
+    ],
+    "correct_answer": "f'(c) = 0 for some c in (a,b)",
+    "explanation": "Rolle's: there exists c where the tangent is horizontal.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "The Mean Value Theorem guarantees:",
+    "options": [
+      "f'(c) = 0",
+      "f'(c) = [f(b)\u2212f(a)]/(b\u2212a) for some c",
+      "f is constant",
+      "f has a maximum"
+    ],
+    "correct_answer": "f'(c) = [f(b)\u2212f(a)]/(b\u2212a) for some c",
+    "explanation": "MVT: tangent line parallel to secant line exists.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "If velocity is v(t) = 3t\u00b2, what is acceleration at t=2?",
+    "options": [
+      "6",
+      "9",
+      "12",
+      "4"
+    ],
+    "correct_answer": "12",
+    "explanation": "a(t) = v'(t) = 6t. At t=2: 12.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is a local maximum?",
+    "options": [
+      "f' > 0 everywhere",
+      "f(c) \u2265 f(x) for x near c",
+      "f'(c) = \u221e",
+      "f''(c) > 0"
+    ],
+    "correct_answer": "f(c) \u2265 f(x) for x near c",
+    "explanation": "Local max: function value larger than nearby values.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "Which theorem connects signed area and antiderivatives?",
+    "options": [
+      "Mean Value Theorem",
+      "Rolle's Theorem",
+      "Fundamental Theorem of Calculus",
+      "Squeeze Theorem"
+    ],
+    "correct_answer": "Fundamental Theorem of Calculus",
+    "explanation": "FTC links antiderivatives to definite integrals.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "Differentiability implies:",
+    "options": [
+      "Continuity",
+      "Integrability",
+      "Both A and B",
+      "Neither"
+    ],
+    "correct_answer": "Both A and B",
+    "explanation": "Differentiable \u2192 continuous, and continuous functions are integrable.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is an improper integral?",
+    "options": [
+      "An integral with incorrect bounds",
+      "An integral over an infinite interval or with a discontinuity",
+      "An integral that equals 0",
+      "An integral with no solution"
+    ],
+    "correct_answer": "An integral over an infinite interval or with a discontinuity",
+    "explanation": "Improper integrals handle infinity or discontinuities.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is the area between two curves y=f(x) and y=g(x) where f\u2265g?",
+    "options": [
+      "\u222b(f\u2212g)dx",
+      "\u222b(f+g)dx",
+      "\u222bf\u00b7g dx",
+      "\u222b(g\u2212f)dx"
+    ],
+    "correct_answer": "\u222b(f\u2212g)dx",
+    "explanation": "Area = \u222b\u2090\u1d47 [f(x)\u2212g(x)] dx when f \u2265 g.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What does the substitution u = g(x) accomplish in integration?",
+    "options": [
+      "Finds the derivative",
+      "Simplifies the integrand by substitution",
+      "Finds critical points",
+      "Applies product rule"
+    ],
+    "correct_answer": "Simplifies the integrand by substitution",
+    "explanation": "u-substitution transforms a complex integral into a simpler one.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "The disk method computes:",
+    "options": [
+      "Arc length",
+      "Volume of revolution",
+      "Area between curves",
+      "Surface area"
+    ],
+    "correct_answer": "Volume of revolution",
+    "explanation": "V = \u03c0\u222b[f(x)]\u00b2 dx rotates curve around x-axis.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "If \u222b\u2090\u1d47 f(x)dx = 0, it means:",
+    "options": [
+      "f has no antiderivative",
+      "The positive and negative areas cancel",
+      "f(x) = 0 everywhere",
+      "The integral diverges"
+    ],
+    "correct_answer": "The positive and negative areas cancel",
+    "explanation": "Net signed area is zero when positive and negative regions balance.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is the average value of f on [a,b]?",
+    "options": [
+      "[f(a)+f(b)]/2",
+      "(1/(b\u2212a))\u222b\u2090\u1d47 f(x)dx",
+      "f((a+b)/2)",
+      "\u222b\u2090\u1d47 f dx"
+    ],
+    "correct_answer": "(1/(b\u2212a))\u222b\u2090\u1d47 f(x)dx",
+    "explanation": "Average value = (1/(b\u2212a))\u222b\u2090\u1d47 f(x) dx.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is \u222b\u2080^(\u03c0/4) sec\u00b2(x) dx?",
+    "options": [
+      "1",
+      "\u03c0/4",
+      "\u221a2",
+      "0"
+    ],
+    "correct_answer": "1",
+    "explanation": "[tan(x)]\u2080^(\u03c0/4) = tan(\u03c0/4) - tan(0) = 1 - 0 = 1.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "calculus"
+  }
+]

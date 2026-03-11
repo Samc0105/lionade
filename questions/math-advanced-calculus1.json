@@ -1,0 +1,2802 @@
+[
+  {
+    "question": "Evaluate lim(x\u21920) of (sin x - x + x\u00b3/6)/x\u2075.",
+    "options": [
+      "1/120",
+      "0",
+      "1/6",
+      "1/24"
+    ],
+    "correct_answer": "1/120",
+    "explanation": "Taylor: sin x = x-x\u00b3/6+x\u2075/120-... Numerator \u2248 x\u2075/120.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "Evaluate lim(x\u21920) of (tan x - x)/x\u00b3.",
+    "options": [
+      "1/3",
+      "1",
+      "0",
+      "1/2"
+    ],
+    "correct_answer": "1/3",
+    "explanation": "Taylor: tan x = x+x\u00b3/3+... so (tan x-x)/x\u00b3 \u2192 1/3.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "Evaluate lim(x\u21920) of (e\u02e3 - 1 - x - x\u00b2/2)/x\u00b3.",
+    "options": [
+      "1/6",
+      "0",
+      "1/2",
+      "1/3"
+    ],
+    "correct_answer": "1/6",
+    "explanation": "Taylor: e\u02e3=1+x+x\u00b2/2+x\u00b3/6+... Numerator \u2248 x\u00b3/6.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "Evaluate lim(x\u21920\u207a) of x\u02e3.",
+    "options": [
+      "0",
+      "1",
+      "e",
+      "\u221e"
+    ],
+    "correct_answer": "1",
+    "explanation": "ln(x\u02e3)=x ln x \u2192 0 as x\u21920\u207a. So x\u02e3 \u2192 e\u2070 = 1.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "Evaluate lim(x\u2192\u221e) of (1 + 1/x)^x.",
+    "options": [
+      "1",
+      "\u221e",
+      "e",
+      "0"
+    ],
+    "correct_answer": "e",
+    "explanation": "This is the definition of e.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "Evaluate lim(x\u21920) of (1 + x)^(1/x).",
+    "options": [
+      "1",
+      "\u221e",
+      "e",
+      "0"
+    ],
+    "correct_answer": "e",
+    "explanation": "ln((1+x)^(1/x)) = ln(1+x)/x \u2192 1. Limit = e\u00b9 = e.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "Evaluate lim(x\u2192\u221e) of x^(1/x).",
+    "options": [
+      "\u221e",
+      "e",
+      "0",
+      "1"
+    ],
+    "correct_answer": "1",
+    "explanation": "ln(x^(1/x)) = ln x/x \u2192 0. Limit = e\u2070 = 1.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "Evaluate lim(x\u21920) of (cos x)^(1/x\u00b2).",
+    "options": [
+      "1",
+      "0",
+      "e^(-1/2)",
+      "e"
+    ],
+    "correct_answer": "e^(-1/2)",
+    "explanation": "ln L = lim ln(cos x)/x\u00b2 = lim(-sin x/cos x)/(2x) \u2192 -1/2. L=e^(-1/2).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "For f(x) = |x|sin(1/x) (x\u22600), f(0)=0, is f differentiable at 0?",
+    "options": [
+      "Yes",
+      "No",
+      "Only from the right",
+      "Only from the left"
+    ],
+    "correct_answer": "Yes",
+    "explanation": "f'(0) = lim |h|sin(1/h)/h. |f'(0)| \u2264 |h|/|h| = 1, and \u21920. Yes.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "lim(x\u21920) of (sin(x\u00b2))/x\u00b2 = ?",
+    "options": [
+      "0",
+      "x",
+      "1",
+      "2"
+    ],
+    "correct_answer": "1",
+    "explanation": "Let u=x\u00b2, lim(u\u21920) sin(u)/u = 1.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "lim(x\u2192\u221e) of n^(1/n) = ?",
+    "options": [
+      "\u221e",
+      "n",
+      "1",
+      "e"
+    ],
+    "correct_answer": "1",
+    "explanation": "Rewrite as e^(ln(n)/n). ln(n)/n \u2192 0, so limit = 1.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "Evaluate lim(x\u21920) of (arcsin x)/x.",
+    "options": [
+      "0",
+      "\u03c0/2",
+      "1",
+      "\u221e"
+    ],
+    "correct_answer": "1",
+    "explanation": "d/dx(arcsin x) at 0 = 1. By L'H\u00f4pital: (1/\u221a(1-x\u00b2))/1 \u2192 1.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "lim(x\u21921) of (x^x - 1)/(x ln x) = ?",
+    "options": [
+      "0",
+      "1",
+      "2",
+      "e"
+    ],
+    "correct_answer": "1",
+    "explanation": "Both \u2192 0. Apply L'H\u00f4pital or note: x^x = e^(x ln x) \u2248 1 + x ln x near x=1.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "Evaluate lim(n\u2192\u221e) of (1 + 2/n)^n.",
+    "options": [
+      "e",
+      "e\u00b2",
+      "2e",
+      "1"
+    ],
+    "correct_answer": "e\u00b2",
+    "explanation": "(1+2/n)^n = ((1+2/n)^(n/2))\u00b2 \u2192 (e)\u00b2 = e\u00b2.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "lim(x\u21920\u207a) of (sin x)^x = ?",
+    "options": [
+      "0",
+      "1",
+      "e",
+      "\u221e"
+    ],
+    "correct_answer": "1",
+    "explanation": "ln L = x\u00b7ln(sin x). As x\u21920\u207a: x\u00b7ln x \u2192 0. So L = 1.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "Find dy/dx if y = x^(sin x).",
+    "options": [
+      "sin(x)\u00b7x^(sin x - 1)",
+      "x^(sin x)(cos x\u00b7ln x + sin x/x)",
+      "cos x\u00b7ln x\u00b7x^(sin x)",
+      "x^(sin x)\u00b7ln x"
+    ],
+    "correct_answer": "x^(sin x)(cos x\u00b7ln x + sin x/x)",
+    "explanation": "ln y = sin x\u00b7ln x. y'/y = cos x\u00b7ln x + sin x/x.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "Find dy/dx if y = (ln x)^x.",
+    "options": [
+      "x(ln x)^(x-1)",
+      "(ln x)^x(ln(ln x) + 1/ln x)",
+      "(ln x)^x\u00b7ln(ln x)",
+      "x/(ln x)"
+    ],
+    "correct_answer": "(ln x)^x(ln(ln x) + 1/ln x)",
+    "explanation": "ln y = x\u00b7ln(ln x). y'/y = ln(ln x) + x\u00b7(1/(x ln x)).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "If y = arctan(x/a), find dy/dx.",
+    "options": [
+      "a/(a\u00b2+x\u00b2)",
+      "1/(a\u00b2+x\u00b2)",
+      "1/(a+x\u00b2)",
+      "x/(a\u00b2+x\u00b2)"
+    ],
+    "correct_answer": "a/(a\u00b2+x\u00b2)",
+    "explanation": "d/dx(arctan(x/a)) = (1/(1+(x/a)\u00b2))\u00b7(1/a) = a/(a\u00b2+x\u00b2).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "Find d\u00b2y/dx\u00b2 if y = sin(x\u00b2).",
+    "options": [
+      "4x\u00b2(-sin(x\u00b2))+2cos(x\u00b2)",
+      "2cos(x\u00b2)",
+      "4x\u00b2sin(x\u00b2)",
+      "cos(x\u00b2)"
+    ],
+    "correct_answer": "2cos(x\u00b2) - 4x\u00b2sin(x\u00b2)",
+    "explanation": "y'=2x cos(x\u00b2). y''=2cos(x\u00b2)+2x\u00b7(-sin(x\u00b2))\u00b72x = 2cos(x\u00b2)-4x\u00b2sin(x\u00b2).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "If f(x)=e\u02e3\u00b7sin x, find f''(x).",
+    "options": [
+      "2e\u02e3cos x",
+      "e\u02e3(sin x+cos x)",
+      "2e\u02e3sin x",
+      "e\u02e3(cos x-sin x)"
+    ],
+    "correct_answer": "2e\u02e3cos x",
+    "explanation": "f'=e\u02e3(sin x+cos x). f''=e\u02e3(sin x+cos x)+e\u02e3(cos x-sin x)=2e\u02e3cos x.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "Find the nth derivative of e\u02e3.",
+    "options": [
+      "n\u00b7e\u02e3",
+      "e\u02e3",
+      "x\u207fe\u02e3",
+      "n!\u00b7e\u02e3"
+    ],
+    "correct_answer": "e\u02e3",
+    "explanation": "Every derivative of e\u02e3 is e\u02e3.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "Find the nth derivative of sin(x).",
+    "options": [
+      "sin(x+n\u03c0/2)",
+      "cos(x)",
+      "(-1)\u207fsin x",
+      "ncos x"
+    ],
+    "correct_answer": "sin(x+n\u03c0/2)",
+    "explanation": "Each differentiation adds \u03c0/2 to the phase.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "Find dy/dx for y = \u222b\u2093^(x\u00b2) sin(t\u00b2) dt.",
+    "options": [
+      "sin(x\u2074)\u00b72x - sin(x\u00b2)",
+      "sin(x\u00b2)",
+      "2x\u00b7sin(x\u2074)",
+      "sin(x\u2074)-sin(x\u00b2)"
+    ],
+    "correct_answer": "sin(x\u2074)\u00b72x - sin(x\u00b2)",
+    "explanation": "FTC2 with both limits: sin((x\u00b2)\u00b2)\u00b72x - sin(x\u00b2)\u00b71.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "If f(g(x))=x and g'(x)=1/(1+x\u00b2), what is f'(g(x))?",
+    "options": [
+      "1+x\u00b2",
+      "1/(1+x\u00b2)",
+      "(1+x\u00b2)\u00b2",
+      "1"
+    ],
+    "correct_answer": "1+x\u00b2",
+    "explanation": "Chain rule: f'(g(x))\u00b7g'(x)=1 \u2192 f'(g(x))=1/g'(x)=1+x\u00b2.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "Find the derivative of f(x) = \u222b\u2080^(sin x) \u221a(1+t\u00b2) dt.",
+    "options": [
+      "\u221a(1+sin\u00b2x)",
+      "cos x\u00b7\u221a(1+sin\u00b2x)",
+      "\u221a(1+cos\u00b2x)",
+      "sin x\u00b7\u221a(1+sin\u00b2x)"
+    ],
+    "correct_answer": "cos x\u00b7\u221a(1+sin\u00b2x)",
+    "explanation": "FTC2 + chain rule: \u221a(1+sin\u00b2x)\u00b7cos x.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "For f(x,y)=x\u00b2y+y\u00b3, find \u2202f/\u2202x.",
+    "options": [
+      "2xy+y\u00b3",
+      "2xy",
+      "2x+3y\u00b2",
+      "x\u00b2+3y\u00b2"
+    ],
+    "correct_answer": "2xy",
+    "explanation": "\u2202/\u2202x(x\u00b2y) = 2xy, treating y as constant.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "For f(x,y)=x\u00b2y+y\u00b3, find \u2202f/\u2202y.",
+    "options": [
+      "x\u00b2+3y\u00b2",
+      "2xy+3y\u00b2",
+      "x\u00b2",
+      "2y"
+    ],
+    "correct_answer": "x\u00b2+3y\u00b2",
+    "explanation": "\u2202/\u2202y(x\u00b2y+y\u00b3) = x\u00b2+3y\u00b2.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "Find \u2202\u00b2f/\u2202x\u2202y for f(x,y)=x\u00b3y\u00b2.",
+    "options": [
+      "6xy\u00b2",
+      "3x\u00b2y",
+      "6x\u00b2y",
+      "3y\u00b2"
+    ],
+    "correct_answer": "6x\u00b2y",
+    "explanation": "\u2202f/\u2202x=3x\u00b2y\u00b2. \u2202\u00b2f/\u2202y\u2202x=6x\u00b2y.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "The gradient \u2207f of f(x,y)=x\u00b2+xy+y\u00b2 is:",
+    "options": [
+      "(2x+y, x+2y)",
+      "(2x, 2y)",
+      "(x+y, x+y)",
+      "(2x+y, 2y)"
+    ],
+    "correct_answer": "(2x+y, x+2y)",
+    "explanation": "\u2202f/\u2202x=2x+y, \u2202f/\u2202y=x+2y.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "Directional derivative of f=x\u00b2+y\u00b2 in direction u=(3/5,4/5) at (1,2):",
+    "options": [
+      "4",
+      "5",
+      "22/5",
+      "2"
+    ],
+    "correct_answer": "22/5",
+    "explanation": "\u2207f(1,2)=(2,4). D_u f=(2,4)\u00b7(3/5,4/5)=6/5+16/5=22/5.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "Find all second-order partial derivatives count for f(x,y).",
+    "options": [
+      "2",
+      "4",
+      "3",
+      "6"
+    ],
+    "correct_answer": "4",
+    "explanation": "f_xx, f_xy, f_yx, f_yy \u2014 four second partials.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "If f is harmonic, then:",
+    "options": [
+      "\u2207f=0",
+      "\u2202\u00b2f/\u2202x\u00b2+\u2202\u00b2f/\u2202y\u00b2=0",
+      "\u2207\u00b2f=1",
+      "f=constant"
+    ],
+    "correct_answer": "\u2202\u00b2f/\u2202x\u00b2+\u2202\u00b2f/\u2202y\u00b2=0",
+    "explanation": "Laplace equation: \u0394f=0.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "Clairaut's theorem states:",
+    "options": [
+      "f_xy = -f_yx",
+      "f_xy = f_yx",
+      "f_xx = f_yy",
+      "\u2202\u00b2f/\u2202x\u00b2=0"
+    ],
+    "correct_answer": "f_xy = f_yx",
+    "explanation": "Mixed partials are equal for continuous second partials.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "The Jacobian determinant of F=(u,v)=(x\u00b2-y\u00b2, 2xy) is:",
+    "options": [
+      "4(x\u00b2+y\u00b2)",
+      "4xy",
+      "2x\u00b2-2y\u00b2",
+      "4x"
+    ],
+    "correct_answer": "4(x\u00b2+y\u00b2)",
+    "explanation": "J=|[2x,-2y],[2y,2x]|=4x\u00b2+4y\u00b2=4(x\u00b2+y\u00b2).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "Find the tangent plane to z=x\u00b2+y\u00b2 at (1,1,2).",
+    "options": [
+      "z=2x+2y-2",
+      "z=2x+2y",
+      "z=x+y",
+      "z=2x+2y+2"
+    ],
+    "correct_answer": "z=2x+2y-2",
+    "explanation": "z-z\u2080=f_x(x-x\u2080)+f_y(y-y\u2080). f_x=2x=2, f_y=2y=2. z-2=2(x-1)+2(y-1).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "Evaluate \u222b\u2080^\u221e x\u00b7e^(-x\u00b2) dx.",
+    "options": [
+      "1",
+      "1/2",
+      "\u221e",
+      "0"
+    ],
+    "correct_answer": "1/2",
+    "explanation": "u=x\u00b2, du=2x dx. (1/2)\u222b\u2080^\u221e e^(-u)du = 1/2.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "Evaluate \u222b\u208b\u221e^\u221e e^(-x\u00b2) dx.",
+    "options": [
+      "1",
+      "\u221a\u03c0",
+      "2",
+      "\u03c0"
+    ],
+    "correct_answer": "\u221a\u03c0",
+    "explanation": "The Gaussian integral equals \u221a\u03c0.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "Evaluate \u222b\u2080^\u221e e^(-x) dx.",
+    "options": [
+      "\u221e",
+      "0",
+      "1",
+      "e"
+    ],
+    "correct_answer": "1",
+    "explanation": "[-e^(-x)]\u2080^\u221e = 0-(-1) = 1.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "Evaluate \u222b\u2080\u00b9 ln(x) dx.",
+    "options": [
+      "0",
+      "1",
+      "-1",
+      "\u221e"
+    ],
+    "correct_answer": "-1",
+    "explanation": "IBP or [x ln x - x]\u2080\u00b9 = (0-1) - lim(0) = -1.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "Evaluate \u222b\u2080^\u221e sin(x)/x dx.",
+    "options": [
+      "1",
+      "\u03c0/2",
+      "\u03c0",
+      "0"
+    ],
+    "correct_answer": "\u03c0/2",
+    "explanation": "The Dirichlet integral = \u03c0/2.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "Evaluate \u222b\u2080\u00b9 x^a\u00b7(1-x)^b dx in terms of Gamma.",
+    "options": [
+      "\u0393(a)\u0393(b)/\u0393(a+b)",
+      "\u0393(a+1)\u0393(b+1)/\u0393(a+b+2)",
+      "a!b!/(a+b)!",
+      "1/(a+b+1)"
+    ],
+    "correct_answer": "\u0393(a+1)\u0393(b+1)/\u0393(a+b+2)",
+    "explanation": "Beta function B(a+1,b+1) = \u0393(a+1)\u0393(b+1)/\u0393(a+b+2).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "The Gamma function satisfies \u0393(n) = ? for positive integer n.",
+    "options": [
+      "n!",
+      "(n-1)!",
+      "n\u00b7n!",
+      "n\u00b2"
+    ],
+    "correct_answer": "(n-1)!",
+    "explanation": "\u0393(n) = (n-1)! for positive integers.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "\u0393(1/2) = ?",
+    "options": [
+      "1/2",
+      "\u221a\u03c0",
+      "\u03c0",
+      "1"
+    ],
+    "correct_answer": "\u221a\u03c0",
+    "explanation": "\u0393(1/2) = \u221a\u03c0 \u2014 a fundamental result.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "Evaluate \u222b x\u00b2/\u221a(1-x\u00b2) dx.",
+    "options": [
+      "arcsin x - x\u221a(1-x\u00b2)/2 + C",
+      "arcsin x + C",
+      "x\u221a(1-x\u00b2) + C",
+      "x\u00b2arcsin x + C"
+    ],
+    "correct_answer": "arcsin x - x\u221a(1-x\u00b2)/2 + C",
+    "explanation": "Trig sub x=sin \u03b8: \u222bsin\u00b2\u03b8 d\u03b8 = \u03b8/2 - sin(2\u03b8)/4 + C.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "Evaluate \u222b 1/(x\u00b2\u221a(x\u00b2+4)) dx.",
+    "options": [
+      "\u221a(x\u00b2+4)/(4x) + C",
+      "-\u221a(x\u00b2+4)/(4x) + C",
+      "arctan(x/2)/4 + C",
+      "ln(x+\u221a(x\u00b2+4)) + C"
+    ],
+    "correct_answer": "-\u221a(x\u00b2+4)/(4x) + C",
+    "explanation": "Trig sub x=2tan \u03b8.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "Evaluate \u222b \u221a(x\u00b2-9)/x dx.",
+    "options": [
+      "\u221a(x\u00b2-9)-3arccos(3/x)+C",
+      "\u221a(x\u00b2-9)+C",
+      "arccos(x/3)+C",
+      "\u221a(x\u00b2-9)-3arcsec(x/3)+C"
+    ],
+    "correct_answer": "\u221a(x\u00b2-9)-3arcsec(x/3)+C",
+    "explanation": "Trig sub x=3sec \u03b8.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "Integrate \u222b 1/(x\u00b3+x) dx.",
+    "options": [
+      "ln|x|-ln(x\u00b2+1)/2+C",
+      "ln|x|+C",
+      "arctan(x)/x+C",
+      "ln|x(x\u00b2+1)|+C"
+    ],
+    "correct_answer": "ln|x|-ln(x\u00b2+1)/2+C",
+    "explanation": "Partial fractions: 1/x - x/(x\u00b2+1). \u222b = ln|x| - ln(x\u00b2+1)/2 + C.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "Evaluate \u222b (x\u00b2+1)/(x\u00b3+3x) dx.",
+    "options": [
+      "ln|x\u00b3+3x|/3+C",
+      "(1/3)ln|x\u00b3+3x|+C",
+      "arctan(x)+C",
+      "Both A and B"
+    ],
+    "correct_answer": "(1/3)ln|x\u00b3+3x|+C",
+    "explanation": "Numerator is (1/3)d/dx(x\u00b3+3x). u-sub gives (1/3)ln|u|+C.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "Evaluate \u222b\u2080^(\u03c0/2) sin^n(x)cos^m(x) dx using beta function.",
+    "options": [
+      "B(n,m)/2",
+      "B((n+1)/2,(m+1)/2)/2",
+      "\u0393(n)\u0393(m)",
+      "n!m!"
+    ],
+    "correct_answer": "B((n+1)/2,(m+1)/2)/2",
+    "explanation": "Reduction to Beta: (1/2)B((n+1)/2,(m+1)/2).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "Evaluate \u222b x\u00b3\u00b7e^(-x) dx.",
+    "options": [
+      "-(x\u00b3+3x\u00b2+6x+6)e^(-x)+C",
+      "x\u00b3e^(-x)+C",
+      "(x\u00b3-3x\u00b2)e^(-x)+C",
+      "e^(-x)(x\u00b3+6)+C"
+    ],
+    "correct_answer": "-(x\u00b3+3x\u00b2+6x+6)e^(-x)+C",
+    "explanation": "IBP 3 times: -(x\u00b3+3x\u00b2+6x+6)e^(-x)+C.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "Evaluate \u222b\u2080^\u221e x^n\u00b7e^(-x) dx.",
+    "options": [
+      "n",
+      "n!",
+      "(n-1)!",
+      "\u221e"
+    ],
+    "correct_answer": "n!",
+    "explanation": "This is \u0393(n+1) = n!",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "Evaluate \u222b sin\u2074(x) dx.",
+    "options": [
+      "3x/8 - sin(2x)/4 + sin(4x)/32 + C",
+      "sin\u2075x/5+C",
+      "x/2-sin(2x)/4+C",
+      "3x/8+C"
+    ],
+    "correct_answer": "3x/8 - sin(2x)/4 + sin(4x)/32 + C",
+    "explanation": "Use reduction: sin\u2074x = (3/8)-(1/2)cos 2x+(1/8)cos 4x.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "Evaluate \u222b tan\u2075(x) dx.",
+    "options": [
+      "tan\u2074x/4-tan\u00b2x/2+ln|cos x|+C",
+      "tan\u2076x/6+C",
+      "tan\u2074x/4+C",
+      "tan\u2075x/5+C"
+    ],
+    "correct_answer": "tan\u2074x/4-tan\u00b2x/2+ln|cos x|+C",
+    "explanation": "Reduction: tan\u2075x=tan\u00b3x\u00b7sec\u00b2x-tan\u00b3x. Apply reduction formula.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "Evaluate \u222b dx/((x\u00b2+1)(x\u00b2+4)).",
+    "options": [
+      "(1/3)(arctan x - arctan(x/2)/2)+C",
+      "arctan x+C",
+      "(arctan x)/3+C",
+      "(1/3)arctan(x)-1/6\u00b7arctan(x/2)+C"
+    ],
+    "correct_answer": "(1/3)arctan(x)-1/6\u00b7arctan(x/2)+C",
+    "explanation": "Partial fractions: A/(x\u00b2+1)+B/(x\u00b2+4). A=1/3, B=-1/3.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "The Fresnel integral \u222b\u2080^\u221e sin(x\u00b2) dx = ?",
+    "options": [
+      "\u03c0/2",
+      "1",
+      "\u221a(\u03c0/8)",
+      "\u221a(\u03c0/2)/2"
+    ],
+    "correct_answer": "\u221a(\u03c0/8)",
+    "explanation": "Fresnel integral S = \u222b\u2080^\u221e sin(x\u00b2)dx = \u221a(\u03c0/8) = (1/2)\u221a(\u03c0/2).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "Evaluate \u222b x\u00b7arcsin(x) dx.",
+    "options": [
+      "x\u00b2arcsin(x)/2 + x\u221a(1-x\u00b2)/4 - arcsin(x)/4 + C",
+      "x\u00b2arcsin(x)/2 + C",
+      "arcsin(x)/2 + C",
+      "x\u00b2arcsin(x)/2 + \u221a(1-x\u00b2)/2 + C"
+    ],
+    "correct_answer": "x\u00b2arcsin(x)/2 - \u221a(1-x\u00b2)\u00b7x/4 + arcsin(x)/4 + C",
+    "explanation": "IBP: u=arcsin x, dv=x dx. Careful integration of remainder.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "Evaluate \u222b sec\u00b3(x) dx.",
+    "options": [
+      "sec x\u00b7tan x/2 + ln|sec x+tan x|/2 + C",
+      "sec\u00b2x\u00b7tan x + C",
+      "tan\u00b3x/3+C",
+      "sec x\u00b7tan x + C"
+    ],
+    "correct_answer": "sec x\u00b7tan x/2 + ln|sec x+tan x|/2 + C",
+    "explanation": "IBP reduction formula for sec\u00b3.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "Evaluate \u222b\u2080\u00b9 x^x dx converges to approximately:",
+    "options": [
+      "0.7834",
+      "1",
+      "0.5",
+      "0.9"
+    ],
+    "correct_answer": "0.7834",
+    "explanation": "\u222b\u2080\u00b9 x\u02e3 dx \u2248 0.7834 (Sophomore's Dream).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "Evaluate \u222b 1/(sin x\u00b7cos x) dx.",
+    "options": [
+      "ln|tan x|+C",
+      "2ln|sin x|+C",
+      "ln|tan x\u00b7sec x|+C",
+      "2csc(2x)+C"
+    ],
+    "correct_answer": "ln|tan x|+C",
+    "explanation": "\u222b1/(sin x cos x)dx = \u222b2/sin(2x)dx = \u222b2csc(2x)dx = ln|tan x|+C.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "Evaluate \u222b\u2080^\u03c0/2 ln(sin x) dx.",
+    "options": [
+      "0",
+      "-\u03c0 ln 2/2",
+      "-\u03c0/2",
+      "\u03c0/4"
+    ],
+    "correct_answer": "\u2212\u03c0 ln 2/2",
+    "explanation": "Classic result: \u222b\u2080^(\u03c0/2) ln(sin x)dx = -\u03c0 ln 2/2.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "Evaluate \u222c_D dA where D is the disk x\u00b2+y\u00b2\u22644.",
+    "options": [
+      "4",
+      "\u03c0",
+      "4\u03c0",
+      "2\u03c0"
+    ],
+    "correct_answer": "4\u03c0",
+    "explanation": "Area = \u03c0 r\u00b2 = \u03c0(4) = 4\u03c0.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "Evaluate \u222c_R xy dA over R=[0,1]\u00d7[0,1].",
+    "options": [
+      "1",
+      "1/2",
+      "1/4",
+      "1/3"
+    ],
+    "correct_answer": "1/4",
+    "explanation": "\u222b\u2080\u00b9\u222b\u2080\u00b9 xy dx dy = (1/2)(1/2) = 1/4.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "Convert \u222b\u2080^1 \u222b\u2080^\u221a(1-x\u00b2) dy dx to polar.",
+    "options": [
+      "\u222b\u2080^(\u03c0/2)\u222b\u2080^1 r dr d\u03b8",
+      "\u222b\u2080^\u03c0\u222b\u2080^1 r dr d\u03b8",
+      "\u222b\u2080^(\u03c0/2)\u222b\u2080^1 dr d\u03b8",
+      "\u222b\u2080^(2\u03c0)\u222b\u2080^1 r dr d\u03b8"
+    ],
+    "correct_answer": "\u222b\u2080^(\u03c0/2)\u222b\u2080^1 r dr d\u03b8",
+    "explanation": "Region is quarter disk. In polar: 0\u2264\u03b8\u2264\u03c0/2, 0\u2264r\u22641, dA=r dr d\u03b8.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "Evaluate \u222b\u222b\u222b_V dV where V is unit ball x\u00b2+y\u00b2+z\u00b2\u22641.",
+    "options": [
+      "\u03c0",
+      "4\u03c0/3",
+      "2\u03c0",
+      "4\u03c0"
+    ],
+    "correct_answer": "4\u03c0/3",
+    "explanation": "Volume of unit sphere = (4/3)\u03c0r\u00b3 = 4\u03c0/3.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "The Jacobian for polar coordinates (x=r cos\u03b8, y=r sin\u03b8) is:",
+    "options": [
+      "1",
+      "r",
+      "r\u00b2",
+      "cos \u03b8\u00b7sin \u03b8"
+    ],
+    "correct_answer": "r",
+    "explanation": "J = |\u2202(x,y)/\u2202(r,\u03b8)| = r.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "The Jacobian for spherical coords (x=\u03c1sin\u03c6cos\u03b8, etc.) is:",
+    "options": [
+      "\u03c1\u00b2",
+      "\u03c1\u00b2sin\u03c6",
+      "\u03c1sin\u03c6",
+      "\u03c1\u00b2cos\u03c6"
+    ],
+    "correct_answer": "\u03c1\u00b2sin\u03c6",
+    "explanation": "J = \u03c1\u00b2sin \u03c6 in spherical coordinates.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "Evaluate \u222c_D (x\u00b2+y\u00b2) dA over x\u00b2+y\u00b2\u22641 using polar.",
+    "options": [
+      "\u03c0/2",
+      "\u03c0",
+      "\u03c0/4",
+      "2\u03c0"
+    ],
+    "correct_answer": "\u03c0/2",
+    "explanation": "\u222b\u2080^(2\u03c0)\u222b\u2080^1 r\u00b2\u00b7r dr d\u03b8 = 2\u03c0\u00b7[r\u2074/4]\u2080\u00b9 = 2\u03c0\u00b7(1/4) = \u03c0/2.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "Green's theorem: \u222e_C P dx + Q dy = ?",
+    "options": [
+      "\u222c(\u2202P/\u2202y-\u2202Q/\u2202x)dA",
+      "\u222c(\u2202Q/\u2202x-\u2202P/\u2202y)dA",
+      "\u222c(\u2202P/\u2202x+\u2202Q/\u2202y)dA",
+      "\u222e(P+Q)ds"
+    ],
+    "correct_answer": "\u222c(\u2202Q/\u2202x-\u2202P/\u2202y)dA",
+    "explanation": "Green's: \u222e P dx+Q dy = \u222c(Q_x - P_y) dA.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "Evaluate \u222e_C y dx - x dy where C is unit circle (counterclockwise).",
+    "options": [
+      "0",
+      "\u03c0",
+      "2\u03c0",
+      "-2\u03c0"
+    ],
+    "correct_answer": "-2\u03c0",
+    "explanation": "Green's: \u222c(-1-1)dA = -2\u00b7\u03c0(1)\u00b2 = -2\u03c0.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "The divergence \u2207\u00b7F where F=(x\u00b2,y\u00b2,z\u00b2) is:",
+    "options": [
+      "2x+2y+2z",
+      "0",
+      "2xyz",
+      "x\u00b2+y\u00b2+z\u00b2"
+    ],
+    "correct_answer": "2x+2y+2z",
+    "explanation": "\u2202(x\u00b2)/\u2202x+\u2202(y\u00b2)/\u2202y+\u2202(z\u00b2)/\u2202z = 2x+2y+2z.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "The curl \u2207\u00d7F where F=(y,-x,0) is:",
+    "options": [
+      "(0,0,-2)",
+      "(0,0,2)",
+      "(-2,-2,0)",
+      "(2x,2y,0)"
+    ],
+    "correct_answer": "(0,0,-2)",
+    "explanation": "(\u22020/\u2202y-\u2202(-x)/\u2202z, \u2202y/\u2202z-\u22020/\u2202x, \u2202(-x)/\u2202x-\u2202y/\u2202y) = (0,0,-1-1)=(0,0,-2).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "Stokes' theorem: \u222e_C F\u00b7dr = ?",
+    "options": [
+      "\u222d(\u2207\u00b7F)dV",
+      "\u222c(\u2207\u00d7F)\u00b7dS",
+      "\u222cF\u00b7dS",
+      "\u222dF dV"
+    ],
+    "correct_answer": "\u222c(\u2207\u00d7F)\u00b7dS",
+    "explanation": "Stokes: \u222e_C F\u00b7dr = \u222c_S (\u2207\u00d7F)\u00b7dS.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "Gauss's divergence theorem: \u222f_S F\u00b7dS = ?",
+    "options": [
+      "\u222d(\u2207\u00b7F)dV",
+      "\u222e(\u2207\u00d7F)\u00b7dr",
+      "\u222cF\u00b7dS",
+      "\u222dF dV"
+    ],
+    "correct_answer": "\u222d(\u2207\u00b7F)dV",
+    "explanation": "Divergence theorem: \u222f_S F\u00b7dS = \u222d_V (\u2207\u00b7F) dV.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "The Laplacian \u2207\u00b2f = ?",
+    "options": [
+      "\u2207\u00b7\u2207f",
+      "\u2207\u00d7\u2207f",
+      "(\u2207f)\u00b2",
+      "\u2207|\u2207f|"
+    ],
+    "correct_answer": "\u2207\u00b7\u2207f",
+    "explanation": "The Laplacian is the divergence of the gradient.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "Find the critical points of f(x,y)=x\u00b2+y\u00b2-2x-4y.",
+    "options": [
+      "(1,2)",
+      "(2,4)",
+      "(0,0)",
+      "(-1,-2)"
+    ],
+    "correct_answer": "(1,2)",
+    "explanation": "f_x=2x-2=0\u2192x=1, f_y=2y-4=0\u2192y=2.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "Classify (1,2) for f(x,y)=x\u00b2+y\u00b2-2x-4y using second derivative test.",
+    "options": [
+      "Saddle point",
+      "Local max",
+      "Local min",
+      "Inconclusive"
+    ],
+    "correct_answer": "Local min",
+    "explanation": "D=f_xx\u00b7f_yy-(f_xy)\u00b2=2\u00b72-0=4>0, f_xx=2>0 \u2192 local min.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "Lagrange multipliers: maximize f subject to g=c requires:",
+    "options": [
+      "\u2207f = \u2207g",
+      "\u2207f = \u03bb\u2207g",
+      "\u2207f\u00b7\u2207g = 0",
+      "f = \u03bbg"
+    ],
+    "correct_answer": "\u2207f = \u03bb\u2207g",
+    "explanation": "Method of Lagrange multipliers: \u2207f = \u03bb\u2207g.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "Optimize f(x,y)=xy subject to x+y=10. Maximum value:",
+    "options": [
+      "25",
+      "20",
+      "50",
+      "100"
+    ],
+    "correct_answer": "25",
+    "explanation": "Lagrange: y=\u03bb, x=\u03bb, x=y=5. f=25.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "The chain rule for z=f(x(t),y(t)) gives dz/dt =",
+    "options": [
+      "f_x+f_y",
+      "f_x\u00b7dx/dt + f_y\u00b7dy/dt",
+      "f_x\u00b7f_y",
+      "dx/dt+dy/dt"
+    ],
+    "correct_answer": "f_x\u00b7dx/dt + f_y\u00b7dy/dt",
+    "explanation": "Multivariable chain rule.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "The second derivative test uses D = f_xx\u00b7f_yy - (f_xy)\u00b2. If D>0 and f_xx<0:",
+    "options": [
+      "Saddle",
+      "Local min",
+      "Local max",
+      "Inconclusive"
+    ],
+    "correct_answer": "Local max",
+    "explanation": "D>0 and f_xx<0 \u2192 local maximum.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "Does \u22111/n\u00b2 converge?",
+    "options": [
+      "No",
+      "Yes, to \u03c0\u00b2/6",
+      "Yes, to 1",
+      "Yes, to ln 2"
+    ],
+    "correct_answer": "Yes, to \u03c0\u00b2/6",
+    "explanation": "Basel problem: \u22111/n\u00b2 = \u03c0\u00b2/6 (Euler).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "Does \u22111/n converge?",
+    "options": [
+      "Yes, to ln 2",
+      "Yes, to e",
+      "No, it diverges",
+      "Yes, to \u03c0"
+    ],
+    "correct_answer": "No, it diverges",
+    "explanation": "Harmonic series diverges.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "The alternating harmonic series \u2211(-1)^(n+1)/n converges to:",
+    "options": [
+      "\u03c0/4",
+      "1",
+      "0",
+      "ln 2"
+    ],
+    "correct_answer": "ln 2",
+    "explanation": "Alternating harmonic series = ln 2.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "Find the radius of convergence of \u2211n!x\u207f.",
+    "options": [
+      "1",
+      "\u221e",
+      "0",
+      "e"
+    ],
+    "correct_answer": "0",
+    "explanation": "Ratio test: (n+1)|x| \u2192 \u221e unless x=0. R=0.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "Find the radius of convergence of \u2211x\u207f/n!.",
+    "options": [
+      "1",
+      "0",
+      "\u221e",
+      "e"
+    ],
+    "correct_answer": "\u221e",
+    "explanation": "Ratio test: |x|/(n+1) \u2192 0 for all x. R=\u221e.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "Find the radius of convergence of \u2211nx\u207f.",
+    "options": [
+      "0",
+      "\u221e",
+      "1",
+      "n"
+    ],
+    "correct_answer": "1",
+    "explanation": "Ratio test: (n+1)|x|/n \u2192 |x| < 1. R=1.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "The Taylor series for ln(1+x) is:",
+    "options": [
+      "\u2211x\u207f/n!",
+      "\u2211(-1)^(n+1)x\u207f/n",
+      "\u2211x\u207f/n",
+      "\u2211(-1)\u207fx\u207f"
+    ],
+    "correct_answer": "\u2211(-1)^(n+1)x\u207f/n",
+    "explanation": "ln(1+x) = x-x\u00b2/2+x\u00b3/3-... = \u2211(-1)^(n+1)x\u207f/n.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "The Taylor series for 1/(1+x) centered at 0 is:",
+    "options": [
+      "\u2211x\u207f",
+      "\u2211(-1)\u207fx\u207f",
+      "\u2211x\u207f/n!",
+      "\u2211(-1)\u207fx\u207f/n!"
+    ],
+    "correct_answer": "\u2211(-1)\u207fx\u207f",
+    "explanation": "Geometric: 1/(1+x) = 1-x+x\u00b2-x\u00b3+...",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "Evaluate \u2211(1/3)\u207f from n=0 to \u221e.",
+    "options": [
+      "3/2",
+      "1/2",
+      "3",
+      "\u221e"
+    ],
+    "correct_answer": "3/2",
+    "explanation": "Geometric: 1/(1-1/3) = 3/2.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "Evaluate \u2211n/2\u207f from n=1 to \u221e.",
+    "options": [
+      "2",
+      "1",
+      "4",
+      "\u221e"
+    ],
+    "correct_answer": "2",
+    "explanation": "\u2211nx\u207f = x/(1-x)\u00b2. At x=1/2: (1/2)/(1/4)=2.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "The series \u2211n\u00b2/3\u207f converges by:",
+    "options": [
+      "p-series",
+      "Ratio test",
+      "Comparison with \u22111/n\u00b2",
+      "Alternating series"
+    ],
+    "correct_answer": "Ratio test",
+    "explanation": "Ratio test: (n+1)\u00b2/3\u207f\u207a\u00b9 \u00b7 3\u207f/n\u00b2 = (n+1)\u00b2/(3n\u00b2) \u2192 1/3 < 1.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "Does \u2211(-1)\u207f/\u221an converge absolutely, conditionally, or diverge?",
+    "options": [
+      "Absolutely",
+      "Conditionally",
+      "Diverges",
+      "Inconclusive"
+    ],
+    "correct_answer": "Conditionally",
+    "explanation": "\u22111/\u221an diverges (p=1/2<1) but alternating series test applies.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "The error in approximating \u2211(-1)^(n+1)a\u2099 by partial sum S\u2099 is:",
+    "options": [
+      "Greater than a\u2099",
+      "Less than a\u2099\u208a\u2081",
+      "Exactly a\u2099",
+      "Greater than a\u2099\u208a\u2081"
+    ],
+    "correct_answer": "Less than a\u2099\u208a\u2081",
+    "explanation": "Alternating series error bound: |error| \u2264 |a\u2099\u208a\u2081|.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "Evaluate lim(n\u2192\u221e) (1+x/n)^n.",
+    "options": [
+      "xe\u02e3",
+      "e\u02e3",
+      "e",
+      "x"
+    ],
+    "correct_answer": "e\u02e3",
+    "explanation": "Classic limit: (1+x/n)^n \u2192 e\u02e3.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "If \u2211|a\u2099| converges, then \u2211a\u2099:",
+    "options": [
+      "Also diverges",
+      "Converges absolutely",
+      "May or may not converge",
+      "Converges to 0"
+    ],
+    "correct_answer": "Converges absolutely",
+    "explanation": "This is the definition of absolute convergence.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "The power series \u2211(x-2)\u207f/3\u207f converges when:",
+    "options": [
+      "x=2",
+      "0<x<5",
+      "-1<x<5",
+      "|x-2|<3"
+    ],
+    "correct_answer": "| x-2|<3",
+    "explanation": "Radius R=3 centered at 2: |x-2|<3.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "Find the sum of \u2211x^(2n) for |x|<1.",
+    "options": [
+      "1/(1-x\u00b2)",
+      "1/(1-x)",
+      "x/(1-x\u00b2)",
+      "1/(1+x\u00b2)"
+    ],
+    "correct_answer": "1/(1-x\u00b2)",
+    "explanation": "Geometric series with ratio x\u00b2: 1/(1-x\u00b2).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "Absolute convergence implies:",
+    "options": [
+      "Conditional convergence",
+      "Convergence",
+      "Divergence",
+      "Both A and B"
+    ],
+    "correct_answer": "Convergence",
+    "explanation": "Absolute convergence \u2192 convergence (but not vice versa).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "The series \u2211n\u00b7r\u207f for |r|<1 equals:",
+    "options": [
+      "r/(1-r)",
+      "r/(1-r)\u00b2",
+      "1/(1-r)\u00b2",
+      "nr/(1-r)"
+    ],
+    "correct_answer": "r/(1-r)\u00b2",
+    "explanation": "Differentiate \u2211r\u207f=1/(1-r): \u2211nr\u207f\u207b\u00b9=1/(1-r)\u00b2. Multiply by r.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "The Cauchy condensation test: \u2211a\u2099 converges iff \u22112\u207fa_(2\u207f):",
+    "options": [
+      "Diverges",
+      "Converges",
+      "Equals \u2211a\u2099",
+      "Is bounded"
+    ],
+    "correct_answer": "Converges",
+    "explanation": "Cauchy condensation: both series have the same convergence behavior.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "Solve y'' - y = 0.",
+    "options": [
+      "y=Ce\u02e3",
+      "y=Ae^x+Be^(-x)",
+      "y=A cos x+B sin x",
+      "y=Cxe\u02e3"
+    ],
+    "correct_answer": "y=Ae^x+Be^(-x)",
+    "explanation": "Char eq: r\u00b2-1=0 \u2192 r=\u00b11 \u2192 y=Ae^x+Be^(-x).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "Solve y'' + 4y = 0.",
+    "options": [
+      "y=Ae^(2x)+Be^(-2x)",
+      "y=A cos(2x)+B sin(2x)",
+      "y=Ae^x+Be^(-x)",
+      "y=Ax+B"
+    ],
+    "correct_answer": "y=A cos(2x)+B sin(2x)",
+    "explanation": "Char eq: r\u00b2+4=0 \u2192 r=\u00b12i \u2192 y=A cos 2x+B sin 2x.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "Solve y'' - 2y' + y = 0.",
+    "options": [
+      "y=(A+Bx)e\u02e3",
+      "y=Ae^x+Be^(-x)",
+      "y=Axe\u02e3",
+      "y=e^x"
+    ],
+    "correct_answer": "y=(A+Bx)e\u02e3",
+    "explanation": "Char eq: (r-1)\u00b2=0 \u2192 repeated root r=1 \u2192 y=(A+Bx)e\u02e3.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "Solve y'' - 5y' + 6y = 0.",
+    "options": [
+      "y=Ae^(2x)+Be^(3x)",
+      "y=e^(5x)",
+      "y=Ae^x+Be^(-x)",
+      "y=A cos x+B sin x"
+    ],
+    "correct_answer": "y=Ae^(2x)+Be^(3x)",
+    "explanation": "Char eq: r\u00b2-5r+6=(r-2)(r-3)=0 \u2192 r=2,3.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "Particular solution of y'' + y = sin(x) is NOT of the form:",
+    "options": [
+      "A sin x",
+      "x(A cos x + B sin x)",
+      "A cos x + B sin x",
+      "Ax sin x"
+    ],
+    "correct_answer": "A cos x + B sin x",
+    "explanation": "Since sin x solves the homogeneous eq, use resonance: multiply by x.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "The method of undetermined coefficients for y''+y=e\u02e3 uses guess:",
+    "options": [
+      "Ae\u02e3",
+      "Axe\u02e3",
+      "Ae^(-x)",
+      "A+Be\u02e3"
+    ],
+    "correct_answer": "Ae\u02e3",
+    "explanation": "Since e\u02e3 doesn't solve homogeneous, guess y_p=Ae\u02e3.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "Variation of parameters finds y_p using:",
+    "options": [
+      "Constants A,B",
+      "Functions u\u2081(x), u\u2082(x)",
+      "Wronskian only",
+      "Fourier series"
+    ],
+    "correct_answer": "Functions u\u2081(x), u\u2082(x)",
+    "explanation": "Variation of parameters: y_p=u\u2081y\u2081+u\u2082y\u2082 where u\u2081,u\u2082 are functions.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "The Wronskian W(y\u2081,y\u2082) = 0 implies:",
+    "options": [
+      "y\u2081,y\u2082 are dependent",
+      "y\u2081,y\u2082 are independent",
+      "Both are solutions",
+      "Neither is a solution"
+    ],
+    "correct_answer": "y\u2081,y\u2082 are dependent",
+    "explanation": "W=0 implies the solutions are linearly dependent.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "Solve the Bernoulli equation y' + y = y\u00b2.",
+    "options": [
+      "y=1/(1+Ce^x)",
+      "y=Ce\u02e3",
+      "y=1/(Ce^x-1)",
+      "y=e\u02e3/(1+Ce\u02e3)"
+    ],
+    "correct_answer": "y=1/(1+Ce^x)",
+    "explanation": "Sub v=y^(-1): v'-v=-1. Integrating factor e\u02e3. Solve.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "The Laplace transform L{e\u1d43\u1d57} = ?",
+    "options": [
+      "1/(s-a)",
+      "1/(s+a)",
+      "a/(s\u00b2+a\u00b2)",
+      "s/(s\u00b2+a\u00b2)"
+    ],
+    "correct_answer": "1/(s-a)",
+    "explanation": "L{e\u1d43\u1d57} = 1/(s-a) for s > a.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "The Laplace transform L{sin(at)} = ?",
+    "options": [
+      "s/(s\u00b2+a\u00b2)",
+      "a/(s\u00b2+a\u00b2)",
+      "1/(s\u00b2+a\u00b2)",
+      "a/(s\u00b2-a\u00b2)"
+    ],
+    "correct_answer": "a/(s\u00b2+a\u00b2)",
+    "explanation": "L{sin(at)} = a/(s\u00b2+a\u00b2).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "The Laplace transform L{cos(at)} = ?",
+    "options": [
+      "a/(s\u00b2+a\u00b2)",
+      "s/(s\u00b2+a\u00b2)",
+      "1/(s\u00b2+a\u00b2)",
+      "s/(s\u00b2-a\u00b2)"
+    ],
+    "correct_answer": "s/(s\u00b2+a\u00b2)",
+    "explanation": "L{cos(at)} = s/(s\u00b2+a\u00b2).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "The inverse Laplace of 1/(s\u00b2+4) is:",
+    "options": [
+      "sin(2t)/2",
+      "sin(2t)",
+      "cos(2t)",
+      "e^(2t)"
+    ],
+    "correct_answer": "sin(2t)/2",
+    "explanation": "L^(-1){a/(s\u00b2+a\u00b2)} = sin(at). Here a=2: L^(-1){2/(s\u00b2+4)} = sin(2t). So 1/(s\u00b2+4) \u2192 sin(2t)/2.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "The convolution theorem states L{f*g} = ?",
+    "options": [
+      "L{f}\u00b7L{g}",
+      "L{f}+L{g}",
+      "L{f}/L{g}",
+      "L{f\u00b7g}"
+    ],
+    "correct_answer": "L{f}\u00b7L{g}",
+    "explanation": "Convolution theorem: L{f*g}(s) = F(s)\u00b7G(s).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "Power series solution near ordinary point: assume y = ?",
+    "options": [
+      "\u2211a\u2099x\u207f",
+      "\u2211a\u2099x^(n+r)",
+      "Ae\u02e3+Be^(-x)",
+      "A sin x+B cos x"
+    ],
+    "correct_answer": "\u2211a\u2099x\u207f",
+    "explanation": "Near ordinary points, assume power series y=\u2211a\u2099x\u207f.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "The intermediate value theorem states: if f is continuous on [a,b] and f(a)<k<f(b), then:",
+    "options": [
+      "f'(c)=k",
+      "f(c)=k for some c",
+      "f has a maximum",
+      "k=0"
+    ],
+    "correct_answer": "f(c)=k for some c",
+    "explanation": "IVT: continuous function takes every value between f(a) and f(b).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "Extreme value theorem: continuous f on [a,b]:",
+    "options": [
+      "Has at most one max",
+      "Attains absolute max and min",
+      "Is differentiable",
+      "Has critical point at midpoint"
+    ],
+    "correct_answer": "Attains absolute max and min",
+    "explanation": "EVT: continuous f on closed bounded interval attains its extrema.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "Taylor's inequality |R\u2099(x)| \u2264 ?",
+    "options": [
+      "M|x-a|\u207f/n!",
+      "M|x-a|^(n+1)/(n+1)!",
+      "M/(n+1)",
+      "M\u00b7|f^(n+1)|"
+    ],
+    "correct_answer": "M|x-a|^(n+1)/(n+1)!",
+    "explanation": "Lagrange remainder bound: |R\u2099| \u2264 M|x-a|^(n+1)/(n+1)!",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "The Cauchy mean value theorem states: [f(b)-f(a)]/[g(b)-g(a)] = ?",
+    "options": [
+      "f'(c)/g'(c) for some c",
+      "f(c)/g(c)",
+      "f'(a)/g'(a)",
+      "f'(b)/g'(b)"
+    ],
+    "correct_answer": "f'(c)/g'(c) for some c",
+    "explanation": "Cauchy MVT generalizes the standard MVT.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "Darboux's theorem states: if f is differentiable on (a,b), then f' has:",
+    "options": [
+      "The intermediate value property",
+      "No local maxima",
+      "Continuous values",
+      "Zero at some point"
+    ],
+    "correct_answer": "The intermediate value property",
+    "explanation": "Darboux: derivatives satisfy IVP even without being continuous.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "The Stone-Weierstrass theorem says polynomials are dense in:",
+    "options": [
+      "L\u00b2[a,b]",
+      "C[a,b]",
+      "All differentiable functions",
+      "L\u00b9[a,b]"
+    ],
+    "correct_answer": "C[a,b]",
+    "explanation": "Stone-Weierstrass: polynomials are dense in C[a,b] with sup norm.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "Fubini's theorem allows:",
+    "options": [
+      "Switching order of integration for suitable f",
+      "Differentiating under integral",
+      "Changing variables",
+      "Applying MVT to integrals"
+    ],
+    "correct_answer": "Switching order of integration for suitable f",
+    "explanation": "Fubini: \u222b\u222bf dA = \u222b\u222bf dx dy = \u222b\u222bf dy dx for integrable f.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "The dominated convergence theorem requires a dominating function:",
+    "options": [
+      "g with \u222bg < \u221e",
+      "g \u2265 |f\u2099| with \u222bg < \u221e",
+      "g = max f\u2099",
+      "g differentiable"
+    ],
+    "correct_answer": "g \u2265 |f\u2099| with \u222bg < \u221e",
+    "explanation": "DCT: if |f\u2099|\u2264g and \u222bg<\u221e, then lim\u222bf\u2099 = \u222blim f\u2099.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "The fundamental theorem of algebra states every polynomial of degree n\u22651 has:",
+    "options": [
+      "n real roots",
+      "exactly n complex roots (counting multiplicity)",
+      "at least one real root",
+      "no repeated roots"
+    ],
+    "correct_answer": "exactly n complex roots (counting multiplicity)",
+    "explanation": "FTA: every degree-n polynomial has exactly n complex roots.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "Lebesgue integral extends Riemann by:",
+    "options": [
+      "Using partitions of range instead of domain",
+      "Integrating more functions",
+      "Being less rigorous",
+      "Using Taylor series"
+    ],
+    "correct_answer": "Integrating more functions",
+    "explanation": "Lebesgue integration handles a broader class of functions.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "The implicit function theorem guarantees a local function y=g(x) near (a,b) if:",
+    "options": [
+      "f(a,b)=0",
+      "f(a,b)=0 and \u2202f/\u2202y\u22600 at (a,b)",
+      "f is continuous",
+      "f_x\u22600"
+    ],
+    "correct_answer": "f(a,b)=0 and \u2202f/\u2202y\u22600 at (a,b)",
+    "explanation": "IFT requires the partial with respect to the dependent variable to be nonzero.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "The inverse function theorem guarantees a local inverse if:",
+    "options": [
+      "f is continuous",
+      "f is differentiable",
+      "det(Df)\u22600",
+      "f is surjective"
+    ],
+    "correct_answer": "det(Df)\u22600",
+    "explanation": "IFT: f has local inverse near a if Jacobian determinant is nonzero.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "A function f is uniformly continuous on [a,b] if:",
+    "options": [
+      "f is differentiable",
+      "f is bounded",
+      "f is continuous",
+      "f is continuous on a closed bounded interval"
+    ],
+    "correct_answer": "f is continuous on a closed bounded interval",
+    "explanation": "Heine-Cantor: continuous on compact \u27f9 uniformly continuous.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "If \u222b\u2090^\u221e f(x)dx converges and f is non-negative decreasing, then by integral test \u2211f(n):",
+    "options": [
+      "Diverges",
+      "Converges",
+      "Oscillates",
+      "Is bounded only"
+    ],
+    "correct_answer": "Converges",
+    "explanation": "Integral test: convergence of integral implies convergence of series.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "Cauchy's convergence criterion for series: \u2211a\u2099 converges iff:",
+    "options": [
+      "a\u2099\u21920",
+      "For any \u03b5>0, |a\u2099\u208a\u2081+...+a\u2099\u208a\u2096|<\u03b5 for large n",
+      "a\u2099 is decreasing",
+      "\u2211|a\u2099|<\u221e"
+    ],
+    "correct_answer": "For any \u03b5>0, |a\u2099\u208a\u2081+...+a\u2099\u208a\u2096|<\u03b5 for large n",
+    "explanation": "Cauchy criterion: partial sums form a Cauchy sequence.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "The Fourier series of f on [-\u03c0,\u03c0] uses basis functions:",
+    "options": [
+      "x\u207f",
+      "sin(nx) and cos(nx)",
+      "e\u02e3",
+      "Legendre polynomials"
+    ],
+    "correct_answer": "sin(nx) and cos(nx)",
+    "explanation": "Fourier series: f(x)=a\u2080/2+\u2211(a\u2099cos nx+b\u2099sin nx).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "The Fourier coefficient a\u2099 = ?",
+    "options": [
+      "(1/\u03c0)\u222b\u208b\u03c0^\u03c0 f(x)cos(nx)dx",
+      "(1/\u03c0)\u222b\u208b\u03c0^\u03c0 f(x)sin(nx)dx",
+      "\u222b\u208b\u03c0^\u03c0 f(x)dx",
+      "(2/\u03c0)\u222b\u2080^\u03c0 f(x)dx"
+    ],
+    "correct_answer": "(1/\u03c0)\u222b\u208b\u03c0^\u03c0 f(x)cos(nx)dx",
+    "explanation": "a\u2099 = (1/\u03c0)\u222b\u208b\u03c0^\u03c0 f(x)cos(nx)dx.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "The Fourier series of an odd function contains only:",
+    "options": [
+      "Cosine terms",
+      "Sine terms",
+      "Both",
+      "Constant term"
+    ],
+    "correct_answer": "Sine terms",
+    "explanation": "Odd functions have only sine terms in Fourier expansion.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "The Fourier series of an even function contains only:",
+    "options": [
+      "Cosine terms and constant",
+      "Sine terms",
+      "Both",
+      "No terms"
+    ],
+    "correct_answer": "Cosine terms and constant",
+    "explanation": "Even functions have only cosine terms (and a\u2080).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "Parseval's theorem states:",
+    "options": [
+      "\u2211|c\u2099|\u00b2 = \u222b|f|\u00b2/(2\u03c0)",
+      "\u2211c\u2099 = \u222bf",
+      "\u2211|c\u2099| = \u222b|f|",
+      "c\u2099\u21920"
+    ],
+    "correct_answer": "\u2211|c\u2099|\u00b2 = \u222b|f|\u00b2/(2\u03c0)",
+    "explanation": "Parseval: (1/2\u03c0)\u222b|f(x)|\u00b2dx = \u2211|c\u2099|\u00b2.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "The Fourier transform of a Gaussian e^(-x\u00b2) is:",
+    "options": [
+      "A Gaussian",
+      "A sinusoid",
+      "A step function",
+      "A polynomial"
+    ],
+    "correct_answer": "A Gaussian",
+    "explanation": "The Fourier transform of e^(-x\u00b2) is \u221a\u03c0\u00b7e^(-k\u00b2/4) \u2014 also Gaussian.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "Convolution in time domain corresponds to in frequency domain:",
+    "options": [
+      "Addition",
+      "Convolution",
+      "Multiplication",
+      "Division"
+    ],
+    "correct_answer": "Multiplication",
+    "explanation": "Convolution theorem: F{f*g} = F{f}\u00b7F{g}.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "The Dirac delta function \u03b4(x) satisfies:",
+    "options": [
+      "\u222b\u03b4(x)dx=0",
+      "\u222b\u03b4(x)f(x)dx=f(0)",
+      "\u03b4(0)=1",
+      "\u222b\u03b4(x)dx=\u221e"
+    ],
+    "correct_answer": "\u222b\u03b4(x)f(x)dx=f(0)",
+    "explanation": "The sifting property of the Dirac delta.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "The Laplace transform is defined for s such that:",
+    "options": [
+      "s>0",
+      "Re(s)>\u03c3 for some \u03c3",
+      "s=1",
+      "s is an integer"
+    ],
+    "correct_answer": "Re(s)>\u03c3 for some \u03c3",
+    "explanation": "Laplace transform converges for Re(s) greater than the abscissa of convergence.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "The Z-transform is the discrete analog of:",
+    "options": [
+      "Fourier transform",
+      "Taylor series",
+      "Laplace transform",
+      "Wavelet transform"
+    ],
+    "correct_answer": "Laplace transform",
+    "explanation": "Z-transform is the discrete counterpart of the Laplace transform.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "Evaluate \u22111/n\u00b2 from n=1 to \u221e.",
+    "options": [
+      "1",
+      "\u03c0\u00b2/6",
+      "\u03c0/4",
+      "ln 2"
+    ],
+    "correct_answer": "\u03c0\u00b2/6",
+    "explanation": "Basel problem solved by Euler: \u22111/n\u00b2 = \u03c0\u00b2/6.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "Evaluate \u2211(-1)^n/(2n+1) from n=0 to \u221e.",
+    "options": [
+      "\u03c0",
+      "\u03c0/2",
+      "\u03c0/4",
+      "1"
+    ],
+    "correct_answer": "\u03c0/4",
+    "explanation": "Leibniz formula: 1-1/3+1/5-... = \u03c0/4.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "The Weierstrass M-test: \u2211f\u2099 converges uniformly if:",
+    "options": [
+      "\u2211|f\u2099(x)|\u2264M\u2099 and \u2211M\u2099<\u221e",
+      "f\u2099\u21920",
+      "\u2211f\u2099 is bounded",
+      "Each f\u2099 is continuous"
+    ],
+    "correct_answer": "\u2211|f\u2099(x)|\u2264M\u2099 and \u2211M\u2099<\u221e",
+    "explanation": "Weierstrass M-test for uniform convergence.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "The Cantor set has measure:",
+    "options": [
+      "1",
+      "1/2",
+      "0",
+      "\u221e"
+    ],
+    "correct_answer": "0",
+    "explanation": "The Cantor set is uncountable but has Lebesgue measure 0.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "If f is analytic in a region, it equals its Taylor series:",
+    "options": [
+      "Only at the center",
+      "Everywhere in the region",
+      "Only on the real axis",
+      "Only if f is a polynomial"
+    ],
+    "correct_answer": "Everywhere in the region",
+    "explanation": "Analytic functions equal their Taylor series throughout their domain.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "Cauchy's integral formula: f(a) = ?",
+    "options": [
+      "(1/2\u03c0i)\u222ef(z)/(z-a)dz",
+      "\u222ef(z)dz",
+      "(1/2\u03c0)\u222bf(x)dx",
+      "f'(a)/2\u03c0i"
+    ],
+    "correct_answer": "(1/2\u03c0i)\u222ef(z)/(z-a)dz",
+    "explanation": "Cauchy integral formula from complex analysis.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "The residue theorem evaluates contour integrals using:",
+    "options": [
+      "Derivatives",
+      "Residues at poles",
+      "Partial fractions",
+      "Taylor series"
+    ],
+    "correct_answer": "Residues at poles",
+    "explanation": "\u222ef(z)dz = 2\u03c0i\u00b7\u2211(residues inside contour).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "Stirling's approximation for n! is:",
+    "options": [
+      "n^n",
+      "(n/e)^n\u00b7\u221a(2\u03c0n)",
+      "n^n/e\u207f",
+      "n!\u2248n"
+    ],
+    "correct_answer": "(n/e)^n\u00b7\u221a(2\u03c0n)",
+    "explanation": "Stirling: n! \u2248 \u221a(2\u03c0n)\u00b7(n/e)\u207f.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "The Euler-Maclaurin formula connects:",
+    "options": [
+      "Derivatives and integrals",
+      "Sums and integrals",
+      "Fourier series and power series",
+      "Limits and series"
+    ],
+    "correct_answer": "Sums and integrals",
+    "explanation": "Euler-Maclaurin: \u2211f(n) related to \u222bf dx plus correction terms.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is the order of the ODE: (y'')\u00b3 + y' = y?",
+    "options": [
+      "1",
+      "2",
+      "3",
+      "6"
+    ],
+    "correct_answer": "2",
+    "explanation": "Order = highest derivative present = y'' \u2192 order 2.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is the degree of (y'')\u00b3 + y' = y?",
+    "options": [
+      "1",
+      "2",
+      "3",
+      "6"
+    ],
+    "correct_answer": "3",
+    "explanation": "Degree = power of highest-order derivative = (y'')\u00b3 \u2192 degree 3.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "Green's identities are derived from:",
+    "options": [
+      "Stokes' theorem",
+      "Divergence theorem",
+      "Chain rule",
+      "Integration by parts"
+    ],
+    "correct_answer": "Divergence theorem",
+    "explanation": "Green's first and second identities follow from the divergence theorem.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "For the heat equation \u2202u/\u2202t = k\u00b7\u2202\u00b2u/\u2202x\u00b2, separation of variables gives:",
+    "options": [
+      "u=X(x)+T(t)",
+      "u=X(x)\u00b7T(t)",
+      "u=X(x)/T(t)",
+      "u=X(x)-T(t)"
+    ],
+    "correct_answer": "u=X(x)\u00b7T(t)",
+    "explanation": "Separation of variables assumes product form.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "The wave equation \u2202\u00b2u/\u2202t\u00b2 = c\u00b2\u00b7\u2202\u00b2u/\u2202x\u00b2 has general solution:",
+    "options": [
+      "u=f(x)+g(t)",
+      "u=f(x-ct)+g(x+ct)",
+      "u=A sin(cx)+B cos(ct)",
+      "u=e^(cx+t)"
+    ],
+    "correct_answer": "u=f(x-ct)+g(x+ct)",
+    "explanation": "D'Alembert's solution: superposition of left and right traveling waves.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "The method of characteristics solves:",
+    "options": [
+      "Elliptic PDEs",
+      "Hyperbolic PDEs",
+      "Parabolic PDEs",
+      "All PDEs equally"
+    ],
+    "correct_answer": "Hyperbolic PDEs",
+    "explanation": "Method of characteristics is especially suited to hyperbolic PDEs.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "Evaluate \u222b\u2080^(\u03c0/2) ln(sin x)dx.",
+    "options": [
+      "0",
+      "-\u03c0 ln 2",
+      "\u2212\u03c0 ln 2/2",
+      "\u03c0/4"
+    ],
+    "correct_answer": "\u2212\u03c0 ln 2/2",
+    "explanation": "Classic result: \u222b\u2080^(\u03c0/2) ln(sin x)dx = -(\u03c0/2)ln 2.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "Evaluate \u222b\u2080^1 (x\u1d43-x\u1d47)/ln(x) dx.",
+    "options": [
+      "ln(a/b)",
+      "ln((b+1)/(a+1))",
+      "a-b",
+      "ln(a+1)-ln(b+1)"
+    ],
+    "correct_answer": "ln((b+1)/(a+1))",
+    "explanation": "Differentiate under integral sign: d/da \u222bx\u1d43 dx = 1/(a+1). Integrate over a.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "The Euler-Mascheroni constant \u03b3 is defined as:",
+    "options": [
+      "lim(n\u2192\u221e)(\u22111/k - ln n)",
+      "lim(n\u2192\u221e)\u22111/n",
+      "\u222b\u2080^1 ln(1/x)dx",
+      "\u2211(-1)\u207f/n"
+    ],
+    "correct_answer": "lim(n\u2192\u221e)(\u22111/k - ln n)",
+    "explanation": "\u03b3 = lim(n\u2192\u221e)(1+1/2+...+1/n - ln n) \u2248 0.5772.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "If f is entire (analytic everywhere), Liouville's theorem states if f is bounded then:",
+    "options": [
+      "f is zero",
+      "f is constant",
+      "f is periodic",
+      "f has no zeros"
+    ],
+    "correct_answer": "f is constant",
+    "explanation": "Liouville: bounded entire function must be constant.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "The residue of f(z)=1/(z-a) at z=a is:",
+    "options": [
+      "0",
+      "1",
+      "a",
+      "1/(z-a)"
+    ],
+    "correct_answer": "1",
+    "explanation": "Residue of simple pole 1/(z-a) at z=a is 1.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "Solve: dy/dx = (y-x)/(y+x) by substitution v=y/x.",
+    "options": [
+      "x\u00b2+y\u00b2=C",
+      "y\u00b2-2xy-x\u00b2=C",
+      "y\u00b2+2xy-x\u00b2=C",
+      "x+y=C"
+    ],
+    "correct_answer": "y\u00b2-2xy-x\u00b2=C",
+    "explanation": "Homogeneous ODE. v=y/x \u2192 separate variables.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "The Cauchy-Euler equation x\u00b2y''+xy'+y=0 has form solutions:",
+    "options": [
+      "e\u02e3, xe^x",
+      "x\u02b3",
+      "sin x, cos x",
+      "x, ln x"
+    ],
+    "correct_answer": "x\u02b3",
+    "explanation": "Cauchy-Euler: try y=x\u02b3 \u2192 characteristic equation in r.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "Solve x\u00b2y'' + xy' - y = 0 (Cauchy-Euler).",
+    "options": [
+      "y=Ax+B/x",
+      "y=Ax\u00b2+B",
+      "y=A ln x+B",
+      "y=Ax\u02b3+Bx^s"
+    ],
+    "correct_answer": "y=Ax+B/x",
+    "explanation": "Characteristic eq: r\u00b2-1=0 \u2192 r=\u00b11 \u2192 y=Ax+Bx^(-1).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "The Bessel equation x\u00b2y''+xy'+(x\u00b2-n\u00b2)y=0 has solutions:",
+    "options": [
+      "Polynomials",
+      "Bessel functions J\u2099 and Y\u2099",
+      "Trig functions",
+      "Exponentials"
+    ],
+    "correct_answer": "Bessel functions J\u2099 and Y\u2099",
+    "explanation": "Bessel's equation arises in cylindrical coordinates.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "For the Legendre equation (1-x\u00b2)y''-2xy'+n(n+1)y=0, solutions are:",
+    "options": [
+      "e\u02e3",
+      "Legendre polynomials P\u2099(x)",
+      "sin(nx)",
+      "x\u207f"
+    ],
+    "correct_answer": "Legendre polynomials P\u2099(x)",
+    "explanation": "Legendre polynomials arise in spherical coordinates.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "The Laplace transform of t\u00b7f(t) is:",
+    "options": [
+      "F(s-a)",
+      "-F'(s)",
+      "sF(s)-f(0)",
+      "F'(s)"
+    ],
+    "correct_answer": "-F'(s)",
+    "explanation": "L{t\u00b7f(t)} = -d/ds F(s) = -F'(s).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "The Laplace transform of f'(t) is:",
+    "options": [
+      "sF(s)",
+      "sF(s)-f(0)",
+      "F(s)/s",
+      "s\u00b2F(s)-sf(0)-f'(0)"
+    ],
+    "correct_answer": "sF(s)-f(0)",
+    "explanation": "L{f'(t)} = sF(s) - f(0).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "The Laplace transform of f''(t) is:",
+    "options": [
+      "s\u00b2F(s)-sf(0)-f'(0)",
+      "s\u00b2F(s)",
+      "sF(s)-f(0)-f'(0)",
+      "s\u00b2F(s)-f(0)"
+    ],
+    "correct_answer": "s\u00b2F(s)-sf(0)-f'(0)",
+    "explanation": "L{f''(t)} = s\u00b2F(s) - sf(0) - f'(0).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "Solve y''+4y=0, y(0)=1, y'(0)=0.",
+    "options": [
+      "y=cos(2t)",
+      "y=sin(2t)",
+      "y=e^(2t)",
+      "y=cos t"
+    ],
+    "correct_answer": "y=cos(2t)",
+    "explanation": "General: A cos 2t+B sin 2t. y(0)=A=1, y'(0)=2B=0 \u2192 B=0.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "Solve y''+4y=0, y(0)=0, y'(0)=2.",
+    "options": [
+      "y=cos(2t)",
+      "y=sin(2t)",
+      "y=2sin(2t)",
+      "y=sin(2t)/2"
+    ],
+    "correct_answer": "y=sin(2t)",
+    "explanation": "A=0, 2B=2 \u2192 B=1 \u2192 y=sin(2t).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "The unit step function u(t-a) has Laplace transform:",
+    "options": [
+      "e^(-as)/s",
+      "e^(as)/s",
+      "1/(s+a)",
+      "s\u00b7e^(-as)"
+    ],
+    "correct_answer": "e^(-as)/s",
+    "explanation": "L{u(t-a)} = e^(-as)/s.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "The convolution (f*g)(t) = ?",
+    "options": [
+      "\u222b\u2080^t f(\u03c4)g(t-\u03c4)d\u03c4",
+      "f(t)\u00b7g(t)",
+      "\u222b\u2080^\u221e f(\u03c4)g(\u03c4)d\u03c4",
+      "f(t)+g(t)"
+    ],
+    "correct_answer": "\u222b\u2080^t f(\u03c4)g(t-\u03c4)d\u03c4",
+    "explanation": "Convolution integral definition.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "Evaluate \u222b\u2080^\u221e t\u00b7e^(-st) dt.",
+    "options": [
+      "1/s",
+      "1/s\u00b2",
+      "2/s\u00b3",
+      "s"
+    ],
+    "correct_answer": "1/s\u00b2",
+    "explanation": "L{t} = 1/s\u00b2. Or IBP: [te^(-st)/(-s)]\u2080^\u221e + \u222be^(-st)/s dt = 1/s\u00b2.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "The Fourier transform of f(x)=e^(-|x|) is:",
+    "options": [
+      "2/(1+k\u00b2)",
+      "1/(1+k\u00b2)",
+      "e^(-k\u00b2)",
+      "1/(1+k)"
+    ],
+    "correct_answer": "2/(1+k\u00b2)",
+    "explanation": "F{e^(-|x|)} = \u222b\u208b\u221e^\u221e e^(-|x|)e^(-ikx)dx = 2/(1+k\u00b2).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "The Abel summability method assigns sum to \u2211a\u2099 via:",
+    "options": [
+      "lim\u2211a\u2099r\u207f as r\u21921\u207b",
+      "lim(a\u2099/n)",
+      "\u222ba\u2099dn",
+      "\u2211a\u2099/n"
+    ],
+    "correct_answer": "lim\u2211a\u2099r\u207f as r\u21921\u207b",
+    "explanation": "Abel sum: lim(r\u21921\u207b) \u2211a\u2099r\u207f.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "Riemann's rearrangement theorem states that a conditionally convergent series:",
+    "options": [
+      "Cannot be rearranged",
+      "Can be rearranged to any sum",
+      "Has a unique sum",
+      "Diverges when rearranged"
+    ],
+    "correct_answer": "Can be rearranged to any sum",
+    "explanation": "Conditionally convergent series can be rearranged to converge to any value.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "A set is compact in \u211d\u207f if and only if it is:",
+    "options": [
+      "Open and bounded",
+      "Closed and bounded",
+      "Connected and open",
+      "Convex"
+    ],
+    "correct_answer": "Closed and bounded",
+    "explanation": "Heine-Borel: compact \u2194 closed and bounded in \u211d\u207f.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "The gradient points in the direction of:",
+    "options": [
+      "Minimum decrease",
+      "Maximum increase",
+      "Zero change",
+      "Constant level curves"
+    ],
+    "correct_answer": "Maximum increase",
+    "explanation": "\u2207f points in the direction of steepest ascent.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "A saddle point for f(x,y) occurs when D<0 where D=f_xx\u00b7f_yy-(f_xy)\u00b2:",
+    "options": [
+      "Always",
+      "Only when f_xx=0",
+      "Yes, D<0 implies saddle",
+      "Only when f_xy\u22600"
+    ],
+    "correct_answer": "Yes, D<0 implies saddle",
+    "explanation": "If D<0 at critical point, it's a saddle point.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "The arc length of r(t)=(cos t, sin t, t) from t=0 to t=2\u03c0 is:",
+    "options": [
+      "2\u03c0",
+      "2\u03c0\u221a2",
+      "4\u03c0",
+      "\u03c0\u221a2"
+    ],
+    "correct_answer": "2\u03c0\u221a2",
+    "explanation": "r'=(-sin t, cos t, 1). |r'|=\u221a(sin\u00b2t+cos\u00b2t+1)=\u221a2. L=\u222b\u2080^(2\u03c0)\u221a2 dt=2\u03c0\u221a2.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "For f(x,y,z)=x\u00b2+y\u00b2+z\u00b2, \u2207\u00b2f (Laplacian) =",
+    "options": [
+      "6",
+      "2(x+y+z)",
+      "2",
+      "0"
+    ],
+    "correct_answer": "6",
+    "explanation": "\u2202\u00b2f/\u2202x\u00b2+\u2202\u00b2f/\u2202y\u00b2+\u2202\u00b2f/\u2202z\u00b2=2+2+2=6.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "The flux of F=(x,y,z) through sphere x\u00b2+y\u00b2+z\u00b2=1 is:",
+    "options": [
+      "4\u03c0",
+      "2\u03c0",
+      "3\u00b7(4\u03c0/3)=4\u03c0",
+      "\u03c0"
+    ],
+    "correct_answer": "4\u03c0",
+    "explanation": "div F=3. By Gauss: \u222d3 dV = 3\u00b7(4\u03c0/3) = 4\u03c0.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "A conservative vector field F satisfies:",
+    "options": [
+      "\u2207\u00b7F=0",
+      "\u2207\u00d7F=0",
+      "\u2207F=0",
+      "F\u00b7dr=1"
+    ],
+    "correct_answer": "\u2207\u00d7F=0",
+    "explanation": "Conservative field: curl F = 0 (irrotational).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "If F=\u2207f, then \u222e_C F\u00b7dr for any closed curve =",
+    "options": [
+      "1",
+      "0",
+      "\u222ef ds",
+      "2\u03c0i"
+    ],
+    "correct_answer": "0",
+    "explanation": "Work integral around closed path is zero for conservative fields.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "The potential function f for F=(2x,2y) is:",
+    "options": [
+      "f=x\u00b2+y\u00b2",
+      "f=x+y",
+      "f=2xy",
+      "f=x\u00b2y"
+    ],
+    "correct_answer": "f=x\u00b2+y\u00b2",
+    "explanation": "\u2202f/\u2202x=2x \u2192 f=x\u00b2+g(y). \u2202f/\u2202y=g'(y)=2y \u2192 g=y\u00b2.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "The triple integral in spherical coords: \u222df dV uses dV=",
+    "options": [
+      "d\u03c1 d\u03c6 d\u03b8",
+      "\u03c1\u00b2 sin \u03c6 d\u03c1 d\u03c6 d\u03b8",
+      "\u03c1 d\u03c1 d\u03c6 d\u03b8",
+      "sin \u03c6 d\u03c1 d\u03c6 d\u03b8"
+    ],
+    "correct_answer": "\u03c1\u00b2 sin \u03c6 d\u03c1 d\u03c6 d\u03b8",
+    "explanation": "Spherical volume element: dV = \u03c1\u00b2sin \u03c6 d\u03c1 d\u03c6 d\u03b8.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "Evaluate \u222d_V 1 dV where V: x\u00b2+y\u00b2+z\u00b2\u2264a\u00b2.",
+    "options": [
+      "(4/3)\u03c0a\u00b3",
+      "\u03c0a\u00b3",
+      "(4/3)\u03c0a\u00b2",
+      "4\u03c0a\u00b2"
+    ],
+    "correct_answer": "(4/3)\u03c0a\u00b3",
+    "explanation": "Volume of ball of radius a.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "The method of Lagrange multipliers requires solving \u2207f=\u03bb\u2207g and:",
+    "options": [
+      "f=g",
+      "g(x,y)=0",
+      "f=0",
+      "\u2207g=0"
+    ],
+    "correct_answer": "g(x,y)=0",
+    "explanation": "Solve \u2207f=\u03bb\u2207g subject to constraint g(x,y)=0.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "For a function f(x,y) the total differential df = ?",
+    "options": [
+      "f_x dx + f_y dy",
+      "f_x + f_y",
+      "f dx dy",
+      "(f_x+f_y)dx"
+    ],
+    "correct_answer": "f_x dx + f_y dy",
+    "explanation": "Total differential: df = \u2202f/\u2202x dx + \u2202f/\u2202y dy.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "The equation \u2202\u00b2u/\u2202x\u00b2 + \u2202\u00b2u/\u2202y\u00b2 = 0 is called:",
+    "options": [
+      "Wave equation",
+      "Heat equation",
+      "Laplace equation",
+      "Poisson equation"
+    ],
+    "correct_answer": "Laplace equation",
+    "explanation": "\u2207\u00b2u=0 is the Laplace equation.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "The equation \u2202\u00b2u/\u2202x\u00b2 + \u2202\u00b2u/\u2202y\u00b2 = f(x,y) is called:",
+    "options": [
+      "Wave equation",
+      "Heat equation",
+      "Laplace equation",
+      "Poisson equation"
+    ],
+    "correct_answer": "Poisson equation",
+    "explanation": "\u2207\u00b2u = f is the Poisson equation.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "A function satisfying \u2207\u00b2f = 0 is called:",
+    "options": [
+      "Holomorphic",
+      "Harmonic",
+      "Analytic",
+      "Meromorphic"
+    ],
+    "correct_answer": "Harmonic",
+    "explanation": "Solutions to Laplace's equation are called harmonic functions.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "By Green's first identity: \u222c_D u\u00b7\u2207\u00b2v dA = ?",
+    "options": [
+      "\u222e u(\u2207v\u00b7n)ds - \u222c\u2207u\u00b7\u2207v dA",
+      "\u222e uv ds",
+      "\u222c \u2207u\u00b7\u2207v dA",
+      "\u222e u\u2207v ds"
+    ],
+    "correct_answer": "\u222e u(\u2207v\u00b7n)ds - \u222c\u2207u\u00b7\u2207v dA",
+    "explanation": "Green's 1st identity relates boundary and domain integrals.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "The maximum principle for harmonic functions states:",
+    "options": [
+      "Max occurs at boundary",
+      "Max occurs at interior critical point",
+      "Min and max occur together",
+      "Max = min"
+    ],
+    "correct_answer": "Max occurs at boundary",
+    "explanation": "Maximum principle: harmonic functions attain max/min on boundary.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is the order of accuracy of Simpson's rule?",
+    "options": [
+      "O(h)",
+      "O(h\u00b2)",
+      "O(h\u2074)",
+      "O(h\u00b3)"
+    ],
+    "correct_answer": "O(h\u2074)",
+    "explanation": "Simpson's rule has error O(h\u2074), much better than trapezoidal O(h\u00b2).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "Gaussian quadrature with n points integrates exactly polynomials up to degree:",
+    "options": [
+      "n",
+      "n-1",
+      "2n-1",
+      "n+1"
+    ],
+    "correct_answer": "2n-1",
+    "explanation": "Gaussian quadrature with n points is exact for degree \u2264 2n-1.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "The Runge-Kutta 4th order method (RK4) has local truncation error:",
+    "options": [
+      "O(h)",
+      "O(h\u00b2)",
+      "O(h\u2074)",
+      "O(h\u2075)"
+    ],
+    "correct_answer": "O(h\u2075)",
+    "explanation": "RK4 has local error O(h\u2075) and global error O(h\u2074).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "The condition number of a matrix measures:",
+    "options": [
+      "Its determinant",
+      "Its sensitivity to perturbations",
+      "Its rank",
+      "Its trace"
+    ],
+    "correct_answer": "Its sensitivity to perturbations",
+    "explanation": "Condition number: how much output changes relative to input change.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "Evaluate \u2211(-1)\u207f/(2n+1) from n=0 to \u221e.",
+    "options": [
+      "\u03c0",
+      "\u03c0/2",
+      "\u03c0/4",
+      "1"
+    ],
+    "correct_answer": "\u03c0/4",
+    "explanation": "Leibniz formula: 1-1/3+1/5-... = \u03c0/4.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  },
+  {
+    "question": "The Mandelbrot set boundary is an example of a:",
+    "options": [
+      "Circle",
+      "Fractal",
+      "Polygon",
+      "Ellipse"
+    ],
+    "correct_answer": "Fractal",
+    "explanation": "The Mandelbrot boundary is a fractal with Hausdorff dimension 2.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "calculus"
+  }
+]

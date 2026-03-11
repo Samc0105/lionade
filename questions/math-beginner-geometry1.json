@@ -1,0 +1,702 @@
+[
+  {
+    "question": "How many sides does a triangle have?",
+    "options": [
+      "2",
+      "3",
+      "4",
+      "5"
+    ],
+    "correct_answer": "3",
+    "explanation": "A triangle is a polygon with exactly 3 sides and 3 angles.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the name of a shape with 4 equal sides and 4 right angles?",
+    "options": [
+      "Rectangle",
+      "Rhombus",
+      "Square",
+      "Trapezoid"
+    ],
+    "correct_answer": "Square",
+    "explanation": "A square has 4 equal sides and 4 right angles (90° each).",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "How many degrees are in a right angle?",
+    "options": [
+      "45°",
+      "90°",
+      "180°",
+      "360°"
+    ],
+    "correct_answer": "90°",
+    "explanation": "A right angle measures exactly 90 degrees and is often marked with a small square symbol.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the total number of degrees in a circle?",
+    "options": [
+      "90°",
+      "180°",
+      "270°",
+      "360°"
+    ],
+    "correct_answer": "360°",
+    "explanation": "A full rotation around a circle is 360 degrees.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What do you call a flat surface that extends infinitely in all directions?",
+    "options": [
+      "Line",
+      "Point",
+      "Plane",
+      "Ray"
+    ],
+    "correct_answer": "Plane",
+    "explanation": "A plane is a flat, two-dimensional surface that extends infinitely in all directions.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "How many sides does a hexagon have?",
+    "options": [
+      "5",
+      "6",
+      "7",
+      "8"
+    ],
+    "correct_answer": "6",
+    "explanation": "The prefix 'hex' means six, so a hexagon has 6 sides.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the perimeter of a square with side length 5 cm?",
+    "options": [
+      "10 cm",
+      "15 cm",
+      "20 cm",
+      "25 cm"
+    ],
+    "correct_answer": "20 cm",
+    "explanation": "Perimeter of a square = 4 × side = 4 × 5 = 20 cm.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "Lines that never intersect and are always the same distance apart are called what?",
+    "options": [
+      "Perpendicular",
+      "Parallel",
+      "Intersecting",
+      "Skew"
+    ],
+    "correct_answer": "Parallel",
+    "explanation": "Parallel lines run in the same direction and never cross, staying the same distance apart.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the area of a rectangle with length 6 and width 4?",
+    "options": [
+      "10",
+      "20",
+      "24",
+      "48"
+    ],
+    "correct_answer": "24",
+    "explanation": "Area of a rectangle = length × width = 6 × 4 = 24 square units.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What type of angle measures less than 90°?",
+    "options": [
+      "Right",
+      "Obtuse",
+      "Acute",
+      "Straight"
+    ],
+    "correct_answer": "Acute",
+    "explanation": "An acute angle is any angle that measures less than 90 degrees.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is a polygon with 5 sides called?",
+    "options": [
+      "Quadrilateral",
+      "Pentagon",
+      "Hexagon",
+      "Octagon"
+    ],
+    "correct_answer": "Pentagon",
+    "explanation": "The prefix 'penta' means five, so a pentagon has 5 sides.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the name for the distance around the outside of a circle?",
+    "options": [
+      "Diameter",
+      "Radius",
+      "Circumference",
+      "Area"
+    ],
+    "correct_answer": "Circumference",
+    "explanation": "Circumference is the total distance around the edge of a circle.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "An angle that measures exactly 180° is called what?",
+    "options": [
+      "Right angle",
+      "Obtuse angle",
+      "Straight angle",
+      "Reflex angle"
+    ],
+    "correct_answer": "Straight angle",
+    "explanation": "A straight angle forms a straight line and measures exactly 180 degrees.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "How many lines of symmetry does a square have?",
+    "options": [
+      "1",
+      "2",
+      "4",
+      "8"
+    ],
+    "correct_answer": "4",
+    "explanation": "A square has 4 lines of symmetry: 2 through opposite corners and 2 through midpoints of opposite sides.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the perimeter of a rectangle with length 8 and width 3?",
+    "options": [
+      "11",
+      "22",
+      "24",
+      "32"
+    ],
+    "correct_answer": "22",
+    "explanation": "Perimeter = 2(length + width) = 2(8 + 3) = 2(11) = 22.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the radius of a circle if the diameter is 10?",
+    "options": [
+      "5",
+      "10",
+      "20",
+      "15"
+    ],
+    "correct_answer": "5",
+    "explanation": "The radius is half the diameter: 10 ÷ 2 = 5.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "Lines that intersect at a 90° angle are called what?",
+    "options": [
+      "Parallel",
+      "Perpendicular",
+      "Diagonal",
+      "Adjacent"
+    ],
+    "correct_answer": "Perpendicular",
+    "explanation": "Perpendicular lines meet at right angles (90°).",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What type of triangle has all three sides equal?",
+    "options": [
+      "Scalene",
+      "Isosceles",
+      "Equilateral",
+      "Right"
+    ],
+    "correct_answer": "Equilateral",
+    "explanation": "An equilateral triangle has all three sides the same length and all three angles equal (60° each).",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "How many vertices does a rectangle have?",
+    "options": [
+      "2",
+      "3",
+      "4",
+      "6"
+    ],
+    "correct_answer": "4",
+    "explanation": "A rectangle has 4 vertices (corners), one at each place where two sides meet.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the area of a square with side length 7?",
+    "options": [
+      "14",
+      "28",
+      "49",
+      "56"
+    ],
+    "correct_answer": "49",
+    "explanation": "Area of a square = side² = 7² = 49 square units.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What do you call an angle greater than 90° but less than 180°?",
+    "options": [
+      "Acute",
+      "Right",
+      "Obtuse",
+      "Reflex"
+    ],
+    "correct_answer": "Obtuse",
+    "explanation": "An obtuse angle measures between 90° and 180°.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the name of a 3D shape with 6 square faces?",
+    "options": [
+      "Sphere",
+      "Cylinder",
+      "Cube",
+      "Pyramid"
+    ],
+    "correct_answer": "Cube",
+    "explanation": "A cube has 6 identical square faces, 12 edges, and 8 vertices.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the sum of the interior angles of a triangle?",
+    "options": [
+      "90°",
+      "180°",
+      "270°",
+      "360°"
+    ],
+    "correct_answer": "180°",
+    "explanation": "The three interior angles of any triangle always add up to exactly 180 degrees.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "How many sides does an octagon have?",
+    "options": [
+      "6",
+      "7",
+      "8",
+      "10"
+    ],
+    "correct_answer": "8",
+    "explanation": "The prefix 'octa' means eight, so an octagon has 8 sides.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "A line segment from the center of a circle to any point on the circle is called the what?",
+    "options": [
+      "Diameter",
+      "Circumference",
+      "Chord",
+      "Radius"
+    ],
+    "correct_answer": "Radius",
+    "explanation": "The radius is the distance from the center of a circle to any point on its edge.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What shape has exactly one pair of parallel sides?",
+    "options": [
+      "Rectangle",
+      "Parallelogram",
+      "Trapezoid",
+      "Rhombus"
+    ],
+    "correct_answer": "Trapezoid",
+    "explanation": "A trapezoid (or trapezium) is a quadrilateral with exactly one pair of parallel sides.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "If a triangle has angles of 60°, 60°, and 60°, what type is it?",
+    "options": [
+      "Scalene",
+      "Isosceles",
+      "Right",
+      "Equilateral"
+    ],
+    "correct_answer": "Equilateral",
+    "explanation": "When all three angles are 60°, all three sides must be equal, making it equilateral.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the perimeter of an equilateral triangle with side length 9?",
+    "options": [
+      "18",
+      "27",
+      "36",
+      "81"
+    ],
+    "correct_answer": "27",
+    "explanation": "An equilateral triangle has 3 equal sides, so perimeter = 3 × 9 = 27.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the name of a line that crosses through the center of a circle and touches both sides?",
+    "options": [
+      "Radius",
+      "Chord",
+      "Diameter",
+      "Tangent"
+    ],
+    "correct_answer": "Diameter",
+    "explanation": "The diameter passes through the center of the circle and is the longest chord, equal to twice the radius.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "On a coordinate plane, which axis runs horizontally?",
+    "options": [
+      "y-axis",
+      "z-axis",
+      "x-axis",
+      "w-axis"
+    ],
+    "correct_answer": "x-axis",
+    "explanation": "The x-axis is the horizontal number line on a coordinate plane.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the area of a triangle with base 10 and height 6?",
+    "options": [
+      "16",
+      "30",
+      "60",
+      "120"
+    ],
+    "correct_answer": "30",
+    "explanation": "Area of a triangle = (1/2) × base × height = (1/2)(10)(6) = 30 square units.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What type of triangle has exactly two equal sides?",
+    "options": [
+      "Equilateral",
+      "Scalene",
+      "Isosceles",
+      "Obtuse"
+    ],
+    "correct_answer": "Isosceles",
+    "explanation": "An isosceles triangle has exactly two sides of equal length and two equal base angles.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What 3D shape does a basketball most resemble?",
+    "options": [
+      "Cube",
+      "Cylinder",
+      "Cone",
+      "Sphere"
+    ],
+    "correct_answer": "Sphere",
+    "explanation": "A sphere is a perfectly round 3D shape where every point on the surface is the same distance from the center.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "How many faces does a rectangular prism have?",
+    "options": [
+      "4",
+      "5",
+      "6",
+      "8"
+    ],
+    "correct_answer": "6",
+    "explanation": "A rectangular prism (box shape) has 6 faces: top, bottom, front, back, left, and right.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "If two angles add up to 90°, they are called what?",
+    "options": [
+      "Supplementary",
+      "Complementary",
+      "Vertical",
+      "Adjacent"
+    ],
+    "correct_answer": "Complementary",
+    "explanation": "Complementary angles are two angles whose measures add up to exactly 90 degrees.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the origin on a coordinate plane?",
+    "options": [
+      "(1, 1)",
+      "(0, 1)",
+      "(1, 0)",
+      "(0, 0)"
+    ],
+    "correct_answer": "(0, 0)",
+    "explanation": "The origin is the point where the x-axis and y-axis intersect, located at coordinates (0, 0).",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the volume of a cube with side length 3?",
+    "options": [
+      "9",
+      "18",
+      "27",
+      "81"
+    ],
+    "correct_answer": "27",
+    "explanation": "Volume of a cube = side³ = 3³ = 27 cubic units.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "Two angles that add up to 180° are called what?",
+    "options": [
+      "Complementary",
+      "Supplementary",
+      "Vertical",
+      "Congruent"
+    ],
+    "correct_answer": "Supplementary",
+    "explanation": "Supplementary angles are two angles whose measures add up to exactly 180 degrees.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "A shape that can be folded along a line so both halves match exactly has what property?",
+    "options": [
+      "Congruence",
+      "Rotation",
+      "Symmetry",
+      "Translation"
+    ],
+    "correct_answer": "Symmetry",
+    "explanation": "A shape with line symmetry can be folded along that line so that both halves match perfectly.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What quadrilateral has both pairs of opposite sides parallel?",
+    "options": [
+      "Trapezoid",
+      "Kite",
+      "Parallelogram",
+      "General quadrilateral"
+    ],
+    "correct_answer": "Parallelogram",
+    "explanation": "A parallelogram has two pairs of parallel opposite sides. Rectangles, rhombuses, and squares are all special parallelograms.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the area of a rectangle with length 12 and width 5?",
+    "options": [
+      "17",
+      "34",
+      "60",
+      "120"
+    ],
+    "correct_answer": "60",
+    "explanation": "Area = length × width = 12 × 5 = 60 square units.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the formula for the circumference of a circle?",
+    "options": [
+      "πr²",
+      "2πr",
+      "πd²",
+      "r²π/2"
+    ],
+    "correct_answer": "2πr",
+    "explanation": "Circumference = 2πr (or equivalently πd), where r is the radius and d is the diameter.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "How many edges does a cube have?",
+    "options": [
+      "6",
+      "8",
+      "10",
+      "12"
+    ],
+    "correct_answer": "12",
+    "explanation": "A cube has 12 edges: 4 on top, 4 on bottom, and 4 connecting the top to the bottom.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What type of angle is formed by the corner of a standard piece of paper?",
+    "options": [
+      "Acute",
+      "Obtuse",
+      "Right",
+      "Straight"
+    ],
+    "correct_answer": "Right",
+    "explanation": "The corner of a standard piece of paper forms a 90° right angle.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "In which quadrant of the coordinate plane is the point (3, −2)?",
+    "options": [
+      "Quadrant I",
+      "Quadrant II",
+      "Quadrant III",
+      "Quadrant IV"
+    ],
+    "correct_answer": "Quadrant IV",
+    "explanation": "Quadrant IV has positive x-values and negative y-values. Since 3 is positive and −2 is negative, (3, −2) is in Quadrant IV.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the name of a polygon with 10 sides?",
+    "options": [
+      "Nonagon",
+      "Decagon",
+      "Dodecagon",
+      "Hectagon"
+    ],
+    "correct_answer": "Decagon",
+    "explanation": "The prefix 'deca' means ten, so a decagon has 10 sides.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the area of a triangle with base 8 and height 5?",
+    "options": [
+      "13",
+      "20",
+      "40",
+      "80"
+    ],
+    "correct_answer": "20",
+    "explanation": "Area = (1/2) × base × height = (1/2)(8)(5) = 20 square units.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "How many lines of symmetry does an equilateral triangle have?",
+    "options": [
+      "0",
+      "1",
+      "2",
+      "3"
+    ],
+    "correct_answer": "3",
+    "explanation": "An equilateral triangle has 3 lines of symmetry, one from each vertex to the midpoint of the opposite side.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What 3D shape has a circular base and comes to a point at the top?",
+    "options": [
+      "Cylinder",
+      "Sphere",
+      "Cone",
+      "Pyramid"
+    ],
+    "correct_answer": "Cone",
+    "explanation": "A cone has a circular base and tapers to a single point (apex) at the top.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the perimeter of a regular hexagon with side length 4?",
+    "options": [
+      "16",
+      "20",
+      "24",
+      "28"
+    ],
+    "correct_answer": "24",
+    "explanation": "A regular hexagon has 6 equal sides, so perimeter = 6 × 4 = 24.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  }
+]

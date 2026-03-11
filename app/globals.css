@@ -34,6 +34,10 @@ html {
   --input-bg: rgba(255, 255, 255, 0.05);
   --input-border: rgba(255, 255, 255, 0.1);
   --sidebar-bg: linear-gradient(135deg, #0a1020 0%, #060c18 100%);
+  --card-solid-bg: linear-gradient(135deg, #0d1528 0%, #060c18 100%);
+  --card-solid-border: rgba(255, 255, 255, 0.1);
+  --progress-track: rgba(255, 255, 255, 0.05);
+  --progress-track-border: rgba(255, 255, 255, 0.1);
 }
 
 * {
@@ -1630,47 +1634,213 @@ html[data-font-size="large"] {
   font-size: 18px;
 }
 
-/* ── Sakura petal animation ── */
-@keyframes sakura-fall {
-  0% {
-    transform: translateY(-5vh) translateX(0) rotate(0deg);
-    opacity: var(--petal-opacity, 0.4);
-  }
-  25% {
-    transform: translateY(25vh) translateX(calc(var(--drift) * 0.4)) rotate(90deg);
+/* ── Acacia tree — very gentle breeze sway ── */
+@keyframes acacia-sway {
+  0%, 100% { transform: rotate(-0.8deg) translateX(0); }
+  30% { transform: rotate(0.5deg) translateX(1px); }
+  70% { transform: rotate(-0.3deg) translateX(-0.5px); }
+}
+
+.acacia-tree {
+  position: fixed;
+  bottom: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.5;
+  transform-origin: bottom center;
+  animation: acacia-sway 12s ease-in-out infinite;
+  will-change: transform;
+}
+
+.acacia-tree-left {
+  left: -30px;
+}
+
+.acacia-tree-right {
+  right: -20px;
+  animation-delay: -6s;
+}
+
+.acacia-tree-center {
+  left: 50%;
+  margin-left: -110px;
+  opacity: 0.2;
+  animation-delay: -3s;
+}
+
+/* ── Sun — gentle pulse ── */
+@keyframes sun-pulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 60px 30px rgba(255,183,0,0.4), 0 0 120px 60px rgba(255,143,0,0.2), 0 0 200px 100px rgba(255,111,0,0.1);
   }
   50% {
-    transform: translateY(50vh) translateX(var(--drift)) rotate(180deg);
-    opacity: var(--petal-opacity, 0.4);
+    transform: scale(1.04);
+    box-shadow: 0 0 70px 35px rgba(255,183,0,0.45), 0 0 140px 70px rgba(255,143,0,0.25), 0 0 220px 110px rgba(255,111,0,0.12);
   }
-  75% {
-    transform: translateY(75vh) translateX(calc(var(--drift) * 0.6)) rotate(270deg);
+}
+
+.savanna-sun {
+  animation: sun-pulse 8s ease-in-out infinite;
+}
+
+/* ── Floating sun rays — 4 wave patterns, each unique ── */
+@keyframes ray-wave-1 {
+  0%, 100% { transform: translateX(0) translateY(0) scale(1); opacity: 0.35; }
+  25% { transform: translateX(3px) translateY(-4px) scale(1.06); opacity: 0.5; }
+  50% { transform: translateX(-2px) translateY(2px) scale(0.95); opacity: 0.3; }
+  75% { transform: translateX(4px) translateY(-1px) scale(1.03); opacity: 0.45; }
+}
+
+@keyframes ray-wave-2 {
+  0%, 100% { transform: translateX(0) translateY(0) scale(1); opacity: 0.3; }
+  30% { transform: translateX(-3px) translateY(3px) scale(1.08); opacity: 0.5; }
+  60% { transform: translateX(2px) translateY(-3px) scale(0.94); opacity: 0.25; }
+  85% { transform: translateX(-1px) translateY(2px) scale(1.04); opacity: 0.42; }
+}
+
+@keyframes ray-wave-3 {
+  0%, 100% { transform: translateX(0) translateY(0) scale(1); opacity: 0.32; }
+  20% { transform: translateX(4px) translateY(2px) scale(1.05); opacity: 0.48; }
+  55% { transform: translateX(-3px) translateY(-2px) scale(0.96); opacity: 0.28; }
+  80% { transform: translateX(2px) translateY(3px) scale(1.02); opacity: 0.4; }
+}
+
+@keyframes ray-wave-4 {
+  0%, 100% { transform: translateX(0) translateY(0) scale(1); opacity: 0.28; }
+  35% { transform: translateX(-2px) translateY(-4px) scale(1.07); opacity: 0.46; }
+  65% { transform: translateX(3px) translateY(1px) scale(0.93); opacity: 0.32; }
+  90% { transform: translateX(-1px) translateY(-2px) scale(1.05); opacity: 0.44; }
+}
+
+.sun-ray-1 { animation: ray-wave-1 3.2s ease-in-out infinite; }
+.sun-ray-2 { animation: ray-wave-2 3.8s ease-in-out infinite; }
+.sun-ray-3 { animation: ray-wave-3 4.2s ease-in-out infinite; }
+.sun-ray-4 { animation: ray-wave-4 3.5s ease-in-out infinite; }
+
+/* ── Grass sway — staggered breeze effect across layers ── */
+@keyframes grass-sway-1 {
+  0%, 100% { transform: skewX(0deg); }
+  25% { transform: skewX(0.3deg); }
+  75% { transform: skewX(-0.2deg); }
+}
+@keyframes grass-sway-2 {
+  0%, 100% { transform: skewX(0deg); }
+  30% { transform: skewX(-0.4deg); }
+  60% { transform: skewX(0.2deg); }
+}
+@keyframes grass-sway-3 {
+  0%, 100% { transform: skewX(0deg); }
+  40% { transform: skewX(0.25deg); }
+  80% { transform: skewX(-0.15deg); }
+}
+
+.savanna-grass-1 { animation: grass-sway-1 8s ease-in-out infinite; }
+.savanna-grass-2 { animation: grass-sway-2 7s ease-in-out infinite 1s; }
+.savanna-grass-3 { animation: grass-sway-3 9s ease-in-out infinite 0.5s; }
+
+/* ── Distant birds — lazy thermal circling ── */
+@keyframes birds-drift {
+  0% { transform: translateX(0) translateY(0); }
+  20% { transform: translateX(25px) translateY(-6px); }
+  40% { transform: translateX(55px) translateY(-2px); }
+  60% { transform: translateX(45px) translateY(-10px); }
+  80% { transform: translateX(15px) translateY(-4px); }
+  100% { transform: translateX(0) translateY(0); }
+}
+
+.savanna-birds {
+  animation: birds-drift 25s ease-in-out infinite;
+  will-change: transform;
+}
+
+/* ── Tumbleweed — slow rolling bounce ── */
+@keyframes tumbleweed-ltr {
+  0% {
+    transform: translateX(-60px) translateY(0) rotate(0deg);
+    opacity: 0;
   }
+  3% { opacity: 0.5; }
+  10% { transform: translateX(calc(100vw * 0.1 - 60px)) translateY(-3px) rotate(72deg); }
+  12% { transform: translateX(calc(100vw * 0.12 - 60px)) translateY(0) rotate(86deg); }
+  20% { transform: translateX(calc(100vw * 0.2 - 60px)) translateY(-2px) rotate(144deg); }
+  22% { transform: translateX(calc(100vw * 0.22 - 60px)) translateY(0) rotate(158deg); }
+  88% { opacity: 0.5; }
   100% {
-    transform: translateY(110vh) translateX(var(--drift)) rotate(calc(var(--rotate) + 360deg));
+    transform: translateX(calc(100vw + 60px)) translateY(0) rotate(640deg);
     opacity: 0;
   }
 }
 
-.sakura-petal {
-  animation: sakura-fall linear infinite;
+@keyframes tumbleweed-rtl {
+  0% {
+    transform: translateX(calc(100vw + 60px)) translateY(0) rotate(0deg);
+    opacity: 0;
+  }
+  3% { opacity: 0.5; }
+  10% { transform: translateX(calc(100vw * 0.9 + 60px)) translateY(-3px) rotate(-72deg); }
+  12% { transform: translateX(calc(100vw * 0.88 + 60px)) translateY(0) rotate(-86deg); }
+  88% { opacity: 0.5; }
+  100% {
+    transform: translateX(-60px) translateY(0) rotate(-640deg);
+    opacity: 0;
+  }
+}
+
+.tumbleweed {
   will-change: transform, opacity;
 }
 
-/* Hide sakura in dark mode */
+.tumbleweed-ltr {
+  left: 0;
+  animation: tumbleweed-ltr linear infinite;
+}
+
+.tumbleweed-rtl {
+  right: 0;
+  animation: tumbleweed-rtl linear infinite;
+}
+
+/* ── Dust motes — slow thermal drift upward ── */
+@keyframes dust-float {
+  0% {
+    transform: translateY(0) translateX(0) scale(1);
+    opacity: 0;
+  }
+  8% { opacity: var(--dust-opacity, 0.15); }
+  40% {
+    transform: translateY(-35vh) translateX(var(--dust-drift, 10px)) scale(1.1);
+    opacity: var(--dust-opacity, 0.15);
+  }
+  70% {
+    transform: translateY(-60vh) translateX(calc(var(--dust-drift, 10px) * 0.3)) scale(0.9);
+    opacity: calc(var(--dust-opacity, 0.15) * 0.5);
+  }
+  100% {
+    transform: translateY(-85vh) translateX(calc(var(--dust-drift, 10px) * -0.2)) scale(0.6);
+    opacity: 0;
+  }
+}
+
+.dust-particle {
+  animation: dust-float linear infinite;
+  will-change: transform, opacity;
+}
+
+/* Hide savanna elements in dark mode */
 html[data-theme="dark"] .sakura-container,
 html:not([data-theme]) .sakura-container {
   display: none;
 }
 
 /* ══════════════════════════════════════════════════════════════════════
-   LIGHT THEME — spring / sakura aesthetic
+   LIGHT THEME — savanna / wild & golden aesthetic
    CSS variable overrides (no !important — specificity wins naturally)
    ══════════════════════════════════════════════════════════════════════ */
 
 /* ─ Light theme variable overrides ─ */
 html.light {
-  --bg-page: #fffdf7;
+  --bg-page: #FFFBF0;
   --bg-card: #ffffff;
   --card-border: #fde68a;
   --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
@@ -1680,22 +1850,27 @@ html.light {
   --nav-text: #d97706;
   --nav-text-hover: #f59e0b;
   --nav-text-active: #d97706;
-  --nav-bg: rgba(255, 253, 247, 0.95);
+  --nav-bg: rgba(255, 251, 240, 0.95);
   --nav-border: #e5e5e5;
   --accent-primary: #f59e0b;
   --accent-primary-bg: rgba(245, 158, 11, 0.1);
   --accent-gold: #f59e0b;
   --accent-gold-dark: #d97706;
-  --dropdown-bg: #fffdf7;
+  --dropdown-bg: #FFFBF0;
   --dropdown-border: #fde68a;
   --input-bg: #ffffff;
   --input-border: #d4d4d4;
   --sidebar-bg: #ffffff;
+  --card-solid-bg: #ffffff;
+  --card-solid-border: #e5e5e5;
+  --progress-track: #f0f0f0;
+  --progress-track-border: #e5e5e5;
 }
 
 /* ─ Page base ─ */
 html.light body {
-  background-color: var(--bg-page);
+  background: linear-gradient(180deg, #FFFBF0 0%, #FEF3C7 100%);
+  background-attachment: fixed;
   color: var(--text-primary);
 }
 
@@ -1805,9 +1980,9 @@ html.light .card-hover:hover {
 }
 
 html.light .tilt-card {
-  background: var(--bg-card);
-  border: 1px solid var(--card-border);
-  box-shadow: var(--card-shadow);
+  background: var(--bg-card) !important;
+  border: 1px solid var(--card-border) !important;
+  box-shadow: var(--card-shadow) !important;
 }
 html.light .tilt-card:hover {
   box-shadow: 0 4px 16px rgba(245, 158, 11, 0.1);
@@ -2350,7 +2525,13 @@ html.light .space-bg-container { display: none; }
   .dropdown-menu-exit,
   .dropdown-item-enter,
   .dropdown-item-exit,
-  .sakura-petal {
+  .acacia-tree,
+  .savanna-sun,
+  .sun-ray,
+  .savanna-grass,
+  .savanna-birds,
+  .tumbleweed,
+  .dust-particle {
     animation: none !important;
   }
 

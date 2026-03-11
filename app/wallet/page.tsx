@@ -29,7 +29,7 @@ export default function WalletPage() {
 
         {/* Balance Card */}
         <div className="rounded-2xl border border-gold/20 p-8 mb-6 text-center animate-slide-up"
-          style={{ animationDelay: "0.05s", background: "linear-gradient(135deg, rgba(255,215,0,0.06), rgba(10,16,32,0.9))", boxShadow: "0 0 30px rgba(255,215,0,0.08)" }}>
+          style={{ animationDelay: "0.05s", background: "var(--card-solid-bg)", boxShadow: "0 0 30px rgba(255,215,0,0.08)" }}>
           <p className="text-cream/40 text-xs uppercase tracking-widest font-semibold mb-3">Current Balance</p>
           <div className="flex items-center justify-center gap-3 mb-4">
             <img src="/fangs.png" alt="Fangs" className="w-10 h-10 object-contain" />
@@ -46,7 +46,7 @@ export default function WalletPage() {
             { label: "Streak", value: `${streak} days`, icon: "🔥", color: "#E67E22" },
           ].map(s => (
             <div key={s.label} className="rounded-xl border p-4 text-center"
-              style={{ background: "linear-gradient(135deg, rgba(10,16,32,0.9), rgba(6,12,24,0.95))", borderColor: `${s.color}20` }}>
+              style={{ background: "var(--card-solid-bg)", borderColor: `${s.color}20` }}>
               <span className="text-2xl block mb-1">{s.icon}</span>
               <p className="font-bebas text-2xl leading-none" style={{ color: s.color }}>{s.value}</p>
               <p className="text-cream/40 text-[10px] uppercase tracking-widest mt-1">{s.label}</p>
@@ -55,8 +55,8 @@ export default function WalletPage() {
         </div>
 
         {/* Transaction History */}
-        <div className="rounded-2xl border border-electric/10 p-6 mb-6 animate-slide-up"
-          style={{ animationDelay: "0.15s", background: "linear-gradient(135deg, rgba(13,21,40,0.5), rgba(10,16,32,0.5))" }}>
+        <div className="rounded-2xl p-6 mb-6 animate-slide-up"
+          style={{ animationDelay: "0.15s", background: "var(--card-solid-bg)", border: "1px solid var(--card-solid-border)" }}>
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-bebas text-xl text-cream tracking-wider">TRANSACTION HISTORY</h2>
             <span className="text-cream/20 text-xs">Recent</span>
@@ -70,7 +70,7 @@ export default function WalletPage() {
 
         {/* Redeem Rewards */}
         <div className="rounded-2xl border border-purple-500/15 p-6 animate-slide-up"
-          style={{ animationDelay: "0.2s", background: "linear-gradient(135deg, rgba(168,85,247,0.05), rgba(10,16,32,0.5))" }}>
+          style={{ animationDelay: "0.2s", background: "var(--card-solid-bg)" }}>
           <div className="flex items-center gap-3 mb-3">
             <span className="text-2xl">🎁</span>
             <div>

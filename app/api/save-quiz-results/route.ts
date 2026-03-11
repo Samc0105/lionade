@@ -82,7 +82,7 @@ export async function POST(req: NextRequest) {
     console.log("[save-quiz-results] Step 3: Fetching profile...");
     const { data: profile, error: profileFetchErr } = await supabaseAdmin
       .from("profiles")
-      .select("coins, xp, streak, max_streak")
+      .select("coins, xp, streak, max_streak, last_activity_at, daily_questions_completed, daily_reset_date")
       .eq("id", userId)
       .single();
 
@@ -125,15 +125,16 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // 5. Daily activity + streak (quiz-count based: 1 streak per 5 quizzes completed)
+    // 5. Daily activity + streak
     console.log("[save-quiz-results] Step 5: Daily activity + streak...");
-    const today = new Date().toISOString().split("T")[0];
+    const nowISO = new Date().toISOString();
+    const todayUTC = nowISO.split("T")[0]; // YYYY-MM-DD in UTC
 
     const { data: existingDaily } = await supabaseAdmin
       .from("daily_activity")
       .select("id, questions_answered, coins_earned")
       .eq("user_id", userId)
-      .eq("date", today)
+      .eq("date", todayUTC)
       .maybeSingle();
 
     if (existingDaily) {
@@ -150,7 +151,7 @@ export async function POST(req: NextRequest) {
     } else {
       const { error: dailyErr } = await supabaseAdmin.from("daily_activity").insert({
         user_id: userId,
-        date: today,
+        date: todayUTC,
         questions_answered: totalQuestions,
         coins_earned: coinsEarned,
         streak_maintained: true,
@@ -159,35 +160,40 @@ export async function POST(req: NextRequest) {
       else console.log("[save-quiz-results] Step 5 OK — daily inserted");
     }
 
-    // Streak logic: 36-hour window daily streak
-    const alreadyMaintained = existingDaily && existingDaily.questions_answered > totalQuestions;
-    // ^ If daily_activity already existed before our update, streak was already maintained today
+    // Daily questions tracking (profile-level)
+    let dailyQuestionsCompleted = profile.daily_questions_completed ?? 0;
+    const dailyResetDate = profile.daily_reset_date as string | null;
 
+    if (dailyResetDate !== todayUTC) {
+      // New day — reset daily counter
+      dailyQuestionsCompleted = 0;
+      console.log("[save-quiz-results] Step 5: daily reset (was", dailyResetDate, "now", todayUTC, ")");
+    }
+    // Clamp existing value first (in case it was stored uncapped), then add and cap at 10
+    dailyQuestionsCompleted = Math.min(Math.min(dailyQuestionsCompleted, 10) + totalQuestions, 10);
+
+    // Streak logic using last_activity_at (timestamptz)
+    const lastActivityAt = profile.last_activity_at as string | null;
     let newStreak = profile.streak ?? 0;
 
-    if (!alreadyMaintained) {
-      // Fetch the user's most recent quiz BEFORE this one
-      const { data: prevQuiz } = await supabaseAdmin
-        .from("quiz_sessions")
-        .select("completed_at")
-        .eq("user_id", userId)
-        .neq("id", session.id)
-        .order("completed_at", { ascending: false })
-        .limit(1)
-        .maybeSingle();
+    if (lastActivityAt) {
+      const lastDate = new Date(lastActivityAt);
+      const lastDayUTC = lastDate.toISOString().split("T")[0];
 
-      if (!prevQuiz) {
-        // First ever quiz — start streak at 1
-        newStreak = 1;
+      if (lastDayUTC === todayUTC) {
+        // Already played today — no streak increment
+        console.log("[save-quiz-results] Step 5 streak: already active today, no change");
       } else {
-        const lastQuizTime = new Date(prevQuiz.completed_at).getTime();
-        const hoursSince = (Date.now() - lastQuizTime) / (1000 * 60 * 60);
+        // Check calendar day difference
+        const lastDayDate = new Date(lastDayUTC + "T00:00:00Z");
+        const todayDate = new Date(todayUTC + "T00:00:00Z");
+        const daysDiff = Math.floor((todayDate.getTime() - lastDayDate.getTime()) / (1000 * 60 * 60 * 24));
 
-        if (hoursSince <= 36) {
-          // Within 36h window — increment streak (once per day)
+        if (daysDiff === 1) {
+          // Yesterday — increment streak
           newStreak = (profile.streak ?? 0) + 1;
         } else {
-          // Streak broken — check for streak shield
+          // 2+ days gap — check for streak shield
           const { data: shield } = await supabaseAdmin
             .from("active_boosters")
             .select("id, uses_remaining")
@@ -196,8 +202,8 @@ export async function POST(req: NextRequest) {
             .limit(1)
             .maybeSingle();
 
-          if (shield) {
-            // Consume streak shield — keep streak
+          if (shield && daysDiff <= 2) {
+            // Shield protects for 1 missed day
             if (shield.uses_remaining && shield.uses_remaining > 1) {
               await supabaseAdmin
                 .from("active_boosters")
@@ -212,21 +218,37 @@ export async function POST(req: NextRequest) {
             newStreak = (profile.streak ?? 0) + 1;
             console.log("[save-quiz-results] Step 5 streak shield consumed");
           } else {
-            // No shield — reset to 1
+            // No shield or gap too large — reset to 1
             newStreak = 1;
           }
         }
       }
+    } else {
+      // last_activity_at is NULL — either first quiz ever or pre-migration user
+      if ((profile.streak ?? 0) > 0) {
+        // Existing user with a streak from before the migration — preserve it, just backfill timestamp
+        console.log("[save-quiz-results] Step 5 streak: backfilling last_activity_at for existing streak", profile.streak);
+      } else {
+        // Truly new user, first quiz
+        newStreak = 1;
+      }
     }
 
     const newMaxStreak = Math.max(newStreak, profile.max_streak ?? 0);
+    const streakUpdate: Record<string, unknown> = {
+      streak: newStreak,
+      max_streak: newMaxStreak,
+      last_activity_at: nowISO,
+      daily_questions_completed: dailyQuestionsCompleted,
+      daily_reset_date: todayUTC,
+    };
 
     const { error: streakErr } = await supabaseAdmin
       .from("profiles")
-      .update({ streak: newStreak, max_streak: newMaxStreak })
+      .update(streakUpdate)
       .eq("id", userId);
     if (streakErr) console.warn("[save-quiz-results] Step 5 streak WARN:", streakErr.message);
-    else console.log("[save-quiz-results] Step 5 streak: → streak=", newStreak);
+    else console.log("[save-quiz-results] Step 5 streak:", profile.streak, "→", newStreak, "daily:", dailyQuestionsCompleted, "/10");
 
     // 6. Achievement checking
     console.log("[save-quiz-results] Step 6: Checking achievements...");

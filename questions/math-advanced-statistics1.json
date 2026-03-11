@@ -1,0 +1,2802 @@
+[
+  {
+    "question": "Bayes' theorem: P(A|B) = ?",
+    "options": [
+      "P(B|A)\u00b7P(A)/P(B)",
+      "P(A)\u00b7P(B)",
+      "P(B|A)/P(A)",
+      "P(A|B)\u00b7P(B)"
+    ],
+    "correct_answer": "P(B|A)\u00b7P(A)/P(B)",
+    "explanation": "Bayes: P(A|B) = P(B|A)\u00b7P(A)/P(B).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The law of total probability states P(B) = ?",
+    "options": [
+      "P(B|A)",
+      "\u03a3P(B|A\u1d62)P(A\u1d62)",
+      "P(A)\u00b7P(B)",
+      "P(B|A)/P(A)"
+    ],
+    "correct_answer": "\u03a3P(B|A\u1d62)P(A\u1d62)",
+    "explanation": "P(B) = sum over all partition events A\u1d62 of P(B|A\u1d62)P(A\u1d62).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "Events A and B are independent iff:",
+    "options": [
+      "P(A\u2229B)=0",
+      "P(A\u2229B)=P(A)\u00b7P(B)",
+      "P(A|B)=P(B)",
+      "P(A\u222aB)=1"
+    ],
+    "correct_answer": "P(A\u2229B)=P(A)\u00b7P(B)",
+    "explanation": "Independence: joint probability equals product of marginals.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "If P(A)=0.4, P(B)=0.3, P(A\u2229B)=0.12, are A and B independent?",
+    "options": [
+      "No",
+      "Yes",
+      "Cannot determine",
+      "Only if P(A\u222aB)=1"
+    ],
+    "correct_answer": "Yes",
+    "explanation": "0.4\u00d70.3=0.12=P(A\u2229B). \u2713",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The Boole's inequality states P(A\u2081\u222a...\u222aA\u2099) \u2264 ?",
+    "options": [
+      "P(A\u2081)\u00b7...\u00b7P(A\u2099)",
+      "P(A\u2081)+...+P(A\u2099)",
+      "1",
+      "n\u00b7P(A\u2081)"
+    ],
+    "correct_answer": "P(A\u2081)+...+P(A\u2099)",
+    "explanation": "Union bound: P(\u222aA\u1d62) \u2264 \u03a3P(A\u1d62).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "For disjoint events, P(A\u2081\u222a...\u222aA\u2099) = ?",
+    "options": [
+      "\u03a3P(A\u1d62)-P(\u2229A\u1d62)",
+      "\u03a3P(A\u1d62)",
+      "P(A\u2081)\u00b7P(A\u2099)",
+      "1"
+    ],
+    "correct_answer": "\u03a3P(A\u1d62)",
+    "explanation": "Mutually exclusive: no overlap, so probabilities add directly.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The inclusion-exclusion principle for P(A\u222aB\u222aC) includes:",
+    "options": [
+      "P(A)+P(B)+P(C)",
+      "P(A)+P(B)+P(C)-P(A\u2229B)-P(A\u2229C)-P(B\u2229C)+P(A\u2229B\u2229C)",
+      "P(A)\u00b7P(B)\u00b7P(C)",
+      "P(A)+P(B)+P(C)-P(A\u2229B\u2229C)"
+    ],
+    "correct_answer": "P(A)+P(B)+P(C)-P(A\u2229B)+P(A\u2229C)-P(B\u2229C)+P(A\u2229B\u2229C)",
+    "explanation": "Inclusion-exclusion alternates signs.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "A prior probability in Bayesian statistics is:",
+    "options": [
+      "The posterior",
+      "The likelihood",
+      "The probability before observing data",
+      "The marginal likelihood"
+    ],
+    "correct_answer": "The probability before observing data",
+    "explanation": "Prior = P(\u03b8) represents beliefs before seeing data.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The posterior probability is proportional to:",
+    "options": [
+      "Prior only",
+      "Likelihood only",
+      "Prior \u00d7 Likelihood",
+      "Prior / Likelihood"
+    ],
+    "correct_answer": "Prior \u00d7 Likelihood",
+    "explanation": "Posterior \u221d Likelihood \u00d7 Prior (Bayes' theorem).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "What is a conjugate prior?",
+    "options": [
+      "A prior equal to the posterior",
+      "A prior that yields a posterior in the same distribution family",
+      "A non-informative prior",
+      "A uniform prior"
+    ],
+    "correct_answer": "A prior that yields a posterior in the same distribution family",
+    "explanation": "Conjugate priors simplify Bayesian calculations.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The Beta distribution is a conjugate prior for:",
+    "options": [
+      "Normal likelihood",
+      "Poisson likelihood",
+      "Binomial likelihood",
+      "Exponential likelihood"
+    ],
+    "correct_answer": "Binomial likelihood",
+    "explanation": "Beta-Binomial conjugacy is a classic Bayesian pair.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The Gamma distribution is a conjugate prior for:",
+    "options": [
+      "Binomial likelihood",
+      "Normal likelihood",
+      "Poisson likelihood",
+      "Bernoulli likelihood"
+    ],
+    "correct_answer": "Poisson likelihood",
+    "explanation": "Gamma-Poisson conjugacy.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "P(A|B) = P(A) implies:",
+    "options": [
+      "A and B are mutually exclusive",
+      "A and B are independent",
+      "P(B|A) = 0",
+      "P(A\u2229B) = 0"
+    ],
+    "correct_answer": "A and B are independent",
+    "explanation": "If knowing B doesn't change P(A), they're independent.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "Boole's inequality is also called:",
+    "options": [
+      "Bayes' rule",
+      "The union bound",
+      "The inclusion-exclusion principle",
+      "The law of total probability"
+    ],
+    "correct_answer": "The union bound",
+    "explanation": "Union bound: P(\u222aA\u1d62) \u2264 \u03a3P(A\u1d62).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "If P(A|B) > P(A), then:",
+    "options": [
+      "A and B are independent",
+      "A and B are positively associated",
+      "A and B are negatively associated",
+      "P(B|A) < P(B)"
+    ],
+    "correct_answer": "A and B are positively associated",
+    "explanation": "Knowing B increases the probability of A.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The odds of event A are defined as:",
+    "options": [
+      "P(A)",
+      "P(A)/P(A\u1d9c)",
+      "P(A)/(1-P(A)\u00b2)",
+      "1/P(A)"
+    ],
+    "correct_answer": "P(A)/P(A\u1d9c)",
+    "explanation": "Odds = P(A) / P(not A).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "If P(A) = 0.75, the odds of A are:",
+    "options": [
+      "3",
+      "0.75",
+      "0.25",
+      "4"
+    ],
+    "correct_answer": "3",
+    "explanation": "Odds = 0.75/0.25 = 3.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The odds ratio comparing two groups is used in:",
+    "options": [
+      "ANOVA",
+      "Logistic regression and case-control studies",
+      "t-tests",
+      "Simple linear regression"
+    ],
+    "correct_answer": "Logistic regression and case-control studies",
+    "explanation": "Odds ratios quantify association in binary outcome studies.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "Pairwise independence of events A, B, C does NOT imply:",
+    "options": [
+      "P(A\u2229B)=P(A)P(B)",
+      "Mutual independence",
+      "P(B\u2229C)=P(B)P(C)",
+      "P(A\u2229C)=P(A)P(C)"
+    ],
+    "correct_answer": "Mutual independence",
+    "explanation": "Pairwise independence is weaker than mutual independence.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "For continuous random variable X, P(X = c) = ?",
+    "options": [
+      "f(c)",
+      "F(c)",
+      "0",
+      "1"
+    ],
+    "correct_answer": "0",
+    "explanation": "For continuous distributions, probability at exactly one point is 0.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The MGF of X is defined as:",
+    "options": [
+      "E[X]",
+      "E[e^(tX)]",
+      "E[X\u00b2]",
+      "Var(X)"
+    ],
+    "correct_answer": "E[e^(tX)]",
+    "explanation": "Moment generating function: M_X(t) = E[e^(tX)].",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The kth moment of X is obtained from the MGF by:",
+    "options": [
+      "M_X(k)",
+      "M_X^(k)(0) (kth derivative at 0)",
+      "M_X(0)^k",
+      "k\u00b7M_X(t)"
+    ],
+    "correct_answer": "M_X^(k)(0) (kth derivative at 0)",
+    "explanation": "E[X\u1d4f] = M_X^(k)(0).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The characteristic function of X is:",
+    "options": [
+      "E[e^(itX)]",
+      "E[e^(tX)]",
+      "E[X]",
+      "log M_X(t)"
+    ],
+    "correct_answer": "E[e^(itX)]",
+    "explanation": "Characteristic function \u03c6_X(t) = E[e^(itX)] always exists.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "For X~N(\u03bc,\u03c3\u00b2), the MGF is:",
+    "options": [
+      "e^(\u03bct+\u03c3\u00b2t\u00b2/2)",
+      "e^(\u03bct)",
+      "e^(\u03c3\u00b2t\u00b2)",
+      "e^(\u03bc+\u03c3t)"
+    ],
+    "correct_answer": "e^(\u03bct+\u03c3\u00b2t\u00b2/2)",
+    "explanation": "MGF of normal: M(t)=exp(\u03bct + \u03c3\u00b2t\u00b2/2).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The sum of independent normals X~N(\u03bc\u2081,\u03c3\u2081\u00b2) and Y~N(\u03bc\u2082,\u03c3\u2082\u00b2) is:",
+    "options": [
+      "N(\u03bc\u2081\u03bc\u2082, \u03c3\u2081\u03c3\u2082)",
+      "N(\u03bc\u2081+\u03bc\u2082, \u03c3\u2081\u00b2+\u03c3\u2082\u00b2)",
+      "N(\u03bc\u2081+\u03bc\u2082, \u03c3\u2081+\u03c3\u2082)",
+      "Not normal"
+    ],
+    "correct_answer": "N(\u03bc\u2081+\u03bc\u2082, \u03c3\u2081\u00b2+\u03c3\u2082\u00b2)",
+    "explanation": "Sum of independent normals is normal with summed parameters.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The chi-squared distribution \u03c7\u00b2(k) is the sum of:",
+    "options": [
+      "k independent normals",
+      "k independent standard normals squared",
+      "k independent exponentials",
+      "k independent uniforms"
+    ],
+    "correct_answer": "k independent standard normals squared",
+    "explanation": "\u03c7\u00b2(k) = Z\u2081\u00b2+Z\u2082\u00b2+...+Z\u2096\u00b2 where Z\u1d62~N(0,1).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The t-distribution arises as:",
+    "options": [
+      "Z/\u221a(\u03c7\u00b2(k)/k)",
+      "Z\u00b7\u03c7\u00b2(k)",
+      "Z+\u03c7\u00b2(k)",
+      "Z\u00b2/k"
+    ],
+    "correct_answer": "Z/\u221a(\u03c7\u00b2(k)/k)",
+    "explanation": "t = Z/\u221a(\u03c7\u00b2(k)/k) where Z and \u03c7\u00b2 are independent.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The F-distribution is the ratio:",
+    "options": [
+      "\u03c7\u00b2(m)/\u03c7\u00b2(n)",
+      "(\u03c7\u00b2(m)/m)/(\u03c7\u00b2(n)/n)",
+      "Z/t",
+      "t\u00b2/\u03c7\u00b2"
+    ],
+    "correct_answer": "(\u03c7\u00b2(m)/m)/(\u03c7\u00b2(n)/n)",
+    "explanation": "F = (\u03c7\u00b2(m)/m)/(\u03c7\u00b2(n)/n) for independent chi-squareds.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The exponential distribution with rate \u03bb has mean:",
+    "options": [
+      "\u03bb",
+      "1/\u03bb",
+      "\u03bb\u00b2",
+      "\u221a\u03bb"
+    ],
+    "correct_answer": "1/\u03bb",
+    "explanation": "E[X] = 1/\u03bb for Exponential(\u03bb).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The exponential distribution is memoryless: P(X>s+t|X>s) = ?",
+    "options": [
+      "P(X>s)",
+      "P(X>s+t)",
+      "P(X>t)",
+      "1"
+    ],
+    "correct_answer": "P(X>t)",
+    "explanation": "Memoryless property: past doesn't affect future.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The Poisson distribution approximates Binomial when:",
+    "options": [
+      "n is small and p is large",
+      "n is large and p is small",
+      "n=p",
+      "p=0.5"
+    ],
+    "correct_answer": "n is large and p is small",
+    "explanation": "Poisson(\u03bb=np) approximates Bin(n,p) for large n, small p.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "Var(X) for X~Poisson(\u03bb) = ?",
+    "options": [
+      "\u03bb\u00b2",
+      "\u221a\u03bb",
+      "\u03bb",
+      "1/\u03bb"
+    ],
+    "correct_answer": "\u03bb",
+    "explanation": "Poisson: mean = variance = \u03bb.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The negative binomial distribution counts:",
+    "options": [
+      "Successes in n trials",
+      "Trials until the rth success",
+      "Events in a fixed interval",
+      "Defects in a sample"
+    ],
+    "correct_answer": "Trials until the rth success",
+    "explanation": "Negative binomial generalizes geometric to rth success.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The hypergeometric distribution models:",
+    "options": [
+      "Sampling with replacement",
+      "Sampling without replacement from a finite population",
+      "Poisson events",
+      "Normal approximation"
+    ],
+    "correct_answer": "Sampling without replacement from a finite population",
+    "explanation": "Hypergeometric: finite population, sampling without replacement.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The uniform distribution U(a,b) has variance:",
+    "options": [
+      "(b-a)\u00b2",
+      "(b-a)\u00b2/12",
+      "(b-a)/2",
+      "(b-a)\u00b2/4"
+    ],
+    "correct_answer": "(b-a)\u00b2/12",
+    "explanation": "Var[U(a,b)] = (b-a)\u00b2/12.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The lognormal distribution: if Y~N(\u03bc,\u03c3\u00b2) then X=eY has mean:",
+    "options": [
+      "e\u03bc",
+      "e^(\u03bc+\u03c3\u00b2/2)",
+      "e\u03bc+\u03c3",
+      "e^(\u03bc+\u03c3\u00b2)"
+    ],
+    "correct_answer": "e^(\u03bc+\u03c3\u00b2/2)",
+    "explanation": "E[eY] = e^(\u03bc+\u03c3\u00b2/2) by the lognormal mean formula.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The Cauchy distribution has no:",
+    "options": [
+      "Mode",
+      "Median",
+      "Mean and Variance",
+      "CDF"
+    ],
+    "correct_answer": "Mean and Variance",
+    "explanation": "Cauchy distribution: mean and variance are undefined (infinite).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The Central Limit Theorem states the sample mean X\u0304 is approximately:",
+    "options": [
+      "Exponential for large n",
+      "Normal for large n",
+      "Uniform for large n",
+      "Chi-squared for large n"
+    ],
+    "correct_answer": "Normal for large n",
+    "explanation": "CLT: X\u0304 \u2192 N(\u03bc, \u03c3\u00b2/n) as n \u2192 \u221e.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The standard error of the mean is:",
+    "options": [
+      "\u03c3",
+      "\u03c3/n",
+      "\u03c3/\u221an",
+      "\u03c3\u00b2/n"
+    ],
+    "correct_answer": "\u03c3/\u221an",
+    "explanation": "SE = \u03c3/\u221an \u2014 standard deviation of the sampling distribution of X\u0304.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "Markov's inequality states P(X\u2265a) \u2264 ? for X\u22650:",
+    "options": [
+      "a/E[X]",
+      "E[X]/a",
+      "E[X]/a\u00b2",
+      "a\u00b2/Var(X)"
+    ],
+    "correct_answer": "E[X]/a",
+    "explanation": "Markov: P(X\u2265a) \u2264 E[X]/a.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "Chebyshev's inequality states P(|X-\u03bc|\u2265k\u03c3) \u2264 ?",
+    "options": [
+      "1/k",
+      "k\u00b2",
+      "1/k\u00b2",
+      "k/\u03c3"
+    ],
+    "correct_answer": "1/k\u00b2",
+    "explanation": "Chebyshev: P(|X-\u03bc|\u2265k\u03c3) \u2264 1/k\u00b2.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The weak law of large numbers states X\u0304\u2099 converges to \u03bc in:",
+    "options": [
+      "Mean squared error",
+      "Distribution",
+      "Probability",
+      "Almost sure sense"
+    ],
+    "correct_answer": "Probability",
+    "explanation": "WLLN: X\u0304\u2099 \u2192\u1d56 \u03bc (convergence in probability).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The strong law of large numbers gives convergence:",
+    "options": [
+      "In probability",
+      "In distribution",
+      "Almost surely",
+      "In mean square"
+    ],
+    "correct_answer": "Almost surely",
+    "explanation": "SLLN: X\u0304\u2099 \u2192 \u03bc almost surely (with probability 1).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "Slutsky's theorem: if X\u2099\u2192X in distribution and Y\u2099\u2192c (constant) in probability, then X\u2099+Y\u2099\u2192?",
+    "options": [
+      "X",
+      "X+c",
+      "Xc",
+      "c"
+    ],
+    "correct_answer": "X+c",
+    "explanation": "Slutsky: X\u2099+Y\u2099 \u2192\u1d48 X+c.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The delta method approximates the distribution of g(X\u0304) as:",
+    "options": [
+      "Normal",
+      "Exponential",
+      "Chi-squared",
+      "Uniform"
+    ],
+    "correct_answer": "Normal",
+    "explanation": "Delta method: g(X\u0304) \u2248 N(g(\u03bc), [g'(\u03bc)]\u00b2\u03c3\u00b2/n).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "What is an unbiased estimator?",
+    "options": [
+      "E[\u03b8\u0302] = \u03b8\u0302",
+      "E[\u03b8\u0302] = \u03b8",
+      "\u03b8\u0302 minimizes MSE",
+      "\u03b8\u0302 = \u03b8 always"
+    ],
+    "correct_answer": "E[\u03b8\u0302] = \u03b8",
+    "explanation": "Unbiased: expected value of the estimator equals the true parameter.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The bias of an estimator \u03b8\u0302 is:",
+    "options": [
+      "\u03b8\u0302 - \u03b8",
+      "E[\u03b8\u0302] - \u03b8",
+      "Var(\u03b8\u0302)",
+      "MSE(\u03b8\u0302)"
+    ],
+    "correct_answer": "E[\u03b8\u0302] - \u03b8",
+    "explanation": "Bias = E[\u03b8\u0302] - \u03b8.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "MSE of an estimator = ?",
+    "options": [
+      "Bias\u00b2",
+      "Variance",
+      "Bias\u00b2 + Variance",
+      "Bias - Variance"
+    ],
+    "correct_answer": "Bias\u00b2 + Variance",
+    "explanation": "MSE = Var(\u03b8\u0302) + [Bias(\u03b8\u0302)]\u00b2.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The Cram\u00e9r-Rao lower bound gives the minimum possible:",
+    "options": [
+      "Bias",
+      "MSE",
+      "Variance of any unbiased estimator",
+      "Standard error"
+    ],
+    "correct_answer": "Variance of any unbiased estimator",
+    "explanation": "CRLB: Var(\u03b8\u0302) \u2265 1/I(\u03b8) for unbiased estimators.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The Fisher information I(\u03b8) = ?",
+    "options": [
+      "E[\u2202logf/\u2202\u03b8]",
+      "E[(\u2202logf/\u2202\u03b8)\u00b2]",
+      "Var(\u03b8\u0302)",
+      "E[logf]"
+    ],
+    "correct_answer": "E[(\u2202logf/\u2202\u03b8)\u00b2]",
+    "explanation": "Fisher info: I(\u03b8) = E[(d/d\u03b8 log f(X;\u03b8))\u00b2].",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "An efficient estimator:",
+    "options": [
+      "Is biased",
+      "Achieves the Cram\u00e9r-Rao lower bound",
+      "Has zero variance",
+      "Minimizes the MSE only"
+    ],
+    "correct_answer": "Achieves the Cram\u00e9r-Rao lower bound",
+    "explanation": "Efficiency: variance equals the CRLB.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The MLE is found by:",
+    "options": [
+      "Minimizing the likelihood",
+      "Maximizing the log-likelihood",
+      "Setting variance to 0",
+      "Setting bias to 0"
+    ],
+    "correct_answer": "Maximizing the log-likelihood",
+    "explanation": "MLE: \u03b8\u0302 = argmax \u2113(\u03b8) = argmax log L(\u03b8).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The MLE of the mean for N(\u03bc,\u03c3\u00b2) with known \u03c3\u00b2 is:",
+    "options": [
+      "Median",
+      "Mode",
+      "X\u0304 (sample mean)",
+      "Sample median"
+    ],
+    "correct_answer": "X\u0304 (sample mean)",
+    "explanation": "MLE for normal mean: \u03b8\u0302 = X\u0304.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The sample variance S\u00b2 = \u03a3(X\u1d62-X\u0304)\u00b2/(n-1) is:",
+    "options": [
+      "A biased estimator of \u03c3\u00b2",
+      "An unbiased estimator of \u03c3\u00b2",
+      "The MLE of \u03c3\u00b2",
+      "Equal to \u03c3\u00b2"
+    ],
+    "correct_answer": "An unbiased estimator of \u03c3\u00b2",
+    "explanation": "E[S\u00b2] = \u03c3\u00b2 because we divide by n-1.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The MLE of \u03c3\u00b2 for a normal sample is:",
+    "options": [
+      "S\u00b2 = \u03a3(X\u1d62-X\u0304)\u00b2/(n-1)",
+      "\u03c3\u0302\u00b2 = \u03a3(X\u1d62-X\u0304)\u00b2/n",
+      "X\u0304",
+      "Median"
+    ],
+    "correct_answer": "\u03c3\u0302\u00b2 = \u03a3(X\u1d62-X\u0304)\u00b2/n",
+    "explanation": "MLE divides by n (biased), not n-1.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "A consistent estimator satisfies:",
+    "options": [
+      "E[\u03b8\u0302]=\u03b8 for all n",
+      "\u03b8\u0302 \u2192 \u03b8 in probability as n\u2192\u221e",
+      "Var(\u03b8\u0302) = 0",
+      "MSE = 0"
+    ],
+    "correct_answer": "\u03b8\u0302 \u2192 \u03b8 in probability as n\u2192\u221e",
+    "explanation": "Consistency: estimator converges to truth as sample grows.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The method of moments estimator sets:",
+    "options": [
+      "Sample moments equal to 0",
+      "Sample moments equal to population moments",
+      "MLE equal to sample mean",
+      "Variance equal to bias"
+    ],
+    "correct_answer": "Sample moments equal to population moments",
+    "explanation": "MOM: E[X\u1d4f] = (1/n)\u03a3x\u1d62\u1d4f, solve for parameters.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "A sufficient statistic T(X) for \u03b8 satisfies:",
+    "options": [
+      "It is unbiased",
+      "The conditional distribution of X given T doesn't depend on \u03b8",
+      "It achieves the CRLB",
+      "It is the MLE"
+    ],
+    "correct_answer": "The conditional distribution of X given T doesn't depend on \u03b8",
+    "explanation": "Sufficiency: T captures all information about \u03b8 in the data.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The Rao-Blackwell theorem states:",
+    "options": [
+      "MLE is always sufficient",
+      "Conditioning on a sufficient statistic improves an estimator",
+      "All unbiased estimators are efficient",
+      "Bias cannot be reduced"
+    ],
+    "correct_answer": "Conditioning on a sufficient statistic improves an estimator",
+    "explanation": "Rao-Blackwell: E[\u03b8\u0302|T] has variance \u2264 Var(\u03b8\u0302).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The Lehmann-Scheff\u00e9 theorem says a complete sufficient statistic yields:",
+    "options": [
+      "A biased estimator",
+      "The unique minimum variance unbiased estimator (UMVUE)",
+      "The MLE",
+      "An inconsistent estimator"
+    ],
+    "correct_answer": "The unique minimum variance unbiased estimator (UMVUE)",
+    "explanation": "Complete sufficient statistic + unbiasedness = UMVUE.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "A 95% CI for \u03bc with known \u03c3 is:",
+    "options": [
+      "X\u0304 \u00b1 1.645\u03c3/\u221an",
+      "X\u0304 \u00b1 1.96\u03c3/\u221an",
+      "X\u0304 \u00b1 2.576\u03c3/\u221an",
+      "X\u0304 \u00b1 \u03c3/\u221an"
+    ],
+    "correct_answer": "X\u0304 \u00b1 1.96\u03c3/\u221an",
+    "explanation": "z* = 1.96 for 95% confidence with known \u03c3.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "A 99% CI uses z* = ?",
+    "options": [
+      "1.645",
+      "1.96",
+      "2.326",
+      "2.576"
+    ],
+    "correct_answer": "2.576",
+    "explanation": "z* = 2.576 for 99% confidence.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The width of a confidence interval is proportional to:",
+    "options": [
+      "n",
+      "\u03c3 only",
+      "1/\u221an",
+      "\u03c3/\u221an"
+    ],
+    "correct_answer": "\u03c3/\u221an",
+    "explanation": "CI width = 2\u00b7z*\u00b7\u03c3/\u221an \u2014 proportional to \u03c3/\u221an.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "To halve the margin of error, you must multiply n by:",
+    "options": [
+      "2",
+      "4",
+      "1/2",
+      "\u221a2"
+    ],
+    "correct_answer": "4",
+    "explanation": "ME \u221d 1/\u221an. To halve ME, need 4n.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "Bayesian credible intervals differ from frequentist CIs because:",
+    "options": [
+      "They are always wider",
+      "They give direct probability statements about the parameter",
+      "They don't use data",
+      "They require larger samples"
+    ],
+    "correct_answer": "They give direct probability statements about the parameter",
+    "explanation": "A 95% credible interval contains \u03b8 with 95% posterior probability.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The Neyman-Pearson lemma states the most powerful test uses:",
+    "options": [
+      "The t-statistic",
+      "The likelihood ratio",
+      "The p-value",
+      "The z-score"
+    ],
+    "correct_answer": "The likelihood ratio",
+    "explanation": "Most powerful test: reject when L(\u03b8\u2081)/L(\u03b8\u2080) > k.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The likelihood ratio test statistic is:",
+    "options": [
+      "2log(L(\u03b8\u0302)/L(\u03b8\u2080))",
+      "L(\u03b8\u2080)/L(\u03b8\u0302)",
+      "log L(\u03b8\u0302)",
+      "L(\u03b8\u0302)-L(\u03b8\u2080)"
+    ],
+    "correct_answer": "2log(L(\u03b8\u0302)/L(\u03b8\u2080))",
+    "explanation": "LRT: \u039b = 2[\u2113(\u03b8\u0302) - \u2113(\u03b8\u2080)] ~ \u03c7\u00b2 asymptotically.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "Wilks' theorem says the LRT statistic asymptotically follows:",
+    "options": [
+      "N(0,1)",
+      "\u03c7\u00b2(p) where p = number of constraints",
+      "F distribution",
+      "t distribution"
+    ],
+    "correct_answer": "\u03c7\u00b2(p) where p = number of constraints",
+    "explanation": "Wilks: -2log(\u039b) \u2192\u1d48 \u03c7\u00b2(p) under H\u2080.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "A uniformly most powerful (UMP) test:",
+    "options": [
+      "Maximizes P(Type I error)",
+      "Has highest power for all values of \u03b8 in H\u2081",
+      "Is always a two-sided test",
+      "Minimizes sample size"
+    ],
+    "correct_answer": "Has highest power for all values of \u03b8 in H\u2081",
+    "explanation": "UMP: most powerful test against all alternatives simultaneously.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The one-sample t-test statistic is:",
+    "options": [
+      "(X\u0304-\u03bc\u2080)/(\u03c3/\u221an)",
+      "(X\u0304-\u03bc\u2080)/(S/\u221an)",
+      "(X\u0304-\u03bc\u2080)\u00b7\u221an",
+      "X\u0304/S"
+    ],
+    "correct_answer": "(X\u0304-\u03bc\u2080)/(S/\u221an)",
+    "explanation": "t = (X\u0304-\u03bc\u2080)/(S/\u221an) with n-1 degrees of freedom.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The two-sample t-test (equal variances) uses df = ?",
+    "options": [
+      "n\u2081+n\u2082",
+      "n\u2081+n\u2082-1",
+      "n\u2081+n\u2082-2",
+      "min(n\u2081,n\u2082)-1"
+    ],
+    "correct_answer": "n\u2081+n\u2082-2",
+    "explanation": "Pooled two-sample t-test has n\u2081+n\u2082-2 degrees of freedom.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "Welch's t-test is used when:",
+    "options": [
+      "Variances are equal",
+      "Variances are unequal",
+      "Samples are paired",
+      "n is very large"
+    ],
+    "correct_answer": "Variances are unequal",
+    "explanation": "Welch's t-test doesn't assume equal population variances.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The chi-square goodness-of-fit test statistic is:",
+    "options": [
+      "\u03a3(O-E)",
+      "\u03a3(O-E)\u00b2/E",
+      "\u03a3(O-E)/E",
+      "\u03a3(O+E)\u00b2/E"
+    ],
+    "correct_answer": "\u03a3(O-E)\u00b2/E",
+    "explanation": "GOF: \u03c7\u00b2 = \u03a3(Observed-Expected)\u00b2/Expected.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The chi-square test of independence has degrees of freedom:",
+    "options": [
+      "(r-1)(c-1)",
+      "rc",
+      "r+c-2",
+      "(r)(c)-1"
+    ],
+    "correct_answer": "(r-1)(c-1)",
+    "explanation": "For an r\u00d7c contingency table: df = (r-1)(c-1).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The ANOVA F-test compares:",
+    "options": [
+      "Sample means across k groups",
+      "Two proportions",
+      "Two variances",
+      "Two medians"
+    ],
+    "correct_answer": "Sample means across k groups",
+    "explanation": "One-way ANOVA: H\u2080: \u03bc\u2081=\u03bc\u2082=...=\u03bc\u2096.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The ANOVA F-statistic is:",
+    "options": [
+      "MSBetween/MSWithin",
+      "MSWithin/MSBetween",
+      "SSTotal/SSerror",
+      "n\u00b7MSBetween"
+    ],
+    "correct_answer": "MSBetween/MSWithin",
+    "explanation": "F = Mean Square Between groups / Mean Square Within groups.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "Post-hoc tests in ANOVA are used:",
+    "options": [
+      "Before the F-test",
+      "After a significant F-test to find which groups differ",
+      "To test normality",
+      "To test equal variances"
+    ],
+    "correct_answer": "After a significant F-test to find which groups differ",
+    "explanation": "Post-hoc tests (Tukey, Bonferroni) identify specific group differences.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The Bonferroni correction adjusts \u03b1 to:",
+    "options": [
+      "\u03b1/2",
+      "\u03b1/k for k tests",
+      "\u03b1\u00b7k",
+      "2\u03b1"
+    ],
+    "correct_answer": "\u03b1/k for k tests",
+    "explanation": "Bonferroni: use \u03b1* = \u03b1/k per comparison to control family-wise error.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The power of a test = ?",
+    "options": [
+      "\u03b1",
+      "\u03b2",
+      "1-\u03b2",
+      "1-\u03b1"
+    ],
+    "correct_answer": "1-\u03b2",
+    "explanation": "Power = P(reject H\u2080 | H\u2081 is true) = 1 - P(Type II error).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "If \u03b1 increases, power:",
+    "options": [
+      "Decreases",
+      "Stays the same",
+      "Increases",
+      "Becomes 1"
+    ],
+    "correct_answer": "Increases",
+    "explanation": "Larger \u03b1 \u2192 easier to reject \u2192 higher power but more Type I errors.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The p-value is the probability of observing results __ extreme as those obtained, assuming H\u2080:",
+    "options": [
+      "Less",
+      "More",
+      "Equally",
+      "Not"
+    ],
+    "correct_answer": "More",
+    "explanation": "p-value = P(test stat \u2265 observed | H\u2080 true).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The sign test is a nonparametric test for:",
+    "options": [
+      "Means",
+      "Medians",
+      "Variances",
+      "Correlations"
+    ],
+    "correct_answer": "Medians",
+    "explanation": "Sign test tests whether the median equals a specified value.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The Wilcoxon rank-sum test is the nonparametric alternative to:",
+    "options": [
+      "Paired t-test",
+      "Two-sample t-test",
+      "One-sample t-test",
+      "ANOVA"
+    ],
+    "correct_answer": "Two-sample t-test",
+    "explanation": "Wilcoxon rank-sum = Mann-Whitney test, for two independent samples.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The Wilcoxon signed-rank test replaces:",
+    "options": [
+      "Two-sample t-test",
+      "One-way ANOVA",
+      "Paired t-test",
+      "Chi-square test"
+    ],
+    "correct_answer": "Paired t-test",
+    "explanation": "Wilcoxon signed-rank is for paired data without normality assumption.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The Kruskal-Wallis test is the nonparametric version of:",
+    "options": [
+      "Two-sample t-test",
+      "Paired t-test",
+      "One-way ANOVA",
+      "Chi-square test"
+    ],
+    "correct_answer": "One-way ANOVA",
+    "explanation": "Kruskal-Wallis extends Wilcoxon rank-sum to k groups.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "In simple linear regression, the OLS estimator minimizes:",
+    "options": [
+      "\u03a3|y\u1d62-\u0177\u1d62|",
+      "\u03a3(y\u1d62-\u0177\u1d62)\u00b2",
+      "\u03a3(y\u1d62-\u0177\u1d62)",
+      "max|y\u1d62-\u0177\u1d62|"
+    ],
+    "correct_answer": "\u03a3(y\u1d62-\u0177\u1d62)\u00b2",
+    "explanation": "Ordinary Least Squares minimizes the sum of squared residuals.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The OLS slope estimate is:",
+    "options": [
+      "Sxy/Sx\u00b2",
+      "\u03a3x\u1d62y\u1d62/\u03a3x\u1d62",
+      "r\u00b7(sy/sx)",
+      "Both A and C"
+    ],
+    "correct_answer": "Both A and C",
+    "explanation": "b\u2081 = Sxy/Sxx = r\u00b7(sy/sx).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "In multiple regression y=\u03b2\u2080+\u03b2\u2081x\u2081+...+\u03b2\u2096x\u2096+\u03b5, the OLS estimator in matrix form is:",
+    "options": [
+      "(X\u1d40X)X\u1d40y",
+      "(X\u1d40X)\u207b\u00b9X\u1d40y",
+      "X\u1d40y",
+      "(X\u1d40X)\u207b\u00b9y"
+    ],
+    "correct_answer": "(X\u1d40X)\u207b\u00b9X\u1d40y",
+    "explanation": "Normal equations: \u03b2\u0302 = (X\u1d40X)\u207b\u00b9X\u1d40y.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The Gauss-Markov theorem states OLS is BLUE when:",
+    "options": [
+      "Errors are normal",
+      "Errors have zero mean, constant variance, and are uncorrelated",
+      "n is large",
+      "All predictors are uncorrelated"
+    ],
+    "correct_answer": "Errors have zero mean, constant variance, and are uncorrelated",
+    "explanation": "BLUE = Best Linear Unbiased Estimator under Gauss-Markov conditions.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "Homoscedasticity means:",
+    "options": [
+      "Errors are normal",
+      "Errors have constant variance",
+      "Errors are uncorrelated",
+      "Errors have zero mean"
+    ],
+    "correct_answer": "Errors have constant variance",
+    "explanation": "Homoscedasticity: Var(\u03b5\u1d62) = \u03c3\u00b2 for all i.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "Heteroscedasticity occurs when:",
+    "options": [
+      "Errors are constant",
+      "Var(\u03b5\u1d62) changes across observations",
+      "Errors are normally distributed",
+      "X and Y are correlated"
+    ],
+    "correct_answer": "Var(\u03b5\u1d62) changes across observations",
+    "explanation": "Heteroscedasticity violates OLS assumptions.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "Multicollinearity in regression refers to:",
+    "options": [
+      "Non-normal errors",
+      "High correlation among predictor variables",
+      "Heteroscedastic errors",
+      "Outliers in y"
+    ],
+    "correct_answer": "High correlation among predictor variables",
+    "explanation": "Multicollinearity inflates standard errors and destabilizes coefficients.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The variance inflation factor (VIF) measures:",
+    "options": [
+      "Influence of outliers",
+      "Degree of multicollinearity",
+      "Heteroscedasticity",
+      "Autocorrelation"
+    ],
+    "correct_answer": "Degree of multicollinearity",
+    "explanation": "VIF > 10 (or 5) indicates problematic multicollinearity.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The adjusted R\u00b2 penalizes for:",
+    "options": [
+      "Sample size",
+      "Adding predictors that don't improve fit",
+      "Heteroscedasticity",
+      "Multicollinearity"
+    ],
+    "correct_answer": "Adding predictors that don't improve fit",
+    "explanation": "Adj. R\u00b2 = 1-(1-R\u00b2)(n-1)/(n-k-1).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The AIC criterion is:",
+    "options": [
+      "n\u00b7log(\u03c3\u0302\u00b2)+2k",
+      "n\u00b7log(\u03c3\u0302\u00b2)+k\u00b7log(n)",
+      "\u03a3residuals\u00b2",
+      "R\u00b2 - k/n"
+    ],
+    "correct_answer": "n\u00b7log(\u03c3\u0302\u00b2)+2k",
+    "explanation": "AIC = n\u00b7log(\u03c3\u0302\u00b2) + 2k; lower is better.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The BIC (Bayesian Information Criterion) is:",
+    "options": [
+      "n\u00b7log(\u03c3\u0302\u00b2)+2k",
+      "n\u00b7log(\u03c3\u0302\u00b2)+k\u00b7log(n)",
+      "2\u00b7log(L)+k",
+      "AIC+2"
+    ],
+    "correct_answer": "n\u00b7log(\u03c3\u0302\u00b2)+k\u00b7log(n)",
+    "explanation": "BIC penalizes model complexity more heavily than AIC.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "Ridge regression adds to OLS:",
+    "options": [
+      "L1 penalty (\u03a3|\u03b2\u2c7c|)",
+      "L2 penalty (\u03a3\u03b2\u2c7c\u00b2)",
+      "A bias term",
+      "Sample size penalty"
+    ],
+    "correct_answer": "L2 penalty (\u03a3\u03b2\u2c7c\u00b2)",
+    "explanation": "Ridge: minimize \u03a3(y-X\u03b2)\u00b2 + \u03bb\u03a3\u03b2\u2c7c\u00b2.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "LASSO regression adds:",
+    "options": [
+      "L2 penalty",
+      "L1 penalty (\u03a3|\u03b2\u2c7c|)",
+      "Both L1 and L2",
+      "No penalty"
+    ],
+    "correct_answer": "L1 penalty (\u03a3|\u03b2\u2c7c|)",
+    "explanation": "LASSO: minimize \u03a3(y-X\u03b2)\u00b2 + \u03bb\u03a3|\u03b2\u2c7c|. Can shrink coefficients to 0.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "Logistic regression models:",
+    "options": [
+      "Continuous outcomes",
+      "The log-odds of a binary outcome",
+      "Counts of events",
+      "Time-to-event data"
+    ],
+    "correct_answer": "The log-odds of a binary outcome",
+    "explanation": "Logistic: log(p/(1-p)) = \u03b2\u2080+\u03b2\u2081x\u2081+...",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The logistic regression coefficient \u03b2\u2081 represents:",
+    "options": [
+      "The change in probability",
+      "The log odds ratio for a 1-unit increase in x\u2081",
+      "The correlation",
+      "The intercept"
+    ],
+    "correct_answer": "The log odds ratio for a 1-unit increase in x\u2081",
+    "explanation": "e\u03b2\u2081 = odds ratio associated with a 1-unit increase in x\u2081.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The Durbin-Watson test detects:",
+    "options": [
+      "Multicollinearity",
+      "Autocorrelation in residuals",
+      "Heteroscedasticity",
+      "Non-normality"
+    ],
+    "correct_answer": "Autocorrelation in residuals",
+    "explanation": "DW statistic tests for serial correlation in residuals.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "Cook's distance measures:",
+    "options": [
+      "Autocorrelation",
+      "The influence of each observation on regression coefficients",
+      "Heteroscedasticity",
+      "Multicollinearity"
+    ],
+    "correct_answer": "The influence of each observation on regression coefficients",
+    "explanation": "Cook's D identifies influential data points.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "In regression, leverage measures:",
+    "options": [
+      "Residual size",
+      "How extreme an observation is in X-space",
+      "Cook's distance",
+      "Heteroscedasticity"
+    ],
+    "correct_answer": "How extreme an observation is in X-space",
+    "explanation": "High leverage: observation far from mean of predictors.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The Hat matrix H = X(X\u1d40X)\u207b\u00b9X\u1d40 projects y onto:",
+    "options": [
+      "Residual space",
+      "Column space of X",
+      "Null space",
+      "Identity space"
+    ],
+    "correct_answer": "Column space of X",
+    "explanation": "\u0177 = Hy; H projects onto the space spanned by predictors.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "Poisson regression is used for:",
+    "options": [
+      "Continuous outcomes",
+      "Count data",
+      "Binary outcomes",
+      "Time series"
+    ],
+    "correct_answer": "Count data",
+    "explanation": "Poisson regression models non-negative integer count outcomes.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The bootstrap method:",
+    "options": [
+      "Uses the normal approximation",
+      "Resamples from the observed data with replacement",
+      "Requires large samples",
+      "Is parametric"
+    ],
+    "correct_answer": "Resamples from the observed data with replacement",
+    "explanation": "Bootstrap: resample data to estimate sampling distribution empirically.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "Cross-validation is used for:",
+    "options": [
+      "Hypothesis testing",
+      "Model selection and assessing predictive performance",
+      "Computing p-values",
+      "Estimating parameters"
+    ],
+    "correct_answer": "Model selection and assessing predictive performance",
+    "explanation": "CV estimates how well a model will generalize to new data.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "In k-fold cross-validation, the data is split into:",
+    "options": [
+      "k equal training sets",
+      "k folds; each used once as validation",
+      "k bootstrap samples",
+      "k independent datasets"
+    ],
+    "correct_answer": "k folds; each used once as validation",
+    "explanation": "Each fold serves as test set once; rest is training set.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The EM algorithm is used for:",
+    "options": [
+      "Computing MLE with complete data",
+      "Maximizing likelihood with missing data or latent variables",
+      "Bootstrap estimation",
+      "Bayesian inference only"
+    ],
+    "correct_answer": "Maximizing likelihood with missing data or latent variables",
+    "explanation": "EM: Expectation step then Maximization step, iterating to convergence.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "Principal component analysis (PCA) seeks:",
+    "options": [
+      "To predict a response variable",
+      "Linear combinations of variables that maximize variance",
+      "The most correlated variables",
+      "Nonlinear transformations"
+    ],
+    "correct_answer": "Linear combinations of variables that maximize variance",
+    "explanation": "PCA finds orthogonal directions of maximum variance.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The first principal component:",
+    "options": [
+      "Explains the least variance",
+      "Is perpendicular to the data",
+      "Explains the most variance",
+      "Is always the first variable"
+    ],
+    "correct_answer": "Explains the most variance",
+    "explanation": "PC1 is the direction of greatest variability in the data.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "Factor analysis differs from PCA in that it:",
+    "options": [
+      "Maximizes variance",
+      "Models observed variables as functions of latent factors",
+      "Is supervised",
+      "Uses likelihood ratio tests"
+    ],
+    "correct_answer": "Models observed variables as functions of latent factors",
+    "explanation": "FA assumes underlying latent factors drive observed correlations.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The Kaplan-Meier estimator is used for:",
+    "options": [
+      "Regression",
+      "Survival analysis: estimating survival functions",
+      "Clustering",
+      "Classification"
+    ],
+    "correct_answer": "Survival analysis: estimating survival functions",
+    "explanation": "KM estimates S(t) = P(survive past time t) from censored data.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "Censoring in survival analysis occurs when:",
+    "options": [
+      "The event is observed for all subjects",
+      "The event time is only partially known",
+      "Data is missing at random",
+      "All subjects experience the event"
+    ],
+    "correct_answer": "The event time is only partially known",
+    "explanation": "Censoring: subject leaves study or study ends before event occurs.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The Cox proportional hazards model assumes:",
+    "options": [
+      "Constant hazard over time",
+      "The hazard ratio between groups is constant over time",
+      "Normal errors",
+      "Independent predictors"
+    ],
+    "correct_answer": "The hazard ratio between groups is constant over time",
+    "explanation": "Cox PH: h(t|x) = h\u2080(t)\u00b7exp(\u03b2'x).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The log-rank test compares:",
+    "options": [
+      "Means",
+      "Medians",
+      "Survival curves between two groups",
+      "Regression coefficients"
+    ],
+    "correct_answer": "Survival curves between two groups",
+    "explanation": "Log-rank test: H\u2080: survival functions are equal across groups.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The Kolmogorov-Smirnov test is used to:",
+    "options": [
+      "Test means",
+      "Compare a sample distribution to a reference or two samples",
+      "Test variances",
+      "Test independence"
+    ],
+    "correct_answer": "Compare a sample distribution to a reference or two samples",
+    "explanation": "KS test: compares empirical CDFs.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The Shapiro-Wilk test specifically tests for:",
+    "options": [
+      "Equal variances",
+      "Independence",
+      "Normality",
+      "Equal medians"
+    ],
+    "correct_answer": "Normality",
+    "explanation": "Shapiro-Wilk: H\u2080: data comes from a normal distribution.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "Structural equation modeling (SEM) combines:",
+    "options": [
+      "Regression and cluster analysis",
+      "Factor analysis and path analysis",
+      "ANOVA and regression",
+      "PCA and survival analysis"
+    ],
+    "correct_answer": "Factor analysis and path analysis",
+    "explanation": "SEM models complex relationships among observed and latent variables.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "Missing at random (MAR) means:",
+    "options": [
+      "Data is never missing",
+      "Missingness depends on observed variables but not missing values",
+      "Missingness is completely random",
+      "Data should be deleted"
+    ],
+    "correct_answer": "Missingness depends on observed variables but not missing values",
+    "explanation": "MAR: conditional on observed data, missingness is random.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "Multiple imputation handles missing data by:",
+    "options": [
+      "Deleting rows",
+      "Replacing each missing value once with the mean",
+      "Creating multiple complete datasets and combining results",
+      "Ignoring missing values"
+    ],
+    "correct_answer": "Creating multiple complete datasets and combining results",
+    "explanation": "MI: impute m times, analyze each, combine results with Rubin's rules.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "A Q-Q plot is used to:",
+    "options": [
+      "Show residuals vs. fitted values",
+      "Compare a distribution to a theoretical one (e.g., normal)",
+      "Show the correlation",
+      "Display the regression line"
+    ],
+    "correct_answer": "Compare a distribution to a theoretical one (e.g., normal)",
+    "explanation": "Q-Q plots compare sample quantiles to theoretical quantiles.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The law of iterated expectations states E[X] = ?",
+    "options": [
+      "E[E[X|Y]]",
+      "E[X|Y]",
+      "E[X]\u00b7E[Y]",
+      "E[Var(X|Y)]"
+    ],
+    "correct_answer": "E[E[X|Y]]",
+    "explanation": "LIE: E[X] = E_Y[E[X|Y]].",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The law of total variance states Var(X) = ?",
+    "options": [
+      "E[Var(X|Y)]+Var(E[X|Y])",
+      "E[Var(X|Y)]",
+      "Var(E[X|Y])",
+      "E[X\u00b2]-E[X]\u00b2"
+    ],
+    "correct_answer": "E[Var(X|Y)]+Var(E[X|Y])",
+    "explanation": "Eve's law: Var(X) = E[Var(X|Y)] + Var(E[X|Y]).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "A sufficient condition for identifiability of a model is:",
+    "options": [
+      "n > p",
+      "The Fisher information matrix is non-singular",
+      "Errors are normal",
+      "Variables are uncorrelated"
+    ],
+    "correct_answer": "The Fisher information matrix is non-singular",
+    "explanation": "Non-singular Fisher information \u2192 model parameters can be uniquely estimated.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The Akaike Information Criterion (AIC) is based on:",
+    "options": [
+      "Bayesian inference",
+      "Information theory (Kullback-Leibler divergence)",
+      "Bootstrapping",
+      "The chi-square distribution"
+    ],
+    "correct_answer": "Information theory (Kullback-Leibler divergence)",
+    "explanation": "AIC minimizes the estimated KL divergence from the true model.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "An MCMC sampler generates samples from:",
+    "options": [
+      "The likelihood only",
+      "The posterior distribution",
+      "The prior only",
+      "A normal distribution"
+    ],
+    "correct_answer": "The posterior distribution",
+    "explanation": "MCMC (e.g., Metropolis-Hastings) samples from the posterior in Bayesian inference.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "Gibbs sampling requires:",
+    "options": [
+      "A proposal distribution",
+      "Sampling each variable from its full conditional distribution",
+      "Gradient of the posterior",
+      "Large sample sizes only"
+    ],
+    "correct_answer": "Sampling each variable from its full conditional distribution",
+    "explanation": "Gibbs: iteratively sample each parameter from its conditional posterior.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The Metropolis-Hastings acceptance probability is:",
+    "options": [
+      "Always 1",
+      "min(1, \u03c0(\u03b8*)q(\u03b8|\u03b8*)/[\u03c0(\u03b8)q(\u03b8*|\u03b8)])",
+      "\u03c0(\u03b8*)",
+      "\u03c0(\u03b8)/\u03c0(\u03b8*)"
+    ],
+    "correct_answer": "min(1, \u03c0(\u03b8*)q(\u03b8|\u03b8*)/[\u03c0(\u03b8)q(\u03b8*|\u03b8)])",
+    "explanation": "MH: accept with probability min(1, likelihood ratio \u00d7 proposal ratio).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "Convergence of an MCMC chain is typically assessed using:",
+    "options": [
+      "The mean",
+      "Trace plots and Gelman-Rubin diagnostics",
+      "p-values",
+      "The AIC"
+    ],
+    "correct_answer": "Trace plots and Gelman-Rubin diagnostics",
+    "explanation": "Visual and statistical tools assess if the MCMC chain has converged.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "A stationary time series has:",
+    "options": [
+      "Increasing mean over time",
+      "Constant mean, variance, and autocovariance structure over time",
+      "A seasonal trend",
+      "A random walk"
+    ],
+    "correct_answer": "Constant mean, variance, and autocovariance structure over time",
+    "explanation": "Stationarity: statistical properties don't change over time.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The autocorrelation function (ACF) measures:",
+    "options": [
+      "Correlation between X and Y",
+      "Correlation between X\u209c and X\u209c\u208b\u2096",
+      "The trend in time series",
+      "The seasonal component"
+    ],
+    "correct_answer": "Correlation between X\u209c and X\u209c\u208b\u2096",
+    "explanation": "ACF: \u03c1(k) = Corr(X\u209c, X\u209c\u208b\u2096).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "An AR(1) model is: X\u209c = ?",
+    "options": [
+      "\u03c6X\u209c\u208b\u2081 + \u03b5\u209c",
+      "\u03b5\u209c + \u03b8\u03b5\u209c\u208b\u2081",
+      "\u03c6X\u209c\u208b\u2081 + \u03b8\u03b5\u209c\u208b\u2081 + \u03b5\u209c",
+      "X\u209c\u208b\u2081 - X\u209c\u208b\u2082"
+    ],
+    "correct_answer": "\u03c6X\u209c\u208b\u2081 + \u03b5\u209c",
+    "explanation": "AR(1): current value = \u03c6 \u00d7 previous value + white noise.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "An MA(1) model is: X\u209c = ?",
+    "options": [
+      "\u03c6X\u209c\u208b\u2081 + \u03b5\u209c",
+      "\u03b5\u209c + \u03b8\u03b5\u209c\u208b\u2081",
+      "\u03c6X\u209c\u208b\u2081 + \u03b8\u03b5\u209c\u208b\u2081",
+      "\u03b5\u209c - \u03b5\u209c\u208b\u2082"
+    ],
+    "correct_answer": "\u03b5\u209c + \u03b8\u03b5\u209c\u208b\u2081",
+    "explanation": "MA(1): current value = white noise + \u03b8 \u00d7 previous noise.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "ARIMA(p,d,q) stands for:",
+    "options": [
+      "Autoregressive Integrated Moving Average",
+      "Autocorrelation Index Mean Average",
+      "Asymptotic Regression In Moving Averages",
+      "Adjusted R-squared In Model Analysis"
+    ],
+    "correct_answer": "Autoregressive Integrated Moving Average",
+    "explanation": "ARIMA: AR(p) + d-order differencing + MA(q).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The Dickey-Fuller test tests for:",
+    "options": [
+      "Autocorrelation",
+      "A unit root (non-stationarity)",
+      "Seasonal patterns",
+      "Heteroscedasticity"
+    ],
+    "correct_answer": "A unit root (non-stationarity)",
+    "explanation": "ADF test: H\u2080: unit root present (non-stationary series).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "Differencing a time series is used to:",
+    "options": [
+      "Add seasonality",
+      "Remove trend and achieve stationarity",
+      "Increase autocorrelation",
+      "Reduce sample size"
+    ],
+    "correct_answer": "Remove trend and achieve stationarity",
+    "explanation": "First differencing: \u2207X\u209c = X\u209c - X\u209c\u208b\u2081 removes linear trends.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The partial autocorrelation function (PACF) helps identify:",
+    "options": [
+      "MA order",
+      "AR order",
+      "Both AR and MA",
+      "Seasonal period"
+    ],
+    "correct_answer": "AR order",
+    "explanation": "PACF cuts off at lag p for AR(p) models.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "GARCH models are used for:",
+    "options": [
+      "Mean forecasting",
+      "Volatility (conditional variance) modeling",
+      "Trend removal",
+      "Seasonal adjustment"
+    ],
+    "correct_answer": "Volatility (conditional variance) modeling",
+    "explanation": "GARCH: Generalized Autoregressive Conditional Heteroskedasticity.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "Granger causality tests whether:",
+    "options": [
+      "X causes Y physically",
+      "Past values of X improve forecasts of Y",
+      "X and Y are correlated",
+      "Y is stationary"
+    ],
+    "correct_answer": "Past values of X improve forecasts of Y",
+    "explanation": "Granger causality: does X's past help predict Y beyond Y's own past?",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "Generalized linear models (GLMs) extend linear regression by allowing:",
+    "options": [
+      "Only normal errors",
+      "Non-normal response distributions via a link function",
+      "Only binary outcomes",
+      "Only count data"
+    ],
+    "correct_answer": "Non-normal response distributions via a link function",
+    "explanation": "GLMs use a link function to connect the linear predictor to E[Y].",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The canonical link for Poisson regression is:",
+    "options": [
+      "Identity",
+      "Logit",
+      "Log",
+      "Probit"
+    ],
+    "correct_answer": "Log",
+    "explanation": "Poisson GLM uses log link: log(\u03bc) = X\u03b2.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The canonical link for logistic regression is:",
+    "options": [
+      "Log",
+      "Identity",
+      "Logit",
+      "Probit"
+    ],
+    "correct_answer": "Logit",
+    "explanation": "Logistic: logit(p) = log(p/(1-p)) = X\u03b2.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "Deviance in GLMs is analogous to:",
+    "options": [
+      "R\u00b2",
+      "The residual sum of squares",
+      "AIC",
+      "BIC"
+    ],
+    "correct_answer": "The residual sum of squares",
+    "explanation": "Deviance measures lack of fit in GLMs.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "A random effects model (mixed model) includes:",
+    "options": [
+      "Only fixed effects",
+      "Both fixed and random effects",
+      "Only random effects",
+      "Neither fixed nor random"
+    ],
+    "correct_answer": "Both fixed and random effects",
+    "explanation": "Mixed models: fixed effects for population-level + random effects for group-level variation.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "Repeated measures ANOVA accounts for:",
+    "options": [
+      "Between-subject variability",
+      "Within-subject correlation over time",
+      "Non-normality",
+      "Missing data"
+    ],
+    "correct_answer": "Within-subject correlation over time",
+    "explanation": "Repeated measures accounts for correlation within subjects.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The Pearson correlation coefficient r is related to the OLS slope by:",
+    "options": [
+      "r = b\u2081",
+      "r = b\u2081\u00b7(sy/sx)",
+      "r = b\u2081\u00b7(sx/sy)",
+      "r = b\u2081\u00b2"
+    ],
+    "correct_answer": "r = b\u2081\u00b7(sx/sy)",
+    "explanation": "b\u2081 = r\u00b7(sy/sx), so r = b\u2081\u00b7(sx/sy).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "Spearman's rank correlation is:",
+    "options": [
+      "Pearson r on raw data",
+      "Pearson r computed on ranks",
+      "The slope of rank regression",
+      "The median correlation"
+    ],
+    "correct_answer": "Pearson r computed on ranks",
+    "explanation": "Spearman's \u03c1 = Pearson r applied to ranked data.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "Kendall's tau measures:",
+    "options": [
+      "Linear correlation",
+      "Concordance-discordance balance in pairs",
+      "Rank difference",
+      "Squared residuals"
+    ],
+    "correct_answer": "Concordance-discordance balance in pairs",
+    "explanation": "\u03c4 = (concordant - discordant pairs) / total pairs.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "Partial correlation between X\u2081 and Y controlling for X\u2082:",
+    "options": [
+      "Is always lower than Pearson r",
+      "Is the correlation after removing X\u2082's effect from both",
+      "Equals the regression coefficient",
+      "Requires normality"
+    ],
+    "correct_answer": "Is the correlation after removing X\u2082's effect from both",
+    "explanation": "Partial r controls for confounders.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The Chebyshev inequality gives a bound valid for:",
+    "options": [
+      "Normal distributions only",
+      "Any distribution with finite mean and variance",
+      "Symmetric distributions",
+      "Unimodal distributions"
+    ],
+    "correct_answer": "Any distribution with finite mean and variance",
+    "explanation": "Chebyshev applies universally, not just to normal distributions.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "Jensen's inequality states: for convex g, E[g(X)] _ g(E[X]).",
+    "options": [
+      "<",
+      "=",
+      "\u2265",
+      ">"
+    ],
+    "correct_answer": "\u2265",
+    "explanation": "Jensen: g convex \u2192 E[g(X)] \u2265 g(E[X]).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The covariance Cov(X,Y) = ?",
+    "options": [
+      "E[XY]",
+      "E[XY] - E[X]E[Y]",
+      "E[X]E[Y]",
+      "Var(X+Y)"
+    ],
+    "correct_answer": "E[XY] - E[X]E[Y]",
+    "explanation": "Cov(X,Y) = E[XY] - E[X]E[Y].",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "Var(aX + bY) = ?",
+    "options": [
+      "aVar(X)+bVar(Y)",
+      "a\u00b2Var(X)+b\u00b2Var(Y)+2ab\u00b7Cov(X,Y)",
+      "(a+b)\u00b2Var(X)",
+      "a\u00b2Var(X)+b\u00b2Var(Y)"
+    ],
+    "correct_answer": "a\u00b2Var(X)+b\u00b2Var(Y)+2ab\u00b7Cov(X,Y)",
+    "explanation": "Variance of linear combination.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "If X and Y are independent, Cov(X,Y) = ?",
+    "options": [
+      "1",
+      "Var(X)",
+      "0",
+      "E[X]"
+    ],
+    "correct_answer": "0",
+    "explanation": "Independent variables have zero covariance.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The correlation \u03c1(X,Y) = ?",
+    "options": [
+      "Cov(X,Y)",
+      "Cov(X,Y)/[\u03c3_X\u00b7\u03c3_Y]",
+      "Var(X)/Var(Y)",
+      "E[XY]"
+    ],
+    "correct_answer": "Cov(X,Y)/[\u03c3_X\u00b7\u03c3_Y]",
+    "explanation": "Pearson correlation = standardized covariance.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The multivariate normal distribution N(\u03bc,\u03a3) requires \u03a3 to be:",
+    "options": [
+      "Diagonal",
+      "Positive definite",
+      "Upper triangular",
+      "Orthogonal"
+    ],
+    "correct_answer": "Positive definite",
+    "explanation": "The covariance matrix must be symmetric and positive definite.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "If X~N(\u03bc,\u03a3), the marginal distributions are:",
+    "options": [
+      "Uniform",
+      "Normal",
+      "Chi-squared",
+      "Unknown"
+    ],
+    "correct_answer": "Normal",
+    "explanation": "Marginals of a multivariate normal are also normal.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The conditional distribution of X given Y in a bivariate normal is:",
+    "options": [
+      "Normal",
+      "Chi-squared",
+      "t-distributed",
+      "Uniform"
+    ],
+    "correct_answer": "Normal",
+    "explanation": "Conditional distributions in multivariate normal are also normal.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The moment E[X\u00b2] - (E[X])\u00b2 equals:",
+    "options": [
+      "E[X]",
+      "Var(X)",
+      "Cov(X,X)",
+      "Both B and C"
+    ],
+    "correct_answer": "Both B and C",
+    "explanation": "Var(X) = E[X\u00b2]-(E[X])\u00b2 = Cov(X,X).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The Friedman test is the nonparametric version of:",
+    "options": [
+      "One-way ANOVA",
+      "Two-way ANOVA (repeated measures)",
+      "Paired t-test",
+      "Two-sample t-test"
+    ],
+    "correct_answer": "Two-way ANOVA (repeated measures)",
+    "explanation": "Friedman test: ranks within blocks for two-way nonparametric ANOVA.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The permutation test is:",
+    "options": [
+      "Parametric",
+      "Distribution-free, based on all permutations of data",
+      "Asymptotic only",
+      "A Bayesian method"
+    ],
+    "correct_answer": "Distribution-free, based on all permutations of data",
+    "explanation": "Permutation tests make no distributional assumptions.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "Jackknife estimation omits one observation at a time to:",
+    "options": [
+      "Compute p-values",
+      "Estimate bias and variance of an estimator",
+      "Test normality",
+      "Find outliers"
+    ],
+    "correct_answer": "Estimate bias and variance of an estimator",
+    "explanation": "Jackknife: leave-one-out resampling for estimating estimator properties.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The bootstrap confidence interval is constructed using:",
+    "options": [
+      "Normal approximation only",
+      "The distribution of bootstrap statistics",
+      "The t-distribution",
+      "The chi-square distribution"
+    ],
+    "correct_answer": "The distribution of bootstrap statistics",
+    "explanation": "Bootstrap CI uses percentiles of the bootstrap distribution.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "A parametric bootstrap uses:",
+    "options": [
+      "The empirical distribution",
+      "The fitted parametric model to generate bootstrap samples",
+      "Only rank-based methods",
+      "The original data directly"
+    ],
+    "correct_answer": "The fitted parametric model to generate bootstrap samples",
+    "explanation": "Parametric bootstrap: simulate from the fitted model.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The Levene test is used to test:",
+    "options": [
+      "Normality",
+      "Equality of variances",
+      "Independence",
+      "Autocorrelation"
+    ],
+    "correct_answer": "Equality of variances",
+    "explanation": "Levene's test: H\u2080: all group variances are equal.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The Breusch-Pagan test detects:",
+    "options": [
+      "Autocorrelation",
+      "Multicollinearity",
+      "Heteroscedasticity",
+      "Non-normality"
+    ],
+    "correct_answer": "Heteroscedasticity",
+    "explanation": "Breusch-Pagan: tests if residual variance depends on predictors.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "A residual plot showing a funnel shape indicates:",
+    "options": [
+      "Autocorrelation",
+      "Heteroscedasticity",
+      "Non-normality",
+      "Multicollinearity"
+    ],
+    "correct_answer": "Heteroscedasticity",
+    "explanation": "Fan/funnel pattern in residuals vs. fitted \u2192 heteroscedastic errors.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The White test is a more general test for:",
+    "options": [
+      "Normality",
+      "Heteroscedasticity",
+      "Autocorrelation",
+      "Stationarity"
+    ],
+    "correct_answer": "Heteroscedasticity",
+    "explanation": "White's test: general heteroscedasticity test without assuming form.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "If the PACF of a time series cuts off after lag 2 and ACF tails off, the model is likely:",
+    "options": [
+      "MA(2)",
+      "AR(2)",
+      "ARMA(2,2)",
+      "ARIMA(0,1,2)"
+    ],
+    "correct_answer": "AR(2)",
+    "explanation": "AR(p): PACF cuts off at p, ACF tails off.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "If the ACF cuts off after lag 1 and PACF tails off, the model is likely:",
+    "options": [
+      "AR(1)",
+      "MA(1)",
+      "ARMA(1,1)",
+      "ARIMA(1,0,0)"
+    ],
+    "correct_answer": "MA(1)",
+    "explanation": "MA(q): ACF cuts off at q, PACF tails off.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The Box-Pierce test statistic Q = n\u00b7\u03a3\u03c1\u0302\u2096\u00b2 tests:",
+    "options": [
+      "Unit roots",
+      "Autocorrelation of residuals (white noise)",
+      "Heteroscedasticity",
+      "Normality"
+    ],
+    "correct_answer": "Autocorrelation of residuals (white noise)",
+    "explanation": "Box-Pierce/Ljung-Box: H\u2080: no autocorrelation up to lag K.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The Kullback-Leibler divergence D_KL(P||Q) = ?",
+    "options": [
+      "\u03a3p_i\u00b7log(q_i/p_i)",
+      "\u03a3p_i\u00b7log(p_i/q_i)",
+      "\u03a3(p_i-q_i)\u00b2",
+      "\u03a3|p_i-q_i|"
+    ],
+    "correct_answer": "\u03a3p_i\u00b7log(p_i/q_i)",
+    "explanation": "KL divergence: D_KL(P||Q) = \u03a3 p_i log(p_i/q_i).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The KL divergence is:",
+    "options": [
+      "Always symmetric",
+      "Non-negative",
+      "Can be negative",
+      "Always equals 0"
+    ],
+    "correct_answer": "Non-negative",
+    "explanation": "D_KL(P||Q) \u2265 0, with equality iff P=Q.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "Entropy H(X) = ?",
+    "options": [
+      "E[log f(X)]",
+      "\u2212E[log f(X)]",
+      "Var(X)",
+      "E[X\u00b2]"
+    ],
+    "correct_answer": "-E[log f(X)]",
+    "explanation": "Shannon entropy: H(X) = -\u03a3 p_i log p_i.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "Mutual information I(X;Y) = 0 implies:",
+    "options": [
+      "X and Y are correlated",
+      "X and Y are independent",
+      "E[X] = E[Y]",
+      "X = Y"
+    ],
+    "correct_answer": "X and Y are independent",
+    "explanation": "Zero mutual information means no statistical dependence.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The Fisher-Neyman factorization theorem characterizes:",
+    "options": [
+      "Sufficient statistics",
+      "Unbiased estimators",
+      "Consistent estimators",
+      "Efficient estimators"
+    ],
+    "correct_answer": "Sufficient statistics",
+    "explanation": "T(X) is sufficient iff f(x;\u03b8) = g(T(x),\u03b8)\u00b7h(x).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The score function is:",
+    "options": [
+      "\u2202logL/\u2202\u03b8",
+      "logL(\u03b8)",
+      "E[\u2202logL/\u2202\u03b8]",
+      "\u2202\u00b2logL/\u2202\u03b8\u00b2"
+    ],
+    "correct_answer": "\u2202logL/\u2202\u03b8",
+    "explanation": "Score: s(\u03b8) = \u2202log L(\u03b8)/\u2202\u03b8. E[score]=0 at true \u03b8.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The observed Fisher information is:",
+    "options": [
+      "E[(score)\u00b2]",
+      "-\u2202\u00b2logL/\u2202\u03b8\u00b2",
+      "\u2202logL/\u2202\u03b8",
+      "\u2202\u00b2logL/\u2202\u03b8\u00b2"
+    ],
+    "correct_answer": "-\u2202\u00b2logL/\u2202\u03b8\u00b2",
+    "explanation": "Observed Fisher info: I_obs = -d\u00b2/d\u03b8\u00b2 log L(\u03b8\u0302).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "A hypothesis test is consistent if:",
+    "options": [
+      "P(Type I error) \u2192 0",
+      "Power \u2192 0 as n \u2192 \u221e",
+      "Power \u2192 1 as n \u2192 \u221e",
+      "\u03b1 \u2192 0"
+    ],
+    "correct_answer": "Power \u2192 1 as n \u2192 \u221e",
+    "explanation": "Consistency of a test: power \u2192 1 under any fixed H\u2081.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The Wald test statistic for H\u2080: \u03b8=\u03b8\u2080 is:",
+    "options": [
+      "(\u03b8\u0302-\u03b8\u2080)/SE(\u03b8\u0302)",
+      "log(L(\u03b8\u0302)/L(\u03b8\u2080))",
+      "2[\u2113(\u03b8\u0302)-\u2113(\u03b8\u2080)]",
+      "(\u03b8\u0302-\u03b8\u2080)\u00b2"
+    ],
+    "correct_answer": "(\u03b8\u0302-\u03b8\u2080)/SE(\u03b8\u0302)",
+    "explanation": "Wald: W = (\u03b8\u0302-\u03b8\u2080)/SE(\u03b8\u0302), approximately N(0,1).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The score test (Lagrange multiplier test) evaluates:",
+    "options": [
+      "The fit at the unrestricted MLE",
+      "The score function at the restricted estimate \u03b8\u2080",
+      "The likelihood ratio",
+      "The Wald statistic"
+    ],
+    "correct_answer": "The score function at the restricted estimate \u03b8\u2080",
+    "explanation": "Score test: only requires fitting H\u2080 model.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "Asymptotically, the Wald, LRT, and Score tests are:",
+    "options": [
+      "Different",
+      "Equivalent under H\u2080",
+      "Only equal for normal data",
+      "Never equivalent"
+    ],
+    "correct_answer": "Equivalent under H\u2080",
+    "explanation": "All three have the same \u03c7\u00b2 limiting distribution under H\u2080.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The false discovery rate (FDR) controls:",
+    "options": [
+      "P(at least one false positive)",
+      "Expected proportion of false positives among all rejections",
+      "P(all nulls are true)",
+      "The Type II error"
+    ],
+    "correct_answer": "Expected proportion of false positives among all rejections",
+    "explanation": "FDR (Benjamini-Hochberg) is less conservative than FWER control.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The family-wise error rate (FWER) is:",
+    "options": [
+      "P(at least one Type II error)",
+      "P(at least one false rejection among all tests)",
+      "The FDR",
+      "The average power"
+    ],
+    "correct_answer": "P(at least one false rejection among all tests)",
+    "explanation": "FWER = P(any false positive) in multiple testing.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "Which model selection criterion is asymptotically consistent?",
+    "options": [
+      "AIC",
+      "BIC",
+      "Mallow's Cp",
+      "All of the above"
+    ],
+    "correct_answer": "BIC",
+    "explanation": "BIC is consistent: selects the true model as n\u2192\u221e. AIC is not.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The expected value of the chi-squared distribution \u03c7\u00b2(k) is:",
+    "options": [
+      "k\u00b2",
+      "k/2",
+      "k",
+      "\u221ak"
+    ],
+    "correct_answer": "k",
+    "explanation": "E[\u03c7\u00b2(k)] = k (degrees of freedom).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The variance of \u03c7\u00b2(k) is:",
+    "options": [
+      "k",
+      "2k",
+      "k\u00b2",
+      "\u221a(2k)"
+    ],
+    "correct_answer": "2k",
+    "explanation": "Var[\u03c7\u00b2(k)] = 2k.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The t-distribution approaches the standard normal as:",
+    "options": [
+      "df \u2192 0",
+      "df \u2192 1",
+      "df \u2192 \u221e",
+      "df \u2192 30 exactly"
+    ],
+    "correct_answer": "df \u2192 \u221e",
+    "explanation": "t(\u03bd) \u2192 N(0,1) as \u03bd \u2192 \u221e.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "In a two-way ANOVA, the interaction term tests:",
+    "options": [
+      "Whether row means differ",
+      "Whether column means differ",
+      "Whether the effect of one factor depends on the other",
+      "Whether residuals are normal"
+    ],
+    "correct_answer": "Whether the effect of one factor depends on the other",
+    "explanation": "Interaction: does Factor A's effect change across levels of Factor B?",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "A Type III sum of squares in ANOVA:",
+    "options": [
+      "Tests each factor ignoring all others",
+      "Tests each factor adjusting for all other factors",
+      "Is the total SS",
+      "Equals Type I SS"
+    ],
+    "correct_answer": "Tests each factor adjusting for all other factors",
+    "explanation": "Type III SS: marginal tests, accounting for all other effects.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The variance of the sample mean X\u0304 is:",
+    "options": [
+      "\u03c3\u00b2",
+      "\u03c3\u00b2/n",
+      "\u03c3/n",
+      "\u03c3\u00b2\u00b7n"
+    ],
+    "correct_answer": "\u03c3\u00b2/n",
+    "explanation": "Var(X\u0304) = \u03c3\u00b2/n.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "An estimator \u03b8\u0302\u2099 is asymptotically normal if:",
+    "options": [
+      "\u03b8\u0302\u2099 = \u03b8",
+      "\u221an(\u03b8\u0302\u2099-\u03b8)\u2192N(0,V)",
+      "\u03b8\u0302\u2099\u2192\u03b8 a.s.",
+      "Var(\u03b8\u0302\u2099)=0"
+    ],
+    "correct_answer": "\u221an(\u03b8\u0302\u2099-\u03b8)\u2192N(0,V)",
+    "explanation": "Asymptotic normality: scaled error converges in distribution to normal.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The relative efficiency of \u03b8\u0302\u2081 vs \u03b8\u0302\u2082 is:",
+    "options": [
+      "Var(\u03b8\u0302\u2081)/Var(\u03b8\u0302\u2082)",
+      "Var(\u03b8\u0302\u2082)/Var(\u03b8\u0302\u2081)",
+      "MSE(\u03b8\u0302\u2081)-MSE(\u03b8\u0302\u2082)",
+      "Bias(\u03b8\u0302\u2081)/Bias(\u03b8\u0302\u2082)"
+    ],
+    "correct_answer": "Var(\u03b8\u0302\u2082)/Var(\u03b8\u0302\u2081)",
+    "explanation": "RE = Var(\u03b8\u0302\u2082)/Var(\u03b8\u0302\u2081); >1 means \u03b8\u0302\u2081 is more efficient.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The sandwich estimator of variance is used when:",
+    "options": [
+      "Data is normal",
+      "Model is correctly specified",
+      "Model may be misspecified",
+      "Sample size is small"
+    ],
+    "correct_answer": "Model may be misspecified",
+    "explanation": "Robust (sandwich) SE accounts for model misspecification.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "A pivot quantity:",
+    "options": [
+      "Depends on unknown parameters",
+      "Has a distribution free of unknown parameters",
+      "Equals the MLE",
+      "Is always normal"
+    ],
+    "correct_answer": "Has a distribution free of unknown parameters",
+    "explanation": "Pivots are used to construct exact confidence intervals.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The sign test uses the fact that under H\u2080: median = m\u2080, each observation is above m\u2080 with probability:",
+    "options": [
+      "0",
+      "1",
+      "0.5",
+      "Unknown"
+    ],
+    "correct_answer": "0.5",
+    "explanation": "Under H\u2080, P(X\u1d62 > m\u2080) = 0.5, making it a binomial test.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The Behrens-Fisher problem involves:",
+    "options": [
+      "Testing equal variances",
+      "Testing equal means with unequal and unknown variances",
+      "Testing normality",
+      "Testing independence"
+    ],
+    "correct_answer": "Testing equal means with unequal and unknown variances",
+    "explanation": "Behrens-Fisher: two-sample t-test when \u03c3\u2081\u00b2 \u2260 \u03c3\u2082\u00b2 are both unknown.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "Robust statistics resist:",
+    "options": [
+      "Large sample sizes",
+      "The influence of outliers and model violations",
+      "Small p-values",
+      "Bayesian inference"
+    ],
+    "correct_answer": "The influence of outliers and model violations",
+    "explanation": "Robust methods maintain performance despite violations of assumptions.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  },
+  {
+    "question": "The M-estimator minimizes:",
+    "options": [
+      "\u03a3(y\u1d62-\u03b8)\u00b2",
+      "\u03a3\u03c1(y\u1d62-\u03b8) for some function \u03c1",
+      "\u03a3|y\u1d62-\u03b8|",
+      "The likelihood"
+    ],
+    "correct_answer": "\u03a3\u03c1(y\u1d62-\u03b8) for some function \u03c1",
+    "explanation": "M-estimators generalize MLE and least squares via a loss function \u03c1.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "statistics"
+  }
+]

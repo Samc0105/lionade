@@ -1,0 +1,702 @@
+[
+  {
+    "question": "In triangle ABC, AB=13, BC=14, AC=15. What is the area?",
+    "options": [
+      "84",
+      "90",
+      "105",
+      "210"
+    ],
+    "correct_answer": "84",
+    "explanation": "s=(13+14+15)/2=21. Area=√(21·8·7·6)=√7056=84.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "A circle has equation x²+y²−6x+8y−11=0. What is its radius?",
+    "options": [
+      "4",
+      "6",
+      "8",
+      "36"
+    ],
+    "correct_answer": "6",
+    "explanation": "Complete the square: (x−3)²+(y+4)²=9+16+11=36. Radius=6.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the area of a triangle with vertices (1,2), (4,6), and (7,2)?",
+    "options": [
+      "6",
+      "12",
+      "18",
+      "24"
+    ],
+    "correct_answer": "12",
+    "explanation": "Using the shoelace formula: (1/2)|1(6−2)+4(2−2)+7(2−6)|=(1/2)|4+0−28|=(1/2)(24)=12.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "In a right triangle, the altitude to the hypotenuse has length 6, and one segment of the hypotenuse is 4. What is the other segment?",
+    "options": [
+      "5",
+      "8",
+      "9",
+      "12"
+    ],
+    "correct_answer": "9",
+    "explanation": "By the geometric mean: altitude²=product of segments → 36=4x → x=9.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "Two secants from external point P create arcs of 120° and 40°. What is angle P?",
+    "options": [
+      "30°",
+      "40°",
+      "60°",
+      "80°"
+    ],
+    "correct_answer": "40°",
+    "explanation": "Angle=(1/2)(far arc−near arc)=(1/2)(120°−40°)=40°.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "A regular tetrahedron has edge length 4. What is its height?",
+    "options": [
+      "2√(2/3)",
+      "4√(2/3)",
+      "4√6/3",
+      "8√6/3"
+    ],
+    "correct_answer": "4√6/3",
+    "explanation": "Height of regular tetrahedron=s√(2/3)=4√(2/3)=4√6/3.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "Find the area of a triangle with sides 8, 11, and 13.",
+    "options": [
+      "8√30",
+      "4√30",
+      "30",
+      "16√30"
+    ],
+    "correct_answer": "8√30",
+    "explanation": "s=(8+11+13)/2=16. A=√(16·8·5·3)=√1920=8√30.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the power of a point 7 units from the center of a circle with radius 5?",
+    "options": [
+      "2",
+      "12",
+      "24",
+      "74"
+    ],
+    "correct_answer": "24",
+    "explanation": "Power of a point=d²−r²=49−25=24.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "A cyclic quadrilateral has opposite angles that are what?",
+    "options": [
+      "Equal",
+      "Complementary",
+      "Supplementary",
+      "Congruent"
+    ],
+    "correct_answer": "Supplementary",
+    "explanation": "In a cyclic quadrilateral inscribed in a circle, opposite angles are supplementary (sum to 180°).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the distance from the point (3,−1) to the line 5x+12y−7=0?",
+    "options": [
+      "2/13",
+      "4/13",
+      "10/13",
+      "2"
+    ],
+    "correct_answer": "4/13",
+    "explanation": "d=|5(3)+12(−1)−7|/√(25+144)=|15−12−7|/13=4/13.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "In triangle ABC, the incircle has radius 4 and the semiperimeter is 15. What is the area?",
+    "options": [
+      "30",
+      "45",
+      "60",
+      "120"
+    ],
+    "correct_answer": "60",
+    "explanation": "Area=inradius×semiperimeter=4×15=60.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "Two tangent lines from point P to a circle form a 60° angle. If the radius is 5, what is the distance from P to the center?",
+    "options": [
+      "5√2",
+      "5√3",
+      "10",
+      "10√3/3"
+    ],
+    "correct_answer": "10",
+    "explanation": "The angle between the two tangents is 60°, so half-angle=30°. sin30°=r/d → 1/2=5/d → d=10.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "Find the area of the triangle formed by the coordinate axes and the line 3x+4y=24.",
+    "options": [
+      "12",
+      "24",
+      "36",
+      "48"
+    ],
+    "correct_answer": "24",
+    "explanation": "x-intercept=8, y-intercept=6. Area=(1/2)(8)(6)=24.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "A sphere is inscribed in a cone with base radius 6 and height 8. What is the sphere's radius?",
+    "options": [
+      "2",
+      "2.4",
+      "3",
+      "4"
+    ],
+    "correct_answer": "3",
+    "explanation": "Slant height=√(36+64)=10. The inscribed sphere radius r=R·h/(√(R²+h²)+R)=6(8)/(10+6)=48/16=3.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the equation of the tangent to the circle x²+y²=25 at the point (3,4)?",
+    "options": [
+      "3x+4y=25",
+      "4x+3y=25",
+      "3x−4y=25",
+      "4x−3y=25"
+    ],
+    "correct_answer": "3x+4y=25",
+    "explanation": "For circle x²+y²=r², the tangent at (x₁,y₁) is x₁x+y₁y=r². So 3x+4y=25.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "In a triangle with sides 7, 24, 25, what is the inradius?",
+    "options": [
+      "2",
+      "3",
+      "4",
+      "6"
+    ],
+    "correct_answer": "3",
+    "explanation": "It's a right triangle (7²+24²=625=25²). Area=(1/2)(7)(24)=84. s=(7+24+25)/2=28. r=Area/s=84/28=3.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the area of a regular octagon inscribed in a circle of radius 10?",
+    "options": [
+      "200",
+      "200√2",
+      "100√2",
+      "400"
+    ],
+    "correct_answer": "200√2",
+    "explanation": "Area=(1/2)nr²sin(360°/n)=(1/2)(8)(100)sin45°=400(√2/2)=200√2.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "Two circles of radii 3 and 5 have centers 8 apart. What is the length of their common external tangent?",
+    "options": [
+      "2√15",
+      "4√3",
+      "6",
+      "8"
+    ],
+    "correct_answer": "2√15",
+    "explanation": "External tangent length=√(d²−(R−r)²)=√(64−4)=√60=2√15.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "A sphere has volume 36π. What is its surface area?",
+    "options": [
+      "12π",
+      "24π",
+      "36π",
+      "48π"
+    ],
+    "correct_answer": "36π",
+    "explanation": "(4/3)πr³=36π→r³=27→r=3. SA=4π(9)=36π.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "Find the circumradius of a triangle with sides 5, 12, and 13.",
+    "options": [
+      "5",
+      "6",
+      "6.5",
+      "7"
+    ],
+    "correct_answer": "6.5",
+    "explanation": "It's a right triangle. Circumradius=hypotenuse/2=13/2=6.5.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the locus of points equidistant from two given points?",
+    "options": [
+      "A circle",
+      "The perpendicular bisector of the segment",
+      "A parabola",
+      "A line parallel to the segment"
+    ],
+    "correct_answer": "The perpendicular bisector of the segment",
+    "explanation": "The set of all points equidistant from two points is the perpendicular bisector of the segment connecting them.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "A cone is cut by a plane parallel to the base at half the height. What fraction of the volume is the smaller cone?",
+    "options": [
+      "1/2",
+      "1/4",
+      "1/6",
+      "1/8"
+    ],
+    "correct_answer": "1/8",
+    "explanation": "At half height, the radius is also halved. V_small=(1/3)π(r/2)²(h/2)=(1/8)·(1/3)πr²h=1/8 of original.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the length of the common internal tangent of two circles with radii 3 and 5, centers 10 apart?",
+    "options": [
+      "6",
+      "√36",
+      "2√11",
+      "√66"
+    ],
+    "correct_answer": "6",
+    "explanation": "Internal tangent=√(d²−(R+r)²)=√(100−64)=√36=6.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "In an equilateral triangle with side 12, what is the distance from the centroid to a vertex?",
+    "options": [
+      "4",
+      "4√3",
+      "6",
+      "6√3"
+    ],
+    "correct_answer": "4√3",
+    "explanation": "Height=6√3. Centroid divides median 2:1 from vertex. Distance=2/3(6√3)=4√3.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "A cylinder is inscribed in a sphere of radius R. What height maximizes the cylinder's volume?",
+    "options": [
+      "R",
+      "R√2",
+      "2R/√3",
+      "2R√(2/3)"
+    ],
+    "correct_answer": "2R/√3",
+    "explanation": "Maximize V=πr²h where r²+h²/4=R². Optimal h=2R/√3.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "The tangent to the circle x²+y²=16 at point (2√2, 2√2) forms a triangle with the axes. What is its area?",
+    "options": [
+      "8",
+      "16",
+      "32",
+      "64"
+    ],
+    "correct_answer": "16",
+    "explanation": "Tangent: 2√2·x+2√2·y=16 → x+y=4√2. x-intercept=4√2, y-intercept=4√2. Area=(1/2)(4√2)(4√2)=16.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "Two chords AB and CD intersect at point E inside a circle. If AE=3, EB=8, CE=4, find ED.",
+    "options": [
+      "5",
+      "6",
+      "7",
+      "24"
+    ],
+    "correct_answer": "6",
+    "explanation": "By the intersecting chords theorem: AE·EB=CE·ED → 3(8)=4(ED) → ED=6.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the volume of a solid formed by rotating a right triangle with legs 3 and 4 about its longer leg?",
+    "options": [
+      "12π",
+      "16π",
+      "36π",
+      "48π"
+    ],
+    "correct_answer": "12π",
+    "explanation": "Rotating about leg 4: radius=3, height=4. V=π(3²)(4)/1... Actually it's a cone: V=(1/3)π(9)(4)=12π.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "In a regular hexagon ABCDEF, what is the measure of angle ACE?",
+    "options": [
+      "30°",
+      "45°",
+      "60°",
+      "90°"
+    ],
+    "correct_answer": "60°",
+    "explanation": "A, C, E are alternate vertices forming an equilateral triangle. Each angle is 60°.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "A triangle has area 30, and two sides are 12 and 10. What is the sine of the included angle?",
+    "options": [
+      "1/4",
+      "1/3",
+      "1/2",
+      "2/3"
+    ],
+    "correct_answer": "1/2",
+    "explanation": "Area=(1/2)ab·sinC → 30=(1/2)(12)(10)sinC → sinC=1/2.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "Find the radius of a circle inscribed in a right triangle with legs 5 and 12.",
+    "options": [
+      "2",
+      "3",
+      "4",
+      "5"
+    ],
+    "correct_answer": "2",
+    "explanation": "Hypotenuse=13. r=(a+b−c)/2=(5+12−13)/2=4/2=2.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the volume of a regular octahedron with edge length 6?",
+    "options": [
+      "36√2",
+      "72√2",
+      "108√2",
+      "144√2"
+    ],
+    "correct_answer": "72√2",
+    "explanation": "Volume = (√2/3)a³ = (√2/3)(216) = 72√2.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "In a circle, an inscribed angle and a central angle intercept the same arc. What is their relationship?",
+    "options": [
+      "They are equal",
+      "The inscribed angle is half the central angle",
+      "The central angle is half the inscribed angle",
+      "They are supplementary"
+    ],
+    "correct_answer": "The inscribed angle is half the central angle",
+    "explanation": "An inscribed angle is always half the central angle that intercepts the same arc.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the area of the quadrilateral with vertices (0,0), (4,0), (5,3), and (1,3)?",
+    "options": [
+      "9",
+      "12",
+      "15",
+      "18"
+    ],
+    "correct_answer": "12",
+    "explanation": "This is a parallelogram with base 4 and height 3. Area=4×3=12.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "A frustum of a cone has top radius 2, bottom radius 5, and height 4. What is its slant height?",
+    "options": [
+      "4",
+      "5",
+      "√7",
+      "√41"
+    ],
+    "correct_answer": "5",
+    "explanation": "Slant=√(h²+(R−r)²)=√(16+9)=√25=5.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "The medial triangle of a triangle has what fraction of the original's area?",
+    "options": [
+      "1/2",
+      "1/3",
+      "1/4",
+      "1/6"
+    ],
+    "correct_answer": "1/4",
+    "explanation": "The medial triangle (formed by connecting midpoints) has 1/4 the area of the original triangle.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "Two circles of radii 8 and 3 are externally tangent. What is the distance between their centers?",
+    "options": [
+      "5",
+      "8",
+      "11",
+      "24"
+    ],
+    "correct_answer": "11",
+    "explanation": "For externally tangent circles, the distance between centers=R+r=8+3=11.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "Find the area of a triangle with sides 10, 17, and 21.",
+    "options": [
+      "60",
+      "72",
+      "84",
+      "90"
+    ],
+    "correct_answer": "84",
+    "explanation": "s=(10+17+21)/2=24. A=√(24·14·7·3)=√7056=84.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "A line through (2,5) makes a 45° angle with the x-axis. What is its equation?",
+    "options": [
+      "y=x+3",
+      "y=−x+7",
+      "y=x+5",
+      "Both A and B"
+    ],
+    "correct_answer": "Both A and B",
+    "explanation": "Slope=tan(45°)=1 or tan(135°)=−1. Lines: y=x+3 and y=−x+7. Both pass through (2,5).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the angle subtended by a chord equal to the radius at the center?",
+    "options": [
+      "30°",
+      "45°",
+      "60°",
+      "90°"
+    ],
+    "correct_answer": "60°",
+    "explanation": "When chord=radius, the triangle formed with two radii is equilateral, so the central angle is 60°.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "A cube has side 6. What is the distance between two opposite edges that do not share a face?",
+    "options": [
+      "6",
+      "6√2",
+      "6√3",
+      "12"
+    ],
+    "correct_answer": "6",
+    "explanation": "The distance between two skew edges of a cube that are opposite is equal to the side length: 6.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "In a circle of radius 10, two parallel chords have lengths 12 and 16. What is the distance between them if they are on the same side?",
+    "options": [
+      "2",
+      "4",
+      "8",
+      "14"
+    ],
+    "correct_answer": "2",
+    "explanation": "Distance from center to chord 12: √(100−36)=8. To chord 16: √(100−64)=6. Same side: 8−6=2.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the area of the region bounded by y=x², y=0, x=0, and x=3?",
+    "options": [
+      "3",
+      "6",
+      "9",
+      "27"
+    ],
+    "correct_answer": "9",
+    "explanation": "Area=∫₀³ x² dx=[x³/3]₀³=27/3=9.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "A tangent from external point P to a circle has length 8. If PO (center distance)=10, what is the radius?",
+    "options": [
+      "2",
+      "4",
+      "6",
+      "8"
+    ],
+    "correct_answer": "6",
+    "explanation": "r²+8²=10² → r²=100−64=36 → r=6.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "In an isosceles trapezoid with bases 8 and 14 and legs 5, what is the height?",
+    "options": [
+      "3",
+      "4",
+      "5",
+      "√34"
+    ],
+    "correct_answer": "4",
+    "explanation": "Each horizontal extension=(14−8)/2=3. Height=√(25−9)=√16=4.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the radius of the circumscribed circle of an equilateral triangle with side 6?",
+    "options": [
+      "2√3",
+      "3",
+      "6/√3",
+      "Both A and C"
+    ],
+    "correct_answer": "Both A and C",
+    "explanation": "R=s/√3=6/√3=2√3. Both expressions are equivalent.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "A sphere and cylinder have equal radii and equal heights (cylinder height=sphere diameter). What is the ratio of their volumes?",
+    "options": [
+      "1:1",
+      "2:3",
+      "3:4",
+      "4:3"
+    ],
+    "correct_answer": "2:3",
+    "explanation": "Sphere V=(4/3)πr³, cylinder V=πr²(2r)=2πr³. Ratio=(4/3)/(2)=2/3=2:3.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "Find the equation of the circle passing through (0,0), (6,0), and (0,8).",
+    "options": [
+      "(x−3)²+(y−4)²=25",
+      "(x−4)²+(y−3)²=25",
+      "x²+y²=100",
+      "(x−3)²+(y−4)²=36"
+    ],
+    "correct_answer": "(x−3)²+(y−4)²=25",
+    "explanation": "Center is equidistant from all three: (h,k). From (0,0) and (6,0): h=3. From (0,0) and (0,8): k=4. r²=9+16=25.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "In a regular polygon, each interior angle is 5 times the exterior angle. How many sides?",
+    "options": [
+      "10",
+      "12",
+      "15",
+      "18"
+    ],
+    "correct_answer": "12",
+    "explanation": "Interior=5×exterior. Interior+exterior=180°→6×exterior=180°→exterior=30°. n=360°/30°=12.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the volume of a torus with major radius R=5 and tube radius r=2?",
+    "options": [
+      "20π²",
+      "40π²",
+      "80π²",
+      "100π²"
+    ],
+    "correct_answer": "40π²",
+    "explanation": "Volume of torus = 2π²Rr² = 2π²(5)(4) = 40π².",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  }
+]

@@ -1,0 +1,452 @@
+[
+  {
+    "question": "Solve for x: 4(x − 3) = 2(x + 5)",
+    "options": ["11", "8", "−1", "5"],
+    "correct_answer": "11",
+    "explanation": "Distribute: 4x − 12 = 2x + 10. Subtract 2x: 2x − 12 = 10. Add 12: 2x = 22. Divide by 2: x = 11.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "algebra"
+  },
+  {
+    "question": "Factor: x² − 16x + 64",
+    "options": ["(x − 8)²", "(x + 8)²", "(x − 4)(x − 16)", "(x − 32)(x − 2)"],
+    "correct_answer": "(x − 8)²",
+    "explanation": "This is a perfect square trinomial: x² − 2(8)(x) + 8² = (x − 8)².",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "algebra"
+  },
+  {
+    "question": "What is the slope of the line 3x + 6y = 18?",
+    "options": ["3", "−1/2", "1/2", "−3"],
+    "correct_answer": "−1/2",
+    "explanation": "Rewrite in slope-intercept form: 6y = −3x + 18 → y = −(1/2)x + 3. The slope is −1/2.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "algebra"
+  },
+  {
+    "question": "Solve the inequality: 5 − 3x < 20",
+    "options": ["x > −5", "x < −5", "x > 5", "x < 5"],
+    "correct_answer": "x > −5",
+    "explanation": "Subtract 5: −3x < 15. Divide by −3 and flip the sign: x > −5.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "algebra"
+  },
+  {
+    "question": "If f(x) = x³ − 2x, what is f(3)?",
+    "options": ["21", "27", "15", "33"],
+    "correct_answer": "21",
+    "explanation": "Substitute: (3)³ − 2(3) = 27 − 6 = 21.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "algebra"
+  },
+  {
+    "question": "Factor: x² − 3x − 18",
+    "options": ["(x − 6)(x + 3)", "(x + 6)(x − 3)", "(x − 9)(x + 2)", "(x − 2)(x + 9)"],
+    "correct_answer": "(x − 6)(x + 3)",
+    "explanation": "Find two numbers that multiply to −18 and add to −3: −6 and 3. So x² − 3x − 18 = (x − 6)(x + 3).",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "algebra"
+  },
+  {
+    "question": "Write the equation of a line passing through (1, 4) with slope −2.",
+    "options": ["y = −2x + 6", "y = −2x + 4", "y = 2x + 2", "y = −2x − 6"],
+    "correct_answer": "y = −2x + 6",
+    "explanation": "Use point-slope form: y − 4 = −2(x − 1) → y = −2x + 2 + 4 = −2x + 6.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "algebra"
+  },
+  {
+    "question": "Simplify: x⁻² when x = 3",
+    "options": ["9", "−9", "1/9", "−6"],
+    "correct_answer": "1/9",
+    "explanation": "A negative exponent means the reciprocal: x⁻² = 1/x² = 1/9.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "algebra"
+  },
+  {
+    "question": "Solve the system: 4x − y = 5 and 2x + y = 7",
+    "options": ["x = 2, y = 3", "x = 3, y = 7", "x = 1, y = −1", "x = 2, y = −3"],
+    "correct_answer": "x = 2, y = 3",
+    "explanation": "Add the equations: 6x = 12, so x = 2. Substitute: 4 + y = 7, so y = 3.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "algebra"
+  },
+  {
+    "question": "What is the x-intercept of the line y = 5x − 15?",
+    "options": ["(3, 0)", "(−3, 0)", "(0, −15)", "(15, 0)"],
+    "correct_answer": "(3, 0)",
+    "explanation": "Set y = 0: 0 = 5x − 15. Add 15: 5x = 15. Divide by 5: x = 3. The x-intercept is (3, 0).",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "algebra"
+  },
+  {
+    "question": "Factor completely: 5x² + 20x + 15",
+    "options": ["5(x + 1)(x + 3)", "(5x + 5)(x + 3)", "5(x² + 4x + 3)", "(5x + 3)(x + 5)"],
+    "correct_answer": "5(x + 1)(x + 3)",
+    "explanation": "Factor out 5: 5(x² + 4x + 3). Then factor the trinomial: 5(x + 1)(x + 3).",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "algebra"
+  },
+  {
+    "question": "Solve: x² = 49",
+    "options": ["x = 7 only", "x = −7 only", "x = ±7", "x = ±49"],
+    "correct_answer": "x = ±7",
+    "explanation": "Take the square root of both sides: x = ±√49 = ±7. Both positive and negative roots are valid.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "algebra"
+  },
+  {
+    "question": "Solve the compound inequality: −3 < 2x + 1 < 9",
+    "options": ["-2 < x < 4", "−1 < x < 5", "−2 ≤ x ≤ 4", "−1 < x < 4"],
+    "correct_answer": "-2 < x < 4",
+    "explanation": "Subtract 1 from all parts: −4 < 2x < 8. Divide by 2: −2 < x < 4.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "algebra"
+  },
+  {
+    "question": "What is the domain of f(x) = √(x − 3)?",
+    "options": ["x ≥ 3", "x > 3", "All real numbers", "x ≥ 0"],
+    "correct_answer": "x ≥ 3",
+    "explanation": "The expression under the square root must be non-negative: x − 3 ≥ 0, so x ≥ 3.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "algebra"
+  },
+  {
+    "question": "Simplify: (2x³)³",
+    "options": ["6x⁹", "8x⁹", "2x⁹", "8x⁶"],
+    "correct_answer": "8x⁹",
+    "explanation": "Raise both the coefficient and variable to the third power: 2³ = 8 and (x³)³ = x⁹, giving 8x⁹.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "algebra"
+  },
+  {
+    "question": "Two angles are complementary. One angle is (3x + 5)° and the other is (2x)°. Find x.",
+    "options": ["17", "19", "15", "20"],
+    "correct_answer": "17",
+    "explanation": "Complementary angles add to 90°: 3x + 5 + 2x = 90 → 5x + 5 = 90 → 5x = 85 → x = 17.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "algebra"
+  },
+  {
+    "question": "What is the axis of symmetry for y = 2x² + 8x − 3?",
+    "options": ["x = −2", "x = 2", "x = −4", "x = 4"],
+    "correct_answer": "x = −2",
+    "explanation": "The axis of symmetry is x = −b/(2a) = −8/(2·2) = −8/4 = −2.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "algebra"
+  },
+  {
+    "question": "Solve for x: |4x − 8| = 0",
+    "options": ["x = 2", "x = 0", "x = −2", "No solution"],
+    "correct_answer": "x = 2",
+    "explanation": "An absolute value equals zero only when the expression inside is zero: 4x − 8 = 0, so x = 2.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "algebra"
+  },
+  {
+    "question": "Multiply: (x − 5)²",
+    "options": ["x² − 25", "x² − 10x + 25", "x² + 10x + 25", "x² − 5x + 25"],
+    "correct_answer": "x² − 10x + 25",
+    "explanation": "Use (a − b)² = a² − 2ab + b²: x² − 2(x)(5) + 25 = x² − 10x + 25.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "algebra"
+  },
+  {
+    "question": "If f(x) = x + 3 and g(x) = 2x − 1, what is g(f(x))?",
+    "options": ["2x + 5", "2x + 1", "2x − 4", "2x + 2"],
+    "correct_answer": "2x + 5",
+    "explanation": "Substitute f(x) into g: g(x + 3) = 2(x + 3) − 1 = 2x + 6 − 1 = 2x + 5.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "algebra"
+  },
+  {
+    "question": "Solve the system: y = 3x − 1 and y = −x + 7",
+    "options": ["x = 2, y = 5", "x = 3, y = 8", "x = 1, y = 2", "x = 4, y = 3"],
+    "correct_answer": "x = 2, y = 5",
+    "explanation": "Set equal: 3x − 1 = −x + 7. Add x: 4x − 1 = 7. Add 1: 4x = 8. So x = 2 and y = 3(2) − 1 = 5.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "algebra"
+  },
+  {
+    "question": "Factor completely: x³ − 4x",
+    "options": ["x(x − 4)", "x(x + 2)(x − 2)", "x²(x − 4)", "(x − 2)(x² + 2x)"],
+    "correct_answer": "x(x + 2)(x − 2)",
+    "explanation": "Factor out x: x(x² − 4). Then factor the difference of squares: x(x + 2)(x − 2).",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "algebra"
+  },
+  {
+    "question": "Simplify: (3x + 2)(3x − 2)",
+    "options": ["9x² − 4", "9x² + 4", "9x² − 6x − 4", "6x² − 4"],
+    "correct_answer": "9x² − 4",
+    "explanation": "This is a difference of squares pattern: (a + b)(a − b) = a² − b² = (3x)² − 2² = 9x² − 4.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "algebra"
+  },
+  {
+    "question": "Which line is perpendicular to y = (3/4)x − 2 and passes through the origin?",
+    "options": ["y = (3/4)x", "y = −(4/3)x", "y = (4/3)x", "y = −(3/4)x"],
+    "correct_answer": "y = −(4/3)x",
+    "explanation": "The perpendicular slope is the negative reciprocal of 3/4, which is −4/3. Passing through the origin gives y = −(4/3)x.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "algebra"
+  },
+  {
+    "question": "Solve: 2x² + 7x + 3 = 0",
+    "options": ["x = −3 and x = −1/2", "x = 3 and x = 1/2", "x = −3 and x = 1/2", "x = 3 and x = −1/2"],
+    "correct_answer": "x = −3 and x = −1/2",
+    "explanation": "Factor: (2x + 1)(x + 3) = 0. Setting each to zero: x = −1/2 or x = −3.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "algebra"
+  },
+  {
+    "question": "Solve for x: 3/(x − 1) = 6",
+    "options": ["3/2", "1/2", "7", "2"],
+    "correct_answer": "3/2",
+    "explanation": "Multiply both sides by (x − 1): 3 = 6(x − 1) → 3 = 6x − 6 → 9 = 6x → x = 3/2.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "algebra"
+  },
+  {
+    "question": "If f(x) = 4x − 7, for what value of x does f(x) = 13?",
+    "options": ["5", "3", "20", "1.5"],
+    "correct_answer": "5",
+    "explanation": "Set 4x − 7 = 13. Add 7: 4x = 20. Divide by 4: x = 5.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "algebra"
+  },
+  {
+    "question": "Simplify: (x² + 5x + 6)/(x + 2)",
+    "options": ["x + 3", "x + 2", "x + 6", "x² + 3"],
+    "correct_answer": "x + 3",
+    "explanation": "Factor the numerator: (x + 2)(x + 3). Cancel (x + 2): the result is x + 3 (where x ≠ −2).",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "algebra"
+  },
+  {
+    "question": "Solve the inequality: x² − 9 ≥ 0",
+    "options": ["x ≤ −3 or x ≥ 3", "−3 ≤ x ≤ 3", "x ≥ 3", "x ≤ −3"],
+    "correct_answer": "x ≤ −3 or x ≥ 3",
+    "explanation": "Factor: (x + 3)(x − 3) ≥ 0. The product is non-negative when x ≤ −3 or x ≥ 3.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "algebra"
+  },
+  {
+    "question": "A number and its reciprocal add up to 10/3. If the number is positive, what is it?",
+    "options": ["3", "1/3", "3 or 1/3", "10/3"],
+    "correct_answer": "3 or 1/3",
+    "explanation": "Set up: x + 1/x = 10/3 → 3x² + 3 = 10x → 3x² − 10x + 3 = 0 → (3x − 1)(x − 3) = 0, so x = 3 or x = 1/3.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "algebra"
+  },
+  {
+    "question": "What is the maximum value of y = −x² + 6x − 5?",
+    "options": ["4", "−5", "9", "3"],
+    "correct_answer": "4",
+    "explanation": "The vertex x-value is −b/(2a) = −6/(−2) = 3. Substitute: y = −9 + 18 − 5 = 4.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "algebra"
+  },
+  {
+    "question": "Multiply and simplify: (x + 2)(x² − 2x + 4)",
+    "options": ["x³ + 8", "x³ − 8", "x³ + 2x² + 4x + 8", "x³ − 4x + 8"],
+    "correct_answer": "x³ + 8",
+    "explanation": "This is the sum of cubes pattern: (a + b)(a² − ab + b²) = a³ + b³, where a = x and b = 2, giving x³ + 8.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "algebra"
+  },
+  {
+    "question": "Solve the system: 2x + 5y = 1 and 3x − 4y = 13",
+    "options": ["x = 3, y = −1", "x = −1, y = 3", "x = 3, y = 1", "x = 7, y = −1"],
+    "correct_answer": "x = 3, y = −1",
+    "explanation": "Multiply the first equation by 4 and the second by 5: 8x + 20y = 4 and 15x − 20y = 65. Add: 23x = 69, so x = 3. Substitute: 6 + 5y = 1, so y = −1.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "algebra"
+  },
+  {
+    "question": "Simplify: (x⁴y²)/(x²y⁵)",
+    "options": ["x²/y³", "x²y³", "x⁶y⁷", "y³/x²"],
+    "correct_answer": "x²/y³",
+    "explanation": "Subtract exponents: x⁴⁻² = x² and y²⁻⁵ = y⁻³ = 1/y³, giving x²/y³.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "algebra"
+  },
+  {
+    "question": "A parabola has roots at x = −1 and x = 5. What is the x-coordinate of its vertex?",
+    "options": ["2", "3", "4", "−3"],
+    "correct_answer": "2",
+    "explanation": "The vertex lies midway between the roots: (−1 + 5)/2 = 4/2 = 2.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "algebra"
+  },
+  {
+    "question": "Solve: 3x² − 12x + 9 = 0",
+    "options": ["x = 1 and x = 3", "x = 3 only", "x = 1 only", "x = −1 and x = −3"],
+    "correct_answer": "x = 1 and x = 3",
+    "explanation": "Divide by 3: x² − 4x + 3 = 0. Factor: (x − 1)(x − 3) = 0, giving x = 1 or x = 3.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "algebra"
+  },
+  {
+    "question": "If f(x) = 2x + 1 and f(g(x)) = 6x − 3, what is g(x)?",
+    "options": ["3x − 2", "3x + 2", "3x − 1", "6x − 4"],
+    "correct_answer": "3x − 2",
+    "explanation": "f(g(x)) = 2·g(x) + 1 = 6x − 3. So 2·g(x) = 6x − 4, and g(x) = 3x − 2.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "algebra"
+  },
+  {
+    "question": "Divide: (2x³ − 5x² + 3x) ÷ x",
+    "options": ["2x² − 5x + 3", "2x³ − 5x + 3", "2x − 5 + 3/x", "2x⁴ − 5x³ + 3x²"],
+    "correct_answer": "2x² − 5x + 3",
+    "explanation": "Divide each term by x: 2x³/x = 2x², −5x²/x = −5x, 3x/x = 3.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "algebra"
+  },
+  {
+    "question": "Solve: |x + 5| > 3",
+    "options": ["x > −2 or x < −8", "−8 < x < −2", "x > 3 or x < −3", "x > −2"],
+    "correct_answer": "x > −2 or x < −8",
+    "explanation": "For |A| > c: A > c or A < −c. So x + 5 > 3 gives x > −2, and x + 5 < −3 gives x < −8.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "algebra"
+  },
+  {
+    "question": "What is the inverse of f(x) = (x − 4)/3?",
+    "options": ["f⁻¹(x) = 3x + 4", "f⁻¹(x) = 3x − 4", "f⁻¹(x) = x/3 + 4", "f⁻¹(x) = (x + 4)/3"],
+    "correct_answer": "f⁻¹(x) = 3x + 4",
+    "explanation": "Swap x and y: x = (y − 4)/3. Multiply by 3: 3x = y − 4. Add 4: y = 3x + 4.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "algebra"
+  },
+  {
+    "question": "Factor: 4x² − 12x + 9",
+    "options": ["(2x − 3)²", "(2x + 3)²", "(4x − 3)(x − 3)", "(2x − 9)(2x − 1)"],
+    "correct_answer": "(2x − 3)²",
+    "explanation": "This is a perfect square trinomial: (2x)² − 2(2x)(3) + 3² = (2x − 3)².",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "algebra"
+  },
+  {
+    "question": "A store sells x items per day. Revenue is R = −x² + 50x. At what number of items is revenue maximized?",
+    "options": ["50", "25", "100", "10"],
+    "correct_answer": "25",
+    "explanation": "The vertex x-value is −b/(2a) = −50/(2·(−1)) = 25. Revenue is maximized at 25 items.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "algebra"
+  },
+  {
+    "question": "Solve the system: x² + y = 10 and y = x + 4",
+    "options": ["(2, 6) and (−3, 1)", "(2, 6) only", "(−3, 1) only", "(1, 5) and (−2, 2)"],
+    "correct_answer": "(2, 6) and (−3, 1)",
+    "explanation": "Substitute y = x + 4: x² + x + 4 = 10 → x² + x − 6 = 0 → (x + 3)(x − 2) = 0. So x = 2 (y = 6) or x = −3 (y = 1).",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "algebra"
+  },
+  {
+    "question": "Simplify: (x² − 9)/(x² − 6x + 9)",
+    "options": ["(x + 3)/(x − 3)", "(x − 3)/(x + 3)", "1", "(x + 3)²"],
+    "correct_answer": "(x + 3)/(x − 3)",
+    "explanation": "Factor numerator: (x+3)(x−3). Factor denominator: (x−3)². Cancel one (x−3): (x+3)/(x−3).",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "algebra"
+  },
+  {
+    "question": "Solve for x: 2^(x+1) = 16",
+    "options": ["3", "4", "7", "8"],
+    "correct_answer": "3",
+    "explanation": "Rewrite 16 as 2⁴: 2^(x+1) = 2⁴. Set exponents equal: x + 1 = 4, so x = 3.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "algebra"
+  },
+  {
+    "question": "Add: (3x² + 2x − 5) + (x² − 7x + 4)",
+    "options": ["4x² − 5x − 1", "4x² + 9x − 1", "3x² − 5x − 1", "4x² − 5x + 9"],
+    "correct_answer": "4x² − 5x − 1",
+    "explanation": "Combine like terms: 3x² + x² = 4x², 2x − 7x = −5x, −5 + 4 = −1.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "algebra"
+  },
+  {
+    "question": "A ball is thrown upward with height h = −16t² + 64t + 5. When does it reach maximum height?",
+    "options": ["t = 2 seconds", "t = 4 seconds", "t = 1 second", "t = 3 seconds"],
+    "correct_answer": "t = 2 seconds",
+    "explanation": "The time at maximum height is t = −b/(2a) = −64/(2·(−16)) = −64/(−32) = 2 seconds.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "algebra"
+  },
+  {
+    "question": "Subtract: (5x³ − 2x + 8) − (3x³ + x² − 4x + 1)",
+    "options": ["2x³ − x² + 2x + 7", "2x³ + x² − 6x + 7", "8x³ − x² + 2x + 9", "2x³ − x² − 2x + 7"],
+    "correct_answer": "2x³ − x² + 2x + 7",
+    "explanation": "Distribute the negative: 5x³ − 2x + 8 − 3x³ − x² + 4x − 1. Combine: 2x³ − x² + 2x + 7.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "algebra"
+  },
+  {
+    "question": "How many real solutions does x² + 4x + 4 = 0 have?",
+    "options": ["0", "1", "2", "Infinitely many"],
+    "correct_answer": "1",
+    "explanation": "The discriminant is b² − 4ac = 16 − 16 = 0. A discriminant of zero means exactly one repeated real solution (x = −2).",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "algebra"
+  },
+  {
+    "question": "A pool is being filled at a rate of (x + 2) gallons per minute. After 2x minutes, it holds 70 gallons. What is x?",
+    "options": ["5", "7", "3", "10"],
+    "correct_answer": "5",
+    "explanation": "Set up: 2x(x + 2) = 70 → 2x² + 4x − 70 = 0 → x² + 2x − 35 = 0 → (x + 7)(x − 5) = 0. Since x must be positive, x = 5.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "algebra"
+  }
+]

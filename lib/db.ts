@@ -73,7 +73,7 @@ const DIFFICULTY_DB_MAP: Record<string, string> = {
 };
 
 /** Fetch 10 random questions WITHOUT correct_answer (anti-cheat) */
-export async function getQuizQuestions(subject: Subject, difficulty: string): Promise<{
+export async function getQuizQuestions(subject: Subject, difficulty: string, topic?: string): Promise<{
   id: string;
   subject: string;
   question: string;
@@ -81,12 +81,15 @@ export async function getQuizQuestions(subject: Subject, difficulty: string): Pr
   difficulty: string;
 }[]> {
   const dbDifficulty = DIFFICULTY_DB_MAP[difficulty] || difficulty;
-  const { data, error } = await supabase
+  let query = supabase
     .from("questions")
     .select("id, subject, question, options, difficulty")
     .eq("subject", subject)
-    .eq("difficulty", dbDifficulty)
-    .limit(50);
+    .eq("difficulty", dbDifficulty);
+  if (topic) {
+    query = query.eq("topic", topic.toLowerCase());
+  }
+  const { data, error } = await query.limit(50);
   if (error) throw error;
   // Shuffle and take 10
   const shuffled = (data ?? []).sort(() => Math.random() - 0.5).slice(0, 10);

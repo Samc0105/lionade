@@ -1,0 +1,702 @@
+[
+  {
+    "question": "What is a chord of a circle?",
+    "options": [
+      "A line from center to edge",
+      "A line segment with both endpoints on the circle",
+      "The distance around the circle",
+      "Half the diameter"
+    ],
+    "correct_answer": "A line segment with both endpoints on the circle",
+    "explanation": "A chord is any line segment whose two endpoints lie on the circle. The diameter is the longest possible chord.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the supplement of a 65° angle?",
+    "options": [
+      "25°",
+      "65°",
+      "115°",
+      "295°"
+    ],
+    "correct_answer": "115°",
+    "explanation": "Supplementary angles add to 180°, so 180° − 65° = 115°.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "A triangle with sides 3, 4, and 5 is what type?",
+    "options": [
+      "Equilateral",
+      "Isosceles",
+      "Right",
+      "Obtuse"
+    ],
+    "correct_answer": "Right",
+    "explanation": "3² + 4² = 9 + 16 = 25 = 5². Since the Pythagorean theorem holds, this is a right triangle.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the complement of a 30° angle?",
+    "options": [
+      "30°",
+      "60°",
+      "150°",
+      "330°"
+    ],
+    "correct_answer": "60°",
+    "explanation": "Complementary angles add to 90°, so 90° − 30° = 60°.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "How many vertices does a triangle have?",
+    "options": [
+      "1",
+      "2",
+      "3",
+      "4"
+    ],
+    "correct_answer": "3",
+    "explanation": "A triangle has 3 vertices (corners), where each pair of sides meets.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the perimeter of a triangle with sides 7, 8, and 10?",
+    "options": [
+      "15",
+      "25",
+      "56",
+      "80"
+    ],
+    "correct_answer": "25",
+    "explanation": "Perimeter = sum of all sides = 7 + 8 + 10 = 25.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is a polygon where all sides and all angles are equal called?",
+    "options": [
+      "Irregular polygon",
+      "Regular polygon",
+      "Concave polygon",
+      "Complex polygon"
+    ],
+    "correct_answer": "Regular polygon",
+    "explanation": "A regular polygon has all sides of equal length and all interior angles of equal measure.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the area of a square with side length 11?",
+    "options": [
+      "22",
+      "44",
+      "111",
+      "121"
+    ],
+    "correct_answer": "121",
+    "explanation": "Area of a square = side² = 11² = 121 square units.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "On a coordinate plane, which axis runs vertically?",
+    "options": [
+      "x-axis",
+      "y-axis",
+      "z-axis",
+      "origin"
+    ],
+    "correct_answer": "y-axis",
+    "explanation": "The y-axis is the vertical number line on a coordinate plane.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What 3D shape has two parallel circular bases connected by a curved surface?",
+    "options": [
+      "Cone",
+      "Sphere",
+      "Cylinder",
+      "Prism"
+    ],
+    "correct_answer": "Cylinder",
+    "explanation": "A cylinder has two identical circular bases that are parallel and connected by a curved surface.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the volume of a rectangular prism with length 5, width 3, and height 2?",
+    "options": [
+      "10",
+      "15",
+      "30",
+      "60"
+    ],
+    "correct_answer": "30",
+    "explanation": "Volume = length × width × height = 5 × 3 × 2 = 30 cubic units.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What type of triangle has no equal sides?",
+    "options": [
+      "Equilateral",
+      "Isosceles",
+      "Scalene",
+      "Right"
+    ],
+    "correct_answer": "Scalene",
+    "explanation": "A scalene triangle has all three sides of different lengths and all three angles of different measures.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "If a circle has radius 6, what is its diameter?",
+    "options": [
+      "3",
+      "6",
+      "12",
+      "36"
+    ],
+    "correct_answer": "12",
+    "explanation": "Diameter = 2 × radius = 2 × 6 = 12.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the measure of each interior angle of an equilateral triangle?",
+    "options": [
+      "45°",
+      "60°",
+      "90°",
+      "120°"
+    ],
+    "correct_answer": "60°",
+    "explanation": "An equilateral triangle has three equal angles, and 180° ÷ 3 = 60° each.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "A line that touches a circle at exactly one point is called a what?",
+    "options": [
+      "Chord",
+      "Secant",
+      "Tangent",
+      "Diameter"
+    ],
+    "correct_answer": "Tangent",
+    "explanation": "A tangent line touches the circle at exactly one point and is perpendicular to the radius at that point.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What point on the coordinate plane has coordinates (−3, 4)?",
+    "options": [
+      "Quadrant I",
+      "Quadrant II",
+      "Quadrant III",
+      "Quadrant IV"
+    ],
+    "correct_answer": "Quadrant II",
+    "explanation": "Quadrant II has negative x-values and positive y-values. (−3, 4) fits this description.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the area of a parallelogram with base 9 and height 4?",
+    "options": [
+      "13",
+      "18",
+      "36",
+      "72"
+    ],
+    "correct_answer": "36",
+    "explanation": "Area of a parallelogram = base × height = 9 × 4 = 36 square units.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "How many diagonals does a rectangle have?",
+    "options": [
+      "1",
+      "2",
+      "4",
+      "6"
+    ],
+    "correct_answer": "2",
+    "explanation": "A rectangle has exactly 2 diagonals, each connecting opposite corners.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the Pythagorean theorem?",
+    "options": [
+      "a + b = c",
+      "a² + b² = c²",
+      "a × b = c",
+      "2a + 2b = c"
+    ],
+    "correct_answer": "a² + b² = c²",
+    "explanation": "The Pythagorean theorem states that in a right triangle, the sum of the squares of the two legs equals the square of the hypotenuse.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the longest side of a right triangle called?",
+    "options": [
+      "Base",
+      "Leg",
+      "Height",
+      "Hypotenuse"
+    ],
+    "correct_answer": "Hypotenuse",
+    "explanation": "The hypotenuse is the side opposite the right angle and is always the longest side of a right triangle.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "A rectangle has length 10 and width 4. What is its area?",
+    "options": [
+      "14",
+      "28",
+      "40",
+      "80"
+    ],
+    "correct_answer": "40",
+    "explanation": "Area = length × width = 10 × 4 = 40 square units.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What type of polygon is a stop sign?",
+    "options": [
+      "Hexagon",
+      "Heptagon",
+      "Octagon",
+      "Decagon"
+    ],
+    "correct_answer": "Octagon",
+    "explanation": "A standard stop sign is a regular octagon with 8 equal sides.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "Two figures that have the same shape and size are called what?",
+    "options": [
+      "Similar",
+      "Congruent",
+      "Parallel",
+      "Symmetric"
+    ],
+    "correct_answer": "Congruent",
+    "explanation": "Congruent figures are identical in both shape and size — one can be placed exactly on top of the other.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "How many faces does a triangular prism have?",
+    "options": [
+      "3",
+      "4",
+      "5",
+      "6"
+    ],
+    "correct_answer": "5",
+    "explanation": "A triangular prism has 5 faces: 2 triangular bases and 3 rectangular sides.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the sum of the interior angles of a quadrilateral?",
+    "options": [
+      "180°",
+      "270°",
+      "360°",
+      "540°"
+    ],
+    "correct_answer": "360°",
+    "explanation": "The interior angles of any quadrilateral (4-sided polygon) always add up to 360 degrees.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the area of a circle with radius 1? (Use π)",
+    "options": [
+      "π",
+      "2π",
+      "π/2",
+      "4π"
+    ],
+    "correct_answer": "π",
+    "explanation": "Area = πr² = π(1)² = π.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the name for a part of a circle's circumference?",
+    "options": [
+      "Chord",
+      "Sector",
+      "Arc",
+      "Segment"
+    ],
+    "correct_answer": "Arc",
+    "explanation": "An arc is a portion of the circumference (the curved edge) of a circle.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "In a right triangle with legs 6 and 8, what is the hypotenuse?",
+    "options": [
+      "7",
+      "10",
+      "14",
+      "48"
+    ],
+    "correct_answer": "10",
+    "explanation": "Using the Pythagorean theorem: c² = 6² + 8² = 36 + 64 = 100, so c = 10.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "Two figures that have the same shape but different sizes are called what?",
+    "options": [
+      "Congruent",
+      "Equal",
+      "Similar",
+      "Symmetric"
+    ],
+    "correct_answer": "Similar",
+    "explanation": "Similar figures have the same shape and proportional sides, but they may differ in size.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the circumference of a circle with diameter 10? (Use π)",
+    "options": [
+      "5π",
+      "10π",
+      "25π",
+      "100π"
+    ],
+    "correct_answer": "10π",
+    "explanation": "Circumference = πd = π(10) = 10π.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "A square pyramid has how many faces?",
+    "options": [
+      "4",
+      "5",
+      "6",
+      "8"
+    ],
+    "correct_answer": "5",
+    "explanation": "A square pyramid has 5 faces: 1 square base and 4 triangular sides.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "If an angle measures 135°, what type is it?",
+    "options": [
+      "Acute",
+      "Right",
+      "Obtuse",
+      "Reflex"
+    ],
+    "correct_answer": "Obtuse",
+    "explanation": "An obtuse angle measures between 90° and 180°, and 135° falls in this range.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the perimeter of a rectangle with length 15 and width 9?",
+    "options": [
+      "24",
+      "48",
+      "135",
+      "270"
+    ],
+    "correct_answer": "48",
+    "explanation": "Perimeter = 2(length + width) = 2(15 + 9) = 2(24) = 48.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "An isosceles triangle has two sides of length 5 and a base of 6. What is its perimeter?",
+    "options": [
+      "11",
+      "15",
+      "16",
+      "30"
+    ],
+    "correct_answer": "16",
+    "explanation": "Perimeter = 5 + 5 + 6 = 16.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "How many lines of symmetry does a circle have?",
+    "options": [
+      "1",
+      "4",
+      "8",
+      "Infinite"
+    ],
+    "correct_answer": "Infinite",
+    "explanation": "A circle has infinitely many lines of symmetry — any line through the center divides it into two equal halves.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the area of a triangle with base 14 and height 10?",
+    "options": [
+      "24",
+      "70",
+      "140",
+      "280"
+    ],
+    "correct_answer": "70",
+    "explanation": "Area = (1/2) × base × height = (1/2)(14)(10) = 70 square units.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is a ray in geometry?",
+    "options": [
+      "A line with two endpoints",
+      "A point with no dimension",
+      "A line with one endpoint extending infinitely in one direction",
+      "A curved line"
+    ],
+    "correct_answer": "A line with one endpoint extending infinitely in one direction",
+    "explanation": "A ray starts at one point (endpoint) and extends infinitely in one direction.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the volume of a cube with side length 5?",
+    "options": [
+      "15",
+      "25",
+      "100",
+      "125"
+    ],
+    "correct_answer": "125",
+    "explanation": "Volume = side³ = 5³ = 125 cubic units.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "When two lines cross, the opposite angles formed are called what?",
+    "options": [
+      "Adjacent angles",
+      "Complementary angles",
+      "Vertical angles",
+      "Supplementary angles"
+    ],
+    "correct_answer": "Vertical angles",
+    "explanation": "Vertical angles are the non-adjacent angles formed when two lines intersect, and they are always equal.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the area of a circle with radius 3? (Use π)",
+    "options": [
+      "3π",
+      "6π",
+      "9π",
+      "12π"
+    ],
+    "correct_answer": "9π",
+    "explanation": "Area = πr² = π(3²) = 9π square units.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "How many degrees are in each angle of a regular hexagon?",
+    "options": [
+      "90°",
+      "108°",
+      "120°",
+      "135°"
+    ],
+    "correct_answer": "120°",
+    "explanation": "Sum of interior angles = (6−2)×180° = 720°. Each angle = 720° ÷ 6 = 120°.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the surface area of a cube with side length 2?",
+    "options": [
+      "8",
+      "12",
+      "16",
+      "24"
+    ],
+    "correct_answer": "24",
+    "explanation": "Surface area = 6 × side² = 6 × 4 = 24 square units.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "A triangle has angles of 40° and 60°. What is the third angle?",
+    "options": [
+      "60°",
+      "80°",
+      "100°",
+      "260°"
+    ],
+    "correct_answer": "80°",
+    "explanation": "The angles of a triangle sum to 180°: 180° − 40° − 60° = 80°.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What does 'congruent' mean in geometry?",
+    "options": [
+      "Same shape, different size",
+      "Same size, different shape",
+      "Exactly the same shape and size",
+      "Mirror images"
+    ],
+    "correct_answer": "Exactly the same shape and size",
+    "explanation": "Congruent figures are identical — they have the same shape and the same measurements.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What shape is formed by connecting all points exactly 5 units from a center point?",
+    "options": [
+      "Square",
+      "Pentagon",
+      "Circle",
+      "Oval"
+    ],
+    "correct_answer": "Circle",
+    "explanation": "A circle is defined as all points equidistant from a center point. Here, every point is 5 units from the center.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "In which quadrant is the point (−4, −5)?",
+    "options": [
+      "Quadrant I",
+      "Quadrant II",
+      "Quadrant III",
+      "Quadrant IV"
+    ],
+    "correct_answer": "Quadrant III",
+    "explanation": "Quadrant III has both negative x and negative y values.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the volume of a rectangular prism with length 6, width 4, and height 3?",
+    "options": [
+      "13",
+      "24",
+      "48",
+      "72"
+    ],
+    "correct_answer": "72",
+    "explanation": "Volume = length × width × height = 6 × 4 × 3 = 72 cubic units.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "How many edges does a triangular pyramid (tetrahedron) have?",
+    "options": [
+      "4",
+      "5",
+      "6",
+      "8"
+    ],
+    "correct_answer": "6",
+    "explanation": "A tetrahedron has 4 triangular faces, 4 vertices, and 6 edges.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "If a right triangle has legs of 5 and 12, what is the hypotenuse?",
+    "options": [
+      "13",
+      "15",
+      "17",
+      "60"
+    ],
+    "correct_answer": "13",
+    "explanation": "c² = 5² + 12² = 25 + 144 = 169, so c = 13.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the sum of the interior angles of a pentagon?",
+    "options": [
+      "360°",
+      "450°",
+      "540°",
+      "720°"
+    ],
+    "correct_answer": "540°",
+    "explanation": "Sum = (n−2) × 180° = (5−2) × 180° = 3 × 180° = 540°.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  }
+]

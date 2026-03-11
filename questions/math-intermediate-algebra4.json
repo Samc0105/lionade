@@ -1,0 +1,452 @@
+[
+  {
+    "question": "Solve for x: (x/4) + (x/6) = 5",
+    "options": ["12", "10", "15", "24"],
+    "correct_answer": "12",
+    "explanation": "Find LCD of 12: 3x/12 + 2x/12 = 5 → 5x/12 = 5. Multiply by 12: 5x = 60. Divide by 5: x = 12.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "algebra"
+  },
+  {
+    "question": "Factor: x² + 10x + 25",
+    "options": ["(x + 5)²", "(x − 5)²", "(x + 25)(x + 1)", "(x + 5)(x − 5)"],
+    "correct_answer": "(x + 5)²",
+    "explanation": "This is a perfect square trinomial: x² + 2(5)(x) + 5² = (x + 5)².",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "algebra"
+  },
+  {
+    "question": "What is the midpoint of the segment connecting (−2, 7) and (6, 1)?",
+    "options": ["(2, 4)", "(4, 8)", "(4, 3)", "(−4, 4)"],
+    "correct_answer": "(2, 4)",
+    "explanation": "Midpoint = ((−2+6)/2, (7+1)/2) = (4/2, 8/2) = (2, 4).",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "algebra"
+  },
+  {
+    "question": "Solve the inequality: x/3 − 2 > x/5",
+    "options": ["x > 15", "x < 15", "x > 5", "x < 5"],
+    "correct_answer": "x > 15",
+    "explanation": "Multiply by 15: 5x − 30 > 3x. Subtract 3x: 2x − 30 > 0. Add 30: 2x > 30. Divide: x > 15.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "algebra"
+  },
+  {
+    "question": "If f(x) = |x − 3| + 2, what is f(0)?",
+    "options": ["5", "1", "−1", "3"],
+    "correct_answer": "5",
+    "explanation": "Substitute: |0 − 3| + 2 = |−3| + 2 = 3 + 2 = 5.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "algebra"
+  },
+  {
+    "question": "Factor: 6x² + 11x − 10",
+    "options": ["(3x − 2)(2x + 5)", "(6x − 5)(x + 2)", "(2x − 1)(3x + 10)", "(3x + 10)(2x − 1)"],
+    "correct_answer": "(3x − 2)(2x + 5)",
+    "explanation": "Find factors of 6 × (−10) = −60 that add to 11: 15 and −4. Rewrite and group: 6x² + 15x − 4x − 10 = 3x(2x + 5) − 2(2x + 5) = (3x − 2)(2x + 5).",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "algebra"
+  },
+  {
+    "question": "Write the equation of the line perpendicular to y = (1/2)x + 3 passing through (4, 1).",
+    "options": ["y = −2x + 9", "y = 2x − 7", "y = −(1/2)x + 3", "y = −2x + 1"],
+    "correct_answer": "y = −2x + 9",
+    "explanation": "Perpendicular slope = −2. Point-slope: y − 1 = −2(x − 4) → y = −2x + 8 + 1 = −2x + 9.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "algebra"
+  },
+  {
+    "question": "Simplify: (x⁻³)(x⁵)",
+    "options": ["x²", "x⁻¹⁵", "x⁸", "x⁻²"],
+    "correct_answer": "x²",
+    "explanation": "When multiplying like bases, add exponents: −3 + 5 = 2, giving x².",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "algebra"
+  },
+  {
+    "question": "Solve the system: x − 3y = −7 and 2x + y = 0",
+    "options": ["x = −1, y = 2", "x = 1, y = −2", "x = −7, y = 0", "x = 3, y = −6"],
+    "correct_answer": "x = −1, y = 2",
+    "explanation": "From the second equation: y = −2x. Substitute: x − 3(−2x) = −7 → x + 6x = −7 → 7x = −7 → x = −1, y = 2.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "algebra"
+  },
+  {
+    "question": "What is the distance between the points (1, 3) and (4, 7)?",
+    "options": ["5", "7", "25", "√7"],
+    "correct_answer": "5",
+    "explanation": "Distance = √((4−1)² + (7−3)²) = √(9 + 16) = √25 = 5.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "algebra"
+  },
+  {
+    "question": "Factor completely: x³ + 8",
+    "options": ["(x + 2)(x² − 2x + 4)", "(x + 2)³", "(x + 2)(x² + 2x + 4)", "(x − 2)(x² + 2x + 4)"],
+    "correct_answer": "(x + 2)(x² − 2x + 4)",
+    "explanation": "This is a sum of cubes: a³ + b³ = (a + b)(a² − ab + b²) where a = x, b = 2.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "algebra"
+  },
+  {
+    "question": "Solve: x² − 8x + 12 = 0",
+    "options": ["x = 2 and x = 6", "x = −2 and x = −6", "x = 3 and x = 4", "x = −3 and x = −4"],
+    "correct_answer": "x = 2 and x = 6",
+    "explanation": "Factor: (x − 2)(x − 6) = 0. Set each factor to zero: x = 2 or x = 6.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "algebra"
+  },
+  {
+    "question": "Solve the compound inequality: 2x − 1 ≤ 5 and 3x + 4 > 7",
+    "options": ["1 < x ≤ 3", "x ≤ 3", "x > 1", "1 ≤ x < 3"],
+    "correct_answer": "1 < x ≤ 3",
+    "explanation": "First: 2x ≤ 6 → x ≤ 3. Second: 3x > 3 → x > 1. Combined: 1 < x ≤ 3.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "algebra"
+  },
+  {
+    "question": "What is the domain of f(x) = √(12 − 4x)?",
+    "options": ["x ≤ 3", "x ≥ 3", "x ≤ 12", "All real numbers"],
+    "correct_answer": "x ≤ 3",
+    "explanation": "The radicand must be non-negative: 12 − 4x ≥ 0 → −4x ≥ −12 → x ≤ 3.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "algebra"
+  },
+  {
+    "question": "Simplify: (3x²/y)³",
+    "options": ["27x⁶/y³", "9x⁶/y³", "27x⁵/y³", "3x⁶/y³"],
+    "correct_answer": "27x⁶/y³",
+    "explanation": "Raise each part to the third power: 3³ = 27, (x²)³ = x⁶, y³ = y³. Result: 27x⁶/y³.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "algebra"
+  },
+  {
+    "question": "Tickets to a play cost $8 for adults and $5 for children. If 120 tickets were sold for $816, how many adult tickets were sold?",
+    "options": ["72", "48", "80", "60"],
+    "correct_answer": "72",
+    "explanation": "Let a = adults: a + c = 120 and 8a + 5c = 816. Substitute c = 120 − a: 8a + 5(120 − a) = 816 → 3a + 600 = 816 → 3a = 216 → a = 72.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "algebra"
+  },
+  {
+    "question": "Does the parabola y = 3x² − 12x + 7 open upward or downward, and what is the vertex?",
+    "options": ["Upward, vertex (2, −5)", "Downward, vertex (2, −5)", "Upward, vertex (−2, 31)", "Downward, vertex (−2, 31)"],
+    "correct_answer": "Upward, vertex (2, −5)",
+    "explanation": "Since a = 3 > 0, it opens upward. Vertex x = 12/(2·3) = 2. y = 3(4) − 24 + 7 = −5. Vertex is (2, −5).",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "algebra"
+  },
+  {
+    "question": "Solve for x: |x − 4| = |2x + 1|",
+    "options": ["x = 1 or x = −5", "x = 1 or x = −5/3", "x = 4 or x = −1/2", "x = 1 only"],
+    "correct_answer": "x = 1 or x = −5",
+    "explanation": "Case 1: x − 4 = 2x + 1 → −5 = x. Check: |−9| = |−9| ✓. Case 2: x − 4 = −(2x + 1) → 3x = 3 → x = 1. Check: |−3| = |3| ✓.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "algebra"
+  },
+  {
+    "question": "Multiply: (x + 3)(x − 1)(x + 2)",
+    "options": ["x³ + 4x² + x − 6", "x³ + 2x² − 5x − 6", "x³ + 4x² + 5x + 6", "x³ − 4x² + x + 6"],
+    "correct_answer": "x³ + 4x² + x − 6",
+    "explanation": "First: (x+3)(x−1) = x² + 2x − 3. Then (x² + 2x − 3)(x+2) = x³ + 2x² + 2x² + 4x − 3x − 6 = x³ + 4x² + x − 6.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "algebra"
+  },
+  {
+    "question": "What is the horizontal asymptote of f(x) = (6x² + 1)/(3x² − 5)?",
+    "options": ["y = 2", "y = 0", "y = −1/5", "No horizontal asymptote"],
+    "correct_answer": "y = 2",
+    "explanation": "When the numerator and denominator have the same degree, the horizontal asymptote is the ratio of leading coefficients: 6/3 = 2.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "algebra"
+  },
+  {
+    "question": "Solve the system: 3x − 2y = 4 and 6x − 4y = 5",
+    "options": ["x = 2, y = 1", "x = 0, y = −2", "Infinitely many solutions", "No solution"],
+    "correct_answer": "No solution",
+    "explanation": "The second equation is 2 times the first on the left side (6x − 4y) but not the right (5 ≠ 8). The lines are parallel, so there is no solution.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "algebra"
+  },
+  {
+    "question": "Factor: 25x² − 36y²",
+    "options": ["(5x − 6y)²", "(5x + 6y)(5x − 6y)", "(25x + 36y)(x − y)", "(5x − 6y)(5x + 36y)"],
+    "correct_answer": "(5x + 6y)(5x − 6y)",
+    "explanation": "This is a difference of squares: (5x)² − (6y)² = (5x + 6y)(5x − 6y).",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "algebra"
+  },
+  {
+    "question": "Simplify: √(18) + √(50)",
+    "options": ["8√2", "√68", "4√17", "5√2 + 3√2"],
+    "correct_answer": "8√2",
+    "explanation": "Simplify each: √18 = 3√2 and √50 = 5√2. Add: 3√2 + 5√2 = 8√2.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "algebra"
+  },
+  {
+    "question": "A line has an x-intercept of 6 and a y-intercept of −4. What is its equation in slope-intercept form?",
+    "options": ["y = (2/3)x − 4", "y = −(2/3)x + 6", "y = (2/3)x + 4", "y = (3/2)x − 4"],
+    "correct_answer": "y = (2/3)x − 4",
+    "explanation": "Slope = (−4 − 0)/(0 − 6) = −4/(−6) = 2/3. The y-intercept is −4, so y = (2/3)x − 4.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "algebra"
+  },
+  {
+    "question": "Solve: 5x² + 3x − 2 = 0",
+    "options": ["x = −1 and x = 2/5", "x = 1 and x = −2/5", "x = 2 and x = −1/5", "x = −2 and x = 1/5"],
+    "correct_answer": "x = −1 and x = 2/5",
+    "explanation": "Factor: (5x − 2)(x + 1) = 0. Set each to zero: x = 2/5 or x = −1.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "algebra"
+  },
+  {
+    "question": "Solve for x: 1/(x − 2) + 1/(x + 2) = 4/(x² − 4)",
+    "options": ["x = 2", "x = −2", "x = 0", "No solution"],
+    "correct_answer": "No solution",
+    "explanation": "Multiply by LCD (x−2)(x+2): (x+2) + (x−2) = 4 → 2x = 4 → x = 2. But x = 2 makes the original denominators zero, so it is an extraneous solution and there is no valid solution.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "algebra"
+  },
+  {
+    "question": "If f(x) = 3x + 1 and g(x) = x² − 2, what is (g − f)(x)?",
+    "options": ["x² − 3x − 3", "x² + 3x + 3", "x² − 3x + 3", "−x² + 3x + 3"],
+    "correct_answer": "x² − 3x − 3",
+    "explanation": "(g − f)(x) = g(x) − f(x) = (x² − 2) − (3x + 1) = x² − 3x − 3.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "algebra"
+  },
+  {
+    "question": "Simplify: (x² − 5x + 6)/(x² − 4)",
+    "options": ["(x − 3)/(x + 2)", "(x + 3)/(x − 2)", "(x − 3)/(x − 2)", "(x + 2)/(x − 3)"],
+    "correct_answer": "(x − 3)/(x + 2)",
+    "explanation": "Factor numerator: (x − 2)(x − 3). Factor denominator: (x − 2)(x + 2). Cancel (x − 2): (x − 3)/(x + 2).",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "algebra"
+  },
+  {
+    "question": "Solve the inequality: (x + 2)/(x − 1) ≤ 0",
+    "options": ["−2 ≤ x < 1", "x ≤ −2 or x > 1", "x < −2 or x ≥ 1", "−2 < x < 1"],
+    "correct_answer": "−2 ≤ x < 1",
+    "explanation": "Critical points: x = −2 and x = 1. Test intervals: the fraction is non-positive when −2 ≤ x < 1 (x = 1 excluded since it makes the denominator zero).",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "algebra"
+  },
+  {
+    "question": "A number is 4 less than 3 times another number. Their sum is 28. What is the larger number?",
+    "options": ["20", "8", "16", "24"],
+    "correct_answer": "20",
+    "explanation": "Let the numbers be x and 3x − 4. Sum: x + 3x − 4 = 28 → 4x = 32 → x = 8. Larger = 3(8) − 4 = 20.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "algebra"
+  },
+  {
+    "question": "Simplify: (2√3)(5√6)",
+    "options": ["10√18", "30√2", "10√9", "7√9"],
+    "correct_answer": "30√2",
+    "explanation": "Multiply: 2 · 5 · √(3·6) = 10√18. Simplify: 10 · 3√2 = 30√2.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "algebra"
+  },
+  {
+    "question": "What is the inverse of f(x) = (2x + 3)/5?",
+    "options": ["f⁻¹(x) = (5x − 3)/2", "f⁻¹(x) = (5x + 3)/2", "f⁻¹(x) = 5/(2x + 3)", "f⁻¹(x) = (2x − 3)/5"],
+    "correct_answer": "f⁻¹(x) = (5x − 3)/2",
+    "explanation": "Swap x and y: x = (2y + 3)/5. Multiply by 5: 5x = 2y + 3. Subtract 3: 5x − 3 = 2y. Divide: y = (5x − 3)/2.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "algebra"
+  },
+  {
+    "question": "Solve: x² − 2x − 1 = 0 using the quadratic formula.",
+    "options": ["1 ± √2", "−1 ± √2", "2 ± √2", "1 ± √3"],
+    "correct_answer": "1 ± √2",
+    "explanation": "x = (2 ± √(4 + 4))/2 = (2 ± √8)/2 = (2 ± 2√2)/2 = 1 ± √2.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "algebra"
+  },
+  {
+    "question": "Solve the system: 2x + y = 8, x − y = 1, and x + 2y = 7. Is the system consistent?",
+    "options": ["Yes: x = 3, y = 2", "No: it is inconsistent", "Yes: infinitely many solutions", "Yes: x = 2, y = 4"],
+    "correct_answer": "Yes: x = 3, y = 2",
+    "explanation": "From eq1 and eq2: add to get 3x = 9, x = 3, y = 2. Check eq3: 3 + 4 = 7 ✓. All three are satisfied.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "algebra"
+  },
+  {
+    "question": "Factor: x³ − 27",
+    "options": ["(x − 3)(x² + 3x + 9)", "(x − 3)³", "(x + 3)(x² − 3x + 9)", "(x − 3)(x² − 3x + 9)"],
+    "correct_answer": "(x − 3)(x² + 3x + 9)",
+    "explanation": "This is a difference of cubes: a³ − b³ = (a − b)(a² + ab + b²) where a = x, b = 3.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "algebra"
+  },
+  {
+    "question": "The graph of y = f(x) is shifted right 3 units and up 5 units. What is the new equation?",
+    "options": ["y = f(x − 3) + 5", "y = f(x + 3) + 5", "y = f(x − 3) − 5", "y = f(x + 5) + 3"],
+    "correct_answer": "y = f(x − 3) + 5",
+    "explanation": "A rightward shift of 3 replaces x with (x − 3), and an upward shift of 5 adds 5, giving y = f(x − 3) + 5.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "algebra"
+  },
+  {
+    "question": "Solve: 9x² − 24x + 16 = 0",
+    "options": ["x = 4/3 only", "x = 4/3 and x = −4/3", "x = 3/4 only", "x = 16/9 only"],
+    "correct_answer": "x = 4/3 only",
+    "explanation": "This is a perfect square: (3x − 4)² = 0. So 3x − 4 = 0 and x = 4/3 (repeated root).",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "algebra"
+  },
+  {
+    "question": "Add: 2/(x + 1) + 3/(x − 4)",
+    "options": ["5/(2x − 3)", "(5x − 5)/((x + 1)(x − 4))", "5/((x + 1)(x − 4))", "(5x + 3)/((x + 1)(x − 4))"],
+    "correct_answer": "(5x − 5)/((x + 1)(x − 4))",
+    "explanation": "LCD is (x+1)(x−4). Rewrite: 2(x−4)/((x+1)(x−4)) + 3(x+1)/((x+1)(x−4)) = (2x − 8 + 3x + 3)/((x+1)(x−4)) = (5x − 5)/((x+1)(x−4)).",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "algebra"
+  },
+  {
+    "question": "A student scores 78, 85, and 90 on three tests. What score is needed on the fourth test for an average of 85?",
+    "options": ["87", "85", "92", "88"],
+    "correct_answer": "87",
+    "explanation": "Set up: (78 + 85 + 90 + x)/4 = 85 → 253 + x = 340 → x = 87.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "algebra"
+  },
+  {
+    "question": "What is the vertical asymptote of f(x) = 3/(x + 7)?",
+    "options": ["x = −7", "x = 7", "x = 3", "y = 0"],
+    "correct_answer": "x = −7",
+    "explanation": "A vertical asymptote occurs where the denominator is zero: x + 7 = 0, so x = −7.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "algebra"
+  },
+  {
+    "question": "Solve: (x + 1)² = 25",
+    "options": ["x = 4 and x = −6", "x = 4 only", "x = 24", "x = ±5"],
+    "correct_answer": "x = 4 and x = −6",
+    "explanation": "Take the square root: x + 1 = ±5. So x = 4 or x = −6.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "algebra"
+  },
+  {
+    "question": "If h(x) = 2f(x) − 3 and f(4) = 5, what is h(4)?",
+    "options": ["7", "10", "13", "2"],
+    "correct_answer": "7",
+    "explanation": "Substitute: h(4) = 2f(4) − 3 = 2(5) − 3 = 10 − 3 = 7.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "algebra"
+  },
+  {
+    "question": "Simplify: (x³ − 8)/(x − 2)",
+    "options": ["x² + 2x + 4", "x² − 2x + 4", "x² − 4", "(x − 2)²"],
+    "correct_answer": "x² + 2x + 4",
+    "explanation": "Factor the numerator as a difference of cubes: x³ − 8 = (x − 2)(x² + 2x + 4). Cancel (x − 2): x² + 2x + 4.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "algebra"
+  },
+  {
+    "question": "Solve: 4^x = 8",
+    "options": ["x = 3/2", "x = 2", "x = 2/3", "x = 4/3"],
+    "correct_answer": "x = 3/2",
+    "explanation": "Rewrite with base 2: (2²)ˣ = 2³ → 2^(2x) = 2³ → 2x = 3 → x = 3/2.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "algebra"
+  },
+  {
+    "question": "Subtract: (4x² + 3x − 1)/(x + 2) − (x² − x + 5)/(x + 2)",
+    "options": ["(3x² + 4x − 6)/(x + 2)", "(3x² − 4x + 4)/(x + 2)", "(5x² + 2x + 4)/(x + 2)", "(3x² + 4x + 4)/(x + 2)"],
+    "correct_answer": "(3x² + 4x − 6)/(x + 2)",
+    "explanation": "Same denominator, so subtract numerators: (4x² + 3x − 1) − (x² − x + 5) = 3x² + 4x − 6. Result: (3x² + 4x − 6)/(x + 2).",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "algebra"
+  },
+  {
+    "question": "Complete the square: x² + 8x + __ = (x + __)²",
+    "options": ["16 and 4", "64 and 8", "4 and 2", "8 and 4"],
+    "correct_answer": "16 and 4",
+    "explanation": "Take half of 8 (which is 4) and square it (which is 16). So x² + 8x + 16 = (x + 4)².",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "algebra"
+  },
+  {
+    "question": "Car A leaves a city traveling east at 50 mph. Car B leaves the same city 1 hour later traveling east at 70 mph. When does Car B catch Car A?",
+    "options": ["2.5 hours after Car B leaves", "3.5 hours after Car B leaves", "5 hours after Car B leaves", "3 hours after Car B leaves"],
+    "correct_answer": "2.5 hours after Car B leaves",
+    "explanation": "Car A's distance: 50(t + 1). Car B's distance: 70t. Set equal: 50t + 50 = 70t → 50 = 20t → t = 2.5 hours after Car B leaves.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "algebra"
+  },
+  {
+    "question": "Solve for x: x⁴ − 5x² + 4 = 0",
+    "options": ["x = ±1 and x = ±2", "x = 1 and x = 4", "x = ±1 only", "x = ±2 only"],
+    "correct_answer": "x = ±1 and x = ±2",
+    "explanation": "Let u = x²: u² − 5u + 4 = 0 → (u − 1)(u − 4) = 0 → u = 1 or u = 4. So x² = 1 (x = ±1) or x² = 4 (x = ±2).",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "algebra"
+  },
+  {
+    "question": "The product of two consecutive odd integers is 143. What are the integers?",
+    "options": ["11 and 13", "9 and 11", "13 and 15", "7 and 9"],
+    "correct_answer": "11 and 13",
+    "explanation": "Let the integers be x and x + 2: x(x + 2) = 143 → x² + 2x − 143 = 0 → (x − 11)(x + 13) = 0. Taking the positive value: x = 11, so the integers are 11 and 13.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "algebra"
+  },
+  {
+    "question": "Simplify: (3x − 6)/(x² − 4) · (x + 2)/(9)",
+    "options": ["1/3", "(x + 2)/(3(x + 2))", "1/(3(x + 2))", "(3x − 6)/(9x − 36)"],
+    "correct_answer": "1/3",
+    "explanation": "Factor: (3(x−2))/((x−2)(x+2)) · (x+2)/9. Cancel (x−2) and (x+2): 3/9 = 1/3.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "algebra"
+  }
+]

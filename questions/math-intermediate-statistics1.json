@@ -1,0 +1,2802 @@
+[
+  {
+    "question": "The sampling distribution of X\u0304 has mean equal to:",
+    "options": [
+      "\u03c3",
+      "\u03bc/n",
+      "\u03bc",
+      "\u03c3/\u221an"
+    ],
+    "correct_answer": "\u03bc",
+    "explanation": "E[X\u0304] = \u03bc \u2014 the sample mean is an unbiased estimator.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "The standard error of X\u0304 is:",
+    "options": [
+      "\u03c3",
+      "\u03c3\u00b2",
+      "\u03c3/\u221an",
+      "\u03c3\u00b7\u221an"
+    ],
+    "correct_answer": "\u03c3/\u221an",
+    "explanation": "SE(X\u0304) = \u03c3/\u221an.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "As sample size increases, the standard error:",
+    "options": [
+      "Increases",
+      "Stays the same",
+      "Decreases",
+      "Doubles"
+    ],
+    "correct_answer": "Decreases",
+    "explanation": "Larger n \u2192 smaller SE = \u03c3/\u221an.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "The Central Limit Theorem applies when n is:",
+    "options": [
+      "n < 10",
+      "n \u2265 5",
+      "n \u2265 30 (rule of thumb)",
+      "n > 100"
+    ],
+    "correct_answer": "n \u2265 30 (rule of thumb)",
+    "explanation": "CLT: X\u0304 is approximately normal for large n (rule of thumb: n \u2265 30).",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "If X~N(50,100) and n=25, the distribution of X\u0304 is:",
+    "options": [
+      "N(50,100)",
+      "N(50,4)",
+      "N(50,20)",
+      "N(2,4)"
+    ],
+    "correct_answer": "N(50,4)",
+    "explanation": "X\u0304~N(\u03bc, \u03c3\u00b2/n) = N(50, 100/25) = N(50,4).",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "The sampling distribution of the sample proportion p\u0302 has mean:",
+    "options": [
+      "p/n",
+      "p(1-p)",
+      "p",
+      "\u221a(p(1-p)/n)"
+    ],
+    "correct_answer": "p",
+    "explanation": "E[p\u0302] = p.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "The standard error of p\u0302 is:",
+    "options": [
+      "p/n",
+      "\u221a(p/n)",
+      "\u221a(p(1-p)/n)",
+      "p(1-p)"
+    ],
+    "correct_answer": "\u221a(p(1-p)/n)",
+    "explanation": "SE(p\u0302) = \u221a(p(1-p)/n).",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "For the CLT to apply to p\u0302, we need:",
+    "options": [
+      "n \u2265 30",
+      "np \u2265 10 and n(1-p) \u2265 10",
+      "n > 100",
+      "p = 0.5"
+    ],
+    "correct_answer": "np \u2265 10 and n(1-p) \u2265 10",
+    "explanation": "Success-failure condition for normal approximation to p\u0302.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "If \u03c3 is unknown, the sampling distribution of (X\u0304-\u03bc)/(S/\u221an) follows a:",
+    "options": [
+      "Normal distribution",
+      "Chi-squared distribution",
+      "t-distribution with n-1 df",
+      "F-distribution"
+    ],
+    "correct_answer": "t-distribution with n-1 df",
+    "explanation": "When \u03c3 is unknown, use S and t-distribution.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "The t-distribution has heavier tails than the normal because:",
+    "options": [
+      "It has a smaller mean",
+      "It accounts for extra uncertainty from estimating \u03c3",
+      "It's defined only for small n",
+      "It's always skewed"
+    ],
+    "correct_answer": "It accounts for extra uncertainty from estimating \u03c3",
+    "explanation": "Estimating \u03c3 introduces variability, widening the distribution.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "As degrees of freedom \u2192 \u221e, the t-distribution approaches:",
+    "options": [
+      "Chi-squared",
+      "F-distribution",
+      "Standard normal",
+      "Uniform"
+    ],
+    "correct_answer": "Standard normal",
+    "explanation": "t(df) \u2192 N(0,1) as df \u2192 \u221e.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "The chi-squared statistic (n-1)S\u00b2/\u03c3\u00b2 follows:",
+    "options": [
+      "N(0,1)",
+      "t(n-1)",
+      "\u03c7\u00b2(n-1)",
+      "F(1,n-1)"
+    ],
+    "correct_answer": "\u03c7\u00b2(n-1)",
+    "explanation": "(n-1)S\u00b2/\u03c3\u00b2 ~ \u03c7\u00b2(n-1) for normal populations.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "The sampling distribution is the distribution of a statistic:",
+    "options": [
+      "From one sample",
+      "Across all possible samples of the same size",
+      "Only for large samples",
+      "Only for normal populations"
+    ],
+    "correct_answer": "Across all possible samples of the same size",
+    "explanation": "Sampling distribution: distribution of a statistic over repeated sampling.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "Increasing sample size reduces sampling variability because:",
+    "options": [
+      "The population changes",
+      "More data \u2192 better estimate, SE = \u03c3/\u221an decreases",
+      "The distribution becomes skewed",
+      "\u03b1 decreases"
+    ],
+    "correct_answer": "More data \u2192 better estimate, SE = \u03c3/\u221an decreases",
+    "explanation": "Larger n \u2192 more precise estimates.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "For a population with \u03c3=20, what n gives SE = 2?",
+    "options": [
+      "10",
+      "20",
+      "100",
+      "50"
+    ],
+    "correct_answer": "100",
+    "explanation": "SE=\u03c3/\u221an=20/\u221an=2 \u2192 \u221an=10 \u2192 n=100.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "A 90% CI uses z* = ?",
+    "options": [
+      "1.96",
+      "2.576",
+      "1.645",
+      "1.28"
+    ],
+    "correct_answer": "1.645",
+    "explanation": "z* = 1.645 for 90% confidence.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "A 95% CI for \u03bc (\u03c3 known) is:",
+    "options": [
+      "X\u0304 \u00b1 z*\u00b7\u03c3",
+      "X\u0304 \u00b1 z*\u00b7S/\u221an",
+      "X\u0304 \u00b1 z*\u00b7\u03c3/\u221an",
+      "X\u0304 \u00b1 t*\u00b7S/\u221an"
+    ],
+    "correct_answer": "X\u0304 \u00b1 z*\u00b7\u03c3/\u221an",
+    "explanation": "95% CI: X\u0304 \u00b1 1.96\u00b7\u03c3/\u221an.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "When \u03c3 is unknown, the CI for \u03bc uses:",
+    "options": [
+      "z*",
+      "t* with n df",
+      "t* with n-1 df",
+      "\u03c7\u00b2"
+    ],
+    "correct_answer": "t* with n-1 df",
+    "explanation": "Use t-distribution with n-1 degrees of freedom.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "A wider CI indicates:",
+    "options": [
+      "More precision",
+      "Less precision (more uncertainty)",
+      "Smaller sample size only",
+      "Smaller \u03c3 only"
+    ],
+    "correct_answer": "Less precision (more uncertainty)",
+    "explanation": "Wider interval = less certainty about the parameter's location.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "To get a narrower CI, you can:",
+    "options": [
+      "Decrease n",
+      "Increase confidence level",
+      "Increase n",
+      "Decrease \u03c3 artificially"
+    ],
+    "correct_answer": "Increase n",
+    "explanation": "Larger n \u2192 smaller SE \u2192 narrower CI.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "The margin of error in a CI is:",
+    "options": [
+      "z*\u00b7\u03c3",
+      "z*\u00b7\u03c3/\u221an",
+      "2\u00b7z*\u00b7\u03c3/\u221an",
+      "SE only"
+    ],
+    "correct_answer": "z*\u00b7\u03c3/\u221an",
+    "explanation": "ME = z*\u00b7SE = z*\u00b7\u03c3/\u221an.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "A 95% CI for p is:",
+    "options": [
+      "p\u0302 \u00b1 1.96\u00b7p\u0302",
+      "p\u0302 \u00b1 1.96\u00b7\u221a(p\u0302(1-p\u0302)/n)",
+      "p\u0302 \u00b1 1.96\u00b7p\u0302/n",
+      "p\u0302 \u00b1 \u221a(p\u0302/n)"
+    ],
+    "correct_answer": "p\u0302 \u00b1 1.96\u00b7\u221a(p\u0302(1-p\u0302)/n)",
+    "explanation": "CI for proportion using normal approximation.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "If a 95% CI for \u03bc is (48, 56), what is X\u0304?",
+    "options": [
+      "48",
+      "56",
+      "52",
+      "54"
+    ],
+    "correct_answer": "52",
+    "explanation": "X\u0304 = midpoint = (48+56)/2 = 52.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "If a 95% CI is (48, 56), the margin of error is:",
+    "options": [
+      "2",
+      "4",
+      "8",
+      "6"
+    ],
+    "correct_answer": "4",
+    "explanation": "ME = (56-48)/2 = 4.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "A 99% CI is __ than a 95% CI (same data).",
+    "options": [
+      "Narrower",
+      "Wider",
+      "Same",
+      "Shorter"
+    ],
+    "correct_answer": "Wider",
+    "explanation": "Higher confidence \u2192 wider interval to capture the parameter.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "Doubling sample size multiplies the CI width by approximately:",
+    "options": [
+      "2",
+      "1/2",
+      "1/\u221a2",
+      "\u221a2"
+    ],
+    "correct_answer": "1/\u221a2",
+    "explanation": "Width \u221d 1/\u221an. Double n \u2192 width \u00d7 1/\u221a2 \u2248 0.707.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "The t* for a 95% CI with df=9 is approximately:",
+    "options": [
+      "1.96",
+      "2.262",
+      "1.833",
+      "2.821"
+    ],
+    "correct_answer": "2.262",
+    "explanation": "t*(0.025, df=9) = 2.262.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "A CI that does NOT contain the null value suggests:",
+    "options": [
+      "Fail to reject H\u2080",
+      "Reject H\u2080",
+      "The data is invalid",
+      "H\u2080 is definitely true"
+    ],
+    "correct_answer": "Reject H\u2080",
+    "explanation": "If H\u2080 value is outside the CI, we reject H\u2080 at the corresponding \u03b1.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "The sample size needed for ME = E with known \u03c3 is:",
+    "options": [
+      "(z*\u03c3/E)",
+      "(z*\u03c3/E)\u00b2",
+      "z*\u03c3\u00b7E",
+      "(z*/E)\u00b2"
+    ],
+    "correct_answer": "(z*\u03c3/E)\u00b2",
+    "explanation": "n = (z*\u00b7\u03c3/E)\u00b2.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "To estimate p within \u00b10.03 with 95% confidence (p unknown), n \u2265?",
+    "options": [
+      "1068",
+      "400",
+      "1000",
+      "2000"
+    ],
+    "correct_answer": "1068",
+    "explanation": "n = (1.96)\u00b2\u00b70.25/0.03\u00b2 = 3.8416\u00b70.25/0.0009 \u2248 1068.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "A t-interval is more appropriate than a z-interval when:",
+    "options": [
+      "n is large",
+      "\u03c3 is known",
+      "\u03c3 is unknown",
+      "The population is non-normal and n is large"
+    ],
+    "correct_answer": "\u03c3 is unknown",
+    "explanation": "Use t* when estimating \u03c3 from the sample.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "Bootstrap confidence intervals are useful when:",
+    "options": [
+      "\u03c3 is known",
+      "The sampling distribution is analytically tractable",
+      "The distributional assumptions are hard to verify",
+      "n is very large"
+    ],
+    "correct_answer": "The distributional assumptions are hard to verify",
+    "explanation": "Bootstrap CIs make fewer distributional assumptions.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "Which CI is wider: 95% with n=25 or 95% with n=100?",
+    "options": [
+      "n=100",
+      "n=25",
+      "They're equal",
+      "Depends on \u03c3"
+    ],
+    "correct_answer": "n=25",
+    "explanation": "Smaller n \u2192 larger SE \u2192 wider CI.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "A CI gives information about:",
+    "options": [
+      "Individual data values",
+      "A range of plausible population parameter values",
+      "The exact parameter value",
+      "Sample statistics only"
+    ],
+    "correct_answer": "A range of plausible population parameter values",
+    "explanation": "CIs quantify uncertainty about the true parameter.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "Paired data CI uses the differences d\u1d62 = x\u2081\u1d62 - x\u2082\u1d62 and treats them as:",
+    "options": [
+      "Two separate samples",
+      "A single sample to compute a one-sample CI",
+      "Independent observations only",
+      "A matched pairs ANOVA"
+    ],
+    "correct_answer": "A single sample to compute a one-sample CI",
+    "explanation": "Paired CI: compute d\u1d62, then CI for \u03bc_d.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "The one-sample z-test requires:",
+    "options": [
+      "Unknown \u03c3",
+      "Known \u03c3 and large n or normal population",
+      "Only large n",
+      "n < 30"
+    ],
+    "correct_answer": "Known \u03c3 and large n or normal population",
+    "explanation": "z-test: use when \u03c3 is known.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "Test H\u2080: \u03bc=100 vs H\u2081: \u03bc\u2260100. With X\u0304=104, \u03c3=10, n=25, z=?",
+    "options": [
+      "2",
+      "4",
+      "0.4",
+      "20"
+    ],
+    "correct_answer": "2",
+    "explanation": "z=(104-100)/(10/\u221a25)=(4/2)=2.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "If z=2.0 and \u03b1=0.05 (two-tailed), we:",
+    "options": [
+      "Fail to reject H\u2080",
+      "Reject H\u2080",
+      "Cannot determine",
+      "Accept H\u2080"
+    ],
+    "correct_answer": "Reject H\u2080",
+    "explanation": "|z|=2 > z*=1.96, so reject H\u2080.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "The p-value for z=2.0 (two-tailed) is approximately:",
+    "options": [
+      "0.05",
+      "0.025",
+      "0.046",
+      "0.10"
+    ],
+    "correct_answer": "0.046",
+    "explanation": "P(|Z|>2) \u2248 0.046.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "H\u2080: \u03bc=50, H\u2081: \u03bc>50. With t=1.8 and df=20, \u03b1=0.05, t*\u22481.725. Decision?",
+    "options": [
+      "Fail to reject",
+      "Reject H\u2080",
+      "p-value=0.05 exactly",
+      "Cannot determine"
+    ],
+    "correct_answer": "Reject H\u2080",
+    "explanation": "1.8 > 1.725, so reject H\u2080.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "The one-sample t-test statistic is:",
+    "options": [
+      "(X\u0304-\u03bc\u2080)\u00b7n",
+      "(X\u0304-\u03bc\u2080)/(S/\u221an)",
+      "(X\u0304-\u03bc\u2080)/\u03c3",
+      "(X\u0304-\u03bc\u2080)\u00b2/S\u00b2"
+    ],
+    "correct_answer": "(X\u0304-\u03bc\u2080)/(S/\u221an)",
+    "explanation": "t = (X\u0304-\u03bc\u2080)/(S/\u221an) with df=n-1.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "For a one-tailed test at \u03b1=0.05, the z* critical value is:",
+    "options": [
+      "1.96",
+      "1.645",
+      "2.576",
+      "2.33"
+    ],
+    "correct_answer": "1.645",
+    "explanation": "One-tailed at 5%: z*=1.645.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "A p-value of 0.03 means:",
+    "options": [
+      "H\u2080 is false with probability 0.97",
+      "We reject H\u2080 at \u03b1=0.05 but not at \u03b1=0.01",
+      "H\u2080 is true with probability 0.03",
+      "The effect size is 0.03"
+    ],
+    "correct_answer": "We reject H\u2080 at \u03b1=0.05 but not at \u03b1=0.01",
+    "explanation": "0.03 < 0.05 but 0.03 > 0.01.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "Type I error rate \u03b1 is controlled by:",
+    "options": [
+      "Sample size",
+      "The significance level chosen",
+      "The power of the test",
+      "The standard deviation"
+    ],
+    "correct_answer": "The significance level chosen",
+    "explanation": "\u03b1 = significance level = P(Type I error).",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "Failing to reject H\u2080 means:",
+    "options": [
+      "H\u2080 is proven true",
+      "There is insufficient evidence against H\u2080",
+      "H\u2080 is definitely true",
+      "The test was wrong"
+    ],
+    "correct_answer": "There is insufficient evidence against H\u2080",
+    "explanation": "We never 'accept' H\u2080; we only fail to reject it.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "The test statistic for H\u2080: p=0.5 with p\u0302=0.55, n=100 is:",
+    "options": [
+      "z=1.0",
+      "z=0.5",
+      "z=1",
+      "z=0.55"
+    ],
+    "correct_answer": "z=1.0",
+    "explanation": "z=(0.55-0.5)/\u221a(0.5\u00b70.5/100)=(0.05/0.05)=1.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "Which of these would NOT lead to rejecting H\u2080 at \u03b1=0.05?",
+    "options": [
+      "p-value=0.03",
+      "p-value=0.049",
+      "p-value=0.06",
+      "z=2.5"
+    ],
+    "correct_answer": "p-value=0.06",
+    "explanation": "0.06 > 0.05, so we fail to reject H\u2080.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "A statistically significant result means:",
+    "options": [
+      "The effect is practically important",
+      "The result is unlikely if H\u2080 were true",
+      "H\u2080 is false",
+      "The sample size was large enough"
+    ],
+    "correct_answer": "The result is unlikely if H\u2080 were true",
+    "explanation": "Statistical significance only means the result is unlikely under H\u2080.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "Effect size measures:",
+    "options": [
+      "Statistical significance",
+      "The practical magnitude of a difference",
+      "The p-value",
+      "Sample size needed"
+    ],
+    "correct_answer": "The practical magnitude of a difference",
+    "explanation": "Effect size (e.g., Cohen's d) measures how big a difference is.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "Cohen's d = ?",
+    "options": [
+      "(X\u0304-\u03bc\u2080)/n",
+      "(X\u0304-\u03bc\u2080)/S",
+      "(X\u0304-\u03bc\u2080)/\u03c3",
+      "t-statistic/n"
+    ],
+    "correct_answer": "(X\u0304-\u03bc\u2080)/S",
+    "explanation": "Cohen's d = difference / standard deviation.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "The two-sample z-test for means requires:",
+    "options": [
+      "Equal variances",
+      "Known \u03c3\u2081 and \u03c3\u2082",
+      "Normal populations only",
+      "Small samples"
+    ],
+    "correct_answer": "Known \u03c3\u2081 and \u03c3\u2082",
+    "explanation": "Two-sample z: use when both population standard deviations are known.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "For the pooled two-sample t-test, the pooled variance is:",
+    "options": [
+      "(S\u2081\u00b2+S\u2082\u00b2)/2",
+      "((n\u2081-1)S\u2081\u00b2+(n\u2082-1)S\u2082\u00b2)/(n\u2081+n\u2082-2)",
+      "S\u2081\u00b7S\u2082",
+      "(S\u2081+S\u2082)/2"
+    ],
+    "correct_answer": "((n\u2081-1)S\u2081\u00b2+(n\u2082-1)S\u2082\u00b2)/(n\u2081+n\u2082-2)",
+    "explanation": "Pooled Sp\u00b2 weights each variance by its df.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "The pooled t-test assumes:",
+    "options": [
+      "Unequal variances",
+      "Equal population variances",
+      "Normal populations with equal variances",
+      "Large sample sizes only"
+    ],
+    "correct_answer": "Normal populations with equal variances",
+    "explanation": "Pooled t-test assumption: \u03c3\u2081\u00b2 = \u03c3\u2082\u00b2.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "For a paired t-test, the test statistic is:",
+    "options": [
+      "(X\u0304\u2081-X\u0304\u2082)/SE",
+      "d\u0304/(S_d/\u221an)",
+      "(X\u0304\u2081-X\u0304\u2082)/(Sp\u00b7\u221a(1/n\u2081+1/n\u2082))",
+      "(X\u0304\u2081+X\u0304\u2082)/S"
+    ],
+    "correct_answer": "d\u0304/(S_d/\u221an)",
+    "explanation": "Paired t: t = d\u0304/(S_d/\u221an) where d = differences.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "When should you use a paired t-test vs. two-sample t-test?",
+    "options": [
+      "Always use paired",
+      "Use paired when measurements are matched/related",
+      "Use two-sample when n is large",
+      "Use two-sample when \u03c3 is unknown"
+    ],
+    "correct_answer": "Use paired when measurements are matched/related",
+    "explanation": "Paired tests remove between-subject variability.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "The CI for \u03bc\u2081-\u03bc\u2082 (known \u03c3) is:",
+    "options": [
+      "(X\u0304\u2081-X\u0304\u2082) \u00b1 z*\u00b7\u221a(\u03c3\u2081\u00b2+\u03c3\u2082\u00b2)",
+      "(X\u0304\u2081-X\u0304\u2082) \u00b1 z*\u00b7\u221a(\u03c3\u2081\u00b2/n\u2081+\u03c3\u2082\u00b2/n\u2082)",
+      "(X\u0304\u2081+X\u0304\u2082) \u00b1 z*\u00b7\u03c3",
+      "(X\u0304\u2081-X\u0304\u2082)/\u221an \u00b1 z*"
+    ],
+    "correct_answer": "(X\u0304\u2081-X\u0304\u2082) \u00b1 z*\u00b7\u221a(\u03c3\u2081\u00b2/n\u2081+\u03c3\u2082\u00b2/n\u2082)",
+    "explanation": "Two-sample CI for difference of means.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "Two groups: n\u2081=n\u2082=25, X\u0304\u2081=50, X\u0304\u2082=45, Sp=10. Pooled t = ?",
+    "options": [
+      "|2.5",
+      "5",
+      "1.77",
+      "0.5"
+    ],
+    "correct_answer": "1.77",
+    "explanation": "t=5/(10\u221a(2/25))=5/2.828\u22481.77.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "The F-test for equality of variances: H\u2080: \u03c3\u2081\u00b2=\u03c3\u2082\u00b2, statistic = ?",
+    "options": [
+      "S\u2081/S\u2082",
+      "(S\u2081-S\u2082)\u00b2",
+      "S\u2081\u00b2/S\u2082\u00b2",
+      "(S\u2081+S\u2082)/2"
+    ],
+    "correct_answer": "S\u2081\u00b2/S\u2082\u00b2",
+    "explanation": "F = S\u2081\u00b2/S\u2082\u00b2 follows an F-distribution under H\u2080.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "For the two-sample test for proportions, the test statistic uses:",
+    "options": [
+      "Separate p\u0302\u2081 and p\u0302\u2082",
+      "The pooled p\u0302 under H\u2080",
+      "The average of p\u0302\u2081 and p\u0302\u2082",
+      "Only p\u0302\u2081"
+    ],
+    "correct_answer": "The pooled p\u0302 under H\u2080",
+    "explanation": "Under H\u2080: p\u2081=p\u2082=p, use pooled p\u0302=(x\u2081+x\u2082)/(n\u2081+n\u2082).",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "A paired design is more efficient when:",
+    "options": [
+      "Subjects are very different",
+      "Measurements within pairs are correlated",
+      "n is very large",
+      "The outcome is binary"
+    ],
+    "correct_answer": "Measurements within pairs are correlated",
+    "explanation": "Pairing removes between-pair variability, increasing precision.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "If H\u2080: \u03bc\u2081=\u03bc\u2082 and the 95% CI for \u03bc\u2081-\u03bc\u2082 is (2, 8), we:",
+    "options": [
+      "Fail to reject H\u2080",
+      "Reject H\u2080 at \u03b1=0.05",
+      "Cannot conclude",
+      "Need more data"
+    ],
+    "correct_answer": "Reject H\u2080 at \u03b1=0.05",
+    "explanation": "0 is not in (2,8), so reject H\u2080 at \u03b1=0.05.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "The Levene test before a t-test checks:",
+    "options": [
+      "Normality",
+      "Equal variances",
+      "Independence",
+      "Sample size"
+    ],
+    "correct_answer": "Equal variances",
+    "explanation": "Levene: H\u2080: \u03c3\u2081\u00b2=\u03c3\u2082\u00b2, used to choose pooled vs. Welch's t-test.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "Welch's t-test degrees of freedom (Satterthwaite) are:",
+    "options": [
+      "n\u2081+n\u2082-2",
+      "Always n-1",
+      "Estimated from the data, usually not an integer",
+      "min(n\u2081,n\u2082)-1"
+    ],
+    "correct_answer": "Estimated from the data, usually not an integer",
+    "explanation": "Satterthwaite approximation gives non-integer df.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "For large independent samples (n\u2081,n\u2082\u226530), the two-sample z-test is valid because:",
+    "options": [
+      "\u03c3 is always known",
+      "CLT ensures X\u0304\u2081-X\u0304\u2082 is approximately normal",
+      "Variances must be equal",
+      "The t and z are identical"
+    ],
+    "correct_answer": "CLT ensures X\u0304\u2081-X\u0304\u2082 is approximately normal",
+    "explanation": "By CLT, differences of sample means are approximately normal.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "The effect size for two-sample comparison is:",
+    "options": [
+      "X\u0304\u2081-X\u0304\u2082",
+      "(X\u0304\u2081-X\u0304\u2082)/Sp",
+      "(X\u0304\u2081-X\u0304\u2082)/n",
+      "t-statistic"
+    ],
+    "correct_answer": "(X\u0304\u2081-X\u0304\u2082)/Sp",
+    "explanation": "Cohen's d = (X\u0304\u2081-X\u0304\u2082)/Sp.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "The chi-square goodness-of-fit test has df = ?",
+    "options": [
+      "k",
+      "k-1",
+      "k-2",
+      "n-1"
+    ],
+    "correct_answer": "k-1",
+    "explanation": "df = (number of categories) - 1.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "For a chi-square GOF test, expected count = ?",
+    "options": [
+      "Observed count",
+      "n\u00b7p\u2080 for each cell",
+      "n/k",
+      "Observed - n"
+    ],
+    "correct_answer": "n\u00b7p\u2080 for each cell",
+    "explanation": "E = n \u00d7 hypothesized proportion for each category.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "The minimum expected frequency rule for chi-square is:",
+    "options": [
+      "E \u2265 1",
+      "E \u2265 5",
+      "E \u2265 10",
+      "E \u2265 n/k"
+    ],
+    "correct_answer": "E \u2265 5",
+    "explanation": "Rule of thumb: all expected frequencies should be \u2265 5.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "For a 4\u00d73 contingency table, df = ?",
+    "options": [
+      "12",
+      "6",
+      "9",
+      "11"
+    ],
+    "correct_answer": "6",
+    "explanation": "df = (4-1)(3-1) = 3\u00d72 = 6.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "In a chi-square test of independence, the expected cell count =",
+    "options": [
+      "Row total \u00d7 Column total",
+      "(Row total \u00d7 Column total)/Grand total",
+      "Grand total/(Row\u00d7Column)",
+      "Observed count"
+    ],
+    "correct_answer": "(Row total \u00d7 Column total)/Grand total",
+    "explanation": "E = (row total \u00d7 column total) / n.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "A chi-square test of independence tests:",
+    "options": [
+      "H\u2080: means are equal",
+      "H\u2080: the two categorical variables are independent",
+      "H\u2080: all proportions equal 0.5",
+      "H\u2080: variances are equal"
+    ],
+    "correct_answer": "H\u2080: the two categorical variables are independent",
+    "explanation": "Chi-square independence test checks for association between categories.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "The chi-square statistic is always:",
+    "options": [
+      "Negative",
+      "Zero",
+      "Non-negative",
+      "Between -1 and 1"
+    ],
+    "correct_answer": "Non-negative",
+    "explanation": "\u03c7\u00b2 = \u03a3(O-E)\u00b2/E \u2265 0.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "A large chi-square statistic suggests:",
+    "options": [
+      "The observed and expected counts are similar",
+      "The observed and expected counts differ significantly",
+      "H\u2080 is true",
+      "Independence between variables"
+    ],
+    "correct_answer": "The observed and expected counts differ significantly",
+    "explanation": "Large \u03c7\u00b2 \u2192 observed data doesn't match expected under H\u2080.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "McNemar's test is used for:",
+    "options": [
+      "Independent samples",
+      "Paired/matched categorical data",
+      "More than two groups",
+      "Continuous outcomes"
+    ],
+    "correct_answer": "Paired/matched categorical data",
+    "explanation": "McNemar: tests marginal homogeneity in 2\u00d72 paired tables.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "Fisher's exact test is preferred over chi-square when:",
+    "options": [
+      "n is large",
+      "Expected counts are small (< 5)",
+      "Data is continuous",
+      "Groups are independent"
+    ],
+    "correct_answer": "Expected counts are small (< 5)",
+    "explanation": "Fisher's exact test is exact and valid for small expected counts.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "One-way ANOVA tests H\u2080: all group means are equal. If rejected, this means:",
+    "options": [
+      "All means differ",
+      "At least two means differ",
+      "No means are equal",
+      "Variances are unequal"
+    ],
+    "correct_answer": "At least two means differ",
+    "explanation": "Rejecting ANOVA F-test means at least one pair of means differs.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "The F-statistic in ANOVA = MSB/MSW. If all group means are equal, F \u2248 ?",
+    "options": [
+      "0",
+      "1",
+      "k",
+      "n"
+    ],
+    "correct_answer": "1",
+    "explanation": "When H\u2080 is true, between-group and within-group variability are both estimating \u03c3\u00b2.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "SSTotal = SSBetween + ?",
+    "options": [
+      "SSMean",
+      "SSWithin",
+      "SSError only",
+      "SSResidual only"
+    ],
+    "correct_answer": "SSWithin",
+    "explanation": "ANOVA partitions total variability: SST = SSB + SSW.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "Degrees of freedom for SSBetween with k groups = ?",
+    "options": [
+      "k",
+      "k-1",
+      "n-k",
+      "n-1"
+    ],
+    "correct_answer": "k-1",
+    "explanation": "dfBetween = k - 1.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "Degrees of freedom for SSWithin with k groups and n total = ?",
+    "options": [
+      "k-1",
+      "n-1",
+      "n-k",
+      "n-k-1"
+    ],
+    "correct_answer": "n-k",
+    "explanation": "dfWithin = n - k.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "The ANOVA F-test requires which assumptions?",
+    "options": [
+      "Independence only",
+      "Independence, normality within groups, equal variances",
+      "Equal sample sizes",
+      "Large samples only"
+    ],
+    "correct_answer": "Independence, normality within groups, equal variances",
+    "explanation": "ANOVA assumptions: independence, normality, homogeneity of variance.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "Tukey's HSD post-hoc test controls:",
+    "options": [
+      "Type II error",
+      "The family-wise error rate for all pairwise comparisons",
+      "Individual test \u03b1",
+      "The false discovery rate"
+    ],
+    "correct_answer": "The family-wise error rate for all pairwise comparisons",
+    "explanation": "Tukey's HSD: simultaneous CI's for all pairwise differences.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "The Bonferroni correction for k tests uses \u03b1* = ?",
+    "options": [
+      "\u03b1\u00b7k",
+      "\u03b1/k",
+      "\u03b1\u00b2",
+      "k/\u03b1"
+    ],
+    "correct_answer": "\u03b1/k",
+    "explanation": "Bonferroni: divide \u03b1 by the number of comparisons.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "MSWithin estimates:",
+    "options": [
+      "The between-group variance",
+      "The within-group (error) variance \u03c3\u00b2",
+      "The total variance",
+      "The mean"
+    ],
+    "correct_answer": "The within-group (error) variance \u03c3\u00b2",
+    "explanation": "MSW = SSW/dfW estimates the common \u03c3\u00b2.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "MSBetween estimates \u03c3\u00b2 plus a term due to:",
+    "options": [
+      "Random error",
+      "Differences between group means",
+      "Within-group variability",
+      "Sample sizes"
+    ],
+    "correct_answer": "Differences between group means",
+    "explanation": "MSB = \u03c3\u00b2 + n\u00b7(variance of group means).",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "If F is very small (near 0) in ANOVA, this suggests:",
+    "options": [
+      "Groups differ greatly",
+      "Groups are very similar",
+      "Large within-group variance",
+      "An error in calculation"
+    ],
+    "correct_answer": "Groups are very similar",
+    "explanation": "Small F \u2192 between-group variance is small relative to within-group.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "The Kruskal-Wallis test is used when ANOVA assumptions:",
+    "options": [
+      "Are all met",
+      "About normality are violated",
+      "About equal variances are met",
+      "About independence are met"
+    ],
+    "correct_answer": "About normality are violated",
+    "explanation": "Kruskal-Wallis is the nonparametric alternative to one-way ANOVA.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "In a one-way ANOVA with k=3 groups and n=30 total, dfWithin =",
+    "options": [
+      "29",
+      "27",
+      "2",
+      "3"
+    ],
+    "correct_answer": "27",
+    "explanation": "dfWithin = n-k = 30-3 = 27.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "The p-value in ANOVA represents:",
+    "options": [
+      "P(all means equal)",
+      "P(F \u2265 observed F | H\u2080 true)",
+      "P(any mean differs)",
+      "P(Type II error)"
+    ],
+    "correct_answer": "P(F \u2265 observed F | H\u2080 true)",
+    "explanation": "p-value = P(observing F this large or larger if H\u2080 were true).",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "\u03b7\u00b2 (eta-squared) in ANOVA measures:",
+    "options": [
+      "The F-statistic",
+      "The effect size: proportion of total variance explained by group",
+      "Standard deviation",
+      "Statistical significance"
+    ],
+    "correct_answer": "The effect size: proportion of total variance explained by group",
+    "explanation": "\u03b7\u00b2 = SSBetween/SSTotal.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "In simple linear regression \u0177 = b\u2080 + b\u2081x, b\u2081 is the:",
+    "options": [
+      "y-intercept",
+      "Slope: change in \u0177 per unit increase in x",
+      "Correlation",
+      "Residual"
+    ],
+    "correct_answer": "Slope: change in \u0177 per unit increase in x",
+    "explanation": "b\u2081 = slope, the rate of change.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "The y-intercept b\u2080 is:",
+    "options": [
+      "The slope",
+      "The predicted y when x=0",
+      "The mean of y",
+      "The correlation"
+    ],
+    "correct_answer": "The predicted y when x=0",
+    "explanation": "b\u2080 = predicted response when x = 0.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "The residual is defined as:",
+    "options": [
+      "\u0177 - y",
+      "y - \u0177",
+      "y - \u0233",
+      "\u0177 - \u0233"
+    ],
+    "correct_answer": "y - \u0177",
+    "explanation": "Residual = observed - predicted.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "SSE (sum of squared errors) = ?",
+    "options": [
+      "\u03a3(y\u1d62-\u0233)\u00b2",
+      "\u03a3(\u0177\u1d62-\u0233)\u00b2",
+      "\u03a3(y\u1d62-\u0177\u1d62)\u00b2",
+      "\u03a3(y\u1d62-\u0177\u1d62)"
+    ],
+    "correct_answer": "\u03a3(y\u1d62-\u0177\u1d62)\u00b2",
+    "explanation": "SSE = sum of squared residuals.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "R\u00b2 = 1 - SSE/SST. R\u00b2=0.85 means:",
+    "options": [
+      "85% of data is in the model",
+      "The model explains 85% of variability in y",
+      "The correlation is 0.85",
+      "The slope is 0.85"
+    ],
+    "correct_answer": "The model explains 85% of variability in y",
+    "explanation": "R\u00b2 = proportion of total variation in y explained by the regression.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "The correlation r and slope b\u2081 have the same:",
+    "options": [
+      "Magnitude",
+      "Sign",
+      "Value",
+      "Units"
+    ],
+    "correct_answer": "Sign",
+    "explanation": "Positive b\u2081 \u2194 positive r; negative b\u2081 \u2194 negative r.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "The regression line always passes through:",
+    "options": [
+      "(0,0)",
+      "(x\u0304, \u0233)",
+      "(0, b\u2080)",
+      "(b\u2081, b\u2080)"
+    ],
+    "correct_answer": "(x\u0304, \u0233)",
+    "explanation": "The regression line passes through the point of means.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "If r=0.9, then R\u00b2=?",
+    "options": [
+      "0.9",
+      "0.81",
+      "0.3",
+      "0.45"
+    ],
+    "correct_answer": "0.81",
+    "explanation": "R\u00b2 = r\u00b2 = 0.9\u00b2 = 0.81.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "The t-test for the slope tests H\u2080: \u03b2\u2081=0. Rejecting means:",
+    "options": [
+      "The intercept is significant",
+      "There is a significant linear relationship",
+      "The residuals are normal",
+      "R\u00b2=1"
+    ],
+    "correct_answer": "There is a significant linear relationship",
+    "explanation": "\u03b2\u2081=0 means no linear relationship; rejecting confirms one exists.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "The standard error of the slope SE(b\u2081) depends on:",
+    "options": [
+      "Only n",
+      "\u03c3, n, and spread of x values",
+      "Only \u03c3",
+      "Only the spread of x"
+    ],
+    "correct_answer": "\u03c3, n, and spread of x values",
+    "explanation": "SE(b\u2081) = s/\u221aSSx, where SSx = \u03a3(x\u1d62-x\u0304)\u00b2.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "A residual plot should show:",
+    "options": [
+      "A pattern or curve",
+      "Random scatter around 0",
+      "Increasing spread",
+      "A straight line"
+    ],
+    "correct_answer": "Random scatter around 0",
+    "explanation": "Random residuals \u2192 model assumptions are met.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "A curved pattern in the residual plot suggests:",
+    "options": [
+      "Normal errors",
+      "A linear model is appropriate",
+      "A nonlinear relationship may exist",
+      "Heteroscedasticity"
+    ],
+    "correct_answer": "A nonlinear relationship may exist",
+    "explanation": "Curved residuals indicate the linear model may be misspecified.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "Extrapolation in regression is:",
+    "options": [
+      "Always reliable",
+      "Predicting within the data range",
+      "Predicting beyond the data range \u2014 risky",
+      "Finding the intercept"
+    ],
+    "correct_answer": "Predicting beyond the data range \u2014 risky",
+    "explanation": "The model may not hold outside the observed range of x.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "In multiple regression, each coefficient represents:",
+    "options": [
+      "The total effect of one predictor",
+      "The effect of one predictor holding all others constant",
+      "The correlation between that predictor and y",
+      "The slope of y vs. that predictor alone"
+    ],
+    "correct_answer": "The effect of one predictor holding all others constant",
+    "explanation": "Partial slope: effect of x\u2c7c controlling for all other predictors.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "Adding a useless predictor to a regression will:",
+    "options": [
+      "Increase R\u00b2",
+      "Decrease R\u00b2",
+      "Not change R\u00b2",
+      "Make R\u00b2=1"
+    ],
+    "correct_answer": "Increase R\u00b2",
+    "explanation": "R\u00b2 never decreases when adding predictors (even useless ones).",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "Adjusted R\u00b2 penalizes for:",
+    "options": [
+      "Sample size",
+      "Adding predictors that don't improve fit",
+      "Outliers",
+      "Heteroscedasticity"
+    ],
+    "correct_answer": "Adding predictors that don't improve fit",
+    "explanation": "Adj. R\u00b2 = 1-(1-R\u00b2)(n-1)/(n-k-1).",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "The F-test in multiple regression tests H\u2080:",
+    "options": [
+      "All slopes are 0",
+      "At least one slope \u2260 0",
+      "The intercept is 0",
+      "Residuals are normal"
+    ],
+    "correct_answer": "All slopes are 0",
+    "explanation": "Overall F-test: H\u2080: \u03b2\u2081=\u03b2\u2082=...=\u03b2\u2096=0.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "Multicollinearity makes regression coefficients:",
+    "options": [
+      "More stable",
+      "Unstable with large standard errors",
+      "Unbiased",
+      "Larger in magnitude"
+    ],
+    "correct_answer": "Unstable with large standard errors",
+    "explanation": "Multicollinearity inflates SE(b\u2c7c), making estimates unreliable.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "An influential point has a large effect on:",
+    "options": [
+      "Only the residual",
+      "The regression line itself (coefficients)",
+      "R\u00b2 only",
+      "The correlation r"
+    ],
+    "correct_answer": "The regression line itself (coefficients)",
+    "explanation": "Influential points change the regression line significantly if removed.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "A leverage point is an observation with:",
+    "options": [
+      "Large residual",
+      "Extreme x-value",
+      "Extreme y-value",
+      "Small Cook's distance"
+    ],
+    "correct_answer": "Extreme x-value",
+    "explanation": "High leverage: the x-value is far from x\u0304.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "The condition for a linear relationship between x and y is best checked with:",
+    "options": [
+      "A bar chart",
+      "A scatter plot",
+      "A histogram",
+      "A box plot"
+    ],
+    "correct_answer": "A scatter plot",
+    "explanation": "Scatter plots reveal the form and direction of the relationship.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "If b\u2081=3.5 in the regression of y on x, an increase of 2 in x leads to predicted change in y of:",
+    "options": [
+      "3.5",
+      "1.75",
+      "7",
+      "5.5"
+    ],
+    "correct_answer": "7",
+    "explanation": "Change in \u0177 = b\u2081 \u00d7 \u0394x = 3.5 \u00d7 2 = 7.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "Which diagnostic plot checks normality of residuals?",
+    "options": [
+      "Residuals vs. fitted",
+      "Normal Q-Q plot of residuals",
+      "Scale-location plot",
+      "Cook's distance plot"
+    ],
+    "correct_answer": "Normal Q-Q plot of residuals",
+    "explanation": "Q-Q plot compares residual quantiles to normal quantiles.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "The variance of residuals should be:",
+    "options": [
+      "Increasing with fitted values",
+      "Constant (homoscedastic)",
+      "Decreasing",
+      "Zero"
+    ],
+    "correct_answer": "Constant (homoscedastic)",
+    "explanation": "Homoscedasticity: residuals have constant variance.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "In logistic regression, the output is:",
+    "options": [
+      "A continuous prediction",
+      "The probability of the event",
+      "The log-likelihood",
+      "The odds"
+    ],
+    "correct_answer": "The probability of the event",
+    "explanation": "Logistic regression models P(Y=1|X).",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "For X~Binomial(n=10, p=0.3), E[X] = ?",
+    "options": [
+      "3",
+      "7",
+      "0.3",
+      "1.45"
+    ],
+    "correct_answer": "3",
+    "explanation": "E[X] = np = 10\u00d70.3 = 3.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "For X~Binomial(n=10, p=0.3), Var(X) = ?",
+    "options": [
+      "3",
+      "2.1",
+      "0.21",
+      "4.5"
+    ],
+    "correct_answer": "2.1",
+    "explanation": "Var(X) = np(1-p) = 10\u00d70.3\u00d70.7 = 2.1.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "For X~Poisson(\u03bb=4), P(X=0) = ?",
+    "options": [
+      "4",
+      "e\u207b\u2074",
+      "1/4",
+      "0.5"
+    ],
+    "correct_answer": "e\u207b\u2074",
+    "explanation": "P(X=0) = e^(-\u03bb)\u00b7\u03bb\u2070/0! = e^(-4) \u2248 0.018.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "For X~Poisson(\u03bb=4), E[X] = Var(X) = ?",
+    "options": [
+      "16",
+      "2",
+      "4",
+      "\u221a4"
+    ],
+    "correct_answer": "4",
+    "explanation": "Poisson: mean = variance = \u03bb.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "The normal approximation to the binomial is valid when:",
+    "options": [
+      "n\u226510",
+      "np\u226510 and n(1-p)\u226510",
+      "p=0.5",
+      "n>100"
+    ],
+    "correct_answer": "np\u226510 and n(1-p)\u226510",
+    "explanation": "Success-failure condition for normal approximation.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "The continuity correction adjusts for:",
+    "options": [
+      "Bias in the estimator",
+      "Approximating a discrete distribution with a continuous one",
+      "Non-normality",
+      "Unequal variances"
+    ],
+    "correct_answer": "Approximating a discrete distribution with a continuous one",
+    "explanation": "Add or subtract 0.5 when approximating binomial with normal.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "For X~N(\u03bc=60, \u03c3=8), P(X<68) = P(Z < ?)",
+    "options": [
+      "1.0",
+      "0.5",
+      "8",
+      "0"
+    ],
+    "correct_answer": "1.0",
+    "explanation": "z=(68-60)/8=1. P(Z<1)\u22480.841.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "For X~N(\u03bc=60, \u03c3=8), P(52<X<68) = ?",
+    "options": [
+      "0.5",
+      "0.68",
+      "0.95",
+      "0.997"
+    ],
+    "correct_answer": "0.68",
+    "explanation": "52 and 68 are 1\u03c3 from mean. P(\u03bc\u00b1\u03c3)\u224868%.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "A z-score of 1.5 corresponds to approximately what percentile?",
+    "options": [
+      "85th",
+      "90th",
+      "95th",
+      "93rd"
+    ],
+    "correct_answer": "93rd",
+    "explanation": "P(Z<1.5)\u22480.9332 \u2248 93rd percentile.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "For X~Exponential(\u03bb=2), P(X>1) = ?",
+    "options": [
+      "e\u207b\u00b2",
+      "e\u207b\u00b9",
+      "1-e\u207b\u00b2",
+      "0.5"
+    ],
+    "correct_answer": "e\u207b\u00b2",
+    "explanation": "P(X>t) = e^(-\u03bbt) = e^(-2\u00d71) = e^(-2).",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "For X~Exponential(rate=\u03bb), the mean is:",
+    "options": [
+      "\u03bb",
+      "\u03bb\u00b2",
+      "1/\u03bb",
+      "\u221a\u03bb"
+    ],
+    "correct_answer": "1/\u03bb",
+    "explanation": "Mean of Exponential = 1/\u03bb.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "P(Z > 1.96) \u2248 ?",
+    "options": [
+      "0.025",
+      "0.05",
+      "0.975",
+      "0.5"
+    ],
+    "correct_answer": "0.025",
+    "explanation": "P(Z>1.96) = 0.025 (2.5% in upper tail).",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "P(-1.96 < Z < 1.96) \u2248 ?",
+    "options": [
+      "0.90",
+      "0.95",
+      "0.99",
+      "0.68"
+    ],
+    "correct_answer": "0.95",
+    "explanation": "Middle 95% of standard normal.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "For Binomial(n=20, p=0.5), P(X=10) is the:",
+    "options": [
+      "Smallest probability",
+      "Largest probability",
+      "Equal to all others",
+      "Zero"
+    ],
+    "correct_answer": "Largest probability",
+    "explanation": "For symmetric binomial (p=0.5), mode = n/2 = 10.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "The geometric distribution P(X=k) = (1-p)^(k-1)\u00b7p represents:",
+    "options": [
+      "k successes in n trials",
+      "Exactly k failures before first success",
+      "Number of trials including the first success",
+      "Proportion of successes"
+    ],
+    "correct_answer": "Number of trials including the first success",
+    "explanation": "Geometric: P(X=k) = probability that kth trial is first success.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "For X~Uniform(a=2, b=8), P(3<X<5) = ?",
+    "options": [
+      "1/3",
+      "2/6",
+      "1/2",
+      "1/4"
+    ],
+    "correct_answer": "1/3",
+    "explanation": "P(3<X<5) = (5-3)/(8-2) = 2/6 = 1/3.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "For X~Uniform(a,b), variance = ?",
+    "options": [
+      "(b-a)/2",
+      "(b-a)\u00b2/12",
+      "(b-a)\u00b2/4",
+      "(b+a)/2"
+    ],
+    "correct_answer": "(b-a)\u00b2/12",
+    "explanation": "Uniform variance = (b-a)\u00b2/12.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "The chi-square distribution with k df has mean = ?",
+    "options": [
+      "k/2",
+      "\u221ak",
+      "k",
+      "k\u00b2"
+    ],
+    "correct_answer": "k",
+    "explanation": "E[\u03c7\u00b2(k)] = k.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "The t-distribution is symmetric about:",
+    "options": [
+      "1",
+      "0",
+      "df",
+      "0.5"
+    ],
+    "correct_answer": "0",
+    "explanation": "t-distribution: symmetric about 0.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "For large n, the binomial B(n,p) with p=0.5 and n=100 has approximate distribution:",
+    "options": [
+      "Poisson(50)",
+      "N(50, 25)",
+      "N(50, 5)",
+      "Uniform"
+    ],
+    "correct_answer": "N(50, 25)",
+    "explanation": "Binomial: \u03bc=np=50, \u03c3\u00b2=np(1-p)=25. N(50,25).",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "A nonparametric test makes:",
+    "options": [
+      "Stronger assumptions than parametric",
+      "Fewer assumptions about the population distribution",
+      "Assumptions about normality",
+      "Assumptions about equal variances"
+    ],
+    "correct_answer": "Fewer assumptions about the population distribution",
+    "explanation": "Nonparametric tests are distribution-free.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "The Mann-Whitney U test is the nonparametric equivalent of:",
+    "options": [
+      "Paired t-test",
+      "One-sample t-test",
+      "Two-sample t-test",
+      "ANOVA"
+    ],
+    "correct_answer": "Two-sample t-test",
+    "explanation": "Mann-Whitney (Wilcoxon rank-sum) tests equality of two distributions.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "The Wilcoxon signed-rank test requires:",
+    "options": [
+      "Independence of two samples",
+      "Symmetrically distributed differences in paired data",
+      "Normal distribution",
+      "Equal variances"
+    ],
+    "correct_answer": "Symmetrically distributed differences in paired data",
+    "explanation": "Signed-rank test: assume differences are symmetric about the median.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "Rank-based tests are less affected by:",
+    "options": [
+      "Small samples",
+      "Outliers and non-normality",
+      "Equal variances",
+      "Large samples"
+    ],
+    "correct_answer": "Outliers and non-normality",
+    "explanation": "Ranking reduces the influence of extreme values.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "The correlation between ranked data is called:",
+    "options": [
+      "Pearson r",
+      "Kendall's tau",
+      "Spearman's \u03c1",
+      "Point-biserial r"
+    ],
+    "correct_answer": "Spearman's \u03c1",
+    "explanation": "Spearman's rho = Pearson r computed on ranks.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "What does P(Type II error) = \u03b2 represent?",
+    "options": [
+      "P(reject H\u2080|H\u2080 true)",
+      "P(fail to reject H\u2080|H\u2080 false)",
+      "P(correct rejection)",
+      "1-\u03b1"
+    ],
+    "correct_answer": "P(fail to reject H\u2080|H\u2080 false)",
+    "explanation": "\u03b2 = P(fail to reject H\u2080 when H\u2081 is true).",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "Power = ?",
+    "options": [
+      "\u03b1",
+      "\u03b2",
+      "1-\u03b2",
+      "1-\u03b1"
+    ],
+    "correct_answer": "1-\u03b2",
+    "explanation": "Power = P(reject H\u2080 | H\u2081 is true) = 1 - \u03b2.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "Power increases when:",
+    "options": [
+      "\u03b1 decreases",
+      "n decreases",
+      "Effect size increases",
+      "\u03c3 increases"
+    ],
+    "correct_answer": "Effect size increases",
+    "explanation": "Larger effect \u2192 easier to detect \u2192 higher power.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "A Type I error is also called:",
+    "options": [
+      "False negative",
+      "False positive",
+      "A miss",
+      "Correct rejection"
+    ],
+    "correct_answer": "False positive",
+    "explanation": "Type I = false positive = rejecting a true H\u2080.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "A Type II error is also called:",
+    "options": [
+      "False positive",
+      "True negative",
+      "False negative",
+      "Correct rejection"
+    ],
+    "correct_answer": "False negative",
+    "explanation": "Type II = false negative = failing to reject a false H\u2080.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "The p-value is NOT:",
+    "options": [
+      "Computed assuming H\u2080 is true",
+      "The probability the data occurred by chance under H\u2080",
+      "The probability H\u2080 is true",
+      "A probability between 0 and 1"
+    ],
+    "correct_answer": "The probability H\u2080 is true",
+    "explanation": "p-value is NOT the probability that H\u2080 is true.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "A statistically significant result with very large n may have:",
+    "options": [
+      "No practical importance",
+      "High Type II error",
+      "Low power",
+      "High p-value"
+    ],
+    "correct_answer": "No practical importance",
+    "explanation": "With large n, even tiny effects become statistically significant.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "The point estimate for \u03bc\u2081-\u03bc\u2082 is:",
+    "options": [
+      "S\u2081-S\u2082",
+      "X\u0304\u2081+X\u0304\u2082",
+      "X\u0304\u2081-X\u0304\u2082",
+      "(X\u0304\u2081-X\u0304\u2082)/\u221an"
+    ],
+    "correct_answer": "X\u0304\u2081-X\u0304\u2082",
+    "explanation": "X\u0304\u2081-X\u0304\u2082 is the natural point estimator for \u03bc\u2081-\u03bc\u2082.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "Regression toward the mean refers to:",
+    "options": [
+      "Residuals equaling 0",
+      "Extreme values tending to be followed by less extreme values",
+      "The mean being the best prediction",
+      "R\u00b2=1"
+    ],
+    "correct_answer": "Extreme values tending to be followed by less extreme values",
+    "explanation": "High/low values tend to be followed by values closer to the mean.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "The coefficient of determination R\u00b2 = ?",
+    "options": [
+      "r",
+      "r\u00b2",
+      "SSE/SST",
+      "1-(SST/SSE)"
+    ],
+    "correct_answer": "r\u00b2",
+    "explanation": "R\u00b2 = r\u00b2 in simple linear regression.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "A lurking variable creates:",
+    "options": [
+      "A direct causal relationship",
+      "Spurious correlation between two variables",
+      "A significant p-value",
+      "A high R\u00b2"
+    ],
+    "correct_answer": "Spurious correlation between two variables",
+    "explanation": "Lurking (confounding) variables create false associations.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "The standard deviation of a sampling distribution is called:",
+    "options": [
+      "Variance",
+      "Standard error",
+      "Standard deviation",
+      "Mean square error"
+    ],
+    "correct_answer": "Standard error",
+    "explanation": "SE = standard deviation of the sampling distribution.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "Stratified random sampling improves precision by:",
+    "options": [
+      "Using larger samples",
+      "Ensuring representation from each subgroup",
+      "Ignoring the population structure",
+      "Using only the most common group"
+    ],
+    "correct_answer": "Ensuring representation from each subgroup",
+    "explanation": "Stratification reduces variability within each stratum.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "In a 2\u00d72 table, the relative risk (RR) = ?",
+    "options": [
+      "P(event|exposed)/P(event|unexposed)",
+      "Odds exposed/Odds unexposed",
+      "P(exposed|event)",
+      "1/OR"
+    ],
+    "correct_answer": "P(event|exposed)/P(event|unexposed)",
+    "explanation": "RR = ratio of event probabilities in two groups.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "The odds ratio (OR) in a 2\u00d72 table = ?",
+    "options": [
+      "(a/b)/(c/d) = ad/bc",
+      "(a+b)/(c+d)",
+      "a/b",
+      "ad/(b+c)"
+    ],
+    "correct_answer": "(a/b)/(c/d) = ad/bc",
+    "explanation": "OR = (a/b)\u00f7(c/d) = ad/bc in a 2\u00d72 table (a,b,c,d = cell counts).",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "The sample mean X\u0304 is a(n) __ estimator of \u03bc.",
+    "options": [
+      "Biased",
+      "Consistent and unbiased",
+      "Inconsistent",
+      "Sufficient only"
+    ],
+    "correct_answer": "Consistent and unbiased",
+    "explanation": "X\u0304 is unbiased (E[X\u0304]=\u03bc) and consistent (\u2192\u03bc as n\u2192\u221e).",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "If X\u0304=25, S=5, n=16, the 95% CI for \u03bc is approximately:",
+    "options": [
+      "(22.3, 27.7)",
+      "(23.5, 26.5)",
+      "(20, 30)",
+      "(24, 26)"
+    ],
+    "correct_answer": "(22.3, 27.7)",
+    "explanation": "t*(df=15)\u22482.131. CI: 25\u00b12.131\u00d75/4 = 25\u00b12.66 \u2248 (22.3,27.7).",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "The standard error of a sample proportion p\u0302=0.4 with n=100 is:",
+    "options": [
+      "0.04",
+      "0.4",
+      "0.049",
+      "0.16"
+    ],
+    "correct_answer": "0.049",
+    "explanation": "SE=\u221a(0.4\u00d70.6/100)=\u221a(0.0024)\u22480.049.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "In hypothesis testing, we reject H\u2080 when:",
+    "options": [
+      "p-value > \u03b1",
+      "p-value < \u03b1",
+      "p-value = \u03b1",
+      "t < z"
+    ],
+    "correct_answer": "p-value < \u03b1",
+    "explanation": "Reject when p-value is less than significance level \u03b1.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "The two conditions for a valid normal approximation to p\u0302 are:",
+    "options": [
+      "n\u226530 and p=0.5",
+      "np\u226510 and n(1-p)\u226510",
+      "n\u2265100 and p>0.1",
+      "n>p and n>1-p"
+    ],
+    "correct_answer": "np\u226510 and n(1-p)\u226510",
+    "explanation": "Success-failure condition.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "A 95% CI for a proportion is (0.42, 0.58). The sample proportion p\u0302 is:",
+    "options": [
+      "0.42",
+      "0.58",
+      "0.5",
+      "0.08"
+    ],
+    "correct_answer": "0.5",
+    "explanation": "p\u0302 = midpoint = (0.42+0.58)/2 = 0.5.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "For a two-tailed test at \u03b1=0.01, the critical z values are:",
+    "options": [
+      "\u00b11.645",
+      "\u00b11.96",
+      "\u00b12.326",
+      "\u00b12.576"
+    ],
+    "correct_answer": "\u00b12.576",
+    "explanation": "Two-tailed at 1%: z*=2.576.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "If F=1 in one-way ANOVA, this indicates:",
+    "options": [
+      "All group means differ",
+      "MSB=MSW (no evidence against H\u2080)",
+      "P-value=1",
+      "Unequal variances"
+    ],
+    "correct_answer": "MSB=MSW (no evidence against H\u2080)",
+    "explanation": "F=1 \u2192 between and within variability are equal.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "The regression residual for a point above the regression line is:",
+    "options": [
+      "Negative",
+      "Positive",
+      "Zero",
+      "The slope"
+    ],
+    "correct_answer": "Positive",
+    "explanation": "Above the line: y > \u0177, so residual = y - \u0177 > 0.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "R\u00b2=0 means:",
+    "options": [
+      "The model is perfect",
+      "x explains none of the variability in y",
+      "The residuals are 0",
+      "The slope is 0... same thing"
+    ],
+    "correct_answer": "x explains none of the variability in y",
+    "explanation": "R\u00b2=0: the regression line is no better than using \u0233.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "The predicted value \u0177 when x=x\u0304 equals:",
+    "options": [
+      "0",
+      "b\u2080",
+      "\u0233",
+      "b\u2081"
+    ],
+    "correct_answer": "\u0233",
+    "explanation": "The regression line passes through (x\u0304,\u0233), so \u0177|x=x\u0304 = \u0233.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "If the slope b\u2081 in regression is tested with t=3.2 and df=28 at \u03b1=0.05, we:",
+    "options": [
+      "Fail to reject \u03b2\u2081=0",
+      "Reject \u03b2\u2081=0",
+      "Cannot determine",
+      "Need more data"
+    ],
+    "correct_answer": "Reject \u03b2\u2081=0",
+    "explanation": "t=3.2 > t*(0.025, 28)\u22482.048, so reject H\u2080: \u03b2\u2081=0.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "The chi-square test for independence requires which sampling condition?",
+    "options": [
+      "Equal group sizes",
+      "Random sampling or random assignment",
+      "n\u2265100",
+      "p=0.5"
+    ],
+    "correct_answer": "Random sampling or random assignment",
+    "explanation": "Valid inference requires the data to be randomly obtained.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "Expected cell count in a chi-square test = (row total \u00d7 col total)/n. What does this represent?",
+    "options": [
+      "The observed count",
+      "Count expected if variables were independent",
+      "The mode",
+      "The mean"
+    ],
+    "correct_answer": "Count expected if variables were independent",
+    "explanation": "Expected counts assume independence between the two variables.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "A very small p-value in a chi-square test of independence indicates:",
+    "options": [
+      "The variables are independent",
+      "Strong evidence of association between the variables",
+      "The expected counts are too large",
+      "R\u00b2\u22481"
+    ],
+    "correct_answer": "Strong evidence of association between the variables",
+    "explanation": "Small p \u2192 reject independence \u2192 evidence of association.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "The Spearman correlation is preferred over Pearson when:",
+    "options": [
+      "Data is normally distributed",
+      "Data contains outliers or is ordinal",
+      "n is large",
+      "Variables are continuous"
+    ],
+    "correct_answer": "Data contains outliers or is ordinal",
+    "explanation": "Spearman uses ranks, making it robust to outliers.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "For a normal population with \u03c3 unknown, a 90% CI for \u03bc uses:",
+    "options": [
+      "z*=1.645",
+      "z*=1.96",
+      "t* from t-distribution",
+      "\u03c7\u00b2"
+    ],
+    "correct_answer": "t* from t-distribution",
+    "explanation": "Unknown \u03c3 \u2192 use t-distribution.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "A researcher finds p=0.049 at \u03b1=0.05. A valid conclusion is:",
+    "options": [
+      "H\u2080 is false",
+      "There is statistically significant evidence against H\u2080",
+      "The effect is large",
+      "H\u2081 is proven"
+    ],
+    "correct_answer": "There is statistically significant evidence against H\u2080",
+    "explanation": "p<\u03b1 \u2192 reject H\u2080. Does not prove H\u2081 or say effect is large.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "The sum of squared residuals SSE is minimized by:",
+    "options": [
+      "The mean \u0233",
+      "The median regression line",
+      "The OLS regression line",
+      "Any line through (x\u0304,\u0233)"
+    ],
+    "correct_answer": "The OLS regression line",
+    "explanation": "OLS is defined by minimizing SSE.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "If you double the sample size n, the standard error SE = \u03c3/\u221an is multiplied by:",
+    "options": [
+      "2",
+      "1/2",
+      "1/\u221a2",
+      "\u221a2"
+    ],
+    "correct_answer": "1/\u221a2",
+    "explanation": "New SE = \u03c3/\u221a(2n) = (\u03c3/\u221an)\u00b7(1/\u221a2).",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "In a matched-pairs experiment, the key advantage is:",
+    "options": [
+      "Larger sample sizes",
+      "Removing between-subject variability",
+      "Avoiding the need for randomization",
+      "Equal group sizes"
+    ],
+    "correct_answer": "Removing between-subject variability",
+    "explanation": "Paired designs control for individual differences.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "The pooled proportion p\u0302 in a two-sample proportion test is:",
+    "options": [
+      "(p\u0302\u2081+p\u0302\u2082)/2",
+      "(x\u2081+x\u2082)/(n\u2081+n\u2082)",
+      "p\u0302\u2081\u00b7p\u0302\u2082",
+      "\u221a(p\u0302\u2081\u00b7p\u0302\u2082)"
+    ],
+    "correct_answer": "(x\u2081+x\u2082)/(n\u2081+n\u2082)",
+    "explanation": "Pooled p\u0302 combines total successes over total trials.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "A 99% CI is wider than a 95% CI because:",
+    "options": [
+      "Larger samples are needed",
+      "Higher confidence requires capturing more possible parameter values",
+      "The standard error increases",
+      "The t* is smaller"
+    ],
+    "correct_answer": "Higher confidence requires capturing more possible parameter values",
+    "explanation": "More confidence \u2192 wider interval.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "The assumption of equal variances in pooled t-test can be checked with:",
+    "options": [
+      "A histogram",
+      "The Levene test or F-test for equal variances",
+      "A chi-square test",
+      "A normality test"
+    ],
+    "correct_answer": "The Levene test or F-test for equal variances",
+    "explanation": "Levene and Bartlett tests check homogeneity of variance.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "In ANOVA, if all group means are exactly equal, SSBetween = ?",
+    "options": [
+      "n",
+      "k",
+      "0",
+      "SSTotal"
+    ],
+    "correct_answer": "0",
+    "explanation": "If all means equal, there is no between-group variation.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "The sum of all residuals in OLS regression = ?",
+    "options": [
+      "SSE",
+      "n",
+      "0",
+      "1"
+    ],
+    "correct_answer": "0",
+    "explanation": "The OLS residuals always sum to 0.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "If b\u2081=0 and b\u2080=\u0233, what is R\u00b2?",
+    "options": [
+      "1",
+      "0.5",
+      "0",
+      "Undefined"
+    ],
+    "correct_answer": "0",
+    "explanation": "If slope is 0, the model predicts \u0233 for all x \u2014 explains nothing.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "Which is a measure of the linear association between two quantitative variables?",
+    "options": [
+      "Chi-square",
+      "F-statistic",
+      "Pearson correlation r",
+      "IQR"
+    ],
+    "correct_answer": "Pearson correlation r",
+    "explanation": "Pearson r measures strength and direction of linear association.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "The null hypothesis for testing if the correlation \u03c1=0 is tested with:",
+    "options": [
+      "t-statistic = r\u221a(n-2)/\u221a(1-r\u00b2)",
+      "z = r/n",
+      "F = r\u00b2",
+      "\u03c7\u00b2 = nr\u00b2"
+    ],
+    "correct_answer": "t-statistic = r\u221a(n-2)/\u221a(1-r\u00b2)",
+    "explanation": "t = r\u221a(n-2)/\u221a(1-r\u00b2) with df=n-2.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "For a 95% CI for \u03bc\u2081-\u03bc\u2082 using the pooled t-procedure, the CI is:",
+    "options": [
+      "(X\u0304\u2081-X\u0304\u2082) \u00b1 t*\u00b7Sp\u00b7\u221a(1/n\u2081+1/n\u2082)",
+      "(X\u0304\u2081-X\u0304\u2082) \u00b1 z*\u00b7Sp",
+      "(X\u0304\u2081-X\u0304\u2082) \u00b1 t*\u00b7Sp",
+      "(X\u0304\u2081-X\u0304\u2082) \u00b1 z*\u00b7\u221a(\u03c3\u2081\u00b2/n\u2081+\u03c3\u2082\u00b2/n\u2082)"
+    ],
+    "correct_answer": "(X\u0304\u2081-X\u0304\u2082) \u00b1 t*\u00b7Sp\u00b7\u221a(1/n\u2081+1/n\u2082)",
+    "explanation": "Pooled two-sample t CI.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "A scatter plot shows the data curving upward exponentially. You should:",
+    "options": [
+      "Use linear regression",
+      "Transform y (e.g., log y) before regression",
+      "Use a chi-square test",
+      "Use ANOVA"
+    ],
+    "correct_answer": "Transform y (e.g., log y) before regression",
+    "explanation": "Transformations linearize relationships for valid regression.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "The margin of error ME of a CI for p is halved by multiplying n by:",
+    "options": [
+      "2",
+      "4",
+      "1/2",
+      "\u221a2"
+    ],
+    "correct_answer": "4",
+    "explanation": "ME \u221d 1/\u221an. To halve ME: need 4n.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "In a 3-group ANOVA, dfBetween = ?",
+    "options": [
+      "3",
+      "2",
+      "n-3",
+      "1"
+    ],
+    "correct_answer": "2",
+    "explanation": "dfBetween = k-1 = 3-1 = 2.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "The total degrees of freedom in one-way ANOVA with n=45 and k=3 groups = ?",
+    "options": [
+      "44",
+      "42",
+      "45",
+      "3"
+    ],
+    "correct_answer": "44",
+    "explanation": "dfTotal = n-1 = 44.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "A 95% prediction interval for a new observation is __ than the 95% CI for \u03bc.",
+    "options": [
+      "Narrower",
+      "Wider",
+      "The same",
+      "Depends on n"
+    ],
+    "correct_answer": "Wider",
+    "explanation": "Prediction intervals account for individual variability, not just mean uncertainty.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "Which of these is not an assumption of linear regression?",
+    "options": [
+      "Linearity",
+      "Independence of errors",
+      "Normality of errors",
+      "Equal sample sizes"
+    ],
+    "correct_answer": "Equal sample sizes",
+    "explanation": "Regression does not require equal sample sizes.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "The F-statistic in simple linear regression equals:",
+    "options": [
+      "t\u00b2",
+      "t",
+      "r\u00b2",
+      "R\u00b2\u00b7n"
+    ],
+    "correct_answer": "t\u00b2",
+    "explanation": "F = t\u00b2 for testing \u03b2\u2081=0 in simple regression.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "In logistic regression, the logit transformation is:",
+    "options": [
+      "log(p)",
+      "log(p/(1-p))",
+      "log(1-p)",
+      "p/(1-p)"
+    ],
+    "correct_answer": "log(p/(1-p))",
+    "explanation": "Logit = log-odds = ln(p/(1-p)).",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "Simpson's paradox occurs when:",
+    "options": [
+      "Sample sizes differ",
+      "A trend in combined data reverses when data is separated into subgroups",
+      "The correlation is 0",
+      "Outliers are removed"
+    ],
+    "correct_answer": "A trend in combined data reverses when data is separated into subgroups",
+    "explanation": "Simpson's paradox: aggregate trends can be misleading.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "The within-group (error) degrees of freedom in ANOVA with k=4, n=40 is:",
+    "options": [
+      "39",
+      "4",
+      "36",
+      "3"
+    ],
+    "correct_answer": "36",
+    "explanation": "dfWithin = n-k = 40-4 = 36.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "A significant Levene test means:",
+    "options": [
+      "The means differ",
+      "The variances are significantly different",
+      "Normality holds",
+      "The ANOVA result is valid"
+    ],
+    "correct_answer": "The variances are significantly different",
+    "explanation": "Significant Levene \u2192 evidence of unequal population variances.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "The best point estimator of \u03c3 is:",
+    "options": [
+      "S\u00b2",
+      "S (sample standard deviation)",
+      "Range",
+      "IQR"
+    ],
+    "correct_answer": "S (sample standard deviation)",
+    "explanation": "S = \u221aS\u00b2 estimates \u03c3.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "The p-value for a one-sided test is __ the p-value for the equivalent two-sided test.",
+    "options": [
+      "Greater than",
+      "Half of",
+      "Equal to",
+      "Double"
+    ],
+    "correct_answer": "Half of",
+    "explanation": "One-tailed p = two-tailed p / 2.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "A 95% CI for p based on p\u0302=0.3, n=200 is approximately:",
+    "options": [
+      "(0.237, 0.363)",
+      "(0.25, 0.35)",
+      "(0.27, 0.33)",
+      "(0.20, 0.40)"
+    ],
+    "correct_answer": "(0.237, 0.363)",
+    "explanation": "SE=\u221a(0.3\u00d70.7/200)=0.032. CI: 0.3\u00b11.96\u00d70.032\u2248(0.237,0.363).",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  },
+  {
+    "question": "The test statistic for H\u2080: p=0.5 with p\u0302=0.6, n=100 is:",
+    "options": [
+      "z=2",
+      "z=1",
+      "z=0.1",
+      "z=10"
+    ],
+    "correct_answer": "z=2",
+    "explanation": "z=(0.6-0.5)/\u221a(0.5\u00d70.5/100)=(0.1/0.05)=2.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "statistics"
+  }
+]

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import BackButton from "@/components/BackButton";
+import { useAuth } from "@/lib/auth";
 
 /* ── Tier definitions (bottom → top) ── */
 const TIERS = [
@@ -28,9 +29,9 @@ const HEX_STATS = [
 ];
 
 const CURRENT_TIER_INDEX = 8;
-const DISPLAY_NAME = "Player";
-
 export default function CompetePage() {
+  const { user } = useAuth();
+  const DISPLAY_NAME = user?.username || "Player";
   const tiersTopDown = [...TIERS].reverse();
   const widthsTopDown = [...TIER_WIDTHS];
 

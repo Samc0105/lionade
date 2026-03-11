@@ -1,0 +1,702 @@
+[
+  {
+    "question": "What is the measure of each interior angle of a regular pentagon?",
+    "options": [
+      "90°",
+      "100°",
+      "108°",
+      "120°"
+    ],
+    "correct_answer": "108°",
+    "explanation": "Sum = (5−2)×180° = 540°. Each angle = 540°/5 = 108°.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "If two parallel lines are cut by a transversal, alternate interior angles are what?",
+    "options": [
+      "Supplementary",
+      "Complementary",
+      "Equal",
+      "Unrelated"
+    ],
+    "correct_answer": "Equal",
+    "explanation": "When a transversal crosses parallel lines, alternate interior angles are congruent (equal in measure).",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the circumference of a circle with radius 7? (Use π)",
+    "options": [
+      "7π",
+      "14π",
+      "49π",
+      "21π"
+    ],
+    "correct_answer": "14π",
+    "explanation": "Circumference = 2πr = 2π(7) = 14π.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "A right triangle has one leg of 9 and hypotenuse of 15. What is the other leg?",
+    "options": [
+      "6",
+      "10",
+      "12",
+      "18"
+    ],
+    "correct_answer": "12",
+    "explanation": "a² + 9² = 15² → a² = 225 − 81 = 144 → a = 12.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the area of a trapezoid with parallel sides 6 and 10, and height 4?",
+    "options": [
+      "24",
+      "32",
+      "40",
+      "64"
+    ],
+    "correct_answer": "32",
+    "explanation": "Area = (1/2)(b₁ + b₂)(h) = (1/2)(6 + 10)(4) = (1/2)(16)(4) = 32.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "How many faces does a cylinder have?",
+    "options": [
+      "1",
+      "2",
+      "3",
+      "4"
+    ],
+    "correct_answer": "3",
+    "explanation": "A cylinder has 3 surfaces: 2 circular faces (top and bottom) and 1 curved surface.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What transformation slides a shape without rotating or flipping it?",
+    "options": [
+      "Rotation",
+      "Reflection",
+      "Translation",
+      "Dilation"
+    ],
+    "correct_answer": "Translation",
+    "explanation": "A translation moves every point of a shape the same distance in the same direction.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the area of a circle with radius 5? (Use π)",
+    "options": [
+      "10π",
+      "15π",
+      "20π",
+      "25π"
+    ],
+    "correct_answer": "25π",
+    "explanation": "Area = πr² = π(5)² = 25π square units.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the perimeter of a semicircle with diameter 8? (Use π)",
+    "options": [
+      "4π + 8",
+      "8π",
+      "4π",
+      "8π + 8"
+    ],
+    "correct_answer": "4π + 8",
+    "explanation": "The curved part = half the circumference = (1/2)(8π) = 4π. Add the straight diameter: 4π + 8.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is a line segment that connects two non-adjacent vertices of a polygon?",
+    "options": [
+      "Side",
+      "Edge",
+      "Diagonal",
+      "Median"
+    ],
+    "correct_answer": "Diagonal",
+    "explanation": "A diagonal connects two vertices of a polygon that are not next to each other.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "A rectangle has an area of 48 and a width of 6. What is its length?",
+    "options": [
+      "6",
+      "7",
+      "8",
+      "42"
+    ],
+    "correct_answer": "8",
+    "explanation": "Area = length × width, so length = 48 ÷ 6 = 8.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the name of the point where the three medians of a triangle meet?",
+    "options": [
+      "Circumcenter",
+      "Incenter",
+      "Centroid",
+      "Orthocenter"
+    ],
+    "correct_answer": "Centroid",
+    "explanation": "The centroid is the point where all three medians intersect, and it is the triangle's center of gravity.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "How many diagonals does a hexagon have?",
+    "options": [
+      "6",
+      "8",
+      "9",
+      "12"
+    ],
+    "correct_answer": "9",
+    "explanation": "Number of diagonals = n(n−3)/2 = 6(3)/2 = 9.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What transformation flips a shape over a line?",
+    "options": [
+      "Translation",
+      "Rotation",
+      "Reflection",
+      "Dilation"
+    ],
+    "correct_answer": "Reflection",
+    "explanation": "A reflection flips a figure over a line (called the line of reflection) to create a mirror image.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "The point (0, 5) lies on which axis?",
+    "options": [
+      "x-axis",
+      "y-axis",
+      "Both axes",
+      "Neither axis"
+    ],
+    "correct_answer": "y-axis",
+    "explanation": "When x = 0, the point lies on the y-axis regardless of the y-value.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the surface area of a rectangular prism with length 4, width 3, and height 2?",
+    "options": [
+      "24",
+      "42",
+      "52",
+      "60"
+    ],
+    "correct_answer": "52",
+    "explanation": "SA = 2(lw + lh + wh) = 2(12 + 8 + 6) = 2(26) = 52 square units.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "If a regular polygon has an interior angle of 90°, what shape is it?",
+    "options": [
+      "Equilateral triangle",
+      "Square",
+      "Pentagon",
+      "Hexagon"
+    ],
+    "correct_answer": "Square",
+    "explanation": "A regular polygon with 90° interior angles is a square (4 sides, each angle = (4−2)×180°/4 = 90°).",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What angle is formed between the hands of a clock at 3:00?",
+    "options": [
+      "45°",
+      "60°",
+      "90°",
+      "120°"
+    ],
+    "correct_answer": "90°",
+    "explanation": "At 3:00, the minute hand is at 12 and the hour hand is at 3, forming a 90° angle.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "A triangle has sides 5, 5, and 8. What type of triangle is it?",
+    "options": [
+      "Equilateral",
+      "Scalene",
+      "Isosceles",
+      "Right"
+    ],
+    "correct_answer": "Isosceles",
+    "explanation": "It has exactly two equal sides (both 5), which makes it isosceles.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the volume of a cylinder with radius 3 and height 10? (Use π)",
+    "options": [
+      "30π",
+      "60π",
+      "90π",
+      "900π"
+    ],
+    "correct_answer": "90π",
+    "explanation": "Volume = πr²h = π(9)(10) = 90π cubic units.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What do corresponding angles formed by parallel lines and a transversal have in common?",
+    "options": [
+      "They are supplementary",
+      "They are equal",
+      "They add to 360°",
+      "They are complementary"
+    ],
+    "correct_answer": "They are equal",
+    "explanation": "When parallel lines are cut by a transversal, corresponding angles are congruent.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the distance between the points (0, 0) and (3, 4)?",
+    "options": [
+      "5",
+      "7",
+      "12",
+      "25"
+    ],
+    "correct_answer": "5",
+    "explanation": "Distance = √(3² + 4²) = √(9 + 16) = √25 = 5.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "An exterior angle of a triangle equals what?",
+    "options": [
+      "The sum of the two non-adjacent interior angles",
+      "Half the opposite angle",
+      "180° minus the adjacent angle only",
+      "90°"
+    ],
+    "correct_answer": "The sum of the two non-adjacent interior angles",
+    "explanation": "The Exterior Angle Theorem states that an exterior angle equals the sum of the two remote (non-adjacent) interior angles.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the area of a rhombus with diagonals 6 and 8?",
+    "options": [
+      "14",
+      "24",
+      "48",
+      "96"
+    ],
+    "correct_answer": "24",
+    "explanation": "Area of a rhombus = (1/2) × d₁ × d₂ = (1/2)(6)(8) = 24 square units.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "Which of these is NOT a type of quadrilateral?",
+    "options": [
+      "Trapezoid",
+      "Pentagon",
+      "Rectangle",
+      "Rhombus"
+    ],
+    "correct_answer": "Pentagon",
+    "explanation": "A pentagon has 5 sides, so it is not a quadrilateral. Quadrilaterals have exactly 4 sides.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "If a right triangle has legs of 8 and 15, what is the hypotenuse?",
+    "options": [
+      "17",
+      "20",
+      "23",
+      "120"
+    ],
+    "correct_answer": "17",
+    "explanation": "c² = 8² + 15² = 64 + 225 = 289, so c = 17.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What transformation changes the size of a shape but keeps its proportions?",
+    "options": [
+      "Translation",
+      "Rotation",
+      "Reflection",
+      "Dilation"
+    ],
+    "correct_answer": "Dilation",
+    "explanation": "A dilation enlarges or shrinks a figure by a scale factor while preserving its shape.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the midpoint of the segment from (2, 4) to (8, 10)?",
+    "options": [
+      "(5, 7)",
+      "(4, 6)",
+      "(6, 14)",
+      "(10, 14)"
+    ],
+    "correct_answer": "(5, 7)",
+    "explanation": "Midpoint = ((2+8)/2, (4+10)/2) = (5, 7).",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "How many degrees are in the sum of the interior angles of a hexagon?",
+    "options": [
+      "360°",
+      "540°",
+      "720°",
+      "1080°"
+    ],
+    "correct_answer": "720°",
+    "explanation": "Sum = (n−2) × 180° = (6−2) × 180° = 4 × 180° = 720°.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the surface area of a sphere with radius 3? (Use π)",
+    "options": [
+      "9π",
+      "18π",
+      "36π",
+      "108π"
+    ],
+    "correct_answer": "36π",
+    "explanation": "Surface area = 4πr² = 4π(9) = 36π square units.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "A right triangle has hypotenuse 10 and one leg 6. What is the other leg?",
+    "options": [
+      "4",
+      "6",
+      "8",
+      "16"
+    ],
+    "correct_answer": "8",
+    "explanation": "a² + 6² = 10² → a² = 100 − 36 = 64 → a = 8.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the perimeter of a regular octagon with side length 5?",
+    "options": [
+      "25",
+      "35",
+      "40",
+      "45"
+    ],
+    "correct_answer": "40",
+    "explanation": "Perimeter = 8 × side = 8 × 5 = 40.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What angle is formed between the hands of a clock at 6:00?",
+    "options": [
+      "90°",
+      "120°",
+      "150°",
+      "180°"
+    ],
+    "correct_answer": "180°",
+    "explanation": "At 6:00, the hands point in opposite directions forming a straight angle of 180°.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "The volume of a sphere with radius r is given by what formula?",
+    "options": [
+      "(4/3)πr³",
+      "4πr²",
+      "πr²h",
+      "(1/3)πr²h"
+    ],
+    "correct_answer": "(4/3)πr³",
+    "explanation": "The volume of a sphere is V = (4/3)πr³.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "A triangle has angles 45°, 45°, and 90°. What type is it?",
+    "options": [
+      "Equilateral",
+      "Scalene",
+      "Isosceles right",
+      "Obtuse"
+    ],
+    "correct_answer": "Isosceles right",
+    "explanation": "This is a right triangle (has a 90° angle) and isosceles (two 45° angles mean two equal legs).",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the distance between points (1, 2) and (4, 6)?",
+    "options": [
+      "3",
+      "4",
+      "5",
+      "7"
+    ],
+    "correct_answer": "5",
+    "explanation": "Distance = √((4−1)² + (6−2)²) = √(9 + 16) = √25 = 5.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the area of a circle with diameter 12? (Use π)",
+    "options": [
+      "12π",
+      "24π",
+      "36π",
+      "144π"
+    ],
+    "correct_answer": "36π",
+    "explanation": "Radius = 6. Area = πr² = π(36) = 36π.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "A kite has how many lines of symmetry?",
+    "options": [
+      "0",
+      "1",
+      "2",
+      "4"
+    ],
+    "correct_answer": "1",
+    "explanation": "A kite has exactly 1 line of symmetry along its main diagonal (the one connecting the vertices between unequal sides).",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the perimeter of a triangle with vertices at (0,0), (3,0), and (0,4)?",
+    "options": [
+      "7",
+      "10",
+      "12",
+      "24"
+    ],
+    "correct_answer": "12",
+    "explanation": "Sides: 3, 4, and √(9+16)=5. Perimeter = 3 + 4 + 5 = 12.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the volume of a cone with radius 3 and height 7? (Use π)",
+    "options": [
+      "7π",
+      "21π",
+      "63π",
+      "189π"
+    ],
+    "correct_answer": "21π",
+    "explanation": "Volume = (1/3)πr²h = (1/3)π(9)(7) = 21π cubic units.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "If two angles of a triangle are 70° and 55°, what is the third angle?",
+    "options": [
+      "45°",
+      "55°",
+      "65°",
+      "125°"
+    ],
+    "correct_answer": "55°",
+    "explanation": "180° − 70° − 55° = 55°.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the area of the region between two concentric circles with radii 5 and 3? (Use π)",
+    "options": [
+      "2π",
+      "8π",
+      "16π",
+      "25π"
+    ],
+    "correct_answer": "16π",
+    "explanation": "Area = π(5²) − π(3²) = 25π − 9π = 16π. This region is called an annulus.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "How many vertices does a rectangular prism have?",
+    "options": [
+      "4",
+      "6",
+      "8",
+      "12"
+    ],
+    "correct_answer": "8",
+    "explanation": "A rectangular prism has 8 vertices (corners).",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the slope of a line passing through (1, 2) and (3, 8)?",
+    "options": [
+      "2",
+      "3",
+      "4",
+      "6"
+    ],
+    "correct_answer": "3",
+    "explanation": "Slope = (8−2)/(3−1) = 6/2 = 3.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "A regular polygon has each interior angle measuring 144°. How many sides does it have?",
+    "options": [
+      "8",
+      "9",
+      "10",
+      "12"
+    ],
+    "correct_answer": "10",
+    "explanation": "Interior angle = (n−2)×180°/n = 144° → 180n − 360 = 144n → 36n = 360 → n = 10.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the surface area of a cylinder with radius 2 and height 5? (Use π)",
+    "options": [
+      "20π",
+      "24π",
+      "28π",
+      "40π"
+    ],
+    "correct_answer": "28π",
+    "explanation": "SA = 2πr² + 2πrh = 2π(4) + 2π(2)(5) = 8π + 20π = 28π.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the area of an equilateral triangle with side length 6? (Exact)",
+    "options": [
+      "9",
+      "9√3",
+      "18",
+      "36√3"
+    ],
+    "correct_answer": "9√3",
+    "explanation": "Area = (√3/4)s² = (√3/4)(36) = 9√3 square units.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "Two angles are supplementary. One is 3 times the other. What are they?",
+    "options": [
+      "30° and 150°",
+      "45° and 135°",
+      "60° and 120°",
+      "90° and 90°"
+    ],
+    "correct_answer": "45° and 135°",
+    "explanation": "x + 3x = 180° → 4x = 180° → x = 45°. The angles are 45° and 135°.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the volume of a rectangular prism with dimensions 8 × 5 × 3?",
+    "options": [
+      "16",
+      "40",
+      "80",
+      "120"
+    ],
+    "correct_answer": "120",
+    "explanation": "Volume = 8 × 5 × 3 = 120 cubic units.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the total number of diagonals in an octagon?",
+    "options": [
+      "8",
+      "16",
+      "20",
+      "24"
+    ],
+    "correct_answer": "20",
+    "explanation": "Diagonals = n(n−3)/2 = 8(5)/2 = 20.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  }
+]

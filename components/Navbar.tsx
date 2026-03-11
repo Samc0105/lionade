@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/lib/auth";
-import { useUserStats, useStreakInfo } from "@/lib/hooks";
+import { useUserStats, useStreakInfo, isStreakExpired, resetExpiredStreak, mutateUserStats } from "@/lib/hooks";
 import { formatCoins } from "@/lib/mockData";
 
 function StatSkeleton({ width = "w-8" }: { width?: string }) {
@@ -38,8 +38,9 @@ export default function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
   const { user, logout } = useAuth();
-  const { stats } = useUserStats(user?.id);
-  const { streakInfo } = useStreakInfo(user?.id);
+  const { stats, mutate: mutateStats } = useUserStats(user?.id);
+  const { streakInfo, mutateStreakInfo } = useStreakInfo(user?.id);
+  const [streakResetDone, setStreakResetDone] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const [dropdownClosing, setDropdownClosing] = useState(false);
 
@@ -114,6 +115,25 @@ export default function Navbar() {
     const iv = setInterval(calc, 60000);
     return () => clearInterval(iv);
   }, [streakInfo?.lastQuizAt]);
+
+  // Reset expired streak in the database on page load
+  useEffect(() => {
+    if (!user?.id || !streakInfo || streakResetDone) return;
+    if (!isStreakExpired(streakInfo.lastQuizAt)) return;
+    // Only reset if streak is currently > 0 in the DB
+    const currentStreak = stats?.streak ?? 0;
+    if (currentStreak === 0) {
+      setStreakResetDone(true);
+      return;
+    }
+    setStreakResetDone(true);
+    resetExpiredStreak(user.id).then(() => {
+      // Revalidate both caches so UI shows 0 everywhere
+      mutateStats();
+      mutateStreakInfo();
+      mutateUserStats(user.id);
+    });
+  }, [user?.id, streakInfo, stats?.streak, streakResetDone, mutateStats, mutateStreakInfo]);
 
   const handleLogout = () => {
     logout();
@@ -221,7 +241,11 @@ export default function Navbar() {
                   >
                     <span className="text-sm">&#x1F525;</span>
                     <span className="font-bebas text-base text-orange-400 tracking-wider leading-none">
-                      {stats ? stats.streak : user.statsLoaded ? user.streak : <StatSkeleton width="w-5" />}
+                      {stats !== null
+                        ? (isStreakExpired(streakInfo?.lastQuizAt ?? null) ? 0 : stats.streak)
+                        : user.statsLoaded
+                        ? (isStreakExpired(streakInfo?.lastQuizAt ?? null) ? 0 : user.streak)
+                        : <StatSkeleton width="w-5" />}
                     </span>
                     <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 px-2 py-1 rounded bg-navy-100
                       border border-electric/20 text-xs text-cream/70 opacity-0 group-hover:opacity-100
@@ -345,11 +369,14 @@ export default function Navbar() {
 
       {/* Streak Modal */}
       {showStreakModal && (() => {
-        const streak = stats?.streak ?? user?.streak ?? 0;
+        const expired = isStreakExpired(streakInfo?.lastQuizAt ?? null);
+        const streak = expired ? 0 : (stats?.streak ?? user?.streak ?? 0);
         const goal = 10;
-        const progress = Math.min((streakInfo?.questionsToday ?? 0) / goal, 1);
-        const message =
-          streak === 0 ? "Start your streak today!" :
+        const questionsToday = Math.min(streakInfo?.questionsToday ?? 0, goal);
+        const progress = questionsToday / goal;
+        const message = expired
+          ? "Your streak has expired. Start a new one today."
+          : streak === 0 ? "Start your streak today!" :
           streak <= 2 ? "Great start — keep it going!" :
           streak <= 6 ? "You're building momentum!" :
           streak <= 13 ? "Impressive dedication!" :
@@ -363,42 +390,62 @@ export default function Navbar() {
               style={{ background: "linear-gradient(135deg, #0a1020, #060c18)" }}
               onClick={(e) => e.stopPropagation()}
             >
-              {/* Fire + Streak Number */}
+              {/* Icon + Streak Number */}
               <div className="text-center mb-4">
-                <div className="text-6xl mb-2" style={{ filter: "drop-shadow(0 0 20px rgba(249,115,22,0.5))" }}>&#x1F525;</div>
-                <h2 className="font-bebas text-4xl text-cream tracking-wider">
-                  Day {streak} Streak!
-                </h2>
+                {expired ? (
+                  <>
+                    <div className="text-6xl mb-2" style={{ filter: "drop-shadow(0 0 20px rgba(220,38,38,0.4))" }}>&#x1F480;</div>
+                    <h2 className="font-bebas text-4xl text-red-400 tracking-wider">
+                      Streak Lost!
+                    </h2>
+                  </>
+                ) : (
+                  <>
+                    <div className="text-6xl mb-2" style={{ filter: "drop-shadow(0 0 20px rgba(249,115,22,0.5))" }}>&#x1F525;</div>
+                    <h2 className="font-bebas text-4xl text-cream tracking-wider">
+                      Day {streak} Streak!
+                    </h2>
+                  </>
+                )}
                 <p className="text-cream/50 text-sm mt-1">{message}</p>
               </div>
 
-              {/* Progress Bar */}
-              <div className="mb-4">
-                <div className="flex items-center justify-between text-xs text-cream/40 mb-1.5">
-                  <span>Today&apos;s progress</span>
-                  <span className="text-orange-400 font-bold">{streakInfo?.questionsToday ?? 0}/{goal} questions</span>
-                </div>
-                <div className="h-3 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.06)" }}>
-                  <div
-                    className="h-full rounded-full transition-all duration-500"
-                    style={{
-                      width: `${progress * 100}%`,
-                      background: "linear-gradient(90deg, #f97316, #fbbf24)",
-                      boxShadow: "0 0 10px rgba(249,115,22,0.4)",
-                    }}
-                  />
-                </div>
-              </div>
+              {/* Progress Bar or Daily Goal Crushed — hide when expired */}
+              {!expired && (
+                questionsToday >= goal ? (
+                  <div className="mb-4 text-center py-3">
+                    <p className="text-orange-400 font-bold text-lg">&#x1F525; Daily goal crushed!</p>
+                    <p className="text-cream/40 text-xs mt-1">You&apos;re all caught up — come back tomorrow to keep your streak alive.</p>
+                  </div>
+                ) : (
+                  <div className="mb-4">
+                    <div className="flex items-center justify-between text-xs text-cream/40 mb-1.5">
+                      <span>Today&apos;s progress</span>
+                      <span className="text-orange-400 font-bold">{questionsToday}/{goal} questions</span>
+                    </div>
+                    <div className="h-3 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.06)" }}>
+                      <div
+                        className="h-full rounded-full transition-all duration-500"
+                        style={{
+                          width: `${progress * 100}%`,
+                          background: "linear-gradient(90deg, #f97316, #fbbf24)",
+                          boxShadow: "0 0 10px rgba(249,115,22,0.4)",
+                        }}
+                      />
+                    </div>
+                  </div>
+                )
+              )}
 
-              {/* Countdown */}
-              {streakInfo?.lastQuizAt && (
+              {/* Countdown — only show when active, not expired */}
+              {!expired && streakInfo?.lastQuizAt && (
                 <div className={`text-center text-sm mb-4 font-mono ${streakUrgent ? "text-red-400" : "text-cream/50"}`}>
                   Streak expires in <span className="font-bold">{streakTimeLeft}</span>
                 </div>
               )}
 
-              {/* Streak Shield */}
-              {streakInfo?.hasStreakShield && (
+              {/* Streak Shield — only when not expired */}
+              {!expired && streakInfo?.hasStreakShield && (
                 <div className="flex items-center justify-center gap-2 mb-4 py-2 px-3 rounded-xl"
                   style={{ background: "rgba(59,130,246,0.08)", border: "1px solid rgba(59,130,246,0.2)" }}>
                   <span>&#x1F6E1;&#xFE0F;</span>

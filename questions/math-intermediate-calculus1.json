@@ -1,0 +1,2802 @@
+[
+  {
+    "question": "Find dy/dx if y = sin(3x\u00b2).",
+    "options": [
+      "6x\u00b7cos(3x\u00b2)",
+      "cos(3x\u00b2)",
+      "6x\u00b7sin(3x\u00b2)",
+      "3cos(3x\u00b2)"
+    ],
+    "correct_answer": "6x\u00b7cos(3x\u00b2)",
+    "explanation": "Chain rule: cos(3x\u00b2)\u00b76x.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Find dy/dx if y = (x\u00b2 + 1)\u2075.",
+    "options": [
+      "5(x\u00b2+1)\u2074",
+      "10x(x\u00b2+1)\u2074",
+      "5x(x\u00b2+1)\u2074",
+      "(x\u00b2+1)\u2075\u00b72x"
+    ],
+    "correct_answer": "10x(x\u00b2+1)\u2074",
+    "explanation": "Chain rule: 5(x\u00b2+1)\u2074\u00b72x.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Find dy/dx if y = e^(x\u00b2).",
+    "options": [
+      "2xe^(x\u00b2)",
+      "e^(x\u00b2)",
+      "x\u00b2e^(x\u00b2)",
+      "2e^(x\u00b2)"
+    ],
+    "correct_answer": "2xe^(x\u00b2)",
+    "explanation": "Chain rule: e^(x\u00b2)\u00b72x.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Find dy/dx if y = ln(x\u00b2 + 3).",
+    "options": [
+      "2x/(x\u00b2+3)",
+      "1/(x\u00b2+3)",
+      "2/(x\u00b2+3)",
+      "x/(x\u00b2+3)"
+    ],
+    "correct_answer": "2x/(x\u00b2+3)",
+    "explanation": "Chain rule: 1/(x\u00b2+3)\u00b72x.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Find dy/dx if y = cos(5x).",
+    "options": [
+      "5sin(5x)",
+      "-5sin(5x)",
+      "cos(5x)\u00b75",
+      "-sin(5x)"
+    ],
+    "correct_answer": "-5sin(5x)",
+    "explanation": "Chain rule: -sin(5x)\u00b75.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Find dy/dx if y = \u221a(x\u00b2+1).",
+    "options": [
+      "x/\u221a(x\u00b2+1)",
+      "1/(2\u221a(x\u00b2+1))",
+      "2x/\u221a(x\u00b2+1)",
+      "x/(x\u00b2+1)"
+    ],
+    "correct_answer": "x/\u221a(x\u00b2+1)",
+    "explanation": "Chain rule: (1/2)(x\u00b2+1)^(-1/2)\u00b72x.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Find dy/dx if y = tan(x\u00b3).",
+    "options": [
+      "3x\u00b2sec\u00b2(x\u00b3)",
+      "sec\u00b2(x\u00b3)",
+      "3x\u00b2tan(x\u00b3)",
+      "3x\u00b2sec(x\u00b3)"
+    ],
+    "correct_answer": "3x\u00b2sec\u00b2(x\u00b3)",
+    "explanation": "Chain rule: sec\u00b2(x\u00b3)\u00b73x\u00b2.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Find dy/dx if y = (2x+1)\u2074.",
+    "options": [
+      "4(2x+1)\u00b3",
+      "8(2x+1)\u00b3",
+      "4(2x+1)\u2074\u00b72",
+      "(2x+1)\u00b3"
+    ],
+    "correct_answer": "8(2x+1)\u00b3",
+    "explanation": "Chain rule: 4(2x+1)\u00b3\u00b72.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Find dy/dx if y = sin\u00b2(x).",
+    "options": [
+      "2sin(x)",
+      "2sin(x)cos(x)",
+      "-2sin(x)cos(x)",
+      "sin(x)cos(x)"
+    ],
+    "correct_answer": "2sin(x)cos(x)",
+    "explanation": "Chain rule: 2sin(x)\u00b7cos(x).",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Find dy/dx if y = e^(sin x).",
+    "options": [
+      "cos(x)\u00b7e^(sin x)",
+      "e^(cos x)",
+      "sin(x)\u00b7e^(cos x)",
+      "e^(sin x)"
+    ],
+    "correct_answer": "cos(x)\u00b7e^(sin x)",
+    "explanation": "Chain rule: e^(sin x)\u00b7cos(x).",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Find dy/dx if y = ln(sin x).",
+    "options": [
+      "cos x/sin x",
+      "1/sin x",
+      "-cos x/sin x",
+      "cos x"
+    ],
+    "correct_answer": "cos x/sin x",
+    "explanation": "Chain rule: 1/sin x \u00b7 cos x = cot x.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Find dy/dx if y = (x\u00b3 - 2)\u2076.",
+    "options": [
+      "18x\u00b2(x\u00b3-2)\u2075",
+      "6(x\u00b3-2)\u2075",
+      "6x\u00b2(x\u00b3-2)\u2075",
+      "18x(x\u00b3-2)\u2075"
+    ],
+    "correct_answer": "18x\u00b2(x\u00b3-2)\u2075",
+    "explanation": "Chain rule: 6(x\u00b3-2)\u2075\u00b73x\u00b2.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Find dy/dx if y = e^(3x+1).",
+    "options": [
+      "3e^(3x+1)",
+      "e^(3x+1)",
+      "3e^(3x)",
+      "e^(3x+1)/3"
+    ],
+    "correct_answer": "3e^(3x+1)",
+    "explanation": "Chain rule: e^(3x+1)\u00b73.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Find dy/dx if y = cos\u00b2(3x).",
+    "options": [
+      "6cos(3x)sin(3x)",
+      "-6cos(3x)sin(3x)",
+      "2cos(3x)",
+      "6cos(3x)"
+    ],
+    "correct_answer": "\u22126cos(3x)sin(3x)",
+    "explanation": "Chain rule twice: 2cos(3x)\u00b7(-sin(3x))\u00b73.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Find dy/dx if y = \u221a(sin x).",
+    "options": [
+      "cos x/(2\u221a(sin x))",
+      "1/(2\u221a(sin x))",
+      "cos x\u00b7\u221a(sin x)",
+      "cos x/\u221a(sin x)"
+    ],
+    "correct_answer": "cos x/(2\u221a(sin x))",
+    "explanation": "Chain rule: (1/2)(sin x)^(-1/2)\u00b7cos x.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Find dy/dx if y = ln(x\u00b2 + x + 1).",
+    "options": [
+      "(2x+1)/(x\u00b2+x+1)",
+      "1/(x\u00b2+x+1)",
+      "2x/(x\u00b2+x+1)",
+      "(x+1)/(x\u00b2+x+1)"
+    ],
+    "correct_answer": "(2x+1)/(x\u00b2+x+1)",
+    "explanation": "Chain rule: 1/(x\u00b2+x+1)\u00b7(2x+1).",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Find dy/dx if y = sin(e^x).",
+    "options": [
+      "cos(e^x)",
+      "e^x\u00b7cos(e^x)",
+      "e^x\u00b7sin(e^x)",
+      "-e^x\u00b7cos(e^x)"
+    ],
+    "correct_answer": "e^x\u00b7cos(e^x)",
+    "explanation": "Chain rule: cos(e^x)\u00b7e^x.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Find dy/dx if y = (ln x)\u00b3.",
+    "options": [
+      "3(ln x)\u00b2",
+      "3(ln x)\u00b2/x",
+      "3ln x/x",
+      "(ln x)\u00b2/x"
+    ],
+    "correct_answer": "3(ln x)\u00b2/x",
+    "explanation": "Chain rule: 3(ln x)\u00b2\u00b7(1/x).",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Find dy/dx if y = arctan(2x).",
+    "options": [
+      "2/(1+4x\u00b2)",
+      "1/(1+4x\u00b2)",
+      "2/(1+2x\u00b2)",
+      "1/(1+2x\u00b2)"
+    ],
+    "correct_answer": "2/(1+4x\u00b2)",
+    "explanation": "d/dx(arctan u)\u00b7du/dx = 1/(1+4x\u00b2)\u00b72.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Find dy/dx if y = e^(x\u00b2+2x).",
+    "options": [
+      "(2x+2)e^(x\u00b2+2x)",
+      "2xe^(x\u00b2+2x)",
+      "e^(x\u00b2+2x)",
+      "2e^(x\u00b2+2x)"
+    ],
+    "correct_answer": "(2x+2)e^(x\u00b2+2x)",
+    "explanation": "Chain rule: e^(x\u00b2+2x)\u00b7(2x+2).",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Find dy/dx if y = x\u00b2\u00b7sin(x).",
+    "options": [
+      "2x\u00b7sin(x) + x\u00b2\u00b7cos(x)",
+      "2x\u00b7cos(x)",
+      "x\u00b2\u00b7cos(x)",
+      "2x\u00b7sin(x)"
+    ],
+    "correct_answer": "2x\u00b7sin(x) + x\u00b2\u00b7cos(x)",
+    "explanation": "Product rule: 2x\u00b7sin(x) + x\u00b2\u00b7cos(x).",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Find dy/dx if y = x\u00b7e\u02e3.",
+    "options": [
+      "e\u02e3 + xe\u02e3",
+      "xe\u02e3",
+      "e\u02e3",
+      "2xe\u02e3"
+    ],
+    "correct_answer": "e\u02e3 + xe\u02e3",
+    "explanation": "Product rule: e\u02e3 + xe\u02e3 = e\u02e3(1+x).",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Find dy/dx if y = x\u00b7ln(x).",
+    "options": [
+      "ln(x) + 1",
+      "1/x + ln(x)",
+      "x\u00b7(1/x)",
+      "ln(x)"
+    ],
+    "correct_answer": "ln(x) + 1",
+    "explanation": "Product rule: ln(x) + x\u00b7(1/x) = ln(x)+1.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Find dy/dx if y = x\u00b2\u00b7cos(x).",
+    "options": [
+      "2x\u00b7cos(x) - x\u00b2\u00b7sin(x)",
+      "2x\u00b7cos(x) + x\u00b2\u00b7sin(x)",
+      "x\u00b2\u00b7sin(x)",
+      "2x\u00b7cos(x)"
+    ],
+    "correct_answer": "2x\u00b7cos(x) - x\u00b2\u00b7sin(x)",
+    "explanation": "Product rule: 2x\u00b7cos(x) + x\u00b2\u00b7(-sin x).",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Find dy/dx if y = e\u02e3\u00b7sin(x).",
+    "options": [
+      "e\u02e3\u00b7sin(x) + e\u02e3\u00b7cos(x)",
+      "e\u02e3\u00b7cos(x)",
+      "e\u02e3\u00b7sin(x)",
+      "sin(x) + cos(x)"
+    ],
+    "correct_answer": "e\u02e3\u00b7sin(x) + e\u02e3\u00b7cos(x)",
+    "explanation": "Product rule: e\u02e3sin x + e\u02e3cos x = e\u02e3(sin x+cos x).",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Find dy/dx if y = x\u00b3\u00b7e\u02e3.",
+    "options": [
+      "3x\u00b2e\u02e3 + x\u00b3e\u02e3",
+      "3x\u00b2e\u02e3",
+      "x\u00b3e\u02e3",
+      "3x\u00b3e\u02e3"
+    ],
+    "correct_answer": "3x\u00b2e\u02e3 + x\u00b3e\u02e3",
+    "explanation": "Product rule: 3x\u00b2e\u02e3 + x\u00b3e\u02e3 = e\u02e3(3x\u00b2+x\u00b3).",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Find dy/dx if y = sin(x)\u00b7cos(x).",
+    "options": [
+      "cos\u00b2(x) - sin\u00b2(x)",
+      "2cos(x)",
+      "2sin(x)",
+      "-sin\u00b2(x)"
+    ],
+    "correct_answer": "cos\u00b2(x) - sin\u00b2(x)",
+    "explanation": "Product rule: cos\u00b2x - sin\u00b2x = cos(2x).",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Find dy/dx if y = x\u00b7tan(x).",
+    "options": [
+      "tan(x) + x\u00b7sec\u00b2(x)",
+      "x\u00b7sec\u00b2(x)",
+      "tan(x)",
+      "sec\u00b2(x)"
+    ],
+    "correct_answer": "tan(x) + x\u00b7sec\u00b2(x)",
+    "explanation": "Product rule: tan(x) + x\u00b7sec\u00b2(x).",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Find dy/dx if y = \u221ax\u00b7e\u02e3.",
+    "options": [
+      "e\u02e3/(2\u221ax) + \u221ax\u00b7e\u02e3",
+      "e\u02e3\u00b7\u221ax",
+      "e\u02e3/(2\u221ax)",
+      "\u221ax + e\u02e3"
+    ],
+    "correct_answer": "e\u02e3/(2\u221ax) + \u221ax\u00b7e\u02e3",
+    "explanation": "Product rule: (1/2\u221ax)\u00b7e\u02e3 + \u221ax\u00b7e\u02e3.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "If f(2)=3, f'(2)=1, g(2)=4, g'(2)=5, find (fg)'(2).",
+    "options": [
+      "19",
+      "20",
+      "17",
+      "23"
+    ],
+    "correct_answer": "19",
+    "explanation": "(fg)' = f'g+fg' = 1(4)+3(5) = 19.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Find dy/dx if y = x\u00b2\u00b7ln(x).",
+    "options": [
+      "2x\u00b7ln(x) + x",
+      "x + 2ln(x)",
+      "2x + 1",
+      "x\u00b7ln(x)+1"
+    ],
+    "correct_answer": "2x\u00b7ln(x) + x",
+    "explanation": "Product rule: 2x\u00b7ln(x) + x\u00b2\u00b7(1/x) = 2x\u00b7ln(x)+x.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Find dy/dx if y = (x+1)\u00b7(x-1).",
+    "options": [
+      "2x",
+      "x-1",
+      "x+1",
+      "2x+1"
+    ],
+    "correct_answer": "2x",
+    "explanation": "Expand: x\u00b2-1, dy/dx = 2x.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Find dy/dx if y = e\u02e3\u00b7ln(x).",
+    "options": [
+      "e\u02e3\u00b7ln(x) + e\u02e3/x",
+      "e\u02e3/x",
+      "e\u02e3\u00b7ln(x)",
+      "e\u02e3 + 1/x"
+    ],
+    "correct_answer": "e\u02e3\u00b7ln(x) + e\u02e3/x",
+    "explanation": "Product rule: e\u02e3ln(x) + e\u02e3/x.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Find dy/dx if y = x\u00b7arctan(x).",
+    "options": [
+      "arctan(x) + x/(1+x\u00b2)",
+      "x/(1+x\u00b2)",
+      "arctan(x)",
+      "1/(1+x\u00b2)"
+    ],
+    "correct_answer": "arctan(x) + x/(1+x\u00b2)",
+    "explanation": "Product rule: arctan(x) + x\u00b71/(1+x\u00b2).",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Find dy/dx if y = sin(x)\u00b7ln(x).",
+    "options": [
+      "cos(x)\u00b7ln(x) + sin(x)/x",
+      "cos(x)/x",
+      "sin(x)/x",
+      "cos(x)\u00b7ln(x)"
+    ],
+    "correct_answer": "cos(x)\u00b7ln(x) + sin(x)/x",
+    "explanation": "Product rule: cos(x)ln(x) + sin(x)/x.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Find dy/dx if y = sin(x)/x.",
+    "options": [
+      "(x\u00b7cos(x) - sin(x))/x\u00b2",
+      "cos(x)/x",
+      "sin(x)/x\u00b2",
+      "(sin(x) - x\u00b7cos(x))/x\u00b2"
+    ],
+    "correct_answer": "(x\u00b7cos(x) - sin(x))/x\u00b2",
+    "explanation": "Quotient rule: (x\u00b7cos x - sin x)/x\u00b2.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Find dy/dx if y = e\u02e3/x.",
+    "options": [
+      "(e\u02e3(x-1))/x\u00b2",
+      "e\u02e3/x\u00b2",
+      "e\u02e3(x+1)/x\u00b2",
+      "xe\u02e3 - e\u02e3"
+    ],
+    "correct_answer": "(e\u02e3(x-1))/x\u00b2",
+    "explanation": "Quotient rule: (e\u02e3\u00b7x - e\u02e3)/x\u00b2 = e\u02e3(x-1)/x\u00b2.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Find dy/dx if y = x\u00b2/(x+1).",
+    "options": [
+      "(x\u00b2+2x)/(x+1)\u00b2",
+      "2x/(x+1)",
+      "(x+1)\u00b2/x\u00b2",
+      "(x+2)/(x+1)\u00b2"
+    ],
+    "correct_answer": "(x\u00b2+2x)/(x+1)\u00b2",
+    "explanation": "Quotient rule: (2x(x+1)-x\u00b2)/(x+1)\u00b2 = (x\u00b2+2x)/(x+1)\u00b2.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Find dy/dx if y = ln(x)/x.",
+    "options": [
+      "(1 - ln(x))/x\u00b2",
+      "1/x\u00b2",
+      "ln(x)/x\u00b2",
+      "(1 + ln(x))/x\u00b2"
+    ],
+    "correct_answer": "(1 - ln(x))/x\u00b2",
+    "explanation": "Quotient rule: ((1/x)\u00b7x - ln x)/x\u00b2 = (1-ln x)/x\u00b2.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Find dy/dx if y = cos(x)/sin(x).",
+    "options": [
+      "csc\u00b2(x)",
+      "-csc\u00b2(x)",
+      "cot(x)",
+      "-tan(x)"
+    ],
+    "correct_answer": "-csc\u00b2(x)",
+    "explanation": "Quotient rule: (-sin\u00b2x-cos\u00b2x)/sin\u00b2x = -1/sin\u00b2x.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Find dy/dx if y = (x\u00b2+1)/(x-1).",
+    "options": [
+      "(x\u00b2-2x-1)/(x-1)\u00b2",
+      "(2x)/(x-1)",
+      "2x/(x-1)\u00b2",
+      "(x\u00b2-2x+1)/(x-1)\u00b2"
+    ],
+    "correct_answer": "(x\u00b2-2x-1)/(x-1)\u00b2",
+    "explanation": "Quotient rule: (2x(x-1)-(x\u00b2+1))/(x-1)\u00b2.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Find dy/dx if y = e\u02e3/sin(x).",
+    "options": [
+      "(e\u02e3sin x - e\u02e3cos x)/sin\u00b2x",
+      "e\u02e3/cos x",
+      "e\u02e3cos x/sin\u00b2x",
+      "e\u02e3(sin x-cos x)/sin\u00b2x"
+    ],
+    "correct_answer": "e\u02e3(sin x - cos x)/sin\u00b2x",
+    "explanation": "Quotient rule: (e\u02e3sin x - e\u02e3cos x)/sin\u00b2x.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Find dy/dx if y = x/e\u02e3.",
+    "options": [
+      "(1-x)/e\u02e3",
+      "1/e\u02e3",
+      "(x-1)/e\u02e3",
+      "x/e\u02e3"
+    ],
+    "correct_answer": "(1-x)/e\u02e3",
+    "explanation": "Quotient rule: (e\u02e3 - xe\u02e3)/e^(2x) = (1-x)/e\u02e3.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Find dy/dx if y = (x+1)/(x-1).",
+    "options": [
+      "2/(x-1)\u00b2",
+      "-2/(x-1)\u00b2",
+      "1/(x-1)",
+      "(x-1)/(x+1)"
+    ],
+    "correct_answer": "\u22122/(x-1)\u00b2",
+    "explanation": "Quotient rule: ((x-1)-(x+1))/(x-1)\u00b2 = -2/(x-1)\u00b2.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Find dy/dx if y = sin(x)/e\u02e3.",
+    "options": [
+      "(sin x - cos x)\u00b7e^(-x)",
+      "cos x/e\u02e3",
+      "(cos x - sin x)/e\u02e3",
+      "sin x\u00b7e\u02e3"
+    ],
+    "correct_answer": "(cos x - sin x)/e\u02e3",
+    "explanation": "Quotient rule: (cos x\u00b7e\u02e3 - sin x\u00b7e\u02e3)/e^(2x).",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Evaluate \u222b2x\u00b7e^(x\u00b2) dx.",
+    "options": [
+      "e^(x\u00b2) + C",
+      "2e^(x\u00b2) + C",
+      "xe^(x\u00b2) + C",
+      "e^(2x) + C"
+    ],
+    "correct_answer": "e^(x\u00b2) + C",
+    "explanation": "u=x\u00b2, du=2x dx. \u222be\u1d58 du = e\u1d58 + C.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Evaluate \u222bcos(2x) dx.",
+    "options": [
+      "sin(2x) + C",
+      "sin(2x)/2 + C",
+      "2sin(2x) + C",
+      "-sin(2x)/2 + C"
+    ],
+    "correct_answer": "sin(2x)/2 + C",
+    "explanation": "u=2x, du=2dx. \u222bcos u du/2 = sin u/2 + C.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Evaluate \u222bx/(x\u00b2+1) dx.",
+    "options": [
+      "ln|x\u00b2+1|/2 + C",
+      "ln|x\u00b2+1| + C",
+      "arctan(x) + C",
+      "x\u00b2/(x\u00b2+1) + C"
+    ],
+    "correct_answer": "ln|x\u00b2+1|/2 + C",
+    "explanation": "u=x\u00b2+1, du=2x dx. (1/2)\u222bdu/u = ln|u|/2 + C.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Evaluate \u222b(3x\u00b2)\u00b7(x\u00b3+1)\u2074 dx.",
+    "options": [
+      "(x\u00b3+1)\u2075/5 + C",
+      "3(x\u00b3+1)\u2075 + C",
+      "(x\u00b3+1)\u2075 + C",
+      "15x\u00b2(x\u00b3+1)\u2074 + C"
+    ],
+    "correct_answer": "(x\u00b3+1)\u2075/5 + C",
+    "explanation": "u=x\u00b3+1, du=3x\u00b2 dx. \u222bu\u2074du = u\u2075/5 + C.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Evaluate \u222bsin(x)\u00b7cos(x) dx.",
+    "options": [
+      "sin\u00b2(x)/2 + C",
+      "cos\u00b2(x)/2 + C",
+      "-cos\u00b2(x)/2 + C",
+      "sin(2x)/4 + C"
+    ],
+    "correct_answer": "sin\u00b2(x)/2 + C",
+    "explanation": "u=sin x, du=cos x dx. \u222bu du = u\u00b2/2 + C.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Evaluate \u222be^(2x) dx.",
+    "options": [
+      "2e^(2x) + C",
+      "e^(2x)/2 + C",
+      "e^(2x) + C",
+      "e^x/2 + C"
+    ],
+    "correct_answer": "e^(2x)/2 + C",
+    "explanation": "u=2x. (1/2)\u222be\u1d58du = e^(2x)/2 + C.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Evaluate \u222b(2x+3)\u2075 dx.",
+    "options": [
+      "(2x+3)\u2076/12 + C",
+      "(2x+3)\u2076/6 + C",
+      "6(2x+3)\u2075 + C",
+      "(2x+3)\u2076 + C"
+    ],
+    "correct_answer": "(2x+3)\u2076/12 + C",
+    "explanation": "u=2x+3, du=2dx. (1/2)\u222bu\u2075du = u\u2076/12 + C.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Evaluate \u222bx\u00b7\u221a(x\u00b2+4) dx.",
+    "options": [
+      "(x\u00b2+4)^(3/2)/3 + C",
+      "\u221a(x\u00b2+4)/2 + C",
+      "x(x\u00b2+4)^(3/2) + C",
+      "(x\u00b2+4)^(3/2) + C"
+    ],
+    "correct_answer": "(x\u00b2+4)^(3/2)/3 + C",
+    "explanation": "u=x\u00b2+4, du=2x dx. (1/2)\u00b7u^(3/2)/(3/2) = u^(3/2)/3 + C.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Evaluate \u222btan(x) dx.",
+    "options": [
+      "ln|cos(x)| + C",
+      "-ln|cos(x)| + C",
+      "ln|sin(x)| + C",
+      "sec\u00b2(x) + C"
+    ],
+    "correct_answer": "-ln|cos(x)| + C",
+    "explanation": "\u222bsin x/cos x dx. u=cos x: -\u222bdu/u = -ln|u| + C.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Evaluate \u222b(ln x)/x dx.",
+    "options": [
+      "(ln x)\u00b2/2 + C",
+      "1/x\u00b2 + C",
+      "ln(ln x) + C",
+      "x\u00b7ln(x) - x + C"
+    ],
+    "correct_answer": "(ln x)\u00b2/2 + C",
+    "explanation": "u=ln x, du=1/x dx. \u222bu du = u\u00b2/2 + C.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Evaluate \u222bx\u00b7e^(x\u00b2) dx.",
+    "options": [
+      "e^(x\u00b2)/2 + C",
+      "e^(x\u00b2) + C",
+      "2xe^(x\u00b2) + C",
+      "xe^(x\u00b2)/2 + C"
+    ],
+    "correct_answer": "e^(x\u00b2)/2 + C",
+    "explanation": "u=x\u00b2, du=2x dx. (1/2)\u222be\u1d58du = e^(x\u00b2)/2 + C.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Evaluate \u222bcos(x)\u00b7e^(sin x) dx.",
+    "options": [
+      "e^(sin x) + C",
+      "sin(x)\u00b7e^(cos x) + C",
+      "e^(cos x) + C",
+      "e^(sin x)\u00b7cos x + C"
+    ],
+    "correct_answer": "e^(sin x) + C",
+    "explanation": "u=sin x, du=cos x dx. \u222be\u1d58du = e\u1d58 + C.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Evaluate \u222bx\u00b2\u00b7(x\u00b3+5)\u2077 dx.",
+    "options": [
+      "(x\u00b3+5)\u2078/24 + C",
+      "(x\u00b3+5)\u2078/8 + C",
+      "3x\u00b2(x\u00b3+5)\u2077 + C",
+      "(x\u00b3+5)\u2078 + C"
+    ],
+    "correct_answer": "(x\u00b3+5)\u2078/24 + C",
+    "explanation": "u=x\u00b3+5, du=3x\u00b2 dx. (1/3)\u00b7u\u2078/8 = u\u2078/24 + C.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Evaluate \u222bsin\u00b3(x)\u00b7cos(x) dx.",
+    "options": [
+      "sin\u2074(x)/4 + C",
+      "cos\u2074(x)/4 + C",
+      "sin\u00b2(x)/2 + C",
+      "sin(x)cos(x)/2 + C"
+    ],
+    "correct_answer": "sin\u2074(x)/4 + C",
+    "explanation": "u=sin x, du=cos x dx. \u222bu\u00b3du = u\u2074/4 + C.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Evaluate \u222b(x+1)/(x\u00b2+2x+3) dx.",
+    "options": [
+      "ln|x\u00b2+2x+3|/2 + C",
+      "ln|x+1| + C",
+      "arctan + C",
+      "(x+1)\u00b2/2 + C"
+    ],
+    "correct_answer": "ln|x\u00b2+2x+3|/2 + C",
+    "explanation": "Numerator = (1/2)d/dx(x\u00b2+2x+3). u=x\u00b2+2x+3: (1/2)ln|u| + C.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Evaluate \u222bx\u00b7sin(x) dx.",
+    "options": [
+      "sin(x) - x\u00b7cos(x) + C",
+      "x\u00b7sin(x) + C",
+      "-x\u00b7cos(x) + C",
+      "sin(x) + x\u00b7cos(x) + C"
+    ],
+    "correct_answer": "sin(x) - x\u00b7cos(x) + C",
+    "explanation": "IBP: u=x, dv=sin x dx. -x cos x + \u222bcos x dx.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Evaluate \u222bx\u00b7e\u02e3 dx.",
+    "options": [
+      "xe\u02e3 + C",
+      "e\u02e3(x-1) + C",
+      "e\u02e3(x+1) + C",
+      "xe\u02e3 - e\u02e3 + C"
+    ],
+    "correct_answer": "e\u02e3(x-1) + C",
+    "explanation": "IBP: u=x, dv=e\u02e3. xe\u02e3 - e\u02e3 + C = e\u02e3(x-1) + C.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Evaluate \u222bln(x) dx.",
+    "options": [
+      "x\u00b7ln(x) - x + C",
+      "ln(x)/x + C",
+      "x\u00b7ln(x) + C",
+      "ln(x) + C"
+    ],
+    "correct_answer": "x\u00b7ln(x) - x + C",
+    "explanation": "IBP: u=ln x, dv=dx. x\u00b7ln x - \u222bdx.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Evaluate \u222bx\u00b7cos(x) dx.",
+    "options": [
+      "x\u00b7sin(x) + cos(x) + C",
+      "sin(x) - x\u00b7cos(x) + C",
+      "x\u00b7sin(x) - cos(x) + C",
+      "cos(x) - x\u00b7sin(x) + C"
+    ],
+    "correct_answer": "x\u00b7sin(x) + cos(x) + C",
+    "explanation": "IBP: u=x, dv=cos x. x\u00b7sin x - \u222bsin x dx.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Evaluate \u222bx\u00b7ln(x) dx.",
+    "options": [
+      "x\u00b2\u00b7ln(x)/2 - x\u00b2/4 + C",
+      "x\u00b2\u00b7ln(x)/2 + C",
+      "ln(x)/x + C",
+      "x\u00b2\u00b7ln(x) + C"
+    ],
+    "correct_answer": "x\u00b2\u00b7ln(x)/2 - x\u00b2/4 + C",
+    "explanation": "IBP: u=ln x, dv=x dx. x\u00b2ln x/2 - \u222bx/2 dx.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Evaluate \u222b\u2080\u00b9 x\u00b7e\u02e3 dx.",
+    "options": [
+      "1",
+      "e-1",
+      "2",
+      "e+1"
+    ],
+    "correct_answer": "1",
+    "explanation": "IBP: [xe\u02e3 - e\u02e3]\u2080\u00b9 = (e-e) - (0-1) = 1.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "\u222bx\u00b2\u00b7e\u02e3 dx = ?",
+    "options": [
+      "x\u00b2e\u02e3 - 2xe\u02e3 + 2e\u02e3 + C",
+      "x\u00b2e\u02e3 + C",
+      "e\u02e3(x\u00b2+2x+2) + C",
+      "x\u00b2e\u02e3 - 2e\u02e3 + C"
+    ],
+    "correct_answer": "x\u00b2e\u02e3 - 2xe\u02e3 + 2e\u02e3 + C",
+    "explanation": "IBP twice: e\u02e3(x\u00b2-2x+2) + C.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "\u222barctan(x) dx = ?",
+    "options": [
+      "x\u00b7arctan(x) - ln(1+x\u00b2)/2 + C",
+      "arctan(x)/x + C",
+      "x\u00b7arctan(x) + C",
+      "ln(1+x\u00b2) + C"
+    ],
+    "correct_answer": "x\u00b7arctan(x) - ln(1+x\u00b2)/2 + C",
+    "explanation": "IBP: u=arctan x, dv=dx. x\u00b7arctan x - \u222bx/(1+x\u00b2)dx.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "\u222bx\u00b2\u00b7sin(x) dx = ?",
+    "options": [
+      "x\u00b2sin x + 2x cos x - 2sin x + C",
+      "-x\u00b2cos x + 2x sin x + 2cos x + C",
+      "x\u00b2cos x + C",
+      "x\u00b2sin x - 2cos x + C"
+    ],
+    "correct_answer": "-x\u00b2cos x + 2x sin x + 2cos x + C",
+    "explanation": "IBP twice on \u222bx\u00b2sin x dx.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "\u222be\u02e3\u00b7cos(x) dx = ?",
+    "options": [
+      "e\u02e3(sin x + cos x)/2 + C",
+      "e\u02e3 cos x + C",
+      "e\u02e3 sin x + C",
+      "e\u02e3(sin x - cos x)/2 + C"
+    ],
+    "correct_answer": "e\u02e3(sin x + cos x)/2 + C",
+    "explanation": "IBP twice, solve: I = e\u02e3(sin x + cos x)/2 + C.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Use L'H\u00f4pital to find lim(x\u21920) sin(x)/x.",
+    "options": [
+      "0",
+      "\u221e",
+      "1",
+      "undefined"
+    ],
+    "correct_answer": "1",
+    "explanation": "Both \u2192 0. d: cos(x)/1 \u2192 1.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Use L'H\u00f4pital to find lim(x\u21920) (e\u02e3 - 1)/x.",
+    "options": [
+      "0",
+      "e",
+      "1",
+      "\u221e"
+    ],
+    "correct_answer": "1",
+    "explanation": "Both \u2192 0. d: e\u02e3/1 \u2192 1.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Use L'H\u00f4pital to find lim(x\u2192\u221e) x/e\u02e3.",
+    "options": [
+      "\u221e",
+      "1",
+      "e",
+      "0"
+    ],
+    "correct_answer": "0",
+    "explanation": "\u221e/\u221e: d: 1/e\u02e3 \u2192 0.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Use L'H\u00f4pital to find lim(x\u21921) (x\u00b2-1)/(x-1).",
+    "options": [
+      "0",
+      "1",
+      "2",
+      "\u221e"
+    ],
+    "correct_answer": "2",
+    "explanation": "0/0: d: 2x/1 \u2192 2.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Use L'H\u00f4pital to find lim(x\u21920) (1 - cos x)/x\u00b2.",
+    "options": [
+      "0",
+      "1",
+      "1/2",
+      "\u221e"
+    ],
+    "correct_answer": "1/2",
+    "explanation": "0/0 twice: final cos(0)/2 = 1/2.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Use L'H\u00f4pital to find lim(x\u21920) (sin 3x)/(sin 2x).",
+    "options": [
+      "2/3",
+      "3/2",
+      "1",
+      "0"
+    ],
+    "correct_answer": "3/2",
+    "explanation": "Both \u2192 0. d: 3cos(3x)/(2cos(2x)) \u2192 3/2.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Use L'H\u00f4pital: lim(x\u2192\u221e) ln(x)/x.",
+    "options": [
+      "\u221e",
+      "1",
+      "0",
+      "e"
+    ],
+    "correct_answer": "0",
+    "explanation": "\u221e/\u221e: d: (1/x)/1 = 1/x \u2192 0.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Use L'H\u00f4pital: lim(x\u21920) (x - sin x)/x\u00b3.",
+    "options": [
+      "0",
+      "1",
+      "1/6",
+      "1/3"
+    ],
+    "correct_answer": "1/6",
+    "explanation": "Apply L'H\u00f4pital 3 times: final result 1/6.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Use L'H\u00f4pital: lim(x\u21920) (e^x - 1 - x)/x\u00b2.",
+    "options": [
+      "0",
+      "1",
+      "1/2",
+      "2"
+    ],
+    "correct_answer": "1/2",
+    "explanation": "Apply twice: e\u02e3/2 \u2192 1/2.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Use L'H\u00f4pital: lim(x\u2192\u221e) x\u00b2/e\u02e3.",
+    "options": [
+      "\u221e",
+      "2",
+      "0",
+      "1"
+    ],
+    "correct_answer": "0",
+    "explanation": "Apply twice: 2/e\u02e3 \u2192 0.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Find dy/dx for x\u00b2 + y\u00b2 = 25.",
+    "options": [
+      "x/y",
+      "-x/y",
+      "y/x",
+      "-y/x"
+    ],
+    "correct_answer": "-x/y",
+    "explanation": "2x + 2y\u00b7dy/dx = 0 \u2192 dy/dx = -x/y.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Find dy/dx for xy = 1.",
+    "options": [
+      "1/y",
+      "-y/x",
+      "-1/x\u00b2",
+      "y/x"
+    ],
+    "correct_answer": "-y/x",
+    "explanation": "y + x\u00b7dy/dx = 0 \u2192 dy/dx = -y/x.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Find dy/dx for sin(y) = x.",
+    "options": [
+      "cos(y)",
+      "1/cos(y)",
+      "-cos(y)",
+      "sin(y)"
+    ],
+    "correct_answer": "1/cos(y)",
+    "explanation": "cos(y)\u00b7dy/dx = 1 \u2192 dy/dx = 1/cos(y) = sec(y).",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Find dy/dx for e\u02b8 = x.",
+    "options": [
+      "e\u02b8",
+      "1/e\u02b8",
+      "x\u00b7e\u02b8",
+      "e\u02e3"
+    ],
+    "correct_answer": "1/e\u02b8",
+    "explanation": "e\u02b8\u00b7dy/dx = 1 \u2192 dy/dx = 1/e\u02b8 = 1/x.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Find dy/dx for x\u00b2 + 2xy + y\u00b2 = 4.",
+    "options": [
+      "-(x+y)/(x+y)",
+      "-1",
+      "1",
+      "0"
+    ],
+    "correct_answer": "-1",
+    "explanation": "2x+2y+2x\u00b7dy/dx+2y\u00b7dy/dx=0 \u2192 (2x+2y)dy/dx=-(2x+2y) \u2192 dy/dx=-1.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Find the slope of x\u00b2+y\u00b2=25 at (3,4).",
+    "options": [
+      "3/4",
+      "-3/4",
+      "4/3",
+      "-4/3"
+    ],
+    "correct_answer": "-3/4",
+    "explanation": "dy/dx = -x/y = -3/4.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Find dy/dx for ln(y) = x\u00b2.",
+    "options": [
+      "2x/y",
+      "2xy",
+      "2x",
+      "2x\u00b7ln y"
+    ],
+    "correct_answer": "2x/y",
+    "explanation": "(1/y)\u00b7dy/dx = 2x \u2192 dy/dx = 2xy.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Find dy/dx for x\u00b3 + y\u00b3 = 6xy.",
+    "options": [
+      "(6y - 3x\u00b2)/(3y\u00b2 - 6x)",
+      "(y-x\u00b2)/(y\u00b2-x)",
+      "(2y-x\u00b2)/(y\u00b2-2x)",
+      "x\u00b2/y\u00b2"
+    ],
+    "correct_answer": "(6y - 3x\u00b2)/(3y\u00b2 - 6x)",
+    "explanation": "3x\u00b2+3y\u00b2dy/dx = 6y+6x\u00b7dy/dx \u2192 dy/dx = (6y-3x\u00b2)/(3y\u00b2-6x).",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "A sphere's radius grows at 2 cm/s. How fast is volume growing when r=3?",
+    "options": [
+      "72\u03c0 cm\u00b3/s",
+      "36\u03c0 cm\u00b3/s",
+      "12\u03c0 cm\u00b3/s",
+      "108\u03c0 cm\u00b3/s"
+    ],
+    "correct_answer": "72\u03c0 cm\u00b3/s",
+    "explanation": "V=4\u03c0r\u00b3/3, dV/dt=4\u03c0r\u00b2\u00b7dr/dt=4\u03c0(9)(2)=72\u03c0.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "A square's side increases at 3 cm/s. How fast is area increasing when s=5?",
+    "options": [
+      "30 cm\u00b2/s",
+      "25 cm\u00b2/s",
+      "15 cm\u00b2/s",
+      "9 cm\u00b2/s"
+    ],
+    "correct_answer": "30 cm\u00b2/s",
+    "explanation": "A=s\u00b2, dA/dt=2s\u00b7ds/dt=2(5)(3)=30.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Water fills a cylinder (r=2m) at 4 m\u00b3/min. How fast is water rising?",
+    "options": [
+      "\u03c0 m/min",
+      "1/\u03c0 m/min",
+      "4/\u03c0 m/min",
+      "2/\u03c0 m/min"
+    ],
+    "correct_answer": "1/\u03c0 m/min",
+    "explanation": "V=4\u03c0h, dV/dt=4\u03c0\u00b7dh/dt. 4=4\u03c0\u00b7dh/dt \u2192 dh/dt=1/\u03c0.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "A ladder 10ft leans on a wall. Base slides out at 1ft/s. How fast is top falling when base=6ft?",
+    "options": [
+      "3/4 ft/s",
+      "4/3 ft/s",
+      "1/2 ft/s",
+      "1 ft/s"
+    ],
+    "correct_answer": "3/4 ft/s",
+    "explanation": "x\u00b2+y\u00b2=100. At x=6, y=8: 12+16(dy/dt)=0 \u2192 dy/dt=-3/4.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "A circle's radius expands at 2 cm/s. How fast is the area growing when r=5?",
+    "options": [
+      "10\u03c0 cm\u00b2/s",
+      "20\u03c0 cm\u00b2/s",
+      "25\u03c0 cm\u00b2/s",
+      "4\u03c0 cm\u00b2/s"
+    ],
+    "correct_answer": "20\u03c0 cm\u00b2/s",
+    "explanation": "A=\u03c0r\u00b2, dA/dt=2\u03c0r\u00b7dr/dt=2\u03c0(5)(2)=20\u03c0.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "A balloon inflates: V increases at 10 cm\u00b3/s. When r=5, how fast is r increasing?",
+    "options": [
+      "1/(10\u03c0) cm/s",
+      "10/(100\u03c0) cm/s",
+      "1/(25\u03c0) cm/s",
+      "2/(5\u03c0) cm/s"
+    ],
+    "correct_answer": "1/(10\u03c0) cm/s",
+    "explanation": "dV/dt=4\u03c0r\u00b2\u00b7dr/dt. 10=4\u03c0(25)\u00b7dr/dt \u2192 dr/dt=10/(100\u03c0)=1/(10\u03c0).",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "A boat moves away from dock at 3 m/s. After 4s, how fast is distance from dock increasing when boat is 5m away and dock height is 3m?",
+    "options": [
+      "3 m/s",
+      "4 m/s",
+      "5 m/s",
+      "12/5 m/s"
+    ],
+    "correct_answer": "12/5 m/s",
+    "explanation": "x=4, rope=5. x\u00b7dx/dt = d\u00b7dd/dt. 4(3)=5\u00b7dd/dt \u2192 dd/dt=12/5.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Sand pours into a cone (r=h always). V increasing at 2 m\u00b3/s. When h=3, how fast is h rising?",
+    "options": [
+      "2/(9\u03c0) m/s",
+      "1/(9\u03c0) m/s",
+      "2/(3\u03c0) m/s",
+      "2/9 m/s"
+    ],
+    "correct_answer": "2/(9\u03c0) m/s",
+    "explanation": "V=\u03c0h\u00b3/3, dV/dt=\u03c0h\u00b2\u00b7dh/dt. 2=\u03c0(9)dh/dt \u2192 dh/dt=2/(9\u03c0).",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Find the local max of f(x) = -x\u00b2 + 4x.",
+    "options": [
+      "f(2) = 4",
+      "f(4) = 4",
+      "f(1) = 3",
+      "f(2) = 2"
+    ],
+    "correct_answer": "f(2) = 4",
+    "explanation": "f'=-2x+4=0 \u2192 x=2. f(2)=4.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Find the minimum of f(x) = x\u00b2 - 6x + 10.",
+    "options": [
+      "1",
+      "4",
+      "3",
+      "10"
+    ],
+    "correct_answer": "1",
+    "explanation": "f'=2x-6=0 \u2192 x=3. f(3)=1.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "A rectangle has perimeter 20. Maximize area.",
+    "options": [
+      "25",
+      "20",
+      "16",
+      "30"
+    ],
+    "correct_answer": "25",
+    "explanation": "x+y=10. A=x(10-x). A'=10-2x=0 \u2192 x=5. A=25.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Find inflection point of f(x) = x\u00b3 - 3x.",
+    "options": [
+      "x=1",
+      "x=-1",
+      "x=0",
+      "x=\u00b11"
+    ],
+    "correct_answer": "x=0",
+    "explanation": "f''=6x=0 at x=0. Sign changes here.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Find critical points of f(x) = x\u00b3 - 12x.",
+    "options": [
+      "x=\u00b12",
+      "x=0",
+      "x=\u00b13",
+      "x=\u00b14"
+    ],
+    "correct_answer": "x=\u00b12",
+    "explanation": "f'=3x\u00b2-12=0 \u2192 x\u00b2=4 \u2192 x=\u00b12.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Where is f(x) = x\u00b3 - 3x\u00b2 concave up?",
+    "options": [
+      "x < 1",
+      "x > 1",
+      "x > 2",
+      "x < 0"
+    ],
+    "correct_answer": "x > 1",
+    "explanation": "f''=6x-6=0 at x=1. f''>0 for x>1.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "f(x) = 2x\u00b3 - 9x\u00b2 + 12x. Classify x=1.",
+    "options": [
+      "Local min",
+      "Local max",
+      "Inflection",
+      "Saddle"
+    ],
+    "correct_answer": "Local max",
+    "explanation": "f'=6x\u00b2-18x+12=6(x-1)(x-2). f''=12x-18. f''(1)=-6<0 \u2192 max.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "f(x) = 2x\u00b3 - 9x\u00b2 + 12x. Classify x=2.",
+    "options": [
+      "Local min",
+      "Local max",
+      "Inflection",
+      "Saddle"
+    ],
+    "correct_answer": "Local min",
+    "explanation": "f''(2)=24-18=6>0 \u2192 local min.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "The average value of f(x)=x\u00b2 on [0,3] is:",
+    "options": [
+      "3",
+      "9",
+      "4",
+      "3/2... wait"
+    ],
+    "correct_answer": "3",
+    "explanation": "(1/3)\u222b\u2080\u00b3 x\u00b2 dx = (1/3)[x\u00b3/3]\u2080\u00b3 = (1/3)(9) = 3.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Find the minimum value of f(x) = e\u02e3 - x.",
+    "options": [
+      "0",
+      "1",
+      "e",
+      "e-1"
+    ],
+    "correct_answer": "1",
+    "explanation": "f'=e\u02e3-1=0 \u2192 x=0. f(0)=1.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Where is f(x) = x\u2074 - 4x\u00b3 decreasing?",
+    "options": [
+      "x < 0",
+      "x > 3",
+      "0 < x < 3",
+      "x < 3"
+    ],
+    "correct_answer": "0 < x < 3",
+    "explanation": "f'=4x\u00b3-12x\u00b2=4x\u00b2(x-3). f'<0 for 0<x<3.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Find the absolute max of f(x)=x\u00b3-3x on [-2,2].",
+    "options": [
+      "f(2)=2",
+      "f(-1)=2",
+      "f(1)=-2",
+      "f(-2)=-2"
+    ],
+    "correct_answer": "f(-1)=2",
+    "explanation": "Check endpoints and critical points. f(-1)=2 is the max.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Minimize f(x) = x + 4/x for x > 0.",
+    "options": [
+      "2",
+      "4",
+      "8",
+      "3"
+    ],
+    "correct_answer": "4",
+    "explanation": "f'=1-4/x\u00b2=0 \u2192 x=2. f(2)=2+2=4.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "A box with square base has volume 32. Minimize surface area. What is the base side length?",
+    "options": [
+      "2",
+      "2\u221b4",
+      "4",
+      "8"
+    ],
+    "correct_answer": "2\u221b4",
+    "explanation": "V=s\u00b2h=32\u2192h=32/s\u00b2. SA=2s\u00b2+4sh. dSA/ds=4s-128/s\u00b2=0 \u2192 s\u00b3=32 \u2192 s=2\u221b4.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Find where f(x)=x\u00b7e\u02e3 has its minimum.",
+    "options": [
+      "x=0",
+      "x=1",
+      "x=-1",
+      "x=-2"
+    ],
+    "correct_answer": "x=-1",
+    "explanation": "f'=e\u02e3+xe\u02e3=e\u02e3(1+x)=0 \u2192 x=-1.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Find area between y=x\u00b2 and y=x.",
+    "options": [
+      "1/6",
+      "1/3",
+      "1/2",
+      "1"
+    ],
+    "correct_answer": "1/6",
+    "explanation": "\u222b\u2080\u00b9(x-x\u00b2)dx = [x\u00b2/2-x\u00b3/3]\u2080\u00b9 = 1/6.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Evaluate \u222b\u2080^(\u03c0/2) cos\u00b2(x) dx.",
+    "options": [
+      "\u03c0/4",
+      "\u03c0/2",
+      "1",
+      "\u03c0"
+    ],
+    "correct_answer": "\u03c0/4",
+    "explanation": "cos\u00b2x=(1+cos2x)/2. \u222b\u2080^(\u03c0/2)(1+cos2x)/2 dx = \u03c0/4.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Evaluate \u222b\u2080^(\u03c0/2) sin\u00b2(x) dx.",
+    "options": [
+      "\u03c0/4",
+      "\u03c0/2",
+      "1",
+      "\u03c0"
+    ],
+    "correct_answer": "\u03c0/4",
+    "explanation": "sin\u00b2x=(1-cos2x)/2. \u222b\u2080^(\u03c0/2)(1-cos2x)/2 dx = \u03c0/4.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Evaluate \u222b\u2080^(\u03c0/4) sec\u00b2(x) dx.",
+    "options": [
+      "1",
+      "\u03c0/4",
+      "\u221a2",
+      "0"
+    ],
+    "correct_answer": "1",
+    "explanation": "[tan x]\u2080^(\u03c0/4) = 1 - 0 = 1.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Find area between y=sin x and y=cos x from 0 to \u03c0/4.",
+    "options": [
+      "\u221a2-1",
+      "1-\u221a2",
+      "2-\u221a2",
+      "\u221a2"
+    ],
+    "correct_answer": "\u221a2-1",
+    "explanation": "cos\u2265sin on [0,\u03c0/4]. \u222b\u2080^(\u03c0/4)(cos-sin)dx = [sin+cos]\u2080^(\u03c0/4) = \u221a2-1.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Evaluate \u222b\u2080\u00b2 (4-x\u00b2) dx.",
+    "options": [
+      "16/3",
+      "8",
+      "4",
+      "8/3"
+    ],
+    "correct_answer": "16/3",
+    "explanation": "[4x-x\u00b3/3]\u2080\u00b2 = 8-8/3 = 16/3.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Evaluate \u222b\u2080\u00b2 |x-1| dx.",
+    "options": [
+      "1",
+      "2",
+      "1/2",
+      "3/2"
+    ],
+    "correct_answer": "1",
+    "explanation": "\u222b\u2080\u00b9(1-x)dx + \u222b\u2081\u00b2(x-1)dx = 1/2+1/2=1.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Find the average value of f(x)=x on [0,4].",
+    "options": [
+      "4",
+      "1",
+      "2",
+      "8"
+    ],
+    "correct_answer": "2",
+    "explanation": "(1/4)\u222b\u2080\u2074 x dx = (1/4)(8) = 2.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Evaluate \u222b\u2080\u00b9 arctan(x) dx.",
+    "options": [
+      "\u03c0/4",
+      "\u03c0/4 - ln(2)/2",
+      "\u03c0/4 + 1",
+      "\u03c0/2"
+    ],
+    "correct_answer": "\u03c0/4 - ln(2)/2",
+    "explanation": "IBP: [x\u00b7arctan x]\u2080\u00b9 - \u222b\u2080\u00b9x/(1+x\u00b2)dx = \u03c0/4 - ln2/2.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Evaluate \u222b\u2080\u00b9 x\u00b7e^(x\u00b2) dx.",
+    "options": [
+      "(e-1)/2",
+      "e-1",
+      "1/2",
+      "e/2"
+    ],
+    "correct_answer": "(e-1)/2",
+    "explanation": "u=x\u00b2, (1/2)\u222b\u2080\u00b9 e\u1d58du = (e-1)/2.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Find area bounded by y=x\u00b2 and y=4.",
+    "options": [
+      "32/3",
+      "16/3",
+      "8",
+      "16"
+    ],
+    "correct_answer": "32/3",
+    "explanation": "x\u00b2=4 \u2192 x=\u00b12. \u222b\u208b\u2082\u00b2(4-x\u00b2)dx = [4x-x\u00b3/3]\u208b\u2082\u00b2 = 32/3.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Evaluate \u222b\u2080^(\u03c0) x\u00b7sin(x) dx.",
+    "options": [
+      "\u03c0",
+      "0",
+      "2",
+      "\u03c0/2"
+    ],
+    "correct_answer": "\u03c0",
+    "explanation": "IBP: [-x cos x + sin x]\u2080^\u03c0 = \u03c0.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Evaluate \u222b\u2081^e ln(x) dx.",
+    "options": [
+      "1",
+      "e-1",
+      "e",
+      "2"
+    ],
+    "correct_answer": "1",
+    "explanation": "[x ln x - x]\u2081^e = (e-e)-(0-1) = 1.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Find area between y=e\u02e3 and y=x+1 from x=-1 to 0.",
+    "options": [
+      "e\u207b\u00b9 - 1/2",
+      "1-1/e",
+      "1/2",
+      "e-1/2"
+    ],
+    "correct_answer": "e\u207b\u00b9 - 1/2",
+    "explanation": "\u222b\u208b\u2081\u2070(e\u02e3-(x+1))dx = [e\u02e3-x\u00b2/2-x]\u208b\u2081\u2070 = (1-0-0)-(e\u207b\u00b9-1/2+1) = 1-e\u207b\u00b9+1/2-1 = 1/2-1/e.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Evaluate \u222b\u2080\u00b9 1/(1+x\u00b2) dx.",
+    "options": [
+      "\u03c0/4",
+      "\u03c0",
+      "1",
+      "1/2"
+    ],
+    "correct_answer": "\u03c0/4",
+    "explanation": "[arctan x]\u2080\u00b9 = \u03c0/4 - 0.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is the sum of \u2211(1/2)\u207f from n=0 to \u221e?",
+    "options": [
+      "1",
+      "2",
+      "1/2",
+      "\u221e"
+    ],
+    "correct_answer": "2",
+    "explanation": "Geometric: a/(1-r) = 1/(1-1/2) = 2.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "For what r does \u2211r\u207f converge?",
+    "options": [
+      "r > 0",
+      "r < 1",
+      "|r| < 1",
+      "|r| \u2264 1"
+    ],
+    "correct_answer": "|r| < 1",
+    "explanation": "Geometric series converges iff |r| < 1.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "The p-series \u22111/n\u1d56 converges when:",
+    "options": [
+      "p > 0",
+      "p > 1",
+      "p \u2265 1",
+      "p < 1"
+    ],
+    "correct_answer": "p > 1",
+    "explanation": "p-series converges iff p > 1.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "The harmonic series \u22111/n:",
+    "options": [
+      "Converges to ln 2",
+      "Diverges",
+      "Converges to \u03c0",
+      "Converges to 1"
+    ],
+    "correct_answer": "Diverges",
+    "explanation": "The harmonic series diverges.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "nth term test: if lim(n\u2192\u221e)a\u2099 \u2260 0, the series:",
+    "options": [
+      "Converges",
+      "Diverges",
+      "Oscillates",
+      "Is inconclusive"
+    ],
+    "correct_answer": "Diverges",
+    "explanation": "If terms don't \u2192 0, series diverges.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is the Maclaurin series for e\u02e3?",
+    "options": [
+      "\u2211x\u207f/n!",
+      "\u2211x\u207f",
+      "\u2211(-1)\u207fx\u207f/n!",
+      "\u2211n\u00b7x\u207f"
+    ],
+    "correct_answer": "\u2211x\u207f/n!",
+    "explanation": "e\u02e3 = 1 + x + x\u00b2/2! + x\u00b3/3! + ...",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is the Maclaurin series for sin(x)?",
+    "options": [
+      "\u2211x^(2n)/(2n)!",
+      "\u2211(-1)\u207fx^(2n+1)/(2n+1)!",
+      "\u2211x\u207f/n!",
+      "\u2211(-1)\u207fx^(2n)/(2n)!"
+    ],
+    "correct_answer": "\u2211(-1)\u207fx^(2n+1)/(2n+1)!",
+    "explanation": "sin x = x - x\u00b3/3! + x\u2075/5! - ...",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is the Maclaurin series for cos(x)?",
+    "options": [
+      "\u2211(-1)\u207fx^(2n)/(2n)!",
+      "\u2211(-1)\u207fx^(2n+1)/(2n+1)!",
+      "\u2211x\u207f/n!",
+      "\u2211x^(2n)/(2n)!"
+    ],
+    "correct_answer": "\u2211(-1)\u207fx^(2n)/(2n)!",
+    "explanation": "cos x = 1 - x\u00b2/2! + x\u2074/4! - ...",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "The ratio test: series converges if lim|a\u2099\u208a\u2081/a\u2099| = L where:",
+    "options": [
+      "L > 1",
+      "L = 1",
+      "L < 1",
+      "L = 0"
+    ],
+    "correct_answer": "L < 1",
+    "explanation": "Ratio test: L<1 \u2192 converges, L>1 \u2192 diverges.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is the radius of convergence of \u2211x\u207f/n!?",
+    "options": [
+      "1",
+      "0",
+      "\u221e",
+      "e"
+    ],
+    "correct_answer": "\u221e",
+    "explanation": "Ratio test: |(x\u207f\u207a\u00b9/(n+1)!)/(x\u207f/n!)| = |x|/(n+1) \u2192 0 < 1 for all x. R=\u221e.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Solve dy/dx = y, y(0)=3.",
+    "options": [
+      "y=3e^(-x)",
+      "y=3e^x",
+      "y=3+x",
+      "y=e^(3x)"
+    ],
+    "correct_answer": "y=3e^x",
+    "explanation": "Separable: y=Ce^x. y(0)=3.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Solve dy/dx = 2x, y(0)=1.",
+    "options": [
+      "y=x\u00b2",
+      "y=x\u00b2+1",
+      "y=2x+1",
+      "y=x+1"
+    ],
+    "correct_answer": "y=x\u00b2+1",
+    "explanation": "Integrate: y=x\u00b2+C. y(0)=1 \u2192 C=1.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Solve: y' + y = 0.",
+    "options": [
+      "y=Ce^x",
+      "y=Ce^(-x)",
+      "y=C",
+      "y=Cx"
+    ],
+    "correct_answer": "y=Ce^(-x)",
+    "explanation": "Characteristic equation r+1=0 \u2192 r=-1 \u2192 y=Ce^(-x).",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Solve dy/dx = ky (exponential growth/decay).",
+    "options": [
+      "y=e^(kx)",
+      "y=Cke^x",
+      "y=Ce^(kx)",
+      "y=Cx^k"
+    ],
+    "correct_answer": "y=Ce^(kx)",
+    "explanation": "Standard exponential DE: y=Ce^(kx).",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "The differential equation y'' + y = 0 has solution:",
+    "options": [
+      "y=Ce^x",
+      "y=A sin x + B cos x",
+      "y=Ae^x + Be^(-x)",
+      "y=Ax+B"
+    ],
+    "correct_answer": "y=A sin x + B cos x",
+    "explanation": "Characteristic roots r=\u00b1i \u2192 y=A sin x + B cos x.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Solve dy/dx = x/y.",
+    "options": [
+      "y\u00b2=x\u00b2+C",
+      "y=x+C",
+      "y\u00b2=x\u00b2/2+C",
+      "y\u00b2/2=x\u00b2/2+C"
+    ],
+    "correct_answer": "y\u00b2=x\u00b2/2+C",
+    "explanation": "Separate: y dy = x dx. y\u00b2/2 = x\u00b2/2 + C, i.e. y\u00b2=x\u00b2+C.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is an integrating factor for y' + P(x)y = Q(x)?",
+    "options": [
+      "e^(\u222bQ dx)",
+      "e^(\u222bP dx)",
+      "\u222bP dx",
+      "P(x)"
+    ],
+    "correct_answer": "e^(\u222bP dx)",
+    "explanation": "Integrating factor \u03bc = e^(\u222bP(x)dx).",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Euler's method with step h gives:",
+    "options": [
+      "y\u2099\u208a\u2081 = y\u2099 + h\u00b7f(x\u2099,y\u2099)",
+      "y\u2099\u208a\u2081 = y\u2099\u00b7h",
+      "y\u2099\u208a\u2081 = y\u2099 - h\u00b7f",
+      "y\u2099\u208a\u2081 = y\u2099 + h"
+    ],
+    "correct_answer": "y\u2099\u208a\u2081 = y\u2099 + h\u00b7f(x\u2099,y\u2099)",
+    "explanation": "Euler's method numerical step formula.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "The logistic DE dy/dt = ky(1-y/M) models:",
+    "options": [
+      "Exponential growth",
+      "Limited/bounded growth",
+      "Oscillation",
+      "Decay only"
+    ],
+    "correct_answer": "Limited/bounded growth",
+    "explanation": "Logistic equation models population with carrying capacity M.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Volume when y=x\u00b2 from 0 to 2 rotated about x-axis:",
+    "options": [
+      "32\u03c0/5",
+      "16\u03c0/5",
+      "8\u03c0",
+      "4\u03c0"
+    ],
+    "correct_answer": "32\u03c0/5",
+    "explanation": "V=\u03c0\u222b\u2080\u00b2 x\u2074 dx = \u03c0[x\u2075/5]\u2080\u00b2 = 32\u03c0/5.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "The disk method formula is:",
+    "options": [
+      "V=\u222b\u03c0[f(x)]\u00b2 dx",
+      "V=\u222b2\u03c0x\u00b7f(x) dx",
+      "V=\u222bf(x)\u00b2 dx",
+      "V=\u03c0\u222bf(x) dx"
+    ],
+    "correct_answer": "V=\u222b\u03c0[f(x)]\u00b2 dx",
+    "explanation": "Disk method: V=\u03c0\u222b\u2090\u1d47[f(x)]\u00b2 dx.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "The shell method formula is:",
+    "options": [
+      "V=\u222b\u03c0[f(x)]\u00b2 dx",
+      "V=\u222b2\u03c0x\u00b7f(x) dx",
+      "V=2\u03c0\u222bf(x) dx",
+      "V=\u03c0\u222bx\u00b7f(x) dx"
+    ],
+    "correct_answer": "V=\u222b2\u03c0x\u00b7f(x) dx",
+    "explanation": "Shell method: V=2\u03c0\u222b\u2090\u1d47 x\u00b7f(x) dx.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Volume between y=x and y=x\u00b2 from 0 to 1 about x-axis:",
+    "options": [
+      "\u03c0/6",
+      "\u03c0/3",
+      "\u03c0/15",
+      "2\u03c0/15"
+    ],
+    "correct_answer": "2\u03c0/15",
+    "explanation": "Washer: \u03c0\u222b\u2080\u00b9(x\u00b2-x\u2074)dx = \u03c0[x\u00b3/3-x\u2075/5]\u2080\u00b9 = \u03c0(1/3-1/5) = 2\u03c0/15.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Volume of solid with circular cross-section radius r=x from x=0 to x=3:",
+    "options": [
+      "9\u03c0",
+      "27\u03c0",
+      "9\u03c0/2",
+      "3\u03c0"
+    ],
+    "correct_answer": "9\u03c0",
+    "explanation": "V=\u03c0\u222b\u2080\u00b3 x\u00b2 dx = \u03c0[x\u00b3/3]\u2080\u00b3 = 9\u03c0.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "For x=cos t, y=sin t, find dy/dx.",
+    "options": [
+      "sin t/cos t",
+      "-cos t/sin t",
+      "cos t/sin t",
+      "-sin t/cos t"
+    ],
+    "correct_answer": "-cos t/sin t",
+    "explanation": "dy/dx = (dy/dt)/(dx/dt) = cos t/(-sin t) = -cot t.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "For x=t\u00b2, y=t\u00b3, find dy/dx.",
+    "options": [
+      "3t/2",
+      "2t/3",
+      "3t\u00b2/2t",
+      "t/2"
+    ],
+    "correct_answer": "3t/2",
+    "explanation": "dy/dx = 3t\u00b2/(2t) = 3t/2.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Polar area formula is:",
+    "options": [
+      "\u222br d\u03b8",
+      "(1/2)\u222br\u00b2 d\u03b8",
+      "\u222br\u00b2 d\u03b8",
+      "\u03c0\u222br d\u03b8"
+    ],
+    "correct_answer": "(1/2)\u222br\u00b2 d\u03b8",
+    "explanation": "Polar area: A=(1/2)\u222b\u2090\u1d47 r\u00b2 d\u03b8.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Convert r=2 to Cartesian.",
+    "options": [
+      "x+y=2",
+      "x\u00b2+y\u00b2=4",
+      "x\u00b2+y\u00b2=2",
+      "x=2"
+    ],
+    "correct_answer": "x\u00b2+y\u00b2=4",
+    "explanation": "r=2 \u2192 r\u00b2=4 \u2192 x\u00b2+y\u00b2=4.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "For parametric curve, arc length = ?",
+    "options": [
+      "\u222b\u221a((dx/dt)\u00b2+(dy/dt)\u00b2) dt",
+      "\u222b(dx+dy)dt",
+      "\u222b|dy/dx|dt",
+      "\u222b\u221a(1+(dy/dx)\u00b2)dx"
+    ],
+    "correct_answer": "\u222b\u221a((dx/dt)\u00b2+(dy/dt)\u00b2) dt",
+    "explanation": "Parametric arc length formula.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Evaluate \u222b\u2080^(\u03c0/2) sin(x)cos(x) dx.",
+    "options": [
+      "1/2",
+      "1/4",
+      "0",
+      "1"
+    ],
+    "correct_answer": "1/2",
+    "explanation": "u=sin x: \u222b\u2080^(\u03c0/2) u du = [u\u00b2/2]\u2080\u00b9 = 1/2.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Find dy/dx if y = x^x.",
+    "options": [
+      "x^x",
+      "x^x(1+ln x)",
+      "x\u00b7x^(x-1)",
+      "x^x\u00b7x"
+    ],
+    "correct_answer": "x^x(1+ln x)",
+    "explanation": "ln y = x ln x. y'/y = ln x + 1 \u2192 y' = x^x(1+ln x).",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is lim(x\u21920\u207a) of x\u00b7ln(x)?",
+    "options": [
+      "0",
+      "\u221e",
+      "-\u221e",
+      "1"
+    ],
+    "correct_answer": "0",
+    "explanation": "Rewrite as ln(x)/(1/x). L'H\u00f4pital: (1/x)/(-1/x\u00b2)=-x\u21920.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Find d/dx of arcsin(x).",
+    "options": [
+      "1/\u221a(1-x\u00b2)",
+      "-1/\u221a(1-x\u00b2)",
+      "1/(1+x\u00b2)",
+      "1/\u221a(1+x\u00b2)"
+    ],
+    "correct_answer": "1/\u221a(1-x\u00b2)",
+    "explanation": "d/dx(arcsin x) = 1/\u221a(1-x\u00b2).",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Find d/dx of arctan(x).",
+    "options": [
+      "1/(1+x\u00b2)",
+      "-1/(1+x\u00b2)",
+      "1/\u221a(1-x\u00b2)",
+      "sec\u00b2(x)"
+    ],
+    "correct_answer": "1/(1+x\u00b2)",
+    "explanation": "d/dx(arctan x) = 1/(1+x\u00b2).",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Evaluate \u222b\u2080\u00b9 x/(x\u00b2+1) dx.",
+    "options": [
+      "ln(2)/2",
+      "ln(2)",
+      "\u03c0/4",
+      "1/2"
+    ],
+    "correct_answer": "ln(2)/2",
+    "explanation": "u=x\u00b2+1: (1/2)[ln|u|]\u2081\u00b2 = ln(2)/2.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Find the linearization of f(x)=\u221ax near x=4.",
+    "options": [
+      "L(x)=2+(x-4)/4",
+      "L(x)=2+x/4",
+      "L(x)=2+(x-4)/2",
+      "L(x)=x/4+1"
+    ],
+    "correct_answer": "L(x)=2+(x-4)/4",
+    "explanation": "f(4)=2, f'(4)=1/4. L(x)=2+(x-4)/4.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Evaluate \u222b\u2080\u00b2 x\u00b2\u00b7e\u02e3 dx (leave in terms of e).",
+    "options": [
+      "2e\u00b2-2",
+      "2e\u00b2+2",
+      "e\u00b2-1",
+      "4e\u00b2-2"
+    ],
+    "correct_answer": "2e\u00b2-2",
+    "explanation": "IBP twice: [e\u02e3(x\u00b2-2x+2)]\u2080\u00b2 = e\u00b2(4-4+2)-e\u2070(2) = 2e\u00b2-2.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "The second FTC states d/dx \u222b\u2090\u02e3 f(t)dt = ?",
+    "options": [
+      "f(a)",
+      "f(x)",
+      "F(x)-F(a)",
+      "f'(x)"
+    ],
+    "correct_answer": "f(x)",
+    "explanation": "The second FTC: the derivative of the integral function equals the integrand.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Find \u222b x/\u221a(1-x\u00b2) dx.",
+    "options": [
+      "\u221a(1-x\u00b2) + C",
+      "-\u221a(1-x\u00b2) + C",
+      "arcsin(x) + C",
+      "x\u221a(1-x\u00b2) + C"
+    ],
+    "correct_answer": "-\u221a(1-x\u00b2) + C",
+    "explanation": "u=1-x\u00b2, du=-2x dx. -(1/2)\u222bu^(-1/2)du = -\u221au + C.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "What trig sub works for \u222b\u221a(a\u00b2-x\u00b2) dx?",
+    "options": [
+      "x=a tan \u03b8",
+      "x=a sin \u03b8",
+      "x=a sec \u03b8",
+      "x=a cos \u03b8"
+    ],
+    "correct_answer": "x=a sin \u03b8",
+    "explanation": "For \u221a(a\u00b2-x\u00b2), let x=a sin \u03b8 so \u221a(a\u00b2-x\u00b2)=a cos \u03b8.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "What trig sub works for \u222b\u221a(x\u00b2+a\u00b2) dx?",
+    "options": [
+      "x=a sin \u03b8",
+      "x=a tan \u03b8",
+      "x=a sec \u03b8",
+      "x=a cos \u03b8"
+    ],
+    "correct_answer": "x=a tan \u03b8",
+    "explanation": "For \u221a(x\u00b2+a\u00b2), let x=a tan \u03b8.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "What trig sub works for \u222b\u221a(x\u00b2-a\u00b2) dx?",
+    "options": [
+      "x=a sin \u03b8",
+      "x=a tan \u03b8",
+      "x=a sec \u03b8",
+      "x=a cos \u03b8"
+    ],
+    "correct_answer": "x=a sec \u03b8",
+    "explanation": "For \u221a(x\u00b2-a\u00b2), let x=a sec \u03b8.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Evaluate \u222b 1/(x\u00b2-1) dx using partial fractions.",
+    "options": [
+      "ln|x-1|-ln|x+1|+C",
+      "(1/2)ln|(x-1)/(x+1)|+C",
+      "ln|(x-1)(x+1)|+C",
+      "arctan(x)+C"
+    ],
+    "correct_answer": "(1/2)ln|(x-1)/(x+1)|+C",
+    "explanation": "1/(x\u00b2-1)=1/((x-1)(x+1)). Partial fractions: (1/2)[ln|x-1|-ln|x+1|]+C.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Partial fraction decomposition of 1/(x(x+1)) is:",
+    "options": [
+      "1/x - 1/(x+1)",
+      "1/x + 1/(x+1)",
+      "1/(x+1) - 1/x",
+      "-1/(x(x+1))"
+    ],
+    "correct_answer": "1/x - 1/(x+1)",
+    "explanation": "A/x+B/(x+1): A=1, B=-1.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Evaluate \u222b 1/(x(x+1)) dx.",
+    "options": [
+      "ln|x|-ln|x+1|+C",
+      "ln|x(x+1)|+C",
+      "ln|x+1|-ln|x|+C",
+      "1/(x+1)+C"
+    ],
+    "correct_answer": "ln|x|-ln|x+1|+C",
+    "explanation": "Using partial fractions: \u222b(1/x - 1/(x+1))dx.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "The improper integral \u222b\u2081^\u221e 1/x\u00b2 dx =",
+    "options": [
+      "\u221e",
+      "1",
+      "2",
+      "0"
+    ],
+    "correct_answer": "1",
+    "explanation": "[-1/x]\u2081^\u221e = 0-(-1) = 1.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "The improper integral \u222b\u2081^\u221e 1/x dx =",
+    "options": [
+      "1",
+      "\u221e",
+      "ln(\u221e)",
+      "0"
+    ],
+    "correct_answer": "\u221e",
+    "explanation": "[ln x]\u2081^\u221e \u2192 \u221e. Diverges.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "For f(x)=x\u00b3-6x\u00b2+9x, find all critical points.",
+    "options": [
+      "x=0,3",
+      "x=1,3",
+      "x=3 only",
+      "x=0,1,3"
+    ],
+    "correct_answer": "x=1,3",
+    "explanation": "f'=3x\u00b2-12x+9=3(x-1)(x-3)=0 \u2192 x=1,3.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "For f(x)=x\u00b3-6x\u00b2+9x, classify x=1.",
+    "options": [
+      "Local min",
+      "Local max",
+      "Inflection",
+      "Neither"
+    ],
+    "correct_answer": "Local max",
+    "explanation": "f''=6x-12. f''(1)=-6<0 \u2192 local max.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "For f(x)=x\u00b3-6x\u00b2+9x, classify x=3.",
+    "options": [
+      "Local min",
+      "Local max",
+      "Inflection",
+      "Neither"
+    ],
+    "correct_answer": "Local min",
+    "explanation": "f''(3)=6>0 \u2192 local min.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Newton's method iteration formula:",
+    "options": [
+      "x\u2099\u208a\u2081=x\u2099-f(x\u2099)/f'(x\u2099)",
+      "x\u2099\u208a\u2081=x\u2099+f(x\u2099)/f'(x\u2099)",
+      "x\u2099\u208a\u2081=x\u2099\u00b7f'(x\u2099)",
+      "x\u2099\u208a\u2081=f(x\u2099)"
+    ],
+    "correct_answer": "x\u2099\u208a\u2081=x\u2099-f(x\u2099)/f'(x\u2099)",
+    "explanation": "Newton's method finds roots iteratively.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "The arc length of y=f(x) from a to b is:",
+    "options": [
+      "\u222b\u2090\u1d47 f(x) dx",
+      "\u222b\u2090\u1d47 \u221a(1+(f'(x))\u00b2) dx",
+      "\u222b\u2090\u1d47 |f'(x)| dx",
+      "\u222b\u2090\u1d47 f'(x) dx"
+    ],
+    "correct_answer": "\u222b\u2090\u1d47 \u221a(1+(f'(x))\u00b2) dx",
+    "explanation": "Arc length formula: L=\u222b\u2090\u1d47\u221a(1+[f'(x)]\u00b2)dx.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Surface area of revolution about x-axis is:",
+    "options": [
+      "2\u03c0\u222bf(x)dx",
+      "2\u03c0\u222bf(x)\u221a(1+(f'(x))\u00b2)dx",
+      "\u03c0\u222b(f(x))\u00b2dx",
+      "2\u03c0\u222bf'(x)dx"
+    ],
+    "correct_answer": "2\u03c0\u222bf(x)\u221a(1+(f'(x))\u00b2)dx",
+    "explanation": "SA=2\u03c0\u222b\u2090\u1d47 f(x)\u221a(1+[f'(x)]\u00b2)dx.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Evaluate \u222b sec(x) dx.",
+    "options": [
+      "ln|sec x|+C",
+      "ln|sec x+tan x|+C",
+      "tan x+C",
+      "ln|tan x|+C"
+    ],
+    "correct_answer": "ln|sec x+tan x|+C",
+    "explanation": "\u222bsec x dx = ln|sec x+tan x|+C.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Evaluate \u222b csc(x) dx.",
+    "options": [
+      "ln|csc x|+C",
+      "-ln|csc x+cot x|+C",
+      "cot x+C",
+      "ln|csc x-cot x|+C"
+    ],
+    "correct_answer": "-ln|csc x+cot x|+C",
+    "explanation": "\u222bcsc x dx = -ln|csc x+cot x|+C.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Find d/dx of a\u02e3 (a>0, a\u22601).",
+    "options": [
+      "a\u02e3",
+      "a\u02e3\u00b7ln a",
+      "x\u00b7a\u02e3\u207b\u00b9",
+      "a\u02e3/ln a"
+    ],
+    "correct_answer": "a\u02e3\u00b7ln a",
+    "explanation": "d/dx(a\u02e3) = a\u02e3\u00b7ln a.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Find d/dx of log_a(x).",
+    "options": [
+      "1/(x\u00b7ln a)",
+      "ln a/x",
+      "1/x",
+      "a/x"
+    ],
+    "correct_answer": "1/(x\u00b7ln a)",
+    "explanation": "d/dx(log_a x) = 1/(x\u00b7ln a).",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Evaluate \u222b x\u00b7arctan(x) dx.",
+    "options": [
+      "x\u00b2arctan(x)/2 - x/2 + arctan(x)/2 + C",
+      "x\u00b2arctan(x)/2 + C",
+      "arctan(x)/x + C",
+      "x\u00b7arctan(x) + C"
+    ],
+    "correct_answer": "x\u00b2arctan(x)/2 - x/2 + arctan(x)/2 + C",
+    "explanation": "IBP: u=arctan x, dv=x dx.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is the washer method volume formula?",
+    "options": [
+      "\u03c0\u222b(R\u00b2-r\u00b2)dx",
+      "\u03c0\u222bR\u00b2dx",
+      "\u03c0\u222b(R-r)\u00b2dx",
+      "2\u03c0\u222b(R-r)dx"
+    ],
+    "correct_answer": "\u03c0\u222b(R\u00b2-r\u00b2)dx",
+    "explanation": "Washer: V=\u03c0\u222b\u2090\u1d47[R(x)\u00b2-r(x)\u00b2]dx.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Evaluate \u222b sinh(x) dx.",
+    "options": [
+      "cosh(x)+C",
+      "-cosh(x)+C",
+      "sinh(x)+C",
+      "tanh(x)+C"
+    ],
+    "correct_answer": "cosh(x)+C",
+    "explanation": "\u222bsinh x dx = cosh x + C.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Evaluate \u222b tanh(x) dx.",
+    "options": [
+      "ln(cosh x)+C",
+      "cosh x+C",
+      "sech\u00b2(x)+C",
+      "sinh(x)+C"
+    ],
+    "correct_answer": "ln(cosh x)+C",
+    "explanation": "\u222btanh x dx = ln|cosh x|+C.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "The Maclaurin series for 1/(1-x) is:",
+    "options": [
+      "\u2211x\u207f for |x|<1",
+      "\u2211(-1)\u207fx\u207f",
+      "\u2211x\u207f/n!",
+      "\u2211nx\u207f"
+    ],
+    "correct_answer": "\u2211x\u207f for |x|<1",
+    "explanation": "Geometric series: 1/(1-x) = 1+x+x\u00b2+... for |x|<1.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Find the interval of convergence of \u2211x\u207f.",
+    "options": [
+      "[-1,1]",
+      "(-1,1)",
+      "[-1,1)",
+      "(-\u221e,\u221e)"
+    ],
+    "correct_answer": "(-1,1)",
+    "explanation": "Ratio test: |x|<1. Check endpoints: both diverge.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is the Lagrange remainder for Taylor polynomials?",
+    "options": [
+      "f^(n)(a)(x-a)\u207f/n!",
+      "f^(n+1)(c)(x-a)^(n+1)/(n+1)!",
+      "f^(n)(c)/n!",
+      "f(x)-P\u2099(x)"
+    ],
+    "correct_answer": "f^(n+1)(c)(x-a)^(n+1)/(n+1)!",
+    "explanation": "The Lagrange remainder R\u2099(x) = f^(n+1)(c)/(n+1)!\u00b7(x-a)^(n+1).",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Evaluate lim(x\u21921) using L'H\u00f4pital: (ln x)/(x-1).",
+    "options": [
+      "0",
+      "\u221e",
+      "1",
+      "e"
+    ],
+    "correct_answer": "1",
+    "explanation": "Both\u21920. d: (1/x)/1 = 1/x \u2192 1.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Find \u222b x\u00b2\u00b7cos(x) dx.",
+    "options": [
+      "x\u00b2sin x+2x cos x-2sin x+C",
+      "x\u00b2sin x+C",
+      "2x cos x+C",
+      "x\u00b2sin x-2cos x+C"
+    ],
+    "correct_answer": "x\u00b2sin x+2x cos x-2sin x+C",
+    "explanation": "IBP twice.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "What is d/dx of (f(x))\u207f?",
+    "options": [
+      "n(f(x))\u207f\u207b\u00b9",
+      "n(f(x))\u207f\u207b\u00b9\u00b7f'(x)",
+      "f'(x)\u207f",
+      "nf'(x)"
+    ],
+    "correct_answer": "n(f(x))\u207f\u207b\u00b9\u00b7f'(x)",
+    "explanation": "Generalized power rule via chain rule.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "If f is differentiable, is f necessarily continuous?",
+    "options": [
+      "No",
+      "Yes",
+      "Only if f'>0",
+      "Only at critical points"
+    ],
+    "correct_answer": "Yes",
+    "explanation": "Differentiability implies continuity.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Evaluate \u222b e^x\u00b7sin(x) dx.",
+    "options": [
+      "e\u02e3(sin x-cos x)/2+C",
+      "e\u02e3cos x+C",
+      "e\u02e3sin x+C",
+      "e\u02e3(sin x+cos x)/2+C"
+    ],
+    "correct_answer": "e\u02e3(sin x-cos x)/2+C",
+    "explanation": "IBP twice, solve: I=e\u02e3(sin x-cos x)/2+C.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "The squeeze theorem states if g\u2264f\u2264h and lim g=lim h=L then:",
+    "options": [
+      "lim f = 0",
+      "lim f = L",
+      "lim f is undefined",
+      "lim f = g"
+    ],
+    "correct_answer": "lim f = L",
+    "explanation": "Squeeze: f is trapped between g and h, both\u2192L.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Mean value theorem for integrals: \u2203c in (a,b) such that:",
+    "options": [
+      "f(c)=0",
+      "f(c)=(1/(b-a))\u222b\u2090\u1d47f(x)dx",
+      "f'(c)=0",
+      "f(c)=f(a)"
+    ],
+    "correct_answer": "f(c)=(1/(b-a))\u222b\u2090\u1d47f(x)dx",
+    "explanation": "MVT for integrals: average value is attained at some c.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "If \u222b\u2090\u1d47 f(x)dx exists and f\u22650, then \u222b\u2090\u1d47 f(x)dx is:",
+    "options": [
+      "Negative",
+      "Zero",
+      "Non-negative",
+      "Undefined"
+    ],
+    "correct_answer": "Non-negative",
+    "explanation": "Area under a non-negative function is \u2265 0.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "Evaluate d/dx \u222b\u2080^(x\u00b3) sin(t) dt.",
+    "options": [
+      "sin(x\u00b3)",
+      "3x\u00b2sin(x\u00b3)",
+      "cos(x\u00b3)",
+      "3x\u00b2cos(x\u00b3)"
+    ],
+    "correct_answer": "3x\u00b2sin(x\u00b3)",
+    "explanation": "FTC2 + chain rule: sin(x\u00b3)\u00b73x\u00b2.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  },
+  {
+    "question": "The derivative of an even function is:",
+    "options": [
+      "Even",
+      "Odd",
+      "Neither",
+      "Always positive"
+    ],
+    "correct_answer": "Odd",
+    "explanation": "If f(-x)=f(x), then f'(-x)=-f'(x), so f' is odd.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "calculus"
+  }
+]

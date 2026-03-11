@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "seed:questions": "npx tsx scripts/seed-questions.ts"
   },
   "dependencies": {
     "@stripe/stripe-js": "^8.9.0",

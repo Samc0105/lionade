@@ -1,0 +1,702 @@
+[
+  {
+    "question": "What is the equation of the line tangent to x²+y²=50 at point (5,5)?",
+    "options": [
+      "x+y=10",
+      "x−y=0",
+      "5x+5y=50",
+      "Both A and C"
+    ],
+    "correct_answer": "Both A and C",
+    "explanation": "Tangent at (5,5): 5x+5y=50 simplifies to x+y=10. Both forms are equivalent.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "A triangle has angles in the ratio 1:2:3. What are the angles?",
+    "options": [
+      "20°, 40°, 120°",
+      "30°, 60°, 90°",
+      "40°, 60°, 80°",
+      "45°, 60°, 75°"
+    ],
+    "correct_answer": "30°, 60°, 90°",
+    "explanation": "x+2x+3x=180° → 6x=180° → x=30°. Angles: 30°, 60°, 90°.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "Two circles of radii 5 and 12 overlap. Their centers are 13 apart. What is the area of the overlapping region?",
+    "options": [
+      "0",
+      "25π",
+      "60π",
+      "The circles are tangent"
+    ],
+    "correct_answer": "0",
+    "explanation": "5²+12²=25+144=169=13². The circles are externally tangent, touching at one point. Overlap area=0.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the area of a regular 12-gon with circumradius 6?",
+    "options": [
+      "54",
+      "72",
+      "108",
+      "108√3"
+    ],
+    "correct_answer": "108",
+    "explanation": "Area=(1/2)nr²sin(360°/n)=(1/2)(12)(36)sin30°=216(1/2)=108.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "A cone has half-angle α where tanα=3/4. If the slant height is 10, what is the volume?",
+    "options": [
+      "48π",
+      "72π",
+      "96π",
+      "144π"
+    ],
+    "correct_answer": "96π",
+    "explanation": "r=10sinα=10(3/5)=6. h=10cosα=10(4/5)=8. V=(1/3)π(36)(8)=96π.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "In triangle ABC, angle A=60°, b=7, c=8. Find side a.",
+    "options": [
+      "√57",
+      "√65",
+      "√113",
+      "13"
+    ],
+    "correct_answer": "√57",
+    "explanation": "By the law of cosines: a²=49+64−2(7)(8)cos60°=113−56=57. a=√57.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is Stewart's Theorem?",
+    "options": [
+      "a²(n)+c²(m)−b²d=d·m·n... no, man+dad=bmb+cnc",
+      "b²m+c²n−a(m·n+d²)=0... no",
+      "a(b²n+c²m−and)... no",
+      "man+dad=bmb+cnc"
+    ],
+    "correct_answer": "man+dad=bmb+cnc",
+    "explanation": "Stewart's Theorem for cevian d in triangle with sides a,b,c is: man+dad=bmb+cnc, where m,n are segments of the divided side.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "The power of a point inside a circle is always what?",
+    "options": [
+      "Positive",
+      "Negative",
+      "Zero",
+      "Depends on the point"
+    ],
+    "correct_answer": "Negative",
+    "explanation": "For a point inside the circle, d<r so power=d²−r²<0 (negative).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "Find the area of the quadrilateral with vertices (0,0), (5,0), (6,4), (1,4).",
+    "options": [
+      "16",
+      "18",
+      "20",
+      "24"
+    ],
+    "correct_answer": "20",
+    "explanation": "This is a parallelogram with base 5 and height 4. Area = base × height = 20.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "A rectangle is inscribed in an ellipse x²/16+y²/9=1. What is the maximum area?",
+    "options": [
+      "12",
+      "24",
+      "48",
+      "72"
+    ],
+    "correct_answer": "24",
+    "explanation": "Max area of inscribed rectangle=2a·2b/√... Actually max area=2ab=2(4)(3)=24 (when x=a/√2, y=b/√2).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the radius of the circumscribed circle of triangle with sides 8, 15, 17?",
+    "options": [
+      "7.5",
+      "8",
+      "8.5",
+      "10"
+    ],
+    "correct_answer": "8.5",
+    "explanation": "It's a right triangle (64+225=289=17²). Circumradius=hypotenuse/2=17/2=8.5.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "A circle is tangent to both coordinate axes and has center in the first quadrant at distance 5√2 from the origin. What is the radius?",
+    "options": [
+      "3",
+      "5",
+      "7",
+      "10"
+    ],
+    "correct_answer": "5",
+    "explanation": "Center=(r,r). Distance=r√2=5√2→r=5.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "In triangle ABC, if the orthocenter and circumcenter coincide, what type of triangle is it?",
+    "options": [
+      "Right",
+      "Isosceles",
+      "Equilateral",
+      "Scalene"
+    ],
+    "correct_answer": "Equilateral",
+    "explanation": "The orthocenter, circumcenter, centroid, and incenter all coincide only in an equilateral triangle.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "A solid hemisphere has radius 6. What is its total surface area?",
+    "options": [
+      "36π",
+      "72π",
+      "108π",
+      "144π"
+    ],
+    "correct_answer": "108π",
+    "explanation": "TSA=curved+flat=2πr²+πr²=3π(36)=108π.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "Find the length of the chord cut from x²+y²=25 by the line x+y=5.",
+    "options": [
+      "5",
+      "5√2",
+      "√50",
+      "Both B and C"
+    ],
+    "correct_answer": "Both B and C",
+    "explanation": "Distance from center to line = |0+0−5|/√2 = 5/√2. Half-chord = √(25−25/2) = √(25/2). Chord = 2√(25/2) = 5√2 = √50.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is Euler's formula relating faces, vertices, and edges of a convex polyhedron?",
+    "options": [
+      "F+V=E+2",
+      "F+E=V+2",
+      "F−V+E=2",
+      "V−E+F=0"
+    ],
+    "correct_answer": "F+V=E+2",
+    "explanation": "Euler's formula states V−E+F=2, which rearranges to F+V=E+2.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "A sphere passes through all 8 vertices of a cube with side 4. What is the sphere's radius?",
+    "options": [
+      "2√2",
+      "2√3",
+      "4",
+      "4√3"
+    ],
+    "correct_answer": "2√3",
+    "explanation": "Space diagonal=4√3. Circumradius=half=2√3.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "In a triangle with sides 6, 8, 10, what is the length of the median to the side of length 10?",
+    "options": [
+      "5",
+      "√31",
+      "√41",
+      "7"
+    ],
+    "correct_answer": "5",
+    "explanation": "This is a right triangle with hypotenuse 10. The median to the hypotenuse equals half the hypotenuse = 5.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "Two parallel chords of a circle have lengths 10 and 24, on opposite sides of the center. The radius is 13. What is the distance between the chords?",
+    "options": [
+      "12",
+      "17",
+      "22",
+      "24"
+    ],
+    "correct_answer": "17",
+    "explanation": "d₁=√(169−25)=12, d₂=√(169−144)=5. Opposite sides: total=12+5=17.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "A tetrahedron has all edges of length 8. What is its volume?",
+    "options": [
+      "64√2/3",
+      "128√2/3",
+      "256√2/3",
+      "512√2/3"
+    ],
+    "correct_answer": "128√2/3",
+    "explanation": "V=(a³)/(6√2)=(512)/(6√2)=512√2/12=128√2/3. Alternatively V=(√2/12)a³=(√2/12)(512)=128√2/3.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the nine-point circle of a triangle?",
+    "options": [
+      "The circle through all 3 vertices",
+      "The circle through 9 special points including side midpoints and altitude feet",
+      "The inscribed circle",
+      "The excircle"
+    ],
+    "correct_answer": "The circle through 9 special points including side midpoints and altitude feet",
+    "explanation": "The nine-point circle passes through 9 points: the 3 side midpoints, 3 altitude feet, and 3 midpoints between each vertex and the orthocenter.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "A square and equilateral triangle share a side of length 6. What is their combined area?",
+    "options": [
+      "36+9√3",
+      "36+6√3",
+      "36+18√3",
+      "72+9√3"
+    ],
+    "correct_answer": "36+9√3",
+    "explanation": "Square area=36. Triangle area=(√3/4)(36)=9√3. Total=36+9√3.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the angle between the diagonals of a cube?",
+    "options": [
+      "arccos(1/3)",
+      "60°",
+      "90°",
+      "arctan(√2)"
+    ],
+    "correct_answer": "arccos(1/3)",
+    "explanation": "The space diagonals of a cube meet at an angle whose cosine is 1/3.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "Find the area of the triangle with vertices (−2,1), (3,4), and (1,−3).",
+    "options": [
+      "11.5",
+      "13",
+      "14.5",
+      "16"
+    ],
+    "correct_answer": "14.5",
+    "explanation": "Using the shoelace formula: (1/2)|−2(4−(−3))+3(−3−1)+1(1−4)|=(1/2)|−14−12−3|=(1/2)(29)=14.5.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "A cylinder has the same surface area as a sphere of radius 6. If the cylinder's radius is 4, what is its height?",
+    "options": [
+      "14",
+      "16",
+      "18",
+      "20"
+    ],
+    "correct_answer": "14",
+    "explanation": "Sphere SA=4π(36)=144π. Cylinder: 2π(4)²+2π(4)h=32π+8πh=144π→8πh=112π→h=14.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "In a triangle with sides 13, 14, 15, what is the circumradius?",
+    "options": [
+      "65/8",
+      "65/4",
+      "8",
+      "16"
+    ],
+    "correct_answer": "65/8",
+    "explanation": "Area=84 (by Heron's). R=abc/(4·Area)=13·14·15/(4·84)=2730/336=65/8.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the radius of the nine-point circle of a triangle with circumradius 10?",
+    "options": [
+      "5",
+      "10",
+      "15",
+      "20"
+    ],
+    "correct_answer": "5",
+    "explanation": "The nine-point circle radius is always half the circumradius: R/2=10/2=5.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "In an equilateral triangle with side 8, what is the length of each median?",
+    "options": [
+      "4√3",
+      "4√2",
+      "8√3",
+      "6"
+    ],
+    "correct_answer": "4√3",
+    "explanation": "In an equilateral triangle, median = (s√3)/2 = (8√3)/2 = 4√3.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "A regular pentagon has diagonal length d and side length s. What is d/s?",
+    "options": [
+      "√2",
+      "(1+√5)/2",
+      "√3",
+      "2"
+    ],
+    "correct_answer": "(1+√5)/2",
+    "explanation": "The ratio of diagonal to side in a regular pentagon equals the golden ratio φ=(1+√5)/2.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the volume of the solid obtained by rotating the region bounded by y=√x, y=0, and x=4 about the x-axis?",
+    "options": [
+      "4π",
+      "8π",
+      "16π",
+      "32π"
+    ],
+    "correct_answer": "8π",
+    "explanation": "V=π∫₀⁴(√x)²dx=π∫₀⁴x dx=π[x²/2]₀⁴=π(8)=8π.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "An ellipse has semi-major axis 5 and semi-minor axis 3. What is its area?",
+    "options": [
+      "8π",
+      "15π",
+      "25π",
+      "30π"
+    ],
+    "correct_answer": "15π",
+    "explanation": "Area of an ellipse=πab=π(5)(3)=15π.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "In a circle of radius 8, an inscribed angle intercepts an arc of 100°. What is the inscribed angle?",
+    "options": [
+      "40°",
+      "50°",
+      "80°",
+      "100°"
+    ],
+    "correct_answer": "50°",
+    "explanation": "Inscribed angle=half the intercepted arc=100°/2=50°.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the area of a regular hexagon with apothem 5√3?",
+    "options": [
+      "75√3",
+      "100√3",
+      "150√3",
+      "200√3"
+    ],
+    "correct_answer": "150√3",
+    "explanation": "apothem=(s√3)/2→s=10. Area=(3√3/2)s²=(3√3/2)(100)=150√3.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "Two similar solids have a surface area ratio of 4:9. What is their volume ratio?",
+    "options": [
+      "2:3",
+      "4:9",
+      "8:27",
+      "16:81"
+    ],
+    "correct_answer": "8:27",
+    "explanation": "SA ratio=(k²), so k=2:3. Volume ratio=k³=8:27.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "A circle has a chord of length 14 at distance 1 from the center. What is the radius?",
+    "options": [
+      "√50",
+      "5√2",
+      "7√2",
+      "Both A and B"
+    ],
+    "correct_answer": "Both A and B",
+    "explanation": "r²=7²+1²=50. r=√50=5√2.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the maximum volume of a cone inscribed in a sphere of radius R?",
+    "options": [
+      "8πR³/27",
+      "32πR³/81",
+      "4πR³/9",
+      "16πR³/27"
+    ],
+    "correct_answer": "32πR³/81",
+    "explanation": "The maximum volume cone has h=4R/3 and r²=2Rh−h²=8R²/3−16R²/9=8R²/9. V=(1/3)π(8R²/9)(4R/3)=32πR³/81.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the total surface area of a frustum of a cone with radii 3, 7, and slant height 5?",
+    "options": [
+      "58π",
+      "98π",
+      "108π",
+      "148π"
+    ],
+    "correct_answer": "108π",
+    "explanation": "TSA = π(R² + r²) + π(R+r)·l = π(49+9) + π(10)(5) = 58π + 50π = 108π.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "The Euler line of a triangle passes through which three points?",
+    "options": [
+      "Incenter, centroid, circumcenter",
+      "Orthocenter, centroid, circumcenter",
+      "Incenter, orthocenter, centroid",
+      "All four triangle centers"
+    ],
+    "correct_answer": "Orthocenter, centroid, circumcenter",
+    "explanation": "The Euler line passes through the orthocenter, centroid, and circumcenter (but not generally the incenter).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the area swept by a line segment of length 5 rotating 60° about one endpoint?",
+    "options": [
+      "25π/6",
+      "25π/3",
+      "25π/2",
+      "25π"
+    ],
+    "correct_answer": "25π/6",
+    "explanation": "Area of sector=(θ/360°)πr²=(60/360)π(25)=25π/6.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "A trapezoid has bases 10 and 6, height 8. A line parallel to the bases divides it into two equal areas. How far from the longer base is this line?",
+    "options": [
+      "4−√2",
+      "8−4√2",
+      "4(2−√2)",
+      "8(1−1/√2)"
+    ],
+    "correct_answer": "4(2−√2)",
+    "explanation": "The dividing line at height h from base 10 has length 10−h/2. Area condition gives h such that the two trapezoids have equal area. Using equal area: h=8−4√2=4(2−√2).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "In a triangle, the centroid divides each median in what ratio from vertex to midpoint?",
+    "options": [
+      "1:1",
+      "1:2",
+      "2:1",
+      "3:1"
+    ],
+    "correct_answer": "2:1",
+    "explanation": "The centroid divides each median in a 2:1 ratio, with the longer segment toward the vertex.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "Two intersecting circles have a common chord of length 10. Their radii are 6 and 8. What is the distance between centers?",
+    "options": [
+      "√87+√39",
+      "2√11+√39",
+      "10",
+      "√47+√39"
+    ],
+    "correct_answer": "√47+√39",
+    "explanation": "Half-chord=5. d₁=√(36−25)=√11. d₂=√(64−25)=√39. Centers on same side: d=√11+√39. On opposite: d=|√39−√11|. Typical interpretation: d=√11+√39.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "A rectangle with perimeter 24 has maximum area of what?",
+    "options": [
+      "24",
+      "32",
+      "36",
+      "48"
+    ],
+    "correct_answer": "36",
+    "explanation": "For fixed perimeter, maximum area occurs when the rectangle is a square. Side=24/4=6. Area=36.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the number of diagonals in a convex polygon with 20 sides?",
+    "options": [
+      "150",
+      "160",
+      "170",
+      "180"
+    ],
+    "correct_answer": "170",
+    "explanation": "Diagonals=n(n−3)/2=20(17)/2=170.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "A circle is inscribed in a semicircle of radius 10. What is the radius of the inscribed circle?",
+    "options": [
+      "3",
+      "4",
+      "5",
+      "6"
+    ],
+    "correct_answer": "5",
+    "explanation": "The largest circle inscribed in a semicircle has radius equal to half the semicircle's radius: 10/2=5.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "The distance between the parallel sides of a regular hexagon with side 6 is what?",
+    "options": [
+      "6",
+      "6√2",
+      "6√3",
+      "12"
+    ],
+    "correct_answer": "6√3",
+    "explanation": "The distance between opposite parallel sides=2×apothem=2(3√3)=6√3.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "A solid is formed by two cones sharing a circular base of radius 4, with heights 3 and 6 on opposite sides. What is its total volume?",
+    "options": [
+      "36π",
+      "48π",
+      "64π",
+      "96π"
+    ],
+    "correct_answer": "48π",
+    "explanation": "V=(1/3)π(16)(3)+(1/3)π(16)(6)=16π+32π=48π.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is Ptolemy's theorem for a cyclic quadrilateral?",
+    "options": [
+      "AC·BD=AB·CD+AD·BC",
+      "AC+BD=AB+CD",
+      "Area=√(s−a)(s−b)(s−c)(s−d)",
+      "The diagonals are equal"
+    ],
+    "correct_answer": "AC·BD=AB·CD+AD·BC",
+    "explanation": "Ptolemy's theorem states that in a cyclic quadrilateral, the product of the diagonals equals the sum of the products of opposite sides.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "A tetrahedron has three mutually perpendicular edges of lengths 3, 4, 5 meeting at one vertex. What is its volume?",
+    "options": [
+      "10",
+      "20",
+      "30",
+      "60"
+    ],
+    "correct_answer": "10",
+    "explanation": "V = (1/6)|a·b·c| = (1/6)(3)(4)(5) = 10.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  },
+  {
+    "question": "In a triangle, the product of two sides times the sine of the included angle equals what?",
+    "options": [
+      "The area",
+      "Twice the area",
+      "Half the perimeter",
+      "The circumradius"
+    ],
+    "correct_answer": "Twice the area",
+    "explanation": "Area = (1/2)ab·sinC, so ab·sinC = 2·Area.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "geometry"
+  }
+]

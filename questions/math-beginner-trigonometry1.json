@@ -1,0 +1,2802 @@
+[
+  {
+    "question": "How many degrees are in a full circle?",
+    "options": [
+      "360\u00b0",
+      "180\u00b0",
+      "270\u00b0",
+      "90\u00b0"
+    ],
+    "correct_answer": "360\u00b0",
+    "explanation": "A full rotation = 360\u00b0.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "How many degrees are in a straight angle?",
+    "options": [
+      "360\u00b0",
+      "90\u00b0",
+      "180\u00b0",
+      "270\u00b0"
+    ],
+    "correct_answer": "180\u00b0",
+    "explanation": "A straight line = 180\u00b0.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "How many degrees are in a right angle?",
+    "options": [
+      "180\u00b0",
+      "45\u00b0",
+      "360\u00b0",
+      "90\u00b0"
+    ],
+    "correct_answer": "90\u00b0",
+    "explanation": "A right angle = 90\u00b0.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "What is \u03c0 radians in degrees?",
+    "options": [
+      "90\u00b0",
+      "270\u00b0",
+      "180\u00b0",
+      "360\u00b0"
+    ],
+    "correct_answer": "180\u00b0",
+    "explanation": "\u03c0 radians = 180\u00b0.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "What is 2\u03c0 radians in degrees?",
+    "options": [
+      "90\u00b0",
+      "180\u00b0",
+      "270\u00b0",
+      "360\u00b0"
+    ],
+    "correct_answer": "360\u00b0",
+    "explanation": "2\u03c0 = 360\u00b0 (full circle).",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "Convert 90\u00b0 to radians.",
+    "options": [
+      "\u03c0",
+      "\u03c0/3",
+      "\u03c0/2",
+      "\u03c0/4"
+    ],
+    "correct_answer": "\u03c0/2",
+    "explanation": "90\u00b0 \u00d7 (\u03c0/180) = \u03c0/2.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "Convert 60\u00b0 to radians.",
+    "options": [
+      "\u03c0/6",
+      "\u03c0/4",
+      "\u03c0/3",
+      "\u03c0/2"
+    ],
+    "correct_answer": "\u03c0/3",
+    "explanation": "60\u00b0 \u00d7 (\u03c0/180) = \u03c0/3.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "Convert 45\u00b0 to radians.",
+    "options": [
+      "\u03c0/3",
+      "\u03c0/4",
+      "\u03c0/6",
+      "\u03c0/2"
+    ],
+    "correct_answer": "\u03c0/4",
+    "explanation": "45\u00b0 \u00d7 (\u03c0/180) = \u03c0/4.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "Convert 30\u00b0 to radians.",
+    "options": [
+      "\u03c0/4",
+      "\u03c0/3",
+      "\u03c0/6",
+      "\u03c0/2"
+    ],
+    "correct_answer": "\u03c0/6",
+    "explanation": "30\u00b0 \u00d7 (\u03c0/180) = \u03c0/6.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "Convert \u03c0/2 radians to degrees.",
+    "options": [
+      "45\u00b0",
+      "60\u00b0",
+      "90\u00b0",
+      "180\u00b0"
+    ],
+    "correct_answer": "90\u00b0",
+    "explanation": "(\u03c0/2) \u00d7 (180/\u03c0) = 90\u00b0.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "Convert \u03c0/3 radians to degrees.",
+    "options": [
+      "30\u00b0",
+      "45\u00b0",
+      "60\u00b0",
+      "90\u00b0"
+    ],
+    "correct_answer": "60\u00b0",
+    "explanation": "(\u03c0/3) \u00d7 (180/\u03c0) = 60\u00b0.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "Convert \u03c0/6 radians to degrees.",
+    "options": [
+      "30\u00b0",
+      "45\u00b0",
+      "60\u00b0",
+      "90\u00b0"
+    ],
+    "correct_answer": "30\u00b0",
+    "explanation": "(\u03c0/6) \u00d7 (180/\u03c0) = 30\u00b0.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "An acute angle is between:",
+    "options": [
+      "0\u00b0 and 90\u00b0",
+      "90\u00b0 and 180\u00b0",
+      "0\u00b0 and 45\u00b0",
+      "90\u00b0 and 360\u00b0"
+    ],
+    "correct_answer": "0\u00b0 and 90\u00b0",
+    "explanation": "Acute angles are less than 90\u00b0.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "An obtuse angle is between:",
+    "options": [
+      "0\u00b0 and 90\u00b0",
+      "90\u00b0 and 180\u00b0",
+      "180\u00b0 and 360\u00b0",
+      "0\u00b0 and 45\u00b0"
+    ],
+    "correct_answer": "90\u00b0 and 180\u00b0",
+    "explanation": "Obtuse angles are greater than 90\u00b0 but less than 180\u00b0.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "Two angles that sum to 90\u00b0 are called:",
+    "options": [
+      "Supplementary",
+      "Complementary",
+      "Vertical",
+      "Adjacent"
+    ],
+    "correct_answer": "Complementary",
+    "explanation": "Complementary angles add up to 90\u00b0.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "Two angles that sum to 180\u00b0 are called:",
+    "options": [
+      "Complementary",
+      "Adjacent",
+      "Supplementary",
+      "Vertical"
+    ],
+    "correct_answer": "Supplementary",
+    "explanation": "Supplementary angles add up to 180\u00b0.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The complement of 35\u00b0 is:",
+    "options": [
+      "55\u00b0",
+      "145\u00b0",
+      "35\u00b0",
+      "65\u00b0"
+    ],
+    "correct_answer": "55\u00b0",
+    "explanation": "90\u00b0 - 35\u00b0 = 55\u00b0.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The supplement of 110\u00b0 is:",
+    "options": [
+      "70\u00b0",
+      "80\u00b0",
+      "250\u00b0",
+      "70\u00b0"
+    ],
+    "correct_answer": "70\u00b0",
+    "explanation": "180\u00b0 - 110\u00b0 = 70\u00b0.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "Convert 270\u00b0 to radians.",
+    "options": [
+      "\u03c0",
+      "2\u03c0",
+      "3\u03c0/2",
+      "\u03c0/2"
+    ],
+    "correct_answer": "3\u03c0/2",
+    "explanation": "270\u00b0 \u00d7 (\u03c0/180) = 3\u03c0/2.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "Convert 120\u00b0 to radians.",
+    "options": [
+      "2\u03c0/3",
+      "\u03c0/3",
+      "3\u03c0/4",
+      "\u03c0/2"
+    ],
+    "correct_answer": "2\u03c0/3",
+    "explanation": "120\u00b0 \u00d7 (\u03c0/180) = 2\u03c0/3.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "In a right triangle, which side is the hypotenuse?",
+    "options": [
+      "The shortest side",
+      "The side opposite the right angle",
+      "Either leg",
+      "The side adjacent to 90\u00b0"
+    ],
+    "correct_answer": "The side opposite the right angle",
+    "explanation": "The hypotenuse is always opposite the 90\u00b0 angle.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "SOH-CAH-TOA: sin(\u03b8) = ?",
+    "options": [
+      "Adjacent/Hypotenuse",
+      "Opposite/Adjacent",
+      "Hypotenuse/Opposite",
+      "Opposite/Hypotenuse"
+    ],
+    "correct_answer": "Opposite/Hypotenuse",
+    "explanation": "sin = Opposite / Hypotenuse.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "SOH-CAH-TOA: cos(\u03b8) = ?",
+    "options": [
+      "Opposite/Hypotenuse",
+      "Opposite/Adjacent",
+      "Adjacent/Hypotenuse",
+      "Hypotenuse/Adjacent"
+    ],
+    "correct_answer": "Adjacent/Hypotenuse",
+    "explanation": "cos = Adjacent / Hypotenuse.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "SOH-CAH-TOA: tan(\u03b8) = ?",
+    "options": [
+      "Adjacent/Opposite",
+      "Opposite/Hypotenuse",
+      "Adjacent/Hypotenuse",
+      "Opposite/Adjacent"
+    ],
+    "correct_answer": "Opposite/Adjacent",
+    "explanation": "tan = Opposite / Adjacent.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "In a right triangle with opposite=3 and hypotenuse=5, sin(\u03b8) = ?",
+    "options": [
+      "5/3",
+      "4/5",
+      "3/4",
+      "3/5"
+    ],
+    "correct_answer": "3/5",
+    "explanation": "sin = opposite/hypotenuse = 3/5.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "In a right triangle with adjacent=4 and hypotenuse=5, cos(\u03b8) = ?",
+    "options": [
+      "5/4",
+      "3/5",
+      "4/5",
+      "4/3"
+    ],
+    "correct_answer": "4/5",
+    "explanation": "cos = adjacent/hypotenuse = 4/5.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "In a right triangle with opposite=3 and adjacent=4, tan(\u03b8) = ?",
+    "options": [
+      "4/3",
+      "3/5",
+      "5/3",
+      "3/4"
+    ],
+    "correct_answer": "3/4",
+    "explanation": "tan = opposite/adjacent = 3/4.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "What is sin(30\u00b0)?",
+    "options": [
+      "\u221a3/2",
+      "\u221a2/2",
+      "1",
+      "1/2"
+    ],
+    "correct_answer": "1/2",
+    "explanation": "sin(30\u00b0) = 1/2.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "What is cos(60\u00b0)?",
+    "options": [
+      "\u221a3/2",
+      "1/2",
+      "1",
+      "0"
+    ],
+    "correct_answer": "1/2",
+    "explanation": "cos(60\u00b0) = 1/2.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "What is sin(60\u00b0)?",
+    "options": [
+      "1/2",
+      "1",
+      "\u221a2/2",
+      "\u221a3/2"
+    ],
+    "correct_answer": "\u221a3/2",
+    "explanation": "sin(60\u00b0) = \u221a3/2.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "What is cos(30\u00b0)?",
+    "options": [
+      "1/2",
+      "\u221a2/2",
+      "\u221a3/2",
+      "1"
+    ],
+    "correct_answer": "\u221a3/2",
+    "explanation": "cos(30\u00b0) = \u221a3/2.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "What is tan(45\u00b0)?",
+    "options": [
+      "0",
+      "\u221a3",
+      "1/\u221a3",
+      "1"
+    ],
+    "correct_answer": "1",
+    "explanation": "tan(45\u00b0) = 1.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "What is sin(45\u00b0)?",
+    "options": [
+      "1/2",
+      "\u221a3/2",
+      "1",
+      "\u221a2/2"
+    ],
+    "correct_answer": "\u221a2/2",
+    "explanation": "sin(45\u00b0) = \u221a2/2 = 1/\u221a2.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "What is cos(45\u00b0)?",
+    "options": [
+      "1/2",
+      "\u221a3/2",
+      "\u221a2/2",
+      "1"
+    ],
+    "correct_answer": "\u221a2/2",
+    "explanation": "cos(45\u00b0) = \u221a2/2.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "What is tan(30\u00b0)?",
+    "options": [
+      "1",
+      "\u221a3",
+      "1/\u221a3",
+      "\u221a3/2"
+    ],
+    "correct_answer": "1/\u221a3",
+    "explanation": "tan(30\u00b0) = sin(30\u00b0)/cos(30\u00b0) = (1/2)/(\u221a3/2) = 1/\u221a3.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "What is tan(60\u00b0)?",
+    "options": [
+      "1/\u221a3",
+      "1",
+      "\u221a3/2",
+      "\u221a3"
+    ],
+    "correct_answer": "\u221a3",
+    "explanation": "tan(60\u00b0) = sin(60\u00b0)/cos(60\u00b0) = (\u221a3/2)/(1/2) = \u221a3.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "What is sin(90\u00b0)?",
+    "options": [
+      "0",
+      "1/2",
+      "\u221a2/2",
+      "1"
+    ],
+    "correct_answer": "1",
+    "explanation": "sin(90\u00b0) = 1.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "What is cos(90\u00b0)?",
+    "options": [
+      "1",
+      "1/2",
+      "0",
+      "\u221a2/2"
+    ],
+    "correct_answer": "0",
+    "explanation": "cos(90\u00b0) = 0.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "What is sin(0\u00b0)?",
+    "options": [
+      "1",
+      "0",
+      "1/2",
+      "\u221a2/2"
+    ],
+    "correct_answer": "0",
+    "explanation": "sin(0\u00b0) = 0.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "What is cos(0\u00b0)?",
+    "options": [
+      "0",
+      "1/2",
+      "1",
+      "\u221a3/2"
+    ],
+    "correct_answer": "1",
+    "explanation": "cos(0\u00b0) = 1.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "A right triangle has legs 5 and 12. The hypotenuse = ?",
+    "options": [
+      "7",
+      "13",
+      "17",
+      "\u221a17"
+    ],
+    "correct_answer": "13",
+    "explanation": "5\u00b2 + 12\u00b2 = 25+144 = 169 = 13\u00b2.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "A right triangle has legs 3 and 4. The hypotenuse = ?",
+    "options": [
+      "5",
+      "7",
+      "\u221a7",
+      "6"
+    ],
+    "correct_answer": "5",
+    "explanation": "3\u00b2+4\u00b2=9+16=25=5\u00b2.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "What is csc(\u03b8)?",
+    "options": [
+      "sin(\u03b8)",
+      "1/sin(\u03b8)",
+      "cos(\u03b8)",
+      "1/cos(\u03b8)"
+    ],
+    "correct_answer": "1/sin(\u03b8)",
+    "explanation": "csc = cosecant = 1/sin.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "What is sec(\u03b8)?",
+    "options": [
+      "sin(\u03b8)",
+      "1/tan(\u03b8)",
+      "1/cos(\u03b8)",
+      "cos(\u03b8)"
+    ],
+    "correct_answer": "1/cos(\u03b8)",
+    "explanation": "sec = secant = 1/cos.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "What is cot(\u03b8)?",
+    "options": [
+      "tan(\u03b8)",
+      "1/sin(\u03b8)",
+      "1/tan(\u03b8)",
+      "sin(\u03b8)/cos(\u03b8)"
+    ],
+    "correct_answer": "1/tan(\u03b8)",
+    "explanation": "cot = cotangent = 1/tan = cos/sin.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "What is the radius of the unit circle?",
+    "options": [
+      "\u03c0",
+      "2",
+      "0",
+      "1"
+    ],
+    "correct_answer": "1",
+    "explanation": "The unit circle has radius 1.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "On the unit circle, what does the x-coordinate represent?",
+    "options": [
+      "sin(\u03b8)",
+      "tan(\u03b8)",
+      "cos(\u03b8)",
+      "csc(\u03b8)"
+    ],
+    "correct_answer": "cos(\u03b8)",
+    "explanation": "Unit circle: point = (cos \u03b8, sin \u03b8).",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "On the unit circle, what does the y-coordinate represent?",
+    "options": [
+      "cos(\u03b8)",
+      "tan(\u03b8)",
+      "cot(\u03b8)",
+      "sin(\u03b8)"
+    ],
+    "correct_answer": "sin(\u03b8)",
+    "explanation": "Unit circle: point = (cos \u03b8, sin \u03b8).",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "At \u03b8=0, the point on the unit circle is:",
+    "options": [
+      "(0,1)",
+      "(1,0)",
+      "(0,0)",
+      "(-1,0)"
+    ],
+    "correct_answer": "(1,0)",
+    "explanation": "cos(0)=1, sin(0)=0.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "At \u03b8=\u03c0/2, the point on the unit circle is:",
+    "options": [
+      "(1,0)",
+      "(0,-1)",
+      "(-1,0)",
+      "(0,1)"
+    ],
+    "correct_answer": "(0,1)",
+    "explanation": "cos(\u03c0/2)=0, sin(\u03c0/2)=1.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "At \u03b8=\u03c0, the point on the unit circle is:",
+    "options": [
+      "(1,0)",
+      "(0,1)",
+      "(0,-1)",
+      "(-1,0)"
+    ],
+    "correct_answer": "(-1,0)",
+    "explanation": "cos(\u03c0)=-1, sin(\u03c0)=0.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "At \u03b8=3\u03c0/2, the point on the unit circle is:",
+    "options": [
+      "(0,1)",
+      "(-1,0)",
+      "(1,0)",
+      "(0,-1)"
+    ],
+    "correct_answer": "(0,-1)",
+    "explanation": "cos(3\u03c0/2)=0, sin(3\u03c0/2)=-1.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "sin(\u03c0) = ?",
+    "options": [
+      "1",
+      "-1",
+      "0",
+      "\u221a2/2"
+    ],
+    "correct_answer": "0",
+    "explanation": "sin(180\u00b0) = 0.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "cos(\u03c0) = ?",
+    "options": [
+      "0",
+      "1",
+      "-1",
+      "\u221a2/2"
+    ],
+    "correct_answer": "-1",
+    "explanation": "cos(180\u00b0) = -1.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "sin(3\u03c0/2) = ?",
+    "options": [
+      "1",
+      "0",
+      "\u221a3/2",
+      "-1"
+    ],
+    "correct_answer": "-1",
+    "explanation": "sin(270\u00b0) = -1.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "cos(3\u03c0/2) = ?",
+    "options": [
+      "1",
+      "-1",
+      "0",
+      "1/2"
+    ],
+    "correct_answer": "0",
+    "explanation": "cos(270\u00b0) = 0.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "In which quadrant is sin positive and cos negative?",
+    "options": [
+      "Quadrant I",
+      "Quadrant II",
+      "Quadrant III",
+      "Quadrant IV"
+    ],
+    "correct_answer": "Quadrant II",
+    "explanation": "QII: x<0 (cos-), y>0 (sin+).",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "In which quadrant are both sin and cos negative?",
+    "options": [
+      "Quadrant I",
+      "Quadrant II",
+      "Quadrant III",
+      "Quadrant IV"
+    ],
+    "correct_answer": "Quadrant III",
+    "explanation": "QIII: x<0, y<0.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "In which quadrant is sin negative and cos positive?",
+    "options": [
+      "Quadrant I",
+      "Quadrant II",
+      "Quadrant III",
+      "Quadrant IV"
+    ],
+    "correct_answer": "Quadrant IV",
+    "explanation": "QIV: x>0, y<0.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The mnemonic 'All Students Take Calculus' tells us which trig functions are positive in each quadrant. In QI:",
+    "options": [
+      "Only sin",
+      "Only cos",
+      "All trig functions",
+      "Only tan"
+    ],
+    "correct_answer": "All trig functions",
+    "explanation": "All are positive in Quadrant I.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "According to ASTC, in Quadrant II only __ is positive.",
+    "options": [
+      "cos",
+      "tan",
+      "sin",
+      "cot"
+    ],
+    "correct_answer": "sin",
+    "explanation": "QII: only Sine is positive.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "According to ASTC, in Quadrant III only __ is positive.",
+    "options": [
+      "sin",
+      "cos",
+      "tan",
+      "csc"
+    ],
+    "correct_answer": "tan",
+    "explanation": "QIII: only Tangent is positive.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "According to ASTC, in Quadrant IV only __ is positive.",
+    "options": [
+      "sin",
+      "tan",
+      "cos",
+      "cot"
+    ],
+    "correct_answer": "cos",
+    "explanation": "QIV: only Cosine is positive.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "sin(\u03c0/4) = ?",
+    "options": [
+      "1/2",
+      "\u221a3/2",
+      "1",
+      "\u221a2/2"
+    ],
+    "correct_answer": "\u221a2/2",
+    "explanation": "sin(45\u00b0) = \u221a2/2.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "cos(2\u03c0/3) = ?",
+    "options": [
+      "1/2",
+      "\u221a3/2",
+      "-1/2",
+      "\u2212\u221a3/2"
+    ],
+    "correct_answer": "-1/2",
+    "explanation": "cos(120\u00b0) = -cos(60\u00b0) = -1/2.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "sin(5\u03c0/6) = ?",
+    "options": [
+      "\u221a3/2",
+      "1/2",
+      "\u2212\u221a3/2",
+      "-1/2"
+    ],
+    "correct_answer": "1/2",
+    "explanation": "sin(150\u00b0) = sin(180\u00b0-30\u00b0) = sin(30\u00b0) = 1/2.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "sin(7\u03c0/6) = ?",
+    "options": [
+      "1/2",
+      "\u221a3/2",
+      "-1/2",
+      "\u2212\u221a3/2"
+    ],
+    "correct_answer": "-1/2",
+    "explanation": "sin(210\u00b0) = -sin(30\u00b0) = -1/2.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "cos(5\u03c0/4) = ?",
+    "options": [
+      "\u221a2/2",
+      "1/2",
+      "\u2212\u221a2/2",
+      "-1"
+    ],
+    "correct_answer": "-\u221a2/2",
+    "explanation": "cos(225\u00b0) = -cos(45\u00b0) = -\u221a2/2.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "tan(\u03c0) = ?",
+    "options": [
+      "1",
+      "undefined",
+      "0",
+      "-1"
+    ],
+    "correct_answer": "0",
+    "explanation": "tan(\u03c0) = sin(\u03c0)/cos(\u03c0) = 0/(-1) = 0.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "tan(\u03c0/2) is:",
+    "options": [
+      "0",
+      "1",
+      "-1",
+      "Undefined"
+    ],
+    "correct_answer": "Undefined",
+    "explanation": "cos(\u03c0/2)=0, so tan(\u03c0/2) = sin/cos = undefined.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The fundamental Pythagorean identity is:",
+    "options": [
+      "sin\u00b2\u03b8 + cos\u00b2\u03b8 = 0",
+      "sin\u03b8\u00b7cos\u03b8 = 1",
+      "sin\u00b2\u03b8 + cos\u00b2\u03b8 = 1",
+      "sin\u00b2\u03b8 - cos\u00b2\u03b8 = 1"
+    ],
+    "correct_answer": "sin\u00b2\u03b8 + cos\u00b2\u03b8 = 1",
+    "explanation": "Pythagorean identity: sin\u00b2\u03b8 + cos\u00b2\u03b8 = 1.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "From sin\u00b2\u03b8 + cos\u00b2\u03b8 = 1, we get cos\u00b2\u03b8 = ?",
+    "options": [
+      "1 + sin\u00b2\u03b8",
+      "1 - sin\u00b2\u03b8",
+      "sin\u00b2\u03b8 - 1",
+      "sin\u03b8"
+    ],
+    "correct_answer": "1 - sin\u00b2\u03b8",
+    "explanation": "cos\u00b2\u03b8 = 1 - sin\u00b2\u03b8.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "From sin\u00b2\u03b8 + cos\u00b2\u03b8 = 1, we get sin\u00b2\u03b8 = ?",
+    "options": [
+      "1 + cos\u00b2\u03b8",
+      "cos\u03b8",
+      "cos\u00b2\u03b8 - 1",
+      "1 - cos\u00b2\u03b8"
+    ],
+    "correct_answer": "1 - cos\u00b2\u03b8",
+    "explanation": "sin\u00b2\u03b8 = 1 - cos\u00b2\u03b8.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The identity 1 + tan\u00b2\u03b8 = ?",
+    "options": [
+      "sec\u00b2\u03b8",
+      "csc\u00b2\u03b8",
+      "cos\u00b2\u03b8",
+      "sin\u00b2\u03b8"
+    ],
+    "correct_answer": "sec\u00b2\u03b8",
+    "explanation": "Divide sin\u00b2+cos\u00b2=1 by cos\u00b2: tan\u00b2+1=sec\u00b2.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The identity 1 + cot\u00b2\u03b8 = ?",
+    "options": [
+      "tan\u00b2\u03b8",
+      "sec\u00b2\u03b8",
+      "csc\u00b2\u03b8",
+      "cos\u00b2\u03b8"
+    ],
+    "correct_answer": "csc\u00b2\u03b8",
+    "explanation": "Divide sin\u00b2+cos\u00b2=1 by sin\u00b2: 1+cot\u00b2=csc\u00b2.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "If sin(\u03b8) = 3/5, find cos(\u03b8) for \u03b8 in QI.",
+    "options": [
+      "4/5",
+      "3/4",
+      "5/3",
+      "\u221a34/5"
+    ],
+    "correct_answer": "4/5",
+    "explanation": "cos\u00b2=1-9/25=16/25, cos=4/5 (positive in QI).",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "If cos(\u03b8) = 5/13, find sin(\u03b8) for \u03b8 in QI.",
+    "options": [
+      "13/12",
+      "12/13",
+      "5/12",
+      "12/5"
+    ],
+    "correct_answer": "12/13",
+    "explanation": "sin\u00b2=1-25/169=144/169, sin=12/13.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "If sin(\u03b8) = 1/2 and \u03b8 is in QII, find cos(\u03b8).",
+    "options": [
+      "\u221a3/2",
+      "1/2",
+      "-\u221a3/2",
+      "-1/2"
+    ],
+    "correct_answer": "-\u221a3/2",
+    "explanation": "cos\u00b2=1-1/4=3/4, cos=-\u221a3/2 (negative in QII).",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "If tan(\u03b8) = 3/4 and \u03b8 is in QI, sin(\u03b8) = ?",
+    "options": [
+      "3/5",
+      "4/5",
+      "3/4",
+      "4/3"
+    ],
+    "correct_answer": "3/5",
+    "explanation": "Opp=3,Adj=4,Hyp=5. sin=3/5.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "Simplify sin\u00b2\u03b8/cos\u00b2\u03b8.",
+    "options": [
+      "1",
+      "sin\u00b2\u03b8",
+      "tan\u00b2\u03b8",
+      "cot\u00b2\u03b8"
+    ],
+    "correct_answer": "tan\u00b2\u03b8",
+    "explanation": "sin\u00b2\u03b8/cos\u00b2\u03b8 = (sin\u03b8/cos\u03b8)\u00b2 = tan\u00b2\u03b8.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "Which identity is correct?",
+    "options": [
+      "sin\u03b8 = cos\u03b8\u00b7tan\u03b8",
+      "cos\u03b8 = sin\u03b8\u00b7tan\u03b8",
+      "tan\u03b8 = sin\u03b8\u00b7cos\u03b8",
+      "sin\u03b8 = 1/cos\u03b8"
+    ],
+    "correct_answer": "sin\u03b8 = cos\u03b8\u00b7tan\u03b8",
+    "explanation": "cos\u03b8\u00b7tan\u03b8 = cos\u03b8\u00b7(sin\u03b8/cos\u03b8) = sin\u03b8.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "Simplify (sin\u00b2\u03b8 + cos\u00b2\u03b8)\u00b3.",
+    "options": [
+      "3",
+      "1",
+      "0",
+      "sin\u2076\u03b8+cos\u2076\u03b8"
+    ],
+    "correct_answer": "1",
+    "explanation": "(1)\u00b3 = 1.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "If sin\u03b8 = 0.6, find sin\u00b2\u03b8 + cos\u00b2\u03b8.",
+    "options": [
+      "0.36",
+      "1.6",
+      "1",
+      "0.64"
+    ],
+    "correct_answer": "1",
+    "explanation": "Always equals 1 regardless of \u03b8.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "sec\u00b2\u03b8 - tan\u00b2\u03b8 = ?",
+    "options": [
+      "0",
+      "2",
+      "tan\u00b2\u03b8",
+      "1"
+    ],
+    "correct_answer": "1",
+    "explanation": "From 1+tan\u00b2=sec\u00b2: sec\u00b2-tan\u00b2=1.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "csc\u00b2\u03b8 - cot\u00b2\u03b8 = ?",
+    "options": [
+      "0",
+      "2",
+      "cot\u00b2\u03b8",
+      "1"
+    ],
+    "correct_answer": "1",
+    "explanation": "From 1+cot\u00b2=csc\u00b2: csc\u00b2-cot\u00b2=1.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The period of y = sin(x) is:",
+    "options": [
+      "\u03c0",
+      "2",
+      "1",
+      "2\u03c0"
+    ],
+    "correct_answer": "2\u03c0",
+    "explanation": "sin(x) repeats every 2\u03c0.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The period of y = cos(x) is:",
+    "options": [
+      "\u03c0",
+      "1",
+      "2",
+      "2\u03c0"
+    ],
+    "correct_answer": "2\u03c0",
+    "explanation": "cos(x) repeats every 2\u03c0.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The period of y = tan(x) is:",
+    "options": [
+      "2\u03c0",
+      "\u03c0/2",
+      "\u03c0",
+      "1"
+    ],
+    "correct_answer": "\u03c0",
+    "explanation": "tan(x) repeats every \u03c0.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The amplitude of y = sin(x) is:",
+    "options": [
+      "2\u03c0",
+      "2",
+      "\u03c0",
+      "1"
+    ],
+    "correct_answer": "1",
+    "explanation": "Amplitude of sin(x) = 1 (ranges from -1 to 1).",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The amplitude of y = 3sin(x) is:",
+    "options": [
+      "1",
+      "\u03c0",
+      "6",
+      "3"
+    ],
+    "correct_answer": "3",
+    "explanation": "Amplitude = |A| = 3.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The range of y = sin(x) is:",
+    "options": [
+      "[0, 1]",
+      "(\u2212\u221e, \u221e)",
+      "[\u22121, 1]",
+      "[0, 2\u03c0]"
+    ],
+    "correct_answer": "[\u22121, 1]",
+    "explanation": "sin(x) outputs values between -1 and 1.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The range of y = cos(x) is:",
+    "options": [
+      "[0, 1]",
+      "[\u22121, 1]",
+      "(0, \u221e)",
+      "[0, 2\u03c0]"
+    ],
+    "correct_answer": "[\u22121, 1]",
+    "explanation": "cos(x) also ranges from -1 to 1.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "y = sin(2x) has period:",
+    "options": [
+      "4\u03c0",
+      "\u03c0",
+      "2",
+      "2\u03c0"
+    ],
+    "correct_answer": "\u03c0",
+    "explanation": "Period = 2\u03c0/|B| = 2\u03c0/2 = \u03c0.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "y = sin(x/2) has period:",
+    "options": [
+      "\u03c0",
+      "4\u03c0",
+      "2\u03c0",
+      "8\u03c0"
+    ],
+    "correct_answer": "4\u03c0",
+    "explanation": "Period = 2\u03c0/(1/2) = 4\u03c0.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The maximum value of y = 5cos(x) is:",
+    "options": [
+      "0",
+      "1",
+      "5",
+      "-5"
+    ],
+    "correct_answer": "5",
+    "explanation": "Max = amplitude = 5.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The minimum value of y = 4sin(x) is:",
+    "options": [
+      "4",
+      "0",
+      "-4",
+      "1"
+    ],
+    "correct_answer": "-4",
+    "explanation": "Min = -amplitude = -4.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "y = sin(x) + 2 is shifted:",
+    "options": [
+      "Left by 2",
+      "Down by 2",
+      "Right by 2",
+      "Up by 2"
+    ],
+    "correct_answer": "Up by 2",
+    "explanation": "Adding 2 outside the function shifts graph up.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "y = sin(x - \u03c0/2) is shifted:",
+    "options": [
+      "Left \u03c0/2",
+      "Down \u03c0/2",
+      "Right \u03c0/2",
+      "Up \u03c0/2"
+    ],
+    "correct_answer": "Right \u03c0/2",
+    "explanation": "Subtracting inside shifts graph right.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "Where does y = sin(x) cross the x-axis (between 0 and 2\u03c0)?",
+    "options": [
+      "\u03c0/2 and 3\u03c0/2",
+      "0 and \u03c0 only",
+      "0, \u03c0, and 2\u03c0",
+      "\u03c0/4 and 3\u03c0/4"
+    ],
+    "correct_answer": "0, \u03c0, and 2\u03c0",
+    "explanation": "sin(x)=0 at x=0, \u03c0, 2\u03c0.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The maximum of y = sin(x) occurs at:",
+    "options": [
+      "x=0",
+      "x=\u03c0",
+      "x=2\u03c0",
+      "x=\u03c0/2"
+    ],
+    "correct_answer": "x=\u03c0/2",
+    "explanation": "sin reaches maximum 1 at x=\u03c0/2.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "arcsin(1/2) = ?",
+    "options": [
+      "60\u00b0",
+      "45\u00b0",
+      "30\u00b0",
+      "90\u00b0"
+    ],
+    "correct_answer": "30\u00b0",
+    "explanation": "sin(30\u00b0) = 1/2.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "arccos(1/2) = ?",
+    "options": [
+      "30\u00b0",
+      "45\u00b0",
+      "90\u00b0",
+      "60\u00b0"
+    ],
+    "correct_answer": "60\u00b0",
+    "explanation": "cos(60\u00b0) = 1/2.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "arctan(1) = ?",
+    "options": [
+      "30\u00b0",
+      "60\u00b0",
+      "90\u00b0",
+      "45\u00b0"
+    ],
+    "correct_answer": "45\u00b0",
+    "explanation": "tan(45\u00b0) = 1.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "arcsin(0) = ?",
+    "options": [
+      "90\u00b0",
+      "45\u00b0",
+      "30\u00b0",
+      "0\u00b0"
+    ],
+    "correct_answer": "0\u00b0",
+    "explanation": "sin(0\u00b0) = 0.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "arccos(0) = ?",
+    "options": [
+      "0\u00b0",
+      "45\u00b0",
+      "180\u00b0",
+      "90\u00b0"
+    ],
+    "correct_answer": "90\u00b0",
+    "explanation": "cos(90\u00b0) = 0.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "arctan(0) = ?",
+    "options": [
+      "90\u00b0",
+      "45\u00b0",
+      "180\u00b0",
+      "0\u00b0"
+    ],
+    "correct_answer": "0\u00b0",
+    "explanation": "tan(0\u00b0) = 0.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "arcsin(-1/2) = ?",
+    "options": [
+      "30\u00b0",
+      "\u221230\u00b0",
+      "150\u00b0",
+      "\u221260\u00b0"
+    ],
+    "correct_answer": "\u221230\u00b0",
+    "explanation": "sin(-30\u00b0) = -1/2.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The domain of arcsin is:",
+    "options": [
+      "[0, \u03c0]",
+      "[\u2212\u03c0, \u03c0]",
+      "(\u2212\u221e, \u221e)",
+      "[\u22121, 1]"
+    ],
+    "correct_answer": "[\u22121, 1]",
+    "explanation": "arcsin is defined for inputs between -1 and 1.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The range of arcsin is:",
+    "options": [
+      "[0, \u03c0]",
+      "[\u22121, 1]",
+      "[\u2212\u03c0/2, \u03c0/2]",
+      "(\u2212\u221e, \u221e)"
+    ],
+    "correct_answer": "[\u2212\u03c0/2, \u03c0/2]",
+    "explanation": "arcsin outputs angles between -90\u00b0 and 90\u00b0.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The range of arccos is:",
+    "options": [
+      "[\u2212\u03c0/2, \u03c0/2]",
+      "[\u22121, 1]",
+      "(0, \u03c0)",
+      "[0, \u03c0]"
+    ],
+    "correct_answer": "[0, \u03c0]",
+    "explanation": "arccos outputs angles between 0\u00b0 and 180\u00b0.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The reciprocal identity: sin(\u03b8) = ?",
+    "options": [
+      "cos(\u03b8)",
+      "1/csc(\u03b8)",
+      "1/sec(\u03b8)",
+      "cot(\u03b8)"
+    ],
+    "correct_answer": "1/csc(\u03b8)",
+    "explanation": "sin = 1/csc.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The quotient identity: tan(\u03b8) = ?",
+    "options": [
+      "sin(\u03b8)/cos(\u03b8)",
+      "cos(\u03b8)/sin(\u03b8)",
+      "1/sin(\u03b8)",
+      "sin(\u03b8)\u00b7cos(\u03b8)"
+    ],
+    "correct_answer": "sin(\u03b8)/cos(\u03b8)",
+    "explanation": "tan = sin/cos.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The quotient identity: cot(\u03b8) = ?",
+    "options": [
+      "sin(\u03b8)/cos(\u03b8)",
+      "tan(\u03b8)",
+      "cos(\u03b8)/sin(\u03b8)",
+      "1/sin(\u03b8)"
+    ],
+    "correct_answer": "cos(\u03b8)/sin(\u03b8)",
+    "explanation": "cot = cos/sin.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "sin(\u2212\u03b8) = ?",
+    "options": [
+      "sin(\u03b8)",
+      "cos(\u03b8)",
+      "\u2212cos(\u03b8)",
+      "\u2212sin(\u03b8)"
+    ],
+    "correct_answer": "\u2212sin(\u03b8)",
+    "explanation": "sin is an odd function: sin(\u2212\u03b8) = \u2212sin(\u03b8).",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "cos(\u2212\u03b8) = ?",
+    "options": [
+      "\u2212cos(\u03b8)",
+      "sin(\u03b8)",
+      "cos(\u03b8)",
+      "\u2212sin(\u03b8)"
+    ],
+    "correct_answer": "cos(\u03b8)",
+    "explanation": "cos is an even function: cos(\u2212\u03b8) = cos(\u03b8).",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The cofunction identity: sin(\u03b8) = ?",
+    "options": [
+      "cos(\u03b8)",
+      "cos(\u03c0/2 \u2212 \u03b8)",
+      "sin(\u03c0 \u2212 \u03b8)",
+      "\u2212cos(\u03b8)"
+    ],
+    "correct_answer": "cos(\u03c0/2 \u2212 \u03b8)",
+    "explanation": "sin(\u03b8) = cos(90\u00b0 \u2212 \u03b8).",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The cofunction identity: sin(30\u00b0) = cos(?)",
+    "options": [
+      "30\u00b0",
+      "90\u00b0",
+      "45\u00b0",
+      "60\u00b0"
+    ],
+    "correct_answer": "60\u00b0",
+    "explanation": "sin(30\u00b0) = cos(60\u00b0).",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "sin(180\u00b0 \u2212 \u03b8) = ?",
+    "options": [
+      "\u2212sin(\u03b8)",
+      "cos(\u03b8)",
+      "sin(\u03b8)",
+      "\u2212cos(\u03b8)"
+    ],
+    "correct_answer": "sin(\u03b8)",
+    "explanation": "Supplementary angle identity: sin(180\u00b0\u2212\u03b8) = sin(\u03b8).",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "cos(180\u00b0 \u2212 \u03b8) = ?",
+    "options": [
+      "cos(\u03b8)",
+      "sin(\u03b8)",
+      "\u2212sin(\u03b8)",
+      "\u2212cos(\u03b8)"
+    ],
+    "correct_answer": "\u2212cos(\u03b8)",
+    "explanation": "cos(180\u00b0\u2212\u03b8) = \u2212cos(\u03b8).",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The double angle formula: sin(2\u03b8) = ?",
+    "options": [
+      "2sin(\u03b8)",
+      "sin\u00b2\u03b8\u2212cos\u00b2\u03b8",
+      "2sin(\u03b8)cos(\u03b8)",
+      "2cos\u00b2\u03b8\u22121"
+    ],
+    "correct_answer": "2sin(\u03b8)cos(\u03b8)",
+    "explanation": "sin(2\u03b8) = 2sin\u03b8cos\u03b8.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The double angle formula: cos(2\u03b8) = ?",
+    "options": [
+      "2sin\u03b8cos\u03b8",
+      "2sin\u00b2\u03b8\u22121",
+      "sin\u00b2\u03b8",
+      "cos\u00b2\u03b8\u2212sin\u00b2\u03b8"
+    ],
+    "correct_answer": "cos\u00b2\u03b8\u2212sin\u00b2\u03b8",
+    "explanation": "cos(2\u03b8) = cos\u00b2\u03b8 \u2212 sin\u00b2\u03b8.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "cos(2\u03b8) can also be written as:",
+    "options": [
+      "1\u22122sin\u00b2\u03b8",
+      "2sin\u00b2\u03b8\u22121",
+      "sin\u00b2\u03b8+cos\u00b2\u03b8",
+      "2cos(\u03b8)sin(\u03b8)"
+    ],
+    "correct_answer": "1\u22122sin\u00b2\u03b8",
+    "explanation": "cos(2\u03b8) = 1 \u2212 2sin\u00b2\u03b8.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "sin\u00b2\u03b8 = ? (using half-angle)",
+    "options": [
+      "(1+cos2\u03b8)/2",
+      "(1\u2212cos2\u03b8)/2",
+      "cos\u00b2\u03b8",
+      "(cos2\u03b8)/2"
+    ],
+    "correct_answer": "(1\u2212cos2\u03b8)/2",
+    "explanation": "Power-reducing: sin\u00b2\u03b8 = (1\u2212cos2\u03b8)/2.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "cos\u00b2\u03b8 = ? (using half-angle)",
+    "options": [
+      "(1\u2212cos2\u03b8)/2",
+      "sin\u00b2\u03b8",
+      "(1+cos2\u03b8)/2",
+      "2cos\u00b2\u03b8"
+    ],
+    "correct_answer": "(1+cos2\u03b8)/2",
+    "explanation": "Power-reducing: cos\u00b2\u03b8 = (1+cos2\u03b8)/2.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "tan(\u03b8) = sin(\u03b8)/cos(\u03b8) is which type of identity?",
+    "options": [
+      "Pythagorean",
+      "Quotient",
+      "Reciprocal",
+      "Cofunction"
+    ],
+    "correct_answer": "Quotient",
+    "explanation": "Quotient identities relate tan/cot to sin/cos.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "Solve sin(x) = 1/2 for 0\u00b0 \u2264 x < 360\u00b0.",
+    "options": [
+      "30\u00b0 only",
+      "30\u00b0 and 150\u00b0",
+      "150\u00b0 only",
+      "30\u00b0 and 210\u00b0"
+    ],
+    "correct_answer": "30\u00b0 and 150\u00b0",
+    "explanation": "sin=1/2 in QI (30\u00b0) and QII (150\u00b0).",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "Solve cos(x) = 0 for 0\u00b0 \u2264 x < 360\u00b0.",
+    "options": [
+      "0\u00b0 and 180\u00b0",
+      "90\u00b0 only",
+      "90\u00b0 and 270\u00b0",
+      "180\u00b0 and 360\u00b0"
+    ],
+    "correct_answer": "90\u00b0 and 270\u00b0",
+    "explanation": "cos=0 at 90\u00b0 and 270\u00b0.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "Solve tan(x) = 1 for 0\u00b0 \u2264 x < 360\u00b0.",
+    "options": [
+      "45\u00b0 only",
+      "45\u00b0 and 135\u00b0",
+      "45\u00b0 and 225\u00b0",
+      "225\u00b0 only"
+    ],
+    "correct_answer": "45\u00b0 and 225\u00b0",
+    "explanation": "tan=1 in QI (45\u00b0) and QIII (225\u00b0).",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "Solve sin(x) = \u22121/2 for 0\u00b0 \u2264 x < 360\u00b0.",
+    "options": [
+      "210\u00b0 and 330\u00b0",
+      "150\u00b0 and 210\u00b0",
+      "30\u00b0 and 150\u00b0",
+      "30\u00b0 and 330\u00b0"
+    ],
+    "correct_answer": "210\u00b0 and 330\u00b0",
+    "explanation": "sin=\u22121/2 in QIII (210\u00b0) and QIV (330\u00b0).",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "Solve cos(x) = 1 for 0\u00b0 \u2264 x < 360\u00b0.",
+    "options": [
+      "0\u00b0 only",
+      "180\u00b0 only",
+      "90\u00b0",
+      "360\u00b0 only"
+    ],
+    "correct_answer": "0\u00b0 only",
+    "explanation": "cos(x)=1 only at x=0\u00b0.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "Solve sin(x) = 0 for 0\u00b0 \u2264 x < 360\u00b0.",
+    "options": [
+      "90\u00b0 and 270\u00b0",
+      "0\u00b0 only",
+      "0\u00b0 and 180\u00b0",
+      "0\u00b0, 180\u00b0, 360\u00b0"
+    ],
+    "correct_answer": "0\u00b0 and 180\u00b0",
+    "explanation": "sin=0 at 0\u00b0 and 180\u00b0 (within 0 to <360\u00b0).",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "Solve 2sin(x) = 1 for 0\u00b0 \u2264 x < 360\u00b0.",
+    "options": [
+      "30\u00b0 only",
+      "60\u00b0 and 120\u00b0",
+      "30\u00b0 and 150\u00b0",
+      "150\u00b0 only"
+    ],
+    "correct_answer": "30\u00b0 and 150\u00b0",
+    "explanation": "sin(x)=1/2 \u2192 x=30\u00b0 or 150\u00b0.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "Solve cos(x) = \u22121 for 0\u00b0 \u2264 x < 360\u00b0.",
+    "options": [
+      "0\u00b0",
+      "90\u00b0",
+      "180\u00b0",
+      "270\u00b0"
+    ],
+    "correct_answer": "180\u00b0",
+    "explanation": "cos(x)=\u22121 only at x=180\u00b0.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "Solve tan(x) = 0 for 0\u00b0 \u2264 x < 360\u00b0.",
+    "options": [
+      "90\u00b0 and 270\u00b0",
+      "45\u00b0 and 225\u00b0",
+      "0\u00b0 and 180\u00b0",
+      "45\u00b0 only"
+    ],
+    "correct_answer": "0\u00b0 and 180\u00b0",
+    "explanation": "tan=0 where sin=0: x=0\u00b0 and 180\u00b0.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "Solve sin(x) = \u221a3/2 for 0\u00b0 \u2264 x < 360\u00b0.",
+    "options": [
+      "30\u00b0 and 150\u00b0",
+      "60\u00b0 and 120\u00b0",
+      "60\u00b0 and 180\u00b0",
+      "30\u00b0 and 60\u00b0"
+    ],
+    "correct_answer": "60\u00b0 and 120\u00b0",
+    "explanation": "sin=\u221a3/2 in QI (60\u00b0) and QII (120\u00b0).",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "Solve cos(x) = \u221a2/2 for 0\u00b0 \u2264 x < 360\u00b0.",
+    "options": [
+      "30\u00b0 and 330\u00b0",
+      "45\u00b0 and 315\u00b0",
+      "45\u00b0 and 135\u00b0",
+      "30\u00b0 and 150\u00b0"
+    ],
+    "correct_answer": "45\u00b0 and 315\u00b0",
+    "explanation": "cos=\u221a2/2 in QI (45\u00b0) and QIV (315\u00b0).",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "Solve sin\u00b2(x) = 1 for 0\u00b0 \u2264 x < 360\u00b0.",
+    "options": [
+      "0\u00b0 and 180\u00b0",
+      "90\u00b0 only",
+      "90\u00b0 and 270\u00b0",
+      "45\u00b0 and 135\u00b0"
+    ],
+    "correct_answer": "90\u00b0 and 270\u00b0",
+    "explanation": "sin(x)=\u00b11: x=90\u00b0 or 270\u00b0.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "Solve 2cos(x) + \u221a3 = 0 for 0\u00b0 \u2264 x < 360\u00b0.",
+    "options": [
+      "30\u00b0 and 330\u00b0",
+      "150\u00b0 and 210\u00b0",
+      "120\u00b0 and 240\u00b0",
+      "90\u00b0 and 270\u00b0"
+    ],
+    "correct_answer": "150\u00b0 and 210\u00b0",
+    "explanation": "cos(x)=\u2212\u221a3/2 in QII (150\u00b0) and QIII (210\u00b0).",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The general solution to sin(x) = 0 is:",
+    "options": [
+      "x = n\u03c0",
+      "x = \u03c0/2 + n\u03c0",
+      "x = 2n\u03c0",
+      "x = n\u03c0/2"
+    ],
+    "correct_answer": "x = n\u03c0",
+    "explanation": "sin(x)=0 at every integer multiple of \u03c0.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The general solution to cos(x) = 1 is:",
+    "options": [
+      "x = 2n\u03c0",
+      "x = n\u03c0",
+      "x = \u03c0/2 + 2n\u03c0",
+      "x = \u03c0 + 2n\u03c0"
+    ],
+    "correct_answer": "x = 2n\u03c0",
+    "explanation": "cos(x)=1 only at x=0, 2\u03c0, 4\u03c0, ... = 2n\u03c0.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The Law of Sines states:",
+    "options": [
+      "a/sin A = b/sin B = c/sin C",
+      "a\u00b7sin A = b\u00b7sin B",
+      "a\u00b2 = b\u00b2+c\u00b2\u22122bc\u00b7cos A",
+      "sin A + sin B = sin C"
+    ],
+    "correct_answer": "a/sin A = b/sin B = c/sin C",
+    "explanation": "Law of Sines relates sides to opposite angles.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "In triangle ABC, a=5, A=30\u00b0, B=45\u00b0. Using Law of Sines, b = ?",
+    "options": [
+      "5\u221a2",
+      "5/\u221a2",
+      "5\u221a2/\u221a3",
+      "5\u221a2\u00b7sin45\u00b0"
+    ],
+    "correct_answer": "5\u221a2",
+    "explanation": "b/sin45\u00b0 = 5/sin30\u00b0 \u2192 b = 5\u00b7sin45\u00b0/sin30\u00b0 = 5\u00b7(\u221a2/2)/(1/2) = 5\u221a2.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The Law of Cosines states:",
+    "options": [
+      "a/sinA = b/sinB",
+      "a\u00b2 = b\u00b2 + c\u00b2 \u2212 2bc\u00b7cos A",
+      "a\u00b2 = b\u00b2 + c\u00b2",
+      "sinA + cosA = 1"
+    ],
+    "correct_answer": "a\u00b2 = b\u00b2 + c\u00b2 \u2212 2bc\u00b7cos A",
+    "explanation": "Law of Cosines generalizes the Pythagorean theorem.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The Law of Cosines reduces to the Pythagorean theorem when angle A = ?",
+    "options": [
+      "0\u00b0",
+      "180\u00b0",
+      "45\u00b0",
+      "90\u00b0"
+    ],
+    "correct_answer": "90\u00b0",
+    "explanation": "When A=90\u00b0, cos90\u00b0=0, so a\u00b2=b\u00b2+c\u00b2.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "When do you use the Law of Sines?",
+    "options": [
+      "When you have 3 sides",
+      "When you have 2 sides and included angle",
+      "When you have AAS or ASA",
+      "When all angles are equal"
+    ],
+    "correct_answer": "When you have AAS or ASA",
+    "explanation": "Law of Sines works with AAS, ASA, or SSA.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "When do you use the Law of Cosines?",
+    "options": [
+      "AAS or ASA only",
+      "SAS or SSS",
+      "SSA only",
+      "AAA only"
+    ],
+    "correct_answer": "SAS or SSS",
+    "explanation": "Law of Cosines works with SAS (two sides + included angle) or SSS.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "In triangle ABC with a=7, b=5, c=6, find cos(C).",
+    "options": [
+      "1/5",
+      "19/35",
+      "1/35",
+      "38/70"
+    ],
+    "correct_answer": "19/35",
+    "explanation": "c\u00b2=a\u00b2+b\u00b2\u22122ab\u00b7cosC \u2192 36=49+25\u221270cosC \u2192 cosC=38/70=19/35.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "In triangle ABC, all angles must sum to:",
+    "options": [
+      "180\u00b0",
+      "360\u00b0",
+      "90\u00b0",
+      "270\u00b0"
+    ],
+    "correct_answer": "180\u00b0",
+    "explanation": "Triangle angle sum = 180\u00b0.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The area of a triangle with sides a, b and included angle C is:",
+    "options": [
+      "(1/2)ab",
+      "ab\u00b7sinC",
+      "(1/2)ab\u00b7sinC",
+      "(1/2)ab\u00b7cosC"
+    ],
+    "correct_answer": "(1/2)ab\u00b7sinC",
+    "explanation": "Area = (1/2)\u00b7a\u00b7b\u00b7sin C.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The ambiguous case (two possible triangles) occurs with:",
+    "options": [
+      "ASA",
+      "SAS",
+      "SSS",
+      "SSA"
+    ],
+    "correct_answer": "SSA",
+    "explanation": "SSA (two sides and non-included angle) can yield 0, 1, or 2 triangles.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "In a 30-60-90 triangle, the sides are in ratio:",
+    "options": [
+      "1:1:\u221a2",
+      "1:2:\u221a3",
+      "1:\u221a3:2",
+      "1:1:1"
+    ],
+    "correct_answer": "1:\u221a3:2",
+    "explanation": "30-60-90: sides opposite 30\u00b0, 60\u00b0, 90\u00b0 are 1, \u221a3, 2.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "In a 45-45-90 triangle, the sides are in ratio:",
+    "options": [
+      "1:\u221a3:2",
+      "1:1:\u221a2",
+      "1:1:1",
+      "1:2:3"
+    ],
+    "correct_answer": "1:1:\u221a2",
+    "explanation": "45-45-90: two equal legs and hypotenuse = leg\u00b7\u221a2.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "If A=60\u00b0, b=4, c=4, find side a.",
+    "options": [
+      "4",
+      "4\u221a3",
+      "4\u221a2",
+      "2\u221a3"
+    ],
+    "correct_answer": "4",
+    "explanation": "a\u00b2=16+16\u22122(16)(1/2)=32\u221216=16, a=4.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The Law of Sines can be used to find an unknown angle given:",
+    "options": [
+      "Three sides",
+      "Two sides and included angle",
+      "Two sides and non-included angle",
+      "Two angles only"
+    ],
+    "correct_answer": "Two sides and non-included angle",
+    "explanation": "SSA: use Law of Sines to find angles.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "A triangle with no equal sides is called:",
+    "options": [
+      "Equilateral",
+      "Isoceles",
+      "Scalene",
+      "Right"
+    ],
+    "correct_answer": "Scalene",
+    "explanation": "Scalene triangles have all three sides of different lengths.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "An angle of elevation is measured:",
+    "options": [
+      "From vertical down to line of sight",
+      "From horizontal up to an object above",
+      "From the object to the ground",
+      "Straight down"
+    ],
+    "correct_answer": "From horizontal up to an object above",
+    "explanation": "Angle of elevation: look up from horizontal.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "An angle of depression is measured:",
+    "options": [
+      "From horizontal down to an object below",
+      "From vertical to the ground",
+      "Upward from an object",
+      "Straight across"
+    ],
+    "correct_answer": "From horizontal down to an object below",
+    "explanation": "Angle of depression: look down from horizontal.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "A ladder 10m long leans against a wall at 60\u00b0. How high does it reach?",
+    "options": [
+      "5m",
+      "10\u221a3m",
+      "5\u221a3m",
+      "10m"
+    ],
+    "correct_answer": "5\u221a3m",
+    "explanation": "Height = 10\u00b7sin(60\u00b0) = 10\u00b7(\u221a3/2) = 5\u221a3.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "From 50m away, the angle of elevation to a tower top is 30\u00b0. Tower height = ?",
+    "options": [
+      "50\u221a3m",
+      "50/\u221a3m",
+      "25m",
+      "50m"
+    ],
+    "correct_answer": "50/\u221a3m",
+    "explanation": "height = 50\u00b7tan(30\u00b0) = 50\u00b7(1/\u221a3) = 50/\u221a3 \u2248 28.9m.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "A ramp rises 3m over a horizontal distance of 4m. sin(angle) = ?",
+    "options": [
+      "3/4",
+      "3/5",
+      "4/5",
+      "4/3"
+    ],
+    "correct_answer": "3/5",
+    "explanation": "Hyp=\u221a(9+16)=5. sin=opp/hyp=3/5.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "What is the period of the sine function in real-world terms?",
+    "options": [
+      "The height",
+      "The time for one full cycle",
+      "The amplitude",
+      "The phase shift"
+    ],
+    "correct_answer": "The time for one full cycle",
+    "explanation": "Period = duration of one complete oscillation.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "A person walks 100m north then 100m east. Distance from start = ?",
+    "options": [
+      "100m",
+      "200m",
+      "100\u221a3m",
+      "100\u221a2m"
+    ],
+    "correct_answer": "100\u221a2m",
+    "explanation": "\u221a(100\u00b2+100\u00b2) = 100\u221a2.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The bearing N45\u00b0E means:",
+    "options": [
+      "45\u00b0 west of north",
+      "45\u00b0 east of north",
+      "45\u00b0 south of east",
+      "Due northeast"
+    ],
+    "correct_answer": "45\u00b0 east of north",
+    "explanation": "Bearings measure clockwise from north.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "In navigation, a bearing of 270\u00b0 points:",
+    "options": [
+      "North",
+      "South",
+      "East",
+      "West"
+    ],
+    "correct_answer": "West",
+    "explanation": "270\u00b0 clockwise from north = west.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "A 6m shadow is cast by a 6m pole. The sun's angle of elevation is:",
+    "options": [
+      "30\u00b0",
+      "60\u00b0",
+      "90\u00b0",
+      "45\u00b0"
+    ],
+    "correct_answer": "45\u00b0",
+    "explanation": "tan(\u03b8) = 6/6 = 1 \u2192 \u03b8 = 45\u00b0.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The hypotenuse of a right triangle is always:",
+    "options": [
+      "The shortest side",
+      "Longer than either leg",
+      "Equal to both legs added",
+      "Equal to the difference of legs"
+    ],
+    "correct_answer": "Longer than either leg",
+    "explanation": "The hypotenuse is the longest side.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "If sin(\u03b8) = 0.8 and \u03b8 is acute, cos(\u03b8) = ?",
+    "options": [
+      "0.6",
+      "0.2",
+      "0.4",
+      "0.64"
+    ],
+    "correct_answer": "0.6",
+    "explanation": "cos\u00b2=1\u22120.64=0.36, cos=0.6.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "At what angle does a road with tan(\u03b8)=0.1 rise?",
+    "options": [
+      "About 5.7\u00b0",
+      "About 10\u00b0",
+      "About 45\u00b0",
+      "About 1\u00b0"
+    ],
+    "correct_answer": "About 5.7\u00b0",
+    "explanation": "arctan(0.1) \u2248 5.7\u00b0.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The value of sin\u00b2(30\u00b0) + cos\u00b2(30\u00b0) = ?",
+    "options": [
+      "0.5",
+      "1.5",
+      "2",
+      "1"
+    ],
+    "correct_answer": "1",
+    "explanation": "Pythagorean identity: always equals 1.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "If a right triangle has hypotenuse 13 and one leg 5, the other leg = ?",
+    "options": [
+      "8",
+      "12",
+      "9",
+      "\u221a194"
+    ],
+    "correct_answer": "12",
+    "explanation": "5\u00b2+b\u00b2=13\u00b2 \u2192 b\u00b2=144 \u2192 b=12.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "What is tan(0\u00b0)?",
+    "options": [
+      "1",
+      "undefined",
+      "0",
+      "\u221e"
+    ],
+    "correct_answer": "0",
+    "explanation": "tan(0\u00b0)=sin(0\u00b0)/cos(0\u00b0)=0/1=0.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "What is sin(270\u00b0)?",
+    "options": [
+      "0",
+      "1",
+      "-1",
+      "\u221a2/2"
+    ],
+    "correct_answer": "-1",
+    "explanation": "sin(270\u00b0)=-1.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "What is cos(270\u00b0)?",
+    "options": [
+      "1",
+      "-1",
+      "0",
+      "\u221a2/2"
+    ],
+    "correct_answer": "0",
+    "explanation": "cos(270\u00b0)=0.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "sin(150\u00b0) = ?",
+    "options": [
+      "\u22121/2",
+      "\u221a3/2",
+      "1/2",
+      "\u2212\u221a3/2"
+    ],
+    "correct_answer": "1/2",
+    "explanation": "sin(150\u00b0)=sin(180\u00b0\u221230\u00b0)=sin(30\u00b0)=1/2.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "cos(150\u00b0) = ?",
+    "options": [
+      "1/2",
+      "\u221a3/2",
+      "\u2212\u221a3/2",
+      "\u22121/2"
+    ],
+    "correct_answer": "-\u221a3/2",
+    "explanation": "cos(150\u00b0)=\u2212cos(30\u00b0)=\u2212\u221a3/2.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "sin(240\u00b0) = ?",
+    "options": [
+      "1/2",
+      "\u221a3/2",
+      "\u22121/2",
+      "\u2212\u221a3/2"
+    ],
+    "correct_answer": "\u2212\u221a3/2",
+    "explanation": "sin(240\u00b0)=\u2212sin(60\u00b0)=\u2212\u221a3/2.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "cos(240\u00b0) = ?",
+    "options": [
+      "1/2",
+      "\u221a3/2",
+      "\u22121/2",
+      "\u2212\u221a3/2"
+    ],
+    "correct_answer": "-1/2",
+    "explanation": "cos(240\u00b0)=\u2212cos(60\u00b0)=\u22121/2.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "sin(300\u00b0) = ?",
+    "options": [
+      "1/2",
+      "\u221a3/2",
+      "\u22121/2",
+      "\u2212\u221a3/2"
+    ],
+    "correct_answer": "\u2212\u221a3/2",
+    "explanation": "sin(300\u00b0)=\u2212sin(60\u00b0)=\u2212\u221a3/2.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "cos(300\u00b0) = ?",
+    "options": [
+      "\u22121/2",
+      "\u2212\u221a3/2",
+      "\u221a3/2",
+      "1/2"
+    ],
+    "correct_answer": "1/2",
+    "explanation": "cos(300\u00b0)=cos(\u221260\u00b0)=cos(60\u00b0)=1/2.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "What is the amplitude of y=\u22122sin(x)?",
+    "options": [
+      "\u22122",
+      "2",
+      "1",
+      "4"
+    ],
+    "correct_answer": "2",
+    "explanation": "Amplitude=|A|=|\u22122|=2.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The phase shift of y=sin(x\u2212\u03c0/4) is:",
+    "options": [
+      "Left \u03c0/4",
+      "Down \u03c0/4",
+      "Up \u03c0/4",
+      "Right \u03c0/4"
+    ],
+    "correct_answer": "Right \u03c0/4",
+    "explanation": "Subtracting \u03c0/4 inside shifts right.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The vertical shift of y=cos(x)+3 is:",
+    "options": [
+      "Right 3",
+      "Left 3",
+      "Down 3",
+      "Up 3"
+    ],
+    "correct_answer": "Up 3",
+    "explanation": "Adding 3 outside shifts graph up.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "y=2sin(3x): amplitude=? period=?",
+    "options": [
+      "2 and 2\u03c0/3",
+      "3 and 2\u03c0/2",
+      "2 and 6\u03c0",
+      "3 and 2\u03c0/3"
+    ],
+    "correct_answer": "2 and 2\u03c0/3",
+    "explanation": "A=2, period=2\u03c0/3.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The cosine function is symmetric about:",
+    "options": [
+      "x=\u03c0/2",
+      "x=0 (y-axis)",
+      "x=\u03c0",
+      "x=\u2212\u03c0"
+    ],
+    "correct_answer": "x=0 (y-axis)",
+    "explanation": "cos(\u2212x)=cos(x): even function, y-axis symmetry.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The sine function passes through the origin because:",
+    "options": [
+      "sin(1)=1",
+      "sin(\u03c0)=0",
+      "sin(0)=0",
+      "sin(90\u00b0)=1"
+    ],
+    "correct_answer": "sin(0)=0",
+    "explanation": "At \u03b8=0, sin(0)=0, so the graph passes through (0,0).",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "csc(30\u00b0) = ?",
+    "options": [
+      "1/2",
+      "\u221a3/2",
+      "2",
+      "\u221a3"
+    ],
+    "correct_answer": "2",
+    "explanation": "csc=1/sin. 1/sin(30\u00b0)=1/(1/2)=2.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "sec(60\u00b0) = ?",
+    "options": [
+      "1/2",
+      "2",
+      "\u221a3",
+      "\u221a2"
+    ],
+    "correct_answer": "2",
+    "explanation": "sec=1/cos. 1/cos(60\u00b0)=1/(1/2)=2.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "cot(45\u00b0) = ?",
+    "options": [
+      "0",
+      "\u221a3",
+      "1",
+      "1/\u221a3"
+    ],
+    "correct_answer": "1",
+    "explanation": "cot=cos/sin=cos(45\u00b0)/sin(45\u00b0)=1.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "tan(\u221245\u00b0) = ?",
+    "options": [
+      "1",
+      "undefined",
+      "0",
+      "\u22121"
+    ],
+    "correct_answer": "\u22121",
+    "explanation": "tan is odd: tan(\u221245\u00b0)=\u2212tan(45\u00b0)=\u22121.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "sin(\u221230\u00b0) = ?",
+    "options": [
+      "1/2",
+      "\u221a3/2",
+      "\u22121/2",
+      "0"
+    ],
+    "correct_answer": "\u22121/2",
+    "explanation": "sin is odd: sin(\u221230\u00b0)=\u2212sin(30\u00b0)=\u22121/2.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "cos(\u221260\u00b0) = ?",
+    "options": [
+      "\u22121/2",
+      "\u2212\u221a3/2",
+      "\u221a3/2",
+      "1/2"
+    ],
+    "correct_answer": "1/2",
+    "explanation": "cos is even: cos(\u221260\u00b0)=cos(60\u00b0)=1/2.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "Which angle is coterminal with 400\u00b0?",
+    "options": [
+      "40\u00b0",
+      "50\u00b0",
+      "60\u00b0",
+      "80\u00b0"
+    ],
+    "correct_answer": "40\u00b0",
+    "explanation": "400\u00b0\u2212360\u00b0=40\u00b0.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "Which angle is coterminal with \u221230\u00b0?",
+    "options": [
+      "150\u00b0",
+      "210\u00b0",
+      "330\u00b0",
+      "\u221230\u00b0 only"
+    ],
+    "correct_answer": "330\u00b0",
+    "explanation": "\u221230\u00b0+360\u00b0=330\u00b0.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The reference angle for 150\u00b0 is:",
+    "options": [
+      "150\u00b0",
+      "30\u00b0",
+      "60\u00b0",
+      "120\u00b0"
+    ],
+    "correct_answer": "30\u00b0",
+    "explanation": "180\u00b0\u2212150\u00b0=30\u00b0.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The reference angle for 225\u00b0 is:",
+    "options": [
+      "45\u00b0",
+      "55\u00b0",
+      "225\u00b0",
+      "135\u00b0"
+    ],
+    "correct_answer": "45\u00b0",
+    "explanation": "225\u00b0\u2212180\u00b0=45\u00b0.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "The reference angle for 300\u00b0 is:",
+    "options": [
+      "60\u00b0",
+      "120\u00b0",
+      "30\u00b0",
+      "300\u00b0"
+    ],
+    "correct_answer": "60\u00b0",
+    "explanation": "360\u00b0\u2212300\u00b0=60\u00b0.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "sin(30\u00b0)\u00b7cos(60\u00b0) = ?",
+    "options": [
+      "1",
+      "1/2",
+      "1/4",
+      "\u221a3/4"
+    ],
+    "correct_answer": "1/4",
+    "explanation": "(1/2)\u00b7(1/2)=1/4.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "cos\u00b2(45\u00b0) + sin\u00b2(45\u00b0) = ?",
+    "options": [
+      "0",
+      "\u221a2",
+      "2",
+      "1"
+    ],
+    "correct_answer": "1",
+    "explanation": "Pythagorean identity always = 1.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "tan(30\u00b0)\u00b7tan(60\u00b0) = ?",
+    "options": [
+      "1",
+      "\u221a3",
+      "3",
+      "1/\u221a3"
+    ],
+    "correct_answer": "1",
+    "explanation": "(1/\u221a3)\u00b7(\u221a3)=1.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  },
+  {
+    "question": "If sin(\u03b8)=cos(\u03b8) and 0\u00b0<\u03b8<90\u00b0, then \u03b8=?",
+    "options": [
+      "30\u00b0",
+      "60\u00b0",
+      "90\u00b0",
+      "45\u00b0"
+    ],
+    "correct_answer": "45\u00b0",
+    "explanation": "sin=cos when \u03b8=45\u00b0.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "trigonometry"
+  }
+]

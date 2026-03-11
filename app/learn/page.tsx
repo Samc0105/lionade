@@ -389,11 +389,12 @@ export default function LearnPage() {
                 Daily Progress
               </p>
               <p className="font-bebas text-lg text-cream tracking-wider">
-                {todayCount}/10{" "}
+                {Math.min(todayCount, 10)}/10{" "}
                 <span className="text-cream/30 text-sm">questions today</span>
               </p>
             </div>
-            <div className="w-full h-3 bg-white/5 rounded-full overflow-hidden border border-white/10">
+            <div className="w-full h-3 rounded-full overflow-hidden"
+              style={{ background: "var(--progress-track)", border: "1px solid var(--progress-track-border)" }}>
               <div
                 className="h-full rounded-full transition-all duration-1000 ease-out"
                 style={{
@@ -414,7 +415,7 @@ export default function LearnPage() {
                   hover:-translate-y-1 cursor-pointer animate-slide-up"
                 style={{
                   animationDelay: `${0.12 + i * 0.05}s`,
-                  background: `linear-gradient(135deg, ${card.color}12 0%, #060c18 100%)`,
+                  background: `var(--card-solid-bg)`,
                   borderColor: `${card.color}30`,
                 }}
                 onMouseEnter={(e) => {
@@ -460,10 +461,11 @@ export default function LearnPage() {
 
             {/* Recent Activity */}
             <div
-              className="rounded-2xl border border-white/10 p-5 animate-slide-up"
+              className="rounded-2xl p-5 animate-slide-up"
               style={{
                 animationDelay: "0.35s",
-                background: "linear-gradient(135deg, #0d1528 0%, #060c18 100%)",
+                background: "var(--card-solid-bg)",
+                border: "1px solid var(--card-solid-border)",
               }}
             >
               <h2 className="font-bebas text-xl text-cream tracking-wider mb-4">
@@ -521,10 +523,11 @@ export default function LearnPage() {
 
             {/* Leaderboard Preview */}
             <div
-              className="rounded-2xl border border-white/10 p-5 animate-slide-up"
+              className="rounded-2xl p-5 animate-slide-up"
               style={{
                 animationDelay: "0.4s",
-                background: "linear-gradient(135deg, #0d1528 0%, #060c18 100%)",
+                background: "var(--card-solid-bg)",
+                border: "1px solid var(--card-solid-border)",
               }}
             >
               <h2 className="font-bebas text-xl text-cream tracking-wider mb-4">
@@ -594,7 +597,7 @@ export default function LearnPage() {
                   key={m.mission}
                   className="flex items-center gap-3 p-4 rounded-2xl border transition-colors hover:bg-white/5"
                   style={{
-                    background: `linear-gradient(135deg, ${m.color}08 0%, #060c18 100%)`,
+                    background: "var(--card-solid-bg)",
                     borderColor: `${m.color}20`,
                   }}
                 >

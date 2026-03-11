@@ -1,0 +1,2803 @@
+[
+  {
+    "question": "What is statistics?",
+    "options": [
+      "The study of collecting, analyzing, and interpreting data",
+      "The study of shapes",
+      "The study of numbers only",
+      "The study of equations"
+    ],
+    "correct_answer": "The study of collecting, analyzing, and interpreting data",
+    "explanation": "Statistics involves gathering and making sense of data.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What is a population in statistics?",
+    "options": [
+      "A sample of data",
+      "The entire group being studied",
+      "The average of a dataset",
+      "A type of graph"
+    ],
+    "correct_answer": "The entire group being studied",
+    "explanation": "Population = the full group you want to draw conclusions about.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What is a sample?",
+    "options": [
+      "A subset of the population",
+      "The entire population",
+      "The median value",
+      "A type of chart"
+    ],
+    "correct_answer": "A subset of the population",
+    "explanation": "A sample is a smaller group selected from the population.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What is a variable in statistics?",
+    "options": [
+      "A fixed number",
+      "A characteristic that can take different values",
+      "The mean of data",
+      "A type of graph"
+    ],
+    "correct_answer": "A characteristic that can take different values",
+    "explanation": "Variables are characteristics measured or observed in a study.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What is a quantitative variable?",
+    "options": [
+      "A variable that names categories",
+      "A variable that takes numerical values",
+      "A variable with only two outcomes",
+      "A variable that can't be measured"
+    ],
+    "correct_answer": "A variable that takes numerical values",
+    "explanation": "Quantitative variables are numeric (e.g., height, weight).",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What is a qualitative (categorical) variable?",
+    "options": [
+      "A numerical variable",
+      "A variable that names categories or groups",
+      "A variable with a mean",
+      "A continuous variable"
+    ],
+    "correct_answer": "A variable that names categories or groups",
+    "explanation": "Categorical variables describe group membership (e.g., color, gender).",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What is a discrete variable?",
+    "options": [
+      "A variable with any value in a range",
+      "A variable with countable separate values",
+      "A variable with no values",
+      "A variable measured continuously"
+    ],
+    "correct_answer": "A variable with countable separate values",
+    "explanation": "Discrete variables take specific countable values (e.g., number of students).",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What is a continuous variable?",
+    "options": [
+      "A variable with countable values only",
+      "A variable that can take any value in a range",
+      "A binary variable",
+      "A categorical variable"
+    ],
+    "correct_answer": "A variable that can take any value in a range",
+    "explanation": "Continuous variables can take any value (e.g., height, temperature).",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What is descriptive statistics?",
+    "options": [
+      "Making predictions",
+      "Summarizing and describing data",
+      "Testing hypotheses",
+      "Analyzing populations"
+    ],
+    "correct_answer": "Summarizing and describing data",
+    "explanation": "Descriptive statistics summarize the main features of a dataset.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What is inferential statistics?",
+    "options": [
+      "Describing a sample only",
+      "Drawing conclusions about a population from a sample",
+      "Computing averages",
+      "Making graphs"
+    ],
+    "correct_answer": "Drawing conclusions about a population from a sample",
+    "explanation": "Inferential statistics uses samples to make predictions about populations.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What is a parameter?",
+    "options": [
+      "A value that describes a sample",
+      "A value that describes a population",
+      "The range of data",
+      "A type of test"
+    ],
+    "correct_answer": "A value that describes a population",
+    "explanation": "Parameters describe the entire population (e.g., population mean \u03bc).",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What is a statistic (in context of estimation)?",
+    "options": [
+      "A value describing a population",
+      "A value computed from a sample",
+      "The median only",
+      "A type of graph"
+    ],
+    "correct_answer": "A value computed from a sample",
+    "explanation": "Sample statistics (e.g., x\u0304) estimate population parameters.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What does 'n' typically represent in statistics?",
+    "options": [
+      "Population size",
+      "Sample size",
+      "The mean",
+      "The median"
+    ],
+    "correct_answer": "Sample size",
+    "explanation": "n = the number of observations in a sample.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What is raw data?",
+    "options": [
+      "Processed data",
+      "Data collected but not yet organized",
+      "The mean of data",
+      "A frequency table"
+    ],
+    "correct_answer": "Data collected but not yet organized",
+    "explanation": "Raw data is the original, unprocessed data values.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What is a dataset?",
+    "options": [
+      "A type of graph",
+      "A collection of data values",
+      "A formula",
+      "The standard deviation"
+    ],
+    "correct_answer": "A collection of data values",
+    "explanation": "A dataset is a set of related data values.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What is the mean of 2, 4, 6, 8, 10?",
+    "options": [
+      "5",
+      "6",
+      "7",
+      "8"
+    ],
+    "correct_answer": "6",
+    "explanation": "Sum=30, n=5. Mean=30/5=6.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What is the median of 3, 7, 9, 11, 15?",
+    "options": [
+      "7",
+      "9",
+      "11",
+      "10"
+    ],
+    "correct_answer": "9",
+    "explanation": "Middle value of ordered set: 9.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What is the mode of 2, 3, 3, 5, 7, 3?",
+    "options": [
+      "2",
+      "5",
+      "3",
+      "7"
+    ],
+    "correct_answer": "3",
+    "explanation": "3 appears most frequently (3 times).",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What is the mean of 10, 20, 30?",
+    "options": [
+      "20",
+      "25",
+      "15",
+      "30"
+    ],
+    "correct_answer": "20",
+    "explanation": "Sum=60, n=3. Mean=20.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What is the median of 1, 2, 3, 4, 5, 6?",
+    "options": [
+      "3",
+      "3.5",
+      "4",
+      "2.5"
+    ],
+    "correct_answer": "3.5",
+    "explanation": "Even number: average of 3rd and 4th = (3+4)/2 = 3.5.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "A dataset has no repeated values. What is its mode?",
+    "options": [
+      "0",
+      "The mean",
+      "No mode",
+      "The median"
+    ],
+    "correct_answer": "No mode",
+    "explanation": "Mode requires at least one value to repeat.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What is the mean of 5, 5, 5, 5?",
+    "options": [
+      "0",
+      "5",
+      "20",
+      "25"
+    ],
+    "correct_answer": "5",
+    "explanation": "All values equal \u2014 mean equals that value.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What is the median of 4, 8, 15, 16, 23?",
+    "options": [
+      "8",
+      "15",
+      "16",
+      "12"
+    ],
+    "correct_answer": "15",
+    "explanation": "Middle value (3rd of 5) is 15.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "Find the mean: 100, 200, 300, 400, 500.",
+    "options": [
+      "200",
+      "250",
+      "300",
+      "350"
+    ],
+    "correct_answer": "300",
+    "explanation": "Sum=1500, n=5. 1500/5=300.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What is the mode of 1, 1, 2, 2, 3?",
+    "options": [
+      "1",
+      "2",
+      "1 and 2",
+      "3"
+    ],
+    "correct_answer": "1 and 2",
+    "explanation": "Both 1 and 2 appear twice \u2014 bimodal dataset.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What measure of center is affected most by outliers?",
+    "options": [
+      "Median",
+      "Mode",
+      "Mean",
+      "Range"
+    ],
+    "correct_answer": "Mean",
+    "explanation": "The mean uses all values, so extreme values shift it significantly.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "Which measure of center is best for skewed data?",
+    "options": [
+      "Mean",
+      "Mode",
+      "Median",
+      "Range"
+    ],
+    "correct_answer": "Median",
+    "explanation": "The median is resistant to outliers and better for skewed distributions.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What is the mean of 0, 0, 0, 12?",
+    "options": [
+      "0",
+      "3",
+      "4",
+      "12"
+    ],
+    "correct_answer": "3",
+    "explanation": "Sum=12, n=4. 12/4=3.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "Find the median of 7, 2, 9, 4, 5 (sort first).",
+    "options": [
+      "4",
+      "5",
+      "7",
+      "6"
+    ],
+    "correct_answer": "5",
+    "explanation": "Sorted: 2,4,5,7,9. Middle=5.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What does \u03a3x mean?",
+    "options": [
+      "Multiply all x values",
+      "Sum all x values",
+      "Average of x",
+      "Count of x values"
+    ],
+    "correct_answer": "Sum all x values",
+    "explanation": "\u03a3 (sigma) means sum.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "Mean formula is:",
+    "options": [
+      "\u03a3x/n",
+      "n/\u03a3x",
+      "\u03a3x\u00b7n",
+      "\u03a3x-n"
+    ],
+    "correct_answer": "\u03a3x/n",
+    "explanation": "Mean = sum of values divided by count.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "Find the mean: 3, 3, 3, 3, 3.",
+    "options": [
+      "0",
+      "1",
+      "3",
+      "15"
+    ],
+    "correct_answer": "3",
+    "explanation": "All values identical \u2014 mean is 3.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What is the median of a dataset with 1 value?",
+    "options": [
+      "0",
+      "That value",
+      "Undefined",
+      "1"
+    ],
+    "correct_answer": "That value",
+    "explanation": "A single value is its own median.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "Find the mode: 5, 10, 5, 15, 20, 5.",
+    "options": [
+      "10",
+      "15",
+      "5",
+      "20"
+    ],
+    "correct_answer": "5",
+    "explanation": "5 appears 3 times.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "Which is true about the mean?",
+    "options": [
+      "It is always the middle value",
+      "It equals sum divided by n",
+      "It ignores all values",
+      "It equals the most frequent value"
+    ],
+    "correct_answer": "It equals sum divided by n",
+    "explanation": "Mean = \u03a3x/n.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "The mean of 8 numbers is 5. What is their sum?",
+    "options": [
+      "13",
+      "40",
+      "45",
+      "25"
+    ],
+    "correct_answer": "40",
+    "explanation": "Sum = mean \u00d7 n = 5 \u00d7 8 = 40.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "Data: 1,2,3,4,5. What is the mean?",
+    "options": [
+      "2",
+      "3",
+      "4",
+      "5"
+    ],
+    "correct_answer": "3",
+    "explanation": "Sum=15, n=5. 15/5=3.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "Data: 10,20,30,40. What is the median?",
+    "options": [
+      "20",
+      "25",
+      "30",
+      "35"
+    ],
+    "correct_answer": "25",
+    "explanation": "Average of 2nd and 3rd: (20+30)/2=25.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What is the mean of -2, 0, 2?",
+    "options": [
+      "0",
+      "2",
+      "-2",
+      "1"
+    ],
+    "correct_answer": "0",
+    "explanation": "Sum=0, n=3. 0/3=0.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "A dataset: 4, 4, 4, 4. Mean=?",
+    "options": [
+      "0",
+      "16",
+      "4",
+      "1"
+    ],
+    "correct_answer": "4",
+    "explanation": "All equal \u2014 mean is 4.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "Find the mean: 50, 60, 70, 80, 90.",
+    "options": [
+      "60",
+      "70",
+      "75",
+      "80"
+    ],
+    "correct_answer": "70",
+    "explanation": "Sum=350, n=5. 350/5=70.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "Find the median of 2, 2, 2, 2, 2.",
+    "options": [
+      "0",
+      "1",
+      "2",
+      "5"
+    ],
+    "correct_answer": "2",
+    "explanation": "All values are 2 \u2014 median is 2.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What is the mode if all values appear once?",
+    "options": [
+      "0",
+      "Mean",
+      "No mode",
+      "Median"
+    ],
+    "correct_answer": "No mode",
+    "explanation": "No mode when every value appears the same number of times.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "Mean of 6, 8, 10 is:",
+    "options": [
+      "6",
+      "7",
+      "8",
+      "9"
+    ],
+    "correct_answer": "8",
+    "explanation": "Sum=24, n=3. 24/3=8.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "If 3 values are 2, 4, 6, the mean is:",
+    "options": [
+      "3",
+      "4",
+      "5",
+      "6"
+    ],
+    "correct_answer": "4",
+    "explanation": "Sum=12, n=3. 12/3=4.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What is the range of 3, 7, 2, 9, 5?",
+    "options": [
+      "6",
+      "7",
+      "9",
+      "5"
+    ],
+    "correct_answer": "7",
+    "explanation": "Range = max - min = 9 - 2 = 7.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What is the range of 10, 20, 30, 40, 50?",
+    "options": [
+      "30",
+      "40",
+      "50",
+      "20"
+    ],
+    "correct_answer": "40",
+    "explanation": "50 - 10 = 40.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "Range formula is:",
+    "options": [
+      "Max + Min",
+      "Max - Min",
+      "Max \u00d7 Min",
+      "Max / Min"
+    ],
+    "correct_answer": "Max - Min",
+    "explanation": "Range = maximum value - minimum value.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What does a large range indicate?",
+    "options": [
+      "Small spread",
+      "Large spread",
+      "Symmetric data",
+      "Normal distribution"
+    ],
+    "correct_answer": "Large spread",
+    "explanation": "A large range means values are spread far apart.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "Data: 5, 5, 5, 5. Range = ?",
+    "options": [
+      "5",
+      "25",
+      "0",
+      "1"
+    ],
+    "correct_answer": "0",
+    "explanation": "Max=Min=5. Range=0.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What is the range of -3, -1, 0, 2, 4?",
+    "options": [
+      "4",
+      "7",
+      "3",
+      "5"
+    ],
+    "correct_answer": "7",
+    "explanation": "4 - (-3) = 7.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "Range of 100, 200, 300 is:",
+    "options": [
+      "100",
+      "200",
+      "300",
+      "150"
+    ],
+    "correct_answer": "200",
+    "explanation": "300-100=200.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What is a limitation of range as a measure of spread?",
+    "options": [
+      "It's hard to compute",
+      "Only uses two values (max and min)",
+      "It requires sorting",
+      "It equals the mean"
+    ],
+    "correct_answer": "Only uses two values (max and min)",
+    "explanation": "Range ignores all middle values.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What is the interquartile range (IQR)?",
+    "options": [
+      "Q3 - Q1",
+      "Q3 + Q1",
+      "Max - Min",
+      "Q2 - Q1"
+    ],
+    "correct_answer": "Q3 - Q1",
+    "explanation": "IQR = third quartile minus first quartile.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What does IQR measure?",
+    "options": [
+      "Total spread",
+      "Spread of the middle 50%",
+      "Spread of the top 25%",
+      "The range"
+    ],
+    "correct_answer": "Spread of the middle 50%",
+    "explanation": "IQR captures variability of the central half of data.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "For data: 1,2,3,4,5,6,7,8. Q1=2.5, Q3=6.5. IQR=?",
+    "options": [
+      "3",
+      "4",
+      "5",
+      "9"
+    ],
+    "correct_answer": "4",
+    "explanation": "IQR = 6.5 - 2.5 = 4.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "An outlier is typically a value more than ___ IQRs from Q1 or Q3.",
+    "options": [
+      "1",
+      "1.5",
+      "2",
+      "3"
+    ],
+    "correct_answer": "1.5",
+    "explanation": "Standard outlier rule: beyond Q1-1.5\u00b7IQR or Q3+1.5\u00b7IQR.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What is variance?",
+    "options": [
+      "Average distance from mean",
+      "Average squared deviation from the mean",
+      "The range squared",
+      "Standard deviation squared... wait, same thing",
+      "Average squared deviation from the mean"
+    ],
+    "correct_answer": "Average squared deviation from the mean",
+    "explanation": "Variance = average of squared deviations from the mean.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What is standard deviation?",
+    "options": [
+      "Variance squared",
+      "Square root of variance",
+      "Range divided by 2",
+      "Mean minus median"
+    ],
+    "correct_answer": "Square root of variance",
+    "explanation": "Standard deviation = \u221avariance, in same units as data.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "If all data values are the same, standard deviation =",
+    "options": [
+      "1",
+      "Mean",
+      "0",
+      "Undefined"
+    ],
+    "correct_answer": "0",
+    "explanation": "No variation means zero standard deviation.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What is a frequency table?",
+    "options": [
+      "A graph of data",
+      "A table showing how often each value occurs",
+      "A measure of center",
+      "A type of test"
+    ],
+    "correct_answer": "A table showing how often each value occurs",
+    "explanation": "Frequency tables tally the count of each value or class.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What is relative frequency?",
+    "options": [
+      "Count of a value",
+      "Count divided by total observations",
+      "Count minus mean",
+      "Total divided by count"
+    ],
+    "correct_answer": "Count divided by total observations",
+    "explanation": "Relative frequency = frequency / n (as a proportion).",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What is a histogram?",
+    "options": [
+      "A bar chart for categorical data",
+      "A bar chart for quantitative data showing frequency",
+      "A pie chart",
+      "A line graph"
+    ],
+    "correct_answer": "A bar chart for quantitative data showing frequency",
+    "explanation": "Histograms display distribution of quantitative data in bins.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What is a bar chart used for?",
+    "options": [
+      "Continuous data",
+      "Categorical data",
+      "Time series only",
+      "Scatter data"
+    ],
+    "correct_answer": "Categorical data",
+    "explanation": "Bar charts display frequencies of categorical variables.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What is a pie chart?",
+    "options": [
+      "A chart showing data over time",
+      "A circular chart showing proportions",
+      "A bar chart",
+      "A scatter plot"
+    ],
+    "correct_answer": "A circular chart showing proportions",
+    "explanation": "Pie charts show how a whole is divided into parts.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What does a dot plot show?",
+    "options": [
+      "Only the mean",
+      "Each individual data point on a number line",
+      "Only the median",
+      "Frequency as bars"
+    ],
+    "correct_answer": "Each individual data point on a number line",
+    "explanation": "Dot plots place a dot for each observation along a scale.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What is a stem-and-leaf plot?",
+    "options": [
+      "A type of bar chart",
+      "A display splitting values into stems and leaves",
+      "A histogram",
+      "A line graph"
+    ],
+    "correct_answer": "A display splitting values into stems and leaves",
+    "explanation": "Stem-and-leaf plots preserve actual data values.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "A cumulative frequency graph is also called a:",
+    "options": [
+      "Histogram",
+      "Ogive",
+      "Bar chart",
+      "Scatter plot"
+    ],
+    "correct_answer": "Ogive",
+    "explanation": "An ogive shows the running total of frequencies.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What is the shape of a normal distribution?",
+    "options": [
+      "Left-skewed",
+      "Right-skewed",
+      "Bell-shaped",
+      "Bimodal"
+    ],
+    "correct_answer": "Bell-shaped",
+    "explanation": "The normal (Gaussian) distribution is symmetric and bell-shaped.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "A distribution skewed to the right has:",
+    "options": [
+      "A long tail on the left",
+      "A long tail on the right",
+      "No tail",
+      "A symmetric shape"
+    ],
+    "correct_answer": "A long tail on the right",
+    "explanation": "Right skew = positive skew = tail stretches right.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "In a right-skewed distribution, the mean is usually:",
+    "options": [
+      "Less than the median",
+      "Greater than the median",
+      "Equal to the median",
+      "Zero"
+    ],
+    "correct_answer": "Greater than the median",
+    "explanation": "Outliers on the right pull the mean up above the median.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What is a bimodal distribution?",
+    "options": [
+      "One peak",
+      "Two peaks",
+      "No peak",
+      "Symmetric"
+    ],
+    "correct_answer": "Two peaks",
+    "explanation": "Bimodal distributions have two local modes.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "A frequency polygon is created by:",
+    "options": [
+      "Connecting bar tops with a line",
+      "Drawing circles",
+      "Making a pie chart",
+      "Computing z-scores"
+    ],
+    "correct_answer": "Connecting bar tops with a line",
+    "explanation": "Frequency polygons connect midpoints of histogram bar tops.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What does a box plot (box-and-whisker) display?",
+    "options": [
+      "Only the mean",
+      "Min, Q1, Median, Q3, Max",
+      "Just the median and mean",
+      "Only outliers"
+    ],
+    "correct_answer": "Min, Q1, Median, Q3, Max",
+    "explanation": "Box plots show the 5-number summary.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "The box in a box plot spans from:",
+    "options": [
+      "Min to Max",
+      "Q1 to Q3",
+      "Mean to Median",
+      "Mode to Mean"
+    ],
+    "correct_answer": "Q1 to Q3",
+    "explanation": "The box represents the interquartile range.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What is a class interval in a frequency table?",
+    "options": [
+      "A single data value",
+      "A range of values grouped together",
+      "The median class",
+      "The mode class"
+    ],
+    "correct_answer": "A range of values grouped together",
+    "explanation": "Class intervals group continuous data into bins.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What is the class width?",
+    "options": [
+      "Upper limit only",
+      "Upper limit minus lower limit",
+      "Lower limit \u00d7 2",
+      "Range divided by class count"
+    ],
+    "correct_answer": "Upper limit minus lower limit",
+    "explanation": "Class width = upper class boundary - lower class boundary.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What is a frequency distribution?",
+    "options": [
+      "A single value",
+      "An organized table of data values and their frequencies",
+      "A scatter plot",
+      "The mean of data"
+    ],
+    "correct_answer": "An organized table of data values and their frequencies",
+    "explanation": "Frequency distributions organize how often values appear.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "The sum of all relative frequencies must equal:",
+    "options": [
+      "0",
+      "n",
+      "1",
+      "Mean"
+    ],
+    "correct_answer": "1",
+    "explanation": "All proportions must add to 1 (or 100%).",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What does a symmetric distribution look like?",
+    "options": [
+      "Tail on the left",
+      "Tail on the right",
+      "Mirror image about the center",
+      "Two peaks"
+    ],
+    "correct_answer": "Mirror image about the center",
+    "explanation": "Symmetric: left and right halves are mirror images.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What is probability?",
+    "options": [
+      "The certainty of an event",
+      "A measure of how likely an event is (0 to 1)",
+      "Always 50%",
+      "The frequency of data"
+    ],
+    "correct_answer": "A measure of how likely an event is (0 to 1)",
+    "explanation": "Probability ranges from 0 (impossible) to 1 (certain).",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "P(impossible event) =",
+    "options": [
+      "0.5",
+      "1",
+      "0",
+      "undefined"
+    ],
+    "correct_answer": "0",
+    "explanation": "An impossible event has probability 0.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "P(certain event) =",
+    "options": [
+      "0",
+      "0.5",
+      "1",
+      "undefined"
+    ],
+    "correct_answer": "1",
+    "explanation": "A certain event always occurs \u2014 probability = 1.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "If you flip a fair coin, P(Heads) =",
+    "options": [
+      "1/4",
+      "1/3",
+      "1/2",
+      "3/4"
+    ],
+    "correct_answer": "1/2",
+    "explanation": "Two equally likely outcomes: P(H) = 1/2.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "Rolling a fair die, P(rolling a 3) =",
+    "options": [
+      "1/3",
+      "1/6",
+      "1/2",
+      "1/12"
+    ],
+    "correct_answer": "1/6",
+    "explanation": "Six equally likely faces: P(3) = 1/6.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "P(A) + P(not A) =",
+    "options": [
+      "0",
+      "P(A)",
+      "1",
+      "2"
+    ],
+    "correct_answer": "1",
+    "explanation": "Complement rule: P(A) + P(A\u1d9c) = 1.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "If P(rain) = 0.3, P(no rain) =",
+    "options": [
+      "0.3",
+      "0.6",
+      "0.7",
+      "1"
+    ],
+    "correct_answer": "0.7",
+    "explanation": "P(no rain) = 1 - 0.3 = 0.7.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "A bag has 3 red and 7 blue balls. P(red) =",
+    "options": [
+      "3/7",
+      "7/10",
+      "3/10",
+      "1/3"
+    ],
+    "correct_answer": "3/10",
+    "explanation": "P(red) = 3/(3+7) = 3/10.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What is an event in probability?",
+    "options": [
+      "A data value",
+      "An outcome or set of outcomes",
+      "A type of graph",
+      "A sample size"
+    ],
+    "correct_answer": "An outcome or set of outcomes",
+    "explanation": "An event is any subset of the sample space.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What is a sample space?",
+    "options": [
+      "The mean of data",
+      "All possible outcomes of an experiment",
+      "A type of chart",
+      "A sample of data"
+    ],
+    "correct_answer": "All possible outcomes of an experiment",
+    "explanation": "Sample space S = set of all possible outcomes.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "Rolling a die: P(even number) =",
+    "options": [
+      "1/6",
+      "1/3",
+      "1/2",
+      "2/3"
+    ],
+    "correct_answer": "1/2",
+    "explanation": "Even numbers: {2,4,6} = 3 outcomes out of 6.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "Rolling a die: P(number > 4) =",
+    "options": [
+      "1/3",
+      "1/2",
+      "1/6",
+      "2/3"
+    ],
+    "correct_answer": "1/3",
+    "explanation": "Numbers > 4: {5,6} = 2/6 = 1/3.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "Probability formula (classical) =",
+    "options": [
+      "Favorable/Total",
+      "Total/Favorable",
+      "Favorable\u00d7Total",
+      "1/Total"
+    ],
+    "correct_answer": "Favorable/Total",
+    "explanation": "P(A) = (# favorable outcomes)/(# total outcomes).",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "If P(A) = 0.4 and P(B) = 0.3 and A,B are mutually exclusive, P(A or B) =",
+    "options": [
+      "0.7",
+      "0.12",
+      "0.1",
+      "1"
+    ],
+    "correct_answer": "0.7",
+    "explanation": "Mutually exclusive: P(A\u222aB) = P(A)+P(B) = 0.7.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "Two events are mutually exclusive if:",
+    "options": [
+      "They can happen together",
+      "They cannot happen at the same time",
+      "They are independent",
+      "Their probabilities add to 0.5"
+    ],
+    "correct_answer": "They cannot happen at the same time",
+    "explanation": "Mutually exclusive events have no overlap.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "P(A and B) for independent events =",
+    "options": [
+      "P(A) + P(B)",
+      "P(A) \u00d7 P(B)",
+      "P(A) - P(B)",
+      "P(A) / P(B)"
+    ],
+    "correct_answer": "P(A) \u00d7 P(B)",
+    "explanation": "For independent events: P(A\u2229B) = P(A)\u00b7P(B).",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "P(H) = 0.5 for a coin flip. Flipping twice, P(HH) =",
+    "options": [
+      "0.5",
+      "0.25",
+      "1",
+      "0.75"
+    ],
+    "correct_answer": "0.25",
+    "explanation": "Independent: 0.5 \u00d7 0.5 = 0.25.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What is a complement of event A?",
+    "options": [
+      "A only",
+      "Everything except A",
+      "A plus B",
+      "A intersection B"
+    ],
+    "correct_answer": "Everything except A",
+    "explanation": "A\u1d9c = all outcomes not in A.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "P(A') = ? if P(A) = 0.65.",
+    "options": [
+      "0.65",
+      "0.35",
+      "1.65",
+      "0.5"
+    ],
+    "correct_answer": "0.35",
+    "explanation": "P(A') = 1 - 0.65 = 0.35.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What is an experiment in probability?",
+    "options": [
+      "A statistical test",
+      "Any process with random outcomes",
+      "A type of graph",
+      "A sample"
+    ],
+    "correct_answer": "Any process with random outcomes",
+    "explanation": "An experiment is a repeatable procedure with uncertain outcomes.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "Rolling a die: P(7) =",
+    "options": [
+      "1/7",
+      "1/6",
+      "0",
+      "1"
+    ],
+    "correct_answer": "0",
+    "explanation": "A standard die has no 7 \u2014 impossible event, P=0.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "Rolling a die: P(1, 2, 3, 4, 5, or 6) =",
+    "options": [
+      "0",
+      "1/6",
+      "0.5",
+      "1"
+    ],
+    "correct_answer": "1",
+    "explanation": "Certain event \u2014 one of these must occur.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "A card is drawn from a standard deck of 52. P(ace) =",
+    "options": [
+      "4/52 = 1/13",
+      "1/52",
+      "4/13",
+      "1/4"
+    ],
+    "correct_answer": "4/52 = 1/13",
+    "explanation": "4 aces in 52 cards.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "P(red card) from standard deck =",
+    "options": [
+      "1/4",
+      "1/2",
+      "1/13",
+      "26/52"
+    ],
+    "correct_answer": "1/2",
+    "explanation": "26 red cards out of 52.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What does P(A|B) mean?",
+    "options": [
+      "P of A and B",
+      "Probability of A given B occurred",
+      "P of A minus B",
+      "P of A divided by P(B)"
+    ],
+    "correct_answer": "Probability of A given B occurred",
+    "explanation": "P(A|B) is conditional probability.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "P(A|B) formula =",
+    "options": [
+      "P(A)\u00b7P(B)",
+      "P(A\u2229B)/P(B)",
+      "P(A)/P(B)",
+      "P(A)+P(B)"
+    ],
+    "correct_answer": "P(A\u2229B)/P(B)",
+    "explanation": "Conditional probability: P(A|B) = P(A\u2229B)/P(B).",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "Two events A, B are independent if:",
+    "options": [
+      "P(A|B) = P(B)",
+      "P(A|B) = P(A)",
+      "P(A\u2229B) = 0",
+      "P(A) = P(B)"
+    ],
+    "correct_answer": "P(A|B) = P(A)",
+    "explanation": "If knowing B doesn't change P(A), they're independent.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "Addition rule for any two events: P(A\u222aB) =",
+    "options": [
+      "P(A)+P(B)",
+      "P(A)+P(B)-P(A\u2229B)",
+      "P(A)\u00d7P(B)",
+      "P(A)-P(B)"
+    ],
+    "correct_answer": "P(A)+P(B)-P(A\u2229B)",
+    "explanation": "General addition rule subtracts the overlap.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "A jar has 5 red, 3 green, 2 blue. P(not red) =",
+    "options": [
+      "1/2",
+      "3/5",
+      "5/10",
+      "1/10"
+    ],
+    "correct_answer": "1/2",
+    "explanation": "P(not red) = (3+2)/10 = 5/10 = 1/2.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What is empirical probability?",
+    "options": [
+      "Theoretical probability",
+      "Probability based on observed data",
+      "P=0.5 always",
+      "Probability from formulas"
+    ],
+    "correct_answer": "Probability based on observed data",
+    "explanation": "Empirical probability = observed frequency / total trials.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What percent of data falls within 1 standard deviation of the mean in a normal distribution?",
+    "options": [
+      "50%",
+      "68%",
+      "95%",
+      "99.7%"
+    ],
+    "correct_answer": "68%",
+    "explanation": "Empirical rule: 68% within \u00b11\u03c3.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What percent of data falls within 2 standard deviations of the mean?",
+    "options": [
+      "68%",
+      "90%",
+      "95%",
+      "99.7%"
+    ],
+    "correct_answer": "95%",
+    "explanation": "Empirical rule: 95% within \u00b12\u03c3.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What percent falls within 3 standard deviations?",
+    "options": [
+      "95%",
+      "99%",
+      "99.7%",
+      "100%"
+    ],
+    "correct_answer": "99.7%",
+    "explanation": "Empirical rule: 99.7% within \u00b13\u03c3.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "The empirical rule applies to which type of distribution?",
+    "options": [
+      "Any distribution",
+      "Skewed distributions",
+      "Normal distributions",
+      "Uniform distributions"
+    ],
+    "correct_answer": "Normal distributions",
+    "explanation": "The 68-95-99.7 rule is for bell-shaped (normal) data.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What is a z-score?",
+    "options": [
+      "The mean",
+      "The number of standard deviations from the mean",
+      "The variance",
+      "A percentile"
+    ],
+    "correct_answer": "The number of standard deviations from the mean",
+    "explanation": "z = (x - \u03bc)/\u03c3 measures how far x is from the mean.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "z-score formula is:",
+    "options": [
+      "z=(x+\u03bc)/\u03c3",
+      "z=(x-\u03bc)/\u03c3",
+      "z=\u03bc/\u03c3",
+      "z=(x-\u03c3)/\u03bc"
+    ],
+    "correct_answer": "z=(x-\u03bc)/\u03c3",
+    "explanation": "z-score = (value - mean) / standard deviation.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "A z-score of 0 means:",
+    "options": [
+      "The value is below the mean",
+      "The value equals the mean",
+      "The value is above the mean",
+      "The standard deviation is 0"
+    ],
+    "correct_answer": "The value equals the mean",
+    "explanation": "z=0 \u2192 x=\u03bc.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "A z-score of 2 means the value is:",
+    "options": [
+      "2 units above the mean",
+      "2 standard deviations above the mean",
+      "2% above the mean",
+      "Equal to 2"
+    ],
+    "correct_answer": "2 standard deviations above the mean",
+    "explanation": "z=2 \u2192 value is 2\u03c3 above \u03bc.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "A negative z-score indicates the value is:",
+    "options": [
+      "Above the mean",
+      "Equal to the mean",
+      "Below the mean",
+      "An outlier"
+    ],
+    "correct_answer": "Below the mean",
+    "explanation": "Negative z \u2192 x < \u03bc.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "The standard normal distribution has mean=? and \u03c3=?",
+    "options": [
+      "mean=0, \u03c3=1",
+      "mean=1, \u03c3=0",
+      "mean=0, \u03c3=0",
+      "mean=1, \u03c3=1"
+    ],
+    "correct_answer": "mean=0, \u03c3=1",
+    "explanation": "Standard normal: N(0,1).",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "If mean=50, \u03c3=10, find z for x=70.",
+    "options": [
+      "1",
+      "2",
+      "3",
+      "0.5"
+    ],
+    "correct_answer": "2",
+    "explanation": "z=(70-50)/10=20/10=2.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "If mean=100, \u03c3=15, find z for x=85.",
+    "options": [
+      "1",
+      "-1",
+      "0",
+      "2"
+    ],
+    "correct_answer": "\u22121",
+    "explanation": "z=(85-100)/15=-15/15=-1.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What is the area under the entire normal curve?",
+    "options": [
+      "0.5",
+      "0.68",
+      "1",
+      "0.95"
+    ],
+    "correct_answer": "1",
+    "explanation": "Total probability under any probability distribution = 1.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "A normal distribution is symmetric about the:",
+    "options": [
+      "Mode only",
+      "Median only",
+      "Mean",
+      "Variance"
+    ],
+    "correct_answer": "Mean",
+    "explanation": "Normal distributions are perfectly symmetric about \u03bc.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "In a standard normal distribution, P(Z < 0) =",
+    "options": [
+      "0",
+      "0.68",
+      "0.5",
+      "1"
+    ],
+    "correct_answer": "0.5",
+    "explanation": "By symmetry, exactly half the distribution is below 0.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What is a random sample?",
+    "options": [
+      "A sample chosen deliberately",
+      "A sample where every member has equal chance of selection",
+      "A biased sample",
+      "A convenience sample"
+    ],
+    "correct_answer": "A sample where every member has equal chance of selection",
+    "explanation": "Random sampling reduces bias.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What is sampling bias?",
+    "options": [
+      "When the sample is too large",
+      "When the sample doesn't represent the population",
+      "When samples are random",
+      "When data is numerical"
+    ],
+    "correct_answer": "When the sample doesn't represent the population",
+    "explanation": "Bias leads to inaccurate conclusions about the population.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What is a census?",
+    "options": [
+      "A sample of the population",
+      "Data from every member of the population",
+      "A type of graph",
+      "A probability calculation"
+    ],
+    "correct_answer": "Data from every member of the population",
+    "explanation": "A census collects data from the entire population.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What is a convenience sample?",
+    "options": [
+      "A random sample",
+      "A sample of who's easiest to reach",
+      "A stratified sample",
+      "A systematic sample"
+    ],
+    "correct_answer": "A sample of who's easiest to reach",
+    "explanation": "Convenience samples are easy to obtain but often biased.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What is stratified sampling?",
+    "options": [
+      "Selecting every nth member",
+      "Dividing population into groups and sampling each",
+      "Sampling the most convenient members",
+      "Random sampling"
+    ],
+    "correct_answer": "Dividing population into groups and sampling each",
+    "explanation": "Stratified sampling ensures representation from each subgroup.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What is systematic sampling?",
+    "options": [
+      "Random selection",
+      "Selecting every kth member from a list",
+      "Stratified sampling",
+      "Convenience sampling"
+    ],
+    "correct_answer": "Selecting every kth member from a list",
+    "explanation": "Systematic: choose a start, then every nth unit.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What is cluster sampling?",
+    "options": [
+      "Sampling from each subgroup",
+      "Selecting entire natural groups at random",
+      "Convenience sampling",
+      "Every nth unit"
+    ],
+    "correct_answer": "Selecting entire natural groups at random",
+    "explanation": "Cluster: divide into clusters, randomly select whole clusters.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What is an observational study?",
+    "options": [
+      "Researchers assign treatments",
+      "Researchers observe without interfering",
+      "A randomized experiment",
+      "A simulation"
+    ],
+    "correct_answer": "Researchers observe without interfering",
+    "explanation": "Observational studies don't manipulate variables.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What is an experiment in statistics?",
+    "options": [
+      "Observing without interference",
+      "Researchers deliberately assign treatments to subjects",
+      "A type of survey",
+      "An observational study"
+    ],
+    "correct_answer": "Researchers deliberately assign treatments to subjects",
+    "explanation": "Experiments manipulate variables to study cause-and-effect.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What is a control group?",
+    "options": [
+      "The group receiving the treatment",
+      "The group receiving no treatment",
+      "The experimental group",
+      "The sample group"
+    ],
+    "correct_answer": "The group receiving no treatment",
+    "explanation": "The control group provides a baseline for comparison.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What is a placebo?",
+    "options": [
+      "A real treatment",
+      "An inactive treatment given to the control group",
+      "A variable",
+      "A type of sample"
+    ],
+    "correct_answer": "An inactive treatment given to the control group",
+    "explanation": "Placebos control for the psychological effect of receiving treatment.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What is the placebo effect?",
+    "options": [
+      "No change from treatment",
+      "Improvement simply from believing one received treatment",
+      "A statistical error",
+      "A sampling method"
+    ],
+    "correct_answer": "Improvement simply from believing one received treatment",
+    "explanation": "People sometimes improve just from expectation.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What is a double-blind study?",
+    "options": [
+      "Neither subjects nor researchers know who gets treatment",
+      "Only subjects are blind",
+      "Only researchers are blind",
+      "Everyone knows the treatment"
+    ],
+    "correct_answer": "Neither subjects nor researchers know who gets treatment",
+    "explanation": "Double-blind eliminates bias from both sides.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What is confounding in research?",
+    "options": [
+      "A type of sampling",
+      "A variable that affects results but isn't accounted for",
+      "A statistical test",
+      "Random error"
+    ],
+    "correct_answer": "A variable that affects results but isn't accounted for",
+    "explanation": "Confounding variables can create false associations.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What is the purpose of randomization in experiments?",
+    "options": [
+      "To reduce sample size",
+      "To evenly distribute unknown variables between groups",
+      "To make data more skewed",
+      "To eliminate the control group"
+    ],
+    "correct_answer": "To evenly distribute unknown variables between groups",
+    "explanation": "Randomization balances confounding variables.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What is an outlier?",
+    "options": [
+      "The middle value",
+      "A value unusually far from the rest",
+      "The most common value",
+      "The mean"
+    ],
+    "correct_answer": "A value unusually far from the rest",
+    "explanation": "Outliers are extreme values that stand apart from other data.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What is the 5-number summary?",
+    "options": [
+      "Mean, Mode, Median, Range, IQR",
+      "Min, Q1, Median, Q3, Max",
+      "Min, Max, Mean, Mode, SD",
+      "Q1, Q2, Q3, Mean, Range"
+    ],
+    "correct_answer": "Min, Q1, Median, Q3, Max",
+    "explanation": "The 5-number summary gives a complete picture of distribution.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What is Q1 (first quartile)?",
+    "options": [
+      "The minimum",
+      "The value at the 25th percentile",
+      "The median",
+      "The mean"
+    ],
+    "correct_answer": "The value at the 25th percentile",
+    "explanation": "Q1 separates the lowest 25% from the rest.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What is Q3 (third quartile)?",
+    "options": [
+      "The maximum",
+      "The 75th percentile value",
+      "The median",
+      "The mean"
+    ],
+    "correct_answer": "The 75th percentile value",
+    "explanation": "Q3 separates the lowest 75% from the top 25%.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What is the median also known as?",
+    "options": [
+      "Q1",
+      "Q2",
+      "Q3",
+      "Mean"
+    ],
+    "correct_answer": "Q2",
+    "explanation": "The median is the second quartile.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "For data: 1,2,3,4,5,6,7,8,9,10. What is Q1?",
+    "options": [
+      "2.5",
+      "3",
+      "3.5",
+      "4"
+    ],
+    "correct_answer": "2.5",
+    "explanation": "Lower half {1,2,3,4,5}: Q1 = 2.5 (average of 2nd and 3rd).",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What does it mean when a distribution is uniform?",
+    "options": [
+      "All values are 0",
+      "All values occur with equal frequency",
+      "The mean equals the median only",
+      "There are no outliers"
+    ],
+    "correct_answer": "All values occur with equal frequency",
+    "explanation": "Uniform distributions have constant frequency across all values.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What is a percentile?",
+    "options": [
+      "A percentage",
+      "The value below which a given percentage of data falls",
+      "The mean times 100",
+      "The number of data points"
+    ],
+    "correct_answer": "The value below which a given percentage of data falls",
+    "explanation": "The 80th percentile is the value below which 80% of data falls.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "The 50th percentile equals the:",
+    "options": [
+      "Mean",
+      "Mode",
+      "Median",
+      "Q3"
+    ],
+    "correct_answer": "Median",
+    "explanation": "The 50th percentile = Q2 = median.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "A score at the 90th percentile means:",
+    "options": [
+      "You scored 90%",
+      "90% of scores are below yours",
+      "10% scored below you",
+      "Your score is 90"
+    ],
+    "correct_answer": "90% of scores are below yours",
+    "explanation": "Percentile rank = percentage of data below the value.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What does standard deviation measure?",
+    "options": [
+      "The center of data",
+      "The spread around the mean",
+      "The maximum value",
+      "The range"
+    ],
+    "correct_answer": "The spread around the mean",
+    "explanation": "Standard deviation quantifies average distance from the mean.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "A small standard deviation means the data is:",
+    "options": [
+      "Spread out",
+      "Clustered close to the mean",
+      "Skewed",
+      "Bimodal"
+    ],
+    "correct_answer": "Clustered close to the mean",
+    "explanation": "Small \u03c3 \u2192 data values are close to the mean.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What is the coefficient of variation?",
+    "options": [
+      "\u03c3/\u03bc \u00d7 100%",
+      "\u03bc/\u03c3 \u00d7 100%",
+      "(max-min)/\u03bc",
+      "\u03c3\u00b2/\u03bc"
+    ],
+    "correct_answer": "\u03c3/\u03bc \u00d7 100%",
+    "explanation": "CV = standard deviation / mean \u00d7 100%, comparing relative spread.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "Variance is measured in:",
+    "options": [
+      "Same units as data",
+      "Squared units",
+      "No units",
+      "Percentage units"
+    ],
+    "correct_answer": "Squared units",
+    "explanation": "Variance = \u03c3\u00b2 is in squared units.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "Standard deviation is measured in:",
+    "options": [
+      "Squared units",
+      "Same units as data",
+      "No units",
+      "Cube units"
+    ],
+    "correct_answer": "Same units as data",
+    "explanation": "Standard deviation \u03c3 is in the same units as the original data.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What is the sum of deviations from the mean?",
+    "options": [
+      "n",
+      "The variance",
+      "0",
+      "The range"
+    ],
+    "correct_answer": "0",
+    "explanation": "The sum of (x\u1d62 - x\u0304) always equals 0.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "Sample variance uses n-1 in the denominator because:",
+    "options": [
+      "It's easier to compute",
+      "It provides an unbiased estimate of population variance",
+      "It equals the population variance",
+      "n-1 is always larger"
+    ],
+    "correct_answer": "It provides an unbiased estimate of population variance",
+    "explanation": "Dividing by n-1 (Bessel's correction) corrects for bias.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "Data: 2, 4, 4, 4, 5, 5, 7, 9. Mean = 5. Variance \u2248 ?",
+    "options": [
+      "2",
+      "4",
+      "5",
+      "1"
+    ],
+    "correct_answer": "4",
+    "explanation": "\u03a3(x-5)\u00b2/n=(9+1+1+1+0+0+4+16)/8=32/8=4.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What is a resistant measure?",
+    "options": [
+      "Sensitive to outliers",
+      "Not affected by extreme values",
+      "Always the mean",
+      "Always the mode"
+    ],
+    "correct_answer": "Not affected by extreme values",
+    "explanation": "Resistant measures (median, IQR) are unaffected by outliers.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "Which pair are both resistant measures?",
+    "options": [
+      "Mean and Range",
+      "Median and IQR",
+      "Mean and SD",
+      "Mode and Variance"
+    ],
+    "correct_answer": "Median and IQR",
+    "explanation": "Median and IQR are both resistant to outliers.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What is correlation?",
+    "options": [
+      "Causation between variables",
+      "A measure of the linear relationship between two variables",
+      "The slope of a line",
+      "The mean of data"
+    ],
+    "correct_answer": "A measure of the linear relationship between two variables",
+    "explanation": "Correlation measures strength and direction of a linear relationship.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "The correlation coefficient r ranges from:",
+    "options": [
+      "0 to 1",
+      "0 to 100",
+      "-1 to 0",
+      "-1 to 1"
+    ],
+    "correct_answer": "\u22121 to 1",
+    "explanation": "Pearson's r is always between -1 and 1.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "r = 1 indicates:",
+    "options": [
+      "No correlation",
+      "A perfect negative linear relationship",
+      "A perfect positive linear relationship",
+      "A curved relationship"
+    ],
+    "correct_answer": "A perfect positive linear relationship",
+    "explanation": "r=1 means perfect positive linear correlation.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "r = -1 indicates:",
+    "options": [
+      "No correlation",
+      "Perfect negative linear relationship",
+      "Perfect positive relationship",
+      "Weak relationship"
+    ],
+    "correct_answer": "Perfect negative linear relationship",
+    "explanation": "r=-1 means perfect negative (inverse) linear correlation.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "r = 0 indicates:",
+    "options": [
+      "Strong positive correlation",
+      "Strong negative correlation",
+      "No linear correlation",
+      "Perfect correlation"
+    ],
+    "correct_answer": "No linear correlation",
+    "explanation": "r=0 means no linear relationship (could still be nonlinear).",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What does a positive correlation mean?",
+    "options": [
+      "As x increases, y decreases",
+      "As x increases, y increases",
+      "x and y are unrelated",
+      "The slope is negative"
+    ],
+    "correct_answer": "As x increases, y increases",
+    "explanation": "Positive r: both variables move in the same direction.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What does a negative correlation mean?",
+    "options": [
+      "As x increases, y increases",
+      "As x increases, y decreases",
+      "Variables are identical",
+      "There's no relationship"
+    ],
+    "correct_answer": "As x increases, y decreases",
+    "explanation": "Negative r: variables move in opposite directions.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "Does correlation imply causation?",
+    "options": [
+      "Always",
+      "Sometimes",
+      "Never",
+      "Only when r=1"
+    ],
+    "correct_answer": "Never",
+    "explanation": "Correlation does not imply causation \u2014 other factors may explain the relationship.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What is a scatter plot?",
+    "options": [
+      "A pie chart",
+      "A graph of paired (x,y) data points",
+      "A histogram",
+      "A bar chart"
+    ],
+    "correct_answer": "A graph of paired (x,y) data points",
+    "explanation": "Scatter plots visualize the relationship between two quantitative variables.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What is the least squares regression line?",
+    "options": [
+      "The line connecting all data points",
+      "The line that minimizes squared vertical distances to data",
+      "The mean line",
+      "The median line"
+    ],
+    "correct_answer": "The line that minimizes squared vertical distances to data",
+    "explanation": "Least squares minimizes \u03a3(residual)\u00b2.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "The equation of the regression line is:",
+    "options": [
+      "y=mx+b",
+      "\u0177=b\u2080+b\u2081x",
+      "y=ax\u00b2+bx+c",
+      "\u0177=x/n"
+    ],
+    "correct_answer": "\u0177=b\u2080+b\u2081x",
+    "explanation": "Regression line: predicted y = intercept + slope \u00d7 x.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What is \u0177 (y-hat)?",
+    "options": [
+      "The actual value",
+      "The predicted value from the regression line",
+      "The residual",
+      "The mean of y"
+    ],
+    "correct_answer": "The predicted value from the regression line",
+    "explanation": "\u0177 is the value predicted by the regression equation.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What is a residual?",
+    "options": [
+      "The slope",
+      "The actual y minus predicted \u0177",
+      "The mean of y",
+      "The correlation coefficient"
+    ],
+    "correct_answer": "The actual y minus predicted \u0177",
+    "explanation": "Residual = y - \u0177 (observed minus predicted).",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "The slope b\u2081 in regression tells us:",
+    "options": [
+      "The predicted y when x=0",
+      "How much \u0177 changes for a 1-unit increase in x",
+      "The correlation",
+      "The mean of y"
+    ],
+    "correct_answer": "How much \u0177 changes for a 1-unit increase in x",
+    "explanation": "The slope is the rate of change.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "The intercept b\u2080 tells us:",
+    "options": [
+      "The predicted y when x=0",
+      "The slope",
+      "The correlation",
+      "The residual"
+    ],
+    "correct_answer": "The predicted y when x=0",
+    "explanation": "The y-intercept is \u0177 when x=0.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What is r\u00b2 (coefficient of determination)?",
+    "options": [
+      "The correlation coefficient",
+      "The percent of variation in y explained by x",
+      "The slope squared",
+      "The residual"
+    ],
+    "correct_answer": "The percent of variation in y explained by x",
+    "explanation": "r\u00b2 tells how well the regression model fits the data.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "If r=0.8, then r\u00b2=",
+    "options": [
+      "0.8",
+      "0.4",
+      "0.64",
+      "0.16"
+    ],
+    "correct_answer": "0.64",
+    "explanation": "r\u00b2=0.8\u00b2=0.64 \u2192 64% of variation explained.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "Extrapolation in regression means:",
+    "options": [
+      "Predicting within the data range",
+      "Predicting far outside the data range",
+      "Computing residuals",
+      "Finding the slope"
+    ],
+    "correct_answer": "Predicting far outside the data range",
+    "explanation": "Extrapolation is unreliable as the model may not hold outside data range.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What is a lurking variable?",
+    "options": [
+      "The dependent variable",
+      "An unobserved variable that influences the relationship",
+      "The independent variable",
+      "The slope"
+    ],
+    "correct_answer": "An unobserved variable that influences the relationship",
+    "explanation": "Lurking variables can create false correlation.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "On a scatter plot, a positive association looks like:",
+    "options": [
+      "Points sloping down left to right",
+      "Points sloping up left to right",
+      "A horizontal line",
+      "A circle"
+    ],
+    "correct_answer": "Points sloping up left to right",
+    "explanation": "Positive association: as x increases, y increases.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What is a random variable?",
+    "options": [
+      "A fixed value",
+      "A variable whose value is determined by chance",
+      "The sample mean",
+      "A constant"
+    ],
+    "correct_answer": "A variable whose value is determined by chance",
+    "explanation": "Random variables take values based on chance outcomes.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What is a probability distribution?",
+    "options": [
+      "A histogram of data",
+      "A table/formula giving probabilities for all values of a random variable",
+      "The mean of data",
+      "A sample"
+    ],
+    "correct_answer": "A table/formula giving probabilities for all values of a random variable",
+    "explanation": "A probability distribution assigns probabilities to each possible value.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "For a valid probability distribution, probabilities must:",
+    "options": [
+      "Sum to 0",
+      "All be negative",
+      "Sum to 1",
+      "Be greater than 1"
+    ],
+    "correct_answer": "Sum to 1",
+    "explanation": "All probabilities must be non-negative and sum to 1.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What is the expected value of a random variable?",
+    "options": [
+      "The most common value",
+      "The weighted average of all possible values",
+      "The maximum value",
+      "The variance"
+    ],
+    "correct_answer": "The weighted average of all possible values",
+    "explanation": "E(X) = \u03a3[x\u00b7P(x)] is the long-run average.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "A fair die: E(X) = ?",
+    "options": [
+      "3",
+      "3.5",
+      "4",
+      "2.5"
+    ],
+    "correct_answer": "3.5",
+    "explanation": "E(X)=(1+2+3+4+5+6)/6=21/6=3.5.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What is a binomial experiment?",
+    "options": [
+      "Any experiment",
+      "An experiment with n independent trials, each with two outcomes",
+      "An experiment with infinite trials",
+      "A continuous experiment"
+    ],
+    "correct_answer": "An experiment with n independent trials, each with two outcomes",
+    "explanation": "Binomial: fixed n, independent, binary outcomes (success/failure).",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "In a binomial distribution, p represents:",
+    "options": [
+      "Sample size",
+      "Number of successes",
+      "Probability of success on one trial",
+      "The mean"
+    ],
+    "correct_answer": "Probability of success on one trial",
+    "explanation": "p = P(success) on any single trial.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "Binomial mean formula: \u03bc = ?",
+    "options": [
+      "np(1-p)",
+      "\u221a(np)",
+      "np",
+      "n/p"
+    ],
+    "correct_answer": "np",
+    "explanation": "E(X) = np for a binomial distribution.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "Binomial standard deviation: \u03c3 = ?",
+    "options": [
+      "np",
+      "\u221a(np)",
+      "\u221a(np(1-p))",
+      "np(1-p)"
+    ],
+    "correct_answer": "\u221a(np(1-p))",
+    "explanation": "\u03c3 = \u221a(npq) where q = 1-p.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "In a binomial with n=10, p=0.5, mean =",
+    "options": [
+      "5",
+      "2.5",
+      "10",
+      "1"
+    ],
+    "correct_answer": "5",
+    "explanation": "\u03bc = np = 10 \u00d7 0.5 = 5.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What is the geometric distribution?",
+    "options": [
+      "Number of successes in n trials",
+      "Number of trials until first success",
+      "A continuous distribution",
+      "A uniform distribution"
+    ],
+    "correct_answer": "Number of trials until first success",
+    "explanation": "Geometric distribution counts trials until the first success.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What is a Poisson distribution used for?",
+    "options": [
+      "Counts of events in a fixed time/space",
+      "Proportions",
+      "Continuous measurements",
+      "Binary outcomes"
+    ],
+    "correct_answer": "Counts of events in a fixed time/space",
+    "explanation": "Poisson models rare event counts in a fixed interval.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "Poisson distribution parameter \u03bb represents:",
+    "options": [
+      "Standard deviation",
+      "Variance only",
+      "Mean number of events in the interval",
+      "The sample size"
+    ],
+    "correct_answer": "Mean number of events in the interval",
+    "explanation": "\u03bb = average rate of occurrence.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "A uniform distribution between a and b has mean:",
+    "options": [
+      "a",
+      "b",
+      "(a+b)/2",
+      "b-a"
+    ],
+    "correct_answer": "(a+b)/2",
+    "explanation": "Uniform mean = midpoint of [a,b].",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What is a discrete probability distribution?",
+    "options": [
+      "A distribution for continuous variables",
+      "A distribution for countable values",
+      "A normal distribution",
+      "A sampling distribution"
+    ],
+    "correct_answer": "A distribution for countable values",
+    "explanation": "Discrete distributions assign probabilities to countable outcomes.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What is a continuous probability distribution?",
+    "options": [
+      "A distribution for countable data",
+      "A distribution where probabilities are areas under a curve",
+      "A bar chart distribution",
+      "A Poisson distribution"
+    ],
+    "correct_answer": "A distribution where probabilities are areas under a curve",
+    "explanation": "For continuous variables, P(X=x)=0; probabilities are areas.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "The normal distribution is:",
+    "options": [
+      "Discrete",
+      "Continuous",
+      "Neither",
+      "Both"
+    ],
+    "correct_answer": "Continuous",
+    "explanation": "The normal distribution is a continuous probability distribution.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "P(X = specific value) for a continuous distribution is:",
+    "options": [
+      "Always 0.5",
+      "Equal to the height of the curve",
+      "0",
+      "1"
+    ],
+    "correct_answer": "0",
+    "explanation": "For continuous distributions, probability at a single point = 0.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "What is the standard deviation of a binomial with n=20, p=0.5?",
+    "options": [
+      "5",
+      "\u221a5",
+      "10",
+      "2.24"
+    ],
+    "correct_answer": "\u221a5",
+    "explanation": "\u03c3=\u221a(20\u00d70.5\u00d70.5)=\u221a5\u22482.24.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  },
+  {
+    "question": "Expected value is also called:",
+    "options": [
+      "Variance",
+      "The mean",
+      "Standard deviation",
+      "Median"
+    ],
+    "correct_answer": "The mean",
+    "explanation": "E(X) = \u03bc = mean of the probability distribution.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "statistics"
+  }
+]

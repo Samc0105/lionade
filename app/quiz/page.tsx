@@ -215,6 +215,7 @@ export default function QuizPage() {
 
   const [phase, setPhase] = useState<Phase>("select");
   const [subject, setSubject] = useState<Subject | null>(null);
+  const [activeTopic, setActiveTopic] = useState<string | null>(null);
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState<AnswerRecord[]>([]);
@@ -268,8 +269,9 @@ export default function QuizPage() {
     auto_correct: "🍀", fifty_fifty: "🧊", score_boost: "📈",
   };
 
-  const startQuiz = async (s: Subject) => {
+  const startQuiz = async (s: Subject, topicName?: string) => {
     setSubject(s);
+    setActiveTopic(topicName ?? null);
     setPhase("loading");
     try {
       // Fetch active boosters
@@ -283,7 +285,7 @@ export default function QuizPage() {
       setFiftyFiftyUsed(false);
       setAutoCorrectUsed(false);
 
-      const qs = await getQuizQuestions(s, difficulty);
+      const qs = await getQuizQuestions(s, difficulty, topicName);
       if (qs.length === 0) {
         alert("No questions available for this subject + difficulty yet. Try another!");
         setPhase("select");
@@ -442,6 +444,7 @@ export default function QuizPage() {
   const restartQuiz = () => {
     setPhase("select");
     setSubject(null);
+    setActiveTopic(null);
     setQuestions([]);
     setCurrentIndex(0);
     setAnswers([]);
@@ -590,7 +593,7 @@ export default function QuizPage() {
                   return (
                     <button
                       key={rec.topic.name}
-                      onClick={() => startQuiz(rec.topic.subject)}
+                      onClick={() => startQuiz(rec.topic.subject, rec.topic.name)}
                       className="flex items-center gap-3 p-4 rounded-2xl border text-left transition-all duration-300 hover:-translate-y-0.5 cursor-pointer"
                       style={{ background: `linear-gradient(135deg, ${color}10 0%, #060c18 100%)`, borderColor: `${color}30` }}
                       onMouseEnter={(e) => { e.currentTarget.style.boxShadow = `0 0 20px ${color}20`; }}
@@ -665,7 +668,7 @@ export default function QuizPage() {
                   return (
                     <button
                       key={topic.name}
-                      onClick={() => startQuiz(topic.subject)}
+                      onClick={() => startQuiz(topic.subject, topic.name)}
                       className="group relative p-5 rounded-2xl border transition-all duration-300 hover:-translate-y-1 text-left animate-slide-up cursor-pointer"
                       style={{ animationDelay: `${i * 0.05}s`, border: `1px solid ${color}30`, background: `linear-gradient(135deg, ${color}08 0%, #060c18 100%)` }}
                       onMouseEnter={(e) => { e.currentTarget.style.boxShadow = `0 0 25px ${color}20, 0 8px 32px ${color}10`; e.currentTarget.style.borderColor = `${color}60`; }}
@@ -967,11 +970,12 @@ function ResultsScreen({
         <div className="flex flex-col sm:flex-row gap-3 animate-slide-up" style={{ animationDelay: "0.24s" }}>
           <button
             onClick={() => router.push("/learn")}
-            className="flex-1 py-3.5 rounded-xl font-syne font-bold text-sm text-cream/90 transition-all duration-200 hover:brightness-125 active:scale-[0.98] backdrop-blur-xl cursor-pointer"
+            className="flex-1 py-3.5 rounded-xl font-syne font-bold text-sm transition-all duration-200 hover:brightness-125 active:scale-[0.98] backdrop-blur-xl cursor-pointer"
             style={{
-              background: "rgba(255,255,255,0.06)",
-              border: "1px solid rgba(255,255,255,0.12)",
-              boxShadow: "0 2px 12px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.06)",
+              background: "var(--bg-card)",
+              border: "1px solid var(--card-border)",
+              color: "var(--text-primary)",
+              boxShadow: "var(--card-shadow)",
             }}
           >
             New Quiz
@@ -981,21 +985,22 @@ function ResultsScreen({
             disabled={mistakes.length === 0}
             className="flex-1 py-3.5 rounded-xl font-syne font-bold text-sm transition-all duration-200 hover:brightness-125 active:scale-[0.98] backdrop-blur-xl cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
             style={{
-              background: mistakes.length > 0 ? "rgba(231,76,60,0.10)" : "rgba(255,255,255,0.04)",
-              border: `1px solid ${mistakes.length > 0 ? "rgba(231,76,60,0.25)" : "rgba(255,255,255,0.08)"}`,
-              color: mistakes.length > 0 ? "#E74C3C" : "rgba(255,255,255,0.3)",
-              boxShadow: "0 2px 12px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.04)",
+              background: mistakes.length > 0 ? "rgba(231,76,60,0.10)" : "var(--bg-card)",
+              border: `1px solid ${mistakes.length > 0 ? "rgba(231,76,60,0.25)" : "var(--card-border)"}`,
+              color: mistakes.length > 0 ? "#E74C3C" : "var(--text-secondary)",
+              boxShadow: "var(--card-shadow)",
             }}
           >
             {showMistakes ? "Hide Mistakes" : `Review Mistakes${mistakes.length > 0 ? ` (${mistakes.length})` : ""}`}
           </button>
           <button
             onClick={() => router.push("/dashboard")}
-            className="flex-1 py-3.5 rounded-xl font-syne font-bold text-sm text-cream/90 transition-all duration-200 hover:brightness-125 active:scale-[0.98] backdrop-blur-xl cursor-pointer"
+            className="flex-1 py-3.5 rounded-xl font-syne font-bold text-sm transition-all duration-200 hover:brightness-125 active:scale-[0.98] backdrop-blur-xl cursor-pointer"
             style={{
-              background: "rgba(255,255,255,0.06)",
-              border: "1px solid rgba(255,255,255,0.12)",
-              boxShadow: "0 2px 12px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.06)",
+              background: "var(--bg-card)",
+              border: "1px solid var(--card-border)",
+              color: "var(--text-primary)",
+              boxShadow: "var(--card-shadow)",
             }}
           >
             Dashboard

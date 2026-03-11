@@ -1,0 +1,702 @@
+[
+  {
+    "question": "Find the area of a triangle with sides 13, 14, and 15 using Heron's formula.",
+    "options": [
+      "84",
+      "90",
+      "105",
+      "210"
+    ],
+    "correct_answer": "84",
+    "explanation": "s = (13+14+15)/2 = 21. Area = √(21·8·7·6) = √7056 = 84.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "geometry"
+  },
+  {
+    "question": "A chord is 8 cm long in a circle of radius 5. How far is the chord from the center?",
+    "options": [
+      "2",
+      "3",
+      "4",
+      "√41"
+    ],
+    "correct_answer": "3",
+    "explanation": "Half-chord = 4. Distance = √(5²−4²) = √9 = 3.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the length of the median to the hypotenuse in a right triangle with hypotenuse 20?",
+    "options": [
+      "5",
+      "10",
+      "15",
+      "20"
+    ],
+    "correct_answer": "10",
+    "explanation": "The median to the hypotenuse of a right triangle equals half the hypotenuse: 20/2 = 10.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "geometry"
+  },
+  {
+    "question": "Two similar rectangles have perimeters 24 and 36. What is the ratio of their areas?",
+    "options": [
+      "2:3",
+      "4:9",
+      "8:27",
+      "1:2"
+    ],
+    "correct_answer": "4:9",
+    "explanation": "Perimeter ratio = 24:36 = 2:3. Area ratio = (2/3)² = 4:9.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "geometry"
+  },
+  {
+    "question": "Find the equation of a line perpendicular to y = 2x + 1 passing through (4, 3).",
+    "options": [
+      "y = −(1/2)x + 5",
+      "y = 2x − 5",
+      "y = −2x + 11",
+      "y = (1/2)x + 1"
+    ],
+    "correct_answer": "y = −(1/2)x + 5",
+    "explanation": "Perpendicular slope = −1/2. y−3 = −(1/2)(x−4) → y = −(1/2)x + 5.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "geometry"
+  },
+  {
+    "question": "A regular octagon has side length 5. What is its perimeter?",
+    "options": [
+      "30",
+      "35",
+      "40",
+      "50"
+    ],
+    "correct_answer": "40",
+    "explanation": "Perimeter = 8 × 5 = 40.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "geometry"
+  },
+  {
+    "question": "In a circle of radius 10, what is the length of a 90° arc?",
+    "options": [
+      "5π",
+      "10π",
+      "20π",
+      "25π"
+    ],
+    "correct_answer": "5π",
+    "explanation": "Arc = (90/360)(2π)(10) = (1/4)(20π) = 5π.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "geometry"
+  },
+  {
+    "question": "A pyramid has a rectangular base 8×6 and height 12. What is its volume?",
+    "options": [
+      "96",
+      "192",
+      "288",
+      "576"
+    ],
+    "correct_answer": "192",
+    "explanation": "V = (1/3)(8×6)(12) = (1/3)(48)(12) = 192.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the area of a segment of a circle with radius 6 and central angle 60°?",
+    "options": [
+      "6π − 9√3",
+      "6π + 9√3",
+      "12π − 9√3",
+      "36π − 9√3"
+    ],
+    "correct_answer": "6π − 9√3",
+    "explanation": "Sector area = (60/360)π(36) = 6π. Triangle area = (1/2)(6²)sin60° = 9√3. Segment = 6π − 9√3.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "geometry"
+  },
+  {
+    "question": "The coordinates of the centroid of a triangle with vertices (0,0), (6,0), and (3,9) are what?",
+    "options": [
+      "(3, 3)",
+      "(3, 4.5)",
+      "(4.5, 3)",
+      "(3, 9)"
+    ],
+    "correct_answer": "(3, 3)",
+    "explanation": "Centroid = ((0+6+3)/3, (0+0+9)/3) = (9/3, 9/3) = (3, 3).",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "geometry"
+  },
+  {
+    "question": "Two tangent segments drawn from the same external point to a circle have lengths of what relation?",
+    "options": [
+      "One is twice the other",
+      "They are perpendicular",
+      "They are equal",
+      "They are supplementary"
+    ],
+    "correct_answer": "They are equal",
+    "explanation": "Tangent segments from the same external point to a circle are always congruent.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "geometry"
+  },
+  {
+    "question": "A cylinder is inscribed in a sphere of radius 5. If the cylinder's radius is 3, what is its height?",
+    "options": [
+      "6",
+      "8",
+      "10",
+      "12"
+    ],
+    "correct_answer": "8",
+    "explanation": "Half-height² + 3² = 5² → half-height = 4 → height = 8.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the area of a parallelogram with sides 10 and 6, and an included angle of 30°?",
+    "options": [
+      "15",
+      "30",
+      "60",
+      "30√3"
+    ],
+    "correct_answer": "30",
+    "explanation": "Area = ab·sin(θ) = 10(6)sin30° = 60(1/2) = 30.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "geometry"
+  },
+  {
+    "question": "In a circle, a central angle is 120°. What fraction of the circle's area is the sector?",
+    "options": [
+      "1/4",
+      "1/3",
+      "2/3",
+      "1/6"
+    ],
+    "correct_answer": "1/3",
+    "explanation": "Fraction = 120°/360° = 1/3.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "geometry"
+  },
+  {
+    "question": "A right prism has a triangular base with legs 3 and 4, and height 10. What is its volume?",
+    "options": [
+      "30",
+      "60",
+      "120",
+      "240"
+    ],
+    "correct_answer": "60",
+    "explanation": "Base area = (1/2)(3)(4) = 6. Volume = 6 × 10 = 60.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the distance from the point (3, 4) to the line y = 0 (the x-axis)?",
+    "options": [
+      "3",
+      "4",
+      "5",
+      "7"
+    ],
+    "correct_answer": "4",
+    "explanation": "The distance from a point to the x-axis is the absolute value of its y-coordinate: |4| = 4.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "geometry"
+  },
+  {
+    "question": "A regular polygon has interior angles of 156°. How many sides does it have?",
+    "options": [
+      "12",
+      "15",
+      "18",
+      "20"
+    ],
+    "correct_answer": "15",
+    "explanation": "Exterior angle = 180°−156° = 24°. n = 360°/24° = 15.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "geometry"
+  },
+  {
+    "question": "Find the area of a triangle with two sides 7 and 10 and included angle 60°.",
+    "options": [
+      "35/2",
+      "35√3/2",
+      "70",
+      "35"
+    ],
+    "correct_answer": "35√3/2",
+    "explanation": "Area = (1/2)ab·sinC = (1/2)(7)(10)sin60° = 35(√3/2) = 35√3/2.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "geometry"
+  },
+  {
+    "question": "A cube has a space diagonal of 6√3. What is its side length?",
+    "options": [
+      "3",
+      "6",
+      "9",
+      "12"
+    ],
+    "correct_answer": "6",
+    "explanation": "Space diagonal = s√3 → 6√3 = s√3 → s = 6.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the area of a kite with diagonals 10 and 14?",
+    "options": [
+      "35",
+      "70",
+      "140",
+      "280"
+    ],
+    "correct_answer": "70",
+    "explanation": "Area of a kite = (1/2)d₁d₂ = (1/2)(10)(14) = 70.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "geometry"
+  },
+  {
+    "question": "A tangent from an external point to a circle has length 12, and the external point is 13 from the center. What is the radius?",
+    "options": [
+      "1",
+      "5",
+      "7",
+      "√313"
+    ],
+    "correct_answer": "5",
+    "explanation": "r² + 12² = 13² → r² = 169 − 144 = 25 → r = 5.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "geometry"
+  },
+  {
+    "question": "The ratio of the areas of two circles is 9:25. What is the ratio of their radii?",
+    "options": [
+      "3:5",
+      "9:25",
+      "81:625",
+      "√9:√25"
+    ],
+    "correct_answer": "3:5",
+    "explanation": "Area ratio = r₁²:r₂² = 9:25, so r₁:r₂ = 3:5.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the length of the altitude to the hypotenuse in a right triangle with legs 6 and 8?",
+    "options": [
+      "4.8",
+      "5",
+      "7",
+      "10"
+    ],
+    "correct_answer": "4.8",
+    "explanation": "Hypotenuse = 10. Altitude = (leg₁ × leg₂)/hypotenuse = (6×8)/10 = 4.8.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "geometry"
+  },
+  {
+    "question": "A sphere has volume 288π. What is its radius?",
+    "options": [
+      "4",
+      "6",
+      "8",
+      "12"
+    ],
+    "correct_answer": "6",
+    "explanation": "(4/3)πr³ = 288π → r³ = 216 → r = 6.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "geometry"
+  },
+  {
+    "question": "Find the area of a regular pentagon with side 6 and apothem 4.13 (approx).",
+    "options": [
+      "41.3",
+      "61.95",
+      "82.6",
+      "123.9"
+    ],
+    "correct_answer": "61.95",
+    "explanation": "Area = (1/2)(perimeter)(apothem) = (1/2)(30)(4.13) = 61.95.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the image of point (3, −2) after a reflection over the y-axis?",
+    "options": [
+      "(−3, −2)",
+      "(3, 2)",
+      "(−3, 2)",
+      "(2, −3)"
+    ],
+    "correct_answer": "(−3, −2)",
+    "explanation": "Reflecting over the y-axis negates the x-coordinate: (3,−2) → (−3,−2).",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "geometry"
+  },
+  {
+    "question": "In a 45-45-90 triangle, if the hypotenuse is 10, what is each leg?",
+    "options": [
+      "5",
+      "5√2",
+      "5√3",
+      "10√2"
+    ],
+    "correct_answer": "5√2",
+    "explanation": "Leg = hypotenuse/√2 = 10/√2 = 5√2.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "geometry"
+  },
+  {
+    "question": "A cone has radius 8 and height 15. What is its slant height?",
+    "options": [
+      "13",
+      "17",
+      "20",
+      "23"
+    ],
+    "correct_answer": "17",
+    "explanation": "Slant height = √(r²+h²) = √(64+225) = √289 = 17.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the image of (2, 5) after a 90° counterclockwise rotation about the origin?",
+    "options": [
+      "(−5, 2)",
+      "(5, −2)",
+      "(−2, −5)",
+      "(2, −5)"
+    ],
+    "correct_answer": "(−5, 2)",
+    "explanation": "A 90° CCW rotation maps (x,y) to (−y,x): (2,5) → (−5,2).",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "geometry"
+  },
+  {
+    "question": "The lateral area of a regular hexagonal prism with side 4 and height 10 is what?",
+    "options": [
+      "120",
+      "200",
+      "240",
+      "480"
+    ],
+    "correct_answer": "240",
+    "explanation": "Lateral area = perimeter × height = 6(4)(10) = 240.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "geometry"
+  },
+  {
+    "question": "Two circles with radii 5 and 12 are externally tangent. How many common tangents do they have?",
+    "options": [
+      "1",
+      "2",
+      "3",
+      "4"
+    ],
+    "correct_answer": "3",
+    "explanation": "Externally tangent circles (touching at one point, not overlapping) have exactly 3 common tangent lines: 2 external and 1 at the point of tangency.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the area of a triangle with vertices (1,1), (4,1), and (1,5)?",
+    "options": [
+      "4",
+      "6",
+      "8",
+      "12"
+    ],
+    "correct_answer": "6",
+    "explanation": "Base along x = 4−1 = 3, height along y = 5−1 = 4. Area = (1/2)(3)(4) = 6.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "geometry"
+  },
+  {
+    "question": "A sector has arc length 8π and radius 12. What is the central angle in degrees?",
+    "options": [
+      "60°",
+      "90°",
+      "120°",
+      "150°"
+    ],
+    "correct_answer": "120°",
+    "explanation": "Arc = (θ/360°)(2π)(12) = (θ/360°)(24π). Set equal to 8π: θ = 120°.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "geometry"
+  },
+  {
+    "question": "Find the surface area of a rectangular prism with dimensions 5 × 7 × 3.",
+    "options": [
+      "105",
+      "142",
+      "210",
+      "284"
+    ],
+    "correct_answer": "142",
+    "explanation": "SA = 2(5·7 + 5·3 + 7·3) = 2(35+15+21) = 2(71) = 142.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the image of (4, −1) after translation by vector ⟨−3, 5⟩?",
+    "options": [
+      "(1, 4)",
+      "(7, −6)",
+      "(−1, −4)",
+      "(1, −4)"
+    ],
+    "correct_answer": "(1, 4)",
+    "explanation": "Add the vector: (4+(−3), −1+5) = (1, 4).",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "geometry"
+  },
+  {
+    "question": "A regular tetrahedron has edge length 6. How many edges does it have?",
+    "options": [
+      "4",
+      "6",
+      "8",
+      "12"
+    ],
+    "correct_answer": "6",
+    "explanation": "A tetrahedron has 4 triangular faces, 4 vertices, and 6 edges.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "geometry"
+  },
+  {
+    "question": "In a parallelogram, consecutive angles are what?",
+    "options": [
+      "Equal",
+      "Complementary",
+      "Supplementary",
+      "Vertical"
+    ],
+    "correct_answer": "Supplementary",
+    "explanation": "Consecutive angles in a parallelogram are supplementary (add to 180°).",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "geometry"
+  },
+  {
+    "question": "A circular pool has circumference 30π feet. What is its area? (Use π)",
+    "options": [
+      "225π",
+      "450π",
+      "900π",
+      "30π"
+    ],
+    "correct_answer": "225π",
+    "explanation": "C = 2πr = 30π → r = 15. Area = π(225) = 225π sq ft.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "geometry"
+  },
+  {
+    "question": "A triangle has sides 8, 15, and 17. Is it a right triangle?",
+    "options": [
+      "Yes",
+      "No",
+      "Only if one angle is labeled 90°",
+      "Cannot determine"
+    ],
+    "correct_answer": "Yes",
+    "explanation": "8² + 15² = 64 + 225 = 289 = 17². The Pythagorean theorem holds.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the scale factor if a shape is dilated from area 16 to area 144?",
+    "options": [
+      "3",
+      "6",
+      "9",
+      "128"
+    ],
+    "correct_answer": "3",
+    "explanation": "Area ratio = 144/16 = 9. Scale factor = √9 = 3.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "geometry"
+  },
+  {
+    "question": "A prism has a regular hexagonal base with side 3 and height 8. What is its volume?",
+    "options": [
+      "27√3/2",
+      "108√3",
+      "216√3",
+      "324"
+    ],
+    "correct_answer": "108√3",
+    "explanation": "Hex area = (3√3/2)(9) = 27√3/2. Volume = (27√3/2)(8) = 108√3.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the equation of the perpendicular bisector of the segment from (0,0) to (6,8)?",
+    "options": [
+      "3x + 4y = 25",
+      "4x + 3y = 25",
+      "3x − 4y = 25",
+      "y = (3/4)x + 25"
+    ],
+    "correct_answer": "3x + 4y = 25",
+    "explanation": "Midpoint = (3,4). Slope of segment = 4/3, so perp slope = −3/4. y−4 = −(3/4)(x−3) → 3x+4y = 25.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "geometry"
+  },
+  {
+    "question": "If the diameter of a sphere is doubled, by what factor does the volume increase?",
+    "options": [
+      "2",
+      "4",
+      "6",
+      "8"
+    ],
+    "correct_answer": "8",
+    "explanation": "Volume scales as r³. Doubling the diameter doubles the radius, so volume × 2³ = 8.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "geometry"
+  },
+  {
+    "question": "A circular sector has area 24π and radius 8. What is the central angle?",
+    "options": [
+      "90°",
+      "108°",
+      "120°",
+      "135°"
+    ],
+    "correct_answer": "135°",
+    "explanation": "(θ/360°)π(64) = 24π → θ/360 = 24/64 = 3/8 → θ = 135°.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "geometry"
+  },
+  {
+    "question": "The angle bisector of a triangle divides the opposite side in what ratio?",
+    "options": [
+      "Equal halves always",
+      "Ratio of the adjacent sides",
+      "Ratio of the opposite angles",
+      "Random"
+    ],
+    "correct_answer": "Ratio of the adjacent sides",
+    "explanation": "By the Angle Bisector Theorem, the bisector divides the opposite side in the ratio of the two adjacent sides.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the perimeter of a 30-60-90 triangle with hypotenuse 10?",
+    "options": [
+      "15 + 5√3",
+      "5 + 5√3 + 10",
+      "10 + 5√3",
+      "25"
+    ],
+    "correct_answer": "15 + 5√3",
+    "explanation": "Short leg = 5, long leg = 5√3, hyp = 10. Perimeter = 5 + 5√3 + 10 = 15 + 5√3.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the volume of a cylinder with diameter 8 and height 7? (Use π)",
+    "options": [
+      "56π",
+      "112π",
+      "224π",
+      "448π"
+    ],
+    "correct_answer": "112π",
+    "explanation": "r = 4. V = π(16)(7) = 112π.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "geometry"
+  },
+  {
+    "question": "A rectangle has diagonal 13 and one side 5. What is the area?",
+    "options": [
+      "30",
+      "48",
+      "60",
+      "65"
+    ],
+    "correct_answer": "60",
+    "explanation": "Other side = √(169−25) = √144 = 12. Area = 5 × 12 = 60.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the image of (−2, 3) after a 180° rotation about the origin?",
+    "options": [
+      "(2, −3)",
+      "(−2, −3)",
+      "(3, −2)",
+      "(2, 3)"
+    ],
+    "correct_answer": "(2, −3)",
+    "explanation": "A 180° rotation maps (x,y) to (−x,−y): (−2,3) → (2,−3).",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "geometry"
+  },
+  {
+    "question": "Find the area of an equilateral triangle with side 10.",
+    "options": [
+      "25√3",
+      "50√3",
+      "100√3",
+      "50"
+    ],
+    "correct_answer": "25√3",
+    "explanation": "Area = (√3/4)s² = (√3/4)(100) = 25√3.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "geometry"
+  }
+]

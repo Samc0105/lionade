@@ -1,0 +1,702 @@
+[
+  {
+    "question": "Solve: log₂(x − 1) + log₂(x + 1) = 3",
+    "options": [
+      "x = 3",
+      "x = −3",
+      "x = 3 and x = −3",
+      "No solution"
+    ],
+    "correct_answer": "x = 3",
+    "explanation": "Combine: log₂((x−1)(x+1)) = 3 → x²−1 = 8 → x² = 9 → x = ±3. Only x = 3 is valid (x−1 must be positive).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "algebra"
+  },
+  {
+    "question": "Simplify: (x³ + x² − 2x)/(x³ − x)",
+    "options": [
+      "(x + 2)/(x + 1)",
+      "(x − 2)/(x − 1)",
+      "(x + 2)/(x − 1)",
+      "x + 2"
+    ],
+    "correct_answer": "(x + 2)/(x + 1)",
+    "explanation": "Factor numerator: x(x²+x−2) = x(x+2)(x−1). Factor denominator: x(x²−1) = x(x+1)(x−1). Cancel x and (x−1).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "algebra"
+  },
+  {
+    "question": "Find the 20th term of the arithmetic sequence with a₁ = 7 and d = −3.",
+    "options": [
+      "−50",
+      "−53",
+      "64",
+      "−47"
+    ],
+    "correct_answer": "−50",
+    "explanation": "a₂₀ = 7 + 19(−3) = 7 − 57 = −50.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "algebra"
+  },
+  {
+    "question": "Solve: 8^(2x) = 4^(3x+1)",
+    "options": [
+      "x = 2",
+      "x = −2",
+      "x = 1",
+      "No solution"
+    ],
+    "correct_answer": "No solution",
+    "explanation": "Rewrite: 2^(6x) = 2^(6x+2) → 6x = 6x + 2 → 0 = 2. This is a contradiction, so no solution.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "algebra"
+  },
+  {
+    "question": "Is (x + 2) a factor of x⁴ + 3x³ − x² − 9x − 6?",
+    "options": [
+      "Yes",
+      "No",
+      "Only if x > 0",
+      "Cannot determine"
+    ],
+    "correct_answer": "Yes",
+    "explanation": "P(−2) = 16 − 24 − 4 + 18 − 6 = 0. Since P(−2) = 0, (x+2) is a factor.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "algebra"
+  },
+  {
+    "question": "Evaluate: i + i² + i³ + ... + i²⁰",
+    "options": [
+      "0",
+      "−1",
+      "1",
+      "i"
+    ],
+    "correct_answer": "0",
+    "explanation": "The powers of i cycle every 4 with sum 0: (i−1−i+1) = 0. Since 20 is divisible by 4, the total sum is 0.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "algebra"
+  },
+  {
+    "question": "Solve: 2·log₃(x) − log₃(x + 6) = 1",
+    "options": [
+      "x = 6",
+      "x = 3",
+      "x = 9",
+      "x = −1"
+    ],
+    "correct_answer": "x = 6",
+    "explanation": "log₃(x²) − log₃(x+6) = 1 → log₃(x²/(x+6)) = 1 → x²/(x+6) = 3 → x²−3x−18 = 0 → (x−6)(x+3) = 0. Only x = 6 valid.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "algebra"
+  },
+  {
+    "question": "In a geometric sequence, a₂ = 6 and a₅ = 162. What is a₁?",
+    "options": [
+      "2",
+      "3",
+      "1",
+      "6"
+    ],
+    "correct_answer": "2",
+    "explanation": "a₅/a₂ = r³ → 162/6 = 27 → r = 3. a₁ = a₂/r = 6/3 = 2.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "algebra"
+  },
+  {
+    "question": "How many x-intercepts does f(x) = x⁴ − 4x² + 3 have?",
+    "options": [
+      "4",
+      "2",
+      "3",
+      "0"
+    ],
+    "correct_answer": "4",
+    "explanation": "Set to 0: (x²−1)(x²−3) = 0 → x = ±1, ±√3. Four real x-intercepts.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "algebra"
+  },
+  {
+    "question": "Solve: 4·3^x = 12^x",
+    "options": [
+      "x = log₄(4) = 1",
+      "x = ln(4)/ln(4) = 1",
+      "x = log(4)/log(4) = 1",
+      "All equivalent to x = 1"
+    ],
+    "correct_answer": "All equivalent to x = 1",
+    "explanation": "Rewrite: 4·3ˣ = (4·3)ˣ = 4ˣ·3ˣ → 4 = 4ˣ → x = 1.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "algebra"
+  },
+  {
+    "question": "If f(x) = x/(x+1) and g(x) = 1/(x−1), what is the domain of (f·g)(x)?",
+    "options": [
+      "All reals except x = −1 and x = 1",
+      "All reals except x = 1",
+      "All reals except x = −1",
+      "All real numbers"
+    ],
+    "correct_answer": "All reals except x = −1 and x = 1",
+    "explanation": "f requires x ≠ −1 and g requires x ≠ 1. The domain excludes both.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "algebra"
+  },
+  {
+    "question": "Given that 2 is a zero of f(x) = x³ − 2x² − x + 2, factor completely.",
+    "options": [
+      "(x−2)(x−1)(x+1)",
+      "(x−2)(x+1)²",
+      "(x−2)²(x+1)",
+      "(x−2)(x²+1)"
+    ],
+    "correct_answer": "(x−2)(x−1)(x+1)",
+    "explanation": "Divide by (x−2): x²−1 = (x−1)(x+1). Full factorization: (x−2)(x−1)(x+1).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "algebra"
+  },
+  {
+    "question": "What is the sum: Σ(n=1 to 8) n(n+1)?",
+    "options": [
+      "240",
+      "210",
+      "168",
+      "120"
+    ],
+    "correct_answer": "240",
+    "explanation": "Σn(n+1) = Σn² + Σn = 8(9)(17)/6 + 8(9)/2 = 204 + 36 = 240.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "algebra"
+  },
+  {
+    "question": "Solve: 10^(x−1) = 100^(x/3)",
+    "options": [
+      "x = 3",
+      "x = −3",
+      "x = 1",
+      "x = 9"
+    ],
+    "correct_answer": "x = 3",
+    "explanation": "Rewrite: 10^(x−1) = 10^(2x/3) → x−1 = 2x/3 → 3x−3 = 2x → x = 3.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "algebra"
+  },
+  {
+    "question": "What are the holes (removable discontinuities) of f(x) = (x²−4)/(x²−x−2)?",
+    "options": [
+      "x = 2",
+      "x = −1",
+      "x = 2 and x = −1",
+      "None"
+    ],
+    "correct_answer": "x = 2",
+    "explanation": "Factor: (x−2)(x+2)/((x−2)(x+1)). Cancel (x−2): hole at x = 2. VA at x = −1.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "algebra"
+  },
+  {
+    "question": "Solve for x: x − √x = 6",
+    "options": [
+      "x = 9",
+      "x = 4",
+      "x = 16",
+      "x = 36"
+    ],
+    "correct_answer": "x = 9",
+    "explanation": "Let u = √x: u²−u−6 = 0 → (u−3)(u+2) = 0. u = 3 → x = 9. (u = −2 invalid since √x ≥ 0.)",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "algebra"
+  },
+  {
+    "question": "What is the inverse of f(x) = e^(2x) + 1?",
+    "options": [
+      "f⁻¹(x) = ln(x−1)/2",
+      "f⁻¹(x) = (ln(x)−1)/2",
+      "f⁻¹(x) = 2·ln(x−1)",
+      "f⁻¹(x) = e^((x−1)/2)"
+    ],
+    "correct_answer": "f⁻¹(x) = ln(x−1)/2",
+    "explanation": "x = e^(2y)+1 → x−1 = e^(2y) → ln(x−1) = 2y → y = ln(x−1)/2.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "algebra"
+  },
+  {
+    "question": "Simplify: log₃(81) − log₃(1/9)",
+    "options": [
+      "6",
+      "2",
+      "8",
+      "4"
+    ],
+    "correct_answer": "6",
+    "explanation": "log₃(81) = 4 and log₃(1/9) = log₃(3⁻²) = −2. So 4 − (−2) = 6.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "algebra"
+  },
+  {
+    "question": "If x + 1/x = 5, find x³ + 1/x³.",
+    "options": [
+      "110",
+      "125",
+      "80",
+      "95"
+    ],
+    "correct_answer": "110",
+    "explanation": "First: x²+1/x² = (x+1/x)² − 2 = 25 − 2 = 23. Then x³+1/x³ = (x+1/x)(x²−1+1/x²) = 5(23−1) = 5(22) = 110.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "algebra"
+  },
+  {
+    "question": "Solve: 3^(x) + 3^(x+1) = 36",
+    "options": [
+      "x = 2",
+      "x = 3",
+      "x = 1",
+      "x = 4"
+    ],
+    "correct_answer": "x = 2",
+    "explanation": "Factor: 3ˣ(1 + 3) = 36 → 4·3ˣ = 36 → 3ˣ = 9 → x = 2.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "algebra"
+  },
+  {
+    "question": "What is the equation of the circle with center (3, −2) and radius 5?",
+    "options": [
+      "(x−3)² + (y+2)² = 25",
+      "(x+3)² + (y−2)² = 25",
+      "(x−3)² + (y−2)² = 5",
+      "(x−3)² + (y+2)² = 5"
+    ],
+    "correct_answer": "(x−3)² + (y+2)² = 25",
+    "explanation": "Standard form: (x−h)² + (y−k)² = r², giving (x−3)² + (y+2)² = 25.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "algebra"
+  },
+  {
+    "question": "Find the remainder when x⁵ + 1 is divided by x + 1.",
+    "options": [
+      "0",
+      "2",
+      "−2",
+      "1"
+    ],
+    "correct_answer": "0",
+    "explanation": "P(−1) = (−1)⁵ + 1 = −1 + 1 = 0.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "algebra"
+  },
+  {
+    "question": "Solve: |x + 3| + |x − 1| = 8",
+    "options": [
+      "x = −5 or x = 3",
+      "x = 5 or x = −3",
+      "x = −5 or x = −3",
+      "x = 3 or x = 5"
+    ],
+    "correct_answer": "x = −5 or x = 3",
+    "explanation": "For x ≥ 1: (x+3)+(x−1) = 8 → 2x+2 = 8 → x = 3. For x ≤ −3: −(x+3)−(x−1) = 8 → −2x−2 = 8 → x = −5. For −3 ≤ x < 1: (x+3)−(x−1) = 4 ≠ 8. Solutions: x = 3, x = −5.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "algebra"
+  },
+  {
+    "question": "If (2+i) is a root of x² + bx + c = 0 (real coefficients), what is c?",
+    "options": [
+      "5",
+      "4",
+      "3",
+      "−5"
+    ],
+    "correct_answer": "5",
+    "explanation": "Complex roots come in conjugate pairs: (2+i)(2−i) = 4+1 = 5 = c.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "algebra"
+  },
+  {
+    "question": "Simplify: Σ(k=1 to n) k = ?",
+    "options": [
+      "n(n+1)/2",
+      "n²",
+      "n(n−1)/2",
+      "(n+1)²/2"
+    ],
+    "correct_answer": "n(n+1)/2",
+    "explanation": "The sum of the first n positive integers is n(n+1)/2.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "algebra"
+  },
+  {
+    "question": "Solve: (2x−1)^(1/3) = −3",
+    "options": [
+      "x = −13",
+      "x = 14",
+      "x = −14",
+      "x = 13"
+    ],
+    "correct_answer": "x = −13",
+    "explanation": "Cube both sides: 2x−1 = −27 → 2x = −26 → x = −13.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "algebra"
+  },
+  {
+    "question": "If f(x) = 5ˣ, find f⁻¹(125).",
+    "options": [
+      "3",
+      "5",
+      "25",
+      "15"
+    ],
+    "correct_answer": "3",
+    "explanation": "f⁻¹(125) asks: 5ˣ = 125 = 5³, so x = 3.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "algebra"
+  },
+  {
+    "question": "What is the degree and leading coefficient of (3x² − 1)(2x³ + x)?",
+    "options": [
+      "Degree 5, LC 6",
+      "Degree 6, LC 6",
+      "Degree 5, LC 3",
+      "Degree 6, LC 2"
+    ],
+    "correct_answer": "Degree 5, LC 6",
+    "explanation": "Highest-degree term: 3x² · 2x³ = 6x⁵. Degree 5, leading coefficient 6.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "algebra"
+  },
+  {
+    "question": "Solve: (x+1)/(x−2) ≥ 3",
+    "options": [
+      "2 < x ≤ 7/2",
+      "x ≥ 7/2",
+      "x ≤ 2 or x ≥ 7/2",
+      "x > 2"
+    ],
+    "correct_answer": "2 < x ≤ 7/2",
+    "explanation": "Rearrange: (x+1−3(x−2))/(x−2) ≥ 0 → (−2x+7)/(x−2) ≥ 0 → (2x−7)/(x−2) ≤ 0. Critical: x=2, x=7/2. Solution: 2 < x ≤ 7/2.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "algebra"
+  },
+  {
+    "question": "Find the sum of the geometric series: 5 + 5/2 + 5/4 + ... (infinite)",
+    "options": [
+      "10",
+      "15",
+      "20",
+      "5"
+    ],
+    "correct_answer": "10",
+    "explanation": "S = a/(1−r) = 5/(1−1/2) = 5/(1/2) = 10.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "algebra"
+  },
+  {
+    "question": "Solve: x⁶ − 9x³ + 8 = 0",
+    "options": [
+      "x = 1 or x = 2",
+      "x = ±1 or x = ±2",
+      "x = 1 and x = 2 only",
+      "x = 8 or x = 1"
+    ],
+    "correct_answer": "x = 1 or x = 2",
+    "explanation": "Let u = x³: u²−9u+8 = (u−1)(u−8) = 0. u=1→x=1, u=8→x=2.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "algebra"
+  },
+  {
+    "question": "If f(x) = (x−1)²(x+2), how does the graph behave at x = 1?",
+    "options": [
+      "Touches and turns",
+      "Crosses",
+      "Has a vertical asymptote",
+      "Has a hole"
+    ],
+    "correct_answer": "Touches and turns",
+    "explanation": "x = 1 is a root of even multiplicity (2), so the graph touches the x-axis and turns around.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "algebra"
+  },
+  {
+    "question": "Solve: log₂(log₃(x)) = 1",
+    "options": [
+      "x = 9",
+      "x = 8",
+      "x = 6",
+      "x = 27"
+    ],
+    "correct_answer": "x = 9",
+    "explanation": "log₂(log₃(x)) = 1 → log₃(x) = 2¹ = 2 → x = 3² = 9.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "algebra"
+  },
+  {
+    "question": "What is (1−i)/(1+i)?",
+    "options": [
+      "−i",
+      "i",
+      "−1",
+      "1"
+    ],
+    "correct_answer": "−i",
+    "explanation": "Multiply by conjugate: (1−i)²/((1+i)(1−i)) = (1−2i+i²)/2 = (1−2i−1)/2 = −2i/2 = −i.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "algebra"
+  },
+  {
+    "question": "How many terms are in the expansion of (a + b)⁸?",
+    "options": [
+      "9",
+      "8",
+      "7",
+      "16"
+    ],
+    "correct_answer": "9",
+    "explanation": "The expansion of (a+b)ⁿ has n+1 terms. For n = 8: 9 terms.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "algebra"
+  },
+  {
+    "question": "Solve: x² · 2^x = 4 · 2^x",
+    "options": [
+      "x = ±2",
+      "x = 2 only",
+      "x = −2 only",
+      "No solution"
+    ],
+    "correct_answer": "x = ±2",
+    "explanation": "Since 2ˣ > 0 always, divide both sides: x² = 4 → x = ±2.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "algebra"
+  },
+  {
+    "question": "If the roots of x² − 5x + k = 0 differ by 3, what is k?",
+    "options": [
+      "4",
+      "6",
+      "8",
+      "16"
+    ],
+    "correct_answer": "4",
+    "explanation": "Let roots be r and s. r+s = 5, r−s = 3. So r = 4, s = 1. k = rs = 4.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "algebra"
+  },
+  {
+    "question": "Simplify: ln(e³) + ln(e⁻¹) − ln(e²)",
+    "options": [
+      "0",
+      "4",
+      "2",
+      "−2"
+    ],
+    "correct_answer": "0",
+    "explanation": "ln(e³) = 3, ln(e⁻¹) = −1, ln(e²) = 2. Sum: 3 + (−1) − 2 = 0.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "algebra"
+  },
+  {
+    "question": "If f(x) = |x² − 4|, how many solutions does f(x) = 3 have?",
+    "options": [
+      "4",
+      "2",
+      "3",
+      "1"
+    ],
+    "correct_answer": "4",
+    "explanation": "Case 1: x²−4 = 3 → x² = 7 → x = ±√7. Case 2: x²−4 = −3 → x² = 1 → x = ±1. Total: 4 solutions.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "algebra"
+  },
+  {
+    "question": "Solve: 2^(x+3) = 3^(x) (express x in terms of ln)",
+    "options": [
+      "x = 3ln(2)/(ln(3)−ln(2))",
+      "x = ln(3)/(ln(2)+ln(3))",
+      "x = 3/(ln(3)−ln(2))",
+      "x = ln(8)/ln(3/2)"
+    ],
+    "correct_answer": "x = 3ln(2)/(ln(3)−ln(2))",
+    "explanation": "Take ln: (x+3)ln(2) = x·ln(3) → x·ln(2)+3ln(2) = x·ln(3) → 3ln(2) = x(ln(3)−ln(2)) → x = 3ln(2)/(ln(3)−ln(2)).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "algebra"
+  },
+  {
+    "question": "What is the nth term formula for the sequence 2, 5, 10, 17, 26, ...?",
+    "options": [
+      "n² + 1",
+      "2n + 1",
+      "n² + n",
+      "n² − 1"
+    ],
+    "correct_answer": "n² + 1",
+    "explanation": "Check: 1²+1=2, 2²+1=5, 3²+1=10, 4²+1=17, 5²+1=26. Pattern: aₙ = n²+1.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "algebra"
+  },
+  {
+    "question": "If x = 2 + √3, what is x + 1/x?",
+    "options": [
+      "4",
+      "2√3",
+      "2 + 2√3",
+      "4 + √3"
+    ],
+    "correct_answer": "4",
+    "explanation": "1/x = 1/(2+√3) = (2−√3)/((2+√3)(2−√3)) = (2−√3)/1 = 2−√3. So x + 1/x = (2+√3)+(2−√3) = 4.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "algebra"
+  },
+  {
+    "question": "Factor: x⁴ + 4x² + 4",
+    "options": [
+      "(x² + 2)²",
+      "(x + 2)⁴",
+      "(x² − 2)²",
+      "Cannot be factored"
+    ],
+    "correct_answer": "(x² + 2)²",
+    "explanation": "This is a perfect square: (x²)² + 2(2)(x²) + 2² = (x² + 2)².",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "algebra"
+  },
+  {
+    "question": "Solve: 1/(x+1) + 1/(x−1) = 3/(x²−1)",
+    "options": [
+      "x = 3/2",
+      "x = 1",
+      "x = −1",
+      "No solution"
+    ],
+    "correct_answer": "x = 3/2",
+    "explanation": "LCD: (x+1)(x−1). Multiply: (x−1)+(x+1) = 3 → 2x = 3 → x = 3/2. Check: neither denominator is zero ✓.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "algebra"
+  },
+  {
+    "question": "Solve the inequality: x³ − 4x > 0",
+    "options": [
+      "−2 < x < 0 or x > 2",
+      "x > 2",
+      "0 < x < 2",
+      "x < −2 or x > 2"
+    ],
+    "correct_answer": "−2 < x < 0 or x > 2",
+    "explanation": "Factor: x(x−2)(x+2) > 0. Sign analysis with critical points −2, 0, 2 gives positive on (−2,0) and (2,∞).",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "algebra"
+  },
+  {
+    "question": "If 3ˣ = 5, what is 9ˣ?",
+    "options": [
+      "25",
+      "10",
+      "15",
+      "125"
+    ],
+    "correct_answer": "25",
+    "explanation": "9ˣ = (3²)ˣ = (3ˣ)² = 5² = 25.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "algebra"
+  },
+  {
+    "question": "What is the sum of the roots of 3x³ − 7x² + 2x − 1 = 0?",
+    "options": [
+      "7/3",
+      "2/3",
+      "1/3",
+      "−7/3"
+    ],
+    "correct_answer": "7/3",
+    "explanation": "By Vieta's formulas, sum of roots = −(−7)/3 = 7/3.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "algebra"
+  },
+  {
+    "question": "Solve: √(x + 6) = x",
+    "options": [
+      "x = 3 only",
+      "x = −2 only",
+      "x = 3 and x = −2",
+      "No solution"
+    ],
+    "correct_answer": "x = 3 only",
+    "explanation": "Square: x+6 = x² → x²−x−6 = 0 → (x−3)(x+2) = 0. Check x=3: √9=3 ✓. Check x=−2: √4=2≠−2 ✗.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "algebra"
+  },
+  {
+    "question": "What is log₅(1/125)?",
+    "options": [
+      "−3",
+      "3",
+      "−5",
+      "1/3"
+    ],
+    "correct_answer": "−3",
+    "explanation": "1/125 = 5⁻³, so log₅(5⁻³) = −3.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "algebra"
+  },
+  {
+    "question": "If P(x) = x⁴ − 5x² + 4, how many times does the graph cross the x-axis?",
+    "options": [
+      "4",
+      "2",
+      "0",
+      "3"
+    ],
+    "correct_answer": "4",
+    "explanation": "Factor: (x²−1)(x²−4) = (x−1)(x+1)(x−2)(x+2). Four distinct real roots, each with multiplicity 1, so the graph crosses 4 times.",
+    "subject": "math",
+    "difficulty": "advanced",
+    "topic": "algebra"
+  }
+]

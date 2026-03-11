@@ -1,0 +1,702 @@
+[
+  {
+    "question": "What is the area of a trapezoid with bases 8 and 14, and height 5?",
+    "options": [
+      "55",
+      "70",
+      "110",
+      "140"
+    ],
+    "correct_answer": "55",
+    "explanation": "Area = (1/2)(8 + 14)(5) = (1/2)(22)(5) = 55.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "A triangle has vertices at (0,0), (6,0), and (6,8). What is its area?",
+    "options": [
+      "14",
+      "24",
+      "48",
+      "96"
+    ],
+    "correct_answer": "24",
+    "explanation": "Base = 6, height = 8. Area = (1/2)(6)(8) = 24.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the sum of the interior angles of a decagon (10 sides)?",
+    "options": [
+      "1080°",
+      "1260°",
+      "1440°",
+      "1800°"
+    ],
+    "correct_answer": "1440°",
+    "explanation": "Sum = (10−2) × 180° = 8 × 180° = 1440°.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "A circle has circumference 20π. What is its radius?",
+    "options": [
+      "5",
+      "10",
+      "20",
+      "100"
+    ],
+    "correct_answer": "10",
+    "explanation": "C = 2πr → 20π = 2πr → r = 10.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the slope of a horizontal line?",
+    "options": [
+      "0",
+      "1",
+      "Undefined",
+      "Infinity"
+    ],
+    "correct_answer": "0",
+    "explanation": "A horizontal line has no rise, so slope = rise/run = 0/run = 0.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "The diagonals of a rectangle are always what?",
+    "options": [
+      "Perpendicular",
+      "Equal in length",
+      "Different lengths",
+      "Parallel"
+    ],
+    "correct_answer": "Equal in length",
+    "explanation": "In a rectangle, both diagonals are congruent (equal in length) and bisect each other.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the volume of a sphere with radius 3? (Use π)",
+    "options": [
+      "12π",
+      "27π",
+      "36π",
+      "108π"
+    ],
+    "correct_answer": "36π",
+    "explanation": "V = (4/3)πr³ = (4/3)π(27) = 36π cubic units.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "If a triangle has sides 7, 24, and 25, is it a right triangle?",
+    "options": [
+      "Yes",
+      "No",
+      "Not enough information",
+      "Only if angles are given"
+    ],
+    "correct_answer": "Yes",
+    "explanation": "Check: 7² + 24² = 49 + 576 = 625 = 25². The Pythagorean theorem holds, so it is a right triangle.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the slope of a vertical line?",
+    "options": [
+      "0",
+      "1",
+      "−1",
+      "Undefined"
+    ],
+    "correct_answer": "Undefined",
+    "explanation": "A vertical line has zero run, so slope = rise/0, which is undefined.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the area of a sector of a circle with radius 6 and central angle 60°? (Use π)",
+    "options": [
+      "3π",
+      "6π",
+      "12π",
+      "36π"
+    ],
+    "correct_answer": "6π",
+    "explanation": "Sector area = (θ/360°)πr² = (60/360)π(36) = (1/6)(36π) = 6π.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "How many axes of symmetry does a regular pentagon have?",
+    "options": [
+      "1",
+      "3",
+      "5",
+      "10"
+    ],
+    "correct_answer": "5",
+    "explanation": "A regular polygon with n sides has n lines of symmetry. A regular pentagon has 5.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What transformation turns a shape around a fixed point?",
+    "options": [
+      "Translation",
+      "Rotation",
+      "Reflection",
+      "Dilation"
+    ],
+    "correct_answer": "Rotation",
+    "explanation": "A rotation turns every point of a shape around a fixed center point by a given angle.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "A parallelogram has base 11 and height 7. What is its area?",
+    "options": [
+      "18",
+      "36",
+      "77",
+      "154"
+    ],
+    "correct_answer": "77",
+    "explanation": "Area = base × height = 11 × 7 = 77 square units.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the midpoint of the segment from (−2, 6) to (4, 2)?",
+    "options": [
+      "(1, 4)",
+      "(2, 8)",
+      "(−3, 4)",
+      "(3, 4)"
+    ],
+    "correct_answer": "(1, 4)",
+    "explanation": "Midpoint = ((−2+4)/2, (6+2)/2) = (1, 4).",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is a polygon that has all vertices on a circle called?",
+    "options": [
+      "Regular polygon",
+      "Inscribed polygon",
+      "Circumscribed polygon",
+      "Convex polygon"
+    ],
+    "correct_answer": "Inscribed polygon",
+    "explanation": "An inscribed polygon has all its vertices touching the circle (the circle is circumscribed around it).",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "A cube has a surface area of 150 square units. What is its side length?",
+    "options": [
+      "5",
+      "6",
+      "10",
+      "25"
+    ],
+    "correct_answer": "5",
+    "explanation": "SA = 6s² → 150 = 6s² → s² = 25 → s = 5.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the area of a semicircle with radius 4? (Use π)",
+    "options": [
+      "4π",
+      "8π",
+      "16π",
+      "32π"
+    ],
+    "correct_answer": "8π",
+    "explanation": "Area of semicircle = (1/2)πr² = (1/2)π(16) = 8π.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "Two complementary angles have a ratio of 2:3. What are the angles?",
+    "options": [
+      "30° and 60°",
+      "36° and 54°",
+      "40° and 50°",
+      "45° and 45°"
+    ],
+    "correct_answer": "36° and 54°",
+    "explanation": "2x + 3x = 90° → 5x = 90° → x = 18°. Angles: 36° and 54°.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "How many faces does a hexagonal prism have?",
+    "options": [
+      "6",
+      "7",
+      "8",
+      "12"
+    ],
+    "correct_answer": "8",
+    "explanation": "A hexagonal prism has 8 faces: 2 hexagonal bases and 6 rectangular lateral faces.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the perimeter of a right triangle with legs 9 and 12?",
+    "options": [
+      "21",
+      "30",
+      "36",
+      "108"
+    ],
+    "correct_answer": "36",
+    "explanation": "Hypotenuse = √(81+144) = √225 = 15. Perimeter = 9 + 12 + 15 = 36.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "The point (4, 0) lies on which axis?",
+    "options": [
+      "x-axis",
+      "y-axis",
+      "Both axes",
+      "Neither axis"
+    ],
+    "correct_answer": "x-axis",
+    "explanation": "When y = 0, the point lies on the x-axis.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the arc length of a semicircle with radius 5? (Use π)",
+    "options": [
+      "5π",
+      "10π",
+      "25π",
+      "50π"
+    ],
+    "correct_answer": "5π",
+    "explanation": "Arc length of semicircle = (1/2)(2πr) = πr = 5π.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the surface area of a cone with radius 3 and slant height 5? (Use π)",
+    "options": [
+      "15π",
+      "24π",
+      "39π",
+      "45π"
+    ],
+    "correct_answer": "24π",
+    "explanation": "SA = πr² + πrl = π(9) + π(3)(5) = 9π + 15π = 24π.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "A triangle has sides 6, 6, and 6. What is its perimeter?",
+    "options": [
+      "12",
+      "18",
+      "36",
+      "216"
+    ],
+    "correct_answer": "18",
+    "explanation": "Perimeter = 6 + 6 + 6 = 18.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "If two angles form a linear pair, what is their sum?",
+    "options": [
+      "90°",
+      "180°",
+      "270°",
+      "360°"
+    ],
+    "correct_answer": "180°",
+    "explanation": "A linear pair consists of two adjacent angles that together form a straight line, so they add up to 180°.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the distance between points (−1, 3) and (2, 7)?",
+    "options": [
+      "4",
+      "5",
+      "7",
+      "25"
+    ],
+    "correct_answer": "5",
+    "explanation": "Distance = √((2−(−1))² + (7−3)²) = √(9 + 16) = √25 = 5.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "A rectangular garden is 12 m long and 8 m wide. How much fencing is needed to enclose it?",
+    "options": [
+      "20 m",
+      "40 m",
+      "96 m",
+      "192 m"
+    ],
+    "correct_answer": "40 m",
+    "explanation": "Fencing = perimeter = 2(12 + 8) = 40 meters.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "The sum of the exterior angles of any convex polygon is always what?",
+    "options": [
+      "180°",
+      "270°",
+      "360°",
+      "Depends on the polygon"
+    ],
+    "correct_answer": "360°",
+    "explanation": "The sum of the exterior angles (one at each vertex) of any convex polygon is always 360°.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "A circle has area 49π. What is its radius?",
+    "options": [
+      "7",
+      "14",
+      "49",
+      "24.5"
+    ],
+    "correct_answer": "7",
+    "explanation": "πr² = 49π → r² = 49 → r = 7.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the volume of a triangular prism with a base triangle area of 15 and length 8?",
+    "options": [
+      "23",
+      "60",
+      "120",
+      "240"
+    ],
+    "correct_answer": "120",
+    "explanation": "Volume = base area × length = 15 × 8 = 120 cubic units.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the measure of each exterior angle of a regular hexagon?",
+    "options": [
+      "30°",
+      "45°",
+      "60°",
+      "90°"
+    ],
+    "correct_answer": "60°",
+    "explanation": "Each exterior angle = 360°/n = 360°/6 = 60°.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "A right triangle has legs of equal length. If the hypotenuse is 10, what is the length of each leg?",
+    "options": [
+      "5",
+      "5√2",
+      "10/√2",
+      "Both B and C"
+    ],
+    "correct_answer": "Both B and C",
+    "explanation": "a² + a² = 100 → 2a² = 100 → a² = 50 → a = √50 = 5√2 = 10/√2. Both expressions are equivalent.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What shape has all points equidistant from two endpoints of a segment?",
+    "options": [
+      "Circle",
+      "Line",
+      "Perpendicular bisector",
+      "Parallel line"
+    ],
+    "correct_answer": "Perpendicular bisector",
+    "explanation": "The perpendicular bisector of a segment is the set of all points equidistant from both endpoints.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "A rectangular prism has volume 240, length 10, and width 6. What is the height?",
+    "options": [
+      "2",
+      "3",
+      "4",
+      "24"
+    ],
+    "correct_answer": "4",
+    "explanation": "V = lwh → 240 = 10(6)(h) → h = 240/60 = 4.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the slope of a line parallel to y = 3x + 7?",
+    "options": [
+      "3",
+      "7",
+      "−3",
+      "1/3"
+    ],
+    "correct_answer": "3",
+    "explanation": "Parallel lines have equal slopes. The slope of y = 3x + 7 is 3.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "How many triangles are formed when you draw all diagonals from one vertex of a hexagon?",
+    "options": [
+      "3",
+      "4",
+      "5",
+      "6"
+    ],
+    "correct_answer": "4",
+    "explanation": "From one vertex of an n-sided polygon, you can draw n−3 diagonals creating n−2 triangles. For n=6: 6−2 = 4 triangles.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "A cone has radius 4 and height 6. What is its volume? (Use π)",
+    "options": [
+      "24π",
+      "32π",
+      "48π",
+      "96π"
+    ],
+    "correct_answer": "32π",
+    "explanation": "V = (1/3)πr²h = (1/3)π(16)(6) = 32π cubic units.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the area of a square inscribed in a circle of radius 5?",
+    "options": [
+      "25",
+      "50",
+      "100",
+      "25π"
+    ],
+    "correct_answer": "50",
+    "explanation": "The diagonal of the inscribed square equals the diameter = 10. Side = 10/√2. Area = side² = 100/2 = 50.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the slope of a line perpendicular to a line with slope 2?",
+    "options": [
+      "2",
+      "−2",
+      "1/2",
+      "−1/2"
+    ],
+    "correct_answer": "−1/2",
+    "explanation": "Perpendicular slopes are negative reciprocals. The negative reciprocal of 2 is −1/2.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "A triangle has area 30 and base 10. What is its height?",
+    "options": [
+      "3",
+      "6",
+      "15",
+      "60"
+    ],
+    "correct_answer": "6",
+    "explanation": "Area = (1/2)(base)(height) → 30 = (1/2)(10)(h) → h = 6.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "How many edges does a pentagonal prism have?",
+    "options": [
+      "10",
+      "12",
+      "15",
+      "20"
+    ],
+    "correct_answer": "15",
+    "explanation": "A pentagonal prism has 15 edges: 5 on top, 5 on bottom, and 5 connecting them.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the circumference of a circle with area 16π? (Use π)",
+    "options": [
+      "4π",
+      "8π",
+      "16π",
+      "32π"
+    ],
+    "correct_answer": "8π",
+    "explanation": "πr² = 16π → r = 4. Circumference = 2πr = 8π.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "Co-interior (same-side interior) angles formed by parallel lines and a transversal are what?",
+    "options": [
+      "Equal",
+      "Complementary",
+      "Supplementary",
+      "Vertical"
+    ],
+    "correct_answer": "Supplementary",
+    "explanation": "Co-interior angles (also called consecutive interior angles) add up to 180° when formed by parallel lines and a transversal.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "A square has a diagonal of 10. What is the side length?",
+    "options": [
+      "5",
+      "5√2",
+      "10/√2",
+      "Both B and C"
+    ],
+    "correct_answer": "Both B and C",
+    "explanation": "If side = s, then s² + s² = 100 → s = √50 = 5√2 = 10/√2.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the total surface area of a hemisphere with radius 4? (Use π)",
+    "options": [
+      "32π",
+      "48π",
+      "64π",
+      "80π"
+    ],
+    "correct_answer": "48π",
+    "explanation": "SA = curved part + flat circle = 2πr² + πr² = 3πr² = 3π(16) = 48π.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "A circle is inscribed in a square of side 10. What is the area of the circle? (Use π)",
+    "options": [
+      "10π",
+      "25π",
+      "50π",
+      "100π"
+    ],
+    "correct_answer": "25π",
+    "explanation": "The inscribed circle has diameter = side = 10, so radius = 5. Area = π(25) = 25π.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the length of the diagonal of a rectangle with sides 5 and 12?",
+    "options": [
+      "13",
+      "15",
+      "17",
+      "60"
+    ],
+    "correct_answer": "13",
+    "explanation": "Diagonal = √(5² + 12²) = √(25 + 144) = √169 = 13.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "If a regular polygon has an exterior angle of 40°, how many sides does it have?",
+    "options": [
+      "6",
+      "8",
+      "9",
+      "10"
+    ],
+    "correct_answer": "9",
+    "explanation": "Number of sides = 360°/exterior angle = 360°/40° = 9.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "A cylinder has volume 100π and radius 5. What is its height?",
+    "options": [
+      "2",
+      "4",
+      "5",
+      "20"
+    ],
+    "correct_answer": "4",
+    "explanation": "V = πr²h → 100π = 25πh → h = 4.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  },
+  {
+    "question": "The diagonals of a rhombus are 10 and 24. What is the side length?",
+    "options": [
+      "12",
+      "13",
+      "14",
+      "26"
+    ],
+    "correct_answer": "13",
+    "explanation": "The diagonals bisect each other at right angles: half-diagonals are 5 and 12. Side = √(5² + 12²) = √169 = 13.",
+    "subject": "math",
+    "difficulty": "beginner",
+    "topic": "geometry"
+  }
+]

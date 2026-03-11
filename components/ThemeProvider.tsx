@@ -11,22 +11,23 @@ function applyTheme() {
   el.classList.toggle("light", theme === "light");
 }
 
-/** Luminance test — returns true if color is very dark */
+/** Luminance test — returns true if ANY color in the string is very dark */
 function isDarkColor(color: string): boolean {
   if (!color) return false;
-  const hex = color.match(/#([0-9a-f]{6})/i);
-  if (hex) {
+  // Check all hex colors in the string (gradients have multiple)
+  const hexMatches = color.matchAll(/#([0-9a-f]{6})/gi);
+  for (const hex of hexMatches) {
     const r = parseInt(hex[1].slice(0, 2), 16);
     const g = parseInt(hex[1].slice(2, 4), 16);
     const b = parseInt(hex[1].slice(4, 6), 16);
-    return (r * 299 + g * 587 + b * 114) / 1000 < 35;
+    if ((r * 299 + g * 587 + b * 114) / 1000 < 50) return true;
   }
   const rgb = color.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
   if (rgb) {
     const r = parseInt(rgb[1]);
     const g = parseInt(rgb[2]);
     const b = parseInt(rgb[3]);
-    return (r * 299 + g * 587 + b * 114) / 1000 < 35;
+    return (r * 299 + g * 587 + b * 114) / 1000 < 50;
   }
   return false;
 }
@@ -86,8 +87,10 @@ export default function ThemeProvider({ children }: { children: React.ReactNode 
   useEffect(() => {
     applyTheme();
 
-    // Initial fix for inline dark backgrounds
+    // Initial fix for inline dark backgrounds — stagger for async-rendered content
     const timer = setTimeout(fixInlineBackgrounds, 100);
+    const timer2 = setTimeout(fixInlineBackgrounds, 600);
+    const timer3 = setTimeout(fixInlineBackgrounds, 1500);
 
     // Watch for new DOM nodes (e.g. client-rendered content) — only childList, no style attrs
     let fixing = false;
@@ -113,6 +116,8 @@ export default function ThemeProvider({ children }: { children: React.ReactNode 
 
     return () => {
       clearTimeout(timer);
+      clearTimeout(timer2);
+      clearTimeout(timer3);
       observer.disconnect();
       window.removeEventListener("themechange", handleThemeChange);
       window.removeEventListener("storage", handleStorage);

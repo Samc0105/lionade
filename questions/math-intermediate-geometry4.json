@@ -1,0 +1,702 @@
+[
+  {
+    "question": "A triangle has sides 9, 40, and 41. What type of triangle is it?",
+    "options": [
+      "Acute",
+      "Right",
+      "Obtuse",
+      "Equilateral"
+    ],
+    "correct_answer": "Right",
+    "explanation": "9²+40² = 81+1600 = 1681 = 41². The Pythagorean theorem holds, so it's a right triangle.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the area of a circle circumscribed about a square with side 6?",
+    "options": [
+      "18π",
+      "36π",
+      "72π",
+      "144π"
+    ],
+    "correct_answer": "18π",
+    "explanation": "Diagonal of square = 6√2. Radius = 6√2/2 = 3√2. Area = π(3√2)² = 18π.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "geometry"
+  },
+  {
+    "question": "A cube is inscribed in a sphere of radius 5√3. What is the side of the cube?",
+    "options": [
+      "5",
+      "10",
+      "15",
+      "5√2"
+    ],
+    "correct_answer": "10",
+    "explanation": "Space diagonal = diameter = 10√3. s√3 = 10√3 → s = 10.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "geometry"
+  },
+  {
+    "question": "Find the equation of the line through (−1, 4) and (3, −2).",
+    "options": [
+      "y = −(3/2)x + 5/2",
+      "y = (3/2)x + 5/2",
+      "y = −(3/2)x − 5/2",
+      "y = −(2/3)x + 5/2"
+    ],
+    "correct_answer": "y = −(3/2)x + 5/2",
+    "explanation": "Slope = (−2−4)/(3−(−1)) = −6/4 = −3/2. y−4 = −(3/2)(x+1) → y = −(3/2)x + 5/2.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "geometry"
+  },
+  {
+    "question": "A regular hexagon has apothem 6√3. What is its area?",
+    "options": [
+      "216",
+      "216√3",
+      "432",
+      "432√3"
+    ],
+    "correct_answer": "216√3",
+    "explanation": "Apothem = (s√3)/2 = 6√3 → s = 12. Area = (3√3/2)(144) = 216√3.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "geometry"
+  },
+  {
+    "question": "In a 45-45-90 triangle, the hypotenuse is 14. What is the area?",
+    "options": [
+      "49",
+      "98",
+      "49√2",
+      "196"
+    ],
+    "correct_answer": "49",
+    "explanation": "Each leg = 14/√2 = 7√2. Area = (1/2)(7√2)(7√2) = (1/2)(98) = 49.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "geometry"
+  },
+  {
+    "question": "Two circles have radii 3 and 7 and are 4 apart (center to center). What is their relationship?",
+    "options": [
+      "Externally tangent",
+      "Internally tangent",
+      "Overlapping",
+      "Separate"
+    ],
+    "correct_answer": "Internally tangent",
+    "explanation": "Distance = 4 = 7−3 = |r₂−r₁|. When d = |r₂−r₁|, the circles are internally tangent.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the volume of a frustum of a pyramid with square bases of sides 4 and 8, and height 6?",
+    "options": [
+      "112",
+      "224",
+      "336",
+      "448"
+    ],
+    "correct_answer": "224",
+    "explanation": "V = (h/3)(A₁+A₂+√(A₁A₂)) = (6/3)(16+64+√(1024)) = 2(16+64+32) = 2(112) = 224.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "geometry"
+  },
+  {
+    "question": "The vertices of a rectangle are (0,0), (6,0), (6,4), and (0,4). What is the length of the diagonal?",
+    "options": [
+      "√20",
+      "√52",
+      "2√13",
+      "Both B and C"
+    ],
+    "correct_answer": "Both B and C",
+    "explanation": "Diagonal = √(36+16) = √52 = 2√13. Both expressions are equivalent.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "geometry"
+  },
+  {
+    "question": "A sector of a circle with radius 12 has area 48π. What is the arc length?",
+    "options": [
+      "4π",
+      "8π",
+      "12π",
+      "24π"
+    ],
+    "correct_answer": "8π",
+    "explanation": "(θ/360)π(144) = 48π → θ/360 = 1/3 → θ = 120°. Arc = (120/360)(24π) = 8π.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the area of a triangle with sides 7, 8, and 9?",
+    "options": [
+      "12√5",
+      "4√35",
+      "26.8",
+      "6√10"
+    ],
+    "correct_answer": "12√5",
+    "explanation": "s = 12. A = √(12·5·4·3) = √720 = 12√5.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "geometry"
+  },
+  {
+    "question": "A sphere has surface area 100π. What is its volume?",
+    "options": [
+      "250π/3",
+      "500π/3",
+      "1000π/3",
+      "125π"
+    ],
+    "correct_answer": "500π/3",
+    "explanation": "4πr² = 100π → r² = 25 → r = 5. V = (4/3)π(125) = 500π/3.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "geometry"
+  },
+  {
+    "question": "If two polygons are similar with a scale factor of 2:5, and the smaller has perimeter 18, what is the larger's perimeter?",
+    "options": [
+      "36",
+      "45",
+      "72",
+      "90"
+    ],
+    "correct_answer": "45",
+    "explanation": "Perimeters scale linearly: 18 × (5/2) = 45.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the area of a parallelogram with vertices (0,0), (5,0), (7,3), and (2,3)?",
+    "options": [
+      "12",
+      "15",
+      "21",
+      "35"
+    ],
+    "correct_answer": "15",
+    "explanation": "Base = 5, height = 3. Area = 5 × 3 = 15.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "geometry"
+  },
+  {
+    "question": "A right triangle has hypotenuse 25 and one leg 7. What is the area?",
+    "options": [
+      "84",
+      "168",
+      "175",
+      "87.5"
+    ],
+    "correct_answer": "84",
+    "explanation": "Other leg = √(625−49) = √576 = 24. Area = (1/2)(7)(24) = 84.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the circumference of a circle inscribed in a right triangle with legs 6 and 8?",
+    "options": [
+      "2π",
+      "4π",
+      "8π",
+      "10π"
+    ],
+    "correct_answer": "4π",
+    "explanation": "Inradius = (a+b−c)/2 = (6+8−10)/2 = 2. Circumference = 2π(2) = 4π.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "geometry"
+  },
+  {
+    "question": "A regular 15-sided polygon has each exterior angle of what measure?",
+    "options": [
+      "12°",
+      "15°",
+      "24°",
+      "36°"
+    ],
+    "correct_answer": "24°",
+    "explanation": "Exterior angle = 360°/15 = 24°.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the lateral surface area of a regular hexagonal prism with base edge 3 and height 8?",
+    "options": [
+      "72",
+      "96",
+      "144",
+      "288"
+    ],
+    "correct_answer": "144",
+    "explanation": "Lateral area = perimeter × height = 6(3)(8) = 144.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "geometry"
+  },
+  {
+    "question": "A chord of length 16 is 6 units from the center of a circle. What is the radius?",
+    "options": [
+      "8",
+      "10",
+      "12",
+      "√292"
+    ],
+    "correct_answer": "10",
+    "explanation": "Half-chord = 8. r = √(8²+6²) = √(64+36) = √100 = 10.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the area of the largest rectangle that can be inscribed in a circle of radius 5?",
+    "options": [
+      "25",
+      "50",
+      "100",
+      "25π"
+    ],
+    "correct_answer": "50",
+    "explanation": "The largest inscribed rectangle is a square. Diagonal = 10. Side = 10/√2. Area = 100/2 = 50.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "geometry"
+  },
+  {
+    "question": "A cone and a cylinder have the same radius and height. What is the ratio of their volumes?",
+    "options": [
+      "1:2",
+      "1:3",
+      "2:3",
+      "1:4"
+    ],
+    "correct_answer": "1:3",
+    "explanation": "Cone volume = (1/3)πr²h, cylinder = πr²h. Ratio = 1:3.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "geometry"
+  },
+  {
+    "question": "In a triangle, the angle bisectors all meet at a point called the what?",
+    "options": [
+      "Centroid",
+      "Orthocenter",
+      "Incenter",
+      "Circumcenter"
+    ],
+    "correct_answer": "Incenter",
+    "explanation": "The incenter is where all three angle bisectors meet, and it is the center of the inscribed circle.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the area of a triangle with base 15 and an altitude from the opposite vertex that divides the base into segments 9 and 6, with altitude length 8?",
+    "options": [
+      "48",
+      "60",
+      "80",
+      "120"
+    ],
+    "correct_answer": "60",
+    "explanation": "Area = (1/2)(base)(height) = (1/2)(15)(8) = 60.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "geometry"
+  },
+  {
+    "question": "If point P divides segment AB in the ratio 2:3, and A=(1,2) and B=(6,7), what are the coordinates of P?",
+    "options": [
+      "(3, 4)",
+      "(4, 5)",
+      "(3.5, 4.5)",
+      "(2.5, 3.5)"
+    ],
+    "correct_answer": "(3, 4)",
+    "explanation": "P = A + (2/5)(B−A) = (1+2, 2+2) = (3, 4). Using section formula: ((2·6+3·1)/5, (2·7+3·2)/5) = (15/5, 20/5) = (3, 4).",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "geometry"
+  },
+  {
+    "question": "A cylinder is cut in half along its height. Each half has how many faces?",
+    "options": [
+      "2",
+      "3",
+      "4",
+      "5"
+    ],
+    "correct_answer": "3",
+    "explanation": "Each half has a circular top, a circular bottom, a curved side, and a flat rectangular face from the cut — actually 3 faces: curved side, circular face, and flat rectangular cut.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the surface area of a sphere whose volume is 36π?",
+    "options": [
+      "12π",
+      "24π",
+      "36π",
+      "48π"
+    ],
+    "correct_answer": "36π",
+    "explanation": "(4/3)πr³ = 36π → r³ = 27 → r = 3. SA = 4π(9) = 36π.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "geometry"
+  },
+  {
+    "question": "In a regular hexagon with side 8, what is the distance between two opposite vertices?",
+    "options": [
+      "8",
+      "12",
+      "16",
+      "8√3"
+    ],
+    "correct_answer": "16",
+    "explanation": "The distance between opposite vertices (long diagonal) = 2 × side = 2(8) = 16.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the area of a triangle with angles 30°, 60°, 90° and hypotenuse 12?",
+    "options": [
+      "18",
+      "18√3",
+      "36",
+      "36√3"
+    ],
+    "correct_answer": "18√3",
+    "explanation": "Legs: 6 and 6√3. Area = (1/2)(6)(6√3) = 18√3.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "geometry"
+  },
+  {
+    "question": "A circle has equation (x−3)²+(y+1)²=25. Does the point (6, 3) lie on the circle?",
+    "options": [
+      "Yes",
+      "No",
+      "On the interior",
+      "Cannot determine"
+    ],
+    "correct_answer": "Yes",
+    "explanation": "(6−3)²+(3+1)² = 9+16 = 25 ✓. The point lies on the circle.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "geometry"
+  },
+  {
+    "question": "Two similar triangles have perimeters 20 and 30. If the area of the smaller is 24, what is the area of the larger?",
+    "options": [
+      "36",
+      "48",
+      "54",
+      "72"
+    ],
+    "correct_answer": "54",
+    "explanation": "Scale factor = 30/20 = 3/2. Area ratio = (3/2)² = 9/4. Larger area = 24(9/4) = 54.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "geometry"
+  },
+  {
+    "question": "A pyramid has a triangular base with area 20 and height 9. What is its volume?",
+    "options": [
+      "30",
+      "60",
+      "90",
+      "180"
+    ],
+    "correct_answer": "60",
+    "explanation": "V = (1/3)(base area)(height) = (1/3)(20)(9) = 60.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the equation of a circle with diameter endpoints (1, 2) and (5, 6)?",
+    "options": [
+      "(x−3)²+(y−4)²=8",
+      "(x−3)²+(y−4)²=16",
+      "(x−3)²+(y−4)²=4",
+      "(x−1)²+(y−2)²=8"
+    ],
+    "correct_answer": "(x−3)²+(y−4)²=8",
+    "explanation": "Center = midpoint = (3,4). Radius = half the diameter length = √(16+16)/2 = √32/2 = √8. r²=8.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the volume of a cylinder whose lateral surface area is 80π and radius is 4?",
+    "options": [
+      "80π",
+      "160π",
+      "320π",
+      "640π"
+    ],
+    "correct_answer": "160π",
+    "explanation": "2πrh = 80π → h = 10. V = πr²h = π(16)(10) = 160π.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "geometry"
+  },
+  {
+    "question": "An exterior angle of a regular polygon is 40°. What is each interior angle?",
+    "options": [
+      "40°",
+      "120°",
+      "135°",
+      "140°"
+    ],
+    "correct_answer": "140°",
+    "explanation": "Interior + exterior = 180°. Interior = 180°−40° = 140°.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "geometry"
+  },
+  {
+    "question": "The ratio of corresponding sides of two similar polygons is 3:7. What is the ratio of their areas?",
+    "options": [
+      "3:7",
+      "6:14",
+      "9:49",
+      "27:343"
+    ],
+    "correct_answer": "9:49",
+    "explanation": "Area ratio = (side ratio)² = (3/7)² = 9:49.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the area of a 30-60-90 triangle whose shorter leg is 5?",
+    "options": [
+      "25/2",
+      "25√3/2",
+      "25√3",
+      "50"
+    ],
+    "correct_answer": "25√3/2",
+    "explanation": "Legs: 5 and 5√3. Area = (1/2)(5)(5√3) = 25√3/2.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "geometry"
+  },
+  {
+    "question": "A right circular cylinder has equal height and diameter. If the volume is 128π, what is the radius?",
+    "options": [
+      "4",
+      "8",
+      "16",
+      "32"
+    ],
+    "correct_answer": "4",
+    "explanation": "h = 2r. V = πr²(2r) = 2πr³ = 128π → r³ = 64 → r = 4.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the perimeter of a 45-45-90 triangle with legs of length 6?",
+    "options": [
+      "12+6√2",
+      "18",
+      "6+6√2",
+      "12+√2"
+    ],
+    "correct_answer": "12+6√2",
+    "explanation": "Hypotenuse = 6√2. Perimeter = 6+6+6√2 = 12+6√2.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "geometry"
+  },
+  {
+    "question": "The three perpendicular bisectors of a triangle meet at the what?",
+    "options": [
+      "Incenter",
+      "Centroid",
+      "Circumcenter",
+      "Orthocenter"
+    ],
+    "correct_answer": "Circumcenter",
+    "explanation": "The circumcenter is where all three perpendicular bisectors meet, and it is the center of the circumscribed circle.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the volume of a composite solid made of a cylinder (r=3, h=10) topped by a hemisphere (r=3)?",
+    "options": [
+      "90π + 18π",
+      "108π",
+      "90π + 36π",
+      "126π"
+    ],
+    "correct_answer": "108π",
+    "explanation": "Cylinder V = π(9)(10) = 90π. Hemisphere V = (2/3)π(27) = 18π. Total = 108π.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "geometry"
+  },
+  {
+    "question": "In a right triangle, the altitude from the right angle to the hypotenuse creates two smaller triangles. These two triangles are what?",
+    "options": [
+      "Congruent",
+      "Equal in area",
+      "Similar to each other and the original",
+      "Isosceles"
+    ],
+    "correct_answer": "Similar to each other and the original",
+    "explanation": "The altitude from the right angle to the hypotenuse creates two triangles that are similar to each other and to the original triangle.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "geometry"
+  },
+  {
+    "question": "A regular dodecagon (12 sides) has each exterior angle of what measure?",
+    "options": [
+      "15°",
+      "24°",
+      "30°",
+      "36°"
+    ],
+    "correct_answer": "30°",
+    "explanation": "Exterior angle = 360°/12 = 30°.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the area of a right triangle with hypotenuse 26 and one leg 10?",
+    "options": [
+      "60",
+      "120",
+      "130",
+      "240"
+    ],
+    "correct_answer": "120",
+    "explanation": "Other leg = √(676−100) = √576 = 24. Area = (1/2)(10)(24) = 120.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "geometry"
+  },
+  {
+    "question": "A cone has total surface area 96π and radius 6. What is its slant height?",
+    "options": [
+      "8",
+      "10",
+      "12",
+      "16"
+    ],
+    "correct_answer": "10",
+    "explanation": "TSA = πr² + πrl → 96π = 36π + 6πl → 60π = 6πl → l = 10.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the distance from the origin to the point (5, −12)?",
+    "options": [
+      "7",
+      "13",
+      "17",
+      "60"
+    ],
+    "correct_answer": "13",
+    "explanation": "d = √(25+144) = √169 = 13.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "geometry"
+  },
+  {
+    "question": "A circle is inscribed in a regular hexagon with side 10. What is the radius of the circle?",
+    "options": [
+      "5",
+      "5√2",
+      "5√3",
+      "10"
+    ],
+    "correct_answer": "5√3",
+    "explanation": "The inscribed circle radius = apothem = (10√3)/2 = 5√3.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "geometry"
+  },
+  {
+    "question": "What is the area of a rectangle whose diagonal is 10 and one side is 6?",
+    "options": [
+      "24",
+      "32",
+      "48",
+      "60"
+    ],
+    "correct_answer": "48",
+    "explanation": "Other side = √(100−36) = √64 = 8. Area = 6 × 8 = 48.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "geometry"
+  },
+  {
+    "question": "Two angles of a triangle are 50° and 60°. What is the measure of the exterior angle adjacent to the third angle?",
+    "options": [
+      "70°",
+      "110°",
+      "120°",
+      "250°"
+    ],
+    "correct_answer": "110°",
+    "explanation": "Third interior angle = 180°−50°−60° = 70°. Exterior angle = 180°−70° = 110°.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "geometry"
+  },
+  {
+    "question": "A sphere is circumscribed about a cube of side 4. What is the radius of the sphere?",
+    "options": [
+      "2√3",
+      "4",
+      "4√2",
+      "4√3"
+    ],
+    "correct_answer": "2√3",
+    "explanation": "Space diagonal of cube = 4√3. Radius = half = 2√3.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "geometry"
+  },
+  {
+    "question": "A cylinder has the same volume as a cone with radius 6 and height 10. If the cylinder's radius is 3, what is its height?",
+    "options": [
+      "20/3",
+      "40/3",
+      "20",
+      "40"
+    ],
+    "correct_answer": "40/3",
+    "explanation": "Cone V = (1/3)π(36)(10) = 120π. Cylinder: π(9)h = 120π → h = 120/9 = 40/3.",
+    "subject": "math",
+    "difficulty": "intermediate",
+    "topic": "geometry"
+  }
+]
