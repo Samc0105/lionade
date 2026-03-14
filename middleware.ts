@@ -82,6 +82,14 @@ export function middleware(request: NextRequest) {
 
   const { pathname } = request.nextUrl;
 
+  // ── Coming Soon mode: redirect all app pages to / ──
+  // Allow: /, /api/*, and static assets (handled by matcher exclusion)
+  if (pathname !== "/" && !pathname.startsWith("/api/")) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/";
+    return NextResponse.redirect(url, 307);
+  }
+
   // Per-route rate limits
   let allowed = true;
 
