@@ -1,8 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
-import { useAuth } from "@/lib/auth";
 
 const DEVOPS_PASSWORD = "LionadeDevOps2026";
 
@@ -111,9 +109,6 @@ function WireframeSphere() {
 }
 
 export default function ComingSoonPage() {
-  const { user, isLoading } = useAuth();
-  const router = useRouter();
-
   const [modalOpen, setModalOpen] = useState(false);
   const [pw, setPw] = useState("");
   const [error, setError] = useState(false);
@@ -127,8 +122,6 @@ export default function ComingSoonPage() {
   const resetTimerRef = useRef<number | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
 
-  useEffect(() => { if (!isLoading && user) router.push("/dashboard"); }, [user, isLoading, router]);
-
   useEffect(() => {
     const timer = setTimeout(() => {
       const reveals = document.querySelectorAll(".reveal");
@@ -140,7 +133,7 @@ export default function ComingSoonPage() {
       return () => observer.disconnect();
     }, 100);
     return () => clearTimeout(timer);
-  }, [isLoading, user]);
+  }, []);
 
   useEffect(() => { if (modalOpen && inputRef.current) inputRef.current.focus(); }, [modalOpen]);
 
@@ -170,15 +163,6 @@ export default function ComingSoonPage() {
       else { setStatus("error"); setMsg(data.error || "Something went wrong."); }
     } catch { setStatus("error"); setMsg("Something went wrong."); }
   };
-
-  if (isLoading || user) return (
-    <div className="min-h-screen flex items-center justify-center bg-[#04080F]" data-force-dark>
-      <div className="flex flex-col items-center gap-4">
-        <div className="w-12 h-12 rounded-full border-2 border-[#4A90D9] border-t-transparent animate-spin" />
-        <p className="font-bebas text-2xl text-[#4A90D9] tracking-widest">LOADING...</p>
-      </div>
-    </div>
-  );
 
   const tickerContent = [...TICKER_ITEMS, ...TICKER_ITEMS, ...TICKER_ITEMS, ...TICKER_ITEMS];
 
