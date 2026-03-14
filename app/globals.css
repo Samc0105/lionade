@@ -46,6 +46,10 @@ html {
   margin: 0;
 }
 
+html {
+  background-color: #04080F;
+}
+
 html,
 body {
   max-width: 100vw;
@@ -56,7 +60,7 @@ body {
 
 /* ── Space / interstellar background ── */
 body {
-  background-color: #060612;
+  background-color: #04080F;
 }
 
 /* Custom scrollbar */
@@ -1874,6 +1878,24 @@ html.light body {
   color: var(--text-primary);
 }
 
+/* Force-dark sections (e.g. landing page) keep dark styling in light mode.
+   Revert all light-mode color/bg overrides inside these containers. */
+html.light [data-force-dark] { background: #04080F !important; color: #EEF4FF !important; }
+html.light [data-force-dark] .text-cream { color: #EEF4FF; }
+html.light [data-force-dark] .text-cream\/25 { color: rgba(238,244,255,0.25); }
+html.light [data-force-dark] .text-cream\/30 { color: rgba(238,244,255,0.3); }
+html.light [data-force-dark] .text-cream\/40 { color: rgba(238,244,255,0.4); }
+html.light [data-force-dark] .text-cream\/50 { color: rgba(238,244,255,0.5); }
+html.light [data-force-dark] .text-cream\/60 { color: rgba(238,244,255,0.6); }
+html.light [data-force-dark] .text-cream\/70 { color: rgba(238,244,255,0.7); }
+html.light [data-force-dark] .text-cream\/80 { color: rgba(238,244,255,0.8); }
+html.light [data-force-dark] .text-electric { color: #4A90D9; }
+html.light [data-force-dark] .text-electric\/80 { color: rgba(74,144,217,0.8); }
+html.light [data-force-dark] .border-electric\/20 { border-color: rgba(74,144,217,0.2); }
+html.light [data-force-dark] .bg-electric { background-color: #4A90D9; }
+html.light [data-force-dark] .gold-text { -webkit-text-fill-color: unset; background: none; color: #FFD700; }
+[data-force-dark] { position: relative; z-index: 10; }
+
 /* ══ TEXT OVERRIDES ══ */
 
 html.light .text-cream { color: var(--text-primary); }
@@ -1996,6 +2018,96 @@ html.light .bg-navy-100 { background-color: var(--bg-page); }
 html.light .bg-\[#04080F\],
 html.light .bg-\[#060c18\],
 html.light .bg-\[#0a1020\] { background-color: var(--bg-card); }
+
+/* ══ QUIZ CARDS — light mode ══ */
+
+/* Subject cards */
+html.light .quiz-subject-card {
+  background: #ffffff !important;
+  border: 1px solid #e5e7eb !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06) !important;
+}
+html.light .quiz-subject-card .card-title { color: #111827; }
+html.light .quiz-subject-card .card-subtitle { color: #6b7280; }
+
+/* Blitz mode card */
+html.light .quiz-blitz-card {
+  background: #ffffff !important;
+  border-color: #e5e7eb !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06) !important;
+}
+html.light .quiz-blitz-card.blitz-active {
+  background: rgba(234, 179, 8, 0.06) !important;
+  border-color: #EAB308 !important;
+  box-shadow: 0 0 16px rgba(234, 179, 8, 0.15) !important;
+}
+html.light .quiz-blitz-card .blitz-subtitle { color: #6b7280; }
+
+/* Difficulty cards */
+html.light .quiz-diff-card {
+  background: #ffffff !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06) !important;
+}
+html.light .quiz-diff-card:not(.diff-selected) {
+  border-color: #e5e7eb !important;
+}
+html.light .quiz-diff-card .diff-label { color: #111827 !important; }
+html.light .quiz-diff-card .diff-desc { color: #6b7280; }
+html.light .quiz-diff-card.diff-selected {
+  box-shadow: none !important;
+}
+html.light .quiz-diff-card.diff-green.diff-selected { border-color: #22C55E !important; background: rgba(34,197,94,0.05) !important; }
+html.light .quiz-diff-card.diff-yellow.diff-selected { border-color: #EAB308 !important; background: rgba(234,179,8,0.05) !important; }
+html.light .quiz-diff-card.diff-red.diff-selected { border-color: #EF4444 !important; background: rgba(239,68,68,0.05) !important; }
+
+/* Quick Stats cards */
+html.light .quiz-stat-card {
+  background: #ffffff !important;
+  border: 1px solid #e5e7eb !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06) !important;
+}
+html.light .quiz-stat-card .stat-label { color: #6b7280; }
+
+/* ══ SHOP CARDS — light mode ══ */
+html.light .shop-card {
+  background: #ffffff !important;
+  border-color: #e5e7eb !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06) !important;
+  backdrop-filter: none !important;
+}
+html.light .shop-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+  border-color: #d1d5db !important;
+}
+html.light .shop-card-title { color: #111827 !important; }
+html.light .shop-card-desc { color: #6b7280 !important; }
+
+/* Shop toggle (coin/premium) */
+html.light .shop-toggle {
+  background: #f3f4f6 !important;
+  border-color: #e5e7eb !important;
+}
+
+/* Shop banners */
+html.light .shop-banner {
+  background: #ffffff !important;
+  border-color: #e5e7eb !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06) !important;
+}
+
+/* Rarity badge overrides for light mode readability */
+html.light .bg-gray-500\/20 { background-color: rgba(107,114,128,0.12); }
+html.light .bg-blue-500\/20 { background-color: rgba(59,130,246,0.12); }
+html.light .bg-purple-500\/20 { background-color: rgba(168,85,247,0.12); }
+html.light .bg-yellow-500\/20 { background-color: rgba(234,179,8,0.12); }
+html.light .text-gray-300 { color: #6b7280; }
+html.light .text-blue-300 { color: #2563eb; }
+html.light .text-purple-300 { color: #7c3aed; }
+html.light .text-yellow-300 { color: #ca8a04; }
+html.light .text-gray-400 { color: #6b7280; }
+html.light .text-blue-400 { color: #3b82f6; }
+html.light .text-purple-400 { color: #8b5cf6; }
+html.light .text-yellow-400 { color: #eab308; }
 
 /* ══ BORDER OVERRIDES ══ */
 

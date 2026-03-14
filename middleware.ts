@@ -131,6 +131,6 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  // Run on all routes except Next.js internals and static files
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\.png$|.*\\.svg$).*)"],
+  // Run on all routes except Next.js internals and static files (with dot extensions)
+  matcher: ["/((?!_next/|favicon\\.ico|.*\\..*).*)" ],
 };
