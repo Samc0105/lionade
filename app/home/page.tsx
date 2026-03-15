@@ -32,10 +32,6 @@ export default function ProductLandingPage() {
   return (
     <div className="min-h-screen text-cream overflow-hidden relative">
       <div className="absolute inset-0 grid-bg opacity-60" />
-      <div className="absolute -top-32 -left-32 w-96 h-96 rounded-full blur-3xl"
-        style={{ background: "radial-gradient(circle, rgba(74,144,217,0.18), transparent 70%)" }} />
-      <div className="absolute -bottom-40 -right-24 w-[28rem] h-[28rem] rounded-full blur-3xl"
-        style={{ background: "radial-gradient(circle, rgba(74,144,217,0.12), transparent 70%)" }} />
 
       {/* ─── Hero ─────────────────────────────────────────────── */}
       <section className="relative z-10 flex min-h-screen flex-col items-center justify-center px-6 text-center pt-16">
