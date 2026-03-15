@@ -47,14 +47,16 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
 
         const { data: profile, error } = await supabase
           .from("profiles")
-          .select("onboarding_completed")
+          .select("onboarding_completed, username")
           .eq("id", authUser.id)
           .maybeSingle();
 
         console.log("[ProtectedRoute] Profile query result:", { profile, error: error?.message ?? null });
 
         // Self-heal: if no profile row exists (trigger missed), create one
-        if (!profile && !error) {
+        // Then re-query so we have the actual profile data
+        let currentProfile = profile;
+        if (!currentProfile && !error) {
           console.log("[ProtectedRoute] No profile row — creating fallback for", authUser.id);
           const username = (authUser.email ?? "").split("@")[0].replace(/[^a-z0-9_]/g, "_").toLowerCase().slice(0, 20) || "user";
           await supabase.from("profiles").insert({
@@ -63,11 +65,21 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
             display_name: authUser.user_metadata?.display_name ?? username,
             onboarding_completed: false,
           });
+          // Re-query to get the freshly created profile
+          const { data: freshProfile } = await supabase
+            .from("profiles")
+            .select("onboarding_completed, username")
+            .eq("id", authUser.id)
+            .maybeSingle();
+          currentProfile = freshProfile;
         }
 
         hasChecked.current = true;
 
-        if (!profile || !profile.onboarding_completed) {
+        // User is onboarded if flag is set OR they already have a username (pre-flag users)
+        const isOnboarded = currentProfile?.onboarding_completed || (currentProfile?.username && currentProfile.username.trim().length > 0);
+
+        if (!currentProfile || !isOnboarded) {
           console.log("[ProtectedRoute] onboarding NOT complete — redirecting to /onboarding");
           setStatus("redirecting");
           router.replace("/onboarding");
@@ -78,10 +90,9 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
         setStatus("pass");
       } catch (err) {
         console.error("[ProtectedRoute] Error checking onboarding:", err);
-        // On error, redirect to onboarding to be safe
+        // On error, let the user through rather than blocking them
         hasChecked.current = true;
-        setStatus("redirecting");
-        router.replace("/onboarding");
+        setStatus("pass");
       }
     })();
   }, [user, router]);
