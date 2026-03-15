@@ -139,6 +139,12 @@ export default function LoginPage() {
     }
   }, [user, isLoading, router, showVerifiedBanner]);
 
+  // Force dark mode on login page
+  useEffect(() => {
+    document.documentElement.classList.remove("light");
+    document.documentElement.dataset.theme = "dark";
+  }, []);
+
   // Username availability check — debounced 500ms
   useEffect(() => {
     if (username.length < 3) { setUsernameStatus("idle"); return; }
@@ -262,7 +268,7 @@ export default function LoginPage() {
   const handleGoogleAuth = async () => {
     await supabase.auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo: window.location.origin + "/onboarding" },
+      options: { redirectTo: window.location.origin + "/login" },
     });
   };
 

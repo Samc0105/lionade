@@ -95,6 +95,12 @@ export default function OnboardingPage() {
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
+  // Force dark mode on onboarding page
+  useEffect(() => {
+    document.documentElement.classList.remove("light");
+    document.documentElement.dataset.theme = "dark";
+  }, []);
+
   /* ── Auth guard + pre-fill ──────────────────────────────────── */
   useEffect(() => {
     if (isLoading) return;
@@ -112,7 +118,8 @@ export default function OnboardingPage() {
 
       if (cancelled) return;
 
-      if (profile?.onboarding_completed) {
+      // Already onboarded if flag is set OR user already has a username (pre-flag users)
+      if (profile?.onboarding_completed || (profile?.username && profile.username.trim().length > 0)) {
         router.replace("/dashboard");
         return;
       }
