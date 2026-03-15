@@ -188,8 +188,8 @@ function StepCard({ step, idx }: { step: typeof STEPS[0]; idx: number }) {
       </div>
 
       <div className="text-[28px] mb-4 shrink-0">{step.icon}</div>
-      <div className="font-syne font-extrabold text-[20px] text-white mb-3 shrink-0">{step.title}</div>
-      <div className="text-sm text-gray-300 leading-[1.7]" dangerouslySetInnerHTML={{ __html: step.desc }} />
+      <div className="font-syne font-extrabold text-[20px] mb-3 shrink-0" style={{ color: "#FFD700" }}>{step.title}</div>
+      <div className="text-sm leading-[1.7]" style={{ color: "#d1d5db" }} dangerouslySetInnerHTML={{ __html: step.desc }} />
     </div>
   );
 }
@@ -463,7 +463,7 @@ export default function ComingSoonPage() {
                             e.currentTarget.style.borderColor = `${glowColor}0.25)`;
                           }}>
                           <span className="text-[40px] mb-3 block">{f.icon}</span>
-                          <span className="font-syne font-extrabold text-[13px] text-white leading-tight">{f.title}</span>
+                          <span className="font-syne font-extrabold text-[13px] leading-tight" style={{ color: "#FFD700" }}>{f.title}</span>
                         </div>
                         {/* BACK */}
                         <div className="flip-card-face flip-card-back"
@@ -474,7 +474,7 @@ export default function ComingSoonPage() {
                             padding: 18,
                           }}>
                           <span className="text-[20px] mb-2 block">{f.icon}</span>
-                          <p className="text-[11px] text-gray-300 leading-[1.6] font-syne">{f.desc}</p>
+                          <p className="text-[11px] leading-[1.6] font-syne" style={{ color: "#d1d5db" }}>{f.desc}</p>
                         </div>
                       </div>
                     </div>
@@ -518,7 +518,7 @@ export default function ComingSoonPage() {
                         padding: 16,
                       }}>
                       <span className="text-[32px] mb-2 block">{f.icon}</span>
-                      <span className="font-syne font-extrabold text-[12px] text-white leading-tight">{f.title}</span>
+                      <span className="font-syne font-extrabold text-[12px] leading-tight" style={{ color: "#FFD700" }}>{f.title}</span>
                     </div>
                     <div className="flip-card-face flip-card-back"
                       style={{
@@ -528,7 +528,7 @@ export default function ComingSoonPage() {
                         padding: 14,
                       }}>
                       <span className="text-[16px] mb-1.5 block">{f.icon}</span>
-                      <p className="text-[10px] text-gray-300 leading-[1.5] font-syne">{f.desc}</p>
+                      <p className="text-[10px] leading-[1.5] font-syne" style={{ color: "#d1d5db" }}>{f.desc}</p>
                     </div>
                   </div>
                 </div>
@@ -563,15 +563,15 @@ export default function ComingSoonPage() {
 
               <div className="flex flex-col lg:flex-row gap-8 lg:gap-16 relative z-10">
                 <div className="flex-1">
-                  <p className="font-mono text-[10px] tracking-[3px] uppercase text-gray-400 mb-3">{peek.tag}</p>
-                  <h3 className="font-bebas text-[clamp(28px,4vw,48px)] leading-[0.95] mb-4 text-white">{peek.title}</h3>
-                  <p className="text-gray-300 text-sm leading-[1.7] max-w-md">{peek.desc}</p>
+                  <p className="font-mono text-[10px] tracking-[3px] uppercase mb-3" style={{ color: "#9ca3af" }}>{peek.tag}</p>
+                  <h3 className="font-bebas text-[clamp(28px,4vw,48px)] leading-[0.95] mb-4" style={{ color: "#FFD700" }}>{peek.title}</h3>
+                  <p className="text-sm leading-[1.7] max-w-md" style={{ color: "#d1d5db" }}>{peek.desc}</p>
                 </div>
                 <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {peek.items.map((item) => (
                     <div key={item.label} className="flex items-start gap-3 rounded-2xl px-4 py-3 border border-white/20 transition-colors backdrop-blur-sm" style={{ background: "rgba(255,255,255,0.05)" }}>
                       <span className="text-xl mt-0.5">{item.icon}</span>
-                      <span className="text-sm text-gray-300 leading-snug">{item.label}</span>
+                      <span className="text-sm leading-snug" style={{ color: "#e5e7eb" }}>{item.label}</span>
                     </div>
                   ))}
                 </div>
@@ -611,8 +611,8 @@ export default function ComingSoonPage() {
                 e.currentTarget.style.background = "linear-gradient(135deg, #080E1A 0%, #0a1225 100%)";
               }}>
               <span className="text-[36px] block mb-3 transition-transform duration-300 group-hover:scale-110">{s.icon}</span>
-              <div className="font-syne font-extrabold text-[16px] text-white mb-1">{s.name}</div>
-              <div className="font-mono text-[10px] tracking-[1px] text-gray-400 uppercase">{s.desc}</div>
+              <div className="font-syne font-extrabold text-[16px] mb-1" style={{ color: "#FFD700" }}>{s.name}</div>
+              <div className="font-mono text-[10px] tracking-[1px] uppercase" style={{ color: "#9ca3af" }}>{s.desc}</div>
             </div>
           ))}
         </div>
@@ -647,8 +647,8 @@ export default function ComingSoonPage() {
                     )}
                   </div>
                   <div>
-                    <h3 className="font-syne font-extrabold text-[20px] text-white mb-2">{item.title}</h3>
-                    <p className="text-sm text-gray-300 leading-[1.7] max-w-lg">{item.desc}</p>
+                    <h3 className="font-syne font-extrabold text-[20px] mb-2" style={{ color: "#FFD700" }}>{item.title}</h3>
+                    <p className="text-sm leading-[1.7] max-w-lg" style={{ color: "#d1d5db" }}>{item.desc}</p>
                   </div>
                 </div>
               </div>
@@ -675,8 +675,8 @@ export default function ComingSoonPage() {
               }}
               onMouseEnter={(e) => { e.currentTarget.style.boxShadow = "0 0 24px rgba(255,215,0,0.2)"; }}
               onMouseLeave={(e) => { e.currentTarget.style.boxShadow = "none"; }}>
-              <h3 className="font-syne font-bold text-[16px] text-white mb-3 group-hover:text-electric transition-colors">{item.q}</h3>
-              <p className="text-sm text-gray-300 leading-[1.7]">{item.a}</p>
+              <h3 className="font-syne font-bold text-[16px] mb-3 group-hover:text-electric transition-colors" style={{ color: "#FFD700" }}>{item.q}</h3>
+              <p className="text-sm leading-[1.7]" style={{ color: "#d1d5db" }}>{item.a}</p>
             </div>
           ))}
         </div>

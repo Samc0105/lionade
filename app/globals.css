@@ -1909,6 +1909,20 @@ html.light [data-force-dark] nav {
 }
 html.light [data-force-dark] nav * { color: inherit !important; }
 html.light [data-force-dark] input { color: #EEF4FF !important; background-color: transparent !important; }
+/* Force ALL text inside data-force-dark to stay light in light mode */
+html.light [data-force-dark] h1,
+html.light [data-force-dark] h2,
+html.light [data-force-dark] h3 { color: #FFD700 !important; }
+html.light [data-force-dark] .font-bebas { color: #FFD700 !important; }
+html.light [data-force-dark] .font-syne { color: #ffffff !important; }
+html.light [data-force-dark] .text-white { color: #ffffff !important; }
+html.light [data-force-dark] .text-gray-300 { color: #d1d5db !important; }
+html.light [data-force-dark] .text-gray-400 { color: #9ca3af !important; }
+html.light [data-force-dark] p { color: #d1d5db !important; }
+html.light [data-force-dark] span { color: inherit; }
+html.light [data-force-dark] .text-electric { color: #4A90D9 !important; }
+html.light [data-force-dark] .text-electric\/20 { color: rgba(74,144,217,0.2) !important; }
+html.light [data-force-dark] .text-electric\/40 { color: rgba(74,144,217,0.4) !important; }
 [data-force-dark] { position: relative; z-index: 10; }
 
 /* ══ TEXT OVERRIDES ══ */
