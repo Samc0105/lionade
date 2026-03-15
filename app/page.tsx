@@ -188,8 +188,8 @@ function StepCard({ step, idx }: { step: typeof STEPS[0]; idx: number }) {
       </div>
 
       <div className="text-[28px] mb-4 shrink-0">{step.icon}</div>
-      <div className="font-syne font-extrabold text-[20px] text-[#EEF4FF] mb-3 shrink-0">{step.title}</div>
-      <div className="text-sm text-[#B0BEC5] leading-[1.7]" dangerouslySetInnerHTML={{ __html: step.desc }} />
+      <div className="font-syne font-extrabold text-[20px] text-white mb-3 shrink-0">{step.title}</div>
+      <div className="text-sm text-gray-300 leading-[1.7]" dangerouslySetInnerHTML={{ __html: step.desc }} />
     </div>
   );
 }
@@ -289,7 +289,7 @@ export default function ComingSoonPage() {
       <nav className="fixed top-0 left-0 right-0 z-[100] flex items-center justify-between px-6 sm:px-12 py-6"
         style={{ background: "linear-gradient(to bottom, rgba(4,8,15,0.95), transparent)" }}>
         <img src="/logo-full.png" alt="Lionade" className="h-9 rounded-md" />
-        <span className="font-mono text-[11px] tracking-[2px] uppercase text-[#94A3B8]">Coming Soon &mdash; 2026</span>
+        <span className="font-mono text-[11px] tracking-[2px] uppercase text-gray-400">Coming Soon &mdash; 2026</span>
       </nav>
 
       {/* ═══════════════════ HERO ═══════════════════ */}
@@ -343,7 +343,7 @@ export default function ComingSoonPage() {
             <div key={stat.label} className="flex items-center gap-8 sm:gap-12">
               <div className="text-center">
                 <div className={`font-bebas text-[42px] leading-none ${stat.label === "Blitz" ? "text-[#FFD700]" : "text-electric"}`}>{stat.value}</div>
-                <div className="font-mono text-[10px] tracking-[2px] uppercase text-[#B0BEC5] mt-1">{stat.label}</div>
+                <div className="font-mono text-[10px] tracking-[2px] uppercase text-gray-400 mt-1">{stat.label}</div>
               </div>
               {i < arr.length - 1 && <div className="w-px self-stretch bg-electric/20 hidden sm:block" />}
             </div>
@@ -352,7 +352,7 @@ export default function ComingSoonPage() {
 
         {/* Email Form */}
         <div className="mt-14 w-full max-w-[520px] animate-[fadeUp_0.8s_ease_0.4s_both] relative z-10">
-          <span className="font-mono text-[11px] tracking-[2px] uppercase text-[#94A3B8] block mb-3">
+          <span className="font-mono text-[11px] tracking-[2px] uppercase text-gray-400 block mb-3">
             Join the waitlist &mdash; be first in line
           </span>
           {status1 !== "success" ? (
@@ -377,7 +377,7 @@ export default function ComingSoonPage() {
               You&apos;re on the list. We&apos;ll hit you when we drop.
             </div>
           )}
-          <p className="font-mono text-[10px] text-[#94A3B8] tracking-[1px] mt-2.5">No spam. No cap. Just early access.</p>
+          <p className="font-mono text-[10px] text-gray-400 tracking-[1px] mt-2.5">No spam. No cap. Just early access.</p>
         </div>
 
         {/* Scroll indicator */}
@@ -395,7 +395,7 @@ export default function ComingSoonPage() {
       <section id="how-it-works" className="max-w-[1100px] mx-auto px-6 sm:px-12 py-20 sm:py-28 relative">
         <div className="reveal">
           <p className="font-mono text-[11px] tracking-[3px] uppercase text-electric mb-4">// How It Works</p>
-          <h2 className="font-bebas text-[clamp(48px,7vw,96px)] leading-[0.95] mb-16 radial-burst highlight-sweep inline-block">
+          <h2 className="font-bebas text-[clamp(48px,7vw,96px)] leading-[0.95] mb-16 radial-burst highlight-sweep inline-block text-white">
             YOUR DAILY<br /><span className="text-electric">GRIND</span>
           </h2>
         </div>
@@ -463,7 +463,7 @@ export default function ComingSoonPage() {
                             e.currentTarget.style.borderColor = `${glowColor}0.25)`;
                           }}>
                           <span className="text-[40px] mb-3 block">{f.icon}</span>
-                          <span className="font-syne font-extrabold text-[13px] text-[#EEF4FF] leading-tight">{f.title}</span>
+                          <span className="font-syne font-extrabold text-[13px] text-white leading-tight">{f.title}</span>
                         </div>
                         {/* BACK */}
                         <div className="flip-card-face flip-card-back"
@@ -474,7 +474,7 @@ export default function ComingSoonPage() {
                             padding: 18,
                           }}>
                           <span className="text-[20px] mb-2 block">{f.icon}</span>
-                          <p className="text-[11px] text-[#B0BEC5] leading-[1.6] font-syne">{f.desc}</p>
+                          <p className="text-[11px] text-gray-300 leading-[1.6] font-syne">{f.desc}</p>
                         </div>
                       </div>
                     </div>
@@ -491,7 +491,7 @@ export default function ComingSoonPage() {
                     <span className="text-[#EAB308] block text-center">BUILT</span>
                     <span className="text-white block text-center">DIFFERENT</span>
                   </h2>
-                  <p className="font-mono text-[8px] tracking-[2px] uppercase text-[#94A3B8] mt-3 text-center">Hover to explore</p>
+                  <p className="font-mono text-[8px] tracking-[2px] uppercase text-gray-400 mt-3 text-center">Hover to explore</p>
                 </div>
               </div>
             </div>
@@ -500,7 +500,7 @@ export default function ComingSoonPage() {
 
         {/* ── Mobile: 2-column flip grid (below lg) ── */}
         <div className="lg:hidden reveal">
-          <h2 className="font-bebas text-[clamp(48px,7vw,72px)] leading-[0.95] mb-10 text-center">
+          <h2 className="font-bebas text-[clamp(48px,7vw,72px)] leading-[0.95] mb-10 text-center text-white">
             BUILT<br /><span className="text-electric">DIFFERENT</span>
           </h2>
           <div className="grid grid-cols-2 gap-4 max-w-[400px] mx-auto">
@@ -518,7 +518,7 @@ export default function ComingSoonPage() {
                         padding: 16,
                       }}>
                       <span className="text-[32px] mb-2 block">{f.icon}</span>
-                      <span className="font-syne font-extrabold text-[12px] text-[#EEF4FF] leading-tight">{f.title}</span>
+                      <span className="font-syne font-extrabold text-[12px] text-white leading-tight">{f.title}</span>
                     </div>
                     <div className="flip-card-face flip-card-back"
                       style={{
@@ -528,7 +528,7 @@ export default function ComingSoonPage() {
                         padding: 14,
                       }}>
                       <span className="text-[16px] mb-1.5 block">{f.icon}</span>
-                      <p className="text-[10px] text-[#B0BEC5] leading-[1.5] font-syne">{f.desc}</p>
+                      <p className="text-[10px] text-gray-300 leading-[1.5] font-syne">{f.desc}</p>
                     </div>
                   </div>
                 </div>
@@ -542,10 +542,10 @@ export default function ComingSoonPage() {
       <section className="max-w-[1100px] mx-auto px-6 sm:px-12 py-20 sm:py-28">
         <div className="reveal">
           <p className="font-mono text-[11px] tracking-[3px] uppercase text-electric mb-4">// Sneak Peek</p>
-          <h2 className="font-bebas text-[clamp(48px,7vw,96px)] leading-[0.95] mb-6 highlight-sweep inline-block">
+          <h2 className="font-bebas text-[clamp(48px,7vw,96px)] leading-[0.95] mb-6 highlight-sweep inline-block text-white">
             INSIDE<br /><span className="text-electric">THE APP</span>
           </h2>
-          <p className="text-[#B0BEC5] text-base sm:text-lg max-w-[600px] leading-relaxed mb-16">
+          <p className="text-gray-300 text-base sm:text-lg max-w-[600px] leading-relaxed mb-16">
             Here&apos;s a look at what you&apos;ll get when you unlock your account. Every screen is designed to keep you grinding.
           </p>
         </div>
@@ -563,9 +563,9 @@ export default function ComingSoonPage() {
 
               <div className="flex flex-col lg:flex-row gap-8 lg:gap-16 relative z-10">
                 <div className="flex-1">
-                  <p className="font-mono text-[10px] tracking-[3px] uppercase text-electric/40 mb-3">{peek.tag}</p>
+                  <p className="font-mono text-[10px] tracking-[3px] uppercase text-gray-400 mb-3">{peek.tag}</p>
                   <h3 className="font-bebas text-[clamp(28px,4vw,48px)] leading-[0.95] mb-4 text-white">{peek.title}</h3>
-                  <p className="text-[#B0BEC5] text-sm leading-[1.7] max-w-md">{peek.desc}</p>
+                  <p className="text-gray-300 text-sm leading-[1.7] max-w-md">{peek.desc}</p>
                 </div>
                 <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {peek.items.map((item) => (
@@ -585,7 +585,7 @@ export default function ComingSoonPage() {
       <section className="max-w-[1100px] mx-auto px-6 sm:px-12 py-20 sm:py-28">
         <div className="reveal">
           <p className="font-mono text-[11px] tracking-[3px] uppercase text-electric mb-4">// Subjects</p>
-          <h2 className="font-bebas text-[clamp(48px,7vw,96px)] leading-[0.95] mb-16 highlight-sweep inline-block">
+          <h2 className="font-bebas text-[clamp(48px,7vw,96px)] leading-[0.95] mb-16 highlight-sweep inline-block text-white">
             PICK YOUR<br /><span className="text-electric">LANE</span>
           </h2>
         </div>
@@ -611,8 +611,8 @@ export default function ComingSoonPage() {
                 e.currentTarget.style.background = "linear-gradient(135deg, #080E1A 0%, #0a1225 100%)";
               }}>
               <span className="text-[36px] block mb-3 transition-transform duration-300 group-hover:scale-110">{s.icon}</span>
-              <div className="font-syne font-extrabold text-[16px] text-[#EEF4FF] mb-1">{s.name}</div>
-              <div className="font-mono text-[10px] tracking-[1px] text-[#B0BEC5] uppercase">{s.desc}</div>
+              <div className="font-syne font-extrabold text-[16px] text-white mb-1">{s.name}</div>
+              <div className="font-mono text-[10px] tracking-[1px] text-gray-400 uppercase">{s.desc}</div>
             </div>
           ))}
         </div>
@@ -622,7 +622,7 @@ export default function ComingSoonPage() {
       <section className="max-w-[1100px] mx-auto px-6 sm:px-12 py-20 sm:py-28">
         <div className="reveal">
           <p className="font-mono text-[11px] tracking-[3px] uppercase text-electric mb-4">// Roadmap</p>
-          <h2 className="font-bebas text-[clamp(48px,7vw,96px)] leading-[0.95] mb-16 highlight-sweep inline-block">
+          <h2 className="font-bebas text-[clamp(48px,7vw,96px)] leading-[0.95] mb-16 highlight-sweep inline-block text-white">
             WHAT&apos;S<br /><span className="text-electric">COMING</span>
           </h2>
         </div>
@@ -641,14 +641,14 @@ export default function ComingSoonPage() {
                 }`} />
                 <div className="flex flex-col sm:flex-row sm:items-start gap-2 sm:gap-6">
                   <div className="flex items-center gap-3">
-                    <span className="font-mono text-[11px] tracking-[2px] uppercase text-electric/40 whitespace-nowrap">{item.phase}</span>
+                    <span className="font-mono text-[11px] tracking-[2px] uppercase text-gray-400 whitespace-nowrap">{item.phase}</span>
                     {item.status === "active" && (
                       <span className="font-mono text-[9px] tracking-[2px] uppercase bg-[#FFD700]/15 text-[#FFD700] px-2 py-0.5 rounded-full">Live</span>
                     )}
                   </div>
                   <div>
-                    <h3 className="font-syne font-extrabold text-[20px] text-[#EEF4FF] mb-2">{item.title}</h3>
-                    <p className="text-sm text-[#B0BEC5] leading-[1.7] max-w-lg">{item.desc}</p>
+                    <h3 className="font-syne font-extrabold text-[20px] text-white mb-2">{item.title}</h3>
+                    <p className="text-sm text-gray-300 leading-[1.7] max-w-lg">{item.desc}</p>
                   </div>
                 </div>
               </div>
@@ -661,7 +661,7 @@ export default function ComingSoonPage() {
       <section className="max-w-[1100px] mx-auto px-6 sm:px-12 py-20 sm:py-28">
         <div className="reveal">
           <p className="font-mono text-[11px] tracking-[3px] uppercase text-electric mb-4">// FAQ</p>
-          <h2 className="font-bebas text-[clamp(48px,7vw,96px)] leading-[0.95] mb-16 highlight-sweep inline-block">
+          <h2 className="font-bebas text-[clamp(48px,7vw,96px)] leading-[0.95] mb-16 highlight-sweep inline-block text-white">
             GOT<br /><span className="text-electric">QUESTIONS?</span>
           </h2>
         </div>
@@ -675,8 +675,8 @@ export default function ComingSoonPage() {
               }}
               onMouseEnter={(e) => { e.currentTarget.style.boxShadow = "0 0 24px rgba(255,215,0,0.2)"; }}
               onMouseLeave={(e) => { e.currentTarget.style.boxShadow = "none"; }}>
-              <h3 className="font-syne font-bold text-[16px] text-[#EEF4FF] mb-3 group-hover:text-electric transition-colors">{item.q}</h3>
-              <p className="text-sm text-[#B0BEC5] leading-[1.7]">{item.a}</p>
+              <h3 className="font-syne font-bold text-[16px] text-white mb-3 group-hover:text-electric transition-colors">{item.q}</h3>
+              <p className="text-sm text-gray-300 leading-[1.7]">{item.a}</p>
             </div>
           ))}
         </div>
@@ -720,15 +720,15 @@ export default function ComingSoonPage() {
               You&apos;re on the list. We&apos;ll hit you when we drop.
             </div>
           )}
-          <p className="font-mono text-[10px] text-[#94A3B8] tracking-[1px] mt-2.5">Free to join &middot; No credit card &middot; No cap</p>
+          <p className="font-mono text-[10px] text-gray-400 tracking-[1px] mt-2.5">Free to join &middot; No credit card &middot; No cap</p>
         </div>
       </section>
 
       {/* ─── Footer ─── */}
       <footer className="px-6 sm:px-12 py-8 flex items-center justify-between flex-wrap gap-4">
         <img src="/logo-full.png" alt="Lionade" className="h-8 rounded-md" />
-        <span className="font-mono text-[10px] tracking-[2px] uppercase text-[#8899A6]">Where champions are made &mdash; 2026</span>
-        <span className="font-mono text-[11px] tracking-[1px] text-[#8899A6]">&copy; 2026 getlionade.com &middot; All rights reserved</span>
+        <span className="font-mono text-[10px] tracking-[2px] uppercase text-gray-400">Where champions are made &mdash; 2026</span>
+        <span className="font-mono text-[11px] tracking-[1px] text-gray-400">&copy; 2026 getlionade.com &middot; All rights reserved</span>
       </footer>
 
       {/* ─── DevOps Secret Trigger ─── */}
