@@ -123,10 +123,11 @@ export default function LoginPage() {
       const checkOnboarding = async () => {
         const { data: profile } = await supabase
           .from("profiles")
-          .select("onboarding_completed")
+          .select("onboarding_completed, username")
           .eq("id", user.id)
           .maybeSingle();
-        const dest = profile?.onboarding_completed ? "/dashboard" : "/onboarding?step=2";
+        const isOnboarded = profile?.onboarding_completed || (profile?.username && profile.username.trim().length > 0);
+        const dest = isOnboarded ? "/dashboard" : "/onboarding?step=2";
         if (showVerifiedBanner) {
           const t = setTimeout(() => router.replace(dest), 2500);
           return () => clearTimeout(t);
@@ -178,10 +179,11 @@ export default function LoginPage() {
       if (session) {
         const { data: profile } = await supabase
           .from("profiles")
-          .select("onboarding_completed")
+          .select("onboarding_completed, username")
           .eq("id", session.user.id)
           .maybeSingle();
-        if (!profile?.onboarding_completed) {
+        const isOnboarded = profile?.onboarding_completed || (profile?.username && profile.username.trim().length > 0);
+        if (!isOnboarded) {
           router.replace("/onboarding?step=2");
           return;
         }
@@ -299,11 +301,9 @@ export default function LoginPage() {
         )}
 
         {/* Logo */}
-        <div className="text-center mb-8">
+        <div className="text-center mb-8 pt-4">
           <Link href="/" className="inline-flex items-center gap-3 group">
-            <div className="w-10 h-10 rounded-xl bg-electric flex items-center justify-center shadow-lg shadow-electric/40">
-              <span className="text-white font-bebas text-xl leading-none">L</span>
-            </div>
+            <img src="/logo-full.png" alt="Lionade" className="w-10 h-10 object-contain" />
             <span className="font-bebas text-3xl tracking-wider text-cream group-hover:text-electric transition-colors">
               LIONADE
             </span>
