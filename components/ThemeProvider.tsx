@@ -39,6 +39,7 @@ function fixInlineBackgrounds() {
   if (!document.documentElement.classList.contains("light")) return;
   document.querySelectorAll<HTMLElement>("[style]").forEach((el) => {
     if (el.hasAttribute(FIXED)) return; // already handled
+    if (el.closest("[data-force-dark]")) return; // skip force-dark sections
     const bg = el.style.background || el.style.backgroundColor;
     if (!bg || !isDarkColor(bg)) return;
     // Skip tiny decorative elements

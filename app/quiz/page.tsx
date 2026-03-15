@@ -10,6 +10,10 @@ import { mutateUserStats } from "@/lib/hooks";
 import { useRouter } from "next/navigation";
 import BackButton from "@/components/BackButton";
 
+function isLightMode() {
+  return typeof document !== "undefined" && document.documentElement.classList.contains("light");
+}
+
 interface Topic {
   name: string;
   subject: Subject;
@@ -524,7 +528,7 @@ export default function QuizPage() {
           <div className="animate-slide-up mb-6" style={{ animationDelay: "0.05s" }}>
             <button
               onClick={() => setBlitzMode(!blitzMode)}
-              className="w-full p-4 rounded-2xl border transition-all duration-300 text-left flex items-center gap-4 cursor-pointer"
+              className={`quiz-blitz-card w-full p-4 rounded-2xl border transition-all duration-300 text-left flex items-center gap-4 cursor-pointer${blitzMode ? " blitz-active" : ""}`}
               style={{
                 background: blitzMode
                   ? "linear-gradient(135deg, #EAB30820 0%, #FFD70010 100%)"
@@ -536,7 +540,7 @@ export default function QuizPage() {
               <span className="text-3xl">&#x26A1;</span>
               <div className="flex-1">
                 <p className="font-bebas text-xl text-[#EAB308] tracking-wider">BLITZ MODE</p>
-                <p className="text-cream/40 text-xs font-syne">2x Coins & XP, Shorter Timer (10s)</p>
+                <p className="blitz-subtitle text-cream/40 text-xs font-syne">2x Coins & XP, Shorter Timer (10s)</p>
               </div>
               {blitzMode && (
                 <span className="text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full bg-[#EAB308]/20 border border-[#EAB308]/40 text-[#EAB308]">
@@ -560,7 +564,7 @@ export default function QuizPage() {
                 <button
                   key={d}
                   onClick={() => setDifficulty(d)}
-                  className="relative p-4 rounded-2xl border-2 transition-all duration-300 text-left cursor-pointer hover:-translate-y-0.5"
+                  className={`quiz-diff-card relative p-4 rounded-2xl border-2 transition-all duration-300 text-left cursor-pointer hover:-translate-y-0.5${difficulty === d ? ` diff-selected diff-${d === "easy" ? "green" : d === "medium" ? "yellow" : "red"}` : ""}`}
                   style={{
                     background: difficulty === d
                       ? `linear-gradient(135deg, ${color}15 0%, ${color}05 100%)`
@@ -570,8 +574,8 @@ export default function QuizPage() {
                   }}
                 >
                   <span className="text-2xl block mb-2">{icon}</span>
-                  <p className="font-bebas text-lg tracking-wider" style={{ color: difficulty === d ? color : "#ffffff60" }}>{label}</p>
-                  <p className="text-cream/40 text-[11px] leading-tight mt-1">{desc}</p>
+                  <p className="diff-label font-bebas text-lg tracking-wider" style={{ color: difficulty === d ? color : "#ffffff60" }}>{label}</p>
+                  <p className="diff-desc text-cream/40 text-[11px] leading-tight mt-1">{desc}</p>
                   <span
                     className="inline-block mt-2 text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full"
                     style={{ background: `${color}15`, border: `1px solid ${color}30`, color: difficulty === d ? color : `${color}80` }}
@@ -594,15 +598,29 @@ export default function QuizPage() {
                     <button
                       key={rec.topic.name}
                       onClick={() => startQuiz(rec.topic.subject, rec.topic.name)}
-                      className="flex items-center gap-3 p-4 rounded-2xl border text-left transition-all duration-300 hover:-translate-y-0.5 cursor-pointer"
+                      className="quiz-subject-card flex items-center gap-3 p-4 rounded-2xl border text-left transition-all duration-200 hover:-translate-y-0.5 cursor-pointer"
                       style={{ background: `linear-gradient(135deg, ${color}10 0%, #060c18 100%)`, borderColor: `${color}30` }}
-                      onMouseEnter={(e) => { e.currentTarget.style.boxShadow = `0 0 20px ${color}20`; }}
-                      onMouseLeave={(e) => { e.currentTarget.style.boxShadow = "none"; }}
+                      onMouseEnter={(e) => {
+                        if (isLightMode()) {
+                          e.currentTarget.style.borderColor = color;
+                          e.currentTarget.style.boxShadow = `0 0 16px ${color}33`;
+                        } else {
+                          e.currentTarget.style.boxShadow = `0 0 20px ${color}20`;
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (isLightMode()) {
+                          e.currentTarget.style.borderColor = "#e5e7eb";
+                          e.currentTarget.style.boxShadow = "0 1px 3px rgba(0,0,0,0.06)";
+                        } else {
+                          e.currentTarget.style.boxShadow = "none";
+                        }
+                      }}
                     >
                       <span className="text-3xl">{rec.category.icon}</span>
                       <div>
-                        <p className="font-bebas text-lg tracking-wider" style={{ color }}>{rec.topic.name}</p>
-                        <p className="text-cream/40 text-xs font-syne">{rec.reason}</p>
+                        <p className="card-title font-bebas text-lg tracking-wider" style={{ color }}>{rec.topic.name}</p>
+                        <p className="card-subtitle text-cream/40 text-xs font-syne">{rec.reason}</p>
                       </div>
                     </button>
                   );
@@ -618,18 +636,34 @@ export default function QuizPage() {
                 <button
                   key={cat.id}
                   onClick={() => setExpandedCategory(cat.id)}
-                  className="group relative p-5 rounded-2xl border transition-all duration-300 hover:-translate-y-1 text-left animate-slide-up cursor-pointer"
+                  className="quiz-subject-card group relative p-5 rounded-2xl border transition-all duration-200 hover:-translate-y-1 text-left animate-slide-up cursor-pointer"
                   style={{
                     animationDelay: `${0.12 + i * 0.04}s`,
                     border: `1px solid ${cat.color}30`,
                     background: `linear-gradient(135deg, ${cat.color}08 0%, #060c18 100%)`,
                   }}
-                  onMouseEnter={(e) => { e.currentTarget.style.boxShadow = `0 0 25px ${cat.color}20, 0 8px 32px ${cat.color}10`; e.currentTarget.style.borderColor = `${cat.color}60`; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.boxShadow = "none"; e.currentTarget.style.borderColor = `${cat.color}30`; }}
+                  onMouseEnter={(e) => {
+                    if (isLightMode()) {
+                      e.currentTarget.style.borderColor = cat.color;
+                      e.currentTarget.style.boxShadow = `0 0 16px ${cat.color}33`;
+                    } else {
+                      e.currentTarget.style.boxShadow = `0 0 25px ${cat.color}20, 0 8px 32px ${cat.color}10`;
+                      e.currentTarget.style.borderColor = `${cat.color}60`;
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (isLightMode()) {
+                      e.currentTarget.style.borderColor = "#e5e7eb";
+                      e.currentTarget.style.boxShadow = "0 1px 3px rgba(0,0,0,0.06)";
+                    } else {
+                      e.currentTarget.style.boxShadow = "none";
+                      e.currentTarget.style.borderColor = `${cat.color}30`;
+                    }
+                  }}
                 >
                   <span className="text-4xl block mb-3 group-hover:scale-110 transition-transform duration-300">{cat.icon}</span>
-                  <p className="font-bebas text-xl text-cream tracking-wider">{cat.name}</p>
-                  <p className="text-xs mt-1" style={{ color: `${cat.color}cc` }}>{cat.topics.length} topics</p>
+                  <p className="card-title font-bebas text-xl text-cream tracking-wider">{cat.name}</p>
+                  <p className="card-subtitle text-xs mt-1" style={{ color: `${cat.color}cc` }}>{cat.topics.length} topics</p>
                 </button>
               ))}
             </div>
@@ -669,12 +703,28 @@ export default function QuizPage() {
                     <button
                       key={topic.name}
                       onClick={() => startQuiz(topic.subject, topic.name)}
-                      className="group relative p-5 rounded-2xl border transition-all duration-300 hover:-translate-y-1 text-left animate-slide-up cursor-pointer"
+                      className="quiz-subject-card group relative p-5 rounded-2xl border transition-all duration-200 hover:-translate-y-1 text-left animate-slide-up cursor-pointer"
                       style={{ animationDelay: `${i * 0.05}s`, border: `1px solid ${color}30`, background: `linear-gradient(135deg, ${color}08 0%, #060c18 100%)` }}
-                      onMouseEnter={(e) => { e.currentTarget.style.boxShadow = `0 0 25px ${color}20, 0 8px 32px ${color}10`; e.currentTarget.style.borderColor = `${color}60`; }}
-                      onMouseLeave={(e) => { e.currentTarget.style.boxShadow = "none"; e.currentTarget.style.borderColor = `${color}30`; }}
+                      onMouseEnter={(e) => {
+                        if (isLightMode()) {
+                          e.currentTarget.style.borderColor = color;
+                          e.currentTarget.style.boxShadow = `0 0 16px ${color}33`;
+                        } else {
+                          e.currentTarget.style.boxShadow = `0 0 25px ${color}20, 0 8px 32px ${color}10`;
+                          e.currentTarget.style.borderColor = `${color}60`;
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (isLightMode()) {
+                          e.currentTarget.style.borderColor = "#e5e7eb";
+                          e.currentTarget.style.boxShadow = "0 1px 3px rgba(0,0,0,0.06)";
+                        } else {
+                          e.currentTarget.style.boxShadow = "none";
+                          e.currentTarget.style.borderColor = `${color}30`;
+                        }
+                      }}
                     >
-                      <p className="font-bebas text-xl text-cream tracking-wider mb-1">{topic.name}</p>
+                      <p className="card-title font-bebas text-xl text-cream tracking-wider mb-1">{topic.name}</p>
                       <span className="inline-block text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full mb-3"
                         style={{ background: `${color}15`, border: `1px solid ${color}30`, color: `${color}cc` }}>{topic.subject}</span>
                       <div className="pt-3 border-t border-white/5">
@@ -706,11 +756,11 @@ export default function QuizPage() {
                 { label: "Favorite", value: favoriteSubject, icon: "\u{2B50}", color: "#A855F7" },
                 { label: "Coins Earned", value: formatCoins(totalCoinsEarned), icon: "\u{1FA99}", color: "#FFD700" },
               ].map((stat) => (
-                <div key={stat.label} className="p-4 rounded-2xl border text-center"
+                <div key={stat.label} className="quiz-stat-card p-4 rounded-2xl border text-center"
                   style={{ background: `linear-gradient(135deg, ${stat.color}08 0%, #060c18 100%)`, borderColor: `${stat.color}20` }}>
                   <span className="text-2xl block mb-1">{stat.icon}</span>
                   <p className="font-bebas text-2xl leading-none" style={{ color: stat.color }}>{stat.value}</p>
-                  <p className="text-cream/40 text-[10px] uppercase tracking-wider mt-1">{stat.label}</p>
+                  <p className="stat-label text-cream/40 text-[10px] uppercase tracking-wider mt-1">{stat.label}</p>
                 </div>
               ))}
             </div>

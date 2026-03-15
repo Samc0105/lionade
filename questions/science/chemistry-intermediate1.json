@@ -1,0 +1,2774 @@
+[
+  {
+    "question": "What is the name for the energy required to remove the outermost electron from a gaseous atom?",
+    "options": [
+      "First ionization energy",
+      "Electron affinity",
+      "Electronegativity",
+      "Lattice energy"
+    ],
+    "correct_answer": "First ionization energy",
+    "explanation": "First ionization energy is the minimum energy needed to remove the highest-energy electron from a neutral gaseous atom, producing a +1 cation.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "Which gas law states PV = nRT?",
+    "options": [
+      "Ideal gas law",
+      "Boyle's law",
+      "Charles's law",
+      "Dalton's law"
+    ],
+    "correct_answer": "Ideal gas law",
+    "explanation": "The ideal gas law PV = nRT combines Boyle's, Charles's, and Avogadro's laws, where P=pressure, V=volume, n=moles, R=gas constant, T=temperature in Kelvin.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for the heat absorbed or released at constant pressure?",
+    "options": [
+      "Enthalpy change (ΔH)",
+      "Entropy change (ΔS)",
+      "Gibbs free energy",
+      "Internal energy"
+    ],
+    "correct_answer": "Enthalpy change (ΔH)",
+    "explanation": "Enthalpy change ΔH equals the heat flow at constant pressure (qp). Negative ΔH means heat is released (exothermic); positive ΔH means heat is absorbed (endothermic).",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for an atom or molecule that has gained or lost one or more electrons?",
+    "options": [
+      "Ion",
+      "Isotope",
+      "Isomer",
+      "Radical"
+    ],
+    "correct_answer": "Ion",
+    "explanation": "An ion is formed when an atom gains electrons (anion, negative charge) or loses electrons (cation, positive charge). Ionic compounds consist of cations and anions.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What does Le Chatelier's principle predict?",
+    "options": [
+      "A system at equilibrium shifts to oppose a change in conditions",
+      "Reaction rate depends on temperature",
+      "Entropy always increases",
+      "Energy is conserved in reactions"
+    ],
+    "correct_answer": "A system at equilibrium shifts to oppose a change in conditions",
+    "explanation": "Le Chatelier's principle states that if a system at equilibrium is disturbed (concentration, temperature, or pressure change), it will shift to partially counteract the disturbance.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the oxidation state of sulfur in H2SO4?",
+    "options": [
+      "6+",
+      "4+",
+      "2-",
+      "0"
+    ],
+    "correct_answer": "6+",
+    "explanation": "In H2SO4: H is +1 (×2 = +2), O is -2 (×4 = -8). For the molecule to be neutral: +2 + S + (-8) = 0, so S = +6.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for a reaction where heat is absorbed from the surroundings?",
+    "options": [
+      "Endothermic reaction",
+      "Exothermic reaction",
+      "Combustion reaction",
+      "Neutralization reaction"
+    ],
+    "correct_answer": "Endothermic reaction",
+    "explanation": "Endothermic reactions absorb heat energy from the surroundings, causing the surroundings to feel cold. They have positive ΔH values. Dissolving NH4NO3 is an example.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the molecular geometry predicted by VSEPR for a molecule with 4 bonding pairs and 0 lone pairs?",
+    "options": [
+      "Tetrahedral",
+      "Trigonal planar",
+      "Linear",
+      "Bent"
+    ],
+    "correct_answer": "Tetrahedral",
+    "explanation": "Four bonding pairs with no lone pairs arrange themselves tetrahedrally to minimize repulsion, with bond angles of 109.5°. Methane (CH4) is the classic example.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the process of a metal losing electrons to form positive ions in a redox reaction?",
+    "options": [
+      "Oxidation",
+      "Reduction",
+      "Hydrolysis",
+      "Neutralization"
+    ],
+    "correct_answer": "Oxidation",
+    "explanation": "Oxidation is the loss of electrons (OIL: Oxidation Is Loss). When a metal is oxidized, it forms a cation. The metal acts as the reducing agent.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What does a large equilibrium constant (K >> 1) indicate?",
+    "options": [
+      "Products are favored at equilibrium",
+      "Reactants are favored at equilibrium",
+      "The reaction is at equilibrium",
+      "The reaction is very fast"
+    ],
+    "correct_answer": "Products are favored at equilibrium",
+    "explanation": "A large K (>>1) means the equilibrium strongly favors products — the reaction proceeds nearly to completion. K < 1 favors reactants; K = 1 means equal concentrations.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the technique that separates mixtures by their affinity for a stationary phase vs. mobile phase?",
+    "options": [
+      "Chromatography",
+      "Distillation",
+      "Filtration",
+      "Electrophoresis"
+    ],
+    "correct_answer": "Chromatography",
+    "explanation": "Chromatography separates mixture components based on differential migration through a stationary phase carried by a mobile phase (gas or liquid).",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for the repulsion between bonding pairs and lone pairs in VSEPR theory?",
+    "options": [
+      "Electron pair repulsion",
+      "Van der Waals forces",
+      "Hydrogen bonding",
+      "Dipole-dipole interaction"
+    ],
+    "correct_answer": "Electron pair repulsion",
+    "explanation": "VSEPR (Valence Shell Electron Pair Repulsion) theory predicts molecular geometry based on minimizing repulsion between all electron pairs around the central atom.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the minimum concentration of acid or base needed to significantly change a buffer's pH?",
+    "options": [
+      "Buffer capacity",
+      "Ka",
+      "pKa",
+      "Buffering range"
+    ],
+    "correct_answer": "Buffer capacity",
+    "explanation": "Buffer capacity is the amount of strong acid or base a buffer can absorb before its pH changes significantly, related to the concentrations of the conjugate acid-base pair.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "Which type of solid has particles arranged in a regular, repeating 3D pattern?",
+    "options": [
+      "Crystalline solid",
+      "Amorphous solid",
+      "Liquid crystal",
+      "Polymer"
+    ],
+    "correct_answer": "Crystalline solid",
+    "explanation": "Crystalline solids (metals, ionic compounds, many covalent compounds) have particles arranged in ordered, repeating lattice structures with sharp melting points.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for reactions where electrons are transferred between reactants?",
+    "options": [
+      "Redox reactions",
+      "Acid-base reactions",
+      "Precipitation reactions",
+      "Complexation reactions"
+    ],
+    "correct_answer": "Redox reactions",
+    "explanation": "Redox (reduction-oxidation) reactions involve transfer of electrons. One species is oxidized (loses electrons) and another is reduced (gains electrons) simultaneously.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the half-life in radioactive decay?",
+    "options": [
+      "Time for half the nuclei to decay",
+      "Time for all nuclei to decay",
+      "Time for the decay rate to double",
+      "Time for one nucleus to decay"
+    ],
+    "correct_answer": "Time for half the nuclei to decay",
+    "explanation": "Half-life (t½) is the time required for exactly half of the radioactive nuclei in a sample to decay. Each subsequent half-life reduces the remaining amount by half.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for a pair of species that differ by one proton in a Brønsted-Lowry acid-base system?",
+    "options": [
+      "Conjugate acid-base pair",
+      "Lewis acid-base pair",
+      "Amphoteric pair",
+      "Buffer pair"
+    ],
+    "correct_answer": "Conjugate acid-base pair",
+    "explanation": "A conjugate acid-base pair differs by one proton: when HA donates H+, it becomes its conjugate base A-. When B accepts H+, it becomes its conjugate acid BH+.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the unit of molarity?",
+    "options": [
+      "mol/L",
+      "mol/kg",
+      "g/mol",
+      "mol/m³"
+    ],
+    "correct_answer": "mol/L",
+    "explanation": "Molarity (M) is the number of moles of solute per liter of solution (mol/L). A 1 M solution contains 1 mole of solute in 1 liter of solution.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What type of hybridization gives a linear molecular geometry?",
+    "options": [
+      "sp",
+      "sp2",
+      "sp3",
+      "sp3d"
+    ],
+    "correct_answer": "sp",
+    "explanation": "sp hybridization mixes one s and one p orbital to form two sp hybrid orbitals oriented 180° apart (linear), as in CO2 and acetylene (C2H2).",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for a species that can act as both an acid and a base?",
+    "options": [
+      "Amphoteric",
+      "Neutral",
+      "Zwitterion",
+      "Buffer"
+    ],
+    "correct_answer": "Amphoteric",
+    "explanation": "An amphoteric species can donate or accept protons depending on the reaction partner. Water (H2O) and amino acids are classic amphoteric substances.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the standard state enthalpy for burning one mole of a substance?",
+    "options": [
+      "Standard enthalpy of combustion",
+      "Standard enthalpy of formation",
+      "Bond dissociation energy",
+      "Activation energy"
+    ],
+    "correct_answer": "Standard enthalpy of combustion",
+    "explanation": "Standard enthalpy of combustion (ΔH°c) is the heat released when one mole of a substance completely combusts in oxygen under standard conditions (298 K, 1 atm).",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for a reaction where one element displaces another from a compound in solution?",
+    "options": [
+      "Single displacement reaction",
+      "Double displacement reaction",
+      "Synthesis reaction",
+      "Decomposition reaction"
+    ],
+    "correct_answer": "Single displacement reaction",
+    "explanation": "In single displacement (single replacement): A + BC → AC + B. A more reactive element replaces a less reactive one, as in Fe + CuSO4 → FeSO4 + Cu.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the concentration of OH⁻ ions at equilibrium for a weak base?",
+    "options": [
+      "Kb expression",
+      "Ka expression",
+      "Kw expression",
+      "pOH"
+    ],
+    "correct_answer": "Kb expression",
+    "explanation": "The base dissociation constant Kb = [BH+][OH-]/[B] describes the degree of dissociation of a weak base. Stronger bases have larger Kb values.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the law stating that the pressure of a gas mixture is the sum of partial pressures?",
+    "options": [
+      "Dalton's law of partial pressures",
+      "Henry's law",
+      "Boyle's law",
+      "Raoult's law"
+    ],
+    "correct_answer": "Dalton's law of partial pressures",
+    "explanation": "Dalton's law states that total pressure of a gas mixture equals the sum of the partial pressures of each component: Ptotal = P1 + P2 + P3 ...",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for organic molecules with the same molecular formula but different structural arrangements?",
+    "options": [
+      "Constitutional isomers",
+      "Stereoisomers",
+      "Enantiomers",
+      "Diastereomers"
+    ],
+    "correct_answer": "Constitutional isomers",
+    "explanation": "Constitutional (structural) isomers have the same molecular formula but different connectivity — atoms are bonded in different arrangements. Example: butane and isobutane.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "Which process increases the rate of a reaction without being consumed?",
+    "options": [
+      "Catalysis",
+      "Inhibition",
+      "Dilution",
+      "Cooling"
+    ],
+    "correct_answer": "Catalysis",
+    "explanation": "Catalysis increases reaction rate by providing an alternative pathway with lower activation energy. The catalyst is regenerated and not consumed in the overall reaction.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the energy stored in the nucleus of an atom?",
+    "options": [
+      "Nuclear energy",
+      "Chemical energy",
+      "Thermal energy",
+      "Radiant energy"
+    ],
+    "correct_answer": "Nuclear energy",
+    "explanation": "Nuclear energy is stored in atomic nuclei as the strong nuclear force holds protons and neutrons together. It is released in fission, fusion, and radioactive decay.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the attraction between the partially positive H and a highly electronegative atom (F, O, N)?",
+    "options": [
+      "Hydrogen bond",
+      "London dispersion force",
+      "Ionic bond",
+      "Dipole-dipole force"
+    ],
+    "correct_answer": "Hydrogen bond",
+    "explanation": "Hydrogen bonds form between the slightly positive H (covalently bonded to F, O, or N) and a lone pair on a nearby F, O, or N atom — the strongest intermolecular force.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for the speed at which reactants are consumed or products are formed?",
+    "options": [
+      "Reaction rate",
+      "Activation energy",
+      "Rate constant",
+      "Equilibrium constant"
+    ],
+    "correct_answer": "Reaction rate",
+    "explanation": "Reaction rate measures how fast concentrations change over time: rate = Δ[concentration]/Δt. Rates depend on concentration, temperature, catalysts, and surface area.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for energy released when an electron is added to a neutral gaseous atom?",
+    "options": [
+      "Electron affinity",
+      "Ionization energy",
+      "Electronegativity",
+      "Bond energy"
+    ],
+    "correct_answer": "Electron affinity",
+    "explanation": "Electron affinity is the energy change when an electron is added to a neutral gaseous atom. More negative values indicate more favorable electron capture.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for a solution that resists pH changes when small amounts of acid or base are added?",
+    "options": [
+      "Buffer solution",
+      "Saturated solution",
+      "Supersaturated solution",
+      "Colloidal solution"
+    ],
+    "correct_answer": "Buffer solution",
+    "explanation": "A buffer resists pH changes due to the equilibrium between a weak acid and its conjugate base (or weak base and conjugate acid), neutralizing added acid or base.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for the process where a solid dissolves in solvent?",
+    "options": [
+      "Solvation",
+      "Precipitation",
+      "Crystallization",
+      "Hydrolysis"
+    ],
+    "correct_answer": "Solvation",
+    "explanation": "Solvation (dissolution) occurs when solvent molecules surround and stabilize dissolved solute particles. In water, it is called hydration — driven by ion-dipole interactions.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the reaction between an acid and a carbonate that produces CO2?",
+    "options": [
+      "Acid-carbonate reaction",
+      "Combustion reaction",
+      "Oxidation reaction",
+      "Hydrolysis"
+    ],
+    "correct_answer": "Acid-carbonate reaction",
+    "explanation": "Acids react with carbonates (CO3²-) and bicarbonates (HCO3-) to produce CO2 gas, water, and a salt. Example: 2HCl + CaCO3 → CaCl2 + H2O + CO2.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for a reaction where an electron acceptor (Lewis acid) reacts with an electron donor (Lewis base)?",
+    "options": [
+      "Lewis acid-base reaction",
+      "Brønsted-Lowry reaction",
+      "Redox reaction",
+      "Precipitation reaction"
+    ],
+    "correct_answer": "Lewis acid-base reaction",
+    "explanation": "Lewis acid-base reactions involve the formation of a coordinate (dative) bond between an electron pair donor (Lewis base) and electron pair acceptor (Lewis acid).",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for the measure of how much a solution's vapor pressure is lowered by a solute?",
+    "options": [
+      "Raoult's law (vapor pressure lowering)",
+      "Henry's law",
+      "Boiling point elevation",
+      "Osmotic pressure"
+    ],
+    "correct_answer": "Raoult's law (vapor pressure lowering)",
+    "explanation": "Raoult's law states that the vapor pressure of a solution is proportional to the mole fraction of the solvent: Psolution = χsolvent × P°solvent.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the oxidation state of nitrogen in NO3-?",
+    "options": [
+      "5+",
+      "3+",
+      "2+",
+      "0"
+    ],
+    "correct_answer": "5+",
+    "explanation": "In NO3-: O is -2 (×3 = -6), total charge is -1. For balance: N + (-6) = -1, so N = +5. Nitrogen is in its highest common oxidation state.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for the curve plotting titrant volume vs. pH during an acid-base titration?",
+    "options": [
+      "Titration curve",
+      "Solubility curve",
+      "Phase diagram",
+      "Calibration curve"
+    ],
+    "correct_answer": "Titration curve",
+    "explanation": "A titration curve plots pH vs. volume of titrant added, showing the equivalence point where moles of acid = moles of base, and identifying useful buffer regions.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the type of radioactive decay that emits a helium nucleus (2p + 2n)?",
+    "options": [
+      "Alpha decay",
+      "Beta decay",
+      "Gamma decay",
+      "Positron emission"
+    ],
+    "correct_answer": "Alpha decay",
+    "explanation": "Alpha (α) decay emits an alpha particle (⁴He nucleus) from a heavy nucleus, reducing mass number by 4 and atomic number by 2. Example: ²³⁸U → ²³⁴Th + ⁴He.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the rule that electrons in subshells fill from lowest to highest energy?",
+    "options": [
+      "Aufbau principle",
+      "Pauli exclusion principle",
+      "Hund's rule",
+      "Octet rule"
+    ],
+    "correct_answer": "Aufbau principle",
+    "explanation": "The Aufbau (building-up) principle states that electrons fill atomic orbitals starting from the lowest available energy: 1s, 2s, 2p, 3s, 3p, 4s, 3d, and so on.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for a chemical reaction that produces an insoluble solid from two solutions?",
+    "options": [
+      "Precipitation reaction",
+      "Combustion reaction",
+      "Synthesis reaction",
+      "Decomposition reaction"
+    ],
+    "correct_answer": "Precipitation reaction",
+    "explanation": "A precipitation reaction occurs when mixing two aqueous solutions produces an insoluble solid (precipitate). Used to identify ions and separate mixtures.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for the sum of all partial charges on individual atoms giving the overall molecular charge?",
+    "options": [
+      "Formal charge",
+      "Oxidation state",
+      "Dipole moment",
+      "Bond order"
+    ],
+    "correct_answer": "Formal charge",
+    "explanation": "Formal charge = (valence electrons) - (non-bonding electrons) - ½(bonding electrons). The sum of all formal charges equals the overall charge on the molecule or ion.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the property of a reaction where ΔG < 0?",
+    "options": [
+      "Spontaneous reaction",
+      "Non-spontaneous reaction",
+      "Equilibrium state",
+      "Reversible reaction"
+    ],
+    "correct_answer": "Spontaneous reaction",
+    "explanation": "A spontaneous reaction has ΔG < 0 (negative Gibbs free energy change) and can proceed without input of external energy. ΔG = ΔH - TΔS determines spontaneity.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the amount of heat needed to raise 1 gram of a substance by 1°C?",
+    "options": [
+      "Specific heat capacity",
+      "Molar heat capacity",
+      "Enthalpy",
+      "Heat of fusion"
+    ],
+    "correct_answer": "Specific heat capacity",
+    "explanation": "Specific heat capacity (c) is the heat required to raise 1 gram of a substance by 1°C. Water's high specific heat (4.18 J/g·°C) moderates Earth's climate.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for an organic molecule with a C=C double bond?",
+    "options": [
+      "Alkene",
+      "Alkane",
+      "Alkyne",
+      "Aromatic compound"
+    ],
+    "correct_answer": "Alkene",
+    "explanation": "Alkenes are hydrocarbons containing one or more carbon-carbon double bonds (C=C). The general formula for simple alkenes is CnH2n. Examples: ethene (C2H4), propene (C3H6).",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for the concentration of H+ at which an acid-base indicator changes color?",
+    "options": [
+      "Transition pH range",
+      "pKa",
+      "Equivalence point",
+      "Endpoint"
+    ],
+    "correct_answer": "Transition pH range",
+    "explanation": "Acid-base indicators change color over a pH range (typically pKin ± 1). They are weak acids where the acid and base forms have different colors.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for a reaction that releases heat to the surroundings?",
+    "options": [
+      "Exothermic reaction",
+      "Endothermic reaction",
+      "Neutralization reaction",
+      "Sublimation"
+    ],
+    "correct_answer": "Exothermic reaction",
+    "explanation": "Exothermic reactions release energy as heat (ΔH < 0), making the surroundings warmer. Combustion, rusting, and neutralization of strong acids/bases are examples.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the measure of the tendency of electrons to flow in a galvanic cell?",
+    "options": [
+      "Cell potential (EMF)",
+      "Current",
+      "Resistance",
+      "Conductance"
+    ],
+    "correct_answer": "Cell potential (EMF)",
+    "explanation": "Cell potential (electromotive force, EMF or E°cell) is the voltage driving electron flow in a galvanic cell: E°cell = E°cathode - E°anode.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for a homogeneous mixture of two or more metals?",
+    "options": [
+      "Alloy",
+      "Compound",
+      "Composite",
+      "Amalgam"
+    ],
+    "correct_answer": "Alloy",
+    "explanation": "An alloy is a homogeneous metallic mixture. Common alloys include steel (Fe+C), brass (Cu+Zn), bronze (Cu+Sn), and solder (Pb+Sn).",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the process where a radioactive nucleus emits a high-energy electron?",
+    "options": [
+      "Alpha decay",
+      "Beta-minus decay",
+      "Gamma decay",
+      "Electron capture"
+    ],
+    "correct_answer": "Beta-minus decay",
+    "explanation": "Beta-minus (β-) decay converts a neutron to a proton, emitting an electron (beta particle) and an antineutrino, increasing atomic number by 1 while mass number stays same.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the law stating that equal volumes of gases at equal T and P contain equal numbers of molecules?",
+    "options": [
+      "Avogadro's law",
+      "Boyle's law",
+      "Charles's law",
+      "Graham's law"
+    ],
+    "correct_answer": "Avogadro's law",
+    "explanation": "Avogadro's law states V ∝ n at constant T and P: equal volumes of gases at same conditions contain equal numbers of molecules, regardless of the gas type.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What type of organic compound contains only single C-C bonds?",
+    "options": [
+      "Alkene",
+      "Alkane",
+      "Alkyne",
+      "Arene"
+    ],
+    "correct_answer": "Alkane",
+    "explanation": "Alkanes are saturated hydrocarbons containing only C-C single bonds (and C-H bonds). General formula CnH2n+2. They are relatively unreactive.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the equilibrium constant expression for a dissolution reaction?",
+    "options": [
+      "Ka",
+      "Ksp",
+      "Kb",
+      "Kw"
+    ],
+    "correct_answer": "Ksp",
+    "explanation": "The solubility product constant (Ksp) is the equilibrium constant for the dissolution of a sparingly soluble salt. For AB ⇌ A+ + B-, Ksp = [A+][B-].",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for the number of atoms bonded to the central atom in a complex ion?",
+    "options": [
+      "Oxidation number",
+      "Coordination number",
+      "Bond order",
+      "Valence number"
+    ],
+    "correct_answer": "Coordination number",
+    "explanation": "The coordination number is the number of ligand donor atoms directly bonded to the central metal ion in a coordination complex. Common coordination numbers are 4 and 6.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the point in a titration where stoichiometric amounts of acid and base have reacted?",
+    "options": [
+      "Buffer point",
+      "Equivalence point",
+      "Endpoint",
+      "Neutral point"
+    ],
+    "correct_answer": "Equivalence point",
+    "explanation": "The equivalence point is where moles of acid completely react with moles of base. For strong acid-strong base titrations, equivalence point pH = 7.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the formula for calculating pH from hydrogen ion concentration?",
+    "options": [
+      "pH = [H+]",
+      "pH = -log[H+]",
+      "pH = log[H+]",
+      "pH = 1/[H+]"
+    ],
+    "correct_answer": "pH = -log[H+]",
+    "explanation": "pH = -log[H+] (or -log[H3O+]). At pH 7, [H+] = 10-7 M. Each unit change in pH represents a 10-fold change in [H+].",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the process where dissolved salts separate into ions?",
+    "options": [
+      "Hydration",
+      "Dissociation",
+      "Solvation",
+      "Ionization"
+    ],
+    "correct_answer": "Dissociation",
+    "explanation": "Dissociation is the separation of ionic compounds into their constituent ions when dissolved. Strong electrolytes (NaCl, HCl) dissociate completely in water.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for the study of heat changes in chemical reactions?",
+    "options": [
+      "Thermodynamics",
+      "Thermochemistry",
+      "Kinetics",
+      "Spectroscopy"
+    ],
+    "correct_answer": "Thermochemistry",
+    "explanation": "Thermochemistry studies heat changes in chemical reactions at constant pressure. It uses calorimetry to measure ΔH values for reactions.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What type of bonding is present in a network covalent solid like diamond?",
+    "options": [
+      "Metallic bonding",
+      "Covalent network bonding",
+      "Ionic bonding",
+      "Van der Waals forces"
+    ],
+    "correct_answer": "Covalent network bonding",
+    "explanation": "Network covalent solids (diamond, SiO2) consist of atoms connected by covalent bonds in a continuous 3D lattice, giving extreme hardness and high melting points.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the law relating heat flow to temperature change: q = mcΔT?",
+    "options": [
+      "Hess's law",
+      "Calorimetry equation",
+      "Le Chatelier's law",
+      "Dulong-Petit law"
+    ],
+    "correct_answer": "Calorimetry equation",
+    "explanation": "The calorimetry equation q = mcΔT calculates heat flow (q) from mass (m), specific heat capacity (c), and temperature change (ΔT). Used in coffee-cup and bomb calorimetry.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What does the rate constant (k) in rate = k[A][B] depend on?",
+    "options": [
+      "Concentration only",
+      "Temperature (and presence of catalyst)",
+      "Pressure",
+      "Volume"
+    ],
+    "correct_answer": "Temperature (and presence of catalyst)",
+    "explanation": "The rate constant k depends on temperature (Arrhenius equation: k = Ae-Ea/RT) and the presence of a catalyst. It does not depend on reactant concentrations.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for an organic compound with the general formula CnH2n+2?",
+    "options": [
+      "Alkene",
+      "Alkane",
+      "Cycloalkane",
+      "Alkyne"
+    ],
+    "correct_answer": "Alkane",
+    "explanation": "Alkanes have general formula CnH2n+2 (acyclic) and contain only C-C and C-H single bonds. Methane (CH4), ethane (C2H6), and propane (C3H8) are common examples.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the energy of activation represented in the Arrhenius equation?",
+    "options": [
+      "Bond energy",
+      "Activation energy (Ea)",
+      "Gibbs energy",
+      "Enthalpy change"
+    ],
+    "correct_answer": "Activation energy (Ea)",
+    "explanation": "Activation energy (Ea) is the minimum energy needed for reactants to overcome the energy barrier and form products. Ea appears in the Arrhenius equation: k = Ae-Ea/RT.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for a substance produced in a chemical reaction?",
+    "options": [
+      "Reactant",
+      "Product",
+      "Intermediate",
+      "Catalyst"
+    ],
+    "correct_answer": "Product",
+    "explanation": "Products are the substances formed from the chemical transformation of reactants. They appear on the right side of a chemical equation.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for the minimum energy required to break a bond?",
+    "options": [
+      "Activation energy",
+      "Bond energy (bond dissociation energy)",
+      "Lattice energy",
+      "Ionization energy"
+    ],
+    "correct_answer": "Bond energy (bond dissociation energy)",
+    "explanation": "Bond dissociation energy (BDE) is the energy needed to homolytically break a specific bond in one mole of gaseous molecules. Stronger bonds have higher BDE values.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the study of the composition, structure, and properties of matter?",
+    "options": [
+      "Physics",
+      "Chemistry",
+      "Biology",
+      "Biochemistry"
+    ],
+    "correct_answer": "Chemistry",
+    "explanation": "Chemistry is the branch of science studying matter's composition, structure, properties, and the changes it undergoes during chemical reactions.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for emission of radiation or particles from an unstable nucleus?",
+    "options": [
+      "Fission",
+      "Radioactive decay",
+      "Fusion",
+      "Transmutation"
+    ],
+    "correct_answer": "Radioactive decay",
+    "explanation": "Radioactive decay is the spontaneous emission of radiation (alpha, beta, gamma) or particles from an unstable nucleus to achieve greater stability.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the type of chemical bond formed by electrostatic attraction between oppositely charged ions?",
+    "options": [
+      "Covalent bond",
+      "Ionic bond",
+      "Metallic bond",
+      "Hydrogen bond"
+    ],
+    "correct_answer": "Ionic bond",
+    "explanation": "Ionic bonds result from electrostatic attraction between cations (positive) and anions (negative), typically formed when metals transfer electrons to nonmetals.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for a substance made from two or more elements chemically bonded?",
+    "options": [
+      "Mixture",
+      "Compound",
+      "Element",
+      "Solution"
+    ],
+    "correct_answer": "Compound",
+    "explanation": "A compound is a pure substance with two or more elements in fixed proportions, joined by chemical bonds. Its properties differ from those of its constituent elements.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the molecular formula of ethylene?",
+    "options": [
+      "C2H6",
+      "C2H4",
+      "C3H6",
+      "CH2"
+    ],
+    "correct_answer": "C2H4",
+    "explanation": "Ethylene (ethene) has the molecular formula C2H4. It is the simplest alkene with one C=C double bond, used in plastics production (polyethylene).",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the reaction where sodium reacts with chlorine to form NaCl?",
+    "options": [
+      "Decomposition",
+      "Synthesis (combination)",
+      "Single displacement",
+      "Double displacement"
+    ],
+    "correct_answer": "Synthesis (combination)",
+    "explanation": "A synthesis reaction combines two or more substances to form one product: 2Na + Cl2 → 2NaCl. Na loses electrons (oxidized) and Cl gains them (reduced).",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the phenomenon where atoms in the same period have decreasing radius with increasing atomic number?",
+    "options": [
+      "Lanthanide contraction",
+      "Periodic trend",
+      "Shielding effect",
+      "Effective nuclear charge increase"
+    ],
+    "correct_answer": "Effective nuclear charge increase",
+    "explanation": "Across a period, atomic radius decreases because increasing proton number raises effective nuclear charge (Zeff), pulling electron clouds closer to the nucleus.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for the process of heating an ore with carbon to extract a metal?",
+    "options": [
+      "Electrolysis",
+      "Smelting",
+      "Roasting",
+      "Leaching"
+    ],
+    "correct_answer": "Smelting",
+    "explanation": "Smelting uses high heat and a reducing agent (coke/carbon) to reduce metal ores to free metals: Fe2O3 + 3CO → 2Fe + 3CO2. Used for iron, copper, and lead.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the SI unit of electric charge?",
+    "options": [
+      "Ampere",
+      "Coulomb",
+      "Volt",
+      "Farad"
+    ],
+    "correct_answer": "Coulomb",
+    "explanation": "The coulomb (C) is the SI unit of electric charge. One coulomb equals the charge of approximately 6.24 × 10¹⁸ elementary charges (electrons/protons).",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the number indicating the position of a double bond in an alkene's IUPAC name?",
+    "options": [
+      "Prefix",
+      "Locant",
+      "Suffix",
+      "Descriptor"
+    ],
+    "correct_answer": "Locant",
+    "explanation": "Locants are numbers in IUPAC names indicating the position of functional groups or multiple bonds on the carbon chain. Example: but-2-ene has a double bond between C2 and C3.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for the product of a nucleophilic attack on a carbonyl group before the leaving group departs?",
+    "options": [
+      "Enolate",
+      "Tetrahedral intermediate",
+      "Acylium ion",
+      "Resonance hybrid"
+    ],
+    "correct_answer": "Tetrahedral intermediate",
+    "explanation": "Nucleophilic addition to a carbonyl creates a tetrahedral intermediate with the nucleophile bonded to the sp2 carbon, which becomes sp3, before the leaving group departs.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for a substance that speeds up both forward and reverse reactions equally at equilibrium?",
+    "options": [
+      "Inhibitor",
+      "Catalyst",
+      "Reactant",
+      "Buffer"
+    ],
+    "correct_answer": "Catalyst",
+    "explanation": "A catalyst lowers activation energy equally for forward and reverse reactions, increasing rates but not changing equilibrium position. It does not appear in the equilibrium expression.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the type of intermolecular force responsible for the high boiling point of water?",
+    "options": [
+      "London dispersion",
+      "Hydrogen bonding",
+      "Dipole-dipole",
+      "Ion-dipole"
+    ],
+    "correct_answer": "Hydrogen bonding",
+    "explanation": "Water's anomalously high boiling point (100°C vs. predicted ~-80°C) results from strong hydrogen bonds between O-H groups, requiring extra energy to separate molecules.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the rule predicting that octets form in second-period elements?",
+    "options": [
+      "Duet rule",
+      "Octet rule",
+      "Hund's rule",
+      "Aufbau principle"
+    ],
+    "correct_answer": "Octet rule",
+    "explanation": "The octet rule states that main-group elements tend to form bonds to achieve 8 valence electrons (full second shell), like noble gas configurations.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for the reaction where an alkene adds HBr across the double bond?",
+    "options": [
+      "Elimination reaction",
+      "Electrophilic addition",
+      "Nucleophilic addition",
+      "Radical addition"
+    ],
+    "correct_answer": "Electrophilic addition",
+    "explanation": "Electrophilic addition to alkenes: HBr adds across C=C with H+ acting as the electrophile. Markovnikov's rule predicts H adds to the carbon with more H atoms.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the chemical formula showing the simplest ratio of atoms in a compound?",
+    "options": [
+      "Molecular formula",
+      "Empirical formula",
+      "Structural formula",
+      "Condensed formula"
+    ],
+    "correct_answer": "Empirical formula",
+    "explanation": "The empirical formula gives the simplest whole-number ratio of atoms in a compound. Glucose (C6H12O6) has empirical formula CH2O.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for ions that do not participate in a net ionic reaction?",
+    "options": [
+      "Reactant ions",
+      "Spectator ions",
+      "Complex ions",
+      "Counter ions"
+    ],
+    "correct_answer": "Spectator ions",
+    "explanation": "Spectator ions appear on both sides of an ionic equation unchanged. They do not participate in the actual reaction and can be canceled from the net ionic equation.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the technique that deposits a thin metal layer on a surface using electrolysis?",
+    "options": [
+      "Smelting",
+      "Electroplating",
+      "Galvanizing",
+      "Anodizing"
+    ],
+    "correct_answer": "Electroplating",
+    "explanation": "Electroplating uses electrolysis to deposit a metal coating on a surface — the object is the cathode, the plating metal is the anode, in a metal salt solution.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the gas produced during the electrolysis of brine (NaCl solution)?",
+    "options": [
+      "Hydrogen only",
+      "Chlorine and hydrogen",
+      "Oxygen and hydrogen",
+      "Sodium hydroxide only"
+    ],
+    "correct_answer": "Chlorine and hydrogen",
+    "explanation": "Electrolysis of brine produces: Cl2 at the anode (2Cl- → Cl2 + 2e-), H2 at the cathode (2H2O + 2e- → H2 + 2OH-), and NaOH solution.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for a hydrocarbon with one or more triple C≡C bonds?",
+    "options": [
+      "Alkane",
+      "Alkyne",
+      "Alkene",
+      "Cycloalkane"
+    ],
+    "correct_answer": "Alkyne",
+    "explanation": "Alkynes are hydrocarbons containing at least one carbon-carbon triple bond (C≡C). General formula CnH2n-2. Ethyne (acetylene, C2H2) is the simplest alkyne.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What does a positive entropy change (ΔS > 0) indicate?",
+    "options": [
+      "Ordered system",
+      "Increased disorder in system",
+      "Spontaneous reaction",
+      "Exothermic reaction"
+    ],
+    "correct_answer": "Increased disorder in system",
+    "explanation": "Positive ΔS means the system becomes more disordered. Dissolution, melting, vaporization, and reactions producing more gas molecules typically have ΔS > 0.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the type of solid where particles are held by metallic bonding?",
+    "options": [
+      "Ionic solid",
+      "Metallic solid",
+      "Network covalent solid",
+      "Molecular solid"
+    ],
+    "correct_answer": "Metallic solid",
+    "explanation": "Metallic solids have positive metal ions (kernels) surrounded by delocalized electrons (electron sea), giving properties like conductivity, malleability, and metallic luster.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the process that converts alkyl halides to alkenes by heating with a strong base?",
+    "options": [
+      "Addition reaction",
+      "Elimination reaction",
+      "Substitution reaction",
+      "Rearrangement reaction"
+    ],
+    "correct_answer": "Elimination reaction",
+    "explanation": "Elimination reactions remove atoms from adjacent carbons to form a double bond. E2 requires a strong base; it is the reverse of addition to alkenes.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for the ratio of actual yield to theoretical yield, expressed as a percentage?",
+    "options": [
+      "Atom economy",
+      "Percent yield",
+      "Conversion factor",
+      "Mole fraction"
+    ],
+    "correct_answer": "Percent yield",
+    "explanation": "Percent yield = (actual yield/theoretical yield) × 100%. It accounts for losses due to incomplete reactions, side reactions, and product recovery inefficiency.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the type of reaction where both reactants and products are present in ionic form?",
+    "options": [
+      "Molecular equation",
+      "Net ionic equation",
+      "Complete ionic equation",
+      "Balanced equation"
+    ],
+    "correct_answer": "Complete ionic equation",
+    "explanation": "A complete ionic equation shows all dissolved ionic compounds as separated ions, including spectator ions. The net ionic equation removes spectator ions.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for the bond formed between two sp2 carbons in an alkene?",
+    "options": [
+      "Sigma bond only",
+      "Both sigma and pi bond",
+      "Pi bond only",
+      "Delta bond"
+    ],
+    "correct_answer": "Both sigma and pi bond",
+    "explanation": "A C=C double bond consists of one sigma bond (head-on sp2-sp2 overlap) and one pi bond (sideways p-p overlap). The pi bond restricts rotation.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the type of radioactive decay that does not change atomic or mass number?",
+    "options": [
+      "Alpha decay",
+      "Gamma emission",
+      "Beta decay",
+      "Positron emission"
+    ],
+    "correct_answer": "Gamma emission",
+    "explanation": "Gamma (γ) emission releases high-energy photons from a nucleus in an excited state but does not change the number of protons or neutrons, so neither atomic number nor mass number changes.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for the measure of how much a reaction proceeds toward products at equilibrium?",
+    "options": [
+      "Reaction rate",
+      "Equilibrium constant (K)",
+      "Activation energy",
+      "Gibbs free energy"
+    ],
+    "correct_answer": "Equilibrium constant (K)",
+    "explanation": "The equilibrium constant K = [products]^stoich / [reactants]^stoich. Large K means equilibrium favors products; small K means equilibrium favors reactants.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the organic reaction mechanism where a nucleophile replaces a leaving group?",
+    "options": [
+      "Electrophilic substitution",
+      "Nucleophilic substitution",
+      "Elimination",
+      "Addition"
+    ],
+    "correct_answer": "Nucleophilic substitution",
+    "explanation": "Nucleophilic substitution (SN1 or SN2) involves a nucleophile attacking an electrophilic carbon and displacing a leaving group. Common in alkyl halide chemistry.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the weak forces of attraction between all molecules including nonpolar ones?",
+    "options": [
+      "Dipole-dipole forces",
+      "London dispersion forces",
+      "Hydrogen bonds",
+      "Ion-dipole forces"
+    ],
+    "correct_answer": "London dispersion forces",
+    "explanation": "London (dispersion) forces are weak attractive forces arising from temporary, instantaneous dipoles. They exist between all molecules and are the only intermolecular forces in nonpolar compounds.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the process where a substance is converted into its component elements by electric current?",
+    "options": [
+      "Smelting",
+      "Electrolysis",
+      "Galvanization",
+      "Anodization"
+    ],
+    "correct_answer": "Electrolysis",
+    "explanation": "Electrolysis uses an external electric current to drive a non-spontaneous redox reaction, decomposing compounds (water → H2 + O2; brine → Cl2 + H2 + NaOH).",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for a weak acid with pKa of 4.75 that is the main component of vinegar?",
+    "options": [
+      "Hydrochloric acid",
+      "Acetic acid (ethanoic acid)",
+      "Citric acid",
+      "Formic acid"
+    ],
+    "correct_answer": "Acetic acid (ethanoic acid)",
+    "explanation": "Acetic acid (CH3COOH) is a weak acid (pKa = 4.75) and the main component of vinegar (~5-8%). It partially dissociates in water: CH3COOH ⇌ CH3COO- + H+.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the product formed when a metal reacts with oxygen?",
+    "options": [
+      "Hydroxide",
+      "Metal oxide",
+      "Salt",
+      "Carbonate"
+    ],
+    "correct_answer": "Metal oxide",
+    "explanation": "Metals react with oxygen to form metal oxides. For example: 4Fe + 3O2 → 2Fe2O3 (rust) and 2Mg + O2 → 2MgO. Many metal oxides are basic.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for the region in a titration curve where pH changes very rapidly?",
+    "options": [
+      "Buffer region",
+      "Equivalence point region",
+      "Plateau region",
+      "Saturation region"
+    ],
+    "correct_answer": "Equivalence point region",
+    "explanation": "Near the equivalence point in a titration, adding a tiny amount of titrant causes a rapid, steep pH change. This is particularly pronounced for strong acid-strong base titrations.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for a negatively charged polyatomic ion containing oxygen?",
+    "options": [
+      "Oxide",
+      "Oxyanion",
+      "Hydroxide",
+      "Peroxide"
+    ],
+    "correct_answer": "Oxyanion",
+    "explanation": "Oxyanions are negatively charged ions containing one or more oxygen atoms bonded to another element, like sulfate (SO4²-), nitrate (NO3-), and phosphate (PO4³-).",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for the volume of solution containing one mole of solute?",
+    "options": [
+      "Molality",
+      "Normality",
+      "Molar volume",
+      "Molar concentration"
+    ],
+    "correct_answer": "Molar volume",
+    "explanation": "Molar volume is the volume of solution that contains exactly one mole of solute. It equals 1/M (molarity). For a 2 M solution, the molar volume is 0.5 L.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for the law stating that the enthalpy of a reaction is the same regardless of the path?",
+    "options": [
+      "Boyle's law",
+      "Avogadro's law",
+      "Hess's law",
+      "Raoult's law"
+    ],
+    "correct_answer": "Hess's law",
+    "explanation": "Hess's law states that ΔH for a reaction is the same regardless of whether it occurs in one step or multiple steps. Enthalpy is a state function (path-independent).",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the process where an electron is removed from an anion?",
+    "options": [
+      "Oxidation",
+      "Ionization",
+      "Electron affinity",
+      "Detachment"
+    ],
+    "correct_answer": "Electron affinity",
+    "explanation": "Electron affinity is the energy change when an electron is added to (or removed from) a gaseous atom or anion. It's related to how tightly extra electrons are held.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the geometry around carbon in carbon dioxide (CO2)?",
+    "options": [
+      "Bent",
+      "Trigonal planar",
+      "Linear",
+      "Tetrahedral"
+    ],
+    "correct_answer": "Linear",
+    "explanation": "CO2 has sp-hybridized carbon with two double bonds and no lone pairs, giving a linear geometry (180° bond angle) and zero net dipole despite polar bonds.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the number of moles of a substance per kilogram of solvent?",
+    "options": [
+      "Molarity",
+      "Normality",
+      "Molality",
+      "Mole fraction"
+    ],
+    "correct_answer": "Molality",
+    "explanation": "Molality (m) = moles solute / kg solvent. Unlike molarity, molality does not change with temperature because it is based on mass, not volume.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the rule predicting that degenerate orbitals are filled with one electron each before pairing?",
+    "options": [
+      "Aufbau principle",
+      "Pauli exclusion principle",
+      "Hund's rule",
+      "Octet rule"
+    ],
+    "correct_answer": "Hund's rule",
+    "explanation": "Hund's rule states that electrons occupy each degenerate orbital singly with parallel spins before pairing begins, minimizing electron-electron repulsion.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What type of reactions involve the breaking and making of covalent bonds?",
+    "options": [
+      "Nuclear reactions",
+      "Ionic reactions",
+      "Covalent reactions",
+      "Physical changes"
+    ],
+    "correct_answer": "Covalent reactions",
+    "explanation": "Covalent (molecular) reactions involve the breaking and forming of covalent bonds between atoms. They include organic reactions, acid-base reactions with molecular acids, and many others.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the IUPAC name for CH3CH2OH?",
+    "options": [
+      "Methanol",
+      "Propanol",
+      "Ethanol",
+      "Butanol"
+    ],
+    "correct_answer": "Ethanol",
+    "explanation": "CH3CH2OH is ethanol (ethyl alcohol), a 2-carbon alcohol. IUPAC naming: eth- (2 carbons) + -anol (hydroxyl group). It is the alcohol in alcoholic beverages.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the property of a gas that changes as PV = nRT predicts?",
+    "options": [
+      "Ideal behavior",
+      "Real gas behavior",
+      "Compressibility",
+      "Effusion"
+    ],
+    "correct_answer": "Ideal behavior",
+    "explanation": "Ideal gas behavior assumes no intermolecular forces and negligible molecular volume. Real gases deviate from ideal behavior at high pressure and low temperature.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the effect where the rate of a reaction increases exponentially with temperature?",
+    "options": [
+      "Le Chatelier effect",
+      "Kinetic isotope effect",
+      "Arrhenius effect",
+      "Temperature coefficient effect"
+    ],
+    "correct_answer": "Arrhenius effect",
+    "explanation": "The Arrhenius equation (k = Ae-Ea/RT) shows rate constants increase exponentially with temperature. A rule of thumb: reaction rate roughly doubles for every 10°C increase.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for the process where liquid water converts to water vapor at temperatures below 100°C?",
+    "options": [
+      "Boiling",
+      "Sublimation",
+      "Evaporation",
+      "Condensation"
+    ],
+    "correct_answer": "Evaporation",
+    "explanation": "Evaporation is the conversion of liquid to vapor at the surface, occurring below the boiling point. High-energy surface molecules escape, cooling the remaining liquid.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the overall enthalpy change of a reaction calculated from bond energies?",
+    "options": [
+      "Standard enthalpy of formation",
+      "Heat of combustion",
+      "Estimated enthalpy using bond energies",
+      "Lattice enthalpy"
+    ],
+    "correct_answer": "Estimated enthalpy using bond energies",
+    "explanation": "ΔHrxn ≈ Σ(bonds broken) - Σ(bonds formed). Using average bond energies gives an estimate of enthalpy change. Values from gas-phase data may differ from actual reactions.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for a carbon atom bonded to four different groups?",
+    "options": [
+      "sp3 carbon",
+      "Alkyl carbon",
+      "Chiral center",
+      "Stereocenter"
+    ],
+    "correct_answer": "Chiral center",
+    "explanation": "A chiral center (stereocenter) is a carbon bonded to four different substituents, making it non-superimposable on its mirror image. It creates R and S enantiomers.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the molecular formula of benzene?",
+    "options": [
+      "C6H12",
+      "C6H10",
+      "C6H6",
+      "C6H8"
+    ],
+    "correct_answer": "C6H6",
+    "explanation": "Benzene (C6H6) is the simplest aromatic hydrocarbon with a planar ring of 6 carbons. Its special stability comes from delocalized π electrons (6 π electrons, Hückel: 4n+2 with n=1).",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the pressure of gas in a solution that is proportional to its mole fraction?",
+    "options": [
+      "Dalton's law",
+      "Henry's law",
+      "Boyle's law",
+      "Raoult's law"
+    ],
+    "correct_answer": "Raoult's law",
+    "explanation": "Raoult's law states the partial vapor pressure of a component in an ideal solution is proportional to its mole fraction: Pi = χi × Pi°.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for a reaction that occurs between an acid and a base to produce water?",
+    "options": [
+      "Redox reaction",
+      "Precipitation reaction",
+      "Neutralization reaction",
+      "Decomposition reaction"
+    ],
+    "correct_answer": "Neutralization reaction",
+    "explanation": "Neutralization occurs when an acid and base react, typically producing a salt and water: HCl + NaOH → NaCl + H2O. Strong acid + strong base gives neutral salt solution.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for the pH at which an amino acid has zero net charge?",
+    "options": [
+      "pKa",
+      "Buffer pH",
+      "Isoelectric point (pI)",
+      "Neutral pH"
+    ],
+    "correct_answer": "Isoelectric point (pI)",
+    "explanation": "The isoelectric point (pI) is the pH at which an amino acid exists as a zwitterion with no net charge. Below pI it is a cation; above pI it is an anion.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for a compound with both a carboxylic acid group and an amino group?",
+    "options": [
+      "Fatty acid",
+      "Nucleotide",
+      "Amino acid",
+      "Peptide"
+    ],
+    "correct_answer": "Amino acid",
+    "explanation": "Amino acids contain a carboxylic acid group (-COOH) and an amino group (-NH2). At physiological pH, they exist as zwitterions. 20 standard amino acids build proteins.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for the direction of electron pair displacement in a polar bond?",
+    "options": [
+      "Inductive effect only",
+      "Dipole moment",
+      "Polarity",
+      "Bond vector"
+    ],
+    "correct_answer": "Dipole moment",
+    "explanation": "A bond dipole moment (μ = q × d) is a vector pointing from positive to negative charge in a polar bond. Molecular polarity depends on the vector sum of all bond dipoles.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for a solution containing fewer solute particles than the maximum possible?",
+    "options": [
+      "Supersaturated solution",
+      "Saturated solution",
+      "Unsaturated solution",
+      "Dilute solution"
+    ],
+    "correct_answer": "Unsaturated solution",
+    "explanation": "An unsaturated solution contains less solute than the maximum that can dissolve at that temperature. More solute can still be dissolved.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the IUPAC suffix for a compound containing a ketone functional group?",
+    "options": [
+      "−ol",
+      "−al",
+      "−one",
+      "−oic acid"
+    ],
+    "correct_answer": "−one",
+    "explanation": "Ketones (R-CO-R') use the suffix -one in IUPAC nomenclature. Example: propan-2-one (acetone, CH3COCH3). The carbonyl carbon is in the middle of the chain.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for the amount of energy released per gram of fuel during combustion?",
+    "options": [
+      "Bond energy",
+      "Enthalpy of formation",
+      "Calorific value (energy density)",
+      "Activation energy"
+    ],
+    "correct_answer": "Calorific value (energy density)",
+    "explanation": "Calorific value (energy density) is the heat released per gram (or per mole) when a fuel completely combusts. Fats (~39 kJ/g) have higher calorific values than carbohydrates (~17 kJ/g).",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the method of protection where a sacrificial metal oxidizes instead of the main structure?",
+    "options": [
+      "Passivation",
+      "Galvanizing",
+      "Cathodic protection",
+      "Anodizing"
+    ],
+    "correct_answer": "Cathodic protection",
+    "explanation": "Cathodic protection connects the structure to a more reactive metal (zinc/magnesium), which acts as a sacrificial anode and oxidizes preferentially, protecting steel from corrosion.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the compound CH3OCH3?",
+    "options": [
+      "Ethanol",
+      "Methanol",
+      "Dimethyl ether",
+      "Propanol"
+    ],
+    "correct_answer": "Dimethyl ether",
+    "explanation": "CH3OCH3 is dimethyl ether, with an oxygen atom bonded between two methyl groups. Ethers have general formula R-O-R' and are relatively unreactive.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the reaction producing a soap from fats and NaOH?",
+    "options": [
+      "Fischer esterification",
+      "Condensation polymerization",
+      "Saponification",
+      "Hydrolysis"
+    ],
+    "correct_answer": "Saponification",
+    "explanation": "Saponification is the base hydrolysis of fats (triglycerides) with NaOH or KOH to produce glycerol and fatty acid salts (soaps): fat + NaOH → soap + glycerol.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for a type of polymer formed by addition of alkene monomers?",
+    "options": [
+      "Polyester",
+      "Polyamide",
+      "Addition polymer",
+      "Condensation polymer"
+    ],
+    "correct_answer": "Addition polymer",
+    "explanation": "Addition polymers form when alkene monomers undergo chain-growth polymerization by adding across their double bonds, producing polyethylene, PVC, polypropylene, etc.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for the measure of a solution's acidity using the concentration of H+ ions?",
+    "options": [
+      "Molarity",
+      "Normality",
+      "pH",
+      "pOH"
+    ],
+    "correct_answer": "pH",
+    "explanation": "pH = -log[H+] measures the acidity of a solution on a scale of 0-14. Acidic: pH < 7, Neutral: pH = 7, Basic: pH > 7 (at 25°C).",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the compound formed when two monosaccharides join with loss of water?",
+    "options": [
+      "Polysaccharide",
+      "Monosaccharide",
+      "Disaccharide",
+      "Oligosaccharide"
+    ],
+    "correct_answer": "Disaccharide",
+    "explanation": "A disaccharide forms when two monosaccharides join via a glycosidic bond with loss of water. Common disaccharides: sucrose (glucose+fructose), lactose (glucose+galactose).",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the thermodynamic state where forward and reverse reaction rates are equal?",
+    "options": [
+      "Steady state",
+      "Activated complex",
+      "Chemical equilibrium",
+      "Transition state"
+    ],
+    "correct_answer": "Chemical equilibrium",
+    "explanation": "Chemical equilibrium is reached when the forward reaction rate equals the reverse reaction rate, resulting in constant concentrations of reactants and products (not necessarily equal concentrations).",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the positively charged ions that migrate toward the cathode during electrolysis?",
+    "options": [
+      "Anions",
+      "Cations",
+      "Spectator ions",
+      "Electrolytes"
+    ],
+    "correct_answer": "Cations",
+    "explanation": "Cations are positively charged ions that migrate toward the negatively charged cathode during electrolysis, where they undergo reduction (gain electrons).",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the reaction between an ester and water to produce an acid and alcohol?",
+    "options": [
+      "Esterification",
+      "Saponification",
+      "Hydrolysis",
+      "Condensation"
+    ],
+    "correct_answer": "Hydrolysis",
+    "explanation": "Ester hydrolysis: RCOOR' + H2O → RCOOH + R'OH (acid catalysis) or RCOO- + R'OH (base catalysis/saponification). It is the reverse of Fischer esterification.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for the process where iron is converted to steel in a blast furnace?",
+    "options": [
+      "Electrolysis",
+      "Reduction",
+      "Steelmaking",
+      "Smelting"
+    ],
+    "correct_answer": "Smelting",
+    "explanation": "Iron smelting in a blast furnace uses coke (carbon) to reduce iron ore (Fe2O3) at high temperatures: Fe2O3 + 3CO → 2Fe + 3CO2, producing crude iron that is then refined.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the product of the reaction between an alcohol and a carboxylic acid?",
+    "options": [
+      "Amine",
+      "Amide",
+      "Ester",
+      "Ether"
+    ],
+    "correct_answer": "Ester",
+    "explanation": "Fischer esterification reacts a carboxylic acid (RCOOH) with an alcohol (R'OH) under acid catalysis to form an ester (RCOOR') and water. Esters have fruity smells.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the law that describes gas volume increasing with temperature?",
+    "options": [
+      "Boyle's law",
+      "Dalton's law",
+      "Charles's law",
+      "Avogadro's law"
+    ],
+    "correct_answer": "Charles's law",
+    "explanation": "Charles's law states that gas volume is directly proportional to absolute temperature at constant pressure: V1/T1 = V2/T2. As temperature increases, gas expands.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for the functional group -OH in organic chemistry?",
+    "options": [
+      "Carbonyl group",
+      "Aldehyde group",
+      "Hydroxyl group",
+      "Carboxyl group"
+    ],
+    "correct_answer": "Hydroxyl group",
+    "explanation": "The hydroxyl group (-OH) is the functional group in alcohols. It is a polar group capable of hydrogen bonding, giving alcohols higher boiling points than alkanes.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for a compound containing only carbon, hydrogen, and oxygen with the general formula Cx(H2O)y?",
+    "options": [
+      "Lipid",
+      "Protein",
+      "Carbohydrate",
+      "Nucleic acid"
+    ],
+    "correct_answer": "Carbohydrate",
+    "explanation": "Carbohydrates (Cx(H2O)y or CnH2nOn) include sugars, starches, and cellulose. They are the primary energy source for living organisms.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for the process by which gases escape through a small hole?",
+    "options": [
+      "Diffusion",
+      "Osmosis",
+      "Effusion",
+      "Permeation"
+    ],
+    "correct_answer": "Effusion",
+    "explanation": "Effusion is the escape of gas through a tiny hole. Graham's law: rate of effusion ∝ 1/√M (molar mass). Lighter gases effuse faster than heavier ones.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the type of bonding within an aromatic ring where electrons are delocalized?",
+    "options": [
+      "Sigma bonding",
+      "Ionic bonding",
+      "Pi delocalization",
+      "Metallic bonding"
+    ],
+    "correct_answer": "Pi delocalization",
+    "explanation": "In benzene and other aromatic compounds, pi electrons are delocalized over the entire ring system, giving extra stability (resonance energy) compared to localized double bonds.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the IUPAC name for CH3COOH?",
+    "options": [
+      "Methanoic acid",
+      "Propionic acid",
+      "Ethanoic acid",
+      "Butanoic acid"
+    ],
+    "correct_answer": "Ethanoic acid",
+    "explanation": "CH3COOH is ethanoic acid (commonly called acetic acid). IUPAC naming: ethano- (2 carbons) + -ic acid (carboxylic acid suffix). It is the main acid in vinegar.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the organic functional group R-CHO?",
+    "options": [
+      "Ketone",
+      "Ester",
+      "Aldehyde",
+      "Carboxylic acid"
+    ],
+    "correct_answer": "Aldehyde",
+    "explanation": "Aldehydes (R-CHO) have the carbonyl group at the end of the carbon chain. IUPAC suffix: -al. They are easily oxidized to carboxylic acids and can reduce Fehling's solution.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the quantitative relationship between charge and amount of substance in electrolysis?",
+    "options": [
+      "Ohm's law",
+      "Coulomb's law",
+      "Faraday's laws of electrolysis",
+      "Nernst equation"
+    ],
+    "correct_answer": "Faraday's laws of electrolysis",
+    "explanation": "Faraday's laws: (1) mass deposited ∝ charge passed; (2) masses of different substances deposited by same charge are proportional to their equivalent masses.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the property describing how easily a gas molecule moves through another gas?",
+    "options": [
+      "Effusion rate",
+      "Viscosity",
+      "Diffusion coefficient",
+      "Mean free path"
+    ],
+    "correct_answer": "Diffusion coefficient",
+    "explanation": "The diffusion coefficient describes how quickly a gas spreads through another. Graham's law relates diffusion rates to molar masses: lighter molecules diffuse faster.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for a reaction mixture where reactant and product concentrations no longer change?",
+    "options": [
+      "Steady state",
+      "Chemical equilibrium",
+      "Completion",
+      "Saturation"
+    ],
+    "correct_answer": "Chemical equilibrium",
+    "explanation": "At chemical equilibrium, the concentrations of reactants and products remain constant because the rates of forward and reverse reactions are equal.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the energy barrier that reactants must overcome to form products?",
+    "options": [
+      "Bond energy",
+      "Enthalpy change",
+      "Activation energy",
+      "Lattice energy"
+    ],
+    "correct_answer": "Activation energy",
+    "explanation": "Activation energy (Ea) is the minimum energy needed for reactant molecules to collide and react. Catalysts lower Ea; higher temperature increases fraction of molecules with Ea.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the functional group in amines?",
+    "options": [
+      "Carboxyl group",
+      "Hydroxyl group",
+      "Amino group (-NH2)",
+      "Carbonyl group"
+    ],
+    "correct_answer": "Amino group (-NH2)",
+    "explanation": "Amines contain the amino group (-NH2, -NHR, or -NR2). They are bases due to the lone pair on nitrogen that can accept protons. Primary amines: RNH2.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the IUPAC name for HCHO?",
+    "options": [
+      "Ethanal",
+      "Propanal",
+      "Methanal",
+      "Butanal"
+    ],
+    "correct_answer": "Methanal",
+    "explanation": "HCHO is methanal (formaldehyde), the simplest aldehyde with just one carbon. It is used in preserving biological specimens and making plastics.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the process that occurs when vapor pressure of a liquid equals atmospheric pressure?",
+    "options": [
+      "Evaporation",
+      "Condensation",
+      "Boiling",
+      "Sublimation"
+    ],
+    "correct_answer": "Boiling",
+    "explanation": "Boiling occurs when the vapor pressure of a liquid equals the external atmospheric pressure, allowing vapor formation throughout the bulk liquid, not just at the surface.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for an element that can form stable compounds with multiple oxidation states?",
+    "options": [
+      "Noble gas",
+      "Alkali metal",
+      "Transition metal",
+      "Alkaline earth metal"
+    ],
+    "correct_answer": "Transition metal",
+    "explanation": "Transition metals have multiple stable oxidation states because d electrons are close in energy. Iron can be Fe2+ or Fe3+; copper can be Cu+ or Cu2+.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the energy required to vaporize one mole of liquid at its boiling point?",
+    "options": [
+      "Enthalpy of fusion",
+      "Enthalpy of sublimation",
+      "Enthalpy of vaporization",
+      "Enthalpy of combustion"
+    ],
+    "correct_answer": "Enthalpy of vaporization",
+    "explanation": "Enthalpy of vaporization (ΔHvap) is the heat needed to convert one mole of liquid to gas at the boiling point. For water, ΔHvap = 40.7 kJ/mol at 100°C.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for a mixture of enantiomers in equal proportions?",
+    "options": [
+      "Diastereomers",
+      "Meso compound",
+      "Racemic mixture",
+      "Optically pure compound"
+    ],
+    "correct_answer": "Racemic mixture",
+    "explanation": "A racemic mixture (racemate) contains equal amounts of R and S enantiomers, giving zero net optical rotation. Synthesized from achiral starting materials typically gives racemates.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What type of bonding is responsible for the properties of metals like conductivity?",
+    "options": [
+      "Ionic bonding",
+      "Covalent bonding",
+      "Hydrogen bonding",
+      "Metallic bonding"
+    ],
+    "correct_answer": "Metallic bonding",
+    "explanation": "Metallic bonding involves delocalized electrons (electron sea) surrounding positive metal ion kernels. This electron mobility explains electrical and thermal conductivity.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the number of moles of hydrogen ions available per mole of acid?",
+    "options": [
+      "Molarity",
+      "Mole fraction",
+      "Normality",
+      "Basicity"
+    ],
+    "correct_answer": "Normality",
+    "explanation": "Normality (N) for acids = molarity × number of ionizable H+ ions (basicity). H2SO4 has basicity 2, so 1 M H2SO4 = 2 N. Used in acid-base and redox calculations.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the temperature at which a pure substance changes from solid to liquid at 1 atm?",
+    "options": [
+      "Boiling point",
+      "Flash point",
+      "Critical temperature",
+      "Melting point"
+    ],
+    "correct_answer": "Melting point",
+    "explanation": "The melting point is the temperature at which a solid converts to liquid at standard pressure (1 atm). It is a characteristic physical property used to identify and assess purity.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the theoretical yield minus actual yield divided by theoretical yield × 100%?",
+    "options": [
+      "Atom economy",
+      "Mole fraction",
+      "Conversion efficiency",
+      "Percent error in yield"
+    ],
+    "correct_answer": "Percent error in yield",
+    "explanation": "Percent error = |theoretical - actual|/theoretical × 100%. In synthesis, losses occur from incomplete reactions, side products, and handling losses.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for a molecule or ion that donates a lone pair to form a bond in a Lewis acid-base reaction?",
+    "options": [
+      "Lewis acid",
+      "Brønsted acid",
+      "Electrophile",
+      "Lewis base"
+    ],
+    "correct_answer": "Lewis base",
+    "explanation": "A Lewis base is an electron pair donor. It includes traditional Brønsted bases but also species like NH3, CO, CN-, and halide ions that donate lone pairs to Lewis acids.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the entropy change when a solid melts?",
+    "options": [
+      "Negative entropy change",
+      "Zero entropy change",
+      "Entropy of vaporization",
+      "Positive entropy change (ΔSfus > 0)"
+    ],
+    "correct_answer": "Positive entropy change (ΔSfus > 0)",
+    "explanation": "Melting increases disorder as the ordered crystal lattice becomes a disordered liquid, so ΔS > 0. Freezing has ΔS < 0. Vaporization has the largest positive ΔS.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for a chemical equation showing only the species that participate in the reaction?",
+    "options": [
+      "Molecular equation",
+      "Complete ionic equation",
+      "Half-equation",
+      "Net ionic equation"
+    ],
+    "correct_answer": "Net ionic equation",
+    "explanation": "The net ionic equation shows only the species that actually react, with spectator ions removed. Example: Ag+(aq) + Cl-(aq) → AgCl(s) is the net ionic equation for silver chloride precipitation.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the technique used to measure the absorbance of light by a solution?",
+    "options": [
+      "Chromatography",
+      "Calorimetry",
+      "Titration",
+      "Spectrophotometry"
+    ],
+    "correct_answer": "Spectrophotometry",
+    "explanation": "Spectrophotometry measures how much light a solution absorbs at specific wavelengths. Beer-Lambert law: A = εcl, relating absorbance to concentration and path length.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for the process where a more reactive halogen displaces a less reactive one from solution?",
+    "options": [
+      "Reduction reaction",
+      "Oxidation reaction",
+      "Neutralization reaction",
+      "Halogen displacement reaction"
+    ],
+    "correct_answer": "Halogen displacement reaction",
+    "explanation": "More reactive halogens (Cl2 > Br2 > I2 in reactivity) displace less reactive halogens from their salt solutions: Cl2 + 2KBr → 2KCl + Br2.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the organic reaction producing a polyester from a diol and a dicarboxylic acid?",
+    "options": [
+      "Addition polymerization",
+      "Saponification",
+      "Esterification",
+      "Condensation polymerization"
+    ],
+    "correct_answer": "Condensation polymerization",
+    "explanation": "Condensation polymerization links bifunctional monomers with loss of small molecules (H2O). Polyesters form from diols + dicarboxylic acids; polyamides from diamines + diacids.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for the colligative property where the freezing point of a solvent decreases when a solute is added?",
+    "options": [
+      "Boiling point elevation",
+      "Osmotic pressure",
+      "Vapor pressure lowering",
+      "Freezing point depression"
+    ],
+    "correct_answer": "Freezing point depression",
+    "explanation": "Freezing point depression ΔTf = Kf × m (molality), a colligative property. Solute particles disrupt lattice formation, requiring lower temperature to freeze. Antifreeze works this way.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for a functional group characterized by a benzene ring?",
+    "options": [
+      "Alkyl group",
+      "Carboxyl group",
+      "Hydroxyl group",
+      "Aryl (phenyl) group"
+    ],
+    "correct_answer": "Aryl (phenyl) group",
+    "explanation": "An aryl group is derived from an aromatic ring by removing one H atom. The phenyl group (C6H5-) is the most common aryl group, derived from benzene.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the observation that a mixture's boiling point is between those of its pure components?",
+    "options": [
+      "Raoult's law",
+      "Henry's law",
+      "Dalton's law",
+      "Fractional distillation principle"
+    ],
+    "correct_answer": "Fractional distillation principle",
+    "explanation": "Fractional distillation exploits differences in boiling points: the more volatile component (lower boiling point) concentrates in the vapor phase, allowing separation.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the energy balance equation: ΔG = ΔH - TΔS?",
+    "options": [
+      "Hess's law",
+      "Arrhenius equation",
+      "Nernst equation",
+      "Gibbs-Helmholtz equation"
+    ],
+    "correct_answer": "Gibbs-Helmholtz equation",
+    "explanation": "The Gibbs-Helmholtz equation ΔG = ΔH - TΔS determines reaction spontaneity. ΔG < 0: spontaneous; ΔG = 0: equilibrium; ΔG > 0: non-spontaneous.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for the process of extracting a substance from a solid using a liquid solvent?",
+    "options": [
+      "Distillation",
+      "Chromatography",
+      "Filtration",
+      "Solvent extraction"
+    ],
+    "correct_answer": "Solvent extraction",
+    "explanation": "Solvent extraction (liquid-liquid or solid-liquid extraction) separates a substance by dissolving it selectively in an immiscible solvent, based on differential solubility.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the law relating the speed of gas effusion to molar mass?",
+    "options": [
+      "Dalton's law",
+      "Boyle's law",
+      "Charles's law",
+      "Graham's law of effusion"
+    ],
+    "correct_answer": "Graham's law of effusion",
+    "explanation": "Graham's law: rate of effusion ∝ 1/√M. Lighter molecules effuse faster. Ratio of rates = √(M2/M1). Used to separate isotopes (uranium hexafluoride).",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the process of converting a primary alcohol to a carboxylic acid?",
+    "options": [
+      "Reduction",
+      "Esterification",
+      "Hydrogenation",
+      "Oxidation"
+    ],
+    "correct_answer": "Oxidation",
+    "explanation": "Primary alcohols can be oxidized to aldehydes (partial) then carboxylic acids (complete). Strong oxidizing agents like acidified KMnO4 or K2Cr2O7 carry this out.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for the increase in effective nuclear charge experienced by valence electrons across a period?",
+    "options": [
+      "Shielding",
+      "Periodic trend",
+      "Atomic radius decrease",
+      "Increased Zeff (effective nuclear charge)"
+    ],
+    "correct_answer": "Increased Zeff (effective nuclear charge)",
+    "explanation": "Across a period, proton number increases but shielding stays approximately constant, so Zeff = Z - σ increases, making atoms smaller and ionization energies higher.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the solubility product expression for Mg(OH)2?",
+    "options": [
+      "Ksp = [Mg2+][OH-]",
+      "Ksp = [Mg2+]²[OH-]",
+      "Ksp = [Mg2+][OH-]³",
+      "Ksp = [Mg2+][OH-]²"
+    ],
+    "correct_answer": "Ksp = [Mg2+][OH-]²",
+    "explanation": "Mg(OH)2 ⇌ Mg2+ + 2OH-. Therefore Ksp = [Mg2+][OH-]². Each Mg(OH)2 unit produces one Mg2+ and two OH- ions.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for an electron pair that is not involved in bonding?",
+    "options": [
+      "Bonding pair",
+      "Sigma pair",
+      "Pi pair",
+      "Lone pair"
+    ],
+    "correct_answer": "Lone pair",
+    "explanation": "Lone pairs (non-bonding pairs) are pairs of valence electrons not involved in covalent bonds. They influence molecular geometry (VSEPR) and chemical reactivity (Lewis base character).",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the product of base hydrolysis of an ester?",
+    "options": [
+      "Ester",
+      "Aldehyde",
+      "Alcohol + carboxylic acid",
+      "Carboxylate salt + alcohol"
+    ],
+    "correct_answer": "Carboxylate salt + alcohol",
+    "explanation": "Base hydrolysis (saponification) of an ester RCOOR' with NaOH gives the carboxylate salt RCOONa and alcohol R'OH. Unlike acid hydrolysis, this is irreversible.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for a reaction that converts an alcohol to a ketone?",
+    "options": [
+      "Reduction",
+      "Esterification",
+      "Hydrolysis",
+      "Oxidation of secondary alcohol"
+    ],
+    "correct_answer": "Oxidation of secondary alcohol",
+    "explanation": "Secondary alcohols (R2CHOH) are oxidized to ketones (R2C=O) by mild oxidizing agents (PCC) or strong oxidants (KMnO4). Unlike primary alcohols, further oxidation is difficult.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the number of d electrons in a transition metal complex in terms of crystal field splitting?",
+    "options": [
+      "Coordination number",
+      "Oxidation state",
+      "Ligand field strength",
+      "d-electron count"
+    ],
+    "correct_answer": "d-electron count",
+    "explanation": "The d-electron count determines how d electrons fill the split d orbitals in a crystal field. Combined with Δo (splitting energy), it determines high spin vs. low spin configuration.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the energy required to break all bonds in one mole of a diatomic gaseous molecule?",
+    "options": [
+      "Ionization energy",
+      "Lattice energy",
+      "Electron affinity",
+      "Bond dissociation energy"
+    ],
+    "correct_answer": "Bond dissociation energy",
+    "explanation": "Bond dissociation energy (BDE) is the energy to homolytically break one mole of a specific bond in the gas phase. H-H BDE = 436 kJ/mol; C=C BDE = 614 kJ/mol.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the reaction product when sodium hydroxide reacts with copper(II) sulfate?",
+    "options": [
+      "CuSO3",
+      "Cu2SO4",
+      "CuNaSO4",
+      "Cu(OH)2 precipitate"
+    ],
+    "correct_answer": "Cu(OH)2 precipitate",
+    "explanation": "NaOH + CuSO4 → Cu(OH)2↓ + Na2SO4. Copper(II) hydroxide forms as a blue precipitate in a double displacement reaction.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the reaction between a metal oxide and an acid?",
+    "options": [
+      "Neutralization of base only",
+      "Metal-acid reaction",
+      "Oxidation reaction",
+      "Metal oxide + acid → salt + water"
+    ],
+    "correct_answer": "Metal oxide + acid → salt + water",
+    "explanation": "Metal oxides are basic oxides: CuO + H2SO4 → CuSO4 + H2O. The metal oxide acts as a base, neutralizing the acid to form a salt and water.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for the number of atoms in the unit cell of a face-centered cubic (FCC) lattice?",
+    "options": [
+      "2",
+      "6",
+      "1",
+      "4"
+    ],
+    "correct_answer": "4",
+    "explanation": "An FCC unit cell has 8 corner atoms (×1/8 each = 1) and 6 face atoms (×1/2 each = 3), giving 4 atoms per unit cell. Many metals (Cu, Al, Ag, Au) adopt FCC packing.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the product when a primary amine reacts with an acyl chloride?",
+    "options": [
+      "Ether",
+      "Ester",
+      "Anhydride",
+      "Amide"
+    ],
+    "correct_answer": "Amide",
+    "explanation": "Primary amines (RNH2) react with acyl chlorides (RCOCl) to form amides (RCONHR') and HCl. Amides contain the -CONH- linkage and form the peptide bonds in proteins.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the electrochemical series listing metals in order of their standard reduction potentials?",
+    "options": [
+      "Reactivity series",
+      "Halogen series",
+      "Metal activity series",
+      "Electrochemical series"
+    ],
+    "correct_answer": "Electrochemical series",
+    "explanation": "The electrochemical series ranks species by standard reduction potential (E°red). Species with higher E° are stronger oxidizing agents and are listed at the top.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the ion with the same electron configuration as noble gas neon?",
+    "options": [
+      "Na+ only",
+      "F- only",
+      "Both Na+ and F- (isoelectronic)",
+      "O2-"
+    ],
+    "correct_answer": "Both Na+ and F- (isoelectronic)",
+    "explanation": "Na+ (lost one electron, 10 electrons) and F- (gained one electron, 10 electrons) are both isoelectronic with neon (10 electrons, 1s²2s²2p⁶).",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the technique measuring the mass spectrum of molecular fragments?",
+    "options": [
+      "IR spectroscopy",
+      "UV-Vis spectroscopy",
+      "NMR spectroscopy",
+      "Mass spectrometry"
+    ],
+    "correct_answer": "Mass spectrometry",
+    "explanation": "Mass spectrometry ionizes molecules and separates fragments by mass-to-charge ratio (m/z). The molecular ion peak gives molar mass; fragmentation patterns help identify structure.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the change in enthalpy when 1 mole of an ionic compound forms from its gaseous ions?",
+    "options": [
+      "Enthalpy of formation",
+      "Enthalpy of hydration",
+      "Enthalpy of atomization",
+      "Lattice enthalpy"
+    ],
+    "correct_answer": "Lattice enthalpy",
+    "explanation": "Lattice enthalpy (ΔHlatt) is released when gaseous ions come together to form an ionic lattice. Higher lattice enthalpy means stronger ionic bonds and higher melting points.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the separation technique that uses differences in partition between two immiscible liquids?",
+    "options": [
+      "Distillation",
+      "Crystallization",
+      "Filtration",
+      "Solvent extraction"
+    ],
+    "correct_answer": "Solvent extraction",
+    "explanation": "Solvent (liquid-liquid) extraction separates compounds using their differential solubility in two immiscible liquids (e.g., water and diethyl ether) in a separating funnel.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the organic product of reducing an aldehyde?",
+    "options": [
+      "Carboxylic acid",
+      "Ketone",
+      "Ether",
+      "Primary alcohol"
+    ],
+    "correct_answer": "Primary alcohol",
+    "explanation": "Reduction of an aldehyde (RCHO) gives a primary alcohol (RCH2OH). Reducing agents: NaBH4, LiAlH4, or H2/catalyst. Ketones are reduced to secondary alcohols.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the standard measurement of acid strength expressed as a negative logarithm?",
+    "options": [
+      "pH",
+      "pOH",
+      "Kw",
+      "pKa"
+    ],
+    "correct_answer": "pKa",
+    "explanation": "pKa = -log(Ka) measures acid strength. Lower pKa = stronger acid (larger Ka). HCl: pKa ≈ -7 (strong); CH3COOH: pKa = 4.75 (weak); H2O: pKa = 15.7 (very weak).",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the energy released when gaseous ions are hydrated by water molecules?",
+    "options": [
+      "Lattice energy",
+      "Bond energy",
+      "Electron affinity",
+      "Hydration enthalpy"
+    ],
+    "correct_answer": "Hydration enthalpy",
+    "explanation": "Hydration enthalpy (ΔHhyd) is the energy released when one mole of gaseous ions is surrounded by water molecules. Smaller, more charged ions have larger hydration enthalpies.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the type of reaction that removes water from two molecules to join them?",
+    "options": [
+      "Hydrolysis",
+      "Addition reaction",
+      "Substitution reaction",
+      "Condensation reaction"
+    ],
+    "correct_answer": "Condensation reaction",
+    "explanation": "Condensation reactions join two molecules with loss of a small molecule (usually H2O). Used in forming esters, amides, disaccharides, and polymers.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for the organic compound class with the general formula R-CO-R'?",
+    "options": [
+      "Ester",
+      "Ether",
+      "Aldehyde",
+      "Ketone"
+    ],
+    "correct_answer": "Ketone",
+    "explanation": "Ketones (R-CO-R') have the carbonyl group flanked by two carbon groups. IUPAC suffix: -one. Propan-2-one (acetone, CH3COCH3) is the simplest ketone.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the reaction of an alkene with bromine water to test for unsaturation?",
+    "options": [
+      "Chlorination",
+      "Hydrogenation",
+      "Combustion",
+      "Bromine water addition test"
+    ],
+    "correct_answer": "Bromine water addition test",
+    "explanation": "Alkenes decolorize bromine water (Br2, orange) by addition across the C=C double bond, forming a dibromo compound. This test distinguishes alkenes from alkanes.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for the pressure when the vapor and liquid phases of a substance are in equilibrium?",
+    "options": [
+      "Atmospheric pressure",
+      "Critical pressure",
+      "Boiling pressure",
+      "Vapor pressure"
+    ],
+    "correct_answer": "Vapor pressure",
+    "explanation": "Vapor pressure is the pressure exerted by a vapor in equilibrium with its liquid (or solid) at a given temperature. Higher vapor pressure means more volatile substance, lower boiling point.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the product when a secondary alcohol is oxidized?",
+    "options": [
+      "Primary alcohol",
+      "Aldehyde",
+      "Carboxylic acid",
+      "Ketone"
+    ],
+    "correct_answer": "Ketone",
+    "explanation": "Secondary alcohols (R2CHOH) are oxidized to ketones (R2C=O) using oxidizing agents like acidified K2Cr2O7 or KMnO4. Ketones cannot be easily oxidized further.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the technique that measures heat released or absorbed in reactions at constant pressure?",
+    "options": [
+      "Bomb calorimetry",
+      "Thermogravimetry",
+      "Spectrophotometry",
+      "Coffee-cup calorimetry"
+    ],
+    "correct_answer": "Coffee-cup calorimetry",
+    "explanation": "Coffee-cup (constant-pressure) calorimetry measures ΔH at atmospheric pressure for reactions in solution using q = mcΔT. Bomb calorimetry measures ΔU at constant volume.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the inorganic compound formed when an acid reacts with a base?",
+    "options": [
+      "Oxide",
+      "Ester",
+      "Ether",
+      "Salt"
+    ],
+    "correct_answer": "Salt",
+    "explanation": "A salt is an ionic compound formed from the cation of a base and the anion of an acid during neutralization. NaCl (from HCl + NaOH) and CuSO4 (from H2SO4 + Cu(OH)2) are salts.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for the arrangement of ions in a repeating three-dimensional pattern?",
+    "options": [
+      "Covalent network",
+      "Amorphous solid",
+      "Alloy structure",
+      "Crystal lattice"
+    ],
+    "correct_answer": "Crystal lattice",
+    "explanation": "A crystal lattice is the ordered, three-dimensional arrangement of ions, atoms, or molecules in a crystalline solid. NaCl forms a cubic face-centered lattice.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the property that determines whether a complex ion will be colored?",
+    "options": [
+      "Electronegativity difference",
+      "Coordination number",
+      "Molar mass",
+      "d-orbital splitting and visible light absorption"
+    ],
+    "correct_answer": "d-orbital splitting and visible light absorption",
+    "explanation": "Transition metal complexes are colored because d-orbital splitting (crystal field splitting) produces energy differences in the visible light range. Absorbed wavelengths determine the observed color.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the carbon skeleton with only the molecular formula of the first four alkanes: methane, ethane, propane, and...?",
+    "options": [
+      "Cyclobutane",
+      "Isobutane",
+      "Pentane",
+      "Butane"
+    ],
+    "correct_answer": "Butane",
+    "explanation": "The first four straight-chain alkanes are methane (C1), ethane (C2), propane (C3), and butane (C4, C4H10). Butane is used in cigarette lighters and camping stoves.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the technique that measures heat flow between a sample and reference as temperature changes?",
+    "options": [
+      "Bomb calorimetry",
+      "Spectroscopy",
+      "Titration",
+      "Differential scanning calorimetry (DSC)"
+    ],
+    "correct_answer": "Differential scanning calorimetry (DSC)",
+    "explanation": "DSC measures the difference in heat flow required to maintain the sample and reference at the same temperature, detecting phase transitions, melting points, and reaction enthalpies.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the process where gaseous ions form a solid ionic compound?",
+    "options": [
+      "Hydration",
+      "Sublimation",
+      "Ionization",
+      "Lattice formation"
+    ],
+    "correct_answer": "Lattice formation",
+    "explanation": "Lattice formation occurs when oppositely charged gaseous ions come together to form an ionic solid, releasing the lattice enthalpy. The reverse process (dissolution) absorbs lattice enthalpy.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the type of nuclear reaction combining light nuclei to release energy?",
+    "options": [
+      "Fission",
+      "Alpha decay",
+      "Beta decay",
+      "Nuclear fusion"
+    ],
+    "correct_answer": "Nuclear fusion",
+    "explanation": "Nuclear fusion combines light nuclei (like hydrogen isotopes) into heavier nuclei, releasing enormous energy. It powers the sun and stars; hydrogen bombs use uncontrolled fusion.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "chemistry"
+  }
+]

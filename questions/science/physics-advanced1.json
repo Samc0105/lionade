@@ -1,0 +1,2270 @@
+[
+  {
+    "question": "What is the Lagrangian in classical mechanics?",
+    "options": [
+      "L = T - V (kinetic minus potential energy)",
+      "L = T + V",
+      "L = V - T",
+      "L = T × V"
+    ],
+    "correct_answer": "L = T - V (kinetic minus potential energy)",
+    "explanation": "The Lagrangian L = T - V, where T is kinetic energy and V is potential energy. The Euler-Lagrange equations derived from L give the equations of motion: d/dt(∂L/∂q̇) - ∂L/∂q = 0.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the Schwarzschild radius of a black hole?",
+    "options": [
+      "r_s = GM/c²",
+      "r_s = 2GM/c²",
+      "r_s = 4GM/c²",
+      "r_s = GM/c"
+    ],
+    "correct_answer": "r_s = 2GM/c²",
+    "explanation": "The Schwarzschild radius r_s = 2GM/c² is the radius at which the escape velocity equals c. For Earth: r_s ≈ 9 mm. For the Sun: r_s ≈ 3 km. Any mass compressed below r_s becomes a black hole.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What does the divergence theorem (Gauss's theorem) state?",
+    "options": [
+      "∇·F = 0 everywhere",
+      "∮F·dl = ∫∇×F·dA",
+      "∮F·dA = ∫∇·F dV (surface integral = volume integral of divergence)",
+      "∫∇·F dV = 0"
+    ],
+    "correct_answer": "∮F·dA = ∫∇·F dV (surface integral = volume integral of divergence)",
+    "explanation": "The divergence theorem: ∮F·dA = ∫∇·F dV. The flux of a vector field through a closed surface equals the volume integral of its divergence. Fundamental to electromagnetism (Gauss's laws).",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the Hamiltonian in classical mechanics?",
+    "options": [
+      "H = L + V",
+      "H = T - V",
+      "H = p²/2m",
+      "H = T + V (total mechanical energy)"
+    ],
+    "correct_answer": "H = T + V (total mechanical energy)",
+    "explanation": "The Hamiltonian H = T + V = total energy of the system, expressed in terms of generalized coordinates and momenta. Hamilton's equations: ṗ = -∂H/∂q and q̇ = ∂H/∂p.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the quantum mechanical commutator [x̂, p̂]?",
+    "options": [
+      "[x̂, p̂] = iℏ",
+      "[x̂, p̂] = -iℏ",
+      "[x̂, p̂] = ℏ",
+      "[x̂, p̂] = 0"
+    ],
+    "correct_answer": "[x̂, p̂] = iℏ",
+    "explanation": "The fundamental commutation relation [x̂, p̂] = iℏ (where ℏ = h/2π) is the basis of quantum mechanics. Non-commuting observables cannot be simultaneously precisely measured — Heisenberg uncertainty principle.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the Biot-Savart law?",
+    "options": [
+      "dB = μ₀I dl/r",
+      "dB = (μ₀/4π)(I dl × r̂)/r²",
+      "dB = μ₀I/(2πr)",
+      "dB = (μ₀/4π)I dl/r²"
+    ],
+    "correct_answer": "dB = (μ₀/4π)(I dl × r̂)/r²",
+    "explanation": "The Biot-Savart law gives the magnetic field from a current element: dB = (μ₀/4π)(I dl × r̂)/r². It is the magnetic analogue of Coulomb's law for electrostatics.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the continuity equation for fluid flow?",
+    "options": [
+      "∂ρ/∂t + ∇·(ρv) = 0 (conservation of mass)",
+      "A₁v₁ = A₂v₂",
+      "ρ₁A₁v₁ = ρ₂A₂v₂",
+      "ρ = constant"
+    ],
+    "correct_answer": "ρ₁A₁v₁ = ρ₂A₂v₂",
+    "explanation": "The continuity equation ρ₁A₁v₁ = ρ₂A₂v₂ expresses mass conservation in fluid flow. For incompressible fluids (ρ constant): A₁v₁ = A₂v₂. Narrower pipes → faster flow.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the relativistic momentum?",
+    "options": [
+      "p = m₀v√(1-v²/c²)",
+      "p = mv",
+      "p = mv/γ",
+      "p = γmv"
+    ],
+    "correct_answer": "p = γmv",
+    "explanation": "Relativistic momentum p = γmv = mv/√(1-v²/c²), where γ is the Lorentz factor. As v → c, p → ∞. The total relativistic energy E² = (pc)² + (m₀c²)².",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the dispersion relation for photons in vacuum?",
+    "options": [
+      "ω = ck",
+      "ω = c/k",
+      "ω = k/c",
+      "ω² = c²k² + m²c⁴/ℏ²"
+    ],
+    "correct_answer": "ω = ck",
+    "explanation": "For photons in vacuum, the dispersion relation ω = ck, where ω is angular frequency and k is wave number. Phase velocity vp = ω/k = c (constant — no dispersion in vacuum).",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the Poynting vector?",
+    "options": [
+      "S = E × B",
+      "S = E × B/μ₀",
+      "S = E/B",
+      "S = μ₀(E × B)"
+    ],
+    "correct_answer": "S = E × B/μ₀",
+    "explanation": "The Poynting vector S = (E × B)/μ₀ = (1/μ₀)(E × B) represents the energy flux (power per unit area) of an electromagnetic field. Its magnitude is the intensity I = |S|.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the Schrödinger equation for a free particle?",
+    "options": [
+      "iℏ ∂ψ/∂t = Vψ",
+      "iℏ ∂ψ/∂t = ℏ²/(2m) ∇²ψ",
+      "iℏ ∂ψ/∂t = -ℏ²/(2m) ∇²ψ",
+      "∇²ψ = -k²ψ"
+    ],
+    "correct_answer": "iℏ ∂ψ/∂t = -ℏ²/(2m) ∇²ψ",
+    "explanation": "The time-dependent Schrödinger equation for a free particle: iℏ∂ψ/∂t = -(ℏ²/2m)∇²ψ. With potential V: iℏ∂ψ/∂t = Ĥψ = [-(ℏ²/2m)∇² + V]ψ.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the electric field of a point charge?",
+    "options": [
+      "E = kq/r³",
+      "E = kq/r",
+      "E = kq²/r²",
+      "E = kq/r² (radially outward)"
+    ],
+    "correct_answer": "E = kq/r² (radially outward)",
+    "explanation": "Electric field of a point charge E = kq/r² = q/(4πε₀r²), directed radially outward for positive q. This follows the inverse square law and is derived from Gauss's law.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is Bernoulli's equation for fluid flow?",
+    "options": [
+      "P + ½ρv² + ρgh = constant",
+      "P + ρv² + ρgh = constant",
+      "P + ½ρv + ρgh = constant",
+      "P = ½ρv²"
+    ],
+    "correct_answer": "P + ½ρv² + ρgh = constant",
+    "explanation": "Bernoulli's equation P + ½ρv² + ρgh = constant for steady, inviscid, incompressible flow. Higher velocity → lower pressure (explains lift, Venturi effect).",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the precession of a gyroscope?",
+    "options": [
+      "Ω = Iω/τ",
+      "Ω = τ/L = mgd/(Iω)",
+      "Ω = τ × L",
+      "Ω = mgd × I"
+    ],
+    "correct_answer": "Ω = τ/L = mgd/(Iω)",
+    "explanation": "Gyroscope precession rate Ω = τ/L, where τ is gravitational torque and L = Iω is angular momentum. Ω = mgd/(Iω), where d is distance from pivot to CM.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the probability current in quantum mechanics?",
+    "options": [
+      "J = ℏ∇ψ/m",
+      "J = |ψ|²v",
+      "J = (ℏ/2mi)(ψ*∇ψ - ψ∇ψ*)",
+      "J = iℏ∇ψ"
+    ],
+    "correct_answer": "J = (ℏ/2mi)(ψ*∇ψ - ψ∇ψ*)",
+    "explanation": "Probability current J = (ℏ/2mi)(ψ*∇ψ - ψ∇ψ*) satisfies continuity: ∂|ψ|²/∂t + ∇·J = 0. It represents the flow of probability density in quantum mechanics.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is Ampere's law with Maxwell's correction?",
+    "options": [
+      "∮H·dl = I_free",
+      "∮B·dl = μ₀I",
+      "∮B·dl = μ₀ε₀ dE/dt",
+      "∮B·dl = μ₀(I + ε₀ dΦ_E/dt)"
+    ],
+    "correct_answer": "∮B·dl = μ₀(I + ε₀ dΦ_E/dt)",
+    "explanation": "Ampere-Maxwell law: ∮B·dl = μ₀(I + ε₀dΦ_E/dt). Maxwell added the displacement current ε₀dΦ_E/dt, which enables electromagnetic waves in vacuum — a crucial step to unifying electricity and magnetism.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the energy of a quantum harmonic oscillator?",
+    "options": [
+      "E_n = (n + ½)ℏω",
+      "E_n = nℏω",
+      "E_n = ½nℏω",
+      "E_n = n²ℏω"
+    ],
+    "correct_answer": "E_n = (n + ½)ℏω",
+    "explanation": "Quantum harmonic oscillator energy levels: E_n = (n + ½)ℏω, where n = 0,1,2,... The ground state has zero-point energy E₀ = ½ℏω (non-zero, unlike classical oscillator).",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the Lorentz transformation of time?",
+    "options": [
+      "t' = γ(t + vx/c²)",
+      "t' = γ(t - vx/c²)",
+      "t' = t/γ",
+      "t' = γt"
+    ],
+    "correct_answer": "t' = γ(t - vx/c²)",
+    "explanation": "The Lorentz time transformation t' = γ(t - vx/c²), where γ = 1/√(1-v²/c²). This causes time dilation (moving clocks run slow) and relativity of simultaneity.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the WKB approximation used for in quantum mechanics?",
+    "options": [
+      "Calculating spin states",
+      "Solving hydrogen atom exactly",
+      "Approximating wavefunctions in slowly varying potentials",
+      "Finding exact energy eigenvalues"
+    ],
+    "correct_answer": "Approximating wavefunctions in slowly varying potentials",
+    "explanation": "The WKB (Wentzel-Kramers-Brillouin) approximation finds approximate solutions to the Schrödinger equation when the potential V(x) varies slowly compared to the de Broglie wavelength.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the Coriolis acceleration?",
+    "options": [
+      "a_Cor = ω²r",
+      "a_Cor = 2ω × v",
+      "a_Cor = ω × v",
+      "a_Cor = -2ω × v"
+    ],
+    "correct_answer": "a_Cor = -2ω × v",
+    "explanation": "The Coriolis acceleration a = -2ω × v acts on objects moving in a rotating reference frame. It causes deflection of wind patterns (cyclones) and the Foucault pendulum rotation.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for photon energy loss in Compton scattering?",
+    "options": [
+      "Δλ = (h/m_e c)(1 - cosθ)",
+      "Δλ = h(1 - cosθ)/m_e",
+      "Δλ = (h/mc)(1 + cosθ)",
+      "Δλ = h/m_e c"
+    ],
+    "correct_answer": "Δλ = (h/m_e c)(1 - cosθ)",
+    "explanation": "Compton shift: Δλ = λ_C(1 - cosθ), where λ_C = h/(m_e c) = 2.43×10⁻¹² m is the Compton wavelength and θ is the scattering angle. Maximum shift at θ = 180°: Δλ = 2λ_C.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for relativistic kinetic energy?",
+    "options": [
+      "KE = γm₀c²",
+      "KE = (γ-1)m₀c²",
+      "KE = ½γm₀v²",
+      "KE = m₀c²(γ-1)/γ"
+    ],
+    "correct_answer": "KE = (γ-1)m₀c²",
+    "explanation": "Relativistic KE = (γ-1)m₀c² = total energy - rest energy = γm₀c² - m₀c². For v << c, this reduces to ½m₀v² (classical limit).",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the Rydberg energy for hydrogen?",
+    "options": [
+      "E_n = 13.6 eV/n²",
+      "E_n = -13.6n eV",
+      "E_n = -13.6 eV/n²",
+      "E_n = -13.6 eV/n"
+    ],
+    "correct_answer": "E_n = -13.6 eV/n²",
+    "explanation": "Hydrogen energy levels: E_n = -13.6 eV/n² = -m_e e⁴/(8ε₀²h²n²). The negative sign indicates bound states. Ionization energy from n=1 is 13.6 eV.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the thermal de Broglie wavelength?",
+    "options": [
+      "λ_th = ℏ/mk_BT",
+      "λ_th = h/mk_BT",
+      "λ_th = √(h/mk_BT)",
+      "λ_th = h/√(2πm k_B T)"
+    ],
+    "correct_answer": "λ_th = h/√(2πm k_B T)",
+    "explanation": "Thermal de Broglie wavelength λ_th = h/√(2πmk_BT) characterizes quantum effects in gases. When λ_th becomes comparable to particle spacing, quantum statistical effects (Bose-Einstein, Fermi-Dirac) become important.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the Navier-Stokes equation for incompressible viscous flow?",
+    "options": [
+      "ρ(∂v/∂t + v·∇v) = -∇P + μ∇²v",
+      "ρ∂v/∂t = -∇P",
+      "∂v/∂t = μ∇²v",
+      "ρv·∇v = -∇P"
+    ],
+    "correct_answer": "ρ(∂v/∂t + v·∇v) = -∇P + μ∇²v",
+    "explanation": "The Navier-Stokes equation ρ(∂v/∂t + v·∇v) = -∇P + μ∇²v describes viscous fluid flow. The left side is inertial forces; right side is pressure gradient and viscous forces.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the magnetic vector potential in terms of the field?",
+    "options": [
+      "B = ∇ · A",
+      "B = ∇ × A",
+      "B = ∇A",
+      "B = ∂A/∂t"
+    ],
+    "correct_answer": "B = ∇ × A",
+    "explanation": "The magnetic field B = ∇ × A, where A is the magnetic vector potential. The electric field E = -∇φ - ∂A/∂t, where φ is the scalar potential. These satisfy Maxwell's equations.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the virial theorem for a bound gravitational system?",
+    "options": [
+      "⟨T⟩ = -⟨V⟩",
+      "⟨T⟩ = ⟨V⟩",
+      "⟨T⟩ = -½⟨V⟩",
+      "⟨T⟩ = 2⟨V⟩"
+    ],
+    "correct_answer": "⟨T⟩ = -½⟨V⟩",
+    "explanation": "The virial theorem: ⟨T⟩ = -½⟨V⟩ for gravitational systems. Time-averaged kinetic energy equals minus half the time-averaged potential energy. Explains stability of stars and galaxy clusters.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the Fermi energy at T = 0K?",
+    "options": [
+      "E_F = k_BT_F",
+      "E_F = (ℏ²/m)(3π²n)",
+      "E_F = ℏ²k_F²/2m only",
+      "E_F = (ℏ²/2m)(3π²n)^(2/3)"
+    ],
+    "correct_answer": "E_F = (ℏ²/2m)(3π²n)^(2/3)",
+    "explanation": "Fermi energy E_F = (ℏ²/2m)(3π²n)^(2/3) at T=0K, where n is electron number density. It is the highest occupied energy level. For copper: E_F ≈ 7 eV.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the group velocity of a wave packet?",
+    "options": [
+      "v_g = dω/dk",
+      "v_g = ω/k",
+      "v_g = k/ω",
+      "v_g = ω·k"
+    ],
+    "correct_answer": "v_g = dω/dk",
+    "explanation": "Group velocity v_g = dω/dk is the velocity of a wave packet's envelope (the velocity of information/energy transport). Phase velocity v_p = ω/k. In dispersive media, v_g ≠ v_p.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the geodesic equation in general relativity?",
+    "options": [
+      "d²x^μ/dt² = 0",
+      "d²x^μ/dτ² + Γ^μ_νλ (dx^ν/dτ)(dx^λ/dτ) = 0",
+      "d²x^μ/dτ² = -Γ^μ_νλ",
+      "dx^μ/dτ = constant"
+    ],
+    "correct_answer": "d²x^μ/dτ² + Γ^μ_νλ (dx^ν/dτ)(dx^λ/dτ) = 0",
+    "explanation": "The geodesic equation d²x^μ/dτ² + Γ^μ_νλ(dx^ν/dτ)(dx^λ/dτ) = 0 describes free-fall motion in curved spacetime. Γ^μ_νλ are Christoffel symbols encoding spacetime curvature.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the entropy in statistical mechanics (Boltzmann)?",
+    "options": [
+      "S = -k_B Σ p_i ln p_i (Gibbs entropy)",
+      "S = k_B Ω",
+      "S = k_B ln Ω",
+      "S = Ω/k_B"
+    ],
+    "correct_answer": "S = k_B ln Ω",
+    "explanation": "Boltzmann's entropy formula S = k_B ln Ω, where Ω is the number of microstates corresponding to a macrostate and k_B = 1.38×10⁻²³ J/K. Inscribed on Boltzmann's tombstone.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the Bragg diffraction condition?",
+    "options": [
+      "2d cosθ = nλ",
+      "d sinθ = nλ",
+      "d cosθ = nλ",
+      "2d sinθ = nλ"
+    ],
+    "correct_answer": "2d sinθ = nλ",
+    "explanation": "Bragg's law: 2d sinθ = nλ, where d is crystal plane spacing, θ is glancing angle, n is order, and λ is wavelength. Used to determine crystal structure by X-ray diffraction.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What does the spin-statistics theorem state?",
+    "options": [
+      "Fermions (half-integer spin) obey Fermi-Dirac statistics; bosons (integer spin) obey Bose-Einstein",
+      "All particles follow Maxwell-Boltzmann statistics",
+      "Spin and statistics are unrelated",
+      "Only electrons are fermions"
+    ],
+    "correct_answer": "Fermions (half-integer spin) obey Fermi-Dirac statistics; bosons (integer spin) obey Bose-Einstein",
+    "explanation": "The spin-statistics theorem: particles with half-integer spin (fermions: electrons, quarks, protons) obey Fermi-Dirac statistics and the Pauli exclusion principle; integer-spin bosons (photons, gluons) obey Bose-Einstein statistics.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the Bohr magneton?",
+    "options": [
+      "μ_B = eℏ/m_e",
+      "μ_B = eℏ/2m_e",
+      "μ_B = e/2m_e",
+      "μ_B = ℏ/2m_e"
+    ],
+    "correct_answer": "μ_B = eℏ/2m_e",
+    "explanation": "The Bohr magneton μ_B = eℏ/(2m_e) = 9.274×10⁻²⁴ J/T is the natural unit of magnetic moment for electrons. Electron spin magnetic moment ≈ -g_s μ_B S, where g_s ≈ 2.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the Fermi-Dirac distribution function?",
+    "options": [
+      "f(E) = 1/(e^(E/k_BT) - 1)",
+      "f(E) = e^(-E/k_BT)",
+      "f(E) = 1/(e^((E-μ)/k_BT) + 1)",
+      "f(E) = e^(-E/k_BT)/Z"
+    ],
+    "correct_answer": "f(E) = 1/(e^((E-μ)/k_BT) + 1)",
+    "explanation": "The Fermi-Dirac distribution f(E) = 1/(e^((E-μ)/k_BT) + 1), where μ is the chemical potential (Fermi energy at T=0). Describes the probability of finding a fermion at energy E.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the tunneling transmission coefficient?",
+    "options": [
+      "T ≈ 1/κa",
+      "T ≈ e^(-κa)",
+      "T ≈ κa",
+      "T ≈ e^(-2κa)"
+    ],
+    "correct_answer": "T ≈ e^(-2κa)",
+    "explanation": "Quantum tunneling transmission T ≈ e^(-2κa) through a barrier of width a, where κ = √(2m(V-E))/ℏ. Exponential sensitivity to barrier width explains scanning tunneling microscopy and nuclear fusion.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the Rayleigh criterion for angular resolution?",
+    "options": [
+      "θ_min = 1.22 λ/D",
+      "θ_min = λ/D",
+      "θ_min = 0.61 λ/D",
+      "θ_min = 2λ/D"
+    ],
+    "correct_answer": "θ_min = 1.22 λ/D",
+    "explanation": "Rayleigh criterion θ_min = 1.22λ/D, where λ is wavelength and D is aperture diameter. The factor 1.22 comes from the first zero of the Bessel function for circular apertures.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the Clausius-Clapeyron equation?",
+    "options": [
+      "dP/dT = ΔV/T",
+      "dP/dT = L/(TΔV)",
+      "dP/dT = LΔV",
+      "dP/dT = T/LΔV"
+    ],
+    "correct_answer": "dP/dT = L/(TΔV)",
+    "explanation": "The Clausius-Clapeyron equation dP/dT = L/(TΔV) describes how phase transition pressure varies with temperature. L is latent heat, T is temperature, ΔV is volume change. Explains why pressure cookers cook faster.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the magnetic susceptibility of a diamagnetic material?",
+    "options": [
+      "χ = 0",
+      "χ > 0 (positive)",
+      "χ < 0 (negative susceptibility)",
+      "χ >> 1"
+    ],
+    "correct_answer": "χ < 0 (negative susceptibility)",
+    "explanation": "Diamagnetic materials have χ < 0 (e.g., bismuth χ ≈ -1.7×10⁻⁴), meaning they are weakly repelled by magnets. This arises from Lenz's law — induced magnetic moments oppose the applied field.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the Debye temperature?",
+    "options": [
+      "θ_D = k_Bω_D/ℏ",
+      "θ_D = ω_D/k_B",
+      "θ_D = ℏ/k_Bω_D",
+      "θ_D = ℏω_D/k_B"
+    ],
+    "correct_answer": "θ_D = ℏω_D/k_B",
+    "explanation": "The Debye temperature θ_D = ℏω_D/k_B, where ω_D is the Debye cutoff frequency. For T >> θ_D: classical Dulong-Petit law; for T << θ_D: heat capacity ∝ T³. For copper: θ_D ≈ 343 K.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the radiation pressure of an electromagnetic wave?",
+    "options": [
+      "P_rad = I/c",
+      "P_rad = I·c",
+      "P_rad = I/c² ",
+      "P_rad = 2I/c"
+    ],
+    "correct_answer": "P_rad = I/c",
+    "explanation": "Radiation pressure P = I/c for absorbed light and P = 2I/c for perfectly reflected light, where I is intensity. Used in laser cooling, solar sails, and optical trapping.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the Lamb shift in hydrogen?",
+    "options": [
+      "ΔE = 0 (no shift)",
+      "ΔE ≈ α⁵m_e c²/n³ (QED correction lifting 2S-2P degeneracy)",
+      "ΔE = α²m_e c²",
+      "ΔE = ℏω_plasma"
+    ],
+    "correct_answer": "ΔE ≈ α⁵m_e c²/n³ (QED correction lifting 2S-2P degeneracy)",
+    "explanation": "The Lamb shift is a quantum electrodynamics (QED) correction that splits the 2S₁/₂ and 2P₁/₂ levels in hydrogen (degenerate in the Dirac equation). It confirmed QED and earned Lamb the Nobel Prize.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the Einstein A coefficient in atomic physics?",
+    "options": [
+      "A = stimulated emission coefficient",
+      "A = absorption cross-section",
+      "A = ω³|d_{if}|²/(3πε₀ℏc³) (spontaneous emission rate)",
+      "A = energy level spacing"
+    ],
+    "correct_answer": "A = ω³|d_{if}|²/(3πε₀ℏc³) (spontaneous emission rate)",
+    "explanation": "Einstein's A coefficient gives the spontaneous emission rate from state i to f: A = ω³|d_if|²/(3πε₀ℏc³). Related to B coefficients (stimulated): A/B = ℏω³/(π²c³). Foundation of laser physics.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the skin depth of electromagnetic waves in a conductor?",
+    "options": [
+      "δ = √(ω/μσ)",
+      "δ = √(μσω)",
+      "δ = 1/(μσω)",
+      "δ = √(2/(μσω))"
+    ],
+    "correct_answer": "δ = √(2/(μσω))",
+    "explanation": "Skin depth δ = √(2/(μσω)) = √(2ρ/(μω)), where σ is conductivity, μ is permeability, and ω is frequency. High-frequency currents are confined to a thin surface layer of depth δ.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the Chandrasekhar limit?",
+    "options": [
+      "~1.4 solar masses (maximum mass of a white dwarf)",
+      "~3 solar masses",
+      "~10 solar masses",
+      "~0.8 solar masses"
+    ],
+    "correct_answer": "~1.4 solar masses (maximum mass of a white dwarf)",
+    "explanation": "The Chandrasekhar limit (~1.4 M_☉) is the maximum mass of a stable white dwarf, supported by electron degeneracy pressure. Above this, it collapses to a neutron star or black hole.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for Larmor radiation from an accelerating charge?",
+    "options": [
+      "P = q²a²/c",
+      "P = q²a²/(6πε₀c³)",
+      "P = q²a/c²",
+      "P = qa²/c³"
+    ],
+    "correct_answer": "P = q²a²/(6πε₀c³)",
+    "explanation": "Larmor formula: P = q²a²/(6πε₀c³) = q²a²/(6πε₀c³), where a is acceleration. Accelerating charges radiate. This classical formula predicts atomic instability — resolved only by quantum mechanics.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the cyclotron frequency?",
+    "options": [
+      "ω_c = mv/qB",
+      "ω_c = qB/mv",
+      "ω_c = qB/m",
+      "ω_c = qm/B"
+    ],
+    "correct_answer": "ω_c = qB/m",
+    "explanation": "Cyclotron frequency ω_c = qB/m (independent of velocity for non-relativistic particles). Period T = 2πm/(qB). Used in cyclotrons, mass spectrometers, and NMR.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the Thomas-Fermi screening length?",
+    "options": [
+      "λ_TF = E_F/ne²",
+      "λ_TF = ε₀E_F/ne²",
+      "λ_TF = √(ε₀/ne²)",
+      "λ_TF = √(ε₀E_F/(3ne²/2))"
+    ],
+    "correct_answer": "λ_TF = √(ε₀E_F/(3ne²/2))",
+    "explanation": "The Thomas-Fermi screening length λ_TF characterizes how quickly electric fields are screened in a metal. Beyond λ_TF, electric fields are exponentially suppressed by conduction electrons.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the Berry phase in quantum mechanics?",
+    "options": [
+      "γ = i∮⟨n|∇_R|n⟩·dR (geometric phase accumulated during adiabatic evolution)",
+      "γ = ω·t",
+      "γ = integral of energy",
+      "γ = ℏ∮k·dr"
+    ],
+    "correct_answer": "γ = i∮⟨n|∇_R|n⟩·dR (geometric phase accumulated during adiabatic evolution)",
+    "explanation": "The Berry phase is a geometric phase γ = i∮⟨n(R)|∇_R|n(R)⟩·dR accumulated when a quantum state undergoes adiabatic cyclic evolution. It has observable consequences in the Aharonov-Bohm effect and topological insulators.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the Planck radiation law?",
+    "options": [
+      "B(ν,T) = 2ν²k_BT/c²",
+      "B(ν,T) = 2hν³/c² × 1/(e^(hν/k_BT)-1)",
+      "B(ν,T) = hν e^(-hν/k_BT)",
+      "B(ν,T) = 2k_BT ν²/c²"
+    ],
+    "correct_answer": "B(ν,T) = 2hν³/c² × 1/(e^(hν/k_BT)-1)",
+    "explanation": "Planck's radiation law: B(ν,T) = 2hν³/c² × 1/(e^(hν/k_BT)-1). It resolved the ultraviolet catastrophe, introducing quantization of light, and launched quantum theory in 1900.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the metric tensor in flat Minkowski spacetime?",
+    "options": [
+      "ds² = dt² + dx² + dy² + dz²",
+      "ds² = c²dt² - dx² - dy² - dz²",
+      "ds² = -c²dt² + dx² + dy² + dz²",
+      "ds² = -dt² + dx²"
+    ],
+    "correct_answer": "ds² = -c²dt² + dx² + dy² + dz²",
+    "explanation": "The Minkowski metric: ds² = -c²dt² + dx² + dy² + dz² (signature -,+,+,+). The negative sign for time distinguishes timelike from spacelike separations. Null intervals (ds²=0) are light paths.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the Maxwell stress tensor component T_xx?",
+    "options": [
+      "T_xx = E_x² + B_x²/μ₀",
+      "T_xx = ε₀E_xE_y",
+      "T_xx = ε₀E²/2",
+      "T_xx = ε₀(E_x² - ½E²) + (B_x² - ½B²)/μ₀"
+    ],
+    "correct_answer": "T_xx = ε₀(E_x² - ½E²) + (B_x² - ½B²)/μ₀",
+    "explanation": "Maxwell stress tensor T_ij = ε₀(E_iE_j - ½δ_ijE²) + (B_iB_j - ½δ_ijB²)/μ₀. It gives the electromagnetic momentum flux and is used to calculate radiation pressure and forces on surfaces.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the Wigner-Eckart theorem?",
+    "options": [
+      "Tensor matrix elements factor into geometric (Clebsch-Gordan) and dynamic (reduced matrix element) parts",
+      "Energy levels split in magnetic fields",
+      "Spin and orbital angular momenta add vectorially",
+      "All matrix elements are zero"
+    ],
+    "correct_answer": "Tensor matrix elements factor into geometric (Clebsch-Gordan) and dynamic (reduced matrix element) parts",
+    "explanation": "The Wigner-Eckart theorem states: ⟨j'm'|T^k_q|jm⟩ = ⟨jm;kq|j'm'⟩⟨j'||T^k||j⟩/√(2j'+1). It separates geometry (Clebsch-Gordan coefficients) from dynamics (reduced matrix element).",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the London penetration depth in a superconductor?",
+    "options": [
+      "λ_L = √(m/μ₀ne²)",
+      "λ_L = √(m/μ₀n_s e²)",
+      "λ_L = μ₀ne²/m",
+      "λ_L = m/ne²"
+    ],
+    "correct_answer": "λ_L = √(m/μ₀n_s e²)",
+    "explanation": "The London penetration depth λ_L = √(m/μ₀n_s e²), where n_s is the superfluid electron density. Magnetic fields are excluded from the bulk of a superconductor, decaying exponentially within λ_L from the surface (Meissner effect).",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the Bogoliubov transformation used for?",
+    "options": [
+      "Relativistic momentum",
+      "Gauge transformations",
+      "Diagonalizing Hamiltonians with particle-hole mixing (superconductivity, BEC)",
+      "Calculating scattering cross-sections"
+    ],
+    "correct_answer": "Diagonalizing Hamiltonians with particle-hole mixing (superconductivity, BEC)",
+    "explanation": "The Bogoliubov transformation mixes creation and annihilation operators (b = ua + v†a†) to diagonalize Hamiltonians in superconductors (BCS) and Bose-Einstein condensates.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the Wien displacement law?",
+    "options": [
+      "λ_max = hc/k_BT",
+      "λ_max = hc/(5k_BT)",
+      "λ_max = 5k_BT/hc",
+      "λ_max T = b (Wien's constant ≈ 2.898×10⁻³ m·K)"
+    ],
+    "correct_answer": "λ_max T = b (Wien's constant ≈ 2.898×10⁻³ m·K)",
+    "explanation": "Wien's displacement law: λ_max T = 2.898×10⁻³ m·K. The peak wavelength of blackbody radiation is inversely proportional to temperature. Sun's peak ≈ 502 nm (visible); body temperature peak ≈ 9.7 μm (infrared).",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the critical temperature in BCS superconductivity?",
+    "options": [
+      "T_c ≈ 1.13 ℏω_D/k_B × e^(-1/N(E_F)V)",
+      "T_c = ℏω_D/k_B",
+      "T_c = N(E_F)V/k_B",
+      "T_c = E_gap/k_B"
+    ],
+    "correct_answer": "T_c ≈ 1.13 ℏω_D/k_B × e^(-1/N(E_F)V)",
+    "explanation": "BCS critical temperature: T_c ≈ 1.13θ_D × e^(-1/N(E_F)V), where N(E_F) is density of states at Fermi energy, V is electron-phonon coupling, and θ_D is Debye temperature.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What does the fluctuation-dissipation theorem relate?",
+    "options": [
+      "Quantum and classical mechanics",
+      "Spontaneous fluctuations of a system to its response to external perturbations",
+      "Energy and momentum",
+      "Wave and particle descriptions"
+    ],
+    "correct_answer": "Spontaneous fluctuations of a system to its response to external perturbations",
+    "explanation": "The fluctuation-dissipation theorem relates spontaneous fluctuations (noise) to the dissipative response of a system. Example: Johnson-Nyquist noise in resistors ⟨V²⟩ = 4k_BTR·Δf.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the magnetic moment of a current loop?",
+    "options": [
+      "μ = I/A",
+      "μ = IA² ",
+      "μ = IA",
+      "μ = I/(2A)"
+    ],
+    "correct_answer": "μ = IA",
+    "explanation": "Magnetic moment μ = IA, where I is current and A is area of the loop. The torque on a magnetic moment in a field: τ = μ × B. Energy U = -μ·B.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the Aharonov-Bohm effect?",
+    "options": [
+      "Radiation from accelerating charges",
+      "Magnetic monopoles effect",
+      "Quantum tunneling through barriers",
+      "Charged particles are affected by electromagnetic potentials even in regions with zero fields"
+    ],
+    "correct_answer": "Charged particles are affected by electromagnetic potentials even in regions with zero fields",
+    "explanation": "The Aharonov-Bohm effect: electron wavefunctions are affected by electromagnetic potentials (A, φ) even in field-free regions, acquiring a phase γ = (e/ℏ)∮A·dl. Demonstrates that potentials are more fundamental than fields.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the Josephson frequency?",
+    "options": [
+      "ν = 2eV/h",
+      "ν = V/Φ₀",
+      "ν = eV/h",
+      "ν = hV/2e"
+    ],
+    "correct_answer": "ν = 2eV/h",
+    "explanation": "The AC Josephson effect: when a voltage V is applied across a Josephson junction, Cooper pairs oscillate at frequency ν = 2eV/h = V/Φ₀, where Φ₀ = h/2e is the flux quantum.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the Casimir effect energy between two parallel conducting plates?",
+    "options": [
+      "E = -ℏcA/d²",
+      "E = -π²ℏcA/(720d³)",
+      "E = ℏcA/d³",
+      "E = -ℏc/d²"
+    ],
+    "correct_answer": "E = -π²ℏcA/(720d³)",
+    "explanation": "Casimir energy E = -π²ℏcA/(720d³), where A is plate area and d is separation. The force (attractive) F = -π²ℏcA/(240d⁴) arises from vacuum quantum fluctuations between the plates.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the Bekenstein-Hawking black hole entropy?",
+    "options": [
+      "S = A/4 (in Planck units)",
+      "S = k_B × mass",
+      "S = k_B A/(4l_P²)",
+      "S = k_B ln(mass)"
+    ],
+    "correct_answer": "S = k_B A/(4l_P²)",
+    "explanation": "Bekenstein-Hawking entropy S = k_B c³A/(4Gℏ) = k_B A/(4l_P²), where A is horizon area and l_P is Planck length. Black holes have entropy proportional to their surface area, not volume.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What does CPT symmetry state?",
+    "options": [
+      "Charge is conserved",
+      "Energy is conserved in all frames",
+      "Momentum is conserved under parity",
+      "All physical laws are invariant under combined charge conjugation, parity, and time reversal"
+    ],
+    "correct_answer": "All physical laws are invariant under combined charge conjugation, parity, and time reversal",
+    "explanation": "CPT theorem: all Lorentz-invariant quantum field theories are invariant under the combined operation of charge conjugation (C), parity inversion (P), and time reversal (T). Individual symmetries (P, CP) can be violated.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the Franck-Condon factor in molecular spectroscopy?",
+    "options": [
+      "FC = |⟨v'|v''⟩|² (overlap integral of vibrational wavefunctions)",
+      "FC = E_v'/E_v''",
+      "FC = ν'_transition/ν''_transition",
+      "FC = r_equilibrium"
+    ],
+    "correct_answer": "FC = |⟨v'|v''⟩|² (overlap integral of vibrational wavefunctions)",
+    "explanation": "The Franck-Condon factor |⟨v'|v''⟩|² is the squared overlap integral between vibrational wavefunctions of initial and final electronic states. It determines the relative intensities of vibronic transitions.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the Hawking temperature of a black hole?",
+    "options": [
+      "T_H = ℏc/k_B",
+      "T_H = ℏc³/(8πGMk_B)",
+      "T_H = M·c²/k_B",
+      "T_H = Gℏ/c³k_B"
+    ],
+    "correct_answer": "T_H = ℏc³/(8πGMk_B)",
+    "explanation": "Hawking temperature T_H = ℏc³/(8πGMk_B). Smaller black holes are hotter. Stellar mass black holes have T_H ~ 10⁻⁸ K (negligible); primordial micro black holes could have detectable temperatures.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the Bose-Einstein condensation temperature?",
+    "options": [
+      "T_c = ℏ²n²/³/(mk_B)",
+      "T_c = n × k_B",
+      "T_c = ℏ²/(mk_B) × (n/2.612)^(2/3)",
+      "T_c = 2.612ℏ²n/(mk_B)"
+    ],
+    "correct_answer": "T_c = ℏ²/(mk_B) × (n/2.612)^(2/3)",
+    "explanation": "BEC critical temperature T_c ≈ 3.31 ℏ²n^(2/3)/(mk_B), where n is number density. Below T_c, a macroscopic fraction of bosons occupies the ground state. First achieved for rubidium atoms in 1995.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the Cooper pair binding energy in BCS theory?",
+    "options": [
+      "Δ = ℏω_D",
+      "Δ = N(E_F)V",
+      "Δ = k_BT_c",
+      "Δ ≈ 2ℏω_D e^(-1/N(E_F)V)"
+    ],
+    "correct_answer": "Δ ≈ 2ℏω_D e^(-1/N(E_F)V)",
+    "explanation": "BCS gap: Δ ≈ 2ℏω_D e^(-1/N(E_F)V). Cooper pairs form due to phonon-mediated attraction. The ratio 2Δ/(k_BT_c) ≈ 3.53 is a universal prediction of BCS theory.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the quantum Hall conductance?",
+    "options": [
+      "σ_xy = ne²/h",
+      "σ_xy = e/h",
+      "σ_xy = e²/2h",
+      "σ_xy = 2e²/h"
+    ],
+    "correct_answer": "σ_xy = ne²/h",
+    "explanation": "In the quantum Hall effect, Hall conductance is quantized: σ_xy = ne²/h (integer quantum Hall) or σ_xy = ne²/h with n being fractional (fractional QHE). Precise enough to define resistance standards.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the Liouville theorem in classical statistical mechanics?",
+    "options": [
+      "Energy is conserved along trajectories",
+      "The phase space density ρ is constant along trajectories (dρ/dt = 0)",
+      "Entropy always increases",
+      "Angular momentum is conserved"
+    ],
+    "correct_answer": "The phase space density ρ is constant along trajectories (dρ/dt = 0)",
+    "explanation": "Liouville's theorem: dρ/dt = ∂ρ/∂t + {ρ,H} = 0. The phase space density is conserved along Hamiltonian trajectories. Equivalent to ∇·(ρv) = 0 — phase space flow is incompressible.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the Drude conductivity of a metal?",
+    "options": [
+      "σ = ne/m",
+      "σ = ne²/mτ",
+      "σ = ne²τ/m",
+      "σ = nτ/me"
+    ],
+    "correct_answer": "σ = ne²τ/m",
+    "explanation": "Drude model conductivity σ = ne²τ/m, where n is electron density, e is electron charge, τ is relaxation time, and m is electron mass. Mobility μ = eτ/m, so σ = neμ.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the partition function in quantum statistical mechanics?",
+    "options": [
+      "Z = Tr(ρ)",
+      "Z = e^(-βF)",
+      "Z = Σ E_n e^(-βE_n)",
+      "Z = Tr(e^(-βH))"
+    ],
+    "correct_answer": "Z = Tr(e^(-βH))",
+    "explanation": "The quantum partition function Z = Tr(e^(-βH)) = Σ_n e^(-βE_n), where β = 1/(k_BT). All thermodynamic quantities follow: F = -k_BT ln Z, ⟨E⟩ = -∂ ln Z/∂β.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the Curie-Weiss law for magnetic susceptibility?",
+    "options": [
+      "χ = C/(T - T_C)",
+      "χ = C/T",
+      "χ = C·T",
+      "χ = C/(T + T_C)"
+    ],
+    "correct_answer": "χ = C/(T - T_C)",
+    "explanation": "Curie-Weiss law: χ = C/(T - T_C), where C is the Curie constant and T_C is the Curie temperature. For T > T_C, material is paramagnetic. At T_C, ferromagnetic phase transition occurs.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the spin-orbit coupling energy?",
+    "options": [
+      "E_SO = A·L + S",
+      "E_SO = A·S·L (proportional to L·S)",
+      "E_SO = A·L·S",
+      "E_SO = AL²S²"
+    ],
+    "correct_answer": "E_SO = A·S·L (proportional to L·S)",
+    "explanation": "Spin-orbit coupling energy H_SO = A·L·S, where A is the spin-orbit coupling constant. This splits levels with same L and S but different J = L + S (fine structure of atomic spectra).",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the Stokes drag force on a sphere?",
+    "options": [
+      "F = 4πηrv",
+      "F = 6πηr²v",
+      "F = 6πηrv",
+      "F = 3πηrv"
+    ],
+    "correct_answer": "F = 6πηrv",
+    "explanation": "Stokes law: F = 6πηrv, where η is dynamic viscosity, r is sphere radius, and v is velocity. Valid for low Reynolds number (Re << 1, laminar flow). Used in Millikan oil drop experiment.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the Hall coefficient?",
+    "options": [
+      "R_H = B/(nev)",
+      "R_H = e/n",
+      "R_H = nev",
+      "R_H = 1/(ne)"
+    ],
+    "correct_answer": "R_H = 1/(ne)",
+    "explanation": "Hall coefficient R_H = 1/(ne), where n is carrier density and e is charge. The Hall voltage V_H = R_H × IB/t. The sign of R_H indicates whether carriers are electrons (negative) or holes (positive).",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the Reynolds number?",
+    "options": [
+      "Re = ρvL/μ",
+      "Re = μ/(ρvL)",
+      "Re = ρL/μv",
+      "Re = ρv/μL"
+    ],
+    "correct_answer": "Re = ρvL/μ",
+    "explanation": "Reynolds number Re = ρvL/μ = vL/ν (inertial forces/viscous forces), where ρ is density, v is flow velocity, L is characteristic length, μ is dynamic viscosity, ν is kinematic viscosity. Re >> 1: turbulent; Re << 1: laminar.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the Meissner effect?",
+    "options": [
+      "Quantization of magnetic flux",
+      "Perfect diamagnetism of superconductors (expulsion of magnetic fields)",
+      "Josephson tunneling",
+      "BCS Cooper pairing"
+    ],
+    "correct_answer": "Perfect diamagnetism of superconductors (expulsion of magnetic fields)",
+    "explanation": "The Meissner effect is the expulsion of magnetic fields from the interior of a superconductor as it transitions below T_c. B = 0 inside. Distinguishes superconductors from perfect conductors.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the path integral formulation of quantum mechanics?",
+    "options": [
+      "All particles follow classical paths",
+      "Wavefunctions solve the Schrödinger equation only",
+      "The quantum amplitude is the sum of e^(iS/ℏ) over all paths (Feynman path integral)",
+      "Particles take the path of minimum time"
+    ],
+    "correct_answer": "The quantum amplitude is the sum of e^(iS/ℏ) over all paths (Feynman path integral)",
+    "explanation": "Feynman's path integral: ⟨x_f,t_f|x_i,t_i⟩ = ∫D[x(t)] e^(iS[x]/ℏ), where S is the classical action. The sum over all paths reproduces quantum mechanics and naturally connects to QFT.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the mean free path in kinetic theory?",
+    "options": [
+      "λ = 1/nσ",
+      "λ = σ/n",
+      "λ = nσ",
+      "λ = 1/(√2 nσ)"
+    ],
+    "correct_answer": "λ = 1/(√2 nσ)",
+    "explanation": "Mean free path λ = 1/(√2 nσ), where n is number density and σ = πd² is collision cross-section. The √2 accounts for relative velocities between moving molecules.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the Einstein relation for diffusion?",
+    "options": [
+      "D = μk_BT/e",
+      "D = μk_BT",
+      "D = μe/k_BT",
+      "D = k_BT/(mμ)"
+    ],
+    "correct_answer": "D = μk_BT/e",
+    "explanation": "Einstein relation D = μk_BT/e, where D is diffusion coefficient, μ is mobility, k_B is Boltzmann constant. For neutral particles: D = μk_BT. Connects random thermal motion to drift mobility.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the Kramers-Kronig relation?",
+    "options": [
+      "Energy-time uncertainty",
+      "The real and imaginary parts of the susceptibility are related by Hilbert transforms",
+      "Spin and statistics",
+      "Phase and group velocity relation"
+    ],
+    "correct_answer": "The real and imaginary parts of the susceptibility are related by Hilbert transforms",
+    "explanation": "Kramers-Kronig relations connect the real (dispersive) and imaginary (absorptive) parts of complex susceptibility via Hilbert transforms. They follow from causality and appear in optics, electronics, and spectroscopy.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the Zeeman splitting of atomic energy levels?",
+    "options": [
+      "ΔE = μ_B B",
+      "ΔE = gμ_B B²",
+      "ΔE = g_J μ_B B m_J",
+      "ΔE = μ_B m_J"
+    ],
+    "correct_answer": "ΔE = g_J μ_B B m_J",
+    "explanation": "Normal Zeeman splitting: ΔE = g_J μ_B B m_J, where g_J is the Landé g-factor, μ_B is the Bohr magneton, B is field strength, and m_J is the magnetic quantum number (from -J to +J).",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the Boltzmann equation in kinetic theory?",
+    "options": [
+      "∂f/∂t = collision term",
+      "∂n/∂t + ∇·J = 0",
+      "∂f/∂t + F·∇f = 0",
+      "∂f/∂t + v·∇f + F/m · ∇_v f = (∂f/∂t)_coll"
+    ],
+    "correct_answer": "∂f/∂t + v·∇f + F/m · ∇_v f = (∂f/∂t)_coll",
+    "explanation": "The Boltzmann transport equation ∂f/∂t + v·∇f + F/m·∇_v f = (∂f/∂t)_coll describes the evolution of the phase space distribution function f(r,v,t), including the effects of collisions.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the anomalous magnetic moment of the electron?",
+    "options": [
+      "g_e ≈ 2(1 + α/2π + ...) ≈ 2.00232",
+      "g_e = 2 exactly",
+      "g_e = 1",
+      "g_e = α/π"
+    ],
+    "correct_answer": "g_e ≈ 2(1 + α/2π + ...) ≈ 2.00232",
+    "explanation": "QED predicts g_e ≈ 2.002319... The deviation from 2 (anomalous moment) comes from virtual photon loops: g_e = 2(1 + α/2π - 0.328α²/π² + ...). Agrees with experiment to 12 significant figures.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the specific heat at constant volume for an ideal monatomic gas?",
+    "options": [
+      "C_v = R",
+      "C_v = (3/2)R",
+      "C_v = 3R",
+      "C_v = (5/2)R"
+    ],
+    "correct_answer": "C_v = (3/2)R",
+    "explanation": "For an ideal monatomic gas, each atom has 3 translational degrees of freedom, each contributing ½k_BT. So C_v = (3/2)R per mole. For diatomic: C_v = (5/2)R (3 translational + 2 rotational).",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the spin magnetic quantum number?",
+    "options": [
+      "m_s = 0 only",
+      "m_s = ±1",
+      "m_s = ±½",
+      "m_s = 0, ±1"
+    ],
+    "correct_answer": "m_s = ±½",
+    "explanation": "The spin magnetic quantum number m_s = ±½ for electrons (spin-½ particles). These two states are often called 'spin up' (↑, m_s = +½) and 'spin down' (↓, m_s = -½).",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the wave impedance of free space?",
+    "options": [
+      "Z₀ = μ₀c",
+      "Z₀ = ε₀c",
+      "Z₀ = 1/(ε₀c)",
+      "Z₀ = √(μ₀/ε₀) ≈ 377 Ω"
+    ],
+    "correct_answer": "Z₀ = √(μ₀/ε₀) ≈ 377 Ω",
+    "explanation": "Wave impedance of free space Z₀ = √(μ₀/ε₀) ≈ 376.73 Ω = μ₀c = 1/(ε₀c). It determines the ratio of E to H in plane waves and is important in antenna design and electromagnetic compatibility.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the Debye-Hückel limiting law?",
+    "options": [
+      "log γ = -Az²√I",
+      "log γ = Az²√I",
+      "log γ = Az²I",
+      "log γ = -Az²I"
+    ],
+    "correct_answer": "log γ = -Az²√I",
+    "explanation": "Debye-Hückel limiting law: log γ± = -Az²√I, where γ± is the mean activity coefficient, A is a temperature-dependent constant, z is the ion charge, and I is ionic strength.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the Poisson ratio?",
+    "options": [
+      "ν = lateral strain/axial strain",
+      "ν = -lateral strain/axial strain",
+      "ν = stress/strain",
+      "ν = axial strain/lateral strain"
+    ],
+    "correct_answer": "ν = -lateral strain/axial strain",
+    "explanation": "Poisson's ratio ν = -(lateral strain)/(axial strain). For most materials 0 < ν < 0.5. For incompressible materials ν = 0.5. For auxetic (negative Poisson ratio) materials ν < 0.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the angular momentum of a photon?",
+    "options": [
+      "L = 2ℏ",
+      "L = ℏ/2",
+      "L = ℏ per photon",
+      "L = ℏk"
+    ],
+    "correct_answer": "L = ℏ per photon",
+    "explanation": "Each circularly polarized photon carries angular momentum ±ℏ (spin-1 particle with m_s = ±1; m_s = 0 state forbidden for massless particles moving at c). Linearly polarized light is a superposition.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the cross-section of Compton scattering (Thomson limit)?",
+    "options": [
+      "σ_T = e²/(6πε₀m_ec²)",
+      "σ_T = ℏ²/m_e²c²",
+      "σ_T = e²/m_ec²",
+      "σ_T = 8π/3 × (e²/4πε₀m_ec²)²"
+    ],
+    "correct_answer": "σ_T = 8π/3 × (e²/4πε₀m_ec²)²",
+    "explanation": "Thomson cross-section σ_T = (8π/3)r_e² = 6.65×10⁻²⁹ m², where r_e = e²/(4πε₀m_ec²) ≈ 2.82×10⁻¹⁵ m is the classical electron radius. Valid for photon energies hν << m_ec².",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the entanglement entropy of a bipartite system?",
+    "options": [
+      "S = -Tr(ρ_A log ρ_A)",
+      "S = -Tr(ρ)",
+      "S = -log Tr(ρ_A)",
+      "S = -Tr(ρ_A²)"
+    ],
+    "correct_answer": "S = -Tr(ρ_A log ρ_A)",
+    "explanation": "Von Neumann entanglement entropy S_A = -Tr(ρ_A log ρ_A), where ρ_A = Tr_B(|ψ⟩⟨ψ|) is the reduced density matrix of subsystem A. S = 0 for product states; S > 0 indicates entanglement.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the Euler equation for rigid body rotation?",
+    "options": [
+      "I dω/dt = τ",
+      "I₁(dω₁/dt) + (I₃-I₂)ω₂ω₃ = τ₁",
+      "τ = Iα",
+      "L = Iω"
+    ],
+    "correct_answer": "I₁(dω₁/dt) + (I₃-I₂)ω₂ω₃ = τ₁",
+    "explanation": "Euler's equations for rigid body rotation: I₁ω̇₁ + (I₃-I₂)ω₂ω₃ = τ₁ (and cyclic permutations). They describe rotation about principal axes with moments I₁, I₂, I₃. The coupling terms cause torque-free precession.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the Debye heat capacity at low temperature?",
+    "options": [
+      "C ∝ T",
+      "C ∝ T²",
+      "C ∝ T³",
+      "C ∝ constant"
+    ],
+    "correct_answer": "C ∝ T³",
+    "explanation": "Debye model: C_V ∝ T³ at T << θ_D (Debye temperature). At high T: C_V → 3R (Dulong-Petit). The T³ law arises from the quadratic phonon density of states.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the nuclear radius?",
+    "options": [
+      "R = r₀",
+      "R = r₀/A^(1/3)",
+      "R = r₀ A^(1/2)",
+      "R = r₀ A^(1/3)"
+    ],
+    "correct_answer": "R = r₀ A^(1/3)",
+    "explanation": "Nuclear radius R = r₀A^(1/3), where r₀ ≈ 1.2 fm and A is the mass number. This R³ ∝ A scaling reflects constant nuclear density — all nuclei have roughly the same density.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the Mossbauer effect?",
+    "options": [
+      "Recoil-free nuclear gamma ray emission/absorption enabling ultra-precise spectroscopy",
+      "Photoelectric effect in crystals",
+      "Quantized energy levels in atoms",
+      "Radioactive decay enhancement"
+    ],
+    "correct_answer": "Recoil-free nuclear gamma ray emission/absorption enabling ultra-precise spectroscopy",
+    "explanation": "The Mössbauer effect is recoil-free nuclear gamma emission/absorption in crystals, where the crystal absorbs recoil momentum. This allows spectroscopy with Δf/f ~ 10⁻¹⁵, used to test gravitational redshift.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the nuclear binding energy per nucleon peak?",
+    "options": [
+      "~2 MeV at He-4",
+      "~8.8 MeV at Fe-56 (most stable nucleus)",
+      "~4 MeV at carbon",
+      "~6 MeV at oxygen"
+    ],
+    "correct_answer": "~8.8 MeV at Fe-56 (most stable nucleus)",
+    "explanation": "Binding energy per nucleon peaks at ~8.8 MeV for Fe-56 (iron-56), the most stable nucleus. Fission of heavy nuclei and fusion of light nuclei both release energy by moving toward Fe-56.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the uncertainty in energy and time?",
+    "options": [
+      "ΔE·Δx ≥ ℏ/2",
+      "ΔE·Δp ≥ ℏ/2",
+      "ΔE·Δt ≥ ℏ/2",
+      "ΔE = ΔE₀ e^(-t/τ)"
+    ],
+    "correct_answer": "ΔE·Δt ≥ ℏ/2",
+    "explanation": "Energy-time uncertainty: ΔE·Δt ≥ ℏ/2. A state that exists for time Δt has energy uncertainty ΔE ≥ ℏ/(2Δt). Explains natural linewidth of spectral lines and virtual particles in QFT.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the absorption cross-section at resonance using Breit-Wigner?",
+    "options": [
+      "σ₀ = πλ̄²",
+      "σ₀ = 2πλ̄²g",
+      "σ₀ = 4πk²g",
+      "σ₀ = 4πλ̄²g(Γ_n/Γ)"
+    ],
+    "correct_answer": "σ₀ = 4πλ̄²g(Γ_n/Γ)",
+    "explanation": "Breit-Wigner resonance peak: σ₀ = 4πλ̄²g(Γ_n/Γ), where g is the statistical factor, λ̄ = λ/2π, Γ_n is partial width for formation channel, and Γ is total width.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the total relativistic energy?",
+    "options": [
+      "E = γm₀c²",
+      "E = m₀c²",
+      "E = (γ-1)m₀c²",
+      "E = ½γm₀c²"
+    ],
+    "correct_answer": "E = γm₀c²",
+    "explanation": "Total relativistic energy E = γm₀c² = m₀c²/√(1-v²/c²). At rest (v=0): E = m₀c² (rest energy). Kinetic energy = E - m₀c² = (γ-1)m₀c².",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the Friedmann equation in cosmology?",
+    "options": [
+      "H² = Λ/3",
+      "H² = 8πGρ/3 - k/a²",
+      "H = √(8πGρ/3)",
+      "ρ = 3H²/8πG only for flat"
+    ],
+    "correct_answer": "H² = 8πGρ/3 - k/a²",
+    "explanation": "Friedmann equation: H² = (ȧ/a)² = 8πGρ/3 - kc²/a², where H is Hubble parameter, ρ is energy density, k is curvature parameter, and a is scale factor. Governs cosmic expansion.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the optical theorem in scattering theory?",
+    "options": [
+      "σ_total = Im(f(0))",
+      "σ_total = |f(0)|²",
+      "σ_total = 4π/k × Im(f(0))",
+      "σ_total = 4πk Im(f(0))"
+    ],
+    "correct_answer": "σ_total = 4π/k × Im(f(0))",
+    "explanation": "Optical theorem: σ_total = (4π/k) Im f(0), where f(0) is the forward scattering amplitude and k is the wave number. Relates total cross-section to forward elastic scattering — a consequence of unitarity.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the Airy function describing diffraction from a circular aperture?",
+    "options": [
+      "I(θ) = I₀(2J₀(x)/x)²",
+      "I(θ) = I₀(J₁(x)/x)²",
+      "I(θ) = I₀ sin²(x)/x²",
+      "I(θ) = I₀[2J₁(kDsinθ/2)/(kDsinθ/2)]²"
+    ],
+    "correct_answer": "I(θ) = I₀[2J₁(kDsinθ/2)/(kDsinθ/2)]²",
+    "explanation": "Diffraction from a circular aperture: I(θ) = I₀[2J₁(πDsinθ/λ)/(πDsinθ/λ)]², where J₁ is Bessel function. First zero at sinθ = 1.22λ/D (Rayleigh criterion).",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the band gap in a nearly free electron model?",
+    "options": [
+      "E_gap = 2|V_G|",
+      "E_gap = V_G",
+      "E_gap = |V_G|",
+      "E_gap = 4|V_G|"
+    ],
+    "correct_answer": "E_gap = 2|V_G|",
+    "explanation": "In the nearly free electron model, the band gap at the Brillouin zone boundary equals E_gap = 2|V_G|, where V_G is the Fourier component of the periodic potential at reciprocal lattice vector G.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the Debye screening length?",
+    "options": [
+      "λ_D = k_BT/ne²",
+      "λ_D = √(ε₀k_BT/ne²)",
+      "λ_D = √(ε₀k_BT/(2ne²))",
+      "λ_D = √(ε₀k_BT/ne)"
+    ],
+    "correct_answer": "λ_D = √(ε₀k_BT/ne²)",
+    "explanation": "Debye screening length λ_D = √(ε₀k_BT/ne²) characterizes how quickly electric fields are screened in a plasma or electrolyte. Beyond λ_D, potentials decay exponentially.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the transition rate by Fermi's golden rule?",
+    "options": [
+      "W = |V_if|²/ℏ",
+      "W = |V_if|²δ(E_i-E_f)",
+      "W = (2π/ℏ)|V_if|²ρ(E_f)",
+      "W = 2π|V_if|²ρ"
+    ],
+    "correct_answer": "W = (2π/ℏ)|V_if|²ρ(E_f)",
+    "explanation": "Fermi's golden rule: W_i→f = (2π/ℏ)|⟨f|H'|i⟩|²ρ(E_f), where H' is perturbation, and ρ(E_f) is density of final states at energy E_f. Fundamental to calculating decay rates and scattering probabilities.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the 1D harmonic oscillator ground state wavefunction?",
+    "options": [
+      "ψ₀ = (mω/πℏ)^(1/4) e^(-mωx²/ℏ)",
+      "ψ₀ = e^(-x²/2)",
+      "ψ₀ = N e^(-x²)",
+      "ψ₀ = (mω/πℏ)^(1/4) e^(-mωx²/2ℏ)"
+    ],
+    "correct_answer": "ψ₀ = (mω/πℏ)^(1/4) e^(-mωx²/2ℏ)",
+    "explanation": "Ground state of quantum harmonic oscillator: ψ₀ = (mω/πℏ)^(1/4) exp(-mωx²/2ℏ). It is a Gaussian with width σ = √(ℏ/2mω). The zero-point energy ½ℏω reflects the uncertainty principle.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the probability density of a quantum state?",
+    "options": [
+      "P = |ψ|² = ψ*ψ",
+      "P = ψ*",
+      "P = ψ",
+      "P = ψ²"
+    ],
+    "correct_answer": "P = |ψ|² = ψ*ψ",
+    "explanation": "Born's rule: probability density P(x) = |ψ(x)|² = ψ*(x)ψ(x). The wavefunction ψ is complex; its squared modulus gives the probability of finding the particle at position x.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the Gibbs free energy in terms of partition function?",
+    "options": [
+      "G = k_BT ln Z",
+      "G = -Nk_BT ln(Z/N)",
+      "G = ℏω ln Z",
+      "G = -k_BT ln Z"
+    ],
+    "correct_answer": "G = -Nk_BT ln(Z/N)",
+    "explanation": "Gibbs free energy G = -k_BT ln Z (grand canonical) or for N identical particles G = -Nk_BT ln(Z₁/N) + correction, where Z₁ is single-particle partition function.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the scattering amplitude in Born approximation?",
+    "options": [
+      "f(θ) = V(q)",
+      "f(θ) = -m/(2πℏ²) V(q)",
+      "f(θ) = -(2m/ℏ²) ∫V(r)e^(iq·r)d³r / 4π",
+      "f(θ) = -m/(2πℏ²) Ṽ(q)"
+    ],
+    "correct_answer": "f(θ) = -(2m/ℏ²) ∫V(r)e^(iq·r)d³r / 4π",
+    "explanation": "Born approximation scattering amplitude: f(θ) = -m/(2πℏ²) ∫V(r')e^(iq·r')d³r', where q = k_f - k_i is the momentum transfer. The differential cross-section dσ/dΩ = |f(θ)|².",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the speed of sound in an ideal gas?",
+    "options": [
+      "c_s = √(RT/M)",
+      "c_s = √(P/ρ)",
+      "c_s = √(γk_BT/m)",
+      "c_s = √(γP/ρ) = √(γRT/M)"
+    ],
+    "correct_answer": "c_s = √(γP/ρ) = √(γRT/M)",
+    "explanation": "Speed of sound in ideal gas: c_s = √(γP/ρ) = √(γRT/M), where γ = C_P/C_V is the adiabatic index. For air (γ≈1.4, T=293K): c_s ≈ 343 m/s.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the magnetic flux quantum?",
+    "options": [
+      "Φ₀ = h/2e",
+      "Φ₀ = e/h",
+      "Φ₀ = h/e",
+      "Φ₀ = 2e/h"
+    ],
+    "correct_answer": "Φ₀ = h/2e",
+    "explanation": "The magnetic flux quantum Φ₀ = h/(2e) ≈ 2.07×10⁻¹⁵ Wb. The factor of 2e reflects Cooper pair charge in superconductors. Flux through a superconducting loop is quantized in units of Φ₀.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the Nernst equation for electrode potential?",
+    "options": [
+      "E = E° + (RT/nF)ln Q",
+      "E = E° - (RT/nF)ln Q",
+      "E = E° - (k_BT/e)ln Q",
+      "E = E° × ln Q"
+    ],
+    "correct_answer": "E = E° - (RT/nF)ln Q",
+    "explanation": "Nernst equation: E = E° - (RT/nF)ln Q, where E° is standard potential, n is electrons transferred, F is Faraday constant, Q is reaction quotient. At equilibrium E = 0 and Q = K.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the electric susceptibility from Clausius-Mossotti?",
+    "options": [
+      "χ_e = (ε_r - 1)",
+      "χ_e = 3ε₀(ε_r-1)/(ε_r+2)",
+      "(ε_r-1)/(ε_r+2) = nα/(3ε₀)",
+      "χ_e = ε_r - 1 = (3nα/ε₀)(ε_r+2)/3"
+    ],
+    "correct_answer": "(ε_r-1)/(ε_r+2) = nα/(3ε₀)",
+    "explanation": "Clausius-Mossotti relation: (ε_r-1)/(ε_r+2) = nα/(3ε₀), where n is molecular number density and α is molecular polarizability. Connects macroscopic dielectric constant to microscopic polarizability.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the Gibbs entropy?",
+    "options": [
+      "S = k_B ln Ω",
+      "S = k_B Ω",
+      "S = -k_B ln p",
+      "S = -k_B Σ p_i ln p_i"
+    ],
+    "correct_answer": "S = -k_B Σ p_i ln p_i",
+    "explanation": "Gibbs entropy S = -k_B Σ p_i ln p_i, where p_i is the probability of microstate i. This is the most general entropy formula, reducing to S = k_B ln Ω for the microcanonical ensemble.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the number of phonon modes in a 3D crystal?",
+    "options": [
+      "3N modes",
+      "2N modes",
+      "N modes",
+      "6N modes"
+    ],
+    "correct_answer": "3N modes",
+    "explanation": "A crystal with N atoms has 3N vibrational modes (3N degrees of freedom minus zero-frequency translations and rotations). These split into acoustic and optical branches in the phonon dispersion.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the gyromagnetic ratio of the electron?",
+    "options": [
+      "γ = e/2m_e (orbital)",
+      "γ = g_e e/(2m_e) (≈ e/m_e for spin)",
+      "γ = e/m_e (spin)",
+      "γ = m_e/e"
+    ],
+    "correct_answer": "γ = g_e e/(2m_e) (≈ e/m_e for spin)",
+    "explanation": "The electron spin gyromagnetic ratio γ = g_e μ_B/ℏ = g_e e/(2m_e), where g_e ≈ 2.00232. For orbital motion γ = e/(2m_e). In NMR, the nuclear gyromagnetic ratio determines Larmor precession frequency.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the Fermi contact interaction in NMR?",
+    "options": [
+      "H_FC = A L·S",
+      "H_FC = A I·J",
+      "H_FC = (8π/3)(μ₀/4π)γ_nγ_e ℏ² |ψ(0)|² I·S",
+      "H_FC = A δ(r)"
+    ],
+    "correct_answer": "H_FC = (8π/3)(μ₀/4π)γ_nγ_e ℏ² |ψ(0)|² I·S",
+    "explanation": "Fermi contact interaction H_FC = (8π/3)(μ₀/4π)γ_nγ_e ℏ² |ψ(0)|² I·S dominates hyperfine splitting for s-electrons (non-zero probability at nucleus). |ψ(0)|² is electron density at the nucleus.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the Penrose process?",
+    "options": [
+      "Quantum tunneling from black holes",
+      "Particle creation near neutron stars",
+      "Hawking radiation",
+      "Energy extraction from a rotating (Kerr) black hole's ergosphere"
+    ],
+    "correct_answer": "Energy extraction from a rotating (Kerr) black hole's ergosphere",
+    "explanation": "The Penrose process extracts rotational energy from a Kerr black hole: a particle enters the ergosphere, splits into two — one falls in with negative energy, the other escapes with more energy than the original particle.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the Wigner function in quantum mechanics?",
+    "options": [
+      "W(x,p) = (1/πℏ)∫ψ*(x+y)ψ(x-y)e^(2ipy/ℏ)dy",
+      "W(x,p) = ψ*(x)ψ(p)",
+      "W(x,p) = ⟨x|ρ|p⟩",
+      "W = |ψ|²"
+    ],
+    "correct_answer": "W(x,p) = (1/πℏ)∫ψ*(x+y)ψ(x-y)e^(2ipy/ℏ)dy",
+    "explanation": "The Wigner function W(x,p) = (1/πℏ)∫ψ*(x+y)ψ(x-y)e^(2ipy/ℏ)dy is a quasi-probability distribution in phase space. It can be negative (quantum interference) and marginals give correct position/momentum distributions.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the Euler-Bernoulli beam bending equation?",
+    "options": [
+      "EI d²y/dx² = M",
+      "EI d⁴y/dx⁴ = q",
+      "EI d²y/dx² = q(x)",
+      "d²y/dx² = M/EI"
+    ],
+    "correct_answer": "EI d⁴y/dx⁴ = q",
+    "explanation": "Euler-Bernoulli beam: EI d⁴y/dx⁴ = q(x), where E is Young's modulus, I is second moment of area, y is deflection, and q is distributed load. M = EI d²y/dx² gives bending moment.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the number of independent components of the Riemann tensor in 4D?",
+    "options": [
+      "16",
+      "40",
+      "20",
+      "10"
+    ],
+    "correct_answer": "20",
+    "explanation": "The Riemann curvature tensor in 4D has 20 independent components (out of 256 total). The Weyl tensor has 10; the Ricci tensor has 10. The Riemann tensor fully describes spacetime curvature.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the Josephson effect critical current?",
+    "options": [
+      "I_c = I₀ sin(φ)",
+      "I_c = nI₀",
+      "I_c = I₀ cos(φ)",
+      "I_c = I₀"
+    ],
+    "correct_answer": "I_c = I₀",
+    "explanation": "The DC Josephson effect: supercurrent I = I₀ sin(φ), where φ is the phase difference across the junction. The maximum (critical) current I_c = I₀ occurs when φ = π/2.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the quantum harmonic oscillator raising operator?",
+    "options": [
+      "a† = √(mω/2ℏ)(x - ip/mω)",
+      "a = √(mω/2ℏ)(x - ip/mω)",
+      "a = √(mω/2ℏ)(x + ip/mω)",
+      "a = x + ip"
+    ],
+    "correct_answer": "a† = √(mω/2ℏ)(x - ip/mω)",
+    "explanation": "The raising (creation) operator: a† = √(mω/2ℏ)(x̂ - ip̂/mω). It creates a quantum of excitation: a†|n⟩ = √(n+1)|n+1⟩. The lowering operator: a = √(mω/2ℏ)(x̂ + ip̂/mω).",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the effective mass of electrons in a crystal band?",
+    "options": [
+      "m* = m_e",
+      "m* = ℏ²/(d²E/dk²)",
+      "m* = ℏ²k/(dE/dk)",
+      "m* = k/(dE/dk)"
+    ],
+    "correct_answer": "m* = ℏ²/(d²E/dk²)",
+    "explanation": "Effective mass m* = ℏ²/(d²E/dk²), the inverse of the band curvature. Near band edges, m* determines transport properties. Positive m* near band minima (conduction band); negative m* near band maxima (valence band, holes).",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the Dirac equation (1D)?",
+    "options": [
+      "(E² - p²c² - m²c⁴)ψ = 0",
+      "iℏ∂ψ/∂t = (p²/2m)ψ",
+      "iℏ∂ψ/∂t = (αpc + βmc²)ψ",
+      "iℏ∂ψ/∂t = Hψ"
+    ],
+    "correct_answer": "iℏ∂ψ/∂t = (αpc + βmc²)ψ",
+    "explanation": "Dirac equation: iℏ∂ψ/∂t = (α·pc + βm₀c²)ψ, where α and β are matrices. It combines quantum mechanics and special relativity, naturally predicts electron spin and antimatter.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the Proca equation (massive photon)?",
+    "options": [
+      "□A^μ = 0",
+      "□A^μ + μ²A^μ = J^μ/ε₀",
+      "∂²A/∂t² = c²∇²A",
+      "□A^μ - μ²A^μ = J^μ/ε₀"
+    ],
+    "correct_answer": "□A^μ - μ²A^μ = J^μ/ε₀",
+    "explanation": "The Proca equation □A^μ - m²A^μ = J^μ describes a massive vector field (massive photon). For m = 0, it reduces to Maxwell's equations. The mass term breaks gauge invariance.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the de Haas-van Alphen oscillation frequency?",
+    "options": [
+      "F = 2πeA_F/ℏ × B",
+      "F = eA_F/ℏ",
+      "F = ℏA_F/(2πe)",
+      "F = A_F/2π"
+    ],
+    "correct_answer": "F = 2πeA_F/ℏ × B",
+    "explanation": "De Haas-van Alphen effect: magnetization oscillates with frequency F = ℏA_F/(2πe) per unit 1/B, where A_F is the Fermi surface cross-sectional area. Used to map Fermi surfaces of metals.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the photon mass energy from the Higgs mechanism?",
+    "options": [
+      "m = 0 for photon",
+      "m_W = g⟨φ⟩/2",
+      "m = e⟨φ⟩",
+      "m_photon ≠ 0"
+    ],
+    "correct_answer": "m_W = g⟨φ⟩/2",
+    "explanation": "The Higgs mechanism gives mass to W and Z bosons: m_W = g⟨φ⟩/2, where g is the weak coupling and ⟨φ⟩ ≈ 246 GeV is the Higgs vacuum expectation value. Photons remain massless due to U(1) gauge symmetry.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the cosmological redshift?",
+    "options": [
+      "z = v/c",
+      "z = Hd/c",
+      "z = (λ_obs - λ_emit)/λ_emit = a₀/a_emit - 1",
+      "z = λ_obs/λ_emit"
+    ],
+    "correct_answer": "z = (λ_obs - λ_emit)/λ_emit = a₀/a_emit - 1",
+    "explanation": "Cosmological redshift: z = (λ_obs - λ_emit)/λ_emit = a(t₀)/a(t_emit) - 1, where a(t) is the scale factor. Higher z means light was emitted when the universe was smaller and denser.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the exchange interaction in ferromagnetism?",
+    "options": [
+      "H = A Σ S_i",
+      "H = -J S_i·S_j",
+      "H = J(S_i + S_j)",
+      "H = -J Σ S_i·S_j (Heisenberg model)"
+    ],
+    "correct_answer": "H = -J Σ S_i·S_j (Heisenberg model)",
+    "explanation": "Heisenberg exchange Hamiltonian: H = -J Σ S_i·S_j. J > 0: ferromagnetic (parallel spins preferred); J < 0: antiferromagnetic. Quantum mechanical exchange interaction is the microscopic origin of ferromagnetism.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the magnetic susceptibility in the Pauli paramagnetism?",
+    "options": [
+      "χ = (3/2)nμ₀μ_B²/E_F",
+      "χ = nμ₀μ_B²/k_BT",
+      "χ = nμ_B²/E_F",
+      "χ = μ₀μ_B²"
+    ],
+    "correct_answer": "χ = (3/2)nμ₀μ_B²/E_F",
+    "explanation": "Pauli paramagnetic susceptibility χ_Pauli = (3/2)nμ₀μ_B²/E_F = μ₀μ_B²N(E_F). Unlike classical paramagnetism, it is temperature-independent because only electrons near the Fermi level can be flipped.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the phonon contribution to thermal conductivity?",
+    "options": [
+      "κ = C_v v",
+      "κ = ⅓ C_v v λ",
+      "κ = C_v v²τ",
+      "κ = ρC_v v"
+    ],
+    "correct_answer": "κ = ⅓ C_v v λ",
+    "explanation": "Phonon thermal conductivity κ = ⅓C_v v λ, where C_v is heat capacity per unit volume, v is phonon velocity (speed of sound), and λ is mean free path. Umklapp scattering limits λ at high T.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the London equation in superconductivity?",
+    "options": [
+      "B = -μ₀λ_L²∇²B",
+      "∂J/∂t = ne²E/m",
+      "J = -ne²A/m (London equation)",
+      "J = σE"
+    ],
+    "correct_answer": "J = -ne²A/m (London equation)",
+    "explanation": "London equation: J_s = -(n_s e²/m)A, or equivalently ∇ × J_s = -(n_s e²/m)B. Combined with Maxwell's equations, this gives exponential field expulsion (Meissner effect) with length scale λ_L.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the WKB quantization condition (Bohr-Sommerfeld)?",
+    "options": [
+      "∮p dq = nℏ",
+      "∮p dq = nhπ",
+      "∮p dq = n²ℏ",
+      "∮p dq = (n+½)h"
+    ],
+    "correct_answer": "∮p dq = (n+½)h",
+    "explanation": "WKB/Bohr-Sommerfeld quantization: ∮p dq = (n+½)h = (2n+1)πℏ, where the ½ is the Maslov index from turning points. This reproduces exact results for harmonic oscillator and hydrogen atom (approximately).",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the Nernst-Planck equation?",
+    "options": [
+      "J = -D(∇n + (ze/k_BT)n∇φ)",
+      "J = -D∇n + nv",
+      "J = -D∇n - (D/k_BT)zeFn",
+      "J = -D∇n"
+    ],
+    "correct_answer": "J = -D(∇n + (ze/k_BT)n∇φ)",
+    "explanation": "Nernst-Planck equation: J = -D[∇n + (ze/k_BT)n∇φ], where D is diffusion coefficient, n is ion concentration, ze is ion charge, and φ is electric potential. Describes ion transport in electrolytes and membranes.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the Rabi frequency formula?",
+    "options": [
+      "Ω = eE₀/ℏ",
+      "Ω_R = |μ·E₀|/ℏ",
+      "Ω = μ·E₀",
+      "Ω = eE₀/2mℏ"
+    ],
+    "correct_answer": "Ω_R = |μ·E₀|/ℏ",
+    "explanation": "Rabi frequency Ω_R = |d·E₀|/ℏ = |μ_eg·E₀|/ℏ, where d is transition dipole moment and E₀ is field amplitude. It describes the rate of population oscillation between two levels in resonant field.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the Kubo linear response formula?",
+    "options": [
+      "χ(ω) = ∫G(t)e^(iωt)dt",
+      "χ = dA/dB",
+      "χ_AB(ω) = -i/ℏ ∫₀^∞ ⟨[A(t),B(0)]⟩ e^(iωt) dt",
+      "χ = ⟨A⟩⟨B⟩"
+    ],
+    "correct_answer": "χ_AB(ω) = -i/ℏ ∫₀^∞ ⟨[A(t),B(0)]⟩ e^(iωt) dt",
+    "explanation": "Kubo formula: χ_AB(ω) = -(i/ℏ)∫₀^∞ e^(iωt)⟨[A(t),B(0)]⟩ dt. Relates linear response functions (conductivity, susceptibility) to equilibrium time-correlation functions via commutators.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the spin-1/2 Hamiltonian in a magnetic field?",
+    "options": [
+      "H = μ_B B·S",
+      "H = g_s μ_B B · σ/2",
+      "H = ω_L S_z",
+      "H = -g_s μ_B B·S = -γ_e ℏ B·S"
+    ],
+    "correct_answer": "H = -g_s μ_B B·S = -γ_e ℏ B·S",
+    "explanation": "Spin-½ Hamiltonian H = -g_s μ_B B·S/ℏ = -γ_e ℏ B·S, where g_s ≈ 2, μ_B is Bohr magneton. Energy eigenvalues E = ∓g_s μ_B B/2. Larmor precession frequency ω_L = g_s μ_B B/ℏ.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the Saha equation in ionization equilibrium?",
+    "options": [
+      "n_e n_1/n_0 ∝ T^(3/2) e^(-χ/k_BT)",
+      "n_e²/n_0 ∝ T^(3/2) e^(-χ/k_BT)",
+      "n_e/n_1 = T^(3/2)",
+      "n_e/n_0 = e^(-χ/k_BT)"
+    ],
+    "correct_answer": "n_e n_1/n_0 ∝ T^(3/2) e^(-χ/k_BT)",
+    "explanation": "Saha equation: n_e n_1/n_0 = (2πm_e k_BT/h²)^(3/2) × (2g_1/g_0) × e^(-χ/k_BT), where χ is ionization energy. Determines ionization fraction in stellar atmospheres and plasmas.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the topological invariant (Chern number)?",
+    "options": [
+      "C = ∮A·dl",
+      "C = (1/2π) ∫_BZ Ω_n(k) d²k",
+      "C = (1/2π) ∫ F dk",
+      "C = ∮B·dA"
+    ],
+    "correct_answer": "C = (1/2π) ∫_BZ Ω_n(k) d²k",
+    "explanation": "Chern number C = (1/2π)∫ Ω_n(k) d²k over the Brillouin zone, where Ω_n(k) = ∇_k × A_n(k) is the Berry curvature. Integer-valued topological invariant determining Hall conductance and edge states in topological insulators.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the Klein-Gordon equation?",
+    "options": [
+      "iℏ∂ψ/∂t = Hψ",
+      "□ψ = 0",
+      "(∂² + m²)ψ = 0 in natural units",
+      "∂²ψ/∂t² = c²∇²ψ"
+    ],
+    "correct_answer": "(∂² + m²)ψ = 0 in natural units",
+    "explanation": "Klein-Gordon equation: (□ + m²c²/ℏ²)ψ = 0, or (∂² + m²)ψ = 0 in natural units. The relativistic wave equation for spin-0 particles. Predicts negative energy solutions (antiparticles).",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the quantum of conductance?",
+    "options": [
+      "G₀ = e/h",
+      "G₀ = e²/2h",
+      "G₀ = h/e²",
+      "G₀ = 2e²/h"
+    ],
+    "correct_answer": "G₀ = 2e²/h",
+    "explanation": "The quantum of conductance G₀ = 2e²/h ≈ 7.748×10⁻⁵ S (factor of 2 for spin degeneracy). Each ballistic one-dimensional channel contributes G₀ to conductance. Measured in quantum point contacts.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the Einstein B coefficient?",
+    "options": [
+      "B = c³A/(8πhν³)",
+      "B = Ac²/8πν²",
+      "B = c²A/(8πhν³)",
+      "B = A c³/8πhν³"
+    ],
+    "correct_answer": "B = c³A/(8πhν³)",
+    "explanation": "Einstein relation A/B = 8πhν³/c³ = 8πhf³/c³. The B coefficient governs stimulated emission/absorption; A governs spontaneous emission. At equilibrium these balance (detailed balance principle).",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the quantum defect in alkali atoms?",
+    "options": [
+      "E_n = -13.6 eV/n²",
+      "E_n = -hcR_∞/(n-δ_l)²",
+      "E_n = -hcR/n",
+      "E_n = -hcR/(n+δ_l)²"
+    ],
+    "correct_answer": "E_n = -hcR_∞/(n-δ_l)²",
+    "explanation": "Quantum defect: E_n = -hcR_∞/(n-δ_l)², where δ_l is the quantum defect for angular momentum l. It accounts for penetration of core electrons by valence electron, causing deviation from hydrogen energy levels.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the Tomonaga-Luttinger liquid boson field?",
+    "options": [
+      "ψ ∝ e^(ikx)",
+      "φ = linear combination of density waves",
+      "ψ_R/L = (1/√2πa) e^(±ikx - iφ(x))",
+      "H = Σ ω_k a†_k a_k"
+    ],
+    "correct_answer": "ψ_R/L = (1/√2πa) e^(±ikx - iφ(x))",
+    "explanation": "In Luttinger liquid theory, the fermion operator ψ_R/L = (1/√2πa)exp(±ik_Fx - iφ(x)) involves a boson field φ. All 1D interacting fermion systems are Luttinger liquids (not Fermi liquids), with spin-charge separation.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the density of states for a 3D free electron gas?",
+    "options": [
+      "g(E) = const",
+      "g(E) ∝ E",
+      "g(E) ∝ E²",
+      "g(E) = (V/4π²)(2m/ℏ²)^(3/2) √E"
+    ],
+    "correct_answer": "g(E) = (V/4π²)(2m/ℏ²)^(3/2) √E",
+    "explanation": "3D free electron DOS: g(E) = (V/2π²)(2m/ℏ²)^(3/2) √E ∝ √E. In 2D: g(E) = constant. In 1D: g(E) ∝ E^(-1/2). DOS determines electronic heat capacity, magnetic susceptibility, and superconducting T_c.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the quantum Fisher information?",
+    "options": [
+      "F_Q = 4(⟨H²⟩ - ⟨H⟩²) = 4 Var(H)",
+      "F = 1/Δθ²",
+      "F = Tr(ρ L²)",
+      "F = ⟨(∂ ln L/∂θ)²⟩"
+    ],
+    "correct_answer": "F_Q = 4(⟨H²⟩ - ⟨H⟩²) = 4 Var(H)",
+    "explanation": "Quantum Fisher information F_Q = 4 Var(H) for pure states, determining the ultimate precision of parameter estimation. Quantum Cramér-Rao bound: Δθ ≥ 1/√F_Q. Maximized by entangled states (Heisenberg scaling).",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the Mott criterion for metal-insulator transition?",
+    "options": [
+      "n^(1/3) a_B = 0.1",
+      "n^(1/3) a_B ≈ 0.25",
+      "n^(1/3) a_B = 1",
+      "n^(1/3) a_B = 0.5"
+    ],
+    "correct_answer": "n^(1/3) a_B ≈ 0.25",
+    "explanation": "Mott criterion for metal-insulator transition: n^(1/3) a_B* ≈ 0.25, where n is carrier density and a_B* is effective Bohr radius. Above this density, wave functions overlap and the material becomes metallic.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the nuclear magnetic resonance (NMR) chemical shift?",
+    "options": [
+      "δ = ν_ref - ν_sample",
+      "δ = ν - ν_L",
+      "δ = (ν_sample - ν_ref)/ν_ref × 10⁶ ppm",
+      "δ = B_eff/B₀"
+    ],
+    "correct_answer": "δ = (ν_sample - ν_ref)/ν_ref × 10⁶ ppm",
+    "explanation": "NMR chemical shift: δ = (ν_sample - ν_ref)/ν_ref × 10⁶ ppm. It reflects the local electronic environment around a nucleus. The reference for ¹H and ¹³C NMR is tetramethylsilane (TMS, δ = 0).",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the Gutzwiller trace formula?",
+    "options": [
+      "Z(E) = Σ_n δ(E-E_n)",
+      "g(E) = dN/dE",
+      "Z(E) = ∫D[x]e^(iS/ℏ)",
+      "Z(E) = Σ_periodic orbits A_γ e^(iS_γ/ℏ)"
+    ],
+    "correct_answer": "Z(E) = Σ_periodic orbits A_γ e^(iS_γ/ℏ)",
+    "explanation": "Gutzwiller trace formula: d(E) = d̄(E) + Σ_γ A_γ cos(S_γ/ℏ - μ_γπ/2). Relates quantum density of states to sums over classical periodic orbits, bridging classical and quantum chaos.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the photonic band gap in a 1D periodic medium?",
+    "options": [
+      "Δω ≈ (4ω₀/π)(n₂-n₁)/(n₂+n₁)",
+      "Δω = ω₀Δn/n̄",
+      "Δω = ω₀(n₂-n₁)/(n₂+n₁)",
+      "Δω = 2ω₀Δn/(n₁n₂)"
+    ],
+    "correct_answer": "Δω ≈ (4ω₀/π)(n₂-n₁)/(n₂+n₁)",
+    "explanation": "For a 1D quarter-wave stack (photonic crystal), the photonic band gap width Δω ≈ (4ω₀/π)sin⁻¹((n₂-n₁)/(n₂+n₁)) ≈ (4ω₀/π)(Δn/2n̄) for small index contrast.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the nuclear spin in terms of proton and neutron spins?",
+    "options": [
+      "I = L only",
+      "I = total angular momentum = Σ(l_i + s_i) for all nucleons",
+      "I = L + S for each nucleon",
+      "I = S only"
+    ],
+    "correct_answer": "I = total angular momentum = Σ(l_i + s_i) for all nucleons",
+    "explanation": "Nuclear spin I = Σ(l_i + s_i) summed over all nucleons. Nuclei with even Z and even N have I = 0 (all paired). Odd-A nuclei have half-integer I. Nuclear spin determines NMR active nuclei.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the Breit-Wigner nuclear resonance cross-section?",
+    "options": [
+      "σ(E) = πλ̄²g Γ²/(E-E_r)²",
+      "σ(E) = πλ̄²g ΓₙΓ/((E-E_r)²+Γ²/4)",
+      "σ(E) = πλ̄²g ΓₙΓ/((E-E_r)²+(Γ/2)²)",
+      "σ(E) = 4πλ̄²g Γ²"
+    ],
+    "correct_answer": "σ(E) = πλ̄²g ΓₙΓ/((E-E_r)²+(Γ/2)²)",
+    "explanation": "Breit-Wigner: σ(E) = πλ̄²g ΓₙΓ/[(E-E_r)²+(Γ/2)²], where E_r is resonance energy, Γ_n is neutron width, Γ is total width, g is statistical factor. Peak cross-section at E = E_r.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the neutrino oscillation probability?",
+    "options": [
+      "P(ν_e→ν_μ) = sin²2θ",
+      "P(ν_e→ν_μ) = sin²(2θ)cos²(Δm²L/4E)",
+      "P(ν_e→ν_μ) = cos²2θ",
+      "P(ν_e→ν_μ) = sin²(2θ)sin²(Δm²L/4Eℏc)"
+    ],
+    "correct_answer": "P(ν_e→ν_μ) = sin²(2θ)sin²(Δm²L/4Eℏc)",
+    "explanation": "Neutrino oscillation probability: P(ν_α→ν_β) = sin²(2θ)sin²(Δm²c⁴L/4Eℏc), where θ is mixing angle, Δm² = m₁² - m₂², L is baseline, E is energy. Evidence for neutrino mass.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the Yang-Mills action in gauge theory?",
+    "options": [
+      "S = -(1/4g²)∫Tr(F_μν F^μν) d⁴x",
+      "S = ∫F_μν F^μν d⁴x",
+      "S = ∫A_μ A^μ d⁴x",
+      "S = ∫∂_μA_ν F^μν d⁴x"
+    ],
+    "correct_answer": "S = -(1/4g²)∫Tr(F_μν F^μν) d⁴x",
+    "explanation": "Yang-Mills action S = -(1/4g²)∫Tr(F_μνF^μν)d⁴x, where F_μν = ∂_μA_ν - ∂_νA_μ + [A_μ,A_ν] is the non-Abelian field strength. Generalizes Maxwell to non-Abelian gauge groups; basis of the Standard Model.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the angular separation of dark fringes in a double slit?",
+    "options": [
+      "θ = nλ/a",
+      "θ = (n+½)λ/d",
+      "θ = nλ/2d",
+      "θ = mλ/d"
+    ],
+    "correct_answer": "θ = (n+½)λ/d",
+    "explanation": "Dark fringes in double slit interference occur at path differences (n+½)λ: sinθ = (n+½)λ/d, where d is slit separation and n = 0,±1,±2,... Bright fringes at sinθ = nλ/d.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the Wess-Zumino-Witten term?",
+    "options": [
+      "S = ∫d²x Tr(∂_μg∂^μg⁻¹)",
+      "S = k∫d²x Tr(g∂g⁻¹)",
+      "S = (k/12π)∫_B Tr(g⁻¹dg)³",
+      "S_WZ = kΓ"
+    ],
+    "correct_answer": "S = (k/12π)∫_B Tr(g⁻¹dg)³",
+    "explanation": "The Wess-Zumino-Witten (WZW) term S_WZ = (k/12π)∫_B ε^abc Tr(g⁻¹∂_ag)(g⁻¹∂_bg)(g⁻¹∂_cg)d³x is a topological term in 2D CFT, important in string theory and condensed matter physics.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the Schwarzian derivative?",
+    "options": [
+      "S[f] = f'''/f'",
+      "S[f] = f''/f'",
+      "S[f] = f''/f",
+      "S[f] = (f'''/f') - (3/2)(f''/f')²"
+    ],
+    "correct_answer": "S[f] = (f'''/f') - (3/2)(f''/f')²",
+    "explanation": "Schwarzian derivative S[f] = (f'''/f') - (3/2)(f''/f')². It appears in 2D CFT (Schwarzian action), SYK model, Jackiw-Teitelboim gravity, and as the anomaly term in conformal transformations.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the flux quantization in a superconducting ring?",
+    "options": [
+      "Φ = nh/(2e) = nΦ₀",
+      "Φ = nh/e",
+      "Φ = n × 2e/h",
+      "Φ = Φ₀/n"
+    ],
+    "correct_answer": "Φ = nh/(2e) = nΦ₀",
+    "explanation": "Magnetic flux through a superconducting ring is quantized: Φ = nΦ₀ = nh/(2e), n = 0,1,2,... The factor of 2e reflects Cooper pair charge. Φ₀ = 2.07×10⁻¹⁵ Wb. Measured by Little-Parks experiment.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the Penrose tiling inflation rule?",
+    "options": [
+      "Tiles expand by √φ",
+      "Tiles scale by φ = (1+√5)/2 (golden ratio)",
+      "Tiles multiply by φ",
+      "Tiles scale by √2"
+    ],
+    "correct_answer": "Tiles scale by φ = (1+√5)/2 (golden ratio)",
+    "explanation": "Penrose tilings have inflation symmetry: each tile can be subdivided and scaled by the golden ratio φ = (1+√5)/2 ≈ 1.618. They tile the plane aperiodically with 5-fold rotational symmetry, related to quasicrystals.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "physics"
+  }
+]

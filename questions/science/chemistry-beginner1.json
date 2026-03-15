@@ -1,0 +1,2830 @@
+[
+  {
+    "question": "What is the chemical symbol for gold?",
+    "options": [
+      "Au",
+      "Ag",
+      "Fe",
+      "Cu"
+    ],
+    "correct_answer": "Au",
+    "explanation": "Gold's symbol Au comes from the Latin word 'aurum.' It is a transition metal with atomic number 79.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "How many protons does a carbon atom have?",
+    "options": [
+      "6",
+      "4",
+      "12",
+      "8"
+    ],
+    "correct_answer": "6",
+    "explanation": "Carbon has atomic number 6, meaning it has 6 protons in its nucleus. This defines it as carbon.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the most abundant gas in Earth's atmosphere?",
+    "options": [
+      "Nitrogen",
+      "Oxygen",
+      "Carbon dioxide",
+      "Argon"
+    ],
+    "correct_answer": "Nitrogen",
+    "explanation": "Nitrogen (N2) makes up about 78% of Earth's atmosphere, far more than oxygen (21%) or other gases.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What type of bond forms when two atoms share electrons?",
+    "options": [
+      "Covalent bond",
+      "Ionic bond",
+      "Metallic bond",
+      "Hydrogen bond"
+    ],
+    "correct_answer": "Covalent bond",
+    "explanation": "Covalent bonds form when two atoms share one or more pairs of electrons, commonly seen in molecules like H2O and CO2.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the chemical formula for water?",
+    "options": [
+      "H2O",
+      "HO",
+      "H2O2",
+      "OH"
+    ],
+    "correct_answer": "H2O",
+    "explanation": "Water consists of two hydrogen atoms bonded to one oxygen atom, giving it the formula H2O.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the pH of a neutral solution at 25°C?",
+    "options": [
+      "7",
+      "0",
+      "14",
+      "5"
+    ],
+    "correct_answer": "7",
+    "explanation": "A neutral solution has equal concentrations of H+ and OH- ions, resulting in a pH of exactly 7 at 25°C.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the atomic number of hydrogen?",
+    "options": [
+      "1",
+      "2",
+      "0",
+      "3"
+    ],
+    "correct_answer": "1",
+    "explanation": "Hydrogen is the simplest element with atomic number 1, meaning it has one proton and typically one electron.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "Which state of matter has a definite volume but no definite shape?",
+    "options": [
+      "Liquid",
+      "Solid",
+      "Gas",
+      "Plasma"
+    ],
+    "correct_answer": "Liquid",
+    "explanation": "Liquids have a definite volume because their particles are close together, but they take the shape of their container.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name of the process where a solid turns directly into a gas?",
+    "options": [
+      "Sublimation",
+      "Evaporation",
+      "Condensation",
+      "Melting"
+    ],
+    "correct_answer": "Sublimation",
+    "explanation": "Sublimation is the phase transition from solid directly to gas without passing through the liquid state, like dry ice (solid CO2).",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What are the tiny particles that make up all matter called?",
+    "options": [
+      "Atoms",
+      "Molecules",
+      "Ions",
+      "Electrons"
+    ],
+    "correct_answer": "Atoms",
+    "explanation": "Atoms are the basic building blocks of all matter. They consist of a nucleus containing protons and neutrons, surrounded by electrons.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What gas do plants use during photosynthesis?",
+    "options": [
+      "Carbon dioxide",
+      "Oxygen",
+      "Nitrogen",
+      "Hydrogen"
+    ],
+    "correct_answer": "Carbon dioxide",
+    "explanation": "Plants absorb carbon dioxide (CO2) from the air during photosynthesis, converting it with water and sunlight into glucose and oxygen.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the chemical symbol for sodium?",
+    "options": [
+      "Na",
+      "So",
+      "Sn",
+      "S"
+    ],
+    "correct_answer": "Na",
+    "explanation": "Sodium's symbol Na comes from the Latin 'natrium.' It is an alkali metal with atomic number 11.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What type of reaction produces a precipitate?",
+    "options": [
+      "Precipitation reaction",
+      "Combustion reaction",
+      "Decomposition reaction",
+      "Synthesis reaction"
+    ],
+    "correct_answer": "Precipitation reaction",
+    "explanation": "A precipitation reaction occurs when two aqueous solutions combine and form an insoluble solid (precipitate) that settles out.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the positively charged particle in an atom's nucleus?",
+    "options": [
+      "Proton",
+      "Neutron",
+      "Electron",
+      "Ion"
+    ],
+    "correct_answer": "Proton",
+    "explanation": "Protons are positively charged particles found in the nucleus. The number of protons defines the element's atomic number.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "Which element is the most abundant in the human body by mass?",
+    "options": [
+      "Oxygen",
+      "Carbon",
+      "Hydrogen",
+      "Nitrogen"
+    ],
+    "correct_answer": "Oxygen",
+    "explanation": "Oxygen makes up about 65% of the human body by mass, primarily as a component of water and organic molecules.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the chemical formula for table salt?",
+    "options": [
+      "NaCl",
+      "KCl",
+      "NaOH",
+      "CaCl2"
+    ],
+    "correct_answer": "NaCl",
+    "explanation": "Table salt is sodium chloride (NaCl), formed when sodium (Na+) and chloride (Cl-) ions bond together ionically.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is a mixture of a solute dissolved in a solvent called?",
+    "options": [
+      "Solution",
+      "Compound",
+      "Element",
+      "Colloid"
+    ],
+    "correct_answer": "Solution",
+    "explanation": "A solution is a homogeneous mixture where a solute is uniformly dissolved in a solvent, like salt dissolved in water.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for atoms of the same element with different numbers of neutrons?",
+    "options": [
+      "Isotopes",
+      "Ions",
+      "Isomers",
+      "Allotropes"
+    ],
+    "correct_answer": "Isotopes",
+    "explanation": "Isotopes are atoms of the same element (same proton number) but with different numbers of neutrons, giving them different mass numbers.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What type of substance has a pH below 7?",
+    "options": [
+      "Acid",
+      "Base",
+      "Neutral",
+      "Salt"
+    ],
+    "correct_answer": "Acid",
+    "explanation": "Acids have a pH below 7. They donate protons (H+) in solution and taste sour. Examples include vinegar and lemon juice.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the chemical formula for carbon dioxide?",
+    "options": [
+      "CO2",
+      "CO",
+      "C2O",
+      "CO3"
+    ],
+    "correct_answer": "CO2",
+    "explanation": "Carbon dioxide consists of one carbon atom double-bonded to two oxygen atoms, giving it the formula CO2.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for the energy required to remove an electron from an atom?",
+    "options": [
+      "Ionization energy",
+      "Electronegativity",
+      "Electron affinity",
+      "Bond energy"
+    ],
+    "correct_answer": "Ionization energy",
+    "explanation": "Ionization energy is the energy needed to remove the outermost electron from a neutral gaseous atom. It generally increases across a period.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the negatively charged subatomic particle?",
+    "options": [
+      "Electron",
+      "Proton",
+      "Neutron",
+      "Ion"
+    ],
+    "correct_answer": "Electron",
+    "explanation": "Electrons are negatively charged particles orbiting the nucleus in electron shells. They have very small mass compared to protons and neutrons.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What happens to temperature during a phase change?",
+    "options": [
+      "It remains constant",
+      "It increases",
+      "It decreases",
+      "It fluctuates"
+    ],
+    "correct_answer": "It remains constant",
+    "explanation": "During a phase change (melting, boiling), temperature stays constant as energy is used to break intermolecular forces rather than increase kinetic energy.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "Which element has the chemical symbol Fe?",
+    "options": [
+      "Iron",
+      "Fluorine",
+      "Francium",
+      "Fermium"
+    ],
+    "correct_answer": "Iron",
+    "explanation": "Fe comes from the Latin 'ferrum,' meaning iron. Iron is a transition metal with atomic number 26.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What type of chemical reaction releases energy to the surroundings?",
+    "options": [
+      "Exothermic",
+      "Endothermic",
+      "Redox",
+      "Synthesis"
+    ],
+    "correct_answer": "Exothermic",
+    "explanation": "Exothermic reactions release energy (usually as heat) to the surroundings, making the surroundings warmer. Combustion is a classic example.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the horizontal rows in the periodic table?",
+    "options": [
+      "Periods",
+      "Groups",
+      "Families",
+      "Series"
+    ],
+    "correct_answer": "Periods",
+    "explanation": "Periods are the horizontal rows of the periodic table. Elements in the same period have the same number of electron shells.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "Which subatomic particle has no electric charge?",
+    "options": [
+      "Neutron",
+      "Proton",
+      "Electron",
+      "Ion"
+    ],
+    "correct_answer": "Neutron",
+    "explanation": "Neutrons are neutral particles found in the nucleus. They have approximately the same mass as protons but carry no charge.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the chemical symbol for potassium?",
+    "options": [
+      "K",
+      "Po",
+      "P",
+      "Pt"
+    ],
+    "correct_answer": "K",
+    "explanation": "Potassium's symbol K comes from the Latin 'kalium.' It is an alkali metal with atomic number 19.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What type of mixture can be separated by filtration?",
+    "options": [
+      "Heterogeneous mixture",
+      "Homogeneous mixture",
+      "Solution",
+      "Colloid"
+    ],
+    "correct_answer": "Heterogeneous mixture",
+    "explanation": "Heterogeneous mixtures have visible, non-uniform components (like sand and water) that can be separated by physical methods like filtration.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the most reactive group of metals in the periodic table?",
+    "options": [
+      "Alkali metals",
+      "Alkaline earth metals",
+      "Transition metals",
+      "Halogens"
+    ],
+    "correct_answer": "Alkali metals",
+    "explanation": "Alkali metals (Group 1) are the most reactive metals, reacting vigorously with water to produce hydrogen gas and a metal hydroxide.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "Which gas is produced when acids react with metals?",
+    "options": [
+      "Hydrogen",
+      "Oxygen",
+      "Carbon dioxide",
+      "Nitrogen"
+    ],
+    "correct_answer": "Hydrogen",
+    "explanation": "When acids react with metals (like zinc + hydrochloric acid), hydrogen gas (H2) is produced along with a metal salt.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the amount of matter in an object?",
+    "options": [
+      "Mass",
+      "Weight",
+      "Volume",
+      "Density"
+    ],
+    "correct_answer": "Mass",
+    "explanation": "Mass is the amount of matter in an object measured in kilograms (kg). It does not change with location, unlike weight.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the chemical symbol for silver?",
+    "options": [
+      "Ag",
+      "Si",
+      "Sv",
+      "Sr"
+    ],
+    "correct_answer": "Ag",
+    "explanation": "Silver's symbol Ag comes from the Latin 'argentum.' It is a transition metal with atomic number 47.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the process of converting liquid to gas by heating?",
+    "options": [
+      "Evaporation",
+      "Condensation",
+      "Sublimation",
+      "Freezing"
+    ],
+    "correct_answer": "Evaporation",
+    "explanation": "Evaporation is the phase transition from liquid to gas that occurs at the surface of a liquid when heated or at room temperature.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "Which type of chemical formula shows the actual number of atoms in a molecule?",
+    "options": [
+      "Molecular formula",
+      "Empirical formula",
+      "Structural formula",
+      "Condensed formula"
+    ],
+    "correct_answer": "Molecular formula",
+    "explanation": "A molecular formula shows the exact number of each type of atom in a molecule, like C6H12O6 for glucose.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the energy stored in chemical bonds?",
+    "options": [
+      "Chemical energy",
+      "Kinetic energy",
+      "Thermal energy",
+      "Nuclear energy"
+    ],
+    "correct_answer": "Chemical energy",
+    "explanation": "Chemical energy is potential energy stored in the bonds between atoms, released when bonds break and new bonds form in reactions.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the chemical formula for oxygen gas?",
+    "options": [
+      "O2",
+      "O",
+      "O3",
+      "2O"
+    ],
+    "correct_answer": "O2",
+    "explanation": "Oxygen exists as a diatomic molecule (O2) under normal conditions. Two oxygen atoms are double-bonded to each other.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "Which element is a liquid at room temperature?",
+    "options": [
+      "Mercury",
+      "Lead",
+      "Bismuth",
+      "Tungsten"
+    ],
+    "correct_answer": "Mercury",
+    "explanation": "Mercury (Hg) is the only metal that is liquid at room temperature (25°C), with a melting point of -39°C.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for a substance that speeds up a chemical reaction without being consumed?",
+    "options": [
+      "Catalyst",
+      "Inhibitor",
+      "Reagent",
+      "Solvent"
+    ],
+    "correct_answer": "Catalyst",
+    "explanation": "A catalyst increases the rate of a reaction by lowering the activation energy. It is not consumed and can be reused.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the chemical formula for glucose?",
+    "options": [
+      "C6H12O6",
+      "C12H22O11",
+      "CH2O",
+      "C6H6"
+    ],
+    "correct_answer": "C6H12O6",
+    "explanation": "Glucose is a simple sugar with the molecular formula C6H12O6, containing 6 carbon, 12 hydrogen, and 6 oxygen atoms.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the process called when a gas turns into a liquid?",
+    "options": [
+      "Condensation",
+      "Evaporation",
+      "Sublimation",
+      "Deposition"
+    ],
+    "correct_answer": "Condensation",
+    "explanation": "Condensation is the phase change from gas to liquid, occurring when a gas cools and loses energy. Water droplets on a cold glass are an example.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for vertical columns in the periodic table?",
+    "options": [
+      "Groups",
+      "Periods",
+      "Rows",
+      "Sections"
+    ],
+    "correct_answer": "Groups",
+    "explanation": "Groups (also called families) are the vertical columns of the periodic table. Elements in the same group have similar chemical properties.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "Which state of matter has both a definite shape and definite volume?",
+    "options": [
+      "Solid",
+      "Liquid",
+      "Gas",
+      "Plasma"
+    ],
+    "correct_answer": "Solid",
+    "explanation": "Solids have both a definite shape and volume because their particles are tightly packed and vibrate in fixed positions.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the lightest element on the periodic table?",
+    "options": [
+      "Hydrogen",
+      "Helium",
+      "Lithium",
+      "Boron"
+    ],
+    "correct_answer": "Hydrogen",
+    "explanation": "Hydrogen is the lightest element with an atomic mass of approximately 1 amu. It has one proton and one electron.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the chemical symbol for copper?",
+    "options": [
+      "Cu",
+      "Co",
+      "Cr",
+      "Cs"
+    ],
+    "correct_answer": "Cu",
+    "explanation": "Copper's symbol Cu comes from the Latin 'cuprum.' It is a transition metal with atomic number 29, known for its reddish color.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What type of reaction combines two or more substances into a single product?",
+    "options": [
+      "Synthesis reaction",
+      "Decomposition reaction",
+      "Single replacement",
+      "Double replacement"
+    ],
+    "correct_answer": "Synthesis reaction",
+    "explanation": "A synthesis (combination) reaction combines two or more reactants to form one product: A + B → AB.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for the smallest particle of a compound that retains its properties?",
+    "options": [
+      "Molecule",
+      "Atom",
+      "Ion",
+      "Formula unit"
+    ],
+    "correct_answer": "Molecule",
+    "explanation": "A molecule is the smallest unit of a covalent compound that retains the compound's chemical properties, like H2O for water.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for elements in Group 18 of the periodic table?",
+    "options": [
+      "Noble gases",
+      "Halogens",
+      "Alkali metals",
+      "Transition metals"
+    ],
+    "correct_answer": "Noble gases",
+    "explanation": "Group 18 elements (He, Ne, Ar, Kr, Xe, Rn) are noble gases — they have full valence shells and are generally unreactive.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What does the law of conservation of mass state?",
+    "options": [
+      "Mass is neither created nor destroyed in a reaction",
+      "Energy is conserved",
+      "Matter can be created from energy",
+      "Mass increases in exothermic reactions"
+    ],
+    "correct_answer": "Mass is neither created nor destroyed in a reaction",
+    "explanation": "The law of conservation of mass states that the total mass of reactants equals the total mass of products in a chemical reaction.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for a pure substance made of only one type of atom?",
+    "options": [
+      "Element",
+      "Compound",
+      "Mixture",
+      "Solution"
+    ],
+    "correct_answer": "Element",
+    "explanation": "An element is a pure substance consisting of only one type of atom. It cannot be broken down into simpler substances by chemical means.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What type of bond forms between a metal and a non-metal?",
+    "options": [
+      "Covalent bond",
+      "Ionic bond",
+      "Metallic bond",
+      "Hydrogen bond"
+    ],
+    "correct_answer": "Ionic bond",
+    "explanation": "Ionic bonds form when a metal transfers electrons to a non-metal, creating oppositely charged ions that attract each other.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the number of protons in a helium atom?",
+    "options": [
+      "1",
+      "2",
+      "4",
+      "3"
+    ],
+    "correct_answer": "2",
+    "explanation": "Helium has atomic number 2, meaning it contains 2 protons in its nucleus. It also has 2 neutrons and 2 electrons.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What color does litmus paper turn in an acidic solution?",
+    "options": [
+      "Blue",
+      "Red",
+      "Purple",
+      "Yellow"
+    ],
+    "correct_answer": "Red",
+    "explanation": "Litmus paper turns red in acidic solutions (pH below 7) and blue in basic solutions. It is a common pH indicator.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for a reaction where a substance reacts with oxygen?",
+    "options": [
+      "Reduction",
+      "Oxidation",
+      "Hydration",
+      "Neutralization"
+    ],
+    "correct_answer": "Oxidation",
+    "explanation": "Oxidation is the reaction of a substance with oxygen or more broadly, the loss of electrons. Rusting and burning are examples.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the chemical formula for hydrogen gas?",
+    "options": [
+      "H",
+      "H2",
+      "H3",
+      "2H"
+    ],
+    "correct_answer": "H2",
+    "explanation": "Hydrogen exists as a diatomic molecule (H2) under standard conditions. Two hydrogen atoms are bonded together.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "Which element is represented by the symbol Pb?",
+    "options": [
+      "Phosphorus",
+      "Lead",
+      "Platinum",
+      "Polonium"
+    ],
+    "correct_answer": "Lead",
+    "explanation": "Pb comes from the Latin 'plumbum,' meaning lead. Lead is a heavy metal with atomic number 82.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for the number of protons in an atom?",
+    "options": [
+      "Mass number",
+      "Atomic number",
+      "Atomic mass",
+      "Neutron number"
+    ],
+    "correct_answer": "Atomic number",
+    "explanation": "The atomic number is the number of protons in an atom's nucleus and uniquely identifies each element.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the process when a liquid turns into a solid?",
+    "options": [
+      "Melting",
+      "Freezing",
+      "Condensation",
+      "Sublimation"
+    ],
+    "correct_answer": "Freezing",
+    "explanation": "Freezing (solidification) is the phase change from liquid to solid that occurs when a substance loses enough thermal energy.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "Which type of mixture has uniform composition throughout?",
+    "options": [
+      "Heterogeneous",
+      "Homogeneous",
+      "Suspension",
+      "Colloid"
+    ],
+    "correct_answer": "Homogeneous",
+    "explanation": "A homogeneous mixture has uniform composition and appearance throughout — you cannot see individual components. Saltwater is an example.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What charge do anions carry?",
+    "options": [
+      "Positive",
+      "Negative",
+      "Neutral",
+      "Variable"
+    ],
+    "correct_answer": "Negative",
+    "explanation": "Anions are negatively charged ions formed when an atom gains electrons. For example, Cl- is the chloride anion.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What are the products of a neutralization reaction?",
+    "options": [
+      "Acid and base",
+      "Salt and water",
+      "Gas and precipitate",
+      "Metal and acid"
+    ],
+    "correct_answer": "Salt and water",
+    "explanation": "When an acid reacts with a base (neutralization), the products are a salt and water: HCl + NaOH → NaCl + H2O.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for elements that are poor conductors and dull in appearance?",
+    "options": [
+      "Metals",
+      "Nonmetals",
+      "Metalloids",
+      "Noble gases"
+    ],
+    "correct_answer": "Nonmetals",
+    "explanation": "Nonmetals are generally poor conductors of heat and electricity, brittle in solid form, and lack metallic luster. Examples include carbon and sulfur.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "How many electrons can the first electron shell hold?",
+    "options": [
+      "4",
+      "2",
+      "8",
+      "1"
+    ],
+    "correct_answer": "2",
+    "explanation": "The first electron shell (n=1) can hold a maximum of 2 electrons in the 1s orbital.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the chemical symbol for calcium?",
+    "options": [
+      "C",
+      "Ca",
+      "Cl",
+      "Cr"
+    ],
+    "correct_answer": "Ca",
+    "explanation": "Calcium's symbol is Ca. It is an alkaline earth metal in Group 2 with atomic number 20.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What does a balanced chemical equation have equal on both sides?",
+    "options": [
+      "Volume",
+      "Atoms of each element",
+      "Moles",
+      "Molecules"
+    ],
+    "correct_answer": "Atoms of each element",
+    "explanation": "A balanced chemical equation has equal numbers of atoms of each element on both sides of the equation, satisfying conservation of mass.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the scale used to measure acidity and basicity?",
+    "options": [
+      "Molarity scale",
+      "pH scale",
+      "Celsius scale",
+      "Richter scale"
+    ],
+    "correct_answer": "pH scale",
+    "explanation": "The pH scale runs from 0-14 and measures the acidity (below 7), neutrality (7), or basicity (above 7) of a solution.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "Which gas is produced when baking soda and vinegar react?",
+    "options": [
+      "Hydrogen",
+      "Carbon dioxide",
+      "Oxygen",
+      "Nitrogen"
+    ],
+    "correct_answer": "Carbon dioxide",
+    "explanation": "Baking soda (NaHCO3) reacts with vinegar (acetic acid) to produce carbon dioxide gas (CO2), water, and sodium acetate.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the outermost electron shell of an atom?",
+    "options": [
+      "Core shell",
+      "Valence shell",
+      "Inner shell",
+      "Nucleus"
+    ],
+    "correct_answer": "Valence shell",
+    "explanation": "The valence shell is the outermost electron shell of an atom. Electrons in this shell are involved in chemical bonding.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for matter that has definite chemical composition and properties?",
+    "options": [
+      "Mixture",
+      "Pure substance",
+      "Solution",
+      "Colloid"
+    ],
+    "correct_answer": "Pure substance",
+    "explanation": "A pure substance has a fixed chemical composition and distinct properties. It can be either an element or a compound.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the chemical formula for ammonia?",
+    "options": [
+      "NO3",
+      "NH3",
+      "N2H4",
+      "NaOH"
+    ],
+    "correct_answer": "NH3",
+    "explanation": "Ammonia is a compound of one nitrogen atom and three hydrogen atoms (NH3), commonly used in fertilizers and cleaning products.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the process where a solid turns into a liquid?",
+    "options": [
+      "Freezing",
+      "Melting",
+      "Evaporation",
+      "Condensation"
+    ],
+    "correct_answer": "Melting",
+    "explanation": "Melting is the phase transition from solid to liquid, occurring when enough heat energy is added to overcome intermolecular forces.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What charge do cations carry?",
+    "options": [
+      "Negative",
+      "Positive",
+      "Neutral",
+      "Variable"
+    ],
+    "correct_answer": "Positive",
+    "explanation": "Cations are positively charged ions formed when an atom loses electrons. For example, Na+ is the sodium cation.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the chemical formula for sulfuric acid?",
+    "options": [
+      "HCl",
+      "H2SO4",
+      "H3PO4",
+      "HNO3"
+    ],
+    "correct_answer": "H2SO4",
+    "explanation": "Sulfuric acid has the formula H2SO4, containing 2 hydrogen, 1 sulfur, and 4 oxygen atoms. It is a strong, corrosive acid.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "Which part of the atom contains most of its mass?",
+    "options": [
+      "Electron cloud",
+      "Nucleus",
+      "Valence shell",
+      "Orbital"
+    ],
+    "correct_answer": "Nucleus",
+    "explanation": "The nucleus contains protons and neutrons, which account for nearly all (99.97%) of an atom's mass despite being very small.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for a substance that accepts protons in an acid-base reaction?",
+    "options": [
+      "Acid",
+      "Base",
+      "Salt",
+      "Indicator"
+    ],
+    "correct_answer": "Base",
+    "explanation": "According to Brønsted-Lowry theory, a base is a proton (H+) acceptor. Bases feel slippery, taste bitter, and have pH above 7.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What type of substance is formed when an acid and a base neutralize each other?",
+    "options": [
+      "Acid",
+      "Salt",
+      "Base",
+      "Oxide"
+    ],
+    "correct_answer": "Salt",
+    "explanation": "Neutralization produces a salt and water. The salt is an ionic compound made from the acid's anion and the base's cation.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the volume occupied by one mole of gas at STP?",
+    "options": [
+      "22.0 L",
+      "22.4 L",
+      "24.0 L",
+      "11.2 L"
+    ],
+    "correct_answer": "22.4 L",
+    "explanation": "At standard temperature and pressure (STP: 0°C and 1 atm), one mole of any ideal gas occupies 22.4 liters.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for a reaction where a compound breaks down into simpler substances?",
+    "options": [
+      "Synthesis",
+      "Decomposition",
+      "Combustion",
+      "Replacement"
+    ],
+    "correct_answer": "Decomposition",
+    "explanation": "A decomposition reaction breaks down one compound into two or more simpler substances: AB → A + B.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What element has the symbol Cl and is a yellowish-green gas?",
+    "options": [
+      "Chromium",
+      "Chlorine",
+      "Cobalt",
+      "Cesium"
+    ],
+    "correct_answer": "Chlorine",
+    "explanation": "Chlorine (Cl) is a halogen in Group 17. It is a yellowish-green toxic gas used in water purification and disinfectants.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for electrons in the outermost shell of an atom?",
+    "options": [
+      "Core electrons",
+      "Valence electrons",
+      "Inner electrons",
+      "Protons"
+    ],
+    "correct_answer": "Valence electrons",
+    "explanation": "Valence electrons are the electrons in an atom's outermost shell. They are responsible for chemical bonding and reactions.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the chemical formula for methane?",
+    "options": [
+      "C2H6",
+      "CH4",
+      "C3H8",
+      "C2H4"
+    ],
+    "correct_answer": "CH4",
+    "explanation": "Methane is the simplest hydrocarbon with formula CH4, consisting of one carbon atom bonded to four hydrogen atoms.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for a substance that cannot be broken down by chemical means?",
+    "options": [
+      "Compound",
+      "Element",
+      "Mixture",
+      "Molecule"
+    ],
+    "correct_answer": "Element",
+    "explanation": "An element is a pure substance that cannot be chemically decomposed into simpler substances. There are 118 known elements.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What type of radiation has no mass and no charge?",
+    "options": [
+      "Alpha radiation",
+      "Gamma radiation",
+      "Beta radiation",
+      "Neutron radiation"
+    ],
+    "correct_answer": "Gamma radiation",
+    "explanation": "Gamma (γ) radiation consists of high-energy electromagnetic waves with no mass or charge. It is the most penetrating type of nuclear radiation.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the force that holds atoms together in a molecule?",
+    "options": [
+      "Nuclear force",
+      "Chemical bond",
+      "Gravity",
+      "Electrostatic attraction"
+    ],
+    "correct_answer": "Chemical bond",
+    "explanation": "Chemical bonds are forces that hold atoms together in molecules or ionic compounds, including covalent, ionic, and metallic bonds.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the chemical symbol for nitrogen?",
+    "options": [
+      "Ni",
+      "N",
+      "Ne",
+      "Na"
+    ],
+    "correct_answer": "N",
+    "explanation": "Nitrogen has the chemical symbol N. It is a nonmetal in Group 15 with atomic number 7, making up 78% of air.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "Which property describes how easily a substance dissolves in water?",
+    "options": [
+      "Reactivity",
+      "Solubility",
+      "Conductivity",
+      "Density"
+    ],
+    "correct_answer": "Solubility",
+    "explanation": "Solubility is the maximum amount of a substance that can dissolve in a given amount of solvent at a specific temperature.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the breakdown of a substance by electricity?",
+    "options": [
+      "Combustion",
+      "Electrolysis",
+      "Oxidation",
+      "Hydrolysis"
+    ],
+    "correct_answer": "Electrolysis",
+    "explanation": "Electrolysis uses electric current to drive non-spontaneous chemical reactions, decomposing substances like water into hydrogen and oxygen.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is a compound made of only carbon and hydrogen called?",
+    "options": [
+      "Carbohydrate",
+      "Hydrocarbon",
+      "Carbonyl",
+      "Lipid"
+    ],
+    "correct_answer": "Hydrocarbon",
+    "explanation": "Hydrocarbons are organic compounds consisting only of carbon and hydrogen atoms, like methane (CH4) and benzene (C6H6).",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the chemical symbol for iron?",
+    "options": [
+      "Ir",
+      "Fe",
+      "I",
+      "In"
+    ],
+    "correct_answer": "Fe",
+    "explanation": "Iron's symbol Fe comes from the Latin 'ferrum.' It is a transition metal with atomic number 26, essential for hemoglobin.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for atoms with the same atomic number but different mass numbers?",
+    "options": [
+      "Allotropes",
+      "Isotopes",
+      "Ions",
+      "Isomers"
+    ],
+    "correct_answer": "Isotopes",
+    "explanation": "Isotopes have the same number of protons (same element) but different numbers of neutrons, giving different mass numbers.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What does STP stand for in chemistry?",
+    "options": [
+      "Stable Temperature and Pressure",
+      "Standard Temperature and Pressure",
+      "Saturated Temperature and Phase",
+      "Solute, Temperature, and Pressure"
+    ],
+    "correct_answer": "Standard Temperature and Pressure",
+    "explanation": "STP stands for Standard Temperature and Pressure, defined as 0°C (273.15 K) and 1 atm (101.325 kPa) pressure.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the ratio of mass to volume?",
+    "options": [
+      "Weight",
+      "Density",
+      "Pressure",
+      "Concentration"
+    ],
+    "correct_answer": "Density",
+    "explanation": "Density is defined as mass divided by volume (D = m/V). It is typically measured in g/cm³ or g/mL.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What type of elements conduct electricity and have a shiny luster?",
+    "options": [
+      "Nonmetals",
+      "Metals",
+      "Metalloids",
+      "Noble gases"
+    ],
+    "correct_answer": "Metals",
+    "explanation": "Metals are shiny, malleable, ductile, and good conductors of heat and electricity. They make up most of the periodic table.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the chemical formula for hydrochloric acid?",
+    "options": [
+      "H2SO4",
+      "HCl",
+      "HNO3",
+      "H3PO4"
+    ],
+    "correct_answer": "HCl",
+    "explanation": "Hydrochloric acid has the formula HCl. It is a strong acid formed by dissolving hydrogen chloride gas in water.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for a substance that donates protons in a reaction?",
+    "options": [
+      "Base",
+      "Acid",
+      "Salt",
+      "Buffer"
+    ],
+    "correct_answer": "Acid",
+    "explanation": "According to Brønsted-Lowry theory, an acid is a proton (H+) donor. Acids have pH below 7 and taste sour.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the process that describes the tendency of atoms to share electrons?",
+    "options": [
+      "Ionization",
+      "Covalent bonding",
+      "Electron affinity",
+      "Metallic bonding"
+    ],
+    "correct_answer": "Covalent bonding",
+    "explanation": "Covalent bonding occurs when atoms share electrons to achieve stable electron configurations, common in nonmetal-nonmetal compounds.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "Which type of reaction involves the transfer of electrons?",
+    "options": [
+      "Neutralization",
+      "Redox reaction",
+      "Precipitation",
+      "Hydrolysis"
+    ],
+    "correct_answer": "Redox reaction",
+    "explanation": "Redox (reduction-oxidation) reactions involve the transfer of electrons between reactants. One substance is oxidized (loses electrons) and another is reduced (gains electrons).",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the chemical formula for sodium hydroxide?",
+    "options": [
+      "NaCl",
+      "NaOH",
+      "Na2O",
+      "NaHCO3"
+    ],
+    "correct_answer": "NaOH",
+    "explanation": "Sodium hydroxide (NaOH) is a strong base consisting of sodium, oxygen, and hydrogen ions. It is commonly called lye or caustic soda.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the energy required to start a chemical reaction?",
+    "options": [
+      "Bond energy",
+      "Activation energy",
+      "Potential energy",
+      "Ionization energy"
+    ],
+    "correct_answer": "Activation energy",
+    "explanation": "Activation energy is the minimum energy needed to start a chemical reaction. Catalysts lower activation energy to speed up reactions.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "How many moles of atoms are in one mole of H2O?",
+    "options": [
+      "2",
+      "3",
+      "1",
+      "4"
+    ],
+    "correct_answer": "3",
+    "explanation": "One mole of H2O contains 3 moles of atoms total — 2 moles of hydrogen atoms and 1 mole of oxygen atoms.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the scientist who developed the modern periodic table?",
+    "options": [
+      "Bohr",
+      "Dalton",
+      "Mendeleev",
+      "Rutherford"
+    ],
+    "correct_answer": "Mendeleev",
+    "explanation": "Dmitri Mendeleev developed the modern periodic table in 1869, arranging elements by atomic mass and predicting properties of undiscovered elements.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the chemical formula for table sugar (sucrose)?",
+    "options": [
+      "C6H12O6",
+      "C12H22O12",
+      "C12H22O11",
+      "CH2O"
+    ],
+    "correct_answer": "C12H22O11",
+    "explanation": "Sucrose has the molecular formula C12H22O11, consisting of a glucose and fructose molecule joined together.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the positively charged center of an atom?",
+    "options": [
+      "Electron cloud",
+      "Orbital",
+      "Nucleus",
+      "Shell"
+    ],
+    "correct_answer": "Nucleus",
+    "explanation": "The nucleus is the dense, positively charged center of an atom containing protons and neutrons. It is surrounded by electrons.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for the amount of substance containing 6.022 × 10²³ particles?",
+    "options": [
+      "Gram",
+      "Dalton",
+      "Mole",
+      "Molarity"
+    ],
+    "correct_answer": "Mole",
+    "explanation": "A mole is the SI unit for amount of substance, containing Avogadro's number (6.022 × 10²³) of particles, atoms, or molecules.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "Which gas makes up about 21% of Earth's atmosphere?",
+    "options": [
+      "Nitrogen",
+      "Carbon dioxide",
+      "Oxygen",
+      "Argon"
+    ],
+    "correct_answer": "Oxygen",
+    "explanation": "Oxygen (O2) makes up approximately 21% of Earth's atmosphere, essential for cellular respiration in most living organisms.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the measure of how strongly an atom attracts bonding electrons?",
+    "options": [
+      "Ionization energy",
+      "Electron affinity",
+      "Electronegativity",
+      "Atomic radius"
+    ],
+    "correct_answer": "Electronegativity",
+    "explanation": "Electronegativity measures an atom's ability to attract electrons in a chemical bond. Fluorine has the highest electronegativity value.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for a reaction that absorbs energy from surroundings?",
+    "options": [
+      "Exothermic",
+      "Redox",
+      "Endothermic",
+      "Combustion"
+    ],
+    "correct_answer": "Endothermic",
+    "explanation": "Endothermic reactions absorb energy (heat) from the surroundings, causing them to feel cold. Dissolving ammonium nitrate in water is an example.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What element is represented by the symbol Hg?",
+    "options": [
+      "Hydrogen",
+      "Helium",
+      "Mercury",
+      "Manganese"
+    ],
+    "correct_answer": "Mercury",
+    "explanation": "Hg comes from the Latin 'hydrargyrum,' meaning liquid silver. Mercury is the only metal that is liquid at room temperature.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for a compound formed from two elements, one of which is oxygen?",
+    "options": [
+      "Hydroxide",
+      "Peroxide",
+      "Oxide",
+      "Carbonate"
+    ],
+    "correct_answer": "Oxide",
+    "explanation": "An oxide is a binary compound formed when an element chemically combines with oxygen. Examples include iron oxide (rust) and carbon dioxide.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the number of electrons in a neutral oxygen atom?",
+    "options": [
+      "6",
+      "16",
+      "8",
+      "10"
+    ],
+    "correct_answer": "8",
+    "explanation": "Oxygen has atomic number 8, meaning it has 8 protons. A neutral atom has equal numbers of protons and electrons, so 8 electrons.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the chemical formula for carbon monoxide?",
+    "options": [
+      "CO2",
+      "C2O",
+      "CO",
+      "C2O3"
+    ],
+    "correct_answer": "CO",
+    "explanation": "Carbon monoxide has formula CO — one carbon atom single (triple) bonded to one oxygen atom. It is a toxic gas produced by incomplete combustion.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What type of change produces a new substance with different properties?",
+    "options": [
+      "Physical change",
+      "State change",
+      "Chemical change",
+      "Nuclear change"
+    ],
+    "correct_answer": "Chemical change",
+    "explanation": "A chemical change (chemical reaction) produces new substances with different chemical properties. Examples include burning, rusting, and cooking.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the unit used to measure atomic mass?",
+    "options": [
+      "Gram",
+      "Mole",
+      "Atomic mass unit (amu)",
+      "Kilogram"
+    ],
+    "correct_answer": "Atomic mass unit (amu)",
+    "explanation": "The atomic mass unit (amu or u) is used to measure atomic masses. One amu equals 1/12 the mass of a carbon-12 atom.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for a molecule with two atoms?",
+    "options": [
+      "Monatomic",
+      "Triatomic",
+      "Diatomic",
+      "Polyatomic"
+    ],
+    "correct_answer": "Diatomic",
+    "explanation": "A diatomic molecule consists of two atoms bonded together. Examples include O2, N2, H2, and HCl.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for a substance dissolved in a solution?",
+    "options": [
+      "Solvent",
+      "Mixture",
+      "Solute",
+      "Suspension"
+    ],
+    "correct_answer": "Solute",
+    "explanation": "A solute is the substance that dissolves in a solvent to form a solution. In saltwater, salt is the solute and water is the solvent.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for the mass of one mole of a substance in grams?",
+    "options": [
+      "Atomic mass",
+      "Formula mass",
+      "Molar mass",
+      "Molecular weight"
+    ],
+    "correct_answer": "Molar mass",
+    "explanation": "Molar mass is the mass of one mole of a substance expressed in grams per mole (g/mol), numerically equal to the molecular mass in amu.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the process of a liquid changing to a gas at its boiling point?",
+    "options": [
+      "Evaporation",
+      "Sublimation",
+      "Vaporization",
+      "Condensation"
+    ],
+    "correct_answer": "Vaporization",
+    "explanation": "Vaporization (boiling) is the phase change from liquid to gas throughout the liquid at its boiling point, not just at the surface.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "Which element has the chemical symbol O?",
+    "options": [
+      "Osmium",
+      "Gold",
+      "Oxygen",
+      "Oganesson"
+    ],
+    "correct_answer": "Oxygen",
+    "explanation": "O is the chemical symbol for oxygen, a nonmetal with atomic number 8. It is essential for combustion and cellular respiration.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the elements in Group 17 of the periodic table?",
+    "options": [
+      "Noble gases",
+      "Alkali metals",
+      "Halogens",
+      "Alkaline earth metals"
+    ],
+    "correct_answer": "Halogens",
+    "explanation": "Halogens are Group 17 elements (F, Cl, Br, I, At). They are highly reactive nonmetals that readily form salts with metals.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the chemical formula for hydrogen peroxide?",
+    "options": [
+      "H2O",
+      "HO",
+      "H2O2",
+      "H2O3"
+    ],
+    "correct_answer": "H2O2",
+    "explanation": "Hydrogen peroxide has formula H2O2, with two hydrogen and two oxygen atoms. It is used as a bleaching agent and antiseptic.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for the minimum temperature at which a substance will ignite?",
+    "options": [
+      "Boiling point",
+      "Melting point",
+      "Flash point",
+      "Ignition point"
+    ],
+    "correct_answer": "Flash point",
+    "explanation": "The flash point is the lowest temperature at which a substance produces enough vapor to ignite when exposed to a flame.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "Which type of bond is formed between water molecules?",
+    "options": [
+      "Ionic bond",
+      "Covalent bond",
+      "Hydrogen bond",
+      "Metallic bond"
+    ],
+    "correct_answer": "Hydrogen bond",
+    "explanation": "Hydrogen bonds form between the slightly positive hydrogen of one water molecule and the slightly negative oxygen of another.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the smallest unit of an element that retains its chemical properties?",
+    "options": [
+      "Molecule",
+      "Ion",
+      "Atom",
+      "Proton"
+    ],
+    "correct_answer": "Atom",
+    "explanation": "An atom is the smallest unit of an element that maintains the chemical properties of that element.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for the number of protons plus neutrons in an atom?",
+    "options": [
+      "Atomic number",
+      "Isotope number",
+      "Mass number",
+      "Electron number"
+    ],
+    "correct_answer": "Mass number",
+    "explanation": "The mass number is the total count of protons and neutrons (nucleons) in an atom's nucleus. It determines the isotope.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the branch of chemistry that studies carbon compounds?",
+    "options": [
+      "Inorganic chemistry",
+      "Nuclear chemistry",
+      "Organic chemistry",
+      "Analytical chemistry"
+    ],
+    "correct_answer": "Organic chemistry",
+    "explanation": "Organic chemistry studies carbon-containing compounds, especially those found in or derived from living organisms.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "Which particle determines the chemical identity of an element?",
+    "options": [
+      "Neutron",
+      "Electron",
+      "Proton",
+      "Ion"
+    ],
+    "correct_answer": "Proton",
+    "explanation": "The number of protons (atomic number) uniquely identifies each element. Changing the number of protons creates a different element.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for the ability of a solid to be hammered into thin sheets?",
+    "options": [
+      "Ductility",
+      "Hardness",
+      "Malleability",
+      "Conductivity"
+    ],
+    "correct_answer": "Malleability",
+    "explanation": "Malleability is the ability of a material (usually a metal) to be deformed under compressive stress, like being hammered into a flat sheet.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the substance that does the dissolving in a solution?",
+    "options": [
+      "Solute",
+      "Compound",
+      "Solvent",
+      "Mixture"
+    ],
+    "correct_answer": "Solvent",
+    "explanation": "The solvent is the substance that dissolves the solute to form a solution. Water is the most common solvent, called the 'universal solvent.'",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the boiling point of water at standard atmospheric pressure?",
+    "options": [
+      "0°C",
+      "50°C",
+      "100°C",
+      "212°F"
+    ],
+    "correct_answer": "100°C",
+    "explanation": "Water boils at 100°C (212°F) at standard atmospheric pressure (1 atm). At higher altitudes, it boils at lower temperatures.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the process of separating a mixture using different boiling points?",
+    "options": [
+      "Filtration",
+      "Chromatography",
+      "Distillation",
+      "Evaporation"
+    ],
+    "correct_answer": "Distillation",
+    "explanation": "Distillation separates liquid mixtures by heating them so that components evaporate at different temperatures, then are condensed separately.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What type of physical change involves a change in state?",
+    "options": [
+      "Chemical change",
+      "Nuclear change",
+      "Phase change",
+      "Composition change"
+    ],
+    "correct_answer": "Phase change",
+    "explanation": "A phase change is a physical change where matter changes state (solid, liquid, gas) by gaining or losing energy.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the symbol for Avogadro's number?",
+    "options": [
+      "R",
+      "K",
+      "NA",
+      "T"
+    ],
+    "correct_answer": "NA",
+    "explanation": "Avogadro's number is represented by NA (or L), equal to 6.022 × 10²³. It defines the number of particles in one mole.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the reaction between an acid and a carbonate?",
+    "options": [
+      "Oxidation",
+      "Neutralization",
+      "Acid-carbonate reaction",
+      "Redox"
+    ],
+    "correct_answer": "Acid-carbonate reaction",
+    "explanation": "When an acid reacts with a carbonate, it produces a salt, water, and carbon dioxide gas. For example, HCl + CaCO3 → CaCl2 + H2O + CO2.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for a molecule that has equal sharing of electrons?",
+    "options": [
+      "Polar molecule",
+      "Ionic compound",
+      "Nonpolar molecule",
+      "Electrolyte"
+    ],
+    "correct_answer": "Nonpolar molecule",
+    "explanation": "A nonpolar molecule has equal or symmetric electron distribution, resulting in no net dipole moment. Examples include O2 and CH4.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the chemical formula for nitric acid?",
+    "options": [
+      "H2SO4",
+      "HCl",
+      "HNO3",
+      "H3PO4"
+    ],
+    "correct_answer": "HNO3",
+    "explanation": "Nitric acid has formula HNO3. It is a strong acid used in making fertilizers and explosives.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the temperature at which a substance changes from solid to liquid?",
+    "options": [
+      "Boiling point",
+      "Flash point",
+      "Melting point",
+      "Critical point"
+    ],
+    "correct_answer": "Melting point",
+    "explanation": "The melting point is the temperature at which a solid converts to a liquid at standard pressure. It is a characteristic physical property.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for a charged atom or group of atoms?",
+    "options": [
+      "Molecule",
+      "Isotope",
+      "Ion",
+      "Radical"
+    ],
+    "correct_answer": "Ion",
+    "explanation": "An ion is an atom or group of atoms that has gained or lost electrons, giving it a net positive (cation) or negative (anion) charge.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What type of change does not alter the chemical composition of matter?",
+    "options": [
+      "Chemical change",
+      "Nuclear reaction",
+      "Physical change",
+      "Combustion"
+    ],
+    "correct_answer": "Physical change",
+    "explanation": "A physical change alters the form or appearance of matter but not its chemical composition. Examples include cutting, melting, and dissolving.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the force attracting electrons to the nucleus?",
+    "options": [
+      "Gravity",
+      "Nuclear force",
+      "Electrostatic attraction",
+      "Van der Waals force"
+    ],
+    "correct_answer": "Electrostatic attraction",
+    "explanation": "Electrostatic attraction (Coulomb force) between opposite charges holds negatively charged electrons around the positively charged nucleus.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the chemical formula for baking soda?",
+    "options": [
+      "Na2CO3",
+      "NaCl",
+      "NaHCO3",
+      "NaOH"
+    ],
+    "correct_answer": "NaHCO3",
+    "explanation": "Baking soda is sodium bicarbonate with formula NaHCO3. It releases CO2 when heated or mixed with acid, causing baked goods to rise.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the temperature at which a liquid changes to a gas?",
+    "options": [
+      "Melting point",
+      "Flash point",
+      "Boiling point",
+      "Dew point"
+    ],
+    "correct_answer": "Boiling point",
+    "explanation": "The boiling point is the temperature at which a liquid's vapor pressure equals atmospheric pressure, causing it to rapidly convert to gas.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for elements with properties of both metals and nonmetals?",
+    "options": [
+      "Noble gases",
+      "Halogens",
+      "Metalloids",
+      "Alkali metals"
+    ],
+    "correct_answer": "Metalloids",
+    "explanation": "Metalloids (semimetals) like silicon, germanium, and arsenic have intermediate properties between metals and nonmetals, used in semiconductors.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the chemical formula for ethanol (drinking alcohol)?",
+    "options": [
+      "CH3OH",
+      "C2H6",
+      "C2H5OH",
+      "C3H7OH"
+    ],
+    "correct_answer": "C2H5OH",
+    "explanation": "Ethanol has formula C2H5OH (or C2H6O). It is a two-carbon alcohol produced by fermentation of sugars.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for an atom that has lost or gained electrons?",
+    "options": [
+      "Isotope",
+      "Molecule",
+      "Ion",
+      "Radical"
+    ],
+    "correct_answer": "Ion",
+    "explanation": "An ion forms when an atom gains electrons (becoming a negative anion) or loses electrons (becoming a positive cation).",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the chemical symbol for helium?",
+    "options": [
+      "H",
+      "Ho",
+      "He",
+      "Hf"
+    ],
+    "correct_answer": "He",
+    "explanation": "Helium's symbol is He. It is a noble gas with atomic number 2, the second lightest element, and is non-reactive.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What type of reaction occurs when fuel burns in oxygen?",
+    "options": [
+      "Synthesis",
+      "Decomposition",
+      "Combustion",
+      "Replacement"
+    ],
+    "correct_answer": "Combustion",
+    "explanation": "Combustion is a rapid exothermic reaction between a fuel and oxygen, producing carbon dioxide and water. It is a type of oxidation.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the energy absorbed or released during a chemical reaction?",
+    "options": [
+      "Activation energy",
+      "Kinetic energy",
+      "Heat of reaction",
+      "Bond energy"
+    ],
+    "correct_answer": "Heat of reaction",
+    "explanation": "The heat of reaction (enthalpy change, ΔH) is the energy absorbed (endothermic, +ΔH) or released (exothermic, -ΔH) during a reaction.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for separation of a mixture based on the attraction of components to a stationary phase?",
+    "options": [
+      "Distillation",
+      "Filtration",
+      "Chromatography",
+      "Crystallization"
+    ],
+    "correct_answer": "Chromatography",
+    "explanation": "Chromatography separates mixtures by passing them over a stationary phase. Components travel at different speeds based on their interactions.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "Which subatomic particle is found outside the nucleus?",
+    "options": [
+      "Proton",
+      "Neutron",
+      "Electron",
+      "Quark"
+    ],
+    "correct_answer": "Electron",
+    "explanation": "Electrons are negatively charged particles found in electron shells outside the nucleus. They are involved in chemical bonding.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the temperature scale used in scientific chemistry?",
+    "options": [
+      "Fahrenheit",
+      "Celsius",
+      "Kelvin",
+      "Rankine"
+    ],
+    "correct_answer": "Kelvin",
+    "explanation": "The Kelvin scale is the SI unit of temperature, starting at absolute zero (0 K = -273.15°C). It is used in scientific calculations.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the chemical formula for ozone?",
+    "options": [
+      "O2",
+      "O",
+      "O3",
+      "O4"
+    ],
+    "correct_answer": "O3",
+    "explanation": "Ozone is an allotrope of oxygen with formula O3. It forms a layer in the stratosphere that absorbs harmful UV radiation.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the number of valence electrons in a carbon atom?",
+    "options": [
+      "2",
+      "2",
+      "6",
+      "4"
+    ],
+    "correct_answer": "4",
+    "explanation": "Carbon is in Group 14 and has 4 valence electrons. This allows it to form 4 covalent bonds, enabling the diversity of organic compounds.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for a mixture where particles settle out over time?",
+    "options": [
+      "Solution",
+      "Colloid",
+      "Emulsion",
+      "Suspension"
+    ],
+    "correct_answer": "Suspension",
+    "explanation": "A suspension is a heterogeneous mixture where particles are large enough to settle out over time, like muddy water.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the chemical symbol for lead?",
+    "options": [
+      "Le",
+      "Li",
+      "La",
+      "Pb"
+    ],
+    "correct_answer": "Pb",
+    "explanation": "Lead's symbol Pb comes from the Latin 'plumbum.' It is a heavy metal with atomic number 82, formerly used in paint and pipes.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the product of combining an acid and a metal?",
+    "options": [
+      "Oxide",
+      "Base",
+      "Water",
+      "Salt and hydrogen"
+    ],
+    "correct_answer": "Salt and hydrogen",
+    "explanation": "When an acid reacts with a metal, it produces a salt and hydrogen gas. For example: Zn + H2SO4 → ZnSO4 + H2.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for a reaction where one element replaces another in a compound?",
+    "options": [
+      "Synthesis",
+      "Decomposition",
+      "Double replacement",
+      "Single replacement"
+    ],
+    "correct_answer": "Single replacement",
+    "explanation": "In a single replacement reaction, a more reactive element displaces a less reactive one from a compound: A + BC → AC + B.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the approximate mass of a proton in atomic mass units?",
+    "options": [
+      "0",
+      "0.0005",
+      "0.5",
+      "1"
+    ],
+    "correct_answer": "1",
+    "explanation": "A proton has a mass of approximately 1 atomic mass unit (1 amu or 1 u). Neutrons have approximately the same mass as protons.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the energy needed to break a chemical bond?",
+    "options": [
+      "Activation energy",
+      "Kinetic energy",
+      "Ionization energy",
+      "Bond energy"
+    ],
+    "correct_answer": "Bond energy",
+    "explanation": "Bond energy (bond dissociation energy) is the energy required to break one mole of a specific type of chemical bond in the gas phase.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the chemical formula for rust?",
+    "options": [
+      "FeO",
+      "Fe3O4",
+      "Fe2O",
+      "Fe2O3"
+    ],
+    "correct_answer": "Fe2O3",
+    "explanation": "Rust is primarily iron(III) oxide with formula Fe2O3. It forms when iron reacts with oxygen and water in a slow oxidation process.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the freezing point of water at standard pressure?",
+    "options": [
+      "100°C",
+      "32°F",
+      "-32°C",
+      "0°C"
+    ],
+    "correct_answer": "0°C",
+    "explanation": "Water freezes at 0°C (32°F) at standard atmospheric pressure. Below this temperature, liquid water converts to solid ice.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for a substance that speeds up a reaction without being consumed?",
+    "options": [
+      "Reactant",
+      "Inhibitor",
+      "Reagent",
+      "Catalyst"
+    ],
+    "correct_answer": "Catalyst",
+    "explanation": "A catalyst increases reaction rate by providing an alternative pathway with lower activation energy, and is not consumed in the process.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "Which element has the highest electronegativity?",
+    "options": [
+      "Oxygen",
+      "Nitrogen",
+      "Chlorine",
+      "Fluorine"
+    ],
+    "correct_answer": "Fluorine",
+    "explanation": "Fluorine (F) has the highest electronegativity value (3.98 on Pauling scale) of all elements, making it the strongest electron attractor.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for atoms of different elements with the same number of electrons?",
+    "options": [
+      "Isotopes",
+      "Allotropes",
+      "Isomers",
+      "Isoelectronic species"
+    ],
+    "correct_answer": "Isoelectronic species",
+    "explanation": "Isoelectronic species have the same number of electrons. For example, N³⁻, O²⁻, F⁻, Ne, Na⁺, and Mg²⁺ all have 10 electrons.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for the simplest whole-number ratio of atoms in a compound?",
+    "options": [
+      "Molecular formula",
+      "Structural formula",
+      "Condensed formula",
+      "Empirical formula"
+    ],
+    "correct_answer": "Empirical formula",
+    "explanation": "The empirical formula gives the simplest whole-number ratio of atoms. For example, H2O2's empirical formula is HO.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the atomic mass of carbon-12?",
+    "options": [
+      "6",
+      "10",
+      "11",
+      "12"
+    ],
+    "correct_answer": "12",
+    "explanation": "Carbon-12 has exactly 12 atomic mass units (amu) by definition. It has 6 protons and 6 neutrons. It is the standard for atomic mass.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What type of substance dissociates into ions when dissolved in water?",
+    "options": [
+      "Nonpolar molecule",
+      "Molecular compound",
+      "Covalent compound",
+      "Electrolyte"
+    ],
+    "correct_answer": "Electrolyte",
+    "explanation": "Electrolytes are substances that dissociate into ions in solution, allowing the solution to conduct electricity. Salts and strong acids/bases are electrolytes.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the process that separates mixtures using solubility differences?",
+    "options": [
+      "Distillation",
+      "Filtration",
+      "Evaporation",
+      "Crystallization"
+    ],
+    "correct_answer": "Crystallization",
+    "explanation": "Crystallization separates a solute from a solution by cooling or evaporating the solvent, causing the solute to form pure solid crystals.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the reaction where two compounds exchange ions?",
+    "options": [
+      "Single replacement",
+      "Synthesis",
+      "Decomposition",
+      "Double replacement"
+    ],
+    "correct_answer": "Double replacement",
+    "explanation": "In a double replacement (double displacement) reaction, the ions of two compounds exchange: AB + CD → AD + CB.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the number of valence electrons in oxygen?",
+    "options": [
+      "2",
+      "4",
+      "5",
+      "6"
+    ],
+    "correct_answer": "6",
+    "explanation": "Oxygen is in Group 16 and has 6 valence electrons. It needs 2 more electrons to achieve a stable octet configuration.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for a property that depends on the amount of substance present?",
+    "options": [
+      "Intensive property",
+      "Physical property",
+      "Chemical property",
+      "Extensive property"
+    ],
+    "correct_answer": "Extensive property",
+    "explanation": "Extensive properties (like mass, volume, and energy) depend on the amount of substance. Intensive properties (like density and melting point) do not.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What does the subscript in a chemical formula represent?",
+    "options": [
+      "The charge of an ion",
+      "The number of molecules",
+      "The number of moles",
+      "The number of atoms of that element"
+    ],
+    "correct_answer": "The number of atoms of that element",
+    "explanation": "Subscripts in chemical formulas indicate how many atoms of each element are in one molecule. In H2O, the 2 means 2 hydrogen atoms.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the chemical formula for calcium carbonate?",
+    "options": [
+      "CaO",
+      "Ca(OH)2",
+      "CaCl2",
+      "CaCO3"
+    ],
+    "correct_answer": "CaCO3",
+    "explanation": "Calcium carbonate has formula CaCO3. It is the main component of limestone, marble, and chalk.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the ability of a metal to be drawn into wires?",
+    "options": [
+      "Malleability",
+      "Conductivity",
+      "Hardness",
+      "Ductility"
+    ],
+    "correct_answer": "Ductility",
+    "explanation": "Ductility is the property that allows metals to be stretched into thin wires without breaking. Copper is highly ductile.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "Which gas is produced during photosynthesis?",
+    "options": [
+      "Carbon dioxide",
+      "Nitrogen",
+      "Carbon monoxide",
+      "Oxygen"
+    ],
+    "correct_answer": "Oxygen",
+    "explanation": "Photosynthesis produces oxygen (O2) as a byproduct when water molecules are split. This oxygen is released into the atmosphere.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for a solution with more solute than normally dissolves?",
+    "options": [
+      "Unsaturated solution",
+      "Saturated solution",
+      "Dilute solution",
+      "Supersaturated solution"
+    ],
+    "correct_answer": "Supersaturated solution",
+    "explanation": "A supersaturated solution contains more dissolved solute than a saturated solution at the same temperature, achieved by careful cooling.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the chemical formula for magnesium oxide?",
+    "options": [
+      "Mg2O",
+      "MgO2",
+      "Mg2O3",
+      "MgO"
+    ],
+    "correct_answer": "MgO",
+    "explanation": "Magnesium oxide has formula MgO — magnesium (2+ charge) combines with oxygen (2- charge) in a 1:1 ratio.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What type of radiation penetrates materials the least?",
+    "options": [
+      "Gamma",
+      "Beta",
+      "Neutron",
+      "Alpha"
+    ],
+    "correct_answer": "Alpha",
+    "explanation": "Alpha particles (He nuclei with 2 protons and 2 neutrons) have the least penetrating power, stopped by a sheet of paper or skin.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the number of moles of solute per liter of solution?",
+    "options": [
+      "Molality",
+      "Normality",
+      "Mass fraction",
+      "Molarity"
+    ],
+    "correct_answer": "Molarity",
+    "explanation": "Molarity (M) is the concentration of a solution expressed as moles of solute per liter of solution (mol/L).",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the chemical symbol for aluminum?",
+    "options": [
+      "Am",
+      "Ar",
+      "Ac",
+      "Al"
+    ],
+    "correct_answer": "Al",
+    "explanation": "Aluminum's symbol is Al. It is a light, silvery metal in Group 13 with atomic number 13, the most abundant metal in Earth's crust.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "Which type of reaction involves the complete burning of a hydrocarbon?",
+    "options": [
+      "Synthesis",
+      "Decomposition",
+      "Redox",
+      "Complete combustion"
+    ],
+    "correct_answer": "Complete combustion",
+    "explanation": "Complete combustion occurs when a hydrocarbon burns completely in excess oxygen, producing only CO2 and H2O as products.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the process by which atomic nuclei split?",
+    "options": [
+      "Nuclear fusion",
+      "Radioactive decay",
+      "Transmutation",
+      "Nuclear fission"
+    ],
+    "correct_answer": "Nuclear fission",
+    "explanation": "Nuclear fission splits a heavy nucleus into smaller nuclei, releasing enormous amounts of energy. It powers nuclear reactors and atomic bombs.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the atomic mass unit approximately equivalent to?",
+    "options": [
+      "Mass of an electron",
+      "Mass of a molecule",
+      "Mass of an atom",
+      "Mass of a proton or neutron"
+    ],
+    "correct_answer": "Mass of a proton or neutron",
+    "explanation": "One atomic mass unit (amu) is approximately equal to the mass of one proton or one neutron (1.66 × 10⁻²⁷ kg).",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What type of formula shows how atoms are connected in a molecule?",
+    "options": [
+      "Empirical formula",
+      "Molecular formula",
+      "Condensed formula",
+      "Structural formula"
+    ],
+    "correct_answer": "Structural formula",
+    "explanation": "A structural formula shows the arrangement of atoms and bonds within a molecule using lines to represent chemical bonds.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the heat needed to raise 1 gram of water by 1°C?",
+    "options": [
+      "Joule",
+      "Enthalpy",
+      "Kilocalorie",
+      "Calorie"
+    ],
+    "correct_answer": "Calorie",
+    "explanation": "A calorie is the amount of heat energy needed to raise the temperature of 1 gram of water by 1°C at standard pressure.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What are allotropes of an element?",
+    "options": [
+      "Isotopes with different masses",
+      "Ions with different charges",
+      "Compounds of the same element",
+      "Different structural forms of the same element"
+    ],
+    "correct_answer": "Different structural forms of the same element",
+    "explanation": "Allotropes are different structural forms of the same element, like diamond and graphite (both carbon) or O2 and O3 (both oxygen).",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the chemical symbol for zinc?",
+    "options": [
+      "Zr",
+      "Ze",
+      "Zn",
+      "Zi"
+    ],
+    "correct_answer": "Zn",
+    "explanation": "Zinc's symbol is Zn. It is a transition metal with atomic number 30, commonly used in galvanizing steel to prevent rust.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the main difference between chemical and physical properties?",
+    "options": [
+      "Physical properties involve reactions",
+      "Chemical properties describe appearance only",
+      "Physical properties change composition",
+      "Chemical properties describe how matter reacts or changes composition"
+    ],
+    "correct_answer": "Chemical properties describe how matter reacts or changes composition",
+    "explanation": "Chemical properties describe a substance's ability to undergo chemical changes (like flammability, reactivity). Physical properties don't involve composition change.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the energy released when electrons transition to lower energy levels?",
+    "options": [
+      "Ionization energy",
+      "Bond energy",
+      "Nuclear energy",
+      "Electromagnetic radiation"
+    ],
+    "correct_answer": "Electromagnetic radiation",
+    "explanation": "When electrons drop to lower energy levels, they release energy as photons of electromagnetic radiation, including visible light.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the chemical formula for phosphoric acid?",
+    "options": [
+      "H2SO4",
+      "H3PO4",
+      "HNO3",
+      "H3PO3"
+    ],
+    "correct_answer": "H3PO4",
+    "explanation": "Phosphoric acid has the formula H3PO4. It contains 3 hydrogen atoms, 1 phosphorus atom, and 4 oxygen atoms.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for elements in the same group of the periodic table having similar properties?",
+    "options": [
+      "Isotopes",
+      "Isobars",
+      "Allotropes",
+      "Chemical families"
+    ],
+    "correct_answer": "Chemical families",
+    "explanation": "Elements in the same group (vertical column) of the periodic table are in the same chemical family and share similar chemical properties due to same valence electrons.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is Avogadro's number?",
+    "options": [
+      "6.022 × 10²¹",
+      "6.022 × 10²⁰",
+      "6.022 × 10²²",
+      "6.022 × 10²³"
+    ],
+    "correct_answer": "6.022 × 10²³",
+    "explanation": "Avogadro's number (NA) is 6.022 × 10²³ particles per mole. It defines the mole as the SI unit of amount of substance.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the process where a nucleus emits particles or radiation?",
+    "options": [
+      "Nuclear fission",
+      "Nuclear fusion",
+      "Electrolysis",
+      "Radioactive decay"
+    ],
+    "correct_answer": "Radioactive decay",
+    "explanation": "Radioactive decay is the spontaneous process where an unstable nucleus loses energy by emitting radiation (alpha, beta, or gamma) to become more stable.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the chemical formula for nitrous oxide (laughing gas)?",
+    "options": [
+      "NO",
+      "N2O3",
+      "NO2",
+      "N2O"
+    ],
+    "correct_answer": "N2O",
+    "explanation": "Nitrous oxide has formula N2O — two nitrogen atoms and one oxygen atom. It is used as an anesthetic and propellant.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the tendency of liquids to minimize surface area?",
+    "options": [
+      "Adhesion",
+      "Cohesion",
+      "Viscosity",
+      "Surface tension"
+    ],
+    "correct_answer": "Surface tension",
+    "explanation": "Surface tension is the elastic tendency of liquid surfaces to minimize their area, caused by cohesive forces between liquid molecules.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the chemical formula for acetic acid (found in vinegar)?",
+    "options": [
+      "CH3OH",
+      "HCOOH",
+      "C2H4O",
+      "CH3COOH"
+    ],
+    "correct_answer": "CH3COOH",
+    "explanation": "Acetic acid has formula CH3COOH (or C2H4O2). It is the main component of vinegar, giving it its sour taste and smell.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is Avogadro's constant used to calculate?",
+    "options": [
+      "Energy of bonds",
+      "Speed of reactions",
+      "Temperature of reactions",
+      "Number of particles in a sample"
+    ],
+    "correct_answer": "Number of particles in a sample",
+    "explanation": "Avogadro's constant (6.022 × 10²³ /mol) converts between moles and number of particles (atoms, molecules, ions) in a sample.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the attraction between unlike molecules?",
+    "options": [
+      "Cohesion",
+      "Surface tension",
+      "Viscosity",
+      "Adhesion"
+    ],
+    "correct_answer": "Adhesion",
+    "explanation": "Adhesion is the attraction between different types of molecules, like water molecules sticking to glass. Cohesion is attraction between like molecules.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the chemical symbol for manganese?",
+    "options": [
+      "Ma",
+      "Me",
+      "Mo",
+      "Mn"
+    ],
+    "correct_answer": "Mn",
+    "explanation": "Manganese's symbol is Mn. It is a transition metal with atomic number 25, used in making steel and dry cell batteries.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for a homogeneous mixture of two or more metals?",
+    "options": [
+      "Compound",
+      "Mixture",
+      "Suspension",
+      "Alloy"
+    ],
+    "correct_answer": "Alloy",
+    "explanation": "An alloy is a homogeneous mixture of two or more metals (or a metal and a nonmetal). Examples include bronze (Cu+Sn) and steel (Fe+C).",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for the heat energy required to convert 1 mole of liquid to gas?",
+    "options": [
+      "Enthalpy of formation",
+      "Heat of fusion",
+      "Specific heat capacity",
+      "Molar enthalpy of vaporization"
+    ],
+    "correct_answer": "Molar enthalpy of vaporization",
+    "explanation": "Molar enthalpy of vaporization (ΔHvap) is the heat required to vaporize one mole of liquid at its boiling point. For water it is 40.7 kJ/mol.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for a reaction that can proceed in both forward and reverse directions?",
+    "options": [
+      "Irreversible reaction",
+      "Exothermic reaction",
+      "Endothermic reaction",
+      "Reversible reaction"
+    ],
+    "correct_answer": "Reversible reaction",
+    "explanation": "A reversible reaction can proceed in both directions (forward and reverse). At equilibrium, both reactions occur at equal rates.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the standard international unit of energy?",
+    "options": [
+      "Calorie",
+      "Kelvin",
+      "Watt",
+      "Joule"
+    ],
+    "correct_answer": "Joule",
+    "explanation": "The joule (J) is the SI unit of energy. One joule equals the work done when a force of 1 newton moves an object 1 meter.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  }
+]

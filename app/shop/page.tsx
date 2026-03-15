@@ -155,7 +155,7 @@ function ConfirmModal({ item, quantity, onConfirm, onCancel, userCoins }: {
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center px-4" onClick={onCancel}>
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
-      <div className="relative w-full max-w-sm rounded-2xl border border-electric/20 p-6 animate-slide-up"
+      <div className="shop-card relative w-full max-w-sm rounded-2xl border border-electric/20 p-6 animate-slide-up"
         style={{ background: "linear-gradient(135deg, #0a1020, #060c18)" }} onClick={(e) => e.stopPropagation()}>
         <div className="text-center mb-6">
           <div className="text-5xl mb-3">{item.icon}</div>
@@ -184,14 +184,14 @@ function ConfirmModal({ item, quantity, onConfirm, onCancel, userCoins }: {
 function FeaturedCard({ item, owned, onBuy }: { item: ShopItem; owned: boolean; onBuy: () => void }) {
   const r = RARITY_COLORS[item.rarity];
   return (
-    <div className={`shop-tilt-card relative group rounded-2xl border ${r.border} ${r.glow} overflow-hidden shop-item-float`}
+    <div className={`shop-card shop-tilt-card relative group rounded-2xl border ${r.border} ${r.glow} overflow-hidden shop-item-float`}
       style={{ background: "linear-gradient(135deg, rgba(10,16,32,0.9), rgba(6,12,24,0.95))", backdropFilter: "blur(20px)" }}>
       {item.rarity === "legendary" && <div className="shop-legendary-border" />}
       <div className="relative p-6 sm:p-8">
         <span className={`absolute top-4 right-4 text-[10px] uppercase tracking-widest font-bold px-2.5 py-1 rounded-full ${r.badge}`}>{item.rarity}</span>
         <div className="text-6xl sm:text-7xl mb-4 shop-item-icon">{item.icon}</div>
-        <h3 className="font-bebas text-2xl sm:text-3xl text-cream tracking-wide mb-1">{item.name}</h3>
-        <p className="text-cream/40 text-sm mb-5 leading-relaxed">{item.description}</p>
+        <h3 className="shop-card-title font-bebas text-2xl sm:text-3xl text-cream tracking-wide mb-1">{item.name}</h3>
+        <p className="shop-card-desc text-cream/40 text-sm mb-5 leading-relaxed">{item.description}</p>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1.5">
             <img src="/fangs.png" alt="Fangs" className="w-5 h-5 object-contain" />
@@ -212,7 +212,7 @@ function FeaturedCard({ item, owned, onBuy }: { item: ShopItem; owned: boolean; 
 function CosmeticCard({ item, owned, canAfford, onBuy }: { item: ShopItem; owned: boolean; canAfford: boolean; onBuy: () => void }) {
   const r = RARITY_COLORS[item.rarity];
   return (
-    <div className={`shop-tilt-card relative group rounded-xl border ${r.border} overflow-hidden transition-all duration-300`}
+    <div className={`shop-card shop-tilt-card relative group rounded-xl border ${r.border} overflow-hidden transition-all duration-300`}
       style={{ background: "linear-gradient(135deg, rgba(10,16,32,0.85), rgba(6,12,24,0.9))", backdropFilter: "blur(12px)" }}>
       {item.rarity === "legendary" && <div className="shop-legendary-border" />}
       <div className="relative p-4">
@@ -220,8 +220,8 @@ function CosmeticCard({ item, owned, canAfford, onBuy }: { item: ShopItem; owned
           <div className="text-4xl shop-item-icon">{item.icon}</div>
           <span className={`text-[9px] uppercase tracking-widest font-bold px-2 py-0.5 rounded-full ${r.badge}`}>{item.rarity}</span>
         </div>
-        <h4 className="font-bebas text-lg text-cream tracking-wide mb-0.5">{item.name}</h4>
-        <p className="text-cream/30 text-xs mb-4 leading-relaxed">{item.description}</p>
+        <h4 className="shop-card-title font-bebas text-lg text-cream tracking-wide mb-0.5">{item.name}</h4>
+        <p className="shop-card-desc text-cream/30 text-xs mb-4 leading-relaxed">{item.description}</p>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1"><img src="/fangs.png" alt="Fangs" className="w-5 h-5 object-contain" /><span className="font-bebas text-lg text-gold">{formatCoins(item.price)}</span></div>
           {owned ? (
@@ -243,7 +243,7 @@ function BoosterCard({ item, quantityOwned, canAfford, onBuy }: { item: ShopItem
   const r = RARITY_COLORS[item.rarity];
   const bulkPrice = Math.floor(item.price * 5 * 0.9);
   return (
-    <div className={`shop-tilt-card relative group rounded-xl border ${r.border} overflow-hidden transition-all duration-300`}
+    <div className={`shop-card shop-tilt-card relative group rounded-xl border ${r.border} overflow-hidden transition-all duration-300`}
       style={{ background: "linear-gradient(135deg, rgba(10,16,32,0.85), rgba(6,12,24,0.9))", backdropFilter: "blur(12px)" }}>
       <div className="relative p-4 flex items-center gap-4">
         <div className="flex-shrink-0 w-14 h-14 rounded-xl flex items-center justify-center text-3xl"
@@ -252,10 +252,10 @@ function BoosterCard({ item, quantityOwned, canAfford, onBuy }: { item: ShopItem
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-0.5">
-            <h4 className="font-bebas text-lg text-cream tracking-wide">{item.name}</h4>
+            <h4 className="shop-card-title font-bebas text-lg text-cream tracking-wide">{item.name}</h4>
             <span className={`text-[9px] uppercase tracking-widest font-bold px-2 py-0.5 rounded-full ${r.badge}`}>{item.rarity}</span>
           </div>
-          <p className="text-cream/30 text-xs mb-3 leading-relaxed">{item.description}</p>
+          <p className="shop-card-desc text-cream/30 text-xs mb-3 leading-relaxed">{item.description}</p>
           <div className="flex items-center gap-2 flex-wrap">
             <button onClick={() => onBuy(1)} disabled={!canAfford}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${canAfford ? "gold-btn shop-btn-pulse" : "bg-gray-600/20 text-gray-500 cursor-not-allowed border border-gray-600/20"}`}>
@@ -282,7 +282,7 @@ function InventoryItem({ item, owned, onEquip }: { item: ShopItem; owned: OwnedI
   const r = RARITY_COLORS[item.rarity];
   const isBooster = item.type === "booster";
   return (
-    <div className={`relative rounded-xl border ${owned.equipped ? "border-green-500/40" : r.border} p-4 transition-all duration-300`}
+    <div className={`shop-card relative rounded-xl border ${owned.equipped ? "border-green-500/40" : r.border} p-4 transition-all duration-300`}
       style={{ background: "linear-gradient(135deg, rgba(10,16,32,0.85), rgba(6,12,24,0.9))" }}>
       {owned.equipped && (
         <div className="absolute top-2 right-2 flex items-center gap-1 bg-green-500/20 border border-green-500/30 rounded-full px-2 py-0.5">
@@ -317,7 +317,7 @@ function InventoryItem({ item, owned, onEquip }: { item: ShopItem; owned: OwnedI
 function PremiumCard({ item }: { item: PremiumItem }) {
   const r = RARITY_COLORS[item.rarity];
   return (
-    <div className={`shop-tilt-card premium-card relative group rounded-xl border ${r.border} overflow-hidden transition-all duration-300`}
+    <div className={`shop-card shop-tilt-card premium-card relative group rounded-xl border ${r.border} overflow-hidden transition-all duration-300`}
       style={{ background: "linear-gradient(135deg, rgba(20,8,40,0.9), rgba(10,6,30,0.95))", backdropFilter: "blur(12px)" }}>
       {item.rarity === "legendary" && <div className="shop-legendary-border-premium" />}
       {item.rarity === "epic" && <div className="shop-epic-border-premium" />}
@@ -326,8 +326,8 @@ function PremiumCard({ item }: { item: PremiumItem }) {
           <div className="text-5xl shop-item-icon premium-icon-glow">{item.icon}</div>
           <span className={`text-[9px] uppercase tracking-widest font-bold px-2 py-0.5 rounded-full ${r.badge}`}>{item.rarity}</span>
         </div>
-        <h4 className="font-bebas text-xl text-cream tracking-wide mb-0.5">{item.name}</h4>
-        <p className="text-cream/30 text-xs mb-5 leading-relaxed">{item.description}</p>
+        <h4 className="shop-card-title font-bebas text-xl text-cream tracking-wide mb-0.5">{item.name}</h4>
+        <p className="shop-card-desc text-cream/30 text-xs mb-5 leading-relaxed">{item.description}</p>
         <div className="flex items-center justify-between">
           <span className="font-bebas text-xl text-purple-300">${item.priceUSD.toFixed(2)}</span>
           <button disabled className="relative px-4 py-2 rounded-lg text-xs font-bold border border-purple-500/30 bg-purple-500/10 text-purple-400/60 cursor-not-allowed overflow-hidden">
@@ -368,7 +368,14 @@ export default function ShopPage() {
 
   useEffect(() => { loadInventory(); }, [loadInventory]);
 
-  if (isLoading) return null;
+  if (isLoading) return (
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="flex flex-col items-center gap-4">
+        <div className="w-12 h-12 rounded-full border-2 border-electric border-t-transparent animate-spin" />
+        <p className="font-bebas text-2xl text-electric tracking-widest">LOADING...</p>
+      </div>
+    </div>
+  );
 
   const userCoins = stats?.coins ?? user?.coins ?? 0;
   const countdown = getWeeklyCountdown();
@@ -466,7 +473,7 @@ export default function ShopPage() {
 
         {/* ── Store Mode Toggle ── */}
         <div className={`flex items-center justify-center mb-8 transition-all duration-700 delay-75 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`}>
-          <div className="relative flex items-center rounded-full p-1" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
+          <div className="shop-toggle relative flex items-center rounded-full p-1" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
             {/* Sliding indicator */}
             <div className="absolute top-1 bottom-1 rounded-full transition-all duration-300 ease-out"
               style={{
@@ -493,7 +500,7 @@ export default function ShopPage() {
         {isPremium && (
           <div className={`transition-all duration-700 delay-200 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`}>
             {/* Coming soon banner */}
-            <div className="text-center mb-8 py-4 px-6 rounded-2xl mx-auto max-w-lg"
+            <div className="shop-banner text-center mb-8 py-4 px-6 rounded-2xl mx-auto max-w-lg"
               style={{ background: "linear-gradient(135deg, rgba(168,85,247,0.08), rgba(124,58,237,0.04))", border: "1px solid rgba(168,85,247,0.15)" }}>
               <p className="text-purple-300 text-sm font-semibold mb-1">Premium store launching soon — stay tuned</p>
               <p className="text-purple-400/40 text-xs">Exclusive items purchasable with real money via Stripe</p>
@@ -526,7 +533,7 @@ export default function ShopPage() {
             {/* FEATURED */}
             {tab === "featured" && (
               <div className={`transition-all duration-700 delay-200 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`}>
-                <div className="flex items-center justify-between mb-6 px-4 py-3 rounded-xl"
+                <div className="shop-banner flex items-center justify-between mb-6 px-4 py-3 rounded-xl"
                   style={{ background: "linear-gradient(90deg, rgba(255,215,0,0.06), rgba(168,85,247,0.06))", border: "1px solid rgba(255,215,0,0.15)" }}>
                   <div className="flex items-center gap-2">
                     <span className="text-lg">🔥</span>

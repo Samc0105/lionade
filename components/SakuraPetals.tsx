@@ -302,7 +302,7 @@ export default function SakuraPetals() {
       {tumbleweeds.map((t) => (
         <div
           key={t.id}
-          className={`absolute tumbleweed tumbleweed-${t.direction}`}
+          className={`fixed tumbleweed tumbleweed-${t.direction}`}
           style={{
             top: `${t.y}%`,
             animationDuration: `${t.duration}s`,
@@ -317,7 +317,7 @@ export default function SakuraPetals() {
       {dustParticles.map((d) => (
         <div
           key={d.id}
-          className="absolute dust-particle"
+          className="fixed dust-particle"
           style={{
             left: `${d.x}%`,
             bottom: "10%",

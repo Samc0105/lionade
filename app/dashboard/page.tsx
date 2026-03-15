@@ -58,6 +58,14 @@ function CircleStat({ value, label, icon, color, size = 90 }: {
 }
 
 export default function DashboardPage() {
+  return (
+    <ProtectedRoute>
+      <DashboardContent />
+    </ProtectedRoute>
+  );
+}
+
+function DashboardContent() {
   const { user, refreshUser } = useAuth();
   const { stats } = useUserStats(user?.id);
   const [recentQuizzes, setRecentQuizzes] = useState<
@@ -116,7 +124,7 @@ export default function DashboardPage() {
     return () => clearTimeout(t);
   }, []);
 
-  if (!user) return null;
+  if (!user) return null; // ProtectedRoute handles redirect
 
   const claimBounty = async (bountyId: string) => {
     const res = await fetch("/api/claim-bounty", {
@@ -173,7 +181,7 @@ export default function DashboardPage() {
   ];
 
   return (
-    <ProtectedRoute>
+    <>
       <style jsx global>{`
         @keyframes orbit-stat {
           0% { transform: rotate(0deg); }
@@ -759,6 +767,6 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
-    </ProtectedRoute>
+    </>
   );
 }

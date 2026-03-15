@@ -1,0 +1,2760 @@
+[
+  {
+    "question": "What is the outermost layer of the Earth called?",
+    "options": [
+      "Crust",
+      "Mantle",
+      "Inner core",
+      "Outer core"
+    ],
+    "correct_answer": "Crust",
+    "explanation": "The crust is the Earth's outermost solid layer. Continental crust is ~35 km thick; oceanic crust is ~7 km thick. Below the crust is the mantle.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What type of rock is formed from cooled magma or lava?",
+    "options": [
+      "Sedimentary rock",
+      "Igneous rock",
+      "Metamorphic rock",
+      "Fossil rock"
+    ],
+    "correct_answer": "Igneous rock",
+    "explanation": "Igneous rocks form when magma (underground) or lava (at the surface) cools and solidifies. Examples include granite and basalt.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the supercontinent that existed about 300 million years ago?",
+    "options": [
+      "Laurasia",
+      "Gondwana",
+      "Pangaea",
+      "Rodinia"
+    ],
+    "correct_answer": "Pangaea",
+    "explanation": "Pangaea was a supercontinent that existed about 300–200 million years ago. It broke apart due to plate tectonics, forming the continents we know today.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name of the scale used to measure earthquake magnitude?",
+    "options": [
+      "Fujita scale",
+      "Mercalli scale",
+      "Beaufort scale",
+      "Richter scale"
+    ],
+    "correct_answer": "Richter scale",
+    "explanation": "The Richter scale (and its successor, the moment magnitude scale) measures the energy released by earthquakes. Each whole number increase represents about 31.6 times more energy.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What gas makes up the majority of Earth's atmosphere?",
+    "options": [
+      "Nitrogen",
+      "Oxygen",
+      "Carbon dioxide",
+      "Argon"
+    ],
+    "correct_answer": "Nitrogen",
+    "explanation": "Nitrogen (N₂) makes up about 78% of Earth's atmosphere. Oxygen accounts for about 21%, with argon and trace gases making up the rest.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What do we call molten rock beneath Earth's surface?",
+    "options": [
+      "Lava",
+      "Magma",
+      "Basalt",
+      "Obsidian"
+    ],
+    "correct_answer": "Magma",
+    "explanation": "Magma is molten rock found beneath Earth's surface. When it reaches the surface and erupts from a volcano, it is called lava.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the process by which wind and water break down rocks?",
+    "options": [
+      "Weathering",
+      "Deposition",
+      "Erosion",
+      "Compaction"
+    ],
+    "correct_answer": "Erosion",
+    "explanation": "Erosion is the process by which wind, water, ice, and gravity transport broken-down rock material from one place to another. Weathering breaks rocks down; erosion moves the material away.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "Which layer of Earth is made mostly of liquid iron and nickel?",
+    "options": [
+      "Crust",
+      "Inner core",
+      "Mantle",
+      "Outer core"
+    ],
+    "correct_answer": "Outer core",
+    "explanation": "The outer core is about 2,200 km thick and consists of liquid iron and nickel. The movement of liquid metal in the outer core generates Earth's magnetic field.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the term for rocks formed from compressed layers of sediment?",
+    "options": [
+      "Sedimentary rocks",
+      "Igneous rocks",
+      "Metamorphic rocks",
+      "Volcanic rocks"
+    ],
+    "correct_answer": "Sedimentary rocks",
+    "explanation": "Sedimentary rocks form when layers of sediment (sand, silt, shells) are compacted and cemented together over time. Examples include sandstone, limestone, and shale.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the point on Earth's surface directly above an earthquake's origin?",
+    "options": [
+      "Focus",
+      "Epicenter",
+      "Fault",
+      "Seismic zone"
+    ],
+    "correct_answer": "Epicenter",
+    "explanation": "The epicenter is the point on Earth's surface directly above the focus (hypocenter), where the earthquake originates. The epicenter typically experiences the strongest shaking.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the most abundant mineral in Earth's crust?",
+    "options": [
+      "Mica",
+      "Quartz",
+      "Feldspar",
+      "Calcite"
+    ],
+    "correct_answer": "Feldspar",
+    "explanation": "Feldspar minerals are the most abundant minerals in Earth's crust, making up about 60% of it. They are silicate minerals found in many rock types including granite.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the large moving pieces of Earth's crust?",
+    "options": [
+      "Ridges",
+      "Fault lines",
+      "Magma chambers",
+      "Tectonic plates"
+    ],
+    "correct_answer": "Tectonic plates",
+    "explanation": "Earth's lithosphere is divided into about 15 major tectonic plates that slowly move, driven by convection currents in the mantle. Their interactions cause earthquakes, volcanoes, and mountains.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What type of boundary is formed when two tectonic plates move apart?",
+    "options": [
+      "Divergent boundary",
+      "Convergent boundary",
+      "Transform boundary",
+      "Subduction zone"
+    ],
+    "correct_answer": "Divergent boundary",
+    "explanation": "At divergent boundaries, tectonic plates move away from each other. New seafloor is created at mid-ocean ridges. The Mid-Atlantic Ridge is a famous divergent boundary.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the water cycle process where liquid water becomes water vapor?",
+    "options": [
+      "Condensation",
+      "Evaporation",
+      "Precipitation",
+      "Transpiration"
+    ],
+    "correct_answer": "Evaporation",
+    "explanation": "Evaporation is when liquid water is heated and turns into water vapor, rising into the atmosphere. It is one of the key processes in the water cycle.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the term for a scientist who studies earthquakes?",
+    "options": [
+      "Volcanologist",
+      "Geologist",
+      "Seismologist",
+      "Meteorologist"
+    ],
+    "correct_answer": "Seismologist",
+    "explanation": "A seismologist is a scientist who studies earthquakes and the propagation of seismic waves through Earth. They use seismographs to detect and measure ground motion.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What percentage of Earth's surface is covered by water?",
+    "options": [
+      "About 80%",
+      "About 50%",
+      "About 60%",
+      "About 71%"
+    ],
+    "correct_answer": "About 71%",
+    "explanation": "About 71% of Earth's surface is covered by water, primarily the oceans. The Pacific Ocean alone covers about one-third of Earth's total surface area.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the layer of gases surrounding Earth?",
+    "options": [
+      "Atmosphere",
+      "Hydrosphere",
+      "Biosphere",
+      "Lithosphere"
+    ],
+    "correct_answer": "Atmosphere",
+    "explanation": "The atmosphere is the layer of gases surrounding Earth. It protects life from harmful solar radiation, traps heat, and provides the air we breathe. It extends about 10,000 km above Earth.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the process where water vapor turns into liquid water droplets in the atmosphere?",
+    "options": [
+      "Evaporation",
+      "Condensation",
+      "Precipitation",
+      "Sublimation"
+    ],
+    "correct_answer": "Condensation",
+    "explanation": "Condensation occurs when water vapor cools and changes into liquid water droplets. This process forms clouds, fog, and dew.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name of the deepest ocean trench on Earth?",
+    "options": [
+      "Java Trench",
+      "Puerto Rico Trench",
+      "Mariana Trench",
+      "Tonga Trench"
+    ],
+    "correct_answer": "Mariana Trench",
+    "explanation": "The Mariana Trench in the western Pacific Ocean is the deepest known point on Earth, reaching about 11 km (36,000 ft) at the Challenger Deep.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for rocks that have been changed by heat and pressure?",
+    "options": [
+      "Extrusive rocks",
+      "Sedimentary rocks",
+      "Igneous rocks",
+      "Metamorphic rocks"
+    ],
+    "correct_answer": "Metamorphic rocks",
+    "explanation": "Metamorphic rocks form when existing rocks are subjected to intense heat and/or pressure, changing their structure without melting. Examples include marble (from limestone) and slate (from shale).",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What does 'geology' literally mean?",
+    "options": [
+      "Study of Earth",
+      "Study of rocks",
+      "Study of soil",
+      "Study of minerals"
+    ],
+    "correct_answer": "Study of Earth",
+    "explanation": "Geology comes from the Greek words 'geo' (Earth) and 'logos' (study). Geologists study the solid Earth, including its rocks, minerals, structures, and history.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the approximate age of Earth?",
+    "options": [
+      "About 1 billion years",
+      "About 4.5 billion years",
+      "About 10 billion years",
+      "About 500 million years"
+    ],
+    "correct_answer": "About 4.5 billion years",
+    "explanation": "Earth is approximately 4.54 billion years old, determined by radiometric dating of meteorites and the oldest Earth rocks. The universe itself is about 13.8 billion years old.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the term for the movement of rock material downhill by gravity?",
+    "options": [
+      "Deposition",
+      "Erosion",
+      "Mass wasting",
+      "Sublimation"
+    ],
+    "correct_answer": "Mass wasting",
+    "explanation": "Mass wasting (or mass movement) is the downhill movement of rock and soil under the influence of gravity. It includes landslides, mudflows, rockfalls, and creep.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What type of volcano has gentle slopes and is built up by fluid lava flows?",
+    "options": [
+      "Caldera",
+      "Stratovolcano",
+      "Cinder cone",
+      "Shield volcano"
+    ],
+    "correct_answer": "Shield volcano",
+    "explanation": "Shield volcanoes have broad, gently sloping sides formed by runny (low-viscosity) basaltic lava. Hawaii's Mauna Loa is the world's largest shield volcano.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the boundary between Earth's crust and mantle?",
+    "options": [
+      "Mohorovičić discontinuity",
+      "Gutenberg discontinuity",
+      "Lehmann discontinuity",
+      "Conrad discontinuity"
+    ],
+    "correct_answer": "Mohorovičić discontinuity",
+    "explanation": "The Mohorovičić discontinuity (Moho) is the boundary between Earth's crust and mantle, where seismic wave velocities increase abruptly. It lies about 35 km deep under continents and 7 km under oceans.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for water that falls from clouds to Earth's surface?",
+    "options": [
+      "Condensation",
+      "Precipitation",
+      "Runoff",
+      "Percolation"
+    ],
+    "correct_answer": "Precipitation",
+    "explanation": "Precipitation is any form of water that falls from clouds to Earth's surface, including rain, snow, sleet, and hail. It is a key part of the water cycle.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the term for land that is permanently frozen below the surface?",
+    "options": [
+      "Glacier",
+      "Tundra",
+      "Permafrost",
+      "Frost"
+    ],
+    "correct_answer": "Permafrost",
+    "explanation": "Permafrost is ground that remains frozen for at least two consecutive years. It covers about 25% of Earth's land surface, mainly in the Arctic. Warming temperatures are causing permafrost to thaw.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the imaginary line that divides Earth into Northern and Southern Hemispheres?",
+    "options": [
+      "Arctic Circle",
+      "Prime meridian",
+      "Tropic of Cancer",
+      "Equator"
+    ],
+    "correct_answer": "Equator",
+    "explanation": "The equator is an imaginary circle at 0° latitude that divides Earth into the Northern and Southern Hemispheres. It is the widest circumference of Earth.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the hardest natural mineral on Earth?",
+    "options": [
+      "Diamond",
+      "Quartz",
+      "Corundum",
+      "Topaz"
+    ],
+    "correct_answer": "Diamond",
+    "explanation": "Diamond is the hardest natural mineral, scoring 10 on the Mohs hardness scale. It is made of pure carbon atoms arranged in a crystal lattice. Diamonds form under extreme pressure deep in the mantle.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the term for solid precipitation that forms when water droplets freeze into crystals?",
+    "options": [
+      "Sleet",
+      "Snow",
+      "Hail",
+      "Frost"
+    ],
+    "correct_answer": "Snow",
+    "explanation": "Snow forms when water vapor in clouds freezes directly into ice crystals. These crystals combine to form snowflakes. Snow is a form of precipitation.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the circular motion of material in the mantle that drives plate movement?",
+    "options": [
+      "Subduction",
+      "Conduction",
+      "Convection currents",
+      "Rifting"
+    ],
+    "correct_answer": "Convection currents",
+    "explanation": "Convection currents in the mantle are driven by heat from Earth's interior. Hot material rises, cools, and sinks, creating circular motion that moves tectonic plates above it.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for a region where two tectonic plates collide and one goes beneath the other?",
+    "options": [
+      "Hot spot",
+      "Transform fault",
+      "Divergent boundary",
+      "Subduction zone"
+    ],
+    "correct_answer": "Subduction zone",
+    "explanation": "A subduction zone forms where one tectonic plate (usually oceanic) slides beneath another. The subducting plate melts and can cause earthquakes and volcanoes. The Andes mountains formed this way.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the term for fine rock particles deposited by wind?",
+    "options": [
+      "Loess",
+      "Alluvium",
+      "Moraine",
+      "Till"
+    ],
+    "correct_answer": "Loess",
+    "explanation": "Loess is fine-grained sediment (mostly silt) deposited by wind. It forms fertile soils and is found in large deposits in China, the US Great Plains, and Central Asia.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for a large mass of moving ice?",
+    "options": [
+      "Iceberg",
+      "Glacier",
+      "Ice sheet",
+      "Permafrost"
+    ],
+    "correct_answer": "Glacier",
+    "explanation": "A glacier is a large, slow-moving mass of ice that forms from accumulated snow over many years. Glaciers shape landscapes through erosion and can contain about 69% of Earth's freshwater.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the layer of Earth directly below the crust?",
+    "options": [
+      "Inner core",
+      "Outer core",
+      "Mantle",
+      "Asthenosphere"
+    ],
+    "correct_answer": "Mantle",
+    "explanation": "The mantle is the layer between Earth's crust and outer core, about 2,900 km thick. It makes up about 84% of Earth's volume and consists of hot, solid silicate rock that can flow very slowly.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What process forms coal?",
+    "options": [
+      "Chemical precipitation from seawater",
+      "Cooled lava",
+      "Compressed animal bones",
+      "Compressed plant material over millions of years"
+    ],
+    "correct_answer": "Compressed plant material over millions of years",
+    "explanation": "Coal forms from plant material (mainly trees and ferns) that accumulated in swamps millions of years ago. Over time, burial, pressure, and heat compressed the organic material into coal.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the point inside Earth where an earthquake originates?",
+    "options": [
+      "Focus (hypocenter)",
+      "Epicenter",
+      "Fault",
+      "Seismic wave"
+    ],
+    "correct_answer": "Focus (hypocenter)",
+    "explanation": "The focus (or hypocenter) is the point inside Earth where an earthquake originates. The epicenter is directly above the focus on Earth's surface. Shallow earthquakes cause more damage.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for flat areas of land built up by river sediment deposits?",
+    "options": [
+      "River deltas",
+      "Alluvial plains",
+      "Floodplains",
+      "Estuaries"
+    ],
+    "correct_answer": "Alluvial plains",
+    "explanation": "Alluvial plains are flat areas formed by sediment (alluvium) deposited by rivers. They are often very fertile. Examples include the Ganges Plain and the Mississippi River valley.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the natural wearing away of Earth's surface by ice, water, and wind?",
+    "options": [
+      "Lithification",
+      "Deposition",
+      "Weathering",
+      "Metamorphism"
+    ],
+    "correct_answer": "Weathering",
+    "explanation": "Weathering is the breakdown of rocks at Earth's surface by physical, chemical, or biological processes. Physical weathering breaks rocks into smaller pieces; chemical weathering changes their composition.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the term for a crack in Earth's crust along which movement occurs?",
+    "options": [
+      "Fracture",
+      "Fold",
+      "Joint",
+      "Fault"
+    ],
+    "correct_answer": "Fault",
+    "explanation": "A fault is a fracture in Earth's crust along which blocks of rock move relative to each other. The San Andreas Fault in California is a famous example. Fault movement causes earthquakes.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the dense, central portion of Earth that is solid?",
+    "options": [
+      "Inner core",
+      "Outer core",
+      "Lower mantle",
+      "Mesosphere"
+    ],
+    "correct_answer": "Inner core",
+    "explanation": "The inner core is the solid, innermost layer of Earth, about 1,220 km in radius. Despite extremely high temperatures (~5,000°C), it remains solid due to enormous pressure.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for a slow-moving river of ice that flows downhill?",
+    "options": [
+      "Ice sheet",
+      "Alpine glacier",
+      "Pack ice",
+      "Permafrost"
+    ],
+    "correct_answer": "Alpine glacier",
+    "explanation": "Alpine (or mountain) glaciers form in mountain valleys and flow downhill under gravity. They carve U-shaped valleys and leave glacial features like moraines and cirques.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the scientific term for a scientist who studies weather?",
+    "options": [
+      "Hydrologist",
+      "Climatologist",
+      "Meteorologist",
+      "Atmospheric scientist"
+    ],
+    "correct_answer": "Meteorologist",
+    "explanation": "A meteorologist studies the atmosphere, weather patterns, and short-term weather forecasting. Climatologists study long-term climate patterns. Meteorology comes from the Greek word for 'atmospheric phenomena'.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the area where a river meets the sea, often forming a triangular deposit?",
+    "options": [
+      "Floodplain",
+      "Estuary",
+      "Alluvial fan",
+      "Delta"
+    ],
+    "correct_answer": "Delta",
+    "explanation": "A river delta is a landform created when a river deposits sediment as it enters a slower-moving or standing body of water. The Nile Delta and Mississippi Delta are famous examples.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the term for the layer of decomposed organic material at the top of soil?",
+    "options": [
+      "Humus",
+      "Clay",
+      "Bedrock",
+      "Subsoil"
+    ],
+    "correct_answer": "Humus",
+    "explanation": "Humus is the dark, organic component of soil formed by the decomposition of plant and animal matter by microorganisms. It improves soil fertility and water retention.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the circular/bowl-shaped depression formed at the top of a volcano?",
+    "options": [
+      "Caldera",
+      "Crater",
+      "Vent",
+      "Fissure"
+    ],
+    "correct_answer": "Crater",
+    "explanation": "A crater is the bowl-shaped depression at the top of a volcanic vent. A caldera is a much larger depression formed by the collapse of a magma chamber after a massive eruption.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for rocks containing valuable minerals in sufficient quantities to be mined profitably?",
+    "options": [
+      "Fossils",
+      "Gems",
+      "Ores",
+      "Minerals"
+    ],
+    "correct_answer": "Ores",
+    "explanation": "Ores are rocks or sediments that contain valuable minerals (like iron, copper, gold) in sufficient concentrations to be economically extracted. Iron ore, bauxite (aluminum), and copper ore are important examples.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for water that flows over the land surface into rivers and streams?",
+    "options": [
+      "Evapotranspiration",
+      "Groundwater",
+      "Infiltration",
+      "Runoff"
+    ],
+    "correct_answer": "Runoff",
+    "explanation": "Runoff is water that flows over the land surface after rainfall or snowmelt, eventually draining into rivers, lakes, and oceans. It is an important part of the water cycle.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the protective layer of the atmosphere that absorbs UV radiation?",
+    "options": [
+      "Ozone layer",
+      "Thermosphere",
+      "Troposphere",
+      "Ionosphere"
+    ],
+    "correct_answer": "Ozone layer",
+    "explanation": "The ozone layer in the stratosphere (about 15–35 km altitude) absorbs most of the Sun's harmful ultraviolet radiation. Chlorofluorocarbons (CFCs) have damaged it, leading to the Montreal Protocol.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the study of fossils?",
+    "options": [
+      "Geology",
+      "Paleontology",
+      "Archaeology",
+      "Mineralogy"
+    ],
+    "correct_answer": "Paleontology",
+    "explanation": "Paleontology is the scientific study of prehistoric life through fossils. Paleontologists study ancient organisms, their evolution, and the environments they lived in.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What type of rock is granite?",
+    "options": [
+      "Sedimentary",
+      "Metamorphic",
+      "Igneous",
+      "Extrusive"
+    ],
+    "correct_answer": "Igneous",
+    "explanation": "Granite is an intrusive igneous rock that forms when magma cools slowly deep underground. It is coarse-grained, very hard, and is used in construction. It forms the cores of many mountain ranges.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the term for the wearing away and carrying away of rock material by water, wind, or ice?",
+    "options": [
+      "Weathering",
+      "Compaction",
+      "Deposition",
+      "Erosion"
+    ],
+    "correct_answer": "Erosion",
+    "explanation": "Erosion is the process where rock and soil are loosened and transported by water, wind, ice, or gravity. It shapes landscapes by carving valleys and creating beaches.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "Where does most of Earth's freshwater exist?",
+    "options": [
+      "Ice caps and glaciers",
+      "Rivers and lakes",
+      "Groundwater",
+      "Atmosphere"
+    ],
+    "correct_answer": "Ice caps and glaciers",
+    "explanation": "About 68.7% of Earth's freshwater is stored in ice caps and glaciers, mainly in Antarctica and Greenland. Only about 0.3% of freshwater is in lakes, rivers, and swamps.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the top layer of the atmosphere where most weather occurs?",
+    "options": [
+      "Stratosphere",
+      "Troposphere",
+      "Mesosphere",
+      "Thermosphere"
+    ],
+    "correct_answer": "Troposphere",
+    "explanation": "The troposphere is the lowest layer of Earth's atmosphere, extending about 12 km above the surface. It contains 75% of atmospheric mass and all of Earth's weather systems.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the term for material deposited by a glacier?",
+    "options": [
+      "Alluvium",
+      "Loess",
+      "Moraine",
+      "Dune"
+    ],
+    "correct_answer": "Moraine",
+    "explanation": "A moraine is an accumulation of rocks, sediment, and debris transported and deposited by a glacier. Terminal moraines mark the furthest extent of past glaciers.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for underground water stored in permeable rocks?",
+    "options": [
+      "Surface water",
+      "Percolation",
+      "Runoff",
+      "Groundwater"
+    ],
+    "correct_answer": "Groundwater",
+    "explanation": "Groundwater is water stored underground in aquifers — permeable rocks, sediments, or soil. It makes up about 30% of Earth's freshwater and is pumped for drinking water and irrigation worldwide.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What type of seismic wave travels through Earth's interior?",
+    "options": [
+      "Body waves (P and S waves)",
+      "Surface waves",
+      "Love waves",
+      "Rayleigh waves"
+    ],
+    "correct_answer": "Body waves (P and S waves)",
+    "explanation": "Body waves travel through Earth's interior. P-waves (primary) are compression waves; S-waves (secondary) are shear waves. P-waves travel through solids and liquids; S-waves travel only through solids.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the area of land that drains into a single river system?",
+    "options": [
+      "Floodplain",
+      "Watershed (drainage basin)",
+      "Aquifer",
+      "Estuary"
+    ],
+    "correct_answer": "Watershed (drainage basin)",
+    "explanation": "A watershed or drainage basin is an area of land where all precipitation drains into the same river system. The Amazon River has the world's largest drainage basin.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What type of plate boundary is the San Andreas Fault?",
+    "options": [
+      "Divergent",
+      "Convergent",
+      "Transform",
+      "Subduction"
+    ],
+    "correct_answer": "Transform",
+    "explanation": "The San Andreas Fault is a transform (strike-slip) fault where the Pacific Plate and North American Plate slide horizontally past each other. It runs about 1,300 km through California.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the process where rocks are broken down by freezing and thawing of water?",
+    "options": [
+      "Chemical weathering",
+      "Hydrolysis",
+      "Oxidation",
+      "Frost wedging"
+    ],
+    "correct_answer": "Frost wedging",
+    "explanation": "Frost wedging (freeze-thaw weathering) occurs when water in rock cracks freezes, expands by 9%, and forces cracks to widen. Repeated cycles break rocks apart. Common in mountains and polar regions.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the natural satellite that orbits Earth?",
+    "options": [
+      "Moon",
+      "Sun",
+      "Mars",
+      "Venus"
+    ],
+    "correct_answer": "Moon",
+    "explanation": "Earth's Moon is our planet's only natural satellite. It orbits at an average distance of about 384,400 km. The Moon's gravity causes ocean tides and stabilizes Earth's axial tilt.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the term for a body of rock that is uniformly sorted in layers?",
+    "options": [
+      "Fault",
+      "Strata",
+      "Fold",
+      "Intrusion"
+    ],
+    "correct_answer": "Strata",
+    "explanation": "Strata (singular: stratum) are distinct layers of rock or soil with similar characteristics. The principle of superposition states that in undisturbed strata, younger layers lie above older ones.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the movement of energy as heat from Earth's hot interior toward the surface?",
+    "options": [
+      "Solar radiation",
+      "Conduction",
+      "Geothermal energy",
+      "Convection"
+    ],
+    "correct_answer": "Geothermal energy",
+    "explanation": "Geothermal energy is heat from Earth's interior, generated by radioactive decay and residual heat from Earth's formation. It can be harnessed for electricity and heating. Iceland gets most of its energy this way.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for a large, steep-sided volcanic mountain with alternating lava and ash layers?",
+    "options": [
+      "Shield volcano",
+      "Lava dome",
+      "Cinder cone",
+      "Stratovolcano (composite volcano)"
+    ],
+    "correct_answer": "Stratovolcano (composite volcano)",
+    "explanation": "Stratovolcanoes (composite volcanoes) are tall, steep-sided volcanoes built up by alternating layers of lava flows and pyroclastic deposits. Mt. Fuji and Mt. St. Helens are examples.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What process causes the ocean floor to spread at mid-ocean ridges?",
+    "options": [
+      "Seafloor spreading",
+      "Subduction",
+      "Faulting",
+      "Folding"
+    ],
+    "correct_answer": "Seafloor spreading",
+    "explanation": "Seafloor spreading occurs at mid-ocean ridges where tectonic plates diverge. New oceanic crust is created as magma rises, cools, and pushes older crust outward. Harry Hess proposed this in the 1960s.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the series of large ocean waves caused by underwater earthquakes?",
+    "options": [
+      "Tidal waves",
+      "Tsunami",
+      "Storm surge",
+      "Swell"
+    ],
+    "correct_answer": "Tsunami",
+    "explanation": "A tsunami is a series of ocean waves generated by underwater disturbances like earthquakes, volcanic eruptions, or landslides. They can travel at over 800 km/h in deep water.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the main cause of ocean tides?",
+    "options": [
+      "Earth's rotation",
+      "Solar winds",
+      "Gravitational pull of the Moon",
+      "Ocean currents"
+    ],
+    "correct_answer": "Gravitational pull of the Moon",
+    "explanation": "Tides are primarily caused by the Moon's gravitational pull on Earth's oceans. The Sun also affects tides. Spring tides (highest) occur when the Sun, Moon, and Earth align; neap tides when they are at 90°.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the zone between the troposphere and mesosphere?",
+    "options": [
+      "Troposphere",
+      "Exosphere",
+      "Thermosphere",
+      "Stratosphere"
+    ],
+    "correct_answer": "Stratosphere",
+    "explanation": "The stratosphere extends from about 12 to 50 km altitude. It contains the ozone layer and is characterized by temperatures that increase with altitude. Commercial jets fly in the lower stratosphere.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for minerals that have a shiny, metallic appearance?",
+    "options": [
+      "Metallic luster minerals",
+      "Dull minerals",
+      "Gem minerals",
+      "Silicate minerals"
+    ],
+    "correct_answer": "Metallic luster minerals",
+    "explanation": "Minerals with metallic luster have a shiny, metal-like appearance. Examples include pyrite (fool's gold), galena, and native copper. Luster is a key property used to identify minerals.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What percentage of Earth's water is saltwater?",
+    "options": [
+      "About 50%",
+      "About 97%",
+      "About 75%",
+      "About 85%"
+    ],
+    "correct_answer": "About 97%",
+    "explanation": "About 97% of Earth's water is saltwater in the oceans. Only about 3% is freshwater, and most of that is frozen in glaciers and ice caps. Less than 1% is accessible freshwater for human use.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for large-scale air circulation patterns that influence global climate?",
+    "options": [
+      "Trade winds",
+      "Jet streams",
+      "Atmospheric cells",
+      "Monsoons"
+    ],
+    "correct_answer": "Atmospheric cells",
+    "explanation": "Atmospheric circulation cells (Hadley, Ferrel, and Polar cells) are large-scale patterns of air movement that distribute heat around Earth. They drive the major wind belts and influence global climate.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for a natural underground chamber formed in limestone by water dissolution?",
+    "options": [
+      "Sinkhole",
+      "Cavern",
+      "Grotto",
+      "Cave (karst cave)"
+    ],
+    "correct_answer": "Cave (karst cave)",
+    "explanation": "Karst caves form when slightly acidic water dissolves limestone over long periods, creating underground chambers and passages. Famous examples include Mammoth Cave (USA) and the caves of Waitomo (NZ).",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the term for rock that has never been altered since its formation?",
+    "options": [
+      "Bedrock",
+      "Unweathered rock",
+      "Parent rock",
+      "Protolith"
+    ],
+    "correct_answer": "Bedrock",
+    "explanation": "Bedrock is the solid, unweathered rock that lies beneath soil and loose surface material. It is the foundation of the landscape and can be exposed by erosion or excavation.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the process where wind deposits sand to form hills?",
+    "options": [
+      "Alluviation",
+      "Sand dune formation",
+      "Loess deposition",
+      "Fluvial deposition"
+    ],
+    "correct_answer": "Sand dune formation",
+    "explanation": "Sand dunes form when wind picks up sand and deposits it in mounds. They are common in deserts and coastal areas. Barchan, longitudinal, and star dunes are common types.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the circular pattern of ocean currents driven by winds and Earth's rotation?",
+    "options": [
+      "Thermohaline circulation",
+      "Upwelling",
+      "Gyre",
+      "Eddies"
+    ],
+    "correct_answer": "Gyre",
+    "explanation": "Gyres are large systems of circular ocean currents driven by global wind patterns and the Coriolis effect (Earth's rotation). There are five major ocean gyres. They concentrate floating debris in 'garbage patches'.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for volcanic rock with many holes formed by trapped gas bubbles?",
+    "options": [
+      "Basalt",
+      "Rhyolite",
+      "Obsidian",
+      "Pumice"
+    ],
+    "correct_answer": "Pumice",
+    "explanation": "Pumice is a porous, lightweight volcanic rock formed from rapidly cooled frothy lava. It has so many gas bubbles it can float on water. It is used as an abrasive in cosmetics and construction.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the term for the bending of rock layers under tectonic forces?",
+    "options": [
+      "Folding",
+      "Faulting",
+      "Shearing",
+      "Fracturing"
+    ],
+    "correct_answer": "Folding",
+    "explanation": "Folding occurs when rock layers bend due to compressional tectonic forces. Upward folds are anticlines; downward folds are synclines. The Himalayas and Appalachians formed partly by folding.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What type of cloud produces thunderstorms?",
+    "options": [
+      "Cirrus",
+      "Cumulonimbus",
+      "Stratus",
+      "Nimbostratus"
+    ],
+    "correct_answer": "Cumulonimbus",
+    "explanation": "Cumulonimbus clouds are tall, dense thunderstorm clouds that can reach from near the surface to the tropopause. They produce lightning, heavy rain, hail, and sometimes tornadoes.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the slow creep of soil downslope?",
+    "options": [
+      "Landslide",
+      "Mudflow",
+      "Soil creep",
+      "Slump"
+    ],
+    "correct_answer": "Soil creep",
+    "explanation": "Soil creep is the very slow, gradual downhill movement of soil and rock debris under gravity. Evidence includes tilted fence posts and bent trees. It moves a few mm per year.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the term for the natural process by which soil is formed?",
+    "options": [
+      "Sedimentation",
+      "Diagenesis",
+      "Lithification",
+      "Pedogenesis (soil formation)"
+    ],
+    "correct_answer": "Pedogenesis (soil formation)",
+    "explanation": "Pedogenesis is the process of soil formation through weathering of parent rock, accumulation of organic matter, and biological activity. It takes hundreds to thousands of years to form a few centimetres of soil.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the hottest layer of Earth's atmosphere?",
+    "options": [
+      "Thermosphere",
+      "Stratosphere",
+      "Mesosphere",
+      "Troposphere"
+    ],
+    "correct_answer": "Thermosphere",
+    "explanation": "The thermosphere, extending from about 80 to 600 km, has the highest temperatures (up to 2,500°C) due to absorption of solar radiation. However, it feels cold because the air is so thin.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for a poisonous mixture of fog and smoke?",
+    "options": [
+      "Acid rain",
+      "Smog",
+      "Ozone",
+      "Haze"
+    ],
+    "correct_answer": "Smog",
+    "explanation": "Smog is a type of air pollution formed from the combination of smoke, fog, and chemical pollutants. Photochemical smog forms when sunlight reacts with nitrogen oxides and volatile organic compounds.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the term for the dark glass-like volcanic rock?",
+    "options": [
+      "Pumice",
+      "Basalt",
+      "Obsidian",
+      "Granite"
+    ],
+    "correct_answer": "Obsidian",
+    "explanation": "Obsidian is a dark, glassy volcanic rock formed when lava cools extremely rapidly, preventing crystal formation. It has a conchoidal (curved) fracture and was used by ancient peoples to make sharp tools.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for Earth's solid outer layer including the crust and upper mantle?",
+    "options": [
+      "Asthenosphere",
+      "Hydrosphere",
+      "Mesosphere",
+      "Lithosphere"
+    ],
+    "correct_answer": "Lithosphere",
+    "explanation": "The lithosphere is the rigid outer layer of Earth, consisting of the crust and the uppermost, solid part of the mantle. It is broken into tectonic plates and is about 100 km thick.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the line of volcanoes and earthquakes surrounding the Pacific Ocean?",
+    "options": [
+      "Ring of Fire",
+      "Mid-Atlantic Ridge",
+      "Pacific Rift",
+      "Circum-Pacific Belt"
+    ],
+    "correct_answer": "Ring of Fire",
+    "explanation": "The Ring of Fire is a horseshoe-shaped zone around the Pacific Ocean with high volcanic and earthquake activity. It contains about 75% of the world's active volcanoes and 90% of the world's earthquakes.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the smallest unit of a mineral's crystal structure?",
+    "options": [
+      "Atom",
+      "Unit cell",
+      "Molecule",
+      "Ion"
+    ],
+    "correct_answer": "Unit cell",
+    "explanation": "The unit cell is the smallest repeating unit of a crystal structure that retains all the properties of the crystal. The arrangement of atoms in the unit cell determines the mineral's properties.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the process by which plants release water vapor into the atmosphere?",
+    "options": [
+      "Evaporation",
+      "Condensation",
+      "Transpiration",
+      "Precipitation"
+    ],
+    "correct_answer": "Transpiration",
+    "explanation": "Transpiration is the process by which plants release water vapor through tiny pores (stomata) in their leaves. Together with evaporation, it is called evapotranspiration.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the measure of how much water vapor is in the air?",
+    "options": [
+      "Precipitation",
+      "Dew point",
+      "Barometric pressure",
+      "Humidity"
+    ],
+    "correct_answer": "Humidity",
+    "explanation": "Humidity measures the amount of water vapor in the air. Relative humidity (%) compares the actual water vapor to the maximum possible at that temperature. 100% humidity means the air is saturated.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the gradual sinking of land?",
+    "options": [
+      "Subsidence",
+      "Uplift",
+      "Isostasy",
+      "Rebound"
+    ],
+    "correct_answer": "Subsidence",
+    "explanation": "Subsidence is the gradual sinking or settling of the ground. It can be caused by extraction of groundwater or oil, mining, natural compaction of sediments, or tectonic forces.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the main greenhouse gas responsible for recent climate change?",
+    "options": [
+      "Oxygen",
+      "Carbon dioxide (CO₂)",
+      "Nitrogen",
+      "Argon"
+    ],
+    "correct_answer": "Carbon dioxide (CO₂)",
+    "explanation": "Carbon dioxide (CO₂) is the primary greenhouse gas contributing to recent climate change. Its concentration has increased from about 280 ppm before industrialization to over 420 ppm today.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for a large depression formed when a volcano collapses?",
+    "options": [
+      "Crater",
+      "Vent",
+      "Caldera",
+      "Fissure"
+    ],
+    "correct_answer": "Caldera",
+    "explanation": "A caldera is a large volcanic depression formed when a magma chamber empties and the overlying volcano collapses. Calderas can be tens of kilometers wide. Yellowstone is a supervolcano caldera.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the term for the natural recycling of rocks through Earth's processes?",
+    "options": [
+      "Water cycle",
+      "Nitrogen cycle",
+      "Carbon cycle",
+      "Rock cycle"
+    ],
+    "correct_answer": "Rock cycle",
+    "explanation": "The rock cycle describes how rocks continually change from one type to another through processes like melting, cooling, weathering, erosion, burial, pressure, and heat over millions of years.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the tool used to detect and record earthquake waves?",
+    "options": [
+      "Seismograph",
+      "Barometer",
+      "Thermometer",
+      "Anemometer"
+    ],
+    "correct_answer": "Seismograph",
+    "explanation": "A seismograph is an instrument that detects and records seismic waves from earthquakes. The record it produces is called a seismogram. Modern seismographs can detect even very small distant earthquakes.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for a narrow, elongated inlet formed by glacial erosion and flooded by the sea?",
+    "options": [
+      "Estuary",
+      "Fjord",
+      "Bay",
+      "Lagoon"
+    ],
+    "correct_answer": "Fjord",
+    "explanation": "Fjords are deep, narrow inlets with steep sides formed by glaciers that carved valleys later flooded by the sea. Norway has famous fjords, as do New Zealand, Canada, and Chile.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the type of rock that contains fossils?",
+    "options": [
+      "Igneous",
+      "Metamorphic",
+      "Sedimentary",
+      "Extrusive"
+    ],
+    "correct_answer": "Sedimentary",
+    "explanation": "Fossils are most commonly found in sedimentary rocks because organisms are buried by sediments that eventually become rock. Igneous and metamorphic rocks rarely contain fossils as heat destroys organic material.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the average salinity (salt content) of the ocean?",
+    "options": [
+      "About 1%",
+      "About 10%",
+      "About 7%",
+      "About 3.5%"
+    ],
+    "correct_answer": "About 3.5%",
+    "explanation": "The average salinity of seawater is about 35 parts per thousand (3.5%). Sodium chloride (table salt) makes up most of this. The saltiest seas are the Red Sea and Mediterranean; least salty is the Baltic Sea.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the warming of Earth's surface by the greenhouse effect?",
+    "options": [
+      "Global warming",
+      "Solar maximum",
+      "Ozone depletion",
+      "Albedo effect"
+    ],
+    "correct_answer": "Global warming",
+    "explanation": "Global warming refers to the long-term rise in Earth's average surface temperature, primarily caused by increased greenhouse gas emissions from human activities like burning fossil fuels.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for rocky debris left by a retreating glacier?",
+    "options": [
+      "Alluvium",
+      "Till (glacial till)",
+      "Loess",
+      "Silt"
+    ],
+    "correct_answer": "Till (glacial till)",
+    "explanation": "Glacial till is unsorted, unstratified sediment deposited directly by glacial ice. Unlike water-sorted sediments, till contains a jumbled mix of particle sizes from clay to boulders.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the boundary between warm and cold ocean water?",
+    "options": [
+      "Halocline",
+      "Pycnocline",
+      "Thermocline",
+      "Chemocline"
+    ],
+    "correct_answer": "Thermocline",
+    "explanation": "The thermocline is a layer in the ocean where temperature decreases rapidly with depth. It separates warmer surface water from cold deep water and forms a barrier to mixing.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the Mohs hardness scale used to measure?",
+    "options": [
+      "Weight of minerals",
+      "Density of rocks",
+      "Age of minerals",
+      "Hardness of minerals"
+    ],
+    "correct_answer": "Hardness of minerals",
+    "explanation": "The Mohs scale (1–10) measures the hardness of minerals by their scratch resistance. Talc = 1 (softest), diamond = 10 (hardest). A mineral can scratch anything softer than itself.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the breaking apart of rocks due to temperature changes?",
+    "options": [
+      "Thermal expansion weathering",
+      "Frost wedging",
+      "Chemical weathering",
+      "Exfoliation"
+    ],
+    "correct_answer": "Thermal expansion weathering",
+    "explanation": "Thermal expansion weathering (insolation weathering) occurs when repeated heating and cooling causes rocks to expand and contract, eventually breaking apart. It is common in deserts with large temperature swings.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the process where limestone dissolves in slightly acidic water?",
+    "options": [
+      "Hydrolysis",
+      "Carbonation",
+      "Oxidation",
+      "Hydration"
+    ],
+    "correct_answer": "Carbonation",
+    "explanation": "Carbonation is when carbon dioxide dissolves in water to form carbonic acid, which reacts with limestone (calcium carbonate), dissolving it. This creates karst landscapes, caves, and sinkholes.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for an area of land permanently frozen to great depth?",
+    "options": [
+      "Arctic tundra",
+      "Polar zone",
+      "Permafrost region",
+      "Subarctic zone"
+    ],
+    "correct_answer": "Permafrost region",
+    "explanation": "Permafrost regions are areas where the ground remains frozen for more than two years. They cover about 25% of the Northern Hemisphere's land area and contain large amounts of stored carbon.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for a volcanic opening in the seafloor that emits hot, mineral-rich water?",
+    "options": [
+      "Submarine volcano",
+      "Geyser",
+      "Fumarole",
+      "Hydrothermal vent"
+    ],
+    "correct_answer": "Hydrothermal vent",
+    "explanation": "Hydrothermal vents are openings in the seafloor near mid-ocean ridges that emit hot, mineral-rich water (up to 400°C). They support unique ecosystems based on chemosynthesis, not sunlight.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the solid rock just beneath the soil?",
+    "options": [
+      "Bedrock",
+      "Subsoil",
+      "Parent material",
+      "Saprolite"
+    ],
+    "correct_answer": "Bedrock",
+    "explanation": "Bedrock is the solid, unweathered rock layer beneath soil and loose surface material. Soil forms from the weathering of bedrock over thousands of years.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the naturally occurring inorganic solid with a definite chemical composition?",
+    "options": [
+      "Rock",
+      "Mineral",
+      "Crystal",
+      "Gem"
+    ],
+    "correct_answer": "Mineral",
+    "explanation": "A mineral is a naturally occurring, inorganic solid with a specific chemical composition and crystal structure. There are about 4,000 known minerals. Rocks are aggregates of one or more minerals.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the daily rise and fall of sea level?",
+    "options": [
+      "Ocean currents",
+      "Wave action",
+      "Tides",
+      "Storm surge"
+    ],
+    "correct_answer": "Tides",
+    "explanation": "Tides are the regular rise and fall of sea levels caused by gravitational forces of the Moon and Sun. Most coastal areas experience two high tides and two low tides each day.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the theory explaining Earth's magnetic field?",
+    "options": [
+      "Core convection",
+      "Polar flip theory",
+      "Magnetic monopole theory",
+      "Dynamo theory"
+    ],
+    "correct_answer": "Dynamo theory",
+    "explanation": "The dynamo theory explains Earth's magnetic field as generated by the movement of liquid iron in the outer core. Electric currents create a magnetic field that extends far into space, protecting Earth from solar wind.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for water that infiltrates into soil and rock?",
+    "options": [
+      "Groundwater",
+      "Surface water",
+      "Runoff",
+      "Throughflow"
+    ],
+    "correct_answer": "Groundwater",
+    "explanation": "Groundwater is water that has infiltrated into soil and permeable rocks, filling the spaces between grains. It flows slowly through aquifers and can emerge as springs or be pumped from wells.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What type of boundary causes the Himalayas to continue rising?",
+    "options": [
+      "Divergent boundary",
+      "Convergent boundary (continent-continent collision)",
+      "Transform boundary",
+      "Subduction zone"
+    ],
+    "correct_answer": "Convergent boundary (continent-continent collision)",
+    "explanation": "The Himalayas are rising because the Indian Plate and Eurasian Plate are converging in a continent-continent collision. Neither plate subducts, so crust piles up, forming the world's highest mountains.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the scientific study of the ocean?",
+    "options": [
+      "Limnology",
+      "Hydrology",
+      "Oceanography",
+      "Marine biology"
+    ],
+    "correct_answer": "Oceanography",
+    "explanation": "Oceanography is the scientific study of the ocean, including its physical, chemical, biological, and geological aspects. Oceanographers study ocean currents, tides, marine life, and seafloor geology.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for a hollow, mineral-lined rock cavity?",
+    "options": [
+      "Nodule",
+      "Concretion",
+      "Xenolith",
+      "Geode"
+    ],
+    "correct_answer": "Geode",
+    "explanation": "A geode is a hollow rock lined with crystals (often quartz or amethyst) or other mineral deposits. They form in volcanic and sedimentary rocks when mineral-rich water fills cavities and crystals grow.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the process where glaciers grind away at bedrock?",
+    "options": [
+      "Abrasion",
+      "Frost weathering",
+      "Plucking",
+      "Quarrying"
+    ],
+    "correct_answer": "Abrasion",
+    "explanation": "Glacial abrasion occurs when rocks embedded in the glacier's base scrape and grind the underlying bedrock, smoothing and polishing it. It creates scratches called striations that show the direction of ice movement.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the dark, iron-rich volcanic rock that makes up most of the ocean floor?",
+    "options": [
+      "Granite",
+      "Basalt",
+      "Obsidian",
+      "Pumice"
+    ],
+    "correct_answer": "Basalt",
+    "explanation": "Basalt is a fine-grained, dark igneous rock that forms from rapidly cooled lava. It makes up most of the ocean floor and is also found in continental flood basalts like the Columbia River Basalt.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the imaginary line from which longitude is measured?",
+    "options": [
+      "Equator",
+      "International Date Line",
+      "Prime meridian",
+      "Tropic of Capricorn"
+    ],
+    "correct_answer": "Prime meridian",
+    "explanation": "The prime meridian is the line of 0° longitude running through Greenwich, England. It divides Earth into Eastern and Western Hemispheres and is used as the reference for time zones.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for any material from a volcanic eruption?",
+    "options": [
+      "Magma",
+      "Lava",
+      "Tephra",
+      "Pyroclastic material"
+    ],
+    "correct_answer": "Pyroclastic material",
+    "explanation": "Pyroclastic material (pyroclasts) includes all fragmentary volcanic materials ejected during an eruption: ash, lapilli, and bombs. Tephra refers to air-fallen pyroclastic material.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the type of rock that can be stretched into thin layers (foliated)?",
+    "options": [
+      "Schist",
+      "Basalt",
+      "Granite",
+      "Quartzite"
+    ],
+    "correct_answer": "Schist",
+    "explanation": "Schist is a medium-to-coarse grained metamorphic rock with a foliated (layered) texture. It forms under moderate to high pressure and temperature. Mica minerals give it a shiny, flaky appearance.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for tiny particles of rock and organic matter that make up soil?",
+    "options": [
+      "Gravel",
+      "Soil particles (sand, silt, clay)",
+      "Minerals",
+      "Sediment"
+    ],
+    "correct_answer": "Soil particles (sand, silt, clay)",
+    "explanation": "Soil is made up of mineral particles of varying sizes: sand (0.05–2 mm), silt (0.002–0.05 mm), and clay (<0.002 mm), plus organic matter, water, and air. Loam (balanced mix) is ideal for agriculture.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for a rotating column of air extending from a thunderstorm to the ground?",
+    "options": [
+      "Hurricane",
+      "Waterspout",
+      "Tornado",
+      "Cyclone"
+    ],
+    "correct_answer": "Tornado",
+    "explanation": "A tornado is a violently rotating column of air extending from a cumulonimbus cloud to the ground. The USA has the most tornadoes, particularly in 'Tornado Alley' in the central US.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the age of a rock determined by ratios of radioactive isotopes?",
+    "options": [
+      "Relative age",
+      "Fossil age",
+      "Stratigraphic age",
+      "Absolute age (radiometric age)"
+    ],
+    "correct_answer": "Absolute age (radiometric age)",
+    "explanation": "Absolute age (radiometric dating) determines the actual age of a rock using ratios of radioactive isotopes to their decay products. Carbon-14 dates organic material up to 50,000 years; uranium-lead dates rocks billions of years old.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the phenomenon where hot gas and steam shoot out of the ground?",
+    "options": [
+      "Geyser",
+      "Fumarole",
+      "Hot spring",
+      "Mudpot"
+    ],
+    "correct_answer": "Geyser",
+    "explanation": "A geyser is a hot spring that periodically erupts, shooting water and steam into the air due to geothermal heating. Old Faithful in Yellowstone is a famous geyser that erupts about every 90 minutes.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the preserved remains or traces of ancient organisms?",
+    "options": [
+      "Minerals",
+      "Fossils",
+      "Rocks",
+      "Crystals"
+    ],
+    "correct_answer": "Fossils",
+    "explanation": "Fossils are preserved remains, impressions, or traces of organisms from the geological past. They include bones, shells, footprints, and molds. Most form in sedimentary rocks.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the term for the area where freshwater and saltwater mix, such as a river mouth?",
+    "options": [
+      "Delta",
+      "Lagoon",
+      "Estuary",
+      "Bay"
+    ],
+    "correct_answer": "Estuary",
+    "explanation": "An estuary is a partially enclosed body of water where a river meets the ocean, creating a mix of fresh and saltwater. Estuaries are highly productive ecosystems and nurseries for many fish species.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the hardening of sediment into rock?",
+    "options": [
+      "Weathering",
+      "Metamorphism",
+      "Diagenesis",
+      "Lithification"
+    ],
+    "correct_answer": "Lithification",
+    "explanation": "Lithification is the process by which loose sediment is compacted and cemented into solid rock (sedimentary rock). The two main processes are compaction (pressure) and cementation (minerals fill pore spaces).",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the climate zone found at the equator, characterized by heavy rainfall?",
+    "options": [
+      "Tropical rainforest climate",
+      "Tundra",
+      "Desert",
+      "Mediterranean climate"
+    ],
+    "correct_answer": "Tropical rainforest climate",
+    "explanation": "Tropical rainforest climates (near the equator) have high temperatures year-round, heavy rainfall (>2000 mm/year), and no dry season. They support the world's most diverse ecosystems.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the process where rock is lifted and exposed by erosion?",
+    "options": [
+      "Uplift",
+      "Exfoliation",
+      "Unloading",
+      "Isostatic rebound"
+    ],
+    "correct_answer": "Exfoliation",
+    "explanation": "Exfoliation (onion-skin weathering) is when outer layers of rock peel away due to pressure release or thermal expansion. Half Dome in Yosemite shows dramatic exfoliation of granite.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for a rock formation shaped by wind erosion?",
+    "options": [
+      "Moraine",
+      "Drumlin",
+      "Yardang",
+      "Esker"
+    ],
+    "correct_answer": "Yardang",
+    "explanation": "Yardangs are elongated, streamlined rock formations carved by wind erosion, aligned parallel to the prevailing wind. They are common in deserts and can range from small features to several kilometers long.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the slow movement of glaciers pulling rocks from the bedrock?",
+    "options": [
+      "Abrasion",
+      "Exfoliation",
+      "Solifluction",
+      "Plucking (quarrying)"
+    ],
+    "correct_answer": "Plucking (quarrying)",
+    "explanation": "Glacial plucking (quarrying) occurs when a glacier freezes onto bedrock, and as it moves, it pulls away chunks of rock. Together with abrasion, plucking is responsible for most glacial erosion.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the imaginary horizontal line used to show latitude?",
+    "options": [
+      "Parallel",
+      "Contour line",
+      "Meridian",
+      "Isoline"
+    ],
+    "correct_answer": "Parallel",
+    "explanation": "Parallels are imaginary horizontal lines that run east-west and measure latitude. They are called parallels because they never intersect. The equator is the 0° parallel.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the force that pulls objects toward Earth's center?",
+    "options": [
+      "Magnetism",
+      "Gravity",
+      "Friction",
+      "Centripetal force"
+    ],
+    "correct_answer": "Gravity",
+    "explanation": "Gravity is the force of attraction between objects with mass. Earth's gravity pulls objects toward its center with an acceleration of about 9.8 m/s². It holds the atmosphere and water on Earth.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the period of time geologists use to divide Earth's history?",
+    "options": [
+      "Epochs",
+      "Eras",
+      "Geologic time scale",
+      "Periods"
+    ],
+    "correct_answer": "Geologic time scale",
+    "explanation": "The geologic time scale divides Earth's 4.54-billion-year history into eons, eras, periods, epochs, and ages. Major divisions are often based on mass extinction events or significant changes in life on Earth.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for a pyramid-shaped peak formed by glacial erosion on multiple sides?",
+    "options": [
+      "Cirque",
+      "Arête",
+      "Col",
+      "Horn"
+    ],
+    "correct_answer": "Horn",
+    "explanation": "A glacial horn is a sharp, pyramid-shaped mountain peak formed when glaciers erode a mountain from multiple sides. The Matterhorn in the Alps is a classic example.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the outermost thin shell of Earth made of silica-rich rock?",
+    "options": [
+      "Continental crust",
+      "Lithosphere",
+      "Asthenosphere",
+      "Oceanic crust"
+    ],
+    "correct_answer": "Continental crust",
+    "explanation": "Continental crust is the thicker (~35 km), less dense part of Earth's crust composed mainly of granitic (silica-rich) rocks. It forms the continents and is much older (up to 4 billion years) than oceanic crust.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What type of rock does granite turn into under high pressure and heat?",
+    "options": [
+      "Sandstone",
+      "Gneiss",
+      "Limestone",
+      "Schist"
+    ],
+    "correct_answer": "Gneiss",
+    "explanation": "Gneiss is a high-grade metamorphic rock formed from the metamorphism of granite (or other igneous/sedimentary rocks) under extreme heat and pressure. It has a banded appearance.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the circulation of nutrients in ocean water driven by density differences?",
+    "options": [
+      "Ocean currents",
+      "Tidal flow",
+      "Thermohaline circulation",
+      "Upwelling"
+    ],
+    "correct_answer": "Thermohaline circulation",
+    "explanation": "Thermohaline circulation (the 'ocean conveyor belt') is global ocean circulation driven by differences in temperature and salinity. It transports heat around the globe and is crucial for climate regulation.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What are the 5 main spheres of Earth science?",
+    "options": [
+      "Core, Mantle, Crust, Ocean, Air",
+      "Rock, Water, Air, Life, Ice",
+      "Land, Sea, Sky, Plants, Animals",
+      "Geosphere, Hydrosphere, Biosphere, Atmosphere, Cryosphere"
+    ],
+    "correct_answer": "Geosphere, Hydrosphere, Biosphere, Atmosphere, Cryosphere",
+    "explanation": "Earth's five major systems are: Geosphere (solid Earth), Hydrosphere (all water), Biosphere (all living things), Atmosphere (gases), and Cryosphere (all frozen water). They interact and affect each other.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the boundary where an oceanic plate sinks beneath a continental plate?",
+    "options": [
+      "Subduction zone",
+      "Divergent boundary",
+      "Mid-ocean ridge",
+      "Transform fault"
+    ],
+    "correct_answer": "Subduction zone",
+    "explanation": "A subduction zone is where a denser oceanic plate dives beneath a lighter continental plate. The subducted plate melts, generating volcanic activity. The Cascadia subduction zone threatens the Pacific Northwest USA.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the global average rate at which temperature increases with depth?",
+    "options": [
+      "Thermal gradient",
+      "Geothermal gradient",
+      "Pressure gradient",
+      "Thermal flux"
+    ],
+    "correct_answer": "Geothermal gradient",
+    "explanation": "The geothermal gradient averages about 25–30°C per km depth in Earth's crust. Temperatures increase with depth due to heat from Earth's formation and radioactive decay.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for a soil profile layer?",
+    "options": [
+      "Stratum",
+      "Level",
+      "Horizon",
+      "Zone"
+    ],
+    "correct_answer": "Horizon",
+    "explanation": "A soil horizon is a distinct layer in a soil profile with specific characteristics. From top to bottom: O (organic), A (topsoil), B (subsoil), C (parent material), and R (bedrock) horizons.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the buildup of sediment at the mouth of a river?",
+    "options": [
+      "Estuary",
+      "Alluvial fan",
+      "Floodplain",
+      "Delta deposition"
+    ],
+    "correct_answer": "Delta deposition",
+    "explanation": "When a river enters a body of standing water (like a lake or sea), it slows down and deposits its sediment load. This builds up to form a delta, named after the Greek letter Δ for its triangular shape.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the thin, outer shell of a planet including crust and upper mantle?",
+    "options": [
+      "Lithosphere",
+      "Asthenosphere",
+      "Geosphere",
+      "Mesosphere"
+    ],
+    "correct_answer": "Lithosphere",
+    "explanation": "The lithosphere is the rigid outer shell of Earth (or other rocky planets), comprising the crust and uppermost mantle. It is divided into tectonic plates that move over the softer asthenosphere below.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the type of soil formed in hot, wet tropical areas?",
+    "options": [
+      "Andisol",
+      "Laterite (Oxisol)",
+      "Chernozem",
+      "Podzol"
+    ],
+    "correct_answer": "Laterite (Oxisol)",
+    "explanation": "Laterite (Oxisol) soils form in hot, humid tropical regions through intense weathering. They are rich in iron and aluminum oxides but poor in nutrients, as heavy rain leaches them away.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for lines on a map connecting points of equal elevation?",
+    "options": [
+      "Isobar",
+      "Isotherm",
+      "Contour line",
+      "Isogon"
+    ],
+    "correct_answer": "Contour line",
+    "explanation": "Contour lines connect points of equal elevation on a map. Closely spaced contours indicate steep terrain; widely spaced contours indicate gentle slopes.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for a valley carved by a glacier with a U-shaped profile?",
+    "options": [
+      "V-shaped valley",
+      "Canyon",
+      "Gorge",
+      "Glacial trough"
+    ],
+    "correct_answer": "Glacial trough",
+    "explanation": "Glacial troughs are U-shaped valleys carved by glaciers. Unlike river-carved V-shaped valleys, they have flat bottoms and steep sides. Many Norwegian fjords are submerged glacial troughs.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for minerals that were present when a rock first formed?",
+    "options": [
+      "Primary minerals",
+      "Trace minerals",
+      "Secondary minerals",
+      "Authigenic minerals"
+    ],
+    "correct_answer": "Primary minerals",
+    "explanation": "Primary minerals form during the original crystallization or formation of a rock. Secondary minerals form later through weathering or alteration. Feldspars and quartz are primary minerals in granite.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the vertical movement of water between layers of different densities?",
+    "options": [
+      "Horizontal current",
+      "Upwelling",
+      "Turbidity current",
+      "Convection"
+    ],
+    "correct_answer": "Upwelling",
+    "explanation": "Upwelling is the vertical movement of cold, nutrient-rich deep ocean water to the surface, often driven by offshore winds. Upwelling zones like the Peruvian coast are among the world's most productive fisheries.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the gradual change in Earth's rotational axis over 26,000 years?",
+    "options": [
+      "Eccentricity",
+      "Obliquity",
+      "Precession",
+      "Nutation"
+    ],
+    "correct_answer": "Precession",
+    "explanation": "Precession is the slow wobble of Earth's rotational axis, completing a full cycle every ~26,000 years (like a spinning top slowing down). It is one of the Milankovitch cycles that influence ice ages.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the area around a river where flooding regularly occurs?",
+    "options": [
+      "River basin",
+      "Alluvial fan",
+      "Delta",
+      "Floodplain"
+    ],
+    "correct_answer": "Floodplain",
+    "explanation": "A floodplain is the flat area of land adjacent to a river that floods periodically. They are formed by sediment deposited during floods and are very fertile. Cities built on floodplains face regular flood risk.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the force that makes tectonic plates subduct?",
+    "options": [
+      "Slab pull",
+      "Hot spot activity",
+      "Mantle convection",
+      "Ridge push"
+    ],
+    "correct_answer": "Slab pull",
+    "explanation": "Slab pull is the dominant force driving plate tectonics. As old, cold, dense oceanic crust sinks into the mantle at a subduction zone, its weight pulls the rest of the plate along.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the layer just below the lithosphere that can flow?",
+    "options": [
+      "Mesosphere",
+      "Asthenosphere",
+      "Inner mantle",
+      "Outer core"
+    ],
+    "correct_answer": "Asthenosphere",
+    "explanation": "The asthenosphere is the partially molten, ductile layer of the upper mantle just below the lithosphere. It flows slowly and allows the overlying tectonic plates to move.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for a mineral's tendency to break along flat planes?",
+    "options": [
+      "Fracture",
+      "Hardness",
+      "Cleavage",
+      "Luster"
+    ],
+    "correct_answer": "Cleavage",
+    "explanation": "Cleavage is a mineral's tendency to break along flat, smooth planes determined by weak bonds in its crystal structure. Mica has perfect one-directional cleavage; halite has perfect three-directional cleavage.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the chemical weathering of iron-containing rocks by oxygen?",
+    "options": [
+      "Hydrolysis",
+      "Carbonation",
+      "Hydration",
+      "Oxidation (rusting)"
+    ],
+    "correct_answer": "Oxidation (rusting)",
+    "explanation": "Oxidation (rusting) is chemical weathering where iron-rich minerals react with oxygen (especially in water) to form iron oxides. This gives many rocks and soils a red/orange color.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for a hot, rising plume of mantle material that can create volcanic islands?",
+    "options": [
+      "Hot spot",
+      "Divergent boundary",
+      "Mid-ocean ridge",
+      "Subduction zone"
+    ],
+    "correct_answer": "Hot spot",
+    "explanation": "A hot spot is a particularly hot area in the mantle that generates a plume of magma, creating a chain of volcanic islands as a tectonic plate moves over it. Hawaii formed over a Pacific hot spot.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the angular distance north or south of the equator?",
+    "options": [
+      "Longitude",
+      "Latitude",
+      "Azimuth",
+      "Altitude"
+    ],
+    "correct_answer": "Latitude",
+    "explanation": "Latitude measures angular distance north or south of the equator (0° to 90°N/S). Lines of equal latitude are called parallels. Latitude greatly influences climate — temperature decreases with increasing latitude.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the term for the temperature at which air becomes saturated and water condenses?",
+    "options": [
+      "Boiling point",
+      "Freezing point",
+      "Dew point",
+      "Wet-bulb temperature"
+    ],
+    "correct_answer": "Dew point",
+    "explanation": "The dew point is the temperature at which air becomes saturated with water vapor and condensation begins. When surface temperature drops to the dew point, dew or frost forms. A high dew point means humid air.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the erosion that removes sediment from one bank and deposits it on another?",
+    "options": [
+      "Corrasion",
+      "Corrosion",
+      "Traction",
+      "Lateral erosion"
+    ],
+    "correct_answer": "Lateral erosion",
+    "explanation": "Lateral erosion occurs when a river cuts into its banks sideways rather than downward, widening the valley and creating meanders. It is dominant in mature river stages on floodplains.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the long-term average weather conditions in an area?",
+    "options": [
+      "Climate",
+      "Microclimate",
+      "Season",
+      "Weather"
+    ],
+    "correct_answer": "Climate",
+    "explanation": "Climate is the long-term average of weather conditions (temperature, precipitation, wind) in a region over at least 30 years. Weather describes day-to-day conditions. 'Climate is what you expect; weather is what you get.'",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the scale that measures wind speed, from calm to hurricane?",
+    "options": [
+      "Richter scale",
+      "Beaufort scale",
+      "Mercalli scale",
+      "Fujita scale"
+    ],
+    "correct_answer": "Beaufort scale",
+    "explanation": "The Beaufort scale (0–12) describes wind force based on observed sea and land conditions. 0 = calm; 12 = hurricane force winds (>64 knots). It was devised by Admiral Francis Beaufort in 1805.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the process that causes mountains to rise after glaciers melt?",
+    "options": [
+      "Tectonic uplift",
+      "Subduction",
+      "Isostatic rebound",
+      "Folding"
+    ],
+    "correct_answer": "Isostatic rebound",
+    "explanation": "Isostatic rebound (post-glacial rebound) is the uplift of land after the weight of ice sheets is removed as glaciers melt. Scandinavia is still rising at up to 10 mm/year after last ice age glaciers melted.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the dense rock that makes up the bulk of Earth?",
+    "options": [
+      "Granite",
+      "Basalt",
+      "Feldspar",
+      "Peridotite"
+    ],
+    "correct_answer": "Peridotite",
+    "explanation": "Peridotite is a dense, coarse-grained rock that makes up most of Earth's mantle. It consists mainly of olivine and pyroxene minerals. Diamonds are sometimes found in peridotite rock brought up by volcanic eruptions.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for rain that is made acidic by air pollution?",
+    "options": [
+      "Acid rain",
+      "Alkaline rain",
+      "Normal rain",
+      "Heavy rain"
+    ],
+    "correct_answer": "Acid rain",
+    "explanation": "Acid rain forms when sulfur dioxide and nitrogen oxides (from burning fossil fuels) react with water vapor in the atmosphere to form sulfuric and nitric acids. It damages forests, lakes, and buildings.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for Earth's protective magnetic field?",
+    "options": [
+      "Atmosphere",
+      "Magnetosphere",
+      "Van Allen belts",
+      "Ionosphere"
+    ],
+    "correct_answer": "Magnetosphere",
+    "explanation": "Earth's magnetosphere is the region of space dominated by Earth's magnetic field. It deflects harmful solar wind particles and cosmic radiation. Without it, Earth's atmosphere would be gradually stripped away.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the organic-rich uppermost layer of soil?",
+    "options": [
+      "Subsoil",
+      "Regolith",
+      "Topsoil",
+      "Saprolite"
+    ],
+    "correct_answer": "Topsoil",
+    "explanation": "Topsoil is the uppermost layer of soil (A horizon), richest in organic matter (humus) and nutrients. It is where most plant roots grow and most biological activity occurs. It takes ~1,000 years to form 1 cm of topsoil.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the line that divides time zones and where the date changes?",
+    "options": [
+      "Prime meridian",
+      "Equator",
+      "Arctic Circle",
+      "International Date Line"
+    ],
+    "correct_answer": "International Date Line",
+    "explanation": "The International Date Line (IDL) runs roughly along the 180° meridian in the Pacific Ocean. Traveling east across the IDL moves the calendar back one day; traveling west moves it forward one day.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What type of volcano is made almost entirely of cinder and ash?",
+    "options": [
+      "Cinder cone",
+      "Stratovolcano",
+      "Lava dome",
+      "Shield volcano"
+    ],
+    "correct_answer": "Cinder cone",
+    "explanation": "Cinder cones are the simplest type of volcano, formed from cinders and ash ejected from a single vent. They are steep-sided and usually small. Paricutín in Mexico grew from a cornfield in 1943.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the measurement of how much a river carries per second?",
+    "options": [
+      "Drainage density",
+      "Discharge",
+      "Stream velocity",
+      "Gradient"
+    ],
+    "correct_answer": "Discharge",
+    "explanation": "Stream discharge (Q) is the volume of water flowing past a point per unit time, measured in m³/s or cubic feet per second. Q = velocity × cross-sectional area. The Amazon River has the world's greatest discharge.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the circular ridge that remains after glaciers carve out a hollow?",
+    "options": [
+      "Arête",
+      "Horn",
+      "Cirque",
+      "Nunatak"
+    ],
+    "correct_answer": "Cirque",
+    "explanation": "A cirque is a bowl-shaped hollow carved by glacial erosion at the head of a valley. It is bounded by steep walls on three sides and open downhill. It can contain a small lake (tarn) after the glacier retreats.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for a large wave produced by an undersea landslide or earthquake?",
+    "options": [
+      "Tidal bore",
+      "Rogue wave",
+      "Storm surge",
+      "Tsunami"
+    ],
+    "correct_answer": "Tsunami",
+    "explanation": "A tsunami is a series of enormous ocean waves triggered by displacement of the seafloor by earthquakes, landslides, or volcanic eruptions. The 2004 Indian Ocean tsunami killed over 230,000 people.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the process by which seawater gradually moves onto land?",
+    "options": [
+      "Sea level rise",
+      "Accretion",
+      "Storm surge",
+      "Subsidence"
+    ],
+    "correct_answer": "Sea level rise",
+    "explanation": "Sea level rise occurs as oceans warm and expand (thermal expansion) and as glaciers and ice sheets melt, adding more water to the oceans. Global sea level has risen about 20 cm since 1900.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the process that forms oil and natural gas?",
+    "options": [
+      "Inorganic synthesis",
+      "Burial and heating of ancient marine organisms",
+      "Metamorphism of coal",
+      "Volcanic outgassing"
+    ],
+    "correct_answer": "Burial and heating of ancient marine organisms",
+    "explanation": "Oil and natural gas form from ancient marine organisms (plankton, algae) buried under sediment. Over millions of years, heat and pressure transform the organic matter into hydrocarbons.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the curved part of a river that bends?",
+    "options": [
+      "Oxbow",
+      "Rapid",
+      "Meander",
+      "Gorge"
+    ],
+    "correct_answer": "Meander",
+    "explanation": "A meander is a winding bend in a river. Rivers naturally develop meanders because water flows faster on the outside of bends (erosion) and slower on the inside (deposition). Over time, they migrate across floodplains.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for a crescent-shaped lake formed when a river meander is cut off?",
+    "options": [
+      "Delta",
+      "Lagoon",
+      "Estuary",
+      "Oxbow lake"
+    ],
+    "correct_answer": "Oxbow lake",
+    "explanation": "An oxbow lake forms when a river meander is cut off as the river takes a new, more direct course. The abandoned meander fills with water, forming a curved (oxbow-shaped) lake.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the measurement of rocks' age relative to each other?",
+    "options": [
+      "Relative dating",
+      "Radiometric dating",
+      "Isotopic dating",
+      "Absolute dating"
+    ],
+    "correct_answer": "Relative dating",
+    "explanation": "Relative dating determines the age of rocks by their position relative to other rocks (older beneath, younger above in undisturbed strata). The principle of superposition is fundamental to relative dating.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for a cliff formed when waves erode the base of sea cliffs?",
+    "options": [
+      "Sea stack",
+      "Wave-cut notch",
+      "Wave-cut platform",
+      "Sea arch"
+    ],
+    "correct_answer": "Wave-cut notch",
+    "explanation": "A wave-cut notch (or wave-cut platform) forms when waves erode the base of sea cliffs, undercutting them. Eventually the cliff collapses, leaving a flat wave-cut platform and moving the cliff back.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the circular movement of water caused by temperature differences?",
+    "options": [
+      "Horizontal circulation",
+      "Tidal flow",
+      "Thermohaline circulation",
+      "Wind-driven current"
+    ],
+    "correct_answer": "Thermohaline circulation",
+    "explanation": "Thermohaline circulation is global ocean circulation driven by differences in water temperature (thermo) and salinity (haline), which affect density. Cold, salty water sinks; warm, fresh water rises.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the part of the ocean floor that descends steeply from continental shelves?",
+    "options": [
+      "Abyssal plain",
+      "Mid-ocean ridge",
+      "Seamount",
+      "Continental slope"
+    ],
+    "correct_answer": "Continental slope",
+    "explanation": "The continental slope is the steep part of the ocean floor that descends from the continental shelf edge (about 200 m depth) to the deep ocean floor (about 4,000 m). It marks the edge of continents.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the type of rock that contains most of the world's fossils?",
+    "options": [
+      "Sedimentary",
+      "Metamorphic",
+      "Volcanic",
+      "Igneous"
+    ],
+    "correct_answer": "Sedimentary",
+    "explanation": "Sedimentary rocks contain the vast majority of fossils because organisms are buried by sediments and preserved as layers accumulate. Heat and pressure destroy organic remains in igneous and metamorphic rocks.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What type of current in the mantle drives plate tectonics?",
+    "options": [
+      "Electrical currents",
+      "Convection currents",
+      "Ocean currents",
+      "Magnetic currents"
+    ],
+    "correct_answer": "Convection currents",
+    "explanation": "Convection currents in Earth's mantle are caused by heat from Earth's interior. Hot rock rises, spreads, cools, and sinks, creating circular currents that drag tectonic plates along.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for a mineral that is scratched by a penny but not by a fingernail?",
+    "options": [
+      "Talc",
+      "Fluorite",
+      "Gypsum",
+      "Calcite"
+    ],
+    "correct_answer": "Gypsum",
+    "explanation": "Gypsum (Mohs hardness 2) can be scratched by a fingernail (hardness ~2.5) with difficulty. A penny (3) scratches calcite (3) but not gypsum easily — actually a fingernail can scratch gypsum at hardness 2, while calcite (3) requires a copper penny.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the force of gravity's effect on large masses of rock and soil?",
+    "options": [
+      "Tectonic force",
+      "Erosion",
+      "Weathering",
+      "Mass movement"
+    ],
+    "correct_answer": "Mass movement",
+    "explanation": "Mass movement (mass wasting) is the downslope movement of rock, soil, and debris under the direct influence of gravity. Types include falls, slides, slumps, flows, and creep.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the term for water that seeps into the soil rather than running off?",
+    "options": [
+      "Infiltration",
+      "Evapotranspiration",
+      "Sublimation",
+      "Runoff"
+    ],
+    "correct_answer": "Infiltration",
+    "explanation": "Infiltration is the movement of water into the soil. It replenishes groundwater and soil moisture. Infiltration rates depend on soil type, vegetation, and how saturated the soil already is.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for a naturally occurring solid substance with an ordered atomic structure?",
+    "options": [
+      "Rock",
+      "Crystal",
+      "Mineral",
+      "Ore"
+    ],
+    "correct_answer": "Crystal",
+    "explanation": "A crystal is a solid in which atoms are arranged in a regular, repeating three-dimensional pattern (crystal lattice). Most minerals form crystals. The study of crystals is called crystallography.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for Earth's long-term record of changes in climate?",
+    "options": [
+      "Weather report",
+      "Climate forecast",
+      "Paleoclimate record",
+      "Tree ring record"
+    ],
+    "correct_answer": "Paleoclimate record",
+    "explanation": "Paleoclimate records document past climate changes using proxies like ice cores, tree rings, sediment cores, and coral records. They help scientists understand natural climate variability and project future climate.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the distance east or west of the prime meridian?",
+    "options": [
+      "Latitude",
+      "Altitude",
+      "Declination",
+      "Longitude"
+    ],
+    "correct_answer": "Longitude",
+    "explanation": "Longitude measures angular distance east or west of the prime meridian (0° to 180°E/W). Lines of longitude are called meridians and converge at the poles. Together with latitude, longitude specifies any location on Earth.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the spinning whirlpool current in the ocean?",
+    "options": [
+      "Eddy",
+      "Gyre",
+      "Rip current",
+      "Upwelling"
+    ],
+    "correct_answer": "Eddy",
+    "explanation": "Ocean eddies are circular currents that spin off from major ocean currents (like the Gulf Stream). They can be hundreds of kilometres wide and persist for months, influencing heat transport and marine ecosystems.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for how a mineral's surface reflects light?",
+    "options": [
+      "Streak",
+      "Luster",
+      "Hardness",
+      "Color"
+    ],
+    "correct_answer": "Luster",
+    "explanation": "Luster describes how a mineral's surface reflects light. Types include metallic (pyrite), vitreous/glassy (quartz), pearly (mica), silky (gypsum), and dull (kaolinite). It is an important identification property.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the area of land around a lake that drains into it?",
+    "options": [
+      "Delta",
+      "Flood basin",
+      "Catchment area",
+      "Estuary"
+    ],
+    "correct_answer": "Catchment area",
+    "explanation": "A catchment area (or watershed/drainage basin) is the land area from which all surface water flows into a particular water body. Managing catchments protects water quality.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the boundary between the ocean floor and continental crust?",
+    "options": [
+      "Mid-ocean ridge",
+      "Abyssal plain",
+      "Seamount chain",
+      "Continental margin"
+    ],
+    "correct_answer": "Continental margin",
+    "explanation": "The continental margin is the transition zone between oceanic and continental crust, including the continental shelf, slope, and rise. Many of the world's productive fisheries and oil fields are found here.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the network of streams and rivers that drain a region?",
+    "options": [
+      "Drainage network",
+      "Aquifer",
+      "Riparian zone",
+      "Water table"
+    ],
+    "correct_answer": "Drainage network",
+    "explanation": "A drainage network (drainage system) is the pattern of streams and rivers that collect and channel precipitation and runoff across a landscape into larger rivers and eventually the ocean.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the type of mineral deposit formed from precipitation in water?",
+    "options": [
+      "Igneous deposit",
+      "Evaporite deposit",
+      "Metamorphic deposit",
+      "Intrusive deposit"
+    ],
+    "correct_answer": "Evaporite deposit",
+    "explanation": "Evaporite deposits form when water (usually saline) evaporates, leaving behind dissolved minerals. Rock salt (halite), gypsum, and potash are common evaporites. Major deposits formed in ancient enclosed seas.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the phenomenon where land shakes because of underground rock movement?",
+    "options": [
+      "Volcanic eruption",
+      "Mudslide",
+      "Earthquake",
+      "Tsunami"
+    ],
+    "correct_answer": "Earthquake",
+    "explanation": "An earthquake is the shaking of Earth's surface caused by the sudden movement of rock along faults, releasing stored energy as seismic waves. About 500,000 earthquakes occur each year; about 100,000 are felt.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for iron-rich spring water that deposits reddish-brown material?",
+    "options": [
+      "Hot spring",
+      "Fumarole",
+      "Acidic spring",
+      "Chalybeate (iron) spring"
+    ],
+    "correct_answer": "Chalybeate (iron) spring",
+    "explanation": "A chalybeate spring contains iron salts dissolved from surrounding rocks. When the water reaches the surface and oxidizes, iron oxide (rust) precipitates, staining the surrounding rock and soil red/orange/brown.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the sediment deposited where a river meets a flat plain?",
+    "options": [
+      "Alluvial fan",
+      "Delta",
+      "Loess",
+      "Moraine"
+    ],
+    "correct_answer": "Alluvial fan",
+    "explanation": "An alluvial fan is a fan-shaped deposit of sediment that forms where a fast-moving river suddenly slows as it reaches a flat plain (e.g., at the base of a mountain). They are common in arid regions.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for Earth's longest mountain range, located underwater?",
+    "options": [
+      "Himalayas",
+      "Mid-Ocean Ridge system",
+      "Rocky Mountains",
+      "Andes"
+    ],
+    "correct_answer": "Mid-Ocean Ridge system",
+    "explanation": "The mid-ocean ridge system is the world's longest mountain range, extending ~65,000 km along the ocean floor. It forms at divergent plate boundaries where new seafloor is created. The Mid-Atlantic Ridge is part of this system.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the process that changes water directly from ice to vapor?",
+    "options": [
+      "Evaporation",
+      "Condensation",
+      "Sublimation",
+      "Melting"
+    ],
+    "correct_answer": "Sublimation",
+    "explanation": "Sublimation is the direct change from solid (ice/snow) to gas (water vapor) without passing through the liquid state. It occurs in cold, dry, windy conditions and is why snow can disappear without melting.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for pressure exerted by the weight of the atmosphere on Earth's surface?",
+    "options": [
+      "Osmotic pressure",
+      "Gravitational pressure",
+      "Hydrostatic pressure",
+      "Atmospheric pressure"
+    ],
+    "correct_answer": "Atmospheric pressure",
+    "explanation": "Atmospheric pressure is the force per unit area exerted by the weight of the air above. At sea level, it averages about 101,325 Pa (1 atmosphere). It decreases with altitude and changes with weather.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for a natural spring of hot water heated by geothermal energy?",
+    "options": [
+      "Hot spring",
+      "Geyser",
+      "Mudpot",
+      "Fumarole"
+    ],
+    "correct_answer": "Hot spring",
+    "explanation": "A hot spring is a naturally occurring spring of hot water, heated by geothermal energy from Earth's interior. They occur worldwide but are common in volcanic regions. Hot springs often contain dissolved minerals.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "earth-science"
+  }
+]

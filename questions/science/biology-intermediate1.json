@@ -1,0 +1,2704 @@
+[
+  {
+    "question": "Which enzyme unwinds the DNA double helix during replication?",
+    "options": [
+      "Helicase",
+      "Ligase",
+      "Polymerase",
+      "Primase"
+    ],
+    "correct_answer": "Helicase",
+    "explanation": "Helicase breaks hydrogen bonds between base pairs to unwind and separate the two DNA strands at the replication fork.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the term for programmed cell death?",
+    "options": [
+      "Necrosis",
+      "Apoptosis",
+      "Autophagy",
+      "Lysis"
+    ],
+    "correct_answer": "Apoptosis",
+    "explanation": "Apoptosis is controlled cell death essential for development, immune function, and removal of damaged cells.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "Which phase of meiosis involves crossing over?",
+    "options": [
+      "Anaphase I",
+      "Metaphase I",
+      "Prophase I",
+      "Telophase I"
+    ],
+    "correct_answer": "Prophase I",
+    "explanation": "Crossing over (recombination) occurs during Prophase I when homologous chromosomes pair up and exchange genetic segments.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the name for the model describing cell membrane structure?",
+    "options": [
+      "Sliding filament model",
+      "Lock and key model",
+      "Induced fit model",
+      "Fluid mosaic model"
+    ],
+    "correct_answer": "Fluid mosaic model",
+    "explanation": "The fluid mosaic model describes the cell membrane as a fluid phospholipid bilayer with embedded proteins that move laterally.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "Which process converts pyruvate to acetyl-CoA?",
+    "options": [
+      "Pyruvate oxidation",
+      "Glycolysis",
+      "Krebs cycle",
+      "Fermentation"
+    ],
+    "correct_answer": "Pyruvate oxidation",
+    "explanation": "Pyruvate oxidation (pyruvate decarboxylation) converts pyruvate to acetyl-CoA, CO2, and NADH before entering the Krebs cycle.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "What type of mutation inserts or deletes nucleotides causing a reading frame shift?",
+    "options": [
+      "Point mutation",
+      "Frameshift mutation",
+      "Silent mutation",
+      "Missense mutation"
+    ],
+    "correct_answer": "Frameshift mutation",
+    "explanation": "Frameshift mutations occur when nucleotides are inserted or deleted in numbers not divisible by three, shifting the reading frame.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the term for the total genetic variation in a population?",
+    "options": [
+      "Genotype",
+      "Genome",
+      "Gene pool",
+      "Gene flow"
+    ],
+    "correct_answer": "Gene pool",
+    "explanation": "The gene pool is the collection of all alleles in all individuals of a population at a given time.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "Which cells in the immune system present antigens to T cells?",
+    "options": [
+      "Mast cells",
+      "B lymphocytes",
+      "Natural killer cells",
+      "Antigen-presenting cells"
+    ],
+    "correct_answer": "Antigen-presenting cells",
+    "explanation": "APCs like dendritic cells and macrophages process and display antigens on MHC molecules to activate T cells.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the name for the functional unit of skeletal muscle?",
+    "options": [
+      "Sarcomere",
+      "Myofibril",
+      "Fascicle",
+      "Motor unit"
+    ],
+    "correct_answer": "Sarcomere",
+    "explanation": "The sarcomere is the repeating contractile unit of skeletal muscle between two Z-lines, containing actin and myosin.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "Which molecules act as chemical messengers between neurons?",
+    "options": [
+      "Hormones",
+      "Neurotransmitters",
+      "Cytokines",
+      "Enzymes"
+    ],
+    "correct_answer": "Neurotransmitters",
+    "explanation": "Neurotransmitters are chemical signals released from presynaptic neurons that bind receptors on postsynaptic cells.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the Hardy-Weinberg principle used to describe?",
+    "options": [
+      "Speed of natural selection",
+      "Rate of genetic mutations",
+      "Allele frequencies in a non-evolving population",
+      "Genetic drift in small populations"
+    ],
+    "correct_answer": "Allele frequencies in a non-evolving population",
+    "explanation": "Hardy-Weinberg equilibrium describes stable allele frequencies in a large, randomly mating population with no evolutionary forces.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "Which RNA polymerase transcribes mRNA in eukaryotes?",
+    "options": [
+      "Primase",
+      "RNA Polymerase I",
+      "RNA Polymerase III",
+      "RNA Polymerase II"
+    ],
+    "correct_answer": "RNA Polymerase II",
+    "explanation": "RNA Polymerase II is responsible for transcribing protein-coding genes into pre-mRNA in eukaryotic cells.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the term for organisms that live in extreme environments?",
+    "options": [
+      "Extremophiles",
+      "Mesophiles",
+      "Halophiles",
+      "Thermophiles"
+    ],
+    "correct_answer": "Extremophiles",
+    "explanation": "Extremophiles thrive in extreme conditions of temperature, pH, salinity, or pressure that would kill most organisms.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "Which process removes introns from pre-mRNA?",
+    "options": [
+      "RNA capping",
+      "RNA splicing",
+      "Polyadenylation",
+      "Transcription"
+    ],
+    "correct_answer": "RNA splicing",
+    "explanation": "RNA splicing removes non-coding introns and joins coding exons together to form mature mRNA in eukaryotes.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the name for the protein complex that degrades damaged proteins?",
+    "options": [
+      "Ribosome",
+      "Lysosome",
+      "Proteasome",
+      "Peroxisome"
+    ],
+    "correct_answer": "Proteasome",
+    "explanation": "The proteasome is a large protein complex that degrades ubiquitin-tagged, misfolded, or damaged proteins.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "Which type of selection favors both extreme phenotypes over the intermediate?",
+    "options": [
+      "Directional selection",
+      "Stabilizing selection",
+      "Sexual selection",
+      "Disruptive selection"
+    ],
+    "correct_answer": "Disruptive selection",
+    "explanation": "Disruptive (diversifying) selection favors individuals at both extremes of phenotypic variation, creating two distinct groups.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the term for the minimum amount of energy needed to start a reaction?",
+    "options": [
+      "Activation energy",
+      "Thermal energy",
+      "Free energy",
+      "Bond energy"
+    ],
+    "correct_answer": "Activation energy",
+    "explanation": "Activation energy is the minimum energy required to initiate a chemical reaction, which enzymes reduce to speed reactions.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "Which type of transport requires energy to move substances against their gradient?",
+    "options": [
+      "Facilitated diffusion",
+      "Active transport",
+      "Osmosis",
+      "Simple diffusion"
+    ],
+    "correct_answer": "Active transport",
+    "explanation": "Active transport uses ATP to move substances against their concentration gradient, from low to high concentration.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the name for a molecule that mimics a substrate and blocks an enzyme's active site?",
+    "options": [
+      "Allosteric inhibitor",
+      "Cofactor",
+      "Competitive inhibitor",
+      "Non-competitive inhibitor"
+    ],
+    "correct_answer": "Competitive inhibitor",
+    "explanation": "A competitive inhibitor competes with the substrate for the enzyme's active site, reducing reaction rate.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "Which bacteria are responsible for nitrogen fixation in root nodules?",
+    "options": [
+      "Azotobacter",
+      "Nitrosomonas",
+      "Clostridium",
+      "Rhizobium"
+    ],
+    "correct_answer": "Rhizobium",
+    "explanation": "Rhizobium bacteria form symbiotic relationships in legume root nodules, converting N2 gas into ammonia usable by plants.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the role of telomerase in cells?",
+    "options": [
+      "Extend telomeres on chromosomes",
+      "Replicate mitochondrial DNA",
+      "Splice mRNA",
+      "Repair DNA breaks"
+    ],
+    "correct_answer": "Extend telomeres on chromosomes",
+    "explanation": "Telomerase adds repetitive DNA sequences to chromosome ends (telomeres), preventing shortening during replication — active in stem cells and cancer cells.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "Which process converts light energy into chemical energy in the thylakoid membrane?",
+    "options": [
+      "Calvin cycle",
+      "Light-dependent reactions",
+      "Cyclic photophosphorylation",
+      "Photorespiration"
+    ],
+    "correct_answer": "Light-dependent reactions",
+    "explanation": "Light-dependent reactions in the thylakoid membrane capture light to produce ATP and NADPH, splitting water and releasing O2.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the term for a change in gene expression without changing the DNA sequence?",
+    "options": [
+      "Mutation",
+      "Transcription",
+      "Epigenetics",
+      "Translation"
+    ],
+    "correct_answer": "Epigenetics",
+    "explanation": "Epigenetics involves heritable changes in gene expression caused by DNA methylation or histone modification, not DNA sequence changes.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "Which law states that alleles separate during gamete formation?",
+    "options": [
+      "Law of Independent Assortment",
+      "Law of Dominance",
+      "Law of Linkage",
+      "Law of Segregation"
+    ],
+    "correct_answer": "Law of Segregation",
+    "explanation": "Mendel's Law of Segregation states that two alleles for each gene separate during meiosis so each gamete carries one allele.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the term for the maximum number of individuals a habitat can support?",
+    "options": [
+      "Carrying capacity",
+      "Ecological niche",
+      "Population density",
+      "Biotic potential"
+    ],
+    "correct_answer": "Carrying capacity",
+    "explanation": "Carrying capacity (K) is the maximum population size an environment can sustain given available resources.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "Which mechanism allows bacteria to acquire resistance genes from other bacteria?",
+    "options": [
+      "Transformation",
+      "Conjugation",
+      "Transduction",
+      "Mutation"
+    ],
+    "correct_answer": "Conjugation",
+    "explanation": "Conjugation is the direct transfer of genetic material (plasmids) between bacteria through a pilus connection.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the Z-scheme in photosynthesis?",
+    "options": [
+      "The arrangement of grana",
+      "The structure of chlorophyll",
+      "The path of electrons through photosystems I and II",
+      "The flow of protons through ATP synthase"
+    ],
+    "correct_answer": "The path of electrons through photosystems I and II",
+    "explanation": "The Z-scheme describes how electrons move from PSII to PSI through the electron transport chain during the light reactions.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "Which process generates the most ATP during aerobic respiration?",
+    "options": [
+      "Glycolysis",
+      "Pyruvate oxidation",
+      "Krebs cycle",
+      "Oxidative phosphorylation"
+    ],
+    "correct_answer": "Oxidative phosphorylation",
+    "explanation": "Oxidative phosphorylation via the electron transport chain and ATP synthase produces ~32-34 ATP per glucose molecule.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the name for junctions that allow direct communication between adjacent cells?",
+    "options": [
+      "Gap junctions",
+      "Desmosomes",
+      "Tight junctions",
+      "Plasmodesmata"
+    ],
+    "correct_answer": "Gap junctions",
+    "explanation": "Gap junctions are protein channels connecting adjacent animal cells, allowing ions and small molecules to pass directly between cells.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "Which type of selection leads to increased average fitness of a population over time?",
+    "options": [
+      "Disruptive selection",
+      "Natural selection",
+      "Artificial selection",
+      "Genetic drift"
+    ],
+    "correct_answer": "Natural selection",
+    "explanation": "Natural selection increases the frequency of heritable traits that improve reproductive success in a given environment.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the function of the signal recognition particle (SRP)?",
+    "options": [
+      "Repair DNA damage",
+      "Degrade misfolded proteins",
+      "Direct ribosomes to the rough ER",
+      "Initiate transcription"
+    ],
+    "correct_answer": "Direct ribosomes to the rough ER",
+    "explanation": "The SRP recognizes signal sequences on nascent proteins and directs their ribosomes to the rough endoplasmic reticulum for translocation.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "Which type of immune response involves memory cells for faster future responses?",
+    "options": [
+      "Innate immunity",
+      "Non-specific immunity",
+      "Inflammatory response",
+      "Adaptive immunity"
+    ],
+    "correct_answer": "Adaptive immunity",
+    "explanation": "Adaptive (acquired) immunity creates immunological memory through T and B lymphocytes for a faster, stronger response to repeat infections.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the term for the movement of alleles between populations?",
+    "options": [
+      "Gene flow",
+      "Natural selection",
+      "Genetic drift",
+      "Mutation"
+    ],
+    "correct_answer": "Gene flow",
+    "explanation": "Gene flow (migration) occurs when individuals move between populations, transferring alleles and changing allele frequencies.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the term for the complete set of proteins expressed by a genome?",
+    "options": [
+      "Genome",
+      "Proteome",
+      "Transcriptome",
+      "Metabolome"
+    ],
+    "correct_answer": "Proteome",
+    "explanation": "The proteome is the entire set of proteins expressed by a genome, cell, tissue, or organism at a given time.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "Which type of speciation occurs when populations are geographically separated?",
+    "options": [
+      "Sympatric speciation",
+      "Parapatric speciation",
+      "Allopatric speciation",
+      "Ecological speciation"
+    ],
+    "correct_answer": "Allopatric speciation",
+    "explanation": "Allopatric speciation occurs when a geographic barrier separates a population, allowing divergence over time into distinct species.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the role of ubiquitin in cells?",
+    "options": [
+      "Catalyzes glycolysis",
+      "Initiates transcription",
+      "Transports oxygen",
+      "Tags proteins for degradation"
+    ],
+    "correct_answer": "Tags proteins for degradation",
+    "explanation": "Ubiquitin is a small protein that attaches to damaged or unneeded proteins, marking them for destruction by the proteasome.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "Which theory explains that mitochondria and chloroplasts originated from ancient bacteria?",
+    "options": [
+      "Endosymbiotic theory",
+      "Germ theory",
+      "Cell theory",
+      "Evolutionary theory"
+    ],
+    "correct_answer": "Endosymbiotic theory",
+    "explanation": "Endosymbiotic theory proposes that mitochondria and chloroplasts were once free-living bacteria engulfed by ancestral eukaryotic cells.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the term for the oxygen-independent breakdown of glucose?",
+    "options": [
+      "Aerobic respiration",
+      "Fermentation",
+      "Oxidative phosphorylation",
+      "Beta-oxidation"
+    ],
+    "correct_answer": "Fermentation",
+    "explanation": "Fermentation is anaerobic (oxygen-free) catabolism of glucose that regenerates NAD+ to sustain glycolysis without the Krebs cycle.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "Which component of the endomembrane system modifies and sorts proteins?",
+    "options": [
+      "Smooth ER",
+      "Nucleus",
+      "Golgi apparatus",
+      "Peroxisome"
+    ],
+    "correct_answer": "Golgi apparatus",
+    "explanation": "The Golgi apparatus receives proteins from the rough ER, modifies them (glycosylation), and sorts them for delivery to their destinations.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the name for the change in allele frequency due to random chance in small populations?",
+    "options": [
+      "Natural selection",
+      "Gene flow",
+      "Mutation pressure",
+      "Genetic drift"
+    ],
+    "correct_answer": "Genetic drift",
+    "explanation": "Genetic drift is random fluctuation in allele frequencies due to chance sampling events, most significant in small populations.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "Which structure initiates the electrical signal in a neuron?",
+    "options": [
+      "Axon hillock",
+      "Cell body",
+      "Dendrite",
+      "Synaptic terminal"
+    ],
+    "correct_answer": "Axon hillock",
+    "explanation": "The axon hillock integrates incoming signals from dendrites and generates an action potential when threshold is reached.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the term for a self-replicating circular DNA element in bacteria?",
+    "options": [
+      "Transposon",
+      "Plasmid",
+      "Chromosome",
+      "Episome"
+    ],
+    "correct_answer": "Plasmid",
+    "explanation": "Plasmids are small, circular, double-stranded DNA molecules in bacteria that replicate independently of chromosomal DNA.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "Which stage of cellular respiration occurs in the cytoplasm?",
+    "options": [
+      "Krebs cycle",
+      "Electron transport chain",
+      "Glycolysis",
+      "Oxidative phosphorylation"
+    ],
+    "correct_answer": "Glycolysis",
+    "explanation": "Glycolysis occurs in the cytoplasm and splits one glucose molecule into two pyruvate molecules, producing 2 ATP and 2 NADH.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the term for the number of times a population can double in a given time?",
+    "options": [
+      "Carrying capacity",
+      "Population density",
+      "Doubling time",
+      "Biotic potential"
+    ],
+    "correct_answer": "Biotic potential",
+    "explanation": "Biotic potential is the maximum reproductive rate of a population under ideal conditions with unlimited resources.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "Which protein complex joins Okazaki fragments during DNA replication?",
+    "options": [
+      "DNA ligase",
+      "Topoisomerase",
+      "Helicase",
+      "Primase"
+    ],
+    "correct_answer": "DNA ligase",
+    "explanation": "DNA ligase seals the nicks between Okazaki fragments on the lagging strand by forming phosphodiester bonds.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the term for the evolutionary history of a species?",
+    "options": [
+      "Taxonomy",
+      "Phylogeny",
+      "Ecology",
+      "Systematics"
+    ],
+    "correct_answer": "Phylogeny",
+    "explanation": "Phylogeny is the evolutionary history and relationships of a species or group, often depicted as a phylogenetic tree.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "Which organelle contains its own DNA and ribosomes?",
+    "options": [
+      "Lysosome",
+      "Vacuole",
+      "Mitochondria",
+      "Peroxisome"
+    ],
+    "correct_answer": "Mitochondria",
+    "explanation": "Mitochondria contain their own circular DNA and ribosomes, supporting the endosymbiotic theory of their bacterial origin.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the name for the chemical gradient that drives ATP synthesis?",
+    "options": [
+      "Redox potential",
+      "Electrochemical gradient",
+      "Gibbs free energy",
+      "Proton motive force"
+    ],
+    "correct_answer": "Proton motive force",
+    "explanation": "The proton motive force is the electrochemical gradient of protons across the inner mitochondrial membrane that drives ATP synthase.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "Which process moves large molecules out of cells via vesicles?",
+    "options": [
+      "Exocytosis",
+      "Phagocytosis",
+      "Pinocytosis",
+      "Endocytosis"
+    ],
+    "correct_answer": "Exocytosis",
+    "explanation": "Exocytosis is the process where vesicles fuse with the plasma membrane to release their contents outside the cell.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the term for the stage where a cell grows and replicates DNA before dividing?",
+    "options": [
+      "G2 phase",
+      "Interphase",
+      "G1 phase",
+      "S phase"
+    ],
+    "correct_answer": "Interphase",
+    "explanation": "Interphase includes G1 (growth), S (DNA synthesis), and G2 (growth/preparation) phases before mitosis begins.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "Which molecule is the final electron acceptor in the electron transport chain?",
+    "options": [
+      "NAD+",
+      "FAD",
+      "Oxygen",
+      "Cytochrome c"
+    ],
+    "correct_answer": "Oxygen",
+    "explanation": "Oxygen is the terminal electron acceptor in aerobic respiration, combining with electrons and H+ to form water.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the process by which bacteria take up DNA from their environment?",
+    "options": [
+      "Conjugation",
+      "Mutation",
+      "Transduction",
+      "Transformation"
+    ],
+    "correct_answer": "Transformation",
+    "explanation": "Transformation is the uptake and incorporation of naked DNA from the environment into a bacterial cell.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "Which hormone stimulates bone and muscle growth?",
+    "options": [
+      "IGF-1",
+      "Insulin",
+      "Glucagon",
+      "Cortisol"
+    ],
+    "correct_answer": "IGF-1",
+    "explanation": "Insulin-like growth factor 1 (IGF-1) mediates many of the growth-promoting effects of growth hormone on bone and muscle.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the name for the first stage of mitosis?",
+    "options": [
+      "Metaphase",
+      "Prophase",
+      "Anaphase",
+      "Telophase"
+    ],
+    "correct_answer": "Prophase",
+    "explanation": "Prophase is the first stage of mitosis where chromatin condenses into visible chromosomes and the mitotic spindle begins to form.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "Which molecule serves as the reducing agent in the light reactions of photosynthesis?",
+    "options": [
+      "ATP",
+      "FADH2",
+      "NADPH",
+      "Glucose"
+    ],
+    "correct_answer": "NADPH",
+    "explanation": "NADPH carries high-energy electrons from the light reactions to the Calvin cycle to power carbon fixation.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the name of the point on a gene where RNA polymerase binds to start transcription?",
+    "options": [
+      "Enhancer",
+      "Operator",
+      "Terminator",
+      "Promoter"
+    ],
+    "correct_answer": "Promoter",
+    "explanation": "The promoter is a DNA sequence upstream of a gene where RNA polymerase and transcription factors bind to initiate transcription.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "Which antibody class is the most abundant in blood serum?",
+    "options": [
+      "IgG",
+      "IgA",
+      "IgM",
+      "IgE"
+    ],
+    "correct_answer": "IgG",
+    "explanation": "IgG is the most abundant antibody class in blood, responsible for long-term immunity and crossing the placenta.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the term for an organism's ability to respond to its environment?",
+    "options": [
+      "Metabolism",
+      "Irritability",
+      "Homeostasis",
+      "Adaptation"
+    ],
+    "correct_answer": "Irritability",
+    "explanation": "Irritability (responsiveness) is the ability of an organism to detect and respond to stimuli in its internal or external environment.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "Which process transfers genetic material through bacteriophage infection?",
+    "options": [
+      "Conjugation",
+      "Transformation",
+      "Transduction",
+      "Mutation"
+    ],
+    "correct_answer": "Transduction",
+    "explanation": "Transduction is the transfer of bacterial DNA by a bacteriophage virus acting as a vector between bacterial cells.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the name for the two turns of the Krebs cycle per glucose molecule?",
+    "options": [
+      "Oxidative phosphorylation",
+      "Fermentation",
+      "Glycolysis",
+      "2 turns producing 6 NADH, 2 FADH2, 2 ATP, 4 CO2"
+    ],
+    "correct_answer": "2 turns producing 6 NADH, 2 FADH2, 2 ATP, 4 CO2",
+    "explanation": "Since each glucose yields 2 pyruvate → 2 acetyl-CoA, the Krebs cycle runs twice, yielding 6 NADH, 2 FADH2, 2 ATP, and 4 CO2.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "Which type of RNA folds into a 3D shape to carry amino acids?",
+    "options": [
+      "tRNA",
+      "mRNA",
+      "rRNA",
+      "snRNA"
+    ],
+    "correct_answer": "tRNA",
+    "explanation": "Transfer RNA (tRNA) folds into a cloverleaf structure with an anticodon loop that pairs with mRNA codons during translation.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "What term describes organisms that have two copies of each chromosome?",
+    "options": [
+      "Haploid",
+      "Diploid",
+      "Polyploid",
+      "Aneuploid"
+    ],
+    "correct_answer": "Diploid",
+    "explanation": "Diploid organisms (2n) have two sets of chromosomes — one from each parent. Most somatic cells in humans are diploid.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "Which process maintains blood glucose levels when they drop?",
+    "options": [
+      "Insulin secretion",
+      "Glycolysis",
+      "Gluconeogenesis",
+      "Lipogenesis"
+    ],
+    "correct_answer": "Gluconeogenesis",
+    "explanation": "Gluconeogenesis synthesizes new glucose from non-carbohydrate precursors (amino acids, glycerol) primarily in the liver.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the name for the organelle that detoxifies hydrogen peroxide?",
+    "options": [
+      "Lysosome",
+      "Smooth ER",
+      "Mitochondria",
+      "Peroxisome"
+    ],
+    "correct_answer": "Peroxisome",
+    "explanation": "Peroxisomes contain catalase, which breaks down hydrogen peroxide (H2O2) into water and oxygen, preventing cellular damage.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "Which component of the cytoskeleton provides the main structural support?",
+    "options": [
+      "Intermediate filaments",
+      "Actin filaments",
+      "Microtubules",
+      "Microfilaments"
+    ],
+    "correct_answer": "Intermediate filaments",
+    "explanation": "Intermediate filaments provide mechanical stability and structural support to cells, resistant to mechanical stress.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the term for natural selection acting on traits that affect mating success?",
+    "options": [
+      "Artificial selection",
+      "Sexual selection",
+      "Natural selection",
+      "Kin selection"
+    ],
+    "correct_answer": "Sexual selection",
+    "explanation": "Sexual selection is natural selection driven by competition for mates or mate choice, leading to traits like peacock feathers.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "Which molecule inhibits an enzyme by binding to a site other than the active site?",
+    "options": [
+      "Competitive inhibitor",
+      "Substrate analog",
+      "Allosteric inhibitor",
+      "Cofactor"
+    ],
+    "correct_answer": "Allosteric inhibitor",
+    "explanation": "Allosteric inhibitors bind to regulatory sites distant from the active site, changing the enzyme's shape and reducing its activity.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "What do C4 plants do differently to reduce photorespiration?",
+    "options": [
+      "Use a different type of chlorophyll",
+      "Use water splitting differently",
+      "Only photosynthesize at night",
+      "Concentrate CO2 around RuBisCO"
+    ],
+    "correct_answer": "Concentrate CO2 around RuBisCO",
+    "explanation": "C4 plants use a carbon-concentrating mechanism — fixing CO2 in mesophyll cells as a 4-carbon compound and releasing it near RuBisCO in bundle sheath cells.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the name for the junction between a motor neuron and a muscle cell?",
+    "options": [
+      "Neuromuscular junction",
+      "Synapse",
+      "Gap junction",
+      "Chemical synapse"
+    ],
+    "correct_answer": "Neuromuscular junction",
+    "explanation": "The neuromuscular junction is the specialized synapse between a motor neuron axon terminal and a skeletal muscle fiber.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "Which type of selection increases phenotypic variation in a population?",
+    "options": [
+      "Stabilizing selection",
+      "Disruptive selection",
+      "Natural selection",
+      "Sexual selection"
+    ],
+    "correct_answer": "Disruptive selection",
+    "explanation": "Disruptive selection increases phenotypic variation by favoring extreme phenotypes and reducing intermediate phenotypes.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the term for the inability of one enzyme alone to complete a metabolic pathway?",
+    "options": [
+      "Enzyme inhibition",
+      "Feedback inhibition",
+      "Metabolic cooperation",
+      "Allosteric regulation"
+    ],
+    "correct_answer": "Metabolic cooperation",
+    "explanation": "Metabolic cooperation refers to the collaborative action of multiple enzymes in sequence to complete a biochemical pathway.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "Which protein acts as the main structural component of microtubules?",
+    "options": [
+      "Actin",
+      "Keratin",
+      "Myosin",
+      "Tubulin"
+    ],
+    "correct_answer": "Tubulin",
+    "explanation": "Microtubules are composed of alpha and beta tubulin dimers that polymerize to form dynamic cylindrical structures.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the term for the evolutionary development of a new species?",
+    "options": [
+      "Speciation",
+      "Evolution",
+      "Extinction",
+      "Adaptation"
+    ],
+    "correct_answer": "Speciation",
+    "explanation": "Speciation is the evolutionary process by which populations diverge to become distinct species that can no longer interbreed.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "Which immunoglobulin class is involved in allergic reactions?",
+    "options": [
+      "IgG",
+      "IgE",
+      "IgA",
+      "IgM"
+    ],
+    "correct_answer": "IgE",
+    "explanation": "IgE antibodies bind to mast cells and basophils; exposure to allergens triggers IgE-mediated histamine release causing allergic reactions.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the bottleneck effect a type of?",
+    "options": [
+      "Natural selection",
+      "Gene flow",
+      "Genetic drift",
+      "Mutation"
+    ],
+    "correct_answer": "Genetic drift",
+    "explanation": "The bottleneck effect is a type of genetic drift where a population is drastically reduced, reducing genetic diversity.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "Which process do CAM plants use to reduce water loss?",
+    "options": [
+      "Open stomata during day",
+      "Close stomata all day",
+      "Increase transpiration",
+      "Fix CO2 at night through open stomata"
+    ],
+    "correct_answer": "Fix CO2 at night through open stomata",
+    "explanation": "CAM (Crassulacean Acid Metabolism) plants open stomata at night to fix CO2, then close them during the day to conserve water.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the name for the protein that helps other proteins fold correctly?",
+    "options": [
+      "Chaperone",
+      "Protease",
+      "Ligase",
+      "Polymerase"
+    ],
+    "correct_answer": "Chaperone",
+    "explanation": "Molecular chaperones are proteins that assist newly synthesized polypeptides in folding correctly and prevent misfolding.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "Which enzyme adds nucleotides to the 3' end of the new DNA strand?",
+    "options": [
+      "Helicase",
+      "DNA polymerase III",
+      "Ligase",
+      "Primase"
+    ],
+    "correct_answer": "DNA polymerase III",
+    "explanation": "DNA polymerase III is the main enzyme in prokaryotic replication, synthesizing the new strand in the 5'→3' direction.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the term for the evolutionary origin of a new higher taxon?",
+    "options": [
+      "Anagenesis",
+      "Cladogenesis",
+      "Macroevolution",
+      "Microevolution"
+    ],
+    "correct_answer": "Macroevolution",
+    "explanation": "Macroevolution refers to large-scale evolutionary changes above the species level, including the origin of new genera and phyla.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "Which cells produce the myelin sheath in the central nervous system?",
+    "options": [
+      "Schwann cells",
+      "Microglia",
+      "Astrocytes",
+      "Oligodendrocytes"
+    ],
+    "correct_answer": "Oligodendrocytes",
+    "explanation": "Oligodendrocytes myelinate axons in the CNS (Schwann cells myelinate peripheral nervous system axons).",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the term for a heritable change in chromosome number?",
+    "options": [
+      "Polyploidy",
+      "Frameshift",
+      "Point mutation",
+      "Inversion"
+    ],
+    "correct_answer": "Polyploidy",
+    "explanation": "Polyploidy is the condition of having more than two complete sets of chromosomes, common in plants but rare in animals.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "Which model describes how enzymes can change shape to better fit their substrate?",
+    "options": [
+      "Lock and key model",
+      "Induced fit model",
+      "Fluid mosaic model",
+      "Active site model"
+    ],
+    "correct_answer": "Induced fit model",
+    "explanation": "The induced fit model proposes that substrate binding causes a conformational change in the enzyme, improving the fit and catalytic activity.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the term for the increase in concentration of toxins at higher trophic levels?",
+    "options": [
+      "Bioaccumulation",
+      "Biotransformation",
+      "Biomagnification",
+      "Biodegradation"
+    ],
+    "correct_answer": "Biomagnification",
+    "explanation": "Biomagnification is the increasing concentration of persistent toxins (like DDT) at each successive trophic level in a food chain.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "Which phase of the cell cycle involves DNA synthesis?",
+    "options": [
+      "G1 phase",
+      "M phase",
+      "G2 phase",
+      "S phase"
+    ],
+    "correct_answer": "S phase",
+    "explanation": "During S (synthesis) phase, the cell replicates all its chromosomal DNA in preparation for cell division.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the name of the process where homologous recombination repairs DNA double-strand breaks?",
+    "options": [
+      "Homologous recombination",
+      "Base excision repair",
+      "Nucleotide excision repair",
+      "Mismatch repair"
+    ],
+    "correct_answer": "Homologous recombination",
+    "explanation": "Homologous recombination uses an intact homologous template to accurately repair double-strand DNA breaks.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "Which molecules are the monomers of nucleic acids?",
+    "options": [
+      "Amino acids",
+      "Nucleotides",
+      "Fatty acids",
+      "Monosaccharides"
+    ],
+    "correct_answer": "Nucleotides",
+    "explanation": "Nucleotides — consisting of a sugar, phosphate group, and nitrogenous base — are the monomers of DNA and RNA.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the term for evolution that occurs rapidly in bursts?",
+    "options": [
+      "Gradualism",
+      "Adaptive radiation",
+      "Punctuated equilibrium",
+      "Anagenesis"
+    ],
+    "correct_answer": "Punctuated equilibrium",
+    "explanation": "Punctuated equilibrium is the theory that species remain stable for long periods, with rapid evolutionary changes in short bursts.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "Which receptor type detects changes in body position and movement?",
+    "options": [
+      "Chemoreceptors",
+      "Thermoreceptors",
+      "Photoreceptors",
+      "Proprioceptors"
+    ],
+    "correct_answer": "Proprioceptors",
+    "explanation": "Proprioceptors in muscles, tendons, and joints detect body position, movement, and muscle tension (kinesthesia).",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the term for a sudden drastic reduction in population size?",
+    "options": [
+      "Bottleneck effect",
+      "Population crash",
+      "Founder effect",
+      "Genetic drift"
+    ],
+    "correct_answer": "Bottleneck effect",
+    "explanation": "The bottleneck effect is a severe population reduction that dramatically reduces genetic diversity in the surviving population.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "Which enzyme catalyzes the fixation of CO2 in the Calvin cycle?",
+    "options": [
+      "ATP synthase",
+      "RuBisCO",
+      "Hexokinase",
+      "Phosphofructokinase"
+    ],
+    "correct_answer": "RuBisCO",
+    "explanation": "RuBisCO (ribulose-1,5-bisphosphate carboxylase/oxygenase) catalyzes the first step of carbon fixation in the Calvin cycle.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the term for the inheritance of traits influenced by many genes?",
+    "options": [
+      "Epistasis",
+      "Codominance",
+      "Polygenic inheritance",
+      "Pleiotropy"
+    ],
+    "correct_answer": "Polygenic inheritance",
+    "explanation": "Polygenic inheritance involves multiple genes contributing to a single phenotypic trait, like height or skin color.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the role of the SER (smooth endoplasmic reticulum) in liver cells?",
+    "options": [
+      "Protein synthesis",
+      "Lysosome formation",
+      "DNA replication",
+      "Detoxification of drugs and poisons"
+    ],
+    "correct_answer": "Detoxification of drugs and poisons",
+    "explanation": "The smooth ER in liver hepatocytes contains detoxification enzymes that modify and neutralize drugs, alcohol, and other toxins.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "Which structure in eukaryotes contains most of the cell's DNA?",
+    "options": [
+      "Nucleus",
+      "Mitochondria",
+      "Cytoplasm",
+      "Ribosome"
+    ],
+    "correct_answer": "Nucleus",
+    "explanation": "The nucleus contains the cell's chromosomes (most of its DNA), organized into chromatin and protected by the nuclear envelope.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the term for the production of organisms from a single parent without fertilization?",
+    "options": [
+      "Sexual reproduction",
+      "Parthenogenesis",
+      "Cloning only",
+      "Vegetative reproduction"
+    ],
+    "correct_answer": "Parthenogenesis",
+    "explanation": "Parthenogenesis is the development of an egg into a new organism without fertilization, as seen in some insects and reptiles.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "Which process produces glucose from CO2 and uses ATP and NADPH?",
+    "options": [
+      "Glycolysis",
+      "Light reactions",
+      "Calvin cycle",
+      "Krebs cycle"
+    ],
+    "correct_answer": "Calvin cycle",
+    "explanation": "The Calvin cycle (light-independent reactions) uses ATP and NADPH from the light reactions to fix CO2 into glucose.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the term for different forms of the same gene?",
+    "options": [
+      "Chromosomes",
+      "Loci",
+      "Codons",
+      "Alleles"
+    ],
+    "correct_answer": "Alleles",
+    "explanation": "Alleles are different versions of the same gene that arise from mutations and may produce different phenotypic effects.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "Which protein in muscles binds calcium to trigger contraction?",
+    "options": [
+      "Troponin",
+      "Myosin",
+      "Tropomyosin",
+      "Actin"
+    ],
+    "correct_answer": "Troponin",
+    "explanation": "Troponin is the calcium-binding regulatory protein that, when bound to Ca2+, moves tropomyosin to expose actin binding sites.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the term for metabolic pathways that break down molecules to release energy?",
+    "options": [
+      "Anabolism",
+      "Catabolism",
+      "Biosynthesis",
+      "Metabolism"
+    ],
+    "correct_answer": "Catabolism",
+    "explanation": "Catabolism includes all metabolic reactions that break down complex molecules into simpler ones, releasing energy.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the name for a group of organisms that share a common ancestor?",
+    "options": [
+      "Taxon",
+      "Species",
+      "Clade",
+      "Order"
+    ],
+    "correct_answer": "Clade",
+    "explanation": "A clade is a group of organisms consisting of a common ancestor and all its descendants, used in cladistics.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "Which structure in chloroplasts is the site of the light reactions?",
+    "options": [
+      "Stroma",
+      "Outer membrane",
+      "Intermembrane space",
+      "Thylakoid membrane"
+    ],
+    "correct_answer": "Thylakoid membrane",
+    "explanation": "The thylakoid membrane contains the photosystems (I and II) and electron transport chain where light-dependent reactions occur.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the term for phenotypic variation caused by the environment?",
+    "options": [
+      "Phenotypic plasticity",
+      "Heritability",
+      "Genetic variation",
+      "Natural selection"
+    ],
+    "correct_answer": "Phenotypic plasticity",
+    "explanation": "Phenotypic plasticity is the ability of an organism to change its phenotype in response to environmental conditions without genetic change.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "Which process releases CO2 from pyruvate in the mitochondrial matrix?",
+    "options": [
+      "Glycolysis",
+      "Pyruvate decarboxylation",
+      "Oxidative phosphorylation",
+      "Fermentation"
+    ],
+    "correct_answer": "Pyruvate decarboxylation",
+    "explanation": "Pyruvate decarboxylation (pyruvate oxidation) converts pyruvate to acetyl-CoA, releasing CO2 and producing NADH.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the name for the enzyme that catalyzes ATP synthesis from ADP and Pi?",
+    "options": [
+      "ATPase",
+      "Kinase",
+      "ATP synthase",
+      "Phosphatase"
+    ],
+    "correct_answer": "ATP synthase",
+    "explanation": "ATP synthase uses the proton gradient across the mitochondrial membrane to drive the phosphorylation of ADP to ATP.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "Which type of dominance occurs when both alleles are expressed equally?",
+    "options": [
+      "Incomplete dominance",
+      "Recessive dominance",
+      "Epistasis",
+      "Codominance"
+    ],
+    "correct_answer": "Codominance",
+    "explanation": "In codominance, both alleles are fully expressed simultaneously in the heterozygote, as in AB blood type.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the term for the specific location of a gene on a chromosome?",
+    "options": [
+      "Locus",
+      "Genome",
+      "Allele",
+      "Codon"
+    ],
+    "correct_answer": "Locus",
+    "explanation": "A locus (plural: loci) is the specific position on a chromosome where a particular gene is located.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "Which membrane protein facilitates passive transport of specific molecules?",
+    "options": [
+      "Pump protein",
+      "Channel protein",
+      "G-protein",
+      "Receptor protein"
+    ],
+    "correct_answer": "Channel protein",
+    "explanation": "Channel proteins form pores in the membrane that allow specific ions or molecules to diffuse passively along their concentration gradient.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the term for the protective protein coat that wraps DNA in eukaryotes?",
+    "options": [
+      "Plasmid",
+      "Centromere",
+      "Histone",
+      "Nucleosome"
+    ],
+    "correct_answer": "Histone",
+    "explanation": "Histones are positively charged proteins around which DNA wraps to form nucleosomes, compacting chromosomes.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "Which process results in genetic recombination during meiosis?",
+    "options": [
+      "DNA replication",
+      "Chromosome segregation",
+      "Cytokinesis",
+      "Crossing over"
+    ],
+    "correct_answer": "Crossing over",
+    "explanation": "Crossing over (chiasmata formation) during prophase I of meiosis exchanges segments between homologous chromosomes, creating new allele combinations.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the primary waste product of protein catabolism excreted by humans?",
+    "options": [
+      "Urea",
+      "Creatinine",
+      "CO2",
+      "Ammonia"
+    ],
+    "correct_answer": "Urea",
+    "explanation": "Humans convert toxic ammonia from amino acid breakdown into urea in the liver (urea cycle) for safe excretion by kidneys.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "Which type of epithelium lines the alveoli of the lungs?",
+    "options": [
+      "Columnar epithelium",
+      "Simple squamous epithelium",
+      "Stratified squamous epithelium",
+      "Cuboidal epithelium"
+    ],
+    "correct_answer": "Simple squamous epithelium",
+    "explanation": "Alveoli are lined with simple squamous epithelium — single, flattened cells ideal for rapid gas diffusion.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the name for the region of a chromosome attached to the spindle fiber?",
+    "options": [
+      "Telomere",
+      "Chromatid",
+      "Kinetochore",
+      "Centromere"
+    ],
+    "correct_answer": "Kinetochore",
+    "explanation": "The kinetochore is a protein complex assembled at the centromere region of a chromosome that attaches to spindle microtubules.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "Which protein transports fatty acids into the mitochondria for beta-oxidation?",
+    "options": [
+      "Albumin",
+      "Transferrin",
+      "Apolipoprotein",
+      "Carnitine"
+    ],
+    "correct_answer": "Carnitine",
+    "explanation": "Carnitine acts as a shuttle, transporting long-chain fatty acids across the inner mitochondrial membrane for beta-oxidation.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the term for a reproductive barrier between two species in the same area?",
+    "options": [
+      "Reproductive isolation",
+      "Ecological barrier",
+      "Allopatric barrier",
+      "Genetic drift"
+    ],
+    "correct_answer": "Reproductive isolation",
+    "explanation": "Reproductive isolation refers to mechanisms (behavioral, temporal, mechanical, genetic) that prevent gene flow between species.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the role of the SRP signal sequence?",
+    "options": [
+      "Terminate translation",
+      "Direct the protein to the ER",
+      "Degrade the protein",
+      "Mark the protein for export"
+    ],
+    "correct_answer": "Direct the protein to the ER",
+    "explanation": "The N-terminal signal sequence on secretory proteins is recognized by the SRP, directing the ribosome-mRNA complex to the rough ER.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "Which stage of cellular respiration produces the most CO2?",
+    "options": [
+      "Glycolysis",
+      "Oxidative phosphorylation",
+      "Krebs cycle",
+      "Fermentation"
+    ],
+    "correct_answer": "Krebs cycle",
+    "explanation": "The Krebs cycle releases 4 CO2 per glucose (2 per turn × 2 turns), the most of any stage in cellular respiration.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the name for the protein responsible for myelin production in the PNS?",
+    "options": [
+      "Oligodendrocyte",
+      "Astrocyte",
+      "Microglia",
+      "Schwann cell"
+    ],
+    "correct_answer": "Schwann cell",
+    "explanation": "Schwann cells wrap around peripheral nervous system axons to form the myelin sheath, speeding up nerve signal conduction.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "Which base pairs with adenine in DNA?",
+    "options": [
+      "Thymine",
+      "Uracil",
+      "Guanine",
+      "Cytosine"
+    ],
+    "correct_answer": "Thymine",
+    "explanation": "In DNA, adenine (A) pairs with thymine (T) via two hydrogen bonds, following Chargaff's complementary base pairing rules.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "Which hormone is responsible for the secondary sexual characteristics in males?",
+    "options": [
+      "Estrogen",
+      "Testosterone",
+      "Progesterone",
+      "FSH"
+    ],
+    "correct_answer": "Testosterone",
+    "explanation": "Testosterone is the primary male sex hormone (androgen) produced by testes, driving secondary sex characteristics like muscle mass and facial hair.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the term for a cell that has undergone indefinite cell division?",
+    "options": [
+      "Stem cell",
+      "Progenitor cell",
+      "Immortalized cell",
+      "Differentiated cell"
+    ],
+    "correct_answer": "Immortalized cell",
+    "explanation": "Immortalized cells can divide indefinitely due to mutations (like telomerase activation) — this is characteristic of cancer cells.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "Which molecule acts as an electron shuttle between complexes in the ETC?",
+    "options": [
+      "NAD+",
+      "FAD",
+      "Cytochrome c",
+      "Ubiquinone (CoQ)"
+    ],
+    "correct_answer": "Ubiquinone (CoQ)",
+    "explanation": "Ubiquinone (coenzyme Q) is a mobile electron carrier in the inner mitochondrial membrane, shuttling electrons between complexes I/II and III.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the term for the formation of a new species from one ancestral species without geographic isolation?",
+    "options": [
+      "Sympatric speciation",
+      "Peripatric speciation",
+      "Allopatric speciation",
+      "Parapatric speciation"
+    ],
+    "correct_answer": "Sympatric speciation",
+    "explanation": "Sympatric speciation occurs when new species evolve from a single ancestral species while inhabiting the same geographic region.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "Which law states genes for different traits assort independently during meiosis?",
+    "options": [
+      "Law of Segregation",
+      "Law of Independent Assortment",
+      "Law of Dominance",
+      "Law of Linkage"
+    ],
+    "correct_answer": "Law of Independent Assortment",
+    "explanation": "Mendel's Law of Independent Assortment states that alleles for different genes are inherited independently of each other during meiosis.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the name for the electrical potential of a resting neuron?",
+    "options": [
+      "Action potential",
+      "Threshold potential",
+      "Resting membrane potential",
+      "Graded potential"
+    ],
+    "correct_answer": "Resting membrane potential",
+    "explanation": "The resting membrane potential (~-70 mV) is maintained by Na+/K+ pumps and ion channels when a neuron is not transmitting a signal.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "Which process is responsible for the rotation of the bacterial flagellum?",
+    "options": [
+      "Myosin motors",
+      "Kinesin motors",
+      "ATP hydrolysis only",
+      "Proton motive force"
+    ],
+    "correct_answer": "Proton motive force",
+    "explanation": "The bacterial flagellar motor is powered by the flow of protons down their electrochemical gradient (proton motive force).",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the function of cyclins in the cell cycle?",
+    "options": [
+      "Activate CDKs to control cell cycle progression",
+      "Degrade damaged proteins",
+      "Repair DNA damage",
+      "Initiate apoptosis"
+    ],
+    "correct_answer": "Activate CDKs to control cell cycle progression",
+    "explanation": "Cyclins bind to cyclin-dependent kinases (CDKs), activating them to phosphorylate target proteins that drive cell cycle transitions.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "Which type of bond holds nucleotides together in a DNA strand?",
+    "options": [
+      "Hydrogen bonds",
+      "Phosphodiester bonds",
+      "Ionic bonds",
+      "Peptide bonds"
+    ],
+    "correct_answer": "Phosphodiester bonds",
+    "explanation": "Phosphodiester bonds link the 3' carbon of one nucleotide's sugar to the 5' phosphate of the next in a DNA strand.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the term for transport across a membrane driven by the concentration gradient of another ion?",
+    "options": [
+      "Primary active transport",
+      "Passive diffusion",
+      "Secondary active transport",
+      "Facilitated diffusion"
+    ],
+    "correct_answer": "Secondary active transport",
+    "explanation": "Secondary active transport uses the electrochemical gradient established by primary active transport (like Na+/K+ ATPase) to drive other molecules across.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "Which enzyme joins RNA primers in DNA replication?",
+    "options": [
+      "DNA polymerase I",
+      "Primase",
+      "Topoisomerase",
+      "DNA ligase"
+    ],
+    "correct_answer": "DNA ligase",
+    "explanation": "DNA ligase seals nicks between Okazaki fragments and after DNA polymerase I removes RNA primers on the lagging strand.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the term for the evolution of similar structures in unrelated lineages?",
+    "options": [
+      "Convergent evolution",
+      "Parallel evolution",
+      "Divergent evolution",
+      "Adaptive radiation"
+    ],
+    "correct_answer": "Convergent evolution",
+    "explanation": "Convergent evolution produces analogous structures in unrelated lineages, like wings in birds and insects, due to similar selective pressures.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "Which type of immunity is provided by vaccination?",
+    "options": [
+      "Innate immunity",
+      "Artificial active immunity",
+      "Natural passive immunity",
+      "Natural active immunity"
+    ],
+    "correct_answer": "Artificial active immunity",
+    "explanation": "Vaccination provides artificial active immunity by stimulating the immune system to produce memory cells against a pathogen without causing disease.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the function of the Na+/K+ ATPase pump?",
+    "options": [
+      "Generate ATP",
+      "Maintain pH",
+      "Maintain resting membrane potential",
+      "Destroy pathogens"
+    ],
+    "correct_answer": "Maintain resting membrane potential",
+    "explanation": "The Na+/K+ ATPase pumps 3 Na+ out and 2 K+ in per ATP, maintaining the electrochemical gradient essential for neuron function.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "Which organelle is responsible for sorting proteins to the correct cellular location?",
+    "options": [
+      "Rough ER",
+      "Lysosome",
+      "Nucleus",
+      "Golgi apparatus"
+    ],
+    "correct_answer": "Golgi apparatus",
+    "explanation": "The Golgi apparatus acts as the cell's postal system — receiving, modifying, and directing proteins to the correct destinations.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the term for the accumulation of genetic changes leading to speciation?",
+    "options": [
+      "Macroevolution",
+      "Cladogenesis",
+      "Microevolution",
+      "Anagenesis"
+    ],
+    "correct_answer": "Macroevolution",
+    "explanation": "Macroevolution refers to evolutionary changes at or above the species level, resulting from accumulated genetic changes over long time periods.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "Which process do tumor cells use to maintain their telomeres?",
+    "options": [
+      "Apoptosis",
+      "Telomerase activation",
+      "DNA repair",
+      "Cell senescence"
+    ],
+    "correct_answer": "Telomerase activation",
+    "explanation": "Most tumor cells reactivate telomerase, which adds telomere sequences to maintain chromosome length and enable unlimited cell division.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the name for the mechanism that prevents sister chromatids from separating too early?",
+    "options": [
+      "Spindle checkpoint",
+      "DNA checkpoint",
+      "Cohesin complex",
+      "Kinetochore attachment"
+    ],
+    "correct_answer": "Cohesin complex",
+    "explanation": "Cohesins are protein complexes that hold sister chromatids together after replication until they are separated during anaphase.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "Which technique uses complementary sequences to find specific DNA regions?",
+    "options": [
+      "Gel electrophoresis",
+      "Western blotting",
+      "PCR",
+      "DNA hybridization"
+    ],
+    "correct_answer": "DNA hybridization",
+    "explanation": "DNA hybridization uses complementary probe sequences to bind (hybridize) to specific target DNA or RNA sequences.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the term for a permanent genetic change caused by a mutagen?",
+    "options": [
+      "Mutation",
+      "Polymorphism",
+      "Epigenetic change",
+      "Recombination"
+    ],
+    "correct_answer": "Mutation",
+    "explanation": "A mutation is a permanent alteration in the DNA sequence, which may be caused by mutagens like radiation, chemicals, or replication errors.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "What is an ecosystem's resistance to change called?",
+    "options": [
+      "Adaptation",
+      "Stability",
+      "Resilience",
+      "Succession"
+    ],
+    "correct_answer": "Stability",
+    "explanation": "Ecosystem stability (resistance) is the ability of an ecosystem to resist disturbance and maintain its structure and function.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "Which chemical is used in CRISPR-Cas9 to cut DNA?",
+    "options": [
+      "Ligase",
+      "Polymerase",
+      "Cas9 nuclease",
+      "Restriction enzyme"
+    ],
+    "correct_answer": "Cas9 nuclease",
+    "explanation": "Cas9 is an endonuclease enzyme guided by RNA to cut double-stranded DNA at specific sequences in CRISPR gene editing.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the name for the sequence of amino acids that determines a protein's structure?",
+    "options": [
+      "Tertiary structure",
+      "Secondary structure",
+      "Quaternary structure",
+      "Primary structure"
+    ],
+    "correct_answer": "Primary structure",
+    "explanation": "The primary structure is the linear sequence of amino acids in a polypeptide chain, determined directly by the gene sequence.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the maximum number of electrons the first electron shell can hold?",
+    "options": [
+      "2",
+      "6",
+      "4",
+      "8"
+    ],
+    "correct_answer": "2",
+    "explanation": "The first electron shell (n=1) can hold a maximum of 2 electrons in the 1s orbital.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "Which biological macromolecule serves as long-term energy storage in animals?",
+    "options": [
+      "Glycogen",
+      "Triglycerides",
+      "Starch",
+      "Cholesterol"
+    ],
+    "correct_answer": "Triglycerides",
+    "explanation": "Triglycerides (neutral fats) are the primary long-term energy storage molecules in animals, stored in adipose tissue.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the term for the energy released when chemical bonds are broken?",
+    "options": [
+      "Potential energy",
+      "Activation energy",
+      "Free energy",
+      "Kinetic energy"
+    ],
+    "correct_answer": "Free energy",
+    "explanation": "Gibbs free energy (ΔG) measures the usable energy released or absorbed during a chemical reaction at constant temperature and pressure.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the name for a gene that increases the risk of cancer when mutated?",
+    "options": [
+      "Tumor suppressor",
+      "Transcription factor",
+      "Proto-oncogene",
+      "Oncogene"
+    ],
+    "correct_answer": "Oncogene",
+    "explanation": "Oncogenes are mutated proto-oncogenes that promote uncontrolled cell growth and division, contributing to cancer development.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "Which type of cell junction prevents molecules from passing between epithelial cells?",
+    "options": [
+      "Tight junction",
+      "Desmosome",
+      "Gap junction",
+      "Hemidesmosome"
+    ],
+    "correct_answer": "Tight junction",
+    "explanation": "Tight junctions seal the space between adjacent epithelial cells, creating a barrier that prevents molecules from passing between cells.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the function of telomeres in cell biology?",
+    "options": [
+      "Initiate transcription",
+      "Protect chromosome ends from degradation",
+      "Attach to spindle fibers",
+      "Store genetic information"
+    ],
+    "correct_answer": "Protect chromosome ends from degradation",
+    "explanation": "Telomeres are repetitive DNA sequences at chromosome ends that protect against degradation and fusion with other chromosomes.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the term for a segment of DNA that can change its position in the genome?",
+    "options": [
+      "Plasmid",
+      "Intron",
+      "Transposon",
+      "Exon"
+    ],
+    "correct_answer": "Transposon",
+    "explanation": "Transposons (jumping genes) are DNA sequences that can move to different positions within a genome, potentially causing mutations.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "Which molecule carries electrons to complex I of the electron transport chain?",
+    "options": [
+      "FADH2",
+      "ATP",
+      "Cytochrome c",
+      "NADH"
+    ],
+    "correct_answer": "NADH",
+    "explanation": "NADH donates its electrons to Complex I (NADH dehydrogenase) at the start of the electron transport chain.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the name for the loss of function of both alleles of a tumor suppressor gene?",
+    "options": [
+      "Loss of heterozygosity",
+      "Gene amplification",
+      "Gain of function",
+      "Epigenetic silencing"
+    ],
+    "correct_answer": "Loss of heterozygosity",
+    "explanation": "Loss of heterozygosity occurs when the remaining wild-type allele of a tumor suppressor is mutated or deleted, eliminating tumor suppression.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "Which molecule acts as the cofactor for transaminase enzymes in amino acid metabolism?",
+    "options": [
+      "NAD+",
+      "Pyridoxal phosphate",
+      "CoA",
+      "FAD"
+    ],
+    "correct_answer": "Pyridoxal phosphate",
+    "explanation": "Pyridoxal phosphate (vitamin B6 derivative) is the essential cofactor for aminotransferases (transaminases) in amino acid interconversion.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the name for the tRNA anticodon that base-pairs with the mRNA stop codon?",
+    "options": [
+      "Initiator tRNA",
+      "Aminoacyl-tRNA",
+      "Suppressor tRNA",
+      "Release factor"
+    ],
+    "correct_answer": "Suppressor tRNA",
+    "explanation": "Suppressor tRNAs carry anticodons that can read stop codons, causing read-through and suppression of termination mutations.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "Which process allows a pathogen to evade the immune system by changing its surface antigens?",
+    "options": [
+      "Immune tolerance",
+      "Clonal deletion",
+      "Molecular mimicry",
+      "Antigenic variation"
+    ],
+    "correct_answer": "Antigenic variation",
+    "explanation": "Antigenic variation is the mechanism by which pathogens change their surface antigens to evade recognition by the host immune system.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the term for the inheritance pattern where heterozygotes show an intermediate phenotype?",
+    "options": [
+      "Incomplete dominance",
+      "Epistasis",
+      "Complete dominance",
+      "Codominance"
+    ],
+    "correct_answer": "Incomplete dominance",
+    "explanation": "In incomplete dominance, the heterozygote shows a phenotype intermediate between the two homozygous parents, like red × white = pink.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "Which organelle is responsible for detecting and responding to ER stress?",
+    "options": [
+      "Golgi apparatus",
+      "Unfolded protein response (UPR)",
+      "Lysosome",
+      "Ribosome"
+    ],
+    "correct_answer": "Unfolded protein response (UPR)",
+    "explanation": "The UPR is an ER stress-response pathway that senses accumulation of misfolded proteins and activates mechanisms to restore normal function.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the term for the process of breaking down fatty acids to produce acetyl-CoA?",
+    "options": [
+      "Lipogenesis",
+      "Ketogenesis",
+      "Beta-oxidation",
+      "Lipolysis"
+    ],
+    "correct_answer": "Beta-oxidation",
+    "explanation": "Beta-oxidation is the metabolic process that sequentially cleaves 2-carbon acetyl-CoA units from fatty acids in the mitochondria.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "Which chromosome segregation error results in offspring with an incorrect number of chromosomes?",
+    "options": [
+      "Inversion",
+      "Translocation",
+      "Deletion",
+      "Nondisjunction"
+    ],
+    "correct_answer": "Nondisjunction",
+    "explanation": "Nondisjunction is the failure of chromosomes to separate properly during meiosis, resulting in gametes with extra or missing chromosomes (aneuploidy).",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the term for the modification of histones to regulate gene expression?",
+    "options": [
+      "Histone modification",
+      "Chromatin remodeling",
+      "RNA interference",
+      "DNA methylation"
+    ],
+    "correct_answer": "Histone modification",
+    "explanation": "Histone modifications (acetylation, methylation, phosphorylation) alter chromatin structure to regulate access of transcription machinery to DNA.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "Which enzyme removes negative supercoils ahead of the replication fork?",
+    "options": [
+      "Helicase",
+      "Topoisomerase",
+      "DNA polymerase",
+      "Primase"
+    ],
+    "correct_answer": "Topoisomerase",
+    "explanation": "Topoisomerases relieve torsional stress ahead of the replication fork by temporarily cutting DNA strands to allow rotation.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the name for the electron transport chain component that directly donates electrons to oxygen?",
+    "options": [
+      "Complex I",
+      "Complex II",
+      "Cytochrome c oxidase",
+      "Complex III"
+    ],
+    "correct_answer": "Cytochrome c oxidase",
+    "explanation": "Cytochrome c oxidase (Complex IV) accepts electrons from cytochrome c and transfers them to O2, forming water.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "Which mechanism allows small populations to diverge rapidly from a parent population?",
+    "options": [
+      "Bottleneck effect",
+      "Natural selection",
+      "Gene flow",
+      "Founder effect"
+    ],
+    "correct_answer": "Founder effect",
+    "explanation": "The founder effect occurs when a small group establishes a new population, carrying a limited genetic subset of the parent population.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the term for the ability of stem cells to produce all cell types of an organism?",
+    "options": [
+      "Totipotency",
+      "Multipotency",
+      "Unipotency",
+      "Pluripotency"
+    ],
+    "correct_answer": "Totipotency",
+    "explanation": "Totipotent cells (like a fertilized egg) can develop into any cell type of the entire organism including extraembryonic tissues.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "Which molecule inhibits the lac operon when glucose is present?",
+    "options": [
+      "Lactose",
+      "Catabolite activator protein (CAP)",
+      "cAMP",
+      "Allolactose"
+    ],
+    "correct_answer": "Catabolite activator protein (CAP)",
+    "explanation": "When glucose is low, cAMP activates CAP which enhances lac operon transcription. High glucose reduces cAMP, reducing CAP activation.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the name for the evolutionary process of one species giving rise to multiple species?",
+    "options": [
+      "Anagenesis",
+      "Coevolution",
+      "Adaptive radiation",
+      "Macroevolution"
+    ],
+    "correct_answer": "Adaptive radiation",
+    "explanation": "Adaptive radiation is the rapid diversification of one ancestral species into many different species occupying different ecological niches.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "Which protein complex controls the metaphase to anaphase transition in mitosis?",
+    "options": [
+      "Kinetochore complex",
+      "Cohesin complex",
+      "Condensin complex",
+      "Anaphase-promoting complex (APC/C)"
+    ],
+    "correct_answer": "Anaphase-promoting complex (APC/C)",
+    "explanation": "The APC/C is a ubiquitin ligase that triggers anaphase by ubiquitinating securin and cyclin B, allowing sister chromatid separation.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the name for the inherited condition where a person lacks one functional copy of a tumor suppressor?",
+    "options": [
+      "Familial cancer predisposition",
+      "Gain-of-function mutation",
+      "Epigenetic silencing",
+      "Sporadic cancer"
+    ],
+    "correct_answer": "Familial cancer predisposition",
+    "explanation": "Familial cancer predisposition occurs when germline mutations in tumor suppressor genes (like BRCA1) increase lifetime cancer risk.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the correct order of the light-independent reactions' inputs?",
+    "options": [
+      "ATP, FADH2, CO2",
+      "CO2, ATP, NADPH",
+      "Glucose, H2O, O2",
+      "NADH, ATP, O2"
+    ],
+    "correct_answer": "CO2, ATP, NADPH",
+    "explanation": "The Calvin cycle uses CO2 (carbon source), ATP (energy), and NADPH (reducing power) to synthesize glyceraldehyde-3-phosphate (G3P).",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the term for when one gene affects multiple phenotypic traits?",
+    "options": [
+      "Polygenic inheritance",
+      "Epistasis",
+      "Pleiotropy",
+      "Codominance"
+    ],
+    "correct_answer": "Pleiotropy",
+    "explanation": "Pleiotropy occurs when a single gene influences two or more seemingly unrelated phenotypic traits.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "Which test determines if alleles of two genes assort independently?",
+    "options": [
+      "Monohybrid cross",
+      "Back cross",
+      "Chi-square test",
+      "Dihybrid cross"
+    ],
+    "correct_answer": "Dihybrid cross",
+    "explanation": "A dihybrid cross between organisms heterozygous for two traits (AaBb × AaBb) tests if genes assort independently (expected 9:3:3:1 ratio).",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the term for the prevention of a new action potential immediately after one fires?",
+    "options": [
+      "Refractory period",
+      "Resting potential",
+      "Graded potential",
+      "Threshold potential"
+    ],
+    "correct_answer": "Refractory period",
+    "explanation": "The refractory period follows an action potential — during this time Na+ channels are inactivated, preventing a new action potential.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the primary role of brown adipose tissue in mammals?",
+    "options": [
+      "Long-term energy storage",
+      "Heat generation (thermogenesis)",
+      "Cushioning organs",
+      "Insulation"
+    ],
+    "correct_answer": "Heat generation (thermogenesis)",
+    "explanation": "Brown adipose tissue generates heat through non-shivering thermogenesis using uncoupling protein 1 (UCP1) in the mitochondria.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "Which blood type is the universal recipient?",
+    "options": [
+      "Type A",
+      "Type B",
+      "Type AB",
+      "Type O"
+    ],
+    "correct_answer": "Type AB",
+    "explanation": "Type AB positive individuals can receive blood from any ABO type because they have no anti-A or anti-B antibodies.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the term for a group of species and their physical environment interacting together?",
+    "options": [
+      "Community",
+      "Population",
+      "Biome",
+      "Ecosystem"
+    ],
+    "correct_answer": "Ecosystem",
+    "explanation": "An ecosystem includes all the living organisms (community) and the abiotic factors (water, soil, air) they interact with.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "Which signal molecule diffuses across the synapse to transmit nerve impulses?",
+    "options": [
+      "Neurotransmitter",
+      "Cytokine",
+      "Enzyme",
+      "Hormone"
+    ],
+    "correct_answer": "Neurotransmitter",
+    "explanation": "Neurotransmitters are released from synaptic vesicles into the synaptic cleft and bind to receptors on the postsynaptic membrane.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "Which enzyme creates an RNA primer for DNA replication?",
+    "options": [
+      "Helicase",
+      "Primase",
+      "DNA Polymerase III",
+      "Ligase"
+    ],
+    "correct_answer": "Primase",
+    "explanation": "Primase synthesizes short RNA primers that provide the 3'-OH group needed for DNA polymerase to begin synthesis.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the term for the evolutionary advantage of having two different alleles at a locus?",
+    "options": [
+      "Heterozygosity",
+      "Genetic drift",
+      "Heterozygote advantage",
+      "Natural selection"
+    ],
+    "correct_answer": "Heterozygote advantage",
+    "explanation": "Heterozygote advantage (overdominance) occurs when heterozygotes have greater fitness than either homozygote, like sickle cell trait providing malaria resistance.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "Which cell surface receptor type is linked to G proteins?",
+    "options": [
+      "Ligand-gated ion channel",
+      "Receptor tyrosine kinase",
+      "Intracellular receptor",
+      "GPCR"
+    ],
+    "correct_answer": "GPCR",
+    "explanation": "G protein-coupled receptors (GPCRs) activate intracellular G proteins upon ligand binding, triggering second messenger cascades.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the name for the process where DNA wraps around proteins to form compact structures?",
+    "options": [
+      "Chromatin packaging",
+      "Replication",
+      "Methylation",
+      "Transcription"
+    ],
+    "correct_answer": "Chromatin packaging",
+    "explanation": "Chromatin packaging involves DNA wrapping around histone octamers to form nucleosomes, then further compacting into higher-order structures.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "Which biomolecule makes up the majority of the cell membrane by mass?",
+    "options": [
+      "Carbohydrates",
+      "Phospholipids",
+      "Enzymes",
+      "Nucleic acids"
+    ],
+    "correct_answer": "Phospholipids",
+    "explanation": "Phospholipids form the bilayer backbone of the cell membrane, constituting the majority of membrane mass.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the term for chemical signals released by one species that affect individuals of another species?",
+    "options": [
+      "Pheromones",
+      "Hormones",
+      "Allelochemicals",
+      "Cytokines"
+    ],
+    "correct_answer": "Allelochemicals",
+    "explanation": "Allelochemicals are secondary metabolites released by one species that influence the behavior or physiology of another species.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "Which test is used to determine if an organism is homozygous or heterozygous dominant?",
+    "options": [
+      "Monohybrid cross",
+      "Dihybrid cross",
+      "F1 cross",
+      "Testcross"
+    ],
+    "correct_answer": "Testcross",
+    "explanation": "A testcross breeds the organism of unknown genotype with a homozygous recessive individual to determine the unknown genotype.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the name for the evolutionary process where neutral traits spread through populations?",
+    "options": [
+      "Neutral evolution",
+      "Sexual selection",
+      "Genetic drift",
+      "Natural selection"
+    ],
+    "correct_answer": "Neutral evolution",
+    "explanation": "Neutral evolution (neutral theory) proposes that most genetic variation is selectively neutral and spreads through random drift.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "Which organelle sequesters damaged organelles for recycling?",
+    "options": [
+      "Lysosome",
+      "Autophagosome",
+      "Ribosome",
+      "Peroxisome"
+    ],
+    "correct_answer": "Autophagosome",
+    "explanation": "Autophagosomes are double-membrane vesicles that engulf damaged organelles or proteins for delivery to lysosomes for degradation.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the term for antibiotic resistance passing between bacterial species?",
+    "options": [
+      "Vertical gene transfer",
+      "Transformation only",
+      "Horizontal gene transfer",
+      "Mutation accumulation"
+    ],
+    "correct_answer": "Horizontal gene transfer",
+    "explanation": "Horizontal gene transfer (HGT) is the movement of genetic material between organisms of different species — a major mechanism of antibiotic resistance spread.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the main function of helper T cells in immunity?",
+    "options": [
+      "Kill infected cells directly",
+      "Produce antibodies",
+      "Regulate inflammation only",
+      "Coordinate adaptive immune responses"
+    ],
+    "correct_answer": "Coordinate adaptive immune responses",
+    "explanation": "Helper T cells (CD4+ T cells) activate B cells, cytotoxic T cells, and macrophages, coordinating both humoral and cell-mediated immunity.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "Which is the correct sequence of events during translation?",
+    "options": [
+      "Initiation, elongation, termination",
+      "Termination, initiation, elongation",
+      "Initiation, termination, elongation",
+      "Elongation, initiation, termination"
+    ],
+    "correct_answer": "Initiation, elongation, termination",
+    "explanation": "Translation proceeds through initiation (ribosome assembly), elongation (amino acid addition), and termination (stop codon recognition).",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "Which molecule is produced by the immune system to neutralize specific antigens?",
+    "options": [
+      "Cytokine",
+      "Antibody",
+      "Interferon",
+      "Complement"
+    ],
+    "correct_answer": "Antibody",
+    "explanation": "Antibodies (immunoglobulins) are Y-shaped proteins produced by plasma cells that specifically bind and neutralize antigens.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the term for the evolutionary tree showing relationships between organisms?",
+    "options": [
+      "Taxonomy",
+      "Classification",
+      "Cladogram",
+      "Binomial nomenclature"
+    ],
+    "correct_answer": "Cladogram",
+    "explanation": "A cladogram is a branching diagram showing hypothetical phylogenetic relationships and evolutionary history among groups of organisms.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the name for the first product of carbon fixation in C3 plants?",
+    "options": [
+      "Pyruvate",
+      "Oxaloacetate",
+      "Acetyl-CoA",
+      "3-phosphoglycerate (3-PGA)"
+    ],
+    "correct_answer": "3-phosphoglycerate (3-PGA)",
+    "explanation": "In C3 photosynthesis, CO2 is fixed by RuBisCO onto RuBP to form an unstable 6-carbon compound that immediately splits into two molecules of 3-PGA.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "Which process describes the sequential change of species in an ecosystem over time?",
+    "options": [
+      "Ecological succession",
+      "Biodiversity change",
+      "Species turnover",
+      "Evolution"
+    ],
+    "correct_answer": "Ecological succession",
+    "explanation": "Ecological succession is the process of change in the species structure of an ecological community over time toward a climax community.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the term for the sum of all biochemical reactions in a cell?",
+    "options": [
+      "Anabolism",
+      "Metabolism",
+      "Homeostasis",
+      "Catabolism"
+    ],
+    "correct_answer": "Metabolism",
+    "explanation": "Metabolism encompasses all chemical reactions within a cell, including both anabolic (building) and catabolic (breaking down) reactions.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "Which type of natural selection acts against extreme phenotypes, maintaining the average?",
+    "options": [
+      "Directional selection",
+      "Disruptive selection",
+      "Stabilizing selection",
+      "Sexual selection"
+    ],
+    "correct_answer": "Stabilizing selection",
+    "explanation": "Stabilizing selection reduces phenotypic variation by favoring the average phenotype and acting against both extremes.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the name for the complete elimination of a species from Earth?",
+    "options": [
+      "Local extinction",
+      "Extirpation",
+      "Endangerment",
+      "Global extinction"
+    ],
+    "correct_answer": "Global extinction",
+    "explanation": "Global (total) extinction means a species has completely disappeared from the entire Earth, with no surviving populations anywhere.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the term for the inability of a gene's expression to be inherited epigenetically from one parent?",
+    "options": [
+      "Genomic imprinting",
+      "X-inactivation",
+      "Codominance",
+      "Incomplete dominance"
+    ],
+    "correct_answer": "Genomic imprinting",
+    "explanation": "Genomic imprinting is an epigenetic phenomenon where gene expression depends on which parent the allele was inherited from.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "biology"
+  }
+]

@@ -1,0 +1,2592 @@
+[
+  {
+    "question": "What is the formula for gravitational force between two masses?",
+    "options": [
+      "F = Gm₁m₂/r²",
+      "F = m₁m₂/r",
+      "F = Gm/r²",
+      "F = Gm₁m₂r"
+    ],
+    "correct_answer": "F = Gm₁m₂/r²",
+    "explanation": "Newton's law of universal gravitation: F = Gm₁m₂/r², where G is the gravitational constant (6.67×10⁻¹¹ N·m²/kg²), m₁ and m₂ are masses, and r is the distance between their centres.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the term for the rate of change of displacement?",
+    "options": [
+      "Acceleration",
+      "Velocity",
+      "Speed",
+      "Momentum"
+    ],
+    "correct_answer": "Velocity",
+    "explanation": "Velocity is the rate of change of displacement: v = Δs/Δt. It is a vector quantity, unlike speed which is scalar. Velocity includes both magnitude and direction.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What does the area under a velocity-time graph represent?",
+    "options": [
+      "Force",
+      "Acceleration",
+      "Displacement",
+      "Power"
+    ],
+    "correct_answer": "Displacement",
+    "explanation": "The area under a velocity-time graph equals displacement. For uniform acceleration, this is a trapezium or triangle area. The gradient of a v-t graph gives acceleration.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the energy stored in a capacitor given by ½CV²?",
+    "options": [
+      "Chemical energy",
+      "Kinetic energy",
+      "Magnetic energy",
+      "Electrical potential energy"
+    ],
+    "correct_answer": "Electrical potential energy",
+    "explanation": "A capacitor stores electrical potential energy E = ½CV² = ½QV = Q²/2C, where C is capacitance and V is voltage. This energy is stored in the electric field between the plates.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is Snell's law of refraction?",
+    "options": [
+      "n₁sinθ₁ = n₂sinθ₂",
+      "n₁cosθ₁ = n₂cosθ₂",
+      "n₁θ₁ = n₂θ₂",
+      "n₁/n₂ = sinθ₂/sinθ₁"
+    ],
+    "correct_answer": "n₁sinθ₁ = n₂sinθ₂",
+    "explanation": "Snell's law: n₁sinθ₁ = n₂sinθ₂, where n₁ and n₂ are refractive indices and θ₁, θ₂ are angles of incidence and refraction. It describes how light bends at boundaries.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the period of a simple pendulum?",
+    "options": [
+      "T = 2π√(g/L)",
+      "T = 2π√(L/g)",
+      "T = π√(L/g)",
+      "T = 2√(L/g)"
+    ],
+    "correct_answer": "T = 2π√(L/g)",
+    "explanation": "The period of a simple pendulum T = 2π√(L/g), where L is length and g is gravitational field strength. It is independent of amplitude (for small angles) and mass.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the work-energy theorem?",
+    "options": [
+      "Energy equals mass times velocity",
+      "Work equals force times time",
+      "Net work done equals change in kinetic energy",
+      "Work equals power times distance"
+    ],
+    "correct_answer": "Net work done equals change in kinetic energy",
+    "explanation": "The work-energy theorem states: Wnet = ΔKE = ½mv² - ½mu². The net work done on an object equals its change in kinetic energy.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the critical angle above which total internal reflection occurs?",
+    "options": [
+      "Glancing angle",
+      "Refraction angle",
+      "Brewster angle",
+      "Critical angle (θc = sin⁻¹(1/n))"
+    ],
+    "correct_answer": "Critical angle (θc = sin⁻¹(1/n))",
+    "explanation": "The critical angle θc = sin⁻¹(n₂/n₁). For light going from glass (n=1.5) to air: θc = sin⁻¹(1/1.5) ≈ 42°. Above this angle, all light is internally reflected.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the property measured in farads in electrical circuits?",
+    "options": [
+      "Capacitance",
+      "Resistance",
+      "Inductance",
+      "Impedance"
+    ],
+    "correct_answer": "Capacitance",
+    "explanation": "Capacitance (C, in farads) measures a capacitor's ability to store charge: C = Q/V. One farad stores one coulomb per volt. Practical capacitors are usually in μF or pF.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the impulse-momentum theorem?",
+    "options": [
+      "Impulse = force × distance",
+      "Impulse = change in momentum (FΔt = mΔv)",
+      "Impulse = mass × velocity",
+      "Impulse = ½mv²"
+    ],
+    "correct_answer": "Impulse = change in momentum (FΔt = mΔv)",
+    "explanation": "The impulse-momentum theorem: J = FΔt = Δp = mΔv. Force applied over time equals the change in momentum. Larger time reduces peak force (e.g., airbags, padded surfaces).",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the field that stores energy in an inductor?",
+    "options": [
+      "Gravitational field",
+      "Electric field",
+      "Magnetic field",
+      "Nuclear field"
+    ],
+    "correct_answer": "Magnetic field",
+    "explanation": "An inductor stores energy in its magnetic field: E = ½LI², where L is inductance (in henries) and I is current. When current changes, the inductor opposes the change (Lenz's law).",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for centripetal acceleration?",
+    "options": [
+      "a = v/r",
+      "a = vr",
+      "a = r/v²",
+      "a = v²/r"
+    ],
+    "correct_answer": "a = v²/r",
+    "explanation": "Centripetal acceleration a = v²/r = ω²r, directed toward the centre of the circle. It is provided by a centripetal force F = mv²/r (gravity, tension, or friction).",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the point on a distance-time graph where the gradient is zero?",
+    "options": [
+      "Stationary point (object at rest)",
+      "Point of maximum velocity",
+      "Point of maximum acceleration",
+      "Inflection point"
+    ],
+    "correct_answer": "Stationary point (object at rest)",
+    "explanation": "Where the gradient of a distance-time graph is zero (flat/horizontal section), the object is stationary — it has zero velocity. Gradient of d-t graph = speed.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the Doppler formula for frequency shift when source moves toward observer?",
+    "options": [
+      "f' = f(v/(v+vs))",
+      "f' = f(v/(v-vs))",
+      "f' = f(v+vs)/v",
+      "f' = f·vs/v"
+    ],
+    "correct_answer": "f' = f(v/(v-vs))",
+    "explanation": "When a source moves toward a stationary observer: f' = f·v/(v-vs), giving higher observed frequency. When moving away: f' = f·v/(v+vs), giving lower frequency.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the refractive index of a medium?",
+    "options": [
+      "n = λ/λ₀",
+      "n = v/c",
+      "n = c/v",
+      "n = f₀/f"
+    ],
+    "correct_answer": "n = c/v",
+    "explanation": "The refractive index n = c/v, where c is the speed of light in vacuum and v is the speed of light in the medium. Higher n means light travels slower in that medium.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the law stating induced EMF opposes the change causing it?",
+    "options": [
+      "Biot-Savart law",
+      "Faraday's law",
+      "Ampere's law",
+      "Lenz's law"
+    ],
+    "correct_answer": "Lenz's law",
+    "explanation": "Lenz's law states that the induced EMF (and current) always opposes the change in magnetic flux that causes it. This is the negative sign in Faraday's law: ε = -dΦ/dt.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the energy stored in a spring?",
+    "options": [
+      "E = ½kx²",
+      "E = kx",
+      "E = kx²",
+      "E = 2kx²"
+    ],
+    "correct_answer": "E = ½kx²",
+    "explanation": "Elastic potential energy E = ½kx², where k is the spring constant (N/m) and x is the extension or compression. This is derived by integrating Hooke's law F = kx.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the phenomenon where a system oscillates at maximum amplitude at its natural frequency?",
+    "options": [
+      "Interference",
+      "Resonance",
+      "Damping",
+      "Diffraction"
+    ],
+    "correct_answer": "Resonance",
+    "explanation": "Resonance occurs when a driving frequency matches the system's natural frequency, causing maximum amplitude oscillations. Examples: Tacoma Narrows bridge, tuning circuits.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the efficiency formula for a heat engine?",
+    "options": [
+      "η = Qh/W",
+      "η = Qc/Qh",
+      "η = W/Qh (work output/heat input)",
+      "η = W/(Qh+Qc)"
+    ],
+    "correct_answer": "η = W/Qh (work output/heat input)",
+    "explanation": "Heat engine efficiency η = W/Qh = (Qh - Qc)/Qh, where W is useful work output and Qh is heat input. The Carnot efficiency gives the maximum: ηmax = 1 - Tc/Th.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for electric field strength between parallel plates?",
+    "options": [
+      "E = V²/d",
+      "E = Vd",
+      "E = d/V",
+      "E = V/d"
+    ],
+    "correct_answer": "E = V/d",
+    "explanation": "The uniform electric field between parallel plates E = V/d, where V is potential difference and d is plate separation. Units: V/m or N/C.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the minimum frequency of light that causes photoelectric emission?",
+    "options": [
+      "Threshold frequency",
+      "Cut-off frequency",
+      "Natural frequency",
+      "Resonant frequency"
+    ],
+    "correct_answer": "Threshold frequency",
+    "explanation": "The threshold (minimum) frequency f₀ is the minimum frequency of light that causes photoelectric emission. Below f₀, no electrons are emitted regardless of intensity.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the orbital speed of a satellite?",
+    "options": [
+      "v = √(Gr/M)",
+      "v = √(GM/r)",
+      "v = GM/r",
+      "v = √(GMr)"
+    ],
+    "correct_answer": "v = √(GM/r)",
+    "explanation": "For a circular orbit, gravitational force provides centripetal force: GMm/r² = mv²/r, giving v = √(GM/r). Larger orbits have slower orbital speeds.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the term for the total resistance of n identical resistors in series?",
+    "options": [
+      "R_total = n/R",
+      "R_total = R/n",
+      "R_total = nR",
+      "R_total = nR²"
+    ],
+    "correct_answer": "R_total = nR",
+    "explanation": "For n identical resistors in series: R_total = R₁ + R₂ + ... + Rₙ = nR. Series connections add resistance directly.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is Faraday's law of electromagnetic induction?",
+    "options": [
+      "EMF = N·B·A",
+      "EMF = N·Φ·t",
+      "EMF = Φ/t",
+      "EMF = -N(dΦ/dt)"
+    ],
+    "correct_answer": "EMF = -N(dΦ/dt)",
+    "explanation": "Faraday's law: EMF = -N(dΦ/dt), where N is number of coil turns and dΦ/dt is the rate of change of magnetic flux. The negative sign (Lenz's law) shows it opposes the change.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What does the gradient of a force-extension graph represent?",
+    "options": [
+      "Spring constant k",
+      "Elastic potential energy",
+      "Young's modulus",
+      "Strain"
+    ],
+    "correct_answer": "Spring constant k",
+    "explanation": "The gradient of a force-extension (F-x) graph gives the spring constant k = F/x (Hooke's law). The area under the graph gives elastic potential energy ½kx².",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the relationship between pressure and depth in a fluid?",
+    "options": [
+      "P = ρg/h",
+      "P = ρgh",
+      "P = gh/ρ",
+      "P = ρh"
+    ],
+    "correct_answer": "P = ρgh",
+    "explanation": "Pressure at depth h in a fluid: P = ρgh, where ρ is fluid density, g is gravitational field strength, and h is depth. This explains why divers experience greater pressure deeper.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for a wave that transfers energy without transferring matter?",
+    "options": [
+      "Stationary wave",
+      "Standing wave",
+      "Progressive wave",
+      "Evanescent wave"
+    ],
+    "correct_answer": "Progressive wave",
+    "explanation": "A progressive (travelling) wave transfers energy from one place to another without transferring matter. Examples: sound, light, water ripples.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula relating wave speed, frequency, and wavelength?",
+    "options": [
+      "f = vλ",
+      "v = f/λ",
+      "v = λ/f",
+      "v = fλ"
+    ],
+    "correct_answer": "v = fλ",
+    "explanation": "Wave speed v = fλ, where f is frequency (Hz) and λ is wavelength (m). This applies to all types of waves — electromagnetic, sound, water, etc.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the rate at which charge flows past a point?",
+    "options": [
+      "Electric current",
+      "Voltage",
+      "Resistance",
+      "Power"
+    ],
+    "correct_answer": "Electric current",
+    "explanation": "Electric current I = Q/t (charge per unit time), measured in amperes. One ampere = one coulomb per second flowing past a point in a conductor.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the power dissipated in a resistor?",
+    "options": [
+      "P = IR",
+      "P = I²R",
+      "P = I/R",
+      "P = R/I²"
+    ],
+    "correct_answer": "P = I²R",
+    "explanation": "Power P = I²R = V²/R = IV. The I²R form is used when current is known. Power dissipated as heat in a resistor is also called Joule heating.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the term for the vector sum of all forces acting on an object?",
+    "options": [
+      "Normal force",
+      "Applied force",
+      "Net force (resultant force)",
+      "Contact force"
+    ],
+    "correct_answer": "Net force (resultant force)",
+    "explanation": "The net (resultant) force is the vector sum of all individual forces acting on an object. If net force ≠ 0, the object accelerates in the direction of the net force (F = ma).",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What does the area under a force-displacement graph represent?",
+    "options": [
+      "Momentum",
+      "Power",
+      "Impulse",
+      "Work done"
+    ],
+    "correct_answer": "Work done",
+    "explanation": "The area under a force-displacement graph equals the work done (W = ∫F·dx). For a constant force, W = Fd; for a variable force, integration is needed.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the point where an object's entire weight appears to act?",
+    "options": [
+      "Centre of gravity",
+      "Centre of mass",
+      "Centroid",
+      "Equilibrium point"
+    ],
+    "correct_answer": "Centre of gravity",
+    "explanation": "The centre of gravity is the point where the total weight of an object effectively acts. For uniform objects in uniform fields, it coincides with the centre of mass.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the escape velocity from a planet's surface?",
+    "options": [
+      "v_esc = √(GM/R)",
+      "v_esc = √(2GM/R)",
+      "v_esc = 2GM/R",
+      "v_esc = GM/R²"
+    ],
+    "correct_answer": "v_esc = √(2GM/R)",
+    "explanation": "Escape velocity v_esc = √(2GM/R) is derived by equating kinetic energy to gravitational potential energy: ½mv² = GMm/R. Earth's escape velocity ≈ 11.2 km/s.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the term for the ability of two waves from the same source to produce a stable interference pattern?",
+    "options": [
+      "Resonance",
+      "Polarization",
+      "Coherence",
+      "Diffraction"
+    ],
+    "correct_answer": "Coherence",
+    "explanation": "Coherent sources have a constant phase difference and same frequency, allowing stable interference patterns. Lasers produce coherent light; different light bulbs do not.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for Young's modulus?",
+    "options": [
+      "E = force × extension",
+      "E = strain/stress",
+      "E = force/area",
+      "E = stress/strain"
+    ],
+    "correct_answer": "E = stress/strain",
+    "explanation": "Young's modulus E = stress/strain = (F/A)/(ΔL/L₀). It measures material stiffness and is constant below the elastic limit. Units: Pa (pascals) or N/m².",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the force per unit positive charge at a point in an electric field?",
+    "options": [
+      "Electric field strength (E = F/q)",
+      "Voltage",
+      "Electric flux",
+      "Electric potential"
+    ],
+    "correct_answer": "Electric field strength (E = F/q)",
+    "explanation": "Electric field strength E = F/q (N/C or V/m) is the force per unit positive charge. It is a vector pointing in the direction of force on a positive test charge.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the period of oscillation of a mass-spring system?",
+    "options": [
+      "T = 2π√(k/m)",
+      "T = 2π√(m/k)",
+      "T = π√(m/k)",
+      "T = 2√(m/k)"
+    ],
+    "correct_answer": "T = 2π√(m/k)",
+    "explanation": "The period of a mass-spring system T = 2π√(m/k), where m is mass and k is spring constant. Greater mass or softer spring gives longer period.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the magnetic flux formula?",
+    "options": [
+      "Φ = B/A",
+      "Φ = BA sinθ",
+      "Φ = BA cosθ",
+      "Φ = BA/cosθ"
+    ],
+    "correct_answer": "Φ = BA cosθ",
+    "explanation": "Magnetic flux Φ = BA cosθ, where B is magnetic flux density, A is area, and θ is angle between B and the normal to the area. Units: weber (Wb). Φ is maximum when B is perpendicular to the plane.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for a material that returns to its original shape when a deforming force is removed?",
+    "options": [
+      "Brittle material",
+      "Plastic material",
+      "Ductile material",
+      "Elastic material"
+    ],
+    "correct_answer": "Elastic material",
+    "explanation": "An elastic material obeys Hooke's law up to the elastic limit and returns to its original shape when the deforming force is removed. Rubber and steel (below yield point) are elastic.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What does the gradient of a displacement-time graph represent?",
+    "options": [
+      "Velocity",
+      "Acceleration",
+      "Distance",
+      "Speed"
+    ],
+    "correct_answer": "Velocity",
+    "explanation": "The gradient of a displacement-time graph gives velocity: v = Δs/Δt. Steeper gradient = greater velocity. Negative gradient = motion in opposite direction.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for Coulomb's law of electrostatic force?",
+    "options": [
+      "F = kq₁q₂/r",
+      "F = kq₁q₂/r²",
+      "F = q₁q₂/r²",
+      "F = kr²/q₁q₂"
+    ],
+    "correct_answer": "F = kq₁q₂/r²",
+    "explanation": "Coulomb's law: F = kq₁q₂/r², where k = 8.99×10⁹ N·m²/C², q₁ and q₂ are charges, and r is separation. Like charges repel; unlike charges attract.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the product of mass and velocity that is conserved in collisions?",
+    "options": [
+      "Impulse",
+      "Kinetic energy",
+      "Momentum",
+      "Work"
+    ],
+    "correct_answer": "Momentum",
+    "explanation": "Momentum p = mv is conserved in all collisions (closed system, no external forces). Total momentum before = total momentum after. It is a vector quantity.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for electric potential energy between two charges?",
+    "options": [
+      "U = kq/r",
+      "U = kq₁q₂/r²",
+      "U = q₁q₂/r",
+      "U = kq₁q₂/r"
+    ],
+    "correct_answer": "U = kq₁q₂/r",
+    "explanation": "Electric potential energy U = kq₁q₂/r = q₁q₂/(4πε₀r). Positive U means repulsion (like charges); negative U means attraction (unlike charges).",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the maximum kinetic energy of a photoelectron?",
+    "options": [
+      "KE_max = hf - φ",
+      "KE_max = hf + φ",
+      "KE_max = φ - hf",
+      "KE_max = hf/φ"
+    ],
+    "correct_answer": "KE_max = hf - φ",
+    "explanation": "Einstein's photoelectric equation: KE_max = hf - φ, where h is Planck's constant, f is frequency, and φ is the work function (minimum energy to remove an electron).",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the equation relating initial velocity, final velocity, acceleration, and distance?",
+    "options": [
+      "v = u + at",
+      "v² = u² + 2as",
+      "s = ut + ½at²",
+      "v² = u² - 2as"
+    ],
+    "correct_answer": "v² = u² + 2as",
+    "explanation": "The kinematic equation v² = u² + 2as relates final velocity (v), initial velocity (u), acceleration (a), and displacement (s). It eliminates time from the equations of motion.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the ratio of useful work output to total energy input?",
+    "options": [
+      "Mechanical advantage",
+      "Power factor",
+      "Efficiency",
+      "Coefficient of performance"
+    ],
+    "correct_answer": "Efficiency",
+    "explanation": "Efficiency η = (useful output / total input) × 100%. For mechanical systems, it accounts for friction losses. For heat engines, it's limited by the Carnot efficiency.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the term for the constant relating photon energy to frequency?",
+    "options": [
+      "Rydberg constant",
+      "Boltzmann constant",
+      "Avogadro's number",
+      "Planck's constant (h)"
+    ],
+    "correct_answer": "Planck's constant (h)",
+    "explanation": "Planck's constant h = 6.63 × 10⁻³⁴ J·s relates photon energy to frequency: E = hf. It is a fundamental constant of quantum mechanics.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for angular velocity?",
+    "options": [
+      "ω = v/r",
+      "ω = v/r²",
+      "ω = vr",
+      "ω = r/v"
+    ],
+    "correct_answer": "ω = v/r",
+    "explanation": "Angular velocity ω = v/r, where v is linear speed and r is radius. Also ω = 2πf = 2π/T. Units: radians per second (rad/s).",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What does the area under a current-time graph represent?",
+    "options": [
+      "Resistance",
+      "Charge (Q = It)",
+      "Power",
+      "Voltage"
+    ],
+    "correct_answer": "Charge (Q = It)",
+    "explanation": "The area under a current-time graph equals the total charge that has flowed: Q = ∫I dt. For constant current, Q = It. Measured in coulombs.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the phenomenon where electron energies in atoms can only take specific values?",
+    "options": [
+      "Wave-particle duality",
+      "Photoelectric effect",
+      "Energy quantization",
+      "Uncertainty principle"
+    ],
+    "correct_answer": "Energy quantization",
+    "explanation": "Energy quantization means electrons in atoms can only occupy specific energy levels (quantized states). When electrons transition between levels, photons of specific energy are emitted or absorbed.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the gradient of a velocity-time graph?",
+    "options": [
+      "Speed",
+      "Kinetic energy",
+      "Displacement",
+      "Acceleration"
+    ],
+    "correct_answer": "Acceleration",
+    "explanation": "The gradient of a velocity-time graph gives acceleration: a = Δv/Δt. Positive gradient = acceleration; negative gradient = deceleration; zero gradient = constant velocity.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the transformer equation?",
+    "options": [
+      "V₁/V₂ = N₁/N₂",
+      "V₁/V₂ = I₁/I₂",
+      "V₁N₁ = V₂N₂",
+      "V₁/N₁ = V₂/N₂"
+    ],
+    "correct_answer": "V₁/V₂ = N₁/N₂",
+    "explanation": "The transformer equation: V₁/V₂ = N₁/N₂ = I₂/I₁ (for ideal transformers). Turns ratio determines voltage ratio. An ideal transformer conserves power: V₁I₁ = V₂I₂.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the de Broglie wavelength formula?",
+    "options": [
+      "λ = h/E",
+      "λ = h/mv",
+      "λ = hmv",
+      "λ = mv/h"
+    ],
+    "correct_answer": "λ = h/mv",
+    "explanation": "The de Broglie wavelength λ = h/mv = h/p, where h is Planck's constant, m is mass, and v is velocity. All matter has wave properties, significant only for very small particles.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the force on a current-carrying conductor in a magnetic field?",
+    "options": [
+      "F = BI",
+      "F = BIL cosθ",
+      "F = BIL sinθ",
+      "F = B²IL"
+    ],
+    "correct_answer": "F = BIL sinθ",
+    "explanation": "The force on a current-carrying conductor: F = BIL sinθ, where B is magnetic flux density, I is current, L is length, and θ is angle between the conductor and field. Maximum when perpendicular.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What does Kirchhoff's current law state?",
+    "options": [
+      "Voltage around a loop = 0",
+      "Power = Current × Voltage",
+      "Resistance = Voltage/Current",
+      "Sum of currents into a junction = sum of currents out"
+    ],
+    "correct_answer": "Sum of currents into a junction = sum of currents out",
+    "explanation": "Kirchhoff's current law (KCL): the sum of currents entering a junction equals the sum leaving it. This reflects conservation of charge — charge cannot accumulate at a junction.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the second equation of kinematics?",
+    "options": [
+      "s = ut + ½at²",
+      "v = u + at",
+      "v² = u² + 2as",
+      "s = (u+v)t/2"
+    ],
+    "correct_answer": "s = ut + ½at²",
+    "explanation": "The kinematic equation s = ut + ½at² gives displacement with initial velocity u, acceleration a, and time t. The first term is constant-velocity motion; the second is due to acceleration.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the relationship between electric potential and electric field?",
+    "options": [
+      "E = V + d",
+      "E = -dV/dr (field is negative gradient of potential)",
+      "E = Vr",
+      "V = E²r"
+    ],
+    "correct_answer": "E = -dV/dr (field is negative gradient of potential)",
+    "explanation": "Electric field E = -dV/dr: it is the negative gradient of electric potential. Field points from high to low potential. For uniform field: E = V/d.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the kinetic energy of a rotating object?",
+    "options": [
+      "KE = mv²",
+      "KE = Iω",
+      "KE = ½Iω²",
+      "KE = ½mv²"
+    ],
+    "correct_answer": "KE = ½Iω²",
+    "explanation": "Rotational kinetic energy KE = ½Iω², where I is the moment of inertia and ω is angular velocity. This is the rotational analogue of translational KE = ½mv².",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the force between current-carrying parallel wires?",
+    "options": [
+      "Electrostatic force",
+      "Nuclear force",
+      "Gravitational force",
+      "Magnetic force between parallel conductors"
+    ],
+    "correct_answer": "Magnetic force between parallel conductors",
+    "explanation": "Parallel wires carrying current in the same direction attract each other; opposite directions repel. This magnetic force between parallel conductors defines the ampere.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the threshold wavelength for the photoelectric effect?",
+    "options": [
+      "λ₀ = hc/φ",
+      "λ₀ = c/f₀",
+      "λ₀ = φ/c",
+      "λ₀ = hf₀/c"
+    ],
+    "correct_answer": "λ₀ = hc/φ",
+    "explanation": "The threshold wavelength λ₀ = hc/φ, where φ is the work function. Photons with λ < λ₀ (higher energy) cause emission; photons with λ > λ₀ do not, regardless of intensity.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is Kirchhoff's voltage law?",
+    "options": [
+      "Sum of EMFs in a loop = sum of currents",
+      "Sum of EMFs = sum of IR drops around a loop",
+      "Sum of currents at a node = 0",
+      "Power = current × resistance"
+    ],
+    "correct_answer": "Sum of EMFs = sum of IR drops around a loop",
+    "explanation": "Kirchhoff's voltage law (KVL): the sum of all EMFs around a closed loop equals the sum of all potential drops (ΣE = ΣIR). Reflects conservation of energy.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the force that acts centripetally in circular motion?",
+    "options": [
+      "Centrifugal force",
+      "Tangential force",
+      "Centripetal force",
+      "Angular force"
+    ],
+    "correct_answer": "Centripetal force",
+    "explanation": "Centripetal force F = mv²/r = mω²r acts toward the centre of circular motion. It is provided by real forces: gravity (orbits), tension (ball on string), friction (car cornering).",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the charge stored on a capacitor?",
+    "options": [
+      "Q = V/C",
+      "Q = V²C",
+      "Q = C/V",
+      "Q = CV"
+    ],
+    "correct_answer": "Q = CV",
+    "explanation": "Charge on a capacitor Q = CV, where C is capacitance (farads) and V is voltage (volts). Rearranged: C = Q/V, V = Q/C.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the diagram showing how electrons fill energy levels in atoms?",
+    "options": [
+      "Energy level diagram",
+      "Wave function diagram",
+      "Orbital diagram",
+      "Electron configuration table"
+    ],
+    "correct_answer": "Energy level diagram",
+    "explanation": "An energy level diagram shows the quantized energy states in atoms. Electrons occupy the lowest available levels (ground state). Transitions between levels produce spectral lines.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "In simple harmonic motion, what is the relationship between displacement and acceleration?",
+    "options": [
+      "a = ω²x (same direction)",
+      "a = -ω²x (acceleration proportional to and opposite to displacement)",
+      "a = ωx",
+      "a = x/ω"
+    ],
+    "correct_answer": "a = -ω²x (acceleration proportional to and opposite to displacement)",
+    "explanation": "SHM definition: a = -ω²x. Acceleration is proportional to displacement and directed toward the equilibrium position. The minus sign shows they are in opposite directions.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the potential difference that drives current through a circuit component?",
+    "options": [
+      "EMF",
+      "Terminal voltage",
+      "Potential difference (voltage)",
+      "Internal resistance drop"
+    ],
+    "correct_answer": "Potential difference (voltage)",
+    "explanation": "Potential difference (PD) is the work done per unit charge in moving charge through a component: V = W/Q. Also equal to IR for a resistor.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the ratio of stress to strain in an elastic material?",
+    "options": [
+      "Modulus of rigidity",
+      "Poisson's ratio",
+      "Bulk modulus",
+      "Young's modulus"
+    ],
+    "correct_answer": "Young's modulus",
+    "explanation": "Young's modulus E = stress/strain = (F/A)/(ΔL/L₀). It measures tensile stiffness — higher E means stiffer material. Steel: ~200 GPa; rubber: ~0.01-0.1 GPa.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the gravitational potential at distance r from a mass?",
+    "options": [
+      "V = -GM/r",
+      "V = GM/r",
+      "V = GM/r²",
+      "V = -GMm/r"
+    ],
+    "correct_answer": "V = -GM/r",
+    "explanation": "Gravitational potential V = -GM/r (negative because gravity is attractive and work is done by gravity when bringing mass from infinity). At infinity, V = 0.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the process that produces line emission spectra?",
+    "options": [
+      "Blackbody radiation",
+      "Electron transitions from higher to lower energy levels",
+      "Photoelectric effect",
+      "Nuclear decay"
+    ],
+    "correct_answer": "Electron transitions from higher to lower energy levels",
+    "explanation": "Line emission spectra are produced when excited electrons fall from higher to lower energy levels, emitting photons of specific frequencies: E = hf = E₂ - E₁.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the maximum kinetic energy in SHM?",
+    "options": [
+      "KE_max = ½kA²",
+      "KE_max = kA",
+      "KE_max = ½mω²A²",
+      "KE_max = mωA"
+    ],
+    "correct_answer": "KE_max = ½mω²A²",
+    "explanation": "In SHM, maximum KE = ½mω²A² (at equilibrium position), which equals the total energy (½kA²). At maximum displacement, all energy is PE and KE = 0.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for electrical energy consumed?",
+    "options": [
+      "E = Pt²",
+      "E = P²t",
+      "E = P/t",
+      "E = Pt"
+    ],
+    "correct_answer": "E = Pt",
+    "explanation": "Electrical energy E = Pt = VIt = I²Rt. Measured in joules (J) or kilowatt-hours (kWh). 1 kWh = 3.6 × 10⁶ J. Used to calculate electricity bills.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the peak voltage in an AC supply related to the RMS voltage by?",
+    "options": [
+      "V₀ = V_rms × √2",
+      "V₀ = 2V_rms",
+      "V₀ = V_rms",
+      "V₀ = V_rms/√2"
+    ],
+    "correct_answer": "V₀ = V_rms × √2",
+    "explanation": "Peak voltage V₀ = V_rms × √2. The RMS (root mean square) voltage V_rms = V₀/√2. UK mains: 230V RMS, so peak voltage ≈ 325V.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the law relating magnetic force to current and field?",
+    "options": [
+      "Coulomb's law",
+      "F = BIL sinθ (motor effect)",
+      "Faraday's law",
+      "Ampere's law"
+    ],
+    "correct_answer": "F = BIL sinθ (motor effect)",
+    "explanation": "The motor effect force F = BIL sinθ, where B is flux density, I is current, L is conductor length, and θ is angle between conductor and field. It explains how motors work.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What does conservation of energy require in a perfectly elastic collision?",
+    "options": [
+      "Momentum is conserved but KE is not",
+      "Neither is conserved",
+      "Both momentum and kinetic energy are conserved",
+      "Only KE is conserved"
+    ],
+    "correct_answer": "Both momentum and kinetic energy are conserved",
+    "explanation": "In a perfectly elastic collision, both momentum and kinetic energy are conserved. Real collisions are inelastic (KE not conserved). Billiard ball collisions are approximately elastic.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the frequency at which a system naturally oscillates?",
+    "options": [
+      "Resonant frequency",
+      "Driving frequency",
+      "Cut-off frequency",
+      "Natural frequency"
+    ],
+    "correct_answer": "Natural frequency",
+    "explanation": "The natural frequency is the frequency at which an undamped system oscillates freely. When driving frequency = natural frequency, resonance occurs (maximum amplitude).",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for electric potential at distance r from a point charge?",
+    "options": [
+      "V = kq/r",
+      "V = kq/r²",
+      "V = kq·r",
+      "V = kq²/r"
+    ],
+    "correct_answer": "V = kq/r",
+    "explanation": "Electric potential V = kq/r = q/(4πε₀r), where k = 8.99×10⁹ N·m²/C². It is a scalar quantity measured in volts. V = 0 at infinity.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the type of waves that can be polarized?",
+    "options": [
+      "Longitudinal waves",
+      "Transverse waves",
+      "Sound waves",
+      "Compression waves"
+    ],
+    "correct_answer": "Transverse waves",
+    "explanation": "Only transverse waves can be polarized because their oscillations are perpendicular to the direction of travel. Light (transverse EM wave) can be polarized; sound (longitudinal) cannot.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the strength of a uniform magnetic field inside a solenoid?",
+    "options": [
+      "B = μ₀I",
+      "B = nI/μ₀",
+      "B = μ₀nI",
+      "B = μ₀I/n"
+    ],
+    "correct_answer": "B = μ₀nI",
+    "explanation": "Magnetic field inside a solenoid B = μ₀nI, where μ₀ = 4π×10⁻⁷ H/m is the permeability of free space, n is turns per metre, and I is current.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the minimum energy needed to remove an electron from a metal surface?",
+    "options": [
+      "Threshold energy",
+      "Binding energy",
+      "Ionization energy",
+      "Work function (φ)"
+    ],
+    "correct_answer": "Work function (φ)",
+    "explanation": "The work function φ is the minimum energy required to liberate an electron from a metal's surface. It determines the threshold frequency for the photoelectric effect: f₀ = φ/h.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the time constant of an RC circuit?",
+    "options": [
+      "τ = RC",
+      "τ = R/C",
+      "τ = R + C",
+      "τ = C/R"
+    ],
+    "correct_answer": "τ = RC",
+    "explanation": "The time constant τ = RC (seconds) characterises how quickly a capacitor charges/discharges. After time τ, the capacitor has charged to 63% (or discharged to 37%) of its final value.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the relationship between EMF, terminal voltage, and internal resistance?",
+    "options": [
+      "ε = V - Ir",
+      "ε = V + Ir",
+      "ε = V × Ir",
+      "ε = V/Ir"
+    ],
+    "correct_answer": "ε = V + Ir",
+    "explanation": "EMF ε = V + Ir, where V is terminal voltage (voltage across external circuit), I is current, and r is internal resistance. The Ir term is the 'lost volts' within the battery.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the number of turns per unit length in a solenoid?",
+    "options": [
+      "n = NL",
+      "n = L/N",
+      "n = N/L",
+      "n = N²/L"
+    ],
+    "correct_answer": "n = N/L",
+    "explanation": "The number of turns per metre n = N/L, where N is the total number of turns and L is the solenoid length. Used in B = μ₀nI to calculate field strength.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the vector cross product F = qv × B?",
+    "options": [
+      "Coulomb force",
+      "Electrostatic force",
+      "Gravity",
+      "Lorentz magnetic force"
+    ],
+    "correct_answer": "Lorentz magnetic force",
+    "explanation": "The Lorentz force F = qv × B acts on a charge q moving with velocity v in magnetic field B. It is always perpendicular to both v and B, causing circular motion.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the moment of inertia of a solid sphere?",
+    "options": [
+      "I = ⅖mr²",
+      "I = mr²",
+      "I = ½mr²",
+      "I = ⅓mr²"
+    ],
+    "correct_answer": "I = ⅖mr²",
+    "explanation": "Moment of inertia for a solid sphere I = ⅖mr², for a hollow sphere I = ⅔mr², for a solid cylinder I = ½mr², and for a thin rod (about centre) I = 1/12 mL².",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the relationship showing voltage leads current by 90° in a capacitor?",
+    "options": [
+      "Capacitive resistance",
+      "Capacitive reactance",
+      "Inductive impedance",
+      "Capacitive impedance"
+    ],
+    "correct_answer": "Capacitive reactance",
+    "explanation": "Capacitive reactance Xc = 1/(2πfC) in ohms describes how a capacitor impedes AC current. Voltage lags current by 90° in a capacitor. Higher frequency → lower Xc.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the Carnot (maximum) efficiency of a heat engine?",
+    "options": [
+      "η = 1 + Tc/Th",
+      "η = Tc/Th",
+      "η = 1 - Tc/Th",
+      "η = Th/Tc - 1"
+    ],
+    "correct_answer": "η = 1 - Tc/Th",
+    "explanation": "Carnot efficiency η = 1 - Tc/Th, where Tc is cold reservoir temperature and Th is hot reservoir temperature (both in kelvin). No engine can exceed Carnot efficiency.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for a graph showing the trajectory of a body as time progresses?",
+    "options": [
+      "Force diagram",
+      "Motion diagram",
+      "Energy level diagram",
+      "Phase space diagram"
+    ],
+    "correct_answer": "Phase space diagram",
+    "explanation": "A phase space (phase plane) diagram plots velocity vs. displacement for oscillating systems, showing an ellipse for simple harmonic motion without damping.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for power in rotational motion?",
+    "options": [
+      "P = τω",
+      "P = Fv",
+      "P = τ/ω",
+      "P = ωv"
+    ],
+    "correct_answer": "P = τω",
+    "explanation": "Rotational power P = τω, where τ is torque and ω is angular velocity. This is the rotational analogue of P = Fv for linear motion.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the resistance offered by an inductor to alternating current?",
+    "options": [
+      "Resistance",
+      "Inductive reactance (XL = 2πfL)",
+      "Capacitive reactance",
+      "Impedance"
+    ],
+    "correct_answer": "Inductive reactance (XL = 2πfL)",
+    "explanation": "Inductive reactance XL = 2πfL = ωL (in ohms), where f is frequency and L is inductance. Higher frequency → higher XL (inductor impedes high-frequency AC more).",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the relationship between angular momentum and torque?",
+    "options": [
+      "L = τω",
+      "L = dτ/dt",
+      "τ = dL/dt",
+      "τ = Lω"
+    ],
+    "correct_answer": "τ = dL/dt",
+    "explanation": "Torque τ = dL/dt, where L = Iω is angular momentum. This is the rotational analogue of F = dp/dt. Angular momentum is conserved when net torque is zero.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the law governing how gas pressure relates to temperature at constant volume?",
+    "options": [
+      "Boyle's law",
+      "Avogadro's law",
+      "Charles's law",
+      "Gay-Lussac's law (pressure law)"
+    ],
+    "correct_answer": "Gay-Lussac's law (pressure law)",
+    "explanation": "Gay-Lussac's (pressure) law: P/T = constant at fixed volume. P₁/T₁ = P₂/T₂. Pressure and absolute temperature are directly proportional.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the electric flux through a surface?",
+    "options": [
+      "Φ = EA cosθ",
+      "Φ = EA",
+      "Φ = E/A",
+      "Φ = EA sinθ"
+    ],
+    "correct_answer": "Φ = EA cosθ",
+    "explanation": "Electric flux Φ = EA cosθ, where E is field strength, A is area, and θ is angle between E and the surface normal. Φ is maximum when field is perpendicular to surface.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the potential at infinity of a gravitational field?",
+    "options": [
+      "Maximum potential",
+      "Zero (V = 0 at infinity)",
+      "Ground potential",
+      "Negative infinity"
+    ],
+    "correct_answer": "Zero (V = 0 at infinity)",
+    "explanation": "By convention, gravitational potential V = 0 at infinity. Gravitational potential is always negative (V = -GM/r) because gravity is attractive and work is done bringing mass from infinity.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the magnetic force on a moving charge?",
+    "options": [
+      "F = qvB",
+      "F = qvB sinθ",
+      "F = qvB sinθ (Lorentz force)",
+      "F = qv/B"
+    ],
+    "correct_answer": "F = qvB sinθ (Lorentz force)",
+    "explanation": "The Lorentz force on a moving charge F = qvB sinθ, where q is charge, v is velocity, B is flux density, and θ is angle between v and B. Maximum when perpendicular (θ = 90°).",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for average kinetic energy of a gas molecule?",
+    "options": [
+      "KE = kT",
+      "KE = RT",
+      "KE = (1/2)kT",
+      "KE = (3/2)kT"
+    ],
+    "correct_answer": "KE = (3/2)kT",
+    "explanation": "Average translational KE of a gas molecule = (3/2)kT, where k is Boltzmann's constant (1.38×10⁻²³ J/K) and T is absolute temperature. This explains why hotter gases have faster molecules.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the first kinematic equation of motion?",
+    "options": [
+      "v = u + at",
+      "v² = u² + 2as",
+      "s = ut + ½at²",
+      "s = vt - ½at²"
+    ],
+    "correct_answer": "v = u + at",
+    "explanation": "The first kinematic equation v = u + at relates final velocity (v) to initial velocity (u), acceleration (a), and time (t). It is derived from the definition of acceleration.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the principle that the total entropy of an isolated system always increases?",
+    "options": [
+      "First law of thermodynamics",
+      "Second law of thermodynamics",
+      "Third law of thermodynamics",
+      "Zeroth law of thermodynamics"
+    ],
+    "correct_answer": "Second law of thermodynamics",
+    "explanation": "The second law of thermodynamics states that total entropy of an isolated system always increases (or remains constant for reversible processes), giving time a direction.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the time period of one complete oscillation of a mass on a spring?",
+    "options": [
+      "T = 2π√(k/m)",
+      "T = π√(m/k)",
+      "T = 2π√(m/k)",
+      "T = √(m/k)"
+    ],
+    "correct_answer": "T = 2π√(m/k)",
+    "explanation": "T = 2π√(m/k) for a mass-spring system. Doubling mass multiplies T by √2; quadrupling k halves T. Period is independent of amplitude for SHM.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for resistance to rotational acceleration, the rotational analogue of mass?",
+    "options": [
+      "Angular momentum",
+      "Torque",
+      "Angular velocity",
+      "Moment of inertia"
+    ],
+    "correct_answer": "Moment of inertia",
+    "explanation": "Moment of inertia I = Σmr² is the rotational analogue of mass. It depends on mass distribution relative to the rotation axis. Torque τ = Iα (analogous to F = ma).",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the pressure of an ideal gas from kinetic theory?",
+    "options": [
+      "P = (1/3)Nm<v²>/V",
+      "P = Nm<v²>",
+      "P = NmV",
+      "P = NmkT"
+    ],
+    "correct_answer": "P = (1/3)Nm<v²>/V",
+    "explanation": "From kinetic theory: P = (1/3)ρ<v²> = (1/3)(Nm/V)<v²>, where N is number of molecules, m is mass per molecule, V is volume, and <v²> is mean square speed.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the quantity defined as force × perpendicular distance from the axis?",
+    "options": [
+      "Work",
+      "Torque (moment of force)",
+      "Angular momentum",
+      "Angular velocity"
+    ],
+    "correct_answer": "Torque (moment of force)",
+    "explanation": "Torque (moment of force) τ = F × d (perpendicular), measured in newton-metres (N·m). It causes rotational acceleration: τ = Iα.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the period of a geostationary satellite?",
+    "options": [
+      "T = 24 min",
+      "T = 12 hours",
+      "T = 24 hours",
+      "T = 90 min"
+    ],
+    "correct_answer": "T = 24 hours",
+    "explanation": "A geostationary satellite has T = 24 hours (Earth's rotational period), allowing it to remain above the same point on Earth. It orbits at ~36,000 km altitude.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the term for the frequency at which impedance is minimum in an LC circuit?",
+    "options": [
+      "Natural frequency",
+      "Harmonic frequency",
+      "Cut-off frequency",
+      "Resonant frequency (f = 1/(2π√LC))"
+    ],
+    "correct_answer": "Resonant frequency (f = 1/(2π√LC))",
+    "explanation": "Resonant frequency f₀ = 1/(2π√LC) for an LC circuit, where L is inductance and C is capacitance. At resonance, inductive and capacitive reactances are equal and cancel.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What does Archimedes' principle state?",
+    "options": [
+      "Upthrust equals weight of fluid displaced",
+      "Objects float if density < fluid density",
+      "Fluid pressure increases with depth",
+      "Objects in fluid lose their weight"
+    ],
+    "correct_answer": "Upthrust equals weight of fluid displaced",
+    "explanation": "Archimedes' principle: the upthrust (buoyant force) on an object equals the weight of fluid displaced by that object. F_upthrust = ρ_fluid × V_displaced × g.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the Lorentz factor in special relativity?",
+    "options": [
+      "γ = 1/(1-v/c)",
+      "γ = 1/√(1-v²/c²)",
+      "γ = 1/(1+v²/c²)",
+      "γ = √(1-v²/c²)"
+    ],
+    "correct_answer": "γ = 1/√(1-v²/c²)",
+    "explanation": "The Lorentz factor γ = 1/√(1-v²/c²) appears in special relativity. As v → c, γ → ∞. Time dilation: Δt' = γΔt; length contraction: L' = L/γ.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the number of undecayed nuclei in radioactive decay?",
+    "options": [
+      "N = N₀e^(λt)",
+      "N = N₀(1 - e^(-λt))",
+      "N = N₀e^(-λt)",
+      "N = N₀/λt"
+    ],
+    "correct_answer": "N = N₀e^(-λt)",
+    "explanation": "Radioactive decay: N = N₀e^(-λt), where N₀ is initial number of nuclei, λ is the decay constant, and t is time. Half-life t½ = ln2/λ = 0.693/λ.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the theorem stating that KE change equals net work done on an object?",
+    "options": [
+      "Principle of conservation of energy",
+      "Work-power theorem",
+      "Conservation of momentum",
+      "Work-energy theorem"
+    ],
+    "correct_answer": "Work-energy theorem",
+    "explanation": "The work-energy theorem: Wnet = ΔKE = ½mv² - ½mu². Net work done on an object equals its change in kinetic energy. It is derived from Newton's second law.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for angular momentum?",
+    "options": [
+      "L = Iω",
+      "L = mω",
+      "L = mv",
+      "L = Iα"
+    ],
+    "correct_answer": "L = Iω",
+    "explanation": "Angular momentum L = Iω, where I is moment of inertia and ω is angular velocity. It is conserved when net torque is zero (like a spinning ice skater pulling in arms).",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the relationship between frequency and period?",
+    "options": [
+      "T = f",
+      "T = 1/f",
+      "T = f²",
+      "f = T²"
+    ],
+    "correct_answer": "T = 1/f",
+    "explanation": "Period T = 1/f (seconds) and frequency f = 1/T (hertz). A wave with f = 50 Hz has T = 0.02 s. They are reciprocals of each other.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for Bohr's model prediction for hydrogen energy levels?",
+    "options": [
+      "En = -13.6/n eV",
+      "En = 13.6n eV",
+      "En = -13.6/n² eV",
+      "En = -13.6n² eV"
+    ],
+    "correct_answer": "En = -13.6/n² eV",
+    "explanation": "The Bohr model predicts hydrogen energy levels En = -13.6/n² eV, where n is the principal quantum number. Ground state n=1: E₁ = -13.6 eV. Ionization requires 13.6 eV.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the intensity of a progressive wave?",
+    "options": [
+      "I = A²f",
+      "I = Af²",
+      "I = A/f",
+      "I ∝ A² (intensity proportional to amplitude squared)"
+    ],
+    "correct_answer": "I ∝ A² (intensity proportional to amplitude squared)",
+    "explanation": "Wave intensity I ∝ A², where A is amplitude. Doubling amplitude quadruples intensity. This applies to sound, light, and all progressive waves.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is Newton's law of cooling?",
+    "options": [
+      "Rate of heat loss ∝ (T - T_surroundings)",
+      "Rate of cooling ∝ 1/(T-T_surroundings)",
+      "Heat flow = area × temperature",
+      "Temperature drop = constant"
+    ],
+    "correct_answer": "Rate of heat loss ∝ (T - T_surroundings)",
+    "explanation": "Newton's law of cooling states the rate of heat loss from an object is proportional to the temperature difference between the object and surroundings: dQ/dt ∝ (T - T₀).",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the thermal energy required to raise temperature?",
+    "options": [
+      "Q = mcΔT/t",
+      "Q = mcΔT",
+      "Q = mc/ΔT",
+      "Q = m/cΔT"
+    ],
+    "correct_answer": "Q = mcΔT",
+    "explanation": "Thermal energy Q = mcΔT, where m is mass, c is specific heat capacity, and ΔT is temperature change. Water: c = 4200 J/(kg·K), so heating 1 kg by 1°C requires 4200 J.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the equation of motion for SHM?",
+    "options": [
+      "a = ωx",
+      "a = -ωx",
+      "a = -ω²x",
+      "a = ω²x"
+    ],
+    "correct_answer": "a = -ω²x",
+    "explanation": "The defining equation of SHM: a = -ω²x, where ω = 2πf is angular frequency and x is displacement. The minus sign means acceleration always opposes displacement.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the RMS speed of gas molecules?",
+    "options": [
+      "v_rms = √(2kT/m)",
+      "v_rms = √(kT/m)",
+      "v_rms = 3kT/m",
+      "v_rms = √(3kT/m)"
+    ],
+    "correct_answer": "v_rms = √(3kT/m)",
+    "explanation": "RMS speed v_rms = √(3kT/m) = √(3RT/M), where k is Boltzmann constant, T is temperature, and m is molecular mass. Heavier molecules and lower temperature give lower RMS speed.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the critical angle in terms of refractive indices?",
+    "options": [
+      "sinθc = n₂/n₁",
+      "sinθc = n₁/n₂",
+      "sinθc = n₁×n₂",
+      "sinθc = 1/n₁"
+    ],
+    "correct_answer": "sinθc = n₂/n₁",
+    "explanation": "Critical angle: sinθc = n₂/n₁, where n₁ > n₂ (light going from denser to less dense medium). For glass-air: sinθc = 1/1.5 = 0.667, θc ≈ 42°.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is Kepler's third law?",
+    "options": [
+      "Planets orbit in ellipses",
+      "T² ∝ r³ (period squared proportional to orbital radius cubed)",
+      "Equal areas swept in equal times",
+      "Orbital speed is constant"
+    ],
+    "correct_answer": "T² ∝ r³ (period squared proportional to orbital radius cubed)",
+    "explanation": "Kepler's third law: T² ∝ r³, or T²/r³ = constant for all planets orbiting the same star. Derived from equating gravitational force to centripetal force.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the Stefan-Boltzmann law for radiated power?",
+    "options": [
+      "P = σAT²",
+      "P = σAT³",
+      "P = σAT⁴",
+      "P = σA/T⁴"
+    ],
+    "correct_answer": "P = σAT⁴",
+    "explanation": "Stefan-Boltzmann law: P = σAT⁴, where σ = 5.67×10⁻⁸ W/(m²·K⁴) is Stefan-Boltzmann constant, A is surface area, and T is absolute temperature.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the experiment demonstrating quantization of atomic energy levels?",
+    "options": [
+      "Rutherford scattering",
+      "Photoelectric effect experiment",
+      "Young's double-slit experiment",
+      "Franck-Hertz experiment"
+    ],
+    "correct_answer": "Franck-Hertz experiment",
+    "explanation": "The Franck-Hertz experiment (1914) showed electrons can only transfer specific discrete amounts of energy to mercury atoms, demonstrating quantized atomic energy levels.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the number of photoelectrons emitted per second?",
+    "options": [
+      "n = P/hf",
+      "n = hf/P",
+      "n = P × hf",
+      "n = P/h"
+    ],
+    "correct_answer": "n = P/hf",
+    "explanation": "Number of photons per second n = P/(hf) = Pλ/(hc), where P is light power. Each photon of energy hf can release at most one electron. Intensity determines n, frequency determines KE.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for inelastic collision final velocity (perfectly inelastic)?",
+    "options": [
+      "v = (m₁ - m₂)u₁/(m₁+m₂)",
+      "v = m₁u₁+m₂u₂)/(m₁+m₂)",
+      "v = m₁u₁/(m₁+m₂)",
+      "v = u₁ + u₂"
+    ],
+    "correct_answer": "v = m₁u₁+m₂u₂)/(m₁+m₂)",
+    "explanation": "For a perfectly inelastic collision (objects stick together): v = (m₁u₁ + m₂u₂)/(m₁ + m₂). Momentum is conserved but kinetic energy is not.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the graph that shows the relationship between stress and strain for a material?",
+    "options": [
+      "Force-extension graph",
+      "Velocity-time graph",
+      "Stress-strain curve",
+      "Pressure-volume diagram"
+    ],
+    "correct_answer": "Stress-strain curve",
+    "explanation": "A stress-strain curve shows a material's behaviour under load: elastic region (linear, recoverable), yield point, plastic region (permanent deformation), and fracture point.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for relativistic energy-mass equivalence?",
+    "options": [
+      "E = mc",
+      "E = ½mc²",
+      "E = m²c",
+      "E = mc²"
+    ],
+    "correct_answer": "E = mc²",
+    "explanation": "Einstein's mass-energy equivalence E = mc², where c = 3×10⁸ m/s. Small masses correspond to enormous energies. Nuclear reactions release energy by converting tiny amounts of mass.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the interference pattern from Young's double-slit experiment fringe spacing?",
+    "options": [
+      "w = Dλ/a",
+      "w = aλ/D",
+      "w = Da/λ",
+      "w = λa/D"
+    ],
+    "correct_answer": "w = Dλ/a",
+    "explanation": "Fringe spacing w = λD/a, where λ is wavelength, D is distance to screen, and a is slit separation. Wider fringes result from longer wavelength, greater D, or smaller slit separation.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the capacitance of a parallel plate capacitor?",
+    "options": [
+      "C = εA/d",
+      "C = ε₀A/d",
+      "C = ε₀A",
+      "C = ε₀d/A"
+    ],
+    "correct_answer": "C = ε₀A/d",
+    "explanation": "Capacitance C = ε₀A/d for parallel plates in vacuum, where ε₀ = 8.85×10⁻¹² F/m, A is plate area, and d is separation. Adding a dielectric: C = ε₀εrA/d.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the relationship P₁V₁ = P₂V₂?",
+    "options": [
+      "Charles's law",
+      "Gay-Lussac's law",
+      "Boyle's law",
+      "Dalton's law"
+    ],
+    "correct_answer": "Boyle's law",
+    "explanation": "Boyle's law P₁V₁ = P₂V₂ states pressure and volume are inversely proportional at constant temperature. Compressing gas to half volume doubles its pressure.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the heat exchanged during a phase change?",
+    "options": [
+      "Q = mcΔT",
+      "Q = mc",
+      "Q = L/m",
+      "Q = mL (latent heat)"
+    ],
+    "correct_answer": "Q = mL (latent heat)",
+    "explanation": "Heat during phase change Q = mL, where m is mass and L is specific latent heat (J/kg). Temperature is constant during phase change. For water: L_fusion = 334 kJ/kg; L_vaporization = 2260 kJ/kg.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the relationship V₁/V₂ = N₁/N₂ in transformers?",
+    "options": [
+      "Transformer ratio (turns ratio)",
+      "Ohm's law extension",
+      "Faraday's ratio",
+      "Lenz's law ratio"
+    ],
+    "correct_answer": "Transformer ratio (turns ratio)",
+    "explanation": "The transformer equation V₁/V₂ = N₁/N₂ is the turns ratio. Step-up: N₂ > N₁ increases voltage; step-down: N₂ < N₁ decreases voltage. Power is conserved: V₁I₁ = V₂I₂.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the de Broglie wavelength of a particle?",
+    "options": [
+      "λ = h/E",
+      "λ = h/p",
+      "λ = p/h",
+      "λ = hE"
+    ],
+    "correct_answer": "λ = h/p",
+    "explanation": "De Broglie wavelength λ = h/p = h/(mv), where p is momentum. This shows all matter has wave properties. For an electron: λ can be ~10⁻¹⁰ m, comparable to atom size.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What does the ideal gas equation state?",
+    "options": [
+      "PV = mRT",
+      "PV = NkT",
+      "PV = nRT",
+      "PV = RT/n"
+    ],
+    "correct_answer": "PV = nRT",
+    "explanation": "The ideal gas equation PV = nRT, where n is moles, R = 8.314 J/(mol·K). Also written PV = NkT, where N is number of molecules and k is Boltzmann's constant.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the minimum energy of a photon to ionize a hydrogen atom from ground state?",
+    "options": [
+      "1 eV",
+      "3.4 eV",
+      "27.2 eV",
+      "13.6 eV"
+    ],
+    "correct_answer": "13.6 eV",
+    "explanation": "The ionization energy of hydrogen from the ground state (n=1) is 13.6 eV, meaning a photon needs at least this energy to completely remove the electron.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the decay constant in radioactive decay?",
+    "options": [
+      "λ = ln2/t½",
+      "λ = ln2 × t½",
+      "λ = t½/ln2",
+      "λ = t½²/ln2"
+    ],
+    "correct_answer": "λ = ln2/t½",
+    "explanation": "The decay constant λ = ln2/t½ = 0.693/t½, where t½ is the half-life. Activity A = λN, where N is number of undecayed nuclei. Units of λ: s⁻¹.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the radius of a circular orbit in a magnetic field?",
+    "options": [
+      "r = Bq/mv",
+      "r = mv/(Bq)",
+      "r = mqB",
+      "r = Bqm/v"
+    ],
+    "correct_answer": "r = mv/(Bq)",
+    "explanation": "For circular motion in a magnetic field: Bqv = mv²/r, giving r = mv/(Bq). Larger mass or velocity → larger radius; stronger field or charge → smaller radius. Used in mass spectrometers.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the scattering experiment that proved atoms have a small dense nucleus?",
+    "options": [
+      "Millikan oil drop experiment",
+      "Photoelectric effect experiment",
+      "Rutherford gold foil scattering",
+      "Young's double-slit experiment"
+    ],
+    "correct_answer": "Rutherford gold foil scattering",
+    "explanation": "Rutherford's alpha particle scattering experiment (1911) showed some alpha particles deflected through large angles, disproving Thomson's plum-pudding model and establishing the nuclear model.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the gravitational potential energy in orbit?",
+    "options": [
+      "GPE = mgh",
+      "GPE = GMm/r",
+      "GPE = GMm/r²",
+      "GPE = -GMm/r"
+    ],
+    "correct_answer": "GPE = -GMm/r",
+    "explanation": "Gravitational PE in orbit U = -GMm/r (negative because gravity is attractive). Total orbital energy E = -GMm/(2r). As r decreases, total energy decreases (becomes more negative).",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the quantized unit of electromagnetic radiation?",
+    "options": [
+      "Photon",
+      "Quark",
+      "Electron",
+      "Neutrino"
+    ],
+    "correct_answer": "Photon",
+    "explanation": "A photon is the quantum (particle) of electromagnetic radiation. Energy E = hf. Photons have zero rest mass and travel at c. They exhibit wave-particle duality.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for total energy of a satellite in circular orbit?",
+    "options": [
+      "E = GMm/r",
+      "E = -GMm/(2r)",
+      "E = -GMm/r",
+      "E = GMm/(2r)"
+    ],
+    "correct_answer": "E = -GMm/(2r)",
+    "explanation": "Total energy of satellite in circular orbit E = KE + PE = GMm/(2r) - GMm/r = -GMm/(2r). Energy is negative, indicating a bound system. As orbit decreases, energy decreases.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for electric flux in terms of charge (Gauss's law)?",
+    "options": [
+      "Φ = ε₀/q",
+      "Φ = q × ε₀",
+      "Φ = q/ε₀",
+      "Φ = q²/ε₀"
+    ],
+    "correct_answer": "Φ = q/ε₀",
+    "explanation": "Gauss's law: Φ = q_enclosed/ε₀. The total electric flux through any closed surface equals the enclosed charge divided by ε₀. Useful for calculating E fields of symmetric charge distributions.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the constant in Newton's law of gravitation?",
+    "options": [
+      "Avogadro's constant",
+      "Planck's constant",
+      "Boltzmann's constant",
+      "Gravitational constant G (6.67×10⁻¹¹ N·m²/kg²)"
+    ],
+    "correct_answer": "Gravitational constant G (6.67×10⁻¹¹ N·m²/kg²)",
+    "explanation": "The gravitational constant G = 6.67×10⁻¹¹ N·m²/kg² appears in Newton's law F = Gm₁m₂/r². It is extremely small, reflecting how weak gravity is compared to other forces.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for Kepler's second law?",
+    "options": [
+      "Equal areas swept in equal times (law of areas)",
+      "T² ∝ r³",
+      "Orbital speed is constant",
+      "Planets orbit in ellipses"
+    ],
+    "correct_answer": "Equal areas swept in equal times (law of areas)",
+    "explanation": "Kepler's second law: a line joining a planet to the Sun sweeps out equal areas in equal times. This means planets move faster when closer to the Sun (perihelion) and slower when farther (aphelion).",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the type of collision where kinetic energy is conserved?",
+    "options": [
+      "Perfectly inelastic collision",
+      "Perfectly elastic collision",
+      "Explosive collision",
+      "Partially inelastic collision"
+    ],
+    "correct_answer": "Perfectly elastic collision",
+    "explanation": "In a perfectly elastic collision, both momentum and kinetic energy are conserved. Real collisions are inelastic; billiard balls and atomic collisions are approximately elastic.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the work function from the photoelectric effect?",
+    "options": [
+      "φ = hf",
+      "φ = hf₀ - KE_max",
+      "φ = hf₀",
+      "φ = KE_max/f₀"
+    ],
+    "correct_answer": "φ = hf₀",
+    "explanation": "The work function φ = hf₀, where f₀ is the threshold frequency and h is Planck's constant. It is the minimum energy needed to liberate an electron from the metal surface.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the maximum extension of a spring that still obeys Hooke's law?",
+    "options": [
+      "Breaking point",
+      "Yield point",
+      "Ultimate tensile stress",
+      "Elastic limit"
+    ],
+    "correct_answer": "Elastic limit",
+    "explanation": "The elastic limit is the maximum extension/compression beyond which a spring (or material) permanently deforms and no longer obeys Hooke's law (F = kx).",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the term for the frequency multiplied by 2π?",
+    "options": [
+      "Angular frequency (ω = 2πf)",
+      "Wavelength",
+      "Frequency",
+      "Period"
+    ],
+    "correct_answer": "Angular frequency (ω = 2πf)",
+    "explanation": "Angular frequency ω = 2πf, measured in radians per second (rad/s). It appears in SHM equations: a = -ω²x, x = A cos(ωt), and v_max = ωA.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the force on a charge in an electric field?",
+    "options": [
+      "F = kq/r²",
+      "F = qE",
+      "F = q/E",
+      "F = qV"
+    ],
+    "correct_answer": "F = qE",
+    "explanation": "The force on a charge in an electric field F = qE, where q is charge (C) and E is electric field strength (N/C or V/m). This gives the direction and magnitude of the force.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What does the uncertainty principle state?",
+    "options": [
+      "Energy can be borrowed if returned quickly",
+      "All particles have wave properties",
+      "Δx·Δp ≥ ℏ/2 (position and momentum cannot both be precisely known)",
+      "Electrons orbit in fixed shells"
+    ],
+    "correct_answer": "Δx·Δp ≥ ℏ/2 (position and momentum cannot both be precisely known)",
+    "explanation": "Heisenberg's uncertainty principle: Δx·Δp ≥ ℏ/2. The more precisely position is known, the less precisely momentum can be known, and vice versa. Fundamental quantum limit.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the displacement in SHM as a function of time?",
+    "options": [
+      "x = A sin(ωt)",
+      "x = A cos(ωt + φ)",
+      "x = A sin(ωt + φ)",
+      "x = A cos(ωt)"
+    ],
+    "correct_answer": "x = A cos(ωt)",
+    "explanation": "For SHM starting at maximum displacement: x = A cos(ωt). More generally x = A cos(ωt + φ), where φ is initial phase. A is amplitude and ω is angular frequency.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the heat conducted through a material?",
+    "options": [
+      "Q = kAΔT/d",
+      "Q = kΔT/At",
+      "Q = kAt/ΔT",
+      "Q = kΔTd/A"
+    ],
+    "correct_answer": "Q = kAΔT/d",
+    "explanation": "Fourier's law of heat conduction: Q/t = kA(ΔT/d), where k is thermal conductivity, A is cross-sectional area, ΔT is temperature difference, and d is thickness.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is Gauss's law for magnetic fields?",
+    "options": [
+      "∇·B = ρ_m",
+      "∇·B = 0 (no magnetic monopoles)",
+      "∮B·dA = μ₀I",
+      "∇·B = B/ε₀"
+    ],
+    "correct_answer": "∇·B = 0 (no magnetic monopoles)",
+    "explanation": "Gauss's law for magnetism states ∇·B = 0, meaning there are no magnetic monopoles. Magnetic field lines always form closed loops — they cannot start or end at a point.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the peak EMF of a rotating coil in a magnetic field?",
+    "options": [
+      "ε₀ = NBA",
+      "ε₀ = NBA/ω",
+      "ε₀ = NBAω",
+      "ε₀ = NBAω²"
+    ],
+    "correct_answer": "ε₀ = NBAω",
+    "explanation": "Peak EMF: ε₀ = NBAω, where N is number of turns, B is flux density, A is area, and ω is angular velocity. The EMF varies as ε = NBAω sinωt.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the property that determines how much a material's electrical resistance changes with temperature?",
+    "options": [
+      "Resistivity",
+      "Conductivity",
+      "Permittivity",
+      "Temperature coefficient of resistance"
+    ],
+    "correct_answer": "Temperature coefficient of resistance",
+    "explanation": "The temperature coefficient α describes how resistance changes with temperature: R = R₀(1 + αΔT). For metals α > 0 (resistance increases with T); for semiconductors/NTC thermistors α < 0.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the electric potential energy stored in a capacitor?",
+    "options": [
+      "E = ½CV²",
+      "E = ½QV²",
+      "E = CV²",
+      "E = QV"
+    ],
+    "correct_answer": "E = ½CV²",
+    "explanation": "Energy stored in capacitor E = ½CV² = ½QV = Q²/(2C), where C is capacitance, V is voltage, and Q is charge. The factor of ½ appears because voltage builds up during charging.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the ratio of the magnetic force to the charge-velocity product?",
+    "options": [
+      "Electric field",
+      "Magnetic flux density (B)",
+      "Electromagnetic force",
+      "Gravitational field"
+    ],
+    "correct_answer": "Magnetic flux density (B)",
+    "explanation": "Magnetic flux density B = F/(qv sinθ), the force per unit charge per unit velocity (perpendicular to field). Units: tesla (T). It defines the strength of a magnetic field.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the gravitational field strength at the Earth's surface?",
+    "options": [
+      "g = GM",
+      "g = GR²/M",
+      "g = GM/R²",
+      "g = GM/R"
+    ],
+    "correct_answer": "g = GM/R²",
+    "explanation": "Gravitational field strength g = GM/R², where G is gravitational constant, M is Earth's mass, and R is Earth's radius. At Earth's surface g ≈ 9.81 N/kg.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the process where a photon produces an electron-positron pair?",
+    "options": [
+      "Compton scattering",
+      "Photoelectric effect",
+      "Auger process",
+      "Pair production"
+    ],
+    "correct_answer": "Pair production",
+    "explanation": "Pair production occurs when a high-energy photon (≥1.02 MeV) near a nucleus creates an electron-positron pair: γ → e⁻ + e⁺. It requires minimum photon energy of 2mₑc².",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the minimum photon wavelength produced in X-ray tubes?",
+    "options": [
+      "Duane-Hunt limit (λ_min = hc/eV)",
+      "Threshold wavelength",
+      "Compton wavelength",
+      "Wien's wavelength"
+    ],
+    "correct_answer": "Duane-Hunt limit (λ_min = hc/eV)",
+    "explanation": "The Duane-Hunt limit gives minimum X-ray wavelength: λ_min = hc/(eV), where V is accelerating voltage. All electron kinetic energy converts to one photon at maximum energy.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the phenomenon where radioactive nuclides approach a stable configuration?",
+    "options": [
+      "Nuclear fission",
+      "Radioactive decay series",
+      "Chain reaction",
+      "Nuclear fusion"
+    ],
+    "correct_answer": "Radioactive decay series",
+    "explanation": "Radioactive decay series (like uranium-238 → lead-206) involves multiple sequential alpha and beta decays until a stable nuclide is reached.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the number of photons per joule of radiation?",
+    "options": [
+      "n = hf",
+      "n = E/h",
+      "n = 1/(hf)",
+      "n = h/E"
+    ],
+    "correct_answer": "n = 1/(hf)",
+    "explanation": "Number of photons per joule = 1/(hf) = λ/(hc). Each photon has energy E = hf. Visible light (f ≈ 5×10¹⁴ Hz): ≈ 3×10¹⁸ photons per joule.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the kinetic energy of a gas molecule at temperature T?",
+    "options": [
+      "KE = kT",
+      "KE = RT",
+      "KE = ½kT",
+      "KE = (3/2)kT"
+    ],
+    "correct_answer": "KE = (3/2)kT",
+    "explanation": "Mean translational KE = (3/2)kT per molecule = (3/2)RT/NA per molecule. For a monatomic ideal gas, all internal energy is translational KE: U = (3/2)nRT.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the photon emission when an electron transitions from n=2 to n=1 in hydrogen?",
+    "options": [
+      "Lyman alpha line (121.6 nm)",
+      "Balmer series line",
+      "Paschen series line",
+      "Lyman alpha (transition in UV)"
+    ],
+    "correct_answer": "Lyman alpha line (121.6 nm)",
+    "explanation": "The Lyman alpha line (n=2→n=1) in hydrogen emits a photon at 121.6 nm (UV). ΔE = 13.6(1/1² - 1/2²) = 10.2 eV. All Lyman series lines are in UV.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the power radiated by an accelerating charge?",
+    "options": [
+      "P = q²a²",
+      "P = q²a²/(6πε₀c³)",
+      "P = qa²",
+      "P = q²a"
+    ],
+    "correct_answer": "P = q²a²/(6πε₀c³)",
+    "explanation": "Larmor formula: P = q²a²/(6πε₀c³), where a is acceleration. Accelerating charges radiate electromagnetic energy. This explains cyclotron radiation and why electrons don't spiral into nuclei classically.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the interference pattern formed when coherent light diffracts through a single narrow slit?",
+    "options": [
+      "Newton's rings",
+      "Diffraction grating pattern",
+      "Single-slit diffraction pattern",
+      "Young's fringes"
+    ],
+    "correct_answer": "Single-slit diffraction pattern",
+    "explanation": "Single-slit diffraction produces a central bright maximum with alternating dark fringes and weaker secondary maxima. First dark fringe at sinθ = λ/a, where a is slit width.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the product of force and time?",
+    "options": [
+      "Work",
+      "Power",
+      "Kinetic energy",
+      "Impulse"
+    ],
+    "correct_answer": "Impulse",
+    "explanation": "Impulse J = Ft = Δp = mΔv. The impulse equals the change in momentum. Measured in N·s or kg·m/s. Longer collision time reduces peak force (airbag principle).",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the voltage induced by a moving conductor in a magnetic field?",
+    "options": [
+      "ε = BLv",
+      "ε = B/Lv",
+      "ε = BL/v",
+      "ε = BL"
+    ],
+    "correct_answer": "ε = BLv",
+    "explanation": "EMF induced in a conductor of length L moving at speed v perpendicular to field B: ε = BLv. Derived from the rate of change of magnetic flux as conductor sweeps area.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the pressure in the ideal gas equation per molecule?",
+    "options": [
+      "PV = kT",
+      "PV = NkT",
+      "PV = Nk",
+      "PV = NkT/3"
+    ],
+    "correct_answer": "PV = NkT",
+    "explanation": "PV = NkT, where N is number of molecules and k = 1.38×10⁻²³ J/K is Boltzmann's constant. Equivalent to PV = nRT where n = N/N_A is moles.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the stopping voltage in the photoelectric effect?",
+    "options": [
+      "eV_s = φ",
+      "eV_s = hf",
+      "eV_s = hf - φ",
+      "eV_s = hf - 2φ"
+    ],
+    "correct_answer": "eV_s = hf - φ",
+    "explanation": "Stopping potential V_s: the minimum reverse voltage needed to stop all photoelectrons. eV_s = KE_max = hf - φ. Stopping voltage depends on frequency, not intensity.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the law that relates net flux to enclosed charge?",
+    "options": [
+      "Ampere's law",
+      "Faraday's law",
+      "Biot-Savart law",
+      "Gauss's law"
+    ],
+    "correct_answer": "Gauss's law",
+    "explanation": "Gauss's law: ∮E·dA = q_enclosed/ε₀. The total electric flux through a closed surface equals the enclosed charge divided by ε₀. One of Maxwell's four equations.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the maximum velocity in SHM?",
+    "options": [
+      "v_max = Aω",
+      "v_max = A/ω",
+      "v_max = A²ω",
+      "v_max = Aω²"
+    ],
+    "correct_answer": "v_max = Aω",
+    "explanation": "Maximum velocity in SHM: v_max = Aω, occurring at the equilibrium position (x = 0). Velocity as a function of position: v = ω√(A² - x²).",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the process where a nucleus emits a high-energy electron from the nucleus?",
+    "options": [
+      "Alpha decay",
+      "Beta-minus decay",
+      "Positron emission",
+      "Gamma emission"
+    ],
+    "correct_answer": "Beta-minus decay",
+    "explanation": "Beta-minus decay: a neutron converts to a proton, emitting an electron (β⁻) and an antineutrino (ν̄ₑ). Atomic number increases by 1; mass number unchanged.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the intensity of electromagnetic radiation from a point source?",
+    "options": [
+      "I = P/r",
+      "I = P/r²",
+      "I = P/(4πr²)",
+      "I = P×r²"
+    ],
+    "correct_answer": "I = P/(4πr²)",
+    "explanation": "Intensity from a point source: I = P/(4πr²), following the inverse square law. Doubling distance quarters intensity. This applies to light, sound, and gravitational fields.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the minimum energy of a photon to create an electron-positron pair?",
+    "options": [
+      "Work function energy",
+      "Ionization energy",
+      "Binding energy",
+      "1.02 MeV (2mₑc²)"
+    ],
+    "correct_answer": "1.02 MeV (2mₑc²)",
+    "explanation": "Pair production requires minimum photon energy 2mₑc² = 2 × 0.511 MeV = 1.02 MeV (rest mass energy of electron + positron). This occurs near a nucleus to conserve momentum.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the change in temperature during adiabatic expansion of an ideal gas?",
+    "options": [
+      "ΔT = -PΔV/nR",
+      "ΔT = PΔV/nR",
+      "ΔT = nRΔP",
+      "ΔT = -nRΔV/P"
+    ],
+    "correct_answer": "ΔT = -PΔV/nR",
+    "explanation": "During adiabatic expansion (no heat exchange), work done = change in internal energy: ΔU = -PΔV = nCvΔT, giving ΔT = -PΔV/(nCv). Temperature drops during adiabatic expansion.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the minimum kinetic energy needed to escape a planet's gravity?",
+    "options": [
+      "Orbital energy",
+      "Escape energy (½mv_esc²)",
+      "Critical energy",
+      "Binding energy"
+    ],
+    "correct_answer": "Escape energy (½mv_esc²)",
+    "explanation": "Escape energy = ½mv_esc² = GMm/R. Setting KE = |PE|: ½mv² = GMm/R, gives v_esc = √(2GM/R). This is the minimum KE needed to completely escape the gravitational field.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the interference of two coherent sources that produces dark fringes at path differences of nλ?",
+    "options": [
+      "Constructive interference",
+      "Resonance",
+      "Destructive interference",
+      "Diffraction"
+    ],
+    "correct_answer": "Destructive interference",
+    "explanation": "Destructive interference occurs when path difference = (n + ½)λ (half wavelength, out of phase). This produces dark fringes in Young's double-slit experiment.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the half-life in terms of the decay constant?",
+    "options": [
+      "t½ = λ/ln2",
+      "t½ = λ × ln2",
+      "t½ = 1/λ",
+      "t½ = ln2/λ"
+    ],
+    "correct_answer": "t½ = ln2/λ",
+    "explanation": "Half-life t½ = ln2/λ = 0.693/λ, where λ is the decay constant. A larger decay constant means faster decay and shorter half-life.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the device that uses the Hall effect to measure magnetic field strength?",
+    "options": [
+      "Hall probe",
+      "Magnetometer",
+      "Gaussmeter",
+      "Galvanometer"
+    ],
+    "correct_answer": "Hall probe",
+    "explanation": "A Hall probe measures magnetic flux density using the Hall effect: when a current-carrying conductor is in a magnetic field, a transverse voltage (Hall voltage) V_H = BId/(ne) is produced.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the Boltzmann factor relating energy states to temperature?",
+    "options": [
+      "e^(+E/kT)",
+      "e^(-E/kT)",
+      "e^(E/kT)",
+      "e^(kT/E)"
+    ],
+    "correct_answer": "e^(-E/kT)",
+    "explanation": "The Boltzmann factor e^(-E/kT) gives the probability of a system being in a state with energy E at temperature T. Higher temperature or lower energy → more likely occupation.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the force restoring SHM directed toward the equilibrium position?",
+    "options": [
+      "Applied force",
+      "Normal force",
+      "Restoring force",
+      "Centripetal force"
+    ],
+    "correct_answer": "Restoring force",
+    "explanation": "The restoring force F = -kx always points toward the equilibrium position, opposite to displacement. This is what produces simple harmonic motion (F = ma = -mω²x).",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the activity of a radioactive sample?",
+    "options": [
+      "A = N/λ",
+      "A = N + λ",
+      "A = λ/N",
+      "A = λN"
+    ],
+    "correct_answer": "A = λN",
+    "explanation": "Radioactive activity A = λN, where λ is the decay constant and N is the number of undecayed nuclei. Units: becquerel (Bq) = 1 decay per second. A decreases as N decreases.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the transfer of kinetic theory to determine pressure showing P ∝ T at constant V?",
+    "options": [
+      "Maxwell-Boltzmann derivation",
+      "Dalton's derivation",
+      "Boyle's derivation",
+      "Gay-Lussac's proof"
+    ],
+    "correct_answer": "Maxwell-Boltzmann derivation",
+    "explanation": "The Maxwell-Boltzmann speed distribution describes the range of molecular speeds in a gas. Combined with kinetic theory, it derives gas laws and shows average KE = (3/2)kT.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the stress in a material?",
+    "options": [
+      "σ = F × A",
+      "σ = F/A",
+      "σ = F × L",
+      "σ = ΔL/L₀"
+    ],
+    "correct_answer": "σ = F/A",
+    "explanation": "Stress σ = F/A (force per unit area), measured in pascals (Pa). Tensile stress stretches; compressive stress compresses. Young's modulus E = stress/strain.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for nuclear binding energy?",
+    "options": [
+      "E = ΔmG",
+      "E = Δmc",
+      "E = Δmc²",
+      "E = Δm/c²"
+    ],
+    "correct_answer": "E = Δmc²",
+    "explanation": "Nuclear binding energy E = Δmc², where Δm is the mass defect (difference between sum of separate nucleon masses and actual nuclear mass). This holds the nucleus together.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the relationship between distance and apparent brightness?",
+    "options": [
+      "Beer-Lambert law",
+      "Inverse distance law",
+      "Kepler's law",
+      "Inverse square law for intensity"
+    ],
+    "correct_answer": "Inverse square law for intensity",
+    "explanation": "The inverse square law I = P/(4πr²) means intensity decreases with the square of distance. Doubling distance reduces intensity to ¼. Applies to light, sound, gravity, and radiation.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for the Larmor radius of a charged particle in a magnetic field?",
+    "options": [
+      "r = mv/(qB)",
+      "r = qv/B",
+      "r = qBm/v",
+      "r = qB/mv"
+    ],
+    "correct_answer": "r = mv/(qB)",
+    "explanation": "Larmor radius r = mv/(qB): the radius of circular motion for a charge q and mass m moving at speed v in field B. Used in mass spectrometers and cyclotrons.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "physics"
+  }
+]

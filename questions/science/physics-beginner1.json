@@ -1,0 +1,2704 @@
+[
+  {
+    "question": "What is the SI unit of force?",
+    "options": [
+      "Newton",
+      "Joule",
+      "Watt",
+      "Pascal"
+    ],
+    "correct_answer": "Newton",
+    "explanation": "The newton (N) is the SI unit of force. One newton equals the force needed to accelerate a 1 kg mass at 1 m/s². Named after Isaac Newton.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the speed of light in a vacuum?",
+    "options": [
+      "3 × 10⁸ m/s",
+      "3 × 10⁶ m/s",
+      "3 × 10¹⁰ m/s",
+      "3 × 10⁴ m/s"
+    ],
+    "correct_answer": "3 × 10⁸ m/s",
+    "explanation": "The speed of light in a vacuum is approximately 3 × 10⁸ m/s (299,792,458 m/s exactly). It is the fastest speed possible in the universe.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What type of energy does a moving object possess?",
+    "options": [
+      "Kinetic energy",
+      "Potential energy",
+      "Chemical energy",
+      "Thermal energy"
+    ],
+    "correct_answer": "Kinetic energy",
+    "explanation": "Kinetic energy is the energy of motion. Any object with mass that is moving possesses kinetic energy. KE = ½mv².",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is Newton's first law of motion?",
+    "options": [
+      "An object at rest stays at rest unless acted upon by a force",
+      "Force equals mass times acceleration",
+      "Every action has an equal and opposite reaction",
+      "Objects fall at the same rate regardless of mass"
+    ],
+    "correct_answer": "An object at rest stays at rest unless acted upon by a force",
+    "explanation": "Newton's first law (law of inertia) states an object remains at rest or in uniform motion unless an unbalanced external force acts on it.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the SI unit of energy?",
+    "options": [
+      "Joule",
+      "Newton",
+      "Watt",
+      "Pascal"
+    ],
+    "correct_answer": "Joule",
+    "explanation": "The joule (J) is the SI unit of energy and work. One joule equals the work done when a force of 1 newton moves an object 1 meter.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What does the term 'frequency' refer to in wave physics?",
+    "options": [
+      "Number of wave cycles per second",
+      "Height of the wave",
+      "Speed of the wave",
+      "Distance between wave crests"
+    ],
+    "correct_answer": "Number of wave cycles per second",
+    "explanation": "Frequency (f) is the number of complete wave cycles passing a point per second, measured in hertz (Hz). Higher frequency means more cycles per second.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "Which force keeps planets in orbit around the sun?",
+    "options": [
+      "Gravity",
+      "Magnetism",
+      "Electrostatic force",
+      "Nuclear force"
+    ],
+    "correct_answer": "Gravity",
+    "explanation": "Gravity is the attractive force between masses that keeps planets in elliptical orbits around the sun, as described by Newton's law of universal gravitation.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What happens to the speed of light when it enters a denser medium?",
+    "options": [
+      "It slows down",
+      "It speeds up",
+      "It stays the same",
+      "It stops completely"
+    ],
+    "correct_answer": "It slows down",
+    "explanation": "Light slows down when entering a denser medium (like glass or water). This is why light refracts (bends) at boundaries between materials of different optical density.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the unit of electrical resistance?",
+    "options": [
+      "Ohm",
+      "Ampere",
+      "Volt",
+      "Watt"
+    ],
+    "correct_answer": "Ohm",
+    "explanation": "The ohm (Ω) is the SI unit of electrical resistance. Ohm's law states V = IR, where V is voltage, I is current, and R is resistance.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What type of wave requires a medium to travel through?",
+    "options": [
+      "Mechanical wave",
+      "Electromagnetic wave",
+      "Radio wave",
+      "Light wave"
+    ],
+    "correct_answer": "Mechanical wave",
+    "explanation": "Mechanical waves (like sound, water waves, and seismic waves) require a physical medium (solid, liquid, or gas) to propagate. Electromagnetic waves travel through vacuum.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the acceleration due to gravity on Earth's surface?",
+    "options": [
+      "9.8 m/s²",
+      "9.8 m/s",
+      "9.8 N",
+      "9.8 kg"
+    ],
+    "correct_answer": "9.8 m/s²",
+    "explanation": "The acceleration due to gravity (g) near Earth's surface is approximately 9.8 m/s² (often rounded to 10 m/s²). All objects fall with this acceleration in the absence of air resistance.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the relationship between wavelength and frequency?",
+    "options": [
+      "As frequency increases, wavelength decreases",
+      "As frequency increases, wavelength increases",
+      "They are unrelated",
+      "They are always equal"
+    ],
+    "correct_answer": "As frequency increases, wavelength decreases",
+    "explanation": "Wavelength and frequency are inversely related: v = fλ. For a constant wave speed, doubling frequency halves wavelength.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the tendency of objects to resist changes in their motion?",
+    "options": [
+      "Inertia",
+      "Momentum",
+      "Friction",
+      "Gravity"
+    ],
+    "correct_answer": "Inertia",
+    "explanation": "Inertia is the tendency of an object to resist changes in its state of motion. More massive objects have greater inertia. This is the basis of Newton's first law.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the SI unit of electric current?",
+    "options": [
+      "Ampere",
+      "Volt",
+      "Ohm",
+      "Coulomb"
+    ],
+    "correct_answer": "Ampere",
+    "explanation": "The ampere (A) is the SI unit of electric current, measuring the rate of flow of electric charge. One ampere equals one coulomb of charge per second.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What type of mirror causes light rays to converge at a focal point?",
+    "options": [
+      "Concave mirror",
+      "Convex mirror",
+      "Plane mirror",
+      "Flat mirror"
+    ],
+    "correct_answer": "Concave mirror",
+    "explanation": "A concave (converging) mirror curves inward and reflects parallel light rays to converge at a focal point in front of the mirror. Used in telescopes and satellite dishes.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for calculating work done?",
+    "options": [
+      "Work = Force × Distance",
+      "Work = Mass × Acceleration",
+      "Work = Power × Time",
+      "Work = Voltage × Current"
+    ],
+    "correct_answer": "Work = Force × Distance",
+    "explanation": "Work (W) = Force (F) × Distance (d) × cos(θ), where θ is the angle between force and displacement. Work is measured in joules.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What does 'amplitude' refer to in a wave?",
+    "options": [
+      "Maximum displacement from rest position",
+      "Number of waves per second",
+      "Distance between crests",
+      "Speed of the wave"
+    ],
+    "correct_answer": "Maximum displacement from rest position",
+    "explanation": "Amplitude is the maximum displacement of a wave from its equilibrium (rest) position. It determines the wave's energy — larger amplitude means more energy.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the SI unit of power?",
+    "options": [
+      "Watt",
+      "Joule",
+      "Newton",
+      "Pascal"
+    ],
+    "correct_answer": "Watt",
+    "explanation": "The watt (W) is the SI unit of power, equal to one joule per second (J/s). It measures the rate of energy transfer or conversion.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "Which law states that the total energy in an isolated system is constant?",
+    "options": [
+      "Law of conservation of energy",
+      "Newton's second law",
+      "Ohm's law",
+      "Hooke's law"
+    ],
+    "correct_answer": "Law of conservation of energy",
+    "explanation": "The law of conservation of energy states that energy cannot be created or destroyed, only transformed from one form to another. Total energy in an isolated system remains constant.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the SI unit of temperature?",
+    "options": [
+      "Kelvin",
+      "Celsius",
+      "Fahrenheit",
+      "Rankine"
+    ],
+    "correct_answer": "Kelvin",
+    "explanation": "The kelvin (K) is the SI base unit of temperature. Absolute zero (0 K) is the lowest possible temperature, equal to -273.15°C.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What happens to the resistance of a wire as its length increases?",
+    "options": [
+      "Resistance increases",
+      "Resistance decreases",
+      "Resistance stays the same",
+      "Resistance becomes zero"
+    ],
+    "correct_answer": "Resistance increases",
+    "explanation": "Electrical resistance is directly proportional to wire length: R = ρL/A. Longer wire means more resistance because electrons collide with more atoms over the greater distance.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What type of electromagnetic radiation has the highest frequency?",
+    "options": [
+      "Gamma rays",
+      "X-rays",
+      "Ultraviolet",
+      "Radio waves"
+    ],
+    "correct_answer": "Gamma rays",
+    "explanation": "Gamma rays have the highest frequency and shortest wavelength in the electromagnetic spectrum. They are produced by nuclear reactions and are extremely penetrating.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the force that opposes motion between surfaces in contact?",
+    "options": [
+      "Friction",
+      "Gravity",
+      "Tension",
+      "Normal force"
+    ],
+    "correct_answer": "Friction",
+    "explanation": "Friction is the force that opposes relative motion or sliding between surfaces in contact. It acts parallel to the surface and opposite to the direction of motion.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for Newton's second law?",
+    "options": [
+      "F = ma",
+      "F = mv",
+      "F = m/a",
+      "F = a/m"
+    ],
+    "correct_answer": "F = ma",
+    "explanation": "Newton's second law states F = ma: net force equals mass times acceleration. Greater force produces greater acceleration; more massive objects require more force to accelerate.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What does a voltmeter measure?",
+    "options": [
+      "Voltage (potential difference)",
+      "Current",
+      "Resistance",
+      "Power"
+    ],
+    "correct_answer": "Voltage (potential difference)",
+    "explanation": "A voltmeter measures the potential difference (voltage) between two points in a circuit. It is connected in parallel and has very high resistance to avoid affecting the circuit.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What happens to the volume of a gas when temperature increases at constant pressure?",
+    "options": [
+      "Volume increases",
+      "Volume decreases",
+      "Volume stays the same",
+      "Volume becomes zero"
+    ],
+    "correct_answer": "Volume increases",
+    "explanation": "Charles's law states that gas volume is directly proportional to absolute temperature at constant pressure. As temperature rises, gas particles move faster and take up more space.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for energy stored in an object due to its position or shape?",
+    "options": [
+      "Potential energy",
+      "Kinetic energy",
+      "Thermal energy",
+      "Electrical energy"
+    ],
+    "correct_answer": "Potential energy",
+    "explanation": "Potential energy is stored energy due to an object's position (gravitational PE = mgh) or shape (elastic PE in a spring). It can be converted to kinetic energy.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is absolute zero?",
+    "options": [
+      "The lowest possible temperature (-273.15°C)",
+      "The temperature of outer space",
+      "The freezing point of water",
+      "0°C"
+    ],
+    "correct_answer": "The lowest possible temperature (-273.15°C)",
+    "explanation": "Absolute zero (0 K = -273.15°C) is the theoretically lowest possible temperature where particles have minimum thermal motion. It has never been achieved in practice.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What type of charge do electrons carry?",
+    "options": [
+      "Negative charge",
+      "Positive charge",
+      "No charge",
+      "Variable charge"
+    ],
+    "correct_answer": "Negative charge",
+    "explanation": "Electrons carry a negative electric charge of -1.6 × 10⁻¹⁹ coulombs. Protons carry positive charge; neutrons are neutral.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the term for the bending of light as it passes from one medium to another?",
+    "options": [
+      "Refraction",
+      "Reflection",
+      "Diffraction",
+      "Dispersion"
+    ],
+    "correct_answer": "Refraction",
+    "explanation": "Refraction is the bending of light (or other waves) when it passes from one medium to another with different optical density, due to the change in wave speed.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What does an ammeter measure?",
+    "options": [
+      "Electric current",
+      "Voltage",
+      "Resistance",
+      "Power"
+    ],
+    "correct_answer": "Electric current",
+    "explanation": "An ammeter measures electric current (flow of charge) in a circuit. It is connected in series and has very low resistance to avoid impeding current flow.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the point where all of an object's weight appears to act?",
+    "options": [
+      "Centre of gravity",
+      "Centre of mass",
+      "Equilibrium point",
+      "Pivot point"
+    ],
+    "correct_answer": "Centre of gravity",
+    "explanation": "The centre of gravity (or center of mass) is the point where gravitational force effectively acts. An object balanced at its centre of gravity will not topple.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for gravitational potential energy?",
+    "options": [
+      "GPE = mgh",
+      "GPE = ½mv²",
+      "GPE = Fd",
+      "GPE = ma"
+    ],
+    "correct_answer": "GPE = mgh",
+    "explanation": "Gravitational potential energy = mass × gravitational field strength × height (GPE = mgh). It represents energy stored due to an object's height above a reference level.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What happens to the pressure of a gas when volume decreases at constant temperature?",
+    "options": [
+      "Pressure increases",
+      "Pressure decreases",
+      "Pressure stays the same",
+      "Pressure becomes zero"
+    ],
+    "correct_answer": "Pressure increases",
+    "explanation": "Boyle's law states pressure and volume are inversely proportional at constant temperature: P₁V₁ = P₂V₂. Compressing a gas into smaller volume increases pressure.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the unit of frequency?",
+    "options": [
+      "Hertz (Hz)",
+      "Decibel",
+      "Watt",
+      "Metre"
+    ],
+    "correct_answer": "Hertz (Hz)",
+    "explanation": "The hertz (Hz) is the unit of frequency, equal to one cycle per second. Named after Heinrich Hertz who first demonstrated radio waves.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What type of lens causes parallel light rays to converge?",
+    "options": [
+      "Convex lens",
+      "Concave lens",
+      "Plane lens",
+      "Diverging lens"
+    ],
+    "correct_answer": "Convex lens",
+    "explanation": "A convex (converging) lens is thicker in the middle and causes parallel light rays to converge at a focal point. Used in magnifying glasses and cameras.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the distance travelled per unit time?",
+    "options": [
+      "Speed",
+      "Velocity",
+      "Acceleration",
+      "Displacement"
+    ],
+    "correct_answer": "Speed",
+    "explanation": "Speed is the scalar quantity measuring the rate of distance covered: speed = distance/time. Unlike velocity, speed has no direction.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the relationship described by Ohm's law?",
+    "options": [
+      "V = IR (voltage = current × resistance)",
+      "V = I/R",
+      "V = IR²",
+      "V = I + R"
+    ],
+    "correct_answer": "V = IR (voltage = current × resistance)",
+    "explanation": "Ohm's law states V = IR: voltage (V) equals current (I) times resistance (R). This applies to ohmic conductors at constant temperature.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the number of complete oscillations per second of a pendulum?",
+    "options": [
+      "Frequency",
+      "Amplitude",
+      "Period",
+      "Wavelength"
+    ],
+    "correct_answer": "Frequency",
+    "explanation": "Frequency is the number of complete oscillations (swings back and forth) a pendulum makes per second, measured in hertz. Period is the time for one complete oscillation.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the SI unit of pressure?",
+    "options": [
+      "Pascal",
+      "Newton",
+      "Bar",
+      "Atmosphere"
+    ],
+    "correct_answer": "Pascal",
+    "explanation": "The pascal (Pa) is the SI unit of pressure, equal to one newton per square metre (N/m²). Named after Blaise Pascal who studied fluid pressure.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the transfer of heat through direct contact between particles?",
+    "options": [
+      "Conduction",
+      "Convection",
+      "Radiation",
+      "Insulation"
+    ],
+    "correct_answer": "Conduction",
+    "explanation": "Conduction is heat transfer through direct particle-to-particle contact. Metals are good conductors because free electrons transfer energy rapidly.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the term for the rate of change of velocity?",
+    "options": [
+      "Acceleration",
+      "Speed",
+      "Displacement",
+      "Momentum"
+    ],
+    "correct_answer": "Acceleration",
+    "explanation": "Acceleration is the rate of change of velocity: a = Δv/Δt. It is a vector quantity and can mean speeding up, slowing down, or changing direction.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "Which colour of visible light has the longest wavelength?",
+    "options": [
+      "Red",
+      "Orange",
+      "Violet",
+      "Blue"
+    ],
+    "correct_answer": "Red",
+    "explanation": "Red light has the longest wavelength (approximately 700 nm) in the visible spectrum. Violet has the shortest wavelength. Red is least refracted by prisms.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the upward force on an object in a fluid?",
+    "options": [
+      "Buoyancy (upthrust)",
+      "Gravity",
+      "Tension",
+      "Normal force"
+    ],
+    "correct_answer": "Buoyancy (upthrust)",
+    "explanation": "Buoyancy (upthrust) is the upward force on objects in fluids, equal to the weight of fluid displaced (Archimedes' principle). Objects float if buoyancy ≥ weight.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is Newton's third law of motion?",
+    "options": [
+      "Every action has an equal and opposite reaction",
+      "F = ma",
+      "Objects resist changes in motion",
+      "Energy is conserved"
+    ],
+    "correct_answer": "Every action has an equal and opposite reaction",
+    "explanation": "Newton's third law: for every action force, there is an equal and opposite reaction force. Forces always occur in pairs acting on different objects.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What type of energy does a compressed spring possess?",
+    "options": [
+      "Elastic potential energy",
+      "Kinetic energy",
+      "Gravitational potential energy",
+      "Chemical energy"
+    ],
+    "correct_answer": "Elastic potential energy",
+    "explanation": "A compressed or stretched spring stores elastic potential energy. When released, this converts to kinetic energy as the spring returns to its natural length.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the transfer of heat by fluid flow (liquid or gas)?",
+    "options": [
+      "Convection",
+      "Conduction",
+      "Radiation",
+      "Insulation"
+    ],
+    "correct_answer": "Convection",
+    "explanation": "Convection is heat transfer through fluid movement — hot fluid rises (less dense), cool fluid sinks (more dense), creating convection currents.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the relationship between mass and weight?",
+    "options": [
+      "Weight = mass × gravitational field strength",
+      "Weight = mass / g",
+      "Weight = mass × speed",
+      "Weight = mass + g"
+    ],
+    "correct_answer": "Weight = mass × gravitational field strength",
+    "explanation": "Weight (W) = mg, where m is mass (kg) and g is gravitational field strength (9.8 N/kg on Earth). Weight is a force (in newtons); mass is the amount of matter (in kg).",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What does the law of reflection state?",
+    "options": [
+      "Angle of incidence equals angle of reflection",
+      "Light bends toward the normal when entering glass",
+      "Angle of refraction depends on wavelength",
+      "All reflected light scatters equally"
+    ],
+    "correct_answer": "Angle of incidence equals angle of reflection",
+    "explanation": "The law of reflection states the angle of incidence (incoming ray to normal) equals the angle of reflection (reflected ray to normal). Both angles are measured from the normal.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for a material that does not allow electric current to flow?",
+    "options": [
+      "Insulator",
+      "Conductor",
+      "Semiconductor",
+      "Resistor"
+    ],
+    "correct_answer": "Insulator",
+    "explanation": "Insulators do not conduct electricity because they have no free electrons. Examples include rubber, plastic, glass, and wood. They protect us from electric shocks.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the SI unit of mass?",
+    "options": [
+      "Newton",
+      "Kilogram",
+      "Gram",
+      "Pound"
+    ],
+    "correct_answer": "Kilogram",
+    "explanation": "The kilogram (kg) is the SI base unit of mass. Mass measures the amount of matter in an object and does not change with location.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for speed?",
+    "options": [
+      "Speed = distance × time",
+      "Speed = distance / time",
+      "Speed = time / distance",
+      "Speed = force × mass"
+    ],
+    "correct_answer": "Speed = distance / time",
+    "explanation": "Speed = distance ÷ time. For example, traveling 100 m in 10 s gives a speed of 10 m/s. Speed is a scalar quantity (no direction).",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What type of circuit has only one path for current to flow?",
+    "options": [
+      "Parallel circuit",
+      "Series circuit",
+      "Complex circuit",
+      "Mixed circuit"
+    ],
+    "correct_answer": "Series circuit",
+    "explanation": "In a series circuit, components are connected end-to-end in a single loop. The same current flows through all components; if one breaks, the whole circuit fails.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What happens to resistance when resistors are connected in parallel?",
+    "options": [
+      "Total resistance increases",
+      "Total resistance decreases",
+      "Total resistance stays the same",
+      "Total resistance doubles"
+    ],
+    "correct_answer": "Total resistance decreases",
+    "explanation": "When resistors are in parallel, total resistance is less than the smallest individual resistor. Multiple paths for current reduce overall resistance: 1/R = 1/R1 + 1/R2 + ...",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What type of image does a plane (flat) mirror produce?",
+    "options": [
+      "Real, inverted image",
+      "Virtual, upright image",
+      "Real, upright image",
+      "Virtual, inverted image"
+    ],
+    "correct_answer": "Virtual, upright image",
+    "explanation": "A plane mirror produces a virtual (cannot be projected on a screen), upright image the same size as the object, located the same distance behind the mirror as the object is in front.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for energy stored in food and fuels?",
+    "options": [
+      "Kinetic energy",
+      "Chemical energy",
+      "Thermal energy",
+      "Nuclear energy"
+    ],
+    "correct_answer": "Chemical energy",
+    "explanation": "Chemical energy is stored in the bonds of molecules. It is released during chemical reactions like burning fuels or during digestion of food.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for a force that causes rotation about a pivot?",
+    "options": [
+      "Normal force",
+      "Torque (moment)",
+      "Friction",
+      "Tension"
+    ],
+    "correct_answer": "Torque (moment)",
+    "explanation": "A torque (or moment) is a turning force that causes rotation about a pivot. Torque = Force × perpendicular distance from pivot.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What type of wave motion is a sound wave?",
+    "options": [
+      "Transverse wave",
+      "Longitudinal wave",
+      "Electromagnetic wave",
+      "Surface wave"
+    ],
+    "correct_answer": "Longitudinal wave",
+    "explanation": "Sound waves are longitudinal — particles vibrate parallel to the direction of wave travel, creating compressions and rarefactions. They cannot travel through a vacuum.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What happens to the pitch of sound as frequency increases?",
+    "options": [
+      "Pitch decreases",
+      "Pitch increases",
+      "Pitch stays the same",
+      "Pitch becomes inaudible"
+    ],
+    "correct_answer": "Pitch increases",
+    "explanation": "Pitch is determined by frequency — higher frequency sound waves produce higher pitched sounds. The human ear can hear frequencies from about 20 Hz to 20,000 Hz.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What type of electromagnetic wave is used in microwave ovens?",
+    "options": [
+      "Infrared radiation",
+      "Microwaves",
+      "Radio waves",
+      "Ultraviolet radiation"
+    ],
+    "correct_answer": "Microwaves",
+    "explanation": "Microwave ovens use microwave radiation (wavelength ~12 cm) which is absorbed by water molecules in food, causing them to vibrate and produce heat.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the total quantity of motion in a system?",
+    "options": [
+      "Force",
+      "Momentum",
+      "Energy",
+      "Velocity"
+    ],
+    "correct_answer": "Momentum",
+    "explanation": "Momentum (p = mv) is the product of mass and velocity. It is a vector quantity conserved in collisions (law of conservation of momentum).",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the path followed by a projectile?",
+    "options": [
+      "Linear path",
+      "Parabolic trajectory",
+      "Circular orbit",
+      "Hyperbolic path"
+    ],
+    "correct_answer": "Parabolic trajectory",
+    "explanation": "A projectile follows a parabolic path because it has constant horizontal velocity and constant downward gravitational acceleration, combining to form a parabola.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What type of radiation transfers heat from the Sun to the Earth?",
+    "options": [
+      "Conduction",
+      "Radiation (electromagnetic)",
+      "Convection",
+      "Conduction through space"
+    ],
+    "correct_answer": "Radiation (electromagnetic)",
+    "explanation": "Heat from the Sun reaches Earth by electromagnetic radiation (infrared, visible light, UV). Unlike conduction and convection, radiation can travel through the vacuum of space.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for an object that allows electricity to flow easily?",
+    "options": [
+      "Insulator",
+      "Conductor",
+      "Resistor",
+      "Semiconductor"
+    ],
+    "correct_answer": "Conductor",
+    "explanation": "Conductors allow electric current to flow easily because they have free electrons. Metals (copper, aluminium, silver) are excellent conductors.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the effect of two waves combining?",
+    "options": [
+      "Diffraction",
+      "Superposition (interference)",
+      "Refraction",
+      "Reflection"
+    ],
+    "correct_answer": "Superposition (interference)",
+    "explanation": "When two waves meet, they superpose (add together). Constructive interference increases amplitude; destructive interference decreases amplitude.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the force a surface exerts perpendicular to an object resting on it?",
+    "options": [
+      "Friction",
+      "Normal force",
+      "Tension",
+      "Weight"
+    ],
+    "correct_answer": "Normal force",
+    "explanation": "The normal force is the contact force a surface exerts perpendicular (normal) to its surface. On a flat horizontal surface, the normal force equals the object's weight.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What does the period of a wave represent?",
+    "options": [
+      "Number of cycles per second",
+      "Time for one complete cycle",
+      "Distance between crests",
+      "Speed of the wave"
+    ],
+    "correct_answer": "Time for one complete cycle",
+    "explanation": "Period (T) is the time for one complete wave cycle, measured in seconds. It is the reciprocal of frequency: T = 1/f.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the spreading of waves through a gap or around an obstacle?",
+    "options": [
+      "Reflection",
+      "Diffraction",
+      "Refraction",
+      "Dispersion"
+    ],
+    "correct_answer": "Diffraction",
+    "explanation": "Diffraction is the spreading of waves as they pass through a gap or around an obstacle. It is most noticeable when the gap size is similar to the wavelength.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the transfer of thermal energy by electromagnetic waves?",
+    "options": [
+      "Conduction",
+      "Radiation",
+      "Convection",
+      "Absorption"
+    ],
+    "correct_answer": "Radiation",
+    "explanation": "Thermal radiation is the transfer of heat by electromagnetic waves (mainly infrared). Unlike conduction and convection, radiation can travel through vacuum.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for pressure?",
+    "options": [
+      "Pressure = Force × Area",
+      "Pressure = Force / Area",
+      "Pressure = Area / Force",
+      "Pressure = Mass × Gravity"
+    ],
+    "correct_answer": "Pressure = Force / Area",
+    "explanation": "Pressure = Force ÷ Area (P = F/A), measured in pascals. Smaller contact area means greater pressure for the same force — this is why knife edges are sharp.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the minimum distance between two identical points on a wave?",
+    "options": [
+      "Amplitude",
+      "Wavelength",
+      "Period",
+      "Frequency"
+    ],
+    "correct_answer": "Wavelength",
+    "explanation": "Wavelength (λ) is the distance between two adjacent identical points on a wave (crest to crest, or trough to trough), measured in metres.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What type of circuit allows current to flow along multiple paths?",
+    "options": [
+      "Series circuit",
+      "Parallel circuit",
+      "Simple circuit",
+      "Single-loop circuit"
+    ],
+    "correct_answer": "Parallel circuit",
+    "explanation": "In a parallel circuit, components are connected across the same two points, providing multiple paths for current. Each component has the same voltage across it.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the rate of doing work?",
+    "options": [
+      "Energy",
+      "Power",
+      "Force",
+      "Velocity"
+    ],
+    "correct_answer": "Power",
+    "explanation": "Power is the rate of energy transfer or work done per unit time: P = W/t = E/t. Measured in watts (W), where 1 W = 1 J/s.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What does the term 'velocity' mean in physics?",
+    "options": [
+      "Rate of change of distance",
+      "Speed in a specific direction",
+      "Rate of change of acceleration",
+      "Distance covered"
+    ],
+    "correct_answer": "Speed in a specific direction",
+    "explanation": "Velocity is a vector quantity that describes both the speed and direction of motion. Unlike speed (scalar), velocity specifies direction: e.g., 10 m/s north.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "Which law states that the extension of a spring is proportional to the force applied?",
+    "options": [
+      "Newton's law",
+      "Hooke's law",
+      "Boyle's law",
+      "Ohm's law"
+    ],
+    "correct_answer": "Hooke's law",
+    "explanation": "Hooke's law states F = kx, where F is force, k is the spring constant, and x is extension. It applies up to the elastic limit of the spring.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the device that converts chemical energy to electrical energy?",
+    "options": [
+      "Motor",
+      "Battery/cell",
+      "Generator",
+      "Transformer"
+    ],
+    "correct_answer": "Battery/cell",
+    "explanation": "A battery (or electrochemical cell) converts chemical energy into electrical energy through redox reactions. Multiple cells connected together form a battery.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What happens to the electric current in a series circuit when another resistor is added?",
+    "options": [
+      "Current increases",
+      "Current decreases",
+      "Current stays the same",
+      "Current doubles"
+    ],
+    "correct_answer": "Current decreases",
+    "explanation": "Adding a resistor in series increases total resistance. Since V = IR, for constant voltage, increased resistance means decreased current throughout the series circuit.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the term for the energy of a photon of light being proportional to its frequency?",
+    "options": [
+      "Wave-particle duality",
+      "Photoelectric effect",
+      "Photon energy (E = hf)",
+      "Quantum mechanics"
+    ],
+    "correct_answer": "Photon energy (E = hf)",
+    "explanation": "The energy of a photon E = hf, where h is Planck's constant (6.63 × 10⁻³⁴ J·s) and f is frequency. Higher frequency photons (like gamma rays) carry more energy.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for a material with electrical properties between conductors and insulators?",
+    "options": [
+      "Superconductor",
+      "Semiconductor",
+      "Resistor",
+      "Dielectric"
+    ],
+    "correct_answer": "Semiconductor",
+    "explanation": "Semiconductors (like silicon and germanium) have conductivity between conductors and insulators. Their conductivity can be controlled, making them essential in electronics.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What does 'displacement' measure in physics?",
+    "options": [
+      "Total path length",
+      "Change in position (vector)",
+      "Speed over time",
+      "Rate of change of velocity"
+    ],
+    "correct_answer": "Change in position (vector)",
+    "explanation": "Displacement is the change in position of an object, including direction. It is a vector quantity and may differ from total distance traveled.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the force that acts on a charged particle moving in a magnetic field?",
+    "options": [
+      "Gravitational force",
+      "Magnetic (Lorentz) force",
+      "Electric force",
+      "Normal force"
+    ],
+    "correct_answer": "Magnetic (Lorentz) force",
+    "explanation": "The Lorentz force acts on a moving charged particle in a magnetic field: F = qvB sinθ. It acts perpendicular to both the velocity and the magnetic field.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the device used to measure voltage in a circuit?",
+    "options": [
+      "Ammeter",
+      "Voltmeter",
+      "Ohmmeter",
+      "Galvanometer"
+    ],
+    "correct_answer": "Voltmeter",
+    "explanation": "A voltmeter measures the potential difference (voltage) between two points. It is connected in parallel and has high internal resistance.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the distance an object falls in 1 second from rest near Earth's surface?",
+    "options": [
+      "9.8 m",
+      "4.9 m",
+      "19.6 m",
+      "1 m"
+    ],
+    "correct_answer": "4.9 m",
+    "explanation": "Using s = ½gt²: s = ½ × 9.8 × 1² = 4.9 m. An object falls 4.9 m in the first second, 19.6 m in 2 seconds (distance increases proportional to t²).",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What type of electromagnetic radiation has longer wavelength than visible light but shorter than radio waves?",
+    "options": [
+      "X-rays",
+      "Infrared radiation",
+      "Gamma rays",
+      "Ultraviolet"
+    ],
+    "correct_answer": "Infrared radiation",
+    "explanation": "Infrared radiation (wavelength 700 nm to 1 mm) has longer wavelength than visible light but shorter than microwaves and radio waves. We feel it as heat.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the property of light that allows polarization?",
+    "options": [
+      "Longitudinal nature",
+      "Transverse nature",
+      "Wave-particle duality",
+      "Diffraction"
+    ],
+    "correct_answer": "Transverse nature",
+    "explanation": "Light can be polarized because it is a transverse wave — the electric and magnetic fields oscillate perpendicular to the direction of travel. Polaroid filters block certain orientations.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the change in frequency of a wave due to relative motion of source and observer?",
+    "options": [
+      "Refraction",
+      "Doppler effect",
+      "Interference",
+      "Resonance"
+    ],
+    "correct_answer": "Doppler effect",
+    "explanation": "The Doppler effect is the change in observed frequency when the source and observer move relative to each other. A siren sounds higher as it approaches, lower as it moves away.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the point in an oscillating system with maximum displacement?",
+    "options": [
+      "Node",
+      "Antinode",
+      "Equilibrium",
+      "Rest position"
+    ],
+    "correct_answer": "Antinode",
+    "explanation": "An antinode is the point of maximum displacement in a standing wave. Nodes (zero displacement) and antinodes alternate in a standing wave pattern.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the physical quantity defined as mass × velocity?",
+    "options": [
+      "Force",
+      "Momentum",
+      "Kinetic energy",
+      "Impulse"
+    ],
+    "correct_answer": "Momentum",
+    "explanation": "Momentum (p = mv) is the product of mass and velocity. It is a vector quantity conserved in closed systems. Units: kg·m/s.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What type of energy is stored in a stretched elastic band?",
+    "options": [
+      "Kinetic energy",
+      "Elastic potential energy",
+      "Gravitational potential energy",
+      "Chemical energy"
+    ],
+    "correct_answer": "Elastic potential energy",
+    "explanation": "A stretched elastic band stores elastic potential energy, which is converted to kinetic energy when released. This is an example of Hooke's law in action.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the number of complete vibrations per second?",
+    "options": [
+      "Period",
+      "Wavelength",
+      "Frequency",
+      "Amplitude"
+    ],
+    "correct_answer": "Frequency",
+    "explanation": "Frequency is the number of complete vibrations (oscillations) per second, measured in hertz (Hz). A 440 Hz tuning fork vibrates 440 times per second.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the term for the splitting of white light into its component colours?",
+    "options": [
+      "Reflection",
+      "Dispersion",
+      "Diffraction",
+      "Interference"
+    ],
+    "correct_answer": "Dispersion",
+    "explanation": "Dispersion occurs when white light splits into its component colours (spectrum) by a prism. Different wavelengths are refracted by different amounts.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What does a concave lens do to parallel light rays?",
+    "options": [
+      "Converge them to a point",
+      "Diverge them (spread them out)",
+      "Reflect them",
+      "Absorb them"
+    ],
+    "correct_answer": "Diverge them (spread them out)",
+    "explanation": "A concave (diverging) lens is thinner in the middle and causes parallel light rays to diverge (spread out). The light appears to come from a virtual focal point.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for energy associated with the motion and position of particles within an object?",
+    "options": [
+      "Kinetic energy",
+      "Thermal (internal) energy",
+      "Chemical energy",
+      "Nuclear energy"
+    ],
+    "correct_answer": "Thermal (internal) energy",
+    "explanation": "Thermal (internal) energy is the sum of all kinetic and potential energies of particles within a substance. Heating an object increases its internal energy.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for kinetic energy?",
+    "options": [
+      "KE = mgh",
+      "KE = ½mv²",
+      "KE = Fv",
+      "KE = mv"
+    ],
+    "correct_answer": "KE = ½mv²",
+    "explanation": "Kinetic energy KE = ½mv², where m is mass (kg) and v is speed (m/s). Doubling speed quadruples KE; doubling mass doubles KE.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What type of waves are light waves?",
+    "options": [
+      "Mechanical transverse waves",
+      "Electromagnetic transverse waves",
+      "Longitudinal waves",
+      "Sound waves"
+    ],
+    "correct_answer": "Electromagnetic transverse waves",
+    "explanation": "Light waves are electromagnetic transverse waves — the electric and magnetic field oscillations are perpendicular to the direction of travel. They can travel through vacuum.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the resistance to being deformed when a force is applied?",
+    "options": [
+      "Density",
+      "Rigidity/stiffness",
+      "Pressure",
+      "Hardness"
+    ],
+    "correct_answer": "Rigidity/stiffness",
+    "explanation": "Rigidity (or stiffness) is a material's resistance to elastic deformation. The spring constant (k in Hooke's law F = kx) measures the stiffness of a spring.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What does the principle of moments state?",
+    "options": [
+      "Force = mass × acceleration",
+      "Clockwise moments = anticlockwise moments at equilibrium",
+      "Pressure = force / area",
+      "Energy is conserved"
+    ],
+    "correct_answer": "Clockwise moments = anticlockwise moments at equilibrium",
+    "explanation": "The principle of moments states that for an object in rotational equilibrium, the sum of clockwise moments about any pivot equals the sum of anticlockwise moments.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the reduction in wave amplitude as it travels further from its source?",
+    "options": [
+      "Absorption",
+      "Attenuation",
+      "Dispersion",
+      "Damping"
+    ],
+    "correct_answer": "Attenuation",
+    "explanation": "Attenuation is the decrease in wave amplitude (and thus intensity) as it propagates away from its source, due to spreading and absorption of energy.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What colour of visible light has the shortest wavelength?",
+    "options": [
+      "Red",
+      "Orange",
+      "Violet",
+      "Green"
+    ],
+    "correct_answer": "Violet",
+    "explanation": "Violet light has the shortest wavelength (~380-420 nm) in the visible spectrum and the highest frequency. It is refracted most by prisms.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the number of neutrons plus protons in an atomic nucleus?",
+    "options": [
+      "Atomic number",
+      "Proton number",
+      "Mass number",
+      "Atomic mass"
+    ],
+    "correct_answer": "Mass number",
+    "explanation": "The mass number (nucleon number) is the total count of protons and neutrons in an atomic nucleus. It determines the isotope of the element.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the formula for calculating electrical power?",
+    "options": [
+      "P = IV²",
+      "P = I/V",
+      "P = IV",
+      "P = V/I"
+    ],
+    "correct_answer": "P = IV",
+    "explanation": "Electrical power P = IV (current × voltage). Also P = I²R = V²/R. Power measured in watts. Used to calculate energy consumed by electrical devices.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What happens to the total resistance when resistors are added in series?",
+    "options": [
+      "Total resistance decreases",
+      "Total resistance stays the same",
+      "Total resistance increases",
+      "Total resistance halves"
+    ],
+    "correct_answer": "Total resistance increases",
+    "explanation": "In a series circuit, total resistance = R1 + R2 + R3 + ... Resistances simply add because current must pass through each resistor in turn.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What type of electromagnetic wave has a wavelength between X-rays and visible light?",
+    "options": [
+      "Gamma rays",
+      "Radio waves",
+      "Ultraviolet (UV)",
+      "Infrared"
+    ],
+    "correct_answer": "Ultraviolet (UV)",
+    "explanation": "Ultraviolet radiation has wavelengths between ~10-400 nm, shorter than visible light but longer than X-rays. The Sun emits UV which causes sunburn and can cause skin cancer.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for a material with no electrical resistance?",
+    "options": [
+      "Conductor",
+      "Semiconductor",
+      "Superconductor",
+      "Insulator"
+    ],
+    "correct_answer": "Superconductor",
+    "explanation": "A superconductor has zero electrical resistance below a critical temperature. Current flows indefinitely without any energy loss. Used in MRI machines and maglev trains.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the term for the ability to do work?",
+    "options": [
+      "Power",
+      "Force",
+      "Energy",
+      "Momentum"
+    ],
+    "correct_answer": "Energy",
+    "explanation": "Energy is the ability to do work. It exists in many forms (kinetic, potential, thermal, chemical, nuclear) and is measured in joules.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the ratio of output energy to input energy?",
+    "options": [
+      "Power",
+      "Work",
+      "Efficiency",
+      "Productivity"
+    ],
+    "correct_answer": "Efficiency",
+    "explanation": "Efficiency = (useful energy output / total energy input) × 100%. No machine is 100% efficient because some energy is always lost as heat due to friction.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "In which medium does sound travel fastest?",
+    "options": [
+      "Air",
+      "Water",
+      "Vacuum",
+      "Solids"
+    ],
+    "correct_answer": "Solids",
+    "explanation": "Sound travels fastest through solids (e.g., ~5100 m/s in steel) because particles are closest together, then liquids (~1500 m/s in water), then gases (~340 m/s in air).",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the change in direction of a wave when it bounces off a surface?",
+    "options": [
+      "Refraction",
+      "Diffraction",
+      "Reflection",
+      "Dispersion"
+    ],
+    "correct_answer": "Reflection",
+    "explanation": "Reflection is the bouncing back of waves from a surface. The law of reflection states the angle of incidence equals the angle of reflection (measured from the normal).",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What type of current flows in one direction only?",
+    "options": [
+      "Alternating current (AC)",
+      "Direct current (DC)",
+      "Induced current",
+      "Eddy current"
+    ],
+    "correct_answer": "Direct current (DC)",
+    "explanation": "Direct current (DC) flows in one direction only. Batteries supply DC. Alternating current (AC) reverses direction periodically and is used in household electricity.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the force per unit area?",
+    "options": [
+      "Weight",
+      "Tension",
+      "Pressure",
+      "Stress"
+    ],
+    "correct_answer": "Pressure",
+    "explanation": "Pressure = Force ÷ Area (P = F/A), measured in pascals (Pa = N/m²). Same force on smaller area produces greater pressure, explaining why sharp knives cut better.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the unit of electrical charge?",
+    "options": [
+      "Ampere",
+      "Volt",
+      "Coulomb",
+      "Farad"
+    ],
+    "correct_answer": "Coulomb",
+    "explanation": "The coulomb (C) is the SI unit of electrical charge. One coulomb = charge of approximately 6.24 × 10¹⁸ electrons. Current (A) = charge (C) per second.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What does the term 'terminal velocity' mean?",
+    "options": [
+      "Maximum possible speed",
+      "Constant velocity when drag equals weight",
+      "Speed at which an object stops",
+      "Speed of sound"
+    ],
+    "correct_answer": "Constant velocity when drag equals weight",
+    "explanation": "Terminal velocity is reached when the drag force (air resistance) on a falling object equals its weight. Net force is zero, so acceleration stops and speed becomes constant.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the point where an object's mass is considered to be concentrated?",
+    "options": [
+      "Centre of gravity",
+      "Pivot point",
+      "Fulcrum",
+      "Centre of mass"
+    ],
+    "correct_answer": "Centre of mass",
+    "explanation": "The centre of mass (or center of gravity in a uniform gravitational field) is the point where an object's mass is effectively concentrated. An object behaves as if all mass is at this point.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the temperature at which water boils at standard atmospheric pressure?",
+    "options": [
+      "273 K",
+      "273°C",
+      "373 K (100°C)",
+      "212 K"
+    ],
+    "correct_answer": "373 K (100°C)",
+    "explanation": "Water boils at 100°C = 373.15 K at standard atmospheric pressure. In Kelvin: K = °C + 273.15. The Kelvin scale is used in scientific thermodynamics.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the phenomenon where a wave's frequency appears to change as source and observer move?",
+    "options": [
+      "Interference",
+      "Diffraction",
+      "Doppler effect",
+      "Resonance"
+    ],
+    "correct_answer": "Doppler effect",
+    "explanation": "The Doppler effect causes an apparent shift in frequency when source and observer move relative to each other. Sound from an approaching source is higher pitch; receding source is lower.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the emission of electrons from a metal surface by light?",
+    "options": [
+      "Thermonic emission",
+      "Radioactivity",
+      "Photoelectric effect",
+      "Ionization"
+    ],
+    "correct_answer": "Photoelectric effect",
+    "explanation": "The photoelectric effect is the emission of electrons from a metal surface when light above a threshold frequency shines on it. Einstein explained it by proposing photons.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the energy stored in atomic nuclei?",
+    "options": [
+      "Chemical energy",
+      "Electrical energy",
+      "Nuclear energy",
+      "Radiant energy"
+    ],
+    "correct_answer": "Nuclear energy",
+    "explanation": "Nuclear energy is the energy stored in atomic nuclei and released during nuclear reactions (fission and fusion). It powers nuclear reactors and the Sun.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What happens to the wavelength of a wave when frequency doubles?",
+    "options": [
+      "Wavelength doubles",
+      "Wavelength stays the same",
+      "Wavelength halves",
+      "Wavelength quadruples"
+    ],
+    "correct_answer": "Wavelength halves",
+    "explanation": "Using v = fλ, at constant wave speed, doubling frequency (f × 2) requires halving wavelength (λ ÷ 2) to maintain the same product.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the force that acts along a rope or string?",
+    "options": [
+      "Normal force",
+      "Friction",
+      "Tension",
+      "Elastic force"
+    ],
+    "correct_answer": "Tension",
+    "explanation": "Tension is the pulling force transmitted along a rope, cable, or string. It acts along the rope in both directions, away from any point on the rope.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the force of attraction between two magnets?",
+    "options": [
+      "Electrostatic force",
+      "Gravity",
+      "Magnetic force",
+      "Nuclear force"
+    ],
+    "correct_answer": "Magnetic force",
+    "explanation": "The magnetic force is the attraction or repulsion between magnets. Unlike poles attract; like poles repel. Magnetic fields are created by moving electric charges.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for an electric charge that builds up on an insulating surface?",
+    "options": [
+      "Current electricity",
+      "Direct current",
+      "Static electricity",
+      "Induced charge"
+    ],
+    "correct_answer": "Static electricity",
+    "explanation": "Static electricity is an imbalance of electric charge on a surface, built up by friction between insulators. It can cause sparks and attract light objects.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the imaginary lines showing the direction and strength of a magnetic field?",
+    "options": [
+      "Electric field lines",
+      "Force lines",
+      "Magnetic field lines",
+      "Flux lines"
+    ],
+    "correct_answer": "Magnetic field lines",
+    "explanation": "Magnetic field lines show the direction (from N to S outside a magnet) and strength (closer lines = stronger field) of a magnetic field. They never cross.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the distance between two successive crests of a wave?",
+    "options": [
+      "Amplitude",
+      "Frequency",
+      "Wavelength",
+      "Period"
+    ],
+    "correct_answer": "Wavelength",
+    "explanation": "Wavelength (λ) is the distance between two consecutive identical points on a wave, such as crest to crest or trough to trough, measured in metres.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the term for the total internal reflection of light in a fibre optic cable?",
+    "options": [
+      "Refraction",
+      "Dispersion",
+      "Total internal reflection",
+      "Diffraction"
+    ],
+    "correct_answer": "Total internal reflection",
+    "explanation": "Total internal reflection occurs when light hits a boundary at an angle greater than the critical angle, making it reflect completely back into the medium. Used in fibre optic cables.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the product of force and the time for which it acts?",
+    "options": [
+      "Kinetic energy",
+      "Momentum change",
+      "Impulse",
+      "Work done"
+    ],
+    "correct_answer": "Impulse",
+    "explanation": "Impulse = Force × time (J = Ft). By Newton's second law, impulse equals the change in momentum: Ft = Δ(mv). Measured in newton-seconds (N·s).",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the scale of loudness of sound?",
+    "options": [
+      "Hertz",
+      "Watt",
+      "Decibel",
+      "Pascal"
+    ],
+    "correct_answer": "Decibel",
+    "explanation": "The decibel (dB) scale measures sound intensity. 0 dB is the threshold of hearing; 120 dB causes pain. Each 10 dB increase represents a 10× increase in intensity.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the force that keeps an object moving in a circle?",
+    "options": [
+      "Gravity",
+      "Inertia",
+      "Centripetal force",
+      "Centrifugal force"
+    ],
+    "correct_answer": "Centripetal force",
+    "explanation": "Centripetal force is the inward-directed force required to keep an object moving in a circular path. It is not a separate force type — gravity, tension, or friction provides it.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the unit of magnetic field strength?",
+    "options": [
+      "Newton",
+      "Ampere",
+      "Tesla",
+      "Gauss"
+    ],
+    "correct_answer": "Tesla",
+    "explanation": "The tesla (T) is the SI unit of magnetic flux density (field strength). Earth's magnetic field is about 25-65 microtesla; MRI machines use fields of 1-3 tesla.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the ability of a material to return to its original shape after being deformed?",
+    "options": [
+      "Plasticity",
+      "Ductility",
+      "Elasticity",
+      "Malleability"
+    ],
+    "correct_answer": "Elasticity",
+    "explanation": "Elasticity is the ability of a material to return to its original shape after deforming force is removed. Elastic limit is the maximum deformation from which it can recover.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the process by which a nucleus splits into smaller nuclei?",
+    "options": [
+      "Fusion",
+      "Fission",
+      "Decay",
+      "Transmutation"
+    ],
+    "correct_answer": "Fission",
+    "explanation": "Nuclear fission splits a heavy nucleus (like uranium-235) into smaller fragments, releasing enormous energy and neutrons that can trigger chain reactions. Used in nuclear power.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What type of energy is generated when an object moves against a frictional force?",
+    "options": [
+      "Kinetic energy",
+      "Potential energy",
+      "Thermal energy",
+      "Chemical energy"
+    ],
+    "correct_answer": "Thermal energy",
+    "explanation": "When objects move against friction, kinetic energy is converted to thermal (heat) energy due to molecular interactions at the surfaces. This is why brakes get hot.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for electromagnetic waves with wavelengths between microwaves and visible light?",
+    "options": [
+      "Ultraviolet rays",
+      "X-rays",
+      "Infrared radiation",
+      "Gamma rays"
+    ],
+    "correct_answer": "Infrared radiation",
+    "explanation": "Infrared radiation has wavelengths from about 700 nm to 1 mm — longer than visible light (red end) but shorter than microwaves. Thermal cameras detect infrared.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the current produced by a changing magnetic field in a conductor?",
+    "options": [
+      "Direct current",
+      "Static charge",
+      "Induced current",
+      "Alternating current"
+    ],
+    "correct_answer": "Induced current",
+    "explanation": "Electromagnetic induction generates current in a conductor when the magnetic flux through it changes. This is the principle behind generators and transformers (Faraday's law).",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the sum of kinetic and potential energy in a system?",
+    "options": [
+      "Thermal energy",
+      "Power",
+      "Mechanical energy",
+      "Internal energy"
+    ],
+    "correct_answer": "Mechanical energy",
+    "explanation": "Mechanical energy is the sum of kinetic energy and potential energy in a system. It is conserved in the absence of non-conservative forces like friction.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the tendency of a fluid to resist flow?",
+    "options": [
+      "Density",
+      "Pressure",
+      "Viscosity",
+      "Surface tension"
+    ],
+    "correct_answer": "Viscosity",
+    "explanation": "Viscosity is a fluid's resistance to flow. High viscosity fluids (honey, oil) flow slowly; low viscosity fluids (water, air) flow easily.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the type of spectrum produced by a heated solid?",
+    "options": [
+      "Line spectrum",
+      "Absorption spectrum",
+      "Continuous spectrum",
+      "Emission spectrum"
+    ],
+    "correct_answer": "Continuous spectrum",
+    "explanation": "A heated solid (like a light bulb filament) emits a continuous spectrum containing all wavelengths of light. A hot gas emits a line spectrum of specific wavelengths.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the transfer of electric charge through a medium?",
+    "options": [
+      "Static electricity",
+      "Magnetic induction",
+      "Electric current",
+      "Electrolysis"
+    ],
+    "correct_answer": "Electric current",
+    "explanation": "Electric current is the flow of electric charge (usually electrons in metals, or ions in solutions/gases) through a conducting medium. Measured in amperes.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the force produced when a current-carrying wire is placed in a magnetic field?",
+    "options": [
+      "Magnetic flux",
+      "Electromagnetic induction",
+      "Motor effect",
+      "Generator effect"
+    ],
+    "correct_answer": "Motor effect",
+    "explanation": "The motor effect: a current-carrying conductor in a magnetic field experiences a force (F = BIL sinθ). This is the basis for electric motors.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for a particle with the same mass as an electron but opposite charge?",
+    "options": [
+      "Proton",
+      "Neutron",
+      "Positron",
+      "Muon"
+    ],
+    "correct_answer": "Positron",
+    "explanation": "A positron is the antiparticle of an electron — same mass (9.11 × 10⁻³¹ kg) but positive charge. It is the antiparticle produced in beta-plus decay.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the bending of a wave as it passes through an aperture comparable to its wavelength?",
+    "options": [
+      "Reflection",
+      "Refraction",
+      "Diffraction",
+      "Dispersion"
+    ],
+    "correct_answer": "Diffraction",
+    "explanation": "Diffraction is the bending and spreading of waves around obstacles or through apertures. It is most pronounced when the aperture size is similar to the wavelength.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the process where two light nuclei combine to release energy?",
+    "options": [
+      "Fission",
+      "Radioactive decay",
+      "Nuclear fusion",
+      "Transmutation"
+    ],
+    "correct_answer": "Nuclear fusion",
+    "explanation": "Nuclear fusion combines light nuclei (like hydrogen isotopes) to form heavier nuclei, releasing vast amounts of energy. This powers the Sun and stars.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the upward force on an object submerged in a fluid equal to the weight of fluid displaced?",
+    "options": [
+      "Weight",
+      "Normal force",
+      "Archimedes' upthrust",
+      "Surface tension"
+    ],
+    "correct_answer": "Archimedes' upthrust",
+    "explanation": "Archimedes' principle: upthrust = weight of fluid displaced. An object floats if upthrust ≥ weight. This principle was discovered by Archimedes in his famous bath moment.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the bending of light at the interface of two media?",
+    "options": [
+      "Reflection",
+      "Dispersion",
+      "Refraction",
+      "Diffraction"
+    ],
+    "correct_answer": "Refraction",
+    "explanation": "Refraction is the bending of light (or any wave) when it passes from one medium to another with a different optical density (refractive index), due to a change in speed.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the SI unit of luminous intensity?",
+    "options": [
+      "Lux",
+      "Lumen",
+      "Candela",
+      "Watt"
+    ],
+    "correct_answer": "Candela",
+    "explanation": "The candela (cd) is the SI base unit of luminous intensity, measuring the power of light in a specific direction. It defines how bright a light source appears.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the force keeping an electron in orbit around a nucleus?",
+    "options": [
+      "Gravity",
+      "Nuclear force",
+      "Electrostatic (Coulomb) attraction",
+      "Magnetic force"
+    ],
+    "correct_answer": "Electrostatic (Coulomb) attraction",
+    "explanation": "The electrostatic attraction between the negatively charged electron and positively charged nucleus keeps electrons in their orbitals. This Coulomb force holds atoms together.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the material that allows magnetic field lines to pass through easily?",
+    "options": [
+      "Diamagnetic material",
+      "Non-magnetic material",
+      "Ferromagnetic material",
+      "Paramagnetic material"
+    ],
+    "correct_answer": "Ferromagnetic material",
+    "explanation": "Ferromagnetic materials (iron, nickel, cobalt) strongly concentrate magnetic field lines and can be magnetized. They form permanent magnets.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the equivalent resistance of two 4Ω resistors in parallel?",
+    "options": [
+      "8Ω",
+      "4Ω",
+      "2Ω",
+      "1Ω"
+    ],
+    "correct_answer": "2Ω",
+    "explanation": "For two equal resistors R in parallel: Rtotal = R/2 = 4/2 = 2Ω. Using 1/R = 1/4 + 1/4 = 2/4, so R = 2Ω.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the law relating pressure and volume of a gas at constant temperature?",
+    "options": [
+      "Charles's law",
+      "Gay-Lussac's law",
+      "Boyle's law",
+      "Avogadro's law"
+    ],
+    "correct_answer": "Boyle's law",
+    "explanation": "Boyle's law states that gas pressure and volume are inversely proportional at constant temperature: P₁V₁ = P₂V₂. Halving volume doubles pressure.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the standard unit of time in the SI system?",
+    "options": [
+      "Minute",
+      "Hour",
+      "Millisecond",
+      "Second"
+    ],
+    "correct_answer": "Second",
+    "explanation": "The second (s) is the SI base unit of time, defined as 9,192,631,770 periods of radiation corresponding to the transition of caesium-133 atoms.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the force between unlike electric charges?",
+    "options": [
+      "Magnetic force",
+      "Gravitational force",
+      "Nuclear force",
+      "Electrostatic attraction"
+    ],
+    "correct_answer": "Electrostatic attraction",
+    "explanation": "Electrostatic attraction is the force between opposite electric charges (positive and negative). Like charges repel; unlike charges attract (Coulomb's law).",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for a device that converts electrical energy into rotational mechanical energy?",
+    "options": [
+      "Generator",
+      "Transformer",
+      "Battery",
+      "Electric motor"
+    ],
+    "correct_answer": "Electric motor",
+    "explanation": "An electric motor uses the interaction between magnetic fields and current-carrying conductors (motor effect) to convert electrical energy into rotational mechanical energy.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the region around a magnet where magnetic forces act?",
+    "options": [
+      "Electric field",
+      "Gravitational field",
+      "Nuclear field",
+      "Magnetic field"
+    ],
+    "correct_answer": "Magnetic field",
+    "explanation": "A magnetic field is the region around a magnet where magnetic forces are experienced. It is represented by magnetic field lines pointing from North to South poles.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "In a transverse wave, which direction do particles oscillate relative to wave travel?",
+    "options": [
+      "Parallel to wave travel",
+      "In the direction of travel",
+      "Backward to wave travel",
+      "Perpendicular to wave travel"
+    ],
+    "correct_answer": "Perpendicular to wave travel",
+    "explanation": "In transverse waves, particles oscillate perpendicular (at 90°) to the direction of wave travel. Examples: light waves, water waves, waves on a string.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the law stating that force equals mass times acceleration?",
+    "options": [
+      "Newton's first law",
+      "Newton's third law",
+      "Law of conservation of energy",
+      "Newton's second law"
+    ],
+    "correct_answer": "Newton's second law",
+    "explanation": "Newton's second law: F = ma. Net force equals mass times acceleration. The direction of acceleration is the same as the net force.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the device that increases or decreases AC voltage?",
+    "options": [
+      "Battery",
+      "Rectifier",
+      "Motor",
+      "Transformer"
+    ],
+    "correct_answer": "Transformer",
+    "explanation": "A transformer uses electromagnetic induction to change AC voltage. Step-up transformers increase voltage; step-down transformers decrease voltage. V1/V2 = N1/N2.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the energy carried by an electromagnetic wave?",
+    "options": [
+      "Kinetic energy",
+      "Thermal energy",
+      "Chemical energy",
+      "Radiant (electromagnetic) energy"
+    ],
+    "correct_answer": "Radiant (electromagnetic) energy",
+    "explanation": "Radiant (electromagnetic) energy is carried by electromagnetic waves (light, radio, X-rays). Energy E = hf per photon, where h is Planck's constant and f is frequency.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the voltage in a circuit with resistance 5Ω and current 3A?",
+    "options": [
+      "0.6 V",
+      "8 V",
+      "1.67 V",
+      "15 V"
+    ],
+    "correct_answer": "15 V",
+    "explanation": "Using Ohm's law: V = IR = 3A × 5Ω = 15V. This is the potential difference across the 5-ohm resistor when 3 amperes flows through it.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What type of radiation can be stopped by a thin sheet of paper?",
+    "options": [
+      "Gamma radiation",
+      "Beta radiation",
+      "Neutron radiation",
+      "Alpha radiation"
+    ],
+    "correct_answer": "Alpha radiation",
+    "explanation": "Alpha particles (helium nuclei: 2p + 2n) are stopped by a sheet of paper or a few centimetres of air due to their large size and double positive charge.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the event when day and night are equal length?",
+    "options": [
+      "Solstice",
+      "Perihelion",
+      "Aphelion",
+      "Equinox"
+    ],
+    "correct_answer": "Equinox",
+    "explanation": "An equinox (vernal in March, autumnal in September) occurs when the Sun is directly over the equator, making day and night approximately equal in length everywhere.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the device that converts mechanical energy into electrical energy?",
+    "options": [
+      "Motor",
+      "Transformer",
+      "Battery",
+      "Generator"
+    ],
+    "correct_answer": "Generator",
+    "explanation": "A generator (dynamo) uses electromagnetic induction (changing magnetic flux) to convert mechanical energy into electrical energy. The reverse of a motor.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the force on a 2 kg object accelerating at 5 m/s²?",
+    "options": [
+      "2.5 N",
+      "7 N",
+      "0.4 N",
+      "10 N"
+    ],
+    "correct_answer": "10 N",
+    "explanation": "Using Newton's second law: F = ma = 2 kg × 5 m/s² = 10 N. Force, mass, and acceleration are related by F = ma.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the process where atomic nuclei release energy by emitting particles?",
+    "options": [
+      "Fission",
+      "Fusion",
+      "Transmutation",
+      "Radioactive decay"
+    ],
+    "correct_answer": "Radioactive decay",
+    "explanation": "Radioactive decay is the spontaneous disintegration of unstable nuclei, emitting alpha particles, beta particles, or gamma rays while becoming more stable.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the path of an electron in an atom?",
+    "options": [
+      "Nucleus",
+      "Proton shell",
+      "Neutron shell",
+      "Electron shell (orbital)"
+    ],
+    "correct_answer": "Electron shell (orbital)",
+    "explanation": "Electrons occupy shells (energy levels) or orbitals around the nucleus. The first shell holds 2 electrons, the second holds 8, and so on.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the unit of magnetic flux density?",
+    "options": [
+      "Ampere",
+      "Newton",
+      "Weber",
+      "Tesla"
+    ],
+    "correct_answer": "Tesla",
+    "explanation": "The tesla (T) is the SI unit of magnetic flux density (B). Earth's magnetic field is about 25-65 μT; typical bar magnets have fields of ~0.1 T.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the distance traveled by a wave in one period?",
+    "options": [
+      "Amplitude",
+      "Frequency",
+      "Period",
+      "Wavelength"
+    ],
+    "correct_answer": "Wavelength",
+    "explanation": "During one period T, a wave travels exactly one wavelength λ. This gives the wave equation: v = fλ, relating speed to frequency and wavelength.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the kinetic energy of a 2 kg ball moving at 4 m/s?",
+    "options": [
+      "8 J",
+      "16 J",
+      "4 J",
+      "16 J"
+    ],
+    "correct_answer": "16 J",
+    "explanation": "KE = ½mv² = ½ × 2 × 4² = ½ × 2 × 16 = 16 J. Kinetic energy depends on the square of speed, so doubling speed quadruples KE.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the current in a 12V circuit with 4Ω total resistance?",
+    "options": [
+      "48 A",
+      "0.33 A",
+      "16 A",
+      "3 A"
+    ],
+    "correct_answer": "3 A",
+    "explanation": "Using Ohm's law: I = V/R = 12V ÷ 4Ω = 3A. Current is voltage divided by resistance.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the reduction in amplitude of oscillations due to energy loss?",
+    "options": [
+      "Resonance",
+      "Interference",
+      "Diffraction",
+      "Damping"
+    ],
+    "correct_answer": "Damping",
+    "explanation": "Damping is the gradual reduction in amplitude of oscillations due to energy being lost to friction or resistance. Car shock absorbers are designed to damp vibrations.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the point at which a pendulum has maximum kinetic energy?",
+    "options": [
+      "Top of swing",
+      "Either end of swing",
+      "Equilibrium position",
+      "Quarter swing"
+    ],
+    "correct_answer": "Equilibrium position",
+    "explanation": "A pendulum has maximum KE at its lowest point (equilibrium position) where speed is greatest. At the ends of the swing, all energy is PE and KE = 0.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the power output when 500 J of work is done in 25 seconds?",
+    "options": [
+      "12,500 W",
+      "475 W",
+      "525 W",
+      "20 W"
+    ],
+    "correct_answer": "20 W",
+    "explanation": "Power = Work ÷ Time = 500 J ÷ 25 s = 20 W. Twenty watts means 20 joules of energy are transferred every second.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the gravitational potential energy of a 5 kg object at height 3m (g=10)?",
+    "options": [
+      "1.5 J",
+      "50 J",
+      "0.17 J",
+      "150 J"
+    ],
+    "correct_answer": "150 J",
+    "explanation": "GPE = mgh = 5 kg × 10 m/s² × 3 m = 150 J. This energy is released if the object falls to the reference level.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for alpha decay product when uranium-238 decays?",
+    "options": [
+      "Ra-234",
+      "Th-238",
+      "Th-234 + He-4",
+      "Pa-234"
+    ],
+    "correct_answer": "Th-234 + He-4",
+    "explanation": "Alpha decay: ²³⁸U → ²³⁴Th + ⁴He (alpha particle). Mass number decreases by 4, atomic number decreases by 2. Thorium-234 and an alpha particle are produced.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the tension in a string holding a 3 kg mass stationary?",
+    "options": [
+      "30 kg",
+      "3 N",
+      "0.3 N",
+      "29.4 N"
+    ],
+    "correct_answer": "29.4 N",
+    "explanation": "For a stationary object, tension = weight = mg = 3 × 9.8 = 29.4 N. The tension equals the gravitational force pulling the mass down.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the displacement of a wave at rest position?",
+    "options": [
+      "Wavelength",
+      "Amplitude",
+      "Period",
+      "Zero"
+    ],
+    "correct_answer": "Zero",
+    "explanation": "At the rest (equilibrium) position, displacement = zero. Amplitude is the maximum displacement. Energy is purely kinetic at the equilibrium position.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the temperature scale with the smallest possible temperature at 0°?",
+    "options": [
+      "Celsius",
+      "Fahrenheit",
+      "Rankine",
+      "Kelvin"
+    ],
+    "correct_answer": "Kelvin",
+    "explanation": "The Kelvin scale starts at absolute zero (0 K = -273.15°C), the lowest possible temperature. It is used in all thermodynamic equations.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the phenomenon where light bends around the edge of an obstacle?",
+    "options": [
+      "Reflection",
+      "Refraction",
+      "Total internal reflection",
+      "Diffraction"
+    ],
+    "correct_answer": "Diffraction",
+    "explanation": "Diffraction is the bending of light around the edges of an obstacle or through small apertures. It is most significant when the object/gap size is comparable to the wavelength.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the law describing how magnetic field strength decreases with distance?",
+    "options": [
+      "Faraday's law",
+      "Lenz's law",
+      "Ampere's law",
+      "Inverse square law"
+    ],
+    "correct_answer": "Inverse square law",
+    "explanation": "Magnetic field strength (and also gravitational and electric fields) follows the inverse square law: field strength ∝ 1/d². Doubling distance quarters field strength.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the acceleration of a 4 kg object when a 20 N force is applied?",
+    "options": [
+      "80 m/s²",
+      "0.2 m/s²",
+      "16 m/s²",
+      "5 m/s²"
+    ],
+    "correct_answer": "5 m/s²",
+    "explanation": "Using F = ma: a = F/m = 20 N ÷ 4 kg = 5 m/s². The object accelerates at 5 metres per second squared in the direction of the force.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the phenomenon where objects in free fall appear weightless?",
+    "options": [
+      "Anti-gravity",
+      "Reduced gravity",
+      "Zero gravity",
+      "Weightlessness"
+    ],
+    "correct_answer": "Weightlessness",
+    "explanation": "Weightlessness (apparent weightlessness) occurs in free fall when the normal force is zero. Astronauts in orbit are in continuous free fall, experiencing weightlessness.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the type of waves on the surface of water?",
+    "options": [
+      "Longitudinal waves",
+      "Electromagnetic waves",
+      "Transverse waves",
+      "Surface waves"
+    ],
+    "correct_answer": "Surface waves",
+    "explanation": "Water surface waves are surface waves — particles move in elliptical paths. They have both transverse and longitudinal components, making them more complex than pure transverse or longitudinal waves.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the device that converts light energy into electrical energy?",
+    "options": [
+      "LED",
+      "Photodiode",
+      "Thermistor",
+      "Solar (photovoltaic) cell"
+    ],
+    "correct_answer": "Solar (photovoltaic) cell",
+    "explanation": "A photovoltaic (solar) cell converts light energy directly into electrical energy using the photoelectric effect in semiconductor materials like silicon.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the energy required to lift a 10 kg object by 2 m (g=10)?",
+    "options": [
+      "5 J",
+      "0.5 J",
+      "50 J",
+      "200 J"
+    ],
+    "correct_answer": "200 J",
+    "explanation": "Work done = GPE gained = mgh = 10 kg × 10 m/s² × 2 m = 200 J. This is the minimum energy needed, assuming no friction or air resistance.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the voltage produced by a generator converting 1000 J of energy per second when a current of 5 A flows?",
+    "options": [
+      "5000 V",
+      "0.005 V",
+      "50 V",
+      "200 V"
+    ],
+    "correct_answer": "200 V",
+    "explanation": "Power = 1000 W. Using P = IV: V = P/I = 1000/5 = 200 V. The generator produces 200 volts with 5 amperes flowing.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the type of nuclear radiation with the highest penetrating power?",
+    "options": [
+      "Alpha radiation",
+      "Beta-minus radiation",
+      "Neutron radiation",
+      "Gamma radiation"
+    ],
+    "correct_answer": "Gamma radiation",
+    "explanation": "Gamma radiation (high-energy photons) has the highest penetrating power — it requires thick lead or concrete to absorb. Alpha is least penetrating; beta is intermediate.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the speed in a medium equal to c divided by the refractive index?",
+    "options": [
+      "Wave speed",
+      "Reduced speed",
+      "Phase velocity",
+      "Speed of light in medium"
+    ],
+    "correct_answer": "Speed of light in medium",
+    "explanation": "Speed of light in a medium v = c/n, where n is the refractive index and c is the speed of light in vacuum. In glass (n≈1.5): v = 3×10⁸/1.5 = 2×10⁸ m/s.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the reading on a spring balance equal to mass times g?",
+    "options": [
+      "Mass reading",
+      "Pressure",
+      "Density",
+      "Weight"
+    ],
+    "correct_answer": "Weight",
+    "explanation": "A spring balance measures weight (W = mg), the gravitational force in newtons. A 1 kg mass has weight 9.8 N on Earth. Weight varies with gravitational field; mass does not.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for when two coherent waves combine to create zero amplitude?",
+    "options": [
+      "Constructive interference",
+      "Resonance",
+      "Diffraction",
+      "Destructive interference"
+    ],
+    "correct_answer": "Destructive interference",
+    "explanation": "Destructive interference occurs when waves are exactly out of phase (180° or half wavelength apart), causing their amplitudes to cancel. Results in zero amplitude at that point.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the gravitational potential energy gained when a 2 kg object is raised by 5 m (g=10)?",
+    "options": [
+      "2.5 J",
+      "0.04 J",
+      "10 J",
+      "100 J"
+    ],
+    "correct_answer": "100 J",
+    "explanation": "GPE = mgh = 2 × 10 × 5 = 100 J. Raising an object increases its gravitational potential energy by this amount.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the unit of electrical energy equal to 1 joule per second for 1 second?",
+    "options": [
+      "Watt-hour",
+      "Kilowatt-hour",
+      "Joule-second",
+      "Joule"
+    ],
+    "correct_answer": "Joule",
+    "explanation": "One joule (J) is the SI unit of energy. It equals 1 watt × 1 second = 1 N·m. Energy used = Power × Time (in joules when using watts and seconds).",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the reading on an oscilloscope that shows potential difference over time?",
+    "options": [
+      "Current trace",
+      "Resistance trace",
+      "Power trace",
+      "Voltage trace"
+    ],
+    "correct_answer": "Voltage trace",
+    "explanation": "An oscilloscope displays voltage (potential difference) against time on its screen. It can measure peak voltage, frequency, and period of electrical signals.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the effect produced when light passes through two narrow slits?",
+    "options": [
+      "Single-slit diffraction",
+      "Reflection pattern",
+      "Refraction pattern",
+      "Young's double-slit interference"
+    ],
+    "correct_answer": "Young's double-slit interference",
+    "explanation": "Young's double-slit experiment demonstrates wave interference: light passing through two narrow slits creates an interference pattern of bright and dark fringes on a screen.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the total momentum before a collision in a closed system?",
+    "options": [
+      "Less than after",
+      "More than after",
+      "Unchanged during",
+      "Equal to total momentum after"
+    ],
+    "correct_answer": "Equal to total momentum after",
+    "explanation": "Conservation of momentum: total momentum before a collision equals total momentum after in a closed system (no external forces). p_before = p_after.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  },
+  {
+    "question": "What is the name for the phenomenon where objects orbit Earth because gravity provides centripetal force?",
+    "options": [
+      "Gravitational field",
+      "Terminal velocity",
+      "Free fall",
+      "Orbital motion"
+    ],
+    "correct_answer": "Orbital motion",
+    "explanation": "In orbital motion, gravity provides the centripetal force needed for circular motion. Objects orbit because they are in continuous free fall but moving fast enough horizontally to 'miss' Earth.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "physics"
+  }
+]

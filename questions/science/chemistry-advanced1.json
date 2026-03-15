@@ -1,0 +1,2620 @@
+[
+  {
+    "question": "What is the name for the quantum mechanical model's probability region where an electron is likely found?",
+    "options": [
+      "Orbital",
+      "Shell",
+      "Valence band",
+      "Energy level"
+    ],
+    "correct_answer": "Orbital",
+    "explanation": "An orbital is the quantum mechanical probability distribution describing where an electron is most likely to be found around the nucleus.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "Which principle states that no two electrons in an atom can have the same four quantum numbers?",
+    "options": [
+      "Aufbau principle",
+      "Pauli exclusion principle",
+      "Hund's rule",
+      "Heisenberg uncertainty principle"
+    ],
+    "correct_answer": "Pauli exclusion principle",
+    "explanation": "The Pauli exclusion principle states that no two electrons in an atom can have identical sets of four quantum numbers, limiting each orbital to two electrons with opposite spins.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the enthalpy change when one mole of a compound forms from its elements in standard states?",
+    "options": [
+      "Lattice enthalpy",
+      "Bond dissociation enthalpy",
+      "Standard enthalpy of formation",
+      "Enthalpy of combustion"
+    ],
+    "correct_answer": "Standard enthalpy of formation",
+    "explanation": "Standard enthalpy of formation (ΔHf°) is the heat change when one mole of a compound forms from its constituent elements in their standard states at 298 K and 1 atm.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for a reaction mechanism step where one molecule breaks into two fragments?",
+    "options": [
+      "Chain initiation",
+      "Bimolecular collision",
+      "Termolecular step",
+      "Unimolecular dissociation"
+    ],
+    "correct_answer": "Unimolecular dissociation",
+    "explanation": "A unimolecular step involves one reactant molecule undergoing dissociation or rearrangement, with rate = k[A]. It is common in gas-phase reactions.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "Which quantum number describes the shape of an orbital?",
+    "options": [
+      "Azimuthal (l)",
+      "Principal (n)",
+      "Magnetic (ml)",
+      "Spin (ms)"
+    ],
+    "correct_answer": "Azimuthal (l)",
+    "explanation": "The azimuthal quantum number (l) determines the shape of the orbital: l=0 (s, spherical), l=1 (p, dumbbell), l=2 (d, complex shapes).",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for a molecule with the same molecular formula but different spatial arrangement of atoms?",
+    "options": [
+      "Constitutional isomers",
+      "Stereoisomers",
+      "Structural isomers",
+      "Resonance structures"
+    ],
+    "correct_answer": "Stereoisomers",
+    "explanation": "Stereoisomers have the same molecular formula and connectivity but different spatial arrangements, including enantiomers and diastereomers.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What does a negative Gibbs free energy change (ΔG < 0) indicate?",
+    "options": [
+      "Equilibrium",
+      "Non-spontaneous reaction",
+      "Spontaneous reaction",
+      "Endothermic reaction only"
+    ],
+    "correct_answer": "Spontaneous reaction",
+    "explanation": "A negative ΔG indicates a thermodynamically spontaneous reaction that can proceed without additional energy input. ΔG = ΔH - TΔS.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the bond between two identical atoms where electrons are shared equally?",
+    "options": [
+      "Polar covalent bond",
+      "Ionic bond",
+      "Coordinate covalent bond",
+      "Nonpolar covalent bond"
+    ],
+    "correct_answer": "Nonpolar covalent bond",
+    "explanation": "A nonpolar covalent bond forms between identical atoms (same electronegativity), sharing electrons equally with no net dipole moment.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What type of orbital hybridization is present in a molecule with tetrahedral geometry?",
+    "options": [
+      "sp3",
+      "sp2",
+      "sp",
+      "sp3d"
+    ],
+    "correct_answer": "sp3",
+    "explanation": "sp3 hybridization involves mixing one s and three p orbitals to form four equivalent sp3 orbitals pointing toward tetrahedral corners (109.5°).",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "Which law relates the pressure and volume of a gas at constant temperature?",
+    "options": [
+      "Charles's law",
+      "Boyle's law",
+      "Gay-Lussac's law",
+      "Avogadro's law"
+    ],
+    "correct_answer": "Boyle's law",
+    "explanation": "Boyle's law states that pressure and volume are inversely proportional at constant temperature: P₁V₁ = P₂V₂.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the energy required to completely remove all electrons from one mole of gaseous atoms?",
+    "options": [
+      "Lattice energy",
+      "Electron affinity",
+      "Successive ionization energies",
+      "Bond dissociation energy"
+    ],
+    "correct_answer": "Successive ionization energies",
+    "explanation": "Successive ionization energies measure the energy to remove each electron sequentially. Large jumps occur when removing core electrons.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for a reaction intermediate that is a carbon atom with six valence electrons?",
+    "options": [
+      "Carbocation",
+      "Carbanion",
+      "Carbon radical",
+      "Carbene"
+    ],
+    "correct_answer": "Carbene",
+    "explanation": "A carbene is a reactive intermediate containing a carbon atom with only six valence electrons (two bonds and one lone pair or two non-bonding electrons).",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the thermodynamic property that measures disorder or randomness?",
+    "options": [
+      "Entropy",
+      "Enthalpy",
+      "Gibbs energy",
+      "Activation energy"
+    ],
+    "correct_answer": "Entropy",
+    "explanation": "Entropy (S) is the thermodynamic measure of disorder or the number of microstates available to a system. The second law states entropy of the universe always increases.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "Which spectroscopic technique identifies functional groups by measuring molecular vibrations?",
+    "options": [
+      "NMR spectroscopy",
+      "IR spectroscopy",
+      "UV-Vis spectroscopy",
+      "Mass spectrometry"
+    ],
+    "correct_answer": "IR spectroscopy",
+    "explanation": "Infrared (IR) spectroscopy measures absorption of IR radiation causing molecular vibrations, identifying functional groups by characteristic absorption frequencies.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for a chemical bond formed when one atom donates both electrons to a shared bond?",
+    "options": [
+      "Ionic bond",
+      "Covalent bond",
+      "Coordinate covalent (dative) bond",
+      "Metallic bond"
+    ],
+    "correct_answer": "Coordinate covalent (dative) bond",
+    "explanation": "A coordinate (dative) covalent bond forms when one atom donates both electrons to the bond. Common in Lewis acid-base adducts and metal complexes.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the rate law for a reaction with concentration [A]² in the rate equation?",
+    "options": [
+      "Zero order",
+      "First order",
+      "Third order",
+      "Second order"
+    ],
+    "correct_answer": "Second order",
+    "explanation": "If rate = k[A]², the reaction is second order with respect to A. Doubling [A] quadruples the rate. The units of k are L/(mol·s).",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for the measure of a solution's ability to conduct electricity?",
+    "options": [
+      "Conductance",
+      "Solubility",
+      "Osmolarity",
+      "Normality"
+    ],
+    "correct_answer": "Conductance",
+    "explanation": "Conductance (the inverse of resistance) measures a solution's ability to carry electric current, determined by ion concentration and mobility.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the phenomenon where two or more Lewis structures represent one molecule?",
+    "options": [
+      "Isomerism",
+      "Resonance",
+      "Tautomerism",
+      "Hybridization"
+    ],
+    "correct_answer": "Resonance",
+    "explanation": "Resonance describes molecules where electron delocalization means no single Lewis structure accurately represents bonding. The true structure is a hybrid of resonance forms.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "Which thermodynamic law states energy cannot be created or destroyed?",
+    "options": [
+      "Zeroth law",
+      "Second law of thermodynamics",
+      "First law of thermodynamics",
+      "Third law of thermodynamics"
+    ],
+    "correct_answer": "First law of thermodynamics",
+    "explanation": "The first law of thermodynamics (conservation of energy) states that the total energy of an isolated system is constant: ΔU = q + w.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the molecular geometry of a molecule with two bonding pairs and two lone pairs?",
+    "options": [
+      "Linear",
+      "Tetrahedral",
+      "Trigonal planar",
+      "Bent"
+    ],
+    "correct_answer": "Bent",
+    "explanation": "A molecule with 4 electron pairs (2 bonding, 2 lone pairs) has tetrahedral electron geometry but bent molecular geometry (~104.5°), like water.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the process by which a racemic mixture is separated into enantiomers?",
+    "options": [
+      "Resolution",
+      "Distillation",
+      "Chromatography",
+      "Crystallization"
+    ],
+    "correct_answer": "Resolution",
+    "explanation": "Resolution is the separation of a racemic mixture into its enantiomers, often using a chiral resolving agent to form diastereomeric salts with different solubilities.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the electrode where oxidation occurs in an electrochemical cell?",
+    "options": [
+      "Cathode",
+      "Anode",
+      "Salt bridge",
+      "Reference electrode"
+    ],
+    "correct_answer": "Anode",
+    "explanation": "The anode is where oxidation occurs (loss of electrons) in both galvanic and electrolytic cells. LEO says GER: Loss of Electrons = Oxidation.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "Which type of isomerism involves compounds with the same structural formula but different configurations around a double bond?",
+    "options": [
+      "Optical isomerism",
+      "Conformational isomerism",
+      "Geometric (cis-trans) isomerism",
+      "Constitutional isomerism"
+    ],
+    "correct_answer": "Geometric (cis-trans) isomerism",
+    "explanation": "Geometric isomerism occurs in alkenes where restricted rotation around the C=C double bond creates cis (same side) and trans (opposite side) configurations.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for reactions that proceed through a planar, cyclic transition state involving 4n+2 electrons?",
+    "options": [
+      "Radical reactions",
+      "Ionic reactions",
+      "Chain reactions",
+      "Pericyclic reactions"
+    ],
+    "correct_answer": "Pericyclic reactions",
+    "explanation": "Pericyclic reactions proceed through concerted cyclic transition states. Thermally allowed pericyclic reactions follow Hückel's 4n+2 rule (Woodward-Hoffmann rules).",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the Nernst equation used to calculate?",
+    "options": [
+      "Cell potential under non-standard conditions",
+      "Gibbs free energy",
+      "Activation energy",
+      "Equilibrium constant"
+    ],
+    "correct_answer": "Cell potential under non-standard conditions",
+    "explanation": "The Nernst equation calculates electrochemical cell potential at non-standard conditions: E = E° - (RT/nF)ln(Q).",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for an sp2 hybridized carbon with a positive charge and empty p orbital?",
+    "options": [
+      "Carbanion",
+      "Carbocation",
+      "Carbon radical",
+      "Carbene"
+    ],
+    "correct_answer": "Carbocation",
+    "explanation": "A carbocation is an sp2 hybridized carbon intermediate with a positive charge and empty p orbital. Tertiary carbocations are most stable due to hyperconjugation.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "Which model describes electrons in metals as delocalized throughout a lattice?",
+    "options": [
+      "Valence bond theory",
+      "Molecular orbital theory",
+      "Free electron model",
+      "Crystal field theory"
+    ],
+    "correct_answer": "Free electron model",
+    "explanation": "The free electron model treats metal electrons as delocalized over the entire metallic lattice, explaining electrical conductivity, thermal conductivity, and luster.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the rate-determining step in an enzyme-catalyzed reaction?",
+    "options": [
+      "Substrate binding",
+      "Product release",
+      "Enzyme-substrate complex formation",
+      "Michaelis-Menten step"
+    ],
+    "correct_answer": "Michaelis-Menten step",
+    "explanation": "The Michaelis-Menten model describes enzyme kinetics, where the slowest step (typically chemical transformation of ES complex) determines overall rate, with Km as the key parameter.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for electron density donated from a σ bond into an adjacent empty orbital?",
+    "options": [
+      "Hyperconjugation",
+      "Inductive effect",
+      "Conjugation",
+      "Resonance"
+    ],
+    "correct_answer": "Hyperconjugation",
+    "explanation": "Hyperconjugation is the stabilizing interaction between electrons in a σ bond (like C-H) and an adjacent empty p orbital or π system, stabilizing carbocations and radicals.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for the measure of how much the boiling point of a solvent increases when a solute is added?",
+    "options": [
+      "Freezing point depression",
+      "Boiling point elevation",
+      "Vapor pressure lowering",
+      "Osmotic pressure"
+    ],
+    "correct_answer": "Boiling point elevation",
+    "explanation": "Boiling point elevation is a colligative property: ΔTb = Kb·m where Kb is the ebullioscopic constant and m is molality of solute particles.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "Which spectroscopic method provides information about carbon skeleton and hydrogen environments?",
+    "options": [
+      "IR spectroscopy",
+      "UV-Vis spectroscopy",
+      "NMR spectroscopy",
+      "X-ray crystallography"
+    ],
+    "correct_answer": "NMR spectroscopy",
+    "explanation": "NMR (nuclear magnetic resonance) spectroscopy reveals molecular structure by measuring how nuclei (¹H, ¹³C) respond to magnetic fields, identifying chemical environments.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the electrophilic addition mechanism that follows Markovnikov's rule?",
+    "options": [
+      "Free radical addition",
+      "Nucleophilic addition",
+      "SN2 mechanism",
+      "Electrophilic addition to alkenes"
+    ],
+    "correct_answer": "Electrophilic addition to alkenes",
+    "explanation": "Electrophilic addition to alkenes follows Markovnikov's rule: the electrophile (H+) adds to the carbon with more hydrogens, placing the positive charge on the more stable (tertiary) carbocation.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the mathematical relationship between the equilibrium constant and standard Gibbs free energy?",
+    "options": [
+      "Van't Hoff equation",
+      "Arrhenius equation",
+      "Boltzmann equation",
+      "Nernst equation"
+    ],
+    "correct_answer": "Van't Hoff equation",
+    "explanation": "The van't Hoff equation relates K to ΔG°: ΔG° = -RT ln K. It also describes how K changes with temperature: d(ln K)/dT = ΔH°/RT².",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for the splitting of d-orbital energies in transition metal complexes?",
+    "options": [
+      "Hybridization",
+      "Crystal field splitting",
+      "Resonance",
+      "Ligand field effect"
+    ],
+    "correct_answer": "Crystal field splitting",
+    "explanation": "Crystal field theory describes how ligand electron pairs repel d-orbital electrons differently, splitting d orbitals into higher (eg) and lower (t2g) energy sets.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for the quantum number specifying an orbital's orientation in space?",
+    "options": [
+      "Principal quantum number",
+      "Azimuthal quantum number",
+      "Magnetic quantum number",
+      "Spin quantum number"
+    ],
+    "correct_answer": "Magnetic quantum number",
+    "explanation": "The magnetic quantum number (ml) specifies the orbital's orientation in space relative to an applied magnetic field. It ranges from -l to +l.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for a reaction where an alkyl group migrates from carbon to an adjacent carbocation?",
+    "options": [
+      "Elimination",
+      "Substitution",
+      "Addition",
+      "Rearrangement (1,2-shift)"
+    ],
+    "correct_answer": "Rearrangement (1,2-shift)",
+    "explanation": "In a 1,2-shift (Wagner-Meerwein rearrangement), an alkyl or hydride group migrates from an adjacent carbon to a carbocation, forming a more stable carbocation.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the curve showing temperature vs. composition for a two-component system in equilibrium?",
+    "options": [
+      "Phase diagram",
+      "Solubility curve",
+      "Titration curve",
+      "Boltzmann distribution"
+    ],
+    "correct_answer": "Phase diagram",
+    "explanation": "A phase diagram maps the stable phases of a system as a function of temperature, pressure, and composition, showing phase boundaries and triple points.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for the activation of an aromatic ring by electron-donating groups?",
+    "options": [
+      "Deactivation",
+      "Ortho-para activation",
+      "Meta-directing",
+      "Ring deactivation"
+    ],
+    "correct_answer": "Ortho-para activation",
+    "explanation": "Electron-donating groups (OH, NH2, alkyl) activate the aromatic ring toward electrophilic aromatic substitution and direct incoming electrophiles to ortho and para positions.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the orbital formed by head-on overlap of two atomic orbitals?",
+    "options": [
+      "Pi bond",
+      "Delta bond",
+      "Sigma bond",
+      "Antibonding orbital"
+    ],
+    "correct_answer": "Sigma bond",
+    "explanation": "A sigma (σ) bond forms by head-on (axial) overlap of atomic orbitals along the internuclear axis. It allows free rotation and is the first bond formed between atoms.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the effect of electron withdrawal through sigma bonds?",
+    "options": [
+      "Mesomeric effect",
+      "Steric effect",
+      "Hyperconjugation",
+      "Inductive effect"
+    ],
+    "correct_answer": "Inductive effect",
+    "explanation": "The inductive effect is the transmission of electron density through sigma bonds due to electronegativity differences, decreasing in strength with distance.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for a reaction in which the same species acts as both oxidizing and reducing agent?",
+    "options": [
+      "Disproportionation",
+      "Combustion",
+      "Redox reaction",
+      "Comproportionation"
+    ],
+    "correct_answer": "Disproportionation",
+    "explanation": "Disproportionation (dismutation) is a redox reaction where the same substance is simultaneously oxidized and reduced. Example: 2H2O2 → 2H2O + O2.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the Arrhenius equation used to describe?",
+    "options": [
+      "Equilibrium constants",
+      "Rate constant dependence on temperature",
+      "Electrode potentials",
+      "Entropy changes"
+    ],
+    "correct_answer": "Rate constant dependence on temperature",
+    "explanation": "The Arrhenius equation k = Ae^(-Ea/RT) describes how the rate constant k increases exponentially with temperature, where Ea is activation energy and A is the pre-exponential factor.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "Which type of isomer has the same connectivity but different arrangements in space that are non-superimposable mirror images?",
+    "options": [
+      "Structural isomers",
+      "Diastereomers",
+      "Enantiomers",
+      "Geometric isomers"
+    ],
+    "correct_answer": "Enantiomers",
+    "explanation": "Enantiomers are non-superimposable mirror images that have the same connectivity and same bond angles, differing only in handedness at chiral centers.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the rule predicting that the most stable conformation of cyclohexane has substituents in equatorial positions?",
+    "options": [
+      "Bredt's rule",
+      "Markovnikov's rule",
+      "Cahn-Ingold-Prelog rule",
+      "Axiom of conformational analysis"
+    ],
+    "correct_answer": "Axiom of conformational analysis",
+    "explanation": "In cyclohexane conformational analysis, bulky substituents preferentially occupy equatorial positions to avoid 1,3-diaxial interactions, stabilizing the chair conformation.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the reaction where a nucleophile attacks a carbonyl and the leaving group departs?",
+    "options": [
+      "Nucleophilic acyl substitution",
+      "Radical substitution",
+      "Electrophilic substitution",
+      "Nucleophilic addition"
+    ],
+    "correct_answer": "Nucleophilic acyl substitution",
+    "explanation": "Nucleophilic acyl substitution occurs at carbonyl groups (C=O) in carboxylic acid derivatives — the nucleophile attacks the carbonyl carbon and the leaving group departs.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the Heisenberg uncertainty principle?",
+    "options": [
+      "Electrons have wave-particle duality",
+      "Both position and momentum cannot be precisely known simultaneously",
+      "Energy levels in atoms are quantized",
+      "Electrons fill lowest energy orbitals first"
+    ],
+    "correct_answer": "Both position and momentum cannot be precisely known simultaneously",
+    "explanation": "Heisenberg's uncertainty principle states Δx·Δp ≥ ℏ/2 — the more precisely position is known, the less precisely momentum can be known, and vice versa.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the process where a complex ion loses a ligand?",
+    "options": [
+      "Association",
+      "Oxidation",
+      "Dissociation",
+      "Substitution"
+    ],
+    "correct_answer": "Dissociation",
+    "explanation": "Dissociation of a complex ion involves loss of a coordinated ligand, described by the dissociation constant Kd — the inverse of the formation constant Kf.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for an orbital with a nodal plane passing through the nucleus?",
+    "options": [
+      "s orbital",
+      "Sigma orbital",
+      "Antibonding orbital",
+      "p orbital"
+    ],
+    "correct_answer": "p orbital",
+    "explanation": "p orbitals have a nodal plane containing the nucleus where electron probability is zero. The three p orbitals (px, py, pz) are oriented along perpendicular axes.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the reaction that forms a hemiacetal from an aldehyde and alcohol?",
+    "options": [
+      "Nucleophilic addition to aldehyde",
+      "Aldol condensation",
+      "Nucleophilic acyl substitution",
+      "Fischer esterification"
+    ],
+    "correct_answer": "Nucleophilic addition to aldehyde",
+    "explanation": "Nucleophilic addition of an alcohol (ROH) to an aldehyde (RCHO) produces a hemiacetal (RCH(OH)(OR')). With excess alcohol under acid catalysis, acetals can form.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the theoretical framework describing bonding using atomic orbital combinations?",
+    "options": [
+      "Crystal field theory",
+      "Molecular orbital theory",
+      "Valence shell electron pair repulsion",
+      "Hybridization theory"
+    ],
+    "correct_answer": "Molecular orbital theory",
+    "explanation": "Molecular orbital (MO) theory combines atomic orbitals to form bonding and antibonding molecular orbitals with electron density delocalized over the whole molecule.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What does the equilibrium constant Kc represent?",
+    "options": [
+      "Rate of forward reaction",
+      "Activation energy at equilibrium",
+      "Ratio of product to reactant concentrations at equilibrium",
+      "Enthalpy change at equilibrium"
+    ],
+    "correct_answer": "Ratio of product to reactant concentrations at equilibrium",
+    "explanation": "Kc is the equilibrium constant expression: ratio of product concentrations to reactant concentrations, each raised to their stoichiometric coefficients.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for a substitution reaction where a nucleophile attacks from the back in one step?",
+    "options": [
+      "SN1 mechanism",
+      "E2 mechanism",
+      "E1 mechanism",
+      "SN2 mechanism"
+    ],
+    "correct_answer": "SN2 mechanism",
+    "explanation": "The SN2 mechanism is a concerted bimolecular nucleophilic substitution where the nucleophile attacks the back of the electrophilic carbon as the leaving group departs, causing inversion of configuration.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for the empirical rule that the most stable Lewis structure minimizes formal charges?",
+    "options": [
+      "Formal charge minimization",
+      "Octet rule",
+      "Valence bond theory",
+      "VSEPR theory"
+    ],
+    "correct_answer": "Formal charge minimization",
+    "explanation": "Formal charge minimization states that the best Lewis structure assigns formal charges closest to zero and places negative charges on more electronegative atoms.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the plot of ln k vs. 1/T used to determine activation energy?",
+    "options": [
+      "Boltzmann plot",
+      "Arrhenius plot",
+      "Van't Hoff plot",
+      "Eyring plot"
+    ],
+    "correct_answer": "Arrhenius plot",
+    "explanation": "An Arrhenius plot of ln k vs. 1/T gives a straight line with slope = -Ea/R, allowing graphical determination of activation energy Ea.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the VSEPR-predicted geometry of a molecule with 3 bonding pairs and 2 lone pairs?",
+    "options": [
+      "Trigonal bipyramidal",
+      "Trigonal planar",
+      "T-shaped",
+      "Square planar"
+    ],
+    "correct_answer": "T-shaped",
+    "explanation": "Five electron pairs (3 bonding, 2 lone) around a central atom give trigonal bipyramidal electron geometry, but with lone pairs in equatorial positions, the molecular geometry is T-shaped.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the standard electrode potential measured against the standard hydrogen electrode?",
+    "options": [
+      "Reduction potential",
+      "Absolute electrode potential",
+      "Nernst potential",
+      "Standard electrode potential"
+    ],
+    "correct_answer": "Standard electrode potential",
+    "explanation": "The standard electrode potential (E°) measures a half-cell's tendency to gain electrons relative to the standard hydrogen electrode (SHE = 0.00 V) at standard conditions.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "Which rule states that electrons occupy degenerate orbitals singly before pairing?",
+    "options": [
+      "Hund's rule",
+      "Pauli exclusion principle",
+      "Aufbau principle",
+      "Madelung rule"
+    ],
+    "correct_answer": "Hund's rule",
+    "explanation": "Hund's rule states that electrons occupy each degenerate orbital singly with parallel spins before any pairing occurs, minimizing electron-electron repulsion.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the reaction where a proton is transferred between a base and conjugate acid?",
+    "options": [
+      "Lewis acid-base reaction",
+      "Brønsted-Lowry acid-base reaction",
+      "Redox reaction",
+      "Nucleophilic substitution"
+    ],
+    "correct_answer": "Brønsted-Lowry acid-base reaction",
+    "explanation": "Brønsted-Lowry theory defines acids as proton donors and bases as proton acceptors. Each acid-base pair forms a conjugate pair after proton transfer.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the Henry's law constant used to relate?",
+    "options": [
+      "Vapor pressure and mole fraction of solute",
+      "Boiling point and molality",
+      "Gas solubility and partial pressure",
+      "Osmotic pressure and concentration"
+    ],
+    "correct_answer": "Gas solubility and partial pressure",
+    "explanation": "Henry's law states that gas solubility is proportional to its partial pressure above the solution: C = kH × P, where kH is the Henry's law constant.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the SN1 reaction intermediate formed from ionization of a leaving group?",
+    "options": [
+      "Carbanion",
+      "Carbene",
+      "Free radical",
+      "Carbocation"
+    ],
+    "correct_answer": "Carbocation",
+    "explanation": "SN1 reactions proceed through a carbocation intermediate formed when the leaving group ionizes in the rate-determining step. Tertiary substrates favor SN1.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for the relationship between conductivity and electrolyte concentration?",
+    "options": [
+      "Kohlrausch's law",
+      "Faraday's law",
+      "Ostwald's dilution law",
+      "Debye-Hückel theory"
+    ],
+    "correct_answer": "Kohlrausch's law",
+    "explanation": "Kohlrausch's law states that the molar conductivity of a strong electrolyte decreases linearly with the square root of concentration due to interionic interactions.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the type of strain that arises from eclipsed C-H bonds in ethane?",
+    "options": [
+      "Angle strain",
+      "Torsional (eclipsing) strain",
+      "Steric strain",
+      "Ring strain"
+    ],
+    "correct_answer": "Torsional (eclipsing) strain",
+    "explanation": "Torsional strain (Pitzer strain) arises from repulsion between eclipsed bonds in the eclipsed conformation of ethane, making the staggered conformation 12 kJ/mol more stable.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for the colligative property describing solvent flow across a semipermeable membrane?",
+    "options": [
+      "Vapor pressure",
+      "Boiling point elevation",
+      "Osmotic pressure",
+      "Freezing point depression"
+    ],
+    "correct_answer": "Osmotic pressure",
+    "explanation": "Osmotic pressure (π = MRT) is the pressure required to prevent osmotic flow of solvent across a semipermeable membrane from dilute to concentrated solution.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for orbital overlap in a side-by-side (lateral) manner?",
+    "options": [
+      "Sigma bond",
+      "Coordinate bond",
+      "Delta bond",
+      "Pi bond"
+    ],
+    "correct_answer": "Pi bond",
+    "explanation": "A pi (π) bond forms by lateral (side-by-side) overlap of p orbitals above and below the internuclear axis. Pi bonds restrict rotation and are weaker than sigma bonds.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for the energy required to separate all ions in one mole of ionic compound?",
+    "options": [
+      "Lattice energy",
+      "Bond energy",
+      "Electron affinity",
+      "Hydration energy"
+    ],
+    "correct_answer": "Lattice energy",
+    "explanation": "Lattice energy is the energy released when gaseous ions form one mole of solid ionic compound (or conversely, the energy to separate the solid into gaseous ions).",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the Henderson-Hasselbalch equation used to calculate?",
+    "options": [
+      "Equilibrium constants",
+      "pH of buffer solutions",
+      "Electrode potentials",
+      "Osmotic pressure"
+    ],
+    "correct_answer": "pH of buffer solutions",
+    "explanation": "The Henderson-Hasselbalch equation pH = pKa + log([A-]/[HA]) calculates the pH of a buffer solution from the pKa and the ratio of conjugate base to acid.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What type of ligand donates more than one lone pair to a central metal ion?",
+    "options": [
+      "Monodentate",
+      "Bridging ligand",
+      "Polydentate (chelating) ligand",
+      "Ambidentate ligand"
+    ],
+    "correct_answer": "Polydentate (chelating) ligand",
+    "explanation": "Polydentate (chelating) ligands donate multiple lone pairs to form two or more coordinate bonds with the same metal center, creating stable ring chelate complexes.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for the electrode at which reduction occurs?",
+    "options": [
+      "Anode",
+      "Reference electrode",
+      "Salt bridge",
+      "Cathode"
+    ],
+    "correct_answer": "Cathode",
+    "explanation": "The cathode is the electrode where reduction occurs (gain of electrons) in both galvanic and electrolytic cells. Positive ions (cations) migrate toward the cathode.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the Michaelis constant (Km) a measure of?",
+    "options": [
+      "Enzyme-substrate binding affinity (substrate concentration for half-Vmax)",
+      "Maximum reaction velocity",
+      "Enzyme concentration",
+      "Inhibitor constant"
+    ],
+    "correct_answer": "Enzyme-substrate binding affinity (substrate concentration for half-Vmax)",
+    "explanation": "Km is the substrate concentration at which the reaction proceeds at half its maximum velocity (Vmax/2). Lower Km indicates higher affinity between enzyme and substrate.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for the energy stored in a stretched or compressed chemical bond?",
+    "options": [
+      "Kinetic energy",
+      "Strain energy",
+      "Torsional energy",
+      "Resonance energy"
+    ],
+    "correct_answer": "Strain energy",
+    "explanation": "Strain energy is the excess potential energy in molecules with compressed bond angles (angle strain), eclipsed conformations (torsional strain), or steric clashes (van der Waals strain).",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the d-orbital splitting pattern for an octahedral complex?",
+    "options": [
+      "All five d orbitals are degenerate",
+      "eg (lower) and t2g (higher) energy sets",
+      "t2g (lower) and eg (higher) energy sets",
+      "Three energy levels"
+    ],
+    "correct_answer": "t2g (lower) and eg (higher) energy sets",
+    "explanation": "In octahedral crystal field theory, ligands stabilize the t2g (dxy, dxz, dyz) orbitals and destabilize the eg (dx²-y², dz²) orbitals, creating a splitting energy Δo.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the reaction of a Grignard reagent with a carbonyl compound?",
+    "options": [
+      "Aldol reaction",
+      "Michael addition",
+      "Wittig reaction",
+      "Grignard addition (nucleophilic addition)"
+    ],
+    "correct_answer": "Grignard addition (nucleophilic addition)",
+    "explanation": "Grignard reagents (RMgX) act as carbanion nucleophiles that attack carbonyl groups in nucleophilic addition reactions, forming alcohols after workup.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the mathematical relationship between Kp and Kc?",
+    "options": [
+      "Kp = Kc(RT)^Δn",
+      "Kp = Kc + RT",
+      "Kp / Kc = RT",
+      "Kp = Kc"
+    ],
+    "correct_answer": "Kp = Kc(RT)^Δn",
+    "explanation": "Kp = Kc(RT)^Δn, where Δn is the change in moles of gas (moles gas products - moles gas reactants), R is the gas constant, and T is temperature in Kelvin.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the effect where electron density is transmitted through pi bonds and lone pairs?",
+    "options": [
+      "Inductive effect",
+      "Mesomeric (resonance) effect",
+      "Hyperconjugation",
+      "Steric effect"
+    ],
+    "correct_answer": "Mesomeric (resonance) effect",
+    "explanation": "The mesomeric effect (M or resonance effect) transmits electron density through pi bonds and lone pairs via conjugation, affecting reactivity and acidity/basicity.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the quantum mechanical phenomenon where electrons behave as waves?",
+    "options": [
+      "Photoelectric effect",
+      "Heisenberg uncertainty",
+      "Wave-particle duality",
+      "Quantum tunneling"
+    ],
+    "correct_answer": "Wave-particle duality",
+    "explanation": "Wave-particle duality, described by de Broglie's equation λ = h/mv, states electrons (and all matter) exhibit both wave and particle properties.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for the thermodynamic cycle used to calculate lattice energies?",
+    "options": [
+      "Carnot cycle",
+      "Rankine cycle",
+      "Hess's law cycle",
+      "Born-Haber cycle"
+    ],
+    "correct_answer": "Born-Haber cycle",
+    "explanation": "The Born-Haber cycle applies Hess's law to ionic compound formation, relating lattice energy to enthalpy of formation, atomization, ionization, and electron affinity values.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the product when two carboxylic acid groups react with each other?",
+    "options": [
+      "Anhydride",
+      "Ester",
+      "Amide",
+      "Lactone"
+    ],
+    "correct_answer": "Anhydride",
+    "explanation": "An acid anhydride forms when two carboxylic acid molecules react, losing water: 2RCOOH → (RCO)2O + H2O. They are more reactive than esters.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for the reaction where an aldehyde undergoes self-condensation in base?",
+    "options": [
+      "Cannizzaro reaction",
+      "Aldol condensation",
+      "Claisen condensation",
+      "Crossed aldol reaction"
+    ],
+    "correct_answer": "Aldol condensation",
+    "explanation": "The aldol condensation involves alpha-carbon deprotonation forming an enolate that attacks another carbonyl, forming a beta-hydroxy carbonyl compound (aldol product).",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the rule predicting that elimination occurs to give the more substituted alkene?",
+    "options": [
+      "Markovnikov's rule",
+      "Hofmann's rule",
+      "Zaitsev's rule",
+      "Baldwin's rule"
+    ],
+    "correct_answer": "Zaitsev's rule",
+    "explanation": "Zaitsev's rule states that the major product of elimination is the more substituted (thermodynamically more stable) alkene, formed by removing the proton from the adjacent carbon.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the half-life formula for a first-order reaction?",
+    "options": [
+      "t½ = 1/(k[A]₀)",
+      "t½ = 2/(k[A]₀)",
+      "t½ = 1/(k[A]₀²)",
+      "t½ = ln2/k"
+    ],
+    "correct_answer": "t½ = ln2/k",
+    "explanation": "For a first-order reaction, half-life t½ = ln2/k = 0.693/k. It is constant and independent of the initial concentration.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the spectroscopic splitting of NMR peaks due to neighboring protons?",
+    "options": [
+      "Spin-spin coupling",
+      "Chemical shift",
+      "NOE effect",
+      "Deshielding"
+    ],
+    "correct_answer": "Spin-spin coupling",
+    "explanation": "Spin-spin coupling (J-coupling) splits NMR peaks when neighboring protons on adjacent carbons interact magnetically, following the n+1 rule for multiplicity.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for the maximum work a system can perform at constant temperature and pressure?",
+    "options": [
+      "Enthalpy",
+      "Gibbs free energy",
+      "Helmholtz energy",
+      "Internal energy"
+    ],
+    "correct_answer": "Gibbs free energy",
+    "explanation": "Gibbs free energy (G = H - TS) represents the maximum non-expansion work available from a system at constant T and P. ΔG = -wmax.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the class of organic reactions where an alpha hydrogen is removed to form an enolate?",
+    "options": [
+      "Electrophilic addition",
+      "Nucleophilic substitution",
+      "Enolate chemistry",
+      "Radical reactions"
+    ],
+    "correct_answer": "Enolate chemistry",
+    "explanation": "Enolate chemistry involves deprotonation alpha to a carbonyl group (pKa ~20) to form a resonance-stabilized carbanion (enolate) that acts as a nucleophile.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for the HOMO-LUMO interaction that drives pericyclic reactions?",
+    "options": [
+      "Crystal field interaction",
+      "Valence bond overlap",
+      "Band theory",
+      "Frontier molecular orbital (FMO) theory"
+    ],
+    "correct_answer": "Frontier molecular orbital (FMO) theory",
+    "explanation": "FMO theory explains reactivity through interactions between the HOMO of one reactant and LUMO of the other. Orbital symmetry rules determine allowed thermal vs. photochemical pathways.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the enthalpy change when one mole of a substance completely combusts?",
+    "options": [
+      "Enthalpy of combustion",
+      "Enthalpy of fusion",
+      "Enthalpy of formation",
+      "Bond dissociation enthalpy"
+    ],
+    "correct_answer": "Enthalpy of combustion",
+    "explanation": "Standard enthalpy of combustion (ΔHc°) is the heat released when one mole of a substance completely combusts in excess oxygen under standard conditions.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the regiochemistry in electrophilic aromatic substitution with an activating group?",
+    "options": [
+      "Meta-directing",
+      "Ortho/para-directing",
+      "Para-only directing",
+      "Random directing"
+    ],
+    "correct_answer": "Ortho/para-directing",
+    "explanation": "Activating groups (electron donors like OH, OR, NR2, alkyl) direct electrophilic aromatic substitution to ortho and para positions through resonance donation into these positions.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the Faraday constant related to in electrochemistry?",
+    "options": [
+      "Cell voltage",
+      "Reaction rate",
+      "Charge per mole of electrons (96,485 C/mol)",
+      "Equilibrium constant"
+    ],
+    "correct_answer": "Charge per mole of electrons (96,485 C/mol)",
+    "explanation": "Faraday's constant (F = 96,485 C/mol) is the charge carried by one mole of electrons, used in calculations of electrodeposition and cell potentials.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the reaction between a primary amine and a carboxylic acid?",
+    "options": [
+      "Fischer esterification",
+      "Grignard reaction",
+      "Nucleophilic acyl substitution",
+      "Amide (peptide bond) formation"
+    ],
+    "correct_answer": "Amide (peptide bond) formation",
+    "explanation": "Reaction between a primary amine (-NH2) and a carboxylic acid (-COOH) forms an amide (peptide bond) and water, after activation of the carboxyl group.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for reactions that proceed through a linear three-membered transition state?",
+    "options": [
+      "SN2 reactions",
+      "Pericyclic reactions",
+      "E2 reactions",
+      "Sigmatropic rearrangements"
+    ],
+    "correct_answer": "SN2 reactions",
+    "explanation": "SN2 reactions proceed through a linear transition state with the nucleophile, electrophilic carbon, and leaving group collinear, allowing backside attack and Walden inversion.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is Hess's law used to calculate?",
+    "options": [
+      "Reaction kinetics",
+      "Enthalpy changes using known reaction enthalpies",
+      "Equilibrium constants",
+      "Gibbs free energy of unknown reactions"
+    ],
+    "correct_answer": "Enthalpy changes using known reaction enthalpies",
+    "explanation": "Hess's law states that the enthalpy change for a reaction is the same regardless of the path taken, allowing calculation of unknown ΔH values by combining known reaction enthalpies.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the splitting of a molecular orbital diagram into bonding, non-bonding, and antibonding orbitals?",
+    "options": [
+      "Hybridization scheme",
+      "Crystal field splitting",
+      "MO energy diagram",
+      "Walsh diagram"
+    ],
+    "correct_answer": "MO energy diagram",
+    "explanation": "MO energy diagrams show the relative energies of molecular orbitals formed from atomic orbital combinations, with bonding MOs lower in energy than antibonding MOs (marked with *).",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the principle governing electron filling of atomic orbitals from lowest to highest energy?",
+    "options": [
+      "Hund's rule",
+      "Octet rule",
+      "Pauli exclusion",
+      "Aufbau principle"
+    ],
+    "correct_answer": "Aufbau principle",
+    "explanation": "The Aufbau principle states that electrons fill atomic orbitals starting from the lowest available energy level, following the order: 1s, 2s, 2p, 3s, 3p, 4s, 3d, etc.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What does a catalyst do to the activation energy of a reaction?",
+    "options": [
+      "Decreases it",
+      "Increases it",
+      "Does not change it",
+      "Doubles it"
+    ],
+    "correct_answer": "Decreases it",
+    "explanation": "A catalyst provides an alternative reaction pathway with lower activation energy, increasing the reaction rate without being consumed or changing the overall thermodynamics (ΔG unchanged).",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for a reaction where free radicals are created from homolytic bond cleavage?",
+    "options": [
+      "Heterolytic cleavage",
+      "Initiation step (radical chain reaction)",
+      "Ionic reaction",
+      "Termination step"
+    ],
+    "correct_answer": "Initiation step (radical chain reaction)",
+    "explanation": "Initiation generates free radicals by homolytic cleavage (each atom gets one electron from the bond). Propagation continues the chain; termination combines radicals.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the reaction of an alkene with ozone followed by workup to give carbonyl compounds?",
+    "options": [
+      "Epoxidation",
+      "Dihydroxylation",
+      "Ozonolysis",
+      "Hydrogenation"
+    ],
+    "correct_answer": "Ozonolysis",
+    "explanation": "Ozonolysis cleaves C=C double bonds using ozone, then reductive workup (Zn/H2O) gives aldehydes/ketones, or oxidative workup (H2O2) gives carboxylic acids.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the quantum number that describes electron spin?",
+    "options": [
+      "Principal quantum number",
+      "Azimuthal quantum number",
+      "Magnetic quantum number",
+      "Spin quantum number"
+    ],
+    "correct_answer": "Spin quantum number",
+    "explanation": "The spin quantum number (ms) can only have values of +1/2 (spin-up) or -1/2 (spin-down), accounting for the two electrons per orbital with opposite spins.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for the process by which radicals abstract hydrogen atoms from substrates?",
+    "options": [
+      "Hydrogen abstraction",
+      "Nucleophilic substitution",
+      "Electrophilic addition",
+      "Homolytic cleavage"
+    ],
+    "correct_answer": "Hydrogen abstraction",
+    "explanation": "Hydrogen abstraction is a radical reaction where a radical removes a hydrogen atom (with its electron) from a C-H bond, forming HX and a new carbon radical.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the quantum mechanical description of the ground state electron configuration of oxygen?",
+    "options": [
+      "1s² 2s² 2p⁶",
+      "1s² 2s² 2p⁴ (two unpaired)",
+      "1s² 2s² 2p⁴ (all paired)",
+      "1s² 2s¹ 2p⁵"
+    ],
+    "correct_answer": "1s² 2s² 2p⁴ (two unpaired)",
+    "explanation": "Oxygen's ground state configuration is 1s² 2s² 2p⁴. Per Hund's rule, the four 2p electrons occupy three degenerate p orbitals with two unpaired electrons.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for the delocalization of electrons in aromatic rings?",
+    "options": [
+      "Hyperconjugation",
+      "Inductive effect",
+      "Aromaticity",
+      "Tautomerism"
+    ],
+    "correct_answer": "Aromaticity",
+    "explanation": "Aromaticity describes exceptional stability of cyclic, planar, fully conjugated systems with 4n+2 π electrons (Hückel's rule), like benzene with 6 π electrons.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the thermodynamic function combining enthalpy and entropy?",
+    "options": [
+      "Internal energy",
+      "Activation energy",
+      "Helmholtz energy",
+      "Gibbs free energy"
+    ],
+    "correct_answer": "Gibbs free energy",
+    "explanation": "Gibbs free energy G = H - TS combines enthalpy (H) and entropy (S) to predict spontaneity. ΔG < 0 for spontaneous processes at constant T and P.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the mechanism where a carbocation forms from solvolysis in polar solvent?",
+    "options": [
+      "SN1 mechanism",
+      "E2 mechanism",
+      "SN2 mechanism",
+      "E1cb mechanism"
+    ],
+    "correct_answer": "SN1 mechanism",
+    "explanation": "SN1 is a two-step unimolecular substitution: ionization of leaving group (rate-determining) forming carbocation, then nucleophile attack. Favored for tertiary substrates in polar protic solvents.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the van der Waals force between instantaneous and induced dipoles?",
+    "options": [
+      "Keesom interaction",
+      "London dispersion force",
+      "Debye interaction",
+      "Hydrogen bonding"
+    ],
+    "correct_answer": "London dispersion force",
+    "explanation": "London (dispersion) forces arise from instantaneous fluctuating dipoles inducing dipoles in neighboring molecules. They are the only intermolecular force between nonpolar molecules.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for the concentration of hydronium ions in a solution?",
+    "options": [
+      "pOH",
+      "Molality",
+      "[H3O+]",
+      "Normality"
+    ],
+    "correct_answer": "[H3O+]",
+    "explanation": "[H3O+] (hydronium ion concentration) defines pH = -log[H3O+]. Pure water has [H3O+] = 10-7 M at 25°C, giving pH = 7.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the stereochemical rule assigning R/S configuration?",
+    "options": [
+      "E/Z nomenclature",
+      "Prelog's rule",
+      "Fischer convention",
+      "Cahn-Ingold-Prelog (CIP) rules"
+    ],
+    "correct_answer": "Cahn-Ingold-Prelog (CIP) rules",
+    "explanation": "CIP rules assign R (rectus) or S (sinister) configuration to chiral centers by ranking substituents by atomic number and determining the rotational direction.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for the number of moles of equivalents per liter of solution?",
+    "options": [
+      "Normality",
+      "Molality",
+      "Molarity",
+      "Formality"
+    ],
+    "correct_answer": "Normality",
+    "explanation": "Normality (N) is the number of equivalents per liter of solution. For acids/bases, equivalents = moles × number of H+ or OH- donated/accepted.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for a substance that donates an electron pair in a Lewis acid-base reaction?",
+    "options": [
+      "Lewis acid",
+      "Lewis base",
+      "Brønsted acid",
+      "Proton acceptor"
+    ],
+    "correct_answer": "Lewis base",
+    "explanation": "A Lewis base is an electron-pair donor. It includes Brønsted bases but also any species with a lone pair (like NH3, H2O, halide ions) that can donate to a Lewis acid.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for the d-orbital splitting in a tetrahedral crystal field?",
+    "options": [
+      "Δo splitting",
+      "Square planar splitting",
+      "Δt splitting",
+      "No splitting"
+    ],
+    "correct_answer": "Δt splitting",
+    "explanation": "Tetrahedral crystal field splits d orbitals into e (lower, 2 orbitals) and t2 (higher, 3 orbitals) sets. Δt = 4/9 Δo — much smaller than octahedral splitting.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the acid dissociation constant of a weak acid?",
+    "options": [
+      "Kw",
+      "Kb",
+      "Ksp",
+      "Ka"
+    ],
+    "correct_answer": "Ka",
+    "explanation": "Ka is the acid dissociation constant: Ka = [H+][A-]/[HA]. Stronger acids have larger Ka values and smaller pKa values.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the reaction that converts an alkyl halide to an alkene via base-induced elimination?",
+    "options": [
+      "E2 reaction",
+      "SN2 reaction",
+      "E1 reaction",
+      "SN1 reaction"
+    ],
+    "correct_answer": "E2 reaction",
+    "explanation": "E2 is a concerted bimolecular elimination: a strong base abstracts a beta hydrogen while the leaving group departs, forming a double bond in one step. Anti-periplanar geometry required.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for the change in Gibbs energy under standard conditions related to cell potential?",
+    "options": [
+      "Nernst equation",
+      "ΔG° = -nFE°",
+      "Kp expression",
+      "ΔG = ΔH - TΔS"
+    ],
+    "correct_answer": "ΔG° = -nFE°",
+    "explanation": "The relationship ΔG° = -nFE° connects standard Gibbs free energy change to standard cell potential, where n is moles of electrons transferred and F is Faraday's constant.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the reaction forming a polymer from bifunctional monomers with loss of small molecules?",
+    "options": [
+      "Addition polymerization",
+      "Free radical polymerization",
+      "Condensation polymerization",
+      "Cationic polymerization"
+    ],
+    "correct_answer": "Condensation polymerization",
+    "explanation": "Condensation (step-growth) polymerization links monomers with two functional groups (-OH, -COOH, -NH2) with elimination of small molecules (H2O) to form polyesters, polyamides, etc.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for the ring strain in three-membered rings like cyclopropane?",
+    "options": [
+      "Torsional strain",
+      "Steric strain",
+      "Pitzer strain",
+      "Angle strain"
+    ],
+    "correct_answer": "Angle strain",
+    "explanation": "Angle strain (Baeyer strain) in cyclopropane arises from compression of internal C-C-C bond angles to 60° (far from the ideal 109.5°), requiring bent bonds.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the reaction of a diene with a dienophile to form a cyclohexene?",
+    "options": [
+      "Diels-Alder reaction",
+      "Retro-Diels-Alder",
+      "[2+2] cycloaddition",
+      "Ene reaction"
+    ],
+    "correct_answer": "Diels-Alder reaction",
+    "explanation": "The Diels-Alder reaction is a [4+2] cycloaddition between a conjugated diene and a dienophile that forms a six-membered ring. It is stereospecific and syn-addition.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the quantum mechanical phenomenon where a particle passes through an energy barrier?",
+    "options": [
+      "Wave-particle duality",
+      "Quantum tunneling",
+      "Photoelectric effect",
+      "Heisenberg uncertainty"
+    ],
+    "correct_answer": "Quantum tunneling",
+    "explanation": "Quantum tunneling allows particles to pass through energy barriers that classical mechanics says they cannot overcome, important in proton transfer and enzyme reactions.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the effect describing the increase in atomic radius down a group due to inner electron shielding?",
+    "options": [
+      "Ionization effect",
+      "Electron affinity trend",
+      "Shielding (screening) effect",
+      "Effective nuclear charge"
+    ],
+    "correct_answer": "Shielding (screening) effect",
+    "explanation": "The shielding effect occurs when inner (core) electrons reduce the effective nuclear charge experienced by valence electrons, reducing the attractive force on outer electrons.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the acid-catalyzed condensation of two carbonyl compounds via an enol intermediate?",
+    "options": [
+      "Claisen condensation",
+      "Michael addition",
+      "Mannich reaction",
+      "Aldol condensation"
+    ],
+    "correct_answer": "Aldol condensation",
+    "explanation": "The acid-catalyzed aldol condensation involves enol formation (from tautomerization), followed by nucleophilic addition to another carbonyl group, then dehydration to give an α,β-unsaturated carbonyl.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for the measure of the disorder of a reaction mixture at constant T and P?",
+    "options": [
+      "Entropy change (ΔS)",
+      "Internal energy",
+      "Enthalpy",
+      "Activation energy"
+    ],
+    "correct_answer": "Entropy change (ΔS)",
+    "explanation": "Entropy change (ΔS) measures the change in disorder/randomness of a system. Positive ΔS (increased disorder) favors spontaneity when combined with ΔH in ΔG = ΔH - TΔS.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the electrophilic aromatic substitution of benzene with a nitro group?",
+    "options": [
+      "Halogenation",
+      "Nitration",
+      "Sulfonation",
+      "Acylation"
+    ],
+    "correct_answer": "Nitration",
+    "explanation": "Nitration of benzene uses a mixture of concentrated HNO3 and H2SO4 to generate the nitronium ion (NO2+), which acts as the electrophile in EAS.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the thermodynamic property that measures heat content at constant pressure?",
+    "options": [
+      "Internal energy",
+      "Entropy",
+      "Enthalpy",
+      "Gibbs energy"
+    ],
+    "correct_answer": "Enthalpy",
+    "explanation": "Enthalpy (H = U + PV) measures heat flow at constant pressure. ΔH is measured in calorimetry; negative ΔH indicates exothermic reactions.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for the rate law where doubling concentration has no effect on rate?",
+    "options": [
+      "First-order kinetics",
+      "Second-order kinetics",
+      "Third-order kinetics",
+      "Zero-order kinetics"
+    ],
+    "correct_answer": "Zero-order kinetics",
+    "explanation": "In zero-order kinetics, rate = k, independent of reactant concentration. This occurs when an enzyme or catalyst is saturated, or when a heterogeneous reaction is rate-limited by surface area.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the molecular orbital formed by out-of-phase combination of atomic orbitals?",
+    "options": [
+      "Antibonding MO",
+      "Hybrid orbital",
+      "Bonding MO",
+      "Non-bonding MO"
+    ],
+    "correct_answer": "Antibonding MO",
+    "explanation": "Antibonding MOs form when atomic orbitals combine out-of-phase (destructive interference), creating a node between nuclei and higher energy than the original atomic orbitals.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the reaction forming a six-membered ring lactone from a hydroxy carboxylic acid?",
+    "options": [
+      "Amide formation",
+      "Lactone formation",
+      "Anhydride formation",
+      "Acetal formation"
+    ],
+    "correct_answer": "Lactone formation",
+    "explanation": "Lactones are cyclic esters formed by intramolecular condensation of hydroxy carboxylic acids. Delta-lactones (six-membered) form readily from gamma-hydroxy acids.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for a chiral molecule that rotates plane-polarized light to the right?",
+    "options": [
+      "S-enantiomer",
+      "Meso compound",
+      "Dextrorotatory (+)",
+      "Levorotatory (-)"
+    ],
+    "correct_answer": "Dextrorotatory (+)",
+    "explanation": "A dextrorotatory (+) compound rotates plane-polarized light clockwise (to the right) when measured with a polarimeter. The direction of rotation is an experimentally determined physical property.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for measuring heat of reaction at constant volume?",
+    "options": [
+      "Constant pressure calorimetry",
+      "Differential calorimetry",
+      "Isothermal calorimetry",
+      "Bomb calorimetry"
+    ],
+    "correct_answer": "Bomb calorimetry",
+    "explanation": "Bomb calorimetry measures heat released by combustion at constant volume in a sealed 'bomb' vessel. It measures ΔU, which can be converted to ΔH using ΔH = ΔU + ΔnRT.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the reaction of benzene with an acyl halide in the presence of AlCl3?",
+    "options": [
+      "Friedel-Crafts acylation",
+      "Nitration",
+      "Halogenation",
+      "Sulfonation"
+    ],
+    "correct_answer": "Friedel-Crafts acylation",
+    "explanation": "Friedel-Crafts acylation uses AlCl3 as Lewis acid catalyst to generate an acylium ion (RC=O+) from an acyl chloride, which attacks benzene by electrophilic aromatic substitution.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for the thermodynamic cycle describing gas-phase ion formation from ionic compounds?",
+    "options": [
+      "Carnot cycle",
+      "Born-Haber cycle",
+      "Hess cycle",
+      "Clausius cycle"
+    ],
+    "correct_answer": "Born-Haber cycle",
+    "explanation": "The Born-Haber cycle uses Hess's law to calculate lattice energy by combining enthalpy of formation, atomization, ionization, electron affinity, and dissociation energies in a thermodynamic cycle.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for a reaction where an alkene inserts into a metal-hydrogen bond?",
+    "options": [
+      "Reductive elimination",
+      "Oxidative addition",
+      "Migratory insertion",
+      "Transmetalation"
+    ],
+    "correct_answer": "Migratory insertion",
+    "explanation": "Migratory insertion occurs in organometallic catalysis when an alkene (or CO) migrates into a metal-hydride or metal-carbon bond, fundamental to Ziegler-Natta polymerization.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the technique that separates ions based on their mass-to-charge ratio?",
+    "options": [
+      "NMR spectroscopy",
+      "IR spectroscopy",
+      "UV-Vis spectroscopy",
+      "Mass spectrometry"
+    ],
+    "correct_answer": "Mass spectrometry",
+    "explanation": "Mass spectrometry ionizes molecules and separates ions by mass-to-charge ratio (m/z) using electric and magnetic fields, providing molecular mass and fragmentation patterns.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for the equilibrium constant expression for a slightly soluble salt?",
+    "options": [
+      "Ksp",
+      "Kw",
+      "Ka",
+      "Kb"
+    ],
+    "correct_answer": "Ksp",
+    "explanation": "The solubility product constant (Ksp) is the equilibrium constant for dissolution of a slightly soluble salt. For AB ⇌ A+ + B-, Ksp = [A+][B-].",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the VSEPR-predicted geometry around sp2 hybridized carbon?",
+    "options": [
+      "Tetrahedral",
+      "Trigonal planar",
+      "Linear",
+      "Trigonal bipyramidal"
+    ],
+    "correct_answer": "Trigonal planar",
+    "explanation": "sp2 hybridized carbon (in alkenes, carbocations, carbonyl groups) has trigonal planar geometry with 120° bond angles and an unhybridized p orbital perpendicular to the plane.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the principle predicting product distribution in kinetic vs thermodynamic control?",
+    "options": [
+      "Curtin-Hammett principle",
+      "Baldwin's rules",
+      "Kinetic vs thermodynamic control",
+      "Reactivity-selectivity principle"
+    ],
+    "correct_answer": "Kinetic vs thermodynamic control",
+    "explanation": "Kinetic control produces the product via the lowest activation energy pathway (faster). Thermodynamic control (higher T, reversible conditions) yields the most stable product.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the process in NMR where energy is released after excitation?",
+    "options": [
+      "Chemical shift",
+      "Spin-spin coupling",
+      "Deshielding",
+      "Relaxation"
+    ],
+    "correct_answer": "Relaxation",
+    "explanation": "In NMR, after radiofrequency excitation, nuclei return to their ground spin states through relaxation (T1 longitudinal and T2 transverse), releasing energy that is detected.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for the reaction forming an ester from an alcohol and carboxylic acid?",
+    "options": [
+      "Fischer esterification",
+      "Amide formation",
+      "Saponification",
+      "Transesterification"
+    ],
+    "correct_answer": "Fischer esterification",
+    "explanation": "Fischer esterification is the acid-catalyzed reaction of a carboxylic acid with an alcohol to form an ester and water: RCOOH + R'OH ⇌ RCOOR' + H2O.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the half-reaction that shows how many electrons are transferred per formula unit?",
+    "options": [
+      "Oxidation state",
+      "Half-reaction",
+      "Stoichiometry",
+      "Net ionic equation"
+    ],
+    "correct_answer": "Half-reaction",
+    "explanation": "Half-reactions show oxidation and reduction separately with explicit electron transfer. Balancing half-reactions (in acid or base) is systematic for complex redox equations.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the maximum number of electrons in the d subshell?",
+    "options": [
+      "6",
+      "8",
+      "10",
+      "14"
+    ],
+    "correct_answer": "10",
+    "explanation": "The d subshell contains 5 orbitals (ml = -2, -1, 0, +1, +2), each holding 2 electrons, for a maximum of 10 electrons.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the effect of a strong field ligand causing electron pairing in d orbitals?",
+    "options": [
+      "High spin complex",
+      "Weak field splitting",
+      "Crystal field stabilization",
+      "Low spin complex"
+    ],
+    "correct_answer": "Low spin complex",
+    "explanation": "Strong field ligands (CN-, CO, NH3) cause large Δo splitting, forcing electrons to pair in lower t2g orbitals rather than distributing in eg, forming low spin complexes.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for a substitution reaction proceeding via a carbocation intermediate?",
+    "options": [
+      "SN1",
+      "E2",
+      "SN2",
+      "E1"
+    ],
+    "correct_answer": "SN1",
+    "explanation": "SN1 (unimolecular nucleophilic substitution) proceeds via a planar carbocation intermediate, giving racemization. Rate = k[substrate], independent of nucleophile concentration.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the conjugate base of a weak acid in a buffer system?",
+    "options": [
+      "Lewis base",
+      "Conjugate base",
+      "Brønsted acid",
+      "Arrhenius base"
+    ],
+    "correct_answer": "Conjugate base",
+    "explanation": "The conjugate base is the species remaining after an acid donates a proton. In the acetate buffer: CH3COOH (acid) / CH3COO- (conjugate base) at pH near pKa 4.75.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the spectral region IR absorption for O-H stretching in carboxylic acids?",
+    "options": [
+      "1700-1750 cm⁻¹",
+      "1630-1680 cm⁻¹",
+      "2500-3300 cm⁻¹",
+      "3200-3600 cm⁻¹"
+    ],
+    "correct_answer": "2500-3300 cm⁻¹",
+    "explanation": "Carboxylic acids show a broad O-H stretch at 2500-3300 cm⁻¹ (broadened by strong hydrogen bonding) and a carbonyl C=O stretch at 1700-1725 cm⁻¹.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for the theoretical maximum efficiency of a heat engine?",
+    "options": [
+      "Gibbs efficiency",
+      "Helmholtz efficiency",
+      "Boltzmann efficiency",
+      "Carnot efficiency"
+    ],
+    "correct_answer": "Carnot efficiency",
+    "explanation": "Carnot efficiency = 1 - Tcold/Thot defines the maximum efficiency of a reversible heat engine operating between two temperatures. Real engines are less efficient.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the organic reaction that forms a carbon-carbon double bond from a carbonyl and a phosphorus ylide?",
+    "options": [
+      "Wittig reaction",
+      "Aldol condensation",
+      "Grignard reaction",
+      "Reformatsky reaction"
+    ],
+    "correct_answer": "Wittig reaction",
+    "explanation": "The Wittig reaction converts an aldehyde or ketone to an alkene by reaction with a phosphorus ylide (Ph3P=CHR), forming the alkene and triphenylphosphine oxide.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the product when a secondary amine reacts with an aldehyde?",
+    "options": [
+      "Primary amine",
+      "Iminium ion",
+      "Oxime",
+      "Hemiaminal"
+    ],
+    "correct_answer": "Iminium ion",
+    "explanation": "Secondary amines react with aldehydes to form hemiaminals that rapidly dehydrate to iminium ions (R2N+=CHR), which are key intermediates in organocatalysis.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for the measure of an atom's ability to attract electrons in a bond?",
+    "options": [
+      "Ionization energy",
+      "Electron affinity",
+      "Electronegativity",
+      "Atomic radius"
+    ],
+    "correct_answer": "Electronegativity",
+    "explanation": "Electronegativity (Pauling scale) measures the tendency of an atom to attract electrons in a bond. It increases across periods and up groups, with F having the highest value (3.98).",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for the law relating gas pressure to the number of moles at constant T and V?",
+    "options": [
+      "Boyle's law",
+      "Charles's law",
+      "Dalton's law",
+      "Gay-Lussac's law"
+    ],
+    "correct_answer": "Gay-Lussac's law",
+    "explanation": "Gay-Lussac's law states that pressure is directly proportional to absolute temperature at constant volume: P₁/T₁ = P₂/T₂.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the nucleophilic attack on a β-carbon of an α,β-unsaturated carbonyl?",
+    "options": [
+      "1,4-conjugate (Michael) addition",
+      "Aldol addition",
+      "Electrophilic addition",
+      "1,2-addition"
+    ],
+    "correct_answer": "1,4-conjugate (Michael) addition",
+    "explanation": "Michael (1,4-conjugate) addition is the nucleophilic attack at the β-carbon (position 4) of an enone. The Michael acceptor is activated by conjugation with the carbonyl.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the reaction where an ester is hydrolyzed by a base?",
+    "options": [
+      "Fischer esterification",
+      "Saponification",
+      "Acid hydrolysis",
+      "Transesterification"
+    ],
+    "correct_answer": "Saponification",
+    "explanation": "Saponification is the irreversible base-catalyzed hydrolysis of an ester to give a carboxylate salt and an alcohol. The carboxylate anion prevents reverse reaction.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for the equilibrium constant in terms of partial pressures?",
+    "options": [
+      "Kc",
+      "Ka",
+      "Kp",
+      "Kb"
+    ],
+    "correct_answer": "Kp",
+    "explanation": "Kp is the equilibrium constant expressed in terms of partial pressures of gaseous reactants and products. Kp = Kc(RT)^Δn where Δn is the change in moles of gas.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the measure of the tendency of a half-reaction to occur as a reduction?",
+    "options": [
+      "Oxidation potential",
+      "Nernst potential",
+      "Overpotential",
+      "Reduction potential (E°red)"
+    ],
+    "correct_answer": "Reduction potential (E°red)",
+    "explanation": "The standard reduction potential (E°red) measures the tendency of a species to gain electrons. Higher E°red means a stronger oxidizing agent. Cell potential E°cell = E°cathode - E°anode.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for the transition state theory describing reaction rates through activated complexes?",
+    "options": [
+      "Eyring transition state theory",
+      "Arrhenius theory",
+      "Chain reaction theory",
+      "Collision theory"
+    ],
+    "correct_answer": "Eyring transition state theory",
+    "explanation": "Eyring (transition state) theory uses quantum mechanics and statistical mechanics to calculate rate constants from the properties of the activated complex (transition state).",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for a stereoisomer with the same connectivity but different configuration at multiple chiral centers that is not an enantiomer?",
+    "options": [
+      "Conformational isomer",
+      "Diastereomer",
+      "Enantiomer",
+      "Geometric isomer"
+    ],
+    "correct_answer": "Diastereomer",
+    "explanation": "Diastereomers are stereoisomers with the same connectivity but different spatial arrangements at two or more stereocenters that are not mirror images of each other.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the organic reaction forming a β-keto ester from two esters via enolate?",
+    "options": [
+      "Aldol condensation",
+      "Michael addition",
+      "Claisen condensation",
+      "Wittig reaction"
+    ],
+    "correct_answer": "Claisen condensation",
+    "explanation": "Claisen condensation is the base-catalyzed self-condensation of esters via enolate formation, producing a β-keto ester and releasing an alkoxide. Two ester molecules condense.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the empirical rule stating that a compound is aromatic if it has 4n+2 π electrons in a planar ring?",
+    "options": [
+      "Woodward-Hoffmann rule",
+      "Bredt's rule",
+      "Octet rule",
+      "Hückel's rule"
+    ],
+    "correct_answer": "Hückel's rule",
+    "explanation": "Hückel's rule: a monocyclic, planar, fully conjugated system with 4n+2 π electrons (n = 0,1,2...) is aromatic. Benzene (n=1, 6π e-) is the classic example.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the spectroscopy technique measuring X-ray absorption edges to determine oxidation state?",
+    "options": [
+      "X-ray absorption spectroscopy (XAS)",
+      "IR spectroscopy",
+      "UV-Vis spectroscopy",
+      "NMR spectroscopy"
+    ],
+    "correct_answer": "X-ray absorption spectroscopy (XAS)",
+    "explanation": "XAS (XANES/EXAFS) uses synchrotron X-rays to probe electronic structure and local coordination environment around metal atoms, determining oxidation state and bonding.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the principle predicting the preferred ring size in cyclization reactions?",
+    "options": [
+      "Markovnikov's rule",
+      "Baldwin's rules",
+      "Bredt's rule",
+      "Zaitsev's rule"
+    ],
+    "correct_answer": "Baldwin's rules",
+    "explanation": "Baldwin's rules predict the feasibility of ring-closing reactions based on ring size, bond type (tet, trig, dig), and exo vs. endo closure, guiding synthetic planning.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for the activation of molecular oxygen in biological catalysis?",
+    "options": [
+      "Photosynthesis",
+      "Fermentation",
+      "Oxidative phosphorylation",
+      "Glycolysis"
+    ],
+    "correct_answer": "Oxidative phosphorylation",
+    "explanation": "Oxidative phosphorylation uses the electron transport chain to reduce O2 to water, generating the proton gradient that drives ATP synthase to produce ATP.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the rule predicting that bridgehead carbons in bicyclic systems cannot bear double bonds?",
+    "options": [
+      "Markovnikov's rule",
+      "Baldwin's rule",
+      "Hückel's rule",
+      "Bredt's rule"
+    ],
+    "correct_answer": "Bredt's rule",
+    "explanation": "Bredt's rule states that bridgehead carbons in bicyclic ring systems cannot be part of a double bond (for small rings), as the required geometry is severely strained.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for the thermodynamic state function measuring energy unavailable for work?",
+    "options": [
+      "Entropy × Temperature (TS)",
+      "Gibbs energy (G)",
+      "Helmholtz energy (A)",
+      "Enthalpy (H)"
+    ],
+    "correct_answer": "Entropy × Temperature (TS)",
+    "explanation": "The TS term in G = H - TS represents energy bound in thermal motion unavailable for useful work. At constant T and P, -TΔS represents the entropic contribution to spontaneity.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the mechanism of enzyme inhibition where an inhibitor mimics the transition state?",
+    "options": [
+      "Competitive inhibition",
+      "Transition state analog inhibition",
+      "Non-competitive inhibition",
+      "Uncompetitive inhibition"
+    ],
+    "correct_answer": "Transition state analog inhibition",
+    "explanation": "Transition state analogs are molecules that mimic the geometry and charge of the transition state, binding extremely tightly to the enzyme active site and inhibiting catalysis.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for the quantum mechanical description of electrons as standing waves around nuclei?",
+    "options": [
+      "Bohr model",
+      "Thomson model",
+      "Wave mechanical model",
+      "Rutherford model"
+    ],
+    "correct_answer": "Wave mechanical model",
+    "explanation": "The wave mechanical (quantum mechanical) model describes electrons as standing waves (orbitals) around the nucleus, with the square of the wavefunction giving probability density.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the process where two organic radicals combine to terminate a chain reaction?",
+    "options": [
+      "Propagation",
+      "Initiation",
+      "Disproportionation",
+      "Termination"
+    ],
+    "correct_answer": "Termination",
+    "explanation": "Radical chain termination occurs when two radicals combine (coupling) or disproportionate (one radical transfers H to another), destroying radicals and ending the chain.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for the natural log of the equilibrium constant related to standard electrode potential?",
+    "options": [
+      "ΔG° = -RTln K",
+      "Nernst equation",
+      "Henderson-Hasselbalch",
+      "Arrhenius equation"
+    ],
+    "correct_answer": "ΔG° = -RTln K",
+    "explanation": "The fundamental relationship ΔG° = -RT ln K connects the standard Gibbs energy change to the equilibrium constant, also linking to electrode potential via ΔG° = -nFE°.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the rearrangement of an aryl nitrene to form an azirine intermediate?",
+    "options": [
+      "Hofmann rearrangement",
+      "Nitrene rearrangement",
+      "Beckmann rearrangement",
+      "Curtius rearrangement"
+    ],
+    "correct_answer": "Nitrene rearrangement",
+    "explanation": "Nitrene rearrangements (like the Curtius and Schmidt reactions) involve electron-deficient nitrogen intermediates that rearrange by alkyl/aryl migration, used in isocyanate and amine synthesis.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for the periodic trend showing decreased atomic radius across a period?",
+    "options": [
+      "Shielding effect",
+      "Electron affinity increase",
+      "Effective nuclear charge increase",
+      "Ionization energy trend"
+    ],
+    "correct_answer": "Effective nuclear charge increase",
+    "explanation": "Atomic radius decreases across a period because increasing nuclear charge (more protons) with the same shielding electrons increases the effective nuclear charge (Zeff), pulling electrons closer.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the solvent-separated ionic pair in polar solvents during SN1?",
+    "options": [
+      "Tight ion pair",
+      "Contact ion pair",
+      "Free radical",
+      "Solvent-separated ion pair"
+    ],
+    "correct_answer": "Solvent-separated ion pair",
+    "explanation": "In polar protic solvents, SN1 generates solvent-separated ion pairs where solvent molecules intervene between the carbocation and leaving group, allowing nucleophile access from either face.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for the enthalpy change describing the formation of a gaseous metal ion from the solid metal?",
+    "options": [
+      "Atomization energy",
+      "Ionization energy",
+      "Hydration enthalpy",
+      "Electron affinity"
+    ],
+    "correct_answer": "Atomization energy",
+    "explanation": "Atomization energy (enthalpy of atomization) is the energy required to produce one mole of gaseous atoms from the solid element in its standard state. Used in Born-Haber cycles.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the technique used to determine crystal structures by X-ray diffraction patterns?",
+    "options": [
+      "Mass spectrometry",
+      "X-ray crystallography",
+      "IR spectroscopy",
+      "NMR spectroscopy"
+    ],
+    "correct_answer": "X-ray crystallography",
+    "explanation": "X-ray crystallography directs X-rays at a crystal and measures diffraction patterns. Fourier transformation of the intensities yields the electron density map and atomic positions.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for the phenomenon where electrons tunnel through a barrier in chemical reactions?",
+    "options": [
+      "Photoelectric effect",
+      "Compton scattering",
+      "Quantum tunneling",
+      "Resonance"
+    ],
+    "correct_answer": "Quantum tunneling",
+    "explanation": "Quantum tunneling allows particles (especially protons and electrons) to pass through classically forbidden energy barriers, important in enzymatic proton transfer and molecular electronics.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the organic reaction forming an imine from an amine and a ketone/aldehyde?",
+    "options": [
+      "Aldol condensation",
+      "Mannich reaction",
+      "Michael addition",
+      "Schiff base formation"
+    ],
+    "correct_answer": "Schiff base formation",
+    "explanation": "Schiff base (imine) formation is the condensation of a primary amine with a ketone or aldehyde under acid catalysis with loss of water: R2C=O + H2N-R' → R2C=N-R' + H2O.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the model describing the ion atmosphere around a charged species in solution?",
+    "options": [
+      "Debye-Hückel model",
+      "Ostwald model",
+      "Van't Hoff model",
+      "Arrhenius model"
+    ],
+    "correct_answer": "Debye-Hückel model",
+    "explanation": "The Debye-Hückel model describes the ion atmosphere of oppositely charged ions surrounding each ion in solution, predicting activity coefficients in dilute electrolyte solutions.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the change in apparent pKa of an acid due to nearby charges in a protein?",
+    "options": [
+      "Inductive effect",
+      "Electrostatic pKa perturbation",
+      "Debye-Hückel effect",
+      "Resonance effect"
+    ],
+    "correct_answer": "Electrostatic pKa perturbation",
+    "explanation": "In proteins, nearby charged residues electrostatically shift the pKa values of ionizable groups from their intrinsic values, critical for enzyme active site function and protein stability.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for the loss of optical activity due to equal amounts of R and S enantiomers?",
+    "options": [
+      "Geometric isomerism",
+      "Diastereomerism",
+      "Racemization",
+      "Conformational isomerism"
+    ],
+    "correct_answer": "Racemization",
+    "explanation": "Racemization is the conversion of a chiral compound to an equal mixture (racemate) of R and S enantiomers, resulting in zero net optical rotation.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for a non-bonding orbital that contains one electron and has high reactivity?",
+    "options": [
+      "Carbocation",
+      "Carbanion",
+      "Carbene",
+      "Carbon radical"
+    ],
+    "correct_answer": "Carbon radical",
+    "explanation": "A carbon radical has an unpaired electron in a non-bonding orbital (sp3 with SOMO). Carbon radicals are planar-like but pyramidal, and highly reactive in chain reactions.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the quantum mechanical concept explaining why orbitals with the same n but different l have different energies in multi-electron atoms?",
+    "options": [
+      "Electron shielding and penetration",
+      "Pauli exclusion",
+      "Hund's rule",
+      "Heisenberg uncertainty"
+    ],
+    "correct_answer": "Electron shielding and penetration",
+    "explanation": "In multi-electron atoms, electrons in orbitals that penetrate closer to the nucleus (s > p > d > f) experience greater effective nuclear charge and are lower in energy than shielded outer orbitals.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the reaction where an acyl group migrates from oxygen to nitrogen?",
+    "options": [
+      "Curtius rearrangement",
+      "O- to N-acyl migration",
+      "Beckmann rearrangement",
+      "Fischer esterification"
+    ],
+    "correct_answer": "O- to N-acyl migration",
+    "explanation": "O- to N-acyl migration occurs when an N-hydroxyl compound rearranges with the acyl group migrating from the oxygen to the nitrogen atom, relevant in prodrug design.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for the intermolecular force between a permanent dipole and an induced dipole?",
+    "options": [
+      "London dispersion",
+      "Keesom interaction",
+      "Debye interaction",
+      "Hydrogen bond"
+    ],
+    "correct_answer": "Debye interaction",
+    "explanation": "Debye (induction) forces arise between a permanent dipole and the dipole it induces in a neighboring molecule. Stronger than London forces but weaker than permanent dipole-dipole (Keesom) interactions.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the spectroscopic technique using synchrotron radiation to probe surface chemistry?",
+    "options": [
+      "NMR spectroscopy",
+      "Raman spectroscopy",
+      "IR spectroscopy",
+      "X-ray photoelectron spectroscopy (XPS)"
+    ],
+    "correct_answer": "X-ray photoelectron spectroscopy (XPS)",
+    "explanation": "XPS (ESCA) uses X-rays to eject core electrons from surface atoms, measuring their binding energies to determine elemental composition and oxidation states of surface species.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for the reaction where an α-amino acid loses CO2 to form an amine?",
+    "options": [
+      "Decarboxylation",
+      "Oxidative deamination",
+      "Amide hydrolysis",
+      "Transamination"
+    ],
+    "correct_answer": "Decarboxylation",
+    "explanation": "Amino acid decarboxylation removes the carboxyl group as CO2, producing a primary amine (biogenic amine). Pyridoxal phosphate (B6) is often the cofactor.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the quantum mechanical phenomenon where electron density is shared between multiple bonds?",
+    "options": [
+      "Hyperconjugation",
+      "Delocalization (resonance)",
+      "Inductive effect",
+      "Orbital hybridization"
+    ],
+    "correct_answer": "Delocalization (resonance)",
+    "explanation": "Electron delocalization (resonance) distributes π electrons over multiple bonds/atoms in conjugated systems, lowering energy and increasing stability compared to localized structures.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for a reaction that forms a new C-C bond between an enolate and an electrophilic carbon?",
+    "options": [
+      "Wittig reaction",
+      "Grignard addition",
+      "Carbon-carbon bond forming reaction via enolate alkylation",
+      "Esterification"
+    ],
+    "correct_answer": "Carbon-carbon bond forming reaction via enolate alkylation",
+    "explanation": "Enolate alkylation forms new C-C bonds by nucleophilic attack of an enolate anion on an electrophilic alkyl halide or carbonyl compound, fundamental to synthesis.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the phenomenon explaining the larger-than-expected radius of Au compared to Pt?",
+    "options": [
+      "Lanthanide contraction",
+      "Actinide contraction",
+      "Quantum tunneling effect",
+      "Relativistic effects on atomic orbitals"
+    ],
+    "correct_answer": "Relativistic effects on atomic orbitals",
+    "explanation": "Relativistic effects cause contraction and stabilization of s and p orbitals in heavy elements (Au, Hg, Pb), and expansion of d and f orbitals, explaining gold's color, HgCl2's properties, and Pb's stability.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the molecular orbital description of the bond order in O2?",
+    "options": [
+      "Bond order 2 (double bond)",
+      "Bond order 1.5 (1.5 bond)",
+      "Bond order 3 (triple bond)",
+      "Bond order 1 (single bond)"
+    ],
+    "correct_answer": "Bond order 2 (double bond)",
+    "explanation": "O2 MO configuration: σ1s² σ*1s² σ2s² σ*2s² σ2p² π2p⁴ π*2p². Bond order = (8-4)/2 = 2. The two unpaired π* electrons explain O2's paramagnetism.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for the colligative property responsible for swelling of plant cells?",
+    "options": [
+      "Boiling point elevation",
+      "Osmotic pressure",
+      "Vapor pressure lowering",
+      "Freezing point depression"
+    ],
+    "correct_answer": "Osmotic pressure",
+    "explanation": "Osmotic pressure drives water into plant cells (higher solute inside) via osmosis through the semipermeable membrane, creating turgor pressure that gives plants rigidity.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the reaction mechanism where a leaving group departs after nucleophilic attack in a single step?",
+    "options": [
+      "SN1",
+      "E1",
+      "SN2",
+      "E2"
+    ],
+    "correct_answer": "SN2",
+    "explanation": "SN2 is a concerted one-step mechanism: the nucleophile attacks the backside of the electrophilic carbon simultaneously as the leaving group departs, inverting stereochemistry (Walden inversion).",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for an organic compound containing a C≡N group?",
+    "options": [
+      "Imine",
+      "Amide",
+      "Amine",
+      "Nitrile"
+    ],
+    "correct_answer": "Nitrile",
+    "explanation": "Nitriles (R-C≡N) contain a carbon-nitrogen triple bond. They are synthesized from alkyl halides + NaCN, and can be reduced to amines or hydrolyzed to carboxylic acids.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the rearrangement that converts a primary amide to a primary amine with one fewer carbon?",
+    "options": [
+      "Hofmann rearrangement",
+      "Schmidt rearrangement",
+      "Beckmann rearrangement",
+      "Curtius rearrangement"
+    ],
+    "correct_answer": "Hofmann rearrangement",
+    "explanation": "The Hofmann rearrangement converts a primary amide to a primary amine with one fewer carbon using Br2/NaOH. It proceeds through a nitrene intermediate that undergoes 1,2-shift.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for the energy required to completely remove one mole of electrons from one mole of gaseous atoms?",
+    "options": [
+      "Electron affinity",
+      "First ionization energy",
+      "Electronegativity",
+      "Lattice energy"
+    ],
+    "correct_answer": "First ionization energy",
+    "explanation": "First ionization energy is the energy to remove the most loosely held electron from one mole of neutral gaseous atoms, creating M+ ions. It increases across periods and up groups.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the name for the thermodynamic quantity defined as U + PV?",
+    "options": [
+      "Gibbs energy",
+      "Entropy",
+      "Enthalpy",
+      "Helmholtz energy"
+    ],
+    "correct_answer": "Enthalpy",
+    "explanation": "Enthalpy H = U + PV, where U is internal energy, P is pressure, and V is volume. At constant pressure, ΔH = heat flow (qp), making it the most useful thermodynamic quantity for chemistry.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "chemistry"
+  }
+]

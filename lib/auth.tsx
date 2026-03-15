@@ -176,8 +176,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     console.log("[Auth] Setting up onAuthStateChange listener");
 
+    // Safety net: if onAuthStateChange never fires (Supabase unreachable),
+    // fall back to getSession() after 3s so the app doesn't stay stuck loading
+    let resolved = false;
+    const safetyTimer = setTimeout(async () => {
+      if (resolved) return;
+      console.warn("[Auth] onAuthStateChange did not fire within 3s — falling back to getSession()");
+      try {
+        const { data: { session: sess } } = await supabase.auth.getSession();
+        if (resolved) return; // listener fired while we were awaiting
+        if (sess?.user) {
+          const basicUser = buildBasicUser(sess.user.id, sess.user.email ?? "", sess.user.user_metadata ?? {});
+          setUser(basicUser);
+          setSession(sess);
+        } else {
+          setUser(null);
+          setSession(null);
+        }
+      } catch (err) {
+        console.error("[Auth] getSession fallback failed:", err);
+        setUser(null);
+        setSession(null);
+      }
+      setIsLoading(false);
+    }, 3000);
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, sess) => {
+        resolved = true;
+        clearTimeout(safetyTimer);
         console.log("[Auth] onAuthStateChange event:", event, "user:", sess?.user?.id ?? "none");
 
         setSession(sess);
@@ -227,6 +254,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     );
 
     return () => {
+      clearTimeout(safetyTimer);
       console.log("[Auth] Cleaning up subscription");
       subscription.unsubscribe();
     };

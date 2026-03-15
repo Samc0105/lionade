@@ -1,0 +1,2662 @@
+[
+  {
+    "question": "What is the Wilson cycle?",
+    "options": [
+      "The cycle of ocean basin opening and closing driven by plate tectonics",
+      "The water cycle in polar regions",
+      "The cycle of magma generation and cooling",
+      "The carbon cycle in marine environments"
+    ],
+    "correct_answer": "The cycle of ocean basin opening and closing driven by plate tectonics",
+    "explanation": "The Wilson cycle describes the opening and closing of ocean basins over hundreds of millions of years. Continents rift apart, an ocean forms and widens, then subduction closes it and continents collide. The Atlantic is currently in the opening phase.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What causes the different colors in a rainbow?",
+    "options": [
+      "Reflection off clouds",
+      "Dispersion of white light by water droplets separating wavelengths",
+      "Diffraction by ice crystals",
+      "Scattering by dust particles"
+    ],
+    "correct_answer": "Dispersion of white light by water droplets separating wavelengths",
+    "explanation": "Rainbows form when sunlight enters water droplets, reflects off the inside surface, and exits at slightly different angles for each wavelength (color). Red bends least (~42°), violet bends most (~40°).",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the silica tetrahedron in mineralogy?",
+    "options": [
+      "A type of volcanic rock",
+      "A four-sided crystal form",
+      "The fundamental building block of silicate minerals (SiO₄⁴⁻)",
+      "A measure of silicon content"
+    ],
+    "correct_answer": "The fundamental building block of silicate minerals (SiO₄⁴⁻)",
+    "explanation": "The silica tetrahedron (SiO₄⁴⁻) consists of one silicon atom surrounded by four oxygen atoms. It is the basic structural unit of all silicate minerals, which make up about 90% of Earth's crust.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the relationship between earthquake magnitude and energy release?",
+    "options": [
+      "Energy is linearly related to magnitude",
+      "Each unit doubles the energy",
+      "Each unit triples the energy",
+      "Each unit increase on the moment magnitude scale releases about 31.6 times more energy"
+    ],
+    "correct_answer": "Each unit increase on the moment magnitude scale releases about 31.6 times more energy",
+    "explanation": "On the moment magnitude scale, each whole number increase represents about 31.6 times more energy released. So a magnitude 7 earthquake releases about 31.6 times more energy than a magnitude 6.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the difference between a stalactite and a stalagmite?",
+    "options": [
+      "Stalactites hang from the ceiling; stalagmites grow from the floor",
+      "Stalactites are on the floor; stalagmites hang from the ceiling",
+      "They are the same thing with different names",
+      "Stalactites are made of aragonite; stalagmites of calcite"
+    ],
+    "correct_answer": "Stalactites hang from the ceiling; stalagmites grow from the floor",
+    "explanation": "Stalactites hang from cave ceilings (remember: 'tites hang tight to the top') and stalagmites rise from floors. Both form from calcium carbonate deposited by dripping water in limestone caves.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the Coriolis effect?",
+    "options": [
+      "The bending of light through the atmosphere",
+      "The deflection of moving air and water due to Earth's rotation",
+      "The curvature of tectonic plates",
+      "The effect of gravity on tidal patterns"
+    ],
+    "correct_answer": "The deflection of moving air and water due to Earth's rotation",
+    "explanation": "The Coriolis effect deflects moving objects to the right in the Northern Hemisphere and left in the Southern Hemisphere, due to Earth's rotation. It drives cyclone rotation and ocean gyre circulation.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the difference between P-waves and S-waves in seismology?",
+    "options": [
+      "P-waves are transverse; S-waves are longitudinal",
+      "P-waves travel only through liquids; S-waves travel only through solids",
+      "P-waves are compressional (travel through solids and liquids); S-waves are shear (travel only through solids)",
+      "S-waves are faster than P-waves"
+    ],
+    "correct_answer": "P-waves are compressional (travel through solids and liquids); S-waves are shear (travel only through solids)",
+    "explanation": "Primary (P) waves are compression waves that travel through both solids and liquids. Secondary (S) waves are shear waves that only travel through solids. The fact that S-waves don't travel through Earth's outer core proved it is liquid.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the formula for calculating stream discharge?",
+    "options": [
+      "Q = velocity/area",
+      "Q = length × width",
+      "Q = volume/depth",
+      "Q = A × v (cross-sectional area × velocity)"
+    ],
+    "correct_answer": "Q = A × v (cross-sectional area × velocity)",
+    "explanation": "Stream discharge Q = A × v, where A is cross-sectional area (m²) and v is mean velocity (m/s), giving Q in m³/s (cumecs). Discharge increases downstream as tributaries add water.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the greenhouse effect?",
+    "options": [
+      "The trapping of heat by atmospheric gases that absorb and re-emit infrared radiation",
+      "The warming of greenhouses by glass",
+      "The heating of Earth's surface by the Sun",
+      "The effect of cloud cover on temperature"
+    ],
+    "correct_answer": "The trapping of heat by atmospheric gases that absorb and re-emit infrared radiation",
+    "explanation": "The greenhouse effect occurs when greenhouse gases (CO₂, H₂O, CH₄, N₂O) absorb outgoing infrared radiation and re-emit it in all directions, trapping heat in the atmosphere. Without it, Earth would average -18°C instead of 15°C.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the significance of the Gutenberg discontinuity?",
+    "options": [
+      "The crust-mantle boundary",
+      "The boundary between the outer core and mantle where S-waves disappear",
+      "The boundary between inner and outer core",
+      "The boundary between lithosphere and asthenosphere"
+    ],
+    "correct_answer": "The boundary between the outer core and mantle where S-waves disappear",
+    "explanation": "The Gutenberg discontinuity at ~2,900 km depth marks the boundary between the mantle and outer core. S-waves cannot pass through it (outer core is liquid), creating a 'shadow zone' that helped discover the outer core.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is Bowen's reaction series?",
+    "options": [
+      "The sequence of metamorphic grade",
+      "The order of rock hardness",
+      "The sequence in which minerals crystallize from cooling magma",
+      "The order of sediment particle sizes"
+    ],
+    "correct_answer": "The sequence in which minerals crystallize from cooling magma",
+    "explanation": "Bowen's reaction series describes the order in which minerals crystallize from magma as it cools. First olivine and calcium-rich feldspar form at high temperatures; last quartz and potassium feldspar form at low temperatures.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the principle of uniformitarianism in geology?",
+    "options": [
+      "Catastrophic events alone shape Earth's surface",
+      "All rocks were formed simultaneously",
+      "Earth has always looked the same",
+      "The present is the key to the past — geological processes operating today also operated in the past"
+    ],
+    "correct_answer": "The present is the key to the past — geological processes operating today also operated in the past",
+    "explanation": "Uniformitarianism, proposed by James Hutton and developed by Charles Lyell, states that the same physical and chemical laws governing geological processes today operated throughout Earth's history at similar rates.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the difference between continental and oceanic crust?",
+    "options": [
+      "Continental crust is thicker (~35 km), less dense (2.7 g/cm³), and older; oceanic crust is thinner (~7 km), denser (3.0 g/cm³), and younger",
+      "Continental crust is denser than oceanic crust",
+      "Oceanic crust is thicker and older",
+      "Continental crust is made of basalt; oceanic crust of granite"
+    ],
+    "correct_answer": "Continental crust is thicker (~35 km), less dense (2.7 g/cm³), and older; oceanic crust is thinner (~7 km), denser (3.0 g/cm³), and younger",
+    "explanation": "Continental crust averages ~35 km thick, has a density of ~2.7 g/cm³ (granitic), and can be up to 4 billion years old. Oceanic crust averages ~7 km thick, density ~3.0 g/cm³ (basaltic), and is no older than ~200 million years.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the El Niño phenomenon?",
+    "options": [
+      "A permanent warm ocean current off Peru",
+      "Periodic warming of the central and eastern Pacific Ocean disrupting global weather patterns",
+      "An annual hurricane season in the Pacific",
+      "A type of monsoon pattern"
+    ],
+    "correct_answer": "Periodic warming of the central and eastern Pacific Ocean disrupting global weather patterns",
+    "explanation": "El Niño (ENSO warm phase) is the periodic warming of the central/eastern Pacific Ocean every 2–7 years, caused by weakening trade winds. It causes droughts in Australia, flooding in South America, and disrupts global weather.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the difference between a rock and a mineral?",
+    "options": [
+      "Rocks are harder than minerals",
+      "A mineral is a rock with crystalline structure",
+      "A rock is a naturally occurring aggregate of one or more minerals; a mineral is a single inorganic substance with definite composition",
+      "Minerals are found underground; rocks are found at the surface"
+    ],
+    "correct_answer": "A rock is a naturally occurring aggregate of one or more minerals; a mineral is a single inorganic substance with definite composition",
+    "explanation": "A mineral is a naturally occurring, inorganic solid with a specific chemical composition and crystal structure. A rock is a naturally occurring aggregate of one or more minerals (or mineraloids). Granite is a rock made of quartz, feldspar, and mica minerals.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What causes the ITCZ (Intertropical Convergence Zone)?",
+    "options": [
+      "Seasonal migration of the polar front",
+      "Convergence of jet streams",
+      "Meeting of cold and warm ocean currents",
+      "Convergence of trade winds near the equator causing rising air and heavy rainfall"
+    ],
+    "correct_answer": "Convergence of trade winds near the equator causing rising air and heavy rainfall",
+    "explanation": "The Intertropical Convergence Zone (ITCZ) is a belt of low pressure near the equator where Northeast and Southeast trade winds converge. Strong solar heating causes air to rise, cool, and produce abundant rainfall. It migrates seasonally.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the isostasy principle?",
+    "options": [
+      "The gravitational equilibrium of Earth's crust floating on the denser mantle",
+      "The equal distribution of minerals in rocks",
+      "The balance between erosion and deposition",
+      "The pressure equilibrium in Earth's layers"
+    ],
+    "correct_answer": "The gravitational equilibrium of Earth's crust floating on the denser mantle",
+    "explanation": "Isostasy describes the gravitational equilibrium where Earth's crust 'floats' on the denser mantle. Mountains have deep roots that extend into the mantle. When mountains erode, the crust rises (isostatic rebound).",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the difference between absolute and relative humidity?",
+    "options": [
+      "Absolute humidity is higher in cold air",
+      "Absolute humidity is the mass of water vapor per unit volume; relative humidity is the percentage of maximum possible water vapor at that temperature",
+      "Relative humidity is measured in grams",
+      "They measure different gases"
+    ],
+    "correct_answer": "Absolute humidity is the mass of water vapor per unit volume; relative humidity is the percentage of maximum possible water vapor at that temperature",
+    "explanation": "Absolute humidity is the actual mass of water vapor in a given volume of air (g/m³). Relative humidity (%) compares the actual water vapor to the maximum possible (saturation point) at that temperature. Cold air can hold less water vapor.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the accretionary wedge (prism)?",
+    "options": [
+      "A wedge-shaped intrusion of magma",
+      "A type of volcano",
+      "The wedge of sediment scraped off subducting oceanic crust and added to the overriding plate",
+      "A sedimentary rock formation"
+    ],
+    "correct_answer": "The wedge of sediment scraped off subducting oceanic crust and added to the overriding plate",
+    "explanation": "An accretionary prism forms at subduction zones where sediments on the subducting plate are scraped off and added to the front of the overriding plate. Japan's outer islands include accretionary prism material.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the albedo of a surface?",
+    "options": [
+      "The scattering of light by clouds",
+      "The absorption of heat by dark surfaces",
+      "The emission of infrared radiation",
+      "The proportion of incoming solar radiation that is reflected"
+    ],
+    "correct_answer": "The proportion of incoming solar radiation that is reflected",
+    "explanation": "Albedo is the fraction of incoming solar radiation reflected by a surface. Fresh snow has albedo ~0.9 (reflects 90%); ocean ~0.06; forest ~0.15. High albedo surfaces stay cooler. Ice-albedo feedback amplifies warming.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the difference between magma and lava viscosity?",
+    "options": [
+      "High-silica magmas (rhyolite/granite) are very viscous; low-silica magmas (basalt) are fluid — viscosity controls eruption style",
+      "All magmas have the same viscosity",
+      "Viscosity only depends on temperature",
+      "Lava is always more viscous than magma"
+    ],
+    "correct_answer": "High-silica magmas (rhyolite/granite) are very viscous; low-silica magmas (basalt) are fluid — viscosity controls eruption style",
+    "explanation": "Silica content largely determines magma viscosity. High-silica magmas form long polymer chains making them sticky and viscous, causing explosive eruptions. Low-silica basaltic magmas flow easily, forming shield volcanoes.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is hydraulic action in river erosion?",
+    "options": [
+      "Chemical dissolution of rock by river water",
+      "The force of water pressure prying apart rocks and forcing air from cracks",
+      "Grinding of bedrock by transported sediment",
+      "Dissolving of soluble rock"
+    ],
+    "correct_answer": "The force of water pressure prying apart rocks and forcing air from cracks",
+    "explanation": "Hydraulic action is the mechanical erosion by water itself — water pressure forces air into cracks, then releases, causing the rock to break. It is especially effective at waterfalls and in rapids.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the jet stream?",
+    "options": [
+      "A type of electrical discharge in the atmosphere",
+      "A current of water in the Pacific Ocean",
+      "A narrow band of fast-moving air in the upper troposphere influencing weather patterns",
+      "A stream of magma in the mantle"
+    ],
+    "correct_answer": "A narrow band of fast-moving air in the upper troposphere influencing weather patterns",
+    "explanation": "Jet streams are narrow bands of fast-moving air (up to 400 km/h) at 8–12 km altitude in the upper troposphere. They influence storm tracks and are used by aircraft for fuel savings. Climate change is causing jet streams to meander more.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the difference between foliation and bedding in rocks?",
+    "options": [
+      "Bedding occurs in metamorphic rocks",
+      "They are the same process",
+      "Foliation is found only in igneous rocks",
+      "Foliation is layering in metamorphic rocks caused by pressure; bedding is original layering in sedimentary rocks"
+    ],
+    "correct_answer": "Foliation is layering in metamorphic rocks caused by pressure; bedding is original layering in sedimentary rocks",
+    "explanation": "Bedding is the original layering in sedimentary rocks formed by deposition. Foliation is layering in metamorphic rocks created by recrystallization under directed pressure. Foliations can cut across original bedding.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the Milankovitch theory?",
+    "options": [
+      "Regular variations in Earth's orbital parameters cause ice ages by changing solar insolation",
+      "Plate tectonics causes ice ages",
+      "Volcanic eruptions cause ice ages",
+      "Solar output variations cause ice ages"
+    ],
+    "correct_answer": "Regular variations in Earth's orbital parameters cause ice ages by changing solar insolation",
+    "explanation": "Milankovitch theory states that ice ages are driven by three orbital cycles: eccentricity (~100,000 years), axial tilt obliquity (~41,000 years), and precession (~26,000 years). These change the distribution of solar insolation.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the difference between a mineral's streak and its color?",
+    "options": [
+      "Streak is the surface color; color is the powder color",
+      "Streak is the color of a mineral's powder (on unglazed porcelain) and is more reliable than surface color for identification",
+      "They are the same property",
+      "Streak only applies to metallic minerals"
+    ],
+    "correct_answer": "Streak is the color of a mineral's powder (on unglazed porcelain) and is more reliable than surface color for identification",
+    "explanation": "Streak is the color of a mineral when powdered, tested on a streak plate. It is more reliable than surface color because impurities color the surface but not the powder. Pyrite has a gold surface but black streak; hematite has red-brown streak.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the oceanic thermohaline circulation often called?",
+    "options": [
+      "Upwelling",
+      "The Gulf Stream",
+      "The global ocean conveyor belt",
+      "Ekman transport"
+    ],
+    "correct_answer": "The global ocean conveyor belt",
+    "explanation": "Thermohaline circulation is informally called the 'global ocean conveyor belt' because it circulates water through all ocean basins over ~1,000 years. Cold, salty, dense water sinks in the North Atlantic and flows toward the Pacific, while warmer surface water returns.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the difference between a rock's texture and its composition?",
+    "options": [
+      "Composition describes texture in igneous rocks",
+      "They mean the same thing",
+      "Texture only applies to metamorphic rocks",
+      "Texture describes crystal size, shape, and arrangement; composition describes the minerals present"
+    ],
+    "correct_answer": "Texture describes crystal size, shape, and arrangement; composition describes the minerals present",
+    "explanation": "Igneous rock texture (coarse, fine, glassy, porphyritic) reflects cooling rate. Composition (felsic, mafic) reflects the magma source. Both texture and composition help classify rocks.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is a pyroclastic flow?",
+    "options": [
+      "A fast-moving avalanche of hot gas, ash, and volcanic fragments that travels close to the ground",
+      "Slow-moving lava flow",
+      "Falling ash from an eruption column",
+      "A volcanic mudflow"
+    ],
+    "correct_answer": "A fast-moving avalanche of hot gas, ash, and volcanic fragments that travels close to the ground",
+    "explanation": "Pyroclastic flows are dense, fast-moving (up to 700 km/h) currents of hot gas and volcanic material. They are the most deadly volcanic hazard. The eruption of Vesuvius in 79 CE buried Pompeii in pyroclastic material.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the process of chemical weathering called hydrolysis?",
+    "options": [
+      "The dissolution of rocks by acids",
+      "The reaction of minerals with water, breaking them down into new clay minerals",
+      "The oxidation of iron minerals",
+      "The absorption of water into minerals"
+    ],
+    "correct_answer": "The reaction of minerals with water, breaking them down into new clay minerals",
+    "explanation": "Hydrolysis is the reaction between water and silicate minerals (especially feldspar), producing clay minerals. For example, feldspar + water → kaolinite clay. It is the dominant chemical weathering process in humid climates.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What are the Milankovitch cycles?",
+    "options": [
+      "Periodic reversals of Earth's magnetic field",
+      "The Wilson cycle of ocean opening and closing",
+      "Three periodic changes in Earth's orbital characteristics: eccentricity, axial tilt, and precession",
+      "Seasonal changes in ocean temperature"
+    ],
+    "correct_answer": "Three periodic changes in Earth's orbital characteristics: eccentricity, axial tilt, and precession",
+    "explanation": "The three Milankovitch cycles are: eccentricity (orbital shape, ~100,000 yr), obliquity (axial tilt 22.1–24.5°, ~41,000 yr), and precession (wobble, ~26,000 yr). Together they control long-term climate cycles including ice ages.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the difference between divergent, convergent, and transform plate boundaries in terms of geological features?",
+    "options": [
+      "Divergent boundaries create subduction zones",
+      "All three produce the same features",
+      "Transform boundaries create mountains",
+      "Divergent: rift valleys/mid-ocean ridges; Convergent: mountains/trenches/volcanoes; Transform: strike-slip faults/no new crust"
+    ],
+    "correct_answer": "Divergent: rift valleys/mid-ocean ridges; Convergent: mountains/trenches/volcanoes; Transform: strike-slip faults/no new crust",
+    "explanation": "Divergent boundaries create rift valleys (East African Rift) and mid-ocean ridges (Mid-Atlantic Ridge). Convergent boundaries create mountains (Himalayas), ocean trenches (Mariana), and volcanic arcs. Transform faults (San Andreas) create strike-slip fault zones.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the Kelvin temperature scale used for in Earth science?",
+    "options": [
+      "Measuring absolute temperature for calculations involving gas laws and climate models",
+      "Measuring ocean temperature only",
+      "Measuring volcanic temperatures only",
+      "Measuring temperatures in Celsius but shifted"
+    ],
+    "correct_answer": "Measuring absolute temperature for calculations involving gas laws and climate models",
+    "explanation": "The Kelvin scale starts at absolute zero (-273.15°C). It is used in gas law calculations (PV = nRT), climate models, and radiation equations. K = °C + 273.15. The atmosphere, oceans, and climate models use Kelvin for calculations.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the difference between chemical and mechanical weathering?",
+    "options": [
+      "Mechanical weathering only occurs in water",
+      "Chemical weathering changes the mineral composition; mechanical weathering breaks rock without changing composition",
+      "Chemical weathering is faster than mechanical",
+      "They are the same process"
+    ],
+    "correct_answer": "Chemical weathering changes the mineral composition; mechanical weathering breaks rock without changing composition",
+    "explanation": "Mechanical (physical) weathering breaks rocks into smaller pieces without changing their chemistry (frost wedging, exfoliation). Chemical weathering changes rock composition through reactions with water, acids, or oxygen (hydrolysis, oxidation, carbonation).",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the Hadley cell in atmospheric circulation?",
+    "options": [
+      "A type of ocean circulation",
+      "A weather system in polar regions",
+      "A large convection cell between the equator and ~30° latitude where air rises at the equator and sinks in the subtropics",
+      "The circulation around hurricanes"
+    ],
+    "correct_answer": "A large convection cell between the equator and ~30° latitude where air rises at the equator and sinks in the subtropics",
+    "explanation": "The Hadley cell is the tropical atmospheric circulation cell: warm, moist air rises at the ITCZ near the equator, moves poleward, cools and dries, then sinks at ~30° latitude creating subtropical deserts (Sahara, Arabian, Australian).",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for sedimentary rocks formed from biological material?",
+    "options": [
+      "Clastic rocks",
+      "Evaporites",
+      "Chemical sedimentary rocks",
+      "Biogenic (biological) sedimentary rocks"
+    ],
+    "correct_answer": "Biogenic (biological) sedimentary rocks",
+    "explanation": "Biogenic sedimentary rocks form from organic material. Examples: limestone (shells/coral), coal (plant material), chalk (microscopic algae/foraminifera). They preserve fossils and are important records of past life.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the zone in the ocean where photosynthesis can occur?",
+    "options": [
+      "Photic (euphotic) zone",
+      "Benthic zone",
+      "Aphotic zone",
+      "Abyssal zone"
+    ],
+    "correct_answer": "Photic (euphotic) zone",
+    "explanation": "The photic (euphotic) zone extends from the surface to about 200 m depth, where sufficient sunlight penetrates for photosynthesis. About 90% of marine life lives in this zone. Below this is the aphotic zone.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is mass balance in glacier science?",
+    "options": [
+      "The weight of a glacier",
+      "The difference between accumulation (snowfall) and ablation (melting/sublimation) — positive = glacier grows, negative = shrinks",
+      "The balance between erosion and deposition",
+      "The ratio of ice to rock in a glacier"
+    ],
+    "correct_answer": "The difference between accumulation (snowfall) and ablation (melting/sublimation) — positive = glacier grows, negative = shrinks",
+    "explanation": "Glacier mass balance = accumulation (snowfall, avalanches) minus ablation (melting, sublimation, calving). A positive mass balance means the glacier is growing; negative means shrinking. Most glaciers currently have negative mass balance.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the cause of the auroras (Northern and Southern Lights)?",
+    "options": [
+      "Volcanic gas emissions",
+      "Reflection of city lights off ice",
+      "Solar wind particles colliding with atmospheric gases at high altitude near the poles, causing them to glow",
+      "Refraction of sunlight through ice crystals"
+    ],
+    "correct_answer": "Solar wind particles colliding with atmospheric gases at high altitude near the poles, causing them to glow",
+    "explanation": "Auroras form when charged particles from the Sun (solar wind) are channeled by Earth's magnetic field toward the poles. They collide with atmospheric gases in the thermosphere (~100 km altitude), exciting them to emit coloured light.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the difference between a hurricane, typhoon, and cyclone?",
+    "options": [
+      "They form over different types of water",
+      "They have different wind speeds",
+      "Typhoons are weaker than hurricanes",
+      "They are the same meteorological phenomenon (tropical cyclone) but named differently by region"
+    ],
+    "correct_answer": "They are the same meteorological phenomenon (tropical cyclone) but named differently by region",
+    "explanation": "Tropical cyclones are called hurricanes (Atlantic/E Pacific), typhoons (W Pacific), and cyclones (Indian Ocean/S Pacific). All are the same phenomenon: rotating tropical storms with sustained winds >119 km/h.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the difference between intrusive and extrusive igneous rocks?",
+    "options": [
+      "Intrusive (plutonic) rocks cool slowly underground forming large crystals; extrusive (volcanic) rocks cool rapidly at the surface forming small or no crystals",
+      "Extrusive rocks are always darker",
+      "Intrusive rocks always contain quartz",
+      "They form at the same rate but in different locations"
+    ],
+    "correct_answer": "Intrusive (plutonic) rocks cool slowly underground forming large crystals; extrusive (volcanic) rocks cool rapidly at the surface forming small or no crystals",
+    "explanation": "Intrusive igneous rocks (e.g., granite) solidify slowly deep underground, allowing large crystals to form. Extrusive rocks (e.g., basalt, obsidian) solidify rapidly at the surface, forming fine-grained or glassy textures.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the principle of cross-cutting relationships in geology?",
+    "options": [
+      "The oldest rocks are always at the bottom",
+      "A rock feature that cuts across another rock must be younger than the rock it cuts",
+      "All rocks that cross the equator are related",
+      "Faults always occur along former plate boundaries"
+    ],
+    "correct_answer": "A rock feature that cuts across another rock must be younger than the rock it cuts",
+    "explanation": "The principle of cross-cutting relationships states that any geological feature (fault, intrusion, dike) that cuts through other rock layers must be younger than those layers it cuts. Used in relative age dating.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the boundary between the inner and outer core?",
+    "options": [
+      "Gutenberg discontinuity",
+      "Mohorovičić discontinuity",
+      "Lehmann discontinuity",
+      "Conrad discontinuity"
+    ],
+    "correct_answer": "Lehmann discontinuity",
+    "explanation": "The Lehmann discontinuity at ~5,100 km depth marks the boundary between the liquid outer core and solid inner core. It was discovered by Danish seismologist Inge Lehmann in 1936 using seismic wave analysis.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is solifluction?",
+    "options": [
+      "Erosion by flowing water in cold climates",
+      "Chemical weathering of soils",
+      "The freezing of soil water",
+      "The slow downslope flow of waterlogged soil over frozen ground (permafrost)"
+    ],
+    "correct_answer": "The slow downslope flow of waterlogged soil over frozen ground (permafrost)",
+    "explanation": "Solifluction is the slow (cm/year) downslope movement of saturated soil over permafrost. In summer, the active layer thaws while permafrost prevents drainage, making soil flow. It creates distinctive lobe-shaped features on slopes.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the difference between an anticline and a syncline?",
+    "options": [
+      "An anticline is an arch-shaped fold with the oldest rocks in the core; a syncline is a trough-shaped fold with the youngest rocks in the core",
+      "They are the same type of fold",
+      "Synclines always contain oil",
+      "Anticlines are found in valleys; synclines in mountains"
+    ],
+    "correct_answer": "An anticline is an arch-shaped fold with the oldest rocks in the core; a syncline is a trough-shaped fold with the youngest rocks in the core",
+    "explanation": "Anticlines are upward-arching folds where the oldest rocks are in the core (middle). Synclines are downward-curving folds with youngest rocks in the core. Anticlines are important oil traps.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the type of metamorphism that affects a wide region?",
+    "options": [
+      "Contact metamorphism",
+      "Regional (burial) metamorphism",
+      "Dynamic metamorphism",
+      "Hydrothermal metamorphism"
+    ],
+    "correct_answer": "Regional (burial) metamorphism",
+    "explanation": "Regional metamorphism affects large areas (thousands of km²) due to deep burial and tectonic heat/pressure associated with mountain building. It produces schist, gneiss, and slate over millions of years.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the difference between weather and climate?",
+    "options": [
+      "Climate is more variable than weather",
+      "Weather includes all precipitation; climate only includes temperature",
+      "Weather is short-term atmospheric conditions; climate is the long-term average (30+ years) of weather patterns",
+      "They are the same but measured at different scales"
+    ],
+    "correct_answer": "Weather is short-term atmospheric conditions; climate is the long-term average (30+ years) of weather patterns",
+    "explanation": "Weather describes short-term atmospheric conditions (daily temperature, rainfall). Climate is the statistical average of weather over at least 30 years for a region. 'Climate is what you expect; weather is what you get.'",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the difference between an artesian well and a regular well?",
+    "options": [
+      "Artesian wells only occur in deserts",
+      "Artesian wells are deeper",
+      "Regular wells always produce more water",
+      "In an artesian well, water rises under its own pressure without pumping because it is confined between impermeable layers"
+    ],
+    "correct_answer": "In an artesian well, water rises under its own pressure without pumping because it is confined between impermeable layers",
+    "explanation": "Artesian wells penetrate confined aquifers where water is under pressure between impermeable layers. If the pressure is high enough, water flows to the surface unaided. The Great Artesian Basin in Australia is the world's largest artesian system.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the lapse rate in meteorology?",
+    "options": [
+      "The rate at which temperature decreases with increasing altitude in the atmosphere",
+      "The rate of pressure decrease with altitude",
+      "The rate of humidity change with height",
+      "The decrease in wind speed with altitude"
+    ],
+    "correct_answer": "The rate at which temperature decreases with increasing altitude in the atmosphere",
+    "explanation": "The environmental lapse rate is the rate of temperature decrease with altitude (~6.5°C/km on average). The dry adiabatic lapse rate is 9.8°C/km; moist adiabatic is ~6°C/km. Temperature inversions (warming with altitude) can trap pollution.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the chemical weathering process where minerals absorb water molecules?",
+    "options": [
+      "Hydrolysis",
+      "Hydration",
+      "Oxidation",
+      "Carbonation"
+    ],
+    "correct_answer": "Hydration",
+    "explanation": "Hydration is when minerals chemically absorb water molecules, increasing their volume and changing their structure. Anhydrite (CaSO₄) + water → gypsum (CaSO₄·2H₂O). Hydration weakens rocks and can cause swelling.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the rock cycle?",
+    "options": [
+      "The process by which ocean water circulates",
+      "The seasonal pattern of rock erosion",
+      "The continuous transformation of rocks from one type to another through geological processes",
+      "The cycle of mineral formation in the mantle"
+    ],
+    "correct_answer": "The continuous transformation of rocks from one type to another through geological processes",
+    "explanation": "The rock cycle describes how igneous, sedimentary, and metamorphic rocks continuously transform into each other through processes like melting, cooling, weathering, erosion, burial, and heat/pressure over geological time.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the phenomenon where warm ocean water flows along the eastern US coast?",
+    "options": [
+      "California Current",
+      "Labrador Current",
+      "Canary Current",
+      "The Gulf Stream"
+    ],
+    "correct_answer": "The Gulf Stream",
+    "explanation": "The Gulf Stream is a powerful, warm ocean current that flows from the Gulf of Mexico along the US East Coast and across the North Atlantic. It moderates European climate, making it much warmer than similar latitudes elsewhere.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the term for the slow downward movement of rock layers relative to others along a thrust fault?",
+    "options": [
+      "Reverse fault movement",
+      "Normal fault displacement",
+      "Fold and thrust belt",
+      "Strike-slip movement"
+    ],
+    "correct_answer": "Reverse fault movement",
+    "explanation": "A reverse fault occurs when the hanging wall moves up relative to the foot wall due to compressional stress. Thrust faults are low-angle reverse faults and are common in mountain belts formed by plate convergence.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the process in which water dissolves and removes material underground, forming sinkholes?",
+    "options": [
+      "Mechanical erosion",
+      "Karst processes (sinkhole formation)",
+      "Frost wedging",
+      "Mass wasting"
+    ],
+    "correct_answer": "Karst processes (sinkhole formation)",
+    "explanation": "Karst processes occur when slightly acidic groundwater dissolves soluble rock (mainly limestone). Over time, underground caves form and can collapse, creating sinkholes. Florida, karst Croatia, and China's stone forests are examples.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the difference between tropical and extratropical cyclones?",
+    "options": [
+      "They form in different ocean regions only",
+      "Extratropical cyclones are always stronger",
+      "Tropical cyclones form over warm oceans and are symmetric with a warm core; extratropical form over land or cold water and have fronts",
+      "Tropical cyclones only affect coastal regions"
+    ],
+    "correct_answer": "Tropical cyclones form over warm oceans and are symmetric with a warm core; extratropical form over land or cold water and have fronts",
+    "explanation": "Tropical cyclones (hurricanes/typhoons) form over warm tropical oceans, are warm-core and symmetric. Extratropical cyclones form from temperature contrasts between air masses (frontal systems), are cold-core, and are common in the mid-latitudes.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the hydrological cycle?",
+    "options": [
+      "The cycle of glacial advance and retreat",
+      "The cycle of ocean salinity changes",
+      "The cycle of groundwater levels",
+      "The water cycle: continuous movement of water through the environment by evaporation, condensation, precipitation, and runoff"
+    ],
+    "correct_answer": "The water cycle: continuous movement of water through the environment by evaporation, condensation, precipitation, and runoff",
+    "explanation": "The hydrological (water) cycle describes the continuous movement of water through the Earth system: evaporation from oceans/land, condensation into clouds, precipitation, runoff into rivers, and infiltration to groundwater.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the angular distance in the orbit where the Earth is closest to the Sun?",
+    "options": [
+      "Perihelion",
+      "Solstice",
+      "Equinox",
+      "Aphelion"
+    ],
+    "correct_answer": "Perihelion",
+    "explanation": "Perihelion is when Earth is closest to the Sun (~147 million km), occurring around January 3–4. Aphelion is when Earth is farthest (~152 million km), around July 4–5. Contrary to intuition, Northern Hemisphere summer occurs at aphelion.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the process where water moves up through soil by surface tension?",
+    "options": [
+      "Percolation",
+      "Capillary action",
+      "Transpiration",
+      "Infiltration"
+    ],
+    "correct_answer": "Capillary action",
+    "explanation": "Capillary action (capillarity) allows water to move up through small pore spaces in soil against gravity, due to surface tension and adhesion. It is important for plant root uptake and moisture distribution in soils.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the type of volcano found in Iceland — a fissure eruption?",
+    "options": [
+      "Shield volcano",
+      "Cinder cone",
+      "Fissure volcano",
+      "Stratovolcano"
+    ],
+    "correct_answer": "Fissure volcano",
+    "explanation": "Fissure volcanoes erupt from linear cracks (fissures) in Earth's crust rather than a central vent. They produce fluid basaltic lava floods (flood basalts). Iceland sits on the Mid-Atlantic Ridge and experiences frequent fissure eruptions.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the mechanism by which old oceanic crust is recycled into the mantle?",
+    "options": [
+      "Seafloor spreading",
+      "Hot spot volcanism",
+      "Ridge push",
+      "Subduction"
+    ],
+    "correct_answer": "Subduction",
+    "explanation": "Subduction is the process where dense oceanic crust descends into the mantle at convergent boundaries. It is the primary mechanism for recycling old oceanic crust. Subducted plates can sink to the core-mantle boundary.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What does paleoclimatology study?",
+    "options": [
+      "Past climates using proxy records like ice cores, pollen, tree rings, and sediment cores",
+      "Modern weather patterns",
+      "The climate of other planets",
+      "Future climate projections"
+    ],
+    "correct_answer": "Past climates using proxy records like ice cores, pollen, tree rings, and sediment cores",
+    "explanation": "Paleoclimatology reconstructs past climates using proxies. Ice cores preserve air bubbles showing past CO₂ and temperature. Tree rings record drought and wet years. Pollen records past vegetation. Sediment cores record ocean temperature changes.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the difference between a normal fault and a reverse fault?",
+    "options": [
+      "Normal faults occur where crust is being compressed; reverse faults where it is being stretched",
+      "Normal faults occur where crust is being stretched (extensional); reverse faults where it is being compressed",
+      "They are mirror images but occur in the same stress environment",
+      "Normal faults are horizontal; reverse faults are vertical"
+    ],
+    "correct_answer": "Normal faults occur where crust is being stretched (extensional); reverse faults where it is being compressed",
+    "explanation": "Normal faults form under tensional stress — the hanging wall drops relative to the footwall. Reverse (thrust) faults form under compressional stress — the hanging wall rises. Basin and Range (USA) has normal faults; Himalayas have thrust faults.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the difference between porosity and permeability in rocks?",
+    "options": [
+      "Porosity measures how much water can flow; permeability measures pore space",
+      "They measure the same property of rocks",
+      "Porosity is the percentage of pore space; permeability is how easily fluid flows through connected pores",
+      "Permeability is greater in fine-grained rocks"
+    ],
+    "correct_answer": "Porosity is the percentage of pore space; permeability is how easily fluid flows through connected pores",
+    "explanation": "Porosity (%) is the proportion of void space in a rock. Permeability measures how easily fluids flow through connected pores. Clay has high porosity but low permeability (pores are tiny and poorly connected). Gravel has both high porosity and permeability.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the point in Earth's orbit when the sun is directly over the Tropic of Cancer?",
+    "options": [
+      "Winter solstice",
+      "Autumnal equinox",
+      "Spring equinox",
+      "Summer solstice (Northern Hemisphere)"
+    ],
+    "correct_answer": "Summer solstice (Northern Hemisphere)",
+    "explanation": "The Northern Hemisphere summer solstice (~June 21) is when Earth's axial tilt points the North Pole most toward the Sun, with the Sun directly overhead at the Tropic of Cancer (23.5°N). It is the longest day in the Northern Hemisphere.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the type of seafloor sediment made of microscopic organism shells?",
+    "options": [
+      "Pelagic ooze",
+      "Red clay",
+      "Turbidite",
+      "Terrigenous sediment"
+    ],
+    "correct_answer": "Pelagic ooze",
+    "explanation": "Pelagic oozes are deep-sea sediments made from microscopic organism remains (foraminifera, radiolaria, diatoms, coccoliths). Calcareous ooze (carbonate shells) dissolves below the carbonate compensation depth; siliceous ooze accumulates at great depths.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the current produced when waves break at an angle to the shore?",
+    "options": [
+      "Rip current",
+      "Longshore drift",
+      "Tidal current",
+      "Undertow"
+    ],
+    "correct_answer": "Longshore drift",
+    "explanation": "Longshore drift (littoral drift) is the movement of sediment along a coastline caused by waves approaching at an angle. The swash carries sand up at an angle; the backwash returns directly down the slope, causing net transport along the shore.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the type of soil found in boreal forests with an ash-gray leached layer?",
+    "options": [
+      "Latosol",
+      "Chernozem",
+      "Podzol",
+      "Rendzina"
+    ],
+    "correct_answer": "Podzol",
+    "explanation": "Podzols (spodosols) form under coniferous forests in cold, humid climates. Acidic rainwater leaches nutrients and iron/aluminum from the upper (eluvial) layer, creating a characteristic pale/ashy E horizon above an orange B horizon.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the measure of how easily a stream can change its channel?",
+    "options": [
+      "Stream competence",
+      "Hydraulic radius",
+      "Stream power",
+      "Sinuosity"
+    ],
+    "correct_answer": "Sinuosity",
+    "explanation": "Sinuosity is the ratio of the actual channel length to the straight-line distance between two points. A perfectly straight channel has sinuosity = 1.0. Meandering rivers typically have sinuosity > 1.5.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the global pattern of air circulation that includes trade winds?",
+    "options": [
+      "General atmospheric circulation (tri-cellular model)",
+      "Polar vortex",
+      "Jet stream",
+      "Monsoon system"
+    ],
+    "correct_answer": "General atmospheric circulation (tri-cellular model)",
+    "explanation": "The tri-cellular model describes global atmospheric circulation: Hadley cells (0°–30°), Ferrel cells (30°–60°), and Polar cells (60°–90°). Trade winds, westerlies, and polar easterlies result from these circulation cells and the Coriolis effect.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the layer in the ocean where salinity changes most rapidly with depth?",
+    "options": [
+      "Thermocline",
+      "Halocline",
+      "Pycnocline",
+      "Chemocline"
+    ],
+    "correct_answer": "Halocline",
+    "explanation": "The halocline is a layer of water where salinity changes rapidly with depth. It is distinct from the thermocline (temperature change) and pycnocline (density change). Haloclines can inhibit vertical mixing.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the zone of active volcanic and earthquake activity in East Africa?",
+    "options": [
+      "Mid-Atlantic Ridge",
+      "Pacific Ring of Fire",
+      "East African Rift System",
+      "Himalayan Belt"
+    ],
+    "correct_answer": "East African Rift System",
+    "explanation": "The East African Rift System is a divergent plate boundary where Africa is splitting apart. It runs from the Afar Triangle through Ethiopia, Kenya, and Tanzania. Active volcanoes (Kilimanjaro, Nyiragongo) and deep rift lakes (Tanganyika, Malawi) mark the zone.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the type of erosion that occurs when rivers cut down into bedrock?",
+    "options": [
+      "Lateral erosion",
+      "Headward erosion",
+      "Meandering",
+      "Vertical incision (downcutting)"
+    ],
+    "correct_answer": "Vertical incision (downcutting)",
+    "explanation": "Vertical incision (downcutting) is when a river cuts downward into bedrock, creating canyons and gorges. The Colorado River's downcutting created the Grand Canyon over millions of years.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the difference between stalactites and stalagmites?",
+    "options": [
+      "Stalactites hang from cave ceilings; stalagmites rise from cave floors",
+      "Same thing, different names",
+      "Stalactites are on the floor; stalagmites hang",
+      "Both grow from the walls"
+    ],
+    "correct_answer": "Stalactites hang from cave ceilings; stalagmites rise from cave floors",
+    "explanation": "Stalactites form from calcium carbonate deposited by dripping water from cave ceilings. Stalagmites build up from the floor where drips land. When they meet, they form a column. Both form in limestone karst caves.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the fossilized tree resin?",
+    "options": [
+      "Lignite",
+      "Amber",
+      "Anthracite",
+      "Jet"
+    ],
+    "correct_answer": "Amber",
+    "explanation": "Amber is fossilized tree resin, sometimes millions of years old. It can preserve ancient insects, pollen, and plant material in exceptional detail. Baltic amber (40–50 million years old) is one of the most well-known sources.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the difference between evapotranspiration and evaporation?",
+    "options": [
+      "They are identical processes",
+      "Transpiration is faster than evaporation",
+      "Evapotranspiration is the combined loss of water from both evaporation and plant transpiration",
+      "Evapotranspiration only occurs in oceans"
+    ],
+    "correct_answer": "Evapotranspiration is the combined loss of water from both evaporation and plant transpiration",
+    "explanation": "Evapotranspiration (ET) combines evaporation from soil and water surfaces with transpiration from plants. Potential ET is ET assuming unlimited water availability. In some ecosystems, transpiration accounts for over 90% of ET.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the type of sediment transported by glaciers, unsorted and unstratified?",
+    "options": [
+      "Alluvium",
+      "Loess",
+      "Varves",
+      "Till"
+    ],
+    "correct_answer": "Till",
+    "explanation": "Glacial till is unsorted, unstratified sediment deposited directly by glacial ice. Unlike water-sorted sediment, till contains everything from clay to boulders randomly mixed. Drumlins, moraines, and erratics are till-based features.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for a circular feature on a map indicating a dome structure?",
+    "options": [
+      "Closed contours indicating a hill or anticline",
+      "Closed contours forming syncline",
+      "Parallel contours showing a slope",
+      "Wavy contours showing a fold"
+    ],
+    "correct_answer": "Closed contours indicating a hill or anticline",
+    "explanation": "On topographic maps, closed (concentric) contour lines indicate hills. On geological maps, closed contours around older rock indicate an anticline (dome); closed contours around younger rock indicate a syncline (basin).",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for material deposited by a stream beyond the main river channel during flooding?",
+    "options": [
+      "Alluvial fan material",
+      "Floodplain alluvium",
+      "Aeolian deposits",
+      "Delta sediment"
+    ],
+    "correct_answer": "Floodplain alluvium",
+    "explanation": "Floodplain alluvium is sediment deposited by a river when it overflows its banks during floods. Fine silt and clay settle over the floodplain, making it extremely fertile. The Nile, Ganges, and Mississippi floodplains support dense agriculture.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the process by which water under pressure is injected into rocks to extract oil or gas?",
+    "options": [
+      "Conventional drilling",
+      "Deep sea mining",
+      "Hydraulic fracturing (fracking)",
+      "Solution mining"
+    ],
+    "correct_answer": "Hydraulic fracturing (fracking)",
+    "explanation": "Hydraulic fracturing (fracking) injects high-pressure fluid into rock to create fractures, allowing trapped oil or gas to flow out. It has significantly increased US oil and gas production but raises concerns about groundwater contamination and earthquakes.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the geologic era when dinosaurs lived?",
+    "options": [
+      "Paleozoic Era",
+      "Cenozoic Era",
+      "Precambrian Era",
+      "Mesozoic Era"
+    ],
+    "correct_answer": "Mesozoic Era",
+    "explanation": "The Mesozoic Era (252–66 million years ago) is divided into the Triassic, Jurassic, and Cretaceous periods. Dinosaurs dominated the land; flying reptiles ruled the skies; ammonites filled the seas. It ended with the K-Pg mass extinction.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the boundary at about 5 km depth in oceans where carbonate sediments dissolve?",
+    "options": [
+      "Carbonate compensation depth (CCD)",
+      "Lysocline",
+      "Pycnocline",
+      "Thermocline"
+    ],
+    "correct_answer": "Carbonate compensation depth (CCD)",
+    "explanation": "The Carbonate Compensation Depth (CCD) is the ocean depth (~4–5 km) where the rate of carbonate dissolution equals the rate of supply. Below this depth, calcareous shells dissolve before reaching the seafloor, leaving red clay.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for volcanic rocks with a glassy texture due to rapid cooling?",
+    "options": [
+      "Granite",
+      "Obsidian",
+      "Basalt",
+      "Pumice"
+    ],
+    "correct_answer": "Obsidian",
+    "explanation": "Obsidian is volcanic glass formed when silica-rich lava cools so rapidly that crystals cannot form. It has a conchoidal fracture producing extremely sharp edges, used by ancient peoples for cutting tools.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the amount of water vapor that air can hold before becoming saturated?",
+    "options": [
+      "Absolute humidity",
+      "Specific humidity",
+      "Saturation vapor pressure",
+      "Relative humidity"
+    ],
+    "correct_answer": "Saturation vapor pressure",
+    "explanation": "Saturation vapor pressure is the partial pressure of water vapor when air is at 100% relative humidity (saturated). It increases with temperature — warm air can hold much more water vapor than cold air.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the type of metamorphism near a magma intrusion?",
+    "options": [
+      "Regional metamorphism",
+      "Burial metamorphism",
+      "Dynamic metamorphism",
+      "Contact (thermal) metamorphism"
+    ],
+    "correct_answer": "Contact (thermal) metamorphism",
+    "explanation": "Contact metamorphism occurs in the area around a magma intrusion (aureole). The heat from the intrusion bakes surrounding rock. It produces hornfels from shale, marble from limestone, and quartzite from sandstone.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for a line of weakness in rock where no movement has yet occurred?",
+    "options": [
+      "Joint",
+      "Fold",
+      "Shear zone",
+      "Fault"
+    ],
+    "correct_answer": "Joint",
+    "explanation": "A joint is a fracture in rock where movement has not occurred (unlike a fault). Joints form from cooling, pressure release, or tectonic stress. They influence weathering, erosion patterns, and the stability of rock slopes.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the gradual increase of global average temperatures?",
+    "options": [
+      "Greenhouse effect",
+      "Global warming trend",
+      "Orbital forcing",
+      "Solar forcing"
+    ],
+    "correct_answer": "Global warming trend",
+    "explanation": "The global warming trend refers to the documented increase in Earth's average surface temperature (~1.1°C since pre-industrial times). It is primarily caused by increased greenhouse gas concentrations from human activities.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the ancient sea that once separated Eurasia from Africa?",
+    "options": [
+      "Panthalassa",
+      "Iapetus Ocean",
+      "Tethys Sea",
+      "Laurentian Sea"
+    ],
+    "correct_answer": "Tethys Sea",
+    "explanation": "The Tethys Sea was a major ocean that separated the northern supercontinent Laurasia from the southern Gondwana during the Mesozoic. Its closure as Africa and India collided with Eurasia formed the Alps, Zagros, and Himalayan mountain ranges.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the type of drainage pattern that resembles a tree?",
+    "options": [
+      "Radial drainage",
+      "Trellis drainage",
+      "Parallel drainage",
+      "Dendritic drainage"
+    ],
+    "correct_answer": "Dendritic drainage",
+    "explanation": "Dendritic (tree-like) drainage patterns develop on uniform, gently sloping rock where streams branch irregularly. Trellis patterns form on folded rocks with alternating resistant/weak beds. Radial patterns drain volcanic cones.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the zone in Earth between 660 and 2,900 km depth?",
+    "options": [
+      "Lower mantle",
+      "Transition zone",
+      "Upper mantle",
+      "Mesosphere"
+    ],
+    "correct_answer": "Lower mantle",
+    "explanation": "The lower mantle extends from 660 km (base of the transition zone) to 2,900 km (Gutenberg discontinuity). It is solid silicate rock under extreme pressure and temperature. Seismic tomography reveals cold subducted slabs sinking through it.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the process where wind picks up and carries fine particles?",
+    "options": [
+      "Saltation",
+      "Deflation",
+      "Traction",
+      "Abrasion"
+    ],
+    "correct_answer": "Deflation",
+    "explanation": "Deflation is the removal of loose fine particles (clay, silt, sand) by wind, lowering the ground surface. It creates desert pavements and deflation hollows. Dust from the Sahara is transported as far as the Amazon.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the process by which dense seawater sinks and drives ocean circulation?",
+    "options": [
+      "Wind-driven circulation",
+      "Tidal mixing",
+      "Deep water formation (thermohaline driving)",
+      "Upwelling"
+    ],
+    "correct_answer": "Deep water formation (thermohaline driving)",
+    "explanation": "Deep water formation occurs when surface water becomes cold and/or salty enough to sink. North Atlantic Deep Water (NADW) and Antarctic Bottom Water (AABW) are key components of the global thermohaline circulation, driving the ocean conveyor belt.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for a fine-grained, dark metamorphic rock formed from shale?",
+    "options": [
+      "Marble",
+      "Quartzite",
+      "Hornfels",
+      "Slate"
+    ],
+    "correct_answer": "Slate",
+    "explanation": "Slate is a low-grade metamorphic rock formed from shale under low temperature and pressure. It has perfect slaty cleavage (splits into thin sheets), making it useful for roofing tiles and blackboards.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the amount of solar energy received per unit area at the top of the atmosphere?",
+    "options": [
+      "Solar constant (~1,361 W/m²)",
+      "Albedo",
+      "Insolation",
+      "Radiative forcing"
+    ],
+    "correct_answer": "Solar constant (~1,361 W/m²)",
+    "explanation": "The solar constant is the average solar irradiance at the top of Earth's atmosphere: ~1,361 W/m². Due to spherical geometry, the average over Earth's surface is ~340 W/m². It varies slightly with solar activity and orbital position.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for a type of sand dune that migrates slowly with the wind?",
+    "options": [
+      "Star dune",
+      "Barchan dune",
+      "Seif dune",
+      "Longitudinal dune"
+    ],
+    "correct_answer": "Barchan dune",
+    "explanation": "Barchan dunes are crescent-shaped dunes that migrate downwind with the 'horns' pointing in the wind direction. They form in areas with limited sand supply and constant wind direction. They can move several metres per year.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the difference between a volcano's vent and its crater?",
+    "options": [
+      "The crater is underground; the vent is at the surface",
+      "A vent is larger than a crater",
+      "The vent is the opening through which magma rises; the crater is the bowl-shaped depression at the top",
+      "They are the same thing"
+    ],
+    "correct_answer": "The vent is the opening through which magma rises; the crater is the bowl-shaped depression at the top",
+    "explanation": "A volcanic vent is the conduit/opening through which lava, gas, and ash erupt. The crater is the bowl-shaped depression at the summit of a volcano, surrounding the vent. Craters form by explosive eruptions or collapse.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the transfer of heat through the ocean by movement of water?",
+    "options": [
+      "Conduction",
+      "Radiation",
+      "Diffusion",
+      "Ocean heat transport (advection)"
+    ],
+    "correct_answer": "Ocean heat transport (advection)",
+    "explanation": "Ocean heat transport (advection) moves heat through ocean currents. The Gulf Stream/North Atlantic Current transports warm water northward, significantly warming Northern Europe. About 40% of total meridional heat transport is by oceans.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for fossilized footprints, burrows, or trails?",
+    "options": [
+      "Trace fossils (ichnofossils)",
+      "Index fossils",
+      "Body fossils",
+      "Mold fossils"
+    ],
+    "correct_answer": "Trace fossils (ichnofossils)",
+    "explanation": "Trace fossils (ichnofossils) are evidence of biological activity preserved in rock, including footprints, burrows, trails, and feeding marks. They can reveal animal behaviour even when body fossils are absent.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the type of lava flow with a ropy, smooth surface?",
+    "options": [
+      "A'a lava",
+      "Pāhoehoe lava",
+      "Block lava",
+      "Pillow lava"
+    ],
+    "correct_answer": "Pāhoehoe lava",
+    "explanation": "Pāhoehoe (Hawaiian term) is basaltic lava with a smooth, ropy, or billowy surface formed by slow-moving, low-viscosity lava. A'a lava has a rough, clinkery surface from faster-moving, more viscous lava.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for a period when glaciers significantly covered much more of Earth?",
+    "options": [
+      "Hothouse Earth",
+      "Snowball Earth event",
+      "Glacial maximum",
+      "Cryogenic era"
+    ],
+    "correct_answer": "Glacial maximum",
+    "explanation": "A glacial maximum is a period during an ice age when glaciers reached their greatest extent. The Last Glacial Maximum (LGM) was ~20,000 years ago when ice sheets covered much of North America, Europe, and Asia, and sea levels were ~120 m lower.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the difference between a 'hanging valley' and a main valley?",
+    "options": [
+      "They are the same thing",
+      "Main valleys are always U-shaped",
+      "Hanging valleys only form in deserts",
+      "A hanging valley is at a higher elevation than the main valley, formed when a tributary glacier was less powerful"
+    ],
+    "correct_answer": "A hanging valley is at a higher elevation than the main valley, formed when a tributary glacier was less powerful",
+    "explanation": "A hanging valley forms when a smaller tributary glacier erodes less deeply than the main glacier. When ice retreats, the tributary valley is left perched above the main valley, often creating a waterfall (e.g., Yosemite Falls).",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the process where fresh glacial meltwater flows into the ocean?",
+    "options": [
+      "Glacial meltwater discharge (runoff)",
+      "Ice shelf calving",
+      "Submarine groundwater discharge",
+      "Thermohaline injection"
+    ],
+    "correct_answer": "Glacial meltwater discharge (runoff)",
+    "explanation": "Glacial meltwater discharge adds large volumes of cold, fresh water to the ocean, affecting ocean salinity and circulation. During glacial retreat, massive meltwater pulses significantly raised sea levels and disrupted thermohaline circulation.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the mineral group that makes up most of Earth's upper mantle?",
+    "options": [
+      "Pyroxene group",
+      "Olivine group",
+      "Mica group",
+      "Feldspar group"
+    ],
+    "correct_answer": "Olivine group",
+    "explanation": "Olivine ((Mg,Fe)₂SiO₄) is the dominant mineral in Earth's upper mantle (peridotite). It is also the first mineral to crystallize in Bowen's reaction series. Peridotite brought up by volcanoes (xenoliths) is mostly olivine.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the scale that measures the intensity of shaking from an earthquake?",
+    "options": [
+      "Richter scale",
+      "Moment magnitude scale",
+      "Modified Mercalli Intensity Scale",
+      "Beaufort scale"
+    ],
+    "correct_answer": "Modified Mercalli Intensity Scale",
+    "explanation": "The Modified Mercalli Intensity (MMI) scale (I–XII) measures the intensity of ground shaking at a specific location based on effects on people and structures. Unlike the Richter scale (energy at source), MMI varies with distance from the epicenter.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for a chain of volcanic islands formed over a mantle hot spot?",
+    "options": [
+      "Island arc",
+      "Atoll chain",
+      "Ophiolite suite",
+      "Hot spot island chain (e.g., Hawaiian-Emperor seamount chain)"
+    ],
+    "correct_answer": "Hot spot island chain (e.g., Hawaiian-Emperor seamount chain)",
+    "explanation": "Hot spot island chains form as a tectonic plate moves over a stationary mantle hot spot. Older volcanic islands are carried away from the hot spot, erode, and become seamounts. The Hawaiian-Emperor chain shows ~5,800 km of such movement over 85 million years.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the sedimentary structure that shows ancient current directions?",
+    "options": [
+      "Cross-bedding (cross-stratification)",
+      "Ripple marks",
+      "Graded bedding",
+      "Bioturbation"
+    ],
+    "correct_answer": "Cross-bedding (cross-stratification)",
+    "explanation": "Cross-bedding (cross-stratification) consists of inclined layers within a larger horizontal layer, formed by migrating dunes or ripples. The direction of inclination indicates current direction. Used to reconstruct ancient wind and water patterns.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for when two plates of similar density collide and both resist subduction?",
+    "options": [
+      "Oceanic subduction",
+      "Continent-continent collision",
+      "Rifting",
+      "Obduction"
+    ],
+    "correct_answer": "Continent-continent collision",
+    "explanation": "When two continental plates converge, neither subducts easily (both are buoyant). Crust shortens and thickens, forming high mountain belts. The Himalayas formed and continue to rise from the India-Eurasia collision (~50 million years ago).",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the dark layer in a lake bed formed during summer from algae and sediment?",
+    "options": [
+      "Turbidite",
+      "Sapropel",
+      "Varve summer layer",
+      "Red bed"
+    ],
+    "correct_answer": "Varve summer layer",
+    "explanation": "Varves are annual layers in lake sediments, each consisting of a summer layer (coarser, darker from algae) and winter layer (finer, lighter from clay settling under ice). Counting varves provides accurate annual chronologies back thousands of years.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is a fumarole?",
+    "options": [
+      "A submarine volcano",
+      "A mudpot in a thermal area",
+      "A type of hot spring",
+      "An opening in the ground that emits steam and volcanic gases"
+    ],
+    "correct_answer": "An opening in the ground that emits steam and volcanic gases",
+    "explanation": "A fumarole is a vent in Earth's surface that emits steam, CO₂, SO₂, HCl, and other volcanic gases. They occur in volcanically active areas and near hydrothermal systems. Solfataras emit sulfurous gases.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the concept of uniformitarianism in geology?",
+    "options": [
+      "The same geological processes have operated throughout Earth's history at roughly constant rates",
+      "All rocks were formed in a single great flood",
+      "Earth's geology changes dramatically each century",
+      "Catastrophism always explains geological features"
+    ],
+    "correct_answer": "The same geological processes have operated throughout Earth's history at roughly constant rates",
+    "explanation": "Uniformitarianism ('the present is the key to the past'), proposed by Hutton and developed by Lyell, holds that current geological processes operated similarly in the past. It implies a very old Earth — contrary to catastrophism.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the zone of saturated groundwater below the water table?",
+    "options": [
+      "Vadose zone",
+      "Phreatic zone",
+      "Unsaturated zone",
+      "Capillary fringe"
+    ],
+    "correct_answer": "Phreatic zone",
+    "explanation": "The phreatic zone (saturated zone) is the area below the water table where all pores and fractures are saturated with water. It is where groundwater and aquifers are found. Above the water table is the vadose (unsaturated) zone.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the process where ocean water temperature increases, causing coral bleaching?",
+    "options": [
+      "Eutrophication",
+      "Ocean acidification",
+      "Thermal bleaching (coral bleaching)",
+      "Coral reef succession"
+    ],
+    "correct_answer": "Thermal bleaching (coral bleaching)",
+    "explanation": "Coral bleaching occurs when ocean temperatures rise above normal by just 1–2°C for prolonged periods. Corals expel their symbiotic algae (zooxanthellae), turning white (bleached). If temperatures remain high, corals die. Mass bleaching events are increasing.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the boundary separating polar and tropical air masses?",
+    "options": [
+      "ITCZ",
+      "Hadley cell boundary",
+      "Subtropical high",
+      "Polar front"
+    ],
+    "correct_answer": "Polar front",
+    "explanation": "The polar front is the boundary between cold polar air masses and warmer mid-latitude air. It is associated with the polar jet stream and spawns mid-latitude cyclones (depressions). It migrates seasonally and varies in intensity.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What does a concave longitudinal profile of a river indicate?",
+    "options": [
+      "River in graded equilibrium with gradient decreasing from source to mouth",
+      "Actively eroding headwaters",
+      "Immature river in a young mountain range",
+      "A river undergoing capture"
+    ],
+    "correct_answer": "River in graded equilibrium with gradient decreasing from source to mouth",
+    "explanation": "A concave river profile (steep near source, gentle near mouth) indicates a graded river in equilibrium. Steep upper reaches have high energy for erosion; gentle lower reaches deposit sediment. Waterfalls and knickpoints indicate disturbances.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the horizontal distance between two adjacent wave crests?",
+    "options": [
+      "Wave amplitude",
+      "Wavelength",
+      "Wave period",
+      "Wave frequency"
+    ],
+    "correct_answer": "Wavelength",
+    "explanation": "Wavelength is the horizontal distance between successive wave crests (or troughs). Ocean swell wavelengths can exceed 1 km. Shorter wavelengths slow more quickly in shallow water, causing refraction of waves toward headlands.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the type of rock formed from marble, which is a metamorphosed form of?",
+    "options": [
+      "Sandstone",
+      "Shale",
+      "Limestone (or dolostone)",
+      "Granite"
+    ],
+    "correct_answer": "Limestone (or dolostone)",
+    "explanation": "Marble forms from the metamorphism of limestone (CaCO₃) or dolostone (CaMg(CO₃)₂) under heat and pressure. Calcite crystals recrystallize and grow larger. Pure marble is white; impurities create coloured varieties used in sculpture and architecture.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for a volcanic island arc that forms behind a subduction zone?",
+    "options": [
+      "Mid-ocean ridge",
+      "Ophiolite",
+      "Continental volcanic arc",
+      "Island arc (e.g., Japan, Aleutians)"
+    ],
+    "correct_answer": "Island arc (e.g., Japan, Aleutians)",
+    "explanation": "Island arcs form where one oceanic plate subducts beneath another. Melting of the subducted plate generates magma that rises through the overlying plate, forming chains of volcanic islands. Japan, Indonesia, and the Aleutians are examples.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the process by which wind erodes sand and grinds rock surfaces?",
+    "options": [
+      "Abrasion by wind (sandblasting)",
+      "Creep",
+      "Deflation",
+      "Saltation"
+    ],
+    "correct_answer": "Abrasion by wind (sandblasting)",
+    "explanation": "Wind abrasion (sandblasting) occurs when wind-driven sand particles strike and grind rock surfaces, polishing and wearing them away. It creates ventifacts (wind-polished rocks) and yardangs (streamlined rock formations).",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for Earth's overall energy balance?",
+    "options": [
+      "Greenhouse forcing",
+      "Radiative equilibrium (energy balance)",
+      "Stefan-Boltzmann balance",
+      "Planetary albedo"
+    ],
+    "correct_answer": "Radiative equilibrium (energy balance)",
+    "explanation": "Earth's energy balance describes the equilibrium between incoming solar radiation (~340 W/m²) and outgoing longwave radiation. When energy in ≠ energy out, Earth warms or cools. Human-induced forcing has disrupted this balance.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the scale used to classify metamorphic grade?",
+    "options": [
+      "Mohs scale",
+      "Grain size classification",
+      "Metamorphic index minerals (e.g., chlorite, garnet, kyanite, sillimanite)",
+      "Rock strength scale"
+    ],
+    "correct_answer": "Metamorphic index minerals (e.g., chlorite, garnet, kyanite, sillimanite)",
+    "explanation": "Metamorphic grade is assessed using index minerals (Barrow's zones): chlorite (lowest), biotite, garnet, staurolite, kyanite, sillimanite (highest). Higher-grade minerals indicate greater temperature and/or pressure during metamorphism.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for a dome-shaped hill formed from glacial deposition?",
+    "options": [
+      "Kame",
+      "Esker",
+      "Erratic",
+      "Drumlin"
+    ],
+    "correct_answer": "Drumlin",
+    "explanation": "Drumlins are smooth, elongated, egg-shaped hills of glacial till formed beneath moving glaciers. Their long axes are parallel to ice flow direction. They occur in swarms ('basket of eggs' topography) and indicate former glacier movement direction.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the zone where different ocean current temperatures converge?",
+    "options": [
+      "Oceanic front",
+      "Downwelling zone",
+      "Deep water boundary",
+      "Upwelling zone"
+    ],
+    "correct_answer": "Oceanic front",
+    "explanation": "Oceanic fronts are sharp boundaries between water masses of different temperature, salinity, or density. Examples include the convergence of the cold Labrador Current and warm Gulf Stream off Newfoundland, creating productive fishing grounds.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for a feature formed when a meander is cut off?",
+    "options": [
+      "Delta",
+      "Oxbow lake",
+      "Floodplain lake",
+      "Estuary"
+    ],
+    "correct_answer": "Oxbow lake",
+    "explanation": "An oxbow lake forms when a river meander is cut off as the river breaks through the neck of a tight bend during a flood. The abandoned meander is sealed at both ends and becomes a curved lake. Eventually it fills with sediment.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the relationship between grain size and velocity in rivers (competence)?",
+    "options": [
+      "Manning equation",
+      "Stokes' law",
+      "Hjulström curve",
+      "Shield's diagram"
+    ],
+    "correct_answer": "Hjulström curve",
+    "explanation": "The Hjulström curve shows the relationship between water velocity and sediment particle size for erosion, transport, and deposition. Interestingly, clay particles require higher velocities to erode than sand (due to cohesion) but settle at very low velocities.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the temperature difference between two air masses that generates cyclones?",
+    "options": [
+      "Adiabatic gradient",
+      "Pressure gradient",
+      "Lapse rate differential",
+      "Thermal contrast at frontal boundaries"
+    ],
+    "correct_answer": "Thermal contrast at frontal boundaries",
+    "explanation": "Mid-latitude cyclones (depressions) form where warm and cold air masses meet at frontal boundaries. The temperature (and density) contrast creates instability. Cyclones develop as warm air rises and cold air undercuts it.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the term for any organism that lived during a short time period and is widely distributed, making it useful for dating rocks?",
+    "options": [
+      "Index fossil (zone fossil)",
+      "Trace fossil",
+      "Living fossil",
+      "Fossil record"
+    ],
+    "correct_answer": "Index fossil (zone fossil)",
+    "explanation": "Index fossils are from organisms with a short time range but wide geographic distribution, allowing correlation of rock layers of the same age across different regions. Trilobites, ammonites, and foraminifera are common index fossils.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the transfer of heat between the ocean and atmosphere that drives climate?",
+    "options": [
+      "Greenhouse forcing",
+      "Ocean-atmosphere heat exchange",
+      "Oceanic albedo effect",
+      "Plate tectonics influence"
+    ],
+    "correct_answer": "Ocean-atmosphere heat exchange",
+    "explanation": "Ocean-atmosphere heat exchange is the transfer of sensible and latent heat between oceans and the overlying atmosphere. Oceans absorb ~90% of excess heat from global warming. Sea surface temperatures strongly influence weather and climate.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the process where gravity causes rock on a slope to move as a single block?",
+    "options": [
+      "Soil creep",
+      "Rockfall",
+      "Rotational slump",
+      "Avalanche"
+    ],
+    "correct_answer": "Rotational slump",
+    "explanation": "A rotational slump is when a mass of rock or sediment slides along a curved, concave failure surface. The block rotates backward as it moves downslope. They are common in coastal cliffs and slopes with clay-rich material.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the line on a weather map connecting points of equal atmospheric pressure?",
+    "options": [
+      "Isotherm",
+      "Isohyet",
+      "Isohaline",
+      "Isobar"
+    ],
+    "correct_answer": "Isobar",
+    "explanation": "Isobars are lines on weather maps connecting points of equal atmospheric pressure (in millibars or hPa). Closely spaced isobars indicate a steep pressure gradient and strong winds. Low pressure (L) centres often bring storms; high pressure (H) brings fair weather.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the process where sand grains bounce along the ground driven by wind?",
+    "options": [
+      "Saltation",
+      "Suspension",
+      "Deflation",
+      "Creep"
+    ],
+    "correct_answer": "Saltation",
+    "explanation": "Saltation is the bouncing movement of sand grains along a surface by wind (or water). Grains are lifted by turbulence, carried a short distance, then land and dislodge other grains. It is the primary mechanism of sand dune building.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the process where CO₂ dissolves in ocean water and forms carbonic acid?",
+    "options": [
+      "Eutrophication",
+      "Ocean acidification",
+      "Ocean deoxygenation",
+      "Salinification"
+    ],
+    "correct_answer": "Ocean acidification",
+    "explanation": "Ocean acidification occurs as the ocean absorbs atmospheric CO₂, forming carbonic acid (H₂CO₃), which dissociates to lower pH. Ocean pH has fallen from ~8.2 to ~8.1 since industrialization — threatening shell-forming organisms.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the ancient landmass that comprised the southern continents?",
+    "options": [
+      "Pangaea",
+      "Laurasia",
+      "Gondwana",
+      "Rodinia"
+    ],
+    "correct_answer": "Gondwana",
+    "explanation": "Gondwana was the southern supercontinent that formed when Pangaea broke up, comprising modern-day South America, Africa, Antarctica, Australia, and the Indian subcontinent. It began breaking apart ~180 million years ago.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the technique using annual growth rings in trees to date and study past climates?",
+    "options": [
+      "Radiometric dating",
+      "Palynology",
+      "Varve analysis",
+      "Dendrochronology"
+    ],
+    "correct_answer": "Dendrochronology",
+    "explanation": "Dendrochronology uses annual growth rings in trees to date wood samples and reconstruct past climate. Wide rings indicate good growth years (warm/wet); narrow rings indicate stress (drought/cold). Records extend back ~12,000 years using overlapping sequences.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for when light ocean crust is forced on top of heavier continental crust?",
+    "options": [
+      "Obduction",
+      "Subduction",
+      "Accretion",
+      "Underplating"
+    ],
+    "correct_answer": "Obduction",
+    "explanation": "Obduction is the overthrusting of oceanic crust onto continental crust — the reverse of normal subduction. It produces ophiolite sequences (slivers of ocean floor on land). The Semail Ophiolite in Oman is one of Earth's best examples.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for a line connecting equal rainfall totals on a map?",
+    "options": [
+      "Isobar",
+      "Isohyet",
+      "Isohaline",
+      "Isotherm"
+    ],
+    "correct_answer": "Isohyet",
+    "explanation": "Isohyets are lines on maps connecting points of equal rainfall amounts over a given period. They are used in hydrology and climatology to display precipitation patterns. Closely spaced isohyets indicate rapid change in rainfall amounts.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the sedimentary rock formed from compressed organic-rich marine sediment?",
+    "options": [
+      "Limestone",
+      "Sandstone",
+      "Mudstone/shale (source rock)",
+      "Conglomerate"
+    ],
+    "correct_answer": "Mudstone/shale (source rock)",
+    "explanation": "Organic-rich mudstones and shales are the primary source rocks for oil and gas. Organic material (mainly marine plankton) accumulates in anoxic bottom conditions, is buried, and under heat/pressure generates hydrocarbons.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the type of landscape with many caves, sinkholes, and losing streams?",
+    "options": [
+      "Glaciated landscape",
+      "Arid landscape",
+      "Fluvial landscape",
+      "Karst landscape"
+    ],
+    "correct_answer": "Karst landscape",
+    "explanation": "Karst landscapes develop on soluble rocks (mainly limestone and dolomite). Characteristic features include sinkholes, caves, disappearing streams ('losing streams'), springs, and tower karst (mogotes). Approximately 25% of Earth's population depends on karst aquifers for water.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the type of fold where one limb has been pushed over the other?",
+    "options": [
+      "Overturned/nappe fold",
+      "Plunging fold",
+      "Recumbent fold",
+      "Upright fold"
+    ],
+    "correct_answer": "Overturned/nappe fold",
+    "explanation": "An overturned fold has one limb rotated past vertical. A nappe is a large sheet of rock that has been moved far (tens of kilometres) from its original position by thrust faulting or recumbent folding. Nappes are common in the Alps.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the difference between a body fossil and a trace fossil?",
+    "options": [
+      "Body fossils are always older",
+      "Body fossils are physical remains of organisms; trace fossils are evidence of activity (burrows, tracks)",
+      "Trace fossils preserve soft tissue; body fossils only preserve hard parts",
+      "They are both the same type of fossil"
+    ],
+    "correct_answer": "Body fossils are physical remains of organisms; trace fossils are evidence of activity (burrows, tracks)",
+    "explanation": "Body fossils are direct physical remains of organisms (bones, shells, wood, leaves). Trace fossils (ichnofossils) preserve evidence of biological activity: footprints, burrows, feeding traces. Trace fossils can reveal animal behavior when body fossils are absent.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the large rocky meteor that killed the dinosaurs 66 million years ago?",
+    "options": [
+      "The Snowball Earth event",
+      "The Great Dying",
+      "Chicxulub impactor (K-Pg extinction event)",
+      "The Younger Dryas event"
+    ],
+    "correct_answer": "Chicxulub impactor (K-Pg extinction event)",
+    "explanation": "The Chicxulub impactor (~10 km diameter) struck what is now Mexico's Yucatán Peninsula 66 million years ago. It caused the Cretaceous-Paleogene (K-Pg) mass extinction, killing ~75% of species including non-avian dinosaurs.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the property of minerals to reflect color from inner surfaces?",
+    "options": [
+      "Fluorescence",
+      "Phosphorescence",
+      "Pleochroism",
+      "Chatoyancy/adularescence"
+    ],
+    "correct_answer": "Chatoyancy/adularescence",
+    "explanation": "Chatoyancy ('cat's eye effect') is a silky, floating reflection in some minerals from fibrous inclusions (e.g., tiger's eye). Adularescence is the floating glow in moonstones. Fluorescence is UV-light emission; pleochroism is different colors in different directions.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the type of current that runs perpendicular to the shore and can be dangerous to swimmers?",
+    "options": [
+      "Rip current",
+      "Tidal rip",
+      "Surge channel",
+      "Longshore current"
+    ],
+    "correct_answer": "Rip current",
+    "explanation": "Rip currents are narrow channels of fast-moving water flowing seaward through surf zones. They form where water piles up near shore and returns seaward through gaps in sandbars. They are the leading cause of swimmer drowning at beaches.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the type of mountain formed by the upthrust of a block of crust?",
+    "options": [
+      "Fold mountain",
+      "Block mountain (horst)",
+      "Residual mountain",
+      "Volcanic mountain"
+    ],
+    "correct_answer": "Block mountain (horst)",
+    "explanation": "Block mountains (horsts) are uplifted fault blocks between normal faults (grabens/rift valleys). They form in extensional tectonic environments. The Sierra Nevada (California) and the Ruwenzori (Africa) are horst mountains.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for a large body of water with minimal oxygen at depth?",
+    "options": [
+      "Oligotrophic lake",
+      "Eutrophic lake",
+      "Anoxic basin",
+      "Hypersaline lake"
+    ],
+    "correct_answer": "Anoxic basin",
+    "explanation": "Anoxic basins have little or no dissolved oxygen at depth, due to stratification preventing mixing of oxygenated surface water with deep water. The Black Sea is the world's largest meromictic (permanently stratified) basin, with anoxic water below ~150 m.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the concept that mountains have deep roots extending into the mantle?",
+    "options": [
+      "Lithospheric flexure",
+      "Plate buoyancy",
+      "Mantle convection support",
+      "Isostasy (isostatic compensation)"
+    ],
+    "correct_answer": "Isostasy (isostatic compensation)",
+    "explanation": "Isostasy explains that mountains have deep roots projecting into the denser mantle (like icebergs in water). As erosion removes mass from mountain tops, the crust rises isostatically. The Himalayas have roots extending ~70 km into the mantle.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the process by which rivers capture the headwaters of other rivers?",
+    "options": [
+      "River piracy (stream capture)",
+      "River confluence",
+      "Meander cutoff",
+      "Stream bifurcation"
+    ],
+    "correct_answer": "River piracy (stream capture)",
+    "explanation": "Stream capture (river piracy) occurs when a more actively eroding river cuts through a drainage divide and captures the headwaters of a less vigorous adjacent stream. It creates 'wind gaps' (abandoned valleys) and 'elbow of capture' bends.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the large scale melting event that is releasing methane from permafrost?",
+    "options": [
+      "Permafrost sublimation",
+      "Thermokarst formation",
+      "Cryosphere collapse",
+      "Carbon cycle disruption"
+    ],
+    "correct_answer": "Thermokarst formation",
+    "explanation": "Thermokarst is the irregular, hummocky terrain formed when permafrost thaws and the ice-rich ground subsides. As warming increases permafrost thaw, thermokarst lakes form and release stored methane and CO₂, creating a positive climate feedback.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the unit of atmospheric pressure equal to 100 pascals?",
+    "options": [
+      "Millibar",
+      "Torr",
+      "Hectopascal (hPa)",
+      "Atmosphere"
+    ],
+    "correct_answer": "Hectopascal (hPa)",
+    "explanation": "A hectopascal (hPa) = 100 pascals and is numerically identical to the millibar (mb). It is the standard unit for atmospheric pressure in meteorology. Standard sea-level pressure is 1013.25 hPa.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the largest known mass extinction event in Earth's history?",
+    "options": [
+      "Cretaceous-Paleogene (K-Pg) extinction",
+      "Ordovician-Silurian extinction",
+      "Late Devonian extinction",
+      "Permian-Triassic (Great Dying) extinction"
+    ],
+    "correct_answer": "Permian-Triassic (Great Dying) extinction",
+    "explanation": "The Permian-Triassic extinction (~252 million years ago), called the 'Great Dying,' was the most severe mass extinction, killing ~96% of marine species and ~70% of terrestrial vertebrates. Likely caused by massive Siberian Traps volcanism releasing CO₂ and SO₂.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the process by which glaciers transport rocks far from their source?",
+    "options": [
+      "Glacial erratic transport",
+      "Glacial plucking",
+      "Glaciofluvial transport",
+      "Glacial abrasion"
+    ],
+    "correct_answer": "Glacial erratic transport",
+    "explanation": "Glacial erratics are rocks that have been transported by glacial ice far from their source and deposited in geologically unrelated bedrock. They can travel hundreds of kilometres. Erratics were key evidence for former ice sheet extent.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the force per unit volume that causes flow in the mantle?",
+    "options": [
+      "Tidal force",
+      "Buoyancy force from density contrasts",
+      "Magnetic force",
+      "Centrifugal force"
+    ],
+    "correct_answer": "Buoyancy force from density contrasts",
+    "explanation": "Mantle convection is driven by buoyancy forces — hot, less dense material rises while cold, denser material sinks. These density contrasts (driven by temperature differences) generate the forces that ultimately drive plate tectonics.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the effect where soil ice expands and heaves upward in spring?",
+    "options": [
+      "Periglacial creep",
+      "Cryoturbation",
+      "Frost heave",
+      "Permafrost thaw"
+    ],
+    "correct_answer": "Frost heave",
+    "explanation": "Frost heave occurs when water in soil freezes and expands, pushing soil and objects (rocks, fence posts, buildings) upward. It creates distinctive periglacial features including patterned ground, stone polygons, and stone stripes.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for rock that has intruded as a horizontal sheet between existing rock layers?",
+    "options": [
+      "Dike",
+      "Batholith",
+      "Laccolith",
+      "Sill"
+    ],
+    "correct_answer": "Sill",
+    "explanation": "A sill is a sheet of igneous rock that intrudes parallel to existing rock layers (concordant). The Whin Sill in England is a famous example. A dike is discordant (cuts across layers). A laccolith is a lens-shaped intrusion that domes the overlying rock.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the isotope of carbon used to date organic material up to 50,000 years?",
+    "options": [
+      "Carbon-14 (radiocarbon)",
+      "Carbon-13",
+      "Carbon-16",
+      "Carbon-12"
+    ],
+    "correct_answer": "Carbon-14 (radiocarbon)",
+    "explanation": "Carbon-14 (¹⁴C) is a radioactive isotope with a half-life of ~5,730 years. It is produced by cosmic ray interactions in the atmosphere and absorbed by living organisms. After death, ¹⁴C decays, allowing dating of organic material up to ~50,000 years.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the rapid removal of surface material from a planet, including Earth, by a large impact?",
+    "options": [
+      "Accretion",
+      "Impact gardening (regolith gardening)",
+      "Planetary differentiation",
+      "Outgassing"
+    ],
+    "correct_answer": "Impact gardening (regolith gardening)",
+    "explanation": "Impact gardening (regolith mixing) describes the churning and mixing of the upper surface layer by meteorite impacts. On airless bodies (Moon, Mercury), it creates the regolith. On early Earth, large impacts excavated deep and redistributed material globally.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the type of volcano associated with the divergence of plates underwater?",
+    "options": [
+      "Stratovolcano",
+      "Shield volcano",
+      "Submarine (mid-ocean ridge) volcano",
+      "Caldera"
+    ],
+    "correct_answer": "Submarine (mid-ocean ridge) volcano",
+    "explanation": "Submarine (underwater) volcanoes are most common at mid-ocean ridges where plates diverge. They produce pillow lavas. Iceland is the rare exception where a mid-ocean ridge is above sea level. There are estimated to be over one million submarine volcanoes.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the model that describes how ocean sediment accumulates in different environments?",
+    "options": [
+      "Plate tectonic model",
+      "Sedimentary basin model",
+      "Stratigraphy principle",
+      "Walther's Law of facies"
+    ],
+    "correct_answer": "Walther's Law of facies",
+    "explanation": "Walther's Law states that in an uninterrupted sequence of sedimentary facies, the facies deposited adjacent to each other horizontally will also be superimposed vertically. Used to reconstruct ancient depositional environments.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the rapid movement of a thin, dense layer of turbid water down a slope?",
+    "options": [
+      "Turbidity current",
+      "Thermohaline flow",
+      "Deep water current",
+      "Contourite current"
+    ],
+    "correct_answer": "Turbidity current",
+    "explanation": "A turbidity current is a dense, sediment-laden water flow that moves rapidly down submarine slopes. They cut submarine canyons and deposit graded beds (turbidites). The 1929 Grand Banks earthquake triggered a turbidity current that broke undersea cables.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the zone in Earth's upper mantle where seismic waves slow down, indicating partial melting?",
+    "options": [
+      "Core-mantle boundary",
+      "Low velocity zone (asthenosphere)",
+      "Mohorovičić discontinuity",
+      "Mantle transition zone"
+    ],
+    "correct_answer": "Low velocity zone (asthenosphere)",
+    "explanation": "The low velocity zone (LVZ) within the asthenosphere (~100–200 km depth) is where seismic waves slow down, indicating 1–5% partial melting. This makes the rock more plastic and allows tectonic plate movement.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the type of sandstone formed in desert dunes?",
+    "options": [
+      "Marine sandstone",
+      "Fluvial sandstone",
+      "Aeolian sandstone",
+      "Deltaic sandstone"
+    ],
+    "correct_answer": "Aeolian sandstone",
+    "explanation": "Aeolian (wind-deposited) sandstones show large-scale cross-bedding from ancient sand dunes. They are well-sorted and well-rounded. The Navajo Sandstone in the American Southwest represents a vast ancient desert similar to the modern Sahara.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the concept in ecology that the deeper you go in sediment, the older it is?",
+    "options": [
+      "Superposition",
+      "Uniformitarianism",
+      "Faunal succession",
+      "Law of superposition"
+    ],
+    "correct_answer": "Law of superposition",
+    "explanation": "The law of superposition states that in undisturbed sedimentary sequences, lower layers are older than upper layers. Proposed by Nicolas Steno in 1669, it is fundamental to stratigraphy and relative age dating.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the thin zone between two different air masses?",
+    "options": [
+      "Front",
+      "Intertropical convergence zone",
+      "Tropopause",
+      "Jet stream"
+    ],
+    "correct_answer": "Front",
+    "explanation": "A front is the narrow transition zone between two air masses of different temperature, humidity, and density. Cold fronts (cold air advancing) bring heavy showers and temperature drops. Warm fronts bring gradual rain and warming.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the natural, deep-freeze preservation method for extinct animals?",
+    "options": [
+      "Fossilization in rock",
+      "Permafrost preservation",
+      "Carbonization",
+      "Petrification"
+    ],
+    "correct_answer": "Permafrost preservation",
+    "explanation": "Permafrost preservation keeps frozen organisms (mammoths, cave bears, ancient horses) intact for tens of thousands of years in Siberian and Alaskan permafrost. As permafrost thaws due to climate change, more specimens are being exposed.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the geological principle that states simpler life forms precede more complex?",
+    "options": [
+      "Superposition",
+      "Uniformitarianism",
+      "Faunal succession",
+      "Lateral continuity"
+    ],
+    "correct_answer": "Faunal succession",
+    "explanation": "The principle of faunal succession (William Smith, 1799) states that fossil species succeed each other in a definite, recognisable order. Rocks of the same age anywhere in the world contain the same fossil assemblages.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for a raised area of seafloor that is not volcanic in origin?",
+    "options": [
+      "Seamount",
+      "Submarine ridge",
+      "Oceanic plateau",
+      "Abyssal hill"
+    ],
+    "correct_answer": "Abyssal hill",
+    "explanation": "Abyssal hills are small (50–300 m high) volcanic mounds on the deep ocean floor, the most abundant landform on Earth, covering over 80 million km². They form at mid-ocean ridges and are buried by sediment near continents.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the energy from the Sun that reaches Earth's surface?",
+    "options": [
+      "Insolation",
+      "Geothermal energy",
+      "Albedo",
+      "Terrestrial radiation"
+    ],
+    "correct_answer": "Insolation",
+    "explanation": "Insolation (incoming solar radiation) is the solar energy that reaches Earth's surface. It varies with latitude, season, time of day, and cloud cover. Tropical regions receive more insolation per unit area than polar regions.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for a deep, steep-sided valley carved by a river?",
+    "options": [
+      "Ria",
+      "Gorge or canyon",
+      "Fjord",
+      "Cirque"
+    ],
+    "correct_answer": "Gorge or canyon",
+    "explanation": "A gorge (or canyon) is a deep, narrow valley with steep rocky walls carved by river downcutting, often in resistant rock. The Grand Canyon (446 km long, 1.6 km deep) is the world's most famous canyon, carved by the Colorado River.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for a sand or gravel bar that connects an island to the mainland?",
+    "options": [
+      "Spit",
+      "Bay bar",
+      "Tombolo",
+      "Barrier beach"
+    ],
+    "correct_answer": "Tombolo",
+    "explanation": "A tombolo is a depositional landform — a sand or gravel bar that connects an island to the mainland (or another island) through wave refraction depositing sediment in the island's wave shadow. Chesil Beach connecting Portland Bill to mainland England is an example.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the type of fold mountain formed at continental collision zones?",
+    "options": [
+      "Block mountains",
+      "Volcanic mountains",
+      "Residual mountains",
+      "Alpine-type fold mountains"
+    ],
+    "correct_answer": "Alpine-type fold mountains",
+    "explanation": "Alpine-type fold mountains form at continent-continent collision zones where sedimentary and volcanic rocks are intensely folded and thrust-faulted. The Alps, Himalayas, and Appalachians are examples. They involve nappes and recumbent folds.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the type of stress that causes normal faulting?",
+    "options": [
+      "Tensional (extensional) stress",
+      "Shear stress",
+      "Torsional stress",
+      "Compressional stress"
+    ],
+    "correct_answer": "Tensional (extensional) stress",
+    "explanation": "Tensional (extensional) stress pulls crust apart, causing normal faults where the hanging wall drops relative to the footwall. It creates rift valleys (East African Rift), horsts, and eventually opens new ocean basins (Red Sea is an early-stage ocean).",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the most well-known marker of the Cambrian explosion of life?",
+    "options": [
+      "Ammonites",
+      "Trilobites",
+      "Foraminifera",
+      "Graptolites"
+    ],
+    "correct_answer": "Trilobites",
+    "explanation": "Trilobites are perhaps the most iconic early animals, abundant in Cambrian–Permian rocks (521–252 Ma). Their complex compound eyes and calcified shells made them good fossils. They are excellent index fossils for the Paleozoic Era.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the deepest point of the world's ocean?",
+    "options": [
+      "Tonga Trench",
+      "Java Trench",
+      "Challenger Deep (Mariana Trench)",
+      "Puerto Rico Trench"
+    ],
+    "correct_answer": "Challenger Deep (Mariana Trench)",
+    "explanation": "Challenger Deep in the Mariana Trench is the deepest known point on Earth at ~10,935 m below sea level. It was first sounded in 1875 by HMS Challenger and first reached by humans in 1960 (Don Walsh and Jacques Piccard).",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the accumulation zone of a glacier?",
+    "options": [
+      "Terminus",
+      "Ablation zone",
+      "Calving front",
+      "Accumulation zone (firn field)"
+    ],
+    "correct_answer": "Accumulation zone (firn field)",
+    "explanation": "The accumulation zone is the upper part of a glacier where snowfall exceeds melting — snow accumulates and is compacted into firn (dense granular snow) and eventually glacial ice. It is separated from the ablation zone by the equilibrium line.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the method that determines the age of rocks relative to each other without giving actual dates?",
+    "options": [
+      "Relative dating (stratigraphy)",
+      "Dendrochronology",
+      "Uranium-lead dating",
+      "Radiometric dating"
+    ],
+    "correct_answer": "Relative dating (stratigraphy)",
+    "explanation": "Relative dating places geological events in chronological order using principles like superposition, cross-cutting relationships, and faunal succession without giving absolute ages. It was the only tool available before radiometric dating in the 20th century.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the coastal landform where a headland has been eroded to an isolated rock stack?",
+    "options": [
+      "Sea arch",
+      "Sea stack",
+      "Tombolo",
+      "Wave-cut platform"
+    ],
+    "correct_answer": "Sea stack",
+    "explanation": "Sea stacks are isolated columns of rock just offshore, formed when wave erosion collapses a sea arch. Old Harry Rocks (Dorset), The Twelve Apostles (Australia), and The Old Man of Hoy (Scotland) are examples.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the type of mountain formed from a volcano?",
+    "options": [
+      "Block mountain",
+      "Fold mountain",
+      "Volcanic mountain (e.g., composite or shield)",
+      "Residual mountain"
+    ],
+    "correct_answer": "Volcanic mountain (e.g., composite or shield)",
+    "explanation": "Volcanic mountains form from the accumulation of lava and volcanic material. Types include shield volcanoes (Mauna Kea, Hawaii), stratovolcanoes (Fuji, Rainier), and calderas. The Hawaiian Islands are entirely volcanic in origin.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the rock that is formed when basalt is squeezed out onto the ocean floor?",
+    "options": [
+      "Rhyolite",
+      "Tuff",
+      "Granite",
+      "Pillow basalt"
+    ],
+    "correct_answer": "Pillow basalt",
+    "explanation": "Pillow basalt forms when basaltic lava erupts underwater and the outer surface quenches instantly, forming rounded 'pillow' shapes as lava continues to push out. They are diagnostic of submarine volcanic eruptions and are found in ophiolite sequences.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the type of shoreline formed when a river valley is flooded by the sea?",
+    "options": [
+      "Ria coast",
+      "Barrier beach coast",
+      "Fjord coast",
+      "Delta coast"
+    ],
+    "correct_answer": "Ria coast",
+    "explanation": "A ria coast forms when river valleys are flooded by sea level rise or land subsidence, creating long, narrow inlets that widen seaward. They differ from fjords (glacial origin). Southwest Ireland and Galicia (Spain) have classic ria coastlines.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the instrument that measures atmospheric pressure?",
+    "options": [
+      "Hygrometer",
+      "Barometer",
+      "Thermometer",
+      "Anemometer"
+    ],
+    "correct_answer": "Barometer",
+    "explanation": "A barometer measures atmospheric pressure. Mercury barometers use a column of mercury; aneroid barometers use a sealed metal capsule. Falling pressure usually indicates approaching storms; rising pressure indicates improving weather.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the type of clouds that form at very high altitude (>6 km) and are made of ice crystals?",
+    "options": [
+      "Stratus clouds",
+      "Cumulus clouds",
+      "Cirrus clouds",
+      "Altocumulus clouds"
+    ],
+    "correct_answer": "Cirrus clouds",
+    "explanation": "Cirrus clouds form above 6 km altitude from ice crystals. They are thin, wispy, and 'feathery' in appearance. They often indicate fair weather but can signal approaching warm fronts. Cirrostratus causes a halo around the sun/moon.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the study of pollen grains preserved in sediments to reconstruct past vegetation?",
+    "options": [
+      "Dendrochronology",
+      "Sedimentology",
+      "Stratigraphy",
+      "Palynology"
+    ],
+    "correct_answer": "Palynology",
+    "explanation": "Palynology is the study of pollen and spores preserved in sediments, peat, and ice. Each plant species produces distinctive pollen. By analyzing fossil pollen assemblages, palynologists reconstruct past vegetation and climate changes.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the type of movement that occurs along the San Andreas fault?",
+    "options": [
+      "Right-lateral strike-slip movement",
+      "Thrust movement",
+      "Oblique movement",
+      "Normal movement"
+    ],
+    "correct_answer": "Right-lateral strike-slip movement",
+    "explanation": "The San Andreas Fault is a right-lateral (dextral) strike-slip fault. Standing on either side of the fault, the opposite side moves to the right. The Pacific Plate moves northwest relative to the North American Plate at ~5 cm/year.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the mineral that commonly forms in limestone cave ceilings?",
+    "options": [
+      "Quartz",
+      "Calcite (speleothems)",
+      "Feldspars",
+      "Gypsum"
+    ],
+    "correct_answer": "Calcite (speleothems)",
+    "explanation": "Cave formations (speleothems) are primarily made of calcite (CaCO₃). Stalactites, stalagmites, columns, flowstone, and helictites are all calcite speleothems. They form as calcium-carbonate-saturated water evaporates or degasses CO₂.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the theory that life-supporting conditions on Earth result from feedback between living organisms and the environment?",
+    "options": [
+      "Biogeochemical cycling",
+      "Ecological feedback",
+      "Gaia hypothesis",
+      "Symbiosis theory"
+    ],
+    "correct_answer": "Gaia hypothesis",
+    "explanation": "The Gaia hypothesis (James Lovelock, 1970s) proposes that living organisms interact with inorganic components to maintain self-regulating conditions that sustain life. For example, life helps regulate atmospheric CO₂ and ocean salinity.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the narrow ridge of rock separating two glacial cirques?",
+    "options": [
+      "Drumlin",
+      "Horn",
+      "Col",
+      "Arête"
+    ],
+    "correct_answer": "Arête",
+    "explanation": "An arête is a narrow, jagged ridge formed between two glacial cirques as backwall erosion narrows the dividing ridge. They create dramatic saw-toothed mountain ridges. The Matterhorn's summit is where four arêtes meet.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for a floating mass of ice that has broken from a glacier or ice shelf?",
+    "options": [
+      "Iceberg",
+      "Sea ice",
+      "Floe",
+      "Pack ice"
+    ],
+    "correct_answer": "Iceberg",
+    "explanation": "An iceberg is a large mass of freshwater ice that has broken (calved) from a glacier or ice shelf and is floating in open water. About 90% of an iceberg's volume is below the waterline. Most North Atlantic icebergs originate from Greenland glaciers.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the technique that uses sound waves to map the seafloor?",
+    "options": [
+      "Ground-penetrating radar",
+      "Sonar (echo sounding)",
+      "Seismic reflection",
+      "Satellite altimetry"
+    ],
+    "correct_answer": "Sonar (echo sounding)",
+    "explanation": "Sonar (Sound Navigation and Ranging) maps the seafloor by sending sound pulses and measuring the time for echoes to return. Multibeam sonar creates detailed 3D maps. Sonar revealed mid-ocean ridges, deep trenches, and abyssal plains.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the greenhouse gas produced by decomposition of organic material in wetlands?",
+    "options": [
+      "Carbon dioxide",
+      "Nitrous oxide",
+      "Methane",
+      "Ozone"
+    ],
+    "correct_answer": "Methane",
+    "explanation": "Methane (CH₄) is produced by anaerobic decomposition of organic material in wetlands, rice paddies, and by livestock. It is ~28 times more potent than CO₂ over 100 years as a greenhouse gas. Methane concentration has increased more than 2.5 times since pre-industrial times.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the type of rock that forms from cooled igneous or sedimentary rocks under intense burial?",
+    "options": [
+      "Extrusive igneous rock",
+      "Sedimentary rock",
+      "Plutonic rock",
+      "Metamorphic rock"
+    ],
+    "correct_answer": "Metamorphic rock",
+    "explanation": "Metamorphic rocks form when pre-existing rocks (igneous, sedimentary, or other metamorphic rocks) are transformed by heat, pressure, or chemically active fluids without melting. Examples: slate (from shale), marble (from limestone), quartzite (from sandstone).",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the point where all drainage in an area converges into a single outlet?",
+    "options": [
+      "Watershed pour point",
+      "Tributary junction",
+      "Drainage basin outlet",
+      "Headwater"
+    ],
+    "correct_answer": "Watershed pour point",
+    "explanation": "The pour point (or drainage outlet) is the lowest point of a drainage basin through which all surface water flows. It is the downstream end of the watershed. Managing land use in a watershed affects water quality at the pour point.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the name for the type of natural disaster that involves a large body of snow rushing down a mountain?",
+    "options": [
+      "Landslide",
+      "Avalanche",
+      "Lahar",
+      "Debris flow"
+    ],
+    "correct_answer": "Avalanche",
+    "explanation": "An avalanche is a rapid flow of snow down a mountain. Dry powder avalanches can reach 300 km/h; wet slab avalanches are slower but denser. They are triggered by heavy snow, earthquakes, or human activity.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "earth-science"
+  }
+]

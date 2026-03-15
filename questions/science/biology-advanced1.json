@@ -1,0 +1,2634 @@
+[
+  {
+    "question": "Which enzyme catalyzes the addition of RNA nucleotides to the 3' end of telomeres?",
+    "options": [
+      "Telomerase",
+      "Helicase",
+      "Topoisomerase II",
+      "DNA polymerase delta"
+    ],
+    "correct_answer": "Telomerase",
+    "explanation": "Telomerase is a reverse transcriptase that uses its own RNA template to extend telomeric DNA repeats at chromosome ends.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the name for the epigenetic silencing mechanism involving small non-coding RNAs?",
+    "options": [
+      "Splicing",
+      "RNA interference (RNAi)",
+      "Transcription attenuation",
+      "Methylation"
+    ],
+    "correct_answer": "RNA interference (RNAi)",
+    "explanation": "RNAi is a gene-silencing mechanism where small RNAs (siRNA, miRNA) guide RISC to degrade or repress complementary mRNA targets.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "Which transcription factor is the master regulator of the innate immune response?",
+    "options": [
+      "STAT3",
+      "p53",
+      "NF-κB",
+      "c-Myc"
+    ],
+    "correct_answer": "NF-κB",
+    "explanation": "NF-κB is a transcription factor that controls the expression of cytokines, chemokines, and other immune response genes when activated by pathogen signals.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the name of the process where ribosomes translate the same mRNA simultaneously?",
+    "options": [
+      "Cap-dependent translation",
+      "Coupled transcription-translation",
+      "Ribosome recycling",
+      "Polysome translation"
+    ],
+    "correct_answer": "Polysome translation",
+    "explanation": "Polysomes (polyribosomes) are multiple ribosomes simultaneously translating the same mRNA molecule, increasing protein output efficiency.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "Which protein complex marks misfolded proteins in the ER for retrotranslocation?",
+    "options": [
+      "ERAD complex",
+      "Proteasome",
+      "Chaperone network",
+      "UPR sensor"
+    ],
+    "correct_answer": "ERAD complex",
+    "explanation": "ER-Associated Degradation (ERAD) recognizes misfolded glycoproteins and retrotranslocates them to the cytoplasm for ubiquitin-proteasome degradation.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the name for the post-translational modification where ubiquitin chains signal proteasomal degradation?",
+    "options": [
+      "Monoubiquitination",
+      "Polyubiquitination",
+      "SUMOylation",
+      "Neddylation"
+    ],
+    "correct_answer": "Polyubiquitination",
+    "explanation": "K48-linked polyubiquitin chains on substrate proteins serve as the canonical signal for recognition and degradation by the 26S proteasome.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "Which signaling pathway is activated by receptor tyrosine kinases and regulates cell growth?",
+    "options": [
+      "Notch pathway",
+      "Wnt pathway",
+      "RAS-MAPK pathway",
+      "Hedgehog pathway"
+    ],
+    "correct_answer": "RAS-MAPK pathway",
+    "explanation": "The RAS-MAPK cascade transduces growth factor signals from RTKs through RAS→RAF→MEK→ERK to regulate proliferation and differentiation.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the molecular basis of the founder effect on genetic diversity?",
+    "options": [
+      "Gene flow adds new alleles",
+      "Natural selection removes unfavorable alleles",
+      "Mutation increases variation",
+      "Sampling error reduces allele diversity below parent population"
+    ],
+    "correct_answer": "Sampling error reduces allele diversity below parent population",
+    "explanation": "The founder effect is a form of genetic drift where a small founding population carries only a subset of the parent population's allelic diversity.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "Which enzyme removes the RNA primer and fills the gap during DNA replication in eukaryotes?",
+    "options": [
+      "DNA polymerase delta",
+      "DNA polymerase alpha",
+      "RNase H",
+      "DNA ligase I"
+    ],
+    "correct_answer": "DNA polymerase delta",
+    "explanation": "DNA polymerase delta removes RNA primers via its 5'→3' exonuclease activity (with help from FEN1) and fills the resulting gap with DNA.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the molecular mechanism by which statins lower cholesterol?",
+    "options": [
+      "Block LDL receptor",
+      "Inhibit HMG-CoA reductase",
+      "Activate PCSK9",
+      "Inhibit bile acid reabsorption"
+    ],
+    "correct_answer": "Inhibit HMG-CoA reductase",
+    "explanation": "Statins competitively inhibit HMG-CoA reductase, the rate-limiting enzyme in the mevalonate pathway for cholesterol biosynthesis in the liver.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "Which mechanism allows alternative splicing to generate protein diversity from a single gene?",
+    "options": [
+      "Promoter switching",
+      "Frameshift mutations",
+      "Exon skipping and intron retention producing multiple mRNA isoforms",
+      "Post-translational cleavage"
+    ],
+    "correct_answer": "Exon skipping and intron retention producing multiple mRNA isoforms",
+    "explanation": "Alternative splicing selects different combinations of exons to produce multiple mRNA isoforms from one pre-mRNA, vastly expanding proteome diversity.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the name for the protein complex that initiates eukaryotic DNA replication?",
+    "options": [
+      "CMG helicase",
+      "PCNA clamp",
+      "RFC clamp loader",
+      "Origin recognition complex (ORC)"
+    ],
+    "correct_answer": "Origin recognition complex (ORC)",
+    "explanation": "The ORC binds replication origins and serves as the landing pad for MCM helicase loading, initiating pre-replication complex assembly.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "Which metabolic pathway produces NADPH for biosynthetic reactions and antioxidant defense?",
+    "options": [
+      "Pentose phosphate pathway",
+      "Glycolysis",
+      "Krebs cycle",
+      "Beta-oxidation"
+    ],
+    "correct_answer": "Pentose phosphate pathway",
+    "explanation": "The pentose phosphate pathway (PPP) generates NADPH for fatty acid synthesis and glutathione reduction, plus ribose-5-phosphate for nucleotide synthesis.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the name for the chromosomal region where kinetochore proteins assemble for spindle attachment?",
+    "options": [
+      "Telomere",
+      "Centromere",
+      "Origin of replication",
+      "Enhancer"
+    ],
+    "correct_answer": "Centromere",
+    "explanation": "Centromeres are defined by CENP-A histone variant incorporation and serve as assembly platforms for the kinetochore complex that attaches spindle microtubules.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "Which protein acts as the sensor for DNA double-strand breaks, recruiting repair machinery?",
+    "options": [
+      "BRCA1",
+      "p53",
+      "ATM kinase",
+      "Ku70/80"
+    ],
+    "correct_answer": "ATM kinase",
+    "explanation": "ATM (Ataxia Telangiectasia Mutated) kinase is activated by DSBs and phosphorylates H2AX and other substrates to coordinate DNA damage response.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the name of the molecular motor protein that moves cargo toward the minus end of microtubules?",
+    "options": [
+      "Myosin VI",
+      "Kinesin",
+      "Myosin V",
+      "Dynein"
+    ],
+    "correct_answer": "Dynein",
+    "explanation": "Cytoplasmic dynein is a minus-end directed motor that transports cargo from the cell periphery toward the centrosome/nucleus.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "Which regulatory RNA prevents the translation of target mRNAs by partial complementarity?",
+    "options": [
+      "miRNA",
+      "siRNA",
+      "piRNA",
+      "lncRNA"
+    ],
+    "correct_answer": "miRNA",
+    "explanation": "MicroRNAs (miRNAs) are ~22 nt non-coding RNAs that bind imperfectly to 3'UTR of target mRNAs, causing translational repression or mRNA degradation.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the term for the phenomenon where a single amino acid change causes a protein to misfold and aggregate?",
+    "options": [
+      "Prion conversion",
+      "Amyloidosis",
+      "Proteotoxic stress",
+      "Chaperonopathy"
+    ],
+    "correct_answer": "Amyloidosis",
+    "explanation": "Amyloidosis involves proteins adopting beta-sheet rich conformations that aggregate into insoluble fibrils, causing diseases like Alzheimer's and Parkinson's.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "Which post-translational modification regulates G protein signaling duration?",
+    "options": [
+      "Ubiquitination",
+      "Phosphorylation by PKA",
+      "GTP hydrolysis by intrinsic GTPase activity",
+      "Acetylation"
+    ],
+    "correct_answer": "GTP hydrolysis by intrinsic GTPase activity",
+    "explanation": "G protein alpha subunits have intrinsic GTPase activity that hydrolyzes GTP to GDP, self-terminating the signal transduction cascade.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the molecular basis of quorum sensing in bacteria?",
+    "options": [
+      "Viral infection transfers regulatory genes",
+      "Nutrient depletion triggers sporulation",
+      "Temperature change alters sigma factor",
+      "Accumulation of autoinducer molecules activates gene expression at high cell density"
+    ],
+    "correct_answer": "Accumulation of autoinducer molecules activates gene expression at high cell density",
+    "explanation": "Bacteria produce and secrete autoinducers; when concentrations reach threshold, they activate transcription factors controlling virulence and biofilm genes.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "Which process generates the diversity of antibody heavy chain variable regions?",
+    "options": [
+      "V(D)J recombination",
+      "Somatic hypermutation",
+      "Class switching",
+      "Gene conversion"
+    ],
+    "correct_answer": "V(D)J recombination",
+    "explanation": "V(D)J recombination is the RAG-mediated cutting and joining of V, D, and J gene segments to generate the diverse primary antibody repertoire.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the name for the chromatin-remodeling complex that uses ATP to reposition nucleosomes?",
+    "options": [
+      "PRC2 complex",
+      "SWI/SNF complex",
+      "NuRD complex",
+      "HDAC complex"
+    ],
+    "correct_answer": "SWI/SNF complex",
+    "explanation": "SWI/SNF (BAF) complex uses ATP hydrolysis to slide, eject, or restructure nucleosomes, regulating chromatin accessibility for transcription.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "Which process describes the conversion of a normal cell to a malignant cell?",
+    "options": [
+      "Senescence",
+      "Apoptosis",
+      "Oncogenesis",
+      "Differentiation"
+    ],
+    "correct_answer": "Oncogenesis",
+    "explanation": "Oncogenesis (carcinogenesis) is the multi-step process by which normal cells acquire mutations that drive uncontrolled proliferation and malignant transformation.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the molecular function of BRCA1 in DNA repair?",
+    "options": [
+      "Degrades damaged chromosomes",
+      "Directly cuts damaged DNA",
+      "Synthesizes new DNA at breaks",
+      "Scaffolding protein for HR repair at DNA double-strand breaks"
+    ],
+    "correct_answer": "Scaffolding protein for HR repair at DNA double-strand breaks",
+    "explanation": "BRCA1 coordinates homologous recombination repair by recruiting and organizing repair factors at DNA double-strand breaks, especially in S/G2 phase.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "Which type of RNA virus uses reverse transcriptase to integrate into the host genome?",
+    "options": [
+      "Retrovirus",
+      "Coronavirus",
+      "Influenza virus",
+      "Picornavirus"
+    ],
+    "correct_answer": "Retrovirus",
+    "explanation": "Retroviruses (like HIV) use reverse transcriptase to convert their RNA genome into DNA, which integrase then inserts into the host chromosome.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the name for metabolic reprogramming in cancer cells favoring glycolysis even in oxygen?",
+    "options": [
+      "Pasteur effect",
+      "Warburg effect",
+      "Crabtree effect",
+      "Metabolic shift"
+    ],
+    "correct_answer": "Warburg effect",
+    "explanation": "The Warburg effect describes cancer cells' preference for aerobic glycolysis over oxidative phosphorylation, producing lactate even when O2 is available.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "Which transcription factor coordinates the heat shock response by activating chaperone genes?",
+    "options": [
+      "AP-1",
+      "NF-κB",
+      "HSF1",
+      "CREB"
+    ],
+    "correct_answer": "HSF1",
+    "explanation": "Heat shock factor 1 (HSF1) trimerizes and activates transcription of heat shock proteins (HSPs) in response to proteotoxic stress.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the primary mechanism of CRISPR-Cas9 specificity?",
+    "options": [
+      "Methylation pattern recognition",
+      "Protein-DNA hydrogen bonding",
+      "Restriction enzyme recognition sites",
+      "Guide RNA complementarity to target DNA sequence"
+    ],
+    "correct_answer": "Guide RNA complementarity to target DNA sequence",
+    "explanation": "CRISPR-Cas9 specificity is determined by the 20-nt guide RNA sequence complementary to the target DNA adjacent to a PAM sequence.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "Which cellular process selectively degrades damaged organelles through autophagy?",
+    "options": [
+      "Mitophagy",
+      "Macroautophagy",
+      "Microautophagy",
+      "Chaperone-mediated autophagy"
+    ],
+    "correct_answer": "Mitophagy",
+    "explanation": "Mitophagy is selective autophagy of damaged mitochondria, regulated by PINK1/Parkin pathway, essential for mitochondrial quality control.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the name for the epigenetic mark associated with transcriptionally active chromatin?",
+    "options": [
+      "H3K27me3",
+      "H3K4me3",
+      "H3K9me3",
+      "DNA methylation"
+    ],
+    "correct_answer": "H3K4me3",
+    "explanation": "Trimethylation of histone H3 at lysine 4 (H3K4me3) marks active gene promoters and is associated with open, transcriptionally active chromatin.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "Which mechanism allows HIV to evade immune detection by downregulating MHC-I?",
+    "options": [
+      "Rev protein sequesters MHC mRNA",
+      "Tat protein blocks antigen presentation",
+      "Nef protein downregulates MHC-I from cell surface",
+      "Vpr degrades MHC-I"
+    ],
+    "correct_answer": "Nef protein downregulates MHC-I from cell surface",
+    "explanation": "HIV Nef promotes endocytosis and lysosomal degradation of MHC class I molecules, reducing antigen presentation to cytotoxic T cells.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the molecular mechanism of RNA polymerase promoter escape?",
+    "options": [
+      "Enhancer activation drives RNA Pol II forward",
+      "Sigma factor dissociation enables processive elongation",
+      "TFIID binding stabilizes elongation complex",
+      "Phosphorylation of CTD serum allows release from Mediator complex"
+    ],
+    "correct_answer": "Phosphorylation of CTD serum allows release from Mediator complex",
+    "explanation": "Phosphorylation of RNA Pol II's C-terminal domain (CTD) Ser5 allows it to release from the promoter-bound Mediator complex and transition to processive elongation.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "Which protein family regulates apoptosis through controlling mitochondrial membrane permeability?",
+    "options": [
+      "Bcl-2 family",
+      "Caspase family",
+      "IAP family",
+      "TNF receptor family"
+    ],
+    "correct_answer": "Bcl-2 family",
+    "explanation": "Bcl-2 family proteins regulate apoptosis through the mitochondrial (intrinsic) pathway — anti-apoptotic members (Bcl-2, Bcl-XL) oppose pro-apoptotic members (Bax, Bak).",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the name for the process where bacteria exchange genetic material through phage-mediated DNA transfer?",
+    "options": [
+      "Conjugation",
+      "Transduction",
+      "Transformation",
+      "Transfection"
+    ],
+    "correct_answer": "Transduction",
+    "explanation": "Transduction is the bacteriophage-mediated transfer of bacterial DNA from donor to recipient cell — generalized transduction packages random DNA fragments.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the molecular basis for the selectivity of ion channels?",
+    "options": [
+      "Ligand binding determines which ions pass",
+      "Protein phosphorylation changes pore size",
+      "Filter region geometry and electrostatic interactions match specific ion dimensions",
+      "ATP energy drives selective transport"
+    ],
+    "correct_answer": "Filter region geometry and electrostatic interactions match specific ion dimensions",
+    "explanation": "The selectivity filter uses precise amino acid spacing and electrostatic charges to allow passage of specific ions (like K+ vs Na+) based on size and charge.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "Which chromatin modification is the hallmark of polycomb-mediated gene silencing?",
+    "options": [
+      "H3K4me3",
+      "H3K36me3",
+      "H3K9ac",
+      "H3K27me3"
+    ],
+    "correct_answer": "H3K27me3",
+    "explanation": "PRC2 complex trimethylates H3K27, creating a repressive mark that recruits PRC1 to compact chromatin and silence developmental genes.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the name for the molecular process where the ribosome is stalled and rescued during translation?",
+    "options": [
+      "tmRNA-mediated trans-translation",
+      "Ribosome rescue",
+      "Ribosome quality control",
+      "No-go decay"
+    ],
+    "correct_answer": "tmRNA-mediated trans-translation",
+    "explanation": "When bacterial ribosomes stall at damaged mRNA, tmRNA (transfer-messenger RNA) acts as both tRNA and mRNA to add a degradation tag and resume translation.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "Which signaling molecule activates protein kinase A (PKA)?",
+    "options": [
+      "cGMP",
+      "cAMP",
+      "IP3",
+      "DAG"
+    ],
+    "correct_answer": "cAMP",
+    "explanation": "cAMP (cyclic AMP) produced by adenylyl cyclase binds to the regulatory subunits of PKA, releasing and activating the catalytic subunits.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the molecular basis of nonsense-mediated mRNA decay (NMD)?",
+    "options": [
+      "Cap removal initiates degradation",
+      "Incorrect splicing activates decay",
+      "Premature stop codons trigger mRNA degradation via exon junction complexes",
+      "Ribosome stalling triggers nuclease activity"
+    ],
+    "correct_answer": "Premature stop codons trigger mRNA degradation via exon junction complexes",
+    "explanation": "NMD degrades mRNAs with premature termination codons; when a stop codon is recognized upstream of an exon junction complex, UPF proteins trigger mRNA decay.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "Which DNA repair mechanism corrects mismatched bases after replication?",
+    "options": [
+      "Homologous recombination",
+      "Nucleotide excision repair",
+      "Base excision repair",
+      "Mismatch repair (MMR)"
+    ],
+    "correct_answer": "Mismatch repair (MMR)",
+    "explanation": "MMR uses MutS to recognize mismatches, MutL as mediator, and MutH to nick the new strand for excision and resynthesis of the error region.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the function of the spindle assembly checkpoint (SAC)?",
+    "options": [
+      "Delay anaphase until all kinetochores are attached to spindle",
+      "Ensure DNA replication is complete",
+      "Check for DNA damage in S phase",
+      "Monitor cytokinesis completion"
+    ],
+    "correct_answer": "Delay anaphase until all kinetochores are attached to spindle",
+    "explanation": "The SAC prevents premature anaphase by generating a wait signal (MCC complex) from unattached kinetochores that inhibits APC/C activity.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "Which protein is the central regulator of the intrinsic apoptosis pathway?",
+    "options": [
+      "Caspase-8",
+      "Cytochrome c",
+      "FasL",
+      "TNF-alpha"
+    ],
+    "correct_answer": "Cytochrome c",
+    "explanation": "Cytochrome c released from mitochondria binds Apaf-1 to form the apoptosome, which activates caspase-9 and initiates the caspase cascade.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the name for the mechanism by which microbes escape autophagy?",
+    "options": [
+      "Autophagy evasion",
+      "Autophagosome escape",
+      "Xenophagy blockade",
+      "Autophagic flux inhibition"
+    ],
+    "correct_answer": "Xenophagy blockade",
+    "explanation": "Many pathogens evolved virulence factors that block xenophagy (selective autophagy of microbes) by preventing autophagosome formation or maturation.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "Which process generates the immunological memory enabling rapid secondary responses?",
+    "options": [
+      "NK cell memory formation",
+      "Innate immune priming",
+      "Complement activation",
+      "Clonal expansion and differentiation of antigen-specific B and T cells into memory cells"
+    ],
+    "correct_answer": "Clonal expansion and differentiation of antigen-specific B and T cells into memory cells",
+    "explanation": "During primary immune responses, antigen-activated lymphocytes clonally expand; a subset differentiates into long-lived memory cells that mount faster, stronger secondary responses.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the function of the exosome complex in RNA metabolism?",
+    "options": [
+      "3' to 5' RNA degradation",
+      "5' cap addition",
+      "Polyadenylation",
+      "mRNA export"
+    ],
+    "correct_answer": "3' to 5' RNA degradation",
+    "explanation": "The RNA exosome is a multi-subunit complex with 3'→5' exoribonuclease activity involved in processing and degradation of diverse RNA species.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "Which molecular mechanism underlies long-term potentiation (LTP) at synapses?",
+    "options": [
+      "GABA receptor upregulation",
+      "AMPA receptor insertion into postsynaptic membrane",
+      "Presynaptic neurotransmitter depletion",
+      "Myelin sheath thickening"
+    ],
+    "correct_answer": "AMPA receptor insertion into postsynaptic membrane",
+    "explanation": "LTP involves NMDA receptor-triggered Ca2+ influx leading to CaMKII activation, which phosphorylates and inserts AMPA receptors, strengthening synaptic transmission.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the name for the phenomenon where one allele prevents the expression of another at a different locus?",
+    "options": [
+      "Pleiotropy",
+      "Dominance",
+      "Epistasis",
+      "Penetrance"
+    ],
+    "correct_answer": "Epistasis",
+    "explanation": "Epistasis occurs when alleles at one gene locus mask or modify the expression of alleles at another locus, affecting phenotypic ratios in crosses.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "Which cellular process involves the bulk uptake of extracellular fluid via small vesicles?",
+    "options": [
+      "Phagocytosis",
+      "Exocytosis",
+      "Receptor-mediated endocytosis",
+      "Pinocytosis"
+    ],
+    "correct_answer": "Pinocytosis",
+    "explanation": "Pinocytosis (cell drinking) is the non-specific uptake of extracellular fluid and dissolved solutes by small vesicles forming from the plasma membrane.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the molecular basis of antibiotic resistance via efflux pumps?",
+    "options": [
+      "Active export of antibiotic molecules from the cell",
+      "Enzymatic degradation of antibiotic",
+      "Modification of antibiotic target",
+      "Reduced membrane permeability"
+    ],
+    "correct_answer": "Active export of antibiotic molecules from the cell",
+    "explanation": "Efflux pumps use proton motive force or ATP to actively export antibiotics from bacteria before they reach inhibitory concentrations, conferring multidrug resistance.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the name for the enzyme complex responsible for removing introns from pre-mRNA?",
+    "options": [
+      "Ribosome",
+      "Spliceosome",
+      "Exosome",
+      "Editosome"
+    ],
+    "correct_answer": "Spliceosome",
+    "explanation": "The spliceosome is a large ribonucleoprotein complex (snRNPs + proteins) that catalyzes splicing of introns from pre-mRNA in eukaryotes.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the molecular mechanism of Shine-Dalgarno sequence function in bacteria?",
+    "options": [
+      "Enhances transcription initiation",
+      "Signals mRNA polyadenylation",
+      "Base pairs with 16S rRNA to position mRNA on the ribosome",
+      "Recruits sigma factors"
+    ],
+    "correct_answer": "Base pairs with 16S rRNA to position mRNA on the ribosome",
+    "explanation": "The Shine-Dalgarno sequence upstream of the AUG start codon base-pairs with the 3' end of 16S rRNA, positioning the mRNA correctly in the ribosomal P-site.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "Which protein catalyzes the exchange of GDP for GTP on RAS?",
+    "options": [
+      "GAP (GTPase activating protein)",
+      "Phosphatase",
+      "Kinase",
+      "GEF (guanine nucleotide exchange factor)"
+    ],
+    "correct_answer": "GEF (guanine nucleotide exchange factor)",
+    "explanation": "GEFs catalyze the exchange of GDP for GTP on GTPases like RAS, activating them. GAPs accelerate GTP hydrolysis to inactivate GTPases.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the name for the process where homologous chromosomes pair intimately during prophase I?",
+    "options": [
+      "Synapsis",
+      "Crossing over",
+      "Condensation",
+      "Segregation"
+    ],
+    "correct_answer": "Synapsis",
+    "explanation": "Synapsis is the precise pairing of homologous chromosomes along their entire length during Prophase I of meiosis, mediated by the synaptonemal complex.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "Which enzyme adds the 5' cap to eukaryotic mRNA?",
+    "options": [
+      "Poly-A polymerase",
+      "Capping enzyme (RNA triphosphatase/guanylyltransferase)",
+      "Ligase",
+      "Primase"
+    ],
+    "correct_answer": "Capping enzyme (RNA triphosphatase/guanylyltransferase)",
+    "explanation": "After RNA Pol II transcribes ~25 nt, capping enzyme adds a 7-methylguanosine cap via an unusual 5'→5' triphosphate bond, protecting mRNA and enabling translation.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the name for the MAPK cascade component immediately downstream of RAS?",
+    "options": [
+      "MEK",
+      "ERK",
+      "RAF",
+      "RSK"
+    ],
+    "correct_answer": "RAF",
+    "explanation": "Activated RAS binds and recruits RAF (MAPKKK) to the membrane, activating the RAF→MEK→ERK kinase cascade for cell proliferation and survival signals.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "Which mechanism explains how steroid hormones regulate gene expression?",
+    "options": [
+      "Bind membrane receptors to activate second messengers",
+      "Inhibit protein kinases",
+      "Activate G-protein coupled receptors",
+      "Bind intracellular receptors that act as transcription factors"
+    ],
+    "correct_answer": "Bind intracellular receptors that act as transcription factors",
+    "explanation": "Steroid hormones diffuse into cells and bind nuclear receptors, which dimerize and bind hormone response elements (HREs) in DNA to activate or repress transcription.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the function of the APC/C (anaphase-promoting complex/cyclosome)?",
+    "options": [
+      "Ubiquitinate securin and cyclin B to trigger anaphase",
+      "Synthesize cyclins",
+      "Phosphorylate histone H1",
+      "Activate DNA replication origins"
+    ],
+    "correct_answer": "Ubiquitinate securin and cyclin B to trigger anaphase",
+    "explanation": "APC/C-Cdc20 ubiquitinates securin (allowing separase to cleave cohesin) and cyclin B (destroying CDK1 activity) to trigger chromosome segregation.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "Which component of the complement system forms the membrane attack complex (MAC)?",
+    "options": [
+      "C3b",
+      "C5b-9",
+      "C1q",
+      "C4b"
+    ],
+    "correct_answer": "C5b-9",
+    "explanation": "The MAC is assembled from C5b, C6, C7, C8, and multiple C9 molecules forming a pore in bacterial membranes, causing lysis.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the term for the evolutionary theory proposing neutral mutations spread by drift?",
+    "options": [
+      "Selectionist theory",
+      "Molecular clock hypothesis",
+      "Neutral theory of molecular evolution",
+      "Coalescent theory"
+    ],
+    "correct_answer": "Neutral theory of molecular evolution",
+    "explanation": "Kimura's neutral theory proposes that most molecular variation is selectively neutral and evolves through genetic drift rather than positive selection.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "Which molecule acts as the second messenger in the IP3/DAG signaling pathway?",
+    "options": [
+      "cAMP",
+      "PIP2",
+      "cGMP",
+      "IP3"
+    ],
+    "correct_answer": "IP3",
+    "explanation": "PLCβ hydrolyzes PIP2 to generate IP3 (inositol trisphosphate) and DAG. IP3 triggers Ca2+ release from the ER, while DAG activates PKC.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the molecular mechanism of restriction enzymes in bacteria?",
+    "options": [
+      "Degrade foreign DNA at specific palindromic sequences",
+      "Block viral replication by degrading RNA",
+      "Inactivate phage proteins",
+      "Prevent phage attachment"
+    ],
+    "correct_answer": "Degrade foreign DNA at specific palindromic sequences",
+    "explanation": "Type II restriction endonucleases cleave double-stranded DNA at specific palindromic sequences, destroying unmethylated foreign (phage) DNA.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "Which model best explains speciation in island archipelagos?",
+    "options": [
+      "Sympatric speciation",
+      "Allopatric speciation via geographic isolation",
+      "Parapatric speciation",
+      "Reinforcement"
+    ],
+    "correct_answer": "Allopatric speciation via geographic isolation",
+    "explanation": "Island archipelagos promote allopatric speciation — physical isolation between islands prevents gene flow, allowing populations to diverge through drift and selection.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the function of the RecA protein in bacterial DNA repair?",
+    "options": [
+      "Recognize DNA damage",
+      "Synthesize new DNA",
+      "Catalyze strand invasion and homologous recombination",
+      "Seal nicks in repaired DNA"
+    ],
+    "correct_answer": "Catalyze strand invasion and homologous recombination",
+    "explanation": "RecA coats ssDNA and catalyzes the search for homology and strand invasion into intact duplex DNA, initiating homologous recombination repair.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the name for the process by which the immune system tolerates self-antigens?",
+    "options": [
+      "Clonal anergy",
+      "Immune ignorance",
+      "Peripheral tolerance",
+      "Central tolerance"
+    ],
+    "correct_answer": "Central tolerance",
+    "explanation": "Central tolerance is established in thymus (T cells) and bone marrow (B cells) through clonal deletion of self-reactive lymphocytes.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "Which kinase phosphorylates p53 to prevent its interaction with MDM2?",
+    "options": [
+      "ATM/ATR",
+      "CDK2",
+      "PKA",
+      "mTOR"
+    ],
+    "correct_answer": "ATM/ATR",
+    "explanation": "DNA damage activates ATM/ATR kinases, which phosphorylate p53 at Ser15/Ser20, disrupting its interaction with MDM2 and stabilizing p53 to activate DNA damage response genes.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the name for the histone modification that opens chromatin for transcription?",
+    "options": [
+      "H3K27 trimethylation",
+      "H3K9 acetylation",
+      "H3K9 trimethylation",
+      "DNA methylation at CpGs"
+    ],
+    "correct_answer": "H3K9 acetylation",
+    "explanation": "Acetylation of H3K9 by HATs neutralizes positive charge on histones, reducing DNA-histone interaction and opening chromatin for transcriptional activation.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "Which molecular feature distinguishes intrinsically disordered proteins?",
+    "options": [
+      "High hydrophobicity",
+      "High cysteine content",
+      "Lack of stable 3D structure under native conditions",
+      "Presence of transmembrane domains"
+    ],
+    "correct_answer": "Lack of stable 3D structure under native conditions",
+    "explanation": "Intrinsically disordered proteins (IDPs) lack stable tertiary structure under physiological conditions, gaining structure upon binding partners — common in signaling hubs.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the function of the origin recognition complex (ORC) at DNA replication origins?",
+    "options": [
+      "Unwind DNA at replication forks",
+      "Ligate Okazaki fragments",
+      "Synthesize RNA primers",
+      "Recruit MCM helicase to establish pre-replication complexes"
+    ],
+    "correct_answer": "Recruit MCM helicase to establish pre-replication complexes",
+    "explanation": "ORC marks replication origins and coordinates with CDC6 and CDT1 to load the MCM2-7 helicase, establishing pre-RC for S-phase replication.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "Which biological process is mediated by the JAK-STAT signaling pathway?",
+    "options": [
+      "Cytokine-mediated gene expression",
+      "Cell cycle arrest",
+      "G protein activation",
+      "Receptor tyrosine kinase signaling"
+    ],
+    "correct_answer": "Cytokine-mediated gene expression",
+    "explanation": "JAK-STAT signaling is the primary pathway for cytokine, interferon, and growth hormone receptors — JAKs phosphorylate STATs which dimerize and activate target genes.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the molecular basis for the lac operon being both negatively and positively regulated?",
+    "options": [
+      "Multiple promoters with different sigma factors",
+      "Repressor protein and CAP-cAMP dual control",
+      "Multiple operator sites with different affinities",
+      "Sigma factor competition"
+    ],
+    "correct_answer": "Repressor protein and CAP-cAMP dual control",
+    "explanation": "The lac operon is negatively regulated by LacI repressor (blocked by allolactose) and positively regulated by CAP-cAMP complex (activated when glucose is absent).",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "Which feature of cancer cells enables unlimited replicative potential?",
+    "options": [
+      "Loss of contact inhibition",
+      "Angiogenesis",
+      "Telomerase reactivation",
+      "Immune evasion"
+    ],
+    "correct_answer": "Telomerase reactivation",
+    "explanation": "~90% of human cancers reactivate telomerase, preventing telomere shortening and enabling cells to divide indefinitely without entering replicative senescence.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the name for the protein that recruits the spliceosome by bridging SR proteins to the 5' splice site?",
+    "options": [
+      "hnRNP",
+      "Branchpoint binding protein",
+      "U1 snRNP",
+      "U2AF"
+    ],
+    "correct_answer": "U2AF",
+    "explanation": "U2AF (U2 auxiliary factor) is a splicing factor that recognizes the polypyrimidine tract and recruits U2 snRNP to the branch point for spliceosome assembly.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "Which lipid modification anchors proteins to the outer leaflet of the plasma membrane?",
+    "options": [
+      "GPI anchor",
+      "Palmitoylation",
+      "Myristoylation",
+      "Farnesylation"
+    ],
+    "correct_answer": "GPI anchor",
+    "explanation": "GPI (glycosylphosphatidylinositol) anchors are lipid modifications that tether proteins exclusively to the outer leaflet of the plasma membrane.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the molecular target of rapamycin (sirolimus) in cell signaling?",
+    "options": [
+      "PI3K",
+      "mTORC1",
+      "AKT",
+      "CDK4"
+    ],
+    "correct_answer": "mTORC1",
+    "explanation": "Rapamycin binds FKBP12 and the complex inhibits mTORC1, reducing protein synthesis, autophagy suppression, and cell growth.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "Which mechanism is responsible for generating immunoglobulin diversity after antigen exposure?",
+    "options": [
+      "V(D)J recombination",
+      "Class switch recombination",
+      "Somatic hypermutation",
+      "All of the above"
+    ],
+    "correct_answer": "Somatic hypermutation",
+    "explanation": "After antigen encounter, activated B cells undergo somatic hypermutation in germinal centers, introducing random mutations in V regions to generate higher-affinity antibodies.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the function of DICER in the RNAi pathway?",
+    "options": [
+      "Synthesize siRNA from templates",
+      "Degrade target mRNA",
+      "Load siRNA into RISC",
+      "Cleave dsRNA into ~21 nt siRNA duplexes"
+    ],
+    "correct_answer": "Cleave dsRNA into ~21 nt siRNA duplexes",
+    "explanation": "DICER is a ribonuclease III enzyme that processes long dsRNA or pre-miRNA hairpins into ~21-23 nt small RNA duplexes for loading into RISC.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "Which protein complex mediates chromosome condensation during mitosis?",
+    "options": [
+      "Condensin",
+      "Cohesin",
+      "SWI/SNF",
+      "Polycomb"
+    ],
+    "correct_answer": "Condensin",
+    "explanation": "Condensin complexes (I and II) use SMC proteins and ATP hydrolysis to compact chromosomes into the highly condensed structures visible during mitosis.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the molecular mechanism by which colchicine disrupts cell division?",
+    "options": [
+      "Inhibits DNA replication",
+      "Binds tubulin dimers and prevents microtubule polymerization",
+      "Activates the spindle checkpoint",
+      "Inhibits CDK1 activity"
+    ],
+    "correct_answer": "Binds tubulin dimers and prevents microtubule polymerization",
+    "explanation": "Colchicine binds to free tubulin dimers at the colchicine-binding site, preventing microtubule polymerization and disrupting the mitotic spindle.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "Which transcription factor is the master regulator of adipogenesis?",
+    "options": [
+      "MyoD",
+      "GATA1",
+      "PPARγ",
+      "MyoG"
+    ],
+    "correct_answer": "PPARγ",
+    "explanation": "PPARγ (peroxisome proliferator-activated receptor gamma) is the master transcriptional regulator of adipocyte differentiation and lipid metabolism.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the function of the unfolded protein response (UPR) in ER stress?",
+    "options": [
+      "Increase ER protein synthesis capacity",
+      "Activate inflammatory pathways only",
+      "Trigger immediate apoptosis",
+      "Reduce ER protein load and increase folding capacity"
+    ],
+    "correct_answer": "Reduce ER protein load and increase folding capacity",
+    "explanation": "UPR activates three branches (IRE1, PERK, ATF6) to reduce translation, increase chaperone expression, and enhance ERAD to restore ER homeostasis.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "Which enzyme is responsible for decatenating daughter chromosomes after replication?",
+    "options": [
+      "Topoisomerase II",
+      "Helicase",
+      "Ligase",
+      "Primase"
+    ],
+    "correct_answer": "Topoisomerase II",
+    "explanation": "Topoisomerase II resolves catenated daughter chromosomes after replication by creating double-strand breaks, passing one strand through another, and resealing.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the name for the protein that prevents re-replication by blocking origin licensing?",
+    "options": [
+      "Cyclin E",
+      "Geminin",
+      "CDK2",
+      "RB"
+    ],
+    "correct_answer": "Geminin",
+    "explanation": "Geminin is expressed in S/G2/M phases and inhibits CDT1, preventing MCM helicase reloading and ensuring each origin fires only once per cell cycle.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "Which signal transduction event is required for T cell activation?",
+    "options": [
+      "BCR crosslinking",
+      "Cytokine receptor signaling alone",
+      "TCR engagement plus co-stimulation via CD28",
+      "Toll-like receptor activation"
+    ],
+    "correct_answer": "TCR engagement plus co-stimulation via CD28",
+    "explanation": "Full T cell activation requires two signals: TCR-MHC:peptide interaction (Signal 1) and CD28-B7 co-stimulation (Signal 2); Signal 1 alone leads to anergy.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What molecular mechanism allows PCNA to function as a sliding clamp in DNA replication?",
+    "options": [
+      "ATP-driven helicase activity",
+      "PCNA directly unwinds the double helix",
+      "Phosphorylation by CDK2 activates PCNA",
+      "RFC loads PCNA as a toroidal clamp encircling double-stranded DNA"
+    ],
+    "correct_answer": "RFC loads PCNA as a toroidal clamp encircling double-stranded DNA",
+    "explanation": "RFC (replication factor C) uses ATP to open the PCNA ring and load it onto ds-DNA at primer-template junctions, tethering DNA polymerase for processive synthesis.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "Which molecular event determines sister chromatid cohesion establishment?",
+    "options": [
+      "Cohesin loading during S phase DNA replication",
+      "Histone acetylation during G1",
+      "Condensin binding at centromeres",
+      "CDK1 phosphorylation in G2"
+    ],
+    "correct_answer": "Cohesin loading during S phase DNA replication",
+    "explanation": "Cohesin complexes are loaded onto chromosomes during S phase and form topological rings that entrap sister chromatids, maintaining their cohesion until anaphase.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the name for the tumor suppressor that monitors mitochondrial membrane integrity?",
+    "options": [
+      "p21",
+      "PUMA",
+      "p53",
+      "BAX"
+    ],
+    "correct_answer": "PUMA",
+    "explanation": "PUMA (p53-upregulated modulator of apoptosis) is a BH3-only protein induced by p53 that neutralizes anti-apoptotic Bcl-2 proteins to trigger cytochrome c release.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "Which molecular clock gene controls circadian rhythm in mammals?",
+    "options": [
+      "PERIOD",
+      "BMAL1",
+      "CLOCK",
+      "CRY"
+    ],
+    "correct_answer": "CLOCK",
+    "explanation": "CLOCK is a core circadian clock transcription factor that dimerizes with BMAL1 to drive expression of PER and CRY genes, which feedback to suppress CLOCK-BMAL1 activity.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the molecular function of the SMN (survival motor neuron) protein?",
+    "options": [
+      "Transcription factor for neuron-specific genes",
+      "Synaptic vesicle docking",
+      "Axonal transport of mRNA",
+      "Assembly of snRNPs for pre-mRNA splicing"
+    ],
+    "correct_answer": "Assembly of snRNPs for pre-mRNA splicing",
+    "explanation": "SMN protein facilitates the assembly of spliceosomal snRNPs by loading Sm proteins onto snRNA, deficiency of which causes spinal muscular atrophy.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "Which type of gene conversion drives rapid concerted evolution of multigene families?",
+    "options": [
+      "Biased gene conversion",
+      "Sister chromatid conversion",
+      "Unequal crossing over",
+      "Transposon-mediated recombination"
+    ],
+    "correct_answer": "Biased gene conversion",
+    "explanation": "Biased gene conversion is a form of recombination-associated repair that preferentially converts certain alleles, causing their spread through populations.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the name for the process where developing neurons compete for limited neurotrophic factors?",
+    "options": [
+      "Axonal pruning",
+      "Programmed cell death (apoptosis) via neurotrophic factor competition",
+      "Synaptic plasticity",
+      "Dendritic arborization"
+    ],
+    "correct_answer": "Programmed cell death (apoptosis) via neurotrophic factor competition",
+    "explanation": "During neural development, neurons compete for limited NGF and other neurotrophins — those without adequate supply undergo apoptosis, refining neural circuits.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What molecular feature makes prions infectious without nucleic acid?",
+    "options": [
+      "High lipid content",
+      "Resistance to proteases",
+      "Ability to propagate misfolded protein conformation",
+      "Surface charge properties"
+    ],
+    "correct_answer": "Ability to propagate misfolded protein conformation",
+    "explanation": "Prions (PrPSc) propagate by acting as templates that induce conformational change in normal PrPC, converting it to the misfolded, aggregating PrPSc form.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the name for the molecular event triggering irreversible cell cycle commitment?",
+    "options": [
+      "CDK4/6 activation",
+      "Geminin destruction",
+      "PCNA loading",
+      "Restriction point passage (RB hyperphosphorylation)"
+    ],
+    "correct_answer": "Restriction point passage (RB hyperphosphorylation)",
+    "explanation": "The restriction point is the commitment point in late G1 — CDK4/6-cyclin D hyperphosphorylates RB, releasing E2F transcription factors to drive S-phase entry irreversibly.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the molecular basis of the two-hit hypothesis in tumor suppressor inactivation?",
+    "options": [
+      "Both alleles of a tumor suppressor must be inactivated",
+      "Two different oncogenes must be activated",
+      "Two independent chromosomal translocations",
+      "Two sequential mutations in the same oncogene"
+    ],
+    "correct_answer": "Both alleles of a tumor suppressor must be inactivated",
+    "explanation": "Knudson's two-hit hypothesis states that cancer requires inactivation of both copies of a tumor suppressor gene — the first hit (germline or somatic) and second hit (somatic LOH).",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "Which component of the innate immune system recognizes pathogen-associated molecular patterns?",
+    "options": [
+      "MHC molecules",
+      "Toll-like receptors (TLRs)",
+      "T cell receptors",
+      "Immunoglobulins"
+    ],
+    "correct_answer": "Toll-like receptors (TLRs)",
+    "explanation": "Toll-like receptors are pattern recognition receptors on innate immune cells that detect conserved PAMPs (like LPS, flagellin, CpG DNA) to trigger innate immune responses.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the function of the nuclear lamina?",
+    "options": [
+      "Package chromatin into nucleosomes",
+      "Process pre-mRNA",
+      "Provide structural support for the nuclear envelope and organize chromatin",
+      "Export proteins to the cytoplasm"
+    ],
+    "correct_answer": "Provide structural support for the nuclear envelope and organize chromatin",
+    "explanation": "The nuclear lamina is a meshwork of lamin intermediate filaments lining the inner nuclear membrane that provides mechanical support and anchors chromatin domains.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "Which epigenetic mark silences transposable elements in the germline?",
+    "options": [
+      "H3K4me3",
+      "H3K36me3",
+      "H3K27me3",
+      "piRNA-mediated DNA methylation"
+    ],
+    "correct_answer": "piRNA-mediated DNA methylation",
+    "explanation": "The piRNA pathway (PIWI-interacting RNAs) silences transposable elements in the germline by directing DNA methylation and H3K9me3 repressive marks.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the term for metabolic enzymes that are activated when AMP:ATP ratio is high?",
+    "options": [
+      "AMPK",
+      "PKA",
+      "Pyruvate dehydrogenase",
+      "mTOR"
+    ],
+    "correct_answer": "AMPK",
+    "explanation": "AMP-activated protein kinase (AMPK) is activated by high AMP:ATP ratios (energy depletion), switching metabolism toward catabolic ATP-producing pathways.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "Which mechanism generates antibody class switching from IgM to IgG?",
+    "options": [
+      "V(D)J recombination",
+      "Class switch recombination",
+      "Somatic hypermutation",
+      "Alternative splicing"
+    ],
+    "correct_answer": "Class switch recombination",
+    "explanation": "Class switch recombination is an AID-mediated DNA deletion event in B cells that changes the constant region from Cμ to Cγ/Cα/Cε, altering antibody effector functions.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the molecular function of the RISC complex in RNAi?",
+    "options": [
+      "Process pre-miRNA hairpins",
+      "Degrade dsRNA precursors",
+      "Cleave or repress target mRNA",
+      "Transport siRNA to the nucleus"
+    ],
+    "correct_answer": "Cleave or repress target mRNA",
+    "explanation": "RISC (RNA-Induced Silencing Complex) loaded with guide strand siRNA or miRNA cleaves perfectly complementary mRNAs (slicer activity via AGO2) or represses translation.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "Which model explains how enhancers activate distant promoters?",
+    "options": [
+      "Stochastic gene expression model",
+      "Tracking model",
+      "Spreading model",
+      "Looping model"
+    ],
+    "correct_answer": "Looping model",
+    "explanation": "The looping model proposes that chromatin loops bring enhancers into direct physical contact with promoters, allowing transcription factors and co-activators to interact.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the term for the post-translational modification that targets proteins to lysosomes via the mannose-6-phosphate pathway?",
+    "options": [
+      "Mannose-6-phosphate tagging",
+      "N-glycosylation",
+      "Ubiquitination",
+      "SUMOylation"
+    ],
+    "correct_answer": "Mannose-6-phosphate tagging",
+    "explanation": "Lysosomal hydrolases are tagged with mannose-6-phosphate in the Golgi, directing their packaging into vesicles destined for lysosomes via M6P receptors.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the name for the mechanism preventing reactivation of fired replication origins in the same S phase?",
+    "options": [
+      "Restriction point control",
+      "Licensing factor model",
+      "G2/M checkpoint",
+      "DNA damage checkpoint"
+    ],
+    "correct_answer": "Licensing factor model",
+    "explanation": "Origin licensing requires MCM helicase loading by CDT1, which is inhibited by geminin and CDK activity after firing, ensuring each origin fires only once per S phase.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "Which receptor mediates the anoikis pathway in normal epithelial cells?",
+    "options": [
+      "Death receptor TRAIL",
+      "Caspase-8 activation",
+      "Integrin signaling loss",
+      "FAS signaling"
+    ],
+    "correct_answer": "Integrin signaling loss",
+    "explanation": "Anoikis is apoptosis triggered when epithelial cells lose integrin-mediated attachment to the extracellular matrix — a critical barrier to metastasis.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the function of the RFC clamp loader in DNA replication?",
+    "options": [
+      "Unwind the DNA double helix",
+      "Synthesize RNA primers",
+      "Seal Okazaki fragments",
+      "Load PCNA clamp onto DNA"
+    ],
+    "correct_answer": "Load PCNA clamp onto DNA",
+    "explanation": "Replication factor C (RFC) uses ATP hydrolysis to open the PCNA ring and load it onto the primer-template junction, enabling processive DNA synthesis by polymerase delta.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "Which metabolic pathway is responsible for synthesis of purine nucleotides de novo?",
+    "options": [
+      "Purine de novo synthesis",
+      "Pyrimidine synthesis",
+      "Salvage pathway",
+      "Nucleotide recycling"
+    ],
+    "correct_answer": "Purine de novo synthesis",
+    "explanation": "The de novo purine synthesis pathway builds the purine ring stepwise on ribose-5-phosphate using amino acids, THF, CO2, and other precursors in 10 enzymatic steps.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the name for the protein complex regulating histone H3K27 methylation in development?",
+    "options": [
+      "SWI/SNF complex",
+      "PRC2 (Polycomb Repressive Complex 2)",
+      "HAT complex",
+      "NuRD complex"
+    ],
+    "correct_answer": "PRC2 (Polycomb Repressive Complex 2)",
+    "explanation": "PRC2 contains the EZH2 methyltransferase that trimethylates H3K27 to silence developmental genes and maintain cell identity.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "Which cellular compartment is the primary site of sterol biosynthesis?",
+    "options": [
+      "Mitochondria",
+      "Nucleus",
+      "Smooth ER",
+      "Peroxisome"
+    ],
+    "correct_answer": "Smooth ER",
+    "explanation": "The smooth ER is the primary site of cholesterol and steroid hormone biosynthesis, containing key enzymes like HMG-CoA reductase.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the molecular basis of Huntington's disease?",
+    "options": [
+      "Loss of function mutation in HTT gene",
+      "Methylation silencing of HTT",
+      "Chromosomal deletion of 4p16",
+      "Triplet repeat expansion in Huntingtin causing toxic protein aggregation"
+    ],
+    "correct_answer": "Triplet repeat expansion in Huntingtin causing toxic protein aggregation",
+    "explanation": "Huntington's disease results from CAG trinucleotide repeat expansion in the HTT gene encoding an abnormally long polyglutamine tract that forms toxic aggregates in neurons.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "Which protein acts as the sensor for unfolded proteins in the ER lumen?",
+    "options": [
+      "BiP/GRP78",
+      "PERK",
+      "IRE1",
+      "ATF6"
+    ],
+    "correct_answer": "BiP/GRP78",
+    "explanation": "BiP (GRP78) is an ER chaperone that binds unfolded proteins under normal conditions; ER stress causes BiP to dissociate from IRE1, PERK, and ATF6, activating them.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the function of the PHD finger domain in chromatin readers?",
+    "options": [
+      "Write H3K4me3 marks",
+      "Recognize H3K4me3 histone marks",
+      "Catalyze DNA methylation",
+      "Deacetylate histones"
+    ],
+    "correct_answer": "Recognize H3K4me3 histone marks",
+    "explanation": "PHD finger domains are chromatin reader modules that specifically recognize and bind methylated H3K4 marks, recruiting transcriptional activators to gene promoters.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "Which co-evolutionary arms race illustrates rapid molecular evolution?",
+    "options": [
+      "Flower-pollinator coevolution",
+      "Mutualistic symbiosis",
+      "Parasite-host coevolution",
+      "Competitive exclusion"
+    ],
+    "correct_answer": "Parasite-host coevolution",
+    "explanation": "Host-parasite coevolution drives rapid molecular evolution — host immune genes and parasite evasion genes evolve rapidly under reciprocal selection (Red Queen dynamics).",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the molecular target of the tumor suppressor PTEN?",
+    "options": [
+      "CDK4",
+      "mTOR directly",
+      "AKT directly",
+      "PIP3 (phosphatidylinositol 3,4,5-trisphosphate)"
+    ],
+    "correct_answer": "PIP3 (phosphatidylinositol 3,4,5-trisphosphate)",
+    "explanation": "PTEN is a lipid phosphatase that dephosphorylates PIP3 to PIP2, opposing PI3K activity and reducing AKT/mTOR signaling to suppress cell survival and proliferation.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "Which molecular mechanism underlies inherited metabolic diseases caused by enzyme deficiencies?",
+    "options": [
+      "Substrate accumulation due to enzyme loss",
+      "Haploinsufficiency",
+      "Gain of function mutations",
+      "Dominant negative effects"
+    ],
+    "correct_answer": "Substrate accumulation due to enzyme loss",
+    "explanation": "Inborn errors of metabolism (e.g., PKU, lysosomal storage diseases) result from enzyme deficiency causing accumulation of toxic substrates that disrupt cellular function.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the name for the nucleosome-free regions (NFRs) at gene promoters?",
+    "options": [
+      "Enhancers",
+      "DNase I hypersensitive sites",
+      "Silencers",
+      "CTCF binding sites"
+    ],
+    "correct_answer": "DNase I hypersensitive sites",
+    "explanation": "DNase I hypersensitive sites are nucleosome-depleted regions of chromatin accessible to transcription factors and DNase I, typically marking active regulatory elements.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "Which post-translational modification regulates kinase activity by conformational change?",
+    "options": [
+      "Methylation",
+      "Ubiquitination",
+      "Phosphorylation of activation loop",
+      "Acetylation"
+    ],
+    "correct_answer": "Phosphorylation of activation loop",
+    "explanation": "Phosphorylation of residues in the kinase activation loop induces conformational changes that either open (activating) or close (inhibiting) the active site.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the molecular basis for the selective permeability of aquaporins?",
+    "options": [
+      "Voltage gating",
+      "Ligand binding",
+      "Phosphorylation-dependent gating",
+      "Electrostatic and size selectivity filter excluding ions"
+    ],
+    "correct_answer": "Electrostatic and size selectivity filter excluding ions",
+    "explanation": "Aquaporins use a narrow selectivity filter with an electrostatic field that allows water molecules (but not protons or ions) to pass single-file through the channel.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "Which epigenetic phenomenon causes differential expression of maternal vs paternal alleles?",
+    "options": [
+      "Genomic imprinting",
+      "Heterochromatin spreading",
+      "X chromosome inactivation",
+      "Position effect variegation"
+    ],
+    "correct_answer": "Genomic imprinting",
+    "explanation": "Genomic imprinting is parent-of-origin specific gene silencing via DNA methylation and H3K27me3 at imprinting control regions, affecting ~1% of mammalian genes.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the function of PCNA ubiquitination in DNA damage tolerance?",
+    "options": [
+      "Recruit nucleotide excision repair factors",
+      "Switch from replicative to translesion synthesis polymerases",
+      "Activate ATM kinase",
+      "Trigger apoptosis"
+    ],
+    "correct_answer": "Switch from replicative to translesion synthesis polymerases",
+    "explanation": "Monoubiquitination of PCNA at K164 by RAD6/RAD18 switches replication polymerases to error-prone translesion synthesis (TLS) polymerases that can bypass DNA lesions.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "Which molecular mechanism generates phase separation in membrane-less organelles?",
+    "options": [
+      "ATP-dependent assembly",
+      "Covalent cross-linking of proteins",
+      "Liquid-liquid phase separation via IDR interactions",
+      "Membrane fusion events"
+    ],
+    "correct_answer": "Liquid-liquid phase separation via IDR interactions",
+    "explanation": "Membrane-less organelles (stress granules, nucleoli) form through liquid-liquid phase separation driven by multivalent weak interactions among intrinsically disordered regions.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the term for DNA sequences that can move via RNA intermediates?",
+    "options": [
+      "DNA transposons",
+      "SINEs and LINEs",
+      "Endogenous retroviruses",
+      "Retrotransposons"
+    ],
+    "correct_answer": "Retrotransposons",
+    "explanation": "Retrotransposons (class I transposons) mobilize via a 'copy-paste' mechanism: transcription to RNA, reverse transcription to DNA, then integration into a new genomic site.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "Which property of cancer cells allows them to survive under hypoxic conditions?",
+    "options": [
+      "HIF-1α-mediated metabolic reprogramming",
+      "Enhanced antioxidant capacity",
+      "Increased mitochondrial biogenesis",
+      "Increased electron transport chain efficiency"
+    ],
+    "correct_answer": "HIF-1α-mediated metabolic reprogramming",
+    "explanation": "Under hypoxia, HIF-1α stabilizes and activates genes encoding glycolytic enzymes, VEGF (for angiogenesis), and proteins that suppress OXPHOS, allowing tumor survival.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the name for the protein that bridges enhancers and promoters in transcription activation?",
+    "options": [
+      "TFIID",
+      "Mediator complex",
+      "RNA Pol II CTD",
+      "TFIIH"
+    ],
+    "correct_answer": "Mediator complex",
+    "explanation": "The Mediator complex is a multi-subunit coactivator that bridges transcription factor-bound enhancers to the RNA Pol II pre-initiation complex at promoters.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "Which molecular event defines the start of S phase in the cell cycle?",
+    "options": [
+      "Cyclin D-CDK4/6 activation",
+      "Rb hyperphosphorylation by CDK2-cyclin E",
+      "Firing of replication origins",
+      "CDC25 activation of CDK1"
+    ],
+    "correct_answer": "Firing of replication origins",
+    "explanation": "S phase is defined by the firing of replication origins — CDK2-cyclin E and CDC7-DBF4 phosphorylate MCM helicase components to initiate unwinding and DNA synthesis.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the function of the APC/C-CDH1 complex in G1 phase?",
+    "options": [
+      "Trigger mitotic entry",
+      "Activate CDK2",
+      "Load replication origins",
+      "Degrade mitotic cyclins maintaining G1 state"
+    ],
+    "correct_answer": "Degrade mitotic cyclins maintaining G1 state",
+    "explanation": "APC/C-CDH1 is active in G1 and degrades mitotic cyclins (A, B) and other substrates to maintain low CDK activity and prevent premature S-phase entry.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the molecular basis for codon degeneracy in the genetic code?",
+    "options": [
+      "Third position wobble allows multiple codons for one amino acid",
+      "Multiple start codons exist",
+      "Multiple amino acids can decode one codon",
+      "Suppressor tRNAs reassign codons"
+    ],
+    "correct_answer": "Third position wobble allows multiple codons for one amino acid",
+    "explanation": "Wobble base pairing at the codon's third position (5' anticodon position) allows a single tRNA to decode multiple synonymous codons differing at position 3.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the name for the membrane tubules connecting adjacent plant cells?",
+    "options": [
+      "Gap junctions",
+      "Plasmodesmata",
+      "Tight junctions",
+      "Desmosomes"
+    ],
+    "correct_answer": "Plasmodesmata",
+    "explanation": "Plasmodesmata are plasma membrane-lined channels traversing the cell wall between adjacent plant cells, allowing direct cytoplasmic communication and transport.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "Which technique uses antibodies conjugated to beads to isolate protein complexes?",
+    "options": [
+      "Western blotting",
+      "ELISA",
+      "Co-immunoprecipitation (Co-IP)",
+      "Flow cytometry"
+    ],
+    "correct_answer": "Co-immunoprecipitation (Co-IP)",
+    "explanation": "Co-IP uses antibody-conjugated beads to pull down a target protein along with its interacting partners, allowing identification of protein-protein interactions.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the molecular mechanism of pyrimidine dimer repair by nucleotide excision repair?",
+    "options": [
+      "Direct photoreversal by photolyase",
+      "Mismatch recognition and strand resynthesis",
+      "Homologous recombination repair",
+      "Dual incision, excision of ~30 nt patch, and resynthesis"
+    ],
+    "correct_answer": "Dual incision, excision of ~30 nt patch, and resynthesis",
+    "explanation": "NER in mammals uses dual incisions 5' and 3' of the lesion, removing ~25-30 nt single-stranded fragments containing the damage, followed by gap filling and ligation.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the name for the ribozyme responsible for peptide bond formation?",
+    "options": [
+      "Peptidyl transferase center (23S/28S rRNA)",
+      "Hammerhead ribozyme",
+      "Group I intron",
+      "RNase P"
+    ],
+    "correct_answer": "Peptidyl transferase center (23S/28S rRNA)",
+    "explanation": "The peptidyl transferase center of the large ribosomal subunit is an RNA-based active site (ribozyme) that catalyzes peptide bond formation between aminoacyl-tRNAs.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "Which mechanism maintains CpG island methylation patterns during DNA replication?",
+    "options": [
+      "De novo methylation by DNMT3a/b",
+      "Maintenance methylation by DNMT1 at hemimethylated CpGs",
+      "RNA-directed DNA methylation",
+      "Histone methyltransferase activity"
+    ],
+    "correct_answer": "Maintenance methylation by DNMT1 at hemimethylated CpGs",
+    "explanation": "DNMT1 preferentially methylates hemimethylated CpG dinucleotides generated during replication, faithfully propagating methylation patterns to daughter cells.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the function of the Hayflick limit in normal cells?",
+    "options": [
+      "Maximum protein synthesis capacity",
+      "Maximum cell membrane size",
+      "Maximum number of cell divisions before senescence",
+      "Maximum metabolic rate"
+    ],
+    "correct_answer": "Maximum number of cell divisions before senescence",
+    "explanation": "The Hayflick limit (~50-70 divisions in human somatic cells) is caused by progressive telomere shortening with each division, eventually triggering replicative senescence.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the molecular function of the Polycomb group protein EZH2?",
+    "options": [
+      "Acetylate H3K27",
+      "Demethylate H3K4",
+      "Phosphorylate RNA Pol II CTD",
+      "Trimethylate H3K27 to repress gene expression"
+    ],
+    "correct_answer": "Trimethylate H3K27 to repress gene expression",
+    "explanation": "EZH2 is the catalytic subunit of PRC2 that trimethylates histone H3 at K27 (H3K27me3), creating a repressive chromatin mark that silences developmental genes.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "Which process in immunology describes the elimination of self-reactive T cells in the thymus?",
+    "options": [
+      "Central tolerance via negative selection",
+      "Clonal anergy",
+      "Peripheral tolerance",
+      "Regulatory T cell suppression"
+    ],
+    "correct_answer": "Central tolerance via negative selection",
+    "explanation": "Negative selection in the thymus eliminates T cells with high affinity for self-peptide/MHC complexes, preventing autoimmunity — requires AIRE for ectopic self-antigen expression.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the name for the molecular process that allows bacteria to express different outer membrane proteins in response to signals?",
+    "options": [
+      "Two-component signaling",
+      "Phase variation",
+      "Quorum sensing",
+      "Adaptive gene regulation"
+    ],
+    "correct_answer": "Phase variation",
+    "explanation": "Phase variation is reversible, high-frequency switching of gene expression (ON/OFF) for surface structures via DNA inversion, methylation, or slipped-strand mispairing.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the molecular basis for multidrug resistance (MDR) in cancer cells?",
+    "options": [
+      "Increased DNA repair capacity",
+      "Enhanced apoptotic signaling",
+      "P-glycoprotein (MDR1) overexpression pumping drugs out",
+      "Reduced cell proliferation rate"
+    ],
+    "correct_answer": "P-glycoprotein (MDR1) overexpression pumping drugs out",
+    "explanation": "P-glycoprotein (ABCB1) is an ABC transporter overexpressed in MDR cancer cells that uses ATP to pump multiple structurally diverse chemotherapy drugs out of cells.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the function of the nucleolus in eukaryotic cells?",
+    "options": [
+      "Package chromosomes during mitosis",
+      "Store DNA in heterochromatin",
+      "Process pre-mRNA introns",
+      "Ribosome biogenesis — rRNA transcription and ribosome assembly"
+    ],
+    "correct_answer": "Ribosome biogenesis — rRNA transcription and ribosome assembly",
+    "explanation": "The nucleolus is the site of rDNA transcription by RNA Pol I, pre-rRNA processing, and assembly of pre-ribosomal subunits before their export to the cytoplasm.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "Which model describes the co-regulation of functionally related genes in bacteria?",
+    "options": [
+      "Operon model",
+      "Regulon model",
+      "Stimulon model",
+      "Modulon model"
+    ],
+    "correct_answer": "Operon model",
+    "explanation": "The operon model (Jacob-Monod) describes prokaryotic genes with related functions transcribed as a single polycistronic mRNA under common regulatory control.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the molecular consequence of telomere uncapping in senescent cells?",
+    "options": [
+      "Increased cell proliferation",
+      "DDR activation and p53/p16 pathway induction",
+      "Chromatin condensation",
+      "Increase in telomerase activity"
+    ],
+    "correct_answer": "DDR activation and p53/p16 pathway induction",
+    "explanation": "When telomeres are critically short and uncapped, they are recognized as DNA double-strand breaks, activating ATM/ATR DDR that stabilizes p53 and activates p16INK4a to enforce senescence.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the role of AID (activation-induced cytidine deaminase) in B cell biology?",
+    "options": [
+      "Activate B cell receptor signaling",
+      "Promote B cell survival",
+      "Initiate somatic hypermutation and class switch recombination",
+      "Suppress autoimmunity"
+    ],
+    "correct_answer": "Initiate somatic hypermutation and class switch recombination",
+    "explanation": "AID deaminates cytosines in immunoglobulin V and switch regions, creating mutations that drive somatic hypermutation (affinity maturation) and class switch recombination.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "Which protein complex mediates the export of mRNPs from the nucleus?",
+    "options": [
+      "Nuclear pore complex alone",
+      "TREX complex",
+      "Exportin-1 (CRM1)",
+      "TREX-2/GANP complex"
+    ],
+    "correct_answer": "TREX-2/GANP complex",
+    "explanation": "The TREX-2 complex (including GANP/MCM3AP) docks at nuclear pore complexes and facilitates mRNP remodeling and export of mRNAs from the nucleus to the cytoplasm.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the function of the DNA-PKcs kinase in V(D)J recombination?",
+    "options": [
+      "Repair RAG-induced double-strand breaks via NHEJ",
+      "Recognize RAG complex",
+      "Generate DNA double-strand breaks",
+      "Generate single-strand nicks"
+    ],
+    "correct_answer": "Repair RAG-induced double-strand breaks via NHEJ",
+    "explanation": "DNA-PKcs is activated by Ku70/80 at RAG-induced DSBs and coordinates NHEJ repair to join V, D, and J segments, with Artemis processing hairpin intermediates.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the name for the signal that terminates RNA Pol II transcription in eukaryotes?",
+    "options": [
+      "RNA Pol II promoter clearance",
+      "Poly-A signal and cleavage/polyadenylation",
+      "Rho factor in eukaryotes",
+      "Terminator stem-loop"
+    ],
+    "correct_answer": "Poly-A signal and cleavage/polyadenylation",
+    "explanation": "Eukaryotic transcription termination involves recognition of the poly-A signal (AAUAAA), cleavage 10-30 nt downstream, polyadenylation, and subsequent RNA Pol II termination.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the molecular basis for the selectivity of nuclear import signals?",
+    "options": [
+      "Signal peptide recognition by ribosomes",
+      "Transmembrane domain insertion",
+      "Nuclear localization signal recognition by importins",
+      "GPI anchor attachment"
+    ],
+    "correct_answer": "Nuclear localization signal recognition by importins",
+    "explanation": "Nuclear localization signals (NLS) are recognized by importin-α/β heterodimers, which ferry cargo through the nuclear pore complex via RanGTP-dependent mechanism.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "Which transcription factor is stabilized by DNA damage and triggers cell cycle arrest or apoptosis?",
+    "options": [
+      "c-Myc",
+      "STAT3",
+      "NF-κB",
+      "p53"
+    ],
+    "correct_answer": "p53",
+    "explanation": "p53 is stabilized by ATM/ATR phosphorylation following DNA damage, activating p21 (cell cycle arrest), PUMA/NOXA (apoptosis), and other damage-response genes.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the name for the enzymatic activity that covalently joins DNA ends without requiring homology?",
+    "options": [
+      "Non-homologous end joining (NHEJ)",
+      "DNA polymerase beta",
+      "Microhomology-mediated end joining",
+      "Homologous recombination"
+    ],
+    "correct_answer": "Non-homologous end joining (NHEJ)",
+    "explanation": "NHEJ directly ligates DNA double-strand break ends with minimal processing, using Ku70/80, DNA-PKcs, Artemis, and Ligase IV/XRCC4, without requiring homologous templates.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "Which molecular event defines the hallmark 'resisting cell death' in cancer?",
+    "options": [
+      "Telomerase reactivation",
+      "Bcl-2 overexpression blocking apoptosis",
+      "Immune evasion",
+      "Angiogenesis induction"
+    ],
+    "correct_answer": "Bcl-2 overexpression blocking apoptosis",
+    "explanation": "Upregulation of anti-apoptotic Bcl-2 family proteins (Bcl-2, Bcl-XL, MCL-1) is a common mechanism by which cancer cells resist apoptotic signals and chemotherapy.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the term for the rapid evolutionary change in allele frequencies due to chance in a small population that colonizes a new area?",
+    "options": [
+      "Natural selection",
+      "Bottleneck effect",
+      "Founder effect",
+      "Gene flow"
+    ],
+    "correct_answer": "Founder effect",
+    "explanation": "The founder effect is genetic drift in a new population established by few individuals — it reduces genetic diversity and can fix rare alleles at high frequency.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "Which molecular mechanism produces diversity at the V(D)J junction beyond segment combination?",
+    "options": [
+      "Somatic hypermutation",
+      "Gene conversion",
+      "V segment duplication",
+      "Junctional diversity via TdT"
+    ],
+    "correct_answer": "Junctional diversity via TdT",
+    "explanation": "Terminal deoxynucleotidyl transferase (TdT) randomly adds non-templated N-nucleotides at V(D)J junctions during NHEJ repair, greatly amplifying antibody CDR3 diversity.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the role of the nuclear export factor XPO1 (exportin-1/CRM1)?",
+    "options": [
+      "Export proteins with nuclear export signals (NES)",
+      "Transport ribosomal proteins to the nucleolus",
+      "Maintain nuclear envelope integrity",
+      "Import proteins with NLS sequences"
+    ],
+    "correct_answer": "Export proteins with nuclear export signals (NES)",
+    "explanation": "CRM1/XPO1 binds leucine-rich nuclear export signals (NES) on cargo proteins and RanGTP in the nucleus, transporting them through the NPC to the cytoplasm.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "Which post-translational modification by SUMO regulates protein localization and activity?",
+    "options": [
+      "Ubiquitination",
+      "SUMOylation",
+      "Acetylation",
+      "Neddylation"
+    ],
+    "correct_answer": "SUMOylation",
+    "explanation": "SUMOylation (attachment of SUMO proteins) regulates nuclear localization, transcription factor activity, DNA repair, and protein-protein interactions.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the molecular mechanism of oncogene activation by chromosomal translocation?",
+    "options": [
+      "Gene deletion causing loss of function",
+      "Promoter methylation silencing a suppressor",
+      "Juxtaposition of an oncogene with an active promoter or fusion to another gene",
+      "Point mutation changing protein function"
+    ],
+    "correct_answer": "Juxtaposition of an oncogene with an active promoter or fusion to another gene",
+    "explanation": "Chromosomal translocations can activate oncogenes by placing them under control of strong promoters (e.g., c-MYC/IgH in Burkitt lymphoma) or creating fusion oncoproteins (BCR-ABL in CML).",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "Which process allows eukaryotic cells to produce multiple protein isoforms from a single gene without altering DNA?",
+    "options": [
+      "Gene duplication",
+      "Post-translational modification",
+      "Protein splicing",
+      "Alternative splicing"
+    ],
+    "correct_answer": "Alternative splicing",
+    "explanation": "Alternative splicing of pre-mRNA generates multiple mRNA isoforms from one gene by selectively including or excluding exons, expanding proteome complexity without genome expansion.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the name for the chromatin domain that forms a topological unit of gene regulation?",
+    "options": [
+      "Topologically associating domain (TAD)",
+      "Heterochromatin domain",
+      "Insulator element",
+      "Enhancer"
+    ],
+    "correct_answer": "Topologically associating domain (TAD)",
+    "explanation": "TADs are self-interacting genomic regions (~0.1-1 Mb) demarcated by CTCF/cohesin boundaries that insulate gene regulation, ensuring enhancers interact only within their TAD.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the molecular basis for the antibiotic resistance mechanism of beta-lactamases?",
+    "options": [
+      "Efflux of antibiotic from cell",
+      "Enzymatic hydrolysis of the beta-lactam ring",
+      "Upregulation of alternative cell wall synthesis pathway",
+      "Modification of the ribosomal target"
+    ],
+    "correct_answer": "Enzymatic hydrolysis of the beta-lactam ring",
+    "explanation": "Beta-lactamases are bacterial enzymes that hydrolyze the beta-lactam ring of penicillins and cephalosporins, inactivating the antibiotic before it can inhibit cell wall synthesis.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the term for the evolutionary process where advantageous mutations spread rapidly through a population?",
+    "options": [
+      "Genetic drift",
+      "Mutation pressure",
+      "Selective sweep",
+      "Balancing selection"
+    ],
+    "correct_answer": "Selective sweep",
+    "explanation": "A selective sweep occurs when positive selection drives a beneficial allele to fixation, reducing genetic variation in the genomic region around it.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "Which molecular event triggers the opening of voltage-gated Na+ channels during an action potential?",
+    "options": [
+      "Ligand binding to the channel",
+      "Phosphorylation of the channel subunit",
+      "G-protein activation",
+      "Membrane depolarization to threshold voltage"
+    ],
+    "correct_answer": "Membrane depolarization to threshold voltage",
+    "explanation": "Voltage-gated Na+ channels have voltage sensors that detect membrane depolarization to threshold (~-55 mV), causing conformational change that opens the channel pore.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the function of the ESCRT machinery at multivesicular bodies (MVBs)?",
+    "options": [
+      "Sort ubiquitinated cargo into intraluminal vesicles for lysosomal degradation",
+      "Transport lipids to the Golgi",
+      "Synthesize membrane cholesterol",
+      "Synthesize lysosomal enzymes"
+    ],
+    "correct_answer": "Sort ubiquitinated cargo into intraluminal vesicles for lysosomal degradation",
+    "explanation": "ESCRT complexes (I, II, III) recognize monoubiquitinated cargo, deform the endosomal membrane, and pinch off intraluminal vesicles delivering cargo to lysosomes.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "Which checkpoint prevents cells with unreplicated DNA from entering mitosis?",
+    "options": [
+      "Spindle assembly checkpoint",
+      "G2/M DNA replication checkpoint",
+      "G1/S checkpoint (restriction point)",
+      "DNA damage checkpoint in G1"
+    ],
+    "correct_answer": "G2/M DNA replication checkpoint",
+    "explanation": "The G2/M checkpoint prevents mitotic entry if DNA replication is incomplete or DNA damage exists, through ATR/CHK1 phosphorylation of CDC25C, preventing CDK1 activation.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the molecular basis for position effect variegation (PEV) in Drosophila?",
+    "options": [
+      "Mutation in transcription factor binding sites",
+      "Enhancer-promoter interactions across chromosomes",
+      "Heterochromatin spreading silencing genes near chromosomal rearrangement boundaries",
+      "CpG island methylation"
+    ],
+    "correct_answer": "Heterochromatin spreading silencing genes near chromosomal rearrangement boundaries",
+    "explanation": "PEV occurs when chromosomal rearrangements place genes near heterochromatin, which spreads stochastically into euchromatin, silencing neighboring genes in a variegated pattern.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the molecular role of cohesin in maintaining genome stability?",
+    "options": [
+      "Compact chromosomes during mitosis",
+      "Initiate DNA replication",
+      "Modify histones for transcription",
+      "Hold sister chromatids together and facilitate DNA repair by homologous recombination"
+    ],
+    "correct_answer": "Hold sister chromatids together and facilitate DNA repair by homologous recombination",
+    "explanation": "Cohesin holds sister chromatids together from replication through anaphase, ensuring accurate segregation. It also promotes HR repair by keeping sister chromatids in proximity.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "Which mechanism allows piRNAs to silence transposable elements during germline development?",
+    "options": [
+      "Ping-pong amplification cycle targeting transposon mRNAs for degradation and heterochromatin formation",
+      "Chromatin remodeling only",
+      "mRNA degradation only",
+      "Antisense RNA blocking transcription"
+    ],
+    "correct_answer": "Ping-pong amplification cycle targeting transposon mRNAs for degradation and heterochromatin formation",
+    "explanation": "The piRNA ping-pong cycle: antisense piRNA-PIWI cleaves transposon mRNA (sense), which is processed into new sense piRNAs that cleave antisense transcripts, amplifying the pathway.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the name for the chemical modification that targets cytosines in CpG dinucleotides for silencing?",
+    "options": [
+      "Histone acetylation",
+      "DNA methylation by DNMT",
+      "H3K27 methylation",
+      "H3K4 methylation"
+    ],
+    "correct_answer": "DNA methylation by DNMT",
+    "explanation": "DNMT enzymes methylate the 5-position of cytosine in CpG dinucleotides; promoter CpG island methylation recruits MBD proteins and HDACs to silence gene expression.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "Which molecular pathway governs the unfolded protein response branch mediated by IRE1?",
+    "options": [
+      "PERK-eIF2α phosphorylation pathway",
+      "ATF6 processing pathway",
+      "IRE1-XBP1 mRNA splicing pathway",
+      "p38-MAPK activation pathway"
+    ],
+    "correct_answer": "IRE1-XBP1 mRNA splicing pathway",
+    "explanation": "Activated IRE1α uses its endoribonuclease activity to splice XBP1 mRNA, generating active XBP1s transcription factor that induces genes for ER protein folding and ERAD.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the term for the evolutionary arms race between selfish genetic elements and host suppression mechanisms?",
+    "options": [
+      "Mutualistic coevolution",
+      "Parasite-host coevolution",
+      "Horizontal gene transfer",
+      "Genomic conflict"
+    ],
+    "correct_answer": "Genomic conflict",
+    "explanation": "Genomic conflict is the evolutionary tension between selfish genetic elements (transposons, B chromosomes) that promote their own transmission and host mechanisms that suppress them.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the molecular function of the SAGA complex in transcription?",
+    "options": [
+      "Acetylate histones and deubiquitinate H2B to activate transcription",
+      "Synthesize the 7-methylguanosine cap",
+      "Terminate transcription at poly-A sites",
+      "Condense chromatin for gene silencing"
+    ],
+    "correct_answer": "Acetylate histones and deubiquitinate H2B to activate transcription",
+    "explanation": "SAGA is a transcriptional coactivator with two enzymatic modules: GCN5 (HAT module acetylates H3K9/K14) and Ubp8 (deubiquitinates H2BK123) to activate gene expression.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "Which process generates genetic diversity through intrachromosomal recombination between similar sequences?",
+    "options": [
+      "V(D)J recombination",
+      "Non-allelic homologous recombination (NAHR)",
+      "Transposon movement",
+      "Crossing over between homologs"
+    ],
+    "correct_answer": "Non-allelic homologous recombination (NAHR)",
+    "explanation": "NAHR occurs between repetitive sequences at non-allelic positions on the same chromosome, causing deletions, duplications, or inversions — underlying many copy number variants.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the molecular consequence of CDK inhibitor p21 induction by p53?",
+    "options": [
+      "Activation of APC/C-Cdc20",
+      "Degradation of cyclin B",
+      "G1/S cell cycle arrest through CDK2-cyclin E inhibition",
+      "Activation of MCM helicase"
+    ],
+    "correct_answer": "G1/S cell cycle arrest through CDK2-cyclin E inhibition",
+    "explanation": "p53-induced p21 (CDKN1A) binds and inhibits CDK2-cyclin E/A complexes, preventing RB hyperphosphorylation and S-phase entry, arresting the cell in G1 for DNA repair.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "Which molecular pathway is dysregulated in nearly all human cancers affecting cell proliferation?",
+    "options": [
+      "Wnt pathway",
+      "Notch pathway",
+      "Hedgehog pathway",
+      "RB-E2F pathway"
+    ],
+    "correct_answer": "RB-E2F pathway",
+    "explanation": "The RB-E2F pathway is altered in virtually all cancers — either through RB mutation/loss, CDK4/6 overactivation, cyclin D amplification, or p16INK4a deletion, deregulating G1/S transition.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the name for the transient evolutionary bottleneck caused by massive population crashes in evolutionary history?",
+    "options": [
+      "Population bottleneck",
+      "Allopatric speciation",
+      "Genetic hitchhiking",
+      "Founder effect"
+    ],
+    "correct_answer": "Population bottleneck",
+    "explanation": "Population bottlenecks dramatically reduce genetic diversity when most individuals die; the genetic composition of the small survivor pool determines future evolutionary trajectory.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "Which molecular mechanism allows retroviruses to persist in the host genome indefinitely?",
+    "options": [
+      "Episomal replication",
+      "Proviral integration by viral integrase",
+      "RNA interference of host immunity",
+      "RNA replication via RdRp"
+    ],
+    "correct_answer": "Proviral integration by viral integrase",
+    "explanation": "Retroviral integrase catalyzes the insertion of reverse-transcribed double-stranded viral DNA into the host chromosome, creating the provirus that replicates with the cell.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the function of the RECQ helicases in genome stability?",
+    "options": [
+      "Synthesize RNA primers",
+      "Package DNA into nucleosomes",
+      "Resolve unusual DNA structures and promote error-free recombination repair",
+      "Initiate transcription"
+    ],
+    "correct_answer": "Resolve unusual DNA structures and promote error-free recombination repair",
+    "explanation": "RECQ helicases (BLM, WRN, RECQL4) resolve G-quadruplexes, D-loops, and Holliday junctions during DNA repair; mutations cause Bloom, Werner, and Rothmund-Thomson syndromes.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "Which mechanism maintains the zygotic genome activation (ZGA) during embryonic development?",
+    "options": [
+      "Maternal mRNA translation only",
+      "Histone methylation by PRC2",
+      "DNA methylation inheritance",
+      "Demethylation of the genome followed by de novo methylation establishing new patterns"
+    ],
+    "correct_answer": "Demethylation of the genome followed by de novo methylation establishing new patterns",
+    "explanation": "After fertilization, the genome undergoes global demethylation, and DNMT3a/3b re-establish methylation patterns during implantation, resetting epigenetic memory for totipotency.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the molecular function of the condensin II complex compared to condensin I?",
+    "options": [
+      "Condensin II acts earlier in prophase for axial compaction while condensin I acts later for lateral compaction",
+      "Condensin II functions exclusively in meiosis",
+      "Condensin II has identical function to condensin I",
+      "Condensin II acts in cytoplasm only"
+    ],
+    "correct_answer": "Condensin II acts earlier in prophase for axial compaction while condensin I acts later for lateral compaction",
+    "explanation": "Condensin II localizes in the nucleus throughout interphase and initiates axial chromosome shortening in prophase, while condensin I enters in prometaphase to compact the lateral axis.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the name for the RNA binding protein complex that protects mRNA 3' ends and regulates stability?",
+    "options": [
+      "Cap binding complex",
+      "Poly-A binding protein (PABP)",
+      "Exon junction complex",
+      "Decapping enzyme complex"
+    ],
+    "correct_answer": "Poly-A binding protein (PABP)",
+    "explanation": "PABP binds the poly-A tail and interacts with eIF4G to stimulate cap-dependent translation; it also protects mRNA from deadenylation and degradation.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "Which molecular mechanism enables bacteria to form antibiotic-resistant biofilms?",
+    "options": [
+      "Increased mutation rate",
+      "Sporulation",
+      "Altered gene expression creating dormant persister cells and extracellular matrix protection",
+      "Enhanced efflux pump expression only"
+    ],
+    "correct_answer": "Altered gene expression creating dormant persister cells and extracellular matrix protection",
+    "explanation": "Biofilms protect bacteria through extracellular matrix, reduced metabolic activity creating persisters, altered gene expression, and reduced antibiotic penetration.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the molecular basis for the different processing of sense and antisense strands by RISC?",
+    "options": [
+      "Dicer cuts preferentially",
+      "mRNA sequence determines strand loading",
+      "Cell type determines strand preference",
+      "Strand thermodynamic stability at 5' end determines guide strand selection"
+    ],
+    "correct_answer": "Strand thermodynamic stability at 5' end determines guide strand selection",
+    "explanation": "The strand with less stable base pairing at its 5' end preferentially loaded into AGO2 as the guide strand; the other (passenger) strand is degraded.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the name for the process by which differentiated cells revert to a stem cell state?",
+    "options": [
+      "Reprogramming to iPSCs",
+      "Metaplasia",
+      "Dedifferentiation",
+      "Transdifferentiation"
+    ],
+    "correct_answer": "Reprogramming to iPSCs",
+    "explanation": "Yamanaka reprogramming uses OCT4, SOX2, KLF4, and c-MYC transcription factors to convert somatic cells into induced pluripotent stem cells (iPSCs) by resetting the epigenome.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "Which DNA repair mechanism corrects UV-induced cyclobutane pyrimidine dimers via direct reversal?",
+    "options": [
+      "Nucleotide excision repair",
+      "Photoreactivation by photolyase",
+      "Base excision repair",
+      "Mismatch repair"
+    ],
+    "correct_answer": "Photoreactivation by photolyase",
+    "explanation": "Photolyase is a flavoenzyme that uses light energy (300-500 nm) to directly split cyclobutane pyrimidine dimers, restoring normal bases without excision — present in most organisms except placental mammals.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the molecular basis for the memory B cell response being more rapid than the primary response?",
+    "options": [
+      "More B cells in total",
+      "Faster antigen uptake by APCs",
+      "Pre-existing high-affinity BCRs and class-switched antibodies with faster activation kinetics",
+      "Lower activation threshold for naive B cells"
+    ],
+    "correct_answer": "Pre-existing high-affinity BCRs and class-switched antibodies with faster activation kinetics",
+    "explanation": "Memory B cells express high-affinity, class-switched BCRs from germinal center affinity maturation, have lower activation thresholds, and rapidly differentiate into plasma cells.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "Which molecular complex serves as the master regulator of mitotic entry?",
+    "options": [
+      "CDK4-cyclin D",
+      "CDK2-cyclin E",
+      "CDK7-cyclin H",
+      "CDK1-cyclin B"
+    ],
+    "correct_answer": "CDK1-cyclin B",
+    "explanation": "CDK1-cyclin B (MPF — maturation promoting factor) is the master regulator of mitotic entry, phosphorylating nuclear lamins, condensins, and other substrates to initiate mitosis.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the term for the epigenetic mechanism regulating allele-specific gene expression based on parent of origin?",
+    "options": [
+      "Genomic imprinting",
+      "Heterochromatin formation",
+      "Position effect variegation",
+      "X-inactivation"
+    ],
+    "correct_answer": "Genomic imprinting",
+    "explanation": "Genomic imprinting is the parent-of-origin-specific, epigenetically regulated monoallelic expression of genes, established by differential DNA methylation at imprinting control regions.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the name for the spontaneous assembly of biological molecules into ordered structures?",
+    "options": [
+      "Induced assembly",
+      "Self-assembly",
+      "Template-directed synthesis",
+      "Chaperone-mediated folding"
+    ],
+    "correct_answer": "Self-assembly",
+    "explanation": "Biological self-assembly is the spontaneous organization of molecular components into ordered structures (ribosomes, virus capsids, membranes) driven by thermodynamic forces.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "Which molecular feature distinguishes the leading strand from the lagging strand in DNA replication?",
+    "options": [
+      "Different DNA polymerases",
+      "Different template strands",
+      "Leading strand synthesized continuously, lagging strand as Okazaki fragments",
+      "Different primer lengths"
+    ],
+    "correct_answer": "Leading strand synthesized continuously, lagging strand as Okazaki fragments",
+    "explanation": "The leading strand is synthesized continuously in the 5'→3' direction toward the fork; the lagging strand is synthesized as discontinuous Okazaki fragments away from the fork, requiring multiple primers.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the molecular basis of the 'poison subunit' model for dominant negative mutations?",
+    "options": [
+      "Gain of new toxic function",
+      "Complete protein loss",
+      "Haploinsufficiency",
+      "Mutant subunit incorporates into multimeric complexes and inactivates them"
+    ],
+    "correct_answer": "Mutant subunit incorporates into multimeric complexes and inactivates them",
+    "explanation": "Dominant negative mutations produce proteins that disrupt the function of wild-type protein in the same complex — the mutant 'poisons' the heteromeric complex, exceeding haploinsufficiency.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "Which molecular mechanism generates the proton gradient used by ATP synthase?",
+    "options": [
+      "Proton pumping via electron transport chain complexes I, III, and IV",
+      "Substrate level phosphorylation",
+      "Direct ATP hydrolysis",
+      "Chemiosmosis without electron transport"
+    ],
+    "correct_answer": "Proton pumping via electron transport chain complexes I, III, and IV",
+    "explanation": "ETC complexes I, III, and IV use the energy from electron transfer to pump protons from the matrix to the intermembrane space, creating the proton motive force that drives ATP synthase.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the name for the RNA-protein complex that degrades mRNA lacking stop codons?",
+    "options": [
+      "Exosome complex",
+      "Non-stop decay machinery",
+      "Decapping complex",
+      "No-go decay machinery"
+    ],
+    "correct_answer": "Non-stop decay machinery",
+    "explanation": "Non-stop decay degrades mRNAs lacking stop codons where ribosomes reach the 3' end — Dom34/Hbs1 recognize stalled ribosomes and trigger mRNA degradation and ribosome rescue.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What molecular mechanism do CRISPR arrays use to memorize past pathogen encounters?",
+    "options": [
+      "DNA methylation of phage sequences",
+      "Methylation of CRISPR repeats",
+      "Integration of short phage DNA spacers between CRISPR repeats",
+      "Upregulation of restriction enzymes"
+    ],
+    "correct_answer": "Integration of short phage DNA spacers between CRISPR repeats",
+    "explanation": "The Cas1-Cas2 adaptation complex integrates short ~30 bp spacers from phage DNA between CRISPR repeats, creating a molecular memory that guides future Cas nuclease responses.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the name for the stochastic gene expression phenomenon where identical cells show different expression levels?",
+    "options": [
+      "Phenotypic plasticity",
+      "Epigenetic variation",
+      "Cell-to-cell variability",
+      "Transcriptional noise"
+    ],
+    "correct_answer": "Transcriptional noise",
+    "explanation": "Transcriptional noise (stochastic gene expression) results from the probabilistic nature of molecular events in transcription, causing phenotypic heterogeneity even in genetically identical cells.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "biology"
+  }
+]

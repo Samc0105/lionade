@@ -1,0 +1,2830 @@
+[
+  {
+    "question": "What is the basic unit of life?",
+    "options": [
+      "Cell",
+      "Tissue",
+      "Organ",
+      "Organism"
+    ],
+    "correct_answer": "Cell",
+    "explanation": "The cell is the smallest structural and functional unit of all living things.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "Which organelle is known as the powerhouse of the cell?",
+    "options": [
+      "Mitochondria",
+      "Nucleus",
+      "Ribosome",
+      "Vacuole"
+    ],
+    "correct_answer": "Mitochondria",
+    "explanation": "Mitochondria produce ATP through cellular respiration, supplying energy to the cell.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What gas do plants absorb during photosynthesis?",
+    "options": [
+      "Carbon dioxide",
+      "Oxygen",
+      "Nitrogen",
+      "Hydrogen"
+    ],
+    "correct_answer": "Carbon dioxide",
+    "explanation": "Plants take in CO2 and use it along with sunlight and water to make glucose.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the process by which cells divide to produce two identical daughter cells?",
+    "options": [
+      "Mitosis",
+      "Meiosis",
+      "Fission",
+      "Budding"
+    ],
+    "correct_answer": "Mitosis",
+    "explanation": "Mitosis produces two genetically identical diploid daughter cells for growth and repair.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "Which molecule carries genetic information in most organisms?",
+    "options": [
+      "DNA",
+      "RNA",
+      "Protein",
+      "Lipid"
+    ],
+    "correct_answer": "DNA",
+    "explanation": "DNA (deoxyribonucleic acid) stores the genetic blueprint of living organisms.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the term for organisms that make their own food using sunlight?",
+    "options": [
+      "Autotrophs",
+      "Heterotrophs",
+      "Decomposers",
+      "Parasites"
+    ],
+    "correct_answer": "Autotrophs",
+    "explanation": "Autotrophs like plants use photosynthesis to produce their own food from sunlight.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the outer boundary of an animal cell called?",
+    "options": [
+      "Cell membrane",
+      "Cell wall",
+      "Nuclear envelope",
+      "Cytoplasm"
+    ],
+    "correct_answer": "Cell membrane",
+    "explanation": "The cell membrane is a phospholipid bilayer that controls what enters and exits the cell.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "Which blood cells fight infection?",
+    "options": [
+      "White blood cells",
+      "Red blood cells",
+      "Platelets",
+      "Plasma cells"
+    ],
+    "correct_answer": "White blood cells",
+    "explanation": "White blood cells (leukocytes) are part of the immune system and defend against pathogens.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the green pigment in plants called?",
+    "options": [
+      "Chlorophyll",
+      "Melanin",
+      "Carotene",
+      "Hemoglobin"
+    ],
+    "correct_answer": "Chlorophyll",
+    "explanation": "Chlorophyll absorbs light energy (mainly red and blue) for photosynthesis and gives plants their green color.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "Which organ pumps blood throughout the body?",
+    "options": [
+      "Heart",
+      "Liver",
+      "Kidney",
+      "Lung"
+    ],
+    "correct_answer": "Heart",
+    "explanation": "The heart is a muscular organ that pumps blood through the circulatory system.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What are the building blocks of proteins?",
+    "options": [
+      "Amino acids",
+      "Fatty acids",
+      "Nucleotides",
+      "Monosaccharides"
+    ],
+    "correct_answer": "Amino acids",
+    "explanation": "Proteins are polymers made of amino acid monomers linked by peptide bonds.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "Which domain includes bacteria?",
+    "options": [
+      "Prokaryota",
+      "Eukarya",
+      "Archaea",
+      "Protista"
+    ],
+    "correct_answer": "Prokaryota",
+    "explanation": "Bacteria belong to the domain Prokaryota, characterized by cells without a membrane-bound nucleus.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the process of water moving across a semipermeable membrane called?",
+    "options": [
+      "Osmosis",
+      "Diffusion",
+      "Active transport",
+      "Filtration"
+    ],
+    "correct_answer": "Osmosis",
+    "explanation": "Osmosis is the passive movement of water from an area of low solute concentration to high solute concentration.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "Which part of the cell contains DNA?",
+    "options": [
+      "Nucleus",
+      "Cytoplasm",
+      "Mitochondria",
+      "Lysosome"
+    ],
+    "correct_answer": "Nucleus",
+    "explanation": "The nucleus houses the cell's chromosomes (DNA) and controls gene expression.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the term for the variety of life on Earth?",
+    "options": [
+      "Biodiversity",
+      "Ecology",
+      "Evolution",
+      "Taxonomy"
+    ],
+    "correct_answer": "Biodiversity",
+    "explanation": "Biodiversity refers to the variety of species, genes, and ecosystems found on Earth.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What type of reproduction requires only one parent?",
+    "options": [
+      "Asexual reproduction",
+      "Sexual reproduction",
+      "Budding only",
+      "Sporulation only"
+    ],
+    "correct_answer": "Asexual reproduction",
+    "explanation": "Asexual reproduction involves a single organism producing offspring genetically identical to itself.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "Which organ is responsible for filtering blood and producing urine?",
+    "options": [
+      "Kidney",
+      "Liver",
+      "Spleen",
+      "Pancreas"
+    ],
+    "correct_answer": "Kidney",
+    "explanation": "Kidneys filter waste from the blood, regulate fluid balance, and produce urine.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the scientific study of plants called?",
+    "options": [
+      "Botany",
+      "Zoology",
+      "Mycology",
+      "Ecology"
+    ],
+    "correct_answer": "Botany",
+    "explanation": "Botany is the branch of biology that studies plant life.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the process by which organisms change over time through natural selection?",
+    "options": [
+      "Evolution",
+      "Adaptation",
+      "Migration",
+      "Speciation"
+    ],
+    "correct_answer": "Evolution",
+    "explanation": "Evolution is the change in heritable traits of populations over successive generations.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What structure controls what enters and exits the nucleus?",
+    "options": [
+      "Nuclear pore",
+      "Cell membrane",
+      "Endoplasmic reticulum",
+      "Golgi apparatus"
+    ],
+    "correct_answer": "Nuclear pore",
+    "explanation": "Nuclear pores are protein channels in the nuclear envelope that regulate molecular traffic.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "Which pigment gives red blood cells their color?",
+    "options": [
+      "Hemoglobin",
+      "Chlorophyll",
+      "Myoglobin",
+      "Melanin"
+    ],
+    "correct_answer": "Hemoglobin",
+    "explanation": "Hemoglobin is the iron-containing protein in red blood cells that transports oxygen.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the main function of the large intestine?",
+    "options": [
+      "Absorb water",
+      "Digest proteins",
+      "Produce bile",
+      "Filter blood"
+    ],
+    "correct_answer": "Absorb water",
+    "explanation": "The large intestine primarily absorbs water and electrolytes from indigestible food matter.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "Which type of organism breaks down dead organic matter?",
+    "options": [
+      "Decomposers",
+      "Producers",
+      "Primary consumers",
+      "Apex predators"
+    ],
+    "correct_answer": "Decomposers",
+    "explanation": "Decomposers like fungi and bacteria break down dead organic matter and recycle nutrients.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the functional unit of the kidney?",
+    "options": [
+      "Nephron",
+      "Alveolus",
+      "Neuron",
+      "Villus"
+    ],
+    "correct_answer": "Nephron",
+    "explanation": "The nephron is the microscopic structural and functional unit of the kidney that filters blood.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "Which organelle is responsible for protein synthesis?",
+    "options": [
+      "Ribosome",
+      "Lysosome",
+      "Vacuole",
+      "Centrosome"
+    ],
+    "correct_answer": "Ribosome",
+    "explanation": "Ribosomes translate mRNA into proteins — they are the site of protein synthesis.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the process by which a caterpillar becomes a butterfly?",
+    "options": [
+      "Metamorphosis",
+      "Molting",
+      "Regeneration",
+      "Morphogenesis"
+    ],
+    "correct_answer": "Metamorphosis",
+    "explanation": "Metamorphosis is the biological process of transformation from larva to adult, as in butterflies.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What does the cell wall provide in plant cells?",
+    "options": [
+      "Structural support",
+      "Energy production",
+      "Protein synthesis",
+      "DNA storage"
+    ],
+    "correct_answer": "Structural support",
+    "explanation": "The cell wall made of cellulose gives plant cells rigidity and structural support.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "Which system in the body includes the brain and spinal cord?",
+    "options": [
+      "Central nervous system",
+      "Peripheral nervous system",
+      "Endocrine system",
+      "Lymphatic system"
+    ],
+    "correct_answer": "Central nervous system",
+    "explanation": "The CNS consists of the brain and spinal cord and coordinates all body activities.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the term for an organism's physical appearance?",
+    "options": [
+      "Phenotype",
+      "Genotype",
+      "Allele",
+      "Trait"
+    ],
+    "correct_answer": "Phenotype",
+    "explanation": "Phenotype refers to the observable characteristics of an organism resulting from its genotype and environment.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "Which gas is released by plants during photosynthesis?",
+    "options": [
+      "Oxygen",
+      "Carbon dioxide",
+      "Nitrogen",
+      "Water vapor"
+    ],
+    "correct_answer": "Oxygen",
+    "explanation": "Photosynthesis splits water molecules, releasing oxygen as a byproduct.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the largest organ of the human body?",
+    "options": [
+      "Skin",
+      "Liver",
+      "Brain",
+      "Intestine"
+    ],
+    "correct_answer": "Skin",
+    "explanation": "The skin is the body's largest organ, covering the entire external surface.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "Which type of cell lacks a nucleus?",
+    "options": [
+      "Prokaryotic cell",
+      "Eukaryotic cell",
+      "Plant cell",
+      "Animal cell"
+    ],
+    "correct_answer": "Prokaryotic cell",
+    "explanation": "Prokaryotic cells (bacteria and archaea) lack a membrane-bound nucleus.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What molecule is the primary source of energy for cells?",
+    "options": [
+      "ATP",
+      "ADP",
+      "Glucose",
+      "Glycogen"
+    ],
+    "correct_answer": "ATP",
+    "explanation": "ATP (adenosine triphosphate) is the primary energy currency used by all living cells.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "Which system fights pathogens in the body?",
+    "options": [
+      "Immune system",
+      "Endocrine system",
+      "Digestive system",
+      "Respiratory system"
+    ],
+    "correct_answer": "Immune system",
+    "explanation": "The immune system defends the body against bacteria, viruses, and other pathogens.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the term for the physical location where an organism lives?",
+    "options": [
+      "Habitat",
+      "Niche",
+      "Biome",
+      "Ecosystem"
+    ],
+    "correct_answer": "Habitat",
+    "explanation": "A habitat is the natural environment where a species lives and finds food, shelter, and mates.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What part of the flower contains pollen?",
+    "options": [
+      "Anther",
+      "Stigma",
+      "Ovary",
+      "Petal"
+    ],
+    "correct_answer": "Anther",
+    "explanation": "The anther is the part of the stamen that produces and releases pollen.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "Which nutrient provides the most energy per gram?",
+    "options": [
+      "Fat",
+      "Carbohydrate",
+      "Protein",
+      "Fiber"
+    ],
+    "correct_answer": "Fat",
+    "explanation": "Fats provide 9 calories per gram, compared to 4 calories per gram for carbohydrates and proteins.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the protective outer covering of a virus called?",
+    "options": [
+      "Capsid",
+      "Cell wall",
+      "Membrane",
+      "Envelope"
+    ],
+    "correct_answer": "Capsid",
+    "explanation": "The capsid is the protein shell that encases and protects the viral genetic material.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the term for an organism that only eats plants?",
+    "options": [
+      "Herbivore",
+      "Carnivore",
+      "Omnivore",
+      "Detritivore"
+    ],
+    "correct_answer": "Herbivore",
+    "explanation": "Herbivores are animals that feed primarily or exclusively on plant material.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "Which part of the brain controls balance and coordination?",
+    "options": [
+      "Cerebellum",
+      "Cerebrum",
+      "Brainstem",
+      "Hypothalamus"
+    ],
+    "correct_answer": "Cerebellum",
+    "explanation": "The cerebellum coordinates voluntary movements, balance, and fine motor skills.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the process of making RNA from DNA called?",
+    "options": [
+      "Transcription",
+      "Translation",
+      "Replication",
+      "Mutation"
+    ],
+    "correct_answer": "Transcription",
+    "explanation": "Transcription is the process where DNA is used as a template to produce mRNA.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the role of enzymes in the body?",
+    "options": [
+      "Speed up chemical reactions",
+      "Store energy",
+      "Carry oxygen",
+      "Build cell walls"
+    ],
+    "correct_answer": "Speed up chemical reactions",
+    "explanation": "Enzymes are biological catalysts that accelerate biochemical reactions without being consumed.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What organ produces insulin?",
+    "options": [
+      "Pancreas",
+      "Liver",
+      "Kidney",
+      "Thyroid"
+    ],
+    "correct_answer": "Pancreas",
+    "explanation": "The pancreas produces insulin, a hormone that regulates blood glucose levels.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "Which type of symbiosis benefits both organisms?",
+    "options": [
+      "Mutualism",
+      "Parasitism",
+      "Commensalism",
+      "Predation"
+    ],
+    "correct_answer": "Mutualism",
+    "explanation": "In mutualism, both species benefit from their interaction, like bees and flowers.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the function of the stomata in leaves?",
+    "options": [
+      "Gas exchange",
+      "Water absorption",
+      "Photosynthesis",
+      "Nutrient storage"
+    ],
+    "correct_answer": "Gas exchange",
+    "explanation": "Stomata are tiny pores in leaves that allow CO2 in and O2 and water vapor out.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the term for the set of all genes in an organism?",
+    "options": [
+      "Genome",
+      "Chromosome",
+      "Gene pool",
+      "Proteome"
+    ],
+    "correct_answer": "Genome",
+    "explanation": "The genome is the complete set of genetic information in an organism.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "Which organelle digests waste materials in the cell?",
+    "options": [
+      "Lysosome",
+      "Ribosome",
+      "Vacuole",
+      "Golgi body"
+    ],
+    "correct_answer": "Lysosome",
+    "explanation": "Lysosomes contain digestive enzymes that break down waste materials and cellular debris.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the main function of red blood cells?",
+    "options": [
+      "Transport oxygen",
+      "Fight infection",
+      "Clot blood",
+      "Produce antibodies"
+    ],
+    "correct_answer": "Transport oxygen",
+    "explanation": "Red blood cells contain hemoglobin which binds and transports oxygen from lungs to tissues.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What do we call the movement of substances from high to low concentration?",
+    "options": [
+      "Diffusion",
+      "Osmosis",
+      "Active transport",
+      "Endocytosis"
+    ],
+    "correct_answer": "Diffusion",
+    "explanation": "Diffusion is the passive movement of particles from an area of high concentration to low concentration.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "Which vitamin is produced when skin is exposed to sunlight?",
+    "options": [
+      "Vitamin D",
+      "Vitamin C",
+      "Vitamin A",
+      "Vitamin B12"
+    ],
+    "correct_answer": "Vitamin D",
+    "explanation": "Sunlight triggers the synthesis of Vitamin D in the skin, essential for calcium absorption.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the study of heredity and genetic variation called?",
+    "options": [
+      "Ecology",
+      "Genetics",
+      "Microbiology",
+      "Anatomy"
+    ],
+    "correct_answer": "Genetics",
+    "explanation": "Genetics is the branch of biology that studies how traits are inherited and vary in populations.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "Which structure in plants conducts water from roots to leaves?",
+    "options": [
+      "Phloem",
+      "Xylem",
+      "Cambium",
+      "Cortex"
+    ],
+    "correct_answer": "Xylem",
+    "explanation": "Xylem is vascular tissue that transports water and dissolved minerals upward from roots to leaves.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the term for organisms that eat both plants and animals?",
+    "options": [
+      "Herbivores",
+      "Omnivores",
+      "Carnivores",
+      "Scavengers"
+    ],
+    "correct_answer": "Omnivores",
+    "explanation": "Omnivores consume both plant and animal matter, like humans and bears.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "Which blood component helps form clots?",
+    "options": [
+      "Red blood cells",
+      "Platelets",
+      "White blood cells",
+      "Plasma"
+    ],
+    "correct_answer": "Platelets",
+    "explanation": "Platelets (thrombocytes) are cell fragments that aggregate at wound sites to form clots and prevent bleeding.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the chemical formula for glucose?",
+    "options": [
+      "C6H12O",
+      "C6H12O6",
+      "C12H22O11",
+      "C2H5OH"
+    ],
+    "correct_answer": "C6H12O6",
+    "explanation": "Glucose is a simple sugar with the molecular formula C6H12O6, a key energy source for cells.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "Which part of the cell is responsible for packaging and shipping proteins?",
+    "options": [
+      "Ribosome",
+      "Golgi apparatus",
+      "Endoplasmic reticulum",
+      "Vacuole"
+    ],
+    "correct_answer": "Golgi apparatus",
+    "explanation": "The Golgi apparatus processes, packages, and ships proteins to their destinations inside or outside the cell.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the term for a change in DNA sequence?",
+    "options": [
+      "Transcription",
+      "Mutation",
+      "Translation",
+      "Replication"
+    ],
+    "correct_answer": "Mutation",
+    "explanation": "A mutation is any change in the nucleotide sequence of DNA, which may or may not affect the organism.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "Which kingdom includes mushrooms and molds?",
+    "options": [
+      "Plantae",
+      "Fungi",
+      "Protista",
+      "Monera"
+    ],
+    "correct_answer": "Fungi",
+    "explanation": "Fungi are eukaryotic organisms that include mushrooms, molds, and yeasts — they absorb nutrients from their environment.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the term for the process by which plants lose water through leaves?",
+    "options": [
+      "Transpiration",
+      "Respiration",
+      "Osmosis",
+      "Evaporation"
+    ],
+    "correct_answer": "Transpiration",
+    "explanation": "Transpiration is the process by which water vapor exits plants through stomata in leaves.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "Which structure connects muscles to bones?",
+    "options": [
+      "Ligament",
+      "Tendon",
+      "Cartilage",
+      "Fascia"
+    ],
+    "correct_answer": "Tendon",
+    "explanation": "Tendons are tough connective tissue bands that attach muscle to bone, transmitting force during movement.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the correct order of biological organization from smallest to largest?",
+    "options": [
+      "Organ, cell, tissue, organism",
+      "Cell, tissue, organ, organism",
+      "Tissue, cell, organ, system",
+      "Organism, organ, tissue, cell"
+    ],
+    "correct_answer": "Cell, tissue, organ, organism",
+    "explanation": "Biological organization goes: cell → tissue → organ → organ system → organism.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the liquid portion of blood called?",
+    "options": [
+      "Serum",
+      "Plasma",
+      "Lymph",
+      "Cytosol"
+    ],
+    "correct_answer": "Plasma",
+    "explanation": "Plasma is the yellowish liquid component of blood that carries cells, nutrients, hormones, and waste.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "Which part of the neuron receives signals?",
+    "options": [
+      "Axon",
+      "Dendrite",
+      "Myelin sheath",
+      "Synapse"
+    ],
+    "correct_answer": "Dendrite",
+    "explanation": "Dendrites are branched projections of neurons that receive signals from other neurons.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the name for the inherited unit of genetic information?",
+    "options": [
+      "Chromosome",
+      "Gene",
+      "Allele",
+      "Codon"
+    ],
+    "correct_answer": "Gene",
+    "explanation": "A gene is a segment of DNA that encodes the information for building a specific protein or RNA molecule.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "Which part of the plant anchors it to the soil and absorbs water?",
+    "options": [
+      "Stem",
+      "Roots",
+      "Leaves",
+      "Flowers"
+    ],
+    "correct_answer": "Roots",
+    "explanation": "Roots anchor plants in soil and absorb water and dissolved minerals for transport throughout the plant.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What type of organism lives in or on another organism causing harm?",
+    "options": [
+      "Mutualist",
+      "Parasite",
+      "Commensal",
+      "Decomposer"
+    ],
+    "correct_answer": "Parasite",
+    "explanation": "A parasite benefits at the expense of its host, often causing harm or disease.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "Which system transports nutrients and gases in the human body?",
+    "options": [
+      "Lymphatic system",
+      "Circulatory system",
+      "Digestive system",
+      "Respiratory system"
+    ],
+    "correct_answer": "Circulatory system",
+    "explanation": "The circulatory system (heart, blood, vessels) transports oxygen, nutrients, hormones, and wastes.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the term for a group of similar cells working together?",
+    "options": [
+      "Organ",
+      "Tissue",
+      "System",
+      "Colony"
+    ],
+    "correct_answer": "Tissue",
+    "explanation": "A tissue is a group of similar cells that work together to perform a specific function.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "Which vitamin is essential for blood clotting?",
+    "options": [
+      "Vitamin A",
+      "Vitamin K",
+      "Vitamin C",
+      "Vitamin E"
+    ],
+    "correct_answer": "Vitamin K",
+    "explanation": "Vitamin K is required for the synthesis of clotting factors needed for proper blood coagulation.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the primary site of photosynthesis in a leaf?",
+    "options": [
+      "Epidermis",
+      "Mesophyll",
+      "Vascular bundle",
+      "Cuticle"
+    ],
+    "correct_answer": "Mesophyll",
+    "explanation": "The mesophyll cells in the middle of a leaf contain chloroplasts and are the primary site of photosynthesis.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "Which process produces four haploid cells from one diploid cell?",
+    "options": [
+      "Mitosis",
+      "Meiosis",
+      "Fission",
+      "Budding"
+    ],
+    "correct_answer": "Meiosis",
+    "explanation": "Meiosis produces four genetically unique haploid cells (gametes) from one diploid parent cell.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the function of the small intestine?",
+    "options": [
+      "Store food",
+      "Absorb nutrients",
+      "Produce bile",
+      "Filter blood"
+    ],
+    "correct_answer": "Absorb nutrients",
+    "explanation": "The small intestine is the primary site of nutrient absorption from digested food into the bloodstream.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "Which molecule serves as the template for protein synthesis?",
+    "options": [
+      "DNA",
+      "mRNA",
+      "tRNA",
+      "rRNA"
+    ],
+    "correct_answer": "mRNA",
+    "explanation": "Messenger RNA (mRNA) carries the genetic code from DNA to ribosomes for protein synthesis.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What connects bones to other bones at a joint?",
+    "options": [
+      "Tendons",
+      "Ligaments",
+      "Cartilage",
+      "Muscles"
+    ],
+    "correct_answer": "Ligaments",
+    "explanation": "Ligaments are tough bands of connective tissue that connect bone to bone at joints.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the role of the spleen?",
+    "options": [
+      "Produce insulin",
+      "Filter blood and recycle red blood cells",
+      "Digest food",
+      "Regulate temperature"
+    ],
+    "correct_answer": "Filter blood and recycle red blood cells",
+    "explanation": "The spleen filters blood, removes old red blood cells, and plays a role in immune function.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What do we call an organism's role in its ecosystem?",
+    "options": [
+      "Habitat",
+      "Niche",
+      "Biome",
+      "Territory"
+    ],
+    "correct_answer": "Niche",
+    "explanation": "An ecological niche describes the role an organism plays in its community, including diet, behavior, and interactions.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "Which nutrient is the body's preferred energy source?",
+    "options": [
+      "Fat",
+      "Carbohydrates",
+      "Protein",
+      "Vitamins"
+    ],
+    "correct_answer": "Carbohydrates",
+    "explanation": "Carbohydrates are broken down into glucose, which is the primary fuel used by cells for energy.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What do ribosomes use to make proteins?",
+    "options": [
+      "DNA",
+      "mRNA",
+      "Lipids",
+      "ATP only"
+    ],
+    "correct_answer": "mRNA",
+    "explanation": "Ribosomes read mRNA sequences (codons) and translate them into amino acid chains (proteins).",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "Which organelle is found only in plant cells and performs photosynthesis?",
+    "options": [
+      "Mitochondria",
+      "Chloroplast",
+      "Vacuole",
+      "Cell wall"
+    ],
+    "correct_answer": "Chloroplast",
+    "explanation": "Chloroplasts are organelles in plant cells that contain chlorophyll and carry out photosynthesis.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the hardest substance in the human body?",
+    "options": [
+      "Bone",
+      "Tooth enamel",
+      "Cartilage",
+      "Fingernail"
+    ],
+    "correct_answer": "Tooth enamel",
+    "explanation": "Tooth enamel is the hardest biological substance, protecting the underlying dentin and pulp.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "Which organ produces bile?",
+    "options": [
+      "Pancreas",
+      "Liver",
+      "Gallbladder",
+      "Stomach"
+    ],
+    "correct_answer": "Liver",
+    "explanation": "The liver produces bile, which is stored in the gallbladder and released to help digest fats.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the name for the process of reading mRNA to produce a protein?",
+    "options": [
+      "Transcription",
+      "Translation",
+      "Replication",
+      "Transduction"
+    ],
+    "correct_answer": "Translation",
+    "explanation": "Translation is the process where ribosomes read mRNA and assemble the corresponding protein.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "Which part of the brain regulates hunger and thirst?",
+    "options": [
+      "Cerebellum",
+      "Hypothalamus",
+      "Hippocampus",
+      "Amygdala"
+    ],
+    "correct_answer": "Hypothalamus",
+    "explanation": "The hypothalamus regulates homeostasis including hunger, thirst, body temperature, and sleep.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What is an organism that has two different alleles for a trait called?",
+    "options": [
+      "Homozygous",
+      "Heterozygous",
+      "Dominant",
+      "Recessive"
+    ],
+    "correct_answer": "Heterozygous",
+    "explanation": "A heterozygous organism has two different alleles (e.g., Aa) for a particular gene locus.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What structure surrounds and protects the brain?",
+    "options": [
+      "Vertebrae",
+      "Skull",
+      "Sternum",
+      "Pelvis"
+    ],
+    "correct_answer": "Skull",
+    "explanation": "The skull is the bony structure that encases and protects the brain from physical damage.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "Which type of reproduction involves two parents contributing genetic material?",
+    "options": [
+      "Asexual",
+      "Sexual",
+      "Binary fission",
+      "Parthenogenesis"
+    ],
+    "correct_answer": "Sexual",
+    "explanation": "Sexual reproduction involves two parents, producing offspring with genetic variation from both.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the function of the trachea?",
+    "options": [
+      "Digest food",
+      "Carry air to the lungs",
+      "Filter blood",
+      "Produce hormones"
+    ],
+    "correct_answer": "Carry air to the lungs",
+    "explanation": "The trachea (windpipe) is a tube that carries air from the throat down to the bronchi and lungs.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the name of the pigment that gives skin its color?",
+    "options": [
+      "Hemoglobin",
+      "Melanin",
+      "Chlorophyll",
+      "Carotene"
+    ],
+    "correct_answer": "Melanin",
+    "explanation": "Melanin is the pigment produced by melanocytes that gives skin, hair, and eyes their color.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "Which structure in the eye focuses light onto the retina?",
+    "options": [
+      "Cornea",
+      "Lens",
+      "Iris",
+      "Pupil"
+    ],
+    "correct_answer": "Lens",
+    "explanation": "The lens of the eye focuses light by changing shape (accommodation) to project a clear image on the retina.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the term for animals that maintain a constant body temperature?",
+    "options": [
+      "Ectotherms",
+      "Endotherms",
+      "Poikilotherms",
+      "Homeotherms"
+    ],
+    "correct_answer": "Endotherms",
+    "explanation": "Endotherms (warm-blooded animals) like mammals and birds regulate their body temperature internally.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the major component of cell membranes?",
+    "options": [
+      "Proteins",
+      "Phospholipids",
+      "Carbohydrates",
+      "Cholesterol"
+    ],
+    "correct_answer": "Phospholipids",
+    "explanation": "Cell membranes are primarily composed of a phospholipid bilayer with embedded proteins.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "Which cells produce antibodies?",
+    "options": [
+      "T cells",
+      "B cells",
+      "Macrophages",
+      "Neutrophils"
+    ],
+    "correct_answer": "B cells",
+    "explanation": "B lymphocytes (B cells) differentiate into plasma cells that produce specific antibodies against antigens.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the outer layer of the skin called?",
+    "options": [
+      "Dermis",
+      "Epidermis",
+      "Hypodermis",
+      "Subcutis"
+    ],
+    "correct_answer": "Epidermis",
+    "explanation": "The epidermis is the outermost layer of skin, providing a barrier against the environment.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "How many chambers does the human heart have?",
+    "options": [
+      "Two",
+      "Four",
+      "Three",
+      "Six"
+    ],
+    "correct_answer": "Four",
+    "explanation": "The human heart has four chambers: right and left atria and right and left ventricles.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the function of the diaphragm?",
+    "options": [
+      "Filter blood",
+      "Assist in breathing",
+      "Digest food",
+      "Produce hormones"
+    ],
+    "correct_answer": "Assist in breathing",
+    "explanation": "The diaphragm is a dome-shaped muscle below the lungs that contracts and relaxes to enable breathing.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "Which type of RNA carries amino acids to the ribosome?",
+    "options": [
+      "mRNA",
+      "tRNA",
+      "rRNA",
+      "hnRNA"
+    ],
+    "correct_answer": "tRNA",
+    "explanation": "Transfer RNA (tRNA) brings specific amino acids to the ribosome during protein synthesis.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the basic unit of the nervous system?",
+    "options": [
+      "Axon",
+      "Neuron",
+      "Synapse",
+      "Glial cell"
+    ],
+    "correct_answer": "Neuron",
+    "explanation": "Neurons are the basic structural and functional units of the nervous system that transmit signals.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "Which system includes bones, cartilage, and joints?",
+    "options": [
+      "Muscular system",
+      "Skeletal system",
+      "Integumentary system",
+      "Endocrine system"
+    ],
+    "correct_answer": "Skeletal system",
+    "explanation": "The skeletal system provides structure, protects organs, enables movement, and produces blood cells.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What substance do plants store energy as?",
+    "options": [
+      "Glycogen",
+      "Starch",
+      "Glucose",
+      "Cellulose"
+    ],
+    "correct_answer": "Starch",
+    "explanation": "Plants store excess glucose as starch, a polysaccharide, mainly in roots, seeds, and tubers.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "Which part of the flower receives pollen during pollination?",
+    "options": [
+      "Anther",
+      "Stigma",
+      "Ovary",
+      "Style"
+    ],
+    "correct_answer": "Stigma",
+    "explanation": "The stigma is the sticky top part of the pistil that receives pollen during pollination.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the term for the total of all chemical reactions in the body?",
+    "options": [
+      "Homeostasis",
+      "Metabolism",
+      "Catabolism",
+      "Anabolism"
+    ],
+    "correct_answer": "Metabolism",
+    "explanation": "Metabolism encompasses all chemical reactions that occur in a living organism to maintain life.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What type of joint allows the widest range of movement?",
+    "options": [
+      "Hinge joint",
+      "Pivot joint",
+      "Ball-and-socket joint",
+      "Gliding joint"
+    ],
+    "correct_answer": "Ball-and-socket joint",
+    "explanation": "Ball-and-socket joints like the hip and shoulder allow movement in multiple planes.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the name for the part of a chromosome where two chromatids are joined?",
+    "options": [
+      "Telomere",
+      "Chromatin",
+      "Centromere",
+      "Chromatid"
+    ],
+    "correct_answer": "Centromere",
+    "explanation": "The centromere is the region of a chromosome that links sister chromatids and attaches to spindle fibers during cell division.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the process of breaking down glucose to release energy called?",
+    "options": [
+      "Photosynthesis",
+      "Fermentation",
+      "Cellular respiration",
+      "Digestion"
+    ],
+    "correct_answer": "Cellular respiration",
+    "explanation": "Cellular respiration is the process of converting glucose and oxygen into ATP, carbon dioxide, and water.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "Which animals are vertebrates?",
+    "options": [
+      "Insects",
+      "Worms",
+      "Fish",
+      "Crabs"
+    ],
+    "correct_answer": "Fish",
+    "explanation": "Fish are vertebrates because they have a backbone (vertebral column), unlike insects, worms, and crabs.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the biological term for an organism's genetic makeup?",
+    "options": [
+      "Phenotype",
+      "Trait",
+      "Genotype",
+      "Allele"
+    ],
+    "correct_answer": "Genotype",
+    "explanation": "Genotype refers to the specific allele combination an organism carries for a particular gene.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "Which part of the eye contains photoreceptors?",
+    "options": [
+      "Cornea",
+      "Iris",
+      "Retina",
+      "Sclera"
+    ],
+    "correct_answer": "Retina",
+    "explanation": "The retina is the light-sensitive layer at the back of the eye containing rods (low light) and cones (color).",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the name of the protein that gives muscles their ability to contract?",
+    "options": [
+      "Collagen",
+      "Keratin",
+      "Myosin",
+      "Elastin"
+    ],
+    "correct_answer": "Myosin",
+    "explanation": "Myosin is a motor protein that interacts with actin to generate the force needed for muscle contraction.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "Which organ produces growth hormone?",
+    "options": [
+      "Thyroid",
+      "Adrenal gland",
+      "Pituitary gland",
+      "Pancreas"
+    ],
+    "correct_answer": "Pituitary gland",
+    "explanation": "The pituitary gland (master gland) produces growth hormone (GH) which stimulates body growth.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the name for when two species evolve together in response to each other?",
+    "options": [
+      "Convergent evolution",
+      "Divergent evolution",
+      "Coevolution",
+      "Speciation"
+    ],
+    "correct_answer": "Coevolution",
+    "explanation": "Coevolution occurs when two or more species reciprocally affect each other's evolution, like flowers and pollinators.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "Which type of tissue covers body surfaces?",
+    "options": [
+      "Connective tissue",
+      "Muscle tissue",
+      "Epithelial tissue",
+      "Nervous tissue"
+    ],
+    "correct_answer": "Epithelial tissue",
+    "explanation": "Epithelial tissue forms the lining of body surfaces, organs, and cavities — it protects, absorbs, and secretes.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the watery fluid inside the cell called?",
+    "options": [
+      "Blood plasma",
+      "Interstitial fluid",
+      "Cytoplasm",
+      "Lymph"
+    ],
+    "correct_answer": "Cytoplasm",
+    "explanation": "Cytoplasm is the gel-like fluid filling the cell, containing organelles, proteins, and dissolved substances.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the function of the gallbladder?",
+    "options": [
+      "Produce bile",
+      "Filter blood",
+      "Store bile",
+      "Absorb nutrients"
+    ],
+    "correct_answer": "Store bile",
+    "explanation": "The gallbladder stores bile produced by the liver and releases it into the small intestine during digestion.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "Which of these is NOT a function of the liver?",
+    "options": [
+      "Detoxification",
+      "Producing bile",
+      "Pumping blood",
+      "Storing glycogen"
+    ],
+    "correct_answer": "Pumping blood",
+    "explanation": "The liver detoxifies substances, produces bile, stores glycogen, and synthesizes proteins — but does not pump blood.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What is a chromosome made of?",
+    "options": [
+      "RNA and lipids",
+      "Proteins only",
+      "DNA and proteins",
+      "Carbohydrates and DNA"
+    ],
+    "correct_answer": "DNA and proteins",
+    "explanation": "Chromosomes are composed of DNA wrapped around histone proteins, forming chromatin.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "How many pairs of chromosomes do humans have?",
+    "options": [
+      "23 pairs",
+      "46 pairs",
+      "23 chromosomes",
+      "22 pairs"
+    ],
+    "correct_answer": "23 pairs",
+    "explanation": "Humans have 46 chromosomes arranged in 23 pairs — 22 autosomes and 1 sex chromosome pair.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the term for animals without a backbone?",
+    "options": [
+      "Vertebrates",
+      "Chordates",
+      "Invertebrates",
+      "Exoskeletal"
+    ],
+    "correct_answer": "Invertebrates",
+    "explanation": "Invertebrates are animals that lack a vertebral column (backbone), including insects, worms, and mollusks.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "Which gas is essential for aerobic cellular respiration?",
+    "options": [
+      "Carbon dioxide",
+      "Nitrogen",
+      "Oxygen",
+      "Hydrogen"
+    ],
+    "correct_answer": "Oxygen",
+    "explanation": "Aerobic respiration requires oxygen to fully break down glucose and produce maximum ATP.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the term for the ability of an organism to maintain internal stability?",
+    "options": [
+      "Adaptation",
+      "Regulation",
+      "Homeostasis",
+      "Equilibrium"
+    ],
+    "correct_answer": "Homeostasis",
+    "explanation": "Homeostasis is the process by which living organisms maintain a stable internal environment.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "Which structure in the ear contains hair cells for hearing?",
+    "options": [
+      "Eardrum",
+      "Ossicles",
+      "Cochlea",
+      "Eustachian tube"
+    ],
+    "correct_answer": "Cochlea",
+    "explanation": "The cochlea is a snail-shaped structure in the inner ear containing hair cells that convert sound waves to nerve signals.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the name for an organism's ability to change to better suit its environment?",
+    "options": [
+      "Evolution",
+      "Selection",
+      "Adaptation",
+      "Mutation"
+    ],
+    "correct_answer": "Adaptation",
+    "explanation": "An adaptation is an inherited trait that increases an organism's fitness in its specific environment.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "Which part of a plant produces seeds?",
+    "options": [
+      "Leaf",
+      "Stem",
+      "Ovary",
+      "Root"
+    ],
+    "correct_answer": "Ovary",
+    "explanation": "After fertilization, the ovary of a flower develops into a fruit containing seeds.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the name for the fluid-filled sac surrounding the fetus?",
+    "options": [
+      "Placenta",
+      "Umbilical cord",
+      "Amniotic sac",
+      "Uterus"
+    ],
+    "correct_answer": "Amniotic sac",
+    "explanation": "The amniotic sac is a fluid-filled membrane that surrounds and protects the developing fetus.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "Which enzyme breaks down starch in the mouth?",
+    "options": [
+      "Pepsin",
+      "Lipase",
+      "Amylase",
+      "Trypsin"
+    ],
+    "correct_answer": "Amylase",
+    "explanation": "Salivary amylase in the mouth begins digesting starch (polysaccharides) into maltose.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the function of the lymphatic system?",
+    "options": [
+      "Pump blood",
+      "Digest food",
+      "Return fluid to circulation and fight infection",
+      "Produce hormones"
+    ],
+    "correct_answer": "Return fluid to circulation and fight infection",
+    "explanation": "The lymphatic system collects interstitial fluid, transports it back to blood, and supports immune responses.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the name of the cells that make up the nervous system's support structure?",
+    "options": [
+      "Neurons",
+      "Axons",
+      "Glial cells",
+      "Dendrites"
+    ],
+    "correct_answer": "Glial cells",
+    "explanation": "Glial cells (neuroglia) support, nourish, and protect neurons in the nervous system.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "Which planet in our solar system is known to support life?",
+    "options": [
+      "Mars",
+      "Venus",
+      "Earth",
+      "Jupiter"
+    ],
+    "correct_answer": "Earth",
+    "explanation": "Earth is the only known planet to support life due to its liquid water, atmosphere, and temperature range.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the name for the sequence of who eats whom in an ecosystem?",
+    "options": [
+      "Food web",
+      "Biomass pyramid",
+      "Food chain",
+      "Energy pyramid"
+    ],
+    "correct_answer": "Food chain",
+    "explanation": "A food chain shows the linear sequence of organisms where each is eaten by the next in the series.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "Which structure prevents food from entering the trachea?",
+    "options": [
+      "Uvula",
+      "Tonsils",
+      "Epiglottis",
+      "Larynx"
+    ],
+    "correct_answer": "Epiglottis",
+    "explanation": "The epiglottis is a flap of cartilage that covers the trachea during swallowing to prevent choking.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the name for the blood vessels that carry blood away from the heart?",
+    "options": [
+      "Veins",
+      "Capillaries",
+      "Arteries",
+      "Venules"
+    ],
+    "correct_answer": "Arteries",
+    "explanation": "Arteries carry oxygenated blood away from the heart to the body (except the pulmonary artery).",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "Which organelle is involved in lipid synthesis?",
+    "options": [
+      "Ribosome",
+      "Golgi apparatus",
+      "Smooth endoplasmic reticulum",
+      "Lysosome"
+    ],
+    "correct_answer": "Smooth endoplasmic reticulum",
+    "explanation": "The smooth ER (without ribosomes) synthesizes lipids, metabolizes carbohydrates, and detoxifies drugs.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "How many bones are in the adult human body?",
+    "options": [
+      "180",
+      "206",
+      "300",
+      "250"
+    ],
+    "correct_answer": "206",
+    "explanation": "The adult human body has 206 bones. Babies are born with about 270-300, which fuse as they grow.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What are the sex chromosomes of a human female?",
+    "options": [
+      "XY",
+      "YY",
+      "XX",
+      "XO"
+    ],
+    "correct_answer": "XX",
+    "explanation": "Human females have two X chromosomes (XX), while males have one X and one Y chromosome (XY).",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "Which hormone is responsible for the fight-or-flight response?",
+    "options": [
+      "Insulin",
+      "Cortisol",
+      "Adrenaline",
+      "Thyroxine"
+    ],
+    "correct_answer": "Adrenaline",
+    "explanation": "Adrenaline (epinephrine) is released by the adrenal glands during stress, triggering the fight-or-flight response.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the term for the physical and chemical processes that break down food?",
+    "options": [
+      "Absorption",
+      "Elimination",
+      "Digestion",
+      "Secretion"
+    ],
+    "correct_answer": "Digestion",
+    "explanation": "Digestion is the mechanical and chemical breakdown of food into absorbable nutrients.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "Which cell type is the most abundant in the human body?",
+    "options": [
+      "Muscle cells",
+      "Neurons",
+      "Red blood cells",
+      "Skin cells"
+    ],
+    "correct_answer": "Red blood cells",
+    "explanation": "Red blood cells are the most numerous cells in the human body, with about 25 trillion at any given time.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What do you call a group of the same species living in the same area?",
+    "options": [
+      "Community",
+      "Ecosystem",
+      "Population",
+      "Biome"
+    ],
+    "correct_answer": "Population",
+    "explanation": "A population is a group of individuals of the same species living in the same geographic area at the same time.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the role of platelets in the blood?",
+    "options": [
+      "Transport oxygen",
+      "Fight bacteria",
+      "Clot blood",
+      "Carry nutrients"
+    ],
+    "correct_answer": "Clot blood",
+    "explanation": "Platelets aggregate at injury sites and release clotting factors that form a fibrin plug to stop bleeding.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "Which organ controls sleep and wakefulness?",
+    "options": [
+      "Hypothalamus",
+      "Cerebellum",
+      "Pineal gland",
+      "Brainstem"
+    ],
+    "correct_answer": "Pineal gland",
+    "explanation": "The pineal gland produces melatonin, regulating sleep-wake cycles (circadian rhythm).",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the name for the process of cell eating (engulfing particles)?",
+    "options": [
+      "Pinocytosis",
+      "Exocytosis",
+      "Phagocytosis",
+      "Endocytosis"
+    ],
+    "correct_answer": "Phagocytosis",
+    "explanation": "Phagocytosis is the process by which cells engulf solid particles or other cells, used by immune cells to destroy pathogens.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "Which type of carbohydrate cannot be digested by humans?",
+    "options": [
+      "Starch",
+      "Glucose",
+      "Dietary fiber",
+      "Glycogen"
+    ],
+    "correct_answer": "Dietary fiber",
+    "explanation": "Dietary fiber (like cellulose) cannot be broken down by human digestive enzymes, aiding bowel movement instead.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the function of sebaceous glands in the skin?",
+    "options": [
+      "Regulate temperature",
+      "Produce sweat",
+      "Produce sebum (oil)",
+      "Sense pressure"
+    ],
+    "correct_answer": "Produce sebum (oil)",
+    "explanation": "Sebaceous glands secrete sebum, an oily substance that lubricates and waterproofs the skin and hair.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What do all living organisms require to survive?",
+    "options": [
+      "Sunlight only",
+      "Soil and water only",
+      "Energy, water, and nutrients",
+      "Oxygen only"
+    ],
+    "correct_answer": "Energy, water, and nutrients",
+    "explanation": "All organisms need energy (from various sources), water for biochemical reactions, and nutrients for building molecules.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the term for the variety of species in a community?",
+    "options": [
+      "Genetic diversity",
+      "Ecosystem diversity",
+      "Species diversity",
+      "Population size"
+    ],
+    "correct_answer": "Species diversity",
+    "explanation": "Species diversity refers to the number and relative abundance of different species in a given community.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "Where does fertilization typically occur in humans?",
+    "options": [
+      "Uterus",
+      "Ovary",
+      "Fallopian tube",
+      "Cervix"
+    ],
+    "correct_answer": "Fallopian tube",
+    "explanation": "Fertilization typically occurs in the fallopian tube when a sperm cell meets and fertilizes an egg (ovum).",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the study of the relationships between organisms and their environment?",
+    "options": [
+      "Taxonomy",
+      "Evolution",
+      "Ecology",
+      "Physiology"
+    ],
+    "correct_answer": "Ecology",
+    "explanation": "Ecology is the study of how organisms interact with each other and with their physical environment.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "Which mineral is most important for bone strength?",
+    "options": [
+      "Iron",
+      "Magnesium",
+      "Calcium",
+      "Phosphorus"
+    ],
+    "correct_answer": "Calcium",
+    "explanation": "Calcium is the main mineral in bones and teeth, providing strength and structure to the skeletal system.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "Which kingdom contains single-celled organisms with a nucleus?",
+    "options": [
+      "Monera",
+      "Bacteria",
+      "Protista",
+      "Archaea"
+    ],
+    "correct_answer": "Protista",
+    "explanation": "Protists are mostly single-celled eukaryotes (have a nucleus) that don't fit other kingdoms, like amoeba and algae.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the function of antidiuretic hormone (ADH)?",
+    "options": [
+      "Increase blood sugar",
+      "Lower heart rate",
+      "Retain water in kidneys",
+      "Stimulate digestion"
+    ],
+    "correct_answer": "Retain water in kidneys",
+    "explanation": "ADH (vasopressin) tells the kidneys to reabsorb water, reducing urine volume and maintaining blood pressure.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the name for the loss of a species from an area but not globally?",
+    "options": [
+      "Mass extinction",
+      "Global extinction",
+      "Local extinction",
+      "Extirpation"
+    ],
+    "correct_answer": "Extirpation",
+    "explanation": "Extirpation (local extinction) occurs when a species disappears from a specific area but still exists elsewhere.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the function of melatonin?",
+    "options": [
+      "Control hunger",
+      "Regulate stress",
+      "Regulate sleep cycles",
+      "Control growth"
+    ],
+    "correct_answer": "Regulate sleep cycles",
+    "explanation": "Melatonin is produced by the pineal gland and regulates circadian rhythms, signaling the body to sleep.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What is osmotic pressure?",
+    "options": [
+      "Pressure from muscle contractions",
+      "Pressure caused by gravity",
+      "Pressure needed to stop osmosis",
+      "Blood pressure in arteries"
+    ],
+    "correct_answer": "Pressure needed to stop osmosis",
+    "explanation": "Osmotic pressure is the pressure required to prevent water from moving across a semipermeable membrane by osmosis.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the scientific name for the human species?",
+    "options": [
+      "Homo erectus",
+      "Homo neanderthalensis",
+      "Homo habilis",
+      "Homo sapiens"
+    ],
+    "correct_answer": "Homo sapiens",
+    "explanation": "Modern humans are classified as Homo sapiens, meaning 'wise man' in Latin.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the main function of the esophagus?",
+    "options": [
+      "Digest proteins",
+      "Absorb nutrients",
+      "Produce enzymes",
+      "Transport food to the stomach"
+    ],
+    "correct_answer": "Transport food to the stomach",
+    "explanation": "The esophagus is a muscular tube that uses peristalsis to move food from the throat to the stomach.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "Which blood type is the universal donor?",
+    "options": [
+      "Type A",
+      "Type B",
+      "Type AB",
+      "Type O negative"
+    ],
+    "correct_answer": "Type O negative",
+    "explanation": "Type O negative blood has no A, B, or Rh antigens, so it can be donated to patients of any blood type.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the term for the process by which plants make food?",
+    "options": [
+      "Digestion",
+      "Respiration",
+      "Fermentation",
+      "Photosynthesis"
+    ],
+    "correct_answer": "Photosynthesis",
+    "explanation": "Photosynthesis is the process by which plants use sunlight, water, and CO2 to produce glucose and oxygen.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the largest bone in the human body?",
+    "options": [
+      "Humerus",
+      "Tibia",
+      "Spine",
+      "Femur"
+    ],
+    "correct_answer": "Femur",
+    "explanation": "The femur (thigh bone) is the longest and strongest bone in the human body.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "Which system includes the ovaries and testes?",
+    "options": [
+      "Endocrine system",
+      "Urinary system",
+      "Nervous system",
+      "Reproductive system"
+    ],
+    "correct_answer": "Reproductive system",
+    "explanation": "The reproductive system includes gonads (ovaries in females, testes in males) that produce gametes and sex hormones.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What do we call organisms that cannot make their own food?",
+    "options": [
+      "Autotrophs",
+      "Producers",
+      "Photoautotrophs",
+      "Heterotrophs"
+    ],
+    "correct_answer": "Heterotrophs",
+    "explanation": "Heterotrophs must consume other organisms or organic matter for energy since they cannot photosynthesize.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the name for the cell division that produces gametes?",
+    "options": [
+      "Mitosis",
+      "Binary fission",
+      "Budding",
+      "Meiosis"
+    ],
+    "correct_answer": "Meiosis",
+    "explanation": "Meiosis is the specialized division that halves the chromosome number to produce haploid gametes (sperm and eggs).",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "Which part of the brain is responsible for language and higher thinking?",
+    "options": [
+      "Brainstem",
+      "Cerebellum",
+      "Hypothalamus",
+      "Cerebrum"
+    ],
+    "correct_answer": "Cerebrum",
+    "explanation": "The cerebrum (cerebral cortex) controls higher functions like language, memory, reasoning, and conscious thought.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the term for a physical characteristic that helps an organism survive?",
+    "options": [
+      "Genotype",
+      "Mutation",
+      "Phenotype",
+      "Adaptation"
+    ],
+    "correct_answer": "Adaptation",
+    "explanation": "An adaptation is an inherited characteristic that increases an organism's fitness and survival in its environment.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "Which vitamin prevents scurvy?",
+    "options": [
+      "Vitamin A",
+      "Vitamin D",
+      "Vitamin E",
+      "Vitamin C"
+    ],
+    "correct_answer": "Vitamin C",
+    "explanation": "Vitamin C (ascorbic acid) is essential for collagen synthesis. Its deficiency causes scurvy.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What type of energy do plants convert sunlight into?",
+    "options": [
+      "Thermal energy",
+      "Kinetic energy",
+      "Nuclear energy",
+      "Chemical energy"
+    ],
+    "correct_answer": "Chemical energy",
+    "explanation": "Photosynthesis converts light energy into chemical energy stored in glucose molecules.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the largest part of the human brain?",
+    "options": [
+      "Brainstem",
+      "Cerebellum",
+      "Thalamus",
+      "Cerebrum"
+    ],
+    "correct_answer": "Cerebrum",
+    "explanation": "The cerebrum makes up about 85% of total brain weight and controls voluntary actions, senses, and intelligence.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the term for the movement of nutrients from the small intestine into the blood?",
+    "options": [
+      "Digestion",
+      "Secretion",
+      "Ingestion",
+      "Absorption"
+    ],
+    "correct_answer": "Absorption",
+    "explanation": "Absorption is the process by which digested nutrients pass through the intestinal wall into the bloodstream.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "Which part of the nervous system controls involuntary functions?",
+    "options": [
+      "Somatic nervous system",
+      "Central nervous system",
+      "Sensory nervous system",
+      "Autonomic nervous system"
+    ],
+    "correct_answer": "Autonomic nervous system",
+    "explanation": "The autonomic nervous system controls involuntary functions like heart rate, digestion, and breathing.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the term for a species that is at risk of extinction?",
+    "options": [
+      "Invasive species",
+      "Keystone species",
+      "Endemic species",
+      "Endangered species"
+    ],
+    "correct_answer": "Endangered species",
+    "explanation": "An endangered species faces a very high risk of extinction in the wild in the near future.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the name of the sugar found in DNA?",
+    "options": [
+      "Glucose",
+      "Fructose",
+      "Ribose",
+      "Deoxyribose"
+    ],
+    "correct_answer": "Deoxyribose",
+    "explanation": "DNA contains the sugar deoxyribose, while RNA contains ribose — the 'deoxy' means one oxygen is missing.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "Which organ is responsible for most chemical digestion?",
+    "options": [
+      "Mouth",
+      "Stomach",
+      "Large intestine",
+      "Small intestine"
+    ],
+    "correct_answer": "Small intestine",
+    "explanation": "The small intestine is where most chemical digestion and nutrient absorption occurs, aided by bile and pancreatic enzymes.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What type of bond holds the two strands of DNA together?",
+    "options": [
+      "Covalent bonds",
+      "Ionic bonds",
+      "Peptide bonds",
+      "Hydrogen bonds"
+    ],
+    "correct_answer": "Hydrogen bonds",
+    "explanation": "The two strands of DNA are held together by hydrogen bonds between complementary base pairs (A-T and G-C).",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the term for a group of populations of different species in an area?",
+    "options": [
+      "Population",
+      "Biome",
+      "Ecosystem",
+      "Community"
+    ],
+    "correct_answer": "Community",
+    "explanation": "A biological community is all the populations of different species living together in the same area.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the name for species that are unique to a specific location?",
+    "options": [
+      "Invasive species",
+      "Keystone species",
+      "Indicator species",
+      "Endemic species"
+    ],
+    "correct_answer": "Endemic species",
+    "explanation": "Endemic species are native to and found exclusively in a particular geographic region.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "Which structure in the ear helps maintain balance?",
+    "options": [
+      "Cochlea",
+      "Eardrum",
+      "Ossicles",
+      "Semicircular canals"
+    ],
+    "correct_answer": "Semicircular canals",
+    "explanation": "The semicircular canals in the inner ear detect rotational movement and help maintain balance.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the function of sweat glands?",
+    "options": [
+      "Produce oil",
+      "Fight infection",
+      "Provide sensation",
+      "Regulate body temperature"
+    ],
+    "correct_answer": "Regulate body temperature",
+    "explanation": "Sweat glands produce sweat that evaporates from the skin surface, cooling the body and regulating temperature.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "Which blood vessels are smallest and allow gas exchange?",
+    "options": [
+      "Arteries",
+      "Veins",
+      "Venules",
+      "Capillaries"
+    ],
+    "correct_answer": "Capillaries",
+    "explanation": "Capillaries are microscopic blood vessels with one-cell-thick walls that allow oxygen and nutrient exchange with tissues.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the name for an organism's complete role in its ecosystem?",
+    "options": [
+      "Habitat",
+      "Biome",
+      "Territory",
+      "Ecological niche"
+    ],
+    "correct_answer": "Ecological niche",
+    "explanation": "An ecological niche encompasses everything about how an organism lives in its environment — its diet, behavior, and interactions.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What molecule carries energy within cells?",
+    "options": [
+      "DNA",
+      "Glucose",
+      "Protein",
+      "ATP"
+    ],
+    "correct_answer": "ATP",
+    "explanation": "ATP (adenosine triphosphate) is the universal energy currency of cells, storing and releasing energy as needed.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the term for the physical environment where an organism lives?",
+    "options": [
+      "Niche",
+      "Biome",
+      "Community",
+      "Habitat"
+    ],
+    "correct_answer": "Habitat",
+    "explanation": "A habitat is the natural environment or setting in which an organism normally lives and grows.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What substance is the cell wall of plants made from?",
+    "options": [
+      "Chitin",
+      "Collagen",
+      "Peptidoglycan",
+      "Cellulose"
+    ],
+    "correct_answer": "Cellulose",
+    "explanation": "Plant cell walls are primarily made of cellulose, a tough polysaccharide that provides structural rigidity.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "Which gland regulates metabolism through thyroid hormones?",
+    "options": [
+      "Pituitary gland",
+      "Adrenal gland",
+      "Pineal gland",
+      "Thyroid gland"
+    ],
+    "correct_answer": "Thyroid gland",
+    "explanation": "The thyroid gland produces thyroxine (T4) and triiodothyronine (T3), which regulate metabolic rate.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the name for the process of fungi absorbing nutrients from dead matter?",
+    "options": [
+      "Predation",
+      "Parasitism",
+      "Mutualism",
+      "Saprotrophic nutrition"
+    ],
+    "correct_answer": "Saprotrophic nutrition",
+    "explanation": "Fungi are saprotrophic — they secrete enzymes onto dead organic matter and absorb the digested nutrients.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "Which organelle stores water and maintains turgor pressure in plant cells?",
+    "options": [
+      "Mitochondria",
+      "Lysosome",
+      "Chloroplast",
+      "Vacuole"
+    ],
+    "correct_answer": "Vacuole",
+    "explanation": "The central vacuole in plant cells stores water, maintains turgor pressure, and helps the cell keep its shape.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the purpose of the eardrum?",
+    "options": [
+      "Maintain balance",
+      "Equalize ear pressure",
+      "Amplify sounds",
+      "Vibrate in response to sound waves"
+    ],
+    "correct_answer": "Vibrate in response to sound waves",
+    "explanation": "The eardrum (tympanic membrane) vibrates when hit by sound waves, transmitting the vibrations to the ossicles.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the term for the stage of mitosis when chromosomes line up in the middle?",
+    "options": [
+      "Prophase",
+      "Anaphase",
+      "Telophase",
+      "Metaphase"
+    ],
+    "correct_answer": "Metaphase",
+    "explanation": "During metaphase, chromosomes align along the cell's equatorial plate before being pulled apart.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the correct sequence of the scientific method?",
+    "options": [
+      "Experiment, hypothesis, observation, conclusion",
+      "Conclusion, experiment, hypothesis, observation",
+      "Hypothesis, observation, experiment, conclusion",
+      "Observation, hypothesis, experiment, conclusion"
+    ],
+    "correct_answer": "Observation, hypothesis, experiment, conclusion",
+    "explanation": "The scientific method follows: observation → hypothesis → experiment → conclusion (analysis).",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What are organisms that use chemical reactions (not light) to make food called?",
+    "options": [
+      "Phototrophs",
+      "Heterotrophs",
+      "Saprotrophs",
+      "Chemotrophs"
+    ],
+    "correct_answer": "Chemotrophs",
+    "explanation": "Chemotrophs (chemoautotrophs) obtain energy from inorganic chemical reactions rather than sunlight.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "Which type of neuron carries signals from the brain to muscles?",
+    "options": [
+      "Sensory neuron",
+      "Interneuron",
+      "Association neuron",
+      "Motor neuron"
+    ],
+    "correct_answer": "Motor neuron",
+    "explanation": "Motor neurons (efferent neurons) transmit impulses from the central nervous system to muscles and glands.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the term for a community plus its physical environment?",
+    "options": [
+      "Population",
+      "Biome",
+      "Habitat",
+      "Ecosystem"
+    ],
+    "correct_answer": "Ecosystem",
+    "explanation": "An ecosystem includes all living organisms (biotic) and their physical environment (abiotic) in a given area.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the term for the movement of energy through a food web?",
+    "options": [
+      "Nutrient cycling",
+      "Carbon cycle",
+      "Water cycle",
+      "Energy flow"
+    ],
+    "correct_answer": "Energy flow",
+    "explanation": "Energy flow describes how energy moves through an ecosystem from producers to consumers at each trophic level.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "Which mammal lays eggs?",
+    "options": [
+      "Bat",
+      "Dolphin",
+      "Kangaroo",
+      "Platypus"
+    ],
+    "correct_answer": "Platypus",
+    "explanation": "The platypus is a monotreme — a rare egg-laying mammal native to Australia.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the term for the period when a cell is not dividing?",
+    "options": [
+      "Prophase",
+      "Mitosis",
+      "Cytokinesis",
+      "Interphase"
+    ],
+    "correct_answer": "Interphase",
+    "explanation": "Interphase is the longest phase of the cell cycle, during which the cell grows and replicates its DNA before division.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the name of the process that converts nitrogen in the air to a usable form?",
+    "options": [
+      "Carbon fixation",
+      "Denitrification",
+      "Nitrification",
+      "Nitrogen fixation"
+    ],
+    "correct_answer": "Nitrogen fixation",
+    "explanation": "Nitrogen fixation converts atmospheric N2 into ammonia (NH3) by bacteria, making nitrogen available to plants.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What type of tissue makes up tendons and ligaments?",
+    "options": [
+      "Epithelial tissue",
+      "Muscle tissue",
+      "Nervous tissue",
+      "Connective tissue"
+    ],
+    "correct_answer": "Connective tissue",
+    "explanation": "Tendons and ligaments are composed of dense connective tissue, primarily collagen fibers.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the term for all the water on Earth?",
+    "options": [
+      "Atmosphere",
+      "Biosphere",
+      "Lithosphere",
+      "Hydrosphere"
+    ],
+    "correct_answer": "Hydrosphere",
+    "explanation": "The hydrosphere includes all water on Earth — oceans, lakes, rivers, groundwater, ice caps, and water vapor.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "Which hormone triggers ovulation?",
+    "options": [
+      "Estrogen",
+      "Progesterone",
+      "Testosterone",
+      "Luteinizing hormone"
+    ],
+    "correct_answer": "Luteinizing hormone",
+    "explanation": "A surge in luteinizing hormone (LH) from the pituitary gland triggers the release of a mature egg (ovulation).",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the term for when two unrelated species evolve similar traits?",
+    "options": [
+      "Divergent evolution",
+      "Adaptive radiation",
+      "Coevolution",
+      "Convergent evolution"
+    ],
+    "correct_answer": "Convergent evolution",
+    "explanation": "Convergent evolution occurs when unrelated species independently evolve similar features in response to similar environments.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the primary role of decomposers in an ecosystem?",
+    "options": [
+      "Produce oxygen",
+      "Consume herbivores",
+      "Photosynthesize",
+      "Recycle nutrients"
+    ],
+    "correct_answer": "Recycle nutrients",
+    "explanation": "Decomposers break down dead organic matter and return nutrients like nitrogen and carbon to the soil and atmosphere.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the name for the protective caps at the ends of chromosomes?",
+    "options": [
+      "Centromeres",
+      "Histones",
+      "Chromatids",
+      "Telomeres"
+    ],
+    "correct_answer": "Telomeres",
+    "explanation": "Telomeres are repetitive DNA sequences at chromosome ends that protect chromosomes from deterioration during replication.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the study of fungi called?",
+    "options": [
+      "Botany",
+      "Zoology",
+      "Virology",
+      "Mycology"
+    ],
+    "correct_answer": "Mycology",
+    "explanation": "Mycology is the branch of biology that studies fungi, including mushrooms, molds, and yeasts.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the name for the phase of photosynthesis that doesn't require light?",
+    "options": [
+      "Light reactions",
+      "Photorespiration",
+      "Electron transport",
+      "Calvin cycle"
+    ],
+    "correct_answer": "Calvin cycle",
+    "explanation": "The Calvin cycle (light-independent reactions) uses ATP and NADPH from light reactions to fix CO2 into glucose.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  },
+  {
+    "question": "What is the function of helper T cells?",
+    "options": [
+      "Kill infected cells",
+      "Produce antibodies",
+      "Regulate inflammation",
+      "Activate other immune cells"
+    ],
+    "correct_answer": "Activate other immune cells",
+    "explanation": "Helper T cells (CD4+ T cells) coordinate the immune response by activating B cells, cytotoxic T cells, and macrophages.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "biology"
+  }
+]
