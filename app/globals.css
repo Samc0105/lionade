@@ -1896,16 +1896,19 @@ html.light [data-force-dark] .bg-electric { background-color: #4A90D9; }
 html.light [data-force-dark] .gold-text { -webkit-text-fill-color: unset; background: none; color: #FFD700; }
 html.light [data-force-dark] .tilt-card {
   background: linear-gradient(135deg, #080E1A 0%, #0a1225 100%) !important;
-  border: 1px solid rgba(74,144,217,0.12) !important;
-  box-shadow: none !important;
-}
-html.light [data-force-dark] .tilt-card:hover {
   border-color: #FFD700 !important;
-  box-shadow: 0 0 20px rgba(255,215,0,0.15) !important;
+  box-shadow: none !important;
 }
 html.light [data-force-dark] .flip-card-face {
   background: linear-gradient(135deg, #080E1A 0%, #0D1526 100%) !important;
 }
+html.light [data-force-dark] nav {
+  background: linear-gradient(to bottom, rgba(4,8,15,0.95), transparent) !important;
+  border-bottom: none !important;
+  backdrop-filter: none !important;
+}
+html.light [data-force-dark] nav * { color: inherit !important; }
+html.light [data-force-dark] input { color: #EEF4FF !important; background-color: transparent !important; }
 [data-force-dark] { position: relative; z-index: 10; }
 
 /* ══ TEXT OVERRIDES ══ */

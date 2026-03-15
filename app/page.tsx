@@ -168,9 +168,9 @@ function StepCard({ step, idx }: { step: typeof STEPS[0]; idx: number }) {
 
   return (
     <div className="tilt-card group relative p-8 sm:p-10 overflow-hidden transition-all duration-300 rounded-[28px] min-h-[320px] flex flex-col"
-      style={{ background: "linear-gradient(135deg, #080E1A 0%, #0a1225 100%)", border: "1.5px solid rgba(74,144,217,0.12)" }}
-      onMouseEnter={(e) => { e.currentTarget.style.borderColor = "#FFD700"; e.currentTarget.style.boxShadow = "0 0 20px rgba(255,215,0,0.15)"; }}
-      onMouseLeave={(e) => { e.currentTarget.style.borderColor = "rgba(74,144,217,0.12)"; e.currentTarget.style.boxShadow = "none"; }}>
+      style={{ background: "linear-gradient(135deg, #080E1A 0%, #0a1225 100%)", border: "2px solid #FFD700" }}
+      onMouseEnter={(e) => { e.currentTarget.style.boxShadow = "0 0 24px rgba(255,215,0,0.2)"; }}
+      onMouseLeave={(e) => { e.currentTarget.style.boxShadow = "none"; }}>
       {/* Top glow line */}
       <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-[#FFD700]/40 via-electric/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
@@ -554,9 +554,9 @@ export default function ComingSoonPage() {
           {SNEAK_PEEKS.map((peek, idx) => (
             <div key={peek.tag} className={`tilt-card group p-8 sm:p-12 relative overflow-hidden transition-all duration-300 ${
               idx === 0 ? "rounded-[32px] rounded-tl-[8px]" : idx === 1 ? "rounded-[32px] rounded-tr-[8px]" : "rounded-[32px] rounded-br-[8px]"
-            }`} style={{ background: "linear-gradient(135deg, #080E1A 0%, #0a1225 100%)", border: "1.5px solid rgba(74,144,217,0.1)" }}
-              onMouseEnter={(e) => { e.currentTarget.style.borderColor = "#FFD700"; e.currentTarget.style.boxShadow = "0 0 20px rgba(255,215,0,0.12)"; }}
-              onMouseLeave={(e) => { e.currentTarget.style.borderColor = "rgba(74,144,217,0.1)"; e.currentTarget.style.boxShadow = "none"; }}>
+            }`} style={{ background: "linear-gradient(135deg, #080E1A 0%, #0a1225 100%)", border: "2px solid #FFD700" }}
+              onMouseEnter={(e) => { e.currentTarget.style.boxShadow = "0 0 24px rgba(255,215,0,0.2)"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.boxShadow = "none"; }}>
               {/* Accent glow */}
               <div className={`absolute top-0 ${idx % 2 === 0 ? "left-0" : "right-0"} w-[200px] h-[200px] rounded-full blur-[80px] pointer-events-none`}
                 style={{ background: idx === 0 ? "rgba(74,144,217,0.06)" : idx === 1 ? "rgba(255,215,0,0.04)" : "rgba(74,144,217,0.05)" }} />
@@ -564,14 +564,14 @@ export default function ComingSoonPage() {
               <div className="flex flex-col lg:flex-row gap-8 lg:gap-16 relative z-10">
                 <div className="flex-1">
                   <p className="font-mono text-[10px] tracking-[3px] uppercase text-electric/40 mb-3">{peek.tag}</p>
-                  <h3 className="font-bebas text-[clamp(28px,4vw,48px)] leading-[0.95] mb-4">{peek.title}</h3>
+                  <h3 className="font-bebas text-[clamp(28px,4vw,48px)] leading-[0.95] mb-4 text-white">{peek.title}</h3>
                   <p className="text-[#B0BEC5] text-sm leading-[1.7] max-w-md">{peek.desc}</p>
                 </div>
                 <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {peek.items.map((item) => (
-                    <div key={item.label} className="flex items-start gap-3 bg-[#04080F]/60 rounded-2xl px-4 py-3 border border-electric/10 group-hover:border-electric/20 transition-colors backdrop-blur-sm">
+                    <div key={item.label} className="flex items-start gap-3 rounded-2xl px-4 py-3 border border-white/20 transition-colors backdrop-blur-sm" style={{ background: "rgba(255,255,255,0.05)" }}>
                       <span className="text-xl mt-0.5">{item.icon}</span>
-                      <span className="text-sm text-[#B0BEC5] leading-snug">{item.label}</span>
+                      <span className="text-sm text-gray-300 leading-snug">{item.label}</span>
                     </div>
                   ))}
                 </div>
@@ -595,8 +595,7 @@ export default function ComingSoonPage() {
               className="group relative rounded-[24px] p-6 sm:p-7 text-center transition-all duration-300 ease-out hover:-translate-y-1 cursor-default"
               style={{
                 background: "linear-gradient(135deg, #080E1A 0%, #0a1225 100%)",
-                border: `1.5px solid ${s.color}30`,
-                boxShadow: `0 0 12px ${s.color}10`,
+                border: "2px solid #FFD700",
                 minHeight: 170,
                 display: "flex",
                 flexDirection: "column",
@@ -604,13 +603,11 @@ export default function ComingSoonPage() {
                 justifyContent: "center",
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = "#FFD700";
-                e.currentTarget.style.boxShadow = `0 0 20px rgba(255,215,0,0.15), 0 0 8px ${s.color}20`;
+                e.currentTarget.style.boxShadow = `0 0 24px rgba(255,215,0,0.2)`;
                 e.currentTarget.style.background = `linear-gradient(135deg, ${s.color}0A 0%, ${s.color}05 100%)`;
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = `${s.color}30`;
-                e.currentTarget.style.boxShadow = `0 0 12px ${s.color}10`;
+                e.currentTarget.style.boxShadow = "none";
                 e.currentTarget.style.background = "linear-gradient(135deg, #080E1A 0%, #0a1225 100%)";
               }}>
               <span className="text-[36px] block mb-3 transition-transform duration-300 group-hover:scale-110">{s.icon}</span>
@@ -673,11 +670,11 @@ export default function ComingSoonPage() {
             <div key={item.q} className="group rounded-[24px] p-7 sm:p-8 transition-all duration-300 ease-out hover:-translate-y-1 flex flex-col"
               style={{
                 background: "linear-gradient(135deg, #080E1A 0%, #0a1225 100%)",
-                border: "1.5px solid rgba(74,144,217,0.1)",
+                border: "2px solid #FFD700",
                 minHeight: 200,
               }}
-              onMouseEnter={(e) => { e.currentTarget.style.borderColor = "#FFD700"; e.currentTarget.style.boxShadow = "0 0 20px rgba(255,215,0,0.12)"; }}
-              onMouseLeave={(e) => { e.currentTarget.style.borderColor = "rgba(74,144,217,0.1)"; e.currentTarget.style.boxShadow = "none"; }}>
+              onMouseEnter={(e) => { e.currentTarget.style.boxShadow = "0 0 24px rgba(255,215,0,0.2)"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.boxShadow = "none"; }}>
               <h3 className="font-syne font-bold text-[16px] text-[#EEF4FF] mb-3 group-hover:text-electric transition-colors">{item.q}</h3>
               <p className="text-sm text-[#B0BEC5] leading-[1.7]">{item.a}</p>
             </div>
