@@ -1894,6 +1894,18 @@ html.light [data-force-dark] .text-electric\/80 { color: rgba(74,144,217,0.8); }
 html.light [data-force-dark] .border-electric\/20 { border-color: rgba(74,144,217,0.2); }
 html.light [data-force-dark] .bg-electric { background-color: #4A90D9; }
 html.light [data-force-dark] .gold-text { -webkit-text-fill-color: unset; background: none; color: #FFD700; }
+html.light [data-force-dark] .tilt-card {
+  background: linear-gradient(135deg, #080E1A 0%, #0a1225 100%) !important;
+  border: 1px solid rgba(74,144,217,0.12) !important;
+  box-shadow: none !important;
+}
+html.light [data-force-dark] .tilt-card:hover {
+  border-color: #FFD700 !important;
+  box-shadow: 0 0 20px rgba(255,215,0,0.15) !important;
+}
+html.light [data-force-dark] .flip-card-face {
+  background: linear-gradient(135deg, #080E1A 0%, #0D1526 100%) !important;
+}
 [data-force-dark] { position: relative; z-index: 10; }
 
 /* ══ TEXT OVERRIDES ══ */

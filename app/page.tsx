@@ -168,7 +168,9 @@ function StepCard({ step, idx }: { step: typeof STEPS[0]; idx: number }) {
 
   return (
     <div className="tilt-card group relative p-8 sm:p-10 overflow-hidden transition-all duration-300 rounded-[28px] min-h-[320px] flex flex-col"
-      style={{ background: "linear-gradient(135deg, #080E1A 0%, #0a1225 100%)", border: "1px solid rgba(74,144,217,0.12)" }}>
+      style={{ background: "linear-gradient(135deg, #080E1A 0%, #0a1225 100%)", border: "1.5px solid rgba(74,144,217,0.12)" }}
+      onMouseEnter={(e) => { e.currentTarget.style.borderColor = "#FFD700"; e.currentTarget.style.boxShadow = "0 0 20px rgba(255,215,0,0.15)"; }}
+      onMouseLeave={(e) => { e.currentTarget.style.borderColor = "rgba(74,144,217,0.12)"; e.currentTarget.style.boxShadow = "none"; }}>
       {/* Top glow line */}
       <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-[#FFD700]/40 via-electric/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
@@ -261,7 +263,7 @@ export default function ComingSoonPage() {
   const tickerContent = [...TICKER_ITEMS, ...TICKER_ITEMS, ...TICKER_ITEMS, ...TICKER_ITEMS];
 
   return (
-    <div className="min-h-screen bg-[#04080F] text-[#EEF4FF] overflow-x-hidden relative">
+    <div className="min-h-screen bg-[#04080F] text-[#EEF4FF] overflow-x-hidden relative" data-force-dark>
 
       {/* Star field — fixed behind everything */}
       <StarField />
@@ -453,8 +455,8 @@ export default function ComingSoonPage() {
                             transition: "box-shadow 0.3s ease, border-color 0.3s ease",
                           }}
                           onMouseEnter={(e) => {
-                            e.currentTarget.style.boxShadow = `0 0 35px ${glowColor}0.25), inset 0 0 30px ${glowColor}0.06)`;
-                            e.currentTarget.style.borderColor = `${glowColor}0.5)`;
+                            e.currentTarget.style.boxShadow = `0 0 35px rgba(255,215,0,0.2), inset 0 0 30px ${glowColor}0.06)`;
+                            e.currentTarget.style.borderColor = `rgba(255,215,0,0.6)`;
                           }}
                           onMouseLeave={(e) => {
                             e.currentTarget.style.boxShadow = `0 0 20px ${glowColor}0.08), inset 0 0 30px ${glowColor}0.04)`;
@@ -552,7 +554,9 @@ export default function ComingSoonPage() {
           {SNEAK_PEEKS.map((peek, idx) => (
             <div key={peek.tag} className={`tilt-card group p-8 sm:p-12 relative overflow-hidden transition-all duration-300 ${
               idx === 0 ? "rounded-[32px] rounded-tl-[8px]" : idx === 1 ? "rounded-[32px] rounded-tr-[8px]" : "rounded-[32px] rounded-br-[8px]"
-            }`} style={{ background: "linear-gradient(135deg, #080E1A 0%, #0a1225 100%)", border: "1px solid rgba(74,144,217,0.1)" }}>
+            }`} style={{ background: "linear-gradient(135deg, #080E1A 0%, #0a1225 100%)", border: "1.5px solid rgba(74,144,217,0.1)" }}
+              onMouseEnter={(e) => { e.currentTarget.style.borderColor = "#FFD700"; e.currentTarget.style.boxShadow = "0 0 20px rgba(255,215,0,0.12)"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.borderColor = "rgba(74,144,217,0.1)"; e.currentTarget.style.boxShadow = "none"; }}>
               {/* Accent glow */}
               <div className={`absolute top-0 ${idx % 2 === 0 ? "left-0" : "right-0"} w-[200px] h-[200px] rounded-full blur-[80px] pointer-events-none`}
                 style={{ background: idx === 0 ? "rgba(74,144,217,0.06)" : idx === 1 ? "rgba(255,215,0,0.04)" : "rgba(74,144,217,0.05)" }} />
@@ -600,8 +604,8 @@ export default function ComingSoonPage() {
                 justifyContent: "center",
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = s.color;
-                e.currentTarget.style.boxShadow = `0 0 28px ${s.color}40, 0 0 8px ${s.color}20`;
+                e.currentTarget.style.borderColor = "#FFD700";
+                e.currentTarget.style.boxShadow = `0 0 20px rgba(255,215,0,0.15), 0 0 8px ${s.color}20`;
                 e.currentTarget.style.background = `linear-gradient(135deg, ${s.color}0A 0%, ${s.color}05 100%)`;
               }}
               onMouseLeave={(e) => {
@@ -669,9 +673,11 @@ export default function ComingSoonPage() {
             <div key={item.q} className="group rounded-[24px] p-7 sm:p-8 transition-all duration-300 ease-out hover:-translate-y-1 flex flex-col"
               style={{
                 background: "linear-gradient(135deg, #080E1A 0%, #0a1225 100%)",
-                border: "1px solid rgba(74,144,217,0.1)",
+                border: "1.5px solid rgba(74,144,217,0.1)",
                 minHeight: 200,
-              }}>
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.borderColor = "#FFD700"; e.currentTarget.style.boxShadow = "0 0 20px rgba(255,215,0,0.12)"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.borderColor = "rgba(74,144,217,0.1)"; e.currentTarget.style.boxShadow = "none"; }}>
               <h3 className="font-syne font-bold text-[16px] text-[#EEF4FF] mb-3 group-hover:text-electric transition-colors">{item.q}</h3>
               <p className="text-sm text-[#B0BEC5] leading-[1.7]">{item.a}</p>
             </div>
