@@ -130,7 +130,7 @@ async function syncProfile(userId: string, email: string, metadata: Record<strin
   return null;
 }
 
-const INACTIVITY_LIMIT_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
+const INACTIVITY_LIMIT_MS = 2 * 60 * 60 * 1000; // 2 hours
 const LAST_ACTIVE_KEY = "lionade_last_active";
 
 function updateLastActive() {
@@ -216,9 +216,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           return;
         }
 
-        // Check 30-day inactivity — sign out if exceeded
+        // Check 2-hour inactivity — sign out if exceeded
         if (isSessionExpiredByInactivity()) {
-          console.log("[Auth] Session expired due to 30-day inactivity — signing out");
+          console.log("[Auth] Session expired due to 2-hour inactivity — signing out");
           await supabase.auth.signOut();
           setUser(null);
           setSession(null);
