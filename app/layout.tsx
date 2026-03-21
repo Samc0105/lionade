@@ -50,7 +50,7 @@ export default function RootLayout({
         <ThemeProvider>
           <SpaceBackground />
           <SakuraPetals />
-          <div className="relative z-10" style={{ background: "var(--bg-page, #04080F)" }}>
+          <div className="relative z-10 layout-content-bg">
             <AuthProviderWrapper>
               <Navbar />
               <main>{children}</main>
