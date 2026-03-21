@@ -2667,6 +2667,16 @@ html.light .space-bg-container { display: none; }
   animation: social-online-pulse 2s ease-in-out infinite;
 }
 
+/* Notification badge pulse */
+@keyframes notif-badge-pulse-anim {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+}
+
+.notif-badge-pulse {
+  animation: notif-badge-pulse-anim 2s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
 
   .space-twinkle,
@@ -2755,7 +2765,8 @@ html.light .space-bg-container { display: none; }
   .arena-countdown-pop,
   .arena-answer-pop,
   .arena-timer-ring,
-  .social-online-dot {
+  .social-online-dot,
+  .notif-badge-pulse {
     animation: none !important;
   }
 

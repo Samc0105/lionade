@@ -2,10 +2,39 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useAuth } from "@/lib/auth";
 import { useUserStats, useStreakInfo, isStreakExpired, resetExpiredStreak, mutateUserStats } from "@/lib/hooks";
 import { formatCoins } from "@/lib/mockData";
+import { supabase } from "@/lib/supabase";
+
+interface Notification {
+  id: string;
+  type: string;
+  title: string;
+  message: string | null;
+  read: boolean;
+  action_url: string | null;
+  created_at: string;
+}
+
+function timeAgoShort(dateStr: string): string {
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return "now";
+  if (mins < 60) return `${mins}m`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h`;
+  return `${Math.floor(hrs / 24)}d`;
+}
+
+const NOTIF_ICONS: Record<string, string> = {
+  friend_request: "\uD83D\uDC65",
+  friend_accepted: "\u2705",
+  arena_challenge: "\u2694\uFE0F",
+  arena_result: "\uD83C\uDFC6",
+  rank_up: "\uD83E\uDD47",
+};
 
 function StatSkeleton({ width = "w-8" }: { width?: string }) {
   return <span className={`inline-block ${width} h-4 bg-white/10 rounded animate-pulse`} />;
@@ -59,6 +88,72 @@ export default function Navbar() {
   };
   const [showStreakModal, setShowStreakModal] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Notifications
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [unreadCount, setUnreadCount] = useState<number | null>(null);
+  const [showNotifPanel, setShowNotifPanel] = useState(false);
+  const notifRef = useRef<HTMLDivElement>(null);
+
+  const loadNotifications = useCallback(async () => {
+    if (!user?.id) return;
+    try {
+      const res = await fetch(`/api/notifications?userId=${user.id}`);
+      const data = await res.json();
+      setNotifications(data.notifications ?? []);
+      setUnreadCount(data.unreadCount ?? 0);
+    } catch { /* ignore */ }
+  }, [user?.id]);
+
+  // Load notifications on mount + poll
+  useEffect(() => {
+    if (!user?.id) return;
+    loadNotifications();
+    const iv = setInterval(loadNotifications, 15000);
+    return () => clearInterval(iv);
+  }, [user?.id, loadNotifications]);
+
+  // Realtime subscription for new notifications
+  useEffect(() => {
+    if (!user?.id) return;
+    const channel = supabase
+      .channel(`notifs-${user.id}`)
+      .on("postgres_changes", {
+        event: "INSERT",
+        schema: "public",
+        table: "notifications",
+        filter: `user_id=eq.${user.id}`,
+      }, () => {
+        loadNotifications();
+      })
+      .subscribe();
+    return () => { channel.unsubscribe(); };
+  }, [user?.id, loadNotifications]);
+
+  // Mark all as read when opening panel
+  const openNotifPanel = useCallback(async () => {
+    setShowNotifPanel(prev => !prev);
+    if (!showNotifPanel && user?.id && (unreadCount ?? 0) > 0) {
+      await fetch("/api/notifications", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: user.id }),
+      });
+      setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+      setUnreadCount(0);
+    }
+  }, [showNotifPanel, user?.id, unreadCount]);
+
+  // Close notif panel on outside click
+  useEffect(() => {
+    function handleNotifOutside(e: MouseEvent) {
+      if (notifRef.current && !notifRef.current.contains(e.target as Node)) {
+        setShowNotifPanel(false);
+      }
+    }
+    document.addEventListener("mousedown", handleNotifOutside);
+    return () => document.removeEventListener("mousedown", handleNotifOutside);
+  }, []);
 
   const isComingSoon = pathname === "/";
   const isLanding = pathname === "/home";
@@ -254,6 +349,66 @@ export default function Navbar() {
                       Streak
                     </div>
                   </button>
+
+                  {/* Notification Bell */}
+                  <div className="relative hidden sm:block" ref={notifRef}>
+                    <button
+                      onClick={openNotifPanel}
+                      className="relative flex items-center justify-center w-8 h-8 rounded-full hover:bg-white/10 transition-colors"
+                    >
+                      <span className="text-base">🔔</span>
+                      {(unreadCount ?? 0) > 0 && (
+                        <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 rounded-full flex items-center justify-center px-1 text-[9px] font-bold notif-badge-pulse"
+                          style={{ background: "#EF4444", color: "#fff" }}>
+                          {unreadCount}
+                        </span>
+                      )}
+                    </button>
+
+                    {/* Notification Dropdown */}
+                    {showNotifPanel && (
+                      <div className="absolute right-0 top-full mt-2 w-80 max-h-96 overflow-y-auto rounded-xl z-50"
+                        style={{
+                          background: "linear-gradient(135deg, #0c1020 0%, #080c18 100%)",
+                          border: "1px solid rgba(255,255,255,0.1)",
+                          boxShadow: "0 12px 40px rgba(0,0,0,0.6)",
+                        }}>
+                        <div className="px-4 py-3 border-b border-white/[0.06]">
+                          <p className="font-bebas text-sm text-cream tracking-wider">NOTIFICATIONS</p>
+                        </div>
+                        {notifications.length === 0 ? (
+                          <div className="py-8 text-center">
+                            <p className="text-cream/20 text-xs">No notifications</p>
+                          </div>
+                        ) : (
+                          notifications.map(n => (
+                            <button
+                              key={n.id}
+                              onClick={() => {
+                                setShowNotifPanel(false);
+                                if (n.action_url) router.push(n.action_url);
+                              }}
+                              className="w-full text-left px-4 py-3 flex items-start gap-3 hover:bg-white/[0.04] transition-colors"
+                              style={!n.read ? { borderLeft: "2px solid #FFD700" } : { borderLeft: "2px solid transparent" }}
+                            >
+                              <span className="text-base flex-shrink-0 mt-0.5">
+                                {NOTIF_ICONS[n.type] ?? "📢"}
+                              </span>
+                              <div className="flex-1 min-w-0">
+                                <p className={`text-xs font-semibold truncate ${n.read ? "text-cream/60" : "text-cream"}`}>
+                                  {n.title}
+                                </p>
+                                {n.message && (
+                                  <p className="text-[10px] text-cream/30 mt-0.5 truncate">{n.message}</p>
+                                )}
+                                <p className="text-[9px] text-cream/20 mt-1">{timeAgoShort(n.created_at)}</p>
+                              </div>
+                            </button>
+                          ))
+                        )}
+                      </div>
+                    )}
+                  </div>
 
                   {/* CTA Button — Clock In */}
                   <Link href="/quiz">

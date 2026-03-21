@@ -87,6 +87,9 @@ export default function SocialPage() {
   const [addError, setAddError] = useState("");
   const [addSuccess, setAddSuccess] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+  const [showNotifView, setShowNotifView] = useState(false);
+  const [socialNotifs, setSocialNotifs] = useState<{ id: string; type: string; title: string; message: string | null; read: boolean; action_url: string | null; created_at: string }[]>([]);
+  const [socialUnreadCount, setSocialUnreadCount] = useState<number | null>(null);
   const [searchResults, setSearchResults] = useState<{ id: string; username: string; avatar_url: string | null; arena_elo: number }[]>([]);
   const [searchLoading, setSearchLoading] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
@@ -155,6 +158,23 @@ export default function SocialPage() {
     const iv = setInterval(loadFriends, 10000);
     return () => clearInterval(iv);
   }, [loadFriends]);
+
+  // ── Load notifications for social panel ─────────────────────
+  const loadSocialNotifs = useCallback(async () => {
+    if (!user?.id) return;
+    try {
+      const res = await fetch(`/api/notifications?userId=${user.id}`);
+      const data = await res.json();
+      setSocialNotifs(data.notifications ?? []);
+      setSocialUnreadCount(data.unreadCount ?? 0);
+    } catch { /* ignore */ }
+  }, [user?.id]);
+
+  useEffect(() => {
+    loadSocialNotifs();
+    const iv = setInterval(loadSocialNotifs, 15000);
+    return () => clearInterval(iv);
+  }, [loadSocialNotifs]);
 
   // ── Load conversation ──────────────────────────────────────
   const loadMessages = useCallback(async (friendId: string) => {
@@ -446,6 +466,73 @@ export default function SocialPage() {
               />
             </div>
 
+            {/* Tab toggle: Friends / Notifications */}
+            <div className="flex border-b border-white/[0.06]">
+              <button
+                onClick={() => setShowNotifView(false)}
+                className={`flex-1 py-2.5 text-xs font-bold uppercase tracking-wider transition-colors ${!showNotifView ? "text-cream border-b-2 border-electric" : "text-cream/30 hover:text-cream/50"}`}
+              >
+                Friends
+              </button>
+              <button
+                onClick={() => { setShowNotifView(true); loadSocialNotifs(); }}
+                className={`flex-1 py-2.5 text-xs font-bold uppercase tracking-wider transition-colors relative ${showNotifView ? "text-cream border-b-2 border-electric" : "text-cream/30 hover:text-cream/50"}`}
+              >
+                Notifications
+                {(socialUnreadCount ?? 0) > 0 && (
+                  <span className="absolute top-1.5 ml-1 min-w-[16px] h-4 rounded-full inline-flex items-center justify-center px-1 text-[9px] font-bold"
+                    style={{ background: "#EF4444", color: "#fff" }}>
+                    {socialUnreadCount}
+                  </span>
+                )}
+              </button>
+            </div>
+
+            {/* Notifications Panel */}
+            {showNotifView ? (
+              <div className="flex-1 overflow-y-auto">
+                {socialNotifs.length === 0 ? (
+                  <div className="py-10 text-center">
+                    <p className="text-cream/20 text-sm">No notifications</p>
+                  </div>
+                ) : (
+                  socialNotifs.map(n => (
+                    <button
+                      key={n.id}
+                      onClick={() => {
+                        if (n.action_url) {
+                          window.location.href = n.action_url;
+                        }
+                      }}
+                      className="w-full text-left px-4 py-3 flex items-start gap-3 hover:bg-white/[0.04] transition-colors"
+                      style={!n.read ? { borderLeft: "2px solid #FFD700" } : { borderLeft: "2px solid transparent" }}
+                    >
+                      <span className="text-base flex-shrink-0 mt-0.5">
+                        {n.type === "friend_request" ? "👥" : n.type === "friend_accepted" ? "✅" : n.type === "arena_challenge" ? "⚔️" : n.type === "arena_result" ? "🏆" : n.type === "rank_up" ? "🥇" : "📢"}
+                      </span>
+                      <div className="flex-1 min-w-0">
+                        <p className={`text-xs font-semibold ${n.read ? "text-cream/50" : "text-cream"}`}>
+                          {n.title}
+                        </p>
+                        {n.message && <p className="text-[10px] text-cream/25 mt-0.5 truncate">{n.message}</p>}
+                        <p className="text-[9px] text-cream/15 mt-1">
+                          {(() => {
+                            const diff = Date.now() - new Date(n.created_at).getTime();
+                            const mins = Math.floor(diff / 60000);
+                            if (mins < 1) return "Just now";
+                            if (mins < 60) return `${mins}m ago`;
+                            const hrs = Math.floor(mins / 60);
+                            if (hrs < 24) return `${hrs}h ago`;
+                            return `${Math.floor(hrs / 24)}d ago`;
+                          })()}
+                        </p>
+                      </div>
+                    </button>
+                  ))
+                )}
+              </div>
+            ) : (
+            <>
             {/* Pending Requests */}
             {pendingRequests.length > 0 && (
               <div className="px-4 py-3 border-b border-white/[0.06]">
@@ -550,6 +637,8 @@ export default function SocialPage() {
                 );
               })}
             </div>
+            </>
+            )}
           </div>
 
           {/* ═══ RIGHT PANEL — Chat ═══ */}
