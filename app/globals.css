@@ -2650,14 +2650,17 @@ html.light .space-bg-container { display: none; }
 }
 
 /* Arena title — red base with white shimmer sweep */
+/* Shimmer sweeps once then idles for ~20s total cycle */
 @keyframes arena-title-shimmer {
   0%   { background-position: -150% center; }
+  5%   { background-position: 350% center; }
   100% { background-position: 350% center; }
 }
 
 @keyframes arena-title-glow {
   0%, 100% { filter: drop-shadow(0 0 20px rgba(239,68,68,0.25)) drop-shadow(0 2px 4px rgba(0,0,0,0.5)); }
-  50%      { filter: drop-shadow(0 0 35px rgba(239,68,68,0.45)) drop-shadow(0 2px 4px rgba(0,0,0,0.5)); }
+  2.5%     { filter: drop-shadow(0 0 40px rgba(239,68,68,0.5)) drop-shadow(0 2px 4px rgba(0,0,0,0.5)); }
+  5%       { filter: drop-shadow(0 0 20px rgba(239,68,68,0.25)) drop-shadow(0 2px 4px rgba(0,0,0,0.5)); }
 }
 
 .arena-title-flash {
@@ -2678,7 +2681,7 @@ html.light .space-bg-container { display: none; }
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  animation: arena-title-shimmer 3s ease-in-out infinite, arena-title-glow 2s ease-in-out infinite;
+  animation: arena-title-shimmer 20s ease-in-out infinite, arena-title-glow 20s ease-in-out infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {
