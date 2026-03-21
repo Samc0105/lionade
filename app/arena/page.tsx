@@ -593,69 +593,128 @@ export default function ArenaPage() {
   // PHASE: LOBBY
   // ═══════════════════════════════════════════════════════════
   if (phase === "lobby") {
+    // Tier-specific glow configs for the rank badge
+    const tierGlow = {
+      Bronze:   { bg: "linear-gradient(135deg, #2a1a0a 0%, #1a0e04 100%)", shadow: "0 0 30px rgba(205,127,50,0.15), inset 0 1px 0 rgba(205,127,50,0.1)", accent: "rgba(205,127,50,0.25)" },
+      Silver:   { bg: "linear-gradient(135deg, #1a1a22 0%, #10101a 100%)", shadow: "0 0 30px rgba(192,192,192,0.15), inset 0 1px 0 rgba(192,192,192,0.1)", accent: "rgba(192,192,192,0.25)" },
+      Gold:     { bg: "linear-gradient(135deg, #1a1608 0%, #120e04 100%)", shadow: "0 0 30px rgba(255,215,0,0.2), inset 0 1px 0 rgba(255,215,0,0.1)", accent: "rgba(255,215,0,0.3)" },
+      Platinum: { bg: "linear-gradient(135deg, #0a1a1a 0%, #041212 100%)", shadow: "0 0 30px rgba(0,206,209,0.15), inset 0 1px 0 rgba(0,206,209,0.1)", accent: "rgba(0,206,209,0.25)" },
+      Diamond:  { bg: "linear-gradient(135deg, #0a1520 0%, #040a14 100%)", shadow: "0 0 30px rgba(185,242,255,0.2), inset 0 1px 0 rgba(185,242,255,0.15)", accent: "rgba(185,242,255,0.3)" },
+    }[myTier.name] ?? { bg: "linear-gradient(135deg, #2a1a0a 0%, #1a0e04 100%)", shadow: "none", accent: "rgba(205,127,50,0.25)" };
+
     return (
       <ProtectedRoute>
         <div className="relative min-h-screen pt-16 pb-20 md:pb-8 overflow-hidden">
-          {/* Ambient glows */}
-          <div className="absolute top-[20%] left-[15%] w-[500px] h-[500px] rounded-full pointer-events-none opacity-[0.04]"
+          {/* Atmospheric glows — deep red combat + gold reward accents */}
+          <div className="absolute top-[10%] left-[10%] w-[600px] h-[600px] rounded-full pointer-events-none opacity-[0.05]"
             style={{ background: "radial-gradient(circle, #EF4444 0%, transparent 70%)" }} />
-          <div className="absolute bottom-[25%] right-[20%] w-[400px] h-[400px] rounded-full pointer-events-none opacity-[0.04]"
+          <div className="absolute top-[50%] right-[5%] w-[500px] h-[500px] rounded-full pointer-events-none opacity-[0.04]"
+            style={{ background: "radial-gradient(circle, #DC2626 0%, transparent 70%)" }} />
+          <div className="absolute bottom-[10%] left-[30%] w-[400px] h-[400px] rounded-full pointer-events-none opacity-[0.03]"
             style={{ background: "radial-gradient(circle, #FFD700 0%, transparent 70%)" }} />
 
           <div className="relative z-10 max-w-3xl mx-auto px-4 sm:px-6 py-8">
             <BackButton />
 
-            {/* Header */}
+            {/* ═══ TITLE — aggressive, epic ═══ */}
             <div className="text-center mb-10 animate-slide-up" style={{ animationDelay: "0s" }}>
-              <span className="inline-flex items-center gap-2 bg-red-500/10 border border-red-500/30 rounded-full px-4 py-1.5 text-red-400 text-sm font-semibold mb-6">
-                ⚔️ 1v1 Battle Mode
-              </span>
-              <h1 className="font-bebas text-6xl sm:text-8xl text-cream tracking-wider leading-none mb-3"
-                style={{ textShadow: "0 0 30px rgba(239,68,68,0.15)" }}>
+              <div className="inline-flex items-center gap-2 mb-6 px-4 py-1.5 rounded-full text-sm font-bold tracking-wider"
+                style={{
+                  background: "linear-gradient(135deg, rgba(239,68,68,0.12) 0%, rgba(220,38,38,0.06) 100%)",
+                  border: "1px solid rgba(239,68,68,0.25)",
+                  color: "#EF4444",
+                  boxShadow: "0 0 20px rgba(239,68,68,0.08)",
+                }}>
+                ⚔️ 1v1 BATTLE MODE
+              </div>
+
+              <h1 className="font-bebas text-7xl sm:text-9xl tracking-wider leading-none mb-3"
+                style={{
+                  background: "linear-gradient(180deg, #FFFFFF 0%, #EF4444 40%, #991B1B 100%)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  filter: "drop-shadow(0 0 30px rgba(239,68,68,0.25))",
+                }}>
                 DUEL ARENA
               </h1>
-              <p className="text-cream/40 text-sm sm:text-base max-w-lg mx-auto">
+
+              <p className="text-cream/40 text-sm sm:text-base max-w-md mx-auto font-syne">
                 Real-time 1v1 battles. Same questions, same timer. Winner takes the Fangs.
               </p>
             </div>
 
-            {/* ELO & Rank Display */}
-            <div className="animate-slide-up mb-8" style={{ animationDelay: "0.05s" }}>
-              <div className="rounded-2xl p-6 text-center"
-                style={{
-                  background: "linear-gradient(135deg, #0c1020 0%, #080c18 100%)",
-                  border: `1px solid ${myTier.color}30`,
-                }}>
-                <div className="flex items-center justify-center gap-3 mb-2">
-                  <span className="text-2xl">{myTier.icon}</span>
-                  <span className="font-bebas text-2xl tracking-wider" style={{ color: myTier.color }}>
-                    {myTier.name.toUpperCase()}
-                  </span>
+            {/* ═══ RANK BADGE — metallic, tier-colored ═══ */}
+            <div className="animate-slide-up mb-10" style={{ animationDelay: "0.05s" }}>
+              <div className="flex items-center justify-center">
+                <div className="flex items-center gap-4 px-8 py-4 rounded-2xl"
+                  style={{
+                    background: tierGlow.bg,
+                    border: `1px solid ${tierGlow.accent}`,
+                    boxShadow: tierGlow.shadow,
+                  }}>
+                  {/* Rank icon with glow ring */}
+                  <div className="relative">
+                    <div className="w-14 h-14 rounded-full flex items-center justify-center"
+                      style={{
+                        background: `radial-gradient(circle, ${myTier.color}20 0%, transparent 70%)`,
+                        boxShadow: `0 0 20px ${myTier.color}15`,
+                      }}>
+                      <span className="text-3xl">{myTier.icon}</span>
+                    </div>
+                  </div>
+
+                  {/* Rank name + ELO */}
+                  <div>
+                    <p className="font-bebas text-2xl sm:text-3xl tracking-[0.15em] leading-none"
+                      style={{
+                        color: myTier.color,
+                        textShadow: `0 0 15px ${myTier.color}40`,
+                      }}>
+                      {myTier.name.toUpperCase()}
+                    </p>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      {myElo !== null ? (
+                        <span className="font-bebas text-lg text-cream/60 tracking-wider">
+                          {myElo} ELO
+                        </span>
+                      ) : (
+                        <span className="bg-white/10 rounded animate-pulse inline-block w-16 h-5" />
+                      )}
+                    </div>
+                  </div>
                 </div>
-                <p className="font-bebas text-5xl text-cream leading-none mb-1">
-                  {myElo !== null ? myElo : <span className="bg-white/10 rounded animate-pulse inline-block w-16 h-10" />}
-                </p>
-                <p className="text-cream/30 text-xs uppercase tracking-widest">ELO RATING</p>
               </div>
             </div>
 
-            {/* Wager Selection */}
+            {/* ═══ WAGER SELECTION — premium golden glow ═══ */}
             <div className="animate-slide-up mb-8" style={{ animationDelay: "0.1s" }}>
-              <p className="font-bebas text-xl text-cream tracking-wider text-center mb-4">
-                SELECT WAGER
+              <p className="font-bebas text-lg text-cream/50 tracking-[0.2em] text-center mb-4">
+                STAKE YOUR FANGS
               </p>
               <div className="grid grid-cols-4 gap-3">
                 {WAGER_OPTIONS.map(w => (
                   <button
                     key={w}
                     onClick={() => setWager(w)}
-                    className={`rounded-xl py-4 font-bebas text-2xl tracking-wider transition-all duration-200
-                      ${wager === w
-                        ? "bg-gold/20 border-2 border-gold text-gold scale-[1.02]"
-                        : "bg-white/5 border border-white/10 text-cream/50 hover:border-white/20 hover:bg-white/[0.07]"
-                      }`}
+                    className="relative rounded-xl py-4 font-bebas text-2xl tracking-wider transition-all duration-300 overflow-hidden"
+                    style={wager === w ? {
+                      background: "linear-gradient(135deg, rgba(255,215,0,0.15) 0%, rgba(184,150,12,0.08) 100%)",
+                      border: "1px solid rgba(255,215,0,0.5)",
+                      color: "#FFD700",
+                      boxShadow: "0 0 25px rgba(255,215,0,0.15), inset 0 1px 0 rgba(255,215,0,0.15)",
+                      transform: "scale(1.03)",
+                    } : {
+                      background: "linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%)",
+                      border: "1px solid rgba(255,255,255,0.08)",
+                      color: "rgba(238,244,255,0.4)",
+                    }}
                   >
-                    <div className="flex items-center justify-center gap-1.5">
+                    {/* Active glow sweep */}
+                    {wager === w && (
+                      <div className="absolute inset-0 pointer-events-none"
+                        style={{ background: "radial-gradient(ellipse at 50% 0%, rgba(255,215,0,0.1) 0%, transparent 70%)" }} />
+                    )}
+                    <div className="relative flex items-center justify-center gap-1.5">
                       <img src="/fangs.png" alt="Fangs" className="w-5 h-5 object-contain" />
                       {w}
                     </div>
@@ -663,63 +722,93 @@ export default function ArenaPage() {
                 ))}
               </div>
               {stats && stats.coins < wager && (
-                <p className="text-red-400 text-xs text-center mt-2">
+                <p className="text-red-400 text-xs text-center mt-3 font-semibold">
                   Not enough Fangs. You have {stats.coins}.
                 </p>
               )}
             </div>
 
-            {/* Action Buttons */}
-            <div className="animate-slide-up mb-8" style={{ animationDelay: "0.15s" }}>
-              <div className="flex flex-col sm:flex-row gap-3">
+            {/* ═══ ACTION BUTTONS — powerful, distinct ═══ */}
+            <div className="animate-slide-up mb-10" style={{ animationDelay: "0.15s" }}>
+              <div className="flex flex-col sm:flex-row gap-4">
+                {/* Find Opponent — primary, aggressive red-gold */}
                 <button
                   onClick={startMatchmaking}
                   disabled={!stats || stats.coins < wager}
-                  className="btn-gold flex-1 py-4 text-lg rounded-xl disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="group relative flex-1 py-4 rounded-xl font-syne font-bold text-lg transition-all duration-300 active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed overflow-hidden"
+                  style={{
+                    background: "linear-gradient(135deg, #FFD700 0%, #B8960C 50%, #FFD700 100%)",
+                    color: "#04080F",
+                    boxShadow: "0 4px 20px rgba(255,215,0,0.3), 0 1px 0 rgba(255,255,255,0.2) inset",
+                  }}
                 >
-                  🎯 Find Opponent
+                  <span className="relative z-10 flex items-center justify-center gap-2">
+                    <span className="text-xl">⚔️</span> Find Opponent
+                  </span>
                 </button>
+
+                {/* Challenge Friend — secondary, outlined with red accent */}
                 <button
                   onClick={() => { setPhase("challenge"); setChallengeError(""); setChallengeSent(false); }}
                   disabled={!stats || stats.coins < wager}
-                  className="btn-outline flex-1 py-4 text-lg rounded-xl disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="group relative flex-1 py-4 rounded-xl font-syne font-bold text-lg transition-all duration-300 active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed"
+                  style={{
+                    background: "linear-gradient(135deg, rgba(239,68,68,0.08) 0%, rgba(239,68,68,0.03) 100%)",
+                    border: "1px solid rgba(239,68,68,0.35)",
+                    color: "#EF4444",
+                    boxShadow: "0 0 15px rgba(239,68,68,0.06)",
+                  }}
                 >
-                  👥 Challenge Friend
+                  <span className="flex items-center justify-center gap-2">
+                    <span className="text-xl">👥</span> Challenge Friend
+                  </span>
                 </button>
               </div>
             </div>
 
-            {/* Incoming Challenges */}
+            {/* ═══ INCOMING CHALLENGES ═══ */}
             {incomingChallenges.length > 0 && (
-              <div className="animate-slide-up mb-8" style={{ animationDelay: "0.2s" }}>
-                <p className="font-bebas text-xl text-cream tracking-wider mb-3">
+              <div className="animate-slide-up mb-10" style={{ animationDelay: "0.2s" }}>
+                <p className="font-bebas text-lg text-cream/50 tracking-[0.15em] mb-3">
                   ⚔️ INCOMING CHALLENGES
                 </p>
                 <div className="space-y-3">
                   {incomingChallenges.map(c => (
                     <div key={c.id} className="rounded-xl p-4 flex items-center gap-4"
                       style={{
-                        background: "linear-gradient(135deg, #1a0a0a 0%, #0d0303 100%)",
-                        border: "1px solid rgba(239,68,68,0.25)",
+                        background: "linear-gradient(135deg, #1a0808 0%, #0d0404 100%)",
+                        border: "1px solid rgba(239,68,68,0.2)",
+                        boxShadow: "0 0 20px rgba(239,68,68,0.05)",
                       }}>
-                      <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-red-400/50 flex-shrink-0">
+                      <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0"
+                        style={{ border: "2px solid rgba(239,68,68,0.4)" }}>
                         <img src={c.challengerAvatar ?? `https://api.dicebear.com/7.x/adventurer/svg?seed=${c.challengerName}`}
                           alt={c.challengerName} className="w-full h-full object-cover" />
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-cream font-bold text-sm truncate">{c.challengerName}</p>
-                        <p className="text-cream/40 text-xs">
-                          {getEloTier(c.challengerElo).icon} {c.challengerElo} ELO ·{" "}
-                          <img src="/fangs.png" alt="" className="w-3 h-3 object-contain inline" /> {c.wager} Fangs
+                        <p className="text-cream/40 text-xs flex items-center gap-1">
+                          {getEloTier(c.challengerElo).icon} {c.challengerElo} ELO
+                          <span className="text-cream/15 mx-1">|</span>
+                          <img src="/fangs.png" alt="" className="w-3 h-3 object-contain" /> {c.wager}
                         </p>
                       </div>
                       <div className="flex gap-2 flex-shrink-0">
                         <button onClick={() => acceptChallenge(c.id)}
-                          className="bg-green-500/20 border border-green-500/40 text-green-400 px-4 py-2 rounded-lg text-sm font-bold hover:bg-green-500/30 transition">
+                          className="font-bold text-sm px-4 py-2 rounded-lg transition-all duration-200 active:scale-95"
+                          style={{
+                            background: "linear-gradient(135deg, rgba(34,197,94,0.15) 0%, rgba(34,197,94,0.05) 100%)",
+                            border: "1px solid rgba(34,197,94,0.35)",
+                            color: "#22C55E",
+                          }}>
                           Accept
                         </button>
                         <button onClick={() => declineChallenge(c.id)}
-                          className="bg-white/5 border border-white/10 text-cream/50 px-3 py-2 rounded-lg text-sm hover:bg-white/10 transition">
+                          className="text-cream/40 px-3 py-2 rounded-lg text-sm transition-all hover:text-cream/60"
+                          style={{
+                            background: "rgba(255,255,255,0.03)",
+                            border: "1px solid rgba(255,255,255,0.08)",
+                          }}>
                           ✕
                         </button>
                       </div>
@@ -729,22 +818,31 @@ export default function ArenaPage() {
               </div>
             )}
 
-            {/* Rules */}
+            {/* ═══ STAT CARDS — sleek with tier glow accents ═══ */}
             <div className="animate-slide-up" style={{ animationDelay: "0.25s" }}>
               <div className="grid grid-cols-3 gap-3">
                 {[
-                  { icon: "⏱️", label: "SMART TIMER", desc: "AI-judged per question" },
-                  { icon: "🎯", label: "10 QUESTIONS", desc: "Same for both players" },
-                  { icon: "fang", label: "WINNER TAKES", desc: "Full wager from loser" },
+                  { icon: "⏱️", label: "SMART TIMER", desc: "AI-judged per question", accent: "#4A90D9" },
+                  { icon: "🎯", label: "10 QUESTIONS", desc: "Same for both players", accent: "#EF4444" },
+                  { icon: "fang", label: "WINNER TAKES", desc: "Full wager from loser", accent: "#FFD700" },
                 ].map(r => (
-                  <div key={r.label} className="rounded-xl text-center p-4"
-                    style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}>
+                  <div key={r.label} className="relative rounded-xl text-center p-4 sm:p-5 overflow-hidden group"
+                    style={{
+                      background: "linear-gradient(135deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 100%)",
+                      border: "1px solid rgba(255,255,255,0.06)",
+                    }}>
+                    {/* Top accent line */}
+                    <div className="absolute top-0 left-[20%] right-[20%] h-[1px]"
+                      style={{ background: `linear-gradient(90deg, transparent, ${r.accent}30, transparent)` }} />
+
                     {r.icon === "fang"
-                      ? <img src="/fangs.png" alt="Fangs" className="w-7 h-7 object-contain mx-auto mb-2" />
-                      : <span className="text-2xl block mb-2">{r.icon}</span>
+                      ? <img src="/fangs.png" alt="Fangs" className="w-7 h-7 object-contain mx-auto mb-2.5" />
+                      : <span className="text-2xl block mb-2.5">{r.icon}</span>
                     }
-                    <p className="font-bebas text-sm text-cream tracking-wider">{r.label}</p>
-                    <p className="text-cream/30 text-[10px]">{r.desc}</p>
+                    <p className="font-bebas text-sm sm:text-base tracking-wider mb-0.5" style={{ color: r.accent }}>
+                      {r.label}
+                    </p>
+                    <p className="text-cream/25 text-[10px] sm:text-xs font-syne">{r.desc}</p>
                   </div>
                 ))}
               </div>
