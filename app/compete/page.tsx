@@ -37,7 +37,11 @@ export default function CompetePage() {
 
   return (
     <ProtectedRoute>
-      <div className="relative min-h-screen pt-16 pb-20 md:pb-8 overflow-hidden">
+      <div
+        data-force-dark
+        className="relative min-h-screen pt-16 pb-20 md:pb-8 overflow-hidden"
+        style={{ background: "#04080F", isolation: "isolate" }}
+      >
         {/* Extra ambient glow orbs */}
         <div className="absolute top-[15%] left-[20%] w-[500px] h-[500px] rounded-full pointer-events-none opacity-[0.04]"
           style={{ background: "radial-gradient(circle, #EF4444 0%, transparent 70%)" }} />
