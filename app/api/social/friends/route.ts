@@ -121,19 +121,19 @@ export async function POST(req: NextRequest) {
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-    // Get sender username for notification
-    const { data: senderProfile } = await supabaseAdmin
-      .from("profiles").select("username").eq("id", userId).single();
-
-    // Create notification for the receiver
-    await supabaseAdmin.from("notifications").insert({
-      user_id: friend.id,
-      type: "friend_request",
-      title: `${senderProfile?.username ?? "Someone"} sent you a friend request`,
-      message: "Accept or decline in Social",
-      action_url: "/social",
-      related_user_id: userId,
-    });
+    // Create notification for the receiver (non-blocking)
+    try {
+      const { data: senderProfile } = await supabaseAdmin
+        .from("profiles").select("username").eq("id", userId).single();
+      await supabaseAdmin.from("notifications").insert({
+        user_id: friend.id,
+        type: "friend_request",
+        title: `${senderProfile?.username ?? "Someone"} sent you a friend request`,
+        message: "Accept or decline in Social",
+        action_url: "/social",
+        related_user_id: userId,
+      });
+    } catch { /* notifications table may not exist yet */ }
 
     return NextResponse.json({ success: true, friendship: data });
   } catch (e) {
@@ -166,19 +166,20 @@ export async function PATCH(req: NextRequest) {
       .update({ status: newStatus })
       .eq("id", friendshipId);
 
-    // Notify the original requester that their request was accepted
+    // Notify the original requester (non-blocking)
     if (action === "accept") {
-      const { data: acceptorProfile } = await supabaseAdmin
-        .from("profiles").select("username").eq("id", userId).single();
-
-      await supabaseAdmin.from("notifications").insert({
-        user_id: friendship.user_id,
-        type: "friend_accepted",
-        title: `${acceptorProfile?.username ?? "Someone"} accepted your friend request`,
-        message: "You can now chat and challenge each other",
-        action_url: "/social",
-        related_user_id: userId,
-      });
+      try {
+        const { data: acceptorProfile } = await supabaseAdmin
+          .from("profiles").select("username").eq("id", userId).single();
+        await supabaseAdmin.from("notifications").insert({
+          user_id: friendship.user_id,
+          type: "friend_accepted",
+          title: `${acceptorProfile?.username ?? "Someone"} accepted your friend request`,
+          message: "You can now chat and challenge each other",
+          action_url: "/social",
+          related_user_id: userId,
+        });
+      } catch { /* notifications table may not exist yet */ }
     }
 
     return NextResponse.json({ success: true, status: newStatus });

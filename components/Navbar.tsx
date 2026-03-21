@@ -99,10 +99,11 @@ export default function Navbar() {
     if (!user?.id) return;
     try {
       const res = await fetch(`/api/notifications?userId=${user.id}`);
+      if (!res.ok) return; // table may not exist yet
       const data = await res.json();
-      setNotifications(data.notifications ?? []);
-      setUnreadCount(data.unreadCount ?? 0);
-    } catch { /* ignore */ }
+      if (data.notifications) setNotifications(data.notifications);
+      if (typeof data.unreadCount === "number") setUnreadCount(data.unreadCount);
+    } catch { /* table may not exist — silently ignore */ }
   }, [user?.id]);
 
   // Load notifications on mount + poll
@@ -116,29 +117,34 @@ export default function Navbar() {
   // Realtime subscription for new notifications
   useEffect(() => {
     if (!user?.id) return;
-    const channel = supabase
-      .channel(`notifs-${user.id}`)
-      .on("postgres_changes", {
-        event: "INSERT",
-        schema: "public",
-        table: "notifications",
-        filter: `user_id=eq.${user.id}`,
-      }, () => {
-        loadNotifications();
-      })
-      .subscribe();
-    return () => { channel.unsubscribe(); };
+    let channel: ReturnType<typeof supabase.channel> | null = null;
+    try {
+      channel = supabase
+        .channel(`notifs-${user.id}`)
+        .on("postgres_changes", {
+          event: "INSERT",
+          schema: "public",
+          table: "notifications",
+          filter: `user_id=eq.${user.id}`,
+        }, () => {
+          loadNotifications();
+        })
+        .subscribe();
+    } catch { /* ignore if table doesn't exist */ }
+    return () => { channel?.unsubscribe(); };
   }, [user?.id, loadNotifications]);
 
   // Mark all as read when opening panel
   const openNotifPanel = useCallback(async () => {
     setShowNotifPanel(prev => !prev);
     if (!showNotifPanel && user?.id && (unreadCount ?? 0) > 0) {
-      await fetch("/api/notifications", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: user.id }),
-      });
+      try {
+        await fetch("/api/notifications", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userId: user.id }),
+        });
+      } catch { /* ignore */ }
       setNotifications(prev => prev.map(n => ({ ...n, read: true })));
       setUnreadCount(0);
     }

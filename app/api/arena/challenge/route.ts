@@ -62,18 +62,19 @@ export async function POST(req: NextRequest) {
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-    // Notify the challenged user
-    const { data: challengerProfile } = await supabaseAdmin
-      .from("profiles").select("username").eq("id", challengerId).single();
-
-    await supabaseAdmin.from("notifications").insert({
-      user_id: challenged.id,
-      type: "arena_challenge",
-      title: `${challengerProfile?.username ?? "Someone"} challenged you to a duel!`,
-      message: `${safeWager} Fangs wager`,
-      action_url: "/social",
-      related_user_id: challengerId,
-    });
+    // Notify the challenged user (non-blocking)
+    try {
+      const { data: challengerProfile } = await supabaseAdmin
+        .from("profiles").select("username").eq("id", challengerId).single();
+      await supabaseAdmin.from("notifications").insert({
+        user_id: challenged.id,
+        type: "arena_challenge",
+        title: `${challengerProfile?.username ?? "Someone"} challenged you to a duel!`,
+        message: `${safeWager} Fangs wager`,
+        action_url: "/social",
+        related_user_id: challengerId,
+      });
+    } catch { /* notifications table may not exist yet */ }
 
     return NextResponse.json({
       challenge: data,
