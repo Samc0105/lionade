@@ -260,10 +260,10 @@ export default function CompetePage() {
                     <img src="/fangs.png" alt="Fangs" className="w-4 h-4 object-contain" /> Wager: 10–100 coins
                   </p>
                   <div className="flex flex-wrap gap-3 mb-6">
-                    <Link href="/duel" className="btn-gold text-sm px-6 py-3 rounded-xl">
+                    <Link href="/arena" className="btn-gold text-sm px-6 py-3 rounded-xl">
                       🎯 Find Opponent
                     </Link>
-                    <Link href="/duel" className="btn-outline text-sm px-6 py-3 rounded-xl">
+                    <Link href="/arena" className="btn-outline text-sm px-6 py-3 rounded-xl">
                       👥 Challenge Friend
                     </Link>
                   </div>

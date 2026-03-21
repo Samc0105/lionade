@@ -2590,6 +2590,65 @@ html.light .space-bg-container { display: none; }
   animation: booster-active-pulse 2s ease-in-out infinite;
 }
 
+/* ── Arena Duel Animations ──────────────────────────────────── */
+
+@keyframes arena-search-ring-anim {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.6;
+    border-color: rgba(239, 68, 68, 0.4);
+  }
+  50% {
+    transform: scale(1.15);
+    opacity: 0.2;
+    border-color: rgba(74, 144, 217, 0.3);
+  }
+  100% {
+    transform: scale(0.8);
+    opacity: 0.6;
+    border-color: rgba(239, 68, 68, 0.4);
+  }
+}
+
+.arena-search-ring {
+  border: 3px solid rgba(239, 68, 68, 0.4);
+  animation: arena-search-ring-anim 2s ease-in-out infinite;
+}
+
+@keyframes arena-search-pulse-anim {
+  0%, 100% { transform: scale(1); opacity: 0.8; }
+  50% { transform: scale(1.05); opacity: 1; }
+}
+
+.arena-search-pulse {
+  animation: arena-search-pulse-anim 2s ease-in-out infinite;
+}
+
+@keyframes arena-countdown-pop-anim {
+  0% { transform: scale(1.4); opacity: 0; }
+  30% { transform: scale(0.95); opacity: 1; }
+  50% { transform: scale(1.02); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.arena-countdown-pop {
+  animation: arena-countdown-pop-anim 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+@keyframes arena-answer-pop-anim {
+  0% { transform: scale(0.8); opacity: 0; }
+  60% { transform: scale(1.1); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.arena-answer-pop {
+  animation: arena-answer-pop-anim 0.3s ease-out both;
+}
+
+.arena-timer-ring {
+  filter: drop-shadow(0 0 6px currentColor);
+}
+
 @media (prefers-reduced-motion: reduce) {
 
   .space-twinkle,
@@ -2672,7 +2731,12 @@ html.light .space-bg-container { display: none; }
   .savanna-grass,
   .savanna-birds,
   .tumbleweed,
-  .dust-particle {
+  .dust-particle,
+  .arena-search-ring,
+  .arena-search-pulse,
+  .arena-countdown-pop,
+  .arena-answer-pop,
+  .arena-timer-ring {
     animation: none !important;
   }
 

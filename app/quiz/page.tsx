@@ -54,7 +54,6 @@ const CATEGORIES: Category[] = [
       { name: "Spanish", subject: "Languages" as Subject },
       { name: "French", subject: "Languages" as Subject },
       { name: "German", subject: "Languages" as Subject },
-      { name: "Japanese", subject: "Languages" as Subject },
       { name: "English Grammar", subject: "Languages" as Subject },
     ],
   },
