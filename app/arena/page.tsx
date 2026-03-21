@@ -628,13 +628,7 @@ export default function ArenaPage() {
                 ⚔️ 1v1 BATTLE MODE
               </div>
 
-              <h1 className="font-bebas text-7xl sm:text-9xl tracking-wider leading-none mb-3"
-                style={{
-                  background: "linear-gradient(180deg, #FFFFFF 0%, #EF4444 40%, #991B1B 100%)",
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                  filter: "drop-shadow(0 0 30px rgba(239,68,68,0.25))",
-                }}>
+              <h1 className="font-bebas text-7xl sm:text-9xl tracking-wider leading-none mb-3 arena-title-flash">
                 DUEL ARENA
               </h1>
 
