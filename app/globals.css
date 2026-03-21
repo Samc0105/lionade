@@ -2649,41 +2649,6 @@ html.light .space-bg-container { display: none; }
   filter: drop-shadow(0 0 6px currentColor);
 }
 
-/* Arena title — solid red with a thin white glint every 20s */
-@keyframes arena-title-glint {
-  0%, 2%   { left: -20%; }
-  4%       { left: 120%; }
-  100%     { left: 120%; }
-}
-
-.arena-title-flash {
-  position: relative;
-  display: inline-block;
-  color: #DC2626;
-  overflow: hidden;
-}
-
-.arena-title-flash::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: -20%;
-  width: 8%;
-  height: 100%;
-  background: linear-gradient(
-    105deg,
-    transparent 0%,
-    rgba(255,255,255,0.05) 30%,
-    rgba(255,255,255,0.35) 48%,
-    rgba(255,255,255,0.5) 50%,
-    rgba(255,255,255,0.35) 52%,
-    rgba(255,255,255,0.05) 70%,
-    transparent 100%
-  );
-  animation: arena-title-glint 20s linear infinite;
-  pointer-events: none;
-}
-
 @media (prefers-reduced-motion: reduce) {
 
   .space-twinkle,
@@ -2771,8 +2736,7 @@ html.light .space-bg-container { display: none; }
   .arena-search-pulse,
   .arena-countdown-pop,
   .arena-answer-pop,
-  .arena-timer-ring,
-  .arena-title-flash {
+  .arena-timer-ring {
     animation: none !important;
   }
 
