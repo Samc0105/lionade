@@ -1,0 +1,576 @@
+"use client";
+
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
+import ProtectedRoute from "@/components/ProtectedRoute";
+import { useAuth } from "@/lib/auth";
+import { useUserStats } from "@/lib/hooks";
+import { supabase } from "@/lib/supabase";
+
+// ── Types ────────────────────────────────────────────────────
+
+interface Friend {
+  id: string;
+  username: string;
+  avatar_url: string | null;
+  arena_elo: number;
+  is_online: boolean;
+  last_seen: string | null;
+  unreadCount: number;
+}
+
+interface PendingRequest {
+  id: string;
+  username: string;
+  avatar_url: string | null;
+  arena_elo: number;
+  friendshipId: string;
+}
+
+interface Message {
+  id: string;
+  sender_id: string;
+  receiver_id: string;
+  content: string;
+  read: boolean;
+  created_at: string;
+}
+
+interface ArenaEvent {
+  id: string;
+  match_id: string;
+  user1_id: string;
+  user2_id: string;
+  winner_id: string | null;
+  player1_score: number;
+  player2_score: number;
+  wager: number;
+  created_at: string;
+}
+
+// ── Helpers ──────────────────────────────────────────────────
+
+const ELO_TIERS = [
+  { name: "Bronze", min: 0, max: 1199, color: "#CD7F32", icon: "🥉" },
+  { name: "Silver", min: 1200, max: 1399, color: "#C0C0C0", icon: "🥈" },
+  { name: "Gold", min: 1400, max: 1599, color: "#FFD700", icon: "🥇" },
+  { name: "Platinum", min: 1600, max: 1799, color: "#00CED1", icon: "💎" },
+  { name: "Diamond", min: 1800, max: 9999, color: "#B9F2FF", icon: "💠" },
+];
+
+function getEloTier(elo: number) {
+  return ELO_TIERS.find(t => elo >= t.min && elo <= t.max) ?? ELO_TIERS[0];
+}
+
+function timeAgo(dateStr: string | null): string {
+  if (!dateStr) return "Unknown";
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return "Just now";
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  const days = Math.floor(hrs / 24);
+  return `${days}d ago`;
+}
+
+// ── Component ────────────────────────────────────────────────
+
+export default function SocialPage() {
+  const { user } = useAuth();
+  useUserStats(user?.id);
+
+  // Friends
+  const [friends, setFriends] = useState<Friend[]>([]);
+  const [pendingRequests, setPendingRequests] = useState<PendingRequest[]>([]);
+  const [selectedFriend, setSelectedFriend] = useState<Friend | null>(null);
+  const [addUsername, setAddUsername] = useState("");
+  const [addError, setAddError] = useState("");
+  const [addSuccess, setAddSuccess] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+
+  // Messages
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [arenaEvents, setArenaEvents] = useState<ArenaEvent[]>([]);
+  const [msgInput, setMsgInput] = useState("");
+  const [sending, setSending] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const chatContainerRef = useRef<HTMLDivElement>(null);
+
+  // Memoized avatar
+  const myAvatar = useMemo(() => {
+    if (user?.avatar) return user.avatar;
+    return `https://api.dicebear.com/7.x/adventurer/svg?seed=${user?.username ?? "player"}`;
+  }, [user?.avatar, user?.username]);
+
+  // ── Online heartbeat ───────────────────────────────────────
+  useEffect(() => {
+    if (!user?.id) return;
+
+    const setOnline = async () => {
+      await supabase
+        .from("profiles")
+        .update({ is_online: true, last_seen: new Date().toISOString() })
+        .eq("id", user.id);
+    };
+
+    setOnline();
+    const heartbeat = setInterval(setOnline, 120000);
+
+    const handleUnload = () => {
+      navigator.sendBeacon?.(
+        `/api/social/friends?offline=${user.id}`,
+      );
+      // Best-effort offline update
+      supabase
+        .from("profiles")
+        .update({ is_online: false, last_seen: new Date().toISOString() })
+        .eq("id", user.id);
+    };
+
+    window.addEventListener("beforeunload", handleUnload);
+    return () => {
+      clearInterval(heartbeat);
+      window.removeEventListener("beforeunload", handleUnload);
+    };
+  }, [user?.id]);
+
+  // ── Load friends ───────────────────────────────────────────
+  const loadFriends = useCallback(async () => {
+    if (!user?.id) return;
+    try {
+      const res = await fetch(`/api/social/friends?userId=${user.id}`);
+      const data = await res.json();
+      setFriends(data.friends ?? []);
+      setPendingRequests(data.pendingRequests ?? []);
+    } catch { /* ignore */ }
+  }, [user?.id]);
+
+  useEffect(() => {
+    loadFriends();
+    const iv = setInterval(loadFriends, 10000);
+    return () => clearInterval(iv);
+  }, [loadFriends]);
+
+  // ── Load conversation ──────────────────────────────────────
+  const loadMessages = useCallback(async (friendId: string) => {
+    if (!user?.id) return;
+    try {
+      const res = await fetch(`/api/social/messages?userId=${user.id}&friendId=${friendId}`);
+      const data = await res.json();
+      setMessages(data.messages ?? []);
+      setArenaEvents(data.arenaEvents ?? []);
+      // Clear unread for this friend locally
+      setFriends(prev => prev.map(f => f.id === friendId ? { ...f, unreadCount: 0 } : f));
+    } catch { /* ignore */ }
+  }, [user?.id]);
+
+  useEffect(() => {
+    if (selectedFriend) loadMessages(selectedFriend.id);
+  }, [selectedFriend, loadMessages]);
+
+  // Auto-scroll to bottom
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  // ── Realtime messages ──────────────────────────────────────
+  useEffect(() => {
+    if (!user?.id || !selectedFriend) return;
+
+    const channel = supabase
+      .channel(`social-chat-${user.id}-${selectedFriend.id}`)
+      .on("postgres_changes", {
+        event: "INSERT",
+        schema: "public",
+        table: "messages",
+        filter: `receiver_id=eq.${user.id}`,
+      }, (payload) => {
+        const newMsg = payload.new as Message;
+        if (newMsg.sender_id === selectedFriend.id) {
+          setMessages(prev => [...prev, newMsg]);
+          // Mark as read
+          supabase.from("messages").update({ read: true }).eq("id", newMsg.id);
+        }
+      })
+      .subscribe();
+
+    return () => { channel.unsubscribe(); };
+  }, [user?.id, selectedFriend?.id]);
+
+  // ── Send message ───────────────────────────────────────────
+  const sendMessage = useCallback(async () => {
+    if (!user?.id || !selectedFriend || !msgInput.trim() || sending) return;
+    setSending(true);
+
+    try {
+      const res = await fetch("/api/social/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          senderId: user.id,
+          receiverId: selectedFriend.id,
+          content: msgInput.trim(),
+        }),
+      });
+      const data = await res.json();
+      if (data.message) {
+        setMessages(prev => [...prev, data.message]);
+        setMsgInput("");
+      }
+    } catch { /* ignore */ }
+    setSending(false);
+  }, [user?.id, selectedFriend, msgInput, sending]);
+
+  // ── Add friend ─────────────────────────────────────────────
+  const addFriend = useCallback(async () => {
+    if (!user?.id || !addUsername.trim()) return;
+    setAddError("");
+    setAddSuccess("");
+
+    try {
+      const res = await fetch("/api/social/friends", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: user.id, friendUsername: addUsername.trim() }),
+      });
+      const data = await res.json();
+      if (data.error) {
+        setAddError(data.error);
+      } else {
+        setAddSuccess(`Request sent to ${addUsername}!`);
+        setAddUsername("");
+        setTimeout(() => setAddSuccess(""), 3000);
+      }
+    } catch {
+      setAddError("Failed to send request");
+    }
+  }, [user?.id, addUsername]);
+
+  // ── Accept / Decline ───────────────────────────────────────
+  const handleRequest = useCallback(async (friendshipId: string, action: "accept" | "decline") => {
+    if (!user?.id) return;
+    await fetch("/api/social/friends", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ friendshipId, userId: user.id, action }),
+    });
+    loadFriends();
+  }, [user?.id, loadFriends]);
+
+  // ── Merge messages + arena events for timeline ─────────────
+  const timeline = useMemo(() => {
+    const items: { type: "message" | "arena"; data: Message | ArenaEvent; time: string }[] = [];
+    for (const m of messages) items.push({ type: "message", data: m, time: m.created_at });
+    for (const e of arenaEvents) items.push({ type: "arena", data: e, time: e.created_at });
+    items.sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime());
+    return items;
+  }, [messages, arenaEvents]);
+
+  // Filtered friends
+  const filteredFriends = searchQuery
+    ? friends.filter(f => f.username.toLowerCase().includes(searchQuery.toLowerCase()))
+    : friends;
+
+  // ══════════════════════════════════════════════════════════
+  // RENDER
+  // ══════════════════════════════════════════════════════════
+  return (
+    <ProtectedRoute>
+      <div data-force-dark className="relative min-h-screen pt-16 pb-0 overflow-hidden" style={{ background: "#04080F", isolation: "isolate" }}>
+        <div className="relative z-10 h-[calc(100vh-64px)] flex max-w-7xl mx-auto">
+
+          {/* ═══ LEFT PANEL — Friends List ═══ */}
+          <div className="w-full sm:w-[320px] flex-shrink-0 flex flex-col border-r border-white/[0.06]"
+            style={selectedFriend ? { display: "none" } : undefined}
+          >
+            {/* Only hide on mobile when chatting */}
+            <style>{`@media(min-width:640px){[style*="display: none"].w-full{display:flex!important}}`}</style>
+
+            {/* Add Friend */}
+            <div className="p-4 border-b border-white/[0.06]">
+              <p className="font-bebas text-lg text-cream tracking-wider mb-3">ADD FRIEND</p>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={addUsername}
+                  onChange={e => { setAddUsername(e.target.value); setAddError(""); setAddSuccess(""); }}
+                  onKeyDown={e => e.key === "Enter" && addFriend()}
+                  placeholder="Username..."
+                  className="flex-1 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-cream placeholder:text-cream/20 focus:outline-none focus:border-electric/40 transition"
+                />
+                <button onClick={addFriend}
+                  className="px-4 py-2 rounded-lg text-xs font-bold transition-all active:scale-95"
+                  style={{
+                    background: "linear-gradient(135deg, #FFD700 0%, #B8960C 100%)",
+                    color: "#04080F",
+                  }}>
+                  Add
+                </button>
+              </div>
+              {addError && <p className="text-red-400 text-xs mt-2">{addError}</p>}
+              {addSuccess && <p className="text-green-400 text-xs mt-2">{addSuccess}</p>}
+            </div>
+
+            {/* Search */}
+            <div className="px-4 py-3 border-b border-white/[0.06]">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                placeholder="Search friends..."
+                className="w-full bg-white/[0.03] border border-white/[0.06] rounded-lg px-3 py-2 text-sm text-cream placeholder:text-cream/15 focus:outline-none focus:border-white/20 transition"
+              />
+            </div>
+
+            {/* Pending Requests */}
+            {pendingRequests.length > 0 && (
+              <div className="px-4 py-3 border-b border-white/[0.06]">
+                <p className="text-cream/40 text-[10px] font-bold uppercase tracking-widest mb-2">
+                  Pending Requests ({pendingRequests.length})
+                </p>
+                <div className="space-y-2">
+                  {pendingRequests.map(req => {
+                    const tier = getEloTier(req.arena_elo);
+                    return (
+                      <div key={req.friendshipId} className="flex items-center gap-3 p-2 rounded-lg"
+                        style={{ background: "rgba(255,255,255,0.03)" }}>
+                        <img
+                          src={req.avatar_url ?? `https://api.dicebear.com/7.x/adventurer/svg?seed=${req.username}`}
+                          alt={req.username}
+                          className="w-8 h-8 rounded-full object-cover flex-shrink-0"
+                        />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-cream text-xs font-semibold truncate">{req.username}</p>
+                          <p className="text-[10px]" style={{ color: tier.color }}>{tier.icon} {tier.name}</p>
+                        </div>
+                        <button onClick={() => handleRequest(req.friendshipId, "accept")}
+                          className="text-green-400 text-[10px] font-bold px-2 py-1 rounded bg-green-400/10 hover:bg-green-400/20 transition">
+                          Accept
+                        </button>
+                        <button onClick={() => handleRequest(req.friendshipId, "decline")}
+                          className="text-cream/30 text-[10px] px-1.5 py-1 rounded hover:text-cream/50 transition">
+                          ✕
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Friends List */}
+            <div className="flex-1 overflow-y-auto">
+              {filteredFriends.length === 0 && (
+                <div className="px-4 py-10 text-center">
+                  <p className="text-cream/20 text-sm">
+                    {searchQuery ? "No friends match your search" : "No friends yet. Add someone above!"}
+                  </p>
+                </div>
+              )}
+              {filteredFriends.map(friend => {
+                const tier = getEloTier(friend.arena_elo);
+                const isSelected = selectedFriend?.id === friend.id;
+                return (
+                  <button
+                    key={friend.id}
+                    onClick={() => setSelectedFriend(friend)}
+                    className="w-full text-left px-4 py-3 flex items-center gap-3 transition-all duration-150 hover:bg-white/[0.04]"
+                    style={isSelected ? {
+                      background: "linear-gradient(135deg, rgba(74,144,217,0.08) 0%, rgba(74,144,217,0.03) 100%)",
+                      borderLeft: "2px solid #4A90D9",
+                    } : { borderLeft: "2px solid transparent" }}
+                  >
+                    {/* Avatar + online dot */}
+                    <div className="relative flex-shrink-0">
+                      <img
+                        src={friend.avatar_url ?? `https://api.dicebear.com/7.x/adventurer/svg?seed=${friend.username}`}
+                        alt={friend.username}
+                        className="w-10 h-10 rounded-full object-cover"
+                      />
+                      {friend.is_online && (
+                        <div className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-green-400 border-2 border-[#04080F] social-online-dot" />
+                      )}
+                    </div>
+
+                    {/* Name + meta */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="text-cream text-sm font-semibold truncate">{friend.username}</span>
+                        <span className="text-[9px] font-bold px-1.5 py-0.5 rounded" style={{
+                          color: tier.color,
+                          background: `${tier.color}15`,
+                        }}>
+                          {tier.icon} {tier.name}
+                        </span>
+                      </div>
+                      <p className="text-cream/25 text-[10px] mt-0.5">
+                        {friend.is_online ? (
+                          <span className="text-green-400/70">Online</span>
+                        ) : (
+                          timeAgo(friend.last_seen)
+                        )}
+                      </p>
+                    </div>
+
+                    {/* Unread badge */}
+                    {friend.unreadCount > 0 && (
+                      <div className="flex-shrink-0 min-w-[20px] h-5 rounded-full flex items-center justify-center px-1.5 font-bold text-[10px]"
+                        style={{
+                          background: "linear-gradient(135deg, #FFD700 0%, #B8960C 100%)",
+                          color: "#04080F",
+                        }}>
+                        {friend.unreadCount}
+                      </div>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* ═══ RIGHT PANEL — Chat ═══ */}
+          <div className="flex-1 flex flex-col min-w-0"
+            style={!selectedFriend ? {} : undefined}
+          >
+            {!selectedFriend ? (
+              /* Empty state */
+              <div className="flex-1 flex flex-col items-center justify-center text-center px-6">
+                <img src="/logo-icon.png" alt="Lionade" className="w-20 h-20 opacity-20 mb-6" />
+                <p className="font-bebas text-2xl text-cream/20 tracking-wider mb-2">SELECT A FRIEND</p>
+                <p className="text-cream/15 text-sm max-w-xs">
+                  Pick someone from your friends list to start chatting
+                </p>
+              </div>
+            ) : (
+              <>
+                {/* Chat header */}
+                <div className="flex items-center justify-between px-5 py-3 border-b border-white/[0.06] flex-shrink-0">
+                  <div className="flex items-center gap-3">
+                    {/* Back button on mobile */}
+                    <button onClick={() => setSelectedFriend(null)} className="sm:hidden text-cream/40 mr-1 hover:text-cream/60 transition">
+                      ←
+                    </button>
+                    <div className="relative">
+                      <img
+                        src={selectedFriend.avatar_url ?? `https://api.dicebear.com/7.x/adventurer/svg?seed=${selectedFriend.username}`}
+                        alt={selectedFriend.username}
+                        className="w-9 h-9 rounded-full object-cover"
+                      />
+                      {selectedFriend.is_online && (
+                        <div className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-green-400 border-2 border-[#04080F] social-online-dot" />
+                      )}
+                    </div>
+                    <div>
+                      <p className="text-cream font-semibold text-sm">{selectedFriend.username}</p>
+                      <p className="text-[10px]" style={{ color: getEloTier(selectedFriend.arena_elo).color }}>
+                        {getEloTier(selectedFriend.arena_elo).icon} {getEloTier(selectedFriend.arena_elo).name} — {selectedFriend.arena_elo} ELO
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Challenge button */}
+                  <a href={`/arena`}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all active:scale-95"
+                    style={{
+                      background: "rgba(239,68,68,0.1)",
+                      border: "1px solid rgba(239,68,68,0.25)",
+                      color: "#EF4444",
+                    }}>
+                    ⚔️ Challenge
+                  </a>
+                </div>
+
+                {/* Messages area */}
+                <div ref={chatContainerRef} className="flex-1 overflow-y-auto px-5 py-4 space-y-3">
+                  {timeline.length === 0 && (
+                    <div className="text-center py-10">
+                      <p className="text-cream/15 text-sm">No messages yet. Say hi!</p>
+                    </div>
+                  )}
+
+                  {timeline.map((item) => {
+                    if (item.type === "arena") {
+                      const event = item.data as ArenaEvent;
+                      const iWon = event.winner_id === user?.id;
+                      const isDraw = !event.winner_id;
+                      return (
+                        <div key={`arena-${event.id}`} className="flex justify-center my-4">
+                          <div className="rounded-xl px-5 py-3 max-w-sm w-full text-center"
+                            style={{
+                              background: "linear-gradient(135deg, rgba(74,144,217,0.08) 0%, rgba(74,144,217,0.03) 100%)",
+                              border: "1px solid rgba(74,144,217,0.15)",
+                            }}>
+                            <p className="text-[10px] text-cream/30 uppercase tracking-widest mb-1">Arena Match</p>
+                            <p className="font-bebas text-lg tracking-wider mb-1"
+                              style={{ color: isDraw ? "#E67E22" : iWon ? "#22C55E" : "#EF4444" }}>
+                              {isDraw ? "DRAW" : iWon ? "VICTORY" : "DEFEAT"}
+                            </p>
+                            <div className="flex items-center justify-center gap-3 text-xs text-cream/40">
+                              <span>{event.player1_score} — {event.player2_score}</span>
+                              <span className="text-cream/10">|</span>
+                              <span className="flex items-center gap-1">
+                                <img src="/fangs.png" alt="Fangs" className="w-3 h-3 object-contain" />
+                                {isDraw ? "±0" : iWon ? `+${event.wager}` : `-${event.wager}`}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    }
+
+                    const msg = item.data as Message;
+                    const isMine = msg.sender_id === user?.id;
+                    return (
+                      <div key={`msg-${msg.id}`} className={`flex ${isMine ? "justify-end" : "justify-start"}`}>
+                        <div className="max-w-[70%] rounded-2xl px-4 py-2.5"
+                          style={isMine ? {
+                            background: "linear-gradient(135deg, rgba(255,215,0,0.12) 0%, rgba(184,150,12,0.06) 100%)",
+                            border: "1px solid rgba(255,215,0,0.15)",
+                            borderBottomRightRadius: "4px",
+                          } : {
+                            background: "rgba(255,255,255,0.04)",
+                            border: "1px solid rgba(255,255,255,0.06)",
+                            borderBottomLeftRadius: "4px",
+                          }}>
+                          <p className="text-cream text-sm leading-relaxed">{msg.content}</p>
+                          <p className={`text-[9px] mt-1 ${isMine ? "text-gold/40 text-right" : "text-cream/20"}`}>
+                            {new Date(msg.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                  <div ref={messagesEndRef} />
+                </div>
+
+                {/* Input */}
+                <div className="px-4 py-3 border-t border-white/[0.06] flex-shrink-0">
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={msgInput}
+                      onChange={e => setMsgInput(e.target.value)}
+                      onKeyDown={e => e.key === "Enter" && !e.shiftKey && sendMessage()}
+                      placeholder="Type a message..."
+                      className="flex-1 bg-white/[0.04] border border-white/[0.08] rounded-xl px-4 py-2.5 text-sm text-cream placeholder:text-cream/20 focus:outline-none focus:border-electric/30 transition"
+                    />
+                    <button
+                      onClick={sendMessage}
+                      disabled={!msgInput.trim() || sending}
+                      className="px-5 py-2.5 rounded-xl font-bold text-sm transition-all active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed"
+                      style={{
+                        background: "linear-gradient(135deg, #FFD700 0%, #B8960C 100%)",
+                        color: "#04080F",
+                      }}>
+                      Send
+                    </button>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+    </ProtectedRoute>
+  );
+}

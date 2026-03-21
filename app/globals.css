@@ -2657,6 +2657,16 @@ html.light .space-bg-container { display: none; }
   filter: drop-shadow(0 0 6px currentColor);
 }
 
+/* Social — online status pulse */
+@keyframes social-online-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(74,222,128,0.5); }
+  50% { box-shadow: 0 0 0 3px rgba(74,222,128,0); }
+}
+
+.social-online-dot {
+  animation: social-online-pulse 2s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
 
   .space-twinkle,
@@ -2744,7 +2754,8 @@ html.light .space-bg-container { display: none; }
   .arena-search-pulse,
   .arena-countdown-pop,
   .arena-answer-pop,
-  .arena-timer-ring {
+  .arena-timer-ring,
+  .social-online-dot {
     animation: none !important;
   }
 
