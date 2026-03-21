@@ -87,6 +87,11 @@ export default function SocialPage() {
   const [addError, setAddError] = useState("");
   const [addSuccess, setAddSuccess] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<{ id: string; username: string; avatar_url: string | null; arena_elo: number }[]>([]);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Messages
   const [messages, setMessages] = useState<Message[]>([]);
@@ -221,6 +226,75 @@ export default function SocialPage() {
     setSending(false);
   }, [user?.id, selectedFriend, msgInput, sending]);
 
+  // ── Debounced search for add friend autocomplete ────────────
+  const handleAddUsernameChange = useCallback((value: string) => {
+    setAddUsername(value);
+    setAddError("");
+    setAddSuccess("");
+
+    if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
+
+    if (value.trim().length < 2) {
+      setSearchResults([]);
+      setShowDropdown(false);
+      setSearchLoading(false);
+      return;
+    }
+
+    setSearchLoading(true);
+    setShowDropdown(true);
+
+    searchTimerRef.current = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/social/search?q=${encodeURIComponent(value.trim())}&userId=${user?.id}`);
+        const data = await res.json();
+        setSearchResults(data.users ?? []);
+      } catch {
+        setSearchResults([]);
+      }
+      setSearchLoading(false);
+    }, 300);
+  }, [user?.id]);
+
+  const selectSearchResult = useCallback(async (username: string) => {
+    setAddUsername(username);
+    setShowDropdown(false);
+    setSearchResults([]);
+
+    // Send friend request immediately
+    if (!user?.id) return;
+    setAddError("");
+    setAddSuccess("");
+    try {
+      const res = await fetch("/api/social/friends", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: user.id, friendUsername: username }),
+      });
+      const data = await res.json();
+      if (data.error) {
+        setAddError(data.error);
+      } else {
+        setAddSuccess(`Request sent to ${username}!`);
+        setAddUsername("");
+        setTimeout(() => setAddSuccess(""), 3000);
+      }
+    } catch {
+      setAddError("Failed to send request");
+    }
+  }, [user?.id]);
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setShowDropdown(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   // ── Add friend ─────────────────────────────────────────────
   const addFriend = useCallback(async () => {
     if (!user?.id || !addUsername.trim()) return;
@@ -286,26 +360,76 @@ export default function SocialPage() {
             {/* Only hide on mobile when chatting */}
             <style>{`@media(min-width:640px){[style*="display: none"].w-full{display:flex!important}}`}</style>
 
-            {/* Add Friend */}
-            <div className="p-4 border-b border-white/[0.06]">
+            {/* Add Friend with autocomplete */}
+            <div className="p-4 border-b border-white/[0.06]" ref={dropdownRef}>
               <p className="font-bebas text-lg text-cream tracking-wider mb-3">ADD FRIEND</p>
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={addUsername}
-                  onChange={e => { setAddUsername(e.target.value); setAddError(""); setAddSuccess(""); }}
-                  onKeyDown={e => e.key === "Enter" && addFriend()}
-                  placeholder="Username..."
-                  className="flex-1 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-cream placeholder:text-cream/20 focus:outline-none focus:border-electric/40 transition"
-                />
-                <button onClick={addFriend}
-                  className="px-4 py-2 rounded-lg text-xs font-bold transition-all active:scale-95"
-                  style={{
-                    background: "linear-gradient(135deg, #FFD700 0%, #B8960C 100%)",
-                    color: "#04080F",
-                  }}>
-                  Add
-                </button>
+              <div className="relative">
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={addUsername}
+                    onChange={e => handleAddUsernameChange(e.target.value)}
+                    onKeyDown={e => e.key === "Enter" && addFriend()}
+                    onFocus={() => { if (searchResults.length > 0 || addUsername.trim().length >= 2) setShowDropdown(true); }}
+                    placeholder="Search username..."
+                    className="flex-1 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-cream placeholder:text-cream/20 focus:outline-none focus:border-electric/40 transition"
+                  />
+                  <button onClick={addFriend}
+                    className="px-4 py-2 rounded-lg text-xs font-bold transition-all active:scale-95"
+                    style={{
+                      background: "linear-gradient(135deg, #FFD700 0%, #B8960C 100%)",
+                      color: "#04080F",
+                    }}>
+                    Add
+                  </button>
+                </div>
+
+                {/* Autocomplete dropdown */}
+                {showDropdown && addUsername.trim().length >= 2 && (
+                  <div className="absolute left-0 right-0 top-full mt-1 rounded-lg overflow-hidden z-50"
+                    style={{
+                      background: "linear-gradient(135deg, #0c1020 0%, #080c18 100%)",
+                      border: "1px solid rgba(255,255,255,0.1)",
+                      boxShadow: "0 8px 24px rgba(0,0,0,0.5)",
+                    }}>
+                    {searchLoading ? (
+                      <div className="flex items-center justify-center gap-2 py-4">
+                        <div className="w-4 h-4 rounded-full border-2 border-electric border-t-transparent animate-spin" />
+                        <span className="text-cream/30 text-xs">Searching...</span>
+                      </div>
+                    ) : searchResults.length === 0 ? (
+                      <div className="py-4 text-center">
+                        <p className="text-cream/20 text-xs">No users found</p>
+                      </div>
+                    ) : (
+                      searchResults.map(u => {
+                        const tier = getEloTier(u.arena_elo);
+                        return (
+                          <button
+                            key={u.id}
+                            onClick={() => selectSearchResult(u.username)}
+                            className="w-full flex items-center gap-3 px-3 py-2.5 text-left hover:bg-white/[0.06] transition-colors"
+                          >
+                            <img
+                              src={u.avatar_url ?? `https://api.dicebear.com/7.x/adventurer/svg?seed=${u.username}`}
+                              alt={u.username}
+                              className="w-8 h-8 rounded-full object-cover flex-shrink-0"
+                            />
+                            <div className="flex-1 min-w-0">
+                              <p className="text-cream text-sm font-semibold truncate">{u.username}</p>
+                            </div>
+                            <span className="text-[9px] font-bold px-1.5 py-0.5 rounded flex-shrink-0" style={{
+                              color: tier.color,
+                              background: `${tier.color}15`,
+                            }}>
+                              {tier.icon} {tier.name}
+                            </span>
+                          </button>
+                        );
+                      })
+                    )}
+                  </div>
+                )}
               </div>
               {addError && <p className="text-red-400 text-xs mt-2">{addError}</p>}
               {addSuccess && <p className="text-green-400 text-xs mt-2">{addSuccess}</p>}
