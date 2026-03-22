@@ -1844,10 +1844,14 @@ html[data-font-size="large"] {
 }
 
 /* Hide savanna elements in dark mode */
-/* Hide savanna in dark mode — light mode pages that need it can show it */
-html[data-theme="dark"] .sakura-container,
-html:not([data-theme]) .sakura-container {
+/* Hide savanna globally — layout-content-bg handles both theme backgrounds */
+.sakura-container {
   display: none;
+}
+
+/* Force dark background regardless of theme — for pages designed dark-only */
+.force-dark-bg {
+  background-color: #04080F !important;
 }
 
 /* ══════════════════════════════════════════════════════════════════════

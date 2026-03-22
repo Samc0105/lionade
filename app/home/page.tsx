@@ -30,7 +30,7 @@ export default function ProductLandingPage() {
   if (isLoading || user || checking || !hasAccess) return null;
 
   return (
-    <div data-force-dark className="min-h-screen text-cream overflow-hidden relative" style={{ background: "#04080F" }}>
+    <div data-force-dark className="min-h-screen text-cream overflow-hidden relative force-dark-bg">
       <div className="absolute inset-0 grid-bg opacity-60" />
 
       {/* ─── Hero ─────────────────────────────────────────────── */}
