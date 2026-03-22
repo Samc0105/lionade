@@ -2657,6 +2657,16 @@ html.light .space-bg-container { display: none; }
   filter: drop-shadow(0 0 6px currentColor);
 }
 
+/* Arena title — wave shimmer in red/white (matches landing page shimmer-text technique) */
+.arena-title-wave {
+  background: linear-gradient(90deg, #DC2626 0%, #EF4444 15%, #FFFFFF 30%, #FF6B6B 45%, #991B1B 60%, #DC2626 75%, #FFFFFF 90%, #DC2626 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer 3s linear infinite;
+}
+
 /* Social — online status pulse */
 @keyframes social-online-pulse {
   0%, 100% { box-shadow: 0 0 0 0 rgba(74,222,128,0.5); }
@@ -2765,6 +2775,7 @@ html.light .space-bg-container { display: none; }
   .arena-countdown-pop,
   .arena-answer-pop,
   .arena-timer-ring,
+  .arena-title-wave,
   .social-online-dot,
   .notif-badge-pulse {
     animation: none !important;

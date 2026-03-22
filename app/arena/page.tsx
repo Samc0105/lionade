@@ -628,7 +628,7 @@ export default function ArenaPage() {
                 ⚔️ 1v1 BATTLE MODE
               </div>
 
-              <h1 className="font-bebas text-7xl sm:text-9xl tracking-wider leading-none mb-3 text-[#DC2626]">
+              <h1 className="font-bebas text-7xl sm:text-9xl tracking-wider leading-none mb-3 arena-title-wave">
                 DUEL ARENA
               </h1>
 
