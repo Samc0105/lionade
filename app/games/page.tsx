@@ -140,35 +140,6 @@ export default function GamesPage() {
   const [tlScore, setTlScore] = useState(0);
   const [dragIdx, setDragIdx] = useState<number | null>(null);
 
-  // Cursor tracking for lion eyes (must be declared before any conditional returns)
-  const [eyeOffset, setEyeOffset] = useState({ x: 0, y: 0 });
-  const lionRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const isMobile = window.matchMedia("(pointer: coarse)").matches;
-    if (isMobile) {
-      let frame = 0;
-      const iv = setInterval(() => {
-        frame++;
-        setEyeOffset({ x: Math.sin(frame * 0.04) * 5, y: Math.cos(frame * 0.06) * 2 });
-      }, 50);
-      return () => clearInterval(iv);
-    }
-    const handleMouse = (e: MouseEvent) => {
-      if (!lionRef.current) return;
-      const rect = lionRef.current.getBoundingClientRect();
-      const cx = rect.left + rect.width / 2;
-      const cy = rect.top + rect.height / 2;
-      const angle = Math.atan2(e.clientY - cy, e.clientX - cx);
-      const dist = Math.min(Math.sqrt((e.clientX - cx) ** 2 + (e.clientY - cy) ** 2), 600);
-      const shift = (dist / 600) * 6;
-      setEyeOffset({ x: Math.cos(angle) * shift, y: Math.sin(angle) * shift });
-    };
-    window.addEventListener("mousemove", handleMouse);
-    return () => window.removeEventListener("mousemove", handleMouse);
-  }, []);
-
   // Load PDF from localStorage on mount
   useEffect(() => {
     try {
@@ -850,25 +821,8 @@ export default function GamesPage() {
 
               {/* ── CENTER: Lion Mascot ── */}
               <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
-                <div ref={lionRef} className="relative games-lion-breathe">
+                <div className="games-lion-breathe">
                   <img src="/image-name.png" alt="Lionade Mascot" className="w-[320px] h-[320px] object-contain" style={{ filter: "drop-shadow(0 0 25px rgba(0,150,255,0.7))" }} />
-                  {/* Eye tracking overlays — positioned on the lion's eyes */}
-                  <div className="absolute" style={{ top: "38%", left: "35%", width: 22, height: 22 }}>
-                    <div className="rounded-full" style={{
-                      width: 10, height: 10,
-                      background: "radial-gradient(circle, #000 60%, transparent 100%)",
-                      transform: `translate(${6 + eyeOffset.x}px, ${6 + eyeOffset.y}px)`,
-                      transition: "transform 0.1s ease-out",
-                    }} />
-                  </div>
-                  <div className="absolute" style={{ top: "38%", right: "35%", width: 22, height: 22 }}>
-                    <div className="rounded-full" style={{
-                      width: 10, height: 10,
-                      background: "radial-gradient(circle, #000 60%, transparent 100%)",
-                      transform: `translate(${6 + eyeOffset.x}px, ${6 + eyeOffset.y}px)`,
-                      transition: "transform 0.1s ease-out",
-                    }} />
-                  </div>
                 </div>
               </div>
 
@@ -963,7 +917,7 @@ export default function GamesPage() {
             {/* Mobile: stacked layout with lion on top */}
             <div className="sm:hidden">
               <div className="flex justify-center mb-6">
-                <div ref={!lionRef.current ? lionRef : undefined} className="games-lion-breathe">
+                <div className="games-lion-breathe">
                   <img src="/image-name.png" alt="Lionade Mascot" className="w-[240px] h-[240px] object-contain" style={{ filter: "drop-shadow(0 0 20px rgba(0,150,255,0.6))" }} />
                 </div>
               </div>
