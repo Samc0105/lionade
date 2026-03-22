@@ -88,6 +88,35 @@ Any new page must:
 
 ---
 
+## Theme Requirements
+
+Every new feature, page, or component built must support both dark and light themes:
+
+**Dark theme (default):**
+- Background: deep dark navy/black (#04080F)
+- Text: white and light grays (#EEF4FF)
+- Accents: Lionade gold (#FFD700), red (#EF4444) for Arena
+- Cards/panels: slightly lighter dark (#0a1020 or similar)
+- Borders: subtle dark borders (rgba(255,255,255,0.06-0.1))
+
+**Light theme:**
+- Background: warm white (#FFFBF0)
+- Text: dark navy or black (#1a1a1a)
+- Same gold and red accents
+- Cards/panels: white with soft shadows
+- Borders: light gray (#e5e5e5)
+
+**Rules:**
+- Use CSS variables for all colors — never hardcode colors directly where possible
+- Every component must look correct in both themes
+- Respect the existing Lionade color palette in both modes
+- Test both themes before committing any UI change
+- The dark theme is the primary/default theme
+- Use `data-force-dark` attribute on sections that must stay dark in light mode (e.g. Arena, Compete)
+- The ThemeProvider's `fixInlineBackgrounds` will override dark inline styles in light mode — use CSS classes instead of inline styles for backgrounds that need to survive theme switching
+
+---
+
 ## Self-Check Before Marking Any Task Complete
 Before finishing, ask yourself:
 - [ ] Did I initialize any stat as `0`? Change to `null`
