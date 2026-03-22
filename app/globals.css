@@ -2676,6 +2676,37 @@ html.light .space-bg-container { display: none; }
   animation: games-lion-breathe 3s ease-in-out infinite;
 }
 
+/* Game card electric border animation */
+@keyframes game-electric-trace {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 300% 50%; }
+}
+
+.game-electric-border {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    transparent 30%,
+    var(--electric-color, #00BFFF) 45%,
+    rgba(255,255,255,0.8) 50%,
+    var(--electric-color, #00BFFF) 55%,
+    transparent 70%,
+    transparent 100%
+  );
+  background-size: 300% 100%;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  padding: 1px;
+  animation: game-electric-trace 3s linear infinite;
+  opacity: 0.4;
+}
+
+.game-card-electric:hover .game-electric-border {
+  opacity: 0.9;
+  animation-duration: 1.5s;
+}
+
 /* Arena title — wave shimmer in red/white (matches landing page shimmer-text technique) */
 .arena-title-wave {
   background: linear-gradient(90deg, #DC2626 0%, #EF4444 15%, #FFFFFF 30%, #FF6B6B 45%, #991B1B 60%, #DC2626 75%, #FFFFFF 90%, #DC2626 100%);
@@ -2796,6 +2827,7 @@ html.light .space-bg-container { display: none; }
   .arena-timer-ring,
   .arena-title-wave,
   .games-lion-breathe,
+  .game-electric-border,
   .social-online-dot,
   .notif-badge-pulse {
     animation: none !important;

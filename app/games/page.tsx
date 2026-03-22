@@ -734,15 +734,13 @@ export default function GamesPage() {
   const lionRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    if (typeof window === "undefined") return;
     const isMobile = window.matchMedia("(pointer: coarse)").matches;
     if (isMobile) {
-      // Mobile: eyes look left and right on loop
       let frame = 0;
       const iv = setInterval(() => {
         frame++;
-        const x = Math.sin(frame * 0.05) * 3;
-        const y = Math.cos(frame * 0.08) * 1.5;
-        setEyeOffset({ x, y });
+        setEyeOffset({ x: Math.sin(frame * 0.04) * 5, y: Math.cos(frame * 0.06) * 2 });
       }, 50);
       return () => clearInterval(iv);
     }
@@ -751,88 +749,41 @@ export default function GamesPage() {
       const rect = lionRef.current.getBoundingClientRect();
       const cx = rect.left + rect.width / 2;
       const cy = rect.top + rect.height / 2;
-      const dx = e.clientX - cx;
-      const dy = e.clientY - cy;
-      const dist = Math.sqrt(dx * dx + dy * dy);
-      const maxShift = 4;
-      const scale = Math.min(maxShift / Math.max(dist, 1), 0.04);
-      setEyeOffset({ x: dx * scale, y: dy * scale });
+      const angle = Math.atan2(e.clientY - cy, e.clientX - cx);
+      const dist = Math.min(Math.sqrt((e.clientX - cx) ** 2 + (e.clientY - cy) ** 2), 600);
+      const shift = (dist / 600) * 6;
+      setEyeOffset({ x: Math.cos(angle) * shift, y: Math.sin(angle) * shift });
     };
     window.addEventListener("mousemove", handleMouse);
     return () => window.removeEventListener("mousemove", handleMouse);
   }, []);
 
   const GAMES = [
-    { id: "roardle" as GameMode, name: "ROARDLE", icon: "🔤", desc: "Guess the science word", fangs: `${wordLength === 4 ? 10 : wordLength === 5 ? 15 : 20}+`, limit: DAILY_LIMITS.roardle, start: startRoardle, glow: "#4A90D9", glowAlpha: "rgba(74,144,217," },
-    { id: "blitz" as GameMode, name: "BLITZ SPRINT", icon: "⚡", desc: "60s rapid fire Q&A", fangs: "2×", limit: DAILY_LIMITS.blitz, start: startBlitz, glow: "#F97316", glowAlpha: "rgba(249,115,22," },
-    { id: "flashcards" as GameMode, name: "FLASH CARDS", icon: "🃏", desc: "Flip, learn, repeat", fangs: "15", limit: DAILY_LIMITS.flashcards, start: startFlashcards, glow: "#A855F7", glowAlpha: "rgba(168,85,247," },
-    { id: "timeline" as GameMode, name: "TIMELINE DROP", icon: "📅", desc: "Order events in time", fangs: "3×", limit: DAILY_LIMITS.timeline, start: startTimeline, glow: "#22C55E", glowAlpha: "rgba(34,197,94," },
+    { id: "roardle" as GameMode, name: "ROARDLE", icon: "🔤", desc: "Guess the science word", fangs: `${wordLength === 4 ? 10 : wordLength === 5 ? 15 : 20}+`, limit: DAILY_LIMITS.roardle, start: startRoardle, color: "#00BFFF", pos: "top-0 left-0" },
+    { id: "blitz" as GameMode, name: "BLITZ SPRINT", icon: "⚡", desc: "60s rapid fire Q&A", fangs: "2×", limit: DAILY_LIMITS.blitz, start: startBlitz, color: "#FF6B00", pos: "top-0 right-0" },
+    { id: "flashcards" as GameMode, name: "FLASH CARDS", icon: "🃏", desc: "Flip, learn, repeat", fangs: "15", limit: DAILY_LIMITS.flashcards, start: startFlashcards, color: "#9B59B6", pos: "bottom-0 left-0" },
+    { id: "timeline" as GameMode, name: "TIMELINE DROP", icon: "📅", desc: "Order events in time", fangs: "3×", limit: DAILY_LIMITS.timeline, start: startTimeline, color: "#00C851", pos: "bottom-0 right-0" },
   ];
+
+  // Helper to build rgba from hex
+  const hexToRgba = (hex: string, a: number) => {
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+    return `rgba(${r},${g},${b},${a})`;
+  };
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen pt-16 pb-20 md:pb-8">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
+      <div className="min-h-screen pt-16 pb-20 md:pb-8 overflow-hidden">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
 
-          {/* ═══ ANIMATED LION + HEADER ═══ */}
-          <div className="text-center mb-10 animate-slide-up">
-            {/* Lion Face SVG */}
-            <div ref={lionRef} className="inline-block mb-4 games-lion-breathe">
-              <svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                {/* Mane */}
-                <circle cx="50" cy="50" r="46" fill="url(#maneGrad)" />
-                <circle cx="50" cy="50" r="40" fill="url(#maneInner)" />
-                {/* Mane tufts */}
-                {[0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330].map(angle => {
-                  const rad = (angle * Math.PI) / 180;
-                  const x = 50 + Math.cos(rad) * 44;
-                  const y = 50 + Math.sin(rad) * 44;
-                  return <circle key={angle} cx={x} cy={y} r="8" fill="#B8860B" opacity="0.6" />;
-                })}
-                {/* Face */}
-                <ellipse cx="50" cy="52" rx="28" ry="26" fill="#D4A017" />
-                <ellipse cx="50" cy="54" rx="24" ry="22" fill="#E8B830" />
-                {/* Eyes - white sclera */}
-                <ellipse cx="39" cy="46" rx="6" ry="5.5" fill="#FFFDF0" />
-                <ellipse cx="61" cy="46" rx="6" ry="5.5" fill="#FFFDF0" />
-                {/* Pupils - follow cursor */}
-                <circle cx={39 + eyeOffset.x} cy={46 + eyeOffset.y} r="3" fill="#1a0a00" />
-                <circle cx={61 + eyeOffset.x} cy={46 + eyeOffset.y} r="3" fill="#1a0a00" />
-                {/* Pupil shine */}
-                <circle cx={38 + eyeOffset.x * 0.5} cy={45 + eyeOffset.y * 0.5} r="1" fill="#fff" opacity="0.8" />
-                <circle cx={60 + eyeOffset.x * 0.5} cy={45 + eyeOffset.y * 0.5} r="1" fill="#fff" opacity="0.8" />
-                {/* Eyebrows - fierce angle */}
-                <line x1="33" y1="40" x2="44" y2="39" stroke="#8B6914" strokeWidth="2.5" strokeLinecap="round" />
-                <line x1="67" y1="40" x2="56" y2="39" stroke="#8B6914" strokeWidth="2.5" strokeLinecap="round" />
-                {/* Nose */}
-                <ellipse cx="50" cy="55" rx="4" ry="3" fill="#8B6914" />
-                {/* Mouth */}
-                <path d="M44 60 Q47 63 50 60 Q53 63 56 60" stroke="#8B6914" strokeWidth="1.5" fill="none" strokeLinecap="round" />
-                {/* Whisker dots */}
-                <circle cx="36" cy="58" r="0.8" fill="#8B6914" />
-                <circle cx="34" cy="56" r="0.8" fill="#8B6914" />
-                <circle cx="34" cy="60" r="0.8" fill="#8B6914" />
-                <circle cx="64" cy="58" r="0.8" fill="#8B6914" />
-                <circle cx="66" cy="56" r="0.8" fill="#8B6914" />
-                <circle cx="66" cy="60" r="0.8" fill="#8B6914" />
-                {/* Gradients */}
-                <defs>
-                  <radialGradient id="maneGrad" cx="50%" cy="40%" r="50%">
-                    <stop offset="0%" stopColor="#D4A017" />
-                    <stop offset="100%" stopColor="#8B6914" />
-                  </radialGradient>
-                  <radialGradient id="maneInner" cx="50%" cy="45%" r="50%">
-                    <stop offset="0%" stopColor="#C49A3C" />
-                    <stop offset="100%" stopColor="#9A7B2A" />
-                  </radialGradient>
-                </defs>
-              </svg>
-            </div>
-
-            <h1 className="font-bebas text-6xl sm:text-7xl text-cream tracking-wider leading-none mb-2">
+          {/* ═══ HEADER ═══ */}
+          <div className="text-center mb-6 animate-slide-up">
+            <h1 className="font-bebas text-6xl sm:text-8xl text-cream tracking-wider leading-none mb-2">
               GAMES
             </h1>
-            <p className="text-cream/40 text-sm font-syne">Study smarter. Earn Fangs. Have fun.</p>
+            <p className="text-cream/35 text-sm font-syne">Study smarter. Earn Fangs. Have fun.</p>
           </div>
 
           {/* ═══ TABS ═══ */}
@@ -858,15 +809,13 @@ export default function GamesPage() {
           {/* ═══ PDF Upload (Library mode) ═══ */}
           {tab === "library" && !pdfContent && (
             <div className="mb-8 animate-slide-up" style={{ animationDelay: "0.1s" }}>
-              <div className="rounded-2xl p-8 text-center"
-                style={{ background: "rgba(255,255,255,0.02)", border: "2px dashed rgba(255,255,255,0.1)" }}>
+              <div className="rounded-2xl p-8 text-center" style={{ background: "rgba(255,255,255,0.02)", border: "2px dashed rgba(255,255,255,0.1)" }}>
                 <span className="text-4xl block mb-3">📄</span>
                 <p className="font-bebas text-xl text-cream tracking-wider mb-2">UPLOAD YOUR STUDY MATERIAL</p>
                 <p className="text-cream/30 text-xs mb-6 font-syne">Drop a PDF to generate custom games from your notes</p>
                 <label className="btn-gold px-6 py-3 rounded-xl text-sm cursor-pointer inline-block">
                   Choose PDF
-                  <input type="file" accept=".pdf" className="hidden"
-                    onChange={e => { if (e.target.files?.[0]) handlePdfUpload(e.target.files[0]); }} />
+                  <input type="file" accept=".pdf" className="hidden" onChange={e => { if (e.target.files?.[0]) handlePdfUpload(e.target.files[0]); }} />
                 </label>
                 {pdfProcessing && (
                   <div className="flex items-center justify-center gap-2 mt-4">
@@ -881,14 +830,11 @@ export default function GamesPage() {
 
           {tab === "library" && pdfContent && (
             <div className="mb-8 animate-slide-up" style={{ animationDelay: "0.1s" }}>
-              <div className="rounded-xl p-4 flex items-center gap-4"
-                style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(74,144,217,0.2)" }}>
+              <div className="rounded-xl p-4 flex items-center gap-4" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(74,144,217,0.2)" }}>
                 <span className="text-2xl">📄</span>
                 <div className="flex-1 min-w-0">
                   <p className="text-cream font-semibold text-sm truncate">{pdfName}</p>
-                  <p className="text-cream/30 text-[10px]">
-                    {pdfContent.vocabulary?.length ?? 0} vocab · {pdfContent.concepts?.length ?? 0} questions · {pdfContent.keyTerms?.length ?? 0} terms
-                  </p>
+                  <p className="text-cream/30 text-[10px]">{pdfContent.vocabulary?.length ?? 0} vocab · {pdfContent.concepts?.length ?? 0} questions · {pdfContent.keyTerms?.length ?? 0} terms</p>
                 </div>
                 <button onClick={() => { setPdfContent(null); setPdfName(null); if (typeof window !== "undefined") { localStorage.removeItem("lionade_pdf_content"); localStorage.removeItem("lionade_pdf_name"); } }}
                   className="text-cream/30 text-xs hover:text-red-400 transition">Remove</button>
@@ -896,86 +842,172 @@ export default function GamesPage() {
             </div>
           )}
 
-          {/* ═══ GAME CARDS — arcade grid ═══ */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 animate-slide-up" style={{ animationDelay: "0.15s" }}>
-            {GAMES.map(g => {
-              const plays = getDailyPlays(g.id);
-              const remaining = g.limit - plays;
-              const canPlay = remaining > 0 || g.limit >= 999;
-              const isPdf = tab === "library";
+          {/* ═══ DIAGONAL LAYOUT: LION CENTER + 4 GAME CARDS ═══ */}
+          <div className="relative animate-slide-up" style={{ animationDelay: "0.15s" }}>
 
-              return (
-                <div key={g.id}
-                  className="group relative rounded-2xl p-5 sm:p-6 transition-all duration-300 hover:-translate-y-1 overflow-hidden"
-                  style={{
-                    background: `linear-gradient(135deg, ${g.glowAlpha}0.06) 0%, rgba(255,255,255,0.02) 100%)`,
-                    border: `1px solid ${g.glowAlpha}0.15)`,
-                  }}>
-                  {/* Hover glow */}
-                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
-                    style={{ boxShadow: `inset 0 0 30px ${g.glowAlpha}0.08), 0 0 20px ${g.glowAlpha}0.06)` }} />
-                  {/* Top accent */}
-                  <div className="absolute top-0 left-[15%] right-[15%] h-[1px]"
-                    style={{ background: `linear-gradient(90deg, transparent, ${g.glowAlpha}0.3), transparent)` }} />
+            {/* Desktop: diagonal layout */}
+            <div className="hidden sm:block relative" style={{ height: "680px" }}>
 
-                  <div className="relative">
-                    <div className="flex items-start justify-between mb-3">
-                      <span className="text-3xl">{g.icon}</span>
-                      <div className="flex items-center gap-1.5 px-2 py-1 rounded-full"
-                        style={{ background: "rgba(255,215,0,0.08)", border: "1px solid rgba(255,215,0,0.15)" }}>
-                        <img src="/fangs.png" alt="Fangs" className="w-3.5 h-3.5 object-contain" />
-                        <span className="text-gold text-[10px] font-bold">{g.fangs}</span>
-                      </div>
-                    </div>
-
-                    <p className="font-bebas text-2xl tracking-wider mb-1" style={{ color: g.glow }}>{g.name}</p>
-                    <p className="text-cream/30 text-xs mb-4 font-syne">{isPdf ? `From ${pdfName ?? "PDF"}` : g.desc}</p>
-
-                    {/* Roardle word length — arcade buttons */}
-                    {g.id === "roardle" && (
-                      <div className="flex gap-2 mb-4">
-                        {[4, 5, 6].map(len => (
-                          <button key={len} onClick={() => setWordLength(len)}
-                            className="transition-all duration-200 active:scale-90"
-                            style={wordLength === len ? {
-                              width: 40, height: 40, borderRadius: "50%",
-                              background: `linear-gradient(135deg, ${g.glow}, ${g.glowAlpha}0.7))`,
-                              color: "#fff",
-                              fontSize: "13px", fontWeight: 800,
-                              border: "none",
-                              boxShadow: `0 4px 12px ${g.glowAlpha}0.4), inset 0 1px 0 rgba(255,255,255,0.3)`,
-                            } : {
-                              width: 40, height: 40, borderRadius: "50%",
-                              background: "rgba(255,255,255,0.05)",
-                              color: "rgba(238,244,255,0.35)",
-                              fontSize: "13px", fontWeight: 700,
-                              border: "1px solid rgba(255,255,255,0.1)",
-                            }}>
-                            {len}
-                          </button>
-                        ))}
-                      </div>
-                    )}
-
-                    <div className="flex items-center justify-between">
-                      <button onClick={canPlay ? g.start : undefined}
-                        disabled={!canPlay || (isPdf && !pdfContent && g.id !== "flashcards")}
-                        className="font-syne font-bold text-sm px-5 py-2 rounded-xl transition-all duration-200 active:scale-95 disabled:opacity-25 disabled:cursor-not-allowed"
-                        style={{
-                          background: `linear-gradient(135deg, ${g.glow}, ${g.glowAlpha}0.8))`,
-                          color: "#fff",
-                          boxShadow: `0 4px 15px ${g.glowAlpha}0.25)`,
-                        }}>
-                        Play
-                      </button>
-                      {g.limit < 999 && (
-                        <span className="text-cream/20 text-[10px] font-syne">{Math.max(0, remaining)} left today</span>
-                      )}
-                    </div>
+              {/* ── CENTER: Lion Mascot ── */}
+              <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
+                <div ref={lionRef} className="relative games-lion-breathe">
+                  <img src="/image-game.png" alt="Lionade Mascot" className="w-[280px] h-[280px] object-contain drop-shadow-2xl" />
+                  {/* Eye tracking overlays — positioned on the lion's eyes */}
+                  <div className="absolute" style={{ top: "38%", left: "35%", width: 22, height: 22 }}>
+                    <div className="rounded-full" style={{
+                      width: 10, height: 10,
+                      background: "radial-gradient(circle, #000 60%, transparent 100%)",
+                      transform: `translate(${6 + eyeOffset.x}px, ${6 + eyeOffset.y}px)`,
+                      transition: "transform 0.1s ease-out",
+                    }} />
+                  </div>
+                  <div className="absolute" style={{ top: "38%", right: "35%", width: 22, height: 22 }}>
+                    <div className="rounded-full" style={{
+                      width: 10, height: 10,
+                      background: "radial-gradient(circle, #000 60%, transparent 100%)",
+                      transform: `translate(${6 + eyeOffset.x}px, ${6 + eyeOffset.y}px)`,
+                      transition: "transform 0.1s ease-out",
+                    }} />
                   </div>
                 </div>
-              );
-            })}
+              </div>
+
+              {/* ── 4 Game Cards positioned diagonally ── */}
+              {GAMES.map((g, idx) => {
+                const positions = [
+                  { top: 0, left: 0 },           // top-left
+                  { top: 0, right: 0 },           // top-right
+                  { bottom: 0, left: 0 },         // bottom-left
+                  { bottom: 0, right: 0 },        // bottom-right
+                ];
+                const pos = positions[idx];
+                const plays = getDailyPlays(g.id);
+                const remaining = g.limit - plays;
+                const canPlay = remaining > 0 || g.limit >= 999;
+                const isPdf = tab === "library";
+
+                return (
+                  <div key={g.id} className="absolute game-card-electric group"
+                    style={{
+                      ...pos,
+                      width: 240,
+                      ["--electric-color" as string]: g.color,
+                      ["--electric-rgb" as string]: `${parseInt(g.color.slice(1,3),16)},${parseInt(g.color.slice(3,5),16)},${parseInt(g.color.slice(5,7),16)}`,
+                    }}>
+                    <div className="relative rounded-2xl p-5 transition-all duration-300 group-hover:-translate-y-1 overflow-hidden h-full"
+                      style={{
+                        background: `linear-gradient(145deg, ${hexToRgba(g.color, 0.08)} 0%, #0d0d14 40%)`,
+                        border: `1px solid ${hexToRgba(g.color, 0.2)}`,
+                      }}>
+
+                      {/* Electric border animation */}
+                      <div className="absolute inset-0 rounded-2xl pointer-events-none game-electric-border"
+                        style={{ ["--electric-color" as string]: g.color }} />
+
+                      {/* Corner sparks */}
+                      <svg className="absolute top-1 right-1 w-4 h-4 opacity-40 group-hover:opacity-80 transition-opacity" viewBox="0 0 16 16">
+                        <path d="M8 0 L9 6 L16 8 L9 10 L8 16 L7 10 L0 8 L7 6 Z" fill={g.color} />
+                      </svg>
+
+                      <div className="relative z-10">
+                        <div className="flex items-start justify-between mb-2">
+                          <span className="text-2xl">{g.icon}</span>
+                          <div className="flex items-center gap-1 px-1.5 py-0.5 rounded-full" style={{ background: "rgba(255,215,0,0.08)" }}>
+                            <img src="/fangs.png" alt="Fangs" className="w-3 h-3 object-contain" />
+                            <span className="text-gold text-[9px] font-bold">{g.fangs}</span>
+                          </div>
+                        </div>
+
+                        <p className="font-bebas text-xl tracking-wider mb-0.5" style={{ color: g.color }}>{g.name}</p>
+                        <p className="text-cream/25 text-[10px] mb-3 font-syne">{isPdf ? `From PDF` : g.desc}</p>
+
+                        {/* Roardle word length selector */}
+                        {g.id === "roardle" && (
+                          <div className="flex gap-1.5 mb-3">
+                            {[4, 5, 6].map(len => (
+                              <button key={len} onClick={() => setWordLength(len)}
+                                className="transition-all duration-200 active:scale-90"
+                                style={wordLength === len ? {
+                                  width: 32, height: 32, borderRadius: "50%",
+                                  background: g.color, color: "#fff",
+                                  fontSize: "11px", fontWeight: 800, border: "none",
+                                  boxShadow: `0 3px 10px ${hexToRgba(g.color, 0.5)}`,
+                                } : {
+                                  width: 32, height: 32, borderRadius: "50%",
+                                  background: "rgba(255,255,255,0.05)", color: "rgba(238,244,255,0.3)",
+                                  fontSize: "11px", fontWeight: 700, border: "1px solid rgba(255,255,255,0.1)",
+                                }}>
+                                {len}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+
+                        <div className="flex items-center justify-between">
+                          <button onClick={canPlay ? g.start : undefined}
+                            disabled={!canPlay || (isPdf && !pdfContent && g.id !== "flashcards")}
+                            className="font-syne font-bold text-xs px-4 py-1.5 rounded-lg transition-all active:scale-95 disabled:opacity-20 disabled:cursor-not-allowed"
+                            style={{ background: g.color, color: "#fff", boxShadow: `0 3px 12px ${hexToRgba(g.color, 0.3)}` }}>
+                            Play
+                          </button>
+                          {g.limit < 999 && <span className="text-cream/15 text-[9px]">{Math.max(0, remaining)}/day</span>}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Mobile: stacked layout with lion on top */}
+            <div className="sm:hidden">
+              <div className="flex justify-center mb-6">
+                <div ref={!lionRef.current ? lionRef : undefined} className="games-lion-breathe">
+                  <img src="/image-game.png" alt="Lionade Mascot" className="w-[200px] h-[200px] object-contain drop-shadow-2xl" />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                {GAMES.map(g => {
+                  const plays = getDailyPlays(g.id);
+                  const remaining = g.limit - plays;
+                  const canPlay = remaining > 0 || g.limit >= 999;
+                  const isPdf = tab === "library";
+                  return (
+                    <div key={g.id} className="rounded-2xl p-4 game-card-electric group"
+                      style={{
+                        background: `linear-gradient(145deg, ${hexToRgba(g.color, 0.08)} 0%, #0d0d14 40%)`,
+                        border: `1px solid ${hexToRgba(g.color, 0.2)}`,
+                        ["--electric-color" as string]: g.color,
+                      }}>
+                      <span className="text-xl block mb-1">{g.icon}</span>
+                      <p className="font-bebas text-base tracking-wider mb-0.5" style={{ color: g.color }}>{g.name}</p>
+                      <p className="text-cream/25 text-[9px] mb-2 font-syne">{isPdf ? "PDF" : g.desc}</p>
+                      {g.id === "roardle" && (
+                        <div className="flex gap-1 mb-2">
+                          {[4, 5, 6].map(len => (
+                            <button key={len} onClick={() => setWordLength(len)}
+                              className="text-[9px] font-bold transition-all active:scale-90"
+                              style={wordLength === len ? {
+                                width: 24, height: 24, borderRadius: "50%", background: g.color, color: "#fff", border: "none",
+                              } : {
+                                width: 24, height: 24, borderRadius: "50%", background: "rgba(255,255,255,0.05)", color: "rgba(238,244,255,0.3)", border: "1px solid rgba(255,255,255,0.1)",
+                              }}>
+                              {len}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                      <button onClick={canPlay ? g.start : undefined}
+                        disabled={!canPlay || (isPdf && !pdfContent && g.id !== "flashcards")}
+                        className="font-syne font-bold text-[10px] px-3 py-1 rounded-lg disabled:opacity-20"
+                        style={{ background: g.color, color: "#fff" }}>
+                        Play
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
           </div>
         </div>
       </div>
