@@ -2666,6 +2666,16 @@ html.light .space-bg-container { display: none; }
   filter: drop-shadow(0 0 6px currentColor);
 }
 
+/* Games lion breathing animation */
+@keyframes games-lion-breathe {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.04); }
+}
+
+.games-lion-breathe {
+  animation: games-lion-breathe 3s ease-in-out infinite;
+}
+
 /* Arena title — wave shimmer in red/white (matches landing page shimmer-text technique) */
 .arena-title-wave {
   background: linear-gradient(90deg, #DC2626 0%, #EF4444 15%, #FFFFFF 30%, #FF6B6B 45%, #991B1B 60%, #DC2626 75%, #FFFFFF 90%, #DC2626 100%);
@@ -2785,6 +2795,7 @@ html.light .space-bg-container { display: none; }
   .arena-answer-pop,
   .arena-timer-ring,
   .arena-title-wave,
+  .games-lion-breathe,
   .social-online-dot,
   .notif-badge-pulse {
     animation: none !important;

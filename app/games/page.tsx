@@ -78,11 +78,13 @@ const TIMELINE_EVENTS = [
 // ── Daily Limits ─────────────────────────────────────────────
 
 function getDailyPlays(gameType: string): number {
+  if (typeof window === "undefined") return 0;
   const key = `lionade_plays_${gameType}_${new Date().toISOString().split("T")[0]}`;
   return parseInt(localStorage.getItem(key) ?? "0");
 }
 
 function incrementDailyPlays(gameType: string) {
+  if (typeof window === "undefined") return;
   const key = `lionade_plays_${gameType}_${new Date().toISOString().split("T")[0]}`;
   const current = parseInt(localStorage.getItem(key) ?? "0");
   localStorage.setItem(key, String(current + 1));
@@ -727,11 +729,44 @@ export default function GamesPage() {
   // MENU
   // ══════════════════════════════════════════════════════════
 
+  // ── Cursor tracking for lion eyes ─────────────────────────
+  const [eyeOffset, setEyeOffset] = useState({ x: 0, y: 0 });
+  const lionRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const isMobile = window.matchMedia("(pointer: coarse)").matches;
+    if (isMobile) {
+      // Mobile: eyes look left and right on loop
+      let frame = 0;
+      const iv = setInterval(() => {
+        frame++;
+        const x = Math.sin(frame * 0.05) * 3;
+        const y = Math.cos(frame * 0.08) * 1.5;
+        setEyeOffset({ x, y });
+      }, 50);
+      return () => clearInterval(iv);
+    }
+    const handleMouse = (e: MouseEvent) => {
+      if (!lionRef.current) return;
+      const rect = lionRef.current.getBoundingClientRect();
+      const cx = rect.left + rect.width / 2;
+      const cy = rect.top + rect.height / 2;
+      const dx = e.clientX - cx;
+      const dy = e.clientY - cy;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      const maxShift = 4;
+      const scale = Math.min(maxShift / Math.max(dist, 1), 0.04);
+      setEyeOffset({ x: dx * scale, y: dy * scale });
+    };
+    window.addEventListener("mousemove", handleMouse);
+    return () => window.removeEventListener("mousemove", handleMouse);
+  }, []);
+
   const GAMES = [
-    { id: "roardle" as GameMode, name: "ROARDLE", icon: "🔤", desc: "Guess the science word", fangs: `${wordLength === 4 ? 10 : wordLength === 5 ? 15 : 20}+ Fangs`, limit: DAILY_LIMITS.roardle, start: startRoardle },
-    { id: "blitz" as GameMode, name: "BLITZ SPRINT", icon: "⚡", desc: "60 seconds of rapid Q&A", fangs: "2× per correct", limit: DAILY_LIMITS.blitz, start: startBlitz },
-    { id: "flashcards" as GameMode, name: "FLASH CARDS", icon: "🃏", desc: "Flip, learn, repeat", fangs: "Up to 15 Fangs", limit: DAILY_LIMITS.flashcards, start: startFlashcards },
-    { id: "timeline" as GameMode, name: "TIMELINE DROP", icon: "📅", desc: "Order events in time", fangs: "3× per correct", limit: DAILY_LIMITS.timeline, start: startTimeline },
+    { id: "roardle" as GameMode, name: "ROARDLE", icon: "🔤", desc: "Guess the science word", fangs: `${wordLength === 4 ? 10 : wordLength === 5 ? 15 : 20}+`, limit: DAILY_LIMITS.roardle, start: startRoardle, glow: "#4A90D9", glowAlpha: "rgba(74,144,217," },
+    { id: "blitz" as GameMode, name: "BLITZ SPRINT", icon: "⚡", desc: "60s rapid fire Q&A", fangs: "2×", limit: DAILY_LIMITS.blitz, start: startBlitz, glow: "#F97316", glowAlpha: "rgba(249,115,22," },
+    { id: "flashcards" as GameMode, name: "FLASH CARDS", icon: "🃏", desc: "Flip, learn, repeat", fangs: "15", limit: DAILY_LIMITS.flashcards, start: startFlashcards, glow: "#A855F7", glowAlpha: "rgba(168,85,247," },
+    { id: "timeline" as GameMode, name: "TIMELINE DROP", icon: "📅", desc: "Order events in time", fangs: "3×", limit: DAILY_LIMITS.timeline, start: startTimeline, glow: "#22C55E", glowAlpha: "rgba(34,197,94," },
   ];
 
   return (
@@ -739,36 +774,95 @@ export default function GamesPage() {
       <div className="min-h-screen pt-16 pb-20 md:pb-8">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
 
-          {/* Header */}
-          <div className="text-center mb-8 animate-slide-up">
+          {/* ═══ ANIMATED LION + HEADER ═══ */}
+          <div className="text-center mb-10 animate-slide-up">
+            {/* Lion Face SVG */}
+            <div ref={lionRef} className="inline-block mb-4 games-lion-breathe">
+              <svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                {/* Mane */}
+                <circle cx="50" cy="50" r="46" fill="url(#maneGrad)" />
+                <circle cx="50" cy="50" r="40" fill="url(#maneInner)" />
+                {/* Mane tufts */}
+                {[0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330].map(angle => {
+                  const rad = (angle * Math.PI) / 180;
+                  const x = 50 + Math.cos(rad) * 44;
+                  const y = 50 + Math.sin(rad) * 44;
+                  return <circle key={angle} cx={x} cy={y} r="8" fill="#B8860B" opacity="0.6" />;
+                })}
+                {/* Face */}
+                <ellipse cx="50" cy="52" rx="28" ry="26" fill="#D4A017" />
+                <ellipse cx="50" cy="54" rx="24" ry="22" fill="#E8B830" />
+                {/* Eyes - white sclera */}
+                <ellipse cx="39" cy="46" rx="6" ry="5.5" fill="#FFFDF0" />
+                <ellipse cx="61" cy="46" rx="6" ry="5.5" fill="#FFFDF0" />
+                {/* Pupils - follow cursor */}
+                <circle cx={39 + eyeOffset.x} cy={46 + eyeOffset.y} r="3" fill="#1a0a00" />
+                <circle cx={61 + eyeOffset.x} cy={46 + eyeOffset.y} r="3" fill="#1a0a00" />
+                {/* Pupil shine */}
+                <circle cx={38 + eyeOffset.x * 0.5} cy={45 + eyeOffset.y * 0.5} r="1" fill="#fff" opacity="0.8" />
+                <circle cx={60 + eyeOffset.x * 0.5} cy={45 + eyeOffset.y * 0.5} r="1" fill="#fff" opacity="0.8" />
+                {/* Eyebrows - fierce angle */}
+                <line x1="33" y1="40" x2="44" y2="39" stroke="#8B6914" strokeWidth="2.5" strokeLinecap="round" />
+                <line x1="67" y1="40" x2="56" y2="39" stroke="#8B6914" strokeWidth="2.5" strokeLinecap="round" />
+                {/* Nose */}
+                <ellipse cx="50" cy="55" rx="4" ry="3" fill="#8B6914" />
+                {/* Mouth */}
+                <path d="M44 60 Q47 63 50 60 Q53 63 56 60" stroke="#8B6914" strokeWidth="1.5" fill="none" strokeLinecap="round" />
+                {/* Whisker dots */}
+                <circle cx="36" cy="58" r="0.8" fill="#8B6914" />
+                <circle cx="34" cy="56" r="0.8" fill="#8B6914" />
+                <circle cx="34" cy="60" r="0.8" fill="#8B6914" />
+                <circle cx="64" cy="58" r="0.8" fill="#8B6914" />
+                <circle cx="66" cy="56" r="0.8" fill="#8B6914" />
+                <circle cx="66" cy="60" r="0.8" fill="#8B6914" />
+                {/* Gradients */}
+                <defs>
+                  <radialGradient id="maneGrad" cx="50%" cy="40%" r="50%">
+                    <stop offset="0%" stopColor="#D4A017" />
+                    <stop offset="100%" stopColor="#8B6914" />
+                  </radialGradient>
+                  <radialGradient id="maneInner" cx="50%" cy="45%" r="50%">
+                    <stop offset="0%" stopColor="#C49A3C" />
+                    <stop offset="100%" stopColor="#9A7B2A" />
+                  </radialGradient>
+                </defs>
+              </svg>
+            </div>
+
             <h1 className="font-bebas text-6xl sm:text-7xl text-cream tracking-wider leading-none mb-2">
               GAMES
             </h1>
-            <p className="text-cream/40 text-sm">Study smarter. Earn Fangs. Have fun.</p>
+            <p className="text-cream/40 text-sm font-syne">Study smarter. Earn Fangs. Have fun.</p>
           </div>
 
-          {/* Tabs */}
-          <div className="flex justify-center gap-1 mb-8 animate-slide-up" style={{ animationDelay: "0.05s" }}>
+          {/* ═══ TABS ═══ */}
+          <div className="flex justify-center gap-2 mb-8 animate-slide-up" style={{ animationDelay: "0.05s" }}>
             {(["quickplay", "library"] as TabMode[]).map(t => (
               <button key={t} onClick={() => setTab(t)}
-                className={`px-6 py-2.5 rounded-xl font-bebas text-sm tracking-wider transition-all ${
-                  tab === t
-                    ? "bg-gold/15 border border-gold/40 text-gold"
-                    : "bg-white/5 border border-white/10 text-cream/40 hover:bg-white/[0.07]"
-                }`}>
+                className="px-6 py-2.5 rounded-xl font-bebas text-sm tracking-wider transition-all"
+                style={tab === t ? {
+                  background: "rgba(255,215,0,0.1)",
+                  border: "1px solid rgba(255,215,0,0.35)",
+                  color: "#FFD700",
+                  boxShadow: "0 0 15px rgba(255,215,0,0.08)",
+                } : {
+                  background: "rgba(255,255,255,0.03)",
+                  border: "1px solid rgba(255,255,255,0.08)",
+                  color: "rgba(238,244,255,0.35)",
+                }}>
                 {t === "quickplay" ? "⚡ QUICK PLAY" : "📚 MY LIBRARY"}
               </button>
             ))}
           </div>
 
-          {/* Library: PDF Upload */}
+          {/* ═══ PDF Upload (Library mode) ═══ */}
           {tab === "library" && !pdfContent && (
             <div className="mb-8 animate-slide-up" style={{ animationDelay: "0.1s" }}>
               <div className="rounded-2xl p-8 text-center"
-                style={{ background: "var(--game-card-bg, rgba(255,255,255,0.03))", border: "2px dashed var(--game-card-border, rgba(255,255,255,0.1))" }}>
+                style={{ background: "rgba(255,255,255,0.02)", border: "2px dashed rgba(255,255,255,0.1)" }}>
                 <span className="text-4xl block mb-3">📄</span>
                 <p className="font-bebas text-xl text-cream tracking-wider mb-2">UPLOAD YOUR STUDY MATERIAL</p>
-                <p className="text-cream/30 text-xs mb-6">Drop a PDF to generate custom games from your notes</p>
+                <p className="text-cream/30 text-xs mb-6 font-syne">Drop a PDF to generate custom games from your notes</p>
                 <label className="btn-gold px-6 py-3 rounded-xl text-sm cursor-pointer inline-block">
                   Choose PDF
                   <input type="file" accept=".pdf" className="hidden"
@@ -785,11 +879,10 @@ export default function GamesPage() {
             </div>
           )}
 
-          {/* Library: PDF loaded */}
           {tab === "library" && pdfContent && (
             <div className="mb-8 animate-slide-up" style={{ animationDelay: "0.1s" }}>
               <div className="rounded-xl p-4 flex items-center gap-4"
-                style={{ background: "var(--game-card-bg, rgba(255,255,255,0.04))", border: "1px solid rgba(74,144,217,0.2)" }}>
+                style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(74,144,217,0.2)" }}>
                 <span className="text-2xl">📄</span>
                 <div className="flex-1 min-w-0">
                   <p className="text-cream font-semibold text-sm truncate">{pdfName}</p>
@@ -797,14 +890,14 @@ export default function GamesPage() {
                     {pdfContent.vocabulary?.length ?? 0} vocab · {pdfContent.concepts?.length ?? 0} questions · {pdfContent.keyTerms?.length ?? 0} terms
                   </p>
                 </div>
-                <button onClick={() => { setPdfContent(null); setPdfName(null); localStorage.removeItem("lionade_pdf_content"); localStorage.removeItem("lionade_pdf_name"); }}
+                <button onClick={() => { setPdfContent(null); setPdfName(null); if (typeof window !== "undefined") { localStorage.removeItem("lionade_pdf_content"); localStorage.removeItem("lionade_pdf_name"); } }}
                   className="text-cream/30 text-xs hover:text-red-400 transition">Remove</button>
               </div>
             </div>
           )}
 
-          {/* Game Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 animate-slide-up" style={{ animationDelay: "0.15s" }}>
+          {/* ═══ GAME CARDS — arcade grid ═══ */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 animate-slide-up" style={{ animationDelay: "0.15s" }}>
             {GAMES.map(g => {
               const plays = getDailyPlays(g.id);
               const remaining = g.limit - plays;
@@ -812,46 +905,73 @@ export default function GamesPage() {
               const isPdf = tab === "library";
 
               return (
-                <div key={g.id} className="rounded-2xl p-5 sm:p-6 transition-all hover:-translate-y-0.5"
+                <div key={g.id}
+                  className="group relative rounded-2xl p-5 sm:p-6 transition-all duration-300 hover:-translate-y-1 overflow-hidden"
                   style={{
-                    background: "var(--game-card-bg, linear-gradient(135deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 100%))",
-                    border: "1px solid var(--game-card-border, rgba(255,255,255,0.08))",
+                    background: `linear-gradient(135deg, ${g.glowAlpha}0.06) 0%, rgba(255,255,255,0.02) 100%)`,
+                    border: `1px solid ${g.glowAlpha}0.15)`,
                   }}>
-                  <div className="flex items-start justify-between mb-3">
-                    <span className="text-3xl">{g.icon}</span>
-                    <div className="flex items-center gap-1.5">
-                      <img src="/fangs.png" alt="Fangs" className="w-4 h-4 object-contain" />
-                      <span className="text-gold text-xs font-bold">{g.fangs}</span>
-                    </div>
-                  </div>
-                  <p className="font-bebas text-xl text-cream tracking-wider mb-1">{g.name}</p>
-                  <p className="text-cream/30 text-xs mb-4">{isPdf ? `From ${pdfName ?? "PDF"}` : g.desc}</p>
+                  {/* Hover glow */}
+                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+                    style={{ boxShadow: `inset 0 0 30px ${g.glowAlpha}0.08), 0 0 20px ${g.glowAlpha}0.06)` }} />
+                  {/* Top accent */}
+                  <div className="absolute top-0 left-[15%] right-[15%] h-[1px]"
+                    style={{ background: `linear-gradient(90deg, transparent, ${g.glowAlpha}0.3), transparent)` }} />
 
-                  {/* Roardle word length selector */}
-                  {g.id === "roardle" && (
-                    <div className="flex gap-2 mb-4">
-                      {[4, 5, 6].map(len => (
-                        <button key={len} onClick={() => setWordLength(len)}
-                          className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                            wordLength === len
-                              ? "bg-gold/15 border border-gold/40 text-gold"
-                              : "bg-white/5 border border-white/10 text-cream/40"
-                          }`}>
-                          {len} letters
-                        </button>
-                      ))}
+                  <div className="relative">
+                    <div className="flex items-start justify-between mb-3">
+                      <span className="text-3xl">{g.icon}</span>
+                      <div className="flex items-center gap-1.5 px-2 py-1 rounded-full"
+                        style={{ background: "rgba(255,215,0,0.08)", border: "1px solid rgba(255,215,0,0.15)" }}>
+                        <img src="/fangs.png" alt="Fangs" className="w-3.5 h-3.5 object-contain" />
+                        <span className="text-gold text-[10px] font-bold">{g.fangs}</span>
+                      </div>
                     </div>
-                  )}
 
-                  <div className="flex items-center justify-between">
-                    <button onClick={canPlay ? g.start : undefined}
-                      disabled={!canPlay || (isPdf && !pdfContent && g.id !== "flashcards")}
-                      className="btn-gold px-5 py-2 rounded-lg text-sm disabled:opacity-30 disabled:cursor-not-allowed">
-                      Play
-                    </button>
-                    {g.limit < 999 && (
-                      <span className="text-cream/20 text-[10px]">{Math.max(0, remaining)} left today</span>
+                    <p className="font-bebas text-2xl tracking-wider mb-1" style={{ color: g.glow }}>{g.name}</p>
+                    <p className="text-cream/30 text-xs mb-4 font-syne">{isPdf ? `From ${pdfName ?? "PDF"}` : g.desc}</p>
+
+                    {/* Roardle word length — arcade buttons */}
+                    {g.id === "roardle" && (
+                      <div className="flex gap-2 mb-4">
+                        {[4, 5, 6].map(len => (
+                          <button key={len} onClick={() => setWordLength(len)}
+                            className="transition-all duration-200 active:scale-90"
+                            style={wordLength === len ? {
+                              width: 40, height: 40, borderRadius: "50%",
+                              background: `linear-gradient(135deg, ${g.glow}, ${g.glowAlpha}0.7))`,
+                              color: "#fff",
+                              fontSize: "13px", fontWeight: 800,
+                              border: "none",
+                              boxShadow: `0 4px 12px ${g.glowAlpha}0.4), inset 0 1px 0 rgba(255,255,255,0.3)`,
+                            } : {
+                              width: 40, height: 40, borderRadius: "50%",
+                              background: "rgba(255,255,255,0.05)",
+                              color: "rgba(238,244,255,0.35)",
+                              fontSize: "13px", fontWeight: 700,
+                              border: "1px solid rgba(255,255,255,0.1)",
+                            }}>
+                            {len}
+                          </button>
+                        ))}
+                      </div>
                     )}
+
+                    <div className="flex items-center justify-between">
+                      <button onClick={canPlay ? g.start : undefined}
+                        disabled={!canPlay || (isPdf && !pdfContent && g.id !== "flashcards")}
+                        className="font-syne font-bold text-sm px-5 py-2 rounded-xl transition-all duration-200 active:scale-95 disabled:opacity-25 disabled:cursor-not-allowed"
+                        style={{
+                          background: `linear-gradient(135deg, ${g.glow}, ${g.glowAlpha}0.8))`,
+                          color: "#fff",
+                          boxShadow: `0 4px 15px ${g.glowAlpha}0.25)`,
+                        }}>
+                        Play
+                      </button>
+                      {g.limit < 999 && (
+                        <span className="text-cream/20 text-[10px] font-syne">{Math.max(0, remaining)} left today</span>
+                      )}
+                    </div>
                   </div>
                 </div>
               );
