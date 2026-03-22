@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
+import { useRouter } from "next/navigation";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { useAuth } from "@/lib/auth";
 import { useUserStats } from "@/lib/hooks";
@@ -77,6 +78,7 @@ function timeAgo(dateStr: string | null): string {
 
 export default function SocialPage() {
   const { user } = useAuth();
+  const router = useRouter();
   useUserStats(user?.id);
 
   // Friends
@@ -374,11 +376,7 @@ export default function SocialPage() {
         <div className="relative z-10 h-[calc(100vh-64px)] flex max-w-7xl mx-auto">
 
           {/* ═══ LEFT PANEL — Friends List ═══ */}
-          <div className="w-full sm:w-[320px] flex-shrink-0 flex flex-col border-r border-white/[0.06]"
-            style={selectedFriend ? { display: "none" } : undefined}
-          >
-            {/* Only hide on mobile when chatting */}
-            <style>{`@media(min-width:640px){[style*="display: none"].w-full{display:flex!important}}`}</style>
+          <div className={`flex-shrink-0 flex flex-col border-r border-white/[0.06] sm:w-[320px] sm:flex ${selectedFriend ? "hidden" : "w-full"}`}>
 
             {/* Add Friend with autocomplete */}
             <div className="p-4 border-b border-white/[0.06]" ref={dropdownRef}>
@@ -501,7 +499,7 @@ export default function SocialPage() {
                       key={n.id}
                       onClick={() => {
                         if (n.action_url) {
-                          window.location.href = n.action_url;
+                          router.push(n.action_url);
                         }
                       }}
                       className="w-full text-left px-4 py-3 flex items-start gap-3 hover:bg-white/[0.04] transition-colors"
