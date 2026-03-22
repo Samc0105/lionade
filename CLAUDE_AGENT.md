@@ -78,6 +78,8 @@ Any new page must:
 - SWR hooks missing `keepPreviousData` → data reverts to 0 during revalidation
 - New pages doing their own Supabase fetch instead of using the shared hook → causes duplicate fetches and inconsistent state
 - `href="#"` left on nav items → broken navigation
+- **White screen on new pages**: The old ThemeProvider `fixInlineBackgrounds` function has been REMOVED. It was overriding inline dark backgrounds to white in light mode, breaking every new page. Do NOT re-add it. Light theme is handled entirely by CSS `html.light` selectors.
+- **Corrupted .next cache**: Run `rm -rf .next` if you see "Cannot find module" errors. This is a known Next.js 14 issue.
 
 ---
 
