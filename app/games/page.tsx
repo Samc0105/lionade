@@ -140,6 +140,35 @@ export default function GamesPage() {
   const [tlScore, setTlScore] = useState(0);
   const [dragIdx, setDragIdx] = useState<number | null>(null);
 
+  // Cursor tracking for lion eyes (must be declared before any conditional returns)
+  const [eyeOffset, setEyeOffset] = useState({ x: 0, y: 0 });
+  const lionRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const isMobile = window.matchMedia("(pointer: coarse)").matches;
+    if (isMobile) {
+      let frame = 0;
+      const iv = setInterval(() => {
+        frame++;
+        setEyeOffset({ x: Math.sin(frame * 0.04) * 5, y: Math.cos(frame * 0.06) * 2 });
+      }, 50);
+      return () => clearInterval(iv);
+    }
+    const handleMouse = (e: MouseEvent) => {
+      if (!lionRef.current) return;
+      const rect = lionRef.current.getBoundingClientRect();
+      const cx = rect.left + rect.width / 2;
+      const cy = rect.top + rect.height / 2;
+      const angle = Math.atan2(e.clientY - cy, e.clientX - cx);
+      const dist = Math.min(Math.sqrt((e.clientX - cx) ** 2 + (e.clientY - cy) ** 2), 600);
+      const shift = (dist / 600) * 6;
+      setEyeOffset({ x: Math.cos(angle) * shift, y: Math.sin(angle) * shift });
+    };
+    window.addEventListener("mousemove", handleMouse);
+    return () => window.removeEventListener("mousemove", handleMouse);
+  }, []);
+
   // Load PDF from localStorage on mount
   useEffect(() => {
     try {
@@ -728,35 +757,6 @@ export default function GamesPage() {
   // ══════════════════════════════════════════════════════════
   // MENU
   // ══════════════════════════════════════════════════════════
-
-  // ── Cursor tracking for lion eyes ─────────────────────────
-  const [eyeOffset, setEyeOffset] = useState({ x: 0, y: 0 });
-  const lionRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const isMobile = window.matchMedia("(pointer: coarse)").matches;
-    if (isMobile) {
-      let frame = 0;
-      const iv = setInterval(() => {
-        frame++;
-        setEyeOffset({ x: Math.sin(frame * 0.04) * 5, y: Math.cos(frame * 0.06) * 2 });
-      }, 50);
-      return () => clearInterval(iv);
-    }
-    const handleMouse = (e: MouseEvent) => {
-      if (!lionRef.current) return;
-      const rect = lionRef.current.getBoundingClientRect();
-      const cx = rect.left + rect.width / 2;
-      const cy = rect.top + rect.height / 2;
-      const angle = Math.atan2(e.clientY - cy, e.clientX - cx);
-      const dist = Math.min(Math.sqrt((e.clientX - cx) ** 2 + (e.clientY - cy) ** 2), 600);
-      const shift = (dist / 600) * 6;
-      setEyeOffset({ x: Math.cos(angle) * shift, y: Math.sin(angle) * shift });
-    };
-    window.addEventListener("mousemove", handleMouse);
-    return () => window.removeEventListener("mousemove", handleMouse);
-  }, []);
 
   const GAMES = [
     { id: "roardle" as GameMode, name: "ROARDLE", icon: "🔤", desc: "Guess the science word", fangs: `${wordLength === 4 ? 10 : wordLength === 5 ? 15 : 20}+`, limit: DAILY_LIMITS.roardle, start: startRoardle, color: "#00BFFF", pos: "top-0 left-0" },
