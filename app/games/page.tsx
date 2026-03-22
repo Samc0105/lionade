@@ -846,12 +846,12 @@ export default function GamesPage() {
           <div className="relative animate-slide-up" style={{ animationDelay: "0.15s" }}>
 
             {/* Desktop: diagonal layout */}
-            <div className="hidden sm:block relative" style={{ height: "680px" }}>
+            <div className="hidden sm:block relative" style={{ height: "760px" }}>
 
               {/* ── CENTER: Lion Mascot ── */}
               <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
                 <div ref={lionRef} className="relative games-lion-breathe">
-                  <img src="/image-game.png" alt="Lionade Mascot" className="w-[280px] h-[280px] object-contain drop-shadow-2xl" />
+                  <img src="/image-name.png" alt="Lionade Mascot" className="w-[320px] h-[320px] object-contain" style={{ filter: "drop-shadow(0 0 25px rgba(0,150,255,0.7))" }} />
                   {/* Eye tracking overlays — positioned on the lion's eyes */}
                   <div className="absolute" style={{ top: "38%", left: "35%", width: 22, height: 22 }}>
                     <div className="rounded-full" style={{
@@ -890,14 +890,15 @@ export default function GamesPage() {
                   <div key={g.id} className="absolute game-card-electric group"
                     style={{
                       ...pos,
-                      width: 240,
+                      width: 300,
                       ["--electric-color" as string]: g.color,
                       ["--electric-rgb" as string]: `${parseInt(g.color.slice(1,3),16)},${parseInt(g.color.slice(3,5),16)},${parseInt(g.color.slice(5,7),16)}`,
                     }}>
-                    <div className="relative rounded-2xl p-5 transition-all duration-300 group-hover:-translate-y-1 overflow-hidden h-full"
+                    <div className="relative rounded-2xl p-6 transition-all duration-300 group-hover:-translate-y-1 overflow-hidden h-full"
                       style={{
                         background: `linear-gradient(145deg, ${hexToRgba(g.color, 0.08)} 0%, #0d0d14 40%)`,
                         border: `1px solid ${hexToRgba(g.color, 0.2)}`,
+                        minHeight: 220,
                       }}>
 
                       {/* Electric border animation */}
@@ -905,37 +906,37 @@ export default function GamesPage() {
                         style={{ ["--electric-color" as string]: g.color }} />
 
                       {/* Corner sparks */}
-                      <svg className="absolute top-1 right-1 w-4 h-4 opacity-40 group-hover:opacity-80 transition-opacity" viewBox="0 0 16 16">
+                      <svg className="absolute top-2 right-2 w-5 h-5 opacity-40 group-hover:opacity-80 transition-opacity" viewBox="0 0 16 16">
                         <path d="M8 0 L9 6 L16 8 L9 10 L8 16 L7 10 L0 8 L7 6 Z" fill={g.color} />
                       </svg>
 
                       <div className="relative z-10">
-                        <div className="flex items-start justify-between mb-2">
-                          <span className="text-2xl">{g.icon}</span>
-                          <div className="flex items-center gap-1 px-1.5 py-0.5 rounded-full" style={{ background: "rgba(255,215,0,0.08)" }}>
-                            <img src="/fangs.png" alt="Fangs" className="w-3 h-3 object-contain" />
-                            <span className="text-gold text-[9px] font-bold">{g.fangs}</span>
+                        <div className="flex items-start justify-between mb-3">
+                          <span className="text-4xl">{g.icon}</span>
+                          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full" style={{ background: "rgba(255,215,0,0.1)", border: "1px solid rgba(255,215,0,0.15)" }}>
+                            <img src="/fangs.png" alt="Fangs" className="w-4 h-4 object-contain" />
+                            <span className="text-gold text-xs font-bold">{g.fangs}</span>
                           </div>
                         </div>
 
-                        <p className="font-bebas text-xl tracking-wider mb-0.5" style={{ color: g.color }}>{g.name}</p>
-                        <p className="text-cream/25 text-[10px] mb-3 font-syne">{isPdf ? `From PDF` : g.desc}</p>
+                        <p className="font-bebas text-3xl tracking-wider mb-1" style={{ color: g.color }}>{g.name}</p>
+                        <p className="text-cream/30 text-xs mb-4 font-syne">{isPdf ? `From PDF` : g.desc}</p>
 
                         {/* Roardle word length selector */}
                         {g.id === "roardle" && (
-                          <div className="flex gap-1.5 mb-3">
+                          <div className="flex gap-2 mb-4">
                             {[4, 5, 6].map(len => (
                               <button key={len} onClick={() => setWordLength(len)}
                                 className="transition-all duration-200 active:scale-90"
                                 style={wordLength === len ? {
-                                  width: 32, height: 32, borderRadius: "50%",
+                                  width: 40, height: 40, borderRadius: "50%",
                                   background: g.color, color: "#fff",
-                                  fontSize: "11px", fontWeight: 800, border: "none",
-                                  boxShadow: `0 3px 10px ${hexToRgba(g.color, 0.5)}`,
+                                  fontSize: "14px", fontWeight: 800, border: "none",
+                                  boxShadow: `0 4px 14px ${hexToRgba(g.color, 0.5)}`,
                                 } : {
-                                  width: 32, height: 32, borderRadius: "50%",
+                                  width: 40, height: 40, borderRadius: "50%",
                                   background: "rgba(255,255,255,0.05)", color: "rgba(238,244,255,0.3)",
-                                  fontSize: "11px", fontWeight: 700, border: "1px solid rgba(255,255,255,0.1)",
+                                  fontSize: "14px", fontWeight: 700, border: "1px solid rgba(255,255,255,0.1)",
                                 }}>
                                 {len}
                               </button>
@@ -946,11 +947,11 @@ export default function GamesPage() {
                         <div className="flex items-center justify-between">
                           <button onClick={canPlay ? g.start : undefined}
                             disabled={!canPlay || (isPdf && !pdfContent && g.id !== "flashcards")}
-                            className="font-syne font-bold text-xs px-4 py-1.5 rounded-lg transition-all active:scale-95 disabled:opacity-20 disabled:cursor-not-allowed"
-                            style={{ background: g.color, color: "#fff", boxShadow: `0 3px 12px ${hexToRgba(g.color, 0.3)}` }}>
+                            className="font-syne font-bold text-sm px-6 py-2.5 rounded-xl transition-all active:scale-95 disabled:opacity-20 disabled:cursor-not-allowed"
+                            style={{ background: g.color, color: "#fff", boxShadow: `0 4px 16px ${hexToRgba(g.color, 0.35)}` }}>
                             Play
                           </button>
-                          {g.limit < 999 && <span className="text-cream/15 text-[9px]">{Math.max(0, remaining)}/day</span>}
+                          {g.limit < 999 && <span className="text-cream/20 text-[10px] font-syne">{Math.max(0, remaining)} left today</span>}
                         </div>
                       </div>
                     </div>
@@ -963,7 +964,7 @@ export default function GamesPage() {
             <div className="sm:hidden">
               <div className="flex justify-center mb-6">
                 <div ref={!lionRef.current ? lionRef : undefined} className="games-lion-breathe">
-                  <img src="/image-game.png" alt="Lionade Mascot" className="w-[200px] h-[200px] object-contain drop-shadow-2xl" />
+                  <img src="/image-name.png" alt="Lionade Mascot" className="w-[240px] h-[240px] object-contain" style={{ filter: "drop-shadow(0 0 20px rgba(0,150,255,0.6))" }} />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-3">
