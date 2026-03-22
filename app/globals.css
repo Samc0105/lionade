@@ -1844,8 +1844,9 @@ html[data-font-size="large"] {
 }
 
 /* Hide savanna elements in dark mode */
-/* Hide savanna background — layout-content-bg provides proper backgrounds for both themes */
-.sakura-container {
+/* Hide savanna in dark mode — light mode pages that need it can show it */
+html[data-theme="dark"] .sakura-container,
+html:not([data-theme]) .sakura-container {
   display: none;
 }
 
