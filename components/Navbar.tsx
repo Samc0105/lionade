@@ -45,6 +45,7 @@ const NAV_LINKS = [
   { href: "/learn", label: "Learn" },
   { href: "/compete", label: "Compete" },
   { href: "/social", label: "Social" },
+  { href: "/games", label: "Games" },
   { href: "/shop", label: "Shop" },
 ];
 
