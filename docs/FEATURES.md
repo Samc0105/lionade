@@ -81,3 +81,13 @@
 - **Terms of Service** — 2026-02-25
 - **Demo page** — 2026-02-25
 - **Coming soon landing page** with hidden DevOps gate — 2026-02-21
+
+---
+
+## Next 5 High-Impact Tasks (Ranked)
+
+1. Build Ninny AI study mode (upload material, generate flashcards/questions).
+2. Replace mock duel opponents/questions with real Supabase-backed matchmaking.
+3. Move coin/XP awarding to secure server-side RPC with validation.
+4. Build out Blitz mode (speed round gameplay).
+5. Implement weekly tournament system with bracket and rewards.

@@ -1,5 +1,12 @@
 # Architecture
 
+## Page Roles (Information Architecture)
+
+- **Dashboard** = "How am I doing?" — personal performance, stats, progress, insights
+- **Learn** = "How do I improve?" — quiz, subjects, practice, AI study
+- **Compete** = "How do I prove myself?" — duels, blitz, leaderboard, tournaments
+- No duplicated navigation tiles between pages.
+
 ## App Structure
 
 ```
@@ -83,3 +90,14 @@ Server-side API routes live in `app/api/`:
 - **Migrations:** `lib/migrations/00X_description.sql`
 - **Questions:** `questions/{subject}/{subject}-{difficulty}-{topic}{number}.json`
 - **Types:** `types/{camelCase}.ts`
+
+## Known Issues / Tech Debt
+
+- Duel uses `QUIZ_QUESTIONS` + `MOCK_USERS` (not real opponent matchmaking or DB-backed questions).
+- Leaderboard filter toggle does not change data source (always `getLeaderboard`).
+- Client-side `incrementCoins`/`incrementXP` in `lib/db.ts` is unsafe for production (should be RPC/secure server-side).
+- Quiz relies on client-side timers; no server validation of answers or time.
+- Several UI utilities (`formatCoins`, level calc, subject icons/colors) live in `lib/mockData.ts` with other mock data.
+- Blitz mode, Library, Study With Ninny, Weekly Tournament are placeholders (coming soon).
+- Dashboard micro insights and Lionade Insight tips are mock text.
+- Compete rank strip uses mock values (0 wins, unranked).
