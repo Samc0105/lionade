@@ -1,20 +1,15 @@
 #!/usr/bin/env npx tsx
 /**
- * Dual-API smart priority question generator.
+ * Dual-API smart priority question generator with retry logic.
  *
- * Each run:
- *  1. Counts questions for all 27 subject/difficulty combos in Supabase
- *  2. Picks the combo with the fewest questions (alphabetical tiebreak)
- *  3. Tries Gemini first (100 questions), falls back to Groq (150 questions)
- *  4. Seeds to Supabase + saves JSON to repo
+ * Each run (up to 55 minutes):
+ *  1. Scans all 27 combos, picks lowest
+ *  2. Generates 25 questions per batch with 5s delays between
+ *  3. Retries on 429 (wait 60s), falls back Gemini → Groq
+ *  4. Seeds to Supabase + saves JSON
+ *  5. Moves to next combo if time remains
  *
  * Target: 1000 questions per combo (27,000 total).
- *
- * Env vars (GitHub Secrets or .env.local):
- *   GEMINI_API_KEY
- *   GROQ_API_KEY
- *   SUPABASE_URL           (or NEXT_PUBLIC_SUPABASE_URL)
- *   SUPABASE_SERVICE_ROLE_KEY (or SUPABASE_SECRET_KEY)
  */
 
 import fs from "fs";
@@ -61,11 +56,16 @@ if (!GEMINI_API_KEY && !GROQ_API_KEY) {
 // ── Config ───────────────────────────────────────────────────
 
 const TARGET_COUNT = 1000;
-const GEMINI_QUESTIONS_PER_RUN = 100;
-const GROQ_QUESTIONS_PER_RUN = 150;
-const GEMINI_BATCH = 25;
-const GROQ_BATCH = 30;
-const BATCH_SIZE = 50; // Supabase upsert batch
+const BATCH_QUESTIONS = 25;
+const GEMINI_BATCHES = 4;  // 4 x 25 = 100
+const GROQ_BATCHES = 6;    // 6 x 25 = 150
+const DELAY_BETWEEN_BATCHES_MS = 5000;
+const RATE_LIMIT_WAIT_MS = 60000;
+const RETRY_WAIT_MS = 30000;
+const MAX_RUN_MINUTES = 55;
+const SUPABASE_BATCH = 50;
+
+const RUN_START = Date.now();
 
 const TOPIC_CONFIG: Record<string, { dbSubject: string; jsonSubject: string; label: string; dir: string }> = {
   algebra:          { dbSubject: "Math",           jsonSubject: "math",    label: "Algebra",        dir: "math" },
@@ -92,7 +92,17 @@ interface RawQuestion {
   topic: string;
 }
 
-// ── Helpers ──────────────────────────────────────────────────
+// ── Utilities ────────────────────────────────────────────────
+
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+function minutesElapsed(): number {
+  return (Date.now() - RUN_START) / 60000;
+}
+
+function minutesRemaining(): number {
+  return Math.max(0, MAX_RUN_MINUTES - minutesElapsed());
+}
 
 function makeUUID(q: RawQuestion): string {
   const hash = crypto
@@ -103,12 +113,8 @@ function makeUUID(q: RawQuestion): string {
 }
 
 function buildPrompt(
-  topic: string,
-  label: string,
-  difficulty: string,
-  jsonSubject: string,
-  count: number,
-  existingSamples: string[]
+  topic: string, label: string, difficulty: string, jsonSubject: string,
+  count: number, existingSamples: string[]
 ): string {
   const dedupBlock =
     existingSamples.length > 0
@@ -134,16 +140,12 @@ function validateQuestion(q: unknown): q is RawQuestion {
   if (!q || typeof q !== "object") return false;
   const r = q as Record<string, unknown>;
   return (
-    typeof r.question === "string" &&
-    r.question.length > 0 &&
-    Array.isArray(r.options) &&
-    r.options.length === 4 &&
+    typeof r.question === "string" && r.question.length > 0 &&
+    Array.isArray(r.options) && r.options.length === 4 &&
     r.options.every((o: unknown) => typeof o === "string" && o.length > 0) &&
-    typeof r.correct_answer === "string" &&
-    r.correct_answer.length > 0 &&
+    typeof r.correct_answer === "string" && r.correct_answer.length > 0 &&
     (r.options as string[]).includes(r.correct_answer) &&
-    typeof r.explanation === "string" &&
-    r.explanation.length > 0 &&
+    typeof r.explanation === "string" && r.explanation.length > 0 &&
     typeof r.subject === "string" &&
     typeof r.difficulty === "string" &&
     typeof r.topic === "string"
@@ -155,33 +157,17 @@ function validateQuestion(q: unknown): q is RawQuestion {
 async function countExisting(dbSubject: string, topic: string, difficulty: string): Promise<number> {
   const res = await fetch(
     `${SUPABASE_URL}/rest/v1/questions?subject=eq.${encodeURIComponent(dbSubject)}&topic=eq.${encodeURIComponent(topic)}&difficulty=eq.${encodeURIComponent(difficulty)}&select=id`,
-    {
-      headers: {
-        apikey: SUPABASE_KEY!,
-        Authorization: `Bearer ${SUPABASE_KEY}`,
-        Prefer: "count=exact",
-        Range: "0-0",
-      },
-    }
+    { headers: { apikey: SUPABASE_KEY!, Authorization: `Bearer ${SUPABASE_KEY}`, Prefer: "count=exact", Range: "0-0" } }
   );
   const range = res.headers.get("content-range");
-  if (range) {
-    const total = range.split("/")[1];
-    return total === "*" ? 0 : parseInt(total, 10);
-  }
+  if (range) { const t = range.split("/")[1]; return t === "*" ? 0 : parseInt(t, 10); }
   return 0;
 }
 
 async function fetchExistingQuestions(dbSubject: string, topic: string, difficulty: string): Promise<string[]> {
   const res = await fetch(
-    `${SUPABASE_URL}/rest/v1/questions?subject=eq.${encodeURIComponent(dbSubject)}&topic=eq.${encodeURIComponent(topic)}&difficulty=eq.${encodeURIComponent(difficulty)}&select=question&limit=500`,
-    {
-      headers: {
-        apikey: SUPABASE_KEY!,
-        Authorization: `Bearer ${SUPABASE_KEY}`,
-        "Content-Type": "application/json",
-      },
-    }
+    `${SUPABASE_URL}/rest/v1/questions?subject=eq.${encodeURIComponent(dbSubject)}&topic=eq.${encodeURIComponent(topic)}&difficulty=eq.${encodeURIComponent(difficulty)}&select=question&limit=1000`,
+    { headers: { apikey: SUPABASE_KEY!, Authorization: `Bearer ${SUPABASE_KEY}`, "Content-Type": "application/json" } }
   );
   if (!res.ok) return [];
   const data = await res.json();
@@ -190,29 +176,27 @@ async function fetchExistingQuestions(dbSubject: string, topic: string, difficul
 
 async function upsertQuestions(rows: Record<string, unknown>[]): Promise<number> {
   let inserted = 0;
-  for (let i = 0; i < rows.length; i += BATCH_SIZE) {
-    const batch = rows.slice(i, i + BATCH_SIZE);
+  for (let i = 0; i < rows.length; i += SUPABASE_BATCH) {
+    const batch = rows.slice(i, i + SUPABASE_BATCH);
     const res = await fetch(`${SUPABASE_URL}/rest/v1/questions`, {
       method: "POST",
       headers: {
-        apikey: SUPABASE_KEY!,
-        Authorization: `Bearer ${SUPABASE_KEY}`,
-        "Content-Type": "application/json",
-        Prefer: "resolution=merge-duplicates,return=minimal",
+        apikey: SUPABASE_KEY!, Authorization: `Bearer ${SUPABASE_KEY}`,
+        "Content-Type": "application/json", Prefer: "resolution=merge-duplicates,return=minimal",
       },
       body: JSON.stringify(batch),
     });
-    if (!res.ok) {
-      const err = await res.text();
-      console.error(`  Upsert batch failed: ${res.status} — ${err}`);
-    } else {
-      inserted += batch.length;
-    }
+    if (!res.ok) { console.error(`  Upsert batch failed: ${res.status} — ${(await res.text()).slice(0, 100)}`); }
+    else { inserted += batch.length; }
   }
   return inserted;
 }
 
-// ── API Calls ────────────────────────────────────────────────
+// ── API Calls with Retry ─────────────────────────────────────
+
+function is429(err: Error): boolean {
+  return err.message.includes("429");
+}
 
 async function callGemini(prompt: string): Promise<string> {
   const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
@@ -221,10 +205,7 @@ async function callGemini(prompt: string): Promise<string> {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }),
   });
-  if (!res.ok) {
-    const err = await res.text();
-    throw new Error(`Gemini error ${res.status}: ${err.slice(0, 200)}`);
-  }
+  if (!res.ok) { const err = await res.text(); throw new Error(`Gemini ${res.status}: ${err.slice(0, 150)}`); }
   const data = await res.json();
   return data.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
 }
@@ -232,49 +213,169 @@ async function callGemini(prompt: string): Promise<string> {
 async function callGroq(prompt: string): Promise<string> {
   const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
     method: "POST",
-    headers: {
-      Authorization: `Bearer ${GROQ_API_KEY}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model: "llama-3.3-70b-versatile",
-      messages: [{ role: "user", content: prompt }],
-      temperature: 0.7,
-    }),
+    headers: { Authorization: `Bearer ${GROQ_API_KEY}`, "Content-Type": "application/json" },
+    body: JSON.stringify({ model: "llama-3.3-70b-versatile", messages: [{ role: "user", content: prompt }], temperature: 0.7 }),
   });
-  if (!res.ok) {
-    const err = await res.text();
-    throw new Error(`Groq error ${res.status}: ${err.slice(0, 200)}`);
-  }
+  if (!res.ok) { const err = await res.text(); throw new Error(`Groq ${res.status}: ${err.slice(0, 150)}`); }
   const data = await res.json();
   return data.choices?.[0]?.message?.content ?? "";
 }
 
-// ── Generation with fallback ─────────────────────────────────
+async function generateWithRetry(
+  apiCall: (prompt: string) => Promise<string>,
+  apiName: string,
+  prompt: string,
+  retries: number = 3
+): Promise<{ text: string; api: string }> {
+  for (let i = 0; i < retries; i++) {
+    try {
+      const text = await apiCall(prompt);
+      return { text, api: apiName };
+    } catch (err) {
+      if (is429(err as Error) && i < retries - 1) {
+        console.log(`  ${apiName} rate limited, waiting 60 seconds... (retry ${i + 1}/${retries - 1})`);
+        await sleep(RATE_LIMIT_WAIT_MS);
+      } else {
+        throw err;
+      }
+    }
+  }
+  throw new Error(`${apiName} failed after ${retries} retries`);
+}
 
-async function generateBatch(
-  prompt: string
-): Promise<{ questions: RawQuestion[]; api: string }> {
-  // Try Gemini first
+/** Try Gemini with retries, then Groq with retries */
+async function callWithFallback(prompt: string): Promise<{ text: string; api: string }> {
   if (GEMINI_API_KEY) {
     try {
-      const text = await callGemini(prompt);
-      const parsed = parseJsonArray(text);
-      return { questions: parsed as RawQuestion[], api: "Gemini" };
+      return await generateWithRetry(callGemini, "Gemini", prompt, 3);
     } catch (err) {
-      console.log(`  Gemini failed: ${(err as Error).message.slice(0, 100)}`);
-      console.log("  Falling back to Groq...");
+      console.log(`  Gemini exhausted: ${(err as Error).message.slice(0, 80)}`);
     }
   }
 
-  // Fallback to Groq
   if (GROQ_API_KEY) {
-    const text = await callGroq(prompt);
-    const parsed = parseJsonArray(text);
-    return { questions: parsed as RawQuestion[], api: "Groq" };
+    try {
+      return await generateWithRetry(callGroq, "Groq", prompt, 3);
+    } catch (err) {
+      console.log(`  Groq exhausted: ${(err as Error).message.slice(0, 80)}`);
+    }
   }
 
-  throw new Error("Both APIs unavailable");
+  throw new Error("Both APIs failed after retries");
+}
+
+// ── Process one combo ────────────────────────────────────────
+
+async function processCombo(
+  topic: string, difficulty: string, currentCount: number
+): Promise<{ added: number; bothFailed: boolean }> {
+  const cfg = TOPIC_CONFIG[topic];
+  const totalBatches = GEMINI_API_KEY ? GEMINI_BATCHES : GROQ_BATCHES;
+  const questionsTarget = totalBatches * BATCH_QUESTIONS;
+
+  console.log(`\nTarget combo: ${cfg.label} ${difficulty} — currently ${currentCount} questions`);
+
+  // Fetch existing for dedup
+  const existingSamples = await fetchExistingQuestions(cfg.dbSubject, topic, difficulty);
+  const seenQuestions = new Set(existingSamples.map((q) => q.toLowerCase().trim()));
+
+  const allGenerated: RawQuestion[] = [];
+  let activeApi = "unknown";
+  let bothFailed = false;
+
+  for (let batch = 1; batch <= totalBatches; batch++) {
+    if (minutesRemaining() < 2) {
+      console.log(`  Time limit approaching — stopping after ${batch - 1} batches`);
+      break;
+    }
+
+    const remaining = questionsTarget - allGenerated.length;
+    const count = Math.min(remaining, BATCH_QUESTIONS);
+    if (count <= 0) break;
+
+    console.log(`  Batch ${batch}/${totalBatches}: generating ${count} questions...`);
+
+    const prompt = buildPrompt(topic, cfg.label, difficulty, cfg.jsonSubject, count, existingSamples);
+
+    // Try with retry, then retry once more after 30s on failure
+    let result: { text: string; api: string } | null = null;
+    try {
+      result = await callWithFallback(prompt);
+    } catch {
+      console.log(`  Batch ${batch} failed, retrying in 30 seconds...`);
+      await sleep(RETRY_WAIT_MS);
+      try {
+        result = await callWithFallback(prompt);
+      } catch {
+        console.log(`  Batch ${batch} failed after retry — both APIs exhausted`);
+        bothFailed = true;
+        break;
+      }
+    }
+
+    if (result) {
+      activeApi = result.api;
+      try {
+        const parsed = parseJsonArray(result.text);
+        const valid = (parsed as RawQuestion[]).filter((q) => {
+          if (!validateQuestion(q)) return false;
+          const key = q.question.toLowerCase().trim();
+          if (seenQuestions.has(key)) return false;
+          seenQuestions.add(key);
+          return true;
+        });
+        allGenerated.push(...valid);
+        console.log(`  Batch ${batch}/${totalBatches}: ${valid.length} valid questions (run total: ${allGenerated.length})`);
+      } catch (err) {
+        console.log(`  Batch ${batch} parse error: ${(err as Error).message.slice(0, 80)}`);
+      }
+    }
+
+    // Delay between batches
+    if (batch < totalBatches && allGenerated.length < questionsTarget) {
+      console.log(`  Waiting ${DELAY_BETWEEN_BATCHES_MS / 1000} seconds before next batch...`);
+      await sleep(DELAY_BETWEEN_BATCHES_MS);
+    }
+  }
+
+  if (allGenerated.length === 0) {
+    console.log(`  No valid questions generated for ${cfg.label} ${difficulty}`);
+    return { added: 0, bothFailed };
+  }
+
+  console.log(`\n  Generated ${allGenerated.length} valid questions via ${activeApi}`);
+
+  // Save JSON
+  const fileDir = path.join(__dirname, "..", "questions", cfg.dir);
+  fs.mkdirSync(fileDir, { recursive: true });
+  const filename = `${topic}-${difficulty}1.json`;
+  const filepath = path.join(fileDir, filename);
+
+  let existingFile: RawQuestion[] = [];
+  if (fs.existsSync(filepath)) {
+    try { existingFile = JSON.parse(fs.readFileSync(filepath, "utf8")); } catch { existingFile = []; }
+  }
+  fs.writeFileSync(filepath, JSON.stringify([...existingFile, ...allGenerated], null, 2));
+  console.log(`  Saved to: questions/${cfg.dir}/${filename}`);
+
+  // Upsert to Supabase
+  const rows = allGenerated.map((q) => ({
+    id: makeUUID(q),
+    subject: cfg.dbSubject,
+    question: q.question,
+    options: q.options,
+    correct_answer: q.options.indexOf(q.correct_answer),
+    difficulty: q.difficulty.toLowerCase(),
+    explanation: q.explanation,
+    topic: q.topic.toLowerCase(),
+  }));
+
+  const inserted = await upsertQuestions(rows);
+  const newTotal = currentCount + inserted;
+  console.log(`  Seeded to Supabase: success`);
+  console.log(`  Combo complete: ${cfg.label} ${difficulty} — added ${inserted} questions, new total: ${newTotal}`);
+
+  return { added: inserted, bothFailed };
 }
 
 // ── Main ─────────────────────────────────────────────────────
@@ -283,7 +384,7 @@ async function main() {
   console.log("=== Question Generation Run ===\n");
   console.log("Checking 27 subject/difficulty combos...\n");
 
-  // 1. Count all 27 combos
+  // 1. Count all combos
   const comboCounts: { topic: string; difficulty: string; count: number }[] = [];
 
   for (const topic of TOPICS) {
@@ -298,7 +399,7 @@ async function main() {
     }
   }
 
-  // 2. Find lowest combo under target
+  // 2. Sort by lowest count
   const needWork = comboCounts
     .filter((c) => c.count < TARGET_COUNT)
     .sort((a, b) => a.count - b.count || a.topic.localeCompare(b.topic) || a.difficulty.localeCompare(b.difficulty));
@@ -308,118 +409,34 @@ async function main() {
     return;
   }
 
-  const target = needWork[0];
-  const cfg = TOPIC_CONFIG[target.topic];
+  console.log(`\n${needWork.length} combos need questions. Time budget: ${MAX_RUN_MINUTES} minutes.`);
 
-  console.log(`\nTarget combo: ${cfg.label} ${target.difficulty} — currently ${target.count} questions`);
+  // 3. Process combos until time runs out
+  let totalAdded = 0;
+  let combosProcessed = 0;
 
-  // 3. Fetch existing questions for dedup
-  const existingSamples = await fetchExistingQuestions(cfg.dbSubject, target.topic, target.difficulty);
-  const seenQuestions = new Set(existingSamples.map((q) => q.toLowerCase().trim()));
-
-  // 4. Generate questions — try Gemini first, Groq on fallback
-  let activeApi = "unknown";
-  let questionsTarget = GEMINI_QUESTIONS_PER_RUN;
-  let batchSize = GEMINI_BATCH;
-
-  // Do a test call to determine which API works
-  const testPrompt = buildPrompt(target.topic, cfg.label, target.difficulty, cfg.jsonSubject, batchSize, existingSamples);
-  try {
-    const testResult = await generateBatch(testPrompt);
-    activeApi = testResult.api;
-    if (activeApi === "Groq") {
-      questionsTarget = GROQ_QUESTIONS_PER_RUN;
-      batchSize = GROQ_BATCH;
+  for (const combo of needWork) {
+    if (minutesRemaining() < 3) {
+      console.log(`\nTime remaining: ${Math.round(minutesRemaining())} minutes — stopping`);
+      break;
     }
 
-    // Process the test batch results
-    const validFirst = testResult.questions.filter((q) => {
-      if (!validateQuestion(q)) return false;
-      const key = q.question.toLowerCase().trim();
-      if (seenQuestions.has(key)) return false;
-      seenQuestions.add(key);
-      return true;
-    });
+    console.log(`\nTime remaining: ${Math.round(minutesRemaining())} minutes — starting next combo...`);
 
-    console.log(`Using API: ${activeApi}`);
-    console.log(`Generating ${questionsTarget} questions...\n`);
+    const { added, bothFailed } = await processCombo(combo.topic, combo.difficulty, combo.count);
+    totalAdded += added;
+    combosProcessed++;
 
-    const allGenerated: RawQuestion[] = [...validFirst];
-    console.log(`  Batch 1: got ${testResult.questions.length} from ${activeApi}, ${validFirst.length} valid/unique (total: ${allGenerated.length}/${questionsTarget})`);
-
-    // Continue generating remaining batches
-    let attempts = 1;
-    const maxAttempts = 12;
-
-    while (allGenerated.length < questionsTarget && attempts < maxAttempts) {
-      attempts++;
-      const remaining = questionsTarget - allGenerated.length;
-      const count = Math.min(remaining, batchSize);
-      const prompt = buildPrompt(target.topic, cfg.label, target.difficulty, cfg.jsonSubject, count, existingSamples);
-
-      try {
-        const result = await generateBatch(prompt);
-        const valid = result.questions.filter((q) => {
-          if (!validateQuestion(q)) return false;
-          const key = q.question.toLowerCase().trim();
-          if (seenQuestions.has(key)) return false;
-          seenQuestions.add(key);
-          return true;
-        });
-        allGenerated.push(...valid);
-        console.log(`  Batch ${attempts}: got ${result.questions.length} from ${result.api}, ${valid.length} valid/unique (total: ${allGenerated.length}/${questionsTarget})`);
-      } catch (err) {
-        console.error(`  Batch ${attempts} error: ${(err as Error).message.slice(0, 100)}`);
-      }
+    if (bothFailed) {
+      console.log("\nBoth APIs exhausted — saving what we have and exiting.");
+      break;
     }
-
-    if (allGenerated.length === 0) {
-      console.log("\nNo valid questions generated. Exiting.");
-      process.exit(1);
-    }
-
-    const final = allGenerated.slice(0, questionsTarget);
-    console.log(`\nGenerated ${final.length} valid questions`);
-
-    // 5. Save JSON file
-    const fileDir = path.join(__dirname, "..", "questions", cfg.dir);
-    fs.mkdirSync(fileDir, { recursive: true });
-    const filename = `${target.topic}-${target.difficulty}1.json`;
-    const filepath = path.join(fileDir, filename);
-
-    let existingFile: RawQuestion[] = [];
-    if (fs.existsSync(filepath)) {
-      try {
-        existingFile = JSON.parse(fs.readFileSync(filepath, "utf8"));
-      } catch {
-        existingFile = [];
-      }
-    }
-    fs.writeFileSync(filepath, JSON.stringify([...existingFile, ...final], null, 2));
-    console.log(`Saved to: questions/${cfg.dir}/${filename}`);
-
-    // 6. Upsert into Supabase
-    const rows = final.map((q) => ({
-      id: makeUUID(q),
-      subject: cfg.dbSubject,
-      question: q.question,
-      options: q.options,
-      correct_answer: q.options.indexOf(q.correct_answer),
-      difficulty: q.difficulty.toLowerCase(),
-      explanation: q.explanation,
-      topic: q.topic.toLowerCase(),
-    }));
-
-    const inserted = await upsertQuestions(rows);
-    const newTotal = target.count + inserted;
-    console.log(`Seeded to Supabase: success`);
-    console.log(`New total for ${cfg.label} ${target.difficulty}: ${newTotal} questions`);
-
-  } catch (err) {
-    console.error(`\nBoth Gemini and Groq failed. Cannot generate questions.`);
-    console.error(`Error: ${(err as Error).message}`);
-    process.exit(1);
   }
+
+  console.log(`\n=== Run Complete ===`);
+  console.log(`Combos processed: ${combosProcessed}`);
+  console.log(`Total questions added: ${totalAdded}`);
+  console.log(`Time elapsed: ${Math.round(minutesElapsed())} minutes`);
 }
 
 main().catch((err) => {
