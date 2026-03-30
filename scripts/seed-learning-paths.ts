@@ -1,7 +1,6 @@
 #!/usr/bin/env npx tsx
 import fs from "fs";
 import path from "path";
-import Anthropic from "@anthropic-ai/sdk";
 
 // ── Read .env.local ──────────────────────────────────────────
 const envPath = path.join(__dirname, "..", ".env.local");
@@ -19,15 +18,15 @@ fs.readFileSync(envPath, "utf8")
 
 const SUPABASE_URL = env.NEXT_PUBLIC_SUPABASE_URL;
 const SUPABASE_KEY = env.SUPABASE_SECRET_KEY;
-const ANTHROPIC_API_KEY = env.ANTHROPIC_API_KEY;
+const GEMINI_API_KEY = env.GEMINI_API_KEY;
 
 if (!SUPABASE_URL || !SUPABASE_KEY) {
   console.error("Missing SUPABASE env vars in .env.local");
   process.exit(1);
 }
 
-if (!ANTHROPIC_API_KEY) {
-  console.error("Missing ANTHROPIC_API_KEY in .env.local — lesson text will be skipped");
+if (!GEMINI_API_KEY) {
+  console.error("Missing GEMINI_API_KEY in .env.local — lesson text will be skipped");
 }
 
 // ── Stage definitions ────────────────────────────────────────
@@ -112,28 +111,32 @@ async function supabaseRequest(
   return text ? JSON.parse(text) : null;
 }
 
-// ── Lesson text generation ───────────────────────────────────
+// ── Lesson text generation (Gemini) ─────────────────────────
 
 async function generateLessonText(
-  client: Anthropic,
   stageName: string,
   subject: string
 ): Promise<string> {
   const subjectLabel = subject === "us_history" ? "US History" : subject.charAt(0).toUpperCase() + subject.slice(1);
-  const message = await client.messages.create({
-    model: "claude-haiku-4-5-20251001",
-    max_tokens: 256,
-    messages: [
-      {
-        role: "user",
-        content: `Write a 3-4 sentence lesson introduction for a student learning ${stageName} in ${subjectLabel}. Be clear, engaging, and educational. No markdown, plain text only.`,
-      },
-    ],
+  const prompt = `Write a 3-4 sentence lesson introduction for a student learning ${stageName} in ${subjectLabel}. Be clear, engaging, and educational. No markdown, plain text only.`;
+
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      contents: [{ parts: [{ text: prompt }] }],
+    }),
   });
 
-  const block = message.content[0];
-  if (block.type === "text") return block.text.trim();
-  return "";
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`Gemini API error ${res.status}: ${err}`);
+  }
+
+  const data = await res.json();
+  const text: string = data.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
+  return text.trim();
 }
 
 // ── Main ─────────────────────────────────────────────────────
@@ -177,14 +180,12 @@ async function main() {
   console.log(`✅ Inserted ${inserted.length} stages\n`);
 
   // Generate lesson text if API key is available
-  if (ANTHROPIC_API_KEY) {
-    console.log("Generating lesson text with Claude Haiku...\n");
-    const client = new Anthropic({ apiKey: ANTHROPIC_API_KEY });
+  if (GEMINI_API_KEY) {
+    console.log("Generating lesson text with Gemini Flash...\n");
 
     for (const row of inserted) {
       try {
         const lessonText = await generateLessonText(
-          client,
           row.stage_name,
           row.subject
         );
@@ -202,7 +203,7 @@ async function main() {
     }
     console.log("\n✅ Lesson text generation complete");
   } else {
-    console.log("⚠️  Skipping lesson text (no ANTHROPIC_API_KEY)");
+    console.log("⚠️  Skipping lesson text (no GEMINI_API_KEY)");
   }
 
   console.log("\n🎉 Done!");

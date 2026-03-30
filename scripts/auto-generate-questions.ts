@@ -1,9 +1,9 @@
 #!/usr/bin/env npx tsx
 /**
- * Auto-generate quiz questions using Claude Haiku and seed them into Supabase.
+ * Auto-generate quiz questions using Google Gemini and seed them into Supabase.
  *
  * Env vars (set in GitHub Secrets or .env.local):
- *   ANTHROPIC_API_KEY
+ *   GEMINI_API_KEY
  *   SUPABASE_URL           (or NEXT_PUBLIC_SUPABASE_URL from .env.local)
  *   SUPABASE_SERVICE_ROLE_KEY (or SUPABASE_SECRET_KEY from .env.local)
  */
@@ -16,9 +16,9 @@ import crypto from "crypto";
 // Support both GitHub Actions env vars and local .env.local
 let SUPABASE_URL = process.env.SUPABASE_URL;
 let SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
-let ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
+let GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
-if (!SUPABASE_URL || !SUPABASE_KEY) {
+if (!SUPABASE_URL || !SUPABASE_KEY || !GEMINI_API_KEY) {
   const envPath = path.join(__dirname, "..", ".env.local");
   if (fs.existsSync(envPath)) {
     const env: Record<string, string> = {};
@@ -30,7 +30,7 @@ if (!SUPABASE_URL || !SUPABASE_KEY) {
       });
     SUPABASE_URL = SUPABASE_URL || env.NEXT_PUBLIC_SUPABASE_URL;
     SUPABASE_KEY = SUPABASE_KEY || env.SUPABASE_SECRET_KEY;
-    ANTHROPIC_API_KEY = ANTHROPIC_API_KEY || env.ANTHROPIC_API_KEY;
+    GEMINI_API_KEY = GEMINI_API_KEY || env.GEMINI_API_KEY;
   }
 }
 
@@ -38,8 +38,8 @@ if (!SUPABASE_URL || !SUPABASE_KEY) {
   console.error("Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY");
   process.exit(1);
 }
-if (!ANTHROPIC_API_KEY) {
-  console.error("Missing ANTHROPIC_API_KEY");
+if (!GEMINI_API_KEY) {
+  console.error("Missing GEMINI_API_KEY");
   process.exit(1);
 }
 
@@ -47,7 +47,7 @@ if (!ANTHROPIC_API_KEY) {
 
 const TARGET_COUNT = 100;
 const BATCH_SIZE = 50;
-const QUESTIONS_PER_REQUEST = 20; // How many questions to ask Claude for at once
+const QUESTIONS_PER_REQUEST = 20; // How many questions to ask Gemini for at once
 const MAX_COMBOS_PER_RUN = 3; // Limit per hourly run to control costs
 
 /**
@@ -127,31 +127,26 @@ Rules:
 - Difficulty guide: beginner = introductory/recall, intermediate = application/analysis, advanced = synthesis/evaluation
 - Return ONLY the JSON array, no markdown fences, no extra text`;
 
-  const res = await fetch("https://api.anthropic.com/v1/messages", {
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
+  const res = await fetch(url, {
     method: "POST",
-    headers: {
-      "x-api-key": ANTHROPIC_API_KEY!,
-      "anthropic-version": "2023-06-01",
-      "content-type": "application/json",
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      model: "claude-haiku-4-5-20251001",
-      max_tokens: 8192,
-      messages: [{ role: "user", content: prompt }],
+      contents: [{ parts: [{ text: prompt }] }],
     }),
   });
 
   if (!res.ok) {
     const err = await res.text();
-    throw new Error(`Claude API error ${res.status}: ${err}`);
+    throw new Error(`Gemini API error ${res.status}: ${err}`);
   }
 
   const data = await res.json();
-  const text: string = data.content?.[0]?.text ?? "";
+  const text: string = data.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
 
   // Extract JSON array — handle possible markdown fences
   const jsonMatch = text.match(/\[[\s\S]*\]/);
-  if (!jsonMatch) throw new Error("No JSON array found in Claude response");
+  if (!jsonMatch) throw new Error("No JSON array found in Gemini response");
 
   const questions: RawQuestion[] = JSON.parse(jsonMatch[0]);
   return questions;
@@ -203,7 +198,7 @@ async function upsertQuestions(rows: Record<string, unknown>[]): Promise<number>
 // ── Main ─────────────────────────────────────────────────────
 
 async function main() {
-  console.log("=== Auto Question Generator ===\n");
+  console.log("=== Auto Question Generator (Gemini) ===\n");
 
   let combosProcessed = 0;
   let totalGenerated = 0;
@@ -224,7 +219,7 @@ async function main() {
       continue;
     }
 
-    console.log(`  Generating ${needed} questions via Claude Haiku...`);
+    console.log(`  Generating ${needed} questions via Gemini Flash...`);
 
     const allGenerated: RawQuestion[] = [];
     let remaining = needed;
