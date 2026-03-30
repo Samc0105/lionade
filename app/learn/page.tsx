@@ -178,7 +178,7 @@ const CARDS = [
     subtitle: "Track mastery across 7 topics",
     color: "#3B82F6",
     action: "navigate" as const,
-    href: "/quiz",
+    href: "/learn/paths",
   },
   {
     id: "practice",
