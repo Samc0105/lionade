@@ -5,7 +5,7 @@
  * Each run (up to 55 minutes):
  *  1. Scans all 27 combos, picks lowest
  *  2. Generates 25 questions per batch with 5s delays between
- *  3. Retries on 429 (wait 60s), falls back Gemini → Groq
+ *  3. Retries on 429 (wait 60s), Groq primary → Gemini key 1 → Gemini key 2
  *  4. Seeds to Supabase + saves JSON
  *  5. Moves to next combo if time remains
  *
@@ -20,10 +20,11 @@ import crypto from "crypto";
 
 let SUPABASE_URL = process.env.SUPABASE_URL;
 let SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
-let GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 let GROQ_API_KEY = process.env.GROQ_API_KEY;
+let GEMINI_KEY_1 = process.env.GEMINI_API_KEY;
+let GEMINI_KEY_2 = process.env.GEMINI_API_KEY_2;
 
-if (!SUPABASE_URL || !SUPABASE_KEY || !GEMINI_API_KEY || !GROQ_API_KEY) {
+if (!SUPABASE_URL || !SUPABASE_KEY || !GROQ_API_KEY || !GEMINI_KEY_1) {
   const envPath = path.join(__dirname, "..", ".env.local");
   if (fs.existsSync(envPath)) {
     const env: Record<string, string> = {};
@@ -39,19 +40,27 @@ if (!SUPABASE_URL || !SUPABASE_KEY || !GEMINI_API_KEY || !GROQ_API_KEY) {
       });
     SUPABASE_URL = SUPABASE_URL || env.NEXT_PUBLIC_SUPABASE_URL;
     SUPABASE_KEY = SUPABASE_KEY || env.SUPABASE_SECRET_KEY;
-    GEMINI_API_KEY = GEMINI_API_KEY || env.GEMINI_API_KEY;
     GROQ_API_KEY = GROQ_API_KEY || env.GROQ_API_KEY;
+    GEMINI_KEY_1 = GEMINI_KEY_1 || env.GEMINI_API_KEY;
+    GEMINI_KEY_2 = GEMINI_KEY_2 || env.GEMINI_API_KEY_2;
   }
 }
+
+// Collect available Gemini keys (filter out undefined)
+const GEMINI_KEYS: string[] = [GEMINI_KEY_1, GEMINI_KEY_2].filter(
+  (k): k is string => typeof k === "string" && k.length > 0
+);
 
 if (!SUPABASE_URL || !SUPABASE_KEY) {
   console.error("Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY");
   process.exit(1);
 }
-if (!GEMINI_API_KEY && !GROQ_API_KEY) {
-  console.error("Missing both GEMINI_API_KEY and GROQ_API_KEY — need at least one");
+if (!GROQ_API_KEY && GEMINI_KEYS.length === 0) {
+  console.error("Missing both GROQ_API_KEY and all GEMINI_API_KEYs — need at least one");
   process.exit(1);
 }
+
+console.log(`APIs available: Groq ${GROQ_API_KEY ? "yes" : "no"}, Gemini keys: ${GEMINI_KEYS.length}`);
 
 // ── Config ───────────────────────────────────────────────────
 
@@ -198,16 +207,18 @@ function is429(err: Error): boolean {
   return err.message.includes("429");
 }
 
-async function callGemini(prompt: string): Promise<string> {
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
-  const res = await fetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }),
-  });
-  if (!res.ok) { const err = await res.text(); throw new Error(`Gemini ${res.status}: ${err.slice(0, 150)}`); }
-  const data = await res.json();
-  return data.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
+function makeCallGemini(apiKey: string) {
+  return async function callGemini(prompt: string): Promise<string> {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }),
+    });
+    if (!res.ok) { const err = await res.text(); throw new Error(`Gemini ${res.status}: ${err.slice(0, 150)}`); }
+    const data = await res.json();
+    return data.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
+  };
 }
 
 async function callGroq(prompt: string): Promise<string> {
@@ -243,16 +254,9 @@ async function generateWithRetry(
   throw new Error(`${apiName} failed after ${retries} retries`);
 }
 
-/** Try Gemini with retries, then Groq with retries */
+/** Try Groq first (primary), then rotate through Gemini keys as fallback */
 async function callWithFallback(prompt: string): Promise<{ text: string; api: string }> {
-  if (GEMINI_API_KEY) {
-    try {
-      return await generateWithRetry(callGemini, "Gemini", prompt, 3);
-    } catch (err) {
-      console.log(`  Gemini exhausted: ${(err as Error).message.slice(0, 80)}`);
-    }
-  }
-
+  // Primary: Groq
   if (GROQ_API_KEY) {
     try {
       return await generateWithRetry(callGroq, "Groq", prompt, 3);
@@ -261,7 +265,18 @@ async function callWithFallback(prompt: string): Promise<{ text: string; api: st
     }
   }
 
-  throw new Error("Both APIs failed after retries");
+  // Fallback: rotate through available Gemini keys
+  for (let i = 0; i < GEMINI_KEYS.length; i++) {
+    const label = `Gemini key ${i + 1}`;
+    console.log(`  Falling back to ${label}...`);
+    try {
+      return await generateWithRetry(makeCallGemini(GEMINI_KEYS[i]), label, prompt, 3);
+    } catch (err) {
+      console.log(`  ${label} exhausted: ${(err as Error).message.slice(0, 80)}`);
+    }
+  }
+
+  throw new Error("All APIs failed after retries");
 }
 
 // ── Process one combo ────────────────────────────────────────
@@ -270,7 +285,7 @@ async function processCombo(
   topic: string, difficulty: string, currentCount: number
 ): Promise<{ added: number; bothFailed: boolean }> {
   const cfg = TOPIC_CONFIG[topic];
-  const totalBatches = GEMINI_API_KEY ? GEMINI_BATCHES : GROQ_BATCHES;
+  const totalBatches = GROQ_API_KEY ? GROQ_BATCHES : GEMINI_BATCHES;
   const questionsTarget = totalBatches * BATCH_QUESTIONS;
 
   console.log(`\nTarget combo: ${cfg.label} ${difficulty} — currently ${currentCount} questions`);
