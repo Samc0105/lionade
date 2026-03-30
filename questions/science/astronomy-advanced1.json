@@ -1,0 +1,3208 @@
+[
+  {
+    "question": "What is the Tolman-Oppenheimer-Volkoff equation used for?",
+    "options": [
+      "Describing the expansion of the universe",
+      "Determining the internal structure and maximum mass of neutron stars",
+      "Calculating the Chandrasekhar limit for white dwarfs",
+      "Modeling stellar nucleosynthesis"
+    ],
+    "correct_answer": "Determining the internal structure and maximum mass of neutron stars",
+    "explanation": "The TOV equation is the general relativistic analog of hydrostatic equilibrium, used to model neutron star interiors where GR corrections are essential.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the Kerr metric in general relativity?",
+    "options": [
+      "A metric describing flat spacetime",
+      "The exact solution to Einstein's field equations for a rotating black hole",
+      "The metric of a non-rotating black hole",
+      "A metric describing the expanding universe"
+    ],
+    "correct_answer": "The exact solution to Einstein's field equations for a rotating black hole",
+    "explanation": "The Kerr metric, found by Roy Kerr in 1963, describes the spacetime geometry outside a rotating black hole, introducing concepts like the ergosphere and frame dragging.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is frame dragging (Lense-Thirring effect)?",
+    "options": [
+      "The deflection of light by massive objects",
+      "The dragging of spacetime around a rotating mass causing gyroscopes to precess",
+      "The slowing of time near massive objects",
+      "The stretching of space by gravitational waves"
+    ],
+    "correct_answer": "The dragging of spacetime around a rotating mass causing gyroscopes to precess",
+    "explanation": "Frame dragging is a GR prediction where a rotating mass drags nearby spacetime, confirmed by Gravity Probe B measuring precession of gyroscopes in Earth orbit.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the Penrose process?",
+    "options": [
+      "The evaporation of black holes",
+      "A mechanism to extract rotational energy from a Kerr black hole by exploiting the ergosphere",
+      "The formation of black holes from neutron stars",
+      "A method to detect gravitational waves"
+    ],
+    "correct_answer": "A mechanism to extract rotational energy from a Kerr black hole by exploiting the ergosphere",
+    "explanation": "In the Penrose process, a particle enters the ergosphere, splits, and one part falls in with negative energy while the other escapes with more energy than the original particle had.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the Blandford-Znajek mechanism?",
+    "options": [
+      "How black holes evaporate",
+      "The extraction of rotational energy from a Kerr black hole via magnetic fields to power relativistic jets",
+      "How neutron stars form millisecond pulsars",
+      "The mechanism of gamma-ray burst production in neutron star mergers"
+    ],
+    "correct_answer": "The extraction of rotational energy from a Kerr black hole via magnetic fields to power relativistic jets",
+    "explanation": "The Blandford-Znajek process is the leading model for powering AGN jets — magnetic field lines threading the ergosphere extract rotational energy electromagnetically.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the r-process nucleosynthesis and where does it occur?",
+    "options": [
+      "Rapid hydrogen fusion in main sequence stars",
+      "Rapid neutron capture building heavy elements in neutron star mergers and core-collapse supernovae",
+      "The process forming iron in stellar cores",
+      "Radioactive decay in white dwarfs"
+    ],
+    "correct_answer": "Rapid neutron capture building heavy elements in neutron star mergers and core-collapse supernovae",
+    "explanation": "The r-process produces roughly half of elements heavier than iron through rapid neutron captures, confirmed when GW170817 (neutron star merger) showed kilonova signatures.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the s-process nucleosynthesis?",
+    "options": [
+      "Slow hydrogen fusion in the Sun",
+      "Slow neutron capture in AGB stars building elements up to bismuth",
+      "The synthesis of sulfur in stars",
+      "Fusion of silicon into iron in massive stars"
+    ],
+    "correct_answer": "Slow neutron capture in AGB stars building elements up to bismuth",
+    "explanation": "The s-process occurs in thermally pulsing AGB stars where slow neutron captures build elements from iron to bismuth over long timescales, producing about half of all heavy elements.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is an asymptotic giant branch (AGB) star?",
+    "options": [
+      "A type of main sequence star",
+      "A late stage of stellar evolution for low-to-intermediate mass stars with helium shell burning and thermal pulses",
+      "A subgiant just leaving the main sequence",
+      "A star on the horizontal branch"
+    ],
+    "correct_answer": "A late stage of stellar evolution for low-to-intermediate mass stars with helium shell burning and thermal pulses",
+    "explanation": "AGB stars are highly evolved low-mass stars with alternating hydrogen and helium shell burning, thermal pulses, strong stellar winds, and active s-process nucleosynthesis.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the Sunyaev-Zeldovich effect used to measure?",
+    "options": [
+      "Galaxy rotation curves",
+      "The temperature and mass of hot gas in galaxy clusters via CMB distortion, and to find clusters at high redshift",
+      "The magnetic field of a neutron star",
+      "The expansion rate of individual galaxy clusters"
+    ],
+    "correct_answer": "The temperature and mass of hot gas in galaxy clusters via CMB distortion, and to find clusters at high redshift",
+    "explanation": "The SZ effect distorts the CMB spectrum toward clusters, allowing measurement of cluster gas temperatures and masses. It is redshift-independent, making it ideal for high-z cluster surveys.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the Navarro-Frenk-White (NFW) profile?",
+    "options": [
+      "A model of stellar density in globular clusters",
+      "An empirical density profile that describes the distribution of dark matter in simulated dark matter halos",
+      "A model of gas distribution in galaxy clusters",
+      "A profile of stellar mass in elliptical galaxies"
+    ],
+    "correct_answer": "An empirical density profile that describes the distribution of dark matter in simulated dark matter halos",
+    "explanation": "The NFW profile fits N-body simulations of dark matter halos with a characteristic 1/r density at small radii and 1/r^3 at large radii, though observations sometimes find flatter cores.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the cosmic distance ladder's top rung?",
+    "options": [
+      "Cepheid variables",
+      "Type Ia supernovae",
+      "Tully-Fisher relation",
+      "The CMB acoustic scale"
+    ],
+    "correct_answer": "Type Ia supernovae",
+    "explanation": "Type Ia supernovae are standardizable candles reaching to redshifts of ~1-2, making them the primary tool for measuring distances at cosmological scales and discovering accelerating expansion.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the Tully-Fisher relation?",
+    "options": [
+      "A relation between star color and temperature",
+      "An empirical relationship between a spiral galaxy's luminosity and its rotation velocity",
+      "A relation between galaxy size and mass",
+      "A relationship between galaxy age and metallicity"
+    ],
+    "correct_answer": "An empirical relationship between a spiral galaxy's luminosity and its rotation velocity",
+    "explanation": "The Tully-Fisher relation links the maximum rotation velocity of spiral galaxies to their luminosity, allowing distance measurements to spiral galaxies.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the fundamental plane of elliptical galaxies?",
+    "options": [
+      "The plane of the Milky Way disk",
+      "A scaling relation between effective radius, surface brightness, and velocity dispersion for elliptical galaxies",
+      "The orbital plane of galaxy clusters",
+      "The flat rotation curve of elliptical galaxies"
+    ],
+    "correct_answer": "A scaling relation between effective radius, surface brightness, and velocity dispersion for elliptical galaxies",
+    "explanation": "The fundamental plane is a tight correlation in 3D parameter space for elliptical galaxies, used as a distance indicator and reflecting the regular formation history of ellipticals.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the concept of virial theorem in astrophysics?",
+    "options": [
+      "Viral infections of stars",
+      "The relationship between total kinetic and potential energy of a gravitationally bound system in equilibrium",
+      "The theorem governing viral stellar winds",
+      "A theorem about the temperature of galaxy clusters"
+    ],
+    "correct_answer": "The relationship between total kinetic and potential energy of a gravitationally bound system in equilibrium",
+    "explanation": "For gravitationally bound systems in equilibrium, the virial theorem states 2KE + PE = 0, used to estimate the mass of clusters, galaxies, and dark matter from observed velocities.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the Jeans mass?",
+    "options": [
+      "The minimum mass of a star",
+      "The critical mass above which a gas cloud will collapse under gravity rather than resist pressure",
+      "The mass of a typical stellar cluster",
+      "The mass of the Sun in kilograms"
+    ],
+    "correct_answer": "The critical mass above which a gas cloud will collapse under gravity rather than resist pressure",
+    "explanation": "The Jeans mass depends on temperature and density — gas clouds exceeding the Jeans mass will collapse under self-gravity to form stars or star clusters.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the concept of stellar feedback in galaxy formation?",
+    "options": [
+      "Stars feeding on interstellar gas",
+      "Energy and momentum injected by stars (via winds, radiation, supernovae) that can heat and expel gas, regulating star formation",
+      "The feedback between stellar populations in a cluster",
+      "The recycling of stellar material into new stars"
+    ],
+    "correct_answer": "Energy and momentum injected by stars (via winds, radiation, supernovae) that can heat and expel gas, regulating star formation",
+    "explanation": "Stellar feedback is crucial in galaxy formation — without it, simulations predict too many stars. Supernova explosions and AGN feedback regulate star formation rates.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the epoch of matter-radiation equality?",
+    "options": [
+      "When the universe first formed matter",
+      "The time when the energy densities of matter and radiation were equal, around 47,000 years after the Big Bang",
+      "The time the CMB was released",
+      "The end of cosmic inflation"
+    ],
+    "correct_answer": "The time when the energy densities of matter and radiation were equal, around 47,000 years after the Big Bang",
+    "explanation": "Matter-radiation equality marks when matter began to dominate the energy budget, allowing matter perturbations to grow and eventually form large-scale structure.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the recombination epoch in cosmology?",
+    "options": [
+      "When atoms first formed after the Big Bang allowing photons to travel freely, releasing the CMB",
+      "When the universe cooled to 0 K",
+      "When dark matter began forming",
+      "The end of nucleosynthesis"
+    ],
+    "correct_answer": "When atoms first formed after the Big Bang allowing photons to travel freely, releasing the CMB",
+    "explanation": "Recombination occurred ~380,000 years after the Big Bang when the universe cooled to ~3,000 K, allowing protons and electrons to combine into neutral hydrogen. The CMB was released at this moment.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is Big Bang nucleosynthesis?",
+    "options": [
+      "Fusion in early stars",
+      "The production of light elements (H, He, Li, D) in the first few minutes after the Big Bang",
+      "The formation of carbon in early stars",
+      "Nuclear reactions in the Sun's core"
+    ],
+    "correct_answer": "The production of light elements (H, He, Li, D) in the first few minutes after the Big Bang",
+    "explanation": "BBN produced roughly 75% hydrogen, 25% helium-4, and trace amounts of deuterium, He-3, and Li-7 in the first ~3-20 minutes — matching observed primordial abundances.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the lithium problem in cosmology?",
+    "options": [
+      "Lithium is not produced in stars",
+      "The observed abundance of primordial lithium-7 is 2-3 times lower than predicted by BBN",
+      "Too much lithium in the universe",
+      "Lithium is only found on Earth"
+    ],
+    "correct_answer": "The observed abundance of primordial lithium-7 is 2-3 times lower than predicted by BBN",
+    "explanation": "The cosmic lithium problem is a significant tension — old metal-poor stars have less Li-7 than BBN predicts. It may indicate unknown physics or Li-7 destruction in stellar interiors.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the flatness problem in cosmology?",
+    "options": [
+      "The universe has flat galaxies",
+      "Why the universe's geometry is so close to flat, requiring extreme fine-tuning of the initial energy density",
+      "Why the CMB temperature is flat",
+      "The horizon problem variant"
+    ],
+    "correct_answer": "Why the universe's geometry is so close to flat, requiring extreme fine-tuning of the initial energy density",
+    "explanation": "The flatness problem asks why the universe's density is so close to the critical density — any deviation early on would have led to rapid collapse or expansion. Inflation solves this.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the horizon problem in cosmology?",
+    "options": [
+      "Why we cannot see beyond the cosmic horizon",
+      "Why opposite sides of the CMB have the same temperature despite having no causal contact in standard Big Bang cosmology",
+      "The limit of what telescopes can observe",
+      "Why galaxies have horizons we cannot cross"
+    ],
+    "correct_answer": "Why opposite sides of the CMB have the same temperature despite having no causal contact in standard Big Bang cosmology",
+    "explanation": "Without inflation, opposite ends of the observable universe could never have been in contact, yet the CMB is uniform to 1 in 100,000 — inflation solves this via exponential expansion.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is slow-roll inflation?",
+    "options": [
+      "A model of galaxy formation",
+      "A class of inflationary models where the inflaton field rolls slowly along its potential, producing nearly scale-invariant perturbations",
+      "The gradual slowing of cosmic expansion",
+      "A model of stellar wind acceleration"
+    ],
+    "correct_answer": "A class of inflationary models where the inflaton field rolls slowly along its potential, producing nearly scale-invariant perturbations",
+    "explanation": "Slow-roll inflation requires the inflaton potential to be sufficiently flat so the field evolves slowly, producing the near-scale-invariant primordial power spectrum observed in the CMB.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the CMB power spectrum?",
+    "options": [
+      "The energy output of the CMB",
+      "The distribution of temperature fluctuations in the CMB as a function of angular scale, revealing cosmological parameters",
+      "The polarization pattern of CMB photons",
+      "The frequency spectrum of CMB radiation"
+    ],
+    "correct_answer": "The distribution of temperature fluctuations in the CMB as a function of angular scale, revealing cosmological parameters",
+    "explanation": "The CMB angular power spectrum shows acoustic oscillation peaks whose positions and heights encode the universe's geometry, matter content, and expansion history.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the Silk damping in CMB physics?",
+    "options": [
+      "Damping of CMB polarization by dust",
+      "The suppression of small-scale CMB fluctuations due to photon diffusion in the early universe",
+      "The redshifting of CMB photons",
+      "The damping of gravitational waves"
+    ],
+    "correct_answer": "The suppression of small-scale CMB fluctuations due to photon diffusion in the early universe",
+    "explanation": "Silk damping (photon diffusion damping) occurs when photons diffuse out of small perturbations before recombination, erasing density fluctuations below the Silk scale.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the Sachs-Wolfe plateau in the CMB power spectrum?",
+    "options": [
+      "The region of highest power in the CMB spectrum",
+      "The flat region at large angular scales (low multipoles) dominated by the gravitational redshift effect",
+      "The acoustic peak region",
+      "The damping tail at small angular scales"
+    ],
+    "correct_answer": "The flat region at large angular scales (low multipoles) dominated by the gravitational redshift effect",
+    "explanation": "At large angular scales (l < 100), the CMB power spectrum shows a nearly flat plateau where the integrated Sachs-Wolfe effect dominates, reflecting superhorizon perturbations.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the E-mode and B-mode polarization of the CMB?",
+    "options": [
+      "Two types of CMB emission",
+      "E-modes are curl-free polarization from density fluctuations; B-modes contain curl and signal primordial gravitational waves or lensing",
+      "Two frequency bands of CMB measurement",
+      "Emission and absorption modes of the CMB"
+    ],
+    "correct_answer": "E-modes are curl-free polarization from density fluctuations; B-modes contain curl and signal primordial gravitational waves or lensing",
+    "explanation": "E-mode CMB polarization comes from density fluctuations. B-modes can arise from gravitational wave background (inflation) or from gravitational lensing of E-modes — a key target for inflationary models.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the Press-Schechter formalism?",
+    "options": [
+      "A formula for calculating stellar lifetimes",
+      "An analytical model predicting the abundance of dark matter halos as a function of mass and redshift",
+      "A formalism for describing black hole accretion",
+      "A model of galactic chemical evolution"
+    ],
+    "correct_answer": "An analytical model predicting the abundance of dark matter halos as a function of mass and redshift",
+    "explanation": "Press-Schechter theory uses the linear growth of perturbations and Gaussian statistics to predict the mass function of dark matter halos — foundational to understanding structure formation.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is reionization's effect on the CMB?",
+    "options": [
+      "It erases all CMB fluctuations",
+      "It suppresses small-scale CMB anisotropies by Thomson scattering and generates large-scale polarization",
+      "It creates additional acoustic peaks",
+      "It has no effect on the CMB"
+    ],
+    "correct_answer": "It suppresses small-scale CMB anisotropies by Thomson scattering and generates large-scale polarization",
+    "explanation": "Reionization at z~6-10 partially re-scatters CMB photons, suppressing fluctuations on small scales and generating a new large-scale polarization signal (optical depth tau).",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the Comptonization parameter (y-parameter) in the SZ effect?",
+    "options": [
+      "The redshift of a galaxy cluster",
+      "A dimensionless measure of the thermal energy transferred from hot electrons to CMB photons along a line of sight",
+      "The magnetic field strength of a cluster",
+      "The optical depth of a cluster"
+    ],
+    "correct_answer": "A dimensionless measure of the thermal energy transferred from hot electrons to CMB photons along a line of sight",
+    "explanation": "The Compton y-parameter is the integral of electron pressure along the line of sight, directly measuring the total thermal energy of intracluster gas in the SZ effect.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the spectral energy distribution (SED) of a galaxy?",
+    "options": [
+      "The sound energy of a galaxy",
+      "The distribution of a galaxy's electromagnetic emission across all wavelengths from radio to gamma-ray",
+      "The brightness distribution across a galaxy's disk",
+      "The energy released in supernovae"
+    ],
+    "correct_answer": "The distribution of a galaxy's electromagnetic emission across all wavelengths from radio to gamma-ray",
+    "explanation": "A galaxy's SED reveals its stellar populations, dust content, star formation rate, AGN activity, and chemical enrichment history across the electromagnetic spectrum.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is abundance matching in galaxy formation?",
+    "options": [
+      "Matching stellar element abundances",
+      "A statistical technique linking galaxy stellar masses to dark matter halo masses by matching their abundance functions",
+      "Comparing galaxy abundances at different redshifts",
+      "Matching observed and predicted galaxy colors"
+    ],
+    "correct_answer": "A statistical technique linking galaxy stellar masses to dark matter halo masses by matching their abundance functions",
+    "explanation": "Abundance matching assumes galaxies with higher stellar masses reside in more massive halos, allowing the stellar-to-halo mass relation to be inferred without requiring hydrodynamical simulations.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is downsizing in galaxy evolution?",
+    "options": [
+      "Galaxies getting physically smaller over time",
+      "The observation that more massive galaxies formed their stars earlier and more rapidly than less massive ones",
+      "Stars decreasing in mass as they age",
+      "The shrinking of the universe's scale factor"
+    ],
+    "correct_answer": "The observation that more massive galaxies formed their stars earlier and more rapidly than less massive ones",
+    "explanation": "Downsizing (or archaeological downsizing) contradicts simple hierarchical assembly — massive ellipticals contain old stars suggesting rapid star formation at high redshift before quenching.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the green valley in galaxy color-magnitude space?",
+    "options": [
+      "A region of green-colored galaxies",
+      "The sparsely populated transition region between the blue star-forming cloud and the red passive sequence",
+      "Young massive galaxies",
+      "Galaxies with high dust content"
+    ],
+    "correct_answer": "The sparsely populated transition region between the blue star-forming cloud and the red passive sequence",
+    "explanation": "The green valley represents galaxies in transition from active star formation (blue cloud) to quiescence (red sequence), possibly undergoing AGN-driven or environmental quenching.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the M-sigma relation?",
+    "options": [
+      "A relation between galaxy mass and star formation rate",
+      "The tight correlation between supermassive black hole mass and the stellar velocity dispersion of the host galaxy's bulge",
+      "A relation between galaxy metallicity and luminosity",
+      "The mass-luminosity relation for galaxies"
+    ],
+    "correct_answer": "The tight correlation between supermassive black hole mass and the stellar velocity dispersion of the host galaxy's bulge",
+    "explanation": "The M-sigma relation (M_BH proportional to sigma^4-5) suggests co-evolution of supermassive black holes and their host galaxies through feedback processes.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is AGN feedback and its role in galaxy evolution?",
+    "options": [
+      "Stars providing energy to black holes",
+      "Energy injection from active galactic nuclei that can quench star formation in massive galaxies",
+      "The feedback loop between AGN jets and galaxy mergers",
+      "The effect of AGN on nearby satellite galaxies"
+    ],
+    "correct_answer": "Energy injection from active galactic nuclei that can quench star formation in massive galaxies",
+    "explanation": "AGN feedback — from jets and winds — can heat and expel gas from massive galaxies, shutting down star formation and producing the red passive ellipticals seen today.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the concept of hierarchical structure formation?",
+    "options": [
+      "Large structures form first, then break apart",
+      "Small dark matter structures form first and merge hierarchically to build larger ones",
+      "Galaxies form before dark matter halos",
+      "Stars form before galaxies"
+    ],
+    "correct_answer": "Small dark matter structures form first and merge hierarchically to build larger ones",
+    "explanation": "In ΛCDM, small density fluctuations collapse first into small halos, which then merge to build progressively larger halos and eventually galaxy clusters.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the missing satellites problem?",
+    "options": [
+      "Satellites disappearing from orbit",
+      "The discrepancy between the large number of small dark matter subhalos predicted by simulations and the fewer dwarf galaxies observed around the Milky Way",
+      "A problem with GPS satellites",
+      "The difficulty observing faint satellite galaxies"
+    ],
+    "correct_answer": "The discrepancy between the large number of small dark matter subhalos predicted by simulations and the fewer dwarf galaxies observed around the Milky Way",
+    "explanation": "CDM simulations predict thousands of subhalos around Milky Way-size halos, but only ~50 satellite galaxies are observed. Stellar feedback and reionization may suppress star formation in small halos.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the core-cusp problem in dark matter?",
+    "options": [
+      "The problem of forming galactic cores",
+      "The discrepancy between CDM predictions of cuspy dark matter density profiles and observations suggesting flatter cores in dwarf galaxies",
+      "The structure of neutron star cores",
+      "The problem of forming galaxy cluster cores"
+    ],
+    "correct_answer": "The discrepancy between CDM predictions of cuspy dark matter density profiles and observations suggesting flatter cores in dwarf galaxies",
+    "explanation": "N-body simulations predict dark matter density rising steeply (cusp) toward galactic centers, but dwarf galaxy observations suggest flatter (core) density profiles — possibly resolved by baryonic feedback.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is warm dark matter (WDM)?",
+    "options": [
+      "Dark matter at higher temperature",
+      "A hypothetical dark matter candidate with higher thermal velocities than cold dark matter, suppressing small-scale structure",
+      "Dark matter near stars",
+      "Dark matter detected by thermal emission"
+    ],
+    "correct_answer": "A hypothetical dark matter candidate with higher thermal velocities than cold dark matter, suppressing small-scale structure",
+    "explanation": "WDM particles have higher thermal velocities than CDM, creating a free-streaming cutoff that would suppress formation of the smallest halos, potentially solving small-scale structure problems.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is self-interacting dark matter (SIDM)?",
+    "options": [
+      "Dark matter that interacts with itself gravitationally only",
+      "Dark matter with significant non-gravitational interactions that scatter off itself, creating flatter density profiles in halo centers",
+      "Dark matter that annihilates with ordinary matter",
+      "Dark matter that interacts with baryons"
+    ],
+    "correct_answer": "Dark matter with significant non-gravitational interactions that scatter off itself, creating flatter density profiles in halo centers",
+    "explanation": "SIDM with a moderate self-interaction cross section can thermalize halo cores, creating the flat density profiles observed in dwarf galaxies without disrupting large-scale structure.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the Weinberg-Salaam-Glashow electroweak theory's relevance to early universe cosmology?",
+    "options": [
+      "It explains the formation of stars",
+      "It describes the electroweak phase transition in the early universe that may be connected to baryogenesis",
+      "It explains dark energy",
+      "It predicts the CMB temperature"
+    ],
+    "correct_answer": "It describes the electroweak phase transition in the early universe that may be connected to baryogenesis",
+    "explanation": "The electroweak phase transition at ~100 GeV (~10^-12 seconds after the Big Bang) is relevant to baryogenesis — explaining the matter-antimatter asymmetry that allowed the universe to exist.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is baryogenesis?",
+    "options": [
+      "The formation of baryons in stars",
+      "The physical processes in the early universe that created a slight excess of matter over antimatter",
+      "The production of hydrogen in the Big Bang",
+      "The creation of protons from quarks"
+    ],
+    "correct_answer": "The physical processes in the early universe that created a slight excess of matter over antimatter",
+    "explanation": "Baryogenesis explains why matter dominated over antimatter — requiring CP violation, baryon number violation, and departure from thermal equilibrium (Sakharov conditions).",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What are WIMPs in dark matter physics?",
+    "options": [
+      "Weakly Interacting Massive Particles — a leading dark matter candidate with weak-force interactions and masses from GeV to TeV",
+      "A type of neutrino",
+      "Dark matter made of black holes",
+      "A type of axion"
+    ],
+    "correct_answer": "Weakly Interacting Massive Particles — a leading dark matter candidate with weak-force interactions and masses from GeV to TeV",
+    "explanation": "WIMPs are a theoretically well-motivated dark matter candidate — their expected abundance from thermal freeze-out naturally produces the observed dark matter density (WIMP miracle).",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the WIMP miracle?",
+    "options": [
+      "The detection of WIMPs by multiple experiments",
+      "The coincidence that WIMPs with weak-scale interactions naturally produce the observed dark matter abundance",
+      "The prediction that WIMPs will be found at the LHC",
+      "The fact that WIMPs interact via gravity"
+    ],
+    "correct_answer": "The coincidence that WIMPs with weak-scale interactions naturally produce the observed dark matter abundance",
+    "explanation": "If dark matter consists of particles with weak-scale masses and interactions, their relic abundance from thermal freeze-out naturally comes out to the observed Omega_DM ~ 0.27 — a remarkable coincidence.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is an axion in cosmology?",
+    "options": [
+      "A fundamental force carrier",
+      "A hypothetical very light particle originally proposed to solve the strong CP problem, also a dark matter candidate",
+      "A type of dark energy particle",
+      "A component of the CMB"
+    ],
+    "correct_answer": "A hypothetical very light particle originally proposed to solve the strong CP problem, also a dark matter candidate",
+    "explanation": "Axions were proposed by Peccei and Quinn to explain why the strong force conserves CP symmetry. Extremely light axions could form a Bose-Einstein condensate comprising cold dark matter.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the concept of inflation's prediction for primordial gravitational waves?",
+    "options": [
+      "Inflation does not predict gravitational waves",
+      "Inflation predicts a background of primordial gravitational waves imprinted as B-mode polarization in the CMB",
+      "Inflation predicts only CMB temperature fluctuations",
+      "Inflation predicts detectable gravitational waves at LIGO frequencies"
+    ],
+    "correct_answer": "Inflation predicts a background of primordial gravitational waves imprinted as B-mode polarization in the CMB",
+    "explanation": "Quantum fluctuations during inflation produce tensor perturbations (gravitational waves) that create a unique B-mode polarization signal in the CMB — not yet confirmed but actively searched for.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the tensor-to-scalar ratio (r) in inflationary cosmology?",
+    "options": [
+      "The ratio of tensor to scalar particles in the universe",
+      "The ratio of primordial gravitational wave amplitude to density perturbation amplitude, constraining inflationary models",
+      "The ratio of dark energy to dark matter",
+      "The ratio of matter to radiation at recombination"
+    ],
+    "correct_answer": "The ratio of primordial gravitational wave amplitude to density perturbation amplitude, constraining inflationary models",
+    "explanation": "The tensor-to-scalar ratio r constrains inflationary models — current CMB data places r < 0.036, ruling out simple large-field inflation models and favoring plateau-type potentials.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the spectral index (n_s) of primordial perturbations?",
+    "options": [
+      "The color of the universe's radiation",
+      "A parameter describing the scale dependence of primordial density fluctuations, with n_s = 1 being scale-invariant",
+      "The index of refraction of the CMB",
+      "The power law index of galaxy luminosity functions"
+    ],
+    "correct_answer": "A parameter describing the scale dependence of primordial density fluctuations, with n_s = 1 being scale-invariant",
+    "explanation": "The measured n_s ≈ 0.965 slightly deviating from scale invariance (n_s = 1) is a key prediction of slow-roll inflation, confirmed by Planck and WMAP observations.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the Schechter luminosity function?",
+    "options": [
+      "A formula for calculating stellar luminosities",
+      "An empirical formula describing the number density of galaxies as a function of luminosity, with a characteristic cutoff at L*",
+      "A function relating galaxy color to luminosity",
+      "An empirical formula describing the number density of galaxies as a function of luminosity, with a characteristic cutoff at L* "
+    ],
+    "correct_answer": "An empirical formula describing the number density of galaxies as a function of luminosity, with a characteristic cutoff at L* ",
+    "explanation": "The Schechter function has a power-law rise at low luminosities and an exponential cutoff at L* (characteristic luminosity), well-matched by observations across many galaxy populations.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the stellar initial mass function (IMF)?",
+    "options": [
+      "The initial temperature distribution of stars",
+      "The distribution of stellar masses at birth, describing how many stars form at each mass",
+      "The sequence of stellar formation events",
+      "The first stars' mass function only"
+    ],
+    "correct_answer": "The distribution of stellar masses at birth, describing how many stars form at each mass",
+    "explanation": "The Salpeter IMF (proportional to M^-2.35) and Kroupa/Chabrier IMFs describe the distribution of stellar birth masses — critical for interpreting stellar populations and galaxy evolution.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is cosmic variance?",
+    "options": [
+      "The variation in cosmic expansion rate",
+      "The fundamental limit on measuring large-scale CMB modes because we observe only one universe with a finite number of independent patches",
+      "The variance of galaxy velocities",
+      "The variation in dark energy equation of state"
+    ],
+    "correct_answer": "The fundamental limit on measuring large-scale CMB modes because we observe only one universe with a finite number of independent patches",
+    "explanation": "Cosmic variance is the irreducible statistical uncertainty in measuring multipoles l, especially at low l — there are only 2l+1 independent measurements per multipole from our single observable universe.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the Sachs-Wolfe plateau in the CMB angular power spectrum?",
+    "options": [
+      "The high-l damping tail",
+      "The approximately flat region at large angular scales (low multipoles l < 30) dominated by the ordinary and integrated Sachs-Wolfe effects",
+      "The first acoustic peak",
+      "The region where CMB polarization peaks"
+    ],
+    "correct_answer": "The approximately flat region at large angular scales (low multipoles l < 30) dominated by the ordinary and integrated Sachs-Wolfe effects",
+    "explanation": "At low multipoles, CMB temperature fluctuations are shaped by the gravitational redshift (ordinary SW) and time-evolving potential wells (integrated SW), creating a near-flat plateau.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the sound horizon in early universe cosmology?",
+    "options": [
+      "How far sound travels in the universe today",
+      "The maximum distance that sound waves in the baryon-photon plasma could travel before recombination, imprinting the acoustic peaks",
+      "The boundary of the heliosphere",
+      "The distance to the nearest star cluster"
+    ],
+    "correct_answer": "The maximum distance that sound waves in the baryon-photon plasma could travel before recombination, imprinting the acoustic peaks",
+    "explanation": "The sound horizon at recombination (~150 Mpc comoving) sets the scale of CMB acoustic peaks and BAO in the galaxy distribution, used as a standard ruler for cosmology.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the cosmic string in cosmology?",
+    "options": [
+      "A string of galaxies",
+      "A hypothetical 1-dimensional topological defect in spacetime that may have formed during phase transitions in the early universe",
+      "The Milky Way's spiral arm",
+      "A filament in the cosmic web"
+    ],
+    "correct_answer": "A hypothetical 1-dimensional topological defect in spacetime that may have formed during phase transitions in the early universe",
+    "explanation": "Cosmic strings are hypothetical relics of symmetry-breaking phase transitions, producing distinctive signatures in CMB temperature maps and potentially detectable via gravitational waves.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the concept of eternal inflation?",
+    "options": [
+      "The universe will expand forever",
+      "A scenario where inflation continues indefinitely in different regions, producing a vast multiverse of pocket universes",
+      "The idea that inflation lasts forever in our universe",
+      "The Big Rip scenario"
+    ],
+    "correct_answer": "A scenario where inflation continues indefinitely in different regions, producing a vast multiverse of pocket universes",
+    "explanation": "In eternal inflation, quantum fluctuations cause inflation to never completely stop — different regions inflate at different rates, potentially nucleating into separate universes with different physical constants.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the de Sitter space?",
+    "options": [
+      "A space without dark energy",
+      "The maximally symmetric Lorentzian manifold with positive cosmological constant, describing exponentially expanding spacetime",
+      "The space around a black hole",
+      "The metric of flat spacetime"
+    ],
+    "correct_answer": "The maximally symmetric Lorentzian manifold with positive cosmological constant, describing exponentially expanding spacetime",
+    "explanation": "De Sitter space is the solution to Einstein's equations with a positive cosmological constant — relevant for the early inflationary epoch and the far future of our dark energy-dominated universe.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the Penrose-Hawking singularity theorems?",
+    "options": [
+      "Theorems about the size of black holes",
+      "Mathematical theorems proving that gravitational singularities are inevitable under certain energy conditions in GR",
+      "Theorems about the maximum mass of neutron stars",
+      "Theorems about the shape of event horizons"
+    ],
+    "correct_answer": "Mathematical theorems proving that gravitational singularities are inevitable under certain energy conditions in GR",
+    "explanation": "Penrose (1965) and Hawking-Penrose (1970) proved that singularities form inevitably inside black holes and at the Big Bang under physically reasonable energy conditions in general relativity.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the no-hair theorem for black holes?",
+    "options": [
+      "Black holes cannot have magnetic fields",
+      "Black holes in GR are completely characterized by only three parameters: mass, angular momentum, and charge",
+      "Black holes cannot accrete material",
+      "Black holes have no entropy"
+    ],
+    "correct_answer": "Black holes in GR are completely characterized by only three parameters: mass, angular momentum, and charge",
+    "explanation": "The no-hair theorem states that all information about the matter that formed a black hole is lost except mass (M), angular momentum (J), and charge (Q) — leading to the information paradox.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the black hole information paradox?",
+    "options": [
+      "We cannot locate black holes precisely",
+      "The conflict between black hole evaporation destroying information (violating quantum mechanics) and general relativity's predictions",
+      "The paradox that black holes cannot be observed",
+      "The problem that black holes have infinite density"
+    ],
+    "correct_answer": "The conflict between black hole evaporation destroying information (violating quantum mechanics) and general relativity's predictions",
+    "explanation": "Hawking radiation appears thermal, destroying quantum information that fell in — violating unitary evolution in quantum mechanics. Resolving this conflict is a major open problem in theoretical physics.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the firewall paradox in black hole physics?",
+    "options": [
+      "Black holes catching fire from nearby stars",
+      "A proposed resolution to the information paradox suggesting infalling observers encounter a high-energy firewall at the horizon",
+      "The burning of material in the accretion disk",
+      "The intense radiation near magnetars"
+    ],
+    "correct_answer": "A proposed resolution to the information paradox suggesting infalling observers encounter a high-energy firewall at the horizon",
+    "explanation": "The firewall paradox (AMPS, 2012) argues that to preserve information, the black hole interior must be replaced by a wall of high-energy radiation — contradicting the equivalence principle.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is holographic principle in cosmology?",
+    "options": [
+      "Using holograms to store astronomical data",
+      "The idea that all information in a volume of space can be encoded on its boundary surface",
+      "The projection of galaxy maps onto spherical shells",
+      "A method to measure CMB polarization"
+    ],
+    "correct_answer": "The idea that all information in a volume of space can be encoded on its boundary surface",
+    "explanation": "The holographic principle, inspired by black hole thermodynamics and developed by 't Hooft and Susskind, suggests reality is fundamentally 2-dimensional with our 3D experience being a projection.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the AdS/CFT correspondence?",
+    "options": [
+      "A method for observing distant objects",
+      "A duality relating gravity in Anti-de Sitter space to a conformal field theory on its boundary, enabling calculations of strongly coupled quantum systems",
+      "A relation between galaxy clusters and CMB",
+      "A cosmological model for the early universe"
+    ],
+    "correct_answer": "A duality relating gravity in Anti-de Sitter space to a conformal field theory on its boundary, enabling calculations of strongly coupled quantum systems",
+    "explanation": "AdS/CFT (Maldacena 1997) is the most concrete realization of the holographic principle, providing tools to study quantum gravity via gauge theory and vice versa.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the Bekenstein-Hawking entropy of a black hole?",
+    "options": [
+      "Entropy proportional to its mass",
+      "Entropy proportional to its event horizon area in Planck units (S = A/4)",
+      "Entropy equal to its temperature",
+      "Entropy equal to the number of particles that fell in"
+    ],
+    "correct_answer": "Entropy proportional to its event horizon area in Planck units (S = A/4)",
+    "explanation": "Black hole entropy S = A/4 (in Planck units) is remarkable — entropy is proportional to area, not volume, making black holes the most entropic objects in nature.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the concept of black hole thermodynamics?",
+    "options": [
+      "The temperature distribution in accretion disks",
+      "A set of laws analogous to thermodynamics where black hole mass is energy, surface gravity is temperature, and horizon area is entropy",
+      "The thermal radiation from black hole accretion",
+      "How black holes affect nearby gas temperature"
+    ],
+    "correct_answer": "A set of laws analogous to thermodynamics where black hole mass is energy, surface gravity is temperature, and horizon area is entropy",
+    "explanation": "The four laws of black hole thermodynamics mirror the four laws of thermodynamics, connecting gravity, quantum mechanics, and thermodynamics in a profound way.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is quantum gravity?",
+    "options": [
+      "The gravity of very small particles",
+      "A theoretical framework attempting to reconcile general relativity with quantum mechanics at Planck-scale energies",
+      "The gravitational force between electrons",
+      "The gravity of dark matter particles"
+    ],
+    "correct_answer": "A theoretical framework attempting to reconcile general relativity with quantum mechanics at Planck-scale energies",
+    "explanation": "Quantum gravity remains one of physics' greatest unsolved problems — GR and QM are incompatible at Planck energies (10^19 GeV), relevant in black hole interiors and the Big Bang singularity.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is loop quantum cosmology?",
+    "options": [
+      "Cosmology modeled as loops of galaxies",
+      "A quantum gravity framework based on loop quantum gravity that replaces the Big Bang singularity with a Big Bounce",
+      "The cyclic model of the universe",
+      "A string theory cosmological model"
+    ],
+    "correct_answer": "A quantum gravity framework based on loop quantum gravity that replaces the Big Bang singularity with a Big Bounce",
+    "explanation": "In loop quantum cosmology, discrete quantum geometry prevents the classical Big Bang singularity, replacing it with a Big Bounce where a prior contracting phase became the current expanding phase.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the conformal cyclic cosmology (CCC)?",
+    "options": [
+      "A model describing cyclic orbits of galaxies",
+      "Roger Penrose's proposal that the universe undergoes infinite cycles (aeons) connected at conformal boundaries",
+      "The cyclic inflation model",
+      "A model of galaxy formation in cycles"
+    ],
+    "correct_answer": "Roger Penrose's proposal that the universe undergoes infinite cycles (aeons) connected at conformal boundaries",
+    "explanation": "In CCC, the far future of each aeon (after all matter evaporates) is conformally equivalent to the Big Bang of the next, with possible observational signatures in the CMB.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What are the observational signatures of primordial black holes?",
+    "options": [
+      "They emit visible light",
+      "Gravitational microlensing, gravitational wave mergers at unexpected mass ratios, and CMB distortions",
+      "They form regular binary systems",
+      "They appear as dark spots in galaxies"
+    ],
+    "correct_answer": "Gravitational microlensing, gravitational wave mergers at unexpected mass ratios, and CMB distortions",
+    "explanation": "Primordial black holes formed in the early universe would produce microlensing events, contribute to LIGO merger rates at unusual mass ratios, and distort the CMB spectrum.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the concept of Weinberg's anthropic prediction of the cosmological constant?",
+    "options": [
+      "The universe must have a cosmological constant",
+      "Weinberg used the anthropic principle to predict the cosmological constant should be small enough to allow galaxy formation",
+      "The cosmological constant equals zero for anthropic reasons",
+      "Weinberg proved dark energy is a cosmological constant"
+    ],
+    "correct_answer": "Weinberg used the anthropic principle to predict the cosmological constant should be small enough to allow galaxy formation",
+    "explanation": "In 1987, Weinberg predicted Lambda ~ 10^-120 Planck units using the anthropic argument that observers can only exist in universes where structures form — confirmed by observations of accelerating expansion.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the equation of state parameter w for dark energy?",
+    "options": [
+      "w = 1 for a cosmological constant",
+      "w = -1 for a cosmological constant, with w < -1/3 needed for accelerated expansion",
+      "w = 0 for dark energy",
+      "w = 1/3 for dark energy"
+    ],
+    "correct_answer": "w = -1 for a cosmological constant, with w < -1/3 needed for accelerated expansion",
+    "explanation": "The dark energy equation of state w = P/rho defines its behavior. A cosmological constant has w = -1; phantom energy w < -1 leads to a Big Rip; quintessence has -1 < w < -1/3.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the Big Rip scenario?",
+    "options": [
+      "The tearing apart of galaxy clusters",
+      "A future scenario where dark energy with w < -1 causes the universe's expansion to accelerate so fast that all bound structures are torn apart",
+      "The collision of two universe bubbles",
+      "The eventual end of star formation"
+    ],
+    "correct_answer": "A future scenario where dark energy with w < -1 causes the universe's expansion to accelerate so fast that all bound structures are torn apart",
+    "explanation": "If dark energy has w < -1 (phantom energy), its density grows with expansion, eventually tearing apart galaxy clusters, then galaxies, stars, and ultimately atoms.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the Big Freeze (Heat Death) of the universe?",
+    "options": [
+      "The universe cooling to absolute zero instantly",
+      "The far future state where all energy is uniformly distributed, stars have burned out, and no thermodynamic processes can occur",
+      "The end of the Big Bang",
+      "A future ice age on Earth"
+    ],
+    "correct_answer": "The far future state where all energy is uniformly distributed, stars have burned out, and no thermodynamic processes can occur",
+    "explanation": "The Big Freeze/Heat Death is the predicted end state of the universe under standard cosmology — after ~10^100 years, proton decay leaves only black holes, which eventually evaporate.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the Poincaré recurrence time?",
+    "options": [
+      "How often pulsars repeat",
+      "The immensely vast timescale after which a finite quantum system returns arbitrarily close to its initial state",
+      "The time for Earth to return to the same position in the galaxy",
+      "The periodicity of the CMB fluctuations"
+    ],
+    "correct_answer": "The immensely vast timescale after which a finite quantum system returns arbitrarily close to its initial state",
+    "explanation": "The Poincaré recurrence time is incomprehensibly large (10^10^10^100 years for the observable universe) — after this time quantum fluctuations could return the universe to a low-entropy state.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is magnetic reconnection in plasma astrophysics?",
+    "options": [
+      "The reconnection of severed magnetic field lines",
+      "The topological rearrangement of magnetic field lines in plasma releasing stored magnetic energy explosively as heat and kinetic energy",
+      "The connection of Earth and Sun by magnetic field lines",
+      "The alignment of galactic magnetic fields"
+    ],
+    "correct_answer": "The topological rearrangement of magnetic field lines in plasma releasing stored magnetic energy explosively as heat and kinetic energy",
+    "explanation": "Magnetic reconnection powers solar flares, CMEs, pulsar magnetospheres, and astrophysical jets by rapidly converting magnetic energy when oppositely directed field lines break and reconnect.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the magneto-rotational instability (MRI)?",
+    "options": [
+      "The instability of neutron star magnetic fields",
+      "A magnetohydrodynamic instability in differentially rotating magnetized disks that drives turbulence and angular momentum transport",
+      "The instability of sunspots",
+      "The magnetic field instability in white dwarfs"
+    ],
+    "correct_answer": "A magnetohydrodynamic instability in differentially rotating magnetized disks that drives turbulence and angular momentum transport",
+    "explanation": "The MRI (Balbus-Hawley instability) is the dominant mechanism for angular momentum transport in accretion disks, enabling matter to spiral inward and explaining why accretion proceeds efficiently.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the concept of pulsar timing arrays?",
+    "options": [
+      "Arrays of radio dishes timing pulsars",
+      "A set of millisecond pulsars used as a galaxy-scale gravitational wave detector by monitoring tiny variations in pulse arrival times",
+      "Timing the rotation of pulsars",
+      "Arrays of X-ray telescopes monitoring pulsars"
+    ],
+    "correct_answer": "A set of millisecond pulsars used as a galaxy-scale gravitational wave detector by monitoring tiny variations in pulse arrival times",
+    "explanation": "Pulsar timing arrays like NANOGrav, EPTA, and PPTA use millisecond pulsars as precise clocks; gravitational waves passing Earth cause correlated timing residuals, recently detecting a gravitational wave background.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the nanohertz gravitational wave background detected by PTAs?",
+    "options": [
+      "Gravitational waves from stellar-mass black holes",
+      "A stochastic background of gravitational waves likely from inspiraling supermassive black hole binaries in galactic mergers",
+      "Gravitational waves from neutron star mergers",
+      "Primordial gravitational waves from inflation"
+    ],
+    "correct_answer": "A stochastic background of gravitational waves likely from inspiraling supermassive black hole binaries in galactic mergers",
+    "explanation": "In 2023, multiple pulsar timing array collaborations reported evidence for a gravitational wave background, consistent with signals from an ensemble of merging supermassive black hole binaries.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the concept of black hole spin (dimensionless spin parameter a)?",
+    "options": [
+      "How fast a black hole moves through space",
+      "The angular momentum of a rotating black hole normalized to its maximum possible value, ranging from 0 (non-rotating) to 1 (maximally rotating)",
+      "The precession rate of a black hole's orbit",
+      "The spin of electrons near a black hole"
+    ],
+    "correct_answer": "The angular momentum of a rotating black hole normalized to its maximum possible value, ranging from 0 (non-rotating) to 1 (maximally rotating)",
+    "explanation": "The dimensionless spin parameter a* = Jc/GM^2 ranges from 0 to 1. Rapidly spinning black holes have larger ergospheres and can power more energetic jets via the Blandford-Znajek mechanism.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is Chandrasekhar's contribution to stellar physics?",
+    "options": [
+      "Discovering the main sequence",
+      "Deriving the maximum mass of a stable white dwarf and founding relativistic astrophysics, winning the 1983 Nobel Prize",
+      "Discovering the first exoplanet",
+      "Developing the theory of stellar nucleosynthesis"
+    ],
+    "correct_answer": "Deriving the maximum mass of a stable white dwarf and founding relativistic astrophysics, winning the 1983 Nobel Prize",
+    "explanation": "Subrahmanyan Chandrasekhar showed that white dwarfs above 1.4 solar masses must collapse, founding relativistic stellar structure theory. He shared the 1983 Nobel Prize in Physics.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the neutrino burst from SN 1987A significant for?",
+    "options": [
+      "Proving neutrinos travel faster than light",
+      "The first detection of neutrinos from an astrophysical source beyond the Sun, confirming core-collapse supernova theory",
+      "Showing that supernovae emit no light",
+      "The discovery of neutrino oscillation"
+    ],
+    "correct_answer": "The first detection of neutrinos from an astrophysical source beyond the Sun, confirming core-collapse supernova theory",
+    "explanation": "About 20 neutrinos from SN 1987A were detected by Kamiokande and IMB 3 hours before the optical brightening, confirming that ~99% of supernova energy is carried away by neutrinos.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the Crab Pulsar and its historical significance?",
+    "options": [
+      "A recently discovered pulsar",
+      "A neutron star at the center of the Crab Nebula, the remnant of SN 1054 observed by Chinese astronomers, one of the first pulsars studied in detail",
+      "The fastest-spinning pulsar known",
+      "A binary pulsar used to test GR"
+    ],
+    "correct_answer": "A neutron star at the center of the Crab Nebula, the remnant of SN 1054 observed by Chinese astronomers, one of the first pulsars studied in detail",
+    "explanation": "The Crab Pulsar (PSR B0531+21) at 33 ms is one of the youngest known pulsars, powering the Crab Nebula with a relativistic wind, and was crucial in confirming the neutron star nature of pulsars.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the Hulse-Taylor binary pulsar's contribution to physics?",
+    "options": [
+      "Discovering the first exoplanet",
+      "The first indirect evidence for gravitational waves through the orbital decay of a binary neutron star system, winning the 1993 Nobel Prize",
+      "Confirming the neutron star equation of state",
+      "Discovering millisecond pulsars"
+    ],
+    "correct_answer": "The first indirect evidence for gravitational waves through the orbital decay of a binary neutron star system, winning the 1993 Nobel Prize",
+    "explanation": "Hulse and Taylor's pulsar PSR B1913+16 showed orbital decay exactly matching GR's prediction from gravitational wave emission — the first indirect proof of gravitational waves.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the GW170817 neutron star merger event significant for?",
+    "options": [
+      "The loudest gravitational wave event detected",
+      "The first multi-messenger observation combining gravitational waves, gamma-ray burst, and optical kilonova confirming r-process nucleosynthesis",
+      "The first detection of a neutron star-black hole merger",
+      "The discovery of the fastest known pulsar"
+    ],
+    "correct_answer": "The first multi-messenger observation combining gravitational waves, gamma-ray burst, and optical kilonova confirming r-process nucleosynthesis",
+    "explanation": "GW170817 was simultaneously detected in GW, gamma-rays, X-rays, optical, and radio — the optical kilonova showed heavy element production, confirming neutron star mergers as r-process sites.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the concept of neutron star equation of state (EOS)?",
+    "options": [
+      "The temperature-pressure relation in neutron star cores",
+      "The relationship between pressure and density in neutron star interiors, governing their maximum mass and radius",
+      "How neutron stars cool over time",
+      "The EOS of gas in neutron star atmospheres"
+    ],
+    "correct_answer": "The relationship between pressure and density in neutron star interiors, governing their maximum mass and radius",
+    "explanation": "The neutron star EOS is unknown because nuclear matter at supranuclear densities cannot be studied in the lab. GW observations and X-ray timing are constraining it — GW170817 placed limits on neutron star radii.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is quark-gluon plasma and its relevance to neutron stars?",
+    "options": [
+      "Plasma produced in nuclear reactors",
+      "A state of matter where quarks and gluons are deconfined, possibly existing in the cores of the most massive neutron stars",
+      "The state of matter in all neutron stars",
+      "Plasma in quasar accretion disks"
+    ],
+    "correct_answer": "A state of matter where quarks and gluons are deconfined, possibly existing in the cores of the most massive neutron stars",
+    "explanation": "At extreme densities in massive neutron star cores, quark confinement may break down creating a quark-gluon plasma or quark matter. Hybrid stars containing this phase are possible.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the concept of a kilonova?",
+    "options": [
+      "A very faint nova",
+      "An optical-infrared transient from a neutron star merger powered by radioactive decay of r-process heavy elements",
+      "A type of supernova in dwarf galaxies",
+      "A nova near a kilogram black hole"
+    ],
+    "correct_answer": "An optical-infrared transient from a neutron star merger powered by radioactive decay of r-process heavy elements",
+    "explanation": "Kilonovae (also called mergernovae) are transients ~1000 times brighter than a nova, powered by radioactive decay of newly synthesized lanthanides and actinides from r-process nucleosynthesis.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the Eddington-Finkelstein coordinates' advantage over Schwarzschild coordinates?",
+    "options": [
+      "They are simpler to calculate with",
+      "They extend smoothly across the event horizon, removing the coordinate singularity at r = 2M in Schwarzschild coordinates",
+      "They apply to rotating black holes",
+      "They describe the black hole's interior uniquely"
+    ],
+    "correct_answer": "They extend smoothly across the event horizon, removing the coordinate singularity at r = 2M in Schwarzschild coordinates",
+    "explanation": "The coordinate singularity at the Schwarzschild radius in Schwarzschild coordinates is a mathematical artifact; Eddington-Finkelstein coordinates pass smoothly across the horizon.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the Birkhoff theorem in GR?",
+    "options": [
+      "A theorem about the uniqueness of black hole solutions",
+      "The theorem stating that any spherically symmetric vacuum solution to Einstein's equations must be static and asymptotically flat, given by the Schwarzschild metric",
+      "A theorem about the expansion of the universe",
+      "A theorem about gravitational wave emission"
+    ],
+    "correct_answer": "The theorem stating that any spherically symmetric vacuum solution to Einstein's equations must be static and asymptotically flat, given by the Schwarzschild metric",
+    "explanation": "Birkhoff's theorem means that the exterior metric of any spherical mass distribution is Schwarzschild, even for pulsating or non-static interiors — the GR analog of Newton's shell theorem.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the concept of cosmic censorship conjecture?",
+    "options": [
+      "Censoring unproven cosmological theories",
+      "Penrose's conjecture that naked singularities cannot form from gravitational collapse of physically reasonable matter",
+      "The suppression of small-scale CMB fluctuations",
+      "The limit on what can be observed past the cosmic horizon"
+    ],
+    "correct_answer": "Penrose's conjecture that naked singularities cannot form from gravitational collapse of physically reasonable matter",
+    "explanation": "The cosmic censorship conjecture states that all singularities must be hidden behind event horizons — 'nature abhors a naked singularity.' Counterexamples in fine-tuned scenarios are known but debated.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the Penrose diagram (conformal diagram)?",
+    "options": [
+      "A diagram of Penrose's theories",
+      "A 2D spacetime diagram using conformal transformations to bring infinity to a finite distance, revealing causal structure",
+      "A diagram of penrose tiling in cosmology",
+      "A diagram showing the cosmic web"
+    ],
+    "correct_answer": "A 2D spacetime diagram using conformal transformations to bring infinity to a finite distance, revealing causal structure",
+    "explanation": "Penrose diagrams (Carter-Penrose diagrams) compactify spacetime so that null rays are at 45 degrees and the full causal structure is visible — essential for understanding black holes and cosmology.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the concept of inflation's graceful exit problem?",
+    "options": [
+      "How inflation ends without creating dangerous relics",
+      "How inflation transitions to a hot Big Bang through reheating without producing too many unwanted relics or failing to end",
+      "How inflation explains the flatness of the universe",
+      "The problem that inflation predicts too many universes"
+    ],
+    "correct_answer": "How inflation transitions to a hot Big Bang through reheating without producing too many unwanted relics or failing to end",
+    "explanation": "Old inflation failed to end gracefully — the transition to non-inflation was too slow, creating an inhomogeneous universe. New and chaotic inflation solved this through the reheating mechanism.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is preheating after inflation?",
+    "options": [
+      "Heating the universe before inflation begins",
+      "The explosive non-perturbative production of particles at the end of inflation through parametric resonance",
+      "Slow reheating via perturbative inflaton decay",
+      "The initial heating of the universe from annihilation"
+    ],
+    "correct_answer": "The explosive non-perturbative production of particles at the end of inflation through parametric resonance",
+    "explanation": "Preheating is a rapid, explosive phase following inflation where the oscillating inflaton field drives parametric resonance, producing particles exponentially faster than perturbative decay.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the spectral distortion of the CMB?",
+    "options": [
+      "The angular variation of CMB temperature",
+      "Small deviations from a perfect blackbody spectrum caused by energy injection in the early universe",
+      "The polarization of CMB photons",
+      "The anisotropy in CMB brightness"
+    ],
+    "correct_answer": "Small deviations from a perfect blackbody spectrum caused by energy injection in the early universe",
+    "explanation": "CMB spectral distortions (mu-type and y-type) encode energy release in the early universe from dissipation of acoustic waves, dark matter annihilation, and cosmic strings — a target for future missions.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the Sachs-Wolfe effect in detail?",
+    "options": [
+      "Sound waves in the early universe",
+      "Photons climbing out of or into gravitational potential wells at recombination gaining or losing energy",
+      "Photon scattering by free electrons",
+      "The diffusion of photons before recombination"
+    ],
+    "correct_answer": "Photons climbing out of or into gravitational potential wells at recombination gaining or losing energy",
+    "explanation": "Photons from overdense regions (potential wells) lose energy climbing out (temperature decreases), while photons from underdense regions (potential hills) gain energy — creating the large-scale CMB pattern.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is stellar pulsation theory?",
+    "options": [
+      "How stars emit pulses of light",
+      "The theory describing periodic expansions and contractions of stars driven by opacity variations, particularly the kappa mechanism",
+      "How pulsars spin",
+      "Vibrations of neutron stars"
+    ],
+    "correct_answer": "The theory describing periodic expansions and contractions of stars driven by opacity variations, particularly the kappa mechanism",
+    "explanation": "Stellar pulsations in Cepheids and RR Lyrae are driven by the kappa mechanism — helium ionization zones absorb heat during compression and release it during expansion, maintaining oscillations.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is asteroseismology?",
+    "options": [
+      "The study of asteroids",
+      "The study of stellar interiors through analysis of sound waves (oscillation modes) propagating within stars",
+      "Seismic activity on asteroids",
+      "The study of meteor impact seismology"
+    ],
+    "correct_answer": "The study of stellar interiors through analysis of sound waves (oscillation modes) propagating within stars",
+    "explanation": "Like helioseismology for the Sun, asteroseismology analyzes stellar oscillation frequencies to probe internal structure, rotation, and composition with unprecedented precision.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is helioseismology?",
+    "options": [
+      "The study of earthquakes caused by the Sun",
+      "The study of the Sun's interior through analysis of its natural oscillation modes",
+      "Seismology applied to other stars",
+      "The study of solar flares"
+    ],
+    "correct_answer": "The study of the Sun's interior through analysis of its natural oscillation modes",
+    "explanation": "Helioseismology uses thousands of normal modes of solar oscillation to map the Sun's internal rotation, composition, and structure — resolving the solar neutrino problem by confirming solar models.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the concept of stellar population synthesis?",
+    "options": [
+      "Creating new stars in simulations",
+      "A technique modeling the integrated light of a galaxy as the sum of contributions from stars of different ages and metallicities",
+      "Synthesizing heavy elements in stellar models",
+      "A technique modeling the integrated light of a galaxy as a sum of contributions from stars of different ages and metallicities"
+    ],
+    "correct_answer": "A technique modeling the integrated light of a galaxy as a sum of contributions from stars of different ages and metallicities",
+    "explanation": "Stellar population synthesis fits galaxy SEDs by combining stellar evolutionary tracks and spectral libraries to derive star formation histories, metallicities, and stellar masses.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the Lyman-alpha forest?",
+    "options": [
+      "A forest of Lyman-alpha emitting galaxies",
+      "Absorption features in quasar spectra from intervening clouds of neutral hydrogen at different redshifts, tracing the cosmic web",
+      "Emission lines in the UV spectrum of stars",
+      "The wavelength region around the Lyman series"
+    ],
+    "correct_answer": "Absorption features in quasar spectra from intervening clouds of neutral hydrogen at different redshifts, tracing the cosmic web",
+    "explanation": "The Lyman-alpha forest consists of hundreds of absorption lines blueward of a quasar's Lyman-alpha emission, each from a neutral hydrogen cloud at a different redshift — a powerful probe of large-scale structure.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the Gunn-Peterson trough?",
+    "options": [
+      "A deep canyon on a neutron star",
+      "The near-complete absorption of quasar light blueward of Lyman-alpha at z > 6, indicating neutral intergalactic hydrogen before reionization",
+      "A gap in the cosmic microwave background spectrum",
+      "A void in the cosmic web"
+    ],
+    "correct_answer": "The near-complete absorption of quasar light blueward of Lyman-alpha at z > 6, indicating neutral intergalactic hydrogen before reionization",
+    "explanation": "The Gunn-Peterson trough marks the end of reionization — at z > 6, the IGM contained enough neutral hydrogen to completely absorb quasar Lyman-alpha photons.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the Madau-Lilly plot?",
+    "options": [
+      "A plot of galaxy positions in 3D space",
+      "The cosmic star formation history showing how star formation rate density evolved with redshift, peaking around z~2",
+      "A plot of quasar luminosity versus redshift",
+      "The evolution of galaxy cluster masses with time"
+    ],
+    "correct_answer": "The cosmic star formation history showing how star formation rate density evolved with redshift, peaking around z~2",
+    "explanation": "The Madau-Dickinson plot shows that the universe's overall star formation rate was roughly 10 times higher at z~2 ('cosmic noon') than today, declining since.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the intergalactic medium (IGM)?",
+    "options": [
+      "The interstellar medium in a galaxy",
+      "The diffuse gas and plasma filling the space between galaxies, containing most of the universe's baryonic matter",
+      "Gas between galaxy clusters",
+      "The medium around quasars"
+    ],
+    "correct_answer": "The diffuse gas and plasma filling the space between galaxies, containing most of the universe's baryonic matter",
+    "explanation": "The IGM contains roughly 60% of all baryons as warm-hot intergalactic medium (WHIM) at 10^5-10^7 K in cosmic web filaments, mostly detected in UV absorption and X-ray emission.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the warm-hot intergalactic medium (WHIM)?",
+    "options": [
+      "The hot gas in galaxy clusters",
+      "The gas at 10^5-10^7 K in large-scale cosmic web filaments containing a large fraction of missing baryons",
+      "The warm gas in galaxy halos",
+      "The interstellar medium near hot stars"
+    ],
+    "correct_answer": "The gas at 10^5-10^7 K in large-scale cosmic web filaments containing a large fraction of missing baryons",
+    "explanation": "The WHIM was predicted by simulations to contain 40-50% of baryons in filaments at intermediate temperatures — partially confirmed by X-ray and UV observations.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the cosmic baryon budget problem?",
+    "options": [
+      "The universe has too many baryons",
+      "Only about half of the predicted baryons can be detected in stars, galaxies, and hot gas — the missing baryons problem",
+      "Baryons decaying faster than predicted",
+      "The unequal distribution of protons and neutrons"
+    ],
+    "correct_answer": "Only about half of the predicted baryons can be detected in stars, galaxies, and hot gas — the missing baryons problem",
+    "explanation": "BBN and CMB predict the total baryon density, but only ~50% are accounted for in observed stars, galaxies, and hot cluster gas. Most of the missing baryons are thought to reside in the WHIM.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is photon spherical orbit and its observational relevance?",
+    "options": [
+      "How photons orbit molecules",
+      "The unstable circular orbit of photons at 1.5 Schwarzschild radii, creating the bright ring in black hole images",
+      "The orbit of photons in a neutron star",
+      "How X-rays orbit an accretion disk"
+    ],
+    "correct_answer": "The unstable circular orbit of photons at 1.5 Schwarzschild radii, creating the bright ring in black hole images",
+    "explanation": "The photon sphere at 3GM/c^2 for Schwarzschild black holes is what appears as the bright ring in EHT images — photons on this unstable orbit can circle many times before escaping.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the concept of gravitational wave strain?",
+    "options": [
+      "The stress on a gravitational wave detector",
+      "The dimensionless amplitude h of a gravitational wave measuring the fractional change in distance between test masses",
+      "The strength of gravitational attraction",
+      "The amplitude of seismic noise in detectors"
+    ],
+    "correct_answer": "The dimensionless amplitude h of a gravitational wave measuring the fractional change in distance between test masses",
+    "explanation": "Gravitational wave strain h = delta L / L is the fractional length change induced by a passing wave. LIGO detects strains of ~10^-21 — a change smaller than 1/1000 the diameter of a proton over a 4-km arm.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the Hulse-Taylor system's orbital decay confirming?",
+    "options": [
+      "The neutron star equation of state",
+      "General relativity's prediction of gravitational wave emission causing the binary orbit to shrink at the precisely predicted rate",
+      "Quantum mechanical corrections to gravity",
+      "The existence of dark matter around pulsars"
+    ],
+    "correct_answer": "General relativity's prediction of gravitational wave emission causing the binary orbit to shrink at the precisely predicted rate",
+    "explanation": "Over decades, the Hulse-Taylor binary's orbital period decreased exactly as GR predicts from energy loss via gravitational radiation — the most precise test of GR before LIGO.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is a matched filter in gravitational wave data analysis?",
+    "options": [
+      "A physical filter in the detector",
+      "A data analysis technique correlating detector output with theoretically predicted waveform templates to detect buried signals",
+      "A method to filter noise from detectors",
+      "The algorithm used to find electromagnetic counterparts"
+    ],
+    "correct_answer": "A data analysis technique correlating detector output with theoretically predicted waveform templates to detect buried signals",
+    "explanation": "Matched filtering is LIGO's primary detection method — cross-correlating data with a bank of thousands of post-Newtonian/NR waveform templates to find weak signals buried in noise.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the concept of the Penrose-Hawking area theorem?",
+    "options": [
+      "A theorem about the size of the universe",
+      "The classical theorem that the total area of all black hole event horizons cannot decrease, analogous to entropy increasing",
+      "A theorem about the formation of singularities",
+      "The theorem that gravitational waves carry energy"
+    ],
+    "correct_answer": "The classical theorem that the total area of all black hole event horizons cannot decrease, analogous to entropy increasing",
+    "explanation": "Hawking's area theorem states that the total event horizon area can never decrease in classical GR — directly analogous to the second law of thermodynamics and motivating black hole entropy.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the concept of cosmic void in large-scale structure?",
+    "options": [
+      "The space between atoms",
+      "The vast regions of extremely low galaxy density in the cosmic web between filaments and walls",
+      "Empty space in galaxy halos",
+      "The interstellar medium in sparse galaxies"
+    ],
+    "correct_answer": "The vast regions of extremely low galaxy density in the cosmic web between filaments and walls",
+    "explanation": "Cosmic voids are underdense regions 10-100 Mpc across that expand relative to the mean density. They contain a small fraction of galaxies but constitute ~80% of the universe's volume.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the Zeldovich approximation?",
+    "options": [
+      "A simplification of stellar evolution",
+      "A first-order perturbation theory approximation describing the formation of large-scale structure through particle displacement",
+      "An approximation for black hole mass",
+      "A model for galaxy cluster formation"
+    ],
+    "correct_answer": "A first-order perturbation theory approximation describing the formation of large-scale structure through particle displacement",
+    "explanation": "The Zel'dovich approximation extrapolates linear particle trajectories, successfully predicting pancake collapse into sheets — the first successful model of cosmic web structure formation.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is a pancake collapse in cosmological structure formation?",
+    "options": [
+      "The collapse of spiral galaxies",
+      "The anisotropic collapse of an overdense region along its shortest axis first, forming a sheet (pancake) of matter",
+      "The formation of flat elliptical galaxies",
+      "The collapse of a protoplanetary disk"
+    ],
+    "correct_answer": "The anisotropic collapse of an overdense region along its shortest axis first, forming a sheet (pancake) of matter",
+    "explanation": "Zel'dovich predicted that matter collapses fastest along the axis of maximum compression, forming 2D pancakes before fragmenting into filaments and clumps — explaining the cosmic web topology.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the concept of non-Gaussianity in primordial perturbations?",
+    "options": [
+      "The non-circular shape of the CMB",
+      "Deviations from Gaussian statistics in primordial density perturbations, constraining inflationary models",
+      "Non-uniform galaxy distribution",
+      "The asymmetry in CMB temperature fluctuations"
+    ],
+    "correct_answer": "Deviations from Gaussian statistics in primordial density perturbations, constraining inflationary models",
+    "explanation": "Single-field slow-roll inflation predicts nearly Gaussian perturbations. Detecting non-Gaussianity would indicate multi-field inflation or other exotic early universe physics — Planck constrains f_NL < 10.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the Hubble flow?",
+    "options": [
+      "A current in the Sun's atmosphere",
+      "The smooth expansion of the universe on large scales, where galaxy recession velocity is proportional to distance",
+      "The flow of gas into galaxy clusters",
+      "The motion of the Milky Way toward Andromeda"
+    ],
+    "correct_answer": "The smooth expansion of the universe on large scales, where galaxy recession velocity is proportional to distance",
+    "explanation": "The Hubble flow describes the cosmological expansion on scales where peculiar velocities are small — at distances beyond ~100 Mpc, galaxy motions are dominated by the expansion.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is peculiar velocity in cosmology?",
+    "options": [
+      "The unusual orbital velocity of a planet",
+      "A galaxy's velocity relative to the Hubble flow, caused by local gravitational attractions",
+      "The velocity of a spacecraft on an unusual trajectory",
+      "Random quantum fluctuations in galaxy motion"
+    ],
+    "correct_answer": "A galaxy's velocity relative to the Hubble flow, caused by local gravitational attractions",
+    "explanation": "Peculiar velocities are deviations from pure Hubble expansion due to gravitational clustering. They cause redshift-space distortions in galaxy surveys and allow reconstruction of the underlying matter distribution.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the kinematic Sunyaev-Zel'dovich effect?",
+    "options": [
+      "The thermal SZ effect",
+      "The CMB temperature shift caused by the bulk peculiar motion of a galaxy cluster along the line of sight",
+      "Polarization caused by cluster gas",
+      "The SZ signal from galaxy halos"
+    ],
+    "correct_answer": "The CMB temperature shift caused by the bulk peculiar motion of a galaxy cluster along the line of sight",
+    "explanation": "The kinematic SZ effect is smaller than the thermal SZ effect and causes a temperature shift (positive or negative) proportional to the cluster's line-of-sight peculiar velocity — a probe of large-scale flows.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the concept of galaxy conformity?",
+    "options": [
+      "Galaxies conforming to morphological types",
+      "The observation that galaxies near quenched central galaxies tend themselves to be quenched even beyond the halo boundary",
+      "Similar galaxies clustering together",
+      "Galaxies following the Tully-Fisher relation"
+    ],
+    "correct_answer": "The observation that galaxies near quenched central galaxies tend themselves to be quenched even beyond the halo boundary",
+    "explanation": "Galaxy conformity (two-halo conformity) suggests environmental quenching extends beyond the virial radius of halos, possibly through cosmic web effects or assembly bias.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is halo assembly bias?",
+    "options": [
+      "A bias toward more massive halos",
+      "The dependence of halo clustering on properties beyond mass, such as formation time and concentration",
+      "Systematic errors in halo mass measurements",
+      "The preference for halos to form near other halos"
+    ],
+    "correct_answer": "The dependence of halo clustering on properties beyond mass, such as formation time and concentration",
+    "explanation": "Assembly bias means older, more concentrated halos of the same mass cluster more strongly than younger ones — this beyond-mass dependence complicates galaxy-halo modeling.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is redshift-space distortion (RSD)?",
+    "options": [
+      "The color change of galaxies with distance",
+      "The apparent distortion of galaxy distributions in redshift space due to peculiar velocities",
+      "The actual distortion of galaxy shapes by gravity",
+      "Gravitational lensing effects on galaxy spectra"
+    ],
+    "correct_answer": "The apparent distortion of galaxy distributions in redshift space due to peculiar velocities",
+    "explanation": "RSD causes galaxy clusters to appear elongated along the line of sight ('Fingers of God') and overdense regions to appear squashed ('Kaiser effect') — used to measure the growth rate of structure.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the growth rate of structure f(z)?",
+    "options": [
+      "How fast galaxies grow in size",
+      "The logarithmic growth rate of matter perturbations as a function of redshift, testing dark energy and modified gravity",
+      "The rate of galaxy cluster formation",
+      "The rate of merger events in the universe"
+    ],
+    "correct_answer": "The logarithmic growth rate of matter perturbations as a function of redshift, testing dark energy and modified gravity",
+    "explanation": "The growth rate f = d ln D/d ln a (where D is the linear growth factor) is measured from RSD and is sensitive to dark energy and modifications of gravity at cosmological scales.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is cosmic shear?",
+    "options": [
+      "The shearing of galaxy disks by tidal forces",
+      "The weak gravitational lensing distortion of background galaxy shapes by large-scale matter distribution",
+      "The shearing of galaxy clusters by mergers",
+      "Wind shear in stellar atmospheres"
+    ],
+    "correct_answer": "The weak gravitational lensing distortion of background galaxy shapes by large-scale matter distribution",
+    "explanation": "Cosmic shear measures correlations in galaxy shape distortions from weak gravitational lensing, probing the distribution and growth of dark matter and constraining dark energy.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the concept of photometric redshift?",
+    "options": [
+      "Redshift measured from photographs of the sky",
+      "A redshift estimate derived from multi-band photometry by fitting template SEDs, without requiring spectroscopy",
+      "The redshift measured from a single photometric band",
+      "The redshift of photons from a star's photosphere"
+    ],
+    "correct_answer": "A redshift estimate derived from multi-band photometry by fitting template SEDs, without requiring spectroscopy",
+    "explanation": "Photometric redshifts (photo-z's) allow redshift estimates for millions of galaxies using broad-band photometry — less precise than spectroscopy but enabling large statistical samples for cosmology.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the Fisher matrix formalism in cosmology?",
+    "options": [
+      "A method to measure galaxy shapes",
+      "A statistical tool for forecasting the precision of cosmological parameter constraints from future surveys",
+      "A matrix describing particle physics in the early universe",
+      "A method for analyzing gravitational wave data"
+    ],
+    "correct_answer": "A statistical tool for forecasting the precision of cosmological parameter constraints from future surveys",
+    "explanation": "The Fisher matrix approximates the information content of a dataset, allowing prediction of how well future experiments will constrain cosmological parameters without running full analyses.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is Silk damping scale?",
+    "options": [
+      "A measurement scale in spectroscopy",
+      "The characteristic scale below which CMB anisotropies are suppressed by photon diffusion before recombination",
+      "The scale of stellar convection",
+      "The damping length of gravitational waves"
+    ],
+    "correct_answer": "The characteristic scale below which CMB anisotropies are suppressed by photon diffusion before recombination",
+    "explanation": "The Silk damping scale (~10 Mpc comoving) sets where the CMB power spectrum turns over in the damping tail — photons diffusing more than this scale during recombination erase density fluctuations.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is a Dyson sphere in astrophysics?",
+    "options": [
+      "A spherical star cluster",
+      "A hypothetical megastructure surrounding a star to capture most or all of its energy output",
+      "A spherical shell of gas around a white dwarf",
+      "The photon sphere of a black hole"
+    ],
+    "correct_answer": "A hypothetical megastructure surrounding a star to capture most or all of its energy output",
+    "explanation": "A Dyson sphere is a thought experiment by Freeman Dyson — an advanced civilization could build a shell around their star to harvest its full energy, potentially detectable as an infrared excess.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the concept of Chandrasekhar mass in Type Ia supernovae?",
+    "options": [
+      "The mass of the star before explosion",
+      "The ~1.4 solar mass threshold where carbon-oxygen white dwarfs undergo thermonuclear runaway",
+      "The mass of the ejected envelope",
+      "The mass of the remaining neutron star"
+    ],
+    "correct_answer": "The ~1.4 solar mass threshold where carbon-oxygen white dwarfs undergo thermonuclear runaway",
+    "explanation": "In the standard single-degenerate Type Ia model, a white dwarf accreting mass approaches 1.4 solar masses, triggering carbon ignition and thermonuclear explosion that destroys the white dwarf.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What are detonation versus deflagration in Type Ia supernovae?",
+    "options": [
+      "Two types of supernova classifications",
+      "Detonation is supersonic burning; deflagration is subsonic burning — the transition between them in Type Ia produces the observed nickel-56 distribution",
+      "Two phases of white dwarf collapse",
+      "Two zones in a supernova remnant"
+    ],
+    "correct_answer": "Detonation is supersonic burning; deflagration is subsonic burning — the transition between them in Type Ia produces the observed nickel-56 distribution",
+    "explanation": "The delayed detonation model proposes Type Ia supernovae begin as slow deflagration that transitions to supersonic detonation, successfully reproducing observed nickel-56 yields and velocity structures.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is nickel-56's role in supernova light curves?",
+    "options": [
+      "Ni-56 powers the initial explosion",
+      "Ni-56 synthesized in the explosion decays to Co-56 then Fe-56, powering the supernova light curve through radioactive heating",
+      "Ni-56 is the ejected envelope's main component",
+      "Ni-56 determines the explosion energy"
+    ],
+    "correct_answer": "Ni-56 synthesized in the explosion decays to Co-56 then Fe-56, powering the supernova light curve through radioactive heating",
+    "explanation": "The nickel-56 decay chain (t_1/2 = 6.1 days for Ni-56, 77 days for Co-56) provides the energy that keeps supernova ejecta luminous for weeks to months after the initial explosion.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is a collimated relativistic jet's Lorentz factor?",
+    "options": [
+      "The jet's rotation rate",
+      "The Lorentz factor gamma describes the jet's bulk relativistic motion, with AGN jets reaching gamma of 10-50",
+      "The angle of jet collimation",
+      "The magnetic field intensity of the jet"
+    ],
+    "correct_answer": "The Lorentz factor gamma describes the jet's bulk relativistic motion, with AGN jets reaching gamma of 10-50",
+    "explanation": "Relativistic jets with high Lorentz factors show superluminal motion (apparent faster-than-light motion), beaming of radiation toward observers, and rapid variability — all consequences of bulk relativistic motion.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is superluminal motion in astrophysics?",
+    "options": [
+      "Actual faster-than-light motion",
+      "The apparent faster-than-light transverse motion of relativistic jet components due to geometric projection effects",
+      "Motion of particles in quasar accretion disks",
+      "Quantum tunneling in extreme gravity"
+    ],
+    "correct_answer": "The apparent faster-than-light transverse motion of relativistic jet components due to geometric projection effects",
+    "explanation": "For a jet moving at nearly the speed of light at a small angle to the line of sight, the apparent transverse velocity can exceed c — not actual FTL but a projection effect predicted by SR.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the Tolman-Bondi model in cosmology?",
+    "options": [
+      "A model of galaxy cluster formation",
+      "An exact GR solution describing spherically symmetric dust collapse, used to study large-scale void formation and inhomogeneous cosmologies",
+      "A model of stellar structure",
+      "A model for primordial nucleosynthesis"
+    ],
+    "correct_answer": "An exact GR solution describing spherically symmetric dust collapse, used to study large-scale void formation and inhomogeneous cosmologies",
+    "explanation": "The Lemaitre-Tolman-Bondi model is an exact GR solution for a spherically symmetric dust distribution, used to model void formation and study effects of inhomogeneity on distance measurements.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the concept of cosmic distance duality?",
+    "options": [
+      "Two independent distance scales in cosmology",
+      "The relation between luminosity distance and angular diameter distance: d_L = (1+z)^2 * d_A, valid in GR for photon conservation",
+      "The two methods of measuring H0",
+      "The relation between comoving and proper distances"
+    ],
+    "correct_answer": "The relation between luminosity distance and angular diameter distance: d_L = (1+z)^2 * d_A, valid in GR for photon conservation",
+    "explanation": "The Etherington distance duality relation is an exact GR result valid for any metric theory when photon number is conserved. Violations would indicate new physics.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the Planck length and its significance?",
+    "options": [
+      "The size of the Planck satellite",
+      "The fundamental length scale ~1.6x10^-35 m where quantum gravitational effects become important",
+      "The wavelength of the CMB peak",
+      "The size of a proton in Planck units"
+    ],
+    "correct_answer": "The fundamental length scale ~1.6x10^-35 m where quantum gravitational effects become important",
+    "explanation": "The Planck length is constructed from G, hbar, and c — at this scale, quantum fluctuations of spacetime geometry become order unity and a quantum theory of gravity is required.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the stochastic gravitational wave background from binary mergers?",
+    "options": [
+      "Random noise in LIGO detectors",
+      "The superposition of gravitational waves from all unresolved merging binary systems throughout the history of the universe",
+      "Gravitational waves from a single massive merger",
+      "Thermal gravitational radiation from hot plasmas"
+    ],
+    "correct_answer": "The superposition of gravitational waves from all unresolved merging binary systems throughout the history of the universe",
+    "explanation": "The astrophysical stochastic GW background from all merging binary black holes, neutron stars, and white dwarfs in the universe forms a continuous background being searched for by LIGO and PTAs.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the concept of neutron star seismology?",
+    "options": [
+      "Earthquakes on neutron stars",
+      "The study of oscillation modes in neutron stars to constrain their equation of state and interior physics",
+      "Seismic activity caused by neutron star mergers",
+      "Sound waves in neutron star atmospheres"
+    ],
+    "correct_answer": "The study of oscillation modes in neutron stars to constrain their equation of state and interior physics",
+    "explanation": "Neutron star oscillation modes (f-modes, g-modes, r-modes) carry information about interior composition. Giant flare oscillations from magnetars and quasi-periodic oscillations in X-ray binaries probe these.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the concept of accretion disk corona in X-ray binaries?",
+    "options": [
+      "The outer atmosphere of the accretion disk",
+      "A hot diffuse plasma above the accretion disk that inverse-Compton scatters soft disk photons into hard X-rays",
+      "The region of the disk near the compact object",
+      "The jet launching region of an X-ray binary"
+    ],
+    "correct_answer": "A hot diffuse plasma above the accretion disk that inverse-Compton scatters soft disk photons into hard X-rays",
+    "explanation": "The accretion disk corona in X-ray binaries and AGN is a hot (10^8-10^9 K) plasma responsible for the hard X-ray power law emission through inverse Compton scattering of soft disk photons.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the Comptonization in astrophysical plasmas?",
+    "options": [
+      "Compton scattering only lowering photon energy",
+      "The modification of a photon spectrum by repeated inverse Compton scattering in a hot plasma, producing power-law high-energy spectra",
+      "The absorption of X-rays by dense gas",
+      "The photoionization of gas by X-rays"
+    ],
+    "correct_answer": "The modification of a photon spectrum by repeated inverse Compton scattering in a hot plasma, producing power-law high-energy spectra",
+    "explanation": "In hot coronae, soft photons undergo inverse Compton scattering multiple times, gaining energy. The resulting power-law X-ray spectra of AGN and X-ray binaries are described by Comptonization models.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the concept of stellar age from isochrone fitting?",
+    "options": [
+      "Measuring stellar ages from radioactive decay",
+      "Fitting theoretical isochrones (same-age evolutionary tracks) to observed star cluster color-magnitude diagrams to determine cluster age",
+      "Counting rings in a star's atmosphere",
+      "Dating stars from their chemical composition"
+    ],
+    "correct_answer": "Fitting theoretical isochrones (same-age evolutionary tracks) to observed star cluster color-magnitude diagrams to determine cluster age",
+    "explanation": "Stellar isochrones are evolutionary tracks for stars of the same age but different masses. Fitting them to cluster CMDs determines the age from the turnoff point where stars leave the main sequence.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is MOND (Modified Newtonian Dynamics)?",
+    "options": [
+      "A modification of quantum mechanics",
+      "A modification of Newton's law of gravity at low accelerations, proposed as an alternative to dark matter to explain galaxy rotation curves",
+      "A model of dark energy",
+      "A theory modifying general relativity at cosmic scales"
+    ],
+    "correct_answer": "A modification of Newton's law of gravity at low accelerations, proposed as an alternative to dark matter to explain galaxy rotation curves",
+    "explanation": "MOND (Milgrom 1983) modifies gravity below a critical acceleration a0 ~ 10^-10 m/s^2, successfully predicting galaxy rotation curves without dark matter but struggling with cluster dynamics.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the neutrino floor in dark matter detection?",
+    "options": [
+      "The minimum detectable neutrino energy",
+      "The irreducible background from solar and atmospheric neutrinos that sets a fundamental limit on WIMP direct detection experiments",
+      "The neutrino emission rate of the Sun's core",
+      "The minimum neutrino mass"
+    ],
+    "correct_answer": "The irreducible background from solar and atmospheric neutrinos that sets a fundamental limit on WIMP direct detection experiments",
+    "explanation": "The neutrino floor (coherent neutrino scattering background) creates an irreducible background for WIMP detectors — once reached, sensitivity cannot be improved without directional detection capabilities.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the concept of fuzzy dark matter?",
+    "options": [
+      "Dark matter with unclear properties",
+      "Ultra-light axion-like dark matter with de Broglie wavelengths of kiloparsecs, creating quantum pressure that suppresses small-scale structure",
+      "Dark matter interacting with electromagnetic fields faintly",
+      "Dark matter with a distribution around galaxies"
+    ],
+    "correct_answer": "Ultra-light axion-like dark matter with de Broglie wavelengths of kiloparsecs, creating quantum pressure that suppresses small-scale structure",
+    "explanation": "Fuzzy dark matter (FDM) consists of ultralight bosons (~10^-22 eV) where quantum wave effects operate on galactic scales, creating solitonic cores and suppressing substructure below ~1 kpc.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the Lyman-break galaxy technique?",
+    "options": [
+      "Finding galaxies with emission lines",
+      "Selecting high-redshift galaxies by the sharp drop in UV flux caused by neutral hydrogen absorption below 912 angstroms",
+      "Finding galaxies with absorption lines",
+      "Selecting galaxies by Lyman-alpha emission"
+    ],
+    "correct_answer": "Selecting high-redshift galaxies by the sharp drop in UV flux caused by neutral hydrogen absorption below 912 angstroms",
+    "explanation": "The Lyman break at 912 Å (ionization edge of hydrogen) causes a sharp flux dropout in galaxy photometry that shifts to longer wavelengths at higher redshift, allowing efficient selection of z~3-6 galaxies.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the concept of galaxy-galaxy lensing?",
+    "options": [
+      "Gravitational lensing of one galaxy by another",
+      "The correlation between foreground galaxy positions and the shapes of background galaxies, measuring the projected mass distribution around galaxies",
+      "Two galaxies merging with lensing effects",
+      "Lensing of quasars by intervening galaxies"
+    ],
+    "correct_answer": "The correlation between foreground galaxy positions and the shapes of background galaxies, measuring the projected mass distribution around galaxies",
+    "explanation": "Galaxy-galaxy lensing measures the average matter distribution around galaxy samples, including dark matter halos, by correlating lens galaxy positions with background source shear.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the angular diameter distance?",
+    "options": [
+      "The distance based on apparent angular size compared to true size",
+      "The proper distance to an object when the light we receive was emitted, used in the angular size formula theta = D/d_A",
+      "The distance measured by angular speed of motion",
+      "The size of the observable universe in angular units"
+    ],
+    "correct_answer": "The proper distance to an object when the light we receive was emitted, used in the angular size formula theta = D/d_A",
+    "explanation": "Angular diameter distance d_A is used in cosmological observations of standard rulers — in an expanding universe, d_A reaches a maximum around z~1-2 and then decreases, making distant objects appear larger.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the luminosity distance?",
+    "options": [
+      "The true distance to a star",
+      "The inferred distance from the inverse square law relating observed flux to intrinsic luminosity, increasing faster than proper distance due to expansion",
+      "The distance to the nearest galaxy cluster",
+      "The distance measured by parallax to very distant objects"
+    ],
+    "correct_answer": "The inferred distance from the inverse square law relating observed flux to intrinsic luminosity, increasing faster than proper distance due to expansion",
+    "explanation": "Luminosity distance d_L = (1+z) * d_M accounts for both the geometrical dilution and the redshifting and time-dilation of photons by expansion — it is used with standard candles.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the cosmic infrared background (CIB)?",
+    "options": [
+      "Infrared emission from the CMB",
+      "The integrated infrared light from all dust-obscured star formation and AGN activity throughout cosmic history",
+      "Infrared radiation from galaxy clusters",
+      "The thermal infrared emission of the interstellar medium"
+    ],
+    "correct_answer": "The integrated infrared light from all dust-obscured star formation and AGN activity throughout cosmic history",
+    "explanation": "The CIB contains the cumulative energy from dust-reprocessed starlight in all galaxies — roughly equal in energy to the optical extragalactic background light, revealing the importance of dusty star formation.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the extragalactic background light (EBL)?",
+    "options": [
+      "The microwave background radiation",
+      "The integrated light from all galaxies throughout cosmic history at optical through infrared wavelengths",
+      "Gamma rays from AGN",
+      "X-ray emission from the cosmic web"
+    ],
+    "correct_answer": "The integrated light from all galaxies throughout cosmic history at optical through infrared wavelengths",
+    "explanation": "The EBL is the cumulative electromagnetic radiation from all galaxies, attenuating high-energy gamma rays through pair production — measuring EBL constrains galaxy formation and the history of star formation.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is TeV astronomy?",
+    "options": [
+      "Astronomy at very high radio frequencies",
+      "The study of the universe at very high energies (trillion eV gamma rays) using Cherenkov telescopes and particle detectors",
+      "Telescope engineering at extreme scales",
+      "Thermal energy measurements of galaxy clusters"
+    ],
+    "correct_answer": "The study of the universe at very high energies (trillion eV gamma rays) using Cherenkov telescopes and particle detectors",
+    "explanation": "TeV astronomy uses Imaging Atmospheric Cherenkov Telescopes (IACTs) like HESS, MAGIC, and VERITAS to detect very high energy gamma rays from AGN, supernova remnants, and pulsars.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the Cherenkov radiation detection technique in gamma-ray astronomy?",
+    "options": [
+      "A type of optical telescope",
+      "Detecting the brief blue light cone produced when gamma-ray-initiated air showers move through the atmosphere faster than light travels in air",
+      "Detecting gamma rays from space telescopes",
+      "A radio detection technique for cosmic rays"
+    ],
+    "correct_answer": "Detecting the brief blue light cone produced when gamma-ray-initiated air showers move through the atmosphere faster than light travels in air",
+    "explanation": "When a high-energy gamma ray initiates an air shower, secondary particles move faster than light in air, producing a nanosecond flash of Cherenkov light detectable by ground-based telescope arrays.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the concept of multi-messenger astronomy?",
+    "options": [
+      "Using multiple telescope types",
+      "Combining gravitational wave, electromagnetic, and neutrino observations of the same astrophysical event for comprehensive understanding",
+      "Broadcasting astronomy to multiple audiences",
+      "Multiple countries cooperating in astronomy"
+    ],
+    "correct_answer": "Combining gravitational wave, electromagnetic, and neutrino observations of the same astrophysical event for comprehensive understanding",
+    "explanation": "Multi-messenger astronomy pairs GW detections with electromagnetic follow-up (GW170817) or neutrino signals (from supernovae), enabling studies impossible in any single channel.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the concept of Hawking temperature of a black hole?",
+    "options": [
+      "The temperature of the accretion disk",
+      "The temperature of Hawking radiation inversely proportional to black hole mass: T = hbar c^3 / (8 pi G M k_B)",
+      "The temperature at the event horizon surface",
+      "The temperature of gas near the photon sphere"
+    ],
+    "correct_answer": "The temperature of Hawking radiation inversely proportional to black hole mass: T = hbar c^3 / (8 pi G M k_B)",
+    "explanation": "Hawking temperature is tiny for astrophysical black holes (~10^-7 K for a solar mass BH) but becomes significant for primordial micro black holes. It implies black holes slowly evaporate.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the black hole complementarity principle?",
+    "options": [
+      "The observation that black holes complement galaxies",
+      "The proposal that falling observers experience nothing special at the horizon while distant observers see information preserved at the horizon",
+      "The duality between black holes in different dimensions",
+      "The complementarity of mass and charge in black holes"
+    ],
+    "correct_answer": "The proposal that falling observers experience nothing special at the horizon while distant observers see information preserved at the horizon",
+    "explanation": "Black hole complementarity (Susskind et al.) proposes that no single observer can see information both fall into a black hole and escape as Hawking radiation, resolving the information paradox for any single observer.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the concept of asymptotic freedom in QCD's relevance to neutron stars?",
+    "options": [
+      "Stars moving away from us at high redshift",
+      "At extremely high densities in neutron star cores, quarks may become asymptotically free and deconfined, forming quark matter",
+      "The freedom of photons to escape neutron star gravity",
+      "The relaxation of stellar oscillations"
+    ],
+    "correct_answer": "At extremely high densities in neutron star cores, quarks may become asymptotically free and deconfined, forming quark matter",
+    "explanation": "Asymptotic freedom in QCD means quarks interact weakly at high energies/densities. At densities 5-10 times nuclear saturation, quark matter may form in neutron star cores as a quark-gluon plasma.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the concept of r-mode instability in neutron stars?",
+    "options": [
+      "Radial oscillations of neutron stars",
+      "A gravitational wave-driven instability in neutron star rotation through Coriolis-force-driven r-mode oscillations",
+      "The instability of neutron stars to collapse",
+      "Oscillations in the neutron star crust"
+    ],
+    "correct_answer": "A gravitational wave-driven instability in neutron star rotation through Coriolis-force-driven r-mode oscillations",
+    "explanation": "R-mode oscillations in rapidly rotating neutron stars are subject to the Chandrasekhar-Friedman-Schutz instability — they emit gravitational waves that can spin down a newly born neutron star significantly.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the concept of cosmic rays' GZK cutoff?",
+    "options": [
+      "A maximum energy for cosmic rays determined by the age of the universe",
+      "The Greisen-Zatsepin-Kuzmin cutoff at ~5x10^19 eV where protons lose energy to CMB photons via pion production",
+      "A minimum energy for cosmic rays detected at Earth",
+      "The energy at which cosmic rays become dark matter"
+    ],
+    "correct_answer": "The Greisen-Zatsepin-Kuzmin cutoff at ~5x10^19 eV where protons lose energy to CMB photons via pion production",
+    "explanation": "Above the GZK energy, protons interact with CMB photons producing pions (p + gamma -> Delta+ -> p + pi0), limiting the range of ultra-high-energy cosmic rays to ~50 Mpc.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the Larmor formula in astrophysics?",
+    "options": [
+      "A formula for the luminosity of stars",
+      "The formula for power radiated by an accelerating charged particle, fundamental to synchrotron and cyclotron radiation calculations",
+      "A formula for the orbital period of binary stars",
+      "The formula for gravitational wave luminosity"
+    ],
+    "correct_answer": "The formula for power radiated by an accelerating charged particle, fundamental to synchrotron and cyclotron radiation calculations",
+    "explanation": "The Larmor formula P = q^2 a^2 / (6 pi epsilon_0 c^3) gives the power radiated by an accelerating charge — the basis for calculating synchrotron and bremsstrahlung radiation in astrophysical sources.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is synchrotron self-absorption?",
+    "options": [
+      "Synchrotron radiation absorbed by the interstellar medium",
+      "The absorption of synchrotron photons by the same relativistic electrons emitting them, creating a spectral turnover at low radio frequencies",
+      "The quenching of synchrotron radiation by magnetic fields",
+      "X-ray absorption in synchrotron sources"
+    ],
+    "correct_answer": "The absorption of synchrotron photons by the same relativistic electrons emitting them, creating a spectral turnover at low radio frequencies",
+    "explanation": "Synchrotron self-absorption makes compact radio sources optically thick at low frequencies, creating a characteristic spectral break — used to estimate the magnetic field strength and size of radio sources.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the concept of the cosmic coincidence problem?",
+    "options": [
+      "The problem that the universe appears to be flat",
+      "The puzzling fact that dark energy and dark matter have comparable densities today despite evolving differently through cosmic history",
+      "The coincidence that the CMB was discovered accidentally",
+      "The fact that there are exactly eight planets in the solar system"
+    ],
+    "correct_answer": "The puzzling fact that dark energy and dark matter have comparable densities today despite evolving differently through cosmic history",
+    "explanation": "Dark matter density scales as (1+z)^3 while dark energy density is constant — their near-equality today after billions of years of different evolution seems like an extraordinary cosmic coincidence.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the Little Rip scenario?",
+    "options": [
+      "A small version of the Big Rip",
+      "A dark energy scenario where bound structures are eventually disrupted but singularity is never reached",
+      "The slow dissolution of galaxy clusters",
+      "A mild version of the Big Freeze"
+    ],
+    "correct_answer": "A dark energy scenario where bound structures are eventually disrupted but singularity is never reached",
+    "explanation": "The Little Rip occurs for dark energy models where the equation of state crosses w = -1 asymptotically — all bound structures dissolve but the Hubble rate diverges only at infinite time.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the concept of isotropic turbulence and its role in star formation?",
+    "options": [
+      "Turbulence that looks the same in all directions",
+      "Random supersonic motions in molecular clouds that provide support against gravitational collapse and determine the stellar IMF",
+      "Turbulence in stellar interiors",
+      "Turbulence in accretion disks"
+    ],
+    "correct_answer": "Random supersonic motions in molecular clouds that provide support against gravitational collapse and determine the stellar IMF",
+    "explanation": "Supersonic turbulence in GMCs creates a hierarchy of density fluctuations — the clumps exceeding the local Jeans mass collapse to form stars, with turbulence setting the characteristic mass scale.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the concept of mass segregation in star clusters?",
+    "options": [
+      "Segregating stars by age",
+      "The tendency for more massive stars to sink toward cluster centers through dynamical friction while lighter stars populate the outskirts",
+      "The separation of gas and stars in a forming cluster",
+      "Segregating star clusters by mass"
+    ],
+    "correct_answer": "The tendency for more massive stars to sink toward cluster centers through dynamical friction while lighter stars populate the outskirts",
+    "explanation": "Mass segregation occurs through two-body relaxation — equipartition of kinetic energy causes massive stars to slow and sink to cluster centers, while low-mass stars gain speed and populate halos.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the concept of stellar archaeology?",
+    "options": [
+      "Finding ancient astronomical instruments",
+      "Using the chemical compositions of old metal-poor stars to reconstruct the nucleosynthetic history of the early universe",
+      "Dating ancient stellar remains like white dwarfs",
+      "Archaeological study of ancient astronomical knowledge"
+    ],
+    "correct_answer": "Using the chemical compositions of old metal-poor stars to reconstruct the nucleosynthetic history of the early universe",
+    "explanation": "Stellar archaeology (near-field cosmology) uses the element abundances in old, metal-poor stars as fossil records of early nucleosynthesis, constraining the first supernovae and chemical evolution of the galaxy.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the concept of the circumgalactic medium (CGM)?",
+    "options": [
+      "Gas within galaxies",
+      "The diffuse gas halo surrounding a galaxy extending to the virial radius, mediating gas accretion and outflows",
+      "Gas between galaxy clusters",
+      "The hot gas in galactic centers"
+    ],
+    "correct_answer": "The diffuse gas halo surrounding a galaxy extending to the virial radius, mediating gas accretion and outflows",
+    "explanation": "The CGM extends to ~300 kpc around the Milky Way, containing most of a galaxy's baryons in a complex multi-phase medium through which gas is accreted from the cosmic web and expelled by galactic winds.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the concept of dynamical friction in astrophysics?",
+    "options": [
+      "Friction between stars in clusters",
+      "The gravitational drag force on a massive body moving through a sea of lighter particles, causing orbital decay",
+      "Friction in accretion disks",
+      "The slowing of galaxy rotation over time"
+    ],
+    "correct_answer": "The gravitational drag force on a massive body moving through a sea of lighter particles, causing orbital decay",
+    "explanation": "Dynamical friction (Chandrasekhar 1943) acts on massive objects moving through a stellar or dark matter background, causing orbital decay — essential for galaxy mergers and globular cluster disruption.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the concept of tidal stripping in galaxy clusters?",
+    "options": [
+      "Stars being stripped from galaxies by tidal forces",
+      "The removal of stars and dark matter from galaxy outskirts by gravitational tidal forces from the cluster potential",
+      "The removal of gas from galaxy halos",
+      "Tidal disruption events in galaxy centers"
+    ],
+    "correct_answer": "The removal of stars and dark matter from galaxy outskirts by gravitational tidal forces from the cluster potential",
+    "explanation": "Tidal stripping removes material from the outer regions of galaxies as they orbit in clusters, contributing to the intracluster stellar population and truncating the galaxy's stellar and dark matter profiles.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the concept of cool-core galaxy clusters?",
+    "options": [
+      "Galaxy clusters with low-temperature stars",
+      "Galaxy clusters where the central gas has short cooling times creating strong temperature gradients and potentially ongoing star formation",
+      "Galaxy clusters at high redshift with cold dark matter",
+      "Galaxy clusters forming new stars rapidly"
+    ],
+    "correct_answer": "Galaxy clusters where the central gas has short cooling times creating strong temperature gradients and potentially ongoing star formation",
+    "explanation": "Cool-core clusters have dense, centrally concentrated X-ray emitting gas with cooling times shorter than the Hubble time — the expected cooling flow is thought to be heated by AGN feedback from the central galaxy.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the concept of weak gravitational lensing?",
+    "options": [
+      "Gravitational lensing by weak gravitational fields",
+      "The slight coherent distortion of background galaxy shapes by intervening mass distributions, statistical in nature",
+      "Lensing that barely bends light",
+      "Lensing detectable only by weak radio signals"
+    ],
+    "correct_answer": "The slight coherent distortion of background galaxy shapes by intervening mass distributions, statistical in nature",
+    "explanation": "Weak lensing produces shear signals of order 1% per galaxy — much smaller than intrinsic ellipticities, requiring millions of galaxy shapes to detect statistically. It maps dark matter without bias.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the Alcock-Paczynski test?",
+    "options": [
+      "A method to measure stellar radii",
+      "A geometric test of cosmology using the statistical isotropy of galaxy pairs to constrain the dark energy equation of state",
+      "A test of general relativity in binary stars",
+      "A method to detect primordial black holes"
+    ],
+    "correct_answer": "A geometric test of cosmology using the statistical isotropy of galaxy pairs to constrain the dark energy equation of state",
+    "explanation": "The AP test uses the geometric fact that statistically isotropic galaxy distributions in 3D appear distorted in redshift space if wrong cosmological parameters are used — constraining the expansion history.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the concept of Silk damping as calculated from the photon mean free path?",
+    "options": [
+      "A damping effect from dust absorption",
+      "The dissipation of acoustic oscillations in the photon-baryon fluid when the photon mean free path becomes comparable to the oscillation wavelength",
+      "The damping of gravitational waves by photons",
+      "The absorption of CMB photons by neutral gas"
+    ],
+    "correct_answer": "The dissipation of acoustic oscillations in the photon-baryon fluid when the photon mean free path becomes comparable to the oscillation wavelength",
+    "explanation": "Silk damping occurs on scales smaller than the photon diffusion scale sqrt(N) * l_mfp where N is the number of scatterings — density perturbations are smeared out, creating the exponential damping tail in the CMB power spectrum.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the concept of bubble nucleation in cosmological phase transitions?",
+    "options": [
+      "Bubbles forming in stellar interiors",
+      "The quantum tunneling formation of bubbles of a new phase in first-order cosmological phase transitions, possibly at the electroweak scale",
+      "Formation of planetary nebulae",
+      "Bubbles in neutron star crusts"
+    ],
+    "correct_answer": "The quantum tunneling formation of bubbles of a new phase in first-order cosmological phase transitions, possibly at the electroweak scale",
+    "explanation": "In first-order phase transitions, the new phase nucleates as bubbles that expand and collide — producing a stochastic gravitational wave background and potentially relevant to baryogenesis.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the concept of peculiar acceleration in cosmology?",
+    "options": [
+      "The unusual acceleration of spacecraft",
+      "The gravitational acceleration of a galaxy relative to the Hubble flow, arising from density inhomogeneities",
+      "The acceleration of cosmic expansion",
+      "The angular acceleration of galaxies"
+    ],
+    "correct_answer": "The gravitational acceleration of a galaxy relative to the Hubble flow, arising from density inhomogeneities",
+    "explanation": "Peculiar accelerations (and the resulting peculiar velocities) are driven by density perturbations — mapping them through galaxy peculiar velocities constrains the matter power spectrum.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the concept of stellar convection and its role in mixing?",
+    "options": [
+      "Heat transfer by radiation in stars",
+      "Turbulent overturning motions in stellar interiors that transport energy, mix chemical elements, and affect stellar evolution",
+      "The convection of stellar winds",
+      "Sound waves propagating in stellar interiors"
+    ],
+    "correct_answer": "Turbulent overturning motions in stellar interiors that transport energy, mix chemical elements, and affect stellar evolution",
+    "explanation": "Convective zones (where the Schwarzschild stability criterion is violated) mix stellar interiors. In the Sun, the outer 30% is convective; in massive stars, the core is convective. Convective overshooting extends mixed regions.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the concept of stellar rotation's effect on evolution?",
+    "options": [
+      "Rotation has no effect on stellar evolution",
+      "Rotation drives internal mixing through meridional circulation and rotational instabilities, affecting chemical evolution and extending stellar lifetimes",
+      "Rotation only affects a star's surface appearance",
+      "Rotation primarily affects binary systems"
+    ],
+    "correct_answer": "Rotation drives internal mixing through meridional circulation and rotational instabilities, affecting chemical evolution and extending stellar lifetimes",
+    "explanation": "Rapidly rotating stars mix fresh hydrogen into their cores (extending MS lifetimes), transport angular momentum outward, and experience enhanced mass loss — critical for modeling massive star evolution and GRBs.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the concept of cosmic lensing tomography?",
+    "options": [
+      "3D mapping of the universe by lensing",
+      "Dividing source galaxies into redshift bins and correlating their shear signals to probe the matter distribution at different cosmic epochs",
+      "Time-domain lensing observations",
+      "Lensing of CMB photons"
+    ],
+    "correct_answer": "Dividing source galaxies into redshift bins and correlating their shear signals to probe the matter distribution at different cosmic epochs",
+    "explanation": "Lensing tomography cross-correlates shear from galaxies at different redshifts, providing 3D information about the matter power spectrum evolution — one of the most powerful probes of dark energy and neutrino mass.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the concept of a standard siren in gravitational wave astronomy?",
+    "options": [
+      "A loud gravitational wave event",
+      "A binary merger that provides an independent measurement of the Hubble constant from GW amplitude (distance) and EM redshift",
+      "A calibration signal for LIGO detectors",
+      "A type of pulsing source in the gravitational wave sky"
+    ],
+    "correct_answer": "A binary merger that provides an independent measurement of the Hubble constant from GW amplitude (distance) and EM redshift",
+    "explanation": "GW170817 provided H0 from the gravitational wave distance (absolute, model-independent) and the optical redshift of the host galaxy — standard sirens are a new cosmological distance ladder rung.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the concept of the intergalactic radiation field?",
+    "options": [
+      "Radiation inside galaxies",
+      "The diffuse background of UV, optical, and X-ray photons filling intergalactic space from AGN and star-forming galaxies",
+      "Radiation from quasar jets",
+      "The CMB radiation field"
+    ],
+    "correct_answer": "The diffuse background of UV, optical, and X-ray photons filling intergalactic space from AGN and star-forming galaxies",
+    "explanation": "The UV background (UVB) from AGN and star-forming galaxies is responsible for keeping the IGM ionized after reionization, suppressing gas accretion into low-mass halos.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is photoionization equilibrium in the IGM?",
+    "options": [
+      "The balance of photon and ion counts",
+      "The equilibrium between photoionization by the UV background and recombination, determining the ionization state of intergalactic hydrogen",
+      "The thermal equilibrium of plasma",
+      "The balance of stellar and AGN radiation"
+    ],
+    "correct_answer": "The equilibrium between photoionization by the UV background and recombination, determining the ionization state of intergalactic hydrogen",
+    "explanation": "In photoionization equilibrium, the UV background ionizes hydrogen at a rate balancing recombinations. This sets the neutral hydrogen fraction in the IGM, determining Lyman-alpha forest opacity.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the baryon acoustic oscillation scale as a standard ruler?",
+    "options": [
+      "The size of galaxy clusters",
+      "The ~150 Mpc comoving scale imprinted by sound waves in the early universe, used to constrain dark energy through the angular diameter distance",
+      "The correlation length of galaxy pairs",
+      "The wavelength of the longest CMB mode"
+    ],
+    "correct_answer": "The ~150 Mpc comoving scale imprinted by sound waves in the early universe, used to constrain dark energy through the angular diameter distance",
+    "explanation": "The BAO scale is a known physical scale that can be measured at different redshifts in galaxy surveys, tracing the ratio d_A(z)/r_s — a powerful probe of the dark energy equation of state.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the concept of galaxy quenching?",
+    "options": [
+      "Galaxies consuming all nearby gas",
+      "The cessation of star formation in galaxies through mechanisms including AGN feedback, stellar feedback, and environmental effects",
+      "Galaxies cooling down after formation",
+      "The end of nuclear fusion in galaxies"
+    ],
+    "correct_answer": "The cessation of star formation in galaxies through mechanisms including AGN feedback, stellar feedback, and environmental effects",
+    "explanation": "Galaxy quenching transforms blue star-forming galaxies into red passive galaxies. Proposed mechanisms include AGN feedback heating the halo, ram pressure stripping in clusters, and merger-driven starbursts.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the concept of stellar metallicity gradient in galaxies?",
+    "options": [
+      "The variation of star formation across a galaxy",
+      "The systematic decrease of stellar metallicity from galaxy centers to outskirts, reflecting inside-out formation history",
+      "The gradient of stellar ages in a galaxy",
+      "The variation of stellar mass with radius"
+    ],
+    "correct_answer": "The systematic decrease of stellar metallicity from galaxy centers to outskirts, reflecting inside-out formation history",
+    "explanation": "Metallicity gradients in galaxies reveal their formation history — negative gradients (higher metallicity at center) result from inside-out growth where inner regions formed earlier and had more chemical enrichment.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the concept of the cosmic star formation rate density?",
+    "options": [
+      "The rate of star formation in individual galaxies",
+      "The total mass of stars formed per unit time per unit comoving volume in the universe, peaking around z~2",
+      "The density of star-forming regions in the Milky Way",
+      "The rate of planetary formation per galaxy"
+    ],
+    "correct_answer": "The total mass of stars formed per unit time per unit comoving volume in the universe, peaking around z~2",
+    "explanation": "The cosmic SFR density peaked at z~2 (cosmic noon, about 3 billion years after the Big Bang) at roughly 10 times its present value, declining since as gas reservoirs were consumed.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is Debye shielding in astrophysical plasmas?",
+    "options": [
+      "Shielding of magnetic fields in stars",
+      "The electrostatic shielding of charged particles in a plasma where free charges redistribute to screen out electric fields on scales above the Debye length",
+      "The blocking of X-rays by dense gas",
+      "The shielding of cosmic rays by Earth's magnetosphere"
+    ],
+    "correct_answer": "The electrostatic shielding of charged particles in a plasma where free charges redistribute to screen out electric fields on scales above the Debye length",
+    "explanation": "The Debye length is the scale over which electric fields are screened in a plasma. Below this scale individual particle interactions matter; above it collective effects dominate.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the concept of photon bubble instability in accretion disks?",
+    "options": [
+      "Bubbles of photons in quasar jets",
+      "A radiation-driven instability near Eddington luminosity where photons concentrate into low-density channels and escape efficiently",
+      "Radiation pressure destabilizing accretion",
+      "The thermal instability of accretion disks"
+    ],
+    "correct_answer": "A radiation-driven instability near Eddington luminosity where photons concentrate into low-density channels and escape efficiently",
+    "explanation": "Photon bubble instability allows super-Eddington accretion in porous media — photons escape through low-density channels while matter falls in through high-density channels.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is Birkhoff's theorem's extension to gravitational waves?",
+    "options": [
+      "Gravitational waves travel at the speed of light",
+      "Spherically symmetric mass distributions do not emit gravitational waves, as there are no time-varying quadrupole moments",
+      "Gravitational waves are shielded by spherical shells",
+      "Spherical symmetry maximizes gravitational wave emission"
+    ],
+    "correct_answer": "Spherically symmetric mass distributions do not emit gravitational waves, as there are no time-varying quadrupole moments",
+    "explanation": "GW emission requires a time-varying quadrupole moment. Perfectly spherical collapse (like a spherical supernova) emits no GWs — only asymmetries produce the detectable GW signal.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the concept of disk precession in X-ray binaries?",
+    "options": [
+      "The precession of neutron stars",
+      "The Lense-Thirring precession of an accretion disk around a spinning compact object, producing quasi-periodic oscillations",
+      "The precession of binary orbits",
+      "The precession of stellar rotation axes"
+    ],
+    "correct_answer": "The Lense-Thirring precession of an accretion disk around a spinning compact object, producing quasi-periodic oscillations",
+    "explanation": "Frame dragging causes the inner accretion disk to precess around a spinning black hole or neutron star — this may explain quasi-periodic oscillations in X-ray binaries, probing strong-field GR.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the concept of gravitational collapse timescale (free-fall time)?",
+    "options": [
+      "How long it takes light to cross a star",
+      "The timescale for a pressureless gas cloud to collapse under its own gravity, proportional to 1/sqrt(G rho)",
+      "The time for a star to exhaust its nuclear fuel",
+      "The orbital period of a binary system"
+    ],
+    "correct_answer": "The timescale for a pressureless gas cloud to collapse under its own gravity, proportional to 1/sqrt(G rho)",
+    "explanation": "The free-fall time t_ff = sqrt(3 pi / 32 G rho) sets the collapse timescale for molecular clouds and stellar cores. It ranges from millions of years for GMCs to milliseconds for neutron star cores.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the concept of Kelvin circulation in stellar rotation?",
+    "options": [
+      "Circulation patterns in stellar winds",
+      "Meridional circulation driven by stellar rotation that transports angular momentum and chemical elements in stellar interiors",
+      "Circulation of gas in planet-forming disks",
+      "Convective circulation in stellar envelopes"
+    ],
+    "correct_answer": "Meridional circulation driven by stellar rotation that transports angular momentum and chemical elements in stellar interiors",
+    "explanation": "Eddington-Sweet meridional circulation creates large-scale flows in rotating stars that redistribute angular momentum and mix chemical species between the core and envelope.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the concept of spectral variability in AGN?",
+    "options": [
+      "AGN emission varies randomly",
+      "The variability in AGN spectra including changing-look AGN where broad emission lines appear and disappear as accretion rate varies",
+      "Periodic variations in AGN brightness",
+      "The reddening of AGN spectra with time"
+    ],
+    "correct_answer": "The variability in AGN spectra including changing-look AGN where broad emission lines appear and disappear as accretion rate varies",
+    "explanation": "Changing-look AGN (CLAGNs) show dramatic spectral changes on timescales of years, with broad Balmer lines appearing and disappearing, likely reflecting large changes in accretion rate.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the concept of the Sagittarius A* flares?",
+    "options": [
+      "Bright flares from Sagittarius A* at all wavelengths daily",
+      "Near-infrared and X-ray flares from Sgr A* from magnetic reconnection events and infalling plasma clumps near the innermost stable circular orbit",
+      "Periodic flares from stellar accretion",
+      "Radio outbursts from the galactic center magnetar"
+    ],
+    "correct_answer": "Near-infrared and X-ray flares from Sgr A* from magnetic reconnection events and infalling plasma clumps near the innermost stable circular orbit",
+    "explanation": "Sgr A* shows daily NIR and X-ray flares lasting 1-2 hours, attributed to magnetic reconnection or plasma blobs orbiting at the innermost stable circular orbit (~30 minutes period) of this 4 million solar mass black hole.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the concept of total solar irradiance variation and its climate impact?",
+    "options": [
+      "Solar output changes drastically over short periods",
+      "The ~0.1% variation in solar output over the 11-year solar cycle and longer Gleissberg cycles, with minor but measurable climate impacts",
+      "Solar output has not changed since formation",
+      "Solar variation is the dominant cause of modern climate change"
+    ],
+    "correct_answer": "The ~0.1% variation in solar output over the 11-year solar cycle and longer Gleissberg cycles, with minor but measurable climate impacts",
+    "explanation": "TSI varies by about 0.1% over the solar cycle — too small to cause modern warming but potentially relevant for pre-industrial climate variations like the Maunder Minimum and Little Ice Age.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the concept of the Madau-Dickinson plot versus the Lilly-Madau plot?",
+    "options": [
+      "Two competing theories of galaxy formation",
+      "Both terms refer to the cosmic star formation rate density history, with the Lilly-Madau identifying the high-redshift peak first confirmed from rest-frame UV luminosity functions",
+      "Different cosmological models for structure formation",
+      "Different methods to measure the Hubble constant"
+    ],
+    "correct_answer": "Both terms refer to the cosmic star formation rate density history, with the Lilly-Madau identifying the high-redshift peak first confirmed from rest-frame UV luminosity functions",
+    "explanation": "Simon Lilly and Piero Madau independently contributed to establishing the redshift history of cosmic star formation using UV luminosity functions, revealing the z~1-3 peak now called 'cosmic noon.'",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the concept of gravitational waveform models (waveform templates)?",
+    "options": [
+      "Templates for recording GW data",
+      "Theoretical predictions of the GW signal shape from merging binaries, derived from post-Newtonian theory and numerical relativity",
+      "Computer models of LIGO detectors",
+      "Statistical models of the GW background"
+    ],
+    "correct_answer": "Theoretical predictions of the GW signal shape from merging binaries, derived from post-Newtonian theory and numerical relativity",
+    "explanation": "GW templates model the inspiral (PN theory), merger, and ringdown (numerical relativity and BH perturbation theory) phases. Thousands of templates spanning the binary parameter space are needed for matched filtering.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the concept of quasi-normal modes of black holes?",
+    "options": [
+      "The normal oscillation modes of neutron stars",
+      "The characteristic damped oscillations of a perturbed black hole that ring down after a merger, encoding black hole mass and spin",
+      "Random noise in LIGO detectors",
+      "The oscillation modes of accretion disks"
+    ],
+    "correct_answer": "The characteristic damped oscillations of a perturbed black hole that ring down after a merger, encoding black hole mass and spin",
+    "explanation": "QNMs are like the 'ringing' of a bell after a black hole merger. Their complex frequencies encode M and J of the final black hole, providing tests of the no-hair theorem and GR.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the concept of black hole ringdown in GW astronomy?",
+    "options": [
+      "The final inspiral of two black holes",
+      "The damped gravitational wave emission as a merged black hole relaxes to a Kerr solution by emitting quasi-normal modes",
+      "The GW signal from a neutron star merger only",
+      "The oscillation of matter in an accretion disk"
+    ],
+    "correct_answer": "The damped gravitational wave emission as a merged black hole relaxes to a Kerr solution by emitting quasi-normal modes",
+    "explanation": "Following a black hole merger, the remnant emits a brief quasi-normal mode ringdown — detectable in LIGO data and providing tests of GR by checking whether the observed modes are consistent with Kerr.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the concept of stellar mass-to-light ratio?",
+    "options": [
+      "The ratio of a star's mass to its brightness",
+      "The ratio of total stellar mass to observed luminosity in a galaxy, used to infer stellar masses from photometry given assumed IMF and stellar populations",
+      "The Eddington luminosity ratio",
+      "The ratio of dark matter to stellar mass"
+    ],
+    "correct_answer": "The ratio of total stellar mass to observed luminosity in a galaxy, used to infer stellar masses from photometry given assumed IMF and stellar populations",
+    "explanation": "The mass-to-light ratio (M/L) depends on the stellar IMF, age, and metallicity. It converts galaxy photometry to stellar mass estimates, with near-infrared bands being less sensitive to star formation history.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the concept of the turnover in the galaxy stellar mass function?",
+    "options": [
+      "When galaxies stop forming",
+      "The exponential cutoff at high stellar masses (above ~10^11 solar masses) in the Schechter function, reflecting efficient quenching of massive galaxies",
+      "The minimum mass for galaxy formation",
+      "When the luminosity function deviates from a power law"
+    ],
+    "correct_answer": "The exponential cutoff at high stellar masses (above ~10^11 solar masses) in the Schechter function, reflecting efficient quenching of massive galaxies",
+    "explanation": "The turnover at the characteristic mass M* (~10^11 solar masses) in the Schechter function reflects the suppression of star formation in massive galaxies, likely by AGN feedback.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the cosmic evolution of AGN space density?",
+    "options": [
+      "AGN are equally abundant at all redshifts",
+      "AGN were much more common at z~2 (cosmic noon) when most supermassive black holes were rapidly growing, declining since",
+      "AGN only form in the local universe",
+      "AGN become more common with time"
+    ],
+    "correct_answer": "AGN were much more common at z~2 (cosmic noon) when most supermassive black holes were rapidly growing, declining since",
+    "explanation": "The AGN luminosity function peaks at z~2 for bright quasars — 'cosmic downsizing' applies here too, with the most luminous quasars peaking at higher redshift than less luminous AGN.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the concept of the effective equation of state for dark energy plus dark matter?",
+    "options": [
+      "The combined EOS of the universe",
+      "The effective fluid description combining dark matter (w=0) and dark energy (w=-1), giving the ΛCDM model's expansion history",
+      "The EOS of baryonic matter only",
+      "The thermal EOS at recombination"
+    ],
+    "correct_answer": "The effective fluid description combining dark matter (w=0) and dark energy (w=-1), giving the ΛCDM model's expansion history",
+    "explanation": "In ΛCDM, the energy budget combines matter (w=0, density scales as a^-3), radiation (w=1/3), and cosmological constant (w=-1, constant density) — their combination determines the Friedmann equation solution.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the concept of modified gravity theories as alternatives to dark energy?",
+    "options": [
+      "Gravity theories that ignore dark energy",
+      "Extensions of GR (f(R), DGP, scalar-tensor theories) that modify gravity on cosmological scales to explain accelerating expansion without a cosmological constant",
+      "Theories that modify gravity only on small scales",
+      "The modification of Newtonian gravity at galactic scales (MOND)"
+    ],
+    "correct_answer": "Extensions of GR (f(R), DGP, scalar-tensor theories) that modify gravity on cosmological scales to explain accelerating expansion without a cosmological constant",
+    "explanation": "Modified gravity theories like f(R) gravity, Brans-Dicke theory, and the DGP model modify GR to produce self-accelerating expansion, constrained by structure growth, gravitational wave speeds, and Solar System tests.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the term for the study of the origin and evolution of the universe?",
+    "options": [
+      "Cosmology",
+      "Astrology",
+      "Astronomy",
+      "Geology"
+    ],
+    "correct_answer": "Cosmology",
+    "explanation": "Cosmology is the study of the origin and evolution of the universe, while astrology is the study of the positions and movements of celestial bodies and their supposed influence on human affairs.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "Which of the following types of stars is the brightest and most massive?",
+    "options": [
+      "Red dwarf",
+      "Blue giant",
+      "White dwarf",
+      "Neutron star"
+    ],
+    "correct_answer": "Blue giant",
+    "explanation": "Blue giants are the brightest and most massive type of star, with surface temperatures between 10,000 and 50,000 Kelvin.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the process by which the universe became transparent to light, occurring when the universe cooled enough for electrons and protons to combine into neutral atoms?",
+    "options": [
+      "Recombination",
+      "Ionization",
+      "Nucleosynthesis",
+      "Dark matter formation"
+    ],
+    "correct_answer": "Recombination",
+    "explanation": "Recombination occurred when the universe cooled enough for electrons and protons to combine into neutral atoms, allowing light to travel freely through space.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "Which of the following planets in our solar system has the most moons?",
+    "options": [
+      "Jupiter",
+      "Saturn",
+      "Uranus",
+      "Neptune"
+    ],
+    "correct_answer": "Jupiter",
+    "explanation": "Jupiter has a total of 79 known moons, with four of them being particularly large: Io, Europa, Ganymede, and Callisto.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the term for the point in the sky where the celestial equator intersects the horizon?",
+    "options": [
+      "Zenith",
+      "Nadir",
+      "Horizon",
+      "Cardinal point"
+    ],
+    "correct_answer": "Cardinal point",
+    "explanation": "The cardinal points are the points on the horizon where the celestial equator intersects the horizon, and are used to navigate and locate celestial objects.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "Which of the following types of telescopes uses a combination of lenses and mirrors to focus light?",
+    "options": [
+      "Refracting telescope",
+      "Reflecting telescope",
+      "Catadioptric telescope",
+      "Radio telescope"
+    ],
+    "correct_answer": "Catadioptric telescope",
+    "explanation": "Catadioptric telescopes use a combination of lenses and mirrors to focus light, offering a compact and versatile design.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the term for the bending of light around a massive object, such as a star or black hole?",
+    "options": [
+      "Gravitational lensing",
+      "Refraction",
+      "Diffraction",
+      "Interference"
+    ],
+    "correct_answer": "Gravitational lensing",
+    "explanation": "Gravitational lensing is the bending of light around a massive object, such as a star or black hole, and can be used to study the properties of these objects.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "Which of the following astronomical events occurs when the Moon passes between the Earth and the Sun?",
+    "options": [
+      "Solar eclipse",
+      "Lunar eclipse",
+      "Planetary alignment",
+      "Comet impact"
+    ],
+    "correct_answer": "Solar eclipse",
+    "explanation": "A solar eclipse occurs when the Moon passes between the Earth and the Sun, blocking the Sun's light and revealing the Sun's corona.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the term for the study of the properties and behavior of black holes?",
+    "options": [
+      "Astrophysics",
+      "Cosmology",
+      "Black hole physics",
+      "Gravitational physics"
+    ],
+    "correct_answer": "Black hole physics",
+    "explanation": "Black hole physics is the study of the properties and behavior of black holes, including their formation, evolution, and effects on the surrounding environment.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "Which of the following types of galaxies is characterized by a central bulge and spiral arms?",
+    "options": [
+      "Elliptical galaxy",
+      "Spiral galaxy",
+      "Irregular galaxy",
+      "Active galaxy"
+    ],
+    "correct_answer": "Spiral galaxy",
+    "explanation": "Spiral galaxies are characterized by a central bulge and spiral arms, and are the most common type of galaxy in the universe.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the term for the distance light travels in one year, equivalent to approximately 9.46 trillion kilometers?",
+    "options": [
+      "Light-year",
+      "Parsec",
+      "Astronomical unit",
+      "Kiloparsec"
+    ],
+    "correct_answer": "Light-year",
+    "explanation": "A light-year is the distance light travels in one year, and is used to measure the vast distances between stars and galaxies.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "Which of the following astronomical phenomena is caused by the interaction between the solar wind and the Earth's magnetic field?",
+    "options": [
+      "Aurora",
+      "Meteor shower",
+      "Comet tail",
+      "Solar flare"
+    ],
+    "correct_answer": "Aurora",
+    "explanation": "Aurorae are caused by the interaction between the solar wind and the Earth's magnetic field, resulting in spectacular displays of colored light in the polar regions.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the term for the point in an orbit where the distance between the orbiting object and the central body is at its minimum?",
+    "options": [
+      "Perihelion",
+      "Aphelion",
+      "Equinox",
+      "Solstice"
+    ],
+    "correct_answer": "Perihelion",
+    "explanation": "Perihelion is the point in an orbit where the distance between the orbiting object and the central body is at its minimum, and is used to describe the orbits of planets, comets, and asteroids.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "Which of the following types of radiation is emitted by hot, dense objects such as stars and black holes?",
+    "options": [
+      "Radio waves",
+      "Microwaves",
+      "X-rays",
+      "Gamma rays"
+    ],
+    "correct_answer": "X-rays",
+    "explanation": "X-rays are emitted by hot, dense objects such as stars and black holes, and are used to study the properties of these objects.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the term for the process by which the universe became dominated by matter, rather than antimatter?",
+    "options": [
+      "Baryogenesis",
+      "Leptogenesis",
+      "Nucleosynthesis",
+      "Recombination"
+    ],
+    "correct_answer": "Baryogenesis",
+    "explanation": "Baryogenesis is the process by which the universe became dominated by matter, rather than antimatter, and is thought to have occurred in the early universe.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "Which of the following astronomical events occurs when a star explodes as a supernova?",
+    "options": [
+      "Black hole formation",
+      "Neutron star formation",
+      "White dwarf formation",
+      "Supernova explosion"
+    ],
+    "correct_answer": "Supernova explosion",
+    "explanation": "A supernova explosion occurs when a star explodes, releasing an enormous amount of energy and expelling heavy elements into space.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the term for the study of the properties and behavior of dark matter?",
+    "options": [
+      "Astrophysics",
+      "Cosmology",
+      "Dark matter physics",
+      "Particle physics"
+    ],
+    "correct_answer": "Dark matter physics",
+    "explanation": "Dark matter physics is the study of the properties and behavior of dark matter, which is thought to make up approximately 27% of the universe's mass-energy density.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "Which of the following types of telescopes uses a dish-shaped antenna to detect radio waves from space?",
+    "options": [
+      "Radio telescope",
+      "Optical telescope",
+      "Infrared telescope",
+      "Ultraviolet telescope"
+    ],
+    "correct_answer": "Radio telescope",
+    "explanation": "Radio telescopes use a dish-shaped antenna to detect radio waves from space, and are used to study the properties of celestial objects such as stars, galaxies, and black holes.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the term for the point in the sky where the celestial pole intersects the horizon?",
+    "options": [
+      "Zenith",
+      "Nadir",
+      "Horizon",
+      "Pole star"
+    ],
+    "correct_answer": "Pole star",
+    "explanation": "The pole star is the point in the sky where the celestial pole intersects the horizon, and is used to navigate and locate celestial objects.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "Which of the following astronomical phenomena is caused by the gravitational pull of the Moon on the Earth's oceans?",
+    "options": [
+      "Tides",
+      "Earthquakes",
+      "Volcanic eruptions",
+      "Meteor showers"
+    ],
+    "correct_answer": "Tides",
+    "explanation": "Tides are caused by the gravitational pull of the Moon on the Earth's oceans, resulting in the periodic rising and falling of the sea level.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the term for the study of the properties and behavior of asteroids?",
+    "options": [
+      "Astrology",
+      "Astronomy",
+      "Planetary science",
+      "Asteroid science"
+    ],
+    "correct_answer": "Asteroid science",
+    "explanation": "Asteroid science is the study of the properties and behavior of asteroids, which are small, rocky objects that orbit the Sun.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "Which of the following types of galaxies is characterized by a bright, active nucleus?",
+    "options": [
+      "Elliptical galaxy",
+      "Spiral galaxy",
+      "Irregular galaxy",
+      "Active galaxy"
+    ],
+    "correct_answer": "Active galaxy",
+    "explanation": "Active galaxies are characterized by a bright, active nucleus, and are thought to be powered by supermassive black holes at their centers.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the term for the distance between the Earth and the Sun, equivalent to approximately 149.6 million kilometers?",
+    "options": [
+      "Astronomical unit",
+      "Light-year",
+      "Parsec",
+      "Kiloparsec"
+    ],
+    "correct_answer": "Astronomical unit",
+    "explanation": "An astronomical unit is the distance between the Earth and the Sun, and is used to measure the distances between objects in our solar system.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "Which of the following astronomical events occurs when a comet passes close to the Sun?",
+    "options": [
+      "Comet impact",
+      "Comet tail formation",
+      "Solar eclipse",
+      "Planetary alignment"
+    ],
+    "correct_answer": "Comet tail formation",
+    "explanation": "Comet tail formation occurs when a comet passes close to the Sun, causing the comet's ices to vaporize and create a bright tail of gas and dust.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the term for the study of the properties and behavior of the Milky Way galaxy?",
+    "options": [
+      "Galactic astronomy",
+      "Extragalactic astronomy",
+      "Stellar astronomy",
+      "Planetary science"
+    ],
+    "correct_answer": "Galactic astronomy",
+    "explanation": "Galactic astronomy is the study of the properties and behavior of the Milky Way galaxy, including its structure, evolution, and interactions with other galaxies.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "Which of the following types of stars is the coolest and least massive?",
+    "options": [
+      "Red giant",
+      "Blue giant",
+      "Red dwarf",
+      "White dwarf"
+    ],
+    "correct_answer": "Red dwarf",
+    "explanation": "Red dwarfs are the coolest and least massive type of star, with surface temperatures between 3,000 and 4,000 Kelvin.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the term for the process by which the universe became transparent to neutrinos?",
+    "options": [
+      "Neutrino decoupling",
+      "Photon decoupling",
+      "Baryogenesis",
+      "Leptogenesis"
+    ],
+    "correct_answer": "Neutrino decoupling",
+    "explanation": "Neutrino decoupling occurred when the universe cooled enough for neutrinos to interact with matter, and is thought to have played a crucial role in the formation of the universe's structure.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "Which of the following astronomical phenomena is caused by the gravitational pull of the Moon on the Earth's tides?",
+    "options": [
+      "Tidal acceleration",
+      "Tidal deceleration",
+      "Earthquakes",
+      "Volcanic eruptions"
+    ],
+    "correct_answer": "Tidal acceleration",
+    "explanation": "Tidal acceleration is caused by the gravitational pull of the Moon on the Earth's tides, resulting in the gradual increase in the length of the Earth's day.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the term for the study of the properties and behavior of the universe on its largest scales?",
+    "options": [
+      "Cosmology",
+      "Astrophysics",
+      "Astronomy",
+      "Planetary science"
+    ],
+    "correct_answer": "Cosmology",
+    "explanation": "Cosmology is the study of the properties and behavior of the universe on its largest scales, including the formation and evolution of the universe as a whole.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "astronomy"
+  }
+]
