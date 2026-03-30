@@ -265,9 +265,11 @@ async function callWithFallback(prompt: string): Promise<{ text: string; api: st
     }
   }
 
-  // Fallback: rotate through available Gemini keys
+  // Fallback: rotate through available Gemini keys with 90s cooldown between each
   for (let i = 0; i < GEMINI_KEYS.length; i++) {
     const label = `Gemini key ${i + 1}`;
+    console.log(`  Waiting 90 seconds before ${label} (rate limit cooldown)...`);
+    await sleep(90000);
     console.log(`  Falling back to ${label}...`);
     try {
       return await generateWithRetry(makeCallGemini(GEMINI_KEYS[i]), label, prompt, 3);
