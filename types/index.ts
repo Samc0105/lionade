@@ -2,10 +2,18 @@ export type Subject =
   | "Math"
   | "Science"
   | "Languages"
+  | "Humanities"
+  | "Tech & Coding"
+  | "Cloud & IT"
+  | "Finance & Business"
+  | "Test Prep"
+  // Legacy values kept for backwards compatibility with old quiz sessions
   | "SAT/ACT"
   | "Coding"
   | "Finance"
-  | "Certifications";
+  | "Certifications"
+  | "History"
+  | "Social Studies";
 
 export type Difficulty = "easy" | "medium" | "hard";
 

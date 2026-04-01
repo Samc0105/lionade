@@ -87,7 +87,9 @@ export async function getQuizQuestions(subject: Subject, difficulty: string, top
     .eq("subject", subject)
     .eq("difficulty", dbDifficulty);
   if (topic) {
-    query = query.eq("topic", topic.toLowerCase());
+    // Convert display name to DB slug: "World History" → "world-history", "SQL & Databases" → "sql-databases"
+    const topicSlug = topic.toLowerCase().replace(/\s*&\s*/g, "-").replace(/\s+/g, "-");
+    query = query.eq("topic", topicSlug);
   }
   const { data, error } = await query.limit(50);
   if (error) throw error;
