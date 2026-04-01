@@ -10,7 +10,7 @@ import { formatCoins } from "@/lib/mockData";
 type Rarity = "common" | "rare" | "epic" | "legendary";
 type ItemType = "frame" | "background" | "name_color" | "banner" | "booster";
 type BoosterEffect = "coin_multiplier" | "xp_multiplier" | "extra_time" | "auto_correct" | "fifty_fifty" | "score_boost" | "streak_shield";
-type Tab = "featured" | "cosmetics" | "boosters" | "inventory";
+type Tab = "featured" | "themes" | "cosmetics" | "boosters" | "inventory";
 type CosmeticSub = "frames" | "backgrounds" | "name_colors" | "banners";
 type StoreMode = "coins" | "premium";
 
@@ -410,7 +410,8 @@ export default function ShopPage() {
 
   const TABS: { key: Tab; label: string; icon: string }[] = [
     { key: "featured", label: "Featured", icon: "⭐" },
-    { key: "cosmetics", label: "Cosmetics", icon: "🎨" },
+    { key: "themes", label: "Themes", icon: "🎨" },
+    { key: "cosmetics", label: "Cosmetics", icon: "✨" },
     { key: "boosters", label: "Boosters", icon: "🚀" },
     { key: "inventory", label: "Inventory", icon: "🎒" },
   ];
@@ -529,6 +530,66 @@ export default function ShopPage() {
                 </button>
               ))}
             </div>
+
+            {/* THEMES */}
+            {tab === "themes" && (
+              <div className={`transition-all duration-700 delay-200 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`}>
+                <div className="shop-banner flex items-center justify-between mb-6 px-4 py-3 rounded-xl"
+                  style={{ background: "linear-gradient(90deg, rgba(245,158,11,0.06), rgba(255,215,0,0.06))", border: "1px solid rgba(245,158,11,0.15)" }}>
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg">🎨</span>
+                    <span className="font-bebas text-xl text-gold tracking-wider">THEMES</span>
+                  </div>
+                  <p className="text-cream/30 text-xs">Change the look of your entire app</p>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                  {/* Savanna Theme */}
+                  <div className="rounded-2xl overflow-hidden border border-amber-500/20 transition-all duration-300 hover:-translate-y-1"
+                    style={{ background: "var(--card-solid-bg)" }}>
+                    {/* Preview */}
+                    <div className="h-36 relative overflow-hidden"
+                      style={{ background: "linear-gradient(180deg, #87CEEB 0%, #F4A460 30%, #DEB887 60%, #C2B280 100%)" }}>
+                      {/* Sun */}
+                      <div className="absolute top-5 right-8 w-14 h-14 rounded-full"
+                        style={{ background: "radial-gradient(circle, #FFD700, #F59E0B)", boxShadow: "0 0 40px rgba(255,215,0,0.5)" }} />
+                      {/* Horizon line */}
+                      <div className="absolute bottom-0 left-0 right-0 h-12"
+                        style={{ background: "linear-gradient(180deg, transparent, #8B7355)" }} />
+                      {/* Silhouette trees */}
+                      <div className="absolute bottom-2 left-6 w-8 h-16 rounded-t-full" style={{ background: "#5C4033" }} />
+                      <div className="absolute bottom-2 left-10 w-12 h-4 rounded-full" style={{ background: "#5C4033" }} />
+                      <div className="absolute bottom-2 right-10 w-6 h-12 rounded-t-full" style={{ background: "#5C4033" }} />
+                      <div className="absolute bottom-2 right-8 w-10 h-3 rounded-full" style={{ background: "#5C4033" }} />
+                      {/* Lion */}
+                      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 text-2xl">🦁</div>
+                    </div>
+
+                    <div className="p-5">
+                      <div className="flex items-center justify-between mb-2">
+                        <div>
+                          <p className="font-bebas text-xl text-cream tracking-wider">Savanna</p>
+                          <p className="text-amber-400/60 text-xs">Wild & golden — warm light theme</p>
+                        </div>
+                        <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full"
+                          style={{ background: "rgba(168,85,247,0.15)", border: "1px solid rgba(168,85,247,0.3)", color: "#a855f7" }}>
+                          Epic
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between mt-4">
+                        <div className="flex items-center gap-1.5">
+                          <img src="/fangs.png" alt="Fangs" className="w-5 h-5 object-contain" />
+                          <span className="font-bebas text-xl text-gold tracking-wider">500</span>
+                        </div>
+                        <button disabled className="px-5 py-2 rounded-xl text-sm font-bold text-cream/30 border border-white/10 bg-white/5 cursor-not-allowed">
+                          Coming Soon
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* FEATURED */}
             {tab === "featured" && (

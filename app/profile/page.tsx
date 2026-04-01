@@ -903,57 +903,28 @@ function PersonalizationSection({ user }: SharedProps) {
       <SectionHead title="PERSONALIZATION" sub="Customize your Lionade experience" />
 
       <Card>
-        <h3 className="font-bebas text-lg text-cream tracking-wider mb-4">THEME</h3>
-        <div className="grid grid-cols-2 gap-4">
-          {/* Dark theme card */}
-          <button onClick={() => autoSave({ theme: "dark" })}
-            className={`relative p-5 rounded-2xl border-2 text-left transition-all duration-300
-              ${theme === "dark"
-                ? "border-blue-500 shadow-[0_0_20px_rgba(59,130,246,0.25)]"
-                : "border-white/10 opacity-60 hover:opacity-80 hover:border-white/20"}`}
-            style={{ background: "#0f172a" }}>
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 rounded-full flex items-center justify-center"
-                style={{ background: "linear-gradient(135deg, #1e293b, #0f172a)", border: "1px solid rgba(59,130,246,0.3)" }}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#93c5fd" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
-                </svg>
-              </div>
-              <div>
-                <p className="font-bold text-sm text-white">Dark</p>
-                <p className="text-[11px] text-blue-300/50">Space interstellar</p>
-              </div>
+        <h3 className="font-bebas text-lg text-cream tracking-wider mb-4">THEMES UNLOCKED</h3>
+        <div className="text-center py-6">
+          <span className="text-4xl block mb-3">🎨</span>
+          <p className="text-cream/50 text-sm mb-1">No themes unlocked yet</p>
+          <p className="text-cream/30 text-xs mb-4">Visit the Shop to unlock new looks for your app</p>
+          <a href="/shop" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold
+            bg-electric/15 text-electric border border-electric/30 hover:bg-electric/25 transition-all duration-200">
+            <span>🛍️</span> Browse Themes
+          </a>
+        </div>
+        <div className="border-t border-white/5 pt-3 mt-2">
+          <div className="flex items-center gap-3 px-2 py-2 rounded-xl bg-white/[0.03]">
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center"
+              style={{ background: "linear-gradient(135deg, #1e293b, #0f172a)", border: "1px solid rgba(59,130,246,0.2)" }}>
+              <span className="text-sm">🌌</span>
             </div>
-            <div className="rounded-xl p-2.5 flex items-center gap-2" style={{ background: "#060c18", border: "1px solid rgba(59,130,246,0.1)" }}>
-              <div className="w-2 h-2 rounded-full bg-blue-500" />
-              <div className="flex-1 h-1 rounded-full bg-white/5" />
-              <div className="w-2 h-2 rounded-full bg-yellow-500/60" />
+            <div className="flex-1">
+              <p className="text-cream text-sm font-semibold">Interstellar</p>
+              <p className="text-cream/30 text-[11px]">Default theme</p>
             </div>
-          </button>
-
-          {/* Light theme card — savanna */}
-          <button onClick={() => autoSave({ theme: "light" })}
-            className={`relative p-5 rounded-2xl border-2 text-left transition-all duration-300 overflow-hidden
-              ${theme === "light"
-                ? "border-amber-400 shadow-[0_0_20px_rgba(245,158,11,0.25)]"
-                : "border-white/10 opacity-60 hover:opacity-80 hover:border-white/20"}`}
-            style={{ background: "linear-gradient(180deg, #FFFBF0, #FEF3C7)" }}>
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 rounded-full flex items-center justify-center"
-                style={{ background: "linear-gradient(135deg, #FEF3C7, #F59E0B)", border: "1px solid rgba(245,158,11,0.3)" }}>
-                <span className="text-lg">🦁</span>
-              </div>
-              <div>
-                <p className="font-bold text-sm" style={{ color: "#1a1a1a" }}>Savanna</p>
-                <p className="text-[11px]" style={{ color: "#d97706" }}>Wild & golden</p>
-              </div>
-            </div>
-            <div className="rounded-xl p-2.5 flex items-center gap-2" style={{ background: "#ffffff", border: "1px solid #fde68a" }}>
-              <div className="w-2 h-2 rounded-full" style={{ background: "#F59E0B" }} />
-              <div className="flex-1 h-1 rounded-full" style={{ background: "#FEF3C7" }} />
-              <div className="w-2 h-2 rounded-full" style={{ background: "#D97706" }} />
-            </div>
-          </button>
+            <span className="text-electric text-xs font-bold">Active</span>
+          </div>
         </div>
       </Card>
 
