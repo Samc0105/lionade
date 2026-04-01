@@ -268,7 +268,7 @@ export default function LoginPage() {
   const handleGoogleAuth = async () => {
     await supabase.auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo: window.location.origin + "/login" },
+      options: { redirectTo: "https://app.getlionade.com/login" },
     });
   };
 

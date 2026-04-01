@@ -31,7 +31,6 @@ export default function ProductLandingPage() {
 
   return (
     <div data-force-dark className="min-h-screen text-cream overflow-hidden relative force-dark-bg">
-      <div className="absolute inset-0 grid-bg opacity-60" />
 
       {/* ─── Hero ─────────────────────────────────────────────── */}
       <section className="relative z-10 flex min-h-screen flex-col items-center justify-center px-6 text-center pt-16">
