@@ -1849,8 +1849,8 @@ html[data-font-size="large"] {
   display: none;
 }
 
-/* Force dark background regardless of theme — for pages designed dark-only */
-.force-dark-bg {
+/* Force dark background in light mode only — dark mode uses space background */
+html.light .force-dark-bg {
   background-color: #04080F !important;
 }
 

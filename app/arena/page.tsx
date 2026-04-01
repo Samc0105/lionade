@@ -604,7 +604,7 @@ export default function ArenaPage() {
 
     return (
       <ProtectedRoute>
-        <div data-force-dark className="relative min-h-screen pt-16 pb-20 md:pb-8 overflow-hidden" style={{ background: "#04080F", isolation: "isolate" }}>
+        <div data-force-dark className="relative min-h-screen pt-16 pb-20 md:pb-8 overflow-hidden" style={{ isolation: "isolate" }}>
           {/* Atmospheric glows — deep red combat + gold reward accents */}
           <div className="absolute top-[10%] left-[10%] w-[600px] h-[600px] rounded-full pointer-events-none opacity-[0.05]"
             style={{ background: "radial-gradient(circle, #EF4444 0%, transparent 70%)" }} />
@@ -853,7 +853,7 @@ export default function ArenaPage() {
   if (phase === "challenge") {
     return (
       <ProtectedRoute>
-        <div data-force-dark className="min-h-screen flex items-center justify-center px-4" style={{ background: "#04080F", isolation: "isolate" }}>
+        <div data-force-dark className="min-h-screen flex items-center justify-center px-4" style={{ isolation: "isolate" }}>
           <div className="max-w-md w-full animate-slide-up">
             <div className="rounded-2xl p-8"
               style={{
@@ -929,7 +929,7 @@ export default function ArenaPage() {
   if (phase === "matchmaking") {
     return (
       <ProtectedRoute>
-        <div data-force-dark className="min-h-screen flex items-center justify-center px-4" style={{ background: "#04080F", isolation: "isolate" }}>
+        <div data-force-dark className="min-h-screen flex items-center justify-center px-4" style={{ isolation: "isolate" }}>
           <div className="text-center max-w-md w-full animate-slide-up">
             {/* Searching animation */}
             <div className="relative w-32 h-32 mx-auto mb-8">
@@ -980,7 +980,7 @@ export default function ArenaPage() {
   if (phase === "prematch") {
     return (
       <ProtectedRoute>
-        <div data-force-dark className="min-h-screen flex items-center justify-center px-4" style={{ background: "#04080F", isolation: "isolate" }}>
+        <div data-force-dark className="min-h-screen flex items-center justify-center px-4" style={{ isolation: "isolate" }}>
           <div className="text-center">
             {/* Player Cards */}
             <div className="flex items-center justify-center gap-6 sm:gap-12 mb-10 animate-slide-up">
@@ -1054,7 +1054,7 @@ export default function ArenaPage() {
 
     return (
       <ProtectedRoute>
-        <div data-force-dark className="min-h-screen pt-16 pb-6" style={{ background: "#04080F", isolation: "isolate" }}>
+        <div data-force-dark className="min-h-screen pt-16 pb-6" style={{ isolation: "isolate" }}>
           <div className="max-w-3xl mx-auto px-4 py-4">
 
             {/* Scoreboard */}
@@ -1259,7 +1259,7 @@ export default function ArenaPage() {
 
     return (
       <ProtectedRoute>
-        <div data-force-dark className="min-h-screen pt-16 pb-20" style={{ background: "#04080F", isolation: "isolate" }}>
+        <div data-force-dark className="min-h-screen pt-16 pb-20" style={{ isolation: "isolate" }}>
           <div className="max-w-2xl mx-auto px-4 py-8 text-center">
 
             {/* Result Banner */}

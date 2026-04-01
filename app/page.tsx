@@ -263,7 +263,7 @@ export default function ComingSoonPage() {
   const tickerContent = [...TICKER_ITEMS, ...TICKER_ITEMS, ...TICKER_ITEMS, ...TICKER_ITEMS];
 
   return (
-    <div className="min-h-screen bg-[#04080F] text-[#EEF4FF] overflow-x-hidden relative" data-force-dark>
+    <div className="min-h-screen text-[#EEF4FF] overflow-x-hidden relative" data-force-dark>
 
       {/* Star field — fixed behind everything */}
       <StarField />
@@ -732,7 +732,7 @@ export default function ComingSoonPage() {
       </footer>
 
       {/* ─── DevOps Secret Trigger ─── */}
-      <div className="text-center py-2.5 bg-[#04080F]">
+      <div className="text-center py-2.5">
         <button id="devops-trigger" onClick={handleSecretClick}
           className="font-mono text-[10px] tracking-[1px] text-white/[0.08] select-none cursor-default">
           &copy; 2026 Lionade

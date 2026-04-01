@@ -30,7 +30,7 @@ export default function ProductLandingPage() {
   if (isLoading || user || checking || !hasAccess) return null;
 
   return (
-    <div data-force-dark className="min-h-screen text-cream overflow-hidden relative force-dark-bg">
+    <div data-force-dark className="min-h-screen text-cream overflow-hidden relative">
 
       {/* ─── Hero ─────────────────────────────────────────────── */}
       <section className="relative z-10 flex min-h-screen flex-col items-center justify-center px-6 text-center pt-16">
