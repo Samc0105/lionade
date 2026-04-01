@@ -252,8 +252,6 @@ export default function QuizPage() {
     getQuizHistory(user.id, 100).then(setQuizHistory).catch(() => {});
   }, [user]);
 
-  if (isLoading || !user) return null;
-
   const diffMult = DIFFICULTY_MULTIPLIER[difficulty];
   const blitzMult = blitzMode ? 2 : 1;
 
@@ -350,6 +348,9 @@ export default function QuizPage() {
     },
     [currentIndex, questions, answers, diffMult, blitzMult]
   );
+
+  // Early return AFTER all hooks
+  if (isLoading || !user) return null;
 
   function advanceToNext() {
     const isLast = currentIndex + 1 >= questions.length;
