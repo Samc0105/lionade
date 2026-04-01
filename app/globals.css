@@ -2471,9 +2471,9 @@ html.light .space-bg-container { display: none; }
 
 /* ── Premium Store ── */
 
-/* Premium page background */
+/* Premium page background — transparent so space background shows through */
 .premium-store-bg {
-  background: linear-gradient(180deg, #060612 0%, #0d0620 40%, #120828 100%);
+  background: transparent;
 }
 
 /* Premium title purple glow */
