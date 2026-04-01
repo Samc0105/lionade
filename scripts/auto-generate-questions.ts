@@ -3,13 +3,13 @@
  * Dual-API smart priority question generator with retry logic.
  *
  * Each run (up to 55 minutes):
- *  1. Scans all 27 combos, picks lowest
+ *  1. Scans all 114 combos, picks lowest
  *  2. Generates 25 questions per batch with 5s delays between
  *  3. Retries on 429 (wait 60s), OpenAI primary → Gemini key 1 → Gemini key 2 → Groq
  *  4. Seeds to Supabase + saves JSON
  *  5. Moves to next combo if time remains
  *
- * Target: 1000 questions per combo (27,000 total).
+ * Target: 1000 questions per combo (114,000 total).
  */
 
 import fs from "fs";
@@ -79,15 +79,52 @@ const SUPABASE_BATCH = 50;
 const RUN_START = Date.now();
 
 const TOPIC_CONFIG: Record<string, { dbSubject: string; jsonSubject: string; label: string; dir: string }> = {
-  algebra:          { dbSubject: "Math",           jsonSubject: "math",    label: "Algebra",        dir: "math" },
-  biology:          { dbSubject: "Science",        jsonSubject: "science", label: "Biology",        dir: "science" },
-  chemistry:        { dbSubject: "Science",        jsonSubject: "science", label: "Chemistry",      dir: "science" },
-  physics:          { dbSubject: "Science",        jsonSubject: "science", label: "Physics",        dir: "science" },
-  "earth-science":  { dbSubject: "Science",        jsonSubject: "science", label: "Earth Science",  dir: "science" },
-  astronomy:        { dbSubject: "Science",        jsonSubject: "science", label: "Astronomy",      dir: "science" },
-  "us-history":     { dbSubject: "History",        jsonSubject: "history", label: "US History",     dir: "history" },
-  "global-history": { dbSubject: "History",        jsonSubject: "history", label: "Global History", dir: "history" },
-  "social-studies": { dbSubject: "Social Studies", jsonSubject: "social",  label: "Social Studies", dir: "social" },
+  // Math
+  algebra:            { dbSubject: "Math",               jsonSubject: "math",      label: "Algebra",            dir: "math" },
+  geometry:           { dbSubject: "Math",               jsonSubject: "math",      label: "Geometry",           dir: "math" },
+  calculus:           { dbSubject: "Math",               jsonSubject: "math",      label: "Calculus",           dir: "math" },
+  statistics:         { dbSubject: "Math",               jsonSubject: "math",      label: "Statistics",         dir: "math" },
+  trigonometry:       { dbSubject: "Math",               jsonSubject: "math",      label: "Trigonometry",       dir: "math" },
+  // Science
+  biology:            { dbSubject: "Science",            jsonSubject: "science",   label: "Biology",            dir: "science" },
+  chemistry:          { dbSubject: "Science",            jsonSubject: "science",   label: "Chemistry",          dir: "science" },
+  physics:            { dbSubject: "Science",            jsonSubject: "science",   label: "Physics",            dir: "science" },
+  "earth-science":    { dbSubject: "Science",            jsonSubject: "science",   label: "Earth Science",      dir: "science" },
+  astronomy:          { dbSubject: "Science",            jsonSubject: "science",   label: "Astronomy",          dir: "science" },
+  // Humanities
+  "world-history":    { dbSubject: "Humanities",         jsonSubject: "humanities", label: "World History",      dir: "humanities" },
+  "us-history":       { dbSubject: "Humanities",         jsonSubject: "humanities", label: "US History",         dir: "humanities" },
+  geography:          { dbSubject: "Humanities",         jsonSubject: "humanities", label: "Geography",          dir: "humanities" },
+  philosophy:         { dbSubject: "Humanities",         jsonSubject: "humanities", label: "Philosophy",         dir: "humanities" },
+  // Languages
+  spanish:            { dbSubject: "Languages",          jsonSubject: "languages", label: "Spanish",            dir: "languages" },
+  french:             { dbSubject: "Languages",          jsonSubject: "languages", label: "French",             dir: "languages" },
+  german:             { dbSubject: "Languages",          jsonSubject: "languages", label: "German",             dir: "languages" },
+  "english-grammar":  { dbSubject: "Languages",          jsonSubject: "languages", label: "English Grammar",    dir: "languages" },
+  // Tech & Coding
+  python:             { dbSubject: "Tech & Coding",      jsonSubject: "tech",      label: "Python",             dir: "tech" },
+  javascript:         { dbSubject: "Tech & Coding",      jsonSubject: "tech",      label: "JavaScript",         dir: "tech" },
+  "data-structures":  { dbSubject: "Tech & Coding",      jsonSubject: "tech",      label: "Data Structures",    dir: "tech" },
+  "web-development":  { dbSubject: "Tech & Coding",      jsonSubject: "tech",      label: "Web Development",    dir: "tech" },
+  "sql-databases":    { dbSubject: "Tech & Coding",      jsonSubject: "tech",      label: "SQL & Databases",    dir: "tech" },
+  // Cloud & IT
+  aws:                { dbSubject: "Cloud & IT",         jsonSubject: "cloud",     label: "AWS",                dir: "cloud" },
+  azure:              { dbSubject: "Cloud & IT",         jsonSubject: "cloud",     label: "Azure",              dir: "cloud" },
+  comptia:            { dbSubject: "Cloud & IT",         jsonSubject: "cloud",     label: "CompTIA",            dir: "cloud" },
+  networking:         { dbSubject: "Cloud & IT",         jsonSubject: "cloud",     label: "Networking",         dir: "cloud" },
+  cybersecurity:      { dbSubject: "Cloud & IT",         jsonSubject: "cloud",     label: "Cybersecurity",      dir: "cloud" },
+  // Finance & Business
+  "personal-finance": { dbSubject: "Finance & Business", jsonSubject: "finance",   label: "Personal Finance",   dir: "finance" },
+  investing:          { dbSubject: "Finance & Business", jsonSubject: "finance",   label: "Investing",          dir: "finance" },
+  accounting:         { dbSubject: "Finance & Business", jsonSubject: "finance",   label: "Accounting",         dir: "finance" },
+  economics:          { dbSubject: "Finance & Business", jsonSubject: "finance",   label: "Economics",          dir: "finance" },
+  entrepreneurship:   { dbSubject: "Finance & Business", jsonSubject: "finance",   label: "Entrepreneurship",   dir: "finance" },
+  // Test Prep
+  "sat-reading":      { dbSubject: "Test Prep",          jsonSubject: "test-prep", label: "SAT Reading",        dir: "test-prep" },
+  "sat-math":         { dbSubject: "Test Prep",          jsonSubject: "test-prep", label: "SAT Math",           dir: "test-prep" },
+  "act-science":      { dbSubject: "Test Prep",          jsonSubject: "test-prep", label: "ACT Science",        dir: "test-prep" },
+  "act-english":      { dbSubject: "Test Prep",          jsonSubject: "test-prep", label: "ACT English",        dir: "test-prep" },
+  "ap-exams":         { dbSubject: "Test Prep",          jsonSubject: "test-prep", label: "AP Exams",           dir: "test-prep" },
 };
 
 const TOPICS = Object.keys(TOPIC_CONFIG);
