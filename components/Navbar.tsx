@@ -442,70 +442,99 @@ export default function Navbar() {
                     </button>
 
                     {showDropdown && (
-                      <div
-                        className={`absolute right-0 top-12 min-w-[240px] rounded-2xl border border-white/10 p-2 z-50
-                          backdrop-blur-xl origin-top-right
-                          ${dropdownClosing ? "dropdown-menu-exit" : "dropdown-menu-enter"}`}
-                        style={{
-                          background: "var(--dropdown-bg)",
-                          border: "1px solid var(--dropdown-border)",
-                          boxShadow: "0 0 20px rgba(251,191,36,0.12), 0 8px 32px rgba(0,0,0,0.3)",
-                        }}
-                      >
-                        {/* User info header */}
-                        <div className={`flex items-center gap-3 px-3 py-3 mb-1 border-b border-white/10
-                          ${dropdownClosing ? "dropdown-item-exit" : "dropdown-item-enter"}`}
-                          style={{ animationDelay: dropdownClosing ? "0ms" : "0ms" }}>
-                          <div className="w-9 h-9 rounded-full overflow-hidden border-2 border-electric/40 flex-shrink-0">
-                            <img src={stats?.avatar ?? user.avatar} alt="" className="w-full h-full object-cover" />
-                          </div>
-                          <div className="min-w-0">
-                            <p className="text-cream font-bold text-sm truncate">{user.username}</p>
-                            <p className="text-amber-400/80 text-[11px] font-semibold">
-                              {stats ? `Level ${stats.level}` : user.statsLoaded ? `Level ${user.level}` : <StatSkeleton width="w-12" />}
-                            </p>
-                          </div>
-                        </div>
+                      <>
+                        {/* Backdrop */}
+                        <div
+                          className={`fixed inset-0 z-40 ${dropdownClosing ? "animate-fade-out" : "animate-fade-in"}`}
+                          style={{ background: "rgba(0,0,0,0.4)", backdropFilter: "blur(2px)" }}
+                          onClick={closeDropdown}
+                        />
 
-                        {/* Menu items */}
-                        {DROPDOWN_ITEMS.map((item, i) => (
-                          <Link
-                            key={item.label}
-                            href={item.href}
-                            onClick={closeDropdown}
+                        {/* Dropdown panel */}
+                        <div
+                          className={`absolute right-0 top-12 w-[280px] rounded-2xl z-50 overflow-hidden origin-top-right
+                            ${dropdownClosing ? "dropdown-menu-exit" : "dropdown-menu-enter"}`}
+                          style={{
+                            background: "linear-gradient(135deg, rgba(12,16,32,0.98), rgba(8,12,24,0.98))",
+                            border: "1px solid rgba(255,255,255,0.1)",
+                            boxShadow: "0 0 30px rgba(0,0,0,0.5), 0 0 60px rgba(74,144,217,0.08)",
+                          }}
+                        >
+                          {/* ── User info header ── */}
+                          <div
+                            className={`px-5 pt-5 pb-4 ${dropdownClosing ? "dropdown-item-exit" : "dropdown-item-enter"}`}
+                            style={{ animationDelay: "0ms" }}
                           >
-                            <div
-                              className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-cream/70
-                                hover:text-cream hover:bg-white/[0.08] transition-all duration-200 cursor-pointer
-                                ${dropdownClosing ? "dropdown-item-exit" : "dropdown-item-enter"}`}
-                              style={{ animationDelay: dropdownClosing ? "0ms" : `${(i + 1) * 50}ms` }}
-                            >
-                              <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
-                                style={{ background: item.color }}>
-                                <span className={item.textColor}><item.Icon /></span>
+                            <div className="flex items-center gap-3.5">
+                              <div
+                                className="w-12 h-12 rounded-full overflow-hidden border-2 border-electric/50 flex-shrink-0"
+                                style={{ boxShadow: "0 0 16px rgba(74,144,217,0.2)" }}
+                              >
+                                <img src={stats?.avatar ?? user.avatar} alt="" className="w-full h-full object-cover" />
                               </div>
-                              <span className="font-medium">{item.label}</span>
+                              <div className="min-w-0 flex-1">
+                                <p className="text-cream font-bold text-[15px] truncate">{user.username}</p>
+                                <div className="flex items-center gap-2 mt-0.5">
+                                  <span className="text-gold text-xs font-semibold">
+                                    {stats ? `Level ${stats.level}` : user.statsLoaded ? `Level ${user.level}` : <StatSkeleton width="w-10" />}
+                                  </span>
+                                  <span className="text-cream/20">·</span>
+                                  <span className="text-cream/40 text-xs">
+                                    {stats ? `${stats.xp.toLocaleString()} XP` : user.statsLoaded ? `${user.xp.toLocaleString()} XP` : <StatSkeleton width="w-10" />}
+                                  </span>
+                                </div>
+                              </div>
                             </div>
-                          </Link>
-                        ))}
+                          </div>
 
-                        {/* Divider + Logout */}
-                        <div className="border-t border-white/10 mt-1 pt-1">
-                          <button
-                            onClick={handleLogout}
-                            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-red-400
-                              hover:bg-red-500/10 transition-all duration-200
-                              ${dropdownClosing ? "dropdown-item-exit" : "dropdown-item-enter"}`}
-                            style={{ animationDelay: dropdownClosing ? "0ms" : `${(DROPDOWN_ITEMS.length + 1) * 50}ms` }}
-                          >
-                            <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
-                              style={{ background: "rgba(239,68,68,0.12)" }}>
-                              <IconLogOut />
-                            </div>
-                            <span className="font-medium">Log Out</span>
-                          </button>
+                          {/* ── Divider ── */}
+                          <div className="mx-4 h-px" style={{ background: "rgba(255,255,255,0.08)" }} />
+
+                          {/* ── Menu items ── */}
+                          <div className="px-2 py-2">
+                            {DROPDOWN_ITEMS.map((item, i) => (
+                              <Link key={item.label} href={item.href} onClick={closeDropdown}>
+                                <div
+                                  className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-cream/60
+                                    hover:text-cream hover:bg-white/[0.06] transition-all duration-200 cursor-pointer
+                                    ${dropdownClosing ? "dropdown-item-exit" : "dropdown-item-enter"}`}
+                                  style={{ animationDelay: dropdownClosing ? "0ms" : `${(i + 1) * 40}ms` }}
+                                >
+                                  <div
+                                    className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+                                    style={{ background: item.color }}
+                                  >
+                                    <span className={item.textColor}><item.Icon /></span>
+                                  </div>
+                                  <span className="font-medium">{item.label}</span>
+                                </div>
+                              </Link>
+                            ))}
+                          </div>
+
+                          {/* ── Divider ── */}
+                          <div className="mx-4 h-px" style={{ background: "rgba(255,255,255,0.08)" }} />
+
+                          {/* ── Logout ── */}
+                          <div className="px-2 py-2">
+                            <button
+                              onClick={handleLogout}
+                              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-red-400/80
+                                hover:text-red-400 hover:bg-red-500/[0.08] transition-all duration-200
+                                ${dropdownClosing ? "dropdown-item-exit" : "dropdown-item-enter"}`}
+                              style={{ animationDelay: dropdownClosing ? "0ms" : `${(DROPDOWN_ITEMS.length + 1) * 40}ms` }}
+                            >
+                              <div
+                                className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+                                style={{ background: "rgba(239,68,68,0.1)" }}
+                              >
+                                <IconLogOut />
+                              </div>
+                              <span className="font-medium">Log Out</span>
+                            </button>
+                          </div>
                         </div>
-                      </div>
+                      </>
                     )}
                   </div>
                 </>

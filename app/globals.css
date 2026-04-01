@@ -1615,6 +1615,20 @@ body {
 .dropdown-item-exit {
   animation: dropdown-item-out 0.12s ease-in forwards;
 }
+.animate-fade-in {
+  animation: fade-in 0.2s ease-out forwards;
+}
+.animate-fade-out {
+  animation: fade-out 0.15s ease-in forwards;
+}
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes fade-out {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
 
 /* Coin burst particles — fly outward then fade */
 @keyframes coin-burst {
@@ -2812,6 +2826,8 @@ html.light .space-bg-container { display: none; }
   .dropdown-menu-enter,
   .dropdown-menu-exit,
   .dropdown-item-enter,
+  .animate-fade-in,
+  .animate-fade-out,
   .dropdown-item-exit,
   .acacia-tree,
   .savanna-sun,
