@@ -346,7 +346,8 @@ export default function QuizPage() {
         console.error("Failed to check answer", err);
       }
     },
-    [currentIndex, questions, answers, diffMult, blitzMult]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [currentIndex, questions, answers, diffMult, blitzMult, coinMultiplier, xpMultiplier, hasAutoCorrect]
   );
 
   // Early return AFTER all hooks
