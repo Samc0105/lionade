@@ -464,7 +464,7 @@ export default function ShopPage() {
               </>
             ) : (
               <>
-                <img src="/F.png" alt="Fangs" className="w-6 h-6 object-contain" />
+                <img src="/F.png" alt="Fangs" className="w-8 h-8 object-contain" />
                 <span className="font-bebas text-3xl text-gold tracking-wider">{formatCoins(userCoins)}</span>
                 <span className="text-cream/30 text-xs ml-1">coins</span>
               </>

@@ -31,8 +31,8 @@ export default function WalletPage() {
         <div className="rounded-2xl border border-gold/20 p-8 mb-6 text-center animate-slide-up"
           style={{ animationDelay: "0.05s", background: "var(--card-solid-bg)", boxShadow: "0 0 30px rgba(255,215,0,0.08)" }}>
           <p className="text-cream/40 text-xs uppercase tracking-widest font-semibold mb-3">Current Balance</p>
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <img src="/F.png" alt="Fangs" className="w-10 h-10 object-contain" />
+          <div className="flex items-center justify-center gap-4 mb-4">
+            <img src="/F.png" alt="Fangs" className="w-20 h-20 sm:w-24 sm:h-24 object-contain" />
             <span className="font-bebas text-7xl sm:text-8xl text-gold leading-none glow-gold">{formatCoins(coins)}</span>
           </div>
           <p className="text-cream/30 text-sm">Fangs</p>
