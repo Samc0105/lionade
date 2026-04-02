@@ -10,8 +10,8 @@ import { formatCoins } from "@/lib/mockData";
 type Rarity = "common" | "rare" | "epic" | "legendary";
 type ItemType = "frame" | "background" | "name_color" | "banner" | "booster";
 type BoosterEffect = "coin_multiplier" | "xp_multiplier" | "extra_time" | "auto_correct" | "fifty_fifty" | "score_boost" | "streak_shield";
-type Tab = "featured" | "themes" | "cosmetics" | "boosters" | "inventory";
-type PremiumTab = "frames" | "name_colors" | "banners";
+type Tab = "featured" | "cosmetics" | "boosters" | "inventory";
+type PremiumTab = "themes" | "frames" | "name_colors" | "banners";
 type CosmeticSub = "frames" | "backgrounds" | "name_colors" | "banners";
 type StoreMode = "coins" | "premium";
 
@@ -345,7 +345,7 @@ export default function ShopPage() {
 
   const [storeMode, setStoreMode] = useState<StoreMode>("coins");
   const [tab, setTab] = useState<Tab>("featured");
-  const [premiumTab, setPremiumTab] = useState<PremiumTab>("frames");
+  const [premiumTab, setPremiumTab] = useState<PremiumTab>("themes");
   const [cosmeticSub, setCosmeticSub] = useState<CosmeticSub>("frames");
   const [inventory, setInventory] = useState<OwnedItem[]>([]);
   const [confirmItem, setConfirmItem] = useState<{ item: ShopItem; quantity: number } | null>(null);
@@ -407,7 +407,6 @@ export default function ShopPage() {
 
   const TABS: { key: Tab; label: string; icon: string }[] = [
     { key: "featured", label: "Featured", icon: "⭐" },
-    { key: "themes", label: "Themes", icon: "🎨" },
     { key: "cosmetics", label: "Cosmetics", icon: "✨" },
     { key: "boosters", label: "Boosters", icon: "🚀" },
     { key: "inventory", label: "Inventory", icon: "🎒" },
@@ -505,8 +504,10 @@ export default function ShopPage() {
             </div>
 
             {/* Premium tabs */}
+            {/* Premium tabs */}
             <div className="flex items-center justify-center gap-1 sm:gap-2 mb-8">
               {([
+                { key: "themes" as PremiumTab, label: "Themes", icon: "🎨" },
                 { key: "frames" as PremiumTab, label: "Frames", icon: "🖼️" },
                 { key: "name_colors" as PremiumTab, label: "Name Colors", icon: "🌈" },
                 { key: "banners" as PremiumTab, label: "Banners", icon: "🏴" },
@@ -520,19 +521,55 @@ export default function ShopPage() {
               ))}
             </div>
 
+            {/* Themes tab */}
+            {premiumTab === "themes" && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                <div className="rounded-2xl overflow-hidden border border-purple-500/20 transition-all duration-300 hover:-translate-y-1 h-full flex flex-col"
+                  style={{ background: "linear-gradient(135deg, rgba(20,8,40,0.9), rgba(10,6,30,0.95))" }}>
+                  <div className="h-36 relative overflow-hidden">
+                    <img src="/savannah.png" alt="Savanna theme preview" className="absolute inset-0 w-full h-full object-cover grayscale-[60%] brightness-75" />
+                    <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                      <div className="w-12 h-12 rounded-full bg-black/40 border border-white/10 flex items-center justify-center">
+                        <span className="text-2xl">🔒</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="p-5 flex flex-col flex-1">
+                    <div className="flex items-center justify-between mb-2">
+                      <div>
+                        <p className="font-bebas text-xl text-cream tracking-wider">Savanna</p>
+                        <p className="text-purple-400/60 text-xs">Wild & golden — warm light theme</p>
+                      </div>
+                      <span className="text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-400 border border-purple-500/30">
+                        Epic
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between mt-auto pt-2 gap-6">
+                      <span className="font-bebas text-xl text-purple-300 flex-shrink-0">$2.99</span>
+                      <button disabled className="relative flex-shrink-0 px-4 py-2 rounded-lg text-xs font-bold border border-purple-500/30 bg-purple-500/10 text-purple-400/60 cursor-not-allowed overflow-hidden">
+                        <span className="premium-coming-soon-pulse">Coming Soon</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Premium items grid — filtered by tab */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
-              {PREMIUM_ITEMS
-                .filter((item) => {
-                  if (premiumTab === "frames") return item.type === "frame";
-                  if (premiumTab === "name_colors") return item.type === "name_color";
-                  if (premiumTab === "banners") return item.type === "banner";
-                  return false;
-                })
-                .map((item) => (
-                  <PremiumCard key={item.id} item={item} />
-                ))}
-            </div>
+            {premiumTab !== "themes" && (
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+                {PREMIUM_ITEMS
+                  .filter((item) => {
+                    if (premiumTab === "frames") return item.type === "frame";
+                    if (premiumTab === "name_colors") return item.type === "name_color";
+                    if (premiumTab === "banners") return item.type === "banner";
+                    return false;
+                  })
+                  .map((item) => (
+                    <PremiumCard key={item.id} item={item} />
+                  ))}
+              </div>
+            )}
           </div>
         )}
 
@@ -550,20 +587,6 @@ export default function ShopPage() {
                 </button>
               ))}
             </div>
-
-            {/* THEMES */}
-            {tab === "themes" && (
-              <div className={`text-center py-16 transition-all duration-700 delay-200 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`}>
-                <span className="text-5xl block mb-4">🎨</span>
-                <p className="font-bebas text-2xl text-cream/40 tracking-wider mb-2">Themes are in the Premium Store</p>
-                <p className="text-cream/25 text-sm mb-6">Themes change the entire look of your app and are available for purchase with real money.</p>
-                <button onClick={() => setStoreMode("premium")}
-                  className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold
-                    border border-purple-500/30 bg-purple-500/10 text-purple-300 hover:bg-purple-500/20 transition-all duration-200">
-                  <span>💎</span> Go to Premium Store
-                </button>
-              </div>
-            )}
 
             {/* FEATURED */}
             {tab === "featured" && (
