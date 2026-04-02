@@ -1,229 +1,179 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/lib/supabase";
+import { getQuizQuestions, checkAnswer } from "@/lib/db";
+import type { Subject } from "@/types";
 
-/* ── Constants ──────────────────────────────────────────────────── */
-
-const RESERVED_USERNAMES = ["admin", "root", "lionade", "support", "help", "ninny"];
-
-const DEFAULT_AVATARS = [
-  { emoji: "\u{1F981}", bg: "#FFD700" },   // lion
-  { emoji: "\u{1F42F}", bg: "#FF8C00" },   // tiger
-  { emoji: "\u{1F98A}", bg: "#E74C3C" },   // fox
-  { emoji: "\u{1F43A}", bg: "#6B7280" },   // wolf
-  { emoji: "\u{1F985}", bg: "#4A90D9" },   // eagle
-  { emoji: "\u{1F432}", bg: "#22C55E" },   // dragon
-  { emoji: "\u{1F98B}", bg: "#A855F7" },   // butterfly
-  { emoji: "\u{1F988}", bg: "#0891B2" },   // shark
-  { emoji: "\u{1F525}", bg: "#F97316" },   // fire
-  { emoji: "\u26A1",    bg: "#EAB308" },   // lightning
-];
-
-const STUDY_GOALS = [
-  { label: "Improve my grades", icon: "\u{1F4DA}" },
-  { label: "Prepare for SAT / ACT / GRE", icon: "\u{1F3AF}" },
-  { label: "Study for certifications", icon: "\u{1F4DC}" },
-  { label: "Learn coding and tech skills", icon: "\u{1F4BB}" },
-  { label: "General knowledge", icon: "\u{1F9E0}" },
-  { label: "Compete and win rewards", icon: "\u{1F3C6}" },
-];
+/* ── Subject categories ──────────────────────────────────────── */
 
 const SUBJECTS = [
-  { label: "Math", icon: "\u{1F522}", color: "#EF4444" },
-  { label: "Science", icon: "\u{1F52C}", color: "#22C55E" },
-  { label: "Languages", icon: "\u{1F30D}", color: "#3B82F6" },
-  { label: "SAT/ACT", icon: "\u{1F4DD}", color: "#A855F7" },
-  { label: "Coding", icon: "\u{1F4BB}", color: "#6B7280" },
-  { label: "Finance", icon: "\u{1F4B0}", color: "#EAB308" },
-  { label: "Certifications", icon: "\u{1F4DC}", color: "#F97316" },
+  { label: "Math", dbSubject: "Math" as Subject, icon: "📐", color: "#EF4444" },
+  { label: "Science", dbSubject: "Science" as Subject, icon: "🔬", color: "#22C55E" },
+  { label: "Humanities", dbSubject: "Humanities" as Subject, icon: "📚", color: "#A855F7" },
+  { label: "Languages", dbSubject: "Languages" as Subject, icon: "🌍", color: "#3B82F6" },
+  { label: "Tech & Coding", dbSubject: "Tech & Coding" as Subject, icon: "💻", color: "#6B7280" },
+  { label: "Cloud & IT", dbSubject: "Cloud & IT" as Subject, icon: "☁️", color: "#F97316" },
+  { label: "Finance & Business", dbSubject: "Finance & Business" as Subject, icon: "💰", color: "#EAB308" },
+  { label: "Test Prep", dbSubject: "Test Prep" as Subject, icon: "📝", color: "#EC4899" },
 ];
 
-const DAILY_TARGETS = [
-  { minutes: 5,  label: "5 min",  desc: "Quick daily check-in" },
-  { minutes: 10, label: "10 min", desc: "Build a habit" },
-  { minutes: 15, label: "15 min", desc: "Solid daily grind" },
-  { minutes: 30, label: "30 min", desc: "Serious student" },
-  { minutes: 60, label: "60 min", desc: "Power grinder" },
+const DAILY_GOALS = [
+  { minutes: 5, label: "5 min", tag: "Casual", icon: "🌱" },
+  { minutes: 10, label: "10 min", tag: "Regular", icon: "📖" },
+  { minutes: 15, label: "15 min", tag: "Serious", icon: "🔥" },
+  { minutes: 20, label: "20 min", tag: "Intense", icon: "⚡" },
 ];
 
-const STEPS = [
-  { n: 1, label: "Identity" },
-  { n: 2, label: "Goal" },
-  { n: 3, label: "Subjects" },
-  { n: 4, label: "Target" },
-];
+const TOTAL_STEPS = 4;
 
-const inputCls =
-  "w-full bg-white/5 border border-electric/20 rounded-xl px-4 py-3.5 text-cream placeholder-cream/25 text-sm font-medium focus:outline-none focus:border-electric focus:bg-electric/5 transition-all";
+/* ── Diagnostic question type ────────────────────────────────── */
 
-/* ── Page ───────────────────────────────────────────────────────── */
+interface DiagQuestion {
+  id: string;
+  question: string;
+  options: string[];
+  difficulty: string;
+}
+
+/* ── Page ────────────────────────────────────────────────────── */
 
 export default function OnboardingPage() {
   const { user, isLoading, refreshUser } = useAuth();
   const router = useRouter();
 
-  // Email signup users arrive with ?step=2 — read once on mount
-  const [minStep] = useState(() => {
-    if (typeof window === "undefined") return 1;
-    const p = new URLSearchParams(window.location.search);
-    return parseInt(p.get("step") ?? "1", 10);
-  });
-  const [step, setStep] = useState(minStep);
   const [ready, setReady] = useState(false);
-
-  // Step 1
-  const [displayName, setDisplayName] = useState("");
-  const [username, setUsername] = useState("");
-  const [usernameStatus, setUsernameStatus] = useState<
-    "idle" | "checking" | "available" | "taken"
-  >("idle");
-  const [selectedAvatarIdx, setSelectedAvatarIdx] = useState<number | null>(null); // null = google pic
-  const [googleAvatarUrl, setGoogleAvatarUrl] = useState<string | null>(null);
-
-  // Step 2
-  const [studyGoal, setStudyGoal] = useState("");
-
-  // Step 3
-  const [selectedSubjects, setSelectedSubjects] = useState<string[]>([]);
-
-  // Step 4
-  const [dailyTarget, setDailyTarget] = useState(0);
-
-  const [error, setError] = useState("");
+  const [step, setStep] = useState(1);
   const [submitting, setSubmitting] = useState(false);
 
-  // Force dark mode on onboarding page
+  // Step 1: Subjects
+  const [selectedSubjects, setSelectedSubjects] = useState<string[]>([]);
+
+  // Step 2: Daily goal
+  const [dailyMinutes, setDailyMinutes] = useState(0);
+  const [goalType, setGoalType] = useState("");
+
+  // Step 3: Level choice
+  const [levelChoice, setLevelChoice] = useState<"scratch" | "diagnostic" | null>(null);
+
+  // Step 4: Diagnostic quiz
+  const [diagQuestions, setDiagQuestions] = useState<DiagQuestion[]>([]);
+  const [diagIndex, setDiagIndex] = useState(0);
+  const [diagScore, setDiagScore] = useState(0);
+  const [diagAnswered, setDiagAnswered] = useState(false);
+  const [diagCorrect, setDiagCorrect] = useState<boolean | null>(null);
+  const [diagLoading, setDiagLoading] = useState(false);
+  const [diagDone, setDiagDone] = useState(false);
+
+  // Speech bubble messages
+  const SPEECHES: Record<number, string> = {
+    1: "Hey! I'm Leo 🦁 Let's get you set up. What do you want to study?",
+    2: "Nice picks! How much time can you study each day?",
+    3: "Almost done! Want to start fresh or test your level?",
+    4: levelChoice === "diagnostic"
+      ? (diagDone ? "All done! Let's see your results..." : "Answer these 5 questions so I can find your level!")
+      : "You're all set! Let's start learning!",
+  };
+
+  // Force dark mode
   useEffect(() => {
     document.documentElement.classList.remove("light");
     document.documentElement.dataset.theme = "dark";
   }, []);
 
-  /* ── Auth guard + pre-fill ──────────────────────────────────── */
+  // Auth guard
   useEffect(() => {
     if (isLoading) return;
     if (!user) { router.replace("/login"); return; }
 
-    let cancelled = false;
-
     (async () => {
-      // Check onboarding status
       const { data: profile } = await supabase
         .from("profiles")
-        .select("onboarding_completed, username, display_name, avatar_url")
+        .select("onboarding_completed, username")
         .eq("id", user.id)
         .maybeSingle();
 
-      if (cancelled) return;
-
-      // Already onboarded if flag is set OR user already has a username (pre-flag users)
       if (profile?.onboarding_completed || (profile?.username && profile.username.trim().length > 0)) {
         router.replace("/dashboard");
         return;
       }
-
-      // Pre-fill from Google metadata
-      const { data: { session } } = await supabase.auth.getSession();
-      const meta = session?.user?.user_metadata ?? {};
-
-      if (!cancelled) {
-        setDisplayName(
-          meta.full_name ?? meta.name ?? profile?.display_name ?? ""
-        );
-        setGoogleAvatarUrl(
-          meta.avatar_url ?? meta.picture ?? profile?.avatar_url ?? null
-        );
-        setReady(true);
-      }
+      setReady(true);
     })();
-
-    return () => { cancelled = true; };
   }, [user, isLoading, router]);
 
-  /* ── Username live check (debounced 500ms) ──────────────────── */
-  useEffect(() => {
-    const clean = username.toLowerCase().replace(/[^a-z0-9_]/g, "");
-    if (clean !== username) return; // will re-fire after setState
-    if (username.length < 3 || username.length > 20) {
-      setUsernameStatus("idle");
-      return;
+  // Load diagnostic questions
+  const loadDiagnostic = useCallback(async () => {
+    if (!selectedSubjects[0]) return;
+    setDiagLoading(true);
+    try {
+      // Get a mix of difficulties
+      const subj = SUBJECTS.find(s => s.label === selectedSubjects[0]);
+      if (!subj) return;
+      const qs = await getQuizQuestions(subj.dbSubject, "medium");
+      setDiagQuestions(qs.slice(0, 5));
+      setDiagIndex(0);
+      setDiagScore(0);
+      setDiagAnswered(false);
+      setDiagCorrect(null);
+      setDiagDone(false);
+    } catch {
+      setDiagQuestions([]);
+    } finally {
+      setDiagLoading(false);
     }
-    if (RESERVED_USERNAMES.includes(username)) {
-      setUsernameStatus("taken");
-      return;
+  }, [selectedSubjects]);
+
+  const handleDiagAnswer = async (answerIdx: number) => {
+    if (diagAnswered || !diagQuestions[diagIndex]) return;
+    setDiagAnswered(true);
+    try {
+      const { correct_answer } = await checkAnswer(diagQuestions[diagIndex].id);
+      const correct = answerIdx === correct_answer;
+      setDiagCorrect(correct);
+      if (correct) setDiagScore(s => s + 1);
+    } catch {
+      setDiagCorrect(false);
     }
-    setUsernameStatus("checking");
-    const timer = setTimeout(async () => {
-      const { data } = await supabase
-        .from("profiles")
-        .select("id")
-        .eq("username", username)
-        .neq("id", user?.id ?? "")
-        .maybeSingle();
-      setUsernameStatus(data ? "taken" : "available");
-    }, 500);
-    return () => clearTimeout(timer);
-  }, [username, user?.id]);
-
-  /* ── Helpers ────────────────────────────────────────────────── */
-  const step1Valid =
-    username.length >= 3 &&
-    username.length <= 20 &&
-    usernameStatus === "available" &&
-    displayName.trim().length > 0;
-
-  const nextStep = () => {
-    setError("");
-    setStep((s) => s + 1);
-  };
-  const prevStep = () => {
-    setError("");
-    setStep((s) => Math.max(minStep, s - 1));
   };
 
+  const nextDiagQuestion = () => {
+    if (diagIndex + 1 >= diagQuestions.length) {
+      setDiagDone(true);
+    } else {
+      setDiagIndex(i => i + 1);
+      setDiagAnswered(false);
+      setDiagCorrect(null);
+    }
+  };
+
+  const getDiagLevel = (): string => {
+    if (diagScore >= 4) return "advanced";
+    if (diagScore >= 2) return "intermediate";
+    return "beginner";
+  };
+
+  // Save and finish
   const handleFinish = async () => {
-    setError("");
-    if (selectedSubjects.length === 0) {
-      setError("Pick at least one subject");
-      return;
-    }
-    if (dailyTarget === 0) {
-      setError("Pick a daily target");
-      return;
-    }
-
+    if (!user) return;
     setSubmitting(true);
 
-    // Build avatar_url
-    let avatarUrl: string | null = null;
-    if (selectedAvatarIdx === null && googleAvatarUrl) {
-      avatarUrl = googleAvatarUrl;
-    }
-    // else null → DiceBear fallback
+    const educationLevel = levelChoice === "diagnostic" ? getDiagLevel() : "beginner";
 
-    const updates: Record<string, unknown> = {
-      goal_type: studyGoal,
-      selected_subjects: selectedSubjects,
-      daily_target_minutes: dailyTarget,
-      onboarding_completed: true,
-    };
-
-    // Only set identity fields if user went through step 1
-    if (minStep === 1) {
-      updates.username = username.trim().toLowerCase();
-      updates.display_name = displayName.trim();
-      updates.avatar_url = avatarUrl;
-    }
-
-    const { error: dbErr } = await supabase
+    const { error } = await supabase
       .from("profiles")
-      .update(updates)
-      .eq("id", user!.id);
+      .update({
+        selected_subjects: selectedSubjects,
+        daily_target: dailyMinutes,
+        goal_type: goalType,
+        education_level: educationLevel,
+        onboarding_completed: true,
+      })
+      .eq("id", user.id);
 
-    if (dbErr) {
-      setError(dbErr.message);
+    if (error) {
+      console.error("[Onboarding] Save failed:", error.message);
       setSubmitting(false);
       return;
     }
@@ -232,7 +182,15 @@ export default function OnboardingPage() {
     router.replace("/dashboard");
   };
 
-  /* ── Loading / guard states ─────────────────────────────────── */
+  const toggleSubject = (label: string) => {
+    setSelectedSubjects(prev =>
+      prev.includes(label) ? prev.filter(s => s !== label) : [...prev, label]
+    );
+  };
+
+  const progress = step / TOTAL_STEPS;
+
+  // Loading state
   if (isLoading || !ready) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -244,444 +202,338 @@ export default function OnboardingPage() {
     );
   }
 
-  /* ── Render ─────────────────────────────────────────────────── */
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 relative overflow-hidden py-8">
-      {/* Background grid */}
-      <div
-        className="absolute inset-0 opacity-30 pointer-events-none"
-        style={{
-          backgroundImage:
-            "linear-gradient(rgba(74,144,217,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(74,144,217,0.08) 1px, transparent 1px)",
-          backgroundSize: "40px 40px",
-        }}
-      />
-
-      <div className="relative z-10 w-full max-w-md animate-slide-up">
-        {/* Logo */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-electric flex items-center justify-center shadow-lg shadow-electric/40">
-              <span className="text-white font-bebas text-xl leading-none">L</span>
-            </div>
-            <span className="font-bebas text-3xl tracking-wider text-cream">LIONADE</span>
-          </div>
-          <p className="text-cream/40 text-sm mt-3">Let&apos;s set up your arena profile</p>
+    <div className="min-h-screen flex flex-col items-center px-4 py-8">
+      {/* Progress bar */}
+      <div className="w-full max-w-lg mb-8">
+        <div className="flex items-center justify-between mb-2">
+          <button
+            onClick={() => step > 1 && setStep(s => s - 1)}
+            className={`text-cream/40 hover:text-cream text-sm font-syne transition-colors ${step === 1 ? "invisible" : ""}`}
+          >
+            &larr; Back
+          </button>
+          <p className="text-cream/30 text-xs font-syne">Step {step} of {TOTAL_STEPS}</p>
         </div>
+        <div className="w-full h-2.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.08)" }}>
+          <div
+            className="h-full rounded-full transition-all duration-500 ease-out"
+            style={{ width: `${progress * 100}%`, background: "linear-gradient(90deg, #4A90D9, #22C55E)" }}
+          />
+        </div>
+      </div>
 
-        <div
-          className="rounded-2xl border border-electric/20 overflow-hidden"
-          style={{ background: "linear-gradient(135deg, #0a1020 0%, #060c18 100%)" }}
-        >
-          <div className="px-6 pt-5 pb-6">
-            {/* ── Step indicator ──────────────────────────────── */}
-            <div className="flex items-center gap-2 mb-6">
-              {STEPS.filter((s) => s.n >= minStep).map((s, i, arr) => (
-                <div key={s.n} className="flex items-center gap-2 flex-1">
-                  <div className="flex flex-col items-center gap-1 flex-1">
-                    <div
-                      className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300 ${
-                        step > s.n
-                          ? "bg-green-500 text-white"
-                          : step === s.n
-                          ? "bg-electric text-white shadow-lg shadow-electric/40"
-                          : "bg-white/10 text-cream/40"
-                      }`}
-                    >
-                      {step > s.n ? "\u2713" : s.n - minStep + 1}
-                    </div>
-                    <span
-                      className={`text-[10px] font-semibold transition-colors duration-200 ${
-                        step === s.n
-                          ? "text-electric"
-                          : step > s.n
-                          ? "text-green-400"
-                          : "text-cream/30"
-                      }`}
-                    >
+      {/* Lion mascot + speech bubble */}
+      <div className="flex items-start gap-3 max-w-lg w-full mb-8 animate-slide-up">
+        <div className="w-14 h-14 rounded-full flex items-center justify-center flex-shrink-0 text-3xl"
+          style={{ background: "linear-gradient(135deg, #FFD70030, #F9731620)", border: "2px solid #FFD70040" }}>
+          🦁
+        </div>
+        <div className="flex-1 rounded-2xl rounded-tl-sm px-5 py-3.5"
+          style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)" }}>
+          <p className="text-cream text-sm font-syne leading-relaxed">
+            {SPEECHES[step]}
+          </p>
+        </div>
+      </div>
+
+      {/* Content card */}
+      <div className="w-full max-w-lg animate-slide-up" style={{ animationDelay: "0.05s" }}>
+
+        {/* ═══ STEP 1: SUBJECTS ═══ */}
+        {step === 1 && (
+          <div>
+            <h2 className="font-bebas text-3xl text-cream tracking-wider text-center mb-6">
+              WHAT DO YOU WANT TO STUDY?
+            </h2>
+            <div className="grid grid-cols-2 gap-3 mb-8">
+              {SUBJECTS.map(s => {
+                const selected = selectedSubjects.includes(s.label);
+                return (
+                  <button key={s.label} onClick={() => toggleSubject(s.label)}
+                    className={`p-4 rounded-2xl border text-left transition-all duration-200 hover:-translate-y-0.5 ${
+                      selected
+                        ? "border-electric/60 shadow-lg"
+                        : "border-white/10 hover:border-white/20"
+                    }`}
+                    style={{
+                      background: selected ? `${s.color}15` : "rgba(255,255,255,0.03)",
+                      boxShadow: selected ? `0 0 20px ${s.color}20` : "none",
+                    }}
+                  >
+                    <span className="text-2xl block mb-2">{s.icon}</span>
+                    <p className={`text-sm font-bold ${selected ? "text-cream" : "text-cream/60"}`}>
                       {s.label}
-                    </span>
-                  </div>
-                  {i < arr.length - 1 && (
-                    <div
-                      className={`h-0.5 flex-1 mb-4 rounded-full transition-all duration-300 ${
-                        step > s.n ? "bg-green-500" : "bg-white/10"
-                      }`}
-                    />
-                  )}
-                </div>
-              ))}
+                    </p>
+                    {selected && (
+                      <span className="text-electric text-xs font-bold mt-1 block">&#x2713; Selected</span>
+                    )}
+                  </button>
+                );
+              })}
             </div>
+            <button
+              onClick={() => setStep(2)}
+              disabled={selectedSubjects.length === 0}
+              className="w-full py-3.5 rounded-xl font-bold text-sm bg-electric text-white
+                hover:bg-electric/90 transition-all duration-200 shadow-lg shadow-electric/20
+                disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              Continue &rarr;
+            </button>
+          </div>
+        )}
 
-            {/* ════════════════ STEP 1: IDENTITY ════════════════ */}
-            {step === 1 && (
-              <div className="space-y-5 animate-slide-up">
-                <div className="text-center mb-2">
-                  <h2 className="font-bebas text-2xl text-cream tracking-wider">
-                    CREATE YOUR IDENTITY
-                  </h2>
-                  <p className="text-cream/40 text-xs mt-1">
-                    This is how other players will see you in the arena
+        {/* ═══ STEP 2: DAILY GOAL ═══ */}
+        {step === 2 && (
+          <div>
+            <h2 className="font-bebas text-3xl text-cream tracking-wider text-center mb-6">
+              HOW MUCH TIME DO YOU HAVE?
+            </h2>
+            <div className="space-y-3 mb-8">
+              {DAILY_GOALS.map(g => {
+                const selected = dailyMinutes === g.minutes;
+                return (
+                  <button key={g.minutes}
+                    onClick={() => { setDailyMinutes(g.minutes); setGoalType(g.tag); }}
+                    className={`w-full flex items-center gap-4 p-4 rounded-2xl border text-left transition-all duration-200 ${
+                      selected
+                        ? "border-electric/60 shadow-lg"
+                        : "border-white/10 hover:border-white/20"
+                    }`}
+                    style={{ background: selected ? "rgba(74,144,217,0.1)" : "rgba(255,255,255,0.03)" }}
+                  >
+                    <span className="text-2xl">{g.icon}</span>
+                    <div className="flex-1">
+                      <p className={`font-bold text-sm ${selected ? "text-cream" : "text-cream/60"}`}>
+                        {g.label} / day
+                      </p>
+                      <p className={`text-xs mt-0.5 ${selected ? "text-electric" : "text-cream/30"}`}>
+                        {g.tag}
+                      </p>
+                    </div>
+                    {selected && <span className="text-electric text-lg">&#x2713;</span>}
+                  </button>
+                );
+              })}
+            </div>
+            <button
+              onClick={() => setStep(3)}
+              disabled={dailyMinutes === 0}
+              className="w-full py-3.5 rounded-xl font-bold text-sm bg-electric text-white
+                hover:bg-electric/90 transition-all duration-200 shadow-lg shadow-electric/20
+                disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              Continue &rarr;
+            </button>
+          </div>
+        )}
+
+        {/* ═══ STEP 3: LEVEL CHOICE ═══ */}
+        {step === 3 && (
+          <div>
+            <h2 className="font-bebas text-3xl text-cream tracking-wider text-center mb-6">
+              FIND YOUR LEVEL
+            </h2>
+            <div className="space-y-3 mb-8">
+              <button
+                onClick={() => setLevelChoice("scratch")}
+                className={`w-full flex items-center gap-4 p-5 rounded-2xl border text-left transition-all duration-200 ${
+                  levelChoice === "scratch"
+                    ? "border-electric/60 shadow-lg"
+                    : "border-white/10 hover:border-white/20"
+                }`}
+                style={{ background: levelChoice === "scratch" ? "rgba(74,144,217,0.1)" : "rgba(255,255,255,0.03)" }}
+              >
+                <span className="text-3xl">🌱</span>
+                <div>
+                  <p className={`font-bold ${levelChoice === "scratch" ? "text-cream" : "text-cream/60"}`}>
+                    Start from scratch
+                  </p>
+                  <p className="text-cream/30 text-xs mt-0.5">
+                    Begin with the basics and work your way up
                   </p>
                 </div>
+              </button>
 
-                {/* Display Name */}
+              <button
+                onClick={() => setLevelChoice("diagnostic")}
+                className={`w-full flex items-center gap-4 p-5 rounded-2xl border text-left transition-all duration-200 ${
+                  levelChoice === "diagnostic"
+                    ? "border-gold/60 shadow-lg"
+                    : "border-white/10 hover:border-white/20"
+                }`}
+                style={{ background: levelChoice === "diagnostic" ? "rgba(255,215,0,0.08)" : "rgba(255,255,255,0.03)" }}
+              >
+                <span className="text-3xl">🎯</span>
                 <div>
-                  <label className="block text-cream/60 text-xs font-bold uppercase tracking-widest mb-2">
-                    Display Name
-                  </label>
-                  <input
-                    type="text"
-                    value={displayName}
-                    onChange={(e) => setDisplayName(e.target.value)}
-                    placeholder="Your name"
-                    className={inputCls}
-                    maxLength={50}
-                  />
-                </div>
-
-                {/* Username */}
-                <div>
-                  <label className="block text-cream/60 text-xs font-bold uppercase tracking-widest mb-2">
-                    Username
-                  </label>
-                  <div className="relative">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-cream/30 text-sm font-medium">
-                      @
-                    </span>
-                    <input
-                      type="text"
-                      value={username}
-                      onChange={(e) =>
-                        setUsername(
-                          e.target.value
-                            .toLowerCase()
-                            .replace(/[^a-z0-9_]/g, "")
-                            .slice(0, 20)
-                        )
-                      }
-                      placeholder="your_handle"
-                      className={inputCls + " pl-9 pr-28"}
-                      maxLength={20}
-                    />
-                    {usernameStatus === "checking" && (
-                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-cream/40 text-xs">
-                        Checking...
-                      </span>
-                    )}
-                    {usernameStatus === "available" && (
-                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-green-400 text-xs font-semibold">
-                        &#x2705; Available
-                      </span>
-                    )}
-                    {usernameStatus === "taken" && (
-                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-red-400 text-xs font-semibold">
-                        &#x274C; Taken
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-cream/25 text-xs mt-1.5">
-                    3-20 characters. Letters, numbers, and underscores only.
+                  <p className={`font-bold ${levelChoice === "diagnostic" ? "text-cream" : "text-cream/60"}`}>
+                    Find my level
+                  </p>
+                  <p className="text-cream/30 text-xs mt-0.5">
+                    Take a quick 5-question diagnostic quiz
                   </p>
                 </div>
+              </button>
+            </div>
+            <button
+              onClick={async () => {
+                if (levelChoice === "diagnostic") {
+                  setStep(4);
+                  await loadDiagnostic();
+                } else if (levelChoice === "scratch") {
+                  await handleFinish();
+                }
+              }}
+              disabled={!levelChoice || submitting}
+              className="w-full py-3.5 rounded-xl font-bold text-sm bg-electric text-white
+                hover:bg-electric/90 transition-all duration-200 shadow-lg shadow-electric/20
+                disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              {submitting ? "Saving..." : levelChoice === "scratch" ? "Let's Go! 🚀" : "Start Quiz →"}
+            </button>
+          </div>
+        )}
 
-                {/* Avatar selection */}
-                <div>
-                  <label className="block text-cream/60 text-xs font-bold uppercase tracking-widest mb-3">
-                    Avatar
-                  </label>
-                  <div className="flex flex-wrap gap-2 justify-center">
-                    {/* Google avatar */}
-                    {googleAvatarUrl && (
-                      <button
-                        type="button"
-                        onClick={() => setSelectedAvatarIdx(null)}
-                        className={`w-12 h-12 rounded-full overflow-hidden border-2 transition-all duration-200 flex-shrink-0 ${
-                          selectedAvatarIdx === null
-                            ? "border-electric shadow-lg shadow-electric/40 scale-110"
-                            : "border-cream/20 opacity-60 hover:opacity-100"
-                        }`}
-                      >
-                        <img
-                          src={googleAvatarUrl}
-                          alt="Google avatar"
-                          className="w-full h-full object-cover"
-                          referrerPolicy="no-referrer"
-                        />
-                      </button>
-                    )}
-                    {/* Emoji avatars */}
-                    {DEFAULT_AVATARS.map((av, i) => (
-                      <button
-                        key={i}
-                        type="button"
-                        onClick={() => setSelectedAvatarIdx(i)}
-                        className={`w-12 h-12 rounded-full flex items-center justify-center text-xl border-2 transition-all duration-200 flex-shrink-0 ${
-                          selectedAvatarIdx === i
-                            ? "border-electric shadow-lg shadow-electric/40 scale-110"
-                            : "border-cream/20 opacity-60 hover:opacity-100"
-                        }`}
-                        style={{ background: av.bg + "30" }}
-                      >
-                        {av.emoji}
-                      </button>
-                    ))}
-                  </div>
+        {/* ═══ STEP 4: DIAGNOSTIC QUIZ ═══ */}
+        {step === 4 && (
+          <div>
+            {diagLoading ? (
+              <div className="text-center py-12">
+                <div className="w-10 h-10 rounded-full border-2 border-electric border-t-transparent animate-spin mx-auto mb-3" />
+                <p className="text-cream/40 text-sm">Loading questions...</p>
+              </div>
+            ) : diagDone ? (
+              /* Results */
+              <div className="text-center animate-slide-up">
+                <div className="text-6xl mb-4">
+                  {diagScore >= 4 ? "🏆" : diagScore >= 2 ? "💪" : "🌱"}
                 </div>
-
-                {error && <ErrorBox msg={error} />}
-
+                <h2 className="font-bebas text-3xl text-cream tracking-wider mb-2">
+                  {diagScore >= 4 ? "ADVANCED" : diagScore >= 2 ? "INTERMEDIATE" : "BEGINNER"}
+                </h2>
+                <p className="text-cream/40 text-sm mb-2">
+                  You got {diagScore} out of {diagQuestions.length} correct
+                </p>
+                <p className="text-cream/30 text-xs mb-8">
+                  {diagScore >= 4
+                    ? "Impressive! You'll start with challenging content."
+                    : diagScore >= 2
+                    ? "Good foundation! We'll build from here."
+                    : "No worries! We'll start with the fundamentals."}
+                </p>
                 <button
-                  type="button"
-                  onClick={nextStep}
-                  disabled={!step1Valid}
-                  className="w-full py-3.5 rounded-xl font-bold text-sm bg-electric text-white hover:bg-electric/90 transition-all duration-200 shadow-lg shadow-electric/20 disabled:opacity-40 disabled:cursor-not-allowed mt-1"
+                  onClick={handleFinish}
+                  disabled={submitting}
+                  className="w-full py-3.5 rounded-xl font-bold text-sm bg-electric text-white
+                    hover:bg-electric/90 transition-all duration-200 shadow-lg shadow-electric/20
+                    disabled:opacity-40 disabled:cursor-not-allowed"
                 >
-                  Next &rarr;
+                  {submitting ? "Saving..." : "Let's Go! 🚀"}
                 </button>
               </div>
-            )}
-
-            {/* ════════════════ STEP 2: GOAL ════════════════════ */}
-            {step === 2 && (
-              <div className="space-y-5 animate-slide-up">
-                <div className="text-center mb-2">
-                  <h2 className="font-bebas text-2xl text-cream tracking-wider">
-                    WHAT&apos;S YOUR GOAL?
-                  </h2>
-                  <p className="text-cream/40 text-xs mt-1">
-                    We&apos;ll tailor your experience
+            ) : diagQuestions.length === 0 ? (
+              /* No questions available — skip diagnostic */
+              <div className="text-center py-8">
+                <p className="text-cream/50 text-sm mb-4">
+                  No diagnostic questions available yet for this subject.
+                </p>
+                <button
+                  onClick={handleFinish}
+                  disabled={submitting}
+                  className="w-full py-3.5 rounded-xl font-bold text-sm bg-electric text-white
+                    hover:bg-electric/90 transition-all duration-200 shadow-lg shadow-electric/20
+                    disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  {submitting ? "Saving..." : "Start as Beginner →"}
+                </button>
+              </div>
+            ) : (
+              /* Active question */
+              <div className="animate-slide-up">
+                <div className="flex items-center justify-between mb-4">
+                  <p className="text-cream/40 text-xs font-syne">
+                    Question {diagIndex + 1} of {diagQuestions.length}
+                  </p>
+                  <p className="text-cream/40 text-xs font-syne">
+                    Score: <span className="text-cream font-bold">{diagScore}</span>
                   </p>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
-                  {STUDY_GOALS.map((g) => (
-                    <button
-                      key={g.label}
-                      type="button"
-                      onClick={() => setStudyGoal(g.label)}
-                      className={`rounded-xl border p-4 text-left transition-all duration-200 ${
-                        studyGoal === g.label
-                          ? "border-electric bg-electric/10 shadow-lg shadow-electric/10"
-                          : "border-cream/10 bg-white/[0.02] hover:border-cream/20"
-                      }`}
-                    >
-                      <span className="text-2xl block mb-2">{g.icon}</span>
-                      <span
-                        className={`text-xs font-semibold ${
-                          studyGoal === g.label ? "text-electric" : "text-cream/60"
-                        }`}
-                      >
-                        {g.label}
-                      </span>
-                    </button>
+                {/* Question progress dots */}
+                <div className="flex gap-1.5 mb-5">
+                  {diagQuestions.map((_, i) => (
+                    <div key={i} className="h-1.5 flex-1 rounded-full transition-all duration-300"
+                      style={{
+                        background: i < diagIndex ? "#22C55E"
+                          : i === diagIndex ? "#4A90D980"
+                          : "rgba(255,255,255,0.08)"
+                      }}
+                    />
                   ))}
                 </div>
 
-                {error && <ErrorBox msg={error} />}
-
-                <div className="flex gap-3 mt-1">
-                  {minStep < 2 && (
-                    <button
-                      type="button"
-                      onClick={prevStep}
-                      className="flex-1 py-3.5 rounded-xl font-bold text-sm border border-electric/30 text-cream/70 hover:text-cream hover:border-electric/60 transition-all duration-200"
-                    >
-                      &larr; Back
-                    </button>
-                  )}
-                  <button
-                    type="button"
-                    onClick={nextStep}
-                    disabled={!studyGoal}
-                    className={`${
-                      minStep < 2 ? "flex-[2]" : "w-full"
-                    } py-3.5 rounded-xl font-bold text-sm bg-electric text-white hover:bg-electric/90 transition-all duration-200 shadow-lg shadow-electric/20 disabled:opacity-40 disabled:cursor-not-allowed`}
-                  >
-                    Next &rarr;
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* ════════════════ STEP 3: SUBJECTS ════════════════ */}
-            {step === 3 && (
-              <div className="space-y-5 animate-slide-up">
-                <div className="text-center mb-2">
-                  <h2 className="font-bebas text-2xl text-cream tracking-wider">
-                    PICK YOUR SUBJECTS
-                  </h2>
-                  <p className="text-cream/40 text-xs mt-1">
-                    Select all that you want to study
+                {/* Question text */}
+                <div className="rounded-2xl p-5 mb-5"
+                  style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
+                  <p className="text-cream text-sm font-syne leading-relaxed">
+                    {diagQuestions[diagIndex].question}
                   </p>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
-                  {SUBJECTS.map((s) => {
-                    const selected = selectedSubjects.includes(s.label);
+                {/* Options */}
+                <div className="space-y-2.5 mb-5">
+                  {diagQuestions[diagIndex].options.map((opt, idx) => {
+                    let border = "rgba(255,255,255,0.1)";
+                    let bg = "rgba(255,255,255,0.03)";
+                    if (diagAnswered && diagCorrect !== null) {
+                      // We don't know which was correct from the UI — just show green/red on selected
+                      // This is fine for a diagnostic
+                    }
                     return (
-                      <button
-                        key={s.label}
-                        type="button"
-                        onClick={() =>
-                          setSelectedSubjects((prev) =>
-                            selected
-                              ? prev.filter((x) => x !== s.label)
-                              : [...prev, s.label]
-                          )
-                        }
-                        className={`rounded-xl border p-4 text-left transition-all duration-200 ${
-                          selected
-                            ? "shadow-lg"
-                            : "border-cream/10 bg-white/[0.02] hover:border-cream/20"
-                        }`}
-                        style={
-                          selected
-                            ? {
-                                borderColor: s.color + "60",
-                                background: s.color + "15",
-                                boxShadow: `0 0 12px ${s.color}20`,
-                              }
-                            : undefined
-                        }
+                      <button key={idx} onClick={() => handleDiagAnswer(idx)}
+                        disabled={diagAnswered}
+                        className={`w-full text-left p-4 rounded-xl border transition-all duration-200
+                          ${!diagAnswered ? "hover:-translate-y-0.5 hover:bg-white/5 cursor-pointer" : "cursor-default"}`}
+                        style={{ borderColor: border, background: bg }}
                       >
-                        <span className="text-2xl block mb-2">{s.icon}</span>
-                        <span
-                          className="text-xs font-semibold"
-                          style={selected ? { color: s.color } : { color: "rgba(238,244,255,0.6)" }}
-                        >
-                          {s.label}
-                        </span>
+                        <div className="flex items-start gap-3">
+                          <span className="w-7 h-7 rounded-full border-2 flex items-center justify-center flex-shrink-0 text-xs font-bold mt-0.5"
+                            style={{ borderColor: "rgba(255,255,255,0.2)" }}>
+                            {String.fromCharCode(65 + idx)}
+                          </span>
+                          <p className="text-cream/80 text-sm font-syne">{opt}</p>
+                        </div>
                       </button>
                     );
                   })}
                 </div>
 
-                {error && <ErrorBox msg={error} />}
-
-                <div className="flex gap-3 mt-1">
-                  <button
-                    type="button"
-                    onClick={prevStep}
-                    className="flex-1 py-3.5 rounded-xl font-bold text-sm border border-electric/30 text-cream/70 hover:text-cream hover:border-electric/60 transition-all duration-200"
-                  >
-                    &larr; Back
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (selectedSubjects.length === 0) {
-                        setError("Pick at least one subject");
-                        return;
-                      }
-                      setError("");
-                      nextStep();
-                    }}
-                    disabled={selectedSubjects.length === 0}
-                    className="flex-[2] py-3.5 rounded-xl font-bold text-sm bg-electric text-white hover:bg-electric/90 transition-all duration-200 shadow-lg shadow-electric/20 disabled:opacity-40 disabled:cursor-not-allowed"
-                  >
-                    Next &rarr;
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* ════════════════ STEP 4: DAILY TARGET ════════════ */}
-            {step === 4 && (
-              <div className="space-y-5 animate-slide-up">
-                <div className="text-center mb-2">
-                  <h2 className="font-bebas text-2xl text-cream tracking-wider">
-                    DAILY STUDY TARGET
-                  </h2>
-                  <p className="text-cream/40 text-xs mt-1">
-                    How much time can you commit each day?
-                  </p>
-                </div>
-
-                <div className="space-y-2">
-                  {DAILY_TARGETS.map((t) => (
-                    <button
-                      key={t.minutes}
-                      type="button"
-                      onClick={() => setDailyTarget(t.minutes)}
-                      className={`w-full rounded-xl border p-4 flex items-center gap-4 transition-all duration-200 ${
-                        dailyTarget === t.minutes
-                          ? "border-electric bg-electric/10 shadow-lg shadow-electric/10"
-                          : "border-cream/10 bg-white/[0.02] hover:border-cream/20"
-                      }`}
-                    >
-                      <span
-                        className={`font-bebas text-2xl ${
-                          dailyTarget === t.minutes ? "text-electric" : "text-cream/40"
-                        }`}
-                      >
-                        {t.label}
-                      </span>
-                      <span
-                        className={`text-xs font-medium ${
-                          dailyTarget === t.minutes ? "text-cream/70" : "text-cream/30"
-                        }`}
-                      >
-                        {t.desc}
-                      </span>
+                {/* Feedback + Next */}
+                {diagAnswered && (
+                  <div className="animate-slide-up">
+                    <div className="rounded-xl p-3 mb-3 border"
+                      style={{
+                        background: diagCorrect ? "rgba(34,197,94,0.08)" : "rgba(239,68,68,0.08)",
+                        borderColor: diagCorrect ? "rgba(34,197,94,0.3)" : "rgba(239,68,68,0.3)",
+                      }}>
+                      <p className="font-bebas text-lg tracking-wider"
+                        style={{ color: diagCorrect ? "#22C55E" : "#EF4444" }}>
+                        {diagCorrect ? "Correct!" : "Incorrect"}
+                      </p>
+                    </div>
+                    <button onClick={nextDiagQuestion}
+                      className="w-full py-3 rounded-xl font-bold text-sm bg-electric text-white
+                        hover:bg-electric/90 transition-all duration-200">
+                      {diagIndex + 1 >= diagQuestions.length ? "See Results" : "Next Question →"}
                     </button>
-                  ))}
-                </div>
-
-                {error && <ErrorBox msg={error} />}
-
-                <div className="flex gap-3 mt-1">
-                  <button
-                    type="button"
-                    onClick={prevStep}
-                    className="flex-1 py-3.5 rounded-xl font-bold text-sm border border-electric/30 text-cream/70 hover:text-cream hover:border-electric/60 transition-all duration-200"
-                  >
-                    &larr; Back
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleFinish}
-                    disabled={submitting || dailyTarget === 0}
-                    className="flex-[2] py-3.5 rounded-xl font-bold text-sm disabled:opacity-60 disabled:cursor-not-allowed transition-all duration-200"
-                    style={{
-                      background:
-                        "linear-gradient(135deg, #F0B429 0%, #B8960C 50%, #F0B429 100%)",
-                      color: "#04080F",
-                      boxShadow: "0 4px 20px rgba(240,180,41,0.35)",
-                    }}
-                  >
-                    {submitting ? <Spinner label="Saving..." /> : "\u{1F525} Let's Go!"}
-                  </button>
-                </div>
+                  </div>
+                )}
               </div>
             )}
           </div>
-        </div>
-
-        <p className="text-center text-cream/20 text-xs mt-5">
-          You can change these settings later in your profile.
-        </p>
+        )}
       </div>
     </div>
-  );
-}
-
-/* ── Helpers ────────────────────────────────────────────────────── */
-
-function ErrorBox({ msg }: { msg: string }) {
-  return (
-    <div className="flex items-center gap-2 px-4 py-3 rounded-xl bg-red-400/10 border border-red-400/30 animate-slide-up">
-      <span className="text-sm flex-shrink-0">&#x26A0;&#xFE0F;</span>
-      <p className="text-red-400 text-sm font-semibold">{msg}</p>
-    </div>
-  );
-}
-
-function Spinner({ label }: { label: string }) {
-  return (
-    <span className="flex items-center justify-center gap-2">
-      <span className="w-4 h-4 rounded-full border-2 border-current border-t-transparent animate-spin" />
-      {label}
-    </span>
   );
 }
