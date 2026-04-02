@@ -59,7 +59,6 @@ const RARITY_COLORS: Record<Rarity, { border: string; glow: string; bg: string; 
 
 const FEATURED_ITEMS: ShopItem[] = [
   { id: "frame_golden_lion", name: "Golden Lion Frame", description: "A majestic golden frame fit for a king", type: "frame", rarity: "legendary", price: 500, icon: "🦁" },
-  { id: "bg_nebula", name: "Nebula Background", description: "Swirling cosmic nebula backdrop", type: "background", rarity: "epic", price: 300, icon: "🌌" },
   { id: "boost_coin_rush", name: "Coin Rush", description: "2x coins for your next quiz", type: "booster", rarity: "rare", price: 75, icon: "💰", boosterEffect: "coin_multiplier", boosterValue: 2, boosterDuration: 1 },
   { id: "name_aurora", name: "Aurora Name Color", description: "Shifting aurora borealis name effect", type: "name_color", rarity: "legendary", price: 450, icon: "🌈" },
 ];
@@ -69,10 +68,6 @@ const COSMETIC_ITEMS: ShopItem[] = [
   { id: "frame_fire", name: "Inferno Ring", description: "Burning ring of fire around your avatar", type: "frame", rarity: "rare", price: 100, icon: "🔥" },
   { id: "frame_crystal", name: "Crystal Prism", description: "Refracting crystal light frame", type: "frame", rarity: "epic", price: 250, icon: "💎" },
   { id: "frame_golden_lion", name: "Golden Lion Frame", description: "A majestic golden frame fit for a king", type: "frame", rarity: "legendary", price: 500, icon: "🦁" },
-  { id: "bg_midnight", name: "Midnight Sky", description: "Deep midnight gradient", type: "background", rarity: "common", price: 30, icon: "🌙" },
-  { id: "bg_ocean", name: "Deep Ocean", description: "Abyssal ocean depths", type: "background", rarity: "rare", price: 80, icon: "🌊" },
-  { id: "bg_nebula", name: "Nebula Background", description: "Swirling cosmic nebula backdrop", type: "background", rarity: "epic", price: 300, icon: "🌌" },
-  { id: "bg_supernova", name: "Supernova Burst", description: "Exploding star in brilliant colors", type: "background", rarity: "legendary", price: 600, icon: "💥" },
   { id: "name_ice", name: "Ice Blue", description: "Frosty ice blue name", type: "name_color", rarity: "common", price: 20, icon: "🧊" },
   { id: "name_emerald", name: "Emerald Green", description: "Rich emerald name color", type: "name_color", rarity: "rare", price: 90, icon: "💚" },
   { id: "name_amethyst", name: "Amethyst Purple", description: "Deep amethyst glow", type: "name_color", rarity: "epic", price: 200, icon: "💜" },
@@ -101,14 +96,11 @@ const BOOSTER_ITEMS: ShopItem[] = [
 const PREMIUM_ITEMS: PremiumItem[] = [
   { id: "prem_frame_diamond", name: "Diamond Crown Frame", description: "An ultra-rare diamond-encrusted frame that radiates prestige", type: "frame", rarity: "legendary", priceUSD: 4.99, icon: "💠" },
   { id: "prem_frame_neon", name: "Neon Pulse Frame", description: "Reactive neon border that pulses with energy", type: "frame", rarity: "epic", priceUSD: 2.99, icon: "💫" },
-  { id: "prem_bg_aurora", name: "Northern Lights", description: "Animated aurora borealis background", type: "background", rarity: "legendary", priceUSD: 3.99, icon: "🌌" },
-  { id: "prem_bg_lava", name: "Molten Core", description: "Living lava flow background", type: "background", rarity: "epic", priceUSD: 2.49, icon: "🌋" },
   { id: "prem_name_holo", name: "Holographic Name", description: "Holographic rainbow shift name effect", type: "name_color", rarity: "legendary", priceUSD: 1.99, icon: "🔮" },
   { id: "prem_name_gold", name: "Solid Gold Name", description: "Pure gold name with metallic sheen", type: "name_color", rarity: "epic", priceUSD: 1.49, icon: "🥇" },
   { id: "prem_banner_phoenix", name: "Phoenix Rising", description: "Animated phoenix banner with particle trail", type: "banner", rarity: "legendary", priceUSD: 4.99, icon: "🔱" },
   { id: "prem_banner_void", name: "Void Walker", description: "Dark energy void banner with lightning", type: "banner", rarity: "epic", priceUSD: 3.49, icon: "🌀" },
   { id: "prem_frame_starfield", name: "Starfield Frame", description: "Animated stars orbiting your avatar", type: "frame", rarity: "rare", priceUSD: 1.99, icon: "⭐" },
-  { id: "prem_bg_cyberpunk", name: "Cyberpunk City", description: "Neon-drenched cyber cityscape", type: "background", rarity: "rare", priceUSD: 1.99, icon: "🏙️" },
   { id: "prem_banner_lightning", name: "Thunder Strike", description: "Crackling lightning bolt banner", type: "banner", rarity: "rare", priceUSD: 2.49, icon: "⚡" },
   { id: "prem_name_fire", name: "Flame Name", description: "Burning flame text effect", type: "name_color", rarity: "rare", priceUSD: 0.99, icon: "🔥" },
 ];
@@ -420,7 +412,7 @@ export default function ShopPage() {
   ];
 
   const COSMETIC_SUBS: { key: CosmeticSub; label: string }[] = [
-    { key: "frames", label: "Frames" }, { key: "backgrounds", label: "Backgrounds" },
+    { key: "frames", label: "Frames" },
     { key: "name_colors", label: "Name Colors" }, { key: "banners", label: "Banners" },
   ];
 
@@ -647,12 +639,33 @@ export default function ShopPage() {
             {/* INVENTORY */}
             {tab === "inventory" && (
               <div className={`transition-all duration-700 delay-200 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`}>
+                {/* Themes — always show Interstellar as owned */}
+                <div className="mb-8">
+                  <h3 className="font-bebas text-xl text-cream/60 tracking-wider mb-4 flex items-center gap-2"><span>🎨</span> Themes</h3>
+                  <div className="space-y-2">
+                    <div className="relative rounded-xl border border-green-500/40 p-4 transition-all duration-300 flex items-center gap-4"
+                      style={{ background: "linear-gradient(135deg, rgba(10,16,32,0.85), rgba(6,12,24,0.9))" }}>
+                      <div className="absolute top-2 right-2 flex items-center gap-1 bg-green-500/20 border border-green-500/30 rounded-full px-2 py-0.5">
+                        <span className="text-green-400 text-[10px] font-bold uppercase tracking-wider">Active</span>
+                      </div>
+                      <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 border border-white/10">
+                        <img src="/interstellar.png" alt="Interstellar" className="w-full h-full object-cover" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <h4 className="font-bebas text-base text-cream tracking-wide">Interstellar</h4>
+                          <span className="text-[8px] uppercase tracking-widest font-bold px-1.5 py-0.5 rounded-full bg-blue-500/20 text-blue-400 border border-blue-500/30">Default</span>
+                        </div>
+                        <p className="text-cream/30 text-xs">Deep space theme with stars and nebula</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
                 {ownedCosmetics.length === 0 && ownedBoosters.length === 0 ? (
-                  <div className="text-center py-20">
-                    <span className="text-6xl block mb-4">🛍️</span>
-                    <p className="font-bebas text-2xl text-cream/40 tracking-wider">Your inventory is empty</p>
-                    <p className="text-cream/25 text-sm mt-1">Purchase items from the shop to see them here</p>
-                    <button onClick={() => setTab("featured")} className="mt-6 btn-outline px-6 py-2 rounded-xl text-sm">Browse Shop</button>
+                  <div className="text-center py-12">
+                    <p className="text-cream/25 text-sm">Purchase items from the shop to add them to your inventory</p>
+                    <button onClick={() => setTab("featured")} className="mt-4 btn-outline px-6 py-2 rounded-xl text-sm">Browse Shop</button>
                   </div>
                 ) : (
                   <>
