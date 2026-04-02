@@ -83,7 +83,7 @@ export default function DuelInvite({ onStartDuel }: DuelInviteProps) {
                 <p className="text-xs text-cream/40">Lvl {user.level} · 🔥 {user.streak} streak</p>
               </div>
               <div className="text-right">
-                <p className="font-bebas text-lg text-gold flex items-center gap-1"><img src="/fangs.png" alt="Fangs" className="w-4 h-4 object-contain" /> {user.coins.toLocaleString()}</p>
+                <p className="font-bebas text-lg text-gold flex items-center gap-1"><img src="/F.png" alt="Fangs" className="w-4 h-4 object-contain" /> {user.coins.toLocaleString()}</p>
                 <p className="text-xs text-cream/30">#{user.rank}</p>
               </div>
             </button>

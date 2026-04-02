@@ -22,7 +22,7 @@ export default function WalletPage() {
         <BackButton />
 
         <div className="text-center mb-10 animate-slide-up">
-          <img src="/fangs.png" alt="Fangs" className="w-14 h-14 object-contain mx-auto mb-3" />
+          <img src="/F.png" alt="Fangs" className="w-14 h-14 object-contain mx-auto mb-3" />
           <h1 className="font-bebas text-5xl sm:text-6xl text-cream tracking-wider mb-2">WALLET</h1>
           <p className="text-cream/50 text-sm">Your Fangs balance and rewards</p>
         </div>
@@ -32,7 +32,7 @@ export default function WalletPage() {
           style={{ animationDelay: "0.05s", background: "var(--card-solid-bg)", boxShadow: "0 0 30px rgba(255,215,0,0.08)" }}>
           <p className="text-cream/40 text-xs uppercase tracking-widest font-semibold mb-3">Current Balance</p>
           <div className="flex items-center justify-center gap-3 mb-4">
-            <img src="/fangs.png" alt="Fangs" className="w-10 h-10 object-contain" />
+            <img src="/F.png" alt="Fangs" className="w-10 h-10 object-contain" />
             <span className="font-bebas text-7xl sm:text-8xl text-gold leading-none glow-gold">{formatCoins(coins)}</span>
           </div>
           <p className="text-cream/30 text-sm">Fangs</p>
@@ -62,7 +62,7 @@ export default function WalletPage() {
             <span className="text-cream/20 text-xs">Recent</span>
           </div>
           <div className="text-center py-10">
-            <img src="/fangs.png" alt="Fangs" className="w-8 h-8 object-contain mx-auto mb-3 opacity-30" />
+            <img src="/F.png" alt="Fangs" className="w-8 h-8 object-contain mx-auto mb-3 opacity-30" />
             <p className="font-bebas text-lg text-cream/30 tracking-wider mb-1">No transactions yet</p>
             <p className="text-cream/20 text-xs">Earn Fangs by completing quizzes, duels, and bounties.</p>
           </div>

@@ -720,7 +720,7 @@ export default function SocialPage() {
                               <span>{event.player1_score} — {event.player2_score}</span>
                               <span className="text-cream/10">|</span>
                               <span className="flex items-center gap-1">
-                                <img src="/fangs.png" alt="Fangs" className="w-3 h-3 object-contain" />
+                                <img src="/F.png" alt="Fangs" className="w-3 h-3 object-contain" />
                                 {isDraw ? "±0" : iWon ? `+${event.wager}` : `-${event.wager}`}
                               </span>
                             </div>

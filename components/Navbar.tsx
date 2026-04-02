@@ -327,7 +327,7 @@ export default function Navbar() {
                     cursor-pointer group relative transition-all duration-200 active:scale-95
                     shadow-md shadow-gold/30 hover:shadow-gold/50"
                     style={{ background: "linear-gradient(135deg, #FFD700, #F59E0B)" }}>
-                    <img src="/fangs.png" alt="Fangs" className="w-5 h-5 object-contain" />
+                    <img src="/F.png" alt="Fangs" className="w-5 h-5 object-contain" />
                     <span className="font-bebas text-base text-navy tracking-wider leading-none font-bold">
                       {stats ? formatCoins(stats.coins) : user.statsLoaded ? formatCoins(user.coins) : <StatSkeleton />}
                     </span>

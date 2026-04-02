@@ -469,7 +469,7 @@ export default function GamesPage() {
                 </p>
                 {fangsEarned !== null && (
                   <div className="flex items-center justify-center gap-1.5 mt-2">
-                    <img src="/fangs.png" alt="Fangs" className="w-5 h-5 object-contain" />
+                    <img src="/F.png" alt="Fangs" className="w-5 h-5 object-contain" />
                     <span className="font-bebas text-xl text-gold">+{fangsEarned}</span>
                   </div>
                 )}
@@ -572,7 +572,7 @@ export default function GamesPage() {
                 <p className="text-cream/40 text-sm mb-4">correct answers</p>
                 {fangsEarned !== null && (
                   <div className="flex items-center justify-center gap-1.5 mb-6">
-                    <img src="/fangs.png" alt="Fangs" className="w-5 h-5 object-contain" />
+                    <img src="/F.png" alt="Fangs" className="w-5 h-5 object-contain" />
                     <span className="font-bebas text-xl text-gold">+{fangsEarned}</span>
                   </div>
                 )}
@@ -651,7 +651,7 @@ export default function GamesPage() {
                 <p className="text-cream/40 text-sm mb-4">{fcKnew} / {fcCards.length} known</p>
                 {fangsEarned !== null && (
                   <div className="flex items-center justify-center gap-1.5 mb-6">
-                    <img src="/fangs.png" alt="Fangs" className="w-5 h-5 object-contain" />
+                    <img src="/F.png" alt="Fangs" className="w-5 h-5 object-contain" />
                     <span className="font-bebas text-xl text-gold">+{fangsEarned}</span>
                   </div>
                 )}
@@ -712,7 +712,7 @@ export default function GamesPage() {
                 <p className="font-bebas text-2xl text-cream mb-1">{tlScore} / {tlEvents.length} correct</p>
                 {fangsEarned !== null && (
                   <div className="flex items-center justify-center gap-1.5 mb-4">
-                    <img src="/fangs.png" alt="Fangs" className="w-5 h-5 object-contain" />
+                    <img src="/F.png" alt="Fangs" className="w-5 h-5 object-contain" />
                     <span className="font-bebas text-xl text-gold">+{fangsEarned}</span>
                   </div>
                 )}
@@ -868,7 +868,7 @@ export default function GamesPage() {
                         <div className="flex items-start justify-between mb-3">
                           <span className="text-4xl">{g.icon}</span>
                           <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full" style={{ background: "rgba(255,215,0,0.1)", border: "1px solid rgba(255,215,0,0.15)" }}>
-                            <img src="/fangs.png" alt="Fangs" className="w-4 h-4 object-contain" />
+                            <img src="/F.png" alt="Fangs" className="w-4 h-4 object-contain" />
                             <span className="text-gold text-xs font-bold">{g.fangs}</span>
                           </div>
                         </div>

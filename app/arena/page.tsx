@@ -709,7 +709,7 @@ export default function ArenaPage() {
                         style={{ background: "radial-gradient(ellipse at 50% 0%, rgba(255,215,0,0.1) 0%, transparent 70%)" }} />
                     )}
                     <div className="relative flex items-center justify-center gap-1.5">
-                      <img src="/fangs.png" alt="Fangs" className="w-5 h-5 object-contain" />
+                      <img src="/F.png" alt="Fangs" className="w-5 h-5 object-contain" />
                       {w}
                     </div>
                   </button>
@@ -784,7 +784,7 @@ export default function ArenaPage() {
                         <p className="text-cream/40 text-xs flex items-center gap-1">
                           {getEloTier(c.challengerElo).icon} {c.challengerElo} ELO
                           <span className="text-cream/15 mx-1">|</span>
-                          <img src="/fangs.png" alt="" className="w-3 h-3 object-contain" /> {c.wager}
+                          <img src="/F.png" alt="" className="w-3 h-3 object-contain" /> {c.wager}
                         </p>
                       </div>
                       <div className="flex gap-2 flex-shrink-0">
@@ -830,7 +830,7 @@ export default function ArenaPage() {
                       style={{ background: `linear-gradient(90deg, transparent, ${r.accent}30, transparent)` }} />
 
                     {r.icon === "fang"
-                      ? <img src="/fangs.png" alt="Fangs" className="w-7 h-7 object-contain mx-auto mb-2.5" />
+                      ? <img src="/F.png" alt="Fangs" className="w-7 h-7 object-contain mx-auto mb-2.5" />
                       : <span className="text-2xl block mb-2.5">{r.icon}</span>
                     }
                     <p className="font-bebas text-sm sm:text-base tracking-wider mb-0.5" style={{ color: r.accent }}>
@@ -885,7 +885,7 @@ export default function ArenaPage() {
                   )}
 
                   <div className="flex items-center justify-center gap-2 mb-6 text-cream/40 text-sm">
-                    <img src="/fangs.png" alt="Fangs" className="w-4 h-4 object-contain" />
+                    <img src="/F.png" alt="Fangs" className="w-4 h-4 object-contain" />
                     <span>Wager: <span className="text-gold font-bold">{wager}</span> Fangs</span>
                   </div>
 
@@ -954,7 +954,7 @@ export default function ArenaPage() {
 
             {/* Wager display */}
             <div className="flex items-center justify-center gap-2 mb-8 text-cream/40 text-sm">
-              <img src="/fangs.png" alt="Fangs" className="w-4 h-4 object-contain" />
+              <img src="/F.png" alt="Fangs" className="w-4 h-4 object-contain" />
               <span>{wager} Fangs wagered</span>
             </div>
 
@@ -1001,7 +1001,7 @@ export default function ArenaPage() {
               <div className="flex flex-col items-center">
                 <div className="font-bebas text-5xl sm:text-6xl text-cream/20 leading-none mb-2">VS</div>
                 <div className="flex items-center gap-1.5 text-cream/30 text-xs">
-                  <img src="/fangs.png" alt="Fangs" className="w-4 h-4 object-contain" />
+                  <img src="/F.png" alt="Fangs" className="w-4 h-4 object-contain" />
                   <span>{wager}</span>
                 </div>
               </div>
@@ -1328,7 +1328,7 @@ export default function ArenaPage() {
                 border: `1px solid ${iWon ? "#FFD70030" : isDraw ? "#E67E2230" : "#E74C3C30"}`,
                 animationDelay: "0.15s",
               }}>
-              <img src="/fangs.png" alt="Fangs" className="w-7 h-7 object-contain" />
+              <img src="/F.png" alt="Fangs" className="w-7 h-7 object-contain" />
               <span className="font-bebas text-2xl" style={{ color: iWon ? "#FFD700" : isDraw ? "#E67E22" : "#E74C3C" }}>
                 {iWon ? `+${matchResult?.wager ?? wager}` : isDraw ? "±0" : `-${matchResult?.wager ?? wager}`} FANGS
               </span>

@@ -323,7 +323,7 @@ function OverviewSection({ user, level, progress, xpToNext, coins, streak, xp, a
           { icon: "📚", label: "Subjects Mastered",  value: !loading ? subjectStats.length.toString() : null, color: "text-green-400" },
         ].map((s) => (
           <Card key={s.label} className="text-center !p-4">
-            {s.icon === "fang" ? <img src="/fangs.png" alt="Fangs" className="w-7 h-7 object-contain mx-auto mb-1" /> : <span className="text-2xl block mb-1">{s.icon}</span>}
+            {s.icon === "fang" ? <img src="/F.png" alt="Fangs" className="w-7 h-7 object-contain mx-auto mb-1" /> : <span className="text-2xl block mb-1">{s.icon}</span>}
             {s.value !== null
               ? <p className={`font-bebas text-2xl leading-none ${s.color}`}>{s.value}</p>
               : <div className="w-12 h-7 bg-white/10 rounded-lg animate-pulse mx-auto" />}

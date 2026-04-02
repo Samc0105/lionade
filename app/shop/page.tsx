@@ -163,7 +163,7 @@ function ConfirmModal({ item, quantity, onConfirm, onCancel, userCoins }: {
           <span className={`inline-block mt-1 text-[10px] uppercase tracking-widest font-bold px-2.5 py-0.5 rounded-full ${r.badge}`}>{item.rarity}</span>
         </div>
         <div className="flex items-center justify-center gap-2 mb-6 py-3 rounded-xl" style={{ background: "rgba(255,215,0,0.06)", border: "1px solid rgba(255,215,0,0.15)" }}>
-          <img src="/fangs.png" alt="Fangs" className="w-6 h-6 object-contain" />
+          <img src="/F.png" alt="Fangs" className="w-6 h-6 object-contain" />
           <span className="font-bebas text-3xl text-gold">{formatCoins(totalPrice)}</span>
           {quantity > 1 && <span className="text-cream/40 text-sm ml-1">(x{quantity})</span>}
         </div>
@@ -194,7 +194,7 @@ function FeaturedCard({ item, owned, onBuy }: { item: ShopItem; owned: boolean; 
         <p className="shop-card-desc text-cream/40 text-sm mb-5 leading-relaxed">{item.description}</p>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1.5">
-            <img src="/fangs.png" alt="Fangs" className="w-5 h-5 object-contain" />
+            <img src="/F.png" alt="Fangs" className="w-5 h-5 object-contain" />
             <span className="font-bebas text-2xl text-gold">{formatCoins(item.price)}</span>
           </div>
           {owned ? (
@@ -223,7 +223,7 @@ function CosmeticCard({ item, owned, canAfford, onBuy }: { item: ShopItem; owned
         <h4 className="shop-card-title font-bebas text-lg text-cream tracking-wide mb-0.5">{item.name}</h4>
         <p className="shop-card-desc text-cream/30 text-xs mb-4 leading-relaxed">{item.description}</p>
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-1"><img src="/fangs.png" alt="Fangs" className="w-5 h-5 object-contain" /><span className="font-bebas text-lg text-gold">{formatCoins(item.price)}</span></div>
+          <div className="flex items-center gap-1"><img src="/F.png" alt="Fangs" className="w-5 h-5 object-contain" /><span className="font-bebas text-lg text-gold">{formatCoins(item.price)}</span></div>
           {owned ? (
             <span className="flex items-center gap-1 text-green-400 text-xs font-bold"><span>✓</span> Owned</span>
           ) : (
@@ -259,11 +259,11 @@ function BoosterCard({ item, quantityOwned, canAfford, onBuy }: { item: ShopItem
           <div className="flex items-center gap-2 flex-wrap">
             <button onClick={() => onBuy(1)} disabled={!canAfford}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${canAfford ? "gold-btn shop-btn-pulse" : "bg-gray-600/20 text-gray-500 cursor-not-allowed border border-gray-600/20"}`}>
-              <img src="/fangs.png" alt="Fangs" className="w-5 h-5 object-contain" /> {formatCoins(item.price)} &middot; Buy x1
+              <img src="/F.png" alt="Fangs" className="w-5 h-5 object-contain" /> {formatCoins(item.price)} &middot; Buy x1
             </button>
             <button onClick={() => onBuy(5)}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all border border-electric/30 text-electric hover:bg-electric/10">
-              <img src="/fangs.png" alt="Fangs" className="w-5 h-5 object-contain" /> {formatCoins(bulkPrice)} &middot; Buy x5 <span className="text-green-400 text-[10px]">(save 10%)</span>
+              <img src="/F.png" alt="Fangs" className="w-5 h-5 object-contain" /> {formatCoins(bulkPrice)} &middot; Buy x5 <span className="text-green-400 text-[10px]">(save 10%)</span>
             </button>
           </div>
         </div>
@@ -464,7 +464,7 @@ export default function ShopPage() {
               </>
             ) : (
               <>
-                <img src="/fangs.png" alt="Fangs" className="w-6 h-6 object-contain" />
+                <img src="/F.png" alt="Fangs" className="w-6 h-6 object-contain" />
                 <span className="font-bebas text-3xl text-gold tracking-wider">{formatCoins(userCoins)}</span>
                 <span className="text-cream/30 text-xs ml-1">coins</span>
               </>
@@ -488,7 +488,7 @@ export default function ShopPage() {
 
             <button onClick={() => setStoreMode("coins")}
               className={`relative z-10 flex items-center gap-2 px-5 sm:px-7 py-2.5 rounded-full text-sm font-bold transition-all duration-200 ${!isPremium ? "text-gold" : "text-cream/40 hover:text-cream/60"}`}>
-              <img src="/fangs.png" alt="Fangs" className="w-5 h-5 object-contain" /> Coin Store
+              <img src="/F.png" alt="Fangs" className="w-5 h-5 object-contain" /> Coin Store
             </button>
             <button onClick={() => setStoreMode("premium")}
               className={`relative z-10 flex items-center gap-2 px-5 sm:px-7 py-2.5 rounded-full text-sm font-bold transition-all duration-200 ${isPremium ? "text-purple-300" : "text-cream/40 hover:text-cream/60"}`}>
@@ -578,7 +578,7 @@ export default function ShopPage() {
                       </div>
                       <div className="flex items-center justify-between mt-4">
                         <div className="flex items-center gap-1.5">
-                          <img src="/fangs.png" alt="Fangs" className="w-5 h-5 object-contain" />
+                          <img src="/F.png" alt="Fangs" className="w-5 h-5 object-contain" />
                           <span className="font-bebas text-xl text-gold tracking-wider">500</span>
                         </div>
                         <button disabled className="px-5 py-2 rounded-xl text-sm font-bold text-cream/30 border border-white/10 bg-white/5 cursor-not-allowed">

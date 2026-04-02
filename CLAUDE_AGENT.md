@@ -35,7 +35,7 @@ Every SWR call for user data: `{ keepPreviousData: true, revalidateOnFocus: true
 All pages use the same shared SWR user hook — no separate Supabase fetches per page.
 
 ### Fangs Icon
-Always use: `<img src="/fangs.png" alt="Fangs" className="w-6 h-6 object-contain" />`
+Always use: `<img src="/F.png" alt="Fangs" className="w-6 h-6 object-contain" />`
 Currency is called **Fangs** (not coins, not tokens).
 
 ### Styling
@@ -92,7 +92,7 @@ These files should never be modified without explicit instruction:
 - [ ] Stats initialized as `null` (not `0`)?
 - [ ] `keepPreviousData: true` on all SWR hooks?
 - [ ] Avatar URLs memoized?
-- [ ] `/fangs.png` used for Fangs icon?
+- [ ] `/F.png` used for Fangs icon?
 - [ ] No `href="#"` in navigation?
 - [ ] Migration file for any DB change?
 - [ ] New pages match Lionade aesthetic?

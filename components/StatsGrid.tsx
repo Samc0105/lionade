@@ -20,7 +20,7 @@ export default function StatsGrid({
   return (
     <div className="grid grid-cols-2 gap-3">
       <StatCard
-        icon={<img src="/fangs.png" alt="Fangs" className="w-6 h-6 object-contain" />}
+        icon={<img src="/F.png" alt="Fangs" className="w-6 h-6 object-contain" />}
         value={coins}
         label="Coins"
         insight={coinInsight}

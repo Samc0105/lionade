@@ -55,7 +55,7 @@ export default function CoinAnimation({ trigger, amount = 3, onComplete }: CoinA
             animationDuration: `${0.7 + Math.random() * 0.3}s`,
           }}
         >
-          <img src="/fangs.png" alt="Fangs" className="w-6 h-6 object-contain" />
+          <img src="/F.png" alt="Fangs" className="w-6 h-6 object-contain" />
         </div>
       ))}
 

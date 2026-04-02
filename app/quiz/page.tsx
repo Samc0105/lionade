@@ -815,7 +815,7 @@ export default function QuizPage() {
               <span className="text-green-400 font-bold">{correctCount} &#x2713;</span>
               <span className="text-red-400 font-bold">{wrongCount} &#x2717;</span>
               <div className="flex items-center gap-1.5 bg-gold/10 border border-gold/30 rounded-full px-3 py-1">
-                <img src="/fangs.png" alt="Fangs" className="w-5 h-5 object-contain" />
+                <img src="/F.png" alt="Fangs" className="w-5 h-5 object-contain" />
                 <span className="font-bebas text-lg text-gold">{totalCoins}</span>
               </div>
             </div>
