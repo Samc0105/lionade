@@ -502,7 +502,45 @@ export default function ShopPage() {
               <p className="text-purple-400/40 text-xs">Exclusive items purchasable with real money via Stripe</p>
             </div>
 
-            {/* Premium grid */}
+            {/* Themes */}
+            <h3 className="font-bebas text-xl text-purple-300/60 tracking-wider mb-4 flex items-center gap-2">
+              <span>🎨</span> Themes
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-10">
+              <div className="rounded-2xl overflow-hidden border border-purple-500/20 transition-all duration-300 hover:-translate-y-1"
+                style={{ background: "linear-gradient(135deg, rgba(20,8,40,0.9), rgba(10,6,30,0.95))" }}>
+                <div className="h-36 relative overflow-hidden">
+                  <img src="/savannah.png" alt="Savanna theme preview" className="absolute inset-0 w-full h-full object-cover grayscale-[60%] brightness-75" />
+                  <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                    <div className="w-12 h-12 rounded-full bg-black/40 border border-white/10 flex items-center justify-center">
+                      <span className="text-2xl">🔒</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="p-5">
+                  <div className="flex items-center justify-between mb-2">
+                    <div>
+                      <p className="font-bebas text-xl text-cream tracking-wider">Savanna</p>
+                      <p className="text-purple-400/60 text-xs">Wild & golden — warm light theme</p>
+                    </div>
+                    <span className="text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-400 border border-purple-500/30">
+                      Epic
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between mt-4 gap-6">
+                    <span className="font-bebas text-xl text-purple-300 flex-shrink-0">$2.99</span>
+                    <button disabled className="relative flex-shrink-0 px-4 py-2 rounded-lg text-xs font-bold border border-purple-500/30 bg-purple-500/10 text-purple-400/60 cursor-not-allowed overflow-hidden">
+                      <span className="premium-coming-soon-pulse">Coming Soon</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Premium items */}
+            <h3 className="font-bebas text-xl text-purple-300/60 tracking-wider mb-4 flex items-center gap-2">
+              <span>✨</span> Premium Items
+            </h3>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
               {PREMIUM_ITEMS.map((item) => (
                 <PremiumCard key={item.id} item={item} />
@@ -528,54 +566,15 @@ export default function ShopPage() {
 
             {/* THEMES */}
             {tab === "themes" && (
-              <div className={`transition-all duration-700 delay-200 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`}>
-                <div className="shop-banner flex items-center justify-between mb-6 px-4 py-3 rounded-xl"
-                  style={{ background: "linear-gradient(90deg, rgba(245,158,11,0.06), rgba(255,215,0,0.06))", border: "1px solid rgba(245,158,11,0.15)" }}>
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg">🎨</span>
-                    <span className="font-bebas text-xl text-gold tracking-wider">THEMES</span>
-                  </div>
-                  <p className="text-cream/30 text-xs">Change the look of your entire app</p>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                  {/* Savanna Theme */}
-                  <div className="rounded-2xl overflow-hidden border border-amber-500/20 transition-all duration-300 hover:-translate-y-1"
-                    style={{ background: "var(--card-solid-bg)" }}>
-                    {/* Preview */}
-                    <div className="h-36 relative overflow-hidden">
-                      <img src="/savannah.png" alt="Savanna theme preview" className="absolute inset-0 w-full h-full object-cover grayscale-[60%] brightness-75" />
-                      {/* Dark overlay + lock */}
-                      <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-                        <div className="w-12 h-12 rounded-full bg-black/40 border border-white/10 flex items-center justify-center">
-                          <span className="text-2xl">🔒</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="p-5">
-                      <div className="flex items-center justify-between mb-2">
-                        <div>
-                          <p className="font-bebas text-xl text-cream tracking-wider">Savanna</p>
-                          <p className="text-amber-400/60 text-xs">Wild & golden — warm light theme</p>
-                        </div>
-                        <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full"
-                          style={{ background: "rgba(168,85,247,0.15)", border: "1px solid rgba(168,85,247,0.3)", color: "#a855f7" }}>
-                          Epic
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between mt-4">
-                        <div className="flex items-center gap-1.5">
-                          <img src="/F.png" alt="Fangs" className="w-5 h-5 object-contain" />
-                          <span className="font-bebas text-xl text-gold tracking-wider">500</span>
-                        </div>
-                        <button disabled className="px-5 py-2 rounded-xl text-sm font-bold text-cream/30 border border-white/10 bg-white/5 cursor-not-allowed">
-                          Coming Soon
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+              <div className={`text-center py-16 transition-all duration-700 delay-200 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`}>
+                <span className="text-5xl block mb-4">🎨</span>
+                <p className="font-bebas text-2xl text-cream/40 tracking-wider mb-2">Themes are in the Premium Store</p>
+                <p className="text-cream/25 text-sm mb-6">Themes change the entire look of your app and are available for purchase with real money.</p>
+                <button onClick={() => setStoreMode("premium")}
+                  className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold
+                    border border-purple-500/30 bg-purple-500/10 text-purple-300 hover:bg-purple-500/20 transition-all duration-200">
+                  <span>💎</span> Go to Premium Store
+                </button>
               </div>
             )}
 
