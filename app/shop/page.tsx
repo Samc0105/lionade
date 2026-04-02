@@ -192,8 +192,8 @@ function FeaturedCard({ item, owned, onBuy }: { item: ShopItem; owned: boolean; 
         <div className="text-6xl sm:text-7xl mb-4 shop-item-icon">{item.icon}</div>
         <h3 className="shop-card-title font-bebas text-2xl sm:text-3xl text-cream tracking-wide mb-1">{item.name}</h3>
         <p className="shop-card-desc text-cream/40 text-sm mb-5 leading-relaxed">{item.description}</p>
-        <div className="flex items-center justify-between mt-auto pt-2 gap-4">
-          <div className="flex items-center gap-2">
+        <div className="flex items-center justify-between mt-auto pt-2 gap-6">
+          <div className="flex items-center gap-2 flex-shrink-0">
             <img src="/F.png" alt="Fangs" className="w-6 h-6 object-contain" />
             <span className="font-bebas text-2xl text-gold">{formatCoins(item.price)}</span>
           </div>
@@ -222,8 +222,8 @@ function CosmeticCard({ item, owned, canAfford, onBuy }: { item: ShopItem; owned
         </div>
         <h4 className="shop-card-title font-bebas text-lg text-cream tracking-wide mb-0.5">{item.name}</h4>
         <p className="shop-card-desc text-cream/30 text-xs mb-4 leading-relaxed">{item.description}</p>
-        <div className="flex items-center justify-between mt-auto pt-2 gap-3">
-          <div className="flex items-center gap-1.5">
+        <div className="flex items-center justify-between mt-auto pt-2 gap-6">
+          <div className="flex items-center gap-1.5 flex-shrink-0">
             <img src="/F.png" alt="Fangs" className="w-5 h-5 object-contain" />
             <span className="font-bebas text-lg text-gold">{formatCoins(item.price)}</span>
           </div>
