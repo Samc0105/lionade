@@ -192,15 +192,15 @@ function FeaturedCard({ item, owned, onBuy }: { item: ShopItem; owned: boolean; 
         <div className="text-6xl sm:text-7xl mb-4 shop-item-icon">{item.icon}</div>
         <h3 className="shop-card-title font-bebas text-2xl sm:text-3xl text-cream tracking-wide mb-1">{item.name}</h3>
         <p className="shop-card-desc text-cream/40 text-sm mb-5 leading-relaxed">{item.description}</p>
-        <div className="flex items-center justify-between mt-auto">
-          <div className="flex items-center gap-1.5">
-            <img src="/F.png" alt="Fangs" className="w-5 h-5 object-contain" />
+        <div className="flex items-center justify-between mt-auto pt-2 gap-4">
+          <div className="flex items-center gap-2">
+            <img src="/F.png" alt="Fangs" className="w-6 h-6 object-contain" />
             <span className="font-bebas text-2xl text-gold">{formatCoins(item.price)}</span>
           </div>
           {owned ? (
             <span className="flex items-center gap-1.5 text-green-400 text-sm font-bold"><span>✓</span> Owned</span>
           ) : (
-            <button onClick={onBuy} className="gold-btn shop-btn-pulse px-5 py-2 rounded-xl text-sm font-bold">Buy Now</button>
+            <button onClick={onBuy} className="gold-btn shop-btn-pulse px-5 py-2 rounded-xl text-sm font-bold flex-shrink-0">Buy Now</button>
           )}
         </div>
       </div>
@@ -222,13 +222,16 @@ function CosmeticCard({ item, owned, canAfford, onBuy }: { item: ShopItem; owned
         </div>
         <h4 className="shop-card-title font-bebas text-lg text-cream tracking-wide mb-0.5">{item.name}</h4>
         <p className="shop-card-desc text-cream/30 text-xs mb-4 leading-relaxed">{item.description}</p>
-        <div className="flex items-center justify-between mt-auto">
-          <div className="flex items-center gap-1"><img src="/F.png" alt="Fangs" className="w-5 h-5 object-contain" /><span className="font-bebas text-lg text-gold">{formatCoins(item.price)}</span></div>
+        <div className="flex items-center justify-between mt-auto pt-2 gap-3">
+          <div className="flex items-center gap-1.5">
+            <img src="/F.png" alt="Fangs" className="w-5 h-5 object-contain" />
+            <span className="font-bebas text-lg text-gold">{formatCoins(item.price)}</span>
+          </div>
           {owned ? (
-            <span className="flex items-center gap-1 text-green-400 text-xs font-bold"><span>✓</span> Owned</span>
+            <span className="flex items-center gap-1 text-green-400 text-xs font-bold flex-shrink-0"><span>✓</span> Owned</span>
           ) : (
             <button onClick={onBuy} disabled={!canAfford}
-              className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${canAfford ? "gold-btn shop-btn-pulse" : "bg-gray-600/20 text-gray-500 cursor-not-allowed border border-gray-600/20"}`}>
+              className={`flex-shrink-0 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${canAfford ? "gold-btn shop-btn-pulse" : "bg-gray-600/20 text-gray-500 cursor-not-allowed border border-gray-600/20"}`}>
               {canAfford ? "Buy" : "Can't Afford"}
             </button>
           )}
@@ -328,9 +331,9 @@ function PremiumCard({ item }: { item: PremiumItem }) {
         </div>
         <h4 className="shop-card-title font-bebas text-xl text-cream tracking-wide mb-0.5">{item.name}</h4>
         <p className="shop-card-desc text-cream/30 text-xs mb-5 leading-relaxed">{item.description}</p>
-        <div className="flex items-center justify-between mt-auto">
+        <div className="flex items-center justify-between mt-auto pt-2 gap-4">
           <span className="font-bebas text-xl text-purple-300">${item.priceUSD.toFixed(2)}</span>
-          <button disabled className="relative px-4 py-2 rounded-lg text-xs font-bold border border-purple-500/30 bg-purple-500/10 text-purple-400/60 cursor-not-allowed overflow-hidden">
+          <button disabled className="relative flex-shrink-0 px-4 py-2 rounded-lg text-xs font-bold border border-purple-500/30 bg-purple-500/10 text-purple-400/60 cursor-not-allowed overflow-hidden">
             <span className="premium-coming-soon-pulse">Coming Soon</span>
           </button>
         </div>
