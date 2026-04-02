@@ -551,21 +551,30 @@ export default function ShopPage() {
                   <div className="rounded-2xl overflow-hidden border border-amber-500/20 transition-all duration-300 hover:-translate-y-1"
                     style={{ background: "var(--card-solid-bg)" }}>
                     {/* Preview */}
-                    <div className="h-36 relative overflow-hidden"
-                      style={{ background: "linear-gradient(180deg, #87CEEB 0%, #F4A460 30%, #DEB887 60%, #C2B280 100%)" }}>
-                      {/* Sun */}
-                      <div className="absolute top-5 right-8 w-14 h-14 rounded-full"
-                        style={{ background: "radial-gradient(circle, #FFD700, #F59E0B)", boxShadow: "0 0 40px rgba(255,215,0,0.5)" }} />
-                      {/* Horizon line */}
-                      <div className="absolute bottom-0 left-0 right-0 h-12"
-                        style={{ background: "linear-gradient(180deg, transparent, #8B7355)" }} />
-                      {/* Silhouette trees */}
-                      <div className="absolute bottom-2 left-6 w-8 h-16 rounded-t-full" style={{ background: "#5C4033" }} />
-                      <div className="absolute bottom-2 left-10 w-12 h-4 rounded-full" style={{ background: "#5C4033" }} />
-                      <div className="absolute bottom-2 right-10 w-6 h-12 rounded-t-full" style={{ background: "#5C4033" }} />
-                      <div className="absolute bottom-2 right-8 w-10 h-3 rounded-full" style={{ background: "#5C4033" }} />
-                      {/* Lion */}
-                      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 text-2xl">🦁</div>
+                    <div className="h-36 relative overflow-hidden">
+                      {/* Scene (desaturated) */}
+                      <div className="absolute inset-0 grayscale-[60%] brightness-75"
+                        style={{ background: "linear-gradient(180deg, #87CEEB 0%, #F4A460 30%, #DEB887 60%, #C2B280 100%)" }}>
+                        {/* Sun */}
+                        <div className="absolute top-5 right-8 w-14 h-14 rounded-full"
+                          style={{ background: "radial-gradient(circle, #FFD700, #F59E0B)", boxShadow: "0 0 40px rgba(255,215,0,0.5)" }} />
+                        {/* Horizon line */}
+                        <div className="absolute bottom-0 left-0 right-0 h-12"
+                          style={{ background: "linear-gradient(180deg, transparent, #8B7355)" }} />
+                        {/* Silhouette trees */}
+                        <div className="absolute bottom-2 left-6 w-8 h-16 rounded-t-full" style={{ background: "#5C4033" }} />
+                        <div className="absolute bottom-2 left-10 w-12 h-4 rounded-full" style={{ background: "#5C4033" }} />
+                        <div className="absolute bottom-2 right-10 w-6 h-12 rounded-t-full" style={{ background: "#5C4033" }} />
+                        <div className="absolute bottom-2 right-8 w-10 h-3 rounded-full" style={{ background: "#5C4033" }} />
+                        {/* Lion */}
+                        <div className="absolute bottom-3 left-1/2 -translate-x-1/2 text-2xl">🦁</div>
+                      </div>
+                      {/* Dark overlay + lock */}
+                      <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                        <div className="w-12 h-12 rounded-full bg-black/40 border border-white/10 flex items-center justify-center">
+                          <span className="text-2xl">🔒</span>
+                        </div>
+                      </div>
                     </div>
 
                     <div className="p-5">
