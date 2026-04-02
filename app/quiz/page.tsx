@@ -242,6 +242,9 @@ export default function QuizPage() {
   const [fiftyFiftyUsed, setFiftyFiftyUsed] = useState(false);
   const [autoCorrectUsed, setAutoCorrectUsed] = useState(false);
 
+  // AP Exams modal
+  const [showApModal, setShowApModal] = useState(false);
+
   useEffect(() => {
     if (!isLoading && !user) router.replace("/login");
   }, [user, isLoading, router]);
@@ -687,7 +690,10 @@ export default function QuizPage() {
                   return (
                     <button
                       key={topic.name}
-                      onClick={() => startQuiz(topic.subject, topic.name)}
+                      onClick={() => {
+                        if (topic.name === "AP Exams") { setShowApModal(true); return; }
+                        startQuiz(topic.subject, topic.name);
+                      }}
                       className="quiz-subject-card group relative p-5 rounded-2xl border transition-all duration-200 hover:-translate-y-1 text-left animate-slide-up cursor-pointer"
                       style={{ animationDelay: `${i * 0.05}s`, border: `1px solid ${color}30`, background: `linear-gradient(135deg, ${color}08 0%, #060c18 100%)` }}
                       onMouseEnter={(e) => {
@@ -751,6 +757,82 @@ export default function QuizPage() {
             </div>
           </div>
         </div>
+
+        {/* AP Exams Modal */}
+        {showApModal && (
+          <div className="fixed inset-0 z-[60] flex items-center justify-center px-4"
+            onClick={() => setShowApModal(false)}>
+            <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
+            <div className="relative w-full max-w-lg max-h-[80vh] overflow-y-auto rounded-2xl border border-gold/20 p-6 animate-slide-up"
+              style={{ background: "linear-gradient(135deg, #0d1528 0%, #0a1020 100%)" }}
+              onClick={(e) => e.stopPropagation()}>
+              {/* Close button */}
+              <button onClick={() => setShowApModal(false)}
+                className="absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center
+                  text-cream/40 hover:text-cream hover:bg-white/10 transition-all">
+                ✕
+              </button>
+
+              <div className="text-center mb-6">
+                <span className="text-4xl block mb-2">📝</span>
+                <h2 className="font-bebas text-2xl text-cream tracking-wider">CHOOSE AP EXAM</h2>
+                <p className="text-cream/40 text-xs mt-1">Select a specific AP subject to practice</p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  { name: "AP Biology", icon: "🧬", color: "#22C55E" },
+                  { name: "AP Chemistry", icon: "⚗️", color: "#A855F7" },
+                  { name: "AP US History", icon: "🏛️", color: "#EAB308" },
+                  { name: "AP World History", icon: "🌍", color: "#3B82F6" },
+                  { name: "AP Calculus AB", icon: "📐", color: "#EF4444" },
+                  { name: "AP English Language", icon: "📖", color: "#F97316" },
+                  { name: "AP Psychology", icon: "🧠", color: "#EC4899" },
+                  { name: "AP Macroeconomics", icon: "📈", color: "#14B8A6" },
+                  { name: "AP Physics", icon: "⚡", color: "#6366F1" },
+                  { name: "AP Statistics", icon: "📊", color: "#8B5CF6" },
+                ].map((ap) => (
+                  <button key={ap.name}
+                    onClick={() => {
+                      setShowApModal(false);
+                      startQuiz("Test Prep" as Subject, ap.name);
+                    }}
+                    className="group relative flex items-center gap-3 p-4 rounded-xl border text-left
+                      transition-all duration-200 hover:-translate-y-0.5 cursor-pointer"
+                    style={{ borderColor: `${ap.color}25`, background: `${ap.color}06` }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.borderColor = `${ap.color}60`;
+                      e.currentTarget.style.boxShadow = `0 0 20px ${ap.color}20, inset 0 0 20px ${ap.color}08`;
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.borderColor = `${ap.color}25`;
+                      e.currentTarget.style.boxShadow = "none";
+                    }}
+                  >
+                    {/* Selection indicator */}
+                    <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0
+                      border-2 transition-all duration-200 group-hover:scale-110"
+                      style={{
+                        borderColor: `${ap.color}40`,
+                        background: `${ap.color}15`,
+                        boxShadow: `0 0 0 0 ${ap.color}00`,
+                      }}
+                      onMouseEnter={(e) => { e.currentTarget.style.boxShadow = `0 0 12px ${ap.color}40`; e.currentTarget.style.borderColor = ap.color; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.boxShadow = `0 0 0 0 ${ap.color}00`; e.currentTarget.style.borderColor = `${ap.color}40`; }}
+                    >
+                      <span className="text-lg">{ap.icon}</span>
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-cream text-sm font-semibold truncate group-hover:text-white transition-colors">
+                        {ap.name}
+                      </p>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
