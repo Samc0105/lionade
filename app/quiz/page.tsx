@@ -270,6 +270,83 @@ export default function QuizPage() {
     auto_correct: "🍀", fifty_fifty: "🧊", score_boost: "📈",
   };
 
+  function advanceToNext() {
+    const isLast = currentIndex + 1 >= questions.length;
+    if (isLast) {
+      finishQuiz(answers);
+    } else {
+      setCurrentIndex((prev) => prev + 1);
+      setCurrentResult(null);
+    }
+  }
+
+  function advanceAfterAnswer(updatedAnswers: AnswerRecord[]) {
+    const isLast = currentIndex + 1 >= questions.length;
+    if (isLast) {
+      finishQuiz(updatedAnswers);
+    } else {
+      setCurrentIndex((prev) => prev + 1);
+      setCurrentResult(null);
+    }
+  }
+
+  async function finishQuiz(finalAnswers: AnswerRecord[]) {
+    const correctCount = Math.min(finalAnswers.filter((a) => a.correct).length + scoreBoost, questions.length);
+    let coins = finalAnswers.reduce((sum, a) => sum + (a.correct ? Math.round(1 * diffMult * blitzMult * coinMultiplier) : 0), 0);
+    const xp = finalAnswers.reduce((sum, a) => sum + (a.correct ? Math.round(10 * diffMult * blitzMult * xpMultiplier) : 0), 0);
+
+    if (correctCount === questions.length && questions.length === 10) {
+      coins += 5;
+    }
+
+    for (const booster of activeBoosters) {
+      try {
+        await fetch("/api/shop/activate-booster", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ boosterId: booster.id }),
+        });
+      } catch { /* ignore */ }
+    }
+
+    setTotalCoins(coins);
+    setTotalXp(xp);
+
+    try {
+      const payload = {
+        userId: user?.id,
+        subject: subject!,
+        totalQuestions: questions.length,
+        correctAnswers: correctCount,
+        coinsEarned: coins,
+        xpEarned: xp,
+        answers: finalAnswers.map((a) => ({
+          questionId: a.questionId,
+          selected: a.selected,
+          isCorrect: a.correct,
+          timeLeft: a.timeLeft,
+        })),
+      };
+
+      const res = await fetch("/api/save-quiz-results", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        await refreshUser();
+        if (user?.id) mutateUserStats(user.id);
+      }
+    } catch (err) {
+      console.error("[Quiz] fetch() failed:", err);
+    }
+
+    setPhase("results");
+  }
+
   const startQuiz = async (s: Subject, topicName?: string) => {
     setSubject(s);
     setActiveTopic(topicName ?? null);
@@ -350,101 +427,8 @@ export default function QuizPage() {
     [currentIndex, questions, answers, diffMult, blitzMult, coinMultiplier, xpMultiplier, hasAutoCorrect]
   );
 
-  // Early return AFTER all hooks
+  // Early return AFTER all hooks and function definitions
   if (isLoading || !user) return null;
-
-  function advanceToNext() {
-    const isLast = currentIndex + 1 >= questions.length;
-    if (isLast) {
-      finishQuiz(answers);
-    } else {
-      setCurrentIndex((prev) => prev + 1);
-      setCurrentResult(null);
-    }
-  }
-
-  function advanceAfterAnswer(updatedAnswers: AnswerRecord[]) {
-    const isLast = currentIndex + 1 >= questions.length;
-    if (isLast) {
-      finishQuiz(updatedAnswers);
-    } else {
-      setCurrentIndex((prev) => prev + 1);
-      setCurrentResult(null);
-    }
-  }
-
-  async function finishQuiz(finalAnswers: AnswerRecord[]) {
-    const correctCount = Math.min(finalAnswers.filter((a) => a.correct).length + scoreBoost, questions.length);
-    let coins = finalAnswers.reduce((sum, a) => sum + (a.correct ? Math.round(1 * diffMult * blitzMult * coinMultiplier) : 0), 0);
-    const xp = finalAnswers.reduce((sum, a) => sum + (a.correct ? Math.round(10 * diffMult * blitzMult * xpMultiplier) : 0), 0);
-
-    // Perfect score bonus
-    if (correctCount === questions.length && questions.length === 10) {
-      coins += 5;
-    }
-
-    // Consume active boosters after quiz
-    for (const booster of activeBoosters) {
-      try {
-        await fetch("/api/shop/activate-booster", {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ boosterId: booster.id }),
-        });
-      } catch { /* ignore */ }
-    }
-
-    setTotalCoins(coins);
-    setTotalXp(xp);
-
-    console.log("[Quiz] ===== finishQuiz =====");
-    console.log("[Quiz] userId:", user!.id);
-    console.log("[Quiz] subject:", subject);
-    console.log("[Quiz] correct:", correctCount, "/", questions.length);
-    console.log("[Quiz] coins:", coins, "xp:", xp);
-    console.log("[Quiz] difficulty:", difficulty, "blitz:", blitzMode);
-
-    try {
-      const payload = {
-        userId: user!.id,
-        subject: subject!,
-        totalQuestions: questions.length,
-        correctAnswers: correctCount,
-        coinsEarned: coins,
-        xpEarned: xp,
-        answers: finalAnswers.map((a) => ({
-          questionId: a.questionId,
-          selected: a.selected,
-          isCorrect: a.correct,
-          timeLeft: a.timeLeft,
-        })),
-      };
-      console.log("[Quiz] Sending to /api/save-quiz-results:", JSON.stringify(payload).slice(0, 300));
-
-      const res = await fetch("/api/save-quiz-results", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-
-      console.log("[Quiz] Response status:", res.status);
-      const data = await res.json();
-      console.log("[Quiz] Response body:", JSON.stringify(data));
-
-      if (data.success) {
-        console.log("[Quiz] Saved! Refreshing user...");
-        await refreshUser();
-        mutateUserStats(user!.id);
-        console.log("[Quiz] User refreshed");
-      } else {
-        console.error("[Quiz] API returned error:", data.error);
-      }
-    } catch (err) {
-      console.error("[Quiz] fetch() failed:", err);
-    }
-
-    setPhase("results");
-  }
 
   const restartQuiz = () => {
     setPhase("select");
