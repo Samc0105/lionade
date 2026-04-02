@@ -184,15 +184,15 @@ function ConfirmModal({ item, quantity, onConfirm, onCancel, userCoins }: {
 function FeaturedCard({ item, owned, onBuy }: { item: ShopItem; owned: boolean; onBuy: () => void }) {
   const r = RARITY_COLORS[item.rarity];
   return (
-    <div className={`shop-card shop-tilt-card relative group rounded-2xl border ${r.border} ${r.glow} overflow-hidden shop-item-float`}
+    <div className={`shop-card shop-tilt-card relative group rounded-2xl border ${r.border} ${r.glow} overflow-hidden shop-item-float h-full flex flex-col`}
       style={{ background: "linear-gradient(135deg, rgba(10,16,32,0.9), rgba(6,12,24,0.95))", backdropFilter: "blur(20px)" }}>
       {item.rarity === "legendary" && <div className="shop-legendary-border" />}
-      <div className="relative p-6 sm:p-8">
+      <div className="relative p-6 sm:p-8 flex flex-col flex-1">
         <span className={`absolute top-4 right-4 text-[10px] uppercase tracking-widest font-bold px-2.5 py-1 rounded-full ${r.badge}`}>{item.rarity}</span>
         <div className="text-6xl sm:text-7xl mb-4 shop-item-icon">{item.icon}</div>
         <h3 className="shop-card-title font-bebas text-2xl sm:text-3xl text-cream tracking-wide mb-1">{item.name}</h3>
         <p className="shop-card-desc text-cream/40 text-sm mb-5 leading-relaxed">{item.description}</p>
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between mt-auto">
           <div className="flex items-center gap-1.5">
             <img src="/F.png" alt="Fangs" className="w-5 h-5 object-contain" />
             <span className="font-bebas text-2xl text-gold">{formatCoins(item.price)}</span>
@@ -212,17 +212,17 @@ function FeaturedCard({ item, owned, onBuy }: { item: ShopItem; owned: boolean; 
 function CosmeticCard({ item, owned, canAfford, onBuy }: { item: ShopItem; owned: boolean; canAfford: boolean; onBuy: () => void }) {
   const r = RARITY_COLORS[item.rarity];
   return (
-    <div className={`shop-card shop-tilt-card relative group rounded-xl border ${r.border} overflow-hidden transition-all duration-300`}
+    <div className={`shop-card shop-tilt-card relative group rounded-xl border ${r.border} overflow-hidden transition-all duration-300 h-full flex flex-col`}
       style={{ background: "linear-gradient(135deg, rgba(10,16,32,0.85), rgba(6,12,24,0.9))", backdropFilter: "blur(12px)" }}>
       {item.rarity === "legendary" && <div className="shop-legendary-border" />}
-      <div className="relative p-4">
+      <div className="relative p-4 flex flex-col flex-1">
         <div className="flex items-start justify-between mb-3">
           <div className="text-4xl shop-item-icon">{item.icon}</div>
           <span className={`text-[9px] uppercase tracking-widest font-bold px-2 py-0.5 rounded-full ${r.badge}`}>{item.rarity}</span>
         </div>
         <h4 className="shop-card-title font-bebas text-lg text-cream tracking-wide mb-0.5">{item.name}</h4>
         <p className="shop-card-desc text-cream/30 text-xs mb-4 leading-relaxed">{item.description}</p>
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between mt-auto">
           <div className="flex items-center gap-1"><img src="/F.png" alt="Fangs" className="w-5 h-5 object-contain" /><span className="font-bebas text-lg text-gold">{formatCoins(item.price)}</span></div>
           {owned ? (
             <span className="flex items-center gap-1 text-green-400 text-xs font-bold"><span>✓</span> Owned</span>
@@ -317,18 +317,18 @@ function InventoryItem({ item, owned, onEquip }: { item: ShopItem; owned: OwnedI
 function PremiumCard({ item }: { item: PremiumItem }) {
   const r = RARITY_COLORS[item.rarity];
   return (
-    <div className={`shop-card shop-tilt-card premium-card relative group rounded-xl border ${r.border} overflow-hidden transition-all duration-300`}
+    <div className={`shop-card shop-tilt-card premium-card relative group rounded-xl border ${r.border} overflow-hidden transition-all duration-300 h-full flex flex-col`}
       style={{ background: "linear-gradient(135deg, rgba(20,8,40,0.9), rgba(10,6,30,0.95))", backdropFilter: "blur(12px)" }}>
       {item.rarity === "legendary" && <div className="shop-legendary-border-premium" />}
       {item.rarity === "epic" && <div className="shop-epic-border-premium" />}
-      <div className="relative p-5">
+      <div className="relative p-5 flex flex-col flex-1">
         <div className="flex items-start justify-between mb-3">
           <div className="text-5xl shop-item-icon premium-icon-glow">{item.icon}</div>
           <span className={`text-[9px] uppercase tracking-widest font-bold px-2 py-0.5 rounded-full ${r.badge}`}>{item.rarity}</span>
         </div>
         <h4 className="shop-card-title font-bebas text-xl text-cream tracking-wide mb-0.5">{item.name}</h4>
         <p className="shop-card-desc text-cream/30 text-xs mb-5 leading-relaxed">{item.description}</p>
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between mt-auto">
           <span className="font-bebas text-xl text-purple-300">${item.priceUSD.toFixed(2)}</span>
           <button disabled className="relative px-4 py-2 rounded-lg text-xs font-bold border border-purple-500/30 bg-purple-500/10 text-purple-400/60 cursor-not-allowed overflow-hidden">
             <span className="premium-coming-soon-pulse">Coming Soon</span>
