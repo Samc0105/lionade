@@ -323,10 +323,11 @@ export default function Navbar() {
               {showAppNav && user && (
                 <>
                   {/* Coin Pill */}
-                  <Link href="/wallet" className="hidden sm:flex items-center gap-1.5 bg-gold/10 border border-gold/20
-                    rounded-full px-2.5 py-1 cursor-pointer group relative hover:bg-gold/15 transition-colors">
-                    <img src="/fangs.png" alt="Fangs" className="w-5 h-5 object-contain" />
-                    <span className="font-bebas text-base text-gold tracking-wider leading-none">
+                  <Link href="/wallet" className="hidden sm:flex items-center gap-2 bg-gold/15 border border-gold/30
+                    rounded-full px-3.5 py-1.5 cursor-pointer group relative hover:bg-gold/25 transition-all duration-200
+                    shadow-sm shadow-gold/10 hover:shadow-gold/20">
+                    <img src="/fangs.png" alt="Fangs" className="w-6 h-6 object-contain" />
+                    <span className="font-bebas text-lg text-gold tracking-wider leading-none">
                       {stats ? formatCoins(stats.coins) : user.statsLoaded ? formatCoins(user.coins) : <StatSkeleton />}
                     </span>
                     <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 px-2 py-1 rounded bg-navy-100
