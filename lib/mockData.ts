@@ -16,22 +16,38 @@ export function formatCoins(coins: number): string {
   return coins.toString();
 }
 
-export const SUBJECT_ICONS: Record<Subject, string> = {
+export const SUBJECT_ICONS: Record<string, string> = {
   Math: "🧮",
   Science: "🔬",
   Languages: "🌍",
+  Humanities: "📚",
+  "Tech & Coding": "💻",
+  "Cloud & IT": "☁️",
+  "Finance & Business": "💰",
+  "Test Prep": "📝",
+  // Legacy
   "SAT/ACT": "📝",
   Coding: "💻",
   Finance: "💰",
   Certifications: "🏆",
+  History: "🏛️",
+  "Social Studies": "🌐",
 };
 
-export const SUBJECT_COLORS: Record<Subject, string> = {
+export const SUBJECT_COLORS: Record<string, string> = {
   Math: "#4A90D9",
   Science: "#2ECC71",
-  Languages: "#9B59B6",
+  Languages: "#3B82F6",
+  Humanities: "#A855F7",
+  "Tech & Coding": "#6B7280",
+  "Cloud & IT": "#F97316",
+  "Finance & Business": "#EAB308",
+  "Test Prep": "#EC4899",
+  // Legacy
   "SAT/ACT": "#E67E22",
   Coding: "#1ABC9C",
   Finance: "#FFD700",
   Certifications: "#E91E63",
+  History: "#EAB308",
+  "Social Studies": "#14B8A6",
 };
