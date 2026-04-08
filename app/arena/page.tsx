@@ -160,11 +160,12 @@ export default function ArenaPage() {
     (async () => {
       const { data } = await supabase
         .from("profiles")
-        .select("*")
+        .select("arena_elo, username, avatar_url")
         // @ts-ignore
         .eq("id", user.id)
         .single();
       if (data) {
+        // @ts-ignore
         setMyElo(data.arena_elo ?? 1000);
         setMe({
           id: user.id,
