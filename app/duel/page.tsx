@@ -9,6 +9,7 @@ import CoinAnimation from "@/components/CoinAnimation";
 import { useAuth } from "@/lib/auth";
 import { useRouter } from "next/navigation";
 import BackButton from "@/components/BackButton";
+import { cdnUrl } from "@/lib/cdn";
 
 type DuelPhase = "invite" | "countdown" | "battle" | "results";
 
@@ -229,7 +230,7 @@ export default function DuelPage() {
               { icon: "fang", label: "2× coins", desc: "for the winner" },
             ].map((r) => (
               <div key={r.label} className="card text-center py-5">
-                {r.icon === "fang" ? <img src="/F.png" alt="Fangs" className="w-8 h-8 object-contain mx-auto mb-2" /> : <span className="text-3xl block mb-2">{r.icon}</span>}
+                {r.icon === "fang" ? <img src={cdnUrl("/F.png")} alt="Fangs" className="w-8 h-8 object-contain mx-auto mb-2" /> : <span className="text-3xl block mb-2">{r.icon}</span>}
                 <p className="font-bebas text-xl text-cream tracking-wider">{r.label}</p>
                 <p className="text-cream/40 text-sm">{r.desc}</p>
               </div>
@@ -374,7 +375,7 @@ export default function DuelPage() {
                 text-yellow-400 border-yellow-400/50 bg-yellow-400/10 capitalize">
                 {q.difficulty}
               </span>
-              <span className="text-cream/40 text-xs flex items-center gap-0.5">+{q.coinReward} <img src="/F.png" alt="Fangs" className="w-4 h-4 object-contain" /></span>
+              <span className="text-cream/40 text-xs flex items-center gap-0.5">+{q.coinReward} <img src={cdnUrl("/F.png")} alt="Fangs" className="w-4 h-4 object-contain" /></span>
             </div>
             <p className="font-syne text-lg font-semibold text-cream text-center leading-relaxed">
               {q.question}
@@ -556,7 +557,7 @@ export default function DuelPage() {
               animationDelay: "0.3s",
             }}
           >
-            <img src="/F.png" alt="Fangs" className="w-7 h-7 object-contain" />
+            <img src={cdnUrl("/F.png")} alt="Fangs" className="w-7 h-7 object-contain" />
             <span className="font-bebas text-3xl text-gold">{coinsEarned} coins earned</span>
           </div>
 

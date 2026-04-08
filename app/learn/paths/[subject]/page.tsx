@@ -17,6 +17,7 @@ import {
   type UserStageProgress,
 } from "@/lib/db";
 import { mutateUserStats } from "@/lib/hooks";
+import { cdnUrl } from "@/lib/cdn";
 
 /* ── Subject config ───────────────────────────────────────── */
 
@@ -756,7 +757,7 @@ export default function RoadMapPage() {
                 }}
               >
                 <div className="flex items-center gap-2">
-                  <img src="/F.png" alt="Fangs" className="w-5 h-5 object-contain" />
+                  <img src={cdnUrl("/F.png")} alt="Fangs" className="w-5 h-5 object-contain" />
                   <span className="font-bebas text-xl text-gold">
                     +{score * 5 + resultStars * 10}
                   </span>

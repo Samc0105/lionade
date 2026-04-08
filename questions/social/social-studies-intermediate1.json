@@ -1,0 +1,1122 @@
+[
+  {
+    "question": "What is the primary purpose of the Constitution of the United States?",
+    "options": [
+      "To establish a legal framework for government",
+      "To declare independence from Britain",
+      "To outline the Bill of Rights",
+      "To create treaties with foreign nations"
+    ],
+    "correct_answer": "To establish a legal framework for government",
+    "explanation": "The Constitution establishes the structure, functions, and limitations of the government.",
+    "subject": "social",
+    "difficulty": "intermediate",
+    "topic": "government"
+  },
+  {
+    "question": "Which of the following best describes 'citizenship'?",
+    "options": [
+      "A legal status of being a member of a nation",
+      "A form of government",
+      "A type of culture",
+      "An economic system"
+    ],
+    "correct_answer": "A legal status of being a member of a nation",
+    "explanation": "Citizenship denotes membership in a political community, granting rights and responsibilities.",
+    "subject": "social",
+    "difficulty": "intermediate",
+    "topic": "civics"
+  },
+  {
+    "question": "What major event triggered the American Civil War?",
+    "options": [
+      "The signing of the Declaration of Independence",
+      "The election of Abraham Lincoln",
+      "The Boston Tea Party",
+      "The War of 1812"
+    ],
+    "correct_answer": "The election of Abraham Lincoln",
+    "explanation": "Lincoln's election in 1860 led to the secession of Southern states and the onset of the Civil War.",
+    "subject": "social",
+    "difficulty": "intermediate",
+    "topic": "history"
+  },
+  {
+    "question": "Which of the following is a primary source?",
+    "options": [
+      "A textbook about World War II",
+      "A letter written by a soldier during the war",
+      "An article summarizing historical events",
+      "A documentary film"
+    ],
+    "correct_answer": "A letter written by a soldier during the war",
+    "explanation": "Primary sources are original materials created at the time of the event, such as letters, diaries, and photographs.",
+    "subject": "social",
+    "difficulty": "intermediate",
+    "topic": "historical-analysis"
+  },
+  {
+    "question": "What is the main purpose of the United Nations?",
+    "options": [
+      "To promote global peace and security",
+      "To establish trade agreements",
+      "To create military alliances",
+      "To support individual nations' economies"
+    ],
+    "correct_answer": "To promote global peace and security",
+    "explanation": "The UN was founded after World War II to foster international cooperation and prevent future conflicts.",
+    "subject": "social",
+    "difficulty": "intermediate",
+    "topic": "international-relations"
+  },
+  {
+    "question": "What does 'cultural diffusion' refer to?",
+    "options": [
+      "The spread of cultural beliefs and social activities",
+      "The creation of new cultures",
+      "The isolation of cultures",
+      "The study of cultures"
+    ],
+    "correct_answer": "The spread of cultural beliefs and social activities",
+    "explanation": "Cultural diffusion is the process by which cultural elements are transmitted from one society to another.",
+    "subject": "social",
+    "difficulty": "intermediate",
+    "topic": "culture"
+  },
+  {
+    "question": "Which economic system is characterized by private ownership of resources and free markets?",
+    "options": [
+      "Socialism",
+      "Communism",
+      "Capitalism",
+      "Feudalism"
+    ],
+    "correct_answer": "Capitalism",
+    "explanation": "Capitalism is an economic system where private individuals own and control property and businesses.",
+    "subject": "social",
+    "difficulty": "intermediate",
+    "topic": "economics"
+  },
+  {
+    "question": "What is the Bill of Rights?",
+    "options": [
+      "A list of amendments to the Constitution",
+      "A historical document from the Revolutionary War",
+      "A manifesto for economic reform",
+      "A declaration of war"
+    ],
+    "correct_answer": "A list of amendments to the Constitution",
+    "explanation": "The Bill of Rights comprises the first ten amendments to the U.S. Constitution, guaranteeing individual rights.",
+    "subject": "social",
+    "difficulty": "intermediate",
+    "topic": "government"
+  },
+  {
+    "question": "Which of the following is an example of a democratic government?",
+    "options": [
+      "Absolute monarchy",
+      "Oligarchy",
+      "Representative democracy",
+      "Theocracy"
+    ],
+    "correct_answer": "Representative democracy",
+    "explanation": "In a representative democracy, citizens elect representatives to make decisions on their behalf.",
+    "subject": "social",
+    "difficulty": "intermediate",
+    "topic": "government"
+  },
+  {
+    "question": "What was the main outcome of the Industrial Revolution?",
+    "options": [
+      "Increased agricultural output",
+      "Emergence of factory-based production",
+      "Decline in urban populations",
+      "Reduction in technological advancements"
+    ],
+    "correct_answer": "Emergence of factory-based production",
+    "explanation": "The Industrial Revolution marked a shift from agrarian economies to industrialized and urbanized societies.",
+    "subject": "social",
+    "difficulty": "intermediate",
+    "topic": "history"
+  },
+  {
+    "question": "What concept describes the rights and responsibilities of individuals in a society?",
+    "options": [
+      "Civics",
+      "Economics",
+      "Geography",
+      "History"
+    ],
+    "correct_answer": "Civics",
+    "explanation": "Civics involves the study of rights and duties of citizenship and the functioning of government.",
+    "subject": "social",
+    "difficulty": "intermediate",
+    "topic": "civics"
+  },
+  {
+    "question": "Which of the following best describes 'globalization'?",
+    "options": [
+      "The process of increasing interconnectedness among countries",
+      "The separation of economies",
+      "The decline of international trade",
+      "The rise of nationalism"
+    ],
+    "correct_answer": "The process of increasing interconnectedness among countries",
+    "explanation": "Globalization refers to the growing interdependence of economies, cultures, and populations across the world.",
+    "subject": "social",
+    "difficulty": "intermediate",
+    "topic": "global-studies"
+  },
+  {
+    "question": "What role does the Executive branch play in government?",
+    "options": [
+      "To interpret laws",
+      "To create laws",
+      "To enforce laws",
+      "To evaluate laws"
+    ],
+    "correct_answer": "To enforce laws",
+    "explanation": "The Executive branch is responsible for implementing and enforcing the laws passed by the legislative branch.",
+    "subject": "social",
+    "difficulty": "intermediate",
+    "topic": "government"
+  },
+  {
+    "question": "Which document ended the American Revolutionary War?",
+    "options": [
+      "The Declaration of Independence",
+      "The Treaty of Paris",
+      "The Bill of Rights",
+      "The Articles of Confederation"
+    ],
+    "correct_answer": "The Treaty of Paris",
+    "explanation": "The Treaty of Paris, signed in 1783, officially ended the Revolutionary War and recognized American independence.",
+    "subject": "social",
+    "difficulty": "intermediate",
+    "topic": "history"
+  },
+  {
+    "question": "What is the significance of the Emancipation Proclamation?",
+    "options": [
+      "It started the Civil War",
+      "It abolished slavery in the Confederate states",
+      "It established the Bill of Rights",
+      "It granted women the right to vote"
+    ],
+    "correct_answer": "It abolished slavery in the Confederate states",
+    "explanation": "Issued by Abraham Lincoln, the Emancipation Proclamation declared the freedom of all slaves in Confederate-held territory.",
+    "subject": "social",
+    "difficulty": "intermediate",
+    "topic": "history"
+  },
+  {
+    "question": "Which term describes a government ruled by a single authority?",
+    "options": [
+      "Democracy",
+      "Monarchy",
+      "Oligarchy",
+      "Anarchy"
+    ],
+    "correct_answer": "Monarchy",
+    "explanation": "A monarchy is a form of government where a single person rules, often a king or queen.",
+    "subject": "social",
+    "difficulty": "intermediate",
+    "topic": "government"
+  },
+  {
+    "question": "What is the primary function of the legislative branch?",
+    "options": [
+      "Enforcing laws",
+      "Interpreting laws",
+      "Making laws",
+      "Advising the President"
+    ],
+    "correct_answer": "Making laws",
+    "explanation": "The legislative branch is responsible for creating and passing legislation in government.",
+    "subject": "social",
+    "difficulty": "intermediate",
+    "topic": "government"
+  },
+  {
+    "question": "Which of the following is an example of a civic duty?",
+    "options": [
+      "Voting in elections",
+      "Attending a concert",
+      "Going shopping",
+      "Traveling abroad"
+    ],
+    "correct_answer": "Voting in elections",
+    "explanation": "Civic duties are responsibilities of citizens, such as voting, paying taxes, and serving on juries.",
+    "subject": "social",
+    "difficulty": "intermediate",
+    "topic": "civics"
+  },
+  {
+    "question": "What is the main purpose of a census?",
+    "options": [
+      "To collect tax information",
+      "To count the population",
+      "To determine election outcomes",
+      "To measure economic growth"
+    ],
+    "correct_answer": "To count the population",
+    "explanation": "A census is conducted to gather demographic data about a nation's population, which informs policy decisions.",
+    "subject": "social",
+    "difficulty": "intermediate",
+    "topic": "demographics"
+  },
+  {
+    "question": "What is a key feature of a mixed economy?",
+    "options": [
+      "Complete government control",
+      "No regulation of markets",
+      "Combination of private and public enterprises",
+      "Exclusive reliance on agriculture"
+    ],
+    "correct_answer": "Combination of private and public enterprises",
+    "explanation": "A mixed economy incorporates elements of both capitalism and socialism, with both private and government involvement.",
+    "subject": "social",
+    "difficulty": "intermediate",
+    "topic": "economics"
+  },
+  {
+    "question": "Which movement aimed to end racial segregation in the United States?",
+    "options": [
+      "The Civil Rights Movement",
+      "The Women's Suffrage Movement",
+      "The Labor Movement",
+      "The Temperance Movement"
+    ],
+    "correct_answer": "The Civil Rights Movement",
+    "explanation": "The Civil Rights Movement fought against racial discrimination and for the equal rights of African Americans.",
+    "subject": "social",
+    "difficulty": "intermediate",
+    "topic": "history"
+  },
+  {
+    "question": "What does the term 'monsoon' refer to?",
+    "options": [
+      "A type of plant",
+      "A seasonal wind pattern",
+      "A geological formation",
+      "A cultural festival"
+    ],
+    "correct_answer": "A seasonal wind pattern",
+    "explanation": "Monsoons are seasonal winds that bring heavy rains and are most commonly associated with South Asia.",
+    "subject": "social",
+    "difficulty": "intermediate",
+    "topic": "geography"
+  },
+  {
+    "question": "Which factor is considered a push factor in migration?",
+    "options": [
+      "Job opportunities",
+      "Political instability",
+      "Family reunification",
+      "Better living conditions"
+    ],
+    "correct_answer": "Political instability",
+    "explanation": "Push factors are negative aspects that drive people to leave their home country, such as conflict or persecution.",
+    "subject": "social",
+    "difficulty": "intermediate",
+    "topic": "migration"
+  },
+  {
+    "question": "What is the primary purpose of the United Nations?",
+    "options": [
+      "To promote international cooperation",
+      "To create world laws",
+      "To manage global economies",
+      "To oversee national elections"
+    ],
+    "correct_answer": "To promote international cooperation",
+    "explanation": "The United Nations aims to foster international cooperation and maintain peace and security across the globe.",
+    "subject": "social",
+    "difficulty": "intermediate",
+    "topic": "international relations"
+  },
+  {
+    "question": "Which amendment to the U.S. Constitution abolished slavery?",
+    "options": [
+      "13th Amendment",
+      "14th Amendment",
+      "15th Amendment",
+      "19th Amendment"
+    ],
+    "correct_answer": "13th Amendment",
+    "explanation": "The 13th Amendment, ratified in 1865, abolished slavery in the United States.",
+    "subject": "social",
+    "difficulty": "intermediate",
+    "topic": "U.S. history"
+  },
+  {
+    "question": "What is a market economy characterized by?",
+    "options": [
+      "Government control",
+      "Supply and demand",
+      "Limited choices",
+      "Fixed prices"
+    ],
+    "correct_answer": "Supply and demand",
+    "explanation": "A market economy is driven by the forces of supply and demand, where prices are determined in a free market.",
+    "subject": "social",
+    "difficulty": "intermediate",
+    "topic": "economics"
+  },
+  {
+    "question": "Which document declared the independence of the United States from Britain?",
+    "options": [
+      "The Constitution",
+      "The Articles of Confederation",
+      "The Declaration of Independence",
+      "The Federalist Papers"
+    ],
+    "correct_answer": "The Declaration of Independence",
+    "explanation": "The Declaration of Independence, adopted on July 4, 1776, announced the American colonies' separation from British rule.",
+    "subject": "social",
+    "difficulty": "intermediate",
+    "topic": "U.S. history"
+  },
+  {
+    "question": "What does the term 'civic duty' refer to?",
+    "options": [
+      "Personal responsibilities",
+      "Rights of citizens",
+      "Obligations of citizens",
+      "Government policies"
+    ],
+    "correct_answer": "Obligations of citizens",
+    "explanation": "Civic duty refers to the responsibilities and obligations that citizens have to participate in their government and society.",
+    "subject": "social",
+    "difficulty": "intermediate",
+    "topic": "civics"
+  },
+  {
+    "question": "What was the main cause of the Cold War?",
+    "options": [
+      "Economic competition",
+      "Ideological conflict",
+      "Colonial disputes",
+      "Military alliances"
+    ],
+    "correct_answer": "Ideological conflict",
+    "explanation": "The Cold War was primarily driven by the ideological conflict between communism and capitalism.",
+    "subject": "social",
+    "difficulty": "intermediate",
+    "topic": "20th-century history"
+  },
+  {
+    "question": "Which country was the first to grant women the right to vote?",
+    "options": [
+      "United States",
+      "New Zealand",
+      "Canada",
+      "Australia"
+    ],
+    "correct_answer": "New Zealand",
+    "explanation": "New Zealand was the first self-governing country to grant women the right to vote in 1893.",
+    "subject": "social",
+    "difficulty": "intermediate",
+    "topic": "women's rights"
+  },
+  {
+    "question": "What is the primary economic system used in the United States?",
+    "options": [
+      "Socialism",
+      "Communism",
+      "Capitalism",
+      "Feudalism"
+    ],
+    "correct_answer": "Capitalism",
+    "explanation": "The United States primarily operates under a capitalist economic system, characterized by private ownership and free markets.",
+    "subject": "social",
+    "difficulty": "intermediate",
+    "topic": "economics"
+  },
+  {
+    "question": "What event marked the beginning of the Great Depression?",
+    "options": [
+      "Stock market crash of 1929",
+      "World War I",
+      "Dust Bowl",
+      "New Deal"
+    ],
+    "correct_answer": "Stock market crash of 1929",
+    "explanation": "The Great Depression began with the stock market crash of October 1929, leading to widespread economic hardship.",
+    "subject": "social",
+    "difficulty": "intermediate",
+    "topic": "economic history"
+  },
+  {
+    "question": "Which of the following rights is protected by the First Amendment?",
+    "options": [
+      "Right to bear arms",
+      "Right to a fair trial",
+      "Freedom of speech",
+      "Right to privacy"
+    ],
+    "correct_answer": "Freedom of speech",
+    "explanation": "The First Amendment protects several fundamental rights, including the freedom of speech.",
+    "subject": "social",
+    "difficulty": "intermediate",
+    "topic": "civics"
+  },
+  {
+    "question": "What is one effect of urbanization?",
+    "options": [
+      "Decreased population density",
+      "Increased access to services",
+      "Rural depopulation",
+      "Lower living standards"
+    ],
+    "correct_answer": "Increased access to services",
+    "explanation": "Urbanization often leads to increased access to services such as education, healthcare, and employment opportunities.",
+    "subject": "social",
+    "difficulty": "intermediate",
+    "topic": "sociology"
+  },
+  {
+    "question": "Which war was fought to end British rule in the American colonies?",
+    "options": [
+      "War of 1812",
+      "American Revolution",
+      "Civil War",
+      "World War I"
+    ],
+    "correct_answer": "American Revolution",
+    "explanation": "The American Revolution was fought from 1775 to 1783 to gain independence from British rule.",
+    "subject": "social",
+    "difficulty": "intermediate",
+    "topic": "U.S. history"
+  },
+  {
+    "question": "What is a constitutional monarchy?",
+    "options": [
+      "A government ruled by a dictator",
+      "A system where the monarch's powers are limited by law",
+      "A democracy without a constitution",
+      "A type of oligarchy"
+    ],
+    "correct_answer": "A system where the monarch's powers are limited by law",
+    "explanation": "In a constitutional monarchy, the monarch's powers are limited by a constitution or legal framework.",
+    "subject": "social",
+    "difficulty": "intermediate",
+    "topic": "government"
+  },
+  {
+    "question": "Which of the following is a common characteristic of totalitarian regimes?",
+    "options": [
+      "Political pluralism",
+      "Individual freedoms",
+      "Censorship of media",
+      "Decentralized power"
+    ],
+    "correct_answer": "Censorship of media",
+    "explanation": "Totalitarian regimes often employ censorship of media as a means to control information and suppress dissent.",
+    "subject": "social",
+    "difficulty": "intermediate",
+    "topic": "political systems"
+  },
+  {
+    "question": "What is the significance of the Magna Carta?",
+    "options": [
+      "It established the principle of due process",
+      "It ended feudalism",
+      "It created the English Parliament",
+      "It declared independence from France"
+    ],
+    "correct_answer": "It established the principle of due process",
+    "explanation": "The Magna Carta, signed in 1215, established the principle of due process and limited the power of the monarchy.",
+    "subject": "social",
+    "difficulty": "intermediate",
+    "topic": "historical documents"
+  },
+  {
+    "question": "Which economic theory advocates for government intervention in the economy?",
+    "options": [
+      "Laissez-faire",
+      "Keynesian economics",
+      "Supply-side economics",
+      "Classical economics"
+    ],
+    "correct_answer": "Keynesian economics",
+    "explanation": "Keynesian economics supports government intervention to help manage economic cycles and promote full employment.",
+    "subject": "social",
+    "difficulty": "intermediate",
+    "topic": "economics"
+  },
+  {
+    "question": "What is the primary function of the legislative branch of government?",
+    "options": [
+      "To interpret laws",
+      "To enforce laws",
+      "To create laws",
+      "To conduct foreign policy"
+    ],
+    "correct_answer": "To create laws",
+    "explanation": "The legislative branch is primarily responsible for creating laws and representing the interests of the people.",
+    "subject": "social",
+    "difficulty": "intermediate",
+    "topic": "government"
+  },
+  {
+    "question": "What was the main goal of the Civil Rights Movement?",
+    "options": [
+      "To promote economic growth",
+      "To end racial segregation",
+      "To expand voting rights",
+      "To improve education"
+    ],
+    "correct_answer": "To end racial segregation",
+    "explanation": "The main goal of the Civil Rights Movement was to end racial segregation and discrimination against African Americans.",
+    "subject": "social",
+    "difficulty": "intermediate",
+    "topic": "social movements"
+  },
+  {
+    "question": "What impact did the printing press have on society?",
+    "options": [
+      "Increased literacy rates",
+      "Decreased communication",
+      "Limited access to information",
+      "Reduced cultural exchange"
+    ],
+    "correct_answer": "Increased literacy rates",
+    "explanation": "The printing press revolutionized the spread of information, leading to increased literacy rates and the dissemination of ideas.",
+    "subject": "social",
+    "difficulty": "intermediate",
+    "topic": "technological impact"
+  },
+  {
+    "question": "Which of the following best describes globalization?",
+    "options": [
+      "Increased isolation of countries",
+      "Integration of economies and cultures",
+      "Return to local economies",
+      "Decline of international trade"
+    ],
+    "correct_answer": "Integration of economies and cultures",
+    "explanation": "Globalization refers to the process of integrating economies, cultures, and societies across the world.",
+    "subject": "social",
+    "difficulty": "intermediate",
+    "topic": "global studies"
+  },
+  {
+    "question": "What is the primary purpose of the Bill of Rights in the United States Constitution?",
+    "options": [
+      "To outline the structure of government",
+      "To protect individual liberties",
+      "To establish voting procedures",
+      "To define citizenship"
+    ],
+    "correct_answer": "To protect individual liberties",
+    "explanation": "The Bill of Rights consists of the first ten amendments to the Constitution, designed to protect the individual rights of citizens.",
+    "subject": "social",
+    "difficulty": "intermediate",
+    "topic": "U.S. Government"
+  },
+  {
+    "question": "Which of the following best describes the concept of 'manifest destiny'?",
+    "options": [
+      "The belief in American exceptionalism",
+      "The idea of expanding U.S. territory across North America",
+      "The policy of isolating the United States from foreign affairs",
+      "The movement for civil rights"
+    ],
+    "correct_answer": "The idea of expanding U.S. territory across North America",
+    "explanation": "Manifest destiny was a 19th-century doctrine that the expansion of the United States throughout the American continents was both justified and inevitable.",
+    "subject": "social",
+    "difficulty": "intermediate",
+    "topic": "U.S. History"
+  },
+  {
+    "question": "What economic system is characterized by private ownership and free markets?",
+    "options": [
+      "Socialism",
+      "Capitalism",
+      "Feudalism",
+      "Communism"
+    ],
+    "correct_answer": "Capitalism",
+    "explanation": "Capitalism is an economic system where private individuals or businesses own capital goods, and production is determined by supply and demand in the market.",
+    "subject": "social",
+    "difficulty": "intermediate",
+    "topic": "Economics"
+  },
+  {
+    "question": "Which amendment abolished slavery in the United States?",
+    "options": [
+      "13th Amendment",
+      "14th Amendment",
+      "15th Amendment",
+      "19th Amendment"
+    ],
+    "correct_answer": "13th Amendment",
+    "explanation": "The 13th Amendment, ratified in 1865, abolished slavery and involuntary servitude, except as punishment for a crime.",
+    "subject": "social",
+    "difficulty": "intermediate",
+    "topic": "U.S. Government"
+  },
+  {
+    "question": "What are the three branches of government in the United States?",
+    "options": [
+      "Legislative, Executive, Judicial",
+      "Legislative, Administrative, Judicial",
+      "Executive, Judicial, Federal",
+      "Federal, State, Local"
+    ],
+    "correct_answer": "Legislative, Executive, Judicial",
+    "explanation": "The U.S. government is divided into three branches: Legislative (makes laws), Executive (enforces laws), and Judicial (interprets laws).",
+    "subject": "social",
+    "difficulty": "intermediate",
+    "topic": "U.S. Government"
+  },
+  {
+    "question": "Which event marked the beginning of the Great Depression?",
+    "options": [
+      "The Stock Market Crash of 1929",
+      "The Dust Bowl",
+      "World War I",
+      "The New Deal"
+    ],
+    "correct_answer": "The Stock Market Crash of 1929",
+    "explanation": "The Great Depression began with the stock market crash on October 29, 1929, leading to widespread economic hardship.",
+    "subject": "social",
+    "difficulty": "intermediate",
+    "topic": "U.S. History"
+  },
+  {
+    "question": "What is a primary source?",
+    "options": [
+      "A textbook summarizing events",
+      "A documentary film",
+      "An original document or artifact",
+      "A biography of a historical figure"
+    ],
+    "correct_answer": "An original document or artifact",
+    "explanation": "A primary source is an original document or artifact created at the time under study, providing direct evidence of historical events.",
+    "subject": "social",
+    "difficulty": "intermediate",
+    "topic": "Historical Analysis"
+  },
+  {
+    "question": "Which of the following is a consequence of deforestation?",
+    "options": [
+      "Increased biodiversity",
+      "Soil erosion",
+      "More carbon absorption",
+      "Improved air quality"
+    ],
+    "correct_answer": "Soil erosion",
+    "explanation": "Deforestation leads to soil erosion because trees that stabilize the soil are removed, making the land more susceptible to erosion.",
+    "subject": "social",
+    "difficulty": "intermediate",
+    "topic": "Environmental Studies"
+  },
+  {
+    "question": "What does the term 'civic engagement' refer to?",
+    "options": [
+      "Participation in community service",
+      "Voting in elections",
+      "Being informed about political issues",
+      "All of the above"
+    ],
+    "correct_answer": "All of the above",
+    "explanation": "Civic engagement encompasses a variety of activities that promote the public good and involve citizens in their communities and government.",
+    "subject": "social",
+    "difficulty": "intermediate",
+    "topic": "Civics"
+  },
+  {
+    "question": "Which international organization was formed after World War II to promote peace and cooperation?",
+    "options": [
+      "NATO",
+      "United Nations",
+      "European Union",
+      "World Trade Organization"
+    ],
+    "correct_answer": "United Nations",
+    "explanation": "The United Nations was established in 1945 to foster international cooperation and prevent future conflicts after the devastation of World War II.",
+    "subject": "social",
+    "difficulty": "intermediate",
+    "topic": "Global Studies"
+  },
+  {
+    "question": "What was the main goal of the Civil Rights Movement in the 1960s?",
+    "options": [
+      "To promote environmental protection",
+      "To end racial segregation and discrimination",
+      "To expand U.S. territory",
+      "To increase economic opportunities for women"
+    ],
+    "correct_answer": "To end racial segregation and discrimination",
+    "explanation": "The Civil Rights Movement sought to eliminate racial segregation and discrimination against African Americans and secure equal rights under the law.",
+    "subject": "social",
+    "difficulty": "intermediate",
+    "topic": "U.S. History"
+  },
+  {
+    "question": "Which of the following is a characteristic of a democracy?",
+    "options": [
+      "Rule by a single leader",
+      "Limited citizen participation",
+      "Majority rule",
+      "Censorship of the press"
+    ],
+    "correct_answer": "Majority rule",
+    "explanation": "In a democracy, decisions are typically made based on majority rule, where the preference of more than half the voters is followed.",
+    "subject": "social",
+    "difficulty": "intermediate",
+    "topic": "Civics"
+  },
+  {
+    "question": "What does GDP stand for?",
+    "options": [
+      "Gross Domestic Product",
+      "General Domestic Product",
+      "Gross Development Plan",
+      "General Development Plan"
+    ],
+    "correct_answer": "Gross Domestic Product",
+    "explanation": "GDP stands for Gross Domestic Product, which measures the total value of all goods and services produced within a country's borders in a specific time period.",
+    "subject": "social",
+    "difficulty": "intermediate",
+    "topic": "Economics"
+  },
+  {
+    "question": "Which war was primarily fought to end the spread of communism in Southeast Asia?",
+    "options": [
+      "World War I",
+      "World War II",
+      "Vietnam War",
+      "Cold War"
+    ],
+    "correct_answer": "Vietnam War",
+    "explanation": "The Vietnam War was fought primarily to prevent the spread of communism in Southeast Asia, particularly after the domino theory became a concern.",
+    "subject": "social",
+    "difficulty": "intermediate",
+    "topic": "U.S. History"
+  },
+  {
+    "question": "What is the role of the executive branch of government?",
+    "options": [
+      "To create laws",
+      "To interpret laws",
+      "To enforce laws",
+      "To amend laws"
+    ],
+    "correct_answer": "To enforce laws",
+    "explanation": "The executive branch is responsible for implementing and enforcing the laws created by the legislative branch.",
+    "subject": "social",
+    "difficulty": "intermediate",
+    "topic": "U.S. Government"
+  },
+  {
+    "question": "Which document officially ended the American Revolutionary War?",
+    "options": [
+      "The Constitution",
+      "The Treaty of Paris",
+      "The Bill of Rights",
+      "The Declaration of Independence"
+    ],
+    "correct_answer": "The Treaty of Paris",
+    "explanation": "The Treaty of Paris, signed in 1783, officially ended the American Revolutionary War and recognized American independence.",
+    "subject": "social",
+    "difficulty": "intermediate",
+    "topic": "U.S. History"
+  },
+  {
+    "question": "What is the primary function of political parties?",
+    "options": [
+      "To create laws",
+      "To organize elections",
+      "To nominate candidates for public office",
+      "To interpret the Constitution"
+    ],
+    "correct_answer": "To nominate candidates for public office",
+    "explanation": "Political parties primarily aim to nominate candidates for public office and promote their policies to gain electoral support.",
+    "subject": "social",
+    "difficulty": "intermediate",
+    "topic": "Civics"
+  },
+  {
+    "question": "Which event led to the U.S. entering World War I?",
+    "options": [
+      "The sinking of the Lusitania",
+      "The attack on Pearl Harbor",
+      "The invasion of Poland",
+      "The signing of the Treaty of Versailles"
+    ],
+    "correct_answer": "The sinking of the Lusitania",
+    "explanation": "The sinking of the Lusitania in 1915 by a German submarine played a significant role in turning American public opinion against Germany and led to the U.S. entering World War I.",
+    "subject": "social",
+    "difficulty": "intermediate",
+    "topic": "U.S. History"
+  },
+  {
+    "question": "What is the main purpose of the United States Constitution?",
+    "options": [
+      "To provide a framework for government",
+      "To establish a national religion",
+      "To outline foreign policy",
+      "To define economic systems"
+    ],
+    "correct_answer": "To provide a framework for government",
+    "explanation": "The Constitution establishes the framework for the federal government, outlining its structure, powers, and limitations.",
+    "subject": "social",
+    "difficulty": "intermediate",
+    "topic": "U.S. Government"
+  },
+  {
+    "question": "Which of the following is an example of a non-renewable resource?",
+    "options": [
+      "Solar energy",
+      "Wind energy",
+      "Natural gas",
+      "Hydropower"
+    ],
+    "correct_answer": "Natural gas",
+    "explanation": "Natural gas is considered a non-renewable resource because it is formed over millions of years and cannot be replenished at the same rate it is consumed.",
+    "subject": "social",
+    "difficulty": "intermediate",
+    "topic": "Environmental Studies"
+  },
+  {
+    "question": "What does the term 'judicial review' refer to?",
+    "options": [
+      "The power of the courts to declare laws unconstitutional",
+      "The process of appointing judges",
+      "The ability of the executive branch to veto laws",
+      "The legislative process of making laws"
+    ],
+    "correct_answer": "The power of the courts to declare laws unconstitutional",
+    "explanation": "Judicial review is the power of the courts to examine laws and actions of the legislative and executive branches and declare them unconstitutional if they violate the Constitution.",
+    "subject": "social",
+    "difficulty": "intermediate",
+    "topic": "U.S. Government"
+  },
+  {
+    "question": "What is the primary purpose of the Federal Reserve System?",
+    "options": [
+      "To regulate the stock market",
+      "To manage the country's monetary policy",
+      "To oversee the federal budget",
+      "To control immigration"
+    ],
+    "correct_answer": "To manage the country's monetary policy",
+    "explanation": "The Federal Reserve System manages the monetary policy of the United States, controlling the money supply and interest rates to promote economic stability.",
+    "subject": "social",
+    "difficulty": "intermediate",
+    "topic": "Economics"
+  },
+  {
+    "question": "Which document declared the independence of the United States?",
+    "options": [
+      "The Constitution",
+      "The Bill of Rights",
+      "The Declaration of Independence",
+      "The Articles of Confederation"
+    ],
+    "correct_answer": "The Declaration of Independence",
+    "explanation": "The Declaration of Independence, adopted on July 4, 1776, proclaimed the thirteen American colonies' separation from British rule.",
+    "subject": "social",
+    "difficulty": "intermediate",
+    "topic": "American history"
+  },
+  {
+    "question": "What was the primary cause of the Cold War?",
+    "options": [
+      "Economic competition",
+      "Ideological conflict between capitalism and communism",
+      "Colonial disputes",
+      "Religious differences"
+    ],
+    "correct_answer": "Ideological conflict between capitalism and communism",
+    "explanation": "The Cold War was primarily driven by the ideological conflict between the capitalist Western nations and the communist Eastern bloc.",
+    "subject": "social",
+    "difficulty": "intermediate",
+    "topic": "20th century history"
+  },
+  {
+    "question": "Which continent is the Sahara Desert located on?",
+    "options": [
+      "Asia",
+      "North America",
+      "Africa",
+      "Australia"
+    ],
+    "correct_answer": "Africa",
+    "explanation": "The Sahara Desert is the largest hot desert in the world and is located in North Africa.",
+    "subject": "social",
+    "difficulty": "intermediate",
+    "topic": "geography"
+  },
+  {
+    "question": "Which of the following is a fundamental principle of democracy?",
+    "options": [
+      "Rule of law",
+      "Monopoly on power",
+      "Absolute authority",
+      "Censorship of media"
+    ],
+    "correct_answer": "Rule of law",
+    "explanation": "In a democracy, the rule of law ensures that laws apply equally to all individuals, protecting rights and freedoms.",
+    "subject": "social",
+    "difficulty": "intermediate",
+    "topic": "political science"
+  },
+  {
+    "question": "What was the significance of the Magna Carta?",
+    "options": [
+      "It established the first democracy",
+      "It limited the power of the king",
+      "It granted women the right to vote",
+      "It ended the feudal system"
+    ],
+    "correct_answer": "It limited the power of the king",
+    "explanation": "The Magna Carta, signed in 1215, was a landmark document that limited the powers of the monarchy and established certain legal rights.",
+    "subject": "social",
+    "difficulty": "intermediate",
+    "topic": "legal history"
+  },
+  {
+    "question": "What is globalization?",
+    "options": [
+      "The process of countries becoming more isolated",
+      "The increasing interconnectedness of economies and cultures",
+      "A trend towards nationalism",
+      "The decline of international trade"
+    ],
+    "correct_answer": "The increasing interconnectedness of economies and cultures",
+    "explanation": "Globalization refers to the process by which businesses and other organizations develop international influence or operate on an international scale.",
+    "subject": "social",
+    "difficulty": "intermediate",
+    "topic": "economics"
+  },
+  {
+    "question": "Which country is known for its pyramids?",
+    "options": [
+      "China",
+      "Egypt",
+      "Greece",
+      "Mexico"
+    ],
+    "correct_answer": "Egypt",
+    "explanation": "Egypt is famous for its ancient pyramids, particularly the Pyramids of Giza, which are among the Seven Wonders of the Ancient World.",
+    "subject": "social",
+    "difficulty": "intermediate",
+    "topic": "world history"
+  },
+  {
+    "question": "What is a mixed economy?",
+    "options": [
+      "An economy with no government intervention",
+      "An economy that combines elements of capitalism and socialism",
+      "An economy based solely on agriculture",
+      "An economy based on barter"
+    ],
+    "correct_answer": "An economy that combines elements of capitalism and socialism",
+    "explanation": "A mixed economy incorporates both private and public enterprises, blending capitalist and socialist practices.",
+    "subject": "social",
+    "difficulty": "intermediate",
+    "topic": "economics"
+  },
+  {
+    "question": "What does the term 'cultural diffusion' refer to?",
+    "options": [
+      "The spread of cultural beliefs and practices",
+      "The isolation of cultures",
+      "The decline of cultural practices",
+      "The preservation of traditions"
+    ],
+    "correct_answer": "The spread of cultural beliefs and practices",
+    "explanation": "Cultural diffusion is the process through which cultural beliefs and social activities are spread from one group to another.",
+    "subject": "social",
+    "difficulty": "intermediate",
+    "topic": "sociology"
+  },
+  {
+    "question": "Who was the first female Prime Minister of the United Kingdom?",
+    "options": [
+      "Margaret Thatcher",
+      "Angela Merkel",
+      "Indira Gandhi",
+      "Golda Meir"
+    ],
+    "correct_answer": "Margaret Thatcher",
+    "explanation": "Margaret Thatcher served as the Prime Minister of the United Kingdom from 1979 to 1990, becoming the first woman to hold this position.",
+    "subject": "social",
+    "difficulty": "intermediate",
+    "topic": "political history"
+  },
+  {
+    "question": "What is the primary function of the executive branch of government?",
+    "options": [
+      "To interpret laws",
+      "To create laws",
+      "To enforce laws",
+      "To conduct elections"
+    ],
+    "correct_answer": "To enforce laws",
+    "explanation": "The executive branch is responsible for implementing and enforcing the laws passed by the legislative branch.",
+    "subject": "social",
+    "difficulty": "intermediate",
+    "topic": "government"
+  },
+  {
+    "question": "Which war was fought between the North and South in the United States?",
+    "options": [
+      "The Revolutionary War",
+      "The Civil War",
+      "World War I",
+      "World War II"
+    ],
+    "correct_answer": "The Civil War",
+    "explanation": "The Civil War (1861-1865) was fought over issues including states' rights and slavery between the Northern states and Southern states.",
+    "subject": "social",
+    "difficulty": "intermediate",
+    "topic": "American history"
+  },
+  {
+    "question": "Which economic system is characterized by private ownership and free markets?",
+    "options": [
+      "Socialism",
+      "Communism",
+      "Capitalism",
+      "Feudalism"
+    ],
+    "correct_answer": "Capitalism",
+    "explanation": "Capitalism is an economic system where private individuals own and control property and businesses, with minimal government intervention.",
+    "subject": "social",
+    "difficulty": "intermediate",
+    "topic": "economics"
+  },
+  {
+    "question": "What does the Bill of Rights protect?",
+    "options": [
+      "Federal government powers",
+      "Individual rights and freedoms",
+      "State laws",
+      "Economic interests"
+    ],
+    "correct_answer": "Individual rights and freedoms",
+    "explanation": "The Bill of Rights consists of the first ten amendments to the U.S. Constitution, protecting individual liberties and rights.",
+    "subject": "social",
+    "difficulty": "intermediate",
+    "topic": "civics"
+  },
+  {
+    "question": "Which ancient civilization is known for developing the first writing system?",
+    "options": [
+      "Egyptians",
+      "Sumerians",
+      "Greeks",
+      "Romans"
+    ],
+    "correct_answer": "Sumerians",
+    "explanation": "The Sumerians of Mesopotamia are credited with developing cuneiform, one of the first writing systems in the world.",
+    "subject": "social",
+    "difficulty": "intermediate",
+    "topic": "ancient history"
+  }
+]

@@ -5,6 +5,7 @@ import { useAuth } from "@/lib/auth";
 import { useUserStats } from "@/lib/hooks";
 import { useRouter } from "next/navigation";
 import { formatCoins } from "@/lib/mockData";
+import { cdnUrl } from "@/lib/cdn";
 
 // ── Types ──
 type Rarity = "common" | "rare" | "epic" | "legendary";
@@ -156,7 +157,7 @@ function ConfirmModal({ item, quantity, onConfirm, onCancel, userCoins }: {
           <span className={`inline-block mt-1 text-[10px] uppercase tracking-widest font-bold px-2.5 py-0.5 rounded-full ${r.badge}`}>{item.rarity}</span>
         </div>
         <div className="flex items-center justify-center gap-2 mb-6 py-3 rounded-xl" style={{ background: "rgba(255,215,0,0.06)", border: "1px solid rgba(255,215,0,0.15)" }}>
-          <img src="/F.png" alt="Fangs" className="w-6 h-6 object-contain" />
+          <img src={cdnUrl("/F.png")} alt="Fangs" className="w-6 h-6 object-contain" />
           <span className="font-bebas text-3xl text-gold">{formatCoins(totalPrice)}</span>
           {quantity > 1 && <span className="text-cream/40 text-sm ml-1">(x{quantity})</span>}
         </div>
@@ -187,7 +188,7 @@ function FeaturedCard({ item, owned, onBuy }: { item: ShopItem; owned: boolean; 
         <p className="shop-card-desc text-cream/40 text-sm mb-5 leading-relaxed">{item.description}</p>
         <div className="flex items-center justify-between mt-auto pt-2 gap-6">
           <div className="flex items-center gap-2 flex-shrink-0">
-            <img src="/F.png" alt="Fangs" className="w-6 h-6 object-contain" />
+            <img src={cdnUrl("/F.png")} alt="Fangs" className="w-6 h-6 object-contain" />
             <span className="font-bebas text-2xl text-gold">{formatCoins(item.price)}</span>
           </div>
           {owned ? (
@@ -217,7 +218,7 @@ function CosmeticCard({ item, owned, canAfford, onBuy }: { item: ShopItem; owned
         <p className="shop-card-desc text-cream/30 text-xs mb-4 leading-relaxed">{item.description}</p>
         <div className="flex items-center justify-between mt-auto pt-2 gap-6">
           <div className="flex items-center gap-1.5 flex-shrink-0">
-            <img src="/F.png" alt="Fangs" className="w-5 h-5 object-contain" />
+            <img src={cdnUrl("/F.png")} alt="Fangs" className="w-5 h-5 object-contain" />
             <span className="font-bebas text-lg text-gold">{formatCoins(item.price)}</span>
           </div>
           {owned ? (
@@ -255,11 +256,11 @@ function BoosterCard({ item, quantityOwned, canAfford, onBuy }: { item: ShopItem
           <div className="flex items-center gap-2 flex-wrap">
             <button onClick={() => onBuy(1)} disabled={!canAfford}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${canAfford ? "gold-btn shop-btn-pulse" : "bg-gray-600/20 text-gray-500 cursor-not-allowed border border-gray-600/20"}`}>
-              <img src="/F.png" alt="Fangs" className="w-5 h-5 object-contain" /> {formatCoins(item.price)} &middot; Buy x1
+              <img src={cdnUrl("/F.png")} alt="Fangs" className="w-5 h-5 object-contain" /> {formatCoins(item.price)} &middot; Buy x1
             </button>
             <button onClick={() => onBuy(5)}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all border border-electric/30 text-electric hover:bg-electric/10">
-              <img src="/F.png" alt="Fangs" className="w-5 h-5 object-contain" /> {formatCoins(bulkPrice)} &middot; Buy x5 <span className="text-green-400 text-[10px]">(save 10%)</span>
+              <img src={cdnUrl("/F.png")} alt="Fangs" className="w-5 h-5 object-contain" /> {formatCoins(bulkPrice)} &middot; Buy x5 <span className="text-green-400 text-[10px]">(save 10%)</span>
             </button>
           </div>
         </div>
@@ -460,7 +461,7 @@ export default function ShopPage() {
               </>
             ) : (
               <>
-                <img src="/F.png" alt="Fangs" className="w-8 h-8 object-contain" />
+                <img src={cdnUrl("/F.png")} alt="Fangs" className="w-8 h-8 object-contain" />
                 <span className="font-bebas text-3xl text-gold tracking-wider">{formatCoins(userCoins)}</span>
                 <span className="text-cream/30 text-xs ml-1">coins</span>
               </>
@@ -484,7 +485,7 @@ export default function ShopPage() {
 
             <button onClick={() => setStoreMode("coins")}
               className={`relative z-10 flex items-center gap-2 px-5 sm:px-7 py-2.5 rounded-full text-sm font-bold transition-all duration-200 ${!isPremium ? "text-gold" : "text-cream/40 hover:text-cream/60"}`}>
-              <img src="/F.png" alt="Fangs" className="w-5 h-5 object-contain" /> Coin Store
+              <img src={cdnUrl("/F.png")} alt="Fangs" className="w-5 h-5 object-contain" /> Coin Store
             </button>
             <button onClick={() => setStoreMode("premium")}
               className={`relative z-10 flex items-center gap-2 px-5 sm:px-7 py-2.5 rounded-full text-sm font-bold transition-all duration-200 ${isPremium ? "text-purple-300" : "text-cream/40 hover:text-cream/60"}`}>
@@ -527,7 +528,7 @@ export default function ShopPage() {
                 <div className="rounded-2xl overflow-hidden border border-purple-500/20 transition-all duration-300 hover:-translate-y-1 h-full flex flex-col"
                   style={{ background: "linear-gradient(135deg, rgba(20,8,40,0.9), rgba(10,6,30,0.95))" }}>
                   <div className="h-36 relative overflow-hidden">
-                    <img src="/savannah.png" alt="Savanna theme preview" className="absolute inset-0 w-full h-full object-cover grayscale-[60%] brightness-75" />
+                    <img src={cdnUrl("/savannah.png")} alt="Savanna theme preview" className="absolute inset-0 w-full h-full object-cover grayscale-[60%] brightness-75" />
                     <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
                       <div className="w-12 h-12 rounded-full bg-black/40 border border-white/10 flex items-center justify-center">
                         <span className="text-2xl">🔒</span>
@@ -658,7 +659,7 @@ export default function ShopPage() {
                         <span className="text-green-400 text-[10px] font-bold uppercase tracking-wider">Active</span>
                       </div>
                       <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 border border-white/10">
-                        <img src="/interstellar.png" alt="Interstellar" className="w-full h-full object-cover" />
+                        <img src={cdnUrl("/interstellar.png")} alt="Interstellar" className="w-full h-full object-cover" />
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">

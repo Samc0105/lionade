@@ -8,5 +8,7 @@ export const supabase = createClient<any>(supabaseUrl, supabaseAnonKey, {
   auth: {
     persistSession: true,
     autoRefreshToken: true,
+    storageKey: "lionade-auth",
+    lockAcquireTimeout: 30000,
   },
 });

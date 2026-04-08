@@ -6,6 +6,7 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import { useAuth } from "@/lib/auth";
 import { useUserStats } from "@/lib/hooks";
 import { supabase } from "@/lib/supabase";
+import { cdnUrl } from "@/lib/cdn";
 
 // ── Types ────────────────────────────────────────────────────
 
@@ -646,7 +647,7 @@ export default function SocialPage() {
             {!selectedFriend ? (
               /* Empty state */
               <div className="flex-1 flex flex-col items-center justify-center text-center px-6">
-                <img src="/logo-icon.png" alt="Lionade" className="w-20 h-20 opacity-20 mb-6" />
+                <img src={cdnUrl("/logo-icon.png")} alt="Lionade" className="w-20 h-20 opacity-20 mb-6" />
                 <p className="font-bebas text-2xl text-cream/20 tracking-wider mb-2">SELECT A FRIEND</p>
                 <p className="text-cream/15 text-sm max-w-xs">
                   Pick someone from your friends list to start chatting
@@ -720,7 +721,7 @@ export default function SocialPage() {
                               <span>{event.player1_score} — {event.player2_score}</span>
                               <span className="text-cream/10">|</span>
                               <span className="flex items-center gap-1">
-                                <img src="/F.png" alt="Fangs" className="w-3 h-3 object-contain" />
+                                <img src={cdnUrl("/F.png")} alt="Fangs" className="w-3 h-3 object-contain" />
                                 {isDraw ? "±0" : iWon ? `+${event.wager}` : `-${event.wager}`}
                               </span>
                             </div>

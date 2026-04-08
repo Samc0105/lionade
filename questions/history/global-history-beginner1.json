@@ -1,0 +1,1248 @@
+[
+  {
+    "question": "What is the term for the process of exploring and settling new lands?",
+    "options": [
+      "Colonization",
+      "Imperialism",
+      "Globalization",
+      "Migration"
+    ],
+    "correct_answer": "Colonization",
+    "explanation": "Colonization refers to the process of exploring and settling new lands, often resulting in the displacement of indigenous populations.",
+    "subject": "history",
+    "difficulty": "beginner",
+    "topic": "global-history"
+  },
+  {
+    "question": "Which ancient civilization built the Great Pyramid of Giza?",
+    "options": [
+      "Egyptians",
+      "Greeks",
+      "Romans",
+      "Chinese"
+    ],
+    "correct_answer": "Egyptians",
+    "explanation": "The Great Pyramid of Giza was built by the ancient Egyptians around 2580 BC.",
+    "subject": "history",
+    "difficulty": "beginner",
+    "topic": "global-history"
+  },
+  {
+    "question": "What is the name of the trade route that connected Europe and Asia?",
+    "options": [
+      "Silk Road",
+      "Spice Route",
+      "Incense Road",
+      "Tea Road"
+    ],
+    "correct_answer": "Silk Road",
+    "explanation": "The Silk Road was a network of trade routes that connected Europe and Asia, facilitating the exchange of goods, ideas, and cultures.",
+    "subject": "history",
+    "difficulty": "beginner",
+    "topic": "global-history"
+  },
+  {
+    "question": "Who is credited with leading the Mongol conquests and creating the largest contiguous empire in history?",
+    "options": [
+      "Genghis Khan",
+      "Alexander the Great",
+      "Napoleon Bonaparte",
+      "Julius Caesar"
+    ],
+    "correct_answer": "Genghis Khan",
+    "explanation": "Genghis Khan united various Mongol tribes and led the Mongol conquests, creating the largest contiguous empire in history.",
+    "subject": "history",
+    "difficulty": "beginner",
+    "topic": "global-history"
+  },
+  {
+    "question": "What was the main reason for the construction of the Great Wall of China?",
+    "options": [
+      "To keep out invaders",
+      "To control trade",
+      "To protect the environment",
+      "To showcase Chinese architecture"
+    ],
+    "correct_answer": "To keep out invaders",
+    "explanation": "The Great Wall of China was built to protect the Chinese Empire from invasions by nomadic tribes and other enemies.",
+    "subject": "history",
+    "difficulty": "beginner",
+    "topic": "global-history"
+  },
+  {
+    "question": "Which event marked the beginning of the Modern Age in Europe?",
+    "options": [
+      "The Renaissance",
+      "The Reformation",
+      "The Enlightenment",
+      "The French Revolution"
+    ],
+    "correct_answer": "The Renaissance",
+    "explanation": "The Renaissance marked a cultural and intellectual shift in Europe, marking the beginning of the Modern Age.",
+    "subject": "history",
+    "difficulty": "beginner",
+    "topic": "global-history"
+  },
+  {
+    "question": "What is the term for the system of government in which power is held by the people or their elected representatives?",
+    "options": [
+      "Democracy",
+      "Monarchy",
+      "Oligarchy",
+      "Dictatorship"
+    ],
+    "correct_answer": "Democracy",
+    "explanation": "Democracy is a system of government in which power is held by the people or their elected representatives.",
+    "subject": "history",
+    "difficulty": "beginner",
+    "topic": "global-history"
+  },
+  {
+    "question": "Who was the leader of the Soviet Union during World War II?",
+    "options": [
+      "Joseph Stalin",
+      "Vladimir Lenin",
+      "Leon Trotsky",
+      "Mikhail Gorbachev"
+    ],
+    "correct_answer": "Joseph Stalin",
+    "explanation": "Joseph Stalin was the leader of the Soviet Union during World War II, playing a crucial role in the defeat of Nazi Germany.",
+    "subject": "history",
+    "difficulty": "beginner",
+    "topic": "global-history"
+  },
+  {
+    "question": "What was the name of the treaty that ended the First World War?",
+    "options": [
+      "Treaty of Versailles",
+      "Treaty of Berlin",
+      "Treaty of Paris",
+      "Treaty of London"
+    ],
+    "correct_answer": "Treaty of Versailles",
+    "explanation": "The Treaty of Versailles was signed in 1919, officially ending the First World War and imposing harsh penalties on Germany.",
+    "subject": "history",
+    "difficulty": "beginner",
+    "topic": "global-history"
+  },
+  {
+    "question": "Which ancient civilization made significant contributions to the development of mathematics, astronomy, and medicine?",
+    "options": [
+      "Babylonians",
+      "Egyptians",
+      "Greeks",
+      "Romans"
+    ],
+    "correct_answer": "Greeks",
+    "explanation": "The ancient Greeks made significant contributions to the development of mathematics, astronomy, and medicine, with figures like Pythagoras, Euclid, and Hippocrates.",
+    "subject": "history",
+    "difficulty": "beginner",
+    "topic": "global-history"
+  },
+  {
+    "question": "What is the term for the movement of people from rural areas to cities?",
+    "options": [
+      "Urbanization",
+      "Suburbanization",
+      "Ruralization",
+      "Migration"
+    ],
+    "correct_answer": "Urbanization",
+    "explanation": "Urbanization refers to the movement of people from rural areas to cities, often resulting in the growth of urban populations and the development of new social and economic systems.",
+    "subject": "history",
+    "difficulty": "beginner",
+    "topic": "global-history"
+  },
+  {
+    "question": "Who was the leader of the Chinese Communist Party during the Chinese Civil War?",
+    "options": [
+      "Mao Zedong",
+      "Chiang Kai-shek",
+      "Zhou Enlai",
+      "Deng Xiaoping"
+    ],
+    "correct_answer": "Mao Zedong",
+    "explanation": "Mao Zedong was the leader of the Chinese Communist Party during the Chinese Civil War, ultimately leading the communists to victory in 1949.",
+    "subject": "history",
+    "difficulty": "beginner",
+    "topic": "global-history"
+  },
+  {
+    "question": "What was the main cause of the Black Death, which devastated Europe in the 14th century?",
+    "options": [
+      "The plague",
+      "Famine",
+      "War",
+      "Climate change"
+    ],
+    "correct_answer": "The plague",
+    "explanation": "The Black Death was caused by the bubonic plague, which spread rapidly throughout Europe in the 14th century, killing an estimated 75 to 200 million people.",
+    "subject": "history",
+    "difficulty": "beginner",
+    "topic": "global-history"
+  },
+  {
+    "question": "Which ancient civilization built the city of Machu Picchu?",
+    "options": [
+      "Incas",
+      "Aztecs",
+      "Mayans",
+      "Toltecs"
+    ],
+    "correct_answer": "Incas",
+    "explanation": "The city of Machu Picchu was built by the Incas in the 15th century, serving as a royal estate and spiritual center.",
+    "subject": "history",
+    "difficulty": "beginner",
+    "topic": "global-history"
+  },
+  {
+    "question": "What is the term for the period of time during which the Roman Empire was divided into Eastern and Western halves?",
+    "options": [
+      "The Roman Empire",
+      "The Byzantine Empire",
+      "The Middle Ages",
+      "The Late Antiquity"
+    ],
+    "correct_answer": "The Late Antiquity",
+    "explanation": "The Late Antiquity refers to the period of time during which the Roman Empire was divided into Eastern and Western halves, marked by significant cultural, social, and economic changes.",
+    "subject": "history",
+    "difficulty": "beginner",
+    "topic": "global-history"
+  },
+  {
+    "question": "Who was the leader of the Arab conquests and the founder of the Umayyad Caliphate?",
+    "options": [
+      "Muhammad",
+      "Abu Bakr",
+      "Umar ibn Al-Khattab",
+      "Uthman ibn Affan"
+    ],
+    "correct_answer": "Umar ibn Al-Khattab",
+    "explanation": "Umar ibn Al-Khattab was the leader of the Arab conquests and the founder of the Umayyad Caliphate, expanding the Islamic Empire and establishing a system of government and administration.",
+    "subject": "history",
+    "difficulty": "beginner",
+    "topic": "global-history"
+  },
+  {
+    "question": "What was the name of the treaty that established the borders of modern-day Europe after World War I?",
+    "options": [
+      "Treaty of Versailles",
+      "Treaty of Berlin",
+      "Treaty of Paris",
+      "Treaty of London"
+    ],
+    "correct_answer": "Treaty of Versailles",
+    "explanation": "The Treaty of Versailles established the borders of modern-day Europe after World War I, redrawing the map of Europe and imposing significant penalties on Germany.",
+    "subject": "history",
+    "difficulty": "beginner",
+    "topic": "global-history"
+  },
+  {
+    "question": "Which ancient civilization developed the concept of zero and made significant contributions to mathematics and astronomy?",
+    "options": [
+      "Babylonians",
+      "Egyptians",
+      "Greeks",
+      "Mayans"
+    ],
+    "correct_answer": "Mayans",
+    "explanation": "The Mayans developed the concept of zero and made significant contributions to mathematics and astronomy, with a sophisticated understanding of calendrical systems and astronomical phenomena.",
+    "subject": "history",
+    "difficulty": "beginner",
+    "topic": "global-history"
+  },
+  {
+    "question": "Who was the leader of the Soviet Union during the Cold War?",
+    "options": [
+      "Joseph Stalin",
+      "Nikita Khrushchev",
+      "Leonid Brezhnev",
+      "Mikhail Gorbachev"
+    ],
+    "correct_answer": "Nikita Khrushchev",
+    "explanation": "Nikita Khrushchev was the leader of the Soviet Union during the Cold War, playing a key role in the Cuban Missile Crisis and the development of the Soviet space program.",
+    "subject": "history",
+    "difficulty": "beginner",
+    "topic": "global-history"
+  },
+  {
+    "question": "What is the term for the system of government in which power is held by a small group of people?",
+    "options": [
+      "Democracy",
+      "Monarchy",
+      "Oligarchy",
+      "Dictatorship"
+    ],
+    "correct_answer": "Oligarchy",
+    "explanation": "Oligarchy is a system of government in which power is held by a small group of people, often a ruling class or elite.",
+    "subject": "history",
+    "difficulty": "beginner",
+    "topic": "global-history"
+  },
+  {
+    "question": "Which ancient civilization built the Terracotta Army?",
+    "options": [
+      "Chinese",
+      "Japanese",
+      "Korean",
+      "Mongolian"
+    ],
+    "correct_answer": "Chinese",
+    "explanation": "The Terracotta Army was built by the ancient Chinese to protect the tomb of the first emperor of China, Qin Shi Huang.",
+    "subject": "history",
+    "difficulty": "beginner",
+    "topic": "global-history"
+  },
+  {
+    "question": "What was the main reason for the construction of the Suez Canal?",
+    "options": [
+      "To connect the Mediterranean Sea to the Red Sea",
+      "To connect the Atlantic Ocean to the Pacific Ocean",
+      "To connect Europe to Asia",
+      "To connect Africa to South America"
+    ],
+    "correct_answer": "To connect the Mediterranean Sea to the Red Sea",
+    "explanation": "The Suez Canal was constructed to connect the Mediterranean Sea to the Red Sea, facilitating trade and navigation between Europe and Asia.",
+    "subject": "history",
+    "difficulty": "beginner",
+    "topic": "global-history"
+  },
+  {
+    "question": "Who was the leader of the Indian independence movement against British rule?",
+    "options": [
+      "Mahatma Gandhi",
+      "Jawaharlal Nehru",
+      "Subhas Chandra Bose",
+      "Bhagat Singh"
+    ],
+    "correct_answer": "Mahatma Gandhi",
+    "explanation": "Mahatma Gandhi was the leader of the Indian independence movement against British rule, using non-violent resistance and civil disobedience to achieve Indian independence in 1947.",
+    "subject": "history",
+    "difficulty": "beginner",
+    "topic": "global-history"
+  },
+  {
+    "question": "What is the term for the period of time during which the Roman Empire was at its peak?",
+    "options": [
+      "The Roman Republic",
+      "The Roman Empire",
+      "The Pax Romana",
+      "The Late Antiquity"
+    ],
+    "correct_answer": "The Pax Romana",
+    "explanation": "The Pax Romana refers to the period of time during which the Roman Empire was at its peak, marked by a period of relative peace and stability throughout the empire.",
+    "subject": "history",
+    "difficulty": "beginner",
+    "topic": "global-history"
+  },
+  {
+    "question": "Which ancient civilization developed the concept of democracy and made significant contributions to philosophy and theater?",
+    "options": [
+      "Athenians",
+      "Spartans",
+      "Thebes",
+      "Corinth"
+    ],
+    "correct_answer": "Athenians",
+    "explanation": "The Athenians developed the concept of democracy and made significant contributions to philosophy and theater, with figures like Socrates, Plato, and Aristotle.",
+    "subject": "history",
+    "difficulty": "beginner",
+    "topic": "global-history"
+  },
+  {
+    "question": "What was the name of the wall built by the Romans to keep out the Picts and other Celtic tribes?",
+    "options": [
+      "Hadrian's Wall",
+      "The Great Wall of China",
+      "The Berlin Wall",
+      "The Maginot Line"
+    ],
+    "correct_answer": "Hadrian's Wall",
+    "explanation": "Hadrian's Wall was built by the Romans to keep out the Picts and other Celtic tribes, marking the northern boundary of the Roman Empire in Britain.",
+    "subject": "history",
+    "difficulty": "beginner",
+    "topic": "global-history"
+  },
+  {
+    "question": "Who was the leader of the Chinese Communist Party during the Cultural Revolution?",
+    "options": [
+      "Mao Zedong",
+      "Zhou Enlai",
+      "Deng Xiaoping",
+      "Jiang Zemin"
+    ],
+    "correct_answer": "Mao Zedong",
+    "explanation": "Mao Zedong was the leader of the Chinese Communist Party during the Cultural Revolution, a period of significant social, cultural, and economic upheaval in China.",
+    "subject": "history",
+    "difficulty": "beginner",
+    "topic": "global-history"
+  },
+  {
+    "question": "What is the term for the system of government in which power is held by one person?",
+    "options": [
+      "Democracy",
+      "Monarchy",
+      "Oligarchy",
+      "Dictatorship"
+    ],
+    "correct_answer": "Monarchy",
+    "explanation": "Monarchy is a system of government in which power is held by one person, often a king or queen.",
+    "subject": "history",
+    "difficulty": "beginner",
+    "topic": "global-history"
+  },
+  {
+    "question": "Which ancient civilization built the city of Petra?",
+    "options": [
+      "Nabataeans",
+      "Phoenicians",
+      "Greeks",
+      "Romans"
+    ],
+    "correct_answer": "Nabataeans",
+    "explanation": "The city of Petra was built by the Nabataeans, a ancient Arabian kingdom that controlled the trade routes between the East and the West.",
+    "subject": "history",
+    "difficulty": "beginner",
+    "topic": "global-history"
+  },
+  {
+    "question": "What was the main reason for the decline of the Roman Empire?",
+    "options": [
+      "External invasions",
+      "Internal corruption",
+      "Economic decline",
+      "Environmental disasters"
+    ],
+    "correct_answer": "External invasions",
+    "explanation": "The Roman Empire declined due to a combination of factors, including external invasions by barbarian tribes, internal corruption, economic decline, and environmental disasters.",
+    "subject": "history",
+    "difficulty": "beginner",
+    "topic": "global-history"
+  },
+  {
+    "question": "What is the main idea of the concept of the 'Silk Road'?",
+    "options": [
+      "A network of trade routes",
+      "A type of ancient currency",
+      "A form of ancient transportation",
+      "A style of ancient architecture"
+    ],
+    "correct_answer": "A network of trade routes",
+    "explanation": "The Silk Road was a network of trade routes that connected Europe and Asia, facilitating the exchange of goods, ideas, and cultures.",
+    "subject": "history",
+    "difficulty": "beginner",
+    "topic": "global-history"
+  },
+  {
+    "question": "Who was the leader of the Mongol Empire during its expansion?",
+    "options": [
+      "Genghis Khan",
+      "Alexander the Great",
+      "Julius Caesar",
+      "Napoleon Bonaparte"
+    ],
+    "correct_answer": "Genghis Khan",
+    "explanation": "Genghis Khan was the founder and leader of the Mongol Empire, which expanded rapidly under his rule.",
+    "subject": "history",
+    "difficulty": "beginner",
+    "topic": "global-history"
+  },
+  {
+    "question": "What was the main cause of the Black Death in Europe?",
+    "options": [
+      "The bubonic plague",
+      "The influenza pandemic",
+      "The smallpox epidemic",
+      "The cholera outbreak"
+    ],
+    "correct_answer": "The bubonic plague",
+    "explanation": "The Black Death, which occurred in the 14th century, was caused by the bubonic plague, a highly infectious and deadly disease.",
+    "subject": "history",
+    "difficulty": "beginner",
+    "topic": "global-history"
+  },
+  {
+    "question": "Which event marked the beginning of World War I?",
+    "options": [
+      "The assassination of Archduke Franz Ferdinand",
+      "The invasion of Poland",
+      "The sinking of the Titanic",
+      "The Battle of Waterloo"
+    ],
+    "correct_answer": "The assassination of Archduke Franz Ferdinand",
+    "explanation": "The assassination of Archduke Franz Ferdinand in 1914 sparked a chain reaction of events that led to the outbreak of World War I.",
+    "subject": "history",
+    "difficulty": "beginner",
+    "topic": "global-history"
+  },
+  {
+    "question": "Who was the ancient Greek historian known for his book 'The Histories'?",
+    "options": [
+      "Herodotus",
+      "Thucydides",
+      "Xenophon",
+      "Polybius"
+    ],
+    "correct_answer": "Herodotus",
+    "explanation": "Herodotus is often referred to as the 'father of history' for his book 'The Histories', which chronicled the ancient world.",
+    "subject": "history",
+    "difficulty": "beginner",
+    "topic": "global-history"
+  },
+  {
+    "question": "What was the main purpose of the construction of the Great Wall of China?",
+    "options": [
+      "To protect the Chinese Empire from invaders",
+      "To mark the border between China and India",
+      "To facilitate trade between China and Europe",
+      "To showcase the architectural skills of the Chinese"
+    ],
+    "correct_answer": "To protect the Chinese Empire from invaders",
+    "explanation": "The Great Wall of China was built to protect the Chinese Empire from invaders and to control trade and immigration.",
+    "subject": "history",
+    "difficulty": "beginner",
+    "topic": "global-history"
+  },
+  {
+    "question": "Which ancient civilization developed the concept of democracy?",
+    "options": [
+      "Athenians",
+      "Spartans",
+      "Romans",
+      "Egyptians"
+    ],
+    "correct_answer": "Athenians",
+    "explanation": "The Athenians developed the concept of democracy, where power is held by the people or their elected representatives.",
+    "subject": "history",
+    "difficulty": "beginner",
+    "topic": "global-history"
+  },
+  {
+    "question": "What is the term for the period of time when humans first developed tools and began to domesticate animals?",
+    "options": [
+      "Neolithic Revolution",
+      "Industrial Revolution",
+      "Agricultural Revolution",
+      "Bronze Age"
+    ],
+    "correct_answer": "Neolithic Revolution",
+    "explanation": "The Neolithic Revolution marked the beginning of the development of tools and the domestication of animals, leading to the rise of settled agriculture.",
+    "subject": "history",
+    "difficulty": "beginner",
+    "topic": "global-history"
+  },
+  {
+    "question": "Who was the Roman general who crossed the Rubicon River with his legions?",
+    "options": [
+      "Julius Caesar",
+      "Pompey the Great",
+      "Hannibal",
+      "Napoleon Bonaparte"
+    ],
+    "correct_answer": "Julius Caesar",
+    "explanation": "Julius Caesar crossed the Rubicon River with his legions, sparking a civil war that led to his rise to power.",
+    "subject": "history",
+    "difficulty": "beginner",
+    "topic": "global-history"
+  },
+  {
+    "question": "What was the main consequence of the fall of the Roman Empire?",
+    "options": [
+      "The rise of the Byzantine Empire",
+      "The spread of Christianity",
+      "The decline of trade and commerce",
+      "The fragmentation of Europe into smaller kingdoms"
+    ],
+    "correct_answer": "The fragmentation of Europe into smaller kingdoms",
+    "explanation": "The fall of the Roman Empire led to the fragmentation of Europe into smaller kingdoms, marking the beginning of the Middle Ages.",
+    "subject": "history",
+    "difficulty": "beginner",
+    "topic": "global-history"
+  },
+  {
+    "question": "What is the term for the movement of goods, services, and ideas between different cultures?",
+    "options": [
+      "Globalization",
+      "Colonization",
+      "Imperialism",
+      "Cultural diffusion"
+    ],
+    "correct_answer": "Cultural diffusion",
+    "explanation": "Cultural diffusion refers to the movement of goods, services, and ideas between different cultures, often resulting in the exchange and blending of cultural practices.",
+    "subject": "history",
+    "difficulty": "beginner",
+    "topic": "global-history"
+  },
+  {
+    "question": "Who was the Chinese philosopher who developed the concept of Taoism?",
+    "options": [
+      "Confucius",
+      "Lao Tzu",
+      "Buddha",
+      "Mencius"
+    ],
+    "correct_answer": "Lao Tzu",
+    "explanation": "Lao Tzu is credited with developing the concept of Taoism, a philosophical and religious tradition that emphasizes living in harmony with nature.",
+    "subject": "history",
+    "difficulty": "beginner",
+    "topic": "global-history"
+  },
+  {
+    "question": "What was the main purpose of the construction of the Suez Canal?",
+    "options": [
+      "To connect the Mediterranean Sea to the Red Sea",
+      "To mark the border between Europe and Asia",
+      "To facilitate trade between Europe and Africa",
+      "To showcase the engineering skills of the Egyptians"
+    ],
+    "correct_answer": "To connect the Mediterranean Sea to the Red Sea",
+    "explanation": "The Suez Canal was built to connect the Mediterranean Sea to the Red Sea, allowing for faster and more efficient trade between Europe and Asia.",
+    "subject": "history",
+    "difficulty": "beginner",
+    "topic": "global-history"
+  },
+  {
+    "question": "Which ancient civilization developed the concept of the alphabet?",
+    "options": [
+      "Phoenicians",
+      "Greeks",
+      "Romans",
+      "Egyptians"
+    ],
+    "correct_answer": "Phoenicians",
+    "explanation": "The Phoenicians developed the concept of the alphabet, which was later adopted and adapted by other civilizations.",
+    "subject": "history",
+    "difficulty": "beginner",
+    "topic": "global-history"
+  },
+  {
+    "question": "What is the term for the period of time when humans first developed settled agriculture?",
+    "options": [
+      "Neolithic Revolution",
+      "Industrial Revolution",
+      "Agricultural Revolution",
+      "Bronze Age"
+    ],
+    "correct_answer": "Neolithic Revolution",
+    "explanation": "The Neolithic Revolution marked the beginning of settled agriculture, leading to the rise of complex societies and civilizations.",
+    "subject": "history",
+    "difficulty": "beginner",
+    "topic": "global-history"
+  },
+  {
+    "question": "What was the main consequence of the Industrial Revolution?",
+    "options": [
+      "The rise of capitalism",
+      "The decline of trade and commerce",
+      "The growth of urbanization",
+      "The development of new technologies"
+    ],
+    "correct_answer": "The growth of urbanization",
+    "explanation": "The Industrial Revolution led to the growth of urbanization, as people moved from rural areas to cities in search of work in factories and mills.",
+    "subject": "history",
+    "difficulty": "beginner",
+    "topic": "global-history"
+  },
+  {
+    "question": "Which ancient civilization built the city of Angkor Wat?",
+    "options": [
+      "Khmer",
+      "Thai",
+      "Vietnamese",
+      "Chinese"
+    ],
+    "correct_answer": "Khmer",
+    "explanation": "The Khmer civilization built the city of Angkor Wat, which was an important center of trade and culture in Southeast Asia.",
+    "subject": "history",
+    "difficulty": "beginner",
+    "topic": "global-history"
+  },
+  {
+    "question": "What is the term for the movement of people from one country to another in search of better economic opportunities?",
+    "options": [
+      "Immigration",
+      "Emigration",
+      "Migration",
+      "Refugee"
+    ],
+    "correct_answer": "Immigration",
+    "explanation": "Immigration refers to the movement of people from one country to another in search of better economic opportunities, often resulting in the creation of diverse and multicultural societies.",
+    "subject": "history",
+    "difficulty": "beginner",
+    "topic": "global-history"
+  },
+  {
+    "question": "Who was the ancient Greek philosopher who developed the concept of stoicism?",
+    "options": [
+      "Socrates",
+      "Plato",
+      "Aristotle",
+      "Epictetus"
+    ],
+    "correct_answer": "Epictetus",
+    "explanation": "Epictetus was a former slave who developed the concept of stoicism, a philosophical tradition that emphasizes reason, self-control, and inner strength.",
+    "subject": "history",
+    "difficulty": "beginner",
+    "topic": "global-history"
+  },
+  {
+    "question": "What was the main purpose of the construction of the Great Barrier Reef?",
+    "options": [
+      "To protect the coastline of Australia",
+      "To facilitate trade between Australia and Asia",
+      "To showcase the natural beauty of Australia",
+      "To provide a habitat for marine life"
+    ],
+    "correct_answer": "To provide a habitat for marine life",
+    "explanation": "The Great Barrier Reef was formed naturally over thousands of years, providing a habitat for a diverse range of marine life.",
+    "subject": "history",
+    "difficulty": "beginner",
+    "topic": "global-history"
+  },
+  {
+    "question": "Which ancient civilization developed the concept of the calendar?",
+    "options": [
+      "Egyptians",
+      "Greeks",
+      "Romans",
+      "Mayans"
+    ],
+    "correct_answer": "Egyptians",
+    "explanation": "The ancient Egyptians developed a calendar based on the cycles of the Nile River, which was later adopted and adapted by other civilizations.",
+    "subject": "history",
+    "difficulty": "beginner",
+    "topic": "global-history"
+  },
+  {
+    "question": "What is the term for the period of time when humans first developed writing?",
+    "options": [
+      "Neolithic Revolution",
+      "Industrial Revolution",
+      "Agricultural Revolution",
+      "Bronze Age"
+    ],
+    "correct_answer": "Neolithic Revolution",
+    "explanation": "The Neolithic Revolution marked the beginning of the development of writing, which allowed for the recording of history, laws, and cultural practices.",
+    "subject": "history",
+    "difficulty": "beginner",
+    "topic": "global-history"
+  },
+  {
+    "question": "What is the main idea of the concept of globalization?",
+    "options": [
+      "The spread of culture and trade across the world",
+      "The decline of international relations",
+      "The rise of nationalism",
+      "The end of cultural diversity"
+    ],
+    "correct_answer": "The spread of culture and trade across the world",
+    "explanation": "Globalization refers to the increasing interconnectedness of the world's economies, cultures, and societies.",
+    "subject": "history",
+    "difficulty": "beginner",
+    "topic": "global-history"
+  },
+  {
+    "question": "Who was the leader of the Mongol Empire?",
+    "options": [
+      "Genghis Khan",
+      "Alexander the Great",
+      "Julius Caesar",
+      "Napoleon Bonaparte"
+    ],
+    "correct_answer": "Genghis Khan",
+    "explanation": "Genghis Khan was the founder and leader of the Mongol Empire, which became the largest contiguous empire in history.",
+    "subject": "history",
+    "difficulty": "beginner",
+    "topic": "global-history"
+  },
+  {
+    "question": "Which river is considered the birthplace of civilization?",
+    "options": [
+      "Nile River",
+      "Tigris River",
+      "Euphrates River",
+      "Indus River"
+    ],
+    "correct_answer": "Nile River",
+    "explanation": "The Nile River is often considered the birthplace of civilization, as it supported the development of ancient Egyptian society.",
+    "subject": "history",
+    "difficulty": "beginner",
+    "topic": "global-history"
+  },
+  {
+    "question": "What is the term for the period of time when humans first developed tools and languages?",
+    "options": [
+      "Paleolithic Era",
+      "Neolithic Era",
+      "Bronze Age",
+      "Iron Age"
+    ],
+    "correct_answer": "Paleolithic Era",
+    "explanation": "The Paleolithic Era, which spanned from approximately 2.5 million years ago to 10,000 years ago, is the period of time when humans first developed tools and languages.",
+    "subject": "history",
+    "difficulty": "beginner",
+    "topic": "global-history"
+  },
+  {
+    "question": "Who was the ancient Greek historian who wrote 'The Histories'?",
+    "options": [
+      "Herodotus",
+      "Thucydides",
+      "Xenophon",
+      "Polybius"
+    ],
+    "correct_answer": "Herodotus",
+    "explanation": "Herodotus is often referred to as the 'father of history' for his work 'The Histories', which chronicled the ancient world.",
+    "subject": "history",
+    "difficulty": "beginner",
+    "topic": "global-history"
+  },
+  {
+    "question": "What is the name of the ancient city that was the capital of the Inca Empire?",
+    "options": [
+      "Machu Picchu",
+      "Cuzco",
+      "Lima",
+      "Santiago"
+    ],
+    "correct_answer": "Cuzco",
+    "explanation": "Cuzco was the capital of the Inca Empire, which was the largest and most powerful empire in the Americas before the arrival of the Spanish.",
+    "subject": "history",
+    "difficulty": "beginner",
+    "topic": "global-history"
+  },
+  {
+    "question": "What is the term for the system of government in which power is held by the people?",
+    "options": [
+      "Democracy",
+      "Monarchy",
+      "Oligarchy",
+      "Dictatorship"
+    ],
+    "correct_answer": "Democracy",
+    "explanation": "Democracy is a system of government in which power is held by the people, either directly or through elected representatives.",
+    "subject": "history",
+    "difficulty": "beginner",
+    "topic": "global-history"
+  },
+  {
+    "question": "What is the name of the ancient trade route that connected Europe and Asia?",
+    "options": [
+      "Silk Road",
+      "Spice Route",
+      "Incense Road",
+      "Tea Road"
+    ],
+    "correct_answer": "Silk Road",
+    "explanation": "The Silk Road was a network of trade routes that connected Europe and Asia, facilitating the exchange of goods, ideas, and cultures.",
+    "subject": "history",
+    "difficulty": "beginner",
+    "topic": "global-history"
+  },
+  {
+    "question": "Which event marked the end of the Cold War?",
+    "options": [
+      "The fall of the Berlin Wall",
+      "The Cuban Missile Crisis",
+      "The Soviet invasion of Afghanistan",
+      "The rise of communism in China"
+    ],
+    "correct_answer": "The fall of the Berlin Wall",
+    "explanation": "The fall of the Berlin Wall in 1989 marked the end of the Cold War, as it symbolized the collapse of communism in Eastern Europe.",
+    "subject": "history",
+    "difficulty": "beginner",
+    "topic": "global-history"
+  },
+  {
+    "question": "Who was the ancient Chinese philosopher who developed the concept of Taoism?",
+    "options": [
+      "Confucius",
+      "Lao Tzu",
+      "Buddha",
+      "Mencius"
+    ],
+    "correct_answer": "Lao Tzu",
+    "explanation": "Lao Tzu is credited with developing the concept of Taoism, a philosophical and religious tradition that emphasizes living in harmony with nature.",
+    "subject": "history",
+    "difficulty": "beginner",
+    "topic": "global-history"
+  },
+  {
+    "question": "What is the term for the process of changing from a traditional to a modern society?",
+    "options": [
+      "Modernization",
+      "Industrialization",
+      "Urbanization",
+      "Globalization"
+    ],
+    "correct_answer": "Modernization",
+    "explanation": "Modernization refers to the process of changing from a traditional to a modern society, often involving the adoption of new technologies, economic systems, and social structures.",
+    "subject": "history",
+    "difficulty": "beginner",
+    "topic": "global-history"
+  },
+  {
+    "question": "Which ancient civilization developed the concept of zero?",
+    "options": [
+      "Babylonians",
+      "Egyptians",
+      "Greeks",
+      "Mayans"
+    ],
+    "correct_answer": "Mayans",
+    "explanation": "The Mayans are credited with developing the concept of zero, which revolutionized mathematics and facilitated the development of more complex mathematical concepts.",
+    "subject": "history",
+    "difficulty": "beginner",
+    "topic": "global-history"
+  },
+  {
+    "question": "What is the name of the treaty that ended World War I?",
+    "options": [
+      "Treaty of Versailles",
+      "Treaty of Berlin",
+      "Treaty of Paris",
+      "Treaty of London"
+    ],
+    "correct_answer": "Treaty of Versailles",
+    "explanation": "The Treaty of Versailles, signed in 1919, officially ended World War I and imposed harsh penalties on Germany, contributing to the rise of Nazi Germany.",
+    "subject": "history",
+    "difficulty": "beginner",
+    "topic": "global-history"
+  },
+  {
+    "question": "Which event marked the beginning of the French Revolution?",
+    "options": [
+      "The Storming of the Bastille",
+      "The execution of King Louis XVI",
+      "The rise of Napoleon Bonaparte",
+      "The Treaty of Versailles"
+    ],
+    "correct_answer": "The Storming of the Bastille",
+    "explanation": "The Storming of the Bastille, which occurred on July 14, 1789, marked the beginning of the French Revolution, as it symbolized the people's rejection of the absolute monarchy.",
+    "subject": "history",
+    "difficulty": "beginner",
+    "topic": "global-history"
+  },
+  {
+    "question": "What is the name of the ancient city that was the capital of the Aztec Empire?",
+    "options": [
+      "Tenochtitlan",
+      "Cuzco",
+      "Machu Picchu",
+      "Chichen Itza"
+    ],
+    "correct_answer": "Tenochtitlan",
+    "explanation": "Tenochtitlan was the capital of the Aztec Empire, which was located in modern-day Mexico City.",
+    "subject": "history",
+    "difficulty": "beginner",
+    "topic": "global-history"
+  },
+  {
+    "question": "What is the term for the process of changing from a rural to an urban society?",
+    "options": [
+      "Urbanization",
+      "Industrialization",
+      "Modernization",
+      "Globalization"
+    ],
+    "correct_answer": "Urbanization",
+    "explanation": "Urbanization refers to the process of changing from a rural to an urban society, often involving the movement of people from rural areas to cities.",
+    "subject": "history",
+    "difficulty": "beginner",
+    "topic": "global-history"
+  },
+  {
+    "question": "Who is credited with leading the Mongol conquests?",
+    "options": [
+      "Genghis Khan",
+      "Alexander the Great",
+      "Julius Caesar",
+      "Napoleon Bonaparte"
+    ],
+    "correct_answer": "Genghis Khan",
+    "explanation": "Genghis Khan is credited with leading the Mongol conquests, which created the largest contiguous empire in history.",
+    "subject": "history",
+    "difficulty": "beginner",
+    "topic": "global-history"
+  },
+  {
+    "question": "What was the primary crop grown by early farmers in Mesopotamia?",
+    "options": [
+      "Wheat",
+      "Barley",
+      "Rice",
+      "Corn"
+    ],
+    "correct_answer": "Barley",
+    "explanation": "Barley was the primary crop grown by early farmers in Mesopotamia, which was used to make bread, beer, and other essential products.",
+    "subject": "history",
+    "difficulty": "beginner",
+    "topic": "global-history"
+  },
+  {
+    "question": "Which event marked the beginning of the end of the Roman Empire?",
+    "options": [
+      "The fall of Constantinople",
+      "The sack of Rome",
+      "The death of Julius Caesar",
+      "The construction of the Great Wall of China"
+    ],
+    "correct_answer": "The sack of Rome",
+    "explanation": "The sack of Rome in 410 CE marked the beginning of the end of the Roman Empire, as it led to a decline in the empire's power and influence.",
+    "subject": "history",
+    "difficulty": "beginner",
+    "topic": "global-history"
+  },
+  {
+    "question": "What is the term for the transfer of plants, animals, and diseases between the Old and New Worlds?",
+    "options": [
+      "The Columbian Exchange",
+      "The Silk Road",
+      "The Triangle Trade",
+      "The Industrial Revolution"
+    ],
+    "correct_answer": "The Columbian Exchange",
+    "explanation": "The Columbian Exchange refers to the transfer of plants, animals, and diseases between the Old and New Worlds, which had a profound impact on the environment, economies, and cultures of the Americas and Europe.",
+    "subject": "history",
+    "difficulty": "beginner",
+    "topic": "global-history"
+  },
+  {
+    "question": "Which Chinese dynasty built the Great Wall of China?",
+    "options": [
+      "Qin",
+      "Han",
+      "Ming",
+      "Qing"
+    ],
+    "correct_answer": "Qin",
+    "explanation": "The Qin dynasty built the earliest versions of the Great Wall of China, which was later extended and fortified by subsequent dynasties.",
+    "subject": "history",
+    "difficulty": "beginner",
+    "topic": "global-history"
+  },
+  {
+    "question": "What was the main purpose of the Rosetta Stone?",
+    "options": [
+      "To commemorate a military victory",
+      "To honor a pharaoh",
+      "To provide a key to deciphering ancient languages",
+      "To mark a trade agreement"
+    ],
+    "correct_answer": "To provide a key to deciphering ancient languages",
+    "explanation": "The Rosetta Stone was inscribed with a decree in three languages, which allowed scholars to decipher ancient Egyptian hieroglyphs and understand the language and culture of ancient Egypt.",
+    "subject": "history",
+    "difficulty": "beginner",
+    "topic": "global-history"
+  },
+  {
+    "question": "Which ancient city was the capital of the Inca Empire?",
+    "options": [
+      "Machu Picchu",
+      "Cuzco",
+      "Lima",
+      "Santiago"
+    ],
+    "correct_answer": "Cuzco",
+    "explanation": "Cuzco was the capital of the Inca Empire, which was the largest and most powerful empire in the pre-Columbian Americas.",
+    "subject": "history",
+    "difficulty": "beginner",
+    "topic": "global-history"
+  },
+  {
+    "question": "What is the term for the system of social hierarchy in ancient India?",
+    "options": [
+      "Caste system",
+      "Feudalism",
+      "Socialism",
+      "Capitalism"
+    ],
+    "correct_answer": "Caste system",
+    "explanation": "The caste system is a social hierarchy that originated in ancient India, in which people were divided into different groups based on their occupation, social status, and birth.",
+    "subject": "history",
+    "difficulty": "beginner",
+    "topic": "global-history"
+  },
+  {
+    "question": "Which river was the lifeblood of ancient Egyptian civilization?",
+    "options": [
+      "Nile",
+      "Tigris",
+      "Euphrates",
+      "Jordan"
+    ],
+    "correct_answer": "Nile",
+    "explanation": "The Nile River was the lifeblood of ancient Egyptian civilization, providing water, fertile soil, and a means of transportation for the ancient Egyptians.",
+    "subject": "history",
+    "difficulty": "beginner",
+    "topic": "global-history"
+  },
+  {
+    "question": "What was the main consequence of the Black Death in Europe?",
+    "options": [
+      "A significant increase in population",
+      "A major decline in trade and commerce",
+      "A shift in the social and economic structure of society",
+      "A complete collapse of the feudal system"
+    ],
+    "correct_answer": "A shift in the social and economic structure of society",
+    "explanation": "The Black Death led to a significant shift in the social and economic structure of European society, as the shortage of labor led to increased social mobility and changes in the feudal system.",
+    "subject": "history",
+    "difficulty": "beginner",
+    "topic": "global-history"
+  },
+  {
+    "question": "Which ancient Greek city-state was the site of the original Olympic Games?",
+    "options": [
+      "Athens",
+      "Sparta",
+      "Corinth",
+      "Olympia"
+    ],
+    "correct_answer": "Olympia",
+    "explanation": "Olympia was the site of the original Olympic Games, which were held in ancient Greece from 776 BCE to 393 CE.",
+    "subject": "history",
+    "difficulty": "beginner",
+    "topic": "global-history"
+  },
+  {
+    "question": "What is the term for the period of cultural and intellectual transformation in Europe during the 14th to 17th centuries?",
+    "options": [
+      "Renaissance",
+      "Reformation",
+      "Enlightenment",
+      "Industrial Revolution"
+    ],
+    "correct_answer": "Renaissance",
+    "explanation": "The Renaissance was a period of cultural and intellectual transformation in Europe, marked by a revival of classical learning, artistic innovation, and scientific discovery.",
+    "subject": "history",
+    "difficulty": "beginner",
+    "topic": "global-history"
+  },
+  {
+    "question": "Which ancient empire was known for its extensive network of roads and bridges?",
+    "options": [
+      "Roman",
+      "Greek",
+      "Persian",
+      "Chinese"
+    ],
+    "correct_answer": "Roman",
+    "explanation": "The Roman Empire was known for its extensive network of roads and bridges, which facilitated trade, communication, and the movement of armies across the empire.",
+    "subject": "history",
+    "difficulty": "beginner",
+    "topic": "global-history"
+  },
+  {
+    "question": "What was the main purpose of the Treaty of Westphalia?",
+    "options": [
+      "To end the Thirty Years' War",
+      "To establish the modern system of nation-states",
+      "To promote the idea of absolute monarchy",
+      "To create a new trade agreement"
+    ],
+    "correct_answer": "To establish the modern system of nation-states",
+    "explanation": "The Treaty of Westphalia marked the end of the Thirty Years' War and established the modern system of nation-states, in which sovereign states recognized each other's independence and territorial integrity.",
+    "subject": "history",
+    "difficulty": "beginner",
+    "topic": "global-history"
+  },
+  {
+    "question": "Which ancient city was the capital of the Aztec Empire?",
+    "options": [
+      "Tenochtitlán",
+      "Teotihuacán",
+      "Cholula",
+      "Tollan"
+    ],
+    "correct_answer": "Tenochtitlán",
+    "explanation": "Tenochtitlán was the capital of the Aztec Empire, which was founded in 1325 CE and became one of the largest and most powerful cities in the pre-Columbian Americas.",
+    "subject": "history",
+    "difficulty": "beginner",
+    "topic": "global-history"
+  },
+  {
+    "question": "What was the main consequence of the Crusades?",
+    "options": [
+      "The reunification of the Christian Church",
+      "The establishment of a new trade route",
+      "The exchange of cultural and scientific knowledge between East and West",
+      "The weakening of the Byzantine Empire"
+    ],
+    "correct_answer": "The weakening of the Byzantine Empire",
+    "explanation": "The Crusades led to the weakening of the Byzantine Empire, which was already facing internal divisions and external pressures, and ultimately contributed to its fall in 1453 CE.",
+    "subject": "history",
+    "difficulty": "beginner",
+    "topic": "global-history"
+  },
+  {
+    "question": "Which ancient trade network connected the East and West?",
+    "options": [
+      "The Silk Road",
+      "The Spice Route",
+      "The Incense Road",
+      "The Amber Road"
+    ],
+    "correct_answer": "The Silk Road",
+    "explanation": "The Silk Road was a network of trade routes that connected the East and West, facilitating the exchange of goods, ideas, and cultures between China, India, the Middle East, and Europe.",
+    "subject": "history",
+    "difficulty": "beginner",
+    "topic": "global-history"
+  },
+  {
+    "question": "What was the main purpose of the Magna Carta?",
+    "options": [
+      "To establish the principles of democracy",
+      "To limit the power of the monarch",
+      "To promote the idea of absolute monarchy",
+      "To create a new system of taxation"
+    ],
+    "correct_answer": "To limit the power of the monarch",
+    "explanation": "The Magna Carta was a document that limited the power of the monarch and established the principle of the rule of law, protecting the rights of nobles and commoners alike.",
+    "subject": "history",
+    "difficulty": "beginner",
+    "topic": "global-history"
+  },
+  {
+    "question": "What is the term for the process of cultural exchange and blending between different societies?",
+    "options": [
+      "Globalization",
+      "Cultural diffusion",
+      "Imperialism",
+      "Nationalism"
+    ],
+    "correct_answer": "Cultural diffusion",
+    "explanation": "Cultural diffusion refers to the process of cultural exchange and blending between different societies, which can result in the creation of new cultural forms and practices.",
+    "subject": "history",
+    "difficulty": "beginner",
+    "topic": "global-history"
+  },
+  {
+    "question": "Which ancient empire was known for its use of the horse-drawn chariot?",
+    "options": [
+      "Egyptian",
+      "Mesopotamian",
+      "Indus Valley",
+      "Shang Dynasty"
+    ],
+    "correct_answer": "Shang Dynasty",
+    "explanation": "The Shang Dynasty was known for its use of the horse-drawn chariot, which was introduced from Central Asia and became a key factor in the development of ancient Chinese warfare and transportation.",
+    "subject": "history",
+    "difficulty": "beginner",
+    "topic": "global-history"
+  },
+  {
+    "question": "What was the main consequence of the voyages of Zheng He?",
+    "options": [
+      "The establishment of a new trade route",
+      "The discovery of a new continent",
+      "The spread of Buddhism to Southeast Asia",
+      "The creation of a new maritime empire"
+    ],
+    "correct_answer": "The establishment of a new trade route",
+    "explanation": "The voyages of Zheng He led to the establishment of a new trade route between China and Southeast Asia, which facilitated the exchange of goods, ideas, and cultures between the two regions.",
+    "subject": "history",
+    "difficulty": "beginner",
+    "topic": "global-history"
+  }
+]

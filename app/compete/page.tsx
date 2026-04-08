@@ -4,18 +4,19 @@ import Link from "next/link";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import BackButton from "@/components/BackButton";
 import { useAuth } from "@/lib/auth";
+import { cdnUrl } from "@/lib/cdn";
 
 /* ── Tier definitions (bottom → top) ── */
 const TIERS = [
-  { name: "BRONZE", color: "#CD7F32", range: "0–99 wins", tagline: "Freshman", icon: "🥉", image: "/bronze.png" },
-  { name: "SILVER", color: "#C0C0C0", range: "100–249 wins", tagline: "Scholar", icon: "🥈", image: "/silver.png" },
-  { name: "GOLD", color: "#FFD700", range: "250–499 wins", tagline: "Honor Roll", icon: "🥇", image: "/gold.png" },
-  { name: "PLATINUM", color: "#00CED1", range: "500–999 wins", tagline: "Dean's List", icon: "💎", image: "/platinum.png" },
-  { name: "DIAMOND", color: "#B9F2FF", range: "1,000–1,999 wins", tagline: "Valedictorian", icon: "💠", image: "/diamond.png" },
-  { name: "ONYX", color: "#1A1A2E", textColor: "#C0C0D0", glowColor: "#C0C0D0", range: "2,000–3,499 wins", tagline: "Prodigy", icon: "🖤", image: "/onix.png" },
-  { name: "RUBY", color: "#E0115F", range: "3,500–4,999 wins", tagline: "Olympiad", icon: "❤️‍🔥", image: "/ruby.png" },
-  { name: "EMERALD", color: "#50C878", range: "5,000–7,499 wins", tagline: "Mastermind", icon: "👑", image: "/emerald.png" },
-  { name: "LEGEND", color: "legend", range: "7,500+ wins", tagline: "Immortal", icon: "⚡", image: "/legend.png" },
+  { name: "BRONZE", color: "#CD7F32", range: "0–99 wins", tagline: "Freshman", icon: "🥉", image: cdnUrl("/bronze.png") },
+  { name: "SILVER", color: "#C0C0C0", range: "100–249 wins", tagline: "Scholar", icon: "🥈", image: cdnUrl("/silver.png") },
+  { name: "GOLD", color: "#FFD700", range: "250–499 wins", tagline: "Honor Roll", icon: "🥇", image: cdnUrl("/gold.png") },
+  { name: "PLATINUM", color: "#00CED1", range: "500–999 wins", tagline: "Dean's List", icon: "💎", image: cdnUrl("/platinum.png") },
+  { name: "DIAMOND", color: "#B9F2FF", range: "1,000–1,999 wins", tagline: "Valedictorian", icon: "💠", image: cdnUrl("/diamond.png") },
+  { name: "ONYX", color: "#1A1A2E", textColor: "#C0C0D0", glowColor: "#C0C0D0", range: "2,000–3,499 wins", tagline: "Prodigy", icon: "🖤", image: cdnUrl("/onix.png") },
+  { name: "RUBY", color: "#E0115F", range: "3,500–4,999 wins", tagline: "Olympiad", icon: "❤️‍🔥", image: cdnUrl("/ruby.png") },
+  { name: "EMERALD", color: "#50C878", range: "5,000–7,499 wins", tagline: "Mastermind", icon: "👑", image: cdnUrl("/emerald.png") },
+  { name: "LEGEND", color: "legend", range: "7,500+ wins", tagline: "Immortal", icon: "⚡", image: cdnUrl("/legend.png") },
 ];
 
 const TIER_WIDTHS = ["40%", "48%", "54%", "60%", "68%", "76%", "84%", "92%", "100%"];
@@ -261,7 +262,7 @@ export default function CompetePage() {
                     Speed bonus for fast answers. Winner takes the wagered coins.
                   </p>
                   <p className="text-cream/30 text-xs mb-6 flex items-center justify-center gap-1">
-                    <img src="/F.png" alt="Fangs" className="w-4 h-4 object-contain" /> Wager: 10–100 coins
+                    <img src={cdnUrl("/F.png")} alt="Fangs" className="w-4 h-4 object-contain" /> Wager: 10–100 coins
                   </p>
                   <div className="flex flex-wrap gap-3 mb-6">
                     <Link href="/arena" className="btn-gold text-sm px-6 py-3 rounded-xl">

@@ -35,7 +35,8 @@ Every SWR call for user data: `{ keepPreviousData: true, revalidateOnFocus: true
 All pages use the same shared SWR user hook — no separate Supabase fetches per page.
 
 ### Fangs Icon
-Always use: `<img src="/F.png" alt="Fangs" className="w-6 h-6 object-contain" />`
+Always use: `<img src={cdnUrl("/F.png")} alt="Fangs" className="w-6 h-6 object-contain" />`
+Import `cdnUrl` from `@/lib/cdn` — all static images must go through this helper.
 Currency is called **Fangs** (not coins, not tokens).
 
 ### Styling

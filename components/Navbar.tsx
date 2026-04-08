@@ -7,6 +7,7 @@ import { useAuth } from "@/lib/auth";
 import { useUserStats, useStreakInfo, isStreakExpired, resetExpiredStreak, mutateUserStats } from "@/lib/hooks";
 import { formatCoins } from "@/lib/mockData";
 import { supabase } from "@/lib/supabase";
+import { cdnUrl } from "@/lib/cdn";
 
 interface Notification {
   id: string;
@@ -266,11 +267,11 @@ export default function Navbar() {
             {/* Logo */}
             <Link href="/dashboard" className="flex items-center">
               <div className="relative overflow-hidden rounded-md logo-glow sm:hidden">
-                <img src="/logo-icon.png" alt="Lionade" className="h-8 rounded-md relative z-10" />
+                <img src={cdnUrl("/logo-icon.png")} alt="Lionade" className="h-8 rounded-md relative z-10" />
                 <div className="logo-shimmer" />
               </div>
               <div className="relative overflow-hidden rounded-md logo-glow hidden sm:block">
-                <img src="/logo-full.png" alt="Lionade" className="h-9 rounded-md relative z-10" />
+                <img src={cdnUrl("/logo-full.png")} alt="Lionade" className="h-9 rounded-md relative z-10" />
                 <div className="logo-shimmer" />
               </div>
             </Link>
@@ -327,7 +328,7 @@ export default function Navbar() {
                     cursor-pointer group relative transition-all duration-200 active:scale-95
                     shadow-md shadow-gold/30 hover:shadow-gold/50"
                     style={{ background: "linear-gradient(135deg, #FFD700, #F59E0B)" }}>
-                    <img src="/F.png" alt="Fangs" className="w-5 h-5 object-contain" />
+                    <img src={cdnUrl("/F.png")} alt="Fangs" className="w-5 h-5 object-contain" />
                     <span className="font-bebas text-base text-navy tracking-wider leading-none font-bold">
                       {stats ? formatCoins(stats.coins) : user.statsLoaded ? formatCoins(user.coins) : <StatSkeleton />}
                     </span>

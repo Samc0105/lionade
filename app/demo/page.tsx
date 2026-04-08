@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
+import { cdnUrl } from "@/lib/cdn";
 
 // ── Hardcoded demo questions ─────────────────────────────────
 
@@ -190,7 +191,7 @@ export default function DemoPage() {
         {/* Logo */}
         <div className="text-center mb-8">
           <Link href="/">
-            <img src="/logo-full.png" alt="Lionade" className="h-[120px] rounded-xl demo-logo-glow mx-auto" />
+            <img src={cdnUrl("/logo-full.png")} alt="Lionade" className="h-[120px] rounded-xl demo-logo-glow mx-auto" />
           </Link>
         </div>
 

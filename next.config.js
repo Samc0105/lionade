@@ -5,6 +5,9 @@
 // browsers to block styles/scripts in dev mode.
 
 const nextConfig = {
+  env: {
+    NEXT_PUBLIC_CDN_URL: process.env.NEXT_PUBLIC_CDN_URL || "",
+  },
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "api.dicebear.com" },

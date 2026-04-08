@@ -6,6 +6,7 @@ import { useAuth } from "@/lib/auth";
 import type { SignupExtra } from "@/lib/auth";
 import { supabase } from "@/lib/supabase";
 import Link from "next/link";
+import { cdnUrl } from "@/lib/cdn";
 
 type Tab = "login" | "signup";
 
@@ -309,7 +310,7 @@ export default function LoginPage() {
         {/* Logo */}
         <div className="text-center mb-8 pt-4">
           <Link href="/" className="inline-flex items-center gap-3 group">
-            <img src="/logo-full.png" alt="Lionade" className="w-10 h-10 object-contain" />
+            <img src={cdnUrl("/logo-full.png")} alt="Lionade" className="w-10 h-10 object-contain" />
             <span className="font-bebas text-3xl tracking-wider text-cream group-hover:text-electric transition-colors">
               LIONADE
             </span>

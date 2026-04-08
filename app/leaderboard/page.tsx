@@ -6,6 +6,7 @@ import { getLeaderboard } from "@/lib/db";
 import { formatCoins } from "@/lib/mockData";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import BackButton from "@/components/BackButton";
+import { cdnUrl } from "@/lib/cdn";
 
 type Filter = "weekly" | "alltime";
 
@@ -96,7 +97,7 @@ export default function LeaderboardPage() {
                         alt="" className="w-full h-full object-cover bg-navy-50" />
                     </div>
                     <p className="text-cream text-xs font-bold text-center truncate w-full text-center">{topThree[1]?.username}</p>
-                    <p className="text-gray-300 font-bebas text-lg flex items-center justify-center gap-1"><img src="/F.png" alt="Fangs" className="w-4 h-4 object-contain" /> {formatCoins(topThree[1]?.coins_this_week ?? 0)}</p>
+                    <p className="text-gray-300 font-bebas text-lg flex items-center justify-center gap-1"><img src={cdnUrl("/F.png")} alt="Fangs" className="w-4 h-4 object-contain" /> {formatCoins(topThree[1]?.coins_this_week ?? 0)}</p>
                   </div>
 
                   {/* 1st */}
@@ -109,7 +110,7 @@ export default function LeaderboardPage() {
                       </div>
                     </div>
                     <p className="text-gold text-sm font-bold text-center">{topThree[0]?.username}</p>
-                    <p className="text-gold font-bebas text-xl glow-gold flex items-center justify-center gap-1"><img src="/F.png" alt="Fangs" className="w-5 h-5 object-contain" /> {formatCoins(topThree[0]?.coins_this_week ?? 0)}</p>
+                    <p className="text-gold font-bebas text-xl glow-gold flex items-center justify-center gap-1"><img src={cdnUrl("/F.png")} alt="Fangs" className="w-5 h-5 object-contain" /> {formatCoins(topThree[0]?.coins_this_week ?? 0)}</p>
                     <span className="text-xs bg-gold/15 border border-gold/30 text-gold px-2 py-0.5 rounded-full mt-1">#1 GOAT</span>
                   </div>
 
@@ -121,7 +122,7 @@ export default function LeaderboardPage() {
                         alt="" className="w-full h-full object-cover bg-navy-50" />
                     </div>
                     <p className="text-cream text-xs font-bold text-center truncate w-full text-center">{topThree[2]?.username}</p>
-                    <p className="text-amber-600 font-bebas text-lg flex items-center justify-center gap-1"><img src="/F.png" alt="Fangs" className="w-4 h-4 object-contain" /> {formatCoins(topThree[2]?.coins_this_week ?? 0)}</p>
+                    <p className="text-amber-600 font-bebas text-lg flex items-center justify-center gap-1"><img src={cdnUrl("/F.png")} alt="Fangs" className="w-4 h-4 object-contain" /> {formatCoins(topThree[2]?.coins_this_week ?? 0)}</p>
                   </div>
                 </div>
               )}
@@ -155,7 +156,7 @@ export default function LeaderboardPage() {
                       </div>
                       <div className="text-right flex-shrink-0">
                         <div className="flex items-center gap-1.5">
-                          <img src="/F.png" alt="Fangs" className="w-4 h-4 object-contain" />
+                          <img src={cdnUrl("/F.png")} alt="Fangs" className="w-4 h-4 object-contain" />
                           <span className={`font-bebas text-xl ${entry.rank === 1 ? "text-gold glow-gold" : "text-cream"}`}>
                             {formatCoins(entry.coins_this_week)}
                           </span>
@@ -172,7 +173,7 @@ export default function LeaderboardPage() {
                   <p className="text-electric text-sm font-semibold text-center mb-2">Your Position</p>
                   <div className="flex items-center justify-between">
                     <span className="font-bebas text-2xl text-electric">#{myRank}</span>
-                    <span className="text-gold font-semibold flex items-center gap-1"><img src="/F.png" alt="Fangs" className="w-4 h-4 object-contain" /> {formatCoins(myEntry.coins_this_week)}</span>
+                    <span className="text-gold font-semibold flex items-center gap-1"><img src={cdnUrl("/F.png")} alt="Fangs" className="w-4 h-4 object-contain" /> {formatCoins(myEntry.coins_this_week)}</span>
                   </div>
                 </div>
               )}

@@ -1,0 +1,4062 @@
+[
+  {
+    "question": "What is the Hertzsprung-Russell diagram used for?",
+    "options": [
+      "Mapping constellations",
+      "Plotting stars by temperature and luminosity to show stellar evolution",
+      "Measuring distances to stars",
+      "Tracking planetary orbits"
+    ],
+    "correct_answer": "Plotting stars by temperature and luminosity to show stellar evolution",
+    "explanation": "The H-R diagram plots stars by surface temperature versus luminosity, revealing patterns like the main sequence that reflect stages of stellar evolution.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the main sequence in stellar astronomy?",
+    "options": [
+      "The order of planets from the Sun",
+      "A band on the H-R diagram where stars fuse hydrogen in their cores",
+      "The sequence of a star's life stages",
+      "The path a star takes across the sky"
+    ],
+    "correct_answer": "A band on the H-R diagram where stars fuse hydrogen in their cores",
+    "explanation": "The main sequence is a continuous band on the H-R diagram populated by stars in the hydrogen-burning phase, including our Sun.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is a white dwarf?",
+    "options": [
+      "A very small cool star just forming",
+      "The dense hot remnant left after a low-mass star sheds its outer layers",
+      "A neutron star with a white glow",
+      "A main sequence star smaller than the Sun"
+    ],
+    "correct_answer": "The dense hot remnant left after a low-mass star sheds its outer layers",
+    "explanation": "White dwarfs form when stars like the Sun exhaust nuclear fuel; they are Earth-sized but very dense and slowly cool over billions of years.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is a neutron star?",
+    "options": [
+      "A star made entirely of neutral atoms",
+      "The ultra-dense collapsed core of a massive star after a supernova",
+      "A very old white dwarf",
+      "A brown dwarf with no nuclear fusion"
+    ],
+    "correct_answer": "The ultra-dense collapsed core of a massive star after a supernova",
+    "explanation": "Neutron stars form when massive stars explode as supernovae; their cores collapse to objects only ~20 km across but with more mass than the Sun.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the Chandrasekhar limit?",
+    "options": [
+      "The maximum speed of a star",
+      "The maximum mass of a stable white dwarf about 1.4 solar masses",
+      "The minimum mass needed to start nuclear fusion",
+      "The distance at which a star becomes visible"
+    ],
+    "correct_answer": "The maximum mass of a stable white dwarf about 1.4 solar masses",
+    "explanation": "If a white dwarf exceeds 1.4 solar masses, electron degeneracy pressure can no longer support it, leading to a Type Ia supernova.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the difference between a Type Ia and Type II supernova?",
+    "options": [
+      "Type Ia are bigger",
+      "Type Ia involves a white dwarf in a binary system; Type II involves the collapse of a massive star",
+      "Type II are brighter",
+      "They are the same event"
+    ],
+    "correct_answer": "Type Ia involves a white dwarf in a binary system; Type II involves the collapse of a massive star",
+    "explanation": "Type Ia supernovae occur when a white dwarf accretes material past the Chandrasekhar limit; Type II result from core collapse of massive stars.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is stellar parallax?",
+    "options": [
+      "The wobble of a star due to orbiting planets",
+      "The apparent shift in a star's position when viewed from different points in Earth's orbit",
+      "The color change of a star over time",
+      "The pulsation of a variable star"
+    ],
+    "correct_answer": "The apparent shift in a star's position when viewed from different points in Earth's orbit",
+    "explanation": "Stellar parallax uses the apparent shift in a star's position as Earth orbits the Sun to calculate the star's distance. Closer stars show more parallax.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is a parsec?",
+    "options": [
+      "A unit of time in astronomy",
+      "A unit of distance equal to about 3.26 light-years defined by a parallax angle of one arcsecond",
+      "The speed of light per second",
+      "A measure of stellar brightness"
+    ],
+    "correct_answer": "A unit of distance equal to about 3.26 light-years defined by a parallax angle of one arcsecond",
+    "explanation": "A parsec is the distance at which one AU subtends an angle of one arcsecond. It equals about 3.26 light-years.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What spectral type is the Sun?",
+    "options": [
+      "A-type star",
+      "G-type star",
+      "K-type star",
+      "F-type star"
+    ],
+    "correct_answer": "G-type star",
+    "explanation": "The Sun is classified as a G2V star — a yellow dwarf main sequence star with a surface temperature of about 5,500 degrees Celsius.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What does OBAFGKM represent in stellar classification?",
+    "options": [
+      "A sequence of planet types",
+      "A sequence of star types ordered by surface temperature from hottest O to coolest M",
+      "A sequence of galaxy types",
+      "A sequence of nebula types"
+    ],
+    "correct_answer": "A sequence of star types ordered by surface temperature from hottest O to coolest M",
+    "explanation": "OBAFGKM classifies stars by surface temperature: O (hottest, blue) through M (coolest, red). The Sun is class G.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the event horizon of a black hole?",
+    "options": [
+      "The surface of a black hole",
+      "The boundary beyond which nothing can escape the black hole's gravity",
+      "The accretion disk around a black hole",
+      "The shadow visible around a black hole"
+    ],
+    "correct_answer": "The boundary beyond which nothing can escape the black hole's gravity",
+    "explanation": "The event horizon is the point of no return around a black hole — once something crosses it, including light, it cannot escape.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is an accretion disk?",
+    "options": [
+      "A flat galaxy type",
+      "A disk of gas and dust spiraling into a compact object like a black hole or neutron star",
+      "A ring system around a planet",
+      "A rotating disk of asteroids"
+    ],
+    "correct_answer": "A disk of gas and dust spiraling into a compact object like a black hole or neutron star",
+    "explanation": "Accretion disks form when material spirals inward toward a compact object, heating up and emitting intense radiation.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is a pulsar?",
+    "options": [
+      "A type of variable star",
+      "A rapidly rotating neutron star that emits beams of radiation",
+      "A pulsating red giant",
+      "A type of quasar"
+    ],
+    "correct_answer": "A rapidly rotating neutron star that emits beams of radiation",
+    "explanation": "Pulsars are neutron stars that emit beams of electromagnetic radiation from their poles; as they rotate the beam sweeps past Earth like a lighthouse.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is a quasar?",
+    "options": [
+      "A type of star close to Earth",
+      "An extremely bright active galactic nucleus powered by a supermassive black hole",
+      "A type of neutron star",
+      "A galaxy without stars"
+    ],
+    "correct_answer": "An extremely bright active galactic nucleus powered by a supermassive black hole",
+    "explanation": "Quasars are the brightest objects in the universe, powered by supermassive black holes accreting matter in the early universe.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the cosmic microwave background (CMB) radiation?",
+    "options": [
+      "Radiation from the Sun",
+      "The afterglow of the Big Bang now visible as microwave radiation filling all of space",
+      "Radiation from all galaxies combined",
+      "Radio waves from pulsars"
+    ],
+    "correct_answer": "The afterglow of the Big Bang now visible as microwave radiation filling all of space",
+    "explanation": "The CMB is thermal radiation left over from about 380,000 years after the Big Bang when the universe cooled enough for atoms to form.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What does Hubble's Law state?",
+    "options": [
+      "Galaxies rotate in proportion to their mass",
+      "The farther a galaxy is the faster it is moving away from us",
+      "The universe is contracting",
+      "Nearby galaxies are older than distant ones"
+    ],
+    "correct_answer": "The farther a galaxy is the faster it is moving away from us",
+    "explanation": "Hubble's Law states that galaxy recession velocity is proportional to distance, providing evidence for the expanding universe.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the Doppler effect in astronomy?",
+    "options": [
+      "The bending of light by gravity",
+      "The shift in wavelength of light due to relative motion between source and observer",
+      "The dimming of stars over time",
+      "The spreading of light through space"
+    ],
+    "correct_answer": "The shift in wavelength of light due to relative motion between source and observer",
+    "explanation": "Moving objects compress or stretch light waves — objects moving away show redshift (longer wavelengths), approaching objects show blueshift.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the habitable zone?",
+    "options": [
+      "The region of the solar system without asteroids",
+      "The range of distances from a star where liquid water could exist on a planet's surface",
+      "The region where gas giants form",
+      "The area around Earth where satellites can orbit"
+    ],
+    "correct_answer": "The range of distances from a star where liquid water could exist on a planet's surface",
+    "explanation": "The habitable zone is not too hot and not too cold for liquid water — a key requirement for life as we know it.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is gravitational lensing?",
+    "options": [
+      "The focusing of starlight by a telescope lens",
+      "The bending of light from a distant object by the gravity of a massive foreground object",
+      "The magnification of stars by the atmosphere",
+      "The focusing of sunlight by gas giants"
+    ],
+    "correct_answer": "The bending of light from a distant object by the gravity of a massive foreground object",
+    "explanation": "Massive objects warp spacetime, bending light that passes near them — this can magnify and distort background objects, confirming Einstein's general relativity.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is an emission nebula?",
+    "options": [
+      "A nebula that reflects starlight",
+      "A cloud of ionized gas that emits light at specific wavelengths",
+      "A dark cloud blocking background stars",
+      "A nebula forming from a supernova"
+    ],
+    "correct_answer": "A cloud of ionized gas that emits light at specific wavelengths",
+    "explanation": "Emission nebulae glow because nearby hot stars ionize the gas, causing it to emit light — the Orion Nebula is a classic example.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the difference between a reflection nebula and an emission nebula?",
+    "options": [
+      "They are the same type",
+      "A reflection nebula scatters light from nearby stars; an emission nebula produces its own light from ionized gas",
+      "Emission nebulae are darker",
+      "Reflection nebulae are always red"
+    ],
+    "correct_answer": "A reflection nebula scatters light from nearby stars; an emission nebula produces its own light from ionized gas",
+    "explanation": "Reflection nebulae appear blue because they scatter blue starlight more efficiently; emission nebulae are typically red from hydrogen-alpha emission.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is a planetary nebula?",
+    "options": [
+      "A nebula that forms planets",
+      "A glowing shell of gas expelled by a dying low-mass star",
+      "A type of reflection nebula",
+      "A nebula surrounding a planet"
+    ],
+    "correct_answer": "A glowing shell of gas expelled by a dying low-mass star",
+    "explanation": "Despite the name, planetary nebulae have nothing to do with planets — they are glowing shells of gas ejected by stars like the Sun in their final stages.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is stellar nucleosynthesis?",
+    "options": [
+      "Photosynthesis in stars",
+      "The process by which heavier elements are formed in stars through nuclear fusion",
+      "Atomic fission inside stars",
+      "Radioactive decay of stellar cores"
+    ],
+    "correct_answer": "The process by which heavier elements are formed in stars through nuclear fusion",
+    "explanation": "Stellar nucleosynthesis is the process by which stars fuse lighter elements into heavier ones — elements up to iron are formed in stars.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "Why is iron significant in massive star evolution?",
+    "options": [
+      "Iron is the lightest element stars can fuse",
+      "Iron fusion absorbs energy rather than releasing it, causing the core to collapse",
+      "Iron is produced only in neutron stars",
+      "Iron causes stars to change color"
+    ],
+    "correct_answer": "Iron fusion absorbs energy rather than releasing it, causing the core to collapse",
+    "explanation": "When a massive star's core becomes iron, fusion no longer produces energy — the core collapses in milliseconds, triggering a supernova.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the transit method for detecting exoplanets?",
+    "options": [
+      "Measuring a star's wobble from a planet's gravity",
+      "Detecting the slight dimming of a star's light as a planet passes in front of it",
+      "Directly photographing the planet",
+      "Measuring radio waves from planetary magnetospheres"
+    ],
+    "correct_answer": "Detecting the slight dimming of a star's light as a planet passes in front of it",
+    "explanation": "The transit method detects exoplanets by measuring the small decrease in starlight when a planet crosses the star's disk, used by Kepler and TESS missions.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the radial velocity method for detecting exoplanets?",
+    "options": [
+      "Measuring star brightness changes",
+      "Detecting the wobble of a star caused by the gravitational pull of an orbiting planet via Doppler shifts",
+      "Measuring the polarization of starlight",
+      "Observing changes in star color"
+    ],
+    "correct_answer": "Detecting the wobble of a star caused by the gravitational pull of an orbiting planet via Doppler shifts",
+    "explanation": "As a planet orbits, it tugs the star, causing slight Doppler shifts in the star's spectral lines — this radial velocity variation reveals the planet.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What NASA mission discovered thousands of exoplanets?",
+    "options": [
+      "Hubble",
+      "TESS",
+      "Kepler",
+      "Spitzer"
+    ],
+    "correct_answer": "Kepler",
+    "explanation": "NASA's Kepler space telescope, operating from 2009 to 2018, discovered over 2,600 confirmed exoplanets using the transit method.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is stellar magnitude?",
+    "options": [
+      "The size of a star in kilometers",
+      "A logarithmic scale measuring the brightness of a star",
+      "The distance of a star in light-years",
+      "The age of a star in billions of years"
+    ],
+    "correct_answer": "A logarithmic scale measuring the brightness of a star",
+    "explanation": "Stellar magnitude is a numerical scale where each step of 1 represents a brightness difference of about 2.5 times; lower numbers indicate brighter objects.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the difference between absolute and apparent magnitude?",
+    "options": [
+      "They are the same measurement",
+      "Apparent magnitude is how bright a star looks from Earth; absolute magnitude is its intrinsic brightness at 10 parsecs",
+      "Absolute magnitude measures size; apparent magnitude measures distance",
+      "Absolute magnitude changes with time; apparent is fixed"
+    ],
+    "correct_answer": "Apparent magnitude is how bright a star looks from Earth; absolute magnitude is its intrinsic brightness at 10 parsecs",
+    "explanation": "Apparent magnitude depends on distance; absolute magnitude (standardized to 10 parsecs) allows true comparison of stellar luminosities.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is Kepler's Third Law?",
+    "options": [
+      "Planets orbit in ellipses with the Sun at one focus",
+      "A planet sweeps equal areas in equal times",
+      "The square of a planet's orbital period is proportional to the cube of its average distance from the Sun",
+      "Planets closer to the Sun move faster"
+    ],
+    "correct_answer": "The square of a planet's orbital period is proportional to the cube of its average distance from the Sun",
+    "explanation": "Kepler's Third Law (P squared proportional to a cubed) relates orbital period to semi-major axis, allowing calculation of planetary distances.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is a brown dwarf?",
+    "options": [
+      "A very old red dwarf star",
+      "A substellar object too massive to be a planet but too small to sustain hydrogen fusion",
+      "A star that has run out of fuel",
+      "A dark cold planet-like body"
+    ],
+    "correct_answer": "A substellar object too massive to be a planet but too small to sustain hydrogen fusion",
+    "explanation": "Brown dwarfs have masses between about 13 and 80 Jupiter masses — massive enough to fuse deuterium but not ordinary hydrogen.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the solar wind?",
+    "options": [
+      "Wind patterns on the Sun's surface",
+      "A stream of charged particles continuously flowing outward from the Sun's corona",
+      "Radiation from the Sun's photosphere",
+      "Heat waves from the Sun"
+    ],
+    "correct_answer": "A stream of charged particles continuously flowing outward from the Sun's corona",
+    "explanation": "The solar wind is a continuous flow of plasma from the Sun that fills the heliosphere, interacts with planetary magnetospheres, and creates auroras.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is Earth's magnetosphere?",
+    "options": [
+      "The magnetic minerals in Earth's crust",
+      "The region of space around Earth dominated by its magnetic field",
+      "Earth's magnetic poles",
+      "The magnetic field inside the Earth"
+    ],
+    "correct_answer": "The region of space around Earth dominated by its magnetic field",
+    "explanation": "Earth's magnetosphere deflects most of the solar wind, protecting the surface from harmful charged particles and helping maintain the atmosphere.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is spectroscopy used for in astronomy?",
+    "options": [
+      "Measuring the size of stars",
+      "Analyzing starlight to determine composition, temperature, velocity, and other properties",
+      "Measuring star distances only",
+      "Observing planets in other solar systems"
+    ],
+    "correct_answer": "Analyzing starlight to determine composition, temperature, velocity, and other properties",
+    "explanation": "Spectroscopy splits starlight into wavelengths — absorption and emission lines reveal chemical composition, while Doppler shifts reveal motion.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is a Cepheid variable star?",
+    "options": [
+      "A star that suddenly brightens in a nova",
+      "A pulsating star whose brightness varies in a precise period related to its luminosity",
+      "A star that orbits another star",
+      "A star that is rotating very fast"
+    ],
+    "correct_answer": "A pulsating star whose brightness varies in a precise period related to its luminosity",
+    "explanation": "Cepheid variables pulsate with regular periods — the longer the period, the more luminous the star — making them standard candles for measuring cosmic distances.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is a standard candle in astronomy?",
+    "options": [
+      "A candle used in observatory laboratories",
+      "An object with a known luminosity used to calculate distances in space",
+      "A type of variable star",
+      "The standard brightness used to calibrate telescopes"
+    ],
+    "correct_answer": "An object with a known luminosity used to calculate distances in space",
+    "explanation": "Standard candles like Cepheids and Type Ia supernovae have known absolute magnitudes — comparing them to apparent brightness reveals their distance.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the Local Group?",
+    "options": [
+      "The group of stars nearest to the Sun",
+      "The cluster of galaxies that includes the Milky Way and Andromeda",
+      "The group of nearby constellations",
+      "The solar system and surrounding star systems"
+    ],
+    "correct_answer": "The cluster of galaxies that includes the Milky Way and Andromeda",
+    "explanation": "The Local Group is a galaxy group containing over 50 galaxies including the Milky Way, Andromeda, and Triangulum galaxies.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the fate of the Milky Way and Andromeda galaxies?",
+    "options": [
+      "They will move apart forever",
+      "They will collide and merge in about 4.5 billion years",
+      "Andromeda will be absorbed without merging",
+      "They are already merging now"
+    ],
+    "correct_answer": "They will collide and merge in about 4.5 billion years",
+    "explanation": "Andromeda is currently approaching the Milky Way at about 110 km/s and the two galaxies will collide in about 4.5 billion years, forming an elliptical galaxy.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is cosmic inflation?",
+    "options": [
+      "The gradual expansion of galaxies",
+      "The extremely rapid expansion of the universe in the first fraction of a second after the Big Bang",
+      "The increase in size of stars over time",
+      "The expansion of the solar system"
+    ],
+    "correct_answer": "The extremely rapid expansion of the universe in the first fraction of a second after the Big Bang",
+    "explanation": "Cosmic inflation proposes that the universe expanded exponentially in roughly 10^-32 seconds after the Big Bang, explaining the large-scale uniformity of the universe.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is general relativity's key prediction about gravity?",
+    "options": [
+      "Gravity is an invisible force acting at a distance",
+      "Massive objects curve spacetime and this curvature is what we experience as gravity",
+      "Gravity only affects matter not light",
+      "Gravity decreases linearly with distance"
+    ],
+    "correct_answer": "Massive objects curve spacetime and this curvature is what we experience as gravity",
+    "explanation": "Einstein's general relativity describes gravity not as a force but as the curvature of spacetime caused by mass and energy.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the Schwarzschild radius?",
+    "options": [
+      "The distance at which a star becomes a red giant",
+      "The radius within which escape velocity equals the speed of light defining the event horizon",
+      "The distance from Earth to the Sun",
+      "The radius of the observable universe"
+    ],
+    "correct_answer": "The radius within which escape velocity equals the speed of light defining the event horizon",
+    "explanation": "The Schwarzschild radius defines the event horizon of a non-rotating black hole — if an object is compressed within this radius it becomes a black hole.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is gravitational time dilation?",
+    "options": [
+      "Time dilation from motion",
+      "The phenomenon where time passes more slowly near a massive object",
+      "Relativistic redshift",
+      "Spacetime curvature"
+    ],
+    "correct_answer": "The phenomenon where time passes more slowly near a massive object",
+    "explanation": "According to general relativity, time runs more slowly in stronger gravitational fields — confirmed by precision atomic clocks at different altitudes.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the Oort Cloud?",
+    "options": [
+      "A cloud of gas near the Sun",
+      "A distant spherical shell of icy bodies surrounding the solar system at 2000 to 100000 AU",
+      "The gas cloud between galaxies",
+      "Saturn's outer ring system"
+    ],
+    "correct_answer": "A distant spherical shell of icy bodies surrounding the solar system at 2000 to 100000 AU",
+    "explanation": "The Oort Cloud is the hypothetical outermost region of the solar system, believed to be the source of long-period comets with orbital periods over 200 years.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the difference between a short-period and long-period comet?",
+    "options": [
+      "Short-period comets are smaller",
+      "Short-period comets have orbital periods under 200 years from the Kuiper Belt; long-period comets have longer periods from the Oort Cloud",
+      "Long-period comets are brighter",
+      "Short-period comets never develop tails"
+    ],
+    "correct_answer": "Short-period comets have orbital periods under 200 years from the Kuiper Belt; long-period comets have longer periods from the Oort Cloud",
+    "explanation": "Halley's Comet is a famous short-period comet at 76 years; long-period comets may take thousands of years to orbit.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the heliopause?",
+    "options": [
+      "Kuiper Belt edge",
+      "The boundary where the solar wind meets interstellar space",
+      "The magnetopause",
+      "The tropopause"
+    ],
+    "correct_answer": "The boundary where the solar wind meets interstellar space",
+    "explanation": "The heliopause is the boundary where the solar wind pressure equals the interstellar medium pressure — Voyager 1 crossed it in 2012.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is orbital resonance?",
+    "options": [
+      "When two objects collide",
+      "When two orbiting bodies exert regular gravitational influence due to orbital periods being in a simple integer ratio",
+      "When a planet's orbit becomes circular",
+      "When a comet approaches a planet"
+    ],
+    "correct_answer": "When two orbiting bodies exert regular gravitational influence due to orbital periods being in a simple integer ratio",
+    "explanation": "Orbital resonances like the 1:2:4 ratio of Io, Europa, and Ganymede create strong gravitational interactions that shape orbital dynamics.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What are the Van Allen radiation belts?",
+    "options": [
+      "A protective layer of the atmosphere",
+      "Zones of high-energy charged particles trapped by Earth's magnetic field",
+      "A region of low gravity above the equator",
+      "A layer of ozone in the upper atmosphere"
+    ],
+    "correct_answer": "Zones of high-energy charged particles trapped by Earth's magnetic field",
+    "explanation": "The Van Allen belts are two donut-shaped zones of energetic particles trapped by Earth's magnetic field, posing radiation hazards to spacecraft.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is Earth's escape velocity?",
+    "options": [
+      "7.9 km/s",
+      "11.2 km/s",
+      "17 km/s",
+      "30 km/s"
+    ],
+    "correct_answer": "11.2 km/s",
+    "explanation": "Earth's escape velocity is about 11.2 km/s — the minimum speed needed to escape Earth's gravity without further propulsion.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the Roche limit?",
+    "options": [
+      "The maximum distance a moon can orbit a planet",
+      "The minimum distance at which a celestial body can orbit without being torn apart by tidal forces",
+      "The limit of telescope resolution",
+      "The minimum mass needed to become a planet"
+    ],
+    "correct_answer": "The minimum distance at which a celestial body can orbit without being torn apart by tidal forces",
+    "explanation": "Inside the Roche limit, tidal forces exceed the self-gravity of orbiting bodies, which is why Saturn's rings exist instead of forming moons.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What are Lagrange points?",
+    "options": [
+      "The highest points of planetary orbits",
+      "Five positions in an orbital system where a small body can maintain a stable position relative to two larger bodies",
+      "Points where planets are closest together",
+      "Points where gravity is zero"
+    ],
+    "correct_answer": "Five positions in an orbital system where a small body can maintain a stable position relative to two larger bodies",
+    "explanation": "Lagrange points are positions where gravitational and centrifugal forces balance. L1, L2, L3 are unstable; L4 and L5 are stable. JWST orbits at L2.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What was the first black hole image captured in 2019?",
+    "options": [
+      "Sagittarius A*",
+      "M87*",
+      "NGC 1052",
+      "Centaurus A"
+    ],
+    "correct_answer": "M87*",
+    "explanation": "The Event Horizon Telescope captured the first image of a black hole's shadow in 2019 — M87*, the supermassive black hole at the center of galaxy M87.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What do radio telescopes detect?",
+    "options": [
+      "Visible light",
+      "Infrared radiation",
+      "Radio waves",
+      "X-rays"
+    ],
+    "correct_answer": "Radio waves",
+    "explanation": "Radio telescopes detect radio waves emitted by cosmic sources like pulsars, quasars, and hydrogen gas, allowing observation through dust clouds.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is an open star cluster?",
+    "options": [
+      "A galaxy with loosely grouped stars",
+      "A relatively loose group of young stars formed from the same molecular cloud",
+      "A cluster of galaxies",
+      "A nebula with visible structure"
+    ],
+    "correct_answer": "A relatively loose group of young stars formed from the same molecular cloud",
+    "explanation": "Open clusters contain hundreds to thousands of young stars that formed together and are loosely bound by gravity — the Pleiades is a classic example.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is a globular cluster?",
+    "options": [
+      "A type of round galaxy",
+      "A dense spherical collection of hundreds of thousands of old stars",
+      "A nebula with a spherical shape",
+      "A cluster of asteroids"
+    ],
+    "correct_answer": "A dense spherical collection of hundreds of thousands of old stars",
+    "explanation": "Globular clusters contain 100,000 to a million old stars in a tight spherical arrangement and orbit the halo of galaxies.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What powers red giant stars?",
+    "options": [
+      "Hydrogen fusion in the core",
+      "Hydrogen shell burning around a helium core",
+      "Helium fusion only",
+      "Carbon fusion in the core"
+    ],
+    "correct_answer": "Hydrogen shell burning around a helium core",
+    "explanation": "When a star exhausts hydrogen in its core, hydrogen burning continues in a shell around the core, causing the outer layers to expand into a red giant.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the triple alpha process?",
+    "options": [
+      "The fusion of three hydrogen atoms",
+      "The fusion of three helium-4 nuclei to form carbon-12",
+      "The decay of three alpha particles",
+      "The process that forms iron in stars"
+    ],
+    "correct_answer": "The fusion of three helium-4 nuclei to form carbon-12",
+    "explanation": "The triple-alpha process occurs in red giant cores — two helium nuclei fuse to beryllium-8 which briefly fuses with another helium to form carbon-12.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the cosmic web?",
+    "options": [
+      "A network of radio waves in space",
+      "The large-scale structure of the universe consisting of filaments of galaxies surrounding cosmic voids",
+      "A type of nebula pattern",
+      "The network of satellite communications"
+    ],
+    "correct_answer": "The large-scale structure of the universe consisting of filaments of galaxies surrounding cosmic voids",
+    "explanation": "The cosmic web is the largest structure in the universe — a network of galaxy filaments and clusters separated by vast nearly empty voids.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is electron degeneracy pressure?",
+    "options": [
+      "Electromagnetic repulsion between electrons",
+      "A quantum mechanical pressure that prevents white dwarfs from collapsing under gravity",
+      "Neutron degeneracy pressure",
+      "Strong nuclear force"
+    ],
+    "correct_answer": "A quantum mechanical pressure that prevents white dwarfs from collapsing under gravity",
+    "explanation": "Electron degeneracy pressure — from the Pauli exclusion principle — prevents white dwarfs from collapsing under gravity.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is photometry in astronomy?",
+    "options": [
+      "Photography of stars",
+      "The measurement of the flux or intensity of light from astronomical objects",
+      "The study of photons from stars",
+      "The use of light to propel spacecraft"
+    ],
+    "correct_answer": "The measurement of the flux or intensity of light from astronomical objects",
+    "explanation": "Photometry measures how much light is received from astronomical objects, used in variable star studies, exoplanet detection, and measuring distances.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is a hot Jupiter?",
+    "options": [
+      "Jupiter during a solar flare",
+      "A gas giant exoplanet orbiting very close to its star with orbital periods of just days",
+      "Jupiter's warmest atmospheric region",
+      "A type of failed star"
+    ],
+    "correct_answer": "A gas giant exoplanet orbiting very close to its star with orbital periods of just days",
+    "explanation": "Hot Jupiters were the first exoplanets discovered — giant planets orbiting so close to their stars that they have extreme temperatures and short orbital periods.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the TRAPPIST-1 system notable for?",
+    "options": [
+      "Having the most massive star known",
+      "Hosting seven Earth-sized planets three in the habitable zone",
+      "Being the closest star system to Earth",
+      "Having the fastest-orbiting planets"
+    ],
+    "correct_answer": "Hosting seven Earth-sized planets three in the habitable zone",
+    "explanation": "TRAPPIST-1 is a red dwarf star 39 light-years away with seven rocky Earth-sized planets, three of which orbit in the habitable zone.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the interstellar medium?",
+    "options": [
+      "The space inside a star",
+      "The matter and energy that exists between star systems in a galaxy",
+      "The medium-sized stars in a galaxy",
+      "The region between galaxies"
+    ],
+    "correct_answer": "The matter and energy that exists between star systems in a galaxy",
+    "explanation": "The interstellar medium (ISM) consists of gas mostly hydrogen, dust, cosmic rays, and magnetic fields filling the space between stars in a galaxy.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the Kuiper Belt?",
+    "options": [
+      "Asteroid Belt",
+      "A region of icy bodies beyond Neptune's orbit where Pluto orbits",
+      "The Oort Cloud",
+      "The Scattered Disc"
+    ],
+    "correct_answer": "A region of icy bodies beyond Neptune's orbit where Pluto orbits",
+    "explanation": "Pluto orbits in the Kuiper Belt, a region of icy bodies beyond Neptune's orbit extending from about 30 to 50 AU from the Sun.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "Which Saturn moon has active geysers?",
+    "options": [
+      "Titan",
+      "Rhea",
+      "Enceladus",
+      "Mimas"
+    ],
+    "correct_answer": "Enceladus",
+    "explanation": "Enceladus has active cryovolcanic geysers near its south pole that eject water vapor and ice, fed by a subsurface ocean of liquid water.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is tidal heating?",
+    "options": [
+      "Heating by the Sun's tidal force",
+      "Internal heating caused by the gravitational flexing of a moon by its planet",
+      "Heating of oceans by tidal currents",
+      "Heating from trapped solar energy"
+    ],
+    "correct_answer": "Internal heating caused by the gravitational flexing of a moon by its planet",
+    "explanation": "Tidal heating occurs when gravitational forces stretch and compress a moon as it orbits, converting orbital energy into heat — driving Io's volcanism.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is astrometry?",
+    "options": [
+      "The study of the composition of stars",
+      "The precise measurement of the positions and motions of stars and other celestial objects",
+      "The measurement of distances to galaxies",
+      "The study of stellar evolution"
+    ],
+    "correct_answer": "The precise measurement of the positions and motions of stars and other celestial objects",
+    "explanation": "Astrometry is one of the oldest branches of astronomy, now used by spacecraft like Gaia to map the positions and motions of over a billion stars.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the ESA Gaia mission?",
+    "options": [
+      "Hipparcos successor that mapped over a billion stars in the Milky Way",
+      "A mission to study black holes",
+      "A comet sample return mission",
+      "A mission to image exoplanets"
+    ],
+    "correct_answer": "Hipparcos successor that mapped over a billion stars in the Milky Way",
+    "explanation": "ESA's Gaia mission launched in 2013 and has measured the positions, distances, and motions of over 1.8 billion stars with unprecedented precision.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What did the Hubble Deep Field reveal?",
+    "options": [
+      "A nearby star cluster",
+      "Thousands of galaxies in a tiny patch of sky",
+      "The center of the Milky Way",
+      "A new type of nebula"
+    ],
+    "correct_answer": "Thousands of galaxies in a tiny patch of sky",
+    "explanation": "The Hubble Deep Field (1995) pointed Hubble at a tiny dark patch for 10 days, revealing about 3,000 galaxies in an area smaller than a grain of sand held at arm's length.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "How old is the universe?",
+    "options": [
+      "4.6 billion years",
+      "8 billion years",
+      "13.8 billion years",
+      "20 billion years"
+    ],
+    "correct_answer": "13.8 billion years",
+    "explanation": "Based on measurements of the cosmic microwave background and expansion rate, the universe is estimated to be about 13.8 billion years old.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is gravitational wave astronomy?",
+    "options": [
+      "Using gravity to bend light for observation",
+      "Detecting ripples in spacetime caused by accelerating massive objects like merging black holes",
+      "Using gravity to launch telescopes",
+      "Studying gravitational effects on star formation"
+    ],
+    "correct_answer": "Detecting ripples in spacetime caused by accelerating massive objects like merging black holes",
+    "explanation": "Gravitational wave astronomy uses detectors like LIGO to detect ripples in spacetime, opening a new window on events invisible to light telescopes.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What did LIGO detect in 2015?",
+    "options": [
+      "The first gamma-ray burst",
+      "The first merger of two black holes producing gravitational waves",
+      "The first pulsar discovered",
+      "The first exoplanet in the habitable zone"
+    ],
+    "correct_answer": "The first merger of two black holes producing gravitational waves",
+    "explanation": "On September 14, 2015, LIGO detected gravitational waves from two merging black holes 1.3 billion light-years away — the first direct detection of gravitational waves.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is a gamma-ray burst?",
+    "options": [
+      "An eruption on the Sun",
+      "The most energetic electromagnetic explosions in the universe from collapsing stars or neutron star mergers",
+      "Radiation from a pulsar",
+      "Radiation emitted by the CMB"
+    ],
+    "correct_answer": "The most energetic electromagnetic explosions in the universe from collapsing stars or neutron star mergers",
+    "explanation": "Gamma-ray bursts are the most powerful explosions in the universe, releasing more energy in seconds than the Sun will emit in its entire lifetime.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is spaghettification?",
+    "options": [
+      "Gravitational compression",
+      "The tidal stretching of objects into long thin shapes as they fall into a black hole",
+      "Hawking radiation",
+      "Tidal disruption event"
+    ],
+    "correct_answer": "The tidal stretching of objects into long thin shapes as they fall into a black hole",
+    "explanation": "Spaghettification is the tidal stretching of objects as they fall into a black hole — the gravitational pull on the near side is much stronger than on the far side.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is Hawking radiation?",
+    "options": [
+      "Radiation emitted by quasars",
+      "Thermal radiation theoretically emitted by black holes due to quantum effects near the event horizon",
+      "X-rays from neutron stars",
+      "Radiation detected from the Big Bang"
+    ],
+    "correct_answer": "Thermal radiation theoretically emitted by black holes due to quantum effects near the event horizon",
+    "explanation": "Hawking radiation is Stephen Hawking's prediction that black holes slowly lose mass by emitting thermal radiation due to quantum particle-antiparticle creation near the event horizon.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is Earth's axial precession?",
+    "options": [
+      "The wobble of a planet in its orbit",
+      "The slow gyroscopic wobble of Earth's rotational axis over a 26000 year cycle",
+      "The precession of a moon around a planet",
+      "The rotation of a galaxy"
+    ],
+    "correct_answer": "The slow gyroscopic wobble of Earth's rotational axis over a 26000 year cycle",
+    "explanation": "Earth's axis slowly precesses like a spinning top over about 26,000 years — eventually Polaris will no longer be the North Star.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "Which comet crashed into Jupiter in 1994?",
+    "options": [
+      "Halley's Comet",
+      "Comet Hale-Bopp",
+      "Comet Shoemaker-Levy 9",
+      "Comet Hyakutake"
+    ],
+    "correct_answer": "Comet Shoemaker-Levy 9",
+    "explanation": "Comet Shoemaker-Levy 9 broke apart and 21 fragments crashed into Jupiter over six days in July 1994, leaving dark scars larger than Earth.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the Yarkovsky effect?",
+    "options": [
+      "Poynting-Robertson effect",
+      "The gradual orbital change of a rotating asteroid caused by asymmetric thermal emission",
+      "Solar pressure drift",
+      "Radiation recoil"
+    ],
+    "correct_answer": "The gradual orbital change of a rotating asteroid caused by asymmetric thermal emission",
+    "explanation": "The Yarkovsky effect is the gradual orbital change of a rotating asteroid caused by asymmetric thermal emission — important for predicting asteroid trajectories.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What was the DART mission?",
+    "options": [
+      "OSIRIS-REx",
+      "Hayabusa2",
+      "NASA's asteroid deflection test that impacted Dimorphos in 2022",
+      "Deep Impact"
+    ],
+    "correct_answer": "NASA's asteroid deflection test that impacted Dimorphos in 2022",
+    "explanation": "NASA's DART (Double Asteroid Redirection Test) mission successfully impacted the asteroid Dimorphos in 2022, demonstrating the ability to deflect an asteroid.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What asteroid did OSIRIS-REx collect samples from?",
+    "options": [
+      "Eros",
+      "Vesta",
+      "Bennu",
+      "Ceres"
+    ],
+    "correct_answer": "Bennu",
+    "explanation": "NASA's OSIRIS-REx collected samples from near-Earth asteroid Bennu in 2020 and returned them to Earth in 2023, providing insights into early solar system materials.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the Hubble constant?",
+    "options": [
+      "The age of the universe",
+      "The rate at which the universe is expanding measured in km/s per megaparsec",
+      "The speed of light",
+      "The gravitational constant"
+    ],
+    "correct_answer": "The rate at which the universe is expanding measured in km/s per megaparsec",
+    "explanation": "The Hubble constant (H0) describes the current expansion rate of the universe — measuring it precisely is a major goal of modern astronomy.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the Hubble tension?",
+    "options": [
+      "The strain on the Hubble Space Telescope",
+      "The disagreement between early and late universe measurements of the Hubble constant",
+      "The tension in the Hubble telescope mirror",
+      "The difference between Hubble's predictions and observations"
+    ],
+    "correct_answer": "The disagreement between early and late universe measurements of the Hubble constant",
+    "explanation": "The Hubble tension is a significant discrepancy between H0 measured from the CMB and from Cepheids/supernovae, suggesting new physics may be needed.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is a coronal mass ejection (CME)?",
+    "options": [
+      "The ejection of a star's outer layers in a nova",
+      "A large expulsion of plasma and magnetic field from the Sun's corona into space",
+      "The release of energy in a solar flare",
+      "The solar wind at maximum strength"
+    ],
+    "correct_answer": "A large expulsion of plasma and magnetic field from the Sun's corona into space",
+    "explanation": "CMEs are large clouds of magnetized plasma ejected from the Sun's corona; when Earth-directed they can cause geomagnetic storms and damage satellites.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the cosmological principle?",
+    "options": [
+      "Isotropic universe model",
+      "Homogeneous universe model",
+      "The principle that on large scales the universe is homogeneous and isotropic with no preferred center",
+      "Copernican principle only"
+    ],
+    "correct_answer": "The principle that on large scales the universe is homogeneous and isotropic with no preferred center",
+    "explanation": "The cosmological principle states that on large scales the universe looks the same everywhere and in all directions — it has no center or edge.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What percentage of the universe is dark energy?",
+    "options": [
+      "About 5%",
+      "About 27%",
+      "About 68%",
+      "About 95%"
+    ],
+    "correct_answer": "About 68%",
+    "explanation": "Current cosmological models indicate the universe consists of about 68% dark energy, 27% dark matter, and only about 5% ordinary matter.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the cosmic distance ladder?",
+    "options": [
+      "A ranking of stars by brightness",
+      "A series of methods each calibrated by the previous for measuring progressively greater distances in the universe",
+      "The distance from Earth to the edge of the observable universe",
+      "A scale model of the solar system"
+    ],
+    "correct_answer": "A series of methods each calibrated by the previous for measuring progressively greater distances in the universe",
+    "explanation": "The distance ladder starts with radar ranging in the solar system, then parallax, Cepheids, and Type Ia supernovae — each method extends farther into the universe.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is a T Tauri star?",
+    "options": [
+      "A very old low-mass star",
+      "A young pre-main-sequence star still contracting toward the main sequence",
+      "A type of variable red giant",
+      "A binary star system"
+    ],
+    "correct_answer": "A young pre-main-sequence star still contracting toward the main sequence",
+    "explanation": "T Tauri stars are young (less than 10 million years) low-mass stars in the final stages of formation before settling on the main sequence.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the Fermi paradox?",
+    "options": [
+      "The paradox that stars can be both hot and cool",
+      "The contradiction between high estimates of intelligent alien civilizations and the lack of evidence for them",
+      "The paradox that the universe expands but appears static",
+      "The fact that the night sky is dark despite infinite stars"
+    ],
+    "correct_answer": "The contradiction between high estimates of intelligent alien civilizations and the lack of evidence for them",
+    "explanation": "Enrico Fermi asked 'Where is everybody?' — given the age and size of the universe where are the signs of extraterrestrial civilizations?",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is Olbers' paradox?",
+    "options": [
+      "The paradox that nearby stars are brighter than distant stars",
+      "The question of why the night sky is dark if the universe is infinite and filled with stars",
+      "The paradox of redshift vs blueshift in galaxies",
+      "The question of how stars can be so massive"
+    ],
+    "correct_answer": "The question of why the night sky is dark if the universe is infinite and filled with stars",
+    "explanation": "Olbers' paradox asks why the night sky is dark if the universe is infinite and filled with stars. The answer involves the finite age and expansion of the universe.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the Drake Equation?",
+    "options": [
+      "Calculating the Hubble constant",
+      "An equation estimating the number of communicating intelligent civilizations in the Milky Way",
+      "Measuring the distance to nearby stars",
+      "Calculating the mass of black holes"
+    ],
+    "correct_answer": "An equation estimating the number of communicating intelligent civilizations in the Milky Way",
+    "explanation": "The Drake Equation multiplies probabilities related to star formation, planetary systems, life emergence, and civilization development to estimate communicating civilizations.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the solar cycle?",
+    "options": [
+      "The orbit of the Sun around the Milky Way",
+      "The approximately 11-year cycle of the Sun's magnetic activity marked by sunspot numbers",
+      "The Sun's rotation period",
+      "Earth's annual orbit around the Sun"
+    ],
+    "correct_answer": "The approximately 11-year cycle of the Sun's magnetic activity marked by sunspot numbers",
+    "explanation": "The Sun follows an approximately 11-year cycle of activity — solar maximum has more sunspots flares and CMEs; solar minimum has fewer.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the Parker Solar Probe?",
+    "options": [
+      "Solar Dynamics Observatory",
+      "SOHO mission",
+      "NASA's mission launched in 2018 to study the Sun's corona at close range",
+      "Hinode mission"
+    ],
+    "correct_answer": "NASA's mission launched in 2018 to study the Sun's corona at close range",
+    "explanation": "NASA's Parker Solar Probe launched in 2018 and has made the closest-ever approaches to the Sun, studying the corona and solar wind origin.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What are the Magellanic Clouds?",
+    "options": [
+      "Cloud formations on Venus",
+      "Two irregular dwarf galaxies that are satellites of the Milky Way visible from the Southern Hemisphere",
+      "Gas clouds near the center of the Milky Way",
+      "Nebulae in the Orion constellation"
+    ],
+    "correct_answer": "Two irregular dwarf galaxies that are satellites of the Milky Way visible from the Southern Hemisphere",
+    "explanation": "The Large and Small Magellanic Clouds are dwarf galaxies orbiting the Milky Way, visible to the naked eye from the Southern Hemisphere.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the difference between a meteor meteoroid and meteorite?",
+    "options": [
+      "They are three names for the same object",
+      "A meteoroid is the space rock; a meteor is the streak of light in the atmosphere; a meteorite is what reaches the ground",
+      "A meteorite is in space; a meteor is in the atmosphere; a meteoroid is on the ground",
+      "Meteoroids are large; meteors are medium; meteorites are small"
+    ],
+    "correct_answer": "A meteoroid is the space rock; a meteor is the streak of light in the atmosphere; a meteorite is what reaches the ground",
+    "explanation": "The same object has different names depending on location: meteoroid in space, meteor (shooting star) while burning in atmosphere, meteorite after landing on Earth.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is SN 1987A?",
+    "options": [
+      "SN 1054",
+      "A supernova in the Large Magellanic Cloud visible to the naked eye — the closest observed since 1604",
+      "SN 2014J",
+      "SN 1006"
+    ],
+    "correct_answer": "A supernova in the Large Magellanic Cloud visible to the naked eye — the closest observed since 1604",
+    "explanation": "SN 1987A was a supernova in the Large Magellanic Cloud visible to the naked eye — the closest observed supernova since Kepler's Star in 1604.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is a circumstellar disk?",
+    "options": [
+      "The orbit of planets around a star",
+      "A disk of gas and dust orbiting a star potentially forming planets",
+      "A ring of asteroids around a star",
+      "The star's equatorial bulge"
+    ],
+    "correct_answer": "A disk of gas and dust orbiting a star potentially forming planets",
+    "explanation": "Circumstellar disks surround young stars and provide material for planet formation through the accretion of gas and dust.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is neutron degeneracy pressure?",
+    "options": [
+      "Electron degeneracy pressure",
+      "A quantum mechanical pressure that supports neutron stars against collapse",
+      "Strong nuclear force",
+      "Electromagnetic repulsion"
+    ],
+    "correct_answer": "A quantum mechanical pressure that supports neutron stars against collapse",
+    "explanation": "Neutron degeneracy pressure supports neutron stars against further collapse — if a neutron star exceeds about 2-3 solar masses it collapses into a black hole.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is an irregular galaxy?",
+    "options": [
+      "A barred spiral",
+      "A lenticular galaxy",
+      "A galaxy with no defined shape often from gravitational interactions",
+      "A ring galaxy"
+    ],
+    "correct_answer": "A galaxy with no defined shape often from gravitational interactions",
+    "explanation": "Irregular galaxies have no defined shape — often the result of gravitational interactions or mergers. The Large and Small Magellanic Clouds are irregular galaxies.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the Hubble sequence (tuning fork diagram)?",
+    "options": [
+      "Yerkes classification",
+      "Hubble's galaxy classification dividing galaxies into ellipticals spirals lenticulars and barred spirals",
+      "De Vaucouleurs classification",
+      "Morgan-Keenan system"
+    ],
+    "correct_answer": "Hubble's galaxy classification dividing galaxies into ellipticals spirals lenticulars and barred spirals",
+    "explanation": "The Hubble sequence (tuning fork diagram) classifies galaxies as ellipticals (E0-E7), lenticulars (S0), spirals (Sa-Sc), and barred spirals (SBa-SBc).",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the main sequence lifetime of the Sun?",
+    "options": [
+      "1 billion years total",
+      "5 billion years total",
+      "About 10 billion years total with about 5 billion years remaining",
+      "About 100 billion years"
+    ],
+    "correct_answer": "About 10 billion years total with about 5 billion years remaining",
+    "explanation": "The Sun will spend about 10 billion years on the main sequence; having spent about 4.6 billion years already it has about 5 billion years left.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is a stellar flare?",
+    "options": [
+      "A star brightening as it ages",
+      "A sudden intense brightening of a star caused by magnetic energy release",
+      "The expanding shell of a supernova",
+      "A type of nova explosion"
+    ],
+    "correct_answer": "A sudden intense brightening of a star caused by magnetic energy release",
+    "explanation": "Stellar flares are explosive releases of magnetic energy from a star, releasing X-rays and energetic particles — M-dwarf flares can threaten exoplanet atmospheres.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is direct imaging of exoplanets?",
+    "options": [
+      "Transit photometry",
+      "Radial velocity",
+      "Using coronagraphs to block starlight allowing the planet to be directly detected",
+      "Astrometry"
+    ],
+    "correct_answer": "Using coronagraphs to block starlight allowing the planet to be directly detected",
+    "explanation": "Direct imaging blocks the bright star's light with a coronagraph, allowing the much fainter planet to be detected — currently limited to large planets far from their stars.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the frost line in a protoplanetary disk?",
+    "options": [
+      "The habitable zone",
+      "The distance from a star beyond which volatile compounds condense into solids allowing gas giant formation",
+      "The Roche limit",
+      "The Hill sphere"
+    ],
+    "correct_answer": "The distance from a star beyond which volatile compounds condense into solids allowing gas giant formation",
+    "explanation": "The frost line is the distance where water, methane, and CO2 freeze — beyond it, solid ice is available for building the large cores needed to become gas giants.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the Ceres dwarf planet known for?",
+    "options": [
+      "Being the largest known dwarf planet",
+      "Being the largest object in the asteroid belt studied by NASA's Dawn spacecraft",
+      "Being a satellite of Jupiter",
+      "Being beyond Neptune in the Kuiper Belt"
+    ],
+    "correct_answer": "Being the largest object in the asteroid belt studied by NASA's Dawn spacecraft",
+    "explanation": "Ceres is the largest object in the asteroid belt and was classified as a dwarf planet in 2006. NASA's Dawn spacecraft orbited it from 2015 to 2018.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the termination shock?",
+    "options": [
+      "Magnetopause",
+      "The boundary where solar wind slows to subsonic speed before reaching the heliopause",
+      "The heliopause",
+      "The shock wave from a supernova"
+    ],
+    "correct_answer": "The boundary where solar wind slows to subsonic speed before reaching the heliopause",
+    "explanation": "The termination shock is where the solar wind slows to subsonic speed as it meets the interstellar medium, inside the heliopause.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is a prograde orbit?",
+    "options": [
+      "An orbit in the same direction as the central body rotates",
+      "An orbit going opposite to the central body's rotation",
+      "A circular orbit",
+      "An orbit that is decaying"
+    ],
+    "correct_answer": "An orbit in the same direction as the central body rotates",
+    "explanation": "Most moons orbit prograde (same direction as planet rotation); retrograde orbits like Triton's suggest the moon was gravitationally captured.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the Sunyaev-Zel'dovich effect?",
+    "options": [
+      "The redshift of galaxies moving away",
+      "The distortion of the cosmic microwave background by hot electrons in galaxy clusters",
+      "The bending of light by galaxy clusters",
+      "The brightening of galaxies due to gravitational lensing"
+    ],
+    "correct_answer": "The distortion of the cosmic microwave background by hot electrons in galaxy clusters",
+    "explanation": "The SZ effect occurs when CMB photons gain energy by scattering off hot electrons in galaxy cluster gas — useful for finding galaxy clusters.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the FAST radio telescope?",
+    "options": [
+      "A NASA X-ray telescope",
+      "China's 500-meter aperture spherical radio telescope the world's largest single-dish radio telescope",
+      "The antenna array in New Mexico",
+      "Australia's Parkes telescope"
+    ],
+    "correct_answer": "China's 500-meter aperture spherical radio telescope the world's largest single-dish radio telescope",
+    "explanation": "FAST in Guizhou China is the world's largest single-dish radio telescope at 500 meters in diameter, surpassing the Arecibo Observatory.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is a transit of Venus historically significant for?",
+    "options": [
+      "Venus crossing in front of Jupiter",
+      "Historically used to measure the Earth-Sun distance by observing Venus cross the Sun's disk",
+      "Venus entering Earth's shadow",
+      "Venus crossing the ecliptic"
+    ],
+    "correct_answer": "Historically used to measure the Earth-Sun distance by observing Venus cross the Sun's disk",
+    "explanation": "Transits of Venus were historically used by astronomers to calculate the Earth-Sun distance through triangulation from different locations on Earth.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is photodissociation in astronomy?",
+    "options": [
+      "The creation of stars from gas",
+      "The breakdown of molecules by ultraviolet photons from nearby stars",
+      "The emission of photons by excited atoms",
+      "The formation of planets from dust"
+    ],
+    "correct_answer": "The breakdown of molecules by ultraviolet photons from nearby stars",
+    "explanation": "Photodissociation occurs when high-energy UV photons break molecular bonds — important in stellar nurseries where massive stars destroy surrounding gas.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the process where a gas cloud collapses to form a star?",
+    "options": [
+      "Stellar nucleosynthesis",
+      "Gravitational collapse of a molecular cloud",
+      "Nuclear ignition",
+      "Supernova implosion"
+    ],
+    "correct_answer": "Gravitational collapse of a molecular cloud",
+    "explanation": "Star formation begins when a dense region of a molecular cloud collapses under its own gravity, heating up until nuclear fusion begins.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the Hertzsprung gap on the H-R diagram?",
+    "options": [
+      "A gap in the main sequence",
+      "A region nearly devoid of stars between the main sequence and red giant branch representing rapid evolution",
+      "The space between giants and supergiants",
+      "The boundary between white dwarfs and neutron stars"
+    ],
+    "correct_answer": "A region nearly devoid of stars between the main sequence and red giant branch representing rapid evolution",
+    "explanation": "The Hertzsprung gap reflects the very fast evolution of stars as they leave the main sequence, spending little time in this intermediate region.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the difference between Population I and Population II stars?",
+    "options": [
+      "Population I stars are hotter",
+      "Population I stars are younger and metal-rich; Population II stars are older and metal-poor",
+      "Population II stars are in the disk; Population I are in the halo",
+      "They are the same type"
+    ],
+    "correct_answer": "Population I stars are younger and metal-rich; Population II stars are older and metal-poor",
+    "explanation": "Population I stars formed more recently from gas enriched by previous generations; Population II stars formed early in the universe from nearly pristine hydrogen and helium.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the helium flash?",
+    "options": [
+      "A burst of solar wind",
+      "The explosive onset of helium fusion in the degenerate core of a low-mass red giant",
+      "A flare on a helium-rich star",
+      "The ignition of the Sun's core"
+    ],
+    "correct_answer": "The explosive onset of helium fusion in the degenerate core of a low-mass red giant",
+    "explanation": "The helium flash is a brief explosive event in a degenerate helium core when helium fusion suddenly ignites, releasing enormous energy in seconds.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is a magnetar?",
+    "options": [
+      "A strongly magnetic planet",
+      "A neutron star with an extremely powerful magnetic field, the strongest known in the universe",
+      "A magnetic black hole",
+      "A binary neutron star"
+    ],
+    "correct_answer": "A neutron star with an extremely powerful magnetic field, the strongest known in the universe",
+    "explanation": "Magnetars have magnetic fields trillions of times stronger than Earth's, occasionally releasing enormous bursts of X-rays and gamma rays.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the powerful jets launched from some black holes?",
+    "options": [
+      "Solar wind jets",
+      "Relativistic jets",
+      "Plasma streams",
+      "Hawking outflows"
+    ],
+    "correct_answer": "Relativistic jets",
+    "explanation": "Relativistic jets are beams of plasma launched near the speed of light from active galactic nuclei and some neutron stars, extending millions of light-years.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is an active galactic nucleus (AGN)?",
+    "options": [
+      "The central bulge of a spiral galaxy",
+      "The extremely luminous center of a galaxy powered by a supermassive black hole actively accreting matter",
+      "A galaxy with many new stars forming",
+      "A galaxy being torn apart by gravity"
+    ],
+    "correct_answer": "The extremely luminous center of a galaxy powered by a supermassive black hole actively accreting matter",
+    "explanation": "AGN include quasars, Seyfert galaxies, and blazars — all powered by accretion onto supermassive black holes and outshining entire galaxies.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is a Seyfert galaxy?",
+    "options": [
+      "A type of irregular galaxy",
+      "A spiral or lenticular galaxy with an unusually bright nucleus powered by an AGN",
+      "A galaxy without dark matter",
+      "A galaxy forming new stars rapidly"
+    ],
+    "correct_answer": "A spiral or lenticular galaxy with an unusually bright nucleus powered by an AGN",
+    "explanation": "Seyfert galaxies have bright nuclei with broad emission lines, indicating rapidly moving gas near a supermassive black hole — a lower-luminosity form of AGN.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the Large Hadron Collider's relevance to astronomy?",
+    "options": [
+      "It directly observes distant galaxies",
+      "It recreates conditions similar to the early universe, helping understand primordial physics",
+      "It detects gravitational waves",
+      "It launches spacecraft"
+    ],
+    "correct_answer": "It recreates conditions similar to the early universe, helping understand primordial physics",
+    "explanation": "The LHC smashes particles at near light-speed, recreating conditions from microseconds after the Big Bang, helping cosmologists understand the early universe.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the cosmic ray?",
+    "options": [
+      "A type of radio wave from space",
+      "Highly energetic particles (protons and nuclei) traveling through space at nearly the speed of light",
+      "UV radiation from the Sun",
+      "A beam of gamma rays from a pulsar"
+    ],
+    "correct_answer": "Highly energetic particles (protons and nuclei) traveling through space at nearly the speed of light",
+    "explanation": "Cosmic rays are high-energy particles, mostly protons and atomic nuclei, that bombard Earth from all directions, originating from supernovae and other energetic sources.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is dark matter's evidence based on?",
+    "options": [
+      "Direct detection in laboratories",
+      "The gravitational effects on visible matter including galaxy rotation curves and gravitational lensing",
+      "Observation of dark-colored regions in space",
+      "The cosmic microwave background only"
+    ],
+    "correct_answer": "The gravitational effects on visible matter including galaxy rotation curves and gravitational lensing",
+    "explanation": "Dark matter is inferred from galaxy rotation curves (stars orbiting too fast), gravitational lensing, and galaxy cluster dynamics — never directly detected.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the galaxy rotation curve problem?",
+    "options": [
+      "Galaxies rotating faster at the center than expected",
+      "The observation that stars at the outer edges of galaxies orbit faster than gravity from visible matter can explain, implying dark matter",
+      "Galaxies rotating slower than expected at all radii",
+      "The fact that galaxies have different rotation rates"
+    ],
+    "correct_answer": "The observation that stars at the outer edges of galaxies orbit faster than gravity from visible matter can explain, implying dark matter",
+    "explanation": "Galaxy rotation curves are flat rather than declining at large radii — Vera Rubin's discovery that suggested vast amounts of unseen dark matter.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the Bullet Cluster?",
+    "options": [
+      "An asteroid cluster near Jupiter",
+      "A famous galaxy cluster collision providing evidence for dark matter separate from normal matter",
+      "A type of neutron star cluster",
+      "A region of intense star formation"
+    ],
+    "correct_answer": "A famous galaxy cluster collision providing evidence for dark matter separate from normal matter",
+    "explanation": "The Bullet Cluster shows that dark matter and hot gas separated during the collision — the dark matter passed through while gas was slowed, confirming dark matter exists.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is baryon acoustic oscillation (BAO)?",
+    "options": [
+      "Sound waves in stellar cores",
+      "Density fluctuations in the early universe that left an imprint on the large-scale structure of galaxies",
+      "Oscillations in pulsar emission",
+      "Vibrations in Saturn's rings"
+    ],
+    "correct_answer": "Density fluctuations in the early universe that left an imprint on the large-scale structure of galaxies",
+    "explanation": "BAO are regular, periodic fluctuations in the density of visible baryonic matter caused by acoustic waves in the early universe, used as a standard ruler.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the Sachs-Wolfe effect?",
+    "options": [
+      "The redshift of CMB photons climbing out of gravitational wells",
+      "The heating of the CMB by galaxy clusters",
+      "The polarization of CMB by dust",
+      "The blueshifting of photons entering deep space"
+    ],
+    "correct_answer": "The redshift of CMB photons climbing out of gravitational wells",
+    "explanation": "The Sachs-Wolfe effect causes temperature fluctuations in the CMB — photons escaping from denser regions lose energy (redshift), while those from voids gain energy.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the epoch of reionization?",
+    "options": [
+      "When the universe first formed atoms",
+      "The period when the first stars and galaxies ionized the neutral hydrogen gas that had filled the universe",
+      "The period of rapid inflation after the Big Bang",
+      "The current era of accelerating expansion"
+    ],
+    "correct_answer": "The period when the first stars and galaxies ionized the neutral hydrogen gas that had filled the universe",
+    "explanation": "The epoch of reionization (around 200-900 million years after the Big Bang) marks when radiation from the first stars re-ionized neutral hydrogen in the universe.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the upcoming NASA mission to study the atmospheres of exoplanets?",
+    "options": [
+      "Kepler 2",
+      "TESS",
+      "LUVOIR",
+      "Hubble replacement"
+    ],
+    "correct_answer": "LUVOIR",
+    "explanation": "LUVOIR (Large UV/Optical/Infrared Surveyor) is a proposed NASA concept for a large space telescope designed to characterize exoplanet atmospheres and search for biosignatures.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is an Einstein ring?",
+    "options": [
+      "A ring-shaped galaxy",
+      "A complete ring of light formed when a background galaxy is perfectly aligned with a foreground massive object",
+      "The orbit of light near a black hole",
+      "A type of gravitational wave"
+    ],
+    "correct_answer": "A complete ring of light formed when a background galaxy is perfectly aligned with a foreground massive object",
+    "explanation": "An Einstein ring is a perfect circle of distorted light from a background galaxy, seen when the source, lens, and observer are in exact alignment.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the photon sphere around a black hole?",
+    "options": [
+      "The accretion disk",
+      "The region where gravity is strong enough that photons orbit the black hole in circular paths",
+      "The event horizon",
+      "The ergosphere"
+    ],
+    "correct_answer": "The region where gravity is strong enough that photons orbit the black hole in circular paths",
+    "explanation": "At 1.5 Schwarzschild radii, photons can orbit a black hole in unstable circular orbits — the photon sphere is visible as a bright ring in black hole images.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the ergosphere of a rotating black hole?",
+    "options": [
+      "The region just inside the event horizon",
+      "The region outside a rotating black hole's event horizon where spacetime is dragged along with the rotation",
+      "The accretion disk boundary",
+      "The photon sphere"
+    ],
+    "correct_answer": "The region outside a rotating black hole's event horizon where spacetime is dragged along with the rotation",
+    "explanation": "The ergosphere surrounds a rotating (Kerr) black hole; within it spacetime rotates so fast that nothing can remain stationary, though objects can still escape.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What are biosignatures in the context of exoplanet research?",
+    "options": [
+      "Signs of planet formation",
+      "Chemical or physical indicators in an exoplanet's atmosphere that could indicate the presence of life",
+      "Signs of water on exoplanets",
+      "Evidence of volcanic activity on exoplanets"
+    ],
+    "correct_answer": "Chemical or physical indicators in an exoplanet's atmosphere that could indicate the presence of life",
+    "explanation": "Biosignatures include gases like oxygen, methane, and nitrous oxide that are produced by life and would be unexpected in a lifeless atmosphere.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is astrochemistry?",
+    "options": [
+      "The chemistry of Earth's atmosphere",
+      "The study of chemical processes in space and the formation of molecules in the interstellar medium",
+      "The chemistry of meteorites",
+      "The study of chemical composition of stars"
+    ],
+    "correct_answer": "The study of chemical processes in space and the formation of molecules in the interstellar medium",
+    "explanation": "Astrochemistry studies molecules in space — from simple ones like H2 and CO to complex organic molecules found in nebulae and on comets.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the technique using microlensing to detect exoplanets?",
+    "options": [
+      "Transit method",
+      "Radial velocity",
+      "Gravitational microlensing",
+      "Astrometry"
+    ],
+    "correct_answer": "Gravitational microlensing",
+    "explanation": "Gravitational microlensing detects exoplanets when a planet's gravity briefly magnifies a background star's light, useful for detecting planets at large orbital distances.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the solar neutrino problem?",
+    "options": [
+      "Too many neutrinos from the Sun",
+      "The initial discrepancy between the predicted and observed number of neutrinos from the Sun, solved by neutrino oscillation",
+      "Neutrinos traveling faster than light",
+      "The Sun emitting the wrong type of neutrinos"
+    ],
+    "correct_answer": "The initial discrepancy between the predicted and observed number of neutrinos from the Sun, solved by neutrino oscillation",
+    "explanation": "Solar neutrino detectors initially found fewer neutrinos than predicted — the resolution was that neutrinos oscillate between types, with detectors only detecting one type.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the Milky Way's stellar disk thickness?",
+    "options": [
+      "About 100 light-years",
+      "About 1,000 light-years (thin disk) with a thicker component extending to ~3,500 light-years",
+      "About 10,000 light-years",
+      "About 100,000 light-years"
+    ],
+    "correct_answer": "About 1,000 light-years (thin disk) with a thicker component extending to ~3,500 light-years",
+    "explanation": "The Milky Way has a thin disk about 1,000 light-years thick containing most stars and a thick disk extending to about 3,500 light-years.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the Milky Way's supermassive black hole?",
+    "options": [
+      "M87*",
+      "Sagittarius A*",
+      "NGC 1277*",
+      "Centaurus A*"
+    ],
+    "correct_answer": "Sagittarius A*",
+    "explanation": "Sagittarius A* is the supermassive black hole at the center of the Milky Way, with a mass of about 4 million solar masses. Its shadow was imaged in 2022.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the structure of the Milky Way's spiral arms?",
+    "options": [
+      "The galaxy has no spiral arms",
+      "Four main spiral arms including Perseus, Sagittarius, Cygnus, and Centaurus arms",
+      "Two main arms called Orion and Cygnus",
+      "Eight spiral arms like octopus tentacles"
+    ],
+    "correct_answer": "Four main spiral arms including Perseus, Sagittarius, Cygnus, and Centaurus arms",
+    "explanation": "The Milky Way has four major spiral arms — Perseus, Sagittarius, Norma, and Scutum-Centaurus — plus shorter spurs including the Orion Arm where our Sun is located.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the Sloan Digital Sky Survey?",
+    "options": [
+      "A NASA space telescope",
+      "A comprehensive ground-based survey that has mapped millions of galaxies and quasars",
+      "A survey of Mars by rovers",
+      "A catalog of all known asteroids"
+    ],
+    "correct_answer": "A comprehensive ground-based survey that has mapped millions of galaxies and quasars",
+    "explanation": "The SDSS has produced detailed maps of hundreds of millions of objects, contributed enormously to understanding large-scale structure, and discovered thousands of quasars.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the Atacama Large Millimeter Array (ALMA)?",
+    "options": [
+      "A single large radio telescope",
+      "An array of 66 radio telescope dishes in Chile observing in millimeter and submillimeter wavelengths",
+      "A space telescope",
+      "An optical telescope in the Atacama desert"
+    ],
+    "correct_answer": "An array of 66 radio telescope dishes in Chile observing in millimeter and submillimeter wavelengths",
+    "explanation": "ALMA is a powerful radio interferometer in the Chilean Atacama desert that has imaged protoplanetary disks, galaxy formation, and molecular clouds in unprecedented detail.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the difference between a nova and a supernova?",
+    "options": [
+      "They are the same event at different scales",
+      "A nova is a less violent eruption on a white dwarf in a binary; a supernova is the complete destruction of a star",
+      "Supernovae are in other galaxies; novae are in the Milky Way",
+      "Novae produce more light than supernovae"
+    ],
+    "correct_answer": "A nova is a less violent eruption on a white dwarf in a binary; a supernova is the complete destruction of a star",
+    "explanation": "A nova occurs when hydrogen accreted on a white dwarf ignites in a nuclear flash — the white dwarf survives. A supernova destroys the star entirely.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the solar constant?",
+    "options": [
+      "The fixed temperature of the Sun",
+      "The average power per unit area received from the Sun at Earth's distance (about 1,361 W/m2)",
+      "The constant rate of solar wind",
+      "The Sun's constant magnetic field strength"
+    ],
+    "correct_answer": "The average power per unit area received from the Sun at Earth's distance (about 1,361 W/m2)",
+    "explanation": "The solar constant is about 1,361 W/m2 — the average solar irradiance at Earth's mean distance from the Sun, essential for climate and energy calculations.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the interplanetary magnetic field?",
+    "options": [
+      "Earth's magnetic field",
+      "The magnetic field carried outward from the Sun by the solar wind forming a heliospheric current sheet",
+      "Jupiter's magnetic field",
+      "The magnetic field between asteroid belt bodies"
+    ],
+    "correct_answer": "The magnetic field carried outward from the Sun by the solar wind forming a heliospheric current sheet",
+    "explanation": "The Sun's magnetic field is carried into the solar system by the solar wind, forming the heliospheric magnetic field with a spiral (Parker spiral) structure.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the Chandrasekhar-Oppenheimer-Volkoff limit?",
+    "options": [
+      "The mass limit of a white dwarf",
+      "The maximum mass of a neutron star (approximately 2-3 solar masses) above which it collapses to a black hole",
+      "The minimum mass to start nuclear fusion",
+      "The maximum brightness of a supernova"
+    ],
+    "correct_answer": "The maximum mass of a neutron star (approximately 2-3 solar masses) above which it collapses to a black hole",
+    "explanation": "The TOV limit is the neutron star equivalent of the Chandrasekhar limit — above about 2-3 solar masses, neutron degeneracy pressure can no longer prevent collapse.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is nuclear pasta in neutron stars?",
+    "options": [
+      "A type of pasta-shaped nebula",
+      "Strange phases of matter in neutron star crusts where nucleons arrange in geometric shapes due to competition between nuclear and electromagnetic forces",
+      "Fusion products in a star",
+      "The crystalline structure of a white dwarf"
+    ],
+    "correct_answer": "Strange phases of matter in neutron star crusts where nucleons arrange in geometric shapes due to competition between nuclear and electromagnetic forces",
+    "explanation": "Nuclear pasta phases (gnocchi, spaghetti, lasagna) form in neutron star crusts where extreme density creates novel states of nuclear matter.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the galaxy supercluster our Milky Way belongs to?",
+    "options": [
+      "Virgo Cluster",
+      "Local Group",
+      "Laniakea Supercluster",
+      "Coma Cluster"
+    ],
+    "correct_answer": "Laniakea Supercluster",
+    "explanation": "The Milky Way is part of the Laniakea Supercluster, a massive structure containing about 100,000 galaxies and spanning 520 million light-years.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the Virgo Cluster?",
+    "options": [
+      "A star cluster in the constellation Virgo",
+      "The nearest large galaxy cluster to the Milky Way at about 53 million light-years",
+      "A supercluster containing our Milky Way",
+      "A cluster of stars in the galactic center"
+    ],
+    "correct_answer": "The nearest large galaxy cluster to the Milky Way at about 53 million light-years",
+    "explanation": "The Virgo Cluster contains over 1,300 galaxies including the giant elliptical M87 and dominates the Local Supercluster (Virgo Supercluster).",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the concept of lookback time?",
+    "options": [
+      "The time it takes to process astronomical data",
+      "The time it took light to travel from a distant object to us, meaning we see objects as they were in the past",
+      "The time elapsed since a star formed",
+      "The time needed for a telescope to rotate"
+    ],
+    "correct_answer": "The time it took light to travel from a distant object to us, meaning we see objects as they were in the past",
+    "explanation": "When we observe a galaxy 1 billion light-years away, we see it as it was 1 billion years ago — all astronomical observation is inherently looking back in time.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the Planck satellite's primary contribution to cosmology?",
+    "options": [
+      "Mapping exoplanet atmospheres",
+      "Producing the most precise measurements of CMB temperature fluctuations, constraining cosmological parameters",
+      "Detecting gravitational waves",
+      "Imaging nearby stars"
+    ],
+    "correct_answer": "Producing the most precise measurements of CMB temperature fluctuations, constraining cosmological parameters",
+    "explanation": "ESA's Planck satellite (2009-2013) produced the most detailed maps of CMB temperature and polarization, precisely measuring the universe's age, composition, and geometry.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the difference between emission and absorption spectral lines?",
+    "options": [
+      "They are the same lines with different names",
+      "Emission lines are bright lines from atoms releasing photons; absorption lines are dark lines where atoms absorb photons from a continuous spectrum",
+      "Absorption lines are bright; emission lines are dark",
+      "They appear at different wavelengths for the same element"
+    ],
+    "correct_answer": "Emission lines are bright lines from atoms releasing photons; absorption lines are dark lines where atoms absorb photons from a continuous spectrum",
+    "explanation": "Emission lines appear bright against a dark background from hot, low-density gas; absorption lines are dark against a bright continuum when cool gas absorbs specific wavelengths.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the Hertzsprung-Russell diagram's instability strip?",
+    "options": [
+      "The region where stars explode",
+      "A near-vertical region of the H-R diagram where pulsating variable stars like Cepheids and RR Lyrae are found",
+      "The region between main sequence and white dwarfs",
+      "The boundary between stable and unstable black holes"
+    ],
+    "correct_answer": "A near-vertical region of the H-R diagram where pulsating variable stars like Cepheids and RR Lyrae are found",
+    "explanation": "The instability strip is a region of the H-R diagram where stars pulsate due to helium ionization zones that drive oscillations in their outer layers.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is meant by a star's metallicity?",
+    "options": [
+      "The amount of iron in a star",
+      "The abundance of elements heavier than hydrogen and helium in a star",
+      "The density of a star's core",
+      "The magnetic field strength of a star"
+    ],
+    "correct_answer": "The abundance of elements heavier than hydrogen and helium in a star",
+    "explanation": "In astronomy, 'metals' means all elements heavier than helium — stellar metallicity measures these elements, reflecting how many generations of stars enriched the galaxy before a star formed.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the Kelvin-Helmholtz mechanism?",
+    "options": [
+      "Nuclear fusion in stars",
+      "The gravitational contraction of a body that releases heat, powering stars before nuclear ignition",
+      "The cooling of white dwarfs",
+      "The convection of energy in stellar interiors"
+    ],
+    "correct_answer": "The gravitational contraction of a body that releases heat, powering stars before nuclear ignition",
+    "explanation": "The Kelvin-Helmholtz mechanism converts gravitational potential energy into heat during stellar contraction, powering pre-main-sequence stars and brown dwarfs.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the NASA spacecraft that became the first to orbit an asteroid?",
+    "options": [
+      "Galileo",
+      "Deep Space 1",
+      "NEAR Shoemaker",
+      "Dawn"
+    ],
+    "correct_answer": "NEAR Shoemaker",
+    "explanation": "NEAR Shoemaker became the first spacecraft to orbit an asteroid (Eros) in 2000, and later became the first to land on one.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is a symbiotic star?",
+    "options": [
+      "Two identical stars",
+      "A binary system in which a cool giant star and a hot compact star (usually white dwarf) interact through mass transfer",
+      "A star that appears to have two colors",
+      "A pre-main-sequence binary"
+    ],
+    "correct_answer": "A binary system in which a cool giant star and a hot compact star (usually white dwarf) interact through mass transfer",
+    "explanation": "Symbiotic stars are interacting binaries showing emission from both a cool giant and hot nebular gas ionized by the compact companion, displaying complex spectra.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the role of Type Ia supernovae in cosmology?",
+    "options": [
+      "They show where stars form",
+      "They serve as standard candles for measuring cosmic distances and were used to discover the accelerating expansion of the universe",
+      "They produce all the heavy elements in the universe",
+      "They mark the location of black holes"
+    ],
+    "correct_answer": "They serve as standard candles for measuring cosmic distances and were used to discover the accelerating expansion of the universe",
+    "explanation": "Type Ia supernovae have consistent peak luminosities, making them standard candles. In 1998 they revealed that the universe's expansion is accelerating, implying dark energy.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is a circumstellar habitable zone around a red dwarf star?",
+    "options": [
+      "Too far away to support life",
+      "Much closer to the star than around the Sun, raising concerns about tidal locking and stellar flares",
+      "Identical to the Sun's habitable zone",
+      "Extends beyond the planetary system"
+    ],
+    "correct_answer": "Much closer to the star than around the Sun, raising concerns about tidal locking and stellar flares",
+    "explanation": "Red dwarf habitable zones are very close to the star (0.1-0.4 AU), meaning planets may be tidally locked and face intense flare activity, complicating habitability.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the angular resolution of a telescope?",
+    "options": [
+      "How many objects a telescope can see",
+      "The minimum angular separation between two objects that a telescope can distinguish",
+      "The maximum distance a telescope can see",
+      "The width of a telescope's field of view"
+    ],
+    "correct_answer": "The minimum angular separation between two objects that a telescope can distinguish",
+    "explanation": "Angular resolution is limited by diffraction — larger telescopes and shorter wavelengths give better (smaller) angular resolution, described by the Rayleigh criterion.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is interferometry in astronomy?",
+    "options": [
+      "Measuring radiation interference",
+      "Combining signals from multiple telescopes to achieve the resolution of a much larger single telescope",
+      "Measuring the interference of gravitational waves",
+      "Splitting starlight into components"
+    ],
+    "correct_answer": "Combining signals from multiple telescopes to achieve the resolution of a much larger single telescope",
+    "explanation": "Interferometry combines signals from separated telescopes, achieving the resolution of a telescope as large as their separation — the Event Horizon Telescope uses Earth-scale interferometry.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is adaptive optics?",
+    "options": [
+      "Adjusting telescope mirrors to compensate for atmospheric distortion in real time",
+      "Optical lenses that adapt to different wavelengths",
+      "Telescope mirrors that change focus automatically",
+      "Computer processing to enhance astronomical images"
+    ],
+    "correct_answer": "Adjusting telescope mirrors to compensate for atmospheric distortion in real time",
+    "explanation": "Adaptive optics systems use deformable mirrors corrected by a wavefront sensor to counteract atmospheric turbulence, dramatically sharpening ground-based telescope images.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is a tidal disruption event (TDE)?",
+    "options": [
+      "An earthquake caused by tidal forces",
+      "When a star passes close enough to a black hole to be torn apart by tidal forces",
+      "The disruption of a moon by a planet's gravity",
+      "A comet being disrupted by Jupiter's gravity"
+    ],
+    "correct_answer": "When a star passes close enough to a black hole to be torn apart by tidal forces",
+    "explanation": "TDEs occur when a star passes within the tidal radius of a supermassive black hole — the star is disrupted, and roughly half the material falls back, creating a luminous flare.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the upcoming Extremely Large Telescope?",
+    "options": [
+      "Giant Magellan Telescope",
+      "European Extremely Large Telescope (E-ELT)",
+      "Thirty Meter Telescope",
+      "Very Large Telescope 2"
+    ],
+    "correct_answer": "European Extremely Large Telescope (E-ELT)",
+    "explanation": "The ELT being built in Chile by ESO will have a 39-meter primary mirror, making it the world's largest optical/infrared telescope, operational expected in the late 2020s.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the TESS mission?",
+    "options": [
+      "The successor to Kepler searching for transiting exoplanets around nearby bright stars",
+      "A telescope studying the Sun",
+      "A deep field survey telescope",
+      "A mission to study dark energy"
+    ],
+    "correct_answer": "The successor to Kepler searching for transiting exoplanets around nearby bright stars",
+    "explanation": "TESS (Transiting Exoplanet Survey Satellite) launched in 2018 and monitors the nearest and brightest stars for exoplanet transits, covering almost the entire sky.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the approximate number of stars in the Milky Way?",
+    "options": [
+      "1 million stars",
+      "1 billion stars",
+      "100-400 billion stars",
+      "1 trillion stars"
+    ],
+    "correct_answer": "100-400 billion stars",
+    "explanation": "Current estimates place the Milky Way's stellar population at roughly 100-400 billion stars, though the number is difficult to determine precisely due to our location inside the galaxy.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the concept of stellar mass affecting lifetime?",
+    "options": [
+      "More massive stars live longer",
+      "More massive stars burn fuel faster and have shorter lives — a 10 solar mass star lives tens of millions of years versus 10 billion for a Sun-like star",
+      "All stars live the same length of time",
+      "Less massive stars live shorter lives"
+    ],
+    "correct_answer": "More massive stars burn fuel faster and have shorter lives — a 10 solar mass star lives tens of millions of years versus 10 billion for a Sun-like star",
+    "explanation": "More massive stars have higher core temperatures and pressures, burning through their hydrogen fuel much faster. Massive blue stars may live only millions of years.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the mission of the James Webb Space Telescope?",
+    "options": [
+      "Replacing Hubble to study nearby planets",
+      "Observing the first galaxies, star formation, and exoplanet atmospheres in infrared light",
+      "Mapping the entire Milky Way",
+      "Detecting gravitational waves"
+    ],
+    "correct_answer": "Observing the first galaxies, star formation, and exoplanet atmospheres in infrared light",
+    "explanation": "JWST observes in infrared wavelengths, allowing it to see through dust, peer at the first galaxies from 13 billion years ago, and analyze exoplanet atmospheres.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the concept of angular momentum conservation in star formation?",
+    "options": [
+      "Stars slow down as they form",
+      "As gas clouds collapse, conservation of angular momentum causes them to spin faster and flatten into a disk",
+      "Angular momentum is lost as stars form",
+      "All protostars spin at the same rate"
+    ],
+    "correct_answer": "As gas clouds collapse, conservation of angular momentum causes them to spin faster and flatten into a disk",
+    "explanation": "Like a spinning ice skater pulling in their arms, collapsing gas clouds spin faster as they contract, forming the protostellar disk that eventually becomes a solar system.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the Eddington luminosity?",
+    "options": [
+      "The minimum brightness of a star",
+      "The maximum luminosity at which radiation pressure balances gravity preventing accretion",
+      "The luminosity of the Sun",
+      "The average luminosity of a galaxy"
+    ],
+    "correct_answer": "The maximum luminosity at which radiation pressure balances gravity preventing accretion",
+    "explanation": "The Eddington luminosity is the theoretical maximum brightness where outward radiation pressure equals inward gravity — exceeded briefly by novae and X-ray binaries.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is stellar wind?",
+    "options": [
+      "Wind on other planets",
+      "A continuous flow of charged particles ejected from the surface of a star",
+      "The motion of stars through the galaxy",
+      "Turbulent convection in a star's outer layers"
+    ],
+    "correct_answer": "A continuous flow of charged particles ejected from the surface of a star",
+    "explanation": "Like the Sun's solar wind, other stars also emit stellar winds — massive hot stars have very powerful winds that can strip material from companion stars.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the main energy source of massive O and B stars?",
+    "options": [
+      "Proton-proton chain",
+      "CNO cycle (carbon-nitrogen-oxygen cycle)",
+      "Triple alpha process",
+      "Helium burning"
+    ],
+    "correct_answer": "CNO cycle (carbon-nitrogen-oxygen cycle)",
+    "explanation": "Hot, massive stars use carbon, nitrogen, and oxygen as catalysts to fuse hydrogen into helium — the CNO cycle dominates above about 1.5 solar masses.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the proton-proton chain?",
+    "options": [
+      "A chain reaction in atomic bombs",
+      "The dominant hydrogen fusion process in Sun-like and lower mass stars",
+      "The CNO fusion process",
+      "The fusion of protons into neutrons"
+    ],
+    "correct_answer": "The dominant hydrogen fusion process in Sun-like and lower mass stars",
+    "explanation": "The p-p chain fuses hydrogen into helium in a series of steps starting with two protons combining — it powers most main sequence stars with masses similar to the Sun.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the mass-luminosity relationship for main sequence stars?",
+    "options": [
+      "More massive stars are dimmer",
+      "Luminosity is approximately proportional to mass to the power of 3.5 making massive stars extremely luminous",
+      "Luminosity equals mass squared",
+      "There is no relationship between mass and luminosity"
+    ],
+    "correct_answer": "Luminosity is approximately proportional to mass to the power of 3.5 making massive stars extremely luminous",
+    "explanation": "L is approximately proportional to M^3.5 for main sequence stars — a star twice as massive is about 11 times more luminous, explaining why massive stars burn out much faster.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is a light echo?",
+    "options": [
+      "An echo of sound in space",
+      "Light from a stellar outburst that illuminates surrounding dust at different distances, arriving at different times",
+      "The reflection of light off planetary rings",
+      "A type of gravitational lensing effect"
+    ],
+    "correct_answer": "Light from a stellar outburst that illuminates surrounding dust at different distances, arriving at different times",
+    "explanation": "Light echoes occur when a flash of light (from a supernova or nova) reflects off interstellar dust shells, with delayed reflections arriving months or years later.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the concept of lookback time in relation to galaxy evolution?",
+    "options": [
+      "We can only study nearby galaxies",
+      "Distant galaxies appear as they were billions of years ago, allowing us to study galaxy evolution directly",
+      "Galaxy evolution is too slow to observe",
+      "Only computer simulations can show galaxy evolution"
+    ],
+    "correct_answer": "Distant galaxies appear as they were billions of years ago, allowing us to study galaxy evolution directly",
+    "explanation": "Because light takes time to travel, we see distant galaxies at earlier cosmic times — comparing nearby and distant galaxies reveals how galaxies evolve over billions of years.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is Neptune's largest moon Triton notable for?",
+    "options": [
+      "Being the largest moon in the solar system",
+      "Orbiting Neptune in the opposite direction to Neptune's rotation suggesting it was captured",
+      "Having active volcanoes like Io",
+      "Having a subsurface ocean"
+    ],
+    "correct_answer": "Orbiting Neptune in the opposite direction to Neptune's rotation suggesting it was captured",
+    "explanation": "Triton's retrograde orbit is unlike any large moon in the solar system, strongly suggesting it is a captured Kuiper Belt Object, similar in composition to Pluto.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What does the term 'periapsis' mean?",
+    "options": [
+      "The farthest point in any orbit around any body",
+      "The closest point in an orbit around any body",
+      "The average orbital distance",
+      "The point of maximum orbital speed only around the Sun"
+    ],
+    "correct_answer": "The closest point in an orbit around any body",
+    "explanation": "Periapsis is the general term for the closest point in any orbit — it becomes perihelion for orbits around the Sun, perigee for orbits around Earth, etc.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the cosmic microwave background's temperature?",
+    "options": [
+      "0 Kelvin",
+      "2.725 Kelvin",
+      "273 Kelvin",
+      "6000 Kelvin"
+    ],
+    "correct_answer": "2.725 Kelvin",
+    "explanation": "The CMB has a temperature of about 2.725 Kelvin — just above absolute zero — representing the cooling of the early universe's hot radiation over 13.8 billion years.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the Milky Way's nearest spiral galaxy neighbor?",
+    "options": [
+      "Large Magellanic Cloud",
+      "Small Magellanic Cloud",
+      "Andromeda Galaxy (M31)",
+      "Triangulum Galaxy (M33)"
+    ],
+    "correct_answer": "Andromeda Galaxy (M31)",
+    "explanation": "The Andromeda Galaxy (M31) is the nearest large spiral galaxy, about 2.537 million light-years away and the most distant object visible to the naked eye.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is a stellar occultation?",
+    "options": [
+      "A type of eclipsing binary",
+      "When a solar system object passes in front of a distant star blocking its light",
+      "A transit of an exoplanet",
+      "A star being consumed by a black hole"
+    ],
+    "correct_answer": "When a solar system object passes in front of a distant star blocking its light",
+    "explanation": "Stellar occultations reveal the size and shape of solar system bodies and can detect their atmospheres by studying how the star's light dims during the event.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the term for the center of mass of a two-body system?",
+    "options": [
+      "Centroid",
+      "Barycenter",
+      "Lagrange point",
+      "Center of gravity"
+    ],
+    "correct_answer": "Barycenter",
+    "explanation": "The barycenter is the center of mass about which two bodies orbit each other — for the Earth-Moon system it is within Earth, but for Pluto-Charon it is between them.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the minimum mass for a star to fuse hydrogen?",
+    "options": [
+      "0.01 solar masses",
+      "0.08 solar masses",
+      "0.5 solar masses",
+      "1 solar mass"
+    ],
+    "correct_answer": "0.08 solar masses",
+    "explanation": "A body needs at least about 0.08 solar masses (80 Jupiter masses) to sustain hydrogen fusion. Below this threshold it is a brown dwarf.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the approximate distance from the Sun to the center of the Milky Way?",
+    "options": [
+      "100 light-years",
+      "1,000 light-years",
+      "26,000 light-years",
+      "100,000 light-years"
+    ],
+    "correct_answer": "26,000 light-years",
+    "explanation": "The Sun is located about 26,000 light-years (8 kiloparsecs) from the galactic center, roughly two-thirds of the way out from center to edge in the Orion Arm.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the Voyager 1 spacecraft's current status?",
+    "options": [
+      "It has returned to Earth",
+      "It is the farthest human-made object from Earth, now in interstellar space beyond the heliopause",
+      "It is orbiting Saturn",
+      "It has lost contact with NASA"
+    ],
+    "correct_answer": "It is the farthest human-made object from Earth, now in interstellar space beyond the heliopause",
+    "explanation": "Voyager 1, launched in 1977, crossed the heliopause in 2012 and is now in interstellar space — the farthest human-made object ever, still sending data.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the concept of stellar evolution tracks on the H-R diagram?",
+    "options": [
+      "Stars move randomly on the H-R diagram",
+      "Stars follow predictable paths on the H-R diagram as they age, from birth to main sequence to red giant to remnant",
+      "Stars remain at fixed points throughout their lives",
+      "Only massive stars move on the H-R diagram"
+    ],
+    "correct_answer": "Stars follow predictable paths on the H-R diagram as they age, from birth to main sequence to red giant to remnant",
+    "explanation": "Stellar evolution tracks show how a star's temperature and luminosity change through its life — low mass stars become red giants then white dwarfs; massive stars become supergiants then explode.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is an eclipsing binary star?",
+    "options": [
+      "Two stars that explode simultaneously",
+      "A binary star system where one star periodically passes in front of the other as seen from Earth causing brightness dips",
+      "Two stars with similar masses",
+      "A binary with a visible orbit"
+    ],
+    "correct_answer": "A binary star system where one star periodically passes in front of the other as seen from Earth causing brightness dips",
+    "explanation": "Eclipsing binaries show periodic brightness dips in their light curves — the most precise method for determining stellar masses and radii.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the Sun's location within the Milky Way?",
+    "options": [
+      "At the center of the galaxy",
+      "In the Orion Arm a minor spiral arm about 26,000 light-years from the galactic center",
+      "In the Perseus Arm",
+      "In the outer halo"
+    ],
+    "correct_answer": "In the Orion Arm a minor spiral arm about 26,000 light-years from the galactic center",
+    "explanation": "The Sun is located in the Orion Spur (Orion Arm), a minor spiral arm between the larger Sagittarius and Perseus arms, about 26,000 light-years from the galactic center.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is cosmic reionization?",
+    "options": [
+      "The period when all atoms in the universe ionized again after the first atoms formed",
+      "The first stars ionizing the neutral hydrogen that filled the universe after recombination",
+      "The ionization of gas around black holes",
+      "The heating of the interstellar medium by supernovae"
+    ],
+    "correct_answer": "The first stars ionizing the neutral hydrogen that filled the universe after recombination",
+    "explanation": "Cosmic reionization describes when the universe transitioned from a neutral to ionized state as the first stars and galaxies formed and emitted ionizing radiation.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the Milky Way's orbital period around its galactic center?",
+    "options": [
+      "1 million years",
+      "10 million years",
+      "About 225-250 million years",
+      "1 billion years"
+    ],
+    "correct_answer": "About 225-250 million years",
+    "explanation": "The Sun (and solar system) orbits the Milky Way's center at about 220 km/s, taking roughly 225-250 million years to complete one galactic year.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is astrobiology?",
+    "options": [
+      "The study of ancient astronomy",
+      "The scientific study of the origin, evolution, and distribution of life in the universe",
+      "The study of biological effects of space on humans",
+      "The biology of extraterrestrial organisms"
+    ],
+    "correct_answer": "The scientific study of the origin, evolution, and distribution of life in the universe",
+    "explanation": "Astrobiology combines astronomy, biology, chemistry, and geology to study how life arises, where it might exist beyond Earth, and what biosignatures could reveal its presence.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is a debris disk around a star?",
+    "options": [
+      "Gas leftover from star formation",
+      "A disk of dust and larger bodies left over after planetary formation, like a scaled-up Kuiper Belt",
+      "An accretion disk of an old star",
+      "Ejected material from a nova"
+    ],
+    "correct_answer": "A disk of dust and larger bodies left over after planetary formation, like a scaled-up Kuiper Belt",
+    "explanation": "Debris disks are second-generation dust disks created by collisions between planetesimals — systems like Vega and Fomalhaut have famous debris disks observed in infrared.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the boundary between the Solar System and interstellar space?",
+    "options": [
+      "The Kuiper Belt edge",
+      "The heliopause",
+      "The Oort Cloud inner boundary",
+      "The termination shock"
+    ],
+    "correct_answer": "The heliopause",
+    "explanation": "The heliopause marks the boundary where solar wind pressure and interstellar medium pressure balance — considered the outer boundary of our solar system.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What are the Trojan asteroids?",
+    "options": [
+      "Asteroids near Mars",
+      "Asteroids that share an orbit with a planet, located at the L4 and L5 Lagrange points 60 degrees ahead and behind",
+      "The largest asteroids in the asteroid belt",
+      "Asteroids captured by Jupiter's moons"
+    ],
+    "correct_answer": "Asteroids that share an orbit with a planet, located at the L4 and L5 Lagrange points 60 degrees ahead and behind",
+    "explanation": "Jupiter's Trojan asteroids (and other planets' Trojans) orbit the Sun at the same distance as the planet, clustering at the stable L4 and L5 Lagrange points.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the significance of the 21-cm hydrogen line in radio astronomy?",
+    "options": [
+      "It is the brightest radio emission",
+      "It allows mapping of neutral hydrogen throughout the galaxy, revealing galactic structure even through dust",
+      "It only comes from black holes",
+      "It marks the temperature of interstellar gas"
+    ],
+    "correct_answer": "It allows mapping of neutral hydrogen throughout the galaxy, revealing galactic structure even through dust",
+    "explanation": "The 21-cm line is emitted by neutral hydrogen atoms and penetrates dust — used to map the spiral structure of the Milky Way and other galaxies.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is cosmological redshift different from Doppler redshift?",
+    "options": [
+      "They are the same thing",
+      "Cosmological redshift is due to the expansion of space itself stretching wavelengths; Doppler redshift is due to motion through space",
+      "Doppler redshift is larger than cosmological redshift",
+      "Cosmological redshift only applies to nearby galaxies"
+    ],
+    "correct_answer": "Cosmological redshift is due to the expansion of space itself stretching wavelengths; Doppler redshift is due to motion through space",
+    "explanation": "For distant galaxies, the redshift we observe is mainly cosmological — the expansion of space stretched the light during its journey, not just motion of the source.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the process by which a neutron star or black hole in a binary draws material from its companion?",
+    "options": [
+      "Stellar wind capture",
+      "Roche lobe overflow and mass transfer",
+      "Tidal stripping",
+      "Gravitational absorption"
+    ],
+    "correct_answer": "Roche lobe overflow and mass transfer",
+    "explanation": "When a star in a binary expands to fill its Roche lobe, material flows through the inner Lagrange point to the compact companion, forming an accretion disk.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the rotation curve of a galaxy?",
+    "options": [
+      "The speed of a galaxy's spin as a whole",
+      "A plot of orbital velocity of stars and gas versus their distance from the galaxy center",
+      "The shape of a galaxy's spiral arms",
+      "The magnetic field pattern in a galaxy"
+    ],
+    "correct_answer": "A plot of orbital velocity of stars and gas versus their distance from the galaxy center",
+    "explanation": "Galaxy rotation curves show that orbital speeds remain roughly constant at large radii rather than declining — evidence for dark matter halos extending beyond visible matter.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the process that creates the elements heavier than iron?",
+    "options": [
+      "Stellar nucleosynthesis stops at iron",
+      "The r-process (rapid neutron capture) in neutron star mergers and supernovae",
+      "The triple alpha process",
+      "Cosmic ray spallation only"
+    ],
+    "correct_answer": "The r-process (rapid neutron capture) in neutron star mergers and supernovae",
+    "explanation": "Elements heavier than iron are built by rapid neutron capture (r-process) in neutron star mergers and core-collapse supernovae — confirmed by observations of the neutron star merger GW170817.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the WMAP satellite known for?",
+    "options": [
+      "Detecting gravitational waves",
+      "Mapping the cosmic microwave background with high precision, constraining cosmological parameters",
+      "Observing nearby exoplanets",
+      "Studying the Sun's corona"
+    ],
+    "correct_answer": "Mapping the cosmic microwave background with high precision, constraining cosmological parameters",
+    "explanation": "NASA's WMAP (Wilkinson Microwave Anisotropy Probe) precisely mapped CMB temperature fluctuations, measuring the universe's age, composition, and geometry.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is a protoplanetary disk?",
+    "options": [
+      "A disk of planets around a new star",
+      "A rotating disk of dense gas and dust surrounding a newly formed star from which planets form",
+      "A ring system around a giant planet",
+      "A disk of asteroids in the outer solar system"
+    ],
+    "correct_answer": "A rotating disk of dense gas and dust surrounding a newly formed star from which planets form",
+    "explanation": "Protoplanetary disks (proplyds) surround young stars and provide the raw material for planet formation through dust grain growth, pebble accretion, and planetesimal formation.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is gravitational microlensing?",
+    "options": [
+      "Lensing by galaxy clusters",
+      "Temporary magnification of a background star when a foreground object passes in front causing a brief brightening",
+      "The bending of light around the Sun",
+      "The lensing effect of a planet on a star"
+    ],
+    "correct_answer": "Temporary magnification of a background star when a foreground object passes in front causing a brief brightening",
+    "explanation": "Microlensing occurs when a foreground star or planet passes in front of a background star, creating a temporary brightness increase — used to detect exoplanets and dark matter.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the Hayashi track on the H-R diagram?",
+    "options": [
+      "The path of a dying star",
+      "The nearly vertical evolutionary path of fully convective pre-main-sequence stars as they contract",
+      "The path of a star leaving the main sequence",
+      "The path of a neutron star as it cools"
+    ],
+    "correct_answer": "The nearly vertical evolutionary path of fully convective pre-main-sequence stars as they contract",
+    "explanation": "The Hayashi track is the path a young fully convective star follows downward on the H-R diagram as it contracts, before developing a radiative core and moving to the main sequence.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the difference between Type I and Type II Cepheid variables?",
+    "options": [
+      "They are the same type of star",
+      "Type I (classical) Cepheids are young metal-rich Population I stars; Type II (W Virginis) Cepheids are older metal-poor Population II stars",
+      "Type II Cepheids are brighter",
+      "Type I have shorter periods"
+    ],
+    "correct_answer": "Type I (classical) Cepheids are young metal-rich Population I stars; Type II (W Virginis) Cepheids are older metal-poor Population II stars",
+    "explanation": "The two Cepheid populations have different period-luminosity relationships — confusing them led to an early underestimate of galactic distances until Baade corrected it in 1952.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the term for a star that has exploded and has become extremely bright?",
+    "options": [
+      "Black Hole",
+      "Nebula",
+      "Supernova",
+      "Galaxy"
+    ],
+    "correct_answer": "Supernova",
+    "explanation": "A supernova is a massive star explosion that can be seen from millions of light-years away.",
+    "subject": "Astronomy",
+    "difficulty": "intermediate",
+    "topic": "Stars"
+  },
+  {
+    "question": "Which planet in our solar system has the most moons?",
+    "options": [
+      "Jupiter",
+      "Saturn",
+      "Uranus",
+      "Neptune"
+    ],
+    "correct_answer": "Jupiter",
+    "explanation": "Jupiter has a total of 79 known moons, with the largest four being Io, Europa, Ganymede, and Callisto.",
+    "subject": "Astronomy",
+    "difficulty": "intermediate",
+    "topic": "Planets"
+  },
+  {
+    "question": "What is the process by which the universe became transparent to light?",
+    "options": [
+      "Cosmic Inflation",
+      "Dark Matter Formation",
+      "Recombination",
+      "Nucleosynthesis"
+    ],
+    "correct_answer": "Recombination",
+    "explanation": "Recombination occurred about 380,000 years after the Big Bang, when electrons and protons combined to form neutral atoms, allowing light to travel freely.",
+    "subject": "Astronomy",
+    "difficulty": "intermediate",
+    "topic": "Cosmology"
+  },
+  {
+    "question": "What is the largest structure in the universe?",
+    "options": [
+      "Galaxy Cluster",
+      "Supercluster",
+      "Filament",
+      "Void"
+    ],
+    "correct_answer": "Filament",
+    "explanation": "Galactic filaments are the largest known structures in the universe, spanning billions of light-years and formed by the distribution of galaxy clusters and superclusters.",
+    "subject": "Astronomy",
+    "difficulty": "intermediate",
+    "topic": "Cosmology"
+  },
+  {
+    "question": "Which type of rock is commonly found in meteorites?",
+    "options": [
+      "Igneous",
+      "Sedimentary",
+      "Metamorphic",
+      "Stony"
+    ],
+    "correct_answer": "Stony",
+    "explanation": "Stony meteorites are the most common type of meteorite and are composed of stone and metal.",
+    "subject": "Astronomy",
+    "difficulty": "intermediate",
+    "topic": "Meteorites"
+  },
+  {
+    "question": "What is the term for the point in the sky where the celestial equator intersects the horizon?",
+    "options": [
+      "Zenith",
+      "Nadir",
+      "Horizon",
+      "Meridian"
+    ],
+    "correct_answer": "Meridian",
+    "explanation": "The meridian is an imaginary line that passes through the zenith and the nadir, and is used to measure the position of celestial objects.",
+    "subject": "Astronomy",
+    "difficulty": "intermediate",
+    "topic": "Astronomical Coordinates"
+  },
+  {
+    "question": "What is the process by which the universe became dominated by matter?",
+    "options": [
+      "Baryogenesis",
+      "Leptogenesis",
+      "Cosmic Inflation",
+      "Nucleosynthesis"
+    ],
+    "correct_answer": "Baryogenesis",
+    "explanation": "Baryogenesis is the process by which the universe became dominated by matter, rather than antimatter, in the first fraction of a second after the Big Bang.",
+    "subject": "Astronomy",
+    "difficulty": "intermediate",
+    "topic": "Cosmology"
+  },
+  {
+    "question": "Which of the following is NOT a type of astronomical telescope?",
+    "options": [
+      "Reflecting",
+      "Refracting",
+      "Radio",
+      "Spectroscopic"
+    ],
+    "correct_answer": "Spectroscopic",
+    "explanation": "A spectroscopic telescope is not a type of telescope, but rather a type of instrument used to analyze the light from celestial objects.",
+    "subject": "Astronomy",
+    "difficulty": "intermediate",
+    "topic": "Telescopes"
+  },
+  {
+    "question": "What is the term for the study of the formation and evolution of the universe?",
+    "options": [
+      "Cosmology",
+      "Astrophysics",
+      "Astronomy",
+      "Geology"
+    ],
+    "correct_answer": "Cosmology",
+    "explanation": "Cosmology is the study of the origin, evolution, and fate of the universe, including the formation of galaxies, stars, and planets.",
+    "subject": "Astronomy",
+    "difficulty": "intermediate",
+    "topic": "Cosmology"
+  },
+  {
+    "question": "Which of the following planets is no longer considered a planet?",
+    "options": [
+      "Pluto",
+      "Eris",
+      "Ceres",
+      "Haumea"
+    ],
+    "correct_answer": "Pluto",
+    "explanation": "In 2006, the International Astronomical Union redefined the term 'planet', and Pluto was reclassified as a dwarf planet.",
+    "subject": "Astronomy",
+    "difficulty": "intermediate",
+    "topic": "Planets"
+  },
+  {
+    "question": "What is the term for the amount of matter in an object?",
+    "options": [
+      "Mass",
+      "Weight",
+      "Density",
+      "Volume"
+    ],
+    "correct_answer": "Mass",
+    "explanation": "Mass is a measure of the amount of matter in an object, and is typically measured in units of kilograms or grams.",
+    "subject": "Astronomy",
+    "difficulty": "intermediate",
+    "topic": "Physics"
+  },
+  {
+    "question": "Which of the following is a type of astronomical event where two celestial objects appear to pass close to each other?",
+    "options": [
+      "Eclipse",
+      "Occultation",
+      "Conjunction",
+      "Transit"
+    ],
+    "correct_answer": "Conjunction",
+    "explanation": "A conjunction occurs when two celestial objects, such as planets or stars, appear to pass close to each other in the sky.",
+    "subject": "Astronomy",
+    "difficulty": "intermediate",
+    "topic": "Astronomical Events"
+  },
+  {
+    "question": "What is the term for the study of the physical properties of celestial objects?",
+    "options": [
+      "Astrophysics",
+      "Astronomy",
+      "Cosmology",
+      "Planetary Science"
+    ],
+    "correct_answer": "Astrophysics",
+    "explanation": "Astrophysics is the study of the physical properties of celestial objects, including their composition, temperature, and motion.",
+    "subject": "Astronomy",
+    "difficulty": "intermediate",
+    "topic": "Astrophysics"
+  },
+  {
+    "question": "Which of the following types of stars is the coolest and least massive?",
+    "options": [
+      "Red Giant",
+      "Blue Giant",
+      "White Dwarf",
+      "Red Dwarf"
+    ],
+    "correct_answer": "Red Dwarf",
+    "explanation": "Red dwarf stars are the coolest and least massive type of main-sequence star, with surface temperatures around 3,000-4,000 Kelvin.",
+    "subject": "Astronomy",
+    "difficulty": "intermediate",
+    "topic": "Stars"
+  },
+  {
+    "question": "What is the term for the point in the sky where the Sun appears to rise and set?",
+    "options": [
+      "Horizon",
+      "Meridian",
+      "Zenith",
+      "Nadir"
+    ],
+    "correct_answer": "Horizon",
+    "explanation": "The horizon is the point in the sky where the Sun appears to rise and set, and is used to measure the position of celestial objects.",
+    "subject": "Astronomy",
+    "difficulty": "intermediate",
+    "topic": "Astronomical Coordinates"
+  },
+  {
+    "question": "Which of the following is a type of galaxy that is characterized by a central bulge and spiral arms?",
+    "options": [
+      "Elliptical",
+      "Spiral",
+      "Irregular",
+      "Barred Spiral"
+    ],
+    "correct_answer": "Spiral",
+    "explanation": "Spiral galaxies, such as the Milky Way, are characterized by a central bulge and spiral arms of stars, gas, and dust.",
+    "subject": "Astronomy",
+    "difficulty": "intermediate",
+    "topic": "Galaxies"
+  },
+  {
+    "question": "What is the term for the process by which atoms gain or lose electrons to form ions?",
+    "options": [
+      "Ionization",
+      "Excitation",
+      "Recombination",
+      "Nucleosynthesis"
+    ],
+    "correct_answer": "Ionization",
+    "explanation": "Ionization is the process by which atoms gain or lose electrons to form ions, and is an important process in the formation of stars and planets.",
+    "subject": "Astronomy",
+    "difficulty": "intermediate",
+    "topic": "Astrophysics"
+  },
+  {
+    "question": "Which of the following types of radiation has the highest energy?",
+    "options": [
+      "Radio",
+      "Microwave",
+      "Infrared",
+      "Gamma"
+    ],
+    "correct_answer": "Gamma",
+    "explanation": "Gamma radiation has the highest energy of any type of electromagnetic radiation, and is often produced by high-energy astrophysical processes.",
+    "subject": "Astronomy",
+    "difficulty": "intermediate",
+    "topic": "Radiation"
+  },
+  {
+    "question": "What is the term for the study of the origin and evolution of the universe's structure?",
+    "options": [
+      "Cosmology",
+      "Astrophysics",
+      "Planetary Science",
+      "Structural Cosmology"
+    ],
+    "correct_answer": "Structural Cosmology",
+    "explanation": "Structural cosmology is the study of the origin and evolution of the universe's structure, including the formation of galaxies, galaxy clusters, and superclusters.",
+    "subject": "Astronomy",
+    "difficulty": "intermediate",
+    "topic": "Cosmology"
+  },
+  {
+    "question": "Which of the following is a type of asteroid that is thought to be the remains of a planet that never formed in the early solar system?",
+    "options": [
+      "C-type",
+      "S-type",
+      "M-type",
+      "Planetesimal"
+    ],
+    "correct_answer": "Planetesimal",
+    "explanation": "Planetesimals are small, rocky objects that are thought to be the remains of a planet that never formed in the early solar system, and are often found in the asteroid belt.",
+    "subject": "Astronomy",
+    "difficulty": "intermediate",
+    "topic": "Asteroids"
+  },
+  {
+    "question": "What is the term for the process by which the universe's matter became neutral, allowing light to travel freely?",
+    "options": [
+      "Recombination",
+      "Ionization",
+      "Nucleosynthesis",
+      "Cosmic Inflation"
+    ],
+    "correct_answer": "Recombination",
+    "explanation": "Recombination occurred about 380,000 years after the Big Bang, when electrons and protons combined to form neutral atoms, allowing light to travel freely.",
+    "subject": "Astronomy",
+    "difficulty": "intermediate",
+    "topic": "Cosmology"
+  },
+  {
+    "question": "Which of the following is a type of celestial object that is thought to be a massive, gravitationally collapsed star?",
+    "options": [
+      "Black Hole",
+      "Neutron Star",
+      "White Dwarf",
+      "Brown Dwarf"
+    ],
+    "correct_answer": "Black Hole",
+    "explanation": "Black holes are thought to be massive, gravitationally collapsed stars that have such a strong gravitational pull that not even light can escape.",
+    "subject": "Astronomy",
+    "difficulty": "intermediate",
+    "topic": "Black Holes"
+  },
+  {
+    "question": "What is the term for the study of the properties and behavior of black holes?",
+    "options": [
+      "Black Hole Physics",
+      "Astrophysics",
+      "Cosmology",
+      "Gravitational Physics"
+    ],
+    "correct_answer": "Black Hole Physics",
+    "explanation": "Black hole physics is the study of the properties and behavior of black holes, including their formation, evolution, and effects on the surrounding environment.",
+    "subject": "Astronomy",
+    "difficulty": "intermediate",
+    "topic": "Black Holes"
+  },
+  {
+    "question": "Which of the following types of stars is the hottest and most massive?",
+    "options": [
+      "Red Giant",
+      "Blue Giant",
+      "White Dwarf",
+      "O-type"
+    ],
+    "correct_answer": "O-type",
+    "explanation": "O-type stars are the hottest and most massive type of star, with surface temperatures over 30,000 Kelvin and masses up to 100 times that of the Sun.",
+    "subject": "Astronomy",
+    "difficulty": "intermediate",
+    "topic": "Stars"
+  },
+  {
+    "question": "What is the term for the point in the sky where the celestial equator intersects the meridian?",
+    "options": [
+      "Zenith",
+      "Nadir",
+      "Meridian",
+      "Equinox"
+    ],
+    "correct_answer": "Equinox",
+    "explanation": "The equinox is the point in the sky where the celestial equator intersects the meridian, and occurs when the Sun crosses the celestial equator from one hemisphere to the other.",
+    "subject": "Astronomy",
+    "difficulty": "intermediate",
+    "topic": "Astronomical Coordinates"
+  },
+  {
+    "question": "Which of the following is a type of galaxy that is characterized by a highly elliptical shape and a lack of spiral arms?",
+    "options": [
+      "Spiral",
+      "Elliptical",
+      "Irregular",
+      "Barred Spiral"
+    ],
+    "correct_answer": "Elliptical",
+    "explanation": "Elliptical galaxies are characterized by a highly elliptical shape and a lack of spiral arms, and are often composed of older stars.",
+    "subject": "Astronomy",
+    "difficulty": "intermediate",
+    "topic": "Galaxies"
+  },
+  {
+    "question": "What is the largest planet in our solar system?",
+    "options": [
+      "Earth",
+      "Saturn",
+      "Jupiter",
+      "Uranus"
+    ],
+    "correct_answer": "Jupiter",
+    "explanation": "Jupiter is the largest planet in terms of both mass and size, with a diameter of approximately 142,984 kilometers.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "Which of the following stars is the closest to the Earth?",
+    "options": [
+      "Sirius",
+      "Betelgeuse",
+      "Proxima Centauri",
+      "Rigel"
+    ],
+    "correct_answer": "Proxima Centauri",
+    "explanation": "Proxima Centauri is a small, cool red dwarf star located about 4.24 light-years from the Earth, making it the closest star to our solar system.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the term for a star that has exploded and has become incredibly bright?",
+    "options": [
+      "Black hole",
+      "Neutron star",
+      "Supernova",
+      "White dwarf"
+    ],
+    "correct_answer": "Supernova",
+    "explanation": "A supernova is a massive star explosion that can be seen from millions of light-years away, briefly outshining an entire galaxy.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the term for the study of the origin and evolution of the universe?",
+    "options": [
+      "Cosmology",
+      "Astronomy",
+      "Astrophysics",
+      "Geology"
+    ],
+    "correct_answer": "Cosmology",
+    "explanation": "Cosmology is the study of the origin, evolution, and fate of the universe, including the formation of galaxies, stars, and planets.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "Which of the following planets has the most moons?",
+    "options": [
+      "Jupiter",
+      "Saturn",
+      "Uranus",
+      "Neptune"
+    ],
+    "correct_answer": "Jupiter",
+    "explanation": "Jupiter has a total of 92 confirmed moons, with many more smaller moonlets and ring particles orbiting the planet.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the term for a region of space where gravity is so strong that not even light can escape?",
+    "options": [
+      "Black hole",
+      "Neutron star",
+      "White dwarf",
+      "Wormhole"
+    ],
+    "correct_answer": "Black hole",
+    "explanation": "A black hole is a region of spacetime where the gravitational pull is so strong that nothing, including light, can escape once it falls within a certain boundary called the event horizon.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "Which of the following types of galaxies is characterized by a central bulge and spiral arms?",
+    "options": [
+      "Elliptical galaxy",
+      "Spiral galaxy",
+      "Irregular galaxy",
+      "Active galaxy"
+    ],
+    "correct_answer": "Spiral galaxy",
+    "explanation": "Spiral galaxies, like our own Milky Way, have a central bulge of older stars and spiral arms of younger stars, gas, and dust.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the term for the remains of a star that has exhausted its fuel and has shrunk to a very small size?",
+    "options": [
+      "White dwarf",
+      "Neutron star",
+      "Black hole",
+      "Brown dwarf"
+    ],
+    "correct_answer": "White dwarf",
+    "explanation": "A white dwarf is the remnants of a star that has exhausted its fuel and has shed its outer layers, leaving behind a hot, compact core.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "Which of the following spacecraft has traveled the farthest from Earth?",
+    "options": [
+      "Voyager 1",
+      "Voyager 2",
+      "Pioneer 10",
+      "New Horizons"
+    ],
+    "correct_answer": "Voyager 1",
+    "explanation": "Voyager 1 is the most distant human-made object, with a distance of over 14 billion miles (22.5 billion kilometers) from Earth, or about 125 AU.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the term for the bending of light around a massive object, such as a star or black hole?",
+    "options": [
+      "Gravitational lensing",
+      "Refraction",
+      "Diffraction",
+      "Interference"
+    ],
+    "correct_answer": "Gravitational lensing",
+    "explanation": "Gravitational lensing is the bending of light around a massive object, such as a star or black hole, due to its strong gravitational field.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "Which of the following astronomical events occurs when the Moon passes between the Earth and the Sun?",
+    "options": [
+      "Lunar eclipse",
+      "Solar eclipse",
+      "Planetary alignment",
+      "Comet impact"
+    ],
+    "correct_answer": "Solar eclipse",
+    "explanation": "A solar eclipse occurs when the Moon passes directly between the Earth and the Sun, blocking the Sun's light and casting a shadow on the Earth.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the term for a star that is exploding and becoming incredibly bright?",
+    "options": [
+      "Nova",
+      "Supernova",
+      "Black hole",
+      "Neutron star"
+    ],
+    "correct_answer": "Supernova",
+    "explanation": "A supernova is a massive star explosion that can be seen from millions of light-years away, briefly outshining an entire galaxy.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "Which of the following planets is no longer considered a planet, but is now classified as a dwarf planet?",
+    "options": [
+      "Pluto",
+      "Mars",
+      "Jupiter",
+      "Earth"
+    ],
+    "correct_answer": "Pluto",
+    "explanation": "Pluto was reclassified as a dwarf planet in 2006 by the International Astronomical Union, due to its small size and unique orbit.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "Which of the following types of telescopes uses a lens to focus light?",
+    "options": [
+      "Refracting telescope",
+      "Reflecting telescope",
+      "Radio telescope",
+      "Space telescope"
+    ],
+    "correct_answer": "Refracting telescope",
+    "explanation": "A refracting telescope uses a lens to focus light, whereas a reflecting telescope uses a mirror to focus light.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "Which of the following astronomical events occurs when the Earth passes between the Sun and the Moon?",
+    "options": [
+      "Lunar eclipse",
+      "Solar eclipse",
+      "Planetary alignment",
+      "Comet impact"
+    ],
+    "correct_answer": "Lunar eclipse",
+    "explanation": "A lunar eclipse occurs when the Earth passes between the Sun and the Moon, blocking the Sun's light from reaching the Moon.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the term for a region of space where the gravitational pull is so weak that objects can escape?",
+    "options": [
+      "Black hole",
+      "Neutron star",
+      "White dwarf",
+      "Galactic halo"
+    ],
+    "correct_answer": "Galactic halo",
+    "explanation": "The galactic halo is a region of space surrounding a galaxy where the gravitational pull is relatively weak, allowing objects to escape.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "Which of the following types of stars is characterized by a high surface temperature and a blue color?",
+    "options": [
+      "Red giant",
+      "Blue giant",
+      "White dwarf",
+      "O-type star"
+    ],
+    "correct_answer": "O-type star",
+    "explanation": "O-type stars are the hottest and brightest stars, with surface temperatures ranging from 30,000 to 60,000 Kelvin, giving them a blue color.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "Which of the following spacecraft has visited the most planets in our solar system?",
+    "options": [
+      "Voyager 1",
+      "Voyager 2",
+      "Pioneer 10",
+      "Cassini"
+    ],
+    "correct_answer": "Voyager 2",
+    "explanation": "Voyager 2 has visited four planets in our solar system: Jupiter, Saturn, Uranus, and Neptune, making it the most traveled spacecraft in terms of planetary visits.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the term for the study of the formation and evolution of the universe's structure?",
+    "options": [
+      "Cosmology",
+      "Astrophysics",
+      "Astronomy",
+      "Geology"
+    ],
+    "correct_answer": "Cosmology",
+    "explanation": "Cosmology is the study of the origin, evolution, and fate of the universe, including the formation of galaxies, stars, and planets.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "Which of the following types of astronomical objects is thought to be the remains of a massive star that has exploded as a supernova?",
+    "options": [
+      "Neutron star",
+      "Black hole",
+      "White dwarf",
+      "Pulsar"
+    ],
+    "correct_answer": "Neutron star",
+    "explanation": "A neutron star is the dense, spinning core of a massive star that has exploded as a supernova, with the density of a sugar-cube-sized amount of neutron star material being about the same as the mass of a mountain.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the term for the process by which the universe became transparent to light, allowing us to see distant objects?",
+    "options": [
+      "Recombination",
+      "Ionization",
+      "Nuclear fusion",
+      "Gravitational lensing"
+    ],
+    "correct_answer": "Recombination",
+    "explanation": "Recombination occurred about 380,000 years after the Big Bang, when the universe had cooled enough for electrons and protons to combine into neutral atoms, allowing light to travel freely.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "Which of the following types of galaxies is characterized by a chaotic, irregular shape?",
+    "options": [
+      "Elliptical galaxy",
+      "Spiral galaxy",
+      "Irregular galaxy",
+      "Active galaxy"
+    ],
+    "correct_answer": "Irregular galaxy",
+    "explanation": "Irregular galaxies, like the Large Magellanic Cloud, have a chaotic, irregular shape and lack a distinct nucleus or spiral arms.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the term for the point in the sky where the Sun is directly overhead at noon?",
+    "options": [
+      "Zenith",
+      "Horizon",
+      "Equator",
+      "Meridian"
+    ],
+    "correct_answer": "Zenith",
+    "explanation": "The zenith is the point in the sky where the Sun is directly overhead at noon, due to the Earth's rotation and the observer's location.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "Which galaxy is the closest major galaxy to the Milky Way?",
+    "options": [
+      "Andromeda Galaxy",
+      "Triangulum Galaxy",
+      "Sombrero Galaxy",
+      "Whirlpool Galaxy"
+    ],
+    "correct_answer": "Andromeda Galaxy",
+    "explanation": "The Andromeda Galaxy is approximately 2.5 million light-years away from the Milky Way.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the process by which stars like our Sun generate energy?",
+    "options": [
+      "Nuclear fission",
+      "Nuclear fusion",
+      "Radioactive decay",
+      "Gravitational contraction"
+    ],
+    "correct_answer": "Nuclear fusion",
+    "explanation": "Nuclear fusion is the process by which atomic nuclei combine to form a heavier nucleus, releasing energy in the process.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the farthest human-made object from Earth?",
+    "options": [
+      "International Space Station",
+      "Hubble Space Telescope",
+      "Voyager 1",
+      "Mars Curiosity Rover"
+    ],
+    "correct_answer": "Voyager 1",
+    "explanation": "Voyager 1 is a space probe that was launched in 1977 and has traveled over 14 billion miles from Earth.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "Which type of rock is formed from the cooling and solidification of magma?",
+    "options": [
+      "Igneous",
+      "Sedimentary",
+      "Metamorphic",
+      "Foliated"
+    ],
+    "correct_answer": "Igneous",
+    "explanation": "Igneous rocks are formed from the cooling and solidification of magma or lava.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the term for a black hole with a mass millions or even billions of times that of the Sun?",
+    "options": [
+      "Stellar black hole",
+      "Supermassive black hole",
+      "Intermediate-mass black hole",
+      "Primordial black hole"
+    ],
+    "correct_answer": "Supermassive black hole",
+    "explanation": "Supermassive black holes are found at the centers of most galaxies, including the Milky Way.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "Which spacecraft is credited with the first successful landing on Mars?",
+    "options": [
+      "Viking 1",
+      "Mars Curiosity Rover",
+      "Mars Pathfinder",
+      "Phoenix"
+    ],
+    "correct_answer": "Mars Pathfinder",
+    "explanation": "The Mars Pathfinder mission landed on Mars in 1997 and included the Sojourner rover.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the term for the point in a planet's orbit when it is farthest from the Sun?",
+    "options": [
+      "Perihelion",
+      "Aphelion",
+      "Equinox",
+      "Solstice"
+    ],
+    "correct_answer": "Aphelion",
+    "explanation": "Aphelion is the point in a planet's orbit when it is farthest from the Sun.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "Which of the following is NOT a type of astronomical object?",
+    "options": [
+      "Galaxy",
+      "Star",
+      "Planet",
+      "Country"
+    ],
+    "correct_answer": "Country",
+    "explanation": "A country is a political entity and not an astronomical object.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "Which type of telescope uses a combination of lenses and mirrors to focus light?",
+    "options": [
+      "Reflector telescope",
+      "Refractor telescope",
+      "Catadioptric telescope",
+      "Radio telescope"
+    ],
+    "correct_answer": "Catadioptric telescope",
+    "explanation": "Catadioptric telescopes use a combination of lenses and mirrors to focus light.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the term for the remains of a star that has exhausted its fuel and has shrunk to a small, hot core?",
+    "options": [
+      "White dwarf",
+      "Neutron star",
+      "Black hole",
+      "Supernova"
+    ],
+    "correct_answer": "White dwarf",
+    "explanation": "A white dwarf is the remains of a star that has exhausted its fuel and has shrunk to a small, hot core.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "Which of the following is a type of binary star system?",
+    "options": [
+      "Visual binary",
+      "Spectroscopic binary",
+      "Eclipsing binary",
+      "All of the above"
+    ],
+    "correct_answer": "All of the above",
+    "explanation": "There are several types of binary star systems, including visual binaries, spectroscopic binaries, and eclipsing binaries.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the term for the study of the relationship between the positions of celestial objects and events on Earth?",
+    "options": [
+      "Astrology",
+      "Astronomy",
+      "Cosmology",
+      "Geology"
+    ],
+    "correct_answer": "Astrology",
+    "explanation": "Astrology is the study of the relationship between the positions of celestial objects and events on Earth.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "Which planet has the highest average surface temperature?",
+    "options": [
+      "Mercury",
+      "Venus",
+      "Mars",
+      "Jupiter"
+    ],
+    "correct_answer": "Venus",
+    "explanation": "Venus has a thick atmosphere that traps heat, resulting in an average surface temperature of around 462°C.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "Which of the following is a type of asteroid?",
+    "options": [
+      "Ceres",
+      "Vesta",
+      "Pallas",
+      "All of the above"
+    ],
+    "correct_answer": "All of the above",
+    "explanation": "Ceres, Vesta, and Pallas are all types of asteroids found in the asteroid belt.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the term for the point in a planet's orbit when it is closest to the Sun?",
+    "options": [
+      "Perihelion",
+      "Aphelion",
+      "Equinox",
+      "Solstice"
+    ],
+    "correct_answer": "Perihelion",
+    "explanation": "Perihelion is the point in a planet's orbit when it is closest to the Sun.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "Which spacecraft is credited with the first successful landing on Titan?",
+    "options": [
+      "Cassini",
+      "Huygens",
+      "Voyager 1",
+      "Voyager 2"
+    ],
+    "correct_answer": "Huygens",
+    "explanation": "The Huygens probe landed on Titan in 2005, providing valuable information about the moon's surface and atmosphere.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the term for the study of the formation and evolution of the universe's largest structures?",
+    "options": [
+      "Cosmology",
+      "Astrophysics",
+      "Galaxy formation",
+      "Structure formation"
+    ],
+    "correct_answer": "Structure formation",
+    "explanation": "Structure formation is the study of the formation and evolution of the universe's largest structures, such as galaxies and galaxy clusters.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "Which of the following types of stars is the coolest?",
+    "options": [
+      "O-type",
+      "B-type",
+      "G-type",
+      "M-type"
+    ],
+    "correct_answer": "M-type",
+    "explanation": "M-type stars, also known as red dwarfs, are the coolest type of main-sequence star.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the term for the amount of time it takes for a planet to complete one orbit around the Sun?",
+    "options": [
+      "Sidereal period",
+      "Synodic period",
+      "Orbital period",
+      "Rotational period"
+    ],
+    "correct_answer": "Orbital period",
+    "explanation": "The orbital period is the amount of time it takes for a planet to complete one orbit around the Sun.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "Which of the following is a characteristic of a black hole?",
+    "options": [
+      "It is a region of extremely low density",
+      "It is a region of extremely high density",
+      "It is a type of star",
+      "It is a type of galaxy"
+    ],
+    "correct_answer": "It is a region of extremely high density",
+    "explanation": "A black hole is a region in space where the gravitational pull is so strong that nothing, not even light, can escape.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "Which of the following types of telescopes uses a combination of lenses and mirrors to focus light?",
+    "options": [
+      "Reflector telescope",
+      "Refractor telescope",
+      "Catadioptric telescope",
+      "Radio telescope"
+    ],
+    "correct_answer": "Catadioptric telescope",
+    "explanation": "A catadioptric telescope uses a combination of lenses and mirrors to focus light, allowing for a more compact and versatile design.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the term for the point in the sky where the sun appears to rise and set at the same point on the horizon?",
+    "options": [
+      "Equinox",
+      "Solstice",
+      "Ecliptic",
+      "Horizon"
+    ],
+    "correct_answer": "Solstice",
+    "explanation": "The solstice is the point in the sky where the sun appears to rise and set at the same point on the horizon, occurring twice a year.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "Which of the following planets in our solar system has the most moons?",
+    "options": [
+      "Jupiter",
+      "Saturn",
+      "Uranus",
+      "Neptune"
+    ],
+    "correct_answer": "Jupiter",
+    "explanation": "Jupiter has a total of 79 known moons, the most of any planet in our solar system.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the term for the bending of light as it passes through a medium, such as a prism or lens?",
+    "options": [
+      "Refraction",
+      "Reflection",
+      "Diffraction",
+      "Dispersion"
+    ],
+    "correct_answer": "Refraction",
+    "explanation": "Refraction is the bending of light as it passes through a medium, causing the light to change direction.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "Which of the following types of stars is the coolest and least luminous?",
+    "options": [
+      "Red giant",
+      "Blue giant",
+      "White dwarf",
+      "Red dwarf"
+    ],
+    "correct_answer": "Red dwarf",
+    "explanation": "Red dwarfs are the coolest and least luminous type of star, with surface temperatures ranging from 3,000 to 4,000 Kelvin.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the term for the remains of a star that has exploded as a supernova?",
+    "options": [
+      "Nebula",
+      "Black hole",
+      "White dwarf",
+      "Neutron star"
+    ],
+    "correct_answer": "Nebula",
+    "explanation": "A nebula is the remains of a star that has exploded as a supernova, consisting of gas and dust that has been expelled into space.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "Which of the following is a type of astronomical object that is thought to have formed from the collapse of a massive star?",
+    "options": [
+      "Galaxy",
+      "Star cluster",
+      "Nebula",
+      "Black hole"
+    ],
+    "correct_answer": "Black hole",
+    "explanation": "A black hole is thought to have formed from the collapse of a massive star, resulting in a region of space with such strong gravity that nothing can escape.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the term for the study of the physical properties and behavior of celestial objects?",
+    "options": [
+      "Astrophysics",
+      "Astronomy",
+      "Cosmology",
+      "Geology"
+    ],
+    "correct_answer": "Astrophysics",
+    "explanation": "Astrophysics is the study of the physical properties and behavior of celestial objects, including their composition, temperature, and motion.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "Which of the following types of radiation has the shortest wavelength and highest energy?",
+    "options": [
+      "Radio waves",
+      "Microwaves",
+      "X-rays",
+      "Gamma rays"
+    ],
+    "correct_answer": "Gamma rays",
+    "explanation": "Gamma rays have the shortest wavelength and highest energy of any type of electromagnetic radiation.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the term for the process by which the universe became transparent to light, occurring when the universe was around 380,000 years old?",
+    "options": [
+      "Big Bang",
+      "Cosmic inflation",
+      "Recombination",
+      "Dark matter formation"
+    ],
+    "correct_answer": "Recombination",
+    "explanation": "Recombination is the process by which the universe became transparent to light, occurring when electrons and protons combined to form neutral atoms.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the term for the point in the orbit of a planet or moon where it is farthest from its parent body?",
+    "options": [
+      "Perihelion",
+      "Aphelion",
+      "Ecliptic",
+      "Nadir"
+    ],
+    "correct_answer": "Aphelion",
+    "explanation": "Aphelion is the point in the orbit of a planet or moon where it is farthest from its parent body, with perihelion being the point where it is closest.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the term for the process by which the universe became dominated by matter, rather than antimatter?",
+    "options": [
+      "Baryogenesis",
+      "Cosmic inflation",
+      "Dark matter formation",
+      "Matter-antimatter asymmetry"
+    ],
+    "correct_answer": "Baryogenesis",
+    "explanation": "Baryogenesis is the process by which the universe became dominated by matter, rather than antimatter, occurring in the early universe.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "Which of the following types of stars is the hottest and most luminous?",
+    "options": [
+      "Red giant",
+      "Blue giant",
+      "White dwarf",
+      "O-type main-sequence star"
+    ],
+    "correct_answer": "O-type main-sequence star",
+    "explanation": "O-type main-sequence stars are the hottest and most luminous type of star, with surface temperatures ranging from 30,000 to 60,000 Kelvin.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the term for the study of the motion of celestial objects, including their positions, velocities, and orbits?",
+    "options": [
+      "Astronomy",
+      "Astrophysics",
+      "Celestial mechanics",
+      "Geology"
+    ],
+    "correct_answer": "Celestial mechanics",
+    "explanation": "Celestial mechanics is the study of the motion of celestial objects, including their positions, velocities, and orbits, using the principles of physics and mathematics.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "Which of the following types of galaxies is characterized by a large central bulge and no spiral arms?",
+    "options": [
+      "Elliptical galaxy",
+      "Spiral galaxy",
+      "Irregular galaxy",
+      "Barred spiral galaxy"
+    ],
+    "correct_answer": "Elliptical galaxy",
+    "explanation": "Elliptical galaxies are characterized by a large central bulge and no spiral arms, often consisting of older stars.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the term for the remains of a star that has exhausted its fuel and has expanded to become much larger?",
+    "options": [
+      "White dwarf",
+      "Neutron star",
+      "Black hole",
+      "Red giant"
+    ],
+    "correct_answer": "Red giant",
+    "explanation": "A red giant is the remains of a star that has exhausted its fuel and has expanded to become much larger, often occurring in the final stages of a star's life.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "Which of the following is a type of astronomical event that occurs when a star explodes, releasing a large amount of energy?",
+    "options": [
+      "Supernova",
+      "Black hole",
+      "Nebula",
+      "Gamma-ray burst"
+    ],
+    "correct_answer": "Supernova",
+    "explanation": "A supernova is a type of astronomical event that occurs when a star explodes, releasing a large amount of energy and often leaving behind either a neutron star or a black hole.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the term for the distance that light travels in one year, used as a unit of measurement for astronomical distances?",
+    "options": [
+      "Light-year",
+      "Parsec",
+      "Astronomical unit",
+      "Kiloparsec"
+    ],
+    "correct_answer": "Light-year",
+    "explanation": "A light-year is the distance that light travels in one year, approximately 9.461 billion kilometers, used as a unit of measurement for astronomical distances.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "Which of the following types of celestial objects is thought to be the remains of a star that has undergone a supernova explosion?",
+    "options": [
+      "Nebula",
+      "Black hole",
+      "Neutron star",
+      "White dwarf"
+    ],
+    "correct_answer": "Nebula",
+    "explanation": "A nebula is the remains of a star that has undergone a supernova explosion, consisting of gas and dust that has been expelled into space.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the term for the study of the formation and evolution of the universe, including the formation of galaxies and stars?",
+    "options": [
+      "Cosmology",
+      "Astronomy",
+      "Astrophysics",
+      "Geology"
+    ],
+    "correct_answer": "Cosmology",
+    "explanation": "Cosmology is the study of the formation and evolution of the universe, including the formation of galaxies and stars, using a combination of observations, experiments, and theoretical frameworks.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  },
+  {
+    "question": "Which of the following types of radiation has the longest wavelength and lowest energy?",
+    "options": [
+      "Gamma rays",
+      "X-rays",
+      "Ultraviolet radiation",
+      "Radio waves"
+    ],
+    "correct_answer": "Radio waves",
+    "explanation": "Radio waves have the longest wavelength and lowest energy of any type of electromagnetic radiation, with wavelengths ranging from 1 millimeter to thousands of kilometers.",
+    "subject": "science",
+    "difficulty": "intermediate",
+    "topic": "astronomy"
+  }
+]

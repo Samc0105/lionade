@@ -1,0 +1,702 @@
+[
+  {
+    "question": "What was the primary goal of the Treaty of Versailles in 1919?",
+    "options": [
+      "To establish the United Nations",
+      "To impose penalties on Germany",
+      "To promote world peace",
+      "To redistribute colonial territories"
+    ],
+    "correct_answer": "To impose penalties on Germany",
+    "explanation": "The Treaty of Versailles was signed after World War I and imposed harsh penalties on Germany, including significant territorial losses and heavy reparations.",
+    "subject": "history",
+    "difficulty": "advanced",
+    "topic": "global-history"
+  },
+  {
+    "question": "Which ancient civilization built the city of Petra?",
+    "options": [
+      "Egyptians",
+      "Greeks",
+      "Romans",
+      "Nabataeans"
+    ],
+    "correct_answer": "Nabataeans",
+    "explanation": "The Nabataeans were a group of Arabs who built the city of Petra in modern-day Jordan, which was an important center of trade and commerce.",
+    "subject": "history",
+    "difficulty": "advanced",
+    "topic": "global-history"
+  },
+  {
+    "question": "What was the main cause of the Russian Revolution of 1917?",
+    "options": [
+      "Economic inequality",
+      "Foreign invasion",
+      "Social unrest",
+      "All of the above"
+    ],
+    "correct_answer": "All of the above",
+    "explanation": "The Russian Revolution of 1917 was caused by a combination of factors, including economic inequality, social unrest, and the country's involvement in World War I.",
+    "subject": "history",
+    "difficulty": "advanced",
+    "topic": "global-history"
+  },
+  {
+    "question": "Who was the leader of the Chinese Communist Party during the Long March?",
+    "options": [
+      "Mao Zedong",
+      "Chiang Kai-shek",
+      "Zhou Enlai",
+      "Deng Xiaoping"
+    ],
+    "correct_answer": "Mao Zedong",
+    "explanation": "Mao Zedong was the leader of the Chinese Communist Party during the Long March, a military retreat that took place from 1934 to 1935.",
+    "subject": "history",
+    "difficulty": "advanced",
+    "topic": "global-history"
+  },
+  {
+    "question": "What was the significance of the Battle of Gaugamela in 331 BCE?",
+    "options": [
+      "It marked the beginning of the Roman Empire",
+      "It led to the conquest of Persia by Alexander the Great",
+      "It resulted in the defeat of the Mongols",
+      "It ended the Peloponnesian War"
+    ],
+    "correct_answer": "It led to the conquest of Persia by Alexander the Great",
+    "explanation": "The Battle of Gaugamela was a decisive victory for Alexander the Great, which led to the conquest of the Persian Empire and the spread of Greek culture throughout the ancient world.",
+    "subject": "history",
+    "difficulty": "advanced",
+    "topic": "global-history"
+  },
+  {
+    "question": "Which of the following was a major consequence of the Black Death in Europe?",
+    "options": [
+      "A significant increase in population",
+      "A decline in trade and commerce",
+      "A shift in the social and economic structure of society",
+      "A reduction in the power of the nobility"
+    ],
+    "correct_answer": "A shift in the social and economic structure of society",
+    "explanation": "The Black Death had a profound impact on European society, leading to significant changes in the social and economic structure, including a shift from feudalism to a more modern economy.",
+    "subject": "history",
+    "difficulty": "advanced",
+    "topic": "global-history"
+  },
+  {
+    "question": "What was the main purpose of the Congress of Vienna in 1815?",
+    "options": [
+      "To establish the United Nations",
+      "To redraw the map of Europe after Napoleon's defeat",
+      "To promote democracy and human rights",
+      "To impose penalties on France"
+    ],
+    "correct_answer": "To redraw the map of Europe after Napoleon's defeat",
+    "explanation": "The Congress of Vienna was a gathering of European powers that took place after Napoleon's defeat, with the goal of redrawing the map of Europe and establishing a new balance of power.",
+    "subject": "history",
+    "difficulty": "advanced",
+    "topic": "global-history"
+  },
+  {
+    "question": "Who was the leader of the Indian National Congress during the Indian independence movement?",
+    "options": [
+      "Mahatma Gandhi",
+      "Jawaharlal Nehru",
+      "Subhas Chandra Bose",
+      "Bhagat Singh"
+    ],
+    "correct_answer": "Mahatma Gandhi",
+    "explanation": "Mahatma Gandhi was a key leader of the Indian National Congress and played a significant role in the Indian independence movement, using non-violent resistance to challenge British rule.",
+    "subject": "history",
+    "difficulty": "advanced",
+    "topic": "global-history"
+  },
+  {
+    "question": "What was the significance of the Opium Wars in China?",
+    "options": [
+      "They led to the establishment of communism in China",
+      "They resulted in the opening of Chinese ports to European trade",
+      "They led to the collapse of the Qing dynasty",
+      "They had no significant impact on Chinese history"
+    ],
+    "correct_answer": "They resulted in the opening of Chinese ports to European trade",
+    "explanation": "The Opium Wars were a series of conflicts between China and European powers, particularly Britain, which resulted in the forced opening of Chinese ports to European trade and the establishment of foreign concessions in China.",
+    "subject": "history",
+    "difficulty": "advanced",
+    "topic": "global-history"
+  },
+  {
+    "question": "Which of the following was a major consequence of the Industrial Revolution?",
+    "options": [
+      "A decline in urbanization",
+      "An increase in agricultural production",
+      "The development of new social classes",
+      "A reduction in international trade"
+    ],
+    "correct_answer": "The development of new social classes",
+    "explanation": "The Industrial Revolution led to the development of new social classes, including the industrial bourgeoisie and the working class, which had a profound impact on the social and economic structure of society.",
+    "subject": "history",
+    "difficulty": "advanced",
+    "topic": "global-history"
+  },
+  {
+    "question": "What was the main goal of the Monroe Doctrine?",
+    "options": [
+      "To promote democracy and human rights in Europe",
+      "To prevent European intervention in the Americas",
+      "To establish the United States as a global superpower",
+      "To promote free trade and commerce"
+    ],
+    "correct_answer": "To prevent European intervention in the Americas",
+    "explanation": "The Monroe Doctrine was a policy introduced by the United States in 1823, which stated that the United States would not tolerate further European intervention in the Americas and would consider any such intervention as a threat to its own security.",
+    "subject": "history",
+    "difficulty": "advanced",
+    "topic": "global-history"
+  },
+  {
+    "question": "Who was the leader of the Soviet Union during World War II?",
+    "options": [
+      "Joseph Stalin",
+      "Vladimir Lenin",
+      "Leon Trotsky",
+      "Mikhail Gorbachev"
+    ],
+    "correct_answer": "Joseph Stalin",
+    "explanation": "Joseph Stalin was the leader of the Soviet Union during World War II, playing a crucial role in the defeat of Nazi Germany and the establishment of the Soviet Union as a superpower.",
+    "subject": "history",
+    "difficulty": "advanced",
+    "topic": "global-history"
+  },
+  {
+    "question": "What was the significance of the Berlin Blockade and Airlift?",
+    "options": [
+      "It marked the beginning of the Cold War",
+      "It led to the division of Germany",
+      "It resulted in the establishment of the Soviet Union as a superpower",
+      "It demonstrated the effectiveness of diplomacy in resolving international conflicts"
+    ],
+    "correct_answer": "It marked the beginning of the Cold War",
+    "explanation": "The Berlin Blockade and Airlift was a major crisis that took place in 1948-1949, in which the Soviet Union blocked Western access to Berlin, and the Western powers responded with a massive airlift to supply the city, marking the beginning of the Cold War.",
+    "subject": "history",
+    "difficulty": "advanced",
+    "topic": "global-history"
+  },
+  {
+    "question": "Which of the following was a major consequence of the French Revolution?",
+    "options": [
+      "The establishment of a constitutional monarchy",
+      "The rise of Napoleon Bonaparte",
+      "The spread of democratic ideals throughout Europe",
+      "The decline of the Catholic Church"
+    ],
+    "correct_answer": "The spread of democratic ideals throughout Europe",
+    "explanation": "The French Revolution had a profound impact on European history, spreading democratic ideals and influencing the development of modern politics, including the rise of liberalism and socialism.",
+    "subject": "history",
+    "difficulty": "advanced",
+    "topic": "global-history"
+  },
+  {
+    "question": "What was the main purpose of the Truman Doctrine?",
+    "options": [
+      "To provide economic aid to war-torn Europe",
+      "To promote democracy and human rights in the Middle East",
+      "To contain the spread of communism",
+      "To establish the United States as a global superpower"
+    ],
+    "correct_answer": "To contain the spread of communism",
+    "explanation": "The Truman Doctrine was a policy introduced by the United States in 1947, which aimed to contain the spread of communism in Europe and provide economic and military aid to countries threatened by communist expansion.",
+    "subject": "history",
+    "difficulty": "advanced",
+    "topic": "global-history"
+  },
+  {
+    "question": "Who was the leader of the Cuban Revolution?",
+    "options": [
+      "Fidel Castro",
+      "Che Guevara",
+      "Jose Marti",
+      "Raul Castro"
+    ],
+    "correct_answer": "Fidel Castro",
+    "explanation": "Fidel Castro was the leader of the Cuban Revolution, which overthrew the authoritarian government of Fulgencio Batista in 1959 and established a socialist government in Cuba.",
+    "subject": "history",
+    "difficulty": "advanced",
+    "topic": "global-history"
+  },
+  {
+    "question": "What was the significance of the Treaty of Westphalia in 1648?",
+    "options": [
+      "It marked the beginning of the modern nation-state system",
+      "It led to the rise of the Habsburg Empire",
+      "It resulted in the decline of the Catholic Church",
+      "It had no significant impact on European history"
+    ],
+    "correct_answer": "It marked the beginning of the modern nation-state system",
+    "explanation": "The Treaty of Westphalia was a series of treaties that ended the Thirty Years' War in Europe, establishing the principle of sovereignty and the modern nation-state system, which has had a lasting impact on international relations.",
+    "subject": "history",
+    "difficulty": "advanced",
+    "topic": "global-history"
+  },
+  {
+    "question": "Which of the following was a major consequence of the Meiji Restoration in Japan?",
+    "options": [
+      "The adoption of a constitutional monarchy",
+      "The modernization of the Japanese economy",
+      "The isolation of Japan from the rest of the world",
+      "The decline of the samurai class"
+    ],
+    "correct_answer": "The modernization of the Japanese economy",
+    "explanation": "The Meiji Restoration was a revolution that took place in Japan in 1868, which led to the modernization of the Japanese economy, the adoption of Western technology and institutions, and the transformation of Japan into a major world power.",
+    "subject": "history",
+    "difficulty": "advanced",
+    "topic": "global-history"
+  },
+  {
+    "question": "What was the main purpose of the Marshall Plan?",
+    "options": [
+      "To provide economic aid to war-torn Europe",
+      "To promote democracy and human rights in the Middle East",
+      "To contain the spread of communism",
+      "To establish the United States as a global superpower"
+    ],
+    "correct_answer": "To provide economic aid to war-torn Europe",
+    "explanation": "The Marshall Plan was a program introduced by the United States in 1948, which provided economic aid to war-torn Europe, helping to rebuild and stabilize the continent after World War II.",
+    "subject": "history",
+    "difficulty": "advanced",
+    "topic": "global-history"
+  },
+  {
+    "question": "Who was the leader of the African National Congress during the fight against apartheid in South Africa?",
+    "options": [
+      "Nelson Mandela",
+      "Oliver Tambo",
+      "Walter Sisulu",
+      "Desmond Tutu"
+    ],
+    "correct_answer": "Nelson Mandela",
+    "explanation": "Nelson Mandela was a key leader of the African National Congress, who played a crucial role in the fight against apartheid in South Africa, serving as president of the country from 1994 to 1999.",
+    "subject": "history",
+    "difficulty": "advanced",
+    "topic": "global-history"
+  },
+  {
+    "question": "What was the significance of the Mongol conquests in the 13th century?",
+    "options": [
+      "They led to the spread of Islam throughout Asia",
+      "They resulted in the establishment of the Silk Road",
+      "They had a profound impact on the development of European society",
+      "They led to the decline of the Chinese Empire"
+    ],
+    "correct_answer": "They had a profound impact on the development of European society",
+    "explanation": "The Mongol conquests had a significant impact on European society, leading to the establishment of trade and cultural exchange between Europe and Asia, and influencing the development of European politics and society.",
+    "subject": "history",
+    "difficulty": "advanced",
+    "topic": "global-history"
+  },
+  {
+    "question": "Which of the following was a major consequence of the Partition of India in 1947?",
+    "options": [
+      "The establishment of a unified Indian state",
+      "The creation of a separate homeland for Muslims",
+      "The displacement of millions of people",
+      "The rise of Hindu nationalism"
+    ],
+    "correct_answer": "The displacement of millions of people",
+    "explanation": "The Partition of India in 1947 led to the displacement of millions of people, as Hindus and Muslims were forced to flee their homes and relocate to newly created countries, resulting in significant human suffering and social upheaval.",
+    "subject": "history",
+    "difficulty": "advanced",
+    "topic": "global-history"
+  },
+  {
+    "question": "What was the main purpose of the League of Nations?",
+    "options": [
+      "To promote democracy and human rights worldwide",
+      "To prevent war and promote international cooperation",
+      "To establish a new world order",
+      "To provide economic aid to war-torn countries"
+    ],
+    "correct_answer": "To prevent war and promote international cooperation",
+    "explanation": "The League of Nations was an international organization established after World War I, with the goal of preventing war and promoting international cooperation, but it ultimately failed to prevent the outbreak of World War II.",
+    "subject": "history",
+    "difficulty": "advanced",
+    "topic": "global-history"
+  },
+  {
+    "question": "Who was the leader of the Chinese Communist Party during the Cultural Revolution?",
+    "options": [
+      "Mao Zedong",
+      "Zhou Enlai",
+      "Deng Xiaoping",
+      "Jiang Zemin"
+    ],
+    "correct_answer": "Mao Zedong",
+    "explanation": "Mao Zedong was the leader of the Chinese Communist Party during the Cultural Revolution, a period of significant social and political upheaval in China, which took place from 1966 to 1976.",
+    "subject": "history",
+    "difficulty": "advanced",
+    "topic": "global-history"
+  },
+  {
+    "question": "What was the significance of the Renaissance in Europe?",
+    "options": [
+      "It marked the beginning of the modern nation-state system",
+      "It led to the rise of the Habsburg Empire",
+      "It resulted in the decline of the Catholic Church",
+      "It led to a cultural and intellectual revival"
+    ],
+    "correct_answer": "It led to a cultural and intellectual revival",
+    "explanation": "The Renaissance was a cultural and intellectual movement that took place in Europe from the 14th to the 17th century, which saw a revival of interest in classical learning and a flourishing of art, literature, and science.",
+    "subject": "history",
+    "difficulty": "advanced",
+    "topic": "global-history"
+  },
+  {
+    "question": "Which of the following was a major consequence of the Scramble for Africa in the late 19th century?",
+    "options": [
+      "The establishment of independent African states",
+      "The spread of European colonial empires",
+      "The decline of the slave trade",
+      "The rise of African nationalism"
+    ],
+    "correct_answer": "The spread of European colonial empires",
+    "explanation": "The Scramble for Africa was a period of intense European colonization of the African continent, which resulted in the establishment of European colonial empires and the exploitation of African resources.",
+    "subject": "history",
+    "difficulty": "advanced",
+    "topic": "global-history"
+  },
+  {
+    "question": "What was the main purpose of the European Union?",
+    "options": [
+      "To promote democracy and human rights in Europe",
+      "To establish a common market and facilitate economic integration",
+      "To provide a collective defense against external threats",
+      "To promote cultural exchange and cooperation"
+    ],
+    "correct_answer": "To establish a common market and facilitate economic integration",
+    "explanation": "The European Union was established to promote economic integration and cooperation among European countries, creating a common market and facilitating the free movement of goods, services, and people.",
+    "subject": "history",
+    "difficulty": "advanced",
+    "topic": "global-history"
+  },
+  {
+    "question": "Who was the leader of the Soviet Union during the Cuban Missile Crisis?",
+    "options": [
+      "Nikita Khrushchev",
+      "Leonid Brezhnev",
+      "Mikhail Gorbachev",
+      "Joseph Stalin"
+    ],
+    "correct_answer": "Nikita Khrushchev",
+    "explanation": "Nikita Khrushchev was the leader of the Soviet Union during the Cuban Missile Crisis, a major Cold War confrontation between the United States and the Soviet Union, which took place in 1962.",
+    "subject": "history",
+    "difficulty": "advanced",
+    "topic": "global-history"
+  },
+  {
+    "question": "What was the primary cause of the French Revolution?",
+    "options": [
+      "Economic crisis",
+      "Social inequality",
+      "Political corruption",
+      "Foreign invasion"
+    ],
+    "correct_answer": "Social inequality",
+    "explanation": "The French Revolution was primarily caused by social inequality, as the burden of taxation fell on the commoners while the nobility was exempt.",
+    "subject": "history",
+    "difficulty": "advanced",
+    "topic": "global-history"
+  },
+  {
+    "question": "Which of the following empires was known for its extensive trade network along the Silk Road?",
+    "options": [
+      "Roman Empire",
+      "Mongol Empire",
+      "Chinese Empire",
+      "Ottoman Empire"
+    ],
+    "correct_answer": "Mongol Empire",
+    "explanation": "The Mongol Empire was known for its extensive trade network along the Silk Road, which connected Europe and Asia.",
+    "subject": "history",
+    "difficulty": "advanced",
+    "topic": "global-history"
+  },
+  {
+    "question": "What was the main goal of the Congress of Vienna in 1815?",
+    "options": [
+      "To establish a new world order",
+      "To promote nationalism",
+      "To prevent future wars",
+      "To restore the pre-Napoleonic order"
+    ],
+    "correct_answer": "To restore the pre-Napoleonic order",
+    "explanation": "The main goal of the Congress of Vienna in 1815 was to restore the pre-Napoleonic order in Europe, which meant re-establishing the monarchies and borders that existed before the French Revolution.",
+    "subject": "history",
+    "difficulty": "advanced",
+    "topic": "global-history"
+  },
+  {
+    "question": "What was the main reason for the decline of the Roman Empire?",
+    "options": [
+      "External invasions",
+      "Internal corruption",
+      "Economic troubles",
+      "All of the above"
+    ],
+    "correct_answer": "All of the above",
+    "explanation": "The decline of the Roman Empire was caused by a combination of external invasions, internal corruption, and economic troubles.",
+    "subject": "history",
+    "difficulty": "advanced",
+    "topic": "global-history"
+  },
+  {
+    "question": "Who was the leader of the Chinese Communist Party during the Chinese Civil War?",
+    "options": [
+      "Mao Zedong",
+      "Chiang Kai-shek",
+      "Zhou Enlai",
+      "Deng Xiaoping"
+    ],
+    "correct_answer": "Mao Zedong",
+    "explanation": "Mao Zedong was the leader of the Chinese Communist Party during the Chinese Civil War, and eventually established the People's Republic of China in 1949.",
+    "subject": "history",
+    "difficulty": "advanced",
+    "topic": "global-history"
+  },
+  {
+    "question": "What was the significance of the Magna Carta in 1215?",
+    "options": [
+      "It established the principle of absolute monarchy",
+      "It protected the rights of the nobility",
+      "It limited the power of the king",
+      "It promoted the idea of democracy"
+    ],
+    "correct_answer": "It limited the power of the king",
+    "explanation": "The Magna Carta in 1215 limited the power of the king and established the principle that the king was not above the law.",
+    "subject": "history",
+    "difficulty": "advanced",
+    "topic": "global-history"
+  },
+  {
+    "question": "What was the main goal of the Meiji Restoration in Japan?",
+    "options": [
+      "To modernize and westernize Japan",
+      "To restore the power of the samurai",
+      "To promote the idea of isolationism",
+      "To establish a communist government"
+    ],
+    "correct_answer": "To modernize and westernize Japan",
+    "explanation": "The main goal of the Meiji Restoration in Japan was to modernize and westernize the country, which involved adopting Western technology, institutions, and values.",
+    "subject": "history",
+    "difficulty": "advanced",
+    "topic": "global-history"
+  },
+  {
+    "question": "What was the significance of the Treaty of Versailles in 1919?",
+    "options": [
+      "It marked the end of World War I",
+      "It established the League of Nations",
+      "It imposed harsh penalties on Germany",
+      "All of the above"
+    ],
+    "correct_answer": "All of the above",
+    "explanation": "The Treaty of Versailles in 1919 marked the end of World War I, established the League of Nations, and imposed harsh penalties on Germany, which many believe contributed to the outbreak of World War II.",
+    "subject": "history",
+    "difficulty": "advanced",
+    "topic": "global-history"
+  },
+  {
+    "question": "Which of the following was a major consequence of the Renaissance in Europe?",
+    "options": [
+      "The decline of art and culture",
+      "The rise of feudalism",
+      "The growth of humanism",
+      "The spread of the Black Death"
+    ],
+    "correct_answer": "The growth of humanism",
+    "explanation": "The Renaissance in Europe led to the growth of humanism, which emphasized the potential of human beings to achieve great things through education, reason, and individualism.",
+    "subject": "history",
+    "difficulty": "advanced",
+    "topic": "global-history"
+  },
+  {
+    "question": "What was the main goal of the Cuban Revolution?",
+    "options": [
+      "To establish a communist government",
+      "To promote the idea of capitalism",
+      "To gain independence from Spain",
+      "To establish a democratic government"
+    ],
+    "correct_answer": "To establish a communist government",
+    "explanation": "The main goal of the Cuban Revolution was to establish a communist government, which was achieved in 1959 with the establishment of a socialist state led by Fidel Castro.",
+    "subject": "history",
+    "difficulty": "advanced",
+    "topic": "global-history"
+  },
+  {
+    "question": "Who was the leader of the Russian Revolution in 1917?",
+    "options": [
+      "Vladimir Lenin",
+      "Leon Trotsky",
+      "Joseph Stalin",
+      "Mikhail Gorbachev"
+    ],
+    "correct_answer": "Vladimir Lenin",
+    "explanation": "Vladimir Lenin was the leader of the Russian Revolution in 1917, and played a key role in the establishment of the Soviet Union.",
+    "subject": "history",
+    "difficulty": "advanced",
+    "topic": "global-history"
+  },
+  {
+    "question": "What was the significance of the Berlin Wall?",
+    "options": [
+      "It marked the division of Germany",
+      "It symbolized the Cold War",
+      "It separated East and West Berlin",
+      "All of the above"
+    ],
+    "correct_answer": "All of the above",
+    "explanation": "The Berlin Wall marked the division of Germany, symbolized the Cold War, and separated East and West Berlin, becoming a powerful symbol of the division between Eastern and Western Europe.",
+    "subject": "history",
+    "difficulty": "advanced",
+    "topic": "global-history"
+  },
+  {
+    "question": "Which of the following was a major consequence of the American Revolution?",
+    "options": [
+      "The establishment of a monarchy",
+      "The promotion of the idea of socialism",
+      "The growth of democracy",
+      "The decline of colonialism"
+    ],
+    "correct_answer": "The growth of democracy",
+    "explanation": "The American Revolution led to the growth of democracy, as the newly independent United States established a government based on the principles of liberty, equality, and representation.",
+    "subject": "history",
+    "difficulty": "advanced",
+    "topic": "global-history"
+  },
+  {
+    "question": "What was the main goal of the Mexican Revolution?",
+    "options": [
+      "To establish a democratic government",
+      "To promote the idea of socialism",
+      "To gain independence from Spain",
+      "To redistribute land to the peasants"
+    ],
+    "correct_answer": "To redistribute land to the peasants",
+    "explanation": "The main goal of the Mexican Revolution was to redistribute land to the peasants, which was achieved through the establishment of a new constitution and the redistribution of land from large landholders to small farmers.",
+    "subject": "history",
+    "difficulty": "advanced",
+    "topic": "global-history"
+  },
+  {
+    "question": "Who was the leader of the Chinese Nationalist Party during the Chinese Civil War?",
+    "options": [
+      "Chiang Kai-shek",
+      "Mao Zedong",
+      "Zhou Enlai",
+      "Deng Xiaoping"
+    ],
+    "correct_answer": "Chiang Kai-shek",
+    "explanation": "Chiang Kai-shek was the leader of the Chinese Nationalist Party during the Chinese Civil War, and eventually established the government of Taiwan after the Communist Party took control of mainland China.",
+    "subject": "history",
+    "difficulty": "advanced",
+    "topic": "global-history"
+  },
+  {
+    "question": "What was the significance of the Indian Rebellion of 1857?",
+    "options": [
+      "It marked the beginning of the British Raj",
+      "It led to the establishment of the Indian National Congress",
+      "It was a major challenge to British rule in India",
+      "It resulted in the partition of India"
+    ],
+    "correct_answer": "It was a major challenge to British rule in India",
+    "explanation": "The Indian Rebellion of 1857 was a major challenge to British rule in India, as Indian soldiers and princes rebelled against the British East India Company's rule, leading to the eventual establishment of direct British rule in India.",
+    "subject": "history",
+    "difficulty": "advanced",
+    "topic": "global-history"
+  },
+  {
+    "question": "Which of the following was a major consequence of the Opium Wars?",
+    "options": [
+      "The decline of Chinese trade and commerce",
+      "The growth of British influence in China",
+      "The establishment of the Chinese Communist Party",
+      "The promotion of the idea of isolationism"
+    ],
+    "correct_answer": "The growth of British influence in China",
+    "explanation": "The Opium Wars led to the growth of British influence in China, as the British forced China to open up to trade and commerce, and established a series of unequal treaties that gave Britain significant concessions and privileges.",
+    "subject": "history",
+    "difficulty": "advanced",
+    "topic": "global-history"
+  },
+  {
+    "question": "What was the main goal of the Arab-Israeli War of 1948?",
+    "options": [
+      "To establish a Palestinian state",
+      "To promote the idea of Zionism",
+      "To gain independence for Israel",
+      "To establish a unified Arab state"
+    ],
+    "correct_answer": "To gain independence for Israel",
+    "explanation": "The main goal of the Arab-Israeli War of 1948 was to gain independence for Israel, which was achieved with the establishment of the State of Israel on May 14, 1948.",
+    "subject": "history",
+    "difficulty": "advanced",
+    "topic": "global-history"
+  },
+  {
+    "question": "Who was the leader of the African National Congress during the anti-apartheid movement?",
+    "options": [
+      "Nelson Mandela",
+      "Oliver Tambo",
+      "Walter Sisulu",
+      "Desmond Tutu"
+    ],
+    "correct_answer": "Nelson Mandela",
+    "explanation": "Nelson Mandela was the leader of the African National Congress during the anti-apartheid movement, and played a key role in the struggle against apartheid in South Africa, eventually becoming the country's first black president.",
+    "subject": "history",
+    "difficulty": "advanced",
+    "topic": "global-history"
+  },
+  {
+    "question": "What was the significance of the Partition of India in 1947?",
+    "options": [
+      "It marked the end of British rule in India",
+      "It led to the establishment of Pakistan",
+      "It resulted in the division of India and Pakistan",
+      "All of the above"
+    ],
+    "correct_answer": "All of the above",
+    "explanation": "The Partition of India in 1947 marked the end of British rule in India, led to the establishment of Pakistan, and resulted in the division of India and Pakistan, leading to one of the largest mass migrations in history.",
+    "subject": "history",
+    "difficulty": "advanced",
+    "topic": "global-history"
+  },
+  {
+    "question": "Which of the following was a major consequence of the Iranian Revolution?",
+    "options": [
+      "The establishment of a democratic government",
+      "The promotion of the idea of socialism",
+      "The growth of Islamic fundamentalism",
+      "The decline of oil production"
+    ],
+    "correct_answer": "The growth of Islamic fundamentalism",
+    "explanation": "The Iranian Revolution led to the growth of Islamic fundamentalism, as the new government established an Islamic republic based on Sharia law, and promoted the idea of Islamic revolution throughout the Middle East.",
+    "subject": "history",
+    "difficulty": "advanced",
+    "topic": "global-history"
+  },
+  {
+    "question": "What was the main goal of the Nicaraguan Revolution?",
+    "options": [
+      "To establish a democratic government",
+      "To promote the idea of socialism",
+      "To gain independence from the United States",
+      "To redistribute land to the peasants"
+    ],
+    "correct_answer": "To promote the idea of socialism",
+    "explanation": "The main goal of the Nicaraguan Revolution was to promote the idea of socialism, which was achieved with the establishment of a socialist government led by the Sandinista National Liberation Front.",
+    "subject": "history",
+    "difficulty": "advanced",
+    "topic": "global-history"
+  }
+]

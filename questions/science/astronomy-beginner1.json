@@ -1,0 +1,3726 @@
+[
+  {
+    "question": "What is the closest star to Earth?",
+    "options": [
+      "Sirius",
+      "Betelgeuse",
+      "The Sun",
+      "Proxima Centauri"
+    ],
+    "correct_answer": "The Sun",
+    "explanation": "The Sun is the closest star to Earth, located about 93 million miles (150 million km) away.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "How many planets are in our solar system?",
+    "options": [
+      "7",
+      "8",
+      "9",
+      "10"
+    ],
+    "correct_answer": "8",
+    "explanation": "There are 8 planets in our solar system: Mercury, Venus, Earth, Mars, Jupiter, Saturn, Uranus, and Neptune.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the largest planet in our solar system?",
+    "options": [
+      "Saturn",
+      "Neptune",
+      "Jupiter",
+      "Uranus"
+    ],
+    "correct_answer": "Jupiter",
+    "explanation": "Jupiter is the largest planet in our solar system, so massive that all other planets could fit inside it.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of Earth's natural satellite?",
+    "options": [
+      "Titan",
+      "The Moon",
+      "Phobos",
+      "Europa"
+    ],
+    "correct_answer": "The Moon",
+    "explanation": "The Moon is Earth's only natural satellite and the fifth largest moon in the solar system.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the Sun made of?",
+    "options": [
+      "Rock and metal",
+      "Mostly hydrogen and helium gas",
+      "Liquid fire",
+      "Ice and dust"
+    ],
+    "correct_answer": "Mostly hydrogen and helium gas",
+    "explanation": "The Sun is a giant ball of plasma composed mostly of hydrogen (about 70%) and helium (about 28%).",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What do we call a group of stars that forms a pattern in the sky?",
+    "options": [
+      "Galaxy",
+      "Nebula",
+      "Constellation",
+      "Cluster"
+    ],
+    "correct_answer": "Constellation",
+    "explanation": "A constellation is a group of stars that appears to form a recognizable pattern or picture in the night sky.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "Which planet is known as the Red Planet?",
+    "options": [
+      "Venus",
+      "Mars",
+      "Jupiter",
+      "Mercury"
+    ],
+    "correct_answer": "Mars",
+    "explanation": "Mars is called the Red Planet because its surface is covered with iron oxide (rust), giving it a reddish appearance.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is a shooting star actually made of?",
+    "options": [
+      "A piece of a star falling",
+      "A comet crashing",
+      "A small rock or dust burning up in Earth's atmosphere",
+      "A satellite falling to Earth"
+    ],
+    "correct_answer": "A small rock or dust burning up in Earth's atmosphere",
+    "explanation": "Shooting stars are meteors — small pieces of rock or dust that burn up due to friction when entering Earth's atmosphere.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of our galaxy?",
+    "options": [
+      "Andromeda",
+      "The Milky Way",
+      "Triangulum",
+      "Whirlpool"
+    ],
+    "correct_answer": "The Milky Way",
+    "explanation": "We live in the Milky Way galaxy, a spiral galaxy containing over 200 billion stars including our Sun.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "Which planet has the most beautiful rings?",
+    "options": [
+      "Jupiter",
+      "Uranus",
+      "Saturn",
+      "Neptune"
+    ],
+    "correct_answer": "Saturn",
+    "explanation": "Saturn is famous for its stunning ring system, made of ice and rock particles, which is the most visible and extensive of any planet.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What causes day and night on Earth?",
+    "options": [
+      "Earth orbiting the Sun",
+      "The Moon blocking the Sun",
+      "Earth rotating on its axis",
+      "Clouds covering the Sun"
+    ],
+    "correct_answer": "Earth rotating on its axis",
+    "explanation": "Day and night are caused by Earth spinning on its axis — the side facing the Sun has day, while the side facing away has night.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the smallest planet in our solar system?",
+    "options": [
+      "Mars",
+      "Mercury",
+      "Venus",
+      "Pluto"
+    ],
+    "correct_answer": "Mercury",
+    "explanation": "Mercury is the smallest planet in our solar system, only slightly larger than Earth's Moon.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "How long does it take Earth to orbit the Sun?",
+    "options": [
+      "24 hours",
+      "30 days",
+      "365 days",
+      "10 years"
+    ],
+    "correct_answer": "365 days",
+    "explanation": "Earth takes approximately 365 days (one year) to complete one full orbit around the Sun.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is a comet?",
+    "options": [
+      "A large planet with no moons",
+      "A ball of ice, rock, and dust that orbits the Sun",
+      "A type of star",
+      "A broken piece of a planet"
+    ],
+    "correct_answer": "A ball of ice, rock, and dust that orbits the Sun",
+    "explanation": "Comets are icy bodies that travel through the solar system, developing a glowing tail of gas and dust when they approach the Sun.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "Which planet is closest to the Sun?",
+    "options": [
+      "Venus",
+      "Earth",
+      "Mercury",
+      "Mars"
+    ],
+    "correct_answer": "Mercury",
+    "explanation": "Mercury is the closest planet to the Sun, orbiting at an average distance of about 36 million miles.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is an asteroid?",
+    "options": [
+      "A small star",
+      "A rocky object that orbits the Sun, mostly found between Mars and Jupiter",
+      "A moon of Jupiter",
+      "A piece of a comet"
+    ],
+    "correct_answer": "A rocky object that orbits the Sun, mostly found between Mars and Jupiter",
+    "explanation": "Asteroids are rocky, metallic objects that orbit the Sun. Most are found in the asteroid belt between Mars and Jupiter.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the hottest planet in our solar system?",
+    "options": [
+      "Mercury",
+      "Mars",
+      "Venus",
+      "Jupiter"
+    ],
+    "correct_answer": "Venus",
+    "explanation": "Venus is the hottest planet with surface temperatures around 465°C (869°F) due to its thick atmosphere trapping heat.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What phase of the Moon is when it appears fully lit?",
+    "options": [
+      "New Moon",
+      "Crescent Moon",
+      "Full Moon",
+      "Quarter Moon"
+    ],
+    "correct_answer": "Full Moon",
+    "explanation": "A full moon occurs when the Moon is on the opposite side of Earth from the Sun, with its entire sunlit side visible from Earth.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is a solar eclipse?",
+    "options": [
+      "When Earth blocks the Sun's light from the Moon",
+      "When the Moon passes between the Sun and Earth, blocking the Sun",
+      "When a planet blocks the Sun",
+      "When clouds cover the Sun completely"
+    ],
+    "correct_answer": "When the Moon passes between the Sun and Earth, blocking the Sun",
+    "explanation": "A solar eclipse occurs when the Moon aligns between Earth and the Sun, casting a shadow on Earth's surface.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is a lunar eclipse?",
+    "options": [
+      "When the Moon blocks the Sun",
+      "When Earth passes between the Sun and Moon, casting a shadow on the Moon",
+      "When a cloud covers the Moon",
+      "When the Moon disappears"
+    ],
+    "correct_answer": "When Earth passes between the Sun and Moon, casting a shadow on the Moon",
+    "explanation": "A lunar eclipse happens when Earth's shadow falls on the Moon, making it appear dark or reddish-orange.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "Which planet is farthest from the Sun?",
+    "options": [
+      "Saturn",
+      "Uranus",
+      "Neptune",
+      "Jupiter"
+    ],
+    "correct_answer": "Neptune",
+    "explanation": "Neptune is the farthest planet from the Sun, orbiting at about 2.8 billion miles away and taking 165 years to complete one orbit.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the force that keeps planets in orbit around the Sun?",
+    "options": [
+      "Magnetism",
+      "Electricity",
+      "Gravity",
+      "Friction"
+    ],
+    "correct_answer": "Gravity",
+    "explanation": "Gravity is the attractive force between masses that keeps planets in orbit around the Sun and moons in orbit around planets.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "How does the Sun produce its energy?",
+    "options": [
+      "By burning wood",
+      "By nuclear fusion of hydrogen into helium",
+      "By chemical reactions",
+      "By cooling down"
+    ],
+    "correct_answer": "By nuclear fusion of hydrogen into helium",
+    "explanation": "The Sun produces energy through nuclear fusion in its core, where hydrogen atoms are fused together to form helium, releasing enormous energy.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the Milky Way?",
+    "options": [
+      "A type of star",
+      "A moon of Saturn",
+      "The galaxy that contains our solar system",
+      "A constellation"
+    ],
+    "correct_answer": "The galaxy that contains our solar system",
+    "explanation": "The Milky Way is a barred spiral galaxy that is home to our solar system and hundreds of billions of other stars.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What are the rings of Saturn made of?",
+    "options": [
+      "Solid metal",
+      "Gas and fire",
+      "Mostly ice and rock particles",
+      "Liquid water"
+    ],
+    "correct_answer": "Mostly ice and rock particles",
+    "explanation": "Saturn's rings are composed mostly of water ice particles ranging in size from tiny grains to large boulders.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "Which planet rotates on its side?",
+    "options": [
+      "Saturn",
+      "Neptune",
+      "Uranus",
+      "Jupiter"
+    ],
+    "correct_answer": "Uranus",
+    "explanation": "Uranus rotates on an axial tilt of about 98 degrees, meaning it essentially rolls on its side as it orbits the Sun.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is a nebula?",
+    "options": [
+      "A type of planet",
+      "A cloud of gas and dust in space",
+      "A small moon",
+      "A distant galaxy"
+    ],
+    "correct_answer": "A cloud of gas and dust in space",
+    "explanation": "A nebula is a giant cloud of gas and dust in space where new stars can be born or where a star has exploded.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the speed of light approximately?",
+    "options": [
+      "100,000 km/s",
+      "200,000 km/s",
+      "300,000 km/s",
+      "500,000 km/s"
+    ],
+    "correct_answer": "300,000 km/s",
+    "explanation": "Light travels at approximately 300,000 kilometers per second (186,000 miles per second) in a vacuum.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the first human to walk on the Moon?",
+    "options": [
+      "Buzz Aldrin",
+      "Neil Armstrong",
+      "Yuri Gagarin",
+      "John Glenn"
+    ],
+    "correct_answer": "Neil Armstrong",
+    "explanation": "Neil Armstrong became the first human to walk on the Moon on July 20, 1969, during NASA's Apollo 11 mission.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is an orbit?",
+    "options": [
+      "The surface of a planet",
+      "The curved path an object takes around another object in space",
+      "A type of telescope",
+      "The atmosphere of a planet"
+    ],
+    "correct_answer": "The curved path an object takes around another object in space",
+    "explanation": "An orbit is the curved path that a planet, moon, or other object follows around a more massive object due to gravity.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "How many moons does Mars have?",
+    "options": [
+      "0",
+      "1",
+      "2",
+      "4"
+    ],
+    "correct_answer": "2",
+    "explanation": "Mars has two small moons named Phobos and Deimos, which are irregularly shaped and likely captured asteroids.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the outer layer of the Sun called?",
+    "options": [
+      "Core",
+      "Mantle",
+      "Corona",
+      "Crust"
+    ],
+    "correct_answer": "Corona",
+    "explanation": "The corona is the outermost layer of the Sun's atmosphere, visible as a glowing halo during a total solar eclipse.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What planet is known for its Great Red Spot?",
+    "options": [
+      "Mars",
+      "Saturn",
+      "Jupiter",
+      "Neptune"
+    ],
+    "correct_answer": "Jupiter",
+    "explanation": "Jupiter's Great Red Spot is a massive, long-lasting storm larger than Earth that has been raging for hundreds of years.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is a light-year?",
+    "options": [
+      "How long the Sun shines each year",
+      "The distance light travels in one year",
+      "The age of a star in years",
+      "A type of star"
+    ],
+    "correct_answer": "The distance light travels in one year",
+    "explanation": "A light-year is the distance that light travels in one year — about 9.46 trillion kilometers — used to measure vast distances in space.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "Which direction does the Sun rise?",
+    "options": [
+      "West",
+      "North",
+      "South",
+      "East"
+    ],
+    "correct_answer": "East",
+    "explanation": "The Sun rises in the east because Earth rotates from west to east, making objects in the sky appear to move from east to west.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the largest moon of Saturn?",
+    "options": [
+      "Europa",
+      "Titan",
+      "Ganymede",
+      "Io"
+    ],
+    "correct_answer": "Titan",
+    "explanation": "Titan is Saturn's largest moon and the second largest moon in the solar system, notable for its thick atmosphere.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the main difference between a planet and a star?",
+    "options": [
+      "Stars are smaller than planets",
+      "Stars produce their own light through nuclear fusion; planets do not",
+      "Planets are hotter than stars",
+      "Stars have moons; planets do not"
+    ],
+    "correct_answer": "Stars produce their own light through nuclear fusion; planets do not",
+    "explanation": "Stars generate their own light and heat through nuclear fusion. Planets only reflect light from their star.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What tool do astronomers use to observe distant objects in space?",
+    "options": [
+      "Microscope",
+      "Telescope",
+      "Binoculars only",
+      "Magnifying glass"
+    ],
+    "correct_answer": "Telescope",
+    "explanation": "Telescopes collect and magnify light from distant objects, allowing astronomers to study stars, planets, and galaxies.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What causes the seasons on Earth?",
+    "options": [
+      "Earth's distance from the Sun changing",
+      "Earth's axial tilt as it orbits the Sun",
+      "The Moon blocking sunlight",
+      "Clouds changing with the year"
+    ],
+    "correct_answer": "Earth's axial tilt as it orbits the Sun",
+    "explanation": "Seasons are caused by Earth's 23.5 degree axial tilt — when a hemisphere tilts toward the Sun, it receives more direct sunlight and has summer.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the space agency that landed humans on the Moon?",
+    "options": [
+      "ESA",
+      "NASA",
+      "JAXA",
+      "SpaceX"
+    ],
+    "correct_answer": "NASA",
+    "explanation": "NASA (National Aeronautics and Space Administration) carried out the Apollo program that landed 12 astronauts on the Moon between 1969-1972.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is a black hole?",
+    "options": [
+      "A hole in space you can see",
+      "A region of space with gravity so strong that nothing, not even light, can escape",
+      "A very dark planet",
+      "A type of star that is invisible"
+    ],
+    "correct_answer": "A region of space with gravity so strong that nothing, not even light, can escape",
+    "explanation": "Black holes form when massive stars collapse, creating a region where gravity is so extreme that even light cannot escape.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "Which planet has the most moons?",
+    "options": [
+      "Jupiter",
+      "Saturn",
+      "Uranus",
+      "Neptune"
+    ],
+    "correct_answer": "Saturn",
+    "explanation": "Saturn has the most confirmed moons with over 140, surpassing Jupiter which has around 95.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of Earth's moon phases cycle?",
+    "options": [
+      "Solar cycle",
+      "Lunar cycle",
+      "Orbital cycle",
+      "Eclipse cycle"
+    ],
+    "correct_answer": "Lunar cycle",
+    "explanation": "The lunar cycle (or lunar month) lasts about 29.5 days, during which the Moon goes through all its phases from new moon to full moon and back.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the imaginary line running through Earth's center from pole to pole?",
+    "options": [
+      "Equator",
+      "Prime Meridian",
+      "Axis",
+      "Orbit"
+    ],
+    "correct_answer": "Axis",
+    "explanation": "Earth's axis is the imaginary line around which it rotates, tilted at 23.5 degrees relative to its orbital plane.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What are sunspots?",
+    "options": [
+      "Bright spots on the Sun's surface",
+      "Dark, cooler regions on the Sun's surface caused by magnetic activity",
+      "Explosions on the Sun",
+      "Stars near the Sun"
+    ],
+    "correct_answer": "Dark, cooler regions on the Sun's surface caused by magnetic activity",
+    "explanation": "Sunspots are temporary dark patches on the Sun's surface where intense magnetic fields reduce convection, making them cooler than surrounding areas.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name given to a meteor that reaches Earth's surface?",
+    "options": [
+      "Comet",
+      "Asteroid",
+      "Meteorite",
+      "Nebula"
+    ],
+    "correct_answer": "Meteorite",
+    "explanation": "A meteorite is a meteor (shooting star) that survives its journey through Earth's atmosphere and lands on Earth's surface.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "Which planet is second from the Sun?",
+    "options": [
+      "Earth",
+      "Mars",
+      "Venus",
+      "Mercury"
+    ],
+    "correct_answer": "Venus",
+    "explanation": "Venus is the second planet from the Sun, orbiting between Mercury and Earth, and is the brightest object in the night sky after the Moon.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the imaginary line around the middle of Earth?",
+    "options": [
+      "Axis",
+      "Equator",
+      "Meridian",
+      "Tropics"
+    ],
+    "correct_answer": "Equator",
+    "explanation": "The equator is an imaginary line dividing Earth into the Northern and Southern Hemispheres, located at 0 degrees latitude.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What do we call the path Earth travels around the Sun?",
+    "options": [
+      "Rotation",
+      "Revolution",
+      "Orbit",
+      "Trajectory"
+    ],
+    "correct_answer": "Orbit",
+    "explanation": "Earth's orbit is the elliptical path it travels around the Sun, completing one full orbit every 365.25 days.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "How many Earth days does it take for the Moon to orbit Earth?",
+    "options": [
+      "7 days",
+      "14 days",
+      "27 days",
+      "60 days"
+    ],
+    "correct_answer": "27 days",
+    "explanation": "The Moon takes about 27.3 days to complete one orbit around Earth (sidereal month), though the lunar cycle appears 29.5 days due to Earth's movement.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the color of the Sun as seen from space?",
+    "options": [
+      "Yellow",
+      "Orange",
+      "Red",
+      "White"
+    ],
+    "correct_answer": "White",
+    "explanation": "The Sun is actually white when seen from space. It appears yellow or orange from Earth's surface due to atmospheric scattering of light.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the first artificial satellite launched into space?",
+    "options": [
+      "Apollo 1",
+      "Sputnik",
+      "Explorer 1",
+      "Vostok"
+    ],
+    "correct_answer": "Sputnik",
+    "explanation": "Sputnik 1, launched by the Soviet Union on October 4, 1957, was the first artificial satellite to orbit Earth.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "Which planet is fourth from the Sun?",
+    "options": [
+      "Earth",
+      "Jupiter",
+      "Mars",
+      "Venus"
+    ],
+    "correct_answer": "Mars",
+    "explanation": "Mars is the fourth planet from the Sun, orbiting beyond Earth at an average distance of about 142 million miles.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the brightest star in the night sky?",
+    "options": [
+      "Betelgeuse",
+      "Polaris",
+      "Sirius",
+      "Vega"
+    ],
+    "correct_answer": "Sirius",
+    "explanation": "Sirius, also called the Dog Star, is the brightest star in the night sky and is located in the constellation Canis Major.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the North Star also known as?",
+    "options": [
+      "Sirius",
+      "Vega",
+      "Polaris",
+      "Betelgeuse"
+    ],
+    "correct_answer": "Polaris",
+    "explanation": "Polaris, the North Star, appears to stay nearly fixed in the sky because it is almost directly above Earth's North Pole.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the force that causes tides on Earth?",
+    "options": [
+      "Solar wind",
+      "Earth's rotation",
+      "The Moon's gravity",
+      "Atmospheric pressure"
+    ],
+    "correct_answer": "The Moon's gravity",
+    "explanation": "Tides are primarily caused by the Moon's gravitational pull on Earth's oceans, creating bulges of water on the sides facing and opposite the Moon.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the region between Mars and Jupiter where many asteroids are found?",
+    "options": [
+      "Kuiper Belt",
+      "Oort Cloud",
+      "Asteroid Belt",
+      "Meteor Shower Zone"
+    ],
+    "correct_answer": "Asteroid Belt",
+    "explanation": "The Asteroid Belt is a region of the solar system between Mars and Jupiter containing millions of rocky objects (asteroids).",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What does the word 'astronomy' mean?",
+    "options": [
+      "Study of planets only",
+      "Study of space and celestial objects",
+      "Study of Earth's atmosphere",
+      "Study of weather patterns"
+    ],
+    "correct_answer": "Study of space and celestial objects",
+    "explanation": "Astronomy is the scientific study of celestial objects including stars, planets, galaxies, and the universe as a whole.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the largest volcano in the solar system?",
+    "options": [
+      "Kilauea",
+      "Mount Everest",
+      "Olympus Mons",
+      "Maxwell Montes"
+    ],
+    "correct_answer": "Olympus Mons",
+    "explanation": "Olympus Mons on Mars is the largest volcano in the solar system, standing about 22 km (14 miles) high — nearly three times the height of Everest.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the space station currently orbiting Earth?",
+    "options": [
+      "Mir",
+      "Skylab",
+      "International Space Station",
+      "Tiangong only"
+    ],
+    "correct_answer": "International Space Station",
+    "explanation": "The International Space Station (ISS) is a habitable space station that has been continuously occupied since November 2000.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the farthest region of our solar system containing icy objects?",
+    "options": [
+      "Asteroid Belt",
+      "Kuiper Belt",
+      "Oort Cloud",
+      "Heliopause"
+    ],
+    "correct_answer": "Oort Cloud",
+    "explanation": "The Oort Cloud is a distant, spherical shell of icy objects surrounding the solar system, believed to be the source of long-period comets.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "How old is the Sun approximately?",
+    "options": [
+      "1 million years",
+      "100 million years",
+      "4.6 billion years",
+      "13 billion years"
+    ],
+    "correct_answer": "4.6 billion years",
+    "explanation": "The Sun is about 4.6 billion years old, roughly halfway through its expected 10-billion-year lifespan as a main sequence star.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the first planet discovered with a telescope?",
+    "options": [
+      "Neptune",
+      "Saturn",
+      "Uranus",
+      "Jupiter"
+    ],
+    "correct_answer": "Uranus",
+    "explanation": "Uranus was the first planet discovered using a telescope, found by William Herschel in 1781.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What do we call it when the Moon is not visible from Earth?",
+    "options": [
+      "Solar eclipse",
+      "New Moon",
+      "Lunar eclipse",
+      "Half Moon"
+    ],
+    "correct_answer": "New Moon",
+    "explanation": "A new moon occurs when the Moon is positioned between Earth and the Sun, with its unlit side facing Earth, making it invisible.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the largest canyon in the solar system?",
+    "options": [
+      "Grand Canyon",
+      "Mariana Trench",
+      "Valles Marineris",
+      "Hellas Basin"
+    ],
+    "correct_answer": "Valles Marineris",
+    "explanation": "Valles Marineris on Mars is the largest canyon system in the solar system, stretching about 4,000 km long and up to 7 km deep.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is Jupiter's moon Europa famous for?",
+    "options": [
+      "Having active volcanoes",
+      "Being the largest moon in the solar system",
+      "Having a subsurface ocean of liquid water",
+      "Having a thick atmosphere like Earth"
+    ],
+    "correct_answer": "Having a subsurface ocean of liquid water",
+    "explanation": "Europa has a global ocean of liquid water beneath its icy crust, making it one of the most promising places to search for life in the solar system.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name given to the point in Earth's orbit when it is closest to the Sun?",
+    "options": [
+      "Aphelion",
+      "Perihelion",
+      "Equinox",
+      "Solstice"
+    ],
+    "correct_answer": "Perihelion",
+    "explanation": "Perihelion is when Earth is closest to the Sun, occurring around January 3 each year. Aphelion is when it is farthest, around July 4.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the imaginary belt in the sky where the Sun appears to travel?",
+    "options": [
+      "Milky Way",
+      "Zodiac",
+      "Ecliptic",
+      "Celestial equator"
+    ],
+    "correct_answer": "Zodiac",
+    "explanation": "The zodiac is the belt of constellations through which the Sun appears to move throughout the year, also representing the twelve astrological signs.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What spacecraft was the first to leave our solar system?",
+    "options": [
+      "Apollo 11",
+      "Voyager 1",
+      "Pioneer 10",
+      "New Horizons"
+    ],
+    "correct_answer": "Voyager 1",
+    "explanation": "Voyager 1, launched in 1977, became the first spacecraft to enter interstellar space in 2012, crossing beyond the heliosphere.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the crater-covered region on the far side of the Moon?",
+    "options": [
+      "Oceanus Procellarum",
+      "South Pole-Aitken Basin",
+      "Mare Tranquillitatis",
+      "Vallis Alpes"
+    ],
+    "correct_answer": "South Pole-Aitken Basin",
+    "explanation": "The South Pole-Aitken Basin is one of the largest known impact craters in the solar system, located on the far side of the Moon.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the process that creates new stars?",
+    "options": [
+      "Supernova",
+      "Nuclear fusion starting in a nebula",
+      "Black hole collision",
+      "Planet formation"
+    ],
+    "correct_answer": "Nuclear fusion starting in a nebula",
+    "explanation": "Stars form when clouds of gas and dust (nebulae) collapse under gravity, eventually reaching temperatures high enough to start nuclear fusion.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "Which planet has a day longer than its year?",
+    "options": [
+      "Mars",
+      "Venus",
+      "Mercury",
+      "Saturn"
+    ],
+    "correct_answer": "Venus",
+    "explanation": "Venus rotates so slowly that one day on Venus (243 Earth days) is longer than its year (225 Earth days to orbit the Sun).",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What are the northern and southern lights called?",
+    "options": [
+      "Solar flares",
+      "Aurora borealis and aurora australis",
+      "Meteor showers",
+      "Zodiacal light"
+    ],
+    "correct_answer": "Aurora borealis and aurora australis",
+    "explanation": "Auroras are colorful light displays caused by solar wind particles interacting with Earth's magnetic field and atmosphere near the poles.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name for a star that explodes at the end of its life?",
+    "options": [
+      "Pulsar",
+      "Quasar",
+      "Supernova",
+      "Nova"
+    ],
+    "correct_answer": "Supernova",
+    "explanation": "A supernova is a massive stellar explosion that occurs at the end of a massive star's life, briefly outshining entire galaxies.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the Mars rover that landed in 2021?",
+    "options": [
+      "Curiosity",
+      "Spirit",
+      "Perseverance",
+      "Opportunity"
+    ],
+    "correct_answer": "Perseverance",
+    "explanation": "NASA's Perseverance rover landed on Mars in February 2021 in Jezero Crater to search for signs of ancient microbial life.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is Pluto classified as today?",
+    "options": [
+      "A planet",
+      "A moon",
+      "A dwarf planet",
+      "An asteroid"
+    ],
+    "correct_answer": "A dwarf planet",
+    "explanation": "In 2006, the International Astronomical Union reclassified Pluto as a dwarf planet because it has not cleared its orbital neighborhood of other objects.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "How many constellations are officially recognized?",
+    "options": [
+      "48",
+      "68",
+      "88",
+      "108"
+    ],
+    "correct_answer": "88",
+    "explanation": "The International Astronomical Union recognizes 88 official constellations that cover the entire celestial sphere.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the Big Bang theory?",
+    "options": [
+      "A theory about how the solar system formed",
+      "The theory that the universe began as an extremely hot, dense point and has been expanding ever since",
+      "A theory about black holes",
+      "A theory about how stars explode"
+    ],
+    "correct_answer": "The theory that the universe began as an extremely hot, dense point and has been expanding ever since",
+    "explanation": "The Big Bang theory describes the universe's origin about 13.8 billion years ago from an extremely hot, dense state and its subsequent expansion.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the telescope launched by NASA in 1990 that orbits Earth?",
+    "options": [
+      "James Webb",
+      "Spitzer",
+      "Hubble",
+      "Chandra"
+    ],
+    "correct_answer": "Hubble",
+    "explanation": "The Hubble Space Telescope was launched in 1990 and has provided stunning images of distant galaxies, nebulae, and other astronomical objects.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is a galaxy?",
+    "options": [
+      "A type of star",
+      "A large system of stars, gas, and dust held together by gravity",
+      "A type of planet",
+      "A region of space with no stars"
+    ],
+    "correct_answer": "A large system of stars, gas, and dust held together by gravity",
+    "explanation": "A galaxy is a gravitationally bound system containing billions of stars, gas, dust, and dark matter. The universe contains trillions of galaxies.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "Which is the correct order of planets from the Sun?",
+    "options": [
+      "Mercury, Venus, Earth, Mars, Jupiter, Saturn, Uranus, Neptune",
+      "Venus, Mercury, Earth, Mars, Saturn, Jupiter, Uranus, Neptune",
+      "Mercury, Earth, Venus, Mars, Jupiter, Saturn, Neptune, Uranus",
+      "Mercury, Venus, Mars, Earth, Jupiter, Saturn, Uranus, Neptune"
+    ],
+    "correct_answer": "Mercury, Venus, Earth, Mars, Jupiter, Saturn, Uranus, Neptune",
+    "explanation": "The eight planets in order from the Sun are: Mercury, Venus, Earth, Mars, Jupiter, Saturn, Uranus, and Neptune.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the nearest galaxy to the Milky Way?",
+    "options": [
+      "Triangulum Galaxy",
+      "Whirlpool Galaxy",
+      "Andromeda Galaxy",
+      "Sombrero Galaxy"
+    ],
+    "correct_answer": "Andromeda Galaxy",
+    "explanation": "The Andromeda Galaxy is the nearest large galaxy to the Milky Way, located about 2.5 million light-years away.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the most active volcanic moon in the solar system?",
+    "options": [
+      "Europa",
+      "Ganymede",
+      "Io",
+      "Titan"
+    ],
+    "correct_answer": "Io",
+    "explanation": "Io, a moon of Jupiter, is the most volcanically active body in the solar system, with hundreds of active volcanoes erupting sulfur compounds.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "How long does light from the Sun take to reach Earth?",
+    "options": [
+      "8 seconds",
+      "8 minutes",
+      "8 hours",
+      "8 days"
+    ],
+    "correct_answer": "8 minutes",
+    "explanation": "Light from the Sun takes about 8 minutes and 20 seconds to travel the 150 million km to Earth.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the effect that causes light from distant stars to shift toward red?",
+    "options": [
+      "Blue shift",
+      "Red shift",
+      "Doppler effect only",
+      "Light bending"
+    ],
+    "correct_answer": "Red shift",
+    "explanation": "Redshift occurs when a light source moves away from an observer, stretching the light to longer (redder) wavelengths — evidence that the universe is expanding.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is Venus's atmosphere primarily made of?",
+    "options": [
+      "Oxygen and nitrogen",
+      "Carbon dioxide",
+      "Methane",
+      "Hydrogen"
+    ],
+    "correct_answer": "Carbon dioxide",
+    "explanation": "Venus has a thick atmosphere of mostly carbon dioxide (about 96%), which traps heat in a runaway greenhouse effect making it extremely hot.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is a meteor shower?",
+    "options": [
+      "Rain caused by meteorites landing in the ocean",
+      "When Earth passes through debris left by a comet, producing many meteors",
+      "A storm on another planet",
+      "When asteroids fall toward Earth"
+    ],
+    "correct_answer": "When Earth passes through debris left by a comet, producing many meteors",
+    "explanation": "Meteor showers occur when Earth passes through a trail of debris left by a comet, with many particles burning up in the atmosphere.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of Jupiter's largest moon?",
+    "options": [
+      "Io",
+      "Europa",
+      "Ganymede",
+      "Callisto"
+    ],
+    "correct_answer": "Ganymede",
+    "explanation": "Ganymede is Jupiter's largest moon and the largest moon in the solar system, even larger than the planet Mercury.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What does a telescope magnify?",
+    "options": [
+      "Only nearby objects",
+      "Distant objects, making them appear larger and closer",
+      "Only the colors of stars",
+      "Only planets in our solar system"
+    ],
+    "correct_answer": "Distant objects, making them appear larger and closer",
+    "explanation": "Telescopes collect and focus light to make distant objects appear larger and brighter than they would to the naked eye.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the point directly above an observer in the sky?",
+    "options": [
+      "Nadir",
+      "Horizon",
+      "Zenith",
+      "Meridian"
+    ],
+    "correct_answer": "Zenith",
+    "explanation": "The zenith is the point directly above an observer, at 90 degrees elevation from the horizon.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the large dark areas visible on the Moon's surface?",
+    "options": [
+      "Craters",
+      "Valleys",
+      "Maria (lunar seas)",
+      "Mountains"
+    ],
+    "correct_answer": "Maria (lunar seas)",
+    "explanation": "The dark areas on the Moon are called maria (singular: mare), which means 'seas' in Latin. They are ancient lava plains, not actual water.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the effect that makes stars appear to twinkle?",
+    "options": [
+      "Diffraction",
+      "Scintillation",
+      "Reflection",
+      "Refraction"
+    ],
+    "correct_answer": "Scintillation",
+    "explanation": "Stars twinkle due to atmospheric scintillation — turbulence in Earth's atmosphere bends and distorts the star's light.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "Which planet spins in the opposite direction to most other planets?",
+    "options": [
+      "Mars",
+      "Venus",
+      "Neptune",
+      "Saturn"
+    ],
+    "correct_answer": "Venus",
+    "explanation": "Venus rotates retrograde (opposite to most planets), so on Venus the Sun rises in the west and sets in the east.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the NASA mission that first photographed Pluto up close?",
+    "options": [
+      "Voyager 2",
+      "Cassini",
+      "New Horizons",
+      "Pioneer 11"
+    ],
+    "correct_answer": "New Horizons",
+    "explanation": "NASA's New Horizons spacecraft made its closest approach to Pluto in July 2015, revealing a heart-shaped region and other surprising features.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What gives Mars its reddish color?",
+    "options": [
+      "Red sand",
+      "Iron oxide (rust) on its surface",
+      "Red clouds in its atmosphere",
+      "Lava flows on the surface"
+    ],
+    "correct_answer": "Iron oxide (rust) on its surface",
+    "explanation": "Mars appears red because its surface and atmosphere are rich in iron oxide (rust), which absorbs blue light and reflects red light.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the point in a planet's orbit when it is farthest from the Sun?",
+    "options": [
+      "Perihelion",
+      "Solstice",
+      "Aphelion",
+      "Equinox"
+    ],
+    "correct_answer": "Aphelion",
+    "explanation": "Aphelion is the point in a planet's orbit farthest from the Sun. For Earth, this occurs around July 4 each year.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the phenomenon where we always see the same side of the Moon?",
+    "options": [
+      "Solar synchronization",
+      "Tidal locking",
+      "Gravitational locking",
+      "Orbital resonance"
+    ],
+    "correct_answer": "Tidal locking",
+    "explanation": "The Moon is tidally locked to Earth — it rotates at the same rate it orbits, so we always see the same face (near side) of the Moon.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the Sun's core temperature approximately?",
+    "options": [
+      "6,000°C",
+      "100,000°C",
+      "15 million°C",
+      "1 billion°C"
+    ],
+    "correct_answer": "15 million°C",
+    "explanation": "The Sun's core temperature is about 15 million degrees Celsius, hot enough to sustain nuclear fusion reactions.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the first person to travel to space?",
+    "options": [
+      "Neil Armstrong",
+      "Alan Shepard",
+      "Yuri Gagarin",
+      "John Glenn"
+    ],
+    "correct_answer": "Yuri Gagarin",
+    "explanation": "Soviet cosmonaut Yuri Gagarin became the first human in space on April 12, 1961, completing one orbit of Earth in 108 minutes.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is Neptune known for having?",
+    "options": [
+      "The biggest volcano",
+      "The strongest winds in the solar system",
+      "The most moons",
+      "The thickest atmosphere"
+    ],
+    "correct_answer": "The strongest winds in the solar system",
+    "explanation": "Neptune has the strongest recorded winds in the solar system, with wind speeds reaching over 2,000 km/h (1,200 mph).",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the Kuiper Belt?",
+    "options": [
+      "A ring around Saturn",
+      "A region beyond Neptune containing icy small bodies including dwarf planets",
+      "A region between Mars and Jupiter",
+      "A ring of asteroids around Earth"
+    ],
+    "correct_answer": "A region beyond Neptune containing icy small bodies including dwarf planets",
+    "explanation": "The Kuiper Belt is a disc-shaped region beyond Neptune's orbit containing many icy objects, including dwarf planets like Pluto and Eris.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the largest impact crater visible on the Moon from Earth?",
+    "options": [
+      "Tycho",
+      "Copernicus",
+      "Clavius",
+      "Aristarchus"
+    ],
+    "correct_answer": "Clavius",
+    "explanation": "Clavius is one of the largest and most visible craters on the Moon, spanning about 225 km in diameter and clearly visible with binoculars.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What type of galaxy is the Milky Way?",
+    "options": [
+      "Elliptical galaxy",
+      "Irregular galaxy",
+      "Barred spiral galaxy",
+      "Lenticular galaxy"
+    ],
+    "correct_answer": "Barred spiral galaxy",
+    "explanation": "The Milky Way is classified as a barred spiral galaxy, with a central bar-shaped structure and spiral arms extending outward.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the boundary where the solar wind meets interstellar space?",
+    "options": [
+      "Kuiper Belt",
+      "Oort Cloud",
+      "Heliopause",
+      "Van Allen Belt"
+    ],
+    "correct_answer": "Heliopause",
+    "explanation": "The heliopause is the boundary where the Sun's solar wind is stopped by the interstellar medium, marking the edge of the heliosphere.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is an exoplanet?",
+    "options": [
+      "A planet outside our atmosphere",
+      "A planet orbiting a star other than our Sun",
+      "A moon of a giant planet",
+      "A former planet that was reclassified"
+    ],
+    "correct_answer": "A planet orbiting a star other than our Sun",
+    "explanation": "Exoplanets are planets that orbit stars other than our Sun. Thousands have been discovered, some in their star's habitable zone.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the colorful region around a comet that forms when it approaches the Sun?",
+    "options": [
+      "Atmosphere",
+      "Coma",
+      "Corona",
+      "Nebula"
+    ],
+    "correct_answer": "Coma",
+    "explanation": "The coma is the fuzzy, glowing region surrounding a comet's nucleus as ice vaporizes when it gets close to the Sun.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "How many Earth years does it take Jupiter to orbit the Sun?",
+    "options": [
+      "2 years",
+      "6 years",
+      "12 years",
+      "29 years"
+    ],
+    "correct_answer": "12 years",
+    "explanation": "Jupiter takes about 11.9 Earth years to complete one orbit around the Sun, roughly 12 years.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the darkest region in a sunspot?",
+    "options": [
+      "Corona",
+      "Photosphere",
+      "Umbra",
+      "Penumbra"
+    ],
+    "correct_answer": "Umbra",
+    "explanation": "The umbra is the darkest, central region of a sunspot where the magnetic field is strongest and temperature is lowest.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What does NASA stand for?",
+    "options": [
+      "National Air and Space Agency",
+      "National Aeronautics and Space Administration",
+      "National Association for Science and Astronomy",
+      "North American Space Alliance"
+    ],
+    "correct_answer": "National Aeronautics and Space Administration",
+    "explanation": "NASA — National Aeronautics and Space Administration — is the U.S. government agency responsible for the civilian space program and aeronautics research.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "Which planet has the shortest day in the solar system?",
+    "options": [
+      "Earth",
+      "Mars",
+      "Jupiter",
+      "Saturn"
+    ],
+    "correct_answer": "Jupiter",
+    "explanation": "Jupiter has the shortest day of any planet, rotating once every 9 hours and 56 minutes despite being the largest planet.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the bright band of stars we can sometimes see crossing the sky at night?",
+    "options": [
+      "The Zodiac",
+      "The Milky Way",
+      "A meteor shower",
+      "The Ecliptic"
+    ],
+    "correct_answer": "The Milky Way",
+    "explanation": "The band of light we see in the night sky is our edge-on view of the Milky Way galaxy, containing billions of stars.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the star at the end of the handle of the Little Dipper?",
+    "options": [
+      "Sirius",
+      "Betelgeuse",
+      "Polaris",
+      "Vega"
+    ],
+    "correct_answer": "Polaris",
+    "explanation": "Polaris (the North Star) is located at the end of the Little Dipper's handle and remains nearly fixed in the northern sky.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the largest known type of star?",
+    "options": [
+      "White dwarf",
+      "Neutron star",
+      "Red supergiant",
+      "Blue main sequence star"
+    ],
+    "correct_answer": "Red supergiant",
+    "explanation": "Red supergiants like Betelgeuse and Mu Cephei are the largest stars by volume, some hundreds of times the Sun's radius.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the region on the Sun where energy is transported by convection?",
+    "options": [
+      "Radiative zone",
+      "Convective zone",
+      "Chromosphere",
+      "Photosphere"
+    ],
+    "correct_answer": "Convective zone",
+    "explanation": "The convective zone is the outer layer of the Sun's interior where energy is transported by rising hot plasma and sinking cool plasma.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name for the point in the Moon's orbit when it is closest to Earth?",
+    "options": [
+      "Apogee",
+      "Perigee",
+      "Perihelion",
+      "Aphelion"
+    ],
+    "correct_answer": "Perigee",
+    "explanation": "Perigee is the point in the Moon's orbit closest to Earth. A full moon at perigee is called a 'supermoon' because it appears larger.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the largest moon of Neptune?",
+    "options": [
+      "Triton",
+      "Oberon",
+      "Charon",
+      "Titan"
+    ],
+    "correct_answer": "Triton",
+    "explanation": "Triton is Neptune's largest moon and is notable for orbiting in the opposite direction to Neptune's rotation, suggesting it was captured.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the term for the total amount of light emitted by a star?",
+    "options": [
+      "Magnitude",
+      "Luminosity",
+      "Brightness",
+      "Intensity"
+    ],
+    "correct_answer": "Luminosity",
+    "explanation": "Luminosity is the total energy output of a star per unit time — its intrinsic brightness, regardless of distance from the observer.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the region at the center of our galaxy?",
+    "options": [
+      "The galactic plane",
+      "The galactic core",
+      "Sagittarius A*",
+      "The galactic bulge"
+    ],
+    "correct_answer": "Sagittarius A*",
+    "explanation": "Sagittarius A* is the supermassive black hole at the center of the Milky Way, with a mass about 4 million times that of the Sun.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the spacecraft that studied Saturn up close from 2004 to 2017?",
+    "options": [
+      "Voyager 2",
+      "New Horizons",
+      "Cassini",
+      "Pioneer 11"
+    ],
+    "correct_answer": "Cassini",
+    "explanation": "The Cassini spacecraft orbited Saturn from 2004 to 2017, making detailed observations of Saturn, its rings, and moons including Titan and Enceladus.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What causes a total solar eclipse to be rare at any given location?",
+    "options": [
+      "The Moon is too small",
+      "The narrow shadow path of the Moon only covers a small area on Earth at a time",
+      "Solar eclipses only happen once per century",
+      "Clouds always block the view"
+    ],
+    "correct_answer": "The narrow shadow path of the Moon only covers a small area on Earth at a time",
+    "explanation": "The Moon's shadow is only about 160 km wide on Earth's surface, so the path of totality during a solar eclipse is a narrow strip.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the imaginary line that the Sun appears to follow through the sky during the year?",
+    "options": [
+      "Celestial equator",
+      "Ecliptic",
+      "Meridian",
+      "Horizon"
+    ],
+    "correct_answer": "Ecliptic",
+    "explanation": "The ecliptic is the apparent path of the Sun across the celestial sphere over the course of a year, reflecting Earth's orbit.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the first Mars rover?",
+    "options": [
+      "Curiosity",
+      "Spirit",
+      "Sojourner",
+      "Opportunity"
+    ],
+    "correct_answer": "Sojourner",
+    "explanation": "Sojourner was the first Mars rover, landing in 1997 as part of the Mars Pathfinder mission. It was about the size of a microwave oven.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the moons of Mars?",
+    "options": [
+      "Titan and Rhea",
+      "Phobos and Deimos",
+      "Io and Europa",
+      "Oberon and Titania"
+    ],
+    "correct_answer": "Phobos and Deimos",
+    "explanation": "Mars has two tiny moons named Phobos (Fear) and Deimos (Dread) after the sons of Ares (the Greek god of war equivalent to Mars).",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the largest dwarf planet in the solar system?",
+    "options": [
+      "Pluto",
+      "Eris",
+      "Ceres",
+      "Makemake"
+    ],
+    "correct_answer": "Eris",
+    "explanation": "Eris is the largest known dwarf planet by mass, slightly more massive than Pluto, located in the scattered disc beyond the Kuiper Belt.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the day when the Sun is highest in the sky?",
+    "options": [
+      "Equinox",
+      "Perihelion",
+      "Solstice",
+      "Aphelion"
+    ],
+    "correct_answer": "Solstice",
+    "explanation": "The summer solstice is the day when the Sun is at its highest point in the sky, marking the longest day of the year in the Northern Hemisphere.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What does an astronaut experience while orbiting Earth?",
+    "options": [
+      "High gravity",
+      "Weightlessness (microgravity)",
+      "No gravity at all",
+      "Double Earth's gravity"
+    ],
+    "correct_answer": "Weightlessness (microgravity)",
+    "explanation": "Astronauts in orbit appear weightless (microgravity) because they are in free fall around Earth, so they feel no contact force.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is a supermoon?",
+    "options": [
+      "A moon larger than Earth",
+      "A full moon that occurs when the Moon is at or near its closest point to Earth",
+      "A new moon that is very dark",
+      "A moon visible during the day"
+    ],
+    "correct_answer": "A full moon that occurs when the Moon is at or near its closest point to Earth",
+    "explanation": "A supermoon appears slightly larger and brighter than a regular full moon because it occurs near perigee, the Moon's closest point to Earth.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the nearest star to our solar system after the Sun?",
+    "options": [
+      "Sirius",
+      "Proxima Centauri",
+      "Vega",
+      "Betelgeuse"
+    ],
+    "correct_answer": "Proxima Centauri",
+    "explanation": "Proxima Centauri is the closest known star to our solar system, located about 4.24 light-years away in the Alpha Centauri system.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the large dark storm on Neptune?",
+    "options": [
+      "Great Red Spot",
+      "Great Dark Spot",
+      "Blue Eye",
+      "Neptune's Storm"
+    ],
+    "correct_answer": "Great Dark Spot",
+    "explanation": "The Great Dark Spot was a large storm observed on Neptune by Voyager 2 in 1989. Unlike Jupiter's storm, it disappeared and new dark spots have formed since.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the process where stars are born in nebulae?",
+    "options": [
+      "Stellar evolution",
+      "Star formation",
+      "Nuclear fusion ignition",
+      "Gravitational collapse"
+    ],
+    "correct_answer": "Star formation",
+    "explanation": "Star formation occurs when a cloud of gas and dust (nebula) collapses under gravity, heating up until nuclear fusion begins in the core.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the region on Mars that contains the largest canyon system?",
+    "options": [
+      "Tharsis",
+      "Hellas",
+      "Elysium",
+      "Arabia Terra"
+    ],
+    "correct_answer": "Tharsis",
+    "explanation": "Valles Marineris, the largest canyon in the solar system, is located along the Tharsis region of Mars, which also contains several massive volcanoes.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is a binary star system?",
+    "options": [
+      "Two planets orbiting each other",
+      "Two stars that orbit around a common center of mass",
+      "A star with two planets",
+      "A double nebula"
+    ],
+    "correct_answer": "Two stars that orbit around a common center of mass",
+    "explanation": "A binary star system consists of two stars gravitationally bound and orbiting a common barycenter. More than half of all stars are in binary or multiple systems.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the telescope launched in 2021 to observe the early universe?",
+    "options": [
+      "Hubble Space Telescope",
+      "Spitzer Space Telescope",
+      "James Webb Space Telescope",
+      "Chandra X-ray Observatory"
+    ],
+    "correct_answer": "James Webb Space Telescope",
+    "explanation": "The James Webb Space Telescope (JWST) was launched in December 2021 and observes in infrared, allowing it to see early galaxies and forming planetary systems.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the term for when the Sun, Moon, and Earth are perfectly aligned?",
+    "options": [
+      "Conjunction",
+      "Syzygy",
+      "Opposition",
+      "Transit"
+    ],
+    "correct_answer": "Syzygy",
+    "explanation": "Syzygy describes the alignment of three celestial bodies — the configuration needed for solar and lunar eclipses.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of Saturn's moon that has a thick atmosphere and lakes of liquid methane?",
+    "options": [
+      "Enceladus",
+      "Rhea",
+      "Titan",
+      "Iapetus"
+    ],
+    "correct_answer": "Titan",
+    "explanation": "Titan is the only moon in the solar system with a dense atmosphere and has lakes and rivers of liquid methane and ethane on its surface.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the NASA program that landed humans on the Moon?",
+    "options": [
+      "Gemini",
+      "Mercury",
+      "Apollo",
+      "Artemis"
+    ],
+    "correct_answer": "Apollo",
+    "explanation": "NASA's Apollo program successfully landed 12 astronauts on the Moon between 1969 and 1972 across six missions.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What type of radiation from the Sun is blocked by Earth's ozone layer?",
+    "options": [
+      "Infrared radiation",
+      "Visible light",
+      "Ultraviolet radiation",
+      "Radio waves"
+    ],
+    "correct_answer": "Ultraviolet radiation",
+    "explanation": "Earth's ozone layer absorbs most of the Sun's harmful ultraviolet (UV) radiation, protecting life on the surface.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the imaginary sphere surrounding Earth on which stars appear to be located?",
+    "options": [
+      "The atmosphere",
+      "The celestial sphere",
+      "The galactic plane",
+      "The ecliptic"
+    ],
+    "correct_answer": "The celestial sphere",
+    "explanation": "The celestial sphere is an imaginary sphere of infinite radius concentric with Earth, used by astronomers to describe the positions of celestial objects.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "How many times larger is the Sun's diameter compared to Earth's?",
+    "options": [
+      "10 times",
+      "50 times",
+      "109 times",
+      "1000 times"
+    ],
+    "correct_answer": "109 times",
+    "explanation": "The Sun's diameter is about 109 times larger than Earth's — if the Sun were the size of a basketball, Earth would be the size of a sesame seed.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the moon that geysers of water vapor erupt from?",
+    "options": [
+      "Titan",
+      "Europa",
+      "Enceladus",
+      "Triton"
+    ],
+    "correct_answer": "Enceladus",
+    "explanation": "Saturn's moon Enceladus has active geysers that shoot water vapor and ice into space from a subsurface liquid water ocean.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the first woman to travel to space?",
+    "options": [
+      "Sally Ride",
+      "Valentina Tereshkova",
+      "Mae Jemison",
+      "Eileen Collins"
+    ],
+    "correct_answer": "Valentina Tereshkova",
+    "explanation": "Soviet cosmonaut Valentina Tereshkova became the first woman in space in June 1963, completing 48 orbits over nearly three days.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is an ellipse?",
+    "options": [
+      "A perfect circle",
+      "A flattened or elongated circle — the shape of most planetary orbits",
+      "A triangle",
+      "A random curved path"
+    ],
+    "correct_answer": "A flattened or elongated circle — the shape of most planetary orbits",
+    "explanation": "Planetary orbits are ellipses — slightly squashed circles — with the Sun at one of the two focal points, as described by Kepler's first law.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the day when day and night are approximately equal in length?",
+    "options": [
+      "Solstice",
+      "Perihelion",
+      "Aphelion",
+      "Equinox"
+    ],
+    "correct_answer": "Equinox",
+    "explanation": "The equinox occurs twice a year (spring and fall) when the Sun is directly above the equator and day and night are approximately equal in length everywhere.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the colorful glowing clouds that form after a star explodes?",
+    "options": [
+      "Star clusters",
+      "Planetary nebulae",
+      "Supernova remnants",
+      "Emission nebulae"
+    ],
+    "correct_answer": "Supernova remnants",
+    "explanation": "When a massive star explodes as a supernova, the ejected material forms a colorful, expanding cloud called a supernova remnant, like the Crab Nebula.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the most famous meteor shower that occurs in August?",
+    "options": [
+      "Leonids",
+      "Geminids",
+      "Perseids",
+      "Orionids"
+    ],
+    "correct_answer": "Perseids",
+    "explanation": "The Perseids meteor shower occurs every August when Earth passes through the debris trail of Comet Swift-Tuttle, producing up to 100 meteors per hour.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is dark matter?",
+    "options": [
+      "Black holes",
+      "Dark-colored gas clouds",
+      "Matter that does not emit or interact with light but exerts gravitational effects",
+      "The space between stars"
+    ],
+    "correct_answer": "Matter that does not emit or interact with light but exerts gravitational effects",
+    "explanation": "Dark matter is a hypothetical form of matter that cannot be detected directly but is inferred from its gravitational effects on visible matter and galaxies.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the line at 0 degrees latitude?",
+    "options": [
+      "Prime Meridian",
+      "Tropic of Cancer",
+      "Equator",
+      "Arctic Circle"
+    ],
+    "correct_answer": "Equator",
+    "explanation": "The equator is the line at 0 degrees latitude that circles Earth at its widest point, dividing it into the Northern and Southern Hemispheres.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the gas giant with blue color caused by methane?",
+    "options": [
+      "Saturn",
+      "Neptune and Uranus",
+      "Jupiter",
+      "Venus"
+    ],
+    "correct_answer": "Neptune and Uranus",
+    "explanation": "Both Neptune and Uranus appear blue due to methane in their atmospheres, which absorbs red light and reflects blue light.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What do we call a rocky or icy body that orbits the Sun in an elongated path and develops a tail?",
+    "options": [
+      "Asteroid",
+      "Meteor",
+      "Comet",
+      "Meteorite"
+    ],
+    "correct_answer": "Comet",
+    "explanation": "Comets are icy bodies with elongated orbits that develop a glowing coma and tails of gas and dust when they approach the Sun.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the first artificial object to land on the Moon?",
+    "options": [
+      "Sputnik 1",
+      "Apollo 11 Lunar Module",
+      "Luna 9",
+      "Luna 2"
+    ],
+    "correct_answer": "Luna 2",
+    "explanation": "Luna 2, launched by the Soviet Union in 1959, was the first spacecraft to impact the Moon's surface.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the largest known star?",
+    "options": [
+      "Betelgeuse",
+      "UY Scuti",
+      "Sirius",
+      "Rigel"
+    ],
+    "correct_answer": "UY Scuti",
+    "explanation": "UY Scuti is currently considered one of the largest known stars, a red supergiant with a radius about 1,700 times larger than the Sun.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the term for the imaginary line that marks the boundary of the solar system?",
+    "options": [
+      "Heliopause",
+      "Kuiper Belt edge",
+      "Oort Cloud boundary",
+      "Magnetopause"
+    ],
+    "correct_answer": "Heliopause",
+    "explanation": "The heliopause is the boundary where the solar wind is stopped by the interstellar medium, generally considered the outer edge of the solar system.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the fourth largest planet in the solar system?",
+    "options": [
+      "Neptune",
+      "Uranus",
+      "Saturn",
+      "Jupiter"
+    ],
+    "correct_answer": "Uranus",
+    "explanation": "Uranus is the third largest by diameter and fourth largest by mass in the solar system, after Jupiter, Saturn, and Neptune.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the famous nebula that looks like an eye?",
+    "options": [
+      "Crab Nebula",
+      "Orion Nebula",
+      "Helix Nebula",
+      "Eagle Nebula"
+    ],
+    "correct_answer": "Helix Nebula",
+    "explanation": "The Helix Nebula is a large planetary nebula located about 650 light-years away that resembles a giant eye in space.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the study of the origin, evolution, and fate of the universe called?",
+    "options": [
+      "Astronomy",
+      "Astrophysics",
+      "Cosmology",
+      "Astrology"
+    ],
+    "correct_answer": "Cosmology",
+    "explanation": "Cosmology is the branch of astronomy concerned with the origin, structure, evolution, and ultimate fate of the universe.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the famous star-forming region in Orion?",
+    "options": [
+      "Crab Nebula",
+      "Orion Nebula",
+      "Horsehead Nebula",
+      "Eagle Nebula"
+    ],
+    "correct_answer": "Orion Nebula",
+    "explanation": "The Orion Nebula is a bright, visible nebula located in Orion's sword and is one of the most studied star-forming regions in the galaxy.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the bright star that marks the shoulder of Orion?",
+    "options": [
+      "Rigel",
+      "Betelgeuse",
+      "Aldebaran",
+      "Sirius"
+    ],
+    "correct_answer": "Betelgeuse",
+    "explanation": "Betelgeuse is a red supergiant star marking Orion's left shoulder, and is one of the largest and brightest stars visible to the naked eye.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the phenomenon where a planet appears to move backward in its orbit?",
+    "options": [
+      "Direct motion",
+      "Retrograde motion",
+      "Elliptical motion",
+      "Orbital decay"
+    ],
+    "correct_answer": "Retrograde motion",
+    "explanation": "Retrograde motion is the apparent backward movement of a planet as seen from Earth, caused by the relative speeds of Earth and the planet in their orbits.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the point in the Moon's orbit farthest from Earth?",
+    "options": [
+      "Perigee",
+      "Perihelion",
+      "Apogee",
+      "Aphelion"
+    ],
+    "correct_answer": "Apogee",
+    "explanation": "Apogee is the point in the Moon's orbit where it is farthest from Earth. A full moon at apogee appears slightly smaller than average.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the process by which a star collapses into a neutron star or black hole?",
+    "options": [
+      "Nuclear fusion",
+      "Gravitational collapse",
+      "Stellar ignition",
+      "Accretion"
+    ],
+    "correct_answer": "Gravitational collapse",
+    "explanation": "When a massive star exhausts its nuclear fuel, the core collapses under gravity in a gravitational collapse, often triggering a supernova explosion.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What are the gas giant planets in our solar system?",
+    "options": [
+      "Mercury, Venus, Earth, Mars",
+      "Jupiter, Saturn, Uranus, Neptune",
+      "Saturn, Jupiter, Mars, Earth",
+      "Neptune, Uranus, Pluto, Saturn"
+    ],
+    "correct_answer": "Jupiter, Saturn, Uranus, Neptune",
+    "explanation": "The four gas giants are Jupiter, Saturn, Uranus, and Neptune — all much larger than rocky planets and composed mainly of gas and ice.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What are the rocky (terrestrial) planets in our solar system?",
+    "options": [
+      "Jupiter, Saturn, Uranus, Neptune",
+      "Mercury, Venus, Earth, Mars",
+      "Earth, Mars, Jupiter, Saturn",
+      "Mercury, Venus, Mars, Pluto"
+    ],
+    "correct_answer": "Mercury, Venus, Earth, Mars",
+    "explanation": "The four terrestrial (rocky) planets are Mercury, Venus, Earth, and Mars — all relatively small with solid surfaces.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the closest star cluster to Earth?",
+    "options": [
+      "Pleiades",
+      "Orion Nebula Cluster",
+      "Hyades",
+      "Beehive Cluster"
+    ],
+    "correct_answer": "Hyades",
+    "explanation": "The Hyades cluster in the constellation Taurus is the closest open star cluster to Earth, about 150 light-years away.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What famous star cluster can be seen with the naked eye in Taurus?",
+    "options": [
+      "Pleiades",
+      "Hyades",
+      "Beehive",
+      "Jewel Box"
+    ],
+    "correct_answer": "Pleiades",
+    "explanation": "The Pleiades (Seven Sisters) is a famous open star cluster in Taurus, easily visible to the naked eye and used for navigation throughout history.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the largest impact crater on Mars?",
+    "options": [
+      "Valles Marineris",
+      "Hellas Basin",
+      "Argyre Basin",
+      "Olympus Mons crater"
+    ],
+    "correct_answer": "Hellas Basin",
+    "explanation": "Hellas Basin is the largest visible impact crater on Mars, spanning about 2,300 km across and 7 km deep.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What causes a rainbow when seen from Earth?",
+    "options": [
+      "Reflection from the Moon",
+      "Sunlight refracting and reflecting in water droplets",
+      "Light bending around clouds",
+      "Diffraction from ice crystals"
+    ],
+    "correct_answer": "Sunlight refracting and reflecting in water droplets",
+    "explanation": "Rainbows form when sunlight enters water droplets, refracts (bends), reflects off the back of the droplet, and refracts again as it exits.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the outermost layer of the Sun's atmosphere?",
+    "options": [
+      "Photosphere",
+      "Chromosphere",
+      "Corona",
+      "Convective zone"
+    ],
+    "correct_answer": "Corona",
+    "explanation": "The corona is the outermost atmospheric layer of the Sun, extending millions of kilometers into space and only visible during a total solar eclipse.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of Saturn's moon that has a two-toned black and white appearance?",
+    "options": [
+      "Titan",
+      "Enceladus",
+      "Iapetus",
+      "Rhea"
+    ],
+    "correct_answer": "Iapetus",
+    "explanation": "Iapetus is known for its dramatic two-toned appearance — one hemisphere is very dark and the other very bright, giving it a yin-yang look.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the circular boundary of the observable universe?",
+    "options": [
+      "Heliopause",
+      "Cosmic horizon",
+      "Big Bang point",
+      "Galactic rim"
+    ],
+    "correct_answer": "Cosmic horizon",
+    "explanation": "The cosmic horizon (cosmic event horizon) is the boundary of the observable universe — the maximum distance from which light has had time to reach us.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What does 'astronomical unit' (AU) measure?",
+    "options": [
+      "The size of a star",
+      "The average distance from Earth to the Sun",
+      "The weight of a planet",
+      "The brightness of a star"
+    ],
+    "correct_answer": "The average distance from Earth to the Sun",
+    "explanation": "One astronomical unit (AU) equals about 150 million km — the average distance between Earth and the Sun, used to measure distances in the solar system.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the mission that first landed on a comet?",
+    "options": [
+      "Deep Impact",
+      "Stardust",
+      "Rosetta/Philae",
+      "NEAR Shoemaker"
+    ],
+    "correct_answer": "Rosetta/Philae",
+    "explanation": "The Rosetta spacecraft and its Philae lander made the first successful soft landing on a comet (67P/Churyumov-Gerasimenko) in 2014.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the large telescope array in Chile that observes the southern sky?",
+    "options": [
+      "Hubble Space Telescope",
+      "Very Large Array",
+      "Very Large Telescope",
+      "Atacama Large Millimeter Array"
+    ],
+    "correct_answer": "Very Large Telescope",
+    "explanation": "The Very Large Telescope (VLT) at Paranal Observatory in Chile is one of the world's most advanced optical telescopes, operated by ESO.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the force that causes the universe to expand faster?",
+    "options": [
+      "Dark matter",
+      "Gravity",
+      "Dark energy",
+      "Electromagnetic force"
+    ],
+    "correct_answer": "Dark energy",
+    "explanation": "Dark energy is the mysterious force thought to be driving the accelerating expansion of the universe, making up about 68% of the universe's energy.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the famous nebula that looks like a crab?",
+    "options": [
+      "Helix Nebula",
+      "Crab Nebula",
+      "Horsehead Nebula",
+      "Ring Nebula"
+    ],
+    "correct_answer": "Crab Nebula",
+    "explanation": "The Crab Nebula is a supernova remnant in the constellation Taurus, the remains of a star that was seen to explode in 1054 AD.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the famous Halley's Comet — how often does it pass Earth?",
+    "options": [
+      "Every 10 years",
+      "Every 25 years",
+      "About every 75-76 years",
+      "Every 100 years"
+    ],
+    "correct_answer": "About every 75-76 years",
+    "explanation": "Halley's Comet has a period of about 75-76 years and was last visible from Earth in 1986. It will next appear around 2061.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the first planet orbiting another star confirmed by scientists?",
+    "options": [
+      "Kepler-22b",
+      "51 Pegasi b",
+      "TRAPPIST-1e",
+      "Proxima b"
+    ],
+    "correct_answer": "51 Pegasi b",
+    "explanation": "51 Pegasi b, discovered in 1995 by Mayor and Queloz, was the first confirmed exoplanet orbiting a Sun-like star, earning a Nobel Prize.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the phenomenon where two galaxies collide?",
+    "options": [
+      "Galaxy absorption",
+      "Galaxy merger",
+      "Stellar collision",
+      "Cosmic crash"
+    ],
+    "correct_answer": "Galaxy merger",
+    "explanation": "Galaxy mergers occur when two galaxies come close enough for gravity to pull them together, eventually merging into a single galaxy over billions of years.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the spacecraft that took the famous 'Pale Blue Dot' photo of Earth?",
+    "options": [
+      "Apollo 8",
+      "Hubble Space Telescope",
+      "Voyager 1",
+      "Cassini"
+    ],
+    "correct_answer": "Voyager 1",
+    "explanation": "Voyager 1 took the famous 'Pale Blue Dot' photograph of Earth from 6 billion km away in 1990, at the request of astronomer Carl Sagan.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What are the two types of telescopes based on how they collect light?",
+    "options": [
+      "Small and large",
+      "Refracting (lens) and reflecting (mirror)",
+      "Radio and optical",
+      "Space and ground-based"
+    ],
+    "correct_answer": "Refracting (lens) and reflecting (mirror)",
+    "explanation": "Refracting telescopes use lenses to collect and focus light, while reflecting telescopes use mirrors — most large modern telescopes are reflectors.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the brightest object in the solar system after the Sun?",
+    "options": [
+      "Jupiter",
+      "Venus",
+      "The Moon",
+      "Sirius"
+    ],
+    "correct_answer": "Venus",
+    "explanation": "Venus is the brightest natural object in the night sky after the Moon, often visible just after sunset or before sunrise as the 'evening star' or 'morning star.'",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name for the path the Moon takes around Earth?",
+    "options": [
+      "The Moon's revolution",
+      "The lunar orbit",
+      "The moontrack",
+      "The tidal path"
+    ],
+    "correct_answer": "The lunar orbit",
+    "explanation": "The Moon follows an elliptical lunar orbit around Earth, completing one full orbit every 27.3 days at an average distance of 384,400 km.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the phenomenon when a smaller body passes in front of a larger one?",
+    "options": [
+      "Eclipse",
+      "Occultation",
+      "Transit",
+      "Conjunction"
+    ],
+    "correct_answer": "Transit",
+    "explanation": "A transit occurs when a smaller body (like Mercury or Venus) passes across the face of a larger body (like the Sun) as seen from Earth.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "How many Earth-sized planets could fit inside Jupiter?",
+    "options": [
+      "About 100",
+      "About 500",
+      "About 1,300",
+      "About 10,000"
+    ],
+    "correct_answer": "About 1,300",
+    "explanation": "Jupiter is so large that about 1,300 Earth-sized planets could fit inside it by volume.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the mission that studied Jupiter up close in the 1990s and 2000s?",
+    "options": [
+      "Pioneer 10",
+      "Voyager 1",
+      "Galileo",
+      "Cassini"
+    ],
+    "correct_answer": "Galileo",
+    "explanation": "The Galileo spacecraft orbited Jupiter from 1995 to 2003, making detailed observations of Jupiter and its moons, and dropping a probe into Jupiter's atmosphere.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the instrument scientists use to split light into its colors?",
+    "options": [
+      "Spectrometer",
+      "Photometer",
+      "Radiometer",
+      "Refractometer"
+    ],
+    "correct_answer": "Spectrometer",
+    "explanation": "A spectrometer splits light into its component wavelengths (spectrum), allowing scientists to determine the composition, temperature, and motion of stars.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the space shuttle that first launched into orbit?",
+    "options": [
+      "Challenger",
+      "Discovery",
+      "Columbia",
+      "Atlantis"
+    ],
+    "correct_answer": "Columbia",
+    "explanation": "Space Shuttle Columbia was the first Space Shuttle to fly, launching on April 12, 1981 — exactly 20 years after Yuri Gagarin's first spaceflight.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name for a star's apparent brightness as seen from Earth?",
+    "options": [
+      "Absolute magnitude",
+      "Luminosity",
+      "Apparent magnitude",
+      "Stellar flux"
+    ],
+    "correct_answer": "Apparent magnitude",
+    "explanation": "Apparent magnitude measures how bright a star appears from Earth regardless of its actual distance. Brighter objects have lower (or negative) magnitude values.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the program that is returning astronauts to the Moon?",
+    "options": [
+      "Apollo",
+      "Gemini",
+      "Artemis",
+      "Constellation"
+    ],
+    "correct_answer": "Artemis",
+    "explanation": "NASA's Artemis program aims to return astronauts to the Moon, including the first woman and first person of color to walk on the lunar surface.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the two largest moons of Uranus?",
+    "options": [
+      "Titan and Rhea",
+      "Triton and Nereid",
+      "Titania and Oberon",
+      "Ariel and Umbriel"
+    ],
+    "correct_answer": "Titania and Oberon",
+    "explanation": "Titania and Oberon are the two largest moons of Uranus, both discovered by William Herschel in 1787.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the famous astronomer who first proposed that Earth orbits the Sun?",
+    "options": [
+      "Galileo Galilei",
+      "Isaac Newton",
+      "Nicolaus Copernicus",
+      "Johannes Kepler"
+    ],
+    "correct_answer": "Nicolaus Copernicus",
+    "explanation": "Nicolaus Copernicus proposed the heliocentric model in 1543, suggesting Earth and other planets orbit the Sun rather than everything orbiting Earth.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the astronomer who first used a telescope to study the night sky?",
+    "options": [
+      "Copernicus",
+      "Kepler",
+      "Galileo Galilei",
+      "Tycho Brahe"
+    ],
+    "correct_answer": "Galileo Galilei",
+    "explanation": "Galileo Galilei was the first to systematically use a telescope for astronomical observations, discovering Jupiter's four large moons in 1610.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the law that says planets move faster when closer to the Sun?",
+    "options": [
+      "Kepler's First Law",
+      "Kepler's Second Law",
+      "Kepler's Third Law",
+      "Newton's Law of Gravitation"
+    ],
+    "correct_answer": "Kepler's Second Law",
+    "explanation": "Kepler's Second Law (law of equal areas) states that a planet sweeps out equal areas in equal times, meaning it moves faster when closer to the Sun.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the rover that discovered water ice at the Moon's south pole?",
+    "options": [
+      "Luna 9",
+      "Chandrayaan-1",
+      "LRO",
+      "LCROSS"
+    ],
+    "correct_answer": "LCROSS",
+    "explanation": "LCROSS (Lunar Crater Observation and Sensing Satellite) crashed into the Moon's south pole in 2009 and confirmed the presence of water ice in the debris plume.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the darkest known object in the solar system?",
+    "options": [
+      "Pluto",
+      "Comet 67P",
+      "Vantablack asteroid",
+      "Comet Borrelly nucleus"
+    ],
+    "correct_answer": "Comet Borrelly nucleus",
+    "explanation": "The nucleus of Comet Borrelly is one of the darkest objects in the solar system, reflecting only about 2.9% of the light that hits it.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name given to a group of gravitationally bound galaxies?",
+    "options": [
+      "Galaxy cluster",
+      "Star cluster",
+      "Constellation group",
+      "Galactic pair"
+    ],
+    "correct_answer": "Galaxy cluster",
+    "explanation": "Galaxy clusters are the largest gravitationally bound structures in the universe, containing hundreds to thousands of galaxies.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the force that holds atoms together inside a star?",
+    "options": [
+      "Gravity",
+      "Electromagnetic force",
+      "Strong nuclear force",
+      "Weak nuclear force"
+    ],
+    "correct_answer": "Strong nuclear force",
+    "explanation": "The strong nuclear force holds protons and neutrons together in atomic nuclei, enabling nuclear fusion in stellar cores.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the tiny solid particles in space between stars?",
+    "options": [
+      "Dark matter",
+      "Cosmic dust",
+      "Meteoroids",
+      "Plasma"
+    ],
+    "correct_answer": "Cosmic dust",
+    "explanation": "Cosmic dust consists of tiny solid particles of rock and organic material that float in the space between stars and within nebulae.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the effect that causes light to bend around massive objects?",
+    "options": [
+      "Refraction",
+      "Gravitational lensing",
+      "Diffraction",
+      "Stellar aberration"
+    ],
+    "correct_answer": "Gravitational lensing",
+    "explanation": "Gravitational lensing occurs when a massive object bends spacetime, causing light from objects behind it to curve — predicted by Einstein's general relativity.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the NASA spacecraft that orbits Jupiter today?",
+    "options": [
+      "Galileo",
+      "Cassini",
+      "Juno",
+      "Voyager 2"
+    ],
+    "correct_answer": "Juno",
+    "explanation": "NASA's Juno spacecraft has been orbiting Jupiter since 2016, studying its atmosphere, magnetic field, and interior structure.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the name of the region in space where water can exist as a liquid on a planet's surface?",
+    "options": [
+      "Goldilocks zone",
+      "Habitable zone",
+      "Both A and B are correct terms",
+      "Frost line"
+    ],
+    "correct_answer": "Both A and B are correct terms",
+    "explanation": "The habitable zone (also called the Goldilocks zone) is the range of distances from a star where conditions might allow liquid water to exist on a planet's surface.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the study of the universe and the objects within it called?",
+    "options": [
+      "Astronomy",
+      "Biology",
+      "Geology",
+      "Physics"
+    ],
+    "correct_answer": "Astronomy",
+    "explanation": "Astronomy is the scientific study of the universe and the objects within it.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the largest planet in our solar system?",
+    "options": [
+      "Earth",
+      "Saturn",
+      "Jupiter",
+      "Uranus"
+    ],
+    "correct_answer": "Jupiter",
+    "explanation": "Jupiter is the largest planet in our solar system, with a diameter of approximately 142,984 kilometers.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "solar system"
+  },
+  {
+    "question": "What is a star?",
+    "options": [
+      "A planet",
+      "A moon",
+      "A massive ball of hot, glowing gas",
+      "A black hole"
+    ],
+    "correct_answer": "A massive ball of hot, glowing gas",
+    "explanation": "A star is a massive ball of hot, glowing gas that is held together by its own gravity.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "stars"
+  },
+  {
+    "question": "What is the farthest human-made object from Earth?",
+    "options": [
+      "The International Space Station",
+      "The Hubble Space Telescope",
+      "The Voyager 1 spacecraft",
+      "The Mars Curiosity Rover"
+    ],
+    "correct_answer": "The Voyager 1 spacecraft",
+    "explanation": "The Voyager 1 spacecraft is the farthest human-made object from Earth, with a distance of over 14 billion miles.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "space exploration"
+  },
+  {
+    "question": "What is the process by which stars like our sun generate energy?",
+    "options": [
+      "Nuclear fission",
+      "Nuclear fusion",
+      "Gravitational contraction",
+      "Radioactive decay"
+    ],
+    "correct_answer": "Nuclear fusion",
+    "explanation": "Nuclear fusion is the process by which stars like our sun generate energy, where hydrogen atoms are combined to form helium, releasing vast amounts of energy in the process.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "stars"
+  },
+  {
+    "question": "What is the term for a star that has exploded and has become incredibly bright?",
+    "options": [
+      "Black hole",
+      "Nebula",
+      "Supernova",
+      "Galaxy"
+    ],
+    "correct_answer": "Supernova",
+    "explanation": "A supernova is a star that has exploded and has become incredibly bright, often outshining an entire galaxy of stars.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "stars"
+  },
+  {
+    "question": "What is the largest structure in the universe?",
+    "options": [
+      "Galaxy",
+      "Galaxy cluster",
+      "Supercluster",
+      "Universe"
+    ],
+    "correct_answer": "Supercluster",
+    "explanation": "A supercluster is the largest structure in the universe, consisting of many galaxy clusters and superclusters that are held together by gravity.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "cosmology"
+  },
+  {
+    "question": "What is the term for the study of the origin and evolution of the universe?",
+    "options": [
+      "Cosmology",
+      "Astronomy",
+      "Geology",
+      "Biology"
+    ],
+    "correct_answer": "Cosmology",
+    "explanation": "Cosmology is the study of the origin and evolution of the universe, including the formation of the first stars and galaxies.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "cosmology"
+  },
+  {
+    "question": "What is the term for a celestial object that orbits around a star?",
+    "options": [
+      "Planet",
+      "Moon",
+      "Asteroid",
+      "Comet"
+    ],
+    "correct_answer": "Planet",
+    "explanation": "A planet is a celestial object that orbits around a star, such as Earth or Mars.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "solar system"
+  },
+  {
+    "question": "What is the term for a rock that orbits around the Sun?",
+    "options": [
+      "Asteroid",
+      "Comet",
+      "Meteor",
+      "Meteorite"
+    ],
+    "correct_answer": "Asteroid",
+    "explanation": "An asteroid is a rock that orbits around the Sun, often found in the asteroid belt between Mars and Jupiter.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "solar system"
+  },
+  {
+    "question": "What is the term for a ball of ice and rock that orbits around the Sun?",
+    "options": [
+      "Comet",
+      "Asteroid",
+      "Meteor",
+      "Meteorite"
+    ],
+    "correct_answer": "Comet",
+    "explanation": "A comet is a ball of ice and rock that orbits around the Sun, often producing a bright tail of gas and dust when it approaches the inner solar system.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "solar system"
+  },
+  {
+    "question": "What is the term for the remains of a star that has exploded as a supernova?",
+    "options": [
+      "Black hole",
+      "Neutron star",
+      "White dwarf",
+      "Nebula"
+    ],
+    "correct_answer": "Nebula",
+    "explanation": "A nebula is the remains of a star that has exploded as a supernova, consisting of gas and dust that is expanding into space.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "stars"
+  },
+  {
+    "question": "What is the term for a region of space where gravity is so strong that not even light can escape?",
+    "options": [
+      "Black hole",
+      "Nebula",
+      "Galaxy",
+      "Universe"
+    ],
+    "correct_answer": "Black hole",
+    "explanation": "A black hole is a region of space where gravity is so strong that not even light can escape, formed when a massive star collapses in on itself.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "cosmology"
+  },
+  {
+    "question": "What is the term for the study of the motion of objects in the universe?",
+    "options": [
+      "Kinematics",
+      "Dynamics",
+      "Astronomy",
+      "Astrophysics"
+    ],
+    "correct_answer": "Astrophysics",
+    "explanation": "Astrophysics is the study of the motion of objects in the universe, including the study of the physical properties of celestial objects.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the term for the amount of time it takes for a planet to orbit around its star?",
+    "options": [
+      "Year",
+      "Month",
+      "Day",
+      "Hour"
+    ],
+    "correct_answer": "Year",
+    "explanation": "A year is the amount of time it takes for a planet to orbit around its star, such as the Earth taking approximately 365.25 days to orbit the Sun.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "solar system"
+  },
+  {
+    "question": "What is the term for the amount of time it takes for a planet to rotate on its axis?",
+    "options": [
+      "Day",
+      "Month",
+      "Year",
+      "Hour"
+    ],
+    "correct_answer": "Day",
+    "explanation": "A day is the amount of time it takes for a planet to rotate on its axis, such as the Earth taking approximately 24 hours to complete one rotation.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "solar system"
+  },
+  {
+    "question": "What is the term for the study of the formation and evolution of the solar system?",
+    "options": [
+      "Planetary science",
+      "Astronomy",
+      "Geology",
+      "Biology"
+    ],
+    "correct_answer": "Planetary science",
+    "explanation": "Planetary science is the study of the formation and evolution of the solar system, including the study of the planets, moons, and other celestial objects.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "solar system"
+  },
+  {
+    "question": "What is the term for a spacecraft that is designed to study the universe?",
+    "options": [
+      "Telescope",
+      "Spacecraft",
+      "Satellite",
+      "Space station"
+    ],
+    "correct_answer": "Spacecraft",
+    "explanation": "A spacecraft is a vehicle that is designed to study the universe, such as the Hubble Space Telescope or the Mars Curiosity Rover.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "space exploration"
+  },
+  {
+    "question": "What is the term for the study of the universe using telescopes and other instruments?",
+    "options": [
+      "Observational astronomy",
+      "Theoretical astronomy",
+      "Astrophysics",
+      "Cosmology"
+    ],
+    "correct_answer": "Observational astronomy",
+    "explanation": "Observational astronomy is the study of the universe using telescopes and other instruments, such as studying the light from distant stars and galaxies.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the term for the study of the properties and behavior of celestial objects?",
+    "options": [
+      "Theoretical astronomy",
+      "Observational astronomy",
+      "Astrophysics",
+      "Cosmology"
+    ],
+    "correct_answer": "Theoretical astronomy",
+    "explanation": "Theoretical astronomy is the study of the properties and behavior of celestial objects, such as the study of the orbits of planets and the life cycles of stars.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the term for the study of the origin and evolution of the universe using computer simulations?",
+    "options": [
+      "Theoretical cosmology",
+      "Observational cosmology",
+      "Astrophysics",
+      "Planetary science"
+    ],
+    "correct_answer": "Theoretical cosmology",
+    "explanation": "Theoretical cosmology is the study of the origin and evolution of the universe using computer simulations, such as simulating the formation of the first stars and galaxies.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "cosmology"
+  },
+  {
+    "question": "What is the term for a device that is used to study the universe in different wavelengths of light?",
+    "options": [
+      "Telescope",
+      "Microscope",
+      "Spectrometer",
+      "Radiometer"
+    ],
+    "correct_answer": "Telescope",
+    "explanation": "A telescope is a device that is used to study the universe in different wavelengths of light, such as visible light, ultraviolet light, or X-rays.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the term for the study of the properties and behavior of the universe on its largest scales?",
+    "options": [
+      "Cosmology",
+      "Astronomy",
+      "Astrophysics",
+      "Planetary science"
+    ],
+    "correct_answer": "Cosmology",
+    "explanation": "Cosmology is the study of the properties and behavior of the universe on its largest scales, including the study of the expansion of the universe and the formation of galaxy clusters.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "cosmology"
+  },
+  {
+    "question": "What is the term for the remains of a star that has exhausted its fuel and has shrunk to a very small size?",
+    "options": [
+      "White dwarf",
+      "Neutron star",
+      "Black hole",
+      "Nebula"
+    ],
+    "correct_answer": "White dwarf",
+    "explanation": "A white dwarf is the remains of a star that has exhausted its fuel and has shrunk to a very small size, often composed of degenerate matter.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "stars"
+  },
+  {
+    "question": "What is the term for a star that is in the final stages of its life and is expelling its outer layers into space?",
+    "options": [
+      "Red giant",
+      "Supernova",
+      "Nebula",
+      "Black hole"
+    ],
+    "correct_answer": "Red giant",
+    "explanation": "A red giant is a star that is in the final stages of its life and is expelling its outer layers into space, often becoming much larger and cooler than it was during its main sequence lifetime.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "stars"
+  },
+  {
+    "question": "What is the study of the universe and the objects within it?",
+    "options": [
+      "Biology",
+      "Astronomy",
+      "Geology",
+      "Physics"
+    ],
+    "correct_answer": "Astronomy",
+    "explanation": "Astronomy is the scientific study of the universe, including the stars, planets, galaxies, and other celestial objects.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is a black hole?",
+    "options": [
+      "A star that has exploded",
+      "A region of space where gravity is so strong that nothing can escape",
+      "A planet that is no longer orbiting its star",
+      "A galaxy that is moving away from us"
+    ],
+    "correct_answer": "A region of space where gravity is so strong that nothing can escape",
+    "explanation": "A black hole is a region of space where the gravitational pull is so strong that nothing, including light, can escape.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "cosmology"
+  },
+  {
+    "question": "What is the process by which stars generate energy?",
+    "options": [
+      "Nuclear fission",
+      "Nuclear fusion",
+      "Radioactive decay",
+      "Gravitational contraction"
+    ],
+    "correct_answer": "Nuclear fusion",
+    "explanation": "Stars generate energy through the process of nuclear fusion, where hydrogen atoms are fused together to form helium, releasing energy in the process.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "stellar astronomy"
+  },
+  {
+    "question": "What is the term for a star that has exploded and has become extremely bright?",
+    "options": [
+      "Supernova",
+      "Black hole",
+      "Nebula",
+      "Galaxy"
+    ],
+    "correct_answer": "Supernova",
+    "explanation": "A supernova is a star that has exploded and has become extremely bright, often outshining an entire galaxy.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "stellar astronomy"
+  },
+  {
+    "question": "What is the largest moon in our solar system?",
+    "options": [
+      "Ganymede",
+      "Titan",
+      "Callisto",
+      "Io"
+    ],
+    "correct_answer": "Ganymede",
+    "explanation": "Ganymede is the largest moon in our solar system, with a diameter of approximately 3,275 miles.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "solar system"
+  },
+  {
+    "question": "What is the term for the movement of an object in space, such as a planet or star?",
+    "options": [
+      "Orbit",
+      "Rotation",
+      "Revolution",
+      "Gravity"
+    ],
+    "correct_answer": "Orbit",
+    "explanation": "An orbit is the path that an object in space follows as it moves around a larger object, such as a planet or star.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the term for the study of the structure and behavior of the universe on its largest scales?",
+    "options": [
+      "Cosmology",
+      "Astronomy",
+      "Geology",
+      "Biology"
+    ],
+    "correct_answer": "Cosmology",
+    "explanation": "Cosmology is the study of the structure and behavior of the universe on its largest scales, including the formation of galaxies and galaxy clusters.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "cosmology"
+  },
+  {
+    "question": "What is the term for a star that is no longer generating energy through nuclear fusion?",
+    "options": [
+      "White dwarf",
+      "Neutron star",
+      "Black hole",
+      "Supernova"
+    ],
+    "correct_answer": "White dwarf",
+    "explanation": "A white dwarf is a star that is no longer generating energy through nuclear fusion, and has shrunk to a small, hot, and extremely dense object.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "stellar astronomy"
+  },
+  {
+    "question": "What is the term for the process by which the universe became transparent to light, occurring about 380,000 years after the Big Bang?",
+    "options": [
+      "Recombination",
+      "Ionization",
+      "Nucleosynthesis",
+      "Galaxy formation"
+    ],
+    "correct_answer": "Recombination",
+    "explanation": "Recombination is the process by which the universe became transparent to light, occurring about 380,000 years after the Big Bang, when electrons and protons combined to form neutral atoms.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "cosmology"
+  },
+  {
+    "question": "What is the term for a region of space where the gravitational pull is so strong that not even light can escape?",
+    "options": [
+      "Black hole",
+      "White hole",
+      "Wormhole",
+      "Nebula"
+    ],
+    "correct_answer": "Black hole",
+    "explanation": "A black hole is a region of space where the gravitational pull is so strong that not even light can escape, making it invisible to us.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "cosmology"
+  },
+  {
+    "question": "What is the term for the study of the formation and evolution of galaxies?",
+    "options": [
+      "Galaxy evolution",
+      "Cosmology",
+      "Astronomy",
+      "Astrophysics"
+    ],
+    "correct_answer": "Galaxy evolution",
+    "explanation": "Galaxy evolution is the study of the formation and evolution of galaxies, including the processes that shape their structure and composition.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "galaxy evolution"
+  },
+  {
+    "question": "What is the term for a star that is exploding as a supernova?",
+    "options": [
+      "Supernova",
+      "Black hole",
+      "Nebula",
+      "White dwarf"
+    ],
+    "correct_answer": "Supernova",
+    "explanation": "A supernova is a star that is exploding, often becoming brighter than an entire galaxy, and can be seen from millions of light-years away.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "stellar astronomy"
+  },
+  {
+    "question": "What is the term for the remains of a star that has exploded as a supernova, often consisting of gas and dust?",
+    "options": [
+      "Nebula",
+      "Black hole",
+      "White dwarf",
+      "Neutron star"
+    ],
+    "correct_answer": "Nebula",
+    "explanation": "A nebula is the remains of a star that has exploded as a supernova, often consisting of gas and dust, and can be seen as a beautiful cloud of gas and dust in space.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "stellar astronomy"
+  },
+  {
+    "question": "What is the term for the study of the properties and behavior of the universe on its smallest scales?",
+    "options": [
+      "Particle physics",
+      "Cosmology",
+      "Astronomy",
+      "Astrophysics"
+    ],
+    "correct_answer": "Particle physics",
+    "explanation": "Particle physics is the study of the properties and behavior of the universe on its smallest scales, including the study of atoms, particles, and forces.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "particle physics"
+  },
+  {
+    "question": "What is the term for the process by which atoms combine to form molecules?",
+    "options": [
+      "Chemical bonding",
+      "Nuclear fusion",
+      "Nuclear fission",
+      "Radioactive decay"
+    ],
+    "correct_answer": "Chemical bonding",
+    "explanation": "Chemical bonding is the process by which atoms combine to form molecules, often releasing energy in the process.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "chemistry"
+  },
+  {
+    "question": "What is the term for the study of the origin and evolution of life in the universe?",
+    "options": [
+      "Astrobiology",
+      "Cosmology",
+      "Astronomy",
+      "Biology"
+    ],
+    "correct_answer": "Astrobiology",
+    "explanation": "Astrobiology is the study of the origin and evolution of life in the universe, including the search for life on other planets and moons.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astrobiology"
+  },
+  {
+    "question": "What is the term for a planet that orbits a star other than the Sun?",
+    "options": [
+      "Exoplanet",
+      "Moon",
+      "Asteroid",
+      "Comet"
+    ],
+    "correct_answer": "Exoplanet",
+    "explanation": "An exoplanet is a planet that orbits a star other than the Sun, often discovered using telescopes and other astronomical instruments.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "exoplanets"
+  },
+  {
+    "question": "What is the term for a star that is in the final stages of its life, often expanding to become a red giant?",
+    "options": [
+      "Red giant",
+      "White dwarf",
+      "Neutron star",
+      "Black hole"
+    ],
+    "correct_answer": "Red giant",
+    "explanation": "A red giant is a star that is in the final stages of its life, often expanding to become much larger and cooler than it was during its main sequence lifetime.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "stellar astronomy"
+  },
+  {
+    "question": "What is the term for a collection of stars that are held together by gravity?",
+    "options": [
+      "Galaxy",
+      "Nebula",
+      "Star cluster",
+      "Constellation"
+    ],
+    "correct_answer": "Galaxy",
+    "explanation": "A galaxy is a collection of stars, gas, and dust that are held together by gravity.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "galaxies"
+  },
+  {
+    "question": "What is the term for a black hole that has a mass millions or even billions of times that of the sun?",
+    "options": [
+      "Stellar black hole",
+      "Supermassive black hole",
+      "Intermediate-mass black hole",
+      "Primordial black hole"
+    ],
+    "correct_answer": "Supermassive black hole",
+    "explanation": "A supermassive black hole is a black hole that has a mass millions or even billions of times that of the sun, and is found at the center of many galaxies.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "black holes"
+  },
+  {
+    "question": "What is the process by which the universe became transparent to light?",
+    "options": [
+      "Recombination",
+      "Ionization",
+      "Nucleosynthesis",
+      "Gravitational collapse"
+    ],
+    "correct_answer": "Recombination",
+    "explanation": "Recombination is the process by which the universe became transparent to light, occurring when electrons and protons combined to form neutral atoms.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "cosmology"
+  },
+  {
+    "question": "What is the term for the remains of a star that has exhausted its fuel and has shrunk to a small, hot core?",
+    "options": [
+      "White dwarf",
+      "Neutron star",
+      "Black hole",
+      "Supernova"
+    ],
+    "correct_answer": "White dwarf",
+    "explanation": "A white dwarf is the remains of a star that has exhausted its fuel and has shrunk to a small, hot core.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "stars"
+  },
+  {
+    "question": "What is the term for a star that is in the final stages of its life and is about to explode as a supernova?",
+    "options": [
+      "Red giant",
+      "Red supergiant",
+      "Blue giant",
+      "Yellow dwarf"
+    ],
+    "correct_answer": "Red supergiant",
+    "explanation": "A red supergiant is a star that is in the final stages of its life and is about to explode as a supernova.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "stars"
+  },
+  {
+    "question": "What is the term for the distance light travels in one year?",
+    "options": [
+      "Light-year",
+      "Parsec",
+      "Astronomical unit",
+      "Kilometer"
+    ],
+    "correct_answer": "Light-year",
+    "explanation": "A light-year is the distance light travels in one year, approximately 9.46 trillion kilometers.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the term for the point in the sky where the sun appears to rise?",
+    "options": [
+      "Horizon",
+      "Zenith",
+      "Nadir",
+      "East point"
+    ],
+    "correct_answer": "East point",
+    "explanation": "The east point is the point in the sky where the sun appears to rise.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the term for the study of the motion of objects in space?",
+    "options": [
+      "Astrodynamics",
+      "Astronomy",
+      "Cosmology",
+      "Gravity"
+    ],
+    "correct_answer": "Astrodynamics",
+    "explanation": "Astrodynamics is the study of the motion of objects in space, including the orbits of planets and spacecraft.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "space exploration"
+  },
+  {
+    "question": "What is the term for a spacecraft that is designed to land on another planet?",
+    "options": [
+      "Lander",
+      "Orbiter",
+      "Rover",
+      "Telescope"
+    ],
+    "correct_answer": "Lander",
+    "explanation": "A lander is a spacecraft that is designed to land on another planet, such as Mars or the Moon.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "space exploration"
+  },
+  {
+    "question": "What is the term for the process by which the universe is still expanding?",
+    "options": [
+      "Inflation",
+      "Expansion",
+      "Contraction",
+      "Stagnation"
+    ],
+    "correct_answer": "Expansion",
+    "explanation": "The expansion of the universe refers to the process by which the universe is still growing and becoming less dense.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "cosmology"
+  },
+  {
+    "question": "What is the term for the largest structure in the universe?",
+    "options": [
+      "Galaxy",
+      "Galaxy cluster",
+      "Supercluster",
+      "Universe"
+    ],
+    "correct_answer": "Supercluster",
+    "explanation": "A supercluster is the largest structure in the universe, consisting of many galaxy clusters and superclusters.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "cosmology"
+  },
+  {
+    "question": "What is the term for a region of space where the gravitational pull is so strong that nothing can escape?",
+    "options": [
+      "Black hole",
+      "White hole",
+      "Wormhole",
+      "Singularity"
+    ],
+    "correct_answer": "Black hole",
+    "explanation": "A black hole is a region of space where the gravitational pull is so strong that nothing can escape, not even light.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "black holes"
+  },
+  {
+    "question": "What is the term for the remains of a massive star that has exploded as a supernova?",
+    "options": [
+      "Neutron star",
+      "Black hole",
+      "White dwarf",
+      "Supernova remnant"
+    ],
+    "correct_answer": "Supernova remnant",
+    "explanation": "A supernova remnant is the remains of a massive star that has exploded as a supernova, consisting of expanding gas and dust.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "stars"
+  },
+  {
+    "question": "What is the term for the process by which atoms gain or lose electrons to form ions?",
+    "options": [
+      "Ionization",
+      "Recombination",
+      "Nucleosynthesis",
+      "Gravitational contraction"
+    ],
+    "correct_answer": "Ionization",
+    "explanation": "Ionization is the process by which atoms gain or lose electrons to form ions, often occurring in the presence of high-energy radiation.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the term for a type of astronomical object that is thought to have formed from the collapse of a massive star?",
+    "options": [
+      "Black hole",
+      "Neutron star",
+      "White dwarf",
+      "Supernova"
+    ],
+    "correct_answer": "Neutron star",
+    "explanation": "A neutron star is a type of astronomical object that is thought to have formed from the collapse of a massive star, consisting of densely packed neutrons.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "stars"
+  },
+  {
+    "question": "What is the term for the point in the sky where the sun appears to set?",
+    "options": [
+      "Horizon",
+      "Zenith",
+      "Nadir",
+      "West point"
+    ],
+    "correct_answer": "West point",
+    "explanation": "The west point is the point in the sky where the sun appears to set.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the term for the study of the formation and evolution of the universe?",
+    "options": [
+      "Cosmology",
+      "Astronomy",
+      "Geology",
+      "Biology"
+    ],
+    "correct_answer": "Cosmology",
+    "explanation": "Cosmology is the study of the formation and evolution of the universe, including the Big Bang theory and the expansion of the universe.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "cosmology"
+  },
+  {
+    "question": "What is the term for a type of celestial object that is thought to be a massive, gravitationally collapsed object?",
+    "options": [
+      "Black hole",
+      "Neutron star",
+      "White dwarf",
+      "Supernova"
+    ],
+    "correct_answer": "Black hole",
+    "explanation": "A black hole is a type of celestial object that is thought to be a massive, gravitationally collapsed object, with such a strong gravitational pull that nothing can escape.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "black holes"
+  },
+  {
+    "question": "What is the term for the process by which the universe became transparent to light, allowing us to see distant objects?",
+    "options": [
+      "Recombination",
+      "Ionization",
+      "Nucleosynthesis",
+      "Gravitational contraction"
+    ],
+    "correct_answer": "Recombination",
+    "explanation": "Recombination is the process by which the universe became transparent to light, occurring when electrons and protons combined to form neutral atoms.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "cosmology"
+  },
+  {
+    "question": "What is the term for the study of the properties and behavior of galaxies?",
+    "options": [
+      "Galaxy astronomy",
+      "Astrophysics",
+      "Cosmology",
+      "Astronomy"
+    ],
+    "correct_answer": "Galaxy astronomy",
+    "explanation": "Galaxy astronomy is the study of the properties and behavior of galaxies, including their formation, evolution, and interactions.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "galaxies"
+  },
+  {
+    "question": "What is the term for a type of astronomical object that is thought to be a massive, rotating cloud of gas and dust?",
+    "options": [
+      "Galaxy",
+      "Star",
+      "Planet",
+      "Nebula"
+    ],
+    "correct_answer": "Nebula",
+    "explanation": "A nebula is a type of astronomical object that is thought to be a massive, rotating cloud of gas and dust, often giving birth to new stars.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the term for the point in the sky where the sun is directly overhead?",
+    "options": [
+      "Zenith",
+      "Horizon",
+      "Nadir",
+      "Meridian"
+    ],
+    "correct_answer": "Zenith",
+    "explanation": "The zenith is the point in the sky where the sun is directly overhead.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "astronomy"
+  },
+  {
+    "question": "What is the term for the study of the formation and evolution of stars?",
+    "options": [
+      "Stellar astronomy",
+      "Astrophysics",
+      "Cosmology",
+      "Astronomy"
+    ],
+    "correct_answer": "Stellar astronomy",
+    "explanation": "Stellar astronomy is the study of the formation and evolution of stars, including their birth, life, and death.",
+    "subject": "science",
+    "difficulty": "beginner",
+    "topic": "stars"
+  }
+]

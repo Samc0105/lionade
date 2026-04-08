@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import CoinAnimation from "./CoinAnimation";
+import { cdnUrl } from "@/lib/cdn";
 
 interface QuizQuestion {
   id: string;
@@ -124,7 +125,7 @@ export default function QuizCard({
             {difficultyLabel}
           </span>
           <div className="flex items-center gap-1.5 bg-gold/10 border border-gold/30 rounded-full px-3 py-1">
-            <img src="/F.png" alt="Fangs" className="w-5 h-5 object-contain" />
+            <img src={cdnUrl("/F.png")} alt="Fangs" className="w-5 h-5 object-contain" />
             <span className="font-bebas text-lg text-gold">+{coinReward}</span>
           </div>
         </div>

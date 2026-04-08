@@ -9,6 +9,7 @@ import BackButton from "@/components/BackButton";
 import { getQuizHistory, getLeaderboard } from "@/lib/db";
 import { SUBJECT_ICONS, SUBJECT_COLORS, formatCoins } from "@/lib/mockData";
 import type { Subject } from "@/types";
+import { cdnUrl } from "@/lib/cdn";
 
 /* ── Ninny Modal ────────────────────────────────────────────── */
 
@@ -356,7 +357,7 @@ export default function LearnPage() {
                   boxShadow: "0 0 20px #FFD70010",
                 }}
               >
-                <img src="/F.png" alt="Fangs" className="w-7 h-7 object-contain" />
+                <img src={cdnUrl("/F.png")} alt="Fangs" className="w-7 h-7 object-contain" />
                 <div>
                   <p className="font-bebas text-3xl text-gold leading-none">
                     {(stats?.coins ?? user.coins).toLocaleString()}
@@ -511,7 +512,7 @@ export default function LearnPage() {
                             {entry.correct_answers}/{entry.total_questions}
                           </p>
                           <p className="text-gold text-[10px] mt-0.5 flex items-center gap-0.5">
-                            +{entry.coins_earned} <img src="/F.png" alt="Fangs" className="w-4 h-4 object-contain inline" />
+                            +{entry.coins_earned} <img src={cdnUrl("/F.png")} alt="Fangs" className="w-4 h-4 object-contain inline" />
                           </p>
                         </div>
                       </div>
@@ -613,7 +614,7 @@ export default function LearnPage() {
                       {m.mission}
                     </p>
                     <p className="text-gold text-xs mt-0.5 flex items-center gap-0.5">
-                      +{m.reward} bonus <img src="/F.png" alt="Fangs" className="w-4 h-4 object-contain inline" />
+                      +{m.reward} bonus <img src={cdnUrl("/F.png")} alt="Fangs" className="w-4 h-4 object-contain inline" />
                     </p>
                   </div>
                 </div>

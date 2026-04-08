@@ -1,0 +1,4174 @@
+[
+  {
+    "question": "What is the primary mechanism driving plate tectonics?",
+    "options": [
+      "Gravitational pull of the Moon",
+      "Mantle convection currents",
+      "Earth's rotation",
+      "Solar radiation heating"
+    ],
+    "correct_answer": "Mantle convection currents",
+    "explanation": "Mantle convection currents, driven by heat from Earth's core, create the movement of tectonic plates at the surface.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "Which type of seismic wave cannot travel through liquid layers?",
+    "options": [
+      "P-waves",
+      "Surface waves",
+      "S-waves",
+      "Love waves"
+    ],
+    "correct_answer": "S-waves",
+    "explanation": "S-waves (secondary/shear waves) require a solid medium and cannot travel through Earth's liquid outer core.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the Mohorovičić discontinuity?",
+    "options": [
+      "The boundary between the inner and outer core",
+      "The boundary between the crust and mantle",
+      "The boundary between the mantle and outer core",
+      "The boundary between the lithosphere and asthenosphere"
+    ],
+    "correct_answer": "The boundary between the crust and mantle",
+    "explanation": "The Moho marks the sharp boundary where seismic wave velocity increases as you transition from crust to mantle.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "Which mineral group makes up approximately 90% of Earth's crust?",
+    "options": [
+      "Carbonates",
+      "Oxides",
+      "Silicates",
+      "Sulfides"
+    ],
+    "correct_answer": "Silicates",
+    "explanation": "Silicates, built on the SiO4 tetrahedron, are the most abundant mineral group and form the bulk of Earth's crust.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What process forms ophiolite sequences?",
+    "options": [
+      "Continental collision",
+      "Obduction of oceanic crust onto continental crust",
+      "Subduction of continental crust",
+      "Hot spot volcanism"
+    ],
+    "correct_answer": "Obduction of oceanic crust onto continental crust",
+    "explanation": "Ophiolites are fragments of oceanic crust and upper mantle thrust onto continental margins during tectonic events.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is isostasy in geology?",
+    "options": [
+      "The stability of Earth's magnetic field",
+      "The gravitational equilibrium between the lithosphere and asthenosphere",
+      "The equal distribution of heat in the mantle",
+      "The balance of erosion and deposition"
+    ],
+    "correct_answer": "The gravitational equilibrium between the lithosphere and asthenosphere",
+    "explanation": "Isostasy describes the gravitational balance where less dense crust floats on denser mantle material, similar to icebergs in water.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "Which type of volcano is associated with hotspot activity?",
+    "options": [
+      "Stratovolcano",
+      "Cinder cone",
+      "Shield volcano",
+      "Lava dome"
+    ],
+    "correct_answer": "Shield volcano",
+    "explanation": "Hotspots produce low-viscosity basaltic lava that spreads widely, forming broad, gently sloping shield volcanoes like those in Hawaii.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What causes the magnetic reversals recorded in oceanic crust?",
+    "options": [
+      "Changes in Earth's rotation speed",
+      "Periodic reversals of Earth's magnetic field recorded as seafloor spreads",
+      "Meteor impacts",
+      "Variations in solar wind"
+    ],
+    "correct_answer": "Periodic reversals of Earth's magnetic field recorded as seafloor spreads",
+    "explanation": "As magma solidifies at mid-ocean ridges, iron minerals align with Earth's magnetic field, recording its orientation at that time.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the Wilson Cycle?",
+    "options": [
+      "The water cycle in polar regions",
+      "The cycle of ocean basin opening and closing driven by plate tectonics",
+      "The carbon cycle in marine environments",
+      "The cycle of magma generation and cooling"
+    ],
+    "correct_answer": "The cycle of ocean basin opening and closing driven by plate tectonics",
+    "explanation": "The Wilson Cycle describes how ocean basins open via rifting and close via subduction over hundreds of millions of years.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the asthenosphere?",
+    "options": [
+      "The solid inner core",
+      "The uppermost rigid layer of the mantle",
+      "The partially molten, ductile layer of the upper mantle below the lithosphere",
+      "The transition zone between upper and lower mantle"
+    ],
+    "correct_answer": "The partially molten, ductile layer of the upper mantle below the lithosphere",
+    "explanation": "The asthenosphere behaves plastically over long timescales, allowing tectonic plates above it to move.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "Which dating method is most appropriate for rocks over 1 billion years old?",
+    "options": [
+      "Carbon-14 dating",
+      "Uranium-lead dating",
+      "Potassium-argon dating",
+      "Rubidium-strontium dating"
+    ],
+    "correct_answer": "Uranium-lead dating",
+    "explanation": "Uranium-lead dating has a half-life of 4.5 billion years, making it ideal for dating ancient rocks and even Earth itself.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is a graben in geology?",
+    "options": [
+      "A type of fold in sedimentary rock",
+      "A downthrown block between two normal faults",
+      "A ridge formed by compression",
+      "A volcanic vent structure"
+    ],
+    "correct_answer": "A downthrown block between two normal faults",
+    "explanation": "A graben forms when a block of crust subsides between two parallel normal faults in an extensional tectonic environment.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What does the term 'metamorphic grade' refer to?",
+    "options": [
+      "The age of a metamorphic rock",
+      "The intensity of heat and pressure experienced during metamorphism",
+      "The mineral composition of a rock",
+      "The depth at which metamorphism occurred"
+    ],
+    "correct_answer": "The intensity of heat and pressure experienced during metamorphism",
+    "explanation": "Metamorphic grade indicates the degree of metamorphism, with index minerals like garnet and sillimanite marking different grades.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the silica tetrahedron?",
+    "options": [
+      "A type of volcanic rock",
+      "A four-sided crystal form",
+      "The fundamental building block of silicate minerals",
+      "A measure of silicon content"
+    ],
+    "correct_answer": "The fundamental building block of silicate minerals",
+    "explanation": "The SiO4 tetrahedron consists of one silicon atom bonded to four oxygen atoms and forms the basic structural unit of all silicate minerals.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the principle of cross-cutting relationships?",
+    "options": [
+      "Younger rock layers are deposited on top of older ones",
+      "A geologic feature that cuts through another is younger than the one it cuts",
+      "Rocks of the same age have the same fossils",
+      "Sediment is deposited horizontally"
+    ],
+    "correct_answer": "A geologic feature that cuts through another is younger than the one it cuts",
+    "explanation": "This principle helps geologists determine the relative age of rocks and geologic events.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What causes deep-focus earthquakes?",
+    "options": [
+      "Volcanic activity near the surface",
+      "Faulting in the cold, brittle portion of subducting oceanic slabs",
+      "Meteorite impacts",
+      "Underground nuclear testing"
+    ],
+    "correct_answer": "Faulting in the cold, brittle portion of subducting oceanic slabs",
+    "explanation": "Deep-focus earthquakes (300-700 km depth) occur in cold, subducting slabs that remain brittle enough to fracture at great depths.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is diagenesis?",
+    "options": [
+      "The formation of igneous rocks",
+      "The physical and chemical changes that convert sediment into sedimentary rock",
+      "The process of metamorphism",
+      "The weathering of surface rocks"
+    ],
+    "correct_answer": "The physical and chemical changes that convert sediment into sedimentary rock",
+    "explanation": "Diagenesis includes compaction and cementation processes that lithify loose sediments into coherent rock without significant heat.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "Which geologic eon encompasses most of Earth's history?",
+    "options": [
+      "Phanerozoic",
+      "Proterozoic",
+      "Archean",
+      "Precambrian"
+    ],
+    "correct_answer": "Precambrian",
+    "explanation": "The Precambrian spans roughly 4 billion years — about 88% of Earth's total history — before the explosion of complex life.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is a Benioff zone?",
+    "options": [
+      "A zone of high heat flow at mid-ocean ridges",
+      "The inclined plane of seismicity marking a subducting slab",
+      "A volcanic island chain",
+      "A zone of crustal extension"
+    ],
+    "correct_answer": "The inclined plane of seismicity marking a subducting slab",
+    "explanation": "The Wadati-Benioff zone is the dipping zone of earthquakes that traces the path of a subducting oceanic plate into the mantle.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the difference between a mineral and a rock?",
+    "options": [
+      "Minerals are organic; rocks are inorganic",
+      "A mineral is a naturally occurring crystalline solid with a definite chemical composition; a rock is an aggregate of minerals",
+      "Rocks are always harder than minerals",
+      "Minerals form underground; rocks form at the surface"
+    ],
+    "correct_answer": "A mineral is a naturally occurring crystalline solid with a definite chemical composition; a rock is an aggregate of minerals",
+    "explanation": "Minerals have specific chemical formulas and crystal structures, while rocks are mixtures of one or more minerals.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the geothermal gradient?",
+    "options": [
+      "The rate at which temperature increases with depth in Earth",
+      "The rate of heat loss at Earth's surface",
+      "The difference in temperature between poles and equator",
+      "The rate of cooling of magma"
+    ],
+    "correct_answer": "The rate at which temperature increases with depth in Earth",
+    "explanation": "The geothermal gradient averages about 25-30°C per kilometer of depth, driven by residual heat and radioactive decay.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is a turbidite?",
+    "options": [
+      "A type of volcanic ash deposit",
+      "A sedimentary deposit formed by a turbidity current",
+      "A metamorphic rock formed under pressure",
+      "A type of glacial sediment"
+    ],
+    "correct_answer": "A sedimentary deposit formed by a turbidity current",
+    "explanation": "Turbidites are graded beds deposited when dense, sediment-laden water flows rapidly down continental slopes.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "Which process generates continental crust?",
+    "options": [
+      "Seafloor spreading",
+      "Subduction-related magmatism and accretion",
+      "Hotspot volcanism",
+      "Transform faulting"
+    ],
+    "correct_answer": "Subduction-related magmatism and accretion",
+    "explanation": "Continental crust grows primarily through magmatic arcs above subduction zones and the accretion of island arcs and terranes.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the 'Snowball Earth' hypothesis?",
+    "options": [
+      "A theory that Earth's poles were once at the equator",
+      "The proposal that Earth was almost entirely covered in ice during the Proterozoic",
+      "A model of future ice age conditions",
+      "The theory that glaciers carved the continents"
+    ],
+    "correct_answer": "The proposal that Earth was almost entirely covered in ice during the Proterozoic",
+    "explanation": "Snowball Earth events (~700 Ma) involved near-global glaciation, evidenced by glacial deposits at equatorial paleolatitudes.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is exhumation in geology?",
+    "options": [
+      "The eruption of magma",
+      "The process by which deep rocks are brought to the surface through erosion and uplift",
+      "The burial of sediments",
+      "The formation of fossils"
+    ],
+    "correct_answer": "The process by which deep rocks are brought to the surface through erosion and uplift",
+    "explanation": "Exhumation involves both tectonic uplift and erosional removal of overlying rock, exposing deeper crustal materials.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the difference between aa and pahoehoe lava?",
+    "options": [
+      "Aa is hotter; pahoehoe is cooler",
+      "Aa has a rough, jagged surface; pahoehoe has a smooth, ropy surface",
+      "Aa is silicic; pahoehoe is basaltic",
+      "Aa flows faster; pahoehoe is stationary"
+    ],
+    "correct_answer": "Aa has a rough, jagged surface; pahoehoe has a smooth, ropy surface",
+    "explanation": "The surface texture difference results from lava viscosity and flow rate — aa forms when lava cools and degasses rapidly during flow.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is uniformitarianism?",
+    "options": [
+      "All rocks were formed in a single catastrophic event",
+      "The present is the key to the past; geologic processes operate the same way through time",
+      "Earth's surface is uniform in composition",
+      "Erosion rates are constant worldwide"
+    ],
+    "correct_answer": "The present is the key to the past; geologic processes operate the same way through time",
+    "explanation": "Uniformitarianism, proposed by James Hutton and Charles Lyell, holds that current geologic processes have operated throughout Earth's history.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is a xenolith?",
+    "options": [
+      "A type of meteorite",
+      "A fragment of pre-existing rock incorporated into magma",
+      "A mineral found only in igneous rocks",
+      "A type of fossil"
+    ],
+    "correct_answer": "A fragment of pre-existing rock incorporated into magma",
+    "explanation": "Xenoliths are 'foreign rocks' carried up by magma from depth, providing samples of the lower crust and upper mantle.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the chemical composition of Earth's inner core?",
+    "options": [
+      "Mostly silicon and oxygen",
+      "Iron and nickel alloy",
+      "Magnesium silicate",
+      "Iron sulfide"
+    ],
+    "correct_answer": "Iron and nickel alloy",
+    "explanation": "Earth's inner core is primarily composed of a solid iron-nickel alloy, inferred from seismic wave analysis and density calculations.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "Which factor most controls the viscosity of magma?",
+    "options": [
+      "Temperature alone",
+      "Pressure alone",
+      "Silica content and temperature",
+      "Water content only"
+    ],
+    "correct_answer": "Silica content and temperature",
+    "explanation": "Higher silica content creates more polymerized melt structures increasing viscosity, while higher temperature reduces it.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What does MORB stand for and what does it represent?",
+    "options": [
+      "Mid-Ocean Ridge Basalt — the most common volcanic rock on Earth",
+      "Mantle Olivine Rich Basalt — a deep mantle rock",
+      "Marine Origin Rock Boundary — a tectonic feature",
+      "Metamorphic Origin Ridge Basalt — a transformed rock"
+    ],
+    "correct_answer": "Mid-Ocean Ridge Basalt — the most common volcanic rock on Earth",
+    "explanation": "MORB forms by partial melting of the mantle beneath mid-ocean ridges and constitutes the majority of oceanic crust.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is a kimberlite pipe?",
+    "options": [
+      "A hydrothermal vent structure",
+      "A volcanic conduit that brings material from great depth including diamonds",
+      "A sedimentary structure formed by burrowing organisms",
+      "A type of lava tube"
+    ],
+    "correct_answer": "A volcanic conduit that brings material from great depth including diamonds",
+    "explanation": "Kimberlite pipes originate over 150 km deep and are the primary source of diamonds, which form at extreme pressure.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the difference between weathering and erosion?",
+    "options": [
+      "They are the same process",
+      "Weathering breaks down rock in place; erosion transports the material",
+      "Erosion breaks down rock; weathering transports it",
+      "Weathering only occurs chemically; erosion only physically"
+    ],
+    "correct_answer": "Weathering breaks down rock in place; erosion transports the material",
+    "explanation": "Weathering disintegrates rock through physical or chemical means at its location, while erosion moves the resulting material elsewhere.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is a suture zone in geology?",
+    "options": [
+      "A fracture in the ocean floor",
+      "The boundary zone marking where two plates collided and merged",
+      "A zone of volcanic activity",
+      "A region of tectonic extension"
+    ],
+    "correct_answer": "The boundary zone marking where two plates collided and merged",
+    "explanation": "Suture zones are relict plate boundaries formed when ocean basins closed and continents collided, often marked by ophiolites.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the Chandler wobble?",
+    "options": [
+      "The oscillation of Earth's magnetic poles",
+      "A small deviation in Earth's rotational axis with a ~433-day period",
+      "The variation in Earth's orbital speed",
+      "The precession of the equinoxes"
+    ],
+    "correct_answer": "A small deviation in Earth's rotational axis with a ~433-day period",
+    "explanation": "The Chandler wobble is a free nutation of Earth's rotation axis caused by the non-rigidity of Earth and fluid redistribution.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What conditions characterize blueschist metamorphic facies?",
+    "options": [
+      "High temperature, low pressure",
+      "Low temperature, high pressure typical of subduction zones",
+      "Contact metamorphism near magma bodies",
+      "Regional metamorphism at moderate conditions"
+    ],
+    "correct_answer": "Low temperature, high pressure typical of subduction zones",
+    "explanation": "Blueschist facies form in subduction zones where cold oceanic crust is rapidly buried, producing minerals like glaucophane.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is terrane accretion?",
+    "options": [
+      "The gradual cooling of oceanic crust",
+      "The addition of exotic crustal blocks to a continent through tectonic collisions",
+      "The accumulation of sediment in basins",
+      "The growth of continental shelves by deposition"
+    ],
+    "correct_answer": "The addition of exotic crustal blocks to a continent through tectonic collisions",
+    "explanation": "Terranes are discrete crustal fragments with different geologic histories that become sutured to continental margins over time.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is lithospheric flexure?",
+    "options": [
+      "The bending of the lithosphere under a load such as a volcanic island or ice sheet",
+      "The stretching of the crust during rifting",
+      "The folding of rocks under compression",
+      "The subsidence of ocean crust with age"
+    ],
+    "correct_answer": "The bending of the lithosphere under a load such as a volcanic island or ice sheet",
+    "explanation": "The elastic lithosphere bends downward under heavy loads, creating characteristic moats and bulges visible around volcanic islands.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is Bowen's Reaction Series?",
+    "options": [
+      "The sequence of sedimentary rock formation",
+      "The order in which minerals crystallize from cooling magma",
+      "The series of metamorphic grades from low to high",
+      "The classification system for volcanic rocks"
+    ],
+    "correct_answer": "The order in which minerals crystallize from cooling magma",
+    "explanation": "Bowen's Reaction Series describes sequential crystallization of minerals as magma cools, from olivine at high temperatures to quartz at low temperatures.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is a caldera?",
+    "options": [
+      "A type of volcanic vent",
+      "A large depression formed by the collapse of a volcanic summit after magma chamber emptying",
+      "A lava flow feature",
+      "A volcanic island"
+    ],
+    "correct_answer": "A large depression formed by the collapse of a volcanic summit after magma chamber emptying",
+    "explanation": "Calderas form when a magma chamber is emptied by eruption and the overlying structure collapses into the void.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is a regolith?",
+    "options": [
+      "A type of metamorphic rock",
+      "The layer of loose, fragmented material covering bedrock",
+      "A mineral deposit in veins",
+      "The solid rock beneath soil"
+    ],
+    "correct_answer": "The layer of loose, fragmented material covering bedrock",
+    "explanation": "Regolith includes soil, sediment, and weathered rock fragments that overlie solid bedrock, and exists on other planetary bodies too.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the role of water in subduction zone magmatism?",
+    "options": [
+      "Water increases the melting point of rocks",
+      "Water from the subducting slab lowers the melting point of the mantle wedge, generating magma",
+      "Water has no effect on magma generation",
+      "Water cools the mantle preventing melting"
+    ],
+    "correct_answer": "Water from the subducting slab lowers the melting point of the mantle wedge, generating magma",
+    "explanation": "As oceanic crust subducts, it releases water that fluxes melting in the overlying mantle wedge, producing arc magmas.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is continental drift?",
+    "options": [
+      "The slow erosion of continental margins",
+      "The theory that continents were once joined and have since moved apart",
+      "The subsidence of continents over time",
+      "The theory that ocean basins are expanding"
+    ],
+    "correct_answer": "The theory that continents were once joined and have since moved apart",
+    "explanation": "Alfred Wegener proposed continental drift in 1912, supported by matching coastlines, fossils, and rock types across continents.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is a horst?",
+    "options": [
+      "A downthrown block between two faults",
+      "An uplifted block between two normal faults",
+      "A type of fold structure",
+      "A volcanic feature"
+    ],
+    "correct_answer": "An uplifted block between two normal faults",
+    "explanation": "A horst is the opposite of a graben — it is a raised crustal block bounded by normal faults in extensional tectonic settings.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "Why is zircon valuable in geochronology?",
+    "options": [
+      "It contains carbon-14 for radiocarbon dating",
+      "It incorporates uranium but excludes lead at crystallization, making U-Pb dating reliable",
+      "It is the most common mineral in all rock types",
+      "It preserves organic material for fossil analysis"
+    ],
+    "correct_answer": "It incorporates uranium but excludes lead at crystallization, making U-Pb dating reliable",
+    "explanation": "Zircon's crystal structure accepts uranium but rejects lead when forming, so any lead present must be from uranium decay.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the geologic time scale based on?",
+    "options": [
+      "Absolute dates from radiometric dating only",
+      "The succession of fossil assemblages and rock strata, now calibrated with radiometric dates",
+      "The cooling rate of Earth",
+      "The number of glacial periods"
+    ],
+    "correct_answer": "The succession of fossil assemblages and rock strata, now calibrated with radiometric dates",
+    "explanation": "The geologic time scale was first built on stratigraphy and fossils, then calibrated with radiometric ages to give absolute dates.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is a mélange in geology?",
+    "options": [
+      "A type of igneous intrusion",
+      "A chaotic mixture of rocks of different origins and ages typical of subduction zones",
+      "A sedimentary deposit from turbidity currents",
+      "A type of metamorphic terrain"
+    ],
+    "correct_answer": "A chaotic mixture of rocks of different origins and ages typical of subduction zones",
+    "explanation": "Mélanges form in accretionary prisms where scraped-off oceanic material is intensely sheared and mixed.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What causes Earth's oblate spheroid shape?",
+    "options": [
+      "Unequal distribution of mass in the mantle",
+      "Earth's rotation causing equatorial bulging",
+      "The gravitational pull of the Moon",
+      "Differential erosion at the poles"
+    ],
+    "correct_answer": "Earth's rotation causing equatorial bulging",
+    "explanation": "Earth's spin causes centrifugal forces that push mass outward at the equator, making the equatorial radius about 21 km larger than the polar radius.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the principle of faunal succession?",
+    "options": [
+      "Fossils always occur in the same rock type",
+      "Different time periods have distinct fossil assemblages that appear in a predictable order",
+      "Animals evolve faster in marine environments",
+      "Fossils are found only in sedimentary rock"
+    ],
+    "correct_answer": "Different time periods have distinct fossil assemblages that appear in a predictable order",
+    "explanation": "William Smith established that strata contain unique fossil assemblages that can be used to correlate rocks globally.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is a batholith?",
+    "options": [
+      "A type of surface lava flow",
+      "A large igneous intrusion with more than 100 square km of surface exposure",
+      "A volcanic island chain",
+      "A deep ocean trench"
+    ],
+    "correct_answer": "A large igneous intrusion with more than 100 square km of surface exposure",
+    "explanation": "Batholiths are massive plutonic bodies, like the Sierra Nevada batholith, typically composed of granite and emplaced in continental crust.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What drives glacial advance and retreat according to Milankovitch theory?",
+    "options": [
+      "Changes in solar luminosity",
+      "Variations in Earth's orbital parameters — eccentricity, axial tilt, and precession",
+      "Volcanic eruptions blocking sunlight",
+      "Changes in ocean circulation"
+    ],
+    "correct_answer": "Variations in Earth's orbital parameters — eccentricity, axial tilt, and precession",
+    "explanation": "Milankovitch cycles describe how Earth's orbital shape, tilt, and wobble change over thousands of years, affecting insolation and climate.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is chemical weathering?",
+    "options": [
+      "The breaking of rocks by temperature changes",
+      "The alteration of minerals through chemical reactions such as oxidation and hydrolysis",
+      "The physical grinding of rocks by glaciers",
+      "The dissolution of rocks by mechanical wave action"
+    ],
+    "correct_answer": "The alteration of minerals through chemical reactions such as oxidation and hydrolysis",
+    "explanation": "Chemical weathering changes the mineralogy of rocks through reactions with water, oxygen, and acids, weakening them.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the key difference between oceanic and continental crust?",
+    "options": [
+      "Oceanic crust is thicker and less dense; continental crust is thinner and denser",
+      "Oceanic crust is thinner, denser, and mafic; continental crust is thicker, less dense, and felsic",
+      "They are the same composition but different thickness",
+      "Continental crust is always below sea level"
+    ],
+    "correct_answer": "Oceanic crust is thinner, denser, and mafic; continental crust is thicker, less dense, and felsic",
+    "explanation": "Oceanic crust (~7 km, basaltic) is denser than continental crust (~35 km, granitic), which is why oceanic crust subducts.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is metasomatism?",
+    "options": [
+      "The metamorphism of sedimentary rocks",
+      "The chemical alteration of rocks by hot fluids that change their mineral composition",
+      "The process of sediment compaction",
+      "The melting of rock by heat"
+    ],
+    "correct_answer": "The chemical alteration of rocks by hot fluids that change their mineral composition",
+    "explanation": "Metasomatism involves the introduction or removal of chemical components by hydrothermal fluids, significantly altering rock composition.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is a pyroclastic flow?",
+    "options": [
+      "A slow-moving lava flow",
+      "A fast-moving mixture of hot gas, ash, and rock fragments from a volcanic eruption",
+      "A river of dissolved minerals",
+      "A type of mudflow triggered by rain"
+    ],
+    "correct_answer": "A fast-moving mixture of hot gas, ash, and rock fragments from a volcanic eruption",
+    "explanation": "Pyroclastic flows are extremely deadly volcanic phenomena that can travel over 100 km/h at temperatures exceeding 700°C.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is geochronology?",
+    "options": [
+      "The study of Earth's climate history",
+      "The science of determining the age of rocks and geologic events",
+      "The study of Earth's magnetic field history",
+      "The classification of rock types"
+    ],
+    "correct_answer": "The science of determining the age of rocks and geologic events",
+    "explanation": "Geochronology uses radiometric dating, stratigraphy, and other methods to establish the timing of Earth's history.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the difference between magma and lava?",
+    "options": [
+      "They are the same material at different temperatures",
+      "Magma is molten rock below the surface; lava is magma that has reached the surface",
+      "Lava is cooler than magma",
+      "Magma contains more gas than lava"
+    ],
+    "correct_answer": "Magma is molten rock below the surface; lava is magma that has reached the surface",
+    "explanation": "The same molten rock is called magma when underground and lava once it erupts or flows at Earth's surface.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the significance of the K-Pg boundary?",
+    "options": [
+      "It marks the beginning of multicellular life",
+      "It marks a mass extinction event ~66 million years ago including the non-avian dinosaurs",
+      "It separates the Jurassic and Cretaceous periods",
+      "It marks the first appearance of mammals"
+    ],
+    "correct_answer": "It marks a mass extinction event ~66 million years ago including the non-avian dinosaurs",
+    "explanation": "The Cretaceous-Paleogene boundary is identified by an iridium-rich layer from an asteroid impact that caused a global mass extinction.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is a drumlin?",
+    "options": [
+      "A glacial lake",
+      "A streamlined hill formed by glacial deposition",
+      "A type of glacial valley",
+      "A meltwater channel"
+    ],
+    "correct_answer": "A streamlined hill formed by glacial deposition",
+    "explanation": "Drumlins are elongated hills of glacial till shaped by moving ice, with their long axis parallel to ice flow direction.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the difference between a syncline and an anticline?",
+    "options": [
+      "A syncline curves upward; an anticline curves downward",
+      "A syncline is a downward fold; an anticline is an upward arch",
+      "They are the same structure",
+      "Synclines occur in igneous rocks; anticlines in sedimentary rocks"
+    ],
+    "correct_answer": "A syncline is a downward fold; an anticline is an upward arch",
+    "explanation": "Anticlines form arch-shaped folds with older rocks in the core; synclines form trough-shaped folds with younger rocks in the core.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the Gutenberg discontinuity?",
+    "options": [
+      "The boundary between the crust and mantle",
+      "The boundary between the mantle and outer core",
+      "The boundary between the inner and outer core",
+      "The boundary between the lithosphere and asthenosphere"
+    ],
+    "correct_answer": "The boundary between the mantle and outer core",
+    "explanation": "The Gutenberg discontinuity at ~2900 km depth marks a sharp change in seismic wave behavior as P-waves slow and S-waves stop.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is hydrothermal alteration?",
+    "options": [
+      "The freezing of groundwater",
+      "The chemical modification of rocks by hot, mineral-rich fluids",
+      "The erosion of rocks by rivers",
+      "The deposition of evaporite minerals"
+    ],
+    "correct_answer": "The chemical modification of rocks by hot, mineral-rich fluids",
+    "explanation": "Hydrothermal fluids can dissolve and redeposit minerals, creating ore deposits and altering the original rock mineralogy.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the difference between a laccolith and a sill?",
+    "options": [
+      "Both are the same type of intrusion",
+      "A laccolith is a dome-shaped intrusion that lifts overlying rocks; a sill is flat and parallel to rock layers",
+      "A sill is dome-shaped; a laccolith is flat",
+      "Laccoliths are extrusive; sills are intrusive"
+    ],
+    "correct_answer": "A laccolith is a dome-shaped intrusion that lifts overlying rocks; a sill is flat and parallel to rock layers",
+    "explanation": "Both are concordant intrusions, but laccoliths have enough magma pressure to dome up overlying strata.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "How does the silicate weathering thermostat regulate long-term climate?",
+    "options": [
+      "Carbon has no effect on long-term climate",
+      "Warmer temperatures accelerate silicate weathering drawing down CO2, while cooler temperatures slow it, releasing CO2",
+      "Carbon only affects short-term weather patterns",
+      "The carbon cycle operates only in the ocean"
+    ],
+    "correct_answer": "Warmer temperatures accelerate silicate weathering drawing down CO2, while cooler temperatures slow it, releasing CO2",
+    "explanation": "This negative feedback stabilizes Earth's climate over millions of years through the silicate-carbonate geochemical cycle.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is a thrust fault?",
+    "options": [
+      "A fault where blocks move horizontally past each other",
+      "A low-angle reverse fault where older rocks are pushed over younger rocks",
+      "A fault caused by tensional forces",
+      "A vertical fault with large displacement"
+    ],
+    "correct_answer": "A low-angle reverse fault where older rocks are pushed over younger rocks",
+    "explanation": "Thrust faults form in compressional settings and can move rocks hundreds of kilometers, placing older strata above younger.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the principle of original horizontality?",
+    "options": [
+      "All rocks form horizontally",
+      "Sedimentary layers are originally deposited horizontally; tilted layers were deformed after deposition",
+      "Horizontal rocks are always older than tilted rocks",
+      "Igneous rocks always intrude horizontally"
+    ],
+    "correct_answer": "Sedimentary layers are originally deposited horizontally; tilted layers were deformed after deposition",
+    "explanation": "Steno's principle states that sediments settle under gravity in horizontal layers, so tilted strata indicate later deformation.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What factors cause sea level changes on geologic timescales?",
+    "options": [
+      "Only melting of ice caps",
+      "Tectonic factors such as mid-ocean ridge volume, glaciation, and thermal expansion of seawater",
+      "Only changes in ocean basin shape",
+      "Changes in the Moon's gravitational pull"
+    ],
+    "correct_answer": "Tectonic factors such as mid-ocean ridge volume, glaciation, and thermal expansion of seawater",
+    "explanation": "Long-term sea level is controlled by the volume of mid-ocean ridges, ice cap volume, and ocean temperature.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is foliation in metamorphic rocks?",
+    "options": [
+      "A type of sedimentary layering",
+      "A planar fabric produced by alignment of minerals under directed pressure",
+      "A pattern of cracks in igneous rocks",
+      "A type of mineral cleavage"
+    ],
+    "correct_answer": "A planar fabric produced by alignment of minerals under directed pressure",
+    "explanation": "Foliation develops when platy or elongated minerals align perpendicular to the maximum stress direction during metamorphism.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the difference between P-waves and S-waves?",
+    "options": [
+      "P-waves are slower; S-waves are faster",
+      "P-waves are compressional and travel through solids and liquids; S-waves are shear waves that only travel through solids",
+      "S-waves travel through liquids; P-waves do not",
+      "P-waves are surface waves; S-waves travel through Earth's core"
+    ],
+    "correct_answer": "P-waves are compressional and travel through solids and liquids; S-waves are shear waves that only travel through solids",
+    "explanation": "Primary (P) waves compress and expand material in their travel direction; secondary (S) waves move material perpendicular to travel.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the Great Unconformity?",
+    "options": [
+      "A major fault zone in the Rocky Mountains",
+      "A widespread gap in the rock record representing hundreds of millions of missing years",
+      "The boundary between the Archean and Proterozoic eons",
+      "A type of angular unconformity in sedimentary basins"
+    ],
+    "correct_answer": "A widespread gap in the rock record representing hundreds of millions of missing years",
+    "explanation": "The Great Unconformity, visible in the Grand Canyon, represents up to 1.2 billion years of missing rock, possibly related to Snowball Earth erosion.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "How does a rift valley form?",
+    "options": [
+      "A valley carved by a river",
+      "Tectonic extension and normal faulting pulling the crust apart",
+      "Glacial erosion",
+      "Volcanic collapse"
+    ],
+    "correct_answer": "Tectonic extension and normal faulting pulling the crust apart",
+    "explanation": "Rift valleys like the East African Rift form where the lithosphere is being stretched, with the central block dropping between normal faults.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the difference between elastic and plastic deformation in rocks?",
+    "options": [
+      "Elastic deformation is permanent; plastic is temporary",
+      "Elastic deformation is recoverable; plastic deformation is permanent",
+      "They are the same process at different temperatures",
+      "Elastic deformation occurs only in metamorphic rocks"
+    ],
+    "correct_answer": "Elastic deformation is recoverable; plastic deformation is permanent",
+    "explanation": "When stress is removed, elastically deformed rocks return to original shape; plastically deformed rocks retain their new shape.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What generates Earth's magnetic field?",
+    "options": [
+      "Iron at the surface creates a static magnetic field",
+      "Convection of liquid iron in the outer core generates the geodynamo",
+      "Iron in the mantle produces magnetic anomalies",
+      "The solid iron inner core acts as a permanent magnet"
+    ],
+    "correct_answer": "Convection of liquid iron in the outer core generates the geodynamo",
+    "explanation": "The geodynamo operates through convection and rotation of the liquid outer core, generating Earth's magnetic field.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is a mafic rock?",
+    "options": [
+      "A rock rich in silicon and aluminum",
+      "A dark-colored igneous rock rich in magnesium and iron minerals",
+      "A light-colored sedimentary rock",
+      "A metamorphic rock with high silica content"
+    ],
+    "correct_answer": "A dark-colored igneous rock rich in magnesium and iron minerals",
+    "explanation": "Mafic rocks like basalt and gabbro are named for magnesium (ma) and iron/ferric (fic), and are characteristic of oceanic crust.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the geologic significance of stromatolites?",
+    "options": [
+      "They are the oldest known animal fossils",
+      "They are layered structures built by cyanobacteria and are among Earth's oldest life records",
+      "They indicate deep-water marine environments",
+      "They are a type of metamorphic structure"
+    ],
+    "correct_answer": "They are layered structures built by cyanobacteria and are among Earth's oldest life records",
+    "explanation": "Stromatolites date back over 3.5 billion years and their photosynthetic builders produced the oxygen that transformed Earth's atmosphere.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the difference between intrusive and extrusive igneous rocks?",
+    "options": [
+      "Intrusive rocks are darker; extrusive rocks are lighter",
+      "Intrusive rocks cool slowly underground forming large crystals; extrusive rocks cool quickly at the surface forming small crystals",
+      "Extrusive rocks form underground; intrusive rocks form at the surface",
+      "They are the same type of rock"
+    ],
+    "correct_answer": "Intrusive rocks cool slowly underground forming large crystals; extrusive rocks cool quickly at the surface forming small crystals",
+    "explanation": "Slow cooling allows large crystal growth in plutonic rocks; rapid surface cooling produces fine-grained or glassy volcanic rocks.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What was the Paleocene-Eocene Thermal Maximum (PETM)?",
+    "options": [
+      "The hottest period in Earth's history",
+      "A rapid global warming event ~56 Ma caused by a massive carbon release",
+      "The formation of polar ice caps",
+      "A period of intense volcanic activity"
+    ],
+    "correct_answer": "A rapid global warming event ~56 Ma caused by a massive carbon release",
+    "explanation": "The PETM saw global temperatures rise ~5-8°C in thousands of years due to a sudden release of carbon, serving as a past analog for modern warming.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is a cuesta?",
+    "options": [
+      "A steep-sided volcanic cone",
+      "An asymmetric ridge with a gentle dip slope and a steep scarp slope formed in tilted strata",
+      "A type of glacial landform",
+      "A coastal erosion feature"
+    ],
+    "correct_answer": "An asymmetric ridge with a gentle dip slope and a steep scarp slope formed in tilted strata",
+    "explanation": "Cuestas develop where resistant rock layers dip gently, creating one steep face (scarp) and one gentle face following the rock's dip.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the significance of the Cambrian Explosion?",
+    "options": [
+      "The first appearance of plants on land",
+      "A rapid diversification of complex multicellular life ~541 million years ago",
+      "The formation of the first oceans",
+      "The first mass extinction event"
+    ],
+    "correct_answer": "A rapid diversification of complex multicellular life ~541 million years ago",
+    "explanation": "The Cambrian Explosion saw most major animal body plans appear in the fossil record over a geologically short period of ~20 million years.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is a fumarole?",
+    "options": [
+      "A type of geyser shooting water",
+      "A volcanic vent that emits gases and steam",
+      "A lava tube opening",
+      "A crater lake"
+    ],
+    "correct_answer": "A volcanic vent that emits gases and steam",
+    "explanation": "Fumaroles are openings in Earth's crust that emit volcanic gases including water vapor, CO2, sulfur dioxide, and hydrogen sulfide.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the accretionary prism in a subduction zone?",
+    "options": [
+      "The volcanic arc above the subduction zone",
+      "The wedge of sediment and rock scraped off the subducting plate and accreted to the overriding plate",
+      "The zone of partial melting in the mantle",
+      "The trench floor sediment"
+    ],
+    "correct_answer": "The wedge of sediment and rock scraped off the subducting plate and accreted to the overriding plate",
+    "explanation": "As oceanic crust subducts, overlying sediments are often scraped off and piled up into an accretionary wedge at the plate boundary.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is pedogenesis?",
+    "options": [
+      "The study of ancient climates",
+      "The process of soil formation from parent rock material",
+      "The formation of sedimentary layers",
+      "The erosion of surface rocks"
+    ],
+    "correct_answer": "The process of soil formation from parent rock material",
+    "explanation": "Pedogenesis involves the physical, chemical, and biological weathering of bedrock over time, transforming it into soil horizons.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is a mass wasting event?",
+    "options": [
+      "Erosion by flowing water",
+      "The downslope movement of soil and rock under gravity",
+      "Coastal erosion by waves",
+      "Wind erosion of surface material"
+    ],
+    "correct_answer": "The downslope movement of soil and rock under gravity",
+    "explanation": "Mass wasting includes landslides, rockfalls, slumps, and debris flows — all driven by gravity without water or ice as the primary transport agent.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the difference between a shield and a platform in continental geology?",
+    "options": [
+      "Shields are ancient exposed Precambrian rocks; platforms are the same rocks covered by sediment",
+      "Platforms are older than shields",
+      "Shields are volcanic; platforms are sedimentary",
+      "They are the same feature"
+    ],
+    "correct_answer": "Shields are ancient exposed Precambrian rocks; platforms are the same rocks covered by sediment",
+    "explanation": "Together, shields and platforms form cratons — the stable, ancient cores of continents that have not been deformed for billions of years.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is a geode?",
+    "options": [
+      "A type of meteorite",
+      "A hollow rock cavity lined with crystals grown from mineral-rich fluids",
+      "A sedimentary concretion",
+      "A type of volcanic bomb"
+    ],
+    "correct_answer": "A hollow rock cavity lined with crystals grown from mineral-rich fluids",
+    "explanation": "Geodes form when mineral-laden groundwater seeps into voids in rock and precipitates crystals such as quartz or calcite over time.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the role of subduction in the rock cycle?",
+    "options": [
+      "Subduction has no role in the rock cycle",
+      "Subduction recycles oceanic crust into the mantle and drives volcanism that creates new igneous rocks",
+      "Subduction only affects sedimentary rocks",
+      "Subduction creates metamorphic rocks only"
+    ],
+    "correct_answer": "Subduction recycles oceanic crust into the mantle and drives volcanism that creates new igneous rocks",
+    "explanation": "Subduction is a key driver of the rock cycle — it destroys oceanic crust, generates arc magmas, and contributes to crustal recycling.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the key difference between a stratovolcano and a shield volcano?",
+    "options": [
+      "Stratovolcanoes are larger; shield volcanoes are smaller",
+      "Stratovolcanoes are steep and explosive with silicic lava; shield volcanoes are broad with fluid basaltic lava",
+      "Shield volcanoes are more dangerous than stratovolcanoes",
+      "They are different names for the same structure"
+    ],
+    "correct_answer": "Stratovolcanoes are steep and explosive with silicic lava; shield volcanoes are broad with fluid basaltic lava",
+    "explanation": "High-silica magma in stratovolcanoes traps gas causing explosive eruptions; low-silica basaltic magma in shield volcanoes flows easily.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is a paleosol?",
+    "options": [
+      "An ancient ocean sediment",
+      "A fossil soil horizon preserved in the rock record",
+      "A type of ancient marine organism",
+      "A metamorphic rock formed from soil"
+    ],
+    "correct_answer": "A fossil soil horizon preserved in the rock record",
+    "explanation": "Paleosols are ancient soils buried and preserved in sedimentary sequences, providing evidence of past climates and vegetation.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is seafloor spreading?",
+    "options": [
+      "The subduction of oceanic crust",
+      "The creation of new oceanic crust at mid-ocean ridges as plates move apart",
+      "The erosion of the seafloor by deep currents",
+      "The accumulation of sediment on the ocean floor"
+    ],
+    "correct_answer": "The creation of new oceanic crust at mid-ocean ridges as plates move apart",
+    "explanation": "Harry Hess proposed seafloor spreading in 1960 — magma wells up at mid-ocean ridges, cools, and spreads outward as new crust.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is rheology in geology?",
+    "options": [
+      "The study of ancient river systems",
+      "The study of how Earth materials deform and flow under stress",
+      "The study of volcanic rocks",
+      "The study of ocean currents"
+    ],
+    "correct_answer": "The study of how Earth materials deform and flow under stress",
+    "explanation": "Rheology examines how rocks, magmas, and other Earth materials respond to applied stresses over various timescales.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the difference between detrital and chemical sedimentary rocks?",
+    "options": [
+      "Detrital rocks form from chemical precipitation; chemical rocks form from fragments",
+      "Detrital rocks form from transported rock fragments; chemical rocks form from precipitation of minerals from solution",
+      "They are the same type of rock",
+      "Chemical rocks are always marine; detrital rocks are always terrestrial"
+    ],
+    "correct_answer": "Detrital rocks form from transported rock fragments; chemical rocks form from precipitation of minerals from solution",
+    "explanation": "Sandstone is detrital (from sand grains); limestone can be chemical (from CaCO3 precipitation) or biochemical (from shells).",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is a perched water table?",
+    "options": [
+      "The main water table at the regional level",
+      "A localized zone of saturation above the main water table, separated by an unsaturated zone",
+      "An underground river",
+      "The water table in a mountain environment"
+    ],
+    "correct_answer": "A localized zone of saturation above the main water table, separated by an unsaturated zone",
+    "explanation": "Perched water tables form where an impermeable layer (aquiclude) traps water above the regional water table.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is a mantle plume?",
+    "options": [
+      "A type of volcanic eruption column",
+      "An upwelling of anomalously hot mantle material from depth",
+      "A cold sinking current in the mantle",
+      "A type of mid-ocean ridge structure"
+    ],
+    "correct_answer": "An upwelling of anomalously hot mantle material from depth",
+    "explanation": "Mantle plumes are columns of hot rock rising from deep in the mantle, often originating at the core-mantle boundary, producing hotspot volcanism.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is TIMS in geochronology?",
+    "options": [
+      "Thermal Ionization Mass Spectrometry — a high-precision method for isotopic dating",
+      "Tectonic Interpretation of Mantle Seismics",
+      "Thermal Imaging of Metamorphic Sequences",
+      "Time-Integrated Mineral Spectroscopy"
+    ],
+    "correct_answer": "Thermal Ionization Mass Spectrometry — a high-precision method for isotopic dating",
+    "explanation": "TIMS is used to measure isotopic ratios with extreme precision for U-Pb, Rb-Sr, and Sm-Nd geochronology.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the approximate velocity of seismic P-waves in the upper mantle?",
+    "options": [
+      "About 1 km/s",
+      "About 6 km/s",
+      "About 8 km/s",
+      "About 13 km/s"
+    ],
+    "correct_answer": "About 8 km/s",
+    "explanation": "P-wave velocities increase to ~8 km/s just below the Moho, a key indicator used to define the crust-mantle boundary.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is an orogenic belt?",
+    "options": [
+      "A zone of frequent earthquakes",
+      "A linear mountain belt formed by tectonic compression and crustal thickening",
+      "A chain of volcanic islands",
+      "A zone of frequent flooding"
+    ],
+    "correct_answer": "A linear mountain belt formed by tectonic compression and crustal thickening",
+    "explanation": "Orogenic belts like the Himalayas and Alps form where continental plates collide, crumpling and thickening the crust.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What are clathrate hydrates and why are they geologically significant?",
+    "options": [
+      "A type of evaporite mineral",
+      "Ice-like solids where gas molecules are trapped in a water lattice, storing large amounts of methane on continental margins",
+      "A type of deep-sea sediment",
+      "A mineral formed by high-pressure metamorphism"
+    ],
+    "correct_answer": "Ice-like solids where gas molecules are trapped in a water lattice, storing large amounts of methane on continental margins",
+    "explanation": "Methane hydrates store vast amounts of carbon and can destabilize with warming, releasing greenhouse gases — important for climate science.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is a geomorphic threshold?",
+    "options": [
+      "The maximum height of a mountain",
+      "The critical condition beyond which a landscape changes abruptly to a new state",
+      "The depth of the water table",
+      "The angle of repose of sediment"
+    ],
+    "correct_answer": "The critical condition beyond which a landscape changes abruptly to a new state",
+    "explanation": "Geomorphic thresholds mark tipping points in landscape evolution — for example, the slope angle beyond which mass wasting begins.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What multiple lines of evidence support plate tectonics?",
+    "options": [
+      "Only the matching coastlines of continents",
+      "Paleomagnetism, seafloor spreading, earthquake patterns, GPS measurements, and fossil distributions",
+      "Only volcanic and earthquake activity",
+      "Only the distribution of mountain ranges"
+    ],
+    "correct_answer": "Paleomagnetism, seafloor spreading, earthquake patterns, GPS measurements, and fossil distributions",
+    "explanation": "Plate tectonics is supported by converging evidence from seismology, geomagnetism, oceanography, paleontology, and modern GPS data.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is a marine transgression in stratigraphy?",
+    "options": [
+      "A break in the rock record",
+      "The landward movement of the sea over previously exposed land",
+      "The seaward migration of the coastline",
+      "A type of unconformity"
+    ],
+    "correct_answer": "The landward movement of the sea over previously exposed land",
+    "explanation": "Marine transgression occurs during sea level rise, depositing marine sediments over terrestrial deposits in a characteristic sequence.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is a regressive stratigraphic sequence?",
+    "options": [
+      "A sequence showing increasing water depth",
+      "A sequence showing a shallowing and seaward shift of environments as sea level falls",
+      "A sequence formed during a transgression",
+      "A sequence with no fossils"
+    ],
+    "correct_answer": "A sequence showing a shallowing and seaward shift of environments as sea level falls",
+    "explanation": "Regression produces coarsening-upward sequences as shorelines prograde seaward, depositing progressively shallower facies.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the difference between magmatic and hydrothermal ore deposits?",
+    "options": [
+      "They are the same type of deposit",
+      "Magmatic deposits form directly from crystallizing magma; hydrothermal deposits form from hot mineralizing fluids",
+      "Hydrothermal deposits are always larger",
+      "Magmatic deposits only contain gold"
+    ],
+    "correct_answer": "Magmatic deposits form directly from crystallizing magma; hydrothermal deposits form from hot mineralizing fluids",
+    "explanation": "Examples include chromite as a magmatic deposit and gold/copper veins as hydrothermal deposits formed from circulating hot water.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "How old is the oldest oceanic crust?",
+    "options": [
+      "About 500 million years",
+      "About 200 million years",
+      "About 1 billion years",
+      "About 3.5 billion years"
+    ],
+    "correct_answer": "About 200 million years",
+    "explanation": "Oceanic crust is continuously recycled by subduction; the oldest preserved oceanic crust (~200 Ma) is found in the western Pacific.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the difference between brittle and ductile deformation?",
+    "options": [
+      "Brittle deformation involves folding; ductile involves fracturing",
+      "Brittle deformation involves fracturing; ductile involves plastic flow without breaking",
+      "Temperature has no effect on deformation style",
+      "They are the same at great depth"
+    ],
+    "correct_answer": "Brittle deformation involves fracturing; ductile involves plastic flow without breaking",
+    "explanation": "Shallow, cold rocks fracture brittlely; deeper, hotter rocks deform ductilely through crystal plasticity and grain boundary processes.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What does the MORB-OIB spectrum reveal about the mantle?",
+    "options": [
+      "A seismic wave spectrum",
+      "A compositional range revealing mantle heterogeneity between depleted and enriched reservoirs",
+      "A spectrum of sedimentary rock ages",
+      "A spectrum of metamorphic grades"
+    ],
+    "correct_answer": "A compositional range revealing mantle heterogeneity between depleted and enriched reservoirs",
+    "explanation": "MORB and OIB have different isotopic and trace element signatures, indicating distinct mantle source reservoirs with different histories.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is an aulacogen?",
+    "options": [
+      "A type of fold belt",
+      "A failed rift arm preserved in the interior of a continent",
+      "A volcanic arc",
+      "A type of sedimentary basin"
+    ],
+    "correct_answer": "A failed rift arm preserved in the interior of a continent",
+    "explanation": "When rifting produces three arms, two form a successful rift while the third fails and becomes an aulacogen, often later filled with sediment.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the lithosphere?",
+    "options": [
+      "Only the crust of the Earth",
+      "The rigid outer layer of Earth comprising the crust and uppermost mantle",
+      "The entire solid Earth",
+      "The layer between the crust and core"
+    ],
+    "correct_answer": "The rigid outer layer of Earth comprising the crust and uppermost mantle",
+    "explanation": "The lithosphere (~100 km thick) includes the crust and the cold, rigid uppermost mantle and is broken into tectonic plates.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the oxygen isotope record in foraminifera used for?",
+    "options": [
+      "Dating sedimentary rocks",
+      "Reconstructing past ocean temperatures and ice volume",
+      "Measuring ocean salinity",
+      "Determining ocean depth"
+    ],
+    "correct_answer": "Reconstructing past ocean temperatures and ice volume",
+    "explanation": "The ratio of oxygen-18 to oxygen-16 in foram shells reflects both ocean temperature and global ice volume at the time of formation.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is subduction erosion?",
+    "options": [
+      "The erosion of the seafloor by turbidity currents",
+      "The removal of material from the base or front of the overriding plate by the subducting slab",
+      "The chemical weathering of oceanic crust",
+      "The erosion of volcanic arcs by rivers"
+    ],
+    "correct_answer": "The removal of material from the base or front of the overriding plate by the subducting slab",
+    "explanation": "Subduction erosion removes crustal material from the overriding plate and transports it into the mantle, causing crustal loss.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is sequence stratigraphy?",
+    "options": [
+      "The classification of rock sequences by age",
+      "A framework for analyzing sedimentary successions in terms of sea level changes and accommodation space",
+      "The study of sediment grain sizes",
+      "The correlation of rock layers by fossil content only"
+    ],
+    "correct_answer": "A framework for analyzing sedimentary successions in terms of sea level changes and accommodation space",
+    "explanation": "Sequence stratigraphy divides sedimentary records into genetically related packages bounded by unconformities caused by sea level changes.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the difference between a continental margin and an oceanic ridge?",
+    "options": [
+      "They are the same feature",
+      "A continental margin is where continent meets ocean; an oceanic ridge is a submarine mountain chain at spreading centers",
+      "An oceanic ridge is at a subduction zone; a continental margin is at a rift",
+      "Continental margins are deeper than oceanic ridges"
+    ],
+    "correct_answer": "A continental margin is where continent meets ocean; an oceanic ridge is a submarine mountain chain at spreading centers",
+    "explanation": "Continental margins can be passive (like the US East Coast) or active (at subduction zones); oceanic ridges mark divergent plate boundaries.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the geologic significance of banded iron formations (BIFs)?",
+    "options": [
+      "They indicate ancient desert environments",
+      "They record the rise of atmospheric oxygen around 2.4 billion years ago",
+      "They form only in deep ocean environments today",
+      "They are produced by volcanic activity"
+    ],
+    "correct_answer": "They record the rise of atmospheric oxygen around 2.4 billion years ago",
+    "explanation": "BIFs formed when photosynthetically produced oxygen reacted with dissolved iron in seawater, precipitating iron oxides in alternating bands.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "How does a sedimentary basin form?",
+    "options": [
+      "A lake or river system",
+      "A region of prolonged subsidence where sediments accumulate, formed by tectonic, isostatic, or thermal processes",
+      "An area of high erosion",
+      "A volcanic crater that fills with water"
+    ],
+    "correct_answer": "A region of prolonged subsidence where sediments accumulate, formed by tectonic, isostatic, or thermal processes",
+    "explanation": "Basins form through various mechanisms including rift extension, thermal cooling, flexure from mountain loading, or strike-slip pull-apart.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the significance of the Deccan Traps?",
+    "options": [
+      "A major mountain range in India",
+      "A large igneous province in India associated with the K-Pg mass extinction",
+      "The world's largest diamond deposit",
+      "A major subduction zone"
+    ],
+    "correct_answer": "A large igneous province in India associated with the K-Pg mass extinction",
+    "explanation": "The Deccan Traps erupted ~66 Ma, releasing massive amounts of CO2 and sulfur that contributed to environmental stress at the K-Pg boundary.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is a passive continental margin?",
+    "options": [
+      "A margin at a convergent plate boundary",
+      "A tectonically inactive margin that forms after rifting, accumulating thick sediment sequences",
+      "A margin with active volcanism",
+      "A margin with a subduction zone"
+    ],
+    "correct_answer": "A tectonically inactive margin that forms after rifting, accumulating thick sediment sequences",
+    "explanation": "Passive margins like the US East Coast form where rifting split continents; they subside thermally and accumulate sediments over millions of years.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the tectonic setting of the Himalayan mountain range?",
+    "options": [
+      "A subduction zone with oceanic-continental convergence",
+      "A continental-continental collision between the Indian and Eurasian plates",
+      "A transform fault boundary",
+      "A hotspot volcanic chain"
+    ],
+    "correct_answer": "A continental-continental collision between the Indian and Eurasian plates",
+    "explanation": "The Himalayas formed when the Indian subcontinent collided with Eurasia ~50 Ma, creating the highest mountain range on Earth.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is partial melting and why is it important?",
+    "options": [
+      "A rock that has been completely melted",
+      "The incomplete melting of rock where only certain minerals melt, producing magma of different composition than the source",
+      "A volcanic rock with a glassy texture",
+      "A type of metamorphic rock"
+    ],
+    "correct_answer": "The incomplete melting of rock where only certain minerals melt, producing magma of different composition than the source",
+    "explanation": "Partial melting is fundamental to magma generation — low-melting-point minerals melt first, creating magmas enriched in silica and incompatible elements.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the difference between joints and faults?",
+    "options": [
+      "Joints have displacement; faults do not",
+      "Faults have displacement along the fracture surface; joints are fractures with no significant displacement",
+      "They are the same structure",
+      "Joints only occur in sedimentary rocks"
+    ],
+    "correct_answer": "Faults have displacement along the fracture surface; joints are fractures with no significant displacement",
+    "explanation": "Joints are tensional fractures with no shear movement; faults are fractures along which blocks have moved relative to each other.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is 'deep time' in geology?",
+    "options": [
+      "The study of deep ocean sediments",
+      "The recognition that Earth's history spans billions of years — far beyond human intuition",
+      "The measurement of time in deep mines",
+      "The age of the deepest rocks in Earth's crust"
+    ],
+    "correct_answer": "The recognition that Earth's history spans billions of years — far beyond human intuition",
+    "explanation": "James Hutton's recognition of 'no vestige of a beginning, no prospect of an end' established that Earth operates over incomprehensibly long timescales.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is a volcanic hotspot track?",
+    "options": [
+      "The path of a lava flow",
+      "A chain of progressively older volcanic islands formed as a plate moves over a stationary mantle plume",
+      "A zone of intense earthquake activity",
+      "A series of volcanic craters"
+    ],
+    "correct_answer": "A chain of progressively older volcanic islands formed as a plate moves over a stationary mantle plume",
+    "explanation": "The Hawaiian-Emperor seamount chain records the Pacific plate's movement over the Hawaiian hotspot over ~80 million years.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the principle of superposition?",
+    "options": [
+      "Younger rocks are always found above older rocks in undisturbed sequences",
+      "All rocks form at the same time",
+      "Sedimentary rocks are always older than igneous rocks",
+      "Rocks at the surface are always the oldest"
+    ],
+    "correct_answer": "Younger rocks are always found above older rocks in undisturbed sequences",
+    "explanation": "Steno's principle of superposition states that in any undisturbed sedimentary sequence, the oldest layers are at the bottom.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is a transform plate boundary?",
+    "options": [
+      "A boundary where plates move apart",
+      "A boundary where plates collide",
+      "A boundary where plates slide horizontally past each other",
+      "A boundary where one plate subducts under another"
+    ],
+    "correct_answer": "A boundary where plates slide horizontally past each other",
+    "explanation": "Transform boundaries like the San Andreas Fault produce shallow earthquakes as plates grind past each other without creating or destroying crust.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is an index mineral in metamorphic petrology?",
+    "options": [
+      "A mineral that forms only in sedimentary rocks",
+      "A mineral whose first appearance marks a specific metamorphic grade or pressure-temperature condition",
+      "The most common mineral in a rock",
+      "A mineral used for absolute dating"
+    ],
+    "correct_answer": "A mineral whose first appearance marks a specific metamorphic grade or pressure-temperature condition",
+    "explanation": "Index minerals like chlorite, biotite, garnet, and sillimanite define isograds — boundaries separating zones of different metamorphic intensity.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is an erratic in glacial geology?",
+    "options": [
+      "An unusual rock formation caused by wind erosion",
+      "A boulder transported by glacial ice far from its origin and deposited on different bedrock",
+      "A type of glacial meltwater deposit",
+      "A sinuous ridge of glacial sediment"
+    ],
+    "correct_answer": "A boulder transported by glacial ice far from its origin and deposited on different bedrock",
+    "explanation": "Glacial erratics can be traced back hundreds of kilometers to their source, providing evidence of past ice sheet extent and flow directions.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the difference between a graben and a rift?",
+    "options": [
+      "They are identical features",
+      "A graben is a single downfaulted block; a rift is a larger tectonic structure of crustal extension including multiple grabens",
+      "Rifts are smaller than grabens",
+      "Grabens only form in oceanic crust"
+    ],
+    "correct_answer": "A graben is a single downfaulted block; a rift is a larger tectonic structure of crustal extension including multiple grabens",
+    "explanation": "A rift system is a regional zone of extension comprising multiple grabens, half-grabens, and associated volcanics and sedimentary basins.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the Coriolis effect's role in Earth science?",
+    "options": [
+      "It causes tides",
+      "It deflects moving air and water masses due to Earth's rotation, affecting winds, ocean currents, and weather patterns",
+      "It drives plate tectonics",
+      "It controls earthquake distribution"
+    ],
+    "correct_answer": "It deflects moving air and water masses due to Earth's rotation, affecting winds, ocean currents, and weather patterns",
+    "explanation": "The Coriolis effect deflects fluids to the right in the Northern Hemisphere and left in the Southern Hemisphere, shaping global circulation patterns.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is a travertine?",
+    "options": [
+      "A type of metamorphic rock",
+      "A sedimentary rock formed by precipitation of calcium carbonate from spring waters",
+      "A volcanic tuff deposit",
+      "A deep-sea siliceous deposit"
+    ],
+    "correct_answer": "A sedimentary rock formed by precipitation of calcium carbonate from spring waters",
+    "explanation": "Travertine forms at hot or cold springs where CO2 degassing causes CaCO3 precipitation, creating terraced deposits like at Yellowstone.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the difference between concordant and discordant intrusions?",
+    "options": [
+      "Concordant intrusions cut across rock layers; discordant intrusions are parallel to them",
+      "Concordant intrusions are parallel to rock layers; discordant intrusions cut across them",
+      "They describe the age relationship between intrusions",
+      "Concordant intrusions are volcanic; discordant are plutonic"
+    ],
+    "correct_answer": "Concordant intrusions are parallel to rock layers; discordant intrusions cut across them",
+    "explanation": "Sills and laccoliths are concordant; dikes and volcanic necks are discordant, cutting across the fabric of host rocks.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the half-life of carbon-14 and what does this limit its use to?",
+    "options": [
+      "4.5 billion years — for dating all rocks",
+      "5,730 years — for dating organic materials up to about 50,000 years old",
+      "1.25 billion years — for dating metamorphic rocks",
+      "713 million years — for dating early life"
+    ],
+    "correct_answer": "5,730 years — for dating organic materials up to about 50,000 years old",
+    "explanation": "Carbon-14's relatively short half-life makes it useful for recent archaeological and geological materials but not for old rocks.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is a black smoker?",
+    "options": [
+      "A type of volcanic vent on land",
+      "A hydrothermal vent on the ocean floor that emits superheated, mineral-rich water",
+      "A coal-burning geological feature",
+      "A type of fumarole in volcanic craters"
+    ],
+    "correct_answer": "A hydrothermal vent on the ocean floor that emits superheated, mineral-rich water",
+    "explanation": "Black smokers form at mid-ocean ridges where seawater percolates through hot crust and emerges as dark, mineral-laden fluid supporting chemosynthetic life.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the difference between a continental shelf and a continental slope?",
+    "options": [
+      "They are the same feature",
+      "The continental shelf is the gently sloping submerged extension of the continent; the slope is the steeper descent to the deep ocean floor",
+      "The continental slope is shallower than the shelf",
+      "The shelf is below 2000 m depth; the slope is above"
+    ],
+    "correct_answer": "The continental shelf is the gently sloping submerged extension of the continent; the slope is the steeper descent to the deep ocean floor",
+    "explanation": "Continental shelves average ~200 m depth and 70 km width; slopes descend more steeply to abyssal plains at depths of 2000-3000 m.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is an esker?",
+    "options": [
+      "A glacial lake",
+      "A sinuous ridge of stratified sediment deposited by meltwater streams flowing within or beneath a glacier",
+      "A glacial erratic boulder",
+      "A type of moraine"
+    ],
+    "correct_answer": "A sinuous ridge of stratified sediment deposited by meltwater streams flowing within or beneath a glacier",
+    "explanation": "Eskers form as tunnels of meltwater under ice deposit sorted sand and gravel, left as sinuous ridges when ice melts.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the difference between a terminal and a lateral moraine?",
+    "options": [
+      "Terminal moraines are larger; lateral moraines are smaller",
+      "A terminal moraine marks the farthest advance of a glacier; a lateral moraine forms along the sides of a glacier",
+      "Lateral moraines are deposited by meltwater; terminal moraines are not",
+      "They are formed by different types of glaciers"
+    ],
+    "correct_answer": "A terminal moraine marks the farthest advance of a glacier; a lateral moraine forms along the sides of a glacier",
+    "explanation": "Moraines are ridges of glacial debris; terminal moraines record maximum glacier extent while lateral moraines record debris carried along glacier margins.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the Great Oxidation Event?",
+    "options": [
+      "The formation of the ozone layer today",
+      "The dramatic rise in atmospheric oxygen ~2.4 billion years ago caused by cyanobacterial photosynthesis",
+      "The burning of fossil fuels in the industrial era",
+      "The extinction of anaerobic organisms in the Phanerozoic"
+    ],
+    "correct_answer": "The dramatic rise in atmospheric oxygen ~2.4 billion years ago caused by cyanobacterial photosynthesis",
+    "explanation": "The GOE transformed Earth's atmosphere from reducing to oxidizing, enabling aerobic life and causing widespread oxidation of surface rocks.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is a lacustrine deposit?",
+    "options": [
+      "A marine sedimentary deposit",
+      "A sedimentary deposit formed in a lake environment",
+      "A deep-sea fan deposit",
+      "A glacial outwash deposit"
+    ],
+    "correct_answer": "A sedimentary deposit formed in a lake environment",
+    "explanation": "Lacustrine deposits include fine sediments, organic matter, and evaporites that accumulate in lake basins, providing paleoclimate records.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the difference between primary and secondary porosity in rocks?",
+    "options": [
+      "Primary porosity develops after burial; secondary porosity is original",
+      "Primary porosity is original pore space formed during rock formation; secondary porosity forms later through fracturing or dissolution",
+      "They are the same type of porosity",
+      "Primary porosity only occurs in igneous rocks"
+    ],
+    "correct_answer": "Primary porosity is original pore space formed during rock formation; secondary porosity forms later through fracturing or dissolution",
+    "explanation": "Sandstone has primary intergranular porosity; limestone often gains secondary porosity through dissolution creating caves and vugs.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the law of inclusions?",
+    "options": [
+      "Larger rocks are always older than smaller ones",
+      "Fragments (inclusions) within a rock are older than the rock that contains them",
+      "Rocks included in faults are always younger",
+      "All inclusions in igneous rocks are metamorphic"
+    ],
+    "correct_answer": "Fragments (inclusions) within a rock are older than the rock that contains them",
+    "explanation": "If a rock contains fragments of another rock, the fragments must have existed before being incorporated, making them older than the host rock.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is paleomagnetism?",
+    "options": [
+      "The study of Earth's future magnetic field",
+      "The study of ancient magnetic fields recorded in rocks as minerals aligned during cooling or deposition",
+      "The measurement of current magnetic field strength",
+      "The study of magnetic minerals in meteorites"
+    ],
+    "correct_answer": "The study of ancient magnetic fields recorded in rocks as minerals aligned during cooling or deposition",
+    "explanation": "Paleomagnetic data from oceanic basalts provided key evidence for seafloor spreading and established the geologic polarity timescale.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is a volcanic arc?",
+    "options": [
+      "A chain of islands with no volcanic activity",
+      "A curved chain of volcanoes formed above a subduction zone",
+      "A mid-ocean ridge system",
+      "A hotspot chain"
+    ],
+    "correct_answer": "A curved chain of volcanoes formed above a subduction zone",
+    "explanation": "Volcanic arcs form when subducting slabs release water that triggers melting in the mantle wedge, producing magma that erupts at the surface.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is fluvial geomorphology?",
+    "options": [
+      "The study of glacial landforms",
+      "The study of landforms created by rivers and streams",
+      "The study of coastal erosion",
+      "The study of wind-created landforms"
+    ],
+    "correct_answer": "The study of landforms created by rivers and streams",
+    "explanation": "Fluvial geomorphology examines how rivers erode, transport, and deposit sediment, shaping valleys, floodplains, and deltas.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the difference between a fjord and a ria?",
+    "options": [
+      "They are the same feature",
+      "A fjord is a glacially carved inlet; a ria is a drowned river valley",
+      "A ria is deeper than a fjord",
+      "Fjords only occur in tropical regions"
+    ],
+    "correct_answer": "A fjord is a glacially carved inlet; a ria is a drowned river valley",
+    "explanation": "Fjords have characteristic U-shaped cross-sections from glacial erosion; rias have V-shaped profiles from river erosion subsequently flooded by sea level rise.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the role of clay minerals in soil formation?",
+    "options": [
+      "Clay minerals have no role in soil",
+      "Clay minerals provide cation exchange capacity, water retention, and structural cohesion in soils",
+      "Clay minerals only contribute to soil color",
+      "Clay minerals prevent plant growth"
+    ],
+    "correct_answer": "Clay minerals provide cation exchange capacity, water retention, and structural cohesion in soils",
+    "explanation": "Clay minerals are weathering products with large surface areas that hold nutrients and water, making soils fertile and structurally stable.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is subsidence in geology?",
+    "options": [
+      "The uplift of the crust",
+      "The sinking of Earth's surface due to natural or human-caused processes",
+      "The erosion of mountain tops",
+      "The deposition of sediment"
+    ],
+    "correct_answer": "The sinking of Earth's surface due to natural or human-caused processes",
+    "explanation": "Subsidence can result from compaction, fluid extraction, dissolution of soluble rocks, or tectonic processes, creating accommodation space for sediments.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is a continental flood basalt?",
+    "options": [
+      "A basalt flow in the ocean",
+      "A massive outpouring of basaltic lava covering large continental areas",
+      "A type of shield volcano",
+      "A basalt intrusion into continental crust"
+    ],
+    "correct_answer": "A massive outpouring of basaltic lava covering large continental areas",
+    "explanation": "Continental flood basalts like the Deccan Traps and Siberian Traps represent some of Earth's largest volcanic events, often linked to mass extinctions.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the geologic record of Earth's oldest rocks?",
+    "options": [
+      "About 1 billion years old from Australia",
+      "About 4.0 billion years old from the Acasta Gneiss in Canada",
+      "About 2.5 billion years old from Greenland",
+      "About 3.5 billion years old from Western Australia"
+    ],
+    "correct_answer": "About 4.0 billion years old from the Acasta Gneiss in Canada",
+    "explanation": "The Acasta Gneiss in the Northwest Territories, Canada, at ~4.0 Ga, are Earth's oldest known intact rocks, while individual zircon crystals up to 4.4 Ga exist.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is a desert varnish?",
+    "options": [
+      "A type of desert sand dune",
+      "A dark coating of manganese and iron oxides deposited on rock surfaces in arid environments",
+      "A salt crust on desert soils",
+      "A weathering rind on desert rocks"
+    ],
+    "correct_answer": "A dark coating of manganese and iron oxides deposited on rock surfaces in arid environments",
+    "explanation": "Desert varnish accumulates slowly over thousands of years and can be used for relative dating of rock art and landforms.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the difference between a horst block mountain and a fold mountain?",
+    "options": [
+      "They are the same type of mountain",
+      "Horst block mountains form by uplift between faults; fold mountains form by compressional folding of strata",
+      "Fold mountains form by faulting; horst mountains form by folding",
+      "Both form only at convergent boundaries"
+    ],
+    "correct_answer": "Horst block mountains form by uplift between faults; fold mountains form by compressional folding of strata",
+    "explanation": "The Sierra Nevada is a tilted fault block; the Appalachians are fold mountains formed by ancient continental collision.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the difference between a sinkhole and a karst window?",
+    "options": [
+      "They are the same feature",
+      "A sinkhole is a collapse depression; a karst window is where a cave stream is exposed at the surface",
+      "Karst windows are always larger than sinkholes",
+      "Sinkholes only form in coastal environments"
+    ],
+    "correct_answer": "A sinkhole is a collapse depression; a karst window is where a cave stream is exposed at the surface",
+    "explanation": "Both are karst features in soluble rock; sinkholes result from roof collapse or surface dissolution, while karst windows expose underground drainage.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is a tectonic window in structural geology?",
+    "options": [
+      "A gap in a mountain range",
+      "An erosional opening through a thrust sheet exposing the underlying rocks",
+      "A transparent mineral used in structural analysis",
+      "A zone of crustal transparency to seismic waves"
+    ],
+    "correct_answer": "An erosional opening through a thrust sheet exposing the underlying rocks",
+    "explanation": "Tectonic windows form where erosion has cut through an overlying thrust sheet, revealing the rocks that were originally beneath it.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the difference between weathering and diagenesis?",
+    "options": [
+      "They are the same process",
+      "Weathering breaks down rocks at the surface; diagenesis transforms sediment into rock at depth without high temperature",
+      "Diagenesis occurs at the surface; weathering occurs at depth",
+      "Weathering only affects igneous rocks; diagenesis affects sedimentary rocks"
+    ],
+    "correct_answer": "Weathering breaks down rocks at the surface; diagenesis transforms sediment into rock at depth without high temperature",
+    "explanation": "Surface weathering produces sediment through breakdown; diagenesis then converts loose sediment to lithified rock through burial processes.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is an alluvial fan?",
+    "options": [
+      "A type of desert wind deposit",
+      "A fan-shaped sedimentary deposit formed where a stream emerges from a mountain onto a flat plain",
+      "A glacial outwash plain",
+      "A coastal sand deposit"
+    ],
+    "correct_answer": "A fan-shaped sedimentary deposit formed where a stream emerges from a mountain onto a flat plain",
+    "explanation": "Alluvial fans form when a stream loses confinement and energy, depositing its sediment load in a radiating pattern.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the Tethys Sea?",
+    "options": [
+      "A modern ocean in Southeast Asia",
+      "An ancient ocean that existed between Gondwana and Laurasia during the Mesozoic",
+      "The predecessor to the Atlantic Ocean",
+      "A shallow sea covering North America during the Cretaceous"
+    ],
+    "correct_answer": "An ancient ocean that existed between Gondwana and Laurasia during the Mesozoic",
+    "explanation": "The Tethys Sea closed as Africa and India moved northward, its sediments being thrust up to form the Alps and Himalayas.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is an unconformity in stratigraphy?",
+    "options": [
+      "A type of rock that forms at the surface",
+      "A surface of erosion or non-deposition representing a gap in the geologic record",
+      "A concordant contact between rock layers",
+      "A boundary between igneous and sedimentary rocks"
+    ],
+    "correct_answer": "A surface of erosion or non-deposition representing a gap in the geologic record",
+    "explanation": "Unconformities represent missing time in the rock record and come in three types: angular unconformity, disconformity, and nonconformity.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is a dike in igneous geology?",
+    "options": [
+      "A concordant sheet intrusion parallel to rock layers",
+      "A discordant tabular igneous intrusion cutting across existing rock layers",
+      "A surface lava flow",
+      "A type of volcanic crater"
+    ],
+    "correct_answer": "A discordant tabular igneous intrusion cutting across existing rock layers",
+    "explanation": "Dikes form when magma intrudes along fractures that cut across pre-existing rock layers, cooling to form wall-like igneous bodies.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the eccentricity cycle in Milankovitch theory?",
+    "options": [
+      "The change in Earth's axial tilt over 41,000 years",
+      "The variation in Earth's orbital shape from nearly circular to slightly elliptical over ~100,000 and 413,000 year cycles",
+      "The wobble of Earth's rotational axis over 26,000 years",
+      "The change in solar output over 11-year cycles"
+    ],
+    "correct_answer": "The variation in Earth's orbital shape from nearly circular to slightly elliptical over ~100,000 and 413,000 year cycles",
+    "explanation": "Eccentricity cycles affect the total variation in solar energy received by Earth and correlate strongly with Pleistocene ice age cycles.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the significance of pillow basalts?",
+    "options": [
+      "They form only in subduction zones",
+      "Their rounded pillow shapes indicate eruption under water, confirming marine environments in ancient rocks",
+      "They are the most silicic form of basalt",
+      "They form only in continental settings"
+    ],
+    "correct_answer": "Their rounded pillow shapes indicate eruption under water, confirming marine environments in ancient rocks",
+    "explanation": "Pillow basalts form when lava erupts into water, rapidly quenching the outer surface while the interior remains molten, creating characteristic bulbous shapes.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the difference between a magma chamber and a magma plumbing system?",
+    "options": [
+      "They are the same feature",
+      "A magma chamber is a discrete reservoir; a magma plumbing system includes chambers, dikes, sills, and conduits",
+      "A magma plumbing system is always smaller",
+      "Magma chambers only exist beneath stratovolcanoes"
+    ],
+    "correct_answer": "A magma chamber is a discrete reservoir; a magma plumbing system includes chambers, dikes, sills, and conduits",
+    "explanation": "Modern volcanology recognizes that magma storage is complex, involving interconnected networks of melt-rich zones rather than simple chambers.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the origin of Earth's water?",
+    "options": [
+      "Water formed only from volcanic outgassing",
+      "Water came from a combination of volcanic outgassing and delivery by asteroids and comets during late accretion",
+      "All water came from comets",
+      "Water was always present in solid form in Earth's interior"
+    ],
+    "correct_answer": "Water came from a combination of volcanic outgassing and delivery by asteroids and comets during late accretion",
+    "explanation": "The deuterium/hydrogen ratio of Earth's water suggests multiple sources including carbonaceous chondrites and possibly comets.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is a chondrite meteorite and why is it important?",
+    "options": [
+      "A metamorphic rock fragment from another planet",
+      "A primitive stony meteorite preserving the original composition of the early solar system",
+      "A type of iron meteorite",
+      "A meteorite that formed on Mars"
+    ],
+    "correct_answer": "A primitive stony meteorite preserving the original composition of the early solar system",
+    "explanation": "Chondrites contain chondrules — ancient spherical structures — and their bulk composition closely matches the Sun, representing primordial solar system material.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the albedo effect in Earth's climate system?",
+    "options": [
+      "The warming effect of greenhouse gases",
+      "The reflectivity of Earth's surface affecting how much solar energy is absorbed versus reflected",
+      "The cooling effect of ocean currents",
+      "The heating of the atmosphere by ozone"
+    ],
+    "correct_answer": "The reflectivity of Earth's surface affecting how much solar energy is absorbed versus reflected",
+    "explanation": "High-albedo surfaces like ice and snow reflect solar radiation, while low-albedo surfaces like oceans absorb it — a key climate feedback mechanism.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is geologic mapping?",
+    "options": [
+      "The creation of topographic maps",
+      "The systematic recording of rock types, structures, and contacts in the field to produce a geologic map",
+      "The mapping of earthquake epicenters",
+      "The identification of mineral deposits from satellite imagery"
+    ],
+    "correct_answer": "The systematic recording of rock types, structures, and contacts in the field to produce a geologic map",
+    "explanation": "Geologic maps show the distribution of rock units and structural features at the surface, providing the foundation for interpreting subsurface geology.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the lithification process?",
+    "options": [
+      "The melting of rocks under high temperature",
+      "The conversion of loose sediment into solid rock through compaction and cementation",
+      "The metamorphism of igneous rocks",
+      "The crystallization of minerals from solution"
+    ],
+    "correct_answer": "The conversion of loose sediment into solid rock through compaction and cementation",
+    "explanation": "Lithification involves burial, compaction which reduces porosity, and cementation where minerals precipitate in pore spaces binding grains together.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is a structural basin?",
+    "options": [
+      "A topographic depression",
+      "A geological structure where rock layers dip inward toward a central point, creating a bowl shape",
+      "A sedimentary basin at a continental margin",
+      "A basin formed by volcanic collapse"
+    ],
+    "correct_answer": "A geological structure where rock layers dip inward toward a central point, creating a bowl shape",
+    "explanation": "Structural basins are syncline-like features at regional scale; younger rocks are preserved in the center while older rocks outcrop at the margins.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the Pangaea supercontinent and when did it exist?",
+    "options": [
+      "A supercontinent that formed 1 billion years ago",
+      "The most recent supercontinent, assembled ~300 Ma and breaking apart starting ~200 Ma",
+      "A theoretical future supercontinent",
+      "The name for the first continent on Earth"
+    ],
+    "correct_answer": "The most recent supercontinent, assembled ~300 Ma and breaking apart starting ~200 Ma",
+    "explanation": "Pangaea united most of Earth's landmasses during the Permian and Triassic periods before rifting produced the modern continental configuration.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is a geologic hazard?",
+    "options": [
+      "Only volcanic eruptions",
+      "Any geologic process or condition that poses a risk to human life or infrastructure",
+      "Floods caused by human activity",
+      "Climate change impacts only"
+    ],
+    "correct_answer": "Any geologic process or condition that poses a risk to human life or infrastructure",
+    "explanation": "Geologic hazards include earthquakes, volcanic eruptions, tsunamis, landslides, subsidence, and flooding — all natural processes with human risk implications.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is a stock in igneous geology?",
+    "options": [
+      "A large volcanic eruption",
+      "A small plutonic intrusion smaller than a batholith with less than 100 square km of surface exposure",
+      "A type of volcanic dike",
+      "A lava dome structure"
+    ],
+    "correct_answer": "A small plutonic intrusion smaller than a batholith with less than 100 square km of surface exposure",
+    "explanation": "Stocks are smaller versions of batholiths — igneous intrusions exposed at the surface covering less than 100 km², often representing the roots of eroded volcanoes.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the difference between magmatic differentiation and fractional crystallization?",
+    "options": [
+      "They are the same process",
+      "Magmatic differentiation is the broad process of compositional change; fractional crystallization is one mechanism where early crystals are removed from melt",
+      "Fractional crystallization produces more mafic magmas",
+      "Magmatic differentiation only occurs in continental settings"
+    ],
+    "correct_answer": "Magmatic differentiation is the broad process of compositional change; fractional crystallization is one mechanism where early crystals are removed from melt",
+    "explanation": "Fractional crystallization is the dominant differentiation process — removing early-formed crystals leaves a progressively more silicic residual melt.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is an abyssal plain?",
+    "options": [
+      "A shallow continental shelf area",
+      "The flat, sediment-covered deep ocean floor beyond continental margins",
+      "A trench at a subduction zone",
+      "A mid-ocean ridge flank"
+    ],
+    "correct_answer": "The flat, sediment-covered deep ocean floor beyond continental margins",
+    "explanation": "Abyssal plains form as sediments from turbidity currents and pelagic settling smooth out the irregular basaltic seafloor at depths of 3000-6000 m.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the role of feldspar weathering in the global carbon cycle?",
+    "options": [
+      "Feldspar weathering has no role in carbon cycling",
+      "Feldspar weathering consumes CO2 from the atmosphere, transferring carbon to rivers and oceans as bicarbonate ions",
+      "Feldspar weathering releases CO2",
+      "Feldspar weathering only affects local carbon cycles"
+    ],
+    "correct_answer": "Feldspar weathering consumes CO2 from the atmosphere, transferring carbon to rivers and oceans as bicarbonate ions",
+    "explanation": "Silicate weathering reactions like the carbonation of feldspars draw CO2 from the atmosphere, a key long-term carbon sink and climate regulator.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the difference between groundwater recharge and discharge zones?",
+    "options": [
+      "They are the same zones",
+      "Recharge zones are areas where water enters the aquifer; discharge zones are where groundwater exits to the surface",
+      "Discharge zones are in mountains; recharge zones are in valleys",
+      "Recharge only occurs in deserts"
+    ],
+    "correct_answer": "Recharge zones are areas where water enters the aquifer; discharge zones are where groundwater exits to the surface",
+    "explanation": "Precipitation infiltrates in recharge zones typically at higher elevations; groundwater flows to discharge at springs, rivers, or wetlands at lower elevations.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the significance of the iridium anomaly at the K-Pg boundary?",
+    "options": [
+      "It marks a period of intense volcanic activity",
+      "It indicates an extraterrestrial impact as iridium is rare in Earth's crust but abundant in meteorites",
+      "It represents a change in ocean chemistry",
+      "It marks the boundary between different magnetic polarity epochs"
+    ],
+    "correct_answer": "It indicates an extraterrestrial impact as iridium is rare in Earth's crust but abundant in meteorites",
+    "explanation": "Luis Alvarez discovered the iridium anomaly in 1980, providing the first strong evidence for an asteroid impact causing the K-Pg mass extinction.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is a sediment budget?",
+    "options": [
+      "The cost of sediment analysis in a laboratory",
+      "The quantification of sediment inputs, storage, and outputs in a geomorphic system",
+      "The amount of sediment in a river",
+      "The economic value of mineral-rich sediments"
+    ],
+    "correct_answer": "The quantification of sediment inputs, storage, and outputs in a geomorphic system",
+    "explanation": "Sediment budgets track erosion, transport, and deposition to understand landscape evolution and inform management of rivers and coastlines.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is thermal subsidence in sedimentary basin formation?",
+    "options": [
+      "Subsidence caused by sediment loading",
+      "The progressive cooling and densification of lithosphere after rifting, causing long-term subsidence",
+      "Subsidence caused by volcanic activity",
+      "The compaction of sediments under their own weight"
+    ],
+    "correct_answer": "The progressive cooling and densification of lithosphere after rifting, causing long-term subsidence",
+    "explanation": "After rifting stretches and thins the lithosphere, thermal subsidence over tens of millions of years creates accommodation space for thick sedimentary sequences.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is andesite and where does it typically form?",
+    "options": [
+      "A basaltic rock from mid-ocean ridges",
+      "An intermediate volcanic rock rich in silica and aluminum, typically forming at subduction zones",
+      "A silicic rock from continental hotspots",
+      "A deep-ocean sedimentary rock"
+    ],
+    "correct_answer": "An intermediate volcanic rock rich in silica and aluminum, typically forming at subduction zones",
+    "explanation": "Andesite is named after the Andes Mountains and is the characteristic rock of continental volcanic arcs above subduction zones.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is a geologic terrane?",
+    "options": [
+      "A topographic region",
+      "A crustal block with a distinct geologic history that has been accreted to a continent",
+      "A type of metamorphic belt",
+      "A sedimentary basin"
+    ],
+    "correct_answer": "A crustal block with a distinct geologic history that has been accreted to a continent",
+    "explanation": "Terranes are bounded by faults and have rock assemblages, fossils, and paleomagnetic signatures inconsistent with adjacent rocks, indicating a different origin.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the difference between a river's bedload and suspended load?",
+    "options": [
+      "Bedload is finer than suspended load",
+      "Bedload moves along the channel floor by rolling and saltation; suspended load is finer material carried in the water column",
+      "Suspended load is always heavier than bedload",
+      "Bedload only moves during floods"
+    ],
+    "correct_answer": "Bedload moves along the channel floor by rolling and saltation; suspended load is finer material carried in the water column",
+    "explanation": "Gravel and coarse sand move as bedload; clay, silt, and fine sand travel in suspension — the distinction affects deposition patterns and sediment transport modeling.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the Archean Eon characterized by?",
+    "options": [
+      "The first appearance of complex life",
+      "Widespread continental collision and mountain building",
+      "The formation of Earth's first stable continental crust and early life",
+      "The first glaciations and oxygenation of the atmosphere"
+    ],
+    "correct_answer": "The formation of Earth's first stable continental crust and early life",
+    "explanation": "During the Archean (4.0-2.5 Ga), greenstone belts and cratons formed, and microbial life including stromatolites existed in the oceans.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is a pseudotachylite?",
+    "options": [
+      "A type of metamorphic rock",
+      "A glassy rock formed by frictional melting during earthquakes along fault zones",
+      "A volcanic glass from rapid cooling",
+      "A type of sedimentary rock in fault zones"
+    ],
+    "correct_answer": "A glassy rock formed by frictional melting during earthquakes along fault zones",
+    "explanation": "Pseudotachylites form when earthquake slip generates enough heat to melt rock along fault surfaces, then rapidly quenches to glass.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the relationship between metamorphic P-T paths and tectonic settings?",
+    "options": [
+      "P-T paths are the same in all tectonic settings",
+      "Clockwise P-T paths typically indicate continental collision; counterclockwise paths indicate magmatic arc settings",
+      "P-T paths only record temperature changes",
+      "Tectonic setting does not influence metamorphic conditions"
+    ],
+    "correct_answer": "Clockwise P-T paths typically indicate continental collision; counterclockwise paths indicate magmatic arc settings",
+    "explanation": "P-T paths record the pressure-temperature history of rocks during burial and exhumation, reflecting the tectonic environment of metamorphism.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the role of the ocean in Earth's heat distribution?",
+    "options": [
+      "Oceans have no role in heat distribution",
+      "Ocean currents act as a conveyor belt redistributing heat from the tropics to polar regions, moderating global climate",
+      "Oceans only absorb heat without redistributing it",
+      "Ocean heat distribution only affects coastal areas"
+    ],
+    "correct_answer": "Ocean currents act as a conveyor belt redistributing heat from the tropics to polar regions, moderating global climate",
+    "explanation": "The thermohaline circulation transports warm surface water poleward and cold deep water equatorward, significantly moderating regional climates.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is a stratigraphic trap in petroleum geology?",
+    "options": [
+      "A structural anticline that traps oil",
+      "A trap formed by changes in rock porosity or permeability due to lateral facies changes, unconformities, or pinch-outs",
+      "A salt dome structure trapping hydrocarbons",
+      "A fault that seals against a reservoir rock"
+    ],
+    "correct_answer": "A trap formed by changes in rock porosity or permeability due to lateral facies changes, unconformities, or pinch-outs",
+    "explanation": "Stratigraphic traps rely on changes in the rock itself rather than structural deformation to seal hydrocarbons in reservoir rocks.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the principle of inclusions in geochronology?",
+    "options": [
+      "Inclusions are always the same age as the host rock",
+      "Mineral inclusions within another mineral are older than the host mineral that grew around them",
+      "Inclusions are always younger than host rocks",
+      "Inclusions cannot be dated"
+    ],
+    "correct_answer": "Mineral inclusions within another mineral are older than the host mineral that grew around them",
+    "explanation": "This principle extends to minerals — a garnet that encloses zircon means the zircon existed before garnet growth, establishing a relative age relationship.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the difference between a transform fault and a transcurrent fault?",
+    "options": [
+      "They are identical features",
+      "Transform faults are plate boundaries connecting spreading centers or trenches; transcurrent faults are strike-slip faults within plates",
+      "Transcurrent faults are longer than transform faults",
+      "Transform faults only occur in oceanic crust"
+    ],
+    "correct_answer": "Transform faults are plate boundaries connecting spreading centers or trenches; transcurrent faults are strike-slip faults within plates",
+    "explanation": "J. Tuzo Wilson defined transform faults as a distinct type of plate boundary that transforms the type of plate motion between two other boundary types.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the significance of ophiolites in understanding Earth's history?",
+    "options": [
+      "They record ancient atmospheric conditions",
+      "They preserve slices of ancient oceanic crust on land, providing a window into ocean floor processes and paleotectonic reconstructions",
+      "They are evidence of ancient continental collisions only",
+      "They only form in shallow marine environments"
+    ],
+    "correct_answer": "They preserve slices of ancient oceanic crust on land, providing a window into ocean floor processes and paleotectonic reconstructions",
+    "explanation": "Ophiolite sequences — harzburgite, gabbro, sheeted dikes, pillow basalts, and deep-sea sediment — allow study of ancient oceanic spreading centers.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is a volcanic tuff?",
+    "options": [
+      "A type of lava flow deposit",
+      "A rock formed from consolidated volcanic ash and pyroclastic material",
+      "A volcanic intrusion",
+      "A type of obsidian"
+    ],
+    "correct_answer": "A rock formed from consolidated volcanic ash and pyroclastic material",
+    "explanation": "Tuffs form when volcanic ash falls and is compacted or welded; they are valuable for dating volcanic events and correlating stratigraphic sections.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is erosional isostasy?",
+    "options": [
+      "The sinking of crust under sediment load",
+      "The uplift of eroded terrain as removal of surface rock reduces mass, causing isostatic rebound",
+      "The subsidence caused by erosion",
+      "The equilibrium of erosion and deposition rates"
+    ],
+    "correct_answer": "The uplift of eroded terrain as removal of surface rock reduces mass, causing isostatic rebound",
+    "explanation": "As erosion removes mass from mountains, the crust rebounds upward isostatically, maintaining topographic relief and exhuming deeper rocks.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the mantle transition zone?",
+    "options": [
+      "The boundary between upper and lower crust",
+      "The region between 410 and 660 km depth marked by phase transitions in olivine to denser mineral assemblages",
+      "The boundary between the mantle and outer core",
+      "A zone of partial melting at the base of the lithosphere"
+    ],
+    "correct_answer": "The region between 410 and 660 km depth marked by phase transitions in olivine to denser mineral assemblages",
+    "explanation": "Seismic discontinuities at 410 and 660 km record phase transitions of olivine to wadsleyite and ringwoodite to bridgmanite, marking the transition zone.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the concept of Gondwana?",
+    "options": [
+      "The name for the modern Southern Hemisphere",
+      "The southern supercontinent that formed after Pangaea's breakup and included Africa, South America, Antarctica, Australia, and India",
+      "A theoretical future supercontinent",
+      "A name for the ancient Tethys Sea region"
+    ],
+    "correct_answer": "The southern supercontinent that formed after Pangaea's breakup and included Africa, South America, Antarctica, Australia, and India",
+    "explanation": "Gondwana was assembled during the Neoproterozoic and persisted through the Paleozoic before progressively rifting apart to form the modern southern continents.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the difference between a seismograph and a seismometer?",
+    "options": [
+      "They are the same instrument",
+      "A seismometer detects ground motion; a seismograph records it — though modern instruments combine both functions",
+      "A seismograph detects ground motion; a seismometer records it",
+      "Seismometers measure magnitude; seismographs measure frequency"
+    ],
+    "correct_answer": "A seismometer detects ground motion; a seismograph records it — though modern instruments combine both functions",
+    "explanation": "Technically, a seismometer is the sensing element and a seismograph includes the recording system; modern digital seismometers perform both functions.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the role of sulfur dioxide in volcanic climate impacts?",
+    "options": [
+      "SO2 has no climate impact",
+      "Volcanic SO2 forms sulfate aerosols in the stratosphere that reflect sunlight, causing short-term global cooling",
+      "SO2 causes long-term warming",
+      "SO2 only affects areas near volcanoes"
+    ],
+    "correct_answer": "Volcanic SO2 forms sulfate aerosols in the stratosphere that reflect sunlight, causing short-term global cooling",
+    "explanation": "Major eruptions like Pinatubo 1991 inject SO2 into the stratosphere, forming aerosols that reflect incoming solar radiation, cooling Earth by ~0.5°C for 1-2 years.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is a oolite and how does it form?",
+    "options": [
+      "A type of deep-sea sediment",
+      "A small, spherical carbonate grain formed by concentric precipitation around a nucleus in agitated shallow marine water",
+      "A type of clastic sedimentary grain",
+      "A mineral formed by volcanic activity"
+    ],
+    "correct_answer": "A small, spherical carbonate grain formed by concentric precipitation around a nucleus in agitated shallow marine water",
+    "explanation": "Ooids form as carbonate precipitates in concentric layers around a nucleus (often a sand grain or shell fragment) in warm, supersaturated, wave-agitated water.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is mass extinction and what are the Big Five events in Earth's history?",
+    "options": [
+      "The disappearance of individual species",
+      "Events where more than 75% of species disappear in a geologically short time; the Big Five are Ordovician, Devonian, Permian, Triassic-Jurassic, and K-Pg",
+      "Only the K-Pg event qualifies as a mass extinction",
+      "Events caused only by asteroid impacts"
+    ],
+    "correct_answer": "Events where more than 75% of species disappear in a geologically short time; the Big Five are Ordovician, Devonian, Permian, Triassic-Jurassic, and K-Pg",
+    "explanation": "The Permian-Triassic extinction was the largest (~96% of species), likely caused by Siberian Traps volcanism; each event reshaped the biosphere.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is geophysics?",
+    "options": [
+      "The study of rocks and minerals",
+      "The application of physics to study Earth's interior, gravity, magnetism, seismicity, and heat flow",
+      "The study of Earth's surface processes",
+      "The classification of geological time"
+    ],
+    "correct_answer": "The application of physics to study Earth's interior, gravity, magnetism, seismicity, and heat flow",
+    "explanation": "Geophysics uses physical measurements and modeling to investigate Earth's structure and processes that are inaccessible to direct observation.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the difference between primary and secondary magmas?",
+    "options": [
+      "Primary magmas are older; secondary magmas are younger",
+      "Primary magmas form directly from mantle melting; secondary magmas are derived by differentiation or mixing of primary magmas",
+      "Secondary magmas are always more mafic",
+      "Primary magmas only form at hotspots"
+    ],
+    "correct_answer": "Primary magmas form directly from mantle melting; secondary magmas are derived by differentiation or mixing of primary magmas",
+    "explanation": "Primary magmas represent direct mantle melts; secondary magmas have been modified by crystal fractionation, assimilation, or mixing with other magmas.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the vadose zone in hydrogeology?",
+    "options": [
+      "The saturated zone below the water table",
+      "The unsaturated zone between the land surface and the water table where pore spaces contain both air and water",
+      "The zone of artesian pressure",
+      "A zone of saline groundwater"
+    ],
+    "correct_answer": "The unsaturated zone between the land surface and the water table where pore spaces contain both air and water",
+    "explanation": "The vadose zone (zone of aeration) transmits water downward to recharge aquifers and is important for soil processes and contaminant transport.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is a tectonic plate?",
+    "options": [
+      "A layer of sedimentary rock",
+      "A rigid segment of the lithosphere that moves as a unit over the asthenosphere",
+      "A type of fault structure",
+      "An area of high seismic activity"
+    ],
+    "correct_answer": "A rigid segment of the lithosphere that moves as a unit over the asthenosphere",
+    "explanation": "Earth's lithosphere is divided into about a dozen major and several minor tectonic plates that move at rates of centimeters per year.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is a breccia and how does it differ from a conglomerate?",
+    "options": [
+      "They are the same rock",
+      "A breccia contains angular clasts; a conglomerate contains rounded clasts — indicating transport distance",
+      "Conglomerates are coarser than breccias",
+      "Breccias only form in volcanic settings"
+    ],
+    "correct_answer": "A breccia contains angular clasts; a conglomerate contains rounded clasts — indicating transport distance",
+    "explanation": "Angular clasts indicate little transport from source (fault breccia, talus); rounded clasts show abrasion during transport in water (conglomerate).",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is an ignimbrite?",
+    "options": [
+      "A type of basaltic lava flow",
+      "A rock formed from the consolidation of pyroclastic flows, often welded at high temperatures",
+      "A deep-sea volcanic deposit",
+      "A type of metamorphic rock"
+    ],
+    "correct_answer": "A rock formed from the consolidation of pyroclastic flows, often welded at high temperatures",
+    "explanation": "Ignimbrites form when hot pyroclastic density currents deposit and weld ash and pumice fragments together, creating sheets that can cover thousands of square kilometers.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is a turbidite sequence and what does it record?",
+    "options": [
+      "A sequence of volcanic deposits",
+      "A graded sedimentary bed deposited by a turbidity current, recording a single submarine mass flow event",
+      "A sequence of metamorphic rocks",
+      "A glacial varve sequence"
+    ],
+    "correct_answer": "A graded sedimentary bed deposited by a turbidity current, recording a single submarine mass flow event",
+    "explanation": "Turbidites show characteristic Bouma sequences from coarse-grained base to fine-grained top, recording the waning energy of a single turbidity current.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is geodynamics?",
+    "options": [
+      "The study of volcanic eruption dynamics",
+      "The study of the forces and processes that drive deformation and motion of Earth's interior and surface",
+      "The study of earthquake wave propagation",
+      "The study of forces and processes that drive deformation and motion of Earth's interior and surface"
+    ],
+    "correct_answer": "The study of forces and processes that drive deformation and motion of Earth's interior and surface",
+    "explanation": "Geodynamics combines geology, geophysics, and fluid mechanics to understand processes like mantle convection, plate motion, and mountain building.",
+    "subject": "science",
+    "difficulty": "advanced",
+    "topic": "earth-science"
+  },
+  {
+    "question": "What is the process by which the Earth's plates move and change, resulting in the creation of mountains and volcanoes?",
+    "options": [
+      "Continental Drift",
+      "Plate Tectonics",
+      "Weathering and Erosion",
+      "Glaciation"
+    ],
+    "correct_answer": "Plate Tectonics",
+    "explanation": "Plate Tectonics is the theory that the Earth's lithosphere is divided into large plates that move and interact, resulting in geological phenomena such as mountain building and volcanic activity.",
+    "subject": "Earth Science",
+    "difficulty": "advanced",
+    "topic": "plate tectonics"
+  },
+  {
+    "question": "What is the term for the movement of water from the ground to the atmosphere through plants?",
+    "options": [
+      "Respiration",
+      "Transpiration",
+      "Evaporation",
+      "Condensation"
+    ],
+    "correct_answer": "Transpiration",
+    "explanation": "Transpiration is the process by which water is transported from the roots of a plant to the atmosphere through the leaves, playing a crucial role in the water cycle.",
+    "subject": "Earth Science",
+    "difficulty": "advanced",
+    "topic": "hydrology"
+  },
+  {
+    "question": "What is the largest desert in the world, covering over 9,000,000 square kilometers?",
+    "options": [
+      "Sahara Desert",
+      "Gobi Desert",
+      "Mojave Desert",
+      "Antarctic Desert"
+    ],
+    "correct_answer": "Antarctic Desert",
+    "explanation": "The Antarctic Desert is the largest desert in the world, covering the entire continent of Antarctica and accounting for about 98% of the continent's land area.",
+    "subject": "Earth Science",
+    "difficulty": "advanced",
+    "topic": "geography"
+  },
+  {
+    "question": "What is the process by which the Earth's atmosphere retains heat, resulting in a warming effect on the planet?",
+    "options": [
+      "Greenhouse Effect",
+      "Climate Change",
+      "Global Warming",
+      "Ozone Depletion"
+    ],
+    "correct_answer": "Greenhouse Effect",
+    "explanation": "The Greenhouse Effect is the process by which certain gases in the Earth's atmosphere, such as carbon dioxide and methane, trap heat from the sun, resulting in a warming effect on the planet.",
+    "subject": "Earth Science",
+    "difficulty": "advanced",
+    "topic": "climate science"
+  },
+  {
+    "question": "What is the term for a rock that is formed from the cooling and solidification of magma or lava?",
+    "options": [
+      "Igneous Rock",
+      "Sedimentary Rock",
+      "Metamorphic Rock",
+      "Foliated Rock"
+    ],
+    "correct_answer": "Igneous Rock",
+    "explanation": "Igneous rocks are formed from the cooling and solidification of magma or lava, and can be either intrusive (formed below the Earth's surface) or extrusive (formed above the Earth's surface).",
+    "subject": "Earth Science",
+    "difficulty": "advanced",
+    "topic": "geology"
+  },
+  {
+    "question": "What is the process by which the Earth's surface is worn away by natural forces such as wind, water, and ice?",
+    "options": [
+      "Weathering and Erosion",
+      "Deposition",
+      "Plate Tectonics",
+      "Glaciation"
+    ],
+    "correct_answer": "Weathering and Erosion",
+    "explanation": "Weathering and erosion are the processes by which the Earth's surface is worn away by natural forces such as wind, water, and ice, resulting in the formation of sediment and the creation of new landforms.",
+    "subject": "Earth Science",
+    "difficulty": "advanced",
+    "topic": "geomorphology"
+  },
+  {
+    "question": "What is the term for a type of rock that is formed from the alteration of existing rocks under high pressure and temperature conditions?",
+    "options": [
+      "Metamorphic Rock",
+      "Igneous Rock",
+      "Sedimentary Rock",
+      "Foliated Rock"
+    ],
+    "correct_answer": "Metamorphic Rock",
+    "explanation": "Metamorphic rocks are formed from the alteration of existing rocks under high pressure and temperature conditions, resulting in changes to the rock's mineral composition and structure.",
+    "subject": "Earth Science",
+    "difficulty": "advanced",
+    "topic": "geology"
+  },
+  {
+    "question": "What is the process by which the Earth's climate has changed over time, resulting in the formation of glaciers and ice sheets?",
+    "options": [
+      "Glaciation",
+      "Climate Change",
+      "Global Warming",
+      "Ice Age"
+    ],
+    "correct_answer": "Glaciation",
+    "explanation": "Glaciation is the process by which the Earth's climate has changed over time, resulting in the formation of glaciers and ice sheets, which have played a significant role in shaping the Earth's surface.",
+    "subject": "Earth Science",
+    "difficulty": "advanced",
+    "topic": "climatology"
+  },
+  {
+    "question": "What is the term for the movement of the Earth's crust, resulting in the creation of faults and earthquakes?",
+    "options": [
+      "Seismic Activity",
+      "Tectonic Activity",
+      "Volcanic Activity",
+      "Geologic Activity"
+    ],
+    "correct_answer": "Tectonic Activity",
+    "explanation": "Tectonic activity refers to the movement of the Earth's crust, resulting in the creation of faults and earthquakes, which are a result of the interaction between the Earth's plates.",
+    "subject": "Earth Science",
+    "difficulty": "advanced",
+    "topic": "seismology"
+  },
+  {
+    "question": "What is the process by which the Earth's ocean currents distribute heat around the globe, playing a crucial role in regulating the planet's climate?",
+    "options": [
+      "Thermohaline Circulation",
+      "Ocean Currents",
+      "Atmospheric Circulation",
+      "Global Wind Patterns"
+    ],
+    "correct_answer": "Thermohaline Circulation",
+    "explanation": "Thermohaline circulation refers to the process by which the Earth's ocean currents distribute heat around the globe, playing a crucial role in regulating the planet's climate and weather patterns.",
+    "subject": "Earth Science",
+    "difficulty": "advanced",
+    "topic": "oceanography"
+  },
+  {
+    "question": "What is the term for the study of the Earth's physical structure, composition, and processes?",
+    "options": [
+      "Geology",
+      "Geography",
+      "Geophysics",
+      "Geomorphology"
+    ],
+    "correct_answer": "Geology",
+    "explanation": "Geology is the study of the Earth's physical structure, composition, and processes, including the formation of rocks, minerals, and landforms.",
+    "subject": "Earth Science",
+    "difficulty": "advanced",
+    "topic": "geology"
+  },
+  {
+    "question": "What is the process by which the Earth's atmosphere is heated, resulting in the formation of high and low pressure systems?",
+    "options": [
+      "Atmospheric Circulation",
+      "Global Wind Patterns",
+      "Ocean Currents",
+      "Thermohaline Circulation"
+    ],
+    "correct_answer": "Atmospheric Circulation",
+    "explanation": "Atmospheric circulation refers to the process by which the Earth's atmosphere is heated, resulting in the formation of high and low pressure systems, which drive global wind patterns and weather phenomena.",
+    "subject": "Earth Science",
+    "difficulty": "advanced",
+    "topic": "meteorology"
+  },
+  {
+    "question": "What is the term for the study of the Earth's oceans, including their properties, dynamics, and interactions with the atmosphere and land?",
+    "options": [
+      "Oceanography",
+      "Limnology",
+      "Hydrology",
+      "Geology"
+    ],
+    "correct_answer": "Oceanography",
+    "explanation": "Oceanography is the study of the Earth's oceans, including their properties, dynamics, and interactions with the atmosphere and land, and is a crucial field of study for understanding the Earth's climate and ecosystems.",
+    "subject": "Earth Science",
+    "difficulty": "advanced",
+    "topic": "oceanography"
+  },
+  {
+    "question": "What is the process by which the Earth's water cycle is driven, resulting in the formation of precipitation and the distribution of water around the globe?",
+    "options": [
+      "Evaporation",
+      "Condensation",
+      "Precipitation",
+      "Runoff"
+    ],
+    "correct_answer": "Evaporation",
+    "explanation": "Evaporation is the process by which the Earth's water cycle is driven, resulting in the formation of precipitation and the distribution of water around the globe, and is a crucial component of the Earth's hydrologic cycle.",
+    "subject": "Earth Science",
+    "difficulty": "advanced",
+    "topic": "hydrology"
+  },
+  {
+    "question": "What is the term for the study of the Earth's landforms, including their formation, evolution, and distribution?",
+    "options": [
+      "Geomorphology",
+      "Geology",
+      "Geography",
+      "Hydrology"
+    ],
+    "correct_answer": "Geomorphology",
+    "explanation": "Geomorphology is the study of the Earth's landforms, including their formation, evolution, and distribution, and is a crucial field of study for understanding the Earth's surface processes and landscape dynamics.",
+    "subject": "Earth Science",
+    "difficulty": "advanced",
+    "topic": "geomorphology"
+  },
+  {
+    "question": "What is the process by which the Earth's soil is formed, resulting in a complex ecosystem that supports plant growth and filters water?",
+    "options": [
+      "Weathering and Erosion",
+      "Pedogenesis",
+      "Deposition",
+      "Glaciation"
+    ],
+    "correct_answer": "Pedogenesis",
+    "explanation": "Pedogenesis is the process by which the Earth's soil is formed, resulting in a complex ecosystem that supports plant growth and filters water, and is a crucial component of the Earth's ecosystems.",
+    "subject": "Earth Science",
+    "difficulty": "advanced",
+    "topic": "pedology"
+  },
+  {
+    "question": "What is the term for the study of the Earth's glaciers, including their formation, movement, and impact on the environment?",
+    "options": [
+      "Glaciology",
+      "Geology",
+      "Geography",
+      "Climatology"
+    ],
+    "correct_answer": "Glaciology",
+    "explanation": "Glaciology is the study of the Earth's glaciers, including their formation, movement, and impact on the environment, and is a crucial field of study for understanding the Earth's climate and ecosystems.",
+    "subject": "Earth Science",
+    "difficulty": "advanced",
+    "topic": "glaciology"
+  },
+  {
+    "question": "What is the process by which the Earth's climate has changed over time, resulting in the formation of different climate zones and ecosystems?",
+    "options": [
+      "Climate Change",
+      "Global Warming",
+      "Glaciation",
+      "Plate Tectonics"
+    ],
+    "correct_answer": "Climate Change",
+    "explanation": "Climate change refers to the process by which the Earth's climate has changed over time, resulting in the formation of different climate zones and ecosystems, and is a crucial component of the Earth's environmental systems.",
+    "subject": "Earth Science",
+    "difficulty": "advanced",
+    "topic": "climatology"
+  },
+  {
+    "question": "What is the term for the study of the Earth's natural hazards, including earthquakes, volcanoes, and hurricanes?",
+    "options": [
+      "Natural Hazards",
+      "Geology",
+      "Geography",
+      "Emergency Management"
+    ],
+    "correct_answer": "Natural Hazards",
+    "explanation": "Natural hazards refer to the study of the Earth's natural hazards, including earthquakes, volcanoes, and hurricanes, and is a crucial field of study for understanding and mitigating the impacts of these events on human populations and the environment.",
+    "subject": "Earth Science",
+    "difficulty": "advanced",
+    "topic": "natural hazards"
+  },
+  {
+    "question": "What is the process by which the Earth's atmosphere is affected by human activities, resulting in changes to the planet's climate and ecosystems?",
+    "options": [
+      "Global Warming",
+      "Climate Change",
+      "Air Pollution",
+      "Deforestation"
+    ],
+    "correct_answer": "Global Warming",
+    "explanation": "Global warming refers to the process by which the Earth's atmosphere is affected by human activities, resulting in changes to the planet's climate and ecosystems, and is a crucial component of the Earth's environmental systems.",
+    "subject": "Earth Science",
+    "difficulty": "advanced",
+    "topic": "climate science"
+  },
+  {
+    "question": "What is the term for the study of the Earth's ecosystems, including their structure, function, and distribution?",
+    "options": [
+      "Ecology",
+      "Biology",
+      "Geology",
+      "Geography"
+    ],
+    "correct_answer": "Ecology",
+    "explanation": "Ecology is the study of the Earth's ecosystems, including their structure, function, and distribution, and is a crucial field of study for understanding the Earth's environmental systems and the impacts of human activities on the planet.",
+    "subject": "Earth Science",
+    "difficulty": "advanced",
+    "topic": "ecology"
+  },
+  {
+    "question": "What is the process by which the Earth's water is distributed and circulated, resulting in the formation of precipitation and the maintenance of ecosystems?",
+    "options": [
+      "Hydrologic Cycle",
+      "Water Cycle",
+      "Evaporation",
+      "Condensation"
+    ],
+    "correct_answer": "Hydrologic Cycle",
+    "explanation": "The hydrologic cycle refers to the process by which the Earth's water is distributed and circulated, resulting in the formation of precipitation and the maintenance of ecosystems, and is a crucial component of the Earth's environmental systems.",
+    "subject": "Earth Science",
+    "difficulty": "advanced",
+    "topic": "hydrology"
+  },
+  {
+    "question": "What is the term for the study of the Earth's landforms and landscapes, including their formation, evolution, and distribution?",
+    "options": [
+      "Geomorphology",
+      "Geology",
+      "Geography",
+      "Hydrology"
+    ],
+    "correct_answer": "Geomorphology",
+    "explanation": "Geomorphology is the study of the Earth's landforms and landscapes, including their formation, evolution, and distribution, and is a crucial field of study for understanding the Earth's surface processes and landscape dynamics.",
+    "subject": "Earth Science",
+    "difficulty": "advanced",
+    "topic": "geomorphology"
+  },
+  {
+    "question": "What is the process by which the Earth's climate is regulated, resulting in the maintenance of a stable and habitable environment?",
+    "options": [
+      "Climate Regulation",
+      "Global Warming",
+      "Greenhouse Effect",
+      "Atmospheric Circulation"
+    ],
+    "correct_answer": "Climate Regulation",
+    "explanation": "Climate regulation refers to the process by which the Earth's climate is regulated, resulting in the maintenance of a stable and habitable environment, and is a crucial component of the Earth's environmental systems.",
+    "subject": "Earth Science",
+    "difficulty": "advanced",
+    "topic": "climatology"
+  },
+  {
+    "question": "What is the term for the study of the Earth's internal structure and composition, including the crust, mantle, and core?",
+    "options": [
+      "Geology",
+      "Geophysics",
+      "Seismology",
+      "Geomagnetism"
+    ],
+    "correct_answer": "Geophysics",
+    "explanation": "Geophysics is the study of the Earth's internal structure and composition, including the crust, mantle, and core, and is a crucial field of study for understanding the Earth's internal dynamics and processes.",
+    "subject": "Earth Science",
+    "difficulty": "advanced",
+    "topic": "geophysics"
+  },
+  {
+    "question": "What is the process by which the Earth's oceans absorb and store carbon dioxide, resulting in a reduction of the greenhouse effect?",
+    "options": [
+      "Ocean Fertilization",
+      "Carbon Sequestration",
+      "Ocean Acidification",
+      "Upwelling"
+    ],
+    "correct_answer": "Carbon Sequestration",
+    "explanation": "Carbon sequestration refers to the process by which the Earth's oceans absorb and store carbon dioxide, resulting in a reduction of the greenhouse effect, and is a crucial component of the Earth's environmental systems.",
+    "subject": "Earth Science",
+    "difficulty": "advanced",
+    "topic": "oceanography"
+  },
+  {
+    "question": "What is the term for the study of the Earth's natural resources, including their formation, distribution, and use?",
+    "options": [
+      "Geology",
+      "Geography",
+      "Economics",
+      "Environmental Science"
+    ],
+    "correct_answer": "Geology",
+    "explanation": "Geology is the study of the Earth's natural resources, including their formation, distribution, and use, and is a crucial field of study for understanding the Earth's environmental systems and the impacts of human activities on the planet.",
+    "subject": "Earth Science",
+    "difficulty": "advanced",
+    "topic": "geology"
+  },
+  {
+    "question": "What is the process by which the Earth's ecosystems are affected by human activities, resulting in changes to the planet's biodiversity and ecosystem functioning?",
+    "options": [
+      "Environmental Degradation",
+      "Climate Change",
+      "Deforestation",
+      "Pollution"
+    ],
+    "correct_answer": "Environmental Degradation",
+    "explanation": "Environmental degradation refers to the process by which the Earth's ecosystems are affected by human activities, resulting in changes to the planet's biodiversity and ecosystem functioning, and is a crucial component of the Earth's environmental systems.",
+    "subject": "Earth Science",
+    "difficulty": "advanced",
+    "topic": "ecology"
+  },
+  {
+    "question": "What is the term for the study of the Earth's water resources, including their distribution, use, and management?",
+    "options": [
+      "Hydrology",
+      "Geology",
+      "Geography",
+      "Environmental Science"
+    ],
+    "correct_answer": "Hydrology",
+    "explanation": "Hydrology is the study of the Earth's water resources, including their distribution, use, and management, and is a crucial field of study for understanding the Earth's environmental systems and the impacts of human activities on the planet.",
+    "subject": "Earth Science",
+    "difficulty": "advanced",
+    "topic": "hydrology"
+  },
+  {
+    "question": "What is the process by which the Earth's plates move and change, resulting in the creation of mountains, volcanoes, and earthquakes?",
+    "options": [
+      "Continental Drift",
+      "Plate Tectonics",
+      "Weathering and Erosion",
+      "Glaciation"
+    ],
+    "correct_answer": "Plate Tectonics",
+    "explanation": "Plate Tectonics is the theory that the Earth's lithosphere is divided into large plates that move and interact, resulting in geological phenomena such as mountain building, volcanism, and earthquakes.",
+    "subject": "Earth Science",
+    "difficulty": "advanced",
+    "topic": "Plate Tectonics"
+  },
+  {
+    "question": "What is the largest desert in the world, covering over 14 million square kilometers?",
+    "options": [
+      "Sahara Desert",
+      "Gobi Desert",
+      "Mojave Desert",
+      "Antarctic Desert"
+    ],
+    "correct_answer": "Antarctic Desert",
+    "explanation": "The Antarctic Desert is the largest desert in the world, covering the entire continent of Antarctica and accounting for about 98% of the continent's land area.",
+    "subject": "Earth Science",
+    "difficulty": "advanced",
+    "topic": "Geography"
+  },
+  {
+    "question": "What is the process by which the universe became transparent to light, occurring about 380,000 years after the Big Bang?",
+    "options": [
+      "Recombination",
+      "Nucleosynthesis",
+      "Dark Matter Formation",
+      "Galaxy Formation"
+    ],
+    "correct_answer": "Recombination",
+    "explanation": "Recombination is the process by which electrons and protons combined to form neutral atoms, allowing light to travel freely through the universe and marking the end of the cosmic dark ages.",
+    "subject": "Earth Science",
+    "difficulty": "advanced",
+    "topic": "Cosmology"
+  },
+  {
+    "question": "What is the term for the study of the shape and features of the Earth's surface?",
+    "options": [
+      "Geomorphology",
+      "Geology",
+      "Geography",
+      "Cartography"
+    ],
+    "correct_answer": "Geomorphology",
+    "explanation": "Geomorphology is the scientific study of the shape and features of the Earth's surface, including landforms, landscapes, and the processes that shape them.",
+    "subject": "Earth Science",
+    "difficulty": "advanced",
+    "topic": "Geomorphology"
+  },
+  {
+    "question": "What is the type of rock that is formed from the cooling and solidification of magma or lava?",
+    "options": [
+      "Igneous",
+      "Sedimentary",
+      "Metamorphic",
+      "Foliated"
+    ],
+    "correct_answer": "Igneous",
+    "explanation": "Igneous rocks are formed from the cooling and solidification of magma or lava, and can be either intrusive (formed below the Earth's surface) or extrusive (formed above the Earth's surface).",
+    "subject": "Earth Science",
+    "difficulty": "advanced",
+    "topic": "Geology"
+  },
+  {
+    "question": "What is the process by which the Earth's atmosphere retains heat, resulting in a warming of the planet?",
+    "options": [
+      "Greenhouse Effect",
+      "Albedo",
+      "Convection",
+      "Evaporation"
+    ],
+    "correct_answer": "Greenhouse Effect",
+    "explanation": "The Greenhouse Effect is the process by which certain gases in the Earth's atmosphere, such as carbon dioxide and water vapor, trap heat from the sun, resulting in a warming of the planet.",
+    "subject": "Earth Science",
+    "difficulty": "advanced",
+    "topic": "Climate Science"
+  },
+  {
+    "question": "What is the term for the movement of tectonic plates that results in the creation of a mountain range?",
+    "options": [
+      "Continental Rifting",
+      "Sea-Floor Spreading",
+      "Subduction",
+      "Orogenesis"
+    ],
+    "correct_answer": "Orogenesis",
+    "explanation": "Orogenesis is the process by which tectonic plates interact to form a mountain range, resulting in the formation of mountains, volcanoes, and earthquakes.",
+    "subject": "Earth Science",
+    "difficulty": "advanced",
+    "topic": "Plate Tectonics"
+  },
+  {
+    "question": "What is the type of earthquake wave that travels through the Earth's surface, causing the most damage?",
+    "options": [
+      "P-Wave",
+      "S-Wave",
+      "Surface Wave",
+      "Body Wave"
+    ],
+    "correct_answer": "Surface Wave",
+    "explanation": "Surface waves are a type of seismic wave that travels along the Earth's surface, causing the most damage to buildings and structures during an earthquake.",
+    "subject": "Earth Science",
+    "difficulty": "advanced",
+    "topic": "Seismology"
+  },
+  {
+    "question": "What is the term for the study of the Earth's climate and its impact on human societies?",
+    "options": [
+      "Climatology",
+      "Meteorology",
+      "Geography",
+      "Environmental Science"
+    ],
+    "correct_answer": "Climatology",
+    "explanation": "Climatology is the scientific study of the Earth's climate and its impact on human societies, including the study of climate patterns, climate change, and its effects on the environment and human populations.",
+    "subject": "Earth Science",
+    "difficulty": "advanced",
+    "topic": "Climate Science"
+  },
+  {
+    "question": "What is the process by which water moves through a plant, from the roots to the leaves, and is then released into the air as water vapor?",
+    "options": [
+      "Respiration",
+      "Transpiration",
+      "Photosynthesis",
+      "Evaporation"
+    ],
+    "correct_answer": "Transpiration",
+    "explanation": "Transpiration is the process by which water is transported from the roots of a plant to the leaves, and is then released into the air as water vapor, playing a crucial role in the water cycle.",
+    "subject": "Earth Science",
+    "difficulty": "advanced",
+    "topic": "Hydrology"
+  },
+  {
+    "question": "What is the term for the layer of the Earth's atmosphere that contains the ozone layer, which protects the planet from harmful ultraviolet radiation?",
+    "options": [
+      "Troposphere",
+      "Stratosphere",
+      "Mesosphere",
+      "Thermosphere"
+    ],
+    "correct_answer": "Stratosphere",
+    "explanation": "The stratosphere is the layer of the Earth's atmosphere that contains the ozone layer, which protects the planet from harmful ultraviolet radiation and plays a crucial role in regulating the Earth's climate.",
+    "subject": "Earth Science",
+    "difficulty": "advanced",
+    "topic": "Atmospheric Science"
+  },
+  {
+    "question": "What is the type of rock that is formed from the alteration of existing rocks under high pressure and temperature conditions?",
+    "options": [
+      "Igneous",
+      "Sedimentary",
+      "Metamorphic",
+      "Foliated"
+    ],
+    "correct_answer": "Metamorphic",
+    "explanation": "Metamorphic rocks are formed from the alteration of existing rocks under high pressure and temperature conditions, resulting in changes to the rock's mineral composition and structure.",
+    "subject": "Earth Science",
+    "difficulty": "advanced",
+    "topic": "Geology"
+  },
+  {
+    "question": "What is the process by which the Earth's ocean currents distribute heat around the globe, playing a crucial role in regulating the Earth's climate?",
+    "options": [
+      "Thermohaline Circulation",
+      "Wind-Driven Circulation",
+      "Tidal Currents",
+      "Ocean Waves"
+    ],
+    "correct_answer": "Thermohaline Circulation",
+    "explanation": "Thermohaline circulation is the process by which the Earth's ocean currents distribute heat around the globe, playing a crucial role in regulating the Earth's climate and influencing regional climate patterns.",
+    "subject": "Earth Science",
+    "difficulty": "advanced",
+    "topic": "Oceanography"
+  },
+  {
+    "question": "What is the term for the study of the Earth's oceans, including their properties, dynamics, and impact on the environment?",
+    "options": [
+      "Oceanography",
+      "Limnology",
+      "Hydrology",
+      "Geology"
+    ],
+    "correct_answer": "Oceanography",
+    "explanation": "Oceanography is the scientific study of the Earth's oceans, including their properties, dynamics, and impact on the environment, and is a crucial field of study for understanding the Earth's climate and ecosystems.",
+    "subject": "Earth Science",
+    "difficulty": "advanced",
+    "topic": "Oceanography"
+  },
+  {
+    "question": "What is the type of volcano that is characterized by a steep, conical shape and is typically found at subduction zones?",
+    "options": [
+      "Shield Volcano",
+      "Stratovolcano",
+      "Cinder Cone Volcano",
+      "Caldera"
+    ],
+    "correct_answer": "Stratovolcano",
+    "explanation": "Stratovolcanoes are characterized by a steep, conical shape and are typically found at subduction zones, where they are formed by the accumulation of alternating layers of lava, ash, and other pyroclastic material.",
+    "subject": "Earth Science",
+    "difficulty": "advanced",
+    "topic": "Volcanology"
+  },
+  {
+    "question": "What is the process by which the Earth's magnetic field reverses its polarity, resulting in a change in the Earth's magnetic field?",
+    "options": [
+      "Magnetic Reversal",
+      "Geologic Time Scale",
+      "Plate Tectonics",
+      "Seafloor Spreading"
+    ],
+    "correct_answer": "Magnetic Reversal",
+    "explanation": "Magnetic reversal is the process by which the Earth's magnetic field reverses its polarity, resulting in a change in the Earth's magnetic field and leaving a record of the reversal in rocks and sediments.",
+    "subject": "Earth Science",
+    "difficulty": "advanced",
+    "topic": "Geophysics"
+  },
+  {
+    "question": "What is the term for the study of the Earth's internal structure, including its composition, temperature, and pressure?",
+    "options": [
+      "Seismology",
+      "Geology",
+      "Geophysics",
+      "Meteorology"
+    ],
+    "correct_answer": "Geophysics",
+    "explanation": "Geophysics is the scientific study of the Earth's internal structure, including its composition, temperature, and pressure, and uses a range of techniques, including seismology and gravity measurements, to understand the Earth's internal dynamics.",
+    "subject": "Earth Science",
+    "difficulty": "advanced",
+    "topic": "Geophysics"
+  },
+  {
+    "question": "What is the type of earthquake that occurs when there is a sudden movement along a fault, resulting in a release of energy?",
+    "options": [
+      "Tectonic Earthquake",
+      "Volcanic Earthquake",
+      "Collapse Earthquake",
+      "Human-Induced Earthquake"
+    ],
+    "correct_answer": "Tectonic Earthquake",
+    "explanation": "Tectonic earthquakes occur when there is a sudden movement along a fault, resulting in a release of energy and causing the ground to shake, sometimes violently.",
+    "subject": "Earth Science",
+    "difficulty": "advanced",
+    "topic": "Seismology"
+  },
+  {
+    "question": "What is the process by which the Earth's climate is influenced by the interaction of the atmosphere, oceans, and land surfaces?",
+    "options": [
+      "Climate Feedback Loop",
+      "Greenhouse Effect",
+      "Albedo",
+      "Evaporation"
+    ],
+    "correct_answer": "Climate Feedback Loop",
+    "explanation": "Climate feedback loops refer to the complex interactions between the atmosphere, oceans, and land surfaces that influence the Earth's climate, and can either amplify or dampen the effects of climate change.",
+    "subject": "Earth Science",
+    "difficulty": "advanced",
+    "topic": "Climate Science"
+  },
+  {
+    "question": "What is the type of rock that is formed from the accumulation of sediments, such as sand, silt, and clay?",
+    "options": [
+      "Igneous",
+      "Sedimentary",
+      "Metamorphic",
+      "Foliated"
+    ],
+    "correct_answer": "Sedimentary",
+    "explanation": "Sedimentary rocks are formed from the accumulation of sediments, such as sand, silt, and clay, and can provide valuable information about the Earth's history, including the formation of landscapes and the evolution of life.",
+    "subject": "Earth Science",
+    "difficulty": "advanced",
+    "topic": "Geology"
+  },
+  {
+    "question": "What is the process by which the Earth's oceans absorb and store carbon dioxide from the atmosphere, helping to regulate the Earth's climate?",
+    "options": [
+      "Ocean Acidification",
+      "Carbon Sequestration",
+      "Nitrogen Fixation",
+      "Phytoplankton Growth"
+    ],
+    "correct_answer": "Carbon Sequestration",
+    "explanation": "Carbon sequestration refers to the process by which the Earth's oceans absorb and store carbon dioxide from the atmosphere, helping to regulate the Earth's climate and mitigate the effects of climate change.",
+    "subject": "Earth Science",
+    "difficulty": "advanced",
+    "topic": "Oceanography"
+  },
+  {
+    "question": "What is the term for the study of the Earth's natural hazards, including earthquakes, volcanoes, and landslides?",
+    "options": [
+      "Natural Hazard Science",
+      "Disaster Risk Reduction",
+      "Emergency Management",
+      "Environmental Science"
+    ],
+    "correct_answer": "Natural Hazard Science",
+    "explanation": "Natural hazard science is the scientific study of the Earth's natural hazards, including earthquakes, volcanoes, and landslides, and aims to understand and mitigate the risks associated with these events.",
+    "subject": "Earth Science",
+    "difficulty": "advanced",
+    "topic": "Natural Hazards"
+  },
+  {
+    "question": "What is the type of mountain range that is formed by the collision of two tectonic plates, resulting in the formation of a fold mountain range?",
+    "options": [
+      "Fold Mountain Range",
+      "Block Mountain Range",
+      "Volcanic Mountain Range",
+      "Dome Mountain Range"
+    ],
+    "correct_answer": "Fold Mountain Range",
+    "explanation": "Fold mountain ranges are formed by the collision of two tectonic plates, resulting in the formation of a mountain range through the process of folding, faulting, and uplift.",
+    "subject": "Earth Science",
+    "difficulty": "advanced",
+    "topic": "Geology"
+  },
+  {
+    "question": "What is the process by which the Earth's atmosphere is heated from the bottom up, resulting in the formation of clouds and precipitation?",
+    "options": [
+      "Convection",
+      "Conduction",
+      "Radiation",
+      "Evaporation"
+    ],
+    "correct_answer": "Convection",
+    "explanation": "Convection is the process by which the Earth's atmosphere is heated from the bottom up, resulting in the formation of clouds and precipitation, and plays a crucial role in shaping the Earth's climate and weather patterns.",
+    "subject": "Earth Science",
+    "difficulty": "advanced",
+    "topic": "Atmospheric Science"
+  },
+  {
+    "question": "What is the term for the study of the Earth's soil, including its composition, properties, and impact on the environment?",
+    "options": [
+      "Pedology",
+      "Geology",
+      "Hydrology",
+      "Ecology"
+    ],
+    "correct_answer": "Pedology",
+    "explanation": "Pedology is the scientific study of the Earth's soil, including its composition, properties, and impact on the environment, and is a crucial field of study for understanding the Earth's ecosystems and natural resources.",
+    "subject": "Earth Science",
+    "difficulty": "advanced",
+    "topic": "Soil Science"
+  },
+  {
+    "question": "What is the type of earthquake that occurs when there is a sudden movement along a fault, resulting in a release of energy and a tsunami?",
+    "options": [
+      "Tectonic Earthquake",
+      "Volcanic Earthquake",
+      "Subduction Earthquake",
+      "Transform Earthquake"
+    ],
+    "correct_answer": "Subduction Earthquake",
+    "explanation": "Subduction earthquakes occur when there is a sudden movement along a fault, resulting in a release of energy and a tsunami, and are often associated with the subduction of one tectonic plate beneath another.",
+    "subject": "Earth Science",
+    "difficulty": "advanced",
+    "topic": "Seismology"
+  },
+  {
+    "question": "What is the process by which the Earth's climate is influenced by the interaction of the atmosphere, oceans, and land surfaces, resulting in the formation of climate patterns and trends?",
+    "options": [
+      "Climate Feedback Loop",
+      "Greenhouse Effect",
+      "Albedo",
+      "Evaporation"
+    ],
+    "correct_answer": "Climate Feedback Loop",
+    "explanation": "Climate feedback loops refer to the complex interactions between the atmosphere, oceans, and land surfaces that influence the Earth's climate, resulting in the formation of climate patterns and trends, and can either amplify or dampen the effects of climate change.",
+    "subject": "Earth Science",
+    "difficulty": "advanced",
+    "topic": "Climate Science"
+  },
+  {
+    "question": "What is the term for the study of the Earth's water resources, including its distribution, quality, and impact on the environment?",
+    "options": [
+      "Hydrology",
+      "Limnology",
+      "Oceanography",
+      "Glaciology"
+    ],
+    "correct_answer": "Hydrology",
+    "explanation": "Hydrology is the scientific study of the Earth's water resources, including its distribution, quality, and impact on the environment, and is a crucial field of study for understanding the Earth's ecosystems and natural resources.",
+    "subject": "Earth Science",
+    "difficulty": "advanced",
+    "topic": "Hydrology"
+  },
+  {
+    "question": "What is the term for a fold in the Earth's crust that is formed by the movement of tectonic plates?",
+    "options": [
+      "Anticline",
+      "Syncline",
+      "Fault",
+      "Joint"
+    ],
+    "correct_answer": "Anticline",
+    "explanation": "An anticline is a type of fold in the Earth's crust that is formed by the movement of tectonic plates, resulting in a upward-folded structure.",
+    "subject": "Earth Science",
+    "difficulty": "advanced",
+    "topic": "structural geology"
+  },
+  {
+    "question": "What is the process by which the Earth's ocean currents distribute heat around the globe, resulting in a moderate climate?",
+    "options": [
+      "Thermohaline circulation",
+      "Wind-driven circulation",
+      "Tidal currents",
+      "Ocean gyres"
+    ],
+    "correct_answer": "Thermohaline circulation",
+    "explanation": "Thermohaline circulation is the process by which the Earth's ocean currents distribute heat around the globe, resulting in a moderate climate. This process involves the sinking of dense, cold water in polar regions and the rising of warm, less dense water in equatorial regions.",
+    "subject": "Earth Science",
+    "difficulty": "advanced",
+    "topic": "oceanography"
+  },
+  {
+    "question": "What is the term for a type of natural hazard that occurs when a sudden release of energy in the Earth's crust creates seismic waves?",
+    "options": [
+      "Earthquake",
+      "Volcanic eruption",
+      "Landslide",
+      "Flood"
+    ],
+    "correct_answer": "Earthquake",
+    "explanation": "An earthquake is a type of natural hazard that occurs when a sudden release of energy in the Earth's crust creates seismic waves, resulting in shaking of the ground and potential damage to structures and infrastructure.",
+    "subject": "Earth Science",
+    "difficulty": "advanced",
+    "topic": "natural hazards"
+  },
+  {
+    "question": "What is the process by which the Earth's soil is formed through the breakdown of rocks and organic matter?",
+    "options": [
+      "Weathering",
+      "Erosion",
+      "Deposition",
+      "Pedogenesis"
+    ],
+    "correct_answer": "Pedogenesis",
+    "explanation": "Pedogenesis is the process by which the Earth's soil is formed through the breakdown of rocks and organic matter, resulting in the creation of a complex ecosystem that supports plant growth and filters water.",
+    "subject": "Earth Science",
+    "difficulty": "advanced",
+    "topic": "soil science"
+  },
+  {
+    "question": "What is the term for a type of rock that is formed from the accumulation and compression of sediments?",
+    "options": [
+      "Igneous",
+      "Sedimentary",
+      "Metamorphic",
+      "Foliated"
+    ],
+    "correct_answer": "Sedimentary",
+    "explanation": "Sedimentary rocks are formed from the accumulation and compression of sediments, such as sand, silt, and clay, which can be derived from a variety of sources including erosion of pre-existing rocks and human activities.",
+    "subject": "Earth Science",
+    "difficulty": "advanced",
+    "topic": "rock cycle"
+  },
+  {
+    "question": "What is the process by which the Earth's atmosphere is depleted of ozone, resulting in an increase in UV radiation at the surface?",
+    "options": [
+      "Ozone depletion",
+      "Global warming",
+      "Climate change",
+      "Acid rain"
+    ],
+    "correct_answer": "Ozone depletion",
+    "explanation": "Ozone depletion is the process by which the Earth's atmosphere is depleted of ozone, resulting in an increase in UV radiation at the surface. This process is primarily caused by the release of chlorofluorocarbons (CFCs) and other halogenated gases.",
+    "subject": "Earth Science",
+    "difficulty": "advanced",
+    "topic": "atmospheric science"
+  },
+  {
+    "question": "What is the term for a type of natural hazard that occurs when a large amount of snow and ice accumulates on a slope, resulting in a rapid flow of material down the slope?",
+    "options": [
+      "Avalanche",
+      "Landslide",
+      "Mudslide",
+      "Rockfall"
+    ],
+    "correct_answer": "Avalanche",
+    "explanation": "An avalanche is a type of natural hazard that occurs when a large amount of snow and ice accumulates on a slope, resulting in a rapid flow of material down the slope. This can be triggered by a variety of factors, including new snowfall, wind, and human activity.",
+    "subject": "Earth Science",
+    "difficulty": "advanced",
+    "topic": "natural hazards"
+  },
+  {
+    "question": "What is the process by which the Earth's water cycle is driven, resulting in the continuous movement of water on, above, and below the surface of the Earth?",
+    "options": [
+      "Evaporation",
+      "Condensation",
+      "Precipitation",
+      "Hydrologic cycle"
+    ],
+    "correct_answer": "Hydrologic cycle",
+    "explanation": "The hydrologic cycle is the process by which the Earth's water cycle is driven, resulting in the continuous movement of water on, above, and below the surface of the Earth. This process involves the movement of water in three phases: liquid, solid (ice), and gas (water vapor).",
+    "subject": "Earth Science",
+    "difficulty": "advanced",
+    "topic": "hydrologic cycle"
+  },
+  {
+    "question": "What is the term for a type of rock that is formed from the cooling and solidification of magma or lava, characterized by a glassy texture?",
+    "options": [
+      "Igneous",
+      "Sedimentary",
+      "Metamorphic",
+      "Obsidian"
+    ],
+    "correct_answer": "Obsidian",
+    "explanation": "Obsidian is a type of igneous rock that is formed from the cooling and solidification of magma or lava, characterized by a glassy texture. It is typically black or dark brown in color and is often found in areas where there has been volcanic activity.",
+    "subject": "Earth Science",
+    "difficulty": "advanced",
+    "topic": "rock cycle"
+  },
+  {
+    "question": "What is the process by which the Earth's climate has changed over time, resulting in the formation of different types of landscapes and ecosystems?",
+    "options": [
+      "Climate change",
+      "Global warming",
+      "Glaciation",
+      "Sea-level rise"
+    ],
+    "correct_answer": "Climate change",
+    "explanation": "Climate change is the process by which the Earth's climate has changed over time, resulting in the formation of different types of landscapes and ecosystems. This process has occurred throughout the Earth's history and is ongoing, with human activities being a major contributor to current climate change.",
+    "subject": "Earth Science",
+    "difficulty": "advanced",
+    "topic": "climate change"
+  },
+  {
+    "question": "What is the term for a type of natural hazard that occurs when a sudden release of water from a dam or other water storage facility results in a rapid flow of water downstream?",
+    "options": [
+      "Flood",
+      "Drought",
+      "Landslide",
+      "Dam failure"
+    ],
+    "correct_answer": "Flood",
+    "explanation": "A flood is a type of natural hazard that occurs when a sudden release of water from a dam or other water storage facility results in a rapid flow of water downstream, resulting in damage to infrastructure, agriculture, and human settlements.",
+    "subject": "Earth Science",
+    "difficulty": "advanced",
+    "topic": "natural hazards"
+  },
+  {
+    "question": "What is the process by which the Earth's soil is degraded, resulting in a loss of fertility and productivity?",
+    "options": [
+      "Soil erosion",
+      "Soil compaction",
+      "Soil salinization",
+      "Soil degradation"
+    ],
+    "correct_answer": "Soil degradation",
+    "explanation": "Soil degradation is the process by which the Earth's soil is degraded, resulting in a loss of fertility and productivity. This can occur through a variety of mechanisms, including soil erosion, soil compaction, and soil salinization.",
+    "subject": "Earth Science",
+    "difficulty": "advanced",
+    "topic": "soil science"
+  },
+  {
+    "question": "What is the term for a type of rock that is formed from the alteration of existing rocks under high pressure and temperature conditions, characterized by a foliated texture?",
+    "options": [
+      "Igneous",
+      "Sedimentary",
+      "Metamorphic",
+      "Gneiss"
+    ],
+    "correct_answer": "Gneiss",
+    "explanation": "Gneiss is a type of metamorphic rock that is formed from the alteration of existing rocks under high pressure and temperature conditions, characterized by a foliated texture. It is typically found in areas where there has been significant tectonic activity.",
+    "subject": "Earth Science",
+    "difficulty": "advanced",
+    "topic": "rock cycle"
+  },
+  {
+    "question": "What is the process by which the Earth's ocean currents are driven, resulting in the distribution of heat and nutrients around the globe?",
+    "options": [
+      "Thermohaline circulation",
+      "Wind-driven circulation",
+      "Tidal currents",
+      "Ocean gyres"
+    ],
+    "correct_answer": "Thermohaline circulation",
+    "explanation": "Thermohaline circulation is the process by which the Earth's ocean currents are driven, resulting in the distribution of heat and nutrients around the globe. This process involves the sinking of dense, cold water in polar regions and the rising of warm, less dense water in equatorial regions.",
+    "subject": "Earth Science",
+    "difficulty": "advanced",
+    "topic": "oceanography"
+  },
+  {
+    "question": "What is the term for a type of natural hazard that occurs when a large amount of rock and soil moves down a slope, resulting in damage to infrastructure and human settlements?",
+    "options": [
+      "Landslide",
+      "Mudslide",
+      "Rockfall",
+      "Avalanche"
+    ],
+    "correct_answer": "Landslide",
+    "explanation": "A landslide is a type of natural hazard that occurs when a large amount of rock and soil moves down a slope, resulting in damage to infrastructure and human settlements. This can be triggered by a variety of factors, including heavy rainfall, earthquakes, and human activity.",
+    "subject": "Earth Science",
+    "difficulty": "advanced",
+    "topic": "natural hazards"
+  },
+  {
+    "question": "What is the process by which the Earth's atmosphere is affected by human activities, resulting in changes to the climate and weather patterns?",
+    "options": [
+      "Global warming",
+      "Climate change",
+      "Air pollution",
+      "Atmospheric circulation"
+    ],
+    "correct_answer": "Climate change",
+    "explanation": "Climate change is the process by which the Earth's atmosphere is affected by human activities, resulting in changes to the climate and weather patterns. This includes the release of greenhouse gases, such as carbon dioxide and methane, which trap heat and contribute to global warming.",
+    "subject": "Earth Science",
+    "difficulty": "advanced",
+    "topic": "climate change"
+  },
+  {
+    "question": "What is the term for a type of rock that is formed from the cooling and solidification of magma or lava, characterized by a coarse-grained texture?",
+    "options": [
+      "Igneous",
+      "Sedimentary",
+      "Metamorphic",
+      "Granite"
+    ],
+    "correct_answer": "Granite",
+    "explanation": "Granite is a type of igneous rock that is formed from the cooling and solidification of magma or lava, characterized by a coarse-grained texture. It is typically found in areas where there has been significant volcanic activity.",
+    "subject": "Earth Science",
+    "difficulty": "advanced",
+    "topic": "rock cycle"
+  },
+  {
+    "question": "What is the process by which the Earth's water cycle is affected by human activities, resulting in changes to the availability and quality of water?",
+    "options": [
+      "Hydrologic cycle",
+      "Water pollution",
+      "Water conservation",
+      "Irrigation"
+    ],
+    "correct_answer": "Hydrologic cycle",
+    "explanation": "The hydrologic cycle is the process by which the Earth's water cycle is affected by human activities, resulting in changes to the availability and quality of water. This includes the extraction of groundwater, the construction of dams and reservoirs, and the release of pollutants into waterways.",
+    "subject": "Earth Science",
+    "difficulty": "advanced",
+    "topic": "hydrologic cycle"
+  },
+  {
+    "question": "What is the term for a type of natural hazard that occurs when a sudden release of energy in the Earth's crust creates seismic waves, resulting in damage to infrastructure and human settlements?",
+    "options": [
+      "Earthquake",
+      "Volcanic eruption",
+      "Landslide",
+      "Tsunami"
+    ],
+    "correct_answer": "Earthquake",
+    "explanation": "An earthquake is a type of natural hazard that occurs when a sudden release of energy in the Earth's crust creates seismic waves, resulting in damage to infrastructure and human settlements. This can be triggered by a variety of factors, including tectonic activity and human activity.",
+    "subject": "Earth Science",
+    "difficulty": "advanced",
+    "topic": "natural hazards"
+  },
+  {
+    "question": "What is the process by which the Earth's soil is formed through the breakdown of rocks and organic matter, resulting in the creation of a complex ecosystem?",
+    "options": [
+      "Weathering",
+      "Erosion",
+      "Deposition",
+      "Pedogenesis"
+    ],
+    "correct_answer": "Pedogenesis",
+    "explanation": "Pedogenesis is the process by which the Earth's soil is formed through the breakdown of rocks and organic matter, resulting in the creation of a complex ecosystem that supports plant growth and filters water.",
+    "subject": "Earth Science",
+    "difficulty": "advanced",
+    "topic": "soil science"
+  },
+  {
+    "question": "What type of rock is formed from the cooling and solidification of magma?",
+    "options": [
+      "Sedimentary",
+      "Igneous",
+      "Metamorphic",
+      "Foliated"
+    ],
+    "correct_answer": "Igneous",
+    "explanation": "Igneous rocks are formed from the cooling and solidification of magma or lava.",
+    "subject": "Earth Science",
+    "difficulty": "advanced",
+    "topic": "rock cycle"
+  },
+  {
+    "question": "What is the process by which the Earth's surface is worn away by natural forces such as wind and water?",
+    "options": [
+      "Weathering",
+      "Erosion",
+      "Deposition",
+      "Denudation"
+    ],
+    "correct_answer": "Erosion",
+    "explanation": "Erosion is the process by which the Earth's surface is worn away by natural forces such as wind and water.",
+    "subject": "Earth Science",
+    "difficulty": "advanced",
+    "topic": "erosion and deposition"
+  },
+  {
+    "question": "What is the term for the movement of tectonic plates that results in the creation of a deep-sea trench?",
+    "options": [
+      "Divergent motion",
+      "Convergent motion",
+      "Transform motion",
+      "Subduction"
+    ],
+    "correct_answer": "Convergent motion",
+    "explanation": "Convergent motion is the movement of tectonic plates that results in the creation of a deep-sea trench.",
+    "subject": "Earth Science",
+    "difficulty": "advanced",
+    "topic": "plate tectonics"
+  },
+  {
+    "question": "What type of mountain is formed by the folding of rocks?",
+    "options": [
+      "Volcanic",
+      "Fold",
+      "Block",
+      "Dome"
+    ],
+    "correct_answer": "Fold",
+    "explanation": "Fold mountains are formed by the folding of rocks, resulting in the creation of a mountain range.",
+    "subject": "Earth Science",
+    "difficulty": "advanced",
+    "topic": "mountain building"
+  },
+  {
+    "question": "What is the term for the study of the Earth's physical structure and composition?",
+    "options": [
+      "Geology",
+      "Geography",
+      "Geophysics",
+      "Geomorphology"
+    ],
+    "correct_answer": "Geology",
+    "explanation": "Geology is the study of the Earth's physical structure and composition.",
+    "subject": "Earth Science",
+    "difficulty": "advanced",
+    "topic": "earth science"
+  },
+  {
+    "question": "What is the process by which the Earth's climate is regulated by the interaction of the atmosphere, oceans, and land?",
+    "options": [
+      "Global warming",
+      "Climate change",
+      "Earth's climate system",
+      "Greenhouse effect"
+    ],
+    "correct_answer": "Earth's climate system",
+    "explanation": "The Earth's climate system is the process by which the Earth's climate is regulated by the interaction of the atmosphere, oceans, and land.",
+    "subject": "Earth Science",
+    "difficulty": "advanced",
+    "topic": "climate"
+  },
+  {
+    "question": "What type of rock is formed from the alteration of existing rocks under high pressure and temperature?",
+    "options": [
+      "Sedimentary",
+      "Igneous",
+      "Metamorphic",
+      "Foliated"
+    ],
+    "correct_answer": "Metamorphic",
+    "explanation": "Metamorphic rocks are formed from the alteration of existing rocks under high pressure and temperature.",
+    "subject": "Earth Science",
+    "difficulty": "advanced",
+    "topic": "rock cycle"
+  },
+  {
+    "question": "What is the term for the movement of water from the atmosphere to the ground through precipitation?",
+    "options": [
+      "Runoff",
+      "Infiltration",
+      "Percolation",
+      "Precipitation"
+    ],
+    "correct_answer": "Precipitation",
+    "explanation": "Precipitation is the movement of water from the atmosphere to the ground through rain, snow, or hail.",
+    "subject": "Earth Science",
+    "difficulty": "advanced",
+    "topic": "hydrologic cycle"
+  },
+  {
+    "question": "What is the process by which the Earth's surface is shaped by the movement of glaciers?",
+    "options": [
+      "Glaciation",
+      "Weathering",
+      "Erosion",
+      "Deposition"
+    ],
+    "correct_answer": "Glaciation",
+    "explanation": "Glaciation is the process by which the Earth's surface is shaped by the movement of glaciers.",
+    "subject": "Earth Science",
+    "difficulty": "advanced",
+    "topic": "glaciers"
+  },
+  {
+    "question": "What type of volcano is characterized by a steep, conical shape and explosive eruptions?",
+    "options": [
+      "Shield volcano",
+      "Stratovolcano",
+      "Cinder cone volcano",
+      "Caldera"
+    ],
+    "correct_answer": "Stratovolcano",
+    "explanation": "Stratovolcanoes are characterized by a steep, conical shape and explosive eruptions.",
+    "subject": "Earth Science",
+    "difficulty": "advanced",
+    "topic": "volcanology"
+  },
+  {
+    "question": "What is the term for the study of the Earth's oceans and their properties?",
+    "options": [
+      "Oceanography",
+      "Limnology",
+      "Hydrology",
+      "Meteorology"
+    ],
+    "correct_answer": "Oceanography",
+    "explanation": "Oceanography is the study of the Earth's oceans and their properties.",
+    "subject": "Earth Science",
+    "difficulty": "advanced",
+    "topic": "oceanography"
+  },
+  {
+    "question": "What is the process by which the Earth's surface is shaped by the movement of wind and water?",
+    "options": [
+      "Weathering",
+      "Erosion",
+      "Deposition",
+      "Denudation"
+    ],
+    "correct_answer": "Erosion",
+    "explanation": "Erosion is the process by which the Earth's surface is shaped by the movement of wind and water.",
+    "subject": "Earth Science",
+    "difficulty": "advanced",
+    "topic": "erosion and deposition"
+  },
+  {
+    "question": "What type of rock is formed from the accumulation of sediments?",
+    "options": [
+      "Sedimentary",
+      "Igneous",
+      "Metamorphic",
+      "Foliated"
+    ],
+    "correct_answer": "Sedimentary",
+    "explanation": "Sedimentary rocks are formed from the accumulation of sediments.",
+    "subject": "Earth Science",
+    "difficulty": "advanced",
+    "topic": "rock cycle"
+  },
+  {
+    "question": "What is the process by which the Earth's climate is affected by human activities?",
+    "options": [
+      "Global warming",
+      "Climate change",
+      "Greenhouse effect",
+      "Atmospheric circulation"
+    ],
+    "correct_answer": "Climate change",
+    "explanation": "Climate change is the process by which the Earth's climate is affected by human activities.",
+    "subject": "Earth Science",
+    "difficulty": "advanced",
+    "topic": "climate"
+  },
+  {
+    "question": "What type of natural hazard is characterized by the movement of the Earth's crust, resulting in the release of energy?",
+    "options": [
+      "Earthquake",
+      "Volcanic eruption",
+      "Landslide",
+      "Flood"
+    ],
+    "correct_answer": "Earthquake",
+    "explanation": "An earthquake is a natural hazard characterized by the movement of the Earth's crust, resulting in the release of energy.",
+    "subject": "Earth Science",
+    "difficulty": "advanced",
+    "topic": "natural hazards"
+  },
+  {
+    "question": "What is the term for the study of the Earth's interior and its properties?",
+    "options": [
+      "Geology",
+      "Geophysics",
+      "Seismology",
+      "Geomagnetism"
+    ],
+    "correct_answer": "Geophysics",
+    "explanation": "Geophysics is the study of the Earth's interior and its properties.",
+    "subject": "Earth Science",
+    "difficulty": "advanced",
+    "topic": "earth science"
+  },
+  {
+    "question": "What type of rock is formed from the cooling and solidification of lava?",
+    "options": [
+      "Sedimentary",
+      "Igneous",
+      "Metamorphic",
+      "Foliated"
+    ],
+    "correct_answer": "Igneous",
+    "explanation": "Igneous rocks are formed from the cooling and solidification of lava or magma.",
+    "subject": "Earth Science",
+    "difficulty": "advanced",
+    "topic": "rock cycle"
+  },
+  {
+    "question": "What is the process by which the Earth's surface is shaped by the movement of ice?",
+    "options": [
+      "Glaciation",
+      "Weathering",
+      "Erosion",
+      "Deposition"
+    ],
+    "correct_answer": "Glaciation",
+    "explanation": "Glaciation is the process by which the Earth's surface is shaped by the movement of ice.",
+    "subject": "Earth Science",
+    "difficulty": "advanced",
+    "topic": "glaciers"
+  },
+  {
+    "question": "What type of volcano is characterized by a gently sloping shape and non-explosive eruptions?",
+    "options": [
+      "Shield volcano",
+      "Stratovolcano",
+      "Cinder cone volcano",
+      "Caldera"
+    ],
+    "correct_answer": "Shield volcano",
+    "explanation": "Shield volcanoes are characterized by a gently sloping shape and non-explosive eruptions.",
+    "subject": "Earth Science",
+    "difficulty": "advanced",
+    "topic": "volcanology"
+  },
+  {
+    "question": "What is the term for the study of the Earth's landforms and their processes?",
+    "options": [
+      "Geomorphology",
+      "Geology",
+      "Geography",
+      "Hydrology"
+    ],
+    "correct_answer": "Geomorphology",
+    "explanation": "Geomorphology is the study of the Earth's landforms and their processes.",
+    "subject": "Earth Science",
+    "difficulty": "advanced",
+    "topic": "earth science"
+  },
+  {
+    "question": "What type of natural hazard is characterized by the movement of water, resulting in the loss of life and property?",
+    "options": [
+      "Earthquake",
+      "Volcanic eruption",
+      "Landslide",
+      "Flood"
+    ],
+    "correct_answer": "Flood",
+    "explanation": "A flood is a natural hazard characterized by the movement of water, resulting in the loss of life and property.",
+    "subject": "Earth Science",
+    "difficulty": "advanced",
+    "topic": "natural hazards"
+  }
+]

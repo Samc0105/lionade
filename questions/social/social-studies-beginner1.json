@@ -1,0 +1,954 @@
+[
+  {
+    "question": "What is the capital city of the United States?",
+    "options": [
+      "New York",
+      "Los Angeles",
+      "Washington, D.C.",
+      "Chicago"
+    ],
+    "correct_answer": "Washington, D.C.",
+    "explanation": "Washington, D.C. is the capital of the United States and serves as the seat of the federal government.",
+    "subject": "social",
+    "difficulty": "beginner",
+    "topic": "geography"
+  },
+  {
+    "question": "Which document declared independence from Britain?",
+    "options": [
+      "The Constitution",
+      "The Bill of Rights",
+      "The Declaration of Independence",
+      "The Articles of Confederation"
+    ],
+    "correct_answer": "The Declaration of Independence",
+    "explanation": "The Declaration of Independence was adopted on July 4, 1776, declaring the colonies' independence from Britain.",
+    "subject": "social",
+    "difficulty": "beginner",
+    "topic": "history"
+  },
+  {
+    "question": "Who was the first President of the United States?",
+    "options": [
+      "Thomas Jefferson",
+      "George Washington",
+      "Abraham Lincoln",
+      "John Adams"
+    ],
+    "correct_answer": "George Washington",
+    "explanation": "George Washington served as the first President from 1789 to 1797.",
+    "subject": "social",
+    "difficulty": "beginner",
+    "topic": "history"
+  },
+  {
+    "question": "What is the main purpose of the legislative branch of government?",
+    "options": [
+      "To enforce laws",
+      "To interpret laws",
+      "To make laws",
+      "To veto laws"
+    ],
+    "correct_answer": "To make laws",
+    "explanation": "The legislative branch is responsible for creating and passing laws.",
+    "subject": "social",
+    "difficulty": "beginner",
+    "topic": "government"
+  },
+  {
+    "question": "Which amendment abolished slavery in the United States?",
+    "options": [
+      "13th Amendment",
+      "14th Amendment",
+      "15th Amendment",
+      "19th Amendment"
+    ],
+    "correct_answer": "13th Amendment",
+    "explanation": "The 13th Amendment, ratified in 1865, abolished slavery in the United States.",
+    "subject": "social",
+    "difficulty": "beginner",
+    "topic": "history"
+  },
+  {
+    "question": "What is the largest continent on Earth?",
+    "options": [
+      "Africa",
+      "Asia",
+      "Europe",
+      "Antarctica"
+    ],
+    "correct_answer": "Asia",
+    "explanation": "Asia is the largest continent, both in terms of area and population.",
+    "subject": "social",
+    "difficulty": "beginner",
+    "topic": "geography"
+  },
+  {
+    "question": "What is a democracy?",
+    "options": [
+      "Rule by a king",
+      "Rule by the people",
+      "Rule by a dictator",
+      "Rule by the military"
+    ],
+    "correct_answer": "Rule by the people",
+    "explanation": "A democracy is a system of government in which the citizens exercise power, typically through elected representatives.",
+    "subject": "social",
+    "difficulty": "beginner",
+    "topic": "government"
+  },
+  {
+    "question": "Which ocean is the largest?",
+    "options": [
+      "Atlantic Ocean",
+      "Indian Ocean",
+      "Arctic Ocean",
+      "Pacific Ocean"
+    ],
+    "correct_answer": "Pacific Ocean",
+    "explanation": "The Pacific Ocean is the largest and deepest ocean on Earth.",
+    "subject": "social",
+    "difficulty": "beginner",
+    "topic": "geography"
+  },
+  {
+    "question": "What is the main function of the judicial branch?",
+    "options": [
+      "To create laws",
+      "To interpret laws",
+      "To enforce laws",
+      "To amend laws"
+    ],
+    "correct_answer": "To interpret laws",
+    "explanation": "The judicial branch interprets the laws and ensures they are applied fairly.",
+    "subject": "social",
+    "difficulty": "beginner",
+    "topic": "government"
+  },
+  {
+    "question": "Which event started World War I?",
+    "options": [
+      "The sinking of the Lusitania",
+      "The assassination of Archduke Franz Ferdinand",
+      "The invasion of Poland",
+      "The bombings of Pearl Harbor"
+    ],
+    "correct_answer": "The assassination of Archduke Franz Ferdinand",
+    "explanation": "The assassination of Archduke Franz Ferdinand of Austria in 1914 is widely regarded as the spark that ignited World War I.",
+    "subject": "social",
+    "difficulty": "beginner",
+    "topic": "history"
+  },
+  {
+    "question": "What is the Bill of Rights?",
+    "options": [
+      "A list of duties for citizens",
+      "The first ten amendments to the Constitution",
+      "A declaration of independence",
+      "A treaty with foreign nations"
+    ],
+    "correct_answer": "The first ten amendments to the Constitution",
+    "explanation": "The Bill of Rights consists of the first ten amendments to the United States Constitution, guaranteeing individual freedoms.",
+    "subject": "social",
+    "difficulty": "beginner",
+    "topic": "government"
+  },
+  {
+    "question": "What is the primary purpose of the United Nations?",
+    "options": [
+      "To promote world peace",
+      "To enforce laws",
+      "To create new nations",
+      "To conduct military operations"
+    ],
+    "correct_answer": "To promote world peace",
+    "explanation": "The United Nations was established to promote international cooperation and maintain world peace.",
+    "subject": "social",
+    "difficulty": "beginner",
+    "topic": "international relations"
+  },
+  {
+    "question": "What is a significant cause of the American Civil War?",
+    "options": [
+      "Taxation without representation",
+      "Slavery",
+      "Territorial expansion",
+      "Foreign intervention"
+    ],
+    "correct_answer": "Slavery",
+    "explanation": "The issue of slavery was a central cause of the American Civil War, leading to conflict between the North and South.",
+    "subject": "social",
+    "difficulty": "beginner",
+    "topic": "history"
+  },
+  {
+    "question": "What is a primary source?",
+    "options": [
+      "A textbook",
+      "A biography",
+      "An original document or artifact",
+      "A summary"
+    ],
+    "correct_answer": "An original document or artifact",
+    "explanation": "A primary source provides direct or firsthand evidence about an event, object, person, or work of art.",
+    "subject": "social",
+    "difficulty": "beginner",
+    "topic": "research skills"
+  },
+  {
+    "question": "Which continent is known for the Sahara Desert?",
+    "options": [
+      "Asia",
+      "Australia",
+      "Africa",
+      "South America"
+    ],
+    "correct_answer": "Africa",
+    "explanation": "The Sahara Desert is the largest hot desert in the world, located in North Africa.",
+    "subject": "social",
+    "difficulty": "beginner",
+    "topic": "geography"
+  },
+  {
+    "question": "What does the term 'civic duty' refer to?",
+    "options": [
+      "Responsibilities of citizens",
+      "Rights of citizens",
+      "Government regulations",
+      "Legal penalties"
+    ],
+    "correct_answer": "Responsibilities of citizens",
+    "explanation": "Civic duty refers to the responsibilities and obligations that a citizen has to their community and government.",
+    "subject": "social",
+    "difficulty": "beginner",
+    "topic": "civics"
+  },
+  {
+    "question": "Which country is known for the Great Wall?",
+    "options": [
+      "India",
+      "China",
+      "Mexico",
+      "Brazil"
+    ],
+    "correct_answer": "China",
+    "explanation": "The Great Wall of China is a famous historical structure built to protect against invasions.",
+    "subject": "social",
+    "difficulty": "beginner",
+    "topic": "history"
+  },
+  {
+    "question": "What is the main economic system in the United States?",
+    "options": [
+      "Socialism",
+      "Communism",
+      "Capitalism",
+      "Feudalism"
+    ],
+    "correct_answer": "Capitalism",
+    "explanation": "Capitalism is the dominant economic system in the United States, characterized by private ownership and free markets.",
+    "subject": "social",
+    "difficulty": "beginner",
+    "topic": "economics"
+  },
+  {
+    "question": "What is a government by a single ruler called?",
+    "options": [
+      "Democracy",
+      "Monarchy",
+      "Oligarchy",
+      "Anarchy"
+    ],
+    "correct_answer": "Monarchy",
+    "explanation": "A monarchy is a form of government where a single ruler, often a king or queen, holds power.",
+    "subject": "social",
+    "difficulty": "beginner",
+    "topic": "government"
+  },
+  {
+    "question": "What is the significance of the Magna Carta?",
+    "options": [
+      "It ended the American Revolution",
+      "It established the principle of limited government",
+      "It created the first democracy",
+      "It abolished slavery"
+    ],
+    "correct_answer": "It established the principle of limited government",
+    "explanation": "The Magna Carta, signed in 1215, is significant for establishing the idea that everyone, including the king, is subject to the law.",
+    "subject": "social",
+    "difficulty": "beginner",
+    "topic": "history"
+  },
+  {
+    "question": "What is the primary function of the executive branch?",
+    "options": [
+      "To interpret laws",
+      "To create laws",
+      "To enforce laws",
+      "To amend laws"
+    ],
+    "correct_answer": "To enforce laws",
+    "explanation": "The executive branch is responsible for enforcing and administering laws.",
+    "subject": "social",
+    "difficulty": "beginner",
+    "topic": "government"
+  },
+  {
+    "question": "What was the main purpose of the Lewis and Clark expedition?",
+    "options": [
+      "To find a route to Asia",
+      "To explore the newly acquired Louisiana Territory",
+      "To establish trade relations",
+      "To map the east coast"
+    ],
+    "correct_answer": "To explore the newly acquired Louisiana Territory",
+    "explanation": "The Lewis and Clark expedition was commissioned to explore the vast territory acquired through the Louisiana Purchase.",
+    "subject": "social",
+    "difficulty": "beginner",
+    "topic": "history"
+  },
+  {
+    "question": "What is the primary goal of environmental conservation?",
+    "options": [
+      "To reduce waste",
+      "To protect natural resources",
+      "To promote economic growth",
+      "To increase population"
+    ],
+    "correct_answer": "To protect natural resources",
+    "explanation": "Environmental conservation aims to protect and sustainably manage natural resources for future generations.",
+    "subject": "social",
+    "difficulty": "beginner",
+    "topic": "environmental studies"
+  },
+  {
+    "question": "What is the capital of the United States?",
+    "options": [
+      "New York",
+      "Washington, D.C.",
+      "Los Angeles",
+      "Chicago"
+    ],
+    "correct_answer": "Washington, D.C.",
+    "explanation": "Washington, D.C. is the capital city of the United States, known for its national monuments and government institutions.",
+    "subject": "social",
+    "difficulty": "beginner",
+    "topic": "geography"
+  },
+  {
+    "question": "Which document declared American independence from Britain?",
+    "options": [
+      "The Constitution",
+      "The Bill of Rights",
+      "The Declaration of Independence",
+      "The Federalist Papers"
+    ],
+    "correct_answer": "The Declaration of Independence",
+    "explanation": "The Declaration of Independence was adopted on July 4, 1776, declaring the thirteen colonies free from British rule.",
+    "subject": "social",
+    "difficulty": "beginner",
+    "topic": "history"
+  },
+  {
+    "question": "Which of the following is a right guaranteed by the First Amendment?",
+    "options": [
+      "Right to bear arms",
+      "Freedom of speech",
+      "Right to a fair trial",
+      "Right to vote"
+    ],
+    "correct_answer": "Freedom of speech",
+    "explanation": "The First Amendment to the U.S. Constitution protects the freedoms of speech, religion, press, assembly, and petition.",
+    "subject": "social",
+    "difficulty": "beginner",
+    "topic": "government"
+  },
+  {
+    "question": "What is the main purpose of the United Nations?",
+    "options": [
+      "To promote world peace",
+      "To enforce laws",
+      "To control trade",
+      "To govern countries"
+    ],
+    "correct_answer": "To promote world peace",
+    "explanation": "The United Nations was established to promote international cooperation and to maintain international peace and security.",
+    "subject": "social",
+    "difficulty": "beginner",
+    "topic": "international relations"
+  },
+  {
+    "question": "Which continent is known as the 'Dark Continent'?",
+    "options": [
+      "Asia",
+      "Africa",
+      "South America",
+      "Europe"
+    ],
+    "correct_answer": "Africa",
+    "explanation": "Africa is often referred to as the 'Dark Continent' due to the historical lack of knowledge and exploration of its interior by Europeans.",
+    "subject": "social",
+    "difficulty": "beginner",
+    "topic": "geography"
+  },
+  {
+    "question": "What is a theocracy?",
+    "options": [
+      "Government by the wealthy",
+      "Government by religious leaders",
+      "Government by the military",
+      "Government by elected officials"
+    ],
+    "correct_answer": "Government by religious leaders",
+    "explanation": "A theocracy is a form of government in which a deity is recognized as the supreme civil ruler, and religious leaders govern in the name of that deity.",
+    "subject": "social",
+    "difficulty": "beginner",
+    "topic": "government"
+  },
+  {
+    "question": "What is the primary function of the legislative branch of government?",
+    "options": [
+      "To interpret laws",
+      "To enforce laws",
+      "To make laws",
+      "To veto laws"
+    ],
+    "correct_answer": "To make laws",
+    "explanation": "The legislative branch is responsible for making laws and is typically composed of a parliament or congress.",
+    "subject": "social",
+    "difficulty": "beginner",
+    "topic": "government"
+  },
+  {
+    "question": "What is the largest ocean on Earth?",
+    "options": [
+      "Atlantic Ocean",
+      "Indian Ocean",
+      "Arctic Ocean",
+      "Pacific Ocean"
+    ],
+    "correct_answer": "Pacific Ocean",
+    "explanation": "The Pacific Ocean is the largest and deepest ocean on Earth, covering more than 63 million square miles.",
+    "subject": "social",
+    "difficulty": "beginner",
+    "topic": "geography"
+  },
+  {
+    "question": "Which country is known as the Land of the Rising Sun?",
+    "options": [
+      "China",
+      "Japan",
+      "Thailand",
+      "South Korea"
+    ],
+    "correct_answer": "Japan",
+    "explanation": "Japan is often referred to as the Land of the Rising Sun due to its name in Japanese (Nihon), which means 'origin of the sun'.",
+    "subject": "social",
+    "difficulty": "beginner",
+    "topic": "culture"
+  },
+  {
+    "question": "What is the currency of the European Union?",
+    "options": [
+      "Dollar",
+      "Euro",
+      "Pound",
+      "Yen"
+    ],
+    "correct_answer": "Euro",
+    "explanation": "The Euro is the official currency of the Eurozone, used by 19 of the 27 member states of the European Union.",
+    "subject": "social",
+    "difficulty": "beginner",
+    "topic": "economics"
+  },
+  {
+    "question": "What does the term 'civil rights' refer to?",
+    "options": [
+      "Rights of soldiers",
+      "Rights of citizens to political and social freedom",
+      "Rights of animals",
+      "Rights of corporations"
+    ],
+    "correct_answer": "Rights of citizens to political and social freedom",
+    "explanation": "Civil rights are the rights of individuals to receive equal treatment under the law and to participate in the political and social life of their country.",
+    "subject": "social",
+    "difficulty": "beginner",
+    "topic": "government"
+  },
+  {
+    "question": "Which event marked the beginning of the Great Depression?",
+    "options": [
+      "World War I",
+      "The Stock Market Crash of 1929",
+      "The Dust Bowl",
+      "The New Deal"
+    ],
+    "correct_answer": "The Stock Market Crash of 1929",
+    "explanation": "The Stock Market Crash of 1929 is widely considered to be the event that triggered the Great Depression, leading to widespread economic hardship.",
+    "subject": "social",
+    "difficulty": "beginner",
+    "topic": "history"
+  },
+  {
+    "question": "What is the main function of the executive branch of government?",
+    "options": [
+      "To make laws",
+      "To interpret laws",
+      "To enforce laws",
+      "To create laws"
+    ],
+    "correct_answer": "To enforce laws",
+    "explanation": "The executive branch is responsible for enforcing the laws passed by the legislative branch and is headed by the president.",
+    "subject": "social",
+    "difficulty": "beginner",
+    "topic": "government"
+  },
+  {
+    "question": "Which famous speech begins with 'I have a dream'?",
+    "options": [
+      "Gettysburg Address",
+      "The Emancipation Proclamation",
+      "Martin Luther King Jr.'s speech",
+      "The Declaration of Independence"
+    ],
+    "correct_answer": "Martin Luther King Jr.'s speech",
+    "explanation": "'I Have a Dream' is a famous speech delivered by Martin Luther King Jr. during the March on Washington for Jobs and Freedom in 1963.",
+    "subject": "social",
+    "difficulty": "beginner",
+    "topic": "history"
+  },
+  {
+    "question": "What does the term 'globalization' refer to?",
+    "options": [
+      "Isolation of countries",
+      "The process of interaction and integration among people, companies, and governments worldwide",
+      "The spread of a single culture",
+      "The end of trade"
+    ],
+    "correct_answer": "The process of interaction and integration among people, companies, and governments worldwide",
+    "explanation": "Globalization refers to the increasing interconnectedness and interdependence of the world's economies, cultures, and populations.",
+    "subject": "social",
+    "difficulty": "beginner",
+    "topic": "economics"
+  },
+  {
+    "question": "What is the primary purpose of a constitution?",
+    "options": [
+      "To create laws",
+      "To outline the structure of government",
+      "To elect officials",
+      "To manage finances"
+    ],
+    "correct_answer": "To outline the structure of government",
+    "explanation": "A constitution establishes the framework of government, outlining the powers and responsibilities of different branches.",
+    "subject": "social",
+    "difficulty": "beginner",
+    "topic": "government"
+  },
+  {
+    "question": "Which historical figure is known for leading the Indian independence movement against British rule?",
+    "options": [
+      "Mahatma Gandhi",
+      "Nelson Mandela",
+      "Martin Luther King Jr.",
+      "Winston Churchill"
+    ],
+    "correct_answer": "Mahatma Gandhi",
+    "explanation": "Mahatma Gandhi was a key leader in the Indian independence movement, known for his nonviolent approach to civil disobedience.",
+    "subject": "social",
+    "difficulty": "beginner",
+    "topic": "history"
+  },
+  {
+    "question": "What is the term for a government controlled by a king or queen?",
+    "options": [
+      "Democracy",
+      "Oligarchy",
+      "Monarchy",
+      "Anarchy"
+    ],
+    "correct_answer": "Monarchy",
+    "explanation": "A monarchy is a form of government where a single ruler, such as a king or queen, holds power, often for life and by hereditary right.",
+    "subject": "social",
+    "difficulty": "beginner",
+    "topic": "government"
+  },
+  {
+    "question": "What is the primary purpose of a map?",
+    "options": [
+      "To show political boundaries",
+      "To provide directions",
+      "To represent geographic information",
+      "To display weather patterns"
+    ],
+    "correct_answer": "To represent geographic information",
+    "explanation": "Maps are designed to represent geographic information visually, helping users understand spatial relationships.",
+    "subject": "social",
+    "difficulty": "beginner",
+    "topic": "geography"
+  },
+  {
+    "question": "Which U.S. president issued the Emancipation Proclamation?",
+    "options": [
+      "George Washington",
+      "Abraham Lincoln",
+      "Thomas Jefferson",
+      "Franklin D. Roosevelt"
+    ],
+    "correct_answer": "Abraham Lincoln",
+    "explanation": "President Abraham Lincoln issued the Emancipation Proclamation on January 1, 1863, declaring all slaves in Confederate-held territory free.",
+    "subject": "social",
+    "difficulty": "beginner",
+    "topic": "history"
+  },
+  {
+    "question": "Which document declared the independence of the United States?",
+    "options": [
+      "The Constitution",
+      "The Bill of Rights",
+      "The Declaration of Independence",
+      "The Articles of Confederation"
+    ],
+    "correct_answer": "The Declaration of Independence",
+    "explanation": "The Declaration of Independence, adopted in 1776, proclaimed the freedom of the thirteen American colonies from British rule.",
+    "subject": "social",
+    "difficulty": "beginner",
+    "topic": "history"
+  },
+  {
+    "question": "What do we call the first ten amendments to the U.S. Constitution?",
+    "options": [
+      "The Constitution",
+      "The Bill of Rights",
+      "The Preamble",
+      "The Articles"
+    ],
+    "correct_answer": "The Bill of Rights",
+    "explanation": "The Bill of Rights is the collective name for the first ten amendments to the United States Constitution, guaranteeing individual rights.",
+    "subject": "social",
+    "difficulty": "beginner",
+    "topic": "government"
+  },
+  {
+    "question": "Which continent is known for having the most countries?",
+    "options": [
+      "Asia",
+      "Africa",
+      "Europe",
+      "North America"
+    ],
+    "correct_answer": "Africa",
+    "explanation": "Africa has 54 recognized countries, making it the continent with the most countries.",
+    "subject": "social",
+    "difficulty": "beginner",
+    "topic": "geography"
+  },
+  {
+    "question": "What is the economic system where the government owns all means of production?",
+    "options": [
+      "Capitalism",
+      "Socialism",
+      "Feudalism",
+      "Monarchy"
+    ],
+    "correct_answer": "Socialism",
+    "explanation": "In socialism, the government or the community as a whole owns and controls the means of production and distribution of goods.",
+    "subject": "social",
+    "difficulty": "beginner",
+    "topic": "economics"
+  },
+  {
+    "question": "What is the main role of the legislative branch of government?",
+    "options": [
+      "Enforce laws",
+      "Interpret laws",
+      "Make laws",
+      "Advising the president"
+    ],
+    "correct_answer": "Make laws",
+    "explanation": "The legislative branch is responsible for making laws, typically through a parliament or congress.",
+    "subject": "social",
+    "difficulty": "beginner",
+    "topic": "government"
+  },
+  {
+    "question": "Which of the following is an example of a renewable resource?",
+    "options": [
+      "Coal",
+      "Natural gas",
+      "Solar energy",
+      "Nuclear energy"
+    ],
+    "correct_answer": "Solar energy",
+    "explanation": "Solar energy is a renewable resource because it is generated from natural processes that are continuously replenished.",
+    "subject": "social",
+    "difficulty": "beginner",
+    "topic": "economics"
+  },
+  {
+    "question": "What was the main reason for the Civil War in the United States?",
+    "options": [
+      "Taxation",
+      "Slavery",
+      "Territorial expansion",
+      "Immigration"
+    ],
+    "correct_answer": "Slavery",
+    "explanation": "The primary cause of the Civil War was the conflict over the institution of slavery and its expansion into new territories.",
+    "subject": "social",
+    "difficulty": "beginner",
+    "topic": "history"
+  },
+  {
+    "question": "Who wrote the Declaration of Independence?",
+    "options": [
+      "George Washington",
+      "Thomas Jefferson",
+      "Benjamin Franklin",
+      "John Adams"
+    ],
+    "correct_answer": "Thomas Jefferson",
+    "explanation": "Thomas Jefferson is the principal author of the Declaration of Independence, which was adopted in 1776.",
+    "subject": "social",
+    "difficulty": "beginner",
+    "topic": "history"
+  },
+  {
+    "question": "What is the main purpose of a constitution?",
+    "options": [
+      "To declare war",
+      "To outline the framework of government",
+      "To regulate trade",
+      "To collect taxes"
+    ],
+    "correct_answer": "To outline the framework of government",
+    "explanation": "A constitution establishes the structure, functions, and limitations of government.",
+    "subject": "social",
+    "difficulty": "beginner",
+    "topic": "government"
+  },
+  {
+    "question": "What is a market economy?",
+    "options": [
+      "An economy controlled by the government",
+      "An economy based on supply and demand",
+      "An economy based on barter",
+      "An economy without money"
+    ],
+    "correct_answer": "An economy based on supply and demand",
+    "explanation": "A market economy is driven by the forces of supply and demand, with minimal government intervention.",
+    "subject": "social",
+    "difficulty": "beginner",
+    "topic": "economics"
+  },
+  {
+    "question": "What is urbanization?",
+    "options": [
+      "The process of moving to rural areas",
+      "The process of city development",
+      "The process of increasing agricultural production",
+      "The process of decreasing population density"
+    ],
+    "correct_answer": "The process of city development",
+    "explanation": "Urbanization refers to the increasing population and development of cities and towns.",
+    "subject": "social",
+    "difficulty": "beginner",
+    "topic": "geography"
+  },
+  {
+    "question": "What is the primary role of the executive branch?",
+    "options": [
+      "To interpret laws",
+      "To make laws",
+      "To enforce laws",
+      "To create budgets"
+    ],
+    "correct_answer": "To enforce laws",
+    "explanation": "The executive branch is responsible for enforcing and implementing the laws passed by the legislative branch.",
+    "subject": "social",
+    "difficulty": "beginner",
+    "topic": "government"
+  },
+  {
+    "question": "What does GDP stand for?",
+    "options": [
+      "Gross Domestic Product",
+      "General Domestic Product",
+      "Gross Development Project",
+      "General Development Product"
+    ],
+    "correct_answer": "Gross Domestic Product",
+    "explanation": "GDP stands for Gross Domestic Product, which measures the total economic output of a country.",
+    "subject": "social",
+    "difficulty": "beginner",
+    "topic": "economics"
+  },
+  {
+    "question": "Which of the following is a right protected by the First Amendment?",
+    "options": [
+      "Right to bear arms",
+      "Right to free speech",
+      "Right to a fair trial",
+      "Right to vote"
+    ],
+    "correct_answer": "Right to free speech",
+    "explanation": "The First Amendment of the U.S. Constitution protects several rights, including the freedom of speech.",
+    "subject": "social",
+    "difficulty": "beginner",
+    "topic": "government"
+  },
+  {
+    "question": "What does the term 'economy' refer to?",
+    "options": [
+      "A type of government",
+      "The study of history",
+      "The system of production and distribution of goods",
+      "A form of social organization"
+    ],
+    "correct_answer": "The system of production and distribution of goods",
+    "explanation": "The economy refers to the large set of inter-related production and consumption activities that aid in determining how scarce resources are allocated.",
+    "subject": "social",
+    "difficulty": "beginner",
+    "topic": "economics"
+  },
+  {
+    "question": "Which continent is known as the birthplace of democracy?",
+    "options": [
+      "Africa",
+      "Asia",
+      "Europe",
+      "North America"
+    ],
+    "correct_answer": "Europe",
+    "explanation": "Democracy originated in ancient Greece, which is located in Europe.",
+    "subject": "social",
+    "difficulty": "beginner",
+    "topic": "history"
+  },
+  {
+    "question": "What is the primary function of a government?",
+    "options": [
+      "To collect taxes",
+      "To provide services",
+      "To maintain order",
+      "All of the above"
+    ],
+    "correct_answer": "All of the above",
+    "explanation": "Governments have multiple functions including collecting taxes, providing services, maintaining order, and many more.",
+    "subject": "social",
+    "difficulty": "beginner",
+    "topic": "government"
+  },
+  {
+    "question": "What is a monarchy?",
+    "options": [
+      "A rule by the people",
+      "A rule by a single person or family",
+      "A rule by elected officials",
+      "A rule by a council"
+    ],
+    "correct_answer": "A rule by a single person or family",
+    "explanation": "A monarchy is a form of government where a single person, often a king or queen, rules the country, usually for life and by hereditary right.",
+    "subject": "social",
+    "difficulty": "beginner",
+    "topic": "government"
+  },
+  {
+    "question": "Which event is known as the start of the American Revolution?",
+    "options": [
+      "Boston Tea Party",
+      "Signing of the Constitution",
+      "Battle of Lexington",
+      "Declaration of Independence"
+    ],
+    "correct_answer": "Battle of Lexington",
+    "explanation": "The Battle of Lexington in 1775 is often cited as the start of the American Revolution.",
+    "subject": "social",
+    "difficulty": "beginner",
+    "topic": "history"
+  },
+  {
+    "question": "What is a republic?",
+    "options": [
+      "A government ruled by a king",
+      "A government in which citizens elect representatives",
+      "A government controlled by the military",
+      "A government with no laws"
+    ],
+    "correct_answer": "A government in which citizens elect representatives",
+    "explanation": "A republic is a form of government in which the country is considered a 'public matter' and is not the private concern of the rulers.",
+    "subject": "social",
+    "difficulty": "beginner",
+    "topic": "government"
+  },
+  {
+    "question": "Which of the following is a natural resource?",
+    "options": [
+      "Gold",
+      "Money",
+      "Wages",
+      "Stocks"
+    ],
+    "correct_answer": "Gold",
+    "explanation": "Natural resources are materials or substances that occur in nature and can be used for economic gain, such as gold.",
+    "subject": "social",
+    "difficulty": "beginner",
+    "topic": "economics"
+  },
+  {
+    "question": "Which of the following is an example of a civic duty?",
+    "options": [
+      "Voting",
+      "Going to school",
+      "Watching TV",
+      "Shopping"
+    ],
+    "correct_answer": "Voting",
+    "explanation": "Voting is considered a civic duty as it is an obligation of citizens to participate in the democratic process.",
+    "subject": "social",
+    "difficulty": "beginner",
+    "topic": "civics"
+  },
+  {
+    "question": "What is the main reason for trade between countries?",
+    "options": [
+      "To exchange goods and services",
+      "To increase military power",
+      "To spread culture",
+      "To create treaties"
+    ],
+    "correct_answer": "To exchange goods and services",
+    "explanation": "Countries trade to obtain goods and services they do not produce themselves, benefiting their economies.",
+    "subject": "social",
+    "difficulty": "beginner",
+    "topic": "economics"
+  },
+  {
+    "question": "What does 'civic engagement' mean?",
+    "options": [
+      "Participating in community activities",
+      "Ignoring local issues",
+      "Only voting in elections",
+      "Reading the news"
+    ],
+    "correct_answer": "Participating in community activities",
+    "explanation": "Civic engagement refers to individual and collective actions designed to identify and address issues of public concern.",
+    "subject": "social",
+    "difficulty": "beginner",
+    "topic": "civics"
+  },
+  {
+    "question": "What is globalization?",
+    "options": [
+      "A process of increasing interaction among people",
+      "A type of government",
+      "A natural disaster",
+      "A cultural movement"
+    ],
+    "correct_answer": "A process of increasing interaction among people",
+    "explanation": "Globalization refers to the process by which businesses or other organizations develop international influence or start operating on an international scale.",
+    "subject": "social",
+    "difficulty": "beginner",
+    "topic": "economics"
+  }
+]

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import BackButton from "@/components/BackButton";
+import { cdnUrl } from "@/lib/cdn";
 
 const SECTIONS = [
   {
@@ -30,7 +31,7 @@ export default function AboutPage() {
         {/* Logo */}
         <div className="text-center mb-12 animate-slide-up">
           <img
-            src="/logo-icon.png"
+            src={cdnUrl("/logo-icon.png")}
             alt="Lionade"
             className="h-24 rounded-2xl demo-logo-glow mx-auto mb-6"
           />

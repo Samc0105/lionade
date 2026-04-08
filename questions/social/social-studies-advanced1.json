@@ -1,0 +1,1178 @@
+[
+  {
+    "question": "What is the primary purpose of the United Nations?",
+    "options": [
+      "To promote international peace and security",
+      "To establish trade agreements",
+      "To provide military support",
+      "To collect taxes from member states"
+    ],
+    "correct_answer": "To promote international peace and security",
+    "explanation": "The United Nations was established to promote international cooperation and to maintain peace and security among nations.",
+    "subject": "social",
+    "difficulty": "advanced",
+    "topic": "international relations"
+  },
+  {
+    "question": "Which theory best explains the rise of nationalism in the 19th century?",
+    "options": [
+      "Marxism",
+      "Liberalism",
+      "Social Darwinism",
+      "Romanticism"
+    ],
+    "correct_answer": "Romanticism",
+    "explanation": "Romanticism emphasized emotion and individualism, which fostered a sense of national identity and unity among people.",
+    "subject": "social",
+    "difficulty": "advanced",
+    "topic": "nationalism"
+  },
+  {
+    "question": "What event is commonly regarded as the spark that ignited World War I?",
+    "options": [
+      "The sinking of the Lusitania",
+      "The assassination of Archduke Franz Ferdinand",
+      "The invasion of Poland",
+      "The signing of the Treaty of Versailles"
+    ],
+    "correct_answer": "The assassination of Archduke Franz Ferdinand",
+    "explanation": "The assassination of Archduke Franz Ferdinand of Austria-Hungary in 1914 is often cited as the immediate catalyst for the onset of World War I.",
+    "subject": "social",
+    "difficulty": "advanced",
+    "topic": "world history"
+  },
+  {
+    "question": "Which economic system is characterized by private ownership and free markets?",
+    "options": [
+      "Socialism",
+      "Feudalism",
+      "Capitalism",
+      "Communism"
+    ],
+    "correct_answer": "Capitalism",
+    "explanation": "Capitalism is an economic system where private individuals own and control property and businesses, and the production of goods is guided mainly by competition in a free market.",
+    "subject": "social",
+    "difficulty": "advanced",
+    "topic": "economics"
+  },
+  {
+    "question": "Which document declared the independence of the thirteen American colonies from British rule?",
+    "options": [
+      "The Constitution",
+      "The Bill of Rights",
+      "The Federalist Papers",
+      "The Declaration of Independence"
+    ],
+    "correct_answer": "The Declaration of Independence",
+    "explanation": "The Declaration of Independence, adopted on July 4, 1776, formally proclaimed the colonies' separation from Great Britain.",
+    "subject": "social",
+    "difficulty": "advanced",
+    "topic": "American history"
+  },
+  {
+    "question": "What was the main outcome of the Berlin Conference of 1884-1885?",
+    "options": [
+      "End of slavery in Africa",
+      "Partitioning of Africa among European powers",
+      "Establishment of the League of Nations",
+      "Creation of the United Nations"
+    ],
+    "correct_answer": "Partitioning of Africa among European powers",
+    "explanation": "The Berlin Conference regulated European colonization and trade in Africa, leading to the partitioning of the continent among various European nations.",
+    "subject": "social",
+    "difficulty": "advanced",
+    "topic": "colonialism"
+  },
+  {
+    "question": "Which of the following best describes the concept of civil disobedience?",
+    "options": [
+      "Legal protest against government policies",
+      "Violent uprising against oppression",
+      "Nonviolent resistance to unjust laws",
+      "Complete withdrawal from society"
+    ],
+    "correct_answer": "Nonviolent resistance to unjust laws",
+    "explanation": "Civil disobedience is the active, professed refusal to obey certain laws, demands, and commands of a government, often in a nonviolent manner.",
+    "subject": "social",
+    "difficulty": "advanced",
+    "topic": "civics"
+  },
+  {
+    "question": "Which philosopher is most closely associated with the social contract theory?",
+    "options": [
+      "John Locke",
+      "Thomas Hobbes",
+      "Jean-Jacques Rousseau",
+      "Karl Marx"
+    ],
+    "correct_answer": "Jean-Jacques Rousseau",
+    "explanation": "Jean-Jacques Rousseau is known for his work on social contract theory, which discusses the legitimacy of political authority based on the consent of the governed.",
+    "subject": "social",
+    "difficulty": "advanced",
+    "topic": "political philosophy"
+  },
+  {
+    "question": "What was the primary goal of the Marshall Plan after World War II?",
+    "options": [
+      "To promote military alliances",
+      "To rebuild European economies",
+      "To establish the United Nations",
+      "To create NATO"
+    ],
+    "correct_answer": "To rebuild European economies",
+    "explanation": "The Marshall Plan aimed to aid in the economic recovery of European nations after World War II to prevent the spread of communism.",
+    "subject": "social",
+    "difficulty": "advanced",
+    "topic": "post-war history"
+  },
+  {
+    "question": "Which amendment to the United States Constitution abolished slavery?",
+    "options": [
+      "The 13th Amendment",
+      "The 14th Amendment",
+      "The 15th Amendment",
+      "The 19th Amendment"
+    ],
+    "correct_answer": "The 13th Amendment",
+    "explanation": "The 13th Amendment, ratified in 1865, abolished slavery and involuntary servitude in the United States.",
+    "subject": "social",
+    "difficulty": "advanced",
+    "topic": "American history"
+  },
+  {
+    "question": "What economic theory advocates for government intervention to ensure economic stability and growth?",
+    "options": [
+      "Classical economics",
+      "Keynesian economics",
+      "Monetarism",
+      "Supply-side economics"
+    ],
+    "correct_answer": "Keynesian economics",
+    "explanation": "Keynesian economics argues that during times of economic downturn, government intervention is necessary to stimulate demand and pull economies out of recession.",
+    "subject": "social",
+    "difficulty": "advanced",
+    "topic": "economics"
+  },
+  {
+    "question": "Which event marked the beginning of the Cold War?",
+    "options": [
+      "The end of World War II",
+      "The Korean War",
+      "The Cuban Missile Crisis",
+      "The Vietnam War"
+    ],
+    "correct_answer": "The end of World War II",
+    "explanation": "The Cold War began after World War II as tensions rose between the Soviet Union and the United States over ideological differences and territorial expansion.",
+    "subject": "social",
+    "difficulty": "advanced",
+    "topic": "Cold War"
+  },
+  {
+    "question": "What is the primary function of the judicial branch in the United States government?",
+    "options": [
+      "To make laws",
+      "To interpret laws",
+      "To enforce laws",
+      "To create budgets"
+    ],
+    "correct_answer": "To interpret laws",
+    "explanation": "The judicial branch interprets the laws and ensures they are applied fairly, including resolving disputes and protecting rights.",
+    "subject": "social",
+    "difficulty": "advanced",
+    "topic": "government"
+  },
+  {
+    "question": "Which movement sought to achieve civil rights for African Americans in the 1960s?",
+    "options": [
+      "The Suffrage Movement",
+      "The Civil Rights Movement",
+      "The Labor Movement",
+      "The Environmental Movement"
+    ],
+    "correct_answer": "The Civil Rights Movement",
+    "explanation": "The Civil Rights Movement aimed to end racial discrimination and secure equal rights for African Americans, particularly through nonviolent protests and legal challenges.",
+    "subject": "social",
+    "difficulty": "advanced",
+    "topic": "civil rights"
+  },
+  {
+    "question": "What is the primary distinction between a parliamentary and a presidential system of government?",
+    "options": [
+      "Separation of powers",
+      "Unity of command",
+      "Direct democracy",
+      "Judicial review"
+    ],
+    "correct_answer": "Separation of powers",
+    "explanation": "In a presidential system, the executive branch is separate from the legislative branch, while in a parliamentary system, the executive is derived from the legislative body.",
+    "subject": "social",
+    "difficulty": "advanced",
+    "topic": "political systems"
+  },
+  {
+    "question": "The concept of 'Manifest Destiny' was primarily associated with which historical period?",
+    "options": [
+      "The American Revolution",
+      "The Industrial Revolution",
+      "The westward expansion of the United States",
+      "The Great Depression"
+    ],
+    "correct_answer": "The westward expansion of the United States",
+    "explanation": "Manifest Destiny was the 19th-century belief that the expansion of the U.S. throughout the American continents was both justified and inevitable.",
+    "subject": "social",
+    "difficulty": "advanced",
+    "topic": "American history"
+  },
+  {
+    "question": "What role did the Federal Reserve play during the Great Depression?",
+    "options": [
+      "Increased interest rates",
+      "Lowered interest rates",
+      "Closed banks",
+      "Printed more currency"
+    ],
+    "correct_answer": "Lowered interest rates",
+    "explanation": "During the Great Depression, the Federal Reserve lowered interest rates to encourage borrowing and investment in an attempt to stimulate the economy.",
+    "subject": "social",
+    "difficulty": "advanced",
+    "topic": "economics"
+  },
+  {
+    "question": "What is the primary purpose of a constitution?",
+    "options": [
+      "To outline government structure",
+      "To promote economic growth",
+      "To enforce laws",
+      "To regulate trade"
+    ],
+    "correct_answer": "To outline government structure",
+    "explanation": "A constitution serves as a foundational legal document that outlines the structure, powers, and limits of government.",
+    "subject": "social",
+    "difficulty": "advanced",
+    "topic": "government"
+  },
+  {
+    "question": "Which historical figure is known for promoting the idea of 'separation of church and state'?",
+    "options": [
+      "Thomas Jefferson",
+      "George Washington",
+      "James Madison",
+      "Alexander Hamilton"
+    ],
+    "correct_answer": "Thomas Jefferson",
+    "explanation": "Thomas Jefferson is often credited with advocating for the separation of church and state, particularly in his writings and the Virginia Statute for Religious Freedom.",
+    "subject": "social",
+    "difficulty": "advanced",
+    "topic": "political philosophy"
+  },
+  {
+    "question": "What was the main cause of the American Civil War?",
+    "options": [
+      "Economic differences",
+      "Slavery",
+      "States' rights",
+      "Territorial expansion"
+    ],
+    "correct_answer": "Slavery",
+    "explanation": "While multiple factors contributed to the Civil War, the primary issue was the debate over the legality and morality of slavery in the United States.",
+    "subject": "social",
+    "difficulty": "advanced",
+    "topic": "American history"
+  },
+  {
+    "question": "Which of the following is a characteristic of totalitarian regimes?",
+    "options": [
+      "Political pluralism",
+      "Limited government control",
+      "Suppression of dissent",
+      "Free press"
+    ],
+    "correct_answer": "Suppression of dissent",
+    "explanation": "Totalitarian regimes are characterized by the state's absolute control over all aspects of public and private life, including the suppression of dissent and opposition.",
+    "subject": "social",
+    "difficulty": "advanced",
+    "topic": "political systems"
+  },
+  {
+    "question": "What is the term for the economic system in which the government owns and controls the means of production?",
+    "options": [
+      "Capitalism",
+      "Socialism",
+      "Feudalism",
+      "Mercantilism"
+    ],
+    "correct_answer": "Socialism",
+    "explanation": "Socialism is an economic system where the means of production are owned and regulated by the government or community as a whole.",
+    "subject": "social",
+    "difficulty": "advanced",
+    "topic": "economics"
+  },
+  {
+    "question": "Which philosopher is known for the concept of the 'social contract'?",
+    "options": [
+      "Thomas Hobbes",
+      "John Locke",
+      "Jean-Jacques Rousseau",
+      "Karl Marx"
+    ],
+    "correct_answer": "Jean-Jacques Rousseau",
+    "explanation": "Jean-Jacques Rousseau is famous for his work on the social contract, which discusses the legitimacy of political authority.",
+    "subject": "social",
+    "difficulty": "advanced",
+    "topic": "political theory"
+  },
+  {
+    "question": "Which event is considered the spark that ignited World War I?",
+    "options": [
+      "The sinking of the Lusitania",
+      "The assassination of Archduke Franz Ferdinand",
+      "The signing of the Treaty of Versailles",
+      "The invasion of Poland"
+    ],
+    "correct_answer": "The assassination of Archduke Franz Ferdinand",
+    "explanation": "The assassination of Archduke Franz Ferdinand of Austria-Hungary is widely regarded as the immediate catalyst for World War I.",
+    "subject": "social",
+    "difficulty": "advanced",
+    "topic": "history"
+  },
+  {
+    "question": "What economic system is characterized by private ownership of the means of production?",
+    "options": [
+      "Socialism",
+      "Capitalism",
+      "Feudalism",
+      "Communism"
+    ],
+    "correct_answer": "Capitalism",
+    "explanation": "Capitalism is an economic system where private individuals own and control property and businesses.",
+    "subject": "social",
+    "difficulty": "advanced",
+    "topic": "economics"
+  },
+  {
+    "question": "Which amendment to the U.S. Constitution abolished slavery?",
+    "options": [
+      "13th Amendment",
+      "14th Amendment",
+      "15th Amendment",
+      "19th Amendment"
+    ],
+    "correct_answer": "13th Amendment",
+    "explanation": "The 13th Amendment, ratified in 1865, abolished slavery and involuntary servitude in the United States.",
+    "subject": "social",
+    "difficulty": "advanced",
+    "topic": "U.S. history"
+  },
+  {
+    "question": "What is the main idea of the theory of separation of powers?",
+    "options": [
+      "To concentrate power in one branch",
+      "To divide government responsibilities among branches",
+      "To eliminate checks and balances",
+      "To increase government efficiency"
+    ],
+    "correct_answer": "To divide government responsibilities among branches",
+    "explanation": "The theory of separation of powers divides government responsibilities into distinct branches to prevent any one branch from gaining too much power.",
+    "subject": "social",
+    "difficulty": "advanced",
+    "topic": "political science"
+  },
+  {
+    "question": "Which of the following is a primary source?",
+    "options": [
+      "A textbook",
+      "An encyclopedia",
+      "A diary",
+      "A documentary"
+    ],
+    "correct_answer": "A diary",
+    "explanation": "A diary is a primary source as it provides direct evidence of an individual's experiences and thoughts.",
+    "subject": "social",
+    "difficulty": "advanced",
+    "topic": "historical analysis"
+  },
+  {
+    "question": "What does GDP stand for?",
+    "options": [
+      "Gross Domestic Product",
+      "General Domestic Profit",
+      "Gross Development Plan",
+      "General Development Product"
+    ],
+    "correct_answer": "Gross Domestic Product",
+    "explanation": "GDP stands for Gross Domestic Product, which measures the economic performance of a country.",
+    "subject": "social",
+    "difficulty": "advanced",
+    "topic": "economics"
+  },
+  {
+    "question": "Which treaty ended World War II in Europe?",
+    "options": [
+      "Treaty of Versailles",
+      "Treaty of Paris",
+      "Treaty of Trianon",
+      "Treaty of Frankfurt"
+    ],
+    "correct_answer": "Treaty of Versailles",
+    "explanation": "The Treaty of Versailles officially ended World War I, but it also set the stage for various geopolitical tensions that contributed to World War II.",
+    "subject": "social",
+    "difficulty": "advanced",
+    "topic": "history"
+  },
+  {
+    "question": "Which of the following is NOT a characteristic of a democratic government?",
+    "options": [
+      "Regular free elections",
+      "Universal suffrage",
+      "Centralized decision-making",
+      "Protection of individual rights"
+    ],
+    "correct_answer": "Centralized decision-making",
+    "explanation": "Democratic governments are characterized by decentralized decision-making, promoting participation and representation.",
+    "subject": "social",
+    "difficulty": "advanced",
+    "topic": "political science"
+  },
+  {
+    "question": "What does the term 'civic engagement' refer to?",
+    "options": [
+      "Participation in local sports",
+      "Involvement in community service",
+      "Active participation in the political process",
+      "Engagement in online forums"
+    ],
+    "correct_answer": "Active participation in the political process",
+    "explanation": "Civic engagement refers to the ways in which individuals participate in the political process and contribute to their communities.",
+    "subject": "social",
+    "difficulty": "advanced",
+    "topic": "civics"
+  },
+  {
+    "question": "Which sociological theory focuses on the role of power and inequality in society?",
+    "options": [
+      "Functionalism",
+      "Symbolic Interactionism",
+      "Conflict Theory",
+      "Structuralism"
+    ],
+    "correct_answer": "Conflict Theory",
+    "explanation": "Conflict Theory emphasizes the role of power differentials and social inequalities in shaping societal structures.",
+    "subject": "social",
+    "difficulty": "advanced",
+    "topic": "sociology"
+  },
+  {
+    "question": "What is the significance of the Magna Carta?",
+    "options": [
+      "It established the principle of parliamentary democracy",
+      "It limited the powers of the king",
+      "It abolished feudalism",
+      "It granted equal rights to all citizens"
+    ],
+    "correct_answer": "It limited the powers of the king",
+    "explanation": "The Magna Carta, signed in 1215, is significant for limiting the powers of the king and laying the groundwork for modern democracy.",
+    "subject": "social",
+    "difficulty": "advanced",
+    "topic": "history"
+  },
+  {
+    "question": "What is the primary focus of environmental sociology?",
+    "options": [
+      "Human behavior",
+      "Economic systems",
+      "Social movements",
+      "The relationship between society and the environment"
+    ],
+    "correct_answer": "The relationship between society and the environment",
+    "explanation": "Environmental sociology studies how societal structures and processes interact with the natural environment.",
+    "subject": "social",
+    "difficulty": "advanced",
+    "topic": "sociology"
+  },
+  {
+    "question": "Which of the following is a consequence of globalization?",
+    "options": [
+      "Increased cultural exchange",
+      "Isolation of nations",
+      "Reduction in trade",
+      "Decrease in technology sharing"
+    ],
+    "correct_answer": "Increased cultural exchange",
+    "explanation": "Globalization leads to increased cultural exchange as people, goods, and ideas flow more freely across borders.",
+    "subject": "social",
+    "difficulty": "advanced",
+    "topic": "global studies"
+  },
+  {
+    "question": "What is the primary goal of the civil rights movement in the United States?",
+    "options": [
+      "To promote economic equality",
+      "To achieve racial equality",
+      "To support women's rights",
+      "To advance labor rights"
+    ],
+    "correct_answer": "To achieve racial equality",
+    "explanation": "The primary goal of the civil rights movement was to end racial discrimination and achieve equality for African Americans.",
+    "subject": "social",
+    "difficulty": "advanced",
+    "topic": "U.S. history"
+  },
+  {
+    "question": "What is a major criticism of modern capitalism?",
+    "options": [
+      "It promotes equality",
+      "It leads to economic instability",
+      "It fosters community spirit",
+      "It enhances cultural diversity"
+    ],
+    "correct_answer": "It leads to economic instability",
+    "explanation": "A major criticism of modern capitalism is that it can lead to economic instability and inequality, often resulting in boom and bust cycles.",
+    "subject": "social",
+    "difficulty": "advanced",
+    "topic": "economics"
+  },
+  {
+    "question": "What is the concept of 'cultural relativism'?",
+    "options": [
+      "Belief in universal values",
+      "Understanding cultures based on their own standards",
+      "Promotion of one's own culture as superior",
+      "Rejecting all cultural practices"
+    ],
+    "correct_answer": "Understanding cultures based on their own standards",
+    "explanation": "Cultural relativism is the practice of assessing a culture by its own standards rather than viewing it through the lens of another culture.",
+    "subject": "social",
+    "difficulty": "advanced",
+    "topic": "anthropology"
+  },
+  {
+    "question": "Which of the following is an effect of industrialization on society?",
+    "options": [
+      "Decreased urbanization",
+      "Increased agricultural production",
+      "Shift from rural to urban living",
+      "Reduction in population density"
+    ],
+    "correct_answer": "Shift from rural to urban living",
+    "explanation": "Industrialization typically leads to a shift from rural to urban living as people move to cities for factory work.",
+    "subject": "social",
+    "difficulty": "advanced",
+    "topic": "sociology"
+  },
+  {
+    "question": "Which amendment granted women the right to vote in the United States?",
+    "options": [
+      "15th Amendment",
+      "19th Amendment",
+      "24th Amendment",
+      "26th Amendment"
+    ],
+    "correct_answer": "19th Amendment",
+    "explanation": "The 19th Amendment, ratified in 1920, granted women the right to vote in the United States.",
+    "subject": "social",
+    "difficulty": "advanced",
+    "topic": "U.S. history"
+  },
+  {
+    "question": "What is the primary function of political parties?",
+    "options": [
+      "To conduct foreign policy",
+      "To educate citizens",
+      "To organize elections",
+      "To aggregate and represent interests"
+    ],
+    "correct_answer": "To aggregate and represent interests",
+    "explanation": "Political parties primarily serve to aggregate diverse interests and represent them in the political process.",
+    "subject": "social",
+    "difficulty": "advanced",
+    "topic": "political science"
+  },
+  {
+    "question": "What economic theory advocates for government intervention in the economy to promote social welfare?",
+    "options": [
+      "Capitalism",
+      "Socialism",
+      "Libertarianism",
+      "Mercantilism"
+    ],
+    "correct_answer": "Socialism",
+    "explanation": "Socialism advocates for government intervention to ensure equitable distribution of resources and social welfare.",
+    "subject": "social",
+    "difficulty": "advanced",
+    "topic": "economic-theories"
+  },
+  {
+    "question": "Which document served as the first constitution of the United States?",
+    "options": [
+      "The Federalist Papers",
+      "Articles of Confederation",
+      "Bill of Rights",
+      "Constitution of 1787"
+    ],
+    "correct_answer": "Articles of Confederation",
+    "explanation": "The Articles of Confederation were the first constitution, governing the United States from 1781 until 1789.",
+    "subject": "social",
+    "difficulty": "advanced",
+    "topic": "U.S.-history"
+  },
+  {
+    "question": "What principle is illustrated by the separation of powers in the U.S. government?",
+    "options": [
+      "Checks and Balances",
+      "Federalism",
+      "Judicial Review",
+      "Popular Sovereignty"
+    ],
+    "correct_answer": "Checks and Balances",
+    "explanation": "The separation of powers ensures that no single branch of government becomes too powerful, illustrating checks and balances.",
+    "subject": "social",
+    "difficulty": "advanced",
+    "topic": "government-structure"
+  },
+  {
+    "question": "Which event was a significant catalyst for the civil rights movement in the United States?",
+    "options": [
+      "Brown v. Board of Education",
+      "The Great Migration",
+      "The New Deal",
+      "The Voting Rights Act"
+    ],
+    "correct_answer": "Brown v. Board of Education",
+    "explanation": "The Supreme Court's decision in Brown v. Board of Education in 1954 declared racial segregation in schools unconstitutional, galvanizing the civil rights movement.",
+    "subject": "social",
+    "difficulty": "advanced",
+    "topic": "civil-rights"
+  },
+  {
+    "question": "What term describes the spread of cultural beliefs and social activities from one group to another?",
+    "options": [
+      "Assimilation",
+      "Acculturation",
+      "Globalization",
+      "Colonization"
+    ],
+    "correct_answer": "Acculturation",
+    "explanation": "Acculturation refers to the process by which cultural traits are transferred between groups.",
+    "subject": "social",
+    "difficulty": "advanced",
+    "topic": "cultural-studies"
+  },
+  {
+    "question": "Which economic system is characterized by private ownership of the means of production?",
+    "options": [
+      "Socialism",
+      "Communism",
+      "Capitalism",
+      "Feudalism"
+    ],
+    "correct_answer": "Capitalism",
+    "explanation": "Capitalism is defined by private ownership and the investment of resources for profit.",
+    "subject": "social",
+    "difficulty": "advanced",
+    "topic": "economic-systems"
+  },
+  {
+    "question": "Which philosophical movement emphasized reason, individualism, and skepticism of traditional authority during the Enlightenment?",
+    "options": [
+      "Romanticism",
+      "Rationalism",
+      "Empiricism",
+      "Humanism"
+    ],
+    "correct_answer": "Rationalism",
+    "explanation": "Rationalism stressed the importance of reason and individual thought, questioning established beliefs.",
+    "subject": "social",
+    "difficulty": "advanced",
+    "topic": "philosophy"
+  },
+  {
+    "question": "Which treaty ended World War I and imposed heavy reparations on Germany?",
+    "options": [
+      "Treaty of Versailles",
+      "Treaty of Trianon",
+      "Treaty of Saint-Germain",
+      "Treaty of Brest-Litovsk"
+    ],
+    "correct_answer": "Treaty of Versailles",
+    "explanation": "The Treaty of Versailles officially ended World War I and imposed significant reparations on Germany.",
+    "subject": "social",
+    "difficulty": "advanced",
+    "topic": "war-history"
+  },
+  {
+    "question": "What is the main function of political parties in a democracy?",
+    "options": [
+      "To conduct elections",
+      "To control the government",
+      "To represent diverse interests",
+      "To implement policies"
+    ],
+    "correct_answer": "To represent diverse interests",
+    "explanation": "Political parties serve to aggregate and represent a range of interests within a democratic society.",
+    "subject": "social",
+    "difficulty": "advanced",
+    "topic": "political-science"
+  },
+  {
+    "question": "What is a major consequence of urbanization?",
+    "options": [
+      "Increased agricultural production",
+      "Population decline in rural areas",
+      "Greater reliance on fossil fuels",
+      "Reduced economic inequality"
+    ],
+    "correct_answer": "Population decline in rural areas",
+    "explanation": "Urbanization often leads to population decline in rural areas as people move to cities for better opportunities.",
+    "subject": "social",
+    "difficulty": "advanced",
+    "topic": "sociology"
+  },
+  {
+    "question": "Which economic indicator is commonly used to measure a country's overall economic health?",
+    "options": [
+      "Gross Domestic Product (GDP)",
+      "Consumer Price Index (CPI)",
+      "Employment Rate",
+      "Trade Balance"
+    ],
+    "correct_answer": "Gross Domestic Product (GDP)",
+    "explanation": "GDP measures the total economic output of a country and is a primary indicator of economic health.",
+    "subject": "social",
+    "difficulty": "advanced",
+    "topic": "economics"
+  },
+  {
+    "question": "What was the main focus of the feminist movement in the 1960s and 1970s?",
+    "options": [
+      "Labor rights",
+      "Civil rights",
+      "Reproductive rights",
+      "Voting rights"
+    ],
+    "correct_answer": "Reproductive rights",
+    "explanation": "The feminist movement in this era focused significantly on reproductive rights and gender equality.",
+    "subject": "social",
+    "difficulty": "advanced",
+    "topic": "gender-studies"
+  },
+  {
+    "question": "Which theory explains the relationship between social class and lifestyle choices?",
+    "options": [
+      "Cultural Capital Theory",
+      "Social Stratification Theory",
+      "Conflict Theory",
+      "Functionalism"
+    ],
+    "correct_answer": "Cultural Capital Theory",
+    "explanation": "Cultural Capital Theory posits that social class influences lifestyle and cultural preferences.",
+    "subject": "social",
+    "difficulty": "advanced",
+    "topic": "sociology"
+  },
+  {
+    "question": "What is the primary function of the Supreme Court in the United States?",
+    "options": [
+      "To legislate laws",
+      "To enforce laws",
+      "To interpret laws",
+      "To create laws"
+    ],
+    "correct_answer": "To interpret laws",
+    "explanation": "The Supreme Court's primary function is to interpret the Constitution and federal laws.",
+    "subject": "social",
+    "difficulty": "advanced",
+    "topic": "government-structure"
+  },
+  {
+    "question": "Which concept refers to the idea that economic and political power should be distributed among many groups?",
+    "options": [
+      "Pluralism",
+      "Elitism",
+      "Monopoly",
+      "Oligarchy"
+    ],
+    "correct_answer": "Pluralism",
+    "explanation": "Pluralism advocates for multiple groups to share power to prevent dominance by a single group.",
+    "subject": "social",
+    "difficulty": "advanced",
+    "topic": "political-science"
+  },
+  {
+    "question": "What was the main purpose of the Berlin Wall during the Cold War?",
+    "options": [
+      "To promote trade",
+      "To prevent East Germans from fleeing to the West",
+      "To establish a border control",
+      "To protect against NATO"
+    ],
+    "correct_answer": "To prevent East Germans from fleeing to the West",
+    "explanation": "The Berlin Wall was erected to stop the mass emigration of East Germans to West Berlin.",
+    "subject": "social",
+    "difficulty": "advanced",
+    "topic": "Cold-war-history"
+  },
+  {
+    "question": "What principle allows individuals to have a say in their government directly or through elected representatives?",
+    "options": [
+      "Sovereignty",
+      "Democracy",
+      "Autocracy",
+      "Totalitarianism"
+    ],
+    "correct_answer": "Democracy",
+    "explanation": "Democracy is the principle that enables individuals to participate in governance either directly or through representatives.",
+    "subject": "social",
+    "difficulty": "advanced",
+    "topic": "government-structure"
+  },
+  {
+    "question": "Which international agreement aimed at reducing greenhouse gas emissions?",
+    "options": [
+      "Kyoto Protocol",
+      "Montreal Protocol",
+      "Paris Agreement",
+      "Rio Declaration"
+    ],
+    "correct_answer": "Kyoto Protocol",
+    "explanation": "The Kyoto Protocol was an international treaty that committed its parties to reduce greenhouse gas emissions.",
+    "subject": "social",
+    "difficulty": "advanced",
+    "topic": "environmental-studies"
+  },
+  {
+    "question": "What is the primary characteristic of a totalitarian regime?",
+    "options": [
+      "Multiple political parties",
+      "Limited government control",
+      "Centralized control over all aspects of life",
+      "Free press"
+    ],
+    "correct_answer": "Centralized control over all aspects of life",
+    "explanation": "Totalitarian regimes exert centralized control over political, social, and economic life.",
+    "subject": "social",
+    "difficulty": "advanced",
+    "topic": "political-science"
+  },
+  {
+    "question": "Which theory suggests that societies progress through stages of development?",
+    "options": [
+      "Social Darwinism",
+      "Modernization Theory",
+      "Dependency Theory",
+      "World-Systems Theory"
+    ],
+    "correct_answer": "Modernization Theory",
+    "explanation": "Modernization Theory posits that societies develop in stages, often moving from traditional to modern ways.",
+    "subject": "social",
+    "difficulty": "advanced",
+    "topic": "sociology"
+  },
+  {
+    "question": "What is the main purpose of a census?",
+    "options": [
+      "To collect taxes",
+      "To allocate government resources",
+      "To create new laws",
+      "To register voters"
+    ],
+    "correct_answer": "To allocate government resources",
+    "explanation": "Censuses are conducted to gather demographic data that helps allocate government resources and services.",
+    "subject": "social",
+    "difficulty": "advanced",
+    "topic": "demographics"
+  },
+  {
+    "question": "Which of the following best defines 'sovereignty' in the context of international relations?",
+    "options": [
+      "Control over a territory",
+      "The ability to form alliances",
+      "The authority to govern oneself",
+      "The capacity for economic independence"
+    ],
+    "correct_answer": "The authority to govern oneself",
+    "explanation": "Sovereignty refers to the supreme authority within a territory, allowing a state to govern itself without external interference.",
+    "subject": "social",
+    "difficulty": "advanced",
+    "topic": "political science"
+  },
+  {
+    "question": "What is the primary purpose of the United Nations according to its charter?",
+    "options": [
+      "To promote economic development",
+      "To maintain international peace and security",
+      "To establish global trade agreements",
+      "To foster cultural exchange"
+    ],
+    "correct_answer": "To maintain international peace and security",
+    "explanation": "The United Nations was established with the main goal of preventing conflicts and maintaining peace among nations.",
+    "subject": "social",
+    "difficulty": "advanced",
+    "topic": "international relations"
+  },
+  {
+    "question": "Which economic system prioritizes private ownership and the free market?",
+    "options": [
+      "Communism",
+      "Socialism",
+      "Capitalism",
+      "Feudalism"
+    ],
+    "correct_answer": "Capitalism",
+    "explanation": "Capitalism is characterized by private ownership of production and the operation of market forces.",
+    "subject": "social",
+    "difficulty": "advanced",
+    "topic": "economics"
+  },
+  {
+    "question": "What was a significant outcome of the Treaty of Versailles in 1919?",
+    "options": [
+      "Creation of the League of Nations",
+      "The establishment of NATO",
+      "The division of Germany among the Allies",
+      "The beginning of the Cold War"
+    ],
+    "correct_answer": "Creation of the League of Nations",
+    "explanation": "The Treaty of Versailles led to the establishment of the League of Nations, aimed at promoting peace and cooperation among countries.",
+    "subject": "social",
+    "difficulty": "advanced",
+    "topic": "history"
+  },
+  {
+    "question": "Which of the following concepts refers to the idea that political power is derived from the consent of the governed?",
+    "options": [
+      "Divine right of kings",
+      "Social contract",
+      "Bureaucratic authority",
+      "Monarchical rule"
+    ],
+    "correct_answer": "Social contract",
+    "explanation": "The social contract theory posits that governments derive their legitimacy from the consent of the people.",
+    "subject": "social",
+    "difficulty": "advanced",
+    "topic": "political theory"
+  },
+  {
+    "question": "The term 'gerrymandering' refers to which of the following?",
+    "options": [
+      "Manipulating electoral district boundaries",
+      "Creating laws to benefit a political party",
+      "Voter suppression tactics",
+      "Campaigning strategies"
+    ],
+    "correct_answer": "Manipulating electoral district boundaries",
+    "explanation": "Gerrymandering is the practice of redrawing electoral district boundaries to favor one political party over others.",
+    "subject": "social",
+    "difficulty": "advanced",
+    "topic": "political science"
+  },
+  {
+    "question": "Which of the following best describes the concept of 'cultural relativism'?",
+    "options": [
+      "Belief in universal moral standards",
+      "Understanding cultures based on their own values",
+      "The superiority of one culture over another",
+      "Imposing one culture's beliefs on another"
+    ],
+    "correct_answer": "Understanding cultures based on their own values",
+    "explanation": "Cultural relativism is the practice of evaluating a culture by its own standards rather than judging it by the standards of another culture.",
+    "subject": "social",
+    "difficulty": "advanced",
+    "topic": "anthropology"
+  },
+  {
+    "question": "Which document formally ended the American Revolutionary War?",
+    "options": [
+      "The Articles of Confederation",
+      "The Declaration of Independence",
+      "The Treaty of Paris 1783",
+      "The Constitution of the United States"
+    ],
+    "correct_answer": "The Treaty of Paris 1783",
+    "explanation": "The Treaty of Paris signed in 1783 ended the Revolutionary War and recognized American independence.",
+    "subject": "social",
+    "difficulty": "advanced",
+    "topic": "history"
+  },
+  {
+    "question": "What is the primary function of a constitution in a democratic society?",
+    "options": [
+      "To outline the roles of government officials",
+      "To define the laws of the land",
+      "To establish the rights of citizens",
+      "To provide a framework for political parties"
+    ],
+    "correct_answer": "To establish the rights of citizens",
+    "explanation": "A constitution outlines the fundamental rights of citizens and the structure of government, ensuring protection and accountability.",
+    "subject": "social",
+    "difficulty": "advanced",
+    "topic": "political science"
+  },
+  {
+    "question": "Which economic theory advocates for government intervention in the economy to achieve full employment and stabilize prices?",
+    "options": [
+      "Monetarism",
+      "Keynesianism",
+      "Classical economics",
+      "Supply-side economics"
+    ],
+    "correct_answer": "Keynesianism",
+    "explanation": "Keynesian economics argues that active government intervention is necessary to manage economic cycles and promote employment.",
+    "subject": "social",
+    "difficulty": "advanced",
+    "topic": "economics"
+  },
+  {
+    "question": "The term 'civil rights' primarily refers to which of the following?",
+    "options": [
+      "Economic rights",
+      "Political rights",
+      "Social rights",
+      "Human rights"
+    ],
+    "correct_answer": "Political rights",
+    "explanation": "Civil rights are the rights of citizens to political and social freedom and equality, primarily focused on participation in political processes.",
+    "subject": "social",
+    "difficulty": "advanced",
+    "topic": "sociology"
+  },
+  {
+    "question": "What was the main goal of the Marshall Plan after World War II?",
+    "options": [
+      "To promote military alliances in Europe",
+      "To provide economic aid for reconstruction",
+      "To establish democratic governments",
+      "To prevent the spread of communism"
+    ],
+    "correct_answer": "To provide economic aid for reconstruction",
+    "explanation": "The Marshall Plan aimed to aid European countries in their recovery from the devastation of World War II through substantial economic assistance.",
+    "subject": "social",
+    "difficulty": "advanced",
+    "topic": "history"
+  },
+  {
+    "question": "Which theory explains the emergence of social classes based on the means of production?",
+    "options": [
+      "Marxism",
+      "Liberalism",
+      "Utilitarianism",
+      "Feminism"
+    ],
+    "correct_answer": "Marxism",
+    "explanation": "Marxism posits that social classes arise from the ownership of productive resources, leading to class struggles.",
+    "subject": "social",
+    "difficulty": "advanced",
+    "topic": "sociology"
+  },
+  {
+    "question": "Which economic indicator is commonly used to measure a country's economic performance?",
+    "options": [
+      "Unemployment rate",
+      "Gross Domestic Product (GDP)",
+      "Inflation rate",
+      "Interest rate"
+    ],
+    "correct_answer": "Gross Domestic Product (GDP)",
+    "explanation": "GDP measures the total value of goods and services produced in a country, reflecting its economic performance.",
+    "subject": "social",
+    "difficulty": "advanced",
+    "topic": "economics"
+  },
+  {
+    "question": "What is 'nationalism' primarily concerned with?",
+    "options": [
+      "Global cooperation",
+      "Cultural identity",
+      "Economic unity",
+      "Political alliances"
+    ],
+    "correct_answer": "Cultural identity",
+    "explanation": "Nationalism emphasizes the promotion of a particular cultural identity and the interests of a nation, often leading to a desire for self-governance.",
+    "subject": "social",
+    "difficulty": "advanced",
+    "topic": "political science"
+  },
+  {
+    "question": "Which historical event is often associated with the beginning of the modern civil rights movement in the United States?",
+    "options": [
+      "The abolition of slavery",
+      "The Montgomery Bus Boycott",
+      "The Voting Rights Act",
+      "Brown v. Board of Education"
+    ],
+    "correct_answer": "The Montgomery Bus Boycott",
+    "explanation": "The Montgomery Bus Boycott in 1955 marked a significant turning point in the civil rights movement, highlighting racial segregation.",
+    "subject": "social",
+    "difficulty": "advanced",
+    "topic": "history"
+  },
+  {
+    "question": "What is the primary characteristic of a 'unitary' system of government?",
+    "options": [
+      "Power is divided between national and regional governments",
+      "Regional governments have significant autonomy",
+      "Central government holds most of the power",
+      "Local governments have independent authority"
+    ],
+    "correct_answer": "Central government holds most of the power",
+    "explanation": "In a unitary system, the central government is supreme, with any administrative divisions operating under its authority.",
+    "subject": "social",
+    "difficulty": "advanced",
+    "topic": "political science"
+  },
+  {
+    "question": "Which of the following is a key tenet of democratic governance?",
+    "options": [
+      "Authoritarian rule",
+      "Majority rule with minority rights",
+      "Centralized decision-making",
+      "Suppression of dissent"
+    ],
+    "correct_answer": "Majority rule with minority rights",
+    "explanation": "Democratic governance operates on the principle of majority rule while ensuring the rights of minority groups are protected.",
+    "subject": "social",
+    "difficulty": "advanced",
+    "topic": "political theory"
+  },
+  {
+    "question": "Which of the following movements primarily aimed to achieve gender equality?",
+    "options": [
+      "The labor movement",
+      "The civil rights movement",
+      "The women's suffrage movement",
+      "The environmental movement"
+    ],
+    "correct_answer": "The women's suffrage movement",
+    "explanation": "The women's suffrage movement worked towards securing women's right to vote and achieving broader gender equality in society.",
+    "subject": "social",
+    "difficulty": "advanced",
+    "topic": "sociology"
+  },
+  {
+    "question": "The concept of 'checks and balances' is most closely associated with which government structure?",
+    "options": [
+      "Monarchy",
+      "Authoritarian regime",
+      "Federal system",
+      "Democracy"
+    ],
+    "correct_answer": "Federal system",
+    "explanation": "Checks and balances refer to the distribution of power among different branches of government, characteristic of a federal system.",
+    "subject": "social",
+    "difficulty": "advanced",
+    "topic": "political science"
+  },
+  {
+    "question": "Which principle is foundational to the concept of social justice?",
+    "options": [
+      "Market freedom",
+      "Equity and fairness",
+      "Individualism",
+      "National security"
+    ],
+    "correct_answer": "Equity and fairness",
+    "explanation": "Social justice emphasizes the fair distribution of resources and opportunities, aiming for equity among all members of society.",
+    "subject": "social",
+    "difficulty": "advanced",
+    "topic": "sociology"
+  }
+]
