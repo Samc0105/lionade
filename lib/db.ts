@@ -95,7 +95,7 @@ export async function getQuizQuestions(subject: Subject, difficulty: string, top
   if (error) throw error;
   // Shuffle and take 10
   const shuffled = (data ?? []).sort(() => Math.random() - 0.5).slice(0, 10);
-  return shuffled.map(q => ({ ...q, options: q.options as string[] }));
+  return shuffled.map((q: any) => ({ ...q, options: q.options as string[] }));
 }
 
 /** Fetch correct answer + explanation for a single question (called after user answers) */
@@ -129,7 +129,7 @@ export async function getQuestions(subject: Subject): Promise<{
     .eq("subject", subject)
     .limit(10);
   if (error) throw error;
-  return (data ?? []).map(q => ({
+  return (data ?? []).map((q: any) => ({
     ...q,
     options: q.options as string[],
     correct_answer: Number(q.correct_answer),
@@ -309,7 +309,7 @@ export async function getLeaderboard(limit = 10): Promise<{
       .order("coins", { ascending: false })
       .limit(limit);
 
-    return (profiles ?? []).map((p, i) => ({
+    return (profiles ?? []).map((p: any, i: number) => ({
       rank: i + 1,
       user_id: p.id,
       username: p.username,
@@ -331,7 +331,7 @@ export async function getLeaderboard(limit = 10): Promise<{
     .in("id", topUserIds);
 
   return topUserIds.map((uid, i) => {
-    const profile = profiles?.find(p => p.id === uid);
+    const profile = profiles?.find((p: any) => p.id === uid);
     return {
       rank: i + 1,
       user_id: uid,
@@ -391,7 +391,7 @@ export async function getUserBadges(userId: string) {
     .order("earned_at", { ascending: false });
 
   if (error) throw error;
-  return (data ?? []).map(row => ({
+  return (data ?? []).map((row: any) => ({
     ...(row.badges as unknown as { id: string; name: string; description: string | null; icon: string; rarity: string }),
     earnedAt: row.earned_at,
   }));
@@ -774,13 +774,13 @@ export async function getUserStageProgress(userId: string, subject?: string): Pr
       .select("id")
       .eq("subject", subject);
     if (stageIds && stageIds.length > 0) {
-      query = query.in("stage_id", stageIds.map(s => s.id));
+      query = query.in("stage_id", stageIds.map((s: any) => s.id));
     }
   }
 
   const { data, error } = await query;
   if (error) throw error;
-  return (data ?? []).map(row => ({
+  return (data ?? []).map((row: any) => ({
     ...row,
     stage: row.stage as unknown as LearningPathStage,
   }));

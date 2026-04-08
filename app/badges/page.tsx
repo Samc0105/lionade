@@ -37,7 +37,7 @@ export default function BadgesPage() {
           getUserBadges(user.id),
         ]);
         setAllBadges(all);
-        setEarnedIds(new Set(earned.map(b => b.id)));
+        setEarnedIds(new Set(earned.map((b: any) => b.id)));
       } catch (err) {
         console.error("[Badges] Failed to load:", err);
       } finally {

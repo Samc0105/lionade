@@ -1,4 +1,3 @@
-// @ts-nocheck
 "use client";
 
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
@@ -159,7 +158,7 @@ export default function ArenaPage() {
   useEffect(() => {
     if (!user?.id) return;
     (async () => {
-      const { data } = await (supabase as any)
+      const { data } = await supabase
         .from("profiles")
         .select("arena_elo, username, avatar_url")
         .eq("id", user.id)
@@ -302,7 +301,7 @@ export default function ArenaPage() {
 
     const channel = supabase.channel(`arena-match-${matchId}`);
 
-    channel.on("broadcast", { event: "player_answered" }, (payload) => {
+    channel.on("broadcast", { event: "player_answered" }, (payload: any) => {
       if (payload.payload?.userId === opponent.id) {
         setOpponentAnswered(true);
       }

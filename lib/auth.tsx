@@ -202,7 +202,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }, 3000);
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, sess) => {
+      async (event: any, sess: any) => {
         resolved = true;
         clearTimeout(safetyTimer);
         console.log("[Auth] onAuthStateChange event:", event, "user:", sess?.user?.id ?? "none");
@@ -338,7 +338,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         display_name: extra?.firstName ?? username.trim(),
         study_goal: extra?.studyGoal ?? null,
         onboarding_completed: false,
-      }, { onConflict: "id" }).then(({ error: e }) => {
+      }, { onConflict: "id" }).then(({ error: e }: any) => {
         if (e) console.warn("[Auth] signup profile upsert:", e.message);
       });
     }

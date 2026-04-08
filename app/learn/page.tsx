@@ -257,8 +257,8 @@ export default function LearnPage() {
         // Count today's questions
         const today = new Date().toISOString().split("T")[0];
         const todayQuestions = history
-          .filter((h) => h.completed_at?.startsWith(today))
-          .reduce((sum, h) => sum + h.total_questions, 0);
+          .filter((h: any) => h.completed_at?.startsWith(today))
+          .reduce((sum: number, h: any) => sum + h.total_questions, 0);
         setTodayCount(todayQuestions);
       })
       .catch(() => {});

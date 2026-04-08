@@ -212,7 +212,7 @@ export default function SocialPage() {
         schema: "public",
         table: "messages",
         filter: `receiver_id=eq.${user.id}`,
-      }, (payload) => {
+      }, (payload: any) => {
         const newMsg = payload.new as Message;
         if (newMsg.sender_id === selectedFriend.id) {
           setMessages(prev => [...prev, newMsg]);

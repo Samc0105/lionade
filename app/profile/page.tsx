@@ -422,7 +422,7 @@ function EditProfileSection({ user, refreshUser }: SharedProps) {
   // Load current profile data + username change cooldown
   useEffect(() => {
     supabase.from("profiles").select("*").eq("id", user.id).single()
-      .then(({ data }) => {
+      .then(({ data }: any) => {
         if (!data) return;
         if (data.display_name)    setFirstName(data.display_name);
         if (data.bio)             setBio(data.bio);
@@ -437,7 +437,7 @@ function EditProfileSection({ user, refreshUser }: SharedProps) {
       .order("changed_at", { ascending: false })
       .limit(1)
       .maybeSingle()
-      .then(({ data }) => {
+      .then(({ data }: any) => {
         if (data) {
           const daysSince = (Date.now() - new Date(data.changed_at).getTime()) / (1000 * 60 * 60 * 24);
           if (daysSince < 365) {
