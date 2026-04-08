@@ -161,6 +161,7 @@ export default function ArenaPage() {
       const { data } = await supabase
         .from("profiles")
         .select("*")
+        // @ts-ignore
         .eq("id", user.id)
         .single();
       if (data) {
