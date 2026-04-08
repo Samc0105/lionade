@@ -158,14 +158,12 @@ export default function ArenaPage() {
   useEffect(() => {
     if (!user?.id) return;
     (async () => {
-      const { data } = await supabase
+      const { data } = await (supabase as any)
         .from("profiles")
         .select("arena_elo, username, avatar_url")
-        // @ts-ignore
         .eq("id", user.id)
         .single();
       if (data) {
-        // @ts-ignore
         setMyElo(data.arena_elo ?? 1000);
         setMe({
           id: user.id,
