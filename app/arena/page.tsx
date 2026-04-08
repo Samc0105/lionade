@@ -161,7 +161,7 @@ export default function ArenaPage() {
       const { data } = await supabase
         .from("profiles")
         .select("arena_elo, username, avatar_url")
-        .eq("id", user.id)
+        .eq("id", user.id as string)
         .single();
       if (data) {
         setMyElo(data.arena_elo ?? 1000);
