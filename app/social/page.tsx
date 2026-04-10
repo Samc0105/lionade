@@ -7,7 +7,7 @@ import { useAuth } from "@/lib/auth";
 import { useUserStats } from "@/lib/hooks";
 import { supabase } from "@/lib/supabase";
 import { cdnUrl } from "@/lib/cdn";
-import { apiGet } from "@/lib/api-client";
+import { apiGet, apiPost, apiPatch } from "@/lib/api-client";
 
 // ── Types ────────────────────────────────────────────────────
 
@@ -149,12 +149,12 @@ export default function SocialPage() {
   // ── Load friends ───────────────────────────────────────────
   const loadFriends = useCallback(async () => {
     if (!user?.id) return;
-    try {
-      const res = await fetch(`/api/social/friends?userId=${user.id}`);
-      const data = await res.json();
-      setFriends(data.friends ?? []);
-      setPendingRequests(data.pendingRequests ?? []);
-    } catch { /* ignore */ }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const res = await apiGet<any>("/api/social/friends");
+    if (res.ok && res.data) {
+      setFriends(res.data.friends ?? []);
+      setPendingRequests(res.data.pendingRequests ?? []);
+    }
   }, [user?.id]);
 
   useEffect(() => {
@@ -185,14 +185,13 @@ export default function SocialPage() {
   // ── Load conversation ──────────────────────────────────────
   const loadMessages = useCallback(async (friendId: string) => {
     if (!user?.id) return;
-    try {
-      const res = await fetch(`/api/social/messages?userId=${user.id}&friendId=${friendId}`);
-      const data = await res.json();
-      setMessages(data.messages ?? []);
-      setArenaEvents(data.arenaEvents ?? []);
-      // Clear unread for this friend locally
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const res = await apiGet<any>(`/api/social/messages?friendId=${friendId}`);
+    if (res.ok && res.data) {
+      setMessages(res.data.messages ?? []);
+      setArenaEvents(res.data.arenaEvents ?? []);
       setFriends(prev => prev.map(f => f.id === friendId ? { ...f, unreadCount: 0 } : f));
-    } catch { /* ignore */ }
+    }
   }, [user?.id]);
 
   useEffect(() => {
@@ -233,22 +232,14 @@ export default function SocialPage() {
     if (!user?.id || !selectedFriend || !msgInput.trim() || sending) return;
     setSending(true);
 
-    try {
-      const res = await fetch("/api/social/messages", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          senderId: user.id,
-          receiverId: selectedFriend.id,
-          content: msgInput.trim(),
-        }),
-      });
-      const data = await res.json();
-      if (data.message) {
-        setMessages(prev => [...prev, data.message]);
-        setMsgInput("");
-      }
-    } catch { /* ignore */ }
+    const res = await apiPost<{ message: Message }>("/api/social/messages", {
+      receiverId: selectedFriend.id,
+      content: msgInput.trim(),
+    });
+    if (res.ok && res.data?.message) {
+      setMessages(prev => [...prev, res.data!.message]);
+      setMsgInput("");
+    }
     setSending(false);
   }, [user?.id, selectedFriend, msgInput, sending]);
 
@@ -271,13 +262,11 @@ export default function SocialPage() {
     setShowDropdown(true);
 
     searchTimerRef.current = setTimeout(async () => {
-      try {
-        const res = await fetch(`/api/social/search?q=${encodeURIComponent(value.trim())}&userId=${user?.id}`);
-        const data = await res.json();
-        setSearchResults(data.users ?? []);
-      } catch {
-        setSearchResults([]);
-      }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const res = await apiGet<{ users: any[] }>(
+        `/api/social/search?q=${encodeURIComponent(value.trim())}`,
+      );
+      setSearchResults(res.ok && res.data ? res.data.users ?? [] : []);
       setSearchLoading(false);
     }, 300);
   }, [user?.id]);
@@ -287,26 +276,16 @@ export default function SocialPage() {
     setShowDropdown(false);
     setSearchResults([]);
 
-    // Send friend request immediately
     if (!user?.id) return;
     setAddError("");
     setAddSuccess("");
-    try {
-      const res = await fetch("/api/social/friends", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: user.id, friendUsername: username }),
-      });
-      const data = await res.json();
-      if (data.error) {
-        setAddError(data.error);
-      } else {
-        setAddSuccess(`Request sent to ${username}!`);
-        setAddUsername("");
-        setTimeout(() => setAddSuccess(""), 3000);
-      }
-    } catch {
-      setAddError("Failed to send request");
+    const res = await apiPost("/api/social/friends", { friendUsername: username });
+    if (!res.ok) {
+      setAddError(res.error ?? "Failed to send request");
+    } else {
+      setAddSuccess(`Request sent to ${username}!`);
+      setAddUsername("");
+      setTimeout(() => setAddSuccess(""), 3000);
     }
   }, [user?.id]);
 
@@ -327,33 +306,22 @@ export default function SocialPage() {
     setAddError("");
     setAddSuccess("");
 
-    try {
-      const res = await fetch("/api/social/friends", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: user.id, friendUsername: addUsername.trim() }),
-      });
-      const data = await res.json();
-      if (data.error) {
-        setAddError(data.error);
-      } else {
-        setAddSuccess(`Request sent to ${addUsername}!`);
-        setAddUsername("");
-        setTimeout(() => setAddSuccess(""), 3000);
-      }
-    } catch {
-      setAddError("Failed to send request");
+    const res = await apiPost("/api/social/friends", {
+      friendUsername: addUsername.trim(),
+    });
+    if (!res.ok) {
+      setAddError(res.error ?? "Failed to send request");
+    } else {
+      setAddSuccess(`Request sent to ${addUsername}!`);
+      setAddUsername("");
+      setTimeout(() => setAddSuccess(""), 3000);
     }
   }, [user?.id, addUsername]);
 
   // ── Accept / Decline ───────────────────────────────────────
   const handleRequest = useCallback(async (friendshipId: string, action: "accept" | "decline") => {
     if (!user?.id) return;
-    await fetch("/api/social/friends", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ friendshipId, userId: user.id, action }),
-    });
+    await apiPatch("/api/social/friends", { friendshipId, action });
     loadFriends();
   }, [user?.id, loadFriends]);
 

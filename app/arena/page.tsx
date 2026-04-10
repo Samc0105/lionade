@@ -8,6 +8,7 @@ import { useAuth } from "@/lib/auth";
 import { useUserStats, mutateUserStats } from "@/lib/hooks";
 import { supabase } from "@/lib/supabase";
 import { cdnUrl } from "@/lib/cdn";
+import { apiGet, apiPost, apiPatch, apiDelete } from "@/lib/api-client";
 
 // ── Types ────────────────────────────────────────────────────
 
@@ -181,17 +182,17 @@ export default function ArenaPage() {
     let cancelled = false;
 
     const check = async () => {
-      try {
-        const res = await fetch(`/api/arena/challenge?userId=${user.id}`);
-        const data = await res.json();
-        if (!cancelled) {
-          setIncomingChallenges(data.challenges ?? []);
-          if (data.acceptedChallenge?.matchId) {
-            setMatchId(data.acceptedChallenge.matchId);
-            loadMatch(data.acceptedChallenge.matchId);
-          }
+      const res = await apiGet<{
+        challenges: typeof incomingChallenges;
+        acceptedChallenge: { matchId: string } | null;
+      }>("/api/arena/challenge");
+      if (!cancelled && res.ok && res.data) {
+        setIncomingChallenges(res.data.challenges ?? []);
+        if (res.data.acceptedChallenge?.matchId) {
+          setMatchId(res.data.acceptedChallenge.matchId);
+          loadMatch(res.data.acceptedChallenge.matchId);
         }
-      } catch { /* ignore */ }
+      }
     };
 
     check();
@@ -207,11 +208,7 @@ export default function ArenaPage() {
     setSearchTime(0);
 
     // Join queue
-    await fetch("/api/arena/queue", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userId: user.id, elo: myElo ?? 1000, wager }),
-    });
+    await apiPost("/api/arena/queue", { wager });
 
     // Poll for match
     let elapsed = 0;
@@ -219,25 +216,27 @@ export default function ArenaPage() {
       elapsed += 2;
       setSearchTime(elapsed);
 
-      try {
-        const res = await fetch(`/api/arena/queue?userId=${user.id}`);
-        const data = await res.json();
+      const res = await apiGet<{
+        eloRange?: number;
+        status?: string;
+        matchId?: string;
+      }>("/api/arena/queue");
+      if (!res.ok || !res.data) return;
 
-        if (data.eloRange) setEloRange(data.eloRange);
+      if (res.data.eloRange) setEloRange(res.data.eloRange);
 
-        if (data.status === "matched" && data.matchId) {
-          if (pollRef.current) clearInterval(pollRef.current);
-          setMatchId(data.matchId);
-          loadMatch(data.matchId);
-        }
-      } catch { /* ignore */ }
+      if (res.data.status === "matched" && res.data.matchId) {
+        if (pollRef.current) clearInterval(pollRef.current);
+        setMatchId(res.data.matchId);
+        loadMatch(res.data.matchId);
+      }
     }, 2000);
-  }, [user?.id, myElo, wager]);
+  }, [user?.id, wager]);
 
   const cancelMatchmaking = useCallback(async () => {
     if (pollRef.current) clearInterval(pollRef.current);
     if (user?.id) {
-      await fetch(`/api/arena/queue?userId=${user.id}`, { method: "DELETE" });
+      await apiDelete("/api/arena/queue");
     }
     setPhase("lobby");
     setSearchTime(0);
@@ -245,35 +244,29 @@ export default function ArenaPage() {
 
   // ── Load match data ────────────────────────────────────────
   const loadMatch = useCallback(async (mId: string) => {
-    try {
-      const res = await fetch(`/api/arena/match?id=${mId}&userId=${user?.id}`);
-      const data = await res.json();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const res = await apiGet<any>(`/api/arena/match?id=${mId}`);
+    if (!res.ok || !res.data) return;
+    const data = res.data;
 
-      if (!data.match) return;
+    if (!data.match) return;
 
-      setMatchId(mId);
-      setQuestions(data.questions ?? []);
+    setMatchId(mId);
+    setQuestions(data.questions ?? []);
 
-      const isP1 = data.match.player1_id === user?.id || data.player1?.id === user?.id;
-      const meData = isP1 ? data.player1 : data.player2;
-      const opData = isP1 ? data.player2 : data.player1;
+    const isP1 = data.match.player1_id === user?.id || data.player1?.id === user?.id;
+    const meData = isP1 ? data.player1 : data.player2;
+    const opData = isP1 ? data.player2 : data.player1;
 
-      if (meData) setMe({ id: meData.id, username: meData.username, avatarUrl: meData.avatarUrl, elo: meData.elo });
-      if (opData) setOpponent({ id: opData.id, username: opData.username, avatarUrl: opData.avatarUrl, elo: opData.elo });
+    if (meData) setMe({ id: meData.id, username: meData.username, avatarUrl: meData.avatarUrl, elo: meData.elo });
+    if (opData) setOpponent({ id: opData.id, username: opData.username, avatarUrl: opData.avatarUrl, elo: opData.elo });
 
-      // Start prematch
-      setPhase("prematch");
-      setCountdown(3);
+    // Start prematch
+    setPhase("prematch");
+    setCountdown(3);
 
-      // Mark match as active
-      await fetch("/api/arena/match", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ matchId: mId, userId: user?.id, action: "start" }),
-      });
-    } catch (e) {
-      console.error("Failed to load match:", e);
-    }
+    // Mark match as active
+    await apiPatch("/api/arena/match", { matchId: mId, action: "start" });
   }, [user?.id]);
 
   // ── Prematch countdown ─────────────────────────────────────
@@ -342,48 +335,42 @@ export default function ArenaPage() {
 
     const responseTimeMs = Date.now() - questionStartTime.current;
 
-    try {
-      const res = await fetch("/api/arena/answer", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          matchId,
-          questionId: questions[currentQ].id,
-          userId: user.id,
-          selectedAnswer: idx,
-          responseTimeMs,
-        }),
-      });
+    const apiRes = await apiPost<AnswerResult>("/api/arena/answer", {
+      matchId,
+      questionId: questions[currentQ].id,
+      selectedAnswer: idx,
+      responseTimeMs,
+    });
 
-      const result: AnswerResult = await res.json();
-      setAnswerResult(result);
-
-      // Update my running score
-      setMyTotalPoints(p => p + result.pointsEarned);
-      if (result.isCorrect) setMyCorrectCount(c => c + 1);
-
-      // Broadcast that we answered
-      channelRef.current?.send({
-        type: "broadcast",
-        event: "player_answered",
-        payload: { userId: user.id, questionIndex: currentQ },
-      });
-
-      if (result.bothAnswered) {
-        setOpponentAnswered(true);
-        if (result.opponentAnswer) {
-          setOpTotalPoints(p => p + result.opponentAnswer!.points_earned);
-          if (result.opponentAnswer.is_correct) setOpCorrectCount(c => c + 1);
-        }
-        // Record and advance after brief delay
-        recordAndAdvance(result, responseTimeMs);
-      } else {
-        setWaitingForOpponent(true);
-        pollForOpponent(result, responseTimeMs);
-      }
-    } catch (e) {
-      console.error("Answer submission error:", e);
+    if (!apiRes.ok || !apiRes.data) {
+      console.error("Answer submission error:", apiRes.error);
       answerLocked.current = false;
+      return;
+    }
+    const result = apiRes.data;
+    setAnswerResult(result);
+
+    // Update my running score
+    setMyTotalPoints(p => p + result.pointsEarned);
+    if (result.isCorrect) setMyCorrectCount(c => c + 1);
+
+    // Broadcast that we answered
+    channelRef.current?.send({
+      type: "broadcast",
+      event: "player_answered",
+      payload: { userId: user.id, questionIndex: currentQ },
+    });
+
+    if (result.bothAnswered) {
+      setOpponentAnswered(true);
+      if (result.opponentAnswer) {
+        setOpTotalPoints(p => p + result.opponentAnswer!.points_earned);
+        if (result.opponentAnswer.is_correct) setOpCorrectCount(c => c + 1);
+      }
+      recordAndAdvance(result, responseTimeMs);
+    } else {
+      setWaitingForOpponent(true);
+      pollForOpponent(result, responseTimeMs);
     }
   }, [matchId, user?.id, questions, currentQ]);
 
@@ -401,22 +388,22 @@ export default function ArenaPage() {
         return;
       }
 
-      try {
-        const res = await fetch(`/api/arena/match?id=${matchId}&userId=${user?.id}`);
-        const data = await res.json();
-        const qId = questions[currentQ]?.id;
-        const answers = data.answers?.[qId];
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const r = await apiGet<any>(`/api/arena/match?id=${matchId}`);
+      if (!r.ok || !r.data) return;
+      const data = r.data;
+      const qId = questions[currentQ]?.id;
+      const answers = data.answers?.[qId];
 
-        if (answers?.player1 && answers?.player2) {
-          clearInterval(iv);
-          const isP1 = me?.id === data.player1?.id;
-          const opAns = isP1 ? answers.player2 : answers.player1;
-          setOpponentAnswered(true);
-          setOpTotalPoints(p => p + (opAns?.points_earned ?? 0));
-          if (opAns?.is_correct) setOpCorrectCount(c => c + 1);
-          recordAndAdvance(myResult, myTimeMs, opAns);
-        }
-      } catch { /* ignore */ }
+      if (answers?.player1 && answers?.player2) {
+        clearInterval(iv);
+        const isP1 = me?.id === data.player1?.id;
+        const opAns = isP1 ? answers.player2 : answers.player1;
+        setOpponentAnswered(true);
+        setOpTotalPoints(p => p + (opAns?.points_earned ?? 0));
+        if (opAns?.is_correct) setOpCorrectCount(c => c + 1);
+        recordAndAdvance(myResult, myTimeMs, opAns);
+      }
     }, 1000);
   }, [matchId, user?.id, questions, currentQ, me?.id]);
 
@@ -458,23 +445,17 @@ export default function ArenaPage() {
 
   // ── Complete match ─────────────────────────────────────────
   const completeMatch = useCallback(async () => {
-    try {
-      const res = await fetch("/api/arena/complete", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ matchId, userId: user?.id }),
-      });
-      const result = await res.json();
-      setMatchResult(result);
-      setPhase("results");
-
-      // Refresh user stats (Fangs, etc.)
-      if (user?.id) mutateUserStats(user.id);
-      mutateStats?.();
-    } catch (e) {
-      console.error("Complete match error:", e);
-      setPhase("results");
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const res = await apiPost<any>("/api/arena/complete", { matchId });
+    if (res.ok && res.data) {
+      setMatchResult(res.data);
+    } else {
+      console.error("Complete match error:", res.error);
     }
+    setPhase("results");
+
+    if (user?.id) mutateUserStats(user.id);
+    mutateStats?.();
   }, [matchId, user?.id, mutateStats]);
 
   // ── Challenge friend ───────────────────────────────────────
@@ -482,43 +463,30 @@ export default function ArenaPage() {
     if (!user?.id || !challengeUsername.trim()) return;
     setChallengeError("");
 
-    try {
-      const res = await fetch("/api/arena/challenge", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          challengerId: user.id,
-          challengedUsername: challengeUsername.trim(),
-          wager,
-        }),
-      });
-      const data = await res.json();
-      if (data.error) {
-        setChallengeError(data.error);
-      } else {
-        setChallengeSent(true);
-        // Poll for acceptance
-        pollChallengeAccepted();
-      }
-    } catch {
-      setChallengeError("Failed to send challenge");
+    const res = await apiPost("/api/arena/challenge", {
+      challengedUsername: challengeUsername.trim(),
+      wager,
+    });
+    if (!res.ok) {
+      setChallengeError(res.error ?? "Failed to send challenge");
+    } else {
+      setChallengeSent(true);
+      pollChallengeAccepted();
     }
   }, [user?.id, challengeUsername, wager]);
 
   const pollChallengeAccepted = useCallback(() => {
     const iv = setInterval(async () => {
-      try {
-        const res = await fetch(`/api/arena/challenge?userId=${user?.id}`);
-        const data = await res.json();
-        if (data.acceptedChallenge?.matchId) {
-          clearInterval(iv);
-          setMatchId(data.acceptedChallenge.matchId);
-          loadMatch(data.acceptedChallenge.matchId);
-        }
-      } catch { /* ignore */ }
+      const res = await apiGet<{ acceptedChallenge: { matchId: string } | null }>(
+        "/api/arena/challenge",
+      );
+      if (res.ok && res.data?.acceptedChallenge?.matchId) {
+        clearInterval(iv);
+        setMatchId(res.data.acceptedChallenge.matchId);
+        loadMatch(res.data.acceptedChallenge.matchId);
+      }
     }, 2000);
 
-    // Auto-cancel after 5 min
     setTimeout(() => {
       clearInterval(iv);
       if (phase === "challenge") {
@@ -530,27 +498,19 @@ export default function ArenaPage() {
 
   const acceptChallenge = useCallback(async (challengeId: string) => {
     if (!user?.id) return;
-    try {
-      const res = await fetch("/api/arena/challenge", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ challengeId, userId: user.id, action: "accept" }),
-      });
-      const data = await res.json();
-      if (data.matchId) {
-        setMatchId(data.matchId);
-        loadMatch(data.matchId);
-      }
-    } catch { /* ignore */ }
+    const res = await apiPatch<{ matchId: string }>("/api/arena/challenge", {
+      challengeId,
+      action: "accept",
+    });
+    if (res.ok && res.data?.matchId) {
+      setMatchId(res.data.matchId);
+      loadMatch(res.data.matchId);
+    }
   }, [user?.id, loadMatch]);
 
   const declineChallenge = useCallback(async (challengeId: string) => {
     if (!user?.id) return;
-    await fetch("/api/arena/challenge", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ challengeId, userId: user.id, action: "decline" }),
-    });
+    await apiPatch("/api/arena/challenge", { challengeId, action: "decline" });
     setIncomingChallenges(prev => prev.filter(c => c.id !== challengeId));
   }, [user?.id]);
 

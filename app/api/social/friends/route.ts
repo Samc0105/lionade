@@ -1,11 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
+import { requireAuth } from "@/lib/api-auth";
 
 // GET — List friends + pending requests
 export async function GET(req: NextRequest) {
+  const auth = await requireAuth(req);
+  if (auth instanceof NextResponse) return auth;
+  const userId = auth.userId;
+
   try {
-    const userId = req.nextUrl.searchParams.get("userId");
-    if (!userId) return NextResponse.json({ error: "Missing userId" }, { status: 400 });
 
     // Get accepted friendships
     const { data: friendships } = await supabaseAdmin
@@ -84,17 +87,27 @@ export async function GET(req: NextRequest) {
 
 // POST — Send friend request
 export async function POST(req: NextRequest) {
+  const auth = await requireAuth(req);
+  if (auth instanceof NextResponse) return auth;
+  const userId = auth.userId;
+
   try {
-    const { userId, friendUsername } = await req.json();
-    if (!userId || !friendUsername) {
-      return NextResponse.json({ error: "Missing fields" }, { status: 400 });
+    const { friendUsername } = await req.json();
+    if (!friendUsername) {
+      return NextResponse.json({ error: "Missing friendUsername" }, { status: 400 });
     }
 
-    // Look up friend
+    // Sanitize username — strip ilike wildcards, validate shape
+    const cleanUsername = String(friendUsername).trim().toLowerCase().replace(/[%_]/g, "");
+    if (!/^[a-z0-9_]{3,20}$/.test(cleanUsername)) {
+      return NextResponse.json({ error: "Invalid username" }, { status: 400 });
+    }
+
+    // Look up friend (use eq, not ilike, to prevent wildcard enumeration)
     const { data: friend } = await supabaseAdmin
       .from("profiles")
       .select("id, username")
-      .ilike("username", friendUsername.trim())
+      .eq("username", cleanUsername)
       .single();
 
     if (!friend) return NextResponse.json({ error: "User not found" }, { status: 404 });
@@ -144,9 +157,13 @@ export async function POST(req: NextRequest) {
 
 // PATCH — Accept or decline friend request
 export async function PATCH(req: NextRequest) {
+  const auth = await requireAuth(req);
+  if (auth instanceof NextResponse) return auth;
+  const userId = auth.userId;
+
   try {
-    const { friendshipId, userId, action } = await req.json();
-    if (!friendshipId || !userId || !["accept", "decline"].includes(action)) {
+    const { friendshipId, action } = await req.json();
+    if (!friendshipId || !["accept", "decline"].includes(action)) {
       return NextResponse.json({ error: "Missing fields" }, { status: 400 });
     }
 

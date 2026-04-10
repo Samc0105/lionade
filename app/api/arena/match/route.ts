@@ -1,13 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
+import { requireAuth } from "@/lib/api-auth";
 
 // GET — Fetch match state (questions, answers, scores)
 export async function GET(req: NextRequest) {
+  const auth = await requireAuth(req);
+  if (auth instanceof NextResponse) return auth;
+  const userId = auth.userId;
+
   try {
     const matchId = req.nextUrl.searchParams.get("id");
-    const userId = req.nextUrl.searchParams.get("userId");
-    if (!matchId || !userId) {
-      return NextResponse.json({ error: "Missing id or userId" }, { status: 400 });
+    if (!matchId) {
+      return NextResponse.json({ error: "Missing id" }, { status: 400 });
     }
 
     // Get match
@@ -119,10 +123,24 @@ export async function GET(req: NextRequest) {
 
 // PATCH — Update match status (start, advance question)
 export async function PATCH(req: NextRequest) {
+  const auth = await requireAuth(req);
+  if (auth instanceof NextResponse) return auth;
+  const userId = auth.userId;
+
   try {
-    const { matchId, userId, action } = await req.json();
-    if (!matchId || !userId) {
-      return NextResponse.json({ error: "Missing fields" }, { status: 400 });
+    const { matchId, action } = await req.json();
+    if (!matchId) {
+      return NextResponse.json({ error: "Missing matchId" }, { status: 400 });
+    }
+
+    // Verify caller is a participant before mutating state
+    const { data: match } = await supabaseAdmin
+      .from("arena_matches")
+      .select("player1_id, player2_id")
+      .eq("id", matchId)
+      .single();
+    if (!match || (match.player1_id !== userId && match.player2_id !== userId)) {
+      return NextResponse.json({ error: "Not a participant" }, { status: 403 });
     }
 
     if (action === "start") {

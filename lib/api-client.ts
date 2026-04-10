@@ -83,6 +83,10 @@ export function apiPatch<T = unknown>(url: string, body?: unknown): Promise<ApiR
   });
 }
 
+export function apiDelete<T = unknown>(url: string): Promise<ApiResult<T>> {
+  return call<T>(url, { method: "DELETE" });
+}
+
 /**
  * SWR-compatible fetcher that auto-attaches the auth token and THROWS on
  * non-2xx (so SWR's `error` channel populates correctly).

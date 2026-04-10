@@ -174,19 +174,15 @@ export default function GamesPage() {
     try {
       // Extract text using FileReader
       const arrayBuffer = await file.arrayBuffer();
-      // Simple PDF text extraction — look for text between stream markers
       const uint8 = new Uint8Array(arrayBuffer);
       let text = "";
       const decoder = new TextDecoder("utf-8", { fatal: false });
       const raw = decoder.decode(uint8);
 
-      // Extract readable text chunks
       const textMatches = raw.match(/\(([^)]{2,})\)/g);
       if (textMatches) {
         text = textMatches.map(m => m.slice(1, -1)).join(" ");
       }
-
-      // Fallback: just get any readable ASCII
       if (text.length < 100) {
         text = raw.replace(/[^\x20-\x7E\n]/g, " ").replace(/\s+/g, " ").trim();
       }
@@ -197,20 +193,16 @@ export default function GamesPage() {
         return;
       }
 
-      // Send to AI for processing
-      const res = await fetch("/api/games/pdf", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text: text.slice(0, 15000) }),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const res = await apiPost<{ content?: any }>("/api/games/pdf", {
+        text: text.slice(0, 12000),
       });
-
-      const data = await res.json();
-      if (data.error) {
-        setPdfError(data.error);
-      } else if (data.content) {
-        setPdfContent(data.content);
+      if (!res.ok) {
+        setPdfError(res.error ?? "Failed to process PDF");
+      } else if (res.data?.content) {
+        setPdfContent(res.data.content);
         setPdfName(file.name);
-        localStorage.setItem("lionade_pdf_content", JSON.stringify(data.content));
+        localStorage.setItem("lionade_pdf_content", JSON.stringify(res.data.content));
         localStorage.setItem("lionade_pdf_name", file.name);
       }
     } catch {

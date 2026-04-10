@@ -1,22 +1,33 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
+import { requireAuth } from "@/lib/api-auth";
 
 // POST — Send a challenge to a friend (by username)
 export async function POST(req: NextRequest) {
+  const auth = await requireAuth(req);
+  if (auth instanceof NextResponse) return auth;
+  const challengerId = auth.userId;
+
   try {
-    const { challengerId, challengedUsername, wager } = await req.json();
-    if (!challengerId || !challengedUsername) {
-      return NextResponse.json({ error: "Missing fields" }, { status: 400 });
+    const { challengedUsername, wager } = await req.json();
+    if (!challengedUsername) {
+      return NextResponse.json({ error: "Missing challengedUsername" }, { status: 400 });
     }
 
     const validWagers = [10, 25, 50, 100];
     const safeWager = validWagers.includes(wager) ? wager : 10;
 
-    // Look up challenged user
+    // Sanitize username — escape ilike wildcards to prevent enumeration
+    const cleanUsername = String(challengedUsername).trim().toLowerCase().replace(/[%_]/g, "");
+    if (!/^[a-z0-9_]{3,20}$/.test(cleanUsername)) {
+      return NextResponse.json({ error: "Invalid username" }, { status: 400 });
+    }
+
+    // Look up challenged user (use eq, not ilike, to prevent wildcard injection)
     const { data: challenged } = await supabaseAdmin
       .from("profiles")
       .select("id, username, coins")
-      .ilike("username", challengedUsername)
+      .eq("username", cleanUsername)
       .single();
 
     if (!challenged) {
@@ -87,10 +98,11 @@ export async function POST(req: NextRequest) {
 
 // GET — Check for incoming challenges
 export async function GET(req: NextRequest) {
-  try {
-    const userId = req.nextUrl.searchParams.get("userId");
-    if (!userId) return NextResponse.json({ error: "Missing userId" }, { status: 400 });
+  const auth = await requireAuth(req);
+  if (auth instanceof NextResponse) return auth;
+  const userId = auth.userId;
 
+  try {
     // Get pending challenges where I'm the challenged party
     const { data: incoming } = await supabaseAdmin
       .from("arena_challenges")
@@ -143,9 +155,13 @@ export async function GET(req: NextRequest) {
 
 // PATCH — Accept or decline a challenge
 export async function PATCH(req: NextRequest) {
+  const auth = await requireAuth(req);
+  if (auth instanceof NextResponse) return auth;
+  const userId = auth.userId;
+
   try {
-    const { challengeId, userId, action } = await req.json();
-    if (!challengeId || !userId || !["accept", "decline"].includes(action)) {
+    const { challengeId, action } = await req.json();
+    if (!challengeId || !["accept", "decline"].includes(action)) {
       return NextResponse.json({ error: "Missing fields" }, { status: 400 });
     }
 

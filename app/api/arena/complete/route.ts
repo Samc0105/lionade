@@ -1,12 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
+import { requireAuth } from "@/lib/api-auth";
 
 // POST — Complete a match: calculate ELO, transfer Fangs
 export async function POST(req: NextRequest) {
+  const auth = await requireAuth(req);
+  if (auth instanceof NextResponse) return auth;
+  const userId = auth.userId;
+
   try {
-    const { matchId, userId } = await req.json();
-    if (!matchId || !userId) {
-      return NextResponse.json({ error: "Missing fields" }, { status: 400 });
+    const { matchId } = await req.json();
+    if (!matchId) {
+      return NextResponse.json({ error: "Missing matchId" }, { status: 400 });
     }
 
     // Get match
@@ -24,6 +29,26 @@ export async function POST(req: NextRequest) {
     // Verify user is participant
     if (match.player1_id !== userId && match.player2_id !== userId) {
       return NextResponse.json({ error: "Not a participant" }, { status: 403 });
+    }
+
+    // Atomic claim: flip status to "completing" only if currently "active".
+    // Closes the race window where two simultaneous completes both run the
+    // ELO/Fangs transfer.
+    const { data: claimed } = await supabaseAdmin
+      .from("arena_matches")
+      .update({ status: "completing" })
+      .eq("id", matchId)
+      .eq("status", "active")
+      .select("id")
+      .maybeSingle();
+    if (!claimed) {
+      // Someone else is already completing it (or it's not active yet)
+      const { data: refetch } = await supabaseAdmin
+        .from("arena_matches")
+        .select("*")
+        .eq("id", matchId)
+        .single();
+      return NextResponse.json({ alreadyCompleted: true, match: refetch });
     }
 
     // Get final scores from answers

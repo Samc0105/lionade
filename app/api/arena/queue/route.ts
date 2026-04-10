@@ -1,11 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
+import { requireAuth } from "@/lib/api-auth";
 
 // POST — Join the matchmaking queue
 export async function POST(req: NextRequest) {
+  const auth = await requireAuth(req);
+  if (auth instanceof NextResponse) return auth;
+  const userId = auth.userId;
+
   try {
-    const { userId, elo, wager } = await req.json();
-    if (!userId) return NextResponse.json({ error: "Missing userId" }, { status: 400 });
+    const { wager } = await req.json();
 
     const validWagers = [10, 25, 50, 100];
     const safeWager = validWagers.includes(wager) ? wager : 10;
@@ -49,10 +53,11 @@ export async function POST(req: NextRequest) {
 
 // GET — Poll for a match (called every 2s by client)
 export async function GET(req: NextRequest) {
-  try {
-    const userId = req.nextUrl.searchParams.get("userId");
-    if (!userId) return NextResponse.json({ error: "Missing userId" }, { status: 400 });
+  const auth = await requireAuth(req);
+  if (auth instanceof NextResponse) return auth;
+  const userId = auth.userId;
 
+  try {
     // Check my queue entry
     const { data: myEntry } = await supabaseAdmin
       .from("arena_queue")
@@ -167,10 +172,11 @@ export async function GET(req: NextRequest) {
 
 // DELETE — Leave the queue
 export async function DELETE(req: NextRequest) {
-  try {
-    const userId = req.nextUrl.searchParams.get("userId");
-    if (!userId) return NextResponse.json({ error: "Missing userId" }, { status: 400 });
+  const auth = await requireAuth(req);
+  if (auth instanceof NextResponse) return auth;
+  const userId = auth.userId;
 
+  try {
     await supabaseAdmin
       .from("arena_queue")
       .update({ status: "cancelled" })

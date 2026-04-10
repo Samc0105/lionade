@@ -1,12 +1,24 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
+import { requireAuth } from "@/lib/api-auth";
+
+// Minimum reaction time floor — humans can't reliably react faster than this.
+// Clamping protects the speed-bonus mechanic from trivial bots that always
+// report responseTimeMs=0.
+const MIN_REACTION_MS = 500;
 
 // POST — Submit an answer (server-validated)
 export async function POST(req: NextRequest) {
-  try {
-    const { matchId, questionId, userId, selectedAnswer, responseTimeMs } = await req.json();
+  const auth = await requireAuth(req);
+  if (auth instanceof NextResponse) return auth;
+  const userId = auth.userId;
 
-    if (!matchId || !questionId || !userId || selectedAnswer === undefined) {
+  try {
+    const body = await req.json();
+    const { matchId, questionId, selectedAnswer } = body;
+    const rawResponseTime = Number(body.responseTimeMs);
+
+    if (!matchId || !questionId || selectedAnswer === undefined) {
       return NextResponse.json({ error: "Missing fields" }, { status: 400 });
     }
 
@@ -63,11 +75,18 @@ export async function POST(req: NextRequest) {
     const timeLimit = matchQ?.time_limit ?? 15;
     const timeLimitMs = timeLimit * 1000;
 
+    // Clamp client-supplied response time so a bot can't always send 0 for max
+    // bonus. Humans can't reliably react faster than ~250ms; 500ms floor is
+    // generous. Cap at the question time limit.
+    const clampedResponseMs = Number.isFinite(rawResponseTime)
+      ? Math.max(MIN_REACTION_MS, Math.min(timeLimitMs, rawResponseTime))
+      : timeLimitMs;
+
     // Calculate points with speed bonus
     let points = 0;
     if (isCorrect) {
       points = 10; // base
-      const pct = (responseTimeMs ?? timeLimitMs) / timeLimitMs;
+      const pct = clampedResponseMs / timeLimitMs;
       if (pct < 0.3) points += 5;
       else if (pct < 0.5) points += 3;
       else if (pct < 0.75) points += 1;
@@ -82,7 +101,7 @@ export async function POST(req: NextRequest) {
         user_id: userId,
         selected_answer: selectedAnswer >= 0 ? selectedAnswer : null,
         is_correct: isCorrect,
-        response_time_ms: responseTimeMs ?? null,
+        response_time_ms: clampedResponseMs,
         points_earned: points,
       });
 
