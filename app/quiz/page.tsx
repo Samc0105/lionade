@@ -236,6 +236,7 @@ export default function QuizPage() {
   const [currentResult, setCurrentResult] = useState<{ correctIndex: number; explanation: string | null } | null>(null);
   const advanceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [showMistakes, setShowMistakes] = useState(false);
+  const [bonusFangs, setBonusFangs] = useState(0);
 
   // Boosters
   interface ActiveBooster { id: string; item_id: string; booster_effect: string; booster_value: number; uses_remaining: number }
@@ -355,6 +356,7 @@ export default function QuizPage() {
       if (data.success) {
         await refreshUser();
         if (user?.id) mutateUserStats(user.id);
+        setBonusFangs(data.bonusFangs ?? 0);
       }
     } catch (err) {
       console.error("[Quiz] fetch() failed:", err);
@@ -457,6 +459,7 @@ export default function QuizPage() {
     setTotalXp(0);
     setCurrentResult(null);
     setShowMistakes(false);
+    setBonusFangs(0);
   };
 
   const correctCount = answers.filter((a) => a.correct).length;
@@ -870,6 +873,7 @@ export default function QuizPage() {
       showMistakes={showMistakes}
       setShowMistakes={setShowMistakes}
       router={router}
+      bonusFangs={bonusFangs}
     />;
   }
 
@@ -883,7 +887,7 @@ export default function QuizPage() {
 
 function ResultsScreen({
   answers, totalCoins, totalXp, accuracy, correctCount, wrongCount,
-  subject, blitzMode, showMistakes, setShowMistakes, router,
+  subject, blitzMode, showMistakes, setShowMistakes, router, bonusFangs,
 }: {
   answers: AnswerRecord[];
   totalCoins: number;
@@ -896,6 +900,7 @@ function ResultsScreen({
   showMistakes: boolean;
   setShowMistakes: (v: boolean) => void;
   router: ReturnType<typeof useRouter>;
+  bonusFangs: number;
 }) {
   const getRank = (acc: number) => {
     if (acc === 100) return { label: "PERFECT", icon: "\u{1F48E}", color: "#FFD700" };
@@ -950,6 +955,26 @@ function ResultsScreen({
           {subject} Quiz Complete
           {blitzMode && <span className="text-[#EAB308] ml-2">&#x26A1; Blitz</span>}
         </p>
+
+        {/* Consecutive quiz bonus banner */}
+        {bonusFangs > 0 && (
+          <div
+            className="flex items-center justify-center gap-3 rounded-2xl px-5 py-4 mb-6 animate-slide-up"
+            style={{
+              animationDelay: "0.10s",
+              background: "linear-gradient(135deg, rgba(255,215,0,0.12) 0%, rgba(255,165,0,0.08) 100%)",
+              border: "1px solid rgba(255,215,0,0.35)",
+              boxShadow: "0 0 30px rgba(255,215,0,0.12)",
+            }}
+          >
+            <span className="text-2xl">&#x1F525;</span>
+            <div className="text-left">
+              <p className="font-bebas text-lg text-[#FFD700] tracking-wider leading-none">3 QUIZZES IN A ROW!</p>
+              <p className="text-cream/50 text-xs mt-0.5">Bonus +{bonusFangs} fangs added to your wallet</p>
+            </div>
+            <span className="font-bebas text-2xl text-[#FFD700] ml-auto">+{bonusFangs} &#x1FA99;</span>
+          </div>
+        )}
 
         {/* Glass Stat Cards — with animated counters */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8 animate-slide-up" style={{ animationDelay: "0.12s" }}>

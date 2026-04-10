@@ -107,6 +107,48 @@ export async function POST(req: NextRequest) {
     }
     console.log("[save-quiz-results] Step 3 OK");
 
+    // 3b. Consecutive quiz bonus — award 50 fangs for every 3rd quiz completed within 60 minutes
+    let bonusFangs = 0;
+    try {
+      const sixtyMinutesAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+      const { count: recentCount } = await supabaseAdmin
+        .from("quiz_sessions")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", userId)
+        .gte("completed_at", sixtyMinutesAgo);
+
+      const count = recentCount ?? 0;
+      console.log("[save-quiz-results] Step 3b: quizzes in last 60min =", count);
+
+      if (count > 0 && count % 3 === 0) {
+        bonusFangs = 50;
+        const { data: freshProfile } = await supabaseAdmin
+          .from("profiles")
+          .select("coins")
+          .eq("id", userId)
+          .single();
+
+        if (freshProfile) {
+          await supabaseAdmin
+            .from("profiles")
+            .update({ coins: freshProfile.coins + bonusFangs })
+            .eq("id", userId);
+        }
+
+        await supabaseAdmin.from("coin_transactions").insert({
+          user_id: userId,
+          amount: bonusFangs,
+          type: "streak_bonus",
+          reference_id: String(session.id),
+          description: `${count} quizzes in a row bonus!`,
+        });
+
+        console.log("[save-quiz-results] Step 3b OK — awarded", bonusFangs, "bonus fangs (quiz #" + count + ")");
+      }
+    } catch (bonusErr) {
+      console.warn("[save-quiz-results] Step 3b WARN (non-fatal):", bonusErr);
+    }
+
     // 4. Log coin transaction
     if (coinsEarned > 0) {
       console.log("[save-quiz-results] Step 4: Coin transaction...");
@@ -456,6 +498,7 @@ export async function POST(req: NextRequest) {
       success: true,
       sessionId: session.id,
       profile: finalProfile,
+      bonusFangs,
     });
   } catch (err) {
     console.error("[save-quiz-results] UNEXPECTED:", err);
