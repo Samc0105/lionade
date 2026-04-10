@@ -11,80 +11,6 @@ import { SUBJECT_ICONS, SUBJECT_COLORS, formatCoins } from "@/lib/mockData";
 import type { Subject } from "@/types";
 import { cdnUrl } from "@/lib/cdn";
 
-/* ── Ninny Modal ────────────────────────────────────────────── */
-
-function NinnyModal({ onClose }: { onClose: () => void }) {
-  useEffect(() => {
-    function onKey(e: KeyboardEvent) {
-      if (e.key === "Escape") onClose();
-    }
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, [onClose]);
-
-  return (
-    <div
-      className="fixed inset-0 z-[60] flex items-center justify-center px-4"
-      onClick={onClose}
-    >
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
-      <div
-        className="relative rounded-2xl border border-electric/20 max-w-md w-full p-8 text-center animate-slide-up"
-        style={{
-          background: "linear-gradient(135deg, #0d1528 0%, #0a1020 100%)",
-        }}
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Icon circle */}
-        <div
-          className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-5"
-          style={{
-            background:
-              "radial-gradient(circle at 40% 35%, #E67E2225 0%, #E67E220A 70%, transparent 100%)",
-            boxShadow: "0 0 30px #E67E2218, 0 0 0 1px #E67E2220",
-          }}
-        >
-          <span className="text-4xl">&#x1F916;</span>
-        </div>
-
-        <p className="font-bebas text-2xl text-cream tracking-wider mb-1">
-          Study With Ninny{" "}
-          <span className="text-cream/40">(Coming Soon)</span>
-        </p>
-        <p className="text-cream/50 text-sm leading-relaxed mb-6 max-w-sm mx-auto">
-          Upload anything or tell Ninny what you&apos;re studying. Ninny will
-          summarize, generate flashcards, and create practice questions.
-        </p>
-
-        <div className="flex flex-col sm:flex-row gap-2.5 justify-center mb-6">
-          <button
-            disabled
-            className="font-syne font-semibold text-sm px-5 py-2.5 rounded-xl border border-cream/10
-              text-cream/25 bg-white/5 cursor-not-allowed"
-          >
-            Upload Material (Soon)
-          </button>
-          <button
-            disabled
-            className="font-syne font-semibold text-sm px-5 py-2.5 rounded-xl border border-cream/10
-              text-cream/25 bg-white/5 cursor-not-allowed"
-          >
-            Tell Ninny What to Study (Soon)
-          </button>
-        </div>
-
-        <button
-          onClick={onClose}
-          className="font-syne font-bold text-sm px-6 py-2.5 rounded-lg transition-all duration-200
-            active:scale-95 text-navy bg-electric hover:bg-electric-light"
-        >
-          Got it
-        </button>
-      </div>
-    </div>
-  );
-}
-
 /* ── Coming Soon Modal (Practice Sets) ────────────────────── */
 
 function ComingSoonModal({ onClose }: { onClose: () => void }) {
@@ -195,8 +121,8 @@ const CARDS = [
     title: "Study With Ninny",
     subtitle: "AI summaries \u2022 Flashcards",
     color: "#A855F7",
-    action: "modal-ninny" as const,
-    badge: "Soon",
+    action: "navigate" as const,
+    href: "/learn/ninny",
   },
 ];
 
@@ -240,7 +166,6 @@ export default function LearnPage() {
   const router = useRouter();
   const { user } = useAuth();
   const { stats } = useUserStats(user?.id);
-  const [showNinny, setShowNinny] = useState(false);
   const [showPractice, setShowPractice] = useState(false);
   const [quizHistory, setQuizHistory] = useState<QuizHistoryEntry[]>([]);
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
@@ -272,8 +197,6 @@ export default function LearnPage() {
   const handleCard = (card: (typeof CARDS)[number]) => {
     if (card.action === "navigate" && "href" in card) {
       router.push(card.href);
-    } else if (card.action === "modal-ninny") {
-      setShowNinny(true);
     } else if (card.action === "modal-practice") {
       setShowPractice(true);
     }
@@ -428,19 +351,6 @@ export default function LearnPage() {
                   e.currentTarget.style.borderColor = `${card.color}30`;
                 }}
               >
-                {card.badge && (
-                  <span
-                    className="absolute top-3 right-3 text-[9px] font-bold uppercase tracking-widest
-                      px-2 py-0.5 rounded-full"
-                    style={{
-                      background: `${card.color}20`,
-                      border: `1px solid ${card.color}40`,
-                      color: card.color,
-                    }}
-                  >
-                    {card.badge}
-                  </span>
-                )}
                 <span className="text-4xl sm:text-5xl block mb-3 group-hover:scale-110 transition-transform duration-300">
                   {card.icon}
                 </span>
@@ -624,7 +534,6 @@ export default function LearnPage() {
         </div>
       </div>
 
-      {showNinny && <NinnyModal onClose={() => setShowNinny(false)} />}
       {showPractice && (
         <ComingSoonModal onClose={() => setShowPractice(false)} />
       )}
