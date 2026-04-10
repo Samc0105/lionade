@@ -67,13 +67,21 @@ const ROUTE_LIMITS: RouteLimit[] = [
   },
 
   // AI endpoints — expensive, anti-abuse
-  // Ninny: 5/15min per IP. Combined with the per-user 20/day cap and Fangs cost,
-  // this protects OpenAI bill from any one IP slamming the endpoint.
+  // Ninny generate: 5/15min per IP. Combined with the per-user 20/day cap
+  // and Fangs cost, this protects OpenAI bill from any one IP slamming.
   {
     test: (p) => p === "/api/ninny/generate",
     max: 5,
     windowMs: 15 * 60 * 1000,
     keyPrefix: "ninny-gen",
+  },
+  // Ninny chat: more permissive (real conversations) but still bounded.
+  // 30/min per IP allows fast back-and-forth without enabling abuse.
+  {
+    test: (p) => p === "/api/ninny/chat",
+    max: 30,
+    windowMs: 60 * 1000,
+    keyPrefix: "ninny-chat",
   },
   {
     test: (p) => p === "/api/games/pdf",

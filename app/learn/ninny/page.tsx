@@ -16,6 +16,7 @@ import FillBlankMode from "@/components/Ninny/FillBlankMode";
 import TrueFalseMode from "@/components/Ninny/TrueFalseMode";
 import OrderingMode from "@/components/Ninny/OrderingMode";
 import BlitzMode from "@/components/Ninny/BlitzMode";
+import ChatPanel from "@/components/Ninny/ChatPanel";
 import { cdnUrl } from "@/lib/cdn";
 import {
   NINNY_DAILY_LIMIT,
@@ -30,7 +31,7 @@ import type {
 } from "@/lib/ninny";
 import { apiPost, swrFetcher } from "@/lib/api-client";
 
-type Phase = "input" | "generating" | "modePicker" | "play" | "results";
+type Phase = "input" | "generating" | "modePicker" | "play" | "results" | "chat";
 type InputMode = "topic" | "material";
 
 interface Material {
@@ -1053,8 +1054,63 @@ function NinnyPageInner() {
               </button>
             </div>
 
+            {/* Chat with Ninny — featured tile (full width on top) */}
+            <button
+              onClick={() => setPhase("chat")}
+              className="group block w-full text-left rounded-2xl border-2 backdrop-blur p-5 mb-4
+                transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.99]"
+              style={{
+                background: `linear-gradient(135deg, ${NINNY_PURPLE}18 0%, ${NINNY_PURPLE}08 100%)`,
+                borderColor: `${NINNY_PURPLE}50`,
+                boxShadow: `0 0 24px ${NINNY_PURPLE}20`,
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = `${NINNY_PURPLE}80`;
+                e.currentTarget.style.boxShadow = `0 0 36px ${NINNY_PURPLE}40`;
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = `${NINNY_PURPLE}50`;
+                e.currentTarget.style.boxShadow = `0 0 24px ${NINNY_PURPLE}20`;
+              }}
+            >
+              <div className="flex items-center gap-4">
+                <div
+                  className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl shrink-0
+                    group-hover:scale-110 transition-transform relative"
+                  style={{
+                    background: `radial-gradient(circle at 40% 35%, ${NINNY_PURPLE}55 0%, ${NINNY_PURPLE}15 70%, transparent 100%)`,
+                    boxShadow: `0 0 20px ${NINNY_PURPLE}40, 0 0 0 1px ${NINNY_PURPLE}50`,
+                  }}
+                >
+                  &#x1F4AC;
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    <p className="font-bebas text-cream text-lg tracking-wide leading-none">
+                      Chat with Ninny
+                    </p>
+                    <span
+                      className="px-1.5 py-0.5 rounded text-[8px] font-syne font-bold uppercase tracking-wider"
+                      style={{
+                        background: `${NINNY_PURPLE}30`,
+                        color: NINNY_PURPLE,
+                      }}
+                    >
+                      New
+                    </span>
+                  </div>
+                  <p className="font-syne text-cream/60 text-xs leading-snug">
+                    Ask questions about this material · scoped to your topic
+                  </p>
+                </div>
+                <span className="font-bebas text-2xl" style={{ color: NINNY_PURPLE }}>
+                  →
+                </span>
+              </div>
+            </button>
+
             <p className="font-bebas text-cream/60 text-xs tracking-widest uppercase mb-3 text-center">
-              Pick a Study Mode
+              Or Pick a Study Mode
             </p>
 
             {/* Mode grid */}
@@ -1102,6 +1158,62 @@ function NinnyPageInner() {
               ))}
             </div>
           </div>
+        )}
+
+        {/* CHAT PHASE */}
+        {phase === "chat" && material && (
+          <>
+            <div
+              className="rounded-xl border bg-white/5 backdrop-blur px-4 py-3 mb-4 flex items-center gap-3 animate-slide-up flex-wrap"
+              style={{ borderColor: `${NINNY_PURPLE}25` }}
+            >
+              <span className="font-bebas text-cream text-base tracking-wide truncate">
+                {material.title}
+              </span>
+              {material.subject && (
+                <span
+                  className="px-2.5 py-0.5 rounded-full text-[10px] font-syne font-semibold uppercase tracking-wider"
+                  style={{
+                    background: `${NINNY_PURPLE}20`,
+                    border: `1px solid ${NINNY_PURPLE}40`,
+                    color: NINNY_PURPLE,
+                  }}
+                >
+                  {material.subject}
+                </span>
+              )}
+              <div
+                className="flex items-center gap-1.5 px-2.5 py-1 rounded-full border"
+                style={{
+                  background: `${NINNY_PURPLE}15`,
+                  borderColor: `${NINNY_PURPLE}40`,
+                }}
+              >
+                <span className="text-xs">&#x1F4AC;</span>
+                <span
+                  className="font-syne text-[10px] font-semibold uppercase tracking-wider"
+                  style={{ color: NINNY_PURPLE }}
+                >
+                  Chat
+                </span>
+              </div>
+              <button
+                onClick={() => setPhase("modePicker")}
+                className="ml-auto w-7 h-7 rounded-full bg-white/5 hover:bg-white/10
+                  flex items-center justify-center text-cream/50 hover:text-cream
+                  border border-white/10 transition-all"
+                aria-label="Back to mode picker"
+                title="Back to mode picker"
+              >
+                ×
+              </button>
+            </div>
+            <ChatPanel
+              materialId={material.id}
+              materialTitle={material.title}
+              materialSubject={material.subject}
+            />
+          </>
         )}
 
         {/* PLAY PHASE */}
