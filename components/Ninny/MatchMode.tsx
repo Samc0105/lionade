@@ -2,11 +2,12 @@
 
 import { useState, useMemo, useEffect } from "react";
 import { cdnUrl } from "@/lib/cdn";
-import type { MatchPair } from "@/lib/ninny";
+import { weightedShuffle, type MatchPair } from "@/lib/ninny";
 import type { NinnyWrongAnswer } from "./MultipleChoiceMode";
 
 interface Props {
   pairs: MatchPair[];
+  wrongAnswerCounts?: Map<string, number>;
   onComplete: (result: { score: number; total: number; wrongAnswers: NinnyWrongAnswer[] }) => void;
 }
 
@@ -19,10 +20,14 @@ interface Item {
 
 const NINNY_PURPLE = "#A855F7";
 
-export default function MatchMode({ pairs, onComplete }: Props) {
-  // Take 6 pairs at a time so the grid stays manageable on mobile
+export default function MatchMode({ pairs, wrongAnswerCounts, onComplete }: Props) {
+  // Take 6 pairs at a time, weighted toward previously-missed pairs
   const round = useMemo(() => {
-    const shuffled = [...pairs].sort(() => Math.random() - 0.5).slice(0, 6);
+    const ordered =
+      wrongAnswerCounts && wrongAnswerCounts.size > 0
+        ? weightedShuffle(pairs, (p) => p.term, wrongAnswerCounts, pairs.length)
+        : [...pairs].sort(() => Math.random() - 0.5);
+    const shuffled = ordered.slice(0, 6);
     const terms: Item[] = shuffled.map((p, i) => ({
       id: i * 2,
       text: p.term,

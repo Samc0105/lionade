@@ -1,25 +1,30 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { cdnUrl } from "@/lib/cdn";
-import type { TrueFalseQuestion } from "@/lib/ninny";
+import { weightedShuffle, type TrueFalseQuestion } from "@/lib/ninny";
 import type { NinnyWrongAnswer } from "./MultipleChoiceMode";
 
 interface Props {
   questions: TrueFalseQuestion[];
+  wrongAnswerCounts?: Map<string, number>;
   onComplete: (result: { score: number; total: number; wrongAnswers: NinnyWrongAnswer[] }) => void;
 }
 
 const NINNY_PURPLE = "#A855F7";
 
-export default function TrueFalseMode({ questions, onComplete }: Props) {
+export default function TrueFalseMode({ questions, wrongAnswerCounts, onComplete }: Props) {
+  const orderedQuestions = useMemo(() => {
+    if (!wrongAnswerCounts || wrongAnswerCounts.size === 0) return questions;
+    return weightedShuffle(questions, (q) => q.statement, wrongAnswerCounts, questions.length);
+  }, [questions, wrongAnswerCounts]);
   const [index, setIndex] = useState(0);
   const [selected, setSelected] = useState<boolean | null>(null);
   const [score, setScore] = useState(0);
   const [wrongAnswers, setWrongAnswers] = useState<NinnyWrongAnswer[]>([]);
 
-  const current = questions[index];
-  const isLast = index === questions.length - 1;
+  const current = orderedQuestions[index];
+  const isLast = index === orderedQuestions.length - 1;
 
   useEffect(() => {
     setSelected(null);
@@ -50,7 +55,7 @@ export default function TrueFalseMode({ questions, onComplete }: Props) {
 
   const handleNext = () => {
     if (isLast) {
-      onComplete({ score, total: questions.length, wrongAnswers });
+      onComplete({ score, total: orderedQuestions.length, wrongAnswers });
     } else {
       setIndex((i) => i + 1);
     }
@@ -63,7 +68,7 @@ export default function TrueFalseMode({ questions, onComplete }: Props) {
       {/* Progress + score chip */}
       <div className="flex items-center justify-between mb-4">
         <span className="font-bebas text-cream/60 text-sm tracking-wider">
-          Statement {index + 1} of {questions.length}
+          Statement {index + 1} of {orderedQuestions.length}
         </span>
         <div
           className="flex items-center gap-1.5 px-2.5 py-1 rounded-full border"
@@ -80,7 +85,7 @@ export default function TrueFalseMode({ questions, onComplete }: Props) {
         <div
           className="h-full transition-all duration-300"
           style={{
-            width: `${((index + 1) / questions.length) * 100}%`,
+            width: `${((index + 1) / orderedQuestions.length) * 100}%`,
             background: "linear-gradient(90deg, #FFD700 0%, #F0C000 100%)",
           }}
         />

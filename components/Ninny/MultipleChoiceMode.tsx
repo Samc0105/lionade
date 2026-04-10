@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { cdnUrl } from "@/lib/cdn";
-import type { MCQQuestion } from "@/lib/ninny";
+import { weightedShuffle, type MCQQuestion } from "@/lib/ninny";
 
 export interface NinnyWrongAnswer {
   question: string;
@@ -13,6 +13,8 @@ export interface NinnyWrongAnswer {
 
 interface Props {
   questions: MCQQuestion[];
+  /** Optional spaced-repetition map: question_text → miss_count */
+  wrongAnswerCounts?: Map<string, number>;
   onComplete: (result: {
     score: number;
     total: number;
@@ -20,15 +22,28 @@ interface Props {
   }) => void;
 }
 
-export default function MultipleChoiceMode({ questions, onComplete }: Props) {
+export default function MultipleChoiceMode({ questions, wrongAnswerCounts, onComplete }: Props) {
+  // Apply spaced-repetition weighting on mount: questions the user has
+  // previously missed appear with higher selection probability.
+  const orderedQuestions = useMemo(() => {
+    if (!wrongAnswerCounts || wrongAnswerCounts.size === 0) {
+      return questions;
+    }
+    return weightedShuffle(
+      questions,
+      (q) => q.question,
+      wrongAnswerCounts,
+      questions.length,
+    );
+  }, [questions, wrongAnswerCounts]);
   const [index, setIndex] = useState(0);
   const [selected, setSelected] = useState<number | null>(null);
   const [revealed, setRevealed] = useState(false);
   const [score, setScore] = useState(0);
   const [wrongAnswers, setWrongAnswers] = useState<NinnyWrongAnswer[]>([]);
 
-  const current = questions[index];
-  const isLast = index === questions.length - 1;
+  const current = orderedQuestions[index];
+  const isLast = index === orderedQuestions.length - 1;
 
   useEffect(() => {
     setSelected(null);
@@ -64,7 +79,7 @@ export default function MultipleChoiceMode({ questions, onComplete }: Props) {
 
   const handleNext = () => {
     if (isLast) {
-      onComplete({ score, total: questions.length, wrongAnswers });
+      onComplete({ score, total: orderedQuestions.length, wrongAnswers });
     } else {
       setIndex((i) => i + 1);
     }
@@ -75,7 +90,7 @@ export default function MultipleChoiceMode({ questions, onComplete }: Props) {
       {/* Progress + score chip */}
       <div className="flex items-center justify-between mb-4">
         <span className="font-bebas text-cream/60 text-sm tracking-wider">
-          Question {index + 1} of {questions.length}
+          Question {index + 1} of {orderedQuestions.length}
         </span>
         <div
           className="flex items-center gap-1.5 px-2.5 py-1 rounded-full border"
@@ -94,7 +109,7 @@ export default function MultipleChoiceMode({ questions, onComplete }: Props) {
         <div
           className="h-full bg-gold transition-all duration-300"
           style={{
-            width: `${((index + 1) / questions.length) * 100}%`,
+            width: `${((index + 1) / orderedQuestions.length) * 100}%`,
             background: "linear-gradient(90deg, #FFD700 0%, #F0C000 100%)",
           }}
         />

@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { cdnUrl } from "@/lib/cdn";
-import type { FillBlankQuestion } from "@/lib/ninny";
+import { weightedShuffle, type FillBlankQuestion } from "@/lib/ninny";
 import type { NinnyWrongAnswer } from "./MultipleChoiceMode";
 
 interface Props {
   questions: FillBlankQuestion[];
+  wrongAnswerCounts?: Map<string, number>;
   onComplete: (result: { score: number; total: number; wrongAnswers: NinnyWrongAnswer[] }) => void;
 }
 
@@ -17,7 +18,11 @@ function normalize(s: string): string {
   return s.trim().toLowerCase().replace(/[.,!?;:'"]/g, "");
 }
 
-export default function FillBlankMode({ questions, onComplete }: Props) {
+export default function FillBlankMode({ questions, wrongAnswerCounts, onComplete }: Props) {
+  const orderedQuestions = useMemo(() => {
+    if (!wrongAnswerCounts || wrongAnswerCounts.size === 0) return questions;
+    return weightedShuffle(questions, (q) => q.sentence, wrongAnswerCounts, questions.length);
+  }, [questions, wrongAnswerCounts]);
   const [index, setIndex] = useState(0);
   const [input, setInput] = useState("");
   const [revealed, setRevealed] = useState(false);
@@ -26,8 +31,8 @@ export default function FillBlankMode({ questions, onComplete }: Props) {
   const [wrongAnswers, setWrongAnswers] = useState<NinnyWrongAnswer[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const current = questions[index];
-  const isLast = index === questions.length - 1;
+  const current = orderedQuestions[index];
+  const isLast = index === orderedQuestions.length - 1;
 
   useEffect(() => {
     setInput("");
@@ -64,7 +69,7 @@ export default function FillBlankMode({ questions, onComplete }: Props) {
 
   const handleNext = () => {
     if (isLast) {
-      onComplete({ score, total: questions.length, wrongAnswers });
+      onComplete({ score, total: orderedQuestions.length, wrongAnswers });
     } else {
       setIndex((i) => i + 1);
     }
@@ -75,7 +80,7 @@ export default function FillBlankMode({ questions, onComplete }: Props) {
       {/* Progress + score chip */}
       <div className="flex items-center justify-between mb-4">
         <span className="font-bebas text-cream/60 text-sm tracking-wider">
-          Question {index + 1} of {questions.length}
+          Question {index + 1} of {orderedQuestions.length}
         </span>
         <div
           className="flex items-center gap-1.5 px-2.5 py-1 rounded-full border"
@@ -92,7 +97,7 @@ export default function FillBlankMode({ questions, onComplete }: Props) {
         <div
           className="h-full transition-all duration-300"
           style={{
-            width: `${((index + 1) / questions.length) * 100}%`,
+            width: `${((index + 1) / orderedQuestions.length) * 100}%`,
             background: "linear-gradient(90deg, #FFD700 0%, #F0C000 100%)",
           }}
         />

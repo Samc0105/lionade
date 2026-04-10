@@ -2,20 +2,26 @@
 
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { cdnUrl } from "@/lib/cdn";
-import type { MCQQuestion } from "@/lib/ninny";
+import { weightedShuffle, type MCQQuestion } from "@/lib/ninny";
 import type { NinnyWrongAnswer } from "./MultipleChoiceMode";
 
 interface Props {
   questions: MCQQuestion[];
+  wrongAnswerCounts?: Map<string, number>;
   onComplete: (result: { score: number; total: number; wrongAnswers: NinnyWrongAnswer[] }) => void;
 }
 
 const BLITZ_DURATION_SEC = 60;
 const NINNY_PURPLE = "#A855F7";
 
-export default function BlitzMode({ questions, onComplete }: Props) {
-  // Shuffle on mount and loop infinitely (in case the user finishes the deck before time)
-  const deck = useMemo(() => [...questions].sort(() => Math.random() - 0.5), [questions]);
+export default function BlitzMode({ questions, wrongAnswerCounts, onComplete }: Props) {
+  // Spaced-repetition shuffle, looped infinitely (deck can repeat in 60s)
+  const deck = useMemo(() => {
+    if (wrongAnswerCounts && wrongAnswerCounts.size > 0) {
+      return weightedShuffle(questions, (q) => q.question, wrongAnswerCounts, questions.length);
+    }
+    return [...questions].sort(() => Math.random() - 0.5);
+  }, [questions, wrongAnswerCounts]);
   const [pos, setPos] = useState(0);
   const [secondsLeft, setSecondsLeft] = useState(BLITZ_DURATION_SEC);
   const [score, setScore] = useState(0);

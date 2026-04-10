@@ -176,6 +176,77 @@ ${
 }`;
 }
 
+// ─── Wrong-answer weighting (spaced repetition) ──────────────────────────
+
+export interface NinnyWrongAnswerRecord {
+  question_text: string;
+  correct_answer: string;
+  miss_count: number;
+}
+
+/**
+ * Spaced repetition: returns a shuffled deck where items the user has
+ * previously missed appear additional times in the deck (weighted by miss
+ * count, capped at MAX_REPEAT). Items not previously missed appear once.
+ *
+ * The result is then trimmed to `targetSize` so the experience stays the
+ * same length as a fresh session.
+ */
+export function weightedShuffle<T>(
+  items: T[],
+  getKey: (item: T) => string,
+  wrongAnswerCounts: Map<string, number>,
+  targetSize: number,
+  maxRepeat = 3,
+): T[] {
+  if (items.length === 0) return [];
+
+  // Build the weighted deck
+  const deck: T[] = [];
+  for (const item of items) {
+    const key = getKey(item).trim().toLowerCase();
+    const missCount = wrongAnswerCounts.get(key) ?? 0;
+    // 1 base + missCount extra copies, capped at maxRepeat total
+    const copies = Math.min(maxRepeat, 1 + missCount);
+    for (let i = 0; i < copies; i++) deck.push(item);
+  }
+
+  // Fisher-Yates shuffle
+  const shuffled = [...deck];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+
+  // Dedupe while preserving order — wrong items still get a higher chance
+  // of being picked first because they appear more often in the shuffled
+  // deck, but the user only sees each unique item once per session.
+  const seen = new Set<string>();
+  const result: T[] = [];
+  for (const item of shuffled) {
+    const key = getKey(item).trim().toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    result.push(item);
+    if (result.length >= targetSize) break;
+  }
+  return result;
+}
+
+/**
+ * Filters items to only those the user previously got wrong. Used by the
+ * "Practice Your Misses" mode to drill down on weak spots.
+ */
+export function filterToWrongOnly<T>(
+  items: T[],
+  getKey: (item: T) => string,
+  wrongAnswerKeys: Set<string>,
+): T[] {
+  return items.filter((item) =>
+    wrongAnswerKeys.has(getKey(item).trim().toLowerCase()),
+  );
+}
+
 // ─── Chat ──────────────────────────────────────────────────────────────────
 
 export type NinnyChatRole = "user" | "assistant";

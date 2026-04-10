@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useCallback, useRef, useMemo } from "react";
+import { useState, useCallback, useRef, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import useSWR from "swr";
 import { useAuth } from "@/lib/auth";
-import { mutateUserStats } from "@/lib/hooks";
+import { mutateUserStats, useUserStats } from "@/lib/hooks";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import BackButton from "@/components/BackButton";
 import MultipleChoiceMode, {
@@ -29,7 +29,7 @@ import type {
   NinnyMode,
   NinnySourceType,
 } from "@/lib/ninny";
-import { apiPost, swrFetcher } from "@/lib/api-client";
+import { apiPost, apiGet, apiDelete, swrFetcher } from "@/lib/api-client";
 
 type Phase = "input" | "generating" | "modePicker" | "play" | "results" | "chat";
 type InputMode = "topic" | "material";
@@ -199,6 +199,12 @@ function NinnyPageInner() {
   const [material, setMaterial] = useState<Material | null>(null);
   const [activeMode, setActiveMode] = useState<NinnyMode>("mcq");
   const [result, setResult] = useState<SessionResult | null>(null);
+  // Spaced repetition: maps lowercased question_text → miss_count
+  const [wrongAnswerCounts, setWrongAnswerCounts] = useState<Map<string, number>>(new Map());
+  // "Practice Your Misses" mode — when true, mode renders only wrong items
+  const [practiceMissesOnly, setPracticeMissesOnly] = useState(false);
+  // Pull streak from shared SWR hook for the header chip
+  const { stats } = useUserStats(user?.id);
   const [comingSoonToast, setComingSoonToast] = useState<string | null>(null);
 
   // Fetch recent materials, daily count, and user's selected subjects
@@ -335,10 +341,58 @@ function NinnyPageInner() {
     setPhase("modePicker");
   };
 
+  // Fetch the user's wrong-answer history for this material — used for
+  // spaced repetition weighting and the "Practice Your Misses" mode.
+  const refreshWrongAnswers = useCallback(
+    async (materialId: string) => {
+      const res = await apiGet<{
+        wrongAnswers: { question_text: string; correct_answer: string; miss_count: number }[];
+      }>(`/api/ninny/wrong-answers?materialId=${materialId}`);
+      if (!res.ok || !res.data) {
+        setWrongAnswerCounts(new Map());
+        return;
+      }
+      const counts = new Map<string, number>();
+      for (const w of res.data.wrongAnswers) {
+        counts.set(w.question_text.trim().toLowerCase(), w.miss_count);
+      }
+      setWrongAnswerCounts(counts);
+    },
+    [],
+  );
+
+  // Refetch wrong answers when entering modePicker so weighting reflects
+  // the latest state (e.g. after just finishing a session)
+  useEffect(() => {
+    if (phase === "modePicker" && material) {
+      refreshWrongAnswers(material.id);
+    }
+  }, [phase, material, refreshWrongAnswers]);
+
   const handlePickMode = (mode: NinnyMode) => {
     setActiveMode(mode);
     setResult(null);
+    setPracticeMissesOnly(false);
     setPhase("play");
+  };
+
+  const handlePracticeMisses = () => {
+    if (!material || wrongAnswerCounts.size === 0) return;
+    // Default to MCQ for practice mode (most common content type)
+    setActiveMode("mcq");
+    setResult(null);
+    setPracticeMissesOnly(true);
+    setPhase("play");
+  };
+
+  const handleDeleteMaterial = async (id: string, title: string) => {
+    if (typeof window !== "undefined" && !window.confirm(`Delete "${title}"? This cannot be undone.`)) {
+      return;
+    }
+    const res = await apiDelete(`/api/ninny/materials?id=${id}`);
+    if (res.ok) {
+      refreshMeta();
+    }
   };
 
   const handleComplete = async (r: {
@@ -468,12 +522,28 @@ function NinnyPageInner() {
               Meet Ninny
             </h1>
             <p
-              className="font-syne text-sm sm:text-base max-w-md leading-relaxed"
+              className="font-syne text-sm sm:text-base max-w-md leading-relaxed mb-3"
               style={{ color: `${NINNY_PURPLE}CC` }}
             >
               Your AI study companion. Drop a file, paste notes, or name a topic.
               I&apos;ll turn it into a study set.
             </p>
+
+            {/* Streak chip — only when user has an active streak */}
+            {(stats?.streak ?? 0) > 0 && (
+              <div
+                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border"
+                style={{
+                  background: "rgba(249,115,22,0.10)",
+                  borderColor: "rgba(249,115,22,0.40)",
+                }}
+              >
+                <span className="text-sm">&#x1F525;</span>
+                <span className="font-bebas text-[#F97316] text-xs tracking-wider">
+                  {stats?.streak}-day streak
+                </span>
+              </div>
+            )}
           </div>
         )}
 
@@ -944,37 +1014,58 @@ function NinnyPageInner() {
                 </p>
                 <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1 scroll-smooth">
                   {meta.materials.map((m) => (
-                    <button
+                    <div
                       key={m.id}
-                      onClick={() => handleRestudy(m)}
-                      className="shrink-0 w-56 text-left rounded-xl border bg-white/5 backdrop-blur
-                        p-4 transition-all duration-200 hover:bg-white/10 hover:-translate-y-0.5
-                        active:scale-[0.99]"
-                      style={{ borderColor: `${NINNY_PURPLE}20` }}
+                      className="shrink-0 w-56 relative group"
                     >
-                      <p className="font-bebas text-cream text-sm tracking-wide truncate mb-1.5">
-                        {m.title}
-                      </p>
-                      <div className="flex items-center gap-2 mb-2">
-                        {m.subject && (
-                          <span
-                            className="px-1.5 py-0.5 rounded text-[9px] font-syne font-semibold uppercase tracking-wider"
-                            style={{
-                              background: `${NINNY_PURPLE}15`,
-                              color: NINNY_PURPLE,
-                            }}
-                          >
-                            {m.subject}
+                      <button
+                        onClick={() => handleRestudy(m)}
+                        className="w-full text-left rounded-xl border bg-white/5 backdrop-blur
+                          p-4 transition-all duration-200 hover:bg-white/10 hover:-translate-y-0.5
+                          active:scale-[0.99]"
+                        style={{ borderColor: `${NINNY_PURPLE}20` }}
+                      >
+                        <p className="font-bebas text-cream text-sm tracking-wide truncate mb-1.5 pr-6">
+                          {m.title}
+                        </p>
+                        <div className="flex items-center gap-2 mb-2">
+                          {m.subject && (
+                            <span
+                              className="px-1.5 py-0.5 rounded text-[9px] font-syne font-semibold uppercase tracking-wider"
+                              style={{
+                                background: `${NINNY_PURPLE}15`,
+                                color: NINNY_PURPLE,
+                              }}
+                            >
+                              {m.subject}
+                            </span>
+                          )}
+                          <span className="text-cream/30 text-[10px] font-syne">
+                            {m.created_at ? timeAgo(m.created_at) : ""}
                           </span>
-                        )}
-                        <span className="text-cream/30 text-[10px] font-syne">
-                          {m.created_at ? timeAgo(m.created_at) : ""}
-                        </span>
-                      </div>
-                      <p className="text-cream/40 text-[10px] font-syne uppercase tracking-wider">
-                        Tap to restudy
-                      </p>
-                    </button>
+                        </div>
+                        <p className="text-cream/40 text-[10px] font-syne uppercase tracking-wider">
+                          Tap to restudy
+                        </p>
+                      </button>
+
+                      {/* Delete button — top-right, only on hover/focus */}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteMaterial(m.id, m.title);
+                        }}
+                        className="absolute top-2.5 right-2.5 w-6 h-6 rounded-full
+                          flex items-center justify-center text-cream/40 hover:text-red-400
+                          bg-white/5 hover:bg-red-500/15 border border-white/10
+                          hover:border-red-500/40 opacity-0 group-hover:opacity-100
+                          focus:opacity-100 transition-all"
+                        aria-label={`Delete ${m.title}`}
+                        title="Delete this study set"
+                      >
+                        ×
+                      </button>
+                    </div>
                   ))}
                 </div>
               </div>
@@ -1269,49 +1360,119 @@ function NinnyPageInner() {
               </button>
             </div>
 
+            {/* Practice-misses indicator */}
+            {practiceMissesOnly && (
+              <div
+                className="rounded-xl border px-4 py-2.5 mb-3 flex items-center gap-2 animate-slide-up"
+                style={{
+                  background: `${NINNY_PURPLE}10`,
+                  borderColor: `${NINNY_PURPLE}30`,
+                }}
+              >
+                <span className="text-base">&#x1F3AF;</span>
+                <span className="font-syne text-cream/80 text-xs">
+                  <span className="font-bold" style={{ color: NINNY_PURPLE }}>
+                    Practice Mode
+                  </span>{" "}
+                  — drilling on questions you&apos;ve missed before
+                </span>
+              </div>
+            )}
+
             {/* Mode renderer — switch on activeMode */}
-            {activeMode === "mcq" && (
-              <MultipleChoiceMode
-                questions={material.generated_content.multipleChoice}
-                onComplete={handleComplete}
-              />
-            )}
-            {activeMode === "flashcards" && (
-              <FlashcardsMode
-                cards={material.generated_content.flashcards}
-                onComplete={handleComplete}
-              />
-            )}
-            {activeMode === "match" && (
-              <MatchMode
-                pairs={material.generated_content.match}
-                onComplete={handleComplete}
-              />
-            )}
-            {activeMode === "fill" && (
-              <FillBlankMode
-                questions={material.generated_content.fillBlank}
-                onComplete={handleComplete}
-              />
-            )}
-            {activeMode === "tf" && (
-              <TrueFalseMode
-                questions={material.generated_content.trueFalse}
-                onComplete={handleComplete}
-              />
-            )}
-            {activeMode === "ordering" && (
-              <OrderingMode
-                questions={material.generated_content.ordering}
-                onComplete={handleComplete}
-              />
-            )}
-            {activeMode === "blitz" && (
-              <BlitzMode
-                questions={material.generated_content.blitz}
-                onComplete={handleComplete}
-              />
-            )}
+            {(() => {
+              const wrongKeys = new Set(wrongAnswerCounts.keys());
+              const filterIfPractice = <T,>(items: T[], getKey: (i: T) => string): T[] => {
+                if (!practiceMissesOnly) return items;
+                const filtered = items.filter((i) =>
+                  wrongKeys.has(getKey(i).trim().toLowerCase()),
+                );
+                return filtered.length > 0 ? filtered : items;
+              };
+
+              if (activeMode === "mcq") {
+                return (
+                  <MultipleChoiceMode
+                    questions={filterIfPractice(
+                      material.generated_content.multipleChoice,
+                      (q) => q.question,
+                    )}
+                    wrongAnswerCounts={practiceMissesOnly ? undefined : wrongAnswerCounts}
+                    onComplete={handleComplete}
+                  />
+                );
+              }
+              if (activeMode === "flashcards") {
+                return (
+                  <FlashcardsMode
+                    cards={filterIfPractice(
+                      material.generated_content.flashcards,
+                      (c) => c.front,
+                    )}
+                    wrongAnswerCounts={practiceMissesOnly ? undefined : wrongAnswerCounts}
+                    onComplete={handleComplete}
+                  />
+                );
+              }
+              if (activeMode === "match") {
+                return (
+                  <MatchMode
+                    pairs={filterIfPractice(material.generated_content.match, (p) => p.term)}
+                    wrongAnswerCounts={practiceMissesOnly ? undefined : wrongAnswerCounts}
+                    onComplete={handleComplete}
+                  />
+                );
+              }
+              if (activeMode === "fill") {
+                return (
+                  <FillBlankMode
+                    questions={filterIfPractice(
+                      material.generated_content.fillBlank,
+                      (q) => q.sentence,
+                    )}
+                    wrongAnswerCounts={practiceMissesOnly ? undefined : wrongAnswerCounts}
+                    onComplete={handleComplete}
+                  />
+                );
+              }
+              if (activeMode === "tf") {
+                return (
+                  <TrueFalseMode
+                    questions={filterIfPractice(
+                      material.generated_content.trueFalse,
+                      (q) => q.statement,
+                    )}
+                    wrongAnswerCounts={practiceMissesOnly ? undefined : wrongAnswerCounts}
+                    onComplete={handleComplete}
+                  />
+                );
+              }
+              if (activeMode === "ordering") {
+                return (
+                  <OrderingMode
+                    questions={filterIfPractice(
+                      material.generated_content.ordering,
+                      (q) => q.prompt,
+                    )}
+                    wrongAnswerCounts={practiceMissesOnly ? undefined : wrongAnswerCounts}
+                    onComplete={handleComplete}
+                  />
+                );
+              }
+              if (activeMode === "blitz") {
+                return (
+                  <BlitzMode
+                    questions={filterIfPractice(
+                      material.generated_content.blitz,
+                      (q) => q.question,
+                    )}
+                    wrongAnswerCounts={practiceMissesOnly ? undefined : wrongAnswerCounts}
+                    onComplete={handleComplete}
+                  />
+                );
+              }
+              return null;
+            })()}
           </>
         )}
 
@@ -1429,6 +1590,27 @@ function NinnyPageInner() {
                 </div>
               )}
 
+              {/* "Practice your misses" — featured CTA when there are wrong answers */}
+              {result.wrongAnswers.length > 0 && (
+                <div className="max-w-2xl mx-auto mb-3">
+                  <button
+                    onClick={handlePracticeMisses}
+                    className="w-full font-bebas text-base tracking-wider px-6 py-3.5 rounded-xl
+                      transition-all duration-200 active:scale-[0.99] hover:brightness-110
+                      flex items-center justify-center gap-2"
+                    style={{
+                      background: `linear-gradient(135deg, ${NINNY_PURPLE}30 0%, ${NINNY_PURPLE}15 100%)`,
+                      border: `1px solid ${NINNY_PURPLE}60`,
+                      color: "#EEF4FF",
+                      boxShadow: `0 0 24px ${NINNY_PURPLE}30`,
+                    }}
+                  >
+                    <span>&#x1F3AF;</span>
+                    Practice Your Misses ({result.wrongAnswers.length})
+                  </button>
+                </div>
+              )}
+
               {/* Action buttons */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-2xl mx-auto">
                 <button
@@ -1448,7 +1630,6 @@ function NinnyPageInner() {
                     background: `${NINNY_PURPLE}25`,
                     border: `1px solid ${NINNY_PURPLE}60`,
                     color: "#EEF4FF",
-                    boxShadow: `0 0 20px ${NINNY_PURPLE}30`,
                   }}
                 >
                   Try Another Mode

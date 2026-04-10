@@ -2,11 +2,12 @@
 
 import { useState, useMemo, useEffect } from "react";
 import { cdnUrl } from "@/lib/cdn";
-import type { OrderingQuestion } from "@/lib/ninny";
+import { weightedShuffle, type OrderingQuestion } from "@/lib/ninny";
 import type { NinnyWrongAnswer } from "./MultipleChoiceMode";
 
 interface Props {
   questions: OrderingQuestion[];
+  wrongAnswerCounts?: Map<string, number>;
   onComplete: (result: { score: number; total: number; wrongAnswers: NinnyWrongAnswer[] }) => void;
 }
 
@@ -17,7 +18,11 @@ interface SlotItem {
   text: string;
 }
 
-export default function OrderingMode({ questions, onComplete }: Props) {
+export default function OrderingMode({ questions, wrongAnswerCounts, onComplete }: Props) {
+  const orderedQuestions = useMemo(() => {
+    if (!wrongAnswerCounts || wrongAnswerCounts.size === 0) return questions;
+    return weightedShuffle(questions, (q) => q.prompt, wrongAnswerCounts, questions.length);
+  }, [questions, wrongAnswerCounts]);
   const [questionIdx, setQuestionIdx] = useState(0);
   const [arrangement, setArrangement] = useState<SlotItem[]>([]);
   const [selectedSlot, setSelectedSlot] = useState<number | null>(null);
@@ -26,8 +31,8 @@ export default function OrderingMode({ questions, onComplete }: Props) {
   const [score, setScore] = useState(0);
   const [wrongAnswers, setWrongAnswers] = useState<NinnyWrongAnswer[]>([]);
 
-  const current = questions[questionIdx];
-  const isLast = questionIdx === questions.length - 1;
+  const current = orderedQuestions[questionIdx];
+  const isLast = questionIdx === orderedQuestions.length - 1;
 
   // Build the user-facing correct order: items[correctOrder[0]], items[correctOrder[1]], ...
   const correctSequence = useMemo(() => {
@@ -91,7 +96,7 @@ export default function OrderingMode({ questions, onComplete }: Props) {
 
   const handleNext = () => {
     if (isLast) {
-      onComplete({ score, total: questions.length, wrongAnswers });
+      onComplete({ score, total: orderedQuestions.length, wrongAnswers });
     } else {
       setQuestionIdx((i) => i + 1);
     }
@@ -127,7 +132,7 @@ export default function OrderingMode({ questions, onComplete }: Props) {
       {/* Progress + score chip */}
       <div className="flex items-center justify-between mb-4">
         <span className="font-bebas text-cream/60 text-sm tracking-wider">
-          Question {questionIdx + 1} of {questions.length}
+          Question {questionIdx + 1} of {orderedQuestions.length}
         </span>
         <div
           className="flex items-center gap-1.5 px-2.5 py-1 rounded-full border"
@@ -144,7 +149,7 @@ export default function OrderingMode({ questions, onComplete }: Props) {
         <div
           className="h-full transition-all duration-300"
           style={{
-            width: `${((questionIdx + 1) / questions.length) * 100}%`,
+            width: `${((questionIdx + 1) / orderedQuestions.length) * 100}%`,
             background: "linear-gradient(90deg, #FFD700 0%, #F0C000 100%)",
           }}
         />

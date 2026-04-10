@@ -2,17 +2,23 @@
 
 import { useState, useMemo } from "react";
 import { cdnUrl } from "@/lib/cdn";
-import type { Flashcard } from "@/lib/ninny";
+import { weightedShuffle, type Flashcard } from "@/lib/ninny";
 import type { NinnyWrongAnswer } from "./MultipleChoiceMode";
 
 interface Props {
   cards: Flashcard[];
+  wrongAnswerCounts?: Map<string, number>;
   onComplete: (result: { score: number; total: number; wrongAnswers: NinnyWrongAnswer[] }) => void;
 }
 
-export default function FlashcardsMode({ cards, onComplete }: Props) {
-  // Shuffle on mount so the order isn't predictable
-  const deck = useMemo(() => [...cards].sort(() => Math.random() - 0.5), [cards]);
+export default function FlashcardsMode({ cards, wrongAnswerCounts, onComplete }: Props) {
+  // Spaced-repetition shuffle: missed cards appear with higher probability
+  const deck = useMemo(() => {
+    if (wrongAnswerCounts && wrongAnswerCounts.size > 0) {
+      return weightedShuffle(cards, (c) => c.front, wrongAnswerCounts, cards.length);
+    }
+    return [...cards].sort(() => Math.random() - 0.5);
+  }, [cards, wrongAnswerCounts]);
   const [index, setIndex] = useState(0);
   const [flipped, setFlipped] = useState(false);
   const [score, setScore] = useState(0);

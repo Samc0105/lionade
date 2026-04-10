@@ -66,3 +66,35 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
 }
+
+// DELETE /api/ninny/materials?id=X — delete a material the user owns.
+// CASCADE deletes its sessions, wrong-answers, and chat messages too.
+export async function DELETE(req: NextRequest) {
+  const auth = await requireAuth(req);
+  if (auth instanceof NextResponse) return auth;
+  const userId = auth.userId;
+
+  const id = req.nextUrl.searchParams.get("id");
+  if (!id) {
+    return NextResponse.json({ error: "Missing id" }, { status: 400 });
+  }
+
+  // Use the user_id filter to scope the delete — even with the service-role
+  // client, this prevents accidentally deleting another user's row.
+  const { data: deleted, error } = await supabaseAdmin
+    .from("ninny_materials")
+    .delete()
+    .eq("id", id)
+    .eq("user_id", userId)
+    .select("id")
+    .maybeSingle();
+
+  if (error) {
+    console.error("[ninny/materials DELETE]", error.message);
+    return NextResponse.json({ error: "Delete failed" }, { status: 500 });
+  }
+  if (!deleted) {
+    return NextResponse.json({ error: "Material not found" }, { status: 404 });
+  }
+  return NextResponse.json({ success: true });
+}
