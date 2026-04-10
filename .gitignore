@@ -12,8 +12,8 @@ out/
 # Vercel
 .vercel
 
-# Claude
-.claude/
+# Claude — track shared agents/commands, ignore per-user local settings
+.claude/settings.local.json
 
 # OS
 .DS_Store
