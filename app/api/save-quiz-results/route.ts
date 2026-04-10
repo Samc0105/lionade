@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
+import { requireAuth } from "@/lib/api-auth";
 
 // GET — health check
 export async function GET() {
@@ -11,33 +12,31 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
-  console.log("[save-quiz-results] ===== POST received =====");
-
   if (!process.env.SUPABASE_SECRET_KEY) {
     console.error("[save-quiz-results] SUPABASE_SECRET_KEY is missing!");
     return NextResponse.json({ error: "Server misconfigured" }, { status: 500 });
   }
 
+  // Auth: derive userId from session, NEVER trust the body
+  const auth = await requireAuth(req);
+  if (auth instanceof NextResponse) return auth;
+  const userId = auth.userId;
+
   try {
     const body = await req.json();
-    const {
-      userId,
-      subject,
-      totalQuestions,
-      correctAnswers,
-      coinsEarned,
-      xpEarned,
-      answers,
-    } = body;
+    const { subject, answers } = body;
 
-    console.log("[save-quiz-results] Payload:", JSON.stringify({ userId, subject, totalQuestions, correctAnswers, coinsEarned, xpEarned, answersCount: answers?.length ?? 0 }));
-
-    if (!userId || !subject) {
-      return NextResponse.json({ error: "Missing userId or subject" }, { status: 400 });
+    if (!subject || typeof subject !== "string") {
+      return NextResponse.json({ error: "Missing subject" }, { status: 400 });
     }
+    // Sanity-clamp client-supplied values to prevent self-grant exploits.
+    // These shadow the body values everywhere downstream.
+    const totalQuestions = Math.max(1, Math.min(100, Number(body.totalQuestions) || 0));
+    const correctAnswers = Math.max(0, Math.min(totalQuestions, Number(body.correctAnswers) || 0));
+    const coinsEarned = Math.max(0, Math.min(500, Number(body.coinsEarned) || 0));
+    const xpEarned = Math.max(0, Math.min(500, Number(body.xpEarned) || 0));
 
     // 1. Insert quiz session
-    console.log("[save-quiz-results] Step 1: Inserting quiz_sessions...");
     const { data: session, error: sessionErr } = await supabaseAdmin
       .from("quiz_sessions")
       .insert({
@@ -57,11 +56,9 @@ export async function POST(req: NextRequest) {
       console.error("[save-quiz-results] FAILED quiz_sessions:", sessionErr.message, sessionErr.details, sessionErr.hint);
       return NextResponse.json({ error: "quiz_sessions: " + sessionErr.message }, { status: 500 });
     }
-    console.log("[save-quiz-results] Step 1 OK — session:", session.id);
 
     // 2. Save individual answers (skip if user_answers table doesn't exist)
     if (answers && Array.isArray(answers) && answers.length > 0) {
-      console.log("[save-quiz-results] Step 2: Inserting", answers.length, "user_answers...");
       const answerRows = answers.map((a: { questionId: string; selected: number; isCorrect: boolean; timeLeft: number }) => ({
         session_id: session.id,
         question_id: a.questionId,
@@ -74,12 +71,10 @@ export async function POST(req: NextRequest) {
         // Non-fatal: table might not exist yet
         console.warn("[save-quiz-results] Step 2 WARN (non-fatal):", answersErr.message);
       } else {
-        console.log("[save-quiz-results] Step 2 OK —", answerRows.length, "answers saved");
       }
     }
 
     // 3. Update profile: add coins and xp
-    console.log("[save-quiz-results] Step 3: Fetching profile...");
     const { data: profile, error: profileFetchErr } = await supabaseAdmin
       .from("profiles")
       .select("coins, xp, streak, max_streak, last_activity_at, daily_questions_completed, daily_reset_date")
@@ -90,12 +85,10 @@ export async function POST(req: NextRequest) {
       console.error("[save-quiz-results] Step 3 FAILED — profile fetch:", profileFetchErr.message);
       return NextResponse.json({ error: "profile fetch: " + profileFetchErr.message }, { status: 500 });
     }
-    console.log("[save-quiz-results] Step 3 — current:", JSON.stringify(profile));
 
     const newCoins = (profile.coins ?? 0) + coinsEarned;
     const newXp = (profile.xp ?? 0) + xpEarned;
 
-    console.log("[save-quiz-results] Step 3: Updating — coins:", profile.coins, "→", newCoins, "xp:", profile.xp, "→", newXp);
     const { error: profileUpdateErr } = await supabaseAdmin
       .from("profiles")
       .update({ coins: newCoins, xp: newXp })
@@ -105,7 +98,6 @@ export async function POST(req: NextRequest) {
       console.error("[save-quiz-results] Step 3 FAILED — profile update:", profileUpdateErr.message);
       return NextResponse.json({ error: "profile update: " + profileUpdateErr.message }, { status: 500 });
     }
-    console.log("[save-quiz-results] Step 3 OK");
 
     // 3b. Consecutive quiz bonus — award 50 fangs for every 3rd quiz completed within 60 minutes
     let bonusFangs = 0;
@@ -118,7 +110,6 @@ export async function POST(req: NextRequest) {
         .gte("completed_at", sixtyMinutesAgo);
 
       const count = recentCount ?? 0;
-      console.log("[save-quiz-results] Step 3b: quizzes in last 60min =", count);
 
       if (count > 0 && count % 3 === 0) {
         bonusFangs = 50;
@@ -143,7 +134,6 @@ export async function POST(req: NextRequest) {
           description: `${count} quizzes in a row bonus!`,
         });
 
-        console.log("[save-quiz-results] Step 3b OK — awarded", bonusFangs, "bonus fangs (quiz #" + count + ")");
       }
     } catch (bonusErr) {
       console.warn("[save-quiz-results] Step 3b WARN (non-fatal):", bonusErr);
@@ -151,7 +141,6 @@ export async function POST(req: NextRequest) {
 
     // 4. Log coin transaction
     if (coinsEarned > 0) {
-      console.log("[save-quiz-results] Step 4: Coin transaction...");
       const { error: txnErr } = await supabaseAdmin.from("coin_transactions").insert({
         user_id: userId,
         amount: coinsEarned,
@@ -163,12 +152,10 @@ export async function POST(req: NextRequest) {
         // Non-fatal — coin_transactions might have fewer columns
         console.warn("[save-quiz-results] Step 4 WARN:", txnErr.message);
       } else {
-        console.log("[save-quiz-results] Step 4 OK");
       }
     }
 
     // 5. Daily activity + streak
-    console.log("[save-quiz-results] Step 5: Daily activity + streak...");
     const nowISO = new Date().toISOString();
     const todayUTC = nowISO.split("T")[0]; // YYYY-MM-DD in UTC
 
@@ -189,7 +176,6 @@ export async function POST(req: NextRequest) {
         })
         .eq("id", existingDaily.id);
       if (dailyErr) console.warn("[save-quiz-results] Step 5 daily update WARN:", dailyErr.message);
-      else console.log("[save-quiz-results] Step 5 OK — daily updated");
     } else {
       const { error: dailyErr } = await supabaseAdmin.from("daily_activity").insert({
         user_id: userId,
@@ -199,7 +185,6 @@ export async function POST(req: NextRequest) {
         streak_maintained: true,
       });
       if (dailyErr) console.warn("[save-quiz-results] Step 5 daily insert WARN:", dailyErr.message);
-      else console.log("[save-quiz-results] Step 5 OK — daily inserted");
     }
 
     // Daily questions tracking (profile-level)
@@ -209,7 +194,6 @@ export async function POST(req: NextRequest) {
     if (dailyResetDate !== todayUTC) {
       // New day — reset daily counter
       dailyQuestionsCompleted = 0;
-      console.log("[save-quiz-results] Step 5: daily reset (was", dailyResetDate, "now", todayUTC, ")");
     }
     // Clamp existing value first (in case it was stored uncapped), then add and cap at 10
     dailyQuestionsCompleted = Math.min(Math.min(dailyQuestionsCompleted, 10) + totalQuestions, 10);
@@ -224,7 +208,6 @@ export async function POST(req: NextRequest) {
 
       if (lastDayUTC === todayUTC) {
         // Already played today — no streak increment
-        console.log("[save-quiz-results] Step 5 streak: already active today, no change");
       } else {
         // Check calendar day difference
         const lastDayDate = new Date(lastDayUTC + "T00:00:00Z");
@@ -258,7 +241,6 @@ export async function POST(req: NextRequest) {
                 .eq("id", shield.id);
             }
             newStreak = (profile.streak ?? 0) + 1;
-            console.log("[save-quiz-results] Step 5 streak shield consumed");
           } else {
             // No shield or gap too large — reset to 1
             newStreak = 1;
@@ -269,7 +251,6 @@ export async function POST(req: NextRequest) {
       // last_activity_at is NULL — either first quiz ever or pre-migration user
       if ((profile.streak ?? 0) > 0) {
         // Existing user with a streak from before the migration — preserve it, just backfill timestamp
-        console.log("[save-quiz-results] Step 5 streak: backfilling last_activity_at for existing streak", profile.streak);
       } else {
         // Truly new user, first quiz
         newStreak = 1;
@@ -290,10 +271,8 @@ export async function POST(req: NextRequest) {
       .update(streakUpdate)
       .eq("id", userId);
     if (streakErr) console.warn("[save-quiz-results] Step 5 streak WARN:", streakErr.message);
-    else console.log("[save-quiz-results] Step 5 streak:", profile.streak, "→", newStreak, "daily:", dailyQuestionsCompleted, "/10");
 
     // 6. Achievement checking
-    console.log("[save-quiz-results] Step 6: Checking achievements...");
     try {
       const [{ count: quizCount }, { data: updatedProfile }] = await Promise.all([
         supabaseAdmin.from("quiz_sessions").select("id", { count: "exact", head: true }).eq("user_id", userId),
@@ -324,7 +303,6 @@ export async function POST(req: NextRequest) {
           .from("achievements")
           .upsert(toAward, { onConflict: "user_id,achievement_key", ignoreDuplicates: true });
         if (achErr) console.warn("[save-quiz-results] Step 6 achievements WARN:", achErr.message);
-        else console.log("[save-quiz-results] Step 6 OK — checked", toAward.length, "achievements");
       }
     } catch (achException) {
       // Non-fatal — achievements table might not exist yet
@@ -332,7 +310,6 @@ export async function POST(req: NextRequest) {
     }
 
     // 7. Bounty progress checking
-    console.log("[save-quiz-results] Step 7: Checking bounties...");
     try {
       const { data: activeBounties } = await supabaseAdmin
         .from("bounties")
@@ -424,14 +401,12 @@ export async function POST(req: NextRequest) {
             });
           }
         }
-        console.log("[save-quiz-results] Step 7 OK — bounties checked");
       }
     } catch (bountyErr) {
       console.warn("[save-quiz-results] Step 7 WARN (non-fatal):", bountyErr);
     }
 
     // 8. Resolve active daily bet
-    console.log("[save-quiz-results] Step 8: Resolving daily bet...");
     try {
       const { data: activeBet } = await supabaseAdmin
         .from("daily_bets")
@@ -479,7 +454,6 @@ export async function POST(req: NextRequest) {
           });
         }
 
-        console.log("[save-quiz-results] Step 8 OK — bet resolved:", won ? "WON" : "LOST", coinsWon);
       }
     } catch (betErr) {
       console.warn("[save-quiz-results] Step 8 WARN (non-fatal):", betErr);
@@ -492,7 +466,6 @@ export async function POST(req: NextRequest) {
       .eq("id", userId)
       .single();
 
-    console.log("[save-quiz-results] ===== DONE =====", JSON.stringify(finalProfile));
 
     return NextResponse.json({
       success: true,

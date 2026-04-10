@@ -5,6 +5,7 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import { useAuth } from "@/lib/auth";
 import { useUserStats, mutateUserStats } from "@/lib/hooks";
 import { cdnUrl } from "@/lib/cdn";
+import { apiPost } from "@/lib/api-client";
 
 // ── Types ────────────────────────────────────────────────────
 
@@ -154,18 +155,12 @@ export default function GamesPage() {
   }, []);
 
   // ── Award Fangs ────────────────────────────────────────────
-  const awardFangs = useCallback(async (amount: number, gameType: string, desc: string) => {
+  const awardFangs = useCallback(async (amount: number, gameType: string, _desc: string) => {
     if (!user?.id || amount <= 0) return;
     setFangsEarned(amount);
-    try {
-      await fetch("/api/games/reward", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: user.id, amount, gameType, description: desc }),
-      });
-      mutateUserStats(user.id);
-      mutateStats?.();
-    } catch { /* ignore */ }
+    await apiPost("/api/games/reward", { amount, gameType });
+    mutateUserStats(user.id);
+    mutateStats?.();
   }, [user?.id, mutateStats]);
 
   // ── PDF Upload ─────────────────────────────────────────────

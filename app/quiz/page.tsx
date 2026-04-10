@@ -10,6 +10,7 @@ import { mutateUserStats } from "@/lib/hooks";
 import { useRouter } from "next/navigation";
 import BackButton from "@/components/BackButton";
 import { cdnUrl } from "@/lib/cdn";
+import { apiGet, apiPost, apiPatch } from "@/lib/api-client";
 
 function isLightMode() {
   return typeof document !== "undefined" && document.documentElement.classList.contains("light");
@@ -317,21 +318,15 @@ export default function QuizPage() {
     }
 
     for (const booster of activeBoosters) {
-      try {
-        await fetch("/api/shop/activate-booster", {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ boosterId: booster.id }),
-        });
-      } catch { /* ignore */ }
+      await apiPatch("/api/shop/activate-booster", { boosterId: booster.id });
     }
 
     setTotalCoins(coins);
     setTotalXp(xp);
 
-    try {
-      const payload = {
-        userId: user?.id,
+    const res = await apiPost<{ success: boolean; bonusFangs?: number }>(
+      "/api/save-quiz-results",
+      {
         subject: subject!,
         totalQuestions: questions.length,
         correctAnswers: correctCount,
@@ -343,23 +338,13 @@ export default function QuizPage() {
           isCorrect: a.correct,
           timeLeft: a.timeLeft,
         })),
-      };
+      },
+    );
 
-      const res = await fetch("/api/save-quiz-results", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-
-      const data = await res.json();
-
-      if (data.success) {
-        await refreshUser();
-        if (user?.id) mutateUserStats(user.id);
-        setBonusFangs(data.bonusFangs ?? 0);
-      }
-    } catch (err) {
-      console.error("[Quiz] fetch() failed:", err);
+    if (res.ok && res.data?.success) {
+      await refreshUser();
+      if (user?.id) mutateUserStats(user.id);
+      setBonusFangs(res.data.bonusFangs ?? 0);
     }
 
     setPhase("results");
@@ -371,13 +356,10 @@ export default function QuizPage() {
     setPhase("loading");
     try {
       // Fetch active boosters
-      try {
-        const boosterRes = await fetch(`/api/shop/activate-booster?userId=${user!.id}`);
-        if (boosterRes.ok) {
-          const boosterData = await boosterRes.json();
-          setActiveBoosters(boosterData.boosters ?? []);
-        }
-      } catch { /* ignore */ }
+      const boosterRes = await apiGet<{ boosters: ActiveBooster[] }>("/api/shop/activate-booster");
+      if (boosterRes.ok && boosterRes.data?.boosters) {
+        setActiveBoosters(boosterRes.data.boosters);
+      }
       setFiftyFiftyUsed(false);
       setAutoCorrectUsed(false);
 

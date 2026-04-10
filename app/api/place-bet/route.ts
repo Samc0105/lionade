@@ -1,10 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
+import { requireAuth } from "@/lib/api-auth";
 
 export async function POST(req: NextRequest) {
+  const auth = await requireAuth(req);
+  if (auth instanceof NextResponse) return auth;
+  const userId = auth.userId;
+
   try {
-    const { userId, coinsStaked, targetScore } = await req.json();
-    if (!userId || !coinsStaked || !targetScore) {
+    const body = await req.json();
+    const coinsStaked = Math.max(1, Math.min(10000, Number(body.coinsStaked) || 0));
+    const targetScore = Number(body.targetScore);
+
+    if (!coinsStaked || !targetScore) {
       return NextResponse.json({ error: "Missing fields" }, { status: 400 });
     }
 
@@ -60,7 +68,8 @@ export async function POST(req: NextRequest) {
         .from("profiles")
         .update({ coins: profile.coins })
         .eq("id", userId);
-      return NextResponse.json({ error: betErr.message }, { status: 500 });
+      console.error("[place-bet] insert:", betErr.message);
+      return NextResponse.json({ error: "Failed to place bet" }, { status: 500 });
     }
 
     // Log coin deduction
@@ -74,6 +83,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ success: true, bet });
   } catch (err) {
-    return NextResponse.json({ error: String(err) }, { status: 500 });
+    console.error("[place-bet]", err);
+    return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
 }

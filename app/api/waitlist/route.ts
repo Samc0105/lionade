@@ -70,8 +70,9 @@ function getWelcomeHtml(email: string): string {
 export async function POST(request: NextRequest) {
   const apiKey = process.env.RESEND_API_KEY;
   const emailFrom = process.env.EMAIL_FROM;
-  console.log("[waitlist] ENV CHECK — RESEND_API_KEY:", apiKey ? `${apiKey.substring(0, 5)}... (${apiKey.length} chars)` : "MISSING");
-  console.log("[waitlist] ENV CHECK — EMAIL_FROM:", emailFrom ?? "MISSING");
+  if (!apiKey || !emailFrom) {
+    console.error("[waitlist] missing RESEND_API_KEY or EMAIL_FROM");
+  }
 
   try {
     const body = await request.json();

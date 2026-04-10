@@ -6,6 +6,7 @@ import { useUserStats } from "@/lib/hooks";
 import { useRouter } from "next/navigation";
 import { formatCoins } from "@/lib/mockData";
 import { cdnUrl } from "@/lib/cdn";
+import { apiGet, apiPost } from "@/lib/api-client";
 
 // ── Types ──
 type Rarity = "common" | "rare" | "epic" | "legendary";
@@ -358,10 +359,8 @@ export default function ShopPage() {
 
   const loadInventory = useCallback(async () => {
     if (!user) return;
-    try {
-      const res = await fetch(`/api/shop/purchase?userId=${user.id}`);
-      if (res.ok) { const data = await res.json(); if (data.inventory) setInventory(data.inventory); }
-    } catch { /* ignore */ }
+    const res = await apiGet<{ inventory: OwnedItem[] }>("/api/shop/purchase");
+    if (res.ok && res.data?.inventory) setInventory(res.data.inventory);
   }, [user]);
 
   useEffect(() => { loadInventory(); }, [loadInventory]);
@@ -385,25 +384,24 @@ export default function ShopPage() {
   const handlePurchase = async () => {
     if (!confirmItem || purchasing || !user) return;
     setPurchasing(true);
-    try {
-      const totalPrice = confirmItem.item.price * confirmItem.quantity;
-      const finalPrice = confirmItem.quantity === 5 ? Math.floor(totalPrice * 0.9) : totalPrice;
-      const res = await fetch("/api/shop/purchase", {
-        method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: user.id, itemId: confirmItem.item.id, itemType: confirmItem.item.type, price: finalPrice, quantity: confirmItem.quantity, itemName: confirmItem.item.name, rarity: confirmItem.item.rarity }),
-      });
-      if (res.ok) { setShowBurst(true); await refreshUser(); await loadInventory(); }
-    } catch { /* ignore */ }
+    // Server reads price from the catalog — we only send itemId + quantity
+    const res = await apiPost("/api/shop/purchase", {
+      itemId: confirmItem.item.id,
+      quantity: confirmItem.quantity,
+    });
+    if (res.ok) {
+      setShowBurst(true);
+      await refreshUser();
+      await loadInventory();
+    }
     setPurchasing(false);
     setConfirmItem(null);
   };
 
   const handleEquip = async (itemId: string) => {
     if (!user) return;
-    try {
-      await fetch("/api/shop/equip", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ userId: user.id, itemId }) });
-      await loadInventory();
-    } catch { /* ignore */ }
+    await apiPost("/api/shop/equip", { itemId });
+    await loadInventory();
   };
 
   const TABS: { key: Tab; label: string; icon: string }[] = [

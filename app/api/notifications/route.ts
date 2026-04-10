@@ -1,14 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
+import { requireAuth } from "@/lib/api-auth";
 
 export const dynamic = "force-dynamic";
 
-// GET — Fetch notifications for a user
+// GET — Fetch notifications for the authenticated user
 export async function GET(req: NextRequest) {
-  try {
-    const userId = req.nextUrl.searchParams.get("userId");
-    if (!userId) return NextResponse.json({ error: "Missing userId" }, { status: 400 });
+  const auth = await requireAuth(req);
+  if (auth instanceof NextResponse) return auth;
+  const userId = auth.userId;
 
+  try {
     const { data, error } = await supabaseAdmin
       .from("notifications")
       .select("id, user_id, type, title, message, read, action_url, related_user_id, created_at")
@@ -16,9 +18,12 @@ export async function GET(req: NextRequest) {
       .order("created_at", { ascending: false })
       .limit(30);
 
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    if (error) {
+      console.error("[notifications GET]", error.message);
+      return NextResponse.json({ error: "Failed to fetch" }, { status: 500 });
+    }
 
-    const unreadCount = (data ?? []).filter(n => !n.read).length;
+    const unreadCount = (data ?? []).filter((n) => !n.read).length;
 
     return NextResponse.json({ notifications: data ?? [], unreadCount });
   } catch (e) {
@@ -27,12 +32,13 @@ export async function GET(req: NextRequest) {
   }
 }
 
-// PATCH — Mark all notifications as read
+// PATCH — Mark all notifications as read for the authenticated user
 export async function PATCH(req: NextRequest) {
-  try {
-    const { userId } = await req.json();
-    if (!userId) return NextResponse.json({ error: "Missing userId" }, { status: 400 });
+  const auth = await requireAuth(req);
+  if (auth instanceof NextResponse) return auth;
+  const userId = auth.userId;
 
+  try {
     await supabaseAdmin
       .from("notifications")
       .update({ read: true })

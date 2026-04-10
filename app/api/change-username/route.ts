@@ -1,11 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
+import { requireAuth } from "@/lib/api-auth";
 
 export async function POST(req: NextRequest) {
+  const auth = await requireAuth(req);
+  if (auth instanceof NextResponse) return auth;
+  const userId = auth.userId;
+
   try {
-    const { userId, newUsername } = await req.json();
-    if (!userId || !newUsername) {
-      return NextResponse.json({ error: "Missing fields" }, { status: 400 });
+    const { newUsername } = await req.json();
+    if (!newUsername || typeof newUsername !== "string") {
+      return NextResponse.json({ error: "Missing newUsername" }, { status: 400 });
     }
 
     const clean = newUsername.trim().toLowerCase().replace(/[^a-z0-9_]/g, "");
@@ -66,7 +71,8 @@ export async function POST(req: NextRequest) {
       .eq("id", userId);
 
     if (updateErr) {
-      return NextResponse.json({ error: updateErr.message }, { status: 500 });
+      console.error("[change-username]", updateErr.message);
+      return NextResponse.json({ error: "Update failed" }, { status: 500 });
     }
 
     // Log the change
@@ -83,6 +89,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ success: true, username: clean });
   } catch (err) {
-    return NextResponse.json({ error: String(err) }, { status: 500 });
+    console.error("[change-username]", err);
+    return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
 }

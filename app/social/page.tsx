@@ -7,6 +7,7 @@ import { useAuth } from "@/lib/auth";
 import { useUserStats } from "@/lib/hooks";
 import { supabase } from "@/lib/supabase";
 import { cdnUrl } from "@/lib/cdn";
+import { apiGet } from "@/lib/api-client";
 
 // ── Types ────────────────────────────────────────────────────
 
@@ -165,12 +166,14 @@ export default function SocialPage() {
   // ── Load notifications for social panel ─────────────────────
   const loadSocialNotifs = useCallback(async () => {
     if (!user?.id) return;
-    try {
-      const res = await fetch(`/api/notifications?userId=${user.id}`);
-      const data = await res.json();
-      setSocialNotifs(data.notifications ?? []);
-      setSocialUnreadCount(data.unreadCount ?? 0);
-    } catch { /* ignore */ }
+    const res = await apiGet<{
+      notifications: { id: string; type: string; title: string; message: string | null; read: boolean; action_url: string | null; created_at: string }[];
+      unreadCount: number;
+    }>("/api/notifications");
+    if (res.ok && res.data) {
+      setSocialNotifs(res.data.notifications ?? []);
+      setSocialUnreadCount(res.data.unreadCount ?? 0);
+    }
   }, [user?.id]);
 
   useEffect(() => {

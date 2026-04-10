@@ -1,12 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
+import { requireAuth } from "@/lib/api-auth";
 
 export async function POST(req: NextRequest) {
-  try {
-    const { userId, itemId } = await req.json();
+  const auth = await requireAuth(req);
+  if (auth instanceof NextResponse) return auth;
+  const userId = auth.userId;
 
-    if (!userId || !itemId) {
-      return NextResponse.json({ error: "Missing userId or itemId" }, { status: 400 });
+  try {
+    const { itemId } = await req.json();
+
+    if (!itemId || typeof itemId !== "string") {
+      return NextResponse.json({ error: "Missing itemId" }, { status: 400 });
     }
 
     // 1. Get the item being toggled
@@ -45,12 +50,13 @@ export async function POST(req: NextRequest) {
       .eq("id", item.id);
 
     if (updateErr) {
-      return NextResponse.json({ error: "Failed to update: " + updateErr.message }, { status: 500 });
+      console.error("[shop/equip] update:", updateErr.message);
+      return NextResponse.json({ error: "Failed to update" }, { status: 500 });
     }
 
     return NextResponse.json({ success: true, equipped: nowEquipped });
   } catch (err) {
     console.error("[shop/equip POST]", err);
-    return NextResponse.json({ error: String(err) }, { status: 500 });
+    return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
 }

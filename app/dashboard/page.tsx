@@ -16,6 +16,7 @@ import {
 import ProtectedRoute from "@/components/ProtectedRoute";
 import BackButton from "@/components/BackButton";
 import { cdnUrl } from "@/lib/cdn";
+import { apiPost } from "@/lib/api-client";
 
 function timeAgo(dateStr: string): string {
   const diff = Date.now() - new Date(dateStr).getTime();
@@ -128,11 +129,7 @@ function DashboardContent() {
   if (!user) return null; // ProtectedRoute handles redirect
 
   const claimBounty = async (bountyId: string) => {
-    const res = await fetch("/api/claim-bounty", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userId: user.id, bountyId }),
-    });
+    const res = await apiPost("/api/claim-bounty", { bountyId });
     if (res.ok) {
       setUserBounties(prev => prev.map(ub => ub.bounty_id === bountyId ? { ...ub, claimed: true } : ub));
       await refreshUser();
@@ -143,14 +140,12 @@ function DashboardContent() {
     if (placingBet || coins < betStake) return;
     setPlacingBet(true);
     try {
-      const res = await fetch("/api/place-bet", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: user.id, coinsStaked: betStake, targetScore: betTarget }),
+      const res = await apiPost<{ success: boolean; bet: ActiveBet }>("/api/place-bet", {
+        coinsStaked: betStake,
+        targetScore: betTarget,
       });
-      const data = await res.json();
-      if (data.success) {
-        setActiveBet(data.bet);
+      if (res.ok && res.data?.success) {
+        setActiveBet(res.data.bet);
         await refreshUser();
       }
     } finally {

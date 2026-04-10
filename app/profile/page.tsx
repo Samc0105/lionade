@@ -16,6 +16,7 @@ import BackButton from "@/components/BackButton";
 import BadgeCard from "@/components/BadgeCard";
 import Link from "next/link";
 import { cdnUrl } from "@/lib/cdn";
+import { apiPost } from "@/lib/api-client";
 
 // ── Types ────────────────────────────────────────────
 type Section =
@@ -478,14 +479,11 @@ function EditProfileSection({ user, refreshUser }: SharedProps) {
 
     // If username changed, use the server API route
     if (usernameChanged) {
-      const res = await fetch("/api/change-username", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: user.id, newUsername: username.trim().toLowerCase() }),
+      const res = await apiPost<{ success: boolean }>("/api/change-username", {
+        newUsername: username.trim().toLowerCase(),
       });
-      const data = await res.json();
       if (!res.ok) {
-        setToast({ msg: data.error ?? "Failed to change username", err: true });
+        setToast({ msg: res.error ?? "Failed to change username", err: true });
         setSaving(false);
         return;
       }

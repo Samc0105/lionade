@@ -1,16 +1,23 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { cdnUrl } from "@/lib/cdn";
 import type { MCQQuestion } from "@/lib/ninny";
 
-interface WrongAnswer {
+export interface NinnyWrongAnswer {
   question: string;
   correctAnswer: string;
+  userAnswer: string;
+  explanation?: string;
 }
 
 interface Props {
   questions: MCQQuestion[];
-  onComplete: (result: { score: number; total: number; wrongAnswers: WrongAnswer[] }) => void;
+  onComplete: (result: {
+    score: number;
+    total: number;
+    wrongAnswers: NinnyWrongAnswer[];
+  }) => void;
 }
 
 export default function MultipleChoiceMode({ questions, onComplete }: Props) {
@@ -18,7 +25,7 @@ export default function MultipleChoiceMode({ questions, onComplete }: Props) {
   const [selected, setSelected] = useState<number | null>(null);
   const [revealed, setRevealed] = useState(false);
   const [score, setScore] = useState(0);
-  const [wrongAnswers, setWrongAnswers] = useState<WrongAnswer[]>([]);
+  const [wrongAnswers, setWrongAnswers] = useState<NinnyWrongAnswer[]>([]);
 
   const current = questions[index];
   const isLast = index === questions.length - 1;
@@ -48,6 +55,8 @@ export default function MultipleChoiceMode({ questions, onComplete }: Props) {
         {
           question: current.question,
           correctAnswer: current.options[current.correctIndex],
+          userAnswer: current.options[i],
+          explanation: current.explanation,
         },
       ]);
     }
@@ -55,11 +64,7 @@ export default function MultipleChoiceMode({ questions, onComplete }: Props) {
 
   const handleNext = () => {
     if (isLast) {
-      onComplete({
-        score: score,
-        total: questions.length,
-        wrongAnswers,
-      });
+      onComplete({ score, total: questions.length, wrongAnswers });
     } else {
       setIndex((i) => i + 1);
     }
@@ -67,19 +72,31 @@ export default function MultipleChoiceMode({ questions, onComplete }: Props) {
 
   return (
     <div className="w-full max-w-2xl mx-auto animate-slide-up">
-      {/* Progress */}
+      {/* Progress + score chip */}
       <div className="flex items-center justify-between mb-4">
         <span className="font-bebas text-cream/60 text-sm tracking-wider">
           Question {index + 1} of {questions.length}
         </span>
-        <span className="font-bebas text-electric text-sm tracking-wider">
-          Score {score}
-        </span>
+        <div
+          className="flex items-center gap-1.5 px-2.5 py-1 rounded-full border"
+          style={{
+            background: "rgba(255,215,0,0.08)",
+            borderColor: "rgba(255,215,0,0.3)",
+          }}
+        >
+          <img src={cdnUrl("/F.png")} alt="" className="w-3.5 h-3.5 object-contain" />
+          <span className="font-bebas text-gold text-xs tracking-wider">
+            {score}
+          </span>
+        </div>
       </div>
       <div className="h-1.5 rounded-full bg-white/5 overflow-hidden mb-8">
         <div
-          className="h-full bg-electric transition-all duration-300"
-          style={{ width: `${((index + 1) / questions.length) * 100}%` }}
+          className="h-full bg-gold transition-all duration-300"
+          style={{
+            width: `${((index + 1) / questions.length) * 100}%`,
+            background: "linear-gradient(90deg, #FFD700 0%, #F0C000 100%)",
+          }}
         />
       </div>
 
@@ -108,7 +125,7 @@ export default function MultipleChoiceMode({ questions, onComplete }: Props) {
             }
           } else {
             cls +=
-              "border-white/10 bg-white/5 text-cream hover:border-electric/50 hover:bg-electric/5 active:scale-[0.99]";
+              "border-white/10 bg-white/5 text-cream hover:border-gold/50 hover:bg-gold/5 active:scale-[0.99]";
           }
 
           return (
@@ -118,7 +135,7 @@ export default function MultipleChoiceMode({ questions, onComplete }: Props) {
               disabled={revealed}
               className={cls}
             >
-              <span className="font-bebas text-electric mr-3 tracking-wider">
+              <span className="font-bebas text-gold mr-3 tracking-wider">
                 {String.fromCharCode(65 + i)}
               </span>
               {opt}
@@ -129,20 +146,31 @@ export default function MultipleChoiceMode({ questions, onComplete }: Props) {
 
       {/* Explanation */}
       {revealed && current.explanation && (
-        <div className="rounded-xl border border-electric/20 bg-electric/5 p-4 mb-6 animate-slide-up">
+        <div
+          className="rounded-xl border px-4 py-3 mb-6 animate-slide-up"
+          style={{
+            background: "rgba(168,85,247,0.06)",
+            borderColor: "rgba(168,85,247,0.25)",
+          }}
+        >
           <p className="font-syne text-cream/80 text-sm leading-relaxed">
             {current.explanation}
           </p>
         </div>
       )}
 
-      {/* Next button */}
+      {/* Next button — gold, consistent with main CTA */}
       {revealed && (
         <button
           onClick={handleNext}
-          className="w-full font-syne font-bold text-base px-6 py-3.5 rounded-xl
-            bg-electric text-navy hover:bg-electric-light transition-all duration-200
-            active:scale-[0.99] animate-slide-up"
+          className="w-full font-bebas text-base tracking-wider px-6 py-3.5 rounded-xl
+            transition-all duration-200 active:scale-[0.99] animate-slide-up
+            hover:brightness-110"
+          style={{
+            background: "linear-gradient(135deg, #FFD700 0%, #F0C000 100%)",
+            color: "#04080F",
+            boxShadow: "0 0 20px rgba(255,215,0,0.2)",
+          }}
         >
           {isLast ? "Finish" : "Next →"}
         </button>

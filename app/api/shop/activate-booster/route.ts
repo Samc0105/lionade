@@ -1,10 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
+import { requireAuth } from "@/lib/api-auth";
+import { getShopItem } from "@/lib/shop-catalog";
 
-// GET — fetch active boosters for a user
+// GET — fetch active boosters for the authenticated user
 export async function GET(req: NextRequest) {
-  const userId = req.nextUrl.searchParams.get("userId");
-  if (!userId) return NextResponse.json({ error: "Missing userId" }, { status: 400 });
+  const auth = await requireAuth(req);
+  if (auth instanceof NextResponse) return auth;
+  const userId = auth.userId;
 
   const { data: boosters, error } = await supabaseAdmin
     .from("active_boosters")
@@ -12,12 +15,10 @@ export async function GET(req: NextRequest) {
     .eq("user_id", userId);
 
   if (error) {
-    // Table might not exist yet
     console.warn("[shop/activate-booster GET]", error.message);
     return NextResponse.json({ boosters: [] });
   }
 
-  // Filter to active boosters and normalize column names
   const active = (boosters ?? [])
     .filter((b: Record<string, unknown>) => ((b.uses_remaining as number) ?? 0) > 0)
     .map((b: Record<string, unknown>) => ({
@@ -34,14 +35,26 @@ export async function GET(req: NextRequest) {
 
 // POST — activate a booster from inventory
 export async function POST(req: NextRequest) {
-  try {
-    const { userId, itemId, boosterEffect, boosterValue } = await req.json();
+  const auth = await requireAuth(req);
+  if (auth instanceof NextResponse) return auth;
+  const userId = auth.userId;
 
-    if (!userId || !itemId || !boosterEffect) {
-      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+  try {
+    const { itemId } = await req.json();
+
+    if (!itemId || typeof itemId !== "string") {
+      return NextResponse.json({ error: "Missing itemId" }, { status: 400 });
     }
 
-    // 1. Check inventory — must own at least 1
+    // Server-trusted catalog lookup — NEVER trust client booster effect/value
+    const item = getShopItem(itemId);
+    if (!item || item.type !== "booster" || !item.boosterEffect) {
+      return NextResponse.json({ error: "Not a booster" }, { status: 400 });
+    }
+    const boosterEffect = item.boosterEffect;
+    const boosterValue = item.boosterValue ?? 1;
+
+    // 1. Check inventory
     const { data: invItem, error: invErr } = await supabaseAdmin
       .from("user_inventory")
       .select("id, quantity")
@@ -53,7 +66,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Booster not in inventory" }, { status: 400 });
     }
 
-    // 2. Check if same booster type is already active
+    // 2. Check if same effect already active
     const { data: existing } = await supabaseAdmin
       .from("active_boosters")
       .select("id")
@@ -66,7 +79,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Same booster type already active" }, { status: 400 });
     }
 
-    // 3. Decrement inventory quantity
+    // 3. Decrement inventory
     const newQty = invItem.quantity - 1;
     if (newQty <= 0) {
       await supabaseAdmin.from("user_inventory").delete().eq("id", invItem.id);
@@ -79,25 +92,29 @@ export async function POST(req: NextRequest) {
       user_id: userId,
       item_id: itemId,
       booster_effect: boosterEffect,
-      booster_value: boosterValue ?? 1,
+      booster_value: boosterValue,
       uses_remaining: 1,
       activated_at: new Date().toISOString(),
     });
 
     if (insertErr) {
       console.error("[shop/activate-booster POST] insert:", insertErr.message);
-      return NextResponse.json({ error: "Failed to activate: " + insertErr.message }, { status: 500 });
+      return NextResponse.json({ error: "Failed to activate" }, { status: 500 });
     }
 
     return NextResponse.json({ success: true });
   } catch (err) {
     console.error("[shop/activate-booster POST]", err);
-    return NextResponse.json({ error: String(err) }, { status: 500 });
+    return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
 }
 
-// PATCH — consume a booster (decrement uses_remaining, delete if 0)
+// PATCH — consume a booster (verify ownership)
 export async function PATCH(req: NextRequest) {
+  const auth = await requireAuth(req);
+  if (auth instanceof NextResponse) return auth;
+  const userId = auth.userId;
+
   try {
     const { boosterId } = await req.json();
     if (!boosterId) {
@@ -106,11 +123,11 @@ export async function PATCH(req: NextRequest) {
 
     const { data: booster } = await supabaseAdmin
       .from("active_boosters")
-      .select("id, uses_remaining")
+      .select("id, user_id, uses_remaining")
       .eq("id", boosterId)
       .single();
 
-    if (!booster) {
+    if (!booster || booster.user_id !== userId) {
       return NextResponse.json({ error: "Booster not found" }, { status: 404 });
     }
 
@@ -124,6 +141,6 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ success: true });
   } catch (err) {
     console.error("[shop/activate-booster PATCH]", err);
-    return NextResponse.json({ error: String(err) }, { status: 500 });
+    return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
 }

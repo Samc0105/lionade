@@ -8,6 +8,7 @@ import { useUserStats, useStreakInfo, isStreakExpired, resetExpiredStreak, mutat
 import { formatCoins } from "@/lib/mockData";
 import { supabase } from "@/lib/supabase";
 import { cdnUrl } from "@/lib/cdn";
+import { apiGet, apiPatch } from "@/lib/api-client";
 
 interface Notification {
   id: string;
@@ -99,13 +100,12 @@ export default function Navbar() {
 
   const loadNotifications = useCallback(async () => {
     if (!user?.id) return;
-    try {
-      const res = await fetch(`/api/notifications?userId=${user.id}`);
-      if (!res.ok) return; // table may not exist yet
-      const data = await res.json();
-      if (data.notifications) setNotifications(data.notifications);
-      if (typeof data.unreadCount === "number") setUnreadCount(data.unreadCount);
-    } catch { /* table may not exist — silently ignore */ }
+    const res = await apiGet<{ notifications: Notification[]; unreadCount: number }>(
+      "/api/notifications",
+    );
+    if (!res.ok || !res.data) return;
+    if (res.data.notifications) setNotifications(res.data.notifications);
+    if (typeof res.data.unreadCount === "number") setUnreadCount(res.data.unreadCount);
   }, [user?.id]);
 
   // Load notifications on mount + poll
@@ -140,13 +140,7 @@ export default function Navbar() {
   const openNotifPanel = useCallback(async () => {
     setShowNotifPanel(prev => !prev);
     if (!showNotifPanel && user?.id && (unreadCount ?? 0) > 0) {
-      try {
-        await fetch("/api/notifications", {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ userId: user.id }),
-        });
-      } catch { /* ignore */ }
+      await apiPatch("/api/notifications");
       setNotifications(prev => prev.map(n => ({ ...n, read: true })));
       setUnreadCount(0);
     }

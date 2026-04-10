@@ -1,29 +1,36 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
+import { requireAuth } from "@/lib/api-auth";
 
 export async function POST(req: NextRequest) {
+  const auth = await requireAuth(req);
+  if (auth instanceof NextResponse) return auth;
+  const userId = auth.userId;
+
   try {
-    const { userId, bountyId } = await req.json();
-    if (!userId || !bountyId) {
-      return NextResponse.json({ error: "Missing userId or bountyId" }, { status: 400 });
+    const { bountyId } = await req.json();
+    if (!bountyId) {
+      return NextResponse.json({ error: "Missing bountyId" }, { status: 400 });
     }
 
-    // Fetch user_bounty
-    const { data: ub, error: ubErr } = await supabaseAdmin
+    // Atomic claim: only flip claimed=true if it's currently false AND completed=true.
+    // This single conditional update closes the double-claim race window.
+    const { data: claimed, error: claimErr } = await supabaseAdmin
       .from("user_bounties")
-      .select("id, completed, claimed")
+      .update({ claimed: true })
       .eq("user_id", userId)
       .eq("bounty_id", bountyId)
-      .single();
+      .eq("completed", true)
+      .eq("claimed", false)
+      .select("id")
+      .maybeSingle();
 
-    if (ubErr || !ub) {
-      return NextResponse.json({ error: "Bounty progress not found" }, { status: 404 });
+    if (claimErr) {
+      console.error("[claim-bounty] update:", claimErr.message);
+      return NextResponse.json({ error: "Claim failed" }, { status: 500 });
     }
-    if (!ub.completed) {
-      return NextResponse.json({ error: "Bounty not completed yet" }, { status: 400 });
-    }
-    if (ub.claimed) {
-      return NextResponse.json({ error: "Already claimed" }, { status: 400 });
+    if (!claimed) {
+      return NextResponse.json({ error: "Bounty not claimable (incomplete or already claimed)" }, { status: 400 });
     }
 
     // Fetch bounty rewards
@@ -37,13 +44,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Bounty not found" }, { status: 404 });
     }
 
-    // Mark as claimed
-    await supabaseAdmin
-      .from("user_bounties")
-      .update({ claimed: true })
-      .eq("id", ub.id);
-
-    // Award coins + xp
+    // Award coins + xp (claim already locked above)
     const { data: profile } = await supabaseAdmin
       .from("profiles")
       .select("coins, xp")
@@ -73,6 +74,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ success: true, coinsAwarded: bounty.coin_reward, xpAwarded: bounty.xp_reward });
   } catch (err) {
-    return NextResponse.json({ error: String(err) }, { status: 500 });
+    console.error("[claim-bounty]", err);
+    return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
 }
