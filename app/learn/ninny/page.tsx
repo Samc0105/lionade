@@ -10,6 +10,12 @@ import BackButton from "@/components/BackButton";
 import MultipleChoiceMode, {
   type NinnyWrongAnswer,
 } from "@/components/Ninny/MultipleChoiceMode";
+import FlashcardsMode from "@/components/Ninny/FlashcardsMode";
+import MatchMode from "@/components/Ninny/MatchMode";
+import FillBlankMode from "@/components/Ninny/FillBlankMode";
+import TrueFalseMode from "@/components/Ninny/TrueFalseMode";
+import OrderingMode from "@/components/Ninny/OrderingMode";
+import BlitzMode from "@/components/Ninny/BlitzMode";
 import { cdnUrl } from "@/lib/cdn";
 import {
   NINNY_DAILY_LIMIT,
@@ -19,11 +25,12 @@ import {
 import type {
   NinnyDifficulty,
   NinnyGeneratedContent,
+  NinnyMode,
   NinnySourceType,
 } from "@/lib/ninny";
 import { apiPost, swrFetcher } from "@/lib/api-client";
 
-type Phase = "input" | "generating" | "play" | "results";
+type Phase = "input" | "generating" | "modePicker" | "play" | "results";
 type InputMode = "topic" | "material";
 
 interface Material {
@@ -63,16 +70,64 @@ interface MaterialsResponse {
 const NINNY_PURPLE = "#A855F7";
 const TEXT_LIMIT = 12000;
 
-// 7 study modes — only MCQ is wired in Phase 1
-const STUDY_MODES = [
-  { key: "mcq", icon: "\u{1F3AF}", label: "Multiple Choice", active: true },
-  { key: "flashcards", icon: "\u{1F4C7}", label: "Flashcards", active: false },
-  { key: "match", icon: "\u{1F517}", label: "Match", active: false },
-  { key: "fill", icon: "\u{270F}\u{FE0F}", label: "Fill Blank", active: false },
-  { key: "tf", icon: "\u{2696}\u{FE0F}", label: "True/False", active: false },
-  { key: "ordering", icon: "\u{1F4CB}", label: "Ordering", active: false },
-  { key: "blitz", icon: "\u{26A1}", label: "Blitz", active: false },
-] as const;
+// All 7 study modes — Phase 2 wires up the rest
+const STUDY_MODES: {
+  key: NinnyMode;
+  icon: string;
+  label: string;
+  description: string;
+  active: boolean;
+}[] = [
+  {
+    key: "mcq",
+    icon: "\u{1F3AF}",
+    label: "Multiple Choice",
+    description: "Pick the right answer from 4 options",
+    active: true,
+  },
+  {
+    key: "flashcards",
+    icon: "\u{1F4C7}",
+    label: "Flashcards",
+    description: "Flip cards · self-rate your recall",
+    active: true,
+  },
+  {
+    key: "match",
+    icon: "\u{1F517}",
+    label: "Match",
+    description: "Pair terms with their definitions",
+    active: true,
+  },
+  {
+    key: "fill",
+    icon: "\u{270F}\u{FE0F}",
+    label: "Fill Blank",
+    description: "Type the missing word",
+    active: true,
+  },
+  {
+    key: "tf",
+    icon: "\u{2696}\u{FE0F}",
+    label: "True/False",
+    description: "Fast-fire fact checks",
+    active: true,
+  },
+  {
+    key: "ordering",
+    icon: "\u{1F4CB}",
+    label: "Ordering",
+    description: "Arrange items in the right sequence",
+    active: true,
+  },
+  {
+    key: "blitz",
+    icon: "\u{26A1}",
+    label: "Blitz",
+    description: "60-second sprint · max points",
+    active: true,
+  },
+];
 
 // Static fallback topic suggestions used when user has no selected subjects
 const FALLBACK_TOPICS = [
@@ -141,6 +196,7 @@ function NinnyPageInner() {
   const [difficulty, setDifficulty] = useState<NinnyDifficulty>("medium");
   const [error, setError] = useState<string | null>(null);
   const [material, setMaterial] = useState<Material | null>(null);
+  const [activeMode, setActiveMode] = useState<NinnyMode>("mcq");
   const [result, setResult] = useState<SessionResult | null>(null);
   const [comingSoonToast, setComingSoonToast] = useState<string | null>(null);
 
@@ -270,11 +326,17 @@ function NinnyPageInner() {
     }
     setMaterial(res.data.material);
     refreshMeta();
-    setPhase("play");
+    setPhase("modePicker");
   };
 
   const handleRestudy = (m: Material) => {
     setMaterial(m);
+    setPhase("modePicker");
+  };
+
+  const handlePickMode = (mode: NinnyMode) => {
+    setActiveMode(mode);
+    setResult(null);
     setPhase("play");
   };
 
@@ -289,7 +351,7 @@ function NinnyPageInner() {
       "/api/ninny/complete",
       {
         materialId: material.id,
-        mode: "mcq",
+        mode: activeMode,
         score: r.score,
         total: r.total,
         // API expects bare {question, correctAnswer} — explanation is UI-only
@@ -330,7 +392,13 @@ function NinnyPageInner() {
     setError(null);
   };
 
-  // Retake the same set without re-generating
+  // Try a different mode on the same material
+  const handleTryAnotherMode = () => {
+    setResult(null);
+    setPhase("modePicker");
+  };
+
+  // Retake the same set in the same mode
   const handleRetake = () => {
     if (!material) return;
     setResult(null);
@@ -344,8 +412,7 @@ function NinnyPageInner() {
     ) {
       return;
     }
-    setMaterial(null);
-    setPhase("input");
+    setPhase("modePicker");
   };
 
   return (
@@ -939,11 +1006,109 @@ function NinnyPageInner() {
           </div>
         )}
 
+        {/* MODE PICKER PHASE — choose which mode to play after generation */}
+        {phase === "modePicker" && material && (
+          <div className="animate-slide-up">
+            {/* Material header */}
+            <div
+              className="rounded-2xl border bg-white/5 backdrop-blur px-5 py-4 mb-6 flex items-center gap-3 flex-wrap"
+              style={{ borderColor: `${NINNY_PURPLE}30` }}
+            >
+              <div className="flex-1 min-w-0">
+                <p className="font-bebas text-cream text-xl tracking-wide truncate">
+                  {material.title}
+                </p>
+                <div className="flex items-center gap-2 mt-1">
+                  {material.subject && (
+                    <span
+                      className="px-2 py-0.5 rounded-full text-[9px] font-syne font-semibold uppercase tracking-wider"
+                      style={{
+                        background: `${NINNY_PURPLE}20`,
+                        border: `1px solid ${NINNY_PURPLE}40`,
+                        color: NINNY_PURPLE,
+                      }}
+                    >
+                      {material.subject}
+                    </span>
+                  )}
+                  <span
+                    className="px-2 py-0.5 rounded-full text-[9px] font-syne font-semibold uppercase tracking-wider"
+                    style={{
+                      background: "rgba(255,215,0,0.10)",
+                      border: "1px solid rgba(255,215,0,0.30)",
+                      color: "#FFD700",
+                    }}
+                  >
+                    {material.difficulty}
+                  </span>
+                </div>
+              </div>
+              <button
+                onClick={handleRestart}
+                className="font-syne text-xs text-cream/50 hover:text-cream
+                  px-3 py-1.5 rounded-lg border border-white/10 hover:bg-white/5
+                  transition-all"
+              >
+                New Set
+              </button>
+            </div>
+
+            <p className="font-bebas text-cream/60 text-xs tracking-widest uppercase mb-3 text-center">
+              Pick a Study Mode
+            </p>
+
+            {/* Mode grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {STUDY_MODES.map((m) => (
+                <button
+                  key={m.key}
+                  onClick={() => handlePickMode(m.key)}
+                  className="group text-left rounded-2xl border-2 backdrop-blur p-5
+                    transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.99]"
+                  style={{
+                    background: "rgba(255,255,255,0.04)",
+                    borderColor: `${NINNY_PURPLE}25`,
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.borderColor = `${NINNY_PURPLE}60`;
+                    e.currentTarget.style.boxShadow = `0 0 24px ${NINNY_PURPLE}25`;
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.borderColor = `${NINNY_PURPLE}25`;
+                    e.currentTarget.style.boxShadow = "none";
+                  }}
+                >
+                  <div className="flex items-start gap-3">
+                    <div
+                      className="w-11 h-11 rounded-xl flex items-center justify-center text-2xl shrink-0
+                        group-hover:scale-110 transition-transform"
+                      style={{
+                        background: `${NINNY_PURPLE}15`,
+                        border: `1px solid ${NINNY_PURPLE}30`,
+                      }}
+                    >
+                      {m.icon}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-bebas text-cream text-base tracking-wide leading-none mb-1">
+                        {m.label}
+                      </p>
+                      <p className="font-syne text-cream/50 text-xs leading-snug">
+                        {m.description}
+                      </p>
+                    </div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* PLAY PHASE */}
         {phase === "play" && material && (
           <>
             <div
-              className="rounded-xl border bg-white/5 backdrop-blur px-4 py-3 mb-3 flex items-center gap-3 animate-slide-up flex-wrap"
+              className="rounded-xl border bg-white/5 backdrop-blur px-4 py-3 mb-6 flex items-center gap-3 animate-slide-up flex-wrap"
               style={{ borderColor: `${NINNY_PURPLE}25` }}
             >
               <span className="font-bebas text-cream text-base tracking-wide truncate">
@@ -961,19 +1126,24 @@ function NinnyPageInner() {
                   {material.subject}
                 </span>
               )}
-              {/* Mode chip */}
-              <div
-                className="flex items-center gap-1.5 px-2.5 py-1 rounded-full border"
-                style={{
-                  background: "rgba(255,215,0,0.08)",
-                  borderColor: "rgba(255,215,0,0.3)",
-                }}
-              >
-                <span className="text-xs">&#x1F3AF;</span>
-                <span className="font-syne text-gold text-[10px] font-semibold uppercase tracking-wider">
-                  Multiple Choice
-                </span>
-              </div>
+              {/* Mode chip — dynamic based on activeMode */}
+              {(() => {
+                const mode = STUDY_MODES.find((m) => m.key === activeMode);
+                return (
+                  <div
+                    className="flex items-center gap-1.5 px-2.5 py-1 rounded-full border"
+                    style={{
+                      background: "rgba(255,215,0,0.08)",
+                      borderColor: "rgba(255,215,0,0.3)",
+                    }}
+                  >
+                    <span className="text-xs">{mode?.icon}</span>
+                    <span className="font-syne text-gold text-[10px] font-semibold uppercase tracking-wider">
+                      {mode?.label}
+                    </span>
+                  </div>
+                );
+              })()}
               {/* Exit button */}
               <button
                 onClick={handleExitQuiz}
@@ -981,18 +1151,55 @@ function NinnyPageInner() {
                   flex items-center justify-center text-cream/50 hover:text-cream
                   border border-white/10 transition-all"
                 aria-label="Exit study set"
-                title="Exit study set"
+                title="Back to mode picker"
               >
                 ×
               </button>
             </div>
-            <p className="text-cream/30 text-[10px] font-syne text-center mb-6 uppercase tracking-wider">
-              6 more study modes coming soon
-            </p>
-            <MultipleChoiceMode
-              questions={material.generated_content.multipleChoice}
-              onComplete={handleComplete}
-            />
+
+            {/* Mode renderer — switch on activeMode */}
+            {activeMode === "mcq" && (
+              <MultipleChoiceMode
+                questions={material.generated_content.multipleChoice}
+                onComplete={handleComplete}
+              />
+            )}
+            {activeMode === "flashcards" && (
+              <FlashcardsMode
+                cards={material.generated_content.flashcards}
+                onComplete={handleComplete}
+              />
+            )}
+            {activeMode === "match" && (
+              <MatchMode
+                pairs={material.generated_content.match}
+                onComplete={handleComplete}
+              />
+            )}
+            {activeMode === "fill" && (
+              <FillBlankMode
+                questions={material.generated_content.fillBlank}
+                onComplete={handleComplete}
+              />
+            )}
+            {activeMode === "tf" && (
+              <TrueFalseMode
+                questions={material.generated_content.trueFalse}
+                onComplete={handleComplete}
+              />
+            )}
+            {activeMode === "ordering" && (
+              <OrderingMode
+                questions={material.generated_content.ordering}
+                onComplete={handleComplete}
+              />
+            )}
+            {activeMode === "blitz" && (
+              <BlitzMode
+                questions={material.generated_content.blitz}
+                onComplete={handleComplete}
+              />
+            )}
           </>
         )}
 
@@ -1111,19 +1318,32 @@ function NinnyPageInner() {
               )}
 
               {/* Action buttons */}
-              <div className="flex flex-col sm:flex-row gap-3 max-w-2xl mx-auto">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-2xl mx-auto">
                 <button
                   onClick={handleRetake}
-                  className="flex-1 font-syne font-bold text-sm px-6 py-3 rounded-xl
+                  className="font-syne font-bold text-sm px-6 py-3 rounded-xl
                     border bg-white/5 text-cream hover:bg-white/10
                     transition-all duration-200 active:scale-[0.99]"
                   style={{ borderColor: `${NINNY_PURPLE}30` }}
                 >
-                  &#x21BA; Retake This Set
+                  &#x21BA; Retake
+                </button>
+                <button
+                  onClick={handleTryAnotherMode}
+                  className="font-bebas text-base tracking-wider px-6 py-3 rounded-xl
+                    transition-all duration-200 active:scale-[0.99] hover:brightness-110"
+                  style={{
+                    background: `${NINNY_PURPLE}25`,
+                    border: `1px solid ${NINNY_PURPLE}60`,
+                    color: "#EEF4FF",
+                    boxShadow: `0 0 20px ${NINNY_PURPLE}30`,
+                  }}
+                >
+                  Try Another Mode
                 </button>
                 <button
                   onClick={handleRestart}
-                  className="flex-1 font-syne font-bold text-sm px-6 py-3 rounded-xl
+                  className="font-syne font-bold text-sm px-6 py-3 rounded-xl
                     border border-white/10 bg-white/5 text-cream hover:bg-white/10
                     transition-all duration-200 active:scale-[0.99]"
                 >
@@ -1131,7 +1351,7 @@ function NinnyPageInner() {
                 </button>
                 <button
                   onClick={() => router.push("/learn")}
-                  className="flex-1 font-bebas text-base tracking-wider px-6 py-3 rounded-xl
+                  className="font-bebas text-base tracking-wider px-6 py-3 rounded-xl
                     transition-all duration-200 active:scale-[0.99] hover:brightness-110"
                   style={{
                     background: "linear-gradient(135deg, #FFD700 0%, #F0C000 100%)",
