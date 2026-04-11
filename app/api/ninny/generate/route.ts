@@ -4,15 +4,18 @@ import { requireAuth } from "@/lib/api-auth";
 import {
   buildNinnyPrompt,
   validateGeneratedContent,
-  getNinnyFangCost,
+  getNinnyModeCost,
   NINNY_DAILY_LIMIT,
   NINNY_FREE_PER_DAY,
+  NINNY_MODE_COSTS,
   type NinnyDifficulty,
   type NinnyGeneratedContent,
+  type NinnyMode,
   type NinnySourceType,
 } from "@/lib/ninny";
 
 const MAX_CONTENT_BYTES = 20 * 1024; // 20 KB cap on user content
+const VALID_MODES: NinnyMode[] = Object.keys(NINNY_MODE_COSTS) as NinnyMode[];
 
 const MIN_ITEMS_PER_MODE = 8;
 const ARRAY_KEYS: (keyof NinnyGeneratedContent)[] = [
@@ -79,6 +82,7 @@ interface GenerateRequest {
   sourceType: NinnySourceType;
   content: string;
   difficulty?: NinnyDifficulty;
+  mode: NinnyMode; // user-selected mode determines the price
 }
 
 export async function POST(req: NextRequest) {
@@ -107,18 +111,21 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
 
-  const { sourceType, content } = body;
+  const { sourceType, content, mode } = body;
   const difficulty: NinnyDifficulty = body.difficulty ?? "medium";
 
-  if (!sourceType || !content) {
+  if (!sourceType || !content || !mode) {
     return NextResponse.json(
-      { error: "Missing sourceType or content" },
+      { error: "Missing sourceType, content, or mode" },
       { status: 400 },
     );
   }
 
   if (!["pdf", "text", "topic"].includes(sourceType)) {
     return NextResponse.json({ error: "Invalid sourceType" }, { status: 400 });
+  }
+  if (!VALID_MODES.includes(mode)) {
+    return NextResponse.json({ error: "Invalid mode" }, { status: 400 });
   }
 
   if (typeof content !== "string" || content.trim().length < 3) {
@@ -153,8 +160,9 @@ export async function POST(req: NextRequest) {
   }
 
   // 3. Free quota OR Fangs charge — atomic deduct, refund on failure
+  // Price is set by the mode the user picked, not the source type.
   const isFree = todayCount < NINNY_FREE_PER_DAY;
-  const fangCost = isFree ? 0 : getNinnyFangCost(sourceType);
+  const fangCost = isFree ? 0 : getNinnyModeCost(mode);
   let coinsBeforeCharge: number | null = null;
 
   if (!isFree) {
@@ -194,7 +202,7 @@ export async function POST(req: NextRequest) {
       user_id: userId,
       amount: -fangCost,
       type: "ninny_unlock",
-      description: `Ninny ${sourceType} generation`,
+      description: `Ninny ${mode} generation (${sourceType})`,
     });
   }
 
@@ -250,8 +258,11 @@ export async function POST(req: NextRequest) {
         generated_content: validated,
         subject: validated.subject,
         difficulty: validated.difficulty,
+        // The mode the user paid for is the only one initially unlocked.
+        // Additional modes cost extra Fangs via /api/ninny/unlock.
+        unlocked_modes: [mode],
       })
-      .select("id, title, subject, difficulty, generated_content, created_at")
+      .select("id, title, subject, difficulty, generated_content, unlocked_modes, created_at")
       .single();
 
     if (insertErr) {

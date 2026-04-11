@@ -106,7 +106,9 @@ const ROUTE_LIMITS: RouteLimit[] = [
       p === "/api/claim-bounty" ||
       p === "/api/games/reward" ||
       p.startsWith("/api/shop/") ||
-      p === "/api/ninny/complete",
+      p === "/api/ninny/complete" ||
+      p === "/api/ninny/abandon" ||
+      p === "/api/ninny/unlock",
     max: 60,
     windowMs: 60 * 1000,
     keyPrefix: "fin",

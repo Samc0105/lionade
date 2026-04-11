@@ -21,7 +21,8 @@ import { cdnUrl } from "@/lib/cdn";
 import {
   NINNY_DAILY_LIMIT,
   NINNY_FREE_PER_DAY,
-  NINNY_FANG_COSTS,
+  NINNY_MODE_COSTS,
+  NINNY_ABANDON_PENALTY,
 } from "@/lib/ninny";
 import type {
   NinnyDifficulty,
@@ -40,6 +41,7 @@ interface Material {
   subject: string | null;
   difficulty: NinnyDifficulty;
   generated_content: NinnyGeneratedContent;
+  unlocked_modes: NinnyMode[];
   created_at?: string;
 }
 
@@ -63,7 +65,7 @@ interface MaterialsResponse {
   dailyRemaining: number;
   freeRemaining: number;
   freePerDay: number;
-  fangCosts: Record<NinnySourceType, number>;
+  modeCosts: Record<NinnyMode, number>;
   userCoins: number;
   selectedSubjects: string[];
 }
@@ -72,12 +74,15 @@ const NINNY_PURPLE = "#A855F7";
 const TEXT_LIMIT = 12000;
 
 // All 7 study modes — Phase 2 wires up the rest
+// Each mode gets its own accent color so the picker is visually distinct
+// from the gold/purple chrome of the rest of the page.
 const STUDY_MODES: {
   key: NinnyMode;
   icon: string;
   label: string;
   description: string;
   active: boolean;
+  color: string; // hex
 }[] = [
   {
     key: "mcq",
@@ -85,6 +90,7 @@ const STUDY_MODES: {
     label: "Multiple Choice",
     description: "Pick the right answer from 4 options",
     active: true,
+    color: "#4A90D9", // electric blue
   },
   {
     key: "flashcards",
@@ -92,6 +98,7 @@ const STUDY_MODES: {
     label: "Flashcards",
     description: "Flip cards · self-rate your recall",
     active: true,
+    color: "#A855F7", // ninny purple
   },
   {
     key: "match",
@@ -99,6 +106,7 @@ const STUDY_MODES: {
     label: "Match",
     description: "Pair terms with their definitions",
     active: true,
+    color: "#22C55E", // green
   },
   {
     key: "fill",
@@ -106,6 +114,7 @@ const STUDY_MODES: {
     label: "Fill Blank",
     description: "Type the missing word",
     active: true,
+    color: "#F97316", // orange
   },
   {
     key: "tf",
@@ -113,6 +122,7 @@ const STUDY_MODES: {
     label: "True/False",
     description: "Fast-fire fact checks",
     active: true,
+    color: "#EC4899", // pink
   },
   {
     key: "ordering",
@@ -120,6 +130,7 @@ const STUDY_MODES: {
     label: "Ordering",
     description: "Arrange items in the right sequence",
     active: true,
+    color: "#14B8A6", // teal
   },
   {
     key: "blitz",
@@ -127,8 +138,31 @@ const STUDY_MODES: {
     label: "Blitz",
     description: "60-second sprint · max points",
     active: true,
+    color: "#FFD700", // gold
   },
 ];
+
+// Difficulty colors — green/gold/red conveys progression intuitively
+const DIFFICULTY_COLORS: Record<NinnyDifficulty, { bg: string; border: string; text: string; glow: string }> = {
+  easy: {
+    bg: "rgba(34,197,94,0.15)",
+    border: "rgba(34,197,94,0.55)",
+    text: "#22C55E",
+    glow: "0 0 18px rgba(34,197,94,0.25)",
+  },
+  medium: {
+    bg: "rgba(255,215,0,0.15)",
+    border: "rgba(255,215,0,0.55)",
+    text: "#FFD700",
+    glow: "0 0 18px rgba(255,215,0,0.25)",
+  },
+  hard: {
+    bg: "rgba(239,68,68,0.15)",
+    border: "rgba(239,68,68,0.55)",
+    text: "#EF4444",
+    glow: "0 0 18px rgba(239,68,68,0.25)",
+  },
+};
 
 // Static fallback topic suggestions used when user has no selected subjects
 const FALLBACK_TOPICS = [
@@ -194,15 +228,23 @@ function NinnyPageInner() {
   const [uploadedFile, setUploadedFile] = useState<UploadedFile | null>(null);
   const [extractingFile, setExtractingFile] = useState(false);
   const [dragActive, setDragActive] = useState(false);
-  const [difficulty, setDifficulty] = useState<NinnyDifficulty>("medium");
+  // null until user picks — gates the visual unlock of the mode chips
+  const [difficulty, setDifficulty] = useState<NinnyDifficulty | null>(null);
+  // Which mode the user is buying — drives the price displayed on the
+  // generate button. Sticky so a second generation defaults to the same.
+  const [selectedMode, setSelectedMode] = useState<NinnyMode | null>(null);
+  // Hover state for the mode chips so we can show a price preview
+  const [hoveredMode, setHoveredMode] = useState<NinnyMode | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [material, setMaterial] = useState<Material | null>(null);
   const [activeMode, setActiveMode] = useState<NinnyMode>("mcq");
   const [result, setResult] = useState<SessionResult | null>(null);
   // Spaced repetition: maps lowercased question_text → miss_count
   const [wrongAnswerCounts, setWrongAnswerCounts] = useState<Map<string, number>>(new Map());
-  // "Practice Your Misses" mode — when true, mode renders only wrong items
-  const [practiceMissesOnly, setPracticeMissesOnly] = useState(false);
+  // "Practice Your Misses" mode — when set, mode renders only items whose
+  // keys appear in this set. Sourced directly from the just-completed
+  // session's wrong answers (not from stale wrongAnswerCounts state).
+  const [practiceMissesKeys, setPracticeMissesKeys] = useState<Set<string> | null>(null);
   // Pull streak from shared SWR hook for the header chip
   const { stats } = useUserStats(user?.id);
   const [comingSoonToast, setComingSoonToast] = useState<string | null>(null);
@@ -217,7 +259,7 @@ function NinnyPageInner() {
   const dailyRemaining = meta?.dailyRemaining ?? NINNY_DAILY_LIMIT;
   const freeRemaining = meta?.freeRemaining ?? NINNY_FREE_PER_DAY;
   const userCoins = meta?.userCoins ?? 0;
-  const fangCosts = meta?.fangCosts ?? NINNY_FANG_COSTS;
+  const modeCosts = meta?.modeCosts ?? NINNY_MODE_COSTS;
   const dailyCapReached = dailyRemaining <= 0;
 
   // Determine the source type the user is about to generate with
@@ -227,10 +269,15 @@ function NinnyPageInner() {
       : uploadedFile?.name.toLowerCase().endsWith(".pdf")
       ? "pdf"
       : "text";
-  const currentCost = freeRemaining > 0 ? 0 : fangCosts[currentSourceType];
+
+  // Price = the cost of the user's selected mode (or hovered mode preview)
+  const previewMode = selectedMode ?? hoveredMode;
+  const currentCost = previewMode ? modeCosts[previewMode] : 0;
   const isFreeNow = freeRemaining > 0;
-  const canAfford = isFreeNow || userCoins >= currentCost;
-  const blocked = dailyCapReached || !canAfford;
+  const canAfford = isFreeNow || (selectedMode !== null && userCoins >= modeCosts[selectedMode]);
+  const needsDifficulty = !difficulty;
+  const needsMode = !selectedMode;
+  const blocked = dailyCapReached || !canAfford || needsDifficulty || needsMode;
 
   // Build personalized topic suggestions: 2 from selected subjects + 4 fallbacks
   const topicSuggestions = useMemo(() => {
@@ -283,12 +330,20 @@ function NinnyPageInner() {
 
   const handleGenerate = async () => {
     if (!user?.id) return;
+    if (!difficulty) {
+      setError("Pick a challenge level first");
+      return;
+    }
+    if (!selectedMode) {
+      setError("Pick a study mode first");
+      return;
+    }
     if (dailyCapReached) {
       setError(`Daily cap reached (${meta?.dailyLimit ?? NINNY_DAILY_LIMIT}). Come back tomorrow!`);
       return;
     }
     if (!isFreeNow && !canAfford) {
-      setError(`Need ${currentCost} Fangs (you have ${userCoins}). Play quizzes to earn more.`);
+      setError(`Need ${modeCosts[selectedMode]} Fangs (you have ${userCoins}). Play quizzes to earn more.`);
       return;
     }
 
@@ -325,6 +380,7 @@ function NinnyPageInner() {
       sourceType,
       content,
       difficulty,
+      mode: selectedMode,
     });
     if (!res.ok || !res.data?.material) {
       setError(res.error ?? "Generation failed");
@@ -333,7 +389,11 @@ function NinnyPageInner() {
     }
     setMaterial(res.data.material);
     refreshMeta();
-    setPhase("modePicker");
+    // Jump straight to play with the mode the user pre-selected.
+    // Mode picker still accessible after via "Try Another Mode".
+    setActiveMode(selectedMode);
+    setPracticeMissesKeys(null);
+    setPhase("play");
   };
 
   const handleRestudy = (m: Material) => {
@@ -362,26 +422,66 @@ function NinnyPageInner() {
   );
 
   // Refetch wrong answers when entering modePicker so weighting reflects
-  // the latest state (e.g. after just finishing a session)
+  // the latest state (e.g. after just finishing a session). Also clear
+  // any stale error from a previous unlock attempt.
   useEffect(() => {
     if (phase === "modePicker" && material) {
       refreshWrongAnswers(material.id);
+      setError(null);
     }
   }, [phase, material, refreshWrongAnswers]);
 
-  const handlePickMode = (mode: NinnyMode) => {
+  // Pick a mode from the post-generation picker. If the mode is already
+  // unlocked for this material, play it free. Otherwise charge the mode's
+  // price via /api/ninny/unlock and refresh the local material state.
+  const handlePickMode = async (mode: NinnyMode) => {
+    if (!material || !user?.id) return;
+
+    const isUnlocked = material.unlocked_modes?.includes(mode) ?? false;
+    if (!isUnlocked) {
+      const cost = (meta?.modeCosts ?? NINNY_MODE_COSTS)[mode];
+      if (userCoins < cost) {
+        setError(`Need ${cost} Fangs to unlock ${mode}. You have ${userCoins}.`);
+        return;
+      }
+      if (
+        typeof window !== "undefined" &&
+        !window.confirm(`Unlock ${STUDY_MODES.find(m => m.key === mode)?.label} for ${cost} Fangs?`)
+      ) {
+        return;
+      }
+      const res = await apiPost<{ unlockedModes: NinnyMode[] }>("/api/ninny/unlock", {
+        materialId: material.id,
+        mode,
+      });
+      if (!res.ok || !res.data) {
+        setError(res.error ?? "Failed to unlock mode");
+        return;
+      }
+      // Update the local material state with the new unlocked modes
+      setMaterial({ ...material, unlocked_modes: res.data.unlockedModes });
+      refreshMeta();
+    }
+
+    setError(null);
     setActiveMode(mode);
     setResult(null);
-    setPracticeMissesOnly(false);
+    setPracticeMissesKeys(null);
     setPhase("play");
   };
 
+  // FIXED: keep activeMode (was hardcoded to MCQ — broken for other modes).
+  // Use the JUST-completed session's wrong answers directly so we don't need
+  // to refetch from the DB and don't have stale data.
   const handlePracticeMisses = () => {
-    if (!material || wrongAnswerCounts.size === 0) return;
-    // Default to MCQ for practice mode (most common content type)
-    setActiveMode("mcq");
+    if (!result || result.wrongAnswers.length === 0) return;
+    const keys = new Set(
+      result.wrongAnswers.map((w) => w.question.trim().toLowerCase()),
+    );
+    setPracticeMissesKeys(keys);
     setResult(null);
-    setPracticeMissesOnly(true);
+    // activeMode stays the same — practice the misses in whatever mode you
+    // were just playing
     setPhase("play");
   };
 
@@ -460,13 +560,27 @@ function NinnyPageInner() {
     setPhase("play");
   };
 
-  const handleExitQuiz = () => {
-    if (
-      typeof window !== "undefined" &&
-      !window.confirm("Exit this study set? Your progress will be lost.")
-    ) {
+  const handleExitQuiz = async () => {
+    // Practice mode doesn't penalize — the user already paid for the
+    // original session, this is just bonus drilling.
+    const isPractice = practiceMissesKeys !== null;
+    const willPenalize = !isPractice && userCoins > 0;
+    const penaltyAmount = Math.min(NINNY_ABANDON_PENALTY, userCoins);
+
+    const message = willPenalize
+      ? `Exit early? You'll lose ${penaltyAmount} Fangs as an early-exit penalty.`
+      : "Exit this study set? Your progress will be lost.";
+
+    if (typeof window !== "undefined" && !window.confirm(message)) {
       return;
     }
+
+    if (willPenalize) {
+      await apiPost("/api/ninny/abandon", {});
+      refreshMeta();
+    }
+
+    setPracticeMissesKeys(null);
     setPhase("modePicker");
   };
 
@@ -807,156 +921,164 @@ function NinnyPageInner() {
               </div>
             )}
 
-            {/* Difficulty picker */}
+            {/* Difficulty picker — each level has its own color */}
             <div className="mb-5">
               <p className="font-bebas text-cream/60 text-xs tracking-widest mb-2.5">
                 CHALLENGE LEVEL
               </p>
               <div className="flex gap-2">
-                {(["easy", "medium", "hard"] as const).map((d) => (
-                  <button
-                    key={d}
-                    onClick={() => setDifficulty(d)}
-                    className="flex-1 px-4 py-2.5 rounded-xl font-syne text-sm font-semibold uppercase tracking-wider transition-all"
-                    style={
-                      difficulty === d
-                        ? {
-                            background: "rgba(255,215,0,0.15)",
-                            border: "1px solid rgba(255,215,0,0.45)",
-                            color: "#FFD700",
-                            boxShadow: "0 0 18px rgba(255,215,0,0.18)",
-                          }
-                        : {
-                            background: "rgba(255,255,255,0.04)",
-                            border: "1px solid rgba(255,255,255,0.08)",
-                            color: "rgba(238,244,255,0.4)",
-                          }
-                    }
-                  >
-                    {d}
-                  </button>
-                ))}
+                {(["easy", "medium", "hard"] as const).map((d) => {
+                  const c = DIFFICULTY_COLORS[d];
+                  const isActive = difficulty === d;
+                  return (
+                    <button
+                      key={d}
+                      onClick={() => setDifficulty(d)}
+                      className="flex-1 px-4 py-2.5 rounded-xl font-syne text-sm font-semibold uppercase tracking-wider transition-all duration-300"
+                      style={
+                        isActive
+                          ? {
+                              background: c.bg,
+                              border: `1px solid ${c.border}`,
+                              color: c.text,
+                              boxShadow: c.glow,
+                            }
+                          : {
+                              background: "rgba(255,255,255,0.04)",
+                              border: "1px solid rgba(255,255,255,0.08)",
+                              color: "rgba(238,244,255,0.4)",
+                            }
+                      }
+                    >
+                      {d}
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
-            {/* Mode preview — what Ninny will create */}
+            {/* Mode picker — selectable cards with prices.
+                Locked + grey until difficulty is picked, then each card
+                animates in with its own color (staggered fade). */}
             <div className="mb-5">
-              <p className="font-bebas text-cream/60 text-xs tracking-widest mb-2.5">
-                NINNY WILL BUILD
-              </p>
-              <div className="flex flex-wrap gap-1.5">
-                {STUDY_MODES.map((m) => (
-                  <button
-                    key={m.key}
-                    type="button"
-                    onClick={() => {
-                      if (m.active) return;
-                      setComingSoonToast(`${m.label} is coming in Phase 2`);
-                      window.setTimeout(() => setComingSoonToast(null), 2400);
-                    }}
-                    disabled={m.active}
-                    className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border font-syne text-[11px] transition-all"
-                    style={
-                      m.active
-                        ? {
-                            background: `${NINNY_PURPLE}15`,
-                            borderColor: `${NINNY_PURPLE}40`,
-                            color: "#EEF4FF",
-                            cursor: "default",
-                          }
-                        : {
-                            background: "rgba(255,255,255,0.03)",
-                            borderColor: "rgba(255,255,255,0.06)",
-                            color: "rgba(238,244,255,0.3)",
-                            cursor: "pointer",
-                          }
-                    }
-                  >
-                    <span>{m.icon}</span>
-                    <span>{m.label}</span>
-                    {!m.active && (
-                      <span className="text-[8px] uppercase tracking-wider opacity-60">
-                        soon
-                      </span>
-                    )}
-                  </button>
-                ))}
+              <div className="flex items-center justify-between mb-2.5">
+                <p className="font-bebas text-cream/60 text-xs tracking-widest">
+                  PICK YOUR MODE
+                </p>
+                {!difficulty ? (
+                  <p className="font-syne text-cream/30 text-[10px] italic">
+                    Pick a level to unlock ↑
+                  </p>
+                ) : !selectedMode ? (
+                  <p className="font-syne text-cream/40 text-[10px] italic">
+                    Tap one to see its price
+                  </p>
+                ) : (
+                  <p className="font-syne text-[10px]" style={{ color: STUDY_MODES.find(m => m.key === selectedMode)?.color }}>
+                    {STUDY_MODES.find(m => m.key === selectedMode)?.label} selected
+                  </p>
+                )}
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
+                {STUDY_MODES.map((m, i) => {
+                  const unlocked = !!difficulty;
+                  const isSelected = selectedMode === m.key;
+                  const isHovered = hoveredMode === m.key;
+                  const cost = modeCosts[m.key];
+                  return (
+                    <button
+                      key={m.key}
+                      type="button"
+                      disabled={!unlocked}
+                      onClick={() => unlocked && setSelectedMode(m.key)}
+                      onMouseEnter={() => unlocked && setHoveredMode(m.key)}
+                      onMouseLeave={() => unlocked && setHoveredMode(null)}
+                      className="relative rounded-xl border font-syne text-[11px] px-3 py-2.5 text-left
+                        transition-all duration-300 ease-out group disabled:cursor-not-allowed"
+                      style={{
+                        background: unlocked
+                          ? isSelected
+                            ? `${m.color}28`
+                            : isHovered
+                            ? `${m.color}1a`
+                            : `${m.color}10`
+                          : "rgba(255,255,255,0.03)",
+                        borderColor: unlocked
+                          ? isSelected
+                            ? `${m.color}cc`
+                            : isHovered
+                            ? `${m.color}80`
+                            : `${m.color}40`
+                          : "rgba(255,255,255,0.06)",
+                        color: unlocked ? "#EEF4FF" : "rgba(238,244,255,0.25)",
+                        boxShadow: unlocked
+                          ? isSelected
+                            ? `0 0 28px ${m.color}55, 0 0 0 2px ${m.color}40 inset`
+                            : isHovered
+                            ? `0 0 20px ${m.color}40`
+                            : `0 0 10px ${m.color}1a`
+                          : "none",
+                        transform: isSelected || isHovered ? "translateY(-2px) scale(1.02)" : "translateY(0)",
+                        transitionDelay: unlocked && !isSelected && !isHovered ? `${i * 50}ms` : "0ms",
+                      }}
+                    >
+                      <div className="flex items-center gap-1.5 mb-1">
+                        <span
+                          className="text-base transition-transform duration-200"
+                          style={{
+                            filter: unlocked ? "none" : "grayscale(1)",
+                            transform: isSelected || isHovered ? "scale(1.15)" : "scale(1)",
+                          }}
+                        >
+                          {m.icon}
+                        </span>
+                        <span
+                          className="font-bebas tracking-wide text-[12px]"
+                          style={{ color: unlocked && (isSelected || isHovered) ? m.color : undefined }}
+                        >
+                          {m.label}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1 mt-0.5">
+                        <img src={cdnUrl("/F.png")} alt="" className="w-3 h-3 object-contain" />
+                        <span
+                          className="font-bebas text-[12px] tracking-wider"
+                          style={{
+                            color: unlocked
+                              ? isSelected
+                                ? m.color
+                                : "rgba(238,244,255,0.85)"
+                              : "rgba(238,244,255,0.20)",
+                          }}
+                        >
+                          {cost}
+                        </span>
+                        {isFreeNow && unlocked && (
+                          <span className="ml-auto text-[8px] font-bebas tracking-wider text-[#22C55E]">
+                            FREE TODAY
+                          </span>
+                        )}
+                      </div>
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
-            {/* Pricing card */}
-            <div
-              className="rounded-2xl border bg-white/5 backdrop-blur p-4 mb-4"
-              style={{ borderColor: `${NINNY_PURPLE}20` }}
-            >
-              <div className="flex items-center justify-between mb-2.5">
-                <p className="font-bebas text-cream/60 text-[10px] tracking-widest uppercase">
-                  Pricing
-                </p>
-                <div className="flex items-center gap-1.5 text-xs font-syne">
-                  <img src={cdnUrl("/F.png")} alt="" className="w-3.5 h-3.5 object-contain" />
-                  <span className="text-cream/80 font-bold">{userCoins.toLocaleString()}</span>
-                  <span className="text-cream/40">balance</span>
-                </div>
+            {/* Compact balance + daily counter — prices are on each mode chip */}
+            <div className="flex items-center justify-between mb-4 px-1 text-xs font-syne">
+              <div className="flex items-center gap-1.5">
+                <img src={cdnUrl("/F.png")} alt="" className="w-3.5 h-3.5 object-contain" />
+                <span className="text-cream/80 font-bold">{userCoins.toLocaleString()}</span>
+                <span className="text-cream/40">balance</span>
               </div>
-
-              {isFreeNow ? (
-                <div
-                  className="flex items-center gap-2 px-3 py-2 rounded-lg"
-                  style={{ background: `${NINNY_PURPLE}15`, border: `1px solid ${NINNY_PURPLE}40` }}
-                >
-                  <span className="text-base">&#x1F381;</span>
-                  <span className="font-syne text-cream text-sm">
-                    <span className="font-bold" style={{ color: NINNY_PURPLE }}>1 free</span>{" "}
-                    generation today — any mode
-                  </span>
-                </div>
-              ) : (
-                <div className="grid grid-cols-3 gap-2">
-                  {(["topic", "text", "pdf"] as const).map((st) => {
-                    const cost = fangCosts[st];
-                    const isCurrent = currentSourceType === st;
-                    const labelMap = { topic: "Topic", text: "Text", pdf: "PDF" };
-                    return (
-                      <div
-                        key={st}
-                        className="rounded-lg border px-2 py-1.5 text-center"
-                        style={{
-                          background: isCurrent ? `${NINNY_PURPLE}15` : "rgba(255,255,255,0.03)",
-                          borderColor: isCurrent
-                            ? `${NINNY_PURPLE}50`
-                            : "rgba(255,255,255,0.08)",
-                        }}
-                      >
-                        <p className="font-bebas text-[9px] uppercase tracking-wider text-cream/50 mb-0.5">
-                          {labelMap[st]}
-                        </p>
-                        <div className="flex items-center justify-center gap-1">
-                          <img
-                            src={cdnUrl("/F.png")}
-                            alt=""
-                            className="w-3 h-3 object-contain"
-                          />
-                          <span
-                            className="font-bebas text-sm tracking-wider"
-                            style={{
-                              color: isCurrent ? "#FFD700" : "rgba(238,244,255,0.7)",
-                            }}
-                          >
-                            {cost}
-                          </span>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-
-              <p className="font-syne text-cream/30 text-[10px] mt-2.5 text-center">
+              <span className="text-cream/40">
                 {dailyCapReached
                   ? "Daily cap reached"
-                  : `${dailyRemaining} of ${meta?.dailyLimit ?? NINNY_DAILY_LIMIT} generations left today`}
-              </p>
+                  : isFreeNow
+                  ? "🎁 First generation free today"
+                  : `${dailyRemaining} of ${meta?.dailyLimit ?? NINNY_DAILY_LIMIT} left today`}
+              </span>
             </div>
 
             {error && (
@@ -986,13 +1108,17 @@ function NinnyPageInner() {
               }}
             >
               <img src={cdnUrl("/F.png")} alt="Fangs" className="w-6 h-6 object-contain" />
-              {dailyCapReached
+              {needsDifficulty
+                ? "Pick a Challenge Level First"
+                : needsMode
+                ? "Pick a Study Mode"
+                : dailyCapReached
                 ? "Come Back Tomorrow"
                 : isFreeNow
-                ? "Generate My Study Set (Free)"
+                ? `Generate ${STUDY_MODES.find(m => m.key === selectedMode)?.label ?? ""} (Free)`
                 : !canAfford
-                ? `Need ${currentCost} Fangs`
-                : `Generate · ${currentCost} Fangs`}
+                ? `Need ${selectedMode ? modeCosts[selectedMode] : 0} Fangs`
+                : `Generate ${STUDY_MODES.find(m => m.key === selectedMode)?.label ?? ""} · ${currentCost} Fangs`}
             </button>
 
             {/* Need-fangs hint */}
@@ -1204,49 +1330,131 @@ function NinnyPageInner() {
               Or Pick a Study Mode
             </p>
 
-            {/* Mode grid */}
+            {/* Inline error (e.g. insufficient Fangs) */}
+            {error && (
+              <div
+                className="rounded-xl border px-4 py-3 mb-4 animate-slide-up"
+                style={{
+                  background: "rgba(239,68,68,0.08)",
+                  borderColor: "rgba(239,68,68,0.30)",
+                }}
+              >
+                <p className="text-red-400 text-sm font-syne">{error}</p>
+              </div>
+            )}
+
+            {/* Mode grid — each tile shows unlock state and price */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {STUDY_MODES.map((m) => (
-                <button
-                  key={m.key}
-                  onClick={() => handlePickMode(m.key)}
-                  className="group text-left rounded-2xl border-2 backdrop-blur p-5
-                    transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.99]"
-                  style={{
-                    background: "rgba(255,255,255,0.04)",
-                    borderColor: `${NINNY_PURPLE}25`,
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.borderColor = `${NINNY_PURPLE}60`;
-                    e.currentTarget.style.boxShadow = `0 0 24px ${NINNY_PURPLE}25`;
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.borderColor = `${NINNY_PURPLE}25`;
-                    e.currentTarget.style.boxShadow = "none";
-                  }}
-                >
-                  <div className="flex items-start gap-3">
-                    <div
-                      className="w-11 h-11 rounded-xl flex items-center justify-center text-2xl shrink-0
-                        group-hover:scale-110 transition-transform"
-                      style={{
-                        background: `${NINNY_PURPLE}15`,
-                        border: `1px solid ${NINNY_PURPLE}30`,
-                      }}
-                    >
-                      {m.icon}
+              {STUDY_MODES.map((m) => {
+                const unlocked = material.unlocked_modes?.includes(m.key) ?? false;
+                const cost = (meta?.modeCosts ?? NINNY_MODE_COSTS)[m.key];
+                const canAffordMode = userCoins >= cost;
+                const blocked = !unlocked && !canAffordMode;
+
+                return (
+                  <button
+                    key={m.key}
+                    onClick={() => !blocked && handlePickMode(m.key)}
+                    disabled={blocked}
+                    className="group text-left rounded-2xl border-2 backdrop-blur p-5
+                      transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.99]
+                      disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+                    style={{
+                      background: unlocked
+                        ? `${m.color}10`
+                        : "rgba(255,255,255,0.04)",
+                      borderColor: unlocked ? `${m.color}55` : `${NINNY_PURPLE}25`,
+                      boxShadow: unlocked ? `0 0 16px ${m.color}20` : "none",
+                    }}
+                    onMouseEnter={(e) => {
+                      if (blocked) return;
+                      e.currentTarget.style.borderColor = unlocked
+                        ? `${m.color}90`
+                        : `${NINNY_PURPLE}60`;
+                      e.currentTarget.style.boxShadow = unlocked
+                        ? `0 0 28px ${m.color}40`
+                        : `0 0 24px ${NINNY_PURPLE}25`;
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.borderColor = unlocked
+                        ? `${m.color}55`
+                        : `${NINNY_PURPLE}25`;
+                      e.currentTarget.style.boxShadow = unlocked
+                        ? `0 0 16px ${m.color}20`
+                        : "none";
+                    }}
+                  >
+                    <div className="flex items-start gap-3">
+                      <div
+                        className="w-11 h-11 rounded-xl flex items-center justify-center text-2xl shrink-0
+                          group-hover:scale-110 transition-transform"
+                        style={{
+                          background: unlocked ? `${m.color}20` : `${NINNY_PURPLE}15`,
+                          border: `1px solid ${unlocked ? m.color + "50" : NINNY_PURPLE + "30"}`,
+                        }}
+                      >
+                        {m.icon}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <p className="font-bebas text-cream text-base tracking-wide leading-none">
+                            {m.label}
+                          </p>
+                          {unlocked && (
+                            <span
+                              className="px-1.5 py-0.5 rounded text-[8px] font-bebas font-bold uppercase tracking-wider"
+                              style={{
+                                background: `${m.color}25`,
+                                color: m.color,
+                              }}
+                            >
+                              UNLOCKED
+                            </span>
+                          )}
+                        </div>
+                        <p className="font-syne text-cream/50 text-xs leading-snug mb-1.5">
+                          {m.description}
+                        </p>
+                        {/* Price/status footer */}
+                        <div className="flex items-center gap-1">
+                          {unlocked ? (
+                            <span
+                              className="font-bebas text-[11px] tracking-wider"
+                              style={{ color: m.color }}
+                            >
+                              ▶ TAP TO PLAY
+                            </span>
+                          ) : (
+                            <>
+                              <img src={cdnUrl("/F.png")} alt="" className="w-3 h-3 object-contain" />
+                              <span
+                                className="font-bebas text-[12px] tracking-wider"
+                                style={{
+                                  color: blocked
+                                    ? "rgba(239,68,68,0.80)"
+                                    : "rgba(255,215,0,0.90)",
+                                }}
+                              >
+                                {cost}
+                              </span>
+                              <span
+                                className="ml-auto font-bebas text-[9px] uppercase tracking-wider"
+                                style={{
+                                  color: blocked
+                                    ? "rgba(239,68,68,0.70)"
+                                    : "rgba(238,244,255,0.50)",
+                                }}
+                              >
+                                {blocked ? "Need more Fangs" : "Unlock"}
+                              </span>
+                            </>
+                          )}
+                        </div>
+                      </div>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-bebas text-cream text-base tracking-wide leading-none mb-1">
-                        {m.label}
-                      </p>
-                      <p className="font-syne text-cream/50 text-xs leading-snug">
-                        {m.description}
-                      </p>
-                    </div>
-                  </div>
-                </button>
-              ))}
+                  </button>
+                );
+              })}
             </div>
           </div>
         )}
@@ -1361,7 +1569,7 @@ function NinnyPageInner() {
             </div>
 
             {/* Practice-misses indicator */}
-            {practiceMissesOnly && (
+            {practiceMissesKeys && (
               <div
                 className="rounded-xl border px-4 py-2.5 mb-3 flex items-center gap-2 animate-slide-up"
                 style={{
@@ -1374,18 +1582,18 @@ function NinnyPageInner() {
                   <span className="font-bold" style={{ color: NINNY_PURPLE }}>
                     Practice Mode
                   </span>{" "}
-                  — drilling on questions you&apos;ve missed before
+                  — drilling on the {practiceMissesKeys.size} you just missed
                 </span>
               </div>
             )}
 
             {/* Mode renderer — switch on activeMode */}
             {(() => {
-              const wrongKeys = new Set(wrongAnswerCounts.keys());
+              const isPractice = practiceMissesKeys !== null;
               const filterIfPractice = <T,>(items: T[], getKey: (i: T) => string): T[] => {
-                if (!practiceMissesOnly) return items;
+                if (!practiceMissesKeys) return items;
                 const filtered = items.filter((i) =>
-                  wrongKeys.has(getKey(i).trim().toLowerCase()),
+                  practiceMissesKeys.has(getKey(i).trim().toLowerCase()),
                 );
                 return filtered.length > 0 ? filtered : items;
               };
@@ -1397,7 +1605,7 @@ function NinnyPageInner() {
                       material.generated_content.multipleChoice,
                       (q) => q.question,
                     )}
-                    wrongAnswerCounts={practiceMissesOnly ? undefined : wrongAnswerCounts}
+                    wrongAnswerCounts={isPractice ? undefined : wrongAnswerCounts}
                     onComplete={handleComplete}
                   />
                 );
@@ -1409,7 +1617,7 @@ function NinnyPageInner() {
                       material.generated_content.flashcards,
                       (c) => c.front,
                     )}
-                    wrongAnswerCounts={practiceMissesOnly ? undefined : wrongAnswerCounts}
+                    wrongAnswerCounts={isPractice ? undefined : wrongAnswerCounts}
                     onComplete={handleComplete}
                   />
                 );
@@ -1418,7 +1626,7 @@ function NinnyPageInner() {
                 return (
                   <MatchMode
                     pairs={filterIfPractice(material.generated_content.match, (p) => p.term)}
-                    wrongAnswerCounts={practiceMissesOnly ? undefined : wrongAnswerCounts}
+                    wrongAnswerCounts={isPractice ? undefined : wrongAnswerCounts}
                     onComplete={handleComplete}
                   />
                 );
@@ -1430,7 +1638,7 @@ function NinnyPageInner() {
                       material.generated_content.fillBlank,
                       (q) => q.sentence,
                     )}
-                    wrongAnswerCounts={practiceMissesOnly ? undefined : wrongAnswerCounts}
+                    wrongAnswerCounts={isPractice ? undefined : wrongAnswerCounts}
                     onComplete={handleComplete}
                   />
                 );
@@ -1442,7 +1650,7 @@ function NinnyPageInner() {
                       material.generated_content.trueFalse,
                       (q) => q.statement,
                     )}
-                    wrongAnswerCounts={practiceMissesOnly ? undefined : wrongAnswerCounts}
+                    wrongAnswerCounts={isPractice ? undefined : wrongAnswerCounts}
                     onComplete={handleComplete}
                   />
                 );
@@ -1454,7 +1662,7 @@ function NinnyPageInner() {
                       material.generated_content.ordering,
                       (q) => q.prompt,
                     )}
-                    wrongAnswerCounts={practiceMissesOnly ? undefined : wrongAnswerCounts}
+                    wrongAnswerCounts={isPractice ? undefined : wrongAnswerCounts}
                     onComplete={handleComplete}
                   />
                 );
@@ -1466,7 +1674,7 @@ function NinnyPageInner() {
                       material.generated_content.blitz,
                       (q) => q.question,
                     )}
-                    wrongAnswerCounts={practiceMissesOnly ? undefined : wrongAnswerCounts}
+                    wrongAnswerCounts={isPractice ? undefined : wrongAnswerCounts}
                     onComplete={handleComplete}
                   />
                 );

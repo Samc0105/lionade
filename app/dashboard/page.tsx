@@ -14,7 +14,6 @@ import {
   XP_PER_LEVEL,
 } from "@/lib/mockData";
 import ProtectedRoute from "@/components/ProtectedRoute";
-import BackButton from "@/components/BackButton";
 import { cdnUrl } from "@/lib/cdn";
 import { apiPost } from "@/lib/api-client";
 
@@ -207,7 +206,6 @@ function DashboardContent() {
         </div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 relative z-10">
-          <BackButton />
 
           {/* ═══ 1) Hero Header ═══ */}
           <div className="mb-6 animate-slide-up">

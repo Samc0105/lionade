@@ -17,3 +17,26 @@ out/
 
 # OS
 .DS_Store
+
+# ─── Terraform ─────────────────────────────────────────────
+# Downloaded providers and modules
+**/.terraform/*
+
+# State files — can contain secrets, never commit
+*.tfstate
+*.tfstate.*
+
+# Variable files often hold secrets
+*.tfvars
+*.tfvars.json
+
+# Plan output files
+*.tfplan
+
+# Crash logs
+crash.log
+crash.*.log
+
+# Local CLI config
+.terraformrc
+terraform.rc

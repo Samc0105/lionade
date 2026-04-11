@@ -4,7 +4,7 @@ import { requireAuth } from "@/lib/api-auth";
 import {
   NINNY_DAILY_LIMIT,
   NINNY_FREE_PER_DAY,
-  NINNY_FANG_COSTS,
+  NINNY_MODE_COSTS,
 } from "@/lib/ninny";
 
 export const dynamic = "force-dynamic";
@@ -27,7 +27,7 @@ export async function GET(req: NextRequest) {
     const [materialsRes, countRes, profileRes] = await Promise.all([
       supabaseAdmin
         .from("ninny_materials")
-        .select("id, title, subject, difficulty, generated_content, created_at")
+        .select("id, title, subject, difficulty, generated_content, unlocked_modes, created_at")
         .eq("user_id", userId)
         .order("created_at", { ascending: false })
         .limit(8),
@@ -57,7 +57,7 @@ export async function GET(req: NextRequest) {
       dailyRemaining,
       freeRemaining,
       freePerDay: NINNY_FREE_PER_DAY,
-      fangCosts: NINNY_FANG_COSTS,
+      modeCosts: NINNY_MODE_COSTS,
       userCoins,
       selectedSubjects,
     });

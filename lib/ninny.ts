@@ -70,19 +70,31 @@ export interface NinnyMaterial {
   created_at: string;
 }
 
-// 1 free generation per day, then Fangs per generation by source type.
+// 1 free generation per day, then Fangs per generation.
+// Pricing is now PER MODE — each study mode has its own price tier so users
+// can choose how much to invest based on which mode they want as their entry
+// point. After generation, all 7 modes are unlocked from the same material.
 // 20/day combined hard cap protects against OpenAI rate-limits & runaway cost.
 export const NINNY_FREE_PER_DAY = 1;
 export const NINNY_DAILY_LIMIT = 20;
-export const NINNY_FANG_COSTS: Record<NinnySourceType, number> = {
-  topic: 400,
-  text: 600,
-  pdf: 1000,
+
+export const NINNY_MODE_COSTS: Record<NinnyMode, number> = {
+  flashcards: 200, // simplest, cheapest entry
+  tf: 200,
+  mcq: 300,
+  match: 350,
+  fill: 400,
+  ordering: 500,
+  blitz: 600, // premium fast-paced sprint
 };
 
-export function getNinnyFangCost(sourceType: NinnySourceType): number {
-  return NINNY_FANG_COSTS[sourceType] ?? 400;
+export function getNinnyModeCost(mode: NinnyMode): number {
+  return NINNY_MODE_COSTS[mode] ?? 300;
 }
+
+// Penalty for exiting a session mid-way. Encourages commitment.
+// Capped at the user's actual Fang balance — they never go negative.
+export const NINNY_ABANDON_PENALTY = 50;
 
 // Subject taxonomy must match Lionade's existing 8 categories
 export const NINNY_SUBJECTS = [

@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import ProtectedRoute from "@/components/ProtectedRoute";
-import BackButton from "@/components/BackButton";
 import { useAuth } from "@/lib/auth";
 import { cdnUrl } from "@/lib/cdn";
 
@@ -52,7 +51,6 @@ export default function CompetePage() {
           style={{ background: "radial-gradient(circle, #A855F7 0%, transparent 70%)" }} />
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <BackButton />
 
           {/* ═══ 1. PRIZE POOL BANNER ═══ */}
           <div className="animate-slide-up mb-10" style={{ animationDelay: "0s" }}>
