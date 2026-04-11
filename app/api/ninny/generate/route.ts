@@ -36,27 +36,36 @@ function isShortContent(c: NinnyGeneratedContent): boolean {
 }
 
 async function callOpenAI(prompt: string): Promise<NinnyGeneratedContent | null> {
-  const res = await fetch("https://api.openai.com/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
-    },
-    body: JSON.stringify({
-      model: "gpt-4o-mini",
-      messages: [
-        {
-          role: "system",
-          content:
-            "You are Ninny, an AI study companion that returns ONLY valid JSON matching the requested schema. Never include markdown fences or explanatory text. You MUST generate exactly 10 items in every array — never fewer.",
-        },
-        { role: "user", content: prompt },
-      ],
-      response_format: { type: "json_object" },
-      temperature: 0.7,
-      max_tokens: 8000,
-    }),
-  });
+  // 45s hard timeout — generation can be slow but must not hang the worker.
+  // AbortSignal aborts the fetch and the .catch() returns null.
+  let res: Response;
+  try {
+    res = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      signal: AbortSignal.timeout(45000),
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: "gpt-4o-mini",
+        messages: [
+          {
+            role: "system",
+            content:
+              "You are Ninny, an AI study companion that returns ONLY valid JSON matching the requested schema. Never include markdown fences or explanatory text. You MUST generate exactly 10 items in every array — never fewer.",
+          },
+          { role: "user", content: prompt },
+        ],
+        response_format: { type: "json_object" },
+        temperature: 0.7,
+        max_tokens: 8000,
+      }),
+    });
+  } catch (e) {
+    console.error("[ninny/generate] OpenAI fetch failed/timed out:", e);
+    return null;
+  }
 
   if (!res.ok) {
     const errText = await res.text();

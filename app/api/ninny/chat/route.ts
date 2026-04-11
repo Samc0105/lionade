@@ -125,23 +125,34 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const openaiRes = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
-      },
-      body: JSON.stringify({
-        model: "gpt-4o-mini",
-        messages: [
-          { role: "system", content: systemPrompt },
-          ...historyMessages,
-          { role: "user", content: message },
-        ],
-        temperature: 0.7,
-        max_tokens: 400,
-      }),
-    });
+    // 20s hard timeout — chat replies are short, must not pin the worker.
+    let openaiRes: Response;
+    try {
+      openaiRes = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        signal: AbortSignal.timeout(20000),
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+        },
+        body: JSON.stringify({
+          model: "gpt-4o-mini",
+          messages: [
+            { role: "system", content: systemPrompt },
+            ...historyMessages,
+            { role: "user", content: message },
+          ],
+          temperature: 0.7,
+          max_tokens: 400,
+        }),
+      });
+    } catch (fetchErr) {
+      console.error("[ninny/chat POST] OpenAI fetch failed/timed out:", fetchErr);
+      return NextResponse.json(
+        { error: "Ninny took too long to respond. Try again." },
+        { status: 504 },
+      );
+    }
 
     if (!openaiRes.ok) {
       const errText = await openaiRes.text();

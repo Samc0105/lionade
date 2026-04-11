@@ -95,33 +95,54 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // Atomic deduct + append in two updates (no transactions in Supabase REST,
-  // but the second update is conditional via the constraint the unlock array
-  // already had the previous value)
-  const { error: chargeErr } = await supabaseAdmin
+  // Atomic deduct via optimistic concurrency control: only update if the
+  // coins value still matches what we read. If a concurrent request beat us
+  // to it, the update will affect 0 rows and we know to fail safely without
+  // double-charging.
+  const { data: chargeRow, error: chargeErr } = await supabaseAdmin
     .from("profiles")
     .update({ coins: before - cost })
-    .eq("id", userId);
+    .eq("id", userId)
+    .eq("coins", before)
+    .select("id")
+    .maybeSingle();
 
   if (chargeErr) {
     console.error("[ninny/unlock] charge:", chargeErr.message);
     return NextResponse.json({ error: "Charge failed" }, { status: 500 });
   }
+  if (!chargeRow) {
+    // Either balance changed since we read it (race) or row was deleted.
+    // Don't double-charge — return a 409 so the client can retry.
+    return NextResponse.json(
+      { error: "Balance changed, please try again" },
+      { status: 409 },
+    );
+  }
 
+  // Atomic array append: only update if unlocked_modes is still what we read.
+  // Prevents losing a concurrent unlock for a different mode.
   const newUnlockedModes = [...unlockedModes, mode];
-  const { error: updateErr } = await supabaseAdmin
+  const { data: updateRow, error: updateErr } = await supabaseAdmin
     .from("ninny_materials")
     .update({ unlocked_modes: newUnlockedModes })
-    .eq("id", materialId);
+    .eq("id", materialId)
+    .contains("unlocked_modes", unlockedModes)
+    .select("id")
+    .maybeSingle();
 
-  if (updateErr) {
-    // Refund the charge
+  if (updateErr || !updateRow) {
+    // Refund the charge — the update failed or another mode was unlocked
+    // concurrently. The user should retry; their balance is intact.
     await supabaseAdmin
       .from("profiles")
       .update({ coins: before })
       .eq("id", userId);
-    console.error("[ninny/unlock] update:", updateErr.message);
-    return NextResponse.json({ error: "Failed to unlock mode" }, { status: 500 });
+    if (updateErr) console.error("[ninny/unlock] update:", updateErr.message);
+    return NextResponse.json(
+      { error: "Failed to unlock mode, balance refunded" },
+      { status: 500 },
+    );
   }
 
   // Log the spend

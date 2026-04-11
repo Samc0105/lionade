@@ -245,6 +245,10 @@ function NinnyPageInner() {
   // keys appear in this set. Sourced directly from the just-completed
   // session's wrong answers (not from stale wrongAnswerCounts state).
   const [practiceMissesKeys, setPracticeMissesKeys] = useState<Set<string> | null>(null);
+  // In-flight guard for unlock requests — prevents double-charge from
+  // double-clicks. useRef instead of state so we can read+set synchronously
+  // without waiting for a re-render.
+  const unlockInFlightRef = useRef(false);
   // Pull streak from shared SWR hook for the header chip
   const { stats } = useUserStats(user?.id);
   const [comingSoonToast, setComingSoonToast] = useState<string | null>(null);
@@ -422,12 +426,14 @@ function NinnyPageInner() {
   );
 
   // Refetch wrong answers when entering modePicker so weighting reflects
-  // the latest state (e.g. after just finishing a session). Also clear
-  // any stale error from a previous unlock attempt.
+  // the latest state (e.g. after just finishing a session). Clear stale
+  // counts FIRST so a different material's data can't bleed through during
+  // the fetch window. Also clear any stale unlock-attempt error.
   useEffect(() => {
     if (phase === "modePicker" && material) {
-      refreshWrongAnswers(material.id);
+      setWrongAnswerCounts(new Map());
       setError(null);
+      refreshWrongAnswers(material.id);
     }
   }, [phase, material, refreshWrongAnswers]);
 
@@ -436,6 +442,9 @@ function NinnyPageInner() {
   // price via /api/ninny/unlock and refresh the local material state.
   const handlePickMode = async (mode: NinnyMode) => {
     if (!material || !user?.id) return;
+    // Prevent double-charge from double-clicks: ignore if a previous unlock
+    // is still in-flight.
+    if (unlockInFlightRef.current) return;
 
     const isUnlocked = material.unlocked_modes?.includes(mode) ?? false;
     if (!isUnlocked) {
@@ -450,17 +459,22 @@ function NinnyPageInner() {
       ) {
         return;
       }
-      const res = await apiPost<{ unlockedModes: NinnyMode[] }>("/api/ninny/unlock", {
-        materialId: material.id,
-        mode,
-      });
-      if (!res.ok || !res.data) {
-        setError(res.error ?? "Failed to unlock mode");
-        return;
+      unlockInFlightRef.current = true;
+      try {
+        const res = await apiPost<{ unlockedModes: NinnyMode[] }>("/api/ninny/unlock", {
+          materialId: material.id,
+          mode,
+        });
+        if (!res.ok || !res.data) {
+          setError(res.error ?? "Failed to unlock mode");
+          return;
+        }
+        // Update the local material state with the new unlocked modes
+        setMaterial({ ...material, unlocked_modes: res.data.unlockedModes });
+        refreshMeta();
+      } finally {
+        unlockInFlightRef.current = false;
       }
-      // Update the local material state with the new unlocked modes
-      setMaterial({ ...material, unlocked_modes: res.data.unlockedModes });
-      refreshMeta();
     }
 
     setError(null);
@@ -492,6 +506,9 @@ function NinnyPageInner() {
     const res = await apiDelete(`/api/ninny/materials?id=${id}`);
     if (res.ok) {
       refreshMeta();
+    } else {
+      // Surface the failure so the user doesn't think it worked
+      setError(res.error ?? "Failed to delete material");
     }
   };
 
@@ -576,7 +593,15 @@ function NinnyPageInner() {
     }
 
     if (willPenalize) {
-      await apiPost("/api/ninny/abandon", {});
+      const res = await apiPost<{ penalty: number; balance: number }>(
+        "/api/ninny/abandon",
+        {},
+      );
+      if (!res.ok) {
+        // Surface the error so the user knows the penalty didn't apply
+        // — still let them exit (don't trap them in the quiz).
+        console.warn("[ninny] abandon failed:", res.error);
+      }
       refreshMeta();
     }
 
