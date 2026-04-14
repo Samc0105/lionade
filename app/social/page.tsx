@@ -7,7 +7,7 @@ import { useAuth } from "@/lib/auth";
 import { useUserStats } from "@/lib/hooks";
 import { supabase } from "@/lib/supabase";
 import { cdnUrl } from "@/lib/cdn";
-import { apiGet, apiPost, apiPatch } from "@/lib/api-client";
+import { apiGet, apiPost, apiPatch, apiDelete } from "@/lib/api-client";
 
 // ── Types ────────────────────────────────────────────────────
 
@@ -27,6 +27,15 @@ interface PendingRequest {
   avatar_url: string | null;
   arena_elo: number;
   friendshipId: string;
+}
+
+interface OutgoingRequest {
+  id: string;
+  username: string;
+  avatar_url: string | null;
+  arena_elo: number;
+  friendshipId: string;
+  sentAt: string;
 }
 
 interface Message {
@@ -86,6 +95,7 @@ export default function SocialPage() {
   // Friends
   const [friends, setFriends] = useState<Friend[]>([]);
   const [pendingRequests, setPendingRequests] = useState<PendingRequest[]>([]);
+  const [outgoingRequests, setOutgoingRequests] = useState<OutgoingRequest[]>([]);
   const [selectedFriend, setSelectedFriend] = useState<Friend | null>(null);
   const [addUsername, setAddUsername] = useState("");
   const [addError, setAddError] = useState("");
@@ -154,6 +164,7 @@ export default function SocialPage() {
     if (res.ok && res.data) {
       setFriends(res.data.friends ?? []);
       setPendingRequests(res.data.pendingRequests ?? []);
+      setOutgoingRequests(res.data.outgoingRequests ?? []);
     }
   }, [user?.id]);
 
@@ -324,6 +335,13 @@ export default function SocialPage() {
     await apiPatch("/api/social/friends", { friendshipId, action });
     loadFriends();
   }, [user?.id, loadFriends]);
+
+  // ── Cancel outgoing request ───────────────────────────
+  const cancelRequest = useCallback(async (friendshipId: string) => {
+    if (!user?.id) return;
+    await apiDelete(`/api/social/friends?id=${friendshipId}`);
+    setOutgoingRequests(prev => prev.filter(r => r.friendshipId !== friendshipId));
+  }, [user?.id]);
 
   // ── Merge messages + arena events for timeline ─────────────
   const timeline = useMemo(() => {
@@ -531,6 +549,38 @@ export default function SocialPage() {
                         <button onClick={() => handleRequest(req.friendshipId, "decline")}
                           className="text-cream/30 text-[10px] px-1.5 py-1 rounded hover:text-cream/50 transition">
                           ✕
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Outgoing Pending Requests */}
+            {outgoingRequests.length > 0 && (
+              <div className="px-4 py-3 border-b border-white/[0.06]">
+                <p className="text-cream/40 text-[10px] font-bold uppercase tracking-widest mb-2">
+                  Sent Requests ({outgoingRequests.length})
+                </p>
+                <div className="space-y-2">
+                  {outgoingRequests.map(req => {
+                    const tier = getEloTier(req.arena_elo);
+                    return (
+                      <div key={req.friendshipId} className="flex items-center gap-3 p-2 rounded-lg"
+                        style={{ background: "rgba(255,255,255,0.03)" }}>
+                        <img
+                          src={req.avatar_url ?? `https://api.dicebear.com/7.x/adventurer/svg?seed=${req.username}`}
+                          alt={req.username}
+                          className="w-8 h-8 rounded-full object-cover flex-shrink-0"
+                        />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-cream text-xs font-semibold truncate">{req.username}</p>
+                          <p className="text-[10px] text-cream/20">Pending</p>
+                        </div>
+                        <button onClick={() => cancelRequest(req.friendshipId)}
+                          className="text-red-400 text-[10px] font-bold px-2 py-1 rounded bg-red-400/10 hover:bg-red-400/20 transition">
+                          Cancel
                         </button>
                       </div>
                     );

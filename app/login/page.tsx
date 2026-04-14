@@ -184,6 +184,7 @@ export default function LoginPage() {
   // ── Login submit ──────────────────────────────────────
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (submitting) return; // guard against double-click
     setError("");
     if (!loginEmail.trim()) { setError("Email is required"); return; }
     if (!loginPassword) { setError("Password is required"); return; }
@@ -192,23 +193,10 @@ export default function LoginPage() {
     if (err) {
       setError(err.includes("Invalid") ? "Wrong email or password" : err);
       setSubmitting(false);
-    } else {
-      // Check if onboarding is completed
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("onboarding_completed, username")
-          .eq("id", session.user.id)
-          .maybeSingle();
-        const isOnboarded = profile?.onboarding_completed || (profile?.username && profile.username.trim().length > 0);
-        if (!isOnboarded) {
-          router.replace("/onboarding?step=2");
-          return;
-        }
-      }
-      router.replace("/dashboard");
     }
+    // On success: don't redirect here — the useEffect watching `user`
+    // handles the redirect once auth state settles. This avoids a race
+    // where handleLogin redirects before the session is fully propagated.
   };
 
   // ── Signup step validation ────────────────────────────

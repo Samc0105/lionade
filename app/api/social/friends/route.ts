@@ -72,12 +72,30 @@ export async function GET(req: NextRequest) {
       if (p) pendingProfiles.push({ ...p, friendshipId: req.id, arena_elo: p.arena_elo ?? 1000 });
     }
 
+    // Get outgoing pending requests (sent by this user, not yet accepted)
+    const { data: outgoing } = await supabaseAdmin
+      .from("friendships")
+      .select("id, friend_id, created_at")
+      .eq("user_id", userId)
+      .eq("status", "pending");
+
+    const outgoingProfiles = [];
+    for (const req of outgoing ?? []) {
+      const { data: p } = await supabaseAdmin
+        .from("profiles")
+        .select("id, username, avatar_url, arena_elo")
+        .eq("id", req.friend_id)
+        .single();
+      if (p) outgoingProfiles.push({ ...p, friendshipId: req.id, arena_elo: p.arena_elo ?? 1000, sentAt: req.created_at });
+    }
+
     return NextResponse.json({
       friends: friends.map(f => ({
         ...f,
         unreadCount: unreadMap[f.id] ?? 0,
       })),
       pendingRequests: pendingProfiles,
+      outgoingRequests: outgoingProfiles,
     });
   } catch (e) {
     console.error("[social/friends GET]", e);
@@ -98,16 +116,16 @@ export async function POST(req: NextRequest) {
     }
 
     // Sanitize username — strip ilike wildcards, validate shape
-    const cleanUsername = String(friendUsername).trim().toLowerCase().replace(/[%_]/g, "");
-    if (!/^[a-z0-9_]{3,20}$/.test(cleanUsername)) {
+    const cleanUsername = String(friendUsername).trim().replace(/[%_]/g, "");
+    if (!/^[a-zA-Z0-9_]{3,20}$/.test(cleanUsername)) {
       return NextResponse.json({ error: "Invalid username" }, { status: 400 });
     }
 
-    // Look up friend (use eq, not ilike, to prevent wildcard enumeration)
+    // Case-insensitive lookup (wildcards already stripped above)
     const { data: friend } = await supabaseAdmin
       .from("profiles")
       .select("id, username")
-      .eq("username", cleanUsername)
+      .ilike("username", cleanUsername)
       .single();
 
     if (!friend) return NextResponse.json({ error: "User not found" }, { status: 404 });
@@ -202,6 +220,41 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ success: true, status: newStatus });
   } catch (e) {
     console.error("[social/friends PATCH]", e);
+    return NextResponse.json({ error: "Server error" }, { status: 500 });
+  }
+}
+
+// DELETE — Cancel an outgoing pending friend request
+export async function DELETE(req: NextRequest) {
+  const auth = await requireAuth(req);
+  if (auth instanceof NextResponse) return auth;
+  const userId = auth.userId;
+
+  try {
+    const friendshipId = req.nextUrl.searchParams.get("id");
+    if (!friendshipId) {
+      return NextResponse.json({ error: "Missing id param" }, { status: 400 });
+    }
+
+    // Only the sender can cancel their own pending request
+    const { data: friendship } = await supabaseAdmin
+      .from("friendships")
+      .select("*")
+      .eq("id", friendshipId)
+      .eq("user_id", userId)
+      .eq("status", "pending")
+      .single();
+
+    if (!friendship) return NextResponse.json({ error: "Request not found" }, { status: 404 });
+
+    await supabaseAdmin
+      .from("friendships")
+      .delete()
+      .eq("id", friendshipId);
+
+    return NextResponse.json({ success: true });
+  } catch (e) {
+    console.error("[social/friends DELETE]", e);
     return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
 }
