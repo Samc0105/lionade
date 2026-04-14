@@ -34,6 +34,27 @@ export const metadata: Metadata = {
   description:
     "The Gen Z study rewards platform. Earn coins for studying, battle friends in duels, climb the leaderboard.",
   keywords: ["study", "rewards", "quiz", "education", "gamification", "coins"],
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "32x32" },
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: "/apple-touch-icon.png",
+  },
+  openGraph: {
+    title: "Lionade — Study Like It's Your Job",
+    description: "The Gen Z study rewards platform. Earn coins for studying, battle friends in duels, climb the leaderboard.",
+    images: [{ url: "/logo-icon.png", width: 1536, height: 1024, alt: "Lionade" }],
+    siteName: "Lionade",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Lionade — Study Like It's Your Job",
+    description: "The Gen Z study rewards platform. Earn coins for studying, battle friends in duels, climb the leaderboard.",
+    images: ["/logo-icon.png"],
+  },
 };
 
 export default function RootLayout({
