@@ -115,6 +115,7 @@ export default function GamesPage() {
   const [roardleWord, setRoardleWord] = useState("");
   const [roardleGuesses, setRoardleGuesses] = useState<string[]>([]);
   const [roardleInput, setRoardleInput] = useState("");
+  const [roardleError, setRoardleError] = useState("");
   const [roardleOver, setRoardleOver] = useState(false);
   const [roardleWon, setRoardleWon] = useState(false);
 
@@ -233,6 +234,17 @@ export default function GamesPage() {
     const guess = roardleInput.toUpperCase().trim();
     if (guess.length !== wordLength || roardleOver) return;
 
+    // Validate against the word bank — only real study words are accepted
+    const validWords = new Set(
+      (WORD_BANK[wordLength] ?? []).map((w) => w.toUpperCase()),
+    );
+    if (!validWords.has(guess)) {
+      setRoardleError("Not in word list");
+      setTimeout(() => setRoardleError(""), 1500);
+      return;
+    }
+
+    setRoardleError("");
     const newGuesses = [...roardleGuesses, guess];
     setRoardleGuesses(newGuesses);
     setRoardleInput("");
@@ -420,7 +432,12 @@ export default function GamesPage() {
           <div className="max-w-lg mx-auto px-4 py-6">
             <button onClick={backToMenu} className="text-cream/40 text-sm mb-4 hover:text-cream/60 transition">← Back</button>
             <h2 className="font-bebas text-4xl text-cream tracking-wider text-center mb-1">ROARDLE</h2>
-            <p className="text-cream/30 text-xs text-center mb-6">{wordLength} letters · {6 - roardleGuesses.length} guesses left</p>
+            <p className="text-cream/30 text-xs text-center mb-2">{wordLength} letters · {6 - roardleGuesses.length} guesses left</p>
+            {roardleError && (
+              <p className="text-red-400 text-xs text-center mb-2 animate-slide-up font-syne font-semibold">
+                {roardleError}
+              </p>
+            )}
 
             {/* Grid */}
             <div className="space-y-2 mb-6">

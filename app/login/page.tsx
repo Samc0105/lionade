@@ -167,7 +167,19 @@ export default function LoginPage() {
       <div className="w-10 h-10 rounded-full border-2 border-electric border-t-transparent animate-spin" />
     </div>
   );
-  if (user && !showVerifiedBanner) return null;
+  // Show a spinner while redirecting after login — NEVER return null here.
+  // Returning null destroys the form; if the auth state briefly flickers,
+  // the component remounts from scratch, resetting email/password fields.
+  if (user && !showVerifiedBanner) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 rounded-full border-2 border-electric border-t-transparent animate-spin" />
+          <p className="font-bebas text-cream/60 text-lg tracking-widest">Signing in...</p>
+        </div>
+      </div>
+    );
+  }
 
   // ── Login submit ──────────────────────────────────────
   const handleLogin = async (e: React.FormEvent) => {
