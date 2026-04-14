@@ -272,6 +272,52 @@ export async function POST(req: NextRequest) {
       .eq("id", userId);
     if (streakErr) console.warn("[save-quiz-results] Step 5 streak WARN:", streakErr.message);
 
+    // 5b. Streak milestone rewards — award bonus Fangs at 3, 7, 14, 30 day milestones
+    let streakMilestone: { days: number; bonus: number } | null = null;
+    const STREAK_MILESTONES: Record<number, number> = { 3: 50, 7: 150, 14: 500, 30: 2000 };
+    if (newStreak in STREAK_MILESTONES) {
+      // Check we haven't already awarded this milestone (prevents duplicate on replay)
+      const { count: alreadyAwarded } = await supabaseAdmin
+        .from("coin_transactions")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", userId)
+        .eq("type", "streak_milestone")
+        .like("description", `%${newStreak}-day%`);
+
+      if (!alreadyAwarded || alreadyAwarded === 0) {
+        const milestoneBonus = STREAK_MILESTONES[newStreak];
+        // Award the bonus
+        const { data: milestoneProfile } = await supabaseAdmin
+          .from("profiles")
+          .select("coins")
+          .eq("id", userId)
+          .single();
+        if (milestoneProfile) {
+          await supabaseAdmin
+            .from("profiles")
+            .update({ coins: (milestoneProfile.coins ?? 0) + milestoneBonus })
+            .eq("id", userId);
+        }
+        await supabaseAdmin.from("coin_transactions").insert({
+          user_id: userId,
+          amount: milestoneBonus,
+          type: "streak_milestone",
+          description: `${newStreak}-day streak milestone!`,
+        });
+        // Notify
+        try {
+          await supabaseAdmin.from("notifications").insert({
+            user_id: userId,
+            type: "streak_milestone",
+            title: `${newStreak}-Day Streak!`,
+            message: `You earned ${milestoneBonus} bonus Fangs for your ${newStreak}-day streak!`,
+            action_url: "/dashboard",
+          });
+        } catch { /* notifications table might not exist */ }
+        streakMilestone = { days: newStreak, bonus: milestoneBonus };
+      }
+    }
+
     // 6. Achievement checking
     try {
       const [{ count: quizCount }, { data: updatedProfile }] = await Promise.all([
@@ -472,6 +518,7 @@ export async function POST(req: NextRequest) {
       sessionId: session.id,
       profile: finalProfile,
       bonusFangs,
+      streakMilestone,
     });
   } catch (err) {
     console.error("[save-quiz-results] UNEXPECTED:", err);

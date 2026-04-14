@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth";
 import { getLeaderboard } from "@/lib/db";
 import { formatCoins } from "@/lib/mockData";
@@ -21,6 +22,7 @@ interface LbEntry {
 }
 
 export default function LeaderboardPage() {
+  const router = useRouter();
   const { user } = useAuth();
   const [filter, setFilter] = useState<Filter>("weekly");
   const [entries, setEntries] = useState<LbEntry[]>([]);
@@ -154,13 +156,29 @@ export default function LeaderboardPage() {
                         </div>
                         <p className="text-xs text-cream/40">Lvl {entry.level} · 🔥 {entry.streak}</p>
                       </div>
-                      <div className="text-right flex-shrink-0">
+                      <div className="text-right flex-shrink-0 flex items-center gap-2">
                         <div className="flex items-center gap-1.5">
                           <img src={cdnUrl("/F.png")} alt="Fangs" className="w-4 h-4 object-contain" />
                           <span className={`font-bebas text-xl ${entry.rank === 1 ? "text-gold glow-gold" : "text-cream"}`}>
                             {formatCoins(entry.coins_this_week)}
                           </span>
                         </div>
+                        {/* Challenge button — not on own row */}
+                        {!isMe && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              router.push(`/arena?challenge=${encodeURIComponent(entry.username)}`);
+                            }}
+                            className="w-8 h-8 rounded-lg flex items-center justify-center
+                              bg-white/5 hover:bg-electric/15 border border-white/10 hover:border-electric/40
+                              text-cream/40 hover:text-electric transition-all active:scale-95"
+                            title={`Challenge ${entry.username}`}
+                            aria-label={`Challenge ${entry.username} to a duel`}
+                          >
+                            <span className="text-sm">&#x2694;</span>
+                          </button>
+                        )}
                       </div>
                     </div>
                   );

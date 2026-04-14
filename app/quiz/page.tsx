@@ -238,6 +238,7 @@ export default function QuizPage() {
   const advanceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [showMistakes, setShowMistakes] = useState(false);
   const [bonusFangs, setBonusFangs] = useState(0);
+  const [streakMilestone, setStreakMilestone] = useState<{ days: number; bonus: number } | null>(null);
 
   // Boosters
   interface ActiveBooster { id: string; item_id: string; booster_effect: string; booster_value: number; uses_remaining: number }
@@ -345,6 +346,7 @@ export default function QuizPage() {
       await refreshUser();
       if (user?.id) mutateUserStats(user.id);
       setBonusFangs(res.data.bonusFangs ?? 0);
+      setStreakMilestone((res.data as { streakMilestone?: { days: number; bonus: number } | null }).streakMilestone ?? null);
     }
 
     setPhase("results");
@@ -856,6 +858,7 @@ export default function QuizPage() {
       setShowMistakes={setShowMistakes}
       router={router}
       bonusFangs={bonusFangs}
+      streakMilestone={streakMilestone}
     />;
   }
 
@@ -870,6 +873,7 @@ export default function QuizPage() {
 function ResultsScreen({
   answers, totalCoins, totalXp, accuracy, correctCount, wrongCount,
   subject, blitzMode, showMistakes, setShowMistakes, router, bonusFangs,
+  streakMilestone,
 }: {
   answers: AnswerRecord[];
   totalCoins: number;
@@ -883,6 +887,7 @@ function ResultsScreen({
   setShowMistakes: (v: boolean) => void;
   router: ReturnType<typeof useRouter>;
   bonusFangs: number;
+  streakMilestone: { days: number; bonus: number } | null;
 }) {
   const getRank = (acc: number) => {
     if (acc === 100) return { label: "PERFECT", icon: "\u{1F48E}", color: "#FFD700" };
@@ -938,10 +943,36 @@ function ResultsScreen({
           {blitzMode && <span className="text-[#EAB308] ml-2">&#x26A1; Blitz</span>}
         </p>
 
+        {/* Streak milestone banner */}
+        {streakMilestone && (
+          <div
+            className="flex items-center justify-center gap-3 rounded-2xl px-5 py-4 mb-4 animate-slide-up"
+            style={{
+              animationDelay: "0.08s",
+              background: "linear-gradient(135deg, rgba(249,115,22,0.15) 0%, rgba(255,215,0,0.10) 100%)",
+              border: "1px solid rgba(249,115,22,0.45)",
+              boxShadow: "0 0 40px rgba(249,115,22,0.20)",
+            }}
+          >
+            <span className="text-3xl">&#x1F525;</span>
+            <div className="text-left">
+              <p className="font-bebas text-xl text-[#F97316] tracking-wider leading-none">
+                {streakMilestone.days}-DAY STREAK!
+              </p>
+              <p className="text-cream/50 text-xs mt-0.5">
+                Milestone bonus added to your wallet
+              </p>
+            </div>
+            <span className="font-bebas text-2xl text-[#FFD700] ml-auto">
+              +{streakMilestone.bonus} &#x1FA99;
+            </span>
+          </div>
+        )}
+
         {/* Consecutive quiz bonus banner */}
         {bonusFangs > 0 && (
           <div
-            className="flex items-center justify-center gap-3 rounded-2xl px-5 py-4 mb-6 animate-slide-up"
+            className="flex items-center justify-center gap-3 rounded-2xl px-5 py-4 mb-4 animate-slide-up"
             style={{
               animationDelay: "0.10s",
               background: "linear-gradient(135deg, rgba(255,215,0,0.12) 0%, rgba(255,165,0,0.08) 100%)",
@@ -1068,6 +1099,37 @@ function ResultsScreen({
             Dashboard
           </button>
         </div>
+
+        {/* Share Results button — Feature 2 */}
+        {correctCount > 0 && (
+          <div className="mt-3 animate-slide-up" style={{ animationDelay: "0.25s" }}>
+            <button
+              onClick={async () => {
+                const text = [
+                  `${rank.icon} ${rank.label} — ${correctCount}/${correctCount + wrongCount} on ${subject ?? "a quiz"}`,
+                  `${accuracy}% accuracy | ${totalCoins} Fangs earned`,
+                  `Can you beat me? getlionade.com/demo`,
+                ].join("\n");
+                try {
+                  if (navigator.share) {
+                    await navigator.share({ text });
+                  } else {
+                    await navigator.clipboard.writeText(text);
+                    alert("Copied to clipboard!");
+                  }
+                } catch { /* user cancelled share sheet */ }
+              }}
+              className="w-full py-3.5 rounded-xl font-bebas tracking-wider text-sm transition-all duration-200 hover:brightness-125 active:scale-[0.98]"
+              style={{
+                background: "linear-gradient(135deg, rgba(74,144,217,0.15) 0%, rgba(74,144,217,0.08) 100%)",
+                border: "1px solid rgba(74,144,217,0.35)",
+                color: "#4A90D9",
+              }}
+            >
+              &#x1F4E4; Share Results
+            </button>
+          </div>
+        )}
 
         {/* Review Mistakes */}
         {showMistakes && mistakes.length > 0 && (

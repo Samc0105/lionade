@@ -89,6 +89,7 @@ function DashboardContent() {
   const [betStake, setBetStake] = useState(10);
   const [betTarget, setBetTarget] = useState(8);
   const [placingBet, setPlacingBet] = useState(false);
+  const [loginBonus, setLoginBonus] = useState<{ amount: number; consecutiveDays: number } | null>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -124,6 +125,19 @@ function DashboardContent() {
     const t = setTimeout(() => setXpMounted(true), 200);
     return () => clearTimeout(t);
   }, []);
+
+  // Daily login bonus — fires once on first dashboard load per day
+  useEffect(() => {
+    if (!user?.id) return;
+    apiPost<{ awarded: boolean; amount: number; consecutiveDays: number }>("/api/login-bonus", {})
+      .then((res) => {
+        if (res.ok && res.data?.awarded) {
+          setLoginBonus({ amount: res.data.amount, consecutiveDays: res.data.consecutiveDays });
+          // Auto-dismiss after 5 seconds
+          setTimeout(() => setLoginBonus(null), 5000);
+        }
+      });
+  }, [user?.id]);
 
   if (!user) return null; // ProtectedRoute handles redirect
 
@@ -190,6 +204,30 @@ function DashboardContent() {
           animation: slide-up 0.5s ease both;
         }
       `}</style>
+
+      {/* Daily Login Bonus Toast — auto-dismisses after 5s */}
+      {loginBonus && (
+        <div
+          className="fixed top-20 left-1/2 -translate-x-1/2 z-50 animate-slide-up rounded-2xl px-5 py-3.5 border backdrop-blur flex items-center gap-3"
+          style={{
+            background: "linear-gradient(135deg, rgba(255,215,0,0.15) 0%, rgba(255,215,0,0.08) 100%)",
+            borderColor: "rgba(255,215,0,0.45)",
+            boxShadow: "0 0 30px rgba(255,215,0,0.20), 0 8px 32px rgba(0,0,0,0.3)",
+          }}
+        >
+          <span className="text-2xl">&#x2600;&#xFE0F;</span>
+          <div>
+            <p className="font-bebas text-gold text-base tracking-wider leading-none">
+              Daily Login Bonus!
+            </p>
+            <p className="text-cream/60 text-xs font-syne mt-0.5">
+              Day {loginBonus.consecutiveDays} streak — +{loginBonus.amount} Fangs
+            </p>
+          </div>
+          <img src={cdnUrl("/F.png")} alt="Fangs" className="w-6 h-6 object-contain ml-auto" />
+          <span className="font-bebas text-gold text-xl tracking-wider">+{loginBonus.amount}</span>
+        </div>
+      )}
 
       <div className="min-h-screen pt-16 pb-20 md:pb-8 relative overflow-hidden">
         {/* Background floating shapes */}
