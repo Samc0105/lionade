@@ -5,11 +5,14 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import { useAuth } from "@/lib/auth";
 import { useUserStats, mutateUserStats } from "@/lib/hooks";
 import { cdnUrl } from "@/lib/cdn";
-import { apiPost } from "@/lib/api-client";
+import { apiPost, apiGet } from "@/lib/api-client";
+import type { MCQQuestion } from "@/lib/ninny";
+import BlitzMode from "@/components/Ninny/BlitzMode";
+import type { NinnyWrongAnswer } from "@/components/Ninny/MultipleChoiceMode";
 
 // ── Types ────────────────────────────────────────────────────
 
-type GameMode = "menu" | "roardle" | "blitz" | "flashcards" | "timeline";
+type GameMode = "menu" | "roardle" | "blitz-setup" | "blitz" | "blitz-results" | "flashcards" | "timeline";
 type TabMode = "quickplay" | "library";
 
 interface PdfContent {
@@ -28,27 +31,18 @@ const WORD_BANK: Record<number, string[]> = {
   6: ["carbon","oxygen","neuron","enzyme","plasma","genome","photon","proton","matter","energy","fusion","fision","motion","vector","tensor","quasar","galaxy","system","planet","nature","fossil","embryo","tissue","muscle","immune","mitral","cortex","fungal","biotic","tundra","desert","island","crater","mantle","ionize","charge","radius","prisms"],
 };
 
-const BLITZ_QUESTIONS = [
-  { q: "What organelle is the powerhouse of the cell?", a: "Mitochondria", opts: ["Mitochondria", "Nucleus", "Ribosome", "Golgi body"] },
-  { q: "What is the chemical symbol for gold?", a: "Au", opts: ["Au", "Ag", "Go", "Gd"] },
-  { q: "What planet is closest to the sun?", a: "Mercury", opts: ["Mercury", "Venus", "Mars", "Earth"] },
-  { q: "What is the formula for water?", a: "H2O", opts: ["H2O", "CO2", "NaCl", "O2"] },
-  { q: "How many chromosomes do humans have?", a: "46", opts: ["46", "23", "48", "44"] },
-  { q: "What gas do plants absorb?", a: "Carbon dioxide", opts: ["Carbon dioxide", "Oxygen", "Nitrogen", "Hydrogen"] },
-  { q: "What is Newton's first law about?", a: "Inertia", opts: ["Inertia", "Gravity", "Friction", "Momentum"] },
-  { q: "What is the pH of pure water?", a: "7", opts: ["7", "0", "14", "1"] },
-  { q: "What bone protects the brain?", a: "Skull", opts: ["Skull", "Spine", "Ribs", "Pelvis"] },
-  { q: "What type of rock is formed from lava?", a: "Igneous", opts: ["Igneous", "Sedimentary", "Metamorphic", "Mineral"] },
-  { q: "What is the largest organ in the human body?", a: "Skin", opts: ["Skin", "Liver", "Brain", "Heart"] },
-  { q: "What particle has a positive charge?", a: "Proton", opts: ["Proton", "Electron", "Neutron", "Photon"] },
-  { q: "What layer of Earth is liquid?", a: "Outer core", opts: ["Outer core", "Inner core", "Mantle", "Crust"] },
-  { q: "What is the speed of light in m/s?", a: "3×10⁸", opts: ["3×10⁸", "3×10⁶", "3×10¹⁰", "3×10⁴"] },
-  { q: "DNA stands for?", a: "Deoxyribonucleic acid", opts: ["Deoxyribonucleic acid", "Dinitrogen acid", "Dioxin nucleic acid", "Deoxynuclear acid"] },
-  { q: "What is the smallest unit of matter?", a: "Atom", opts: ["Atom", "Molecule", "Cell", "Proton"] },
-  { q: "What vitamin does sunlight give?", a: "Vitamin D", opts: ["Vitamin D", "Vitamin C", "Vitamin A", "Vitamin B"] },
-  { q: "What is the hardest natural substance?", a: "Diamond", opts: ["Diamond", "Quartz", "Topaz", "Ruby"] },
-  { q: "What is the process of cell division?", a: "Mitosis", opts: ["Mitosis", "Meiosis", "Osmosis", "Diffusion"] },
-  { q: "How many elements in the periodic table?", a: "118", opts: ["118", "108", "92", "126"] },
+const BLITZ_SUBJECTS = [
+  { key: "random", label: "Random Mix", icon: "🎲", color: "#FF6B00" },
+  { key: "science", label: "Science", icon: "🔬", color: "#00BFFF" },
+  { key: "math", label: "Math", icon: "🔢", color: "#9B59B6" },
+  { key: "history", label: "History", icon: "📜", color: "#E67E22" },
+  { key: "social", label: "Social Studies", icon: "🌍", color: "#00C851" },
+];
+
+const BLITZ_DIFFICULTIES = [
+  { key: "easy", label: "Easy", color: "#22C55E" },
+  { key: "medium", label: "Medium", color: "#FBBF24" },
+  { key: "hard", label: "Hard", color: "#EF4444" },
 ];
 
 const FLASHCARD_TERMS = [
@@ -120,13 +114,12 @@ export default function GamesPage() {
   const [roardleWon, setRoardleWon] = useState(false);
 
   // Blitz state
-  const [blitzTime, setBlitzTime] = useState(60);
-  const [blitzIdx, setBlitzIdx] = useState(0);
-  const [blitzCorrect, setBlitzCorrect] = useState(0);
-  const [blitzStreak, setBlitzStreak] = useState(0);
-  const [blitzOver, setBlitzOver] = useState(false);
-  const [blitzQuestions, setBlitzQuestions] = useState<typeof BLITZ_QUESTIONS>([]);
-  const blitzTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [blitzSubject, setBlitzSubject] = useState("random");
+  const [blitzDifficulty, setBlitzDifficulty] = useState("medium");
+  const [blitzQuestions, setBlitzQuestions] = useState<MCQQuestion[]>([]);
+  const [blitzLoading, setBlitzLoading] = useState(false);
+  const [blitzResult, setBlitzResult] = useState<{ score: number; total: number; wrongAnswers: NinnyWrongAnswer[] } | null>(null);
+  const [blitzBest, setBlitzBest] = useState<number>(0);
 
   // Flashcard state
   const [fcIdx, setFcIdx] = useState(0);
@@ -143,7 +136,7 @@ export default function GamesPage() {
   const [tlScore, setTlScore] = useState(0);
   const [dragIdx, setDragIdx] = useState<number | null>(null);
 
-  // Load PDF from localStorage on mount
+  // Load PDF + blitz best from localStorage on mount
   useEffect(() => {
     try {
       const saved = localStorage.getItem("lionade_pdf_content");
@@ -152,6 +145,8 @@ export default function GamesPage() {
         setPdfContent(JSON.parse(saved));
         setPdfName(name);
       }
+      const best = localStorage.getItem("lionade_blitz_best");
+      if (best) setBlitzBest(parseInt(best));
     } catch { /* ignore */ }
   }, []);
 
@@ -260,61 +255,50 @@ export default function GamesPage() {
     }
   }, [roardleInput, wordLength, roardleOver, roardleGuesses, roardleWord, awardFangs]);
 
-  // ── Start Blitz ────────────────────────────────────────────
-  const startBlitz = useCallback(() => {
-    const source = tab === "library" && pdfContent?.concepts?.length
-      ? pdfContent.concepts.map(c => ({ q: c.question, a: c.answer, opts: c.options }))
-      : [...BLITZ_QUESTIONS];
-
-    const shuffled = source.sort(() => Math.random() - 0.5);
-    setBlitzQuestions(shuffled);
-    setBlitzIdx(0);
-    setBlitzCorrect(0);
-    setBlitzStreak(0);
-    setBlitzTime(60);
-    setBlitzOver(false);
+  // ── Blitz: open setup ───────────────────────────────────────
+  const openBlitzSetup = useCallback(() => {
     setFangsEarned(null);
-    setGame("blitz");
-    incrementDailyPlays("blitz");
-
-    blitzTimerRef.current = setInterval(() => {
-      setBlitzTime(prev => {
-        if (prev <= 1) {
-          if (blitzTimerRef.current) clearInterval(blitzTimerRef.current);
-          setBlitzOver(true);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-  }, [tab, pdfContent]);
-
-  const answerBlitz = useCallback((answer: string) => {
-    if (blitzOver || !blitzQuestions[blitzIdx]) return;
-    const correct = answer === blitzQuestions[blitzIdx].a;
-    if (correct) {
-      setBlitzCorrect(c => c + 1);
-      setBlitzStreak(s => s + 1);
-    } else {
-      setBlitzStreak(0);
-    }
-    if (blitzIdx + 1 < blitzQuestions.length) {
-      setBlitzIdx(i => i + 1);
-    } else {
-      if (blitzTimerRef.current) clearInterval(blitzTimerRef.current);
-      setBlitzOver(true);
-    }
-  }, [blitzOver, blitzQuestions, blitzIdx]);
-
-  useEffect(() => {
-    if (blitzOver && blitzCorrect > 0) {
-      awardFangs(blitzCorrect * 2, "blitz", `Blitz Sprint — ${blitzCorrect} correct`);
-    }
-  }, [blitzOver, blitzCorrect, awardFangs]);
-
-  useEffect(() => {
-    return () => { if (blitzTimerRef.current) clearInterval(blitzTimerRef.current); };
+    setBlitzResult(null);
+    setGame("blitz-setup");
   }, []);
+
+  // ── Blitz: start game (load questions from API) ────────────
+  const launchBlitz = useCallback(async () => {
+    setBlitzLoading(true);
+    const subjectParam = blitzSubject === "random" ? "" : `subject=${blitzSubject}`;
+    const diffParam = `difficulty=${blitzDifficulty}`;
+    const params = [subjectParam, diffParam].filter(Boolean).join("&");
+
+    const res = await apiGet<{ questions: MCQQuestion[] }>(`/api/games/blitz/questions?${params}`);
+    if (res.ok && res.data?.questions?.length) {
+      setBlitzQuestions(res.data.questions);
+      setBlitzResult(null);
+      setFangsEarned(null);
+      setGame("blitz");
+      incrementDailyPlays("blitz");
+    } else {
+      setBlitzQuestions([]);
+    }
+    setBlitzLoading(false);
+  }, [blitzSubject, blitzDifficulty]);
+
+  // ── Blitz: handle completion from BlitzMode component ──────
+  const handleBlitzComplete = useCallback(async (result: { score: number; total: number; wrongAnswers: NinnyWrongAnswer[] }) => {
+    setBlitzResult(result);
+    setGame("blitz-results");
+
+    // Award 2x Fangs per correct answer
+    const earned = result.score * 2;
+    if (earned > 0) {
+      awardFangs(earned, "blitz", `Blitz Sprint — ${result.score} correct`);
+    }
+
+    // Update personal best
+    if (result.score > blitzBest) {
+      setBlitzBest(result.score);
+      localStorage.setItem("lionade_blitz_best", String(result.score));
+    }
+  }, [awardFangs, blitzBest]);
 
   // ── Start Flashcards ───────────────────────────────────────
   const startFlashcards = useCallback(() => {
@@ -387,7 +371,6 @@ export default function GamesPage() {
   const backToMenu = useCallback(() => {
     setGame("menu");
     setFangsEarned(null);
-    if (blitzTimerRef.current) clearInterval(blitzTimerRef.current);
   }, []);
 
   // ── Letter feedback for Roardle ────────────────────────────
@@ -524,66 +507,200 @@ export default function GamesPage() {
   }
 
   // ── BLITZ SPRINT ────────────────────────────────────────
-  if (game === "blitz") {
-    const currentQ = blitzQuestions[blitzIdx];
+  // ── BLITZ SETUP (subject + difficulty picker) ───────────
+  if (game === "blitz-setup") {
+    const plays = getDailyPlays("blitz");
+    const remaining = DAILY_LIMITS.blitz - plays;
+    const canPlay = remaining > 0;
+
     return (
       <ProtectedRoute>
         <div className="min-h-screen pt-16 pb-8">
           <div className="max-w-lg mx-auto px-4 py-6">
-            <button onClick={backToMenu} className="text-cream/40 text-sm mb-4 hover:text-cream/60 transition">← Back</button>
+            <button onClick={backToMenu} className="text-cream/40 text-sm mb-6 hover:text-cream/60 transition">← Back</button>
 
-            {!blitzOver ? (
-              <>
-                {/* Timer + Score */}
-                <div className="flex items-center justify-between mb-6">
-                  <div className="font-bebas text-4xl" style={{ color: blitzTime > 20 ? "#4A90D9" : blitzTime > 10 ? "#EAB308" : "#EF4444" }}>
-                    {blitzTime}s
-                  </div>
-                  <div className="text-right">
-                    <p className="font-bebas text-2xl text-cream">{blitzCorrect}</p>
-                    <p className="text-cream/30 text-[10px] uppercase tracking-wider">correct</p>
-                  </div>
+            <div className="text-center mb-8 animate-slide-up">
+              <span className="text-5xl mb-3 block">⚡</span>
+              <h1 className="font-bebas text-5xl text-cream tracking-wider mb-2">BLITZ SPRINT</h1>
+              <p className="text-cream/40 text-sm">60 seconds. Unlimited questions. 2x Fangs.</p>
+              {blitzBest > 0 && (
+                <p className="text-gold/60 text-xs mt-2 font-bebas tracking-wider">Personal Best: {blitzBest} correct</p>
+              )}
+            </div>
+
+            {/* Subject picker */}
+            <div className="mb-6 animate-slide-up" style={{ animationDelay: "0.1s" }}>
+              <p className="font-bebas text-sm text-cream/40 tracking-widest uppercase mb-3">Subject</p>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                {BLITZ_SUBJECTS.map(s => (
+                  <button key={s.key} onClick={() => setBlitzSubject(s.key)}
+                    className="px-4 py-3 rounded-xl text-sm font-semibold transition-all active:scale-95"
+                    style={blitzSubject === s.key ? {
+                      background: `${s.color}20`,
+                      border: `2px solid ${s.color}`,
+                      color: s.color,
+                      boxShadow: `0 0 20px ${s.color}15`,
+                    } : {
+                      background: "rgba(255,255,255,0.03)",
+                      border: "2px solid rgba(255,255,255,0.08)",
+                      color: "rgba(238,244,255,0.4)",
+                    }}>
+                    <span className="mr-1.5">{s.icon}</span> {s.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Difficulty picker */}
+            <div className="mb-8 animate-slide-up" style={{ animationDelay: "0.15s" }}>
+              <p className="font-bebas text-sm text-cream/40 tracking-widest uppercase mb-3">Difficulty</p>
+              <div className="flex gap-2">
+                {BLITZ_DIFFICULTIES.map(d => (
+                  <button key={d.key} onClick={() => setBlitzDifficulty(d.key)}
+                    className="flex-1 py-3 rounded-xl text-sm font-bold transition-all active:scale-95"
+                    style={blitzDifficulty === d.key ? {
+                      background: `${d.color}20`,
+                      border: `2px solid ${d.color}`,
+                      color: d.color,
+                    } : {
+                      background: "rgba(255,255,255,0.03)",
+                      border: "2px solid rgba(255,255,255,0.08)",
+                      color: "rgba(238,244,255,0.4)",
+                    }}>
+                    {d.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Start button */}
+            <div className="text-center animate-slide-up" style={{ animationDelay: "0.2s" }}>
+              <button
+                onClick={canPlay ? launchBlitz : undefined}
+                disabled={!canPlay || blitzLoading}
+                className="font-bebas text-2xl tracking-wider px-12 py-4 rounded-2xl transition-all active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed"
+                style={{
+                  background: "linear-gradient(135deg, #FF6B00 0%, #FF8C00 100%)",
+                  color: "#fff",
+                  boxShadow: canPlay ? "0 8px 30px rgba(255,107,0,0.3)" : undefined,
+                }}>
+                {blitzLoading ? (
+                  <span className="flex items-center gap-3">
+                    <div className="w-5 h-5 rounded-full border-2 border-white border-t-transparent animate-spin" />
+                    Loading...
+                  </span>
+                ) : "START BLITZ"}
+              </button>
+              {!canPlay && <p className="text-red-400/60 text-xs mt-3">No plays left today (resets at midnight)</p>}
+              {canPlay && <p className="text-cream/20 text-xs mt-3">{remaining} play{remaining !== 1 ? "s" : ""} left today</p>}
+            </div>
+          </div>
+        </div>
+      </ProtectedRoute>
+    );
+  }
+
+  // ── BLITZ GAME (BlitzMode component) ───────────────────
+  if (game === "blitz") {
+    return (
+      <ProtectedRoute>
+        <div className="min-h-screen pt-16 pb-8">
+          <div className="max-w-2xl mx-auto px-4 py-6">
+            <BlitzMode
+              questions={blitzQuestions}
+              onComplete={handleBlitzComplete}
+            />
+          </div>
+        </div>
+      </ProtectedRoute>
+    );
+  }
+
+  // ── BLITZ RESULTS ──────────────────────────────────────
+  if (game === "blitz-results" && blitzResult) {
+    const accuracy = blitzResult.total > 0 ? Math.round((blitzResult.score / blitzResult.total) * 100) : 0;
+    const isNewBest = blitzResult.score >= blitzBest && blitzResult.score > 0;
+
+    return (
+      <ProtectedRoute>
+        <div className="min-h-screen pt-16 pb-8">
+          <div className="max-w-lg mx-auto px-4 py-6">
+
+            {/* Results header */}
+            <div className="text-center mb-8 animate-slide-up">
+              <span className="text-5xl mb-3 block">⚡</span>
+              <h2 className="font-bebas text-5xl text-cream tracking-wider mb-1">TIME&apos;S UP!</h2>
+              {isNewBest && (
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full mb-3"
+                  style={{ background: "rgba(255,215,0,0.15)", border: "1px solid rgba(255,215,0,0.3)" }}>
+                  <span className="text-gold text-xs font-bold">NEW PERSONAL BEST!</span>
                 </div>
+              )}
+            </div>
 
-                {/* Streak */}
-                {blitzStreak >= 3 && (
-                  <div className="text-center mb-3">
-                    <span className="text-gold font-bebas text-sm tracking-wider">🔥 {blitzStreak}x STREAK</span>
-                  </div>
-                )}
+            {/* Stats grid */}
+            <div className="grid grid-cols-3 gap-3 mb-6 animate-slide-up" style={{ animationDelay: "0.1s" }}>
+              <div className="rounded-xl p-4 text-center" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,215,0,0.2)" }}>
+                <p className="font-bebas text-4xl text-gold">{blitzResult.score}</p>
+                <p className="text-cream/30 text-[10px] uppercase tracking-wider">Correct</p>
+              </div>
+              <div className="rounded-xl p-4 text-center" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
+                <p className="font-bebas text-4xl text-cream">{blitzResult.total}</p>
+                <p className="text-cream/30 text-[10px] uppercase tracking-wider">Attempted</p>
+              </div>
+              <div className="rounded-xl p-4 text-center" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
+                <p className="font-bebas text-4xl" style={{ color: accuracy >= 80 ? "#22C55E" : accuracy >= 50 ? "#FBBF24" : "#EF4444" }}>{accuracy}%</p>
+                <p className="text-cream/30 text-[10px] uppercase tracking-wider">Accuracy</p>
+              </div>
+            </div>
 
-                {/* Question */}
-                {currentQ && (
-                  <>
-                    <div className="rounded-xl p-5 mb-4 text-center" style={{ background: "var(--game-card-bg, rgba(255,255,255,0.04))", border: "1px solid var(--game-card-border, rgba(255,255,255,0.08))" }}>
-                      <p className="text-cream font-semibold text-base leading-relaxed">{currentQ.q}</p>
-                    </div>
-                    <div className="grid grid-cols-2 gap-3">
-                      {currentQ.opts.map((opt, i) => (
-                        <button key={i} onClick={() => answerBlitz(opt)}
-                          className="p-4 rounded-xl text-sm font-semibold text-left transition-all active:scale-95"
-                          style={{ background: "var(--game-card-bg, rgba(255,255,255,0.04))", border: "1px solid var(--game-card-border, rgba(255,255,255,0.08))", color: "var(--game-tile-text, #EEF4FF)" }}>
-                          {opt}
-                        </button>
-                      ))}
-                    </div>
-                  </>
-                )}
-              </>
-            ) : (
-              <div className="text-center animate-slide-up">
-                <h2 className="font-bebas text-4xl text-cream tracking-wider mb-2">TIME&apos;S UP!</h2>
-                <p className="font-bebas text-6xl text-gold mb-2">{blitzCorrect}</p>
-                <p className="text-cream/40 text-sm mb-4">correct answers</p>
-                {fangsEarned !== null && (
-                  <div className="flex items-center justify-center gap-1.5 mb-6">
-                    <img src={cdnUrl("/F.png")} alt="Fangs" className="w-5 h-5 object-contain" />
-                    <span className="font-bebas text-xl text-gold">+{fangsEarned}</span>
-                  </div>
-                )}
-                <button onClick={backToMenu} className="btn-gold px-6 py-2 rounded-lg text-sm">Play Again</button>
+            {/* Fangs earned */}
+            {fangsEarned !== null && fangsEarned > 0 && (
+              <div className="flex items-center justify-center gap-2 mb-6 animate-slide-up" style={{ animationDelay: "0.15s" }}>
+                <div className="flex items-center gap-2 px-5 py-2.5 rounded-xl" style={{ background: "rgba(255,215,0,0.1)", border: "1px solid rgba(255,215,0,0.25)" }}>
+                  <img src={cdnUrl("/F.png")} alt="Fangs" className="w-6 h-6 object-contain" />
+                  <span className="font-bebas text-2xl text-gold tracking-wider">+{fangsEarned}</span>
+                  <span className="text-gold/40 text-xs ml-1">earned</span>
+                </div>
               </div>
             )}
+
+            {/* Wrong answers review */}
+            {blitzResult.wrongAnswers.length > 0 && (
+              <div className="mb-6 animate-slide-up" style={{ animationDelay: "0.2s" }}>
+                <p className="font-bebas text-sm text-cream/40 tracking-widest uppercase mb-3">
+                  Review Mistakes ({blitzResult.wrongAnswers.length})
+                </p>
+                <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1">
+                  {blitzResult.wrongAnswers.map((wa, i) => (
+                    <div key={i} className="rounded-xl p-3" style={{ background: "rgba(239,68,68,0.06)", border: "1px solid rgba(239,68,68,0.15)" }}>
+                      <p className="text-cream text-xs font-semibold mb-1.5">{wa.question}</p>
+                      <div className="flex flex-wrap gap-2 text-[10px]">
+                        <span className="text-red-400">Your answer: {wa.userAnswer}</span>
+                        <span className="text-green-400">Correct: {wa.correctAnswer}</span>
+                      </div>
+                      {wa.explanation && (
+                        <p className="text-cream/25 text-[10px] mt-1">{wa.explanation}</p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Actions */}
+            <div className="flex gap-3 justify-center animate-slide-up" style={{ animationDelay: "0.25s" }}>
+              <button onClick={() => { setBlitzResult(null); setGame("blitz-setup"); }}
+                className="font-bebas text-lg tracking-wider px-8 py-3 rounded-xl transition-all active:scale-95"
+                style={{ background: "linear-gradient(135deg, #FF6B00 0%, #FF8C00 100%)", color: "#fff" }}>
+                Play Again
+              </button>
+              <button onClick={backToMenu}
+                className="font-bebas text-lg tracking-wider px-8 py-3 rounded-xl transition-all active:scale-95"
+                style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "rgba(238,244,255,0.5)" }}>
+                Games Menu
+              </button>
+            </div>
           </div>
         </div>
       </ProtectedRoute>
@@ -736,7 +853,7 @@ export default function GamesPage() {
 
   const GAMES = [
     { id: "roardle" as GameMode, name: "ROARDLE", icon: "🔤", desc: "Guess the science word", fangs: `${wordLength === 4 ? 10 : wordLength === 5 ? 15 : 20}+`, limit: DAILY_LIMITS.roardle, start: startRoardle, color: "#00BFFF", pos: "top-0 left-0" },
-    { id: "blitz" as GameMode, name: "BLITZ SPRINT", icon: "⚡", desc: "60s rapid fire Q&A", fangs: "2×", limit: DAILY_LIMITS.blitz, start: startBlitz, color: "#FF6B00", pos: "top-0 right-0" },
+    { id: "blitz" as GameMode, name: "BLITZ SPRINT", icon: "⚡", desc: "60s rapid fire Q&A", fangs: "2×", limit: DAILY_LIMITS.blitz, start: openBlitzSetup, color: "#FF6B00", pos: "top-0 right-0" },
     { id: "flashcards" as GameMode, name: "FLASH CARDS", icon: "🃏", desc: "Flip, learn, repeat", fangs: "15", limit: DAILY_LIMITS.flashcards, start: startFlashcards, color: "#9B59B6", pos: "bottom-0 left-0" },
     { id: "timeline" as GameMode, name: "TIMELINE DROP", icon: "📅", desc: "Order events in time", fangs: "3×", limit: DAILY_LIMITS.timeline, start: startTimeline, color: "#00C851", pos: "bottom-0 right-0" },
   ];

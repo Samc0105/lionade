@@ -42,7 +42,7 @@ async function callOpenAI(prompt: string): Promise<NinnyGeneratedContent | null>
   try {
     res = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
-      signal: AbortSignal.timeout(45000),
+      signal: AbortSignal.timeout?.(45000) ?? (() => { const c = new AbortController(); setTimeout(() => c.abort(), 45000); return c.signal; })(),
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,

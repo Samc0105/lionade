@@ -130,7 +130,7 @@ export async function POST(req: NextRequest) {
     try {
       openaiRes = await fetch("https://api.openai.com/v1/chat/completions", {
         method: "POST",
-        signal: AbortSignal.timeout(20000),
+        signal: AbortSignal.timeout?.(20000) ?? (() => { const c = new AbortController(); setTimeout(() => c.abort(), 20000); return c.signal; })(),
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,

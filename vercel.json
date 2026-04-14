@@ -1,5 +1,13 @@
 {
   "framework": "nextjs",
   "buildCommand": "next build",
-  "outputDirectory": ".next"
+  "outputDirectory": ".next",
+  "functions": {
+    "app/api/ninny/generate/route.ts": {
+      "maxDuration": 60
+    },
+    "app/api/ninny/chat/route.ts": {
+      "maxDuration": 30
+    }
+  }
 }
