@@ -2,14 +2,9 @@ import { Subject } from "@/types";
 
 // ─── Utility ──────────────────────────────────────────────────────────────────
 
-export const XP_PER_LEVEL = 1000;
-
-export function getLevelProgress(xp: number): { level: number; progress: number; xpToNext: number } {
-  const level = Math.floor(xp / XP_PER_LEVEL) + 1;
-  const progress = ((xp % XP_PER_LEVEL) / XP_PER_LEVEL) * 100;
-  const xpToNext = XP_PER_LEVEL - (xp % XP_PER_LEVEL);
-  return { level, progress, xpToNext };
-}
+// Re-export the new progressive leveling system for backwards compat
+export { getLevelProgress, getLevelFromXp as getLevelFromXpNew } from "@/lib/levels";
+export const XP_PER_LEVEL = 100; // Base XP (first level) — kept for any legacy refs
 
 export function formatCoins(coins: number): string {
   if (coins >= 1000) return `${(coins / 1000).toFixed(1)}K`;

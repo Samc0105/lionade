@@ -11,7 +11,6 @@ import {
   formatCoins,
   SUBJECT_ICONS,
   SUBJECT_COLORS,
-  XP_PER_LEVEL,
 } from "@/lib/mockData";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { cdnUrl } from "@/lib/cdn";
@@ -174,8 +173,11 @@ function DashboardContent() {
   const userLevel = stats?.level ?? user.level;
   const statsReady = !!stats || user.statsLoaded;
   console.log("[Dashboard] user:", { coins, xp, streak, level: userLevel });
-  const { level, progress, xpToNext } = getLevelProgress(xp);
-  const currentXp = xp % XP_PER_LEVEL;
+  const levelInfo = getLevelProgress(xp);
+  const { level } = levelInfo;
+  const progress = levelInfo.progressPercent;
+  const xpToNext = levelInfo.xpNeededForNext;
+  const currentXp = levelInfo.currentXpInLevel;
   const todayCoins = dailyProgress.coins_earned;
   const displaySubjects = subjectStats;
   const dailyDone = dailyProgress.questions_answered > 0;
@@ -282,7 +284,7 @@ function DashboardContent() {
               </div>
               <span className="text-cream/30 text-[9px] font-mono tracking-wider uppercase">quiz streak</span>
             </div>
-            <CircleStat icon="&#x26A1;" value={statsReady ? `Lv${level}` : "\u2014"} label={statsReady ? `${xpToNext} xp left` : ""} color="#4A90D9" />
+            <CircleStat icon={levelInfo.tier.icon} value={statsReady ? `Lv.${level}` : "\u2014"} label={statsReady ? levelInfo.tier.name : ""} color={levelInfo.tier.color} />
             <CircleStat icon="&#x1F4DA;" value={String(displaySubjects.length)} label="subjects" color="#9B59B6" />
           </div>
           {statsReady && streak >= 3 && (
@@ -292,18 +294,25 @@ function DashboardContent() {
             </div>
           )}
 
-          {/* ═══ 3) XP Progress ═══ */}
+          {/* ═══ 3) Level Progress ═══ */}
           <div className="mb-8 animate-slide-up" style={{ animationDelay: "0.08s" }}>
             <div className="flex items-center justify-between mb-1.5">
               <div className="flex items-center gap-2">
-                <span className="text-cream/50 text-xs font-semibold">Level {level}</span>
-                <span className="text-cream/20 text-[10px]">{currentXp.toLocaleString()} / {XP_PER_LEVEL.toLocaleString()} XP</span>
+                <span className="text-sm">{levelInfo.tier.icon}</span>
+                <span className="font-bebas text-sm tracking-wider" style={{ color: levelInfo.tier.color }}>
+                  Lv.{level} {levelInfo.tier.name}
+                </span>
+                <span className="text-cream/20 text-[10px]">
+                  {currentXp.toLocaleString()} / {levelInfo.isMaxLevel ? "MAX" : xpToNext.toLocaleString()} XP
+                </span>
               </div>
-              <span className="text-cream/25 text-[10px]">{progress.toFixed(0)}% &bull; {xpToNext} XP to Level {level + 1}</span>
+              <span className="text-cream/25 text-[10px]">
+                {levelInfo.isMaxLevel ? "MAX LEVEL" : `${progress.toFixed(0)}% \u2022 ${(xpToNext - currentXp).toLocaleString()} XP to Lv.${level + 1}`}
+              </span>
             </div>
             <div className="w-full h-3 rounded-full overflow-hidden relative" style={{ background: "rgba(255,255,255,0.04)" }}>
               <div className="h-full rounded-full xp-bar-fill"
-                style={{ width: xpMounted ? `${Math.max(progress, 2)}%` : "0%", background: "linear-gradient(90deg, #2D6BB5, #4A90D9, #6AABF0, #9B59B6)", boxShadow: "0 0 12px rgba(74,144,217,0.5), 0 0 24px rgba(155,89,182,0.2)", transition: "width 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)" }} />
+                style={{ width: xpMounted ? `${Math.max(progress, 2)}%` : "0%", background: `linear-gradient(90deg, ${levelInfo.tier.color}90, ${levelInfo.tier.color})`, boxShadow: `0 0 12px ${levelInfo.tier.color}50, 0 0 24px ${levelInfo.tier.color}20`, transition: "width 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)" }} />
             </div>
           </div>
 

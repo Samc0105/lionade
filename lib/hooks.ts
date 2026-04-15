@@ -1,5 +1,6 @@
 import useSWR, { mutate } from "swr";
 import { supabase } from "@/lib/supabase";
+import { getLevelFromXp } from "@/lib/levels";
 
 interface UserStats {
   coins: number;
@@ -23,7 +24,7 @@ async function fetchUserStats(userId: string): Promise<UserStats> {
     coins: data.coins ?? 0,
     streak: data.streak ?? 0,
     xp,
-    level: Math.floor(xp / 1000) + 1,
+    level: getLevelFromXp(xp),
     avatar: data.avatar_url ?? null,
   };
 }

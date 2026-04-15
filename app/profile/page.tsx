@@ -141,7 +141,10 @@ export default function ProfilePage() {
   const xp = stats?.xp ?? user.xp;
   const avatarUrl = stats?.avatar ?? user.avatar;
   const statsReady = !!stats || user.statsLoaded;
-  const { level, progress, xpToNext } = getLevelProgress(xp);
+  const levelInfo = getLevelProgress(xp);
+  const level = levelInfo.level;
+  const progress = levelInfo.progressPercent;
+  const xpToNext = levelInfo.xpNeededForNext;
   const totalQuestions = subjectStats.reduce((s: number, r: any) => s + r.questionsAnswered, 0);
   const totalCorrect = subjectStats.reduce((s: number, r: any) => s + r.correctAnswers, 0);
   const accuracy = totalQuestions > 0 ? Math.round((totalCorrect / totalQuestions) * 100) : 0;

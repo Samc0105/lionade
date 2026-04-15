@@ -4,6 +4,7 @@ import { createContext, useContext, useState, useEffect, ReactNode } from "react
 import { supabase } from "@/lib/supabase";
 import { sanitizeEmail, sanitizePassword, sanitizeUsername, sanitizeText } from "@/lib/sanitize";
 import type { Session } from "@supabase/supabase-js";
+import { getLevelFromXp } from "@/lib/levels";
 
 export interface AuthUser {
   id: string;
@@ -49,7 +50,7 @@ function buildAuthUser(profile: {
   xp?: number;
 }, email: string): AuthUser {
   const xp = profile.xp ?? 0;
-  const level = Math.floor(xp / 1000) + 1;
+  const level = getLevelFromXp(xp);
   return {
     id: profile.id,
     email,

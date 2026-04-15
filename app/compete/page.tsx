@@ -282,15 +282,15 @@ export default function CompetePage() {
           <div className="animate-slide-up mb-10" style={{ animationDelay: "0.2s" }}>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               {/* Blitz */}
-              <div className="glow-yellow rounded-2xl tilt-card">
-                <div className="relative overflow-hidden h-full rounded-2xl clip-angled-br"
+              <a href="/games?mode=blitz" className="block glow-yellow rounded-2xl tilt-card group cursor-pointer">
+                <div className="relative overflow-hidden h-full rounded-2xl clip-angled-br transition-all duration-300 group-hover:-translate-y-1"
                   style={{
                     background: "linear-gradient(135deg, #1a1400 0%, #0f0a00 30%, #080600 50%, #060c18 100%)",
                     border: "1px solid rgba(234,179,8,0.25)",
                   }}>
                   <div className="absolute inset-0 pointer-events-none"
                     style={{ background: "radial-gradient(ellipse at 30% 30%, rgba(234,179,8,0.06) 0%, transparent 60%)" }} />
-                  <div className="ribbon-diagonal">SOON</div>
+                  <div className="ribbon-diagonal" style={{ background: "linear-gradient(135deg, #FF6B00, #FF8C00)" }}>PLAY</div>
                   <div className="relative p-7">
                     <p className="text-4xl mb-3">⚡</p>
                     <p className="font-bebas text-2xl sm:text-3xl tracking-wider text-[#EAB308] mb-2"
@@ -300,12 +300,13 @@ export default function CompetePage() {
                     <p className="text-cream/50 text-sm leading-relaxed mb-4">
                       Speed round. 60 seconds. Unlimited questions. 2x coins on every correct answer.
                     </p>
-                    <p className="text-cream/30 text-xs font-semibold uppercase tracking-wider">
-                      Coming V1 — Summer 2026
-                    </p>
+                    <button className="font-bebas text-lg tracking-wider px-8 py-2.5 rounded-xl transition-all active:scale-95"
+                      style={{ background: "linear-gradient(135deg, #FF6B00 0%, #FF8C00 100%)", color: "#fff", boxShadow: "0 4px 16px rgba(255,107,0,0.3)" }}>
+                      PLAY NOW
+                    </button>
                   </div>
                 </div>
-              </div>
+              </a>
 
               {/* Leaderboard */}
               <div className="glow-purple rounded-2xl tilt-card">
