@@ -72,7 +72,8 @@ const DIFFICULTY_DB_MAP: Record<string, string> = {
   hard: "advanced",
 };
 
-/** Fetch 10 random questions WITHOUT correct_answer (anti-cheat) */
+/** Fetch 10 random questions WITHOUT correct_answer (anti-cheat).
+ *  Merges from the static `questions` table AND approved `question_bank` entries. */
 export async function getQuizQuestions(subject: Subject, difficulty: string, topic?: string): Promise<{
   id: string;
   subject: string;
@@ -81,35 +82,75 @@ export async function getQuizQuestions(subject: Subject, difficulty: string, top
   difficulty: string;
 }[]> {
   const dbDifficulty = DIFFICULTY_DB_MAP[difficulty] || difficulty;
+
+  // 1. Fetch from static questions table
   let query = supabase
     .from("questions")
     .select("id, subject, question, options, difficulty")
     .eq("subject", subject)
     .eq("difficulty", dbDifficulty);
   if (topic) {
-    // Convert display name to DB slug: "World History" → "world-history", "SQL & Databases" → "sql-databases"
     const topicSlug = topic.toLowerCase().replace(/\s*&\s*/g, "-").replace(/\s+/g, "-");
     query = query.eq("topic", topicSlug);
   }
-  const { data, error } = await query.limit(50);
+  const { data: staticData, error } = await query.limit(50);
   if (error) throw error;
-  // Shuffle and take 10
-  const shuffled = (data ?? []).sort(() => Math.random() - 0.5).slice(0, 10);
+
+  // 2. Fetch from question_bank (approved AI-generated questions)
+  const normalizedSubject = subject.toLowerCase().replace(/\s+/g, "-");
+  const bankDifficulty = difficulty === "easy" ? "easy" : difficulty === "hard" ? "hard" : "medium";
+  const { data: bankData } = await supabase
+    .from("question_bank")
+    .select("id, subject, question, options, difficulty, correct_index")
+    .eq("status", "approved")
+    .eq("difficulty", bankDifficulty)
+    .or(`subject.eq.${normalizedSubject},topic.eq.${normalizedSubject}`)
+    .limit(20);
+
+  // 3. Normalize bank questions to same shape (strip correct_index for anti-cheat)
+  const bankQuestions = (bankData ?? []).map((q: any) => ({
+    id: q.id,
+    subject: q.subject,
+    question: q.question,
+    options: typeof q.options === "string" ? JSON.parse(q.options) : q.options,
+    difficulty: q.difficulty,
+  }));
+
+  // 4. Merge, shuffle, take 10
+  const allQuestions = [...(staticData ?? []), ...bankQuestions];
+  const shuffled = allQuestions.sort(() => Math.random() - 0.5).slice(0, 10);
   return shuffled.map((q: any) => ({ ...q, options: q.options as string[] }));
 }
 
-/** Fetch correct answer + explanation for a single question (called after user answers) */
+/** Fetch correct answer + explanation for a single question (called after user answers).
+ *  Checks both the static `questions` table and the `question_bank` table. */
 export async function checkAnswer(questionId: string): Promise<{
   correct_answer: number;
   explanation: string | null;
 }> {
+  // Try static questions table first
   const { data, error } = await supabase
     .from("questions")
     .select("correct_answer, explanation")
     .eq("id", questionId)
-    .single();
-  if (error) throw error;
-  return { correct_answer: Number(data.correct_answer), explanation: data.explanation };
+    .maybeSingle();
+
+  if (data) {
+    return { correct_answer: Number(data.correct_answer), explanation: data.explanation };
+  }
+
+  // Fall back to question_bank
+  const { data: bankQ, error: bankErr } = await supabase
+    .from("question_bank")
+    .select("correct_index, explanation")
+    .eq("id", questionId)
+    .maybeSingle();
+
+  if (bankQ) {
+    return { correct_answer: bankQ.correct_index, explanation: bankQ.explanation };
+  }
+
+  throw error ?? bankErr ?? new Error("Question not found");
 }
 
 /** Legacy: fetch questions with answers (used by existing code like getQuestions) */

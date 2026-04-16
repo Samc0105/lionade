@@ -92,6 +92,8 @@ function DashboardContent() {
 
   useEffect(() => {
     if (!user) return;
+    // Check bounty rotation first (idempotent), then load data
+    apiPost("/api/bounties/rotate", {}).catch(() => {});
     Promise.all([
       getSubjectStats(user.id).catch(() => []),
       getQuizHistory(user.id, 5).catch(() => []),
