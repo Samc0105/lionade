@@ -1,9 +1,11 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { useAuth } from "@/lib/auth";
 import { cdnUrl } from "@/lib/cdn";
+import { getEloLeaderboard } from "@/lib/db";
 
 /* ── Tier definitions (bottom → top) ── */
 const TIERS = [
@@ -34,6 +36,12 @@ export default function CompetePage() {
   const DISPLAY_NAME = user?.username || "Player";
   const tiersTopDown = [...TIERS].reverse();
   const widthsTopDown = [...TIER_WIDTHS];
+
+  // Load real ELO leaderboard
+  const [topPlayers, setTopPlayers] = useState<{ rank: number; username: string; arena_elo: number }[]>([]);
+  useEffect(() => {
+    getEloLeaderboard(5).then(data => setTopPlayers(data)).catch(() => {});
+  }, []);
 
   return (
     <ProtectedRoute>
@@ -101,36 +109,19 @@ export default function CompetePage() {
                   <span className="font-bebas text-2xl sm:text-3xl text-[#3a2800]" style={{ textShadow: "0 1px 0 rgba(255,255,255,0.3)" }}>$</span>
                 </div>
 
-                <p className="gold-text glow-gold font-bebas text-6xl sm:text-8xl tracking-wider leading-none">
-                  50,000
-                </p>
                 <p className="font-bebas text-2xl sm:text-4xl text-cream/80 tracking-[0.2em] mt-2">
                   MONTHLY COIN POOL
                 </p>
                 <p className="text-cream/40 text-sm mt-3 max-w-md mx-auto">
-                  Top 20 verified players split the pot every month.
+                  Top players will compete for a monthly prize pool. Details coming soon.
                 </p>
 
-                {/* Prize breakdown */}
-                <div className="flex flex-wrap justify-center gap-x-3 gap-y-1.5 mt-6 text-cream/50 text-xs font-semibold uppercase tracking-wider">
-                  <span className="text-gold/80">🥇 1st — 25%</span>
-                  <span className="text-cream/15">|</span>
-                  <span className="text-cream/60">🥈 2nd — 15%</span>
-                  <span className="text-cream/15">|</span>
-                  <span className="text-cream/50">🥉 3rd — 10%</span>
-                  <span className="text-cream/15">|</span>
-                  <span>4th-10th — 5% ea</span>
-                  <span className="text-cream/15">|</span>
-                  <span>11th-20th — share rest</span>
-                </div>
-
-                {/* Verified badge */}
-                <div className="mt-6 inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-green-500/20 bg-green-500/[0.06] text-green-400/80 text-[10px] font-bold uppercase tracking-widest">
-                  <span>✅</span> Verified players eligible for bonus rewards
+                <div className="mt-6 inline-flex items-center gap-2 px-5 py-2 rounded-full border border-gold/20 bg-gold/[0.06]">
+                  <span className="font-bebas text-gold/80 text-sm tracking-widest uppercase">Coming Soon</span>
                 </div>
 
                 <p className="text-cream/20 text-xs mt-4">
-                  Coin rewards active at launch. Cash payouts begin V2 — December 2026.
+                  Launching with ranked competitive season V2 — 2026.
                 </p>
               </div>
             </div>
@@ -324,33 +315,32 @@ export default function CompetePage() {
                       LEADERBOARD
                     </p>
                     <div className="space-y-2 mb-4">
-                      {[
-                        { rank: 1, medal: "🥇", name: "LionKing", elo: "1,847" },
-                        { rank: 2, medal: "🥈", name: "QuizNinja", elo: "1,756" },
-                        { rank: 3, medal: "🥉", name: "BrainStorm", elo: "1,702" },
-                        { rank: 4, medal: "", name: "GrindMaster", elo: "1,654" },
-                        { rank: 5, medal: "", name: "StudyBeast", elo: "1,621" },
-                      ].map((player) => (
-                        <div key={player.rank}
-                          className="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors"
-                          style={{
-                            background: player.rank <= 3
-                              ? "linear-gradient(135deg, rgba(168,85,247,0.08) 0%, rgba(168,85,247,0.02) 100%)"
-                              : "rgba(255,255,255,0.02)",
-                            border: "1px solid rgba(168,85,247,0.1)",
-                          }}>
-                          <span className="font-bebas text-sm text-cream/40 w-5">#{player.rank}</span>
-                          <span className="text-cream/60 text-xs flex-1 font-medium">
-                            {player.medal && <span className="mr-1">{player.medal}</span>}
-                            {player.name}
-                          </span>
-                          <span className="font-bebas text-xs text-cream/30">{player.elo} Elo</span>
-                        </div>
-                      ))}
+                      {(topPlayers.length > 0 ? topPlayers : [
+                        { rank: 1, username: "—", arena_elo: 0 },
+                      ]).map((player) => {
+                        const medals: Record<number, string> = { 1: "🥇", 2: "🥈", 3: "🥉" };
+                        return (
+                          <div key={player.rank}
+                            className="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors"
+                            style={{
+                              background: player.rank <= 3
+                                ? "linear-gradient(135deg, rgba(168,85,247,0.08) 0%, rgba(168,85,247,0.02) 100%)"
+                                : "rgba(255,255,255,0.02)",
+                              border: "1px solid rgba(168,85,247,0.1)",
+                            }}>
+                            <span className="font-bebas text-sm text-cream/40 w-5">#{player.rank}</span>
+                            <span className="text-cream/60 text-xs flex-1 font-medium">
+                              {medals[player.rank] && <span className="mr-1">{medals[player.rank]}</span>}
+                              {player.username}
+                            </span>
+                            <span className="font-bebas text-xs text-cream/30">{player.arena_elo.toLocaleString()} Elo</span>
+                          </div>
+                        );
+                      })}
                     </div>
                     <div className="border-t border-cream/10 pt-3 mb-4">
                       <p className="text-cream/30 text-xs">
-                        Your Rank: <span className="text-cream/50 font-semibold">Unranked</span>
+                        Your Rank: <span className="text-cream/50 font-semibold">{user?.id && topPlayers.find(p => p.username === user.username) ? `#${topPlayers.find(p => p.username === user.username)!.rank}` : "Unranked"}</span>
                       </p>
                     </div>
                     <Link href="/leaderboard"

@@ -3,13 +3,13 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth";
-import { getLeaderboard } from "@/lib/db";
+import { getLeaderboard, getEloLeaderboard } from "@/lib/db";
 import { formatCoins } from "@/lib/mockData";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import BackButton from "@/components/BackButton";
 import { cdnUrl } from "@/lib/cdn";
 
-type Filter = "weekly" | "alltime";
+type Filter = "elo" | "weekly";
 
 interface LbEntry {
   rank: number;
@@ -19,21 +19,29 @@ interface LbEntry {
   level: number;
   streak: number;
   coins_this_week: number;
+  arena_elo?: number;
 }
 
 export default function LeaderboardPage() {
   const router = useRouter();
   const { user } = useAuth();
-  const [filter, setFilter] = useState<Filter>("weekly");
+  const [filter, setFilter] = useState<Filter>("elo");
   const [entries, setEntries] = useState<LbEntry[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     setLoading(true);
-    getLeaderboard(20).then(data => {
-      setEntries(data);
-      setLoading(false);
-    }).catch(() => setLoading(false));
+    if (filter === "elo") {
+      getEloLeaderboard(200).then(data => {
+        setEntries(data.map(d => ({ ...d, streak: 0, coins_this_week: 0 })));
+        setLoading(false);
+      }).catch(() => setLoading(false));
+    } else {
+      getLeaderboard(200).then(data => {
+        setEntries(data);
+        setLoading(false);
+      }).catch(() => setLoading(false));
+    }
   }, [filter]);
 
   const topThree = entries.slice(0, 3);
@@ -41,6 +49,10 @@ export default function LeaderboardPage() {
 
   const rankEmoji: Record<number, string> = { 1: "👑", 2: "🥈", 3: "🥉" };
   const rankBorderColor: Record<number, string> = { 1: "#FFD700", 2: "#9CA3AF", 3: "#B45309" };
+
+  // Display value based on current filter mode
+  const displayValue = (entry: LbEntry) =>
+    filter === "elo" ? `${(entry.arena_elo ?? 1000).toLocaleString()} ELO` : formatCoins(entry.coins_this_week);
 
   const myEntry = entries.find(e => e.user_id === user?.id);
   const myRank = myEntry ? entries.indexOf(myEntry) + 1 : null;
@@ -54,7 +66,7 @@ export default function LeaderboardPage() {
           {/* Header */}
           <div className="text-center mb-10 animate-slide-up">
             <span className="inline-flex items-center gap-2 bg-gold/10 border border-gold/30 rounded-full px-4 py-1.5 text-gold text-sm font-semibold mb-6">
-              👑 Weekly Rankings
+              👑 {filter === "elo" ? "ELO Rankings" : "Weekly Rankings"}
             </span>
             <h1 className="font-bebas text-6xl sm:text-7xl text-cream tracking-wider mb-3">LEADERBOARD</h1>
             <p className="text-cream/50 text-base">Top earners reset every Sunday midnight.</p>
@@ -63,8 +75,8 @@ export default function LeaderboardPage() {
           {/* Filters */}
           <div className="flex items-center gap-2 bg-navy-50 border border-electric/20 rounded-xl p-1.5 mb-8 animate-slide-up" style={{ animationDelay: "0.1s" }}>
             {[
-              { key: "weekly", label: "This Week" },
-              { key: "alltime", label: "⭐ All Time" },
+              { key: "elo", label: "⚔️ ELO Ranking" },
+              { key: "weekly", label: "📈 Weekly Fangs" },
             ].map((tab) => (
               <button key={tab.key} onClick={() => setFilter(tab.key as Filter)}
                 className={`flex-1 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200
@@ -99,7 +111,7 @@ export default function LeaderboardPage() {
                         alt="" className="w-full h-full object-cover bg-navy-50" />
                     </div>
                     <p className="text-cream text-xs font-bold text-center truncate w-full text-center">{topThree[1]?.username}</p>
-                    <p className="text-gray-300 font-bebas text-lg flex items-center justify-center gap-1"><img src={cdnUrl("/F.png")} alt="Fangs" className="w-4 h-4 object-contain" /> {formatCoins(topThree[1]?.coins_this_week ?? 0)}</p>
+                    <p className="text-gray-300 font-bebas text-lg flex items-center justify-center gap-1">{filter === "elo" ? `${(topThree[1]?.arena_elo ?? 1000).toLocaleString()} ELO` : <><img src={cdnUrl("/F.png")} alt="Fangs" className="w-4 h-4 object-contain" /> {formatCoins(topThree[1]?.coins_this_week ?? 0)}</>}</p>
                   </div>
 
                   {/* 1st */}
@@ -112,7 +124,7 @@ export default function LeaderboardPage() {
                       </div>
                     </div>
                     <p className="text-gold text-sm font-bold text-center">{topThree[0]?.username}</p>
-                    <p className="text-gold font-bebas text-xl glow-gold flex items-center justify-center gap-1"><img src={cdnUrl("/F.png")} alt="Fangs" className="w-5 h-5 object-contain" /> {formatCoins(topThree[0]?.coins_this_week ?? 0)}</p>
+                    <p className="text-gold font-bebas text-xl glow-gold flex items-center justify-center gap-1">{filter === "elo" ? `${(topThree[0]?.arena_elo ?? 1000).toLocaleString()} ELO` : <><img src={cdnUrl("/F.png")} alt="Fangs" className="w-5 h-5 object-contain" /> {formatCoins(topThree[0]?.coins_this_week ?? 0)}</>}</p>
                     <span className="text-xs bg-gold/15 border border-gold/30 text-gold px-2 py-0.5 rounded-full mt-1">#1 GOAT</span>
                   </div>
 
@@ -124,7 +136,7 @@ export default function LeaderboardPage() {
                         alt="" className="w-full h-full object-cover bg-navy-50" />
                     </div>
                     <p className="text-cream text-xs font-bold text-center truncate w-full text-center">{topThree[2]?.username}</p>
-                    <p className="text-amber-600 font-bebas text-lg flex items-center justify-center gap-1"><img src={cdnUrl("/F.png")} alt="Fangs" className="w-4 h-4 object-contain" /> {formatCoins(topThree[2]?.coins_this_week ?? 0)}</p>
+                    <p className="text-amber-600 font-bebas text-lg flex items-center justify-center gap-1">{filter === "elo" ? `${(topThree[2]?.arena_elo ?? 1000).toLocaleString()} ELO` : <><img src={cdnUrl("/F.png")} alt="Fangs" className="w-4 h-4 object-contain" /> {formatCoins(topThree[2]?.coins_this_week ?? 0)}</>}</p>
                   </div>
                 </div>
               )}
@@ -158,9 +170,9 @@ export default function LeaderboardPage() {
                       </div>
                       <div className="text-right flex-shrink-0 flex items-center gap-2">
                         <div className="flex items-center gap-1.5">
-                          <img src={cdnUrl("/F.png")} alt="Fangs" className="w-4 h-4 object-contain" />
+                          {filter !== "elo" && <img src={cdnUrl("/F.png")} alt="Fangs" className="w-4 h-4 object-contain" />}
                           <span className={`font-bebas text-xl ${entry.rank === 1 ? "text-gold glow-gold" : "text-cream"}`}>
-                            {formatCoins(entry.coins_this_week)}
+                            {displayValue(entry)}
                           </span>
                         </div>
                         {/* Challenge button — not on own row */}
@@ -191,7 +203,7 @@ export default function LeaderboardPage() {
                   <p className="text-electric text-sm font-semibold text-center mb-2">Your Position</p>
                   <div className="flex items-center justify-between">
                     <span className="font-bebas text-2xl text-electric">#{myRank}</span>
-                    <span className="text-gold font-semibold flex items-center gap-1"><img src={cdnUrl("/F.png")} alt="Fangs" className="w-4 h-4 object-contain" /> {formatCoins(myEntry.coins_this_week)}</span>
+                    <span className="text-gold font-semibold">{displayValue(myEntry)}</span>
                   </div>
                 </div>
               )}

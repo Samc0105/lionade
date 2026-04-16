@@ -344,6 +344,34 @@ export async function getLeaderboard(limit = 10): Promise<{
   });
 }
 
+// ── ELO Leaderboard (ranked by arena_elo descending) ─────────
+
+export async function getEloLeaderboard(limit = 200): Promise<{
+  rank: number;
+  user_id: string;
+  username: string;
+  avatar_url: string | null;
+  arena_elo: number;
+  level: number;
+}[]> {
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("id, username, avatar_url, arena_elo, level, xp")
+    .order("arena_elo", { ascending: false })
+    .limit(limit);
+
+  if (error) throw error;
+
+  return (data ?? []).map((p: any, i: number) => ({
+    rank: i + 1,
+    user_id: p.id,
+    username: p.username ?? "Unknown",
+    avatar_url: p.avatar_url ?? null,
+    arena_elo: p.arena_elo ?? 1000,
+    level: p.level ?? 1,
+  }));
+}
+
 // ── Recent Activity ───────────────────────────────────────────
 
 export async function getRecentActivity(userId: string, limit = 8) {
