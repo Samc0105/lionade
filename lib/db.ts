@@ -413,6 +413,61 @@ export async function getEloLeaderboard(limit = 200): Promise<{
   }));
 }
 
+// ── Weekly Activity Chart Data ────────────────────────────────
+
+export async function getWeeklyActivityChart(userId: string): Promise<{
+  day: string;        // "Mon", "Tue", etc.
+  date: string;       // "Apr 14"
+  questions: number;
+  correct: number;
+  coins: number;
+  xp: number;
+}[]> {
+  const days = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    days.push(d);
+  }
+
+  const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+  const result = [];
+
+  for (const day of days) {
+    const startOfDay = new Date(Date.UTC(day.getFullYear(), day.getMonth(), day.getDate()));
+    const endOfDay = new Date(Date.UTC(day.getFullYear(), day.getMonth(), day.getDate() + 1));
+
+    // Count quiz sessions for this day
+    const { data: sessions } = await supabase
+      .from("quiz_sessions")
+      .select("total_questions, correct_answers, coins_earned, xp_earned")
+      .eq("user_id", userId)
+      .gte("completed_at", startOfDay.toISOString())
+      .lt("completed_at", endOfDay.toISOString());
+
+    let questions = 0, correct = 0, coins = 0, xp = 0;
+    for (const s of sessions ?? []) {
+      questions += s.total_questions ?? 0;
+      correct += s.correct_answers ?? 0;
+      coins += s.coins_earned ?? 0;
+      xp += s.xp_earned ?? 0;
+    }
+
+    result.push({
+      day: dayNames[day.getDay()],
+      date: `${monthNames[day.getMonth()]} ${day.getDate()}`,
+      questions,
+      correct,
+      coins,
+      xp,
+    });
+  }
+
+  return result;
+}
+
 // ── Recent Activity ───────────────────────────────────────────
 
 export async function getRecentActivity(userId: string, limit = 8) {

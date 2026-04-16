@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth";
 import { useUserStats } from "@/lib/hooks";
-import { getSubjectStats, getQuizHistory, getDailyProgress, getUserAchievements, getBestScores, getLeaderboard, getRecentTopics, getActiveBounties, getUserBountyProgress, getActiveBet, getLastResolvedBet } from "@/lib/db";
+import { getSubjectStats, getQuizHistory, getDailyProgress, getUserAchievements, getBestScores, getLeaderboard, getRecentTopics, getActiveBounties, getUserBountyProgress, getActiveBet, getLastResolvedBet, getWeeklyActivityChart } from "@/lib/db";
 import type { Bounty, UserBounty, ActiveBet } from "@/lib/db";
 import {
   getLevelProgress,
@@ -87,6 +87,8 @@ function DashboardContent() {
   const [lastBet, setLastBet] = useState<ActiveBet | null>(null);
   const [betStake, setBetStake] = useState(10);
   const [betTarget, setBetTarget] = useState(8);
+  const [weeklyChart, setWeeklyChart] = useState<{ day: string; date: string; questions: number; correct: number; coins: number; xp: number }[]>([]);
+  const [chartAnimated, setChartAnimated] = useState(false);
   const [placingBet, setPlacingBet] = useState(false);
   const [loginBonus, setLoginBonus] = useState<{ amount: number; consecutiveDays: number } | null>(null);
 
@@ -106,7 +108,8 @@ function DashboardContent() {
       getUserBountyProgress(user.id).catch(() => []),
       getActiveBet(user.id).catch(() => null),
       getLastResolvedBet(user.id).catch(() => null),
-    ]).then(([stats, history, daily, achs, bests, lb, topics, bnts, ubProgress, abet, lbet]) => {
+      getWeeklyActivityChart(user.id).catch(() => []),
+    ]).then(([stats, history, daily, achs, bests, lb, topics, bnts, ubProgress, abet, lbet, wChart]) => {
       setSubjectStats(stats);
       setRecentQuizzes(history);
       setDailyProgress(daily);
@@ -118,6 +121,8 @@ function DashboardContent() {
       setUserBounties(ubProgress);
       setActiveBet(abet);
       setLastBet(lbet);
+      setWeeklyChart(wChart as typeof weeklyChart);
+      setTimeout(() => setChartAnimated(true), 300); // trigger bar animation
       setLoadingData(false);
     });
   }, [user?.id]);
@@ -675,6 +680,116 @@ function DashboardContent() {
                     </Link>
                   );
                 })}
+              </div>
+
+              {/* ═══ 7-Day Activity Chart ═══ */}
+              <div className="mt-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="font-bebas text-lg text-cream tracking-wider">WEEKLY ACTIVITY</h2>
+                  <div className="flex items-center gap-4 text-[10px]">
+                    <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full" style={{ background: "#4A90D9" }} /> Questions</span>
+                    <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full" style={{ background: "#22C55E" }} /> Correct</span>
+                  </div>
+                </div>
+                <div className="rounded-2xl p-5 relative overflow-hidden"
+                  style={{
+                    background: "linear-gradient(160deg, rgba(74,144,217,0.06) 0%, rgba(10,16,32,0.95) 30%, rgba(8,14,26,1) 100%)",
+                    border: "1px solid rgba(74,144,217,0.1)",
+                  }}>
+                  {/* Subtle grid lines */}
+                  <div className="absolute inset-0 pointer-events-none" style={{ opacity: 0.04 }}>
+                    {[25, 50, 75].map(pct => (
+                      <div key={pct} className="absolute left-0 right-0 border-t border-white" style={{ bottom: `${pct}%` }} />
+                    ))}
+                  </div>
+
+                  {(() => {
+                    const maxQ = Math.max(...weeklyChart.map(d => d.questions), 1);
+                    const totalWeek = weeklyChart.reduce((s, d) => s + d.questions, 0);
+                    const totalCorrect = weeklyChart.reduce((s, d) => s + d.correct, 0);
+                    const totalCoins = weeklyChart.reduce((s, d) => s + d.coins, 0);
+
+                    return (
+                      <>
+                        {/* Bar chart */}
+                        <div className="flex items-end justify-between gap-2 relative z-10" style={{ height: 180 }}>
+                          {weeklyChart.map((d, i) => {
+                            const isToday = i === weeklyChart.length - 1;
+                            const qHeight = (d.questions / maxQ) * 100;
+                            const cHeight = (d.correct / maxQ) * 100;
+
+                            return (
+                              <div key={i} className="flex-1 flex flex-col items-center gap-1 group relative">
+                                {/* Tooltip on hover */}
+                                <div className="absolute -top-16 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none z-20"
+                                  style={{ minWidth: 100 }}>
+                                  <div className="rounded-lg px-3 py-2 text-center"
+                                    style={{ background: "rgba(10,16,32,0.95)", border: "1px solid rgba(74,144,217,0.3)", boxShadow: "0 4px 20px rgba(0,0,0,0.5)" }}>
+                                    <p className="text-cream text-[10px] font-semibold">{d.date}</p>
+                                    <p className="text-electric text-[9px]">{d.questions} questions · {d.correct} correct</p>
+                                    {d.coins > 0 && <p className="text-gold text-[9px]">+{d.coins} Fangs</p>}
+                                  </div>
+                                </div>
+
+                                {/* Bars container */}
+                                <div className="w-full flex items-end justify-center gap-[3px]" style={{ height: 150 }}>
+                                  {/* Questions bar */}
+                                  <div className="rounded-t-md transition-all duration-1000 ease-out relative overflow-hidden"
+                                    style={{
+                                      width: "40%",
+                                      height: chartAnimated ? `${Math.max(qHeight, d.questions > 0 ? 8 : 0)}%` : "0%",
+                                      background: "linear-gradient(180deg, #4A90D9 0%, #2D6BB5 100%)",
+                                      boxShadow: d.questions > 0 ? "0 0 10px rgba(74,144,217,0.3)" : undefined,
+                                      transitionDelay: `${i * 80}ms`,
+                                    }}>
+                                    <div className="absolute inset-0 opacity-20"
+                                      style={{ background: "linear-gradient(180deg, rgba(255,255,255,0.3) 0%, transparent 50%)" }} />
+                                  </div>
+                                  {/* Correct bar */}
+                                  <div className="rounded-t-md transition-all duration-1000 ease-out relative overflow-hidden"
+                                    style={{
+                                      width: "40%",
+                                      height: chartAnimated ? `${Math.max(cHeight, d.correct > 0 ? 8 : 0)}%` : "0%",
+                                      background: "linear-gradient(180deg, #22C55E 0%, #16A34A 100%)",
+                                      boxShadow: d.correct > 0 ? "0 0 10px rgba(34,197,94,0.3)" : undefined,
+                                      transitionDelay: `${i * 80 + 100}ms`,
+                                    }}>
+                                    <div className="absolute inset-0 opacity-20"
+                                      style={{ background: "linear-gradient(180deg, rgba(255,255,255,0.3) 0%, transparent 50%)" }} />
+                                  </div>
+                                </div>
+
+                                {/* Day label */}
+                                <span className={`text-[10px] font-bebas tracking-wider mt-1 ${isToday ? "text-electric" : "text-cream/30"}`}>
+                                  {isToday ? "Today" : d.day}
+                                </span>
+                              </div>
+                            );
+                          })}
+                        </div>
+
+                        {/* Summary stats below chart */}
+                        <div className="flex items-center justify-between mt-4 pt-3 border-t border-white/[0.04]">
+                          <div className="flex items-center gap-4">
+                            <div>
+                              <span className="font-bebas text-xl text-electric">{totalWeek}</span>
+                              <span className="text-cream/25 text-[9px] ml-1">questions</span>
+                            </div>
+                            <div>
+                              <span className="font-bebas text-xl text-green-400">{totalWeek > 0 ? Math.round((totalCorrect / totalWeek) * 100) : 0}%</span>
+                              <span className="text-cream/25 text-[9px] ml-1">accuracy</span>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            <img src={cdnUrl("/F.png")} alt="Fangs" className="w-4 h-4 object-contain" />
+                            <span className="font-bebas text-lg text-gold">{totalCoins}</span>
+                            <span className="text-cream/25 text-[9px] ml-0.5">earned</span>
+                          </div>
+                        </div>
+                      </>
+                    );
+                  })()}
+                </div>
               </div>
             </div>
 
