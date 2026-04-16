@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
 import { calcNinnyReward, type NinnyMode } from "@/lib/ninny";
+import { recordQuestionPerformance } from "@/lib/question-bank";
 
 export const dynamic = "force-dynamic";
 
@@ -248,6 +249,27 @@ export async function POST(req: NextRequest) {
         });
       }
     }
+  }
+
+  // ── Background: track question performance in question bank ──
+  // For MCQ-based modes, record each question's outcome.
+  // Wrong answers are tracked above; we also need to record correct answers.
+  if (["mcq", "blitz", "tf"].includes(mode) && materialId) {
+    // All questions in this session that WEREN'T wrong were correct
+    const wrongSet = new Set(wrongAnswers.map(w => w.question));
+    try {
+      const { data: mat } = await supabaseAdmin
+        .from("ninny_materials")
+        .select("generated_content")
+        .eq("id", materialId)
+        .single();
+      if (mat?.generated_content?.multipleChoice) {
+        for (const q of mat.generated_content.multipleChoice) {
+          const wasCorrect = !wrongSet.has(q.question);
+          recordQuestionPerformance(q.question, wasCorrect).catch(() => {});
+        }
+      }
+    } catch { /* non-blocking */ }
   }
 
   return NextResponse.json({

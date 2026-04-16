@@ -13,6 +13,7 @@ import {
   type NinnyMode,
   type NinnySourceType,
 } from "@/lib/ninny";
+import { saveGeneratedQuestions } from "@/lib/question-bank";
 
 const MAX_CONTENT_BYTES = 20 * 1024; // 20 KB cap on user content
 const VALID_MODES: NinnyMode[] = Object.keys(NINNY_MODE_COSTS) as NinnyMode[];
@@ -278,6 +279,19 @@ export async function POST(req: NextRequest) {
       console.error("[ninny/generate] insert error:", insertErr.message);
       await refundOnFailure("DB insert failed");
       return NextResponse.json({ error: "Failed to save material" }, { status: 500 });
+    }
+
+    // ── Background: save MCQ questions to the question bank ──
+    // Non-blocking — fire and forget. Never affects the response.
+    if (validated.multipleChoice?.length > 0) {
+      saveGeneratedQuestions({
+        questions: validated.multipleChoice,
+        subject: validated.subject ?? "general",
+        topic: validated.title,
+        difficulty: validated.difficulty ?? "medium",
+        materialId: material.id,
+        userId,
+      }).catch(() => {}); // swallow errors silently
     }
 
     return NextResponse.json({ material, fangCost, wasFree: isFree });
