@@ -7,6 +7,7 @@ import { useUserStats } from "@/lib/hooks";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { getQuizHistory, getLeaderboard } from "@/lib/db";
 import { SUBJECT_ICONS, SUBJECT_COLORS, formatCoins } from "@/lib/mockData";
+import { getLevelProgress } from "@/lib/levels";
 import type { Subject } from "@/types";
 import { cdnUrl } from "@/lib/cdn";
 
@@ -249,25 +250,30 @@ export default function LearnPage() {
                 </div>
               </div>
 
-              {/* XP */}
-              <div
-                className="flex items-center gap-3 px-5 py-3 rounded-2xl border"
-                style={{
-                  background: "linear-gradient(135deg, #4A90D920 0%, #4A90D908 100%)",
-                  borderColor: "#4A90D930",
-                  boxShadow: "0 0 20px #4A90D910",
-                }}
-              >
-                <span className="text-2xl">&#x26A1;</span>
-                <div>
-                  <p className="font-bebas text-3xl text-electric leading-none">
-                    {(stats?.xp ?? user.xp).toLocaleString()}
-                  </p>
-                  <p className="text-cream/40 text-[10px] uppercase tracking-wider">
-                    XP
-                  </p>
-                </div>
-              </div>
+              {/* Level */}
+              {(() => {
+                const li = getLevelProgress(stats?.xp ?? user.xp);
+                return (
+                  <div
+                    className="flex items-center gap-3 px-5 py-3 rounded-2xl border"
+                    style={{
+                      background: `linear-gradient(135deg, ${li.tier.color}20 0%, ${li.tier.color}08 100%)`,
+                      borderColor: `${li.tier.color}30`,
+                      boxShadow: `0 0 20px ${li.tier.color}10`,
+                    }}
+                  >
+                    <span className="text-2xl">{li.tier.icon}</span>
+                    <div>
+                      <p className="font-bebas text-3xl leading-none" style={{ color: li.tier.color }}>
+                        Lv.{li.level}
+                      </p>
+                      <p className="text-cream/40 text-[10px] uppercase tracking-wider">
+                        {li.tier.name}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })()}
 
               {/* Coins */}
               <div

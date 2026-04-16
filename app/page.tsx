@@ -215,7 +215,7 @@ export default function ComingSoonPage() {
   const resetTimerRef = useRef<number | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
 
-  useEffect(() => { if (!isLoading && user) router.push("/dashboard"); }, [user, isLoading, router]);
+  useEffect(() => { if (!isLoading && user) router.replace("/dashboard"); }, [user, isLoading, router]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -259,7 +259,26 @@ export default function ComingSoonPage() {
     } catch { setStatus("error"); setMsg("Something went wrong."); }
   };
 
-  if (isLoading || user) return null;
+  // While auth is loading, show a branded splash screen
+  if (isLoading) return (
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="flex flex-col items-center gap-4">
+        <img src="/logo-icon.png" alt="Lionade" className="w-16 h-16 animate-pulse" />
+        <div className="w-10 h-10 rounded-full border-2 border-gold border-t-transparent animate-spin" />
+      </div>
+    </div>
+  );
+
+  // Logged in — redirect is happening via useEffect, show redirect message
+  if (user) return (
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="flex flex-col items-center gap-4">
+        <img src="/logo-icon.png" alt="Lionade" className="w-16 h-16 animate-pulse" />
+        <p className="font-bebas text-lg text-cream/40 tracking-widest">Entering Dashboard...</p>
+        <a href="/dashboard" className="text-electric/50 text-xs hover:text-electric transition mt-2">Click here if not redirected</a>
+      </div>
+    </div>
+  );
 
   const tickerContent = [...TICKER_ITEMS, ...TICKER_ITEMS, ...TICKER_ITEMS, ...TICKER_ITEMS];
 

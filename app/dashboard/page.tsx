@@ -125,15 +125,18 @@ function DashboardContent() {
     return () => clearTimeout(t);
   }, []);
 
-  // Daily login bonus — fires once on first dashboard load per day
+  // Daily login bonus — fires once per calendar day (client-side guard + server-side check)
   useEffect(() => {
     if (!user?.id) return;
+    const todayKey = `lionade_login_bonus_${new Date().toISOString().split("T")[0]}`;
+    if (typeof window !== "undefined" && sessionStorage.getItem(todayKey)) return; // already called this session
     apiPost<{ awarded: boolean; amount: number; consecutiveDays: number }>("/api/login-bonus", {})
       .then((res) => {
+        if (typeof window !== "undefined") sessionStorage.setItem(todayKey, "1");
         if (res.ok && res.data?.awarded) {
           setLoginBonus({ amount: res.data.amount, consecutiveDays: res.data.consecutiveDays });
-          // Auto-dismiss after 5 seconds
           setTimeout(() => setLoginBonus(null), 5000);
+          refreshUser(); // refresh coin count
         }
       });
   }, [user?.id]);
