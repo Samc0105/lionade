@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { User, Subject, Question } from "@/types";
-import { SUBJECT_ICONS } from "@/lib/mockData";
+import { SUBJECT_ICONS, DefaultSubjectIcon } from "@/lib/mockData";
 import { createDuel, completeDuel, getQuestions } from "@/lib/db";
 import DuelInvite from "@/components/DuelInvite";
 import CoinAnimation from "@/components/CoinAnimation";
@@ -10,6 +10,17 @@ import { useAuth } from "@/lib/auth";
 import { useRouter } from "next/navigation";
 import BackButton from "@/components/BackButton";
 import { cdnUrl } from "@/lib/cdn";
+import {
+  Sword,
+  Lightning,
+  Target,
+  Check,
+  X as XIcon,
+  Handshake,
+  Trophy,
+  Skull,
+  ArrowsClockwise,
+} from "@phosphor-icons/react";
 
 type DuelPhase = "invite" | "countdown" | "battle" | "results";
 
@@ -211,7 +222,7 @@ export default function DuelPage() {
           <div className="text-center mb-12 animate-slide-up">
             <span className="inline-flex items-center gap-2 bg-red-500/10 border border-red-500/30
               rounded-full px-4 py-1.5 text-red-400 text-sm font-semibold mb-6">
-              ⚔️ 1v1 Battle Mode
+              <Sword size={16} weight="regular" aria-hidden="true" /> 1v1 Battle Mode
             </span>
             <h1 className="font-bebas text-6xl sm:text-8xl text-cream tracking-wider mb-4">
               DUEL ARENA
@@ -224,13 +235,15 @@ export default function DuelPage() {
 
           {/* Rules */}
           <div className="grid sm:grid-cols-3 gap-4 mb-10 animate-slide-up" style={{ animationDelay: "0.15s" }}>
-            {[
-              { icon: "⚡", label: "15 seconds", desc: "per question" },
-              { icon: "🎯", label: "10 questions", desc: "same for both players" },
-              { icon: "fang", label: "2× coins", desc: "for the winner" },
-            ].map((r) => (
+            {([
+              { kind: "icon" as const, Icon: Lightning, label: "15 seconds", desc: "per question" },
+              { kind: "icon" as const, Icon: Target, label: "10 questions", desc: "same for both players" },
+              { kind: "fang" as const, label: "2× coins", desc: "for the winner" },
+            ]).map((r) => (
               <div key={r.label} className="card text-center py-5">
-                {r.icon === "fang" ? <img src={cdnUrl("/F.png")} alt="Fangs" className="w-8 h-8 object-contain mx-auto mb-2" /> : <span className="text-3xl block mb-2">{r.icon}</span>}
+                {r.kind === "fang"
+                  ? <img src={cdnUrl("/F.png")} alt="Fangs" className="w-8 h-8 object-contain mx-auto mb-2" />
+                  : <r.Icon size={32} weight="regular" aria-hidden="true" className="block mx-auto mb-2" />}
                 <p className="font-bebas text-xl text-cream tracking-wider">{r.label}</p>
                 <p className="text-cream/40 text-sm">{r.desc}</p>
               </div>
@@ -278,8 +291,12 @@ export default function DuelPage() {
             {countdown === 0 ? "GO!" : countdown}
           </div>
 
-          <p className="font-bebas text-2xl text-cream/50 tracking-widest">
-            {subject && SUBJECT_ICONS[subject]} {subject}
+          <p className="font-bebas text-2xl text-cream/50 tracking-widest inline-flex items-center gap-2">
+            {subject && (() => {
+              const DuelIcon = SUBJECT_ICONS[subject] ?? DefaultSubjectIcon;
+              return <DuelIcon size={22} weight="regular" aria-hidden="true" />;
+            })()}
+            {subject}
           </p>
         </div>
       </div>
@@ -421,8 +438,13 @@ export default function DuelPage() {
                           i === q.correctAnswer ? "bg-green-400/30 text-green-300" :
                           i === selected ? "bg-red-400/30 text-red-300" : "bg-white/5 text-cream/30"}`}
                     >
-                      {revealed && i === q.correctAnswer ? "✓" :
-                        revealed && i === selected ? "✗" : ["A", "B", "C", "D"][i]}
+                      {revealed && i === q.correctAnswer ? (
+                        <Check size={16} weight="bold" aria-hidden="true" />
+                      ) : revealed && i === selected ? (
+                        <XIcon size={16} weight="bold" aria-hidden="true" />
+                      ) : (
+                        ["A", "B", "C", "D"][i]
+                      )}
                     </span>
                     {opt}
                   </span>
@@ -444,8 +466,14 @@ export default function DuelPage() {
         <div className="max-w-2xl mx-auto px-4 py-12 text-center">
           {/* Result */}
           <div className="mb-8 animate-slide-up">
-            <div className="text-7xl mb-4">
-              {isTie ? "🤝" : iWon ? "🏆" : "💀"}
+            <div className="mb-4 flex justify-center">
+              {isTie ? (
+                <Handshake size={64} weight="fill" color="#E67E22" aria-hidden="true" />
+              ) : iWon ? (
+                <Trophy size={64} weight="fill" color="#FFD700" aria-hidden="true" />
+              ) : (
+                <Skull size={64} weight="fill" color="#E74C3C" aria-hidden="true" />
+              )}
             </div>
             <h1
               className="font-bebas text-7xl sm:text-8xl tracking-wider mb-2"
@@ -521,7 +549,11 @@ export default function DuelPage() {
                       color: a.challenger ? "#2ECC71" : "#E74C3C",
                     }}
                   >
-                    {a.challenger ? "✓" : "✗"}
+                    {a.challenger ? (
+                      <Check size={14} weight="bold" aria-hidden="true" />
+                    ) : (
+                      <XIcon size={14} weight="bold" aria-hidden="true" />
+                    )}
                   </div>
                   <div
                     className="w-full h-6 rounded flex items-center justify-center text-xs font-bold"
@@ -531,7 +563,11 @@ export default function DuelPage() {
                       color: a.opponent ? "#4A90D9" : "#E74C3C",
                     }}
                   >
-                    {a.opponent ? "✓" : "✗"}
+                    {a.opponent ? (
+                      <Check size={14} weight="bold" aria-hidden="true" />
+                    ) : (
+                      <XIcon size={14} weight="bold" aria-hidden="true" />
+                    )}
                   </div>
                 </div>
               ))}
@@ -564,10 +600,10 @@ export default function DuelPage() {
           {/* Actions */}
           <div className="flex flex-col sm:flex-row gap-3 animate-slide-up" style={{ animationDelay: "0.4s" }}>
             <button onClick={reset} className="btn-gold flex-1 py-3">
-              ⚔️ Rematch
+              <Sword size={18} weight="regular" aria-hidden="true" className="inline mr-1.5 -mt-0.5" /> Rematch
             </button>
             <button onClick={reset} className="btn-outline flex-1 py-3">
-              🔄 New Duel
+              <ArrowsClockwise size={18} weight="regular" aria-hidden="true" className="inline mr-1.5 -mt-0.5" /> New Duel
             </button>
           </div>
         </div>

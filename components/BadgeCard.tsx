@@ -2,6 +2,7 @@
 
 import { Badge } from "@/types";
 import { getRarityColor } from "@/lib/utils";
+import { Lock } from "@phosphor-icons/react";
 
 interface BadgeCardProps {
   badge: Badge;
@@ -77,7 +78,9 @@ export default function BadgeCard({ badge, size = "md", earned = true }: BadgeCa
       {/* Lock overlay */}
       {!earned && (
         <div className="absolute inset-0 flex items-center justify-center rounded-xl">
-          <span className="text-2xl">🔒</span>
+          <span className="text-2xl inline-flex items-center justify-center">
+            <Lock size={28} weight="regular" aria-hidden="true" />
+          </span>
         </div>
       )}
     </div>

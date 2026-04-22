@@ -9,6 +9,29 @@ import { apiPost, apiGet } from "@/lib/api-client";
 import type { MCQQuestion } from "@/lib/ninny";
 import BlitzMode from "@/components/Ninny/BlitzMode";
 import type { NinnyWrongAnswer } from "@/components/Ninny/MultipleChoiceMode";
+import {
+  Brain,
+  Lightning,
+  Target,
+  Fire,
+  BookOpen,
+  Trophy,
+  Dna,
+  Flask,
+  Binoculars,
+  Calculator,
+  Scroll,
+  Globe,
+  Bank,
+  StarFour,
+  Check,
+  X as XIcon,
+  TextAa,
+  Cards,
+  Calendar,
+  FileText,
+  type Icon as PhosphorIcon,
+} from "@phosphor-icons/react";
 
 // ── Types ────────────────────────────────────────────────────
 
@@ -31,10 +54,10 @@ const WORD_BANK: Record<number, string[]> = {
   6: ["carbon","oxygen","neuron","enzyme","plasma","genome","photon","proton","matter","energy","fusion","fision","motion","vector","tensor","quasar","galaxy","system","planet","nature","fossil","embryo","tissue","muscle","immune","mitral","cortex","fungal","biotic","tundra","desert","island","crater","mantle","ionize","charge","radius","prisms"],
 };
 
-const BLITZ_RULES = [
+const BLITZ_RULES: { icon: string | null; Icon?: PhosphorIcon; label: string; desc: string }[] = [
   { icon: "⏱", label: "60 SECONDS", desc: "Race the clock" },
-  { icon: "🧠", label: "ALL SUBJECTS", desc: "Random mix" },
-  { icon: "⚡", label: "2× FANGS", desc: "Per correct answer" },
+  { icon: null, Icon: Brain, label: "ALL SUBJECTS", desc: "Random mix" },
+  { icon: null, Icon: Lightning, label: "2× FANGS", desc: "Per correct answer" },
 ];
 
 const FLASHCARD_TERMS = [
@@ -544,12 +567,18 @@ export default function GamesPage() {
                   <p className="font-bebas text-sm tracking-widest text-cream/30 uppercase mb-3">Pro Tips</p>
                   <div className="space-y-2">
                     {[
-                      "🎯 Speed matters — don't overthink it",
-                      "🔥 Build streaks for that dopamine hit",
-                      "📚 Review your mistakes after each round",
-                    ].map((tip, i) => (
-                      <p key={i} className="text-cream/30 text-xs font-syne">{tip}</p>
-                    ))}
+                      { Icon: Target, text: "Speed matters — don't overthink it" },
+                      { Icon: Fire, text: "Build streaks for that dopamine hit" },
+                      { Icon: BookOpen, text: "Review your mistakes after each round" },
+                    ].map((tip, i) => {
+                      const TipIcon = tip.Icon;
+                      return (
+                        <p key={i} className="text-cream/30 text-xs font-syne">
+                          <TipIcon size={14} weight="regular" aria-hidden="true" className="inline mr-1.5 -mt-0.5" />
+                          {tip.text}
+                        </p>
+                      );
+                    })}
                   </div>
                 </div>
               </div>
@@ -570,7 +599,9 @@ export default function GamesPage() {
                     style={{ background: "radial-gradient(circle, rgba(255,107,0,0.12) 0%, transparent 70%)", animation: "pulse 3s ease-in-out infinite" }} />
 
                   <div className="relative">
-                    <p className="text-8xl mb-3" style={{ filter: "drop-shadow(0 0 25px rgba(255,107,0,0.6))" }}>⚡</p>
+                    <p className="text-8xl mb-3 flex items-center justify-center" style={{ filter: "drop-shadow(0 0 25px rgba(255,107,0,0.6))" }}>
+                      <Lightning size={96} weight="fill" aria-hidden="true" />
+                    </p>
                     <h1 className="font-bebas text-6xl sm:text-7xl tracking-wider mb-1"
                       style={{
                         background: "linear-gradient(135deg, #FF6B00 0%, #FFD700 50%, #FF6B00 100%)",
@@ -584,16 +615,25 @@ export default function GamesPage() {
 
                     {/* Rules row */}
                     <div className="grid grid-cols-3 gap-2 mb-8">
-                      {BLITZ_RULES.map((rule, i) => (
-                        <div key={i} className="rounded-xl py-3 px-2" style={{
-                          background: "rgba(255,255,255,0.03)",
-                          border: "1px solid rgba(255,107,0,0.1)",
-                        }}>
-                          <p className="text-xl mb-0.5">{rule.icon}</p>
-                          <p className="font-bebas text-[11px] tracking-wider text-cream/70">{rule.label}</p>
-                          <p className="text-cream/20 text-[8px] font-syne">{rule.desc}</p>
-                        </div>
-                      ))}
+                      {BLITZ_RULES.map((rule, i) => {
+                        const RuleIcon = rule.Icon;
+                        return (
+                          <div key={i} className="rounded-xl py-3 px-2" style={{
+                            background: "rgba(255,255,255,0.03)",
+                            border: "1px solid rgba(255,107,0,0.1)",
+                          }}>
+                            <p className="text-xl mb-0.5 flex items-center justify-center">
+                              {RuleIcon ? (
+                                <RuleIcon size={24} weight="regular" aria-hidden="true" />
+                              ) : (
+                                rule.icon
+                              )}
+                            </p>
+                            <p className="font-bebas text-[11px] tracking-wider text-cream/70">{rule.label}</p>
+                            <p className="text-cream/20 text-[8px] font-syne">{rule.desc}</p>
+                          </div>
+                        );
+                      })}
                     </div>
 
                     {/* Personal best */}
@@ -601,7 +641,7 @@ export default function GamesPage() {
                       <div className="flex justify-center mb-6">
                         <div className="flex items-center gap-2 px-4 py-1.5 rounded-full"
                           style={{ background: "rgba(255,215,0,0.08)", border: "1px solid rgba(255,215,0,0.15)" }}>
-                          <span className="text-xs">🏆</span>
+                          <Trophy size={14} weight="regular" aria-hidden="true" />
                           <span className="font-bebas text-xs tracking-wider text-gold/60">Best: {blitzBest} correct</span>
                         </div>
                       </div>
@@ -665,21 +705,25 @@ export default function GamesPage() {
                 }}>
                   <p className="font-bebas text-sm tracking-widest text-cream/30 uppercase mb-3">Subjects Mixed</p>
                   <div className="flex flex-wrap gap-2">
-                    {[
-                      { label: "Biology", icon: "🧬" },
-                      { label: "Chemistry", icon: "⚗️" },
-                      { label: "Physics", icon: "🔭" },
-                      { label: "Math", icon: "🔢" },
-                      { label: "History", icon: "📜" },
-                      { label: "Earth Sci", icon: "🌍" },
-                      { label: "Social", icon: "🏛" },
-                      { label: "Astronomy", icon: "🌌" },
-                    ].map((s, i) => (
-                      <span key={i} className="flex items-center gap-1 text-[10px] text-cream/30 font-syne px-2 py-1 rounded-full"
-                        style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}>
-                        {s.icon} {s.label}
-                      </span>
-                    ))}
+                    {([
+                      { label: "Biology", Icon: Dna, weight: "regular" as const },
+                      { label: "Chemistry", Icon: Flask, weight: "regular" as const },
+                      { label: "Physics", Icon: Binoculars, weight: "regular" as const },
+                      { label: "Math", Icon: Calculator, weight: "regular" as const },
+                      { label: "History", Icon: Scroll, weight: "regular" as const },
+                      { label: "Earth Sci", Icon: Globe, weight: "regular" as const },
+                      { label: "Social", Icon: Bank, weight: "regular" as const },
+                      { label: "Astronomy", Icon: StarFour, weight: "fill" as const },
+                    ]).map((s, i) => {
+                      const SubjectIcon = s.Icon;
+                      return (
+                        <span key={i} className="flex items-center gap-1 text-[10px] text-cream/30 font-syne px-2 py-1 rounded-full"
+                          style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}>
+                          <SubjectIcon size={14} weight={s.weight} aria-hidden="true" />
+                          {s.label}
+                        </span>
+                      );
+                    })}
                   </div>
                 </div>
 
@@ -736,7 +780,9 @@ export default function GamesPage() {
 
             {/* Results header */}
             <div className="text-center mb-8 animate-slide-up">
-              <span className="text-5xl mb-3 block">⚡</span>
+              <span className="text-5xl mb-3 flex items-center justify-center">
+                <Lightning size={52} weight="fill" aria-hidden="true" />
+              </span>
               <h2 className="font-bebas text-5xl text-cream tracking-wider mb-1">TIME&apos;S UP!</h2>
               {isNewBest && (
                 <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full mb-3"
@@ -928,7 +974,13 @@ export default function GamesPage() {
                       {tlSubmitted && <p className="text-cream/40 text-xs mt-0.5">{ev.date}</p>}
                     </div>
                     {tlSubmitted && (
-                      <span className="text-lg">{isCorrect ? "✓" : "✗"}</span>
+                      <span className="text-lg flex items-center">
+                        {isCorrect ? (
+                          <Check size={20} weight="bold" aria-hidden="true" />
+                        ) : (
+                          <XIcon size={20} weight="bold" aria-hidden="true" />
+                        )}
+                      </span>
                     )}
                   </div>
                 );
@@ -959,11 +1011,11 @@ export default function GamesPage() {
   // MENU
   // ══════════════════════════════════════════════════════════
 
-  const GAMES = [
-    { id: "roardle" as GameMode, name: "ROARDLE", icon: "🔤", desc: "Guess the science word", fangs: `${wordLength === 4 ? 10 : wordLength === 5 ? 15 : 20}+`, limit: DAILY_LIMITS.roardle, start: startRoardle, color: "#00BFFF", pos: "top-0 left-0" },
-    { id: "blitz" as GameMode, name: "BLITZ SPRINT", icon: "⚡", desc: "60s rapid fire Q&A", fangs: "2×", limit: DAILY_LIMITS.blitz, start: openBlitzSetup, color: "#FF6B00", pos: "top-0 right-0" },
-    { id: "flashcards" as GameMode, name: "FLASH CARDS", icon: "🃏", desc: "Flip, learn, repeat", fangs: "15", limit: DAILY_LIMITS.flashcards, start: startFlashcards, color: "#9B59B6", pos: "bottom-0 left-0" },
-    { id: "timeline" as GameMode, name: "TIMELINE DROP", icon: "📅", desc: "Order events in time", fangs: "3×", limit: DAILY_LIMITS.timeline, start: startTimeline, color: "#00C851", pos: "bottom-0 right-0" },
+  const GAMES: { id: GameMode; name: string; Icon: PhosphorIcon; desc: string; fangs: string; limit: number; start: () => void; color: string; pos: string }[] = [
+    { id: "roardle" as GameMode, name: "ROARDLE", Icon: TextAa, desc: "Guess the science word", fangs: `${wordLength === 4 ? 10 : wordLength === 5 ? 15 : 20}+`, limit: DAILY_LIMITS.roardle, start: startRoardle, color: "#00BFFF", pos: "top-0 left-0" },
+    { id: "blitz" as GameMode, name: "BLITZ SPRINT", Icon: Lightning, desc: "60s rapid fire Q&A", fangs: "2×", limit: DAILY_LIMITS.blitz, start: openBlitzSetup, color: "#FF6B00", pos: "top-0 right-0" },
+    { id: "flashcards" as GameMode, name: "FLASH CARDS", Icon: Cards, desc: "Flip, learn, repeat", fangs: "15", limit: DAILY_LIMITS.flashcards, start: startFlashcards, color: "#9B59B6", pos: "bottom-0 left-0" },
+    { id: "timeline" as GameMode, name: "TIMELINE DROP", Icon: Calendar, desc: "Order events in time", fangs: "3×", limit: DAILY_LIMITS.timeline, start: startTimeline, color: "#00C851", pos: "bottom-0 right-0" },
   ];
 
   // Helper to build rgba from hex
@@ -974,18 +1026,74 @@ export default function GamesPage() {
     return `rgba(${r},${g},${b},${a})`;
   };
 
+  // Mini-animation component per game id — rendered inside each ticket.
+  const GameMini = ({ id }: { id: GameMode }) => {
+    if (id === "roardle") {
+      return (
+        <div className="roardle-mini flex items-center">
+          <span className="roardle-tile" style={{ color: "#00BFFF", borderColor: "rgba(0,191,255,0.4)", background: "rgba(0,191,255,0.06)" }}>R</span>
+          <span className="roardle-tile" style={{ color: "#00BFFF", borderColor: "rgba(0,191,255,0.4)", background: "rgba(0,191,255,0.06)" }}>O</span>
+          <span className="roardle-tile" style={{ color: "#00BFFF", borderColor: "rgba(0,191,255,0.4)", background: "rgba(0,191,255,0.06)" }}>A</span>
+        </div>
+      );
+    }
+    if (id === "blitz") {
+      return <Lightning size={40} weight="fill" color="#FF6B00" className="blitz-mini" aria-hidden="true" />;
+    }
+    if (id === "flashcards") {
+      return (
+        <div className="flashcards-mini">
+          <div className="flashcards-mini-inner">
+            <div className="flashcards-face flashcards-face-front">Q</div>
+            <div className="flashcards-face flashcards-face-back">A</div>
+          </div>
+        </div>
+      );
+    }
+    if (id === "timeline") {
+      return (
+        <div className="timeline-mini" aria-hidden="true">
+          <div className="timeline-mini-track" />
+          {[0, 25, 50, 75, 100].map(x => (
+            <span key={x} className="timeline-mini-tick" style={{ left: `${x}%` }} />
+          ))}
+          <span className="timeline-mini-dot" />
+        </div>
+      );
+    }
+    return null;
+  };
+
   return (
     <ProtectedRoute>
-      <div className="min-h-screen pt-16 pb-20 md:pb-8 overflow-hidden">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
+      <div className="min-h-screen pt-16 pb-20 md:pb-8 overflow-hidden relative">
+        {/* Small lion crest — demoted from center-mascot to corner watermark */}
+        <div
+          className="hidden md:block absolute top-24 right-10 w-28 h-28 opacity-40 pointer-events-none games-lion-breathe z-0"
+          aria-hidden="true"
+        >
+          <img
+            src="/image-name.png"
+            alt=""
+            className="w-full h-full object-contain"
+            style={{ filter: "drop-shadow(0 0 18px rgba(255,215,0,0.35))" }}
+          />
+        </div>
 
-          {/* ═══ HEADER ═══ */}
-          <div className="text-center mb-6 animate-slide-up">
-            <h1 className="font-bebas text-6xl sm:text-8xl text-cream tracking-wider leading-none mb-2">
-              GAMES
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-10 relative z-10">
+
+          {/* ═══ HEADER — "The Arcade" private-catalog feel ═══ */}
+          <header className="mb-10 animate-slide-up">
+            <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-cream/30 mb-2">
+              private ledger · est. 2026
+            </p>
+            <h1 className="font-bebas text-[clamp(4rem,14vw,11rem)] text-cream tracking-tight leading-[0.86]">
+              THE<br />ARCADE
             </h1>
-            <p className="text-cream/35 text-sm font-syne">Study smarter. Earn Fangs. Have fun.</p>
-          </div>
+            <p className="font-serif italic text-cream/40 text-sm mt-3 max-w-md">
+              four lots · two-times Fangs on strong runs · pick one, pull the ticket
+            </p>
+          </header>
 
           {/* ═══ TABS ═══ */}
           <div className="flex justify-center gap-2 mb-8 animate-slide-up" style={{ animationDelay: "0.05s" }}>
@@ -1002,7 +1110,17 @@ export default function GamesPage() {
                   border: "1px solid rgba(255,255,255,0.08)",
                   color: "rgba(238,244,255,0.35)",
                 }}>
-                {t === "quickplay" ? "⚡ QUICK PLAY" : "📚 MY LIBRARY"}
+                {t === "quickplay" ? (
+                  <>
+                    <Lightning size={16} weight="regular" aria-hidden="true" className="inline mr-1.5 -mt-0.5" />
+                    QUICK PLAY
+                  </>
+                ) : (
+                  <>
+                    <BookOpen size={16} weight="regular" aria-hidden="true" className="inline mr-1.5 -mt-0.5" />
+                    MY LIBRARY
+                  </>
+                )}
               </button>
             ))}
           </div>
@@ -1011,7 +1129,9 @@ export default function GamesPage() {
           {tab === "library" && !pdfContent && (
             <div className="mb-8 animate-slide-up" style={{ animationDelay: "0.1s" }}>
               <div className="rounded-2xl p-8 text-center" style={{ background: "rgba(255,255,255,0.02)", border: "2px dashed rgba(255,255,255,0.1)" }}>
-                <span className="text-4xl block mb-3">📄</span>
+                <span className="text-4xl mb-3 flex items-center justify-center">
+                  <FileText size={40} weight="fill" aria-hidden="true" />
+                </span>
                 <p className="font-bebas text-xl text-cream tracking-wider mb-2">UPLOAD YOUR STUDY MATERIAL</p>
                 <p className="text-cream/30 text-xs mb-6 font-syne">Drop a PDF to generate custom games from your notes</p>
                 <label className="btn-gold px-6 py-3 rounded-xl text-sm cursor-pointer inline-block">
@@ -1032,7 +1152,9 @@ export default function GamesPage() {
           {tab === "library" && pdfContent && (
             <div className="mb-8 animate-slide-up" style={{ animationDelay: "0.1s" }}>
               <div className="rounded-xl p-4 flex items-center gap-4" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(74,144,217,0.2)" }}>
-                <span className="text-2xl">📄</span>
+                <span className="text-2xl flex items-center">
+                  <FileText size={28} weight="regular" aria-hidden="true" />
+                </span>
                 <div className="flex-1 min-w-0">
                   <p className="text-cream font-semibold text-sm truncate">{pdfName}</p>
                   <p className="text-cream/30 text-[10px]">{pdfContent.vocabulary?.length ?? 0} vocab · {pdfContent.concepts?.length ?? 0} questions · {pdfContent.keyTerms?.length ?? 0} terms</p>
@@ -1043,157 +1165,148 @@ export default function GamesPage() {
             </div>
           )}
 
-          {/* ═══ DIAGONAL LAYOUT: LION CENTER + 4 GAME CARDS ═══ */}
-          <div className="relative animate-slide-up" style={{ animationDelay: "0.15s" }}>
+          {/* ═══ TICKET STACK — 4 wide luxury tickets, vertical, with foil sheen ═══ */}
+          <div className="games-stack space-y-5 animate-slide-up" style={{ animationDelay: "0.15s" }}>
+            {GAMES.map((g, idx) => {
+              const plays = getDailyPlays(g.id);
+              const remaining = g.limit - plays;
+              const canPlay = remaining > 0 || g.limit >= 999;
+              const isPdf = tab === "library";
+              const lotNumber = String(idx + 1).padStart(3, "0");
+              const GameIcon = g.Icon;
 
-            {/* Desktop: diagonal layout */}
-            <div className="hidden sm:block relative" style={{ height: "760px" }}>
+              return (
+                <div
+                  key={g.id}
+                  className="games-ticket games-foil relative rounded-[6px] overflow-hidden"
+                  style={{
+                    background: `linear-gradient(90deg, ${hexToRgba(g.color, 0.08)} 0%, #0c0a14 60%)`,
+                    border: `1px solid ${hexToRgba(g.color, 0.22)}`,
+                    boxShadow: "0 10px 28px rgba(0, 0, 0, 0.4)",
+                  }}
+                >
+                  <div className="relative z-10 flex items-stretch min-h-[140px] sm:min-h-[160px]">
 
-              {/* ── CENTER: Lion Mascot ── */}
-              <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
-                <div className="games-lion-breathe">
-                  <img src="/image-name.png" alt="Lionade Mascot" className="w-[320px] h-[320px] object-contain" style={{ filter: "drop-shadow(0 0 25px rgba(0,150,255,0.7))" }} />
-                </div>
-              </div>
-
-              {/* ── 4 Game Cards positioned diagonally ── */}
-              {GAMES.map((g, idx) => {
-                const positions = [
-                  { top: 0, left: 0 },           // top-left
-                  { top: 0, right: 0 },           // top-right
-                  { bottom: 0, left: 0 },         // bottom-left
-                  { bottom: 0, right: 0 },        // bottom-right
-                ];
-                const pos = positions[idx];
-                const plays = getDailyPlays(g.id);
-                const remaining = g.limit - plays;
-                const canPlay = remaining > 0 || g.limit >= 999;
-                const isPdf = tab === "library";
-
-                return (
-                  <div key={g.id} className="absolute game-card-electric group"
-                    style={{
-                      ...pos,
-                      width: 300,
-                      ["--electric-color" as string]: g.color,
-                      ["--electric-rgb" as string]: `${parseInt(g.color.slice(1,3),16)},${parseInt(g.color.slice(3,5),16)},${parseInt(g.color.slice(5,7),16)}`,
-                    }}>
-                    <div className="relative rounded-2xl p-6 transition-all duration-300 group-hover:-translate-y-1 overflow-hidden h-full"
-                      style={{
-                        background: `linear-gradient(145deg, ${hexToRgba(g.color, 0.08)} 0%, #0d0d14 40%)`,
-                        border: `1px solid ${hexToRgba(g.color, 0.2)}`,
-                        minHeight: 220,
-                      }}>
-
-                      {/* Electric border animation */}
-                      <div className="absolute inset-0 rounded-2xl pointer-events-none game-electric-border"
-                        style={{ ["--electric-color" as string]: g.color }} />
-
-                      {/* Corner sparks */}
-                      <svg className="absolute top-2 right-2 w-5 h-5 opacity-40 group-hover:opacity-80 transition-opacity" viewBox="0 0 16 16">
-                        <path d="M8 0 L9 6 L16 8 L9 10 L8 16 L7 10 L0 8 L7 6 Z" fill={g.color} />
-                      </svg>
-
-                      <div className="relative z-10">
-                        <div className="flex items-start justify-between mb-3">
-                          <span className="text-4xl">{g.icon}</span>
-                          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full" style={{ background: "rgba(255,215,0,0.1)", border: "1px solid rgba(255,215,0,0.15)" }}>
-                            <img src={cdnUrl("/F.png")} alt="Fangs" className="w-4 h-4 object-contain" />
-                            <span className="text-gold text-xs font-bold">{g.fangs}</span>
-                          </div>
-                        </div>
-
-                        <p className="font-bebas text-3xl tracking-wider mb-1" style={{ color: g.color }}>{g.name}</p>
-                        <p className="text-cream/30 text-xs mb-4 font-syne">{isPdf ? `From PDF` : g.desc}</p>
-
-                        {/* Roardle word length selector */}
-                        {g.id === "roardle" && (
-                          <div className="flex gap-2 mb-4">
-                            {[4, 5, 6].map(len => (
-                              <button key={len} onClick={() => setWordLength(len)}
-                                className="transition-all duration-200 active:scale-90"
-                                style={wordLength === len ? {
-                                  width: 40, height: 40, borderRadius: "50%",
-                                  background: g.color, color: "#fff",
-                                  fontSize: "14px", fontWeight: 800, border: "none",
-                                  boxShadow: `0 4px 14px ${hexToRgba(g.color, 0.5)}`,
-                                } : {
-                                  width: 40, height: 40, borderRadius: "50%",
-                                  background: "rgba(255,255,255,0.05)", color: "rgba(238,244,255,0.3)",
-                                  fontSize: "14px", fontWeight: 700, border: "1px solid rgba(255,255,255,0.1)",
-                                }}>
-                                {len}
-                              </button>
-                            ))}
-                          </div>
-                        )}
-
-                        <div className="flex items-center justify-between">
-                          <button onClick={canPlay ? g.start : undefined}
-                            disabled={!canPlay || (isPdf && !pdfContent && g.id !== "flashcards")}
-                            className="font-syne font-bold text-sm px-6 py-2.5 rounded-xl transition-all active:scale-95 disabled:opacity-20 disabled:cursor-not-allowed"
-                            style={{ background: g.color, color: "#fff", boxShadow: `0 4px 16px ${hexToRgba(g.color, 0.35)}` }}>
-                            Play
-                          </button>
-                          {g.limit < 999 && <span className="text-cream/20 text-[10px] font-syne">{Math.max(0, remaining)} left today</span>}
-                        </div>
+                    {/* ── Column 1: Lot number ── */}
+                    <div
+                      className="flex items-center justify-center w-[60px] sm:w-[88px] flex-shrink-0"
+                      style={{ background: "rgba(0, 0, 0, 0.25)", borderRight: "1px dashed rgba(255, 215, 0, 0.12)" }}
+                    >
+                      <div className="games-lot-number font-mono text-[11px] sm:text-[13px] text-cream/35 font-bold">
+                        lot {lotNumber}
                       </div>
                     </div>
-                  </div>
-                );
-              })}
-            </div>
 
-            {/* Mobile: stacked layout with lion on top */}
-            <div className="sm:hidden">
-              <div className="flex justify-center mb-6">
-                <div className="games-lion-breathe">
-                  <img src="/image-name.png" alt="Lionade Mascot" className="w-[240px] h-[240px] object-contain" style={{ filter: "drop-shadow(0 0 20px rgba(0,150,255,0.6))" }} />
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                {GAMES.map(g => {
-                  const plays = getDailyPlays(g.id);
-                  const remaining = g.limit - plays;
-                  const canPlay = remaining > 0 || g.limit >= 999;
-                  const isPdf = tab === "library";
-                  return (
-                    <div key={g.id} className="rounded-2xl p-4 game-card-electric group"
-                      style={{
-                        background: `linear-gradient(145deg, ${hexToRgba(g.color, 0.08)} 0%, #0d0d14 40%)`,
-                        border: `1px solid ${hexToRgba(g.color, 0.2)}`,
-                        ["--electric-color" as string]: g.color,
-                      }}>
-                      <span className="text-xl block mb-1">{g.icon}</span>
-                      <p className="font-bebas text-base tracking-wider mb-0.5" style={{ color: g.color }}>{g.name}</p>
-                      <p className="text-cream/25 text-[9px] mb-2 font-syne">{isPdf ? "PDF" : g.desc}</p>
+                    {/* ── Column 2: Icon badge ── */}
+                    <div className="flex items-center justify-center w-14 sm:w-20 flex-shrink-0">
+                      <div
+                        className="w-11 h-11 sm:w-14 sm:h-14 flex items-center justify-center rounded-sm"
+                        style={{
+                          background: hexToRgba(g.color, 0.12),
+                          border: `1px solid ${hexToRgba(g.color, 0.4)}`,
+                          boxShadow: `inset 0 0 20px ${hexToRgba(g.color, 0.15)}`,
+                        }}
+                      >
+                        <GameIcon size={24} weight="fill" style={{ color: g.color }} aria-hidden="true" />
+                      </div>
+                    </div>
+
+                    {/* ── Column 3: Title + description + meta ── */}
+                    <div className="flex-1 min-w-0 flex flex-col justify-center px-3 sm:px-5 py-4">
+                      <div className="flex items-baseline gap-2 flex-wrap mb-1">
+                        <h3
+                          className="font-bebas tracking-wider leading-none"
+                          style={{
+                            color: g.color,
+                            fontSize: "clamp(1.5rem, 4.5vw, 2.25rem)",
+                          }}
+                        >
+                          {g.name}
+                        </h3>
+                      </div>
+                      <p className="text-cream/45 text-xs sm:text-sm font-syne italic mb-2">
+                        {isPdf ? "from your PDF" : g.desc}
+                      </p>
+
+                      {/* Meta strip: fangs + daily limit */}
+                      <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+                        <div className="flex items-center gap-1.5 px-2 py-0.5" style={{ background: "rgba(255, 215, 0, 0.08)", border: "1px solid rgba(255, 215, 0, 0.22)" }}>
+                          <img src={cdnUrl("/F.png")} alt="Fangs" className="w-3.5 h-3.5 object-contain" />
+                          <span className="font-mono text-[10px] sm:text-[11px] font-bold text-gold">{g.fangs}</span>
+                        </div>
+                        {g.limit < 999 && (
+                          <span className="font-mono text-[10px] text-cream/40 uppercase tracking-wider">
+                            {Math.max(0, remaining)} / {g.limit} today
+                          </span>
+                        )}
+                        {g.limit >= 999 && (
+                          <span className="font-mono text-[10px] text-cream/40 uppercase tracking-wider">unlimited</span>
+                        )}
+                      </div>
+
+                      {/* Roardle word-length selector inline with ticket */}
                       {g.id === "roardle" && (
-                        <div className="flex gap-1 mb-2">
+                        <div className="flex gap-2 mt-3">
                           {[4, 5, 6].map(len => (
-                            <button key={len} onClick={() => setWordLength(len)}
-                              className="text-[9px] font-bold transition-all active:scale-90"
+                            <button
+                              key={len}
+                              onClick={() => setWordLength(len)}
+                              className="transition-all duration-200 active:scale-90"
                               style={wordLength === len ? {
-                                width: 24, height: 24, borderRadius: "50%", background: g.color, color: "#fff", border: "none",
+                                width: 32, height: 32,
+                                background: g.color, color: "#fff",
+                                fontSize: "12px", fontWeight: 800,
+                                border: "none",
+                                boxShadow: `0 2px 10px ${hexToRgba(g.color, 0.5)}`,
                               } : {
-                                width: 24, height: 24, borderRadius: "50%", background: "rgba(255,255,255,0.05)", color: "rgba(238,244,255,0.3)", border: "1px solid rgba(255,255,255,0.1)",
-                              }}>
+                                width: 32, height: 32,
+                                background: "rgba(255,255,255,0.04)", color: "rgba(238,244,255,0.35)",
+                                fontSize: "12px", fontWeight: 700,
+                                border: "1px solid rgba(255,255,255,0.1)",
+                              }}
+                              aria-label={`${len} letters`}
+                            >
                               {len}
                             </button>
                           ))}
                         </div>
                       )}
-                      <button onClick={canPlay ? g.start : undefined}
+                    </div>
+
+                    {/* ── Column 4: Mini-animation (hidden on mobile) ── */}
+                    <div className="hidden md:flex items-center justify-center w-[110px] flex-shrink-0 pr-2">
+                      <GameMini id={g.id} />
+                    </div>
+
+                    {/* ── Column 5: Play button ── */}
+                    <div className="flex items-center justify-end flex-shrink-0 pr-4 sm:pr-6">
+                      <button
+                        onClick={canPlay ? g.start : undefined}
                         disabled={!canPlay || (isPdf && !pdfContent && g.id !== "flashcards")}
-                        className="font-syne font-bold text-[10px] px-3 py-1 rounded-lg disabled:opacity-20"
-                        style={{ background: g.color, color: "#fff" }}>
-                        Play
+                        className="font-syne font-bold text-xs sm:text-sm px-4 sm:px-6 py-2.5 transition-all active:scale-95 disabled:opacity-20 disabled:cursor-not-allowed inline-flex items-center gap-2"
+                        style={{
+                          background: g.color,
+                          color: "#fff",
+                          boxShadow: `0 4px 14px ${hexToRgba(g.color, 0.4)}, inset 0 1px 0 rgba(255, 255, 255, 0.18)`,
+                        }}
+                      >
+                        Pull
+                        <span aria-hidden="true">→</span>
                       </button>
                     </div>
-                  );
-                })}
-              </div>
-            </div>
+                  </div>
+
+                  {/* Perforated vertical line between lot column and content */}
+                  <div className="games-ticket-perf" aria-hidden="true" />
+                </div>
+              );
+            })}
           </div>
+
+          {/* Footer tag for the page */}
+          <p className="font-serif italic text-cream/20 text-xs text-center mt-10">
+            house rules: no Fangs without effort · draw resets at midnight
+          </p>
         </div>
       </div>
     </ProtectedRoute>

@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import Link from "next/link";
+import { Warning } from "@phosphor-icons/react";
 
 export default function Error({
   error,
@@ -18,7 +19,9 @@ export default function Error({
     <div className="min-h-screen flex items-center justify-center px-6"
       style={{ background: "#04080F" }}>
       <div className="text-center max-w-md">
-        <div className="text-6xl mb-6">⚠️</div>
+        <div className="flex justify-center mb-6">
+          <Warning size={64} weight="fill" color="#EF4444" aria-hidden="true" />
+        </div>
         <h2 className="font-bebas text-4xl text-cream tracking-wider mb-3">
           SOMETHING WENT WRONG
         </h2>

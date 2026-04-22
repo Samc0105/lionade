@@ -6,18 +6,35 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import { useAuth } from "@/lib/auth";
 import { cdnUrl } from "@/lib/cdn";
 import { getEloLeaderboard } from "@/lib/db";
+import {
+  Medal,
+  Diamond,
+  DiamondsFour,
+  Heart,
+  Flame,
+  Crown,
+  Lightning,
+  Sword,
+  Target,
+  Users,
+  Trophy,
+  CheckCircle,
+  CurrencyDollar,
+  Lock,
+  Shield,
+} from "@phosphor-icons/react";
 
 /* ── Tier definitions (bottom → top) ── */
 const TIERS = [
-  { name: "BRONZE", color: "#CD7F32", range: "0–99 wins", tagline: "Freshman", icon: "🥉", image: cdnUrl("/bronze.png") },
-  { name: "SILVER", color: "#C0C0C0", range: "100–249 wins", tagline: "Scholar", icon: "🥈", image: cdnUrl("/silver.png") },
-  { name: "GOLD", color: "#FFD700", range: "250–499 wins", tagline: "Honor Roll", icon: "🥇", image: cdnUrl("/gold.png") },
-  { name: "PLATINUM", color: "#00CED1", range: "500–999 wins", tagline: "Dean's List", icon: "💎", image: cdnUrl("/platinum.png") },
-  { name: "DIAMOND", color: "#B9F2FF", range: "1,000–1,999 wins", tagline: "Valedictorian", icon: "💠", image: cdnUrl("/diamond.png") },
-  { name: "ONYX", color: "#1A1A2E", textColor: "#C0C0D0", glowColor: "#C0C0D0", range: "2,000–3,499 wins", tagline: "Prodigy", icon: "🖤", image: cdnUrl("/onix.png") },
-  { name: "RUBY", color: "#E0115F", range: "3,500–4,999 wins", tagline: "Olympiad", icon: "❤️‍🔥", image: cdnUrl("/ruby.png") },
-  { name: "EMERALD", color: "#50C878", range: "5,000–7,499 wins", tagline: "Mastermind", icon: "👑", image: cdnUrl("/emerald.png") },
-  { name: "LEGEND", color: "legend", range: "7,500+ wins", tagline: "Immortal", icon: "⚡", image: cdnUrl("/legend.png") },
+  { name: "BRONZE", color: "#CD7F32", range: "0–99 wins", tagline: "Freshman", Icon: Medal, iconColor: "#CD7F32", iconWeight: "regular" as const, image: cdnUrl("/bronze.png") },
+  { name: "SILVER", color: "#C0C0C0", range: "100–249 wins", tagline: "Scholar", Icon: Medal, iconColor: "#C0C0C0", iconWeight: "regular" as const, image: cdnUrl("/silver.png") },
+  { name: "GOLD", color: "#FFD700", range: "250–499 wins", tagline: "Honor Roll", Icon: Medal, iconColor: "#FFD700", iconWeight: "regular" as const, image: cdnUrl("/gold.png") },
+  { name: "PLATINUM", color: "#00CED1", range: "500–999 wins", tagline: "Dean's List", Icon: Diamond, iconColor: "#00CED1", iconWeight: "regular" as const, image: cdnUrl("/platinum.png") },
+  { name: "DIAMOND", color: "#B9F2FF", range: "1,000–1,999 wins", tagline: "Valedictorian", Icon: DiamondsFour, iconColor: "#B9F2FF", iconWeight: "regular" as const, image: cdnUrl("/diamond.png") },
+  { name: "ONYX", color: "#1A1A2E", textColor: "#C0C0D0", glowColor: "#C0C0D0", range: "2,000–3,499 wins", tagline: "Prodigy", Icon: Heart, iconColor: "#1A1A2E", iconWeight: "fill" as const, image: cdnUrl("/onix.png") },
+  { name: "RUBY", color: "#E0115F", range: "3,500–4,999 wins", tagline: "Olympiad", Icon: Flame, iconColor: "#E0115F", iconWeight: "fill" as const, image: cdnUrl("/ruby.png") },
+  { name: "EMERALD", color: "#50C878", range: "5,000–7,499 wins", tagline: "Mastermind", Icon: Crown, iconColor: "#50C878", iconWeight: "fill" as const, image: cdnUrl("/emerald.png") },
+  { name: "LEGEND", color: "legend", range: "7,500+ wins", tagline: "Immortal", Icon: Lightning, iconColor: "#FFD700", iconWeight: "fill" as const, image: cdnUrl("/legend.png") },
 ];
 
 const TIER_WIDTHS = ["40%", "48%", "54%", "60%", "68%", "76%", "84%", "92%", "100%"];
@@ -211,7 +228,7 @@ export default function CompetePage() {
           {/* ═══ 3. ARENA HEADLINE ═══ */}
           <div className="text-center mb-10 animate-slide-up" style={{ animationDelay: "0.1s" }}>
             <h1 className="font-bebas text-6xl sm:text-8xl chrome-text tracking-wider leading-none">
-              ⚔️ ARENA
+              <Sword size={52} weight="regular" aria-hidden="true" className="inline mr-1.5 -mt-0.5" /> ARENA
             </h1>
             <p className="text-cream/40 text-sm sm:text-base mt-2 max-w-lg mx-auto">
               Choose your battleground. Climb the ranks. Earn real rewards.
@@ -237,11 +254,11 @@ export default function CompetePage() {
                     color: "#fff",
                     boxShadow: "0 2px 12px rgba(239,68,68,0.5)",
                   }}>
-                  ⚔️ MOST POPULAR
+                  <Sword size={18} weight="regular" aria-hidden="true" className="inline mr-1.5 -mt-0.5" /> MOST POPULAR
                 </div>
 
                 <div className="relative p-7 sm:p-10">
-                  <p className="text-5xl mb-4">⚔️</p>
+                  <p className="text-5xl mb-4"><Sword size={52} weight="regular" aria-hidden="true" /></p>
                   <p className="font-bebas text-4xl sm:text-5xl tracking-wider text-[#EF4444] mb-3"
                     style={{ textShadow: "0 0 20px rgba(239,68,68,0.3)" }}>
                     1v1 DUEL
@@ -255,10 +272,10 @@ export default function CompetePage() {
                   </p>
                   <div className="flex flex-wrap gap-3 mb-6">
                     <Link href="/arena" className="btn-gold text-sm px-6 py-3 rounded-xl">
-                      🎯 Find Opponent
+                      <Target size={18} weight="regular" aria-hidden="true" className="inline mr-1.5 -mt-0.5" /> Find Opponent
                     </Link>
                     <Link href="/arena" className="btn-outline text-sm px-6 py-3 rounded-xl">
-                      👥 Challenge Friend
+                      <Users size={18} weight="regular" aria-hidden="true" className="inline mr-1.5 -mt-0.5" /> Challenge Friend
                     </Link>
                   </div>
                   <p className="text-cream/20 text-xs">
@@ -283,7 +300,7 @@ export default function CompetePage() {
                     style={{ background: "radial-gradient(ellipse at 30% 30%, rgba(234,179,8,0.06) 0%, transparent 60%)" }} />
                   <div className="ribbon-diagonal" style={{ background: "linear-gradient(135deg, #FF6B00, #FF8C00)" }}>PLAY</div>
                   <div className="relative p-7">
-                    <p className="text-4xl mb-3">⚡</p>
+                    <p className="text-4xl mb-3"><Lightning size={40} weight="fill" aria-hidden="true" /></p>
                     <p className="font-bebas text-2xl sm:text-3xl tracking-wider text-[#EAB308] mb-2"
                       style={{ textShadow: "0 0 15px rgba(234,179,8,0.2)" }}>
                       BLITZ MODE
@@ -309,7 +326,7 @@ export default function CompetePage() {
                   <div className="absolute inset-0 pointer-events-none"
                     style={{ background: "radial-gradient(ellipse at 50% 20%, rgba(168,85,247,0.06) 0%, transparent 60%)" }} />
                   <div className="relative p-7">
-                    <p className="text-4xl mb-3">👑</p>
+                    <p className="text-4xl mb-3"><Crown size={40} weight="fill" aria-hidden="true" /></p>
                     <p className="font-bebas text-2xl sm:text-3xl tracking-wider text-[#A855F7] mb-4"
                       style={{ textShadow: "0 0 15px rgba(168,85,247,0.2)" }}>
                       LEADERBOARD
@@ -318,7 +335,18 @@ export default function CompetePage() {
                       {(topPlayers.length > 0 ? topPlayers : [
                         { rank: 1, username: "—", arena_elo: 0 },
                       ]).map((player) => {
-                        const medals: Record<number, string> = { 1: "🥇", 2: "🥈", 3: "🥉" };
+                        const renderMedal = () => {
+                          if (player.rank === 1) {
+                            return <Crown size={14} weight="fill" aria-hidden="true" className="inline mr-1 -mt-0.5" color="#FFD700" />;
+                          }
+                          if (player.rank === 2) {
+                            return <Medal size={14} weight="regular" aria-hidden="true" className="inline mr-1 -mt-0.5" color="#C0C0C0" />;
+                          }
+                          if (player.rank === 3) {
+                            return <Medal size={14} weight="regular" aria-hidden="true" className="inline mr-1 -mt-0.5" color="#CD7F32" />;
+                          }
+                          return null;
+                        };
                         return (
                           <div key={player.rank}
                             className="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors"
@@ -330,7 +358,7 @@ export default function CompetePage() {
                             }}>
                             <span className="font-bebas text-sm text-cream/40 w-5">#{player.rank}</span>
                             <span className="text-cream/60 text-xs flex-1 font-medium">
-                              {medals[player.rank] && <span className="mr-1">{medals[player.rank]}</span>}
+                              {renderMedal()}
                               {player.username}
                             </span>
                             <span className="font-bebas text-xs text-cream/30">{player.arena_elo.toLocaleString()} Elo</span>
@@ -367,7 +395,7 @@ export default function CompetePage() {
                 <div className="relative p-7 sm:p-10">
                   <p className="font-bebas text-3xl sm:text-4xl tracking-wider text-[#3B82F6] mb-3"
                     style={{ textShadow: "0 0 15px rgba(59,130,246,0.2)" }}>
-                    🏆 WEEKLY TOURNAMENT
+                    <Trophy size={32} weight="regular" aria-hidden="true" className="inline mr-1.5 -mt-0.5" /> WEEKLY TOURNAMENT
                   </p>
                   <p className="text-cream/50 text-sm sm:text-base leading-relaxed mb-6 max-w-xl">
                     Squad up with friends. Compete in a week-long bracket. Top 3 earn exclusive badges and coin prizes.
@@ -420,9 +448,9 @@ export default function CompetePage() {
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
               {[
-                { step: 1, icon: "⚔️", title: "COMPETE", desc: "Win duels and climb the leaderboard. Your Elo rating determines your rank." },
-                { step: 2, icon: "✅", title: "VERIFY", desc: "Complete identity verification. One account per person." },
-                { step: 3, icon: "💵", title: "GET PAID", desc: "Top 20 verified players receive their cut monthly." },
+                { step: 1, Icon: Sword, iconWeight: "regular" as const, title: "COMPETE", desc: "Win duels and climb the leaderboard. Your Elo rating determines your rank." },
+                { step: 2, Icon: CheckCircle, iconWeight: "fill" as const, title: "VERIFY", desc: "Complete identity verification. One account per person." },
+                { step: 3, Icon: CurrencyDollar, iconWeight: "regular" as const, title: "GET PAID", desc: "Top 20 verified players receive their cut monthly." },
               ].map((item) => (
                 <div key={item.step} className="tilt-card rounded-2xl overflow-hidden"
                   style={{
@@ -437,7 +465,7 @@ export default function CompetePage() {
                       </span>
                     </div>
                     <p className="font-bebas text-xl tracking-wider text-gold mb-2">
-                      {item.icon} {item.title}
+                      <item.Icon size={24} weight={item.iconWeight} aria-hidden="true" className="inline mr-1.5 -mt-0.5" /> {item.title}
                     </p>
                     <p className="text-cream/40 text-sm leading-relaxed">{item.desc}</p>
                   </div>
@@ -501,7 +529,7 @@ export default function CompetePage() {
                       >
                         <div className="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center">
                           {isLocked ? (
-                            <span className="text-lg sm:text-xl">🔒</span>
+                            <span className="text-lg sm:text-xl"><Lock size={20} weight="regular" aria-hidden="true" /></span>
                           ) : (
                             <div className="gem-shimmer w-10 h-10 sm:w-12 sm:h-12" style={{ "--gem-color": tierColor } as React.CSSProperties}>
                               <img
@@ -595,7 +623,7 @@ export default function CompetePage() {
                 background: "linear-gradient(135deg, #0a1020 0%, #060c18 100%)",
                 border: "1px solid rgba(74,144,217,0.15)",
               }}>
-              <div className="text-3xl flex-shrink-0">🛡️</div>
+              <div className="text-3xl flex-shrink-0"><Shield size={32} weight="fill" aria-hidden="true" /></div>
               <div>
                 <p className="font-bebas text-xl tracking-wider text-electric mb-1.5"
                   style={{ textShadow: "0 0 10px rgba(74,144,217,0.2)" }}>

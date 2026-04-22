@@ -4,6 +4,9 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth";
+import { Fire, Rocket, Target, Coin, Notepad, Sword, BookOpen, Trophy } from "@phosphor-icons/react";
+import type { IconProps } from "@phosphor-icons/react";
+import type { ComponentType } from "react";
 
 export default function ProductLandingPage() {
   const { user, isLoading } = useAuth();
@@ -61,14 +64,20 @@ export default function ProductLandingPage() {
 
         {/* Stats Grid */}
         <div className="mt-12 grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-3xl w-full">
-          {[
-            { label: "Subjects", value: "\u221E" },
+          {([
+            { label: "Subjects", value: "∞" },
             { label: "To Join", value: "$0" },
             { label: "Duels", value: "1v1" },
-            { label: "Daily Streaks", value: "\uD83D\uDD25" },
-          ].map((stat) => (
+            { label: "Daily Streaks", Icon: Fire as ComponentType<IconProps> },
+          ] as Array<{ label: string; value?: string; Icon?: ComponentType<IconProps> }>).map((stat) => (
             <div key={stat.label} className="card text-center py-4">
-              <p className="font-bebas text-3xl text-electric leading-none">{stat.value}</p>
+              {stat.Icon ? (
+                <div className="flex justify-center text-electric">
+                  <stat.Icon size={32} weight="fill" color="currentColor" aria-hidden="true" />
+                </div>
+              ) : (
+                <p className="font-bebas text-3xl text-electric leading-none">{stat.value}</p>
+              )}
               <p className="text-cream/40 text-xs font-semibold mt-1 uppercase tracking-widest">{stat.label}</p>
             </div>
           ))}
@@ -84,28 +93,30 @@ export default function ProductLandingPage() {
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[
+            {([
               {
                 step: "01",
                 title: "Sign Up",
-                desc: "Create your free account in seconds. No credit card, no catch \u2014 just pick a username and go.",
-                icon: "\uD83D\uDE80",
+                desc: "Create your free account in seconds. No credit card, no catch — just pick a username and go.",
+                Icon: Rocket,
               },
               {
                 step: "02",
                 title: "Study & Compete",
                 desc: "Take daily quizzes across any subject, challenge friends to 1v1 duels, and build your streak.",
-                icon: "\uD83C\uDFAF",
+                Icon: Target,
               },
               {
                 step: "03",
                 title: "Earn Rewards",
                 desc: "Every correct answer earns coins. Climb the leaderboard, unlock badges, and cash in your knowledge.",
-                icon: "\uD83E\uDE99",
+                Icon: Coin,
               },
-            ].map((item) => (
+            ] as Array<{ step: string; title: string; desc: string; Icon: ComponentType<IconProps> }>).map((item) => (
               <div key={item.step} className="card-hover text-center p-8">
-                <span className="text-4xl mb-4 block">{item.icon}</span>
+                <div className="flex justify-center mb-4 text-electric">
+                  <item.Icon size={40} weight="fill" color="currentColor" aria-hidden="true" />
+                </div>
                 <p className="text-electric font-bebas text-lg tracking-[0.2em] mb-1">STEP {item.step}</p>
                 <h3 className="font-bebas text-2xl tracking-wider text-cream mb-3">{item.title}</h3>
                 <p className="text-cream/50 text-sm leading-relaxed">{item.desc}</p>
@@ -124,40 +135,42 @@ export default function ProductLandingPage() {
           </h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[
+            {([
               {
-                icon: "\uD83D\uDCDD",
+                Icon: Notepad,
                 title: "Daily Quizzes",
                 desc: "Fresh questions every day across Math, Science, Languages, SAT/ACT, Coding, Finance, and more.",
               },
               {
-                icon: "\u2694\uFE0F",
+                Icon: Sword,
                 title: "1v1 Duels",
                 desc: "Challenge any player head-to-head. Wager coins, answer fast, and prove who knows more.",
               },
               {
-                icon: "\uD83E\uDE99",
+                Icon: Coin,
                 title: "Coin Rewards",
                 desc: "Earn coins for every correct answer. Harder questions pay more. Stack your wallet.",
               },
               {
-                icon: "\uD83D\uDD25",
+                Icon: Fire,
                 title: "Streaks",
                 desc: "Study every day to build your streak. Longer streaks unlock bonus multipliers and badges.",
               },
               {
-                icon: "\uD83D\uDCDA",
+                Icon: BookOpen,
                 title: "Multiple Subjects",
-                desc: "From algebra to cybersecurity \u2014 pick your lane or study across all subjects to maximize earnings.",
+                desc: "From algebra to cybersecurity — pick your lane or study across all subjects to maximize earnings.",
               },
               {
-                icon: "\uD83C\uDFC6",
+                Icon: Trophy,
                 title: "Leaderboards",
                 desc: "Compete globally or with friends. Top earners get featured and earn exclusive rewards.",
               },
-            ].map((feature) => (
+            ] as Array<{ Icon: ComponentType<IconProps>; title: string; desc: string }>).map((feature) => (
               <div key={feature.title} className="card-hover text-left p-6">
-                <span className="text-3xl mb-3 block">{feature.icon}</span>
+                <div className="mb-3 text-electric">
+                  <feature.Icon size={32} weight="fill" color="currentColor" aria-hidden="true" />
+                </div>
                 <h3 className="font-bebas text-xl tracking-wider text-cream mb-2">{feature.title}</h3>
                 <p className="text-cream/50 text-sm leading-relaxed">{feature.desc}</p>
               </div>

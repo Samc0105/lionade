@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { apiGet, apiPost } from "@/lib/api-client";
+import { Robot } from "@phosphor-icons/react";
 import type { NinnyChatMessage } from "@/lib/ninny";
 
 interface Props {
@@ -163,13 +164,14 @@ export default function ChatPanel({ materialId, materialTitle, materialSubject }
         ) : isEmpty ? (
           <div className="text-center py-6 sm:py-10">
             <div
-              className="w-14 h-14 rounded-full inline-flex items-center justify-center text-3xl mb-4"
+              className="w-14 h-14 rounded-full inline-flex items-center justify-center mb-4"
               style={{
                 background: `radial-gradient(circle, ${NINNY_PURPLE}40 0%, transparent 70%)`,
                 boxShadow: `0 0 30px ${NINNY_PURPLE}33`,
+                color: NINNY_PURPLE,
               }}
             >
-              &#x1F916;
+              <Robot size={32} weight="regular" aria-hidden="true" />
             </div>
             <p className="font-bebas text-cream text-2xl tracking-wider mb-2">
               Ask Me Anything
@@ -282,13 +284,14 @@ function ChatBubble({ role, content }: { role: "user" | "assistant"; content: st
       <div className="flex items-start gap-2 max-w-[85%]">
         {!isUser && (
           <div
-            className="w-7 h-7 rounded-full flex items-center justify-center text-base shrink-0 mt-0.5"
+            className="w-7 h-7 rounded-full flex items-center justify-center shrink-0 mt-0.5"
             style={{
               background: `radial-gradient(circle, ${NINNY_PURPLE}40 0%, transparent 70%)`,
               boxShadow: `0 0 0 1px ${NINNY_PURPLE}40`,
+              color: NINNY_PURPLE,
             }}
           >
-            &#x1F916;
+            <Robot size={18} weight="regular" aria-hidden="true" />
           </div>
         )}
         <div
@@ -319,13 +322,14 @@ function TypingIndicator() {
     <div className="flex justify-start animate-slide-up">
       <div className="flex items-start gap-2">
         <div
-          className="w-7 h-7 rounded-full flex items-center justify-center text-base shrink-0 mt-0.5"
+          className="w-7 h-7 rounded-full flex items-center justify-center shrink-0 mt-0.5"
           style={{
             background: `radial-gradient(circle, ${NINNY_PURPLE}40 0%, transparent 70%)`,
             boxShadow: `0 0 0 1px ${NINNY_PURPLE}40`,
+            color: NINNY_PURPLE,
           }}
         >
-          &#x1F916;
+          <Robot size={18} weight="regular" aria-hidden="true" />
         </div>
         <div
           className="rounded-2xl px-4 py-3 flex items-center gap-1.5"

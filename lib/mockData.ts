@@ -1,4 +1,17 @@
 import { Subject } from "@/types";
+import {
+  Calculator,
+  TestTube,
+  Globe,
+  BookOpen,
+  Code,
+  Cloud,
+  CurrencyDollar,
+  NotePencil,
+  Trophy,
+  HourglassMedium,
+  type Icon,
+} from "@phosphor-icons/react";
 
 // ─── Utility ──────────────────────────────────────────────────────────────────
 
@@ -11,23 +24,31 @@ export function formatCoins(coins: number): string {
   return coins.toString();
 }
 
-export const SUBJECT_ICONS: Record<string, string> = {
-  Math: "🧮",
-  Science: "🔬",
-  Languages: "🌍",
-  Humanities: "📚",
-  "Tech & Coding": "💻",
-  "Cloud & IT": "☁️",
-  "Finance & Business": "💰",
-  "Test Prep": "📝",
-  // Legacy
-  "SAT/ACT": "📝",
-  Coding: "💻",
-  Finance: "💰",
-  Certifications: "🏆",
-  History: "🏛️",
-  "Social Studies": "🌐",
+/**
+ * Subject iconography. Each entry is a Phosphor icon component — consumers
+ * render it as `<Icon size={24} weight="regular" />`. Falls back to `BookOpen`
+ * in consumers when a subject isn't mapped.
+ */
+export const SUBJECT_ICONS: Record<string, Icon> = {
+  Math: Calculator,
+  Science: TestTube,
+  Languages: Globe,
+  Humanities: BookOpen,
+  "Tech & Coding": Code,
+  "Cloud & IT": Cloud,
+  "Finance & Business": CurrencyDollar,
+  "Test Prep": NotePencil,
+  // Legacy subject keys — keep mapped for old records
+  "SAT/ACT": NotePencil,
+  Coding: Code,
+  Finance: CurrencyDollar,
+  Certifications: Trophy,
+  History: HourglassMedium,
+  "Social Studies": Globe,
 };
+
+/** Default icon when a subject isn't in the map. Use this at call sites. */
+export const DefaultSubjectIcon: Icon = BookOpen;
 
 export const SUBJECT_COLORS: Record<string, string> = {
   Math: "#4A90D9",

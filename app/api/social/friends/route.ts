@@ -3,100 +3,133 @@ import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
 
 // GET — List friends + pending requests
+//
+// Performance: the naïve version of this route did ~10 serial DB round-trips
+// (per-friend/per-pending profile lookups + sequential friendships/messages
+// queries). That's ~1.5-2s on cold cache. This rewrite does everything in
+// two parallel waves:
+//   Wave 1 (parallel): accepted friendships, incoming pending, outgoing
+//                      pending, unread messages
+//   Wave 2 (parallel): ONE profiles query for every id collected above
+// Net: ~2 logical round-trips regardless of circle size.
 export async function GET(req: NextRequest) {
   const auth = await requireAuth(req);
   if (auth instanceof NextResponse) return auth;
   const userId = auth.userId;
 
   try {
+    // ── Wave 1: fire the 4 independent queries in parallel ──
+    const [acceptedRes, incomingRes, outgoingRes, unreadRes] = await Promise.all([
+      supabaseAdmin
+        .from("friendships")
+        .select("id, user_id, friend_id, status, created_at")
+        .or(`user_id.eq.${userId},friend_id.eq.${userId}`)
+        .eq("status", "accepted"),
+      supabaseAdmin
+        .from("friendships")
+        .select("id, user_id, created_at")
+        .eq("friend_id", userId)
+        .eq("status", "pending"),
+      supabaseAdmin
+        .from("friendships")
+        .select("id, friend_id, created_at")
+        .eq("user_id", userId)
+        .eq("status", "pending"),
+      supabaseAdmin
+        .from("messages")
+        .select("sender_id")
+        .eq("receiver_id", userId)
+        .eq("read", false),
+    ]);
 
-    // Get accepted friendships
-    const { data: friendships } = await supabaseAdmin
-      .from("friendships")
-      .select("id, user_id, friend_id, status, created_at")
-      .or(`user_id.eq.${userId},friend_id.eq.${userId}`)
-      .eq("status", "accepted");
+    const acceptedRows = acceptedRes.data ?? [];
+    const incomingRows = incomingRes.data ?? [];
+    const outgoingRows = outgoingRes.data ?? [];
+    const unreadRows = unreadRes.data ?? [];
 
-    // Get friend profile data
-    const friendIds = (friendships ?? []).map(f =>
-      f.user_id === userId ? f.friend_id : f.user_id
-    );
+    // Collect every profile id we need in a single Set so one .in() query
+    // covers all three consumer tables.
+    const profileIds = new Set<string>();
+    for (const f of acceptedRows) {
+      profileIds.add(f.user_id === userId ? f.friend_id : f.user_id);
+    }
+    for (const r of incomingRows) profileIds.add(r.user_id);
+    for (const r of outgoingRows) profileIds.add(r.friend_id);
 
-    let friends: {
+    // ── Wave 2: one combined profile fetch ──
+    type Profile = {
       id: string;
       username: string;
       avatar_url: string | null;
-      arena_elo: number;
-      is_online: boolean;
+      arena_elo: number | null;
+      is_online: boolean | null;
       last_seen: string | null;
-    }[] = [];
-
-    if (friendIds.length > 0) {
-      const { data } = await supabaseAdmin
+    };
+    const profileMap = new Map<string, Profile>();
+    if (profileIds.size > 0) {
+      const { data: profileRows } = await supabaseAdmin
         .from("profiles")
         .select("id, username, avatar_url, arena_elo, is_online, last_seen")
-        .in("id", friendIds);
-      friends = (data ?? []).map(p => ({
-        ...p,
-        arena_elo: p.arena_elo ?? 1000,
-        is_online: p.is_online ?? false,
-      }));
+        .in("id", Array.from(profileIds));
+      for (const p of (profileRows ?? []) as Profile[]) {
+        profileMap.set(p.id, p);
+      }
     }
 
-    // Get unread message counts per friend
-    const { data: unreadCounts } = await supabaseAdmin
-      .from("messages")
-      .select("sender_id")
-      .eq("receiver_id", userId)
-      .eq("read", false);
-
+    // Build unread-count map
     const unreadMap: Record<string, number> = {};
-    for (const m of unreadCounts ?? []) {
+    for (const m of unreadRows) {
       unreadMap[m.sender_id] = (unreadMap[m.sender_id] ?? 0) + 1;
     }
 
-    // Get pending incoming requests
-    const { data: incoming } = await supabaseAdmin
-      .from("friendships")
-      .select("id, user_id, created_at")
-      .eq("friend_id", userId)
-      .eq("status", "pending");
+    // Shape the response
+    const friends = acceptedRows
+      .map(f => {
+        const otherId = f.user_id === userId ? f.friend_id : f.user_id;
+        const p = profileMap.get(otherId);
+        if (!p) return null;
+        return {
+          id: p.id,
+          username: p.username,
+          avatar_url: p.avatar_url,
+          arena_elo: p.arena_elo ?? 1000,
+          is_online: p.is_online ?? false,
+          last_seen: p.last_seen,
+          unreadCount: unreadMap[p.id] ?? 0,
+        };
+      })
+      .filter(Boolean);
 
-    const pendingProfiles = [];
-    for (const req of incoming ?? []) {
-      const { data: p } = await supabaseAdmin
-        .from("profiles")
-        .select("id, username, avatar_url, arena_elo")
-        .eq("id", req.user_id)
-        .single();
-      if (p) pendingProfiles.push({ ...p, friendshipId: req.id, arena_elo: p.arena_elo ?? 1000 });
-    }
+    const pendingRequests = incomingRows
+      .map(r => {
+        const p = profileMap.get(r.user_id);
+        if (!p) return null;
+        return {
+          id: p.id,
+          username: p.username,
+          avatar_url: p.avatar_url,
+          arena_elo: p.arena_elo ?? 1000,
+          friendshipId: r.id,
+        };
+      })
+      .filter(Boolean);
 
-    // Get outgoing pending requests (sent by this user, not yet accepted)
-    const { data: outgoing } = await supabaseAdmin
-      .from("friendships")
-      .select("id, friend_id, created_at")
-      .eq("user_id", userId)
-      .eq("status", "pending");
+    const outgoingRequests = outgoingRows
+      .map(r => {
+        const p = profileMap.get(r.friend_id);
+        if (!p) return null;
+        return {
+          id: p.id,
+          username: p.username,
+          avatar_url: p.avatar_url,
+          arena_elo: p.arena_elo ?? 1000,
+          friendshipId: r.id,
+          sentAt: r.created_at,
+        };
+      })
+      .filter(Boolean);
 
-    const outgoingProfiles = [];
-    for (const req of outgoing ?? []) {
-      const { data: p } = await supabaseAdmin
-        .from("profiles")
-        .select("id, username, avatar_url, arena_elo")
-        .eq("id", req.friend_id)
-        .single();
-      if (p) outgoingProfiles.push({ ...p, friendshipId: req.id, arena_elo: p.arena_elo ?? 1000, sentAt: req.created_at });
-    }
-
-    return NextResponse.json({
-      friends: friends.map(f => ({
-        ...f,
-        unreadCount: unreadMap[f.id] ?? 0,
-      })),
-      pendingRequests: pendingProfiles,
-      outgoingRequests: outgoingProfiles,
-    });
+    return NextResponse.json({ friends, pendingRequests, outgoingRequests });
   } catch (e) {
     console.error("[social/friends GET]", e);
     return NextResponse.json({ error: "Server error" }, { status: 500 });

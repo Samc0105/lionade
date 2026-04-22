@@ -3,6 +3,18 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { cdnUrl } from "@/lib/cdn";
+import {
+  Brain,
+  Target,
+  ChartBar,
+  Check,
+  X as XIcon,
+  Lightbulb,
+  Trophy,
+  Fire,
+  Barbell,
+} from "@phosphor-icons/react";
+import type { Icon as PhosphorIcon } from "@phosphor-icons/react";
 
 // ── Hardcoded demo questions ─────────────────────────────────
 
@@ -204,7 +216,9 @@ export default function DemoPage() {
                 "linear-gradient(135deg, #0a1020 0%, #060c18 100%)",
             }}
           >
-            <div className="text-6xl mb-4">🧠</div>
+            <div className="flex justify-center mb-4">
+              <Brain size={64} weight="fill" className="text-electric" aria-hidden="true" />
+            </div>
             <h1 className="font-bebas text-4xl text-cream tracking-wider mb-3">
               Sample Quiz
             </h1>
@@ -216,17 +230,21 @@ export default function DemoPage() {
             </p>
 
             <div className="space-y-3 text-left mb-8">
-              {[
-                { icon: "⏱", text: "15-second timer per question" },
-                { icon: "🎯", text: "Multiple choice — pick your best answer" },
-                { icon: "📊", text: "See your score at the end" },
-              ].map((item) => (
+              {([
+                { Icon: null as PhosphorIcon | null, emoji: "⏱", text: "15-second timer per question" },
+                { Icon: Target as PhosphorIcon, emoji: null, text: "Multiple choice — pick your best answer" },
+                { Icon: ChartBar as PhosphorIcon, emoji: null, text: "See your score at the end" },
+              ] as { Icon: PhosphorIcon | null; emoji: string | null; text: string }[]).map((item) => (
                 <div
                   key={item.text}
                   className="flex items-center gap-3 text-cream/60 text-sm"
                 >
-                  <span className="text-lg w-6 text-center flex-shrink-0">
-                    {item.icon}
+                  <span className="text-lg w-6 text-center flex-shrink-0 inline-flex items-center justify-center">
+                    {item.Icon ? (
+                      <item.Icon size={20} aria-hidden="true" />
+                    ) : (
+                      item.emoji
+                    )}
                   </span>
                   <span>{item.text}</span>
                 </div>
@@ -379,13 +397,15 @@ export default function DemoPage() {
                               : "bg-white/10 text-cream/50"
                         }`}
                       >
-                        {showCorrect && idx === question.correctAnswer
-                          ? "✓"
-                          : showCorrect &&
-                              idx === selected &&
-                              idx !== question.correctAnswer
-                            ? "✗"
-                            : letter}
+                        {showCorrect && idx === question.correctAnswer ? (
+                          <Check size={14} weight="bold" aria-hidden="true" />
+                        ) : showCorrect &&
+                          idx === selected &&
+                          idx !== question.correctAnswer ? (
+                          <XIcon size={14} weight="bold" aria-hidden="true" />
+                        ) : (
+                          letter
+                        )}
                       </span>
                       {opt}
                     </span>
@@ -399,7 +419,7 @@ export default function DemoPage() {
               <div className="px-6 pb-3 animate-slide-up">
                 <div className="p-3.5 rounded-xl border border-electric/20 bg-electric/5">
                   <div className="flex items-start gap-2.5">
-                    <span className="text-lg flex-shrink-0">💡</span>
+                    <Lightbulb size={18} weight="regular" color="#4A90D9" className="flex-shrink-0 mt-0.5" aria-hidden="true" />
                     <p className="text-cream/70 text-sm leading-relaxed">{question.explanation}</p>
                   </div>
                 </div>
@@ -427,12 +447,14 @@ export default function DemoPage() {
                 "linear-gradient(135deg, #0a1020 0%, #060c18 100%)",
             }}
           >
-            <div className="text-6xl mb-4">
-              {score === totalQuestions
-                ? "🏆"
-                : score >= 3
-                  ? "🔥"
-                  : "💪"}
+            <div className="flex justify-center mb-4">
+              {score === totalQuestions ? (
+                <Trophy size={64} weight="fill" className="text-gold" aria-hidden="true" />
+              ) : score >= 3 ? (
+                <Fire size={64} weight="fill" className="text-orange-400" aria-hidden="true" />
+              ) : (
+                <Barbell size={64} weight="fill" className="text-electric" aria-hidden="true" />
+              )}
             </div>
 
             <h1 className="font-bebas text-4xl text-cream tracking-wider mb-2">
@@ -500,7 +522,11 @@ export default function DemoPage() {
                           : "bg-red-400/20 text-red-400"
                       }`}
                     >
-                      {correct ? "✓" : "✗"}
+                      {correct ? (
+                        <Check size={14} weight="bold" aria-hidden="true" />
+                      ) : (
+                        <XIcon size={14} weight="bold" aria-hidden="true" />
+                      )}
                     </span>
                     <span className="text-cream/70 text-sm truncate flex-1">
                       {q.question}

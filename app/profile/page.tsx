@@ -10,13 +10,54 @@ import {
   getPreferences, updatePreferences,
 } from "@/lib/db";
 import type { UserPreferences } from "@/lib/db";
-import { getLevelProgress, formatCoins, SUBJECT_ICONS } from "@/lib/mockData";
+import { getLevelProgress, formatCoins } from "@/lib/mockData";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import BackButton from "@/components/BackButton";
 import BadgeCard from "@/components/BadgeCard";
 import Link from "next/link";
 import { cdnUrl } from "@/lib/cdn";
 import { apiPost } from "@/lib/api-client";
+import {
+  ChartBar,
+  PencilSimple,
+  Palette,
+  Gear,
+  Lock,
+  Shield,
+  Calendar,
+  Bell,
+  PawPrint,
+  List,
+  Warning,
+  Check,
+  X as XIcon,
+  Fire,
+  Lightning,
+  NotePencil,
+  Sword,
+  BookOpen,
+  MedalMilitary,
+  MaskHappy,
+  Sparkle,
+  DiceFive,
+  Storefront,
+  Planet,
+  Globe,
+  Users,
+  Prohibit,
+  FloppyDisk,
+  Key,
+  Laptop,
+  Trash,
+  Coins,
+  Diamond,
+  CheckCircle,
+  XCircle,
+  Target,
+  Handshake,
+  Rocket,
+  type Icon,
+} from "@phosphor-icons/react";
 
 // ── Types ────────────────────────────────────────────
 type Section =
@@ -87,16 +128,16 @@ const STUDY_GOALS = [
 
 const RESERVED = ["admin","root","lionade","support","help","ninny"];
 
-const NAV: { key: Section; label: string; icon: string }[] = [
-  { key: "overview",        label: "Overview",          icon: "📊" },
-  { key: "edit-profile",    label: "Edit Profile",      icon: "✏️" },
-  { key: "avatar",          label: "Avatar & Appearance", icon: "🎨" },
-  { key: "personalization", label: "Personalization",   icon: "⚙️" },
-  { key: "privacy",         label: "Privacy",           icon: "🔒" },
-  { key: "security",        label: "Security",          icon: "🛡️" },
-  { key: "activity",        label: "Activity History",  icon: "📅" },
-  { key: "notifications",   label: "Notifications",     icon: "🔔" },
-  { key: "about",           label: "About Lionade",     icon: "🦁" },
+const NAV: { key: Section; label: string; Icon: Icon }[] = [
+  { key: "overview",        label: "Overview",            Icon: ChartBar },
+  { key: "edit-profile",    label: "Edit Profile",        Icon: PencilSimple },
+  { key: "avatar",          label: "Avatar & Appearance", Icon: Palette },
+  { key: "personalization", label: "Personalization",     Icon: Gear },
+  { key: "privacy",         label: "Privacy",             Icon: Lock },
+  { key: "security",        label: "Security",            Icon: Shield },
+  { key: "activity",        label: "Activity History",    Icon: Calendar },
+  { key: "notifications",   label: "Notifications",       Icon: Bell },
+  { key: "about",           label: "About Lionade",       Icon: PawPrint },
 ];
 
 // ── Main Page ──────────────────────────────────────────
@@ -139,7 +180,11 @@ export default function ProfilePage() {
   const coins = stats?.coins ?? user.coins;
   const streak = stats?.streak ?? user.streak;
   const xp = stats?.xp ?? user.xp;
-  const avatarUrl = stats?.avatar ?? user.avatar;
+  // Memoize so `<img src>` stays stable across renders (prevents flash on tab return).
+  const avatarUrl = useMemo(
+    () => stats?.avatar ?? user.avatar,
+    [stats?.avatar, user.avatar],
+  );
   const statsReady = !!stats || user.statsLoaded;
   const levelInfo = getLevelProgress(xp);
   const level = levelInfo.level;
@@ -176,7 +221,7 @@ export default function ProfilePage() {
             </div>
             <button onClick={() => setSidebarOpen(!sidebarOpen)}
               className="p-2 rounded-lg border border-electric/20 text-cream/60">
-              ☰
+              <List size={22} weight="bold" aria-hidden="true" />
             </button>
           </div>
 
@@ -216,7 +261,7 @@ export default function ProfilePage() {
                         ${section === item.key
                           ? "bg-electric/20 text-electric border border-electric/30"
                           : "text-cream/50 hover:text-cream hover:bg-white/5"}`}>
-                      <span className="text-base w-5">{item.icon}</span>
+                      <item.Icon size={18} weight={section === item.key ? "fill" : "regular"} color="currentColor" aria-hidden="true" className="w-5 flex-shrink-0" />
                       {item.label}
                     </button>
                   ))}
@@ -277,7 +322,7 @@ function SaveToast({ msg, isError = false }: { msg: string; isError?: boolean })
   return (
     <div className={`flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold
       ${isError ? "bg-red-400/10 border border-red-400/30 text-red-400" : "bg-green-400/10 border border-green-400/30 text-green-400"}`}>
-      {isError ? "⚠️" : "✓"} {msg}
+      <span className="inline-flex items-center gap-1.5">{isError ? <Warning size={16} weight="fill" aria-hidden="true" /> : <Check size={16} weight="bold" aria-hidden="true" />} {msg}</span>
     </div>
   );
 }
@@ -319,16 +364,18 @@ function OverviewSection({ user, level, progress, xpToNext, coins, streak, xp, a
 
       {/* Stats grid */}
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-        {[
-          { icon: "fang", label: "Total Coins",        value: statsReady ? formatCoins(coins) : null,          color: "text-gold" },
-          { icon: "🔥", label: "Day Streak",         value: statsReady ? `${streak}` : null,                 color: "text-orange-400" },
-          { icon: "⚡", label: "Total XP",           value: statsReady ? xp.toLocaleString() : null,         color: "text-electric" },
-          { icon: "📝", label: "Quizzes Completed",  value: !loading ? quizHistory.length.toString() : null, color: "text-cream" },
-          { icon: "⚔️", label: "Duels Won",          value: !loading ? duelsWon.toString() : null,           color: "text-purple-400" },
-          { icon: "📚", label: "Subjects Mastered",  value: !loading ? subjectStats.length.toString() : null, color: "text-green-400" },
-        ].map((s) => (
+        {([
+          { kind: "fang" as const, label: "Total Coins",        value: statsReady ? formatCoins(coins) : null,          color: "text-gold",         iconColor: "#FFD700" },
+          { kind: "icon" as const, Icon: Fire,                  label: "Day Streak",         value: statsReady ? `${streak}` : null,                 color: "text-orange-400", iconColor: "#FB923C" },
+          { kind: "icon" as const, Icon: Lightning,             label: "Total XP",           value: statsReady ? xp.toLocaleString() : null,         color: "text-electric",   iconColor: "#4A90D9" },
+          { kind: "icon" as const, Icon: NotePencil,            label: "Quizzes Completed",  value: !loading ? quizHistory.length.toString() : null, color: "text-cream",      iconColor: "#EEF4FF" },
+          { kind: "icon" as const, Icon: Sword,                 label: "Duels Won",          value: !loading ? duelsWon.toString() : null,           color: "text-purple-400", iconColor: "#A855F7" },
+          { kind: "icon" as const, Icon: BookOpen,              label: "Subjects Mastered",  value: !loading ? subjectStats.length.toString() : null, color: "text-green-400",  iconColor: "#22C55E" },
+        ]).map((s) => (
           <Card key={s.label} className="text-center !p-4">
-            {s.icon === "fang" ? <img src={cdnUrl("/F.png")} alt="Fangs" className="w-7 h-7 object-contain mx-auto mb-1" /> : <span className="text-2xl block mb-1">{s.icon}</span>}
+            {s.kind === "fang"
+              ? <img src={cdnUrl("/F.png")} alt="Fangs" className="w-7 h-7 object-contain mx-auto mb-1" />
+              : <s.Icon size={28} weight="fill" color={s.iconColor} className="mx-auto mb-1" aria-hidden="true" />}
             {s.value !== null
               ? <p className={`font-bebas text-2xl leading-none ${s.color}`}>{s.value}</p>
               : <div className="w-12 h-7 bg-white/10 rounded-lg animate-pulse mx-auto" />}
@@ -346,7 +393,7 @@ function OverviewSection({ user, level, progress, xpToNext, coins, streak, xp, a
           </div>
           {earnedBadges.length === 0 ? (
             <div className="text-center py-6">
-              <p className="text-3xl mb-2">🔒</p>
+              <Lock size={32} weight="regular" color="rgba(238,244,255,0.4)" className="mx-auto mb-2" aria-hidden="true" />
               <p className="text-cream/40 text-sm">Complete quizzes to earn badges</p>
             </div>
           ) : (
@@ -368,7 +415,11 @@ function OverviewSection({ user, level, progress, xpToNext, coins, streak, xp, a
               {activity.slice(0, 8).map((a: any, i: number) => (
                 <div key={i} className="flex justify-between items-center py-1.5 border-b border-electric/10 last:border-0">
                   <div className="flex items-center gap-2">
-                    <span className="text-sm">{a.type === "duel_win" ? "⚔️" : a.type === "badge_bonus" ? "🎖️" : "📝"}</span>
+                    {a.type === "duel_win"
+                      ? <Sword size={16} weight="fill" color="currentColor" aria-hidden="true" />
+                      : a.type === "badge_bonus"
+                      ? <MedalMilitary size={16} weight="fill" color="currentColor" aria-hidden="true" />
+                      : <NotePencil size={16} weight="regular" color="currentColor" aria-hidden="true" />}
                     <span className="text-cream/70 text-xs truncate max-w-[160px]">{a.description}</span>
                   </div>
                   <span className={`font-bebas text-sm ${a.amount > 0 ? "text-gold" : "text-cream/30"}`}>
@@ -564,8 +615,8 @@ function EditProfileSection({ user, refreshUser }: SharedProps) {
                 disabled={usernameLocked}
                 className={inputCls + " pr-28" + (usernameLocked ? " opacity-50 cursor-not-allowed" : "")} />
               {!usernameLocked && usernameStatus === "checking" && <span className="absolute right-3 top-1/2 -translate-y-1/2 text-cream/40 text-xs">Checking...</span>}
-              {!usernameLocked && usernameStatus === "available" && <span className="absolute right-3 top-1/2 -translate-y-1/2 text-green-400 text-xs font-semibold">✓ Available</span>}
-              {!usernameLocked && usernameStatus === "taken"     && <span className="absolute right-3 top-1/2 -translate-y-1/2 text-red-400 text-xs font-semibold">✗ Taken</span>}
+              {!usernameLocked && usernameStatus === "available" && <span className="absolute right-3 top-1/2 -translate-y-1/2 text-green-400 text-xs font-semibold inline-flex items-center gap-1"><Check size={12} weight="bold" aria-hidden="true" /> Available</span>}
+              {!usernameLocked && usernameStatus === "taken"     && <span className="absolute right-3 top-1/2 -translate-y-1/2 text-red-400 text-xs font-semibold inline-flex items-center gap-1"><XIcon size={12} weight="bold" aria-hidden="true" /> Taken</span>}
             </div>
             {usernameLocked && usernameUnlockDate ? (
               <p className="text-amber-400/70 text-xs mt-1">You can change your username again on {usernameUnlockDate}</p>
@@ -725,7 +776,7 @@ function AvatarSection({ user, refreshUser }: SharedProps) {
           <button key={t} onClick={() => setTab(t)}
             className={`flex-1 py-2 rounded-lg text-sm font-bold transition-all text-center
               ${tab === t ? "bg-electric text-white shadow-lg shadow-electric/30" : "text-cream/50 hover:text-cream"}`}>
-            {t === "styles" ? "🎭 Styles" : "✨ Create"}
+            <span className="inline-flex items-center gap-1.5">{t === "styles" ? <><MaskHappy size={14} weight="fill" aria-hidden="true" /> Styles</> : <><Sparkle size={14} weight="fill" aria-hidden="true" /> Create</>}</span>
           </button>
         ))}
       </div>
@@ -765,7 +816,7 @@ function AvatarSection({ user, refreshUser }: SharedProps) {
           {/* Randomize button */}
           <button onClick={randomizeSeeds}
             className="w-full py-3 rounded-xl border border-electric/20 text-cream/70 text-sm font-bold hover:bg-white/5 hover:text-cream transition-all flex items-center justify-center gap-2">
-            <span className="text-lg">🎲</span> Randomize
+            <DiceFive size={20} weight="regular" aria-hidden="true" /> Randomize
           </button>
         </Card>
       )}
@@ -907,19 +958,19 @@ function PersonalizationSection({ user }: SharedProps) {
       <Card>
         <h3 className="font-bebas text-lg text-cream tracking-wider mb-4">THEMES UNLOCKED</h3>
         <div className="text-center py-6">
-          <span className="text-4xl block mb-3">🎨</span>
+          <Palette size={40} weight="regular" color="currentColor" className="mx-auto mb-3" aria-hidden="true" />
           <p className="text-cream/50 text-sm mb-1">No themes unlocked yet</p>
           <p className="text-cream/30 text-xs mb-4">Visit the Shop to unlock new looks for your app</p>
           <a href="/shop" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold
             bg-electric/15 text-electric border border-electric/30 hover:bg-electric/25 transition-all duration-200">
-            <span>🛍️</span> Browse Themes
+            <Storefront size={16} weight="regular" aria-hidden="true" /> Browse Themes
           </a>
         </div>
         <div className="border-t border-white/5 pt-3 mt-2">
           <div className="flex items-center gap-3 px-2 py-2 rounded-xl bg-white/[0.03]">
             <div className="w-8 h-8 rounded-lg flex items-center justify-center"
               style={{ background: "linear-gradient(135deg, #1e293b, #0f172a)", border: "1px solid rgba(59,130,246,0.2)" }}>
-              <span className="text-sm">🌌</span>
+              <Planet size={16} weight="regular" color="currentColor" aria-hidden="true" />
             </div>
             <div className="flex-1">
               <p className="text-cream text-sm font-semibold">Interstellar</p>
@@ -1009,7 +1060,7 @@ function PrivacySection({ user, quizHistory, activity }: SharedProps) {
               <button key={v} onClick={() => setVisibility(v)}
                 className={`flex-1 py-2.5 rounded-xl border text-sm font-bold capitalize transition-all
                   ${visibility === v ? "border-electric bg-electric/20 text-electric" : "border-white/10 text-cream/50 hover:border-white/20"}`}>
-                {v === "public" ? "🌍" : v === "friends" ? "👥" : "🔒"} {v}
+                <span className="inline-flex items-center gap-1.5">{v === "public" ? <Globe size={14} weight="regular" aria-hidden="true" /> : v === "friends" ? <Users size={14} weight="regular" aria-hidden="true" /> : <Lock size={14} weight="regular" aria-hidden="true" />} {v}</span>
               </button>
             ))}
           </div>
@@ -1036,7 +1087,7 @@ function PrivacySection({ user, quizHistory, activity }: SharedProps) {
               <button key={v} onClick={() => setDuelFrom(v)}
                 className={`flex-1 py-2.5 rounded-xl border text-sm font-bold capitalize transition-all
                   ${duelFrom === v ? "border-electric bg-electric/20 text-electric" : "border-white/10 text-cream/50 hover:border-white/20"}`}>
-                {v === "everyone" ? "⚔️ Everyone" : "🚫 Nobody"}
+                <span className="inline-flex items-center gap-1.5">{v === "everyone" ? <><Sword size={14} weight="fill" aria-hidden="true" /> Everyone</> : <><Prohibit size={14} weight="regular" aria-hidden="true" /> Nobody</>}</span>
               </button>
             ))}
           </div>
@@ -1047,7 +1098,7 @@ function PrivacySection({ user, quizHistory, activity }: SharedProps) {
       <button onClick={save}
         className="w-full py-3.5 rounded-xl font-bold text-sm"
         style={{ background: "linear-gradient(135deg, #F0B429 0%, #B8960C 50%, #F0B429 100%)", color: "#04080F", boxShadow: "0 4px 15px rgba(240,180,41,0.3)" }}>
-        💾 Save Privacy Settings
+        <span className="inline-flex items-center gap-2"><FloppyDisk size={16} weight="regular" aria-hidden="true" /> Save Privacy Settings</span>
       </button>
 
       <Card>
@@ -1130,7 +1181,7 @@ function SecuritySection({ user }: SharedProps) {
                   { ok: pwChecks.special, label: "One special character (!@#$%^&*)" },
                 ].map(c => (
                   <div key={c.label} className={`flex items-center gap-2 text-xs ${c.ok ? "text-green-400" : "text-red-400"}`}>
-                    <span>{c.ok ? "✓" : "✗"}</span><span>{c.label}</span>
+                    {c.ok ? <Check size={14} weight="bold" aria-hidden="true" /> : <XIcon size={14} weight="bold" aria-hidden="true" />}<span>{c.label}</span>
                   </div>
                 ))}
               </div>
@@ -1142,7 +1193,7 @@ function SecuritySection({ user }: SharedProps) {
               placeholder="Re-enter new password" className={inputCls} />
             {confirmPw.length > 0 && (
               <p className={`text-xs font-semibold mt-1 ${pwMatch ? "text-green-400" : "text-red-400"}`}>
-                {pwMatch ? "✓ Passwords match" : "Passwords do not match"}
+                <span className="inline-flex items-center gap-1">{pwMatch ? <><Check size={12} weight="bold" aria-hidden="true" /> Passwords match</> : "Passwords do not match"}</span>
               </p>
             )}
           </div>
@@ -1150,7 +1201,7 @@ function SecuritySection({ user }: SharedProps) {
           {toast && <SaveToast msg={toast.msg} isError={toast.err} />}
           <button onClick={handleChangePassword} disabled={saving}
             className="w-full py-3.5 rounded-xl font-bold text-sm bg-electric text-white disabled:opacity-60 transition-all">
-            {saving ? "Updating..." : "🔐 Change Password"}
+            {saving ? "Updating..." : <span className="inline-flex items-center gap-2"><Key size={16} weight="regular" aria-hidden="true" /> Change Password</span>}
           </button>
         </div>
       </Card>
@@ -1159,7 +1210,7 @@ function SecuritySection({ user }: SharedProps) {
         <h3 className="font-bebas text-lg text-cream tracking-wider mb-2">ACTIVE SESSIONS</h3>
         <p className="text-cream/40 text-sm mb-4">Devices currently signed into your account</p>
         <div className="flex items-center gap-3 p-3 rounded-xl bg-electric/5 border border-electric/20">
-          <span className="text-2xl">💻</span>
+          <Laptop size={28} weight="regular" color="currentColor" aria-hidden="true" />
           <div>
             <p className="text-cream text-sm font-semibold">Current Session</p>
             <p className="text-cream/40 text-xs">This device · Active now</p>
@@ -1173,7 +1224,7 @@ function SecuritySection({ user }: SharedProps) {
         <h3 className="font-bebas text-lg text-red-400 tracking-wider mb-2">DANGER ZONE</h3>
         <p className="text-cream/40 text-sm mb-4">These actions are permanent and cannot be undone</p>
         <button className="px-6 py-2.5 rounded-xl border border-red-400/30 text-red-400 text-sm font-bold hover:bg-red-400/10 transition-all">
-          🗑️ Delete Account
+          <span className="inline-flex items-center gap-2"><Trash size={16} weight="regular" aria-hidden="true" /> Delete Account</span>
         </button>
       </Card>
     </div>
@@ -1192,12 +1243,12 @@ function ActivitySection({ activity, quizHistory }: SharedProps) {
         <button onClick={() => setView("transactions")}
           className={`flex-1 py-2 rounded-lg text-sm font-bold transition-all
             ${view === "transactions" ? "bg-electric text-white shadow-lg shadow-electric/30" : "text-cream/50 hover:text-cream"}`}>
-          💰 Coin Transactions
+          <span className="inline-flex items-center gap-2"><Coins size={16} weight="fill" color="#FFD700" aria-hidden="true" /> Coin Transactions</span>
         </button>
         <button onClick={() => setView("quizzes")}
           className={`flex-1 py-2 rounded-lg text-sm font-bold transition-all
             ${view === "quizzes" ? "bg-electric text-white shadow-lg shadow-electric/30" : "text-cream/50 hover:text-cream"}`}>
-          📝 Quiz History
+          <span className="inline-flex items-center gap-2"><NotePencil size={16} weight="regular" aria-hidden="true" /> Quiz History</span>
         </button>
       </div>
 
@@ -1210,8 +1261,12 @@ function ActivitySection({ activity, quizHistory }: SharedProps) {
           ) : activity.map((a: any, i: number) => (
             <div key={i} className="flex items-center gap-3 p-4 rounded-xl border border-electric/10 hover:border-electric/30 transition-all"
               style={{ background: "linear-gradient(135deg, #0a1020, #060c18)" }}>
-              <div className="w-9 h-9 rounded-full flex items-center justify-center text-lg flex-shrink-0 bg-electric/10">
-                {a.type === "duel_win" ? "⚔️" : a.type === "badge_bonus" ? "🎖️" : "📝"}
+              <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 bg-electric/10">
+                {a.type === "duel_win"
+                  ? <Sword size={20} weight="fill" color="currentColor" aria-hidden="true" />
+                  : a.type === "badge_bonus"
+                  ? <MedalMilitary size={20} weight="fill" color="currentColor" aria-hidden="true" />
+                  : <NotePencil size={20} weight="regular" color="currentColor" aria-hidden="true" />}
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-cream text-sm font-semibold truncate">{a.description}</p>
@@ -1239,7 +1294,11 @@ function ActivitySection({ activity, quizHistory }: SharedProps) {
                 style={{ background: "linear-gradient(135deg, #0a1020, #060c18)" }}>
                 <div className={`w-9 h-9 rounded-full flex items-center justify-center text-lg flex-shrink-0 border
                   ${acc === 100 ? "bg-gold/20 border-gold/50" : acc >= 70 ? "bg-green-400/20 border-green-400/50" : "bg-red-400/20 border-red-400/50"}`}>
-                  {acc === 100 ? "💎" : acc >= 70 ? "✅" : "❌"}
+                  {acc === 100
+                    ? <Diamond size={16} weight="fill" color="#FFD700" aria-hidden="true" />
+                    : acc >= 70
+                    ? <CheckCircle size={16} weight="fill" color="#22C55E" aria-hidden="true" />
+                    : <XCircle size={16} weight="fill" color="#EF4444" aria-hidden="true" />}
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-cream text-sm font-semibold">{h.subject}</p>
@@ -1312,7 +1371,7 @@ function NotificationsSection() {
       <button onClick={save}
         className="w-full py-3.5 rounded-xl font-bold text-sm"
         style={{ background: "linear-gradient(135deg, #F0B429 0%, #B8960C 50%, #F0B429 100%)", color: "#04080F", boxShadow: "0 4px 15px rgba(240,180,41,0.3)" }}>
-        💾 Save Notification Settings
+        <span className="inline-flex items-center gap-2"><FloppyDisk size={16} weight="regular" aria-hidden="true" /> Save Notification Settings</span>
       </button>
     </div>
   );
@@ -1320,10 +1379,10 @@ function NotificationsSection() {
 
 // ── ABOUT LIONADE ─────────────────────────────────────────
 function AboutLionadeSection() {
-  const sections = [
-    { title: "OUR MISSION", icon: "🎯", body: "Lionade was built to give back to students. Oftentimes students work hard and burn out with little recognition. Lionade was built by students for other students. We allow all learners \u2014 novice or advanced \u2014 to be seen, valued, and acknowledged. We reward growth and achievement in a tangible way, empowering students with not just recognition but true support." },
-    { title: "ABOUT US", icon: "🤝", body: "Created by a team of ambitious students looking for a way to revolutionize studying. Lionade is the platform we wish existed before us. We look to give back to a community that already gives so much, and further self improvement around the world." },
-    { title: "OUR VISION", icon: "🚀", body: "Lionade aims to completely redefine the way studying is done \u2014 rewarding discipline and focus in a measurable way with active compensation for investing your time in self improvement, giving top performers real-world success." },
+  const sections: { title: string; Icon: Icon; body: string }[] = [
+    { title: "OUR MISSION", Icon: Target, body: "Lionade was built to give back to students. Oftentimes students work hard and burn out with little recognition. Lionade was built by students for other students. We allow all learners \u2014 novice or advanced \u2014 to be seen, valued, and acknowledged. We reward growth and achievement in a tangible way, empowering students with not just recognition but true support." },
+    { title: "ABOUT US", Icon: Handshake, body: "Created by a team of ambitious students looking for a way to revolutionize studying. Lionade is the platform we wish existed before us. We look to give back to a community that already gives so much, and further self improvement around the world." },
+    { title: "OUR VISION", Icon: Rocket, body: "Lionade aims to completely redefine the way studying is done \u2014 rewarding discipline and focus in a measurable way with active compensation for investing your time in self improvement, giving top performers real-world success." },
   ];
   return (
     <div className="space-y-6 animate-slide-up">
@@ -1331,7 +1390,7 @@ function AboutLionadeSection() {
       {sections.map((s) => (
         <Card key={s.title}>
           <div className="flex items-center gap-3 mb-3">
-            <span className="text-2xl">{s.icon}</span>
+            <s.Icon size={28} weight="regular" color="#4A90D9" aria-hidden="true" />
             <h3 className="font-bebas text-xl tracking-wider text-electric">{s.title}</h3>
           </div>
           <p className="text-cream/70 text-sm leading-relaxed">{s.body}</p>

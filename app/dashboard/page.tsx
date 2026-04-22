@@ -4,17 +4,35 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth";
 import { useUserStats } from "@/lib/hooks";
-import { getSubjectStats, getQuizHistory, getDailyProgress, getUserAchievements, getBestScores, getLeaderboard, getRecentTopics, getActiveBounties, getUserBountyProgress, getActiveBet, getLastResolvedBet, getWeeklyActivityChart } from "@/lib/db";
+import { getSubjectStats, getQuizHistory, getDailyProgress, getUserAchievements, getBestScores, getLeaderboard, getActiveBounties, getUserBountyProgress, getActiveBet, getLastResolvedBet, getWeeklyActivityChart, getEloLeaderboard } from "@/lib/db";
 import type { Bounty, UserBounty, ActiveBet } from "@/lib/db";
 import {
   getLevelProgress,
   formatCoins,
   SUBJECT_ICONS,
   SUBJECT_COLORS,
+  DefaultSubjectIcon,
 } from "@/lib/mockData";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { cdnUrl } from "@/lib/cdn";
-import { apiPost } from "@/lib/api-client";
+import { apiPost, apiGet } from "@/lib/api-client";
+import CountUp from "@/components/CountUp";
+import { toastError, toastSuccess } from "@/lib/toast";
+import Confetti from "@/components/Confetti";
+import {
+  Lock,
+  Sun,
+  Fire,
+  BookOpen,
+  Sword,
+  Check,
+  DiceFive,
+  Confetti as ConfettiIcon,
+  SmileySad,
+  Target,
+  Crown,
+  Medal,
+} from "@phosphor-icons/react";
 
 function timeAgo(dateStr: string): string {
   const diff = Date.now() - new Date(dateStr).getTime();
@@ -37,7 +55,7 @@ function getGreeting(): string {
 
 /* ── Circular stat widget ── */
 function CircleStat({ value, label, icon, color, size = 90 }: {
-  value: string; label: string; icon: React.ReactNode; color: string; size?: number;
+  value: React.ReactNode; label: string; icon: React.ReactNode; color: string; size?: number;
 }) {
   return (
     <div className="flex flex-col items-center gap-1.5 group">
@@ -74,13 +92,11 @@ function DashboardContent() {
   const [subjectStats, setSubjectStats] = useState<
     { subject: string; questionsAnswered: number; correctAnswers: number; coinsEarned: number }[]
   >([]);
-  const [, setLoadingData] = useState(true);
   const [dailyProgress, setDailyProgress] = useState({ questions_answered: 0, coins_earned: 0 });
   const [xpMounted, setXpMounted] = useState(false);
   const [achievements, setAchievements] = useState<{ achievement_key: string; unlocked_at: string }[]>([]);
   const [bestScores, setBestScores] = useState<Record<string, { best: number; total: number }>>({});
   const [leaderboard, setLeaderboard] = useState<{ rank: number; user_id: string; username: string; coins_this_week: number }[]>([]);
-  const [recentTopics, setRecentTopics] = useState<{ topic: string; subject: string; correct_answers: number; total_questions: number; completed_at: string }[]>([]);
   const [bounties, setBounties] = useState<Bounty[]>([]);
   const [userBounties, setUserBounties] = useState<UserBounty[]>([]);
   const [activeBet, setActiveBet] = useState<ActiveBet | null>(null);
@@ -90,11 +106,43 @@ function DashboardContent() {
   const [weeklyChart, setWeeklyChart] = useState<{ day: string; date: string; questions: number; correct: number; coins: number; xp: number }[]>([]);
   const [chartAnimated, setChartAnimated] = useState(false);
   const [placingBet, setPlacingBet] = useState(false);
+  const [eloRank, setEloRank] = useState<number | null>(null);
+  const [dailyMissions, setDailyMissions] = useState<{ id: string; title: string; description: string; icon: string; type: string; target: number; coinReward: number; xpReward: number; color: string; progress: number; completed: boolean; claimed: boolean }[]>([]);
+  const [missionsResetIn, setMissionsResetIn] = useState("");
   const [loginBonus, setLoginBonus] = useState<{ amount: number; consecutiveDays: number } | null>(null);
+  // Counter instead of boolean: rapid claims re-increment this, which remounts
+  // the Confetti component via `key` and fires a fresh burst even if the
+  // previous burst hasn't finished yet.
+  const [celebrateKey, setCelebrateKey] = useState(0);
 
+  // Restore cached dashboard data instantly on mount (no loading flash)
   useEffect(() => {
     if (!user) return;
-    // Check bounty rotation first (idempotent), then load data
+    try {
+      const cached = sessionStorage.getItem(`lionade_dash_${user.id}`);
+      if (cached) {
+        const c = JSON.parse(cached);
+        if (c.subjectStats) setSubjectStats(c.subjectStats);
+        if (c.recentQuizzes) setRecentQuizzes(c.recentQuizzes);
+        if (c.dailyProgress) setDailyProgress(c.dailyProgress);
+        if (c.achievements) setAchievements(c.achievements);
+        if (c.bestScores) setBestScores(c.bestScores);
+        if (c.leaderboard) setLeaderboard(c.leaderboard);
+        if (c.bounties) setBounties(c.bounties);
+        if (c.userBounties) setUserBounties(c.userBounties);
+        if (c.activeBet !== undefined) setActiveBet(c.activeBet);
+        if (c.lastBet !== undefined) setLastBet(c.lastBet);
+        if (c.weeklyChart) { setWeeklyChart(c.weeklyChart); setTimeout(() => setChartAnimated(true), 100); }
+        if (c.eloRank !== undefined) setEloRank(c.eloRank);
+        if (c.dailyMissions) setDailyMissions(c.dailyMissions);
+        if (c.missionsResetIn) setMissionsResetIn(c.missionsResetIn);
+      }
+    } catch {}
+  }, [user?.id]);
+
+  // Fetch fresh data in background and update cache
+  useEffect(() => {
+    if (!user) return;
     apiPost("/api/bounties/rotate", {}).catch(() => {});
     Promise.all([
       getSubjectStats(user.id).catch(() => []),
@@ -103,28 +151,54 @@ function DashboardContent() {
       getUserAchievements(user.id).catch(() => []),
       getBestScores(user.id).catch(() => ({})),
       getLeaderboard(5).catch(() => []),
-      getRecentTopics(user.id, 6).catch(() => []),
       getActiveBounties().catch(() => []),
       getUserBountyProgress(user.id).catch(() => []),
       getActiveBet(user.id).catch(() => null),
       getLastResolvedBet(user.id).catch(() => null),
       getWeeklyActivityChart(user.id).catch(() => []),
-    ]).then(([stats, history, daily, achs, bests, lb, topics, bnts, ubProgress, abet, lbet, wChart]) => {
+      getEloLeaderboard(200).catch(() => []),
+    ]).then(([stats, history, daily, achs, bests, lb, bnts, ubProgress, abet, lbet, wChart, eloLb]) => {
       setSubjectStats(stats);
       setRecentQuizzes(history);
       setDailyProgress(daily);
       setAchievements(achs);
       setBestScores(bests);
       setLeaderboard(lb);
-      setRecentTopics(topics);
       setBounties(bnts);
       setUserBounties(ubProgress);
       setActiveBet(abet);
       setLastBet(lbet);
       setWeeklyChart(wChart as typeof weeklyChart);
-      setTimeout(() => setChartAnimated(true), 300); // trigger bar animation
-      setLoadingData(false);
+      const myEloEntry = (eloLb as any[]).find((e: any) => e.user_id === user.id);
+      const rank = myEloEntry ? myEloEntry.rank : null;
+      setEloRank(rank);
+      setTimeout(() => setChartAnimated(true), 300);
+      // Cache for instant restore on next visit
+      try {
+        sessionStorage.setItem(`lionade_dash_${user.id}`, JSON.stringify({
+          subjectStats: stats, recentQuizzes: history, dailyProgress: daily,
+          achievements: achs, bestScores: bests, leaderboard: lb,
+          bounties: bnts, userBounties: ubProgress, activeBet: abet,
+          lastBet: lbet, weeklyChart: wChart, eloRank: rank,
+        }));
+      } catch {}
     });
+    // Fetch daily missions separately (server-computed progress)
+    apiGet<{ missions: typeof dailyMissions; resetsIn: string }>("/api/missions/progress")
+      .then(res => {
+        if (res.ok && res.data) {
+          setDailyMissions(res.data.missions);
+          setMissionsResetIn(res.data.resetsIn);
+          // Update cache with missions
+          try {
+            const cached = sessionStorage.getItem(`lionade_dash_${user.id}`);
+            const c = cached ? JSON.parse(cached) : {};
+            c.dailyMissions = res.data.missions;
+            c.missionsResetIn = res.data.resetsIn;
+            sessionStorage.setItem(`lionade_dash_${user.id}`, JSON.stringify(c));
+          } catch {}
+        }
+      });
   }, [user?.id]);
 
   useEffect(() => {
@@ -142,7 +216,7 @@ function DashboardContent() {
         if (typeof window !== "undefined") sessionStorage.setItem(todayKey, "1");
         if (res.ok && res.data?.awarded) {
           setLoginBonus({ amount: res.data.amount, consecutiveDays: res.data.consecutiveDays });
-          setTimeout(() => setLoginBonus(null), 5000);
+          setTimeout(() => setLoginBonus(null), 2500);
           refreshUser(); // refresh coin count
         }
       });
@@ -151,10 +225,29 @@ function DashboardContent() {
   if (!user) return null; // ProtectedRoute handles redirect
 
   const claimBounty = async (bountyId: string) => {
-    const res = await apiPost("/api/claim-bounty", { bountyId });
+    const bounty = bounties.find(b => b.id === bountyId);
+    const res = await apiPost<{ coinsAwarded?: number }>("/api/claim-bounty", { bountyId });
     if (res.ok) {
       setUserBounties(prev => prev.map(ub => ub.bounty_id === bountyId ? { ...ub, claimed: true } : ub));
       await refreshUser();
+      const reward = bounty?.coin_reward ?? res.data?.coinsAwarded ?? 0;
+      toastSuccess(reward > 0 ? `Bounty claimed — +${reward} Fangs` : "Bounty claimed");
+      setCelebrateKey(k => k + 1);
+    } else {
+      toastError("Couldn't claim bounty — please try again");
+    }
+  };
+
+  const claimMission = async (missionId: string) => {
+    const mission = dailyMissions.find(m => m.id === missionId);
+    const res = await apiPost("/api/missions/claim", { missionId });
+    if (res.ok) {
+      setDailyMissions(prev => prev.map(m => m.id === missionId ? { ...m, claimed: true } : m));
+      await refreshUser();
+      toastSuccess(mission ? `${mission.title} — +${mission.coinReward} Fangs` : "Mission claimed");
+      setCelebrateKey(k => k + 1);
+    } else {
+      toastError("Couldn't claim mission — please try again");
     }
   };
 
@@ -169,7 +262,12 @@ function DashboardContent() {
       if (res.ok && res.data?.success) {
         setActiveBet(res.data.bet);
         await refreshUser();
+        toastSuccess(`Bet placed — ${betStake} Fangs on ${betTarget}/10`);
+      } else {
+        toastError("Couldn't place bet — please try again");
       }
+    } catch {
+      toastError("Couldn't place bet — please try again");
     } finally {
       setPlacingBet(false);
     }
@@ -217,27 +315,40 @@ function DashboardContent() {
         }
       `}</style>
 
-      {/* Daily Login Bonus Toast — auto-dismisses after 5s */}
+      {/* Celebration confetti on bounty/mission claim — keyed on a counter
+          so rapid-fire claims remount the component and always fire fresh. */}
+      <Confetti key={celebrateKey} trigger={celebrateKey > 0} count={50} duration={1400} />
+
+      {/* Daily Login Bonus Toast — auto-dismisses after 2.5s, dismissible */}
       {loginBonus && (
         <div
-          className="fixed top-20 left-1/2 -translate-x-1/2 z-50 animate-slide-up rounded-2xl px-5 py-3.5 border backdrop-blur flex items-center gap-3"
+          role="status"
+          className="fixed top-20 left-1/2 -translate-x-1/2 z-50 animate-slide-up rounded-2xl px-5 py-3.5 border backdrop-blur flex items-center gap-3 pr-10"
           style={{
             background: "linear-gradient(135deg, rgba(255,215,0,0.15) 0%, rgba(255,215,0,0.08) 100%)",
             borderColor: "rgba(255,215,0,0.45)",
             boxShadow: "0 0 30px rgba(255,215,0,0.20), 0 8px 32px rgba(0,0,0,0.3)",
           }}
         >
-          <span className="text-2xl">&#x2600;&#xFE0F;</span>
+          <Sun size={28} weight="fill" color="#FFD700" aria-hidden="true" />
           <div>
             <p className="font-bebas text-gold text-base tracking-wider leading-none">
               Daily Login Bonus!
             </p>
             <p className="text-cream/60 text-xs font-syne mt-0.5">
-              Day {loginBonus.consecutiveDays} streak — +{loginBonus.amount} Fangs
+              Day {loginBonus.consecutiveDays} streak &mdash; +{loginBonus.amount} Fangs
             </p>
           </div>
           <img src={cdnUrl("/F.png")} alt="Fangs" className="w-6 h-6 object-contain ml-auto" />
           <span className="font-bebas text-gold text-xl tracking-wider">+{loginBonus.amount}</span>
+          <button
+            type="button"
+            aria-label="Dismiss bonus"
+            onClick={() => setLoginBonus(null)}
+            className="absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center text-cream/40 hover:text-cream hover:bg-white/10 transition-colors"
+          >
+            <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M1 1L9 9M9 1L1 9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
+          </button>
         </div>
       )}
 
@@ -261,8 +372,8 @@ function DashboardContent() {
           <div className="mb-6 animate-slide-up">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <h1 className="font-bebas text-3xl sm:text-4xl text-cream tracking-wider leading-tight">
-                  Welcome back, <span className="text-electric">{user.username}</span>
+                <h1 className="font-bebas text-4xl sm:text-5xl text-cream tracking-wider leading-tight">
+                  Welcome back, <span className="shimmer-text">{user.username}</span>
                 </h1>
                 <p className="text-cream/40 text-sm mt-1">{getGreeting()}</p>
               </div>
@@ -279,14 +390,14 @@ function DashboardContent() {
           {/* ═══ 2) Circular Stats Row ═══ */}
           <div className="flex justify-center sm:justify-start gap-6 sm:gap-8 mb-8 animate-slide-up" style={{ animationDelay: "0.05s" }}>
             <Link href="/wallet">
-              <CircleStat icon={<img src={cdnUrl("/F.png")} alt="Fangs" className="w-5 h-5 object-contain mx-auto" />} value={statsReady ? formatCoins(coins) : "\u2014"} label={`+${todayCoins} today`} color="#FFD700" />
+              <CircleStat icon={<img src={cdnUrl("/F.png")} alt="Fangs" className="w-5 h-5 object-contain mx-auto" />} value={statsReady ? <CountUp value={coins} format={formatCoins} /> : "\u2014"} label={`+${todayCoins} today`} color="#FFD700" />
             </Link>
             <div className="flex flex-col items-center gap-1.5 group">
               <div className={`relative rounded-full flex items-center justify-center transition-transform duration-300 group-hover:scale-105 ${streak >= 1 ? "streak-fire-glow" : ""}`}
                 style={{ width: 90, height: 90, background: `linear-gradient(135deg, #E67E2215, #E67E2208)`, border: `1.5px solid #E67E2225`, boxShadow: streak >= 1 ? `0 0 ${12 + Math.min(streak, 10) * 3}px rgba(230,126,34,${0.15 + Math.min(streak, 10) * 0.04})` : `0 0 20px #E67E2208` }}>
                 <div className="text-center">
-                  <span className="text-sm block mb-0.5">{streak >= 1 ? "\u{1F525}" : "\u{1F525}"}</span>
-                  <span className="font-bebas text-lg leading-none" style={{ color: "#E67E22" }}>{statsReady ? String(streak) : "\u2014"}</span>
+                  <Fire size={16} weight="fill" color="#E67E22" className="mx-auto mb-0.5" aria-hidden="true" />
+                  <span className="font-bebas text-lg leading-none" style={{ color: "#E67E22" }}>{statsReady ? <CountUp value={streak} duration={400} /> : "\u2014"}</span>
                 </div>
                 <div className="absolute inset-0 rounded-full" style={{ animation: "orbit-stat 8s linear infinite" }}>
                   <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full" style={{ background: "#E67E22", boxShadow: `0 0 6px #E67E22` }} />
@@ -294,12 +405,15 @@ function DashboardContent() {
               </div>
               <span className="text-cream/30 text-[9px] font-mono tracking-wider uppercase">quiz streak</span>
             </div>
-            <CircleStat icon={levelInfo.tier.icon} value={statsReady ? `Lv.${level}` : "\u2014"} label={statsReady ? levelInfo.tier.name : ""} color={levelInfo.tier.color} />
-            <CircleStat icon="&#x1F4DA;" value={String(displaySubjects.length)} label="subjects" color="#9B59B6" />
+            <CircleStat icon={levelInfo.tier.icon} value={statsReady ? <>Lv.<CountUp value={level} duration={400} /></> : "\u2014"} label={statsReady ? levelInfo.tier.name : ""} color={levelInfo.tier.color} />
+            <CircleStat icon={<BookOpen size={20} weight="regular" color="#9B59B6" aria-hidden="true" />} value={<CountUp value={displaySubjects.length} duration={400} />} label="subjects" color="#9B59B6" />
+            <Link href="/leaderboard">
+              <CircleStat icon={<Sword size={20} weight="regular" color="#E74C3C" aria-hidden="true" />} value={eloRank ? <>#<CountUp value={eloRank} duration={400} /></> : "\u2014"} label="rank" color="#E74C3C" />
+            </Link>
           </div>
           {statsReady && streak >= 3 && (
             <div className="mb-6 animate-slide-up flex items-center gap-2 px-4 py-2.5 rounded-full w-fit mx-auto sm:mx-0" style={{ background: "linear-gradient(135deg, rgba(230,126,34,0.12), rgba(255,215,0,0.08))", border: "1px solid rgba(230,126,34,0.2)" }}>
-              <span className="text-base streak-fire-glow">{"\u{1F525}"}</span>
+              <Fire size={18} weight="fill" color="#E67E22" className="streak-fire-glow" aria-hidden="true" />
               <span className="text-cream/80 text-xs font-semibold">You&apos;re on fire! {streak} streak</span>
             </div>
           )}
@@ -326,81 +440,109 @@ function DashboardContent() {
             </div>
           </div>
 
-          {/* ═══ 4) Mission Hero ═══ */}
-          <div className="rounded-tl-[32px] rounded-br-[32px] rounded-tr-[12px] rounded-bl-[12px] p-6 sm:p-8 mb-8 animate-slide-up relative overflow-hidden transition-all duration-300 hover:scale-[1.01]"
-            style={{ background: "linear-gradient(135deg, #0d1528 0%, #0a1020 50%, #0d1528 100%)", boxShadow: "0 0 0 1px rgba(74,144,217,0.1), 0 8px 32px rgba(0,0,0,0.3)", animationDelay: "0.1s" }}>
-            {/* Decorative orb */}
-            <div className="absolute top-0 right-0 w-56 h-56 rounded-full pointer-events-none" style={{ background: "radial-gradient(circle, rgba(255,215,0,0.04), transparent 70%)" }} />
-            {/* Accent line */}
-            <div className="absolute top-0 left-0 right-0 h-[2px]" style={{ background: "linear-gradient(90deg, #FFD700, #4A90D9, transparent)" }} />
-
-            <div className="relative flex items-start gap-5">
-              <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-gold/10 flex items-center justify-center flex-shrink-0"
-                style={{ boxShadow: "0 0 24px rgba(255,215,0,0.06)" }}>
-                <span className="text-3xl sm:text-4xl">&#x1F3AF;</span>
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="font-bebas text-2xl sm:text-3xl text-cream tracking-wider">TODAY&apos;S MISSION</p>
-                <p className="text-cream/70 text-sm sm:text-base mt-0.5">Complete Daily Quiz</p>
-                <p className="text-cream/30 text-xs mt-1">Earn +10 coins &bull; Build your streak</p>
-                {/* Daily progress bar */}
-                <div className="mt-4">
-                  <div className="flex items-center justify-between mb-1.5">
-                    <span className="text-cream/50 text-[11px] font-semibold">Questions today</span>
-                    <span className="text-cream/40 text-[11px] font-mono">{Math.min(dailyProgress.questions_answered, 10)}/10</span>
-                  </div>
-                  <div className="w-full h-2.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.06)" }}>
-                    <div className="h-full rounded-full transition-all duration-1000 ease-out daily-progress-bar"
-                      style={{ width: xpMounted ? `${Math.min((dailyProgress.questions_answered / 10) * 100, 100)}%` : "0%", background: "linear-gradient(90deg, #FFD700, #FFA500)", boxShadow: dailyProgress.questions_answered > 0 ? "0 0 8px rgba(255,215,0,0.4)" : "none" }} />
-                  </div>
-                  {dailyProgress.questions_answered >= 10 && (
-                    <p className="text-gold text-[10px] font-semibold mt-1">&#x2728; Daily goal complete!</p>
-                  )}
-                </div>
-                <div className="flex flex-wrap items-center gap-4 mt-4">
-                  <Link href="/quiz">
-                    <button className="gold-btn px-6 py-2.5 rounded-full font-syne font-bold text-sm text-navy">
-                      {dailyDone ? "Practice a Subject" : "Start Daily Quiz"}
-                    </button>
-                  </Link>
-                  <div className="flex items-center gap-2">
-                    <span className="text-cream/25 text-xs font-semibold">{dailyProgress.questions_answered >= 10 ? "10" : dailyProgress.questions_answered}/10</span>
-                    <span className="text-cream/15 text-[10px]">&bull; +{dailyProgress.coins_earned} coins earned</span>
-                  </div>
-                </div>
-              </div>
+          {/* ═══ 4) Today's Missions ═══ */}
+          <div className="mb-8 animate-slide-up" style={{ animationDelay: "0.1s" }}>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="font-bebas text-xl text-cream tracking-wider">TODAY&apos;S MISSIONS</h2>
+              {missionsResetIn && (
+                <span className="text-cream/25 text-[10px] font-mono">Resets in {missionsResetIn}</span>
+              )}
             </div>
-          </div>
-
-          {/* ═══ 5) Continue ═══ */}
-          <div className="mb-8 animate-slide-up" style={{ animationDelay: "0.15s" }}>
-            <h2 className="font-bebas text-lg text-cream tracking-wider mb-3">CONTINUE</h2>
-            <div className="flex flex-wrap gap-3">
-              {recentTopics.slice(0, 6).map((item, i) => {
-                const color = SUBJECT_COLORS[item.subject as keyof typeof SUBJECT_COLORS] ?? "#4A90D9";
-                const icon = SUBJECT_ICONS[item.subject as keyof typeof SUBJECT_ICONS] ?? "\u{1F4DA}";
-                const accuracy = item.total_questions > 0 ? Math.round((item.correct_answers / item.total_questions) * 100) : 0;
-                const shapes = ["rounded-[20px]", "rounded-tl-[28px] rounded-br-[28px] rounded-tr-[6px] rounded-bl-[6px]", "rounded-[20px]"];
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {dailyMissions.map((mission, i) => {
+                const progressPct = Math.min((mission.progress / mission.target) * 100, 100);
+                const shapes = [
+                  "rounded-tl-[24px] rounded-br-[24px] rounded-tr-[8px] rounded-bl-[8px]",
+                  "rounded-[16px]",
+                  "rounded-tr-[24px] rounded-bl-[24px] rounded-tl-[8px] rounded-br-[8px]",
+                ];
                 return (
-                  <Link key={item.topic} href="/quiz">
-                    <div className={`w-36 p-3.5 transition-all duration-200 hover:scale-[1.03] ${shapes[i % shapes.length]}`}
-                      style={{ background: `linear-gradient(135deg, ${color}12 0%, ${color}06 100%)`, border: `1px solid ${color}18` }}>
-                      <span className="text-2xl block">{icon}</span>
-                      <p className="font-semibold text-cream text-xs mt-2">{item.topic}</p>
-                      <div className="flex items-center gap-1.5 mt-1.5">
-                        <div className="flex-1 h-1 bg-white/[0.06] rounded-full overflow-hidden">
-                          <div className="h-full rounded-full" style={{ width: `${accuracy}%`, background: color }} />
-                        </div>
-                        <span className="text-cream/35 text-[9px]">{accuracy}%</span>
+                  <div key={mission.id} className={`${shapes[i]} p-4 relative overflow-hidden transition-all duration-300 hover:scale-[1.02] group`}
+                    style={{
+                      background: mission.claimed
+                        ? "linear-gradient(135deg, rgba(46,204,113,0.08), rgba(46,204,113,0.03))"
+                        : mission.completed
+                        ? "linear-gradient(135deg, rgba(255,215,0,0.1), rgba(255,165,0,0.05))"
+                        : "linear-gradient(135deg, #0d1528, #0a1020)",
+                      boxShadow: mission.completed && !mission.claimed
+                        ? `0 0 0 1.5px ${mission.color}40, 0 0 20px ${mission.color}15`
+                        : "0 0 0 1px rgba(255,255,255,0.05)",
+                    }}>
+                    {/* Accent line */}
+                    <div className="absolute top-0 left-0 right-0 h-[2px]" style={{ background: `linear-gradient(90deg, ${mission.color}, transparent)` }} />
+
+                    <div className="flex items-start gap-3 mb-3">
+                      <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
+                        style={{ background: `${mission.color}15`, boxShadow: `0 0 12px ${mission.color}10` }}>
+                        <span className="text-lg">{mission.icon}</span>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-bebas text-sm tracking-wider text-cream leading-tight">{mission.title}</p>
+                        <p className="text-cream/40 text-[10px] mt-0.5 leading-tight">{mission.description}</p>
                       </div>
                     </div>
-                  </Link>
+
+                    {/* Rewards */}
+                    <div className="flex items-center gap-1.5 mb-3">
+                      <span className="text-[9px] font-semibold px-2 py-0.5 rounded-full" style={{ background: `${mission.color}15`, color: mission.color }}>
+                        +{mission.coinReward} Fangs
+                      </span>
+                      <span className="text-[9px] font-semibold px-2 py-0.5 rounded-full bg-electric/10 text-electric/80">
+                        +{mission.xpReward} XP
+                      </span>
+                    </div>
+
+                    {/* Progress bar */}
+                    <div className="mb-2">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-cream/30 text-[9px] font-mono">
+                          {mission.claimed ? "Claimed" : mission.completed ? "Complete!" : `${mission.progress}/${mission.target}`}
+                        </span>
+                        {!mission.claimed && <span className="text-cream/20 text-[9px]">{Math.round(progressPct)}%</span>}
+                      </div>
+                      <div className="w-full h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.05)" }}>
+                        <div className={`h-full rounded-full transition-all duration-1000 ease-out ${progressPct > 0 && progressPct < 100 && !mission.claimed ? "progress-shimmer" : ""}`}
+                          style={{
+                            width: `${Math.max(progressPct, progressPct > 0 ? 4 : 0)}%`,
+                            background: mission.claimed
+                              ? "linear-gradient(90deg, #2ECC71, #27AE60)"
+                              : `linear-gradient(90deg, ${mission.color}90, ${mission.color})`,
+                            boxShadow: progressPct > 0 ? `0 0 6px ${mission.claimed ? "#2ECC71" : mission.color}40` : "none",
+                          }} />
+                      </div>
+                    </div>
+
+                    {/* Claim button */}
+                    {mission.completed && !mission.claimed && (
+                      <button onClick={() => claimMission(mission.id)}
+                        className="w-full py-1.5 rounded-full text-[11px] font-bold text-navy transition-all duration-200 active:scale-95 breathe-glow"
+                        style={{ background: `linear-gradient(90deg, ${mission.color}, ${mission.color}CC)` }}>
+                        Claim Reward
+                      </button>
+                    )}
+                    {mission.claimed && (
+                      <div className="text-center">
+                        <span className="text-[10px] font-semibold text-emerald-400/70 inline-flex items-center gap-1"><Check size={12} weight="bold" aria-hidden="true" /> Reward Claimed</span>
+                      </div>
+                    )}
+                  </div>
                 );
               })}
+              {dailyMissions.length === 0 && (
+                <>
+                  {[0, 1, 2].map(i => (
+                    <div key={i} className="rounded-[16px] p-4 animate-pulse" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.04)" }}>
+                      <div className="h-10 w-10 rounded-full bg-white/5 mb-3" />
+                      <div className="h-3 w-24 rounded bg-white/5 mb-2" />
+                      <div className="h-2 w-32 rounded bg-white/3" />
+                    </div>
+                  ))}
+                </>
+              )}
             </div>
           </div>
 
-          {/* ═══ 5b) Daily Bet ═══ */}
+          {/* ═══ 5) Daily Bet ═══ */}
           <div className="mb-8 animate-slide-up" style={{ animationDelay: "0.16s" }}>
             <h2 className="font-bebas text-lg text-cream tracking-wider mb-3">DAILY BET</h2>
             <div className="rounded-tl-[28px] rounded-br-[28px] rounded-tr-[10px] rounded-bl-[10px] p-5 relative overflow-hidden"
@@ -410,7 +552,7 @@ function DashboardContent() {
               {activeBet ? (
                 <div>
                   <div className="flex items-center gap-3 mb-3">
-                    <span className="text-2xl">&#x1F3B0;</span>
+                    <DiceFive size={28} weight="fill" color="#FFD700" aria-hidden="true" />
                     <div>
                       <p className="text-cream text-sm font-semibold">Bet Active</p>
                       <p className="text-cream/40 text-[11px]">Score {activeBet.target_score}/{activeBet.target_total} on your next quiz to win!</p>
@@ -431,7 +573,9 @@ function DashboardContent() {
               ) : lastBet && lastBet.resolved_at ? (
                 <div>
                   <div className="flex items-center gap-3 mb-3">
-                    <span className="text-2xl">{lastBet.won ? "&#x1F389;" : "&#x1F614;"}</span>
+                    {lastBet.won
+                      ? <ConfettiIcon size={28} weight="fill" color="#FFD700" aria-hidden="true" />
+                      : <SmileySad size={28} weight="regular" color="rgba(238,244,255,0.5)" aria-hidden="true" />}
                     <div>
                       <p className={`text-sm font-semibold ${lastBet.won ? "text-gold" : "text-cream/50"}`}>
                         {lastBet.won ? `YOU WON ${lastBet.coins_won} COINS!` : `Lost ${lastBet.coins_staked} coins`}
@@ -482,7 +626,7 @@ function DashboardContent() {
               ) : (
                 <div>
                   <div className="flex items-center gap-3 mb-3">
-                    <span className="text-2xl">&#x1F3B0;</span>
+                    <DiceFive size={28} weight="fill" color="#FFD700" aria-hidden="true" />
                     <div>
                       <p className="text-cream text-sm font-semibold">Bet on Yourself</p>
                       <p className="text-cream/40 text-[11px]">Stake coins, hit your target score, win big</p>
@@ -541,7 +685,7 @@ function DashboardContent() {
                   <span className="text-cream/20 text-[10px]">Resets at midnight</span>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                  {bounties.filter(b => b.type === "daily").map((bounty) => {
+                  {bounties.filter(b => b.type === "daily").slice(0, 3).map((bounty) => {
                     const ub = userBounties.find(u => u.bounty_id === bounty.id);
                     const progress = ub?.progress ?? 0;
                     const pct = Math.min((progress / bounty.requirement_value) * 100, 100);
@@ -560,14 +704,14 @@ function DashboardContent() {
                         <div className="mt-3">
                           <div className="flex items-center justify-between mb-1">
                             <span className="text-cream/30 text-[10px]">{progress}/{bounty.requirement_value}</span>
-                            {claimed && <span className="text-gold text-[10px] font-bold">Claimed &#x2714;</span>}
+                            {claimed && <span className="text-gold text-[10px] font-bold">Claimed</span>}
                           </div>
                           <div className="w-full h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.06)" }}>
-                            <div className="h-full rounded-full transition-all duration-700" style={{ width: `${pct}%`, background: claimed ? "rgba(255,215,0,0.3)" : "linear-gradient(90deg, #FFD700, #FFA500)" }} />
+                            <div className={`h-full rounded-full transition-all duration-700 ${pct > 0 && pct < 100 && !claimed ? "progress-shimmer" : ""}`} style={{ width: `${pct}%`, background: claimed ? "rgba(255,215,0,0.3)" : "linear-gradient(90deg, #FFD700, #FFA500)" }} />
                           </div>
                         </div>
                         {completed && !claimed && (
-                          <button onClick={() => claimBounty(bounty.id)} className="mt-3 w-full py-2 rounded-full text-xs font-bold text-navy transition-all duration-200 active:scale-95"
+                          <button onClick={() => claimBounty(bounty.id)} className="mt-3 w-full py-2 rounded-full text-xs font-bold text-navy transition-all duration-200 active:scale-95 breathe-glow"
                             style={{ background: "linear-gradient(90deg, #FFD700, #FFA500)", boxShadow: "0 0 16px rgba(255,215,0,0.3)" }}>
                             Claim Reward
                           </button>
@@ -587,7 +731,7 @@ function DashboardContent() {
                   <span className="text-cream/20 text-[10px]">Resets every Monday</span>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                  {bounties.filter(b => b.type === "weekly").map((bounty) => {
+                  {bounties.filter(b => b.type === "weekly").slice(0, 6).map((bounty) => {
                     const ub = userBounties.find(u => u.bounty_id === bounty.id);
                     const progress = ub?.progress ?? 0;
                     const pct = Math.min((progress / bounty.requirement_value) * 100, 100);
@@ -606,15 +750,15 @@ function DashboardContent() {
                         <div className="mt-3">
                           <div className="flex items-center justify-between mb-1">
                             <span className="text-cream/30 text-[10px]">{progress}/{bounty.requirement_value}</span>
-                            {claimed && <span className="text-[#9B59B6] text-[10px] font-bold">Claimed &#x2714;</span>}
+                            {claimed && <span className="text-[#9B59B6] text-[10px] font-bold">Claimed</span>}
                           </div>
                           <div className="w-full h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.06)" }}>
-                            <div className="h-full rounded-full transition-all duration-700" style={{ width: `${pct}%`, background: claimed ? "rgba(155,89,182,0.3)" : "linear-gradient(90deg, #9B59B6, #8E44AD)" }} />
+                            <div className={`h-full rounded-full transition-all duration-700 ${pct > 0 && pct < 100 && !claimed ? "progress-shimmer" : ""}`} style={{ width: `${pct}%`, background: claimed ? "rgba(155,89,182,0.3)" : "linear-gradient(90deg, #9B59B6, #8E44AD)" }} />
                           </div>
                         </div>
                         {completed && !claimed && (
-                          <button onClick={() => claimBounty(bounty.id)} className="mt-3 w-full py-2 rounded-full text-xs font-bold text-white transition-all duration-200 active:scale-95"
-                            style={{ background: "linear-gradient(90deg, #9B59B6, #8E44AD)", boxShadow: "0 0 16px rgba(155,89,182,0.3)" }}>
+                          <button onClick={() => claimBounty(bounty.id)} className="mt-3 w-full py-2 rounded-full text-xs font-bold text-white transition-all duration-200 active:scale-95 breathe-glow"
+                            style={{ background: "linear-gradient(90deg, #9B59B6, #8E44AD)" }}>
                             Claim Reward
                           </button>
                         )}
@@ -627,7 +771,7 @@ function DashboardContent() {
 
             {bounties.length === 0 && (
               <div className="rounded-[20px] p-6 text-center" style={{ background: "linear-gradient(135deg, rgba(13,21,40,0.5), rgba(10,16,32,0.5))", border: "1px solid rgba(255,215,0,0.06)" }}>
-                <span className="text-3xl block mb-2">&#x1F3AF;</span>
+                <Target size={32} weight="regular" color="rgba(238,244,255,0.4)" className="mx-auto mb-2" aria-hidden="true" />
                 <p className="text-cream/30 text-xs">No bounties available right now. Check back soon!</p>
               </div>
             )}
@@ -638,15 +782,18 @@ function DashboardContent() {
 
             {/* Left: Subjects as cards */}
             <div className="lg:col-span-2 animate-slide-up" style={{ animationDelay: "0.2s" }}>
-              <h2 className="font-bebas text-lg text-cream tracking-wider mb-3">YOUR SUBJECTS</h2>
+              <Link href="/learn" className="flex items-center justify-between mb-3 group">
+                <h2 className="font-bebas text-lg text-cream tracking-wider">YOUR SUBJECTS</h2>
+                <span className="text-cream/20 text-[10px] group-hover:text-electric transition-colors">Learn &rarr;</span>
+              </Link>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {displaySubjects.slice(0, 6).map((stat, i) => {
                   const accuracy = stat.questionsAnswered > 0 ? Math.round((stat.correctAnswers / stat.questionsAnswered) * 100) : 0;
-                  const icon = SUBJECT_ICONS[stat.subject as keyof typeof SUBJECT_ICONS] ?? "\u{1F4DA}";
+                  const SubjectIcon = SUBJECT_ICONS[stat.subject] ?? DefaultSubjectIcon;
                   const color = SUBJECT_COLORS[stat.subject as keyof typeof SUBJECT_COLORS] ?? "#4A90D9";
                   return (
                     <Link key={stat.subject} href="/learn">
-                      <div className={`tilt-card group p-4 transition-all duration-300 hover:scale-[1.02] ${cardShapes[i % cardShapes.length]}`}
+                      <div className={`tilt-card subject-tilt group p-4 ${cardShapes[i % cardShapes.length]}`}
                         style={{ background: `linear-gradient(135deg, ${color}08 0%, #080E1A 100%)`, border: `1px solid ${color}15` }}>
                         {/* Top accent */}
                         <div className="absolute top-0 left-0 right-0 h-[2px] opacity-0 group-hover:opacity-100 transition-opacity duration-500"
@@ -655,7 +802,7 @@ function DashboardContent() {
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
                             style={{ background: `${color}12`, border: `1px solid ${color}20` }}>
-                            <span className="text-lg">{icon}</span>
+                            <SubjectIcon size={20} weight="regular" color={color} aria-hidden="true" />
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center justify-between mb-1">
@@ -798,17 +945,22 @@ function DashboardContent() {
 
               {/* This Week — Leaderboard */}
               <div className="animate-slide-up" style={{ animationDelay: "0.18s" }}>
-                <h2 className="font-bebas text-lg text-cream tracking-wider mb-3">THIS WEEK</h2>
-                <div className="rounded-[20px] p-4 space-y-2"
+                <Link href="/leaderboard" className="flex items-center justify-between mb-3 group">
+                  <h2 className="font-bebas text-lg text-cream tracking-wider">THIS WEEK</h2>
+                  <span className="text-cream/20 text-[10px] group-hover:text-electric transition-colors">View All &rarr;</span>
+                </Link>
+                <Link href="/leaderboard" className="block rounded-[20px] p-4 space-y-2 transition-all duration-200 hover:scale-[1.01]"
                   style={{ background: "linear-gradient(135deg, #0d1528 0%, #0a1020 100%)", border: "1px solid rgba(74,144,217,0.08)" }}>
                   {leaderboard.length > 0 ? (
                     <>
                       {leaderboard.slice(0, 3).map((entry) => {
-                        const medal = entry.rank === 1 ? "\u{1F947}" : entry.rank === 2 ? "\u{1F948}" : "\u{1F949}";
+                        const medalColor = entry.rank === 1 ? "#FFD700" : entry.rank === 2 ? "#C0C0C0" : "#CD7F32";
                         const isMe = entry.user_id === user.id;
                         return (
                           <div key={entry.user_id} className={`flex items-center gap-2.5 py-1.5 px-2 rounded-lg ${isMe ? "bg-electric/8" : ""}`}>
-                            <span className="text-sm">{medal}</span>
+                            {entry.rank === 1
+                              ? <Crown size={16} weight="fill" color={medalColor} aria-hidden="true" />
+                              : <Medal size={16} weight="fill" color={medalColor} aria-hidden="true" />}
                             <span className={`text-xs flex-1 truncate ${isMe ? "text-electric font-semibold" : "text-cream/60"}`}>
                               {entry.username}{isMe ? " (you)" : ""}
                             </span>
@@ -833,19 +985,25 @@ function DashboardContent() {
                   ) : (
                     <p className="text-cream/20 text-xs text-center py-2">No activity this week yet.</p>
                   )}
-                </div>
+                </Link>
               </div>
 
               {/* Recent Activity */}
               <div className="animate-slide-up" style={{ animationDelay: "0.22s" }}>
-                <h2 className="font-bebas text-lg text-cream tracking-wider mb-3">RECENT ACTIVITY</h2>
+                <Link href="/quiz" className="flex items-center justify-between mb-3 group">
+                  <h2 className="font-bebas text-lg text-cream tracking-wider">RECENT ACTIVITY</h2>
+                  <span className="text-cream/20 text-[10px] group-hover:text-electric transition-colors">Quiz &rarr;</span>
+                </Link>
                 {recentQuizzes.length > 0 ? (
                   <div className="space-y-1">
-                    {recentQuizzes.map((quiz, i) => (
-                      <div key={quiz.id} className={`flex items-center gap-3 py-2.5 px-3 transition-all duration-200 hover:bg-white/[0.03] ${
+                    {recentQuizzes.map((quiz, i) => {
+                      const RecentIcon = SUBJECT_ICONS[quiz.subject] ?? DefaultSubjectIcon;
+                      const recentColor = SUBJECT_COLORS[quiz.subject as keyof typeof SUBJECT_COLORS] ?? "#4A90D9";
+                      return (
+                      <Link key={quiz.id} href="/quiz" className={`flex items-center gap-3 py-2.5 px-3 transition-all duration-200 hover:bg-white/[0.03] cursor-pointer ${
                         i % 2 === 0 ? "rounded-[16px]" : "rounded-tl-[20px] rounded-br-[20px] rounded-tr-[6px] rounded-bl-[6px]"
                       }`}>
-                        <span className="text-lg flex-shrink-0">{SUBJECT_ICONS[quiz.subject as keyof typeof SUBJECT_ICONS] ?? "\u{1F4DA}"}</span>
+                        <RecentIcon size={18} weight="regular" color={recentColor} aria-hidden="true" />
                         <div className="flex-1 min-w-0">
                           <p className="text-cream text-xs font-semibold truncate">{quiz.subject}</p>
                           <p className="text-cream/25 text-[10px]">{timeAgo(quiz.completed_at)}</p>
@@ -854,8 +1012,9 @@ function DashboardContent() {
                           <span className="text-xs font-mono text-cream/60">{quiz.correct_answers}/{quiz.total_questions}</span>
                           <span className="text-xs font-bold text-gold">+{quiz.coins_earned}</span>
                         </div>
-                      </div>
-                    ))}
+                      </Link>
+                      );
+                    })}
                   </div>
                 ) : (
                   <div className="rounded-[20px] p-6 text-center"
@@ -863,10 +1022,8 @@ function DashboardContent() {
                     <img src={cdnUrl("/F.png")} alt="Fangs" className="w-8 h-8 object-contain mx-auto mb-2" />
                     <p className="font-bebas text-base text-cream/50 tracking-wider">No activity yet</p>
                     <p className="text-cream/25 text-xs mt-1 mb-4 leading-relaxed">Take your first quiz to start tracking progress.</p>
-                    <Link href="/quiz">
-                      <button className="font-syne font-semibold text-xs px-4 py-2 rounded-full transition-all duration-200 active:scale-95 border border-electric/30 text-electric hover:bg-electric/10">
-                        Start Quiz
-                      </button>
+                    <Link href="/quiz" className="inline-block font-syne font-semibold text-xs px-4 py-2 rounded-full transition-all duration-200 active:scale-95 border border-electric/30 text-electric hover:bg-electric/10">
+                      Start Quiz
                     </Link>
                   </div>
                 )}
@@ -874,23 +1031,50 @@ function DashboardContent() {
 
               {/* Achievements */}
               <div className="animate-slide-up" style={{ animationDelay: "0.24s" }}>
-                <h2 className="font-bebas text-lg text-cream tracking-wider mb-3">ACHIEVEMENTS <span className="text-cream/25 text-xs font-mono">{achievements.length}/8</span></h2>
+                <Link href="/profile" className="flex items-center justify-between mb-3 group">
+                  <h2 className="font-bebas text-lg text-cream tracking-wider">ACHIEVEMENTS <span className="text-cream/25 text-xs font-mono">{achievements.length}/8</span></h2>
+                  <span className="text-cream/20 text-[10px] group-hover:text-electric transition-colors">Profile &rarr;</span>
+                </Link>
                 <div className="grid grid-cols-4 gap-2">
-                  {[
-                    { key: "first_quiz", emoji: "\u{1F680}", name: "First Steps" },
-                    { key: "perfect_score", emoji: "\u{1F4AF}", name: "Perfectionist" },
-                    { key: "streak_3", emoji: "\u{1F525}", name: "On Fire" },
-                    { key: "streak_7", emoji: "\u{1F4AA}", name: "Dedicated" },
-                    { key: "coins_100", emoji: "\u{1FA99}", name: "Coin Collector" },
-                    { key: "coins_500", emoji: "\u{1F4B0}", name: "Big Saver" },
-                    { key: "quizzes_10", emoji: "\u{1F3C6}", name: "Quiz Master" },
-                    { key: "quizzes_50", emoji: "\u{1F393}", name: "Scholar" },
-                  ].map((ach) => {
+                  {([
+                    { key: "first_quiz",    illustration: "ach-first-steps",     name: "First Steps" },
+                    { key: "perfect_score", illustration: "ach-perfectionist",   name: "Perfectionist" },
+                    { key: "streak_3",      illustration: "ach-on-fire",         name: "On Fire" },
+                    { key: "streak_7",      illustration: "ach-dedicated",       name: "Dedicated" },
+                    { key: "coins_100",     illustration: "ach-coin-collector",  name: "Coin Collector" },
+                    { key: "coins_500",     illustration: "ach-big-saver",       name: "Big Saver" },
+                    { key: "quizzes_10",    illustration: "ach-quiz-master",     name: "Quiz Master" },
+                    { key: "quizzes_50",    illustration: "ach-scholar",         name: "Scholar" },
+                  ] as { key: string; illustration: string; name: string }[]).map((ach) => {
                     const unlocked = achievements.some(a => a.achievement_key === ach.key);
                     return (
-                      <div key={ach.key} className="flex flex-col items-center p-2 rounded-xl transition-all duration-200"
-                        style={{ background: unlocked ? "rgba(255,215,0,0.06)" : "rgba(255,255,255,0.02)", border: unlocked ? "1px solid rgba(255,215,0,0.15)" : "1px solid rgba(255,255,255,0.04)", boxShadow: unlocked ? "0 0 12px rgba(255,215,0,0.1)" : "none" }}>
-                        <span className={`text-lg ${unlocked ? "" : "grayscale opacity-30"}`}>{unlocked ? ach.emoji : "\u{1F512}"}</span>
+                      <div
+                        key={ach.key}
+                        className={`flex flex-col items-center p-2 rounded-xl ${unlocked ? "achievement-tile-unlocked" : "transition-all duration-200"}`}
+                        style={{
+                          background: unlocked ? "rgba(255,215,0,0.06)" : "rgba(255,255,255,0.02)",
+                          border: unlocked ? "1px solid rgba(255,215,0,0.15)" : "1px solid rgba(255,255,255,0.04)",
+                          boxShadow: unlocked ? "0 0 12px rgba(255,215,0,0.1)" : "none",
+                        }}
+                      >
+                        {unlocked ? (
+                          <img
+                            src={`/illustrations/${ach.illustration}.png`}
+                            alt=""
+                            width={40}
+                            height={40}
+                            className="w-10 h-10 object-contain"
+                            aria-hidden="true"
+                          />
+                        ) : (
+                          <Lock
+                            size={22}
+                            weight="regular"
+                            color="rgba(238,244,255,0.25)"
+                            aria-hidden="true"
+                            className="mx-auto my-2"
+                          />
+                        )}
                         <span className={`text-[8px] mt-1 text-center leading-tight ${unlocked ? "text-cream/60" : "text-cream/20"}`}>{ach.name}</span>
                       </div>
                     );
@@ -898,32 +1082,91 @@ function DashboardContent() {
                 </div>
               </div>
 
-              {/* Ninny's Notes */}
-              <div className="animate-slide-up" style={{ animationDelay: "0.26s" }}>
-                <h2 className="font-bebas text-lg text-cream tracking-wider mb-3">NINNY&apos;S NOTES</h2>
-                <div className="rounded-tl-[24px] rounded-br-[24px] rounded-tr-[8px] rounded-bl-[8px] p-4 idle-glow-ninny"
-                  style={{ background: "linear-gradient(135deg, #0d1528 0%, #0a1020 100%)", border: "1px solid rgba(74,144,217,0.08)" }}>
-                  <div className="space-y-2.5 mb-4">
-                    <div className="flex items-start gap-2">
-                      <span className="text-electric text-[10px] mt-0.5 flex-shrink-0">&#x25CF;</span>
-                      <p className="text-cream/50 text-xs leading-relaxed">You perform better in the morning. Try studying before noon.</p>
-                    </div>
-                    <div className="flex items-start gap-2">
-                      <span className="text-electric text-[10px] mt-0.5 flex-shrink-0">&#x25CF;</span>
-                      <p className="text-cream/50 text-xs leading-relaxed">Science accuracy up 12% this week. Keep it up.</p>
+              {/* Ninny's Notes — computed from real stats, no mock copy.
+                  Generates up to 3 facts ranked by usefulness; falls back to
+                  a welcome message for new users. */}
+              {(() => {
+                const notes: { text: string; weakSubject?: string }[] = [];
+
+                // Find best + weakest subjects by accuracy (require ≥ 5 answers so noise doesn't dominate)
+                const ranked = subjectStats
+                  .filter(s => s.questionsAnswered >= 5)
+                  .map(s => ({
+                    subject: s.subject,
+                    accuracy: Math.round((s.correctAnswers / s.questionsAnswered) * 100),
+                    answered: s.questionsAnswered,
+                  }))
+                  .sort((a, b) => b.accuracy - a.accuracy);
+
+                if (ranked.length >= 2) {
+                  const best = ranked[0];
+                  const worst = ranked[ranked.length - 1];
+                  if (best.accuracy >= 70) {
+                    notes.push({ text: `${best.subject} is your strongest — ${best.accuracy}% accuracy. Stack Fangs while you're hot.` });
+                  }
+                  if (worst.accuracy < 60 && worst.subject !== best.subject) {
+                    notes.push({ text: `${worst.subject} accuracy is ${worst.accuracy}%. A quick round could move that fast.`, weakSubject: worst.subject });
+                  }
+                }
+
+                // Weekly trend: today vs 3-day average
+                if (weeklyChart.length >= 4) {
+                  const today = weeklyChart[weeklyChart.length - 1];
+                  const prev3 = weeklyChart.slice(-4, -1);
+                  const prev3Avg = prev3.reduce((s, d) => s + d.questions, 0) / prev3.length;
+                  if (today.questions === 0 && prev3Avg > 0) {
+                    notes.push({ text: `You haven't studied yet today. A 10-question round keeps the streak safe.` });
+                  } else if (today.questions > prev3Avg * 1.5 && today.questions >= 5) {
+                    notes.push({ text: `${today.questions} questions today — above your usual pace. Nice gear.` });
+                  }
+                }
+
+                // Streak-aware nudge
+                if (streak >= 7) {
+                  notes.push({ text: `${streak}-day streak. Don't break it now.` });
+                } else if (streak === 0 && subjectStats.length > 0) {
+                  notes.push({ text: `No active streak. One quiz today starts a new one.` });
+                }
+
+                // Fallback for empty/new users
+                if (notes.length === 0) {
+                  notes.push({ text: subjectStats.length === 0
+                    ? `Take your first quiz — Ninny will start spotting patterns after a few rounds.`
+                    : `Keep answering — Ninny needs a bit more data to spot patterns.`
+                  });
+                }
+
+                const topNotes = notes.slice(0, 3);
+                const weakSubject = topNotes.find(n => n.weakSubject)?.weakSubject;
+
+                return (
+                  <div className="animate-slide-up" style={{ animationDelay: "0.26s" }}>
+                    <h2 className="font-bebas text-lg text-cream tracking-wider mb-3">NINNY&apos;S NOTES</h2>
+                    <div className="rounded-tl-[24px] rounded-br-[24px] rounded-tr-[8px] rounded-bl-[8px] p-4 idle-glow-ninny"
+                      style={{ background: "linear-gradient(135deg, #0d1528 0%, #0a1020 100%)", border: "1px solid rgba(74,144,217,0.08)" }}>
+                      <div className="space-y-2.5 mb-4">
+                        {topNotes.map((note, i) => (
+                          <div key={i} className="flex items-start gap-2">
+                            <span className="text-electric text-[10px] mt-0.5 flex-shrink-0">&#x25CF;</span>
+                            <p className="text-cream/50 text-xs leading-relaxed">{note.text}</p>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        <Link
+                          href={weakSubject ? `/quiz?subject=${encodeURIComponent(weakSubject)}` : "/learn"}
+                          className="text-[11px] font-semibold py-1.5 px-3 rounded-full border border-electric/20 text-electric/60 bg-electric/5 hover:bg-electric/10 transition-colors"
+                        >
+                          {weakSubject ? `Drill ${weakSubject}` : "Pick a Subject"}
+                        </Link>
+                        <Link href="/learn" className="text-[11px] font-semibold py-1.5 px-3 rounded-full border border-electric/20 text-electric/60 bg-electric/5 hover:bg-electric/10 transition-colors">
+                          Daily Quiz
+                        </Link>
+                      </div>
                     </div>
                   </div>
-                  <div className="flex flex-wrap gap-2 mb-3">
-                    <button disabled className="text-[11px] font-semibold py-1.5 px-3 rounded-full border border-electric/15 text-cream/25 bg-white/[0.03] cursor-not-allowed">
-                      Review Weak Spot (Soon)
-                    </button>
-                    <button disabled className="text-[11px] font-semibold py-1.5 px-3 rounded-full border border-electric/15 text-cream/25 bg-white/[0.03] cursor-not-allowed">
-                      Ask Ninny (Soon)
-                    </button>
-                  </div>
-                  <p className="text-cream/15 text-[10px] italic">Ninny is analyzing your progress&hellip;</p>
-                </div>
-              </div>
+                );
+              })()}
             </div>
           </div>
         </div>

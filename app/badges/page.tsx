@@ -5,6 +5,7 @@ import { useAuth } from "@/lib/auth";
 import { getAllBadges, getUserBadges } from "@/lib/db";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import BackButton from "@/components/BackButton";
+import { MedalMilitary, Lock, Star } from "@phosphor-icons/react";
 
 const RARITY_STYLES: Record<string, { border: string; bg: string; text: string; glow: string }> = {
   common:    { border: "border-gray-500/30",   bg: "bg-gray-500/10",   text: "text-gray-400",   glow: "" },
@@ -55,7 +56,7 @@ export default function BadgesPage() {
         <BackButton />
 
         <div className="text-center mb-10 animate-slide-up">
-          <span className="text-5xl block mb-3">🏅</span>
+          <MedalMilitary size={52} weight="fill" color="#FFD700" className="mx-auto mb-3" aria-hidden="true" />
           <h1 className="font-bebas text-5xl sm:text-6xl text-cream tracking-wider mb-2">BADGES</h1>
           <p className="text-cream/50 text-sm">
             {earned.length} of {allBadges.length} earned
@@ -70,7 +71,7 @@ export default function BadgesPage() {
           </div>
         ) : allBadges.length === 0 ? (
           <div className="text-center py-20 rounded-2xl" style={{ background: "linear-gradient(135deg, rgba(13,21,40,0.5), rgba(10,16,32,0.5))", border: "1px solid rgba(74,144,217,0.08)" }}>
-            <span className="text-4xl block mb-3">🔒</span>
+            <Lock size={40} weight="regular" color="rgba(238,244,255,0.4)" className="mx-auto mb-3" aria-hidden="true" />
             <p className="font-bebas text-2xl text-cream/50 tracking-wider mb-1">No badges yet</p>
             <p className="text-cream/30 text-sm">Complete quizzes and challenges to earn badges.</p>
           </div>
@@ -107,7 +108,7 @@ export default function BadgesPage() {
             {locked.length > 0 && (
               <div className="animate-slide-up" style={{ animationDelay: "0.2s" }}>
                 <h2 className="font-bebas text-2xl text-cream/50 tracking-wider mb-4 flex items-center gap-2">
-                  <span>🔒</span> LOCKED
+                  <Lock size={12} weight="regular" aria-hidden="true" /> LOCKED
                   <span className="text-cream/20 text-base ml-1">({locked.length})</span>
                 </h2>
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">

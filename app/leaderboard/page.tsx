@@ -8,6 +8,7 @@ import { formatCoins } from "@/lib/mockData";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import BackButton from "@/components/BackButton";
 import { cdnUrl } from "@/lib/cdn";
+import { Crown, Medal, Sword, TrendUp, Trophy, Brain, Fire } from "@phosphor-icons/react";
 
 type Filter = "elo" | "weekly";
 
@@ -47,8 +48,14 @@ export default function LeaderboardPage() {
   const topThree = entries.slice(0, 3);
   const rest = entries.slice(3);
 
-  const rankEmoji: Record<number, string> = { 1: "👑", 2: "🥈", 3: "🥉" };
   const rankBorderColor: Record<number, string> = { 1: "#FFD700", 2: "#9CA3AF", 3: "#B45309" };
+
+  const renderRankIcon = (rank: number, size: number) => {
+    if (rank === 1) return <Crown size={size} weight="fill" color="#FFD700" aria-hidden="true" />;
+    if (rank === 2) return <Medal size={size} weight="fill" color="#9CA3AF" aria-hidden="true" />;
+    if (rank === 3) return <Medal size={size} weight="fill" color="#B45309" aria-hidden="true" />;
+    return null;
+  };
 
   // Display value based on current filter mode
   const displayValue = (entry: LbEntry) =>
@@ -66,7 +73,8 @@ export default function LeaderboardPage() {
           {/* Header */}
           <div className="text-center mb-10 animate-slide-up">
             <span className="inline-flex items-center gap-2 bg-gold/10 border border-gold/30 rounded-full px-4 py-1.5 text-gold text-sm font-semibold mb-6">
-              👑 {filter === "elo" ? "ELO Rankings" : "Weekly Rankings"}
+              <Crown size={16} weight="fill" color="currentColor" aria-hidden="true" />
+              {filter === "elo" ? "ELO Rankings" : "Weekly Rankings"}
             </span>
             <h1 className="font-bebas text-6xl sm:text-7xl text-cream tracking-wider mb-3">LEADERBOARD</h1>
             <p className="text-cream/50 text-base">Top earners reset every Sunday midnight.</p>
@@ -75,12 +83,13 @@ export default function LeaderboardPage() {
           {/* Filters */}
           <div className="flex items-center gap-2 bg-navy-50 border border-electric/20 rounded-xl p-1.5 mb-8 animate-slide-up" style={{ animationDelay: "0.1s" }}>
             {[
-              { key: "elo", label: "⚔️ ELO Ranking" },
-              { key: "weekly", label: "📈 Weekly Fangs" },
+              { key: "elo" as const, label: "ELO Ranking", Icon: Sword },
+              { key: "weekly" as const, label: "Weekly Fangs", Icon: TrendUp },
             ].map((tab) => (
-              <button key={tab.key} onClick={() => setFilter(tab.key as Filter)}
-                className={`flex-1 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200
+              <button key={tab.key} onClick={() => setFilter(tab.key)}
+                className={`flex-1 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 inline-flex items-center justify-center gap-2
                   ${filter === tab.key ? "bg-electric text-white shadow-lg shadow-electric/30" : "text-cream/50 hover:text-cream hover:bg-white/5"}`}>
+                <tab.Icon size={16} weight={filter === tab.key ? "fill" : "regular"} color="currentColor" aria-hidden="true" />
                 {tab.label}
               </button>
             ))}
@@ -92,10 +101,15 @@ export default function LeaderboardPage() {
             </div>
           ) : entries.length === 0 ? (
             <div className="card text-center py-16">
-              <p className="text-5xl mb-4">🏆</p>
+              <div className="flex justify-center mb-4">
+                <Trophy size={52} weight="fill" color="#FFD700" aria-hidden="true" />
+              </div>
               <p className="font-bebas text-3xl text-cream tracking-wider mb-2">No rankings yet</p>
               <p className="text-cream/40 text-sm mb-6">Be the first to earn coins and claim the #1 spot!</p>
-              <a href="/quiz"><button className="btn-gold px-8 py-3">🧠 Take a Quiz</button></a>
+              <a href="/quiz"><button className="btn-gold px-8 py-3 inline-flex items-center gap-2">
+                <Brain size={16} weight="fill" color="currentColor" aria-hidden="true" />
+                Take a Quiz
+              </button></a>
             </div>
           ) : (
             <>
@@ -104,7 +118,7 @@ export default function LeaderboardPage() {
                 <div className="grid grid-cols-3 gap-3 mb-8 animate-slide-up" style={{ animationDelay: "0.2s" }}>
                   {/* 2nd */}
                   <div className="flex flex-col items-center pt-6">
-                    <div className="text-3xl mb-2">🥈</div>
+                    <div className="mb-2"><Medal size={32} weight="fill" color="#9CA3AF" aria-hidden="true" /></div>
                     <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-gray-400 mb-2"
                       style={{ boxShadow: "0 0 15px #9CA3AF40" }}>
                       <img src={topThree[1]?.avatar_url ?? `https://api.dicebear.com/7.x/avataaars/svg?seed=${topThree[1]?.username}`}
@@ -117,7 +131,7 @@ export default function LeaderboardPage() {
                   {/* 1st */}
                   <div className="flex flex-col items-center">
                     <div className="relative">
-                      <div className="absolute -top-6 left-1/2 -translate-x-1/2 text-4xl animate-float">👑</div>
+                      <div className="absolute -top-6 left-1/2 -translate-x-1/2 animate-float"><Crown size={40} weight="fill" color="#FFD700" aria-hidden="true" /></div>
                       <div className="w-20 h-20 rounded-full overflow-hidden border-4 border-gold mb-2 shadow-xl shadow-gold/30">
                         <img src={topThree[0]?.avatar_url ?? `https://api.dicebear.com/7.x/avataaars/svg?seed=${topThree[0]?.username}`}
                           alt="" className="w-full h-full object-cover bg-navy-50" />
@@ -130,7 +144,7 @@ export default function LeaderboardPage() {
 
                   {/* 3rd */}
                   <div className="flex flex-col items-center pt-10">
-                    <div className="text-3xl mb-2">🥉</div>
+                    <div className="mb-2"><Medal size={32} weight="fill" color="#B45309" aria-hidden="true" /></div>
                     <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-amber-600 mb-2">
                       <img src={topThree[2]?.avatar_url ?? `https://api.dicebear.com/7.x/avataaars/svg?seed=${topThree[2]?.username}`}
                         alt="" className="w-full h-full object-cover bg-navy-50" />
@@ -151,8 +165,8 @@ export default function LeaderboardPage() {
                       className={`flex items-center gap-4 p-4 rounded-xl border transition-all duration-300 hover:-translate-y-0.5
                         ${isMe ? "border-electric/50 bg-electric/10" : isTop ? "border-gold/30 bg-gold/5" : "border-electric/10 bg-navy-50 hover:border-electric/30"}`}
                       style={{ animationDelay: `${i * 50}ms` }}>
-                      <div className="w-10 flex-shrink-0 text-center">
-                        {isTop ? <span className="text-xl">{rankEmoji[entry.rank]}</span>
+                      <div className="w-10 flex-shrink-0 text-center flex items-center justify-center">
+                        {isTop ? renderRankIcon(entry.rank, 24)
                           : <span className={`font-bebas text-2xl leading-none ${isMe ? "text-electric" : "text-cream/50"}`}>{entry.rank}</span>}
                       </div>
                       <div className={`w-10 h-10 rounded-full overflow-hidden border-2 flex-shrink-0
@@ -166,7 +180,11 @@ export default function LeaderboardPage() {
                           <span className={`font-bold text-sm truncate ${isMe ? "text-electric" : "text-cream"}`}>{entry.username}</span>
                           {isMe && <span className="text-xs bg-electric/20 text-electric px-2 py-0.5 rounded-full border border-electric/30">You</span>}
                         </div>
-                        <p className="text-xs text-cream/40">Lvl {entry.level} · 🔥 {entry.streak}</p>
+                        <p className="text-xs text-cream/40 inline-flex items-center gap-1">
+                          Lvl {entry.level} <span aria-hidden="true">·</span>
+                          <Fire size={14} weight="fill" color="#F97316" aria-hidden="true" />
+                          {entry.streak}
+                        </p>
                       </div>
                       <div className="text-right flex-shrink-0 flex items-center gap-2">
                         <div className="flex items-center gap-1.5">
@@ -188,7 +206,7 @@ export default function LeaderboardPage() {
                             title={`Challenge ${entry.username}`}
                             aria-label={`Challenge ${entry.username} to a duel`}
                           >
-                            <span className="text-sm">&#x2694;</span>
+                            <Sword size={16} weight="regular" color="currentColor" aria-hidden="true" />
                           </button>
                         )}
                       </div>

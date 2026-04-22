@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { createContext, useContext, useState, useEffect, useRef, ReactNode } from "react";
 import { supabase } from "@/lib/supabase";
 import { sanitizeEmail, sanitizePassword, sanitizeUsername, sanitizeText } from "@/lib/sanitize";
 import type { Session } from "@supabase/supabase-js";
@@ -151,6 +151,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  // Tracks which user id we have fully loaded from the DB. TOKEN_REFRESHED
+  // fires on every tab focus — without this guard we'd reset the user to the
+  // basic/default avatar every time, causing a flash until syncProfile returns.
+  const loadedUserIdRef = useRef<string | null>(null);
 
   const refreshUser = async () => {
     const { data: { session: sess } } = await supabase.auth.getSession();
@@ -178,13 +182,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     console.log("[Auth] Setting up onAuthStateChange listener");
 
     // Safety net: if onAuthStateChange never fires (Supabase unreachable),
-    // fall back to getSession() after 3s so the app doesn't stay stuck loading
+    // fall back to getSession() after 3s so the app doesn't stay stuck loading.
+    // getSession() itself is raced against a 2s timeout so a hung client
+    // (stale/invalid JWT that can't be refreshed) can never lock the app.
     let resolved = false;
     const safetyTimer = setTimeout(async () => {
       if (resolved) return;
       console.warn("[Auth] onAuthStateChange did not fire within 3s — falling back to getSession()");
       try {
-        const { data: { session: sess } } = await supabase.auth.getSession();
+        const getSessionPromise = supabase.auth.getSession();
+        const timeoutPromise = new Promise<{ data: { session: null } }>((resolve) =>
+          setTimeout(() => {
+            console.warn("[Auth] getSession() timed out after 2s — assuming no session");
+            resolve({ data: { session: null } });
+          }, 2000),
+        );
+        const { data: { session: sess } } = await Promise.race([getSessionPromise, timeoutPromise]);
         if (resolved) return; // listener fired while we were awaiting
         if (sess?.user) {
           const basicUser = buildBasicUser(sess.user.id, sess.user.email ?? "", sess.user.user_metadata ?? {});
@@ -198,8 +211,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         console.error("[Auth] getSession fallback failed:", err);
         setUser(null);
         setSession(null);
+      } finally {
+        // Guarantee the app unblocks even if every code path above threw.
+        setIsLoading(false);
       }
-      setIsLoading(false);
     }, 3000);
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -213,6 +228,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (!sess?.user) {
           console.log("[Auth] No session — showing login");
           setUser(null);
+          loadedUserIdRef.current = null;
           setIsLoading(false);
           return;
         }
@@ -223,14 +239,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           await supabase.auth.signOut();
           setUser(null);
           setSession(null);
+          loadedUserIdRef.current = null;
           setIsLoading(false);
           return;
         }
 
         updateLastActive();
 
-        // Set a basic user IMMEDIATELY from session metadata — no DB call
-        // This unblocks the login redirect right away
+        // If we already have the full profile for this user (e.g. this is a
+        // TOKEN_REFRESHED event fired on tab focus), don't reset `user` to the
+        // basic default — that's what causes the avatar flash. Just make sure
+        // isLoading is cleared and leave the existing user state intact.
+        const alreadyLoadedForThisUser =
+          loadedUserIdRef.current === sess.user.id;
+
+        if (alreadyLoadedForThisUser) {
+          console.log("[Auth] Token refresh for already-loaded user — keeping existing state");
+          setIsLoading(false);
+          return;
+        }
+
+        // First time seeing this user (or different user). Set a basic user
+        // IMMEDIATELY from session metadata — no DB call. This unblocks the
+        // login redirect right away.
         const basicUser = buildBasicUser(
           sess.user.id,
           sess.user.email ?? "",
@@ -246,9 +277,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             if (profile) {
               console.log("[Auth] Updated user from DB profile — coins:", profile.coins, "xp:", profile.xp, "streak:", profile.streak);
               setUser(profile);
+              loadedUserIdRef.current = sess.user.id;
             } else {
               console.warn("[Auth] syncProfile returned null — marking statsLoaded anyway");
               setUser(prev => prev ? { ...prev, statsLoaded: true } : prev);
+              loadedUserIdRef.current = sess.user.id;
             }
           });
       }
@@ -265,19 +298,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const cleanEmail = sanitizeEmail(email);
     const cleanPassword = sanitizePassword(password);
 
-    // Check brute-force lock before attempting sign-in
+    // Check brute-force lock before attempting sign-in.
+    // 3s AbortController timeout — if the check endpoint hangs, fail open so
+    // the login button can never stall indefinitely on a network wobble.
     try {
-      const lockRes = await fetch(`/api/auth/check-lock?email=${encodeURIComponent(cleanEmail)}`);
+      const controller = new AbortController();
+      const abortId = setTimeout(() => controller.abort(), 3000);
+      const lockRes = await fetch(`/api/auth/check-lock?email=${encodeURIComponent(cleanEmail)}`, {
+        signal: controller.signal,
+      });
+      clearTimeout(abortId);
       const lockData = await lockRes.json();
       if (lockData.locked) {
         return { error: "Account temporarily locked due to too many failed attempts. Try again in 15 minutes." };
       }
     } catch {
-      // Fail open — allow login if the check endpoint is unreachable
+      // Fail open — allow login if the check endpoint is unreachable or slow
     }
 
     console.log("[Auth] login() called for", cleanEmail);
-    const { data, error } = await supabase.auth.signInWithPassword({ email: cleanEmail, password: cleanPassword });
+
+    // 10s timeout around signInWithPassword so the button can never spin forever
+    const signInPromise = supabase.auth.signInWithPassword({ email: cleanEmail, password: cleanPassword });
+    const timeoutPromise = new Promise<{ data: null; error: { message: string } }>((resolve) =>
+      setTimeout(
+        () => resolve({ data: null, error: { message: "Network timeout — check your connection and try again." } }),
+        10000,
+      ),
+    );
+    const { data, error } = await Promise.race([signInPromise, timeoutPromise]);
     console.log("[Auth] signInWithPassword result — error:", error?.message ?? "none", "user:", data?.user?.id ?? "none");
 
     // Record the attempt (fire-and-forget, don't block login flow)
@@ -355,6 +404,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await supabase.auth.signOut();
     setUser(null);
     setSession(null);
+    loadedUserIdRef.current = null;
   };
 
   return (

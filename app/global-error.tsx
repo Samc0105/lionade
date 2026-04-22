@@ -1,5 +1,7 @@
 "use client";
 
+import { Warning } from "@phosphor-icons/react";
+
 export default function GlobalError({
   error,
   reset,
@@ -18,7 +20,7 @@ export default function GlobalError({
           padding: "24px",
         }}>
           <div style={{ textAlign: "center", maxWidth: "400px" }}>
-            <div style={{ fontSize: "64px", marginBottom: "24px" }}>⚠️</div>
+            <Warning size={64} weight="fill" color="#EF4444" style={{ marginBottom: "24px" }} aria-hidden="true" />
             <h2 style={{ fontSize: "32px", fontWeight: "bold", letterSpacing: "2px", marginBottom: "12px" }}>
               SOMETHING WENT WRONG
             </h2>

@@ -6,34 +6,35 @@ import { useAuth } from "@/lib/auth";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import BackButton from "@/components/BackButton";
 import { getAllSubjectPaths, getUserStageProgress } from "@/lib/db";
+import { Ruler, Dna, Bank, Flask, type Icon } from "@phosphor-icons/react";
 
 /* ── Subject config ───────────────────────────────────────── */
 
 const SUBJECT_META: Record<
   string,
-  { label: string; icon: string; color: string; gradient: string }
+  { label: string; icon: Icon; color: string; gradient: string }
 > = {
   algebra: {
     label: "Algebra",
-    icon: "\u{1F4D0}",
+    icon: Ruler,
     color: "#3B82F6",
     gradient: "linear-gradient(135deg, #3B82F620 0%, #3B82F608 100%)",
   },
   biology: {
     label: "Biology",
-    icon: "\u{1F9EC}",
+    icon: Dna,
     color: "#22C55E",
     gradient: "linear-gradient(135deg, #22C55E20 0%, #22C55E08 100%)",
   },
   us_history: {
     label: "US History",
-    icon: "\u{1F3DB}",
+    icon: Bank,
     color: "#EAB308",
     gradient: "linear-gradient(135deg, #EAB30820 0%, #EAB30808 100%)",
   },
   chemistry: {
     label: "Chemistry",
-    icon: "\u{2697}",
+    icon: Flask,
     color: "#A855F7",
     gradient: "linear-gradient(135deg, #A855F720 0%, #A855F708 100%)",
   },
@@ -112,6 +113,7 @@ export default function SubjectSelectorPage() {
                 const total = subj?.total_stages ?? 0;
                 const prog = progressMap[key] ?? { completed: 0, stars: 0 };
                 const pct = total > 0 ? (prog.completed / total) * 100 : 0;
+                const IconComp = meta.icon;
 
                 return (
                   <button
@@ -134,8 +136,8 @@ export default function SubjectSelectorPage() {
                     }}
                   >
                     {/* Icon */}
-                    <span className="text-4xl block mb-3 group-hover:scale-110 transition-transform duration-300">
-                      {meta.icon}
+                    <span className="text-4xl block mb-3 group-hover:scale-110 transition-transform duration-300" style={{ color: meta.color }}>
+                      <IconComp size={40} weight="regular" aria-hidden="true" color="currentColor" />
                     </span>
 
                     {/* Title */}

@@ -6,25 +6,49 @@ import { useAuth } from "@/lib/auth";
 import { supabase } from "@/lib/supabase";
 import { getQuizQuestions, checkAnswer } from "@/lib/db";
 import type { Subject } from "@/types";
+import {
+  MathOperations,
+  Flask,
+  BookOpen,
+  Globe,
+  Code,
+  Cloud,
+  CurrencyDollar,
+  Notepad,
+  Plant,
+  BookOpenText,
+  Fire,
+  Lightning,
+  Target,
+  Rocket,
+  Trophy,
+  Barbell,
+  PawPrint,
+  Check,
+} from "@phosphor-icons/react";
+import type { IconProps } from "@phosphor-icons/react";
+import type { ComponentType } from "react";
 
 /* ── Subject categories ──────────────────────────────────────── */
 
-const SUBJECTS = [
-  { label: "Math", dbSubject: "Math" as Subject, icon: "📐", color: "#EF4444" },
-  { label: "Science", dbSubject: "Science" as Subject, icon: "🔬", color: "#22C55E" },
-  { label: "Humanities", dbSubject: "Humanities" as Subject, icon: "📚", color: "#A855F7" },
-  { label: "Languages", dbSubject: "Languages" as Subject, icon: "🌍", color: "#3B82F6" },
-  { label: "Tech & Coding", dbSubject: "Tech & Coding" as Subject, icon: "💻", color: "#6B7280" },
-  { label: "Cloud & IT", dbSubject: "Cloud & IT" as Subject, icon: "☁️", color: "#F97316" },
-  { label: "Finance & Business", dbSubject: "Finance & Business" as Subject, icon: "💰", color: "#EAB308" },
-  { label: "Test Prep", dbSubject: "Test Prep" as Subject, icon: "📝", color: "#EC4899" },
+type IconComp = ComponentType<IconProps>;
+
+const SUBJECTS: Array<{ label: string; dbSubject: Subject; Icon: IconComp; color: string }> = [
+  { label: "Math", dbSubject: "Math" as Subject, Icon: MathOperations, color: "#EF4444" },
+  { label: "Science", dbSubject: "Science" as Subject, Icon: Flask, color: "#22C55E" },
+  { label: "Humanities", dbSubject: "Humanities" as Subject, Icon: BookOpen, color: "#A855F7" },
+  { label: "Languages", dbSubject: "Languages" as Subject, Icon: Globe, color: "#3B82F6" },
+  { label: "Tech & Coding", dbSubject: "Tech & Coding" as Subject, Icon: Code, color: "#6B7280" },
+  { label: "Cloud & IT", dbSubject: "Cloud & IT" as Subject, Icon: Cloud, color: "#F97316" },
+  { label: "Finance & Business", dbSubject: "Finance & Business" as Subject, Icon: CurrencyDollar, color: "#EAB308" },
+  { label: "Test Prep", dbSubject: "Test Prep" as Subject, Icon: Notepad, color: "#EC4899" },
 ];
 
-const DAILY_GOALS = [
-  { minutes: 5, label: "5 min", tag: "Casual", icon: "🌱" },
-  { minutes: 10, label: "10 min", tag: "Regular", icon: "📖" },
-  { minutes: 15, label: "15 min", tag: "Serious", icon: "🔥" },
-  { minutes: 20, label: "20 min", tag: "Intense", icon: "⚡" },
+const DAILY_GOALS: Array<{ minutes: number; label: string; tag: string; Icon: IconComp }> = [
+  { minutes: 5, label: "5 min", tag: "Casual", Icon: Plant },
+  { minutes: 10, label: "10 min", tag: "Regular", Icon: BookOpenText },
+  { minutes: 15, label: "15 min", tag: "Serious", Icon: Fire },
+  { minutes: 20, label: "20 min", tag: "Intense", Icon: Lightning },
 ];
 
 const TOTAL_STEPS = 4;
@@ -69,7 +93,7 @@ export default function OnboardingPage() {
 
   // Speech bubble messages
   const SPEECHES: Record<number, string> = {
-    1: "Hey! I'm Leo 🦁 Let's get you set up. What do you want to study?",
+    1: "Hey! I'm Leo. Let's get you set up. What do you want to study?",
     2: "Nice picks! How much time can you study each day?",
     3: "Almost done! Want to start fresh or test your level?",
     4: levelChoice === "diagnostic"
@@ -202,6 +226,13 @@ export default function OnboardingPage() {
     );
   }
 
+  // Results icon for diagnostic
+  const resultsIcon = (size: number) => {
+    if (diagScore >= 4) return <Trophy size={size} weight="fill" color="#FFD700" aria-hidden="true" />;
+    if (diagScore >= 2) return <Barbell size={size} weight="fill" color="#4A90D9" aria-hidden="true" />;
+    return <Plant size={size} weight="fill" color="#22C55E" aria-hidden="true" />;
+  };
+
   return (
     <div className="min-h-screen flex flex-col items-center px-4 py-8">
       {/* Progress bar */}
@@ -225,9 +256,9 @@ export default function OnboardingPage() {
 
       {/* Lion mascot + speech bubble */}
       <div className="flex items-start gap-3 max-w-lg w-full mb-8 animate-slide-up">
-        <div className="w-14 h-14 rounded-full flex items-center justify-center flex-shrink-0 text-3xl"
+        <div className="w-14 h-14 rounded-full flex items-center justify-center flex-shrink-0"
           style={{ background: "linear-gradient(135deg, #FFD70030, #F9731620)", border: "2px solid #FFD70040" }}>
-          🦁
+          <PawPrint size={32} weight="fill" color="#FFD700" aria-hidden="true" />
         </div>
         <div className="flex-1 rounded-2xl rounded-tl-sm px-5 py-3.5"
           style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)" }}>
@@ -261,12 +292,17 @@ export default function OnboardingPage() {
                       boxShadow: selected ? `0 0 20px ${s.color}20` : "none",
                     }}
                   >
-                    <span className="text-2xl block mb-2">{s.icon}</span>
+                    <span className="block mb-2" style={{ color: s.color }}>
+                      <s.Icon size={28} weight={selected ? "fill" : "regular"} color="currentColor" aria-hidden="true" />
+                    </span>
                     <p className={`text-sm font-bold ${selected ? "text-cream" : "text-cream/60"}`}>
                       {s.label}
                     </p>
                     {selected && (
-                      <span className="text-electric text-xs font-bold mt-1 block">&#x2713; Selected</span>
+                      <span className="text-electric text-xs font-bold mt-1 inline-flex items-center gap-1">
+                        <Check size={14} weight="bold" color="currentColor" aria-hidden="true" />
+                        Selected
+                      </span>
                     )}
                   </button>
                 );
@@ -303,7 +339,9 @@ export default function OnboardingPage() {
                     }`}
                     style={{ background: selected ? "rgba(74,144,217,0.1)" : "rgba(255,255,255,0.03)" }}
                   >
-                    <span className="text-2xl">{g.icon}</span>
+                    <span className={selected ? "text-electric" : "text-cream/60"}>
+                      <g.Icon size={28} weight={selected ? "fill" : "regular"} color="currentColor" aria-hidden="true" />
+                    </span>
                     <div className="flex-1">
                       <p className={`font-bold text-sm ${selected ? "text-cream" : "text-cream/60"}`}>
                         {g.label} / day
@@ -312,7 +350,11 @@ export default function OnboardingPage() {
                         {g.tag}
                       </p>
                     </div>
-                    {selected && <span className="text-electric text-lg">&#x2713;</span>}
+                    {selected && (
+                      <span className="text-electric">
+                        <Check size={20} weight="bold" color="currentColor" aria-hidden="true" />
+                      </span>
+                    )}
                   </button>
                 );
               })}
@@ -345,7 +387,9 @@ export default function OnboardingPage() {
                 }`}
                 style={{ background: levelChoice === "scratch" ? "rgba(74,144,217,0.1)" : "rgba(255,255,255,0.03)" }}
               >
-                <span className="text-3xl">🌱</span>
+                <span className={levelChoice === "scratch" ? "text-electric" : "text-cream/60"}>
+                  <Plant size={32} weight={levelChoice === "scratch" ? "fill" : "regular"} color="currentColor" aria-hidden="true" />
+                </span>
                 <div>
                   <p className={`font-bold ${levelChoice === "scratch" ? "text-cream" : "text-cream/60"}`}>
                     Start from scratch
@@ -365,7 +409,9 @@ export default function OnboardingPage() {
                 }`}
                 style={{ background: levelChoice === "diagnostic" ? "rgba(255,215,0,0.08)" : "rgba(255,255,255,0.03)" }}
               >
-                <span className="text-3xl">🎯</span>
+                <span className={levelChoice === "diagnostic" ? "text-gold" : "text-cream/60"}>
+                  <Target size={32} weight={levelChoice === "diagnostic" ? "fill" : "regular"} color="currentColor" aria-hidden="true" />
+                </span>
                 <div>
                   <p className={`font-bold ${levelChoice === "diagnostic" ? "text-cream" : "text-cream/60"}`}>
                     Find my level
@@ -388,9 +434,14 @@ export default function OnboardingPage() {
               disabled={!levelChoice || submitting}
               className="w-full py-3.5 rounded-xl font-bold text-sm bg-electric text-white
                 hover:bg-electric/90 transition-all duration-200 shadow-lg shadow-electric/20
-                disabled:opacity-40 disabled:cursor-not-allowed"
+                disabled:opacity-40 disabled:cursor-not-allowed inline-flex items-center justify-center gap-2"
             >
-              {submitting ? "Saving..." : levelChoice === "scratch" ? "Let's Go! 🚀" : "Start Quiz →"}
+              {submitting ? "Saving..." : levelChoice === "scratch" ? (
+                <>
+                  Let&apos;s Go!
+                  <Rocket size={16} weight="fill" color="currentColor" aria-hidden="true" />
+                </>
+              ) : "Start Quiz →"}
             </button>
           </div>
         )}
@@ -406,8 +457,8 @@ export default function OnboardingPage() {
             ) : diagDone ? (
               /* Results */
               <div className="text-center animate-slide-up">
-                <div className="text-6xl mb-4">
-                  {diagScore >= 4 ? "🏆" : diagScore >= 2 ? "💪" : "🌱"}
+                <div className="flex justify-center mb-4">
+                  {resultsIcon(64)}
                 </div>
                 <h2 className="font-bebas text-3xl text-cream tracking-wider mb-2">
                   {diagScore >= 4 ? "ADVANCED" : diagScore >= 2 ? "INTERMEDIATE" : "BEGINNER"}
@@ -427,9 +478,14 @@ export default function OnboardingPage() {
                   disabled={submitting}
                   className="w-full py-3.5 rounded-xl font-bold text-sm bg-electric text-white
                     hover:bg-electric/90 transition-all duration-200 shadow-lg shadow-electric/20
-                    disabled:opacity-40 disabled:cursor-not-allowed"
+                    disabled:opacity-40 disabled:cursor-not-allowed inline-flex items-center justify-center gap-2"
                 >
-                  {submitting ? "Saving..." : "Let's Go! 🚀"}
+                  {submitting ? "Saving..." : (
+                    <>
+                      Let&apos;s Go!
+                      <Rocket size={16} weight="fill" color="currentColor" aria-hidden="true" />
+                    </>
+                  )}
                 </button>
               </div>
             ) : diagQuestions.length === 0 ? (

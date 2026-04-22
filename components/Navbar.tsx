@@ -2,13 +2,30 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useAuth } from "@/lib/auth";
 import { useUserStats, useStreakInfo, isStreakExpired, resetExpiredStreak, mutateUserStats } from "@/lib/hooks";
 import { formatCoins } from "@/lib/mockData";
 import { supabase } from "@/lib/supabase";
 import { cdnUrl } from "@/lib/cdn";
 import { apiGet, apiPatch } from "@/lib/api-client";
+import CountUp from "@/components/CountUp";
+import {
+  Bell,
+  Users,
+  Check,
+  Sword,
+  Trophy,
+  Medal,
+  Megaphone,
+  Fire,
+  Skull,
+  Shield,
+  House,
+  BookOpen,
+  Storefront,
+  type Icon,
+} from "@phosphor-icons/react";
 
 interface Notification {
   id: string;
@@ -30,12 +47,12 @@ function timeAgoShort(dateStr: string): string {
   return `${Math.floor(hrs / 24)}d`;
 }
 
-const NOTIF_ICONS: Record<string, string> = {
-  friend_request: "\uD83D\uDC65",
-  friend_accepted: "\u2705",
-  arena_challenge: "\u2694\uFE0F",
-  arena_result: "\uD83C\uDFC6",
-  rank_up: "\uD83E\uDD47",
+const NOTIF_ICONS: Record<string, Icon> = {
+  friend_request: Users,
+  friend_accepted: Check,
+  arena_challenge: Sword,
+  arena_result: Trophy,
+  rank_up: Medal,
 };
 
 function StatSkeleton({ width = "w-8" }: { width?: string }) {
@@ -72,6 +89,14 @@ export default function Navbar() {
   const router = useRouter();
   const { user, logout } = useAuth();
   const { stats, mutate: mutateStats } = useUserStats(user?.id);
+
+  // Memoized avatar URL so the <img src> stays stable across re-renders.
+  // Without this, every render creates a new fallback string and the browser
+  // treats it as a new resource — causing a flash on tab return.
+  const avatarUrl = useMemo(
+    () => stats?.avatar ?? user?.avatar ?? null,
+    [stats?.avatar, user?.avatar],
+  );
   const { streakInfo, mutateStreakInfo } = useStreakInfo(user?.id);
   const [streakResetDone, setStreakResetDone] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
@@ -97,6 +122,8 @@ export default function Navbar() {
   const [unreadCount, setUnreadCount] = useState<number | null>(null);
   const [showNotifPanel, setShowNotifPanel] = useState(false);
   const notifRef = useRef<HTMLDivElement>(null);
+  const [bellTilt, setBellTilt] = useState(false);
+  const prevUnreadRef = useRef<number | null>(null);
 
   const loadNotifications = useCallback(async () => {
     if (!user?.id) return;
@@ -115,6 +142,25 @@ export default function Navbar() {
     const iv = setInterval(loadNotifications, 15000);
     return () => clearInterval(iv);
   }, [user?.id, loadNotifications]);
+
+  // Tilt the bell when unreadCount actually increases (new notif arrived).
+  // Ignore the initial null -> number transition on first load so we don't
+  // shake every page mount. Respects prefers-reduced-motion.
+  useEffect(() => {
+    const prev = prevUnreadRef.current;
+    if (prev !== null && unreadCount !== null && unreadCount > prev) {
+      const reduceMotion =
+        typeof window !== "undefined" &&
+        window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+      if (!reduceMotion) {
+        setBellTilt(true);
+        const t = setTimeout(() => setBellTilt(false), 600);
+        prevUnreadRef.current = unreadCount;
+        return () => clearTimeout(t);
+      }
+    }
+    prevUnreadRef.current = unreadCount;
+  }, [unreadCount]);
 
   // Realtime subscription for new notifications
   useEffect(() => {
@@ -324,7 +370,11 @@ export default function Navbar() {
                     style={{ background: "linear-gradient(135deg, #FFD700, #F59E0B)" }}>
                     <img src={cdnUrl("/F.png")} alt="Fangs" className="w-5 h-5 object-contain" />
                     <span className="font-bebas text-base text-navy tracking-wider leading-none font-bold">
-                      {stats ? formatCoins(stats.coins) : user.statsLoaded ? formatCoins(user.coins) : <StatSkeleton />}
+                      {stats
+                        ? <CountUp value={stats.coins} format={formatCoins} />
+                        : user.statsLoaded
+                          ? <CountUp value={user.coins} format={formatCoins} />
+                          : <StatSkeleton />}
                     </span>
                   </Link>
 
@@ -334,13 +384,13 @@ export default function Navbar() {
                     className="hidden sm:flex items-center gap-1 bg-orange-500/10 border border-orange-500/20
                       rounded-full px-2.5 py-1 cursor-pointer group relative hover:bg-orange-500/15 transition-colors"
                   >
-                    <span className="text-sm">&#x1F525;</span>
+                    <Fire size={16} weight="fill" color="#FB923C" aria-hidden="true" />
                     <span className="font-bebas text-base text-orange-400 tracking-wider leading-none">
                       {stats !== null
-                        ? (isStreakExpired(streakInfo?.lastQuizAt ?? null) ? 0 : stats.streak)
+                        ? <CountUp value={isStreakExpired(streakInfo?.lastQuizAt ?? null) ? 0 : stats.streak} duration={400} />
                         : user.statsLoaded
-                        ? (isStreakExpired(streakInfo?.lastQuizAt ?? null) ? 0 : user.streak)
-                        : <StatSkeleton width="w-5" />}
+                          ? <CountUp value={isStreakExpired(streakInfo?.lastQuizAt ?? null) ? 0 : user.streak} duration={400} />
+                          : <StatSkeleton width="w-5" />}
                     </span>
                     <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 px-2 py-1 rounded bg-navy-100
                       border border-electric/20 text-xs text-cream/70 opacity-0 group-hover:opacity-100
@@ -353,16 +403,33 @@ export default function Navbar() {
                   <div className="relative hidden sm:block" ref={notifRef}>
                     <button
                       onClick={openNotifPanel}
+                      aria-label={`Notifications${(unreadCount ?? 0) > 0 ? ` (${unreadCount} unread)` : ""}`}
                       className="relative flex items-center justify-center w-8 h-8 rounded-full hover:bg-white/10 transition-colors"
                     >
-                      <span className="text-base">🔔</span>
+                      <span
+                        className="inline-flex"
+                        style={{
+                          transformOrigin: "top center",
+                          animation: bellTilt ? "bell-tilt 600ms var(--ease-out-emil)" : undefined,
+                        }}
+                        aria-hidden="true"
+                      >
+                        <Bell size={18} weight="regular" color="currentColor" />
+                      </span>
                       {(unreadCount ?? 0) > 0 && (
-                        <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 rounded-full flex items-center justify-center px-1 text-[9px] font-bold notif-badge-pulse"
-                          style={{ background: "#EF4444", color: "#fff" }}>
+                        <span
+                          className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 rounded-full flex items-center justify-center px-1 text-[9px] font-bold notif-badge-pulse"
+                          style={{ background: "#EF4444", color: "#fff" }}
+                          aria-hidden="true"
+                        >
                           {unreadCount}
                         </span>
                       )}
                     </button>
+                    {/* Screen-reader live region announces unread count changes. */}
+                    <span className="sr-only" aria-live="polite" aria-atomic="true">
+                      {(unreadCount ?? 0) > 0 ? `${unreadCount} unread notifications` : ""}
+                    </span>
 
                     {/* Notification Dropdown */}
                     {showNotifPanel && (
@@ -390,9 +457,18 @@ export default function Navbar() {
                               className="w-full text-left px-4 py-3 flex items-start gap-3 hover:bg-white/[0.04] transition-colors"
                               style={!n.read ? { borderLeft: "2px solid #FFD700" } : { borderLeft: "2px solid transparent" }}
                             >
-                              <span className="text-base flex-shrink-0 mt-0.5">
-                                {NOTIF_ICONS[n.type] ?? "📢"}
-                              </span>
+                              {(() => {
+                                const NotifIcon = NOTIF_ICONS[n.type] ?? Megaphone;
+                                return (
+                                  <NotifIcon
+                                    size={18}
+                                    weight="regular"
+                                    className="flex-shrink-0 mt-0.5"
+                                    color="currentColor"
+                                    aria-hidden="true"
+                                  />
+                                );
+                              })()}
                               <div className="flex-1 min-w-0">
                                 <p className={`text-xs font-semibold truncate ${n.read ? "text-cream/60" : "text-cream"}`}>
                                   {n.title}
@@ -426,30 +502,36 @@ export default function Navbar() {
                         hover:border-electric transition-colors duration-200 cursor-pointer flex-shrink-0"
                       style={{ backgroundColor: "rgba(74, 144, 217, 0.25)" }}
                     >
-                      <img
-                        src={stats?.avatar ?? user.avatar}
-                        alt={user.username}
-                        className="w-full h-full object-cover"
-                      />
+                      {avatarUrl && (
+                        <img
+                          src={avatarUrl}
+                          alt={user.username}
+                          className="w-full h-full object-cover"
+                        />
+                      )}
                     </button>
 
                     {showDropdown && (
                       <>
-                        {/* Backdrop */}
+                        {/* Invisible click-catcher — closes dropdown when clicking anywhere outside.
+                            No dim/blur: a dropdown isn't a modal. Outside-click still dismisses via
+                            the existing mousedown listener on dropdownRef. */}
                         <div
-                          className={`fixed inset-0 z-40 ${dropdownClosing ? "animate-fade-out" : "animate-fade-in"}`}
-                          style={{ background: "rgba(0,0,0,0.4)", backdropFilter: "blur(2px)" }}
+                          className="fixed inset-0 z-40"
                           onClick={closeDropdown}
+                          aria-hidden="true"
                         />
 
-                        {/* Dropdown panel */}
+                        {/* Dropdown panel — scales from top-right so it reads as opening
+                            FROM the avatar, not from nowhere. */}
                         <div
                           className={`absolute right-0 top-12 w-[280px] rounded-2xl z-50 overflow-hidden origin-top-right
                             ${dropdownClosing ? "dropdown-menu-exit" : "dropdown-menu-enter"}`}
                           style={{
                             background: "linear-gradient(135deg, rgba(12,16,32,0.98), rgba(8,12,24,0.98))",
                             border: "1px solid rgba(255,255,255,0.1)",
-                            boxShadow: "0 0 30px rgba(0,0,0,0.5), 0 0 60px rgba(74,144,217,0.08)",
+                            boxShadow: "0 12px 32px rgba(0,0,0,0.45)",
+                            transformOrigin: "top right",
                           }}
                         >
                           {/* ── User info header ── */}
@@ -462,7 +544,7 @@ export default function Navbar() {
                                 className="w-12 h-12 rounded-full overflow-hidden border-2 border-electric/50 flex-shrink-0"
                                 style={{ boxShadow: "0 0 16px rgba(74,144,217,0.2)" }}
                               >
-                                <img src={stats?.avatar ?? user.avatar} alt="" className="w-full h-full object-cover" />
+                                {avatarUrl && <img src={avatarUrl} alt="" className="w-full h-full object-cover" />}
                               </div>
                               <div className="min-w-0 flex-1">
                                 <p className="text-cream font-bold text-[15px] truncate">{user.username}</p>
@@ -574,18 +656,30 @@ export default function Navbar() {
               style={{ background: "linear-gradient(135deg, #0a1020, #060c18)" }}
               onClick={(e) => e.stopPropagation()}
             >
-              {/* Icon + Streak Number */}
+              {/* Icon + Streak Number — illustration tiers up at 7 / 30 / 100 days */}
               <div className="text-center mb-4">
                 {expired ? (
                   <>
-                    <div className="text-6xl mb-2" style={{ filter: "drop-shadow(0 0 20px rgba(220,38,38,0.4))" }}>&#x1F480;</div>
+                    <Skull size={64} weight="fill" color="#F87171" className="mx-auto mb-2" style={{ filter: "drop-shadow(0 0 20px rgba(220,38,38,0.4))" }} aria-hidden="true" />
                     <h2 className="font-bebas text-4xl text-red-400 tracking-wider">
                       Streak Lost!
                     </h2>
                   </>
                 ) : (
                   <>
-                    <div className="text-6xl mb-2" style={{ filter: "drop-shadow(0 0 20px rgba(249,115,22,0.5))" }}>&#x1F525;</div>
+                    {streak >= 7 ? (
+                      <img
+                        src={`/illustrations/${streak >= 100 ? "streak-100-day" : streak >= 30 ? "streak-30-day" : "streak-7-day"}.png`}
+                        alt=""
+                        width={96}
+                        height={96}
+                        className="w-24 h-24 object-contain mx-auto mb-2"
+                        style={{ filter: "drop-shadow(0 0 20px rgba(249,115,22,0.5))" }}
+                        aria-hidden="true"
+                      />
+                    ) : (
+                      <Fire size={64} weight="fill" color="#FB923C" className="mx-auto mb-2" style={{ filter: "drop-shadow(0 0 20px rgba(249,115,22,0.5))" }} aria-hidden="true" />
+                    )}
                     <h2 className="font-bebas text-4xl text-cream tracking-wider">
                       Day {streak} Streak!
                     </h2>
@@ -598,7 +692,7 @@ export default function Navbar() {
               {!expired && (
                 questionsToday >= goal ? (
                   <div className="mb-4 text-center py-3">
-                    <p className="text-orange-400 font-bold text-lg">&#x1F525; Daily goal crushed!</p>
+                    <p className="text-orange-400 font-bold text-lg inline-flex items-center gap-1.5"><Fire size={20} weight="fill" aria-hidden="true" /> Daily goal crushed!</p>
                     <p className="text-cream/40 text-xs mt-1">You&apos;re all caught up — come back tomorrow to keep your streak alive.</p>
                   </div>
                 ) : (
@@ -632,7 +726,7 @@ export default function Navbar() {
               {!expired && streakInfo?.hasStreakShield && (
                 <div className="flex items-center justify-center gap-2 mb-4 py-2 px-3 rounded-xl"
                   style={{ background: "rgba(59,130,246,0.08)", border: "1px solid rgba(59,130,246,0.2)" }}>
-                  <span>&#x1F6E1;&#xFE0F;</span>
+                  <Shield size={16} weight="fill" color="#60A5FA" aria-hidden="true" />
                   <span className="text-blue-400 text-xs font-semibold">Streak Shield Active — you&apos;re protected for 1 missed day</span>
                 </div>
               )}
@@ -657,13 +751,14 @@ export default function Navbar() {
           style={{ background: "rgba(4, 8, 15, 0.95)" }}
         >
           <div className="flex items-center justify-around h-14 px-2">
-            {[
-              { href: "/dashboard", label: "Home", icon: "\u{1F3E0}" },
-              { href: "/learn", label: "Learn", icon: "\u{1F4DA}" },
-              { href: "/compete", label: "Compete", icon: "\u2694\uFE0F" },
-              { href: "/shop", label: "Shop", icon: "\u{1F6CD}\uFE0F" },
-            ].map((item) => {
+            {([
+              { href: "/dashboard", label: "Home",     Icon: House },
+              { href: "/learn",     label: "Learn",    Icon: BookOpen },
+              { href: "/compete",   label: "Compete",  Icon: Sword },
+              { href: "/shop",      label: "Shop",     Icon: Storefront },
+            ] as { href: string; label: string; Icon: Icon }[]).map((item) => {
               const active = isTabActive(item.href);
+              const ItemIcon = item.Icon;
               return (
                 <Link
                   key={item.href}
@@ -674,7 +769,7 @@ export default function Navbar() {
                       : "text-cream/40 hover:text-cream/70"
                     }`}
                 >
-                  <span className="text-lg">{item.icon}</span>
+                  <ItemIcon size={20} weight={active ? "fill" : "regular"} color="currentColor" aria-hidden="true" />
                   <span className="text-[10px] font-semibold tracking-wide">{item.label}</span>
                 </Link>
               );

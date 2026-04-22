@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { cdnUrl } from "@/lib/cdn";
 import { weightedShuffle, type MCQQuestion } from "@/lib/ninny";
 import type { NinnyWrongAnswer } from "./MultipleChoiceMode";
+import { Fire } from "@phosphor-icons/react";
 
 interface Props {
   questions: MCQQuestion[];
@@ -150,10 +151,13 @@ export default function BlitzMode({ questions, wrongAnswerCounts, onComplete }: 
             Streak
           </p>
           <p
-            className="font-bebas text-2xl tracking-wider"
+            className="font-bebas text-2xl tracking-wider inline-flex items-center justify-center gap-1"
             style={{ color: streak >= 3 ? NINNY_PURPLE : "rgba(238,244,255,0.50)" }}
           >
-            {streak >= 3 && "🔥"} {streak}
+            {streak >= 3 && (
+              <Fire size={14} weight="fill" aria-hidden="true" className="inline -mt-0.5" />
+            )}{" "}
+            {streak}
           </p>
         </div>
       </div>

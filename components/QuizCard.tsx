@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import CoinAnimation from "./CoinAnimation";
 import { cdnUrl } from "@/lib/cdn";
+import { Check, X as XIcon, Lightbulb } from "@phosphor-icons/react";
 
 interface QuizQuestion {
   id: string;
@@ -71,6 +72,41 @@ export default function QuizCard({
 
     return () => clearInterval(timer);
   }, [revealed, waiting, question.id]);
+
+  // Keyboard shortcuts:
+  //   1-4 or A-D    → select that option (when not yet answered)
+  //   Enter / Space → advance to next question (when answer revealed)
+  // Ignored while typing in an input or if modifiers are held.
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      const target = e.target as HTMLElement | null;
+      const tag = target?.tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA" || target?.isContentEditable) return;
+
+      // Advance when answer revealed
+      if (revealed && (e.key === "Enter" || e.key === " ")) {
+        e.preventDefault();
+        handleSkip();
+        return;
+      }
+
+      // Answer selection 1-4 or A-D (case-insensitive)
+      if (revealed || waiting) return;
+      const key = e.key.toLowerCase();
+      const numberMap: Record<string, number> = { "1": 0, "2": 1, "3": 2, "4": 3 };
+      const letterMap: Record<string, number> = { a: 0, b: 1, c: 2, d: 3 };
+      const index = numberMap[key] ?? letterMap[key];
+      if (index !== undefined && index < question.options.length) {
+        e.preventDefault();
+        handleSelect(index);
+      }
+    };
+
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [revealed, waiting, question.id, question.options.length]);
 
   const handleSelect = (index: number) => {
     if (revealed || waiting) return;
@@ -194,7 +230,9 @@ export default function QuizCard({
               key={index}
               onClick={() => handleSelect(index)}
               disabled={revealed || waiting}
-              className={optionClass}
+              aria-keyshortcuts={`${index + 1} ${optionLabel}`}
+              className={`${optionClass} quiz-option-enter`}
+              style={{ animationDelay: `${index * 60}ms` }}
             >
               <div className="flex items-center gap-4">
                 <span
@@ -210,11 +248,13 @@ export default function QuizCard({
                       : "bg-white/5 text-cream/30"
                     }`}
                 >
-                  {revealed && result && index === result.correctIndex
-                    ? "✓"
-                    : revealed && index === selected && index !== result?.correctIndex
-                    ? "✗"
-                    : optionLabel}
+                  {revealed && result && index === result.correctIndex ? (
+                    <Check size={18} weight="bold" aria-hidden="true" />
+                  ) : revealed && index === selected && index !== result?.correctIndex ? (
+                    <XIcon size={18} weight="bold" aria-hidden="true" />
+                  ) : (
+                    optionLabel
+                  )}
                 </span>
                 <span>{option}</span>
               </div>
@@ -227,7 +267,9 @@ export default function QuizCard({
       {revealed && result?.explanation && (
         <div className="mt-4 p-4 rounded-xl border border-electric/20 bg-electric/5 animate-slide-up">
           <div className="flex items-start gap-2.5">
-            <span className="text-lg flex-shrink-0">💡</span>
+            <span className="text-lg flex-shrink-0 inline-flex items-center justify-center">
+              <Lightbulb size={20} weight="regular" color="#4A90D9" aria-hidden="true" />
+            </span>
             <p className="text-cream/70 text-sm leading-relaxed">{result.explanation}</p>
           </div>
         </div>

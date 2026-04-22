@@ -6,6 +6,7 @@ import { getPreferences, updatePreferences } from "@/lib/db";
 import type { UserPreferences } from "@/lib/db";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import BackButton from "@/components/BackButton";
+import { Gear, Check } from "@phosphor-icons/react";
 
 function Toggle({ enabled, onChange, label, description }: {
   enabled: boolean; onChange: (v: boolean) => void; label: string; description?: string;
@@ -60,7 +61,9 @@ export default function SettingsPage() {
         <BackButton />
 
         <div className="text-center mb-10 animate-slide-up">
-          <span className="text-5xl block mb-3">⚙️</span>
+          <div className="flex justify-center mb-3">
+            <Gear size={52} weight="regular" className="text-cream/80" aria-hidden="true" />
+          </div>
           <h1 className="font-bebas text-5xl sm:text-6xl text-cream tracking-wider mb-2">SETTINGS</h1>
           <p className="text-cream/50 text-sm">Manage your account preferences</p>
         </div>
@@ -135,8 +138,9 @@ export default function SettingsPage() {
         </div>
 
         {saved && (
-          <div className="fixed bottom-6 left-1/2 -translate-x-1/2 px-4 py-2 rounded-full bg-green-500/20 border border-green-500/30 text-green-400 text-xs font-bold animate-slide-up">
-            ✓ Saved
+          <div className="fixed bottom-6 left-1/2 -translate-x-1/2 px-4 py-2 rounded-full bg-green-500/20 border border-green-500/30 text-green-400 text-xs font-bold animate-slide-up inline-flex items-center">
+            <Check size={14} weight="bold" className="inline mr-1.5 -mt-0.5" aria-hidden="true" />
+            Saved
           </div>
         )}
       </div>

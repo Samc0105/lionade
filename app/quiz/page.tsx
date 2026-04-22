@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect, useRef, useMemo } from "react";
 import { Subject } from "@/types";
-import { SUBJECT_ICONS, SUBJECT_COLORS, formatCoins } from "@/lib/mockData";
+import { SUBJECT_ICONS, SUBJECT_COLORS, DefaultSubjectIcon, formatCoins } from "@/lib/mockData";
 import { getQuizQuestions, checkAnswer, getSubjectStats, getQuizHistory } from "@/lib/db";
 import QuizCard from "@/components/QuizCard";
 import { useAuth } from "@/lib/auth";
@@ -11,6 +11,35 @@ import { useRouter } from "next/navigation";
 import BackButton from "@/components/BackButton";
 import { cdnUrl } from "@/lib/cdn";
 import { apiGet, apiPost, apiPatch } from "@/lib/api-client";
+import Confetti from "@/components/Confetti";
+import {
+  Calculator,
+  TestTube,
+  Globe,
+  BookOpen,
+  Code,
+  Cloud,
+  CurrencyDollar,
+  NotePencil,
+  Lightning,
+  Check,
+  X as XIcon,
+  Share,
+  Lightbulb,
+  ChartBar,
+  Target,
+  Star,
+  Coin,
+  Coins,
+  Clock,
+  Leaf,
+  Snowflake,
+  TrendUp,
+  Rocket,
+  Circle,
+  Fire,
+  type Icon,
+} from "@phosphor-icons/react";
 
 function isLightMode() {
   return typeof document !== "undefined" && document.documentElement.classList.contains("light");
@@ -24,14 +53,14 @@ interface Topic {
 interface Category {
   id: string;
   name: string;
-  icon: string;
+  Icon: Icon;
   color: string;
   topics: Topic[];
 }
 
 const CATEGORIES: Category[] = [
   {
-    id: "math", name: "Math", icon: "📐", color: "#EF4444",
+    id: "math", name: "Math", Icon: Calculator, color: "#EF4444",
     topics: [
       { name: "Algebra", subject: "Math" as Subject },
       { name: "Geometry", subject: "Math" as Subject },
@@ -41,7 +70,7 @@ const CATEGORIES: Category[] = [
     ],
   },
   {
-    id: "science", name: "Science", icon: "🔬", color: "#22C55E",
+    id: "science", name: "Science", Icon: TestTube, color: "#22C55E",
     topics: [
       { name: "Biology", subject: "Science" as Subject },
       { name: "Chemistry", subject: "Science" as Subject },
@@ -51,7 +80,7 @@ const CATEGORIES: Category[] = [
     ],
   },
   {
-    id: "languages", name: "Languages", icon: "🌍", color: "#3B82F6",
+    id: "languages", name: "Languages", Icon: Globe, color: "#3B82F6",
     topics: [
       { name: "Spanish", subject: "Languages" as Subject },
       { name: "French", subject: "Languages" as Subject },
@@ -60,7 +89,7 @@ const CATEGORIES: Category[] = [
     ],
   },
   {
-    id: "humanities", name: "Humanities", icon: "📚", color: "#A855F7",
+    id: "humanities", name: "Humanities", Icon: BookOpen, color: "#A855F7",
     topics: [
       { name: "World History", subject: "Humanities" as Subject },
       { name: "US History", subject: "Humanities" as Subject },
@@ -69,7 +98,7 @@ const CATEGORIES: Category[] = [
     ],
   },
   {
-    id: "tech", name: "Tech & Coding", icon: "💻", color: "#6B7280",
+    id: "tech", name: "Tech & Coding", Icon: Code, color: "#6B7280",
     topics: [
       { name: "Python", subject: "Tech & Coding" as Subject },
       { name: "JavaScript", subject: "Tech & Coding" as Subject },
@@ -79,7 +108,7 @@ const CATEGORIES: Category[] = [
     ],
   },
   {
-    id: "cloud", name: "Cloud & IT", icon: "☁️", color: "#F97316",
+    id: "cloud", name: "Cloud & IT", Icon: Cloud, color: "#F97316",
     topics: [
       { name: "AWS", subject: "Cloud & IT" as Subject },
       { name: "Azure", subject: "Cloud & IT" as Subject },
@@ -89,7 +118,7 @@ const CATEGORIES: Category[] = [
     ],
   },
   {
-    id: "finance", name: "Finance & Business", icon: "💰", color: "#EAB308",
+    id: "finance", name: "Finance & Business", Icon: CurrencyDollar, color: "#EAB308",
     topics: [
       { name: "Personal Finance", subject: "Finance & Business" as Subject },
       { name: "Investing", subject: "Finance & Business" as Subject },
@@ -99,7 +128,7 @@ const CATEGORIES: Category[] = [
     ],
   },
   {
-    id: "testprep", name: "Test Prep", icon: "📝", color: "#EC4899",
+    id: "testprep", name: "Test Prep", Icon: NotePencil, color: "#EC4899",
     topics: [
       { name: "SAT Reading", subject: "Test Prep" as Subject },
       { name: "SAT Math", subject: "Test Prep" as Subject },
@@ -284,9 +313,9 @@ export default function QuizPage() {
   const hasFiftyFifty = hasBooster("fifty_fifty") && !fiftyFiftyUsed;
   const scoreBoost = hasBooster("score_boost") ? getBoosterValue("score_boost") : 0;
 
-  const BOOSTER_ICONS: Record<string, string> = {
-    coin_multiplier: "💰", xp_multiplier: "⚡", extra_time: "⏰",
-    auto_correct: "🍀", fifty_fifty: "🧊", score_boost: "📈",
+  const BOOSTER_ICONS: Record<string, Icon> = {
+    coin_multiplier: Coins, xp_multiplier: Lightning, extra_time: Clock,
+    auto_correct: Leaf, fifty_fifty: Snowflake, score_boost: TrendUp,
   };
 
   function advanceToNext() {
@@ -450,13 +479,6 @@ export default function QuizPage() {
   const wrongCount = answers.filter((a) => !a.correct).length;
   const accuracy = answers.length > 0 ? Math.round((correctCount / answers.length) * 100) : 0;
 
-  const getRank = (acc: number) => {
-    if (acc === 100) return { label: "PERFECT", icon: "\u{1F48E}", color: "#FFD700" };
-    if (acc >= 80)  return { label: "ELITE",   icon: "\u{1F525}", color: "#4A90D9" };
-    if (acc >= 60)  return { label: "SOLID",   icon: "\u{1F44D}", color: "#2ECC71" };
-    return { label: "KEEP GRINDING", icon: "\u{1F4AA}", color: "#E67E22" };
-  };
-
   const getStatForSubject = (s: Subject) => subjectStats.find((st) => st.subject === s);
 
   const recommendations: { category: Category; topic: Topic; reason: string }[] = [];
@@ -504,7 +526,7 @@ export default function QuizPage() {
           <BackButton />
           <div className="text-center mb-8 animate-slide-up">
             <span className="inline-flex items-center gap-2 bg-electric/10 border border-electric/30 rounded-full px-4 py-1.5 text-electric text-sm font-semibold mb-6">
-              &#x26A1; Daily Quiz
+              <Lightning size={14} weight="fill" aria-hidden="true" className="inline mr-1.5 -mt-0.5" /> Daily Quiz
             </span>
             <h1 className="font-bebas text-6xl sm:text-7xl text-cream tracking-wider mb-4">
               PICK YOUR<br /><span className="shimmer-text">BATTLEFIELD</span>
@@ -525,7 +547,7 @@ export default function QuizPage() {
                 boxShadow: blitzMode ? "0 0 30px #EAB30820, 0 0 60px #EAB30810" : "none",
               }}
             >
-              <span className="text-3xl">&#x26A1;</span>
+              <Lightning size={32} weight="fill" color="#EAB308" aria-hidden="true" />
               <div className="flex-1">
                 <p className="font-bebas text-xl text-[#EAB308] tracking-wider">BLITZ MODE</p>
                 <p className="blitz-subtitle text-cream/40 text-xs font-syne">2x Coins & XP, Shorter Timer (10s)</p>
@@ -545,10 +567,10 @@ export default function QuizPage() {
           <div className="animate-slide-up mb-8" style={{ animationDelay: "0.08s" }}>
             <div className="grid grid-cols-3 gap-3">
               {([
-                { d: "easy" as Difficulty, label: "Beginner", icon: "\uD83D\uDFE2", color: "#22C55E", desc: "Fundamentals and basics", mult: "1x" },
-                { d: "medium" as Difficulty, label: "Intermediate", icon: "\uD83D\uDFE1", color: "#EAB308", desc: "Deeper concepts and application", mult: "1.5x" },
-                { d: "hard" as Difficulty, label: "Advanced", icon: "\uD83D\uDD34", color: "#EF4444", desc: "Expert-level challenges", mult: "2x" },
-              ]).map(({ d, label, icon, color, desc, mult }) => (
+                { d: "easy" as Difficulty, label: "Beginner", color: "#22C55E", desc: "Fundamentals and basics", mult: "1x" },
+                { d: "medium" as Difficulty, label: "Intermediate", color: "#EAB308", desc: "Deeper concepts and application", mult: "1.5x" },
+                { d: "hard" as Difficulty, label: "Advanced", color: "#EF4444", desc: "Expert-level challenges", mult: "2x" },
+              ]).map(({ d, label, color, desc, mult }) => (
                 <button
                   key={d}
                   onClick={() => setDifficulty(d)}
@@ -561,7 +583,7 @@ export default function QuizPage() {
                     boxShadow: difficulty === d ? `0 0 20px ${color}30, 0 0 40px ${color}10` : "none",
                   }}
                 >
-                  <span className="text-2xl block mb-2">{icon}</span>
+                  <Circle size={28} weight="fill" color={color} className="mb-2" aria-hidden="true" />
                   <p className="diff-label font-bebas text-lg tracking-wider" style={{ color: difficulty === d ? color : "#ffffff60" }}>{label}</p>
                   <p className="diff-desc text-cream/40 text-[11px] leading-tight mt-1">{desc}</p>
                   <span
@@ -605,7 +627,7 @@ export default function QuizPage() {
                         }
                       }}
                     >
-                      <span className="text-3xl">{rec.category.icon}</span>
+                      <rec.category.Icon size={32} weight="regular" color={rec.category.color} aria-hidden="true" />
                       <div>
                         <p className="card-title font-bebas text-lg tracking-wider" style={{ color }}>{rec.topic.name}</p>
                         <p className="card-subtitle text-cream/40 text-xs font-syne">{rec.reason}</p>
@@ -649,7 +671,7 @@ export default function QuizPage() {
                     }
                   }}
                 >
-                  <span className="text-4xl block mb-3 group-hover:scale-110 transition-transform duration-300">{cat.icon}</span>
+                  <cat.Icon size={40} weight="regular" color={cat.color} className="mb-3 group-hover:scale-110 transition-transform duration-300" aria-hidden="true" />
                   <p className="card-title font-bebas text-xl text-cream tracking-wider">{cat.name}</p>
                   <p className="card-subtitle text-xs mt-1" style={{ color: `${cat.color}cc` }}>{cat.topics.length} topics</p>
                 </button>
@@ -664,7 +686,7 @@ export default function QuizPage() {
                 <span>&larr;</span> Back to Categories
               </button>
               <div className="flex items-center gap-4 mb-6">
-                <span className="text-5xl">{activeCategory.icon}</span>
+                <activeCategory.Icon size={52} weight="regular" color={activeCategory.color} aria-hidden="true" />
                 <div>
                   <h2 className="font-bebas text-3xl tracking-wider" style={{ color: activeCategory.color }}>{activeCategory.name}</h2>
                   <p className="text-cream/40 text-sm font-syne">{activeCategory.topics.length} topics available</p>
@@ -742,18 +764,21 @@ export default function QuizPage() {
             <h2 className="font-bebas text-lg text-cream tracking-wider mb-3">QUICK STATS</h2>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               {[
-                { label: "Quizzes", value: totalQuizzes.toString(), icon: "\u{1F4CA}", color: "#4A90D9" },
-                { label: "Avg Accuracy", value: `${avgAccuracy}%`, icon: "\u{1F3AF}", color: "#22C55E" },
-                { label: "Favorite", value: favoriteSubject, icon: "\u{2B50}", color: "#A855F7" },
-                { label: "Coins Earned", value: formatCoins(totalCoinsEarned), icon: "\u{1FA99}", color: "#FFD700" },
-              ].map((stat) => (
-                <div key={stat.label} className="quiz-stat-card p-4 rounded-2xl border text-center"
-                  style={{ background: `linear-gradient(135deg, ${stat.color}08 0%, #060c18 100%)`, borderColor: `${stat.color}20` }}>
-                  <span className="text-2xl block mb-1">{stat.icon}</span>
-                  <p className="font-bebas text-2xl leading-none" style={{ color: stat.color }}>{stat.value}</p>
-                  <p className="stat-label text-cream/40 text-[10px] uppercase tracking-wider mt-1">{stat.label}</p>
-                </div>
-              ))}
+                { label: "Quizzes", value: totalQuizzes.toString(), Icon: ChartBar, color: "#4A90D9" },
+                { label: "Avg Accuracy", value: `${avgAccuracy}%`, Icon: Target, color: "#22C55E" },
+                { label: "Favorite", value: favoriteSubject, Icon: Star, color: "#A855F7" },
+                { label: "Coins Earned", value: formatCoins(totalCoinsEarned), Icon: Coin, color: "#FFD700" },
+              ].map((stat) => {
+                const StatIcon = stat.Icon;
+                return (
+                  <div key={stat.label} className="quiz-stat-card p-4 rounded-2xl border text-center"
+                    style={{ background: `linear-gradient(135deg, ${stat.color}08 0%, #060c18 100%)`, borderColor: `${stat.color}20` }}>
+                    <StatIcon size={28} weight="fill" color={stat.color} className="mx-auto mb-1" aria-hidden="true" />
+                    <p className="font-bebas text-2xl leading-none" style={{ color: stat.color }}>{stat.value}</p>
+                    <p className="stat-label text-cream/40 text-[10px] uppercase tracking-wider mt-1">{stat.label}</p>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>
@@ -784,13 +809,16 @@ export default function QuizPage() {
         <div className="max-w-3xl mx-auto px-4 py-8">
           <div className="flex items-center justify-between mb-8">
             <div className="flex items-center gap-3">
-              <span className="text-2xl">{SUBJECT_ICONS[subject]}</span>
+              {(() => {
+                const QuizSubjectIcon = SUBJECT_ICONS[subject] ?? DefaultSubjectIcon;
+                return <QuizSubjectIcon size={24} weight="regular" color={subjectColor} aria-hidden="true" />;
+              })()}
               <div>
                 <div className="flex items-center gap-2">
                   <p className="font-bebas text-xl text-cream tracking-wider">{subject}</p>
                   {blitzMode && (
                     <span className="text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full bg-[#EAB308]/20 border border-[#EAB308]/40 text-[#EAB308]">
-                      &#x26A1; Blitz
+                      <Lightning size={11} weight="fill" aria-hidden="true" className="inline mr-1 -mt-px" /> Blitz
                     </span>
                   )}
                 </div>
@@ -811,16 +839,19 @@ export default function QuizPage() {
               {/* Active booster icons */}
               {activeBoosters.length > 0 && (
                 <div className="flex items-center gap-1">
-                  {activeBoosters.map((b) => (
-                    <span key={b.id} className="w-7 h-7 rounded-lg flex items-center justify-center text-sm booster-active" title={b.booster_effect}
-                      style={{ background: "rgba(74,144,217,0.1)", border: "1px solid rgba(74,144,217,0.3)" }}>
-                      {BOOSTER_ICONS[b.booster_effect] ?? "🚀"}
-                    </span>
-                  ))}
+                  {activeBoosters.map((b) => {
+                    const BoosterIcon = BOOSTER_ICONS[b.booster_effect] ?? Rocket;
+                    return (
+                      <span key={b.id} className="w-7 h-7 rounded-lg flex items-center justify-center text-sm booster-active" title={b.booster_effect}
+                        style={{ background: "rgba(74,144,217,0.1)", border: "1px solid rgba(74,144,217,0.3)" }}>
+                        <BoosterIcon size={16} weight="fill" aria-hidden="true" />
+                      </span>
+                    );
+                  })}
                 </div>
               )}
-              <span className="text-green-400 font-bold">{correctCount} &#x2713;</span>
-              <span className="text-red-400 font-bold">{wrongCount} &#x2717;</span>
+              <span className="text-green-400 font-bold inline-flex items-center gap-1">{correctCount} <Check size={14} weight="bold" aria-hidden="true" /></span>
+              <span className="text-red-400 font-bold inline-flex items-center gap-1">{wrongCount} <XIcon size={14} weight="bold" aria-hidden="true" /></span>
               <div className="flex items-center gap-1.5 bg-gold/10 border border-gold/30 rounded-full px-3 py-1">
                 <img src={cdnUrl("/F.png")} alt="Fangs" className="w-5 h-5 object-contain" />
                 <span className="font-bebas text-lg text-gold">{totalCoins}</span>
@@ -890,10 +921,10 @@ function ResultsScreen({
   streakMilestone: { days: number; bonus: number } | null;
 }) {
   const getRank = (acc: number) => {
-    if (acc === 100) return { label: "PERFECT", icon: "\u{1F48E}", color: "#FFD700" };
-    if (acc >= 80)  return { label: "ELITE",   icon: "\u{1F525}", color: "#4A90D9" };
-    if (acc >= 60)  return { label: "SOLID",   icon: "\u{1F44D}", color: "#2ECC71" };
-    return { label: "KEEP GRINDING", icon: "\u{1F4AA}", color: "#E67E22" };
+    if (acc === 100) return { label: "PERFECT",       icon: "\u{1F48E}", color: "#FFD700", illustration: "rank-perfect" };
+    if (acc >= 80)  return { label: "ELITE",          icon: "\u{1F525}", color: "#4A90D9", illustration: "rank-elite" };
+    if (acc >= 60)  return { label: "SOLID",          icon: "\u{1F44D}", color: "#2ECC71", illustration: "rank-solid" };
+    return            { label: "KEEP GRINDING",       icon: "\u{1F4AA}", color: "#E67E22", illustration: "rank-keep-grinding" };
   };
 
   const rank = getRank(accuracy);
@@ -922,17 +953,27 @@ function ResultsScreen({
 
   return (
     <div className="min-h-screen pt-20">
+      {/* Celebration confetti for strong results — ELITE (80%+) or PERFECT (100%) */}
+      <Confetti trigger={accuracy >= 80} count={accuracy === 100 ? 80 : 50} duration={accuracy === 100 ? 1800 : 1400} />
+
       <div className="max-w-2xl mx-auto px-4 py-12 text-center">
-        {/* Rank Badge */}
+        {/* Rank Badge — custom illustration with the tier's accent ring */}
         <div
-          className="inline-flex flex-col items-center justify-center w-32 h-32 rounded-full mb-8 animate-slide-up"
+          className="inline-flex flex-col items-center justify-center w-32 h-32 rounded-full mb-8 animate-slide-up overflow-hidden"
           style={{
             background: `radial-gradient(circle, ${rank.color}18 0%, transparent 70%)`,
             boxShadow: `0 0 60px ${rank.color}25, inset 0 0 30px ${rank.color}10`,
             border: `2px solid ${rank.color}40`,
           }}
         >
-          <span className="text-5xl">{rank.icon}</span>
+          <img
+            src={`/illustrations/${rank.illustration}.png`}
+            alt=""
+            width={112}
+            height={112}
+            className="w-28 h-28 object-contain"
+            aria-hidden="true"
+          />
         </div>
 
         <h1 className="font-bebas text-6xl text-cream tracking-wider mb-2 animate-slide-up" style={{ animationDelay: "0.05s" }}>
@@ -940,11 +981,16 @@ function ResultsScreen({
         </h1>
         <p className="text-cream/40 text-base mb-10 animate-slide-up" style={{ animationDelay: "0.08s" }}>
           {subject} Quiz Complete
-          {blitzMode && <span className="text-[#EAB308] ml-2">&#x26A1; Blitz</span>}
+          {blitzMode && <span className="text-[#EAB308] ml-2 inline-flex items-center gap-1"><Lightning size={14} weight="fill" aria-hidden="true" /> Blitz</span>}
         </p>
 
-        {/* Streak milestone banner */}
-        {streakMilestone && (
+        {/* Streak milestone banner — uses tier illustration matching the streak length */}
+        {streakMilestone && (() => {
+          const tier =
+            streakMilestone.days >= 100 ? "streak-100-day" :
+            streakMilestone.days >= 30  ? "streak-30-day"  :
+                                          "streak-7-day";
+          return (
           <div
             className="flex items-center justify-center gap-3 rounded-2xl px-5 py-4 mb-4 animate-slide-up"
             style={{
@@ -954,7 +1000,14 @@ function ResultsScreen({
               boxShadow: "0 0 40px rgba(249,115,22,0.20)",
             }}
           >
-            <span className="text-3xl">&#x1F525;</span>
+            <img
+              src={`/illustrations/${tier}.png`}
+              alt=""
+              width={44}
+              height={44}
+              className="w-11 h-11 object-contain flex-shrink-0"
+              aria-hidden="true"
+            />
             <div className="text-left">
               <p className="font-bebas text-xl text-[#F97316] tracking-wider leading-none">
                 {streakMilestone.days}-DAY STREAK!
@@ -964,10 +1017,11 @@ function ResultsScreen({
               </p>
             </div>
             <span className="font-bebas text-2xl text-[#FFD700] ml-auto">
-              +{streakMilestone.bonus} &#x1FA99;
+              +{streakMilestone.bonus} <Coin size={20} weight="fill" color="#FFD700" aria-hidden="true" className="inline ml-0.5 -mt-0.5" />
             </span>
           </div>
-        )}
+          );
+        })()}
 
         {/* Consecutive quiz bonus banner */}
         {bonusFangs > 0 && (
@@ -980,45 +1034,48 @@ function ResultsScreen({
               boxShadow: "0 0 30px rgba(255,215,0,0.12)",
             }}
           >
-            <span className="text-2xl">&#x1F525;</span>
+            <Fire size={28} weight="fill" color="#FFD700" aria-hidden="true" />
             <div className="text-left">
               <p className="font-bebas text-lg text-[#FFD700] tracking-wider leading-none">3 QUIZZES IN A ROW!</p>
               <p className="text-cream/50 text-xs mt-0.5">Bonus +{bonusFangs} fangs added to your wallet</p>
             </div>
-            <span className="font-bebas text-2xl text-[#FFD700] ml-auto">+{bonusFangs} &#x1FA99;</span>
+            <span className="font-bebas text-2xl text-[#FFD700] ml-auto inline-flex items-center gap-1">+{bonusFangs} <Coin size={20} weight="fill" aria-hidden="true" /></span>
           </div>
         )}
 
         {/* Glass Stat Cards — with animated counters */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8 animate-slide-up" style={{ animationDelay: "0.12s" }}>
           {[
-            { icon: "\u2705", label: "Correct", value: animCorrect, accent: "#2ECC71", isCoin: false },
-            { icon: "\u274C", label: "Wrong", value: animWrong, accent: "#E74C3C", isCoin: false },
-            { icon: "\u{1FA99}", label: "Coins", value: animCoins, accent: "#FFD700", isCoin: true },
-            { icon: "\u26A1", label: "XP", value: animXp, accent: "#4A90D9", isCoin: false },
-          ].map((s) => (
-            <div
-              key={s.label}
-              className="relative rounded-2xl p-5 text-center backdrop-blur-xl overflow-visible"
-              style={{
-                background: "rgba(255,255,255,0.04)",
-                border: `1px solid ${s.isCoin && coinGlow ? "rgba(255,215,0,0.35)" : "rgba(255,255,255,0.10)"}`,
-                boxShadow: s.isCoin && coinGlow
-                  ? "0 0 30px rgba(255,215,0,0.15), 0 4px 24px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.06)"
-                  : "0 4px 24px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.06)",
-                transition: "border-color 0.6s, box-shadow 0.6s",
-              }}
-            >
-              {/* Coin burst particles */}
-              {s.isCoin && showBurst && <CoinBurst count={totalCoins} />}
+            { Icon: Check, label: "Correct", value: animCorrect, accent: "#2ECC71", isCoin: false },
+            { Icon: XIcon, label: "Wrong", value: animWrong, accent: "#E74C3C", isCoin: false },
+            { Icon: Coin, label: "Coins", value: animCoins, accent: "#FFD700", isCoin: true },
+            { Icon: Lightning, label: "XP", value: animXp, accent: "#4A90D9", isCoin: false },
+          ].map((s) => {
+            const SIcon = s.Icon;
+            return (
+              <div
+                key={s.label}
+                className="relative rounded-2xl p-5 text-center backdrop-blur-xl overflow-visible"
+                style={{
+                  background: "rgba(255,255,255,0.04)",
+                  border: `1px solid ${s.isCoin && coinGlow ? "rgba(255,215,0,0.35)" : "rgba(255,255,255,0.10)"}`,
+                  boxShadow: s.isCoin && coinGlow
+                    ? "0 0 30px rgba(255,215,0,0.15), 0 4px 24px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.06)"
+                    : "0 4px 24px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.06)",
+                  transition: "border-color 0.6s, box-shadow 0.6s",
+                }}
+              >
+                {/* Coin burst particles */}
+                {s.isCoin && showBurst && <CoinBurst count={totalCoins} />}
 
-              <span className="text-2xl block mb-2">{s.icon}</span>
-              <p className="font-bebas text-4xl leading-none" style={{ color: s.accent }}>
-                {s.isCoin ? `+${s.value}` : s.value}
-              </p>
-              <p className="text-cream/35 text-[11px] uppercase tracking-wider mt-1.5">{s.label}</p>
-            </div>
-          ))}
+                <SIcon size={28} weight="fill" color={s.accent} className="mx-auto mb-2" aria-hidden="true" />
+                <p className="font-bebas text-4xl leading-none" style={{ color: s.accent }}>
+                  {s.isCoin ? `+${s.value}` : s.value}
+                </p>
+                <p className="text-cream/35 text-[11px] uppercase tracking-wider mt-1.5">{s.label}</p>
+              </div>
+            );
+          })}
         </div>
 
         {/* Glass Answer Breakdown */}
@@ -1126,7 +1183,7 @@ function ResultsScreen({
                 color: "#4A90D9",
               }}
             >
-              &#x1F4E4; Share Results
+              <Share size={16} weight="regular" aria-hidden="true" className="inline mr-2 -mt-0.5" /> Share Results
             </button>
           </div>
         )}
@@ -1178,7 +1235,7 @@ function ResultsScreen({
                   {m.explanation && (
                     <div className="flex items-start gap-2.5 p-3.5 rounded-xl"
                       style={{ background: "rgba(74,144,217,0.06)", border: "1px solid rgba(74,144,217,0.15)" }}>
-                      <span className="text-base flex-shrink-0">&#x1F4A1;</span>
+                      <Lightbulb size={18} weight="regular" color="#4A90D9" className="flex-shrink-0" aria-hidden="true" />
                       <p className="text-cream/60 text-sm leading-relaxed">{m.explanation}</p>
                     </div>
                   )}

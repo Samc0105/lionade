@@ -3,6 +3,7 @@
 import { LeaderboardEntry } from "@/types";
 import { formatCoins } from "@/lib/mockData";
 import { cdnUrl } from "@/lib/cdn";
+import { Crown, Medal, Fire } from "@phosphor-icons/react";
 
 interface LeaderboardRowProps {
   entry: LeaderboardEntry;
@@ -27,10 +28,11 @@ export default function LeaderboardRow({
     3: "bg-amber-600/10 border-amber-600/30",
   };
 
-  const rankEmoji: Record<number, string> = {
-    1: "👑",
-    2: "🥈",
-    3: "🥉",
+  const renderRankMedal = (rank: number) => {
+    if (rank === 1) return <Crown size={24} weight="fill" color="#FFD700" aria-hidden="true" />;
+    if (rank === 2) return <Medal size={24} weight="fill" color="#C0C0C0" aria-hidden="true" />;
+    if (rank === 3) return <Medal size={24} weight="fill" color="#CD7F32" aria-hidden="true" />;
+    return null;
   };
 
   const changeColor =
@@ -58,7 +60,9 @@ export default function LeaderboardRow({
       {/* Rank */}
       <div className="w-10 flex-shrink-0 text-center">
         {entry.rank <= 3 ? (
-          <span className="text-xl">{rankEmoji[entry.rank]}</span>
+          <span className="text-xl inline-flex items-center justify-center">
+            {renderRankMedal(entry.rank)}
+          </span>
         ) : (
           <span
             className={`font-bebas text-2xl leading-none
@@ -101,7 +105,10 @@ export default function LeaderboardRow({
         </div>
         <div className="flex items-center gap-2 mt-0.5">
           <span className="text-xs text-cream/40">Lvl {entry.user.level}</span>
-          <span className="text-xs text-orange-400">🔥 {entry.streak}</span>
+          <span className="text-xs text-orange-400 inline-flex items-center gap-1">
+            <Fire size={12} weight="fill" aria-hidden="true" className="inline -mt-0.5" />
+            {entry.streak}
+          </span>
         </div>
       </div>
 

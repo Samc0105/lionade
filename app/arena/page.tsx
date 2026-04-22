@@ -9,6 +9,23 @@ import { useUserStats, mutateUserStats } from "@/lib/hooks";
 import { supabase } from "@/lib/supabase";
 import { cdnUrl } from "@/lib/cdn";
 import { apiGet, apiPost, apiPatch, apiDelete } from "@/lib/api-client";
+import Confetti from "@/components/Confetti";
+import {
+  Medal,
+  Diamond,
+  DiamondsFour,
+  Sword,
+  Users,
+  EnvelopeSimple,
+  Target,
+  Timer,
+  Check,
+  X as XIcon,
+  Handshake,
+  Trophy,
+  Skull,
+  type Icon,
+} from "@phosphor-icons/react";
 
 // ── Types ────────────────────────────────────────────────────
 
@@ -80,12 +97,12 @@ interface IncomingChallenge {
 
 const WAGER_OPTIONS = [10, 25, 50, 100];
 
-const ELO_TIERS = [
-  { name: "Bronze", min: 0, max: 1199, color: "#CD7F32", icon: "🥉" },
-  { name: "Silver", min: 1200, max: 1399, color: "#C0C0C0", icon: "🥈" },
-  { name: "Gold", min: 1400, max: 1599, color: "#FFD700", icon: "🥇" },
-  { name: "Platinum", min: 1600, max: 1799, color: "#00CED1", icon: "💎" },
-  { name: "Diamond", min: 1800, max: 9999, color: "#B9F2FF", icon: "💠" },
+const ELO_TIERS: { name: string; min: number; max: number; color: string; Icon: Icon }[] = [
+  { name: "Bronze", min: 0, max: 1199, color: "#CD7F32", Icon: Medal },
+  { name: "Silver", min: 1200, max: 1399, color: "#C0C0C0", Icon: Medal },
+  { name: "Gold", min: 1400, max: 1599, color: "#FFD700", Icon: Medal },
+  { name: "Platinum", min: 1600, max: 1799, color: "#00CED1", Icon: Diamond },
+  { name: "Diamond", min: 1800, max: 9999, color: "#B9F2FF", Icon: DiamondsFour },
 ];
 
 function getEloTier(elo: number) {
@@ -586,7 +603,7 @@ export default function ArenaPage() {
                   color: "#EF4444",
                   boxShadow: "0 0 20px rgba(239,68,68,0.08)",
                 }}>
-                ⚔️ 1v1 BATTLE MODE
+                <Sword size={14} weight="regular" aria-hidden="true" className="inline mr-1.5 -mt-0.5" /> 1v1 BATTLE MODE
               </div>
 
               <h1 className="font-bebas text-7xl sm:text-9xl tracking-wider leading-none mb-3 arena-title-wave">
@@ -614,7 +631,7 @@ export default function ArenaPage() {
                         background: `radial-gradient(circle, ${myTier.color}20 0%, transparent 70%)`,
                         boxShadow: `0 0 20px ${myTier.color}15`,
                       }}>
-                      <span className="text-3xl">{myTier.icon}</span>
+                      <myTier.Icon size={32} weight="fill" color={myTier.color} aria-hidden="true" />
                     </div>
                   </div>
 
@@ -698,7 +715,7 @@ export default function ArenaPage() {
                   }}
                 >
                   <span className="relative z-10 flex items-center justify-center gap-2">
-                    <span className="text-xl">⚔️</span> Find Opponent
+                    <Sword size={24} weight="regular" aria-hidden="true" /> Find Opponent
                   </span>
                 </button>
 
@@ -715,7 +732,7 @@ export default function ArenaPage() {
                   }}
                 >
                   <span className="flex items-center justify-center gap-2">
-                    <span className="text-xl">👥</span> Challenge Friend
+                    <Users size={24} weight="regular" aria-hidden="true" /> Challenge Friend
                   </span>
                 </button>
               </div>
@@ -725,7 +742,7 @@ export default function ArenaPage() {
             {incomingChallenges.length > 0 && (
               <div className="animate-slide-up mb-10" style={{ animationDelay: "0.2s" }}>
                 <p className="font-bebas text-lg text-cream/50 tracking-[0.15em] mb-3">
-                  ⚔️ INCOMING CHALLENGES
+                  <Sword size={20} weight="regular" aria-hidden="true" className="inline mr-1.5 -mt-0.5" /> INCOMING CHALLENGES
                 </p>
                 <div className="space-y-3">
                   {incomingChallenges.map(c => (
@@ -743,7 +760,10 @@ export default function ArenaPage() {
                       <div className="flex-1 min-w-0">
                         <p className="text-cream font-bold text-sm truncate">{c.challengerName}</p>
                         <p className="text-cream/40 text-xs flex items-center gap-1">
-                          {getEloTier(c.challengerElo).icon} {c.challengerElo} ELO
+                          {(() => {
+                            const ct = getEloTier(c.challengerElo);
+                            return <ct.Icon size={14} weight="fill" color={ct.color} aria-hidden="true" />;
+                          })()} {c.challengerElo} ELO
                           <span className="text-cream/15 mx-1">|</span>
                           <img src={cdnUrl("/F.png")} alt="" className="w-3 h-3 object-contain" /> {c.wager}
                         </p>
@@ -763,8 +783,9 @@ export default function ArenaPage() {
                           style={{
                             background: "rgba(255,255,255,0.03)",
                             border: "1px solid rgba(255,255,255,0.08)",
-                          }}>
-                          ✕
+                          }}
+                          aria-label="Decline challenge">
+                          <XIcon size={16} weight="bold" aria-hidden="true" />
                         </button>
                       </div>
                     </div>
@@ -776,11 +797,11 @@ export default function ArenaPage() {
             {/* ═══ STAT CARDS — sleek with tier glow accents ═══ */}
             <div className="animate-slide-up" style={{ animationDelay: "0.25s" }}>
               <div className="grid grid-cols-3 gap-3">
-                {[
-                  { icon: "⏱️", label: "SMART TIMER", desc: "AI-judged per question", accent: "#4A90D9" },
-                  { icon: "🎯", label: "10 QUESTIONS", desc: "Same for both players", accent: "#EF4444" },
-                  { icon: "fang", label: "WINNER TAKES", desc: "Full wager from loser", accent: "#FFD700" },
-                ].map(r => (
+                {([
+                  { kind: "icon" as const, Icon: Timer, label: "SMART TIMER", desc: "AI-judged per question", accent: "#4A90D9" },
+                  { kind: "icon" as const, Icon: Target, label: "10 QUESTIONS", desc: "Same for both players", accent: "#EF4444" },
+                  { kind: "fang" as const, label: "WINNER TAKES", desc: "Full wager from loser", accent: "#FFD700" },
+                ]).map(r => (
                   <div key={r.label} className="relative rounded-xl text-center p-4 sm:p-5 overflow-hidden group"
                     style={{
                       background: "linear-gradient(135deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 100%)",
@@ -790,9 +811,9 @@ export default function ArenaPage() {
                     <div className="absolute top-0 left-[20%] right-[20%] h-[1px]"
                       style={{ background: `linear-gradient(90deg, transparent, ${r.accent}30, transparent)` }} />
 
-                    {r.icon === "fang"
+                    {r.kind === "fang"
                       ? <img src={cdnUrl("/F.png")} alt="Fangs" className="w-7 h-7 object-contain mx-auto mb-2.5" />
-                      : <span className="text-2xl block mb-2.5">{r.icon}</span>
+                      : <r.Icon size={28} weight="regular" color={r.accent} aria-hidden="true" className="block mx-auto mb-2.5" />
                     }
                     <p className="font-bebas text-sm sm:text-base tracking-wider mb-0.5" style={{ color: r.accent }}>
                       {r.label}
@@ -822,7 +843,7 @@ export default function ArenaPage() {
                 border: "1px solid rgba(74,144,217,0.2)",
               }}>
               <h2 className="font-bebas text-3xl text-cream tracking-wider text-center mb-2">
-                👥 CHALLENGE FRIEND
+                <Users size={32} weight="regular" aria-hidden="true" className="inline mr-1.5 -mt-0.5" /> CHALLENGE FRIEND
               </h2>
               <p className="text-cream/40 text-sm text-center mb-6">
                 Enter their username to send a duel challenge
@@ -866,7 +887,7 @@ export default function ArenaPage() {
                 <div className="text-center">
                   <div className="arena-search-pulse w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center"
                     style={{ background: "rgba(74,144,217,0.1)", border: "2px solid rgba(74,144,217,0.3)" }}>
-                    <span className="text-2xl">📨</span>
+                    <EnvelopeSimple size={28} weight="regular" aria-hidden="true" />
                   </div>
                   <p className="text-cream/60 text-sm mb-1">Challenge sent to</p>
                   <p className="text-electric font-bold text-lg mb-4">{challengeUsername}</p>
@@ -897,7 +918,7 @@ export default function ArenaPage() {
               <div className="absolute inset-0 rounded-full arena-search-ring" />
               <div className="absolute inset-3 rounded-full arena-search-ring" style={{ animationDelay: "0.5s", animationDuration: "2.5s" }} />
               <div className="absolute inset-0 flex items-center justify-center">
-                <span className="text-5xl">⚔️</span>
+                <Sword size={52} weight="fill" aria-hidden="true" />
               </div>
             </div>
 
@@ -953,7 +974,7 @@ export default function ArenaPage() {
                 </div>
                 <p className="font-bold text-cream text-sm sm:text-base mb-1">{me?.username ?? "You"}</p>
                 <div className="flex items-center gap-1.5">
-                  <span className="text-sm">{myTier.icon}</span>
+                  <myTier.Icon size={16} weight="fill" color={myTier.color} aria-hidden="true" />
                   <span className="font-bebas text-sm" style={{ color: myTier.color }}>{myElo}</span>
                 </div>
               </div>
@@ -975,7 +996,7 @@ export default function ArenaPage() {
                 </div>
                 <p className="font-bold text-cream text-sm sm:text-base mb-1">{opponent?.username ?? "Opponent"}</p>
                 <div className="flex items-center gap-1.5">
-                  <span className="text-sm">{opTier?.icon}</span>
+                  {opTier && <opTier.Icon size={16} weight="fill" color={opTier.color} aria-hidden="true" />}
                   <span className="font-bebas text-sm" style={{ color: opTier?.color }}>{opponent?.elo}</span>
                 </div>
               </div>
@@ -1124,9 +1145,11 @@ export default function ArenaPage() {
             {answerResult && (
               <div className={`text-center mb-4 font-bebas text-xl tracking-wider arena-answer-pop
                 ${answerResult.isCorrect ? "text-green-400" : "text-red-400"}`}>
-                {answerResult.isCorrect
-                  ? `✓ CORRECT! +${answerResult.pointsEarned} pts`
-                  : "✗ WRONG"}
+                {answerResult.isCorrect ? (
+                  <><Check size={24} weight="bold" aria-hidden="true" className="inline mr-1.5 -mt-0.5" /> CORRECT! +{answerResult.pointsEarned} pts</>
+                ) : (
+                  <><XIcon size={24} weight="bold" aria-hidden="true" className="inline mr-1.5 -mt-0.5" /> WRONG</>
+                )}
                 {waitingForOpponent && !opponentAnswered && (
                   <span className="block text-cream/30 text-sm font-syne font-normal mt-1 animate-pulse">
                     Waiting for opponent...
@@ -1163,9 +1186,13 @@ export default function ArenaPage() {
                           i === answerResult.correctAnswer ? "bg-green-400/30 text-green-300" :
                           i === selected && !answerResult.isCorrect ? "bg-red-400/30 text-red-300" :
                           "bg-white/5 text-cream/20"}`}>
-                        {answerResult && i === answerResult.correctAnswer ? "✓" :
-                          answerResult && i === selected && !answerResult.isCorrect ? "✗" :
-                          ["A", "B", "C", "D"][i]}
+                        {answerResult && i === answerResult.correctAnswer ? (
+                          <Check size={16} weight="bold" aria-hidden="true" />
+                        ) : answerResult && i === selected && !answerResult.isCorrect ? (
+                          <XIcon size={16} weight="bold" aria-hidden="true" />
+                        ) : (
+                          ["A", "B", "C", "D"][i]
+                        )}
                       </span>
                       {opt}
                     </span>
@@ -1221,12 +1248,21 @@ export default function ArenaPage() {
     return (
       <ProtectedRoute>
         <div data-force-dark className="min-h-screen pt-16 pb-20" style={{ isolation: "isolate" }}>
+          {/* Victory confetti — rains from top, 80 particles, 2s. Fires once. */}
+          <Confetti trigger={iWon && !isDraw} count={80} origin="top" duration={2000} />
+
           <div className="max-w-2xl mx-auto px-4 py-8 text-center">
 
             {/* Result Banner */}
             <div className="mb-8 animate-slide-up">
-              <div className="text-7xl mb-4">
-                {isDraw ? "🤝" : iWon ? "🏆" : "💀"}
+              <div className="mb-4 flex justify-center">
+                {isDraw ? (
+                  <Handshake size={72} weight="fill" color="#E67E22" aria-hidden="true" />
+                ) : iWon ? (
+                  <Trophy size={72} weight="fill" color="#FFD700" aria-hidden="true" />
+                ) : (
+                  <Skull size={72} weight="fill" color="#E74C3C" aria-hidden="true" />
+                )}
               </div>
               <h1 className="font-bebas text-7xl sm:text-8xl tracking-wider mb-2"
                 style={{
@@ -1326,11 +1362,19 @@ export default function ArenaPage() {
                     <span className="text-cream/30 font-bebas w-6 text-right">Q{i + 1}</span>
                     <div className="flex-1 flex items-center gap-2">
                       <div className={`flex items-center gap-1 px-2 py-1 rounded ${r.myCorrect ? "bg-green-400/10 text-green-400" : "bg-red-400/10 text-red-400"}`}>
-                        {r.myCorrect ? "✓" : "✗"} <span className="text-cream/30">+{r.myPoints}</span>
+                        {r.myCorrect ? (
+                          <Check size={14} weight="bold" aria-hidden="true" />
+                        ) : (
+                          <XIcon size={14} weight="bold" aria-hidden="true" />
+                        )} <span className="text-cream/30">+{r.myPoints}</span>
                       </div>
                       <span className="text-cream/20">vs</span>
                       <div className={`flex items-center gap-1 px-2 py-1 rounded ${r.opCorrect ? "bg-blue-400/10 text-blue-400" : "bg-red-400/10 text-red-400"}`}>
-                        {r.opCorrect ? "✓" : "✗"} <span className="text-cream/30">+{r.opPoints}</span>
+                        {r.opCorrect ? (
+                          <Check size={14} weight="bold" aria-hidden="true" />
+                        ) : (
+                          <XIcon size={14} weight="bold" aria-hidden="true" />
+                        )} <span className="text-cream/30">+{r.opPoints}</span>
                       </div>
                     </div>
                   </div>
@@ -1346,7 +1390,7 @@ export default function ArenaPage() {
             <div className="flex flex-col sm:flex-row gap-3 animate-slide-up" style={{ animationDelay: "0.3s" }}>
               <button onClick={() => { resetArena(); startMatchmaking(); }}
                 className="btn-gold flex-1 py-3 rounded-xl">
-                🎯 Find New Opponent
+                <Target size={18} weight="regular" aria-hidden="true" className="inline mr-1.5 -mt-0.5" /> Find New Opponent
               </button>
               <button onClick={resetArena}
                 className="btn-outline flex-1 py-3 rounded-xl">

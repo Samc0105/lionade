@@ -1,5 +1,7 @@
 "use client";
 
+import { Fire } from "@phosphor-icons/react";
+
 interface StreakCounterProps {
   streak: number;
   size?: "sm" | "md" | "lg";
@@ -11,9 +13,9 @@ export default function StreakCounter({ streak, size = "md", showLabel = true }:
   const isOnFire = streak >= 14;
 
   const sizeClasses = {
-    sm: { fire: "text-xl", number: "text-2xl", label: "text-xs" },
-    md: { fire: "text-3xl", number: "text-4xl", label: "text-sm" },
-    lg: { fire: "text-5xl", number: "text-6xl", label: "text-base" },
+    sm: { fire: "text-xl", number: "text-2xl", label: "text-xs", fireSize: 24 },
+    md: { fire: "text-3xl", number: "text-4xl", label: "text-sm", fireSize: 32 },
+    lg: { fire: "text-5xl", number: "text-6xl", label: "text-base", fireSize: 52 },
   };
 
   const classes = sizeClasses[size];
@@ -30,9 +32,9 @@ export default function StreakCounter({ streak, size = "md", showLabel = true }:
 
         {/* Fire icon */}
         <span
-          className={`${classes.fire} ${isHot ? "animate-streak-fire" : ""} relative z-10`}
+          className={`${classes.fire} ${isHot ? "animate-streak-fire" : ""} relative z-10 inline-flex items-center justify-center`}
         >
-          🔥
+          <Fire size={classes.fireSize} weight="fill" color="#FB923C" aria-hidden="true" />
         </span>
 
         {/* Streak count overlay */}

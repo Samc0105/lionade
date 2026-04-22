@@ -8,6 +8,8 @@ import { useUserStats } from "@/lib/hooks";
 import { supabase } from "@/lib/supabase";
 import { cdnUrl } from "@/lib/cdn";
 import { apiGet, apiPost, apiPatch, apiDelete } from "@/lib/api-client";
+import { Medal, Diamond, DiamondsFour, Users, CheckCircle, Sword, Trophy, Megaphone, X as XIcon, BookOpen, Fire, Target, MedalMilitary, GameController, Coins, PushPinSimple, Crown } from "@phosphor-icons/react";
+import { toastError, toastSuccess } from "@/lib/toast";
 
 // ── Types ────────────────────────────────────────────────────
 
@@ -59,14 +61,45 @@ interface ArenaEvent {
   created_at: string;
 }
 
+interface FeedItem {
+  id: string;
+  friendId: string;
+  friendUsername: string;
+  friendAvatarUrl: string | null;
+  type: string;
+  amount: number;
+  description: string | null;
+  createdAt: string;
+}
+
+interface CircleRank {
+  userId: string;
+  username: string;
+  avatarUrl: string | null;
+  coinsThisWeek: number;
+  isMe: boolean;
+}
+
+// Icon + pin color per feed event type — drives both the rendered icon and
+// the thumbtack tint on the post card.
+const FEED_META: Record<string, { Icon: typeof BookOpen; pin: string; label: string }> = {
+  quiz_reward:      { Icon: BookOpen,      pin: "#4A90D9", label: "quiz" },
+  duel_win:         { Icon: Sword,         pin: "#EF4444", label: "duel" },
+  streak_milestone: { Icon: Fire,          pin: "#F97316", label: "streak" },
+  streak_bonus:     { Icon: Fire,          pin: "#F97316", label: "streak" },
+  bounty_reward:    { Icon: Target,        pin: "#FFD700", label: "bounty" },
+  badge_bonus:      { Icon: MedalMilitary, pin: "#A855F7", label: "badge" },
+  game_reward:      { Icon: GameController, pin: "#22C55E", label: "game" },
+};
+
 // ── Helpers ──────────────────────────────────────────────────
 
 const ELO_TIERS = [
-  { name: "Bronze", min: 0, max: 1199, color: "#CD7F32", icon: "🥉" },
-  { name: "Silver", min: 1200, max: 1399, color: "#C0C0C0", icon: "🥈" },
-  { name: "Gold", min: 1400, max: 1599, color: "#FFD700", icon: "🥇" },
-  { name: "Platinum", min: 1600, max: 1799, color: "#00CED1", icon: "💎" },
-  { name: "Diamond", min: 1800, max: 9999, color: "#B9F2FF", icon: "💠" },
+  { name: "Bronze", min: 0, max: 1199, color: "#CD7F32", Icon: Medal },
+  { name: "Silver", min: 1200, max: 1399, color: "#C0C0C0", Icon: Medal },
+  { name: "Gold", min: 1400, max: 1599, color: "#FFD700", Icon: Medal },
+  { name: "Platinum", min: 1600, max: 1799, color: "#00CED1", Icon: Diamond },
+  { name: "Diamond", min: 1800, max: 9999, color: "#B9F2FF", Icon: DiamondsFour },
 ];
 
 function getEloTier(elo: number) {
@@ -115,6 +148,22 @@ export default function SocialPage() {
   const [arenaEvents, setArenaEvents] = useState<ArenaEvent[]>([]);
   const [msgInput, setMsgInput] = useState("");
   const [sending, setSending] = useState(false);
+
+  // Feed + circle leaderboard
+  const [feed, setFeed] = useState<FeedItem[]>([]);
+  const [circle, setCircle] = useState<CircleRank[]>([]);
+
+  // Challenge modal
+  const [challengeTarget, setChallengeTarget] = useState<Friend | null>(null);
+  const [challengeWager, setChallengeWager] = useState(25);
+  const [sendingChallenge, setSendingChallenge] = useState(false);
+
+  // Nudges
+  const [nudgeState, setNudgeState] = useState<{ remaining: number; limit: number; nudgedToday: string[] }>({
+    remaining: 5, limit: 5, nudgedToday: [],
+  });
+  const [nudgeTarget, setNudgeTarget] = useState<{ id: string; username: string } | null>(null);
+  const [sendingNudge, setSendingNudge] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
@@ -173,6 +222,70 @@ export default function SocialPage() {
     const iv = setInterval(loadFriends, 10000);
     return () => clearInterval(iv);
   }, [loadFriends]);
+
+  // ── Load activity feed + circle leaderboard ───────────────
+  const loadFeed = useCallback(async () => {
+    if (!user?.id) return;
+    const res = await apiGet<{ feed: FeedItem[]; circle: CircleRank[] }>("/api/social/feed");
+    if (res.ok && res.data) {
+      setFeed(res.data.feed ?? []);
+      setCircle(res.data.circle ?? []);
+    }
+  }, [user?.id]);
+
+  useEffect(() => {
+    loadFeed();
+    const iv = setInterval(loadFeed, 30000);
+    return () => clearInterval(iv);
+  }, [loadFeed]);
+
+  // ── Load nudge budget for the day ──────────────────────────
+  const loadNudgeBudget = useCallback(async () => {
+    if (!user?.id) return;
+    const res = await apiGet<{ remaining: number; limit: number; nudgedToday: string[] }>("/api/social/nudge");
+    if (res.ok && res.data) setNudgeState(res.data);
+  }, [user?.id]);
+
+  useEffect(() => {
+    loadNudgeBudget();
+    const iv = setInterval(loadNudgeBudget, 60000);
+    return () => clearInterval(iv);
+  }, [loadNudgeBudget]);
+
+  // ── Send nudge ─────────────────────────────────────────────
+  const sendNudge = useCallback(async (preset: string) => {
+    if (!nudgeTarget || sendingNudge) return;
+    setSendingNudge(true);
+    const res = await apiPost<{ ok: boolean; remaining: number }>("/api/social/nudge", {
+      recipientId: nudgeTarget.id,
+      preset,
+    });
+    setSendingNudge(false);
+    if (res.ok) {
+      toastSuccess(`Nudge sent to ${nudgeTarget.username}`);
+      setNudgeTarget(null);
+      loadNudgeBudget();
+    } else {
+      toastError(res.error ?? "Couldn't send nudge");
+    }
+  }, [nudgeTarget, sendingNudge, loadNudgeBudget]);
+
+  // ── Send direct arena challenge ────────────────────────────
+  const sendChallenge = useCallback(async () => {
+    if (!challengeTarget || sendingChallenge) return;
+    setSendingChallenge(true);
+    const res = await apiPost<{ challengeId?: string }>("/api/arena/challenge", {
+      challengedUsername: challengeTarget.username,
+      wager: challengeWager,
+    });
+    setSendingChallenge(false);
+    if (res.ok) {
+      toastSuccess(`Challenge sent to ${challengeTarget.username}`);
+      setChallengeTarget(null);
+    } else {
+      toastError(res.error ?? "Couldn't send challenge");
+    }
+  }, [challengeTarget, challengeWager, sendingChallenge]);
 
   // ── Load notifications for social panel ─────────────────────
   const loadSocialNotifs = useCallback(async () => {
@@ -357,6 +470,33 @@ export default function SocialPage() {
     ? friends.filter(f => f.username.toLowerCase().includes(searchQuery.toLowerCase()))
     : friends;
 
+  // ── Derived circle metrics (for hero strip + showdown + squad goal) ───────
+  const onlineCount = friends.filter(f => f.is_online).length;
+
+  const myRank = useMemo(() => {
+    const idx = circle.findIndex(c => c.isMe);
+    return idx >= 0 ? idx + 1 : null;
+  }, [circle]);
+
+  const myWeekly = useMemo(() => {
+    return circle.find(c => c.isMe)?.coinsThisWeek ?? 0;
+  }, [circle]);
+
+  // Showdown rival — the circle member closest to you in Fangs-this-week
+  // (excluding yourself). Null when you have no friends in the circle yet.
+  const rival = useMemo(() => {
+    const others = circle.filter(c => !c.isMe);
+    if (others.length === 0) return null;
+    return others.reduce((best, c) =>
+      Math.abs(c.coinsThisWeek - myWeekly) < Math.abs(best.coinsThisWeek - myWeekly) ? c : best
+    , others[0]);
+  }, [circle, myWeekly]);
+
+  // Squad goal — simple collective target that scales with circle size
+  const squadTarget = Math.max(200, circle.length * 80);
+  const squadProgress = circle.reduce((s, c) => s + c.coinsThisWeek, 0);
+  const squadPct = Math.min(100, (squadProgress / squadTarget) * 100);
+
   // ══════════════════════════════════════════════════════════
   // RENDER
   // ══════════════════════════════════════════════════════════
@@ -426,11 +566,12 @@ export default function SocialPage() {
                             <div className="flex-1 min-w-0">
                               <p className="text-cream text-sm font-semibold truncate">{u.username}</p>
                             </div>
-                            <span className="text-[9px] font-bold px-1.5 py-0.5 rounded flex-shrink-0" style={{
+                            <span className="text-[9px] font-bold px-1.5 py-0.5 rounded flex-shrink-0 inline-flex items-center gap-1" style={{
                               color: tier.color,
                               background: `${tier.color}15`,
                             }}>
-                              {tier.icon} {tier.name}
+                              <tier.Icon size={12} weight="fill" color={tier.color} aria-hidden="true" />
+                              {tier.name}
                             </span>
                           </button>
                         );
@@ -495,8 +636,12 @@ export default function SocialPage() {
                       className="w-full text-left px-4 py-3 flex items-start gap-3 hover:bg-white/[0.04] transition-colors"
                       style={!n.read ? { borderLeft: "2px solid #FFD700" } : { borderLeft: "2px solid transparent" }}
                     >
-                      <span className="text-base flex-shrink-0 mt-0.5">
-                        {n.type === "friend_request" ? "👥" : n.type === "friend_accepted" ? "✅" : n.type === "arena_challenge" ? "⚔️" : n.type === "arena_result" ? "🏆" : n.type === "rank_up" ? "🥇" : "📢"}
+                      <span className="flex-shrink-0 mt-0.5 text-cream">
+                        {(() => {
+                          const map = { friend_request: Users, friend_accepted: CheckCircle, arena_challenge: Sword, arena_result: Trophy, rank_up: Medal };
+                          const NIcon = map[n.type as keyof typeof map] ?? Megaphone;
+                          return <NIcon size={18} weight="fill" aria-hidden="true" />;
+                        })()}
                       </span>
                       <div className="flex-1 min-w-0">
                         <p className={`text-xs font-semibold ${n.read ? "text-cream/50" : "text-cream"}`}>
@@ -540,15 +685,18 @@ export default function SocialPage() {
                         />
                         <div className="flex-1 min-w-0">
                           <p className="text-cream text-xs font-semibold truncate">{req.username}</p>
-                          <p className="text-[10px]" style={{ color: tier.color }}>{tier.icon} {tier.name}</p>
+                          <p className="text-[10px] inline-flex items-center gap-1" style={{ color: tier.color }}>
+                            <tier.Icon size={12} weight="fill" color={tier.color} aria-hidden="true" />
+                            {tier.name}
+                          </p>
                         </div>
                         <button onClick={() => handleRequest(req.friendshipId, "accept")}
                           className="text-green-400 text-[10px] font-bold px-2 py-1 rounded bg-green-400/10 hover:bg-green-400/20 transition">
                           Accept
                         </button>
                         <button onClick={() => handleRequest(req.friendshipId, "decline")}
-                          className="text-cream/30 text-[10px] px-1.5 py-1 rounded hover:text-cream/50 transition">
-                          ✕
+                          className="text-cream/30 px-1.5 py-1 rounded hover:text-cream/50 transition inline-flex items-center">
+                          <XIcon size={12} weight="bold" aria-hidden="true" />
                         </button>
                       </div>
                     );
@@ -627,11 +775,12 @@ export default function SocialPage() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
                         <span className="text-cream text-sm font-semibold truncate">{friend.username}</span>
-                        <span className="text-[9px] font-bold px-1.5 py-0.5 rounded" style={{
+                        <span className="text-[9px] font-bold px-1.5 py-0.5 rounded inline-flex items-center gap-1" style={{
                           color: tier.color,
                           background: `${tier.color}15`,
                         }}>
-                          {tier.icon} {tier.name}
+                          <tier.Icon size={12} weight="fill" color={tier.color} aria-hidden="true" />
+                          {tier.name}
                         </span>
                       </div>
                       <p className="text-cream/25 text-[10px] mt-0.5">
@@ -666,13 +815,345 @@ export default function SocialPage() {
             style={!selectedFriend ? {} : undefined}
           >
             {!selectedFriend ? (
-              /* Empty state */
-              <div className="flex-1 flex flex-col items-center justify-center text-center px-6">
-                <img src={cdnUrl("/logo-icon.png")} alt="Lionade" className="w-20 h-20 opacity-20 mb-6" />
-                <p className="font-bebas text-2xl text-cream/20 tracking-wider mb-2">SELECT A FRIEND</p>
-                <p className="text-cream/15 text-sm max-w-xs">
-                  Pick someone from your friends list to start chatting
-                </p>
+              /* ═══ Bulletin board — Activity Feed + Circle leaderboard ═══ */
+              <div className="flex-1 overflow-y-auto">
+                <div className="max-w-3xl mx-auto px-5 sm:px-8 py-8">
+
+                  {/* ═══ Circle Pulse — 4 live-stat chips replace the old hero ═══ */}
+                  <header className="mb-8">
+                    <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-cream/30 mb-3">
+                      circle pulse &nbsp;&middot;&nbsp; {new Date().toLocaleDateString(undefined, { weekday: "long" }).toLowerCase()}
+                    </p>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                      {[
+                        {
+                          label: "online now",
+                          value: onlineCount,
+                          accent: "#22C55E",
+                          pulse: onlineCount > 0,
+                        },
+                        {
+                          label: "requests",
+                          value: pendingRequests.length,
+                          accent: pendingRequests.length > 0 ? "#FFD700" : "#71717A",
+                        },
+                        {
+                          label: "your rank",
+                          value: myRank ? `#${myRank}` : "—",
+                          accent: "#4A90D9",
+                        },
+                        {
+                          label: "nudges left",
+                          value: `${nudgeState.remaining}/${nudgeState.limit}`,
+                          accent: nudgeState.remaining > 0 ? "#F97316" : "#71717A",
+                        },
+                      ].map(chip => (
+                        <div
+                          key={chip.label}
+                          className="rounded-[6px] px-4 py-3 relative"
+                          style={{
+                            background: `linear-gradient(135deg, ${chip.accent}12 0%, rgba(255,255,255,0.02) 100%)`,
+                            border: `1px solid ${chip.accent}28`,
+                          }}
+                        >
+                          {chip.pulse && (
+                            <span
+                              className="absolute top-3 right-3 w-2 h-2 rounded-full social-studying-dot"
+                              style={{ background: chip.accent }}
+                              aria-hidden="true"
+                            />
+                          )}
+                          <p className="font-mono text-[9px] uppercase tracking-[0.25em] text-cream/45">
+                            {chip.label}
+                          </p>
+                          <p className="font-bebas text-2xl tabular-nums mt-0.5" style={{ color: chip.accent }}>
+                            {chip.value}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </header>
+
+                  {/* ═══ Weekly Showdown — auto-picked rival ═══ */}
+                  {rival && (
+                    <section
+                      className="mb-8 rounded-[8px] p-5 relative overflow-hidden"
+                      style={{
+                        background: "linear-gradient(90deg, rgba(239, 68, 68, 0.10) 0%, rgba(12, 16, 32, 0.95) 45%, rgba(74, 144, 217, 0.10) 100%)",
+                        border: "1px solid rgba(239, 68, 68, 0.22)",
+                      }}
+                    >
+                      <div className="flex items-baseline justify-between mb-3">
+                        <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-cream/40">
+                          this week&rsquo;s showdown
+                        </p>
+                        <p className="font-mono text-[10px] text-cream/30">ends friday 23:59 UTC</p>
+                      </div>
+
+                      <div className="flex items-center justify-between gap-4">
+                        {/* YOU */}
+                        <div className="flex-1 text-left min-w-0">
+                          <p className="text-cream/70 text-xs font-mono uppercase tracking-wider mb-0.5">you</p>
+                          <p className="font-bebas text-3xl text-red-400 tabular-nums leading-none">
+                            {myWeekly}
+                            <span className="text-cream/30 text-sm ml-1.5">Fangs</span>
+                          </p>
+                        </div>
+
+                        <Sword size={22} weight="fill" color="rgba(255,215,0,0.7)" aria-hidden="true" />
+
+                        {/* RIVAL */}
+                        <div className="flex-1 text-right min-w-0">
+                          <p className="text-cream/70 text-xs font-mono uppercase tracking-wider mb-0.5 truncate">
+                            {rival.username}
+                          </p>
+                          <p className="font-bebas text-3xl text-electric tabular-nums leading-none">
+                            {rival.coinsThisWeek}
+                            <span className="text-cream/30 text-sm ml-1.5">Fangs</span>
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Head-to-head bar */}
+                      <div className="mt-4 relative h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(255, 255, 255, 0.06)" }}>
+                        {(() => {
+                          const total = Math.max(1, myWeekly + rival.coinsThisWeek);
+                          const myPct = (myWeekly / total) * 100;
+                          return (
+                            <div
+                              className="absolute top-0 left-0 h-full"
+                              style={{
+                                width: `${myPct}%`,
+                                background: "linear-gradient(90deg, #EF4444 0%, #F97316 100%)",
+                                transition: "width 800ms var(--ease-out-emil)",
+                              }}
+                            />
+                          );
+                        })()}
+                      </div>
+
+                      <div className="flex items-center justify-between mt-2">
+                        <p className="text-red-400/80 text-[10px] font-mono">
+                          {myWeekly > rival.coinsThisWeek
+                            ? `+${myWeekly - rival.coinsThisWeek} ahead`
+                            : myWeekly < rival.coinsThisWeek
+                            ? `${rival.coinsThisWeek - myWeekly} behind`
+                            : "tied"}
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const friend = friends.find(f => f.id === rival.userId);
+                            if (friend) { setChallengeTarget(friend); setChallengeWager(25); }
+                          }}
+                          disabled={!friends.find(f => f.id === rival.userId)}
+                          className="font-mono text-[10px] uppercase tracking-[0.25em] text-electric hover:text-cream transition-colors disabled:opacity-30"
+                        >
+                          challenge now →
+                        </button>
+                      </div>
+                    </section>
+                  )}
+
+                  {/* ═══ Squad Goal — collective weekly target ═══ */}
+                  {circle.length > 0 && (
+                    <section className="mb-10">
+                      <div className="flex items-baseline justify-between mb-3">
+                        <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-cream/40">
+                          squad goal &middot; {circle.length} member{circle.length === 1 ? "" : "s"}
+                        </p>
+                        <p className="font-bebas text-cream/70 text-sm tabular-nums">
+                          {squadProgress}
+                          <span className="text-cream/30 text-xs"> / {squadTarget}</span>
+                        </p>
+                      </div>
+                      <div className="h-1.5 rounded-full overflow-hidden relative" style={{ background: "rgba(255, 255, 255, 0.04)" }}>
+                        <div
+                          className={`h-full ${squadPct > 0 && squadPct < 100 ? "progress-shimmer" : ""}`}
+                          style={{
+                            width: `${squadPct}%`,
+                            background: squadPct >= 100
+                              ? "linear-gradient(90deg, #22C55E 0%, #FFD700 100%)"
+                              : "linear-gradient(90deg, #4A90D9 0%, #A855F7 100%)",
+                            transition: "width 900ms var(--ease-out-emil)",
+                          }}
+                        />
+                      </div>
+                      <p className="mt-2 font-serif italic text-cream/35 text-xs">
+                        {squadPct >= 100
+                          ? "goal crushed. circle unlocked a 50 Fang bonus."
+                          : `${Math.round(squadPct)}% there — every quiz counts toward the circle total`}
+                      </p>
+                    </section>
+                  )}
+
+                  {/* Circle weekly leaderboard — polaroids */}
+                  {circle.length > 0 && (
+                    <section className="mb-10">
+                      <div className="flex items-baseline justify-between mb-4">
+                        <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-cream/40">this week · Fangs</p>
+                        <p className="text-cream/25 text-[10px] italic font-serif">top 5</p>
+                      </div>
+                      <div className="flex gap-4 overflow-x-auto pb-4">
+                        {circle.slice(0, 5).map((c, i) => {
+                          const tilts = ["-2deg", "1.5deg", "-1deg", "2deg", "-1.5deg"];
+                          const friendObj = friends.find(f => f.id === c.userId);
+                          const alreadyNudged = nudgeState.nudgedToday.includes(c.userId);
+                          const canNudge = !c.isMe && friendObj && !alreadyNudged && nudgeState.remaining > 0;
+                          return (
+                            <div
+                              key={c.userId}
+                              className="flex-shrink-0 w-[110px] flex flex-col items-center gap-2"
+                            >
+                              <div
+                                className="social-polaroid w-[110px] text-center"
+                                style={{ "--polaroid-tilt": tilts[i] } as React.CSSProperties}
+                              >
+                                <div className="relative w-[102px] h-[102px] mb-2 bg-[#0a1020] overflow-hidden">
+                                  <img
+                                    src={c.avatarUrl ?? `https://api.dicebear.com/7.x/adventurer/svg?seed=${c.username}`}
+                                    alt={c.username}
+                                    className="w-full h-full object-cover"
+                                  />
+                                  {i === 0 && c.coinsThisWeek > 0 && (
+                                    <div className="absolute top-1 left-1 w-6 h-6 rounded-full flex items-center justify-center" style={{ background: "#FFD700" }}>
+                                      <Crown size={14} weight="fill" color="#04080F" aria-hidden="true" />
+                                    </div>
+                                  )}
+                                </div>
+                                <p className="font-mono text-[10px] text-[#1a1a1a] truncate leading-tight">
+                                  {c.isMe ? "you" : c.username}
+                                </p>
+                                <p className="font-bebas text-sm text-[#1a1a1a] tabular-nums leading-tight">
+                                  {c.coinsThisWeek}
+                                  <span className="text-[#1a1a1a]/50 text-[9px]"> Fangs</span>
+                                </p>
+                              </div>
+
+                              {/* Tap-to-challenge + nudge — only on friends, not on yourself */}
+                              {!c.isMe && friendObj && (
+                                <div className="flex gap-1.5">
+                                  <button
+                                    type="button"
+                                    onClick={() => { setChallengeTarget(friendObj); setChallengeWager(25); }}
+                                    className="w-8 h-8 rounded-full flex items-center justify-center transition-all active:scale-90"
+                                    style={{
+                                      background: "rgba(239, 68, 68, 0.1)",
+                                      border: "1px solid rgba(239, 68, 68, 0.3)",
+                                      color: "#EF4444",
+                                    }}
+                                    aria-label={`Challenge ${c.username}`}
+                                    title="Challenge"
+                                  >
+                                    <Sword size={14} weight="fill" aria-hidden="true" />
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => canNudge && setNudgeTarget({ id: c.userId, username: c.username })}
+                                    disabled={!canNudge}
+                                    className="w-8 h-8 rounded-full flex items-center justify-center transition-all active:scale-90 disabled:opacity-25 disabled:cursor-not-allowed"
+                                    style={{
+                                      background: alreadyNudged ? "rgba(34, 197, 94, 0.1)" : "rgba(249, 115, 22, 0.1)",
+                                      border: `1px solid ${alreadyNudged ? "rgba(34, 197, 94, 0.3)" : "rgba(249, 115, 22, 0.3)"}`,
+                                      color: alreadyNudged ? "#22C55E" : "#F97316",
+                                    }}
+                                    aria-label={alreadyNudged ? `Already nudged ${c.username} today` : `Nudge ${c.username}`}
+                                    title={alreadyNudged ? "Nudged today" : nudgeState.remaining === 0 ? "No nudges left today" : "Nudge"}
+                                  >
+                                    {alreadyNudged ? <CheckCircle size={14} weight="fill" aria-hidden="true" /> : <Fire size={14} weight="fill" aria-hidden="true" />}
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </section>
+                  )}
+
+                  {/* Activity feed */}
+                  <section className="relative">
+                    <div className="flex items-baseline justify-between mb-5">
+                      <h2 className="font-bebas text-lg text-cream tracking-[0.15em]">FEED</h2>
+                      <button onClick={loadFeed} className="font-mono text-[10px] uppercase tracking-[0.25em] text-cream/40 hover:text-electric transition-colors">
+                        refresh ↻
+                      </button>
+                    </div>
+
+                    {feed.length === 0 ? (
+                      <div className="py-14 text-center border-y border-white/[0.05]">
+                        <PushPinSimple size={28} weight="regular" color="rgba(255,255,255,0.2)" className="mx-auto mb-3" aria-hidden="true" />
+                        <p className="text-cream/40 text-sm italic font-serif mb-1">
+                          board&rsquo;s empty for now
+                        </p>
+                        <p className="text-cream/20 text-xs">
+                          {friends.length === 0 ? "add some friends and their wins show up here" : "your circle hasn't posted anything yet — be the first"}
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="relative pl-10">
+                        {/* Timeline rail */}
+                        <div className="social-rail" aria-hidden="true" />
+
+                        <ul className="space-y-3">
+                          {feed.map((item, i) => {
+                            const meta = FEED_META[item.type] ?? { Icon: Coins, pin: "#FFD700", label: item.type };
+                            const ItemIcon = meta.Icon;
+                            const tiltClasses = ["social-post-a", "social-post-b", "social-post-c", "social-post-d", "social-post-e"];
+                            const tilt = tiltClasses[i % tiltClasses.length];
+                            return (
+                              <li key={item.id}
+                                className={`social-post ${tilt} relative rounded-[6px] pl-12 pr-4 py-3.5`}
+                                style={{
+                                  background: "linear-gradient(135deg, #0f1629 0%, #0a1020 100%)",
+                                  border: "1px solid rgba(255,255,255,0.06)",
+                                  boxShadow: "0 6px 14px rgba(0,0,0,0.28)",
+                                  "--pin": meta.pin,
+                                } as React.CSSProperties}
+                              >
+                                <span className="social-pin" aria-hidden="true" />
+
+                                {/* Timeline dot + avatar */}
+                                <div className="absolute left-3 top-3.5">
+                                  <img
+                                    src={item.friendAvatarUrl ?? `https://api.dicebear.com/7.x/adventurer/svg?seed=${item.friendUsername}`}
+                                    alt={item.friendUsername}
+                                    className="w-6 h-6 rounded-full border-2 object-cover"
+                                    style={{ borderColor: meta.pin }}
+                                  />
+                                </div>
+
+                                <div className="flex items-start gap-3">
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-cream text-sm font-semibold leading-tight">
+                                      <span className="text-cream">{item.friendUsername}</span>
+                                      <span className="text-cream/40 font-normal"> {item.description ?? `earned Fangs from ${meta.label}`}</span>
+                                    </p>
+                                    <p className="text-cream/25 text-[10px] mt-1 font-mono uppercase tracking-wider">
+                                      {meta.label} · {timeAgo(item.createdAt)}
+                                    </p>
+                                  </div>
+                                  <div className="flex items-center gap-1.5 flex-shrink-0">
+                                    <ItemIcon size={14} weight="regular" color={meta.pin} aria-hidden="true" />
+                                    <span className="font-bebas text-lg tabular-nums" style={{ color: meta.pin }}>
+                                      +{item.amount}
+                                    </span>
+                                  </div>
+                                </div>
+                              </li>
+                            );
+                          })}
+                        </ul>
+                      </div>
+                    )}
+                  </section>
+
+                  {friends.length > 0 && (
+                    <p className="text-cream/20 text-[10px] italic font-serif text-center mt-10">
+                      pick someone from the left to chat &middot; tap a post to react (soon)
+                    </p>
+                  )}
+                </div>
               </div>
             ) : (
               <>
@@ -695,22 +1176,32 @@ export default function SocialPage() {
                     </div>
                     <div>
                       <p className="text-cream font-semibold text-sm">{selectedFriend.username}</p>
-                      <p className="text-[10px]" style={{ color: getEloTier(selectedFriend.arena_elo).color }}>
-                        {getEloTier(selectedFriend.arena_elo).icon} {getEloTier(selectedFriend.arena_elo).name} — {selectedFriend.arena_elo} ELO
-                      </p>
+                      {(() => {
+                        const tier = getEloTier(selectedFriend.arena_elo);
+                        return (
+                          <p className="text-[10px] inline-flex items-center gap-1" style={{ color: tier.color }}>
+                            <tier.Icon size={12} weight="fill" color={tier.color} aria-hidden="true" />
+                            {tier.name} — {selectedFriend.arena_elo} ELO
+                          </p>
+                        );
+                      })()}
                     </div>
                   </div>
 
-                  {/* Challenge button */}
-                  <a href={`/arena`}
+                  {/* Challenge button — opens direct-challenge modal (no /arena redirect) */}
+                  <button
+                    type="button"
+                    onClick={() => { setChallengeTarget(selectedFriend); setChallengeWager(25); }}
                     className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all active:scale-95"
                     style={{
                       background: "rgba(239,68,68,0.1)",
                       border: "1px solid rgba(239,68,68,0.25)",
                       color: "#EF4444",
-                    }}>
-                    ⚔️ Challenge
-                  </a>
+                    }}
+                  >
+                    <Sword size={14} weight="fill" aria-hidden="true" />
+                    Challenge
+                  </button>
                 </div>
 
                 {/* Messages area */}
@@ -803,6 +1294,127 @@ export default function SocialPage() {
             )}
           </div>
         </div>
+
+        {/* ═══ Nudge Modal — pick a preset, send encouragement to a friend ═══ */}
+        {nudgeTarget && (
+          <div
+            className="fixed inset-0 z-[60] flex items-center justify-center px-4"
+            onClick={() => !sendingNudge && setNudgeTarget(null)}
+          >
+            <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
+            <div
+              className="relative w-full max-w-sm rounded-2xl border border-orange-500/25 p-6 animate-slide-up"
+              style={{ background: "linear-gradient(135deg, #0c1020 0%, #080c18 100%)" }}
+              onClick={e => e.stopPropagation()}
+            >
+              <div className="text-center mb-5">
+                <Fire size={40} weight="fill" color="#F97316" className="mx-auto mb-3" aria-hidden="true" />
+                <h2 className="font-bebas text-2xl text-cream tracking-wider leading-tight">
+                  Nudge {nudgeTarget.username}
+                </h2>
+                <p className="font-serif italic text-cream/40 text-xs mt-2">
+                  one-tap encouragement. you have {nudgeState.remaining} nudge{nudgeState.remaining === 1 ? "" : "s"} left today.
+                </p>
+              </div>
+
+              <div className="space-y-2 mb-5">
+                {[
+                  { key: "grind",   label: "grind time — let's go",        accent: "#F97316" },
+                  { key: "gotthis", label: "you got this, stay locked in", accent: "#FFD700" },
+                  { key: "studyup", label: "we studying? hop on",          accent: "#4A90D9" },
+                  { key: "missyou", label: "miss your grind — pull up",    accent: "#A855F7" },
+                ].map(p => (
+                  <button
+                    key={p.key}
+                    onClick={() => sendNudge(p.key)}
+                    disabled={sendingNudge}
+                    className="w-full text-left px-4 py-3 rounded-lg transition-all active:scale-[0.98] disabled:opacity-40"
+                    style={{
+                      background: `${p.accent}10`,
+                      border: `1px solid ${p.accent}30`,
+                      color: p.accent,
+                    }}
+                  >
+                    <span className="font-syne text-sm font-semibold">{p.label}</span>
+                  </button>
+                ))}
+              </div>
+
+              <button
+                onClick={() => setNudgeTarget(null)}
+                disabled={sendingNudge}
+                className="w-full py-2.5 rounded-lg text-sm font-semibold border border-white/10 text-cream/60 hover:bg-white/5 transition-all disabled:opacity-40"
+              >
+                {sendingNudge ? "Sending…" : "Cancel"}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* ═══ Challenge Modal — direct arena challenge with wager picker ═══ */}
+        {challengeTarget && (
+          <div
+            className="fixed inset-0 z-[60] flex items-center justify-center px-4"
+            onClick={() => !sendingChallenge && setChallengeTarget(null)}
+          >
+            <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
+            <div
+              className="relative w-full max-w-sm rounded-2xl border border-red-500/25 p-6 animate-slide-up"
+              style={{ background: "linear-gradient(135deg, #0c1020 0%, #080c18 100%)" }}
+              onClick={e => e.stopPropagation()}
+            >
+              <div className="text-center mb-5">
+                <Sword size={40} weight="fill" color="#EF4444" className="mx-auto mb-3" aria-hidden="true" />
+                <h2 className="font-bebas text-2xl text-cream tracking-wider leading-tight">
+                  Challenge {challengeTarget.username}?
+                </h2>
+                <p className="font-serif italic text-cream/40 text-xs mt-2">
+                  winner takes the pot. 10 questions, 15s each.
+                </p>
+              </div>
+
+              <div className="mb-5">
+                <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-cream/40 mb-2">wager · Fangs</p>
+                <div className="grid grid-cols-4 gap-2">
+                  {[10, 25, 50, 100].map(w => (
+                    <button
+                      key={w}
+                      onClick={() => setChallengeWager(w)}
+                      className={`py-2 rounded-lg text-sm font-bold transition-all ${challengeWager === w ? "text-navy" : "text-cream/60 hover:text-cream"}`}
+                      style={challengeWager === w
+                        ? { background: "linear-gradient(135deg, #FFD700 0%, #B8960C 100%)" }
+                        : { background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}
+                    >
+                      {w}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setChallengeTarget(null)}
+                  disabled={sendingChallenge}
+                  className="flex-1 py-2.5 rounded-lg text-sm font-semibold border border-white/10 text-cream/60 hover:bg-white/5 transition-all disabled:opacity-40"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={sendChallenge}
+                  disabled={sendingChallenge}
+                  className="flex-1 py-2.5 rounded-lg text-sm font-bold transition-all active:scale-95 inline-flex items-center justify-center gap-2"
+                  style={{
+                    background: "linear-gradient(135deg, #EF4444 0%, #B91C1C 100%)",
+                    color: "#FFF",
+                    opacity: sendingChallenge ? 0.6 : 1,
+                  }}
+                >
+                  {sendingChallenge ? "Sending…" : <><Sword size={14} weight="fill" aria-hidden="true" /> Send Challenge</>}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </ProtectedRoute>
   );

@@ -7,6 +7,22 @@ import type { SignupExtra } from "@/lib/auth";
 import { supabase } from "@/lib/supabase";
 import Link from "next/link";
 import { cdnUrl } from "@/lib/cdn";
+import {
+  Check,
+  X as XIcon,
+  EnvelopeOpen,
+  Rocket,
+  Fire,
+  Brain,
+  Warning,
+  EnvelopeSimple,
+  User,
+  Target,
+  GameController,
+  GraduationCap,
+  Megaphone,
+} from "@phosphor-icons/react";
+import type { Icon } from "@phosphor-icons/react";
 
 type Tab = "login" | "signup";
 
@@ -118,26 +134,38 @@ export default function LoginPage() {
   const pwStrong = Object.values(pwChecks).every(Boolean);
   const passwordsMatch = confirmPassword === "" || password === confirmPassword;
 
-  // Redirect if already logged in — delay 2.5s when showing verified banner so user sees it
+  // Redirect if already logged in. Always go to /dashboard — ProtectedRoute
+  // runs the onboarding check there and re-routes to /onboarding if needed.
+  // Doing that query here used to hang on slow/failing profile reads,
+  // which trapped the user on the "Signing in..." spinner.
+  //
+  // Fallback: if router.replace doesn't navigate within 2s (Next.js router
+  // occasionally no-ops mid-render), hard-redirect via window.location.
   useEffect(() => {
-    if (!isLoading && user) {
-      const checkOnboarding = async () => {
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("onboarding_completed, username")
-          .eq("id", user.id)
-          .maybeSingle();
-        const isOnboarded = profile?.onboarding_completed || (profile?.username && profile.username.trim().length > 0);
-        const dest = isOnboarded ? "/dashboard" : "/onboarding?step=2";
-        if (showVerifiedBanner) {
-          const t = setTimeout(() => router.replace(dest), 2500);
-          return () => clearTimeout(t);
-        } else {
-          router.replace(dest);
+    if (isLoading || !user) return;
+
+    const dest = "/dashboard";
+    let cancelled = false;
+
+    const doRedirect = () => {
+      if (cancelled) return;
+      router.replace(dest);
+      setTimeout(() => {
+        if (cancelled) return;
+        if (typeof window !== "undefined" && window.location.pathname === "/login") {
+          console.warn("[Login] router.replace did not navigate — hard-redirecting");
+          window.location.href = dest;
         }
-      };
-      checkOnboarding();
-    }
+      }, 2000);
+    };
+
+    const delay = showVerifiedBanner ? 2500 : 0;
+    const t = setTimeout(doRedirect, delay);
+
+    return () => {
+      cancelled = true;
+      clearTimeout(t);
+    };
   }, [user, isLoading, router, showVerifiedBanner]);
 
   // Force dark mode on login page
@@ -300,7 +328,7 @@ export default function LoginPage() {
         {/* Email verified banner */}
         {showVerifiedBanner && (
           <div className="mb-4 flex items-center gap-3 px-4 py-3.5 rounded-xl bg-green-400/10 border border-green-400/30 animate-slide-up">
-            <span className="text-green-400 text-lg leading-none">✓</span>
+            <Check size={20} weight="bold" className="text-green-400" aria-hidden="true" />
             <p className="text-green-400 text-sm font-semibold">
               Email verified! You can now log in.
             </p>
@@ -324,7 +352,9 @@ export default function LoginPage() {
         {signupSuccess ? (
           <div className="rounded-2xl p-8 border border-green-400/30 text-center"
             style={{ background: "linear-gradient(135deg, #0a1020 0%, #060c18 100%)" }}>
-            <div className="text-6xl mb-4">📬</div>
+            <div className="flex justify-center mb-4">
+              <EnvelopeOpen size={64} weight="regular" className="text-green-400" aria-hidden="true" />
+            </div>
             <h2 className="font-bebas text-3xl text-green-400 tracking-wider mb-3">Check Your Email</h2>
             <p className="text-cream/60 text-sm leading-relaxed mb-6">
               We sent a confirmation link to{" "}
@@ -393,7 +423,12 @@ export default function LoginPage() {
                   <button type="submit" disabled={submitting}
                     className="w-full py-4 rounded-xl font-bold text-base mt-2 disabled:opacity-60 disabled:cursor-not-allowed transition-all duration-200"
                     style={{ background: submitting ? "#4A90D960" : "linear-gradient(135deg, #F0B429 0%, #B8960C 50%, #F0B429 100%)", color: "#04080F", boxShadow: submitting ? "none" : "0 4px 20px rgba(240,180,41,0.35)" }}>
-                    {submitting ? <Spinner label="Logging in..." /> : "🚀 Log In & Grind"}
+                    {submitting ? <Spinner label="Logging in..." /> : (
+                      <span className="inline-flex items-center justify-center">
+                        <Rocket size={18} className="inline mr-1.5 -mt-0.5" aria-hidden="true" />
+                        Log In &amp; Grind
+                      </span>
+                    )}
                   </button>
                 </form>
               )}
@@ -408,7 +443,7 @@ export default function LoginPage() {
                         <div className="flex flex-col items-center gap-1 flex-1">
                           <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300
                             ${step > s.n ? "bg-green-500 text-white" : step === s.n ? "bg-electric text-white shadow-lg shadow-electric/40" : "bg-white/10 text-cream/40"}`}>
-                            {step > s.n ? "✓" : s.n}
+                            {step > s.n ? <Check size={14} weight="bold" aria-hidden="true" /> : s.n}
                           </div>
                           <span className={`text-xs font-semibold transition-colors duration-200
                             ${step === s.n ? "text-electric" : step > s.n ? "text-green-400" : "text-cream/30"}`}>
@@ -464,10 +499,16 @@ export default function LoginPage() {
                             <span className="absolute right-3 top-1/2 -translate-y-1/2 text-cream/40 text-xs">Checking...</span>
                           )}
                           {usernameStatus === "available" && (
-                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-green-400 text-xs font-semibold">✓ Available</span>
+                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-green-400 text-xs font-semibold inline-flex items-center">
+                              <Check size={14} className="inline mr-1.5 -mt-0.5" aria-hidden="true" />
+                              Available
+                            </span>
                           )}
                           {usernameStatus === "taken" && (
-                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-red-400 text-xs font-semibold">✗ Taken</span>
+                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-red-400 text-xs font-semibold inline-flex items-center">
+                              <XIcon size={14} className="inline mr-1.5 -mt-0.5" aria-hidden="true" />
+                              Taken
+                            </span>
                           )}
                         </div>
                         <p className="text-cream/25 text-xs mt-1.5">Lowercase letters, numbers, underscores only</p>
@@ -504,7 +545,10 @@ export default function LoginPage() {
                           <p className="text-red-400 text-xs font-semibold mt-1.5">Passwords do not match</p>
                         )}
                         {confirmPassword.length > 0 && passwordsMatch && (
-                          <p className="text-green-400 text-xs font-semibold mt-1.5">✓ Passwords match</p>
+                          <p className="text-green-400 text-xs font-semibold mt-1.5">
+                            <Check size={14} className="inline mr-1.5 -mt-0.5" aria-hidden="true" />
+                            Passwords match
+                          </p>
                         )}
                       </div>
 
@@ -589,12 +633,12 @@ export default function LoginPage() {
                         <div className="rounded-xl border border-electric/20 p-4 space-y-2 mt-2"
                           style={{ background: "rgba(74,144,217,0.05)" }}>
                           <p className="text-electric text-xs font-bold uppercase tracking-widest mb-3">Your Account Summary</p>
-                          <SummaryRow icon="📧" label="Email" value={email} />
-                          <SummaryRow icon="🎮" label="Username" value={`@${username}`} />
-                          <SummaryRow icon="👤" label="Name" value={firstName} />
-                          <SummaryRow icon="🎓" label="Education" value={educationLevel} />
-                          <SummaryRow icon="🎯" label="Goal" value={studyGoal} />
-                          <SummaryRow icon="📣" label="Via" value={referralSource} />
+                          <SummaryRow Icon={EnvelopeSimple} label="Email" value={email} />
+                          <SummaryRow Icon={GameController} label="Username" value={`@${username}`} />
+                          <SummaryRow Icon={User} label="Name" value={firstName} />
+                          <SummaryRow Icon={GraduationCap} label="Education" value={educationLevel} />
+                          <SummaryRow Icon={Target} label="Goal" value={studyGoal} />
+                          <SummaryRow Icon={Megaphone} label="Via" value={referralSource} />
                         </div>
                       )}
 
@@ -607,7 +651,12 @@ export default function LoginPage() {
                         <button onClick={handleSignup} type="button" disabled={submitting}
                           className="flex-[2] py-3.5 rounded-xl font-bold text-sm disabled:opacity-60 disabled:cursor-not-allowed transition-all duration-200"
                           style={{ background: "linear-gradient(135deg, #F0B429 0%, #B8960C 50%, #F0B429 100%)", color: "#04080F", boxShadow: "0 4px 20px rgba(240,180,41,0.35)" }}>
-                          {submitting ? <Spinner label="Creating account..." /> : "🔥 Create Account"}
+                          {submitting ? <Spinner label="Creating account..." /> : (
+                            <span className="inline-flex items-center justify-center">
+                              <Fire size={18} className="inline mr-1.5 -mt-0.5" aria-hidden="true" />
+                              Create Account
+                            </span>
+                          )}
                         </button>
                       </div>
                     </div>
@@ -649,7 +698,7 @@ export default function LoginPage() {
               href="/demo"
               className="inline-flex items-center gap-2 px-6 py-3 rounded-xl border border-electric/20 text-cream/60 text-sm font-semibold hover:text-electric hover:border-electric/50 hover:bg-electric/5 transition-all duration-200"
             >
-              <span className="text-base">🧠</span>
+              <Brain size={18} aria-hidden="true" />
               Try a Sample Quiz
               <span className="text-cream/30">&#8594;</span>
             </Link>
@@ -665,7 +714,13 @@ export default function LoginPage() {
 function PwCheck({ ok, label }: { ok: boolean; label: string }) {
   return (
     <div className={`flex items-center gap-2 text-xs font-medium transition-colors duration-200 ${ok ? "text-green-400" : "text-red-400"}`}>
-      <span className="w-3 flex-shrink-0">{ok ? "✓" : "✗"}</span>
+      <span className="w-3 flex-shrink-0 inline-flex items-center">
+        {ok ? (
+          <Check size={14} weight="bold" aria-hidden="true" />
+        ) : (
+          <XIcon size={14} weight="bold" aria-hidden="true" />
+        )}
+      </span>
       <span>{label}</span>
     </div>
   );
@@ -674,7 +729,7 @@ function PwCheck({ ok, label }: { ok: boolean; label: string }) {
 function ErrorBox({ msg }: { msg: string }) {
   return (
     <div className="flex items-center gap-2 px-4 py-3 rounded-xl bg-red-400/10 border border-red-400/30 animate-slide-up">
-      <span className="text-sm flex-shrink-0">⚠️</span>
+      <Warning size={16} weight="fill" color="#EF4444" className="flex-shrink-0" aria-hidden="true" />
       <p className="text-red-400 text-sm font-semibold">{msg}</p>
     </div>
   );
@@ -689,10 +744,12 @@ function Spinner({ label }: { label: string }) {
   );
 }
 
-function SummaryRow({ icon, label, value }: { icon: string; label: string; value: string }) {
+function SummaryRow({ Icon: IconCmp, label, value }: { Icon: Icon; label: string; value: string }) {
   return (
     <div className="flex items-center gap-2 text-sm">
-      <span className="text-base w-5">{icon}</span>
+      <span className="w-5 inline-flex items-center justify-center text-cream/70">
+        <IconCmp size={18} aria-hidden="true" />
+      </span>
       <span className="text-cream/40 w-20 text-xs font-semibold">{label}</span>
       <span className="text-cream/80 text-xs truncate">{value}</span>
     </div>

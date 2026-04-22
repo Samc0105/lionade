@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import { User, Subject } from "@/types";
-import { SUBJECT_ICONS } from "@/lib/mockData";
+import { SUBJECT_ICONS, DefaultSubjectIcon } from "@/lib/mockData";
 import { cdnUrl } from "@/lib/cdn";
+import { Sword, Check, Fire, Trophy } from "@phosphor-icons/react";
 
 const SUBJECTS: Subject[] = ["Math", "Science", "Languages", "SAT/ACT", "Coding", "Finance", "Certifications"];
 
@@ -36,7 +37,9 @@ export default function DuelInvite({ onStartDuel }: DuelInviteProps) {
     <div className="card max-w-lg w-full mx-auto">
       {/* Header */}
       <div className="text-center mb-6">
-        <div className="text-5xl mb-3">⚔️</div>
+        <div className="text-5xl mb-3 flex items-center justify-center">
+          <Sword size={52} weight="fill" aria-hidden="true" />
+        </div>
         <h2 className="font-bebas text-3xl text-cream tracking-wider">Challenge to Duel</h2>
         <p className="text-cream/50 text-sm mt-1">Winner takes double the coins</p>
       </div>
@@ -55,7 +58,11 @@ export default function DuelInvite({ onStartDuel }: DuelInviteProps) {
                   : "bg-white/10 text-cream/30"
                 }`}
             >
-              {["opponent", "subject", "confirm"].indexOf(step) > i ? "✓" : i + 1}
+              {["opponent", "subject", "confirm"].indexOf(step) > i ? (
+                <Check size={14} weight="bold" aria-hidden="true" />
+              ) : (
+                i + 1
+              )}
             </div>
             {i < 2 && <div className="w-6 h-px bg-electric/20" />}
           </div>
@@ -81,7 +88,11 @@ export default function DuelInvite({ onStartDuel }: DuelInviteProps) {
               </div>
               <div className="flex-1 text-left">
                 <p className="font-bold text-cream text-sm">{user.username}</p>
-                <p className="text-xs text-cream/40">Lvl {user.level} · 🔥 {user.streak} streak</p>
+                <p className="text-xs text-cream/40 inline-flex items-center gap-1">
+                  Lvl {user.level} ·
+                  <Fire size={12} weight="fill" aria-hidden="true" className="inline mr-0.5 -mt-0.5" />
+                  {user.streak} streak
+                </p>
               </div>
               <div className="text-right">
                 <p className="font-bebas text-lg text-gold flex items-center gap-1"><img src={cdnUrl("/F.png")} alt="Fangs" className="w-4 h-4 object-contain" /> {user.coins.toLocaleString()}</p>
@@ -114,7 +125,10 @@ export default function DuelInvite({ onStartDuel }: DuelInviteProps) {
                     : "border-electric/15 hover:border-electric/40 hover:bg-white/5"
                   }`}
               >
-                <span className="text-2xl">{SUBJECT_ICONS[subject]}</span>
+                {(() => {
+                  const SubjectIcon = SUBJECT_ICONS[subject] ?? DefaultSubjectIcon;
+                  return <SubjectIcon size={24} weight="regular" color="currentColor" aria-hidden="true" />;
+                })()}
                 <p className="text-sm font-bold text-cream mt-1">{subject}</p>
               </button>
             ))}
@@ -149,7 +163,10 @@ export default function DuelInvite({ onStartDuel }: DuelInviteProps) {
             {/* VS */}
             <div className="flex flex-col items-center">
               <span className="font-bebas text-3xl text-cream/30 leading-none">VS</span>
-              <span className="text-xl mt-1">{SUBJECT_ICONS[selectedSubject]}</span>
+              {(() => {
+                const ConfirmIcon = SUBJECT_ICONS[selectedSubject] ?? DefaultSubjectIcon;
+                return <ConfirmIcon size={22} weight="regular" color="currentColor" className="mt-1" aria-hidden="true" />;
+              })()}
               <span className="text-xs text-cream/50 mt-1">{selectedSubject}</span>
             </div>
 
@@ -163,14 +180,18 @@ export default function DuelInvite({ onStartDuel }: DuelInviteProps) {
           </div>
 
           <div className="bg-gold/5 border border-gold/20 rounded-xl p-3 mb-4 text-center">
-            <p className="text-gold text-sm font-semibold">🏆 Winner earns 2x coins</p>
+            <p className="text-gold text-sm font-semibold inline-flex items-center gap-1.5">
+              <Trophy size={14} weight="fill" aria-hidden="true" className="inline -mt-0.5" />
+              Winner earns 2x coins
+            </p>
             <p className="text-cream/40 text-xs mt-0.5">10 questions · {selectedSubject}</p>
           </div>
 
           <div className="flex gap-3">
             <button onClick={() => setStep("subject")} className="btn-outline flex-1">← Back</button>
-            <button onClick={handleStart} className="btn-gold flex-1">
-              ⚔️ Start Duel
+            <button onClick={handleStart} className="btn-gold flex-1 inline-flex items-center justify-center gap-1.5">
+              <Sword size={16} weight="fill" aria-hidden="true" className="inline" />
+              Start Duel
             </button>
           </div>
         </div>

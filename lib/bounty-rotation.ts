@@ -6,7 +6,7 @@
 
 import { supabaseAdmin } from "./supabase-server";
 
-const DAILY_ACTIVE_COUNT = 5;
+const DAILY_ACTIVE_COUNT = 3;
 const WEEKLY_ACTIVE_COUNT = 3;
 
 interface RotationState {

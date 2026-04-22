@@ -7,6 +7,7 @@ import AuthProviderWrapper from "@/components/AuthProviderWrapper";
 import SpaceBackground from "@/components/SpaceBackground";
 import SakuraPetals from "@/components/SakuraPetals";
 import ThemeProvider from "@/components/ThemeProvider";
+import { ToastProvider } from "@/components/Toast";
 
 const bebasNeue = Bebas_Neue({
   variable: "--font-bebas",
@@ -73,9 +74,11 @@ export default function RootLayout({
           <SakuraPetals />
           <div className="relative z-10 layout-content-bg">
             <AuthProviderWrapper>
-              <Navbar />
-              <main>{children}</main>
-              <Footer />
+              <ToastProvider>
+                <Navbar />
+                <main>{children}</main>
+                <Footer />
+              </ToastProvider>
             </AuthProviderWrapper>
           </div>
         </ThemeProvider>

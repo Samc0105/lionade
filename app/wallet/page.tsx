@@ -9,26 +9,43 @@ import BackButton from "@/components/BackButton";
 import Link from "next/link";
 import { cdnUrl } from "@/lib/cdn";
 import { supabase } from "@/lib/supabase";
+import {
+  BookOpen,
+  Sword,
+  DiceFive,
+  Target,
+  Fire,
+  Gift,
+  Medal,
+  Storefront,
+  GameController,
+  Robot,
+  Sun,
+  Coin,
+  Lightning,
+  TrendUp,
+  type Icon,
+} from "@phosphor-icons/react";
 
-// Type icons by transaction type
-const TXN_ICONS: Record<string, string> = {
-  quiz_reward: "\u{1F4DA}",
-  duel_win: "\u{2694}\u{FE0F}",
-  duel_loss: "\u{2694}\u{FE0F}",
-  bet_placed: "\u{1F3B2}",
-  bet_won: "\u{1F3B2}",
-  bounty_reward: "\u{1F3AF}",
-  streak_milestone: "\u{1F525}",
-  streak_bonus: "\u{1F525}",
-  signup_bonus: "\u{1F381}",
-  badge_bonus: "\u{1F3C5}",
-  shop_purchase: "\u{1F6CD}\u{FE0F}",
-  game_reward: "\u{1F3AE}",
-  ninny_session: "\u{1F916}",
-  ninny_unlock: "\u{1F916}",
-  ninny_refund: "\u{1F916}",
-  ninny_abandon: "\u{1F916}",
-  login_bonus: "\u{2600}\u{FE0F}",
+// Phosphor icon by transaction type
+const TXN_ICONS: Record<string, Icon> = {
+  quiz_reward:      BookOpen,
+  duel_win:         Sword,
+  duel_loss:        Sword,
+  bet_placed:       DiceFive,
+  bet_won:          DiceFive,
+  bounty_reward:    Target,
+  streak_milestone: Fire,
+  streak_bonus:     Fire,
+  signup_bonus:     Gift,
+  badge_bonus:      Medal,
+  shop_purchase:    Storefront,
+  game_reward:      GameController,
+  ninny_session:    Robot,
+  ninny_unlock:     Robot,
+  ninny_refund:     Robot,
+  ninny_abandon:    Robot,
+  login_bonus:      Sun,
 };
 
 interface Transaction {
@@ -102,17 +119,20 @@ export default function WalletPage() {
         {/* Stats Row */}
         <div className="grid grid-cols-3 gap-4 mb-8 animate-slide-up" style={{ animationDelay: "0.1s" }}>
           {[
-            { label: "Total XP", value: xp.toLocaleString(), icon: "\u26A1", color: "#4A90D9" },
-            { label: "Level", value: `Lv ${level}`, icon: "\u{1F4C8}", color: "#9B59B6" },
-            { label: "Streak", value: `${streak} days`, icon: "\u{1F525}", color: "#E67E22" },
-          ].map(s => (
-            <div key={s.label} className="rounded-xl border p-4 text-center"
-              style={{ background: "var(--card-solid-bg)", borderColor: `${s.color}20` }}>
-              <span className="text-2xl block mb-1">{s.icon}</span>
-              <p className="font-bebas text-2xl leading-none" style={{ color: s.color }}>{s.value}</p>
-              <p className="text-cream/40 text-[10px] uppercase tracking-widest mt-1">{s.label}</p>
-            </div>
-          ))}
+            { label: "Total XP", value: xp.toLocaleString(), Icon: Lightning, color: "#4A90D9" },
+            { label: "Level",    value: `Lv ${level}`,        Icon: TrendUp,   color: "#9B59B6" },
+            { label: "Streak",   value: `${streak} days`,     Icon: Fire,      color: "#E67E22" },
+          ].map(s => {
+            const StatIcon = s.Icon;
+            return (
+              <div key={s.label} className="rounded-xl border p-4 text-center"
+                style={{ background: "var(--card-solid-bg)", borderColor: `${s.color}20` }}>
+                <StatIcon size={28} weight="fill" color={s.color} className="mx-auto mb-1" aria-hidden="true" />
+                <p className="font-bebas text-2xl leading-none" style={{ color: s.color }}>{s.value}</p>
+                <p className="text-cream/40 text-[10px] uppercase tracking-widest mt-1">{s.label}</p>
+              </div>
+            );
+          })}
         </div>
 
         {/* Transaction History — now populated from coin_transactions */}
@@ -139,14 +159,16 @@ export default function WalletPage() {
             <div className="space-y-2">
               {transactions.map((txn) => {
                 const isPositive = txn.amount > 0;
-                const icon = TXN_ICONS[txn.type] ?? "\u{1FA99}";
+                const TxnIcon = TXN_ICONS[txn.type] ?? Coin;
                 return (
                   <div
                     key={txn.id}
                     className="flex items-center gap-3 px-3 py-2.5 rounded-xl border transition-colors hover:bg-white/5"
                     style={{ borderColor: "rgba(255,255,255,0.06)" }}
                   >
-                    <span className="text-lg w-8 text-center shrink-0">{icon}</span>
+                    <span className="w-8 flex justify-center shrink-0">
+                      <TxnIcon size={20} weight="regular" color="currentColor" aria-hidden="true" />
+                    </span>
                     <div className="flex-1 min-w-0">
                       <p className="font-syne text-cream text-sm truncate">
                         {txn.description ?? txn.type.replace(/_/g, " ")}
@@ -172,7 +194,7 @@ export default function WalletPage() {
         <div className="rounded-2xl border border-purple-500/15 p-6 animate-slide-up"
           style={{ animationDelay: "0.2s", background: "var(--card-solid-bg)" }}>
           <div className="flex items-center gap-3 mb-3">
-            <span className="text-2xl">&#x1F381;</span>
+            <Gift size={28} weight="fill" color="#FFD700" aria-hidden="true" />
             <div>
               <h2 className="font-bebas text-xl text-cream tracking-wider">REDEEM REWARDS</h2>
               <p className="text-cream/40 text-xs">Convert your Fangs into real rewards</p>

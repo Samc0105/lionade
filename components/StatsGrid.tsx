@@ -1,5 +1,6 @@
 import StatCard from "./StatCard";
 import { cdnUrl } from "@/lib/cdn";
+import { Fire, Lightning, ChartBar } from "@phosphor-icons/react";
 
 interface StatsGridProps {
   coins: string;
@@ -28,21 +29,21 @@ export default function StatsGrid({
         accentColor="#FFD700"
       />
       <StatCard
-        icon="&#x1F525;"
+        icon={<Fire size={24} weight="regular" color="currentColor" aria-hidden="true" />}
         value={String(streak)}
         label="Streak"
         insight={streakInsight}
         accentColor="#F97316"
       />
       <StatCard
-        icon="&#x26A1;"
+        icon={<Lightning size={24} weight="regular" color="currentColor" aria-hidden="true" />}
         value={`LVL ${level}`}
         label="Level"
         insight={levelInsight}
         accentColor="#4A90D9"
       />
       <StatCard
-        icon="&#x1F4CA;"
+        icon={<ChartBar size={24} weight="regular" color="currentColor" aria-hidden="true" />}
         value={String(subjects)}
         label="Subjects"
         insight={subjectInsight}

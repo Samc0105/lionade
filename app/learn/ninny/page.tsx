@@ -31,6 +31,24 @@ import type {
   NinnySourceType,
 } from "@/lib/ninny";
 import { apiPost, apiGet, apiDelete, swrFetcher } from "@/lib/api-client";
+import {
+  Target,
+  Cards,
+  Link as LinkIcon,
+  PencilSimple,
+  Scales,
+  Clipboard,
+  Lightning,
+  Robot,
+  Fire,
+  ChatCircle,
+  FileText,
+  TrayArrowDown,
+  Trophy,
+  Gift,
+} from "@phosphor-icons/react";
+import type { IconProps } from "@phosphor-icons/react";
+import type { ComponentType } from "react";
 
 type Phase = "input" | "generating" | "modePicker" | "play" | "results" | "chat";
 type InputMode = "topic" | "material";
@@ -78,7 +96,7 @@ const TEXT_LIMIT = 12000;
 // from the gold/purple chrome of the rest of the page.
 const STUDY_MODES: {
   key: NinnyMode;
-  icon: string;
+  icon: ComponentType<IconProps>;
   label: string;
   description: string;
   active: boolean;
@@ -86,7 +104,7 @@ const STUDY_MODES: {
 }[] = [
   {
     key: "mcq",
-    icon: "\u{1F3AF}",
+    icon: Target,
     label: "Multiple Choice",
     description: "Pick the right answer from 4 options",
     active: true,
@@ -94,7 +112,7 @@ const STUDY_MODES: {
   },
   {
     key: "flashcards",
-    icon: "\u{1F4C7}",
+    icon: Cards,
     label: "Flashcards",
     description: "Flip cards · self-rate your recall",
     active: true,
@@ -102,7 +120,7 @@ const STUDY_MODES: {
   },
   {
     key: "match",
-    icon: "\u{1F517}",
+    icon: LinkIcon,
     label: "Match",
     description: "Pair terms with their definitions",
     active: true,
@@ -110,7 +128,7 @@ const STUDY_MODES: {
   },
   {
     key: "fill",
-    icon: "\u{270F}\u{FE0F}",
+    icon: PencilSimple,
     label: "Fill Blank",
     description: "Type the missing word",
     active: true,
@@ -118,7 +136,7 @@ const STUDY_MODES: {
   },
   {
     key: "tf",
-    icon: "\u{2696}\u{FE0F}",
+    icon: Scales,
     label: "True/False",
     description: "Fast-fire fact checks",
     active: true,
@@ -126,7 +144,7 @@ const STUDY_MODES: {
   },
   {
     key: "ordering",
-    icon: "\u{1F4CB}",
+    icon: Clipboard,
     label: "Ordering",
     description: "Arrange items in the right sequence",
     active: true,
@@ -134,7 +152,7 @@ const STUDY_MODES: {
   },
   {
     key: "blitz",
-    icon: "\u{26A1}",
+    icon: Lightning,
     label: "Blitz",
     description: "60-second sprint · max points",
     active: true,
@@ -643,14 +661,17 @@ function NinnyPageInner() {
         {phase === "input" && (
           <div className="flex flex-col items-center text-center mt-6 mb-8 animate-slide-up">
             <div
-              className="w-20 h-20 rounded-full flex items-center justify-center text-5xl mb-4 relative"
+              className="w-20 h-20 rounded-full flex items-center justify-center mb-4 relative"
               style={{
                 background:
                   "radial-gradient(circle at 40% 35%, #A855F740 0%, #A855F710 60%, transparent 100%)",
                 boxShadow: `0 0 50px ${NINNY_PURPLE}33, 0 0 0 1px ${NINNY_PURPLE}44, inset 0 0 20px ${NINNY_PURPLE}15`,
+                color: NINNY_PURPLE,
               }}
             >
-              <span className="relative z-10">&#x1F916;</span>
+              <span className="relative z-10">
+                <Robot size={52} weight="regular" aria-hidden="true" />
+              </span>
               <div
                 className="absolute inset-0 rounded-full animate-pulse"
                 style={{ boxShadow: `0 0 0 1px ${NINNY_PURPLE}30` }}
@@ -675,9 +696,10 @@ function NinnyPageInner() {
                 style={{
                   background: "rgba(249,115,22,0.10)",
                   borderColor: "rgba(249,115,22,0.40)",
+                  color: "#F97316",
                 }}
               >
-                <span className="text-sm">&#x1F525;</span>
+                <Fire size={16} weight="regular" aria-hidden="true" />
                 <span className="font-bebas text-[#F97316] text-xs tracking-wider">
                   {stats?.streak}-day streak
                 </span>
@@ -690,13 +712,14 @@ function NinnyPageInner() {
         {phase !== "input" && (
           <div className="flex items-center gap-2 mt-4 mb-6 animate-slide-up">
             <div
-              className="w-8 h-8 rounded-full flex items-center justify-center text-base"
+              className="w-8 h-8 rounded-full flex items-center justify-center"
               style={{
                 background: `${NINNY_PURPLE}20`,
                 boxShadow: `0 0 0 1px ${NINNY_PURPLE}40`,
+                color: NINNY_PURPLE,
               }}
             >
-              <span>&#x1F916;</span>
+              <Robot size={18} weight="regular" aria-hidden="true" />
             </div>
             <span
               className="font-bebas text-sm tracking-widest uppercase"
@@ -756,7 +779,9 @@ function NinnyPageInner() {
                       }
                 }
               >
-                <span className="block text-base mb-0.5">&#x1F4AC;</span>
+                <span className="block mb-0.5">
+                  <ChatCircle size={18} weight="regular" aria-hidden="true" color="currentColor" className="mx-auto" />
+                </span>
                 Tell Me a Topic
               </button>
               <button
@@ -777,7 +802,9 @@ function NinnyPageInner() {
                       }
                 }
               >
-                <span className="block text-base mb-0.5">&#x1F4C4;</span>
+                <span className="block mb-0.5">
+                  <FileText size={18} weight="regular" aria-hidden="true" color="currentColor" className="mx-auto" />
+                </span>
                 Upload or Paste
               </button>
             </div>
@@ -867,7 +894,7 @@ function NinnyPageInner() {
                     </div>
                   ) : uploadedFile ? (
                     <div className="flex items-center justify-center gap-3">
-                      <span className="text-3xl">&#x1F4C4;</span>
+                      <FileText size={32} weight="regular" aria-hidden="true" color={NINNY_PURPLE} />
                       <div className="text-left">
                         <p className="font-syne font-semibold text-cream text-sm truncate max-w-[280px]">
                           {uploadedFile.name}
@@ -891,10 +918,10 @@ function NinnyPageInner() {
                   ) : (
                     <>
                       <div
-                        className="text-4xl mb-3 transition-transform duration-200 group-hover:scale-110"
+                        className="mb-3 transition-transform duration-200 group-hover:scale-110 inline-flex"
                         style={{ color: NINNY_PURPLE }}
                       >
-                        &#x1F4E5;
+                        <TrayArrowDown size={40} weight="regular" aria-hidden="true" color="currentColor" />
                       </div>
                       <p className="font-bebas text-cream text-lg tracking-wider mb-1">
                         Drop a PDF or TXT file
@@ -1010,6 +1037,7 @@ function NinnyPageInner() {
                   const isSelected = selectedMode === m.key;
                   const isHovered = hoveredMode === m.key;
                   const cost = modeCosts[m.key];
+                  const Icon = m.icon;
                   return (
                     <button
                       key={m.key}
@@ -1049,13 +1077,14 @@ function NinnyPageInner() {
                     >
                       <div className="flex items-center gap-1.5 mb-1">
                         <span
-                          className="text-base transition-transform duration-200"
+                          className="inline-flex transition-transform duration-200"
                           style={{
                             filter: unlocked ? "none" : "grayscale(1)",
                             transform: isSelected || isHovered ? "scale(1.15)" : "scale(1)",
+                            color: unlocked ? m.color : undefined,
                           }}
                         >
-                          {m.icon}
+                          <Icon size={18} weight="regular" aria-hidden="true" color="currentColor" />
                         </span>
                         <span
                           className="font-bebas tracking-wide text-[12px]"
@@ -1101,7 +1130,7 @@ function NinnyPageInner() {
                 {dailyCapReached
                   ? "Daily cap reached"
                   : isFreeNow
-                  ? "🎁 First generation free today"
+                  ? (<span className="inline-flex items-center gap-1.5"><Gift size={14} weight="fill" aria-hidden="true" /> First generation free today</span>)
                   : `${dailyRemaining} of ${meta?.dailyLimit ?? NINNY_DAILY_LIMIT} left today`}
               </span>
             </div>
@@ -1228,13 +1257,16 @@ function NinnyPageInner() {
         {phase === "generating" && (
           <div className="text-center py-24 animate-slide-up">
             <div
-              className="inline-flex items-center justify-center w-20 h-20 rounded-full text-5xl mb-6 relative"
+              className="inline-flex items-center justify-center w-20 h-20 rounded-full mb-6 relative"
               style={{
                 background: `radial-gradient(circle, ${NINNY_PURPLE}40 0%, transparent 70%)`,
                 boxShadow: `0 0 60px ${NINNY_PURPLE}66`,
+                color: NINNY_PURPLE,
               }}
             >
-              <span className="animate-pulse">&#x1F916;</span>
+              <span className="animate-pulse inline-flex">
+                <Robot size={52} weight="regular" aria-hidden="true" color="currentColor" />
+              </span>
               <div
                 className="absolute inset-0 rounded-full animate-ping"
                 style={{ boxShadow: `0 0 0 2px ${NINNY_PURPLE}30` }}
@@ -1317,14 +1349,15 @@ function NinnyPageInner() {
             >
               <div className="flex items-center gap-4">
                 <div
-                  className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl shrink-0
+                  className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0
                     group-hover:scale-110 transition-transform relative"
                   style={{
                     background: `radial-gradient(circle at 40% 35%, ${NINNY_PURPLE}55 0%, ${NINNY_PURPLE}15 70%, transparent 100%)`,
                     boxShadow: `0 0 20px ${NINNY_PURPLE}40, 0 0 0 1px ${NINNY_PURPLE}50`,
+                    color: NINNY_PURPLE,
                   }}
                 >
-                  &#x1F4AC;
+                  <ChatCircle size={28} weight="regular" aria-hidden="true" color="currentColor" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
@@ -1375,6 +1408,7 @@ function NinnyPageInner() {
                 const cost = (meta?.modeCosts ?? NINNY_MODE_COSTS)[m.key];
                 const canAffordMode = userCoins >= cost;
                 const blocked = !unlocked && !canAffordMode;
+                const Icon = m.icon;
 
                 return (
                   <button
@@ -1411,14 +1445,15 @@ function NinnyPageInner() {
                   >
                     <div className="flex items-start gap-3">
                       <div
-                        className="w-11 h-11 rounded-xl flex items-center justify-center text-2xl shrink-0
+                        className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0
                           group-hover:scale-110 transition-transform"
                         style={{
                           background: unlocked ? `${m.color}20` : `${NINNY_PURPLE}15`,
                           border: `1px solid ${unlocked ? m.color + "50" : NINNY_PURPLE + "30"}`,
+                          color: unlocked ? m.color : NINNY_PURPLE,
                         }}
                       >
-                        {m.icon}
+                        <Icon size={28} weight="regular" aria-hidden="true" color="currentColor" />
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
@@ -1511,9 +1546,10 @@ function NinnyPageInner() {
                 style={{
                   background: `${NINNY_PURPLE}15`,
                   borderColor: `${NINNY_PURPLE}40`,
+                  color: NINNY_PURPLE,
                 }}
               >
-                <span className="text-xs">&#x1F4AC;</span>
+                <ChatCircle size={14} weight="regular" aria-hidden="true" color="currentColor" />
                 <span
                   className="font-syne text-[10px] font-semibold uppercase tracking-wider"
                   style={{ color: NINNY_PURPLE }}
@@ -1565,15 +1601,17 @@ function NinnyPageInner() {
               {/* Mode chip — dynamic based on activeMode */}
               {(() => {
                 const mode = STUDY_MODES.find((m) => m.key === activeMode);
+                const ModeIcon = mode?.icon;
                 return (
                   <div
                     className="flex items-center gap-1.5 px-2.5 py-1 rounded-full border"
                     style={{
                       background: "rgba(255,215,0,0.08)",
                       borderColor: "rgba(255,215,0,0.3)",
+                      color: "#FFD700",
                     }}
                   >
-                    <span className="text-xs">{mode?.icon}</span>
+                    {ModeIcon && <ModeIcon size={14} weight="regular" aria-hidden="true" color="currentColor" />}
                     <span className="font-syne text-gold text-[10px] font-semibold uppercase tracking-wider">
                       {mode?.label}
                     </span>
@@ -1600,9 +1638,10 @@ function NinnyPageInner() {
                 style={{
                   background: `${NINNY_PURPLE}10`,
                   borderColor: `${NINNY_PURPLE}30`,
+                  color: NINNY_PURPLE,
                 }}
               >
-                <span className="text-base">&#x1F3AF;</span>
+                <Target size={18} weight="regular" aria-hidden="true" color="currentColor" />
                 <span className="font-syne text-cream/80 text-xs">
                   <span className="font-bold" style={{ color: NINNY_PURPLE }}>
                     Practice Mode
@@ -1717,7 +1756,7 @@ function NinnyPageInner() {
             <div className="animate-slide-up text-center pt-4">
               {/* Trophy / robot avatar — celebratory if perfect */}
               <div
-                className="w-24 h-24 rounded-full inline-flex items-center justify-center text-5xl mx-auto mb-5 relative"
+                className="w-24 h-24 rounded-full inline-flex items-center justify-center mx-auto mb-5 relative"
                 style={{
                   background: isPerfect
                     ? "radial-gradient(circle, rgba(255,215,0,0.45) 0%, transparent 70%)"
@@ -1725,10 +1764,15 @@ function NinnyPageInner() {
                   boxShadow: isPerfect
                     ? "0 0 80px rgba(255,215,0,0.6), 0 0 0 2px rgba(255,215,0,0.5)"
                     : `0 0 40px ${NINNY_PURPLE}44`,
+                  color: isPerfect ? "#FFD700" : NINNY_PURPLE,
                 }}
               >
-                <span className={isPerfect ? "animate-pulse" : ""}>
-                  {isPerfect ? "\u{1F3C6}" : "\u{1F916}"}
+                <span className={`inline-flex ${isPerfect ? "animate-pulse" : ""}`}>
+                  {isPerfect ? (
+                    <Trophy size={52} weight="fill" aria-hidden="true" color="currentColor" />
+                  ) : (
+                    <Robot size={52} weight="regular" aria-hidden="true" color="currentColor" />
+                  )}
                 </span>
                 {isPerfect && (
                   <div
@@ -1838,7 +1882,7 @@ function NinnyPageInner() {
                       boxShadow: `0 0 24px ${NINNY_PURPLE}30`,
                     }}
                   >
-                    <span>&#x1F3AF;</span>
+                    <Target size={18} weight="regular" aria-hidden="true" color="currentColor" />
                     Practice Your Misses ({result.wrongAnswers.length})
                   </button>
                 </div>

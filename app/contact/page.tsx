@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useAuth } from "@/lib/auth";
 import BackButton from "@/components/BackButton";
+import { CheckCircle, Warning } from "@phosphor-icons/react";
 
 const CATEGORIES = ["Bug Report", "Feature Request", "General Question", "Account Issue", "Feedback"];
 
@@ -81,7 +82,9 @@ export default function ContactPage() {
             className="rounded-2xl border border-green-400/30 p-8 text-center animate-slide-up"
             style={{ background: "linear-gradient(135deg, #0a1020 0%, #060c18 100%)" }}
           >
-            <span className="text-5xl block mb-4">✅</span>
+            <div className="flex justify-center mb-4">
+              <CheckCircle size={52} weight="fill" color="#22C55E" aria-hidden="true" />
+            </div>
             <h2 className="font-bebas text-2xl text-cream tracking-wider mb-2">Message Sent!</h2>
             <p className="text-cream/50 text-sm">We'll get back to you soon.</p>
           </div>
@@ -133,7 +136,8 @@ export default function ContactPage() {
 
             {error && (
               <div className="flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold bg-red-400/10 border border-red-400/30 text-red-400">
-                ⚠️ {error}
+                <Warning size={14} weight="fill" color="#EF4444" aria-hidden="true" />
+                {error}
               </div>
             )}
 

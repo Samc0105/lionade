@@ -6,18 +6,32 @@ import { useAuth } from "@/lib/auth";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import BackButton from "@/components/BackButton";
 import { getQuizHistory } from "@/lib/db";
+import {
+  Dna,
+  Flask,
+  Bank,
+  GlobeHemisphereWest,
+  Ruler,
+  BookBookmark,
+  Brain,
+  TrendUp,
+  Lightning,
+  ChartBar,
+  NotePencil,
+  type Icon,
+} from "@phosphor-icons/react";
 
-const AP_TOPICS = [
-  { name: "AP Biology", slug: "ap-biology", icon: "\u{1F9EC}", color: "#22C55E" },
-  { name: "AP Chemistry", slug: "ap-chemistry", icon: "\u2697\uFE0F", color: "#A855F7" },
-  { name: "AP US History", slug: "ap-us-history", icon: "\u{1F3DB}\uFE0F", color: "#EAB308" },
-  { name: "AP World History", slug: "ap-world-history", icon: "\u{1F30D}", color: "#3B82F6" },
-  { name: "AP Calculus AB", slug: "ap-calculus-ab", icon: "\u{1F4D0}", color: "#EF4444" },
-  { name: "AP English Language", slug: "ap-english-language", icon: "\u{1F4D6}", color: "#F97316" },
-  { name: "AP Psychology", slug: "ap-psychology", icon: "\u{1F9E0}", color: "#EC4899" },
-  { name: "AP Macroeconomics", slug: "ap-macroeconomics", icon: "\u{1F4C8}", color: "#14B8A6" },
-  { name: "AP Physics", slug: "ap-physics", icon: "\u26A1", color: "#6366F1" },
-  { name: "AP Statistics", slug: "ap-statistics", icon: "\u{1F4CA}", color: "#8B5CF6" },
+const AP_TOPICS: { name: string; slug: string; icon: Icon; color: string }[] = [
+  { name: "AP Biology", slug: "ap-biology", icon: Dna, color: "#22C55E" },
+  { name: "AP Chemistry", slug: "ap-chemistry", icon: Flask, color: "#A855F7" },
+  { name: "AP US History", slug: "ap-us-history", icon: Bank, color: "#EAB308" },
+  { name: "AP World History", slug: "ap-world-history", icon: GlobeHemisphereWest, color: "#3B82F6" },
+  { name: "AP Calculus AB", slug: "ap-calculus-ab", icon: Ruler, color: "#EF4444" },
+  { name: "AP English Language", slug: "ap-english-language", icon: BookBookmark, color: "#F97316" },
+  { name: "AP Psychology", slug: "ap-psychology", icon: Brain, color: "#EC4899" },
+  { name: "AP Macroeconomics", slug: "ap-macroeconomics", icon: TrendUp, color: "#14B8A6" },
+  { name: "AP Physics", slug: "ap-physics", icon: Lightning, color: "#6366F1" },
+  { name: "AP Statistics", slug: "ap-statistics", icon: ChartBar, color: "#8B5CF6" },
 ];
 
 interface QuizHistoryEntry {
@@ -63,7 +77,9 @@ export default function ApExamsPage() {
 
           {/* Header */}
           <div className="flex items-center gap-4 mb-8 animate-slide-up">
-            <span className="text-5xl">{"\u{1F4DD}"}</span>
+            <span className="text-5xl" style={{ color: "#EC4899" }}>
+              <NotePencil size={52} weight="regular" aria-hidden="true" color="currentColor" />
+            </span>
             <div>
               <h1 className="font-bebas text-4xl sm:text-5xl tracking-wider" style={{ color: "#EC4899" }}>
                 AP EXAMS
@@ -77,6 +93,7 @@ export default function ApExamsPage() {
             {AP_TOPICS.map((ap, i) => {
               const best = getBestScore(ap.name);
               const accuracy = best ? Math.round((best.correct / best.total) * 100) : 0;
+              const IconComp = ap.icon;
 
               return (
                 <button
@@ -98,8 +115,8 @@ export default function ApExamsPage() {
                     e.currentTarget.style.borderColor = `${ap.color}30`;
                   }}
                 >
-                  <span className="text-3xl block mb-3 group-hover:scale-110 transition-transform duration-300">
-                    {ap.icon}
+                  <span className="text-3xl block mb-3 group-hover:scale-110 transition-transform duration-300" style={{ color: ap.color }}>
+                    <IconComp size={32} weight="regular" aria-hidden="true" color="currentColor" />
                   </span>
                   <p className="card-title font-bebas text-xl text-cream tracking-wider mb-1">{ap.name}</p>
                   <span

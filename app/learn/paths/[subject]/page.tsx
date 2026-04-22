@@ -18,17 +18,18 @@ import {
 } from "@/lib/db";
 import { mutateUserStats } from "@/lib/hooks";
 import { cdnUrl } from "@/lib/cdn";
+import { Ruler, Dna, Bank, Flask, Check, Lock, Lightning, type Icon } from "@phosphor-icons/react";
 
 /* ── Subject config ───────────────────────────────────────── */
 
 const SUBJECT_META: Record<
   string,
-  { label: string; icon: string; color: string; quizSubject: string; quizTopic?: string }
+  { label: string; icon: Icon; color: string; quizSubject: string; quizTopic?: string }
 > = {
-  algebra: { label: "Algebra", icon: "\u{1F4D0}", color: "#3B82F6", quizSubject: "Math", quizTopic: "algebra" },
-  biology: { label: "Biology", icon: "\u{1F9EC}", color: "#22C55E", quizSubject: "Science", quizTopic: "biology" },
-  us_history: { label: "US History", icon: "\u{1F3DB}", color: "#EAB308", quizSubject: "History" },
-  chemistry: { label: "Chemistry", icon: "\u{2697}", color: "#A855F7", quizSubject: "Science", quizTopic: "chemistry" },
+  algebra: { label: "Algebra", icon: Ruler, color: "#3B82F6", quizSubject: "Math", quizTopic: "algebra" },
+  biology: { label: "Biology", icon: Dna, color: "#22C55E", quizSubject: "Science", quizTopic: "biology" },
+  us_history: { label: "US History", icon: Bank, color: "#EAB308", quizSubject: "History" },
+  chemistry: { label: "Chemistry", icon: Flask, color: "#A855F7", quizSubject: "Science", quizTopic: "chemistry" },
 };
 
 /* ── Types ─────────────────────────────────────────────────── */
@@ -306,7 +307,9 @@ export default function RoadMapPage() {
 
               {/* Header */}
               <div className="text-center mb-6 animate-slide-up">
-                <span className="text-5xl block mb-2">{meta.icon}</span>
+                <span className="text-5xl block mb-2 flex justify-center" style={{ color: meta.color }}>
+                  {(() => { const IconComp = meta.icon; return <IconComp size={52} weight="regular" aria-hidden="true" color="currentColor" />; })()}
+                </span>
                 <h1
                   className="font-bebas text-5xl sm:text-6xl tracking-wider"
                   style={{ color: meta.color }}
@@ -420,9 +423,13 @@ export default function RoadMapPage() {
                           }}
                         >
                           {stage.status === "completed" ? (
-                            <span className="text-lg">&#x2713;</span>
+                            <span className="text-lg">
+                              <Check size={20} weight="regular" aria-hidden="true" color="currentColor" />
+                            </span>
                           ) : stage.status === "locked" ? (
-                            <span className="text-base">&#x1F512;</span>
+                            <span className="text-base">
+                              <Lock size={18} weight="regular" aria-hidden="true" color="currentColor" />
+                            </span>
                           ) : (
                             stage.stage_number
                           )}
@@ -763,7 +770,9 @@ export default function RoadMapPage() {
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-lg">&#x26A1;</span>
+                  <span className="text-lg text-electric">
+                    <Lightning size={20} weight="regular" aria-hidden="true" color="currentColor" />
+                  </span>
                   <span className="font-bebas text-xl text-electric">
                     +{score * 20 + resultStars * 25} XP
                   </span>
