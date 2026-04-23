@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
+import { SUPPORT_EMAIL } from "@/lib/site-config";
 
 function getResend() {
   if (!process.env.RESEND_API_KEY) return null;
@@ -64,7 +65,7 @@ export async function POST(req: NextRequest) {
 
     await resend.emails.send({
       from: process.env.EMAIL_FROM,
-      to: "support@getlionade.com",
+      to: SUPPORT_EMAIL,
       replyTo: email,
       subject: `[${category}] ${subject}`,
       html: `

@@ -361,11 +361,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     if (existing) return { error: "Username already taken. Try another." };
 
+    // Route the confirmation email back to the current origin — works on
+    // localhost, previews, and whatever domain we deploy to without
+    // hardcoding a subdomain.
+    const emailRedirectTo =
+      typeof window !== "undefined"
+        ? `${window.location.origin}/login`
+        : undefined;
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        emailRedirectTo: "https://app.getlionade.com/login",
+        ...(emailRedirectTo ? { emailRedirectTo } : {}),
         data: {
           username: username.trim(),
           display_name: extra?.firstName ?? username.trim(),

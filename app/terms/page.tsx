@@ -1,6 +1,7 @@
 "use client";
 
 import BackButton from "@/components/BackButton";
+import { SUPPORT_EMAIL } from "@/lib/site-config";
 
 export default function TermsPage() {
   return (
@@ -18,8 +19,8 @@ export default function TermsPage() {
           <p className="text-cream/70 text-sm leading-relaxed">
             Our full terms of service will be published before public launch. By using Lionade you agree to fair play
             and respectful use of the platform. For questions, contact{" "}
-            <a href="mailto:support@getlionade.com" className="text-electric hover:underline">
-              support@getlionade.com
+            <a href={`mailto:${SUPPORT_EMAIL}`} className="text-electric hover:underline">
+              {SUPPORT_EMAIL}
             </a>.
           </p>
         </div>

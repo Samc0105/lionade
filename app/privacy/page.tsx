@@ -1,6 +1,7 @@
 "use client";
 
 import BackButton from "@/components/BackButton";
+import { SUPPORT_EMAIL } from "@/lib/site-config";
 
 export default function PrivacyPage() {
   return (
@@ -18,8 +19,8 @@ export default function PrivacyPage() {
           <p className="text-cream/70 text-sm leading-relaxed">
             Your privacy matters to us. This policy will be updated with full details before our public launch.
             For questions, contact{" "}
-            <a href="mailto:support@getlionade.com" className="text-electric hover:underline">
-              support@getlionade.com
+            <a href={`mailto:${SUPPORT_EMAIL}`} className="text-electric hover:underline">
+              {SUPPORT_EMAIL}
             </a>.
           </p>
         </div>

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth";
+import { SITE_HOST } from "@/lib/site-config";
 import { Fire, Rocket, Target, Coin, Notepad, Sword, BookOpen, Trophy } from "@phosphor-icons/react";
 import type { IconProps } from "@phosphor-icons/react";
 import type { ComponentType } from "react";
@@ -215,7 +216,7 @@ export default function ProductLandingPage() {
 
       {/* ─── Footer ───────────────────────────────────────────── */}
       <footer className="relative z-10 border-t border-electric/10 py-8 px-6 text-center">
-        <p className="text-cream/30 text-xs">getlionade.com &middot; all rights reserved</p>
+        <p className="text-cream/30 text-xs">{SITE_HOST} &middot; all rights reserved</p>
       </footer>
     </div>
   );

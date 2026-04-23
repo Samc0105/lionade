@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { absoluteUrl } from "@/lib/site-config";
 
 export const metadata: Metadata = {
   title: "Try the demo",
@@ -9,7 +10,7 @@ export const metadata: Metadata = {
     title: "Try the Lionade demo",
     description:
       "Free Lionade quiz demo — no sign-up. AI-generated questions, rewards, and duels.",
-    url: "https://getlionade.com/demo",
+    url: absoluteUrl("/demo"),
     type: "website",
   },
 };

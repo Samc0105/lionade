@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { absoluteUrl } from "@/lib/site-config";
 
 // Server-side metadata for a client-rendered page. The client `page.tsx`
 // handles all interactivity; this layout exists solely to emit SEO tags
@@ -12,7 +13,7 @@ export const metadata: Metadata = {
     title: "About · Lionade",
     description:
       "About Lionade — the Gen Z study-rewards app. Earn Fangs, master any exam, duel friends, climb the leaderboard.",
-    url: "https://getlionade.com/about",
+    url: absoluteUrl("/about"),
     type: "website",
   },
 };

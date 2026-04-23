@@ -10,6 +10,7 @@ import { mutateUserStats } from "@/lib/hooks";
 import { useRouter } from "next/navigation";
 import BackButton from "@/components/BackButton";
 import { cdnUrl } from "@/lib/cdn";
+import { SITE_HOST } from "@/lib/site-config";
 import { apiGet, apiPost, apiPatch } from "@/lib/api-client";
 import Confetti from "@/components/Confetti";
 import {
@@ -1165,7 +1166,7 @@ function ResultsScreen({
                 const text = [
                   `${rank.icon} ${rank.label} — ${correctCount}/${correctCount + wrongCount} on ${subject ?? "a quiz"}`,
                   `${accuracy}% accuracy | ${totalCoins} Fangs earned`,
-                  `Can you beat me? getlionade.com/demo`,
+                  `Can you beat me? ${SITE_HOST}/demo`,
                 ].join("\n");
                 try {
                   if (navigator.share) {

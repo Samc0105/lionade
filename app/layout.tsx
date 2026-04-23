@@ -9,6 +9,7 @@ import SakuraPetals from "@/components/SakuraPetals";
 import ThemeProvider from "@/components/ThemeProvider";
 import { ToastProvider } from "@/components/Toast";
 import StructuredData from "@/components/StructuredData";
+import { SITE_URL, SITE_URL_OBJ } from "@/lib/site-config";
 
 const bebasNeue = Bebas_Neue({
   variable: "--font-bebas",
@@ -40,7 +41,7 @@ const dmMono = DM_Mono({
 // `title.template` means every child page gets "<page> · Lionade" for free
 // unless it sets its own `title.absolute`.
 export const metadata: Metadata = {
-  metadataBase: new URL("https://getlionade.com"),
+  metadataBase: SITE_URL_OBJ,
   title: {
     default: "Lionade — Study Like It's Your Job",
     template: "%s · Lionade",
@@ -64,7 +65,7 @@ export const metadata: Metadata = {
     "AWS certification",
     "SAT prep",
   ],
-  authors: [{ name: "Lionade", url: "https://getlionade.com" }],
+  authors: [{ name: "Lionade", url: SITE_URL }],
   creator: "Lionade",
   publisher: "Lionade",
   category: "education",
@@ -83,7 +84,7 @@ export const metadata: Metadata = {
     title: "Lionade — Study Like It's Your Job",
     description:
       "Lionade is the Gen Z study-rewards app. Earn Fangs for studying, battle friends in duels, master any exam with AI, and climb the leaderboard.",
-    url: "https://getlionade.com",
+    url: SITE_URL,
     siteName: "Lionade",
     images: [{ url: "/logo-icon.png", width: 1536, height: 1024, alt: "Lionade — Study Like It's Your Job" }],
     locale: "en_US",

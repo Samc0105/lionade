@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth";
 import { cdnUrl } from "@/lib/cdn";
+import { SITE_HOST } from "@/lib/site-config";
 
 const DEVOPS_PASSWORD = "LionadeDevOps2026";
 
@@ -748,7 +749,7 @@ export default function ComingSoonPage() {
       <footer className="px-6 sm:px-12 py-8 flex items-center justify-between flex-wrap gap-4">
         <img src={cdnUrl("/logo-full.png")} alt="Lionade" className="h-8 rounded-md" />
         <span className="font-mono text-[10px] tracking-[2px] uppercase text-gray-400">Where champions are made &mdash; 2026</span>
-        <span className="font-mono text-[11px] tracking-[1px] text-gray-400">&copy; 2026 getlionade.com &middot; All rights reserved</span>
+        <span className="font-mono text-[11px] tracking-[1px] text-gray-400">&copy; 2026 {SITE_HOST} &middot; All rights reserved</span>
       </footer>
 
       {/* ─── DevOps Secret Trigger ─── */}

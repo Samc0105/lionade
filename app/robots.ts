@@ -1,12 +1,11 @@
 import type { MetadataRoute } from "next";
+import { SITE_URL, absoluteUrl } from "@/lib/site-config";
 
 /**
  * Next.js auto-generates `/robots.txt` from this route. We invite crawlers
  * to index the public marketing pages and keep them off the authenticated
  * app surface (which would 404/redirect them anyway) and the API.
  */
-
-const BASE = "https://getlionade.com";
 
 export default function robots(): MetadataRoute.Robots {
   return {
@@ -36,7 +35,7 @@ export default function robots(): MetadataRoute.Robots {
         ],
       },
     ],
-    sitemap: `${BASE}/sitemap.xml`,
-    host: BASE,
+    sitemap: absoluteUrl("/sitemap.xml"),
+    host: SITE_URL,
   };
 }

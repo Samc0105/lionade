@@ -295,9 +295,15 @@ export default function LoginPage() {
   };
 
   const handleGoogleAuth = async () => {
+    // Route OAuth back to the current origin — works in dev (localhost), on
+    // previews, and on the production domain without hardcoding a subdomain.
+    const redirectTo =
+      typeof window !== "undefined"
+        ? `${window.location.origin}/login`
+        : undefined;
     await supabase.auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo: "https://app.getlionade.com/login" },
+      options: redirectTo ? { redirectTo } : undefined,
     });
   };
 

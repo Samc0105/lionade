@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useAuth } from "@/lib/auth";
 import BackButton from "@/components/BackButton";
+import { SUPPORT_EMAIL } from "@/lib/site-config";
 import { CheckCircle, Warning } from "@phosphor-icons/react";
 
 const CATEGORIES = ["Bug Report", "Feature Request", "General Question", "Account Issue", "Feedback"];
@@ -40,7 +41,7 @@ export default function ContactPage() {
       if (!res.ok) throw new Error();
       setSent(true);
     } catch {
-      setError("Failed to send. Please try again or email support@getlionade.com directly.");
+      setError(`Failed to send. Please try again or email ${SUPPORT_EMAIL} directly.`);
     }
     setSending(false);
   };

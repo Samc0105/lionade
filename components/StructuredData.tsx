@@ -11,8 +11,9 @@
  * are emitted in one script tag so rich-result eligibility is broad.
  */
 
-const SITE_URL = "https://getlionade.com";
-const LOGO_URL = `${SITE_URL}/logo-icon.png`;
+import { SITE_URL, SUPPORT_EMAIL, absoluteUrl } from "@/lib/site-config";
+
+const LOGO_URL = absoluteUrl("/logo-icon.png");
 
 const SCHEMA = [
   {
@@ -24,7 +25,7 @@ const SCHEMA = [
     logo: LOGO_URL,
     description:
       "Lionade is the Gen Z study-rewards app. AI-guided study sessions, duels, leaderboards, and an in-app Fangs economy.",
-    email: "support@getlionade.com",
+    email: SUPPORT_EMAIL,
     sameAs: [] as string[],
   },
   {
