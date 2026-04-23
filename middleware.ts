@@ -90,6 +90,35 @@ const ROUTE_LIMITS: RouteLimit[] = [
     keyPrefix: "games-pdf",
   },
 
+  // Mastery Mode — parse is a Claude Sonnet call, strict cap; the rest are
+  // chatty but bounded. Per-user daily cost is bounded by the server-side
+  // teaching-panel + socratic caps inside each session.
+  {
+    test: (p) => p === "/api/mastery/parse",
+    max: 10,
+    windowMs: 15 * 60 * 1000,
+    keyPrefix: "mastery-parse",
+  },
+  {
+    test: (p) =>
+      /^\/api\/mastery\/sessions\/[^/]+\/(next|answer|socratic)$/.test(p),
+    max: 60,
+    windowMs: 60 * 1000,
+    keyPrefix: "mastery-loop",
+  },
+  {
+    test: (p) => /^\/api\/mastery\/sessions\/[^/]+\/prefetch$/.test(p),
+    max: 20,
+    windowMs: 60 * 1000,
+    keyPrefix: "mastery-prefetch",
+  },
+  {
+    test: (p) => /^\/api\/mastery\/sessions\/[^/]+\/heartbeat$/.test(p),
+    max: 30,
+    windowMs: 60 * 1000,
+    keyPrefix: "mastery-heartbeat",
+  },
+
   // Email-sending routes — anti-spam
   {
     test: (p) => p === "/api/contact" || p === "/api/waitlist",

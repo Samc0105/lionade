@@ -11,53 +11,8 @@ import { SUBJECT_ICONS, SUBJECT_COLORS, DefaultSubjectIcon } from "@/lib/mockDat
 import { getLevelProgress } from "@/lib/levels";
 import type { Subject } from "@/types";
 import { apiGet } from "@/lib/api-client";
-import { NotePencil, Fire, BookOpen, PawPrint, ArrowRight, Target } from "@phosphor-icons/react";
+import { NotePencil, Fire, BookOpen, PawPrint, ArrowRight, Target, Brain } from "@phosphor-icons/react";
 import CountUp from "@/components/CountUp";
-
-/* ── Coming Soon Modal (Practice Sets) ────────────────────── */
-
-function ComingSoonModal({ onClose }: { onClose: () => void }) {
-  useEffect(() => {
-    function onKey(e: KeyboardEvent) {
-      if (e.key === "Escape") onClose();
-    }
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, [onClose]);
-
-  return (
-    <div
-      className="fixed inset-0 z-[60] flex items-center justify-center px-4"
-      onClick={onClose}
-    >
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
-      <div
-        className="relative rounded-2xl border border-electric/20 max-w-sm w-full p-8 text-center animate-slide-up"
-        style={{
-          background: "linear-gradient(135deg, #0d1528 0%, #0a1020 100%)",
-        }}
-        onClick={(e) => e.stopPropagation()}
-      >
-        <NotePencil size={32} weight="regular" color="currentColor" className="mx-auto mb-3" aria-hidden="true" />
-        <p className="font-bebas text-2xl text-cream tracking-wider mb-1">
-          Practice Sets
-        </p>
-        <span className="inline-block text-[10px] font-bold uppercase tracking-widest px-2.5 py-0.5 rounded-full border border-[#2ECC71]/30 text-[#2ECC71]/70 bg-[#2ECC71]/10 mb-3">
-          Coming Soon
-        </span>
-        <p className="text-cream/50 text-sm leading-relaxed mb-5">
-          Curated question sets grouped by difficulty. Perfect for focused study sessions.
-        </p>
-        <button
-          onClick={onClose}
-          className="font-syne font-bold text-sm px-6 py-2.5 rounded-lg transition-all duration-200 active:scale-95 text-navy bg-electric hover:bg-electric-light"
-        >
-          Got it
-        </button>
-      </div>
-    </div>
-  );
-}
 
 /* ── Relative Time Helper ─────────────────────────────────── */
 
@@ -103,7 +58,6 @@ export default function LearnPage() {
   const router = useRouter();
   const { user } = useAuth();
   const { stats } = useUserStats(user?.id);
-  const [showPractice, setShowPractice] = useState(false);
   const [quizHistory, setQuizHistory] = useState<QuizHistoryEntry[]>([]);
   const [todayCount, setTodayCount] = useState(0);
   const [missions, setMissions] = useState<Mission[]>([]);
@@ -326,14 +280,14 @@ export default function LearnPage() {
                 <ArrowRight size={14} weight="regular" color="rgba(238,244,255,0.3)" aria-hidden="true" className="group-hover:text-[#A855F7] transition-colors" />
               </Link>
 
-              <button onClick={() => setShowPractice(true)} className="group flex items-center gap-3 px-4 py-3 rounded-[6px] border border-white/[0.06] hover:bg-white/[0.03] hover:border-[#22C55E]/30 transition-colors text-left">
-                <NotePencil size={18} weight="regular" color="#22C55E" aria-hidden="true" className="flex-shrink-0" />
+              <Link href="/learn/mastery" className="group flex items-center gap-3 px-4 py-3 rounded-[6px] border border-white/[0.06] hover:bg-white/[0.03] hover:border-gold/30 transition-colors text-left">
+                <Brain size={18} weight="fill" color="#FFD700" aria-hidden="true" className="flex-shrink-0" />
                 <div className="flex-1 min-w-0">
-                  <p className="font-syne font-semibold text-sm text-cream leading-tight">Practice Sets</p>
-                  <p className="text-cream/30 text-[10px] font-mono italic">soon</p>
+                  <p className="font-syne font-semibold text-sm text-cream leading-tight">Mastery Mode</p>
+                  <p className="text-cream/30 text-[10px] font-mono">any exam · any topic</p>
                 </div>
-                <ArrowRight size={14} weight="regular" color="rgba(238,244,255,0.3)" aria-hidden="true" className="group-hover:text-[#22C55E] transition-colors" />
-              </button>
+                <ArrowRight size={14} weight="regular" color="rgba(238,244,255,0.3)" aria-hidden="true" className="group-hover:text-gold transition-colors" />
+              </Link>
             </div>
           </section>
 
@@ -576,9 +530,6 @@ export default function LearnPage() {
         </div>
       </div>
 
-      {showPractice && (
-        <ComingSoonModal onClose={() => setShowPractice(false)} />
-      )}
     </ProtectedRoute>
   );
 }

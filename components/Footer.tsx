@@ -16,6 +16,13 @@ export default function Footer() {
   // Hide on coming soon and onboarding
   if (pathname === "/" || pathname === "/onboarding") return null;
 
+  // Hide on active Mastery Mode sessions — the session screen is a
+  // viewport-height focused workspace with its own fixed stats bar + FAB.
+  // Rendering the footer below it creates a visible background seam and
+  // adds links that aren't actionable mid-session. The landing page
+  // (`/learn/mastery`) keeps the footer.
+  if (pathname?.match(/^\/learn\/mastery\/[^/]+$/)) return null;
+
   return (
     <footer className="w-full py-6 text-center">
       <div className="flex items-center justify-center gap-4 flex-wrap">
