@@ -48,7 +48,7 @@ export const metadata: Metadata = {
   },
   applicationName: "Lionade",
   description:
-    "Lionade is the Gen Z study-rewards app. Earn Fangs for studying, battle friends in duels, master any exam or course with AI-guided sessions, and climb the leaderboard.",
+    "Stop studying for free. Earn Fangs, climb ranks, get paid.",
   keywords: [
     "Lionade",
     "Lionade app",
@@ -82,20 +82,26 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: "Lionade — Study Like It's Your Job",
-    description:
-      "Lionade is the Gen Z study-rewards app. Earn Fangs for studying, battle friends in duels, master any exam with AI, and climb the leaderboard.",
+    description: "Stop studying for free. Earn Fangs, climb ranks, get paid.",
     url: SITE_URL,
     siteName: "Lionade",
-    images: [{ url: "/logo-icon.png", width: 1536, height: 1024, alt: "Lionade — Study Like It's Your Job" }],
+    // Served from our CloudFront CDN so the preview card loads fast on
+    // iMessage, Slack, Discord, etc. 1200×630 is the size every major
+    // platform uses for its large-card layout.
+    images: [{
+      url: "https://d1745aj99cclbu.cloudfront.net/logo-full.png",
+      width: 1200,
+      height: 630,
+      alt: "Lionade — Study Like It's Your Job",
+    }],
     locale: "en_US",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
     title: "Lionade — Study Like It's Your Job",
-    description:
-      "The Gen Z study-rewards app. Earn Fangs, master any exam with AI, battle friends, climb the board.",
-    images: ["/logo-icon.png"],
+    description: "Stop studying for free. Earn Fangs, climb ranks, get paid.",
+    images: ["https://d1745aj99cclbu.cloudfront.net/logo-full.png"],
     creator: "@lionade",
     site: "@lionade",
   },
