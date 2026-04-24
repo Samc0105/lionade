@@ -31,7 +31,6 @@ export default function robots(): MetadataRoute.Robots {
           "/leaderboard",
           "/badges",
           "/quiz",
-          "/login",
         ],
       },
     ],
