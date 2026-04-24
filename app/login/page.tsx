@@ -265,35 +265,38 @@ export default function LoginPage() {
     // true OR `postLoginLock` already set means an earlier click is in
     // flight — drop this one.
     if (submitting || postLoginLock) return;
+
+    console.log("[Login] submit start");
     setError("");
     if (!loginEmail.trim()) { setError("Email is required"); return; }
     if (!loginPassword) { setError("Password is required"); return; }
     setSubmitting(true);
 
+    console.log("[Login] calling login()");
     const { error: err } = await login(loginEmail.trim(), loginPassword);
+    console.log("[Login] login() resolved — error:", err ?? "none");
+
     if (err) {
       setError(err.includes("Invalid") ? "Wrong email or password" : err);
       setSubmitting(false);
       return;
     }
 
-    // Lock the UI into "Signing in…" so no auth-state flicker can bring
-    // the form back (that was the "asks for credentials a second time"
-    // bug). The lock is only released by navigation OR the 10s ceiling.
+    // Lock the UI so nothing can re-render the form.
     setPostLoginLock(true);
 
-    // Navigate immediately. login() has already proactively written the
-    // session + user into AuthProvider state; we do NOT wait on
-    // onAuthStateChange.
-    router.replace("/dashboard");
-
-    // Hard fallback for the case where Next's client router silently
-    // no-ops after the auth cookie flip.
-    setTimeout(() => {
-      if (typeof window !== "undefined" && window.location.pathname === "/login") {
-        window.location.href = "/dashboard";
-      }
-    }, 1500);
+    // HARD REDIRECT via window.location.assign — bypasses the Next.js
+    // client router entirely. router.replace has been unreliable here on
+    // production: it returns without throwing but the page never
+    // transitions, so the user sees an endless spinner. A full page load
+    // is slower by ~200ms but guaranteed to work every time: the browser
+    // requests /dashboard fresh, AuthProvider re-initializes with the
+    // session Supabase just wrote to localStorage, and the dashboard
+    // renders with a valid user.
+    console.log("[Login] navigating to /dashboard via window.location.assign");
+    if (typeof window !== "undefined") {
+      window.location.assign("/dashboard");
+    }
   };
 
   // ── Signup step validation ────────────────────────────

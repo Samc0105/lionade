@@ -10,6 +10,7 @@ import { supabase } from "@/lib/supabase";
 import { cdnUrl } from "@/lib/cdn";
 import { apiGet, apiPatch } from "@/lib/api-client";
 import CountUp from "@/components/CountUp";
+import ClockInButton from "@/components/ClockInButton";
 import {
   Bell,
   Users,
@@ -485,14 +486,12 @@ export default function Navbar() {
                     )}
                   </div>
 
-                  {/* CTA Button — Clock In */}
-                  <Link href="/quiz">
-                    <button className="font-syne font-bold text-sm px-4 py-1.5 rounded-lg transition-all duration-200
-                      active:scale-95 text-navy bg-electric hover:bg-electric-light
-                      shadow-md shadow-electric/30 hover:shadow-electric/50">
-                      Clock In
-                    </button>
-                  </Link>
+                  {/* CTA Button — Daily check-in. Claims Fangs via the
+                      existing /api/login-bonus escalating reward (10/15/25
+                      tier) rather than linking to the quiz page. Showing
+                      up IS the reward — quiz entry is one tab click away
+                      via the Learn nav item. */}
+                  <ClockInButton />
 
                   {/* Avatar + Dropdown */}
                   <div className="relative" ref={dropdownRef}>

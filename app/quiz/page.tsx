@@ -958,21 +958,16 @@ function ResultsScreen({
       <Confetti trigger={accuracy >= 80} count={accuracy === 100 ? 80 : 50} duration={accuracy === 100 ? 1800 : 1400} />
 
       <div className="max-w-2xl mx-auto px-4 py-12 text-center">
-        {/* Rank Badge — custom illustration with the tier's accent ring */}
-        <div
-          className="inline-flex flex-col items-center justify-center w-32 h-32 rounded-full mb-8 animate-slide-up overflow-hidden"
-          style={{
-            background: `radial-gradient(circle, ${rank.color}18 0%, transparent 70%)`,
-            boxShadow: `0 0 60px ${rank.color}25, inset 0 0 30px ${rank.color}10`,
-            border: `2px solid ${rank.color}40`,
-          }}
-        >
+        {/* Rank illustration — rendered directly on the space background
+            with no circle/ring/shadow. The illustration itself carries the
+            tier signal. */}
+        <div className="inline-flex items-center justify-center mb-8 animate-slide-up">
           <img
             src={`/illustrations/${rank.illustration}.png`}
             alt=""
-            width={112}
-            height={112}
-            className="w-28 h-28 object-contain"
+            width={128}
+            height={128}
+            className="w-32 h-32 object-contain"
             aria-hidden="true"
           />
         </div>
