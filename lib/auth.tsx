@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useState, useEffect, useRef, ReactNode } from "react";
-import { supabase } from "@/lib/supabase";
+import { supabase, readStoredSessionSync } from "@/lib/supabase";
 import { sanitizeEmail, sanitizePassword, sanitizeUsername, sanitizeText } from "@/lib/sanitize";
 import type { Session } from "@supabase/supabase-js";
 import { getLevelFromXp } from "@/lib/levels";
@@ -148,9 +148,24 @@ function isSessionExpiredByInactivity(): boolean {
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<AuthUser | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  // Synchronous bootstrap: if localStorage already has a valid session
+  // (common path: user just came from /login via window.location.assign,
+  // or refreshed a page mid-session), initialize state from that BEFORE
+  // the component renders. This eliminates the "flash unauth, bounce to
+  // /login, bounce back" loop that happens when ProtectedRoute reads
+  // user=null before Supabase's async listeners fire.
+  const seed = typeof window !== "undefined" ? readStoredSessionSync() : null;
+
+  const [user, setUser] = useState<AuthUser | null>(() => {
+    if (!seed) return null;
+    return buildBasicUser(
+      seed.user.id,
+      seed.user.email ?? "",
+      (seed.user.user_metadata ?? {}) as Record<string, string>,
+    );
+  });
+  const [session, setSession] = useState<Session | null>(() => (seed as unknown as Session) ?? null);
+  const [isLoading, setIsLoading] = useState(() => !seed); // no loading state if we seeded
   // Tracks which user id we have fully loaded from the DB. TOKEN_REFRESHED
   // fires on every tab focus — without this guard we'd reset the user to the
   // basic/default avatar every time, causing a flash until syncProfile returns.
@@ -180,6 +195,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     console.log("[Auth] Setting up onAuthStateChange listener");
+
+    // If we synchronously seeded `user` from localStorage at mount time,
+    // mark the user id as "loaded" so the first onAuthStateChange event
+    // (INITIAL_SESSION fired after subscribe) doesn't clobber our seed
+    // in the odd case where Supabase decides the session is pending or
+    // needs a refresh. This keeps the seeded user on screen continuously
+    // — no bounce to /login.
+    if (seed?.user?.id) {
+      loadedUserIdRef.current = seed.user.id;
+      // Kick off a background profile sync so coins/xp/streak/avatar
+      // hydrate beyond the basic-from-metadata fields we seeded with.
+      void syncProfile(seed.user.id, seed.user.email ?? "", (seed.user.user_metadata ?? {}) as Record<string, string>)
+        .then((profile) => { if (profile) setUser(profile); })
+        .catch(() => {});
+    }
 
     // Safety net: if onAuthStateChange never fires (Supabase unreachable or
     // the JS client is hung refreshing a stale JWT), fall back to
