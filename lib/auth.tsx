@@ -181,21 +181,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     console.log("[Auth] Setting up onAuthStateChange listener");
 
-    // Safety net: if onAuthStateChange never fires (Supabase unreachable),
-    // fall back to getSession() after 3s so the app doesn't stay stuck loading.
-    // getSession() itself is raced against a 2s timeout so a hung client
-    // (stale/invalid JWT that can't be refreshed) can never lock the app.
+    // Safety net: if onAuthStateChange never fires (Supabase unreachable or
+    // the JS client is hung refreshing a stale JWT), fall back to
+    // getSession() so the app doesn't stay stuck loading. The previous
+    // tuning (3s safety + 2s race = 5s worst case) left first-time visitors
+    // staring at a spinner too long; this one caps at 1.5s + 1.5s = 3s.
     let resolved = false;
     const safetyTimer = setTimeout(async () => {
       if (resolved) return;
-      console.warn("[Auth] onAuthStateChange did not fire within 3s — falling back to getSession()");
+      console.warn("[Auth] onAuthStateChange did not fire within 1.5s — falling back to getSession()");
       try {
         const getSessionPromise = supabase.auth.getSession();
         const timeoutPromise = new Promise<{ data: { session: null } }>((resolve) =>
           setTimeout(() => {
-            console.warn("[Auth] getSession() timed out after 2s — assuming no session");
+            console.warn("[Auth] getSession() timed out after 1.5s — assuming no session");
             resolve({ data: { session: null } });
-          }, 2000),
+          }, 1500),
         );
         const { data: { session: sess } } = await Promise.race([getSessionPromise, timeoutPromise]);
         if (resolved) return; // listener fired while we were awaiting
@@ -215,6 +216,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // Guarantee the app unblocks even if every code path above threw.
         setIsLoading(false);
       }
+    }, 1500);
+
+    // Hard ceiling — if nothing else has cleared isLoading by 3s from mount,
+    // force it clear. This is paranoid belt-and-suspenders: no network or
+    // code path should EVER keep a first-time visitor on a spinner beyond
+    // 3 seconds. If `user` is still null at this point, the landing page
+    // (or ProtectedRoute) will treat them as signed-out and render that
+    // path's normal unauthenticated UI.
+    const maxBootTimer = setTimeout(() => {
+      setIsLoading(prev => {
+        if (prev) console.warn("[Auth] Hard 3s ceiling hit — forcing isLoading=false");
+        return false;
+      });
     }, 3000);
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -289,6 +303,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     return () => {
       clearTimeout(safetyTimer);
+      clearTimeout(maxBootTimer);
       console.log("[Auth] Cleaning up subscription");
       subscription.unsubscribe();
     };
@@ -337,6 +352,40 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }).catch(() => null);
 
     if (error) return { error: error.message };
+
+    // Proactively propagate the session into our React state. Don't wait
+    // for onAuthStateChange to fire — under certain network/client-timing
+    // conditions it lags or misses the SIGNED_IN event on first sign-in,
+    // which was the root cause of "login spins forever on first attempt."
+    // signInWithPassword returns the session object directly; we use it.
+    if (data?.user && data?.session) {
+      const basicUser = buildBasicUser(
+        data.user.id,
+        data.user.email ?? "",
+        data.user.user_metadata ?? {},
+      );
+      setSession(data.session);
+      setUser(basicUser);
+      setIsLoading(false);
+
+      // Background-hydrate the full profile (coins, streak, avatar, …) so
+      // the dashboard lands with real numbers. Non-blocking — the caller
+      // can navigate immediately on our return.
+      syncProfile(data.user.id, data.user.email ?? "", data.user.user_metadata ?? {})
+        .then((profile) => {
+          if (profile) {
+            setUser(profile);
+            loadedUserIdRef.current = data.user.id;
+          } else {
+            setUser(prev => prev ? { ...prev, statsLoaded: true } : prev);
+            loadedUserIdRef.current = data.user.id;
+          }
+        })
+        .catch(() => {
+          loadedUserIdRef.current = data.user.id;
+        });
+    }
+
     updateLastActive();
     return {};
   };

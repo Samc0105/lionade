@@ -123,6 +123,16 @@ export default function LoginPage() {
   const [signupSuccess, setSignupSuccess] = useState(false);
   const [usernameStatus, setUsernameStatus] = useState<"idle" | "checking" | "available" | "taken">("idle");
 
+  // Local safety ceiling: even if AuthProvider is still resolving, show
+  // the login form after 3s so visitors aren't staring at a blank spinner
+  // when their session hasn't loaded.
+  const [authExpired, setAuthExpired] = useState(false);
+  useEffect(() => {
+    if (!isLoading) return;
+    const t = setTimeout(() => setAuthExpired(true), 3000);
+    return () => clearTimeout(t);
+  }, [isLoading]);
+
   // Password strength checks
   const pwChecks = {
     length: password.length >= 8,
@@ -190,7 +200,9 @@ export default function LoginPage() {
     return () => clearTimeout(timer);
   }, [username]);
 
-  if (isLoading) return (
+  // Initial auth check — capped at 3s via `authExpired` so the login form
+  // always renders even if the provider is stuck resolving.
+  if (isLoading && !authExpired) return (
     <div className="min-h-screen flex items-center justify-center">
       <div className="w-10 h-10 rounded-full border-2 border-electric border-t-transparent animate-spin" />
     </div>
@@ -221,10 +233,21 @@ export default function LoginPage() {
     if (err) {
       setError(err.includes("Invalid") ? "Wrong email or password" : err);
       setSubmitting(false);
+      return;
     }
-    // On success: don't redirect here — the useEffect watching `user`
-    // handles the redirect once auth state settles. This avoids a race
-    // where handleLogin redirects before the session is fully propagated.
+    // On success: navigate IMMEDIATELY. login() has already proactively
+    // set the session + user in the AuthProvider, so we don't need to
+    // wait for onAuthStateChange. The effect below still redirects as a
+    // backstop if this navigation no-ops (which has been observed on
+    // the first post-signIn render).
+    router.replace("/dashboard");
+    // Hard-fallback in case Next's client router doesn't complete the
+    // transition (happens in some deploys after the auth cookie flip).
+    setTimeout(() => {
+      if (typeof window !== "undefined" && window.location.pathname === "/login") {
+        window.location.href = "/dashboard";
+      }
+    }, 1500);
   };
 
   // ── Signup step validation ────────────────────────────

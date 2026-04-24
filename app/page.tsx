@@ -200,6 +200,17 @@ export default function ComingSoonPage() {
   const { user, isLoading } = useAuth();
   const router = useRouter();
 
+  // Local safety ceiling: the landing page must never block on auth. If
+  // the AuthProvider is still resolving after 3s (network hiccup, hung
+  // Supabase client, etc.) force-render the marketing page anyway. Visitors
+  // who aren't signed in don't need an auth result to see the site.
+  const [authExpired, setAuthExpired] = useState(false);
+  useEffect(() => {
+    if (!isLoading) return;
+    const t = setTimeout(() => setAuthExpired(true), 3000);
+    return () => clearTimeout(t);
+  }, [isLoading]);
+
   const [modalOpen, setModalOpen] = useState(false);
   const [pw, setPw] = useState("");
   const [error, setError] = useState(false);
@@ -260,8 +271,10 @@ export default function ComingSoonPage() {
     } catch { setStatus("error"); setMsg("Something went wrong."); }
   };
 
-  // While auth is loading, show a branded splash screen
-  if (isLoading) return (
+  // While auth is loading, show a branded splash screen — but only up to
+  // the 3s ceiling. After that, render the page even if auth is still
+  // pending so a slow session check never gates the marketing surface.
+  if (isLoading && !authExpired) return (
     <div className="min-h-screen flex items-center justify-center">
       <div className="flex flex-col items-center gap-4">
         <img src="/logo-icon.png" alt="Lionade" className="w-16 h-16 animate-pulse" />
