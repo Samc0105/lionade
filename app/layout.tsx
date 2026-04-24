@@ -109,6 +109,11 @@ export const metadata: Metadata = {
       "max-snippet": -1,
     },
   },
+  verification: {
+    // Google Search Console site-ownership verification for
+    // getlionade.com. Tied to Sam's Search Console account.
+    google: "TWs2aoIbK3JUZiAz61rqLuWWowiVHewk6das8GL6US4",
+  },
 };
 
 export default function RootLayout({
