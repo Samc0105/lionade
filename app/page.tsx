@@ -1,10 +1,9 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
-import { useAuth } from "@/lib/auth";
 import { cdnUrl } from "@/lib/cdn";
 import { SITE_HOST } from "@/lib/site-config";
+import RedirectIfSignedIn from "@/components/RedirectIfSignedIn";
 
 const DEVOPS_PASSWORD = "LionadeDevOps2026";
 
@@ -197,19 +196,11 @@ function StepCard({ step, idx }: { step: typeof STEPS[0]; idx: number }) {
 }
 
 export default function ComingSoonPage() {
-  const { user, isLoading } = useAuth();
-  const router = useRouter();
-
-  // Local safety ceiling: the landing page must never block on auth. If
-  // the AuthProvider is still resolving after 3s (network hiccup, hung
-  // Supabase client, etc.) force-render the marketing page anyway. Visitors
-  // who aren't signed in don't need an auth result to see the site.
-  const [authExpired, setAuthExpired] = useState(false);
-  useEffect(() => {
-    if (!isLoading) return;
-    const t = setTimeout(() => setAuthExpired(true), 3000);
-    return () => clearTimeout(t);
-  }, [isLoading]);
+  // NO `useAuth()` here on purpose. The landing page must render instantly
+  // like a static site. Auth status is handled silently, AFTER hydration,
+  // by the <RedirectIfSignedIn /> component rendered at the end of this
+  // tree — which signs-in'd visitors to /dashboard without ever gating the
+  // marketing surface.
 
   const [modalOpen, setModalOpen] = useState(false);
   const [pw, setPw] = useState("");
@@ -227,8 +218,6 @@ export default function ComingSoonPage() {
   const resetTimerRef = useRef<number | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
 
-  useEffect(() => { if (!isLoading && user) router.replace("/dashboard"); }, [user, isLoading, router]);
-
   useEffect(() => {
     const timer = setTimeout(() => {
       const reveals = document.querySelectorAll(".reveal");
@@ -240,7 +229,7 @@ export default function ComingSoonPage() {
       return () => observer.disconnect();
     }, 100);
     return () => clearTimeout(timer);
-  }, [isLoading, user]);
+  }, []);
 
   useEffect(() => { if (modalOpen && inputRef.current) inputRef.current.focus(); }, [modalOpen]);
 
@@ -271,33 +260,19 @@ export default function ComingSoonPage() {
     } catch { setStatus("error"); setMsg("Something went wrong."); }
   };
 
-  // While auth is loading, show a branded splash screen — but only up to
-  // the 3s ceiling. After that, render the page even if auth is still
-  // pending so a slow session check never gates the marketing surface.
-  if (isLoading && !authExpired) return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="flex flex-col items-center gap-4">
-        <img src="/logo-icon.png" alt="Lionade" className="w-16 h-16 animate-pulse" />
-        <div className="w-10 h-10 rounded-full border-2 border-gold border-t-transparent animate-spin" />
-      </div>
-    </div>
-  );
-
-  // Logged in — redirect is happening via useEffect, show redirect message
-  if (user) return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="flex flex-col items-center gap-4">
-        <img src="/logo-icon.png" alt="Lionade" className="w-16 h-16 animate-pulse" />
-        <p className="font-bebas text-lg text-cream/40 tracking-widest">Entering Dashboard...</p>
-        <a href="/dashboard" className="text-electric/50 text-xs hover:text-electric transition mt-2">Click here if not redirected</a>
-      </div>
-    </div>
-  );
+  // No auth gate — page renders immediately. RedirectIfSignedIn (below,
+  // in the returned JSX) does the session check silently after hydration
+  // and forwards signed-in users to /dashboard with no visible splash.
 
   const tickerContent = [...TICKER_ITEMS, ...TICKER_ITEMS, ...TICKER_ITEMS, ...TICKER_ITEMS];
 
   return (
     <div className="min-h-screen text-[#EEF4FF] overflow-x-hidden relative" data-force-dark>
+
+      {/* Silent post-hydration session check. Renders nothing; if the
+          visitor has a cached Supabase session, navigates them to
+          /dashboard. Never blocks the landing page from painting. */}
+      <RedirectIfSignedIn />
 
       {/* Star field — fixed behind everything */}
       <StarField />

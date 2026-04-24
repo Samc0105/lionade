@@ -123,6 +123,13 @@ export default function LoginPage() {
   const [signupSuccess, setSignupSuccess] = useState(false);
   const [usernameStatus, setUsernameStatus] = useState<"idle" | "checking" | "available" | "taken">("idle");
 
+  // Once handleLogin succeeds, we LOCK the UI into "Signing in…" mode
+  // until navigation completes. Without this, any intermediate auth
+  // state flicker (e.g. a SIGNED_OUT fired during a stale-token refresh)
+  // would flip `user` back to null and re-render the empty form — the
+  // "login asks for credentials a second time" bug.
+  const [postLoginLock, setPostLoginLock] = useState(false);
+
   // Local safety ceiling: even if AuthProvider is still resolving, show
   // the login form after 3s so visitors aren't staring at a blank spinner
   // when their session hasn't loaded.
@@ -132,6 +139,21 @@ export default function LoginPage() {
     const t = setTimeout(() => setAuthExpired(true), 3000);
     return () => clearTimeout(t);
   }, [isLoading]);
+
+  // Hard 10s ceiling on post-login redirect. If navigation hasn't moved
+  // us off /login by then, we surface an error and unlock the form so the
+  // user can try again — instead of silently resetting and re-prompting.
+  useEffect(() => {
+    if (!postLoginLock) return;
+    const t = setTimeout(() => {
+      if (typeof window !== "undefined" && window.location.pathname === "/login") {
+        setError("Signed in, but couldn't switch pages. Refresh to continue.");
+        setPostLoginLock(false);
+        setSubmitting(false);
+      }
+    }, 10_000);
+    return () => clearTimeout(t);
+  }, [postLoginLock]);
 
   // Password strength checks
   const pwChecks = {
@@ -200,6 +222,21 @@ export default function LoginPage() {
     return () => clearTimeout(timer);
   }, [username]);
 
+  // Post-login lock takes precedence over every other render branch. Once
+  // we've signed in successfully, we render the "Signing in…" spinner
+  // until navigation completes — NO auth-state flicker can drop us back
+  // to the form.
+  if (postLoginLock) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 rounded-full border-2 border-electric border-t-transparent animate-spin" />
+          <p className="font-bebas text-cream/60 text-lg tracking-widest">Signing in…</p>
+        </div>
+      </div>
+    );
+  }
+
   // Initial auth check — capped at 3s via `authExpired` so the login form
   // always renders even if the provider is stuck resolving.
   if (isLoading && !authExpired) return (
@@ -224,25 +261,34 @@ export default function LoginPage() {
   // ── Login submit ──────────────────────────────────────
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (submitting) return; // guard against double-click
+    // Belt-and-suspenders double-submit guard. Either `submitting` being
+    // true OR `postLoginLock` already set means an earlier click is in
+    // flight — drop this one.
+    if (submitting || postLoginLock) return;
     setError("");
     if (!loginEmail.trim()) { setError("Email is required"); return; }
     if (!loginPassword) { setError("Password is required"); return; }
     setSubmitting(true);
+
     const { error: err } = await login(loginEmail.trim(), loginPassword);
     if (err) {
       setError(err.includes("Invalid") ? "Wrong email or password" : err);
       setSubmitting(false);
       return;
     }
-    // On success: navigate IMMEDIATELY. login() has already proactively
-    // set the session + user in the AuthProvider, so we don't need to
-    // wait for onAuthStateChange. The effect below still redirects as a
-    // backstop if this navigation no-ops (which has been observed on
-    // the first post-signIn render).
+
+    // Lock the UI into "Signing in…" so no auth-state flicker can bring
+    // the form back (that was the "asks for credentials a second time"
+    // bug). The lock is only released by navigation OR the 10s ceiling.
+    setPostLoginLock(true);
+
+    // Navigate immediately. login() has already proactively written the
+    // session + user into AuthProvider state; we do NOT wait on
+    // onAuthStateChange.
     router.replace("/dashboard");
-    // Hard-fallback in case Next's client router doesn't complete the
-    // transition (happens in some deploys after the auth cookie flip).
+
+    // Hard fallback for the case where Next's client router silently
+    // no-ops after the auth cookie flip.
     setTimeout(() => {
       if (typeof window !== "undefined" && window.location.pathname === "/login") {
         window.location.href = "/dashboard";
