@@ -238,6 +238,23 @@ export default function MasterySessionPage() {
   // ── Actions ──────────────────────────────────────────────────────────────
   const [busy, setBusy] = useState(false);
 
+  // /next response shape — kept local so we can drive optimistic updates
+  // off it without going back to the server for a fresh snapshot.
+  type NextResponse = {
+    kind: string;
+    message?: MessageShape;
+    subtopicId?: string;
+    challengeToken?: string;
+  };
+
+  /**
+   * Ask the orchestrator for the next card and render it optimistically —
+   * no refetch, no spinner between answer and next. The server response
+   * carries every field we need (new message + challengeToken + subtopicId),
+   * so we splice it directly into SWR's cached snapshot with
+   * `{ revalidate: false }`. A background revalidation fires eventually
+   * via SWR's focus/interval strategies and would paper over any drift.
+   */
   const doNext = useCallback(
     async (opts?: { preferredQuestionId?: string }) => {
       if (!sessionId || busy) return;
@@ -245,41 +262,123 @@ export default function MasterySessionPage() {
       try {
         const body: Record<string, unknown> = {};
         if (opts?.preferredQuestionId) body.preferredQuestionId = opts.preferredQuestionId;
-        const r = await apiPost<{ kind: string; message?: MessageShape }>(
+        const r = await apiPost<NextResponse>(
           `/api/mastery/sessions/${sessionId}/next`, body,
         );
         if (r.ok && r.data?.kind === "celebrate") setCelebrateKey(k => k + 1);
-        await mutate();
+        if (r.ok && r.data?.kind === "question" && r.data.message && r.data.challengeToken && r.data.subtopicId) {
+          const msg = r.data.message;
+          const token = r.data.challengeToken;
+          const subtopicId = r.data.subtopicId;
+          const questionId = (msg.payload as { questionId?: string } | null)?.questionId;
+          mutate((current) => {
+            if (!current) return current;
+            return {
+              ...current,
+              messages: [...current.messages, msg],
+              session: {
+                ...current.session,
+                pending: questionId ? {
+                  type: "question",
+                  messageId: msg.id,
+                  subtopicId,
+                  questionId,
+                  challengeToken: token,
+                } : current.session.pending,
+              },
+            };
+          }, { revalidate: false });
+        } else if (r.ok && r.data?.kind === "teach" && r.data.message) {
+          const msg = r.data.message;
+          mutate((current) => {
+            if (!current) return current;
+            return {
+              ...current,
+              messages: [...current.messages, msg],
+              session: { ...current.session, pending: null },
+            };
+          }, { revalidate: false });
+        } else {
+          // Celebrate or unknown — do a real refetch to stay safe.
+          void mutate();
+        }
       } finally { setBusy(false); }
     },
     [sessionId, busy, mutate],
   );
 
+  /** /answer response shape for local typing. */
+  type AnswerResponse = {
+    wasCorrect: boolean;
+    correctIndex: number;
+    explanation: string;
+    pPass: number;
+    displayPct: number;
+    pMasteryForSubtopic: number;
+    streakAtSubtopic: number;
+    socraticProbe: boolean;
+    answerMessage: MessageShape | null;
+    feedbackMessage: MessageShape | null;
+    socraticProbeMessage: MessageShape | null;
+  };
+
   const doAnswer = useCallback(async (selectedIndex: number) => {
     if (!sessionId || !liveQuestion || busy) return;
-    // Snapshot subtopic BEFORE mutate; after mutate, liveQuestion can change.
+    // Snapshot subtopic BEFORE mutating; after the optimistic update,
+    // liveQuestion might be about to change.
     const answeredSubtopicId = data?.session.pending?.subtopicId ?? null;
     setBusy(true);
     try {
-      const r = await apiPost<{ wasCorrect: boolean; socraticProbe: boolean }>(
+      const r = await apiPost<AnswerResponse>(
         `/api/mastery/sessions/${sessionId}/answer`,
         { selectedIndex, challengeToken: liveQuestion.challengeToken },
       );
-      await mutate();
       if (!r.ok || !r.data) return;
+      const ans = r.data;
 
-      if (r.data.socraticProbe) {
-        // User has to reply in text; queue is stale-but-ok, leave as-is.
+      // OPTIMISTIC UPDATE — splice the answer + feedback messages into the
+      // SWR cache directly. No network refetch, no 300ms wait, feedback
+      // renders the instant /answer resolves.
+      mutate((current) => {
+        if (!current) return current;
+        const newMessages = [...current.messages];
+        if (ans.answerMessage) newMessages.push(ans.answerMessage);
+        if (ans.feedbackMessage) newMessages.push(ans.feedbackMessage);
+        if (ans.socraticProbeMessage) newMessages.push(ans.socraticProbeMessage);
+        return {
+          ...current,
+          messages: newMessages,
+          pPass: ans.pPass,
+          overallDisplayPct: ans.displayPct,
+          session: {
+            ...current.session,
+            pending: ans.socraticProbe && ans.socraticProbeMessage
+              ? {
+                  type: "socratic",
+                  messageId: ans.socraticProbeMessage.id,
+                  subtopicId: answeredSubtopicId ?? undefined,
+                  questionId: liveQuestion.questionId,
+                }
+              : null,
+            currentPPass: ans.pPass,
+            questionsAnswered: current.session.questionsAnswered + 1,
+            correctCount: current.session.correctCount + (ans.wasCorrect ? 1 : 0),
+            socraticTurnsSpent: current.session.socraticTurnsSpent + (ans.socraticProbe ? 1 : 0),
+          },
+        };
+      }, { revalidate: false });
+
+      if (ans.socraticProbe) {
+        // Wait for user text reply. Queue stays as-is (still valid).
         return;
       }
 
-      const wasCorrect = r.data.wasCorrect;
+      // Pick the next question from the pre-fetched queue.
+      const wasCorrect = ans.wasCorrect;
       let nextQId: string | undefined;
 
       if (!wasCorrect && answeredSubtopicId) {
-        // Reinforce: promote a queued question from the SAME subtopic if
-        // one exists; otherwise fall through to a fresh /next call and let
-        // the server pick (which will also lean toward the same topic).
+        // Reinforce: promote a queued question from the SAME subtopic.
         const sameTopicIdx = queue.findIndex(q => q.subtopicId === answeredSubtopicId);
         if (sameTopicIdx >= 0) {
           nextQId = queue[sameTopicIdx].questionId;
@@ -287,7 +386,6 @@ export default function MasterySessionPage() {
         }
         void refillQueue("reinforce", answeredSubtopicId);
       } else {
-        // Correct: take the head of the queue (most recently prepared).
         if (queue.length > 0) {
           nextQId = queue[0].questionId;
           setQueue(q => q.slice(1));
@@ -295,7 +393,11 @@ export default function MasterySessionPage() {
         void refillQueue("next", answeredSubtopicId ?? undefined);
       }
 
-      void doNext({ preferredQuestionId: nextQId });
+      // doNext ALSO uses optimistic updates, so the next question appears
+      // the instant /next resolves (~200-400ms on a cache hit). `busy`
+      // stays true through both calls so the action area doesn't flicker
+      // to the "Continue" state between feedback and the new question.
+      await doNext({ preferredQuestionId: nextQId });
     } finally { setBusy(false); }
   }, [sessionId, liveQuestion, busy, data?.session.pending?.subtopicId, queue, mutate, doNext, refillQueue]);
 
