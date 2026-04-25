@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import useSWR from "swr";
 import Link from "next/link";
@@ -54,6 +54,11 @@ type ParsedResponse =
 
 export default function MasteryLandingPage() {
   const router = useRouter();
+  // When this page is opened from inside a class notebook, the URL carries
+  // ?classId=<uuid>. Created exam targets get attached to that class so
+  // they show up under the right notebook automatically.
+  const searchParams = useSearchParams();
+  const classIdContext = searchParams?.get("classId") ?? null;
   const { data, isLoading: loadingExams } = useSWR<{ exams: ExamSummary[] }>(
     "/api/mastery/exams", swrFetcher,
     { keepPreviousData: true, revalidateOnFocus: true },
@@ -97,6 +102,9 @@ export default function MasteryLandingPage() {
           title: parsed.title,
           topicHash: parsed.topicHash,
           subtopics: parsed.subtopics,
+          // When opened from /classes/:id this attaches the new exam to the
+          // class notebook automatically. Server validates ownership.
+          classId: classIdContext,
         },
       );
       // 403 LIMIT → show paywall instead of a generic error

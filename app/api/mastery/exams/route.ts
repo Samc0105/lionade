@@ -141,6 +141,8 @@ interface CreateBody {
     contentHash: string;
   }[];
   targetDate?: string | null;
+  /** Optional — attach this exam target to a class notebook. */
+  classId?: string | null;
 }
 
 export async function POST(req: NextRequest) {
@@ -195,6 +197,18 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  // If classId is provided, verify the class belongs to the same user
+  // before linking — never trust a client-supplied foreign key blindly.
+  let classId: string | null = null;
+  if (body.classId) {
+    const { data: cls } = await supabaseAdmin
+      .from("classes")
+      .select("user_id")
+      .eq("id", body.classId)
+      .single();
+    if (cls && cls.user_id === userId) classId = body.classId;
+  }
+
   try {
     const { data: exam, error: examErr } = await supabaseAdmin
       .from("user_exams")
@@ -205,6 +219,7 @@ export async function POST(req: NextRequest) {
         topic_hash: topicHash,
         scope: "specific",
         target_date: targetDate,
+        class_id: classId,
       })
       .select("id")
       .single();

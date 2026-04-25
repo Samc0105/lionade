@@ -11,6 +11,8 @@ import { cdnUrl } from "@/lib/cdn";
 import { apiGet, apiPatch } from "@/lib/api-client";
 import CountUp from "@/components/CountUp";
 import ClockInButton from "@/components/ClockInButton";
+import PlanBadge, { UpgradePill } from "@/components/PlanBadge";
+import { usePlan } from "@/lib/use-plan";
 import {
   Bell,
   Users,
@@ -74,6 +76,7 @@ function IconUser() { return <svg width="16" height="16" viewBox="0 0 24 24" fil
 function IconMedal() { return <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M7.21 15 2.66 7.14a2 2 0 0 1 .13-2.2L4.4 2.8A2 2 0 0 1 6 2h12a2 2 0 0 1 1.6.8l1.6 2.14a2 2 0 0 1 .14 2.2L16.79 15"/><path d="M11 12 5.12 2.2"/><path d="m13 12 5.88-9.8"/><circle cx="12" cy="17" r="5"/><path d="M12 18v-2h-.5"/></svg>; }
 function IconWallet() { return <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg>; }
 function IconSettings() { return <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>; }
+function IconStar() { return <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 17.27l5.15 3.12-1.36-5.89L20 10.5l-5.92-.51L12 4.5 9.92 9.99 4 10.5l4.21 3.99-1.36 5.89L12 17.27z"/></svg>; }
 function IconHelp() { return <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>; }
 function IconLogOut() { return <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>; }
 
@@ -81,6 +84,7 @@ const DROPDOWN_ITEMS = [
   { href: "/profile", label: "Profile", Icon: IconUser, color: "rgba(74,144,217,0.15)", textColor: "text-electric" },
   { href: "/badges", label: "Badges", Icon: IconMedal, color: "rgba(251,191,36,0.15)", textColor: "text-amber-400" },
   { href: "/wallet", label: "Wallet / Rewards", Icon: IconWallet, color: "rgba(168,85,247,0.15)", textColor: "text-purple-400" },
+  { href: "/settings/subscription", label: "Subscription", Icon: IconStar, color: "rgba(255,215,0,0.15)", textColor: "text-gold" },
   { href: "/settings", label: "Settings", Icon: IconSettings, color: "rgba(156,163,175,0.15)", textColor: "text-gray-400" },
   { href: "/contact", label: "Help / Support", Icon: IconHelp, color: "rgba(34,197,94,0.15)", textColor: "text-green-400" },
 ];
@@ -90,6 +94,7 @@ export default function Navbar() {
   const router = useRouter();
   const { user, logout } = useAuth();
   const { stats, mutate: mutateStats } = useUserStats(user?.id);
+  const { plan: userPlan, isPaid } = usePlan();
 
   // Memoized avatar URL so the <img src> stays stable across re-renders.
   // Without this, every render creates a new fallback string and the browser
@@ -492,6 +497,14 @@ export default function Navbar() {
                       up IS the reward — quiz entry is one tab click away
                       via the Learn nav item. */}
                   <ClockInButton />
+
+                  {/* Subscription plan chip — only renders for paid users.
+                      Free users get an Upgrade pill instead (hidden on
+                      small screens to avoid pushing the avatar off). */}
+                  {isPaid
+                    ? <PlanBadge />
+                    : <UpgradePill className="hidden lg:inline-flex" />
+                  }
 
                   {/* Avatar + Dropdown */}
                   <div className="relative" ref={dropdownRef}>

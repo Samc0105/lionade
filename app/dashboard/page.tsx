@@ -15,7 +15,8 @@ import {
 } from "@/lib/mockData";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { cdnUrl } from "@/lib/cdn";
-import { apiPost, apiGet } from "@/lib/api-client";
+import { apiPost, apiGet, swrFetcher } from "@/lib/api-client";
+import useSWR from "swr";
 import CountUp from "@/components/CountUp";
 import { toastError, toastSuccess } from "@/lib/toast";
 import Confetti from "@/components/Confetti";
@@ -439,6 +440,9 @@ function DashboardContent() {
                 style={{ width: xpMounted ? `${Math.max(progress, 2)}%` : "0%", background: `linear-gradient(90deg, ${levelInfo.tier.color}90, ${levelInfo.tier.color})`, boxShadow: `0 0 12px ${levelInfo.tier.color}50, 0 0 24px ${levelInfo.tier.color}20`, transition: "width 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)" }} />
             </div>
           </div>
+
+          {/* ═══ 3.5) Your Classes — quick row that links into the notebook ═══ */}
+          <YourClassesRow />
 
           {/* ═══ 4) Today's Missions ═══ */}
           <div className="mb-8 animate-slide-up" style={{ animationDelay: "0.1s" }}>
@@ -1172,5 +1176,89 @@ function DashboardContent() {
         </div>
       </div>
     </>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Your Classes — compact dashboard row.
+// Renders chips for the user's first 4 active classes with their next exam
+// countdown, plus a "+ new" tile. Hidden entirely if the user has no
+// classes yet (no empty state — keeps the dashboard clean for new users
+// who haven't onboarded into Class Notebook yet).
+// ─────────────────────────────────────────────────────────────────────────────
+function YourClassesRow() {
+  const { data } = useSWR<{
+    classes: Array<{
+      id: string;
+      name: string;
+      shortCode: string | null;
+      color: string;
+      emoji: string | null;
+      nextExamDate: string | null;
+    }>;
+  }>("/api/classes", swrFetcher, {
+    keepPreviousData: true,
+    revalidateOnFocus: true,
+  });
+  const classes = data?.classes ?? [];
+
+  if (classes.length === 0) return null;
+
+  const top = classes.slice(0, 4);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const daysFor = (d: string | null) => {
+    if (!d) return null;
+    const target = new Date(d + "T00:00:00");
+    return Math.ceil((target.getTime() - today.getTime()) / 86_400_000);
+  };
+
+  return (
+    <div className="mb-8 animate-slide-up" style={{ animationDelay: "0.08s" }}>
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="font-bebas text-xl text-cream tracking-wider">YOUR CLASSES</h2>
+        <a
+          href="/classes"
+          className="font-mono text-[10px] uppercase tracking-[0.25em] text-cream/40 hover:text-cream transition-colors"
+        >
+          All →
+        </a>
+      </div>
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+        {top.map((c) => {
+          const days = daysFor(c.nextExamDate);
+          return (
+            <a
+              key={c.id}
+              href={`/classes/${c.id}`}
+              className="group relative rounded-[10px] border border-white/[0.06] bg-white/[0.02]
+                hover:border-white/[0.15] hover:bg-white/[0.04] transition-all duration-200
+                px-3 py-2.5 flex flex-col gap-0.5 overflow-hidden"
+            >
+              <span
+                className="absolute top-0 left-0 right-0 h-[2px]"
+                style={{ background: c.color }}
+                aria-hidden="true"
+              />
+              <div className="flex items-center gap-1.5 min-w-0">
+                {c.emoji && <span className="text-[14px] leading-none shrink-0">{c.emoji}</span>}
+                <span className="font-syne font-semibold text-[13px] text-cream truncate">
+                  {c.name}
+                </span>
+              </div>
+              <div className="font-mono text-[9.5px] uppercase tracking-[0.2em] text-cream/45">
+                {days === null
+                  ? "no exam set"
+                  : days < 0
+                    ? "exam passed"
+                    : days === 0
+                      ? "exam today"
+                      : `${days}d to exam`}
+              </div>
+            </a>
+          );
+        })}
+      </div>
+    </div>
   );
 }
