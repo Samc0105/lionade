@@ -183,7 +183,10 @@ export async function POST(req: NextRequest) {
       .select()
       .single();
 
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    if (error) {
+      console.error("[social/friends]", error.message);
+      return NextResponse.json({ error: "Couldn't load friends." }, { status: 500 });
+    }
 
     // Create notification for the receiver (non-blocking)
     try {

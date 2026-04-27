@@ -9,6 +9,10 @@ import SakuraPetals from "@/components/SakuraPetals";
 import ThemeProvider from "@/components/ThemeProvider";
 import { ToastProvider } from "@/components/Toast";
 import StructuredData from "@/components/StructuredData";
+import QuickNoteShortcut from "@/components/QuickNoteShortcut";
+import FocusMusicToggle from "@/components/FocusMusicToggle";
+import FocusLockIn from "@/components/FocusLockIn";
+import PageTransition from "@/components/PageTransition";
 import { SITE_URL, SITE_URL_OBJ } from "@/lib/site-config";
 
 const bebasNeue = Bebas_Neue({
@@ -149,8 +153,13 @@ export default function RootLayout({
             <AuthProviderWrapper>
               <ToastProvider>
                 <Navbar />
-                <main>{children}</main>
+                <main>
+                  <PageTransition>{children}</PageTransition>
+                </main>
                 <Footer />
+                <QuickNoteShortcut />
+                <FocusMusicToggle />
+                <FocusLockIn />
               </ToastProvider>
             </AuthProviderWrapper>
           </div>

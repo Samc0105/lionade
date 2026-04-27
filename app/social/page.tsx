@@ -10,6 +10,7 @@ import { cdnUrl } from "@/lib/cdn";
 import { apiGet, apiPost, apiPatch, apiDelete } from "@/lib/api-client";
 import { Medal, Diamond, DiamondsFour, Users, CheckCircle, Sword, Trophy, Megaphone, X as XIcon, BookOpen, Fire, Target, MedalMilitary, GameController, Coins, PushPinSimple, Crown } from "@phosphor-icons/react";
 import { toastError, toastSuccess } from "@/lib/toast";
+import CountUp from "@/components/CountUp";
 
 // ── Types ────────────────────────────────────────────────────
 
@@ -123,7 +124,9 @@ function timeAgo(dateStr: string | null): string {
 export default function SocialPage() {
   const { user } = useAuth();
   const router = useRouter();
-  useUserStats(user?.id);
+  // Pull stats so the navbar / dashboard SWR cache stays warm with this
+  // user's profile — keeps the user pill in sync across pages.
+  const { stats: userStats } = useUserStats(user?.id);
 
   // Friends
   const [friends, setFriends] = useState<Friend[]>([]);
@@ -167,11 +170,45 @@ export default function SocialPage() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
-  // Memoized avatar
-  const myAvatar = useMemo(() => {
-    if (user?.avatar) return user.avatar;
-    return `https://api.dicebear.com/7.x/adventurer/svg?seed=${user?.username ?? "player"}`;
-  }, [user?.avatar, user?.username]);
+  // userStats is fetched purely so the navbar/dashboard SWR cache stays
+  // hot. The social page itself doesn't currently render the viewer's own
+  // avatar (chat shows friend's only).
+  void userStats;
+
+  // ── Hydrate visible lists from sessionStorage on mount ─────
+  // Network fetches still run in the background, but the page renders
+  // the previous-known data immediately so navigating away and back
+  // doesn't visibly empty the friend list / feed / leaderboard.
+  useEffect(() => {
+    if (!user?.id) return;
+    try {
+      const raw = sessionStorage.getItem(`lionade_social_${user.id}`);
+      if (!raw) return;
+      const c = JSON.parse(raw) as {
+        friends?: Friend[];
+        pendingRequests?: PendingRequest[];
+        outgoingRequests?: OutgoingRequest[];
+        feed?: FeedItem[];
+        circle?: CircleRank[];
+        nudgeState?: typeof nudgeState;
+      };
+      if (Array.isArray(c.friends)) setFriends(c.friends);
+      if (Array.isArray(c.pendingRequests)) setPendingRequests(c.pendingRequests);
+      if (Array.isArray(c.outgoingRequests)) setOutgoingRequests(c.outgoingRequests);
+      if (Array.isArray(c.feed)) setFeed(c.feed);
+      if (Array.isArray(c.circle)) setCircle(c.circle);
+      if (c.nudgeState) setNudgeState(c.nudgeState);
+    } catch { /* ignore — corrupt cache won't block fresh fetches */ }
+  }, [user?.id]);
+
+  const cacheSocial = useCallback((patch: Record<string, unknown>) => {
+    if (!user?.id) return;
+    try {
+      const key = `lionade_social_${user.id}`;
+      const prev = JSON.parse(sessionStorage.getItem(key) || "{}");
+      sessionStorage.setItem(key, JSON.stringify({ ...prev, ...patch }));
+    } catch { /* quota / private mode */ }
+  }, [user?.id]);
 
   // ── Online heartbeat ───────────────────────────────────────
   useEffect(() => {
@@ -211,11 +248,15 @@ export default function SocialPage() {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const res = await apiGet<any>("/api/social/friends");
     if (res.ok && res.data) {
-      setFriends(res.data.friends ?? []);
-      setPendingRequests(res.data.pendingRequests ?? []);
-      setOutgoingRequests(res.data.outgoingRequests ?? []);
+      const friends = res.data.friends ?? [];
+      const pendingRequests = res.data.pendingRequests ?? [];
+      const outgoingRequests = res.data.outgoingRequests ?? [];
+      setFriends(friends);
+      setPendingRequests(pendingRequests);
+      setOutgoingRequests(outgoingRequests);
+      cacheSocial({ friends, pendingRequests, outgoingRequests });
     }
-  }, [user?.id]);
+  }, [user?.id, cacheSocial]);
 
   useEffect(() => {
     loadFriends();
@@ -228,10 +269,13 @@ export default function SocialPage() {
     if (!user?.id) return;
     const res = await apiGet<{ feed: FeedItem[]; circle: CircleRank[] }>("/api/social/feed");
     if (res.ok && res.data) {
-      setFeed(res.data.feed ?? []);
-      setCircle(res.data.circle ?? []);
+      const feed = res.data.feed ?? [];
+      const circle = res.data.circle ?? [];
+      setFeed(feed);
+      setCircle(circle);
+      cacheSocial({ feed, circle });
     }
-  }, [user?.id]);
+  }, [user?.id, cacheSocial]);
 
   useEffect(() => {
     loadFeed();
@@ -243,8 +287,11 @@ export default function SocialPage() {
   const loadNudgeBudget = useCallback(async () => {
     if (!user?.id) return;
     const res = await apiGet<{ remaining: number; limit: number; nudgedToday: string[] }>("/api/social/nudge");
-    if (res.ok && res.data) setNudgeState(res.data);
-  }, [user?.id]);
+    if (res.ok && res.data) {
+      setNudgeState(res.data);
+      cacheSocial({ nudgeState: res.data });
+    }
+  }, [user?.id, cacheSocial]);
 
   useEffect(() => {
     loadNudgeBudget();
@@ -556,13 +603,10 @@ export default function SocialPage() {
                           <button
                             key={u.id}
                             onClick={() => selectSearchResult(u.username)}
+                            aria-label={`${u.username} — open profile`}
                             className="w-full flex items-center gap-3 px-3 py-2.5 text-left hover:bg-white/[0.06] transition-colors"
                           >
-                            <img
-                              src={u.avatar_url ?? `https://api.dicebear.com/7.x/adventurer/svg?seed=${u.username}`}
-                              alt={u.username}
-                              className="w-8 h-8 rounded-full object-cover flex-shrink-0"
-                            />
+                            <img src={u.avatar_url ?? ""} alt={u.username} className="w-8 h-8 rounded-full object-cover" />
                             <div className="flex-1 min-w-0">
                               <p className="text-cream text-sm font-semibold truncate">{u.username}</p>
                             </div>
@@ -677,12 +721,9 @@ export default function SocialPage() {
                     const tier = getEloTier(req.arena_elo);
                     return (
                       <div key={req.friendshipId} className="flex items-center gap-3 p-2 rounded-lg"
+                        aria-label={`Friend request from ${req.username}`}
                         style={{ background: "rgba(255,255,255,0.03)" }}>
-                        <img
-                          src={req.avatar_url ?? `https://api.dicebear.com/7.x/adventurer/svg?seed=${req.username}`}
-                          alt={req.username}
-                          className="w-8 h-8 rounded-full object-cover flex-shrink-0"
-                        />
+                        <img src={req.avatar_url ?? ""} alt={req.username} className="w-8 h-8 rounded-full object-cover flex-shrink-0" />
                         <div className="flex-1 min-w-0">
                           <p className="text-cream text-xs font-semibold truncate">{req.username}</p>
                           <p className="text-[10px] inline-flex items-center gap-1" style={{ color: tier.color }}>
@@ -716,12 +757,9 @@ export default function SocialPage() {
                     const tier = getEloTier(req.arena_elo);
                     return (
                       <div key={req.friendshipId} className="flex items-center gap-3 p-2 rounded-lg"
+                        aria-label={`Outgoing friend request to ${req.username}`}
                         style={{ background: "rgba(255,255,255,0.03)" }}>
-                        <img
-                          src={req.avatar_url ?? `https://api.dicebear.com/7.x/adventurer/svg?seed=${req.username}`}
-                          alt={req.username}
-                          className="w-8 h-8 rounded-full object-cover flex-shrink-0"
-                        />
+                        <img src={req.avatar_url ?? ""} alt={req.username} className="w-8 h-8 rounded-full object-cover flex-shrink-0" />
                         <div className="flex-1 min-w-0">
                           <p className="text-cream text-xs font-semibold truncate">{req.username}</p>
                           <p className="text-[10px] text-cream/20">Pending</p>
@@ -760,12 +798,8 @@ export default function SocialPage() {
                     } : { borderLeft: "2px solid transparent" }}
                   >
                     {/* Avatar + online dot */}
-                    <div className="relative flex-shrink-0">
-                      <img
-                        src={friend.avatar_url ?? `https://api.dicebear.com/7.x/adventurer/svg?seed=${friend.username}`}
-                        alt={friend.username}
-                        className="w-10 h-10 rounded-full object-cover"
-                      />
+                    <div className="relative flex-shrink-0" aria-label={`${friend.username}'s avatar`}>
+                      <img src={friend.avatar_url ?? ""} alt={friend.username} className="w-10 h-10 rounded-full object-cover" />
                       {friend.is_online && (
                         <div className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-green-400 border-2 border-[#04080F] social-online-dot" />
                       )}
@@ -828,23 +862,23 @@ export default function SocialPage() {
                       {[
                         {
                           label: "online now",
-                          value: onlineCount,
+                          value: <CountUp id="social-online" value={onlineCount} duration={400} />,
                           accent: "#22C55E",
                           pulse: onlineCount > 0,
                         },
                         {
                           label: "requests",
-                          value: pendingRequests.length,
+                          value: <CountUp id="social-requests" value={pendingRequests.length} duration={400} />,
                           accent: pendingRequests.length > 0 ? "#FFD700" : "#71717A",
                         },
                         {
                           label: "your rank",
-                          value: myRank ? `#${myRank}` : "—",
+                          value: myRank ? <>#<CountUp id="social-rank" value={myRank} duration={400} /></> : "—",
                           accent: "#4A90D9",
                         },
                         {
                           label: "nudges left",
-                          value: `${nudgeState.remaining}/${nudgeState.limit}`,
+                          value: <><CountUp id="social-nudges-left" value={nudgeState.remaining} duration={300} /><span className="text-cream/30">/{nudgeState.limit}</span></>,
                           accent: nudgeState.remaining > 0 ? "#F97316" : "#71717A",
                         },
                       ].map(chip => (
@@ -895,7 +929,7 @@ export default function SocialPage() {
                         <div className="flex-1 text-left min-w-0">
                           <p className="text-cream/70 text-xs font-mono uppercase tracking-wider mb-0.5">you</p>
                           <p className="font-bebas text-3xl text-red-400 tabular-nums leading-none">
-                            {myWeekly}
+                            <CountUp id="social-myweekly" value={myWeekly} duration={500} />
                             <span className="text-cream/30 text-sm ml-1.5">Fangs</span>
                           </p>
                         </div>
@@ -963,7 +997,7 @@ export default function SocialPage() {
                           squad goal &middot; {circle.length} member{circle.length === 1 ? "" : "s"}
                         </p>
                         <p className="font-bebas text-cream/70 text-sm tabular-nums">
-                          {squadProgress}
+                          <CountUp id="social-squad-progress" value={squadProgress} duration={500} />
                           <span className="text-cream/30 text-xs"> / {squadTarget}</span>
                         </p>
                       </div>
@@ -1007,14 +1041,11 @@ export default function SocialPage() {
                             >
                               <div
                                 className="social-polaroid w-[110px] text-center"
+                                aria-label={`${c.isMe ? "you" : c.username} — circle leaderboard polaroid`}
                                 style={{ "--polaroid-tilt": tilts[i] } as React.CSSProperties}
                               >
                                 <div className="relative w-[102px] h-[102px] mb-2 bg-[#0a1020] overflow-hidden">
-                                  <img
-                                    src={c.avatarUrl ?? `https://api.dicebear.com/7.x/adventurer/svg?seed=${c.username}`}
-                                    alt={c.username}
-                                    className="w-full h-full object-cover"
-                                  />
+                                  <img src={c.avatarUrl ?? ""} alt={c.username} className="w-[102px] h-[102px] object-cover" />
                                   {i === 0 && c.coinsThisWeek > 0 && (
                                     <div className="absolute top-1 left-1 w-6 h-6 rounded-full flex items-center justify-center" style={{ background: "#FFD700" }}>
                                       <Crown size={14} weight="fill" color="#04080F" aria-hidden="true" />
@@ -1114,13 +1145,12 @@ export default function SocialPage() {
                                 <span className="social-pin" aria-hidden="true" />
 
                                 {/* Timeline dot + avatar */}
-                                <div className="absolute left-3 top-3.5">
-                                  <img
-                                    src={item.friendAvatarUrl ?? `https://api.dicebear.com/7.x/adventurer/svg?seed=${item.friendUsername}`}
-                                    alt={item.friendUsername}
-                                    className="w-6 h-6 rounded-full border-2 object-cover"
-                                    style={{ borderColor: meta.pin }}
-                                  />
+                                <div
+                                  className="absolute left-3 top-3.5 w-6 h-6 rounded-full overflow-hidden border-2"
+                                  aria-label={`${item.friendUsername}'s avatar`}
+                                  style={{ borderColor: meta.pin }}
+                                >
+                                  <img src={item.friendAvatarUrl ?? ""} alt={item.friendUsername} className="w-5 h-5 rounded-full object-cover" />
                                 </div>
 
                                 <div className="flex items-start gap-3">
@@ -1164,12 +1194,8 @@ export default function SocialPage() {
                     <button onClick={() => setSelectedFriend(null)} className="sm:hidden text-cream/40 mr-1 hover:text-cream/60 transition">
                       ←
                     </button>
-                    <div className="relative">
-                      <img
-                        src={selectedFriend.avatar_url ?? `https://api.dicebear.com/7.x/adventurer/svg?seed=${selectedFriend.username}`}
-                        alt={selectedFriend.username}
-                        className="w-9 h-9 rounded-full object-cover"
-                      />
+                    <div className="relative" aria-label={`${selectedFriend.username}'s avatar`}>
+                      <img src={selectedFriend.avatar_url ?? ""} alt={selectedFriend.username} className="w-9 h-9 rounded-full object-cover" />
                       {selectedFriend.is_online && (
                         <div className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-green-400 border-2 border-[#04080F] social-online-dot" />
                       )}

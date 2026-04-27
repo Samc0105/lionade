@@ -100,18 +100,23 @@ export async function POST(req: NextRequest, { params }: RouteCtx) {
     const wasCorrect = selectedIndex === q.correct_index;
     const difficulty = (["easy", "medium", "hard"].includes(q.difficulty) ? q.difficulty : "medium") as Difficulty;
 
-    // Load exam (for bktTarget) + subtopic + progress for the BKT math
-    const [examRes, subRes, progRes] = await Promise.all([
+    // Load exam (for bktTarget) + subtopic for the BKT math
+    const [examRes, subRes] = await Promise.all([
       supabaseAdmin.from("user_exams")
         .select("id, mastery_bkt_target, ready_threshold, reached_mastery_at")
         .eq("id", session.user_exam_id).single(),
       supabaseAdmin.from("mastery_subtopics")
         .select("id, weight")
         .eq("user_exam_id", session.user_exam_id).order("display_order"),
-      supabaseAdmin.from("mastery_progress")
-        .select("subtopic_id, p_mastery, attempts, correct, current_streak, total_active_seconds, last_taught_at")
-        .eq("user_id", userId),
     ]);
+    const subtopicIds = (subRes.data ?? []).map(s => s.id);
+    // Bound to current exam's subtopics — was full-user scan
+    const progRes = subtopicIds.length === 0
+      ? { data: [] as Array<{ subtopic_id: string; p_mastery: number; attempts: number; correct: number; current_streak: number; total_active_seconds: number | null; last_taught_at: string | null }> }
+      : await supabaseAdmin.from("mastery_progress")
+          .select("subtopic_id, p_mastery, attempts, correct, current_streak, total_active_seconds, last_taught_at")
+          .eq("user_id", userId)
+          .in("subtopic_id", subtopicIds);
 
     const exam = examRes.data;
     if (!exam) return NextResponse.json({ error: "Exam missing" }, { status: 500 });

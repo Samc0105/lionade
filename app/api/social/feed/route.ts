@@ -107,7 +107,10 @@ export async function GET(req: NextRequest) {
     }
 
     const profileMap = new Map(
-      (profiles ?? []).map(p => [p.id, { username: p.username, avatar_url: p.avatar_url }]),
+      (profiles ?? []).map(p => [
+        p.id,
+        { username: p.username, avatar_url: p.avatar_url },
+      ]),
     );
 
     const weeklyTotals = new Map<string, number>();

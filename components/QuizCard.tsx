@@ -1,7 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { motion, useReducedMotion } from "framer-motion";
 import CoinAnimation from "./CoinAnimation";
+import Confetti from "./Confetti";
 import { cdnUrl } from "@/lib/cdn";
 import { Check, X as XIcon, Lightbulb } from "@phosphor-icons/react";
 
@@ -37,8 +39,10 @@ export default function QuizCard({
   const [timeLeft, setTimeLeft] = useState(timeLimit);
   const [showCoin, setShowCoin] = useState(false);
   const [advanceTimer, setAdvanceTimer] = useState<ReturnType<typeof setTimeout> | null>(null);
+  const reducedMotion = useReducedMotion();
 
   const revealed = result !== null && selected !== null;
+  const wasCorrect = revealed && selected === result?.correctIndex;
 
   useEffect(() => {
     setSelected(null);
@@ -225,14 +229,43 @@ export default function QuizCard({
 
           const optionLabel = ["A", "B", "C", "D"][index];
 
+          // Animation state per option:
+          //   - selected + correct  → scale-pop (green flash via existing classes)
+          //   - selected + wrong    → horizontal shake
+          //   - others              → no transform animation
+          // `whileHover/whileTap` are gated to the pre-answer state.
+          const isThisCorrectReveal = revealed && index === result?.correctIndex && index === selected;
+          const isThisWrongReveal = revealed && index === selected && index !== result?.correctIndex;
+
+          const animateProps = reducedMotion
+            ? undefined
+            : isThisCorrectReveal
+              ? { scale: [1, 1.04, 1] }
+              : isThisWrongReveal
+                ? { x: [0, -6, 6, -4, 4, 0] }
+                : undefined;
+
+          const transitionProps = isThisCorrectReveal
+            ? { duration: 0.25, ease: "easeOut" as const }
+            : isThisWrongReveal
+              ? { duration: 0.28, ease: "easeOut" as const }
+              : undefined;
+
+          const interactiveAnims = !revealed && !waiting && !reducedMotion
+            ? { whileHover: { y: -2 }, whileTap: { scale: 0.98 } }
+            : {};
+
           return (
-            <button
+            <motion.button
               key={index}
               onClick={() => handleSelect(index)}
               disabled={revealed || waiting}
               aria-keyshortcuts={`${index + 1} ${optionLabel}`}
               className={`${optionClass} quiz-option-enter`}
               style={{ animationDelay: `${index * 60}ms` }}
+              animate={animateProps}
+              transition={transitionProps}
+              {...interactiveAnims}
             >
               <div className="flex items-center gap-4">
                 <span
@@ -258,9 +291,21 @@ export default function QuizCard({
                 </span>
                 <span>{option}</span>
               </div>
-            </button>
+            </motion.button>
           );
         })}
+
+        {/* Correct-answer confetti burst, anchored fresh per question via key */}
+        {wasCorrect && (
+          <Confetti
+            key={`quiz-correct-${question.id}`}
+            trigger={true}
+            count={30}
+            origin="center"
+            palette={["#22C55E", "#FFD700", "#4ADE80"]}
+            duration={1200}
+          />
+        )}
       </div>
 
       {/* Explanation + Next */}

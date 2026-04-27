@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/lib/supabase";
+import { apiPost } from "@/lib/api-client";
 import { getQuizQuestions, checkAnswer } from "@/lib/db";
 import type { Subject } from "@/types";
 import {
@@ -51,7 +52,30 @@ const DAILY_GOALS: Array<{ minutes: number; label: string; tag: string; Icon: Ic
   { minutes: 20, label: "20 min", tag: "Intense", Icon: Lightning },
 ];
 
-const TOTAL_STEPS = 4;
+const TOTAL_STEPS = 5;
+
+// Preset color wheel for the class-onboarding step. Same palette as the
+// /classes/new modal so users see consistent options.
+const CLASS_COLORS = [
+  "#FFD700", "#4A90D9", "#A855F7", "#22C55E",
+  "#EF4444", "#F97316", "#06B6D4", "#EAB308",
+];
+
+interface ClassDraft {
+  name: string;
+  shortCode: string;
+  examDate: string; // YYYY-MM-DD
+  color: string;
+  emoji: string;
+}
+
+const EMPTY_CLASS_DRAFT: ClassDraft = {
+  name: "",
+  shortCode: "",
+  examDate: "",
+  color: CLASS_COLORS[0],
+  emoji: "",
+};
 
 /* ── Diagnostic question type ────────────────────────────────── */
 
@@ -91,6 +115,9 @@ export default function OnboardingPage() {
   const [diagLoading, setDiagLoading] = useState(false);
   const [diagDone, setDiagDone] = useState(false);
 
+  // Step 5: Classes
+  const [classDrafts, setClassDrafts] = useState<ClassDraft[]>([{ ...EMPTY_CLASS_DRAFT }]);
+
   // Speech bubble messages
   const SPEECHES: Record<number, string> = {
     1: "Hey! I'm Leo. Let's get you set up. What do you want to study?",
@@ -99,6 +126,7 @@ export default function OnboardingPage() {
     4: levelChoice === "diagnostic"
       ? (diagDone ? "All done! Let's see your results..." : "Answer these 5 questions so I can find your level!")
       : "You're all set! Let's start learning!",
+    5: "Last thing — got specific classes you're studying for? Add them and Lionade builds your study around them.",
   };
 
   // Force dark mode
@@ -178,7 +206,8 @@ export default function OnboardingPage() {
     return "beginner";
   };
 
-  // Save and finish
+  // Save and finish. Also creates any classes the user listed in step 5
+  // (best-effort — we don't fail onboarding if a class insert errors).
   const handleFinish = async () => {
     if (!user) return;
     setSubmitting(true);
@@ -200,6 +229,24 @@ export default function OnboardingPage() {
       console.error("[Onboarding] Save failed:", error.message);
       setSubmitting(false);
       return;
+    }
+
+    // Create any classes drafted in step 5. Fire sequentially so the
+    // server-side `position` ordering matches the UI order. Best-effort —
+    // a failed class insert shouldn't block onboarding completion.
+    for (const c of classDrafts) {
+      const cleanName = c.name.trim();
+      if (cleanName.length < 2) continue;
+      try {
+        await apiPost("/api/classes", {
+          name: cleanName,
+          shortCode: c.shortCode.trim() || null,
+          color: c.color,
+          emoji: c.emoji.trim() || null,
+        });
+      } catch (e) {
+        console.error("[Onboarding] Class create failed:", (e as Error).message);
+      }
     }
 
     await refreshUser();
@@ -428,7 +475,10 @@ export default function OnboardingPage() {
                   setStep(4);
                   await loadDiagnostic();
                 } else if (levelChoice === "scratch") {
-                  await handleFinish();
+                  // Skip diagnostic, but funnel through step 5 (classes)
+                  // so users always get the chance to set up their
+                  // class notebooks before landing on the dashboard.
+                  setStep(5);
                 }
               }}
               disabled={!levelChoice || submitting}
@@ -436,12 +486,7 @@ export default function OnboardingPage() {
                 hover:bg-electric/90 transition-all duration-200 shadow-lg shadow-electric/20
                 disabled:opacity-40 disabled:cursor-not-allowed inline-flex items-center justify-center gap-2"
             >
-              {submitting ? "Saving..." : levelChoice === "scratch" ? (
-                <>
-                  Let&apos;s Go!
-                  <Rocket size={16} weight="fill" color="currentColor" aria-hidden="true" />
-                </>
-              ) : "Start Quiz →"}
+              {submitting ? "Saving..." : levelChoice === "scratch" ? "Continue →" : "Start Quiz →"}
             </button>
           </div>
         )}
@@ -474,18 +519,12 @@ export default function OnboardingPage() {
                     : "No worries! We'll start with the fundamentals."}
                 </p>
                 <button
-                  onClick={handleFinish}
-                  disabled={submitting}
+                  onClick={() => setStep(5)}
                   className="w-full py-3.5 rounded-xl font-bold text-sm bg-electric text-white
                     hover:bg-electric/90 transition-all duration-200 shadow-lg shadow-electric/20
-                    disabled:opacity-40 disabled:cursor-not-allowed inline-flex items-center justify-center gap-2"
+                    inline-flex items-center justify-center gap-2"
                 >
-                  {submitting ? "Saving..." : (
-                    <>
-                      Let&apos;s Go!
-                      <Rocket size={16} weight="fill" color="currentColor" aria-hidden="true" />
-                    </>
-                  )}
+                  Continue →
                 </button>
               </div>
             ) : diagQuestions.length === 0 ? (
@@ -495,13 +534,11 @@ export default function OnboardingPage() {
                   No diagnostic questions available yet for this subject.
                 </p>
                 <button
-                  onClick={handleFinish}
-                  disabled={submitting}
+                  onClick={() => setStep(5)}
                   className="w-full py-3.5 rounded-xl font-bold text-sm bg-electric text-white
-                    hover:bg-electric/90 transition-all duration-200 shadow-lg shadow-electric/20
-                    disabled:opacity-40 disabled:cursor-not-allowed"
+                    hover:bg-electric/90 transition-all duration-200 shadow-lg shadow-electric/20"
                 >
-                  {submitting ? "Saving..." : "Start as Beginner →"}
+                  Continue →
                 </button>
               </div>
             ) : (
@@ -587,6 +624,136 @@ export default function OnboardingPage() {
                 )}
               </div>
             )}
+          </div>
+        )}
+
+        {/* ═══ STEP 5: CLASSES ═══ */}
+        {step === 5 && (
+          <div className="animate-slide-up">
+            <p className="text-center font-bebas text-2xl text-cream tracking-wider mb-2">
+              YOUR CLASSES
+            </p>
+            <p className="text-center text-cream/50 text-sm mb-6">
+              College class? Cert prep? Add what you're studying for. Skip if none yet.
+            </p>
+
+            <div className="space-y-3 mb-4">
+              {classDrafts.map((c, idx) => (
+                <div
+                  key={idx}
+                  className="rounded-xl border p-3 transition-colors"
+                  style={{
+                    borderColor: `${c.color}55`,
+                    background: `${c.color}0a`,
+                  }}
+                >
+                  <div className="flex items-start gap-2 mb-2">
+                    <input
+                      value={c.emoji}
+                      onChange={(e) => {
+                        const v = e.target.value.slice(0, 4);
+                        setClassDrafts(d => d.map((row, i) => i === idx ? { ...row, emoji: v } : row));
+                      }}
+                      placeholder="📐"
+                      className="w-12 rounded-lg bg-white/[0.04] border border-white/[0.08]
+                        focus:border-electric/40 focus:outline-none px-2 py-2 text-[16px] text-center"
+                    />
+                    <input
+                      value={c.name}
+                      onChange={(e) => {
+                        const v = e.target.value.slice(0, 80);
+                        setClassDrafts(d => d.map((row, i) => i === idx ? { ...row, name: v } : row));
+                      }}
+                      placeholder="Class name"
+                      className="flex-1 rounded-lg bg-white/[0.04] border border-white/[0.08]
+                        focus:border-electric/40 focus:outline-none px-3 py-2 text-[14px] text-cream
+                        placeholder:text-cream/30"
+                    />
+                    {classDrafts.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => setClassDrafts(d => d.filter((_, i) => i !== idx))}
+                        aria-label="Remove class"
+                        className="grid place-items-center w-9 h-9 rounded-lg text-cream/40 hover:text-[#EF4444] hover:bg-[#EF4444]/10 transition-colors"
+                      >
+                        ✕
+                      </button>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <input
+                      value={c.shortCode}
+                      onChange={(e) => {
+                        const v = e.target.value.slice(0, 24);
+                        setClassDrafts(d => d.map((row, i) => i === idx ? { ...row, shortCode: v } : row));
+                      }}
+                      placeholder="Code (optional)"
+                      className="flex-1 rounded-lg bg-white/[0.04] border border-white/[0.08]
+                        focus:border-electric/40 focus:outline-none px-3 py-1.5 text-[12px] text-cream
+                        placeholder:text-cream/30"
+                    />
+                    <div className="flex gap-1">
+                      {CLASS_COLORS.map((col) => (
+                        <button
+                          key={col}
+                          type="button"
+                          onClick={() => setClassDrafts(d => d.map((row, i) => i === idx ? { ...row, color: col } : row))}
+                          aria-label={`Color ${col}`}
+                          className={`w-5 h-5 rounded-full border-2 transition-transform ${c.color === col ? "scale-110" : "hover:scale-105"}`}
+                          style={{
+                            backgroundColor: col,
+                            borderColor: c.color === col ? "#ffffff80" : "#ffffff10",
+                          }}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {classDrafts.length < 8 && (
+              <button
+                type="button"
+                onClick={() => setClassDrafts(d => [...d, { ...EMPTY_CLASS_DRAFT }])}
+                className="w-full rounded-lg border border-dashed border-white/[0.1] hover:border-white/[0.2]
+                  text-cream/50 hover:text-cream font-mono text-[11px] uppercase tracking-[0.2em]
+                  py-2.5 mb-5 transition-colors"
+              >
+                + Another class
+              </button>
+            )}
+
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={handleFinish}
+                disabled={submitting}
+                className="flex-1 py-3.5 rounded-xl font-bold text-sm border border-white/[0.15]
+                  text-cream/70 hover:text-cream hover:border-white/[0.3]
+                  transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                {submitting ? "Saving…" : "Skip for now"}
+              </button>
+              <button
+                type="button"
+                onClick={handleFinish}
+                disabled={submitting}
+                className="flex-1 py-3.5 rounded-xl font-bold text-sm bg-electric text-white
+                  hover:bg-electric/90 transition-all duration-200 shadow-lg shadow-electric/20
+                  disabled:opacity-40 disabled:cursor-not-allowed inline-flex items-center justify-center gap-2"
+              >
+                {submitting ? "Saving…" : (
+                  <>
+                    Let&apos;s Go!
+                    <Rocket size={16} weight="fill" color="currentColor" aria-hidden="true" />
+                  </>
+                )}
+              </button>
+            </div>
+            <p className="text-center text-cream/30 text-[11px] mt-3 font-mono uppercase tracking-[0.2em]">
+              You can edit or add more classes anytime
+            </p>
           </div>
         )}
       </div>

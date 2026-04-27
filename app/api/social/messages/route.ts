@@ -38,13 +38,26 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Failed to fetch" }, { status: 500 });
     }
 
-    // Mark unread messages from friend as read
-    await supabaseAdmin
+    // Mark-as-read guard: do a cheap COUNT(*) to see if anything's unread
+    // BEFORE issuing the UPDATE. We can't use the messages array we just
+    // loaded because pagination caps it at the OLDEST `limit` rows — an
+    // unread message outside that window would never get marked.
+    const msgs = messages ?? [];
+    const { count: unreadCount } = await supabaseAdmin
       .from("messages")
-      .update({ read: true })
+      .select("id", { count: "exact", head: true })
       .eq("sender_id", friendId)
       .eq("receiver_id", userId)
       .eq("read", false);
+
+    if ((unreadCount ?? 0) > 0) {
+      await supabaseAdmin
+        .from("messages")
+        .update({ read: true })
+        .eq("sender_id", friendId)
+        .eq("receiver_id", userId)
+        .eq("read", false);
+    }
 
     // Get arena chat events between these two users
     const { data: arenaEvents } = await supabaseAdmin
@@ -57,7 +70,7 @@ export async function GET(req: NextRequest) {
       .limit(20);
 
     return NextResponse.json({
-      messages: messages ?? [],
+      messages: msgs,
       arenaEvents: arenaEvents ?? [],
     });
   } catch (e) {

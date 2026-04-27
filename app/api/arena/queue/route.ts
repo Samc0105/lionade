@@ -44,7 +44,10 @@ export async function POST(req: NextRequest) {
       .select()
       .single();
 
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    if (error) {
+      console.error("[arena/queue]", error.message);
+      return NextResponse.json({ error: "Couldn't update queue." }, { status: 500 });
+    }
     return NextResponse.json({ queueEntry: data });
   } catch {
     return NextResponse.json({ error: "Server error" }, { status: 500 });
@@ -237,6 +240,7 @@ async function selectArenaQuestions(): Promise<string[]> {
 }
 
 async function judgeQuestions(matchId: string, questionIds: string[]) {
+  // Heuristic only — Anthropic call removed (was 10 parallel API calls + ~$0.001 per match start).
   // Fetch question texts
   const { data: questions } = await supabaseAdmin
     .from("questions")
@@ -248,73 +252,30 @@ async function judgeQuestions(matchId: string, questionIds: string[]) {
   // Order questions to match questionIds order
   const ordered = questionIds.map(id => questions.find(q => q.id === id)).filter(Boolean);
 
-  // Try Claude API judge, fall back to heuristic
-  const apiKey = process.env.ANTHROPIC_API_KEY;
+  const judgeResults = ordered.map((q, idx) => {
+    let timeLimit = 15;
+    let cognitiveLoad = "recall";
 
-  const judgeResults = await Promise.all(
-    ordered.map(async (q, idx) => {
-      let timeLimit = 15;
-      let cognitiveLoad = "recall";
-
-      if (apiKey && q) {
-        try {
-          const res = await fetch("https://api.anthropic.com/v1/messages", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "x-api-key": apiKey,
-              "anthropic-version": "2023-06-01",
-            },
-            body: JSON.stringify({
-              model: "claude-haiku-4-5-20251001",
-              max_tokens: 100,
-              messages: [{
-                role: "user",
-                content: `You are a Judge for a competitive quiz app. Analyze this question and return ONLY a JSON object with two fields: time_limit (integer, seconds between 8-25 that a knowledgeable student would need), and cognitive_load (string: 'recall', 'calculation', or 'reasoning'). Question: ${q.question}`,
-              }],
-            }),
-          });
-
-          if (res.ok) {
-            const data = await res.json();
-            const text = data.content?.[0]?.text ?? "";
-            const match = text.match(/\{[\s\S]*?\}/);
-            if (match) {
-              const parsed = JSON.parse(match[0]);
-              timeLimit = Math.max(8, Math.min(25, parsed.time_limit ?? 15));
-              cognitiveLoad = ["recall", "calculation", "reasoning"].includes(parsed.cognitive_load)
-                ? parsed.cognitive_load : "recall";
-            }
-          }
-        } catch {
-          // Fall through to heuristic
-        }
+    if (q) {
+      const len = q.question.length;
+      const text = q.question.toLowerCase();
+      if (text.includes("calculate") || text.includes("solve") || text.includes("compute")) {
+        cognitiveLoad = "calculation";
+        timeLimit = len > 150 ? 22 : 18;
+      } else if (text.includes("why") || text.includes("explain") || text.includes("which of")) {
+        cognitiveLoad = "reasoning";
+        timeLimit = len > 150 ? 20 : 15;
+      } else {
+        cognitiveLoad = "recall";
+        timeLimit = len > 200 ? 15 : len > 100 ? 12 : 10;
       }
+      // Adjust for difficulty
+      if (q.difficulty === "advanced") timeLimit = Math.min(25, timeLimit + 4);
+      else if (q.difficulty === "beginner") timeLimit = Math.max(8, timeLimit - 2);
+    }
 
-      // Heuristic fallback
-      if (!apiKey || timeLimit === 15) {
-        if (q) {
-          const len = q.question.length;
-          const text = q.question.toLowerCase();
-          if (text.includes("calculate") || text.includes("solve") || text.includes("compute")) {
-            cognitiveLoad = "calculation";
-            timeLimit = len > 150 ? 22 : 18;
-          } else if (text.includes("why") || text.includes("explain") || text.includes("which of")) {
-            cognitiveLoad = "reasoning";
-            timeLimit = len > 150 ? 20 : 15;
-          } else {
-            cognitiveLoad = "recall";
-            timeLimit = len > 200 ? 15 : len > 100 ? 12 : 10;
-          }
-          // Adjust for difficulty
-          if (q.difficulty === "advanced") timeLimit = Math.min(25, timeLimit + 4);
-          else if (q.difficulty === "beginner") timeLimit = Math.max(8, timeLimit - 2);
-        }
-      }
-
-      return { questionId: q?.id, order: idx, timeLimit, cognitiveLoad };
-    })
-  );
+    return { questionId: q?.id, order: idx, timeLimit, cognitiveLoad };
+  });
 
   // Insert judge results
   const rows = judgeResults.filter(r => r.questionId).map(r => ({

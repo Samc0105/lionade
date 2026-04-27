@@ -28,9 +28,9 @@ export default function PlanBadge() {
       href="/settings/subscription"
       aria-label={`${plan} subscription — manage`}
       className={`
-        inline-flex items-center gap-1 rounded-full
+        h-8 inline-flex items-center gap-1 rounded-full
         font-mono text-[9.5px] uppercase tracking-[0.22em]
-        px-2 py-0.5 leading-none
+        px-3 leading-none
         transition-all duration-200 hover:scale-[1.04] active:scale-[0.98]
         ${isPlatinum
           ? "bg-gradient-to-r from-[#C0C6D6] via-[#E8EAF2] to-[#C0C6D6] text-[#0a0f1d] shadow-[0_0_12px_rgba(200,206,220,0.35)]"
@@ -39,8 +39,8 @@ export default function PlanBadge() {
       `}
     >
       {isPlatinum
-        ? <Crown size={10} weight="fill" />
-        : <Sparkle size={10} weight="fill" />
+        ? <Crown size={11} weight="fill" />
+        : <Sparkle size={11} weight="fill" />
       }
       <span>{plan}</span>
     </Link>
@@ -57,10 +57,10 @@ export function UpgradePill({ className = "" }: { className?: string }) {
     <Link
       href="/pricing"
       className={`
-        inline-flex items-center gap-1.5
+        h-8 inline-flex items-center gap-1.5
         rounded-full bg-gradient-to-r from-gold to-[#F0B429]
         text-navy font-mono text-[10px] uppercase tracking-[0.22em]
-        px-3 py-1.5 leading-none
+        px-3 leading-none
         transition-transform duration-200 hover:scale-[1.03] active:scale-[0.98]
         ${className}
       `}

@@ -76,7 +76,7 @@ export async function POST(req: NextRequest, { params }: RouteCtx) {
     }
 
     // Load exam + subtopics + progress to decide which subtopics to pre-fetch
-    const [examRes, subRes, progRes, seenRes] = await Promise.all([
+    const [examRes, subRes, seenRes] = await Promise.all([
       supabaseAdmin
         .from("user_exams")
         .select("id, title, mastery_bkt_target")
@@ -87,10 +87,6 @@ export async function POST(req: NextRequest, { params }: RouteCtx) {
         .select("id, name, weight, display_order, content_hash")
         .eq("user_exam_id", session.user_exam_id)
         .order("display_order"),
-      supabaseAdmin
-        .from("mastery_progress")
-        .select("subtopic_id, p_mastery, attempts, last_seen_at")
-        .eq("user_id", userId),
       supabaseAdmin
         .from("mastery_events")
         .select("question_id")
@@ -103,6 +99,16 @@ export async function POST(req: NextRequest, { params }: RouteCtx) {
 
     const subs = subRes.data ?? [];
     if (!subs.length) return NextResponse.json({ questions: [] });
+    const subtopicIds = subs.map(s => s.id);
+
+    // Bound to current exam's subtopics — was full-user scan
+    const progRes = subtopicIds.length === 0
+      ? { data: [] as Array<{ subtopic_id: string; p_mastery: number; attempts: number; last_seen_at: string | null }> }
+      : await supabaseAdmin
+          .from("mastery_progress")
+          .select("subtopic_id, p_mastery, attempts, last_seen_at")
+          .eq("user_id", userId)
+          .in("subtopic_id", subtopicIds);
 
     const progMap = new Map((progRes.data ?? []).map(p => [p.subtopic_id, p]));
     const seenQuestionIds = new Set<string>([

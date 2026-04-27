@@ -3527,3 +3527,109 @@ html.light .space-bg-container { display: none; }
     transition: none !important;
   }
 }
+
+/* ── Clock In button — compact gold pill with coin micro-animation
+   Height pinned to 2rem (32px) so it aligns with the h-8 navbar pill row. ── */
+.clock-in-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  height: 2rem;
+  padding: 0 0.875rem;
+  border-radius: 9999px;
+  background: linear-gradient(135deg, #FFD700 0%, #F0B429 50%, #FFA500 100%);
+  background-size: 200% 200%;
+  color: #04080F;
+  font-family: var(--font-syne, "Syne"), sans-serif;
+  font-weight: 700;
+  font-size: 11.5px;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  box-shadow: 0 0 14px rgba(255, 215, 0, 0.28), 0 0 4px rgba(255, 165, 0, 0.18);
+  animation: clock-in-shift 4s ease-in-out infinite, clock-in-breathe 2.4s ease-in-out infinite;
+  transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.clock-in-btn::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 55%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.45), transparent);
+  animation: clock-in-shine 3.2s ease-in-out infinite;
+  z-index: -1;
+}
+
+.clock-in-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 0 22px rgba(255, 215, 0, 0.55), 0 0 8px rgba(255, 165, 0, 0.32);
+}
+
+.clock-in-btn:active {
+  transform: scale(0.96);
+}
+
+.clock-in-btn .coin-icon {
+  display: inline-flex;
+  transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transform-style: preserve-3d;
+}
+
+.clock-in-btn:hover .coin-icon {
+  transform: rotateY(360deg);
+}
+
+.clock-in-btn--claimed {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: rgba(245, 235, 218, 0.45);
+  box-shadow: none;
+  animation: none;
+  cursor: not-allowed;
+}
+
+.clock-in-btn--claimed::after {
+  display: none;
+}
+
+.clock-in-btn--claimed:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+.clock-in-btn--claimed .coin-icon {
+  transform: none;
+}
+
+@keyframes clock-in-shift {
+  0%, 100% { background-position: 0% 50%; }
+  50%      { background-position: 100% 50%; }
+}
+
+@keyframes clock-in-breathe {
+  0%, 100% {
+    box-shadow: 0 0 14px rgba(255, 215, 0, 0.28), 0 0 4px rgba(255, 165, 0, 0.18);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.45), 0 0 8px rgba(255, 165, 0, 0.28);
+  }
+}
+
+@keyframes clock-in-shine {
+  0%       { left: -100%; }
+  60%, 100% { left: 160%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .clock-in-btn,
+  .clock-in-btn::after,
+  .clock-in-btn .coin-icon {
+    animation: none !important;
+    transition: none !important;
+  }
+}

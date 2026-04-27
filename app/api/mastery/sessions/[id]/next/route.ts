@@ -110,25 +110,31 @@ export async function POST(req: NextRequest, { params }: RouteCtx) {
       .single();
     if (!exam) return NextResponse.json({ error: "Exam missing" }, { status: 500 });
 
-    const [subRes, progRes, seenEventsRes] = await Promise.all([
-      supabaseAdmin
-        .from("mastery_subtopics")
-        .select("id, name, weight, display_order, content_hash")
-        .eq("user_exam_id", session.user_exam_id)
-        .order("display_order"),
-      supabaseAdmin
-        .from("mastery_progress")
-        .select("subtopic_id, p_mastery, attempts, last_taught_at, last_seen_at")
-        .eq("user_id", userId),
+    const subRes = await supabaseAdmin
+      .from("mastery_subtopics")
+      .select("id, name, weight, display_order, content_hash")
+      .eq("user_exam_id", session.user_exam_id)
+      .order("display_order");
+
+    const subs = subRes.data ?? [];
+    if (!subs.length) return NextResponse.json({ error: "No subtopics for this exam" }, { status: 500 });
+    const subtopicIds = subs.map(s => s.id);
+
+    const [progRes, seenEventsRes] = await Promise.all([
+      // Bound to current exam's subtopics — was full-user scan
+      subtopicIds.length === 0
+        ? Promise.resolve({ data: [] as Array<{ subtopic_id: string; p_mastery: number; attempts: number; last_taught_at: string | null; last_seen_at: string | null }> })
+        : supabaseAdmin
+            .from("mastery_progress")
+            .select("subtopic_id, p_mastery, attempts, last_taught_at, last_seen_at")
+            .eq("user_id", userId)
+            .in("subtopic_id", subtopicIds),
       supabaseAdmin
         .from("mastery_events")
         .select("question_id")
         .eq("session_id", sessionId)
         .not("question_id", "is", null),
     ]);
-
-    const subs = subRes.data ?? [];
-    if (!subs.length) return NextResponse.json({ error: "No subtopics for this exam" }, { status: 500 });
 
     const progMap = new Map((progRes.data ?? []).map(p => [p.subtopic_id, p]));
     const seenQuestionIds: string[] = (seenEventsRes.data ?? [])

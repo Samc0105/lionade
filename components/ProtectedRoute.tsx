@@ -12,6 +12,13 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
   const [status, setStatus] = useState<"checking" | "pass" | "redirecting">("checking");
   const hasChecked = useRef(false);
 
+  // Defer auth-driven rendering to after hydration. useAuth seeds from
+  // localStorage on the client, so the SSR pass renders the spinner but
+  // the first client render renders authed content — guaranteed mismatch
+  // without this gate.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
+
   // Safety timeout — never stay stuck on loading spinner
   useEffect(() => {
     if (!isLoading) return;
@@ -97,7 +104,7 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
     })();
   }, [user, router]);
 
-  if (isLoading && !timedOut) {
+  if (!mounted || (isLoading && !timedOut)) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">

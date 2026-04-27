@@ -56,8 +56,10 @@ import {
   Target,
   Handshake,
   Rocket,
+  ShareNetwork,
   type Icon,
 } from "@phosphor-icons/react";
+import ShareCard from "@/components/ShareCard";
 
 // ── Types ────────────────────────────────────────────
 type Section =
@@ -161,7 +163,7 @@ export default function ProfilePage() {
     Promise.all([
       getAllBadges().catch(() => []),
       getUserBadges(user.id).catch(() => []),
-      getSubjectStats(user.id).catch(() => []),
+      getSubjectStats(user.id, { lifetime: true }).catch(() => []),
       getQuizHistory(user.id, 30).catch(() => []),
       getRecentActivity(user.id, 30).catch(() => []),
     ]).then(([all, earned, stats, history, act]) => {
@@ -212,8 +214,9 @@ export default function ProfilePage() {
           {/* Mobile header */}
           <div className="flex items-center justify-between mb-4 md:hidden">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-full overflow-hidden border-2 border-electric/50">
-                <img src={avatarUrl} alt={user.username} className="w-full h-full object-cover" />
+              <div className="w-9 h-9 rounded-full overflow-hidden border-2 border-electric/50"
+                aria-label={`${user.username}'s avatar`}>
+                <img src={avatarUrl} alt={user.username} className="w-9 h-9 rounded-full object-cover" />
               </div>
               <span className="font-bebas text-xl text-cream tracking-wider">
                 {NAV.find(n => n.key === section)?.label}
@@ -235,8 +238,9 @@ export default function ProfilePage() {
                 <div className="p-6 border-b border-electric/10 text-center">
                   <div className="relative w-20 h-20 mx-auto mb-3">
                     <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-electric/50"
+                      aria-label={`${user.username}'s avatar`}
                       style={{ boxShadow: "0 0 20px #4A90D940" }}>
-                      <img src={avatarUrl} alt={user.username} className="w-full h-full object-cover" />
+                      <img src={avatarUrl} alt={user.username} className="w-20 h-20 rounded-full object-cover" />
                     </div>
                     <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full border-2 border-navy
                       flex items-center justify-center font-bebas text-xs text-white"
@@ -291,7 +295,8 @@ export default function ProfilePage() {
 // ── Shared prop type ──────────────────────────────────
 type SharedProps = {
   user: any; level: number; progress: number; xpToNext: number;
-  coins: number; streak: number; xp: number; avatarUrl: string; statsReady: boolean;
+  coins: number; streak: number; xp: number; avatarUrl: string;
+  statsReady: boolean;
   allBadges: any[]; earnedBadges: any[]; subjectStats: any[];
   quizHistory: any[]; activity: any[];
   loading: boolean; accuracy: number; totalQuestions: number;
@@ -333,6 +338,7 @@ const labelCls = "block text-cream/50 text-xs font-bold uppercase tracking-wides
 // ── OVERVIEW ───────────────────────────────────────────
 function OverviewSection({ user, level, progress, xpToNext, coins, streak, xp, avatarUrl, statsReady, earnedBadges, allBadges, subjectStats, quizHistory, activity, loading, accuracy, totalQuestions, totalCorrect, duelsWon, refreshUser }: SharedProps) {
   const lockedBadges = allBadges.filter(b => !earnedBadges.some((e: any) => e.id === b.id));
+  const [shareOpen, setShareOpen] = useState(false);
 
   return (
     <div className="space-y-6 animate-slide-up">
@@ -340,10 +346,21 @@ function OverviewSection({ user, level, progress, xpToNext, coins, streak, xp, a
       <Card className="relative overflow-hidden">
         <div className="absolute top-0 right-0 w-64 h-64 rounded-full blur-3xl opacity-15 pointer-events-none"
           style={{ background: "radial-gradient(circle, #4A90D9 0%, transparent 70%)" }} />
+        <button
+          type="button"
+          onClick={() => setShareOpen(true)}
+          aria-label="Share profile"
+          className="absolute top-3 right-3 z-20 inline-flex items-center gap-1.5 rounded-full border border-white/[0.1] bg-white/[0.04] hover:bg-white/[0.08] px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.25em] text-cream/70 hover:text-cream transition-colors"
+        >
+          <ShareNetwork size={11} weight="fill" /> Share
+        </button>
         <div className="relative z-10 flex flex-col sm:flex-row items-center sm:items-start gap-6">
-          <div className="w-24 h-24 rounded-full overflow-hidden border-4 flex-shrink-0"
-            style={{ borderColor: "#4A90D9", boxShadow: "0 0 25px #4A90D960" }}>
-            <img src={avatarUrl} alt={user.username} className="w-full h-full object-cover" />
+          <div className="flex flex-col items-center gap-2 flex-shrink-0">
+            <div className="w-24 h-24 rounded-full overflow-hidden border-4"
+              aria-label={`${user.username}'s avatar`}
+              style={{ borderColor: "#4A90D9", boxShadow: "0 0 25px #4A90D960" }}>
+              <img src={avatarUrl} alt={user.username} className="w-24 h-24 rounded-full object-cover" />
+            </div>
           </div>
           <div className="flex-1 text-center sm:text-left">
             <h1 className="font-bebas text-4xl text-cream tracking-wider">{user.username}</h1>
@@ -361,6 +378,22 @@ function OverviewSection({ user, level, progress, xpToNext, coins, streak, xp, a
           </div>
         </div>
       </Card>
+
+      <ShareCard
+        open={shareOpen}
+        onClose={() => setShareOpen(false)}
+        shareTitle={`profile-${user.username}`}
+        card={{
+          headline: "I'M ON LIONADE",
+          subline: `@${user.username} · Level ${level}`,
+          bigNumber: { value: formatCoins(coins), label: "Fangs earned" },
+          stats: [
+            { label: "Streak", value: `${streak}d` },
+            { label: "Accuracy", value: `${accuracy}%` },
+          ],
+          accent: "#FFD700",
+        }}
+      />
 
       {/* Stats grid */}
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">

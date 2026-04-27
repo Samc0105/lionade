@@ -7,7 +7,10 @@ export async function GET() {
   const { count, error } = await supabaseAdmin
     .from("profiles")
     .select("id", { count: "exact", head: true });
-  if (error) return NextResponse.json({ ok: false, error: error.message });
+  if (error) {
+    console.error("[save-quiz-results GET]", error.message);
+    return NextResponse.json({ ok: false, error: "Health check failed" }, { status: 500 });
+  }
   return NextResponse.json({ ok: true, profiles: count });
 }
 
@@ -54,7 +57,7 @@ export async function POST(req: NextRequest) {
 
     if (sessionErr) {
       console.error("[save-quiz-results] FAILED quiz_sessions:", sessionErr.message, sessionErr.details, sessionErr.hint);
-      return NextResponse.json({ error: "quiz_sessions: " + sessionErr.message }, { status: 500 });
+      return NextResponse.json({ error: "Couldn't save quiz results." }, { status: 500 });
     }
 
     // 2. Save individual answers (skip if user_answers table doesn't exist)
@@ -83,7 +86,7 @@ export async function POST(req: NextRequest) {
 
     if (profileFetchErr) {
       console.error("[save-quiz-results] Step 3 FAILED — profile fetch:", profileFetchErr.message);
-      return NextResponse.json({ error: "profile fetch: " + profileFetchErr.message }, { status: 500 });
+      return NextResponse.json({ error: "Couldn't load profile." }, { status: 500 });
     }
 
     const newCoins = (profile.coins ?? 0) + coinsEarned;
@@ -96,7 +99,7 @@ export async function POST(req: NextRequest) {
 
     if (profileUpdateErr) {
       console.error("[save-quiz-results] Step 3 FAILED — profile update:", profileUpdateErr.message);
-      return NextResponse.json({ error: "profile update: " + profileUpdateErr.message }, { status: 500 });
+      return NextResponse.json({ error: "Couldn't update profile." }, { status: 500 });
     }
 
     // 3b. Consecutive quiz bonus — award 50 fangs for every 3rd quiz completed within 60 minutes
@@ -363,6 +366,44 @@ export async function POST(req: NextRequest) {
         .eq("active", true);
 
       if (activeBounties && activeBounties.length > 0) {
+        // Batched: was N sequential round-trips per bounty.
+        // Pre-fetch today's quizzes ONCE with subject column so quiz_count
+        // bounties can compute per-subject totals without a second query.
+        const todayStart = new Date();
+        todayStart.setUTCHours(0, 0, 0, 0);
+        const bountyIds = activeBounties.map(b => b.id);
+        const [{ data: todaysQuizRows }, { data: existingProgressRows }] = await Promise.all([
+          supabaseAdmin
+            .from("quiz_sessions")
+            .select("subject")
+            .eq("user_id", userId)
+            .gte("completed_at", todayStart.toISOString()),
+          supabaseAdmin
+            .from("user_bounties")
+            .select("id, bounty_id, progress, completed")
+            .eq("user_id", userId)
+            .in("bounty_id", bountyIds),
+        ]);
+        const progressByBounty = new Map(
+          (existingProgressRows ?? []).map(p => [p.bounty_id, p])
+        );
+        // Total + per-subject quiz counts derived from one query.
+        const todaysQuizzes = todaysQuizRows?.length ?? 0;
+        const todaysQuizzesBySubject = new Map<string, number>();
+        for (const row of todaysQuizRows ?? []) {
+          const s = (row as { subject: string | null }).subject ?? "";
+          if (!s) continue;
+          todaysQuizzesBySubject.set(s, (todaysQuizzesBySubject.get(s) ?? 0) + 1);
+        }
+        const nowIso = new Date().toISOString();
+        const rowsToUpsert: Array<{
+          user_id: string;
+          bounty_id: string;
+          progress: number;
+          completed: boolean;
+          completed_at?: string;
+        }> = [];
+
         for (const bounty of activeBounties) {
           let progress = 0;
           let completed = false;
@@ -378,16 +419,11 @@ export async function POST(req: NextRequest) {
               break;
             }
             case "quiz_count": {
-              // Count quizzes today (or this week for weekly)
-              const since = new Date();
-              since.setHours(0, 0, 0, 0);
-              const { count } = await supabaseAdmin
-                .from("quiz_sessions")
-                .select("id", { count: "exact", head: true })
-                .eq("user_id", userId)
-                .gte("completed_at", since.toISOString())
-                .match(bounty.requirement_subject ? { subject: bounty.requirement_subject } : {});
-              progress = count ?? 0;
+              // Subject-tagged bounties (e.g. "Math Marathon") look up the
+              // per-subject count; untagged bounties use today's all-subject total.
+              progress = bounty.requirement_subject
+                ? (todaysQuizzesBySubject.get(bounty.requirement_subject) ?? 0)
+                : todaysQuizzes;
               completed = progress >= bounty.requirement_value;
               break;
             }
@@ -416,36 +452,34 @@ export async function POST(req: NextRequest) {
               continue;
           }
 
-          // Upsert user_bounty
-          const { data: existing } = await supabaseAdmin
-            .from("user_bounties")
-            .select("id, progress, completed")
-            .eq("user_id", userId)
-            .eq("bounty_id", bounty.id)
-            .maybeSingle();
-
+          const existing = progressByBounty.get(bounty.id);
           if (existing) {
             const newProgress = Math.max(existing.progress, progress);
             const nowCompleted = existing.completed || completed;
             if (newProgress !== existing.progress || nowCompleted !== existing.completed) {
-              await supabaseAdmin
-                .from("user_bounties")
-                .update({
-                  progress: newProgress,
-                  completed: nowCompleted,
-                  ...(nowCompleted && !existing.completed ? { completed_at: new Date().toISOString() } : {}),
-                })
-                .eq("id", existing.id);
+              rowsToUpsert.push({
+                user_id: userId,
+                bounty_id: bounty.id,
+                progress: newProgress,
+                completed: nowCompleted,
+                ...(nowCompleted && !existing.completed ? { completed_at: nowIso } : {}),
+              });
             }
           } else {
-            await supabaseAdmin.from("user_bounties").insert({
+            rowsToUpsert.push({
               user_id: userId,
               bounty_id: bounty.id,
               progress,
               completed,
-              ...(completed ? { completed_at: new Date().toISOString() } : {}),
+              ...(completed ? { completed_at: nowIso } : {}),
             });
           }
+        }
+
+        if (rowsToUpsert.length > 0) {
+          await supabaseAdmin
+            .from("user_bounties")
+            .upsert(rowsToUpsert, { onConflict: "user_id,bounty_id" });
         }
       }
     } catch (bountyErr) {

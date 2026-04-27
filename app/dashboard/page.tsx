@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth";
 import { useUserStats } from "@/lib/hooks";
-import { getSubjectStats, getQuizHistory, getDailyProgress, getUserAchievements, getBestScores, getLeaderboard, getActiveBounties, getUserBountyProgress, getActiveBet, getLastResolvedBet, getWeeklyActivityChart, getEloLeaderboard } from "@/lib/db";
+import { getSubjectStats, getQuizHistory, getDailyProgress, getUserAchievements, getBestScores, getLeaderboard, getActiveBounties, getUserBountyProgress, getActiveBet, getLastResolvedBet, getWeeklyActivityChart } from "@/lib/db";
 import type { Bounty, UserBounty, ActiveBet } from "@/lib/db";
 import {
   getLevelProgress,
@@ -18,6 +18,9 @@ import { cdnUrl } from "@/lib/cdn";
 import { apiPost, apiGet, swrFetcher } from "@/lib/api-client";
 import useSWR from "swr";
 import CountUp from "@/components/CountUp";
+import DailyDrillWidget from "@/components/DailyDrillWidget";
+import StreakReviveBanner from "@/components/StreakReviveBanner";
+import DailyReadyNudge from "@/components/DailyReadyNudge";
 import { toastError, toastSuccess } from "@/lib/toast";
 import Confetti from "@/components/Confetti";
 import {
@@ -94,7 +97,6 @@ function DashboardContent() {
     { subject: string; questionsAnswered: number; correctAnswers: number; coinsEarned: number }[]
   >([]);
   const [dailyProgress, setDailyProgress] = useState({ questions_answered: 0, coins_earned: 0 });
-  const [xpMounted, setXpMounted] = useState(false);
   const [achievements, setAchievements] = useState<{ achievement_key: string; unlocked_at: string }[]>([]);
   const [bestScores, setBestScores] = useState<Record<string, { best: number; total: number }>>({});
   const [leaderboard, setLeaderboard] = useState<{ rank: number; user_id: string; username: string; coins_this_week: number }[]>([]);
@@ -110,7 +112,6 @@ function DashboardContent() {
   const [eloRank, setEloRank] = useState<number | null>(null);
   const [dailyMissions, setDailyMissions] = useState<{ id: string; title: string; description: string; icon: string; type: string; target: number; coinReward: number; xpReward: number; color: string; progress: number; completed: boolean; claimed: boolean }[]>([]);
   const [missionsResetIn, setMissionsResetIn] = useState("");
-  const [loginBonus, setLoginBonus] = useState<{ amount: number; consecutiveDays: number } | null>(null);
   // Counter instead of boolean: rapid claims re-increment this, which remounts
   // the Confetti component via `key` and fires a fresh burst even if the
   // previous burst hasn't finished yet.
@@ -157,8 +158,7 @@ function DashboardContent() {
       getActiveBet(user.id).catch(() => null),
       getLastResolvedBet(user.id).catch(() => null),
       getWeeklyActivityChart(user.id).catch(() => []),
-      getEloLeaderboard(200).catch(() => []),
-    ]).then(([stats, history, daily, achs, bests, lb, bnts, ubProgress, abet, lbet, wChart, eloLb]) => {
+    ]).then(([stats, history, daily, achs, bests, lb, bnts, ubProgress, abet, lbet, wChart]) => {
       setSubjectStats(stats);
       setRecentQuizzes(history);
       setDailyProgress(daily);
@@ -170,9 +170,20 @@ function DashboardContent() {
       setActiveBet(abet);
       setLastBet(lbet);
       setWeeklyChart(wChart as typeof weeklyChart);
-      const myEloEntry = (eloLb as any[]).find((e: any) => e.user_id === user.id);
-      const rank = myEloEntry ? myEloEntry.rank : null;
-      setEloRank(rank);
+      // Fetch caller's ELO rank via dedicated single-row endpoint (no 200-row scan)
+      apiGet<{ rank: number | null }>("/api/me/elo-rank").then(r => {
+        const rank = r.ok && r.data ? r.data.rank : null;
+        setEloRank(rank);
+        // Patch cache with the resolved rank so next mount restores instantly
+        try {
+          const cached = sessionStorage.getItem(`lionade_dash_${user.id}`);
+          if (cached) {
+            const c = JSON.parse(cached);
+            c.eloRank = rank;
+            sessionStorage.setItem(`lionade_dash_${user.id}`, JSON.stringify(c));
+          }
+        } catch {}
+      });
       setTimeout(() => setChartAnimated(true), 300);
       // Cache for instant restore on next visit
       try {
@@ -180,7 +191,7 @@ function DashboardContent() {
           subjectStats: stats, recentQuizzes: history, dailyProgress: daily,
           achievements: achs, bestScores: bests, leaderboard: lb,
           bounties: bnts, userBounties: ubProgress, activeBet: abet,
-          lastBet: lbet, weeklyChart: wChart, eloRank: rank,
+          lastBet: lbet, weeklyChart: wChart,
         }));
       } catch {}
     });
@@ -202,26 +213,8 @@ function DashboardContent() {
       });
   }, [user?.id]);
 
-  useEffect(() => {
-    const t = setTimeout(() => setXpMounted(true), 200);
-    return () => clearTimeout(t);
-  }, []);
-
-  // Daily login bonus — fires once per calendar day (client-side guard + server-side check)
-  useEffect(() => {
-    if (!user?.id) return;
-    const todayKey = `lionade_login_bonus_${new Date().toISOString().split("T")[0]}`;
-    if (typeof window !== "undefined" && sessionStorage.getItem(todayKey)) return; // already called this session
-    apiPost<{ awarded: boolean; amount: number; consecutiveDays: number }>("/api/login-bonus", {})
-      .then((res) => {
-        if (typeof window !== "undefined") sessionStorage.setItem(todayKey, "1");
-        if (res.ok && res.data?.awarded) {
-          setLoginBonus({ amount: res.data.amount, consecutiveDays: res.data.consecutiveDays });
-          setTimeout(() => setLoginBonus(null), 2500);
-          refreshUser(); // refresh coin count
-        }
-      });
-  }, [user?.id]);
+  // Daily login bonus is now claimed via the Clock In button in the
+  // navbar (24h rolling cooldown + history popover). No auto-claim here.
 
   if (!user) return null; // ProtectedRoute handles redirect
 
@@ -320,39 +313,6 @@ function DashboardContent() {
           so rapid-fire claims remount the component and always fire fresh. */}
       <Confetti key={celebrateKey} trigger={celebrateKey > 0} count={50} duration={1400} />
 
-      {/* Daily Login Bonus Toast — auto-dismisses after 2.5s, dismissible */}
-      {loginBonus && (
-        <div
-          role="status"
-          className="fixed top-20 left-1/2 -translate-x-1/2 z-50 animate-slide-up rounded-2xl px-5 py-3.5 border backdrop-blur flex items-center gap-3 pr-10"
-          style={{
-            background: "linear-gradient(135deg, rgba(255,215,0,0.15) 0%, rgba(255,215,0,0.08) 100%)",
-            borderColor: "rgba(255,215,0,0.45)",
-            boxShadow: "0 0 30px rgba(255,215,0,0.20), 0 8px 32px rgba(0,0,0,0.3)",
-          }}
-        >
-          <Sun size={28} weight="fill" color="#FFD700" aria-hidden="true" />
-          <div>
-            <p className="font-bebas text-gold text-base tracking-wider leading-none">
-              Daily Login Bonus!
-            </p>
-            <p className="text-cream/60 text-xs font-syne mt-0.5">
-              Day {loginBonus.consecutiveDays} streak &mdash; +{loginBonus.amount} Fangs
-            </p>
-          </div>
-          <img src={cdnUrl("/F.png")} alt="Fangs" className="w-6 h-6 object-contain ml-auto" />
-          <span className="font-bebas text-gold text-xl tracking-wider">+{loginBonus.amount}</span>
-          <button
-            type="button"
-            aria-label="Dismiss bonus"
-            onClick={() => setLoginBonus(null)}
-            className="absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center text-cream/40 hover:text-cream hover:bg-white/10 transition-colors"
-          >
-            <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M1 1L9 9M9 1L1 9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
-          </button>
-        </div>
-      )}
-
       <div className="min-h-screen pt-16 pb-20 md:pb-8 relative overflow-hidden">
         {/* Background floating shapes */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden" aria-hidden="true">
@@ -391,14 +351,14 @@ function DashboardContent() {
           {/* ═══ 2) Circular Stats Row ═══ */}
           <div className="flex justify-center sm:justify-start gap-6 sm:gap-8 mb-8 animate-slide-up" style={{ animationDelay: "0.05s" }}>
             <Link href="/wallet">
-              <CircleStat icon={<img src={cdnUrl("/F.png")} alt="Fangs" className="w-5 h-5 object-contain mx-auto" />} value={statsReady ? <CountUp value={coins} format={formatCoins} /> : "\u2014"} label={`+${todayCoins} today`} color="#FFD700" />
+              <CircleStat icon={<img src={cdnUrl("/F.png")} alt="Fangs" className="w-5 h-5 object-contain mx-auto" />} value={<CountUp id="dash-coins" value={coins} format={formatCoins} />} label={`+${todayCoins} today`} color="#FFD700" />
             </Link>
             <div className="flex flex-col items-center gap-1.5 group">
               <div className={`relative rounded-full flex items-center justify-center transition-transform duration-300 group-hover:scale-105 ${streak >= 1 ? "streak-fire-glow" : ""}`}
                 style={{ width: 90, height: 90, background: `linear-gradient(135deg, #E67E2215, #E67E2208)`, border: `1.5px solid #E67E2225`, boxShadow: streak >= 1 ? `0 0 ${12 + Math.min(streak, 10) * 3}px rgba(230,126,34,${0.15 + Math.min(streak, 10) * 0.04})` : `0 0 20px #E67E2208` }}>
                 <div className="text-center">
                   <Fire size={16} weight="fill" color="#E67E22" className="mx-auto mb-0.5" aria-hidden="true" />
-                  <span className="font-bebas text-lg leading-none" style={{ color: "#E67E22" }}>{statsReady ? <CountUp value={streak} duration={400} /> : "\u2014"}</span>
+                  <span className="font-bebas text-lg leading-none" style={{ color: "#E67E22" }}><CountUp id="dash-streak" value={streak} duration={400} /></span>
                 </div>
                 <div className="absolute inset-0 rounded-full" style={{ animation: "orbit-stat 8s linear infinite" }}>
                   <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full" style={{ background: "#E67E22", boxShadow: `0 0 6px #E67E22` }} />
@@ -406,10 +366,10 @@ function DashboardContent() {
               </div>
               <span className="text-cream/30 text-[9px] font-mono tracking-wider uppercase">quiz streak</span>
             </div>
-            <CircleStat icon={levelInfo.tier.icon} value={statsReady ? <>Lv.<CountUp value={level} duration={400} /></> : "\u2014"} label={statsReady ? levelInfo.tier.name : ""} color={levelInfo.tier.color} />
-            <CircleStat icon={<BookOpen size={20} weight="regular" color="#9B59B6" aria-hidden="true" />} value={<CountUp value={displaySubjects.length} duration={400} />} label="subjects" color="#9B59B6" />
+            <CircleStat icon={levelInfo.tier.icon} value={<>Lv.<CountUp id="dash-level" value={level} duration={400} /></>} label={levelInfo.tier.name} color={levelInfo.tier.color} />
+            <CircleStat icon={<BookOpen size={20} weight="regular" color="#9B59B6" aria-hidden="true" />} value={<CountUp id="dash-subjects" value={displaySubjects.length} duration={400} />} label="subjects" color="#9B59B6" />
             <Link href="/leaderboard">
-              <CircleStat icon={<Sword size={20} weight="regular" color="#E74C3C" aria-hidden="true" />} value={eloRank ? <>#<CountUp value={eloRank} duration={400} /></> : "\u2014"} label="rank" color="#E74C3C" />
+              <CircleStat icon={<Sword size={20} weight="regular" color="#E74C3C" aria-hidden="true" />} value={eloRank ? <>#<CountUp id="dash-rank" value={eloRank} duration={400} /></> : "\u2014"} label="rank" color="#E74C3C" />
             </Link>
           </div>
           {statsReady && streak >= 3 && (
@@ -437,12 +397,21 @@ function DashboardContent() {
             </div>
             <div className="w-full h-3 rounded-full overflow-hidden relative" style={{ background: "rgba(255,255,255,0.04)" }}>
               <div className="h-full rounded-full xp-bar-fill"
-                style={{ width: xpMounted ? `${Math.max(progress, 2)}%` : "0%", background: `linear-gradient(90deg, ${levelInfo.tier.color}90, ${levelInfo.tier.color})`, boxShadow: `0 0 12px ${levelInfo.tier.color}50, 0 0 24px ${levelInfo.tier.color}20`, transition: "width 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)" }} />
+                style={{ width: `${Math.max(progress, 2)}%`, background: `linear-gradient(90deg, ${levelInfo.tier.color}90, ${levelInfo.tier.color})`, boxShadow: `0 0 12px ${levelInfo.tier.color}50, 0 0 24px ${levelInfo.tier.color}20`, transition: "width 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)" }} />
             </div>
           </div>
 
+          {/* ═══ 3.3) Daily ready nudge — only renders when the daily Clock In is available ═══ */}
+          <DailyReadyNudge />
+
+          {/* ═══ 3.4) Streak Revive — only renders when a 24h grace window is open ═══ */}
+          <StreakReviveBanner />
+
           {/* ═══ 3.5) Your Classes — quick row that links into the notebook ═══ */}
           <YourClassesRow />
+
+          {/* ═══ 3.7) Daily Drill — 5 questions you got wrong ═══ */}
+          <DailyDrillWidget />
 
           {/* ═══ 4) Today's Missions ═══ */}
           <div className="mb-8 animate-slide-up" style={{ animationDelay: "0.1s" }}>
@@ -833,7 +802,7 @@ function DashboardContent() {
                 })}
               </div>
 
-              {/* ═══ 7-Day Activity Chart ═══ */}
+              {/* ═══ 7-Day Activity Chart — sits below YOUR SUBJECTS, fills the column next to Achievements ═══ */}
               <div className="mt-6">
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="font-bebas text-lg text-cream tracking-wider">WEEKLY ACTIVITY</h2>
@@ -842,7 +811,7 @@ function DashboardContent() {
                     <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full" style={{ background: "#22C55E" }} /> Correct</span>
                   </div>
                 </div>
-                <div className="rounded-2xl p-5 relative overflow-hidden"
+                <div className="rounded-2xl p-5 sm:p-6 relative overflow-hidden"
                   style={{
                     background: "linear-gradient(160deg, rgba(74,144,217,0.06) 0%, rgba(10,16,32,0.95) 30%, rgba(8,14,26,1) 100%)",
                     border: "1px solid rgba(74,144,217,0.1)",
@@ -862,8 +831,8 @@ function DashboardContent() {
 
                     return (
                       <>
-                        {/* Bar chart */}
-                        <div className="flex items-end justify-between gap-2 relative z-10" style={{ height: 180 }}>
+                        {/* Bar chart — taller than v0 since we now own the empty space */}
+                        <div className="flex items-end justify-between gap-2 sm:gap-3 relative z-10" style={{ height: 240 }}>
                           {weeklyChart.map((d, i) => {
                             const isToday = i === weeklyChart.length - 1;
                             const qHeight = (d.questions / maxQ) * 100;
@@ -873,7 +842,7 @@ function DashboardContent() {
                               <div key={i} className="flex-1 flex flex-col items-center gap-1 group relative">
                                 {/* Tooltip on hover */}
                                 <div className="absolute -top-16 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none z-20"
-                                  style={{ minWidth: 100 }}>
+                                  style={{ minWidth: 110 }}>
                                   <div className="rounded-lg px-3 py-2 text-center"
                                     style={{ background: "rgba(10,16,32,0.95)", border: "1px solid rgba(74,144,217,0.3)", boxShadow: "0 4px 20px rgba(0,0,0,0.5)" }}>
                                     <p className="text-cream text-[10px] font-semibold">{d.date}</p>
@@ -883,14 +852,14 @@ function DashboardContent() {
                                 </div>
 
                                 {/* Bars container */}
-                                <div className="w-full flex items-end justify-center gap-[3px]" style={{ height: 150 }}>
+                                <div className="w-full flex items-end justify-center gap-1.5" style={{ height: 200 }}>
                                   {/* Questions bar */}
                                   <div className="rounded-t-md transition-all duration-1000 ease-out relative overflow-hidden"
                                     style={{
-                                      width: "40%",
+                                      width: "42%",
                                       height: chartAnimated ? `${Math.max(qHeight, d.questions > 0 ? 8 : 0)}%` : "0%",
                                       background: "linear-gradient(180deg, #4A90D9 0%, #2D6BB5 100%)",
-                                      boxShadow: d.questions > 0 ? "0 0 10px rgba(74,144,217,0.3)" : undefined,
+                                      boxShadow: d.questions > 0 ? "0 0 12px rgba(74,144,217,0.35)" : undefined,
                                       transitionDelay: `${i * 80}ms`,
                                     }}>
                                     <div className="absolute inset-0 opacity-20"
@@ -899,10 +868,10 @@ function DashboardContent() {
                                   {/* Correct bar */}
                                   <div className="rounded-t-md transition-all duration-1000 ease-out relative overflow-hidden"
                                     style={{
-                                      width: "40%",
+                                      width: "42%",
                                       height: chartAnimated ? `${Math.max(cHeight, d.correct > 0 ? 8 : 0)}%` : "0%",
                                       background: "linear-gradient(180deg, #22C55E 0%, #16A34A 100%)",
-                                      boxShadow: d.correct > 0 ? "0 0 10px rgba(34,197,94,0.3)" : undefined,
+                                      boxShadow: d.correct > 0 ? "0 0 12px rgba(34,197,94,0.35)" : undefined,
                                       transitionDelay: `${i * 80 + 100}ms`,
                                     }}>
                                     <div className="absolute inset-0 opacity-20"
@@ -911,7 +880,7 @@ function DashboardContent() {
                                 </div>
 
                                 {/* Day label */}
-                                <span className={`text-[10px] font-bebas tracking-wider mt-1 ${isToday ? "text-electric" : "text-cream/30"}`}>
+                                <span className={`text-[11px] font-bebas tracking-wider mt-1 ${isToday ? "text-electric" : "text-cream/35"}`}>
                                   {isToday ? "Today" : d.day}
                                 </span>
                               </div>
@@ -920,21 +889,21 @@ function DashboardContent() {
                         </div>
 
                         {/* Summary stats below chart */}
-                        <div className="flex items-center justify-between mt-4 pt-3 border-t border-white/[0.04]">
-                          <div className="flex items-center gap-4">
+                        <div className="flex items-center justify-between mt-5 pt-4 border-t border-white/[0.04]">
+                          <div className="flex items-center gap-5 sm:gap-7">
                             <div>
-                              <span className="font-bebas text-xl text-electric">{totalWeek}</span>
-                              <span className="text-cream/25 text-[9px] ml-1">questions</span>
+                              <span className="font-bebas text-2xl text-electric tabular-nums">{totalWeek}</span>
+                              <span className="text-cream/30 text-[10px] ml-1.5 uppercase tracking-wider">questions</span>
                             </div>
                             <div>
-                              <span className="font-bebas text-xl text-green-400">{totalWeek > 0 ? Math.round((totalCorrect / totalWeek) * 100) : 0}%</span>
-                              <span className="text-cream/25 text-[9px] ml-1">accuracy</span>
+                              <span className="font-bebas text-2xl text-green-400 tabular-nums">{totalWeek > 0 ? Math.round((totalCorrect / totalWeek) * 100) : 0}%</span>
+                              <span className="text-cream/30 text-[10px] ml-1.5 uppercase tracking-wider">accuracy</span>
                             </div>
                           </div>
                           <div className="flex items-center gap-1.5">
-                            <img src={cdnUrl("/F.png")} alt="Fangs" className="w-4 h-4 object-contain" />
-                            <span className="font-bebas text-lg text-gold">{totalCoins}</span>
-                            <span className="text-cream/25 text-[9px] ml-0.5">earned</span>
+                            <img src={cdnUrl("/F.png")} alt="Fangs" className="w-5 h-5 object-contain" />
+                            <span className="font-bebas text-2xl text-gold tabular-nums">{totalCoins}</span>
+                            <span className="text-cream/30 text-[10px] ml-0.5 uppercase tracking-wider">earned</span>
                           </div>
                         </div>
                       </>
@@ -942,6 +911,7 @@ function DashboardContent() {
                   })()}
                 </div>
               </div>
+
             </div>
 
             {/* Right sidebar */}

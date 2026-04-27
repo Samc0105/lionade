@@ -71,7 +71,10 @@ export async function POST(req: NextRequest) {
       .select()
       .single();
 
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    if (error) {
+      console.error("[arena/challenge]", error.message);
+      return NextResponse.json({ error: "Couldn't update challenge." }, { status: 500 });
+    }
 
     // Notify the challenged user (non-blocking)
     try {

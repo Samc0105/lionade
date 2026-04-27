@@ -16,35 +16,50 @@ export async function GET(req: NextRequest) {
   const todayMissions = getDailyMissions();
   const todayDate = new Date().toISOString().split("T")[0];
 
-  // Fetch existing rows for today
-  const { data: existingRows } = await supabaseAdmin
-    .from("user_daily_missions")
-    .select("*")
-    .eq("user_id", userId)
-    .eq("mission_date", todayDate);
+  // Batched: was N sequential round-trips per mission (computeMissionProgress + per-mission update/insert)
+  const [{ data: existingRows }, progresses] = await Promise.all([
+    supabaseAdmin
+      .from("user_daily_missions")
+      .select("*")
+      .eq("user_id", userId)
+      .eq("mission_date", todayDate),
+    Promise.all(todayMissions.map(m => computeMissionProgress(userId, m))),
+  ]);
 
   const existingMap = new Map(
     (existingRows ?? []).map((r: any) => [r.mission_id, r])
   );
 
   const results: MissionWithProgress[] = [];
+  const rowsToWrite: Array<{
+    user_id: string;
+    mission_date: string;
+    mission_id: string;
+    progress: number;
+    completed: boolean;
+    completed_at: string | null;
+    claimed?: boolean;
+  }> = [];
+  const nowIso = new Date().toISOString();
 
-  for (const mission of todayMissions) {
-    const existing = existingMap.get(mission.id);
-    const progress = await computeMissionProgress(userId, mission);
+  for (let i = 0; i < todayMissions.length; i++) {
+    const mission = todayMissions[i];
+    const progress = progresses[i];
     const completed = progress >= mission.target;
+    const existing = existingMap.get(mission.id);
 
     if (existing) {
       // Update progress if changed
       if (existing.progress !== progress || existing.completed !== completed) {
-        await supabaseAdmin
-          .from("user_daily_missions")
-          .update({
-            progress,
-            completed,
-            completed_at: completed && !existing.completed ? new Date().toISOString() : existing.completed_at,
-          })
-          .eq("id", existing.id);
+        rowsToWrite.push({
+          user_id: userId,
+          mission_date: todayDate,
+          mission_id: mission.id,
+          progress,
+          completed,
+          completed_at: completed && !existing.completed ? nowIso : existing.completed_at,
+          claimed: existing.claimed,
+        });
       }
 
       results.push({
@@ -55,16 +70,14 @@ export async function GET(req: NextRequest) {
       });
     } else {
       // Create new row
-      await supabaseAdmin
-        .from("user_daily_missions")
-        .insert({
-          user_id: userId,
-          mission_date: todayDate,
-          mission_id: mission.id,
-          progress,
-          completed,
-          completed_at: completed ? new Date().toISOString() : null,
-        });
+      rowsToWrite.push({
+        user_id: userId,
+        mission_date: todayDate,
+        mission_id: mission.id,
+        progress,
+        completed,
+        completed_at: completed ? nowIso : null,
+      });
 
       results.push({
         ...mission,
@@ -73,6 +86,12 @@ export async function GET(req: NextRequest) {
         claimed: false,
       });
     }
+  }
+
+  if (rowsToWrite.length > 0) {
+    await supabaseAdmin
+      .from("user_daily_missions")
+      .upsert(rowsToWrite, { onConflict: "user_id,mission_date,mission_id" });
   }
 
   return NextResponse.json({

@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useAuth } from "@/lib/auth";
 import { useUserStats, useStreakInfo, isStreakExpired, resetExpiredStreak, mutateUserStats } from "@/lib/hooks";
 import { formatCoins } from "@/lib/mockData";
@@ -64,6 +65,7 @@ function StatSkeleton({ width = "w-8" }: { width?: string }) {
 
 const NAV_LINKS = [
   { href: "/dashboard", label: "Dashboard" },
+  { href: "/academia", label: "Academia" },
   { href: "/learn", label: "Learn" },
   { href: "/compete", label: "Compete" },
   { href: "/social", label: "Social" },
@@ -96,13 +98,9 @@ export default function Navbar() {
   const { stats, mutate: mutateStats } = useUserStats(user?.id);
   const { plan: userPlan, isPaid } = usePlan();
 
-  // Memoized avatar URL so the <img src> stays stable across re-renders.
-  // Without this, every render creates a new fallback string and the browser
-  // treats it as a new resource — causing a flash on tab return.
-  const avatarUrl = useMemo(
-    () => stats?.avatar ?? user?.avatar ?? null,
-    [stats?.avatar, user?.avatar],
-  );
+  // DiceBear avatar URL — pulled from the profile row via useUserStats,
+  // with a fallback to the auth user record while stats are loading.
+  const avatarUrl = stats?.avatar ?? user?.avatar ?? "";
   const { streakInfo, mutateStreakInfo } = useStreakInfo(user?.id);
   const [streakResetDone, setStreakResetDone] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
@@ -128,8 +126,20 @@ export default function Navbar() {
   const [unreadCount, setUnreadCount] = useState<number | null>(null);
   const [showNotifPanel, setShowNotifPanel] = useState(false);
   const notifRef = useRef<HTMLDivElement>(null);
-  const [bellTilt, setBellTilt] = useState(false);
   const prevUnreadRef = useRef<number | null>(null);
+
+  // framer-motion: respect reduced-motion preference for both micro-anims.
+  const reduceMotion = useReducedMotion();
+
+  // Bell bounce trigger — increments each time unreadCount goes UP, used as
+  // a `key` on the motion.div so React re-mounts and re-runs the animation.
+  // Skips the initial null -> number hydration transition (see effect below).
+  const [bellBounceKey, setBellBounceKey] = useState(0);
+
+  // Fangs +N pop — track previous coin value, push deltas into a small queue
+  // of {id, amount} entries that AnimatePresence renders + reaps on exit.
+  const prevCoinsRef = useRef<number | null>(null);
+  const [coinPops, setCoinPops] = useState<Array<{ id: number; amount: number }>>([]);
 
   const loadNotifications = useCallback(async () => {
     if (!user?.id) return;
@@ -149,24 +159,39 @@ export default function Navbar() {
     return () => clearInterval(iv);
   }, [user?.id, loadNotifications]);
 
-  // Tilt the bell when unreadCount actually increases (new notif arrived).
-  // Ignore the initial null -> number transition on first load so we don't
-  // shake every page mount. Respects prefers-reduced-motion.
+  // Bounce the bell when unreadCount increases (new notif arrived). Skips the
+  // initial null -> number hydration transition so we don't bounce on first
+  // paint. framer-motion's useReducedMotion silences the actual animation —
+  // we still bump the key (cheap), but the motion.div will not animate.
   useEffect(() => {
     const prev = prevUnreadRef.current;
     if (prev !== null && unreadCount !== null && unreadCount > prev) {
-      const reduceMotion =
-        typeof window !== "undefined" &&
-        window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-      if (!reduceMotion) {
-        setBellTilt(true);
-        const t = setTimeout(() => setBellTilt(false), 600);
-        prevUnreadRef.current = unreadCount;
-        return () => clearTimeout(t);
-      }
+      setBellBounceKey(k => k + 1);
     }
     prevUnreadRef.current = unreadCount;
   }, [unreadCount]);
+
+  // Pop a "+N" chip above the Fangs pill whenever the displayed value goes
+  // UP. We compare against the same source the Fangs pill renders (stats →
+  // user fallback), and skip the initial null -> number hydration so we don't
+  // pop on first paint. Each pop has a unique id so AnimatePresence can
+  // exit-animate prior chips while a fresh one mounts.
+  const displayedCoins =
+    stats?.coins ?? (user?.statsLoaded ? user?.coins : user?.coins ?? null);
+  useEffect(() => {
+    if (typeof displayedCoins !== "number") return;
+    const prev = prevCoinsRef.current;
+    if (prev !== null && displayedCoins > prev) {
+      const delta = displayedCoins - prev;
+      const id = Date.now() + Math.random();
+      setCoinPops(p => [...p, { id, amount: delta }]);
+      // Reap after the exit animation finishes (600ms anim + small buffer).
+      window.setTimeout(() => {
+        setCoinPops(p => p.filter(x => x.id !== id));
+      }, 900);
+    }
+    prevCoinsRef.current = displayedCoins;
+  }, [displayedCoins]);
 
   // Realtime subscription for new notifications
   useEffect(() => {
@@ -213,7 +238,15 @@ export default function Navbar() {
   const isLanding = pathname === "/home";
   const isLogin = pathname === "/login";
   const isOnboarding = pathname === "/onboarding";
-  const showAppNav = !!user && !isComingSoon && !isLanding && !isLogin && !isOnboarding;
+
+  // Defer auth-driven render to after hydration. useAuth seeds from
+  // localStorage on the client, so the SSR pass renders the signed-out
+  // shell but the first client render renders the full navbar with all
+  // its <Link>s — guaranteed mismatch without this gate.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
+
+  const showAppNav = mounted && !!user && !isComingSoon && !isLanding && !isLogin && !isOnboarding;
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -365,38 +398,83 @@ export default function Navbar() {
               </div>
             )}
 
-            {/* Right Section */}
-            <div className="flex items-center gap-2">
+            {/* Right Section
+                Unified silhouette: every non-avatar element settles at h-8 +
+                rounded-full so the rhythm reads as a single row of equal
+                pills. Static info pills (Fangs, Streak) share the same neutral
+                bg / border treatment — only the icon color differentiates
+                them. ClockIn keeps its gold animation as the lone CTA. */}
+            <div className="flex items-center gap-1.5 sm:gap-2">
               {showAppNav && user && (
                 <>
-                  {/* Coin Pill */}
-                  <Link href="/wallet" className="hidden sm:flex items-center gap-2 rounded-lg px-4 py-1.5
-                    cursor-pointer group relative transition-all duration-200 active:scale-95
-                    shadow-md shadow-gold/30 hover:shadow-gold/50"
-                    style={{ background: "linear-gradient(135deg, #FFD700, #F59E0B)" }}>
-                    <img src={cdnUrl("/F.png")} alt="Fangs" className="w-5 h-5 object-contain" />
-                    <span className="font-bebas text-base text-navy tracking-wider leading-none font-bold">
-                      {stats
-                        ? <CountUp value={stats.coins} format={formatCoins} />
-                        : user.statsLoaded
-                          ? <CountUp value={user.coins} format={formatCoins} />
-                          : <StatSkeleton />}
-                    </span>
-                  </Link>
+                  {/* Coin Pill — neutral pill with gold Fangs icon. Hosts the
+                      animated +N chip absolutely above it. */}
+                  <div className="relative hidden sm:block">
+                    <Link
+                      href="/wallet"
+                      aria-label="Fangs balance — open wallet"
+                      className="h-8 inline-flex items-center gap-1.5 rounded-full px-3
+                        bg-white/[0.04] border border-white/[0.08]
+                        cursor-pointer transition-colors duration-200
+                        hover:bg-white/[0.07] hover:border-white/[0.14] active:scale-[0.97]"
+                    >
+                      <img src={cdnUrl("/F.png")} alt="" className="w-4 h-4 object-contain" />
+                      <span className="font-bebas text-[15px] text-gold tracking-wider leading-none tabular-nums">
+                        {stats
+                          ? <CountUp id="user-coins" value={stats.coins} format={formatCoins} />
+                          : user.statsLoaded
+                            ? <CountUp id="user-coins" value={user.coins} format={formatCoins} />
+                            : <CountUp id="user-coins" value={user.coins ?? 0} format={formatCoins} />}
+                      </span>
+                    </Link>
 
-                  {/* Streak Pill */}
+                    {/* +N pop — absolutely positioned above the pill so it
+                        doesn't shift any layout. AnimatePresence reaps each
+                        chip after exit. Reduced-motion: skip transition. */}
+                    <div
+                      className="pointer-events-none absolute left-1/2 -translate-x-1/2 -top-1 z-10"
+                      aria-hidden="true"
+                    >
+                      <AnimatePresence>
+                        {coinPops.map(pop => (
+                          <motion.span
+                            key={pop.id}
+                            initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 8 }}
+                            animate={reduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
+                            exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: -16 }}
+                            transition={
+                              reduceMotion
+                                ? { duration: 0 }
+                                : { duration: 0.6, ease: [0.16, 1, 0.3, 1] }
+                            }
+                            className="absolute left-1/2 -translate-x-1/2 -top-1 whitespace-nowrap
+                              font-bebas text-[15px] tracking-wider text-gold leading-none tabular-nums"
+                            style={{ textShadow: "0 0 10px rgba(255,215,0,0.55)" }}
+                          >
+                            +{pop.amount}
+                          </motion.span>
+                        ))}
+                      </AnimatePresence>
+                    </div>
+                  </div>
+
+                  {/* Streak Pill — same shell as Fangs, orange icon does the
+                      differentiation. Tooltip + click-to-open-modal preserved. */}
                   <button
                     onClick={() => setShowStreakModal(true)}
-                    className="hidden sm:flex items-center gap-1 bg-orange-500/10 border border-orange-500/20
-                      rounded-full px-2.5 py-1 cursor-pointer group relative hover:bg-orange-500/15 transition-colors"
+                    aria-label={`Streak${stats?.streak ? ` — ${stats.streak} days` : ""}`}
+                    className="hidden sm:inline-flex h-8 items-center gap-1.5 rounded-full px-3
+                      bg-white/[0.04] border border-white/[0.08]
+                      cursor-pointer group relative transition-colors duration-200
+                      hover:bg-white/[0.07] hover:border-white/[0.14] active:scale-[0.97]"
                   >
-                    <Fire size={16} weight="fill" color="#FB923C" aria-hidden="true" />
-                    <span className="font-bebas text-base text-orange-400 tracking-wider leading-none">
+                    <Fire size={14} weight="fill" color="#FB923C" aria-hidden="true" />
+                    <span className="font-bebas text-[15px] text-orange-400 tracking-wider leading-none tabular-nums">
                       {stats !== null
-                        ? <CountUp value={isStreakExpired(streakInfo?.lastQuizAt ?? null) ? 0 : stats.streak} duration={400} />
+                        ? <CountUp id="user-streak" value={isStreakExpired(streakInfo?.lastQuizAt ?? null) ? 0 : stats.streak} duration={400} />
                         : user.statsLoaded
-                          ? <CountUp value={isStreakExpired(streakInfo?.lastQuizAt ?? null) ? 0 : user.streak} duration={400} />
-                          : <StatSkeleton width="w-5" />}
+                          ? <CountUp id="user-streak" value={isStreakExpired(streakInfo?.lastQuizAt ?? null) ? 0 : user.streak} duration={400} />
+                          : <CountUp id="user-streak" value={user.streak ?? 0} duration={400} />}
                     </span>
                     <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 px-2 py-1 rounded bg-navy-100
                       border border-electric/20 text-xs text-cream/70 opacity-0 group-hover:opacity-100
@@ -405,23 +483,35 @@ export default function Navbar() {
                     </div>
                   </button>
 
-                  {/* Notification Bell */}
+                  {/* Notification Bell — icon-only square pill, h-8 w-8 to
+                      match the row. Bell wrapped in a motion.div that bounces
+                      on each new arrival via the bellBounceKey re-mount. */}
                   <div className="relative hidden sm:block" ref={notifRef}>
                     <button
                       onClick={openNotifPanel}
                       aria-label={`Notifications${(unreadCount ?? 0) > 0 ? ` (${unreadCount} unread)` : ""}`}
-                      className="relative flex items-center justify-center w-8 h-8 rounded-full hover:bg-white/10 transition-colors"
+                      className="relative h-8 w-8 grid place-items-center rounded-full
+                        bg-white/[0.04] border border-white/[0.08]
+                        hover:bg-white/[0.07] hover:border-white/[0.14] transition-colors duration-200"
                     >
-                      <span
+                      <motion.div
+                        key={bellBounceKey}
+                        initial={false}
+                        animate={
+                          bellBounceKey === 0 || reduceMotion
+                            ? { scale: 1 }
+                            : { scale: [1, 1.2, 1] }
+                        }
+                        transition={
+                          reduceMotion
+                            ? { duration: 0 }
+                            : { duration: 0.25, ease: [0.34, 1.56, 0.64, 1] }
+                        }
                         className="inline-flex"
-                        style={{
-                          transformOrigin: "top center",
-                          animation: bellTilt ? "bell-tilt 600ms var(--ease-out-emil)" : undefined,
-                        }}
                         aria-hidden="true"
                       >
-                        <Bell size={18} weight="regular" color="currentColor" />
-                      </span>
+                        <Bell size={16} weight="regular" color="currentColor" />
+                      </motion.div>
                       {(unreadCount ?? 0) > 0 && (
                         <span
                           className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 rounded-full flex items-center justify-center px-1 text-[9px] font-bold notif-badge-pulse"
@@ -506,21 +596,17 @@ export default function Navbar() {
                     : <UpgradePill className="hidden lg:inline-flex" />
                   }
 
-                  {/* Avatar + Dropdown */}
+                  {/* Avatar + Dropdown — soft border so it harmonizes with the
+                      neutral pills next to it instead of competing. */}
                   <div className="relative" ref={dropdownRef}>
                     <button
                       onClick={toggleDropdown}
-                      className="w-8 h-8 rounded-full border-2 border-electric/40 overflow-hidden
-                        hover:border-electric transition-colors duration-200 cursor-pointer flex-shrink-0"
+                      aria-label={`${user.username} — open menu`}
+                      className="w-8 h-8 rounded-full border border-white/[0.08] overflow-hidden
+                        hover:border-white/20 transition-colors duration-200 cursor-pointer flex-shrink-0"
                       style={{ backgroundColor: "rgba(74, 144, 217, 0.25)" }}
                     >
-                      {avatarUrl && (
-                        <img
-                          src={avatarUrl}
-                          alt={user.username}
-                          className="w-full h-full object-cover"
-                        />
-                      )}
+                      <img src={avatarUrl} alt={user.username} className="w-8 h-8 rounded-full object-cover" />
                     </button>
 
                     {showDropdown && (
@@ -556,7 +642,7 @@ export default function Navbar() {
                                 className="w-12 h-12 rounded-full overflow-hidden border-2 border-electric/50 flex-shrink-0"
                                 style={{ boxShadow: "0 0 16px rgba(74,144,217,0.2)" }}
                               >
-                                {avatarUrl && <img src={avatarUrl} alt="" className="w-full h-full object-cover" />}
+                                <img src={avatarUrl} alt={user.username} className="w-12 h-12 rounded-full object-cover" />
                               </div>
                               <div className="min-w-0 flex-1">
                                 <p className="text-cream font-bold text-[15px] truncate">{user.username}</p>

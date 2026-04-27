@@ -106,8 +106,40 @@ export function isStreakExpired(lastQuizAt: string | null): boolean {
   return Date.now() > expires;
 }
 
-/** Reset expired streak in Supabase — sets streak=0, clears activity fields */
+/** Reset expired streak in Supabase — sets streak=0, clears activity fields.
+ *
+ *  Streak Revive: before zeroing, snapshots the current streak into
+ *  `streak_revives` with a 24h grace window. The user can then pay
+ *  (5K Fangs or $0.99) to restore the streak. If the window expires
+ *  unclaimed, the streak stays at zero. The unique partial index
+ *  `uniq_streak_revives_one_open_per_user` guarantees we never open a
+ *  second window while one is still open — ON CONFLICT swallows the
+ *  duplicate insert quietly.
+ */
+const REVIVE_WINDOW_MS = 24 * 60 * 60 * 1000;
+
 export async function resetExpiredStreak(userId: string): Promise<void> {
+  // Snapshot the current streak before we zero it. Only worth opening a
+  // revive window if there was actually a meaningful streak to lose.
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("streak")
+    .eq("id", userId)
+    .maybeSingle();
+
+  const previousStreak = profile?.streak ?? 0;
+  if (previousStreak >= 2) {
+    const expiresAt = new Date(Date.now() + REVIVE_WINDOW_MS).toISOString();
+    // Insert; the unique partial index on (user_id) WHERE status='open'
+    // means a duplicate insert (window already open) errors silently.
+    await supabase.from("streak_revives").insert({
+      user_id: userId,
+      previous_streak: previousStreak,
+      expires_at: expiresAt,
+      status: "open",
+    });
+  }
+
   await supabase
     .from("profiles")
     .update({

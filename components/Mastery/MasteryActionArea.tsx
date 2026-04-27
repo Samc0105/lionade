@@ -1,7 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { motion, useReducedMotion } from "framer-motion";
 import { ArrowRight, PaperPlaneTilt } from "@phosphor-icons/react";
+import Confetti from "@/components/Confetti";
 
 /**
  * The bottom-of-chat action area. Its shape depends on what's pending on
@@ -22,12 +24,19 @@ export interface LiveQuestion {
   challengeToken: string;
 }
 
+/**
+ * Optional return shape from onAnswer — when present, the option-card animation
+ * uses it to flash green (correct) or shake red (wrong). The page's doAnswer
+ * already has these from the /answer response, so it just propagates them.
+ */
+export type AnswerOutcome = { wasCorrect: boolean; correctIndex: number };
+
 interface Props {
   pending: { type: "teach" | "question" | "socratic"; [k: string]: unknown } | null;
   liveQuestion: LiveQuestion | null;    // only populated when pending.type === 'question'
   disabled?: boolean;
   onContinue: () => Promise<void> | void;
-  onAnswer: (selectedIndex: number) => Promise<void> | void;
+  onAnswer: (selectedIndex: number) => Promise<AnswerOutcome | void> | AnswerOutcome | void;
   onSocraticSubmit: (reply: string) => Promise<void> | void;
 }
 
@@ -44,49 +53,125 @@ export default function MasteryActionArea({
 }
 
 // ── Four option buttons for a live question ─────────────────────────────────
-function QuestionOptions({
+// The wrapper just keys the body by questionId so all per-question state
+// (picked, outcome, submitting) resets cleanly when the next question arrives.
+function QuestionOptions(props: {
+  q: LiveQuestion;
+  disabled?: boolean;
+  onAnswer: (i: number) => Promise<AnswerOutcome | void> | AnswerOutcome | void;
+}) {
+  return <QuestionOptionsBody key={props.q.questionId} {...props} />;
+}
+
+function QuestionOptionsBody({
   q, disabled, onAnswer,
-}: { q: LiveQuestion; disabled?: boolean; onAnswer: (i: number) => Promise<void> | void }) {
+}: {
+  q: LiveQuestion;
+  disabled?: boolean;
+  onAnswer: (i: number) => Promise<AnswerOutcome | void> | AnswerOutcome | void;
+}) {
   const [picked, setPicked] = useState<number | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [outcome, setOutcome] = useState<AnswerOutcome | null>(null);
+  const reducedMotion = useReducedMotion();
 
-  const submit = async (i: number) => {
-    if (disabled || submitting) return;
+  const onPick = async (i: number) => {
+    if (disabled || submitting || picked !== null) return;
     setPicked(i);
     setSubmitting(true);
-    try { await onAnswer(i); }
-    finally { setSubmitting(false); }
+    try {
+      const result = await onAnswer(i);
+      if (result && typeof result === "object" && "wasCorrect" in result) {
+        setOutcome(result);
+      }
+    } finally { setSubmitting(false); }
   };
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="relative flex flex-col gap-2">
       {q.options.map((opt, i) => {
         const isPicked = i === picked;
+        const revealed = outcome !== null && picked !== null;
+        const isCorrectReveal = revealed && isPicked && outcome.wasCorrect;
+        const isWrongReveal = revealed && isPicked && !outcome.wasCorrect;
+        const isCorrectIndexReveal = revealed && i === outcome.correctIndex && i !== picked;
+
+        const animateProps = reducedMotion
+          ? undefined
+          : isCorrectReveal
+            ? { scale: [1, 1.04, 1] }
+            : isWrongReveal
+              ? { x: [0, -6, 6, -4, 4, 0] }
+              : undefined;
+
+        const transitionProps = isCorrectReveal
+          ? { duration: 0.25, ease: "easeOut" as const }
+          : isWrongReveal
+            ? { duration: 0.28, ease: "easeOut" as const }
+            : undefined;
+
+        const interactiveAnims = picked === null && !disabled && !reducedMotion
+          ? { whileHover: { y: -2 }, whileTap: { scale: 0.98 } }
+          : {};
+
+        // Color state: pre-reveal uses the original gold-on-pick styling. Post-
+        // reveal, the picked card flashes green or red, and the actually-correct
+        // card subtly highlights green even if not picked.
+        const stateClasses = isCorrectReveal
+          ? "bg-[#22C55E]/[0.10] border-[#22C55E]/60 text-cream"
+          : isWrongReveal
+            ? "bg-[#EF4444]/[0.10] border-[#EF4444]/60 text-cream"
+            : isCorrectIndexReveal
+              ? "bg-[#22C55E]/[0.06] border-[#22C55E]/40 text-cream"
+              : isPicked
+                ? "bg-gold/[0.08] border-gold/40 text-cream"
+                : "bg-white/[0.02] border-white/[0.08] hover:border-white/[0.2] hover:bg-white/[0.04] text-cream/90";
+
+        const labelClass = isCorrectReveal || isCorrectIndexReveal
+          ? "text-[#22C55E]"
+          : isWrongReveal
+            ? "text-[#EF4444]"
+            : isPicked
+              ? "text-gold"
+              : "text-cream/40";
+
         return (
-          <button
+          <motion.button
             key={i}
-            onClick={() => submit(i)}
-            disabled={disabled || submitting}
+            onClick={() => onPick(i)}
+            disabled={disabled || picked !== null}
             className={`
               group relative flex items-start gap-3 text-left w-full
               rounded-[8px] border px-4 py-3 text-[14px] leading-relaxed
-              transition-all duration-200
-              ${isPicked
-                ? "bg-gold/[0.08] border-gold/40 text-cream"
-                : "bg-white/[0.02] border-white/[0.08] hover:border-white/[0.2] hover:bg-white/[0.04] text-cream/90"}
-              disabled:opacity-50 disabled:cursor-not-allowed
+              transition-colors duration-200
+              ${stateClasses}
+              disabled:cursor-not-allowed
             `}
+            animate={animateProps}
+            transition={transitionProps}
+            {...interactiveAnims}
           >
             <span className={`
               font-mono text-[10px] uppercase tracking-wider mt-0.5 shrink-0
-              ${isPicked ? "text-gold" : "text-cream/40"}
+              ${labelClass}
             `}>
               {String.fromCharCode(65 + i)}
             </span>
             <span className="flex-1">{opt}</span>
-          </button>
+          </motion.button>
         );
       })}
+
+      {outcome?.wasCorrect && (
+        <Confetti
+          key={`mastery-correct-${q.questionId}`}
+          trigger={true}
+          count={30}
+          origin="center"
+          palette={["#22C55E", "#FFD700", "#4ADE80"]}
+          duration={1200}
+        />
+      )}
     </div>
   );
 }

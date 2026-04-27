@@ -199,7 +199,7 @@ export default function LearnPage() {
                     {ChipIcon && <ChipIcon size={12} weight="fill" color={chip.color} aria-hidden="true" />}
                   </div>
                   <p className="font-bebas text-[26px] tabular-nums leading-none" style={{ color: chip.color }}>
-                    <CountUp value={displayValue} duration={600} />
+                    <CountUp id={`learn-chip-${chip.label}`} value={displayValue} duration={600} />
                     {chip.suffix && <span className="text-cream/30 text-sm ml-1.5">{chip.suffix}</span>}
                   </p>
                   {"extra" in chip && chip.extra && (

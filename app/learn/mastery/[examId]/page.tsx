@@ -4,10 +4,11 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import useSWR from "swr";
 import Link from "next/link";
-import { CaretLeft, CaretUp, CaretDown, Clock, DotsThree, Sparkle } from "@phosphor-icons/react";
+import { CaretLeft, CaretUp, CaretDown, Clock, DotsThree, Sparkle, ShareNetwork } from "@phosphor-icons/react";
 import Navbar from "@/components/Navbar";
 import SpaceBackground from "@/components/SpaceBackground";
 import Confetti from "@/components/Confetti";
+import ShareCard from "@/components/ShareCard";
 import MasteryProgressBar from "@/components/Mastery/MasteryProgressBar";
 import SubtopicRail, { type SubtopicRailItem } from "@/components/Mastery/SubtopicRail";
 import MasteryMessage, { type MessageShape } from "@/components/Mastery/MasteryMessage";
@@ -102,6 +103,7 @@ export default function MasterySessionPage() {
   const [bootError, setBootError] = useState<string | null>(null);
   const [celebrateKey, setCelebrateKey] = useState(0);
   const [headerCollapsed, setHeaderCollapsed] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
 
   // Resolve active session on mount (idempotent)
   useEffect(() => {
@@ -335,6 +337,9 @@ export default function MasterySessionPage() {
       );
       if (!r.ok || !r.data) return;
       const ans = r.data;
+      // Capture the outcome to return to QuestionOptions for its
+      // green/red feedback animation. Returned at end of try block.
+      const outcomeForUi = { wasCorrect: ans.wasCorrect, correctIndex: ans.correctIndex };
 
       // OPTIMISTIC UPDATE — splice the answer + feedback messages into the
       // SWR cache directly. No network refetch, no 300ms wait, feedback
@@ -370,7 +375,7 @@ export default function MasterySessionPage() {
 
       if (ans.socraticProbe) {
         // Wait for user text reply. Queue stays as-is (still valid).
-        return;
+        return outcomeForUi;
       }
 
       // Pick the next question from the pre-fetched queue.
@@ -397,7 +402,14 @@ export default function MasterySessionPage() {
       // the instant /next resolves (~200-400ms on a cache hit). `busy`
       // stays true through both calls so the action area doesn't flicker
       // to the "Continue" state between feedback and the new question.
-      await doNext({ preferredQuestionId: nextQId });
+      //
+      // We FIRE doNext but don't await it here — that way the doAnswer
+      // promise resolves immediately after /answer returns, letting the
+      // option-card feedback animation render before the new question
+      // remounts the button. doNext flips `busy` itself; we leave busy
+      // true via a no-op finally so the action area doesn't flicker.
+      void doNext({ preferredQuestionId: nextQId });
+      return outcomeForUi;
     } finally { setBusy(false); }
   }, [sessionId, liveQuestion, busy, data?.session.pending?.subtopicId, queue, mutate, doNext, refillQueue]);
 
@@ -629,12 +641,41 @@ export default function MasterySessionPage() {
           <span><span className="tabular-nums text-cream/80">{data.session.teachingPanelsShown}</span> taught</span>
           <span><span className="tabular-nums text-cream/80">{stats.sessionTime}</span> this session</span>
           {data.session.reachedMasteryAt && (
-            <span className="text-gold flex items-center gap-1 ml-auto">
+            <span className="text-gold flex items-center gap-1">
               <Sparkle size={10} weight="fill" /> Mastered
             </span>
           )}
+          {(data.mastered || data.ready) && (
+            <button
+              type="button"
+              onClick={() => setShareOpen(true)}
+              className="ml-auto inline-flex items-center gap-1.5 rounded-full border border-gold/40 bg-gold/10 hover:bg-gold/20 px-3 py-1 text-gold transition-colors"
+              aria-label="Share milestone"
+            >
+              <ShareNetwork size={10} weight="fill" /> Share
+            </button>
+          )}
         </div>
       </div>
+
+      <ShareCard
+        open={shareOpen}
+        onClose={() => setShareOpen(false)}
+        shareTitle={`mastery-${data.exam.title.toLowerCase().replace(/\s+/g, "-").slice(0, 24)}`}
+        card={{
+          headline: data.mastered ? "MASTERED" : "READY TO PASS",
+          subline: data.exam.title,
+          bigNumber: {
+            value: `${Math.round(data.overallDisplayPct)}%`,
+            label: data.mastered ? "Mastery" : "Predicted pass",
+          },
+          stats: [
+            { label: "Questions", value: `${data.session.questionsAnswered}` },
+            { label: "Correct", value: `${data.session.correctCount}` },
+          ],
+          accent: data.mastered ? "#FFD700" : "#A855F7",
+        }}
+      />
 
       {/* Session Report FAB — sits above the fixed stats bar. Visible to
           everyone; locked below 33% mastery, then paywalled for free users. */}

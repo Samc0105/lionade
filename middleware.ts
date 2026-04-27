@@ -118,6 +118,38 @@ const ROUTE_LIMITS: RouteLimit[] = [
     windowMs: 60 * 1000,
     keyPrefix: "mastery-heartbeat",
   },
+  // Quick Note shortcut — small AI call per save when no class is set.
+  // Bound at 30/min per IP so an autoclicker can't burn through credits.
+  {
+    test: (p) => p === "/api/classes/quick-note",
+    max: 30,
+    windowMs: 60 * 1000,
+    keyPrefix: "classes-quicknote",
+  },
+  // Daily plan generation — one AI call per class per day, but cap so
+  // hitting `?regenerate=1` repeatedly can't burn credits.
+  {
+    test: (p) => /^\/api\/classes\/[^/]+\/plan$/.test(p),
+    max: 10,
+    windowMs: 60 * 1000,
+    keyPrefix: "classes-plan",
+  },
+  // Syllabus upload — Storage download + GPT-4o-mini parse per call. Capped
+  // tightly so a malicious client can't burn AI credits in a loop.
+  {
+    test: (p) => /^\/api\/classes\/[^/]+\/syllabus$/.test(p),
+    max: 5,
+    windowMs: 15 * 60 * 1000,
+    keyPrefix: "classes-syllabus",
+  },
+  // Class notes POST — kicks fire-and-forget GPT card generation per save
+  // (≥80 chars). Cap so an autoclicker can't fire 100+ background AI calls.
+  {
+    test: (p) => /^\/api\/classes\/[^/]+\/notes$/.test(p),
+    max: 15,
+    windowMs: 60 * 1000,
+    keyPrefix: "classes-notes",
+  },
 
   // Email-sending routes — anti-spam
   {
@@ -180,7 +212,7 @@ const SECURITY_HEADERS: Record<string, string> = {
     "font-src 'self' https://fonts.gstatic.com",
     `img-src 'self' data: blob: https://api.dicebear.com https://*.supabase.co${CDN_HOST ? ` https://${CDN_HOST}` : ""}`,
     "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.openai.com https://api.anthropic.com https://generativelanguage.googleapis.com https://api.groq.com https://api.stripe.com",
-    "frame-src https://js.stripe.com",
+    "frame-src https://js.stripe.com https://www.youtube.com https://www.youtube-nocookie.com",
     "frame-ancestors 'none'",
     "base-uri 'self'",
     "form-action 'self'",

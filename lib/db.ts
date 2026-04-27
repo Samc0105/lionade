@@ -415,6 +415,7 @@ export async function getEloLeaderboard(limit = 200): Promise<{
 
 // ── Weekly Activity Chart Data ────────────────────────────────
 
+// Single range query — was 7 sequential awaits per call (one per day bucket).
 export async function getWeeklyActivityChart(userId: string): Promise<{
   day: string;        // "Mon", "Tue", etc.
   date: string;       // "Apr 14"
@@ -433,39 +434,43 @@ export async function getWeeklyActivityChart(userId: string): Promise<{
   const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
-  const result = [];
+  // One query for the whole 7-day window; bucket in JS below.
+  const firstDay = days[0];
+  const lastDay = days[days.length - 1];
+  const startIso = new Date(Date.UTC(firstDay.getFullYear(), firstDay.getMonth(), firstDay.getDate())).toISOString();
+  const endIso = new Date(Date.UTC(lastDay.getFullYear(), lastDay.getMonth(), lastDay.getDate() + 1)).toISOString();
 
-  for (const day of days) {
-    const startOfDay = new Date(Date.UTC(day.getFullYear(), day.getMonth(), day.getDate()));
-    const endOfDay = new Date(Date.UTC(day.getFullYear(), day.getMonth(), day.getDate() + 1));
+  const { data: sessions } = await supabase
+    .from("quiz_sessions")
+    .select("completed_at, total_questions, correct_answers, coins_earned, xp_earned")
+    .eq("user_id", userId)
+    .gte("completed_at", startIso)
+    .lt("completed_at", endIso);
 
-    // Count quiz sessions for this day
-    const { data: sessions } = await supabase
-      .from("quiz_sessions")
-      .select("total_questions, correct_answers, coins_earned, xp_earned")
-      .eq("user_id", userId)
-      .gte("completed_at", startOfDay.toISOString())
-      .lt("completed_at", endOfDay.toISOString());
-
-    let questions = 0, correct = 0, coins = 0, xp = 0;
-    for (const s of sessions ?? []) {
-      questions += s.total_questions ?? 0;
-      correct += s.correct_answers ?? 0;
-      coins += s.coins_earned ?? 0;
-      xp += s.xp_earned ?? 0;
-    }
-
-    result.push({
-      day: dayNames[day.getDay()],
-      date: `${monthNames[day.getMonth()]} ${day.getDate()}`,
-      questions,
-      correct,
-      coins,
-      xp,
-    });
+  // Bucket sessions by UTC day key (YYYY-MM-DD).
+  const buckets: Record<string, { questions: number; correct: number; coins: number; xp: number }> = {};
+  for (const s of sessions ?? []) {
+    if (!s.completed_at) continue;
+    const key = new Date(s.completed_at).toISOString().slice(0, 10);
+    if (!buckets[key]) buckets[key] = { questions: 0, correct: 0, coins: 0, xp: 0 };
+    buckets[key].questions += s.total_questions ?? 0;
+    buckets[key].correct += s.correct_answers ?? 0;
+    buckets[key].coins += s.coins_earned ?? 0;
+    buckets[key].xp += s.xp_earned ?? 0;
   }
 
-  return result;
+  return days.map((day) => {
+    const key = new Date(Date.UTC(day.getFullYear(), day.getMonth(), day.getDate())).toISOString().slice(0, 10);
+    const b = buckets[key] ?? { questions: 0, correct: 0, coins: 0, xp: 0 };
+    return {
+      day: dayNames[day.getDay()],
+      date: `${monthNames[day.getMonth()]} ${day.getDate()}`,
+      questions: b.questions,
+      correct: b.correct,
+      coins: b.coins,
+      xp: b.xp,
+    };
+  });
 }
 
 // ── Recent Activity ───────────────────────────────────────────
@@ -603,11 +608,24 @@ export async function getUserDuels(userId: string, limit = 5) {
 
 // ── Subject Stats ─────────────────────────────────────────────
 
-export async function getSubjectStats(userId: string) {
-  const { data, error } = await supabase
+// Default: 90-day floor + 500-row cap (dashboard "recent stats").
+// Pass { lifetime: true } from the profile page where users expect totals
+// across their entire history (cap raised to 5000 to keep memory bounded).
+export async function getSubjectStats(userId: string, opts?: { lifetime?: boolean }) {
+  const lifetime = opts?.lifetime === true;
+  let q = supabase
     .from("quiz_sessions")
-    .select("subject, total_questions, correct_answers, coins_earned")
-    .eq("user_id", userId);
+    .select("subject, total_questions, correct_answers, coins_earned, completed_at")
+    .eq("user_id", userId)
+    // Order matters: when the limit caps the result we want the MOST RECENT
+    // sessions retained, not random ones from the middle of history.
+    .order("completed_at", { ascending: false })
+    .limit(lifetime ? 5000 : 500);
+  if (!lifetime) {
+    const since = new Date(Date.now() - 90 * 86_400_000).toISOString();
+    q = q.gte("completed_at", since);
+  }
+  const { data, error } = await q;
 
   if (error) throw error;
 
@@ -642,6 +660,7 @@ export async function getDailyProgress(userId: string): Promise<{
 
 // ── Recent Topics (for Continue section) ──────────────────────
 
+// Single batched relational-join query for answers — was 1 + N (up to 21) round-trips.
 export async function getRecentTopics(userId: string, limit = 8): Promise<{
   topic: string;
   subject: string;
@@ -659,20 +678,34 @@ export async function getRecentTopics(userId: string, limit = 8): Promise<{
 
   if (error || !sessions?.length) return [];
 
-  // For each session, get the topic from the first answered question
+  const sessionIds = (sessions as Array<{ id: string }>).map((s) => s.id);
+
+  // ONE query for all answers across those sessions, with relational join to questions.
+  // Order by session so the per-session "first topic seen" loop below is stable
+  // (without an order, Postgres can starve later sessions when limit is hit).
+  const { data: answers } = await supabase
+    .from("user_answers")
+    .select("session_id, questions(topic)")
+    .in("session_id", sessionIds)
+    .order("session_id", { ascending: true })
+    .limit(sessionIds.length * 5); // 5 answers per session is enough to surface one topic
+
+  // Map session_id -> first non-null topic seen.
+  const sessionTopic = new Map<string, string>();
+  for (const a of answers ?? []) {
+    const sid = (a as { session_id: string }).session_id;
+    if (sessionTopic.has(sid)) continue;
+    const topic = ((a as { questions: { topic: string } | null }).questions)?.topic ?? null;
+    if (topic) sessionTopic.set(sid, topic);
+  }
+
   const results: { topic: string; subject: string; correct_answers: number; total_questions: number; completed_at: string }[] = [];
   const seenTopics = new Set<string>();
 
   for (const session of sessions) {
     if (results.length >= limit) break;
 
-    const { data: answers } = await supabase
-      .from("user_answers")
-      .select("questions(topic)")
-      .eq("session_id", session.id)
-      .limit(1);
-
-    const topic = (answers?.[0]?.questions as unknown as { topic: string } | null)?.topic ?? null;
+    const topic = sessionTopic.get(session.id) ?? null;
 
     // Skip sessions with no topic — don't fall back to generic subject
     if (!topic) continue;
@@ -713,11 +746,17 @@ export async function getUserAchievements(userId: string): Promise<{ achievement
 
 // ── Best Scores Per Subject ───────────────────────────────────
 
+// 90-day window + 500-row cap — dashboard scoreboard, not a lifetime hall-of-fame, so trailing 90d is the right slice.
 export async function getBestScores(userId: string): Promise<Record<string, { best: number; total: number }>> {
+  const since = new Date(Date.now() - 90 * 86_400_000).toISOString();
   const { data, error } = await supabase
     .from("quiz_sessions")
-    .select("subject, correct_answers, total_questions")
-    .eq("user_id", userId);
+    .select("subject, correct_answers, total_questions, completed_at")
+    .eq("user_id", userId)
+    .gte("completed_at", since)
+    // Order so cap trims oldest first if the window is unusually busy.
+    .order("completed_at", { ascending: false })
+    .limit(500);
 
   if (error) {
     console.warn("[getBestScores] Error:", error.message);

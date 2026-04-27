@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef, useMemo } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import BackButton from "@/components/BackButton";
@@ -160,17 +160,10 @@ export default function ArenaPage() {
   // Results
   const [matchResult, setMatchResult] = useState<MatchResult | null>(null);
 
-  // Memoized avatar URLs
-  const myAvatar = useMemo(() => {
-    if (me?.avatarUrl) return me.avatarUrl;
-    if (user?.avatar) return user.avatar;
-    return `https://api.dicebear.com/7.x/adventurer/svg?seed=${user?.username ?? "player"}`;
-  }, [me?.avatarUrl, user?.avatar, user?.username]);
-
-  const opAvatar = useMemo(() => {
-    if (!opponent) return "";
-    return opponent.avatarUrl ?? `https://api.dicebear.com/7.x/adventurer/svg?seed=${opponent.username}`;
-  }, [opponent]);
+  // DiceBear avatar URLs for the arena scoreboard / pre-match. Falls
+  // through to the user-stats SWR cache; both default to "" if missing.
+  const myAvatarUrl = me?.avatarUrl ?? stats?.avatar ?? "";
+  const opAvatarUrl = opponent?.avatarUrl ?? "";
 
   // ── Load ELO on mount ──────────────────────────────────────
   useEffect(() => {
@@ -753,9 +746,9 @@ export default function ArenaPage() {
                         boxShadow: "0 0 20px rgba(239,68,68,0.05)",
                       }}>
                       <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0"
+                        aria-label={`${c.challengerName}'s avatar`}
                         style={{ border: "2px solid rgba(239,68,68,0.4)" }}>
-                        <img src={c.challengerAvatar ?? `https://api.dicebear.com/7.x/adventurer/svg?seed=${c.challengerName}`}
-                          alt={c.challengerName} className="w-full h-full object-cover" />
+                        <img src={c.challengerAvatar ?? ""} alt={c.challengerName} className="w-12 h-12 rounded-full object-cover" />
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-cream font-bold text-sm truncate">{c.challengerName}</p>
@@ -969,8 +962,9 @@ export default function ArenaPage() {
               {/* Me */}
               <div className="flex flex-col items-center">
                 <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden mb-3"
+                  aria-label="Your avatar"
                   style={{ border: `3px solid ${myTier.color}` }}>
-                  <img src={myAvatar} alt="You" className="w-full h-full object-cover" />
+                  <img src={myAvatarUrl} alt={me?.username ?? "You"} className="w-full h-full rounded-full object-cover" />
                 </div>
                 <p className="font-bold text-cream text-sm sm:text-base mb-1">{me?.username ?? "You"}</p>
                 <div className="flex items-center gap-1.5">
@@ -991,8 +985,9 @@ export default function ArenaPage() {
               {/* Opponent */}
               <div className="flex flex-col items-center">
                 <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden mb-3"
+                  aria-label={`${opponent?.username ?? "Opponent"}'s avatar`}
                   style={{ border: `3px solid ${opTier?.color ?? "#EF4444"}` }}>
-                  <img src={opAvatar} alt={opponent?.username ?? "Opponent"} className="w-full h-full object-cover" />
+                  <img src={opAvatarUrl} alt={opponent?.username ?? "Opponent"} className="w-full h-full rounded-full object-cover" />
                 </div>
                 <p className="font-bold text-cream text-sm sm:text-base mb-1">{opponent?.username ?? "Opponent"}</p>
                 <div className="flex items-center gap-1.5">
@@ -1049,8 +1044,9 @@ export default function ArenaPage() {
                 {/* Me */}
                 <div className="flex items-center gap-3 flex-1">
                   <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0"
+                    aria-label="Your avatar"
                     style={{ border: `2px solid ${myTier.color}` }}>
-                    <img src={myAvatar} alt="You" className="w-full h-full object-cover" />
+                    <img src={myAvatarUrl} alt={me?.username ?? "You"} className="w-10 h-10 rounded-full object-cover" />
                   </div>
                   <div>
                     <p className="text-electric font-bold text-xs">{me?.username ?? "You"}</p>
@@ -1101,8 +1097,9 @@ export default function ArenaPage() {
                     <p className="font-bebas text-2xl text-cream leading-none">{opTotalPoints}</p>
                   </div>
                   <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0"
+                    aria-label={`${opponent?.username ?? "Opponent"}'s avatar`}
                     style={{ border: `2px solid ${opTier?.color ?? "#EF4444"}` }}>
-                    <img src={opAvatar} alt={opponent?.username ?? ""} className="w-full h-full object-cover" />
+                    <img src={opAvatarUrl} alt={opponent?.username ?? "Opponent"} className="w-10 h-10 rounded-full object-cover" />
                   </div>
                 </div>
               </div>
@@ -1290,8 +1287,9 @@ export default function ArenaPage() {
               <div className="flex items-center justify-center gap-8">
                 <div className="text-center">
                   <div className="w-16 h-16 rounded-full overflow-hidden mx-auto mb-2"
+                    aria-label="Your avatar"
                     style={{ border: `3px solid ${iWon || isDraw ? "#FFD700" : "#E74C3C"}` }}>
-                    <img src={myAvatar} alt="You" className="w-full h-full object-cover" />
+                    <img src={myAvatarUrl} alt={me?.username ?? "You"} className="w-16 h-16 rounded-full object-cover" />
                   </div>
                   <p className="text-electric font-bold text-sm mb-1">{me?.username ?? "You"}</p>
                   <p className="font-bebas text-5xl leading-none"
@@ -1305,8 +1303,9 @@ export default function ArenaPage() {
 
                 <div className="text-center">
                   <div className="w-16 h-16 rounded-full overflow-hidden mx-auto mb-2"
+                    aria-label={`${opponent?.username ?? "Opponent"}'s avatar`}
                     style={{ border: `3px solid ${!iWon && !isDraw ? "#FFD700" : "#E74C3C"}` }}>
-                    <img src={opAvatar} alt={opponent?.username ?? ""} className="w-full h-full object-cover" />
+                    <img src={opAvatarUrl} alt={opponent?.username ?? "Opponent"} className="w-16 h-16 rounded-full object-cover" />
                   </div>
                   <p className="text-red-400 font-bold text-sm mb-1">{opponent?.username ?? "Opponent"}</p>
                   <p className="font-bebas text-5xl leading-none"

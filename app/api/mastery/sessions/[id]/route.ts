@@ -38,7 +38,7 @@ export async function GET(req: NextRequest, { params }: RouteCtx) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
-    const [examRes, subRes, progRes, msgRes] = await Promise.all([
+    const [examRes, subRes, msgRes] = await Promise.all([
       supabaseAdmin
         .from("user_exams")
         .select("id, title, ready_threshold, mastery_bkt_target, target_date, total_active_seconds, reached_mastery_at")
@@ -50,10 +50,6 @@ export async function GET(req: NextRequest, { params }: RouteCtx) {
         .eq("user_exam_id", session.user_exam_id)
         .order("display_order"),
       supabaseAdmin
-        .from("mastery_progress")
-        .select("subtopic_id, p_mastery, attempts, correct, current_streak, display_pct")
-        .eq("user_id", userId),
-      supabaseAdmin
         .from("mastery_messages")
         .select("id, role, kind, content, payload, p_pass_after, display_pct_after, created_at")
         .eq("session_id", sessionId)
@@ -63,6 +59,16 @@ export async function GET(req: NextRequest, { params }: RouteCtx) {
 
     const exam = examRes.data;
     if (!exam) return NextResponse.json({ error: "Exam missing" }, { status: 500 });
+
+    const subtopicIds = (subRes.data ?? []).map(s => s.id);
+    // Bound to current exam's subtopics — was full-user scan
+    const progRes = subtopicIds.length === 0
+      ? { data: [] as Array<{ subtopic_id: string; p_mastery: number; attempts: number; correct: number; current_streak: number; display_pct: number }> }
+      : await supabaseAdmin
+          .from("mastery_progress")
+          .select("subtopic_id, p_mastery, attempts, correct, current_streak, display_pct")
+          .eq("user_id", userId)
+          .in("subtopic_id", subtopicIds);
 
     const progressMap = new Map((progRes.data ?? []).map(p => [p.subtopic_id, p]));
 
