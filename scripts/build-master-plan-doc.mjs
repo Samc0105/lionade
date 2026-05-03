@@ -1,19 +1,38 @@
-// Build LIONADE_MASTER_PLAN.html from the markdown source.
+// Build styled HTML doc(s) from markdown source(s).
 // Self-contained: open in browser, share, or print-to-PDF (Cmd+P).
 //
 // Run:  node scripts/build-master-plan-doc.mjs
+//
+// Add a new doc by appending to the DOCS array below — markdown source +
+// output path + cover metadata. The CSS, header, and structure are shared.
 
 import fs from "node:fs";
 import path from "node:path";
 import { marked } from "marked";
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), "..");
-const SRC = path.join(ROOT, "LIONADE_MASTER_PLAN.md");
-const OUT = path.join(ROOT, "LIONADE_MASTER_PLAN.html");
 
-const md = fs.readFileSync(SRC, "utf8");
+const DOCS = [
+  {
+    src: "LIONADE_MASTER_PLAN.md",
+    out: "LIONADE_MASTER_PLAN.html",
+    title: "Lionade — Master Plan",
+    eyebrow: "Internal · For team distribution",
+    coverTitle: "LIONADE",
+    coverSubtitle: "Master Plan — Features, Economics, Roadmap",
+    stamp: "Last updated 2026-05-02 · Sam C",
+  },
+  {
+    src: "FOCUS_MODE_PROPOSAL.md",
+    out: "FOCUS_MODE_PROPOSAL.html",
+    title: "Lionade — Focus Mode Proposal",
+    eyebrow: "Internal · Feature proposal · For team review",
+    coverTitle: "FOCUS MODE",
+    coverSubtitle: "Proposal & Feasibility — Camera-based study lock-in",
+    stamp: "2026-05-02 · Author: Sam · Originator: Dawda",
+  },
+];
 
-// Configure marked: GitHub-flavored markdown features (tables, fenced code).
 marked.setOptions({
   gfm: true,
   breaks: false,
@@ -21,21 +40,7 @@ marked.setOptions({
   mangle: false,
 });
 
-const body = marked.parse(md);
-
-const html = `<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8" />
-<title>Lionade — Master Plan</title>
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<meta name="description" content="Lionade master plan — features, economics, roadmap" />
-
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-
-<style>
+const SHARED_CSS = `
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   html { scroll-behavior: smooth; }
   body {
@@ -57,7 +62,6 @@ const html = `<!doctype html>
     padding: 64px 72px;
   }
 
-  /* ─── Cover band ──────────────────────────────────── */
   .cover {
     text-align: left;
     padding-bottom: 32px;
@@ -93,7 +97,6 @@ const html = `<!doctype html>
     margin-top: 16px;
   }
 
-  /* ─── Headings ────────────────────────────────────── */
   h1 {
     font-family: "Bebas Neue", sans-serif;
     font-size: 36px;
@@ -129,17 +132,8 @@ const html = `<!doctype html>
     margin: 24px 0 8px;
   }
 
-  /* ─── Body text ────────────────────────────────────── */
-  p {
-    margin: 12px 0;
-    color: #1f2937;
-    font-size: 15px;
-  }
-  ul, ol {
-    margin: 12px 0 12px 20px;
-    color: #1f2937;
-    font-size: 15px;
-  }
+  p { margin: 12px 0; color: #1f2937; font-size: 15px; }
+  ul, ol { margin: 12px 0 12px 20px; color: #1f2937; font-size: 15px; }
   li { margin: 6px 0; }
   li > p { margin: 4px 0; }
   strong { color: #0f172a; font-weight: 700; }
@@ -152,11 +146,7 @@ const html = `<!doctype html>
   }
   a:hover { border-bottom-color: #2563eb; }
 
-  hr {
-    border: none;
-    border-top: 1px solid #e5e7eb;
-    margin: 40px 0;
-  }
+  hr { border: none; border-top: 1px solid #e5e7eb; margin: 40px 0; }
 
   blockquote {
     border-left: 3px solid #f0b429;
@@ -188,7 +178,6 @@ const html = `<!doctype html>
   }
   pre code { background: transparent; color: inherit; padding: 0; }
 
-  /* ─── Tables ────────────────────────────────────── */
   table {
     width: 100%;
     border-collapse: collapse;
@@ -196,10 +185,7 @@ const html = `<!doctype html>
     font-size: 13.5px;
     background: #ffffff;
   }
-  thead {
-    background: #1a1f2e;
-    color: #ffffff;
-  }
+  thead { background: #1a1f2e; color: #ffffff; }
   thead th {
     text-align: left;
     padding: 10px 12px;
@@ -218,10 +204,8 @@ const html = `<!doctype html>
   tbody tr:nth-child(even) { background: #fafafa; }
   tbody tr:hover { background: #fffaee; }
 
-  /* ─── TOC links ─────────────────────────────────── */
   ol > li > a { font-weight: 500; }
 
-  /* ─── Print-friendly (Cmd+P → Save as PDF) ─────── */
   @media print {
     body { background: #ffffff; padding: 0; }
     .page { box-shadow: none; border-radius: 0; padding: 24px 32px; max-width: none; }
@@ -232,15 +216,30 @@ const html = `<!doctype html>
     thead { background: #1a1f2e !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     tbody tr:nth-child(even) { background: #fafafa !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   }
-</style>
+`;
+
+function render({ src, out, title, eyebrow, coverTitle, coverSubtitle, stamp }) {
+  const md = fs.readFileSync(path.join(ROOT, src), "utf8");
+  const body = marked.parse(md);
+
+  const html = `<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>${title}</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>${SHARED_CSS}</style>
 </head>
 <body>
 <div class="page">
   <div class="cover">
-    <div class="eyebrow">Internal · For team distribution</div>
-    <h1 class="title">LIONADE</h1>
-    <div class="subtitle">Master Plan — Features, Economics, Roadmap</div>
-    <div class="stamp">Last updated 2026-05-01 · Sam C</div>
+    <div class="eyebrow">${eyebrow}</div>
+    <h1 class="title">${coverTitle}</h1>
+    <div class="subtitle">${coverSubtitle}</div>
+    <div class="stamp">${stamp}</div>
   </div>
   ${body}
 </div>
@@ -248,6 +247,10 @@ const html = `<!doctype html>
 </html>
 `;
 
-fs.writeFileSync(OUT, html);
-const sizeKb = (fs.statSync(OUT).size / 1024).toFixed(1);
-console.log(`Wrote ${path.relative(ROOT, OUT)} (${sizeKb} KB)`);
+  const outPath = path.join(ROOT, out);
+  fs.writeFileSync(outPath, html);
+  const sizeKb = (fs.statSync(outPath).size / 1024).toFixed(1);
+  console.log(`Wrote ${out} (${sizeKb} KB)`);
+}
+
+for (const doc of DOCS) render(doc);
