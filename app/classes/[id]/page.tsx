@@ -125,7 +125,7 @@ export default function ClassNotebookPage() {
         <Navbar />
 
         <main
-          className="relative z-10 max-w-[980px] mx-auto px-4 sm:px-6 pt-6 pb-24"
+          className="relative z-10 max-w-[980px] mx-auto px-4 sm:px-6 pt-6 pb-12"
           style={{ ["--accent" as string]: cls.color }}
         >
           {/* Top bar with back + menu */}
@@ -220,7 +220,7 @@ export default function ClassNotebookPage() {
           )}
 
           {/* Mastery targets */}
-          <section className="mb-10">
+          <section className="mb-6">
             <div className="flex items-baseline justify-between mb-4">
               <h2 className="font-bebas text-sm text-cream/85 tracking-[0.2em]">
                 <span className="inline-flex items-center gap-2">
@@ -236,16 +236,15 @@ export default function ClassNotebookPage() {
             </div>
 
             {exams.length === 0 ? (
-              <div className="rounded-[12px] border border-dashed border-white/[0.1] bg-white/[0.02] p-6 text-center">
-                <Target size={20} className="text-cream/40 mx-auto mb-2" />
-                <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-cream/50 mb-3">
-                  No exam targets yet
+              <div className="rounded-[12px] border border-dashed border-white/[0.1] bg-white/[0.02] px-4 py-3 flex items-center justify-between gap-3">
+                <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-cream/50 inline-flex items-center gap-2">
+                  <Target size={14} className="text-cream/40" /> No exam targets yet
                 </p>
                 <Link
                   href={`/learn/mastery?classId=${cls.id}`}
-                  className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.25em] text-cream/70 hover:text-cream"
+                  className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.25em] text-cream/70 hover:text-cream whitespace-nowrap"
                 >
-                  <ArrowRight size={11} weight="bold" /> Set up your first target
+                  Set first target <ArrowRight size={11} weight="bold" />
                 </Link>
               </div>
             ) : (
@@ -257,19 +256,21 @@ export default function ClassNotebookPage() {
 
           {/* Grades — between exam targets (outcomes) and notes (inputs).
               Self-fetches so it doesn't bloat the parent class detail call. */}
-          <section className="mb-10">
+          <section className="mb-6">
             <GradeTracker classId={cls.id} />
           </section>
 
-          {/* Notes — real list now, with inline create + pin/archive */}
-          <NotesSection
-            classId={cls.id}
-            notes={notes}
-            onChange={() => void mutate()}
-          />
-
-          {/* Flashcards — auto-generated from notes by Ninny on save */}
-          <FlashcardStudy classId={cls.id} />
+          {/* Notes + Flashcards — these are paired (notes feed flashcards)
+              so on desktop they sit side-by-side instead of stacking with
+              big empty-state gaps. On mobile they collapse back to a stack. */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
+            <NotesSection
+              classId={cls.id}
+              notes={notes}
+              onChange={() => void mutate()}
+            />
+            <FlashcardStudy classId={cls.id} />
+          </div>
         </main>
       </div>
     </ProtectedRoute>

@@ -1,0 +1,2311 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Lionade — Master Plan</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="description" content="Lionade master plan — features, economics, roadmap" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: "Inter", -apple-system, system-ui, sans-serif;
+    color: #1a1f2e;
+    background: #f5f1e6;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    padding: 32px 0;
+  }
+
+  .page {
+    max-width: 880px;
+    margin: 0 auto;
+    background: #ffffff;
+    box-shadow: 0 4px 32px rgba(10, 16, 32, 0.06);
+    border-radius: 12px;
+    padding: 64px 72px;
+  }
+
+  /* ─── Cover band ──────────────────────────────────── */
+  .cover {
+    text-align: left;
+    padding-bottom: 32px;
+    margin-bottom: 40px;
+    border-bottom: 2px solid #f0b429;
+  }
+  .cover .eyebrow {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: #6b7280;
+    margin-bottom: 12px;
+  }
+  .cover h1.title {
+    font-family: "Bebas Neue", sans-serif;
+    font-size: 72px;
+    line-height: 0.95;
+    letter-spacing: 0.02em;
+    color: #1a1f2e;
+    margin-bottom: 12px;
+  }
+  .cover .subtitle {
+    font-size: 20px;
+    color: #4b5563;
+    font-weight: 500;
+    margin-bottom: 8px;
+  }
+  .cover .stamp {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px;
+    color: #6b7280;
+    margin-top: 16px;
+  }
+
+  /* ─── Headings ────────────────────────────────────── */
+  h1 {
+    font-family: "Bebas Neue", sans-serif;
+    font-size: 36px;
+    letter-spacing: 0.04em;
+    color: #1a1f2e;
+    margin: 56px 0 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #e5e7eb;
+  }
+  h1:first-of-type { margin-top: 0; }
+  h2 {
+    font-family: "Bebas Neue", sans-serif;
+    font-size: 26px;
+    letter-spacing: 0.04em;
+    color: #1a1f2e;
+    margin: 36px 0 12px;
+  }
+  h3 {
+    font-family: "Inter", sans-serif;
+    font-size: 17px;
+    font-weight: 700;
+    color: #1a1f2e;
+    margin: 28px 0 10px;
+    letter-spacing: -0.01em;
+  }
+  h4 {
+    font-family: "Inter", sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #f0b429;
+    margin: 24px 0 8px;
+  }
+
+  /* ─── Body text ────────────────────────────────────── */
+  p {
+    margin: 12px 0;
+    color: #1f2937;
+    font-size: 15px;
+  }
+  ul, ol {
+    margin: 12px 0 12px 20px;
+    color: #1f2937;
+    font-size: 15px;
+  }
+  li { margin: 6px 0; }
+  li > p { margin: 4px 0; }
+  strong { color: #0f172a; font-weight: 700; }
+  em { color: #334155; }
+
+  a {
+    color: #2563eb;
+    text-decoration: none;
+    border-bottom: 1px solid rgba(37, 99, 235, 0.25);
+  }
+  a:hover { border-bottom-color: #2563eb; }
+
+  hr {
+    border: none;
+    border-top: 1px solid #e5e7eb;
+    margin: 40px 0;
+  }
+
+  blockquote {
+    border-left: 3px solid #f0b429;
+    background: #fffaee;
+    margin: 16px 0;
+    padding: 12px 18px;
+    font-size: 14px;
+    color: #4b5563;
+    border-radius: 0 6px 6px 0;
+  }
+  blockquote p { margin: 4px 0; color: inherit; font-size: inherit; }
+
+  code {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 13px;
+    background: #f3f4f6;
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: #be185d;
+  }
+  pre {
+    background: #0f172a;
+    color: #f1f5f9;
+    padding: 16px 20px;
+    border-radius: 8px;
+    overflow-x: auto;
+    margin: 16px 0;
+    font-size: 13px;
+  }
+  pre code { background: transparent; color: inherit; padding: 0; }
+
+  /* ─── Tables ────────────────────────────────────── */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 18px 0;
+    font-size: 13.5px;
+    background: #ffffff;
+  }
+  thead {
+    background: #1a1f2e;
+    color: #ffffff;
+  }
+  thead th {
+    text-align: left;
+    padding: 10px 12px;
+    font-family: "Inter", sans-serif;
+    font-weight: 600;
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  tbody td {
+    padding: 9px 12px;
+    border-bottom: 1px solid #e5e7eb;
+    color: #1f2937;
+    vertical-align: top;
+  }
+  tbody tr:nth-child(even) { background: #fafafa; }
+  tbody tr:hover { background: #fffaee; }
+
+  /* ─── TOC links ─────────────────────────────────── */
+  ol > li > a { font-weight: 500; }
+
+  /* ─── Print-friendly (Cmd+P → Save as PDF) ─────── */
+  @media print {
+    body { background: #ffffff; padding: 0; }
+    .page { box-shadow: none; border-radius: 0; padding: 24px 32px; max-width: none; }
+    h1 { page-break-before: auto; page-break-after: avoid; }
+    h2, h3 { page-break-after: avoid; }
+    table, pre, blockquote { page-break-inside: avoid; }
+    a { color: #1a1f2e; border-bottom: none; }
+    thead { background: #1a1f2e !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    tbody tr:nth-child(even) { background: #fafafa !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="cover">
+    <div class="eyebrow">Internal · For team distribution</div>
+    <h1 class="title">LIONADE</h1>
+    <div class="subtitle">Master Plan — Features, Economics, Roadmap</div>
+    <div class="stamp">Last updated 2026-05-01 · Sam C</div>
+  </div>
+  <h1>LIONADE — Master Plan</h1>
+<p><strong>Last updated:</strong> 2026-05-01
+<strong>Domain:</strong> getlionade.com
+<strong>Status:</strong> Private beta. Web app live at getlionade.com. iOS app Phase 0–6c shipped (awaiting EAS dev build). No paid users yet.</p>
+<blockquote>
+<p>This is the strategic master doc — what we have, what it earns, what it costs, what&#39;s next, and what we could build. For the marketing pitch, see <code>LIONADE_PRESENTATION.md</code>. For the dev/architecture reference, see <code>docs/LIONADE_CONTEXT.md</code>.</p>
+</blockquote>
+<hr>
+<h2>Table of Contents</h2>
+<ol>
+<li><a href="#1-what-lionade-is-in-one-page">What Lionade Is, In One Page</a></li>
+<li><a href="#2-the-three-pillars">The Three Pillars</a></li>
+<li><a href="#3-complete-feature-inventory">Complete Feature Inventory</a></li>
+<li><a href="#4-the-fangs-economy">The Fangs Economy</a></li>
+<li><a href="#5-pricing--plans">Pricing &amp; Plans</a></li>
+<li><a href="#6-revenue-streams">Revenue Streams</a></li>
+<li><a href="#7-cost-structure">Cost Structure</a></li>
+<li><a href="#8-financial-projections">Financial Projections</a></li>
+<li><a href="#9-near-term-roadmap-q2q3-2026">Near-Term Roadmap (Q2–Q3 2026)</a></li>
+<li><a href="#10-mid-term-roadmap-q4-2026--q2-2027">Mid-Term Roadmap (Q4 2026 – Q2 2027)</a></li>
+<li><a href="#11-future-feature-ideas">Future Feature Ideas</a></li>
+<li><a href="#12-tech-stack--infrastructure">Tech Stack &amp; Infrastructure</a></li>
+<li><a href="#13-risks--open-questions">Risks &amp; Open Questions</a></li>
+</ol>
+<hr>
+<h2>1. What Lionade Is, In One Page</h2>
+<p><strong>One-liner:</strong> A study app that pays students for showing up.</p>
+<p><strong>Tagline:</strong> <em>Study Like It&#39;s Your Job.</em></p>
+<p><strong>Target user:</strong> Gen Z students (middle school → college → self-taught). The &quot;I should be studying but TikTok is right there&quot; demographic.</p>
+<p><strong>Core promise:</strong> Every quiz, focus session, note, and streak earns <strong>Fangs</strong> — an in-app currency that unlocks cosmetics, perks, and (V2) real cash payouts.</p>
+<p><strong>Why this works:</strong> Studying is a habit problem dressed up as a content problem. Duolingo solved this for languages. Nobody has for general studying. We&#39;re building the loop: <em>show up → make progress → get rewarded → come back tomorrow.</em></p>
+<p><strong>What&#39;s actually shipped (web app):</strong></p>
+<ul>
+<li>Authenticated platform with email/password + Google OAuth</li>
+<li>8 subject categories, AP exam prep (10 subjects), question bank seeded via JSON</li>
+<li>Daily Quiz (10 questions, 15s timer, anti-cheat server validation)</li>
+<li>Mastery Mode (chat-based AI tutor, BKT mastery tracking, AWS Sec Specialty pilot)</li>
+<li>Class Notebook (syllabus PDF parser → daily study plan, exam countdown, weighted grade tracker, auto-flashcards)</li>
+<li>Daily Drill, Daily Bet, Streak Revive, Clock-In Bonus</li>
+<li>1v1 Duels + ELO-ranked Arena</li>
+<li>Compete tier ladder (Bronze → Legend, 9 tiers)</li>
+<li>Friends + DMs + leaderboards (weekly + ELO)</li>
+<li>Mini-games (Roardle, Blitz Sprint, Flashcards, Timeline Drop) with PDF-to-game generator</li>
+<li>Shop (Fangs cosmetics + boosters; Stripe wired for premium store)</li>
+<li>Profile system, badges, achievements, bounties, missions</li>
+<li>Real-time notifications, focus music, focus lock-in (Pomodoro), quick-note shortcut</li>
+<li>3-tier subscription pricing page (Free / Pro $6.99/mo / Platinum $14.99/mo)</li>
+</ul>
+<p><strong>iOS app:</strong> Expo + EAS pipeline through Phase 6c. Apple Team ID set. Awaiting dev-client build.</p>
+<hr>
+<h2>2. The Three Pillars</h2>
+<p>Every feature falls under one of three pillars. If a new idea doesn&#39;t, we don&#39;t build it.</p>
+<table>
+<thead>
+<tr>
+<th>Pillar</th>
+<th>Question it answers</th>
+<th>Surfaces</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Learn</strong></td>
+<td>&quot;How do I get better at this?&quot;</td>
+<td>Daily Quiz, Mastery Mode, Class Notebook, AP prep, learning paths</td>
+</tr>
+<tr>
+<td><strong>Compete</strong></td>
+<td>&quot;How do I prove it?&quot;</td>
+<td>Duels, Arena, leaderboards, tier ladder, tournaments</td>
+</tr>
+<tr>
+<td><strong>Grow</strong></td>
+<td>&quot;What&#39;s my reward for showing up?&quot;</td>
+<td>Fangs economy, streaks, badges, bounties, shop, cosmetics, future cash payouts</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>3. Complete Feature Inventory</h2>
+<h3>3.1 Auth &amp; Onboarding</h3>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Status</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Email/password + Google OAuth</td>
+<td>Live</td>
+<td>Brute-force lockout (5 fails / 15 min)</td>
+</tr>
+<tr>
+<td>3-step signup wizard</td>
+<td>Live</td>
+<td>Education level, study goal, referral source</td>
+</tr>
+<tr>
+<td>4-step new-user onboarding</td>
+<td>Live</td>
+<td>Subjects, daily target, avatar, intro tour</td>
+</tr>
+<tr>
+<td>2-hour inactivity auto-logout</td>
+<td>Live</td>
+<td>LocalStorage timestamp</td>
+</tr>
+<tr>
+<td>Self-healing profile rows</td>
+<td>Live</td>
+<td>Creates fallback profile if signup trigger missed</td>
+</tr>
+</tbody></table>
+<h3>3.2 Daily Habit Loop</h3>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Status</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Daily Quiz</td>
+<td>Live</td>
+<td>10 questions, 15s/q, server-side anti-cheat</td>
+</tr>
+<tr>
+<td>Daily Drill</td>
+<td>Live</td>
+<td>Quick warmup quiz, 1 per day</td>
+</tr>
+<tr>
+<td>Daily Clock In</td>
+<td>Live</td>
+<td>24-hour rolling cooldown (was UTC reset), Fangs reward</td>
+</tr>
+<tr>
+<td>Daily Bet</td>
+<td>Live</td>
+<td>Wager Fangs on quiz score (7/8/9/10 = 1.5x/2x/3x/5x)</td>
+</tr>
+<tr>
+<td>Streak system</td>
+<td>Live</td>
+<td>Increments per calendar day, fire animation at 7+</td>
+</tr>
+<tr>
+<td>Streak Revive</td>
+<td>Live</td>
+<td>24h Snapchat-style post-hoc restore via Fangs or $0.99</td>
+</tr>
+<tr>
+<td>Login bonus (legacy)</td>
+<td>Live</td>
+<td>One-time per session</td>
+</tr>
+</tbody></table>
+<h3>3.3 Learn Pillar</h3>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Status</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>8 subject categories</td>
+<td>Live</td>
+<td>Math, Science, Languages, Humanities, Tech, Cloud/IT, Finance, Test Prep</td>
+</tr>
+<tr>
+<td>AP Exam prep</td>
+<td>Live</td>
+<td>10 AP subjects, best-score tracking</td>
+</tr>
+<tr>
+<td>Learning paths</td>
+<td>Live</td>
+<td>4 subjects (Algebra, Bio, US History, Chem), star system</td>
+</tr>
+<tr>
+<td>Practice Sets</td>
+<td>Coming</td>
+<td>Curated timed batches</td>
+</tr>
+<tr>
+<td><strong>Mastery Mode</strong></td>
+<td>Live</td>
+<td>Chat-first AI tutor. Topic-driven Socratic teaching + adaptive quizzing. BKT progress tracking. Pilot: AWS Security Specialty.</td>
+</tr>
+<tr>
+<td><strong>Class Notebook v1</strong></td>
+<td>Live</td>
+<td>Per-class hub: syllabus PDF parser, daily study plan, exam countdown, weighted grade tracker, &quot;needed-on-final&quot; calculator, notes, auto-flashcards via Ninny</td>
+</tr>
+<tr>
+<td>Spaced-repetition flashcards</td>
+<td>Live</td>
+<td>Auto-generated from notes ≥80 chars</td>
+</tr>
+</tbody></table>
+<h3>3.4 Compete Pillar</h3>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Status</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1v1 Duels (casual)</td>
+<td>Live</td>
+<td>Subject + 10 questions + Fangs wager. Currently simulated opponents (68% accuracy).</td>
+</tr>
+<tr>
+<td>Arena (ranked)</td>
+<td>Live</td>
+<td>ELO matchmaking (~1200 start), wagers 10/25/50/100, real-time via Supabase</td>
+</tr>
+<tr>
+<td>Direct challenges</td>
+<td>Live</td>
+<td>5-min expiry</td>
+</tr>
+<tr>
+<td>Compete tier ladder</td>
+<td>Live</td>
+<td>Bronze → Silver → Gold → Platinum → Diamond → Onyx → Ruby → Emerald → Legend (9 tiers, win-based)</td>
+</tr>
+<tr>
+<td>Weekly leaderboard</td>
+<td>Live</td>
+<td>Coins-this-week ranking, podium UI</td>
+</tr>
+<tr>
+<td>ELO leaderboard</td>
+<td>Live</td>
+<td>Top 200, lifetime</td>
+</tr>
+<tr>
+<td>Weekly Tournaments</td>
+<td>Coming</td>
+<td>Bracket + prize pool placeholder</td>
+</tr>
+</tbody></table>
+<h3>3.5 Grow Pillar (Economy &amp; Rewards)</h3>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Status</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Fangs (in-app currency)</td>
+<td>Live</td>
+<td>See section 4</td>
+</tr>
+<tr>
+<td>XP &amp; Leveling</td>
+<td>Live</td>
+<td>100 levels, ~5 years to max, progressive curve</td>
+</tr>
+<tr>
+<td>Badges + Achievements</td>
+<td>Live</td>
+<td>Common/Rare/Epic/Legendary; +100F bonus on unlock</td>
+</tr>
+<tr>
+<td>Bounties</td>
+<td>Live</td>
+<td>Daily + weekly; auto-rotates</td>
+</tr>
+<tr>
+<td>Daily Missions</td>
+<td>Live</td>
+<td>Multi-step tasks</td>
+</tr>
+<tr>
+<td>Shop &quot;The Lion&#39;s Den&quot;</td>
+<td>Live</td>
+<td>Fangs side: avatar frames, name colors, banners (15-750F), boosters (75-200F). USD side wired to Stripe (not live).</td>
+</tr>
+<tr>
+<td>Wallet / transaction log</td>
+<td>Live</td>
+<td>Full Fangs audit trail</td>
+</tr>
+</tbody></table>
+<h3>3.6 Social</h3>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Status</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Friends (mutual follow)</td>
+<td>Live</td>
+<td></td>
+</tr>
+<tr>
+<td>Direct messaging</td>
+<td>Live</td>
+<td></td>
+</tr>
+<tr>
+<td>Live username search</td>
+<td>Live</td>
+<td></td>
+</tr>
+<tr>
+<td>Online presence</td>
+<td>Live</td>
+<td>Real-time via Supabase</td>
+</tr>
+<tr>
+<td>Real-time notifications</td>
+<td>Live</td>
+<td>Bell icon, channel sub</td>
+</tr>
+<tr>
+<td>Friend match feed</td>
+<td>Live</td>
+<td></td>
+</tr>
+<tr>
+<td>Study Groups</td>
+<td>Future</td>
+<td></td>
+</tr>
+</tbody></table>
+<h3>3.7 Games</h3>
+<table>
+<thead>
+<tr>
+<th>Game</th>
+<th>Status</th>
+<th>Reward</th>
+<th>Daily limit</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Roardle</td>
+<td>Live</td>
+<td>10–20F + bonus</td>
+<td>3</td>
+</tr>
+<tr>
+<td>Blitz Sprint</td>
+<td>Live</td>
+<td>correct × 2F</td>
+<td>5</td>
+</tr>
+<tr>
+<td>Flashcards</td>
+<td>Live</td>
+<td>%known × 15F</td>
+<td>unlimited</td>
+</tr>
+<tr>
+<td>Timeline Drop</td>
+<td>Live</td>
+<td>correct × 3F</td>
+<td>3</td>
+</tr>
+</tbody></table>
+<p>All games support <strong>PDF upload</strong> — drop a PDF and AI generates game content from it.</p>
+<h3>3.8 Productivity Tools (Floating UI)</h3>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Status</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Quick Note (Cmd+K)</td>
+<td>Live</td>
+<td>Lightweight modal anywhere; AI auto-files into right class</td>
+</tr>
+<tr>
+<td>Focus Lock-In</td>
+<td>Live</td>
+<td>Sealed Pomodoro timer with Fangs reward</td>
+</tr>
+<tr>
+<td>Focus Music</td>
+<td>Live</td>
+<td>3 curated lo-fi stations</td>
+</tr>
+<tr>
+<td>Idle-fade</td>
+<td>Live</td>
+<td>All floating buttons dim to 0.4 opacity when idle</td>
+</tr>
+</tbody></table>
+<h3>3.9 Profile, Settings, Polish</h3>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Status</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Profile page (overview/badges/stats/history)</td>
+<td>Live</td>
+<td></td>
+</tr>
+<tr>
+<td>DiceBear avatar system</td>
+<td>Live</td>
+<td>Currently default; custom avatar system was built then reverted per user direction</td>
+</tr>
+<tr>
+<td>Username change</td>
+<td>Live</td>
+<td>One per 365 days</td>
+</tr>
+<tr>
+<td>Settings: theme + font scaling + compact layout</td>
+<td>Live</td>
+<td>Dark default, light theme working</td>
+</tr>
+<tr>
+<td>Light/dark theme</td>
+<td>Live</td>
+<td></td>
+</tr>
+<tr>
+<td>Mobile-responsive</td>
+<td>Live</td>
+<td>Bottom nav on small screens</td>
+</tr>
+<tr>
+<td>Page transitions (framer-motion)</td>
+<td>Live</td>
+<td>80ms enter, no exit</td>
+</tr>
+</tbody></table>
+<h3>3.10 Security &amp; Infrastructure</h3>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Status</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Rate limiting middleware</td>
+<td>Live</td>
+<td>In-memory; needs Redis at scale</td>
+</tr>
+<tr>
+<td>Input sanitization</td>
+<td>Live</td>
+<td>XSS, SQL injection, script tag detection</td>
+</tr>
+<tr>
+<td>Security headers (CSP/HSTS/etc.)</td>
+<td>Live</td>
+<td></td>
+</tr>
+<tr>
+<td>Anti-cheat (server-side answer validation)</td>
+<td>Live</td>
+<td>Questions served without <code>correct_answer</code></td>
+</tr>
+<tr>
+<td>RLS on Supabase tables</td>
+<td>Live</td>
+<td>See <code>lib/migrations/RLS_RULES.md</code></td>
+</tr>
+<tr>
+<td>Brute-force account lockout</td>
+<td>Live</td>
+<td>5 failures / 15 min</td>
+</tr>
+<tr>
+<td>Storage RLS on syllabus bucket</td>
+<td>Live</td>
+<td>Migration 044</td>
+</tr>
+</tbody></table>
+<h3>3.11 SEO &amp; Marketing Surface</h3>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Status</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Landing page</td>
+<td>Live</td>
+<td>Coming-soon variant + full home page</td>
+</tr>
+<tr>
+<td>About / Contact / Privacy / Terms</td>
+<td>Live</td>
+<td></td>
+</tr>
+<tr>
+<td>Demo page</td>
+<td>Live</td>
+<td>Public quiz demo, no login required</td>
+</tr>
+<tr>
+<td>Sitemap + robots.txt</td>
+<td>Live</td>
+<td></td>
+</tr>
+<tr>
+<td>JSON-LD structured data</td>
+<td>Live</td>
+<td>Combats Google &quot;lionade → lemonade&quot; autocorrect</td>
+</tr>
+<tr>
+<td>Multi-resolution favicon set</td>
+<td>Live</td>
+<td>16/32/48/192/512 + apple-touch</td>
+</tr>
+<tr>
+<td>Open Graph + Twitter cards</td>
+<td>Live</td>
+<td>1200×630 OG image via CloudFront</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>4. The Fangs Economy</h2>
+<p>Fangs are the lifeblood of the product loop. They&#39;re the reason students come back tomorrow.</p>
+<h3>Earn Faucets</h3>
+<table>
+<thead>
+<tr>
+<th>Action</th>
+<th>Reward</th>
+<th>Frequency</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Correct quiz answer</td>
+<td>~10F (1× easy / 1.5× medium / 2× hard)</td>
+<td>Per question</td>
+</tr>
+<tr>
+<td>Quiz completion</td>
+<td>~100F (10 questions)</td>
+<td>Per quiz</td>
+</tr>
+<tr>
+<td>Duel win</td>
+<td>2× wagered (winner: 750F, loser: 100F, tie: 200F)</td>
+<td>Per duel</td>
+</tr>
+<tr>
+<td>Arena win</td>
+<td>Wager from loser</td>
+<td>Per match</td>
+</tr>
+<tr>
+<td>Daily Bet win</td>
+<td>1.5×–5× stake</td>
+<td>Daily, optional</td>
+</tr>
+<tr>
+<td>Bounty claim</td>
+<td>50–500F</td>
+<td>Daily/weekly</td>
+</tr>
+<tr>
+<td>Badge unlock</td>
+<td>+100F</td>
+<td>One-time per badge</td>
+</tr>
+<tr>
+<td>Learning path stage</td>
+<td>score×5 + stars×10 F</td>
+<td>Per stage</td>
+</tr>
+<tr>
+<td>Mini-game</td>
+<td>10–30F</td>
+<td>Per play</td>
+</tr>
+<tr>
+<td>Daily Clock In</td>
+<td>varies</td>
+<td>1× per 24h</td>
+</tr>
+<tr>
+<td>Focus Lock-In completion</td>
+<td>varies</td>
+<td>Per session</td>
+</tr>
+</tbody></table>
+<h3>Spend Sinks</h3>
+<table>
+<thead>
+<tr>
+<th>Sink</th>
+<th>Cost</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Coin Rush 2×</td>
+<td>75F</td>
+<td>2× Fangs earnings, 1 quiz</td>
+</tr>
+<tr>
+<td>XP Surge 2×</td>
+<td>75F</td>
+<td>2× XP, 1 quiz</td>
+</tr>
+<tr>
+<td>Streak Shield (legacy)</td>
+<td>150F</td>
+<td>(replaced by Streak Revive)</td>
+</tr>
+<tr>
+<td>Streak Revive</td>
+<td>varies</td>
+<td>24h post-hoc streak restore</td>
+</tr>
+<tr>
+<td>Double Down</td>
+<td>200F</td>
+<td>+2× wager cap</td>
+</tr>
+<tr>
+<td>Brain Freeze / 50-50</td>
+<td>125F</td>
+<td>Eliminate 2 wrong options</td>
+</tr>
+<tr>
+<td>Avatar frames</td>
+<td>25–500F</td>
+<td>Cosmetic</td>
+</tr>
+<tr>
+<td>Name colors</td>
+<td>20–450F</td>
+<td>Cosmetic</td>
+</tr>
+<tr>
+<td>Banners</td>
+<td>15–750F</td>
+<td>Cosmetic</td>
+</tr>
+<tr>
+<td>Bulk buy</td>
+<td>-10% on 5×</td>
+<td>Bulk discount</td>
+</tr>
+</tbody></table>
+<h3>Plan Multipliers</h3>
+<p>Pro = 1.5× Fangs earn rate. Platinum = 2.0× Fangs earn rate. (<code>lib/mastery-plan.ts</code>)</p>
+<p>This is the upgrade lever: Pro/Platinum users feel measurably faster progress on the same activity.</p>
+<h3>Future: Cash Out</h3>
+<p>V2 goal (Dec 2026) — Fangs convert to real prizes / payouts. Planned conversion ratio TBD; the comparable benchmark is <strong>Microsoft Rewards: ~1,000 points → $1</strong>, so a similar 1,000F → $1 anchor is plausible. With our average earn rate (~100F per quiz, ~700F/week active user), a daily-active student would realistically earn $20–$40/year — meaningful but not abuse-prone.</p>
+<hr>
+<h2>5. Pricing &amp; Plans</h2>
+<p>Source of truth: <code>lib/mastery-plan.ts</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Plan</th>
+<th>Monthly</th>
+<th>Annual</th>
+<th>Annual / mo</th>
+<th>Mastery exam targets</th>
+<th>Fangs multiplier</th>
+<th>Ads</th>
+<th>Other</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Free</strong></td>
+<td>$0</td>
+<td>$0</td>
+<td>$0</td>
+<td>1</td>
+<td>1.0×</td>
+<td>Popup + background</td>
+<td>Core experience</td>
+</tr>
+<tr>
+<td><strong>Pro</strong></td>
+<td>$6.99</td>
+<td>$69.99</td>
+<td>$5.83</td>
+<td>3</td>
+<td>1.5×</td>
+<td>No popups</td>
+<td>Most features</td>
+</tr>
+<tr>
+<td><strong>Platinum</strong></td>
+<td>$14.99</td>
+<td>$149.99</td>
+<td>$12.50</td>
+<td>8</td>
+<td>2.0×</td>
+<td>None</td>
+<td>Power users</td>
+</tr>
+</tbody></table>
+<p><strong>Annual = ~2 months free</strong> (standard SaaS value prop, encourages prepay).</p>
+<p><strong>Stripe wiring:</strong> Done. Not flipped to live. Going live is a business decision, not an engineering one.</p>
+<hr>
+<h2>6. Revenue Streams</h2>
+<p>We have <strong>13 potential revenue streams</strong> across 5 categories. Subscriptions are the headline; the rest are how we make the unit economics work.</p>
+<h3>Category A — Subscriptions (Recurring SaaS)</h3>
+<p><strong>6.1 Pro / Platinum subscriptions</strong> — Wired. Stripe integrated; live switch is a business call. Primary recurring revenue line.</p>
+<p><strong>6.2 Family Plan</strong> — Planned (§9.6). $19.99/mo for up to 4 kids. Covers ~30% margin uplift vs solo Platinum because parents churn less than students.</p>
+<p><strong>6.3 Lionade for Teachers (B2B)</strong> — Concept. $99/mo per classroom. Teacher dashboard, assignments, class leaderboards, FERPA-compliant. Even 100 paying teachers = $119K/yr. Schools have budget; consumer apps usually don&#39;t tap this.</p>
+<p><strong>6.4 Battle Pass (Cosmetic Season)</strong> — Planned. $4.99/mo recurring upgrade on top of any tier. Unlocks exclusive seasonal cosmetics, animated avatar frames, special name effects. Fortnite proved this works at massive scale; Duolingo is now testing similar with their Duolingo Max tier. Realistic uptake: ~5% of MAU at maturity.</p>
+<h3>Category B — Advertising (The Underrated Lever)</h3>
+<p>This was undersold in my first pass. With a Gen-Z education audience, ads can be <em>substantial</em> — but only if we layer multiple networks.</p>
+<p><strong>6.5 Display ads (Google AdSense + Meta Audience Network)</strong></p>
+<ul>
+<li>AdSense for desktop web; Meta Audience Network often pays higher CPM for the 13-22 demo</li>
+<li>Layered via header bidding (PubMatic, OpenX) — 20–40% CPM uplift over single-network</li>
+<li>Placements: passive sidebar banner, between-question interstitial (free tier only)</li>
+<li>Realistic blended RPM: <strong>$3–$5 USD</strong> at our demo + content quality</li>
+<li>Removed for Pro (popups) and Platinum (all)</li>
+</ul>
+<p><strong>6.6 Mobile in-app ads (Google AdMob + Unity Ads + ironSource)</strong></p>
+<ul>
+<li>Native mobile app monetization. Mobile CPMs typically beat desktop by 30–50% for Gen-Z apps</li>
+<li>Placements: post-quiz interstitial, app-resume banner</li>
+<li>Realistic blended RPM: <strong>$5–$8</strong> on mobile</li>
+</ul>
+<p><strong>6.7 Rewarded video ads — KEY OPPORTUNITY</strong></p>
+<ul>
+<li>&quot;Watch a 30-second ad → earn 25 Fangs&quot; or &quot;Get a hint&quot; or &quot;Skip cooldown&quot;</li>
+<li>Voluntary, so no Pro/Platinum pushback</li>
+<li>Highest-RPM ad format: <strong>$8–$15 per 1000 views</strong></li>
+<li>Unity Ads, AppLovin MAX, ironSource — all support rewarded video</li>
+<li>Realistic engagement: 20% of MAU watches ~5 ads/month</li>
+</ul>
+<p><strong>6.8 TikTok Audience Network</strong></p>
+<ul>
+<li>Perfect demographic match for our target user</li>
+<li>Lower fill rate than AdSense but very high CPM ($6–$10) when it fills</li>
+<li>Add as a tertiary network in the waterfall</li>
+</ul>
+<p><strong>6.9 Direct sponsorships</strong></p>
+<ul>
+<li>Brands like Chegg, Notion, Grammarly, Khan Academy pay $5K–$50K for branded quiz integrations or sponsored study weeks</li>
+<li>&quot;This week&#39;s productivity bounty sponsored by Notion — claim 250F + a 1-month Notion trial&quot;</li>
+<li>Higher margin than programmatic ads (no ad-tech tax)</li>
+</ul>
+<h3>Category C — Microtransactions (Snapchat-style)</h3>
+<p><strong>6.10 Streak Revive</strong> — Wired. $0.99 to restore an expired streak. Pure emotional-leverage purchase.</p>
+<p><strong>6.11 Premium cosmetics (one-shot IAPs)</strong> — Wired. $1.99–$4.99 vanity purchases. ~96% gross margin (Stripe fee only).</p>
+<p><strong>6.12 Gift cards</strong> — Concept. Parents/grandparents buy $25/$50/$100 Fangs gift cards. Apple&#39;s gift-card line alone is $1.3B/yr. Holiday + birthday revenue spikes. Stripe Gift Card API is straightforward to wire.</p>
+<p><strong>6.13 Premium content packs</strong> — Concept. Pre-built study guides for SAT/ACT/MCAT/CFA/Bar at $9.99 each, or past AP exam packs at $4.99. One-time purchase, near-zero variable cost after authoring.</p>
+<h3>Category D — Marketplace / Take Rates (V2/V3)</h3>
+<p><strong>6.14 Real cash payouts</strong> — Planned (V2). Top performers earn real money from a monthly prize pool. Funded by a take rate on optional tournament entry fees + a portion of subscription revenue. Structure ≤10% of subscription gross + 15% take on tournament entry.</p>
+<p><strong>6.15 Tutoring marketplace</strong> — Planned (V3). Top users tutor lower users; Lionade takes 15–20% of session price. Pure-margin revenue (no AI cost, no inventory). Strongest users become our distribution.</p>
+<p><strong>6.16 Tournament entry fees</strong> — Planned. $5 entry, 64-player single-elim, $300 prize pool, 15% house take. Recurring weekly/monthly cadence.</p>
+<h3>Category E — Affiliates &amp; Adjacent</h3>
+<p><strong>6.17 Affiliate revenue (passive)</strong></p>
+<ul>
+<li>Amazon Associates: textbook recommendations in study material</li>
+<li>Coursera/edX/Skillshare affiliate signups</li>
+<li>Chegg/Course Hero referrals</li>
+<li>Calculator/equipment (TI-84, Apple Pencil) — back-to-school season spike</li>
+<li>Notion, Grammarly, ChatGPT Plus referral programs</li>
+<li>Realistic: <strong>$0.10–$0.20 per MAU per month</strong> at maturity</li>
+</ul>
+<p><strong>6.18 Lionade Merch</strong> — Concept. Print-on-demand hoodies, water bottles, stickers via Printful (no inventory risk, 30–40% margin). Brand-building bonus.</p>
+<p><strong>6.19 Anonymized data insights (B2B)</strong> — Concept. Curriculum publishers + test-prep companies pay for &quot;what concepts are students struggling with at scale.&quot; High-margin, opt-in only, requires legal/privacy framework.</p>
+<h3>Quick Comparison: Margin Per Stream</h3>
+<table>
+<thead>
+<tr>
+<th>Stream</th>
+<th>Variable cost</th>
+<th>Gross margin</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Subscriptions</td>
+<td>AI + Stripe fee</td>
+<td>35–60%</td>
+</tr>
+<tr>
+<td>Family plan</td>
+<td>Same</td>
+<td>50–65%</td>
+</tr>
+<tr>
+<td>Teacher edition</td>
+<td>Same</td>
+<td>70%+ (lower AI per student vs. consumer)</td>
+</tr>
+<tr>
+<td>Battle pass</td>
+<td>Stripe fee only</td>
+<td>95%</td>
+</tr>
+<tr>
+<td>Display ads</td>
+<td>Ad-tech tax (~30%)</td>
+<td>70%</td>
+</tr>
+<tr>
+<td>Rewarded video</td>
+<td>Ad-tech tax</td>
+<td>70%</td>
+</tr>
+<tr>
+<td>Direct sponsorships</td>
+<td>None</td>
+<td>95%+</td>
+</tr>
+<tr>
+<td>Streak Revive / cosmetics</td>
+<td>Stripe fee</td>
+<td>92%</td>
+</tr>
+<tr>
+<td>Gift cards</td>
+<td>Stripe fee + breakage</td>
+<td>90%+</td>
+</tr>
+<tr>
+<td>Cash payouts (take)</td>
+<td>Stripe fee</td>
+<td>85%</td>
+</tr>
+<tr>
+<td>Tutoring marketplace (take)</td>
+<td>Stripe Connect fee</td>
+<td>85%</td>
+</tr>
+<tr>
+<td>Affiliate</td>
+<td>None</td>
+<td>100%</td>
+</tr>
+<tr>
+<td>Merch</td>
+<td>Printful unit cost</td>
+<td>30–40%</td>
+</tr>
+</tbody></table>
+<p><strong>Key insight: every stream other than subscriptions has 70%+ gross margin.</strong> Once we diversify off &quot;just subscriptions,&quot; the unit economics improve dramatically.</p>
+<hr>
+<h2>7. Cost Structure</h2>
+<h3>7.1 Variable Costs (Per User Per Month)</h3>
+<table>
+<thead>
+<tr>
+<th>Cost</th>
+<th>Free user</th>
+<th>Pro user</th>
+<th>Platinum user</th>
+<th>Source</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>AI (OpenAI/Anthropic/Gemini)</td>
+<td>~$0.50</td>
+<td>~$3.00</td>
+<td>~$5.00</td>
+<td><code>lib/mastery-plan.ts</code> notes</td>
+</tr>
+<tr>
+<td>Supabase (DB + auth + realtime)</td>
+<td>~$0.05</td>
+<td>~$0.10</td>
+<td>~$0.15</td>
+<td>Pro+ users do more reads</td>
+</tr>
+<tr>
+<td>Vercel (hosting + bandwidth)</td>
+<td>~$0.05</td>
+<td>~$0.05</td>
+<td>~$0.05</td>
+<td>Mostly fixed</td>
+</tr>
+<tr>
+<td>CloudFront CDN</td>
+<td>~$0.01</td>
+<td>~$0.01</td>
+<td>~$0.01</td>
+<td>Image bandwidth</td>
+</tr>
+<tr>
+<td>Resend (transactional email)</td>
+<td>~$0.005</td>
+<td>~$0.005</td>
+<td>~$0.005</td>
+<td>&lt;0.01¢ per email</td>
+</tr>
+<tr>
+<td>Stripe fees (per transaction)</td>
+<td>$0</td>
+<td>2.9% + $0.30</td>
+<td>2.9% + $0.30</td>
+<td>Flat</td>
+</tr>
+<tr>
+<td><strong>Total variable</strong></td>
+<td><strong>~$0.62</strong></td>
+<td><strong>~$3.66</strong> (after Stripe)</td>
+<td><strong>~$5.66</strong> (after Stripe)</td>
+<td></td>
+</tr>
+</tbody></table>
+<p><strong>Stripe fee math:</strong></p>
+<ul>
+<li>Pro monthly $6.99 → Stripe takes ~$0.50 → net $6.49</li>
+<li>Pro annual $69.99 → Stripe takes ~$2.33 → net $67.66 (much better)</li>
+<li>Platinum monthly $14.99 → Stripe takes ~$0.73 → net $14.26</li>
+<li>Platinum annual $149.99 → Stripe takes ~$4.65 → net $145.34</li>
+</ul>
+<h3>7.2 Fixed Costs (Per Month)</h3>
+<table>
+<thead>
+<tr>
+<th>Cost</th>
+<th>Estimate</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Domain renewals</td>
+<td>~$2</td>
+<td>getlionade.com</td>
+</tr>
+<tr>
+<td>Apple Developer</td>
+<td>~$8</td>
+<td>$99/yr ÷ 12</td>
+</tr>
+<tr>
+<td>Google Play Developer</td>
+<td>~$2</td>
+<td>$25 one-time amortized</td>
+</tr>
+<tr>
+<td>Supabase base tier</td>
+<td>$0–$25</td>
+<td>Free tier sufficient until ~10K users</td>
+</tr>
+<tr>
+<td>Vercel base tier</td>
+<td>$0–$20</td>
+<td>Hobby → Pro at scale</td>
+</tr>
+<tr>
+<td>Monitoring/error tracking</td>
+<td>~$0–$26</td>
+<td>Sentry free tier</td>
+</tr>
+<tr>
+<td><strong>Fixed monthly base</strong></td>
+<td><strong>~$15–$85</strong></td>
+<td>At small scale</td>
+</tr>
+</tbody></table>
+<h3>7.3 Margin Per User</h3>
+<table>
+<thead>
+<tr>
+<th>Plan</th>
+<th>Net revenue (annual cycle)</th>
+<th>Variable cost</th>
+<th>Gross margin</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Free</td>
+<td>$0</td>
+<td>$0.62/mo = $7.44/yr</td>
+<td><strong>-$7.44/yr</strong> (loss leader)</td>
+</tr>
+<tr>
+<td>Pro annual</td>
+<td>$67.66/yr</td>
+<td>$3.66 × 12 = $43.92</td>
+<td><strong>+$23.74/yr (35% margin)</strong></td>
+</tr>
+<tr>
+<td>Platinum annual</td>
+<td>$145.34/yr</td>
+<td>$5.66 × 12 = $67.92</td>
+<td><strong>+$77.42/yr (53% margin)</strong></td>
+</tr>
+<tr>
+<td>Pro monthly</td>
+<td>$77.88/yr ($6.49 × 12)</td>
+<td>$43.92</td>
+<td><strong>+$33.96/yr (44% margin)</strong></td>
+</tr>
+<tr>
+<td>Platinum monthly</td>
+<td>$171.12/yr ($14.26 × 12)</td>
+<td>$67.92</td>
+<td><strong>+$103.20/yr (60% margin)</strong></td>
+</tr>
+</tbody></table>
+<p><strong>Key insight:</strong> Free users cost ~$7/yr in AI alone. We need a 1.6% conversion rate to Pro annual just to break even on the free tier (1 paying Pro pays for 3 free users). Conversion rate above 5% = healthy.</p>
+<hr>
+<h2>8. Financial Projections</h2>
+<blockquote>
+<p><strong>These are projections based on shipped features + comparable Gen-Z app benchmarks. Not promises.</strong> Update assumptions as real data comes in.</p>
+</blockquote>
+<h3>8.1 The First Pass Was Too Pessimistic — Here&#39;s What Changed</h3>
+<p>The original projections in this doc showed every scale losing money. The team is right to push back. Three errors in the first model:</p>
+<ol>
+<li><strong>Conversion math was applied to DAU instead of MAU.</strong> Industry-standard &quot;% paid&quot; is measured against MAU. MAU is typically 2.5–3× DAU for habit apps, so true paying users are ~2.5× higher than I showed.</li>
+<li><strong>Free-tier AI cost was modeled ungated</strong> ($0.50/free/mo). With sensible product gating (Mastery Mode = Pro only, syllabus parser = 3 free, free chat routes to gpt-4o-mini exclusively), free AI cost drops to ≤$0.20/mo. <strong>This single change flips every scenario.</strong></li>
+<li><strong>Only 4 revenue streams modeled</strong> — subscriptions, ads, Streak Revive, cosmetics. We have 13+ realistic streams (see §6). Battle pass alone could rival ad revenue at scale.</li>
+</ol>
+<p>The tables below model the <strong>realistic with AI controls + full ad stack + battle pass + affiliate</strong> scenario.</p>
+<h3>8.2 Updated Assumptions</h3>
+<table>
+<thead>
+<tr>
+<th>Assumption</th>
+<th>Conservative</th>
+<th>Base</th>
+<th>Optimistic</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>MAU / DAU ratio</td>
+<td>2.5×</td>
+<td>2.8×</td>
+<td>3.0×</td>
+</tr>
+<tr>
+<td>Conversion to paid</td>
+<td>3% of MAU</td>
+<td>5% of MAU</td>
+<td>8% of MAU</td>
+</tr>
+<tr>
+<td>Pro / Platinum split</td>
+<td>75 / 25</td>
+<td>70 / 30</td>
+<td>65 / 35</td>
+</tr>
+<tr>
+<td>Annual prepay share</td>
+<td>30%</td>
+<td>45%</td>
+<td>60%</td>
+</tr>
+<tr>
+<td>Free AI cost / user</td>
+<td>$0.30/mo</td>
+<td>$0.20/mo</td>
+<td>$0.10/mo</td>
+</tr>
+<tr>
+<td>Display ad RPM (web)</td>
+<td>$2.50</td>
+<td>$4</td>
+<td>$6</td>
+</tr>
+<tr>
+<td>Mobile ad RPM</td>
+<td>$4</td>
+<td>$6</td>
+<td>$9</td>
+</tr>
+<tr>
+<td>Rewarded video uptake</td>
+<td>10% MAU × 3 ads</td>
+<td>20% × 5 ads</td>
+<td>30% × 7 ads</td>
+</tr>
+<tr>
+<td>Battle pass uptake</td>
+<td>2% MAU</td>
+<td>5% MAU</td>
+<td>8% MAU</td>
+</tr>
+<tr>
+<td>Affiliate $/MAU/mo</td>
+<td>$0.05</td>
+<td>$0.12</td>
+<td>$0.20</td>
+</tr>
+<tr>
+<td>Streak Revive uptake</td>
+<td>1% MAU</td>
+<td>2% MAU</td>
+<td>4% MAU</td>
+</tr>
+<tr>
+<td>Cosmetic IAP / MAU/mo</td>
+<td>0.3% × $4</td>
+<td>0.5% × $4</td>
+<td>1% × $5</td>
+</tr>
+<tr>
+<td>Gift card $/MAU/mo</td>
+<td>$0.03</td>
+<td>$0.07</td>
+<td>$0.15</td>
+</tr>
+</tbody></table>
+<h3>8.3 Scenarios at Different DAU</h3>
+<h4>1,000 DAU (early launch — Q3 2026)</h4>
+<table>
+<thead>
+<tr>
+<th>Stream</th>
+<th>Conservative</th>
+<th>Base</th>
+<th>Optimistic</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Subscriptions</td>
+<td>$580</td>
+<td>$1,095</td>
+<td>$2,005</td>
+</tr>
+<tr>
+<td>Battle pass</td>
+<td>$50</td>
+<td>$625</td>
+<td>$1,200</td>
+</tr>
+<tr>
+<td>Display + mobile ads</td>
+<td>$290</td>
+<td>$475</td>
+<td>$810</td>
+</tr>
+<tr>
+<td>Rewarded video ads</td>
+<td>$75</td>
+<td>$200</td>
+<td>$480</td>
+</tr>
+<tr>
+<td>Affiliate</td>
+<td>$125</td>
+<td>$300</td>
+<td>$600</td>
+</tr>
+<tr>
+<td>Streak Revive</td>
+<td>$25</td>
+<td>$50</td>
+<td>$120</td>
+</tr>
+<tr>
+<td>Cosmetics</td>
+<td>$30</td>
+<td>$50</td>
+<td>$150</td>
+</tr>
+<tr>
+<td>Gift cards</td>
+<td>$75</td>
+<td>$175</td>
+<td>$450</td>
+</tr>
+<tr>
+<td><strong>Gross monthly</strong></td>
+<td><strong>$1,250</strong></td>
+<td><strong>$2,970</strong></td>
+<td><strong>$5,815</strong></td>
+</tr>
+<tr>
+<td>Variable + Stripe + Infra</td>
+<td>-$900</td>
+<td>-$1,225</td>
+<td>-$1,500</td>
+</tr>
+<tr>
+<td>Fixed</td>
+<td>-$100</td>
+<td>-$100</td>
+<td>-$100</td>
+</tr>
+<tr>
+<td><strong>Net monthly</strong></td>
+<td><strong>+$250</strong></td>
+<td><strong>+$1,645</strong></td>
+<td><strong>+$4,215</strong></td>
+</tr>
+</tbody></table>
+<h4>10,000 DAU (V1 public — late 2026)</h4>
+<table>
+<thead>
+<tr>
+<th>Stream</th>
+<th>Conservative</th>
+<th>Base</th>
+<th>Optimistic</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Subscriptions</td>
+<td>$5,800</td>
+<td>$10,950</td>
+<td>$20,050</td>
+</tr>
+<tr>
+<td>Battle pass</td>
+<td>$500</td>
+<td>$6,250</td>
+<td>$12,000</td>
+</tr>
+<tr>
+<td>Display + mobile ads</td>
+<td>$2,900</td>
+<td>$4,750</td>
+<td>$8,100</td>
+</tr>
+<tr>
+<td>Rewarded video ads</td>
+<td>$750</td>
+<td>$2,000</td>
+<td>$4,800</td>
+</tr>
+<tr>
+<td>Affiliate</td>
+<td>$1,250</td>
+<td>$3,000</td>
+<td>$6,000</td>
+</tr>
+<tr>
+<td>Streak Revive</td>
+<td>$250</td>
+<td>$495</td>
+<td>$1,200</td>
+</tr>
+<tr>
+<td>Cosmetics</td>
+<td>$300</td>
+<td>$500</td>
+<td>$1,500</td>
+</tr>
+<tr>
+<td>Gift cards</td>
+<td>$750</td>
+<td>$1,750</td>
+<td>$4,500</td>
+</tr>
+<tr>
+<td><strong>Gross monthly</strong></td>
+<td><strong>$12,500</strong></td>
+<td><strong>$29,695</strong></td>
+<td><strong>$58,150</strong></td>
+</tr>
+<tr>
+<td>Variable + Stripe + Infra</td>
+<td>-$8,500</td>
+<td>-$11,950</td>
+<td>-$15,500</td>
+</tr>
+<tr>
+<td>Fixed</td>
+<td>-$500</td>
+<td>-$500</td>
+<td>-$500</td>
+</tr>
+<tr>
+<td><strong>Net monthly</strong></td>
+<td><strong>+$3,500</strong></td>
+<td><strong>+$17,245</strong></td>
+<td><strong>+$42,150</strong></td>
+</tr>
+</tbody></table>
+<h4>50,000 DAU (V2 milestone — mid 2027)</h4>
+<table>
+<thead>
+<tr>
+<th>Stream</th>
+<th>Conservative</th>
+<th>Base</th>
+<th>Optimistic</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Subscriptions</td>
+<td>$29,000</td>
+<td>$54,750</td>
+<td>$100,250</td>
+</tr>
+<tr>
+<td>Battle pass</td>
+<td>$2,500</td>
+<td>$31,250</td>
+<td>$60,000</td>
+</tr>
+<tr>
+<td>Display + mobile ads</td>
+<td>$14,500</td>
+<td>$23,750</td>
+<td>$40,500</td>
+</tr>
+<tr>
+<td>Rewarded video ads</td>
+<td>$3,750</td>
+<td>$10,000</td>
+<td>$24,000</td>
+</tr>
+<tr>
+<td>Affiliate</td>
+<td>$6,250</td>
+<td>$15,000</td>
+<td>$30,000</td>
+</tr>
+<tr>
+<td>Streak Revive</td>
+<td>$1,250</td>
+<td>$2,475</td>
+<td>$6,000</td>
+</tr>
+<tr>
+<td>Cosmetics</td>
+<td>$1,500</td>
+<td>$2,500</td>
+<td>$7,500</td>
+</tr>
+<tr>
+<td>Gift cards</td>
+<td>$3,750</td>
+<td>$8,750</td>
+<td>$22,500</td>
+</tr>
+<tr>
+<td>Tournament take + cash payouts (V2)</td>
+<td>$0</td>
+<td>$5,000</td>
+<td>$15,000</td>
+</tr>
+<tr>
+<td><strong>Gross monthly</strong></td>
+<td><strong>$62,500</strong></td>
+<td><strong>$153,475</strong></td>
+<td><strong>$305,750</strong></td>
+</tr>
+<tr>
+<td>Variable + Stripe + Infra</td>
+<td>-$40,000</td>
+<td>-$54,000</td>
+<td>-$72,000</td>
+</tr>
+<tr>
+<td>Fixed</td>
+<td>-$1,500</td>
+<td>-$1,500</td>
+<td>-$1,500</td>
+</tr>
+<tr>
+<td><strong>Net monthly</strong></td>
+<td><strong>+$21,000</strong></td>
+<td><strong>+$97,975</strong></td>
+<td><strong>+$232,250</strong></td>
+</tr>
+</tbody></table>
+<h4>100,000 DAU (full vision — 2027–2028)</h4>
+<table>
+<thead>
+<tr>
+<th>Stream</th>
+<th>Conservative</th>
+<th>Base</th>
+<th>Optimistic</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Subscriptions</td>
+<td>$58,000</td>
+<td>$109,500</td>
+<td>$200,500</td>
+</tr>
+<tr>
+<td>Battle pass</td>
+<td>$5,000</td>
+<td>$62,500</td>
+<td>$120,000</td>
+</tr>
+<tr>
+<td>Display + mobile ads</td>
+<td>$29,000</td>
+<td>$47,500</td>
+<td>$81,000</td>
+</tr>
+<tr>
+<td>Rewarded video ads</td>
+<td>$7,500</td>
+<td>$20,000</td>
+<td>$48,000</td>
+</tr>
+<tr>
+<td>Affiliate</td>
+<td>$12,500</td>
+<td>$30,000</td>
+<td>$60,000</td>
+</tr>
+<tr>
+<td>Streak Revive</td>
+<td>$2,500</td>
+<td>$4,950</td>
+<td>$12,000</td>
+</tr>
+<tr>
+<td>Cosmetics</td>
+<td>$3,000</td>
+<td>$5,000</td>
+<td>$15,000</td>
+</tr>
+<tr>
+<td>Gift cards</td>
+<td>$7,500</td>
+<td>$17,500</td>
+<td>$45,000</td>
+</tr>
+<tr>
+<td>Tournament + cash payouts</td>
+<td>$0</td>
+<td>$15,000</td>
+<td>$45,000</td>
+</tr>
+<tr>
+<td>Tutoring marketplace (V3)</td>
+<td>$0</td>
+<td>$10,000</td>
+<td>$40,000</td>
+</tr>
+<tr>
+<td>Teacher edition (B2B)</td>
+<td>$0</td>
+<td>$10,000</td>
+<td>$30,000</td>
+</tr>
+<tr>
+<td>Direct sponsorships</td>
+<td>$0</td>
+<td>$5,000</td>
+<td>$25,000</td>
+</tr>
+<tr>
+<td><strong>Gross monthly</strong></td>
+<td><strong>$125,000</strong></td>
+<td><strong>$336,950</strong></td>
+<td><strong>$721,500</strong></td>
+</tr>
+<tr>
+<td>Variable + Stripe + Infra</td>
+<td>-$80,000</td>
+<td>-$108,000</td>
+<td>-$144,000</td>
+</tr>
+<tr>
+<td>Fixed</td>
+<td>-$3,000</td>
+<td>-$3,000</td>
+<td>-$3,000</td>
+</tr>
+<tr>
+<td><strong>Net monthly</strong></td>
+<td><strong>+$42,000</strong></td>
+<td><strong>+$225,950</strong></td>
+<td><strong>+$574,500</strong></td>
+</tr>
+<tr>
+<td><strong>Net annual</strong></td>
+<td><strong>+$504K</strong></td>
+<td><strong>+$2.7M</strong></td>
+<td><strong>+$6.9M</strong></td>
+</tr>
+</tbody></table>
+<h3>8.4 The Levers That Make This Work</h3>
+<p>The story across all four scales: <strong>profitable from day one IF four levers stay in place.</strong></p>
+<ol>
+<li><p><strong>Free-tier AI is gated.</strong> Mastery Mode is Pro+. Syllabus parser = 3 lifetime parses on free. Free chat routes to gpt-4o-mini only. <strong>This is the difference between profitable and bleeding.</strong></p>
+</li>
+<li><p><strong>Ads are layered.</strong> Single-network AdSense gets you $2 RPM. Layered (AdSense + AdMob + Meta + TikTok + rewarded video) gets $5–$8 blended. That&#39;s a 2.5–4× multiplier on the same eyeballs.</p>
+</li>
+<li><p><strong>Battle pass ships.</strong> $4.99/mo cosmetic season is high-margin recurring revenue with proven Gen-Z appetite (Fortnite, Snapchat+, Duolingo Max). Even 5% uptake adds 50–80% to subscription revenue.</p>
+</li>
+<li><p><strong>Conversion holds at ≥5%.</strong> Below 3%, the model gets shaky. Above 5%, it&#39;s strong. Levers: aggressive paywall on Mastery + Class Notebook (the AI features), free trials on Pro, founding-member discounts, friction at &quot;I want a 4th class&quot; → upgrade.</p>
+</li>
+</ol>
+<p>If two of these slip, we&#39;re back to the original pessimistic scenario. If all four hold, <strong>break-even comes at &lt;1,000 DAU</strong> in the base case.</p>
+<h3>8.5 What This Looks Like at Real Comparable Scale</h3>
+<p>For context — actual Gen-Z app DAUs in roughly the same lane:</p>
+<table>
+<thead>
+<tr>
+<th>App</th>
+<th>DAU (approx)</th>
+<th>Monetization mix</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Duolingo</td>
+<td>30M+</td>
+<td>Subs + ads + cosmetics + family plan</td>
+</tr>
+<tr>
+<td>Quizlet</td>
+<td>50M+ MAU</td>
+<td>Subs + ads (light)</td>
+</tr>
+<tr>
+<td>Photomath</td>
+<td>10M+ MAU</td>
+<td>Subs</td>
+</tr>
+<tr>
+<td>Brainly</td>
+<td>50M+ MAU</td>
+<td>Subs + ads</td>
+</tr>
+<tr>
+<td>Snapchat (study/chat overlap)</td>
+<td>414M</td>
+<td>Ads + Snap+ subs + microtransactions</td>
+</tr>
+</tbody></table>
+<p>Reaching even 100K DAU is ambitious but realistic — Lionade only needs ~0.3% of the US student population (~50M K-12 + ~20M post-secondary) to hit it.</p>
+<hr>
+<h2>9. Near-Term Roadmap (Q2–Q3 2026)</h2>
+<p>Sequenced. Each item should ship in 1–4 weeks.</p>
+<h3>9.1 iOS App — Public Beta (TestFlight)</h3>
+<p>iOS Phases 0–6c done; awaiting EAS dev-client build. Once that builds: TestFlight invite, friends-and-family beta, App Store submission. <strong>Critical</strong> — unlocks half the addressable market.</p>
+<h3>9.2 Android App</h3>
+<p>Same Expo codebase. EAS already configured for both targets. Should ship within 2 weeks of iOS beta.</p>
+<h3>9.3 Stripe Live Switch</h3>
+<p>Toggle live mode on Stripe + flip the Premium Store from &quot;Coming Soon&quot; to live + enable Pro/Platinum signup CTAs across the app. <strong>Activates revenue.</strong> Requires only ops work, no engineering.</p>
+<h3>9.4 Ads Integration</h3>
+<p>Wire ad provider (Google AdSense or AdMob for native apps) into free-tier surfaces. Two placements: passive background banner (low intrusion) + interstitial popup between quiz sessions. Pro removes popups; Platinum removes all.</p>
+<p><strong>Why important:</strong> Ads are the only stream that monetizes the 95% of users who never convert to paid. Even at $3 RPM, 100K free users generates ~$900/mo before optimization.</p>
+<h3>9.5 Roulette / Daily Spin</h3>
+<p>A daily spin-the-wheel feature for engagement — one free spin per day, optional Fangs-funded re-spins. Outcomes: small Fangs prizes (10–500F), boosters, occasional rare cosmetics, very occasional jackpot (10,000F).</p>
+<p><strong>Why important:</strong> Daily-return ritual independent of &quot;did I do the work today.&quot; Adds variable reward (the Vegas hook). Comparable: Snapchat&#39;s daily streak rewards, Duolingo&#39;s chest reveals.</p>
+<p><strong>Risk:</strong> Inflates Fangs supply. Must be balanced against sinks (cosmetics, boosters) so we don&#39;t break the economy. Plan: gate jackpot rate so expected value ≤ 100F/day.</p>
+<h3>9.6 Family Console</h3>
+<p>A multi-account hub for parents/guardians to:</p>
+<ul>
+<li>See their kids&#39; study time, streak, accuracy across subjects</li>
+<li>Set weekly study goals; reward Fangs or real $ on achievement</li>
+<li>Pay for kids&#39; Pro/Platinum subscription as a family plan</li>
+<li>Get weekly progress emails</li>
+</ul>
+<p><strong>Pricing concept:</strong> Family plan = $19.99/mo (vs $14.99 Platinum solo) — covers up to 4 kids. Higher LTV (parents pay more reliably + don&#39;t churn out of &quot;I&#39;m broke this month&quot;).</p>
+<p><strong>Why important:</strong> Parents are the wallet. We&#39;ve been pitching to students; pitching to parents unlocks a whole second buyer persona.</p>
+<h3>9.7 macOS Desktop App</h3>
+<p>Wrap the web app in Electron or native SwiftUI shell. Adds:</p>
+<ul>
+<li>Always-on status bar widget (streak + daily target)</li>
+<li>System notifications for streak warnings</li>
+<li>Cmd+Shift+L global hotkey to open Quick Note from anywhere</li>
+<li>Offline-friendly for plane/library studying</li>
+</ul>
+<p><strong>Effort:</strong> ~2 weeks for an Electron wrapper, ~6 weeks for native. Recommend Electron first.</p>
+<h3>9.8 Server-Side Reward RPC Migration</h3>
+<p>Currently <code>incrementCoins</code>/<code>incrementXP</code> in <code>lib/db.ts</code> is fetch-then-update — race condition risk under concurrent quiz completions. Migrate to a Postgres function. <strong>Boring but critical</strong> — prevents currency exploits.</p>
+<hr>
+<h2>10. Mid-Term Roadmap (Q4 2026 – Q2 2027)</h2>
+<h3>10.1 Real Cash Payouts (V2)</h3>
+<p>The headline V2 milestone. Top performers in monthly leaderboards earn real money.</p>
+<p><strong>Mechanism:</strong></p>
+<ul>
+<li>Fangs → cash conversion at 1,000F → $1 (tentative)</li>
+<li>Monthly prize pool funded by ~10% of subscription revenue + entry fees on optional opt-in tournaments</li>
+<li>Payout via Stripe Connect to verified accounts (KYC required for $50+)</li>
+<li>Cap monthly payouts per user to prevent abuse</li>
+</ul>
+<p><strong>Why this matters:</strong> Differentiates Lionade from every other study app on day one. The pitch becomes &quot;study and we&#39;ll actually pay you&quot; — that&#39;s a marketing moat, not a feature.</p>
+<h3>10.2 Ninny AI Study Companion</h3>
+<p>Already in flight (Mastery Mode is the foundation). Expand to:</p>
+<ul>
+<li>Chat about any uploaded material (PDF, screenshot, paste)</li>
+<li>Generate practice questions in any format on demand</li>
+<li>Personalized weekly study plan that adapts to performance</li>
+<li>Voice mode (TTS for explanations, STT for verbal Q&amp;A)</li>
+</ul>
+<h3>10.3 Tutoring Marketplace (V3)</h3>
+<p>Top-ranked users opt in to tutor lower-ranked users. Lionade takes 15–20% of session price. Pricing set by tutor ($10–$50/hr). Built-in scheduling, video, payments.</p>
+<p><strong>Why this matters:</strong> Pure-margin revenue. Doesn&#39;t require us to do the teaching. Strongest users become our distribution.</p>
+<h3>10.4 Weekly Tournaments</h3>
+<p>Bracket-style competition with structured prize pools. 16/32/64-player single-elim. Entry fee in Fangs; winner gets cash or rare cosmetic.</p>
+<h3>10.5 School / Teacher Bulk Licensing</h3>
+<p>Sell Lionade Premium access to schools at bulk rate. Teacher dashboard for class-wide assignments, leaderboards, progress reports.</p>
+<p><strong>Pricing concept:</strong> $5/student/year for schools (vs $69.99 retail). Hits a 10× user volume target if we close even 100 schools (avg 500 students/school = 50K users at $250K ARR).</p>
+<hr>
+<h2>11. Future Feature Ideas</h2>
+<p>A grab-bag. Not committed. Sorted roughly by upside × feasibility.</p>
+<h3>11.1 High-Confidence Wins</h3>
+<table>
+<thead>
+<tr>
+<th>Idea</th>
+<th>What</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Battle Pass ($4.99/mo)</strong></td>
+<td>Seasonal cosmetic upgrade on top of any tier</td>
+<td>Fortnite/Snap+ proved this; near-zero variable cost; could rival ad revenue</td>
+</tr>
+<tr>
+<td><strong>Daily Spin (Roulette)</strong></td>
+<td>One spin per day, prize wheel</td>
+<td>Daily return ritual; variable rewards = Vegas hook</td>
+</tr>
+<tr>
+<td><strong>Family Console</strong></td>
+<td>Parent dashboard + family plan</td>
+<td>Parents are the wallet; LTV much higher</td>
+</tr>
+<tr>
+<td><strong>macOS app + status bar widget</strong></td>
+<td>Always-visible streak + Quick Note hotkey</td>
+<td>Keeps Lionade top-of-mind for power users</td>
+</tr>
+<tr>
+<td><strong>Friend referrals with Fangs reward</strong></td>
+<td>Refer a friend → both get 500F</td>
+<td>Cheap viral growth; Duolingo and Snapchat lean on this</td>
+</tr>
+<tr>
+<td><strong>Push notification streak warnings</strong></td>
+<td>&quot;Your 47-day streak ends in 2 hours&quot;</td>
+<td>Single highest-leverage retention message</td>
+</tr>
+<tr>
+<td><strong>Rewarded video ads</strong></td>
+<td>Watch ad → earn Fangs</td>
+<td>Voluntary, $8–$15 RPM, doesn&#39;t piss off paying users</td>
+</tr>
+<tr>
+<td><strong>Affiliate links in study material</strong></td>
+<td>Amazon textbook + Notion + Grammarly refs</td>
+<td>$0.10–$0.20/MAU passive income</td>
+</tr>
+<tr>
+<td><strong>Lionade gift cards</strong></td>
+<td>$25/$50/$100 Fangs cards via Apple/Google/Stripe</td>
+<td>Holiday + birthday revenue spike, near-100% margin</td>
+</tr>
+<tr>
+<td><strong>Premium content packs</strong></td>
+<td>SAT/ACT/MCAT/Bar prep packs at $9.99 each</td>
+<td>One-time IAP, near-zero variable cost</td>
+</tr>
+</tbody></table>
+<h3>11.2 Speculative / Higher Variance</h3>
+<table>
+<thead>
+<tr>
+<th>Idea</th>
+<th>What</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Wagering with friends</strong></td>
+<td>Direct head-to-head Fangs/cash bets between friends</td>
+<td>High engagement; legal/regulatory complexity</td>
+</tr>
+<tr>
+<td><strong>Sponsored brand quizzes</strong></td>
+<td>Notion/Chegg sponsors a 10Q quiz; users earn 2× Fangs</td>
+<td>$5K–$50K per integration, brands love engaged Gen Z</td>
+</tr>
+<tr>
+<td><strong>Direct-sponsor weekly challenge</strong></td>
+<td>&quot;This week&#39;s bounty board sponsored by Calculator.net&quot;</td>
+<td>Recurring sponsor cadence; predictable revenue</td>
+</tr>
+<tr>
+<td><strong>Lionade for Teachers (B2B SaaS)</strong></td>
+<td>$99/mo per classroom dashboard</td>
+<td>Untapped budget; 100 classrooms = $119K/yr</td>
+</tr>
+<tr>
+<td><strong>Anonymized data insights</strong></td>
+<td>Sell aggregated &quot;what students struggle with&quot; to publishers</td>
+<td>High-margin B2B; needs careful privacy/legal</td>
+</tr>
+<tr>
+<td><strong>AI Tutor Premium tier</strong></td>
+<td>$19.99/mo above Platinum for priority Ninny + voice mode</td>
+<td>ChatGPT Plus model; small % of Platinum users will upgrade</td>
+</tr>
+<tr>
+<td><strong>Cosmetic NFTs / digital trading cards</strong></td>
+<td>Limited-edition badges that users can trade</td>
+<td>Pump for power users; reputational risk</td>
+</tr>
+<tr>
+<td><strong>AI-generated personalized quiz</strong></td>
+<td>Generate a quiz on-demand from user&#39;s weak topics</td>
+<td>Already partially there via Mastery Mode; expand to all subjects</td>
+</tr>
+<tr>
+<td><strong>Voice-only mode (Alexa-style)</strong></td>
+<td>&quot;Ninny, quiz me on biology&quot;</td>
+<td>Differentiated; small market today</td>
+</tr>
+<tr>
+<td><strong>Public profile pages</strong></td>
+<td><code>lionade.com/u/sam</code> shareable profile</td>
+<td>Free organic SEO; social-proof for app stores</td>
+</tr>
+<tr>
+<td><strong>Discord integration</strong></td>
+<td>Streak announcements + leaderboards in Discord servers</td>
+<td>Gen Z lives on Discord</td>
+</tr>
+<tr>
+<td><strong>Group study rooms (live Pomodoro)</strong></td>
+<td>6-person video lobby with shared timer</td>
+<td>&quot;Study with me&quot; YouTube videos validate the demand</td>
+</tr>
+<tr>
+<td><strong>Streak insurance</strong></td>
+<td>$0.99/mo to never lose a streak</td>
+<td>Snapchat-style microtransaction; high margin</td>
+</tr>
+<tr>
+<td><strong>Parent-paid allowance</strong></td>
+<td>Parent loads $X/mo into kid&#39;s wallet, kid earns it by hitting study targets</td>
+<td>The financial-literacy angle parents love</td>
+</tr>
+</tbody></table>
+<h3>11.3 Long-Tail / Defensive</h3>
+<table>
+<thead>
+<tr>
+<th>Idea</th>
+<th>What</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Arabic / Spanish localization</strong></td>
+<td>Two highest-leverage non-English markets for our target</td>
+<td>International growth</td>
+</tr>
+<tr>
+<td><strong>Offline-first mobile</strong></td>
+<td>Cache 50 questions locally; sync on connect</td>
+<td>&quot;Studying on a plane&quot; use case</td>
+</tr>
+<tr>
+<td><strong>GDPR / FERPA compliance pass</strong></td>
+<td>Required if we sell to schools</td>
+<td>Sales unlock</td>
+</tr>
+<tr>
+<td><strong>API for third-party LMS integrations</strong></td>
+<td>Canvas, Schoology, Google Classroom</td>
+<td>Schools won&#39;t adopt without it</td>
+</tr>
+<tr>
+<td><strong>In-app tutorial / first-quiz cinematic</strong></td>
+<td>Gorgeous onboarding that explains Fangs in 30s</td>
+<td>Cuts D1 dropoff</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>12. Tech Stack &amp; Infrastructure</h2>
+<table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Technology</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Web framework</td>
+<td>Next.js 14.2.35 (App Router)</td>
+<td>All pages <code>&quot;use client&quot;</code></td>
+</tr>
+<tr>
+<td>Mobile framework</td>
+<td>Expo + EAS</td>
+<td>iOS/Android shared codebase</td>
+</tr>
+<tr>
+<td>Language</td>
+<td>TypeScript (strict)</td>
+<td></td>
+</tr>
+<tr>
+<td>Styling</td>
+<td>Tailwind CSS 3.4.1</td>
+<td>Custom keyframes in <code>globals.css</code></td>
+</tr>
+<tr>
+<td>Database</td>
+<td>Supabase (PostgreSQL + Auth + Realtime)</td>
+<td>45 migrations</td>
+</tr>
+<tr>
+<td>Data fetching</td>
+<td>SWR</td>
+<td><code>keepPreviousData: true</code> everywhere</td>
+</tr>
+<tr>
+<td>AI</td>
+<td>OpenAI (gpt-4o, gpt-4o-mini), Anthropic (Sonnet 4.6), Gemini, Groq</td>
+<td>Routed via <code>lib/ai.ts</code></td>
+</tr>
+<tr>
+<td>Payments</td>
+<td>Stripe (wired, not live)</td>
+<td></td>
+</tr>
+<tr>
+<td>Email</td>
+<td>Resend</td>
+<td></td>
+</tr>
+<tr>
+<td>Hosting</td>
+<td>Vercel</td>
+<td>Auto-deploy on push to <code>main</code></td>
+</tr>
+<tr>
+<td>CDN</td>
+<td>CloudFront</td>
+<td>Static images via <code>cdnUrl()</code> helper</td>
+</tr>
+<tr>
+<td>Storage</td>
+<td>Supabase Storage</td>
+<td><code>class-syllabi</code> bucket with RLS</td>
+</tr>
+<tr>
+<td>PDF parsing</td>
+<td><code>pdf-parse</code> v2</td>
+<td><code>serverComponentsExternalPackages</code> for webpack</td>
+</tr>
+<tr>
+<td>Icons</td>
+<td>@phosphor-icons/react</td>
+<td></td>
+</tr>
+<tr>
+<td>Fonts</td>
+<td>Bebas Neue, Syne, DM Mono</td>
+<td>next/font/google</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>13. Risks &amp; Open Questions</h2>
+<h3>13.1 Top Risks</h3>
+<ol>
+<li><p><strong>Free-tier AI cost spirals as users use Mastery Mode more.</strong> $3/mo is a sustainable Pro cost; if free users start hitting that AI usage, the unit economics break. Mitigation: hard daily AI request caps for free users + cheaper-model routing for free-tier requests.</p>
+</li>
+<li><p><strong>Conversion to paid stays under 3%.</strong> Then we&#39;re at perpetual loss. Mitigation: aggressive A/B on paywall placement, free trial offers, founding-member pricing, friction at &quot;set up class notebook&quot; → &quot;upgrade to track 3 classes.&quot;</p>
+</li>
+<li><p><strong>Real cash payouts attract fraud.</strong> Bot accounts farming Fangs for cash-out. Mitigation: server-side anti-cheat is already in; add device fingerprinting, KYC at $50+ payout, machine-learning anomaly detection on quiz patterns before V2 ships.</p>
+</li>
+<li><p><strong>App Store rejection for cash-payout mechanics.</strong> Apple rejects gambling-adjacent apps. Mitigation: payout system can be web-only (App Store can&#39;t reject our website); structure payouts as scholarships/rewards rather than gambling-style payouts.</p>
+</li>
+<li><p><strong>Question-bank quality plateaus.</strong> AI-generated questions drift in quality. Mitigation: human review workflow, user-flag bad questions, Gemini-as-a-judge eval pass before publishing.</p>
+</li>
+</ol>
+<h3>13.2 Open Questions</h3>
+<ul>
+<li><strong>What&#39;s the right Free → Pro paywall trigger?</strong> Currently 1 mastery target on free. Options: 5 quizzes/day cap? Class limit (3 max)? Premium AI features only?</li>
+<li><strong>Is Platinum priced too low?</strong> Power users (we have a few testing) easily get $50/mo of value. Could we charge $24.99 for Platinum and keep Pro at $6.99?</li>
+<li><strong>Should ads run on Pro tier too</strong> (just no popups), or is ads-free the Pro hook itself? Currently background ads stay on Pro.</li>
+<li><strong>Real cash payouts — open to all states/countries, or US-only at launch?</strong> Regulation varies. US-only at launch is safer.</li>
+<li><strong>Family Console pricing — flat or per-kid?</strong> $19.99 flat is simpler; $9.99 + $4.99/kid is more expandable.</li>
+</ul>
+<hr>
+<h2>Appendix: Quick Numbers Cheat-Sheet</h2>
+<h3>Pricing</h3>
+<table>
+<thead>
+<tr>
+<th>Number</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Pro price (mo / annual)</td>
+<td>$6.99 / $69.99</td>
+</tr>
+<tr>
+<td>Platinum price (mo / annual)</td>
+<td>$14.99 / $149.99</td>
+</tr>
+<tr>
+<td>Family Plan (planned)</td>
+<td>$19.99/mo, up to 4 kids</td>
+</tr>
+<tr>
+<td>Battle Pass (planned)</td>
+<td>$4.99/mo on top of any tier</td>
+</tr>
+<tr>
+<td>Teacher Edition (planned)</td>
+<td>$99/mo per classroom</td>
+</tr>
+<tr>
+<td>Stripe fee</td>
+<td>2.9% + $0.30</td>
+</tr>
+</tbody></table>
+<h3>Unit Economics</h3>
+<table>
+<thead>
+<tr>
+<th>Number</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>AI cost — Pro / Platinum user</td>
+<td>~$3 / ~$5 per mo</td>
+</tr>
+<tr>
+<td>AI cost — Free user (target with controls)</td>
+<td>≤$0.20/mo</td>
+</tr>
+<tr>
+<td>Pro gross margin (annual prepay)</td>
+<td>35%</td>
+</tr>
+<tr>
+<td>Platinum gross margin (annual prepay)</td>
+<td>53%</td>
+</tr>
+<tr>
+<td>Battle pass / cosmetics gross margin</td>
+<td>92–95%</td>
+</tr>
+<tr>
+<td>Ads gross margin (after ad-tech tax)</td>
+<td>~70%</td>
+</tr>
+<tr>
+<td>Affiliate gross margin</td>
+<td>~100%</td>
+</tr>
+</tbody></table>
+<h3>Ads (Layered Strategy)</h3>
+<table>
+<thead>
+<tr>
+<th>Network</th>
+<th>Use case</th>
+<th>Expected RPM</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Google AdSense</td>
+<td>Web display</td>
+<td>$2.50–$4</td>
+</tr>
+<tr>
+<td>Google AdMob</td>
+<td>Mobile native</td>
+<td>$4–$7</td>
+</tr>
+<tr>
+<td>Meta Audience Network</td>
+<td>Mobile + secondary web</td>
+<td>$4–$6</td>
+</tr>
+<tr>
+<td>TikTok Audience Network</td>
+<td>Tertiary, demo match</td>
+<td>$6–$10 (when fills)</td>
+</tr>
+<tr>
+<td>Unity Ads / AppLovin / ironSource</td>
+<td>Rewarded video</td>
+<td>$8–$15</td>
+</tr>
+<tr>
+<td><strong>Blended target</strong></td>
+<td>All-in</td>
+<td><strong>$5–$8</strong></td>
+</tr>
+</tbody></table>
+<h3>Targets to Profitability</h3>
+<table>
+<thead>
+<tr>
+<th>Lever</th>
+<th>Target</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Paid conversion rate</td>
+<td>≥5% of MAU</td>
+<td>Below 3% = perpetual loss</td>
+</tr>
+<tr>
+<td>Annual prepay share</td>
+<td>≥50%</td>
+<td>Cuts Stripe fees materially</td>
+</tr>
+<tr>
+<td>Free AI cap</td>
+<td>≤$0.20/user/mo</td>
+<td>Single biggest lever</td>
+</tr>
+<tr>
+<td>Battle pass uptake</td>
+<td>≥5% of MAU</td>
+<td>Adds 50–80% to sub revenue</td>
+</tr>
+<tr>
+<td>Layered ad RPM</td>
+<td>≥$5 blended</td>
+<td>Single-network gets you $2</td>
+</tr>
+</tbody></table>
+<h3>V2/V3 Reference</h3>
+<table>
+<thead>
+<tr>
+<th>Number</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Fangs cash-out anchor</td>
+<td>1,000F → $1</td>
+</tr>
+<tr>
+<td>Tournament take rate</td>
+<td>15%</td>
+</tr>
+<tr>
+<td>Tutoring marketplace take</td>
+<td>15–20%</td>
+</tr>
+<tr>
+<td>Cash payouts ≤ % of subs</td>
+<td>10%</td>
+</tr>
+</tbody></table>
+<h3>Break-Even (Realistic Model)</h3>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>DAU</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Conservative</td>
+<td>~3,000 DAU</td>
+</tr>
+<tr>
+<td>Base</td>
+<td>&lt;1,000 DAU</td>
+</tr>
+<tr>
+<td>Optimistic</td>
+<td>&lt;500 DAU</td>
+</tr>
+</tbody></table>
+<p><em>The realistic model with AI controls + full ad stack + battle pass is profitable from day one. The original pessimistic model assumed no AI controls and only 4 revenue streams — that&#39;s the trap to avoid.</em></p>
+<hr>
+<p><em>Maintained by Sam. Update whenever pricing, costs, or roadmap changes — this is the doc we trust.</em></p>
+
+</div>
+</body>
+</html>

@@ -38,14 +38,18 @@ export default function PageTransition({ children }: { children: React.ReactNode
 
   if (!mounted || reduce) return <>{children}</>;
 
+  // Tuned tight: 80ms enter, 0ms exit (mode="sync" so the new page mounts
+  // immediately while the old one is still fading is intentionally avoided —
+  // we just skip the exit animation so navigation feels instant). 180ms
+  // exit + 180ms enter = 360ms perceived delay; this is ~80ms.
   return (
     <AnimatePresence mode="wait" initial={false}>
       <motion.div
         key={pathname}
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: 0 }}
-        transition={{ duration: 0.18, ease: "easeOut" }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 1 }}
+        transition={{ duration: 0.08, ease: "easeOut" }}
       >
         {children}
       </motion.div>

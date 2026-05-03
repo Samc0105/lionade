@@ -7,6 +7,7 @@ import { useAuth } from "@/lib/auth";
 import { useUserStats } from "@/lib/hooks";
 import { supabase } from "@/lib/supabase";
 import { cdnUrl } from "@/lib/cdn";
+import { avatarFor } from "@/lib/avatar";
 import { apiGet, apiPost, apiPatch, apiDelete } from "@/lib/api-client";
 import { Medal, Diamond, DiamondsFour, Users, CheckCircle, Sword, Trophy, Megaphone, X as XIcon, BookOpen, Fire, Target, MedalMilitary, GameController, Coins, PushPinSimple, Crown } from "@phosphor-icons/react";
 import { toastError, toastSuccess } from "@/lib/toast";
@@ -606,7 +607,7 @@ export default function SocialPage() {
                             aria-label={`${u.username} — open profile`}
                             className="w-full flex items-center gap-3 px-3 py-2.5 text-left hover:bg-white/[0.06] transition-colors"
                           >
-                            <img src={u.avatar_url ?? ""} alt={u.username} className="w-8 h-8 rounded-full object-cover" />
+                            <img src={avatarFor(u.username, u.avatar_url)} alt={u.username} className="w-8 h-8 rounded-full object-cover" />
                             <div className="flex-1 min-w-0">
                               <p className="text-cream text-sm font-semibold truncate">{u.username}</p>
                             </div>
@@ -723,7 +724,7 @@ export default function SocialPage() {
                       <div key={req.friendshipId} className="flex items-center gap-3 p-2 rounded-lg"
                         aria-label={`Friend request from ${req.username}`}
                         style={{ background: "rgba(255,255,255,0.03)" }}>
-                        <img src={req.avatar_url ?? ""} alt={req.username} className="w-8 h-8 rounded-full object-cover flex-shrink-0" />
+                        <img src={avatarFor(req.username, req.avatar_url)} alt={req.username} className="w-8 h-8 rounded-full object-cover flex-shrink-0" />
                         <div className="flex-1 min-w-0">
                           <p className="text-cream text-xs font-semibold truncate">{req.username}</p>
                           <p className="text-[10px] inline-flex items-center gap-1" style={{ color: tier.color }}>
@@ -759,7 +760,7 @@ export default function SocialPage() {
                       <div key={req.friendshipId} className="flex items-center gap-3 p-2 rounded-lg"
                         aria-label={`Outgoing friend request to ${req.username}`}
                         style={{ background: "rgba(255,255,255,0.03)" }}>
-                        <img src={req.avatar_url ?? ""} alt={req.username} className="w-8 h-8 rounded-full object-cover flex-shrink-0" />
+                        <img src={avatarFor(req.username, req.avatar_url)} alt={req.username} className="w-8 h-8 rounded-full object-cover flex-shrink-0" />
                         <div className="flex-1 min-w-0">
                           <p className="text-cream text-xs font-semibold truncate">{req.username}</p>
                           <p className="text-[10px] text-cream/20">Pending</p>
@@ -799,7 +800,7 @@ export default function SocialPage() {
                   >
                     {/* Avatar + online dot */}
                     <div className="relative flex-shrink-0" aria-label={`${friend.username}'s avatar`}>
-                      <img src={friend.avatar_url ?? ""} alt={friend.username} className="w-10 h-10 rounded-full object-cover" />
+                      <img src={avatarFor(friend.username, friend.avatar_url)} alt={friend.username} className="w-10 h-10 rounded-full object-cover" />
                       {friend.is_online && (
                         <div className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-green-400 border-2 border-[#04080F] social-online-dot" />
                       )}
@@ -1195,7 +1196,7 @@ export default function SocialPage() {
                       ←
                     </button>
                     <div className="relative" aria-label={`${selectedFriend.username}'s avatar`}>
-                      <img src={selectedFriend.avatar_url ?? ""} alt={selectedFriend.username} className="w-9 h-9 rounded-full object-cover" />
+                      <img src={avatarFor(selectedFriend.username, selectedFriend.avatar_url)} alt={selectedFriend.username} className="w-9 h-9 rounded-full object-cover" />
                       {selectedFriend.is_online && (
                         <div className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-green-400 border-2 border-[#04080F] social-online-dot" />
                       )}

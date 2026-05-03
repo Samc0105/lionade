@@ -277,9 +277,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           return;
         }
 
-        // Check 2-hour inactivity — sign out if exceeded
-        if (isSessionExpiredByInactivity()) {
+        // Check 2-hour inactivity — sign out if exceeded.
+        //
+        // Skip on SIGNED_IN: the user is authenticating right now, so they're
+        // active by definition. A stale LAST_ACTIVE_KEY from a prior abandoned
+        // session must not retroactively force a signout of the fresh login —
+        // that bug manifests as "first login click bounces /dashboard back to
+        // /login, second click works."
+        //
+        // Also clear the key on signout so subsequent logins can't re-trigger
+        // this on already-stale state (the previous code path was self-perpetuating
+        // because supabase.auth.signOut doesn't touch our app-level key).
+        if (event !== "SIGNED_IN" && isSessionExpiredByInactivity()) {
           console.log("[Auth] Session expired due to 2-hour inactivity — signing out");
+          if (typeof window !== "undefined") {
+            localStorage.removeItem(LAST_ACTIVE_KEY);
+          }
           await supabase.auth.signOut();
           setUser(null);
           setSession(null);
@@ -342,6 +355,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = async (email: string, password: string): Promise<{ error?: string }> => {
     const cleanEmail = sanitizeEmail(email);
     const cleanPassword = sanitizePassword(password);
+
+    // Mark the user as active *before* signInWithPassword so the SIGNED_IN
+    // listener never sees a stale LAST_ACTIVE_KEY and force-signs them out
+    // mid-login. Belt-and-suspenders: the listener also skips the inactivity
+    // check on SIGNED_IN events, but updating here closes any handler-ordering
+    // gap and means a partial sign-in still leaves consistent state.
+    updateLastActive();
 
     // Check brute-force lock before attempting sign-in.
     // 3s AbortController timeout — if the check endpoint hangs, fail open so
@@ -487,6 +507,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (typeof window !== "undefined") {
       localStorage.removeItem(LAST_ACTIVE_KEY);
     }
+    // Drop cached onboarding pass so a re-login on the same tab
+    // re-validates the next user (different account = different check).
+    const { clearOnboardingCache } = await import("@/components/ProtectedRoute");
+    clearOnboardingCache();
     await supabase.auth.signOut();
     setUser(null);
     setSession(null);

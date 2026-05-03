@@ -30,6 +30,12 @@ export default function QuickNoteShortcut() {
   const [open, setOpen] = useState(false);
   const { attentioned, bind } = useIdleAttention(10_000);
 
+  // useAuth seeds `user` from localStorage on the client, so SSR renders
+  // null and the first client render can render the button — that's a
+  // hydration mismatch. Defer auth-driven render until after mount.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
+
   // Wire up Cmd+K / Ctrl+K. We register on document so any page state can't
   // intercept it; the browser's "find in page" Cmd+F is unaffected.
   useEffect(() => {
@@ -48,7 +54,8 @@ export default function QuickNoteShortcut() {
   }, [user?.id, open]);
 
   // Hide the button while signed out — quick-note is an authed feature.
-  if (!user?.id) return null;
+  // Also gate on mount to keep SSR HTML and first client render in sync.
+  if (!mounted || !user?.id) return null;
 
   return (
     <>

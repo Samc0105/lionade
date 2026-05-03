@@ -14,6 +14,15 @@ const nextConfig = {
       { protocol: "https", hostname: "*.supabase.co" },
     ],
   },
+  // pdf-parse pulls in pdfjs-dist, which calls Object.defineProperty on its
+  // own module namespace at runtime. Webpack freezes ESM namespaces, so the
+  // bundled version throws "Object.defineProperty called on non-object" on
+  // first use. Marking it external tells Next.js to require() it at runtime
+  // from node_modules instead of bundling, which restores a writable
+  // namespace and lets the syllabus parser work.
+  experimental: {
+    serverComponentsExternalPackages: ["pdf-parse"],
+  },
 };
 
 module.exports = nextConfig;

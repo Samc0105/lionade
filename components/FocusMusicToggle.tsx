@@ -54,6 +54,12 @@ export default function FocusMusicToggle() {
   const [station, setStation] = useState<StationId | null>(null);
   const audioContainerRef = useRef<HTMLDivElement>(null);
 
+  // useAuth seeds `user` from localStorage on the client, so SSR renders
+  // null and the first client render can render the button — that's a
+  // hydration mismatch. Defer auth-driven render until after mount.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
+
   // Restore last station + panel state on mount.
   useEffect(() => {
     try {
@@ -78,8 +84,9 @@ export default function FocusMusicToggle() {
   const currentStation = STATIONS.find(s => s.id === station) ?? null;
 
   // Hide on signed-out marketing pages — this is a study-mode tool,
-  // not a homepage attraction.
-  if (!user?.id) return null;
+  // not a homepage attraction. Also gate on mount to keep SSR HTML and
+  // first client render in sync.
+  if (!mounted || !user?.id) return null;
 
   return (
     <>

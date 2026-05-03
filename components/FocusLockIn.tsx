@@ -42,7 +42,13 @@ export default function FocusLockIn() {
   const [phase, setPhase] = useState<Phase>({ kind: "idle" });
   const { attentioned, bind } = useIdleAttention(10_000);
 
-  if (!user?.id) return null;
+  // useAuth seeds `user` from localStorage on the client, so SSR renders
+  // null and the first client render can render the button — that's a
+  // hydration mismatch. Defer auth-driven render until after mount.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
+
+  if (!mounted || !user?.id) return null;
 
   const isRunning = phase.kind === "running";
   // Active timers stay fully visible — the user needs to see the count.

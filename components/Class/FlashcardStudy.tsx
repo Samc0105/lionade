@@ -55,7 +55,7 @@ export default function FlashcardStudy({ classId }: { classId: string }) {
   // Loading skeleton (compact — same height as the pill).
   if (isLoading && !data) {
     return (
-      <section className="mt-10">
+      <section>
         <div className="h-12 w-full max-w-md rounded-[10px] bg-white/[0.04] animate-pulse" />
       </section>
     );
@@ -68,7 +68,7 @@ export default function FlashcardStudy({ classId }: { classId: string }) {
   // Empty state — encourage the user to add a real note.
   if (total === 0) {
     return (
-      <section className="mt-10">
+      <section>
         <div className="flex items-baseline justify-between mb-4">
           <h2 className="font-bebas text-sm text-cream/85 tracking-[0.2em]">
             <span className="inline-flex items-center gap-2">
@@ -90,7 +90,7 @@ export default function FlashcardStudy({ classId }: { classId: string }) {
   }
 
   return (
-    <section className="mt-10">
+    <section>
       <div className="flex items-baseline justify-between mb-4">
         <h2 className="font-bebas text-sm text-cream/85 tracking-[0.2em]">
           <span className="inline-flex items-center gap-2">

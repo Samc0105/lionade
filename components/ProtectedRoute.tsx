@@ -5,11 +5,24 @@ import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useRef } from "react";
 
+// Module-level cache — keyed by user id. Once we've confirmed a user is
+// onboarded in this tab, every subsequent navigation can skip the
+// onboarding fetch entirely. Cleared on logout via clearOnboardingCache().
+// This is what makes tab switches feel instant: prior version ran a full
+// supabase.auth.getUser() + profile fetch on EVERY navigation.
+const onboardedUserIds = new Set<string>();
+
+export function clearOnboardingCache() {
+  onboardedUserIds.clear();
+}
+
 export default function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, isLoading } = useAuth();
   const router = useRouter();
   const [timedOut, setTimedOut] = useState(false);
-  const [status, setStatus] = useState<"checking" | "pass" | "redirecting">("checking");
+  const [status, setStatus] = useState<"checking" | "pass" | "redirecting">(
+    () => (user?.id && onboardedUserIds.has(user.id) ? "pass" : "checking"),
+  );
   const hasChecked = useRef(false);
 
   // Defer auth-driven rendering to after hydration. useAuth seeds from
@@ -33,50 +46,53 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
     }
   }, [user, isLoading, timedOut, router]);
 
-  // Check onboarding — runs once when user is available
+  // Check onboarding — runs once per session, cached at module scope.
+  //
+  // Skipped entirely when this user is already in `onboardedUserIds`
+  // (the common case after the first navigation), which is what
+  // eliminates the "loading flash on every tab click" feel.
+  //
+  // We rely on `user.id` from useAuth (seeded from localStorage in
+  // AuthProvider) instead of supabase.auth.getUser() — the latter was
+  // a network round-trip on every navigation. If the JWT is actually
+  // bad, the profile query below will fail under RLS and we'll fall
+  // back to the catch branch.
   useEffect(() => {
     if (!user) return;
-    if (hasChecked.current) return; // only run once
+    if (hasChecked.current) return;
+    if (onboardedUserIds.has(user.id)) {
+      hasChecked.current = true;
+      setStatus("pass");
+      return;
+    }
 
     console.log("[ProtectedRoute] Checking onboarding for user:", user.id);
 
     (async () => {
       try {
-        // Use getUser() to ensure we have a valid session
-        const { data: { user: authUser } } = await supabase.auth.getUser();
-        console.log("[ProtectedRoute] auth.getUser():", authUser?.id ?? "NO AUTH USER");
-
-        if (!authUser) {
-          console.log("[ProtectedRoute] No auth user — redirecting to login");
-          router.replace("/login");
-          return;
-        }
-
         const { data: profile, error } = await supabase
           .from("profiles")
           .select("onboarding_completed, username")
-          .eq("id", authUser.id)
+          .eq("id", user.id)
           .maybeSingle();
 
         console.log("[ProtectedRoute] Profile query result:", { profile, error: error?.message ?? null });
 
         // Self-heal: if no profile row exists (trigger missed), create one
-        // Then re-query so we have the actual profile data
         let currentProfile = profile;
         if (!currentProfile && !error) {
-          console.log("[ProtectedRoute] No profile row — creating fallback for", authUser.id);
-          const username = (authUser.email ?? "").split("@")[0].replace(/[^a-z0-9_]/g, "_").toLowerCase().slice(0, 20) || "user";
+          console.log("[ProtectedRoute] No profile row — creating fallback for", user.id);
+          const fallbackUsername = (user.email ?? "").split("@")[0].replace(/[^a-z0-9_]/g, "_").toLowerCase().slice(0, 20) || "user";
           await supabase.from("profiles").insert({
-            id: authUser.id,
-            username,
-            display_name: authUser.user_metadata?.display_name ?? username,
+            id: user.id,
+            username: fallbackUsername,
+            display_name: user.displayName ?? fallbackUsername,
             onboarding_completed: false,
           });
-          // Re-query to get the freshly created profile
           const { data: freshProfile } = await supabase
             .from("profiles")
             .select("onboarding_completed, username")
-            .eq("id", authUser.id)
+            .eq("id", user.id)
             .maybeSingle();
           currentProfile = freshProfile;
         }
@@ -94,6 +110,7 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
         }
 
         console.log("[ProtectedRoute] onboarding complete — showing page");
+        onboardedUserIds.add(user.id);
         setStatus("pass");
       } catch (err) {
         console.error("[ProtectedRoute] Error checking onboarding:", err);

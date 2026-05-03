@@ -8,6 +8,7 @@ import { formatCoins } from "@/lib/mockData";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import BackButton from "@/components/BackButton";
 import { cdnUrl } from "@/lib/cdn";
+import { avatarFor } from "@/lib/avatar";
 import { Crown, Medal, Sword, TrendUp, Trophy, Brain, Fire } from "@phosphor-icons/react";
 
 type Filter = "elo" | "weekly";
@@ -126,7 +127,7 @@ export default function LeaderboardPage() {
                     <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-gray-400 mb-2"
                       aria-label={topThree[1]?.username ? `${topThree[1]?.username}'s avatar` : undefined}
                       style={{ boxShadow: "0 0 15px #9CA3AF40" }}>
-                      <img src={topThree[1]?.avatar_url ?? ""} alt={topThree[1]?.username ?? ""} className="w-14 h-14 rounded-full object-cover" />
+                      <img src={avatarFor(topThree[1]?.username, topThree[1]?.avatar_url)} alt={topThree[1]?.username ?? ""} className="w-14 h-14 rounded-full object-cover" />
                     </div>
                     <p className="text-cream text-xs font-bold text-center truncate w-full text-center">{topThree[1]?.username}</p>
                     <p className="text-gray-300 font-bebas text-lg flex items-center justify-center gap-1">{filter === "elo" ? `${(topThree[1]?.arena_elo ?? 1000).toLocaleString()} ELO` : <><img src={cdnUrl("/F.png")} alt="Fangs" className="w-4 h-4 object-contain" /> {formatCoins(topThree[1]?.coins_this_week ?? 0)}</>}</p>
@@ -138,7 +139,7 @@ export default function LeaderboardPage() {
                       <div className="absolute -top-6 left-1/2 -translate-x-1/2 animate-float"><Crown size={40} weight="fill" color="#FFD700" aria-hidden="true" /></div>
                       <div className="w-20 h-20 rounded-full overflow-hidden border-4 border-gold mb-2 shadow-xl shadow-gold/30"
                         aria-label={topThree[0]?.username ? `${topThree[0]?.username}'s avatar` : undefined}>
-                        <img src={topThree[0]?.avatar_url ?? ""} alt={topThree[0]?.username ?? ""} className="w-20 h-20 rounded-full object-cover" />
+                        <img src={avatarFor(topThree[0]?.username, topThree[0]?.avatar_url)} alt={topThree[0]?.username ?? ""} className="w-20 h-20 rounded-full object-cover" />
                       </div>
                     </div>
                     <p className="text-gold text-sm font-bold text-center">{topThree[0]?.username}</p>
@@ -151,7 +152,7 @@ export default function LeaderboardPage() {
                     <div className="mb-2"><Medal size={32} weight="fill" color="#B45309" aria-hidden="true" /></div>
                     <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-amber-600 mb-2"
                       aria-label={topThree[2]?.username ? `${topThree[2]?.username}'s avatar` : undefined}>
-                      <img src={topThree[2]?.avatar_url ?? ""} alt={topThree[2]?.username ?? ""} className="w-12 h-12 rounded-full object-cover" />
+                      <img src={avatarFor(topThree[2]?.username, topThree[2]?.avatar_url)} alt={topThree[2]?.username ?? ""} className="w-12 h-12 rounded-full object-cover" />
                     </div>
                     <p className="text-cream text-xs font-bold text-center truncate w-full text-center">{topThree[2]?.username}</p>
                     <p className="text-amber-600 font-bebas text-lg flex items-center justify-center gap-1">{filter === "elo" ? `${(topThree[2]?.arena_elo ?? 1000).toLocaleString()} ELO` : <><img src={cdnUrl("/F.png")} alt="Fangs" className="w-4 h-4 object-contain" /> {formatCoins(topThree[2]?.coins_this_week ?? 0)}</>}</p>
@@ -177,7 +178,7 @@ export default function LeaderboardPage() {
                         ${isMe ? "border-electric" : isTop ? "" : "border-electric/20"}`}
                         aria-label={`${entry.username}'s avatar`}
                         style={{ borderColor: isTop && !isMe ? rankBorderColor[entry.rank] : undefined }}>
-                        <img src={entry.avatar_url ?? ""} alt={entry.username} className="w-10 h-10 rounded-full object-cover" />
+                        <img src={avatarFor(entry.username, entry.avatar_url)} alt={entry.username} className="w-10 h-10 rounded-full object-cover" />
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
