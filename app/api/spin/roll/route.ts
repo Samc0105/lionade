@@ -1,0 +1,175 @@
+import { NextRequest, NextResponse } from "next/server";
+import { supabaseAdmin } from "@/lib/supabase-server";
+import { requireAuth } from "@/lib/api-auth";
+import {
+  rollSlot,
+  computeReward,
+  canSpinNow,
+  nextSpinAt,
+  spinMultiplierForPlan,
+  SPIN_SLOTS,
+  type SpinOutcome,
+} from "@/lib/spin";
+
+export const dynamic = "force-dynamic";
+
+/**
+ * POST /api/spin/roll
+ *
+ * The actual spin. Server-rolls, applies the Fangs delta, grants any
+ * payload (booster / cosmetic / streak shield), writes the audit row,
+ * and returns the outcome + new balance.
+ *
+ * Guarantees:
+ *   - Server-side RNG (crypto.randomInt) — outcome cannot be tampered with.
+ *   - Cooldown re-checked here even though the UI also checks via
+ *     /api/spin/status. Status is advisory; this is authoritative.
+ *   - Bust never pushes balance below 0 (clamp).
+ *   - Tax Man uses the SERVER-side current balance — pre-spending to dodge
+ *     it doesn't work, but it does honestly mean the loss is smaller.
+ *   - Plan multiplier (Pro +25%, Platinum +50%) applies to POSITIVE Fangs
+ *     payouts only. Bust and Tax Man are the same for everyone.
+ */
+export async function POST(req: NextRequest) {
+  const auth = await requireAuth(req);
+  if (auth instanceof NextResponse) return auth;
+  const userId = auth.userId;
+
+  // ── 1. Cooldown re-check ────────────────────────────────────────────────
+  const { data: lastSpin } = await supabaseAdmin
+    .from("daily_spins")
+    .select("spun_at")
+    .eq("user_id", userId)
+    .order("spun_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  const lastSpunAt = lastSpin?.spun_at ? new Date(lastSpin.spun_at) : null;
+  if (!canSpinNow(lastSpunAt)) {
+    return NextResponse.json(
+      {
+        error: "Cooldown active",
+        nextSpinAt: nextSpinAt(lastSpunAt)?.toISOString() ?? null,
+      },
+      { status: 429 },
+    );
+  }
+
+  // ── 2. Load current balance + plan ──────────────────────────────────────
+  const { data: profile, error: profileErr } = await supabaseAdmin
+    .from("profiles")
+    .select("coins, plan")
+    .eq("id", userId)
+    .single();
+  if (profileErr || !profile) {
+    console.error("[spin/roll] profile load:", profileErr?.message);
+    return NextResponse.json({ error: "Profile not found" }, { status: 500 });
+  }
+
+  const balanceBefore: number = profile.coins ?? 0;
+  const planMultiplier = spinMultiplierForPlan(profile.plan);
+
+  // ── 3. Roll the slot ────────────────────────────────────────────────────
+  const { index: slotIndex, slot } = rollSlot();
+  let outcome: SpinOutcome = slot.outcome;
+  let { fangsDelta, rewardPayload } = computeReward(outcome, balanceBefore, planMultiplier);
+
+  // ── 4. Special-case: rare_cosmetic without an unowned item ─────────────
+  // Pick a rare cosmetic the user doesn't already own. If they own all of
+  // them, fall back to a 1,000F payout (and adjust the outcome+payload
+  // honestly so the audit row reflects what actually happened).
+  if (outcome === "rare_cosmetic") {
+    const RARE_POOL = ["frame_fire", "name_emerald", "banner_warrior", "boost_lucky_start"];
+    const { data: owned } = await supabaseAdmin
+      .from("user_inventory")
+      .select("item_id")
+      .eq("user_id", userId)
+      .in("item_id", RARE_POOL);
+    const ownedIds = new Set((owned ?? []).map((r: { item_id: string }) => r.item_id));
+    const unowned = RARE_POOL.filter((id) => !ownedIds.has(id));
+
+    if (unowned.length > 0) {
+      const { randomInt } = await import("node:crypto");
+      const pickedId = unowned[randomInt(0, unowned.length)];
+      rewardPayload = { kind: "rare_cosmetic", itemId: pickedId };
+    } else {
+      // User has everything — convert to a flat 1,000F payout.
+      outcome = "big_fangs";
+      fangsDelta = Math.round(1000 * planMultiplier);
+      rewardPayload = { kind: "rare_cosmetic_fallback" };
+    }
+  }
+
+  // ── 5. Apply the Fangs delta ────────────────────────────────────────────
+  // Clamp so we never go negative. If a Bust would push them below 0, they
+  // just go to 0 — UI shows the honest "you only had X" message.
+  const intendedAfter = balanceBefore + fangsDelta;
+  const balanceAfter = Math.max(0, intendedAfter);
+  const actualDelta = balanceAfter - balanceBefore; // signed, possibly less negative than intended
+
+  // Update profile.coins
+  const { error: updateErr } = await supabaseAdmin
+    .from("profiles")
+    .update({ coins: balanceAfter })
+    .eq("id", userId);
+  if (updateErr) {
+    console.error("[spin/roll] coin update:", updateErr.message);
+    return NextResponse.json({ error: "Couldn't update balance" }, { status: 500 });
+  }
+
+  // ── 6. Grant side-rewards (booster, streak shield, cosmetic) ────────────
+  if (rewardPayload) {
+    if (rewardPayload.kind === "booster" && typeof rewardPayload.boosterId === "string") {
+      await supabaseAdmin.from("user_inventory").upsert(
+        { user_id: userId, item_id: rewardPayload.boosterId, quantity: 1 },
+        { onConflict: "user_id,item_id", ignoreDuplicates: false },
+      );
+    } else if (rewardPayload.kind === "streak_shield") {
+      await supabaseAdmin.from("user_inventory").upsert(
+        { user_id: userId, item_id: "boost_streak_shield", quantity: 1 },
+        { onConflict: "user_id,item_id", ignoreDuplicates: false },
+      );
+    } else if (rewardPayload.kind === "rare_cosmetic" && typeof rewardPayload.itemId === "string") {
+      await supabaseAdmin.from("user_inventory").upsert(
+        { user_id: userId, item_id: rewardPayload.itemId, quantity: 1 },
+        { onConflict: "user_id,item_id", ignoreDuplicates: false },
+      );
+    }
+  }
+
+  // ── 7. Write audit rows (daily_spins + coin_transactions) ──────────────
+  const spinInsert = supabaseAdmin.from("daily_spins").insert({
+    user_id: userId,
+    outcome,
+    fangs_delta: actualDelta,
+    reward_payload: rewardPayload,
+    balance_before: balanceBefore,
+    balance_after: balanceAfter,
+  });
+  const txInsert =
+    actualDelta !== 0
+      ? supabaseAdmin.from("coin_transactions").insert({
+          user_id: userId,
+          amount: actualDelta,
+          type: "daily_spin",
+          description: `Daily Spin · ${outcome}`,
+        })
+      : Promise.resolve({ error: null });
+
+  // Best-effort — if the audit write fails, the user has already received
+  // (or lost) their Fangs. Log loudly but don't reverse — the spin happened.
+  const [{ error: spinErr }, { error: txErr }] = await Promise.all([spinInsert, txInsert]);
+  if (spinErr) console.error("[spin/roll] daily_spins insert:", spinErr.message);
+  if (txErr) console.error("[spin/roll] coin_transactions insert:", txErr.message);
+
+  // ── 8. Return the result ────────────────────────────────────────────────
+  return NextResponse.json({
+    outcome,
+    slotIndex: SPIN_SLOTS.findIndex((s) => s.outcome === outcome),
+    fangsDelta: actualDelta,
+    intendedDelta: fangsDelta, // for honest "you only had X" UI when clamped
+    balanceBefore,
+    balanceAfter,
+    rewardPayload,
+  });
+}

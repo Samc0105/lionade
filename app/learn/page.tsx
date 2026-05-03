@@ -140,14 +140,33 @@ export default function LearnPage() {
 
   const weakestSubject = mastery.length > 0 && mastery[0].accuracy < 70 ? mastery[0].subject : null;
 
-  // Primary CTA copy adapts to whether you've hit the daily goal
+  // Hours since the user's last activity (most recent quiz). Used below to
+  // freshen the copy when someone hit the daily goal hours ago and is back
+  // on the page — sitting on "you're done" for 11+ hours after a 2 AM grind
+  // session reads as "stop studying" when they're clearly here to study.
+  // We DON'T reset the daily-goal flag itself (would corrupt the streak
+  // math); we only swap the headline and subtitle so the page feels alive.
+  const lastActivityAt = quizHistory[0]?.completed_at;
+  const hoursSinceLastActivity = lastActivityAt
+    ? (Date.now() - new Date(lastActivityAt).getTime()) / (1000 * 60 * 60)
+    : Infinity;
+  const goalMetReturning = goalRemaining === 0 && hoursSinceLastActivity >= 5;
+
+  // Primary CTA copy adapts to whether you've hit the daily goal AND how
+  // long it's been since your last activity.
   const primaryCtaTitle = goalRemaining > 0
     ? (todayCount === 0 ? "Start today's quiz" : "Finish today's goal")
+    : goalMetReturning
+    ? "Welcome back — ready for round 2?"
     : "You're done for today — push further?";
   const primaryCtaSub = goalRemaining > 0
     ? (todayCount === 0
         ? `${dailyGoal} questions keeps your streak alive`
         : `${goalRemaining} more question${goalRemaining === 1 ? "" : "s"} to hit your goal`)
+    : goalMetReturning
+    ? (weakestSubject
+        ? `You crushed today's goal earlier — keep the momentum on ${weakestSubject}`
+        : "You crushed today's goal earlier — keep the momentum going")
     : weakestSubject
     ? `Sharpen up — your weakest subject is ${weakestSubject}`
     : "Daily goal hit. Try a harder difficulty or a new subject.";

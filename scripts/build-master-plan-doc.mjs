@@ -31,6 +31,15 @@ const DOCS = [
     coverSubtitle: "Proposal & Feasibility — Camera-based study lock-in",
     stamp: "2026-05-02 · Author: Sam · Originator: Dawda",
   },
+  {
+    src: "DAILY_SPIN_PROPOSAL.md",
+    out: "DAILY_SPIN_PROPOSAL.html",
+    title: "Lionade — Daily Spin Proposal",
+    eyebrow: "Internal · Feature spec · Ready for implementation",
+    coverTitle: "DAILY SPIN",
+    coverSubtitle: "Wheel design, probabilities, and implementation spec",
+    stamp: "2026-05-03 · Author: Sam",
+  },
 ];
 
 marked.setOptions({

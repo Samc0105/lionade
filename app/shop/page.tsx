@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { formatCoins } from "@/lib/mockData";
 import { cdnUrl } from "@/lib/cdn";
 import { apiGet, apiPost } from "@/lib/api-client";
+import DailySpinHero from "@/components/Shop/DailySpinHero";
 import type { ComponentType } from "react";
 import type { IconProps } from "@phosphor-icons/react";
 import {
@@ -570,6 +571,9 @@ export default function ShopPage() {
             </button>
           </div>
         </div>
+
+        {/* ══════════ DAILY SPIN HERO (coin store only) ══════════ */}
+        {!isPremium && <DailySpinHero />}
 
         {/* ══════════ PREMIUM STORE ══════════ */}
         {isPremium && (
