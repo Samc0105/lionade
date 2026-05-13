@@ -3,7 +3,12 @@
     "target": "ES2022",
     "module": "ESNext",
     "moduleResolution": "bundler",
-    "lib": ["ES2022"],
+    // "DOM" is included so we get types for the Web Platform standards
+    // (fetch, Response, Headers, RequestInit). These are runtime-available
+    // in Node 18+, modern browsers, and React Native. Other DOM globals
+    // (window, document, localStorage) are still banned via ESLint
+    // (.eslintrc.cjs → no-restricted-globals).
+    "lib": ["ES2022", "DOM"],
     "strict": true,
     "noImplicitAny": true,
     "strictNullChecks": true,

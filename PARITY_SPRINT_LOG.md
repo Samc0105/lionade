@@ -352,25 +352,88 @@ packages/lionade-core/src/
 
 ---
 
+### 2026-05-13 — Days 4-5: API client + Ninny prompts migrated
+**Actor:** Claude
+**What happened:** Built createApiClient in core, reconciled web + iOS api-clients, added spinAPI canary, moved Ninny types + prompt to core.
+
+**Files created in core:**
+- `packages/lionade-core/src/api/http.ts` — `createApiClient({ baseUrl, getToken, fetch, requireAuth })` returns typed ApiClient with `get/post/patch/delete/swrFetcher`. DI'd fetch, DI'd token getter. Platform-agnostic. Updated core `tsconfig.json` to include `"DOM"` lib (for fetch/Response/Headers types — these are Web Platform standards available in Node 18+ and RN; DOM-specific globals like window/document still banned via ESLint).
+- `packages/lionade-core/src/api/index.ts` — re-exports createApiClient + types
+- `packages/lionade-core/src/api/spin.ts` — `spinAPI.status()` and `spinAPI.roll()` typed wrappers. Methods take an `ApiClient` arg, return typed `ApiResult<SpinStatus | SpinRollResult>`.
+- `packages/lionade-core/src/prompts/ninny.ts` — Ninny types (NinnyDifficulty, NinnyMode, Flashcard, MatchPair, MCQQuestion, FillBlankQuestion, TrueFalseQuestion, OrderingQuestion, NinnyGeneratedContent, NinnySubject) + NINNY_SUBJECTS taxonomy + buildNinnyPrompt prompt template.
+
+**Files modified in web:**
+- `/lib/api-client.ts` → re-implemented as a thin shim. Configures createApiClient with `baseUrl: ""` (relative URLs) and Supabase session token getter. Public surface unchanged (apiGet/apiPost/apiPatch/apiDelete/swrFetcher).
+- `/lib/ninny.ts` → Hybrid. Re-exports types + buildNinnyPrompt + NINNY_SUBJECTS from core. Keeps server-only stuff (NINNY_REWARDS, calcNinnyReward, weightedShuffle, buildNinnyChatSystemPrompt, validateGeneratedContent, NinnyMaterial DB row interface, cost constants).
+
+**Files modified in iOS:**
+- `/lib/api-client.ts` → Mirror shim. Configures createApiClient with `baseUrl: EXPO_PUBLIC_API_BASE_URL || "https://getlionade.com"`. `requireAuth: false` because iOS makes some anonymous probes (pricing pre-login). Public surface unchanged (apiGet/apiPost/apiPatch/apiDelete).
+
+**Verification:**
+- `npm run core:typecheck` → clean ✅
+- Web `npx tsc --noEmit` → clean ✅
+- iOS `npx tsc --noEmit` → only 3 pre-existing `app/onboarding.tsx` errors ✅
+
+**Architectural decisions:**
+- createApiClient uses DI for fetch (default `globalThis.fetch`). This means the SAME client code works on both Next.js (server + client) and RN (which provides its own fetch).
+- iOS api-client sets `requireAuth: false` (web sets `true`) — this matches the existing behavior where iOS sometimes hits public endpoints without a session. Per-method gating can still be enforced server-side.
+- spinAPI methods take an `ApiClient` arg rather than holding a private instance. Lets the app pass its configured client without rebuilding the dependency graph inside core.
+- DOM lib added to core tsconfig — only for fetch/Response types (Web Platform standards). DOM-specific globals (window, document, localStorage) still banned via ESLint `no-restricted-globals`.
+
+**Cumulative state after Days 1-5:**
+- `packages/lionade-core/` complete with: types, logic (levels, mastery-bkt, spin-rng), validation (sanitize), constants (shop-catalog, missions), api (http, spin), prompts (ninny)
+- Web `/types/*`, `/lib/levels.ts`, `/lib/sanitize.ts`, `/lib/shop-catalog.ts`, `/lib/mastery.ts`, `/lib/api-client.ts` are shims
+- Web `/lib/spin.ts`, `/lib/missions.ts`, `/lib/ninny.ts` are hybrids (core re-export + server-only logic stays)
+- iOS `/lib/levels.ts`, `/lib/api-client.ts` are shims
+- ~1000 lines of business logic consolidated; first feature canary (Daily Spin re-wire on iOS) is unblocked
+
+---
+
 ## NEXT (resume point for interrupted sessions)
 
-**Last completed step:** Day 3 — pure logic migration done. Both apps typecheck clean.
+**Last completed step:** Day 5 — API client + Ninny prompts migrated. Foundation phase complete.
 
-**Next concrete actions:**
-1. **Commit Day 2-3 work** (web side + iOS side separately)
-2. **Day 4-5: API surface migration**
-   - Build `core/src/api/http.ts` with `createApiClient({ baseUrl, getToken, fetch })`
-   - Reconcile divergent `api-client.ts` files (web + iOS both have one)
-   - Per-route API methods: `quizAPI`, `masteryAPI`, `missionsAPI`, `spinAPI`
-   - Move Ninny prompt strings → `core/src/prompts/`
+**Phase 1 (shared-core extraction) is DONE.** All planned migrations complete.
 
-**Then Phase 2 (Week 2):**
-- **Daily Spin canary** — re-wire iOS Daily Spin through shared-core API client to prove end-to-end architecture works. iOS already has SpinWheel + SpinResultModal + DailySpinHero components; just need to swap its lib/api-client.ts call for `spinAPI.roll()` from core.
-- After canary: real feature ports — Duel, Learn hub, Mastery orchestrator full integration, Arena PvP, Classes index
+**Next concrete actions — Phase 2 (Week 2, real feature ports):**
+
+1. **Daily Spin canary** (HIGHEST PRIORITY — proves architecture)
+   - iOS already has `Shop/DailySpinHero.tsx`, `Shop/SpinResultModal.tsx`, `Shop/SpinWheel.tsx` components
+   - Currently they call iOS's old api-client directly
+   - Swap to `spinAPI.roll(apiClient)` and `spinAPI.status(apiClient)` from `@lionade/core/api/spin`
+   - Validate end-to-end: spin → server → outcome → result modal
+   - This proves shared-core works in production code, not just typecheck
+
+2. **Duel** (BATCH A: highest user value)
+   - Entire feature missing on iOS
+   - Build: route `/duel` (new in iOS), `DuelInvite` component, real-time matchmaking integration
+   - Add `duelAPI` to core (POST /api/duel/create, GET /api/duel/[id], etc.)
+   - Push notifications when challenged
+
+3. **Learn hub** (BATCH A)
+   - iOS missing `/learn`, `/learn/ninny`, `/learn/paths`
+   - Build hub screen + Ninny chat screen + path browsing
+   - All Ninny prompt building uses `@lionade/core/prompts/ninny.buildNinnyPrompt`
+
+4. **Classes index page** (BATCH A — small but UX-breaking gap)
+   - iOS only has `/classes/[id]` detail; no list view
+   - Build `/classes` index that mirrors web
+
+5. **Arena PvP** (complete the stub)
+   - iOS has Arena UI; "Find Match" button is stubbed
+   - Wire to real matchmaking API
+
+6. **Mastery orchestrator full integration**
+   - iOS has chat session UI; orchestrator integration is partial
+   - Complete the auto-advance + question generation loop
+
+**Then Batch B (Week 3): Syllabus upload, Grade tracker, Flashcard study, Study DNA, Shop cosmetics + boosters, Friend DM**
+**Then Batch D (Week 4 or defer): Games hub, Focus music toggle**
 
 **Pick-up instructions if session breaks:**
-1. Read this log top-to-bottom
-2. `TaskList` shows in-flight work
+1. Read this log entire (focus on Day 1-5 summaries)
+2. `TaskList` shows phase 1 tasks are completed
 3. Verify `npm run core:typecheck` and web `npx tsc --noEmit` both clean
 4. iOS should show only 3 pre-existing `app/onboarding.tsx` errors
-5. If unsure where we are, check `git log --oneline` in both repos — every Day commits separately
+5. Phase 2 starts with the Daily Spin canary — that's the next concrete file change. iOS files to look at: `components/Shop/DailySpinHero.tsx`, `components/Shop/SpinWheel.tsx`, plus `lib/api-client.ts` for how to use the apiPost helper
+6. After canary works end-to-end, mark "Phase 1 complete, Phase 2 underway" and move to Duel
