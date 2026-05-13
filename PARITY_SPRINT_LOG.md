@@ -296,37 +296,81 @@ packages/lionade-core/src/
 
 ---
 
+### 2026-05-13 — Day 2: pure logic migration (levels, sanitize, shop-catalog)
+**Actor:** Claude
+**What happened:** Three simple pure-logic moves to core. No splitting needed — all files are entirely platform-agnostic.
+
+**Files created in core:**
+- `packages/lionade-core/src/logic/levels.ts` — copy of web `/lib/levels.ts` (122 lines). LEVEL_TIERS, xpForNextLevel, totalXpForLevel, getLevelFromXp, getLevelProgress, getTierForLevel, formatLevel, formatLevelWithTier.
+- `packages/lionade-core/src/validation/sanitize.ts` — copy of web `/lib/sanitize.ts`. isSuspicious, stripHtml, sanitizeText/Username/Email/Bio/Password, sanitizeSignupForm, sanitizeLoginForm.
+- `packages/lionade-core/src/constants/shop-catalog.ts` — copy of web `/lib/shop-catalog.ts`. COSMETIC_ITEMS, BOOSTER_ITEMS, FEATURED_ITEMS, PREMIUM_ITEMS, getShopItem.
+
+**Files modified in web (now re-export shims):**
+- `/lib/levels.ts` → `export * from "@lionade/core/logic/levels"`
+- `/lib/sanitize.ts` → `export * from "@lionade/core/validation/sanitize"`
+- `/lib/shop-catalog.ts` → `export * from "@lionade/core/constants/shop-catalog"`
+
+**Verification:**
+- `npm run core:typecheck` → clean ✅
+- `npx tsc --noEmit` (web) → clean ✅
+
+**Wins:**
+- iOS lib/levels.ts is now a documented duplicate (still exists but slated for deletion in Phase 2 when first iOS feature uses core)
+- Source of truth for shop catalog is now single — server price lookup matches whatever iOS displays
+
+---
+
+### 2026-05-13 — Day 3: BKT mastery + spin RNG split + missions split
+**Actor:** Claude
+**What happened:** More complex moves. Mastery is entirely pure. Spin needed splitting (pure pieces → core, node:crypto pieces stayed). Missions needed splitting (pure pool → core, supabase computation stayed in web).
+
+**Files created in core:**
+- `packages/lionade-core/src/logic/mastery-bkt.ts` — copy of web `/lib/mastery.ts` (BKT params, updateBKT, pPass, displayPct, pickNextSubtopic, isPassReady, isMasteryReached, pickDifficulty). Difficulty type re-exported from core/types.
+- `packages/lionade-core/src/logic/spin-rng.ts` — pure pieces of `/lib/spin.ts`: SpinOutcome, SpinSlot, SPIN_SLOTS (with weight-sum sanity check), pickSlotByWeight(roll), RewardResult, SPIN_COOLDOWN_MS, nextSpinAt, canSpinNow, spinMultiplierForPlan. **Does NOT import node:crypto** — caller injects entropy.
+- `packages/lionade-core/src/constants/missions.ts` — pure pieces of `/lib/missions.ts`: MissionTemplate, MissionWithProgress, MISSION_POOL (18 templates), hashString, seededShuffle, getDailyMissions, getMissionResetTime.
+
+**Files modified in web:**
+- `/lib/mastery.ts` → re-export shim (`export * from "@lionade/core/logic/mastery-bkt"`)
+- `/lib/spin.ts` → **HYBRID**: re-exports pure surface from core, KEEPS rollSlot() and computeReward() because they use node:crypto.randomInt for cryptographic-grade randomness. rollSlot now delegates to core's pickSlotByWeight under the hood.
+- `/lib/missions.ts` → **HYBRID**: re-exports MISSION_POOL/getDailyMissions/getMissionResetTime from core. KEEPS computeMissionProgress because it uses supabaseAdmin.
+
+**Verification:**
+- `npm run core:typecheck` → clean ✅
+- `npx tsc --noEmit` (web) → clean ✅
+- iOS `npx tsc --noEmit` → only 3 pre-existing `app/onboarding.tsx` errors ✅
+
+**Important architectural decisions:**
+- Spin RNG split was the cleanest possible: pure picker in core (any caller can supply a roll), node:crypto wrapper in web (only API route). This means iOS could in the future implement client-side animation preview using its own RNG without touching server-grade entropy.
+- Difficulty type is now canonical in core/types. Mastery-bkt re-exports it so `import { Difficulty } from '@lionade/core/logic/mastery-bkt'` keeps working.
+- Missions split keeps the DB-coupled function on the server but exposes the deterministic daily rotation logic to both platforms — iOS can render "today's missions" without a server roundtrip, then compute progress via API.
+
+**Day 2 + 3 cumulative impact:**
+- 6 pure-logic files migrated to core
+- 3 hybrid splits (spin, missions, mastery — though mastery was clean)
+- ~700 lines of platform-agnostic code now live in one place
+- iOS can consume any of: levels, sanitize, shop-catalog, mastery-bkt, spin-rng (pure picker), missions (pure pool)
+
+---
+
 ## NEXT (resume point for interrupted sessions)
 
-**Last completed step:** Day 1 — types migrated to `@lionade/core`, both apps wired and typechecking.
+**Last completed step:** Day 3 — pure logic migration done. Both apps typecheck clean.
 
-**Next concrete actions (Day 2-3, pure logic migration):**
-1. Move `lib/levels.ts` → `packages/lionade-core/src/logic/levels.ts`, delete iOS `lib/levels.ts` duplicate, leave web `lib/levels.ts` as re-export shim
-2. Split `lib/spin.ts`: pure `pickSlotByWeight` + `SPIN_SLOTS` into `core/src/logic/spin-rng.ts`; `node:crypto` caller stays in `/app/api/spin/roll/route.ts`
-3. Move BKT math from `lib/mastery.ts` → `core/src/logic/mastery-bkt.ts` (only pure functions; DB-touching parts stay in web)
-4. Move `lib/sanitize.ts` → `core/src/validation/sanitize.ts`
-5. Move `lib/shop-catalog.ts` and MISSION_POOL → `core/src/constants/`
-6. After each move: typecheck both apps, log here
-
-**Then Day 4-5 (API surface):**
-7. Build `core/src/api/http.ts` with `createApiClient({ baseUrl, getToken, fetch })`
-8. Reconcile the two divergent `api-client.ts` files
-9. Per-route API methods (quiz, mastery, missions, spin)
-10. Move Ninny prompt strings → `core/src/prompts/`
+**Next concrete actions:**
+1. **Commit Day 2-3 work** (web side + iOS side separately)
+2. **Day 4-5: API surface migration**
+   - Build `core/src/api/http.ts` with `createApiClient({ baseUrl, getToken, fetch })`
+   - Reconcile divergent `api-client.ts` files (web + iOS both have one)
+   - Per-route API methods: `quizAPI`, `masteryAPI`, `missionsAPI`, `spinAPI`
+   - Move Ninny prompt strings → `core/src/prompts/`
 
 **Then Phase 2 (Week 2):**
-- Daily Spin canary: re-wire iOS Daily Spin through shared-core to prove the architecture works end-to-end
-- Then real feature ports: Duel, Learn hub, Mastery orchestrator full integration, Arena PvP, Classes index
-
-**Commit checkpoint:** Day 1 work should be committed before continuing. Files to stage:
-- `packages/lionade-core/**` (all new)
-- `package.json`, `next.config.js`, `types/index.ts`, `types/supabase.ts` (web modifications)
-- `package-lock.json` (npm install side effect)
-- iOS-side changes commit separately in `~/Desktop/lionade-ios`
+- **Daily Spin canary** — re-wire iOS Daily Spin through shared-core API client to prove end-to-end architecture works. iOS already has SpinWheel + SpinResultModal + DailySpinHero components; just need to swap its lib/api-client.ts call for `spinAPI.roll()` from core.
+- After canary: real feature ports — Duel, Learn hub, Mastery orchestrator full integration, Arena PvP, Classes index
 
 **Pick-up instructions if session breaks:**
-1. Read this entire log top-to-bottom
-2. Check `TaskList` for in-flight work
-3. Verify both `npm run core:typecheck` and `npx tsc --noEmit` (web) pass with no output
-4. Verify iOS `npx tsc --noEmit` only shows 3 pre-existing `app/onboarding.tsx` errors
-5. Proceed to "Next concrete actions" Day 2-3 list above
+1. Read this log top-to-bottom
+2. `TaskList` shows in-flight work
+3. Verify `npm run core:typecheck` and web `npx tsc --noEmit` both clean
+4. iOS should show only 3 pre-existing `app/onboarding.tsx` errors
+5. If unsure where we are, check `git log --oneline` in both repos — every Day commits separately
