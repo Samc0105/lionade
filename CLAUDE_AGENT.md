@@ -1,6 +1,18 @@
 # Lionade — Claude Agent Standing Instructions
 
 **Read this file fully before starting any task.**
+**Also read [LIONADE_WORKFLOW.md](LIONADE_WORKFLOW.md) — that file defines how agents and iOS parity work.**
+
+---
+
+## Workflow Constitution (REQUIRED READING)
+
+| Doc | What's Inside |
+|-----|--------------|
+| [LIONADE_WORKFLOW.md](LIONADE_WORKFLOW.md) | **Agent routing matrix, done-definition, iOS parity rule. Read first.** |
+| [IOS_PARITY.md](IOS_PARITY.md) | **Web ↔ iOS feature drift tracker. Update after every shippable change.** |
+
+The UserPromptSubmit hook in `.claude/settings.local.json` injects a reminder of these on every prompt — do not ignore it.
 
 ---
 
@@ -50,6 +62,16 @@ Check `package.json` before installing anything. Prefer: framer-motion, lucide-r
 ### Database Changes
 Any schema change = migration file at `lib/migrations/00X_description.sql`
 
+**RLS is mandatory** on every `CREATE TABLE` in the `public` schema. Every migration that creates a public table MUST include:
+
+```sql
+ALTER TABLE <name> ENABLE ROW LEVEL SECURITY;
+```
+
+Default to **service-role-only** (no policies) and only add policies if a client (browser) needs to read/write the table directly. Run `npm run lint:migrations` before committing — it will fail the build if RLS is missing. A Postgres event trigger (`force_rls_on_create`) also auto-enables RLS at the DB layer as defense-in-depth.
+
+When writing RLS policies, **never use `USING (true)` or `WITH CHECK (true)` on UPDATE/INSERT/DELETE**. Bind to `auth.uid() = user_id` (or the equivalent ownership column) instead. The Supabase advisor flags `USING (true)` as a security WARN.
+
 ### Navigation
 All links must route to real pages — never leave `href="#"`
 
@@ -96,6 +118,11 @@ These files should never be modified without explicit instruction:
 - [ ] `/F.png` used for Fangs icon?
 - [ ] No `href="#"` in navigation?
 - [ ] Migration file for any DB change?
+- [ ] `ALTER TABLE … ENABLE ROW LEVEL SECURITY;` after every public `CREATE TABLE`?
+- [ ] `npm run lint:migrations` passes?
 - [ ] New pages match Lionade aesthetic?
 - [ ] Using shared user data hook?
 - [ ] Works in both dark and light themes?
+- [ ] **Agent routing followed per [LIONADE_WORKFLOW.md](LIONADE_WORKFLOW.md)?**
+- [ ] **iOS parity row added to [IOS_PARITY.md](IOS_PARITY.md)?**
+- [ ] **`quality-code-reviewer` + `quality-docs-writer` ran?**
