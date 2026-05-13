@@ -225,17 +225,108 @@ packages/lionade-core/src/
 
 ---
 
+### 2026-05-13 — IOS_PARITY.md corrected based on audit
+**Actor:** Claude
+**What happened:** Rewrote IOS_PARITY.md with accurate iOS status. Many ❌ flipped to ✅ or 🟡 (Daily Spin, Daily Drill, Focus Lock-In, Clock-In, Quick Note, full dashboard tab, badges, leaderboard, etc. are all built on iOS).
+**Files touched:** `/Users/samc/Desktop/lionade/IOS_PARITY.md`
+**Decisions:**
+- Added "Reverse Parity" section flagging web-side gaps (notifications inbox, daily bet, bounties, streak revive UI)
+- Added explicit "Real Feature Gaps" list — 11 features iOS genuinely missing
+- Strategy locked: shared-core (Strategy C) starting Day 1
+
+---
+
+### 2026-05-13 — Docs checkpoint committed
+**Actor:** Claude
+**What happened:** Committed `LIONADE_WORKFLOW.md` + `IOS_PARITY.md` + `PARITY_SPRINT_LOG.md` + `CLAUDE_AGENT.md` updates as a clean restore point before code changes.
+**Commit:** `4651fda — docs: agent workflow + iOS parity tracking + sprint log`
+**Files touched:** 4 files, 529 insertions
+**Decisions:**
+- `.claude/settings.local.json` hook stays gitignored (personal enforcement layer)
+- Future doc updates land in sprint log first, get committed in batches with code
+
+---
+
+### 2026-05-13 — Day 1: shared-core scaffolded + types migrated
+**Actor:** Claude
+**What happened:** Set up `packages/lionade-core` as an npm workspace, migrated `types/index.ts` + `types/supabase.ts` into it, wired both web and iOS to consume.
+
+**Files created:**
+- `/Users/samc/Desktop/lionade/packages/lionade-core/package.json` — subpath exports with `react-native`, `types`, `default` conditions
+- `/Users/samc/Desktop/lionade/packages/lionade-core/tsconfig.json` — strict, `lib: ["ES2022"]`, no DOM/Node types
+- `/Users/samc/Desktop/lionade/packages/lionade-core/.eslintrc.cjs` — `no-restricted-imports` blocking React, RN, Next, Expo, SWR, DOM globals, node:*
+- `/Users/samc/Desktop/lionade/packages/lionade-core/README.md` — package contract + import patterns
+- `/Users/samc/Desktop/lionade/packages/lionade-core/src/index.ts` — re-exports types
+- `/Users/samc/Desktop/lionade/packages/lionade-core/src/types/index.ts` — User, Subject, Question, QuizResult, Badge, DuelSession, LeaderboardEntry, SubjectStat, BadgeRarity, Difficulty, DuelStatus
+- `/Users/samc/Desktop/lionade/packages/lionade-core/src/types/supabase.ts` — DB row types (Database, Json)
+- `/Users/samc/Desktop/lionade-ios/lib/_core-import-test.ts` — smoke test (safe to delete once a real import lands)
+
+**Files modified:**
+- `/Users/samc/Desktop/lionade/package.json` — added `"workspaces": ["packages/*"]` + `core:typecheck` script
+- `/Users/samc/Desktop/lionade/next.config.js` — added `transpilePackages: ["@lionade/core"]`
+- `/Users/samc/Desktop/lionade/types/index.ts` — replaced with `export * from "@lionade/core/types"` shim
+- `/Users/samc/Desktop/lionade/types/supabase.ts` — replaced with `export * from "@lionade/core/types/supabase"` shim
+- `/Users/samc/Desktop/lionade-ios/package.json` — added `"@lionade/core": "file:../lionade/packages/lionade-core"`
+- `/Users/samc/Desktop/lionade-ios/metro.config.js` — added `watchFolders` + `nodeModulesPaths` + `disableHierarchicalLookup`
+- `/Users/samc/Desktop/lionade-ios/tsconfig.json` — added explicit `paths` mappings for `@lionade/core/*` (necessary because Expo base sets `customConditions: ["react-native"]` which doesn't resolve `.ts` source via exports cleanly)
+
+**Verification:**
+- `npm install` at root → `node_modules/@lionade/core` symlink created ✅
+- `npm install` in iOS → `node_modules/@lionade/core` symlink created (via file: dep) ✅
+- `npm run core:typecheck` → clean ✅
+- Web `npx tsc --noEmit` → clean ✅
+- iOS `npx tsc --noEmit` → 3 pre-existing errors in `app/onboarding.tsx` (lines 162, 190, 191) — UNRELATED to shared-core. Smoke test file resolves correctly. ✅
+
+**Decisions:**
+- Used TS-source exports (no build step) rather than building to `dist/` — simpler dev flow, web's `transpilePackages` and Metro's bundler both handle .ts source
+- iOS needed both `metro.config.js` (Metro runtime resolution) AND `tsconfig.json paths` (TS typecheck resolution) because Expo's `customConditions: ["react-native"]` complicates package.json exports resolution
+- Web's `/types/index.ts` and `/types/supabase.ts` kept as re-export shims to avoid touching 100+ files with `import { User } from '@/types'`
+- Smoke test file (`lib/_core-import-test.ts`) left in place; safe to delete once production code starts importing from core
+
+**Open issues to address later:**
+- 3 pre-existing TS errors in iOS `app/onboarding.tsx` — pre-existing, doc'd here so they don't get conflated with shared-core issues
+- Pre-existing modified files in iOS repo (24 files in working tree) — not touched, not related
+
+---
+
+### 2026-05-13 — Day 1 status
+**Where we are:** Shared-core scaffold complete. Both apps consume `@lionade/core/types` and `@lionade/core/types/supabase`. Day 1 of the 5-day extraction migration plan is **done**.
+
+**What's NOT yet in core:** All business logic (levels, BKT mastery, spin RNG, sanitize, Ninny prompts, API client). That's Day 2-5 work.
+
+---
+
 ## NEXT (resume point for interrupted sessions)
 
-**Last completed step:** Synthesis of agent outputs into refined Phase 1 plan.
-**Currently in progress:** About to correct `IOS_PARITY.md` based on the iOS explorer's findings (many features marked ❌ are actually ✅).
-**Next concrete actions (in order):**
-1. Correct `IOS_PARITY.md` with accurate iOS status from explorer findings
-2. Pause and confirm direction with user before scaffolding `packages/lionade-core`
-3. Scaffold workspace + package.json + tsconfig + tsup
-4. Move `types/index.ts` and `types/supabase.ts` into core (Day 1 of migration plan)
-5. Wire web imports through `@lionade/core/types`
-6. Add metro.config.js update on iOS side
-7. Continue Day 2-3: pure logic moves (levels, mastery BKT, sanitize, spin RNG split)
+**Last completed step:** Day 1 — types migrated to `@lionade/core`, both apps wired and typechecking.
 
-**Pick-up instructions if session breaks:** Read this entire log. Check `TaskList` for `Synthesize agent outputs into Phase 1 plan` task status. If `completed`, proceed to "Next concrete actions" above. If session needs to re-spawn agents, prompts are reconstructible from the log entries above.
+**Next concrete actions (Day 2-3, pure logic migration):**
+1. Move `lib/levels.ts` → `packages/lionade-core/src/logic/levels.ts`, delete iOS `lib/levels.ts` duplicate, leave web `lib/levels.ts` as re-export shim
+2. Split `lib/spin.ts`: pure `pickSlotByWeight` + `SPIN_SLOTS` into `core/src/logic/spin-rng.ts`; `node:crypto` caller stays in `/app/api/spin/roll/route.ts`
+3. Move BKT math from `lib/mastery.ts` → `core/src/logic/mastery-bkt.ts` (only pure functions; DB-touching parts stay in web)
+4. Move `lib/sanitize.ts` → `core/src/validation/sanitize.ts`
+5. Move `lib/shop-catalog.ts` and MISSION_POOL → `core/src/constants/`
+6. After each move: typecheck both apps, log here
+
+**Then Day 4-5 (API surface):**
+7. Build `core/src/api/http.ts` with `createApiClient({ baseUrl, getToken, fetch })`
+8. Reconcile the two divergent `api-client.ts` files
+9. Per-route API methods (quiz, mastery, missions, spin)
+10. Move Ninny prompt strings → `core/src/prompts/`
+
+**Then Phase 2 (Week 2):**
+- Daily Spin canary: re-wire iOS Daily Spin through shared-core to prove the architecture works end-to-end
+- Then real feature ports: Duel, Learn hub, Mastery orchestrator full integration, Arena PvP, Classes index
+
+**Commit checkpoint:** Day 1 work should be committed before continuing. Files to stage:
+- `packages/lionade-core/**` (all new)
+- `package.json`, `next.config.js`, `types/index.ts`, `types/supabase.ts` (web modifications)
+- `package-lock.json` (npm install side effect)
+- iOS-side changes commit separately in `~/Desktop/lionade-ios`
+
+**Pick-up instructions if session breaks:**
+1. Read this entire log top-to-bottom
+2. Check `TaskList` for in-flight work
+3. Verify both `npm run core:typecheck` and `npx tsc --noEmit` (web) pass with no output
+4. Verify iOS `npx tsc --noEmit` only shows 3 pre-existing `app/onboarding.tsx` errors
+5. Proceed to "Next concrete actions" Day 2-3 list above

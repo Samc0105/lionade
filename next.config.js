@@ -5,6 +5,10 @@
 // browsers to block styles/scripts in dev mode.
 
 const nextConfig = {
+  // Compile @lionade/core from its TypeScript source on the fly.
+  // No build step needed for the shared package — Next.js transpiles it
+  // along with the rest of the app.
+  transpilePackages: ["@lionade/core"],
   env: {
     NEXT_PUBLIC_CDN_URL: process.env.NEXT_PUBLIC_CDN_URL || "",
   },
