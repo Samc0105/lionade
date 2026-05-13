@@ -14,7 +14,14 @@ import { supabase } from "./supabase";
 
 export type { ApiResult };
 
-const client = createApiClient({
+/**
+ * Configured ApiClient singleton — pass this to typed per-feature methods
+ * from @lionade/core/api/* (e.g. spinAPI.roll(apiClient)).
+ *
+ * Prefer apiClient + a typed feature method for new code. The standalone
+ * apiGet/apiPost/swrFetcher helpers below are for migration of existing routes.
+ */
+export const apiClient = createApiClient({
   baseUrl: "", // relative URLs — Next.js routes on same origin
   getToken: async () => {
     const { data } = await supabase.auth.getSession();
@@ -22,10 +29,10 @@ const client = createApiClient({
   },
 });
 
-export const apiGet = client.get;
-export const apiPost = client.post;
-export const apiPatch = client.patch;
-export const apiDelete = client.delete;
+export const apiGet = apiClient.get;
+export const apiPost = apiClient.post;
+export const apiPatch = apiClient.patch;
+export const apiDelete = apiClient.delete;
 
 /**
  * SWR-compatible fetcher that auto-attaches the auth token and THROWS on
@@ -33,4 +40,4 @@ export const apiDelete = client.delete;
  *
  *   useSWR(`/api/foo`, swrFetcher)
  */
-export const swrFetcher = client.swrFetcher;
+export const swrFetcher = apiClient.swrFetcher;

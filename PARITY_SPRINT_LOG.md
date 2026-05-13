@@ -389,20 +389,46 @@ packages/lionade-core/src/
 
 ---
 
+### 2026-05-13 — Phase 2 kickoff: Daily Spin CANARY shipped 🎯
+**Actor:** Claude
+**What happened:** First iOS feature to consume `@lionade/core` end-to-end. Proves the shared-core architecture works in production code, not just typecheck.
+
+**Pre-flight fix:** The initial `spinAPI` types in core had wrong response shapes (used `newBalance` instead of `balanceBefore`/`balanceAfter`/`intendedDelta` — didn't match actual server contract). Read `/app/api/spin/roll/route.ts` and `/app/api/spin/status/route.ts` and updated `core/src/api/spin.ts` to match exactly.
+
+**Files modified:**
+- `packages/lionade-core/src/api/spin.ts` — corrected `SpinStatus` and `SpinRollResult` shapes to match the actual server response
+- `/Users/samc/Desktop/lionade/lib/api-client.ts` (web) — exports `apiClient` singleton for typed-method consumption
+- `/Users/samc/Desktop/lionade-ios/lib/api-client.ts` — same exposure of `apiClient` singleton
+- `/Users/samc/Desktop/lionade-ios/components/Shop/DailySpinHero.tsx`:
+  - Replaced hardcoded `WHEEL_SLOTS` array with `SPIN_SLOTS.map(...)` from `@lionade/core/logic/spin-rng` (eliminates the silent-drift risk that the comment "Order MUST match" used to warn about)
+  - `apiGet<SpinStatus>("/api/spin/status")` → `spinAPI.status(apiClient)`
+  - 7-field hand-typed `apiPost<...>("/api/spin/roll", {})` → `spinAPI.roll(apiClient)` (types come from core)
+
+**Verification:**
+- `npm run core:typecheck` → clean ✅
+- Web `npx tsc --noEmit` → clean ✅
+- iOS `npx tsc --noEmit` → only 3 pre-existing `app/onboarding.tsx` errors ✅
+- DailySpinHero compiles against the new typed contract — no manual type annotations needed
+
+**Why this matters:**
+- The wheel order in iOS used to be a hand-maintained mirror of web's `SPIN_SLOTS`. A reorder on the server would silently break landing animations. Now it's derived from the canonical core array — drift impossible.
+- The 7-field hand-typed roll response is gone — server contract change = single-file core update + both apps pick it up.
+- This is the pattern every future Phase 2 feature will follow: typed method in core, app calls it with its configured `apiClient`.
+
+**`IOS_PARITY.md` updated:** Daily Spin row now marked as the first shared-core consumer. Header notes Phase 2 in progress.
+
+---
+
 ## NEXT (resume point for interrupted sessions)
 
-**Last completed step:** Day 5 — API client + Ninny prompts migrated. Foundation phase complete.
+**Last completed step:** Daily Spin canary shipped — proves shared-core architecture end-to-end.
 
-**Phase 1 (shared-core extraction) is DONE.** All planned migrations complete.
+**Phase 1 (shared-core extraction) is DONE.**
+**Phase 2 (real feature ports) is UNDERWAY.**
 
-**Next concrete actions — Phase 2 (Week 2, real feature ports):**
+**Next concrete actions — Phase 2 continued:**
 
-1. **Daily Spin canary** (HIGHEST PRIORITY — proves architecture)
-   - iOS already has `Shop/DailySpinHero.tsx`, `Shop/SpinResultModal.tsx`, `Shop/SpinWheel.tsx` components
-   - Currently they call iOS's old api-client directly
-   - Swap to `spinAPI.roll(apiClient)` and `spinAPI.status(apiClient)` from `@lionade/core/api/spin`
-   - Validate end-to-end: spin → server → outcome → result modal
-   - This proves shared-core works in production code, not just typecheck
+**~~1. Daily Spin canary~~ ✅ Done 2026-05-13.**
 
 2. **Duel** (BATCH A: highest user value)
    - Entire feature missing on iOS

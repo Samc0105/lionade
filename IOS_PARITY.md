@@ -6,6 +6,8 @@
 Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by design, or replaced by native UX)
 
 **Last full audit:** 2026-05-13 (by Explore agent, see `PARITY_SPRINT_LOG.md`).
+**Phase 1 (shared-core extraction):** ✅ Complete — `@lionade/core` consumed by both apps.
+**Phase 2 (feature ports):** 🟡 In progress — Daily Spin canary wired 2026-05-13.
 
 ---
 
@@ -71,7 +73,7 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 | Study DNA | `/study-dna` | (none) | ✅ | ❌ | port pending |
 | **Economy** | | | | | |
 | Shop | `/shop` | `/shop` | ✅ | 🟡 | iOS has Daily Spin hero; cosmetics + boosters stubbed "Coming soon" |
-| Daily Spin | `app/api/spin/roll` + UI | `Shop/DailySpinHero` + `SpinResultModal` + `SpinWheel` | ✅ | ✅ | BUILT on iOS, needs shared-core wiring |
+| Daily Spin | `app/api/spin/roll` + UI | `Shop/DailySpinHero` + `SpinResultModal` + `SpinWheel` | ✅ | ✅ | **Shared-core wired** — first canary feature, uses `spinAPI` + `SPIN_SLOTS` from `@lionade/core` |
 | Wallet | `/wallet` | `/wallet` | ✅ | ✅ | balance + lifetime + transaction history |
 | **Settings** | | | | | |
 | Settings | `/settings` | `/settings` | ✅ | ✅ | font, notifications, privacy |

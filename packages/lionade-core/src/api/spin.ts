@@ -5,33 +5,45 @@
  * Both web and iOS use these via the createApiClient instance configured
  * in their respective lib/api-client.ts.
  *
+ * Response shapes mirror the actual server contract in
+ * /app/api/spin/{status,roll}/route.ts — if those routes change, update
+ * these interfaces in lockstep.
+ *
  * Usage:
  *   import { spinAPI } from '@lionade/core/api/spin';
- *   const { ok, data } = await spinAPI.roll(apiClient);
+ *   const status = await spinAPI.status(apiClient);
+ *   if (status.data?.canSpin) {
+ *     const result = await spinAPI.roll(apiClient);
+ *   }
  */
 
 import type { ApiClient, ApiResult } from "./http.js";
 import type { SpinOutcome } from "../logic/spin-rng.js";
 
-// ── Response shapes (mirror what /app/api/spin/* routes return) ───────────
+// ── Response shapes (match what /app/api/spin/* routes return) ────────────
 
 export interface SpinStatus {
   canSpin: boolean;
+  lastSpinAt: string | null;        // ISO timestamp, null if never spun
   nextSpinAt: string | null;        // ISO timestamp, null if available now
-  lastSpunAt: string | null;
-  /** Streak of consecutive daily spins — drives badge unlocks. */
-  spinStreak: number;
+  cooldownMs: number;
+  lastOutcome: {
+    outcome: string;                // SpinOutcome string, but DB has historical values so widened
+    fangsDelta: number;
+  } | null;
 }
 
 export interface SpinRollResult {
   outcome: SpinOutcome;
-  slotIndex: number;                // 0..9 — for client-side animation targeting
-  fangsDelta: number;               // signed; can be negative (bust, tax_man)
-  newBalance: number;               // balance AFTER the delta is applied
-  rewardPayload: {
-    kind: string;
-    [k: string]: unknown;
-  } | null;
+  /** Index into SPIN_SLOTS — drives wheel landing animation on the client. */
+  slotIndex: number;
+  /** Actual Fangs change after balance clamping (e.g. bust never goes negative). */
+  fangsDelta: number;
+  /** Pre-clamp delta — lets the UI show an honest "you only had X" message. */
+  intendedDelta: number;
+  balanceBefore: number;
+  balanceAfter: number;
+  rewardPayload: Record<string, unknown> | null;
 }
 
 // ── Methods ───────────────────────────────────────────────────────────────
