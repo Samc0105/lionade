@@ -86,7 +86,7 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 | **Identity** | | | | | |
 | Profile | `/profile` | `(tabs)/profile` | ✅ | ✅ | hero portrait, 4 stat tiles, 3 segments |
 | Badges | `/badges` | `/badges` | ✅ | ✅ | full gallery with rarity rings |
-| Study DNA | `/study-dna` | (none) | ✅ | ❌ | port pending |
+| Study DNA | `/study-dna` | `app/study-dna.tsx` | ✅ | ✅ | **NEW iOS feature shipped 2026-05-13** — 1059 lines, uses canonical `/api/study-dna` endpoint, identity card, strengths/weaknesses, heatmap, native iOS share sheet (no canvas hack), triple empty-states |
 | **Economy** | | | | | |
 | Shop | `/shop` | `/shop` | ✅ | 🟡 | iOS has Daily Spin hero; cosmetics + boosters stubbed "Coming soon" |
 | Daily Spin | `app/api/spin/roll` + UI | `Shop/DailySpinHero` + `SpinResultModal` + `SpinWheel` | ✅ | ✅ | **Shared-core wired** — first canary feature, uses `spinAPI` + `SPIN_SLOTS` from `@lionade/core` |
@@ -96,7 +96,7 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 | Subscription | `/settings/subscription` | (StoreKit deep-link) | ✅ | 🚫 | iOS uses Apple manage-subscription URL |
 | Pricing | `/pricing` | `/pricing` | ✅ | ✅ | full plans on iOS, monthly/annual toggle |
 | **Gamification** | | | | | |
-| Games hub | `/games` | (none) | ✅ | ❌ | port pending (Batch D — nice to have) |
+| Games hub | `/games` | `app/games.tsx` | ✅ | ✅ | **NEW iOS feature shipped 2026-05-13** — 2081 lines, 4 games: Blitz (routes to /quiz), Roardle (fully ported wordle), Flash Cards (fully ported), Timeline Drop (tap-to-swap instead of HTML5 drag). PDF library upload dropped (RN-incompatible). Single electric hero, rest in neutral grouped list per manifesto. |
 | **AI / Ninny modes** | | | | | |
 | Chat panel | `components/Ninny/ChatPanel.tsx` | partial via mastery session | ✅ | 🟡 | audit in Week 2 |
 | Multiple choice | `Ninny/MultipleChoiceMode.tsx` | partial | ✅ | 🟡 | audit |

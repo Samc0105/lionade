@@ -432,6 +432,93 @@ packages/lionade-core/src/
 
 ---
 
+### 2026-05-13 — 🎮 Big batch: onboarding fix + Study DNA + Games + Quiz premium moment + polish
+**Actor:** Claude + two parallel dev-frontend agents
+**What happened:** User said "keep going more stuff it's missing". Did a coordinated push:
+- Fixed the 3 pre-existing onboarding.tsx bugs (carried since sprint start)
+- Shipped 2 NEW iOS feature areas in parallel via background agents (Study DNA + Games hub)
+- Shipped 2 deferred premium-pass items (quiz difficulty color reduction, DailyBet relocation)
+- Implemented the deferred Quiz results premium moment
+
+**iOS typecheck went from 3 carried errors → 0 errors for the first time this sprint.**
+
+---
+
+**Pre-existing onboarding.tsx bug fix (`app/onboarding.tsx`):**
+Three TypeScript errors had been carrying through every typecheck since the start. They masked real production bugs in the onboarding diagnostic flow:
+1. `fetchQuizQuestions(subj as never, 5)` — passed `5` as second arg but signature is `(subject, difficulty)`. Diagnostic was almost certainly failing.
+2. `checkAnswer(q.id, q.options[optionIdx])` — passed 2 args, signature only takes `(questionId)`. Returns `{correctAnswer, explanation}` not boolean.
+3. `setDiagCorrect(correct)` — tried to assign object result to boolean state.
+
+Fixed: `fetchQuizQuestions(subj, "medium")` + slice(0, 5); compare `optionIdx === result.correctAnswer` for the boolean. **TypeScript value-add proved AGAIN** — the shared-core typed signatures surfaced what the loose-typed direct calls were hiding.
+
+---
+
+**Study DNA shipped (`app/study-dna.tsx` — 1059 lines, dev-frontend agent):**
+- Uses canonical `/api/study-dna` server endpoint via `apiGet` (server-side aggregation, no client reassembly — eliminates parity drift surface)
+- Identity card with personal study-DNA title
+- Strengths (`#2BBE6B` success) + Weak Spots (`#E5484D` danger) lists with "drill this" microcopy nudge on items < 40% mastery
+- 6-col × 5-row activity heatmap (better than web's 15-col grid for narrow viewports)
+- Lifetime Fangs CountUp (the ONLY gold in the value layer — currency only per manifesto)
+- Native iOS `Share.share()` instead of canvas image render (less complexity, better social handoff)
+- Triple empty states: API failure / brand-new-account (questionsAnswered=0) / populated-but-no-strengths
+
+**Games hub shipped (`app/games.tsx` — 2081 lines, dev-frontend agent):**
+4 games ported with smart scope decisions:
+1. **Blitz Sprint** — Featured hero card (the ONE electric gradient). "Start" routes to existing `/quiz` rather than duplicating the rapid-fire engine.
+2. **Roardle** (4/5/6-letter Wordle clone) — Fully ported. Length picker, 6-row grid, full QWERTY with color-coded keys, Fangs reward (base + fewer-guess bonus).
+3. **Flash Cards** — Fully ported. 12-card random deck, tap to flip, Knew It/Didn't Know buttons, completion %.
+4. **Timeline Drop** — Ported with deviation: tap-to-swap + ↑/↓ arrows instead of HTML5 drag (RN drag-on-list was out of scope).
+
+Deviations:
+- PDF library tab dropped (RN-incompatible file-system PDF ingestion). Logged as follow-up.
+- Single neutral palette across game tiles (no per-game brand color) — manifesto applied.
+- Web's 4 brand colors → 1 electric hero + cream grouped-list rows.
+
+---
+
+**Quiz difficulty picker color reduction (`app/quiz.tsx`):**
+3 colored cards (Easy=green, Medium=orange, Hard=red) → only Hard keeps red. Easy + Medium go neutral cream. Per manifesto: color carries meaning (red=danger=challenge); decorative color was noise.
+
+---
+
+**DailyBetCard relocation:**
+- `app/(tabs)/index.tsx`: removed import + render (was the 13th component on Dashboard)
+- `app/(tabs)/compete.tsx`: imported + rendered between Modes and Top Players
+- Rationale: betting is a Compete concept, not a daily-ritual one. Continues the Linear-style Dashboard subtraction.
+
+---
+
+**Quiz results premium moment (`app/quiz.tsx` ResultsView + new `PerfectParticle`):**
+Per design-ui-ux audit: "the results screen is the highest-emotion second in the app; under-investing here is the biggest miss."
+
+On perfect-score mount:
+- **Radial gold halo** (600×600 circle, scaling 0→1 over 1400ms with `Easing.out(Easing.cubic)`, opacity sequence 0→0.6→0.18). Centered behind the score.
+- **8 gold particle burst** — radially distributed, staggered 60ms each, fly outward 180-260pt with cubic-ease, fade over 1100ms. Each carries a soft gold shadow for depth.
+- **CountUp duration** doubled (700ms → 1400ms) on perfect, so the number lands when the halo peaks.
+- **Reward chip slides up** from below (translateY 24→0, opacity 0→1 over 600ms) — lands 300ms after the count-up tops out.
+- **Double haptic** — existing success haptic at mount + a `Heavy` impact at 1100ms timed to the count-up landing.
+
+Non-perfect path unchanged. All animations gated by Reanimated `useSharedValue` (off-thread, no JS bridge latency).
+
+---
+
+**Verification:**
+- iOS `npx tsc --noEmit` → **0 errors** (was 3 since sprint start; now fully clean for the first time) ✅
+- Both new screens registered in `app/_layout.tsx` (`study-dna`, `games` — both routes work)
+- 5 files modified, 2 new files created
+
+**Phase 2 sprint state after this commit:**
+- 16 iOS surfaces on shared-core
+- **4 NEW iOS feature areas shipped** (Duel · Learn hub + Paths · Study DNA · Games hub)
+- Apple HIG pass shipped (Settings rebuild + crowding fixes)
+- Premium design pass shipped (palette tokens + manifesto + 4 targeted edits)
+- Quiz results premium moment shipped
+- All pre-existing iOS bugs fixed
+- Syllabus upload still in flight (background agent)
+
+---
+
 ### 2026-05-13 — 💎 Premium design pass: research-driven foundation upgrade
 **Actor:** Claude + design-ui-ux agent (manifesto + recommendations) + research via WebSearch/WebFetch
 **What happened:** User asked for "quality premium design on the iOS" with explicit instruction to research the web + reference other apps. Did a 4-search research pass (Linear redesign, Cash App design system, Duolingo gamification, 2026 mobile trends), then routed synthesis through design-ui-ux for a Lionade-specific premium upgrade plan, then executed the highest-impact recommendations.
