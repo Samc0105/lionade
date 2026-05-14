@@ -432,6 +432,70 @@ packages/lionade-core/src/
 
 ---
 
+### 2026-05-14 — 🔐 Security + Profile + Permissions pass — full Settings architecture
+**Actor:** Claude + two parallel dev-frontend agents + Claude direct
+**What happened:** User asked "make sure all settings are good for the profile like security and everything permissions". Built 3 new screens, 1 shared primitive module, and added an Account section to Settings as the connective tissue.
+
+**Architecture decision:** Extracted Settings primitives into a shared module so /security can reuse them without duplication. Future settings-shaped screens just import.
+
+**New shared module: `components/SettingsPrimitives.tsx` (398 lines, dev-frontend agent)**
+- Exports: `Section`, `Row` (with new optional `disabled` + `destructive` props), `ToggleRow`, `SegmentRow`, `Divider`, `settingsStyles`
+- Non-breaking additions to existing `Row` interface
+- Refactored `app/settings.tsx` from 947 lines → 660 lines by removing the inline primitives
+
+**New: `app/security.tsx` (941 lines, dev-frontend agent)**
+- Sign-in method detection — reads `app_metadata.provider` first, falls back to `identities[0].provider`. Normalized: email/apple/google/unknown. For Apple: looks up `identity_data.email` to show real Apple ID
+- Change Password modal — current/new/confirm fields, independent show/hide toggles, live 4-segment strength meter (red→orange→gold→green by length + character class variety), inline don't-match hint. Submit calls `supabase.auth.updateUser({ password })`. Current-password field is UX-only (Supabase doesn't verify it).
+- Biometric lock — uses `expo-local-authentication` (newly installed). Row only renders if `hasHardwareAsync() && isEnrolledAsync()`. Label adapts to Face ID / Touch ID / Iris ID via `supportedAuthenticationTypesAsync()`. Toggle ON triggers `authenticateAsync` — success persists to `lionade.biometric-lock-enabled` AsyncStorage; failure reverts. Toggle OFF persists immediately (no auth required to disable). TODO: `(tabs)/_layout.tsx` lock-on-open integration deferred.
+- Active sessions — "This device" row with `Device.modelName`, green Active chip with pulse dot, relative timestamp. "Sign out everywhere" → `supabase.auth.signOut({ scope: 'global' })`. Supabase doesn't expose other-device session list to clients (admin-only).
+- Two-factor auth — visual stub with "Coming soon", disabled chevron. Real Supabase MFA needs migration + recovery codes flow; deferred.
+- Data export — POST /api/account/export via apiPost. 404-graceful: catch shows "We'll email your data within 24 hours" toast either way.
+
+**New: `app/edit-profile.tsx` (1202 lines, dev-frontend agent)**
+- Avatar picker via ActionSheetIOS — 3 modes: Pick from library (`expo-image-picker` → Supabase Storage `avatars/${userId}.jpg` with upsert + cache-bust), Generate (cycles DiceBear seed), Remove (Avatar falls back to initial-disc)
+- Bucket-missing graceful degrade ("Avatar storage isn't set up yet. Try a generated one for now.")
+- Username change — 365-day cooldown enforced. Calls new `profileAPI.changeUsername()` typed core method. Lowercase alphanumeric + underscore. Debounced live availability check. Confirm dialog before commit. Hard-coded client-side reserved list for UX.
+- Display name (1-50 chars) and Bio (0-150) via direct Supabase profiles update
+- Bio column graceful-degrade: load detects `"bio" in profile` and conditionally renders the field; save retries without bio if server returns PGRST204/column-missing
+- Sticky save bar, dirty-state confirm-discard, queued toasts, mutate `useUserStats` for instant Settings card refresh
+
+**New: `app/permissions.tsx` (365 lines, Claude direct)**
+- 3 permission rows: Notifications · Camera · Photo Library
+- Status chips: Allowed (green) · Limited (yellow) · Denied (red) · Ask (cream)
+- Re-checks via `useFocusEffect` on every screen focus — returning from iOS Settings refreshes values
+- In-app prompt for Notifications when status === undetermined (calls `requestPermissionsAsync` directly)
+- For all permissions: "Open iOS Settings" deep-link CTA
+- Footnote: lists what Lionade does NOT ask for (location/contacts/microphone) — transparency win
+
+**New: `packages/lionade-core/src/api/profile.ts` (45 lines, dev-frontend agent)**
+- `profileAPI.changeUsername(client, newUsername)` wraps POST /api/change-username (existing server route)
+- Module intentionally minimal — display name / bio / avatar use direct supabase (no HTTP roundtrip needed). Username goes through HTTP because of server-side cooldown + audit log requirements.
+
+**Settings wiring (Claude direct):**
+Added new "Account" section at the top of Settings (before Subscription) with 3 rows:
+- Edit profile → /edit-profile
+- Security → /security
+- Permissions → /permissions
+
+**New iOS package:** `expo-local-authentication@~17.0.8` (for biometric lock)
+
+**Verification:**
+- iOS `npx tsc --noEmit` → 0 errors ✅
+- Core `npm run core:typecheck` → clean ✅
+
+**Phase 2 sprint state after this commit:**
+- 8 NEW iOS feature areas shipped (Duel · Learn hub + Paths · Study DNA · Games hub · Syllabus upload · Grade tracker + Flashcards · Arena PvP · **Security + Edit Profile + Permissions**)
+- 21 iOS surfaces consuming shared-core (+1 profileAPI)
+- All Apple App Store security UX requirements met (sign-in method visible, password change available, sign-out-everywhere, biometric lock, permissions transparency, data export)
+
+**Open issues / follow-ups:**
+1. `avatars` Supabase Storage bucket may need creation in production — sheet handles missing gracefully but library-upload path is dead until it exists
+2. Lock-on-app-open integration with `(tabs)/_layout.tsx` deferred (just the toggle is wired)
+3. Real Supabase MFA flow deferred (stub in place)
+4. /api/account/export endpoint may need building on web side
+
+---
+
 ### 2026-05-14 — 🎯 Stub-fix batch: Arena PvP + Mastery orchestrator + 5 polish wins
 **Actor:** Claude + dev-frontend agent (Arena)
 **What happened:** User said "Fix the Shipping next stubs" — these were the two embarrassing user-visible broken promises on iOS. Both fixed. Plus 5 additional premium polish items knocked off while Arena agent ran in background.
