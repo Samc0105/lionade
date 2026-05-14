@@ -71,6 +71,11 @@
       "react-native": "./src/hooks/*.ts",
       "types": "./src/hooks/*.ts",
       "default": "./src/hooks/*.ts"
+    },
+    "./cache/*": {
+      "react-native": "./src/cache/*.ts",
+      "types": "./src/cache/*.ts",
+      "default": "./src/cache/*.ts"
     }
   },
   "scripts": {

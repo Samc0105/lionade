@@ -7,6 +7,7 @@ import { getQuizQuestions, checkAnswer, getSubjectStats, getQuizHistory } from "
 import QuizCard from "@/components/QuizCard";
 import { useAuth } from "@/lib/auth";
 import { mutateUserStats } from "@/lib/hooks";
+import { invalidateAfter } from "@/lib/cache-invalidation";
 import { useRouter } from "next/navigation";
 import BackButton from "@/components/BackButton";
 import { cdnUrl } from "@/lib/cdn";
@@ -374,7 +375,15 @@ export default function QuizPage() {
 
     if (res.ok && res.data?.success) {
       await refreshUser();
-      if (user?.id) mutateUserStats(user.id);
+      if (user?.id) {
+        mutateUserStats(user.id);
+        // Cascading cache invalidation 2026-05-14 — mirrors iOS pattern.
+        // Refresh every cache key the quiz could have stale'd: recent
+        // quizzes, weekly activity, subject stats, missions, bounties,
+        // wallet, badges. Same action map as iOS — see
+        // @lionade/core/cache/invalidate.ts.
+        void invalidateAfter("quizCompleted", user.id);
+      }
       setBonusFangs(res.data.bonusFangs ?? 0);
       setStreakMilestone((res.data as { streakMilestone?: { days: number; bonus: number } | null }).streakMilestone ?? null);
     }
@@ -551,7 +560,7 @@ export default function QuizPage() {
               <Lightning size={32} weight="fill" color="#EAB308" aria-hidden="true" />
               <div className="flex-1">
                 <p className="font-bebas text-xl text-[#EAB308] tracking-wider">BLITZ MODE</p>
-                <p className="blitz-subtitle text-cream/40 text-xs font-syne">2x Coins & XP, Shorter Timer (10s)</p>
+                <p className="blitz-subtitle text-cream/60 text-xs font-syne">2x Coins & XP, Shorter Timer (10s)</p>
               </div>
               {blitzMode && (
                 <span className="text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full bg-[#EAB308]/20 border border-[#EAB308]/40 text-[#EAB308]">
@@ -586,7 +595,7 @@ export default function QuizPage() {
                 >
                   <Circle size={28} weight="fill" color={color} className="mb-2" aria-hidden="true" />
                   <p className="diff-label font-bebas text-lg tracking-wider" style={{ color: difficulty === d ? color : "#ffffff60" }}>{label}</p>
-                  <p className="diff-desc text-cream/40 text-[11px] leading-tight mt-1">{desc}</p>
+                  <p className="diff-desc text-cream/60 text-[11px] leading-tight mt-1">{desc}</p>
                   <span
                     className="inline-block mt-2 text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full"
                     style={{ background: `${color}15`, border: `1px solid ${color}30`, color: difficulty === d ? color : `${color}80` }}
@@ -631,7 +640,7 @@ export default function QuizPage() {
                       <rec.category.Icon size={32} weight="regular" color={rec.category.color} aria-hidden="true" />
                       <div>
                         <p className="card-title font-bebas text-lg tracking-wider" style={{ color }}>{rec.topic.name}</p>
-                        <p className="card-subtitle text-cream/40 text-xs font-syne">{rec.reason}</p>
+                        <p className="card-subtitle text-cream/60 text-xs font-syne">{rec.reason}</p>
                       </div>
                     </button>
                   );
@@ -690,7 +699,7 @@ export default function QuizPage() {
                 <activeCategory.Icon size={52} weight="regular" color={activeCategory.color} aria-hidden="true" />
                 <div>
                   <h2 className="font-bebas text-3xl tracking-wider" style={{ color: activeCategory.color }}>{activeCategory.name}</h2>
-                  <p className="text-cream/40 text-sm font-syne">{activeCategory.topics.length} topics available</p>
+                  <p className="text-cream/60 text-sm font-syne">{activeCategory.topics.length} topics available</p>
                 </div>
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
@@ -750,7 +759,7 @@ export default function QuizPage() {
                             </div>
                           </>
                         ) : (
-                          <p className="text-cream/30 text-[11px]">Not attempted yet</p>
+                          <p className="text-cream/55 text-[11px]">Not attempted yet</p>
                         )}
                       </div>
                     </button>
@@ -776,7 +785,7 @@ export default function QuizPage() {
                     style={{ background: `linear-gradient(135deg, ${stat.color}08 0%, #060c18 100%)`, borderColor: `${stat.color}20` }}>
                     <StatIcon size={28} weight="fill" color={stat.color} className="mx-auto mb-1" aria-hidden="true" />
                     <p className="font-bebas text-2xl leading-none" style={{ color: stat.color }}>{stat.value}</p>
-                    <p className="stat-label text-cream/40 text-[10px] uppercase tracking-wider mt-1">{stat.label}</p>
+                    <p className="stat-label text-cream/60 text-[10px] uppercase tracking-wider mt-1">{stat.label}</p>
                   </div>
                 );
               })}
@@ -975,7 +984,7 @@ function ResultsScreen({
         <h1 className="font-bebas text-6xl text-cream tracking-wider mb-2 animate-slide-up" style={{ animationDelay: "0.05s" }}>
           {rank.label}
         </h1>
-        <p className="text-cream/40 text-base mb-10 animate-slide-up" style={{ animationDelay: "0.08s" }}>
+        <p className="text-cream/60 text-base mb-10 animate-slide-up" style={{ animationDelay: "0.08s" }}>
           {subject} Quiz Complete
           {blitzMode && <span className="text-[#EAB308] ml-2 inline-flex items-center gap-1"><Lightning size={14} weight="fill" aria-hidden="true" /> Blitz</span>}
         </p>
@@ -1101,7 +1110,7 @@ function ResultsScreen({
             ))}
           </div>
           <div className="flex justify-between items-center">
-            <span className="text-cream/40 text-sm">Accuracy</span>
+            <span className="text-cream/60 text-sm">Accuracy</span>
             <span className="font-bebas text-2xl" style={{ color: rank.color }}>{animAccuracy}%</span>
           </div>
           <div className="w-full h-2 bg-white/[0.06] rounded-full mt-2.5 overflow-hidden">
@@ -1200,7 +1209,7 @@ function ResultsScreen({
                     boxShadow: "0 4px 24px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.06)",
                   }}
                 >
-                  <p className="text-cream/30 text-xs font-bold uppercase tracking-widest mb-2">
+                  <p className="text-cream/55 text-xs font-bold uppercase tracking-widest mb-2">
                     Question {answers.indexOf(m) + 1}
                   </p>
                   <p className="text-cream font-syne font-semibold text-sm leading-relaxed mb-4">

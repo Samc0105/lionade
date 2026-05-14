@@ -432,6 +432,50 @@ packages/lionade-core/src/
 
 ---
 
+### 2026-05-14 — 🏷️ Cache-tag invalidation pass — fix stale UI segments
+**Actor:** Claude direct
+**What happened:** User shared a Next.js 16 streaming-routes post about fixing stale UI when different segments fetch at different times. The same problem exists on Lionade at the SWR layer: a quiz finishes, `useUserStats` updates instantly (optimistic) but `useRecentQuizzes` / weekly activity / subject stats / missions / bounties / wallet all stay stale for 30s until SWR's revalidateOnFocus runs.
+
+**Architecture: cache-tag invalidation in shared-core**
+
+Built a central action → cache-keys map (the iOS/web equivalent of Next.js `revalidateTag()`). Single source of truth for which cache keys go stale on which action.
+
+**Files added in core:**
+- `packages/lionade-core/src/cache/keys.ts` — every SWR cache key in the app, namespaced and consolidated. Hooks should reference `cacheKeys.userStats(userId)` instead of inline template strings (prevents drift).
+- `packages/lionade-core/src/cache/invalidate.ts` — `keysForAction(action, userId)` returns the list of keys to revalidate. 17 actions defined: quizCompleted, dailyDrillCompleted, clockInClaimed, streakRevived, spinRolled, missionClaimed, bountyClaimed, dailyBetPlaced, arenaMatchCompleted, duelCompleted, classCreated, classUpdated, noteCreated, flashcardRated, gradeChanged, syllabusUploaded, masterySessionAdvanced, profileUpdated. Exhaustiveness check via TS `never` so the next time an action is added the compiler flags missing handlers.
+- Updated package.json `exports` + iOS tsconfig `paths` so `@lionade/core/cache/*` resolves on both apps.
+
+**Platform wrappers:**
+- `lib/cache-invalidation.ts` (iOS) — wraps SWR's global `mutate()`. Exports `invalidateAfter(action, userId)`.
+- `lib/cache-invalidation.ts` (web) — mirrors iOS exactly. Same SWR API on both ends.
+
+**Wired in feature handlers:**
+- **iOS `app/quiz.tsx`** — after `quizAPI.saveResults`, calls `invalidateAfter("quizCompleted", userId)`. Cascades: userStats, recentQuizzes, weeklyActivity, subjectStats, missionsProgress, bounties, dailyBet, badges, wallet. Result: navigating back to dashboard shows consistent fresh state.
+- **iOS `components/DailyDrillModal.tsx`** — after `dailyDrillAPI.submit`, calls `invalidateAfter("dailyDrillCompleted", userId)`. Cascades: userStats, dailyDrillStatus, missionsProgress, wallet.
+- **Web `app/quiz/page.tsx`** — same wiring after `/api/save-quiz-results`. Same action name = same cascade. Web + iOS stay in sync via the single core action map.
+
+**`revalidate` on public marketing pages (web)**
+
+Couldn't directly apply `next.revalidate` per-fetch because Lionade's 5 marketing pages are all `"use client"` (no server-side fetches to cache). BUT — found that `/privacy` and `/terms` had no actual client-side interactivity beyond `BackButton` (which is itself a client island). Converted both to server components + added `export const revalidate = 86400` (1 day) so Next.js statically renders them at build time and serves from edge cache.
+
+- `app/privacy/page.tsx`: dropped `"use client"`, added `revalidate = 86400`
+- `app/terms/page.tsx`: same
+
+Pages /about, /pricing, /contact stay client (they have real interactivity).
+
+**Verification:**
+- iOS `npx tsc --noEmit` → 0 errors ✅
+- Web `npx tsc --noEmit` → clean ✅
+- Core `npm run core:typecheck` → clean ✅
+
+**Net premium-feel win:**
+Before: finish quiz → results screen shows new Fangs (optimistic) → tap Done → land on dashboard → recent quizzes list STILL shows the previous run → wait 30s → refreshes. Confusing.
+After: finish quiz → results → Done → dashboard → all surfaces show the new state simultaneously. Coherent.
+
+**Pattern:** the cache-tag system is now extensible. Adding more action wiring (spin rolled, mission claimed, arena match complete, etc.) is a 1-line change per handler. Next contributors won't need to think about WHICH caches to invalidate — they just declare the action name.
+
+---
+
 ### 2026-05-14 — 🎬 Premium feel finale: Arena worklets + optimistic + SWR tuning + Leaderboard polish
 **Actor:** Claude + dev-frontend agent (Arena worklets)
 **What happened:** User said "keep going." Closed out the last 4 premium-feel items.

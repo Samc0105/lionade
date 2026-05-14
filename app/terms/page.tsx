@@ -1,7 +1,10 @@
-"use client";
-
+// Server component 2026-05-14 — converted from "use client" so Next.js
+// can statically render at build time. BackButton stays a client island.
 import BackButton from "@/components/BackButton";
 import { SUPPORT_EMAIL } from "@/lib/site-config";
+
+// Same ISR cadence as /privacy — semi-static legal text.
+export const revalidate = 86_400;
 
 export default function TermsPage() {
   return (
@@ -10,7 +13,7 @@ export default function TermsPage() {
         <BackButton />
         <div className="text-center mb-10 animate-slide-up">
           <h1 className="font-bebas text-5xl text-cream tracking-wider mb-2">Terms of Service</h1>
-          <p className="text-cream/40 text-sm">Last updated: February 2026</p>
+          <p className="text-cream/60 text-sm">Last updated: February 2026</p>
         </div>
         <div
           className="rounded-2xl border border-electric/20 p-6 sm:p-8 animate-slide-up"

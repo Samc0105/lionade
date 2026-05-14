@@ -1,7 +1,16 @@
-"use client";
-
+// Server component 2026-05-14 — converted from "use client" so Next.js
+// can statically render at build time. BackButton stays a client island
+// (it's marked "use client" itself and uses next/navigation). The rest
+// of the page is plain JSX → SSG → edge-cached, near-zero TTFB.
+//
+// The animate-slide-up classes are CSS-keyframe driven, no JS needed.
 import BackButton from "@/components/BackButton";
 import { SUPPORT_EMAIL } from "@/lib/site-config";
+
+// ISR cadence — the page won't actually change without a redeploy, but
+// setting a revalidate window makes a future content-CMS migration
+// drop-in. 1 day is the right tier (semi-static legal text).
+export const revalidate = 86_400;
 
 export default function PrivacyPage() {
   return (
@@ -10,7 +19,7 @@ export default function PrivacyPage() {
         <BackButton />
         <div className="text-center mb-10 animate-slide-up">
           <h1 className="font-bebas text-5xl text-cream tracking-wider mb-2">Privacy Policy</h1>
-          <p className="text-cream/40 text-sm">Last updated: February 2026</p>
+          <p className="text-cream/60 text-sm">Last updated: February 2026</p>
         </div>
         <div
           className="rounded-2xl border border-electric/20 p-6 sm:p-8 animate-slide-up"
