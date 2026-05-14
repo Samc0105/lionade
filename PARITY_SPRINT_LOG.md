@@ -432,6 +432,58 @@ packages/lionade-core/src/
 
 ---
 
+### 2026-05-14 — 🏎️ Smoothness pass: native nav + FlashList + tightened cascades
+**Actor:** Claude + dev-frontend agent (FlashList migration)
+**What happened:** User asked "make every screen move very smooth — how they do it." Audited what premium iOS apps do (native push transitions, `freezeOnBlur`, FlashList, gesture-driven swipe-back, worklet animations) and shipped the foundation.
+
+**1. Stack screen-options foundation (`app/_layout.tsx`)**
+Configured global Stack defaults so every push route gets:
+- `animation: "slide_from_right"` — native UIKit-style push (explicit instead of relying on the default)
+- `gestureEnabled: true` — edge-swipe-back gesture (default but explicit for future contributors)
+- **`freezeOnBlur: true`** — off-screen routes pause rendering. Coming back is **instant** — no re-mount, no re-fetch flash. **Biggest single "feels native" win in this pass.**
+- `animationDuration: 320` — matches UIKit native (was using RN default 350ms, slightly laggy)
+- login + onboarding override: `gestureEnabled: false` (can't swipe-away auth); onboarding uses `animation: "fade"` (it's not a push, it's a flow)
+
+**2. FlashList migration (4 screens, dev-frontend agent)**
+Installed `@shopify/flash-list@2.0.2` and migrated the longest-scrolling surfaces.
+
+| Screen | Before | After |
+|---|---|---|
+| `app/leaderboard.tsx` | ScrollView + `entries.map()` for 47 podium-below rows | FlashList. Podium + section eyebrow lifted to `ListHeaderComponent`. 6pt `ItemSeparatorComponent`. |
+| `app/notifications.tsx` | ScrollView + single map() inside one wrapping BlurView | FlashList. Per-row BlurView (necessary to virtualize while preserving frosted look). Conditional first/last rounded corners via `isFirst`/`isLast` props. |
+| `app/wallet.tsx` | ScrollView + day-grouped map() of transactions | FlashList with flattened `WalletListItem[]` union (`type: "header"` vs `type: "tx"`). `getItemType` keeps separate recycle pools per type. Hero/lifetime/cash-out CTA in `ListHeaderComponent`. |
+| `app/badges.tsx` | ScrollView + nested earned/locked maps | FlashList with `numColumns={2}` + `overrideItemLayout` so section headers span 2 columns and badge cards span 1. Hero + progress bar in `ListHeaderComponent`. |
+
+**Skipped (with rationale):**
+- `app/arena.tsx` — recent matches capped at 5 (`matches.slice(0, 5)`). Virtualization overhead > benefit.
+- `app/(tabs)/social.tsx` — three discrete sub-sections each in their own BlurView. Flattening would fragment the BlurView look for marginal gain.
+
+**FlashList v2 API note:** v2 dropped `estimatedItemSize` (the new arch auto-measures). Did not pass `estimatedItemSize` anywhere; would have generated TS errors.
+
+**3. Animation cascade tightening (`components/SettingsPrimitives.tsx`)**
+The Section primitive entered with `FadeInUp.duration(360).delay(delay)`. With section delays 50..260, total time-to-stable was ~620ms — perceptibly slow. Reduced duration to 240ms — net time-to-stable now ~500ms with plenty of breathing room. Affects every Settings/Security screen.
+
+**4. Reanimated worklet follow-ups flagged (queued, not shipped)**
+Agent flagged 3 high-impact JS-thread animations that should migrate to worklets:
+- `app/arena.tsx` 3-2-1-GO countdown — currently driven by `setState` inside `setTimeout`; should be worklet-driven counter
+- `app/arena.tsx` per-question timer ring — currently `setInterval` + `setTimeLeft`; the most visible JS-thread tick in the app. Move to `useSharedValue + withTiming(0, { duration })` and the ring stays smooth even when JS is busy submitting answers.
+- `app/leaderboard.tsx` — no entrance animations; should match the FadeInDown polish of other screens.
+
+These ship in a follow-up pass.
+
+**Verification:**
+- iOS `npx tsc --noEmit` → 0 errors ✅
+- 4 list screens migrated to virtualized scrolling
+- Every push route gets native iOS gesture + freeze-on-blur
+
+**Expected outcomes:**
+- **Tab switching:** instant (off-screen tabs pause; no re-mount cost)
+- **Push routes:** edge-swipe-back works everywhere; UIKit-feel animation
+- **Long scrolls** (leaderboard, notifications, wallet, badges): buttery 60fps via FlashList recycling
+- **Settings entry:** ~120ms faster to stable state
+
+---
+
 ### 2026-05-14 — ⚡ Caching foundation: persistent SWR + write-through + cross-device realtime
 **Actor:** Claude direct
 **What happened:** User asked for "premium fluid feel" — eliminate the 1s reload-on-open delay. Built the foundation that gets us 80% of the way.
