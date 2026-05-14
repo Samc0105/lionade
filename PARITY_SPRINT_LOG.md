@@ -432,6 +432,57 @@ packages/lionade-core/src/
 
 ---
 
+### 2026-05-13 — 🎓 Class tools batch: Grade tracker + Flashcards + Streak milestone celebration
+**Actor:** Claude + two parallel dev-frontend agents
+**What happened:** Final class-detail toolkit. Two new class tools shipped in parallel via background agents, plus a global streak milestone celebration overlay added directly.
+
+**File: `components/Class/FlashcardStudy.tsx` (1073 lines, dev-frontend agent)**
+- Full-screen pageSheet modal opened from a CTA card in `classes/[id]`
+- Spring-physics card flip (`withSpring` on rotateY 0°→180° + opacity swap at midpoint, cleaner than `backfaceVisibility` cross-platform)
+- Light haptic on flip, Medium on Again/Hard, Light on Good/Easy
+- Next-card transition: slide-out-left then spring-in-from-right with flip reset
+- Per-rate-button press scale animation
+- Semantic confidence colors: Again=red, Hard=amber, Good=green, Easy=electric. **No gold** (manifesto: web had gold-bordered answer card; iOS uses electric instead)
+- Server applies SR scheduling — iOS is a thin renderer + rater
+- New core types: `FlashcardRating`, `ClassFlashcard`, `ListFlashcardsResponse`, `RateFlashcardResponse`
+- New core methods: `classesAPI.listFlashcards(client, classId)`, `classesAPI.rateFlashcard(client, classId, cardId, rating)`
+
+**File: `components/Class/GradeTracker.tsx` (1867 lines, dev-frontend agent)**
+- Tap-to-expand collapsed shell (keeps class detail page lean)
+- Collapsed row: current %, letter chip, row count
+- Expanded: hero + list + add/edit modal
+- Inline form replaced with full Modal (matches SyllabusUploadSheet family) — has live percentage+letter preview as user types
+- CountUp animation on current grade
+- **Semantic letter colors** (manifesto applied): A=green `#2BBE6B`, B=electric `#4A90D9`, C=yellow `#F5A524`, D/F=red `#E5484D`. **Web painted letter gold; iOS does NOT** — gold is for currency only.
+- Delete moved to edit-form footer as red ghost button (RN has no hover; long-press-delete on rows would risk accidental data loss)
+- Date entry uses TextInput with regex filter (no DateTimePicker package — could swap later)
+- Graceful degrade to "Track your grades — coming soon" if API errors
+- New core types: `ClassGrade`, `ClassGradeSummary`, `ClassGradesResponse`, `CreateGradePayload`, `UpdateGradePayload`, `GradeCategory`
+- New core methods: `classesAPI.listGrades`, `createGrade`, `updateGrade`, `deleteGrade`
+
+**File: `components/StreakMilestoneOverlay.tsx` (~310 lines, Claude direct)**
+- Once-per-milestone celebration: 3 / 7 / 14 / 30 / 100 day streak crossings
+- Idempotent via AsyncStorage (`lionade.last-celebrated-streak-milestone`) — re-mount doesn't re-fire
+- Detects crossing by comparing current `stats.streak` against highest previously-celebrated value
+- Animations: orange halo (520×520, cubic-ease scale 0→1 over 900ms, opacity sequence 0.5→0.22), text fade+rise from below at 150ms delay, gold Fangs-bonus chip slide-in at 600ms delay
+- Three flame particles rising in staggered sequence (200ms delay each, fly 260-320pt up with horizontal spread, cubic-ease 1300ms)
+- Haptic sequence: `Success` notification at mount + `Heavy` impact at 950ms (timed to chip landing)
+- Streak-orange `#F97316` carries the semantic; gold reserved for the Fangs-bonus chip only (manifesto-compliant)
+- Mounted globally in `app/(tabs)/_layout.tsx` so it fires on any tab when stats refresh
+
+**Verification:**
+- iOS `npx tsc --noEmit` → 0 errors ✅
+- Core `npm run core:typecheck` → clean ✅
+- Both agents touched `app/classes/[id].tsx` + `core/classes.ts` — additions coexist cleanly, no overwrites
+
+**Phase 2 sprint state after this commit:**
+- 6 NEW iOS feature areas shipped: Duel · Learn hub + Paths · Study DNA · Games hub · Syllabus upload · Grade tracker + Flashcards
+- 19 iOS surfaces consuming shared-core (added: listFlashcards, rateFlashcard, listGrades, createGrade, updateGrade, deleteGrade)
+- 2 micro-celebrations shipped (Quiz perfect-score, Streak milestone) — 3 remaining queued (Daily Spin already had haptic; Level up + Duel victory pending)
+- All Class-tool gaps now closed on iOS
+
+---
+
 ### 2026-05-13 — 📷 Syllabus upload shipped to iOS (5th new feature area)
 **Actor:** Claude + dev-frontend agent
 **What happened:** Camera-native Syllabus upload sheet shipped. 5th net-new iOS feature port of the sprint.
