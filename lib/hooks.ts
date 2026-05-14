@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import useSWR, { mutate } from "swr";
 import { supabase } from "@/lib/supabase";
 import { getLevelFromXp } from "@/lib/levels";
@@ -39,6 +40,43 @@ export function useUserStats(userId: string | undefined) {
       keepPreviousData: true,
     }
   );
+
+  // Realtime cross-device sync 2026-05-14 — mirrors the iOS hook pattern.
+  // Subscribes to UPDATEs on this user's profile row, so changes made on
+  // the iOS app (Fangs earned, streak tick, level up) propagate to the
+  // open web tab without polling. RLS scopes the subscription to the
+  // user's own row.
+  //
+  // Channel-name suffix is random per effect run because React StrictMode
+  // double-invokes effects in dev — without the suffix the second run
+  // collides with the still-subscribed channel from the first and
+  // .on() throws "cannot add postgres_changes callbacks after subscribe()".
+  useEffect(() => {
+    if (!userId) return;
+    const channelName = `profile:${userId}:${Math.random()
+      .toString(36)
+      .slice(2, 8)}`;
+    const channel = supabase
+      .channel(channelName)
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "profiles",
+          filter: `id=eq.${userId}`,
+        },
+        () => {
+          // Re-fetch through the canonical RLS path so we never drift
+          // from server truth.
+          void boundMutate();
+        },
+      )
+      .subscribe();
+    return () => {
+      void supabase.removeChannel(channel);
+    };
+  }, [userId, boundMutate]);
 
   return { stats: data ?? null, error, isLoading, mutate: boundMutate };
 }

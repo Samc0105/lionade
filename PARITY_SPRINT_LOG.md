@@ -432,6 +432,60 @@ packages/lionade-core/src/
 
 ---
 
+### 2026-05-14 — ⚡ Caching foundation: persistent SWR + write-through + cross-device realtime
+**Actor:** Claude direct
+**What happened:** User asked for "premium fluid feel" — eliminate the 1s reload-on-open delay. Built the foundation that gets us 80% of the way.
+
+**Diagnosis (from the strategic write-up):**
+The "feels slow" gap was almost entirely caching architecture:
+1. No persistent SWR cache → every cold open shows skeletons
+2. `revalidateOnFocus: true` everywhere → app foreground = 6-12 parallel fetches and visible flicker
+3. No realtime on hot data → cross-device updates required polling
+4. No prefetch / no batching / no edge cache
+
+**Foundation shipped (this commit):**
+
+### Web (was missing all of this)
+- **NEW: `lib/swr-config.ts`** — localStorage-persistent SWR cache provider
+  - Synchronous hydrate on first construction (instant data on cold tab open)
+  - Write-through Map (intercept `.set`/`.delete`) → debounced persist (500ms)
+  - Persist on `visibilitychange → hidden` (covers tab background) + `beforeunload` (hard close)
+  - LRU eviction at 500 entries
+  - SSR-safe (server returns fresh empty Map)
+  - Versioned key (`lionade-swr-cache-v1`) for future invalidation
+  - Defaults: `keepPreviousData: true` (kills the flash-to-loading on revalidate), `shouldRetryOnError: false`
+- **NEW: `components/SwrProvider.tsx`** — client wrapper mounting SWRConfig
+- **MODIFIED: `app/layout.tsx`** — `<SwrProvider>` wraps `<AuthProviderWrapper>`. Now every web hook benefits from the persistent cache.
+- **MODIFIED: `lib/hooks.ts` useUserStats** — added Supabase realtime channel subscription on the user's profiles row (mirrors the iOS pattern). When iOS app earns Fangs / ticks streak / levels up, the open web tab reflects it without polling.
+
+### iOS (had baseline, upgraded)
+- **MODIFIED: `lib/swr-config.ts`** — upgraded from a 4s polling heartbeat → write-through debounced 500ms
+  - Old behavior: every 4 seconds, regardless of changes, serialize the entire map and write to AsyncStorage. Wasted writes on idle; up to 4s of data loss on hard kill.
+  - New behavior: intercept `.set` and `.delete` on the Map; schedule a debounced 500ms persist. Plus an additional flush on `AppState.change → background|inactive` so iOS process-kill (memory pressure) doesn't drop the cache.
+  - Same LRU 500-entry cap added.
+  - Same default tightening (`keepPreviousData: true`, `shouldRetryOnError: false`).
+
+**Result expectations:**
+- **Cold app/tab open** — last-known data renders in <100ms (the localStorage/AsyncStorage hydrate). User never sees an empty skeleton on subsequent opens.
+- **Cross-device updates** — Fangs/streak/level/xp on one device pushes to the other in realtime via the profiles channel. No more "I earned 50 Fangs on web but iOS still shows the old balance."
+- **Backgrounding** — cache flushes immediately on tab/app background, so the very next open has the absolute-latest data.
+- **Hard-kill data loss** — down from 4s on iOS to 500ms.
+
+**Still on the queue (this batch doesn't ship them, follow-ups):**
+- Per-data-type `dedupingInterval` tuning (hot=5s / warm=30s / cold=60s+)
+- Optimistic mutations audit (most-impactful: save-quiz-results, daily-drill complete, spin/roll)
+- Background prefetch on idle
+- CDN edge caching for read-mostly endpoints (subject taxonomy, shop catalog)
+
+**Verification:**
+- iOS `npx tsc --noEmit` → 0 errors ✅
+- Web `npx tsc --noEmit` → clean ✅
+- Core `npm run core:typecheck` → clean ✅
+
+This foundation is the biggest single "feels fluid" lever. Per-hook tuning and optimistic mutations are next sessions' work.
+
+---
+
 ### 2026-05-14 — 🔐 Security + Profile + Permissions pass — full Settings architecture
 **Actor:** Claude + two parallel dev-frontend agents + Claude direct
 **What happened:** User asked "make sure all settings are good for the profile like security and everything permissions". Built 3 new screens, 1 shared primitive module, and added an Account section to Settings as the connective tissue.

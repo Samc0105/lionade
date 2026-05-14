@@ -4,6 +4,7 @@ import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import AuthProviderWrapper from "@/components/AuthProviderWrapper";
+import SwrProvider from "@/components/SwrProvider";
 import SpaceBackground from "@/components/SpaceBackground";
 import SakuraPetals from "@/components/SakuraPetals";
 import ThemeProvider from "@/components/ThemeProvider";
@@ -145,23 +146,31 @@ export default function RootLayout({
         <script dangerouslySetInnerHTML={{ __html: `(function(){try{var d=document.documentElement;var t=localStorage.getItem("theme")||"dark";d.dataset.theme=t;d.dataset.fontSize=localStorage.getItem("fontSize")||"medium";if(t==="light")d.classList.add("light")}catch(e){}})()` }} />
       </head>
       <body className="text-cream font-syne antialiased">
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[1000] focus:px-4 focus:py-2 focus:rounded-md focus:bg-gold focus:text-navy focus:font-semibold focus:shadow-lg"
+        >
+          Skip to main content
+        </a>
         <StructuredData />
         <ThemeProvider>
           <SpaceBackground />
           <SakuraPetals />
           <div className="relative z-10 layout-content-bg">
-            <AuthProviderWrapper>
-              <ToastProvider>
-                <Navbar />
-                <main>
-                  <PageTransition>{children}</PageTransition>
-                </main>
-                <Footer />
-                <QuickNoteShortcut />
-                <FocusMusicToggle />
-                <FocusLockIn />
-              </ToastProvider>
-            </AuthProviderWrapper>
+            <SwrProvider>
+              <AuthProviderWrapper>
+                <ToastProvider>
+                  <Navbar />
+                  <main id="main-content">
+                    <PageTransition>{children}</PageTransition>
+                  </main>
+                  <Footer />
+                  <QuickNoteShortcut />
+                  <FocusMusicToggle />
+                  <FocusLockIn />
+                </ToastProvider>
+              </AuthProviderWrapper>
+            </SwrProvider>
           </div>
         </ThemeProvider>
       </body>
