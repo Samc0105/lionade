@@ -432,6 +432,61 @@ packages/lionade-core/src/
 
 ---
 
+### 2026-05-13 — 🎨 Apple HIG quality pass: Settings rebuild + crowding fixes
+**Actor:** Claude + design-ui-ux agent (audit)
+**What happened:** User flagged "nothing super crowded, settings page way better". Ran a full design-ui-ux audit across 10 iOS screens, then rebuilt Settings and applied surgical fixes to the 3 most-crowded screens identified.
+
+**Audit findings (from design-ui-ux agent):**
+- Top crowded screens: Dashboard (12 stacked components), Settings (140pt hero waste, wrong card paradigm), Academia (redundant 3-tile stat strip), Compete (4 competing brand colors in mode rows), Profile (4 stat tiles, "Best" duplicates Streak)
+- Cross-cutting: custom back buttons everywhere instead of native nav, stat-strip overuse, corner-radius drift (10/14/18/20/24pt all in use), color tint inflation on navigation rows
+- What's great (preserved): Profile segmented control, Wallet hero card, Compete's GroupedList primitive, haptic discipline, empty-state consistency
+
+**Settings rebuild — full Apple HIG inset-grouped-list design:**
+
+File: `/Users/samc/Desktop/lionade-ios/app/settings.tsx` — rebuilt ~480 lines (was ~480 lines but completely restructured).
+
+Sections (top → bottom):
+1. **Profile card** — Apple ID-style: avatar + username + email + Lv/Fangs + chevron to edit
+2. **Subscription** — plan chip (Free/Pro/Platinum colored) + "Manage subscription" → Apple deep link
+3. **Appearance** — Theme (Auto/Dark/Light) + Font size (S/M/L) + Haptics + Sound effects. Theme/Haptics/Sound stored in AsyncStorage (device-local); Font size in user_preferences (synced).
+4. **Notifications** — "Push notifications" → opens iOS Settings via `Linking.openSettings()` + 4 per-channel toggles (streak/duel/daily-drill/leaderboard)
+5. **Privacy** — Public profile + Show on leaderboard + "Data & privacy policy" link
+6. **Support** — Contact (mailto), Rate Lionade (App Store URL), Share (native Share API)
+7. **About** — Version display + Terms + Privacy Policy
+8. **Sign out** — full-width destructive button with Alert confirm
+9. **Delete account** — Apple App Store REQUIREMENT for account-creating apps. Two-step confirmation alert, then mailto fallback (TODO: wire to /api/account/delete endpoint when built)
+
+Design improvements:
+- Killed the 140pt centered hero (icon tile + Bebas title + subtitle) — replaced with compact native-style nav title
+- Section headers are JetBrainsMono caps OUTSIDE the cards (Apple HIG inset-grouped pattern)
+- Cards use 14pt corner radius (was 18pt), subtle 1px border, no glassmorphism
+- Native iOS `<Switch>` component for toggles (was a custom track/thumb)
+- Every row has an icon tile + label + description + chevron/accessory — proper hierarchy
+- 52pt minimum row height (Apple uses 44pt minimum touch target)
+- Saved-toast moved to bottom 38pt (clears tab bar)
+- New shop-friendly imports: `Linking`, `Share`, `AsyncStorage`, native `Switch`
+
+**Companion crowding fixes:**
+
+1. **Academia tab** (`app/(tabs)/academia.tsx`) — Removed the 3-tile stat strip (29 lines). Per-card countdown chip + note count already exist; aggregate stat strip was redundant and added 24pt of crowding above the classes list.
+
+2. **Profile tab** (`app/(tabs)/profile.tsx`) — Dropped "Best" stat tile (max streak). 4 tiles → 3 tiles. Max-streak overlaps conceptually with current streak; lives better on the Streak detail page.
+
+3. **Compete tab** (`app/(tabs)/compete.tsx`) — Neutralized 3 mode-row icon colors (Daily Quiz, Mastery Mode, Focus Lock-In) from blue/purple/green → cream/70%. Quick Match keeps gold as the "featured/recommended" accent. Reduces color noise; gold ELO hero accent no longer fights 4 sibling brand colors.
+
+**Verification:**
+- iOS `npx tsc --noEmit` → only 3 pre-existing `app/onboarding.tsx` errors ✅
+- All 4 files compile clean
+
+**What did NOT get fixed (deferred):**
+- Dashboard 12-component overload (`app/(tabs)/index.tsx`) — needs a bigger restructure (collapse TopBar pills into StatOrbs, group ritual cards under a "TODAY" header, demote 3 of 4 ritual cards to grouped-list rows). Higher-risk change; queued for next pass.
+- Native large-title nav adoption across all `app/*.tsx` routes — would eliminate 5 reimplementations of the custom back-button pill. Mechanical but spread across many files.
+- Corner-radius standardization to 10/14/20pt (currently 10/14/16/18/20/24pt drift across the app).
+
+**`IOS_PARITY.md` updated:** Settings row now describes the rebuild scope; new sections (Subscription, Appearance, Notifications channels, Support, Delete account) are visible.
+
+---
+
 ### 2026-05-13 — 📚 Learn hub + Paths shipped to iOS (2nd new feature area)
 **Actor:** Claude + dev-frontend agent
 **What happened:** Second net-new iOS feature port. Web had `/learn` (554 lines) + `/learn/paths` (182 lines) + `/learn/paths/[subject]` (806 lines) — totaling 1,542 lines. iOS now has all three as new screens, plus a smart redirect decision for `/learn/ninny`.

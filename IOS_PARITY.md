@@ -92,7 +92,7 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 | Daily Spin | `app/api/spin/roll` + UI | `Shop/DailySpinHero` + `SpinResultModal` + `SpinWheel` | ✅ | ✅ | **Shared-core wired** — first canary feature, uses `spinAPI` + `SPIN_SLOTS` from `@lionade/core` |
 | Wallet | `/wallet` | `/wallet` | ✅ | ✅ | balance + lifetime + transaction history |
 | **Settings** | | | | | |
-| Settings | `/settings` | `/settings` | ✅ | ✅ | font, notifications, privacy |
+| Settings | `/settings` | `/settings` | ✅ | ✅ | **Apple HIG rebuild 2026-05-13**: profile card, subscription chip, appearance (theme/font/haptics/sound), notifications (5 channels + iOS Settings deeplink), privacy, support (contact/rate/share), about (terms/privacy/version), sign-out + Apple-required delete account flow |
 | Subscription | `/settings/subscription` | (StoreKit deep-link) | ✅ | 🚫 | iOS uses Apple manage-subscription URL |
 | Pricing | `/pricing` | `/pricing` | ✅ | ✅ | full plans on iOS, monthly/annual toggle |
 | **Gamification** | | | | | |
