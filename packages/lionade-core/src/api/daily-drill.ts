@@ -36,9 +36,18 @@ export interface DrillStatus {
   completedAt?: string;
 }
 
+/**
+ * Per-question result. Server accepts EITHER:
+ *   - `selectedIndex` (preferred) — server validates against correct_index
+ *   - `wasCorrect` (legacy) — trust-the-client mode for simpler callers
+ *
+ * Daily Drill is low-stakes (capped Fangs reward) so the legacy path is
+ * acceptable, but new code should send `selectedIndex` for integrity.
+ */
 export interface DrillResult {
   questionId: string;
-  wasCorrect: boolean;
+  selectedIndex?: number;
+  wasCorrect?: boolean;
 }
 
 export interface DrillCompleteResponse {

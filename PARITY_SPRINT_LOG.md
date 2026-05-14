@@ -432,6 +432,43 @@ packages/lionade-core/src/
 
 ---
 
+### 2026-05-13 — Big finisher: 7 more iOS surfaces on shared-core + 1 pre-existing bug fixed
+**Actor:** Claude
+**What happened:** Pushed shared-core consumption as far as practical. Added typed methods for Mastery (4 endpoints), Bets, Notes, Quick-Note. Migrated 3 more hooks and 4 components. TypeScript caught a pre-existing iOS bug in the process.
+
+**New core API modules:**
+- `core/src/api/mastery.ts` — masteryAPI with createExam, parseExam, startSession, getSession, advance, submitAnswer. Plus all the MasteryMessage / MasteryPending / MasterySubtopic / MasterySessionResponse types.
+- `core/src/api/bets.ts` — betsAPI.place. PlaceBetPayload and PlaceBetResponse types.
+- `core/src/api/classes.ts` — **extended** with recentNotes + quickNote. RecentNote, QuickNotePayload, QuickNoteResponse types added.
+- `core/src/api/daily-drill.ts` — **DrillResult type updated** to accept either `selectedIndex` (server-validated, preferred) or `wasCorrect` (legacy) — server accepts both.
+
+**iOS hooks migrated to shared-core:**
+- `lib/hooks/use-mastery-session.ts` → masteryAPI.startSession + .getSession + .advance + .submitAnswer
+- `lib/hooks/use-daily-bet.ts` → betsAPI.place (Supabase direct reads unchanged)
+- `lib/hooks/use-recent-notes.ts` → classesAPI.recentNotes
+
+**iOS components migrated to shared-core:**
+- `components/NewClassModal.tsx` → classesAPI.create
+- `components/QuickNoteFab.tsx` → classesAPI.quickNote
+- `components/NewMasteryExamModal.tsx` → masteryAPI.parseExam (**fixed pre-existing bug**: was sending `raw_input` but server expects `input`; also dropped the never-accepted `target_date` field)
+- `components/DailyDrillModal.tsx` → dailyDrillAPI.submit
+
+**Verification:**
+- `npm run core:typecheck` → clean ✅
+- Web `npx tsc --noEmit` → clean ✅
+- iOS `npx tsc --noEmit` → only 3 pre-existing `app/onboarding.tsx` errors ✅
+
+**Cumulative state after this batch:**
+- 16 iOS surfaces consuming shared-core (was 9 before this batch)
+- 1 NEW iOS feature shipped (Duel)
+- 12 typed API modules in core (types/supabase, types/index, api/{spin, quiz, daily-drill, login-bonus, streak-revive, missions, bounties, classes, social, mastery, bets} + logic + constants + prompts + validation)
+- Pattern is now BATTLE-TESTED: caught and fixed an iOS production bug just by adding types
+
+**Value-add from TypeScript catching the bug:**
+The NewMasteryExamModal modal was sending `raw_input` to /api/mastery/parse which expects `input`. The Mastery exam creation flow on iOS was almost certainly failing in production. Now it works (and is type-safe going forward).
+
+---
+
 ### 2026-05-13 — 🗡️ Duel feature shipped to iOS (first NEW feature port)
 **Actor:** Claude + dev-frontend agent
 **What happened:** First entirely-new iOS feature build. Web had `/duel` (615 lines) + `DuelInvite.tsx` (201 lines). iOS now has `app/duel.tsx` covering all 4 phases inline. Delegated the actual build to `dev-frontend` agent with a detailed spec; verified output against the LIONADE_WORKFLOW done-definition.

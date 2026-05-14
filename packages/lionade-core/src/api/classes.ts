@@ -42,6 +42,30 @@ export interface CreateClassResponse {
   classId: string;
 }
 
+export interface RecentNote {
+  id: string;
+  title: string | null;
+  preview: string;
+  pinned: boolean;
+  updatedAt: string;
+  classId: string;
+  className: string;
+  classColor: string;
+  classEmoji: string | null;
+  classShortCode: string | null;
+}
+
+export interface QuickNotePayload {
+  body: string;
+  /** Class to attach the note to. Server falls back to a default if omitted. */
+  classId?: string | null;
+}
+
+export interface QuickNoteResponse {
+  noteId: string;
+  classId: string;
+}
+
 export const classesAPI = {
   list(client: ApiClient): Promise<ApiResult<{ classes: ClassSummary[] }>> {
     return client.get<{ classes: ClassSummary[] }>("/api/classes");
@@ -51,5 +75,16 @@ export const classesAPI = {
     payload: CreateClassPayload,
   ): Promise<ApiResult<CreateClassResponse>> {
     return client.post<CreateClassResponse>("/api/classes", payload);
+  },
+  recentNotes(
+    client: ApiClient,
+  ): Promise<ApiResult<{ notes: RecentNote[] }>> {
+    return client.get<{ notes: RecentNote[] }>("/api/classes/recent-notes");
+  },
+  quickNote(
+    client: ApiClient,
+    payload: QuickNotePayload,
+  ): Promise<ApiResult<QuickNoteResponse>> {
+    return client.post<QuickNoteResponse>("/api/classes/quick-note", payload);
   },
 } as const;

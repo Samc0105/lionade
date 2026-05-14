@@ -7,7 +7,7 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 
 **Last full audit:** 2026-05-13 (by Explore agent, see `PARITY_SPRINT_LOG.md`).
 **Phase 1 (shared-core extraction):** ✅ Complete — `@lionade/core` consumed by both apps.
-**Phase 2 (feature ports):** 🟡 In progress — 9 iOS surfaces on shared-core + 1 NEW iOS feature shipped (Duel) (2026-05-13):
+**Phase 2 (feature ports):** 🟡 In progress — 14 iOS surfaces on shared-core + 1 NEW iOS feature shipped (Duel) (2026-05-13):
 1. **Daily Spin** (`Shop/DailySpinHero`) → `spinAPI` + `SPIN_SLOTS`
 2. **Quiz** (`app/quiz.tsx`) → `quizAPI.saveResults`
 3. **Daily Drill** (`use-daily-drill` hook) → `dailyDrillAPI`
@@ -15,6 +15,15 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 5. **Streak Revive** (`use-streak-revive` hook) → `streakReviveAPI`
 6. **Missions** (`use-missions` hook) → `missionsAPI`
 7. **Bounties** (`use-bounties` hook) → `bountiesAPI`
+8. **Classes** (`use-classes` hook) → `classesAPI.list`
+9. **Friends/Social** (`use-friends` hook) → `socialAPI`
+10. **Mastery session** (`use-mastery-session` hook) → `masteryAPI` (startSession, getSession, advance, submitAnswer)
+11. **Daily Bet** (`use-daily-bet` hook) → `betsAPI.place`
+12. **Recent Notes** (`use-recent-notes` hook) → `classesAPI.recentNotes`
+13. **New Class form** (`NewClassModal` component) → `classesAPI.create`
+14. **Quick Note FAB** (`QuickNoteFab` component) → `classesAPI.quickNote`
+15. **New Mastery Exam form** (`NewMasteryExamModal` component) → `masteryAPI.parseExam` (also fixed pre-existing field-name bug)
+16. **Daily Drill modal** (`DailyDrillModal` component) → `dailyDrillAPI.submit`
 
 ---
 
