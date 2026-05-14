@@ -432,6 +432,60 @@ packages/lionade-core/src/
 
 ---
 
+### 2026-05-13 — 💎 Premium design pass: research-driven foundation upgrade
+**Actor:** Claude + design-ui-ux agent (manifesto + recommendations) + research via WebSearch/WebFetch
+**What happened:** User asked for "quality premium design on the iOS" with explicit instruction to research the web + reference other apps. Did a 4-search research pass (Linear redesign, Cash App design system, Duolingo gamification, 2026 mobile trends), then routed synthesis through design-ui-ux for a Lionade-specific premium upgrade plan, then executed the highest-impact recommendations.
+
+**Research sources synthesized:**
+- Linear redesign (linear.app/now/behind-the-latest-design-refresh): "Don't compete for attention you haven't earned" · warmth shift from cool to warm grays · sidebar/nav recession · fewer separators · "structure should be felt not seen"
+- Cash App design system: true OLED black backgrounds · color carries meaning · expressive motion as brand signature
+- Duolingo: every color has semantic meaning (green=success, orange=streak, gold=XP, purple=premium) · micro-celebrations on wins
+- Muz.li 2026 trends: dark-mode-first design (borders+luminance not shadows) · surgical glassmorphism · thumb-zone architecture
+
+**Lionade design manifesto (the 5 laws — to apply going forward):**
+1. **Gold is for currency only. Never decorative.** Fangs counts, perfect-quiz halos, jackpot moments. Never on nav rows, eyebrow labels, or section headers.
+2. **Structure should be felt, not seen.** Dividers ≤ 0.05 alpha. Card borders are hairlines. Group by rhythm, not chrome.
+3. **Glass is temporary. Solids are permanent.** BlurView for overlays/sheets only. Permanent surfaces are warm solid fills.
+4. **One hero per screen.** Two heroes = no hero.
+5. **Color carries meaning or it doesn't ship.** Each accent has a defined semantic — never decorative.
+
+**Color palette pass — token-level changes:**
+
+```
+Background base:     #04080F → #07090E   (warmer, Linear gray family)
+Background elevated: #0A1020 → #11151D   (warmer, drops the blue cast)
+Success:             #22C55E → #2BBE6B   (less neon, Cash-App muted)
+Danger:              #EF4444 → #E5484D   (softer, less alert-banner)
+```
+
+Applied globally via sed across all `app/` and `components/` .tsx/.ts files PLUS updated `tailwind.config.js` so new code naturally picks up the warmer tokens. Web pass also gets these tokens via shared design system if/when adopted.
+
+**Targeted premium edits:**
+
+1. **Profile stat strip (`app/(tabs)/profile.tsx`):** Decorative colored icon backgrounds removed (was `${color}1A` bg + `${color}40` border + color icon). Now neutral cream `rgba(245,235,218,0.05)` bg with cream/70 icon. Color now lives on the VALUE NUMBER (Fangs=gold, Streak=orange, Badges=purple). Mirrors Linear's "removed colored team-icon backgrounds."
+
+2. **Compete ELO hero glow restraint (`app/(tabs)/compete.tsx`):** Three stacked glows → one. Dropped: card-level shadow (0.3 → 0.15 alpha, 22 → 12 radius) and ELO number text-shadow. Kept: progress-bar glow (the win-state moment). ELO digits enlarged 64pt → 72pt — size carries the weight, not the glow. Tier eyebrow chip alpha softened (`1F` → `14` bg, `80` → `55` border).
+
+3. **Gold eyebrow violations removed:** "COMPETE" eyebrow on Compete tab + "LEARN" eyebrow on Learn hub were rendering in `#FFD700`. Per the new "gold = currency only" law, both demoted to neutral cream `rgba(245,235,218,0.5)`. The Bebas section title underneath already carries the section's identity; the gold label was redundant AND violated the law.
+
+**Verification:**
+- iOS `npx tsc --noEmit` → only 3 pre-existing `app/onboarding.tsx` errors ✅
+- All edits compile clean. Sed-replace across 26 files succeeded with no breakage.
+
+**Recommendations DEFERRED (logged for future sessions):**
+- Dashboard ruthless subtraction (12 components → 6) — biggest impact, biggest risk, needs careful UX
+- Quiz results premium moment (perfect-score confetti, particle burst, custom easing, ascending two-note chime via Audio.Sound) — M-effort but the highest-emotion second in the app
+- Tab bar compaction (smaller icons, gold-underline indicator, BlurView intensity raised) — affects every screen
+- Subject color removal from Learn surfaces (9 brand colors → 1) — needs design call on how subject identity surfaces inside the quiz flow
+- DailyBetCard relocation from Dashboard to Compete tab
+- Quiz difficulty picker third-color removal (E/M cards lose green/orange, only Hard keeps red)
+- True-OLED-black option (`#000000` when device reports OLED + dark)
+- Micro-celebration / haptic moments: streak milestone, level up, Duel victory, Daily Spin jackpot — 5 specific celebration spots queued
+
+The `IOS_PARITY.md` doesn't need a new row for this pass — it's foundation, not a feature port — but the design manifesto + new tokens are now the standing rules.
+
+---
+
 ### 2026-05-13 — 🎨 Apple HIG quality pass: Settings rebuild + crowding fixes
 **Actor:** Claude + design-ui-ux agent (audit)
 **What happened:** User flagged "nothing super crowded, settings page way better". Ran a full design-ui-ux audit across 10 iOS screens, then rebuilt Settings and applied surgical fixes to the 3 most-crowded screens identified.
