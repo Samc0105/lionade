@@ -7,12 +7,14 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 
 **Last full audit:** 2026-05-13 (by Explore agent, see `PARITY_SPRINT_LOG.md`).
 **Phase 1 (shared-core extraction):** ✅ Complete — `@lionade/core` consumed by both apps.
-**Phase 2 (feature ports):** 🟡 In progress — 5 iOS surfaces now on shared-core (2026-05-13):
+**Phase 2 (feature ports):** 🟡 In progress — 7 iOS surfaces now on shared-core (2026-05-13):
 1. **Daily Spin** (`Shop/DailySpinHero`) → `spinAPI` + `SPIN_SLOTS`
 2. **Quiz** (`app/quiz.tsx`) → `quizAPI.saveResults`
 3. **Daily Drill** (`use-daily-drill` hook) → `dailyDrillAPI`
 4. **Clock-In / Login Bonus** (`use-clock-in` hook) → `loginBonusAPI`
 5. **Streak Revive** (`use-streak-revive` hook) → `streakReviveAPI`
+6. **Missions** (`use-missions` hook) → `missionsAPI`
+7. **Bounties** (`use-bounties` hook) → `bountiesAPI`
 
 ---
 
