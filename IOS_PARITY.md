@@ -7,7 +7,12 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 
 **Last full audit:** 2026-05-13 (by Explore agent, see `PARITY_SPRINT_LOG.md`).
 **Phase 1 (shared-core extraction):** ✅ Complete — `@lionade/core` consumed by both apps.
-**Phase 2 (feature ports):** 🟡 In progress — Daily Spin canary wired 2026-05-13.
+**Phase 2 (feature ports):** 🟡 In progress — 5 iOS surfaces now on shared-core (2026-05-13):
+1. **Daily Spin** (`Shop/DailySpinHero`) → `spinAPI` + `SPIN_SLOTS`
+2. **Quiz** (`app/quiz.tsx`) → `quizAPI.saveResults`
+3. **Daily Drill** (`use-daily-drill` hook) → `dailyDrillAPI`
+4. **Clock-In / Login Bonus** (`use-clock-in` hook) → `loginBonusAPI`
+5. **Streak Revive** (`use-streak-revive` hook) → `streakReviveAPI`
 
 ---
 
@@ -93,15 +98,15 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 | **Cross-cutting widgets** | | | | | |
 | Focus Lock-In | `components/FocusLockIn.tsx` | `components/FocusLockIn.tsx` | ✅ | ✅ | BUILT on iOS |
 | Focus music toggle | `components/FocusMusicToggle.tsx` | (none) | ✅ | ❌ | port pending (Batch D) |
-| Clock-in button | `components/ClockInButton.tsx` | `components/ClockInButton.tsx` + `ClockInToast.tsx` | ✅ | ✅ | BUILT on iOS |
-| Daily Drill widget | `components/DailyDrillWidget.tsx` | `DailyDrillCard.tsx` + `DailyDrillModal.tsx` | ✅ | ✅ | BUILT on iOS |
+| Clock-in button | `components/ClockInButton.tsx` | `components/ClockInButton.tsx` + `ClockInToast.tsx` (hook on `loginBonusAPI`) | ✅ | ✅ | **shared-core wired** via `use-clock-in` |
+| Daily Drill widget | `components/DailyDrillWidget.tsx` | `DailyDrillCard.tsx` + `DailyDrillModal.tsx` (hook on `dailyDrillAPI`) | ✅ | ✅ | **shared-core wired** via `use-daily-drill` |
 | Duel invite | `components/DuelInvite.tsx` | (none) | ✅ | ❌ | port pending with Duel |
 | Quick note shortcut | `components/QuickNoteShortcut.tsx` | `components/QuickNoteFab.tsx` | ✅ | ✅ | BUILT on iOS |
 | Notifications | (component-only) | `/notifications` (full route) | 🟡 | ✅ | web should match iOS, not other way |
 | Daily bet | (web?) | `DailyBetCard.tsx` | ? | ✅ | verify web has parity |
 | Missions | (web?) | `MissionsCard.tsx` | ? | ✅ | verify web has parity |
 | Bounties | (web?) | `BountiesCard.tsx` | ? | ✅ | verify web has parity |
-| Streak revive | (web?) | `StreakReviveBanner.tsx` + `use-streak-revive` hook | ? | ✅ | verify web has parity |
+| Streak revive | server: `/api/streak-revive` | `StreakReviveBanner.tsx` + `use-streak-revive` (on `streakReviveAPI`) | ✅ | ✅ | **shared-core wired** via `use-streak-revive` |
 | **System / Legal** | | | | | |
 | About | `/about` | (none) | ✅ | 🚫 | iOS uses Settings → About modal |
 | Contact | `/contact` | (none) | ✅ | 🚫 | iOS uses native mail |

@@ -432,6 +432,37 @@ packages/lionade-core/src/
 
 ---
 
+### 2026-05-13 — Batch typed-API push: Daily Drill, Clock-In, Streak Revive
+**Actor:** Claude
+**What happened:** Added 3 more typed API method modules to core and refactored 3 iOS hooks to consume them. The "typed method per feature" pattern is now well-established.
+
+**Files created in core:**
+- `packages/lionade-core/src/api/login-bonus.ts` — `loginBonusAPI.status` + `.claim`. Types: ClockInStatus, ClockInClaimResponse.
+- `packages/lionade-core/src/api/streak-revive.ts` — `streakReviveAPI.status` + `.claim(method)`. Types: StreakReviveStatus, StreakReviveClaimResponse, StreakReviveMethod.
+- `packages/lionade-core/src/api/daily-drill.ts` — `dailyDrillAPI.status` + `.submit(results)`. Types: DrillQuestion, DrillStatus, DrillResult, DrillCompleteResponse.
+
+**Files modified in iOS:**
+- `lib/hooks/use-clock-in.ts` → imports types + `loginBonusAPI` from core. Re-exports types so screens using `import { ClockInStatus } from '@/lib/hooks/use-clock-in'` keep working.
+- `lib/hooks/use-streak-revive.ts` → same pattern with `streakReviveAPI`.
+- `lib/hooks/use-daily-drill.ts` → same pattern with `dailyDrillAPI`.
+
+**Verification:**
+- `npm run core:typecheck` → clean ✅
+- Web `npx tsc --noEmit` → clean ✅
+- iOS `npx tsc --noEmit` → only 3 pre-existing `app/onboarding.tsx` errors ✅
+
+**iOS surfaces now consuming shared-core after this batch (5 total):**
+1. `components/Shop/DailySpinHero.tsx` → spinAPI
+2. `app/quiz.tsx` → quizAPI
+3. `lib/hooks/use-daily-drill.ts` → dailyDrillAPI (used by DailyDrillCard + DailyDrillModal)
+4. `lib/hooks/use-clock-in.ts` → loginBonusAPI (used by ClockInButton + ClockInToast)
+5. `lib/hooks/use-streak-revive.ts` → streakReviveAPI (used by StreakReviveBanner)
+
+**Pattern is now durable enough to scale.** Every remaining endpoint follows the same shape:
+- Read server route → mirror request/response in `core/src/api/<feature>.ts` → expose `<feature>API` namespace → consume in iOS hook/screen by calling `<feature>API.method(apiClient, ...)`.
+
+---
+
 ### 2026-05-13 — Quiz wired to shared-core (2nd consumer)
 **Actor:** Claude
 **What happened:** Added `quizAPI.saveResults()` to core. Refactored iOS `app/quiz.tsx` to consume it. Proves the canary pattern generalizes — this is no longer a one-off.
