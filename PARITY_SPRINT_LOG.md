@@ -432,6 +432,77 @@ packages/lionade-core/src/
 
 ---
 
+### 2026-05-14 — 🎬 Premium feel finale: Arena worklets + optimistic + SWR tuning + Leaderboard polish
+**Actor:** Claude + dev-frontend agent (Arena worklets)
+**What happened:** User said "keep going." Closed out the last 4 premium-feel items.
+
+**1. Arena animations → Reanimated worklets (`app/arena.tsx`, dev-frontend agent)**
+
+Two most-visible JS-thread ticks migrated to UI-thread worklets:
+
+- **Prematch 3-2-1-GO countdown** — was setState inside setTimeout chain, re-running the whole useEffect per tick. Now a single chained `withSequence(...withTiming(..., callback))` on a shared scale value. JS thread receives the next number via `runOnJS`, doesn't drive scheduling.
+- **Per-question timer ring** — was `setInterval + setTimeLeft` driving the ring. Now `useSharedValue + withTiming(0, { duration: timeLimit * 1000, easing: linear })`. Ring uses `useAnimatedStyle` reading the SV — re-renders on UI thread at 60fps, no JS involvement. **The most-visible JS-thread tick in the app is gone.**
+- **Color interpolation** — discrete JS color updates → `interpolateColor` worklet across `[danger, danger, warn, meAccent]` thresholds. Continuous color flow.
+- **`<5s` urgency pulse** — was JS-state-driven `withRepeat`. Now triggered via `useAnimatedReaction` purely on UI thread.
+- **Time-expired** — `runOnJS(fireExpired)` callback with a `useRef`-guarded closure to avoid double-submission if worklet completion races with user answer.
+- **Cleanup** — `cancelAnimation` on reveal + question change so ring + urgency pulse freeze cleanly.
+
+Acceptable trade: displayed seconds text ("12s") still updates state-driven (1 setState/sec, bridged via `useAnimatedReaction`). The ring carries the smooth visual; text just labels.
+
+**2. Quiz reward optimistic mutation (`app/quiz.tsx`)**
+
+On last-question commit, predict reward locally and bump `useUserStats` cache BEFORE the network call:
+
+```ts
+void mutateStats(
+  (prev) => prev ? { ...prev, coins: prev.coins + reward.coinsEarned, xp: prev.xp + reward.xpEarned } : prev,
+  { revalidate: false },
+);
+```
+
+Then revalidate after save resolves to reconcile with server truth (includes any `bonusFangs` or `streakMilestone` bonuses). Error path revalidates to roll back.
+
+Net: Fangs balance bumps instantly when user finishes quiz — no "loading…" gap between last answer and rewards screen.
+
+**3. SWR dedupe tuning per data type**
+
+Audited each hook's `dedupingInterval`:
+- `use-wallet.ts` 5s → **30s** (realtime profiles channel pushes coin changes; polling redundant)
+- `use-notifications.ts` 5s → **15s** (mid-warm; dedupe prevents same-second double-fetches on nav churn)
+- Others verified at appropriate tier (hot 5s, warm 30s, cold 60s+)
+
+**4. Leaderboard entrance animations (`app/leaderboard.tsx`)**
+
+Added `FadeInDown` with 24ms-step cascade capped at first 12 rows (rank 4-15) so 50-entry list still settles fast. Wrapped Row in `Animated.View`. Matches the polish other screens have.
+
+**Verification:** iOS, web, core typechecks all clean ✅
+
+**Cumulative premium-feel work this session:**
+| Pillar | Status |
+|---|---|
+| Persistent SWR cache (web + iOS) | ✅ |
+| Cross-device realtime (profiles channel both apps) | ✅ |
+| Write-through cache (4s → 500ms loss window iOS) | ✅ |
+| Stack screen options (slide_from_right, gestureEnabled, freezeOnBlur) | ✅ |
+| FlashList migration on 4 longest scrolling surfaces | ✅ |
+| Animation cascade tightening | ✅ |
+| Arena timer + countdown → Reanimated worklets | ✅ |
+| Optimistic Fangs/XP on quiz finish | ✅ |
+| SWR dedupe tuning per data type | ✅ |
+| Leaderboard entrance animations | ✅ |
+
+**Remaining queued (next session):**
+- Native large-title nav adoption (kills 5 custom back-button reimplementations)
+- Daily Drill optimistic mutation (server-computed reward; needs prediction)
+- Mastery answer optimistic transition
+- `InteractionManager.runAfterInteractions` defer on heavy-mount screens
+- Background prefetch on idle
+- CDN edge caching for static query data
+- Loading skeletons everywhere
+- Native large-title nav adoption
+
+---
+
 ### 2026-05-14 — 🏎️ Smoothness pass: native nav + FlashList + tightened cascades
 **Actor:** Claude + dev-frontend agent (FlashList migration)
 **What happened:** User asked "make every screen move very smooth — how they do it." Audited what premium iOS apps do (native push transitions, `freezeOnBlur`, FlashList, gesture-driven swipe-back, worklet animations) and shipped the foundation.
