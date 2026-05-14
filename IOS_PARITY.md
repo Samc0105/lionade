@@ -49,7 +49,7 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 | Learn → Paths | `/learn/paths` + `/[subject]` | (none) | ✅ | ❌ | port pending |
 | Learn → Mastery | `/learn/mastery` + `/[examId]` | `/mastery` + `/mastery/[examId]` | ✅ | 🟡 | iOS chat session exists, orchestrator integration partial |
 | **Practice** | | | | | |
-| Quiz hub | `/quiz` | `/quiz` | ✅ | ✅ | full flow on iOS (subject → difficulty → 10Q → results) |
+| Quiz hub | `/quiz` | `/quiz` | ✅ | ✅ | full flow on iOS — **wired to `@lionade/core/api/quiz.quizAPI.saveResults`** (2nd shared-core consumer) |
 | AP Exams quiz | `/quiz/ap-exams` | (n/a) | ✅ | 🚫 | FOLD into `/quiz` as filter on both platforms |
 | Arena | `/arena` | `/arena` | ✅ | 🟡 | iOS UI + ELO + recent matches done; "Find Match" stubbed |
 | **Competitive** | | | | | |

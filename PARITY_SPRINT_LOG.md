@@ -430,6 +430,38 @@ packages/lionade-core/src/
 
 **~~1. Daily Spin canary~~ ✅ Done 2026-05-13.**
 
+---
+
+### 2026-05-13 — Quiz wired to shared-core (2nd consumer)
+**Actor:** Claude
+**What happened:** Added `quizAPI.saveResults()` to core. Refactored iOS `app/quiz.tsx` to consume it. Proves the canary pattern generalizes — this is no longer a one-off.
+
+**Files created in core:**
+- `packages/lionade-core/src/api/quiz.ts` — `quizAPI.saveResults(client, payload)` with typed request (`SaveQuizResultsPayload`) and response (`SaveQuizResultsResponse` including `StreakMilestone` and `bonusFangs`). Mirrors `/app/api/save-quiz-results/route.ts` server contract exactly.
+
+**Files modified in iOS:**
+- `app/quiz.tsx`:
+  - `import { apiPost }` → `import { apiClient }` + `import { quizAPI } from '@lionade/core/api/quiz'`
+  - `await apiPost("/api/save-quiz-results", payload)` → `await quizAPI.saveResults(apiClient, payload)`
+  - Removed implicit `any` on the response (was untyped before).
+
+**Verification:**
+- `npm run core:typecheck` → clean ✅
+- Web `npx tsc --noEmit` → clean ✅
+- iOS `npx tsc --noEmit` → only 3 pre-existing `app/onboarding.tsx` errors ✅
+
+**Two iOS features now on shared-core:**
+1. Daily Spin (canary) — uses `spinAPI.status` + `spinAPI.roll` + `SPIN_SLOTS`
+2. Quiz hub — uses `quizAPI.saveResults`
+
+**Pattern established for the rest of Phase 2:**
+- Read server route → write typed wrapper in `core/src/api/<feature>.ts` → swap iOS calls → typecheck → commit.
+- Average per-feature time: ~15-30 minutes once the route shape is known.
+
+---
+
+
+
 2. **Duel** (BATCH A: highest user value)
    - Entire feature missing on iOS
    - Build: route `/duel` (new in iOS), `DuelInvite` component, real-time matchmaking integration
