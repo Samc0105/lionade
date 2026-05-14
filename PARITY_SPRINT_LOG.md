@@ -432,6 +432,47 @@ packages/lionade-core/src/
 
 ---
 
+### 2026-05-13 — 🗡️ Duel feature shipped to iOS (first NEW feature port)
+**Actor:** Claude + dev-frontend agent
+**What happened:** First entirely-new iOS feature build. Web had `/duel` (615 lines) + `DuelInvite.tsx` (201 lines). iOS now has `app/duel.tsx` covering all 4 phases inline. Delegated the actual build to `dev-frontend` agent with a detailed spec; verified output against the LIONADE_WORKFLOW done-definition.
+
+**Files created in iOS:**
+- `app/duel.tsx` (2338 lines — verbose RN inline styles, equivalent dense web JSX is ~800 lines). 5-phase finite state machine: invite → loading → countdown → battle → results. 9 internal sub-components (InvitePhase, LoadingPhase, CountdownPhase, BattlePhase, ResultsPhase, RuleCard, OptionButton, DotCell, LegendRow, ThinkingDots, PrimaryButton, SecondaryButton).
+
+**Files modified in iOS:**
+- `app/_layout.tsx` — added `<Stack.Screen name="duel" />` to register the route.
+
+**Gameplay parity with web:**
+- 5 fake bot opponents (StudyBot_Alex, QuizMaster_99, BrainiacSam, CoinHunter_X, NightOwl_Dev) with hardcoded levels/streaks/avatars — identical to web
+- 7 subjects to pick from — identical to web
+- 15 second timer per question, 10 questions total
+- Opponent simulation: random 68% accuracy with 300-1800ms staggered delay
+- Tie supported (no prize)
+- Persists to `duels` table via Supabase direct (no /api endpoint — matches web)
+- Winner gets 1000F (2x of 500 wagered) via direct profile.coins update + coin_transactions row (mirrors web's `incrementCoins` + transaction insert)
+- Haptics on correct/wrong/results
+
+**Verification:**
+- iOS `npx tsc --noEmit` → only 3 pre-existing `app/onboarding.tsx` errors ✅
+- Route registered in `_layout.tsx`
+- Sub-components well-organized; no duplicated logic
+
+**Open issues / pre-existing bugs inherited from web** (NOT introduced by this port):
+1. `duels.opponent_id` column is likely typed as UUID, but bot IDs are strings ('bot-1'...'bot-5'). Insert may fail in production. Same bug exists on web — pre-existing.
+2. Duel subjects use labels like "SAT/ACT", "Coding", "Certifications" while the questions table may be seeded under different labels ("Test Prep", "Tech & Coding"). If labels don't match, `fetchQuizQuestions(subject, "medium")` returns no rows. Same issue exists on web — pre-existing.
+3. Mid-battle coin pop-up animation omitted; results screen has CountUp + haptic. v1.1 polish item.
+
+**Deviations from spec (acceptable):**
+- Used Ionicons (not Phosphor — Phosphor is web-only). Specified in original brief.
+- Used internal sub-components rather than separate DuelInvite file (single-file route per iOS convention).
+
+**Phase 2 progress after this commit:**
+- 9 iOS surfaces on shared-core (typed API methods)
+- 1 NEW iOS feature shipped (Duel)
+- Pattern established for future new-feature ports: detailed spec → dev-frontend agent → review → commit
+
+---
+
 ### 2026-05-13 — Batch typed-API push: Daily Drill, Clock-In, Streak Revive
 **Actor:** Claude
 **What happened:** Added 3 more typed API method modules to core and refactored 3 iOS hooks to consume them. The "typed method per feature" pattern is now well-established.

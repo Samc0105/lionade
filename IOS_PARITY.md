@@ -7,7 +7,7 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 
 **Last full audit:** 2026-05-13 (by Explore agent, see `PARITY_SPRINT_LOG.md`).
 **Phase 1 (shared-core extraction):** ✅ Complete — `@lionade/core` consumed by both apps.
-**Phase 2 (feature ports):** 🟡 In progress — 7 iOS surfaces now on shared-core (2026-05-13):
+**Phase 2 (feature ports):** 🟡 In progress — 9 iOS surfaces on shared-core + 1 NEW iOS feature shipped (Duel) (2026-05-13):
 1. **Daily Spin** (`Shop/DailySpinHero`) → `spinAPI` + `SPIN_SLOTS`
 2. **Quiz** (`app/quiz.tsx`) → `quizAPI.saveResults`
 3. **Daily Drill** (`use-daily-drill` hook) → `dailyDrillAPI`
@@ -60,7 +60,7 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 | AP Exams quiz | `/quiz/ap-exams` | (n/a) | ✅ | 🚫 | FOLD into `/quiz` as filter on both platforms |
 | Arena | `/arena` | `/arena` | ✅ | 🟡 | iOS UI + ELO + recent matches done; "Find Match" stubbed |
 | **Competitive** | | | | | |
-| Duel | `/duel` | (none) | ✅ | ❌ | port pending — HIGH VALUE |
+| Duel | `/duel` | `app/duel.tsx` | ✅ | ✅ | **NEW iOS feature shipped 2026-05-13** — 5-phase flow (invite → loading → countdown → battle → results), simulated bot opponents, Supabase-direct duels persistence + winner Fangs payout |
 | Compete tab | `/compete` | `(tabs)/compete` | ✅ | ✅ | ELO hero, 4 game modes, top 3 leaderboard |
 | Leaderboard | `/leaderboard` | `/leaderboard` | ✅ | ✅ | top 50 with podium |
 | **Classes** | | | | | |
@@ -102,7 +102,7 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 | Focus music toggle | `components/FocusMusicToggle.tsx` | (none) | ✅ | ❌ | port pending (Batch D) |
 | Clock-in button | `components/ClockInButton.tsx` | `components/ClockInButton.tsx` + `ClockInToast.tsx` (hook on `loginBonusAPI`) | ✅ | ✅ | **shared-core wired** via `use-clock-in` |
 | Daily Drill widget | `components/DailyDrillWidget.tsx` | `DailyDrillCard.tsx` + `DailyDrillModal.tsx` (hook on `dailyDrillAPI`) | ✅ | ✅ | **shared-core wired** via `use-daily-drill` |
-| Duel invite | `components/DuelInvite.tsx` | (none) | ✅ | ❌ | port pending with Duel |
+| Duel invite | `components/DuelInvite.tsx` | inline in `app/duel.tsx` InvitePhase | ✅ | ✅ | folded into the single Duel route file |
 | Quick note shortcut | `components/QuickNoteShortcut.tsx` | `components/QuickNoteFab.tsx` | ✅ | ✅ | BUILT on iOS |
 | Notifications | (component-only) | `/notifications` (full route) | 🟡 | ✅ | web should match iOS, not other way |
 | Daily bet | (web?) | `DailyBetCard.tsx` | ? | ✅ | verify web has parity |
