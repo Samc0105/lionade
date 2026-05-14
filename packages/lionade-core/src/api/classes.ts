@@ -66,6 +66,51 @@ export interface QuickNoteResponse {
   classId: string;
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Syllabus types — shared by web + iOS
+// ─────────────────────────────────────────────────────────────────────────────
+
+export type SyllabusStatus = "uploaded" | "parsing" | "parsed" | "failed";
+
+export interface ParsedSyllabusTopic {
+  topic: string;
+  week_n: number | null;
+  est_hours: number | null;
+}
+
+export interface ParsedSyllabusExam {
+  name: string;
+  date_iso: string | null;
+  weight_pct: number | null;
+}
+
+export interface SyllabusRow {
+  id: string;
+  filename: string;
+  fileSizeBytes: number;
+  status: SyllabusStatus;
+  parseError: string | null;
+  parsedTopics: ParsedSyllabusTopic[];
+  parsedExams: ParsedSyllabusExam[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface RegisterSyllabusPayload {
+  /** Path inside the `class-syllabi` Supabase Storage bucket where the PDF lives. */
+  storagePath: string;
+  /** Display filename — shown back to the user in the parsed pill. */
+  filename: string;
+  fileSizeBytes: number;
+}
+
+export interface RegisterSyllabusResponse {
+  ok: boolean;
+  syllabusId: string;
+  topicsCount: number;
+  examsCount: number;
+}
+
 export const classesAPI = {
   list(client: ApiClient): Promise<ApiResult<{ classes: ClassSummary[] }>> {
     return client.get<{ classes: ClassSummary[] }>("/api/classes");
@@ -86,5 +131,32 @@ export const classesAPI = {
     payload: QuickNotePayload,
   ): Promise<ApiResult<QuickNoteResponse>> {
     return client.post<QuickNoteResponse>("/api/classes/quick-note", payload);
+  },
+  /**
+   * Get the most-recent syllabus row for a class. Returns `{ syllabus: null }`
+   * when the class has never had a syllabus uploaded.
+   */
+  getSyllabus(
+    client: ApiClient,
+    classId: string,
+  ): Promise<ApiResult<{ syllabus: SyllabusRow | null }>> {
+    return client.get<{ syllabus: SyllabusRow | null }>(
+      `/api/classes/${classId}/syllabus`,
+    );
+  },
+  /**
+   * Register an already-uploaded syllabus PDF and trigger the AI parse.
+   * The caller is responsible for uploading the file to Supabase Storage at
+   * `${userId}/${classId}/<uuid>.pdf` before invoking this method.
+   */
+  uploadSyllabus(
+    client: ApiClient,
+    classId: string,
+    payload: RegisterSyllabusPayload,
+  ): Promise<ApiResult<RegisterSyllabusResponse>> {
+    return client.post<RegisterSyllabusResponse>(
+      `/api/classes/${classId}/syllabus`,
+      payload,
+    );
   },
 } as const;

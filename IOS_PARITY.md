@@ -75,7 +75,7 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 | **Classes** | | | | | |
 | Classes index | `/classes` | (none) | ✅ | ❌ | port pending — iOS detail exists, no list |
 | Class detail | `/classes/[id]` | `/classes/[id]` | ✅ | 🟡 | iOS has countdown + notes; missing syllabus upload, flashcards, grade tracker |
-| Syllabus upload | `components/Class/SyllabusUpload.tsx` | (none) | ✅ | ❌ | port pending — camera-native fit |
+| Syllabus upload | `components/Class/SyllabusUpload.tsx` | `components/Class/SyllabusUploadSheet.tsx` | ✅ | ✅ | **NEW iOS feature shipped 2026-05-13** — 1671 lines. 5-stage sheet (source→preview→upload→parse→result). 3 on-ramps: camera, photo library, PDF picker. Photos auto-rendered to single-page PDF via expo-print on-device (matches server's PDF-only requirement). Upload via Supabase Storage direct + `classesAPI.uploadSyllabus()` JSON register call (no FormData added to createApiClient). Integrated as banner in `app/classes/[id].tsx`. |
 | Exam countdown | `components/Class/ExamCountdown.tsx` | inline in academia tab | ✅ | 🟡 | iOS has inline countdown; standalone component port pending |
 | Grade tracker | `components/Class/GradeTracker.tsx` | (none) | ✅ | ❌ | port pending |
 | Flashcard study | `components/Class/FlashcardStudy.tsx` | (none) | ✅ | ❌ | port pending |

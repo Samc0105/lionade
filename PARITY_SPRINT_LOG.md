@@ -432,6 +432,47 @@ packages/lionade-core/src/
 
 ---
 
+### 2026-05-13 — 📷 Syllabus upload shipped to iOS (5th new feature area)
+**Actor:** Claude + dev-frontend agent
+**What happened:** Camera-native Syllabus upload sheet shipped. 5th net-new iOS feature port of the sprint.
+
+**Files created in iOS:**
+- `components/Class/SyllabusUploadSheet.tsx` (1,671 lines) — full page-sheet modal with 5 stages (source → preview → uploading → parsing → result/failed). 3 on-ramps: camera, photo library, PDF picker. Animated transitions, haptics on every state edge, cancel-guard ref to prevent unmount races.
+
+**Files modified in iOS:**
+- `app/classes/[id].tsx` — added `SyllabusBanner` (CTA on empty / blue "parsing" pill / red "failed" pill / green "parsed" pill, all hairline-styled). Sits between exam countdown and Notes section as the natural empty-state CTA.
+- `app.json` — `NSCameraUsageDescription`, `NSPhotoLibraryUsageDescription`, `NSPhotoLibraryAddUsageDescription` in `ios.infoPlist`. Also registered `expo-image-picker` plugin with its config-level permission copy.
+- `package.json` — added `expo-image-picker@~17.0.11`, `expo-document-picker@~14.0.8`, `expo-print@~15.0.8` (via `npx expo install` for SDK 54 pins).
+
+**Files modified in core:**
+- `packages/lionade-core/src/api/classes.ts` — extended classesAPI with `getSyllabus()` and `uploadSyllabus()` methods. New types: `SyllabusStatus`, `ParsedSyllabusTopic`, `ParsedSyllabusExam`, `SyllabusRow`, `RegisterSyllabusPayload`, `RegisterSyllabusResponse`.
+
+**Key design decisions:**
+
+1. **No FormData support added to createApiClient.** The agent split responsibilities cleanly: binary PDF goes to Supabase Storage directly via `supabase.storage.from('class-syllabi').upload(...)`. The HTTP API call only sends JSON `{ storagePath, filename, fileSizeBytes }` — which existing createApiClient handles. Zero changes to shared HTTP infrastructure. This keeps the shared client's invariant simple ("HTTP client is JSON-only") which is the right shape for now.
+
+2. **Image-to-PDF on-device conversion.** Server requires `.pdf` extension + `%PDF` magic bytes. Camera/library images pass through `expo-print.printToFileAsync({ html: '<img src="${uri}" />' })` to render a single-page 612×792 letter PDF on-device before upload. Image is `object-fit: contain` so aspect ratio is preserved. PDFs picked via document-picker skip conversion.
+
+3. **iOS permissions properly declared.** Camera + Photo Library usage descriptions added with thoughtful copy ("Lionade uses the camera so you can snap a photo of your printed syllabus and have Ninny extract your topics and exam dates."). Layered approach: raw infoPlist strings + expo-image-picker plugin config strings (Expo's modern way + safety net).
+
+**Open issues flagged for future:**
+1. **Multi-page scans** — v1 is one-shot (one photo → one-page PDF). Real syllabi are often 2-4 pages. Follow-up: "Capture another page" affordance using expo-print's multi-page HTML support.
+2. **PDF parse character cap** — server has `MAX_RAW_TEXT_CHARS = 80,000` silent truncation. 12-page scanned PDF could exceed this without UI warning.
+3. **Re-upload while parsing** — gate exists for Cancel during upload/parse, but new upload starting before previous parse finishes could SWR-race. Server FSM (uploaded → parsing → parsed/failed) handles it; harmless if visually snappy.
+4. **Supabase Storage bucket setup** — `class-syllabi` bucket must exist with PDF mime restriction + RLS letting users write only into `${userId}/...`. Sheet detects missing bucket and surfaces "Storage bucket missing on the server."
+
+**Verification:**
+- iOS `npx tsc --noEmit` → 0 errors ✅
+- Core `npm run core:typecheck` → clean ✅
+- `npx expo install --check` → all 3 new packages on SDK 54 compatible pins ✅
+
+**Phase 2 sprint state after this commit:**
+- 5 NEW iOS feature areas shipped (Duel, Learn hub + Paths, Study DNA, Games hub, Syllabus upload)
+- 17 iOS surfaces now consuming shared-core (added Syllabus upload + getSyllabus)
+- Permission infrastructure for camera/library/document picker properly declared
+
+---
+
 ### 2026-05-13 — 🎮 Big batch: onboarding fix + Study DNA + Games + Quiz premium moment + polish
 **Actor:** Claude + two parallel dev-frontend agents
 **What happened:** User said "keep going more stuff it's missing". Did a coordinated push:
