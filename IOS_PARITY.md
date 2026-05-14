@@ -7,7 +7,7 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 
 **Last full audit:** 2026-05-13 (by Explore agent, see `PARITY_SPRINT_LOG.md`).
 **Phase 1 (shared-core extraction):** ✅ Complete — `@lionade/core` consumed by both apps.
-**Phase 2 (feature ports):** 🟡 In progress — 14 iOS surfaces on shared-core + 1 NEW iOS feature shipped (Duel) (2026-05-13):
+**Phase 2 (feature ports):** 🟡 In progress — 16 iOS surfaces on shared-core + 2 NEW iOS feature areas shipped (Duel, Learn hub + Paths) (2026-05-13):
 1. **Daily Spin** (`Shop/DailySpinHero`) → `spinAPI` + `SPIN_SLOTS`
 2. **Quiz** (`app/quiz.tsx`) → `quizAPI.saveResults`
 3. **Daily Drill** (`use-daily-drill` hook) → `dailyDrillAPI`
@@ -60,9 +60,9 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 | Home tab | `/home` | `(tabs)/index` | ✅ | ✅ | full dashboard: drill, missions, bounties, weekly chart, stat orbs |
 | Dashboard (separate) | `/dashboard` | (merged into home) | ✅ | 🚫 | KILL on web — merge into /home |
 | **Learning** | | | | | |
-| Learn hub | `/learn` | (none) | ✅ | ❌ | port pending |
-| Learn → Ninny | `/learn/ninny` | (none) | ✅ | ❌ | port pending |
-| Learn → Paths | `/learn/paths` + `/[subject]` | (none) | ✅ | ❌ | port pending |
+| Learn hub | `/learn` | `app/learn/index.tsx` | ✅ | ✅ | **NEW iOS feature shipped 2026-05-13** — hub with 3 CTAs (Mastery, Quizzes, Paths), subject mastery snapshot, missions widget, recent activity, 7-day heatmap |
+| Learn → Ninny | `/learn/ninny` | (redirects to `/mastery`) | ✅ | 🚫 | **By design** — iOS Mastery mode IS the chat-first Ninny tutor. Hub points the "AI tutor" CTA at `/mastery`. |
+| Learn → Paths | `/learn/paths` + `/[subject]` | `app/learn/paths.tsx` + `app/learn/paths/[subject].tsx` | ✅ | ✅ | **NEW iOS feature shipped 2026-05-13** — 4 subject grid + stage-detail with map/lesson/quiz/results flow. Gracefully handles 0-row tables ("Coming soon" overlay). |
 | Learn → Mastery | `/learn/mastery` + `/[examId]` | `/mastery` + `/mastery/[examId]` | ✅ | 🟡 | iOS chat session exists, orchestrator integration partial |
 | **Practice** | | | | | |
 | Quiz hub | `/quiz` | `/quiz` | ✅ | ✅ | full flow on iOS — **wired to `@lionade/core/api/quiz.quizAPI.saveResults`** (2nd shared-core consumer) |

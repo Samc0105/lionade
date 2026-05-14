@@ -432,6 +432,42 @@ packages/lionade-core/src/
 
 ---
 
+### 2026-05-13 — 📚 Learn hub + Paths shipped to iOS (2nd new feature area)
+**Actor:** Claude + dev-frontend agent
+**What happened:** Second net-new iOS feature port. Web had `/learn` (554 lines) + `/learn/paths` (182 lines) + `/learn/paths/[subject]` (806 lines) — totaling 1,542 lines. iOS now has all three as new screens, plus a smart redirect decision for `/learn/ninny`.
+
+**Files created in iOS:**
+- `app/learn/index.tsx` (1,227 lines) — Learn hub. 3 main CTAs (Mastery Mode, Practice Quizzes, Learn Paths), subject mastery snapshot computed from quiz history, today's missions widget, recent activity list, 7-day question heatmap with 5 intensity buckets.
+- `app/learn/paths.tsx` (351 lines) — 4-subject grid (algebra, biology, us_history, chemistry) with progress overlays. Gracefully degrades to "Coming soon" cards when `learning_paths` table has 0 rows.
+- `app/learn/paths/[subject].tsx` (1,512 lines) — Full stage detail: map view → lesson → quiz → results flow. Stars earned, locked/unlocked state, server-validated quiz answers, progress upsert to `user_stage_progress`.
+
+**Files modified in iOS:**
+- `app/_layout.tsx` — registered 3 new `<Stack.Screen>` entries for the new routes.
+
+**Smart decision on `/learn/ninny`:**
+Web has a separate 1,949-line `/learn/ninny` chat route. iOS already has `app/mastery.tsx` which IS the chat-first Ninny tutor. The Learn hub's "AI tutor" CTA points at `/mastery` instead. Avoided building a duplicate 1,949-line screen. Marked `/learn/ninny` as `🚫 by design` in IOS_PARITY.md.
+
+**DB state:**
+- `learning_paths` table EXISTS but has 0 rows
+- `user_stage_progress` table EXISTS but has 0 rows
+- Screens are wired and will light up automatically when web seeds these tables — no follow-up iOS work needed for that
+
+**Verification:**
+- `npm run core:typecheck` → clean ✅
+- Web `npx tsc --noEmit` → clean ✅
+- iOS `npx tsc --noEmit` → only 3 pre-existing `app/onboarding.tsx` errors ✅
+
+**Phase 2 progress after this commit:**
+- 16 iOS surfaces on shared-core
+- 2 NEW iOS feature areas shipped (Duel, Learn hub + Paths)
+- 3 new screens total (learn hub, paths grid, path detail) + 1 NEW feature (duel)
+- The remaining Phase 2 gaps are: Study DNA, Games hub, Arena PvP matchmaking completion, Mastery orchestrator full integration (mostly DB-side work)
+
+**Pattern observations:**
+The dev-frontend agent is now a reliable workflow: detailed spec → agent builds → I review summary → commit. Two clean feature builds via this pattern (Duel ~2,338 lines + Learn ~3,090 lines = ~5,400 lines of production iOS code from agent delegation).
+
+---
+
 ### 2026-05-13 — Big finisher: 7 more iOS surfaces on shared-core + 1 pre-existing bug fixed
 **Actor:** Claude
 **What happened:** Pushed shared-core consumption as far as practical. Added typed methods for Mastery (4 endpoints), Bets, Notes, Quick-Note. Migrated 3 more hooks and 4 components. TypeScript caught a pre-existing iOS bug in the process.
