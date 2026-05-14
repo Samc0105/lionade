@@ -63,11 +63,11 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 | Learn hub | `/learn` | `app/learn/index.tsx` | ✅ | ✅ | **NEW iOS feature shipped 2026-05-13** — hub with 3 CTAs (Mastery, Quizzes, Paths), subject mastery snapshot, missions widget, recent activity, 7-day heatmap |
 | Learn → Ninny | `/learn/ninny` | (redirects to `/mastery`) | ✅ | 🚫 | **By design** — iOS Mastery mode IS the chat-first Ninny tutor. Hub points the "AI tutor" CTA at `/mastery`. |
 | Learn → Paths | `/learn/paths` + `/[subject]` | `app/learn/paths.tsx` + `app/learn/paths/[subject].tsx` | ✅ | ✅ | **NEW iOS feature shipped 2026-05-13** — 4 subject grid + stage-detail with map/lesson/quiz/results flow. Gracefully handles 0-row tables ("Coming soon" overlay). |
-| Learn → Mastery | `/learn/mastery` + `/[examId]` | `/mastery` + `/mastery/[examId]` | ✅ | 🟡 | iOS chat session exists, orchestrator integration partial |
+| Learn → Mastery | `/learn/mastery` + `/[examId]` | `/mastery` + `/mastery/[examId]` | ✅ | ✅ | **Orchestrator integration completed 2026-05-14** — all 3 pending states wired (question + teach + socratic). New: Continue button for teach mode, multiline text-input + Send for socratic mode. `masteryAPI.submitSocratic` added to core. |
 | **Practice** | | | | | |
 | Quiz hub | `/quiz` | `/quiz` | ✅ | ✅ | full flow on iOS — **wired to `@lionade/core/api/quiz.quizAPI.saveResults`** (2nd shared-core consumer) |
 | AP Exams quiz | `/quiz/ap-exams` | (n/a) | ✅ | 🚫 | FOLD into `/quiz` as filter on both platforms |
-| Arena | `/arena` | `/arena` | ✅ | 🟡 | iOS UI + ELO + recent matches done; "Find Match" stubbed |
+| Arena | `/arena` | `/arena` | ✅ | ✅ | **NEW iOS shipped 2026-05-14** — full 4-phase flow wired (lobby → queue → prematch → playing → results). 2535 lines. Real-time-ish via HTTP polling (1s cap 30s). Server-judged timer, wager picker (10/25/50/100), opponent abandon handling, race-safe complete claim, idempotent retry. Challenge-a-friend typed in `arenaAPI` but UI deferred (social-screen wiring pending). |
 | **Competitive** | | | | | |
 | Duel | `/duel` | `app/duel.tsx` | ✅ | ✅ | **NEW iOS feature shipped 2026-05-13** — 5-phase flow (invite → loading → countdown → battle → results), simulated bot opponents, Supabase-direct duels persistence + winner Fangs payout |
 | Compete tab | `/compete` | `(tabs)/compete` | ✅ | ✅ | ELO hero, 4 game modes, top 3 leaderboard |

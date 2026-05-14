@@ -155,4 +155,17 @@ export const masteryAPI = {
       challengeToken,
     });
   },
+
+  /**
+   * POST /api/mastery/sessions/[id]/socratic — submit the user's text reply
+   * to a socratic prompt. Server evaluates against the expected concept and
+   * either accepts (advance), redirects (clarifying question), or asks again.
+   */
+  submitSocratic(
+    client: ApiClient,
+    sessionId: string,
+    reply: string,
+  ): Promise<ApiResult<unknown>> {
+    return client.post(`/api/mastery/sessions/${sessionId}/socratic`, { reply });
+  },
 } as const;

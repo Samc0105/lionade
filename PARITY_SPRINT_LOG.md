@@ -432,6 +432,77 @@ packages/lionade-core/src/
 
 ---
 
+### 2026-05-14 — 🎯 Stub-fix batch: Arena PvP + Mastery orchestrator + 5 polish wins
+**Actor:** Claude + dev-frontend agent (Arena)
+**What happened:** User said "Fix the Shipping next stubs" — these were the two embarrassing user-visible broken promises on iOS. Both fixed. Plus 5 additional premium polish items knocked off while Arena agent ran in background.
+
+---
+
+**Arena PvP matchmaking wired (`app/arena.tsx` — 2535 lines, dev-frontend agent):**
+The "Find Match" button on iOS arena was a stub that said "Shipping next" despite backend being fully implemented. Now a complete 4-phase flow:
+
+**Phases:**
+- **lobby** — ELO hero ring, wager picker (10/25/50/100 Fangs), gated Find Match CTA, friend duel CTA, recent matches list
+- **queue** — dual pulse-ring animation around sword icon, "FINDING OPPONENT · Within {eloBand}" copy, elapsed timer, "Expanding search range…" at 30s, Cancel (DELETEs queue server-side)
+- **prematch** — 3-2-1-GO over tier-colored avatars, opponent ELO + wager chip
+- **playing** — live scoreboard (avatars/points/qN/dots), pulsing red timer ≤5s, question card with tags, A/B/C/D buttons with correct/wrong/dim states + scale-pop + shake, "Waiting for opponent…" beat
+- **results** — VICTORY/DEFEAT/DRAW banner with gold/red/orange glow, Fangs delta, ELO delta, round-by-round breakdown, Find Another (re-queues) + Back
+
+**New core module: `packages/lionade-core/src/api/arena.ts` (400 lines)** — 10 typed methods:
+- `joinQueue`, `pollQueue`, `leaveQueue`, `getMatch`, `startMatch`
+- `submitAnswer`, `completeMatch`
+- `challengeFriend`, `listChallenges`, `respondToChallenge` (typed but UI deferred)
+
+**Edge cases handled:** queue timeout/abandon, opponent mid-match abandon (30 ticks × 1s poll then 0-score advance), race on complete (server `active → completing` claim makes idempotent), insufficient Fangs (client + server gate), timer expiry submits `selectedAnswer: -1`, server-refused answer unlocks ref to prevent stranding.
+
+**Deviations from web (acceptable):** No Supabase realtime channel — HTTP polling at 1s capped 30s; signal equivalent because `submitAnswer` returns `bothAnswered`. No confetti yet (no iOS confetti component shipped); gold glow on outcome icon + VICTORY shadow burst carry the celebration.
+
+---
+
+**Mastery orchestrator fully integrated:**
+The "partial" Mastery status was because iOS only handled `pending.type === "question"`. Two other states (teach + socratic) silently relied on auto-advance which was brittle. Now both have proper interactive UI.
+
+- **Core (`packages/lionade-core/src/api/mastery.ts`):** added `masteryAPI.submitSocratic(client, sessionId, reply)` wrapping `POST /api/mastery/sessions/[id]/socratic` (server endpoint already existed)
+- **Hook (`lib/hooks/use-mastery-session.ts`):** added `submitSocratic` to the returned hook surface
+- **iOS screen (`app/mastery/[examId].tsx`):**
+  - `isTeach` → electric-blue full-width **Continue button** that advances to next beat
+  - `isSocratic` → purple-bordered sticky card with multiline TextInput + Send button. Disabled until ≥2 chars typed.
+  - `paddingBottom` now adjusts per pending type (280pt question / 220pt socratic / 140pt teach / 100pt idle)
+  - Empty-state condition now checks all pending types
+
+**Before vs after:** Before, Ninny entering socratic mode left iOS users with no way to reply — stuck. After, all 3 orchestrator states have proper UX.
+
+---
+
+**Premium polish wins shipped this batch (while Arena agent ran):**
+
+1. **LevelUpOverlay (new `components/LevelUpOverlay.tsx`)** — global once-per-level celebration. Detects `stats.level` increase past highest previously-celebrated value (AsyncStorage `lionade.last-celebrated-level`). First-launch records current level silently (no fake celebration). Tier-color halo scales in over 900ms with cubic-ease + opacity sequence 0→0.55→0.22. Big level number in tier color, tier chip slides in at 600ms delay. Heavy haptic at 950ms. Mounted globally in `(tabs)/_layout.tsx` alongside StreakMilestoneOverlay.
+
+2. **Duel victory celebration (`app/duel.tsx` ResultsPhase)** — per audit recommendation #5. On `iWon`: gold halo (560pt absolute behind scoreboard) scales 0→1 over 1100ms cubic-ease + opacity sequence 0.55→0.22. Prize chip slides up from below (translateY 24→0 + opacity 0→1 at 500ms delay over 600ms). Heavy haptic at 1050ms timed to chip landing. Tie/Loss paths unchanged.
+
+3. **Dashboard rhythm pass (`app/(tabs)/index.tsx`)** — per audit's "TODAY / PROGRESS" grouping. Added minimal `SectionLabel` component (JetBrainsMono caps, no chrome — "structure felt not seen"). Dashboard's 11 components now grouped: TODAY (DailyReadyNudge, StreakReviveBanner, DailyDrillCard, MissionsCard, BountiesCard) + PROGRESS (WeeklyChart, SubjectStatsCard, RecentActivityCard). Minimal-risk version of the ruthless subtraction — no component restructuring, just visual rhythm.
+
+4. **Subject color removal from Learn surfaces (`app/learn/index.tsx`)** — per audit deferred item. The 9-subject color map (Math=red, Science=green, etc.) was 9 brand colors competing on the Learn hub. Replaced with single neutral cream `rgba(245,235,218,0.7)`. Subject color is still meaningful inside the quiz flow (picker grid + playing progress dots) — but on the hub, the subject NAME carries identity; color was decoration. Manifesto rule #5 enforced.
+
+5. **iOS bug-fix from earlier sprint** carries: 3 pre-existing `onboarding.tsx` errors fixed (`fetchQuizQuestions` signature, `checkAnswer` arity, `setDiagCorrect` type).
+
+---
+
+**Phase 2 sprint state after this commit:**
+- **7 NEW iOS feature areas shipped** (Duel · Learn hub + Paths · Study DNA · Games hub · Syllabus upload · Grade tracker + Flashcards · **Arena PvP**)
+- **20 iOS surfaces consuming shared-core** (+10 Arena methods)
+- **4 micro-celebrations shipped** (Quiz perfect-score · Streak milestone · Level up · Duel victory). Daily Spin has its own existing modal/haptic.
+- **All "Shipping next" stubs fixed.** No more embarrassing in-app broken promises.
+- **Mastery orchestrator fully integrated.** All 3 pending states render proper UI.
+- **iOS typecheck: 0 errors** (sustained across this batch)
+
+**Verification:**
+- `npm run core:typecheck` → clean ✅
+- Web `npx tsc --noEmit` → clean ✅
+- iOS `npx tsc --noEmit` → clean ✅
+
+---
+
 ### 2026-05-13 — 🎓 Class tools batch: Grade tracker + Flashcards + Streak milestone celebration
 **Actor:** Claude + two parallel dev-frontend agents
 **What happened:** Final class-detail toolkit. Two new class tools shipped in parallel via background agents, plus a global streak milestone celebration overlay added directly.
