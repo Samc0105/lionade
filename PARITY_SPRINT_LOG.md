@@ -432,6 +432,72 @@ packages/lionade-core/src/
 
 ---
 
+### 2026-05-14 — 📱 iOS-native premium features pass
+**Actor:** Claude direct + 2 dev-frontend agents in parallel
+**What happened:** User picked "iOS-native premium features." The differentiators web can't match. Shipped 4 features that make Lionade feel like a native Apple-grade app, no SwiftUI required (all JS/Reanimated via well-maintained Expo modules).
+
+**1. Bottom sheets — replace `Modal` with `@gorhom/bottom-sheet`**
+
+The single most "feels native iOS" change possible. Apple Music, Apple Maps, Apple Files all use this pattern for secondary action UI.
+
+- **NEW: `components/Sheet.tsx`** — shared wrapper. Snap points, spring drag, native handle indicator, opacity-interpolated backdrop with tap-dismiss. Solid `#11151D` matches design manifesto.
+- **NEW: `GestureHandlerRootView` + `BottomSheetModalProvider` mounted in `app/_layout.tsx`** at app root (above ThemeProvider).
+- **MIGRATED via dev-frontend agent:** `NewClassModal`, `NewMasteryExamModal`, `QuickNoteFab` modal, `SyllabusUploadSheet`. All switched from `Modal visible={...}` to `forwardRef<Handle>` + imperative `present()` / `dismiss()`. `BottomSheetTextInput` and `BottomSheetScrollView` used inside so keyboard + drag gestures cooperate. `keyboardBehavior="interactive"` everywhere.
+- **Caller-side updates:** `(tabs)/academia.tsx`, `mastery.tsx`, `classes/[id].tsx` swapped from `useState(open)` to `useRef<Handle>`.
+- **Smart guards:** `SyllabusUploadSheet` disables `enablePanDownToClose` + backdrop tap during upload/parse so accidental drag-down can't lose an in-flight upload (matches old Modal Cancel-disable behavior).
+- **NOT migrated:** `DailyDrillModal` — it's a full-screen drill experience, not a sheet.
+
+**2. App Icon variants — Pro/Platinum tier perk**
+
+- **NEW: `app/app-icon.tsx`** — 5 variant tiles (Default free; Midnight + Wildfire Pro-tier; Platinum + Void Platinum-tier).
+- Free users see Pro lock icon + upgrade Alert routing to `/pricing`.
+- Pro+ users tap to select; active selection persists in AsyncStorage (`lionade.active-app-icon`).
+- Actual native icon swap is gracefully stubbed with "applies on next app update" toast — the `setAlternateAppIcon` call wires after the next EAS rebuild lands a `react-native-change-icon` dep. UI is fully shipped; native plumbing is a config-plugin follow-up.
+- **Settings → Appearance → "App icon" row** added pointing to the picker.
+- `app/_layout.tsx` registered the new Stack.Screen.
+
+**3. Native iOS context menus on cards (4 surfaces, dev-frontend agent)**
+
+`react-native-context-menu-view` wraps native `UIContextMenuInteraction` — the haptic + scale-down + blur + menu animation are all UIKit-native, indistinguishable from Apple's own apps.
+
+| Surface | Actions wired | Stub actions |
+|---|---|---|
+| **Academia class cards** | Open, **Delete (soft-archive via `/api/classes/[id]` DELETE)** | Edit details, Archive |
+| **Profile quiz rows** | **Share (native `Share.share()`)** | View results |
+| **Mastery exam rows** | Resume | View progress, Delete |
+| **Social friend rows** | **Challenge to duel (route w/ opponent param)** | View profile, Remove friend |
+
+Stubs flagged with "Coming soon" Alerts where backend doesn't expose the endpoint yet (no DELETE on mastery exams, no DELETE on accepted friendships). All previews use SF Symbols icon names.
+
+**4. PressableScale wrapper — Apple-style tactile feedback**
+
+- **NEW: `components/PressableScale.tsx`** — Reanimated-worklet-driven spring scale-down on press + Light haptic. UI-thread animation, no JS bridge cost. Default `scaleTo: 0.96` (4% scale-down), default `withSpring({ damping: 18, stiffness: 380, mass: 0.6 })` for natural bounce.
+- **Demoed on `DailySpinHero` "Spin Now" button** (highest-engagement CTA in the app). `haptic={false}` because `handleSpin` already fires its own Medium impact haptic — wrapper haptics suppressed to avoid stacking.
+- Mass migration deferred — incremental drop-in by future contributors avoids regression risk during in-flight agent work.
+
+**Verification:**
+- iOS `npx tsc --noEmit` → **0 errors** ✅
+- All 4 modal migrations + context menus + Sheet + PressableScale + App Icon picker compile clean
+
+**New iOS packages installed this batch:**
+- `@gorhom/bottom-sheet@^5.2.14`
+- `react-native-context-menu-view@^1.21.0`
+- (Already installed earlier: `expo-image-picker`, `expo-document-picker`, `expo-print`, `expo-local-authentication`)
+
+**Visual considerations to watch on device:**
+- Sheet handle indicator + 8pt paddingTop means content sits closer to the top vs. old Modal pageSheet's system-provided inset. Apple Music-tight, but worth eyeballing.
+- Backdrop dim is 0.55 opacity — matches typical Apple sheet dimming.
+- Context menu peek `previewBackgroundColor` set per-surface (`#07090E` for academia, `#11151D` for mastery, `#0F1219` for profile/social) to avoid white seam during the peek scale.
+
+**What's STILL deferred (next session):**
+- Home Screen Widget (needs Swift WidgetKit code)
+- Live Activity / Dynamic Island (needs Swift ActivityKit)
+- Siri Shortcuts via App Intents (needs Swift)
+- Native icon switch (needs `react-native-change-icon` install + next EAS build)
+- PressableScale mass migration (incremental, not session-scope)
+
+---
+
 ### 2026-05-14 — 🏷️ Cache-tag invalidation pass — fix stale UI segments
 **Actor:** Claude direct
 **What happened:** User shared a Next.js 16 streaming-routes post about fixing stale UI when different segments fetch at different times. The same problem exists on Lionade at the SWR layer: a quiz finishes, `useUserStats` updates instantly (optimistic) but `useRecentQuizzes` / weekly activity / subject stats / missions / bounties / wallet all stay stale for 30s until SWR's revalidateOnFocus runs.
