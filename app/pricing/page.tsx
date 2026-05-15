@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Check, X, Sparkle, Crown, Lightning, CaretLeft } from "@phosphor-icons/react";
+import { Check, X, Sparkle, Crown, CaretLeft } from "@phosphor-icons/react";
 import BackButton from "@/components/BackButton";
+import PricingShader from "@/components/PricingShader";
 import {
   PLAN_PRICING,
   PLAN_EXAM_LIMITS,
@@ -20,6 +21,11 @@ import { SUPPORT_EMAIL } from "@/lib/site-config";
  *
  * Checkout is not wired yet — "Upgrade" CTAs point to a mailto so the
  * founder handles manual upgrades until Stripe is live. Easy swap later.
+ * (Stripe self-serve lands behind the same hrefs via /settings/subscription.)
+ *
+ * Visual shell only redesigned (2026-05-15): glassy cards + page-local
+ * Lionade WebGL shader. Plan DATA, the cycle toggle, the annual price
+ * math, and every mailto CTA are unchanged.
  */
 
 const FAQ = [
@@ -56,7 +62,10 @@ export default function PricingPage() {
 
   return (
     <div className="min-h-screen pt-20 pb-24 relative">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6">
+      {/* Page-local Lionade shader (decorative, /pricing only). */}
+      <PricingShader />
+
+      <div className="relative max-w-5xl mx-auto px-4 sm:px-6">
         <BackButton />
 
         <header className="text-center mb-10 animate-slide-up">
@@ -74,46 +83,60 @@ export default function PricingPage() {
           </p>
         </header>
 
-        {/* Monthly / Annual toggle */}
-        <div className="flex items-center justify-center gap-2 mb-8 animate-slide-up" style={{ animationDelay: "0.05s" }}>
-          <button
-            onClick={() => setCycle("monthly")}
-            className={`font-mono text-[10px] uppercase tracking-[0.25em] px-4 py-2 rounded-full transition-colors ${
-              cycle === "monthly"
-                ? "bg-white/[0.08] text-cream border border-white/[0.15]"
-                : "text-cream/50 hover:text-cream border border-transparent"
-            }`}
+        {/* Monthly / Annual toggle — segmented glass pill */}
+        <div
+          className="flex justify-center mb-9 animate-slide-up"
+          style={{ animationDelay: "0.05s" }}
+        >
+          <div
+            role="group"
+            aria-label="Billing cycle"
+            className="inline-flex items-center gap-1 rounded-full bg-white/[0.04] backdrop-blur border border-white/10 p-1"
           >
-            Monthly
-          </button>
-          <button
-            onClick={() => setCycle("annual")}
-            className={`font-mono text-[10px] uppercase tracking-[0.25em] px-4 py-2 rounded-full transition-colors relative ${
-              cycle === "annual"
-                ? "bg-white/[0.08] text-cream border border-white/[0.15]"
-                : "text-cream/50 hover:text-cream border border-transparent"
-            }`}
-          >
-            Annual
-            <span className="absolute -top-2 -right-2 bg-gold text-navy font-mono text-[8.5px] px-1.5 py-0.5 rounded-full tracking-wider">
-              Save ~17%
-            </span>
-          </button>
+            <button
+              onClick={() => setCycle("monthly")}
+              aria-pressed={cycle === "monthly"}
+              className={`font-mono text-[10px] uppercase tracking-[0.25em] px-5 py-2 rounded-full transition-all duration-200 ${
+                cycle === "monthly"
+                  ? "bg-white/[0.10] text-cream"
+                  : "text-cream/50 hover:text-cream/80"
+              }`}
+            >
+              Monthly
+            </button>
+            <button
+              onClick={() => setCycle("annual")}
+              aria-pressed={cycle === "annual"}
+              className={`relative font-mono text-[10px] uppercase tracking-[0.25em] px-5 py-2 rounded-full transition-all duration-200 ${
+                cycle === "annual"
+                  ? "bg-white/[0.10] text-cream"
+                  : "text-cream/50 hover:text-cream/80"
+              }`}
+            >
+              Annual
+              <span className="absolute -top-2.5 -right-2.5 bg-gold text-navy font-mono text-[8.5px] px-1.5 py-0.5 rounded-full tracking-wider shadow-[0_0_12px_-2px_rgba(255,215,0,0.6)]">
+                Save ~17%
+              </span>
+            </button>
+          </div>
         </div>
 
         {/* Plan cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-14 animate-slide-up" style={{ animationDelay: "0.1s" }}>
+        <div
+          className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-14 animate-slide-up"
+          style={{ animationDelay: "0.1s" }}
+        >
           <PlanCard
             tier="free"
             name="Free"
-            tagline="For anyone who just wants to grind."
+            tagline="Grind for free. Forever. No card."
             price={0}
             cta={{ label: "Start free", href: "/login" }}
           />
           <PlanCard
             tier="pro"
             name="Pro"
-            tagline="For students and certifiers who mean it."
+            tagline="For students who actually mean it."
             price={cycle === "monthly" ? PLAN_PRICING.pro.monthly : PLAN_PRICING.pro.annual}
             cycle={cycle}
             highlight
@@ -122,7 +145,7 @@ export default function PricingPage() {
           <PlanCard
             tier="platinum"
             name="Platinum"
-            tagline="For the fully-committed. Every feature, zero ads."
+            tagline="Everything on. Zero ads. Full send."
             price={cycle === "monthly" ? PLAN_PRICING.platinum.monthly : PLAN_PRICING.platinum.annual}
             cycle={cycle}
             cta={{ label: "Go Platinum", href: "mailto:" + SUPPORT_EMAIL + "?subject=Upgrade%20to%20Lionade%20Platinum" }}
@@ -134,8 +157,8 @@ export default function PricingPage() {
           <h2 className="font-bebas text-2xl tracking-[0.15em] text-cream/80 text-center mb-5">
             Full Comparison
           </h2>
-          <div className="rounded-[14px] border border-white/[0.08] bg-white/[0.02] overflow-hidden">
-            <div className="grid grid-cols-4 text-[12px] font-mono uppercase tracking-[0.18em] text-cream/50 bg-white/[0.03] px-4 sm:px-6 py-3 border-b border-white/[0.06]">
+          <div className="rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-xl overflow-hidden">
+            <div className="grid grid-cols-4 text-[12px] font-mono uppercase tracking-[0.18em] text-cream/50 bg-white/[0.04] px-4 sm:px-6 py-3 border-b border-white/10">
               <div>Feature</div>
               <div className="text-center">Free</div>
               <div className="text-center text-gold">Pro</div>
@@ -168,7 +191,7 @@ export default function PricingPage() {
         </section>
 
         {/* FAQ */}
-        <section className="mb-16 animate-slide-up" style={{ animationDelay: "0.2s" }}>
+        <section id="faq" className="mb-16 animate-slide-up" style={{ animationDelay: "0.2s" }}>
           <h2 className="font-bebas text-2xl tracking-[0.15em] text-cream/80 text-center mb-5">
             Questions
           </h2>
@@ -176,11 +199,11 @@ export default function PricingPage() {
             {FAQ.map((item) => (
               <details
                 key={item.q}
-                className="group rounded-[10px] border border-white/[0.06] bg-white/[0.02] overflow-hidden"
+                className="group rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-xl overflow-hidden"
               >
                 <summary className="cursor-pointer px-4 py-3 flex items-center justify-between gap-3 text-[13.5px] text-cream/90 hover:text-cream transition-colors [&::-webkit-details-marker]:hidden">
                   {item.q}
-                  <CaretLeft size={12} weight="bold" className="shrink-0 -rotate-90 group-open:rotate-90 transition-transform text-cream/40" />
+                  <CaretLeft size={12} weight="bold" className="shrink-0 -rotate-90 group-open:rotate-90 transition-transform text-cream/60" />
                 </summary>
                 <div className="px-4 pb-4 text-[13px] text-cream/65 leading-relaxed">
                   {item.a}
@@ -191,7 +214,7 @@ export default function PricingPage() {
         </section>
 
         {/* Trust footer */}
-        <p className="text-center font-mono text-[10px] uppercase tracking-[0.25em] text-cream/30">
+        <p className="text-center font-mono text-[10px] uppercase tracking-[0.25em] text-cream/55">
           Prices in USD · Cancel anytime · Questions? {" "}
           <a href={`mailto:${SUPPORT_EMAIL}`} className="hover:text-cream transition-colors">
             {SUPPORT_EMAIL}
@@ -219,99 +242,106 @@ function PlanCard({
 
   const perks: string[] = isFree
     ? [
-        `${PLAN_EXAM_LIMITS.free} active Mastery target`,
-        "Quizzes, duels, leaderboards",
-        `Daily Clock-In (Fangs ${PLAN_FANG_MULTIPLIER.free}×)`,
-        "Includes popup + banner ads",
+        `${PLAN_EXAM_LIMITS.free} Mastery target`,
+        "Quizzes, duels, leaderboards — all in",
+        `Daily Clock-In Fangs (${PLAN_FANG_MULTIPLIER.free}×)`,
+        "Free includes popup + banner ads",
       ]
     : tier === "pro"
       ? [
-          `${PLAN_EXAM_LIMITS.pro} active Mastery targets`,
+          `${PLAN_EXAM_LIMITS.pro} Mastery targets`,
+          `${PLAN_FANG_MULTIPLIER.pro}× Fangs on everything`,
           "Session Report PDF — unlimited",
-          `${PLAN_FANG_MULTIPLIER.pro}× Fangs earn rate`,
-          "No popup ads",
+          "Popups gone",
           "Priority support",
         ]
       : [
-          `${PLAN_EXAM_LIMITS.platinum} active Mastery targets`,
-          `${PLAN_FANG_MULTIPLIER.platinum}× Fangs earn rate — highest`,
-          "ZERO ads — clean surface",
+          `${PLAN_EXAM_LIMITS.platinum} Mastery targets`,
+          `${PLAN_FANG_MULTIPLIER.platinum}× Fangs — the max`,
+          "Zero ads. Clean surface.",
           "Priority AI routing",
-          "Early access to new features",
+          "Early access to everything new",
         ];
+
+  // Pro = gold gradient ring; Platinum = silver/electric ring; Free = plain glass.
+  const ringClass = highlight
+    ? "bg-gradient-to-b from-gold/40 via-gold/10 to-transparent"
+    : isPlatinum
+      ? "bg-gradient-to-b from-[#C0C6D6]/40 via-electric/10 to-transparent"
+      : "bg-white/10";
 
   return (
     <div
-      className={`
-        relative rounded-[14px] p-5 sm:p-6 flex flex-col
-        transition-all duration-300
-        ${highlight
-          ? "border-2 border-gold/60 bg-gradient-to-br from-gold/[0.06] to-transparent shadow-[0_0_30px_rgba(255,215,0,0.12)]"
-          : isPlatinum
-            ? "border border-white/[0.15] bg-gradient-to-br from-white/[0.04] to-transparent"
-            : "border border-white/[0.08] bg-white/[0.02]"
-        }
-      `}
+      className={`relative rounded-3xl p-px ${ringClass} ${
+        highlight ? "shadow-[0_0_40px_-8px_rgba(255,215,0,0.35)]" : ""
+      }`}
     >
-      {highlight && (
-        <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gold text-navy font-mono text-[9px] uppercase tracking-[0.25em] px-2.5 py-1 rounded-full">
-          Most popular
-        </span>
-      )}
+      <div className="relative h-full rounded-[calc(1.5rem-1px)] p-5 sm:p-6 flex flex-col bg-[#070c16]/80 backdrop-blur-xl overflow-hidden">
+        {/* Top inner light — pure CSS gradient, no animation. */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-white/[0.06] to-transparent"
+        />
 
-      <div className="flex items-center gap-2 mb-1">
-        {tier === "pro" && <Sparkle size={14} className="text-gold" weight="fill" />}
-        {tier === "platinum" && <Crown size={14} className="text-[#E8EAF2]" weight="fill" />}
-        <h3 className="font-bebas text-[24px] tracking-wider text-cream">{name}</h3>
-      </div>
-      <p className="text-[12.5px] text-cream/55 mb-5">{tagline}</p>
-
-      <div className="mb-5">
-        {isFree ? (
-          <div className="flex items-baseline gap-1">
-            <span className="font-bebas text-[44px] tracking-wider text-cream leading-none">$0</span>
-            <span className="text-cream/40 text-[12px]">forever</span>
-          </div>
-        ) : (
-          <div className="flex items-baseline gap-1.5">
-            <span className="font-bebas text-[44px] tracking-wider text-cream leading-none tabular-nums">
-              ${cycle === "annual" ? Math.round(price / 12 * 100) / 100 : price}
-            </span>
-            <span className="text-cream/40 text-[12px]">/ month</span>
-            {cycle === "annual" && (
-              <span className="ml-2 font-mono text-[9.5px] uppercase tracking-[0.2em] text-gold/80">
-                ${price}/yr
-              </span>
-            )}
-          </div>
+        {highlight && (
+          <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gold text-navy font-mono text-[9px] uppercase tracking-[0.25em] px-2.5 py-1 rounded-full shadow-[0_0_16px_-2px_rgba(255,215,0,0.7)]">
+            Most popular
+          </span>
         )}
+
+        <div className="relative flex items-center gap-2 mb-1">
+          {tier === "pro" && <Sparkle size={14} className="text-gold" weight="fill" />}
+          {tier === "platinum" && <Crown size={14} className="text-[#E8EAF2]" weight="fill" />}
+          <h3 className="font-bebas text-[24px] tracking-wider text-cream">{name}</h3>
+        </div>
+        <p className="relative text-[12.5px] text-cream/55 mb-5">{tagline}</p>
+
+        <div className="relative mb-5">
+          {isFree ? (
+            <div className="flex items-baseline gap-1.5">
+              <span className="font-bebas text-6xl sm:text-7xl tracking-wider text-cream leading-none">
+                $0
+              </span>
+              <span className="text-cream/50 text-[12px]">forever</span>
+            </div>
+          ) : (
+            <div className="flex items-baseline gap-1.5">
+              <span className="font-bebas text-6xl sm:text-7xl tracking-wider text-cream leading-none tabular-nums">
+                <span className="text-cream/45 text-[0.45em] align-top mr-0.5">$</span>
+                {cycle === "annual" ? Math.round(price / 12 * 100) / 100 : price}
+              </span>
+              <span className="text-cream/50 text-[12px]">/ mo</span>
+              {cycle === "annual" && (
+                <span className="ml-1.5 font-mono text-[9.5px] uppercase tracking-[0.2em] text-gold/80">
+                  ${price}/yr
+                </span>
+              )}
+            </div>
+          )}
+        </div>
+
+        <ul className="relative flex-1 flex flex-col gap-2 mb-6">
+          {perks.map((p) => (
+            <li key={p} className="flex items-start gap-2 text-[13px] text-cream/85 leading-snug">
+              <Check size={13} weight="bold" className="text-gold mt-[3px] shrink-0" />
+              <span>{p}</span>
+            </li>
+          ))}
+        </ul>
+
+        <Link
+          href={cta.href}
+          className={`relative w-full text-center rounded-full font-mono text-[11px] uppercase tracking-[0.25em] py-3 transition-all duration-200 active:scale-[0.98] ${
+            highlight
+              ? "btn-gold !rounded-full !py-3"
+              : isPlatinum
+                ? "bg-gradient-to-r from-[#C0C6D6] to-[#E8EAF2] text-navy hover:brightness-110"
+                : "border border-white/15 text-cream hover:bg-white/[0.06]"
+          }`}
+        >
+          {cta.label}
+        </Link>
       </div>
-
-      <ul className="flex-1 flex flex-col gap-2 mb-6">
-        {perks.map((p) => (
-          <li key={p} className="flex items-start gap-2 text-[13px] text-cream/85 leading-snug">
-            <Check size={13} weight="bold" className="text-gold mt-[3px] shrink-0" />
-            <span>{p}</span>
-          </li>
-        ))}
-      </ul>
-
-      <Link
-        href={cta.href}
-        className={`
-          w-full text-center rounded-full
-          font-mono text-[11px] uppercase tracking-[0.25em]
-          py-3 transition-all duration-200 active:scale-[0.98]
-          ${highlight
-            ? "bg-gold text-navy hover:bg-gold/90 shadow-md shadow-gold/20"
-            : isPlatinum
-              ? "bg-gradient-to-r from-[#C0C6D6] to-[#E8EAF2] text-navy hover:brightness-110"
-              : "border border-white/[0.15] text-cream hover:bg-white/[0.05]"
-          }
-        `}
-      >
-        {cta.label}
-      </Link>
     </div>
   );
 }
@@ -329,7 +359,7 @@ function CompareRow({
   return (
     <div
       className={`grid grid-cols-4 items-center text-[13px] px-4 sm:px-6 py-3 ${
-        last ? "" : "border-b border-white/[0.05]"
+        last ? "" : "border-b border-white/[0.06]"
       }`}
     >
       <div className="text-cream/85">{label}</div>
@@ -338,10 +368,10 @@ function CompareRow({
           {typeof v === "boolean"
             ? (v
                 ? (invertTruth
-                    ? <X size={14} weight="bold" className="inline text-[#EF4444]/70" aria-label="included" />
+                    ? <X size={14} weight="bold" className="inline text-[#EF4444]/70" aria-label="not included" />
                     : <Check size={14} weight="bold" className="inline text-[#22C55E]/80" aria-label="included" />)
                 : (invertTruth
-                    ? <Check size={14} weight="bold" className="inline text-[#22C55E]/80" aria-label="not included" />
+                    ? <Check size={14} weight="bold" className="inline text-[#22C55E]/80" aria-label="included" />
                     : <X size={14} weight="bold" className="inline text-cream/25" aria-label="not included" />)
               )
             : <span className="font-mono text-[12.5px] tabular-nums text-cream/80">{v}</span>

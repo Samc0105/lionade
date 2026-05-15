@@ -81,6 +81,7 @@
 - **Terms of Service** — 2026-02-25
 - **Demo page** — 2026-02-25
 - **Coming soon landing page** with hidden DevOps gate — 2026-02-21
+- **Pricing page** (Free/Pro/Platinum, monthly/annual toggle, full comparison, FAQ) — 2026-04-24; premium glassy redesign + page-local Lionade WebGL shader — 2026-05-15
 
 ---
 
@@ -91,3 +92,6 @@
 3. Move coin/XP awarding to secure server-side RPC with validation.
 4. Build out Blitz mode (speed round gameplay).
 5. Implement weekly tournament system with bracket and rewards.
+
+## Navigation
+- **Consistent route-based back affordance** (semantic-parent "Back to {Parent}" on every non-root screen, web + iOS; roots/funnels excluded by design) — 2026-05-15

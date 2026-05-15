@@ -4,6 +4,16 @@ All notable changes to Lionade, newest first.
 
 ---
 
+## 2026-05-15
+- feat(pricing): premium glassy redesign of revenue-critical `app/pricing/page.tsx` (visual shell only).
+  - **Web:** deep glass plan cards (gradient ring on Pro = gold "Most Popular", silver/electric ring on Platinum), segmented monthly/annual toggle, large Bebas numerals, restored `#faq` deep-link anchor. New page-local `components/PricingShader.tsx` — raw WebGL (no new deps), Lionade-recolored (navy `#04080F` -> electric `#4A90D9` -> sparse gold `#FFD700`, no hue cycling), scoped to /pricing only (NOT in layout, does not alter global SpaceBackground elsewhere). Theme-detect via `html.light` (Lionade has no `.dark` class); `prefers-reduced-motion` skips WebGL/rAF entirely and renders a static Lionade gradient. Full GL/observer/rAF cleanup on unmount.
+  - **Logic preserved:** all `PLAN_PRICING`/`PLAN_EXAM_LIMITS`/`PLAN_FANG_MULTIPLIER`/`PLAN_ADS` bindings, the cycle toggle, the annual `price/12` math, and every mailto upgrade CTA unchanged — no revenue regression. Fixed two pre-existing a11y defects (mislabeled CompareRow ad-row aria-labels; missing FAQ anchor).
+  - **iOS:** pricing redesign NOT in this pass — tracked as pending follow-up in `IOS_PARITY.md`.
+- feat(nav): consistent route-based "Back to {Parent}" affordance on every non-root screen, cross-platform.
+  - **Web:** extended `components/BackButton.tsx` `PARENT_PATHS`/`PARENT_LABELS` + dynamic-route regexes for `/learn/mastery`, `/learn/mastery/[examId]`, `/classes`, `/classes/[id]`, `/study-dna`. Added/standardized `<BackButton/>` on `learn/mastery`, `learn/mastery/[examId]`, `classes`, `classes/[id]`, `study-dna` (replaced ad-hoc Phosphor breadcrumbs; fixed study-dna pointing at the wrong parent). Roots (`/academia`, `academia/onboarding` funnel) intentionally excluded.
+  - **iOS:** new shared `components/BackButton.tsx` mirroring web's semantic-parent behavior (NOT history). Applied to all 21 pushed/non-tab screens, replacing ~21 inconsistent ad-hoc disc/chevron back controls (3 local `BackButton` copies + `BackChip` deleted). Tab screens unchanged; native swipe-back preserved. `edit-profile` keeps its unsaved-changes discard guard; `arena`/`duel`/`quiz` in-match abandon controls left intact.
+  - iOS parity tracked in `IOS_PARITY.md`.
+
 ## 2026-03-29
 - `c3f7fa6` — docs: reorganize CLAUDE_AGENT.md into clean sections
 
