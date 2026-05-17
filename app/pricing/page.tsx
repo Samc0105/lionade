@@ -4,7 +4,6 @@ import { useState } from "react";
 import Link from "next/link";
 import { Check, X, Sparkle, Crown, CaretLeft } from "@phosphor-icons/react";
 import BackButton from "@/components/BackButton";
-import PricingShader from "@/components/PricingShader";
 import {
   PLAN_PRICING,
   PLAN_EXAM_LIMITS,
@@ -61,9 +60,41 @@ export default function PricingPage() {
   const [cycle, setCycle] = useState<Cycle>("monthly");
 
   return (
-    <div className="min-h-screen pt-20 pb-24 relative">
-      {/* Page-local Lionade shader (decorative, /pricing only). */}
-      <PricingShader />
+    <div
+      data-force-dark
+      className="min-h-screen pt-20 pb-24 relative"
+      style={{
+        isolation: "isolate",
+        // Self-contained dark interstellar — inline so it CANNOT be defeated
+        // by CSS specificity, a missing html.light class, or stale globals.css.
+        // Purple + navy nebula glow ("floating"), opaque #04080F base. Renders
+        // correctly in every theme even if WebGL/PricingShader fails.
+        backgroundColor: "#04080F",
+        backgroundImage: `
+          radial-gradient(60rem 60rem at 78% 6%, rgba(124,58,237,0.30) 0%, transparent 60%),
+          radial-gradient(55rem 55rem at 10% 78%, rgba(30,58,138,0.30) 0%, transparent 62%),
+          radial-gradient(42rem 42rem at 52% 42%, rgba(88,28,135,0.20) 0%, transparent 66%),
+          radial-gradient(46rem 46rem at 90% 88%, rgba(37,99,235,0.16) 0%, transparent 60%)
+        `,
+      }}
+    >
+      {/* Decorative glowing concentric ring — PURE CSS. No WebGL, no
+          document/window, no rAF, no DOM observers, no client branching.
+          Identical markup SSR + client (cannot hydration-mismatch) and
+          cannot crash the render the way the WebGL shader did. */}
+      <div
+        aria-hidden="true"
+        data-lpring
+        className="pointer-events-none absolute left-1/2 top-[42%] h-[40rem] w-[40rem] max-w-[95vw] max-h-[95vw] rounded-full"
+        style={{
+          transform: "translate(-50%,-50%)",
+          background:
+            "radial-gradient(circle, transparent 30%, rgba(74,144,217,0.22) 33%, rgba(124,58,237,0.30) 36%, transparent 39%, transparent 45%, rgba(124,58,237,0.16) 47%, rgba(255,215,0,0.13) 49%, transparent 52%)",
+          filter: "blur(1px)",
+          animation: "lpRingPulse 7s ease-in-out infinite",
+        }}
+      />
+      <style>{`@keyframes lpRingPulse{0%,100%{opacity:.55}50%{opacity:1}}@media (prefers-reduced-motion:reduce){[data-lpring]{animation:none!important;opacity:.8!important}}`}</style>
 
       <div className="relative max-w-5xl mx-auto px-4 sm:px-6">
         <BackButton />

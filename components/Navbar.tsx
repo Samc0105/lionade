@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useAuth } from "@/lib/auth";
 import { useUserStats, useStreakInfo, isStreakExpired, resetExpiredStreak, mutateUserStats } from "@/lib/hooks";
@@ -100,7 +100,13 @@ export default function Navbar() {
 
   // DiceBear avatar URL — pulled from the profile row via useUserStats,
   // with a fallback to the auth user record while stats are loading.
-  const avatarUrl = stats?.avatar ?? user?.avatar ?? "";
+  // Perf 2026-05-17 (P3): memoized (mirrors app/profile/page.tsx) so `<img
+  // src>` stays referentially stable across renders → no avatar hard-reload
+  // / flash on tab return or unrelated state changes.
+  const avatarUrl = useMemo(
+    () => stats?.avatar ?? user?.avatar ?? "",
+    [stats?.avatar, user?.avatar],
+  );
   const { streakInfo, mutateStreakInfo } = useStreakInfo(user?.id);
   const [streakResetDone, setStreakResetDone] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
@@ -540,7 +546,7 @@ export default function Navbar() {
                         </div>
                         {notifications.length === 0 ? (
                           <div className="py-8 text-center">
-                            <p className="text-cream/20 text-xs">No notifications</p>
+                            <p className="text-cream/55 text-xs">No notifications</p>
                           </div>
                         ) : (
                           notifications.map(n => (
@@ -570,9 +576,9 @@ export default function Navbar() {
                                   {n.title}
                                 </p>
                                 {n.message && (
-                                  <p className="text-[10px] text-cream/30 mt-0.5 truncate">{n.message}</p>
+                                  <p className="text-[10px] text-cream/55 mt-0.5 truncate">{n.message}</p>
                                 )}
-                                <p className="text-[9px] text-cream/20 mt-1">{timeAgoShort(n.created_at)}</p>
+                                <p className="text-[9px] text-cream/55 mt-1">{timeAgoShort(n.created_at)}</p>
                               </div>
                             </button>
                           ))
@@ -650,8 +656,8 @@ export default function Navbar() {
                                   <span className="text-gold text-xs font-semibold">
                                     {stats ? `Level ${stats.level}` : user.statsLoaded ? `Level ${user.level}` : <StatSkeleton width="w-10" />}
                                   </span>
-                                  <span className="text-cream/20">·</span>
-                                  <span className="text-cream/40 text-xs">
+                                  <span className="text-cream/55">·</span>
+                                  <span className="text-cream/60 text-xs">
                                     {stats ? `${stats.xp.toLocaleString()} XP` : user.statsLoaded ? `${user.xp.toLocaleString()} XP` : <StatSkeleton width="w-10" />}
                                   </span>
                                 </div>
@@ -719,10 +725,11 @@ export default function Navbar() {
                     className="hidden sm:block btn-outline text-sm py-1.5 px-4">
                     Log In
                   </Link>
-                  <Link href="/login">
-                    <button className={`text-sm py-1.5 px-4 rounded-xl font-bold transition-all duration-200 ${isLanding ? "btn-gold" : "btn-primary"}`}>
-                      Start Free
-                    </button>
+                  <Link
+                    href="/login"
+                    className={`text-sm py-1.5 px-4 rounded-xl font-bold transition-all duration-200 ${isLanding ? "btn-gold" : "btn-primary"}`}
+                  >
+                    Start Free
                   </Link>
                 </div>
               )}
@@ -791,11 +798,11 @@ export default function Navbar() {
                 questionsToday >= goal ? (
                   <div className="mb-4 text-center py-3">
                     <p className="text-orange-400 font-bold text-lg inline-flex items-center gap-1.5"><Fire size={20} weight="fill" aria-hidden="true" /> Daily goal crushed!</p>
-                    <p className="text-cream/40 text-xs mt-1">You&apos;re all caught up — come back tomorrow to keep your streak alive.</p>
+                    <p className="text-cream/60 text-xs mt-1">You&apos;re all caught up — come back tomorrow to keep your streak alive.</p>
                   </div>
                 ) : (
                   <div className="mb-4">
-                    <div className="flex items-center justify-between text-xs text-cream/40 mb-1.5">
+                    <div className="flex items-center justify-between text-xs text-cream/60 mb-1.5">
                       <span>Today&apos;s progress</span>
                       <span className="text-orange-400 font-bold">{questionsToday}/{goal} questions</span>
                     </div>
@@ -830,12 +837,14 @@ export default function Navbar() {
               )}
 
               {/* Go Study Button */}
-              <Link href="/learn" onClick={() => setShowStreakModal(false)}>
-                <button className="w-full font-syne font-bold text-sm px-4 py-3 rounded-xl transition-all duration-200
+              <Link
+                href="/learn"
+                onClick={() => setShowStreakModal(false)}
+                className="block w-full text-center font-syne font-bold text-sm px-4 py-3 rounded-xl transition-all duration-200
                   active:scale-95 text-navy bg-electric hover:bg-electric-light
-                  shadow-md shadow-electric/30 hover:shadow-electric/50">
-                  Go Study
-                </button>
+                  shadow-md shadow-electric/30 hover:shadow-electric/50"
+              >
+                Go Study
               </Link>
             </div>
           </div>
@@ -864,7 +873,7 @@ export default function Navbar() {
                   className={`flex flex-col items-center gap-0.5 py-1.5 px-4 rounded-lg transition-all duration-200
                     ${active
                       ? "text-electric"
-                      : "text-cream/40 hover:text-cream/70"
+                      : "text-cream/60 hover:text-cream/70"
                     }`}
                 >
                   <ItemIcon size={20} weight={active ? "fill" : "regular"} color="currentColor" aria-hidden="true" />
