@@ -10,6 +10,7 @@ import { useAuth } from "@/lib/auth";
 import {
   Coin, CheckCircle, Sparkle, Fire, Clock, Trophy, X, ArrowRight,
 } from "@phosphor-icons/react";
+import ClaimBanner from "@/components/ClaimBanner";
 
 /**
  * Daily check-in button with a 24h ROLLING cooldown (not calendar-day).
@@ -215,7 +216,7 @@ function HistoryPopover({
           onClick={onClose}
           aria-label="Close"
           className="absolute top-2.5 right-2.5 grid place-items-center w-6 h-6 rounded-full
-            text-cream/40 hover:text-cream hover:bg-white/[0.06] transition-colors"
+            text-cream/60 hover:text-cream hover:bg-white/[0.06] transition-colors"
         >
           <X size={11} weight="bold" />
         </button>
@@ -229,27 +230,27 @@ function HistoryPopover({
 
         {/* ─── Hero state: countdown OR ready-to-claim ─── */}
         {data.available ? (
-          <div className="rounded-[10px] border border-gold/30 bg-gold/[0.06] p-3 mb-3">
-            <div className="flex items-baseline justify-between mb-1">
-              <span className="font-mono text-[9.5px] uppercase tracking-[0.25em] text-gold/80">
-                Ready now
-              </span>
-              <span className="font-bebas text-[22px] tracking-wider text-gold leading-none">
-                +{data.nextAmount}
-              </span>
-            </div>
-            <button
-              type="button"
-              onClick={onClaim}
-              disabled={submitting}
-              className="w-full mt-1.5 inline-flex items-center justify-center gap-1.5 rounded-full
-                bg-gold text-navy hover:bg-gold/90 disabled:opacity-60
-                font-syne font-bold text-[13px] py-2 transition-transform active:scale-[0.97]"
-            >
-              <Coin size={13} weight="fill" />
-              {submitting ? "Claiming…" : `Claim ${data.nextAmount} Fangs`}
-              <ArrowRight size={12} weight="bold" />
-            </button>
+          <div className="mb-3">
+            <ClaimBanner
+              variant="gold"
+              size="pill"
+              ariaLabel="Daily Fangs ready to claim"
+              icon={<Coin size={13} weight="fill" />}
+              title="Ready now"
+              meta={<>+{data.nextAmount}F</>}
+              primaryAction={{
+                label: (
+                  <>
+                    <Coin size={13} weight="fill" />
+                    {submitting ? "Claiming…" : `Claim ${data.nextAmount} Fangs`}
+                    <ArrowRight size={12} weight="bold" />
+                  </>
+                ),
+                onClick: onClaim,
+                disabled: submitting,
+                loading: submitting,
+              }}
+            />
           </div>
         ) : (
           <div className="rounded-[10px] border border-white/[0.08] bg-white/[0.02] p-3 mb-3">
@@ -257,7 +258,7 @@ function HistoryPopover({
               <span className="font-mono text-[9.5px] uppercase tracking-[0.25em] text-cream/55">
                 Next claim in
               </span>
-              <span className="font-mono text-[9.5px] uppercase tracking-[0.22em] text-cream/40">
+              <span className="font-mono text-[9.5px] uppercase tracking-[0.22em] text-cream/60">
                 +{data.nextAmount} ready
               </span>
             </div>
@@ -412,7 +413,7 @@ function ClockInReveal({
               <span className="text-gold">+{amount}</span>{" "}
               <span className="text-cream/70 font-normal">Fangs claimed</span>
             </p>
-            <p className="font-mono text-[9.5px] uppercase tracking-[0.25em] text-cream/40 mt-1 leading-none">
+            <p className="font-mono text-[9.5px] uppercase tracking-[0.25em] text-cream/60 mt-1 leading-none">
               Day {day} streak
             </p>
           </div>
@@ -423,7 +424,7 @@ function ClockInReveal({
             onClick={onClose}
             aria-label="Dismiss"
             className="shrink-0 grid place-items-center w-6 h-6 rounded-full
-              text-cream/40 hover:text-cream hover:bg-white/[0.08] transition-colors"
+              text-cream/60 hover:text-cream hover:bg-white/[0.08] transition-colors"
           >
             <X size={11} weight="bold" />
           </button>

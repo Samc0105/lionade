@@ -2,14 +2,13 @@
 
 import { useEffect, useState } from "react";
 import useSWR from "swr";
-import {
-  Fire, Lightning, Coin, X, Sparkle, Clock,
-} from "@phosphor-icons/react";
+import { Fire, Lightning, Coin, Clock } from "@phosphor-icons/react";
 import { apiPost, swrFetcher } from "@/lib/api-client";
 import { useAuth } from "@/lib/auth";
 import { mutateUserStats } from "@/lib/hooks";
 import { toastSuccess, toastError, toastInfo } from "@/lib/toast";
 import Confetti from "@/components/Confetti";
+import ClaimBanner from "@/components/ClaimBanner";
 
 /**
  * Streak Revive banner — the Snapchat-style post-hoc save.
@@ -102,53 +101,18 @@ export default function StreakReviveBanner() {
   return (
     <div className="mb-8 animate-slide-up" style={{ animationDelay: "0.04s" }}>
       {celebrate && <Confetti trigger={celebrate} count={50} palette={["#FFD700", "#22C55E", "#A855F7"]} duration={1500} />}
-      <div
-        className="relative rounded-[14px] border overflow-hidden p-5 sm:p-6"
-        style={{
-          borderColor: "rgba(239, 68, 68, 0.35)",
-          background: "linear-gradient(135deg, rgba(239,68,68,0.10) 0%, rgba(168,85,247,0.08) 100%)",
-        }}
+      <ClaimBanner
+        variant="ember"
+        size="panel"
+        ariaLabel="Streak revive — limited-time window"
+        icon={<Fire size={26} weight="fill" />}
+        eyebrow="Streak broke — last chance"
+        title={<>Bring back your <span className="text-gold">{previousStreak}-day</span> streak</>}
+        description={<>You&apos;ve got <Countdown remainingMs={remainingMs} /> to revive it. After that, it&apos;s gone for good.</>}
+        onDismiss={onDismiss}
+        dismissLabel="Dismiss for this session"
       >
-        {/* Decorative ember glow */}
-        <div
-          className="pointer-events-none absolute inset-0 opacity-50"
-          style={{
-            background: "radial-gradient(circle at 12% 20%, rgba(239,68,68,0.18), transparent 55%)",
-          }}
-          aria-hidden="true"
-        />
-
-        <button
-          type="button"
-          onClick={onDismiss}
-          aria-label="Dismiss for this session"
-          className="absolute top-3 right-3 z-10 grid place-items-center w-7 h-7 rounded-full
-            text-cream/40 hover:text-cream hover:bg-white/[0.08] transition-colors"
-        >
-          <X size={13} weight="bold" />
-        </button>
-
-        <div className="relative flex items-start gap-4 mb-4">
-          <div
-            className="shrink-0 grid place-items-center w-12 h-12 sm:w-14 sm:h-14 rounded-full"
-            style={{ background: "rgba(239,68,68,0.18)", color: "#EF4444" }}
-          >
-            <Fire size={26} weight="fill" />
-          </div>
-          <div className="flex-1 min-w-0 pr-6">
-            <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-[#EF4444]/80 mb-1">
-              Streak broke — last chance
-            </p>
-            <h2 className="font-bebas text-[28px] sm:text-[34px] tracking-[0.04em] text-cream leading-none mb-1.5">
-              Bring back your <span className="text-gold">{previousStreak}-day</span> streak
-            </h2>
-            <p className="text-[13px] text-cream/65 leading-snug">
-              You've got <Countdown remainingMs={remainingMs} /> to revive it. After that, it's gone for good.
-            </p>
-          </div>
-        </div>
-
-        <div className="relative grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mt-4">
           <button
             type="button"
             onClick={() => claim("fangs")}
@@ -159,7 +123,7 @@ export default function StreakReviveBanner() {
               transition-all duration-200 active:scale-[0.98]
               ${canAffordFangs
                 ? "bg-gold text-navy hover:bg-gold/90 shadow-md shadow-gold/20"
-                : "bg-white/[0.04] border border-white/[0.1] text-cream/40 cursor-not-allowed"
+                : "bg-white/[0.04] border border-white/[0.1] text-cream/60 cursor-not-allowed"
               }
               disabled:cursor-not-allowed disabled:opacity-60
             `}
@@ -185,11 +149,11 @@ export default function StreakReviveBanner() {
         </div>
 
         {!canAffordFangs && (
-          <p className="relative font-mono text-[10px] uppercase tracking-[0.22em] text-cream/40 mt-2">
+          <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-cream/60 mt-2">
             Short on Fangs · cash path coming with Stripe rollout
           </p>
         )}
-      </div>
+      </ClaimBanner>
     </div>
   );
 }

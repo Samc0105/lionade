@@ -122,7 +122,9 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 | Missions | (web?) | `MissionsCard.tsx` | ? | ✅ | verify web has parity |
 | Bounties | (web?) | `BountiesCard.tsx` | ? | ✅ | verify web has parity |
 | Streak revive | server: `/api/streak-revive` | `StreakReviveBanner.tsx` + `use-streak-revive` (on `streakReviveAPI`) | ✅ | ✅ | **shared-core wired** via `use-streak-revive` |
+| Claim/upgrade banner + Pro nudge | `components/ClaimBanner.tsx` (shell) + `ProUpgradeNudge.tsx`; applied to DailyReady/StreakRevive/ClockIn/DailyDrill | (none — iOS has native DailyReady/StreakRevive/ClockIn/DailyDrill equivalents but no shared `ClaimBanner` shell or Free→Pro nudge) | ✅ | ❌ pending | **NEW 2026-05-17** — web introduced one reusable `ClaimBanner` + a free-tier `ProUpgradeNudge` (`usePlan` → /pricing). iOS port: extract an equivalent shared banner in `@lionade/core`/native and add a Pro nudge on the iOS dashboard. Underlying claim APIs already shared (loginBonus/streakRevive/dailyDrill) — this is a presentational-shell + one new nudge port only. |
 | Back affordance | `components/BackButton.tsx` (route-based) on all pushed pages | `components/BackButton.tsx` (route-based) on all 21 pushed screens | ✅ | ✅ | **NEW cross-platform shipped 2026-05-15** — single shared component per repo; semantic-parent map (NOT history); renders null on roots/tabs/funnels. iOS replaced ~21 ad-hoc disc/chevron controls (3 local `BackButton` copies + `BackChip` deleted). Native swipe-back kept. `edit-profile` discard-guard + arena/duel/quiz in-match abandon controls preserved (restyled, not replaced). |
+| Limelight bottom-nav highlight | `components/Navbar.tsx` (framer-motion `layoutId="navLimelight"` shared-layout backdrop + `"navLimelightBeam"` top beam, conditionally rendered inside the active `<Link>`) | `app/(tabs)/_layout.tsx` (one `Animated.View` driven by `useSharedValue` + `withSpring` translateX against `state.index * cellW`, cellW from `onLayout`) | ✅ | ✅ | **NEW cross-platform shipped 2026-05-19** — single travelling gold pill springs to the active tab instead of per-cell static gold backdrop. Both platforms reuse existing `ACCENT_BG` / `ACCENT_BORDER` rgba(255,215,0,…) tokens — zero design-token drift. Reduced-motion: framer's `useReducedMotion()` → `{duration:0}` on web, Reanimated's `useReducedMotion()` → `withTiming(target,{duration:0})` on iOS. Web is hydration-safe: active state is pathname-driven so DOM tree is invariant SSR === first client render. iOS preserves haptics + `tabPress`/`defaultPrevented` guard + `accessibilityRole/State/Label`. |
 | **System / Legal** | | | | | |
 | About | `/about` | (none) | ✅ | 🚫 | iOS uses Settings → About modal |
 | Contact | `/contact` | (none) | ✅ | 🚫 | iOS uses native mail |
@@ -165,6 +167,14 @@ These are flagged for the WEB team — iOS shipped them first or better:
 - **Bounties card** — verify web has it
 - **Streak Revive UI** — iOS has dedicated banner + hook
 - **Native auth flow polish** — Apple auth, haptics, animated intro on iOS
+
+---
+
+## Deliberate No-Row Decisions (perf/architecture refactors)
+
+These web changes intentionally have **no parity row** — recorded here so a future audit doesn't misread the absence as missed tracking:
+
+- **2026-05-17 — Web SWR navigation refactor.** ~8 pages migrated from raw `useState`+`useEffect`+`lib/db.ts` fetches to the existing global persistent `<SWRConfig>` cache (+ 4 `<a>`→`<Link>` swaps, 2 P3 micro-opts). This is a **data-fetch-mechanism / performance** change with **zero user-facing feature surface** — no new screen, flow, copy, or capability. There is nothing for a user to "see" on iOS, so no feature to port. Separately, the iOS data layer was audited 2026-05-13 (Phase 1 `@lionade/core` hooks: `quizAPI`, `socialAPI`, `missionsAPI`, etc., all already SWR/cache-backed) and assessed as **already exemplary** — it does not have the raw-fetch anti-pattern this web pass fixed. Adding a parity row would therefore be spurious. (`quality-docs-writer`, per `admin` routing.)
 
 ---
 

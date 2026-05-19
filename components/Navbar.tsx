@@ -870,14 +870,41 @@ export default function Navbar() {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`flex flex-col items-center gap-0.5 py-1.5 px-4 rounded-lg transition-all duration-200
+                  className={`relative overflow-hidden flex flex-col items-center gap-0.5 py-1.5 px-4 rounded-lg transition-all duration-200
                     ${active
                       ? "text-electric"
                       : "text-cream/60 hover:text-cream/70"
                     }`}
                 >
-                  <ItemIcon size={20} weight={active ? "fill" : "regular"} color="currentColor" aria-hidden="true" />
-                  <span className="text-[10px] font-semibold tracking-wide">{item.label}</span>
+                  {/* Sliding "limelight" — shared-layout backdrop + thin top
+                      beam that travel to the active tab. Rendered ONLY in the
+                      active item; framer-motion `layoutId` animates position
+                      between tabs post-mount (no useLayoutEffect, no DOM
+                      measurement — same hydration-safe technique as the
+                      pricing cycle pill). `active` is pathname-driven so the
+                      element tree is identical SSR & first client render.
+                      aria-hidden: active state already conveyed by the
+                      electric text + filled icon. */}
+                  {active && (
+                    <>
+                      <motion.span
+                        layoutId="navLimelight"
+                        aria-hidden="true"
+                        className="absolute inset-x-1 inset-y-0.5 rounded-lg bg-electric/10 border border-electric/20"
+                        transition={reduceMotion ? { duration: 0 } : { type: "spring", stiffness: 380, damping: 32 }}
+                      />
+                      <motion.span
+                        layoutId="navLimelightBeam"
+                        aria-hidden="true"
+                        className="absolute top-0 inset-x-3 h-[2px] rounded-full bg-electric shadow-[0_0_10px_-2px_rgba(74,144,217,0.7)]"
+                        transition={reduceMotion ? { duration: 0 } : { type: "spring", stiffness: 380, damping: 32 }}
+                      />
+                    </>
+                  )}
+                  <span className="relative z-10 flex flex-col items-center gap-0.5">
+                    <ItemIcon size={20} weight={active ? "fill" : "regular"} color="currentColor" aria-hidden="true" />
+                    <span className="text-[10px] font-semibold tracking-wide">{item.label}</span>
+                  </span>
                 </Link>
               );
             })}

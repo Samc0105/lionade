@@ -27,6 +27,21 @@ const nextConfig = {
   experimental: {
     serverComponentsExternalPackages: ["pdf-parse"],
   },
+  // @lionade/core is consumed as raw TypeScript source (see transpilePackages
+  // above) and uses NodeNext-style ".js" import specifiers that actually
+  // resolve to ".ts" files. TypeScript ("moduleResolution: bundler")
+  // understands this, but Next/webpack does not rewrite ".js" -> ".ts" at
+  // bundle time without an extensionAlias. Without this, every route 500s
+  // with: Module not found: Can't resolve './http.js'.
+  webpack: (config) => {
+    config.resolve.extensionAlias = {
+      ...(config.resolve.extensionAlias || {}),
+      ".js": [".ts", ".tsx", ".js"],
+      ".mjs": [".mts", ".mjs"],
+      ".cjs": [".cts", ".cjs"],
+    };
+    return config;
+  },
 };
 
 module.exports = nextConfig;

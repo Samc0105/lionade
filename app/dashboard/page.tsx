@@ -3,8 +3,8 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth";
-import { useUserStats } from "@/lib/hooks";
-import { getSubjectStats, getQuizHistory, getDailyProgress, getUserAchievements, getBestScores, getLeaderboard, getActiveBounties, getUserBountyProgress, getActiveBet, getLastResolvedBet, getWeeklyActivityChart } from "@/lib/db";
+import { useUserStats, useSubjectStats, useQuizHistory, useWeeklyLeaderboard } from "@/lib/hooks";
+import { getDailyProgress, getUserAchievements, getBestScores, getActiveBounties, getUserBountyProgress, getActiveBet, getLastResolvedBet, getWeeklyActivityChart } from "@/lib/db";
 import type { Bounty, UserBounty, ActiveBet } from "@/lib/db";
 import {
   getLevelProgress,
@@ -21,6 +21,7 @@ import CountUp from "@/components/CountUp";
 import DailyDrillWidget from "@/components/DailyDrillWidget";
 import StreakReviveBanner from "@/components/StreakReviveBanner";
 import DailyReadyNudge from "@/components/DailyReadyNudge";
+import ProUpgradeNudge from "@/components/ProUpgradeNudge";
 import { toastError, toastSuccess } from "@/lib/toast";
 import Confetti from "@/components/Confetti";
 import {
@@ -74,7 +75,7 @@ function CircleStat({ value, label, icon, color, size = 90 }: {
           <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full" style={{ background: color, boxShadow: `0 0 6px ${color}` }} />
         </div>
       </div>
-      <span className="text-cream/30 text-[9px] font-mono tracking-wider uppercase">{label}</span>
+      <span className="text-cream/55 text-[9px] font-mono tracking-wider uppercase">{label}</span>
     </div>
   );
 }
@@ -90,128 +91,144 @@ export default function DashboardPage() {
 function DashboardContent() {
   const { user, refreshUser } = useAuth();
   const { stats } = useUserStats(user?.id);
-  const [recentQuizzes, setRecentQuizzes] = useState<
-    { id: string; subject: string; total_questions: number; correct_answers: number; coins_earned: number; completed_at: string }[]
-  >([]);
-  const [subjectStats, setSubjectStats] = useState<
-    { subject: string; questionsAnswered: number; correctAnswers: number; coinsEarned: number }[]
-  >([]);
-  const [dailyProgress, setDailyProgress] = useState({ questions_answered: 0, coins_earned: 0 });
-  const [achievements, setAchievements] = useState<{ achievement_key: string; unlocked_at: string }[]>([]);
-  const [bestScores, setBestScores] = useState<Record<string, { best: number; total: number }>>({});
-  const [leaderboard, setLeaderboard] = useState<{ rank: number; user_id: string; username: string; coins_this_week: number }[]>([]);
-  const [bounties, setBounties] = useState<Bounty[]>([]);
+  // ── Perf 2026-05-17: 14 uncached calls + hand-rolled sessionStorage cache
+  //    → SWR. The bespoke `lionade_dash_*` sessionStorage layer is DELETED:
+  //    the global persistent localStorage <SWRConfig> (app/layout.tsx) now
+  //    supplies last-known data instantly on re-nav and revalidates in the
+  //    background — that was the whole point of the audit. Shared hooks
+  //    (subject stats / quiz history / weekly leaderboard) dedupe app-wide;
+  //    everything else is keyed page-locally with stable string keys. State
+  //    that is mutated optimistically (userBounties via claimBounty,
+  //    dailyMissions via claimMission, activeBet via placeBet) stays useState
+  //    and is hydrated from SWR onSuccess so those local mutations survive a
+  //    background revalidation. Read-only data is derived directly. No new
+  //    ad-hoc cache is introduced — the provider is the single cache.
+  type RecentQuiz = { id: string; subject: string; total_questions: number; correct_answers: number; coins_earned: number; completed_at: string };
+  type SubjStat = { subject: string; questionsAnswered: number; correctAnswers: number; coinsEarned: number };
+  type LbRow = { rank: number; user_id: string; username: string; coins_this_week: number };
+  type WeeklyChart = { day: string; date: string; questions: number; correct: number; coins: number; xp: number }[];
+  type DailyMission = { id: string; title: string; description: string; icon: string; type: string; target: number; coinReward: number; xpReward: number; color: string; progress: number; completed: boolean; claimed: boolean };
+
+  const uid = user?.id;
+
+  const { data: subjectStatsData } = useSubjectStats(uid);
+  const subjectStats: SubjStat[] = (subjectStatsData as SubjStat[] | undefined) ?? [];
+
+  const { data: recentQuizzesData } = useQuizHistory(uid, 5);
+  const recentQuizzes: RecentQuiz[] = (recentQuizzesData as RecentQuiz[] | undefined) ?? [];
+
+  const { data: dailyProgressData } = useSWR(
+    uid ? `dashboard-daily-progress/${uid}` : null,
+    () => getDailyProgress(uid!).catch(() => ({ questions_answered: 0, coins_earned: 0 })),
+    { keepPreviousData: true }
+  );
+  const dailyProgress = dailyProgressData ?? { questions_answered: 0, coins_earned: 0 };
+
+  const { data: achievementsData } = useSWR(
+    uid ? `dashboard-achievements/${uid}` : null,
+    () => getUserAchievements(uid!).catch(() => []),
+    { keepPreviousData: true }
+  );
+  const achievements: { achievement_key: string; unlocked_at: string }[] = achievementsData ?? [];
+
+  const { data: bestScoresData } = useSWR(
+    uid ? `dashboard-best-scores/${uid}` : null,
+    () => getBestScores(uid!).catch(() => ({})),
+    { keepPreviousData: true }
+  );
+  const bestScores: Record<string, { best: number; total: number }> = bestScoresData ?? {};
+
+  const { data: leaderboardData } = useWeeklyLeaderboard(5);
+  const leaderboard: LbRow[] = (leaderboardData as LbRow[] | undefined) ?? [];
+
+  const { data: bountiesData } = useSWR(
+    "dashboard-active-bounties",
+    () => getActiveBounties().catch(() => []),
+    { keepPreviousData: true }
+  );
+  const bounties: Bounty[] = bountiesData ?? [];
+
+  // userBounties — locally mutated by claimBounty → keep useState, hydrate from SWR.
   const [userBounties, setUserBounties] = useState<UserBounty[]>([]);
+  useSWR(
+    uid ? `dashboard-user-bounties/${uid}` : null,
+    () => getUserBountyProgress(uid!).catch(() => []),
+    { keepPreviousData: true, onSuccess: (d) => setUserBounties(d ?? []) }
+  );
+
+  // activeBet — locally mutated by placeBet → keep useState, hydrate from SWR.
   const [activeBet, setActiveBet] = useState<ActiveBet | null>(null);
-  const [lastBet, setLastBet] = useState<ActiveBet | null>(null);
+  useSWR(
+    uid ? `dashboard-active-bet/${uid}` : null,
+    () => getActiveBet(uid!).catch(() => null),
+    { keepPreviousData: true, onSuccess: (d) => setActiveBet(d ?? null) }
+  );
+
+  const { data: lastBetData } = useSWR(
+    uid ? `dashboard-last-bet/${uid}` : null,
+    () => getLastResolvedBet(uid!).catch(() => null),
+    { keepPreviousData: true }
+  );
+  const lastBet: ActiveBet | null = lastBetData ?? null;
+
   const [betStake, setBetStake] = useState(10);
   const [betTarget, setBetTarget] = useState(8);
-  const [weeklyChart, setWeeklyChart] = useState<{ day: string; date: string; questions: number; correct: number; coins: number; xp: number }[]>([]);
+
+  const { data: weeklyChartData } = useSWR(
+    uid ? `dashboard-weekly-chart/${uid}` : null,
+    () => getWeeklyActivityChart(uid!).catch(() => []),
+    { keepPreviousData: true }
+  );
+  const weeklyChart: WeeklyChart = (weeklyChartData as WeeklyChart | undefined) ?? [];
   const [chartAnimated, setChartAnimated] = useState(false);
+  // Trigger the chart fill once data is present (mirrors the prior
+  // setTimeout-after-fetch behaviour, no flash-of-empty).
+  useEffect(() => {
+    if (weeklyChart.length > 0) {
+      const t = setTimeout(() => setChartAnimated(true), 300);
+      return () => clearTimeout(t);
+    }
+  }, [weeklyChart.length]);
+
   const [placingBet, setPlacingBet] = useState(false);
-  const [eloRank, setEloRank] = useState<number | null>(null);
-  const [dailyMissions, setDailyMissions] = useState<{ id: string; title: string; description: string; icon: string; type: string; target: number; coinReward: number; xpReward: number; color: string; progress: number; completed: boolean; claimed: boolean }[]>([]);
+
+  const { data: eloRankData } = useSWR(
+    uid ? `dashboard-elo-rank/${uid}` : null,
+    async () => {
+      const r = await apiGet<{ rank: number | null }>("/api/me/elo-rank");
+      return r.ok && r.data ? r.data.rank : null;
+    },
+    { keepPreviousData: true }
+  );
+  const eloRank: number | null = eloRankData ?? null;
+
+  // dailyMissions — locally mutated by claimMission → keep useState, hydrate.
+  const [dailyMissions, setDailyMissions] = useState<DailyMission[]>([]);
   const [missionsResetIn, setMissionsResetIn] = useState("");
+  useSWR(
+    uid ? `dashboard-missions/${uid}` : null,
+    async () => {
+      const res = await apiGet<{ missions: DailyMission[]; resetsIn: string }>("/api/missions/progress");
+      return res.ok && res.data ? res.data : { missions: [], resetsIn: "" };
+    },
+    {
+      keepPreviousData: true,
+      onSuccess: (d) => {
+        setDailyMissions(d?.missions ?? []);
+        setMissionsResetIn(d?.resetsIn ?? "");
+      },
+    }
+  );
+
+  // Side-effect (not data): rotate bounties once per mount, exactly as before.
+  useEffect(() => {
+    if (!uid) return;
+    apiPost("/api/bounties/rotate", {}).catch(() => {});
+  }, [uid]);
   // Counter instead of boolean: rapid claims re-increment this, which remounts
   // the Confetti component via `key` and fires a fresh burst even if the
   // previous burst hasn't finished yet.
   const [celebrateKey, setCelebrateKey] = useState(0);
-
-  // Restore cached dashboard data instantly on mount (no loading flash)
-  useEffect(() => {
-    if (!user) return;
-    try {
-      const cached = sessionStorage.getItem(`lionade_dash_${user.id}`);
-      if (cached) {
-        const c = JSON.parse(cached);
-        if (c.subjectStats) setSubjectStats(c.subjectStats);
-        if (c.recentQuizzes) setRecentQuizzes(c.recentQuizzes);
-        if (c.dailyProgress) setDailyProgress(c.dailyProgress);
-        if (c.achievements) setAchievements(c.achievements);
-        if (c.bestScores) setBestScores(c.bestScores);
-        if (c.leaderboard) setLeaderboard(c.leaderboard);
-        if (c.bounties) setBounties(c.bounties);
-        if (c.userBounties) setUserBounties(c.userBounties);
-        if (c.activeBet !== undefined) setActiveBet(c.activeBet);
-        if (c.lastBet !== undefined) setLastBet(c.lastBet);
-        if (c.weeklyChart) { setWeeklyChart(c.weeklyChart); setTimeout(() => setChartAnimated(true), 100); }
-        if (c.eloRank !== undefined) setEloRank(c.eloRank);
-        if (c.dailyMissions) setDailyMissions(c.dailyMissions);
-        if (c.missionsResetIn) setMissionsResetIn(c.missionsResetIn);
-      }
-    } catch {}
-  }, [user?.id]);
-
-  // Fetch fresh data in background and update cache
-  useEffect(() => {
-    if (!user) return;
-    apiPost("/api/bounties/rotate", {}).catch(() => {});
-    Promise.all([
-      getSubjectStats(user.id).catch(() => []),
-      getQuizHistory(user.id, 5).catch(() => []),
-      getDailyProgress(user.id).catch(() => ({ questions_answered: 0, coins_earned: 0 })),
-      getUserAchievements(user.id).catch(() => []),
-      getBestScores(user.id).catch(() => ({})),
-      getLeaderboard(5).catch(() => []),
-      getActiveBounties().catch(() => []),
-      getUserBountyProgress(user.id).catch(() => []),
-      getActiveBet(user.id).catch(() => null),
-      getLastResolvedBet(user.id).catch(() => null),
-      getWeeklyActivityChart(user.id).catch(() => []),
-    ]).then(([stats, history, daily, achs, bests, lb, bnts, ubProgress, abet, lbet, wChart]) => {
-      setSubjectStats(stats);
-      setRecentQuizzes(history);
-      setDailyProgress(daily);
-      setAchievements(achs);
-      setBestScores(bests);
-      setLeaderboard(lb);
-      setBounties(bnts);
-      setUserBounties(ubProgress);
-      setActiveBet(abet);
-      setLastBet(lbet);
-      setWeeklyChart(wChart as typeof weeklyChart);
-      // Fetch caller's ELO rank via dedicated single-row endpoint (no 200-row scan)
-      apiGet<{ rank: number | null }>("/api/me/elo-rank").then(r => {
-        const rank = r.ok && r.data ? r.data.rank : null;
-        setEloRank(rank);
-        // Patch cache with the resolved rank so next mount restores instantly
-        try {
-          const cached = sessionStorage.getItem(`lionade_dash_${user.id}`);
-          if (cached) {
-            const c = JSON.parse(cached);
-            c.eloRank = rank;
-            sessionStorage.setItem(`lionade_dash_${user.id}`, JSON.stringify(c));
-          }
-        } catch {}
-      });
-      setTimeout(() => setChartAnimated(true), 300);
-      // Cache for instant restore on next visit
-      try {
-        sessionStorage.setItem(`lionade_dash_${user.id}`, JSON.stringify({
-          subjectStats: stats, recentQuizzes: history, dailyProgress: daily,
-          achievements: achs, bestScores: bests, leaderboard: lb,
-          bounties: bnts, userBounties: ubProgress, activeBet: abet,
-          lastBet: lbet, weeklyChart: wChart,
-        }));
-      } catch {}
-    });
-    // Fetch daily missions separately (server-computed progress)
-    apiGet<{ missions: typeof dailyMissions; resetsIn: string }>("/api/missions/progress")
-      .then(res => {
-        if (res.ok && res.data) {
-          setDailyMissions(res.data.missions);
-          setMissionsResetIn(res.data.resetsIn);
-          // Update cache with missions
-          try {
-            const cached = sessionStorage.getItem(`lionade_dash_${user.id}`);
-            const c = cached ? JSON.parse(cached) : {};
-            c.dailyMissions = res.data.missions;
-            c.missionsResetIn = res.data.resetsIn;
-            sessionStorage.setItem(`lionade_dash_${user.id}`, JSON.stringify(c));
-          } catch {}
-        }
-      });
-  }, [user?.id]);
 
   // Daily login bonus is now claimed via the Clock In button in the
   // navbar (24h rolling cooldown + history popover). No auto-claim here.
@@ -336,7 +353,7 @@ function DashboardContent() {
                 <h1 className="font-bebas text-4xl sm:text-5xl text-cream tracking-wider leading-tight">
                   Welcome back, <span className="shimmer-text">{user.username}</span>
                 </h1>
-                <p className="text-cream/40 text-sm mt-1">{getGreeting()}</p>
+                <p className="text-cream/60 text-sm mt-1">{getGreeting()}</p>
               </div>
               <div className="hidden sm:flex flex-col items-end gap-1.5 flex-shrink-0">
                 <p className="text-cream/25 text-xs">{today}</p>
@@ -364,7 +381,7 @@ function DashboardContent() {
                   <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full" style={{ background: "#E67E22", boxShadow: `0 0 6px #E67E22` }} />
                 </div>
               </div>
-              <span className="text-cream/30 text-[9px] font-mono tracking-wider uppercase">quiz streak</span>
+              <span className="text-cream/55 text-[9px] font-mono tracking-wider uppercase">quiz streak</span>
             </div>
             <CircleStat icon={levelInfo.tier.icon} value={<>Lv.<CountUp id="dash-level" value={level} duration={400} /></>} label={levelInfo.tier.name} color={levelInfo.tier.color} />
             <CircleStat icon={<BookOpen size={20} weight="regular" color="#9B59B6" aria-hidden="true" />} value={<CountUp id="dash-subjects" value={displaySubjects.length} duration={400} />} label="subjects" color="#9B59B6" />
@@ -387,7 +404,7 @@ function DashboardContent() {
                 <span className="font-bebas text-sm tracking-wider" style={{ color: levelInfo.tier.color }}>
                   Lv.{level} {levelInfo.tier.name}
                 </span>
-                <span className="text-cream/20 text-[10px]">
+                <span className="text-cream/55 text-[10px]">
                   {currentXp.toLocaleString()} / {levelInfo.isMaxLevel ? "MAX" : xpToNext.toLocaleString()} XP
                 </span>
               </div>
@@ -406,6 +423,9 @@ function DashboardContent() {
 
           {/* ═══ 3.4) Streak Revive — only renders when a 24h grace window is open ═══ */}
           <StreakReviveBanner />
+
+          {/* ═══ 3.45) Free → Pro upgrade nudge — only renders for free-tier users ═══ */}
+          <ProUpgradeNudge />
 
           {/* ═══ 3.5) Your Classes — quick row that links into the notebook ═══ */}
           <YourClassesRow />
@@ -451,7 +471,7 @@ function DashboardContent() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="font-bebas text-sm tracking-wider text-cream leading-tight">{mission.title}</p>
-                        <p className="text-cream/40 text-[10px] mt-0.5 leading-tight">{mission.description}</p>
+                        <p className="text-cream/60 text-[10px] mt-0.5 leading-tight">{mission.description}</p>
                       </div>
                     </div>
 
@@ -468,10 +488,10 @@ function DashboardContent() {
                     {/* Progress bar */}
                     <div className="mb-2">
                       <div className="flex items-center justify-between mb-1">
-                        <span className="text-cream/30 text-[9px] font-mono">
+                        <span className="text-cream/55 text-[9px] font-mono">
                           {mission.claimed ? "Claimed" : mission.completed ? "Complete!" : `${mission.progress}/${mission.target}`}
                         </span>
-                        {!mission.claimed && <span className="text-cream/20 text-[9px]">{Math.round(progressPct)}%</span>}
+                        {!mission.claimed && <span className="text-cream/55 text-[9px]">{Math.round(progressPct)}%</span>}
                       </div>
                       <div className="w-full h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.05)" }}>
                         <div className={`h-full rounded-full transition-all duration-1000 ease-out ${progressPct > 0 && progressPct < 100 && !mission.claimed ? "progress-shimmer" : ""}`}
@@ -528,18 +548,18 @@ function DashboardContent() {
                     <DiceFive size={28} weight="fill" color="#FFD700" aria-hidden="true" />
                     <div>
                       <p className="text-cream text-sm font-semibold">Bet Active</p>
-                      <p className="text-cream/40 text-[11px]">Score {activeBet.target_score}/{activeBet.target_total} on your next quiz to win!</p>
+                      <p className="text-cream/60 text-[11px]">Score {activeBet.target_score}/{activeBet.target_total} on your next quiz to win!</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-4">
                     <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full" style={{ background: "rgba(255,215,0,0.08)", border: "1px solid rgba(255,215,0,0.15)" }}>
                       <span className="text-gold text-xs font-bold flex items-center gap-0.5">{activeBet.coins_staked} <img src={cdnUrl("/F.png")} alt="Fangs" className="w-4 h-4 object-contain inline" /></span>
-                      <span className="text-cream/30 text-[10px]">staked</span>
+                      <span className="text-cream/55 text-[10px]">staked</span>
                     </div>
-                    <span className="text-cream/20 text-lg">&rarr;</span>
+                    <span className="text-cream/55 text-lg">&rarr;</span>
                     <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full" style={{ background: "rgba(74,144,217,0.08)", border: "1px solid rgba(74,144,217,0.15)" }}>
                       <span className="text-electric text-xs font-bold flex items-center gap-0.5">{Math.floor(activeBet.coins_staked * (BET_MULTIPLIERS[activeBet.target_score] ?? 1))} <img src={cdnUrl("/F.png")} alt="Fangs" className="w-4 h-4 object-contain inline" /></span>
-                      <span className="text-cream/30 text-[10px]">potential</span>
+                      <span className="text-cream/55 text-[10px]">potential</span>
                     </div>
                   </div>
                 </div>
@@ -553,14 +573,14 @@ function DashboardContent() {
                       <p className={`text-sm font-semibold ${lastBet.won ? "text-gold" : "text-cream/50"}`}>
                         {lastBet.won ? `YOU WON ${lastBet.coins_won} COINS!` : `Lost ${lastBet.coins_staked} coins`}
                       </p>
-                      <p className="text-cream/30 text-[10px]">Place another bet below</p>
+                      <p className="text-cream/55 text-[10px]">Place another bet below</p>
                     </div>
                   </div>
                   {/* Show bet form below */}
                   <div className="border-t border-white/[0.06] pt-3 mt-2">
                     <div className="flex flex-wrap items-center gap-3">
                       <div>
-                        <span className="text-cream/30 text-[10px] block mb-1">Stake</span>
+                        <span className="text-cream/55 text-[10px] block mb-1">Stake</span>
                         <div className="flex gap-1.5">
                           {[10, 25, 50].map(amt => (
                             <button key={amt} onClick={() => setBetStake(amt)}
@@ -572,7 +592,7 @@ function DashboardContent() {
                         </div>
                       </div>
                       <div>
-                        <span className="text-cream/30 text-[10px] block mb-1">Target</span>
+                        <span className="text-cream/55 text-[10px] block mb-1">Target</span>
                         <div className="flex gap-1.5">
                           {[7, 8, 9, 10].map(t => (
                             <button key={t} onClick={() => setBetTarget(t)}
@@ -584,9 +604,9 @@ function DashboardContent() {
                         </div>
                       </div>
                       <div className="flex flex-col items-center">
-                        <span className="text-cream/30 text-[10px] block mb-1">Win</span>
+                        <span className="text-cream/55 text-[10px] block mb-1">Win</span>
                         <span className="text-gold text-sm font-bold">{Math.floor(betStake * (BET_MULTIPLIERS[betTarget] ?? 1))} <img src={cdnUrl("/F.png")} alt="Fangs" className="w-4 h-4 object-contain inline" /></span>
-                        <span className="text-cream/20 text-[9px]">{BET_MULTIPLIERS[betTarget]}x</span>
+                        <span className="text-cream/55 text-[9px]">{BET_MULTIPLIERS[betTarget]}x</span>
                       </div>
                     </div>
                     <button onClick={placeBet} disabled={placingBet || coins < betStake}
@@ -602,12 +622,12 @@ function DashboardContent() {
                     <DiceFive size={28} weight="fill" color="#FFD700" aria-hidden="true" />
                     <div>
                       <p className="text-cream text-sm font-semibold">Bet on Yourself</p>
-                      <p className="text-cream/40 text-[11px]">Stake coins, hit your target score, win big</p>
+                      <p className="text-cream/60 text-[11px]">Stake coins, hit your target score, win big</p>
                     </div>
                   </div>
                   <div className="flex flex-wrap items-center gap-3">
                     <div>
-                      <span className="text-cream/30 text-[10px] block mb-1">Stake</span>
+                      <span className="text-cream/55 text-[10px] block mb-1">Stake</span>
                       <div className="flex gap-1.5">
                         {[10, 25, 50].map(amt => (
                           <button key={amt} onClick={() => setBetStake(amt)}
@@ -619,7 +639,7 @@ function DashboardContent() {
                       </div>
                     </div>
                     <div>
-                      <span className="text-cream/30 text-[10px] block mb-1">Target</span>
+                      <span className="text-cream/55 text-[10px] block mb-1">Target</span>
                       <div className="flex gap-1.5">
                         {[7, 8, 9, 10].map(t => (
                           <button key={t} onClick={() => setBetTarget(t)}
@@ -631,9 +651,9 @@ function DashboardContent() {
                       </div>
                     </div>
                     <div className="flex flex-col items-center">
-                      <span className="text-cream/30 text-[10px] block mb-1">Win</span>
+                      <span className="text-cream/55 text-[10px] block mb-1">Win</span>
                       <span className="text-gold text-sm font-bold">{Math.floor(betStake * (BET_MULTIPLIERS[betTarget] ?? 1))} <img src={cdnUrl("/F.png")} alt="Fangs" className="w-4 h-4 object-contain inline" /></span>
-                      <span className="text-cream/20 text-[9px]">{BET_MULTIPLIERS[betTarget]}x</span>
+                      <span className="text-cream/55 text-[9px]">{BET_MULTIPLIERS[betTarget]}x</span>
                     </div>
                   </div>
                   <button onClick={placeBet} disabled={placingBet || coins < betStake}
@@ -655,7 +675,7 @@ function DashboardContent() {
               <div className="mb-4">
                 <div className="flex items-center gap-2 mb-2">
                   <span className="text-gold text-xs font-semibold">DAILY</span>
-                  <span className="text-cream/20 text-[10px]">Resets at midnight</span>
+                  <span className="text-cream/55 text-[10px]">Resets at midnight</span>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                   {bounties.filter(b => b.type === "daily").slice(0, 3).map((bounty) => {
@@ -669,14 +689,14 @@ function DashboardContent() {
                         style={{ background: "linear-gradient(135deg, #0d1528 0%, #0a1020 100%)", border: completed && !claimed ? "1px solid rgba(255,215,0,0.3)" : "1px solid rgba(255,215,0,0.1)", boxShadow: completed && !claimed ? "0 0 16px rgba(255,215,0,0.1)" : "none" }}>
                         <div className="absolute top-0 left-0 right-0 h-[2px]" style={{ background: "linear-gradient(90deg, #FFD700, transparent)" }} />
                         <p className="font-semibold text-cream text-sm">{bounty.title}</p>
-                        <p className="text-cream/40 text-[11px] mt-0.5 leading-relaxed">{bounty.description}</p>
+                        <p className="text-cream/60 text-[11px] mt-0.5 leading-relaxed">{bounty.description}</p>
                         <div className="flex items-center gap-3 mt-2">
                           <span className="text-gold text-[10px] font-bold">+{bounty.coin_reward} <img src={cdnUrl("/F.png")} alt="Fangs" className="w-4 h-4 object-contain inline" /></span>
                           <span className="text-electric text-[10px] font-bold">+{bounty.xp_reward} XP</span>
                         </div>
                         <div className="mt-3">
                           <div className="flex items-center justify-between mb-1">
-                            <span className="text-cream/30 text-[10px]">{progress}/{bounty.requirement_value}</span>
+                            <span className="text-cream/55 text-[10px]">{progress}/{bounty.requirement_value}</span>
                             {claimed && <span className="text-gold text-[10px] font-bold">Claimed</span>}
                           </div>
                           <div className="w-full h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.06)" }}>
@@ -701,7 +721,7 @@ function DashboardContent() {
               <div>
                 <div className="flex items-center gap-2 mb-2">
                   <span className="text-[#9B59B6] text-xs font-semibold">WEEKLY</span>
-                  <span className="text-cream/20 text-[10px]">Resets every Monday</span>
+                  <span className="text-cream/55 text-[10px]">Resets every Monday</span>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                   {bounties.filter(b => b.type === "weekly").slice(0, 6).map((bounty) => {
@@ -715,14 +735,14 @@ function DashboardContent() {
                         style={{ background: "linear-gradient(135deg, #0d1528 0%, #0a1020 100%)", border: completed && !claimed ? "1px solid rgba(155,89,182,0.3)" : "1px solid rgba(155,89,182,0.1)", boxShadow: completed && !claimed ? "0 0 16px rgba(155,89,182,0.1)" : "none" }}>
                         <div className="absolute top-0 left-0 right-0 h-[2px]" style={{ background: "linear-gradient(90deg, #9B59B6, transparent)" }} />
                         <p className="font-semibold text-cream text-sm">{bounty.title}</p>
-                        <p className="text-cream/40 text-[11px] mt-0.5 leading-relaxed">{bounty.description}</p>
+                        <p className="text-cream/60 text-[11px] mt-0.5 leading-relaxed">{bounty.description}</p>
                         <div className="flex items-center gap-3 mt-2">
                           <span className="text-gold text-[10px] font-bold">+{bounty.coin_reward} <img src={cdnUrl("/F.png")} alt="Fangs" className="w-4 h-4 object-contain inline" /></span>
                           <span className="text-electric text-[10px] font-bold">+{bounty.xp_reward} XP</span>
                         </div>
                         <div className="mt-3">
                           <div className="flex items-center justify-between mb-1">
-                            <span className="text-cream/30 text-[10px]">{progress}/{bounty.requirement_value}</span>
+                            <span className="text-cream/55 text-[10px]">{progress}/{bounty.requirement_value}</span>
                             {claimed && <span className="text-[#9B59B6] text-[10px] font-bold">Claimed</span>}
                           </div>
                           <div className="w-full h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.06)" }}>
@@ -745,7 +765,7 @@ function DashboardContent() {
             {bounties.length === 0 && (
               <div className="rounded-[20px] p-6 text-center" style={{ background: "linear-gradient(135deg, rgba(13,21,40,0.5), rgba(10,16,32,0.5))", border: "1px solid rgba(255,215,0,0.06)" }}>
                 <Target size={32} weight="regular" color="rgba(238,244,255,0.4)" className="mx-auto mb-2" aria-hidden="true" />
-                <p className="text-cream/30 text-xs">No bounties available right now. Check back soon!</p>
+                <p className="text-cream/55 text-xs">No bounties available right now. Check back soon!</p>
               </div>
             )}
           </div>
@@ -757,7 +777,7 @@ function DashboardContent() {
             <div className="lg:col-span-2 animate-slide-up" style={{ animationDelay: "0.2s" }}>
               <Link href="/learn" className="flex items-center justify-between mb-3 group">
                 <h2 className="font-bebas text-lg text-cream tracking-wider">YOUR SUBJECTS</h2>
-                <span className="text-cream/20 text-[10px] group-hover:text-electric transition-colors">Learn &rarr;</span>
+                <span className="text-cream/55 text-[10px] group-hover:text-electric transition-colors">Learn &rarr;</span>
               </Link>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {displaySubjects.slice(0, 6).map((stat, i) => {
@@ -793,7 +813,7 @@ function DashboardContent() {
                           {bestScores[stat.subject] ? (
                             <span className="text-[10px] font-semibold" style={{ color }}>Best: {bestScores[stat.subject].best}/{bestScores[stat.subject].total}</span>
                           ) : (
-                            <span className="text-cream/20 text-[10px]">No attempts yet</span>
+                            <span className="text-cream/55 text-[10px]">No attempts yet</span>
                           )}
                         </div>
                       </div>
@@ -893,17 +913,17 @@ function DashboardContent() {
                           <div className="flex items-center gap-5 sm:gap-7">
                             <div>
                               <span className="font-bebas text-2xl text-electric tabular-nums">{totalWeek}</span>
-                              <span className="text-cream/30 text-[10px] ml-1.5 uppercase tracking-wider">questions</span>
+                              <span className="text-cream/55 text-[10px] ml-1.5 uppercase tracking-wider">questions</span>
                             </div>
                             <div>
                               <span className="font-bebas text-2xl text-green-400 tabular-nums">{totalWeek > 0 ? Math.round((totalCorrect / totalWeek) * 100) : 0}%</span>
-                              <span className="text-cream/30 text-[10px] ml-1.5 uppercase tracking-wider">accuracy</span>
+                              <span className="text-cream/55 text-[10px] ml-1.5 uppercase tracking-wider">accuracy</span>
                             </div>
                           </div>
                           <div className="flex items-center gap-1.5">
                             <img src={cdnUrl("/F.png")} alt="Fangs" className="w-5 h-5 object-contain" />
                             <span className="font-bebas text-2xl text-gold tabular-nums">{totalCoins}</span>
-                            <span className="text-cream/30 text-[10px] ml-0.5 uppercase tracking-wider">earned</span>
+                            <span className="text-cream/55 text-[10px] ml-0.5 uppercase tracking-wider">earned</span>
                           </div>
                         </div>
                       </>
@@ -921,7 +941,7 @@ function DashboardContent() {
               <div className="animate-slide-up" style={{ animationDelay: "0.18s" }}>
                 <Link href="/leaderboard" className="flex items-center justify-between mb-3 group">
                   <h2 className="font-bebas text-lg text-cream tracking-wider">THIS WEEK</h2>
-                  <span className="text-cream/20 text-[10px] group-hover:text-electric transition-colors">View All &rarr;</span>
+                  <span className="text-cream/55 text-[10px] group-hover:text-electric transition-colors">View All &rarr;</span>
                 </Link>
                 <Link href="/leaderboard" className="block rounded-[20px] p-4 space-y-2 transition-all duration-200 hover:scale-[1.01]"
                   style={{ background: "linear-gradient(135deg, #0d1528 0%, #0a1020 100%)", border: "1px solid rgba(74,144,217,0.08)" }}>
@@ -947,7 +967,7 @@ function DashboardContent() {
                         if (myRank && myRank.rank > 3) {
                           return (
                             <div className="flex items-center gap-2.5 py-1.5 px-2 rounded-lg bg-electric/8 mt-1 border-t border-white/[0.04]">
-                              <span className="text-cream/40 text-[10px] font-mono w-5 text-center">#{myRank.rank}</span>
+                              <span className="text-cream/60 text-[10px] font-mono w-5 text-center">#{myRank.rank}</span>
                               <span className="text-xs flex-1 text-electric font-semibold truncate">{myRank.username} (you)</span>
                               <span className="text-[10px] font-mono text-gold">{formatCoins(myRank.coins_this_week)}</span>
                             </div>
@@ -957,7 +977,7 @@ function DashboardContent() {
                       })()}
                     </>
                   ) : (
-                    <p className="text-cream/20 text-xs text-center py-2">No activity this week yet.</p>
+                    <p className="text-cream/55 text-xs text-center py-2">No activity this week yet.</p>
                   )}
                 </Link>
               </div>
@@ -966,7 +986,7 @@ function DashboardContent() {
               <div className="animate-slide-up" style={{ animationDelay: "0.22s" }}>
                 <Link href="/quiz" className="flex items-center justify-between mb-3 group">
                   <h2 className="font-bebas text-lg text-cream tracking-wider">RECENT ACTIVITY</h2>
-                  <span className="text-cream/20 text-[10px] group-hover:text-electric transition-colors">Quiz &rarr;</span>
+                  <span className="text-cream/55 text-[10px] group-hover:text-electric transition-colors">Quiz &rarr;</span>
                 </Link>
                 {recentQuizzes.length > 0 ? (
                   <div className="space-y-1">
@@ -1007,7 +1027,7 @@ function DashboardContent() {
               <div className="animate-slide-up" style={{ animationDelay: "0.24s" }}>
                 <Link href="/profile" className="flex items-center justify-between mb-3 group">
                   <h2 className="font-bebas text-lg text-cream tracking-wider">ACHIEVEMENTS <span className="text-cream/25 text-xs font-mono">{achievements.length}/8</span></h2>
-                  <span className="text-cream/20 text-[10px] group-hover:text-electric transition-colors">Profile &rarr;</span>
+                  <span className="text-cream/55 text-[10px] group-hover:text-electric transition-colors">Profile &rarr;</span>
                 </Link>
                 <div className="grid grid-cols-4 gap-2">
                   {([
@@ -1049,7 +1069,7 @@ function DashboardContent() {
                             className="mx-auto my-2"
                           />
                         )}
-                        <span className={`text-[8px] mt-1 text-center leading-tight ${unlocked ? "text-cream/60" : "text-cream/20"}`}>{ach.name}</span>
+                        <span className={`text-[8px] mt-1 text-center leading-tight ${unlocked ? "text-cream/60" : "text-cream/55"}`}>{ach.name}</span>
                       </div>
                     );
                   })}
@@ -1189,7 +1209,7 @@ function YourClassesRow() {
         <h2 className="font-bebas text-xl text-cream tracking-wider">YOUR CLASSES</h2>
         <a
           href="/classes"
-          className="font-mono text-[10px] uppercase tracking-[0.25em] text-cream/40 hover:text-cream transition-colors"
+          className="font-mono text-[10px] uppercase tracking-[0.25em] text-cream/60 hover:text-cream transition-colors"
         >
           All →
         </a>

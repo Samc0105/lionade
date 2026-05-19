@@ -7,6 +7,7 @@ import {
   Lightning, ArrowRight, X, CheckCircle, XCircle, Sparkle, Coin,
   Brain, Trophy, ShareNetwork,
 } from "@phosphor-icons/react";
+import ClaimBanner from "@/components/ClaimBanner";
 import { apiPost, swrFetcher } from "@/lib/api-client";
 import { mutateUserStats } from "@/lib/hooks";
 import { useAuth } from "@/lib/auth";
@@ -71,56 +72,49 @@ export default function DailyDrillWidget() {
           <h2 className="font-bebas text-xl text-cream tracking-wider inline-flex items-center gap-2">
             <Lightning size={16} weight="fill" className="text-electric" /> DAILY DRILL
           </h2>
-          <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-cream/40">
+          <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-cream/60">
             {completed ? "Today: complete" : "5 questions · 3 min"}
           </span>
         </div>
 
-        <button
-          type="button"
-          onClick={() => !completed && data.questions.length > 0 && setDrillOpen(true)}
-          disabled={completed}
-          className={`
-            w-full text-left rounded-[12px] border px-5 py-4 transition-all duration-200
-            ${completed
-              ? "border-[#22C55E]/30 bg-[#22C55E]/[0.06] cursor-default"
-              : "border-electric/30 bg-gradient-to-r from-electric/[0.07] to-transparent hover:border-electric/60 hover:bg-electric/[0.1] active:scale-[0.99]"
-            }
-          `}
-        >
-          <div className="flex items-center gap-4">
-            <div
-              className={`
-                shrink-0 grid place-items-center w-12 h-12 rounded-full
-                ${completed
-                  ? "bg-[#22C55E]/[0.15] text-[#22C55E]"
-                  : "bg-electric/[0.18] text-electric"}
-              `}
-            >
-              {completed
-                ? <CheckCircle size={20} weight="fill" />
-                : <Brain size={18} weight="fill" />}
+        {completed ? (
+          <div className="w-full rounded-[12px] border border-[#22C55E]/30 bg-[#22C55E]/[0.06] px-5 py-4">
+            <div className="flex items-center gap-4">
+              <div className="shrink-0 grid place-items-center w-12 h-12 rounded-full bg-[#22C55E]/[0.15] text-[#22C55E]">
+                <CheckCircle size={20} weight="fill" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-syne font-semibold text-[15px] text-cream leading-tight mb-0.5">
+                  {`You scored ${score}/${total} today`}
+                </p>
+                <p className="text-[12.5px] text-cream/55 leading-snug">
+                  {`+${data.coinsEarned ?? 0} Fangs · come back tomorrow for a fresh drill`}
+                </p>
+              </div>
+              {score === total && total >= 3 && (
+                <Trophy size={16} weight="fill" className="text-gold shrink-0" />
+              )}
             </div>
-            <div className="flex-1 min-w-0">
-              <p className="font-syne font-semibold text-[15px] text-cream leading-tight mb-0.5">
-                {completed
-                  ? `You scored ${score}/${total} today`
-                  : "Drill 5 questions you missed before"}
-              </p>
-              <p className="text-[12.5px] text-cream/55 leading-snug">
-                {completed
-                  ? `+${data.coinsEarned ?? 0} Fangs · come back tomorrow for a fresh drill`
-                  : "Quick spaced-repetition review — keep your streak fed"}
-              </p>
-            </div>
-            {!completed && (
-              <ArrowRight size={16} weight="bold" className="text-electric shrink-0" />
-            )}
-            {completed && score === total && total >= 3 && (
-              <Trophy size={16} weight="fill" className="text-gold shrink-0" />
-            )}
           </div>
-        </button>
+        ) : (
+          <button
+            type="button"
+            onClick={() => data.questions.length > 0 && setDrillOpen(true)}
+            className="block w-full text-left rounded-[14px] transition-transform duration-200 active:scale-[0.99]"
+          >
+            <ClaimBanner
+              variant="electric"
+              size="panel"
+              ariaLabel="Daily Drill ready — 5 questions you missed"
+              icon={<Brain size={18} weight="fill" />}
+              title="Drill 5 questions you missed before"
+              description="Quick spaced-repetition review — keep your streak fed"
+              meta={<>5Q &middot; 3 MIN</>}
+            >
+              <span className="sr-only">Open the daily drill</span>
+            </ClaimBanner>
+          </button>
+        )}
       </div>
 
       {drillOpen && data.questions.length > 0 && (
@@ -267,7 +261,7 @@ function DrillModal({
           type="button"
           onClick={() => onClose(false)}
           aria-label="Close"
-          className="absolute top-3 right-3 grid place-items-center w-7 h-7 rounded-full text-cream/40 hover:text-cream hover:bg-white/[0.05]"
+          className="absolute top-3 right-3 grid place-items-center w-7 h-7 rounded-full text-cream/60 hover:text-cream hover:bg-white/[0.05]"
         >
           <X size={14} weight="bold" />
         </button>
@@ -300,7 +294,7 @@ function DrillModal({
 
             {/* Subtopic / class context */}
             {(q.subtopicName || q.className) && (
-              <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-cream/40 mb-2">
+              <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-cream/60 mb-2">
                 {[q.className, q.subtopicName].filter(Boolean).join(" · ")} · missed previously
               </p>
             )}
@@ -345,7 +339,7 @@ function DrillModal({
                     transition={transitionProps}
                     {...interactiveAnims}
                   >
-                    <span className={`font-mono text-[10px] uppercase tracking-wider mt-0.5 shrink-0 ${isPicked ? "text-electric" : "text-cream/40"}`}>
+                    <span className={`font-mono text-[10px] uppercase tracking-wider mt-0.5 shrink-0 ${isPicked ? "text-electric" : "text-cream/60"}`}>
                       {String.fromCharCode(65 + i)}
                     </span>
                     <span className="flex-1 text-[13.5px] leading-relaxed">{opt}</span>
@@ -432,7 +426,7 @@ function DrillResults({
         </button>
       </div>
       {!perfect && (
-        <p className="font-mono text-[9.5px] uppercase tracking-[0.22em] text-cream/30 mt-3">
+        <p className="font-mono text-[9.5px] uppercase tracking-[0.22em] text-cream/55 mt-3">
           Come back tomorrow for a fresh drill
         </p>
       )}

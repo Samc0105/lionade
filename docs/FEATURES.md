@@ -12,6 +12,7 @@
 - **Dynamic greeting by time of day** — 2026-02-28
 - **Idle glow animations on mission card and Ninny's Notes** — 2026-02-28
 - **CTA pulse on "Start Daily Quiz"** — 2026-02-28
+- **Reusable `ClaimBanner` + Free→Pro upgrade nudge** (one themeable banner across DailyReady/StreakRevive/ClockIn/DailyDrill claim surfaces; free-tier-only Pro nudge via `usePlan()`, links to /pricing) — 2026-05-17
 - **Achievement grid with earned/locked states** — 2026-02-28
 - **Streak fire animation with motivational banner** — 2026-02-28
 - **Continue shelf with real quiz history** — 2026-02-28
@@ -95,3 +96,4 @@
 
 ## Navigation
 - **Consistent route-based back affordance** (semantic-parent "Back to {Parent}" on every non-root screen, web + iOS; roots/funnels excluded by design) — 2026-05-15
+- **Sliding "limelight" bottom-nav highlight** (single travelling gold pill springs to active tab; framer-motion shared-layout on web, Reanimated spring on iOS; reduced-motion → instant; existing gold tokens reused — zero design drift) — 2026-05-19
