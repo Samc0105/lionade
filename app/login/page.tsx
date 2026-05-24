@@ -273,7 +273,17 @@ export default function LoginPage() {
     setSubmitting(true);
 
     console.log("[Login] calling login()");
-    const { error: err } = await login(loginEmail.trim(), loginPassword);
+    let err: string | null | undefined;
+    try {
+      const result = await login(loginEmail.trim(), loginPassword);
+      err = result.error;
+    } catch (thrown) {
+      // Network drop or unexpected failure — don't leave the spinner running forever.
+      console.error("[Login] login() threw:", thrown);
+      setError("Couldn't reach the server. Check your connection and try again.");
+      setSubmitting(false);
+      return;
+    }
     console.log("[Login] login() resolved — error:", err ?? "none");
 
     if (err) {
@@ -373,10 +383,29 @@ export default function LoginPage() {
       typeof window !== "undefined"
         ? `${window.location.origin}/login`
         : undefined;
-    await supabase.auth.signInWithOAuth({
+    const { error: oauthErr } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: redirectTo ? { redirectTo } : undefined,
     });
+    // If the provider is mis-configured in Supabase, signInWithOAuth resolves
+    // with `{ error }` instead of redirecting — surface it instead of leaving
+    // the user staring at a button that did nothing.
+    if (oauthErr) setError(oauthErr.message);
+  };
+
+  const handleAppleAuth = async () => {
+    // Mirrors handleGoogleAuth — iOS already uses this provider via
+    // `signInWithApple` in lionade-ios/lib/auth-oauth.ts. Assumes Supabase
+    // project has Apple OAuth provider configured (same one iOS hits).
+    const redirectTo =
+      typeof window !== "undefined"
+        ? `${window.location.origin}/login`
+        : undefined;
+    const { error: oauthErr } = await supabase.auth.signInWithOAuth({
+      provider: "apple",
+      options: redirectTo ? { redirectTo } : undefined,
+    });
+    if (oauthErr) setError(oauthErr.message);
   };
 
   const resetSignup = () => {
@@ -421,7 +450,7 @@ export default function LoginPage() {
               LIONADE
             </span>
           </Link>
-          <p className="text-cream/40 text-sm mt-3">
+          <p className="text-cream/60 text-sm mt-3">
             {signupSuccess ? "One more step!" : tab === "login" ? "Welcome back. Your streak is waiting." : "Join 50K students already grinding."}
           </p>
         </div>
@@ -474,10 +503,21 @@ export default function LoginPage() {
                     <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59a14.5 14.5 0 0 1 0-9.18l-7.98-6.19a24.0 24.0 0 0 0 0 21.56l7.98-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
                     Continue with Google
                   </button>
+                  {/* Apple OAuth */}
+                  <button
+                    type="button"
+                    onClick={handleAppleAuth}
+                    className="w-full flex items-center justify-center gap-3 py-3.5 rounded-xl font-semibold text-sm transition-all duration-200 bg-black text-white hover:bg-gray-900 active:scale-[0.98] shadow-sm"
+                  >
+                    <svg width="16" height="20" viewBox="0 0 384 512" aria-hidden="true">
+                      <path fill="currentColor" d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/>
+                    </svg>
+                    Continue with Apple
+                  </button>
                   {/* Divider */}
                   <div className="flex items-center gap-3">
                     <div className="flex-1 h-px bg-cream/10" />
-                    <span className="text-cream/30 text-xs font-medium">or</span>
+                    <span className="text-cream/55 text-xs font-medium">or</span>
                     <div className="flex-1 h-px bg-cream/10" />
                   </div>
                   <div>
@@ -520,11 +560,11 @@ export default function LoginPage() {
                       <div key={s.n} className="flex items-center gap-2 flex-1">
                         <div className="flex flex-col items-center gap-1 flex-1">
                           <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300
-                            ${step > s.n ? "bg-green-500 text-white" : step === s.n ? "bg-electric text-white shadow-lg shadow-electric/40" : "bg-white/10 text-cream/40"}`}>
+                            ${step > s.n ? "bg-green-500 text-white" : step === s.n ? "bg-electric text-white shadow-lg shadow-electric/40" : "bg-white/10 text-cream/60"}`}>
                             {step > s.n ? <Check size={14} weight="bold" aria-hidden="true" /> : s.n}
                           </div>
                           <span className={`text-xs font-semibold transition-colors duration-200
-                            ${step === s.n ? "text-electric" : step > s.n ? "text-green-400" : "text-cream/30"}`}>
+                            ${step === s.n ? "text-electric" : step > s.n ? "text-green-400" : "text-cream/55"}`}>
                             {s.label}
                           </span>
                         </div>
@@ -551,10 +591,10 @@ export default function LoginPage() {
                       {/* Divider */}
                       <div className="flex items-center gap-3">
                         <div className="flex-1 h-px bg-cream/10" />
-                        <span className="text-cream/30 text-xs font-medium">or</span>
+                        <span className="text-cream/55 text-xs font-medium">or</span>
                         <div className="flex-1 h-px bg-cream/10" />
                       </div>
-                      <p className="text-cream/40 text-xs mb-4">Create your login credentials</p>
+                      <p className="text-cream/60 text-xs mb-4">Create your login credentials</p>
                       <div>
                         <label className={labelCls}>Email</label>
                         <input type="email" value={email} onChange={(e) => setEmail(e.target.value)}
@@ -574,7 +614,7 @@ export default function LoginPage() {
                             className={inputCls + " pr-28"}
                           />
                           {usernameStatus === "checking" && (
-                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-cream/40 text-xs">Checking...</span>
+                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-cream/60 text-xs">Checking...</span>
                           )}
                           {usernameStatus === "available" && (
                             <span className="absolute right-3 top-1/2 -translate-y-1/2 text-green-400 text-xs font-semibold inline-flex items-center">
@@ -641,7 +681,7 @@ export default function LoginPage() {
                   {/* Step 2: About You */}
                   {step === 2 && (
                     <div className="space-y-4 animate-slide-up">
-                      <p className="text-cream/40 text-xs mb-4">Tell us a little about yourself</p>
+                      <p className="text-cream/60 text-xs mb-4">Tell us a little about yourself</p>
                       <div>
                         <label className={labelCls}>First Name</label>
                         <input type="text" value={firstName} onChange={(e) => setFirstName(e.target.value)}
@@ -662,7 +702,7 @@ export default function LoginPage() {
                             <option value="" disabled>Select your level...</option>
                             {EDUCATION_LEVELS.map((l) => <option key={l} value={l}>{l}</option>)}
                           </select>
-                          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-cream/40 pointer-events-none">▾</span>
+                          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-cream/60 pointer-events-none">▾</span>
                         </div>
                       </div>
                       {error && <ErrorBox msg={error} />}
@@ -682,7 +722,7 @@ export default function LoginPage() {
                   {/* Step 3: Goals + Summary */}
                   {step === 3 && (
                     <div className="space-y-4 animate-slide-up">
-                      <p className="text-cream/40 text-xs mb-4">Almost done — set your goals</p>
+                      <p className="text-cream/60 text-xs mb-4">Almost done — set your goals</p>
                       <div>
                         <label className={labelCls}>Primary Study Goal</label>
                         <div className="relative">
@@ -691,7 +731,7 @@ export default function LoginPage() {
                             <option value="" disabled>What brings you here?</option>
                             {STUDY_GOALS.map((g) => <option key={g} value={g}>{g}</option>)}
                           </select>
-                          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-cream/40 pointer-events-none">▾</span>
+                          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-cream/60 pointer-events-none">▾</span>
                         </div>
                       </div>
                       <div>
@@ -702,7 +742,7 @@ export default function LoginPage() {
                             <option value="" disabled>Select a source...</option>
                             {REFERRAL_SOURCES.map((r) => <option key={r} value={r}>{r}</option>)}
                           </select>
-                          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-cream/40 pointer-events-none">▾</span>
+                          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-cream/60 pointer-events-none">▾</span>
                         </div>
                       </div>
 
@@ -743,7 +783,7 @@ export default function LoginPage() {
               )}
 
               {/* Switch tab hint */}
-              <p className="text-center text-cream/30 text-sm mt-5">
+              <p className="text-center text-cream/55 text-sm mt-5">
                 {tab === "login" ? (
                   <>No account?{" "}
                     <button onClick={() => { setTab("signup"); setError(""); }} className="text-electric font-semibold hover:text-electric/80">
@@ -762,7 +802,7 @@ export default function LoginPage() {
           </div>
         )}
 
-        <p className="text-center text-cream/20 text-xs mt-5">
+        <p className="text-center text-cream/55 text-xs mt-5">
           By signing up, you agree to study harder than yesterday.
         </p>
 
@@ -778,7 +818,7 @@ export default function LoginPage() {
             >
               <Brain size={18} aria-hidden="true" />
               Try a Sample Quiz
-              <span className="text-cream/30">&#8594;</span>
+              <span className="text-cream/55">&#8594;</span>
             </Link>
           </div>
         )}
@@ -828,7 +868,7 @@ function SummaryRow({ Icon: IconCmp, label, value }: { Icon: Icon; label: string
       <span className="w-5 inline-flex items-center justify-center text-cream/70">
         <IconCmp size={18} aria-hidden="true" />
       </span>
-      <span className="text-cream/40 w-20 text-xs font-semibold">{label}</span>
+      <span className="text-cream/60 w-20 text-xs font-semibold">{label}</span>
       <span className="text-cream/80 text-xs truncate">{value}</span>
     </div>
   );

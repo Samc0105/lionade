@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth";
 import { useUserStats } from "@/lib/hooks";
 import ProtectedRoute from "@/components/ProtectedRoute";
-import { getQuizHistory } from "@/lib/db";
+import { useQuizHistory } from "@/lib/hooks";
+import useSWR from "swr";
 import { SUBJECT_ICONS, SUBJECT_COLORS, DefaultSubjectIcon } from "@/lib/mockData";
 import { getLevelProgress } from "@/lib/levels";
 import type { Subject } from "@/types";
@@ -58,29 +59,40 @@ export default function LearnPage() {
   const router = useRouter();
   const { user } = useAuth();
   const { stats } = useUserStats(user?.id);
-  const [quizHistory, setQuizHistory] = useState<QuizHistoryEntry[]>([]);
-  const [todayCount, setTodayCount] = useState(0);
-  const [missions, setMissions] = useState<Mission[]>([]);
 
+  // Coming-Soon toast for the Subjects/Learning Paths CTA — auto-dismisses 3s.
+  const [showSubjectsComingSoon, setShowSubjectsComingSoon] = useState(false);
   useEffect(() => {
-    if (!user) return;
-    // Pull more history so the 7-day heatmap + subject-mastery computations
-    // have something to work with. 60 covers the vast majority of use cases
-    // since DAILY_QUESTION_LIMIT caps per-day contributions anyway.
-    getQuizHistory(user.id, 60)
-      .then((history) => {
-        setQuizHistory(history);
-        const today = new Date().toISOString().split("T")[0];
-        const todayQuestions = history
-          .filter((h: any) => h.completed_at?.startsWith(today))
-          .reduce((sum: number, h: any) => sum + h.total_questions, 0);
-        setTodayCount(todayQuestions);
-      })
-      .catch(() => {});
-    apiGet<{ missions: Mission[] }>("/api/missions/progress")
-      .then(res => { if (res.ok && res.data) setMissions(res.data.missions); })
-      .catch(() => {});
-  }, [user]);
+    if (!showSubjectsComingSoon) return;
+    const t = window.setTimeout(() => setShowSubjectsComingSoon(false), 3000);
+    return () => window.clearTimeout(t);
+  }, [showSubjectsComingSoon]);
+  // Perf 2026-05-17: raw useEffect+db/api fetches → SWR so the global
+  // persistent <SWRConfig> cache renders Learn instantly on re-nav instead of
+  // a cold refetch + empty flash. Quiz history uses the SHARED useQuizHistory
+  // hook (key `quiz-history/${id}/60`, deduped with Dashboard). Missions stay
+  // page-local behind a stable key. `quizHistory`/`todayCount`/`missions`
+  // derived to preserve the prior computations (heatmap, mastery, today goal)
+  // byte-for-byte. 60 still covers the 7-day heatmap + subject-mastery since
+  // DAILY_QUESTION_LIMIT caps per-day contributions anyway.
+  const { data: historyData } = useQuizHistory(user?.id, 60);
+  const quizHistory: QuizHistoryEntry[] =
+    (historyData as QuizHistoryEntry[] | undefined) ?? [];
+  const todayCount = (() => {
+    const today = new Date().toISOString().split("T")[0];
+    return quizHistory
+      .filter((h: any) => h.completed_at?.startsWith(today))
+      .reduce((sum: number, h: any) => sum + h.total_questions, 0);
+  })();
+  const { data: missionsData } = useSWR(
+    user?.id ? `learn-missions/${user.id}` : null,
+    async () => {
+      const res = await apiGet<{ missions: Mission[] }>("/api/missions/progress");
+      return res.ok && res.data ? res.data.missions : [];
+    },
+    { keepPreviousData: true }
+  );
+  const missions: Mission[] = missionsData ?? [];
 
   const recentActivity = quizHistory.slice(0, 5);
   const dailyGoal = 10;
@@ -189,7 +201,7 @@ export default function LearnPage() {
             <h1 className="font-bebas text-3xl sm:text-4xl text-cream tracking-[0.08em] leading-none">
               Learn
             </h1>
-            <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-cream/30">
+            <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-cream/55">
               {new Date().toLocaleDateString(undefined, { weekday: "long", month: "short", day: "numeric" }).toLowerCase()}
             </p>
           </header>
@@ -219,7 +231,7 @@ export default function LearnPage() {
                   </div>
                   <p className="font-bebas text-[26px] tabular-nums leading-none" style={{ color: chip.color }}>
                     <CountUp id={`learn-chip-${chip.label}`} value={displayValue} duration={600} />
-                    {chip.suffix && <span className="text-cream/30 text-sm ml-1.5">{chip.suffix}</span>}
+                    {chip.suffix && <span className="text-cream/55 text-sm ml-1.5">{chip.suffix}</span>}
                   </p>
                   {"extra" in chip && chip.extra && (
                     <p className="text-cream/35 text-[10px] mt-0.5 font-mono lowercase truncate">{chip.extra}</p>
@@ -272,7 +284,7 @@ export default function LearnPage() {
                 />
               </div>
               <div className="flex items-center justify-between mt-1.5">
-                <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-cream/30">daily goal</p>
+                <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-cream/55">daily goal</p>
                 <p className="font-mono text-[10px] tabular-nums text-cream/50">
                   {Math.min(todayCount, dailyGoal)} / {dailyGoal}
                 </p>
@@ -281,20 +293,30 @@ export default function LearnPage() {
 
             {/* Secondary actions — 3 clean rows, not cards */}
             <div className="mt-3 grid grid-cols-1 sm:grid-cols-3 gap-2">
-              <Link href="/learn/paths" className="group flex items-center gap-3 px-4 py-3 rounded-[6px] border border-white/[0.06] hover:bg-white/[0.03] hover:border-electric/30 transition-colors">
-                <BookOpen size={18} weight="regular" color="#3B82F6" aria-hidden="true" className="flex-shrink-0" />
+              <button
+                type="button"
+                onClick={() => setShowSubjectsComingSoon(true)}
+                className="group flex items-center gap-3 px-4 py-3 rounded-[6px] border border-white/[0.06] bg-white/[0.01] hover:bg-white/[0.03] hover:border-gold/30 transition-colors text-left cursor-pointer"
+                aria-label="Subjects — in development, coming soon"
+              >
+                <BookOpen size={18} weight="regular" color="#3B82F6" aria-hidden="true" className="flex-shrink-0 opacity-60" />
                 <div className="flex-1 min-w-0">
-                  <p className="font-syne font-semibold text-sm text-cream leading-tight">Subjects</p>
-                  <p className="text-cream/30 text-[10px] font-mono">7 learning paths</p>
+                  <p className="font-syne font-semibold text-sm text-cream/80 leading-tight flex items-center gap-2 flex-wrap">
+                    Subjects
+                    <span className="text-[8px] font-mono uppercase tracking-[0.15em] px-1.5 py-0.5 rounded bg-gold/15 text-gold border border-gold/30 whitespace-nowrap">
+                      Coming Soon
+                    </span>
+                  </p>
+                  <p className="text-cream/40 text-[10px] font-mono">7 learning paths</p>
                 </div>
-                <ArrowRight size={14} weight="regular" color="rgba(238,244,255,0.3)" aria-hidden="true" className="group-hover:text-electric transition-colors" />
-              </Link>
+                <ArrowRight size={14} weight="regular" color="rgba(238,244,255,0.2)" aria-hidden="true" className="group-hover:text-gold/60 transition-colors" />
+              </button>
 
               <Link href="/learn/ninny" className="group flex items-center gap-3 px-4 py-3 rounded-[6px] border border-white/[0.06] hover:bg-white/[0.03] hover:border-[#A855F7]/30 transition-colors">
                 <PawPrint size={18} weight="fill" color="#A855F7" aria-hidden="true" className="flex-shrink-0" />
                 <div className="flex-1 min-w-0">
                   <p className="font-syne font-semibold text-sm text-cream leading-tight">Study with Ninny</p>
-                  <p className="text-cream/30 text-[10px] font-mono">ai tutor</p>
+                  <p className="text-cream/55 text-[10px] font-mono">ai tutor</p>
                 </div>
                 <ArrowRight size={14} weight="regular" color="rgba(238,244,255,0.3)" aria-hidden="true" className="group-hover:text-[#A855F7] transition-colors" />
               </Link>
@@ -303,7 +325,7 @@ export default function LearnPage() {
                 <Brain size={18} weight="fill" color="#FFD700" aria-hidden="true" className="flex-shrink-0" />
                 <div className="flex-1 min-w-0">
                   <p className="font-syne font-semibold text-sm text-cream leading-tight">Mastery Mode</p>
-                  <p className="text-cream/30 text-[10px] font-mono">any exam · any topic</p>
+                  <p className="text-cream/55 text-[10px] font-mono">any exam · any topic</p>
                 </div>
                 <ArrowRight size={14} weight="regular" color="rgba(238,244,255,0.3)" aria-hidden="true" className="group-hover:text-gold transition-colors" />
               </Link>
@@ -320,14 +342,14 @@ export default function LearnPage() {
               <section className="animate-slide-up" style={{ animationDelay: "0.12s" }}>
                 <div className="flex items-baseline justify-between mb-4">
                   <h2 className="font-bebas text-sm text-cream tracking-[0.2em]">MASTERY</h2>
-                  <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-cream/30">
+                  <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-cream/55">
                     {mastery.length} {mastery.length === 1 ? "subject" : "subjects"} · weakest first
                   </p>
                 </div>
 
                 {mastery.length === 0 ? (
                   <div className="py-8 border-y border-white/[0.04] text-center">
-                    <p className="text-cream/40 text-sm mb-3">No data yet. One quiz and this fills in.</p>
+                    <p className="text-cream/60 text-sm mb-3">No data yet. One quiz and this fills in.</p>
                     <Link href="/quiz" className="inline-block font-syne font-bold text-xs px-5 py-2 rounded-full border border-electric/40 text-electric hover:bg-electric/10 transition-colors">
                       Start a quiz
                     </Link>
@@ -352,7 +374,7 @@ export default function LearnPage() {
                                 {isWeak && (
                                   <span className="font-mono text-[9px] uppercase tracking-wider text-red-400/80">weak</span>
                                 )}
-                                <span className="font-mono text-[9px] text-cream/30 ml-auto tabular-nums">
+                                <span className="font-mono text-[9px] text-cream/55 ml-auto tabular-nums">
                                   {m.correct}/{m.answered}
                                 </span>
                               </div>
@@ -369,7 +391,7 @@ export default function LearnPage() {
                               </div>
                             </div>
                             <p className="font-bebas text-xl tabular-nums" style={{ color }}>
-                              {m.accuracy}<span className="text-cream/30 text-xs">%</span>
+                              {m.accuracy}<span className="text-cream/55 text-xs">%</span>
                             </p>
                           </Link>
                         </li>
@@ -384,7 +406,7 @@ export default function LearnPage() {
                 <section className="animate-slide-up" style={{ animationDelay: "0.16s" }}>
                   <div className="flex items-baseline justify-between mb-4">
                     <h2 className="font-bebas text-sm text-cream tracking-[0.2em]">TODAY&rsquo;S MISSIONS</h2>
-                    <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-cream/30">resets 00:00</p>
+                    <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-cream/55">resets 00:00</p>
                   </div>
 
                   <ul className="space-y-2">
@@ -428,7 +450,7 @@ export default function LearnPage() {
 
                           <div className="flex-shrink-0 text-right">
                             <p className="font-bebas text-sm tabular-nums" style={{ color: m.color }}>
-                              {m.progress}<span className="text-cream/30 text-xs">/{m.target}</span>
+                              {m.progress}<span className="text-cream/55 text-xs">/{m.target}</span>
                             </p>
                             <p className="font-mono text-[9px] text-gold/70">+{m.coinReward}</p>
                           </div>
@@ -448,7 +470,7 @@ export default function LearnPage() {
               <section className="animate-slide-up" style={{ animationDelay: "0.12s" }}>
                 <div className="flex items-baseline justify-between mb-4">
                   <h2 className="font-bebas text-sm text-cream tracking-[0.2em]">7-DAY ACTIVITY</h2>
-                  <p className="font-mono text-[10px] tabular-nums text-cream/30">{weekTotal} questions</p>
+                  <p className="font-mono text-[10px] tabular-nums text-cream/55">{weekTotal} questions</p>
                 </div>
 
                 <div className="grid grid-cols-7 gap-1.5">
@@ -488,13 +510,13 @@ export default function LearnPage() {
 
                 {/* Heatmap legend */}
                 <div className="flex items-center justify-end gap-1.5 mt-3">
-                  <span className="font-mono text-[9px] uppercase tracking-wider text-cream/30">less</span>
+                  <span className="font-mono text-[9px] uppercase tracking-wider text-cream/55">less</span>
                   {[0.04, 0.18, 0.42, 0.72, 1].map((o, i) => (
                     <span key={i} className="w-2.5 h-2.5 rounded-[2px]" style={{
                       background: o < 0.1 ? "rgba(255, 255, 255, 0.04)" : `rgba(34, 197, 94, ${o})`,
                     }} />
                   ))}
-                  <span className="font-mono text-[9px] uppercase tracking-wider text-cream/30">more</span>
+                  <span className="font-mono text-[9px] uppercase tracking-wider text-cream/55">more</span>
                 </div>
               </section>
 
@@ -502,14 +524,14 @@ export default function LearnPage() {
               <section className="animate-slide-up" style={{ animationDelay: "0.18s" }}>
                 <div className="flex items-baseline justify-between mb-4">
                   <h2 className="font-bebas text-sm text-cream tracking-[0.2em]">RECENT</h2>
-                  <Link href="/quiz" className="font-mono text-[10px] uppercase tracking-[0.2em] text-cream/40 hover:text-electric transition-colors">
+                  <Link href="/quiz" className="font-mono text-[10px] uppercase tracking-[0.2em] text-cream/60 hover:text-electric transition-colors">
                     new →
                   </Link>
                 </div>
 
                 {recentActivity.length === 0 ? (
                   <div className="py-8 text-center border-y border-white/[0.04]">
-                    <p className="text-cream/30 text-xs mb-3">No quizzes yet</p>
+                    <p className="text-cream/55 text-xs mb-3">No quizzes yet</p>
                     <Link href="/quiz" className="inline-block font-syne font-bold text-xs px-4 py-2 rounded-full border border-electric/40 text-electric hover:bg-electric/10 transition-colors">
                       Start
                     </Link>
@@ -527,11 +549,11 @@ export default function LearnPage() {
                             <RecentIcon size={16} weight="regular" color={color} aria-hidden="true" />
                             <div className="flex-1 min-w-0">
                               <p className="text-cream text-xs font-semibold truncate">{entry.subject}</p>
-                              <p className="text-cream/30 text-[10px] font-mono">{timeAgo(entry.completed_at)}</p>
+                              <p className="text-cream/55 text-[10px] font-mono">{timeAgo(entry.completed_at)}</p>
                             </div>
                             <div className="text-right">
                               <p className="font-bebas text-sm tabular-nums" style={{ color }}>
-                                {pct}<span className="text-cream/30 text-[10px]">%</span>
+                                {pct}<span className="text-cream/55 text-[10px]">%</span>
                               </p>
                               <p className="font-mono text-[9px] text-gold/70">+{entry.coins_earned}</p>
                             </div>
@@ -548,6 +570,20 @@ export default function LearnPage() {
 
         </div>
       </div>
+
+      {/* Coming-Soon toast — triggered by the Subjects CTA */}
+      {showSubjectsComingSoon && (
+        <div
+          role="status"
+          aria-live="polite"
+          className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[10000] px-5 py-3 rounded-xl border border-gold/40 backdrop-blur-md shadow-2xl animate-slide-up"
+          style={{ background: "rgba(10, 16, 32, 0.95)" }}
+        >
+          <p className="font-mono text-[11px] tracking-[0.12em] uppercase text-gold whitespace-nowrap">
+            Subjects &amp; Learning Paths &mdash; in development, coming soon
+          </p>
+        </div>
+      )}
 
     </ProtectedRoute>
   );

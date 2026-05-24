@@ -2,6 +2,7 @@
 
 ## Auth & Onboarding
 - **Email/password + Google OAuth login/signup** — 2026-02-19
+- **Sign in with Apple (web)** (`/login` Log In + Sign Up tabs both show a black "Continue with Apple" button beneath the Google button; `supabase.auth.signInWithOAuth({ provider: 'apple' })` mirroring iOS; redirect-back to current origin like the Google flow) — 2026-05-24
 - **Multi-step onboarding flow** — 2026-02-24
 - **Session expiry + brute force protection** — 2026-02-20
 - **ProtectedRoute with self-healing profile rows** — 2026-02-24
@@ -9,6 +10,7 @@
 
 ## Dashboard
 - **Command center layout** (hero header, stat pills, XP bar, mission hero, continue shelf, Ninny's Notes) — 2026-02-28
+- **Daily Claim — single-click + faster toast** (the daily-Fangs button: clicking when available now claims **instantly** without auto-opening the history popover; cooldown/claimed state still opens the popover on click. Reveal toast auto-dismiss reduced from 5s → 3s for tighter attention). `components/ClockInButton.tsx` — 2026-05-24
 - **Dynamic greeting by time of day** — 2026-02-28
 - **Idle glow animations on mission card and Ninny's Notes** — 2026-02-28
 - **CTA pulse on "Start Daily Quiz"** — 2026-02-28
@@ -22,6 +24,7 @@
 - **Primary action hierarchy** (Daily Quiz bubble larger) — 2026-02-28
 - **Hover glow/scale effects, idle float animations** — 2026-02-28
 - **Coming soon modals for unreleased features** — 2026-02-28
+- **Subjects CTA → Coming Soon block** (the `/learn/paths` Subjects card on `/learn` is now click-blocked with a "Coming Soon" gold pill on the card + a 3-second auto-dismissing toast that says "Subjects & Learning Paths — in development, coming soon"; Daily Quiz / Study with Ninny / Mastery Mode CTAs remain clickable) — 2026-05-24
 
 ## Quiz System
 - **Timed daily quiz flow with scoring** — 2026-02-27
@@ -41,6 +44,7 @@
 ## Social
 - **Social tab with friends and messaging** — 2026-03-20
 - **Live username search for adding friends** — 2026-03-20
+- **Add-Friend popover** (the ADD FRIEND search + Sent Requests list moved out of the always-visible left sidebar into a modal triggered by a gold UserPlus icon button placed in the friends-search header row. Modal: MagnifyingGlass-prefixed search input + autocomplete dropdown + Sent Requests list with "Undo" buttons. Click-outside + X dismiss. Empty-state when no pending requests) — 2026-05-24
 
 ## Games
 - **Games tab** with Roardle, Blitz Sprint, Flash Cards, Timeline Drop — 2026-03-22

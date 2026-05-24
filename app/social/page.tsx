@@ -5,11 +5,12 @@ import { useRouter } from "next/navigation";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { useAuth } from "@/lib/auth";
 import { useUserStats } from "@/lib/hooks";
+import useSWR from "swr";
 import { supabase } from "@/lib/supabase";
 import { cdnUrl } from "@/lib/cdn";
 import { avatarFor } from "@/lib/avatar";
 import { apiGet, apiPost, apiPatch, apiDelete } from "@/lib/api-client";
-import { Medal, Diamond, DiamondsFour, Users, CheckCircle, Sword, Trophy, Megaphone, X as XIcon, BookOpen, Fire, Target, MedalMilitary, GameController, Coins, PushPinSimple, Crown } from "@phosphor-icons/react";
+import { Medal, Diamond, DiamondsFour, Users, CheckCircle, Sword, Trophy, Megaphone, X as XIcon, BookOpen, Fire, Target, MedalMilitary, GameController, Coins, PushPinSimple, Crown, UserPlus, MagnifyingGlass } from "@phosphor-icons/react";
 import { toastError, toastSuccess } from "@/lib/toast";
 import CountUp from "@/components/CountUp";
 
@@ -137,6 +138,25 @@ export default function SocialPage() {
   const [addUsername, setAddUsername] = useState("");
   const [addError, setAddError] = useState("");
   const [addSuccess, setAddSuccess] = useState("");
+  // Add-Friend popover (formerly inline in the left sidebar). Triggered by the
+  // top-right UserPlus button so the sidebar isn't permanently consumed by it.
+  const [showAddFriendModal, setShowAddFriendModal] = useState(false);
+
+  // Esc-key closes the Add-Friend modal (matches the pattern in ClockInButton).
+  useEffect(() => {
+    if (!showAddFriendModal) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setShowAddFriendModal(false);
+        setAddUsername("");
+        setShowDropdown(false);
+        setAddError("");
+        setAddSuccess("");
+      }
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [showAddFriendModal]);
   const [searchQuery, setSearchQuery] = useState("");
   const [showNotifView, setShowNotifView] = useState(false);
   const [socialNotifs, setSocialNotifs] = useState<{ id: string; type: string; title: string; message: string | null; read: boolean; action_url: string | null; created_at: string }[]>([]);
@@ -244,61 +264,80 @@ export default function SocialPage() {
   }, [user?.id]);
 
   // ── Load friends ───────────────────────────────────────────
-  const loadFriends = useCallback(async () => {
-    if (!user?.id) return;
+  // Perf 2026-05-17: manual setInterval(10s) → SWR refreshInterval. The global
+  // persistent <SWRConfig> caches the last friends payload so the panel is
+  // instant on re-nav. `friends`/pending/outgoing stay useState because
+  // friends is locally mutated (unread→0 on open, optimistic accept/remove);
+  // SWR hydrates them via onSuccess and the pre-existing sessionStorage
+  // (cacheSocial) restore path is left untouched. loadFriends is kept as a
+  // mutate-backed revalidator so every imperative loadFriends() call site
+  // (post-accept, focus, etc.) works unchanged.
+  const { mutate: mutateFriends } = useSWR(
+    user?.id ? `social-friends/${user.id}` : null,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const res = await apiGet<any>("/api/social/friends");
-    if (res.ok && res.data) {
-      const friends = res.data.friends ?? [];
-      const pendingRequests = res.data.pendingRequests ?? [];
-      const outgoingRequests = res.data.outgoingRequests ?? [];
-      setFriends(friends);
-      setPendingRequests(pendingRequests);
-      setOutgoingRequests(outgoingRequests);
-      cacheSocial({ friends, pendingRequests, outgoingRequests });
+    () => apiGet<any>("/api/social/friends"),
+    {
+      refreshInterval: 10000,
+      keepPreviousData: true,
+      onSuccess: (res) => {
+        if (res.ok && res.data) {
+          const friends = res.data.friends ?? [];
+          const pendingRequests = res.data.pendingRequests ?? [];
+          const outgoingRequests = res.data.outgoingRequests ?? [];
+          setFriends(friends);
+          setPendingRequests(pendingRequests);
+          setOutgoingRequests(outgoingRequests);
+          cacheSocial({ friends, pendingRequests, outgoingRequests });
+        }
+      },
     }
-  }, [user?.id, cacheSocial]);
-
-  useEffect(() => {
-    loadFriends();
-    const iv = setInterval(loadFriends, 10000);
-    return () => clearInterval(iv);
-  }, [loadFriends]);
+  );
+  const loadFriends = useCallback(async () => {
+    await mutateFriends();
+  }, [mutateFriends]);
 
   // ── Load activity feed + circle leaderboard ───────────────
-  const loadFeed = useCallback(async () => {
-    if (!user?.id) return;
-    const res = await apiGet<{ feed: FeedItem[]; circle: CircleRank[] }>("/api/social/feed");
-    if (res.ok && res.data) {
-      const feed = res.data.feed ?? [];
-      const circle = res.data.circle ?? [];
-      setFeed(feed);
-      setCircle(circle);
-      cacheSocial({ feed, circle });
+  // Perf 2026-05-17: manual setInterval(30s) → SWR refreshInterval (cached).
+  const { mutate: mutateFeed } = useSWR(
+    user?.id ? `social-feed/${user.id}` : null,
+    () => apiGet<{ feed: FeedItem[]; circle: CircleRank[] }>("/api/social/feed"),
+    {
+      refreshInterval: 30000,
+      keepPreviousData: true,
+      onSuccess: (res) => {
+        if (res.ok && res.data) {
+          const feed = res.data.feed ?? [];
+          const circle = res.data.circle ?? [];
+          setFeed(feed);
+          setCircle(circle);
+          cacheSocial({ feed, circle });
+        }
+      },
     }
-  }, [user?.id, cacheSocial]);
-
-  useEffect(() => {
-    loadFeed();
-    const iv = setInterval(loadFeed, 30000);
-    return () => clearInterval(iv);
-  }, [loadFeed]);
+  );
+  const loadFeed = useCallback(async () => {
+    await mutateFeed();
+  }, [mutateFeed]);
 
   // ── Load nudge budget for the day ──────────────────────────
-  const loadNudgeBudget = useCallback(async () => {
-    if (!user?.id) return;
-    const res = await apiGet<{ remaining: number; limit: number; nudgedToday: string[] }>("/api/social/nudge");
-    if (res.ok && res.data) {
-      setNudgeState(res.data);
-      cacheSocial({ nudgeState: res.data });
+  // Perf 2026-05-17: manual setInterval(60s) → SWR refreshInterval (cached).
+  const { mutate: mutateNudge } = useSWR(
+    user?.id ? `social-nudge/${user.id}` : null,
+    () => apiGet<{ remaining: number; limit: number; nudgedToday: string[] }>("/api/social/nudge"),
+    {
+      refreshInterval: 60000,
+      keepPreviousData: true,
+      onSuccess: (res) => {
+        if (res.ok && res.data) {
+          setNudgeState(res.data);
+          cacheSocial({ nudgeState: res.data });
+        }
+      },
     }
-  }, [user?.id, cacheSocial]);
-
-  useEffect(() => {
-    loadNudgeBudget();
-    const iv = setInterval(loadNudgeBudget, 60000);
-    return () => clearInterval(iv);
-  }, [loadNudgeBudget]);
+  );
+  const loadNudgeBudget = useCallback(async () => {
+    await mutateNudge();
+  }, [mutateNudge]);
 
   // ── Send nudge ─────────────────────────────────────────────
   const sendNudge = useCallback(async (preset: string) => {
@@ -336,39 +375,68 @@ export default function SocialPage() {
   }, [challengeTarget, challengeWager, sendingChallenge]);
 
   // ── Load notifications for social panel ─────────────────────
-  const loadSocialNotifs = useCallback(async () => {
-    if (!user?.id) return;
-    const res = await apiGet<{
-      notifications: { id: string; type: string; title: string; message: string | null; read: boolean; action_url: string | null; created_at: string }[];
-      unreadCount: number;
-    }>("/api/notifications");
-    if (res.ok && res.data) {
-      setSocialNotifs(res.data.notifications ?? []);
-      setSocialUnreadCount(res.data.unreadCount ?? 0);
+  // Perf 2026-05-17: manual setInterval(15s) → SWR refreshInterval (cached).
+  // socialNotifs/unreadCount stay useState (mutated locally on mark-read);
+  // loadSocialNotifs kept as a mutate-backed revalidator (called imperatively
+  // when the notif view opens).
+  const { mutate: mutateSocialNotifs } = useSWR(
+    user?.id ? `social-notifs/${user.id}` : null,
+    () =>
+      apiGet<{
+        notifications: { id: string; type: string; title: string; message: string | null; read: boolean; action_url: string | null; created_at: string }[];
+        unreadCount: number;
+      }>("/api/notifications"),
+    {
+      refreshInterval: 15000,
+      keepPreviousData: true,
+      onSuccess: (res) => {
+        if (res.ok && res.data) {
+          setSocialNotifs(res.data.notifications ?? []);
+          setSocialUnreadCount(res.data.unreadCount ?? 0);
+        }
+      },
     }
-  }, [user?.id]);
-
-  useEffect(() => {
-    loadSocialNotifs();
-    const iv = setInterval(loadSocialNotifs, 15000);
-    return () => clearInterval(iv);
-  }, [loadSocialNotifs]);
+  );
+  const loadSocialNotifs = useCallback(async () => {
+    await mutateSocialNotifs();
+  }, [mutateSocialNotifs]);
 
   // ── Load conversation ──────────────────────────────────────
-  const loadMessages = useCallback(async (friendId: string) => {
-    if (!user?.id) return;
+  // Perf 2026-05-17: manual useEffect fetch → SWR keyed on the selected
+  // friend, so re-opening a recent conversation is instant from the global
+  // persistent cache. messages/arenaEvents stay useState (mutated by realtime
+  // INSERT + optimistic send). The original side-effect — clearing that
+  // friend's unread badge on open — is preserved in onSuccess. loadMessages
+  // kept as a mutate-backed revalidator with the same (friendId) signature so
+  // any imperative call site is unchanged.
+  const { mutate: mutateMessages } = useSWR(
+    user?.id && selectedFriend
+      ? `social-messages/${user.id}/${selectedFriend.id}`
+      : null,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const res = await apiGet<any>(`/api/social/messages?friendId=${friendId}`);
-    if (res.ok && res.data) {
-      setMessages(res.data.messages ?? []);
-      setArenaEvents(res.data.arenaEvents ?? []);
-      setFriends(prev => prev.map(f => f.id === friendId ? { ...f, unreadCount: 0 } : f));
+    () => apiGet<any>(`/api/social/messages?friendId=${selectedFriend!.id}`),
+    {
+      keepPreviousData: true,
+      onSuccess: (res) => {
+        if (res.ok && res.data) {
+          setMessages(res.data.messages ?? []);
+          setArenaEvents(res.data.arenaEvents ?? []);
+          const fid = selectedFriend?.id;
+          if (fid) {
+            setFriends(prev =>
+              prev.map(f => (f.id === fid ? { ...f, unreadCount: 0 } : f))
+            );
+          }
+        }
+      },
     }
-  }, [user?.id]);
-
-  useEffect(() => {
-    if (selectedFriend) loadMessages(selectedFriend.id);
-  }, [selectedFriend, loadMessages]);
+  );
+  const loadMessages = useCallback(
+    async (_friendId: string) => {
+      await mutateMessages();
+    },
+    [mutateMessages]
+  );
 
   // Auto-scroll to bottom
   useEffect(() => {
@@ -556,101 +624,41 @@ export default function SocialPage() {
           {/* ═══ LEFT PANEL — Friends List ═══ */}
           <div className={`flex-shrink-0 flex flex-col border-r border-white/[0.06] sm:w-[320px] sm:flex ${selectedFriend ? "hidden" : "w-full"}`}>
 
-            {/* Add Friend with autocomplete */}
-            <div className="p-4 border-b border-white/[0.06]" ref={dropdownRef}>
-              <p className="font-bebas text-lg text-cream tracking-wider mb-3">ADD FRIEND</p>
-              <div className="relative">
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={addUsername}
-                    onChange={e => handleAddUsernameChange(e.target.value)}
-                    onKeyDown={e => e.key === "Enter" && addFriend()}
-                    onFocus={() => { if (searchResults.length > 0 || addUsername.trim().length >= 2) setShowDropdown(true); }}
-                    placeholder="Search username..."
-                    className="flex-1 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-cream placeholder:text-cream/20 focus:outline-none focus:border-electric/40 transition"
-                  />
-                  <button onClick={addFriend}
-                    className="px-4 py-2 rounded-lg text-xs font-bold transition-all active:scale-95"
-                    style={{
-                      background: "linear-gradient(135deg, #FFD700 0%, #B8960C 100%)",
-                      color: "#04080F",
-                    }}>
-                    Add
-                  </button>
-                </div>
-
-                {/* Autocomplete dropdown */}
-                {showDropdown && addUsername.trim().length >= 2 && (
-                  <div className="absolute left-0 right-0 top-full mt-1 rounded-lg overflow-hidden z-50"
-                    style={{
-                      background: "linear-gradient(135deg, #0c1020 0%, #080c18 100%)",
-                      border: "1px solid rgba(255,255,255,0.1)",
-                      boxShadow: "0 8px 24px rgba(0,0,0,0.5)",
-                    }}>
-                    {searchLoading ? (
-                      <div className="flex items-center justify-center gap-2 py-4">
-                        <div className="w-4 h-4 rounded-full border-2 border-electric border-t-transparent animate-spin" />
-                        <span className="text-cream/30 text-xs">Searching...</span>
-                      </div>
-                    ) : searchResults.length === 0 ? (
-                      <div className="py-4 text-center">
-                        <p className="text-cream/20 text-xs">No users found</p>
-                      </div>
-                    ) : (
-                      searchResults.map(u => {
-                        const tier = getEloTier(u.arena_elo);
-                        return (
-                          <button
-                            key={u.id}
-                            onClick={() => selectSearchResult(u.username)}
-                            aria-label={`${u.username} — open profile`}
-                            className="w-full flex items-center gap-3 px-3 py-2.5 text-left hover:bg-white/[0.06] transition-colors"
-                          >
-                            <img src={avatarFor(u.username, u.avatar_url)} alt={u.username} className="w-8 h-8 rounded-full object-cover" />
-                            <div className="flex-1 min-w-0">
-                              <p className="text-cream text-sm font-semibold truncate">{u.username}</p>
-                            </div>
-                            <span className="text-[9px] font-bold px-1.5 py-0.5 rounded flex-shrink-0 inline-flex items-center gap-1" style={{
-                              color: tier.color,
-                              background: `${tier.color}15`,
-                            }}>
-                              <tier.Icon size={12} weight="fill" color={tier.color} aria-hidden="true" />
-                              {tier.name}
-                            </span>
-                          </button>
-                        );
-                      })
-                    )}
-                  </div>
-                )}
-              </div>
-              {addError && <p className="text-red-400 text-xs mt-2">{addError}</p>}
-              {addSuccess && <p className="text-green-400 text-xs mt-2">{addSuccess}</p>}
-            </div>
-
-            {/* Search */}
-            <div className="px-4 py-3 border-b border-white/[0.06]">
+            {/* Friends search + Add-friend trigger (top-right, opens modal) */}
+            <div className="px-4 py-3 border-b border-white/[0.06] flex items-center gap-2">
               <input
                 type="text"
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
                 placeholder="Search friends..."
-                className="w-full bg-white/[0.03] border border-white/[0.06] rounded-lg px-3 py-2 text-sm text-cream placeholder:text-cream/15 focus:outline-none focus:border-white/20 transition"
+                className="flex-1 min-w-0 bg-white/[0.03] border border-white/[0.06] rounded-lg px-3 py-2 text-sm text-cream placeholder:text-cream/15 focus:outline-none focus:border-white/20 transition"
               />
+              <button
+                type="button"
+                onClick={() => setShowAddFriendModal(true)}
+                aria-label="Add friend"
+                title="Add friend"
+                className="flex-shrink-0 w-10 h-10 rounded-lg inline-flex items-center justify-center transition-all hover:scale-105 active:scale-95"
+                style={{
+                  background: "linear-gradient(135deg, #FFD700 0%, #B8960C 100%)",
+                  color: "#04080F",
+                }}
+              >
+                <UserPlus size={18} weight="bold" aria-hidden="true" />
+              </button>
             </div>
 
             {/* Tab toggle: Friends / Notifications */}
             <div className="flex border-b border-white/[0.06]">
               <button
                 onClick={() => setShowNotifView(false)}
-                className={`flex-1 py-2.5 text-xs font-bold uppercase tracking-wider transition-colors ${!showNotifView ? "text-cream border-b-2 border-electric" : "text-cream/30 hover:text-cream/50"}`}
+                className={`flex-1 py-2.5 text-xs font-bold uppercase tracking-wider transition-colors ${!showNotifView ? "text-cream border-b-2 border-electric" : "text-cream/55 hover:text-cream/50"}`}
               >
                 Friends
               </button>
               <button
                 onClick={() => { setShowNotifView(true); loadSocialNotifs(); }}
-                className={`flex-1 py-2.5 text-xs font-bold uppercase tracking-wider transition-colors relative ${showNotifView ? "text-cream border-b-2 border-electric" : "text-cream/30 hover:text-cream/50"}`}
+                className={`flex-1 py-2.5 text-xs font-bold uppercase tracking-wider transition-colors relative ${showNotifView ? "text-cream border-b-2 border-electric" : "text-cream/55 hover:text-cream/50"}`}
               >
                 Notifications
                 {(socialUnreadCount ?? 0) > 0 && (
@@ -667,7 +675,7 @@ export default function SocialPage() {
               <div className="flex-1 overflow-y-auto">
                 {socialNotifs.length === 0 ? (
                   <div className="py-10 text-center">
-                    <p className="text-cream/20 text-sm">No notifications</p>
+                    <p className="text-cream/55 text-sm">No notifications</p>
                   </div>
                 ) : (
                   socialNotifs.map(n => (
@@ -714,7 +722,7 @@ export default function SocialPage() {
             {/* Pending Requests */}
             {pendingRequests.length > 0 && (
               <div className="px-4 py-3 border-b border-white/[0.06]">
-                <p className="text-cream/40 text-[10px] font-bold uppercase tracking-widest mb-2">
+                <p className="text-cream/60 text-[10px] font-bold uppercase tracking-widest mb-2">
                   Pending Requests ({pendingRequests.length})
                 </p>
                 <div className="space-y-2">
@@ -737,7 +745,7 @@ export default function SocialPage() {
                           Accept
                         </button>
                         <button onClick={() => handleRequest(req.friendshipId, "decline")}
-                          className="text-cream/30 px-1.5 py-1 rounded hover:text-cream/50 transition inline-flex items-center">
+                          className="text-cream/55 px-1.5 py-1 rounded hover:text-cream/50 transition inline-flex items-center">
                           <XIcon size={12} weight="bold" aria-hidden="true" />
                         </button>
                       </div>
@@ -747,41 +755,14 @@ export default function SocialPage() {
               </div>
             )}
 
-            {/* Outgoing Pending Requests */}
-            {outgoingRequests.length > 0 && (
-              <div className="px-4 py-3 border-b border-white/[0.06]">
-                <p className="text-cream/40 text-[10px] font-bold uppercase tracking-widest mb-2">
-                  Sent Requests ({outgoingRequests.length})
-                </p>
-                <div className="space-y-2">
-                  {outgoingRequests.map(req => {
-                    const tier = getEloTier(req.arena_elo);
-                    return (
-                      <div key={req.friendshipId} className="flex items-center gap-3 p-2 rounded-lg"
-                        aria-label={`Outgoing friend request to ${req.username}`}
-                        style={{ background: "rgba(255,255,255,0.03)" }}>
-                        <img src={avatarFor(req.username, req.avatar_url)} alt={req.username} className="w-8 h-8 rounded-full object-cover flex-shrink-0" />
-                        <div className="flex-1 min-w-0">
-                          <p className="text-cream text-xs font-semibold truncate">{req.username}</p>
-                          <p className="text-[10px] text-cream/20">Pending</p>
-                        </div>
-                        <button onClick={() => cancelRequest(req.friendshipId)}
-                          className="text-red-400 text-[10px] font-bold px-2 py-1 rounded bg-red-400/10 hover:bg-red-400/20 transition">
-                          Cancel
-                        </button>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
+            {/* Sent Requests moved to the Add-Friend modal (top-right UserPlus button). */}
 
             {/* Friends List */}
             <div className="flex-1 overflow-y-auto">
               {filteredFriends.length === 0 && (
                 <div className="px-4 py-10 text-center">
-                  <p className="text-cream/20 text-sm">
-                    {searchQuery ? "No friends match your search" : "No friends yet. Add someone above!"}
+                  <p className="text-cream/55 text-sm">
+                    {searchQuery ? "No friends match your search" : "No friends yet. Tap the + icon up top to add someone."}
                   </p>
                 </div>
               )}
@@ -856,7 +837,7 @@ export default function SocialPage() {
 
                   {/* ═══ Circle Pulse — 4 live-stat chips replace the old hero ═══ */}
                   <header className="mb-8">
-                    <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-cream/30 mb-3">
+                    <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-cream/55 mb-3">
                       circle pulse &nbsp;&middot;&nbsp; {new Date().toLocaleDateString(undefined, { weekday: "long" }).toLowerCase()}
                     </p>
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
@@ -879,7 +860,7 @@ export default function SocialPage() {
                         },
                         {
                           label: "nudges left",
-                          value: <><CountUp id="social-nudges-left" value={nudgeState.remaining} duration={300} /><span className="text-cream/30">/{nudgeState.limit}</span></>,
+                          value: <><CountUp id="social-nudges-left" value={nudgeState.remaining} duration={300} /><span className="text-cream/55">/{nudgeState.limit}</span></>,
                           accent: nudgeState.remaining > 0 ? "#F97316" : "#71717A",
                         },
                       ].map(chip => (
@@ -919,10 +900,10 @@ export default function SocialPage() {
                       }}
                     >
                       <div className="flex items-baseline justify-between mb-3">
-                        <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-cream/40">
+                        <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-cream/60">
                           this week&rsquo;s showdown
                         </p>
-                        <p className="font-mono text-[10px] text-cream/30">ends friday 23:59 UTC</p>
+                        <p className="font-mono text-[10px] text-cream/55">ends friday 23:59 UTC</p>
                       </div>
 
                       <div className="flex items-center justify-between gap-4">
@@ -931,7 +912,7 @@ export default function SocialPage() {
                           <p className="text-cream/70 text-xs font-mono uppercase tracking-wider mb-0.5">you</p>
                           <p className="font-bebas text-3xl text-red-400 tabular-nums leading-none">
                             <CountUp id="social-myweekly" value={myWeekly} duration={500} />
-                            <span className="text-cream/30 text-sm ml-1.5">Fangs</span>
+                            <span className="text-cream/55 text-sm ml-1.5">Fangs</span>
                           </p>
                         </div>
 
@@ -944,7 +925,7 @@ export default function SocialPage() {
                           </p>
                           <p className="font-bebas text-3xl text-electric tabular-nums leading-none">
                             {rival.coinsThisWeek}
-                            <span className="text-cream/30 text-sm ml-1.5">Fangs</span>
+                            <span className="text-cream/55 text-sm ml-1.5">Fangs</span>
                           </p>
                         </div>
                       </div>
@@ -994,12 +975,12 @@ export default function SocialPage() {
                   {circle.length > 0 && (
                     <section className="mb-10">
                       <div className="flex items-baseline justify-between mb-3">
-                        <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-cream/40">
+                        <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-cream/60">
                           squad goal &middot; {circle.length} member{circle.length === 1 ? "" : "s"}
                         </p>
                         <p className="font-bebas text-cream/70 text-sm tabular-nums">
                           <CountUp id="social-squad-progress" value={squadProgress} duration={500} />
-                          <span className="text-cream/30 text-xs"> / {squadTarget}</span>
+                          <span className="text-cream/55 text-xs"> / {squadTarget}</span>
                         </p>
                       </div>
                       <div className="h-1.5 rounded-full overflow-hidden relative" style={{ background: "rgba(255, 255, 255, 0.04)" }}>
@@ -1026,7 +1007,7 @@ export default function SocialPage() {
                   {circle.length > 0 && (
                     <section className="mb-10">
                       <div className="flex items-baseline justify-between mb-4">
-                        <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-cream/40">this week · Fangs</p>
+                        <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-cream/60">this week · Fangs</p>
                         <p className="text-cream/25 text-[10px] italic font-serif">top 5</p>
                       </div>
                       <div className="flex gap-4 overflow-x-auto pb-4">
@@ -1107,7 +1088,7 @@ export default function SocialPage() {
                   <section className="relative">
                     <div className="flex items-baseline justify-between mb-5">
                       <h2 className="font-bebas text-lg text-cream tracking-[0.15em]">FEED</h2>
-                      <button onClick={loadFeed} className="font-mono text-[10px] uppercase tracking-[0.25em] text-cream/40 hover:text-electric transition-colors">
+                      <button onClick={loadFeed} className="font-mono text-[10px] uppercase tracking-[0.25em] text-cream/60 hover:text-electric transition-colors">
                         refresh ↻
                       </button>
                     </div>
@@ -1115,10 +1096,10 @@ export default function SocialPage() {
                     {feed.length === 0 ? (
                       <div className="py-14 text-center border-y border-white/[0.05]">
                         <PushPinSimple size={28} weight="regular" color="rgba(255,255,255,0.2)" className="mx-auto mb-3" aria-hidden="true" />
-                        <p className="text-cream/40 text-sm italic font-serif mb-1">
+                        <p className="text-cream/60 text-sm italic font-serif mb-1">
                           board&rsquo;s empty for now
                         </p>
-                        <p className="text-cream/20 text-xs">
+                        <p className="text-cream/55 text-xs">
                           {friends.length === 0 ? "add some friends and their wins show up here" : "your circle hasn't posted anything yet — be the first"}
                         </p>
                       </div>
@@ -1158,7 +1139,7 @@ export default function SocialPage() {
                                   <div className="flex-1 min-w-0">
                                     <p className="text-cream text-sm font-semibold leading-tight">
                                       <span className="text-cream">{item.friendUsername}</span>
-                                      <span className="text-cream/40 font-normal"> {item.description ?? `earned Fangs from ${meta.label}`}</span>
+                                      <span className="text-cream/60 font-normal"> {item.description ?? `earned Fangs from ${meta.label}`}</span>
                                     </p>
                                     <p className="text-cream/25 text-[10px] mt-1 font-mono uppercase tracking-wider">
                                       {meta.label} · {timeAgo(item.createdAt)}
@@ -1180,7 +1161,7 @@ export default function SocialPage() {
                   </section>
 
                   {friends.length > 0 && (
-                    <p className="text-cream/20 text-[10px] italic font-serif text-center mt-10">
+                    <p className="text-cream/55 text-[10px] italic font-serif text-center mt-10">
                       pick someone from the left to chat &middot; tap a post to react (soon)
                     </p>
                   )}
@@ -1192,7 +1173,7 @@ export default function SocialPage() {
                 <div className="flex items-center justify-between px-5 py-3 border-b border-white/[0.06] flex-shrink-0">
                   <div className="flex items-center gap-3">
                     {/* Back button on mobile */}
-                    <button onClick={() => setSelectedFriend(null)} className="sm:hidden text-cream/40 mr-1 hover:text-cream/60 transition">
+                    <button onClick={() => setSelectedFriend(null)} className="sm:hidden text-cream/60 mr-1 hover:text-cream/60 transition">
                       ←
                     </button>
                     <div className="relative" aria-label={`${selectedFriend.username}'s avatar`}>
@@ -1251,12 +1232,12 @@ export default function SocialPage() {
                               background: "linear-gradient(135deg, rgba(74,144,217,0.08) 0%, rgba(74,144,217,0.03) 100%)",
                               border: "1px solid rgba(74,144,217,0.15)",
                             }}>
-                            <p className="text-[10px] text-cream/30 uppercase tracking-widest mb-1">Arena Match</p>
+                            <p className="text-[10px] text-cream/55 uppercase tracking-widest mb-1">Arena Match</p>
                             <p className="font-bebas text-lg tracking-wider mb-1"
                               style={{ color: isDraw ? "#E67E22" : iWon ? "#22C55E" : "#EF4444" }}>
                               {isDraw ? "DRAW" : iWon ? "VICTORY" : "DEFEAT"}
                             </p>
-                            <div className="flex items-center justify-center gap-3 text-xs text-cream/40">
+                            <div className="flex items-center justify-center gap-3 text-xs text-cream/60">
                               <span>{event.player1_score} — {event.player2_score}</span>
                               <span className="text-cream/10">|</span>
                               <span className="flex items-center gap-1">
@@ -1284,7 +1265,7 @@ export default function SocialPage() {
                             borderBottomLeftRadius: "4px",
                           }}>
                           <p className="text-cream text-sm leading-relaxed">{msg.content}</p>
-                          <p className={`text-[9px] mt-1 ${isMine ? "text-gold/40 text-right" : "text-cream/20"}`}>
+                          <p className={`text-[9px] mt-1 ${isMine ? "text-gold/40 text-right" : "text-cream/55"}`}>
                             {new Date(msg.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                           </p>
                         </div>
@@ -1303,7 +1284,7 @@ export default function SocialPage() {
                       onChange={e => setMsgInput(e.target.value)}
                       onKeyDown={e => e.key === "Enter" && !e.shiftKey && sendMessage()}
                       placeholder="Type a message..."
-                      className="flex-1 bg-white/[0.04] border border-white/[0.08] rounded-xl px-4 py-2.5 text-sm text-cream placeholder:text-cream/20 focus:outline-none focus:border-electric/30 transition"
+                      className="flex-1 bg-white/[0.04] border border-white/[0.08] rounded-xl px-4 py-2.5 text-sm text-cream placeholder:text-cream/55 focus:outline-none focus:border-electric/30 transition"
                     />
                     <button
                       onClick={sendMessage}
@@ -1339,7 +1320,7 @@ export default function SocialPage() {
                 <h2 className="font-bebas text-2xl text-cream tracking-wider leading-tight">
                   Nudge {nudgeTarget.username}
                 </h2>
-                <p className="font-serif italic text-cream/40 text-xs mt-2">
+                <p className="font-serif italic text-cream/60 text-xs mt-2">
                   one-tap encouragement. you have {nudgeState.remaining} nudge{nudgeState.remaining === 1 ? "" : "s"} left today.
                 </p>
               </div>
@@ -1395,13 +1376,13 @@ export default function SocialPage() {
                 <h2 className="font-bebas text-2xl text-cream tracking-wider leading-tight">
                   Challenge {challengeTarget.username}?
                 </h2>
-                <p className="font-serif italic text-cream/40 text-xs mt-2">
+                <p className="font-serif italic text-cream/60 text-xs mt-2">
                   winner takes the pot. 10 questions, 15s each.
                 </p>
               </div>
 
               <div className="mb-5">
-                <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-cream/40 mb-2">wager · Fangs</p>
+                <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-cream/60 mb-2">wager · Fangs</p>
                 <div className="grid grid-cols-4 gap-2">
                   {[10, 25, 50, 100].map(w => (
                     <button
@@ -1438,6 +1419,193 @@ export default function SocialPage() {
                 >
                   {sendingChallenge ? "Sending…" : <><Sword size={14} weight="fill" aria-hidden="true" /> Send Challenge</>}
                 </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ═══ Add-Friend Modal ═══ */}
+        {showAddFriendModal && (
+          <div
+            className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-slide-up"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Add friend"
+            onClick={(e) => {
+              if (e.target === e.currentTarget) {
+                setShowAddFriendModal(false);
+                setAddUsername("");
+                setShowDropdown(false);
+                setAddError("");
+                setAddSuccess("");
+              }
+            }}
+          >
+            <div
+              className="w-full max-w-md rounded-2xl border border-electric/25 overflow-hidden"
+              style={{ background: "linear-gradient(135deg, #0c1020 0%, #080c18 100%)" }}
+              ref={dropdownRef}
+            >
+              {/* Header */}
+              <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06]">
+                <div className="inline-flex items-center gap-2.5">
+                  <UserPlus size={20} weight="bold" className="text-gold" aria-hidden="true" />
+                  <h2 className="font-bebas text-lg text-cream tracking-wider">ADD FRIEND</h2>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowAddFriendModal(false);
+                    setAddUsername("");
+                    setShowDropdown(false);
+                    setAddError("");
+                    setAddSuccess("");
+                  }}
+                  aria-label="Close"
+                  className="text-cream/55 hover:text-cream/50 transition p-1"
+                >
+                  <XIcon size={18} weight="bold" aria-hidden="true" />
+                </button>
+              </div>
+
+              {/* Search input */}
+              <div className="px-5 pt-4">
+                <div className="relative">
+                  <MagnifyingGlass
+                    size={16}
+                    weight="bold"
+                    className="absolute left-3 top-1/2 -translate-y-1/2 text-cream/40"
+                    aria-hidden="true"
+                  />
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={addUsername}
+                      onChange={(e) => handleAddUsernameChange(e.target.value)}
+                      onKeyDown={(e) => e.key === "Enter" && addFriend()}
+                      onFocus={() => {
+                        if (searchResults.length > 0 || addUsername.trim().length >= 2) setShowDropdown(true);
+                      }}
+                      autoFocus
+                      placeholder="Search username..."
+                      className="flex-1 bg-white/5 border border-white/10 rounded-lg pl-9 pr-3 py-2.5 text-sm text-cream placeholder:text-cream/55 focus:outline-none focus:border-electric/40 transition"
+                    />
+                    <button
+                      onClick={addFriend}
+                      className="px-4 py-2.5 rounded-lg text-xs font-bold transition-all active:scale-95"
+                      style={{
+                        background: "linear-gradient(135deg, #FFD700 0%, #B8960C 100%)",
+                        color: "#04080F",
+                      }}
+                    >
+                      Add
+                    </button>
+                  </div>
+
+                  {/* Autocomplete dropdown */}
+                  {showDropdown && addUsername.trim().length >= 2 && (
+                    <div
+                      className="absolute left-0 right-0 top-full mt-1 rounded-lg overflow-hidden z-50 max-h-64 overflow-y-auto"
+                      style={{
+                        background: "linear-gradient(135deg, #0c1020 0%, #080c18 100%)",
+                        border: "1px solid rgba(255,255,255,0.1)",
+                        boxShadow: "0 8px 24px rgba(0,0,0,0.5)",
+                      }}
+                    >
+                      {searchLoading ? (
+                        <div className="flex items-center justify-center gap-2 py-4">
+                          <div className="w-4 h-4 rounded-full border-2 border-electric border-t-transparent animate-spin" />
+                          <span className="text-cream/55 text-xs">Searching...</span>
+                        </div>
+                      ) : searchResults.length === 0 ? (
+                        <div className="py-4 text-center">
+                          <p className="text-cream/55 text-xs">No users found</p>
+                        </div>
+                      ) : (
+                        searchResults.map((u) => {
+                          const tier = getEloTier(u.arena_elo);
+                          return (
+                            <button
+                              key={u.id}
+                              onClick={() => selectSearchResult(u.username)}
+                              aria-label={`${u.username} — open profile`}
+                              className="w-full flex items-center gap-3 px-3 py-2.5 text-left hover:bg-white/[0.06] transition-colors"
+                            >
+                              <img
+                                src={avatarFor(u.username, u.avatar_url)}
+                                alt={u.username}
+                                className="w-8 h-8 rounded-full object-cover"
+                              />
+                              <div className="flex-1 min-w-0">
+                                <p className="text-cream text-sm font-semibold truncate">{u.username}</p>
+                              </div>
+                              <span
+                                className="text-[9px] font-bold px-1.5 py-0.5 rounded flex-shrink-0 inline-flex items-center gap-1"
+                                style={{ color: tier.color, background: `${tier.color}15` }}
+                              >
+                                <tier.Icon size={12} weight="fill" color={tier.color} aria-hidden="true" />
+                                {tier.name}
+                              </span>
+                            </button>
+                          );
+                        })
+                      )}
+                    </div>
+                  )}
+                </div>
+                {addError && <p className="text-red-400 text-xs mt-2">{addError}</p>}
+                {addSuccess && <p className="text-green-400 text-xs mt-2">{addSuccess}</p>}
+              </div>
+
+              {/* Sent Requests list */}
+              <div className="px-5 pt-5 pb-5">
+                <p className="text-cream/60 text-[10px] font-bold uppercase tracking-widest mb-3 inline-flex items-center gap-2">
+                  Sent Requests
+                  <span className="text-cream/40 font-mono normal-case tracking-normal text-[10px]">
+                    ({outgoingRequests.length})
+                  </span>
+                </p>
+                {outgoingRequests.length === 0 ? (
+                  <div className="py-6 text-center rounded-lg" style={{ background: "rgba(255,255,255,0.02)" }}>
+                    <p className="text-cream/45 text-xs">No pending requests</p>
+                    <p className="text-cream/30 text-[10px] mt-1 font-mono">Search above to add a friend</p>
+                  </div>
+                ) : (
+                  <div className="space-y-2 max-h-72 overflow-y-auto">
+                    {outgoingRequests.map((req) => {
+                      const tier = getEloTier(req.arena_elo);
+                      return (
+                        <div
+                          key={req.friendshipId}
+                          className="flex items-center gap-3 p-2.5 rounded-lg"
+                          aria-label={`Outgoing friend request to ${req.username}`}
+                          style={{ background: "rgba(255,255,255,0.03)" }}
+                        >
+                          <img
+                            src={avatarFor(req.username, req.avatar_url)}
+                            alt={req.username}
+                            className="w-9 h-9 rounded-full object-cover flex-shrink-0"
+                          />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-cream text-xs font-semibold truncate">{req.username}</p>
+                            <p className="text-[10px] inline-flex items-center gap-1" style={{ color: tier.color }}>
+                              <tier.Icon size={10} weight="fill" color={tier.color} aria-hidden="true" />
+                              {tier.name} &middot; <span className="text-cream/45">Pending</span>
+                            </p>
+                          </div>
+                          <button
+                            onClick={() => cancelRequest(req.friendshipId)}
+                            aria-label={`Undo friend request to ${req.username}`}
+                            className="text-red-400 text-[10px] font-bold px-2.5 py-1.5 rounded bg-red-400/10 hover:bg-red-400/20 transition inline-flex items-center gap-1"
+                          >
+                            <XIcon size={10} weight="bold" aria-hidden="true" />
+                            Undo
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             </div>
           </div>

@@ -140,11 +140,18 @@ export default function ClockInButton() {
       <div ref={wrapperRef} className="relative">
         <button
           onClick={() => {
-            // Available → claim AND open popover. Cooldown → just open.
-            if (available && !submitting) void claim();
+            // Available → just claim (instant, no popover — the reveal toast
+            // is the user-facing confirmation). Cooldown/claimed → click
+            // opens the popover so the user can see countdown + history.
+            // Submitting (claim in-flight) → no-op so a rapid double-click
+            // doesn't accidentally toggle the popover open.
+            if (available) {
+              if (!submitting) void claim();
+              return;
+            }
             setOpen(o => !o);
           }}
-          aria-label={available ? "Claim daily Fangs" : `Daily on cooldown (${formatCountdown(remainingMs)})`}
+          aria-label={available ? "Claim daily Fangs" : `Daily on cooldown (${formatCountdown(remainingMs)}). Click to view history.`}
           className={`clock-in-btn ${claimed ? "clock-in-btn--claimed" : ""}`}
         >
           {claimed
@@ -350,7 +357,7 @@ function StatTile({
 // Reveal toast — slides down from top, auto-dismisses after AUTO_CLOSE_MS,
 // non-blocking (no backdrop). Replaces the old center-screen modal.
 // ─────────────────────────────────────────────────────────────────────────────
-const AUTO_CLOSE_MS = 5000;
+const AUTO_CLOSE_MS = 3000;
 
 function ClockInReveal({
   amount, day, onClose,
