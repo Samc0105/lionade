@@ -188,3 +188,85 @@ export async function resetExpiredStreak(userId: string): Promise<void> {
     })
     .eq("id", userId);
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Shared read hooks — perf refactor 2026-05-17
+//
+// These wrap existing lib/db.ts functions (signatures UNCHANGED) behind SWR so
+// the global localStorage-persisted <SWRConfig> cache makes navigation instant
+// instead of cold-refetching on every mount. Keys are STABLE STRINGS, mirroring
+// the `user-stats/${userId}` pattern above. Pages that previously did raw
+// useState+useEffect+db-call now consume these so the data is deduped/shared
+// across Dashboard / Learn / Profile / Badges / Leaderboard / Quiz.
+//
+// No new ad-hoc caching layer is introduced — the provider in lib/swr-config.ts
+// is the single source of cache truth.
+// ─────────────────────────────────────────────────────────────────────────────
+
+import {
+  getSubjectStats,
+  getQuizHistory,
+  getAllBadges,
+  getUserBadges,
+  getLeaderboard,
+  getEloLeaderboard,
+} from "@/lib/db";
+
+/** Subject stats (Dashboard + Profile + Quiz select screen). */
+export function useSubjectStats(
+  userId: string | undefined,
+  opts?: { lifetime?: boolean }
+) {
+  const lifetime = opts?.lifetime ? "lifetime" : "window";
+  return useSWR(
+    userId ? `subject-stats/${userId}/${lifetime}` : null,
+    () => getSubjectStats(userId!, opts),
+    { keepPreviousData: true }
+  );
+}
+
+/** Recent quiz history (Dashboard recent list, Learn activity, Profile). */
+export function useQuizHistory(userId: string | undefined, limit = 10) {
+  return useSWR(
+    userId ? `quiz-history/${userId}/${limit}` : null,
+    () => getQuizHistory(userId!, limit),
+    { keepPreviousData: true }
+  );
+}
+
+/** Full badge catalog — effectively static; long dedupe so it never re-fetches
+ *  while navigating. */
+export function useAllBadges() {
+  return useSWR("all-badges", () => getAllBadges(), {
+    keepPreviousData: true,
+    dedupingInterval: 5 * 60_000,
+    revalidateOnFocus: false,
+  });
+}
+
+/** Badges a user has earned (Badges page + Profile). */
+export function useUserBadges(userId: string | undefined) {
+  return useSWR(
+    userId ? `user-badges/${userId}` : null,
+    () => getUserBadges(userId!),
+    { keepPreviousData: true, dedupingInterval: 60_000 }
+  );
+}
+
+/** Weekly (coins-this-week) leaderboard. */
+export function useWeeklyLeaderboard(limit = 200) {
+  return useSWR(
+    `leaderboard-weekly/${limit}`,
+    () => getLeaderboard(limit),
+    { keepPreviousData: true, dedupingInterval: 30_000 }
+  );
+}
+
+/** ELO leaderboard. */
+export function useEloLeaderboard(limit = 200) {
+  return useSWR(
+    `leaderboard-elo/${limit}`,
+    () => getEloLeaderboard(limit),
+    { keepPreviousData: true, dedupingInterval: 30_000 }
+  );
+}
