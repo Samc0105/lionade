@@ -1,11 +1,10 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
+import { useEffect, useMemo, useState } from "react";
 import { cdnUrl } from "@/lib/cdn";
 import { SITE_HOST } from "@/lib/site-config";
 import RedirectIfSignedIn from "@/components/RedirectIfSignedIn";
-
-const DEVOPS_PASSWORD = "LionadeDevOps2026";
 
 const STEPS = [
   { num: "01", icon: "\uD83C\uDFAF", title: "Clock In Daily", desc: 'Open Lionade and start your <strong class="text-electric">Daily Grind</strong> \u2014 AI-generated quizzes in your subject. Every correct answer adds to your streak and your bag.' },
@@ -41,8 +40,7 @@ const SUBJECTS = [
 ];
 
 const ROADMAP = [
-  { phase: "Q1 2026", title: "Private Beta", desc: "Core quiz engine, daily streaks, coin system, and basic profiles. Invite-only access for early waitlist members. You\u2019re watching us build in real time.", status: "active" },
-  { phase: "Summer 2026", title: "V1 \u2014 Public Launch", desc: "Lionade goes live for everyone. 1v1 Duels, full leaderboards, friend challenges, and every subject unlocked. Free to join, free to grind.", status: "upcoming" },
+  { phase: "Live Now", title: "V1 \u2014 Public Launch", desc: "Lionade is live. Daily quizzes, 1v1 Duels, full leaderboards, friend challenges, and every subject unlocked. Free to join, free to grind. Sign up and start stacking coins.", status: "active" },
   { phase: "December 2026", title: "V2 \u2014 Lionade Pro", desc: "Paid subscriptions arrive. Pro tiers with advanced analytics, bonus coin multipliers, exclusive tournaments, and priority matchmaking. Plus \u2014 real cash payouts go live. Start converting your earned coins into real money.", status: "upcoming" },
   { phase: "March 2027", title: "V3 \u2014 The Full Vision", desc: "Meet Ninny \u2014 your AI-powered study companion. Team leagues, tutoring marketplace, and the complete Lionade ecosystem. Cash payouts get a 10% boost across the board \u2014 the longer you\u2019ve been grinding, the more you earn.", status: "upcoming" },
 ];
@@ -56,7 +54,7 @@ const FAQ = [
   { q: "What are 1v1 Duels?", a: "Challenge any other user to a head-to-head quiz match. Both players wager coins, answer the same questions, and the winner takes the pot." },
   { q: "Do I need to download an app?", a: "Nope. Lionade is web-first \u2014 just open your browser, log in, and start grinding. Works on any device, anywhere, anytime. No app store needed." },
   { q: "What\u2019s a streak and why does it matter?", a: "Your streak tracks how many consecutive days you\u2019ve studied. The longer your streak, the higher your coin multiplier. Break it and you start over." },
-  { q: "When does the public version launch?", a: "V1 launches Summer 2026 and will be free for everyone. Right now we\u2019re in private beta \u2014 join the waitlist to get early access before anyone else." },
+  { q: "Is Lionade live yet?", a: "Yes \u2014 V1 is live. Sign up free and start grinding right now. No waitlist, no invite codes. V2 with real cash payouts ships December 2026; V3 with team leagues and tutoring marketplace ships March 2027." },
 ];
 
 const TICKER_ITEMS = [
@@ -195,28 +193,16 @@ function StepCard({ step, idx }: { step: typeof STEPS[0]; idx: number }) {
   );
 }
 
-export default function ComingSoonPage() {
+export default function LandingPage() {
   // NO `useAuth()` here on purpose. The landing page must render instantly
   // like a static site. Auth status is handled silently, AFTER hydration,
   // by the <RedirectIfSignedIn /> component rendered at the end of this
   // tree — which signs-in'd visitors to /dashboard without ever gating the
   // marketing surface.
 
-  const [modalOpen, setModalOpen] = useState(false);
-  const [pw, setPw] = useState("");
-  const [error, setError] = useState(false);
-  const [success, setSuccess] = useState(false);
-
-  const [email1, setEmail1] = useState("");
-  const [status1, setStatus1] = useState<"idle" | "loading" | "success" | "error" | "duplicate">("idle");
-  const [msg1, setMsg1] = useState("");
-  const [email2, setEmail2] = useState("");
-  const [status2, setStatus2] = useState<"idle" | "loading" | "success" | "error" | "duplicate">("idle");
-  const [msg2, setMsg2] = useState("");
-
-  const clickCountRef = useRef(0);
-  const resetTimerRef = useRef<number | null>(null);
-  const inputRef = useRef<HTMLInputElement | null>(null);
+  const [newsletterEmail, setNewsletterEmail] = useState("");
+  const [newsletterStatus, setNewsletterStatus] = useState<"idle" | "loading" | "success" | "error" | "duplicate">("idle");
+  const [newsletterMsg, setNewsletterMsg] = useState("");
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -231,33 +217,36 @@ export default function ComingSoonPage() {
     return () => clearTimeout(timer);
   }, []);
 
-  useEffect(() => { if (modalOpen && inputRef.current) inputRef.current.focus(); }, [modalOpen]);
-
-  const handleSecretClick = () => {
-    clickCountRef.current += 1;
-    if (resetTimerRef.current) window.clearTimeout(resetTimerRef.current);
-    if (clickCountRef.current >= 5) { clickCountRef.current = 0; setPw(""); setError(false); setSuccess(false); setModalOpen(true); return; }
-    resetTimerRef.current = window.setTimeout(() => { clickCountRef.current = 0; }, 1500);
-  };
-
-  const closeModal = () => { setModalOpen(false); setPw(""); setError(false); setSuccess(false); };
-
-  const handleDevOpsSubmit = () => {
-    if (pw === DEVOPS_PASSWORD) { setError(false); setSuccess(true); localStorage.setItem("lionade_beta_access", "true"); return; }
-    setError(true); setSuccess(false); setPw(""); window.setTimeout(() => closeModal(), 1200);
-  };
-
-  const submitWaitlist = async (email: string, setStatus: (s: "idle" | "loading" | "success" | "error" | "duplicate") => void, setMsg: (m: string) => void, setEmail: (e: string) => void) => {
-    const clean = email.trim().toLowerCase();
-    if (!clean || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(clean)) { setStatus("error"); setMsg("Please enter a valid email."); return; }
-    setStatus("loading");
+  const submitNewsletter = async () => {
+    const clean = newsletterEmail.trim().toLowerCase();
+    if (!clean || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(clean)) {
+      setNewsletterStatus("error");
+      setNewsletterMsg("Please enter a valid email.");
+      return;
+    }
+    setNewsletterStatus("loading");
     try {
-      const res = await fetch("/api/waitlist", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email: clean, source: "landing" }) });
+      const res = await fetch("/api/waitlist", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: clean, source: "landing-newsletter" }),
+      });
       const data = await res.json();
-      if (res.ok) { setStatus("success"); setMsg(data.message || "You\u2019re on the list!"); setEmail(""); }
-      else if (res.status === 409) { setStatus("duplicate"); setMsg(data.error || "You\u2019re already on the list!"); }
-      else { setStatus("error"); setMsg(data.error || "Something went wrong."); }
-    } catch { setStatus("error"); setMsg("Something went wrong."); }
+      if (res.ok) {
+        setNewsletterStatus("success");
+        setNewsletterMsg(data.message || "You\u2019re subscribed.");
+        setNewsletterEmail("");
+      } else if (res.status === 409) {
+        setNewsletterStatus("duplicate");
+        setNewsletterMsg(data.error || "You\u2019re already subscribed.");
+      } else {
+        setNewsletterStatus("error");
+        setNewsletterMsg(data.error || "Something went wrong.");
+      }
+    } catch {
+      setNewsletterStatus("error");
+      setNewsletterMsg("Something went wrong.");
+    }
   };
 
   // No auth gate — page renders immediately. RedirectIfSignedIn (below,
@@ -298,7 +287,9 @@ export default function ComingSoonPage() {
       <nav className="fixed top-0 left-0 right-0 z-[100] flex items-center justify-between px-6 sm:px-12 py-6"
         style={{ background: "linear-gradient(to bottom, rgba(4,8,15,0.95), transparent)" }}>
         <img src={cdnUrl("/logo-full.png")} alt="Lionade" className="h-9 rounded-md" />
-        <span className="font-mono text-[11px] tracking-[2px] uppercase text-gray-400">Coming Soon &mdash; 2026</span>
+        <Link href="/login" className="font-mono text-[11px] tracking-[2px] uppercase text-gray-300 hover:text-electric transition-colors">
+          Sign In
+        </Link>
       </nav>
 
       {/* ═══════════════════ HERO ═══════════════════ */}
@@ -359,34 +350,16 @@ export default function ComingSoonPage() {
           ))}
         </div>
 
-        {/* Email Form */}
+        {/* Primary CTA */}
         <div className="mt-14 w-full max-w-[520px] animate-[fadeUp_0.8s_ease_0.4s_both] relative z-10">
-          <span className="font-mono text-[11px] tracking-[2px] uppercase text-gray-400 block mb-3">
-            Join the waitlist &mdash; be first in line
-          </span>
-          {status1 !== "success" ? (
-            <>
-              <div className="flex bg-[#0D1526] border border-electric/20 rounded-full overflow-hidden focus-within:border-[#FFD700]/50 focus-within:shadow-[0_0_20px_rgba(255,215,0,0.08)] transition-all">
-                <input type="email" value={email1}
-                  onChange={(e) => { setEmail1(e.target.value); if (status1 !== "idle" && status1 !== "loading") setStatus1("idle"); }}
-                  onKeyDown={(e) => { if (e.key === "Enter") submitWaitlist(email1, setStatus1, setMsg1, setEmail1); }}
-                  placeholder="your@email.com" disabled={status1 === "loading"}
-                  className="flex-1 bg-transparent border-none outline-none px-6 py-4 text-[#EEF4FF] font-syne text-[15px] placeholder:text-white/20" />
-                <button onClick={() => submitWaitlist(email1, setStatus1, setMsg1, setEmail1)} disabled={status1 === "loading"}
-                  className="gold-btn border-none px-8 py-4 font-bebas text-[18px] tracking-[2px] whitespace-nowrap disabled:opacity-60 rounded-full m-1">
-                  {status1 === "loading" ? "..." : "LOCK IN"}
-                </button>
-              </div>
-              {(status1 === "error" || status1 === "duplicate") && (
-                <p className={`mt-3 font-mono text-[12px] tracking-[1px] ${status1 === "duplicate" ? "text-electric" : "text-red-400"}`}>{msg1}</p>
-              )}
-            </>
-          ) : (
-            <div className="flex items-center justify-center gap-3 px-6 py-4 bg-[#FFD700]/[0.08] border border-[#FFD700]/30 rounded-full font-mono text-[13px] tracking-[1px] text-[#FFD700] animate-[fadeUp_0.5s_ease_both]">
-              You&apos;re on the list. We&apos;ll hit you when we drop.
-            </div>
-          )}
-          <p className="font-mono text-[10px] text-gray-400 tracking-[1px] mt-2.5">No spam. No cap. Just early access.</p>
+          <Link href="/login" className="block">
+            <button className="gold-btn w-full border-none px-8 py-5 font-bebas text-[22px] tracking-[3px] rounded-full">
+              START STUDYING FREE
+            </button>
+          </Link>
+          <p className="font-mono text-[10px] text-gray-400 tracking-[1px] mt-3 text-center">
+            No credit card &middot; No app download &middot; 100% free
+          </p>
         </div>
 
         {/* Scroll indicator */}
@@ -707,77 +680,68 @@ export default function ComingSoonPage() {
           </h2>
         </div>
         <div className="max-w-[520px] mx-auto mt-12 reveal relative z-10">
-          {status2 !== "success" ? (
+          <Link href="/login" className="block">
+            <button className="gold-btn w-full border-none px-8 py-5 font-bebas text-[22px] tracking-[3px] rounded-full">
+              START STUDYING FREE
+            </button>
+          </Link>
+          <p className="font-mono text-[10px] text-gray-400 tracking-[1px] mt-3 text-center">
+            Free to join &middot; No credit card &middot; No cap
+          </p>
+        </div>
+      </section>
+
+      {/* ─── Newsletter (optional updates) ─── */}
+      <section className="border-t border-electric/10 px-6 sm:px-12 py-10 relative z-10">
+        <div className="max-w-[420px] mx-auto text-center">
+          <span className="font-mono text-[10px] tracking-[2px] uppercase text-gray-400 block mb-3">
+            Get product updates
+          </span>
+          {newsletterStatus !== "success" ? (
             <>
-              <div className="flex bg-[#0D1526] border border-electric/20 rounded-full overflow-hidden focus-within:border-[#FFD700]/50 focus-within:shadow-[0_0_20px_rgba(255,215,0,0.08)] transition-all">
-                <input type="email" value={email2}
-                  onChange={(e) => { setEmail2(e.target.value); if (status2 !== "idle" && status2 !== "loading") setStatus2("idle"); }}
-                  onKeyDown={(e) => { if (e.key === "Enter") submitWaitlist(email2, setStatus2, setMsg2, setEmail2); }}
-                  placeholder="Drop your email, get early access" disabled={status2 === "loading"}
-                  className="flex-1 bg-transparent border-none outline-none px-6 py-4 text-[#EEF4FF] font-syne text-[15px] placeholder:text-white/20" />
-                <button onClick={() => submitWaitlist(email2, setStatus2, setMsg2, setEmail2)} disabled={status2 === "loading"}
-                  className="gold-btn border-none px-8 py-4 font-bebas text-[18px] tracking-[2px] whitespace-nowrap disabled:opacity-60 rounded-full m-1">
-                  {status2 === "loading" ? "..." : "LOCK IN"}
+              <div className="flex bg-[#0D1526] border border-electric/15 rounded-full overflow-hidden focus-within:border-electric/40 transition-all">
+                <input
+                  type="email"
+                  value={newsletterEmail}
+                  onChange={(e) => {
+                    setNewsletterEmail(e.target.value);
+                    if (newsletterStatus !== "idle" && newsletterStatus !== "loading") setNewsletterStatus("idle");
+                  }}
+                  onKeyDown={(e) => { if (e.key === "Enter") submitNewsletter(); }}
+                  placeholder="your@email.com"
+                  disabled={newsletterStatus === "loading"}
+                  className="flex-1 bg-transparent border-none outline-none px-5 py-3 text-[#EEF4FF] font-syne text-[13px] placeholder:text-white/20"
+                />
+                <button
+                  onClick={submitNewsletter}
+                  disabled={newsletterStatus === "loading"}
+                  className="border-none px-5 py-3 font-mono text-[10px] tracking-[2px] uppercase text-electric hover:text-electric-light whitespace-nowrap disabled:opacity-60"
+                >
+                  {newsletterStatus === "loading" ? "..." : "Subscribe"}
                 </button>
               </div>
-              {(status2 === "error" || status2 === "duplicate") && (
-                <p className={`mt-3 font-mono text-[12px] tracking-[1px] ${status2 === "duplicate" ? "text-electric" : "text-red-400"}`}>{msg2}</p>
+              {(newsletterStatus === "error" || newsletterStatus === "duplicate") && (
+                <p className={`mt-2 font-mono text-[10px] tracking-[1px] ${newsletterStatus === "duplicate" ? "text-electric" : "text-red-400"}`}>
+                  {newsletterMsg}
+                </p>
               )}
             </>
           ) : (
-            <div className="flex items-center justify-center gap-3 px-6 py-4 bg-[#FFD700]/[0.08] border border-[#FFD700]/30 rounded-full font-mono text-[13px] tracking-[1px] text-[#FFD700] animate-[fadeUp_0.5s_ease_both]">
-              You&apos;re on the list. We&apos;ll hit you when we drop.
+            <div className="px-5 py-3 font-mono text-[11px] tracking-[1px] text-[#FFD700]">
+              {newsletterMsg}
             </div>
           )}
-          <p className="font-mono text-[10px] text-gray-400 tracking-[1px] mt-2.5">Free to join &middot; No credit card &middot; No cap</p>
+          <p className="font-mono text-[9px] text-gray-500 tracking-[1px] mt-2">Optional. No spam.</p>
         </div>
       </section>
 
       {/* ─── Footer ─── */}
       <footer className="px-6 sm:px-12 py-8 flex items-center justify-between flex-wrap gap-4">
         <img src={cdnUrl("/logo-full.png")} alt="Lionade" className="h-8 rounded-md" />
-        <span className="font-mono text-[10px] tracking-[2px] uppercase text-gray-400">Where champions are made &mdash; 2026</span>
+        <span className="font-mono text-[10px] tracking-[2px] uppercase text-gray-400">Where champions are made</span>
         <span className="font-mono text-[11px] tracking-[1px] text-gray-400">&copy; 2026 {SITE_HOST} &middot; All rights reserved</span>
       </footer>
 
-      {/* ─── DevOps Secret Trigger ─── */}
-      <div className="text-center py-2.5">
-        <button id="devops-trigger" onClick={handleSecretClick}
-          className="font-mono text-[10px] tracking-[1px] text-white/[0.08] select-none cursor-default">
-          &copy; 2026 Lionade
-        </button>
-      </div>
-
-      {/* ─── DevOps Modal ─── */}
-      {modalOpen && (
-        <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/85 backdrop-blur-sm"
-          onClick={(e) => { if (e.target === e.currentTarget) closeModal(); }}>
-          <div className="bg-[#0D1526] border border-electric/25 rounded-2xl p-10 w-full max-w-[400px] mx-6">
-            <p className="font-mono text-[10px] tracking-[3px] uppercase text-electric/50 mb-3.5">// Internal Access</p>
-            <h2 className="font-bebas text-[30px] tracking-[2px] text-[#EEF4FF] mb-7">ADMIN LOGIN</h2>
-            {!success && (
-              <>
-                <input ref={inputRef} type="password" value={pw}
-                  onChange={(e) => setPw(e.target.value)}
-                  onKeyDown={(e) => { if (e.key === "Enter") handleDevOpsSubmit(); if (e.key === "Escape") closeModal(); }}
-                  placeholder="Enter password"
-                  className="w-full bg-[#080E1A] border border-electric/20 rounded-xl px-4 py-3.5 text-[#EEF4FF] font-syne text-[15px] outline-none focus:border-electric/60 placeholder:text-white/20 mb-3 transition-colors" />
-                <button onClick={handleDevOpsSubmit}
-                  className="w-full bg-electric hover:bg-electric-light text-[#04080F] border-none py-3.5 font-bebas text-[18px] tracking-[2px] rounded-xl transition-colors">
-                  SUBMIT
-                </button>
-                {error && <p className="mt-3.5 text-center font-mono text-[11px] tracking-[2px] uppercase text-red-400">Access Denied</p>}
-              </>
-            )}
-            {success && (
-              <div className="mt-3.5 text-center">
-                <p className="font-mono text-[11px] tracking-[2px] uppercase text-electric mb-5">{"\u2713"} Access Granted</p>
-                <a href="/home" className="inline-block bg-electric hover:bg-electric-light text-[#04080F] px-9 py-3.5 font-bebas text-[20px] tracking-[2px] rounded-xl transition-colors">ENTER BETA</a>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
     </div>
   );
 }
