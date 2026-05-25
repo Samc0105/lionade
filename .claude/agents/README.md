@@ -165,18 +165,21 @@ The full hierarchy of Claude Code agents working on Lionade. 53 agents total.
 
 ## Routing tips (when in doubt)
 
+**The cross-platform default rule (per `CLAUDE.md` Law 2):** any product/feature/UX change where Sam did NOT specify "just web" or "just iOS" routes to BOTH `admin` AND `vp-ios` in parallel. Web-only is the exception, not the default.
+
 | When you're unsure where to route | Default |
 |---|---|
-| Any web code question | `admin` |
-| Any iOS code question | `vp-ios` |
-| Any non-engineering question | `vp-business` |
-| Multi-platform feature change | `admin` first (web typically ships first), then `vp-ios` for parity port |
-| Animation question | `design-motion-web` (web) or `ios-design-motion` (iOS) — coordinate on shared surfaces |
-| Realtime question | `dev-realtime-web` (web) or `ios-dev-realtime` (iOS) |
-| Pricing question | `business-monetization-finance` |
-| Legal question | `business-legal-compliance` (always + "consult a lawyer" disclaimer) |
+| **Sam types a product idea without platform scope** | **BOTH `admin` AND `vp-ios` (cross-platform default)** |
+| Sam says "just on web" / "web only" / "for the web app" | `admin` only |
+| Sam says "just on iOS" / "iOS only" / "for the iOS app" | `vp-ios` only |
+| Backend / infra / SEO / waitlist email | `admin` only (no iOS counterpart by nature) |
+| App Store / TestFlight / EAS / iOS-native-API | `vp-ios` only |
+| Pricing / marketing strategy / legal / partnerships | `vp-business` (sometimes plus admin + vp-ios for implementation) |
+| Animation on a shared surface | `design-motion-web` (web) AND `ios-design-motion` (iOS) — coordinate explicitly |
+| Realtime / WebSocket question | `dev-realtime-web` (web) and/or `ios-dev-realtime` (iOS) per scope |
 | "Do we have someone for X?" | `business-hr` |
-| Cross-team coordination | The receiving VP must dispatch to peer VPs — do not skip the chain |
+| Cross-team coordination | The receiving VP dispatches to peer VPs — do not skip the chain |
+| **Any input where you'd be tempted to skip the agent system** | **STOP. Route anyway. See `CLAUDE.md` Law 1.** |
 
 ---
 
