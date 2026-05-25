@@ -186,6 +186,8 @@ export default function PricingPage() {
           radial-gradient(60rem 60rem at 78% 6%, rgba(124,58,237,0.30) 0%, transparent 60%),
           radial-gradient(55rem 55rem at 10% 78%, rgba(30,58,138,0.30) 0%, transparent 62%),
           radial-gradient(42rem 42rem at 52% 42%, rgba(88,28,135,0.20) 0%, transparent 66%),
+          radial-gradient(50rem 50rem at 22% 62%, rgba(124,58,237,0.18) 0%, transparent 64%),
+          radial-gradient(48rem 48rem at 80% 65%, rgba(74,144,217,0.16) 0%, transparent 64%),
           radial-gradient(46rem 46rem at 90% 88%, rgba(37,99,235,0.16) 0%, transparent 60%)
         `,
       }}
@@ -218,6 +220,7 @@ export default function PricingPage() {
           backgroundImage: `
             radial-gradient(50rem 50rem at 20% 18%, rgba(124,58,237,0.20) 0%, transparent 60%),
             radial-gradient(46rem 46rem at 82% 30%, rgba(74,144,217,0.16) 0%, transparent 62%),
+            radial-gradient(44rem 44rem at 35% 62%, rgba(124,58,237,0.12) 0%, transparent 64%),
             radial-gradient(40rem 40rem at 60% 80%, rgba(255,215,0,0.07) 0%, transparent 64%)
           `,
           backgroundSize: "180% 180%",
