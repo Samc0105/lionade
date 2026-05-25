@@ -64,7 +64,6 @@ export default function GradeTracker({ classId }: Props) {
   const swrKey = `/api/classes/${classId}/grades`;
   const { data, isLoading, mutate } = useSWR<ApiShape>(swrKey, swrFetcher, {
     keepPreviousData: true,
-    revalidateOnFocus: true,
   });
 
   const [adding, setAdding] = useState(false);

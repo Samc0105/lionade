@@ -275,7 +275,7 @@ function NinnyPageInner() {
   const { data: meta, mutate: refreshMeta } = useSWR<MaterialsResponse>(
     user?.id ? "/api/ninny/materials" : null,
     swrFetcher,
-    { keepPreviousData: true, revalidateOnFocus: true },
+    { keepPreviousData: true },
   );
 
   const dailyRemaining = meta?.dailyRemaining ?? NINNY_DAILY_LIMIT;

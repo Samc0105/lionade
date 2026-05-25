@@ -1214,7 +1214,6 @@ function YourClassesRow() {
     }>;
   }>("/api/classes", swrFetcher, {
     keepPreviousData: true,
-    revalidateOnFocus: true,
   });
   const classes = data?.classes ?? [];
 

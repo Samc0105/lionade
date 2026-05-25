@@ -36,7 +36,6 @@ export default function DailyReadyNudge() {
   const { data } = useSWR<StatusResponse>(
     user?.id ? "/api/login-bonus" : null,
     swrFetcher,
-    { revalidateOnFocus: true },
   );
   const [dismissed, setDismissed] = useState(false);
 

@@ -52,7 +52,6 @@ export default function DailyDrillWidget() {
   const { data, mutate } = useSWR<DrillResponse>(
     user?.id ? "/api/daily-drill" : null,
     swrFetcher,
-    { revalidateOnFocus: true },
   );
   const [drillOpen, setDrillOpen] = useState(false);
 

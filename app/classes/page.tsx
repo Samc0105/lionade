@@ -43,7 +43,7 @@ const PRESET_COLORS = [
 export default function ClassesIndexPage() {
   const { data, mutate, isLoading } = useSWR<{ classes: ClassSummary[] }>(
     "/api/classes", swrFetcher,
-    { keepPreviousData: true, revalidateOnFocus: true },
+    { keepPreviousData: true },
   );
   const classes = data?.classes ?? [];
   const [showCreate, setShowCreate] = useState(false);

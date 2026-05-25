@@ -48,7 +48,7 @@ export default function DailySpinHero() {
   const { data: status, mutate: mutateStatus } = useSWR<SpinStatus>(
     mounted && user?.id ? "/api/spin/status" : null,
     swrFetcher,
-    { revalidateOnFocus: true, refreshInterval: 60_000 },
+    { refreshInterval: 60_000 },
   );
 
   const [spinning, setSpinning] = useState(false);

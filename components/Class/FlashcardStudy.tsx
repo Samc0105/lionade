@@ -48,7 +48,7 @@ export default function FlashcardStudy({ classId }: { classId: string }) {
   const { data, isLoading, mutate } = useSWR<CardsResponse>(
     classId ? `/api/classes/${classId}/flashcards` : null,
     swrFetcher,
-    { keepPreviousData: true, revalidateOnFocus: true },
+    { keepPreviousData: true },
   );
   const [open, setOpen] = useState(false);
 

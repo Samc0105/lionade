@@ -78,11 +78,11 @@ export default function AcademiaPage() {
 
   const { data: classData, mutate: mutateClasses, isLoading: classesLoading } = useSWR<{ classes: ClassSummary[] }>(
     allowed ? "/api/classes" : null, swrFetcher,
-    { keepPreviousData: true, revalidateOnFocus: true },
+    { keepPreviousData: true },
   );
   const { data: notesData } = useSWR<{ notes: RecentNote[] }>(
     allowed ? "/api/classes/recent-notes" : null, swrFetcher,
-    { keepPreviousData: true, revalidateOnFocus: true },
+    { keepPreviousData: true },
   );
 
   const classes = classData?.classes ?? [];

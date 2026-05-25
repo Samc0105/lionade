@@ -61,7 +61,7 @@ export default function MasteryLandingPage() {
   const classIdContext = searchParams?.get("classId") ?? null;
   const { data, isLoading: loadingExams } = useSWR<{ exams: ExamSummary[] }>(
     "/api/mastery/exams", swrFetcher,
-    { keepPreviousData: true, revalidateOnFocus: true },
+    { keepPreviousData: true },
   );
   const exams = data?.exams ?? [];
 

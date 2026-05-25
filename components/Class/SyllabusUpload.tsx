@@ -58,7 +58,7 @@ export default function SyllabusUpload({ classId }: Props) {
   const { data, mutate } = useSWR<{ syllabus: SyllabusRow | null }>(
     classId ? `/api/classes/${classId}/syllabus` : null,
     swrFetcher,
-    { keepPreviousData: true, revalidateOnFocus: true },
+    { keepPreviousData: true },
   );
   const syllabus = data?.syllabus ?? null;
 

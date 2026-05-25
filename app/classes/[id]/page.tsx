@@ -79,7 +79,7 @@ export default function ClassNotebookPage() {
   const { data, isLoading, mutate } = useSWR<ClassDetail>(
     classId ? `/api/classes/${classId}` : null,
     swrFetcher,
-    { keepPreviousData: true, revalidateOnFocus: true },
+    { keepPreviousData: true },
   );
 
   const [menuOpen, setMenuOpen] = useState(false);

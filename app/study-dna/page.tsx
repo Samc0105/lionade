@@ -62,7 +62,7 @@ interface DnaResponse {
 export default function StudyDnaPage() {
   const { data, isLoading } = useSWR<DnaResponse>(
     "/api/study-dna", swrFetcher,
-    { revalidateOnFocus: true, keepPreviousData: true },
+    { keepPreviousData: true },
   );
   const [shareOpen, setShareOpen] = useState(false);
 

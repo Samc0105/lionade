@@ -41,7 +41,7 @@ export default function StreakReviveBanner() {
   const { data, mutate } = useSWR<ReviveStatus>(
     user?.id ? "/api/streak-revive" : null,
     swrFetcher,
-    { revalidateOnFocus: true, refreshInterval: 60_000 },
+    { refreshInterval: 60_000 },
   );
 
   const [dismissed, setDismissed] = useState(false);

@@ -52,7 +52,7 @@ export default function ClockInButton() {
   const { data, mutate } = useSWR<StatusResponse>(
     user?.id ? "/api/login-bonus" : null,
     swrFetcher,
-    { revalidateOnFocus: true, refreshInterval: 60_000 },
+    { refreshInterval: 60_000 },
   );
 
   const [submitting, setSubmitting] = useState(false);

@@ -30,7 +30,7 @@ export default function ClassStreakChip({ classId }: Props) {
   const { data, isLoading } = useSWR<StreakResponse>(
     classId ? `/api/classes/${classId}/streak` : null,
     swrFetcher,
-    { keepPreviousData: true, revalidateOnFocus: true },
+    { keepPreviousData: true },
   );
 
   // Loading: light skeleton so the header doesn't jump.
