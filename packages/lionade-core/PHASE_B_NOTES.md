@@ -164,3 +164,241 @@ in lockstep, which is the correct behaviour.
 *Owners: web side filed by `admin`. iOS side action by `ios-shared-core` /
 `vp-ios`. CEO sign-off required before either side changes the canonical
 exports.*
+
+---
+
+## Phase C — iOS audit (2026-05-25, vp-ios)
+
+> Phase C is the migration of `getSubjectStats` from SELECT-500-then-JS-aggregate
+> to a Postgres RPC. Admin is shipping the RPC on the web side; this section is
+> iOS's pre-migration audit so the moment the RPC lands, the iOS port is a
+> mechanical swap.
+
+### Where iOS fetches subject-stats today
+
+**Single hook, single call site type:** `lib/hooks/use-subject-stats.ts`
+(82 LOC). iOS does NOT route through `@lionade/core` for this — the hook
+calls `supabase.from("quiz_sessions").select(...).limit(200)` directly,
+then aggregates in JS exactly like the web's `getSubjectStats` does.
+
+Two consumers:
+- `components/SubjectStatsCard.tsx` (Dashboard "BY SUBJECT" panel; 7-day
+  window; uses `subject`, `questions`, `accuracyPct`).
+- `components/StatOrbs.tsx` (Dashboard stat-orb strip; reads
+  `subjectStats.length` for the "Subjects" orb value — count of distinct
+  subjects studied in the window).
+
+No other file imports the hook (`grep -rln useSubjectStats` confirms).
+
+### Differences from web's pre-Phase-C path
+
+| Dimension              | Web                                      | iOS                                  |
+|------------------------|------------------------------------------|--------------------------------------|
+| Window                 | 90 days (lifetime: full history)         | 7 days only                          |
+| Row cap                | 500 windowed / 5000 lifetime             | 200 windowed                         |
+| Lifetime variant       | YES (`opts.lifetime=true` on profile)    | **NO** — iOS only uses windowed      |
+| Output field naming    | `questionsAnswered`, `correctAnswers`,   | `questions`, `correct`, `coins`,     |
+|                        | `coinsEarned`                            | + `accuracyPct` (precomputed)        |
+| Sort order             | Insertion (record order)                 | `questions DESC` (most-grinded first)|
+| Empty bucket label     | Whatever `row.subject` is (no fallback)  | `"Other"` fallback when null/blank   |
+| Color/UI shaping       | All in component                         | All in `SubjectStatsCard` component  |
+
+### iOS-specific transforms to PRESERVE post-migration
+
+These run AFTER aggregation and must stay in JS regardless of where the
+aggregation happens:
+1. `accuracyPct` computation (`round(correct/questions*100)`) — could ship
+   inside the RPC, but trivial to keep client-side and avoids forcing a
+   shape on web.
+2. Sort by `questions DESC` — iOS-specific. Web doesn't sort. RPC should
+   NOT impose an order; iOS sorts client-side.
+3. `"Other"` fallback for null/blank subject — RPC should return whatever
+   it returns; iOS coerces.
+4. Window choice — iOS wants **7 days**, web wants **90 days**. The RPC
+   needs a window parameter (or two separate windowed/lifetime modes).
+   See "Open questions for admin" below.
+
+### Lifetime variant — iOS does NOT use it
+
+iOS has no profile-page "lifetime stats" surface that consumes
+`useSubjectStats`. Profile screen (`app/profile.tsx`) shows lifetime
+totals from `useUserStats` (`stats.coins`, `stats.xp`) but NOT a subject
+breakdown. So `p_lifetime` will always be passed `false` from iOS for
+the foreseeable port. If/when iOS adds a lifetime subject breakdown,
+the flag is already wired — no client changes needed.
+
+### SWR / cache discipline (Phase A continuity)
+
+`use-subject-stats.ts` is on the Phase A **no-focus-revalidate** side
+(not in the keep-list). Mutation invalidation is upstream — when quiz
+results post, `lib/cache-invalidation.ts` mutates the cache key. Phase C
+must NOT change the cache key string `subject-stats/${userId}` — that
+would invalidate every iOS user's persisted cache on first launch
+post-build. (Phase B shared adapter persists by key.)
+
+If admin later extends `cacheKeys.subjectStats` to accept a `lifetime`
+param (per §2e proposal in this doc), iOS will adopt the helper but
+the windowed-only string must stay `subject-stats/${userId}` or
+`subject-stats/${userId}/window` — one of the two — and we pick the
+same shape as web so the cross-platform string matches even if no
+user ever runs both clients.
+
+### Open questions for admin (BLOCKING Phase C iOS migration)
+
+1. **RPC signature** — confirm `get_subject_stats(p_user_id uuid,
+   p_lifetime bool)` or different? Or
+   `get_subject_stats(p_user_id, p_since_days int)` so iOS passes 7 and
+   web passes 90 + a "lifetime override"?
+2. **Return-shape field names** — does the RPC return
+   `questionsAnswered/correctAnswers/coinsEarned` (web's current JS
+   shape) or `total_questions/correct_answers/coins_earned` (the
+   underlying column names) or something normalized? iOS will map
+   client-side regardless — just need to know.
+3. **Gating pattern** — hard-cutover or fallback-to-old-aggregator on
+   RPC 404? iOS will mirror whatever web chooses. **Default
+   assumption: hard-cutover, deployed in the same window as the
+   migration push + iOS build.**
+4. **Window semantics** — 7-day vs 90-day. If the RPC bakes in a
+   single window, iOS will need a separate path OR the RPC takes a
+   `p_since_days` int. Admin's call.
+
+### Migration plan (Phase 2, after admin ships)
+
+Once admin commits the RPC + updates `getSubjectStats` in `lib/db.ts`:
+- Update `lib/hooks/use-subject-stats.ts` to call
+  `supabase.rpc('get_subject_stats', { p_user_id, p_lifetime: false })`.
+- Map RPC return shape to existing `SubjectStat` interface in the hook
+  (preserve `questions/correct/coins/accuracyPct` field names so
+  consumers in `SubjectStatsCard` + `StatOrbs` are untouched).
+- Preserve the `"Other"` fallback + sort + 7-day window expectation.
+- Cache key `subject-stats/${userId}` stays — no SWR invalidation.
+- iOS-local commit on top of `806eba6`. NO build until Sam says "build it".
+
+### Surprises
+
+- iOS hook was migrated to iOS-local in Phase A (per the JSDoc at top
+  of `use-subject-stats.ts`) and explicitly notes "we'll move this to a
+  Postgres view + RPC like the web's plan" — Phase C is exactly that
+  planned move. Confirms the audit-then-migrate sequencing is correct.
+- iOS has its OWN client-side aggregator in `use-weekly-activity.ts`
+  (separate hook, also Phase A territory). Per Sam's scope-discipline
+  directive, **flagged but NOT migrating in this pass**. If it's also
+  slow, that's a Phase D conversation.
+
+*Owner: `vp-ios` → `ios-dev-data` + `ios-platform-bridge`. Awaiting
+admin's RPC commit + Phase C handoff before code change.*
+
+---
+
+# Phase C coordination notes — `get_subject_stats` RPC (2026-05-25)
+
+Status: **WEB-SIDE READY 2026-05-25.** Migration `047_subject_stats_rpc.sql`
+committed locally on web; NOT yet applied to prod (Sam batches A+B+C push
+together). Web's `lib/db.ts:getSubjectStats` now calls the RPC instead of
+SELECT-then-JS-aggregate. Cache key + return shape unchanged.
+
+## RPC signature (verbatim — drop into iOS data layer as-is)
+
+```sql
+public.get_subject_stats(p_user_id uuid, p_lifetime boolean DEFAULT false)
+RETURNS TABLE (
+  subject            text,
+  "questionsAnswered" integer,
+  "correctAnswers"    integer,
+  "coinsEarned"       integer
+)
+LANGUAGE sql STABLE SECURITY INVOKER
+```
+
+- `SECURITY INVOKER` → existing `quiz_sessions_owner` RLS policy enforces
+  ownership. iOS callers using the user's JWT will get only their own data.
+- Return columns are quoted camelCase so the JS/TS shape lands as
+  `{ subject, questionsAnswered, correctAnswers, coinsEarned }[]` with zero
+  field mapping needed on the client.
+- `p_lifetime = false` (default) → trailing 90-day window
+- `p_lifetime = true` → all-time aggregation (Profile-page variant)
+
+## Web call-site (mirror in iOS)
+
+```ts
+const { data, error } = await supabase.rpc("get_subject_stats", {
+  p_user_id: userId,
+  p_lifetime: lifetime, // boolean
+});
+// data: { subject; questionsAnswered; correctAnswers; coinsEarned }[]
+```
+
+## iOS recommendation: migrate now (parity), but don't ship until web ships
+
+Recommended approach:
+
+1. `ios-shared-core` adds `subjectStatsAPI.fetch(userId, { lifetime })` to
+   the shared package — same shape as the web wrapper above. **Internally
+   uses the RPC** — don't keep two paths.
+2. `vp-ios` queues this for the same Phase A+B+C push window so the RPC
+   is available on prod when the iOS build that consumes it goes out.
+3. Until the RPC exists on prod, iOS can either:
+   - **Option A (recommended):** stay on the old SELECT-and-aggregate path
+     in `subjectStatsAPI` and swap to the RPC in a one-line internal change
+     the moment migration 047 lands on prod. Zero user-visible iOS impact
+     during the transition.
+   - **Option B:** ship the RPC call in iOS dev-client now, test against a
+     Supabase branch where migration 047 is applied (Sam to greenlight a
+     branch test before merging to prod).
+
+Either option is fine — the contract above is stable. The choice is purely
+about iOS release timing relative to web.
+
+## Index coverage (already in place)
+
+Migration 039 added `idx_quiz_sessions_user_completed (user_id, completed_at DESC)`
+which the windowed variant uses directly. Lifetime variant also uses the
+user_id prefix. No new index is needed for iOS to consume this RPC.
+
+## Performance expectation (web measurement, iOS will be similar)
+
+- Old path (SELECT 500-5000 rows + JS GROUP BY): ~150-300ms (Dashboard) / ~300-600ms (Profile lifetime)
+- New path (RPC): ~5-20ms server + <5ms client. ~95-98% network payload reduction.
+
+## Type generation note for both platforms
+
+`@lionade/core/types/supabase.ts` does not yet have the RPC typed because
+migration 047 is not on prod. **After Sam pushes A+B+C and the migration
+applies to prod**, regenerate types via the Supabase CLI / MCP
+`generate_typescript_types` and commit the regenerated `supabase.ts`. Until
+then, the RPC call is typed via the inline cast in `lib/db.ts:getSubjectStats`
+on web (and should be similarly cast in iOS).
+
+## Open question for `vp-ios`
+
+iOS currently has no Profile-page lifetime aggregation surface
+(per IOS_PARITY 2026-05-13: iOS missing Study-DNA, but does it have a
+Profile-level subject breakdown?). If iOS only consumes the 90-day variant,
+the lifetime branch in `subjectStatsAPI` can be omitted on iOS for now —
+it's a no-op cost since the boolean is just a param. Confirm before merging
+the iOS API to avoid carrying unused surface area.
+
+## Hotspots flagged but NOT migrated this pass (scope discipline)
+
+While auditing `lib/db.ts` for Phase C, I noted these similar
+SELECT-many-then-JS-aggregate patterns. Sam can prioritize a Phase C-extension:
+
+1. **`getBestScores` (lib/db.ts:750)** — SELECT 500 rows, computes max per
+   subject in JS. Same pattern, same fix (RPC with `MAX(correct_answers)`
+   GROUP BY subject). Probably ~100ms savings on Dashboard.
+2. **`getRecentTopics` (lib/db.ts:664)** — already a 2-query design after
+   the N+1 batch fix; could be a single RPC with a LATERAL join but the win
+   is smaller (~30-50ms).
+3. **`getQuizHistory` (similar pattern elsewhere in lib/db.ts)** — pulls 100
+   rows for Profile. Pagination, not aggregation — leave as-is; raw rows
+   are needed for the history list.
+
+Migration 047 is intentionally narrow. Sam to greenlight a Phase C.2 if the
+win on `getBestScores` is worth the second migration.
+
+---
+
+*Phase C web owners: `dev-database` (migration), `dev-backend` (db.ts rewrite),
+`security-auditor` (RLS / SECURITY INVOKER review), `dev-performance` (speedup
+estimate), `quality-qa-tester` (shape parity), `quality-code-reviewer` (sign-off).
+iOS owners: `ios-shared-core` (subjectStatsAPI wrapper), `vp-ios` (release timing).*

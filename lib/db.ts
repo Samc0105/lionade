@@ -608,38 +608,36 @@ export async function getUserDuels(userId: string, limit = 5) {
 
 // ── Subject Stats ─────────────────────────────────────────────
 
-// Default: 90-day floor + 500-row cap (dashboard "recent stats").
-// Pass { lifetime: true } from the profile page where users expect totals
-// across their entire history (cap raised to 5000 to keep memory bounded).
-export async function getSubjectStats(userId: string, opts?: { lifetime?: boolean }) {
+// Phase C (2026-05-25): client-side aggregation replaced with a Postgres
+// GROUP BY via the get_subject_stats(p_user_id, p_lifetime) RPC. The old
+// path SELECT'd up to 500 rows (5000 lifetime) just to SUM() in JS — that
+// network payload + JS loop was ~150-300ms per Dashboard load. The RPC
+// returns one row per subject in the exact JS shape (quoted camelCase
+// identifiers in SQL), so cache key + callers are unchanged.
+//
+// Caller contract (unchanged):
+//   getSubjectStats(userId)                       → trailing 90-day window
+//   getSubjectStats(userId, { lifetime: true })   → all-time
+//   Returns: { subject, questionsAnswered, correctAnswers, coinsEarned }[]
+export async function getSubjectStats(
+  userId: string,
+  opts?: { lifetime?: boolean }
+): Promise<
+  { subject: string; questionsAnswered: number; correctAnswers: number; coinsEarned: number }[]
+> {
   const lifetime = opts?.lifetime === true;
-  let q = supabase
-    .from("quiz_sessions")
-    .select("subject, total_questions, correct_answers, coins_earned, completed_at")
-    .eq("user_id", userId)
-    // Order matters: when the limit caps the result we want the MOST RECENT
-    // sessions retained, not random ones from the middle of history.
-    .order("completed_at", { ascending: false })
-    .limit(lifetime ? 5000 : 500);
-  if (!lifetime) {
-    const since = new Date(Date.now() - 90 * 86_400_000).toISOString();
-    q = q.gte("completed_at", since);
-  }
-  const { data, error } = await q;
+  const { data, error } = await supabase.rpc("get_subject_stats", {
+    p_user_id: userId,
+    p_lifetime: lifetime,
+  });
 
   if (error) throw error;
-
-  const stats: Record<string, { questionsAnswered: number; correctAnswers: number; coinsEarned: number }> = {};
-  for (const row of data ?? []) {
-    if (!stats[row.subject]) {
-      stats[row.subject] = { questionsAnswered: 0, correctAnswers: 0, coinsEarned: 0 };
-    }
-    stats[row.subject].questionsAnswered += row.total_questions;
-    stats[row.subject].correctAnswers += row.correct_answers;
-    stats[row.subject].coinsEarned += row.coins_earned;
-  }
-
-  return Object.entries(stats).map(([subject, s]) => ({ subject, ...s }));
+  return (data ?? []) as {
+    subject: string;
+    questionsAnswered: number;
+    correctAnswers: number;
+    coinsEarned: number;
+  }[];
 }
 
 // ── Daily Progress ───────────────────────────────────────────
