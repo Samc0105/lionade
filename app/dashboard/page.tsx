@@ -220,10 +220,36 @@ function DashboardContent() {
     }
   );
 
-  // Side-effect (not data): rotate bounties once per mount, exactly as before.
+  // Side-effect (not data): rotate bounties at most once per hour per browser.
+  //
+  // 2026-05-25 (Phase A perf): previously fired POST /api/bounties/rotate on
+  // EVERY dashboard mount, including every tab-switch back. With tab-switching
+  // being a common dashboard interaction this was an unbounded write storm
+  // against the rotate endpoint. Now gated by a localStorage timestamp so the
+  // request fires at most once per hour per device. Server still owns the
+  // canonical rotation cadence — this is a client-side coalesce, not a
+  // correctness change. (Long-term we'll move rotation to a Supabase cron;
+  // tracked separately.)
   useEffect(() => {
     if (!uid) return;
+    const LS_KEY = "bounties-last-rotation";
+    const ROTATE_INTERVAL_MS = 60 * 60 * 1000; // 1h
+    try {
+      const lastStr = localStorage.getItem(LS_KEY);
+      const last = lastStr ? Number(lastStr) : 0;
+      if (Number.isFinite(last) && Date.now() - last < ROTATE_INTERVAL_MS) {
+        return;
+      }
+    } catch {
+      // localStorage unavailable (private mode etc) — fall through and let
+      // the rotate request fire. Better-safe than skipping rotation entirely.
+    }
     apiPost("/api/bounties/rotate", {}).catch(() => {});
+    try {
+      localStorage.setItem(LS_KEY, String(Date.now()));
+    } catch {
+      /* ignore quota / disabled */
+    }
   }, [uid]);
   // Counter instead of boolean: rapid claims re-increment this, which remounts
   // the Confetti component via `key` and fires a fresh burst even if the

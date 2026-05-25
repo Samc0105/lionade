@@ -376,11 +376,17 @@ export default function SocialPage() {
 
   // ── Load notifications for social panel ─────────────────────
   // Perf 2026-05-17: manual setInterval(15s) → SWR refreshInterval (cached).
+  // Perf 2026-05-25 (Phase A): SWR key changed `social-notifs/${user.id}` →
+  // `notifications/${user.id}` so this hook SHARES THE CACHE with the
+  // Navbar's notifications poll (also keyed on `notifications/${user.id}`).
+  // Previously each page ran its own 15s poll on the same endpoint —
+  // doubling API hits. With a shared key both pages see the same data and
+  // the Navbar's realtime INSERT channel invalidates this hook too.
   // socialNotifs/unreadCount stay useState (mutated locally on mark-read);
   // loadSocialNotifs kept as a mutate-backed revalidator (called imperatively
   // when the notif view opens).
   const { mutate: mutateSocialNotifs } = useSWR(
-    user?.id ? `social-notifs/${user.id}` : null,
+    user?.id ? `notifications/${user.id}` : null,
     () =>
       apiGet<{
         notifications: { id: string; type: string; title: string; message: string | null; read: boolean; action_url: string | null; created_at: string }[];
@@ -388,6 +394,7 @@ export default function SocialPage() {
       }>("/api/notifications"),
     {
       refreshInterval: 15000,
+      revalidateOnFocus: true,
       keepPreviousData: true,
       onSuccess: (res) => {
         if (res.ok && res.data) {

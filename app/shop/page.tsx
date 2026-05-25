@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
+import useSWR from "swr";
 import { useAuth } from "@/lib/auth";
 import { useUserStats } from "@/lib/hooks";
 import { useRouter } from "next/navigation";
@@ -205,7 +206,7 @@ function ConfirmModal({ item, quantity, onConfirm, onCancel, userCoins }: {
         <div className="flex items-center justify-center gap-2 mb-6 py-3 rounded-xl" style={{ background: "rgba(255,215,0,0.06)", border: "1px solid rgba(255,215,0,0.15)" }}>
           <img src={cdnUrl("/F.png")} alt="Fangs" className="w-6 h-6 object-contain" />
           <span className="font-bebas text-3xl text-gold">{formatCoins(totalPrice)}</span>
-          {quantity > 1 && <span className="text-cream/40 text-sm ml-1">(x{quantity})</span>}
+          {quantity > 1 && <span className="text-cream/60 text-sm ml-1">(x{quantity})</span>}
         </div>
         {!canAfford && <p className="text-red-400 text-xs text-center mb-4 font-semibold">Not enough coins — you need {formatCoins(totalPrice - userCoins)} more</p>}
         <div className="flex gap-3">
@@ -234,7 +235,7 @@ function FeaturedCard({ item, owned, onBuy }: { item: ShopItem; owned: boolean; 
           <Icon size={72} weight={item.iconWeight ?? "fill"} color={item.iconColor ?? "currentColor"} aria-hidden="true" />
         </div>
         <h3 className="shop-card-title font-bebas text-2xl sm:text-3xl text-cream tracking-wide mb-1">{item.name}</h3>
-        <p className="shop-card-desc text-cream/40 text-sm mb-5 leading-relaxed">{item.description}</p>
+        <p className="shop-card-desc text-cream/60 text-sm mb-5 leading-relaxed">{item.description}</p>
         <div className="flex items-center justify-between mt-auto pt-2 gap-6">
           <div className="flex items-center gap-2 flex-shrink-0">
             <img src={cdnUrl("/F.png")} alt="Fangs" className="w-6 h-6 object-contain" />
@@ -269,7 +270,7 @@ function CosmeticCard({ item, owned, canAfford, onBuy }: { item: ShopItem; owned
           <span className={`text-[9px] uppercase tracking-widest font-bold px-2 py-0.5 rounded-full ${r.badge}`}>{item.rarity}</span>
         </div>
         <h4 className="shop-card-title font-bebas text-lg text-cream tracking-wide mb-0.5">{item.name}</h4>
-        <p className="shop-card-desc text-cream/30 text-xs mb-4 leading-relaxed">{item.description}</p>
+        <p className="shop-card-desc text-cream/55 text-xs mb-4 leading-relaxed">{item.description}</p>
         <div className="flex items-center justify-between mt-auto pt-2 gap-6">
           <div className="flex items-center gap-1.5 flex-shrink-0">
             <img src={cdnUrl("/F.png")} alt="Fangs" className="w-5 h-5 object-contain" />
@@ -309,7 +310,7 @@ function BoosterCard({ item, quantityOwned, canAfford, onBuy }: { item: ShopItem
             <h4 className="shop-card-title font-bebas text-lg text-cream tracking-wide">{item.name}</h4>
             <span className={`text-[9px] uppercase tracking-widest font-bold px-2 py-0.5 rounded-full ${r.badge}`}>{item.rarity}</span>
           </div>
-          <p className="shop-card-desc text-cream/30 text-xs mb-3 leading-relaxed">{item.description}</p>
+          <p className="shop-card-desc text-cream/55 text-xs mb-3 leading-relaxed">{item.description}</p>
           <div className="flex items-center gap-2 flex-wrap">
             <button onClick={() => onBuy(1)} disabled={!canAfford}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${canAfford ? "gold-btn shop-btn-pulse" : "bg-gray-600/20 text-gray-500 cursor-not-allowed border border-gray-600/20"}`}>
@@ -354,9 +355,9 @@ function InventoryItem({ item, owned, onEquip }: { item: ShopItem; owned: OwnedI
             <span className={`text-[8px] uppercase tracking-widest font-bold px-1.5 py-0.5 rounded-full ${r.badge}`}>{item.rarity}</span>
           </div>
           {isBooster ? (
-            <p className="text-cream/30 text-xs">Qty: {owned.quantity} remaining &middot; Use Before Quiz</p>
+            <p className="text-cream/55 text-xs">Qty: {owned.quantity} remaining &middot; Use Before Quiz</p>
           ) : (
-            <p className="text-cream/30 text-xs">{item.description}</p>
+            <p className="text-cream/55 text-xs">{item.description}</p>
           )}
         </div>
         {!isBooster && (
@@ -387,7 +388,7 @@ function PremiumCard({ item }: { item: PremiumItem }) {
           <span className={`text-[9px] uppercase tracking-widest font-bold px-2 py-0.5 rounded-full ${r.badge}`}>{item.rarity}</span>
         </div>
         <h4 className="shop-card-title font-bebas text-xl text-cream tracking-wide mb-0.5">{item.name}</h4>
-        <p className="shop-card-desc text-cream/30 text-xs mb-5 leading-relaxed">{item.description}</p>
+        <p className="shop-card-desc text-cream/55 text-xs mb-5 leading-relaxed">{item.description}</p>
         <div className="flex items-center justify-between mt-auto pt-2 gap-4">
           <span className="font-bebas text-xl text-purple-300">${item.priceUSD.toFixed(2)}</span>
           <button disabled className="relative flex-shrink-0 px-4 py-2 rounded-lg text-xs font-bold border border-purple-500/30 bg-purple-500/10 text-purple-400/60 cursor-not-allowed overflow-hidden">
@@ -411,7 +412,6 @@ export default function ShopPage() {
   const [tab, setTab] = useState<Tab>("featured");
   const [premiumTab, setPremiumTab] = useState<PremiumTab>("themes");
   const [cosmeticSub, setCosmeticSub] = useState<CosmeticSub>("frames");
-  const [inventory, setInventory] = useState<OwnedItem[]>([]);
   const [confirmItem, setConfirmItem] = useState<{ item: ShopItem; quantity: number } | null>(null);
   const [showBurst, setShowBurst] = useState(false);
   const [purchasing, setPurchasing] = useState(false);
@@ -419,13 +419,18 @@ export default function ShopPage() {
 
   useEffect(() => { setMounted(true); }, []);
 
-  const loadInventory = useCallback(async () => {
-    if (!user) return;
-    const res = await apiGet<{ inventory: OwnedItem[] }>("/api/shop/purchase");
-    if (res.ok && res.data?.inventory) setInventory(res.data.inventory);
-  }, [user]);
-
-  useEffect(() => { loadInventory(); }, [loadInventory]);
+  // 2026-05-25 (Phase A perf): inventory was a raw useEffect → setState fetch
+  // that re-fired on every shop mount (incl. tab-switch back). Moved into the
+  // global SWR cache with 60s dedupe so tab-switches are instant. Equip /
+  // purchase still feels immediate via the imperative `mutate()` calls below
+  // (revalidates from server truth after the mutation API resolves).
+  const inventoryKey = user?.id ? `shop-inventory/${user.id}` : null;
+  const { data: inventoryData, mutate: mutateInventory } = useSWR(
+    inventoryKey,
+    () => apiGet<{ inventory: OwnedItem[] }>("/api/shop/purchase"),
+    { dedupingInterval: 60_000, keepPreviousData: true },
+  );
+  const inventory: OwnedItem[] = inventoryData?.ok ? (inventoryData.data?.inventory ?? []) : [];
 
   if (isLoading) return (
     <div className="min-h-screen flex items-center justify-center">
@@ -454,7 +459,7 @@ export default function ShopPage() {
     if (res.ok) {
       setShowBurst(true);
       await refreshUser();
-      await loadInventory();
+      await mutateInventory();
     }
     setPurchasing(false);
     setConfirmItem(null);
@@ -463,7 +468,7 @@ export default function ShopPage() {
   const handleEquip = async (itemId: string) => {
     if (!user) return;
     await apiPost("/api/shop/equip", { itemId });
-    await loadInventory();
+    await mutateInventory();
   };
 
   const TABS: { key: Tab; label: string; Icon: PhosphorIcon; iconWeight?: IconProps["weight"] }[] = [
@@ -521,7 +526,7 @@ export default function ShopPage() {
                 : <PawPrint size={52} weight="fill" color="#FFD700" aria-hidden="true" />}
             </span>
           </div>
-          <p className={`text-sm font-semibold tracking-widest uppercase ${isPremium ? "text-purple-400/60" : "text-cream/40"}`}>
+          <p className={`text-sm font-semibold tracking-widest uppercase ${isPremium ? "text-purple-400/60" : "text-cream/60"}`}>
             {isPremium ? "Premium Collection" : "Premium Item Shop"}
           </p>
 
@@ -541,7 +546,7 @@ export default function ShopPage() {
               <>
                 <img src={cdnUrl("/F.png")} alt="Fangs" className="w-8 h-8 object-contain" />
                 <span className="font-bebas text-3xl text-gold tracking-wider">{formatCoins(userCoins)}</span>
-                <span className="text-cream/30 text-xs ml-1">coins</span>
+                <span className="text-cream/55 text-xs ml-1">coins</span>
               </>
             )}
           </div>
@@ -562,11 +567,11 @@ export default function ShopPage() {
               }} />
 
             <button onClick={() => setStoreMode("coins")}
-              className={`relative z-10 flex items-center gap-2 px-5 sm:px-7 py-2.5 rounded-full text-sm font-bold transition-all duration-200 ${!isPremium ? "text-gold" : "text-cream/40 hover:text-cream/60"}`}>
+              className={`relative z-10 flex items-center gap-2 px-5 sm:px-7 py-2.5 rounded-full text-sm font-bold transition-all duration-200 ${!isPremium ? "text-gold" : "text-cream/60 hover:text-cream/60"}`}>
               <img src={cdnUrl("/F.png")} alt="Fangs" className="w-5 h-5 object-contain" /> Coin Store
             </button>
             <button onClick={() => setStoreMode("premium")}
-              className={`relative z-10 flex items-center gap-2 px-5 sm:px-7 py-2.5 rounded-full text-sm font-bold transition-all duration-200 ${isPremium ? "text-purple-300" : "text-cream/40 hover:text-cream/60"}`}>
+              className={`relative z-10 flex items-center gap-2 px-5 sm:px-7 py-2.5 rounded-full text-sm font-bold transition-all duration-200 ${isPremium ? "text-purple-300" : "text-cream/60 hover:text-cream/60"}`}>
               <Diamond size={18} weight="fill" color={isPremium ? "#D8B4FE" : "currentColor"} aria-hidden="true" /> Premium Store
             </button>
           </div>
@@ -598,7 +603,7 @@ export default function ShopPage() {
                 return (
                   <button key={t.key} onClick={() => setPremiumTab(t.key)}
                     className={`flex items-center gap-1.5 px-3 sm:px-5 py-2 rounded-xl text-sm font-bold transition-all duration-200
-                      ${premiumTab === t.key ? "bg-purple-500/15 text-purple-300 border border-purple-500/30" : "text-cream/40 hover:text-cream hover:bg-white/5 border border-transparent"}`}>
+                      ${premiumTab === t.key ? "bg-purple-500/15 text-purple-300 border border-purple-500/30" : "text-cream/60 hover:text-cream hover:bg-white/5 border border-transparent"}`}>
                     <TabIcon size={16} weight={t.iconWeight} color="currentColor" aria-hidden="true" />
                     <span className="hidden sm:inline">{t.label}</span>
                   </button>
@@ -668,7 +673,7 @@ export default function ShopPage() {
                 return (
                   <button key={t.key} onClick={() => setTab(t.key)}
                     className={`flex items-center gap-1.5 px-3 sm:px-5 py-2 rounded-xl text-sm font-bold transition-all duration-200
-                      ${tab === t.key ? "bg-electric/15 text-electric border border-electric/30" : "text-cream/40 hover:text-cream hover:bg-white/5 border border-transparent"}`}>
+                      ${tab === t.key ? "bg-electric/15 text-electric border border-electric/30" : "text-cream/60 hover:text-cream hover:bg-white/5 border border-transparent"}`}>
                     <TabIcon size={16} weight={t.iconWeight} color="currentColor" aria-hidden="true" />
                     <span className="hidden sm:inline">{t.label}</span>
                   </button>
@@ -685,7 +690,7 @@ export default function ShopPage() {
                     <Fire size={20} weight="fill" color="#F97316" aria-hidden="true" />
                     <span className="font-bebas text-xl text-gold tracking-wider">WEEKLY FEATURED</span>
                   </div>
-                  <div className="flex items-center gap-1.5 text-cream/40 text-xs font-mono">
+                  <div className="flex items-center gap-1.5 text-cream/60 text-xs font-mono">
                     <span>Refreshes in</span>
                     <span className="text-electric font-bold">{countdown.days}d {countdown.hours}h</span>
                   </div>
@@ -707,7 +712,7 @@ export default function ShopPage() {
                     <button key={s.key} onClick={() => setCosmeticSub(s.key)}
                       className={`px-4 py-1.5 rounded-full text-sm font-bold whitespace-nowrap transition-all ${cosmeticSub === s.key
                         ? "bg-electric/15 text-electric border border-electric/30"
-                        : "text-cream/40 hover:text-cream border border-transparent hover:border-white/10"}`}>
+                        : "text-cream/60 hover:text-cream border border-transparent hover:border-white/10"}`}>
                       {s.label}
                     </button>
                   ))}
@@ -755,7 +760,7 @@ export default function ShopPage() {
                           <h4 className="font-bebas text-base text-cream tracking-wide">Interstellar</h4>
                           <span className="text-[8px] uppercase tracking-widest font-bold px-1.5 py-0.5 rounded-full bg-blue-500/20 text-blue-400 border border-blue-500/30">Default</span>
                         </div>
-                        <p className="text-cream/30 text-xs">Deep space theme with stars and nebula</p>
+                        <p className="text-cream/55 text-xs">Deep space theme with stars and nebula</p>
                       </div>
                     </div>
                   </div>

@@ -9,6 +9,7 @@ import { useUserStats, useStreakInfo, isStreakExpired, resetExpiredStreak, mutat
 import { formatCoins } from "@/lib/mockData";
 import { supabase } from "@/lib/supabase";
 import { cdnUrl } from "@/lib/cdn";
+import useSWR from "swr";
 import { apiGet, apiPatch } from "@/lib/api-client";
 import CountUp from "@/components/CountUp";
 import ClockInButton from "@/components/ClockInButton";
@@ -147,23 +148,37 @@ export default function Navbar() {
   const prevCoinsRef = useRef<number | null>(null);
   const [coinPops, setCoinPops] = useState<Array<{ id: number; amount: number }>>([]);
 
+  // 2026-05-25 (Phase A perf): manual setInterval(15s) → shared SWR hook.
+  // Key is intentionally generic (`notifications/${user.id}`) so the Social
+  // page reuses the SAME cache + poll (previously they were on separate
+  // keys, doubling the API hit). Local `notifications` + `unreadCount`
+  // state stay because they're mutated optimistically on mark-as-read;
+  // SWR hydrates them via onSuccess. `loadNotifications` is kept as a
+  // mutate-backed revalidator so the realtime INSERT channel and
+  // openNotifPanel call sites need no changes.
+  const notificationsKey = user?.id ? `notifications/${user.id}` : null;
+  const { mutate: mutateNotifications } = useSWR(
+    notificationsKey,
+    () =>
+      apiGet<{ notifications: Notification[]; unreadCount: number }>(
+        "/api/notifications",
+      ),
+    {
+      refreshInterval: 15000,
+      revalidateOnFocus: true,
+      keepPreviousData: true,
+      onSuccess: (res) => {
+        if (!res.ok || !res.data) return;
+        if (res.data.notifications) setNotifications(res.data.notifications);
+        if (typeof res.data.unreadCount === "number") {
+          setUnreadCount(res.data.unreadCount);
+        }
+      },
+    },
+  );
   const loadNotifications = useCallback(async () => {
-    if (!user?.id) return;
-    const res = await apiGet<{ notifications: Notification[]; unreadCount: number }>(
-      "/api/notifications",
-    );
-    if (!res.ok || !res.data) return;
-    if (res.data.notifications) setNotifications(res.data.notifications);
-    if (typeof res.data.unreadCount === "number") setUnreadCount(res.data.unreadCount);
-  }, [user?.id]);
-
-  // Load notifications on mount + poll
-  useEffect(() => {
-    if (!user?.id) return;
-    loadNotifications();
-    const iv = setInterval(loadNotifications, 15000);
-    return () => clearInterval(iv);
-  }, [user?.id, loadNotifications]);
+    await mutateNotifications();
+  }, [mutateNotifications]);
 
   // Bounce the bell when unreadCount increases (new notif arrived). Skips the
   // initial null -> number hydration transition so we don't bounce on first

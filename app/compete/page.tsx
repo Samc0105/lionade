@@ -1,11 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import Link from "next/link";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { useAuth } from "@/lib/auth";
 import { cdnUrl } from "@/lib/cdn";
-import { getEloLeaderboard } from "@/lib/db";
+import { useEloLeaderboard } from "@/lib/hooks";
 import {
   Medal,
   Diamond,
@@ -55,10 +54,11 @@ export default function CompetePage() {
   const widthsTopDown = [...TIER_WIDTHS];
 
   // Load real ELO leaderboard
-  const [topPlayers, setTopPlayers] = useState<{ rank: number; username: string; arena_elo: number }[]>([]);
-  useEffect(() => {
-    getEloLeaderboard(5).then(data => setTopPlayers(data)).catch(() => {});
-  }, []);
+  // 2026-05-25 (Phase A perf): raw fetch in useEffect → shared SWR hook so
+  // the compete page no longer re-fetches on every mount. Hook already lives
+  // in lib/hooks.ts with a 30s dedupe.
+  const { data: topPlayersData } = useEloLeaderboard(5);
+  const topPlayers: { rank: number; username: string; arena_elo: number }[] = topPlayersData ?? [];
 
   return (
     <ProtectedRoute>
@@ -129,7 +129,7 @@ export default function CompetePage() {
                 <p className="font-bebas text-2xl sm:text-4xl text-cream/80 tracking-[0.2em] mt-2">
                   MONTHLY COIN POOL
                 </p>
-                <p className="text-cream/40 text-sm mt-3 max-w-md mx-auto">
+                <p className="text-cream/60 text-sm mt-3 max-w-md mx-auto">
                   Top players will compete for a monthly prize pool. Details coming soon.
                 </p>
 
@@ -137,7 +137,7 @@ export default function CompetePage() {
                   <span className="font-bebas text-gold/80 text-sm tracking-widest uppercase">Coming Soon</span>
                 </div>
 
-                <p className="text-cream/20 text-xs mt-4">
+                <p className="text-cream/55 text-xs mt-4">
                   Launching with ranked competitive season V2 — 2026.
                 </p>
               </div>
@@ -171,17 +171,17 @@ export default function CompetePage() {
                         style={stat.achieved ? { color: stat.color } : undefined}>
                         {stat.value}
                       </p>
-                      <p className={`text-[8px] font-bold uppercase tracking-widest mt-1 ${stat.achieved ? "text-cream/40" : "text-gray-700"}`}>
+                      <p className={`text-[8px] font-bold uppercase tracking-widest mt-1 ${stat.achieved ? "text-cream/60" : "text-gray-700"}`}>
                         {stat.label}
                       </p>
                     </div>
                     {i === 0 && (
                       <div className="mt-2 w-20">
-                        <div className="text-[9px] text-cream/30 text-center mb-1">Play 5 matches</div>
+                        <div className="text-[9px] text-cream/55 text-center mb-1">Play 5 matches</div>
                         <div className="h-1.5 rounded-full bg-cream/[0.07] overflow-hidden">
                           <div className="h-full w-0 bg-gradient-to-r from-gold/60 to-gold rounded-full" />
                         </div>
-                        <div className="text-[9px] text-cream/20 text-center mt-0.5">0 / 5</div>
+                        <div className="text-[9px] text-cream/55 text-center mt-0.5">0 / 5</div>
                       </div>
                     )}
                   </div>
@@ -207,17 +207,17 @@ export default function CompetePage() {
                       style={stat.achieved ? { color: stat.color } : undefined}>
                       {stat.value}
                     </p>
-                    <p className={`text-[8px] font-bold uppercase tracking-widest mt-0.5 ${stat.achieved ? "text-cream/40" : "text-gray-700"}`}>
+                    <p className={`text-[8px] font-bold uppercase tracking-widest mt-0.5 ${stat.achieved ? "text-cream/60" : "text-gray-700"}`}>
                       {stat.label}
                     </p>
                   </div>
                   {i === 0 && (
                     <div className="mt-1.5 w-16">
-                      <div className="text-[8px] text-cream/30 text-center mb-0.5">Play 5 matches</div>
+                      <div className="text-[8px] text-cream/55 text-center mb-0.5">Play 5 matches</div>
                       <div className="h-1 rounded-full bg-cream/10 overflow-hidden">
                         <div className="h-full w-0 bg-gold rounded-full" />
                       </div>
-                      <div className="text-[8px] text-cream/20 text-center mt-0.5">0/5</div>
+                      <div className="text-[8px] text-cream/55 text-center mt-0.5">0/5</div>
                     </div>
                   )}
                 </div>
@@ -230,7 +230,7 @@ export default function CompetePage() {
             <h1 className="font-bebas text-6xl sm:text-8xl chrome-text tracking-wider leading-none">
               <Sword size={52} weight="regular" aria-hidden="true" className="inline mr-1.5 -mt-0.5" /> ARENA
             </h1>
-            <p className="text-cream/40 text-sm sm:text-base mt-2 max-w-lg mx-auto">
+            <p className="text-cream/60 text-sm sm:text-base mt-2 max-w-lg mx-auto">
               Choose your battleground. Climb the ranks. Earn real rewards.
             </p>
           </div>
@@ -267,7 +267,7 @@ export default function CompetePage() {
                     Challenge anyone to a head-to-head battle. Same 10 questions. 15 seconds each.
                     Speed bonus for fast answers. Winner takes the wagered coins.
                   </p>
-                  <p className="text-cream/30 text-xs mb-6 flex items-center justify-center gap-1">
+                  <p className="text-cream/55 text-xs mb-6 flex items-center justify-center gap-1">
                     <img src={cdnUrl("/F.png")} alt="Fangs" className="w-4 h-4 object-contain" /> Wager: 10–100 coins
                   </p>
                   <div className="flex flex-wrap gap-3 mb-6">
@@ -278,7 +278,7 @@ export default function CompetePage() {
                       <Users size={18} weight="regular" aria-hidden="true" className="inline mr-1.5 -mt-0.5" /> Challenge Friend
                     </Link>
                   </div>
-                  <p className="text-cream/20 text-xs">
+                  <p className="text-cream/55 text-xs">
                     Wins count toward your monthly ranking and Elo rating
                   </p>
                 </div>
@@ -290,7 +290,7 @@ export default function CompetePage() {
           <div className="animate-slide-up mb-10" style={{ animationDelay: "0.2s" }}>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               {/* Blitz */}
-              <a href="/games?mode=blitz" className="block glow-yellow rounded-2xl tilt-card group cursor-pointer">
+              <Link href="/games?mode=blitz" className="block glow-yellow rounded-2xl tilt-card group cursor-pointer">
                 <div className="relative overflow-hidden h-full rounded-2xl clip-angled-br transition-all duration-300 group-hover:-translate-y-1"
                   style={{
                     background: "linear-gradient(135deg, #1a1400 0%, #0f0a00 30%, #080600 50%, #060c18 100%)",
@@ -314,7 +314,7 @@ export default function CompetePage() {
                     </button>
                   </div>
                 </div>
-              </a>
+              </Link>
 
               {/* Leaderboard */}
               <div className="glow-purple rounded-2xl tilt-card">
@@ -356,18 +356,18 @@ export default function CompetePage() {
                                 : "rgba(255,255,255,0.02)",
                               border: "1px solid rgba(168,85,247,0.1)",
                             }}>
-                            <span className="font-bebas text-sm text-cream/40 w-5">#{player.rank}</span>
+                            <span className="font-bebas text-sm text-cream/60 w-5">#{player.rank}</span>
                             <span className="text-cream/60 text-xs flex-1 font-medium">
                               {renderMedal()}
                               {player.username}
                             </span>
-                            <span className="font-bebas text-xs text-cream/30">{player.arena_elo.toLocaleString()} Elo</span>
+                            <span className="font-bebas text-xs text-cream/55">{player.arena_elo.toLocaleString()} Elo</span>
                           </div>
                         );
                       })}
                     </div>
                     <div className="border-t border-cream/10 pt-3 mb-4">
-                      <p className="text-cream/30 text-xs">
+                      <p className="text-cream/55 text-xs">
                         Your Rank: <span className="text-cream/50 font-semibold">{user?.id && topPlayers.find(p => p.username === user.username) ? `#${topPlayers.find(p => p.username === user.username)!.rank}` : "Unranked"}</span>
                       </p>
                     </div>
@@ -433,7 +433,7 @@ export default function CompetePage() {
                     </svg>
                   </div>
 
-                  <p className="text-cream/30 text-xs font-semibold uppercase tracking-wider text-center">
+                  <p className="text-cream/55 text-xs font-semibold uppercase tracking-wider text-center">
                     Coming Summer 2026
                   </p>
                 </div>
@@ -467,7 +467,7 @@ export default function CompetePage() {
                     <p className="font-bebas text-xl tracking-wider text-gold mb-2">
                       <item.Icon size={24} weight={item.iconWeight} aria-hidden="true" className="inline mr-1.5 -mt-0.5" /> {item.title}
                     </p>
-                    <p className="text-cream/40 text-sm leading-relaxed">{item.desc}</p>
+                    <p className="text-cream/60 text-sm leading-relaxed">{item.desc}</p>
                   </div>
                 </div>
               ))}
@@ -555,7 +555,7 @@ export default function CompetePage() {
                           </div>
                         </div>
 
-                        <span className={`font-bebas text-[10px] sm:text-xs tracking-wider flex-shrink-0 ${isLocked ? "text-gray-700" : "text-cream/30"}`}>
+                        <span className={`font-bebas text-[10px] sm:text-xs tracking-wider flex-shrink-0 ${isLocked ? "text-gray-700" : "text-cream/55"}`}>
                           {tier.range}
                         </span>
 
@@ -605,7 +605,7 @@ export default function CompetePage() {
                     style={TIERS[CURRENT_TIER_INDEX + 1].name !== "LEGEND" ? { color: TIERS[CURRENT_TIER_INDEX + 1].color } : undefined}>
                     {DISPLAY_NAME}
                   </p>
-                  <p className="text-cream/20 text-[10px] mt-1">
+                  <p className="text-cream/55 text-[10px] mt-1">
                     {TIERS[CURRENT_TIER_INDEX + 1].range} to unlock{" "}
                     <span style={{ color: TIERS[CURRENT_TIER_INDEX + 1].name === "LEGEND" ? "#FFD700" : TIERS[CURRENT_TIER_INDEX + 1].color }}>
                       {TIERS[CURRENT_TIER_INDEX + 1].name}
@@ -629,7 +629,7 @@ export default function CompetePage() {
                   style={{ textShadow: "0 0 10px rgba(74,144,217,0.2)" }}>
                   FAIR PLAY PROTECTED
                 </p>
-                <p className="text-cream/40 text-sm leading-relaxed">
+                <p className="text-cream/60 text-sm leading-relaxed">
                   Lionade uses tab detection, timing analysis, and behavioral pattern monitoring.
                   Cheaters are permanently banned from cash rewards.
                 </p>

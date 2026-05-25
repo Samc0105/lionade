@@ -116,8 +116,17 @@ export const swrConfig: SWRConfiguration = {
   provider: () => getProvider(),
   // Default for the whole app. Hooks that need different cadence pass
   // their own override.
-  revalidateOnFocus: true,
-  dedupingInterval: 5_000,
+  //
+  // 2026-05-25 (Phase A perf): revalidateOnFocus flipped to FALSE and
+  // dedupingInterval bumped to 60s. Reason: tab-switching between Dashboard
+  // ↔ Shop ↔ Academia was firing a full revalidation storm on every focus,
+  // burning Supabase reads and producing perceptible jank. Hooks that DO
+  // need cross-tab freshness (Navbar notifications, useUserStats Fangs
+  // balance, Social unread badges, ClockIn, StreakRevive, DailySpin) keep
+  // their per-hook `revalidateOnFocus: true` override. `keepPreviousData`
+  // stays on globally so background revalidations never flash a skeleton.
+  revalidateOnFocus: false,
+  dedupingInterval: 60_000,
   // Don't aggressively retry on error — surface state to the consumer.
   shouldRetryOnError: false,
   // Keep showing the cached value while fetching the new one. Without
