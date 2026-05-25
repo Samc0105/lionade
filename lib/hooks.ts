@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import useSWR, { mutate } from "swr";
+import { cacheKeys } from "@lionade/core/cache/keys";
 import { supabase } from "@/lib/supabase";
 import { getLevelFromXp } from "@/lib/levels";
 
@@ -32,7 +33,9 @@ async function fetchUserStats(userId: string): Promise<UserStats> {
 
 export function useUserStats(userId: string | undefined) {
   const { data, error, isLoading, mutate: boundMutate } = useSWR(
-    userId ? `user-stats/${userId}` : null,
+    // Phase B: shared cacheKey registry (@lionade/core) — same string,
+    // sourced from canonical helper so iOS + web cannot drift.
+    userId ? cacheKeys.userStats(userId) : null,
     () => fetchUserStats(userId!),
     {
       revalidateOnFocus: true,
@@ -83,7 +86,8 @@ export function useUserStats(userId: string | undefined) {
 
 /** Imperatively revalidate stats (e.g. after quiz completion) */
 export function mutateUserStats(userId: string) {
-  return mutate(`user-stats/${userId}`);
+  // Phase B: shared registry — see cacheKeys.userStats in @lionade/core.
+  return mutate(cacheKeys.userStats(userId));
 }
 
 // ── Streak Info (for streak popup modal) ──

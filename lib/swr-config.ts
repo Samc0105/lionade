@@ -1,115 +1,123 @@
 /**
  * Web SWR config — localStorage-persistent cache + tuned revalidation.
  *
- * Before this existed, every cold tab open / hard refresh started with an
- * empty SWR cache. Every hook then fired its own fetch in parallel, and
- * the user saw skeletons for 0.5-1s before content materialised. Now the
- * cache survives across reloads via localStorage; the next open shows
- * last-known data instantly and revalidates in the background.
+ * Phase B (2026-05-25): the Map-backed provider scaffold (hydrate-on-init,
+ * write-through .set/.delete, debounced persist, LRU prune) was extracted
+ * into `@lionade/core/cache/storage` by `ios-shared-core`. Both web and
+ * iOS consume the same `createPersistedSwrProvider` factory; the only
+ * platform-specific bits are the I/O adapter and any persist-skip policy.
  *
- * Persistence strategy:
- *   - Synchronous hydrate from localStorage on first construction
- *   - Write-through Map (intercept set/delete) → debounced persist (500ms)
- *   - Also persist on `visibilitychange → hidden` (covers tab close,
- *     mobile background) and `beforeunload` (covers hard close + reload)
- *   - Versioned key so a future cache shape change can invalidate cleanly
- *   - SSR-safe: server-side returns a fresh empty Map (no localStorage)
+ *   - Shared factory:  packages/lionade-core/src/cache/storage.ts
+ *   - Web I/O adapter: lib/cache/localStorageAdapter.ts (this consumer)
+ *   - iOS I/O adapter: lionade-ios/lib/swr-config.ts (vp-ios consumer)
+ *
+ * Cold-load hydration is synchronous on web because localStorage is sync —
+ * the factory's `readyPromise` resolves on the next microtask, so we mount
+ * <SWRConfig> immediately and never see a flash-of-skeleton on first
+ * paint. iOS uses the same factory but awaits `readyPromise` before
+ * dropping its splash screen because AsyncStorage is genuinely async.
  *
  * Mounted at the root in `app/layout.tsx` via `<SWRConfig value={swrConfig}>`.
  */
 
 import type { Cache, SWRConfiguration } from "swr";
 
-const CACHE_KEY = "lionade-swr-cache-v1";
-const PERSIST_DEBOUNCE_MS = 500;
-/** Soft cap on entries — beyond this we evict oldest first on next write. */
-const MAX_ENTRIES = 500;
+import {
+  createPersistedSwrProvider,
+  SWR_PERSIST_KEY,
+  type PersistedSwrProvider,
+  type StorageAdapter,
+} from "@lionade/core/cache/storage";
+import {
+  localStorageAdapter,
+  stripSkippedKeys,
+} from "@/lib/cache/localStorageAdapter";
 
-let memoryCache: Map<string, unknown> | null = null;
-let persistTimer: ReturnType<typeof setTimeout> | null = null;
-
-function persist(map: Map<string, unknown>): void {
-  if (typeof window === "undefined") return;
-  try {
-    // LRU prune if we've blown the cap. We don't track access time
-    // explicitly; insertion-order is the next-best proxy (older keys
-    // are most-likely no-longer-mounted).
-    while (map.size > MAX_ENTRIES) {
-      const firstKey = map.keys().next().value;
-      if (firstKey === undefined) break;
-      map.delete(firstKey);
-    }
-    const obj: Record<string, unknown> = {};
-    map.forEach((v, k) => {
-      obj[k] = v;
-    });
-    localStorage.setItem(CACHE_KEY, JSON.stringify(obj));
-  } catch {
-    // Quota exceeded or stringification failed — give up silently. SWR
-    // still has the in-memory cache so the session continues working.
-  }
-}
-
-function debouncedPersist(map: Map<string, unknown>): void {
-  if (persistTimer) clearTimeout(persistTimer);
-  persistTimer = setTimeout(() => persist(map), PERSIST_DEBOUNCE_MS);
-}
-
-function buildWriteThroughMap(): Map<string, unknown> {
-  const map = new Map<string, unknown>();
-
-  // Hydrate synchronously from localStorage. This is the value: the
-  // first render of any hook with a matching key sees real data, not
-  // a skeleton.
-  if (typeof window !== "undefined") {
-    try {
-      const json = window.localStorage.getItem(CACHE_KEY);
-      if (json) {
-        const parsed = JSON.parse(json) as Record<string, unknown>;
-        Object.entries(parsed).forEach(([k, v]) => map.set(k, v));
-      }
-    } catch {
-      // Corrupted cache — wipe and start fresh.
+/**
+ * Wraps the raw localStorage adapter with a setItem filter that applies
+ * the persist-skip policy. The shared factory writes the FULL Map JSON
+ * blob under SWR_PERSIST_KEY on every debounced persist — this wrapper
+ * intercepts that single blob write, parses it, strips skip-listed
+ * entries, and re-serialises before handing off to the real adapter.
+ *
+ * Why intercept at the adapter layer rather than at the factory:
+ *   - The shared factory has no concept of skip lists (intentional —
+ *     skip policy is platform-specific, e.g. iOS has more storage
+ *     budget so its skip list may be empty or smaller).
+ *   - Doing the strip here keeps `swr-config.ts` declarative: "consume
+ *     the factory with a policy-decorated adapter," vs. duplicating
+ *     the persist-loop in this file.
+ *
+ * Trade-off: we re-parse/serialise the JSON blob once per persist. At
+ * 500ms debounce + typical payload sizes this is sub-millisecond on the
+ * main thread. Acceptable.
+ */
+function withSkipList(base: StorageAdapter): StorageAdapter {
+  return {
+    getItem: base.getItem.bind(base),
+    removeItem: base.removeItem.bind(base),
+    async setItem(key: string, value: string): Promise<void> {
+      // Only filter the cache blob — other keys (if any future code
+      // routes through this adapter) pass through untouched.
+      if (key !== SWR_PERSIST_KEY) return base.setItem(key, value);
       try {
-        window.localStorage.removeItem(CACHE_KEY);
+        const parsed = JSON.parse(value) as Record<string, unknown>;
+        const filtered = stripSkippedKeys(parsed);
+        return base.setItem(key, JSON.stringify(filtered));
       } catch {
-        /* ignore */
+        // If for any reason the blob isn't JSON-shaped, fall through —
+        // the factory always writes JSON so this branch is defensive only.
+        return base.setItem(key, value);
       }
-    }
-  }
-
-  // Intercept .set / .delete so every cache write triggers a debounced
-  // persist. This is the difference between "lose 4s of writes on a
-  // hard kill" and "lose 500ms" — and crucially, the actual writes are
-  // batched so we don't thrash localStorage on every keystroke.
-  const originalSet = map.set.bind(map);
-  const originalDelete = map.delete.bind(map);
-  map.set = (key: string, value: unknown) => {
-    const result = originalSet(key, value);
-    debouncedPersist(map);
-    return result;
+    },
   };
-  map.delete = (key: string) => {
-    const result = originalDelete(key);
-    debouncedPersist(map);
-    return result;
-  };
-
-  if (typeof window !== "undefined") {
-    // Flush on tab background (covers mobile Safari) + actual close.
-    document.addEventListener("visibilitychange", () => {
-      if (document.visibilityState === "hidden") persist(map);
-    });
-    window.addEventListener("beforeunload", () => persist(map));
-  }
-
-  return map;
 }
+
+let providerSingleton: PersistedSwrProvider | null = null;
 
 function getProvider(): Cache {
-  if (memoryCache) return memoryCache as unknown as Cache;
-  memoryCache = buildWriteThroughMap();
-  return memoryCache as unknown as Cache;
+  if (providerSingleton) {
+    return providerSingleton.cache as unknown as Cache;
+  }
+  providerSingleton = createPersistedSwrProvider(
+    withSkipList(localStorageAdapter),
+    {
+      onError: (where, err) => {
+        // Surface to console in dev; production should hook this to
+        // Sentry once that's wired into the web app (tracked separately).
+        if (process.env.NODE_ENV !== "production") {
+          // eslint-disable-next-line no-console
+          console.warn(`[swr-cache] ${where} error:`, err);
+        }
+      },
+    },
+  );
+
+  // Wire visibilitychange + beforeunload flushes — these are the same
+  // resilience hooks Phase A had, just routed through the factory's
+  // `flush()` API instead of an inline persist() call.
+  if (typeof window !== "undefined") {
+    const onHide = () => {
+      if (document.visibilityState === "hidden") {
+        void providerSingleton?.flush();
+      }
+    };
+    document.addEventListener("visibilitychange", onHide);
+    window.addEventListener("beforeunload", () => {
+      void providerSingleton?.flush();
+    });
+  }
+
+  return providerSingleton.cache as unknown as Cache;
+}
+
+/**
+ * Test-only: reset the singleton provider. Lets unit tests verify cold-load
+ * hydration from a controlled localStorage state without polluting other
+ * tests' caches.
+ */
+export function __resetSwrProviderForTests(): void {
+  providerSingleton = null;
 }
 
 export const swrConfig: SWRConfiguration = {
