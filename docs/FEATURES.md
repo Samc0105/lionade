@@ -54,6 +54,9 @@
 ## Notifications
 - **Real-time notifications system with bell icon** — 2026-03-20
 
+## Email Program
+- **Phase 1 — Shared template skeleton + 5 transactional emails + 3 Supabase Auth reference HTMLs** (`lib/emails/` — typed slot renderer, no `@react-email`. Cream/parchment + gold-dark CTA palette, table-based, inline styles, system fonts, 600px max width; survives Gmail/Apple Mail/Outlook Web. Templates: `waitlistConfirmation`, `contactForm`, `welcome`, `firstStreakDay`, `masteryStart`. Send-trigger wiring: waitlist + contact + firstStreakDay + masteryStart wired; welcome deferred to Phase 1.5 (no `/api/auth/callback` route exists). Dev preview at `/dev/emails` — gated on `NODE_ENV !== "production"`. Supabase Auth templates not auto-applied — paste manually per `lib/emails/supabase/README.md`. Phase 2 hook: `{{aiPersonalization}}` slot in every body template.) — 2026-05-25
+
 ## Shop & Wallet
 - **Lion's Den shop** (Coin Store + Premium Store toggle) — 2026-03-06
 - **Shop API routes** (purchase, equip, activate-booster) — 2026-03-06

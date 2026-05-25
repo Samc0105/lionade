@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
 import { SUPPORT_EMAIL } from "@/lib/site-config";
+import { renderEmail, templates } from "@/lib/emails";
 
 function getResend() {
   if (!process.env.RESEND_API_KEY) return null;
@@ -54,27 +55,25 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Email service not configured" }, { status: 500 });
     }
 
-    // Escape every user-supplied string before interpolating into HTML
+    // Escape every user-supplied string before it lands in HTML.
+    // messageHtml is the only HTML-rendered slot — see lib/emails/README.md.
     const safe = {
-      name: escapeHtml(name),
-      email: escapeHtml(email),
+      fromName: escapeHtml(name),
+      fromEmail: escapeHtml(email),
       category: escapeHtml(category),
       subject: escapeHtml(subject),
-      message: escapeHtml(message).replace(/\n/g, "<br />"),
+      messageHtml: escapeHtml(message).replace(/\n/g, "<br />"),
     };
+
+    const rendered = renderEmail(templates.contactForm, safe);
 
     await resend.emails.send({
       from: process.env.EMAIL_FROM,
       to: SUPPORT_EMAIL,
       replyTo: email,
-      subject: `[${category}] ${subject}`,
-      html: `
-        <h2>${safe.category}</h2>
-        <p><strong>From:</strong> ${safe.name} (${safe.email})</p>
-        <p><strong>Subject:</strong> ${safe.subject}</p>
-        <hr />
-        <p>${safe.message}</p>
-      `,
+      subject: rendered.subject,
+      html: rendered.html,
+      text: rendered.text,
     });
 
     return NextResponse.json({ success: true });

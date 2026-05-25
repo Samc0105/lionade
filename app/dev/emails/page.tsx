@@ -1,0 +1,104 @@
+/**
+ * Dev-only email preview route — never ships to prod.
+ *
+ * Renders every template in lib/emails so we can eyeball them in a browser
+ * without burning Resend quota. Gated on NODE_ENV !== "production" (returns
+ * notFound() in prod, which makes the route literally unreachable).
+ *
+ * Usage: `npm run dev` then visit `http://localhost:3000/dev/emails`.
+ * Click a template to view its rendered HTML in an isolated iframe.
+ */
+import { notFound } from "next/navigation";
+import { renderEmail, templates, type TemplateKey, type EmailSlots } from "@/lib/emails";
+import { absoluteUrl } from "@/lib/site-config";
+
+// Per-template sample slots so the preview shows realistic content.
+const SAMPLES: Record<TemplateKey, EmailSlots> = {
+  waitlistConfirmation: {
+    userName: "Sam",
+    ctaUrl: absoluteUrl("/"),
+    ctaLabel: "Visit Lionade",
+  },
+  contactForm: {
+    fromName: "Jordan Lee",
+    fromEmail: "jordan@example.com",
+    category: "Bug Report",
+    subject: "Quiz timer freezes at question 7",
+    messageHtml:
+      "Hey — running Chrome 124 on macOS.<br />The timer pauses when I switch tabs.<br />Repro: take any AP Bio quiz, alt-tab away, come back.<br /><br />Thanks!",
+  },
+  welcome: {
+    userName: "Sam",
+    ctaUrl: absoluteUrl("/dashboard"),
+    ctaLabel: "Open dashboard",
+  },
+  firstStreakDay: {
+    userName: "Sam",
+    fangsEarned: 45,
+    ctaUrl: absoluteUrl("/dashboard"),
+    ctaLabel: "Keep the streak alive",
+  },
+  masteryStart: {
+    userName: "Sam",
+    subjectName: "AWS Sec Specialty",
+    ctaUrl: absoluteUrl("/learn/mastery/example-id"),
+    ctaLabel: "Open Mastery",
+  },
+};
+
+export default function EmailPreviewIndex({
+  searchParams,
+}: {
+  searchParams?: { template?: string };
+}) {
+  if (process.env.NODE_ENV === "production") notFound();
+
+  const requested = searchParams?.template as TemplateKey | undefined;
+  if (requested && requested in templates) {
+    const tpl = templates[requested];
+    const rendered = renderEmail(tpl, SAMPLES[requested]);
+    return (
+      <div style={{ fontFamily: "system-ui, sans-serif", padding: "20px", background: "#0a0a0a", color: "#eee", minHeight: "100vh" }}>
+        <a href="/dev/emails" style={{ color: "#C9A24A", textDecoration: "underline" }}>← Back to all templates</a>
+        <h1 style={{ marginTop: "12px" }}>{tpl.id}</h1>
+        <p style={{ color: "#aaa" }}>
+          <strong>Subject:</strong> {rendered.subject}
+        </p>
+        <details style={{ marginBottom: "12px", background: "#1a1a1a", padding: "12px", borderRadius: "8px" }}>
+          <summary style={{ cursor: "pointer", color: "#aaa" }}>Plain-text fallback</summary>
+          <pre style={{ whiteSpace: "pre-wrap", color: "#ccc", fontSize: "13px", margin: "12px 0 0 0" }}>{rendered.text}</pre>
+        </details>
+        <iframe
+          srcDoc={rendered.html}
+          style={{ width: "100%", height: "1200px", border: "1px solid #333", borderRadius: "8px", background: "white" }}
+        />
+      </div>
+    );
+  }
+
+  // Index — list every template with a thumbnail link
+  const all = Object.keys(templates) as TemplateKey[];
+  return (
+    <div style={{ fontFamily: "system-ui, sans-serif", padding: "20px", background: "#0a0a0a", color: "#eee", minHeight: "100vh" }}>
+      <h1>Email previews <span style={{ color: "#C9A24A" }}>(dev only)</span></h1>
+      <p style={{ color: "#aaa" }}>
+        Phase 1 templates. NODE_ENV: <code>{process.env.NODE_ENV}</code>
+      </p>
+      <ul style={{ listStyle: "none", padding: 0, marginTop: "24px" }}>
+        {all.map(key => {
+          const rendered = renderEmail(templates[key], SAMPLES[key]);
+          return (
+            <li key={key} style={{ padding: "16px", marginBottom: "12px", background: "#1a1a1a", borderRadius: "8px" }}>
+              <a href={`/dev/emails?template=${key}`} style={{ color: "#C9A24A", fontSize: "18px", fontWeight: 600, textDecoration: "none" }}>
+                {key}
+              </a>
+              <div style={{ color: "#aaa", fontSize: "14px", marginTop: "4px" }}>
+                Subject: {rendered.subject}
+              </div>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  );
+}

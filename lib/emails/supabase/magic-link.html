@@ -1,0 +1,83 @@
+<!--
+  Lionade — Supabase Auth "Magic Link" template
+  Paste into Supabase Dashboard → Authentication → Email Templates → "Magic Link"
+  Variables:
+    - {{ .ConfirmationURL }}  the magic-link sign-in URL
+    - {{ .Email }}            the user's email
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Your Lionade magic link</title>
+</head>
+<body style="margin:0;padding:0;background:#FAF6EE;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;color:#1B1A17;-webkit-font-smoothing:antialiased;">
+<div style="display:none;max-height:0;overflow:hidden;mso-hide:all;font-size:1px;line-height:1px;color:#FAF6EE;">
+Tap to sign into Lionade — no password needed.
+</div>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#FAF6EE;padding:32px 16px;">
+  <tr>
+    <td align="center">
+      <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%;background:#FFFFFF;border:1px solid #E4DCC4;border-radius:12px;overflow:hidden;">
+        <tr>
+          <td style="padding:28px 32px 20px 32px;border-bottom:1px solid #E4DCC4;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td align="left" valign="middle">
+                  <img src="https://d1745aj99cclbu.cloudfront.net/F.png" width="40" height="40" alt="Lionade" style="display:block;border:0;height:40px;width:40px;" />
+                </td>
+                <td align="right" valign="middle" style="font-size:14px;font-weight:600;color:#8E6F22;letter-spacing:0.12em;text-transform:uppercase;">
+                  Lionade
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td style="height:4px;background:#C9A24A;font-size:0;line-height:0;">&nbsp;</td>
+        </tr>
+        <tr>
+          <td style="padding:36px 32px 32px 32px;font-size:16px;line-height:1.6;color:#1B1A17;">
+            <h1 style="margin:0 0 16px 0;font-size:26px;font-weight:700;color:#1B1A17;">
+              your magic link. ✨
+            </h1>
+            <p style="margin:0 0 18px 0;">
+              Sign into <strong>{{ .Email }}</strong> with one tap. No password to remember.
+            </p>
+            <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:8px 0 24px 0;">
+              <tr>
+                <td align="center" style="border-radius:8px;background:#8E6F22;">
+                  <a href="{{ .ConfirmationURL }}" style="display:inline-block;padding:14px 28px;font-size:15px;font-weight:600;color:#FFFFFF;text-decoration:none;border-radius:8px;">
+                    Sign in to Lionade &rarr;
+                  </a>
+                </td>
+              </tr>
+            </table>
+            <p style="margin:0 0 4px 0;font-size:14px;color:#615C50;">
+              Or paste this link into your browser:
+            </p>
+            <p style="margin:0 0 18px 0;font-size:13px;color:#8E6F22;word-break:break-all;">
+              {{ .ConfirmationURL }}
+            </p>
+            <p style="margin:0;font-size:14px;color:#615C50;">
+              Link expires in 1 hour. Didn't request it? Ignore this email.
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:24px 32px;background:#F3ECD9;border-top:1px solid #E4DCC4;font-size:12px;line-height:1.6;color:#615C50;">
+            <p style="margin:0 0 8px 0;">
+              Questions? <a href="mailto:support@getlionade.com" style="color:#8E6F22;text-decoration:underline;">support@getlionade.com</a>
+            </p>
+            <p style="margin:0;font-size:11px;opacity:0.8;">
+              Lionade &middot; Study rewards &middot; <a href="https://getlionade.com" style="color:#8E6F22;">getlionade.com</a>
+            </p>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+</body>
+</html>

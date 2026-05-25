@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
+import { Resend } from "resend";
 import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
 import { pPass } from "@/lib/mastery";
+import { renderEmail, templates } from "@/lib/emails";
+import { absoluteUrl } from "@/lib/site-config";
 
 /**
  * POST /api/mastery/exams/[id]/sessions
@@ -123,6 +126,50 @@ export async function POST(req: NextRequest, { params }: RouteCtx) {
       if (seedRows.length) {
         await supabaseAdmin.from("mastery_progress").insert(seedRows);
       }
+    }
+
+    // First-ever Mastery session email — fires once when the user creates
+    // their first mastery_sessions row across ALL exams. Best-effort; never
+    // breaks the API. Phase 1 wiring; Phase 2 AI personalization slot ready.
+    try {
+      if (process.env.RESEND_API_KEY && process.env.EMAIL_FROM) {
+        const { count: priorSessions } = await supabaseAdmin
+          .from("mastery_sessions")
+          .select("id", { count: "exact", head: true })
+          .eq("user_id", userId)
+          .neq("id", session.id);
+
+        if ((priorSessions ?? 0) === 0) {
+          const [{ data: authUser }, { data: profile }] = await Promise.all([
+            supabaseAdmin.auth.admin.getUserById(userId),
+            supabaseAdmin.from("profiles").select("display_name").eq("id", userId).single(),
+          ]);
+          const toEmail = authUser?.user?.email;
+          if (toEmail) {
+            const resend = new Resend(process.env.RESEND_API_KEY);
+            const rendered = renderEmail(templates.masteryStart, {
+              userName: (profile?.display_name as string | null) || undefined,
+              subjectName: exam.title,
+              ctaUrl: absoluteUrl(`/learn/mastery/${examId}`),
+              ctaLabel: "Open Mastery",
+            });
+            const { error: emailErr } = await resend.emails.send({
+              from: process.env.EMAIL_FROM,
+              to: toEmail,
+              replyTo: "support@getlionade.com",
+              subject: rendered.subject,
+              html: rendered.html,
+              text: rendered.text,
+            });
+            if (emailErr) {
+              console.warn("[mastery/exams/:id/sessions] masteryStart email failed:", JSON.stringify(emailErr));
+            }
+          }
+        }
+      }
+    } catch (masteryEmailErr) {
+      // Non-fatal — never block session creation on email failure
+      console.warn("[mastery/exams/:id/sessions] masteryStart email WARN:", masteryEmailErr);
     }
 
     return NextResponse.json({ sessionId: session.id, resumed: false });

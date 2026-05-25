@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
+import { Resend } from "resend";
 import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
+import { renderEmail, templates } from "@/lib/emails";
+import { absoluteUrl } from "@/lib/site-config";
 
 // GET — health check
 export async function GET() {
@@ -80,7 +83,7 @@ export async function POST(req: NextRequest) {
     // 3. Update profile: add coins and xp
     const { data: profile, error: profileFetchErr } = await supabaseAdmin
       .from("profiles")
-      .select("coins, xp, streak, max_streak, last_activity_at, daily_questions_completed, daily_reset_date")
+      .select("coins, xp, streak, max_streak, last_activity_at, daily_questions_completed, daily_reset_date, display_name")
       .eq("id", userId)
       .single();
 
@@ -319,6 +322,45 @@ export async function POST(req: NextRequest) {
         } catch { /* notifications table might not exist */ }
         streakMilestone = { days: newStreak, bonus: milestoneBonus };
       }
+    }
+
+    // 5c. First-day-streak email — fires exactly once per user (max_streak === 0
+    // before this run guarantees no prior streak). Best-effort: failures here
+    // never break the API. Phase 1 wiring; Phase 2 will personalize via Ninny.
+    try {
+      const isFirstEverStreak = (profile.max_streak ?? 0) === 0 && newStreak === 1;
+      if (
+        isFirstEverStreak &&
+        process.env.RESEND_API_KEY &&
+        process.env.EMAIL_FROM
+      ) {
+        // Look up the user's email via auth.users (profiles doesn't store it)
+        const { data: authUser } = await supabaseAdmin.auth.admin.getUserById(userId);
+        const toEmail = authUser?.user?.email;
+        if (toEmail) {
+          const resend = new Resend(process.env.RESEND_API_KEY);
+          const rendered = renderEmail(templates.firstStreakDay, {
+            userName: (profile.display_name as string | null) || undefined,
+            fangsEarned: coinsEarned,
+            ctaUrl: absoluteUrl("/dashboard"),
+            ctaLabel: "Keep the streak alive",
+          });
+          const { error: emailErr } = await resend.emails.send({
+            from: process.env.EMAIL_FROM,
+            to: toEmail,
+            replyTo: "support@getlionade.com",
+            subject: rendered.subject,
+            html: rendered.html,
+            text: rendered.text,
+          });
+          if (emailErr) {
+            console.warn("[save-quiz-results] firstStreakDay email failed:", JSON.stringify(emailErr));
+          }
+        }
+      }
+    } catch (streakEmailErr) {
+      // Non-fatal — email send must never 500 a quiz submission
+      console.warn("[save-quiz-results] firstStreakDay email WARN:", streakEmailErr);
     }
 
     // 6. Achievement checking
