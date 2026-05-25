@@ -402,3 +402,86 @@ win on `getBestScores` is worth the second migration.
 `security-auditor` (RLS / SECURITY INVOKER review), `dev-performance` (speedup
 estimate), `quality-qa-tester` (shape parity), `quality-code-reviewer` (sign-off).
 iOS owners: `ios-shared-core` (subjectStatsAPI wrapper), `vp-ios` (release timing).*
+
+---
+
+## Phase C.1 follow-up request — `p_window_days` server-side param (2026-05-25, vp-ios)
+
+**Status:** REQUESTED. Awaiting admin's next-cycle pickup.
+
+### Why iOS is filing this
+
+Admin's Phase C answer to the iOS audit's question #4 (window semantics) recommended: *"iOS calls with `p_lifetime=false` and filters client-side to 7 days."* On inspection, **this workaround is not viable on the current RPC return shape**:
+
+- `get_subject_stats(p_user_id, p_lifetime=false)` returns rows **already aggregated by subject** across the 90-day window — `(subject, "questionsAnswered", "correctAnswers", "coinsEarned")`.
+- There is no `completed_at` on the returned rows. Client-side has no signal to distinguish a subject played 6 days ago from one played 60 days ago — the SUMs already collapsed both into a single row.
+- iOS UX (`SubjectStatsCard` literal "Last 7 days" label + `StatOrbs` distinct-subjects-this-week orb) is load-bearing on 7-day semantics. Swallowing 90 days silently is a UX regression.
+
+So iOS cannot do the workaround; it needs server-side support.
+
+### Proposed signature
+
+```sql
+CREATE OR REPLACE FUNCTION public.get_subject_stats(
+  p_user_id uuid,
+  p_lifetime boolean DEFAULT false,
+  p_window_days integer DEFAULT 90
+)
+RETURNS TABLE (
+  subject text,
+  "questionsAnswered" integer,
+  "correctAnswers" integer,
+  "coinsEarned" integer
+)
+LANGUAGE sql STABLE SECURITY INVOKER
+SET search_path = public
+AS $$
+  SELECT
+    qs.subject,
+    COALESCE(SUM(qs.total_questions), 0)::integer AS "questionsAnswered",
+    COALESCE(SUM(qs.correct_answers), 0)::integer AS "correctAnswers",
+    COALESCE(SUM(qs.coins_earned),    0)::integer AS "coinsEarned"
+  FROM public.quiz_sessions qs
+  WHERE qs.user_id = p_user_id
+    AND (
+      p_lifetime
+      OR qs.completed_at >= (now() - make_interval(days => p_window_days))
+    )
+  GROUP BY qs.subject;
+$$;
+```
+
+### Design notes
+
+- **Backward-compatible.** `p_window_days` defaults to `90`, so web's existing `getSubjectStats(userId, { lifetime })` call works unchanged.
+- iOS calls with `p_window_days: 7` for the Dashboard "Last 7 days" panel.
+- Index coverage from migration 039 (`idx_quiz_sessions_user_completed (user_id, completed_at DESC)`) still applies — any trailing-window predicate `completed_at >= now() - interval` is a prefix scan.
+- `make_interval(days => p_window_days)` is the safe idiom for parameterized intervals — avoids string concatenation / SQL injection seams.
+- Same `SECURITY INVOKER` + `REVOKE FROM PUBLIC` + `GRANT EXECUTE TO authenticated, service_role` posture as 047.
+- Idempotent via `CREATE OR REPLACE FUNCTION` (replacing the 3-arg signature; the 2-arg signature from 047 is left in place by default — Postgres allows function overloading. If admin prefers to retire the 2-arg form, add `DROP FUNCTION public.get_subject_stats(uuid, boolean);` before the CREATE).
+
+### Web migration choice
+
+Two paths admin can pick:
+
+1. **Add the 3-arg signature alongside the 2-arg one** (Postgres overloading; minimal blast radius — existing web call site unaffected). Cleanest.
+2. **Replace the 2-arg signature with the 3-arg one** (single canonical function; web's `getSubjectStats` wrapper passes `p_window_days: undefined` and gets the 90 default). One-line diff in `lib/db.ts`.
+
+vp-ios is agnostic — both work for iOS. Pick whichever fits the web team's policy on function-signature versioning.
+
+### Owner
+
+`dev-database` (migration design) + `dev-backend` (no web call-site change needed if admin picks option 1; one-line param add if option 2) + `security-auditor` (RLS / `search_path` review — should be a rubber stamp; same posture as 047). `quality-qa-tester` should add a 7-day variant case to the existing `get_subject_stats` parity table.
+
+### iOS-side wait state
+
+iOS hook `lib/hooks/use-subject-stats.ts` stays on the existing SELECT-and-aggregate path until this migration lands on prod. When it does:
+
+- iOS swap is a 4-line edit: `supabase.rpc('get_subject_stats', { p_user_id: userId, p_lifetime: false, p_window_days: 7 })`.
+- Field mapping: rename `questionsAnswered → questions`, `correctAnswers → correct`, `coinsEarned → coins` in the hook's transform step. Consumers in `SubjectStatsCard` + `StatOrbs` stay untouched.
+- Cache key `subject-stats/${userId}` stays byte-identical.
+- Estimated speedup matches admin's web measurement: ~150ms → ~10ms on Dashboard.
+
+---
+
+*Owner: web `dev-database` next cycle. Blocking iOS Phase C code migration.*
