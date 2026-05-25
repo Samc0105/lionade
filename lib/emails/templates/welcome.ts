@@ -1,13 +1,13 @@
 /**
  * Welcome email — sent immediately after Supabase signup-verify completes.
  *
- * Phase 1 deliverable 3.1. Template only. Send-trigger DEFERRED to Phase 1.5
- * because the repo has no app/api/auth/callback/route.ts — Supabase signup
- * flow is currently 100% client-side. Wiring this requires either:
- *  (a) A Supabase Auth webhook → new API route → enqueue email, OR
- *  (b) A client-side fetch on the post-verify success screen.
+ * Phase 1 deliverable 3.1 (template) + Phase 1.5 (wiring).
  *
- * (a) is the right answer (server-side, can't be skipped). Filed for Phase 1.5.
+ * Send-trigger WIRED in app/api/auth/welcome/route.ts as a Supabase Auth
+ * webhook (server-to-server, post-verify). Idempotent via
+ * profiles.welcome_email_sent_at (migration 048) — replay-safe under
+ * Supabase retries. Requires SUPABASE_AUTH_HOOK_SECRET env var + a one-time
+ * dashboard paste of the webhook URL; see lib/emails/supabase/README.md.
  *
  * Voice: Ninny. Job: bridge from Supabase's bland verify email → "here are
  * the 3 things to do first." Keep CTA single — the body explains the 3 paths

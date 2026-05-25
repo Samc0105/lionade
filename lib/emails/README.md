@@ -30,7 +30,7 @@ await resend.emails.send({ from, to, subject, html, text });
 |-----|------|------|----------------|
 | `waitlistConfirmation` | `templates/waitlist-confirmation.ts` | User joins waitlist | ✅ Wired (`app/api/waitlist/route.ts`) |
 | `contactForm` | `templates/contact-form.ts` | User submits contact form | ✅ Wired (`app/api/contact/route.ts`) |
-| `welcome` | `templates/welcome.ts` | Right after Supabase signup-verify | 🟡 Template only — wiring deferred to Phase 1.5 (no `/api/auth/callback` route exists; signup verify is client-side) |
+| `welcome` | `templates/welcome.ts` | Right after Supabase signup-verify | ✅ Wired Phase 1.5 (`app/api/auth/welcome/route.ts`) — Supabase Auth webhook, server-to-server. Idempotent via `profiles.welcome_email_sent_at` (migration 048). Requires `SUPABASE_AUTH_HOOK_SECRET` env var. Paste step: `lib/emails/supabase/README.md` §2. |
 | `firstStreakDay` | `templates/first-streak-day.ts` | User hits day-1 streak for the first time | ✅ Wired (`app/api/save-quiz-results/route.ts`) |
 | `masteryStart` | `templates/mastery-start.ts` | User creates first-ever Mastery session | ✅ Wired (`app/api/mastery/exams/[id]/sessions/route.ts`) |
 

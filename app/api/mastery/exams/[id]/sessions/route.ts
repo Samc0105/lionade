@@ -128,15 +128,27 @@ export async function POST(req: NextRequest, { params }: RouteCtx) {
       }
     }
 
-    // First-ever Mastery session email — fires once when the user creates
-    // their first mastery_sessions row across ALL exams. Best-effort; never
-    // breaks the API. Phase 1 wiring; Phase 2 AI personalization slot ready.
+    // First-ever Mastery session email — fires once per (user, exam) pair.
+    // Sam's intent in plain English: "congrats on starting ur mastery on
+    // whatever subjects" — i.e. when a user starts mastery on AWS Sec, they
+    // get one. When they later start mastery on Biology, they get another.
+    // A second session on the SAME exam (manual re-start after closing the
+    // active one) does NOT re-trigger — the gate filters by user_exam_id.
+    //
+    // Note: "resume" returns early at line 58, so we only get here on a
+    // truly fresh session insert. The count below is the additional defense
+    // against the rare race where two parallel POSTs both reach the insert
+    // (the `.neq("id", session.id)` excludes the row we just inserted).
+    //
+    // Best-effort; never breaks the API. Phase 1.5 wiring (was per-user
+    // across-all-exams in Phase 1; corrected to per-exam in Phase 1.5).
     try {
       if (process.env.RESEND_API_KEY && process.env.EMAIL_FROM) {
         const { count: priorSessions } = await supabaseAdmin
           .from("mastery_sessions")
           .select("id", { count: "exact", head: true })
           .eq("user_id", userId)
+          .eq("user_exam_id", examId)
           .neq("id", session.id);
 
         if ((priorSessions ?? 0) === 0) {
