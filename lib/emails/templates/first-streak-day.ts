@@ -21,7 +21,7 @@ export const firstStreakDay: TemplateDef = {
   day 1 streak. 🔥
 </h1>
 <p style="margin:0 0 18px 0;font-size:16px;line-height:1.65;color:#1B1A17;">
-  Lookatchu {{userName}} — first quiz down, streak started, <strong>{{fangsEarned}} Fangs</strong> in the bag.
+  Lookatchu {{userName}}. First quiz down, streak started, <strong>{{fangsEarned}} Fangs</strong> in the bag.
 </p>
 <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:0 0 22px 0;background:#FAF6EE;border:1px solid #E4DCC4;border-radius:8px;">
   <tr>
@@ -42,7 +42,7 @@ ${ctaButton()}
 </p>`,
   text: `day 1. you're cooking.
 
-Lookatchu — first quiz down, streak started, {{fangsEarned}} Fangs in the bag.
+Lookatchu. First quiz down, streak started, {{fangsEarned}} Fangs in the bag.
 
 Here's the play: show up tomorrow, hit one more quiz, and your streak jumps to day 2.
 
@@ -55,6 +55,6 @@ Stack 'em.
 
 {{ctaLabel}}: {{ctaUrl}}
 
-— Lionade · getlionade.com
+Lionade · getlionade.com
 `,
 };

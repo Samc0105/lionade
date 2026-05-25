@@ -19,7 +19,7 @@ export const waitlistConfirmation: TemplateDef = {
   you're in. 🦷
 </h1>
 <p style="margin:0 0 18px 0;font-size:16px;line-height:1.65;color:#1B1A17;">
-  Heyyy {{userName}} — you officially made the Lionade waitlist. Welcome to the den.
+  Heyyy {{userName}}. You officially made the Lionade waitlist. Welcome to the den.
 </p>
 <p style="margin:0 0 18px 0;font-size:16px;line-height:1.65;color:#1B1A17;">
   Lionade is the study-rewards platform where grinding actually pays off.
@@ -37,11 +37,11 @@ export const waitlistConfirmation: TemplateDef = {
 ${ctaButton()}
 {{aiPersonalization}}
 <p style="margin:24px 0 0 0;font-size:14px;line-height:1.6;color:#615C50;">
-  Want priority? Share Lionade with a friend who studies — it moves you up the list.
+  Want priority? Share Lionade with a friend who studies. It moves you up the list.
 </p>`,
   text: `you're in.
 
-Heyyy {{userName}} — you officially made the Lionade waitlist. Welcome to the den.
+Heyyy {{userName}}. You officially made the Lionade waitlist. Welcome to the den.
 
 Lionade is the study-rewards platform where grinding actually pays off. Take quizzes, build streaks, earn Fangs, cash them out.
 
@@ -52,8 +52,8 @@ What happens next:
 
 {{ctaLabel}}: {{ctaUrl}}
 
-Want priority? Share Lionade with a friend who studies — it moves you up the list.
+Want priority? Share Lionade with a friend who studies. It moves you up the list.
 
-— Lionade · getlionade.com
+Lionade · getlionade.com
 `,
 };

@@ -15,7 +15,7 @@ import { TemplateDef, ctaButton } from "../render";
 
 export const masteryStart: TemplateDef = {
   id: "mastery-start",
-  subject: "mastery: {{subjectName}} — locked in.",
+  subject: "mastery: {{subjectName}}. locked in.",
   preheader: "Your exam's set up. Here's how Mastery works.",
   body: `
 <h1 style="margin:0 0 16px 0;font-size:26px;line-height:1.25;font-weight:700;color:#1B1A17;">
@@ -45,7 +45,7 @@ ${ctaButton()}
 <p style="margin:18px 0 0 0;font-size:14px;line-height:1.6;color:#615C50;">
   You got this. Talk to Ninny in-app if you're stuck on a topic.
 </p>`,
-  text: `mastery: {{subjectName}} — locked in.
+  text: `mastery: {{subjectName}}. locked in.
 
 Bet, {{userName}}. You just started Mastery for {{subjectName}}. Ninny's already sizing up the topics.
 
@@ -59,6 +59,6 @@ Open the exam, start where Ninny suggests, and just let it cook.
 
 {{ctaLabel}}: {{ctaUrl}}
 
-— Lionade · getlionade.com
+Lionade · getlionade.com
 `,
 };

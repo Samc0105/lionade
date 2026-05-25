@@ -24,7 +24,7 @@ export const welcome: TemplateDef = {
   you're in. for real this time. 🦷
 </h1>
 <p style="margin:0 0 18px 0;font-size:16px;line-height:1.65;color:#1B1A17;">
-  What's good {{userName}} — account's verified, Lionade's yours.
+  What's good {{userName}}. Account's verified, Lionade's yours.
   Quick rundown so you're not just staring at a dashboard:
 </p>
 <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:0 0 22px 0;">
@@ -52,11 +52,11 @@ export const welcome: TemplateDef = {
 ${ctaButton()}
 {{aiPersonalization}}
 <p style="margin:18px 0 0 0;font-size:14px;line-height:1.6;color:#615C50;">
-  Stuck? Just reply to this email — it goes straight to us.
+  Stuck? Just reply to this email. It goes straight to us.
 </p>`,
   text: `welcome to lionade, {{userName}}.
 
-What's good — account's verified, Lionade's yours. Quick rundown:
+What's good. Account's verified, Lionade's yours. Quick rundown:
 
 1. Take a quiz. Pick any subject. 10 questions. You earn Fangs for every right answer.
 2. Start a streak. Show up tomorrow. The longer you grind, the bigger the bonus.
@@ -66,8 +66,8 @@ TL;DR: study, earn Fangs, cash out. That's the loop.
 
 {{ctaLabel}}: {{ctaUrl}}
 
-Stuck? Just reply to this email — it goes straight to us.
+Stuck? Just reply to this email. It goes straight to us.
 
-— Lionade · getlionade.com
+Lionade · getlionade.com
 `,
 };

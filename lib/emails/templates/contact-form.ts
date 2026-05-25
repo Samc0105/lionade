@@ -12,7 +12,7 @@ import { TemplateDef } from "../render";
 export const contactForm: TemplateDef = {
   id: "contact-form",
   // {{subject}} here is the user-submitted subject line, already escaped.
-  subject: "[{{category}}] {{subject}} — {{fromEmail}}",
+  subject: "[{{category}}] {{subject}} from {{fromEmail}}",
   preheader: "{{fromName}} ({{fromEmail}}) sent a contact-form message.",
   body: `
 <p style="margin:0 0 8px 0;font-size:13px;line-height:1.5;color:#615C50;text-transform:uppercase;letter-spacing:0.08em;font-weight:600;">
@@ -36,7 +36,7 @@ export const contactForm: TemplateDef = {
 {{messageHtml}}
 </div>
 <p style="margin:20px 0 0 0;font-size:13px;line-height:1.5;color:#615C50;">
-  Reply directly to this email to respond — the reply-to is set to the sender.
+  Reply directly to this email to respond. The reply-to is set to the sender.
 </p>`,
   text: `[{{category}}] {{subject}}
 
@@ -45,6 +45,6 @@ From: {{fromName}} <{{fromEmail}}>
 Message:
 {{messageHtml}}
 
-— Reply directly to respond.
+Reply directly to respond.
 `,
 };
