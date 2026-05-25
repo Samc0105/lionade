@@ -368,16 +368,29 @@ function ClockInReveal({
 }) {
   const reduceMotion = useReducedMotion();
 
-  // 5s auto-dismiss + Esc to close early.
+  // Keep the latest onClose in a ref so the auto-dismiss effect can re-fire
+  // without re-arming the timer every time the parent re-renders (the
+  // parent's `now` tick on cooldown was creating a fresh onClose every
+  // second, which cleared the timeout before it ever fired → toast got
+  // stuck on screen).
+  const onCloseRef = useRef(onClose);
+  useEffect(() => { onCloseRef.current = onClose; }, [onClose]);
+
+  // Hover-pause / un-hover-resume + manual X stay wired via onClose.
+  const [hovering, setHovering] = useState(false);
+
+  // 3s auto-dismiss, keyed on the unique claim event (amount + day) so
+  // back-to-back claims reset cleanly; cleared if the user hovers.
   useEffect(() => {
-    const t = setTimeout(onClose, AUTO_CLOSE_MS);
-    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    if (hovering) return;
+    const t = setTimeout(() => { onCloseRef.current(); }, AUTO_CLOSE_MS);
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onCloseRef.current(); };
     document.addEventListener("keydown", onKey);
     return () => {
       clearTimeout(t);
       document.removeEventListener("keydown", onKey);
     };
-  }, [onClose]);
+  }, [amount, day, hovering]);
 
   // Animation values — skip motion when the user prefers reduced motion.
   const initial = reduceMotion ? { opacity: 0 } : { opacity: 0, y: -24 };
@@ -391,10 +404,15 @@ function ClockInReveal({
         initial={initial}
         animate={animate}
         exit={exit}
-        transition={{ duration: 0.24, ease: [0.16, 1, 0.3, 1] }}
+        transition={{ duration: reduceMotion ? 0 : 0.24, ease: [0.16, 1, 0.3, 1] }}
         role="status"
         aria-live="polite"
+        aria-atomic="true"
         aria-label={`+${amount} Fangs claimed for day ${day}`}
+        onMouseEnter={() => setHovering(true)}
+        onMouseLeave={() => setHovering(false)}
+        onFocus={() => setHovering(true)}
+        onBlur={() => setHovering(false)}
         className="fixed top-20 left-1/2 -translate-x-1/2 z-50 pointer-events-auto"
       >
         <div
