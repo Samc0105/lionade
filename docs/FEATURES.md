@@ -33,6 +33,7 @@
 - **Difficulty selector cards + answer explanations** — 2026-02-25
 - **Anti-cheat wiring** — 2026-02-27
 - **Coin burst animation on results** — 2026-02-28
+- **Live missions & bet visibility during quiz (V1)** (floating pill on `/quiz` opens a bottom sheet showing Today's Missions + active Daily Bet with progress that ticks up live as the player answers. Pill joins the existing FocusMusic / QuickNote / LockIn float family; shared SWR cache with the Dashboard via `dashboard-missions/${uid}` and `dashboard-active-bet/${uid}`, mutated after every successful answer. New `components/ui/BottomSheet.tsx` framer-motion primitive with Esc / click-outside / swipe-down dismiss, focus-trap, ARIA modal, reduce-motion gate. Pinning deferred to V2.). 2026-05-26
 
 ## Arena / Compete
 - **Rank summary strip + 3 mode tiles** (Duel, Blitz, Leaderboard) — 2026-02-20

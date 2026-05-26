@@ -7,6 +7,7 @@ import { useIdleAttention } from "@/lib/use-idle-attention";
 import { cdnUrl } from "@/lib/cdn";
 import BottomSheet from "@/components/ui/BottomSheet";
 import { Target, Coins } from "@phosphor-icons/react";
+import type { ActiveBet } from "@/lib/db";
 
 /**
  * MissionsBetFloat — floating pill on /quiz that surfaces Today's Missions
@@ -48,22 +49,27 @@ export default function MissionsBetFloat() {
   // Pulse trigger: when the SUM of mission progress increases vs the
   // previous snapshot, briefly pulse the badge. Refs avoid a re-render
   // loop. Skip the first observed value (initial hydration is not a tick).
+  // Memoize sum so this effect only fires when the NUMBER changes, not on
+  // every SWR poll where the missions array gets a new reference.
+  const progressSum = useMemo(
+    () => missions.reduce((acc, m) => acc + m.progress, 0),
+    [missions],
+  );
   const prevSumRef = useRef<number | null>(null);
   useEffect(() => {
-    const sum = missions.reduce((acc, m) => acc + m.progress, 0);
-    if (prevSumRef.current !== null && sum > prevSumRef.current) {
-      // Respect reduced-motion at fire-time.
-      const reduced =
-        typeof window !== "undefined" &&
-        window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      if (!reduced) {
-        setPulse(true);
-        const t = setTimeout(() => setPulse(false), 600);
-        return () => clearTimeout(t);
-      }
-    }
-    prevSumRef.current = sum;
-  }, [missions]);
+    const prev = prevSumRef.current;
+    // Always advance the ref so back-to-back ticks compare against the
+    // latest baseline, not a stale pre-pulse value.
+    prevSumRef.current = progressSum;
+    if (prev === null || progressSum <= prev) return;
+    const reduced =
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduced) return;
+    setPulse(true);
+    const t = setTimeout(() => setPulse(false), 600);
+    return () => clearTimeout(t);
+  }, [progressSum]);
 
   if (!uid) return null;
 
@@ -86,7 +92,7 @@ export default function MissionsBetFloat() {
         }}
         className="
           fixed z-30 right-4 md:right-6
-          bottom-[208px] md:bottom-[184px]
+          bottom-[310px] md:bottom-[280px]
           hidden sm:inline-flex items-center gap-1.5
           rounded-full px-3 py-2
           bg-white/[0.04] hover:bg-white/[0.08]
@@ -130,7 +136,7 @@ function SheetBody({
   activeBet,
 }: {
   missions: DailyMission[];
-  activeBet: { coins_staked: number; target_score: number; target_total: number; subject: string | null } | null;
+  activeBet: ActiveBet | null;
 }) {
   return (
     <div>
