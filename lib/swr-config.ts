@@ -120,6 +120,26 @@ export function __resetSwrProviderForTests(): void {
   providerSingleton = null;
 }
 
+/**
+ * No-persistence variant used during server SSR and the client's FIRST
+ * render (pre-hydration). The default SWR in-memory cache matches the
+ * server's "no localStorage" state, so server-rendered DOM = client
+ * first-render DOM and React doesn't throw a hydration mismatch.
+ *
+ * `SwrProvider.tsx` swaps to `swrConfig` (the persisted variant) in a
+ * post-mount `useEffect`. See that file for the rationale.
+ *
+ * Every revalidation/retry setting must match `swrConfig` so the only
+ * observable difference is whether the provider hydrates from disk.
+ */
+export const swrConfigNoPersist: SWRConfiguration = {
+  // No `provider` — SWR defaults to a fresh in-memory Map per <SWRConfig>.
+  revalidateOnFocus: false,
+  dedupingInterval: 60_000,
+  shouldRetryOnError: false,
+  keepPreviousData: true,
+};
+
 export const swrConfig: SWRConfiguration = {
   provider: () => getProvider(),
   // Default for the whole app. Hooks that need different cadence pass
