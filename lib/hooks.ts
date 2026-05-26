@@ -214,7 +214,58 @@ import {
   getUserBadges,
   getLeaderboard,
   getEloLeaderboard,
+  getActiveBet,
+  type ActiveBet,
 } from "@/lib/db";
+import { apiGet } from "@/lib/api-client";
+
+// ── Daily Missions ────────────────────────────────────────────
+// Shared across Dashboard + the Quiz "Missions & Bet" float so
+// both surfaces hit the same SWR cache (key: `dashboard-missions/${uid}`).
+// When the float `mutate()`s after each answer, the dashboard's still-
+// mounted hook picks it up too — single source of truth.
+
+export interface DailyMission {
+  id: string;
+  title: string;
+  description: string;
+  icon: string;
+  type: string;
+  target: number;
+  coinReward: number;
+  xpReward: number;
+  color: string;
+  progress: number;
+  completed: boolean;
+  claimed: boolean;
+}
+
+export interface DailyMissionsPayload {
+  missions: DailyMission[];
+  resetsIn: string;
+}
+
+export function useDailyMissions(userId: string | undefined) {
+  return useSWR<DailyMissionsPayload>(
+    userId ? `dashboard-missions/${userId}` : null,
+    async () => {
+      const res = await apiGet<DailyMissionsPayload>("/api/missions/progress");
+      return res.ok && res.data ? res.data : { missions: [], resetsIn: "" };
+    },
+    { keepPreviousData: true }
+  );
+}
+
+// ── Active Daily Bet ──────────────────────────────────────────
+// Same shared-cache rationale as missions. Key: `dashboard-active-bet/${uid}`.
+
+export function useActiveBet(userId: string | undefined) {
+  return useSWR<ActiveBet | null>(
+    userId ? `dashboard-active-bet/${userId}` : null,
+    () => getActiveBet(userId!).catch(() => null),
+    { keepPreviousData: true }
+  );
+}
 
 /** Subject stats (Dashboard + Profile + Quiz select screen). */
 export function useSubjectStats(

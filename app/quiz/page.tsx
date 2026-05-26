@@ -8,6 +8,8 @@ import QuizCard from "@/components/QuizCard";
 import { useAuth } from "@/lib/auth";
 import { mutateUserStats } from "@/lib/hooks";
 import { invalidateAfter } from "@/lib/cache-invalidation";
+import { mutate as swrMutate } from "swr";
+import MissionsBetFloat from "@/components/Quiz/MissionsBetFloat";
 import { useRouter } from "next/navigation";
 import BackButton from "@/components/BackButton";
 import { cdnUrl } from "@/lib/cdn";
@@ -455,6 +457,14 @@ export default function QuizPage() {
         setTotalXp((prev) => prev + xpReward);
         setCurrentResult({ correctIndex: correct_answer, explanation });
 
+        // Live-update the MissionsBetFloat (shared SWR cache with Dashboard).
+        // SWR's 5s dedupe debounces the network spam if the user answers
+        // fast — this is fire-and-forget; we never await the revalidation.
+        if (user?.id) {
+          void swrMutate(`dashboard-missions/${user.id}`);
+          void swrMutate(`dashboard-active-bet/${user.id}`);
+        }
+
         // Auto-advance after delay
         const delay = explanation ? 3000 : 1400;
         advanceTimerRef.current = setTimeout(() => {
@@ -465,7 +475,7 @@ export default function QuizPage() {
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [currentIndex, questions, answers, diffMult, blitzMult, coinMultiplier, xpMultiplier, hasAutoCorrect]
+    [currentIndex, questions, answers, diffMult, blitzMult, coinMultiplier, xpMultiplier, hasAutoCorrect, user?.id]
   );
 
   // Early return AFTER all hooks and function definitions
@@ -880,6 +890,10 @@ export default function QuizPage() {
             result={currentResult}
           />
         </div>
+
+        {/* Floating Today's Missions + Daily Bet pill. Mounted only during
+            the answering phase so it stays out of the way on select/results. */}
+        <MissionsBetFloat />
       </div>
     );
   }

@@ -3,8 +3,8 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth";
-import { useUserStats, useSubjectStats, useQuizHistory, useWeeklyLeaderboard } from "@/lib/hooks";
-import { getDailyProgress, getUserAchievements, getBestScores, getActiveBounties, getUserBountyProgress, getActiveBet, getLastResolvedBet, getWeeklyActivityChart } from "@/lib/db";
+import { useUserStats, useSubjectStats, useQuizHistory, useWeeklyLeaderboard, useDailyMissions, useActiveBet } from "@/lib/hooks";
+import { getDailyProgress, getUserAchievements, getBestScores, getActiveBounties, getUserBountyProgress, getLastResolvedBet, getWeeklyActivityChart } from "@/lib/db";
 import type { Bounty, UserBounty, ActiveBet } from "@/lib/db";
 import {
   getLevelProgress,
@@ -156,13 +156,14 @@ function DashboardContent() {
     { keepPreviousData: true, onSuccess: (d) => setUserBounties(d ?? []) }
   );
 
-  // activeBet — locally mutated by placeBet → keep useState, hydrate from SWR.
+  // activeBet — locally mutated by placeBet → keep useState, hydrate from
+  // the shared `useActiveBet` hook (lib/hooks.ts) so the Quiz "Missions &
+  // Bet" float and Dashboard read from the same SWR cache.
   const [activeBet, setActiveBet] = useState<ActiveBet | null>(null);
-  useSWR(
-    uid ? `dashboard-active-bet/${uid}` : null,
-    () => getActiveBet(uid!).catch(() => null),
-    { keepPreviousData: true, onSuccess: (d) => setActiveBet(d ?? null) }
-  );
+  const { data: activeBetData } = useActiveBet(uid);
+  useEffect(() => {
+    setActiveBet(activeBetData ?? null);
+  }, [activeBetData]);
 
   const { data: lastBetData } = useSWR(
     uid ? `dashboard-last-bet/${uid}` : null,
@@ -202,23 +203,16 @@ function DashboardContent() {
   );
   const eloRank: number | null = eloRankData ?? null;
 
-  // dailyMissions — locally mutated by claimMission → keep useState, hydrate.
+  // dailyMissions — locally mutated by claimMission → keep useState, hydrate
+  // from the shared `useDailyMissions` hook (lib/hooks.ts). Same SWR cache as
+  // the Quiz "Missions & Bet" float so post-answer mutate() updates both.
   const [dailyMissions, setDailyMissions] = useState<DailyMission[]>([]);
   const [missionsResetIn, setMissionsResetIn] = useState("");
-  useSWR(
-    uid ? `dashboard-missions/${uid}` : null,
-    async () => {
-      const res = await apiGet<{ missions: DailyMission[]; resetsIn: string }>("/api/missions/progress");
-      return res.ok && res.data ? res.data : { missions: [], resetsIn: "" };
-    },
-    {
-      keepPreviousData: true,
-      onSuccess: (d) => {
-        setDailyMissions(d?.missions ?? []);
-        setMissionsResetIn(d?.resetsIn ?? "");
-      },
-    }
-  );
+  const { data: dailyMissionsData } = useDailyMissions(uid);
+  useEffect(() => {
+    setDailyMissions(dailyMissionsData?.missions ?? []);
+    setMissionsResetIn(dailyMissionsData?.resetsIn ?? "");
+  }, [dailyMissionsData]);
 
   // Side-effect (not data): rotate bounties at most once per hour per browser.
   //
