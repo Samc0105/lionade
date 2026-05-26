@@ -123,17 +123,18 @@ Return ONLY a valid JSON object matching this exact schema (no markdown, no comm
   "difficulty": "${difficulty}",
   "flashcards": [{"front": "string", "back": "string"}],
   "match": [{"term": "string", "definition": "string"}],
-  "multipleChoice": [{"question": "string", "options": ["a", "b", "c", "d"], "correctIndex": 0, "explanation": "string"}],
+  "multipleChoice": [{"question": "string", "options": ["a", "b", "c", "d"], "correctIndex": 2, "explanation": "string"}],
   "fillBlank": [{"sentence": "The ___ is the powerhouse of the cell.", "answer": "mitochondrion"}],
   "trueFalse": [{"statement": "string", "answer": true, "explanation": "string"}],
   "ordering": [{"prompt": "string", "items": ["a", "b", "c"], "correctOrder": [0, 1, 2]}],
-  "blitz": [{"question": "string", "options": ["a", "b", "c", "d"], "correctIndex": 0}]
+  "blitz": [{"question": "string", "options": ["a", "b", "c", "d"], "correctIndex": 3}]
 }
 
 REQUIREMENTS — DO NOT VIOLATE:
 - Generate EXACTLY 10 items in EVERY array (flashcards, match, multipleChoice, fillBlank, trueFalse, ordering, blitz). NEVER fewer than 10. This is mandatory.
 - Difficulty is ${difficulty} — match question complexity accordingly
 - multipleChoice options must have exactly 4 entries; correctIndex is 0-3; ALWAYS include a useful explanation
+- IMPORTANT: distribute correctIndex evenly across 0, 1, 2, and 3 within the multipleChoice and blitz arrays. Do not default to 0. Aim for roughly 25 percent of each position across the 10 items.
 - fillBlank sentences must contain "___" exactly where the answer goes
 - ordering correctOrder is the sorted index sequence (e.g. if items are already in order, use [0,1,2,...])
 - blitz questions should be short and answerable in under 5 seconds

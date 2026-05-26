@@ -14,6 +14,7 @@ import {
   type NinnySourceType,
 } from "@/lib/ninny";
 import { saveGeneratedQuestions } from "@/lib/question-bank";
+import { shuffleOptions } from "@/lib/shuffle-mcq";
 
 const MAX_CONTENT_BYTES = 20 * 1024; // 20 KB cap on user content
 const VALID_MODES: NinnyMode[] = Object.keys(NINNY_MODE_COSTS) as NinnyMode[];
@@ -256,6 +257,30 @@ export async function POST(req: NextRequest) {
       } else {
         console.warn("[ninny/generate] retry still short, accepting anyway");
       }
+    }
+
+    // ── Answer-position de-bias ──
+    // The model has a strong positional bias toward correctIndex === 0 (and
+    // secondarily 1). Without shuffling, the rendered quiz feels rigged
+    // toward A/B and almost never shows C/D. Shuffle every MCQ + blitz
+    // option set with a uniform Fisher-Yates permutation before persistence,
+    // tracking the new correct index. The question text and the option
+    // SET are unchanged — only the visible order differs. Mastery has the
+    // same fix in lib/mastery-content.ts via shuffleFour; this is the
+    // Ninny equivalent on its own MCQ + blitz arrays.
+    if (Array.isArray(validated.multipleChoice)) {
+      validated.multipleChoice = validated.multipleChoice.map((q) => {
+        if (!Array.isArray(q.options) || typeof q.correctIndex !== "number") return q;
+        const { options, correctIndex } = shuffleOptions(q.options, q.correctIndex);
+        return { ...q, options, correctIndex };
+      });
+    }
+    if (Array.isArray(validated.blitz)) {
+      validated.blitz = validated.blitz.map((q) => {
+        if (!Array.isArray(q.options) || typeof q.correctIndex !== "number") return q;
+        const { options, correctIndex } = shuffleOptions(q.options, q.correctIndex);
+        return { ...q, options, correctIndex };
+      });
     }
 
     const { data: material, error: insertErr } = await supabaseAdmin
