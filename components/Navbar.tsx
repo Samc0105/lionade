@@ -763,11 +763,11 @@ export default function Navbar() {
         const message = expired
           ? "Your streak has expired. Start a new one today."
           : streak === 0 ? "Start your streak today!" :
-          streak <= 2 ? "Great start — keep it going!" :
+          streak <= 2 ? "Great start. Keep it going!" :
           streak <= 6 ? "You're building momentum!" :
           streak <= 13 ? "Impressive dedication!" :
           streak <= 29 ? "You're on fire! Don't stop now!" :
-          "Legendary streak — absolute beast!";
+          "Legendary streak, absolute beast!";
         return (
           <div className="fixed inset-0 z-[60] flex items-center justify-center px-4" onClick={() => setShowStreakModal(false)}>
             <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
@@ -813,7 +813,7 @@ export default function Navbar() {
                 questionsToday >= goal ? (
                   <div className="mb-4 text-center py-3">
                     <p className="text-orange-400 font-bold text-lg inline-flex items-center gap-1.5"><Fire size={20} weight="fill" aria-hidden="true" /> Daily goal crushed!</p>
-                    <p className="text-cream/60 text-xs mt-1">You&apos;re all caught up — come back tomorrow to keep your streak alive.</p>
+                    <p className="text-cream/60 text-xs mt-1">You&apos;re all caught up. Come back tomorrow to keep your streak alive.</p>
                   </div>
                 ) : (
                   <div className="mb-4">
@@ -847,7 +847,7 @@ export default function Navbar() {
                 <div className="flex items-center justify-center gap-2 mb-4 py-2 px-3 rounded-xl"
                   style={{ background: "rgba(59,130,246,0.08)", border: "1px solid rgba(59,130,246,0.2)" }}>
                   <Shield size={16} weight="fill" color="#60A5FA" aria-hidden="true" />
-                  <span className="text-blue-400 text-xs font-semibold">Streak Shield Active — you&apos;re protected for 1 missed day</span>
+                  <span className="text-blue-400 text-xs font-semibold">Streak Shield Active. Protected for 1 missed day</span>
                 </div>
               )}
 

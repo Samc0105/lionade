@@ -282,33 +282,43 @@ async function upsertDailyActivity(userId: string, coinsEarned: number, question
     }
     console.log("[upsertDailyActivity] Inserted new row");
 
-    // Check if yesterday had activity to continue streak
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-    const yesterdayStr = yesterday.toISOString().split("T")[0];
-
-    const { data: yesterdayActivity } = await supabase
-      .from("daily_activity")
-      .select("streak_maintained")
-      .eq("user_id", userId)
-      .eq("date", yesterdayStr)
-      .maybeSingle();
+    // Time-based streak increment — mirrors app/api/save-quiz-results.
+    // Bumping on every UTC-day-rollover incremented inside the same "day"
+    // from the user's POV (midnight UTC = 8pm ET). We now require >= 20h
+    // since last_activity_at before the streak can tick.
+    const MIN_GAP_TO_INCREMENT_MS = 20 * 60 * 60 * 1000;
+    const MAX_GAP_TO_CONTINUE_MS = 48 * 60 * 60 * 1000;
 
     const { data: profile } = await supabase
       .from("profiles")
-      .select("streak, max_streak")
+      .select("streak, max_streak, last_activity_at")
       .eq("id", userId)
       .single();
 
     if (profile) {
-      const newStreak = yesterdayActivity?.streak_maintained ? profile.streak + 1 : 1;
+      const lastActivityAt = (profile as { last_activity_at: string | null }).last_activity_at;
+      let newStreak = profile.streak ?? 0;
+      if (!lastActivityAt) {
+        // Truly first activity ever — start at 1
+        newStreak = newStreak > 0 ? newStreak : 1;
+      } else {
+        const gapMs = Date.now() - new Date(lastActivityAt).getTime();
+        if (gapMs < MIN_GAP_TO_INCREMENT_MS) {
+          // Same study window — keep current streak (avoid the new-row bump)
+        } else if (gapMs <= MAX_GAP_TO_CONTINUE_MS) {
+          newStreak = (profile.streak ?? 0) + 1;
+        } else {
+          // Long gap — reset (shield handling lives in save-quiz-results)
+          newStreak = 1;
+        }
+      }
       const newMax = Math.max(newStreak, profile.max_streak ?? 0);
       const { error: streakErr } = await supabase
         .from("profiles")
-        .update({ streak: newStreak, max_streak: newMax })
+        .update({ streak: newStreak, max_streak: newMax, last_activity_at: new Date().toISOString() })
         .eq("id", userId);
       if (streakErr) console.error("[upsertDailyActivity] Streak update error:", streakErr.message);
-      else console.log("[upsertDailyActivity] Streak:", profile.streak, "→", newStreak);
+      else console.log("[upsertDailyActivity] Streak:", profile.streak, "->", newStreak);
     }
   }
 }

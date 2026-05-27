@@ -204,24 +204,29 @@ export async function POST(req: NextRequest) {
     // Clamp existing value first (in case it was stored uncapped), then add and cap at 10
     dailyQuestionsCompleted = Math.min(Math.min(dailyQuestionsCompleted, 10) + totalQuestions, 10);
 
-    // Streak logic using last_activity_at (timestamptz)
+    // Streak logic — time-based (NOT UTC-calendar-based).
+    // We previously bumped the streak whenever the UTC day string flipped,
+    // which fired immediately at midnight UTC (8pm ET) and felt like the
+    // streak ticked forward inside the same "day" from the user's POV.
+    // Now we require >= 20h since the last activity before the streak ticks,
+    // and stay symmetric with the 36h streak-expiry window:
+    //   gap < 20h        → same study session, no increment
+    //   20h <= gap <= 48h → next-day increment (works across any timezone)
+    //   gap > 48h        → streak resets (shield can rescue gap <= 60h)
+    const MIN_GAP_TO_INCREMENT_MS = 20 * 60 * 60 * 1000;
+    const MAX_GAP_TO_CONTINUE_MS = 48 * 60 * 60 * 1000;
+    const SHIELD_MAX_GAP_MS = 60 * 60 * 60 * 1000;
     const lastActivityAt = profile.last_activity_at as string | null;
     let newStreak = profile.streak ?? 0;
 
     if (lastActivityAt) {
-      const lastDate = new Date(lastActivityAt);
-      const lastDayUTC = lastDate.toISOString().split("T")[0];
+      const gapMs = Date.now() - new Date(lastActivityAt).getTime();
 
-      if (lastDayUTC === todayUTC) {
-        // Already played today — no streak increment
+      if (gapMs < MIN_GAP_TO_INCREMENT_MS) {
+        // Same study window — no streak increment
       } else {
-        // Check calendar day difference
-        const lastDayDate = new Date(lastDayUTC + "T00:00:00Z");
-        const todayDate = new Date(todayUTC + "T00:00:00Z");
-        const daysDiff = Math.floor((todayDate.getTime() - lastDayDate.getTime()) / (1000 * 60 * 60 * 24));
-
-        if (daysDiff === 1) {
-          // Yesterday — increment streak
+        if (gapMs <= MAX_GAP_TO_CONTINUE_MS) {
+          // Next-day-equivalent — increment streak
           newStreak = (profile.streak ?? 0) + 1;
         } else {
           // 2+ days gap — check for streak shield
@@ -233,7 +238,7 @@ export async function POST(req: NextRequest) {
             .limit(1)
             .maybeSingle();
 
-          if (shield && daysDiff <= 2) {
+          if (shield && gapMs <= SHIELD_MAX_GAP_MS) {
             // Shield protects for 1 missed day
             if (shield.uses_remaining && shield.uses_remaining > 1) {
               await supabaseAdmin

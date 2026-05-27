@@ -91,6 +91,14 @@ export default function DashboardPage() {
 function DashboardContent() {
   const { user, refreshUser } = useAuth();
   const { stats } = useUserStats(user?.id);
+  // Hydration gate. useAuth + SWR seed from localStorage on the client,
+  // so SSR (and the first client render commit) sees an empty cache while
+  // the very next render sees populated data. Any conditional inside this
+  // tree that depends on `stats` or `streakInfo` therefore renders
+  // differently across those two passes. We gate those conditionals on
+  // `mounted` so server + first client render agree, then flip post-mount.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
   // ── Perf 2026-05-17: 14 uncached calls + hand-rolled sessionStorage cache
   //    → SWR. The bespoke `lionade_dash_*` sessionStorage layer is DELETED:
   //    the global persistent localStorage <SWRConfig> (app/layout.tsx) now
@@ -409,7 +417,7 @@ function DashboardContent() {
               <CircleStat icon={<Sword size={20} weight="regular" color="#E74C3C" aria-hidden="true" />} value={eloRank ? <>#<CountUp id="dash-rank" value={eloRank} duration={400} /></> : "\u2014"} label="rank" color="#E74C3C" />
             </Link>
           </div>
-          {statsReady && streak >= 3 && (
+          {mounted && statsReady && streak >= 3 && (
             <div className="mb-6 animate-slide-up flex items-center gap-2 px-4 py-2.5 rounded-full w-fit mx-auto sm:mx-0" style={{ background: "linear-gradient(135deg, rgba(230,126,34,0.12), rgba(255,215,0,0.08))", border: "1px solid rgba(230,126,34,0.2)" }}>
               <Fire size={18} weight="fill" color="#E67E22" className="streak-fire-glow" aria-hidden="true" />
               <span className="text-cream/80 text-xs font-semibold">You&apos;re on fire! {streak} streak</span>
