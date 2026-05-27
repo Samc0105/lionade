@@ -13,6 +13,8 @@ import {
   Flame,
   Crown,
   Lightning,
+  Clock,
+  Brain,
   Sword,
   Target,
   Users,
@@ -306,8 +308,30 @@ export default function CompetePage() {
                       BLITZ MODE
                     </p>
                     <p className="text-cream/50 text-sm leading-relaxed mb-4">
-                      Speed round. 60 seconds. Unlimited questions. 2x coins on every correct answer.
+                      Pure speed. No penalties.
                     </p>
+
+                    <div className="grid grid-cols-3 gap-2 mb-5">
+                      <div className="rounded-xl py-2.5 px-2 text-center"
+                        style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,107,0,0.12)" }}>
+                        <Clock size={20} weight="regular" aria-hidden="true" className="mx-auto mb-1 text-cream/70" />
+                        <p className="font-bebas text-[11px] tracking-wider text-cream/80">60 SECONDS</p>
+                        <p className="text-cream/30 text-[9px] font-syne">race the clock</p>
+                      </div>
+                      <div className="rounded-xl py-2.5 px-2 text-center"
+                        style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,107,0,0.12)" }}>
+                        <Brain size={20} weight="regular" aria-hidden="true" className="mx-auto mb-1 text-cream/70" />
+                        <p className="font-bebas text-[11px] tracking-wider text-cream/80">ALL SUBJECTS</p>
+                        <p className="text-cream/30 text-[9px] font-syne">random mix</p>
+                      </div>
+                      <div className="rounded-xl py-2.5 px-2 text-center"
+                        style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,107,0,0.12)" }}>
+                        <img src={cdnUrl("/F.png")} alt="" className="w-5 h-5 object-contain mx-auto mb-1" />
+                        <p className="font-bebas text-[11px] tracking-wider text-cream/80">2x FANGS</p>
+                        <p className="text-cream/30 text-[9px] font-syne">per correct</p>
+                      </div>
+                    </div>
+
                     <button className="font-bebas text-lg tracking-wider px-8 py-2.5 rounded-xl transition-all active:scale-95"
                       style={{ background: "linear-gradient(135deg, #FF6B00 0%, #FF8C00 100%)", color: "#fff", boxShadow: "0 4px 16px rgba(255,107,0,0.3)" }}>
                       PLAY NOW

@@ -131,7 +131,11 @@ export default function MasteryLandingPage() {
         setCreating(false);
         return;
       }
-      router.push(`/learn/mastery/${create.data.examId}`);
+      router.push(
+        classIdContext
+          ? `/learn/mastery/${create.data.examId}?classId=${classIdContext}`
+          : `/learn/mastery/${create.data.examId}`,
+      );
     } catch (e) {
       setError((e as Error).message);
       setCreating(false);
@@ -144,12 +148,13 @@ export default function MasteryLandingPage() {
       <Navbar />
 
       <main className="relative z-10 max-w-[980px] mx-auto px-4 sm:px-6 pt-8 pb-24">
-        {/* Breadcrumb */}
+        {/* Breadcrumb — returns to the class notebook if we entered from one,
+            else falls back to /learn. */}
         <Link
-          href="/learn"
+          href={classIdContext ? `/classes/${classIdContext}` : "/learn"}
           className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.25em] text-cream/50 hover:text-cream mb-4 transition-colors"
         >
-          <CaretLeft size={12} weight="bold" /> Learn
+          <CaretLeft size={12} weight="bold" /> {classIdContext ? "Class" : "Learn"}
         </Link>
 
         {/* Header */}

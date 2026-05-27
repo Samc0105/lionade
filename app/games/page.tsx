@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
+import { useRouter } from "next/navigation";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { useAuth } from "@/lib/auth";
 import { useUserStats, mutateUserStats } from "@/lib/hooks";
@@ -106,6 +107,7 @@ const DAILY_LIMITS: Record<string, number> = { roardle: 3, blitz: 99, flashcards
 // ── Component ────────────────────────────────────────────────
 
 export default function GamesPage() {
+  const router = useRouter();
   const { user } = useAuth();
   const { stats, mutate: mutateStats } = useUserStats(user?.id);
 
@@ -118,6 +120,16 @@ export default function GamesPage() {
     return "menu";
   });
   const [fangsEarned, setFangsEarned] = useState<number | null>(null);
+
+  // Tracks whether the user landed on a sub-game via a URL deep link
+  // (e.g. /games?mode=blitz from the /compete card) vs. by clicking
+  // into it from the in-page games menu. The setup-screen Back button
+  // routes differently for each case so "Back" sends you to wherever
+  // you actually came from.
+  const enteredFromExternalUrl = useRef<boolean>(
+    typeof window !== "undefined" &&
+      new URLSearchParams(window.location.search).get("mode") !== null,
+  );
 
   // PDF state
   const [pdfContent, setPdfContent] = useState<PdfContent | null>(null);
@@ -279,6 +291,8 @@ export default function GamesPage() {
     setFangsEarned(null);
     setBlitzResult(null);
     setGame("blitz-setup");
+    // Opening from inside /games menu — Back should reset state, not nav.
+    enteredFromExternalUrl.current = false;
   }, []);
 
   // ── Blitz: start game (load random mix questions from API) ──
@@ -386,7 +400,23 @@ export default function GamesPage() {
   const backToMenu = useCallback(() => {
     setGame("menu");
     setFangsEarned(null);
-  }, []);
+    // Clear the deep-link query param so a refresh doesn't re-launch the game.
+    if (typeof window !== "undefined" && window.location.search) {
+      router.replace("/games");
+    }
+    enteredFromExternalUrl.current = false;
+  }, [router]);
+
+  // Setup-screen Back: if user deep-linked in (e.g. from /compete), send them
+  // back to where they came from. If they opened the game from inside /games,
+  // just reset state to the menu.
+  const backFromSetup = useCallback(() => {
+    if (enteredFromExternalUrl.current) {
+      router.back();
+    } else {
+      backToMenu();
+    }
+  }, [router, backToMenu]);
 
   // ── Letter feedback for Roardle ────────────────────────────
   function getLetterStatus(guess: string, target: string, idx: number): "correct" | "present" | "absent" {
@@ -532,7 +562,7 @@ export default function GamesPage() {
       <ProtectedRoute>
         <div className="min-h-screen pt-16 pb-8 overflow-hidden">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6">
-            <button onClick={backToMenu} className="text-cream/30 text-xs mb-4 hover:text-cream/50 transition">← Back to Games</button>
+            <button onClick={backFromSetup} className="text-cream/30 text-xs mb-4 hover:text-cream/50 transition">← Back</button>
 
             <div className="grid grid-cols-1 lg:grid-cols-[1fr_420px_1fr] gap-6 items-center min-h-[calc(100vh-180px)]">
 

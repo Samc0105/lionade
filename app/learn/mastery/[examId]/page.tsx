@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import useSWR from "swr";
 import Link from "next/link";
 import { CaretLeft, CaretUp, CaretDown, Clock, DotsThree, Sparkle, ShareNetwork } from "@phosphor-icons/react";
@@ -96,8 +96,16 @@ interface SessionResponse {
 export default function MasterySessionPage() {
   const params = useParams<{ examId: string }>();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { user } = useAuth();
   const examId = params?.examId;
+
+  // If we got here from a class notebook, the URL carries ?classId=<uuid>.
+  // We use it to keep the back-link pointed at the class instead of the
+  // generic /learn/mastery landing.
+  const classIdContext = searchParams?.get("classId") ?? null;
+  const backHref = classIdContext ? `/classes/${classIdContext}` : "/learn/mastery";
+  const backLabel = classIdContext ? "Class" : "Mastery";
 
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [bootError, setBootError] = useState<string | null>(null);
@@ -436,8 +444,8 @@ export default function MasterySessionPage() {
         <main className="max-w-[720px] mx-auto px-6 py-24 text-center">
           <h1 className="font-bebas text-3xl tracking-wider mb-3">Couldn't load this session</h1>
           <p className="text-[14px] text-cream/60 mb-6">{bootError}</p>
-          <Link href="/learn/mastery" className="font-mono text-[11px] uppercase tracking-[0.25em] text-gold hover:underline">
-            Back to Mastery Mode
+          <Link href={backHref} className="font-mono text-[11px] uppercase tracking-[0.25em] text-gold hover:underline">
+            {classIdContext ? "Back to Class" : "Back to Mastery Mode"}
           </Link>
         </main>
       </div>
@@ -515,10 +523,10 @@ export default function MasterySessionPage() {
           {!headerCollapsed && (
             <div className="flex items-center justify-between gap-3 mb-2">
               <Link
-                href="/learn/mastery"
+                href={backHref}
                 className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.25em] text-cream/50 hover:text-cream transition-colors"
               >
-                <CaretLeft size={12} weight="bold" /> Mastery
+                <CaretLeft size={12} weight="bold" /> {backLabel}
               </Link>
               <h1 className="font-bebas text-xl sm:text-2xl tracking-wider text-cream truncate">
                 {data.exam.title}
@@ -597,10 +605,10 @@ export default function MasterySessionPage() {
                 <div className="rounded-[10px] bg-white/[0.03] border border-white/[0.06] px-4 py-4 text-center">
                   <p className="text-[13px] text-cream/70 mb-3">Session closed. Start a new one anytime.</p>
                   <Link
-                    href="/learn/mastery"
+                    href={backHref}
                     className="inline-block rounded-full bg-gold text-navy font-mono text-[11px] uppercase tracking-[0.25em] px-5 py-2.5"
                   >
-                    Back to Mastery
+                    {classIdContext ? "Back to Class" : "Back to Mastery"}
                   </Link>
                 </div>
               ) : (
