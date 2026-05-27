@@ -381,6 +381,7 @@ Requirements:
 - If this is a named certification, questions should feel like real exam items — favor edge cases, IAM boundary conditions, default-vs-configured behavior, cost-vs-security tradeoffs, etc.
 - No options longer than 180 chars; questions can be up to 500 chars for setup-heavy scenarios.
 - "easy" for a cert exam = the cert's baseline difficulty; "medium" = a thoughtful exam item; "hard" = tricky wording + two plausible answers where one is subtly better.
+- ANSWER POSITION: distribute correctIndex evenly across 0, 1, 2, and 3 within the 10-question batch. Aim for roughly 25 percent of each position. Do not default to 0.
 
 Return EXACTLY:
 {
@@ -388,7 +389,7 @@ Return EXACTLY:
     {
       "question": "...",
       "options": ["...", "...", "...", "..."],
-      "correctIndex": 0,
+      "correctIndex": 2,
       "explanation": "...",
       "difficulty": "${args.difficulty}"
     }

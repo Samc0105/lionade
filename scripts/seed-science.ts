@@ -38,6 +38,20 @@ interface RawQuestion {
   topic: string;
 }
 
+/**
+ * Fisher-Yates shuffle of a 4-option MCQ before insert. Source JSON files
+ * inherit LLM positional bias toward index 0, so randomizing here keeps the
+ * stored A/B/C/D distribution uniform without a data migration.
+ */
+function shuffleQuestionOptions(q: RawQuestion): RawQuestion {
+  const indices = q.options.map((_, i) => i);
+  for (let i = indices.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [indices[i], indices[j]] = [indices[j], indices[i]];
+  }
+  return { ...q, options: indices.map((i) => q.options[i]) };
+}
+
 /** Deterministic UUID from question text so upserts are idempotent */
 function makeUUID(q: RawQuestion): string {
   const hash = crypto
@@ -66,30 +80,35 @@ async function main() {
     const rows: Record<string, unknown>[] = [];
     let skipped = 0;
 
-    for (const q of questions) {
+    for (const rawQ of questions) {
       if (
-        !q.question ||
-        !Array.isArray(q.options) ||
-        q.options.length !== 4 ||
-        !q.correct_answer ||
-        !q.explanation ||
-        !q.subject ||
-        !q.difficulty ||
-        !q.topic
+        !rawQ.question ||
+        !Array.isArray(rawQ.options) ||
+        rawQ.options.length !== 4 ||
+        !rawQ.correct_answer ||
+        !rawQ.explanation ||
+        !rawQ.subject ||
+        !rawQ.difficulty ||
+        !rawQ.topic
       ) {
         skipped++;
         continue;
       }
 
       // Skip astronomy questions even if inside a mixed file
-      if (SKIP_TOPICS.includes(q.topic.toLowerCase())) {
+      if (SKIP_TOPICS.includes(rawQ.topic.toLowerCase())) {
         skipped++;
         continue;
       }
 
+      // Shuffle options before storing the correct_answer index. Source JSON
+      // files carry LLM positional bias toward index 0; permuting on insert
+      // gives uniform A/B/C/D distribution in the live DB.
+      const q = shuffleQuestionOptions(rawQ);
+
       const correctIndex = q.options.indexOf(q.correct_answer);
       if (correctIndex === -1) {
-        console.warn(`  ⚠ Answer not in options: "${q.correct_answer.slice(0, 40)}…" in ${file}`);
+        console.warn(`  Answer not in options: "${q.correct_answer.slice(0, 40)}..." in ${file}`);
         skipped++;
         continue;
       }

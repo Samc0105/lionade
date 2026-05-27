@@ -174,8 +174,27 @@ Return ONLY a valid JSON array with no markdown, no backticks, no explanation.
 Each question must have: question, options (array of 4), correct_answer (must match one option exactly), explanation, subject, difficulty, topic.
 Make questions varied: definitions, applications, problem-solving, conceptual understanding.
 Do not repeat questions.
+ANSWER POSITION: vary which of the 4 options is the correct one across the batch. Aim for roughly 25 percent of correct answers at each of the four positions. Do not default to placing the correct answer first.
 Example format:
-[{"question": "...", "options": ["A", "B", "C", "D"], "correct_answer": "A", "explanation": "...", "subject": "${jsonSubject}", "difficulty": "${difficulty}", "topic": "${topic}"}]`;
+[{"question": "...", "options": ["First option", "Second option", "Third option", "Fourth option"], "correct_answer": "Third option", "explanation": "...", "subject": "${jsonSubject}", "difficulty": "${difficulty}", "topic": "${topic}"}]`;
+}
+
+/**
+ * Fisher-Yates shuffle of a 4-option MCQ. Operates on the seed-script row
+ * shape (options is a string array, correct_answer is the text value, not an
+ * index). Returns a new row with permuted options and the correct_answer
+ * text untouched (still matches one of the options). This guarantees uniform
+ * A/B/C/D distribution at write time regardless of LLM positional bias.
+ */
+function shuffleRawQuestion(q: RawQuestion): RawQuestion {
+  const correctText = q.correct_answer;
+  const indices = q.options.map((_, i) => i);
+  for (let i = indices.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [indices[i], indices[j]] = [indices[j], indices[i]];
+  }
+  const shuffledOptions = indices.map((i) => q.options[i]);
+  return { ...q, options: shuffledOptions, correct_answer: correctText };
 }
 
 function parseJsonArray(text: string): unknown[] {
@@ -435,17 +454,24 @@ async function processCombo(
   fs.writeFileSync(filepath, JSON.stringify([...existingFile, ...allGenerated], null, 2));
   console.log(`  Saved to: questions/${cfg.dir}/${filename}`);
 
-  // Upsert to Supabase
-  const rows = allGenerated.map((q) => ({
-    id: makeUUID(q),
-    subject: cfg.dbSubject,
-    question: q.question,
-    options: q.options,
-    correct_answer: q.options.indexOf(q.correct_answer),
-    difficulty: q.difficulty.toLowerCase(),
-    explanation: q.explanation,
-    topic: q.topic.toLowerCase(),
-  }));
+  // Upsert to Supabase. Shuffle options before writing because the model
+  // exhibits a strong positional bias (correct answer most often at index 0). Permuting
+  // here guarantees uniform A/B/C/D distribution in the DB so /quiz, /arena,
+  // and /blitz reads stay balanced. The shuffle keeps correct_answer text in
+  // sync with whichever index it lands at.
+  const rows = allGenerated.map((raw) => {
+    const q = shuffleRawQuestion(raw);
+    return {
+      id: makeUUID(q),
+      subject: cfg.dbSubject,
+      question: q.question,
+      options: q.options,
+      correct_answer: q.options.indexOf(q.correct_answer),
+      difficulty: q.difficulty.toLowerCase(),
+      explanation: q.explanation,
+      topic: q.topic.toLowerCase(),
+    };
+  });
 
   const inserted = await upsertQuestions(rows);
   const newTotal = currentCount + inserted;
