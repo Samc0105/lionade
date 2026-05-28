@@ -86,12 +86,10 @@ export default function PokerFaceScreen({ loaded, selfId }: { loaded: LoadedMatc
       setPhase("settling");
       if (!finishedRef.current) {
         finishedRef.current = true;
-        // Scores are irrelevant for Poker Face winner (the prize pot decides via
-        // fang_delta), but /complete still needs a score map. Use 0/0 so the
-        // ELO ladder treats it as a draw-by-score; the Fang prize already moved.
-        const map: Record<string, number> = {};
-        [...loaded.match.team_a, ...loaded.match.team_b].forEach((u) => (map[u] = 0));
-        settle(map);
+        // /complete derives the Poker Face winner server-side from the
+        // accumulated per-hand prize pot (fang_delta), written by /pokerface/call.
+        // The client sends no score map.
+        settle();
       }
       return;
     }
@@ -131,16 +129,18 @@ export default function PokerFaceScreen({ loaded, selfId }: { loaded: LoadedMatc
   }, [matchId, handNum, send, goToHand]);
 
   if (result) return <ResultCard result={result} selfId={selfId} teamA={loaded.match.team_a} />;
-  if (phase === "settling") return <div className="text-center py-20"><p className="font-bebas text-3xl text-cream/70 tracking-wider">SETTLING STAKES...</p></div>;
+  if (phase === "settling") return <div className="flex-1 flex items-center justify-center text-center"><p className="font-bebas text-3xl text-cream/70 tracking-wider">SETTLING STAKES...</p></div>;
 
   return (
-    <div>
-      {/* header */}
-      <div className="flex items-center justify-between mb-5">
+    <div className="flex-1 min-h-0 flex flex-col w-full px-3 sm:px-6">
+      {/* header pinned to the top edge */}
+      <div className="flex-none flex items-center justify-between w-full max-w-2xl mx-auto mb-4">
         <span className="font-bebas tracking-wider text-cream/50 text-sm">HAND {handNum + 1} / {TOTAL_HANDS}</span>
         <span className="font-bebas tracking-wider text-[#FFD700] text-sm">{isPresenter ? "YOU PRESENT" : "YOU READ"}</span>
       </div>
 
+      {/* Active panel commands the center mass */}
+      <div className="flex-1 min-h-0 flex flex-col justify-center w-full max-w-2xl mx-auto py-2 overflow-y-auto">
       {/* reveal overlay */}
       {phase === "reveal" && reveal && (
         <RevealCard reveal={reveal} selfId={selfId} isPresenter={isPresenter} />
@@ -148,7 +148,7 @@ export default function PokerFaceScreen({ loaded, selfId }: { loaded: LoadedMatc
 
       {/* PRESENT phase (presenter only) */}
       {phase === "present" && isPresenter && (
-        <div className="rounded-2xl p-6" style={{ background: "linear-gradient(135deg, #1a1400 0%, #060c18 100%)", border: "1px solid rgba(255,215,0,0.25)" }}>
+        <div className="rounded-2xl p-6 sm:p-8" style={{ background: "linear-gradient(135deg, #1a1400 0%, #060c18 100%)", border: "1px solid rgba(255,215,0,0.25)" }}>
           <p className="text-cream/40 text-[10px] uppercase tracking-widest mb-1">Your secret card</p>
           <p className="font-bebas text-3xl text-[#FFD700] mb-1">{card.word}</p>
           <p className="text-cream/60 text-sm mb-5 italic">True fact: {card.fact}</p>
@@ -193,6 +193,7 @@ export default function PokerFaceScreen({ loaded, selfId }: { loaded: LoadedMatc
             <span className="text-cream/70 font-bebas">+{raise}</span>
           </div>
           <input type="range" min={0} max={openingStake * MAX_RAISE_MULTIPLIER} step={5} value={raise}
+            aria-label="Optional raise to your Challenge Stake"
             onChange={(e) => setRaise(parseInt(e.target.value, 10))} className="w-full accent-[#FFD700] mb-1" />
           <p className="text-cream/35 text-[11px] mb-5">
             Total Stake: <span className="text-cream/70 font-bebas">{openingStake + raise}</span> Fangs each. Prize goes to the winner of the read.
@@ -236,17 +237,18 @@ export default function PokerFaceScreen({ loaded, selfId }: { loaded: LoadedMatc
             <img src={cdnUrl("/F.png")} alt="Fangs" className="w-3 h-3 object-contain" /> Stake on the line: {callerPending.stake} Fangs
           </p>
           <div className="flex gap-3">
-            <button onClick={() => respond("believe")} className="flex-1 py-3 rounded-xl font-bebas tracking-wider text-lg"
+            <button onClick={() => respond("believe")} className="flex-1 py-3.5 rounded-xl font-bebas tracking-wider text-lg"
               style={{ background: "linear-gradient(135deg, #50C878, #3da862)", color: "#0a0a14" }}>
               BELIEVE
             </button>
-            <button onClick={() => respond("doubt")} className="flex-1 py-3 rounded-xl font-bebas tracking-wider text-lg"
+            <button onClick={() => respond("doubt")} className="flex-1 py-3.5 rounded-xl font-bebas tracking-wider text-lg"
               style={{ background: "linear-gradient(135deg, #EF4444, #c43333)", color: "#fff" }}>
               DOUBT
             </button>
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 }

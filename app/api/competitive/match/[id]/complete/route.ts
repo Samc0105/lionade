@@ -1,13 +1,18 @@
 // Competitive platform — the ONE shared completion endpoint all 5 modes call.
 //
 // POST /api/competitive/match/[id]/complete
-// Body: { scores: { "<user_id>": number, ... } }   // per-user raw mode score
-//   OR (Poker Face): { potSettled: true }           // pot already settled per-hand
+// Body: {}   // NOTHING from the body is trusted for scoring (see HIGH 5 fix).
 //
 // Behavior:
 //   1. requireAuth — only a match participant may complete.
 //   2. Atomic claim active → completing (race guard, mirrors Arena V2 trick).
-//   3. Determine winner_team from the submitted per-user scores (team sum).
+//   3. Determine winner_team from SERVER-PERSISTED scores:
+//        - answer-scored modes (sabotage/zoom/spectrum/pin): sum each team's
+//          competitive_responses.points. The /answer route scored every guess
+//          server-side against the round secret, so the body cannot influence
+//          the outcome.
+//        - Poker Face: derive the winner from the accumulated per-hand zero-sum
+//          fang_delta (written server-side by /pokerface/call), not from scores.
 //   4. ELO: K=32 team update on the format's ladder (competitive_elo for 1v1,
 //      squad_elo for 2v2). Pool-conserved (team A gain == team B loss).
 //   5. Fang settle: locked payout table (lib/competitive/fang-payout.ts). For
@@ -19,9 +24,11 @@
 //      delta is clamped to 0 (we stop the bleeding; we never refund).
 //   7. Persist elo_before/elo_after/fang_delta jsonb + winner_team + status.
 //
-// Security: userId comes ONLY from requireAuth, never the body. The score map
-// is validated to contain ONLY the match's participants. Fang debits are
-// clamped so a user can never go below 0 and never exceed the loss cap.
+// Security: userId comes ONLY from requireAuth, never the body. The match
+// outcome is computed EXCLUSIVELY from server-written rows (competitive_responses
+// for answer modes, the per-hand fang_delta for Poker Face) — a client can no
+// longer submit a score to win. Fang debits are clamped so a user can never go
+// below 0 and never exceed the loss cap.
 
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
@@ -45,8 +52,9 @@ export async function POST(
   const matchId = params.id;
 
   try {
-    const body = await req.json().catch(() => ({}));
-    const scores: Record<string, number> = body?.scores ?? {};
+    // NOTE: the body is intentionally ignored for scoring. Any score map a
+    // client submits is discarded; the outcome is recomputed server-side.
+    await req.json().catch(() => ({}));
 
     const { data: matchRaw } = await supabaseAdmin
       .from("competitive_matches")
@@ -83,11 +91,32 @@ export async function POST(
       return NextResponse.json({ alreadyCompleted: true, match: refetch });
     }
 
-    // ── Determine winner via team score sums ──
-    const sum = (team: string[]) =>
-      team.reduce((acc, u) => acc + (typeof scores[u] === "number" ? scores[u] : 0), 0);
-    const scoreA = sum(match.team_a);
-    const scoreB = sum(match.team_b);
+    // ── Determine winner from SERVER-PERSISTED scores (never the body) ──
+    const isPokerFace = match.mode === "pokerface";
+    let scoreA = 0;
+    let scoreB = 0;
+
+    if (isPokerFace) {
+      // Poker Face has no per-round response rows; the zero-sum pot was settled
+      // per hand into the match's fang_delta by /pokerface/call. The team whose
+      // accumulated pot delta is positive is the winner.
+      const pot = (match.fang_delta ?? {}) as Record<string, number>;
+      scoreA = match.team_a.reduce((acc, u) => acc + (pot[u] ?? 0), 0);
+      scoreB = match.team_b.reduce((acc, u) => acc + (pot[u] ?? 0), 0);
+    } else {
+      // Answer-scored modes: sum each team's server-scored responses.
+      const { data: responses } = await supabaseAdmin
+        .from("competitive_responses")
+        .select("user_id, points")
+        .eq("match_id", matchId);
+      const byUser: Record<string, number> = {};
+      for (const r of responses ?? []) {
+        byUser[r.user_id] = (byUser[r.user_id] ?? 0) + (r.points ?? 0);
+      }
+      scoreA = match.team_a.reduce((acc, u) => acc + (byUser[u] ?? 0), 0);
+      scoreB = match.team_b.reduce((acc, u) => acc + (byUser[u] ?? 0), 0);
+    }
+
     let winner: "a" | "b" | "draw";
     if (scoreA > scoreB) winner = "a";
     else if (scoreB > scoreA) winner = "b";
@@ -127,7 +156,6 @@ export async function POST(
 
     // Poker Face: the staked pot is settled per-hand and already accumulated on
     // the match row's fang_delta. Here we only ADD the flat participation.
-    const isPokerFace = match.mode === "pokerface";
     const existingFangDelta = (match.fang_delta ?? {}) as Record<string, number>;
 
     for (const u of participants) {

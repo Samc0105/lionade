@@ -2,11 +2,13 @@
 
 // Shared settlement hook for competitive mode screens.
 //
-// Each mode accumulates a per-user raw score during play, then calls settle()
-// once at the end. settle() POSTs the score map to the shared /complete endpoint
-// which computes winner + ELO + Fang deltas + loss cap, and returns the result
-// the screen renders. Idempotent on the server (atomic claim), so a double-call
-// from both clients just returns alreadyCompleted.
+// At the end of a match the screen calls settle() once. settle() POSTs to the
+// shared /complete endpoint with an EMPTY body — the server recomputes the
+// winner from its own persisted scores (competitive_responses for answer modes,
+// the per-hand fang_delta for Poker Face). The client NO LONGER sends a score
+// map; the body is ignored server-side (HIGH 5 fix). Idempotent on the server
+// (atomic claim), so a double-call from both clients just returns
+// alreadyCompleted.
 
 import { useState, useCallback } from "react";
 import { apiPost } from "@/lib/api-client";
@@ -27,12 +29,12 @@ export function useSettle(matchId: string) {
   const [settling, setSettling] = useState(false);
 
   const settle = useCallback(
-    async (scores: Record<string, number>) => {
+    async () => {
       if (settling || result) return;
       setSettling(true);
       const { ok, data } = await apiPost<SettleResult & { alreadyCompleted?: boolean }>(
         `/api/competitive/match/${matchId}/complete`,
-        { scores },
+        {},
       );
       setSettling(false);
       if (ok && data && data.winnerTeam) {

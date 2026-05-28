@@ -111,12 +111,12 @@ export default function CompetitiveArenaPage() {
         <div className="absolute bottom-[18%] right-[14%] w-[420px] h-[420px] rounded-full pointer-events-none opacity-[0.05]"
           style={{ background: "radial-gradient(circle, #00BFFF 0%, transparent 70%)" }} />
 
-        <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 py-8">
           <BackButton />
 
-          {/* Header */}
+          {/* Header — launcher framing */}
           <div className="text-center mb-8">
-            <h1 className="font-bebas text-5xl sm:text-7xl chrome-text tracking-wider leading-none">
+            <h1 className="font-bebas text-6xl sm:text-8xl chrome-text tracking-wider leading-none">
               COMPETITIVE ARENA
             </h1>
             <p className="text-cream/60 text-sm sm:text-base mt-3 max-w-xl mx-auto">
@@ -147,15 +147,15 @@ export default function CompetitiveArenaPage() {
             </p>
           )}
 
-          {/* Mode grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          {/* Mode grid — launcher tiles */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 lg:gap-6">
             {MODES.map((m) => {
               const busy = search.phase === "searching" && search.mode === m.mode;
               const dead = search.phase === "none" && search.mode === m.mode;
               return (
                 <div
                   key={m.mode}
-                  className="relative overflow-hidden rounded-2xl p-6 flex flex-col transition-all duration-300 hover:-translate-y-1"
+                  className="relative overflow-hidden rounded-2xl p-6 lg:p-7 flex flex-col transition-all duration-300 hover:-translate-y-1"
                   style={{
                     background: "linear-gradient(135deg, #0c1020 0%, #080c18 50%, #060c18 100%)",
                     border: `1px solid ${m.accent}30`,
@@ -166,7 +166,7 @@ export default function CompetitiveArenaPage() {
                     style={{ background: `radial-gradient(ellipse at 30% 20%, ${m.accent}10 0%, transparent 60%)` }} />
                   <div className="relative">
                     <div className="flex items-center gap-3 mb-2">
-                      <span className="text-3xl">{m.icon}</span>
+                      <span className="text-4xl">{m.icon}</span>
                       <span className="text-[10px] font-bold uppercase tracking-[0.2em] px-2 py-0.5 rounded-md"
                         style={{ color: m.accent, background: `${m.accent}15` }}>
                         {m.verb}

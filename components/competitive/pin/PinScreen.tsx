@@ -9,9 +9,8 @@ import dynamic from "next/dynamic";
 import { useMatchChannel } from "@/lib/competitive/use-match-channel";
 import { useSettle } from "../useSettle";
 import ResultCard from "../ResultCard";
-import { Hud, SettlingMsg } from "../zoom/ZoomScreen";
-import { haversineKm } from "@/lib/competitive/pin-places";
-import { scorePin } from "@/lib/competitive/scoring";
+import { SettlingMsg } from "../zoom/ZoomScreen";
+import { apiPost } from "@/lib/api-client";
 import { COMPETITIVE_EVENTS } from "@/lib/competitive/channels";
 import type { LoadedMatch } from "@/app/compete/arena/[mode]/[matchId]/page";
 
@@ -20,12 +19,12 @@ const PinMap = dynamic(() => import("./PinMap"), {
   loading: () => <div className="h-full w-full flex items-center justify-center text-cream/40 font-bebas tracking-wider">LOADING MAP...</div>,
 });
 
+// true_lat / true_lng are stripped from the in-flight payload by the sanitized
+// match route; the true point arrives in the /answer reveal after lock-in.
 interface Round {
   id: string;
   round_num: number;
   prompt: string;
-  true_lat: number;
-  true_lng: number;
 }
 
 export default function PinScreen({ loaded, selfId }: { loaded: LoadedMatch; selfId: string }) {
@@ -41,6 +40,7 @@ export default function PinScreen({ loaded, selfId }: { loaded: LoadedMatch; sel
   const [revealed, setRevealed] = useState(false);
   const [lastDist, setLastDist] = useState(0);
   const [lastPts, setLastPts] = useState(0);
+  const [truePoint, setTruePoint] = useState<{ lat: number; lng: number } | null>(null);
   const [finished, setFinished] = useState(false);
   const myScoreRef = useRef(0);
 
@@ -54,7 +54,7 @@ export default function PinScreen({ loaded, selfId }: { loaded: LoadedMatch; sel
   }, [on]);
 
   const advance = useCallback(() => {
-    setGuess(null); setRevealed(false); setLastDist(0); setLastPts(0);
+    setGuess(null); setRevealed(false); setLastDist(0); setLastPts(0); setTruePoint(null);
     if (idx + 1 >= rounds.length) {
       setFinished(true);
       send({ type: COMPETITIVE_EVENTS.FINISHED });
@@ -63,61 +63,83 @@ export default function PinScreen({ loaded, selfId }: { loaded: LoadedMatch; sel
     setIdx((i) => i + 1);
   }, [idx, rounds.length, send]);
 
-  const lockIn = useCallback(() => {
+  const lockIn = useCallback(async () => {
     if (revealed || !guess || finished) return;
-    const dist = haversineKm(guess.lat, guess.lng, round.true_lat, round.true_lng);
-    const pts = scorePin(dist);
+    setRevealed(true); // lock the map; the server scores by haversine distance
+    const { ok, data } = await apiPost<{ points: number; reveal: { true_lat: number; true_lng: number; distance_km: number } }>(
+      `/api/competitive/match/${matchId}/answer`,
+      { roundNum: round.round_num, lat: guess.lat, lng: guess.lng },
+    );
+    const pts = ok && data ? data.points : 0;
+    const dist = ok && data ? data.reveal.distance_km : 0;
+    if (ok && data) setTruePoint({ lat: data.reveal.true_lat, lng: data.reveal.true_lng });
     setLastDist(dist); setLastPts(pts);
     setScore((s) => { myScoreRef.current = s + pts; return s + pts; });
-    setRevealed(true);
     send({ type: COMPETITIVE_EVENTS.PROGRESS, score: myScoreRef.current });
     setTimeout(advance, 2400);
-  }, [revealed, guess, finished, round, send, advance]);
+  }, [revealed, guess, finished, round, send, advance, matchId]);
 
   useEffect(() => {
     if (!finished) return;
-    const map: Record<string, number> = {};
-    const myTeam = loaded.match.team_a.includes(selfId) ? loaded.match.team_a : loaded.match.team_b;
-    const otherTeam = loaded.match.team_a.includes(selfId) ? loaded.match.team_b : loaded.match.team_a;
-    myTeam.forEach((u) => (map[u] = myScoreRef.current));
-    otherTeam.forEach((u) => (map[u] = oppScore));
-    settle(map);
-  }, [finished, settle, loaded.match, selfId, oppScore]);
+    // Outcome is recomputed server-side from competitive_responses; no score map.
+    settle();
+  }, [finished, settle]);
 
   if (result) return <ResultCard result={result} selfId={selfId} teamA={loaded.match.team_a} />;
   if (finished) return <SettlingMsg />;
-  if (!round) return <p className="text-cream/60 text-center py-20">No rounds loaded.</p>;
+  if (!round) return <p className="text-cream/60 text-center flex-1 flex items-center justify-center">No rounds loaded.</p>;
 
+  // Map Pin Drop is a MAP game — the map is the screen. It fills the whole play
+  // surface edge-to-edge; the prompt, HUD and lock-in control float over it as
+  // glassmorphic panels in the corners/edges.
   return (
-    <div>
-      <Hud idx={idx} total={rounds.length} score={score} oppScore={oppScore} accent="#50C878" />
-      <div className="rounded-2xl px-5 py-4 mb-4 text-center" style={{ background: "linear-gradient(135deg, #081a12 0%, #060c18 100%)", border: "1px solid rgba(80,200,120,0.25)" }}>
-        <p className="text-cream/40 text-[10px] uppercase tracking-widest mb-1">Drop a pin on</p>
-        <p className="font-bebas text-2xl tracking-wider text-[#50C878]">{round.prompt}</p>
-      </div>
-
-      <div className="rounded-2xl overflow-hidden mb-4 h-[360px]" style={{ border: "1px solid rgba(80,200,120,0.2)" }}>
+    <div className="relative flex-1 min-h-0 w-full">
+      {/* Full-bleed map */}
+      <div className="absolute inset-0">
         <PinMap
           guess={guess}
-          truePoint={revealed ? { lat: round.true_lat, lng: round.true_lng } : null}
+          truePoint={revealed ? truePoint : null}
           onPick={(lat, lng) => setGuess({ lat, lng })}
           disabled={revealed}
         />
       </div>
 
-      {revealed ? (
-        <div className="text-center">
-          <p className="text-cream/70">
-            <span className="font-bebas text-2xl text-[#50C878]">{Math.round(lastDist).toLocaleString()} km</span>
-            <span className="text-cream/40 text-sm"> away &middot; +{lastPts} pts</span>
-          </p>
+      {/* Floating prompt + HUD over the top of the map */}
+      <div className="absolute top-3 left-0 right-0 z-[500] px-3 sm:px-6 pointer-events-none">
+        <div className="w-full max-w-3xl mx-auto flex flex-col gap-2">
+          <div className="rounded-2xl px-5 py-3 text-center backdrop-blur-md pointer-events-none"
+            style={{ background: "rgba(8,26,18,0.72)", border: "1px solid rgba(80,200,120,0.3)" }}>
+            <p className="text-cream/40 text-[10px] uppercase tracking-widest mb-0.5">Drop a pin on</p>
+            <p className="font-bebas text-xl sm:text-2xl tracking-wider text-[#50C878]">{round.prompt}</p>
+          </div>
+          <div className="flex items-center justify-between rounded-xl px-4 py-1.5 backdrop-blur-md"
+            style={{ background: "rgba(6,12,24,0.6)", border: "1px solid rgba(255,255,255,0.06)" }}>
+            <div className="text-cream/70"><span className="font-bebas text-2xl text-[#50C878]">{score}</span><span className="text-cream/40 text-xs"> you</span></div>
+            <div className="font-bebas tracking-wider text-cream/50 text-xs">ROUND {idx + 1} / {rounds.length}</div>
+            <div className="text-cream/70 text-right"><span className="font-bebas text-2xl text-cream/60">{oppScore}</span><span className="text-cream/40 text-xs"> rival</span></div>
+          </div>
         </div>
-      ) : (
-        <button onClick={lockIn} disabled={!guess} className="w-full font-bebas tracking-wider text-lg py-3 rounded-xl disabled:opacity-40"
-          style={{ background: "linear-gradient(135deg, #50C878, #3da862)", color: "#0a0a14" }}>
-          {guess ? "LOCK IN PIN" : "TAP THE MAP TO PLACE A PIN"}
-        </button>
-      )}
+      </div>
+
+      {/* Floating action / result over the bottom of the map */}
+      <div className="absolute bottom-4 left-0 right-0 z-[500] px-3 sm:px-6">
+        <div className="w-full max-w-md mx-auto">
+          {revealed ? (
+            <div className="text-center rounded-xl px-4 py-3 backdrop-blur-md"
+              style={{ background: "rgba(6,12,24,0.72)", border: "1px solid rgba(80,200,120,0.3)" }}>
+              <p className="text-cream/70">
+                <span className="font-bebas text-2xl sm:text-3xl text-[#50C878]">{Math.round(lastDist).toLocaleString()} km</span>
+                <span className="text-cream/40 text-sm"> away &middot; +{lastPts} pts</span>
+              </p>
+            </div>
+          ) : (
+            <button onClick={lockIn} disabled={!guess} className="w-full font-bebas tracking-wider text-lg py-4 rounded-xl disabled:opacity-50 shadow-[0_8px_30px_rgba(0,0,0,0.4)]"
+              style={{ background: "linear-gradient(135deg, #50C878, #3da862)", color: "#0a0a14" }}>
+              {guess ? "LOCK IN PIN" : "TAP THE MAP TO PLACE A PIN"}
+            </button>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

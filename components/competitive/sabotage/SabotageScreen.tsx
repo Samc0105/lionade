@@ -32,12 +32,14 @@ import type { LoadedMatch } from "@/app/compete/arena/[mode]/[matchId]/page";
 
 const ROUND_MS = 12_000;
 
+// correct_index is stripped from the in-flight payload by the sanitized match
+// route. The server grades each answer and returns correct_index in the /answer
+// reveal, which we use only AFTER the player has answered (for the highlight).
 interface Round {
   id: string;
   round_num: number;
   question: string;
   options: string[];
-  correct_index: number;
   category: string | null;
 }
 
@@ -63,6 +65,7 @@ export default function SabotageScreen({ loaded, selfId }: { loaded: LoadedMatch
   const [meter, setMeter] = useState<MeterState>({ charge: 0, lastFiredAt: 0 });
   const [roundStart, setRoundStart] = useState(() => Date.now());
   const [answered, setAnswered] = useState<number | null>(null);
+  const [correctIdx, setCorrectIdx] = useState<number | null>(null); // revealed post-answer
   const [now, setNow] = useState(Date.now());
   const [effects, setEffects] = useState<ActiveEffect[]>([]);
   const [scrambleSeed, setScrambleSeed] = useState(0);
@@ -127,6 +130,7 @@ export default function SabotageScreen({ loaded, selfId }: { loaded: LoadedMatch
 
   const advance = useCallback(() => {
     setAnswered(null);
+    setCorrectIdx(null);
     setEffects([]);
     if (roundIdx + 1 >= rounds.length) {
       setFinished(true);
@@ -138,10 +142,15 @@ export default function SabotageScreen({ loaded, selfId }: { loaded: LoadedMatch
   }, [roundIdx, rounds.length, send]);
 
   const answer = useCallback(
-    (idx: number) => {
+    async (idx: number) => {
       if (answered !== null || hasEffect("freeze") || finished) return;
-      const correct = idx === round.correct_index;
-      setAnswered(idx);
+      setAnswered(idx); // lock the grid immediately; the server grades the pick
+      const { ok, data } = await apiPost<{ isCorrect: boolean; reveal: { correct_index: number } }>(
+        `/api/competitive/match/${matchId}/answer`,
+        { roundNum: round.round_num, index: idx },
+      );
+      const correct = ok && !!data?.isCorrect;
+      if (ok && data) setCorrectIdx(data.reveal.correct_index);
       if (correct) {
         setScore((s) => { myScoreRef.current = s + 1; return s + 1; });
         const charge = chargeForAnswer({ correct, responseMs: elapsed, timeLimitMs: ROUND_MS });
@@ -150,7 +159,7 @@ export default function SabotageScreen({ loaded, selfId }: { loaded: LoadedMatch
       send({ type: SABOTAGE_EVENTS.ANSWERED, correct });
       setTimeout(advance, 1100);
     },
-    [answered, round, elapsed, send, advance, finished],
+    [answered, round, elapsed, send, advance, finished, matchId],
   );
 
   // auto-advance on timeout
@@ -162,28 +171,24 @@ export default function SabotageScreen({ loaded, selfId }: { loaded: LoadedMatch
     }
   }, [timeLeft, answered, finished, advance, send]);
 
-  // settle when finished — my team gets my score, the enemy team gets oppScore.
+  // settle when finished — the outcome is recomputed server-side from
+  // competitive_responses (the /answer route scored every pick); no score map.
   useEffect(() => {
     if (!finished) return;
-    const map: Record<string, number> = {};
-    const myTeam = loaded.match.team_a.includes(selfId) ? loaded.match.team_a : loaded.match.team_b;
-    const otherTeam = loaded.match.team_a.includes(selfId) ? loaded.match.team_b : loaded.match.team_a;
-    myTeam.forEach((u) => (map[u] = myScoreRef.current));
-    otherTeam.forEach((u) => (map[u] = oppScore));
-    settle(map);
-  }, [finished, settle, loaded.match, selfId, oppScore]);
+    settle();
+  }, [finished, settle]);
 
   if (result) {
     return <ResultCard result={result} selfId={selfId} teamA={loaded.match.team_a} />;
   }
   if (finished) {
     return (
-      <div className="text-center py-20">
+      <div className="flex-1 flex items-center justify-center text-center px-6">
         <p className="font-bebas text-3xl text-cream/70 tracking-wider">SETTLING DUEL...</p>
       </div>
     );
   }
-  if (!round) return <p className="text-cream/60 text-center py-20">No questions loaded.</p>;
+  if (!round) return <p className="text-cream/60 text-center flex-1 flex items-center justify-center">No questions loaded.</p>;
 
   // display options (apply scramble + fog)
   let displayOptions = round.options.map((text, i) => ({ text, origIdx: i }));
@@ -196,84 +201,93 @@ export default function SabotageScreen({ loaded, selfId }: { loaded: LoadedMatch
     displayOptions = seeded;
   }
   const fogHidden = hasEffect("fog") ? [1, 3] : [];
-  const decoyIdx = hasEffect("decoy") ? (round.correct_index + 1) % 4 : -1;
+  // Decoy points a misleading "suggested" badge at one option. It must NOT depend
+  // on the secret correct_index (which the client no longer holds pre-answer); a
+  // deterministic per-round index is just as deceptive to the victim.
+  const decoyIdx = hasEffect("decoy") ? (round.round_num * 3 + 1) % round.options.length : -1;
 
   return (
-    <div className="relative">
-      {/* HUD */}
-      <div className="flex items-center justify-between mb-4">
-        <div className="text-cream/70">
-          <span className="font-bebas text-2xl text-[#EF4444]">{score}</span>
-          <span className="text-cream/40 text-sm"> you</span>
-        </div>
-        <div className="font-bebas tracking-wider text-cream/50 text-sm">
-          ROUND {roundIdx + 1} / {rounds.length}
-        </div>
-        <div className="text-cream/70 text-right">
-          <span className="font-bebas text-2xl text-cream/60">{oppScore}</span>
-          <span className="text-cream/40 text-sm"> rival</span>
-        </div>
-      </div>
-
-      {/* timer */}
-      <div className="h-1.5 rounded-full bg-cream/[0.07] overflow-hidden mb-5">
-        <div className="h-full rounded-full transition-[width] duration-100"
-          style={{ width: `${(timeLeft / ROUND_MS) * 100}%`, background: timeLeft < 3000 ? "#EF4444" : "#FFD700" }} />
-      </div>
-
-      {/* question */}
-      <div className={`relative rounded-2xl p-6 mb-5 transition-all ${hasEffect("blur") ? "blur-md" : ""}`}
-        style={{ background: "linear-gradient(135deg, #150505 0%, #0d0303 50%, #060c18 100%)", border: "1px solid rgba(239,68,68,0.25)" }}>
-        {round.category && <p className="text-[#EF4444]/70 text-[10px] uppercase tracking-widest mb-2">{round.category}</p>}
-        <p className="text-cream/90 text-lg leading-snug">{round.question}</p>
-        {hasEffect("freeze") && (
-          <div className="absolute inset-0 rounded-2xl flex items-center justify-center bg-[#00BFFF]/10 backdrop-blur-sm">
-            <span className="font-bebas text-2xl text-[#00BFFF] tracking-widest">❄ FROZEN</span>
-          </div>
-        )}
-      </div>
-
-      {/* options */}
-      <div className={`grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6 ${hasEffect("blur") ? "blur-md pointer-events-none" : ""}`}>
-        {displayOptions.map((opt, displayI) => {
-          const isHidden = fogHidden.includes(displayI);
-          const isAnswered = answered !== null;
-          const isCorrect = opt.origIdx === round.correct_index;
-          const isMine = answered === opt.origIdx;
-          const isDecoy = opt.origIdx === decoyIdx;
-          return (
-            <button
-              key={opt.origIdx}
-              onClick={() => answer(opt.origIdx)}
-              disabled={isAnswered || hasEffect("freeze")}
-              className={`relative text-left px-4 py-3.5 rounded-xl border transition-all
-                ${isAnswered && isCorrect ? "border-[#50C878] bg-[#50C878]/15"
-                  : isAnswered && isMine ? "border-[#EF4444] bg-[#EF4444]/15"
-                  : "border-cream/10 bg-cream/[0.03] hover:border-cream/25 active:scale-[0.98]"}
-                ${isDecoy && !isAnswered ? "ring-1 ring-[#A855F7]/40" : ""}`}
-            >
-              <span className={`text-cream/85 ${isHidden ? "blur-sm select-none" : ""}`}>
-                {isHidden ? "• • • • •" : opt.text}
-              </span>
-              {isDecoy && !isAnswered && (
-                <span className="absolute top-1 right-2 text-[8px] text-[#A855F7]/70 uppercase">suggested</span>
-              )}
-            </button>
-          );
-        })}
-      </div>
-
-      {/* attack tray */}
-      <div className="rounded-2xl p-4" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(168,85,247,0.18)" }}>
+    <div className="relative flex-1 min-h-0 flex flex-col w-full px-3 sm:px-6">
+      {/* HUD pinned to the top edge */}
+      <div className="flex-none w-full max-w-5xl mx-auto">
         <div className="flex items-center justify-between mb-3">
+          <div className="text-cream/70">
+            <span className="font-bebas text-3xl sm:text-4xl text-[#EF4444]">{score}</span>
+            <span className="text-cream/40 text-sm"> you</span>
+          </div>
+          <div className="font-bebas tracking-wider text-cream/50 text-sm">
+            ROUND {roundIdx + 1} / {rounds.length}
+          </div>
+          <div className="text-cream/70 text-right">
+            <span className="font-bebas text-3xl sm:text-4xl text-cream/60">{oppScore}</span>
+            <span className="text-cream/40 text-sm"> rival</span>
+          </div>
+        </div>
+
+        {/* timer */}
+        <div className="h-2 rounded-full bg-cream/[0.07] overflow-hidden">
+          <div className="h-full rounded-full transition-[width] duration-100"
+            style={{ width: `${(timeLeft / ROUND_MS) * 100}%`, background: timeLeft < 3000 ? "#EF4444" : "#FFD700" }} />
+        </div>
+      </div>
+
+      {/* Center mass: question + options dominate the screen */}
+      <div className="flex-1 min-h-0 flex flex-col justify-center w-full max-w-5xl mx-auto py-4">
+        {/* question */}
+        <div className={`relative rounded-2xl p-6 sm:p-8 mb-4 sm:mb-6 transition-all ${hasEffect("blur") ? "blur-md" : ""}`}
+          style={{ background: "linear-gradient(135deg, #150505 0%, #0d0303 50%, #060c18 100%)", border: "1px solid rgba(239,68,68,0.25)" }}>
+          {round.category && <p className="text-[#EF4444]/70 text-[10px] uppercase tracking-widest mb-2">{round.category}</p>}
+          <p className="text-cream/90 text-xl sm:text-2xl lg:text-3xl leading-snug font-medium">{round.question}</p>
+          {hasEffect("freeze") && (
+            <div className="absolute inset-0 rounded-2xl flex items-center justify-center bg-[#00BFFF]/10 backdrop-blur-sm">
+              <span className="font-bebas text-3xl text-[#00BFFF] tracking-widest">❄ FROZEN</span>
+            </div>
+          )}
+        </div>
+
+        {/* options */}
+        <div className={`grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 ${hasEffect("blur") ? "blur-md pointer-events-none" : ""}`}>
+          {displayOptions.map((opt, displayI) => {
+            const isHidden = fogHidden.includes(displayI);
+            const isAnswered = answered !== null;
+            const isCorrect = correctIdx !== null && opt.origIdx === correctIdx;
+            const isMine = answered === opt.origIdx;
+            const isDecoy = opt.origIdx === decoyIdx;
+            return (
+              <button
+                key={opt.origIdx}
+                onClick={() => answer(opt.origIdx)}
+                disabled={isAnswered || hasEffect("freeze")}
+                className={`relative text-left px-5 py-4 sm:py-5 rounded-xl border transition-all text-base sm:text-lg
+                  ${isAnswered && isCorrect ? "border-[#50C878] bg-[#50C878]/15"
+                    : isAnswered && isMine ? "border-[#EF4444] bg-[#EF4444]/15"
+                    : "border-cream/10 bg-cream/[0.03] hover:border-cream/25 active:scale-[0.98]"}
+                  ${isDecoy && !isAnswered ? "ring-1 ring-[#A855F7]/40" : ""}`}
+              >
+                <span className={`text-cream/85 ${isHidden ? "blur-sm select-none" : ""}`}>
+                  {isHidden ? "• • • • •" : opt.text}
+                </span>
+                {isDecoy && !isAnswered && (
+                  <span className="absolute top-1 right-2 text-[8px] text-[#A855F7]/70 uppercase">suggested</span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* attack tray pinned to the bottom edge */}
+      <div className="flex-none w-full max-w-5xl mx-auto rounded-2xl p-3 sm:p-4 mt-auto"
+        style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(168,85,247,0.18)" }}>
+        <div className="flex items-center justify-between mb-2.5">
           <span className="font-bebas text-sm tracking-wider text-[#A855F7]">ATTACK METER</span>
           <span className="text-cream/40 text-xs">{Math.round(meter.charge)} / {METER_MAX}</span>
         </div>
-        <div className="h-2 rounded-full bg-cream/[0.07] overflow-hidden mb-4">
+        <div className="h-2 rounded-full bg-cream/[0.07] overflow-hidden mb-3">
           <div className="h-full rounded-full transition-[width] duration-300"
             style={{ width: `${(meter.charge / METER_MAX) * 100}%`, background: "linear-gradient(90deg, #A855F7, #00BFFF)" }} />
         </div>
-        <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+        <div className="grid grid-cols-6 gap-2">
           {(Object.keys(ATTACK_META) as SabotageAttackKind[]).map((kind) => {
             const cost = ATTACK_COSTS[kind];
             const affordable = meter.charge >= cost && now - meter.lastFiredAt >= ATTACK_COOLDOWN_MS;

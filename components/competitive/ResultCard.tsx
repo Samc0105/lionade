@@ -29,7 +29,8 @@ export default function ResultCard({
   const color = draw ? "#A855F7" : youWon ? "#FFD700" : "#EF4444";
 
   return (
-    <div className="relative overflow-hidden rounded-2xl p-8 text-center mt-6"
+    <div className="flex-1 min-h-0 flex items-center justify-center w-full px-4">
+    <div className="relative overflow-hidden rounded-2xl p-8 sm:p-10 text-center w-full max-w-lg"
       style={{ background: "linear-gradient(135deg, #0c1020 0%, #060c18 100%)", border: `1px solid ${color}40` }}>
       <div className="absolute inset-0 pointer-events-none"
         style={{ background: `radial-gradient(ellipse at 50% 0%, ${color}12 0%, transparent 60%)` }} />
@@ -77,6 +78,7 @@ export default function ResultCard({
           </Link>
         </div>
       </div>
+    </div>
     </div>
   );
 }
