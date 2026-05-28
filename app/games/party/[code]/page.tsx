@@ -20,7 +20,8 @@ import { useAuth } from "@/lib/auth";
 import RoomLobby from "@/components/party/RoomLobby";
 import SketchView from "@/components/party/SketchView";
 import BluffView from "@/components/party/BluffView";
-import type { PartyPlayer, PartyRoom } from "@/lib/party/types";
+import PokerFaceView from "@/components/party/PokerFaceView";
+import type { CurrentGame, PartyPlayer, PartyRoom } from "@/lib/party/types";
 
 interface Snapshot {
   room: PartyRoom;
@@ -160,7 +161,7 @@ export default function PartyRoomPage() {
 
   // ── Broadcast helpers ──
   const broadcastGameStarted = useCallback(
-    async (game: "sketch" | "bluff") => {
+    async (game: Exclude<CurrentGame, null>) => {
       const ch = supabase.channel(roomChannel(code));
       await ch.send({ type: "broadcast", event: PARTY_EVENTS.GAME_STARTED, payload: { game } });
     },
@@ -283,6 +284,16 @@ export default function PartyRoomPage() {
 
           {inGame && snap.room.current_game === "bluff" && (
             <BluffView
+              room={snap.room}
+              players={snap.players}
+              isHost={snap.isHost}
+              meUserId={snap.meUserId}
+              onReturnToLobby={onReturnToLobby}
+            />
+          )}
+
+          {inGame && snap.room.current_game === "pokerface" && (
+            <PokerFaceView
               room={snap.room}
               players={snap.players}
               isHost={snap.isHost}

@@ -27,11 +27,10 @@ export const SABOTAGE_EVENTS = {
   FINISHED: "finished",
 } as const;
 
-// ── Generic mode lifecycle events (zoom / spectrum / pin / pokerface) ──
+// ── Generic mode lifecycle events (zoom / spectrum / pin) ──
 export const COMPETITIVE_EVENTS = {
   PROGRESS: "progress",   // opponent advanced a round (score/round sync)
   GUESS: "guess",         // a guess/answer landed (zoom lock, spectrum lock)
-  HAND: "hand",           // poker face hand phase change
   FINISHED: "finished",   // a side finished all rounds
 } as const;
 

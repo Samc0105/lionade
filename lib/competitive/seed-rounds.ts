@@ -13,14 +13,14 @@ import { pickZoomImages } from "./zoom-images";
 import { pickSpectrumEntries } from "./spectrum-data";
 import { pickPinPlaces } from "./pin-places";
 import { getCountryPlaces } from "./rest-countries";
-import { drawRandomCard } from "./pokerface-cards";
 
 const SABOTAGE_ROUNDS = 8;
 const ZOOM_ROUNDS = 6;
 const SPECTRUM_ROUNDS = 10;
 const PIN_ROUNDS = 10;
-const POKERFACE_HANDS = 6;
 
+// (Poker Face was moved to Lionade Party as a no-Fang party game on 2026-05-28;
+// it is no longer a competitive mode and is not seeded here.)
 export async function seedRoundsForMatch(
   supabase: SupabaseClient,
   matchId: string,
@@ -35,8 +35,6 @@ export async function seedRoundsForMatch(
       return seedSpectrum(supabase, matchId);
     case "pin":
       return seedPin(supabase, matchId);
-    case "pokerface":
-      return seedPokerFace(supabase, matchId);
   }
 }
 
@@ -101,16 +99,4 @@ async function seedPin(supabase: SupabaseClient, matchId: string) {
     true_lng: p.lng,
   }));
   if (rows.length) await supabase.from("pin_rounds").insert(rows);
-}
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-async function seedPokerFace(_supabase: SupabaseClient, _matchId: string) {
-  // Poker Face hands carry non-null presenter_id/caller_id foreign keys, which
-  // depend on the live match teams + hand parity (presenter alternates). We
-  // therefore DEFER hand creation to the Poker Face present endpoint
-  // (app/api/competitive/pokerface/present/route.ts), which knows the real
-  // teams and draws the card at present time. Seeding nothing here avoids FK
-  // violations on placeholder ids. Intentional no-op.
-  void POKERFACE_HANDS;
-  void drawRandomCard;
 }

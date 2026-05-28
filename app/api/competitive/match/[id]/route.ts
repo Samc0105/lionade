@@ -10,9 +10,12 @@
 // for in-flight round content. The mode screens render from this payload, so it
 // MUST NOT include the round secret until the round has ended. We drop
 // correct_index / answer / aliases / true_value / true_lat / true_lng for any
-// round whose ended_at is still null, and the entire is_truth/card_fact/claim
-// surface for any pokerface hand not yet at reveal/done. The secret reaches a
-// player only through the /answer (or /pokerface/call) reveal, after they act.
+// round whose ended_at is still null. The secret reaches a player only through
+// the /answer reveal, after they act.
+//
+// (Poker Face was moved to Lionade Party as a no-Fang party game on 2026-05-28
+// and is no longer a competitive mode — its hand-secret stripping now lives in
+// app/api/party/pokerface/rounds/[id]/route.ts.)
 
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
@@ -24,7 +27,6 @@ const ROUND_TABLE: Record<string, string> = {
   zoom: "zoom_rounds",
   spectrum: "spectrum_rounds",
   pin: "pin_rounds",
-  pokerface: "pokerface_hands",
 };
 
 // Per-mode secret columns dropped from any round that has not yet ended.
@@ -40,20 +42,9 @@ type RoundRow = Record<string, unknown>;
 /**
  * Strip the round secret from any not-yet-ended row. For the answer-scored modes
  * the secret is gone until ended_at is set (the /answer route sets it once every
- * participant has submitted). For pokerface, hands not at reveal/done lose the
- * truth flag + the curated fact + the (possibly invented) claim text, so a caller
- * can't peek before calling.
+ * participant has submitted).
  */
 function sanitizeRounds(mode: string, rounds: RoundRow[]): RoundRow[] {
-  if (mode === "pokerface") {
-    return rounds.map((h) => {
-      const ended = h.phase === "reveal" || h.phase === "done" || !!h.ended_at;
-      if (ended) return h;
-      const { is_truth, card_fact, claim_text, ...safe } = h;
-      void is_truth; void card_fact; void claim_text;
-      return safe;
-    });
-  }
   const secrets = SECRET_COLUMNS[mode] ?? [];
   if (secrets.length === 0) return rounds;
   return rounds.map((r) => {
@@ -89,7 +80,7 @@ export async function GET(
     }
 
     const roundTable = ROUND_TABLE[match.mode];
-    const orderCol = match.mode === "pokerface" ? "hand_num" : "round_num";
+    const orderCol = "round_num";
     const { data: rounds } = await supabaseAdmin
       .from(roundTable)
       .select("*")

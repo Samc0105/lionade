@@ -21,3 +21,14 @@ export function sketchDrawerPoints(correctGuessers: number, fastGuesserRatio: nu
 // Picking the truth: +1000. Every player tricked by your fake: +500.
 export const BLUFF_TRUTH_POINTS = 1000;
 export const BLUFF_FAKE_TRICK_POINTS = 500;
+
+// ── Poker Face (party) ──
+// NO ELO, NO Fang wager — pure points. The scoring matrix:
+//   Presenter scores when they FOOL a caller: each caller who calls the wrong
+//     way (believed a lie, or doubted a truth) earns the presenter points.
+//   Callers score when they call CORRECTLY: catching a lie (doubt + is_lie) or
+//     trusting a truth (believe + truth) earns the caller points.
+// Tuned so a confident bluffer who fools the whole room out-scores a single
+// correct caller, but a sharp room shuts a liar down — symmetric and readable.
+export const POKERFACE_FOOL_POINTS = 500;   // presenter, per caller fooled
+export const POKERFACE_CORRECT_CALL_POINTS = 400;  // caller, for a correct read

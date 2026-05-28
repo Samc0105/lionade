@@ -15,7 +15,6 @@ import { motion, useReducedMotion } from "framer-motion";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import BackButton from "@/components/BackButton";
 import { apiPost, apiGet, apiDelete } from "@/lib/api-client";
-import { cdnUrl } from "@/lib/cdn";
 import type { CompetitiveMode, CompetitiveFormat } from "@/lib/competitive/types";
 
 interface ModeCard {
@@ -25,14 +24,17 @@ interface ModeCard {
   blurb: string;
   accent: string;
   icon: string;
+  /** Ideal-context badge shown on the card. All ranked modes play fine remotely. */
+  bestPlayed: string;
 }
 
+// Poker Face was moved to Lionade Party (no ELO, no Fangs) on 2026-05-28, so the
+// ranked arena is now 4 modes — all of which play fine over the internet.
 const MODES: ModeCard[] = [
-  { mode: "sabotage", name: "Sabotage Trivia", verb: "Fight", blurb: "Real-time trivia duel. Answer fast to charge attacks, then blur, scramble, and freeze your rival.", accent: "#EF4444", icon: "⚔️" },
-  { mode: "zoom", name: "Zoom Reveal", verb: "Nerve", blurb: "An image un-blurs over time. Guess early to score big, but a wrong guess locks the round.", accent: "#00BFFF", icon: "🔍" },
-  { mode: "spectrum", name: "Spectrum Slider", verb: "Feel", blurb: "Slide to estimate a value. Closest to the truth scores the most, with partial credit for near misses.", accent: "#A855F7", icon: "🎚️" },
-  { mode: "pin", name: "Map Pin Drop", verb: "Spatial", blurb: "Drop a pin on the world map. The closer to the real spot, the more points you bank.", accent: "#50C878", icon: "📍" },
-  { mode: "pokerface", name: "Poker Face", verb: "Read", blurb: "Hold a secret fact. Present truth or a bluff, set your Challenge Stake, and read your rival's call.", accent: "#FFD700", icon: "🃏" },
+  { mode: "sabotage", name: "Sabotage Trivia", verb: "Fight", blurb: "Real-time trivia duel. Answer fast to charge attacks, then blur, scramble, and freeze your rival.", accent: "#EF4444", icon: "⚔️", bestPlayed: "Remote OK" },
+  { mode: "zoom", name: "Zoom Reveal", verb: "Nerve", blurb: "An image un-blurs over time. Guess early to score big, but a wrong guess locks the round.", accent: "#00BFFF", icon: "🔍", bestPlayed: "Remote OK" },
+  { mode: "spectrum", name: "Spectrum Slider", verb: "Feel", blurb: "Slide to estimate a value. Closest to the truth scores the most, with partial credit for near misses.", accent: "#A855F7", icon: "🎚️", bestPlayed: "Remote OK" },
+  { mode: "pin", name: "Map Pin Drop", verb: "Spatial", blurb: "Drop a pin on the world map. The closer to the real spot, the more points you bank.", accent: "#50C878", icon: "📍", bestPlayed: "Remote OK" },
 ];
 
 type SearchState =
@@ -122,7 +124,7 @@ export default function CompetitiveArenaPage() {
               COMPETITIVE ARENA
             </h1>
             <p className="text-cream/60 text-sm sm:text-base mt-3 max-w-xl mx-auto">
-              Five competitive modes. Earn Elo and Fangs on the ranked ladders. Pick a format, pick a mode.
+              Four competitive modes. Earn Elo and Fangs on the ranked ladders. Pick a format, pick a mode.
             </p>
           </div>
 
@@ -177,24 +179,24 @@ export default function CompetitiveArenaPage() {
                   <div className="absolute inset-0 pointer-events-none"
                     style={{ background: `radial-gradient(ellipse at 30% 20%, ${m.accent}10 0%, transparent 60%)` }} />
                   <div className="relative">
-                    <div className="flex items-center gap-3 mb-2">
+                    <div className="flex items-center gap-2 mb-2">
                       <span className="text-4xl">{m.icon}</span>
                       <span className="text-[10px] font-bold uppercase tracking-[0.2em] px-2 py-0.5 rounded-md"
                         style={{ color: m.accent, background: `${m.accent}15` }}>
                         {m.verb}
+                      </span>
+                      {/* Best-played context chip — small tasteful glass pill */}
+                      <span
+                        className="ml-auto text-[10px] font-bebas uppercase tracking-[0.18em] px-2.5 py-1 rounded-full
+                          text-cream/70 bg-white/[0.04] border border-white/10 backdrop-blur-md"
+                      >
+                        {m.bestPlayed}
                       </span>
                     </div>
                     <p className="font-bebas text-2xl tracking-wider mb-2" style={{ color: m.accent }}>
                       {m.name.toUpperCase()}
                     </p>
                     <p className="text-cream/55 text-sm leading-relaxed mb-5 min-h-[60px]">{m.blurb}</p>
-
-                    {m.mode === "pokerface" && (
-                      <p className="text-cream/40 text-[11px] mb-3 flex items-center gap-1">
-                        <img src={cdnUrl("/F.png")} alt="Fangs" className="w-3.5 h-3.5 object-contain" />
-                        Challenge Stakes: 10 to 50 Fangs
-                      </p>
-                    )}
 
                     {!busy && !dead && (
                       <button

@@ -1,7 +1,7 @@
 // Shared types for Lionade Party API + UI.
 
 export type RoomStatus = "lobby" | "playing" | "ended";
-export type CurrentGame = "sketch" | "bluff" | null;
+export type CurrentGame = "sketch" | "bluff" | "pokerface" | null;
 
 export interface PartyRoom {
   id: string;
@@ -20,6 +20,7 @@ export interface PartySettings {
   bluff_round_count?: number;   // bluff: default 5
   write_seconds?: number;       // bluff: default 45
   vote_seconds?: number;        // bluff: default 30
+  pf_vote_seconds?: number;     // pokerface: default 30 (caller call window)
 }
 
 export interface PartyPlayer {
@@ -89,4 +90,42 @@ export interface BluffAnswerPublic {
   // We hide author + is_truth until reveal phase. The server filters these.
   author_user_id?: string;
   is_truth?: boolean;
+}
+
+export type PokerFacePhase = "present" | "vote" | "reveal";
+export type PokerFaceCall = "believe" | "doubt";
+
+// Phase-aware Poker Face round view. The server NEVER ships card_fact / is_lie /
+// claim_text to a non-presenter before reveal (the secrets that decide the
+// bluff). Fields below are present only in the phase that's allowed to see them.
+export interface PokerFaceRoundView {
+  id: string;
+  room_id: string;
+  round_num: number;
+  presenter_user_id: string;
+  presenter_username: string | null;
+  card_word: string;            // shown to everyone (not secret)
+  phase: PokerFacePhase;
+  started_at: string;
+  presented_at: string | null;
+  ended_at: string | null;
+  // Caller-visible only from phase='vote' onward: what the presenter chose to
+  // show (truth shown verbatim, or their invented lie). Never reveals is_lie.
+  claim_text?: string | null;
+  // Presenter-only convenience (the server gates this to the presenter): the
+  // true fact + whether they marked it a lie, so their own screen can render.
+  card_fact?: string | null;
+  is_lie?: boolean | null;
+  // Per-viewer state.
+  my_call?: PokerFaceCall | null;
+  call_count?: number;          // how many callers have called so far
+  caller_count?: number;        // how many non-presenters are in the room
+  // Reveal-only.
+  reveal?: {
+    is_lie: boolean;
+    card_fact: string;
+    claim_text: string;
+    calls: { user_id: string; username: string | null; call: PokerFaceCall; correct: boolean }[];
+    round_points: Record<string, number>;  // per-user points earned this round
+  };
 }

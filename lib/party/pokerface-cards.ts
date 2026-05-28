@@ -1,20 +1,24 @@
-// Poker Face — curated fact cards.
+// Poker Face (Lionade Party) — curated fact cards.
 //
-// Each card is a WORD plus a TRUE fact about it. In a hand, the presenter draws
-// a card in secret, then chooses to either:
-//   - present the truth as written, OR
-//   - invent a LIE (edit the claim text to something false), then present that.
-// The LIE is always player-authored — we never generate it. This keeps the mode
-// zero-AI and makes the "tell" purely about the presenter's confidence wager,
-// since remote play has no face to read.
+// Moved out of the competitive arena 2026-05-28 (see project_lionade_party.md +
+// project_competitive_modes.md). Poker Face is now an N-player party game: one
+// presenter per round draws a card in secret, then chooses to either present the
+// TRUE fact as written, or invent a LIE (an edited claim) and present that. The
+// rest of the room calls BELIEVE or DOUBT. The LIE is always player-authored —
+// we never generate it. NO Fang wager, NO ELO: pure points / bragging rights.
 //
-// Content sourced from well-established, verifiable trivia. Kept family-safe.
+// Because the game is "best in person," the presenter's FACE is the tell — there
+// is no confidence-wager mechanic (that was a remote crutch in the old duel).
+//
+// These 51 cards were harvested verbatim from the retired
+// lib/competitive/pokerface-cards.ts. Content is well-established, verifiable
+// trivia, kept family-safe.
 
 export interface PokerFaceCard {
-  /** The subject word shown on the card. */
+  /** The subject word shown on the card (NOT secret — the room sees it). */
   word: string;
-  /** A verifiably TRUE fact about the word. The presenter may show this verbatim,
-   *  or invent a false claim instead. */
+  /** A verifiably TRUE fact about the word. SECRET until reveal: the presenter
+   *  may show this verbatim (truth) or invent a false claim instead (lie). */
   fact: string;
 }
 
@@ -73,7 +77,12 @@ export const POKERFACE_CARDS: PokerFaceCard[] = [
   { word: "The Great Wall", fact: "The Great Wall of China is not visible to the naked eye from space." },
 ];
 
-export function drawRandomCard(): PokerFaceCard {
-  const i = Math.floor(Math.random() * POKERFACE_CARDS.length);
-  return POKERFACE_CARDS[i];
+/** Draw a random card, optionally excluding words already used this game so the
+ *  same fact doesn't recur within a single room session. Falls back to the full
+ *  deck once every card has been seen. */
+export function drawRandomCard(usedWords: string[] = []): PokerFaceCard {
+  const used = new Set(usedWords);
+  const fresh = POKERFACE_CARDS.filter((c) => !used.has(c.word));
+  const pool = fresh.length > 0 ? fresh : POKERFACE_CARDS;
+  return pool[Math.floor(Math.random() * pool.length)];
 }

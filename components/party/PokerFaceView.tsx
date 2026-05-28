@@ -1,0 +1,599 @@
+"use client";
+
+// PokerFaceView — the per-round screen for Poker Face (Lionade Party).
+//
+// N-player (3-8) presenter-rotation bluff game. Each round the SERVER picks one
+// presenter (rotating through the room) and deals them a secret fact card. The
+// presenter chooses to present the TRUE fact or invent a LIE, then presents the
+// claim to the room. Everyone else calls BELIEVE or DOUBT. Reveal + score, then
+// the presenter rotates next round. NO ELO, NO Fangs — pure points.
+//
+// "Best in person": the presenter's FACE is the tell, so there is no
+// confidence-wager mechanic. We surface a small "gather your crew" banner.
+//
+// Three phases, server-driven (we poll the round detail every ~1.5s and also
+// subscribe to phase_changed broadcasts, mirroring BluffView):
+//   1. "present" — presenter decides truth/lie + writes the claim. Others wait.
+//   2. "vote"    — callers call believe/doubt. Presenter watches the count.
+//   3. "reveal"  — truth shown, who was fooled, scoreboard, Next Round CTA.
+
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import { supabase } from "@/lib/supabase";
+import { apiGet, apiPost } from "@/lib/api-client";
+import PartyScoreboard from "./PartyScoreboard";
+import NinnyHostBubble from "./NinnyHostBubble";
+import { pokerFaceChannel, POKERFACE_EVENTS } from "@/lib/party/realtime-channels";
+import type { PartyPlayer, PartyRoom, PokerFaceCall } from "@/lib/party/types";
+
+interface Props {
+  room: PartyRoom;
+  players: PartyPlayer[];
+  isHost: boolean;
+  meUserId: string;
+  onReturnToLobby: () => void;
+}
+
+type Phase = "loading" | "present" | "vote" | "reveal";
+
+const ACCENT = "#00BFFF";
+const DEFAULT_CALL_SECONDS = 30;
+
+interface RoundDetail {
+  round: {
+    id: string;
+    room_id: string;
+    round_num: number;
+    presenter_user_id: string;
+    presenter_username: string | null;
+    card_word: string;
+    phase: "present" | "vote" | "reveal";
+    started_at: string;
+    presented_at: string | null;
+    ended_at: string | null;
+    is_presenter: boolean;
+    my_call?: PokerFaceCall | null;
+    caller_count?: number;
+    call_count?: number;
+    claim_text?: string | null;
+    card_fact?: string | null;   // presenter-only (present + vote)
+    is_lie?: boolean | null;     // presenter-only (vote)
+    reveal?: {
+      is_lie: boolean;
+      card_fact: string;
+      claim_text: string;
+      calls: { user_id: string; username: string | null; call: PokerFaceCall; correct: boolean }[];
+      round_points: Record<string, number>;
+    };
+  };
+}
+
+export default function PokerFaceView({
+  room,
+  players,
+  isHost,
+  meUserId,
+  onReturnToLobby,
+}: Props) {
+  const reduced = useReducedMotion();
+  const [roundId, setRoundId] = useState<string | null>(null);
+  const [detail, setDetail] = useState<RoundDetail["round"] | null>(null);
+  const [phase, setPhase] = useState<Phase>("loading");
+  const [lieText, setLieText] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [ninnyMsg, setNinnyMsg] = useState<string | null>("Read the room. Trust no face.");
+  const [timeLeft, setTimeLeft] = useState(0);
+  const advanceLock = useRef(false);
+
+  // ── Start a fresh round (host) ──
+  const startRound = useCallback(async () => {
+    setPhase("loading");
+    setDetail(null);
+    setLieText("");
+    setError(null);
+    const res = await apiPost<{ round: { id: string } }>(
+      "/api/party/pokerface/rounds",
+      { code: room.code },
+    );
+    if (!res.ok || !res.data) {
+      setError("Couldn't deal a round. Try again.");
+      return;
+    }
+    setRoundId(res.data.round.id);
+    setPhase("present");
+    const ch = supabase.channel(pokerFaceChannel(room.code));
+    await ch.send({
+      type: "broadcast",
+      event: POKERFACE_EVENTS.ROUND_STARTED,
+      payload: { round_id: res.data.round.id },
+    });
+  }, [room.code]);
+
+  // Host auto-deals the first round.
+  useEffect(() => {
+    if (isHost && !roundId && phase === "loading") {
+      void startRound();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isHost]);
+
+  // ── Listen for round + phase broadcasts ──
+  useEffect(() => {
+    const ch = supabase.channel(pokerFaceChannel(room.code));
+    ch.on("broadcast", { event: POKERFACE_EVENTS.ROUND_STARTED }, (msg: { payload?: unknown }) => {
+      const payload = (msg.payload ?? {}) as { round_id?: string };
+      if (payload.round_id && payload.round_id !== roundId) {
+        setRoundId(payload.round_id);
+        setPhase("present");
+        setLieText("");
+        setDetail(null);
+      }
+    });
+    ch.on("broadcast", { event: POKERFACE_EVENTS.PRESENTED }, () => void refreshDetail());
+    ch.on("broadcast", { event: POKERFACE_EVENTS.PHASE_CHANGED }, () => void refreshDetail());
+    ch.on("broadcast", { event: POKERFACE_EVENTS.ROUND_ENDED }, () => void refreshDetail());
+    ch.subscribe();
+    return () => {
+      supabase.removeChannel(ch);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [room.code, roundId]);
+
+  // ── Poll round detail (server is the source of truth) ──
+  const refreshDetail = useCallback(async () => {
+    if (!roundId) return;
+    const res = await apiGet<RoundDetail>(`/api/party/pokerface/rounds/${roundId}`);
+    if (!res.ok || !res.data) return;
+    const r = res.data.round;
+    setDetail(r);
+    setPhase(r.phase);
+    if (r.phase === "present") {
+      setNinnyMsg(
+        r.is_presenter
+          ? "Your card is secret. Tell the truth, or invent a convincing lie."
+          : `${r.presenter_username ?? "The presenter"} is studying their card...`,
+      );
+    } else if (r.phase === "vote") {
+      setNinnyMsg(
+        r.is_presenter
+          ? "You've presented. Hold your face. The room is deciding."
+          : "Believe the claim, or call the bluff. Watch their eyes.",
+      );
+    } else if (r.phase === "reveal") {
+      setNinnyMsg(r.reveal?.is_lie ? "It was a LIE." : "It was the TRUTH.");
+    }
+  }, [roundId]);
+
+  useEffect(() => {
+    if (!roundId) return;
+    void refreshDetail();
+    const iv = setInterval(refreshDetail, 1500);
+    return () => clearInterval(iv);
+  }, [roundId, refreshDetail]);
+
+  // ── Vote-phase timer + auto-complete (host) ──
+  useEffect(() => {
+    if (!detail || detail.phase !== "vote" || !detail.presented_at) {
+      setTimeLeft(0);
+      return;
+    }
+    const callSeconds = room.settings?.pf_vote_seconds ?? DEFAULT_CALL_SECONDS;
+    const targetMs = new Date(detail.presented_at).getTime() + callSeconds * 1000;
+    const rid = detail.id;
+    function tick() {
+      const remain = Math.max(0, Math.ceil((targetMs - Date.now()) / 1000));
+      setTimeLeft(remain);
+      if (remain === 0 && isHost && !advanceLock.current) {
+        advanceLock.current = true;
+        void apiPost(`/api/party/pokerface/rounds/${rid}/complete`, {}).then(() => {
+          advanceLock.current = false;
+          void refreshDetail();
+          void supabase.channel(pokerFaceChannel(room.code)).send({
+            type: "broadcast",
+            event: POKERFACE_EVENTS.PHASE_CHANGED,
+            payload: { round_id: rid },
+          });
+        });
+      }
+    }
+    tick();
+    const iv = setInterval(tick, 500);
+    return () => clearInterval(iv);
+  }, [detail, isHost, room.code, room.settings?.pf_vote_seconds, refreshDetail]);
+
+  // ── Presenter: commit truth or lie ──
+  async function present(isLie: boolean) {
+    if (!roundId || submitting) return;
+    if (isLie && !lieText.trim()) {
+      setError("Write the lie you want to present.");
+      return;
+    }
+    setSubmitting(true);
+    setError(null);
+    const res = await apiPost(`/api/party/pokerface/rounds/${roundId}/present`, {
+      isLie,
+      claimText: isLie ? lieText.trim() : undefined,
+    });
+    setSubmitting(false);
+    if (!res.ok) {
+      setError(res.error ?? "Couldn't present the hand.");
+      return;
+    }
+    void refreshDetail();
+    void supabase.channel(pokerFaceChannel(room.code)).send({
+      type: "broadcast",
+      event: POKERFACE_EVENTS.PRESENTED,
+      payload: { round_id: roundId },
+    });
+  }
+
+  // ── Caller: call believe / doubt ──
+  async function call(c: PokerFaceCall) {
+    if (!roundId) return;
+    const res = await apiPost(`/api/party/pokerface/rounds/${roundId}/call`, { call: c });
+    if (!res.ok) {
+      setError(res.error ?? "Couldn't submit your call.");
+      return;
+    }
+    void refreshDetail();
+    void supabase.channel(pokerFaceChannel(room.code)).send({
+      type: "broadcast",
+      event: POKERFACE_EVENTS.CALL_SUBMITTED,
+      payload: { round_id: roundId },
+    });
+  }
+
+  // ── Host can force the reveal once everyone has called ──
+  async function revealNow() {
+    if (!roundId || !isHost) return;
+    const res = await apiPost(`/api/party/pokerface/rounds/${roundId}/complete`, {});
+    if (!res.ok) {
+      setError(res.error ?? "Couldn't reveal the round.");
+      return;
+    }
+    void refreshDetail();
+    void supabase.channel(pokerFaceChannel(room.code)).send({
+      type: "broadcast",
+      event: POKERFACE_EVENTS.PHASE_CHANGED,
+      payload: { round_id: roundId },
+    });
+  }
+
+  const playersForBoard = useMemo(
+    () => players.map((p) => ({ user_id: p.user_id, username: p.username, score: p.score })),
+    [players],
+  );
+
+  if (phase === "loading" || !detail) {
+    return (
+      <div className="flex flex-col items-center py-16 gap-4">
+        <p className="font-bebas text-2xl text-cream/60 tracking-wider">DEALING THE CARD...</p>
+        <div
+          className="w-12 h-12 rounded-full border-2 animate-spin"
+          style={{ borderColor: `${ACCENT}40`, borderTopColor: ACCENT }}
+        />
+      </div>
+    );
+  }
+
+  const round = detail;
+  const isPresenter = round.is_presenter;
+  const callsIn = round.call_count ?? 0;
+  const callerCount = round.caller_count ?? Math.max(0, players.length - 1);
+  const everyoneCalled = callerCount > 0 && callsIn >= callerCount;
+
+  return (
+    <div className="space-y-4">
+      <NinnyHostBubble message={ninnyMsg} />
+
+      {/* Best-played banner — the face is the tell. */}
+      <div
+        className="rounded-xl px-4 py-2.5 flex items-center gap-2.5"
+        style={{
+          background: `linear-gradient(135deg, ${ACCENT}14 0%, rgba(168,85,247,0.06) 100%)`,
+          border: `1px solid ${ACCENT}33`,
+        }}
+      >
+        <span className="text-lg" aria-hidden="true">👀</span>
+        <p className="text-cream/70 text-xs sm:text-sm font-syne leading-snug">
+          Best face to face. Gather your crew. The face is the tell.
+        </p>
+      </div>
+
+      {/* Card header — the WORD everyone can see + presenter + round/phase */}
+      <div
+        className="rounded-2xl p-5"
+        style={{
+          background: `linear-gradient(135deg, ${ACCENT}1f 0%, rgba(168,85,247,0.06) 100%)`,
+          border: `1px solid ${ACCENT}59`,
+          boxShadow: `0 0 24px ${ACCENT}1a`,
+        }}
+      >
+        <p className="font-bebas text-xs text-cream/50 tracking-[0.25em] mb-1">THE CARD</p>
+        <p className="font-bebas text-3xl sm:text-4xl tracking-wider" style={{ color: ACCENT, textShadow: `0 0 18px ${ACCENT}55` }}>
+          {round.card_word.toUpperCase()}
+        </p>
+        <div className="mt-3 flex items-center justify-between">
+          <span className="font-bebas text-[10px] tracking-[0.3em] text-cream/40">
+            ROUND {round.round_num} · {phase.toUpperCase()} · {isPresenter ? "YOU PRESENT" : `${round.presenter_username ?? "PRESENTER"} PRESENTS`}
+          </span>
+          {phase === "vote" && (
+            <span className={`font-bebas text-2xl ${timeLeft <= 5 ? "text-red-400" : "text-cream/80"}`}>
+              {timeLeft}s
+            </span>
+          )}
+        </div>
+      </div>
+
+      <AnimatePresence mode="wait">
+        {/* ── PRESENT PHASE ── */}
+        {phase === "present" && (
+          <motion.div
+            key="present"
+            initial={reduced ? false : { opacity: 0, rotateY: -12, y: 8 }}
+            animate={{ opacity: 1, rotateY: 0, y: 0 }}
+            exit={reduced ? { opacity: 0 } : { opacity: 0, y: -8 }}
+            transition={{ duration: reduced ? 0 : 0.4, ease: [0.16, 1, 0.3, 1] }}
+            className="space-y-3"
+          >
+            {isPresenter ? (
+              <>
+                <div
+                  className="rounded-2xl p-5"
+                  style={{
+                    background: "linear-gradient(135deg, rgba(16,12,26,0.85) 0%, rgba(8,6,16,0.85) 100%)",
+                    border: "1px solid rgba(255,255,255,0.1)",
+                  }}
+                >
+                  <p className="font-bebas text-xs text-cream/45 tracking-[0.25em] mb-1">YOUR SECRET FACT</p>
+                  <p className="font-syne text-base sm:text-lg text-cream/95 leading-relaxed">
+                    {round.card_fact}
+                  </p>
+                  <p className="text-cream/40 text-xs font-syne mt-3 italic">
+                    Present this truth, or write a lie and sell it with a straight face.
+                  </p>
+                </div>
+
+                <input
+                  type="text"
+                  value={lieText}
+                  onChange={(e) => setLieText(e.target.value)}
+                  placeholder="Optional: write your lie about this card..."
+                  maxLength={280}
+                  className="w-full rounded-xl px-4 py-3.5 text-base font-syne text-cream outline-none"
+                  style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)" }}
+                />
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <button
+                    onClick={() => present(false)}
+                    disabled={submitting}
+                    className="py-3.5 rounded-xl font-bebas text-base tracking-wider transition-all active:scale-95 disabled:opacity-40"
+                    style={{
+                      background: "linear-gradient(135deg, rgba(34,197,94,0.9) 0%, rgba(22,163,74,0.8) 100%)",
+                      color: "#04140a",
+                      boxShadow: "0 4px 18px rgba(34,197,94,0.3)",
+                    }}
+                  >
+                    PRESENT THE TRUTH
+                  </button>
+                  <button
+                    onClick={() => present(true)}
+                    disabled={submitting || !lieText.trim()}
+                    className="py-3.5 rounded-xl font-bebas text-base tracking-wider transition-all active:scale-95 disabled:opacity-40"
+                    style={{
+                      background: `linear-gradient(135deg, ${ACCENT} 0%, #0090d0 100%)`,
+                      color: "#04080F",
+                      boxShadow: `0 4px 18px ${ACCENT}4d`,
+                    }}
+                  >
+                    PRESENT THE LIE
+                  </button>
+                </div>
+                <p className="text-cream/40 text-xs font-syne text-center">
+                  To bluff, write your lie above, then tap Present the Lie.
+                </p>
+              </>
+            ) : (
+              <div className="flex flex-col items-center py-10 gap-3">
+                <p className="font-bebas text-xl text-cream/55 tracking-wider text-center">
+                  {round.presenter_username ?? "THE PRESENTER"} IS DECIDING...
+                </p>
+                <div
+                  className="w-10 h-10 rounded-full border-2 animate-spin"
+                  style={{ borderColor: `${ACCENT}33`, borderTopColor: ACCENT }}
+                />
+                <p className="text-cream/40 text-xs font-syne text-center max-w-xs">
+                  Watch their face. Truth or lie, you'll have to call it.
+                </p>
+              </div>
+            )}
+          </motion.div>
+        )}
+
+        {/* ── VOTE PHASE ── */}
+        {phase === "vote" && (
+          <motion.div
+            key="vote"
+            initial={reduced ? false : { opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={reduced ? { opacity: 0 } : { opacity: 0, y: -8 }}
+            className="space-y-3"
+          >
+            <div
+              className="rounded-2xl p-5"
+              style={{
+                background: "linear-gradient(135deg, rgba(16,12,26,0.85) 0%, rgba(8,6,16,0.85) 100%)",
+                border: "1px solid rgba(255,255,255,0.1)",
+              }}
+            >
+              <p className="font-bebas text-xs text-cream/45 tracking-[0.25em] mb-1">THE CLAIM</p>
+              <p className="font-syne text-base sm:text-lg text-cream/95 leading-relaxed">
+                &ldquo;{round.claim_text}&rdquo;
+              </p>
+            </div>
+
+            {isPresenter ? (
+              <div
+                className="rounded-xl px-4 py-4 text-center"
+                style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)" }}
+              >
+                <p className="font-bebas text-lg text-cream/70 tracking-wider">HOLD YOUR FACE</p>
+                <p className="text-cream/45 text-xs font-syne mt-1">
+                  {callsIn} of {callerCount} have called.
+                </p>
+              </div>
+            ) : (
+              <>
+                <p className="font-bebas text-sm text-cream/60 tracking-[0.25em] text-center">DO YOU BELIEVE IT?</p>
+                <div className="grid grid-cols-2 gap-3">
+                  {(["believe", "doubt"] as const).map((c) => {
+                    const mine = round.my_call === c;
+                    const isBelieve = c === "believe";
+                    const col = isBelieve ? "#22C55E" : "#EF4444";
+                    return (
+                      <button
+                        key={c}
+                        onClick={() => call(c)}
+                        className="py-5 rounded-xl font-bebas text-xl tracking-wider transition-all active:scale-95"
+                        style={{
+                          background: mine
+                            ? `linear-gradient(135deg, ${col}cc 0%, ${col}99 100%)`
+                            : "rgba(255,255,255,0.04)",
+                          border: mine ? `1px solid ${col}` : "1px solid rgba(255,255,255,0.1)",
+                          color: mine ? "#04080F" : "rgba(238,244,255,0.85)",
+                          boxShadow: mine ? `0 4px 18px ${col}40` : "none",
+                        }}
+                      >
+                        {isBelieve ? "BELIEVE" : "DOUBT"}
+                        {mine && <span className="block text-[10px] tracking-[0.2em] mt-0.5">YOUR CALL</span>}
+                      </button>
+                    );
+                  })}
+                </div>
+                <p className="text-cream/40 text-xs font-syne text-center">
+                  {round.my_call ? "Locked in. You can change it until the reveal." : "Tap to call. Trust the face, not the words."}
+                </p>
+              </>
+            )}
+
+            {isHost && everyoneCalled && (
+              <button
+                onClick={revealNow}
+                className="w-full py-3 rounded-xl font-bebas tracking-wider text-base transition-all active:scale-95"
+                style={{
+                  background: `linear-gradient(135deg, ${ACCENT} 0%, #0090d0 100%)`,
+                  color: "#04080F",
+                  boxShadow: `0 4px 18px ${ACCENT}4d`,
+                }}
+              >
+                REVEAL NOW
+              </button>
+            )}
+          </motion.div>
+        )}
+
+        {/* ── REVEAL PHASE ── */}
+        {phase === "reveal" && round.reveal && (
+          <motion.div
+            key="reveal"
+            initial={reduced ? false : { opacity: 0, rotateX: -14, y: 10 }}
+            animate={{ opacity: 1, rotateX: 0, y: 0 }}
+            exit={reduced ? { opacity: 0 } : { opacity: 0, y: -8 }}
+            transition={{ duration: reduced ? 0 : 0.45, ease: [0.16, 1, 0.3, 1] }}
+            className="space-y-4"
+          >
+            <div
+              className="rounded-2xl p-5 text-center"
+              style={{
+                background: round.reveal.is_lie
+                  ? "linear-gradient(135deg, rgba(239,68,68,0.22) 0%, rgba(168,85,247,0.08) 100%)"
+                  : "linear-gradient(135deg, rgba(34,197,94,0.2) 0%, rgba(0,191,255,0.08) 100%)",
+                border: round.reveal.is_lie ? "1px solid rgba(239,68,68,0.5)" : "1px solid rgba(34,197,94,0.45)",
+              }}
+            >
+              <p className="font-bebas text-xs tracking-[0.3em] text-cream/55 mb-1">
+                {round.reveal.is_lie ? "THAT WAS A LIE" : "THAT WAS THE TRUTH"}
+              </p>
+              <p
+                className="font-bebas text-2xl tracking-wider"
+                style={{ color: round.reveal.is_lie ? "#FCA5A5" : "#86EFAC" }}
+              >
+                {round.reveal.is_lie ? "🃏 BLUFFED" : "✓ HONEST"}
+              </p>
+              {round.reveal.is_lie && (
+                <p className="text-cream/60 text-sm font-syne mt-3">
+                  The real fact: <span className="text-cream/90">{round.reveal.card_fact}</span>
+                </p>
+              )}
+            </div>
+
+            {/* Who called what */}
+            <div className="space-y-2">
+              {round.reveal.calls.map((c) => (
+                <div
+                  key={c.user_id}
+                  className="rounded-xl px-4 py-3 flex items-center justify-between"
+                  style={{
+                    background: c.correct
+                      ? "linear-gradient(135deg, rgba(34,197,94,0.14) 0%, rgba(34,197,94,0.04) 100%)"
+                      : "rgba(255,255,255,0.03)",
+                    border: c.correct ? "1px solid rgba(34,197,94,0.4)" : "1px solid rgba(255,255,255,0.08)",
+                  }}
+                >
+                  <p className="font-syne text-sm text-cream/90">
+                    {c.username ?? "Player"}
+                    {c.user_id === meUserId && <span className="text-cream/40 text-xs"> (you)</span>}
+                  </p>
+                  <span className="font-bebas text-sm tracking-wider" style={{ color: c.correct ? "#86EFAC" : "rgba(238,244,255,0.45)" }}>
+                    {c.call.toUpperCase()} · {c.correct ? "RIGHT" : "FOOLED"}
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            <PartyScoreboard players={playersForBoard} highlightUserId={meUserId} />
+
+            {isHost && (
+              <div className="flex flex-col sm:flex-row gap-3">
+                <button
+                  onClick={startRound}
+                  className="flex-1 py-3 rounded-xl font-bebas tracking-wider text-base transition-all active:scale-95"
+                  style={{
+                    background: `linear-gradient(135deg, ${ACCENT} 0%, #0090d0 100%)`,
+                    color: "#04080F",
+                    boxShadow: `0 4px 18px ${ACCENT}4d`,
+                  }}
+                >
+                  NEXT ROUND
+                </button>
+                <button
+                  onClick={onReturnToLobby}
+                  className="flex-1 py-3 rounded-xl font-bebas tracking-wider text-base transition-all active:scale-95"
+                  style={{
+                    background: "rgba(255,255,255,0.04)",
+                    border: "1px solid rgba(255,255,255,0.1)",
+                    color: "rgba(238,244,255,0.85)",
+                  }}
+                >
+                  BACK TO LOBBY
+                </button>
+              </div>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {error && (
+        <p className="text-red-400 text-sm font-syne text-center" role="alert">
+          {error}
+        </p>
+      )}
+
+      {phase !== "reveal" && (
+        <PartyScoreboard players={playersForBoard} highlightUserId={meUserId} compact />
+      )}
+    </div>
+  );
+}

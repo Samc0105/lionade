@@ -1,11 +1,14 @@
-// Competitive platform — shared types across all 5 modes and both formats.
+// Competitive platform — shared types across all 4 modes and both formats.
+//
+// Poker Face was MOVED to Lionade Party (Arcade) on 2026-05-28 as a no-ELO,
+// no-Fang social party game; the competitive arena is now 4 modes. See
+// project_competitive_modes.md + project_lionade_party.md.
 
 export type CompetitiveMode =
   | "sabotage"
   | "zoom"
   | "spectrum"
-  | "pin"
-  | "pokerface";
+  | "pin";
 
 export type CompetitiveFormat = "1v1" | "2v2";
 
@@ -18,7 +21,6 @@ export const COMPETITIVE_MODES: CompetitiveMode[] = [
   "zoom",
   "spectrum",
   "pin",
-  "pokerface",
 ];
 
 export function isCompetitiveMode(v: unknown): v is CompetitiveMode {

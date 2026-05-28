@@ -25,7 +25,6 @@ import SabotageScreen from "@/components/competitive/sabotage/SabotageScreen";
 import ZoomScreen from "@/components/competitive/zoom/ZoomScreen";
 import SpectrumScreen from "@/components/competitive/spectrum/SpectrumScreen";
 import PinScreen from "@/components/competitive/pin/PinScreen";
-import PokerFaceScreen from "@/components/competitive/pokerface/PokerFaceScreen";
 
 export interface MatchPlayer {
   id: string;
@@ -49,7 +48,6 @@ const MODE_THEME: Record<CompetitiveMode, { accent: string; label: string }> = {
   zoom: { accent: "#00BFFF", label: "Zoom Reveal" },
   spectrum: { accent: "#A855F7", label: "Spectrum Slider" },
   pin: { accent: "#50C878", label: "Map Pin Drop" },
-  pokerface: { accent: "#FFD700", label: "Poker Face" },
 };
 
 export default function CompetitiveMatchPage() {
@@ -104,7 +102,6 @@ export default function CompetitiveMatchPage() {
             {mode === "zoom" && <ZoomScreen loaded={loaded} selfId={user.id} />}
             {mode === "spectrum" && <SpectrumScreen loaded={loaded} selfId={user.id} />}
             {mode === "pin" && <PinScreen loaded={loaded} selfId={user.id} />}
-            {mode === "pokerface" && <PokerFaceScreen loaded={loaded} selfId={user.id} />}
           </>
         )}
       </Shell>

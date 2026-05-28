@@ -12,19 +12,62 @@ import type { PartyPlayer, PartyRoom } from "@/lib/party/types";
 
 const MAX_PLAYERS = 6;
 
+type PartyGame = "sketch" | "bluff" | "pokerface";
+
 interface Props {
   room: PartyRoom;
   players: PartyPlayer[];
   isHost: boolean;
   meUserId: string;
-  onGameStarted: (game: "sketch" | "bluff") => void;
+  onGameStarted: (game: PartyGame) => void;
 }
 
 const MAX_TOPIC_PICKS = 2;
 
+// Per-game lobby metadata. `bestPlayed` is the small "ideal context" glass chip
+// Sam asked for: Sketchy = Either, Bluff = Remote OK, Poker Face = Best in person
+// (the face IS the tell, so it shines when the room is physically together).
+const GAME_META: Record<PartyGame, {
+  title: string;
+  short: string;
+  tagline: string;
+  accent: string;
+  players: string;
+  minPlayers: number;
+  bestPlayed: string;
+}> = {
+  sketch: {
+    title: "Sketchy Subjects",
+    short: "SKETCHY SUBJECTS",
+    tagline: "Draw subject-locked words. Others guess in chat.",
+    accent: "#A855F7",
+    players: "2 to 6 players",
+    minPlayers: 2,
+    bestPlayed: "Either",
+  },
+  bluff: {
+    title: "Bluff Trivia",
+    short: "BLUFF TRIVIA",
+    tagline: "Write fake trivia answers. Trick your friends.",
+    accent: "#FFD700",
+    players: "3 to 6 players",
+    minPlayers: 3,
+    bestPlayed: "Remote OK",
+  },
+  pokerface: {
+    title: "Poker Face",
+    short: "POKER FACE",
+    tagline: "Hold a secret fact. Present truth or a bluff. The room calls it.",
+    accent: "#00BFFF",
+    players: "3 to 6 players",
+    minPlayers: 3,
+    bestPlayed: "Best in person",
+  },
+};
+
 export default function RoomLobby({ room, players, isHost, meUserId, onGameStarted }: Props) {
   const reduced = useReducedMotion();
-  const [selectedGame, setSelectedGame] = useState<"sketch" | "bluff">("sketch");
+  const [selectedGame, setSelectedGame] = useState<PartyGame>("sketch");
   const [starting, setStarting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -74,7 +117,7 @@ export default function RoomLobby({ room, players, isHost, meUserId, onGameStart
   });
   const allReady = optimisticPlayers.length > 0 && optimisticPlayers.every((p) => p.is_ready);
   const readyCount = optimisticPlayers.filter((p) => p.is_ready).length;
-  const minPlayers = selectedGame === "sketch" ? 2 : 3;
+  const minPlayers = GAME_META[selectedGame].minPlayers;
   const enoughPlayers = players.length >= minPlayers;
 
   // Vote counts per subject across the room (for the "voted by N" aggregate).
@@ -121,11 +164,8 @@ export default function RoomLobby({ room, players, isHost, meUserId, onGameStart
   async function startGame() {
     if (!isHost) return;
     if (!enoughPlayers) {
-      setError(
-        selectedGame === "sketch"
-          ? "Sketchy Subjects needs at least 2 players."
-          : "Bluff Trivia needs at least 3 players.",
-      );
+      const meta = GAME_META[selectedGame];
+      setError(`${meta.title} needs at least ${meta.minPlayers} players.`);
       return;
     }
     if (!allReady) {
@@ -253,15 +293,11 @@ export default function RoomLobby({ room, players, isHost, meUserId, onGameStart
       {/* Game select */}
       <div>
         <p className="font-bebas text-sm text-cream/60 tracking-[0.25em] mb-3">PICK A GAME</p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {(["sketch", "bluff"] as const).map((g) => {
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          {(["sketch", "bluff", "pokerface"] as const).map((g) => {
+            const meta = GAME_META[g];
             const selected = selectedGame === g;
-            const title = g === "sketch" ? "Sketchy Subjects" : "Bluff Trivia";
-            const tagline =
-              g === "sketch"
-                ? "Draw subject-locked words. Others guess in chat."
-                : "Write fake trivia answers. Trick your friends.";
-            const accent = g === "sketch" ? "#A855F7" : "#FFD700";
+            const accent = meta.accent;
             return (
               <motion.button
                 key={g}
@@ -279,20 +315,31 @@ export default function RoomLobby({ room, players, isHost, meUserId, onGameStart
                   opacity: isHost ? 1 : 0.85,
                 }}
               >
+                {/* Best-played context chip — small tasteful glass pill */}
+                <span
+                  className="absolute top-3 right-3 text-[9px] font-bebas uppercase tracking-[0.16em] px-2 py-0.5 rounded-full
+                    text-cream/70 bg-white/[0.05] border border-white/10 backdrop-blur-md"
+                >
+                  {meta.bestPlayed}
+                </span>
                 <p
-                  className="font-bebas text-2xl tracking-wider mb-1"
+                  className="font-bebas text-2xl tracking-wider mb-1 pr-20"
                   style={{ color: accent, textShadow: `0 0 18px ${accent}55` }}
                 >
-                  {title.toUpperCase()}
+                  {meta.title.toUpperCase()}
                 </p>
-                <p className="text-cream/55 text-sm font-syne leading-relaxed">{tagline}</p>
-                <p className="text-cream/35 text-xs font-syne mt-3">
-                  {g === "sketch" ? "2 to 6 players" : "3 to 6 players"}
-                </p>
+                <p className="text-cream/55 text-sm font-syne leading-relaxed">{meta.tagline}</p>
+                <p className="text-cream/35 text-xs font-syne mt-3">{meta.players}</p>
               </motion.button>
             );
           })}
         </div>
+        {/* Best-played footnote — only Poker Face carries the "gather your crew" nudge */}
+        {selectedGame === "pokerface" && (
+          <p className="text-cream/45 text-xs font-syne mt-3 text-center">
+            Best face to face. Gather your crew, share the room code, and read the tells in the room.
+          </p>
+        )}
         {!isHost && (
           <p className="text-cream/40 text-xs font-syne mt-3 italic text-center">
             Only the host can pick the game.
@@ -367,18 +414,12 @@ export default function RoomLobby({ room, players, isHost, meUserId, onGameStart
             disabled={starting || !enoughPlayers || !allReady}
             className="w-full py-4 rounded-xl font-bebas text-xl tracking-wider transition-all active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed"
             style={{
-              background:
-                selectedGame === "sketch"
-                  ? "linear-gradient(135deg, #A855F7 0%, #6366F1 100%)"
-                  : "linear-gradient(135deg, #FFD700 0%, #B8960C 100%)",
+              background: `linear-gradient(135deg, ${GAME_META[selectedGame].accent} 0%, ${GAME_META[selectedGame].accent}99 100%)`,
               color: selectedGame === "sketch" ? "#fff" : "#04080F",
-              boxShadow:
-                selectedGame === "sketch"
-                  ? "0 4px 20px rgba(168,85,247,0.3)"
-                  : "0 4px 20px rgba(255,215,0,0.3)",
+              boxShadow: `0 4px 20px ${GAME_META[selectedGame].accent}4d`,
             }}
           >
-            {starting ? "STARTING..." : `START ${selectedGame === "sketch" ? "SKETCHY SUBJECTS" : "BLUFF TRIVIA"}`}
+            {starting ? "STARTING..." : `START ${GAME_META[selectedGame].short}`}
           </button>
           {!enoughPlayers && (
             <p className="text-cream/40 text-xs font-syne text-center italic">

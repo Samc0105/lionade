@@ -1,6 +1,6 @@
 // POST /api/party/rooms/[code]/start — host kicks off a game in the room.
 //
-// Body: { game: "sketch" | "bluff" }
+// Body: { game: "sketch" | "bluff" | "pokerface" }
 //
 // Behavior:
 //   - Verify the caller is the host and the room is in lobby status.
@@ -14,7 +14,7 @@ import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
 import { isValidRoomCode, normalizeRoomCode } from "@/lib/party/room-code";
 
-const VALID_GAMES = new Set(["sketch", "bluff"]);
+const VALID_GAMES = new Set(["sketch", "bluff", "pokerface"]);
 
 export async function POST(
   req: NextRequest,
@@ -59,6 +59,11 @@ export async function POST(
   }
   if (game === "bluff" && playerCount < 3) {
     return NextResponse.json({ error: "Bluff Trivia needs at least 3 players" }, { status: 400 });
+  }
+  // Poker Face needs at least 3 (one presenter + two callers) so a bluff has a
+  // room to fool; caps at 8 like the rest of the suite.
+  if (game === "pokerface" && playerCount < 3) {
+    return NextResponse.json({ error: "Poker Face needs at least 3 players" }, { status: 400 });
   }
 
   // Every active player must be ready (host included).

@@ -16,6 +16,10 @@ export function bluffChannel(code: string): string {
   return `party-room-${code}-bluff`;
 }
 
+export function pokerFaceChannel(code: string): string {
+  return `party-room-${code}-pokerface`;
+}
+
 // ── Event name constants ──
 // Keep these centralized so the client and server send/listen for the same
 // strings. Realtime broadcast events are case-sensitive.
@@ -43,4 +47,12 @@ export const BLUFF_EVENTS = {
   ANSWER_SUBMITTED: "answer_submitted",
   VOTE_SUBMITTED: "vote_submitted",
   ROUND_ENDED: "round_ended",
+} as const;
+
+export const POKERFACE_EVENTS = {
+  ROUND_STARTED: "round_started",   // a fresh round was dealt (new presenter)
+  PRESENTED: "presented",           // presenter committed truth/lie + claim
+  PHASE_CHANGED: "phase_changed",   // present -> vote -> reveal
+  CALL_SUBMITTED: "call_submitted", // a caller called believe/doubt
+  ROUND_ENDED: "round_ended",       // reveal + score
 } as const;

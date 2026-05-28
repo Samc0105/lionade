@@ -10,8 +10,8 @@
 // 2v2: per-player payout is ~2/3 of the 1v1 figure (so a duo's combined haul is
 // ~4/3 of a solo win, not double — keeps squad farming from out-earning solo).
 //
-// Poker Face is special: the prize is the zero-sum staked pot (handled in the
-// hand-settlement, NOT here), plus a flat +5/+5 participation from this table.
+// (Poker Face was moved to Lionade Party as a no-Fang party game on 2026-05-28,
+// so there is no longer a staked-pot mode in this table.)
 
 import type { CompetitiveMode, CompetitiveFormat } from "./types";
 
@@ -32,9 +32,6 @@ const PAYOUTS: Record<CompetitiveMode, ModePayout> = {
   zoom: { win: 25, loss: -25, partWin: 8, partLoss: 4 },
   spectrum: { win: 20, loss: -20, partWin: 8, partLoss: 4 },
   pin: { win: 20, loss: -20, partWin: 8, partLoss: 4 },
-  // Poker Face: the staked pot is settled per-hand; this table only carries the
-  // flat participation. Win/loss transfer is 0 here so we don't double-count.
-  pokerface: { win: 0, loss: 0, partWin: 5, partLoss: 5 },
 };
 
 /** Scale per-player payout for the format. 2v2 = ~2/3 of 1v1. */
@@ -54,7 +51,6 @@ export interface PayoutResult {
 /**
  * Resolve the per-player Fang deltas for a mode + format.
  *
- * For non-Poker-Face modes:
  *   winner gets +(win + partWin); loser gets (loss + partLoss) i.e. -25+4 = -21.
  *   draw: both get the smaller participation (partLoss) since nobody won.
  *
@@ -72,9 +68,4 @@ export function resolvePayout(args: {
     loserDelta: Math.round((base.loss + base.partLoss) * scale),
     drawDelta: Math.round(base.partLoss * scale),
   };
-}
-
-/** The flat participation a Poker Face player always receives (on top of pot). */
-export function pokerFaceParticipation(format: CompetitiveFormat): number {
-  return Math.round(PAYOUTS.pokerface.partWin * formatScale(format));
 }
