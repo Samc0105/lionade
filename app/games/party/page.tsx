@@ -1,0 +1,254 @@
+"use client";
+
+// /games/party — Lionade Party landing page.
+//
+// Two big CTAs (Create Room / Join Room) + a "How to play" expandable.
+// On create or successful join, we router.push to /games/party/[code].
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import ProtectedRoute from "@/components/ProtectedRoute";
+import BackButton from "@/components/BackButton";
+import { apiPost } from "@/lib/api-client";
+import { normalizeRoomCode, isValidRoomCode } from "@/lib/party/room-code";
+import { PaintBrush, ChatCircleText, Sparkle, Users, ChartLineUp } from "@phosphor-icons/react";
+
+export default function PartyLandingPage() {
+  const router = useRouter();
+  const reduced = useReducedMotion();
+
+  const [busy, setBusy] = useState<"none" | "creating" | "joining">("none");
+  const [joinCode, setJoinCode] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [howOpen, setHowOpen] = useState(false);
+
+  async function createRoom() {
+    setBusy("creating");
+    setError(null);
+    const res = await apiPost<{ code: string }>("/api/party/rooms", {});
+    setBusy("none");
+    if (!res.ok || !res.data?.code) {
+      setError(res.error ?? "Couldn't create a room.");
+      return;
+    }
+    router.push(`/games/party/${res.data.code}`);
+  }
+
+  async function joinRoom(e: React.FormEvent) {
+    e.preventDefault();
+    const code = normalizeRoomCode(joinCode);
+    if (!isValidRoomCode(code)) {
+      setError("Room code must be 6 letters and numbers.");
+      return;
+    }
+    setBusy("joining");
+    setError(null);
+    const res = await apiPost<{ ok: boolean }>(`/api/party/rooms/${code}/join`, {});
+    setBusy("none");
+    if (!res.ok) {
+      setError(res.error ?? "That room isn't open right now.");
+      return;
+    }
+    router.push(`/games/party/${code}`);
+  }
+
+  return (
+    <ProtectedRoute>
+      <div
+        data-force-dark
+        className="relative min-h-screen pt-16 pb-20 md:pb-8 overflow-hidden"
+        style={{ isolation: "isolate" }}
+      >
+        {/* Atmospheric glows — purple primary, gold accent */}
+        <div
+          className="absolute top-[10%] left-[10%] w-[600px] h-[600px] rounded-full pointer-events-none opacity-[0.05]"
+          style={{ background: "radial-gradient(circle, #A855F7 0%, transparent 70%)" }}
+        />
+        <div
+          className="absolute top-[40%] right-[8%] w-[500px] h-[500px] rounded-full pointer-events-none opacity-[0.04]"
+          style={{ background: "radial-gradient(circle, #FFD700 0%, transparent 70%)" }}
+        />
+        <div
+          className="absolute bottom-[10%] left-[40%] w-[450px] h-[450px] rounded-full pointer-events-none opacity-[0.03]"
+          style={{ background: "radial-gradient(circle, #3B82F6 0%, transparent 70%)" }}
+        />
+
+        <div className="relative z-10 max-w-3xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+          <BackButton />
+
+          {/* Hero */}
+          <div className="text-center mb-10">
+            <div
+              className="inline-flex items-center gap-2 mb-4 px-3 py-1 rounded-full text-[11px] font-bebas tracking-[0.2em]"
+              style={{
+                background: "linear-gradient(135deg, rgba(168,85,247,0.18) 0%, rgba(168,85,247,0.06) 100%)",
+                border: "1px solid rgba(168,85,247,0.4)",
+                color: "#C4B5FD",
+              }}
+            >
+              LIONADE PARTY · V1
+            </div>
+            <h1 className="font-bebas text-6xl sm:text-8xl tracking-wider leading-none mb-3 text-cream">
+              PARTY
+            </h1>
+            <p className="text-cream/55 text-sm sm:text-base max-w-md mx-auto font-syne">
+              Play together. Two games tonight, more coming. Bring 2 to 8 friends and a room code.
+            </p>
+          </div>
+
+          {/* CTA cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-10">
+            {/* Create */}
+            <motion.button
+              onClick={createRoom}
+              disabled={busy !== "none"}
+              whileHover={reduced ? undefined : { y: -3 }}
+              whileTap={reduced ? undefined : { scale: 0.98 }}
+              className="relative rounded-2xl p-6 text-left overflow-hidden transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              style={{
+                background: "linear-gradient(135deg, #A855F7 0%, #6366F1 100%)",
+                boxShadow: "0 8px 32px rgba(168,85,247,0.35)",
+              }}
+            >
+              <p className="font-bebas text-3xl tracking-wider text-white mb-1">
+                CREATE ROOM
+              </p>
+              <p className="text-white/80 text-sm font-syne">
+                {busy === "creating" ? "Generating code..." : "You'll be the host."}
+              </p>
+            </motion.button>
+
+            {/* Join */}
+            <form
+              onSubmit={joinRoom}
+              className="rounded-2xl p-6 flex flex-col gap-3"
+              style={{
+                background: "linear-gradient(135deg, rgba(16,12,26,0.8) 0%, rgba(8,6,16,0.8) 100%)",
+                border: "1px solid rgba(255,215,0,0.35)",
+                boxShadow: "0 8px 32px rgba(255,215,0,0.08)",
+              }}
+            >
+              <div>
+                <p className="font-bebas text-3xl tracking-wider text-[#FFD700] mb-1">
+                  JOIN ROOM
+                </p>
+                <p className="text-cream/55 text-xs font-syne">Enter the 4-digit code.</p>
+              </div>
+              <input
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                value={joinCode}
+                onChange={(e) => setJoinCode(e.target.value.replace(/[^0-9]/g, "").slice(0, 4))}
+                placeholder="1234"
+                maxLength={4}
+                className="rounded-xl px-4 py-3 font-bebas text-2xl tracking-[0.3em] text-cream outline-none text-center"
+                style={{
+                  background: "rgba(255,255,255,0.05)",
+                  border: "1px solid rgba(255,215,0,0.3)",
+                }}
+              />
+              <button
+                type="submit"
+                disabled={busy !== "none" || joinCode.length !== 4}
+                className="py-2.5 rounded-xl font-bebas text-base tracking-wider transition-all active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed"
+                style={{
+                  background: "linear-gradient(135deg, #FFD700 0%, #B8960C 100%)",
+                  color: "#04080F",
+                  boxShadow: "0 4px 18px rgba(255,215,0,0.25)",
+                }}
+              >
+                {busy === "joining" ? "JOINING..." : "JOIN"}
+              </button>
+            </form>
+          </div>
+
+          {error && (
+            <p className="text-red-400 text-sm font-syne text-center mb-6" role="alert">
+              {error}
+            </p>
+          )}
+
+          {/* How to play */}
+          <button
+            onClick={() => setHowOpen((v) => !v)}
+            className="w-full rounded-xl px-4 py-3 flex items-center justify-between font-bebas tracking-wider text-sm transition-colors"
+            style={{
+              background: "rgba(255,255,255,0.03)",
+              border: "1px solid rgba(255,255,255,0.08)",
+              color: "rgba(238,244,255,0.75)",
+            }}
+            aria-expanded={howOpen}
+          >
+            <span>HOW TO PLAY</span>
+            <span className="text-cream/40 text-base">{howOpen ? "−" : "+"}</span>
+          </button>
+
+          <AnimatePresence>
+            {howOpen && (
+              <motion.div
+                initial={reduced ? false : { opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={reduced ? { opacity: 0 } : { opacity: 0, height: 0 }}
+                transition={{ duration: 0.25 }}
+                className="overflow-hidden"
+              >
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
+                  <div
+                    className="rounded-2xl p-5"
+                    style={{
+                      background: "linear-gradient(135deg, rgba(168,85,247,0.12) 0%, rgba(124,58,237,0.05) 100%)",
+                      border: "1px solid rgba(168,85,247,0.3)",
+                    }}
+                  >
+                    <div className="flex items-center gap-2 mb-2">
+                      <PaintBrush size={24} weight="fill" className="text-purple-300" aria-hidden="true" />
+                      <p className="font-bebas text-xl tracking-wider text-[#E9D5FF]">SKETCHY SUBJECTS</p>
+                    </div>
+                    <ul className="space-y-1.5 text-cream/75 text-sm font-syne">
+                      <li>One person draws a subject-locked word.</li>
+                      <li>Everyone else guesses in chat. First correct earns the most.</li>
+                      <li>No fill bucket, no text. Just the canvas.</li>
+                      <li>Subjects: Biology, Chemistry, Physics, Math, History, Geography, Astronomy, Pop Culture.</li>
+                    </ul>
+                  </div>
+                  <div
+                    className="rounded-2xl p-5"
+                    style={{
+                      background: "linear-gradient(135deg, rgba(255,215,0,0.12) 0%, rgba(184,150,12,0.05) 100%)",
+                      border: "1px solid rgba(255,215,0,0.3)",
+                    }}
+                  >
+                    <div className="flex items-center gap-2 mb-2">
+                      <ChatCircleText size={24} weight="fill" className="text-[#FFD700]" aria-hidden="true" />
+                      <p className="font-bebas text-xl tracking-wider text-[#FFD700]">BLUFF TRIVIA</p>
+                    </div>
+                    <ul className="space-y-1.5 text-cream/75 text-sm font-syne">
+                      <li>Everyone writes a fake answer to a trivia question.</li>
+                      <li>Fakes are shuffled with the truth. Vote which is real.</li>
+                      <li>Pick the truth, score big. Trick someone with your fake, score bigger.</li>
+                      <li>3-8 players. 5 to 7 rounds per game.</li>
+                    </ul>
+                  </div>
+                </div>
+                <div className="mt-3 rounded-xl px-4 py-3 flex flex-wrap items-center gap-4 text-cream/60 text-xs font-syne"
+                  style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)" }}>
+                  <span className="flex items-center gap-1.5">
+                    <Users size={16} weight="regular" aria-hidden="true" /> 2 to 8 players
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <Sparkle size={16} weight="regular" aria-hidden="true" /> No Fang stakes in V1
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <ChartLineUp size={16} weight="regular" aria-hidden="true" /> Score-based winner
+                  </span>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </div>
+    </ProtectedRoute>
+  );
+}

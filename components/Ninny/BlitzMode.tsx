@@ -9,13 +9,23 @@ import { Fire } from "@phosphor-icons/react";
 interface Props {
   questions: MCQQuestion[];
   wrongAnswerCounts?: Map<string, number>;
-  onComplete: (result: { score: number; total: number; wrongAnswers: NinnyWrongAnswer[] }) => void;
+  /** Plays used today (passed in so the in-game HUD can show "3/99"). */
+  playsToday?: number;
+  /** Daily cap (passed in alongside playsToday). */
+  playsLimit?: number;
+  onComplete: (result: {
+    score: number;
+    total: number;
+    wrongAnswers: NinnyWrongAnswer[];
+    longestStreak: number;
+  }) => void;
 }
 
 const BLITZ_DURATION_SEC = 60;
 const NINNY_PURPLE = "#A855F7";
+const RECENT_WINDOW = 5;
 
-export default function BlitzMode({ questions, wrongAnswerCounts, onComplete }: Props) {
+export default function BlitzMode({ questions, wrongAnswerCounts, playsToday, playsLimit, onComplete }: Props) {
   // Spaced-repetition shuffle, looped infinitely (deck can repeat in 60s)
   const deck = useMemo(() => {
     if (wrongAnswerCounts && wrongAnswerCounts.size > 0) {
@@ -29,8 +39,12 @@ export default function BlitzMode({ questions, wrongAnswerCounts, onComplete }: 
   const [streak, setStreak] = useState(0);
   const [wrongAnswers, setWrongAnswers] = useState<NinnyWrongAnswer[]>([]);
   const [feedback, setFeedback] = useState<"correct" | "wrong" | null>(null);
+  // Rolling window of the last RECENT_WINDOW answers, true = correct.
+  // Renders below the options to give a quick "how's the run going" cue.
+  const [recent, setRecent] = useState<boolean[]>([]);
   const completedRef = useRef(false);
   const finalCountRef = useRef(0); // total questions actually shown
+  const longestStreakRef = useRef(0); // peak streak across the run
 
   const current = deck[pos % deck.length];
 
@@ -49,6 +63,7 @@ export default function BlitzMode({ questions, wrongAnswerCounts, onComplete }: 
                 score,
                 total: Math.max(1, finalCountRef.current),
                 wrongAnswers,
+                longestStreak: longestStreakRef.current,
               });
             }, 0);
           }
@@ -68,7 +83,11 @@ export default function BlitzMode({ questions, wrongAnswerCounts, onComplete }: 
       const isCorrect = selectedIdx === current.correctIndex;
       if (isCorrect) {
         setScore((s) => s + 1);
-        setStreak((s) => s + 1);
+        setStreak((s) => {
+          const next = s + 1;
+          if (next > longestStreakRef.current) longestStreakRef.current = next;
+          return next;
+        });
         setFeedback("correct");
       } else {
         setStreak(0);
@@ -83,6 +102,10 @@ export default function BlitzMode({ questions, wrongAnswerCounts, onComplete }: 
           },
         ]);
       }
+      setRecent((r) => {
+        const next = [...r, isCorrect];
+        return next.length > RECENT_WINDOW ? next.slice(-RECENT_WINDOW) : next;
+      });
       // Brief flash, then advance
       setTimeout(() => {
         setFeedback(null);
@@ -213,6 +236,43 @@ export default function BlitzMode({ questions, wrongAnswerCounts, onComplete }: 
             {opt}
           </button>
         ))}
+      </div>
+
+      {/* Run footer: recent-5 strip + plays-today */}
+      <div className="mt-5 flex items-center justify-between gap-4 px-1">
+        <div className="flex items-center gap-2">
+          <p className="font-bebas text-[10px] tracking-widest uppercase text-cream/30">
+            Recent
+          </p>
+          <div className="flex items-center gap-1.5" aria-label="Last five answers">
+            {Array.from({ length: RECENT_WINDOW }).map((_, i) => {
+              const slot = recent[recent.length - RECENT_WINDOW + i];
+              const filled = slot !== undefined;
+              const color = !filled
+                ? "rgba(255,255,255,0.10)"
+                : slot
+                ? "#FFD700"
+                : "#EF4444";
+              return (
+                <span
+                  key={i}
+                  className="block w-2 h-2 rounded-full"
+                  style={{
+                    background: color,
+                    boxShadow: filled && slot ? "0 0 6px rgba(255,215,0,0.45)" : undefined,
+                  }}
+                  aria-hidden="true"
+                />
+              );
+            })}
+          </div>
+        </div>
+
+        {playsToday !== undefined && playsLimit !== undefined && (
+          <p className="font-bebas text-[10px] tracking-widest uppercase text-cream/30">
+            Plays today <span className="text-cream/60 ml-1">{playsToday + 1}/{playsLimit}</span>
+          </p>
+        )}
       </div>
     </div>
   );
