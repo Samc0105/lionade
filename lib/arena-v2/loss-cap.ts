@@ -47,9 +47,19 @@ export interface LossWindowSummary {
 /**
  * Computes 24h loss-window stats for a user.
  *
- * For Phase 1 this reads arena_matches directly. The "Fang delta" per match
- * is wager-signed: winner gains +wager, loser loses -wager, draws net 0.
- * Trainer-Ninny matches are excluded (free practice).
+ * Reads BOTH arena_matches (legacy 1v1 Arena) AND competitive_matches (the 5
+ * new competitive modes) so the daily loss cap is a SINGLE shared budget across
+ * all wager-bearing competitive play (locked, project_competitive_modes.md).
+ *
+ * For arena_matches the "Fang delta" is wager-signed: winner +wager, loser
+ * -wager, draws net 0. Trainer-Ninny matches are excluded (free practice).
+ *
+ * For competitive_matches the signed per-user delta is already stored on the
+ * row's `fang_delta` jsonb (keyed by user_id) at completion time, so we just
+ * read it directly. The loss STREAK (for the shake-it-off intervention) is
+ * still driven by arena_matches only — the streak intervention is an Arena
+ * mechanic and the competitive modes feed only the net-Fang cap, not the
+ * streak counter.
  */
 export async function computeLossWindow(
   supabase: SupabaseClient,
@@ -83,6 +93,28 @@ export async function computeLossWindow(
       if (isWin) streakBroken = true;
       else streak += 1;
     }
+  }
+
+  // ── Competitive modes contribution to the shared 24h Fang net ──
+  // The competitive matcher stores the signed per-user delta on the row's
+  // fang_delta jsonb at completion. We sum whichever entry belongs to this
+  // user. A user can appear in team_a OR team_b; we query both via the gin
+  // indexes (overlaps `&&`). Read-only; never fails the cap if the table is
+  // empty or the query errors.
+  try {
+    const { data: comp } = await supabase
+      .from("competitive_matches")
+      .select("fang_delta, team_a, team_b, completed_at")
+      .eq("status", "completed")
+      .gte("completed_at", since)
+      .or(`team_a.cs.{${userId}},team_b.cs.{${userId}}`);
+
+    for (const cm of comp ?? []) {
+      const delta = (cm.fang_delta ?? {})[userId];
+      if (typeof delta === "number") net += delta;
+    }
+  } catch {
+    // Competitive table missing or query hiccup — fall back to arena-only net.
   }
 
   // Last shake-it-off gift: stored on profiles.last_shake_it_off_at (added
