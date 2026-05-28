@@ -230,7 +230,7 @@ export default function CompetePage() {
           {/* ═══ 3. ARENA HEADLINE ═══ */}
           <div className="text-center mb-10 animate-slide-up" style={{ animationDelay: "0.1s" }}>
             <h1 className="font-bebas text-6xl sm:text-8xl chrome-text tracking-wider leading-none">
-              <Sword size={52} weight="regular" aria-hidden="true" className="inline mr-1.5 -mt-0.5" /> ARENA
+              <Sword size={52} weight="regular" aria-hidden="true" className="inline mr-1.5 -mt-0.5" /> COMPETE
             </h1>
             <p className="text-cream/60 text-sm sm:text-base mt-2 max-w-lg mx-auto">
               Choose your battleground. Climb the ranks. Earn real rewards.
@@ -273,10 +273,10 @@ export default function CompetePage() {
                     <img src={cdnUrl("/F.png")} alt="Fangs" className="w-4 h-4 object-contain" /> Wager: 10–100 coins
                   </p>
                   <div className="flex flex-wrap gap-3 mb-6">
-                    <Link href="/arena" className="btn-gold text-sm px-6 py-3 rounded-xl">
+                    <Link href="/compete/arena/duel" className="btn-gold text-sm px-6 py-3 rounded-xl">
                       <Target size={18} weight="regular" aria-hidden="true" className="inline mr-1.5 -mt-0.5" /> Find Opponent
                     </Link>
-                    <Link href="/arena" className="btn-outline text-sm px-6 py-3 rounded-xl">
+                    <Link href="/compete/arena/duel" className="btn-outline text-sm px-6 py-3 rounded-xl">
                       <Users size={18} weight="regular" aria-hidden="true" className="inline mr-1.5 -mt-0.5" /> Challenge Friend
                     </Link>
                   </div>
@@ -294,7 +294,7 @@ export default function CompetePage() {
               GAME MODES
             </h2>
             <p className="text-cream/55 text-sm text-center mb-6 max-w-lg mx-auto">
-              Five competitive modes beyond the Duel. Every match earns Elo and Fangs on the ranked ladders. Play 1v1 or squad up 2v2.
+              Five ranked modes in one Arena. Every match earns Elo and Fangs on the ranked ladders. Play 1v1 or squad up 2v2.
             </p>
             <Link href="/compete/arena" className="block glow-purple rounded-2xl tilt-card group">
               <div className="relative overflow-hidden rounded-2xl transition-all duration-300 group-hover:-translate-y-1"
@@ -311,11 +311,11 @@ export default function CompetePage() {
                   </p>
                   <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-6">
                     {[
+                      { name: "Quiz Duel", icon: "🗡️", accent: "#FFD700", tag: "1v1" },
                       { name: "Sabotage", icon: "⚔️", accent: "#EF4444", tag: "Fight" },
                       { name: "Zoom Reveal", icon: "🔍", accent: "#00BFFF", tag: "Nerve" },
                       { name: "Spectrum", icon: "🎚️", accent: "#A855F7", tag: "Feel" },
                       { name: "Map Pin", icon: "📍", accent: "#50C878", tag: "Spatial" },
-                      { name: "Poker Face", icon: "🃏", accent: "#FFD700", tag: "Read" },
                     ].map((m) => (
                       <div key={m.name} className="rounded-xl py-3 px-2 text-center"
                         style={{ background: "rgba(255,255,255,0.03)", border: `1px solid ${m.accent}22` }}>

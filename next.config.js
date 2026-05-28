@@ -18,6 +18,19 @@ const nextConfig = {
       { protocol: "https", hostname: "*.supabase.co" },
     ],
   },
+  // IA consolidation (2026-05-28): one Arena. The bare /arena V1 duel page
+  // moved under the unified arena at /compete/arena/duel (the "Quiz Duel"
+  // mode). Arena V2 (the dark ghost-replay system) and the legacy fake-bot
+  // /duel page were both killed. These redirects keep old links + bookmarks
+  // alive — query strings (e.g. /arena?challenge=user) are preserved by Next
+  // automatically. Not permanent (307) while the IA settles.
+  async redirects() {
+    return [
+      { source: "/arena", destination: "/compete/arena/duel", permanent: false },
+      { source: "/arena/v2", destination: "/compete/arena", permanent: false },
+      { source: "/duel", destination: "/compete/arena", permanent: false },
+    ];
+  },
   // pdf-parse pulls in pdfjs-dist, which calls Object.defineProperty on its
   // own module namespace at runtime. Webpack freezes ESM namespaces, so the
   // bundled version throws "Object.defineProperty called on non-object" on

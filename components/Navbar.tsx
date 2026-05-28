@@ -70,7 +70,7 @@ const NAV_LINKS = [
   { href: "/learn", label: "Learn" },
   { href: "/compete", label: "Compete" },
   { href: "/social", label: "Social" },
-  { href: "/games", label: "Games" },
+  { href: "/games", label: "Arcade" },
   { href: "/shop", label: "Shop" },
 ];
 
@@ -348,7 +348,7 @@ export default function Navbar() {
   const isTabActive = (href: string) => {
     if (href === "/dashboard") return pathname === "/dashboard";
     if (href === "/learn") return pathname === "/learn" || pathname === "/quiz";
-    if (href === "/compete") return pathname === "/compete" || pathname === "/duel" || pathname === "/leaderboard";
+    if (href === "/compete") return (pathname?.startsWith("/compete") ?? false) || pathname === "/leaderboard";
     if (href === "/shop") return pathname === "/shop";
     return pathname === href;
   };

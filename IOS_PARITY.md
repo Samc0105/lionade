@@ -7,6 +7,18 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 
 ---
 
+## 2026-05-28 — Arena IA consolidation (web-only, iOS paused)
+
+| Feature | Web route(s) | iOS route(s) | Web | iOS | Notes |
+|---|---|---|---|---|---|
+| **One unified Arena** — Quiz Duel folded in as a mode | `/compete/arena` (hub) + `/compete/arena/duel` (Quiz Duel, ex-`/arena`) | iOS Duel screen (independent) | ✅ | ❌ paused per CEO web-only scope | V1 1v1 ELO quiz duel moved `app/arena/page.tsx` → `app/compete/arena/duel/page.tsx`; now the 5th tile on the arena hub. `arena_elo` ladder + `/api/arena/*` endpoints UNCHANGED so the existing iOS Duel screen (calls the same backend) is unaffected. `/arena` → `/compete/arena/duel` (307, query-preserving). No iOS client change needed; iOS routing is separate and was never `/arena`. |
+| **Arena V2 (ghost-replay) KILLED** | (deleted: `/arena/v2`, `/api/arena/v2/*`) | (never existed on iOS) | 🚫 | 🚫 | V2 was always web-only + flag-gated behind `NEXT_PUBLIC_ARENA_V2_ENABLED` (now dead). Deleted page + 6 API routes + 5 components + 3 lib files. **Live shared loss-cap preserved** by moving `lib/arena-v2/loss-cap.ts` → `lib/competitive/loss-cap.ts` (the competitive `/complete` route imports it). **Orphaned DB left intact (NOT dropped):** migration `20260526213500_arena_v2_ghosts.sql` (`duel_ghosts`) + `20260526220000_arena_v2_ghost_elo.sql` (`profiles.pending_elo_*`) — harmless to keep, risky to drop. iOS never ported V2, so zero iOS impact. |
+| **Legacy fake-bot `/duel` KILLED** | (deleted: `/duel`) | (n/a) | 🚫 | 🚫 | `app/duel/page.tsx` simulated a 68% bot wagering coins — a trust landmine. Deleted; `/duel` → `/compete/arena` (307). No iOS counterpart. |
+| **Leaderboard surfaces all 3 ranked ladders** | `/leaderboard` (tabs: Quiz Duel / Competitive / Squad / Weekly Fangs) | iOS leaderboard screen | ✅ | 🟡 | Web now reads `arena_elo` + `competitive_elo` + `squad_elo` via `getLadderLeaderboard()`. iOS leaderboard shows the single ladder; when iOS resumes, mirror the multi-ladder tabs (the `competitive_elo`/`squad_elo` columns already exist in the shared DB from migration `20260528000000_competitive_modes.sql`). |
+| **Nav/IA polish** — Compete H1 + Arcade tab + redirects | `/compete` H1 "COMPETE", "Arcade" nav tab | iOS tab bar (native) | 🚫 | 🚫 | Web-side label/route cleanup (H1 retitle, "Games"→"Arcade" nav label, BackButton map, robots). iOS tab bar is native and named independently; no parity action. |
+
+---
+
 ## 2026-05-26 — Lionade Party V1 (web-only scope, iOS paused)
 
 | Feature | Web route(s) | iOS route(s) | Web | iOS | Notes |

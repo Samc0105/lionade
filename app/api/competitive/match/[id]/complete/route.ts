@@ -34,7 +34,7 @@ import {
   resolveLossCapTier,
   computeLossWindow,
   isLossCapReached,
-} from "@/lib/arena-v2/loss-cap";
+} from "@/lib/competitive/loss-cap";
 import { buildEloDeltas } from "@/lib/competitive/elo";
 import { resolvePayout } from "@/lib/competitive/fang-payout";
 import { eloColumnForFormat, type CompetitiveMatchRow, type CompetitiveFormat } from "@/lib/competitive/types";

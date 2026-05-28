@@ -1,4 +1,10 @@
-// Arena V2 tiered daily Fang loss cap.
+// Shared competitive tiered daily Fang loss cap.
+//
+// Originally written for Arena V2 (killed 2026-05-28). This is the LIVE shared
+// daily-loss-cap for the competitive 4-mode system, imported by
+// app/api/competitive/match/[id]/complete/route.ts. Moved from lib/arena-v2/
+// to lib/competitive/ during the V2 deletion so it sits with the code that
+// uses it.
 //
 // From the locked spec (project_arena_v2_decisions.md):
 //   ELO < 1200       → -150 Fangs/day

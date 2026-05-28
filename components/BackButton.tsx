@@ -20,11 +20,9 @@ const PARENT_PATHS: Record<string, string> = {
   "/quiz/ap-exams": "/quiz",
 
   // Sub-pages of /compete
-  "/duel": "/compete",
-  "/arena": "/compete",
-  "/arena/v2": "/compete",
   "/compete/blitz": "/compete",
   "/compete/arena": "/compete",
+  "/compete/arena/duel": "/compete/arena",
   "/games/party": "/games",
   "/leaderboard": "/compete",
 

@@ -423,6 +423,48 @@ export async function getEloLeaderboard(limit = 200): Promise<{
   }));
 }
 
+// ── Multi-ladder ELO Leaderboard ─────────────────────────────
+//
+// Added 2026-05-28 (IA consolidation) so /leaderboard can surface all three
+// ranked ladders, not just arena_elo (the Quiz Duel ladder):
+//   - "arena_elo"        → Quiz Duel (the V1 1v1 duel)
+//   - "competitive_elo"  → the 4 competitive modes, 1v1 (migration 20260528000000)
+//   - "squad_elo"        → the 4 competitive modes, 2v2 squad
+// All default to 1000. Returns a normalized `elo` field so the page renders
+// any ladder identically.
+export type EloLadder = "arena_elo" | "competitive_elo" | "squad_elo";
+
+export async function getLadderLeaderboard(
+  ladder: EloLadder,
+  limit = 200,
+): Promise<{
+  rank: number;
+  user_id: string;
+  username: string;
+  avatar_url: string | null;
+  elo: number;
+  level: number;
+  streak: number;
+}[]> {
+  const { data, error } = await supabase
+    .from("profiles")
+    .select(`id, username, avatar_url, level, streak, ${ladder}`)
+    .order(ladder, { ascending: false })
+    .limit(limit);
+
+  if (error) throw error;
+
+  return (data ?? []).map((p: any, i: number) => ({
+    rank: i + 1,
+    user_id: p.id,
+    username: p.username ?? "Unknown",
+    avatar_url: p.avatar_url ?? null,
+    elo: p[ladder] ?? 1000,
+    level: p.level ?? 1,
+    streak: p.streak ?? 0,
+  }));
+}
+
 // ── Weekly Activity Chart Data ────────────────────────────────
 
 // Single range query — was 7 sequential awaits per call (one per day bucket).

@@ -10,6 +10,7 @@
 // Theme: dark interstellar + glassmorphism, gold/purple/electric accents.
 
 import { useState, useRef, useCallback, useEffect } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion, useReducedMotion } from "framer-motion";
 import ProtectedRoute from "@/components/ProtectedRoute";
@@ -124,7 +125,7 @@ export default function CompetitiveArenaPage() {
               COMPETITIVE ARENA
             </h1>
             <p className="text-cream/60 text-sm sm:text-base mt-3 max-w-xl mx-auto">
-              Four competitive modes. Earn Elo and Fangs on the ranked ladders. Pick a format, pick a mode.
+              Five ranked modes. Earn Elo and Fangs on the ranked ladders. Pick a format, pick a mode.
             </p>
           </div>
 
@@ -161,6 +162,49 @@ export default function CompetitiveArenaPage() {
 
           {/* Mode grid — launcher tiles, staggered reveal + hover lift/glow */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 lg:gap-6">
+            {/* Quiz Duel — the real 1v1 ELO quiz duel (Arena V1, folded in
+                2026-05-28). Unlike the 4 matchmaking modes it has its own
+                system (arena_elo ladder + /api/arena/*), so the tile LINKS to
+                the standalone duel flow at /compete/arena/duel rather than
+                calling startSearch. Always 1v1; ignores the 2v2 toggle. */}
+            <Link
+              href="/compete/arena/duel"
+              className={`ca-mode-card group relative overflow-hidden rounded-2xl p-6 lg:p-7 flex flex-col transition-all duration-300 hover:-translate-y-1.5 ${reduce ? "" : "ca-card-reveal"}`}
+              style={{
+                background: "linear-gradient(135deg, #0c1020 0%, #080c18 50%, #060c18 100%)",
+                border: "1px solid #FFD70030",
+                boxShadow: "0 0 30px #FFD70008",
+                ["--mode-accent" as string]: "#FFD700",
+              }}
+            >
+              <div className="absolute inset-0 pointer-events-none"
+                style={{ background: "radial-gradient(ellipse at 30% 20%, #FFD70010 0%, transparent 60%)" }} />
+              <div className="relative">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-4xl">🗡️</span>
+                  <span className="text-[10px] font-bold uppercase tracking-[0.2em] px-2 py-0.5 rounded-md"
+                    style={{ color: "#FFD700", background: "#FFD70015" }}>
+                    Duel
+                  </span>
+                  <span className="ml-auto text-[10px] font-bebas uppercase tracking-[0.18em] px-2.5 py-1 rounded-full
+                    text-cream/70 bg-white/[0.04] border border-white/10 backdrop-blur-md">
+                    Remote OK
+                  </span>
+                </div>
+                <p className="font-bebas text-2xl tracking-wider mb-2" style={{ color: "#FFD700" }}>
+                  QUIZ DUEL
+                </p>
+                <p className="text-cream/55 text-sm leading-relaxed mb-5 min-h-[60px]">
+                  Head-to-head 1v1 quiz battle. Same questions, 15 seconds each, speed bonus for fast answers. Winner takes the wagered Fangs and climbs the Quiz Duel ladder.
+                </p>
+                <span
+                  className="block w-full text-center font-bebas tracking-wider text-lg py-2.5 rounded-xl transition-all group-active:scale-95"
+                  style={{ background: "linear-gradient(135deg, #FFD700, #FFD700cc)", color: "#0a0a14" }}
+                >
+                  ENTER DUEL
+                </span>
+              </div>
+            </Link>
             {MODES.map((m, i) => {
               const busy = search.phase === "searching" && search.mode === m.mode;
               const dead = search.phase === "none" && search.mode === m.mode;

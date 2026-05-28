@@ -3,15 +3,24 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth";
-import { getLeaderboard, getEloLeaderboard } from "@/lib/db";
+import { getLeaderboard, getLadderLeaderboard, type EloLadder } from "@/lib/db";
 import { formatCoins } from "@/lib/mockData";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import BackButton from "@/components/BackButton";
 import { cdnUrl } from "@/lib/cdn";
 import { avatarFor } from "@/lib/avatar";
-import { Crown, Medal, Sword, TrendUp, Trophy, Brain, Fire } from "@phosphor-icons/react";
+import { Crown, Medal, Sword, TrendUp, Trophy, Brain, Fire, Crosshair, UsersThree } from "@phosphor-icons/react";
 
-type Filter = "elo" | "weekly";
+// Tabs: three ranked ELO ladders + Weekly Fangs. Each ELO filter maps to a
+// profiles column (IA consolidation 2026-05-28 — leaderboard now surfaces all
+// three ladders, not just the Quiz Duel one).
+type Filter = "duel" | "competitive" | "squad" | "weekly";
+
+const LADDER_FOR: Record<Exclude<Filter, "weekly">, EloLadder> = {
+  duel: "arena_elo",
+  competitive: "competitive_elo",
+  squad: "squad_elo",
+};
 
 interface LbEntry {
   rank: number;
@@ -21,24 +30,31 @@ interface LbEntry {
   level: number;
   streak: number;
   coins_this_week: number;
-  arena_elo?: number;
+  elo?: number;
 }
 
 export default function LeaderboardPage() {
   const router = useRouter();
   const { user } = useAuth();
-  const [filter, setFilter] = useState<Filter>("elo");
+  const [filter, setFilter] = useState<Filter>("duel");
   const [entries, setEntries] = useState<LbEntry[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const isElo = filter !== "weekly";
+
   useEffect(() => {
     setLoading(true);
-    if (filter === "elo") {
-      getEloLeaderboard(200).then(data => {
+    if (filter !== "weekly") {
+      getLadderLeaderboard(LADDER_FOR[filter], 200).then(data => {
         setEntries(data.map(d => ({
-          ...d,
-          streak: 0,
+          rank: d.rank,
+          user_id: d.user_id,
+          username: d.username,
+          avatar_url: d.avatar_url,
+          level: d.level,
+          streak: d.streak,
           coins_this_week: 0,
+          elo: d.elo,
         })));
         setLoading(false);
       }).catch(() => setLoading(false));
@@ -64,7 +80,7 @@ export default function LeaderboardPage() {
 
   // Display value based on current filter mode
   const displayValue = (entry: LbEntry) =>
-    filter === "elo" ? `${(entry.arena_elo ?? 1000).toLocaleString()} ELO` : formatCoins(entry.coins_this_week);
+    isElo ? `${(entry.elo ?? 1000).toLocaleString()} ELO` : formatCoins(entry.coins_this_week);
 
   const myEntry = entries.find(e => e.user_id === user?.id);
   const myRank = myEntry ? entries.indexOf(myEntry) + 1 : null;
@@ -79,20 +95,27 @@ export default function LeaderboardPage() {
           <div className="text-center mb-10 animate-slide-up">
             <span className="inline-flex items-center gap-2 bg-gold/10 border border-gold/30 rounded-full px-4 py-1.5 text-gold text-sm font-semibold mb-6">
               <Crown size={16} weight="fill" color="currentColor" aria-hidden="true" />
-              {filter === "elo" ? "ELO Rankings" : "Weekly Rankings"}
+              {filter === "duel" ? "Quiz Duel Rankings"
+                : filter === "competitive" ? "Competitive Rankings"
+                : filter === "squad" ? "Squad Rankings"
+                : "Weekly Rankings"}
             </span>
             <h1 className="font-bebas text-6xl sm:text-7xl text-cream tracking-wider mb-3">LEADERBOARD</h1>
-            <p className="text-cream/50 text-base">Top earners reset every Sunday midnight.</p>
+            <p className="text-cream/50 text-base">
+              {isElo ? "Ranked by Elo across the season." : "Top earners reset every Sunday midnight."}
+            </p>
           </div>
 
-          {/* Filters */}
-          <div className="flex items-center gap-2 bg-navy-50 border border-electric/20 rounded-xl p-1.5 mb-8 animate-slide-up" style={{ animationDelay: "0.1s" }}>
+          {/* Filters — three ranked ELO ladders + Weekly Fangs */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 bg-navy-50 border border-electric/20 rounded-xl p-1.5 mb-8 animate-slide-up" style={{ animationDelay: "0.1s" }}>
             {[
-              { key: "elo" as const, label: "ELO Ranking", Icon: Sword },
+              { key: "duel" as const, label: "Quiz Duel", Icon: Sword },
+              { key: "competitive" as const, label: "Competitive", Icon: Crosshair },
+              { key: "squad" as const, label: "Squad", Icon: UsersThree },
               { key: "weekly" as const, label: "Weekly Fangs", Icon: TrendUp },
             ].map((tab) => (
               <button key={tab.key} onClick={() => setFilter(tab.key)}
-                className={`flex-1 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 inline-flex items-center justify-center gap-2
+                className={`py-2.5 px-2 rounded-lg text-sm font-semibold transition-all duration-200 inline-flex items-center justify-center gap-1.5
                   ${filter === tab.key ? "bg-electric text-white shadow-lg shadow-electric/30" : "text-cream/50 hover:text-cream hover:bg-white/5"}`}>
                 <tab.Icon size={16} weight={filter === tab.key ? "fill" : "regular"} color="currentColor" aria-hidden="true" />
                 {tab.label}
@@ -130,7 +153,7 @@ export default function LeaderboardPage() {
                       <img src={avatarFor(topThree[1]?.username, topThree[1]?.avatar_url)} alt={topThree[1]?.username ?? ""} className="w-14 h-14 rounded-full object-cover" />
                     </div>
                     <p className="text-cream text-xs font-bold text-center truncate w-full text-center">{topThree[1]?.username}</p>
-                    <p className="text-gray-300 font-bebas text-lg flex items-center justify-center gap-1">{filter === "elo" ? `${(topThree[1]?.arena_elo ?? 1000).toLocaleString()} ELO` : <><img src={cdnUrl("/F.png")} alt="Fangs" className="w-4 h-4 object-contain" /> {formatCoins(topThree[1]?.coins_this_week ?? 0)}</>}</p>
+                    <p className="text-gray-300 font-bebas text-lg flex items-center justify-center gap-1">{isElo ? `${(topThree[1]?.elo ?? 1000).toLocaleString()} ELO` : <><img src={cdnUrl("/F.png")} alt="Fangs" className="w-4 h-4 object-contain" /> {formatCoins(topThree[1]?.coins_this_week ?? 0)}</>}</p>
                   </div>
 
                   {/* 1st */}
@@ -143,7 +166,7 @@ export default function LeaderboardPage() {
                       </div>
                     </div>
                     <p className="text-gold text-sm font-bold text-center">{topThree[0]?.username}</p>
-                    <p className="text-gold font-bebas text-xl glow-gold flex items-center justify-center gap-1">{filter === "elo" ? `${(topThree[0]?.arena_elo ?? 1000).toLocaleString()} ELO` : <><img src={cdnUrl("/F.png")} alt="Fangs" className="w-5 h-5 object-contain" /> {formatCoins(topThree[0]?.coins_this_week ?? 0)}</>}</p>
+                    <p className="text-gold font-bebas text-xl glow-gold flex items-center justify-center gap-1">{isElo ? `${(topThree[0]?.elo ?? 1000).toLocaleString()} ELO` : <><img src={cdnUrl("/F.png")} alt="Fangs" className="w-5 h-5 object-contain" /> {formatCoins(topThree[0]?.coins_this_week ?? 0)}</>}</p>
                     <span className="text-xs bg-gold/15 border border-gold/30 text-gold px-2 py-0.5 rounded-full mt-1">#1 GOAT</span>
                   </div>
 
@@ -155,7 +178,7 @@ export default function LeaderboardPage() {
                       <img src={avatarFor(topThree[2]?.username, topThree[2]?.avatar_url)} alt={topThree[2]?.username ?? ""} className="w-12 h-12 rounded-full object-cover" />
                     </div>
                     <p className="text-cream text-xs font-bold text-center truncate w-full text-center">{topThree[2]?.username}</p>
-                    <p className="text-amber-600 font-bebas text-lg flex items-center justify-center gap-1">{filter === "elo" ? `${(topThree[2]?.arena_elo ?? 1000).toLocaleString()} ELO` : <><img src={cdnUrl("/F.png")} alt="Fangs" className="w-4 h-4 object-contain" /> {formatCoins(topThree[2]?.coins_this_week ?? 0)}</>}</p>
+                    <p className="text-amber-600 font-bebas text-lg flex items-center justify-center gap-1">{isElo ? `${(topThree[2]?.elo ?? 1000).toLocaleString()} ELO` : <><img src={cdnUrl("/F.png")} alt="Fangs" className="w-4 h-4 object-contain" /> {formatCoins(topThree[2]?.coins_this_week ?? 0)}</>}</p>
                   </div>
                 </div>
               )}
@@ -193,7 +216,7 @@ export default function LeaderboardPage() {
                       </div>
                       <div className="text-right flex-shrink-0 flex items-center gap-2">
                         <div className="flex items-center gap-1.5">
-                          {filter !== "elo" && <img src={cdnUrl("/F.png")} alt="Fangs" className="w-4 h-4 object-contain" />}
+                          {!isElo && <img src={cdnUrl("/F.png")} alt="Fangs" className="w-4 h-4 object-contain" />}
                           <span className={`font-bebas text-xl ${entry.rank === 1 ? "text-gold glow-gold" : "text-cream"}`}>
                             {displayValue(entry)}
                           </span>
@@ -203,7 +226,7 @@ export default function LeaderboardPage() {
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              router.push(`/arena?challenge=${encodeURIComponent(entry.username)}`);
+                              router.push(`/compete/arena/duel?challenge=${encodeURIComponent(entry.username)}`);
                             }}
                             className="w-8 h-8 rounded-lg flex items-center justify-center
                               bg-white/5 hover:bg-electric/15 border border-white/10 hover:border-electric/40
