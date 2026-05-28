@@ -99,6 +99,35 @@ async function createMatch(args: {
 }): Promise<string | null> {
   const participants = [...args.teamA, ...args.teamB];
 
+  // ── CLAIM-FIRST (double-match race fix) ──
+  // Two players POSTing /queue simultaneously each read the same waiting pool and
+  // each saw the other as an opponent, so BOTH ran createMatch and produced TWO
+  // match rows. If they then subscribed to different `competitive-match-<id>`
+  // channels they'd never connect. We now atomically CLAIM all involved queue
+  // rows (conditional on status='waiting') BEFORE creating the match. The DB
+  // serializes these updates, so only one concurrent matcher can claim a given
+  // row. If we don't claim every expected row, another matcher beat us: release
+  // whatever we grabbed back to 'waiting' and bail (the caller falls back to the
+  // GET poll, which returns the winning matcher's stored match_id).
+  const { data: claimed } = await supabaseAdmin
+    .from("competitive_queue")
+    .update({ status: "claimed" })
+    .in("id", args.queueIds)
+    .eq("status", "waiting")
+    .select("id");
+
+  if (!claimed || claimed.length !== args.queueIds.length) {
+    // Lost the race for at least one row. Roll back our partial claim.
+    if (claimed && claimed.length > 0) {
+      await supabaseAdmin
+        .from("competitive_queue")
+        .update({ status: "waiting" })
+        .in("id", claimed.map((r) => r.id))
+        .eq("status", "claimed");
+    }
+    return null;
+  }
+
   // Capture each participant's pre-match ladder rating for elo_before.
   const eloCol = eloColumnForFormat(args.format);
   const { data: profiles } = await supabaseAdmin
@@ -124,17 +153,21 @@ async function createMatch(args: {
     .single();
   if (error || !match) {
     console.error("[competitive/queue] match insert", error?.message);
+    // Release the rows we claimed so the players can be matched again.
+    await supabaseAdmin
+      .from("competitive_queue")
+      .update({ status: "waiting" })
+      .in("id", args.queueIds)
+      .eq("status", "claimed");
     return null;
   }
 
-  // Atomically flip the involved queue rows to matched. If another concurrent
-  // matcher already claimed one of them, this best-effort update simply marks
-  // fewer rows — but the match row is created, so the searcher gets a match.
+  // Finalize: mark the claimed rows matched and point them at our match.
   await supabaseAdmin
     .from("competitive_queue")
     .update({ status: "matched", match_id: match.id })
     .in("id", args.queueIds)
-    .eq("status", "waiting");
+    .eq("status", "claimed");
 
   // Seed the per-mode rounds so the screen has content immediately.
   await seedRoundsForMatch(supabaseAdmin, match.id, args.mode);
