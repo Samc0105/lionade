@@ -3,6 +3,14 @@
 // Shared scoreboard component for Lionade Party games.
 // Renders a compact grid of players + scores, sorted descending.
 // Pure presentation; the parent owns the data shape.
+//
+// JUICE: scores COUNT UP (reusing the reduced-motion-aware CountUp), rank
+// changes animate via framer `layout` (rows slide to their new position when
+// the sort order shifts), and the leader (#1) gets a subtle gold glow breathe.
+// All driven by the `players` already in client state — nothing is re-fetched.
+
+import { motion, useReducedMotion } from "framer-motion";
+import CountUp from "@/components/CountUp";
 
 interface Player {
   user_id: string;
@@ -23,6 +31,7 @@ export default function PartyScoreboard({
   drawerUserId,
   compact = false,
 }: Props) {
+  const reduced = useReducedMotion();
   const sorted = [...players].sort((a, b) => b.score - a.score);
 
   return (
@@ -41,10 +50,13 @@ export default function PartyScoreboard({
         {sorted.map((p, i) => {
           const isMe = p.user_id === highlightUserId;
           const isDrawer = p.user_id === drawerUserId;
+          const isLeader = i === 0 && p.score > 0;
           return (
-            <div
+            <motion.div
               key={p.user_id}
-              className="flex items-center justify-between rounded-lg px-3 py-1.5"
+              layout={reduced ? false : "position"}
+              transition={reduced ? { duration: 0 } : { type: "spring", stiffness: 380, damping: 30 }}
+              className={`flex items-center justify-between rounded-lg px-3 py-1.5 ${isLeader && !reduced ? "pa-leader-glow" : ""}`}
               style={{
                 background: isMe ? "rgba(168,85,247,0.12)" : "rgba(255,255,255,0.02)",
                 border: isMe ? "1px solid rgba(168,85,247,0.35)" : "1px solid rgba(255,255,255,0.04)",
@@ -55,7 +67,7 @@ export default function PartyScoreboard({
                   className="font-bebas text-xs tracking-wider w-5 text-center"
                   style={{ color: i === 0 ? "#FFD700" : i === 1 ? "#C0C0C0" : i === 2 ? "#CD7F32" : "rgba(238,244,255,0.4)" }}
                 >
-                  {i + 1}
+                  {isLeader ? "👑" : i + 1}
                 </span>
                 <span className="font-syne text-sm text-cream/85 truncate">
                   {p.username ?? "Player"}
@@ -68,9 +80,9 @@ export default function PartyScoreboard({
                 )}
               </div>
               <span className="font-bebas text-lg text-[#FFD700] tracking-wider">
-                {p.score.toLocaleString()}
+                <CountUp value={p.score} duration={600} />
               </span>
-            </div>
+            </motion.div>
           );
         })}
       </div>

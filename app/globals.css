@@ -3952,3 +3952,170 @@ html.light .space-bg-container { display: none; }
     opacity: 1 !important;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   LIONADE PARTY — juice keyframe block (self-contained)
+   ───────────────────────────────────────────────────────────────────────────
+   Mirrors the competitive `ca-*` block: every animation is GPU-only
+   (transform / opacity / filter / box-shadow), nothing above ~2.5Hz, and NO
+   full-viewport flash (color washes are scoped to small elements or capped
+   low-opacity). Per-game accents: Sketch purple #A855F7, Bluff gold #FFD700,
+   Poker Face electric #00BFFF. All `pa-*` classes are disabled together by the
+   single prefers-reduced-motion guard at the bottom of this block.
+
+   NOTE: nothing here touches the live <canvas> in SketchCanvas — the 30Hz
+   stroke broadcast loop is bandwidth-sensitive, so all "someone is drawing"
+   feedback animates chrome OUTSIDE the canvas at low frequency only.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Generic content pop-in (panels, cards, readouts) — party variant */
+@keyframes pa-pop-in {
+  from { transform: scale(0.94) translateY(8px); opacity: 0; }
+  to   { transform: scale(1) translateY(0); opacity: 1; }
+}
+.pa-pop-in { animation: pa-pop-in 0.34s var(--ease-out-expo) both; }
+
+/* Card deal-in — used for vote answers / player chips (delay set inline per index) */
+@keyframes pa-deal-in {
+  0%   { transform: translateY(14px) scale(0.96) rotate(-1deg); opacity: 0; }
+  60%  { transform: translateY(-2px) scale(1.01) rotate(0); opacity: 1; }
+  100% { transform: translateY(0) scale(1) rotate(0); opacity: 1; }
+}
+.pa-deal-in { will-change: transform, opacity; animation: pa-deal-in 0.4s var(--ease-out-quart) both; }
+
+/* Player chip / item pop-in (join, list entry) */
+@keyframes pa-chip-in {
+  0%   { transform: scale(0.6); opacity: 0; }
+  60%  { transform: scale(1.08); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+.pa-chip-in { animation: pa-chip-in 0.36s var(--ease-out-quart) both; }
+
+/* DRAWER SPOTLIGHT — soft accent glow breathe on the "is drawing" pill (~1Hz) */
+@keyframes pa-spotlight {
+  0%, 100% { box-shadow: 0 0 10px 0 rgba(168,85,247,0.28); }
+  50%      { box-shadow: 0 0 20px 4px rgba(168,85,247,0.55); }
+}
+.pa-spotlight { animation: pa-spotlight 1.6s ease-in-out infinite; }
+
+/* INK DOTS — the three "drawing..." dots breathe in sequence (low freq, chrome only) */
+@keyframes pa-ink-dot {
+  0%, 80%, 100% { transform: scale(0.6); opacity: 0.35; }
+  40%           { transform: scale(1); opacity: 1; }
+}
+.pa-ink-dot { animation: pa-ink-dot 1.4s ease-in-out infinite; }
+
+/* TOOL ACTIVE — selected brush/size/eraser gets a tactile glow breathe (purple) */
+@keyframes pa-tool-active {
+  0%, 100% { box-shadow: 0 0 6px 0 rgba(168,85,247,0.4); }
+  50%      { box-shadow: 0 0 12px 2px rgba(168,85,247,0.7); }
+}
+.pa-tool-active { animation: pa-tool-active 1.5s ease-in-out infinite; }
+
+/* GUESS POP — a guesser chat line pops as it lands */
+@keyframes pa-guess-pop {
+  0%   { transform: translateY(6px) scale(0.96); opacity: 0; }
+  55%  { transform: translateY(-1px) scale(1.02); opacity: 1; }
+  100% { transform: translateY(0) scale(1); opacity: 1; }
+}
+.pa-guess-pop { animation: pa-guess-pop 0.32s var(--ease-out-quart) both; }
+
+/* CORRECT GUESS — green flash scoped to the chat line, low alpha, single shot */
+@keyframes pa-correct-flash {
+  0%   { box-shadow: inset 0 0 0 9999px rgba(34,197,94,0.0); }
+  30%  { box-shadow: inset 0 0 0 9999px rgba(34,197,94,0.24); }
+  100% { box-shadow: inset 0 0 0 9999px rgba(34,197,94,0.0); }
+}
+.pa-correct-flash { animation: pa-correct-flash 0.7s ease-out; }
+
+/* SUBMIT CONFIRM — quick scale bump on confirm (no color flash) */
+@keyframes pa-confirm-pop {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.18); }
+  100% { transform: scale(1); }
+}
+.pa-confirm-pop { animation: pa-confirm-pop 0.45s var(--ease-out-quart); }
+
+/* WORD STAMP — the revealed word slams in then settles (gold) */
+@keyframes pa-stamp {
+  0%   { transform: scale(2.2); opacity: 0; }
+  55%  { transform: scale(0.94); opacity: 1; }
+  70%  { transform: scale(1.04); }
+  100% { transform: scale(1); opacity: 1; }
+}
+.pa-stamp { animation: pa-stamp 0.55s var(--ease-out-quart) both; }
+
+/* FACTOID — slides up with a flourish on reveal (delay inline) */
+@keyframes pa-factoid-up {
+  from { transform: translateY(14px); opacity: 0; }
+  to   { transform: translateY(0); opacity: 1; }
+}
+.pa-factoid-up { animation: pa-factoid-up 0.5s var(--ease-out-expo) 0.25s both; }
+
+/* LEADER GLOW — #1 scoreboard row gets a subtle gold breathe */
+@keyframes pa-leader-glow {
+  0%, 100% { box-shadow: inset 0 0 0 1px rgba(255,215,0,0.22), 0 0 8px 0 rgba(255,215,0,0.12); }
+  50%      { box-shadow: inset 0 0 0 1px rgba(255,215,0,0.45), 0 0 14px 2px rgba(255,215,0,0.28); }
+}
+.pa-leader-glow { animation: pa-leader-glow 2.2s ease-in-out infinite; }
+
+/* TRUTH GLOW — the real answer breathes green on the Bluff reveal */
+@keyframes pa-truth-glow {
+  0%, 100% { box-shadow: inset 0 0 0 1px rgba(34,197,94,0.4), 0 0 10px 0 rgba(34,197,94,0.18); }
+  50%      { box-shadow: inset 0 0 0 1px rgba(34,197,94,0.7), 0 0 18px 3px rgba(34,197,94,0.4); }
+}
+.pa-truth-glow { animation: pa-truth-glow 2s ease-in-out infinite; }
+
+/* READY SWEEP — green accent sweep across the lobby when everyone is ready (once) */
+@keyframes pa-ready-sweep {
+  0%   { transform: translateX(-130%) skewX(-18deg); opacity: 0; }
+  18%  { opacity: 0.85; }
+  100% { transform: translateX(230%) skewX(-18deg); opacity: 0; }
+}
+.pa-ready-sweep {
+  position: absolute; top: 0; bottom: 0; left: 0;
+  width: 42%; pointer-events: none; will-change: transform, opacity;
+  background: linear-gradient(100deg, transparent 0%, rgba(34,197,94,0.16) 50%, transparent 100%);
+  animation: pa-ready-sweep 1.05s var(--ease-out-expo) both;
+}
+
+/* READY GLOW — Start button "ready to go" breathe once everyone is ready */
+@keyframes pa-ready-glow {
+  0%, 100% { box-shadow: 0 4px 20px rgba(34,197,94,0.28), 0 0 0 0 rgba(34,197,94,0.0); }
+  50%      { box-shadow: 0 4px 24px rgba(34,197,94,0.45), 0 0 18px 2px rgba(34,197,94,0.35); }
+}
+.pa-ready-glow { animation: pa-ready-glow 1.6s ease-in-out infinite; }
+
+/* SELECTED GAME CARD — accent ring breathe on the chosen game (color via --pa-accent) */
+@keyframes pa-card-selected {
+  0%, 100% { box-shadow: 0 0 22px -2px var(--pa-accent-soft, rgba(168,85,247,0.22)); }
+  50%      { box-shadow: 0 0 34px 2px var(--pa-accent-soft, rgba(168,85,247,0.4)); }
+}
+.pa-card-selected { animation: pa-card-selected 2.4s ease-in-out infinite; }
+
+/* GAME-SELECT CARD — hover lift + accent glow (box-shadow only, no layout shift) */
+.pa-game-card { transition: transform 0.3s var(--ease-out-emil), box-shadow 0.3s var(--ease-out-emil); }
+.pa-game-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 40px -8px var(--pa-accent-soft, rgba(168,85,247,0.3)),
+              0 0 0 1px var(--pa-accent-soft, rgba(168,85,247,0.45));
+}
+
+/* The single reduced-motion guard for the WHOLE party block.
+   Disables motion but leaves final visual states intact (opacity 1, no shift). */
+@media (prefers-reduced-motion: reduce) {
+  .pa-pop-in, .pa-deal-in, .pa-chip-in, .pa-spotlight, .pa-ink-dot,
+  .pa-tool-active, .pa-guess-pop, .pa-correct-flash, .pa-confirm-pop,
+  .pa-stamp, .pa-factoid-up, .pa-leader-glow, .pa-truth-glow,
+  .pa-ready-sweep, .pa-ready-glow, .pa-card-selected,
+  .pa-game-card, .pa-game-card:hover {
+    animation: none !important;
+    transition: none !important;
+  }
+  .pa-game-card:hover { transform: none !important; }
+  .pa-ready-sweep { opacity: 0 !important; }
+  .pa-pop-in, .pa-deal-in, .pa-chip-in, .pa-guess-pop, .pa-stamp, .pa-factoid-up {
+    transform: none !important;
+    opacity: 1 !important;
+  }
+}

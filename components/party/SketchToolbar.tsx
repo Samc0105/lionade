@@ -53,25 +53,25 @@ export default function SketchToolbar({
     >
       {/* Colors */}
       <div className="flex items-center gap-1.5">
-        {SKETCH_COLORS.map((c) => (
-          <button
-            key={c}
-            aria-label={`Color ${c}`}
-            onClick={() => {
-              onColorChange(c);
-              onToolChange("brush");
-            }}
-            className="w-7 h-7 rounded-full transition-transform active:scale-90"
-            style={{
-              background: c,
-              border:
-                color === c && tool === "brush"
-                  ? "2px solid #FFD700"
-                  : "1px solid rgba(255,255,255,0.2)",
-              boxShadow: color === c && tool === "brush" ? "0 0 10px rgba(255,215,0,0.5)" : "none",
-            }}
-          />
-        ))}
+        {SKETCH_COLORS.map((c) => {
+          const active = color === c && tool === "brush";
+          return (
+            <button
+              key={c}
+              aria-label={`Color ${c}`}
+              onClick={() => {
+                onColorChange(c);
+                onToolChange("brush");
+              }}
+              className={`w-7 h-7 rounded-full transition-transform active:scale-90 ${active ? "scale-110" : "hover:scale-105"}`}
+              style={{
+                background: c,
+                border: active ? "2px solid #FFD700" : "1px solid rgba(255,255,255,0.2)",
+                boxShadow: active ? "0 0 10px rgba(255,215,0,0.5)" : "none",
+              }}
+            />
+          );
+        })}
       </div>
 
       <div className="w-px h-7 bg-white/10" />
@@ -83,10 +83,11 @@ export default function SketchToolbar({
             key={s}
             aria-label={`Brush size ${s}`}
             onClick={() => onSizeChange(s)}
-            className="w-7 h-7 rounded-full flex items-center justify-center transition-transform active:scale-90"
+            className={`w-7 h-7 rounded-full flex items-center justify-center transition-all active:scale-90 ${size === s ? "scale-110" : "hover:scale-105"}`}
             style={{
               background: size === s ? "rgba(168,85,247,0.25)" : "rgba(255,255,255,0.04)",
               border: size === s ? "1px solid rgba(168,85,247,0.6)" : "1px solid rgba(255,255,255,0.08)",
+              boxShadow: size === s ? "0 0 10px rgba(168,85,247,0.45)" : "none",
             }}
           >
             <span
@@ -103,11 +104,12 @@ export default function SketchToolbar({
       <button
         aria-label="Eraser"
         onClick={() => onToolChange("eraser")}
-        className="px-3 py-1.5 rounded-lg font-bebas text-xs tracking-wider transition-all active:scale-95"
+        className={`px-3 py-1.5 rounded-lg font-bebas text-xs tracking-wider transition-all active:scale-95 ${tool === "eraser" ? "scale-105" : ""}`}
         style={{
           background: tool === "eraser" ? "rgba(168,85,247,0.25)" : "rgba(255,255,255,0.04)",
           border: tool === "eraser" ? "1px solid rgba(168,85,247,0.6)" : "1px solid rgba(255,255,255,0.08)",
           color: tool === "eraser" ? "#E9D5FF" : "rgba(238,244,255,0.65)",
+          boxShadow: tool === "eraser" ? "0 0 10px rgba(168,85,247,0.45)" : "none",
         }}
       >
         ERASER

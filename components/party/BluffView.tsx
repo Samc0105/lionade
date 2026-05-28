@@ -16,6 +16,7 @@ import { supabase } from "@/lib/supabase";
 import { apiGet, apiPost } from "@/lib/api-client";
 import PartyScoreboard from "./PartyScoreboard";
 import NinnyHostBubble from "./NinnyHostBubble";
+import CountUp from "@/components/CountUp";
 import { bluffChannel, BLUFF_EVENTS } from "@/lib/party/realtime-channels";
 import type { PartyPlayer, PartyRoom } from "@/lib/party/types";
 
@@ -71,6 +72,10 @@ export default function BluffView({
   const [ninnyMsg, setNinnyMsg] = useState<string | null>("Get ready to bluff.");
   const [timeLeft, setTimeLeft] = useState(0);
   const advanceLock = useRef(false);
+
+  // ── juice-only transient state (no gameplay effect, derived from `detail`
+  //    already in client state — nothing extra is fetched) ──
+  const [confirmKey, setConfirmKey] = useState(0); // bumps on a successful submit -> button pop
 
   // ── Start a fresh round (host) ──
   const startRound = useCallback(async () => {
@@ -200,6 +205,7 @@ export default function BluffView({
       setError(res.error ?? "Couldn't save your fake.");
       return;
     }
+    setConfirmKey((k) => k + 1); // juice-only: submit confirmation pop
     void refreshDetail();
   }
 
@@ -238,7 +244,8 @@ export default function BluffView({
 
       {/* Question card */}
       <div
-        className="rounded-2xl p-5"
+        key={round.id}
+        className={`rounded-2xl p-5 ${reduced ? "" : "ca-pop-in"}`}
         style={{
           background: "linear-gradient(135deg, rgba(255,215,0,0.12) 0%, rgba(168,85,247,0.05) 100%)",
           border: "1px solid rgba(255,215,0,0.35)",
@@ -258,7 +265,11 @@ export default function BluffView({
             ROUND {round.round_num} · {phase.toUpperCase()}
           </span>
           {phase !== "reveal" && (
-            <span className={`font-bebas text-2xl ${timeLeft <= 5 ? "text-red-400" : "text-cream/80"}`}>
+            <span
+              className={`font-bebas text-2xl ${timeLeft <= 5 ? "text-red-400" : "text-cream/80"} ${
+                timeLeft <= 5 && !reduced ? "ca-urgent inline-block" : ""
+              }`}
+            >
               {timeLeft}s
             </span>
           )}
@@ -296,10 +307,24 @@ export default function BluffView({
                 {detail.submitted_count ?? 0} / {players.length} submitted
               </p>
             </div>
+            {/* Live "N of M answered" progress — fills as players submit */}
+            <div className="h-1.5 rounded-full bg-cream/[0.07] overflow-hidden">
+              <div
+                className="h-full rounded-full"
+                style={{
+                  width: `${players.length > 0 ? ((detail.submitted_count ?? 0) / players.length) * 100 : 0}%`,
+                  background: "linear-gradient(90deg, #FFD700, #B8960C)",
+                  transition: reduced ? "none" : "width 0.5s var(--ease-out-quart)",
+                }}
+              />
+            </div>
             <button
+              key={confirmKey}
               type="submit"
               disabled={!fakeInput.trim() || submitting}
-              className="w-full py-3 rounded-xl font-bebas text-base tracking-wider transition-all active:scale-95 disabled:opacity-30"
+              className={`w-full py-3 rounded-xl font-bebas text-base tracking-wider transition-all active:scale-95 disabled:opacity-30 ${
+                confirmKey > 0 && !reduced ? "pa-confirm-pop" : ""
+              }`}
               style={{
                 background: "linear-gradient(135deg, #FFD700 0%, #B8960C 100%)",
                 color: "#04080F",
@@ -320,13 +345,13 @@ export default function BluffView({
             className="space-y-2"
           >
             <p className="font-bebas text-sm text-cream/60 tracking-[0.25em]">PICK THE REAL ANSWER</p>
-            {detail.answers.map((a) => {
+            {detail.answers.map((a, i) => {
               const isMine = detail.my_vote_answer_id === a.id;
               return (
                 <button
                   key={a.id}
                   onClick={() => castVote(a.id)}
-                  className="w-full text-left rounded-xl px-4 py-3 transition-all active:scale-[0.98]"
+                  className={`w-full text-left rounded-xl px-4 py-3 transition-all active:scale-[0.98] hover:-translate-y-0.5 ${reduced ? "" : "pa-deal-in"}`}
                   style={{
                     background: isMine
                       ? "linear-gradient(135deg, rgba(168,85,247,0.22) 0%, rgba(124,58,237,0.1) 100%)"
@@ -335,6 +360,7 @@ export default function BluffView({
                       ? "1px solid rgba(168,85,247,0.55)"
                       : "1px solid rgba(255,255,255,0.08)",
                     color: "rgba(238,244,255,0.92)",
+                    ...(reduced ? {} : { animationDelay: `${i * 80}ms` }),
                   }}
                 >
                   <span className="font-syne text-base">{a.text}</span>
@@ -358,27 +384,52 @@ export default function BluffView({
             className="space-y-4"
           >
             <div
-              className="rounded-2xl p-5 text-center"
+              className={`rounded-2xl p-5 text-center ${reduced ? "" : "pa-pop-in"}`}
               style={{
                 background: "linear-gradient(135deg, rgba(34,197,94,0.2) 0%, rgba(255,215,0,0.1) 100%)",
                 border: "1px solid rgba(34,197,94,0.45)",
               }}
             >
               <p className="font-bebas text-xs tracking-[0.3em] text-cream/55 mb-1">THE TRUTH</p>
-              <p className="font-bebas text-3xl text-emerald-300 tracking-wider">
+              <p className={`font-bebas text-3xl text-emerald-300 tracking-wider inline-block ${reduced ? "" : "ca-slam"}`}>
                 {round.correct_answer}
               </p>
             </div>
 
+            {/* "You fooled N people" — sum of votes on the fakes I authored.
+                Derived from the reveal payload already in client state. */}
+            {(() => {
+              const myFooledVotes = detail.answers!
+                .filter((a) => !a.is_truth && a.author_user_id === meUserId)
+                .reduce((sum, a) => sum + (a.vote_count ?? 0), 0);
+              if (myFooledVotes <= 0) return null;
+              return (
+                <div
+                  className={`rounded-xl px-4 py-2.5 text-center ${reduced ? "" : "pa-pop-in"}`}
+                  style={{
+                    background: "linear-gradient(135deg, rgba(168,85,247,0.18) 0%, rgba(99,102,241,0.08) 100%)",
+                    border: "1px solid rgba(168,85,247,0.4)",
+                  }}
+                >
+                  <span className="font-bebas text-base tracking-wider text-purple-200">
+                    YOU FOOLED <CountUp value={myFooledVotes} duration={800} />{" "}
+                    {myFooledVotes === 1 ? "PLAYER" : "PLAYERS"}!
+                  </span>
+                </div>
+              );
+            })()}
+
             <div className="space-y-2">
               {detail.answers
                 .sort((a, b) => (b.vote_count ?? 0) - (a.vote_count ?? 0))
-                .map((a) => {
+                .map((a, i) => {
                   const author = players.find((p) => p.user_id === a.author_user_id);
                   return (
                     <div
                       key={a.id}
-                      className="rounded-xl px-4 py-3 flex items-center justify-between"
+                      className={`rounded-xl px-4 py-3 flex items-center justify-between ${
+                        reduced ? "" : "pa-deal-in"
+                      } ${a.is_truth && !reduced ? "pa-truth-glow" : ""}`}
                       style={{
                         background: a.is_truth
                           ? "linear-gradient(135deg, rgba(34,197,94,0.15) 0%, rgba(34,197,94,0.05) 100%)"
@@ -386,6 +437,7 @@ export default function BluffView({
                         border: a.is_truth
                           ? "1px solid rgba(34,197,94,0.4)"
                           : "1px solid rgba(255,255,255,0.08)",
+                        ...(reduced ? {} : { animationDelay: `${i * 90}ms` }),
                       }}
                     >
                       <div className="min-w-0">
@@ -395,7 +447,8 @@ export default function BluffView({
                         </p>
                       </div>
                       <span className="font-bebas text-lg text-cream/80 ml-3 flex-shrink-0">
-                        {a.vote_count ?? 0} {(a.vote_count ?? 0) === 1 ? "vote" : "votes"}
+                        <CountUp value={a.vote_count ?? 0} duration={700} />{" "}
+                        {(a.vote_count ?? 0) === 1 ? "vote" : "votes"}
                       </span>
                     </div>
                   );

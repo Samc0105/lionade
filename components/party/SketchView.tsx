@@ -21,6 +21,8 @@ import SketchCanvas from "./SketchCanvas";
 import SketchToolbar, { SKETCH_COLORS, SKETCH_SIZES, type SketchTool } from "./SketchToolbar";
 import PartyScoreboard from "./PartyScoreboard";
 import NinnyHostBubble from "./NinnyHostBubble";
+import Confetti from "@/components/Confetti";
+import FangBurst from "@/components/competitive/FangBurst";
 import { sketchChannel, SKETCH_EVENTS } from "@/lib/party/realtime-channels";
 import { SUBJECT_LABELS, type Subject } from "@/lib/party/word-lists-stub";
 import type { PartyPlayer, PartyRoom } from "@/lib/party/types";
@@ -80,6 +82,12 @@ export default function SketchView({
   const [iGotIt, setIGotIt] = useState(false);
   const [ninnyMsg, setNinnyMsg] = useState<string | null>(null);
 
+  // ── juice-only transient state (no gameplay effect, derived from events already
+  //    in client state — nothing is re-fetched and no secret column is read) ──
+  const [fireFirstConfetti, setFireFirstConfetti] = useState(false); // FIRST correct guesser celebration
+  const sawFirstCorrectRef = useRef(false); // gate so only the first correct guess fires confetti
+  const [fangKey, setFangKey] = useState(0); // bumps on MY correct guess -> Fang burst
+
   // Toolbar state (drawer only).
   const [tool, setTool] = useState<SketchTool>("brush");
   const [color, setColor] = useState<string>(SKETCH_COLORS[0]);
@@ -100,6 +108,8 @@ export default function SketchView({
     setChat([]);
     setIGotIt(false);
     setStrokeCount(0);
+    sawFirstCorrectRef.current = false;
+    setFireFirstConfetti(false);
     const res = await apiPost<{ round: RoundSnapshot; drawer_should_pick: boolean }>(
       "/api/party/sketch/rounds",
       { code: room.code },
@@ -169,6 +179,8 @@ export default function SketchView({
       setStrokeCount(0);
       setLockedWord(null);
       setCandidates(null);
+      sawFirstCorrectRef.current = false;
+      setFireFirstConfetti(false);
       setPhase(isMe ? "select-word" : "drawing");
       setNinnyMsg(isMe ? "Your turn! Pick a word to draw." : "Watch carefully and guess what they're drawing.");
     });
@@ -184,6 +196,12 @@ export default function SketchView({
         variant: ChatMsg["variant"];
       };
       if (!payload.user_id) return;
+      // Juice-only: the FIRST correct guess of the round fires a celebratory
+      // confetti burst. Derived from the broadcast we already receive — no fetch.
+      if (payload.variant === "correct" && !sawFirstCorrectRef.current) {
+        sawFirstCorrectRef.current = true;
+        setFireFirstConfetti(true);
+      }
       setChat((prev) => [
         ...prev,
         {
@@ -261,6 +279,7 @@ export default function SketchView({
     const me = players.find((p) => p.user_id === meUserId);
     if (res.data.verdict === "correct") {
       setIGotIt(true);
+      setFangKey((k) => k + 1); // juice-only: Fang burst on my own correct guess
       const ch = supabase.channel(sketchChannel(room.code));
       await ch.send({
         type: "broadcast",
@@ -332,7 +351,9 @@ export default function SketchView({
       {round && phase === "drawing" && (
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-2">
-            <span className="font-bebas text-xs tracking-wider px-2.5 py-1 rounded-full bg-purple-500/15 text-purple-200 border border-purple-500/40">
+            <span
+              className={`font-bebas text-xs tracking-wider px-2.5 py-1 rounded-full bg-purple-500/15 text-purple-200 border border-purple-500/40 ${reduced ? "" : "pa-spotlight"}`}
+            >
               {subjectLabel || "DRAWING"}
             </span>
             {isDrawer && lockedWord && (
@@ -341,14 +362,27 @@ export default function SketchView({
               </span>
             )}
             {!isDrawer && (
-              <span className="font-syne text-xs text-cream/60 italic">
+              <span className="font-syne text-xs text-cream/60 italic inline-flex items-center gap-1.5">
                 {players.find((p) => p.user_id === round.drawer_user_id)?.username ?? "Someone"} is drawing
+                {/* Low-frequency ink-dot pulse — pure chrome, never touches the
+                    30Hz stroke canvas. Signals "live drawing in progress." */}
+                <span aria-hidden="true" className="inline-flex items-center gap-0.5 ml-0.5">
+                  {[0, 1, 2].map((i) => (
+                    <span
+                      key={i}
+                      className={`w-1 h-1 rounded-full bg-purple-300 ${reduced ? "opacity-70" : "pa-ink-dot"}`}
+                      style={reduced ? undefined : { animationDelay: `${i * 200}ms` }}
+                    />
+                  ))}
+                </span>
               </span>
             )}
           </div>
           <div className="flex items-center gap-2">
             <span
-              className={`font-bebas text-2xl tracking-wider ${timeLeft <= 10 ? "text-red-400" : "text-cream/80"}`}
+              className={`font-bebas text-2xl tracking-wider ${
+                timeLeft <= 10 ? "text-red-400" : "text-cream/80"
+              } ${timeLeft <= 10 && !reduced ? "ca-urgent inline-block" : ""}`}
             >
               {timeLeft}s
             </span>
@@ -365,15 +399,16 @@ export default function SketchView({
         >
           <p className="font-bebas text-sm text-cream/60 tracking-[0.25em]">PICK A WORD</p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            {candidates.map((c) => (
+            {candidates.map((c, i) => (
               <button
                 key={c.word}
                 onClick={() => selectWord(c.word)}
-                className="rounded-2xl p-5 text-left transition-all active:scale-95"
+                className={`rounded-2xl p-5 text-left transition-all active:scale-95 hover:-translate-y-0.5 ${reduced ? "" : "pa-deal-in"}`}
                 style={{
                   background: "linear-gradient(135deg, rgba(168,85,247,0.15) 0%, rgba(124,58,237,0.06) 100%)",
                   border: "1px solid rgba(168,85,247,0.45)",
                   boxShadow: "0 0 20px rgba(168,85,247,0.15)",
+                  ...(reduced ? {} : { animationDelay: `${i * 90}ms` }),
                 }}
               >
                 <p className="font-bebas text-3xl tracking-wider text-cream mb-2">
@@ -432,11 +467,13 @@ export default function SketchView({
                     key={m.id}
                     initial={reduced ? false : { opacity: 0, y: 4 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="text-sm font-syne py-0.5"
+                    className={`text-sm font-syne py-0.5 rounded-md px-1.5 -mx-1.5 ${
+                      reduced ? "" : "pa-guess-pop"
+                    } ${m.variant === "correct" && !reduced ? "pa-correct-flash" : ""}`}
                   >
                     <span className="text-cream/55">{m.username ?? "Someone"}</span>
                     {m.variant === "correct" ? (
-                      <span className="text-emerald-300 font-bold"> {m.body}</span>
+                      <span className="text-emerald-300 font-bold"> {m.body} 🎉</span>
                     ) : m.variant === "close" ? (
                       <span className="text-amber-300"> {m.body}</span>
                     ) : (
@@ -484,13 +521,14 @@ export default function SketchView({
           )}
           {!isDrawer && iGotIt && (
             <div
-              className="text-center rounded-xl py-2 font-bebas text-sm tracking-wider"
+              className={`relative text-center rounded-xl py-2 font-bebas text-sm tracking-wider ${reduced ? "" : "pa-pop-in"}`}
               style={{
                 background: "rgba(34,197,94,0.15)",
                 border: "1px solid rgba(34,197,94,0.4)",
                 color: "#86EFAC",
               }}
             >
+              <FangBurst burstKey={fangKey} />
               YOU GOT IT! WAITING FOR THE ROUND TO END...
             </div>
           )}
@@ -504,6 +542,15 @@ export default function SketchView({
           animate={{ opacity: 1, y: 0 }}
           className="space-y-4"
         >
+          {/* First-correct-guesser celebration (self-gates on reduced motion) */}
+          <Confetti
+            trigger={fireFirstConfetti}
+            count={56}
+            origin="top"
+            duration={1500}
+            palette={["#A855F7", "#FFD700", "#6366F1", "#22C55E"]}
+            onComplete={() => setFireFirstConfetti(false)}
+          />
           <div
             className="rounded-2xl p-6 text-center"
             style={{
@@ -513,11 +560,11 @@ export default function SketchView({
             }}
           >
             <p className="font-bebas text-xs tracking-[0.3em] text-cream/50 mb-2">THE WORD WAS</p>
-            <p className="font-bebas text-5xl text-[#FFD700] tracking-wider mb-3">
+            <p className={`font-bebas text-5xl text-[#FFD700] tracking-wider mb-3 inline-block ${reduced ? "" : "pa-stamp"}`}>
               {reveal.word.toUpperCase()}
             </p>
             {reveal.factoid && (
-              <p className="text-cream/80 text-sm font-syne italic max-w-md mx-auto">
+              <p className={`text-cream/80 text-sm font-syne italic max-w-md mx-auto ${reduced ? "" : "pa-factoid-up"}`}>
                 Did you know... {reveal.factoid}
               </p>
             )}
