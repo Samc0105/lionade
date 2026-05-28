@@ -22,6 +22,10 @@ const PARENT_PATHS: Record<string, string> = {
   // Sub-pages of /compete
   "/duel": "/compete",
   "/arena": "/compete",
+  "/arena/v2": "/compete",
+  "/compete/blitz": "/compete",
+  "/compete/arena": "/compete",
+  "/games/party": "/games",
   "/leaderboard": "/compete",
 
   // Sub-pages reached via avatar dropdown
@@ -45,6 +49,9 @@ const PARENT_LABELS: Record<string, string> = {
   "/learn": "Learn",
   "/learn/paths": "Paths",
   "/compete": "Compete",
+  "/compete/arena": "Arena",
+  "/games": "Games",
+  "/games/party": "Party",
   "/profile": "Profile",
   "/quiz": "Quiz",
 };
@@ -57,6 +64,12 @@ function getParentPath(currentPath: string): string | null {
   // Dynamic route patterns
   // /learn/paths/[subject] → /learn/paths
   if (/^\/learn\/paths\/[^/]+$/.test(currentPath)) return "/learn/paths";
+
+  // /games/party/[code] → /games/party
+  if (/^\/games\/party\/[^/]+$/.test(currentPath)) return "/games/party";
+
+  // /compete/arena/[mode]/[matchId] → /compete/arena
+  if (/^\/compete\/arena\/[^/]+\/[^/]+$/.test(currentPath)) return "/compete/arena";
 
   // No parent → top-level page, hide the back button
   return null;

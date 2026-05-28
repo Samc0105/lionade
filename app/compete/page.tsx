@@ -288,11 +288,57 @@ export default function CompetePage() {
             </div>
           </div>
 
+          {/* ═══ 4.5 GAME MODES — Competitive Arena ═══ */}
+          <div className="animate-slide-up mb-10" style={{ animationDelay: "0.18s" }}>
+            <h2 className="font-bebas text-3xl text-cream tracking-wider text-center mb-2">
+              GAME MODES
+            </h2>
+            <p className="text-cream/55 text-sm text-center mb-6 max-w-lg mx-auto">
+              Five competitive modes beyond the Duel. Every match earns Elo and Fangs on the ranked ladders. Play 1v1 or squad up 2v2.
+            </p>
+            <Link href="/compete/arena" className="block glow-purple rounded-2xl tilt-card group">
+              <div className="relative overflow-hidden rounded-2xl transition-all duration-300 group-hover:-translate-y-1"
+                style={{
+                  background: "linear-gradient(135deg, #120a1f 0%, #0a0618 35%, #060c18 100%)",
+                  border: "1px solid rgba(168,85,247,0.3)",
+                }}>
+                <div className="absolute inset-0 pointer-events-none"
+                  style={{ background: "radial-gradient(ellipse at 30% 20%, rgba(168,85,247,0.10) 0%, transparent 60%)" }} />
+                <div className="relative p-7 sm:p-9">
+                  <p className="font-bebas text-3xl sm:text-4xl tracking-wider text-[#A855F7] mb-4"
+                    style={{ textShadow: "0 0 18px rgba(168,85,247,0.25)" }}>
+                    COMPETITIVE ARENA
+                  </p>
+                  <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-6">
+                    {[
+                      { name: "Sabotage", icon: "⚔️", accent: "#EF4444", tag: "Fight" },
+                      { name: "Zoom Reveal", icon: "🔍", accent: "#00BFFF", tag: "Nerve" },
+                      { name: "Spectrum", icon: "🎚️", accent: "#A855F7", tag: "Feel" },
+                      { name: "Map Pin", icon: "📍", accent: "#50C878", tag: "Spatial" },
+                      { name: "Poker Face", icon: "🃏", accent: "#FFD700", tag: "Read" },
+                    ].map((m) => (
+                      <div key={m.name} className="rounded-xl py-3 px-2 text-center"
+                        style={{ background: "rgba(255,255,255,0.03)", border: `1px solid ${m.accent}22` }}>
+                        <p className="text-2xl mb-1">{m.icon}</p>
+                        <p className="font-bebas text-[11px] tracking-wider" style={{ color: m.accent }}>{m.name.toUpperCase()}</p>
+                        <p className="text-cream/30 text-[9px] font-syne">{m.tag}</p>
+                      </div>
+                    ))}
+                  </div>
+                  <span className="inline-flex items-center gap-2 font-bebas text-lg tracking-wider px-7 py-2.5 rounded-xl"
+                    style={{ background: "linear-gradient(135deg, #A855F7 0%, #8b3fd6 100%)", color: "#0a0a14" }}>
+                    ENTER ARENA <span className="text-base">&rarr;</span>
+                  </span>
+                </div>
+              </div>
+            </Link>
+          </div>
+
           {/* ═══ 5. BLITZ + LEADERBOARD — Side by Side ═══ */}
           <div className="animate-slide-up mb-10" style={{ animationDelay: "0.2s" }}>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               {/* Blitz */}
-              <Link href="/games?mode=blitz" className="block glow-yellow rounded-2xl tilt-card group cursor-pointer">
+              <Link href="/compete/blitz" className="block glow-yellow rounded-2xl tilt-card group cursor-pointer">
                 <div className="relative overflow-hidden h-full rounded-2xl clip-angled-br transition-all duration-300 group-hover:-translate-y-1"
                   style={{
                     background: "linear-gradient(135deg, #1a1400 0%, #0f0a00 30%, #080600 50%, #060c18 100%)",
