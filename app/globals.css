@@ -3633,3 +3633,115 @@ html.light .space-bg-container { display: none; }
     transition: none !important;
   }
 }
+/* ═══════════════════════════════════════════════════════════════════════════
+   Void-fix layout polish (2026-05-28)
+   Shared primitives for the full-width redesign of wallet / games / quiz
+   results / learning paths / mastery. GPU-only (transform + opacity), all
+   guarded by the reduced-motion block at the bottom of this section.
+   ─────────────────────────────────────────────────────────────────────────── */
+
+/* ── Wallet: balance number breathing glow ── */
+@keyframes balance-breathe {
+  0%, 100% { text-shadow: 0 0 22px rgba(255, 215, 0, 0.22), 0 0 6px rgba(255, 215, 0, 0.12); }
+  50%      { text-shadow: 0 0 34px rgba(255, 215, 0, 0.40), 0 0 12px rgba(255, 215, 0, 0.20); }
+}
+.balance-breathe {
+  animation: balance-breathe 3.4s ease-in-out infinite;
+  will-change: text-shadow;
+}
+
+/* ── Wallet: sparkline path draw-on ── */
+@keyframes sparkline-draw {
+  from { stroke-dashoffset: var(--spark-len, 600); }
+  to   { stroke-dashoffset: 0; }
+}
+.sparkline-path {
+  stroke-dasharray: var(--spark-len, 600);
+  stroke-dashoffset: var(--spark-len, 600);
+  animation: sparkline-draw 1.6s cubic-bezier(0.16, 1, 0.3, 1) 0.4s forwards;
+}
+
+/* ── Wallet: transaction-row accent bar shimmer on hover ── */
+.txn-row {
+  transition: transform 0.2s var(--ease-out-emil, ease-out), background 0.2s ease;
+}
+@media (hover: hover) and (pointer: fine) {
+  .txn-row:hover { transform: translateX(2px); }
+}
+
+/* ── Progress ring fill (learning-path cards) ── */
+@keyframes path-ring-fill {
+  from { stroke-dashoffset: var(--ring-circ, 138); }
+  to   { stroke-dashoffset: var(--ring-offset, 0); }
+}
+.path-ring {
+  stroke-dasharray: var(--ring-circ, 138);
+  stroke-dashoffset: var(--ring-circ, 138);
+  animation: path-ring-fill 1.3s cubic-bezier(0.16, 1, 0.3, 1) 0.3s forwards;
+  transform: rotate(-90deg);
+  transform-origin: center;
+}
+
+/* ── Generic hover-lift card (games tickets, path cards) ── */
+.lift-card {
+  transition: transform 0.25s var(--ease-out-emil, ease-out),
+              box-shadow 0.25s var(--ease-out-emil, ease-out),
+              border-color 0.25s ease;
+  will-change: transform;
+}
+@media (hover: hover) and (pointer: fine) {
+  .lift-card:hover { transform: translateY(-2px) scale(1.01); }
+}
+
+/* ── Mastery: textarea focus shimmer border ── */
+@keyframes mastery-border-shimmer {
+  0%, 100% { box-shadow: 0 0 0 1px rgba(255, 215, 0, 0.18), 0 0 22px rgba(255, 215, 0, 0.06); }
+  50%      { box-shadow: 0 0 0 1px rgba(255, 215, 0, 0.40), 0 0 30px rgba(255, 215, 0, 0.14); }
+}
+.mastery-focus-glow:focus-within {
+  animation: mastery-border-shimmer 2.4s ease-in-out infinite;
+  border-color: rgba(255, 215, 0, 0.45) !important;
+}
+
+/* ── Mastery: parse-loading shimmer sweep across textarea border ── */
+@keyframes mastery-parse-sweep {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+.mastery-parsing { position: relative; overflow: hidden; }
+.mastery-parsing::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(100deg, transparent 30%, rgba(168, 85, 247, 0.10) 50%, transparent 70%);
+  animation: mastery-parse-sweep 1.3s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* ── Generic slide-in-from-left (parsed result, mastery list) ── */
+@keyframes slide-in-left {
+  from { transform: translateX(-14px); opacity: 0; }
+  to   { transform: translateX(0); opacity: 1; }
+}
+.animate-slide-in-left {
+  animation: slide-in-left 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .balance-breathe,
+  .sparkline-path,
+  .path-ring,
+  .lift-card,
+  .lift-card:hover,
+  .txn-row,
+  .txn-row:hover,
+  .mastery-focus-glow:focus-within,
+  .mastery-parsing::after,
+  .animate-slide-in-left {
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
+  }
+  .sparkline-path { stroke-dashoffset: 0 !important; }
+  .path-ring { stroke-dashoffset: var(--ring-offset, 0) !important; }
+}

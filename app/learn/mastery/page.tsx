@@ -7,6 +7,7 @@ import Link from "next/link";
 import {
   ArrowRight, Brain, Target, Clock, Sparkle,
   CaretLeft, NotePencil, Warning, X, Lock,
+  ChatCircleText, GraduationCap, ListChecks,
 } from "@phosphor-icons/react";
 import { PLAN_EXAM_LIMITS } from "@/lib/mastery-plan";
 import Navbar from "@/components/Navbar";
@@ -147,9 +148,9 @@ export default function MasteryLandingPage() {
       <SpaceBackground />
       <Navbar />
 
-      <main className="relative z-10 max-w-[980px] mx-auto px-4 sm:px-6 pt-8 pb-24">
+      <main className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 pt-8 pb-24">
         {/* Breadcrumb — returns to the class notebook if we entered from one,
-            else falls back to /learn. */}
+            else falls back to /learn. PRESERVED: classIdContext routing. */}
         <Link
           href={classIdContext ? `/classes/${classIdContext}` : "/learn"}
           className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.25em] text-cream/50 hover:text-cream mb-4 transition-colors"
@@ -169,25 +170,30 @@ export default function MasteryLandingPage() {
             what do you want to master?
           </h1>
           <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-cream/50 mt-3">
-            Ninny teaches + quizzes until you're ready. Slow burn — real grind.
+            Ninny teaches + quizzes until you're ready. Slow burn, real grind.
           </p>
         </div>
 
+        {/* ═══ 2-COLUMN: funnel LEFT, targets / explainer RIGHT ═══ */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+
+        {/* ── LEFT: the create / parse funnel ── */}
+        <div>
         {/* New target form */}
         {!parsed && (
-          <section className="mb-12">
-            <div className="rounded-[12px] bg-white/[0.03] border border-white/[0.08] p-4 sm:p-5">
+          <section>
+            <div className={`mastery-focus-glow rounded-[12px] bg-white/[0.03] border border-white/[0.08] p-4 sm:p-5 transition-shadow ${parsing ? "mastery-parsing" : ""}`}>
               <textarea
                 value={input}
                 onChange={e => setInput(e.target.value.slice(0, 8000))}
                 disabled={parsing}
-                rows={5}
+                rows={6}
                 placeholder="Examples:
 • AWS Security Specialty (SCS-C02)
-• Calculus 1 midterm — derivatives, integrals, limits, chain rule
+• Calculus 1 midterm: derivatives, integrals, limits, chain rule
 • AP Chemistry unit on thermochemistry
-• Or paste your syllabus — I'll parse it."
-                className="w-full resize-none bg-transparent border-none focus:outline-none
+• Or paste your syllabus and I'll parse it."
+                className="relative z-10 w-full resize-none bg-transparent border-none focus:outline-none
                   text-[15px] text-cream placeholder:text-cream/30 leading-relaxed font-sans"
               />
             </div>
@@ -218,7 +224,7 @@ export default function MasteryLandingPage() {
 
         {/* Parsed — broad case */}
         {parsed && parsed.scope === "broad" && (
-          <section className="mb-12">
+          <section className="animate-slide-in-left">
             <div className="flex gap-3">
               <div className="shrink-0 w-[28px] h-[28px] rounded-full grid place-items-center text-[10px] font-mono tracking-wider bg-[#A855F7]/[0.15] border border-[#A855F7]/30 text-[#A855F7]">
                 N
@@ -260,12 +266,13 @@ export default function MasteryLandingPage() {
 
         {/* Parsed — specific case, show preview + confirm */}
         {parsed && parsed.scope === "specific" && (
-          <section className="mb-12">
-            <div className="rounded-[12px] bg-gradient-to-br from-gold/[0.06] to-white/[0.02] border border-gold/30 p-5">
+          <section className="animate-slide-in-left">
+            <div className="rounded-[12px] bg-gradient-to-br from-[#A855F7]/[0.08] via-gold/[0.05] to-white/[0.02] border border-[#A855F7]/30 p-5"
+              style={{ boxShadow: "0 0 30px rgba(168,85,247,0.08)" }}>
               <div className="flex items-center gap-2 mb-2">
-                <Sparkle size={14} className="text-gold" weight="fill" />
-                <span className="font-mono text-[9.5px] uppercase tracking-[0.25em] text-gold">
-                  Target locked
+                <Sparkle size={14} className="text-[#A855F7]" weight="fill" />
+                <span className="font-mono text-[9.5px] uppercase tracking-[0.25em] text-[#A855F7]">
+                  Ninny locked your target
                 </span>
               </div>
               <h3 className="font-bebas text-[28px] tracking-wider text-cream leading-tight mb-1">
@@ -311,26 +318,74 @@ export default function MasteryLandingPage() {
           </section>
         )}
 
-        {/* Existing exams */}
-        {exams.length > 0 && (
-          <section>
-            <h2 className="font-bebas text-sm text-cream tracking-[0.2em] mb-3">YOUR TARGETS</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {exams.map(e => (
-                <ExamCard key={e.id} exam={e} />
+        </div>{/* ── end LEFT funnel column ── */}
+
+        {/* ── RIGHT: targets list, or the "how Mastery works" explainer ── */}
+        <div className="animate-slide-up" style={{ animationDelay: "0.08s" }}>
+          {loadingExams && exams.length === 0 ? (
+            <div className="space-y-3">
+              {[1, 2].map(i => (
+                <div key={i} className="h-28 rounded-[10px] bg-white/[0.03] animate-pulse" />
               ))}
             </div>
-          </section>
-        )}
+          ) : exams.length > 0 ? (
+            <section>
+              <h2 className="font-bebas text-sm text-cream tracking-[0.2em] mb-3">YOUR TARGETS</h2>
+              <div className="grid grid-cols-1 gap-3">
+                {exams.map(e => (
+                  <ExamCard key={e.id} exam={e} />
+                ))}
+              </div>
+            </section>
+          ) : (
+            /* No targets yet — fill the right half with a 3-step explainer so
+               the layout is never half-empty during the create step. */
+            <section
+              className="rounded-[12px] p-6"
+              style={{
+                background: "linear-gradient(160deg, rgba(168,85,247,0.06) 0%, rgba(255,255,255,0.02) 60%)",
+                border: "1px solid rgba(168,85,247,0.18)",
+                boxShadow: "0 0 30px rgba(168,85,247,0.05)",
+              }}
+            >
+              <div className="flex items-center gap-2 mb-5">
+                <Brain size={16} className="text-[#A855F7]" weight="fill" />
+                <h2 className="font-bebas text-sm text-cream tracking-[0.2em]">HOW MASTERY WORKS</h2>
+              </div>
+              <ol className="space-y-4">
+                {[
+                  { Icon: NotePencil,    title: "Describe it", body: "Name an exam, a unit, or paste a syllabus. Ninny parses it into weighted subtopics." },
+                  { Icon: ChatCircleText, title: "Ninny teaches + quizzes", body: "A chat-first loop: short lessons, then questions. It adapts to what you miss." },
+                  { Icon: GraduationCap, title: "Grind to 100%", body: "The bar fills slowly and honestly. Reaching ready means you've actually earned it." },
+                ].map((step, i) => {
+                  const StepIcon = step.Icon;
+                  return (
+                    <li key={i} className="flex items-start gap-3">
+                      <span className="shrink-0 w-9 h-9 grid place-items-center rounded-xl"
+                        style={{ background: "rgba(168,85,247,0.12)", border: "1px solid rgba(168,85,247,0.3)", color: "#A855F7" }}>
+                        <StepIcon size={18} weight="fill" aria-hidden="true" />
+                      </span>
+                      <div>
+                        <p className="font-bebas text-base text-cream tracking-wider leading-none mb-1">
+                          <span className="text-[#A855F7] mr-1.5">{i + 1}.</span>{step.title}
+                        </p>
+                        <p className="text-cream/55 text-[12.5px] leading-relaxed font-sans">{step.body}</p>
+                      </div>
+                    </li>
+                  );
+                })}
+              </ol>
+              <div className="mt-5 pt-4 border-t border-white/[0.06] flex items-center gap-2">
+                <ListChecks size={14} className="text-cream/40" weight="bold" aria-hidden="true" />
+                <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-cream/45">
+                  Describe your first target to begin
+                </p>
+              </div>
+            </section>
+          )}
+        </div>{/* ── end RIGHT column ── */}
 
-        {exams.length === 0 && !loadingExams && !parsed && (
-          <section className="rounded-[10px] bg-white/[0.02] border border-white/[0.05] p-6 text-center">
-            <NotePencil size={20} className="text-cream/40 mx-auto mb-2" />
-            <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-cream/50">
-              No targets yet — describe your first above.
-            </p>
-          </section>
-        )}
+        </div>{/* ── end 2-column grid ── */}
       </main>
 
       {limitHit && <LimitPaywall state={limitHit} onClose={() => setLimitHit(null)} />}

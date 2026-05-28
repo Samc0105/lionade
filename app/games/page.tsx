@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import AmbientOrbs from "@/components/AmbientOrbs";
 import { useAuth } from "@/lib/auth";
 import { useUserStats, mutateUserStats } from "@/lib/hooks";
 import { cdnUrl } from "@/lib/cdn";
@@ -670,35 +671,57 @@ export default function GamesPage() {
     return null;
   };
 
+  // Today's remaining pulls across the limited games — drives the footer strip.
+  const pullsToday = (["roardle", "timeline"] as const).reduce(
+    (acc, id) => {
+      const used = getDailyPlays(id);
+      acc.used += used;
+      acc.cap += DAILY_LIMITS[id];
+      return acc;
+    },
+    { used: 0, cap: 0 },
+  );
+  const pullsRemaining = Math.max(0, pullsToday.cap - pullsToday.used);
+
   return (
     <ProtectedRoute>
-      <div className="min-h-screen pt-16 pb-20 md:pb-8 overflow-hidden relative">
-        {/* Small lion crest — demoted from center-mascot to corner watermark */}
-        <div
-          className="hidden md:block absolute top-24 right-10 w-28 h-28 opacity-40 pointer-events-none games-lion-breathe z-0"
-          aria-hidden="true"
-        >
-          <img
-            src="/image-name.png"
-            alt=""
-            className="w-full h-full object-contain"
-            style={{ filter: "drop-shadow(0 0 18px rgba(255,215,0,0.35))" }}
-          />
-        </div>
+      <div className="min-h-screen pt-16 pb-20 md:pb-8 overflow-hidden relative" style={{ isolation: "isolate" }}>
+        {/* Faint orbs keyed to the four game accents — intentional depth */}
+        <AmbientOrbs
+          orbs={[
+            { color: "#EC4899", pos: "top-[12%] right-[14%]", size: 460, opacity: 0.05 },
+            { color: "#9B59B6", pos: "top-[48%] left-[10%]", size: 520, opacity: 0.04 },
+            { color: "#00BFFF", pos: "bottom-[14%] left-[44%]", size: 440, opacity: 0.04 },
+            { color: "#00C851", pos: "bottom-[22%] right-[20%]", size: 380, opacity: 0.035 },
+          ]}
+        />
 
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-10 relative z-10">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10 relative z-10">
 
-          {/* ═══ HEADER — "The Arcade" private-catalog feel ═══ */}
-          <header className="mb-10 animate-slide-up">
-            <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-cream/30 mb-2">
-              private ledger · est. 2026
-            </p>
-            <h1 className="font-bebas text-[clamp(4rem,14vw,11rem)] text-cream tracking-tight leading-[0.86]">
-              THE<br />ARCADE
-            </h1>
-            <p className="font-serif italic text-cream/40 text-sm mt-3 max-w-md">
-              four lots · two-times Fangs on strong runs · pick one, pull the ticket
-            </p>
+          {/* ═══ HEADER — title left, lion crest as a real right-side hero ═══ */}
+          <header className="mb-10 animate-slide-up flex items-start justify-between gap-6">
+            <div>
+              <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-cream/30 mb-2">
+                private ledger · est. 2026
+              </p>
+              <h1 className="font-bebas text-[clamp(3.5rem,11vw,9rem)] text-cream tracking-tight leading-[0.86]">
+                THE<br />ARCADE
+              </h1>
+              <p className="font-serif italic text-cream/40 text-sm mt-3 max-w-md">
+                four lots · two-times Fangs on strong runs · pick one, pull the ticket
+              </p>
+            </div>
+            <div
+              className="hidden md:block w-40 lg:w-52 shrink-0 -mt-2 games-lion-breathe"
+              aria-hidden="true"
+            >
+              <img
+                src="/image-name.png"
+                alt=""
+                className="w-full h-full object-contain"
+                style={{ filter: "drop-shadow(0 0 32px rgba(255,215,0,0.40))" }}
+              />
+            </div>
           </header>
 
           {/* ═══ TABS ═══ */}
@@ -771,8 +794,8 @@ export default function GamesPage() {
             </div>
           )}
 
-          {/* ═══ TICKET STACK — 4 wide luxury tickets, vertical, with foil sheen ═══ */}
-          <div className="games-stack space-y-5 animate-slide-up" style={{ animationDelay: "0.15s" }}>
+          {/* ═══ TICKET GRID — 2×2 luxury tickets with foil sheen + hover lift ═══ */}
+          <div className="games-stack grid grid-cols-1 lg:grid-cols-2 gap-5">
             {GAMES.map((g, idx) => {
               const plays = getDailyPlays(g.id);
               const remaining = g.limit - plays;
@@ -784,8 +807,9 @@ export default function GamesPage() {
               return (
                 <div
                   key={g.id}
-                  className="games-ticket games-foil relative rounded-[6px] overflow-hidden"
+                  className="games-ticket games-foil lift-card relative rounded-[6px] overflow-hidden animate-slide-up"
                   style={{
+                    animationDelay: `${0.15 + idx * 0.07}s`,
                     background: `linear-gradient(90deg, ${hexToRgba(g.color, 0.08)} 0%, #0c0a14 60%)`,
                     border: `1px solid ${hexToRgba(g.color, 0.22)}`,
                     boxShadow: "0 10px 28px rgba(0, 0, 0, 0.4)",
@@ -909,10 +933,32 @@ export default function GamesPage() {
             })}
           </div>
 
-          {/* Footer tag for the page */}
-          <p className="font-serif italic text-cream/20 text-xs text-center mt-10">
-            house rules: no Fangs without effort · draw resets at midnight
-          </p>
+          {/* ═══ FOOTER STAT STRIP — fills the dead space below the grid ═══ */}
+          <div
+            className="mt-8 rounded-[6px] flex flex-wrap items-center gap-x-8 gap-y-3 px-5 sm:px-7 py-4 animate-slide-up"
+            style={{
+              animationDelay: "0.45s",
+              background: "linear-gradient(90deg, rgba(255,215,0,0.05) 0%, rgba(12,10,20,0.6) 60%)",
+              border: "1px solid rgba(255,215,0,0.14)",
+            }}
+          >
+            <div className="flex items-center gap-2.5">
+              <img src={cdnUrl("/F.png")} alt="Fangs" className="w-5 h-5 object-contain" />
+              <div>
+                <p className="font-bebas text-xl text-gold leading-none tabular-nums">{pullsRemaining}</p>
+                <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-cream/40 mt-0.5">pulls left today</p>
+              </div>
+            </div>
+            <div className="h-8 w-px bg-cream/10 hidden sm:block" aria-hidden="true" />
+            <div>
+              <p className="font-bebas text-xl text-cream leading-none">{GAMES.length}</p>
+              <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-cream/40 mt-0.5">lots open</p>
+            </div>
+            <div className="h-8 w-px bg-cream/10 hidden sm:block" aria-hidden="true" />
+            <p className="font-serif italic text-cream/30 text-xs ml-auto">
+              house rules: no Fangs without effort · draw resets at midnight
+            </p>
+          </div>
         </div>
       </div>
     </ProtectedRoute>

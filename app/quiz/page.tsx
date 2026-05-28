@@ -976,32 +976,41 @@ function ResultsScreen({
   }, []);
 
   return (
-    <div className="min-h-screen pt-20">
+    <div className="min-h-screen pt-20 relative overflow-hidden">
       {/* Celebration confetti for strong results — ELITE (80%+) or PERFECT (100%) */}
       <Confetti trigger={accuracy >= 80} count={accuracy === 100 ? 80 : 50} duration={accuracy === 100 ? 1800 : 1400} />
 
-      <div className="max-w-2xl mx-auto px-4 py-12 text-center">
-        {/* Rank illustration — rendered directly on the space background
-            with no circle/ring/shadow. The illustration itself carries the
-            tier signal. */}
-        <div className="inline-flex items-center justify-center mb-8 animate-slide-up">
-          <img
-            src={`/illustrations/${rank.illustration}.png`}
-            alt=""
-            width={128}
-            height={128}
-            className="w-32 h-32 object-contain"
-            aria-hidden="true"
-          />
-        </div>
+      {/* Radial glow behind the score, tinted by performance tier */}
+      <div
+        className="absolute top-[10%] left-1/2 -translate-x-1/2 w-[640px] h-[640px] rounded-full pointer-events-none"
+        style={{ background: `radial-gradient(circle, ${rank.color}14 0%, transparent 60%)` }}
+        aria-hidden="true"
+      />
 
-        <h1 className="font-bebas text-6xl text-cream tracking-wider mb-2 animate-slide-up" style={{ animationDelay: "0.05s" }}>
-          {rank.label}
-        </h1>
-        <p className="text-cream/60 text-base mb-10 animate-slide-up" style={{ animationDelay: "0.08s" }}>
-          {subject} Quiz Complete
-          {blitzMode && <span className="text-[#EAB308] ml-2 inline-flex items-center gap-1"><Lightning size={14} weight="fill" aria-hidden="true" /> Blitz</span>}
-        </p>
+      <div className="max-w-4xl mx-auto px-4 py-12 relative z-10">
+        {/* Rank header — illustration + label, centered above the debrief */}
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center justify-center mb-4 animate-slide-up">
+            <img
+              src={`/illustrations/${rank.illustration}.png`}
+              alt=""
+              width={120}
+              height={120}
+              className="w-28 h-28 object-contain"
+              aria-hidden="true"
+            />
+          </div>
+          <h1
+            className="font-bebas text-6xl tracking-wider mb-2 animate-slide-up"
+            style={{ animationDelay: "0.05s", color: rank.color, textShadow: `0 0 32px ${rank.color}40` }}
+          >
+            {rank.label}
+          </h1>
+          <p className="text-cream/60 text-base animate-slide-up" style={{ animationDelay: "0.08s" }}>
+            {subject} Quiz Complete
+            {blitzMode && <span className="text-[#EAB308] ml-2 inline-flex items-center gap-1"><Lightning size={14} weight="fill" aria-hidden="true" /> Blitz</span>}
+          </p>
+        </div>
 
         {/* Streak milestone banner — uses tier illustration matching the streak length */}
         {streakMilestone && (() => {
@@ -1062,8 +1071,13 @@ function ResultsScreen({
           </div>
         )}
 
+        {/* ═══ 2-COLUMN DEBRIEF ═══ */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 items-start text-left">
+
+        {/* ── LEFT: score stat tiles + accuracy + actions ── */}
+        <div>
         {/* Glass Stat Cards — with animated counters */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8 animate-slide-up" style={{ animationDelay: "0.12s" }}>
+        <div className="grid grid-cols-2 gap-3 mb-5 animate-slide-up" style={{ animationDelay: "0.12s" }}>
           {[
             { Icon: Check, label: "Correct", value: animCorrect, accent: "#2ECC71", isCoin: false },
             { Icon: XIcon, label: "Wrong", value: animWrong, accent: "#E74C3C", isCoin: false },
@@ -1099,7 +1113,7 @@ function ResultsScreen({
 
         {/* Glass Answer Breakdown */}
         <div
-          className="rounded-2xl p-5 mb-8 text-left backdrop-blur-xl animate-slide-up"
+          className="rounded-2xl p-5 mb-5 text-left backdrop-blur-xl animate-slide-up"
           style={{
             animationDelay: "0.18s",
             background: "rgba(255,255,255,0.04)",
@@ -1136,7 +1150,7 @@ function ResultsScreen({
         </div>
 
         {/* Glass Buttons */}
-        <div className="flex flex-col sm:flex-row gap-3 animate-slide-up" style={{ animationDelay: "0.24s" }}>
+        <div className="flex flex-col gap-3 animate-slide-up" style={{ animationDelay: "0.24s" }}>
           <button
             onClick={() => router.push("/learn")}
             className="flex-1 py-3.5 rounded-xl font-syne font-bold text-sm transition-all duration-200 hover:brightness-125 active:scale-[0.98] backdrop-blur-xl cursor-pointer"
@@ -1206,12 +1220,40 @@ function ResultsScreen({
             </button>
           </div>
         )}
+        </div>{/* ── end LEFT column ── */}
 
-        {/* Review Mistakes */}
-        {showMistakes && mistakes.length > 0 && (
-          <div className="mt-8 space-y-4 text-left animate-slide-up">
-            <h3 className="font-bebas text-xl text-cream tracking-wider text-center mb-2">REVIEW MISTAKES</h3>
-            {mistakes.map((m) => {
+        {/* ── RIGHT: review mistakes (fills the column) ── */}
+        <div className="animate-slide-up" style={{ animationDelay: "0.2s" }}>
+          {mistakes.length === 0 ? (
+            <div
+              className="rounded-2xl p-8 text-center backdrop-blur-xl h-full flex flex-col items-center justify-center"
+              style={{
+                background: "rgba(46,204,113,0.04)",
+                border: "1px solid rgba(46,204,113,0.18)",
+                boxShadow: "0 4px 24px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.06)",
+              }}
+            >
+              <Check size={40} weight="bold" color="#2ECC71" aria-hidden="true" className="mb-3" />
+              <h3 className="font-bebas text-2xl text-cream tracking-wider mb-1">FLAWLESS RUN</h3>
+              <p className="text-cream/50 text-sm leading-relaxed max-w-xs">
+                No mistakes to review. Every answer landed. Keep the streak going.
+              </p>
+            </div>
+          ) : (
+            <div
+              className="rounded-2xl p-5 text-left backdrop-blur-xl"
+              style={{
+                background: "rgba(255,255,255,0.04)",
+                border: "1px solid rgba(255,255,255,0.10)",
+                boxShadow: "0 4px 24px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.06)",
+              }}
+            >
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-bebas text-xl text-cream tracking-wider">REVIEW MISTAKES</h3>
+                <span className="text-[#E74C3C] text-xs font-bold uppercase tracking-widest">{mistakes.length}</span>
+              </div>
+              <div className="space-y-4">
+              {(showMistakes ? mistakes : mistakes.slice(0, 1)).map((m) => {
               const optionLabels = ["A", "B", "C", "D"];
               return (
                 <div
@@ -1261,8 +1303,25 @@ function ResultsScreen({
                 </div>
               );
             })}
-          </div>
-        )}
+              </div>
+              {mistakes.length > 1 && (
+                <button
+                  onClick={() => setShowMistakes(!showMistakes)}
+                  className="w-full mt-4 py-2.5 rounded-xl font-syne font-bold text-xs transition-all duration-200 hover:brightness-125 active:scale-[0.98]"
+                  style={{
+                    background: "rgba(231,76,60,0.10)",
+                    border: "1px solid rgba(231,76,60,0.25)",
+                    color: "#E74C3C",
+                  }}
+                >
+                  {showMistakes ? "Show less" : `Show all ${mistakes.length} mistakes`}
+                </button>
+              )}
+            </div>
+          )}
+        </div>{/* ── end RIGHT column ── */}
+
+        </div>{/* ── end 2-column debrief ── */}
       </div>
     </div>
   );
