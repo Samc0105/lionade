@@ -3745,3 +3745,210 @@ html.light .space-bg-container { display: none; }
   .sparkline-path { stroke-dashoffset: 0 !important; }
   .path-ring { stroke-dashoffset: var(--ring-offset, 0) !important; }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   COMPETITIVE ARENA — juice keyframe block (self-contained)
+   ───────────────────────────────────────────────────────────────────────────
+   Every animation here is GPU-only (transform / opacity / filter), nothing
+   above ~2.5Hz, and NO full-viewport flash (color washes are scoped to small
+   elements or capped low-opacity). All `ca-*` classes are disabled together by
+   the single prefers-reduced-motion guard at the bottom of this block.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Diagonal accent light-sweep across the shell on entry (runs once) */
+@keyframes ca-light-sweep {
+  0%   { transform: translateX(-130%) skewX(-18deg); opacity: 0; }
+  18%  { opacity: 0.9; }
+  100% { transform: translateX(230%) skewX(-18deg); opacity: 0; }
+}
+.ca-light-sweep {
+  position: absolute; top: 0; bottom: 0; left: 0;
+  width: 42%; pointer-events: none; will-change: transform, opacity;
+  background: linear-gradient(100deg, transparent 0%, var(--ca-sweep, rgba(255,255,255,0.10)) 50%, transparent 100%);
+  animation: ca-light-sweep 1.05s var(--ease-out-expo) 0.12s both;
+}
+
+/* Generic content pop-in (panels, cards, readouts) */
+@keyframes ca-pop-in {
+  from { transform: scale(0.92) translateY(8px); opacity: 0; }
+  to   { transform: scale(1) translateY(0); opacity: 1; }
+}
+.ca-pop-in { animation: ca-pop-in 0.34s var(--ease-out-expo) both; }
+
+/* Spring-style overshoot pop (markers, true-value, verdict) */
+@keyframes ca-spring-in {
+  0%   { transform: scale(0.4); opacity: 0; }
+  60%  { transform: scale(1.12); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+.ca-spring-in { animation: ca-spring-in 0.45s var(--ease-out-expo) both; }
+
+/* Score-change pulse — a single quick scale bump (no color flash) */
+@keyframes ca-score-pulse {
+  0%   { transform: scale(1); }
+  35%  { transform: scale(1.28); }
+  100% { transform: scale(1); }
+}
+.ca-score-pulse { animation: ca-score-pulse 0.5s var(--ease-out-quart); }
+
+/* Fang-coin burst — small coins fly up + out then fade (per particle var) */
+@keyframes ca-fang-burst {
+  0%   { transform: translate(0,0) scale(0.6); opacity: 0; }
+  20%  { opacity: 1; }
+  100% { transform: translate(var(--fx,0), var(--fy,-44px)) scale(1); opacity: 0; }
+}
+.ca-fang { will-change: transform, opacity; animation: ca-fang-burst 0.85s var(--ease-out-quart) both; }
+
+/* Urgent timer pulse — opacity breathe (under-10s). Scoped to the timer bar. */
+@keyframes ca-urgent {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.45; }
+}
+.ca-urgent { animation: ca-urgent 0.7s ease-in-out infinite; }
+
+/* SABOTAGE — attack projectile travels attacker -> opponent edge */
+@keyframes ca-projectile {
+  0%   { transform: translate(0, 0) scale(0.6); opacity: 0; }
+  12%  { opacity: 1; }
+  88%  { opacity: 1; }
+  100% { transform: translate(var(--px, 60vw), var(--py, -30vh)) scale(1.1); opacity: 0; }
+}
+.ca-projectile { will-change: transform, opacity; animation: ca-projectile 0.6s var(--ease-out-quart) both; }
+
+/* SABOTAGE — screen shake (freeze hit). Bounded ~6px, ~2Hz, single shot */
+@keyframes ca-shake {
+  0%, 100% { transform: translate(0, 0); }
+  15% { transform: translate(-5px, 2px); }
+  30% { transform: translate(5px, -2px); }
+  45% { transform: translate(-4px, 3px); }
+  60% { transform: translate(4px, -1px); }
+  75% { transform: translate(-2px, 1px); }
+}
+.ca-shake { animation: ca-shake 0.5s ease-in-out; }
+
+/* SABOTAGE — scramble shuffle, each option lifts + settles */
+@keyframes ca-scramble {
+  0%   { transform: translateY(-10px) rotate(-1.5deg); opacity: 0.55; }
+  100% { transform: translateY(0) rotate(0); opacity: 1; }
+}
+.ca-scramble { animation: ca-scramble 0.35s var(--ease-out-expo) both; }
+
+/* SABOTAGE — decoy single-shot glitch (one quick offset, not a strobe) */
+@keyframes ca-glitch {
+  0%   { transform: translate(0,0); filter: none; }
+  20%  { transform: translate(-3px, 1px); filter: hue-rotate(40deg); }
+  40%  { transform: translate(3px, -1px); filter: hue-rotate(-30deg); }
+  60%  { transform: translate(-2px, 0); }
+  100% { transform: translate(0,0); filter: none; }
+}
+.ca-glitch { animation: ca-glitch 0.4s steps(4, end); }
+
+/* SABOTAGE — charge-ready glow breathe on the meter once full */
+@keyframes ca-charge-ready {
+  0%, 100% { box-shadow: 0 0 8px 0 rgba(168,85,247,0.35); }
+  50%      { box-shadow: 0 0 18px 3px rgba(168,85,247,0.65); }
+}
+.ca-charge-ready { animation: ca-charge-ready 1.1s ease-in-out infinite; }
+
+/* Correct flash (green) — scoped to the element, low alpha, single shot */
+@keyframes ca-correct {
+  0%   { box-shadow: inset 0 0 0 9999px rgba(80,200,120,0.0); }
+  30%  { box-shadow: inset 0 0 0 9999px rgba(80,200,120,0.22); }
+  100% { box-shadow: inset 0 0 0 9999px rgba(80,200,120,0.0); }
+}
+.ca-correct { animation: ca-correct 0.6s ease-out; }
+
+/* Wrong shake (red tint + small shake) — scoped, single shot */
+@keyframes ca-wrong {
+  0%   { transform: translateX(0); box-shadow: inset 0 0 0 9999px rgba(239,68,68,0.0); }
+  20%  { transform: translateX(-6px); box-shadow: inset 0 0 0 9999px rgba(239,68,68,0.2); }
+  40%  { transform: translateX(6px); }
+  60%  { transform: translateX(-4px); }
+  80%  { transform: translateX(3px); }
+  100% { transform: translateX(0); box-shadow: inset 0 0 0 9999px rgba(239,68,68,0.0); }
+}
+.ca-wrong { animation: ca-wrong 0.5s ease-out; }
+
+/* ZOOM — "LOCKED IN" stamp slam */
+@keyframes ca-stamp {
+  0%   { transform: scale(2.4) rotate(-12deg); opacity: 0; }
+  55%  { transform: scale(0.92) rotate(-12deg); opacity: 1; }
+  70%  { transform: scale(1.04) rotate(-12deg); }
+  100% { transform: scale(1) rotate(-12deg); opacity: 1; }
+}
+.ca-stamp { animation: ca-stamp 0.5s var(--ease-out-quart) both; }
+
+/* COUNTDOWN — each number scales down + fades (3..2..1..GO) */
+@keyframes ca-count-tick {
+  0%   { transform: scale(1.8); opacity: 0; }
+  25%  { transform: scale(1); opacity: 1; }
+  80%  { transform: scale(1); opacity: 1; }
+  100% { transform: scale(0.7); opacity: 0; }
+}
+.ca-count-tick { animation: ca-count-tick 0.9s var(--ease-out-expo) both; }
+
+/* PIN — bounce drop */
+@keyframes ca-pin-drop {
+  0%   { transform: translateY(-26px) scale(0.7); opacity: 0; }
+  60%  { transform: translateY(4px) scale(1.05); opacity: 1; }
+  80%  { transform: translateY(-2px) scale(0.98); }
+  100% { transform: translateY(0) scale(1); opacity: 1; }
+}
+.ca-pin-drop { animation: ca-pin-drop 0.5s var(--ease-out-quart) both; }
+
+/* PIN — guess->true line draws/fades in on reveal (SVG path opacity) */
+@keyframes ca-pin-line {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.ca-pin-line { animation: ca-pin-line 0.6s var(--ease-out-expo) 0.15s both; }
+
+/* POKER FACE — 3D card flip on reveal */
+@keyframes ca-card-flip {
+  0%   { transform: perspective(900px) rotateY(0deg); }
+  100% { transform: perspective(900px) rotateY(180deg); }
+}
+.ca-card-flip-face { backface-visibility: hidden; }
+
+/* POKER FACE — verdict slam */
+@keyframes ca-slam {
+  0%   { transform: scale(1.6); opacity: 0; letter-spacing: 0.5em; }
+  60%  { transform: scale(0.96); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; letter-spacing: 0.1em; }
+}
+.ca-slam { animation: ca-slam 0.5s var(--ease-out-quart) both; }
+
+/* ARENA HUB — staggered card reveal (delay set inline per index) */
+@keyframes ca-card-reveal {
+  from { transform: translateY(18px) scale(0.97); opacity: 0; }
+  to   { transform: translateY(0) scale(1); opacity: 1; }
+}
+.ca-card-reveal { animation: ca-card-reveal 0.5s var(--ease-out-expo) both; }
+
+/* ARENA HUB — hover lift + accent glow (box-shadow only, no layout shift) */
+.ca-mode-card { transition: transform 0.3s var(--ease-out-emil), box-shadow 0.3s var(--ease-out-emil); }
+.ca-mode-card:hover {
+  box-shadow: 0 14px 40px -8px color-mix(in srgb, var(--mode-accent, #FFD700) 38%, transparent),
+              0 0 0 1px color-mix(in srgb, var(--mode-accent, #FFD700) 45%, transparent);
+}
+
+/* The single reduced-motion guard for the WHOLE competitive-arena block.
+   Disables motion but leaves final visual states intact (opacity 1, no shift). */
+@media (prefers-reduced-motion: reduce) {
+  .ca-light-sweep, .ca-pop-in, .ca-spring-in, .ca-score-pulse,
+  .ca-fang, .ca-urgent, .ca-projectile, .ca-shake, .ca-scramble,
+  .ca-glitch, .ca-charge-ready, .ca-correct, .ca-wrong, .ca-stamp,
+  .ca-count-tick, .ca-pin-drop, .ca-pin-line, .ca-slam, .ca-card-reveal,
+  .ca-mode-card, .ca-mode-card:hover {
+    animation: none !important;
+    transition: none !important;
+  }
+  .ca-pin-line { opacity: 1 !important; }
+  .ca-mode-card:hover { transform: none !important; }
+  .ca-light-sweep, .ca-fang, .ca-projectile { opacity: 0 !important; }
+  .ca-pop-in, .ca-spring-in, .ca-stamp, .ca-count-tick,
+  .ca-pin-drop, .ca-slam, .ca-card-reveal {
+    transform: none !important;
+    opacity: 1 !important;
+  }
+}

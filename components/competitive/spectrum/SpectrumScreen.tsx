@@ -96,6 +96,18 @@ export default function SpectrumScreen({ loaded, selfId }: { loaded: LoadedMatch
       ? 0
       : ((trueValue - round.min_value) / (round.max_value - round.min_value)) * 100;
 
+  // Result coloring by closeness — derived purely from values already in client
+  // state after the reveal (no secret read). 0 = bullseye, 1 = whole-range off.
+  const closeness = (() => {
+    if (trueValue === null) return { color: "#50C878", label: "" };
+    const span = Math.abs(round.max_value - round.min_value) || 1;
+    const errFrac = Math.min(1, Math.abs(value - trueValue) / span);
+    if (errFrac < 0.05) return { color: "#FFD700", label: "BULLSEYE" };
+    if (errFrac < 0.15) return { color: "#50C878", label: "VERY CLOSE" };
+    if (errFrac < 0.35) return { color: "#00BFFF", label: "CLOSE" };
+    return { color: "#EF4444", label: "OFF THE MARK" };
+  })();
+
   return (
     <div className="flex-1 min-h-0 flex flex-col w-full px-3 sm:px-6">
       <Hud idx={idx} total={rounds.length} score={score} oppScore={oppScore} accent="#A855F7" />
@@ -112,9 +124,9 @@ export default function SpectrumScreen({ loaded, selfId }: { loaded: LoadedMatch
             onChange={(e) => setPct(parseFloat(e.target.value))}
             className="w-full accent-[#A855F7] h-3"
           />
-          {/* true marker after reveal */}
+          {/* true-value marker springs in on lock-in */}
           {revealed && trueValue !== null && (
-            <div className="absolute -top-1 h-5 w-0.5 bg-[#50C878]" style={{ left: `${Math.max(0, Math.min(100, truePct))}%` }} />
+            <div className="ca-spring-in absolute -top-1 h-5 w-0.5 bg-[#50C878] shadow-[0_0_8px_rgba(80,200,120,0.7)]" style={{ left: `${Math.max(0, Math.min(100, truePct))}%` }} />
           )}
         </div>
 
@@ -125,10 +137,16 @@ export default function SpectrumScreen({ loaded, selfId }: { loaded: LoadedMatch
 
         <div className="text-center mt-8 sm:mt-10">
           <p className="text-cream/40 text-[10px] uppercase tracking-widest">Your estimate</p>
-          <p className="font-bebas text-5xl sm:text-7xl text-[#A855F7]">{fmt(value)}<span className="text-cream/40 text-xl sm:text-2xl ml-1.5">{round.unit}</span></p>
+          <p
+            className="font-bebas text-5xl sm:text-7xl text-[#A855F7] transition-transform duration-150 ease-out"
+            style={{ transform: revealed ? "scale(1)" : `scale(${1 + Math.min(0.06, Math.abs(pct - 50) / 900)})` }}
+          >
+            {fmt(value)}<span className="text-cream/40 text-xl sm:text-2xl ml-1.5">{round.unit}</span>
+          </p>
           {revealed && trueValue !== null && (
-            <p className="text-[#50C878] text-sm sm:text-base mt-3">
-              True value: <span className="font-bebas text-lg sm:text-xl">{fmt(trueValue)} {round.unit}</span> &middot; +{lastPts} pts
+            <p className="ca-pop-in text-sm sm:text-base mt-3" style={{ color: closeness.color }}>
+              True value: <span className="font-bebas text-lg sm:text-xl text-[#50C878]">{fmt(trueValue)} {round.unit}</span>
+              {" "}&middot; <span style={{ color: closeness.color }}>{closeness.label}</span> &middot; +{lastPts} pts
             </p>
           )}
         </div>

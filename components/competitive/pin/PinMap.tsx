@@ -12,15 +12,18 @@ import "leaflet/dist/leaflet.css";
 
 // Default Leaflet marker icons reference image files that don't resolve under
 // the Next bundler — define inline divIcons instead so no asset import needed.
+// JUICE: the guess pin DROPS with a bounce (.ca-pin-drop) and the true marker
+// POPS in (.ca-spring-in) on reveal. transform-origin bottom so the drop reads
+// as landing on the spot. (Both classes self-gate on reduced motion.)
 const guessIcon = L.divIcon({
   className: "",
-  html: `<div style="width:18px;height:18px;border-radius:50%;background:#FFD700;border:2px solid #0a0a14;box-shadow:0 0 8px rgba(255,215,0,0.7)"></div>`,
+  html: `<div class="ca-pin-drop" style="transform-origin:50% 100%;width:18px;height:18px;border-radius:50%;background:#FFD700;border:2px solid #0a0a14;box-shadow:0 0 8px rgba(255,215,0,0.7)"></div>`,
   iconSize: [18, 18],
   iconAnchor: [9, 9],
 });
 const trueIcon = L.divIcon({
   className: "",
-  html: `<div style="width:18px;height:18px;border-radius:50%;background:#50C878;border:2px solid #0a0a14;box-shadow:0 0 8px rgba(80,200,120,0.7)"></div>`,
+  html: `<div class="ca-spring-in" style="width:18px;height:18px;border-radius:50%;background:#50C878;border:2px solid #0a0a14;box-shadow:0 0 8px rgba(80,200,120,0.7)"></div>`,
   iconSize: [18, 18],
   iconAnchor: [9, 9],
 });
@@ -71,7 +74,7 @@ export default function PinMap({
       {guess && <Marker position={[guess.lat, guess.lng]} icon={guessIcon} />}
       {truePoint && <Marker position={[truePoint.lat, truePoint.lng]} icon={trueIcon} />}
       {guess && truePoint && (
-        <Polyline positions={[[guess.lat, guess.lng], [truePoint.lat, truePoint.lng]]} pathOptions={{ color: "#EF4444", dashArray: "6 6", weight: 2 }} />
+        <Polyline positions={[[guess.lat, guess.lng], [truePoint.lat, truePoint.lng]]} pathOptions={{ color: "#EF4444", dashArray: "6 6", weight: 2, className: "ca-pin-line" }} />
       )}
     </MapContainer>
   );

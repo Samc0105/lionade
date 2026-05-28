@@ -14,9 +14,11 @@
 // the shared /complete endpoint (which folds in the accumulated prize pot).
 
 import { useState, useEffect, useRef, useCallback } from "react";
+import { motion, useReducedMotion } from "framer-motion";
 import { useMatchChannel } from "@/lib/competitive/use-match-channel";
 import { useSettle } from "../useSettle";
 import ResultCard from "../ResultCard";
+import CountUp from "@/components/CountUp";
 import { apiPost } from "@/lib/api-client";
 import { cdnUrl } from "@/lib/cdn";
 import { OPENING_STAKES, MAX_RAISE_MULTIPLIER } from "@/lib/competitive/pokerface-wager";
@@ -148,7 +150,7 @@ export default function PokerFaceScreen({ loaded, selfId }: { loaded: LoadedMatc
 
       {/* PRESENT phase (presenter only) */}
       {phase === "present" && isPresenter && (
-        <div className="rounded-2xl p-6 sm:p-8" style={{ background: "linear-gradient(135deg, #1a1400 0%, #060c18 100%)", border: "1px solid rgba(255,215,0,0.25)" }}>
+        <div className="ca-pop-in rounded-2xl p-6 sm:p-8" style={{ background: "linear-gradient(135deg, #1a1400 0%, #060c18 100%)", border: "1px solid rgba(255,215,0,0.25)" }}>
           <p className="text-cream/40 text-[10px] uppercase tracking-widest mb-1">Your secret card</p>
           <p className="font-bebas text-3xl text-[#FFD700] mb-1">{card.word}</p>
           <p className="text-cream/60 text-sm mb-5 italic">True fact: {card.fact}</p>
@@ -228,7 +230,7 @@ export default function PokerFaceScreen({ loaded, selfId }: { loaded: LoadedMatc
 
       {/* CALL phase (caller responds) */}
       {phase === "call" && !isPresenter && callerPending && (
-        <div className="rounded-2xl p-6" style={{ background: "linear-gradient(135deg, #150a1f 0%, #060c18 100%)", border: "1px solid rgba(168,85,247,0.25)" }}>
+        <div className="ca-pop-in rounded-2xl p-6" style={{ background: "linear-gradient(135deg, #150a1f 0%, #060c18 100%)", border: "1px solid rgba(168,85,247,0.25)" }}>
           <p className="text-cream/40 text-[10px] uppercase tracking-widest mb-1">Their card</p>
           <p className="font-bebas text-2xl text-[#A855F7] mb-3">{callerPending.word}</p>
           <p className="text-cream/40 text-[10px] uppercase tracking-widest mb-1">Their claim</p>
@@ -237,12 +239,12 @@ export default function PokerFaceScreen({ loaded, selfId }: { loaded: LoadedMatc
             <img src={cdnUrl("/F.png")} alt="Fangs" className="w-3 h-3 object-contain" /> Stake on the line: {callerPending.stake} Fangs
           </p>
           <div className="flex gap-3">
-            <button onClick={() => respond("believe")} className="flex-1 py-3.5 rounded-xl font-bebas tracking-wider text-lg"
-              style={{ background: "linear-gradient(135deg, #50C878, #3da862)", color: "#0a0a14" }}>
+            <button onClick={() => respond("believe")} className="ca-spring-in flex-1 py-3.5 rounded-xl font-bebas tracking-wider text-lg active:scale-95"
+              style={{ background: "linear-gradient(135deg, #50C878, #3da862)", color: "#0a0a14", animationDelay: "60ms" }}>
               BELIEVE
             </button>
-            <button onClick={() => respond("doubt")} className="flex-1 py-3.5 rounded-xl font-bebas tracking-wider text-lg"
-              style={{ background: "linear-gradient(135deg, #EF4444, #c43333)", color: "#fff" }}>
+            <button onClick={() => respond("doubt")} className="ca-spring-in flex-1 py-3.5 rounded-xl font-bebas tracking-wider text-lg active:scale-95"
+              style={{ background: "linear-gradient(135deg, #EF4444, #c43333)", color: "#fff", animationDelay: "140ms" }}>
               DOUBT
             </button>
           </div>
@@ -253,17 +255,58 @@ export default function PokerFaceScreen({ loaded, selfId }: { loaded: LoadedMatc
   );
 }
 
+// The reveal is the showpiece of Poker Face: a suspense beat, then a 3D card
+// flip from a face-down "?" to the truth/bluff face, the verdict headline slams
+// in, and the prize Fangs count up. All driven by the `reveal` already in client
+// state. Self-gates on reduced motion (flip + slam collapse to an instant show).
 function RevealCard({ reveal, selfId, isPresenter }: { reveal: Reveal; selfId: string; isPresenter: boolean }) {
+  const reduce = useReducedMotion();
+  const [flipped, setFlipped] = useState(reduce); // reduced motion -> already flipped
   const youWon = (reveal.winner === "presenter" && isPresenter) || (reveal.winner === "caller" && !isPresenter);
   const color = youWon ? "#FFD700" : "#EF4444";
+  const claimColor = reveal.presenterToldTruth ? "#50C878" : "#EF4444";
+
+  // Suspense beat: hold the card face-down ~650ms, then flip to the truth.
+  useEffect(() => {
+    if (reduce) return;
+    const t = setTimeout(() => setFlipped(true), 650);
+    return () => clearTimeout(t);
+  }, [reduce]);
+
   return (
     <div className="rounded-2xl p-6 text-center mb-4" style={{ background: "linear-gradient(135deg, #0c1020 0%, #060c18 100%)", border: `1px solid ${color}40` }}>
-      <p className="font-bebas text-3xl tracking-widest mb-2" style={{ color }}>{youWon ? "YOU WIN THE PRIZE" : "RIVAL TAKES THE PRIZE"}</p>
-      <p className="text-cream/70 mb-1">The claim was <span className="font-bold" style={{ color: reveal.presenterToldTruth ? "#50C878" : "#EF4444" }}>{reveal.presenterToldTruth ? "TRUE" : "A BLUFF"}</span></p>
-      <p className="text-cream/50 text-sm mb-1">Real fact: {reveal.cardFact}</p>
-      <p className="text-cream/40 text-xs flex items-center gap-1 justify-center mt-2">
-        <img src={cdnUrl("/F.png")} alt="Fangs" className="w-3 h-3 object-contain" /> Prize: {reveal.amount} Fangs
-      </p>
+      {/* 3D flip card */}
+      <div className="mx-auto mb-4" style={{ width: 132, height: 92, perspective: 900 }}>
+        <motion.div
+          className="relative w-full h-full"
+          style={{ transformStyle: "preserve-3d" }}
+          initial={false}
+          animate={{ rotateY: flipped ? 180 : 0 }}
+          transition={reduce ? { duration: 0 } : { duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
+        >
+          {/* face-down */}
+          <div className="ca-card-flip-face absolute inset-0 rounded-xl flex items-center justify-center font-bebas text-4xl"
+            style={{ background: "linear-gradient(135deg, #1a1400, #060c18)", border: "1px solid rgba(255,215,0,0.3)", color: "#FFD70066" }}>
+            ?
+          </div>
+          {/* revealed */}
+          <div className="ca-card-flip-face absolute inset-0 rounded-xl flex items-center justify-center font-bebas text-2xl tracking-wider"
+            style={{ background: `linear-gradient(135deg, ${claimColor}22, #060c18)`, border: `1px solid ${claimColor}66`, color: claimColor, transform: "rotateY(180deg)" }}>
+            {reveal.presenterToldTruth ? "TRUE" : "BLUFF"}
+          </div>
+        </motion.div>
+      </div>
+
+      {flipped && (
+        <>
+          <p className="ca-slam font-bebas text-3xl tracking-widest mb-2" style={{ color }}>{youWon ? "YOU WIN THE PRIZE" : "RIVAL TAKES THE PRIZE"}</p>
+          <p className="text-cream/70 mb-1">The claim was <span className="font-bold" style={{ color: claimColor }}>{reveal.presenterToldTruth ? "TRUE" : "A BLUFF"}</span></p>
+          <p className="text-cream/50 text-sm mb-1">Real fact: {reveal.cardFact}</p>
+          <p className="text-cream/40 text-xs flex items-center gap-1 justify-center mt-2">
+            <img src={cdnUrl("/F.png")} alt="Fangs" className="w-3 h-3 object-contain" /> Prize: <CountUp value={reveal.amount} duration={900} /> Fangs
+          </p>
+        </>
+      )}
     </div>
   );
 }

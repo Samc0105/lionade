@@ -28,6 +28,9 @@ import {
 } from "@/lib/competitive/sabotage-economy";
 import { SABOTAGE_EVENTS, type SabotageAttackKind } from "@/lib/competitive/channels";
 import { apiPost } from "@/lib/api-client";
+import CountUp from "@/components/CountUp";
+import FangBurst from "../FangBurst";
+import Countdown from "../Countdown";
 import type { LoadedMatch } from "@/app/compete/arena/[mode]/[matchId]/page";
 
 const ROUND_MS = 12_000;
@@ -73,6 +76,15 @@ export default function SabotageScreen({ loaded, selfId }: { loaded: LoadedMatch
   const oppFinishedRef = useRef(false);
   const myScoreRef = useRef(0);
 
+  // ── juice-only transient state (no gameplay effect) ──
+  const [shakeKey, setShakeKey] = useState(0);   // bumps when a freeze lands -> screen shake
+  const [glitchKey, setGlitchKey] = useState(0); // bumps when a decoy lands -> single glitch
+  const [fangKey, setFangKey] = useState(0);     // bumps on a correct answer -> coin burst + score pulse
+  const [answerFx, setAnswerFx] = useState<"" | "correct" | "wrong">(""); // flash on the picked option
+  const [projectiles, setProjectiles] = useState<{ id: number; kind: SabotageAttackKind }[]>([]);
+  const projIdRef = useRef(0);
+  const [started, setStarted] = useState(false); // false until the 3-2-1-GO countdown finishes
+
   const round = rounds[roundIdx];
 
   // ── tick ──
@@ -87,7 +99,9 @@ export default function SabotageScreen({ loaded, selfId }: { loaded: LoadedMatch
     setEffects((prev) => prev.filter((e) => e.until > now));
   }, [now, effects.length]);
 
-  const elapsed = now - roundStart;
+  // Hold the round timer at full until the 3-2-1-GO countdown completes so the
+  // player isn't bleeding time during the pre-round beat.
+  const elapsed = started ? now - roundStart : 0;
   const drained = effects.filter((e) => e.kind === "drain" && e.until > now).length * 5000;
   const timeLeft = Math.max(0, ROUND_MS - elapsed - drained);
 
@@ -103,6 +117,9 @@ export default function SabotageScreen({ loaded, selfId }: { loaded: LoadedMatch
         blur: 3000, scramble: 4000, drain: 0, decoy: 4000, freeze: 2000, fog: 2500,
       };
       if (kind === "scramble") setScrambleSeed((s) => s + 1);
+      // Juice-only reactions — pure presentation, do not change the effect logic.
+      if (kind === "freeze") setShakeKey((s) => s + 1);
+      if (kind === "decoy") setGlitchKey((s) => s + 1);
       setEffects((prev) => [...prev, { kind, until: Date.now() + (durations[kind] || 3000) }]);
     });
     const offAns = on(SABOTAGE_EVENTS.ANSWERED, (p) => {
@@ -122,6 +139,10 @@ export default function SabotageScreen({ loaded, selfId }: { loaded: LoadedMatch
       if (!check.ok) return;
       const target = enemyTeam[Math.floor(Math.random() * enemyTeam.length)];
       setMeter((m) => applyFire(m, kind, Date.now()));
+      // Juice-only: launch a projectile from the tray toward the rival's HUD.
+      const pid = ++projIdRef.current;
+      setProjectiles((p) => [...p, { id: pid, kind }]);
+      setTimeout(() => setProjectiles((p) => p.filter((x) => x.id !== pid)), 700);
       send({ type: SABOTAGE_EVENTS.ATTACK, kind, attacker_id: selfId, target_id: target });
       apiPost("/api/competitive/sabotage/attack", { matchId, targetId: target, kind }).catch(() => {});
     },
@@ -131,6 +152,7 @@ export default function SabotageScreen({ loaded, selfId }: { loaded: LoadedMatch
   const advance = useCallback(() => {
     setAnswered(null);
     setCorrectIdx(null);
+    setAnswerFx("");
     setEffects([]);
     if (roundIdx + 1 >= rounds.length) {
       setFinished(true);
@@ -143,7 +165,7 @@ export default function SabotageScreen({ loaded, selfId }: { loaded: LoadedMatch
 
   const answer = useCallback(
     async (idx: number) => {
-      if (answered !== null || hasEffect("freeze") || finished) return;
+      if (!started || answered !== null || hasEffect("freeze") || finished) return;
       setAnswered(idx); // lock the grid immediately; the server grades the pick
       const { ok, data } = await apiPost<{ isCorrect: boolean; reveal: { correct_index: number } }>(
         `/api/competitive/match/${matchId}/answer`,
@@ -151,25 +173,27 @@ export default function SabotageScreen({ loaded, selfId }: { loaded: LoadedMatch
       );
       const correct = ok && !!data?.isCorrect;
       if (ok && data) setCorrectIdx(data.reveal.correct_index);
+      setAnswerFx(correct ? "correct" : "wrong"); // juice-only flash on the picked option
       if (correct) {
         setScore((s) => { myScoreRef.current = s + 1; return s + 1; });
+        setFangKey((k) => k + 1); // coin burst + score pulse on a banked point
         const charge = chargeForAnswer({ correct, responseMs: elapsed, timeLimitMs: ROUND_MS });
         setMeter((m) => applyCharge(m, charge));
       }
       send({ type: SABOTAGE_EVENTS.ANSWERED, correct });
       setTimeout(advance, 1100);
     },
-    [answered, round, elapsed, send, advance, finished, matchId],
+    [started, answered, round, elapsed, send, advance, finished, matchId],
   );
 
-  // auto-advance on timeout
+  // auto-advance on timeout (only once the round has actually started)
   useEffect(() => {
-    if (answered !== null || finished) return;
+    if (!started || answered !== null || finished) return;
     if (timeLeft <= 0) {
       send({ type: SABOTAGE_EVENTS.ANSWERED, correct: false });
       advance();
     }
-  }, [timeLeft, answered, finished, advance, send]);
+  }, [started, timeLeft, answered, finished, advance, send]);
 
   // settle when finished — the outcome is recomputed server-side from
   // competitive_responses (the /answer route scored every pick); no score map.
@@ -206,28 +230,70 @@ export default function SabotageScreen({ loaded, selfId }: { loaded: LoadedMatch
   // deterministic per-round index is just as deceptive to the victim.
   const decoyIdx = hasEffect("decoy") ? (round.round_num * 3 + 1) % round.options.length : -1;
 
+  const urgent = timeLeft < 10_000 && answered === null;
+  const timerColor = timeLeft < 3000 ? "#EF4444" : timeLeft < 10_000 ? "#FF8C42" : "#FFD700";
+  const offCooldown = now - meter.lastFiredAt >= ATTACK_COOLDOWN_MS;
+  const cheapestCost = Math.min(...Object.values(ATTACK_COSTS));
+  const anyAttackReady = offCooldown && meter.charge >= cheapestCost;
+
   return (
-    <div className="relative flex-1 min-h-0 flex flex-col w-full px-3 sm:px-6">
+    <div
+      key={`shake-${shakeKey}`}
+      className={`relative flex-1 min-h-0 flex flex-col w-full px-3 sm:px-6 ${shakeKey ? "ca-shake" : ""}`}
+    >
+      {/* Pre-duel 3-2-1-GO beat (first round only). Self-gates on reduced motion. */}
+      {!started && (
+        <Countdown
+          accent="#EF4444"
+          onDone={() => { setRoundStart(Date.now()); setStarted(true); }}
+        />
+      )}
+
+      {/* Decoy glitch — a single-shot scanline offset flash, low-alpha (no white flash) */}
+      {glitchKey > 0 && (
+        <div
+          key={`glitch-${glitchKey}`}
+          className="ca-glitch absolute inset-0 z-30 pointer-events-none"
+          style={{ background: "repeating-linear-gradient(0deg, rgba(168,85,247,0.10) 0px, rgba(168,85,247,0.10) 2px, transparent 2px, transparent 5px)" }}
+          aria-hidden="true"
+        />
+      )}
+
+      {/* Attack projectiles fly from the tray toward the rival HUD (top-right) */}
+      {projectiles.map((p) => (
+        <span
+          key={p.id}
+          className="ca-projectile absolute left-6 bottom-24 z-40 text-2xl pointer-events-none"
+          style={{ "--px": "70vw", "--py": "-60vh" } as React.CSSProperties & Record<string, string>}
+          aria-hidden="true"
+        >
+          {ATTACK_META[p.kind].icon}
+        </span>
+      ))}
+
       {/* HUD pinned to the top edge */}
       <div className="flex-none w-full max-w-5xl mx-auto">
         <div className="flex items-center justify-between mb-3">
-          <div className="text-cream/70">
-            <span className="font-bebas text-3xl sm:text-4xl text-[#EF4444]">{score}</span>
+          <div className="relative text-cream/70">
+            <FangBurst burstKey={fangKey} />
+            <span key={fangKey} className={`inline-block font-bebas text-3xl sm:text-4xl text-[#EF4444] ${fangKey ? "ca-score-pulse" : ""}`}>
+              <CountUp value={score} duration={450} />
+            </span>
             <span className="text-cream/40 text-sm"> you</span>
           </div>
           <div className="font-bebas tracking-wider text-cream/50 text-sm">
             ROUND {roundIdx + 1} / {rounds.length}
           </div>
           <div className="text-cream/70 text-right">
-            <span className="font-bebas text-3xl sm:text-4xl text-cream/60">{oppScore}</span>
+            <span className="font-bebas text-3xl sm:text-4xl text-cream/60"><CountUp value={oppScore} duration={450} /></span>
             <span className="text-cream/40 text-sm"> rival</span>
           </div>
         </div>
 
-        {/* timer */}
-        <div className="h-2 rounded-full bg-cream/[0.07] overflow-hidden">
+        {/* timer — turns urgent (color tier + pulse) as it runs low */}
+        <div className={`h-2 rounded-full bg-cream/[0.07] overflow-hidden ${urgent ? "ca-urgent" : ""}`}>
           <div className="h-full rounded-full transition-[width] duration-100"
-            style={{ width: `${(timeLeft / ROUND_MS) * 100}%`, background: timeLeft < 3000 ? "#EF4444" : "#FFD700" }} />
+            style={{ width: `${(timeLeft / ROUND_MS) * 100}%`, background: timerColor }} />
         </div>
       </div>
 
@@ -253,12 +319,15 @@ export default function SabotageScreen({ loaded, selfId }: { loaded: LoadedMatch
             const isCorrect = correctIdx !== null && opt.origIdx === correctIdx;
             const isMine = answered === opt.origIdx;
             const isDecoy = opt.origIdx === decoyIdx;
+            const fxClass = isMine && answerFx === "correct" ? "ca-correct" : isMine && answerFx === "wrong" ? "ca-wrong" : "";
             return (
               <button
-                key={opt.origIdx}
+                key={`${opt.origIdx}-${scrambleSeed}`}
                 onClick={() => answer(opt.origIdx)}
                 disabled={isAnswered || hasEffect("freeze")}
+                style={hasEffect("scramble") ? ({ animationDelay: `${displayI * 60}ms` } as React.CSSProperties) : undefined}
                 className={`relative text-left px-5 py-4 sm:py-5 rounded-xl border transition-all text-base sm:text-lg
+                  ${hasEffect("scramble") ? "ca-scramble" : ""} ${fxClass}
                   ${isAnswered && isCorrect ? "border-[#50C878] bg-[#50C878]/15"
                     : isAnswered && isMine ? "border-[#EF4444] bg-[#EF4444]/15"
                     : "border-cream/10 bg-cream/[0.03] hover:border-cream/25 active:scale-[0.98]"}
@@ -280,10 +349,10 @@ export default function SabotageScreen({ loaded, selfId }: { loaded: LoadedMatch
       <div className="flex-none w-full max-w-5xl mx-auto rounded-2xl p-3 sm:p-4 mt-auto"
         style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(168,85,247,0.18)" }}>
         <div className="flex items-center justify-between mb-2.5">
-          <span className="font-bebas text-sm tracking-wider text-[#A855F7]">ATTACK METER</span>
+          <span className="font-bebas text-sm tracking-wider text-[#A855F7]">ATTACK METER{anyAttackReady ? " — READY" : ""}</span>
           <span className="text-cream/40 text-xs">{Math.round(meter.charge)} / {METER_MAX}</span>
         </div>
-        <div className="h-2 rounded-full bg-cream/[0.07] overflow-hidden mb-3">
+        <div className={`h-2 rounded-full bg-cream/[0.07] overflow-hidden mb-3 ${anyAttackReady ? "ca-charge-ready" : ""}`}>
           <div className="h-full rounded-full transition-[width] duration-300"
             style={{ width: `${(meter.charge / METER_MAX) * 100}%`, background: "linear-gradient(90deg, #A855F7, #00BFFF)" }} />
         </div>

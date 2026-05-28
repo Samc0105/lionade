@@ -10,6 +10,7 @@ import { useMatchChannel } from "@/lib/competitive/use-match-channel";
 import { useSettle } from "../useSettle";
 import ResultCard from "../ResultCard";
 import { SettlingMsg } from "../zoom/ZoomScreen";
+import CountUp from "@/components/CountUp";
 import { apiPost } from "@/lib/api-client";
 import { COMPETITIVE_EVENTS } from "@/lib/competitive/channels";
 import type { LoadedMatch } from "@/app/compete/arena/[mode]/[matchId]/page";
@@ -114,9 +115,9 @@ export default function PinScreen({ loaded, selfId }: { loaded: LoadedMatch; sel
           </div>
           <div className="flex items-center justify-between rounded-xl px-4 py-1.5 backdrop-blur-md"
             style={{ background: "rgba(6,12,24,0.6)", border: "1px solid rgba(255,255,255,0.06)" }}>
-            <div className="text-cream/70"><span className="font-bebas text-2xl text-[#50C878]">{score}</span><span className="text-cream/40 text-xs"> you</span></div>
+            <div className="text-cream/70"><span className="font-bebas text-2xl text-[#50C878]"><CountUp value={score} duration={500} /></span><span className="text-cream/40 text-xs"> you</span></div>
             <div className="font-bebas tracking-wider text-cream/50 text-xs">ROUND {idx + 1} / {rounds.length}</div>
-            <div className="text-cream/70 text-right"><span className="font-bebas text-2xl text-cream/60">{oppScore}</span><span className="text-cream/40 text-xs"> rival</span></div>
+            <div className="text-cream/70 text-right"><span className="font-bebas text-2xl text-cream/60"><CountUp value={oppScore} duration={500} /></span><span className="text-cream/40 text-xs"> rival</span></div>
           </div>
         </div>
       </div>
@@ -125,10 +126,12 @@ export default function PinScreen({ loaded, selfId }: { loaded: LoadedMatch; sel
       <div className="absolute bottom-4 left-0 right-0 z-[500] px-3 sm:px-6">
         <div className="w-full max-w-md mx-auto">
           {revealed ? (
-            <div className="text-center rounded-xl px-4 py-3 backdrop-blur-md"
+            <div className="ca-pop-in text-center rounded-xl px-4 py-3 backdrop-blur-md"
               style={{ background: "rgba(6,12,24,0.72)", border: "1px solid rgba(80,200,120,0.3)" }}>
               <p className="text-cream/70">
-                <span className="font-bebas text-2xl sm:text-3xl text-[#50C878]">{Math.round(lastDist).toLocaleString()} km</span>
+                <span className="font-bebas text-2xl sm:text-3xl text-[#50C878]">
+                  <CountUp value={Math.round(lastDist)} duration={1100} /> km
+                </span>
                 <span className="text-cream/40 text-sm"> away &middot; +{lastPts} pts</span>
               </p>
             </div>

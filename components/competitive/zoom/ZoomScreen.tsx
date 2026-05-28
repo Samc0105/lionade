@@ -8,6 +8,8 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useMatchChannel } from "@/lib/competitive/use-match-channel";
 import { useSettle } from "../useSettle";
 import ResultCard from "../ResultCard";
+import CountUp from "@/components/CountUp";
+import FangBurst from "../FangBurst";
 import { apiPost } from "@/lib/api-client";
 import { COMPETITIVE_EVENTS } from "@/lib/competitive/channels";
 import type { LoadedMatch } from "@/app/compete/arena/[mode]/[matchId]/page";
@@ -131,13 +133,21 @@ export default function ZoomScreen({ loaded, selfId }: { loaded: LoadedMatch; se
               </button>
             </div>
           )}
+          {/* LOCKED IN stamp slams in the instant a guess is submitted (in-flight) */}
+          {locked && !feedback && (
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <span className="ca-stamp font-bebas text-4xl sm:text-6xl text-[#00BFFF] tracking-widest px-6 py-2 border-2 border-[#00BFFF]/70 rounded-xl">
+                LOCKED IN
+              </span>
+            </div>
+          )}
           {feedback === "correct" && (
-            <div className="absolute inset-0 flex items-center justify-center bg-[#50C878]/20 backdrop-blur-sm">
-              <span className="font-bebas text-4xl sm:text-6xl text-[#50C878] tracking-widest">{revealAnswer.toUpperCase()}</span>
+            <div className="ca-correct absolute inset-0 flex items-center justify-center bg-[#50C878]/20 backdrop-blur-sm">
+              <span className="ca-spring-in font-bebas text-4xl sm:text-6xl text-[#50C878] tracking-widest">{revealAnswer.toUpperCase()}</span>
             </div>
           )}
           {(feedback === "wrong" || feedback === "close") && (
-            <div className="absolute inset-0 flex items-center justify-center bg-[#EF4444]/20 backdrop-blur-sm">
+            <div className="ca-wrong absolute inset-0 flex items-center justify-center bg-[#EF4444]/20 backdrop-blur-sm">
               <span className="font-bebas text-2xl sm:text-4xl text-[#EF4444] tracking-widest">
                 {feedback === "close" ? "SO CLOSE" : "LOCKED OUT"}
               </span>
@@ -174,12 +184,35 @@ export default function ZoomScreen({ loaded, selfId }: { loaded: LoadedMatch; se
 
 // Shared top-edge HUD used by Zoom, Spectrum and Pin. flex-none so it pins to
 // the top of the full-screen game shell; the play surface fills the rest.
+//
+// JUICE: the "you" score COUNTS UP (reused CountUp, reduced-motion-safe), the
+// number pulses on every gain (.ca-score-pulse), and a Fang-coin burst fires
+// from behind it. Score deltas are derived purely from props already in client
+// state — no fetch, no secret read.
 export function Hud({ idx, total, score, oppScore, accent }: { idx: number; total: number; score: number; oppScore: number; accent: string }) {
+  const [burstKey, setBurstKey] = useState(0);
+  const [pulseKey, setPulseKey] = useState(0);
+  const prevScore = useRef(score);
+
+  useEffect(() => {
+    if (score > prevScore.current) {
+      setBurstKey((k) => k + 1);
+      setPulseKey((k) => k + 1);
+    }
+    prevScore.current = score;
+  }, [score]);
+
   return (
     <div className="flex-none flex items-center justify-between w-full max-w-5xl mx-auto mb-2">
-      <div className="text-cream/70"><span className="font-bebas text-3xl sm:text-4xl" style={{ color: accent }}>{score}</span><span className="text-cream/40 text-sm"> you</span></div>
+      <div className="relative text-cream/70">
+        <FangBurst burstKey={burstKey} />
+        <span key={pulseKey} className={`inline-block font-bebas text-3xl sm:text-4xl ${pulseKey ? "ca-score-pulse" : ""}`} style={{ color: accent }}>
+          <CountUp value={score} duration={500} />
+        </span>
+        <span className="text-cream/40 text-sm"> you</span>
+      </div>
       <div className="font-bebas tracking-wider text-cream/50 text-sm">ROUND {idx + 1} / {total}</div>
-      <div className="text-cream/70 text-right"><span className="font-bebas text-3xl sm:text-4xl text-cream/60">{oppScore}</span><span className="text-cream/40 text-sm"> rival</span></div>
+      <div className="text-cream/70 text-right"><span className="font-bebas text-3xl sm:text-4xl text-cream/60"><CountUp value={oppScore} duration={500} /></span><span className="text-cream/40 text-sm"> rival</span></div>
     </div>
   );
 }

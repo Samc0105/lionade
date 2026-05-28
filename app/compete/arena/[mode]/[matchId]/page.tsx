@@ -142,15 +142,23 @@ function Shell({ mode, children }: { mode: CompetitiveMode; children: React.Reac
       data-force-dark
       role="application"
       aria-label={`${theme.label} match`}
-      initial={reduce ? false : { opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: reduce ? 0 : 0.35, ease: "easeOut" }}
+      initial={reduce ? false : { opacity: 0, scale: 0.965 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: reduce ? 0 : 0.4, ease: [0.16, 1, 0.3, 1] }}
       className="fixed inset-0 z-[60] flex flex-col overflow-hidden"
       style={{
         isolation: "isolate",
         background: "radial-gradient(ellipse at 50% -10%, #0c1020 0%, #070b16 45%, #04060d 100%)",
       }}
     >
+      {/* Accent light-sweep across the takeover on entry (runs once, then gone) */}
+      {!reduce && (
+        <div
+          className="ca-light-sweep"
+          style={{ "--ca-sweep": `${accent}24` } as React.CSSProperties & Record<string, string>}
+        />
+      )}
+
       {/* Ambient orbs in the mode accent — they fill the corners, not the center */}
       <div className="absolute top-[-10%] left-[-6%] w-[55vw] h-[55vw] max-w-[640px] max-h-[640px] rounded-full pointer-events-none opacity-[0.06]"
         style={{ background: ambient.one }} />

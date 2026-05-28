@@ -11,6 +11,7 @@
 
 import { useState, useRef, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { motion, useReducedMotion } from "framer-motion";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import BackButton from "@/components/BackButton";
 import { apiPost, apiGet, apiDelete } from "@/lib/api-client";
@@ -44,6 +45,7 @@ const POLL_INTERVAL_MS = 2500;
 
 export default function CompetitiveArenaPage() {
   const router = useRouter();
+  const reduce = useReducedMotion();
   const [format, setFormat] = useState<CompetitiveFormat>("1v1");
   const [search, setSearch] = useState<SearchState>({ phase: "idle" });
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -124,7 +126,7 @@ export default function CompetitiveArenaPage() {
             </p>
           </div>
 
-          {/* Format toggle */}
+          {/* Format toggle — the gold pill slides between options (layoutId) */}
           <div className="flex justify-center mb-10">
             <div className="inline-flex rounded-full p-1 border border-cream/10 bg-cream/[0.03]">
               {(["1v1", "2v2"] as CompetitiveFormat[]).map((f) => (
@@ -132,10 +134,18 @@ export default function CompetitiveArenaPage() {
                   key={f}
                   onClick={() => setFormat(f)}
                   disabled={search.phase === "searching"}
-                  className={`px-6 py-2 rounded-full font-bebas tracking-wider text-lg transition-all
-                    ${format === f ? "bg-gold text-[#1a1400] shadow-[0_2px_12px_rgba(255,215,0,0.3)]" : "text-cream/60 hover:text-cream/90"}`}
+                  className="relative px-6 py-2 rounded-full font-bebas tracking-wider text-lg transition-colors"
                 >
-                  {f === "1v1" ? "1 V 1" : "2 V 2 SQUAD"}
+                  {format === f && (
+                    <motion.span
+                      layoutId="arena-format-pill"
+                      className="absolute inset-0 rounded-full bg-gold shadow-[0_2px_12px_rgba(255,215,0,0.3)]"
+                      transition={reduce ? { duration: 0 } : { type: "spring", stiffness: 380, damping: 30 }}
+                    />
+                  )}
+                  <span className={`relative z-10 ${format === f ? "text-[#1a1400]" : "text-cream/60 hover:text-cream/90"}`}>
+                    {f === "1v1" ? "1 V 1" : "2 V 2 SQUAD"}
+                  </span>
                 </button>
               ))}
             </div>
@@ -147,19 +157,21 @@ export default function CompetitiveArenaPage() {
             </p>
           )}
 
-          {/* Mode grid — launcher tiles */}
+          {/* Mode grid — launcher tiles, staggered reveal + hover lift/glow */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 lg:gap-6">
-            {MODES.map((m) => {
+            {MODES.map((m, i) => {
               const busy = search.phase === "searching" && search.mode === m.mode;
               const dead = search.phase === "none" && search.mode === m.mode;
               return (
                 <div
                   key={m.mode}
-                  className="relative overflow-hidden rounded-2xl p-6 lg:p-7 flex flex-col transition-all duration-300 hover:-translate-y-1"
+                  className={`ca-mode-card group relative overflow-hidden rounded-2xl p-6 lg:p-7 flex flex-col transition-all duration-300 hover:-translate-y-1.5 ${reduce ? "" : "ca-card-reveal"}`}
                   style={{
                     background: "linear-gradient(135deg, #0c1020 0%, #080c18 50%, #060c18 100%)",
                     border: `1px solid ${m.accent}30`,
                     boxShadow: `0 0 30px ${m.accent}08`,
+                    animationDelay: reduce ? undefined : `${i * 80}ms`,
+                    ["--mode-accent" as string]: m.accent,
                   }}
                 >
                   <div className="absolute inset-0 pointer-events-none"
