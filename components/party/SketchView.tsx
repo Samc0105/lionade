@@ -48,7 +48,24 @@ interface RoundSnapshot {
 interface CandidateWord {
   word: string;
   difficulty: string;
+  factoid?: string;
 }
+
+interface WordInfo {
+  loading: boolean;
+  definition?: string;
+  example?: string;
+  /** No dictionary entry found — popover falls back to the factoid alone. */
+  notFound?: boolean;
+}
+
+const DIFFICULTY_STYLE: Record<string, { label: string; bg: string; border: string; color: string }> = {
+  easy: { label: "EASY", bg: "rgba(34,197,94,0.16)", border: "rgba(34,197,94,0.5)", color: "#86EFAC" },
+  medium: { label: "MEDIUM", bg: "rgba(245,158,11,0.16)", border: "rgba(245,158,11,0.5)", color: "#FCD34D" },
+  hard: { label: "HARD", bg: "rgba(244,63,94,0.16)", border: "rgba(244,63,94,0.5)", color: "#FDA4AF" },
+};
+
+const PICK_SECONDS = 10;
 
 interface ChatMsg {
   id: string;
@@ -141,6 +158,15 @@ export default function SketchView({
   const undoRef = useRef<(() => void) | null>(null);
   const clearRef = useRef<(() => void) | null>(null);
 
+  // ── Word-picker extras (drawer-facing only) ──
+  // Countdown to auto-pick, which candidate's info popover is open, and a
+  // per-word dictionary cache. pickedRef guards against the manual pick and the
+  // auto-pick both firing select-word.
+  const [pickSecs, setPickSecs] = useState(PICK_SECONDS);
+  const [infoWord, setInfoWord] = useState<string | null>(null);
+  const [wordInfo, setWordInfo] = useState<Record<string, WordInfo>>({});
+  const pickedRef = useRef(false);
+
   const isDrawer = round?.drawer_user_id === meUserId;
   const subjectLabel = round ? SUBJECT_LABELS[round.subject as Subject] ?? round.subject : "";
 
@@ -157,6 +183,10 @@ export default function SketchView({
     setRevealed({});
     sawFirstCorrectRef.current = false;
     setFireFirstConfetti(false);
+    pickedRef.current = false;
+    setPickSecs(PICK_SECONDS);
+    setInfoWord(null);
+    setWordInfo({});
     const res = await apiPost<{ round: RoundSnapshot; drawer_should_pick: boolean }>(
       "/api/party/sketch/rounds",
       { code: room.code },
@@ -230,6 +260,10 @@ export default function SketchView({
       setRevealed({});
       sawFirstCorrectRef.current = false;
       setFireFirstConfetti(false);
+      pickedRef.current = false;
+      setPickSecs(PICK_SECONDS);
+      setInfoWord(null);
+      setWordInfo({});
       setPhase(isMe ? "select-word" : "drawing");
       setNinnyMsg(isMe ? "Your turn! Pick a word to draw." : "Watch carefully and guess what they're drawing.");
     });
@@ -349,20 +383,101 @@ export default function SketchView({
   }, [phase, isDrawer, isHost]);
 
   // ── Drawer picks a word ──
-  async function selectWord(word: string) {
-    if (!round) return;
-    const res = await apiPost(`/api/party/sketch/rounds/${round.id}/select-word`, { word });
-    if (!res.ok) return;
-    setLockedWord(word);
-    setPhase("drawing");
-    setNinnyMsg(null);
-    const ch = supabase.channel(sketchChannel(room.code));
-    await ch.send({
-      type: "broadcast",
-      event: SKETCH_EVENTS.WORD_SELECTED,
-      payload: { round_id: round.id },
+  // pickedRef gates so the manual pick and the 10s auto-pick can't both fire
+  // (the server also rejects a second select-word with 409, so a race is safe).
+  const selectWord = useCallback(
+    async (word: string) => {
+      if (!round || pickedRef.current) return;
+      pickedRef.current = true;
+      setInfoWord(null);
+      const res = await apiPost(`/api/party/sketch/rounds/${round.id}/select-word`, { word });
+      if (!res.ok) {
+        pickedRef.current = false; // let them try again
+        return;
+      }
+      setLockedWord(word);
+      setPhase("drawing");
+      setNinnyMsg(null);
+      const ch = supabase.channel(sketchChannel(room.code));
+      await ch.send({
+        type: "broadcast",
+        event: SKETCH_EVENTS.WORD_SELECTED,
+        payload: { round_id: round.id },
+      });
+    },
+    [round, room.code],
+  );
+
+  // ── Word info ("i" popover): real definition + example sentence ──
+  // Fetched from the free Dictionary API client-side (drawer-only screen — the
+  // candidate words are already on this client, so nothing leaks). The factoid
+  // is always shown as the reliable base; the definition/example layer on top
+  // when the dictionary has the word, and degrade silently when it doesn't.
+  const fetchWordInfo = useCallback(async (word: string) => {
+    setWordInfo((prev) => {
+      if (prev[word]) return prev; // already fetched/fetching
+      return { ...prev, [word]: { loading: true } };
     });
-  }
+    try {
+      const r = await fetch(
+        `https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(word.toLowerCase())}`,
+      );
+      if (!r.ok) {
+        setWordInfo((prev) => ({ ...prev, [word]: { loading: false, notFound: true } }));
+        return;
+      }
+      const data = await r.json();
+      let definition: string | undefined;
+      let example: string | undefined;
+      for (const entry of Array.isArray(data) ? data : []) {
+        for (const m of entry?.meanings ?? []) {
+          for (const d of m?.definitions ?? []) {
+            if (!definition && d?.definition) definition = d.definition;
+            if (!example && d?.example) example = d.example;
+          }
+        }
+      }
+      setWordInfo((prev) => ({
+        ...prev,
+        [word]: { loading: false, definition, example, notFound: !definition },
+      }));
+    } catch {
+      setWordInfo((prev) => ({ ...prev, [word]: { loading: false, notFound: true } }));
+    }
+  }, []);
+
+  const toggleInfo = useCallback(
+    (word: string) => {
+      setInfoWord((cur) => {
+        const next = cur === word ? null : word;
+        if (next) void fetchWordInfo(next);
+        return next;
+      });
+    },
+    [fetchWordInfo],
+  );
+
+  // ── Auto-pick countdown (drawer) ──
+  // The picker can stall a round, so after PICK_SECONDS we pick a random
+  // candidate for them. Runs only on the drawer's client while choosing.
+  useEffect(() => {
+    if (phase !== "select-word" || !candidates || candidates.length === 0) return;
+    setPickSecs(PICK_SECONDS);
+    const iv = setInterval(() => {
+      setPickSecs((t) => {
+        if (t <= 1) {
+          clearInterval(iv);
+          if (!pickedRef.current) {
+            const rnd = candidates[Math.floor(Math.random() * candidates.length)];
+            void selectWord(rnd.word);
+          }
+          return 0;
+        }
+        return t - 1;
+      });
+    }, 1000);
+    return () => clearInterval(iv);
+  }, [phase, candidates, selectWord]);
 
   // ── Guess submit ──
   async function submitGuess(e: React.FormEvent) {
@@ -581,31 +696,203 @@ export default function SketchView({
         <motion.div
           initial={reduced ? false : { opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
-          className="space-y-3"
+          className="space-y-5"
         >
-          <p className="font-bebas text-sm text-cream/60 tracking-[0.25em]">PICK A WORD</p>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            {candidates.map((c, i) => (
-              <button
-                key={c.word}
-                onClick={() => selectWord(c.word)}
-                className={`rounded-2xl p-5 text-left transition-all active:scale-95 hover:-translate-y-0.5 ${reduced ? "" : "pa-deal-in"}`}
-                style={{
-                  background: "linear-gradient(135deg, rgba(168,85,247,0.15) 0%, rgba(124,58,237,0.06) 100%)",
-                  border: "1px solid rgba(168,85,247,0.45)",
-                  boxShadow: "0 0 20px rgba(168,85,247,0.15)",
-                  ...(reduced ? {} : { animationDelay: `${i * 90}ms` }),
-                }}
-              >
-                <p className="font-bebas text-3xl tracking-wider text-cream mb-2">
-                  {c.word.toUpperCase()}
-                </p>
-                <p className="text-cream/40 text-xs font-syne uppercase tracking-wider">
-                  {c.difficulty}
-                </p>
-              </button>
-            ))}
+          {/* Header: title + subject on the left, auto-pick countdown ring on the right */}
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className="font-bebas text-sm text-cream/60 tracking-[0.25em]">PICK A WORD</p>
+              {subjectLabel && (
+                <p className="font-syne text-xs text-cream/40 mt-0.5">{subjectLabel}</p>
+              )}
+            </div>
+            {(() => {
+              const C = 2 * Math.PI * 18;
+              const frac = Math.max(0, Math.min(1, pickSecs / PICK_SECONDS));
+              const urgent = pickSecs <= 3;
+              const ring = urgent ? "#F43F5E" : "#A855F7";
+              return (
+                <div className="flex items-center gap-2 shrink-0">
+                  <div className="relative w-12 h-12">
+                    <svg viewBox="0 0 44 44" className="w-12 h-12 -rotate-90">
+                      <circle cx="22" cy="22" r="18" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="3" />
+                      <circle
+                        cx="22" cy="22" r="18" fill="none" stroke={ring} strokeWidth="3" strokeLinecap="round"
+                        strokeDasharray={C}
+                        strokeDashoffset={C * (1 - frac)}
+                        style={{ transition: reduced ? "none" : "stroke-dashoffset 1s linear, stroke 0.3s" }}
+                      />
+                    </svg>
+                    <span
+                      className={`absolute inset-0 flex items-center justify-center font-bebas text-base ${urgent && !reduced ? "ca-urgent" : ""}`}
+                      style={{ color: ring }}
+                    >
+                      {pickSecs}
+                    </span>
+                  </div>
+                  <span className="font-syne text-[10px] text-cream/35 leading-tight max-w-[72px]">
+                    auto-picks a word
+                  </span>
+                </div>
+              );
+            })()}
           </div>
+
+          {/* Candidate cards: difficulty badge + word + "i" info popover */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {candidates.map((c, i) => {
+              const diff = DIFFICULTY_STYLE[c.difficulty] ?? DIFFICULTY_STYLE.medium;
+              const info = wordInfo[c.word];
+              const open = infoWord === c.word;
+              return (
+                <div
+                  key={c.word}
+                  className={`relative ${reduced ? "" : "pa-deal-in"}`}
+                  style={reduced ? undefined : { animationDelay: `${i * 90}ms` }}
+                >
+                  <button
+                    onClick={() => selectWord(c.word)}
+                    className="w-full rounded-2xl p-5 pt-11 text-left transition-all active:scale-95 hover:-translate-y-0.5"
+                    style={{
+                      background: "linear-gradient(135deg, rgba(168,85,247,0.15) 0%, rgba(124,58,237,0.06) 100%)",
+                      border: "1px solid rgba(168,85,247,0.45)",
+                      boxShadow: "0 0 20px rgba(168,85,247,0.15)",
+                    }}
+                  >
+                    <p className="font-bebas text-3xl tracking-wider text-cream">
+                      {c.word.toUpperCase()}
+                    </p>
+                    <p className="text-cream/35 text-[11px] font-syne mt-2">Tap to draw this</p>
+                  </button>
+
+                  {/* Difficulty badge (top-left, color-coded) */}
+                  <span
+                    className="absolute top-3 left-3 font-bebas text-[10px] tracking-[0.18em] px-2 py-0.5 rounded-full pointer-events-none"
+                    style={{ background: diff.bg, border: `1px solid ${diff.border}`, color: diff.color }}
+                  >
+                    {diff.label}
+                  </span>
+
+                  {/* "i" info toggle (top-right) — sibling button, stops the pick */}
+                  <button
+                    type="button"
+                    aria-label={`What does ${c.word} mean?`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleInfo(c.word);
+                    }}
+                    className="absolute top-2.5 right-2.5 z-10 w-7 h-7 rounded-full flex items-center justify-center font-bebas text-sm transition-all active:scale-90"
+                    style={{
+                      background: open ? "rgba(168,85,247,0.3)" : "rgba(255,255,255,0.06)",
+                      border: `1px solid ${open ? "rgba(168,85,247,0.6)" : "rgba(255,255,255,0.14)"}`,
+                      color: open ? "#E9D5FF" : "rgba(238,244,255,0.6)",
+                    }}
+                  >
+                    i
+                  </button>
+
+                  {/* Info popover: definition + example sentence + factoid */}
+                  <AnimatePresence>
+                    {open && (
+                      <motion.div
+                        initial={reduced ? false : { opacity: 0, y: -4, scale: 0.98 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={reduced ? undefined : { opacity: 0, y: -4, scale: 0.98 }}
+                        className="absolute left-0 right-0 top-full mt-2 z-30 rounded-xl p-3.5 text-left space-y-2"
+                        style={{
+                          background: "rgba(10,8,18,0.97)",
+                          border: "1px solid rgba(168,85,247,0.4)",
+                          boxShadow: "0 12px 36px rgba(0,0,0,0.55)",
+                          backdropFilter: "blur(6px)",
+                        }}
+                      >
+                        {info?.loading ? (
+                          <p className="font-syne text-xs text-cream/50 italic">Looking it up...</p>
+                        ) : (
+                          <>
+                            {info?.definition && (
+                              <div>
+                                <p className="font-bebas text-[10px] tracking-[0.2em] text-purple-300/80 mb-0.5">
+                                  MEANING
+                                </p>
+                                <p className="font-syne text-xs text-cream/85 leading-relaxed">
+                                  {info.definition}
+                                </p>
+                              </div>
+                            )}
+                            {info?.example && (
+                              <div>
+                                <p className="font-bebas text-[10px] tracking-[0.2em] text-purple-300/80 mb-0.5">
+                                  IN A SENTENCE
+                                </p>
+                                <p className="font-syne text-xs text-cream/70 italic leading-relaxed">
+                                  &ldquo;{info.example}&rdquo;
+                                </p>
+                              </div>
+                            )}
+                            {c.factoid && (
+                              <div>
+                                <p className="font-bebas text-[10px] tracking-[0.2em] text-[#FFD700]/80 mb-0.5">
+                                  DID YOU KNOW
+                                </p>
+                                <p className="font-syne text-xs text-cream/70 leading-relaxed">
+                                  {c.factoid}
+                                </p>
+                              </div>
+                            )}
+                            {!info?.definition && !info?.example && !c.factoid && (
+                              <p className="font-syne text-xs text-cream/50 italic">
+                                No extra info for this one. Just draw it.
+                              </p>
+                            )}
+                          </>
+                        )}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Waiting-to-guess strip — fills the page + shows who's ready to play.
+              Each other player gets a "charging" green dot while the drawer picks. */}
+          {players.filter((p) => p.user_id !== meUserId).length > 0 && (
+            <div
+              className="rounded-2xl p-4"
+              style={{
+                background: "linear-gradient(135deg, rgba(16,12,26,0.6) 0%, rgba(8,6,16,0.6) 100%)",
+                border: "1px solid rgba(255,255,255,0.06)",
+              }}
+            >
+              <p className="font-bebas text-[11px] tracking-[0.25em] text-cream/45 mb-3">
+                WAITING TO GUESS
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {players
+                  .filter((p) => p.user_id !== meUserId)
+                  .map((p) => (
+                    <div
+                      key={p.user_id}
+                      className="inline-flex items-center gap-2 rounded-full px-3 py-1.5"
+                      style={{
+                        background: "rgba(34,197,94,0.06)",
+                        border: "1px solid rgba(34,197,94,0.22)",
+                      }}
+                    >
+                      <span
+                        aria-hidden="true"
+                        className={`inline-block w-2 h-2 rounded-full ${reduced ? "" : "pa-charge"}`}
+                        style={{ background: "#22C55E" }}
+                      />
+                      <span className="font-syne text-xs text-cream/80 truncate max-w-[120px]">
+                        {p.username ?? "Player"}
+                      </span>
+                    </div>
+                  ))}
+              </div>
+            </div>
+          )}
         </motion.div>
       )}
 

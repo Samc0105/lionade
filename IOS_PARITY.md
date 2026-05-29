@@ -7,6 +7,13 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 
 ---
 
+## 2026-05-29 — Sketchy Subjects: word-picker redesign + fair-random drawer (web-only, iOS paused)
+
+| Feature | Web route(s) | iOS route(s) | Web | iOS | Notes |
+|---|---|---|---|---|---|
+| **Word-picker redesign** (difficulty badges, "i" info popover, 10s auto-pick countdown, waiting-players strip) | `/games/party` (sketch `select-word`) | iOS Party (not built) | ✅ | ❌ paused | `components/party/SketchView.tsx`: color-coded easy/medium/hard badges; per-word "i" popover = MEANING + IN A SENTENCE (free Dictionary API, client-side, drawer-only screen so no guesser leak) + DID YOU KNOW factoid as guaranteed base; 10s countdown ring auto-picks a random candidate if the drawer stalls (`pickedRef` double-pick guard; server 409 backstop); "WAITING TO GUESS" strip with `pa-charge` green dots. Drawer-only `GET .../words` now includes the factoid (still 403 for non-drawers). Picker chat deferred. iOS: paused. |
+| **Fair-but-random first drawer** | `/api/party/sketch/rounds` (POST) | iOS Party (not built) | ✅ | ❌ paused | Replaced `(round_num-1) % players` (host always drew round 1) with a least-drawn-random pick: count prior `drawer_user_id` rounds, pick randomly among players at the minimum. Round 1 fully random; each rotation everyone draws once before any repeat (fairness kept, order varied). `Math.random` OK (not security-sensitive). iOS: paused. |
+
 ## 2026-05-29 — Sketchy Subjects v2 (web-only, iOS paused)
 
 | Feature | Web route(s) | iOS route(s) | Web | iOS | Notes |

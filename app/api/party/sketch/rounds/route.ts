@@ -77,15 +77,32 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Not enough players" }, { status: 400 });
   }
 
-  const { data: previousRounds } = await supabaseAdmin
+  // Pull all prior rounds: highest round_num for numbering + per-player draw
+  // counts for a fair-but-random drawer pick.
+  const { data: priorRounds } = await supabaseAdmin
     .from("sketch_rounds")
-    .select("round_num")
-    .eq("room_id", room.id)
-    .order("round_num", { ascending: false })
-    .limit(1);
-  const nextRoundNum = (previousRounds?.[0]?.round_num ?? 0) + 1;
-  const drawerIdx = (nextRoundNum - 1) % players.length;
-  const drawerUserId = players[drawerIdx].user_id;
+    .select("round_num, drawer_user_id")
+    .eq("room_id", room.id);
+  const nextRoundNum =
+    (priorRounds && priorRounds.length > 0
+      ? Math.max(...priorRounds.map((r) => r.round_num ?? 0))
+      : 0) + 1;
+
+  // Fair-but-random drawer: count how many times each active player has drawn,
+  // then pick randomly among those who've drawn the FEWEST. Round 1 = everyone
+  // at 0 draws = fully random, so the room creator isn't forced to draw first.
+  // Each rotation everyone draws once before anyone draws twice (fairness),
+  // with the order shuffled within each tier (variety).
+  const drawCounts = new Map<string, number>();
+  for (const p of players) drawCounts.set(p.user_id, 0);
+  for (const r of priorRounds ?? []) {
+    if (r.drawer_user_id && drawCounts.has(r.drawer_user_id)) {
+      drawCounts.set(r.drawer_user_id, (drawCounts.get(r.drawer_user_id) ?? 0) + 1);
+    }
+  }
+  const minDraws = Math.min(...players.map((p) => drawCounts.get(p.user_id) ?? 0));
+  const leastDrawn = players.filter((p) => (drawCounts.get(p.user_id) ?? 0) === minDraws);
+  const drawerUserId = leastDrawn[Math.floor(Math.random() * leastDrawn.length)].user_id;
 
   // Subject pool resolution — per-player picks (weighted multiset) take
   // priority. Each player picks up to 2 topics; a subject picked by N

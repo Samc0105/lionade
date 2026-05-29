@@ -36,7 +36,10 @@ export async function GET(
     candidates: candidates.map((c) => ({
       word: c.word,
       difficulty: c.difficulty,
-      // factoid kept server-side until round end; drawer doesn't need it.
+      // Drawer-only endpoint (403 for everyone else), so it's safe to hand the
+      // drawer the factoid here — it powers the "i" info popover on the picker.
+      // Guessers never hit this route, so nothing leaks.
+      factoid: c.factoid,
     })),
   });
 }

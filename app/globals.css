@@ -4005,6 +4005,14 @@ html.light .space-bg-container { display: none; }
 }
 .pa-ink-dot { animation: pa-ink-dot 1.4s ease-in-out infinite; }
 
+/* CHARGE DOT — a "powering up" green dot for waiting players on the word picker.
+   Pulses scale + alpha + a soft green halo (~1.3s, chrome only). */
+@keyframes pa-charge {
+  0%, 100% { transform: scale(0.65); opacity: 0.4; box-shadow: 0 0 0 0 rgba(34,197,94,0); }
+  50%      { transform: scale(1); opacity: 1; box-shadow: 0 0 9px 1px rgba(34,197,94,0.55); }
+}
+.pa-charge { animation: pa-charge 1.3s ease-in-out infinite; }
+
 /* TOOL ACTIVE — selected brush/size/eraser gets a tactile glow breathe (purple) */
 @keyframes pa-tool-active {
   0%, 100% { box-shadow: 0 0 6px 0 rgba(168,85,247,0.4); }
@@ -4104,7 +4112,7 @@ html.light .space-bg-container { display: none; }
 /* The single reduced-motion guard for the WHOLE party block.
    Disables motion but leaves final visual states intact (opacity 1, no shift). */
 @media (prefers-reduced-motion: reduce) {
-  .pa-pop-in, .pa-deal-in, .pa-chip-in, .pa-spotlight, .pa-ink-dot,
+  .pa-pop-in, .pa-deal-in, .pa-chip-in, .pa-spotlight, .pa-ink-dot, .pa-charge,
   .pa-tool-active, .pa-guess-pop, .pa-correct-flash, .pa-confirm-pop,
   .pa-stamp, .pa-factoid-up, .pa-leader-glow, .pa-truth-glow,
   .pa-ready-sweep, .pa-ready-glow, .pa-card-selected,
