@@ -1252,7 +1252,9 @@ function ResultsScreen({
                 <h3 className="font-bebas text-xl text-cream tracking-wider">REVIEW MISTAKES</h3>
                 <span className="text-[#E74C3C] text-xs font-bold uppercase tracking-widest">{mistakes.length}</span>
               </div>
-              <div className="space-y-4">
+              {/* Scrollable box so a long mistake list doesn't stretch the
+                  whole results screen — it scrolls inside a fixed max height. */}
+              <div className="space-y-4 max-h-[55vh] overflow-y-auto pr-1">
               {(showMistakes ? mistakes : mistakes.slice(0, 1)).map((m) => {
               const optionLabels = ["A", "B", "C", "D"];
               return (
