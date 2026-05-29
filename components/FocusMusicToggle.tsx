@@ -24,18 +24,36 @@ import { useIdleAttention } from "@/lib/use-idle-attention";
  *     than `sm` to avoid crowding mobile.
  */
 
+// NOTE on playback: these are YouTube IFrame embeds. Two things matter for
+// audio to actually start:
+//   1. The iframe must NOT be display:none (browsers refuse to play audio from
+//      a display:none iframe). We render it off-screen but "displayed" instead.
+//   2. autoplay needs a user gesture — clicking a station IS that gesture, so
+//      the embed is allowed to start with sound.
+// `playsinline=1` + `rel=0` keep mobile + suggestions sane.
+// TODO(verify-in-browser): confirm each video ID is embeddable + autoplays.
+// If "tropical-rain" doesn't play, the video isn't embeddable — swap the ID.
+const EMBED = (id: string) =>
+  `https://www.youtube.com/embed/${id}?autoplay=1&controls=0&modestbranding=1&playsinline=1&rel=0`;
+
 const STATIONS = [
   {
     id: "lofi-girl",
     label: "Lo-fi to study",
-    description: "The classic. ChilledCow's 24/7 stream.",
-    src: "https://www.youtube.com/embed/jfKfPfyJRdk?autoplay=1&controls=0&modestbranding=1",
+    description: "The classic. Lofi Girl's 24/7 stream.",
+    src: EMBED("jfKfPfyJRdk"),
+  },
+  {
+    id: "tropical-rain",
+    label: "Tropical rain",
+    description: "Warm rain on leaves. Calm and cozy.",
+    src: EMBED("yIQd2Ya0Ziw"),
   },
   {
     id: "deep-focus",
     label: "Deep focus",
     description: "Ambient + light beats for hard work.",
-    src: "https://www.youtube.com/embed/7NOSDKb0HlU?autoplay=1&controls=0&modestbranding=1",
+    src: EMBED("7NOSDKb0HlU"),
   },
 ] as const;
 
@@ -98,17 +116,32 @@ export default function FocusMusicToggle() {
         onToggle={() => setOpen(o => !o)}
       />
 
-      {/* Hidden iframe for actual playback. Re-mounts when station changes;
-          unmounts when station is null (= stopped). */}
-      <div ref={audioContainerRef} className="hidden" aria-hidden="true">
+      {/* Off-screen iframe for actual playback. We do NOT use display:none /
+          `hidden` here — browsers block audio + autoplay from display:none
+          iframes (this was why Lo-fi never started). Positioning it off the
+          left edge keeps it "rendered" (so audio plays) while invisible.
+          Re-mounts when station changes; unmounts when station is null. */}
+      <div
+        ref={audioContainerRef}
+        aria-hidden="true"
+        style={{
+          position: "fixed",
+          left: "-9999px",
+          top: 0,
+          width: 1,
+          height: 1,
+          overflow: "hidden",
+          pointerEvents: "none",
+        }}
+      >
         {currentStation && (
           <iframe
             key={currentStation.id}
             src={currentStation.src}
             allow="autoplay; encrypted-media"
             title={currentStation.label}
-            width="0"
-            height="0"
+            width="320"
+            height="180"
           />
         )}
       </div>
@@ -116,7 +149,9 @@ export default function FocusMusicToggle() {
       {open && (
         <Panel
           station={station}
-          onPick={(s) => setStation(s)}
+          // Toggle: tapping the station that's already playing stops it;
+          // tapping a different one switches. (Tap-again-to-stop, per design.)
+          onPick={(s) => setStation((prev) => (prev === s ? null : s))}
           onStop={() => setStation(null)}
           onClose={() => setOpen(false)}
         />
