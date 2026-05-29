@@ -86,11 +86,54 @@ export default function PokerFaceView({
   const [timeLeft, setTimeLeft] = useState(0);
   const advanceLock = useRef(false);
 
+  // ── Mode + game length (from room settings; default in-person, 2 rotations) ──
+  // In-person: the claim is spoken out loud, so no claim text is shown and the
+  // presenter only privately picks truth/lie. Remote: the typed-claim flow.
+  const inperson = (room.settings?.pf_mode ?? "inperson") !== "remote";
+  const rotations = Math.min(3, Math.max(1, room.settings?.pf_rotations ?? 2));
+  // Player count is frozen at game start (room.settings.pf_player_count) so a
+  // mid-game leaver can't shrink the game length; fall back to live count for
+  // any pre-existing room that started before this was recorded.
+  const presenterCount = room.settings?.pf_player_count ?? players.length;
+  const totalRounds = rotations * Math.max(1, presenterCount);
+
+  // Presenter's private truth/lie pick for in-person (a beat to compose before
+  // opening the table — nothing is typed).
+  const [intent, setIntent] = useState<"truth" | "lie" | null>(null);
+
+  // Per-GAME tally accumulated across rounds, for the end-game awards. Resets
+  // naturally on remount (= a fresh game); countedRoundsRef gates double-count.
+  const [tally, setTally] = useState<{ fooled: Record<string, number>; correct: Record<string, number> }>({
+    fooled: {},
+    correct: {},
+  });
+  const countedRoundsRef = useRef<Set<string>>(new Set());
+
+  // End-game awards (most callers fooled = Bluff Master; most correct reads =
+  // Human Lie Detector). First-max wins ties — fine for a party game.
+  const awards = useMemo(() => {
+    const top = (rec: Record<string, number>) => {
+      let best: { user_id: string; count: number } | null = null;
+      for (const [uid, n] of Object.entries(rec)) {
+        if (n > 0 && (!best || n > best.count)) best = { user_id: uid, count: n };
+      }
+      return best;
+    };
+    const nameOf = (uid: string) => players.find((p) => p.user_id === uid)?.username ?? "Player";
+    const bm = top(tally.fooled);
+    const ld = top(tally.correct);
+    return {
+      bluffMaster: bm ? { name: nameOf(bm.user_id), count: bm.count } : null,
+      lieDetector: ld ? { name: nameOf(ld.user_id), count: ld.count } : null,
+    };
+  }, [tally, players]);
+
   // ── Start a fresh round (host) ──
   const startRound = useCallback(async () => {
     setPhase("loading");
     setDetail(null);
     setLieText("");
+    setIntent(null);
     setError(null);
     const res = await apiPost<{ round: { id: string } }>(
       "/api/party/pokerface/rounds",
@@ -127,6 +170,7 @@ export default function PokerFaceView({
         setRoundId(payload.round_id);
         setPhase("present");
         setLieText("");
+        setIntent(null);
         setDetail(null);
       }
     });
@@ -148,22 +192,45 @@ export default function PokerFaceView({
     const r = res.data.round;
     setDetail(r);
     setPhase(r.phase);
+
+    // Accumulate the per-game tally exactly once per round when its reveal lands
+    // (drives the end-game awards). Correct readers count toward Lie Detector;
+    // each fooled caller counts toward the presenter's Bluff Master tally.
+    if (r.phase === "reveal" && r.reveal && !countedRoundsRef.current.has(r.id)) {
+      countedRoundsRef.current.add(r.id);
+      const calls = r.reveal.calls;
+      const presenterId = r.presenter_user_id;
+      setTally((prev) => {
+        const fooled = { ...prev.fooled };
+        const correct = { ...prev.correct };
+        for (const c of calls) {
+          if (c.correct) correct[c.user_id] = (correct[c.user_id] ?? 0) + 1;
+          else fooled[presenterId] = (fooled[presenterId] ?? 0) + 1;
+        }
+        return { fooled, correct };
+      });
+    }
+
     if (r.phase === "present") {
       setNinnyMsg(
         r.is_presenter
-          ? "Your card is secret. Tell the truth, or invent a convincing lie."
+          ? inperson
+            ? "Your fact is secret. Tell it straight, or twist it. The room only has your face to read."
+            : "Your card is secret. Tell the truth, or invent a convincing lie."
           : `${r.presenter_username ?? "The presenter"} is studying their card...`,
       );
     } else if (r.phase === "vote") {
       setNinnyMsg(
         r.is_presenter
-          ? "You've presented. Hold your face. The room is deciding."
-          : "Believe the claim, or call the bluff. Watch their eyes.",
+          ? "You've presented. Hold your face. Give them nothing."
+          : inperson
+            ? "They made their claim out loud. Did their face give it away?"
+            : "Believe the claim, or call the bluff. Read between the lines.",
       );
     } else if (r.phase === "reveal") {
-      setNinnyMsg(r.reveal?.is_lie ? "It was a LIE." : "It was the TRUTH.");
+      setNinnyMsg(r.reveal?.is_lie ? "It was a LIE. Who fell for it?" : "It was the TRUTH. The doubters got played by an honest face.");
     }
-  }, [roundId]);
+  }, [roundId, inperson]);
 
   useEffect(() => {
     if (!roundId) return;
@@ -205,7 +272,8 @@ export default function PokerFaceView({
   // ── Presenter: commit truth or lie ──
   async function present(isLie: boolean) {
     if (!roundId || submitting) return;
-    if (isLie && !lieText.trim()) {
+    // Remote lies need typed text; in-person lies are spoken (no text required).
+    if (!inperson && isLie && !lieText.trim()) {
       setError("Write the lie you want to present.");
       return;
     }
@@ -213,7 +281,7 @@ export default function PokerFaceView({
     setError(null);
     const res = await apiPost(`/api/party/pokerface/rounds/${roundId}/present`, {
       isLie,
-      claimText: isLie ? lieText.trim() : undefined,
+      claimText: !inperson && isLie ? lieText.trim() : undefined,
     });
     setSubmitting(false);
     if (!res.ok) {
@@ -295,9 +363,11 @@ export default function PokerFaceView({
           border: `1px solid ${ACCENT}33`,
         }}
       >
-        <span className="text-lg" aria-hidden="true">👀</span>
+        <span className="text-lg" aria-hidden="true">{inperson ? "👀" : "🎭"}</span>
         <p className="text-cream/70 text-xs sm:text-sm font-syne leading-snug">
-          Best face to face. Gather your crew. The face is the tell.
+          {inperson
+            ? "Same room. Claims are spoken out loud. The face is the tell."
+            : "Playing apart. Read the words and the timing. Trust your gut."}
         </p>
       </div>
 
@@ -316,7 +386,7 @@ export default function PokerFaceView({
         </p>
         <div className="mt-3 flex items-center justify-between">
           <span className="font-bebas text-[10px] tracking-[0.3em] text-cream/40">
-            ROUND {round.round_num} · {phase.toUpperCase()} · {isPresenter ? "YOU PRESENT" : `${round.presenter_username ?? "PRESENTER"} PRESENTS`}
+            ROUND {round.round_num} OF {totalRounds} · {isPresenter ? "YOU PRESENT" : `${round.presenter_username ?? "PRESENTER"} PRESENTS`}
           </span>
           {phase === "vote" && (
             <span className={`font-bebas text-2xl ${timeLeft <= 5 ? "text-red-400" : "text-cream/80"}`}>
@@ -351,49 +421,123 @@ export default function PokerFaceView({
                     {round.card_fact}
                   </p>
                   <p className="text-cream/40 text-xs font-syne mt-3 italic">
-                    Present this truth, or write a lie and sell it with a straight face.
+                    {inperson
+                      ? "Say it out loud. Tell it straight, or twist it and sell the lie with your face."
+                      : "Present this truth, or write a lie and sell it with a straight face."}
                   </p>
                 </div>
 
-                <input
-                  type="text"
-                  value={lieText}
-                  onChange={(e) => setLieText(e.target.value)}
-                  placeholder="Optional: write your lie about this card..."
-                  maxLength={280}
-                  className="w-full rounded-xl px-4 py-3.5 text-base font-syne text-cream outline-none"
-                  style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)" }}
-                />
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <button
-                    onClick={() => present(false)}
-                    disabled={submitting}
-                    className="py-3.5 rounded-xl font-bebas text-base tracking-wider transition-all active:scale-95 disabled:opacity-40"
-                    style={{
-                      background: "linear-gradient(135deg, rgba(34,197,94,0.9) 0%, rgba(22,163,74,0.8) 100%)",
-                      color: "#04140a",
-                      boxShadow: "0 4px 18px rgba(34,197,94,0.3)",
-                    }}
-                  >
-                    PRESENT THE TRUTH
-                  </button>
-                  <button
-                    onClick={() => present(true)}
-                    disabled={submitting || !lieText.trim()}
-                    className="py-3.5 rounded-xl font-bebas text-base tracking-wider transition-all active:scale-95 disabled:opacity-40"
-                    style={{
-                      background: `linear-gradient(135deg, ${ACCENT} 0%, #0090d0 100%)`,
-                      color: "#04080F",
-                      boxShadow: `0 4px 18px ${ACCENT}4d`,
-                    }}
-                  >
-                    PRESENT THE LIE
-                  </button>
-                </div>
-                <p className="text-cream/40 text-xs font-syne text-center">
-                  To bluff, write your lie above, then tap Present the Lie.
-                </p>
+                {inperson ? (
+                  intent === null ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <button
+                        onClick={() => setIntent("truth")}
+                        className="py-4 rounded-xl font-bebas text-base tracking-wider transition-all active:scale-95"
+                        style={{
+                          background: "linear-gradient(135deg, rgba(34,197,94,0.9) 0%, rgba(22,163,74,0.8) 100%)",
+                          color: "#04140a",
+                          boxShadow: "0 4px 18px rgba(34,197,94,0.3)",
+                        }}
+                      >
+                        TELL THE TRUTH
+                      </button>
+                      <button
+                        onClick={() => setIntent("lie")}
+                        className="py-4 rounded-xl font-bebas text-base tracking-wider transition-all active:scale-95"
+                        style={{
+                          background: `linear-gradient(135deg, ${ACCENT} 0%, #0090d0 100%)`,
+                          color: "#04080F",
+                          boxShadow: `0 4px 18px ${ACCENT}4d`,
+                        }}
+                      >
+                        TELL A LIE
+                      </button>
+                    </div>
+                  ) : (
+                    <motion.div
+                      initial={reduced ? false : { opacity: 0, y: 6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="space-y-3"
+                    >
+                      <div
+                        className="rounded-xl px-4 py-4 text-center"
+                        style={{
+                          background: intent === "lie" ? `${ACCENT}14` : "rgba(34,197,94,0.1)",
+                          border: intent === "lie" ? `1px solid ${ACCENT}40` : "1px solid rgba(34,197,94,0.35)",
+                        }}
+                      >
+                        <p className="font-bebas text-lg tracking-wider" style={{ color: intent === "lie" ? "#7DD3FC" : "#86EFAC" }}>
+                          {intent === "lie" ? "YOU'RE BLUFFING" : "YOU'RE BEING HONEST"}
+                        </p>
+                        <p className="text-cream/55 text-xs font-syne mt-1 max-w-sm mx-auto leading-snug">
+                          {intent === "lie"
+                            ? "Make up your lie in your head. Don't type it. Say it out loud and hold your face."
+                            : "Read the real fact out loud, word for word. Sound just as shifty as a liar would."}
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => present(intent === "lie")}
+                        disabled={submitting}
+                        className="w-full py-4 rounded-xl font-bebas text-lg tracking-wider transition-all active:scale-95 disabled:opacity-40"
+                        style={{
+                          background: `linear-gradient(135deg, ${ACCENT} 0%, #0090d0 100%)`,
+                          color: "#04080F",
+                          boxShadow: `0 4px 20px ${ACCENT}4d`,
+                        }}
+                      >
+                        {submitting ? "OPENING..." : "OPEN THE TABLE"}
+                      </button>
+                      <button
+                        onClick={() => setIntent(null)}
+                        disabled={submitting}
+                        className="w-full py-2 rounded-xl font-syne text-xs text-cream/45 hover:text-cream/70 transition-colors disabled:opacity-40"
+                      >
+                        change my mind
+                      </button>
+                    </motion.div>
+                  )
+                ) : (
+                  <>
+                    <input
+                      type="text"
+                      value={lieText}
+                      onChange={(e) => setLieText(e.target.value)}
+                      placeholder="Optional: write your lie about this card..."
+                      maxLength={280}
+                      className="w-full rounded-xl px-4 py-3.5 text-base font-syne text-cream outline-none"
+                      style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)" }}
+                    />
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <button
+                        onClick={() => present(false)}
+                        disabled={submitting}
+                        className="py-3.5 rounded-xl font-bebas text-base tracking-wider transition-all active:scale-95 disabled:opacity-40"
+                        style={{
+                          background: "linear-gradient(135deg, rgba(34,197,94,0.9) 0%, rgba(22,163,74,0.8) 100%)",
+                          color: "#04140a",
+                          boxShadow: "0 4px 18px rgba(34,197,94,0.3)",
+                        }}
+                      >
+                        PRESENT THE TRUTH
+                      </button>
+                      <button
+                        onClick={() => present(true)}
+                        disabled={submitting || !lieText.trim()}
+                        className="py-3.5 rounded-xl font-bebas text-base tracking-wider transition-all active:scale-95 disabled:opacity-40"
+                        style={{
+                          background: `linear-gradient(135deg, ${ACCENT} 0%, #0090d0 100%)`,
+                          color: "#04080F",
+                          boxShadow: `0 4px 18px ${ACCENT}4d`,
+                        }}
+                      >
+                        PRESENT THE LIE
+                      </button>
+                    </div>
+                    <p className="text-cream/40 text-xs font-syne text-center">
+                      To bluff, write your lie above, then tap Present the Lie.
+                    </p>
+                  </>
+                )}
               </>
             ) : (
               <div className="flex flex-col items-center py-10 gap-3">
@@ -405,7 +549,9 @@ export default function PokerFaceView({
                   style={{ borderColor: `${ACCENT}33`, borderTopColor: ACCENT }}
                 />
                 <p className="text-cream/40 text-xs font-syne text-center max-w-xs">
-                  Watch their face. Truth or lie, you'll have to call it.
+                  {inperson
+                    ? "They're about to make their claim out loud. Watch their face."
+                    : "Truth or lie, you'll have to call it. Get ready."}
                 </p>
               </div>
             )}
@@ -428,10 +574,22 @@ export default function PokerFaceView({
                 border: "1px solid rgba(255,255,255,0.1)",
               }}
             >
-              <p className="font-bebas text-xs text-cream/45 tracking-[0.25em] mb-1">THE CLAIM</p>
-              <p className="font-syne text-base sm:text-lg text-cream/95 leading-relaxed">
-                &ldquo;{round.claim_text}&rdquo;
-              </p>
+              {inperson || !round.claim_text ? (
+                <>
+                  <p className="font-bebas text-xs text-cream/45 tracking-[0.25em] mb-1">THE CLAIM WAS SPOKEN</p>
+                  <p className="font-syne text-base sm:text-lg text-cream/95 leading-relaxed">
+                    {round.presenter_username ?? "The presenter"} made their claim about{" "}
+                    <span style={{ color: ACCENT }}>{round.card_word}</span> out loud. Did you buy it?
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p className="font-bebas text-xs text-cream/45 tracking-[0.25em] mb-1">THE CLAIM</p>
+                  <p className="font-syne text-base sm:text-lg text-cream/95 leading-relaxed">
+                    &ldquo;{round.claim_text}&rdquo;
+                  </p>
+                </>
+              )}
             </div>
 
             {isPresenter ? (
@@ -517,29 +675,30 @@ export default function PokerFaceView({
                 {round.reveal.is_lie ? "THAT WAS A LIE" : "THAT WAS THE TRUTH"}
               </p>
               <p
-                className="font-bebas text-2xl tracking-wider"
+                className={`font-bebas text-3xl tracking-wider inline-block ${reduced ? "" : "pa-stamp"}`}
                 style={{ color: round.reveal.is_lie ? "#FCA5A5" : "#86EFAC" }}
               >
-                {round.reveal.is_lie ? "🃏 BLUFFED" : "✓ HONEST"}
+                {round.reveal.is_lie ? "BLUFFED" : "HONEST"}
               </p>
-              {round.reveal.is_lie && (
-                <p className="text-cream/60 text-sm font-syne mt-3">
-                  The real fact: <span className="text-cream/90">{round.reveal.card_fact}</span>
-                </p>
-              )}
+              {/* Always surface the real fact — the educational payoff lands for
+                  the whole room every round, truth or lie. */}
+              <p className={`text-cream/70 text-sm font-syne mt-3 max-w-md mx-auto ${reduced ? "" : "pa-factoid-up"}`}>
+                The real fact: <span className="text-cream/95">{round.reveal.card_fact}</span>
+              </p>
             </div>
 
-            {/* Who called what */}
+            {/* Who called what — rows deal in staggered; correct reads flash green */}
             <div className="space-y-2">
-              {round.reveal.calls.map((c) => (
+              {round.reveal.calls.map((c, i) => (
                 <div
                   key={c.user_id}
-                  className="rounded-xl px-4 py-3 flex items-center justify-between"
+                  className={`rounded-xl px-4 py-3 flex items-center justify-between ${reduced ? "" : "pa-deal-in"} ${c.correct && !reduced ? "pa-correct-flash" : ""}`}
                   style={{
                     background: c.correct
                       ? "linear-gradient(135deg, rgba(34,197,94,0.14) 0%, rgba(34,197,94,0.04) 100%)"
                       : "rgba(255,255,255,0.03)",
                     border: c.correct ? "1px solid rgba(34,197,94,0.4)" : "1px solid rgba(255,255,255,0.08)",
+                    ...(reduced ? {} : { animationDelay: `${i * 80}ms` }),
                   }}
                 >
                   <p className="font-syne text-sm text-cream/90">
@@ -555,32 +714,84 @@ export default function PokerFaceView({
 
             <PartyScoreboard players={playersForBoard} highlightUserId={meUserId} />
 
-            {isHost && (
-              <div className="flex flex-col sm:flex-row gap-3">
+            {/* ── End-game awards — shown to everyone once all rotations are done ── */}
+            {round.round_num >= totalRounds && (
+              <motion.div
+                initial={reduced ? false : { opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: reduced ? 0 : 0.2 }}
+                className="space-y-3"
+              >
+                <p className="font-bebas text-xs tracking-[0.3em] text-cream/45 text-center pt-1">
+                  GAME OVER
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {[
+                    { title: "BLUFF MASTER", sub: "most callers fooled", a: awards.bluffMaster, unit: "fooled", accent: "#FFD700" },
+                    { title: "HUMAN LIE DETECTOR", sub: "most correct reads", a: awards.lieDetector, unit: "reads", accent: "#22C55E" },
+                  ].map((aw) => (
+                    <div
+                      key={aw.title}
+                      className={`rounded-2xl p-4 text-center ${reduced ? "" : "pa-leader-glow"}`}
+                      style={{
+                        background: `linear-gradient(135deg, ${aw.accent}1f 0%, ${aw.accent}08 100%)`,
+                        border: `1px solid ${aw.accent}59`,
+                      }}
+                    >
+                      <p className="font-bebas text-[10px] tracking-[0.25em]" style={{ color: aw.accent }}>
+                        {aw.title}
+                      </p>
+                      <p className="font-bebas text-2xl tracking-wider text-cream mt-1">
+                        {aw.a?.name ?? "Nobody"}
+                      </p>
+                      <p className="text-cream/45 text-[11px] font-syne mt-0.5">
+                        {aw.a ? `${aw.a.count} ${aw.unit}` : aw.sub}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+
+            {isHost &&
+              (round.round_num >= totalRounds ? (
                 <button
-                  onClick={startRound}
-                  className="flex-1 py-3 rounded-xl font-bebas tracking-wider text-base transition-all active:scale-95"
+                  onClick={onReturnToLobby}
+                  className="w-full py-3 rounded-xl font-bebas tracking-wider text-base transition-all active:scale-95"
                   style={{
                     background: `linear-gradient(135deg, ${ACCENT} 0%, #0090d0 100%)`,
                     color: "#04080F",
                     boxShadow: `0 4px 18px ${ACCENT}4d`,
                   }}
                 >
-                  NEXT ROUND
+                  BACK TO LOBBY · RUN IT BACK
                 </button>
-                <button
-                  onClick={onReturnToLobby}
-                  className="flex-1 py-3 rounded-xl font-bebas tracking-wider text-base transition-all active:scale-95"
-                  style={{
-                    background: "rgba(255,255,255,0.04)",
-                    border: "1px solid rgba(255,255,255,0.1)",
-                    color: "rgba(238,244,255,0.85)",
-                  }}
-                >
-                  BACK TO LOBBY
-                </button>
-              </div>
-            )}
+              ) : (
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <button
+                    onClick={startRound}
+                    className="flex-1 py-3 rounded-xl font-bebas tracking-wider text-base transition-all active:scale-95"
+                    style={{
+                      background: `linear-gradient(135deg, ${ACCENT} 0%, #0090d0 100%)`,
+                      color: "#04080F",
+                      boxShadow: `0 4px 18px ${ACCENT}4d`,
+                    }}
+                  >
+                    NEXT ROUND
+                  </button>
+                  <button
+                    onClick={onReturnToLobby}
+                    className="flex-1 py-3 rounded-xl font-bebas tracking-wider text-base transition-all active:scale-95"
+                    style={{
+                      background: "rgba(255,255,255,0.04)",
+                      border: "1px solid rgba(255,255,255,0.1)",
+                      color: "rgba(238,244,255,0.85)",
+                    }}
+                  >
+                    BACK TO LOBBY
+                  </button>
+                </div>
+              ))}
           </motion.div>
         )}
       </AnimatePresence>

@@ -20,10 +20,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
-import {
-  POKERFACE_FOOL_POINTS,
-  POKERFACE_CORRECT_CALL_POINTS,
-} from "@/lib/party/scoring";
+import { pokerFaceRoundPoints } from "@/lib/party/scoring";
 
 export async function POST(
   req: NextRequest,
@@ -72,32 +69,26 @@ export async function POST(
     return NextResponse.json({ ok: true, phase: "reveal", alreadyRevealed: true });
   }
 
-  // ── Server-authoritative scoring ──
+  // ── Server-authoritative scoring (shared helper — same math the reveal GET
+  // previews, so banked == displayed, including the caught-red-handed penalty) ──
   const isLie = round.is_lie === true;
   const { data: calls } = await supabaseAdmin
     .from("party_pokerface_votes")
     .select("voter_user_id, call")
     .eq("round_id", round.id);
 
-  const deltas = new Map<string, number>();
-  for (const c of calls ?? []) {
-    const correct = (c.call === "doubt" && isLie) || (c.call === "believe" && !isLie);
-    if (correct) {
-      deltas.set(
-        c.voter_user_id,
-        (deltas.get(c.voter_user_id) ?? 0) + POKERFACE_CORRECT_CALL_POINTS,
-      );
-    } else {
-      deltas.set(
-        round.presenter_user_id,
-        (deltas.get(round.presenter_user_id) ?? 0) + POKERFACE_FOOL_POINTS,
-      );
-    }
-  }
+  const deltas = pokerFaceRoundPoints(
+    isLie,
+    (calls ?? []).map((c) => ({ voter_user_id: c.voter_user_id, call: c.call as "believe" | "doubt" })),
+    round.presenter_user_id,
+  );
 
   // Apply deltas to party_room_players.score (read-modify-write per player,
-  // matching the bluff scoring path).
-  for (const [uid, delta] of Array.from(deltas.entries())) {
+  // matching the bluff scoring path). We do NOT floor at 0: the caught-red-handed
+  // penalty is allowed to push a presenter negative so the banked score always
+  // equals the per-round breakdown the reveal previews (no preview/score
+  // divergence), and a deep-negative score is a fitting badge of a blown bluff.
+  for (const [uid, delta] of Object.entries(deltas)) {
     if (delta === 0) continue;
     const { data: row } = await supabaseAdmin
       .from("party_room_players")

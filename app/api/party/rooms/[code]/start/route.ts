@@ -37,7 +37,7 @@ export async function POST(
 
   const { data: room } = await supabaseAdmin
     .from("party_rooms")
-    .select("id, host_user_id, status")
+    .select("id, host_user_id, status, settings")
     .eq("code", code)
     .neq("status", "ended")
     .maybeSingle();
@@ -81,9 +81,26 @@ export async function POST(
     .update({ score: 0, is_ready: false })
     .eq("room_id", room.id);
 
+  // Merge any host-chosen game settings (Poker Face mode + rotations) into the
+  // room settings bag. Whitelisted + clamped so the client can't write arbitrary
+  // keys; everything else in `settings` is preserved.
+  const incoming = (body?.settings ?? {}) as Record<string, unknown>;
+  const merged: Record<string, unknown> = { ...(room.settings ?? {}) };
+  if (incoming.pf_mode === "inperson" || incoming.pf_mode === "remote") {
+    merged.pf_mode = incoming.pf_mode;
+  }
+  if (typeof incoming.pf_rotations === "number") {
+    merged.pf_rotations = Math.min(3, Math.max(1, Math.round(incoming.pf_rotations)));
+  }
+  // Freeze the presenter count at game start so the game length (rotations x
+  // players) is stable even if someone leaves mid-game.
+  if (game === "pokerface") {
+    merged.pf_player_count = playerCount;
+  }
+
   await supabaseAdmin
     .from("party_rooms")
-    .update({ status: "playing", current_game: game })
+    .update({ status: "playing", current_game: game, settings: merged })
     .eq("id", room.id);
 
   return NextResponse.json({ ok: true, game, room_id: room.id });

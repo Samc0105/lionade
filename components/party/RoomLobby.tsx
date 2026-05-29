@@ -71,6 +71,10 @@ export default function RoomLobby({ room, players, isHost, meUserId, onGameStart
   const [starting, setStarting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Poker Face host settings (only sent when starting pokerface).
+  const [pfMode, setPfMode] = useState<"inperson" | "remote">("inperson");
+  const [pfRotations, setPfRotations] = useState<number>(2);
+
   const me = players.find((p) => p.user_id === meUserId);
   const serverReady = !!me?.is_ready;
 
@@ -176,6 +180,9 @@ export default function RoomLobby({ room, players, isHost, meUserId, onGameStart
     setError(null);
     const res = await apiPost(`/api/party/rooms/${room.code}/start`, {
       game: selectedGame,
+      ...(selectedGame === "pokerface"
+        ? { settings: { pf_mode: pfMode, pf_rotations: pfRotations } }
+        : {}),
     });
     setStarting(false);
     if (!res.ok) {
@@ -334,11 +341,82 @@ export default function RoomLobby({ room, players, isHost, meUserId, onGameStart
             );
           })}
         </div>
-        {/* Best-played footnote — only Poker Face carries the "gather your crew" nudge */}
+        {/* Poker Face setup — how you're playing (spoken vs typed) + game length.
+            Host-only controls; everyone else sees the chosen values read-only. */}
         {selectedGame === "pokerface" && (
-          <p className="text-cream/45 text-xs font-syne mt-3 text-center">
-            Best face to face. Gather your crew, share the room code, and read the tells in the room.
-          </p>
+          <div className="mt-4 space-y-4">
+            <div>
+              <p className="font-bebas text-sm text-cream/60 tracking-[0.25em] mb-2">
+                HOW ARE YOU PLAYING?
+              </p>
+              <div className="grid grid-cols-2 gap-2">
+                {([
+                  { v: "inperson" as const, label: "SAME ROOM", sub: "Claims spoken out loud. The face is the tell." },
+                  { v: "remote" as const, label: "REMOTE", sub: "Claims typed on screen. Read the words." },
+                ]).map((opt) => {
+                  const on = pfMode === opt.v;
+                  return (
+                    <button
+                      key={opt.v}
+                      onClick={() => isHost && setPfMode(opt.v)}
+                      disabled={!isHost}
+                      className="text-left rounded-xl p-3 transition-all active:scale-[0.98] disabled:cursor-not-allowed"
+                      style={{
+                        background: on
+                          ? "linear-gradient(135deg, rgba(0,191,255,0.2) 0%, rgba(0,191,255,0.05) 100%)"
+                          : "rgba(255,255,255,0.03)",
+                        border: on ? "1px solid rgba(0,191,255,0.6)" : "1px solid rgba(255,255,255,0.08)",
+                        opacity: isHost || on ? 1 : 0.6,
+                      }}
+                    >
+                      <p className="font-bebas text-sm tracking-wider" style={{ color: on ? "#7DD3FC" : "rgba(238,244,255,0.7)" }}>
+                        {opt.label}
+                      </p>
+                      <p className="text-cream/45 text-[11px] font-syne mt-0.5 leading-snug">{opt.sub}</p>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div>
+              <p className="font-bebas text-sm text-cream/60 tracking-[0.25em] mb-2">
+                ROUNDS
+                <span className="text-cream/30 ml-2 normal-case tracking-normal">
+                  · everyone presents {pfRotations === 1 ? "once" : `${pfRotations} times`}
+                </span>
+              </p>
+              <div className="flex gap-2">
+                {[1, 2, 3].map((n) => {
+                  const on = pfRotations === n;
+                  return (
+                    <button
+                      key={n}
+                      onClick={() => isHost && setPfRotations(n)}
+                      disabled={!isHost}
+                      className="flex-1 py-2.5 rounded-xl font-bebas text-base tracking-wider transition-all active:scale-95 disabled:cursor-not-allowed"
+                      style={{
+                        background: on
+                          ? "linear-gradient(135deg, rgba(0,191,255,0.2) 0%, rgba(0,191,255,0.05) 100%)"
+                          : "rgba(255,255,255,0.03)",
+                        border: on ? "1px solid rgba(0,191,255,0.6)" : "1px solid rgba(255,255,255,0.08)",
+                        color: on ? "#7DD3FC" : "rgba(238,244,255,0.6)",
+                        opacity: isHost || on ? 1 : 0.6,
+                      }}
+                    >
+                      {n}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <p className="text-cream/45 text-xs font-syne text-center">
+              {pfMode === "inperson"
+                ? "Best face to face. Share the room code, gather your crew, and read the tells in the room."
+                : "Playing apart? Read the words and the timing. Trust your gut."}
+            </p>
+          </div>
         )}
         {!isHost && (
           <p className="text-cream/40 text-xs font-syne mt-3 italic text-center">

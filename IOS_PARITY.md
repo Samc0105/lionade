@@ -7,6 +7,15 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 
 ---
 
+## 2026-05-29 — Poker Face deep pass (web-only, iOS paused)
+
+| Feature | Web route(s) | iOS route(s) | Web | iOS | Notes |
+|---|---|---|---|---|---|
+| **Hybrid in-person / remote mode** | `/games/party` (pokerface) | iOS Party (not built) | ✅ | ❌ paused | Host picks Same Room (default, claims spoken aloud, `claim_text` null, no text box, callers read the face) vs Remote (typed claim) in the lobby; stored in `party_rooms.settings.pf_mode` (no migration). `present/route.ts` is mode-aware; in-person ships strictly less data, so the migration-`20260528020000` RLS + presenter-gated GET posture is preserved. iOS: paused. |
+| **Win condition + end-game awards** | `/games/party` (pokerface) | iOS Party (not built) | ✅ | ❌ paused | Game ends after `pf_rotations` full rotations (host 1/2/3, default 2; player count frozen at start via `settings.pf_player_count`). GAME OVER screen crowns Bluff Master (most fooled) + Human Lie Detector (most correct reads), tallied client-side (best-effort). iOS: paused. |
+| **Scoring risk + shared helper** | `/api/party/pokerface/rounds/[id]/{complete,route}` | iOS Party (not built) | ✅ | ❌ paused | `POKERFACE_CAUGHT_PENALTY = 200` (a fully-doubted lie docks the presenter; lying isn't free). One `pokerFaceRoundPoints()` helper powers both the banked score and the reveal preview (displayed == banked); score floor removed so a blown bluff can go negative. iOS: paused. |
+| **Reveal theater + 8 cards + copy** | `/games/party` (pokerface) | iOS Party (not built) | ✅ | ❌ paused | Verdict `pa-stamp`, always-on real-fact reveal (`pa-factoid-up`, educational payoff), staggered call-outs (`pa-deal-in` + `pa-correct-flash`), GPU-only + reduced-motion guarded. 8 new family-safe cards, mode-aware Ninny lines, "ROUND X OF N" header. iOS: paused. |
+
 ## 2026-05-29 — Sketchy Subjects: word-picker redesign + fair-random drawer (web-only, iOS paused)
 
 | Feature | Web route(s) | iOS route(s) | Web | iOS | Notes |

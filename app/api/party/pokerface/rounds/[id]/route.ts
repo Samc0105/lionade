@@ -21,10 +21,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
-import {
-  POKERFACE_FOOL_POINTS,
-  POKERFACE_CORRECT_CALL_POINTS,
-} from "@/lib/party/scoring";
+import { pokerFaceRoundPoints } from "@/lib/party/scoring";
 import type { PokerFaceCall } from "@/lib/party/types";
 
 export async function GET(
@@ -130,25 +127,20 @@ export async function GET(
   }
 
   const isLie = round.is_lie === true;
-  const roundPoints: Record<string, number> = {};
-  const callDetails = (calls ?? []).map((c) => {
+  // Per-round points come from the shared helper (same math the authoritative
+  // complete route banks, including the caught-red-handed penalty).
+  const roundPoints = pokerFaceRoundPoints(
+    isLie,
+    (calls ?? []).map((c) => ({ voter_user_id: c.voter_user_id, call: c.call as "believe" | "doubt" })),
+    round.presenter_user_id,
+  );
+  const callDetails = (calls ?? []).map((c) => ({
+    user_id: c.voter_user_id,
+    username: usernameById.get(c.voter_user_id) ?? null,
+    call: c.call as PokerFaceCall,
     // A caller is CORRECT when they doubt a lie or believe a truth.
-    const correct = (c.call === "doubt" && isLie) || (c.call === "believe" && !isLie);
-    if (correct) {
-      roundPoints[c.voter_user_id] =
-        (roundPoints[c.voter_user_id] ?? 0) + POKERFACE_CORRECT_CALL_POINTS;
-    } else {
-      // The presenter fooled this caller.
-      roundPoints[round.presenter_user_id] =
-        (roundPoints[round.presenter_user_id] ?? 0) + POKERFACE_FOOL_POINTS;
-    }
-    return {
-      user_id: c.voter_user_id,
-      username: usernameById.get(c.voter_user_id) ?? null,
-      call: c.call as PokerFaceCall,
-      correct,
-    };
-  });
+    correct: (c.call === "doubt" && isLie) || (c.call === "believe" && !isLie),
+  }));
 
   return NextResponse.json({
     round: {

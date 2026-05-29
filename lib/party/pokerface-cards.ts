@@ -75,6 +75,14 @@ export const POKERFACE_CARDS: PokerFaceCard[] = [
   { word: "Owls", fact: "Owls cannot move their eyeballs, so they rotate their heads instead." },
   { word: "Coconuts", fact: "Coconuts are not nuts; they are classified as a type of fruit called a drupe." },
   { word: "The Great Wall", fact: "The Great Wall of China is not visible to the naked eye from space." },
+  { word: "Otters", fact: "Sea otters hold hands while they sleep so they don't drift apart." },
+  { word: "Scotland", fact: "Scotland's official national animal is the unicorn." },
+  { word: "Bubble Wrap", fact: "Bubble wrap was originally invented to be textured wallpaper." },
+  { word: "Sea Cucumbers", fact: "Some sea cucumbers breathe through their backside." },
+  { word: "Ketchup", fact: "Ketchup was sold in the 1830s as a medicine for an upset stomach." },
+  { word: "Avocados", fact: "Avocados are botanically a berry, while strawberries are not." },
+  { word: "Pineapples", fact: "A single pineapple takes about two years to grow." },
+  { word: "Roman Concrete", fact: "Ancient Roman concrete grows stronger over time when exposed to seawater." },
 ];
 
 /** Draw a random card, optionally excluding words already used this game so the

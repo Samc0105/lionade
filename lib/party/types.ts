@@ -21,6 +21,9 @@ export interface PartySettings {
   write_seconds?: number;       // bluff: default 45
   vote_seconds?: number;        // bluff: default 30
   pf_vote_seconds?: number;     // pokerface: default 30 (caller call window)
+  pf_rotations?: number;        // pokerface: full presenter rotations per game, default 2
+  pf_mode?: "inperson" | "remote"; // pokerface: spoken (default) vs typed-claim
+  pf_player_count?: number;     // pokerface: player count frozen at game start (stable game length)
 }
 
 export interface PartyPlayer {

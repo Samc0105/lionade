@@ -34,7 +34,7 @@ export async function POST(
 
   const { data: round } = await supabaseAdmin
     .from("party_pokerface_rounds")
-    .select("id, presenter_user_id, phase, card_fact")
+    .select("id, room_id, presenter_user_id, phase, card_fact")
     .eq("id", params.id)
     .maybeSingle();
   if (!round) return NextResponse.json({ error: "Round not found" }, { status: 404 });
@@ -45,12 +45,27 @@ export async function POST(
     return NextResponse.json({ error: "This hand has already been presented" }, { status: 409 });
   }
 
-  // Truth → the shown claim IS the card fact (server-forced). Lie → the
-  // presenter's authored claim (must be non-empty).
-  let claimText: string;
-  if (isLie) {
+  // Mode decides whether a claim is TYPED or SPOKEN. Default in-person (the
+  // brand: "the face is the tell") unless the room is explicitly remote.
+  const { data: room } = await supabaseAdmin
+    .from("party_rooms")
+    .select("settings")
+    .eq("id", round.room_id)
+    .maybeSingle();
+  const inperson = (room?.settings?.pf_mode ?? "inperson") !== "remote";
+
+  // In-person: the claim is spoken out loud, so NOTHING is shown on screen —
+  // claim_text stays null for both truth and lie (and a null truth-claim never
+  // leaks the real fact to callers during the vote). is_lie is still recorded
+  // server-side for scoring. Remote: truth shows the card fact verbatim
+  // (server-forced so a liar can't masquerade as honest), a lie shows the
+  // presenter's authored claim (non-empty, never generated).
+  let claimText: string | null;
+  if (inperson) {
+    claimText = null;
+  } else if (isLie) {
     claimText = rawClaim.trim().slice(0, MAX_CLAIM_LEN);
-    if (claimText.length === 0) {
+    if (!claimText) {
       return NextResponse.json(
         { error: "Write the lie you want to present." },
         { status: 400 },

@@ -32,3 +32,34 @@ export const BLUFF_FAKE_TRICK_POINTS = 500;
 // correct caller, but a sharp room shuts a liar down — symmetric and readable.
 export const POKERFACE_FOOL_POINTS = 500;   // presenter, per caller fooled
 export const POKERFACE_CORRECT_CALL_POINTS = 400;  // caller, for a correct read
+// Caught red-handed: a LIE that fooled NOBODY (the whole room doubted) costs the
+// presenter a flat penalty, so lying isn't free and the truth/lie call carries
+// real risk. Only on the total-whiff case (one readable rule, never per-caller).
+export const POKERFACE_CAUGHT_PENALTY = 200;
+
+// Single source of truth for per-round Poker Face points, used by BOTH the
+// reveal-preview GET route and the authoritative complete/scoring route so the
+// displayed round points always equal the banked deltas. Caller correct read
+// (doubt a lie / believe a truth) earns the caller; each fooled caller earns the
+// presenter; a fully-doubted lie docks the presenter the caught penalty.
+export function pokerFaceRoundPoints(
+  isLie: boolean,
+  calls: { voter_user_id: string; call: "believe" | "doubt" }[],
+  presenterUserId: string,
+): Record<string, number> {
+  const points: Record<string, number> = {};
+  let fooled = 0;
+  for (const c of calls) {
+    const correct = (c.call === "doubt" && isLie) || (c.call === "believe" && !isLie);
+    if (correct) {
+      points[c.voter_user_id] = (points[c.voter_user_id] ?? 0) + POKERFACE_CORRECT_CALL_POINTS;
+    } else {
+      fooled += 1;
+      points[presenterUserId] = (points[presenterUserId] ?? 0) + POKERFACE_FOOL_POINTS;
+    }
+  }
+  if (isLie && calls.length > 0 && fooled === 0) {
+    points[presenterUserId] = (points[presenterUserId] ?? 0) - POKERFACE_CAUGHT_PENALTY;
+  }
+  return points;
+}
