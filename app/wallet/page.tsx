@@ -190,7 +190,7 @@ export default function WalletPage() {
       <div className="relative min-h-screen pt-16 pb-20 md:pb-8 overflow-hidden" style={{ isolation: "isolate" }}>
         <AmbientOrbs
           orbs={[
-            { color: "#FFD700", pos: "top-[10%] left-[14%]", size: 540, opacity: 0.06 },
+            { color: "#00BFFF", pos: "top-[10%] left-[14%]", size: 540, opacity: 0.06 },
             { color: "#4A90D9", pos: "bottom-[16%] right-[10%]", size: 460, opacity: 0.045 },
             { color: "#A855F7", pos: "top-[50%] left-[55%]", size: 560, opacity: 0.03 },
           ]}

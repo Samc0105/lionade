@@ -244,7 +244,7 @@ export default function PartyRoomPage() {
         />
         <div
           className="absolute bottom-[10%] right-[5%] w-[500px] h-[500px] rounded-full pointer-events-none opacity-[0.04]"
-          style={{ background: "radial-gradient(circle, #FFD700 0%, transparent 70%)" }}
+          style={{ background: "radial-gradient(circle, #00BFFF 0%, transparent 70%)" }}
         />
 
         <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-8">

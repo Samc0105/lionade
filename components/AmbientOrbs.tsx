@@ -10,8 +10,9 @@
  * (static radial gradients, no animation) so it's reduced-motion safe by
  * construction and never intercepts clicks.
  *
- * Pass `orbs` to key the colors to a page's accent palette. Defaults to the
- * Lionade gold + electric + violet set that matches /compete.
+ * Pass `orbs` to key the colors to a page's accent palette. Defaults to a
+ * cool electric + blue + violet set so every page shares one consistent
+ * dark-interstellar background (no warm tints leaking in).
  */
 
 export interface Orb {
@@ -26,7 +27,7 @@ export interface Orb {
 }
 
 const DEFAULT_ORBS: Orb[] = [
-  { color: "#FFD700", pos: "top-[12%] left-[16%]", size: 520, opacity: 0.05 },
+  { color: "#00BFFF", pos: "top-[12%] left-[16%]", size: 520, opacity: 0.05 },
   { color: "#4A90D9", pos: "bottom-[18%] right-[12%]", size: 440, opacity: 0.045 },
   { color: "#A855F7", pos: "top-[55%] left-[48%]", size: 600, opacity: 0.03 },
 ];

@@ -578,11 +578,11 @@ export default function ArenaPage() {
         <div data-force-dark className="relative min-h-screen pt-16 pb-20 md:pb-8 overflow-hidden" style={{ isolation: "isolate" }}>
           {/* Atmospheric glows — deep red combat + gold reward accents */}
           <div className="absolute top-[10%] left-[10%] w-[600px] h-[600px] rounded-full pointer-events-none opacity-[0.05]"
-            style={{ background: "radial-gradient(circle, #EF4444 0%, transparent 70%)" }} />
+            style={{ background: "radial-gradient(circle, #4A90D9 0%, transparent 70%)" }} />
           <div className="absolute top-[50%] right-[5%] w-[500px] h-[500px] rounded-full pointer-events-none opacity-[0.04]"
             style={{ background: "radial-gradient(circle, #DC2626 0%, transparent 70%)" }} />
           <div className="absolute bottom-[10%] left-[30%] w-[400px] h-[400px] rounded-full pointer-events-none opacity-[0.03]"
-            style={{ background: "radial-gradient(circle, #FFD700 0%, transparent 70%)" }} />
+            style={{ background: "radial-gradient(circle, #00BFFF 0%, transparent 70%)" }} />
 
           <div className="relative z-10 max-w-3xl mx-auto px-4 sm:px-6 py-8">
             <BackButton />
@@ -677,7 +677,7 @@ export default function ArenaPage() {
                     {/* Active glow sweep */}
                     {wager === w && (
                       <div className="absolute inset-0 pointer-events-none"
-                        style={{ background: "radial-gradient(ellipse at 50% 0%, rgba(255,215,0,0.1) 0%, transparent 70%)" }} />
+                        style={{ background: "radial-gradient(ellipse at 50% 0%, rgba(74,144,217,0.1) 0%, transparent 70%)" }} />
                     )}
                     <div className="relative flex items-center justify-center gap-1.5">
                       <img src={cdnUrl("/F.png")} alt="Fangs" className="w-5 h-5 object-contain" />

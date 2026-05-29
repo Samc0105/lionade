@@ -65,7 +65,7 @@ export default function SpaceBackground() {
         className="absolute"
         style={{
           width: 450, height: 450, top: "15%", left: "10%",
-          background: "radial-gradient(circle, rgba(160,30,80,0.15) 0%, transparent 70%)",
+          background: "radial-gradient(circle, rgba(49,46,129,0.16) 0%, transparent 70%)",
         }}
       />
 
@@ -107,13 +107,13 @@ export default function SpaceBackground() {
       <div className="shooting-star" />
       <div className="shooting-star-2" />
 
-      {/* Distant sun glow */}
+      {/* Distant horizon glow (cool, matches the interstellar palette) */}
       <div
         className="absolute"
         style={{
           width: 800, height: 400, bottom: "-200px", left: "50%",
           transform: "translateX(-50%)",
-          background: "radial-gradient(ellipse at center, rgba(255,180,50,0.06) 0%, transparent 70%)",
+          background: "radial-gradient(ellipse at center, rgba(74,144,217,0.06) 0%, transparent 70%)",
         }}
       />
     </div>

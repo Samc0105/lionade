@@ -71,9 +71,9 @@ export default function CompetePage() {
       >
         {/* Extra ambient glow orbs */}
         <div className="absolute top-[15%] left-[20%] w-[500px] h-[500px] rounded-full pointer-events-none opacity-[0.04]"
-          style={{ background: "radial-gradient(circle, #EF4444 0%, transparent 70%)" }} />
+          style={{ background: "radial-gradient(circle, #4A90D9 0%, transparent 70%)" }} />
         <div className="absolute bottom-[20%] right-[15%] w-[400px] h-[400px] rounded-full pointer-events-none opacity-[0.05]"
-          style={{ background: "radial-gradient(circle, #FFD700 0%, transparent 70%)" }} />
+          style={{ background: "radial-gradient(circle, #00BFFF 0%, transparent 70%)" }} />
         <div className="absolute top-[60%] left-[50%] w-[600px] h-[600px] -translate-x-1/2 rounded-full pointer-events-none opacity-[0.03]"
           style={{ background: "radial-gradient(circle, #A855F7 0%, transparent 70%)" }} />
 

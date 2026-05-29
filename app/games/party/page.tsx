@@ -39,7 +39,7 @@ export default function PartyLandingPage() {
     e.preventDefault();
     const code = normalizeRoomCode(joinCode);
     if (!isValidRoomCode(code)) {
-      setError("Room code must be 6 letters and numbers.");
+      setError("Room code must be 4 digits.");
       return;
     }
     setBusy("joining");
@@ -67,7 +67,7 @@ export default function PartyLandingPage() {
         />
         <div
           className="absolute top-[40%] right-[8%] w-[500px] h-[500px] rounded-full pointer-events-none opacity-[0.04]"
-          style={{ background: "radial-gradient(circle, #FFD700 0%, transparent 70%)" }}
+          style={{ background: "radial-gradient(circle, #00BFFF 0%, transparent 70%)" }}
         />
         <div
           className="absolute bottom-[10%] left-[40%] w-[450px] h-[450px] rounded-full pointer-events-none opacity-[0.03]"
