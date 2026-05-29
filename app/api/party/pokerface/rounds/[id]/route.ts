@@ -9,6 +9,9 @@
 //   phase='present':
 //     - presenter: card_word + card_fact (so they can decide truth vs lie).
 //     - everyone else: card_word only. NOT card_fact, NOT is_lie, NOT claim_text.
+//   phase='interrogate' (live mode only — the grill before the vote):
+//     - presenter: card_word + card_fact + is_lie (their own context).
+//     - everyone else: card_word + interrogator id/name only. NOT card_fact/is_lie.
 //   phase='vote':
 //     - presenter: card_word + card_fact + their committed claim_text + is_lie.
 //     - callers: card_word + claim_text (what was shown). NOT is_lie, NOT card_fact.
@@ -49,12 +52,24 @@ export async function GET(
     .maybeSingle();
 
   // Active players → caller pool (everyone except the presenter) + count.
+  // Ordered by joined_at so the interrogator (seat after the presenter) is
+  // computed identically here, in the deal route, and in the open-vote route.
   const { data: activePlayers } = await supabaseAdmin
     .from("party_room_players")
-    .select("user_id, profiles!inner(username)")
+    .select("user_id, joined_at, profiles!inner(username)")
     .eq("room_id", round.room_id)
-    .is("left_at", null);
+    .is("left_at", null)
+    .order("joined_at", { ascending: true });
   const callerCount = Math.max(0, (activePlayers?.length ?? 1) - 1);
+
+  // Interrogator = the active player seated right after the presenter (wrapping).
+  // Null if there aren't enough players. Non-secret — shown to the whole room.
+  const seatIds = (activePlayers ?? []).map((p) => p.user_id);
+  const presenterIdx = seatIds.indexOf(round.presenter_user_id);
+  const interrogatorUserId =
+    seatIds.length >= 2 && presenterIdx !== -1
+      ? seatIds[(presenterIdx + 1) % seatIds.length]
+      : null;
 
   // This viewer's own call (if any).
   const { data: myCall } = await supabaseAdmin
@@ -71,13 +86,23 @@ export async function GET(
     presenter_user_id: round.presenter_user_id,
     presenter_username: presenterProfile?.username ?? null,
     card_word: round.card_word,
-    phase: round.phase as "present" | "vote" | "reveal",
+    phase: round.phase as "present" | "interrogate" | "vote" | "reveal",
     started_at: round.started_at,
     presented_at: round.presented_at,
     ended_at: round.ended_at,
     my_call: (myCall?.call as PokerFaceCall | undefined) ?? null,
     caller_count: callerCount,
     is_presenter: isPresenter,
+    interrogator_user_id: interrogatorUserId,
+    interrogator_username: interrogatorUserId
+      ? (() => {
+          const p = (activePlayers ?? []).find((x) => x.user_id === interrogatorUserId) as
+            | { profiles?: { username?: string } | { username?: string }[] }
+            | undefined;
+          const prof = p?.profiles;
+          return (Array.isArray(prof) ? prof[0]?.username : prof?.username) ?? null;
+        })()
+      : null,
   };
 
   // ── present phase ──
@@ -86,6 +111,19 @@ export async function GET(
       round: {
         ...base,
         // Presenter-only: the true fact so they can choose truth or invent a lie.
+        card_fact: isPresenter ? round.card_fact : null,
+      },
+    });
+  }
+
+  // ── interrogate phase (live mode only) ──
+  // The room grills the presenter out loud; no secret reaches a caller. The
+  // presenter keeps their card_fact + is_lie on screen for context.
+  if (round.phase === "interrogate") {
+    return NextResponse.json({
+      round: {
+        ...base,
+        is_lie: isPresenter ? round.is_lie : null,
         card_fact: isPresenter ? round.card_fact : null,
       },
     });

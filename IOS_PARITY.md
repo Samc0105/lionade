@@ -7,6 +7,14 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 
 ---
 
+## 2026-05-29 — Poker Face: Interrogation + call reframe + rules (web-only, iOS paused)
+
+| Feature | Web route(s) | iOS route(s) | Web | iOS | Notes |
+|---|---|---|---|---|---|
+| **The Interrogation sub-phase** | `/games/party` (pokerface) + `/api/party/pokerface/rounds/[id]/open-vote` | iOS Party (not built) | ✅ | ❌ paused | Live mode only: after present, a new `interrogate` phase lets one rotating caller (seat after presenter, join order) grill the presenter with one question out loud before calls open. NO migration (`phase` column is unconstrained text; interrogator derived deterministically server-side in both the GET + open-vote routes). New `open-vote` route advances interrogate→vote (host OR interrogator; race-guarded; resets the vote clock); 25s backstop timer fired by host OR interrogator so a host-drop can't stall. Text mode skips it. Secret-safe (reviewer: no leak). iOS: paused. |
+| **"Same room OR call" reframe** | `/games/party` (pokerface lobby + banner) | iOS Party (not built) | ✅ | ❌ paused | The spoken/face mode now explicitly covers video/voice calls, not just same-room. Lobby toggle: SAME ROOM OR CALL vs TEXT ONLY. Stored `pf_mode` unchanged (inperson/remote); labels + banner + footnote copy reframed. iOS: paused. |
+| **How-to-play rules** | `/games/party` (pokerface lobby) | iOS Party (not built) | ✅ | ❌ paused | Collapsible HOW TO PLAY block (6 rules) in the Poker Face lobby section. iOS: paused. |
+
 ## 2026-05-29 — Poker Face deep pass (web-only, iOS paused)
 
 | Feature | Web route(s) | iOS route(s) | Web | iOS | Notes |

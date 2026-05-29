@@ -34,10 +34,11 @@ interface Props {
   onReturnToLobby: () => void;
 }
 
-type Phase = "loading" | "present" | "vote" | "reveal";
+type Phase = "loading" | "present" | "interrogate" | "vote" | "reveal";
 
 const ACCENT = "#00BFFF";
 const DEFAULT_CALL_SECONDS = 30;
+const INTERROGATE_SECONDS = 25;
 
 interface RoundDetail {
   round: {
@@ -47,11 +48,13 @@ interface RoundDetail {
     presenter_user_id: string;
     presenter_username: string | null;
     card_word: string;
-    phase: "present" | "vote" | "reveal";
+    phase: "present" | "interrogate" | "vote" | "reveal";
     started_at: string;
     presented_at: string | null;
     ended_at: string | null;
     is_presenter: boolean;
+    interrogator_user_id?: string | null;
+    interrogator_username?: string | null;
     my_call?: PokerFaceCall | null;
     caller_count?: number;
     call_count?: number;
@@ -85,6 +88,7 @@ export default function PokerFaceView({
   const [ninnyMsg, setNinnyMsg] = useState<string | null>("Read the room. Trust no face.");
   const [timeLeft, setTimeLeft] = useState(0);
   const advanceLock = useRef(false);
+  const interrogateLock = useRef(false);
 
   // ── Mode + game length (from room settings; default in-person, 2 rotations) ──
   // In-person: the claim is spoken out loud, so no claim text is shown and the
@@ -219,6 +223,15 @@ export default function PokerFaceView({
             : "Your card is secret. Tell the truth, or invent a convincing lie."
           : `${r.presenter_username ?? "The presenter"} is studying their card...`,
       );
+    } else if (r.phase === "interrogate") {
+      const grillName = r.interrogator_username ?? "Someone";
+      setNinnyMsg(
+        r.interrogator_user_id === meUserId
+          ? "Your turn to grill. Ask them one question out loud, then open the vote."
+          : r.is_presenter
+            ? `${grillName} gets to ask you one question. Answer out loud and hold your face.`
+            : `${grillName} is grilling the presenter. Listen for the crack.`,
+      );
     } else if (r.phase === "vote") {
       setNinnyMsg(
         r.is_presenter
@@ -230,7 +243,7 @@ export default function PokerFaceView({
     } else if (r.phase === "reveal") {
       setNinnyMsg(r.reveal?.is_lie ? "It was a LIE. Who fell for it?" : "It was the TRUTH. The doubters got played by an honest face.");
     }
-  }, [roundId, inperson]);
+  }, [roundId, inperson, meUserId]);
 
   useEffect(() => {
     if (!roundId) return;
@@ -268,6 +281,56 @@ export default function PokerFaceView({
     const iv = setInterval(tick, 500);
     return () => clearInterval(iv);
   }, [detail, isHost, room.code, room.settings?.pf_vote_seconds, refreshDetail]);
+
+  // ── Interrogation timer + auto-open-vote (host backstop) ──
+  // The grill is spoken; this just bounds the beat so it can't stall. The host
+  // (or the interrogator, via the button) opens the vote; here the host's client
+  // auto-fires when the window elapses.
+  useEffect(() => {
+    if (!detail || detail.phase !== "interrogate" || !detail.presented_at) {
+      return;
+    }
+    const targetMs = new Date(detail.presented_at).getTime() + INTERROGATE_SECONDS * 1000;
+    const rid = detail.id;
+    // Either the host OR the interrogator's client may fire the backstop (the
+    // server authorizes both), so a host-drop mid-grill can't stall the round.
+    const canAdvance = isHost || detail.interrogator_user_id === meUserId;
+    function tick() {
+      const remain = Math.max(0, Math.ceil((targetMs - Date.now()) / 1000));
+      setTimeLeft(remain);
+      if (remain === 0 && canAdvance && !interrogateLock.current) {
+        interrogateLock.current = true;
+        void apiPost(`/api/party/pokerface/rounds/${rid}/open-vote`, {}).then(() => {
+          interrogateLock.current = false;
+          void refreshDetail();
+          void supabase.channel(pokerFaceChannel(room.code)).send({
+            type: "broadcast",
+            event: POKERFACE_EVENTS.PHASE_CHANGED,
+            payload: { round_id: rid },
+          });
+        });
+      }
+    }
+    tick();
+    const iv = setInterval(tick, 500);
+    return () => clearInterval(iv);
+  }, [detail, isHost, meUserId, room.code, refreshDetail]);
+
+  // ── Open the vote (end the Interrogation) — host or interrogator ──
+  async function openVote() {
+    if (!roundId) return;
+    const res = await apiPost(`/api/party/pokerface/rounds/${roundId}/open-vote`, {});
+    if (!res.ok) {
+      setError(res.error ?? "Couldn't open the vote.");
+      return;
+    }
+    void refreshDetail();
+    void supabase.channel(pokerFaceChannel(room.code)).send({
+      type: "broadcast",
+      event: POKERFACE_EVENTS.PHASE_CHANGED,
+      payload: { round_id: roundId },
+    });
+  }
 
   // ── Presenter: commit truth or lie ──
   async function present(isLie: boolean) {
@@ -366,8 +429,8 @@ export default function PokerFaceView({
         <span className="text-lg" aria-hidden="true">{inperson ? "👀" : "🎭"}</span>
         <p className="text-cream/70 text-xs sm:text-sm font-syne leading-snug">
           {inperson
-            ? "Same room. Claims are spoken out loud. The face is the tell."
-            : "Playing apart. Read the words and the timing. Trust your gut."}
+            ? "Same room or on a call. Claims are spoken out loud. The face is the tell."
+            : "Text only. Read the words and the timing. Trust your gut."}
         </p>
       </div>
 
@@ -388,7 +451,7 @@ export default function PokerFaceView({
           <span className="font-bebas text-[10px] tracking-[0.3em] text-cream/40">
             ROUND {round.round_num} OF {totalRounds} · {isPresenter ? "YOU PRESENT" : `${round.presenter_username ?? "PRESENTER"} PRESENTS`}
           </span>
-          {phase === "vote" && (
+          {(phase === "vote" || phase === "interrogate") && (
             <span className={`font-bebas text-2xl ${timeLeft <= 5 ? "text-red-400" : "text-cream/80"}`}>
               {timeLeft}s
             </span>
@@ -554,6 +617,73 @@ export default function PokerFaceView({
                     : "Truth or lie, you'll have to call it. Get ready."}
                 </p>
               </div>
+            )}
+          </motion.div>
+        )}
+
+        {/* ── INTERROGATION PHASE (live mode only) ── */}
+        {phase === "interrogate" && (
+          <motion.div
+            key="interrogate"
+            initial={reduced ? false : { opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={reduced ? { opacity: 0 } : { opacity: 0, y: -8 }}
+            className="space-y-3"
+          >
+            <div
+              className="rounded-2xl p-6 text-center"
+              style={{
+                background: `linear-gradient(135deg, ${ACCENT}1f 0%, rgba(168,85,247,0.06) 100%)`,
+                border: `1px solid ${ACCENT}59`,
+              }}
+            >
+              <p className="text-3xl mb-2" aria-hidden="true">🔎</p>
+              <p className="font-bebas text-xs tracking-[0.3em] text-cream/55 mb-1">THE INTERROGATION</p>
+              {round.interrogator_user_id === meUserId ? (
+                <>
+                  <p className="font-bebas text-2xl tracking-wider text-cream">YOUR TURN TO GRILL</p>
+                  <p className="text-cream/60 text-sm font-syne mt-2 max-w-sm mx-auto">
+                    Ask {round.presenter_username ?? "the presenter"} one question, out loud. Read how they answer, then open the vote.
+                  </p>
+                </>
+              ) : isPresenter ? (
+                <>
+                  <p className="font-bebas text-2xl tracking-wider text-cream">
+                    {(round.interrogator_username ?? "SOMEONE").toUpperCase()} IS GRILLING YOU
+                  </p>
+                  <p className="text-cream/60 text-sm font-syne mt-2 max-w-sm mx-auto">
+                    Answer their one question out loud. Hold your face. Give nothing away.
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p className="font-bebas text-2xl tracking-wider text-cream">
+                    {(round.interrogator_username ?? "SOMEONE").toUpperCase()} IS GRILLING {(round.presenter_username ?? "THE PRESENTER").toUpperCase()}
+                  </p>
+                  <p className="text-cream/60 text-sm font-syne mt-2 max-w-sm mx-auto">
+                    Listen for the crack. The tell is in how they handle the question.
+                  </p>
+                </>
+              )}
+            </div>
+
+            {(round.interrogator_user_id === meUserId || isHost) && (
+              <button
+                onClick={openVote}
+                className="w-full py-3.5 rounded-xl font-bebas text-base tracking-wider transition-all active:scale-95"
+                style={{
+                  background: `linear-gradient(135deg, ${ACCENT} 0%, #0090d0 100%)`,
+                  color: "#04080F",
+                  boxShadow: `0 4px 18px ${ACCENT}4d`,
+                }}
+              >
+                OPEN THE VOTE
+              </button>
+            )}
+            {round.interrogator_user_id !== meUserId && !isHost && (
+              <p className="text-cream/40 text-xs font-syne text-center">
+                Voting opens when {round.interrogator_username ?? "the interrogator"} is done, or in {timeLeft}s.
+              </p>
             )}
           </motion.div>
         )}

@@ -95,7 +95,9 @@ export interface BluffAnswerPublic {
   is_truth?: boolean;
 }
 
-export type PokerFacePhase = "present" | "vote" | "reveal";
+// 'interrogate' is a live-mode-only beat between present and vote: one caller
+// grills the presenter with a question before calls open. Text mode skips it.
+export type PokerFacePhase = "present" | "interrogate" | "vote" | "reveal";
 export type PokerFaceCall = "believe" | "doubt";
 
 // Phase-aware Poker Face round view. The server NEVER ships card_fact / is_lie /

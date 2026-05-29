@@ -74,6 +74,7 @@ export default function RoomLobby({ room, players, isHost, meUserId, onGameStart
   // Poker Face host settings (only sent when starting pokerface).
   const [pfMode, setPfMode] = useState<"inperson" | "remote">("inperson");
   const [pfRotations, setPfRotations] = useState<number>(2);
+  const [showRules, setShowRules] = useState(false);
 
   const me = players.find((p) => p.user_id === meUserId);
   const serverReady = !!me?.is_ready;
@@ -351,8 +352,8 @@ export default function RoomLobby({ room, players, isHost, meUserId, onGameStart
               </p>
               <div className="grid grid-cols-2 gap-2">
                 {([
-                  { v: "inperson" as const, label: "SAME ROOM", sub: "Claims spoken out loud. The face is the tell." },
-                  { v: "remote" as const, label: "REMOTE", sub: "Claims typed on screen. Read the words." },
+                  { v: "inperson" as const, label: "SAME ROOM OR CALL", sub: "Claims spoken out loud. Read the face and the voice." },
+                  { v: "remote" as const, label: "TEXT ONLY", sub: "Claims typed on screen. No call needed." },
                 ]).map((opt) => {
                   const on = pfMode === opt.v;
                   return (
@@ -413,9 +414,31 @@ export default function RoomLobby({ room, players, isHost, meUserId, onGameStart
 
             <p className="text-cream/45 text-xs font-syne text-center">
               {pfMode === "inperson"
-                ? "Best face to face. Share the room code, gather your crew, and read the tells in the room."
-                : "Playing apart? Read the words and the timing. Trust your gut."}
+                ? "Same room or on a video call. Share the code, say your claim out loud, and read the room."
+                : "No call? Claims are typed on screen. Read the words and the timing, and trust your gut."}
             </p>
+
+            {/* How to play — collapsible so newcomers can learn the game */}
+            <div className="rounded-xl overflow-hidden" style={{ border: "1px solid rgba(255,255,255,0.08)" }}>
+              <button
+                onClick={() => setShowRules((s) => !s)}
+                className="w-full px-4 py-2.5 flex items-center justify-between text-left transition-colors"
+                style={{ background: "rgba(255,255,255,0.03)" }}
+              >
+                <span className="font-bebas text-sm text-cream/70 tracking-[0.2em]">HOW TO PLAY</span>
+                <span className="font-bebas text-cream/40 text-lg leading-none">{showRules ? "−" : "+"}</span>
+              </button>
+              {showRules && (
+                <ol className="px-4 py-3 space-y-1.5 text-cream/65 text-xs font-syne list-decimal list-inside">
+                  <li>Each round one player gets a secret fact. Everyone else sees only the topic word.</li>
+                  <li>That player presents it as the truth, or makes up a lie, and says it out loud (or types it in Text Only mode).</li>
+                  <li>One player gets to grill them with a single question first. Watch how they answer.</li>
+                  <li>Everyone else calls Believe or Doubt.</li>
+                  <li>Catch a lie or trust a truth and you score. Fool the room and the presenter scores. Get fully caught lying and you lose points.</li>
+                  <li>Most fools wins Bluff Master. Most correct reads wins Human Lie Detector.</li>
+                </ol>
+              )}
+            </div>
           </div>
         )}
         {!isHost && (

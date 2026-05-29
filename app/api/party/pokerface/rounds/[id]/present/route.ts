@@ -75,12 +75,16 @@ export async function POST(
     claimText = round.card_fact;
   }
 
+  // Live mode (same room or on a call) runs the Interrogation beat before the
+  // vote; text-only mode goes straight to the vote. presented_at marks the start
+  // of the new phase (reused as the phase-window clock by the client timers).
+  const nextPhase = inperson ? "interrogate" : "vote";
   const { error } = await supabaseAdmin
     .from("party_pokerface_rounds")
     .update({
       is_lie: isLie,
       claim_text: claimText,
-      phase: "vote",
+      phase: nextPhase,
       presented_at: new Date().toISOString(),
     })
     .eq("id", round.id)
@@ -93,5 +97,5 @@ export async function POST(
   // Return only the claim shown — never echo is_lie back in a way a caller could
   // read (this response goes to the presenter, who already knows, but we keep it
   // minimal). Callers learn claim_text via the phase-aware GET route.
-  return NextResponse.json({ ok: true, phase: "vote", claim_text: claimText });
+  return NextResponse.json({ ok: true, phase: nextPhase, claim_text: claimText });
 }
