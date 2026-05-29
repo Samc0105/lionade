@@ -11,6 +11,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
 import { sketchDrawerPoints } from "@/lib/party/scoring";
+import { awardSketchFangs } from "@/lib/party/sketch-fangs";
+import { sketchDrawerFangs } from "@/lib/party/sketch-economy";
 
 export async function POST(
   req: NextRequest,
@@ -79,6 +81,16 @@ export async function POST(
         .eq("user_id", round.drawer_user_id);
     }
   }
+
+  // Fang faucet: the drawer earns minted Fangs when their word gets guessed
+  // (per correct guesser, capped). Idempotent per (round, drawer) — a re-fired
+  // /complete never double-mints. Server-authoritative.
+  await awardSketchFangs(supabaseAdmin, {
+    roundId: round.id,
+    userId: round.drawer_user_id,
+    reason: "drawing",
+    fangs: sketchDrawerFangs(correctCount),
+  });
 
   await supabaseAdmin
     .from("sketch_rounds")

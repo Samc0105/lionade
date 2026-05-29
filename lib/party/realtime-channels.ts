@@ -38,6 +38,10 @@ export const SKETCH_EVENTS = {
   STROKE: "stroke",
   CLEAR_CANVAS: "clear_canvas",
   GUESS: "guess",
+  // Progressive Wordle reveal: a guess matched new letter POSITIONS. Payload
+  // carries only matched positions + their letters (never the secret word), so
+  // every client lights up the shared green squares in real time.
+  LETTER_REVEAL: "letter_reveal",
   ROUND_ENDED: "round_ended",
 } as const;
 

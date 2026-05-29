@@ -56,6 +56,43 @@ interface ChatMsg {
   username: string | null;
   body: string;
   variant: "guess" | "close" | "correct" | "system";
+  /** Comparable-letter indices of THIS guess that landed green (panel highlight). */
+  matched?: number[];
+}
+
+// Renders a guess in the shared panel, greening the letters that landed in a
+// correct position. `matched` is the set of comparable-letter indices (spaces/
+// punctuation ignored) that matched. Highlighting the guesser's OWN typed text
+// leaks nothing about the secret beyond which of their letters were right.
+function GuessText({ body, matched }: { body: string; matched?: number[] }) {
+  if (!matched || matched.length === 0) {
+    return <span className="text-cream/80">{body}</span>;
+  }
+  const green = new Set(matched);
+  let comparable = -1;
+  return (
+    <span>
+      {Array.from(body).map((ch, i) => {
+        const isLetter = /[a-zA-Z0-9]/.test(ch);
+        if (isLetter) comparable += 1;
+        const hit = isLetter && green.has(comparable);
+        return (
+          <span
+            key={i}
+            className={hit ? "text-emerald-300 font-bold" : "text-cream/80"}
+          >
+            {ch}
+          </span>
+        );
+      })}
+    </span>
+  );
+}
+
+// A single display cell of the word-being-guessed (server-computed structure).
+interface MaskCell {
+  kind: "letter" | "fixed";
+  char?: string;
 }
 
 export default function SketchView({
@@ -81,6 +118,14 @@ export default function SketchView({
   const [guessInput, setGuessInput] = useState("");
   const [iGotIt, setIGotIt] = useState(false);
   const [ninnyMsg, setNinnyMsg] = useState<string | null>(null);
+
+  // ── Wordle reveal state (guesser-facing; the SECRET word never lives here) ──
+  // mask = the word STRUCTURE (length + punctuation); revealed = the room-wide
+  // map of matched display-position -> letter (green squares). Both are computed
+  // server-side; guesser clients only ever receive matched positions + letters
+  // the guesser already typed, never unrevealed letters.
+  const [mask, setMask] = useState<MaskCell[]>([]);
+  const [revealed, setRevealed] = useState<Record<number, string>>({});
 
   // ── juice-only transient state (no gameplay effect, derived from events already
   //    in client state — nothing is re-fetched and no secret column is read) ──
@@ -108,6 +153,8 @@ export default function SketchView({
     setChat([]);
     setIGotIt(false);
     setStrokeCount(0);
+    setMask([]);
+    setRevealed({});
     sawFirstCorrectRef.current = false;
     setFireFirstConfetti(false);
     const res = await apiPost<{ round: RoundSnapshot; drawer_should_pick: boolean }>(
@@ -179,6 +226,8 @@ export default function SketchView({
       setStrokeCount(0);
       setLockedWord(null);
       setCandidates(null);
+      setMask([]);
+      setRevealed({});
       sawFirstCorrectRef.current = false;
       setFireFirstConfetti(false);
       setPhase(isMe ? "select-word" : "drawing");
@@ -188,12 +237,32 @@ export default function SketchView({
       setPhase("drawing");
       setNinnyMsg(null);
     });
+    // Progressive Wordle reveal — a guess matched new letter positions. Light up
+    // the shared green squares for everyone. Payload carries ONLY matched
+    // positions + letters (never the secret word).
+    ch.on("broadcast", { event: SKETCH_EVENTS.LETTER_REVEAL }, (msg: { payload?: unknown }) => {
+      const payload = (msg.payload ?? {}) as {
+        mask?: MaskCell[];
+        revealed?: { position: number; letter: string }[];
+      };
+      if (Array.isArray(payload.mask) && payload.mask.length > 0) {
+        setMask((prev) => (prev.length > 0 ? prev : payload.mask!));
+      }
+      if (Array.isArray(payload.revealed)) {
+        setRevealed((prev) => {
+          const next = { ...prev };
+          for (const r of payload.revealed!) next[r.position] = r.letter;
+          return next;
+        });
+      }
+    });
     ch.on("broadcast", { event: SKETCH_EVENTS.GUESS }, (msg: { payload?: unknown }) => {
       const payload = (msg.payload ?? {}) as {
         user_id: string;
         username: string | null;
         body: string;
         variant: ChatMsg["variant"];
+        matched?: number[];
       };
       if (!payload.user_id) return;
       // Juice-only: the FIRST correct guess of the round fires a celebratory
@@ -210,6 +279,7 @@ export default function SketchView({
           username: payload.username,
           body: payload.body,
           variant: payload.variant,
+          matched: Array.isArray(payload.matched) ? payload.matched : undefined,
         },
       ]);
     });
@@ -227,6 +297,37 @@ export default function SketchView({
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [room.code, meUserId]);
+
+  // ── Wordle reveal catch-up fetch ──
+  // When a guesser enters/refreshes the drawing phase, pull the word STRUCTURE
+  // (mask) + any already-revealed positions so late joiners see accumulated
+  // green squares. The drawer never needs this (they see the real word); the
+  // endpoint returns ONLY the mask + matched positions, never the secret.
+  useEffect(() => {
+    if (phase !== "drawing" || !round?.id || isDrawer) return;
+    let cancelled = false;
+    void (async () => {
+      const res = await apiGet<{
+        mask: MaskCell[];
+        revealed: { position: number; letter: string }[];
+      }>(`/api/party/sketch/rounds/${round.id}/reveal`);
+      if (cancelled || !res.ok || !res.data) return;
+      if (Array.isArray(res.data.mask) && res.data.mask.length > 0) {
+        setMask(res.data.mask);
+      }
+      if (Array.isArray(res.data.revealed)) {
+        setRevealed((prev) => {
+          const next = { ...prev };
+          for (const r of res.data!.revealed) next[r.position] = r.letter;
+          return next;
+        });
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phase, round?.id, isDrawer]);
 
   // ── Timer ──
   useEffect(() => {
@@ -274,13 +375,70 @@ export default function SketchView({
       was_correct: boolean;
       was_close: boolean;
       points_earned: number;
+      fangs_earned?: number;
+      mask?: MaskCell[];
+      matched_positions?: { position: number; comparable: number; letter: string }[];
+      newly_revealed?: { position: number; letter: string }[];
     }>(`/api/party/sketch/rounds/${round.id}/guess`, { guess: text });
     if (!res.ok || !res.data) return;
+    const data = res.data;
     const me = players.find((p) => p.user_id === meUserId);
-    if (res.data.verdict === "correct") {
+
+    const matched = data.matched_positions ?? [];
+    // Comparable-letter indices for the panel green-highlight of THIS guess.
+    const matchedComparable = matched.map((m) => m.comparable);
+    const serverMask = data.mask;
+    const newlyRevealed = data.newly_revealed ?? [];
+
+    // Apply the reveal locally for the submitter (own green squares + mask).
+    if (Array.isArray(serverMask) && serverMask.length > 0) {
+      setMask((prev) => (prev.length > 0 ? prev : serverMask));
+    }
+    if (matched.length > 0) {
+      setRevealed((prev) => {
+        const next = { ...prev };
+        for (const m of matched) next[m.position] = m.letter;
+        return next;
+      });
+    }
+
+    // Optimistic local echo so the submitter sees their own guess in the shared
+    // panel (Supabase broadcast does not echo to the sender).
+    setChat((prev) => [
+      ...prev,
+      {
+        id: `${Date.now()}-${Math.random()}`,
+        user_id: meUserId,
+        username: me?.username ?? "You",
+        body: data.verdict === "correct" ? "got it!" : text,
+        variant:
+          data.verdict === "correct"
+            ? "correct"
+            : data.was_close
+              ? "close"
+              : "guess",
+        matched: matchedComparable,
+      },
+    ]);
+
+    const ch = supabase.channel(sketchChannel(room.code));
+
+    // Broadcast the progressive reveal so the WHOLE room lights up the shared
+    // green squares. Carries only matched positions + letters (no secret).
+    if (newlyRevealed.length > 0 || matched.length > 0) {
+      await ch.send({
+        type: "broadcast",
+        event: SKETCH_EVENTS.LETTER_REVEAL,
+        payload: {
+          mask: serverMask,
+          revealed: newlyRevealed.length > 0 ? newlyRevealed : matched,
+        },
+      });
+    }
+
+    if (data.verdict === "correct") {
       setIGotIt(true);
       setFangKey((k) => k + 1); // juice-only: Fang burst on my own correct guess
-      const ch = supabase.channel(sketchChannel(room.code));
       await ch.send({
         type: "broadcast",
         event: SKETCH_EVENTS.GUESS,
@@ -289,18 +447,20 @@ export default function SketchView({
           username: me?.username ?? "Someone",
           body: "got it!",
           variant: "correct",
+          matched: matchedComparable,
         },
       });
     } else {
-      const ch = supabase.channel(sketchChannel(room.code));
       await ch.send({
         type: "broadcast",
         event: SKETCH_EVENTS.GUESS,
         payload: {
           user_id: meUserId,
           username: me?.username ?? "Someone",
-          body: res.data.was_close ? "is close!" : text,
-          variant: res.data.was_close ? "close" : "guess",
+          // Show the guesser's actual attempt to the room (shared guesses panel).
+          body: text,
+          variant: data.was_close ? "close" : "guess",
+          matched: matchedComparable,
         },
       });
     }
@@ -333,6 +493,32 @@ export default function SketchView({
     username: p.username,
     score: p.score,
   })), [players]);
+
+  // Per-cell display for the Wordle blanks row. For the drawer, fill every
+  // letter cell from their locked word (they already know it). For guessers,
+  // a letter cell shows its character ONLY if the room has revealed that
+  // position (green); otherwise it stays a blank box. Fixed cells (space/
+  // punctuation) always show their separator char.
+  const blankCells = useMemo(() => {
+    if (mask.length === 0) return [];
+    // Drawer overlay source: their locked word, char by char.
+    const drawerChars = isDrawer && lockedWord ? Array.from(lockedWord) : null;
+    return mask.map((cell, i) => {
+      if (cell.kind === "fixed") {
+        return { kind: "fixed" as const, char: cell.char ?? " " };
+      }
+      if (drawerChars) {
+        return { kind: "letter" as const, char: drawerChars[i] ?? "", filled: true, drawer: true };
+      }
+      const revealedChar = revealed[i];
+      return {
+        kind: "letter" as const,
+        char: revealedChar ?? "",
+        filled: revealedChar != null,
+        drawer: false,
+      };
+    });
+  }, [mask, revealed, isDrawer, lockedWord]);
 
   if (phase === "loading") {
     return (
@@ -438,6 +624,47 @@ export default function SketchView({
             clearRef={clearRef}
           />
 
+          {/* Wordle blanks — the word being guessed, one box per letter, with
+              spaces/punctuation shown. Correct-position letters turn green as
+              the room reveals them. The SECRET never reaches guesser clients;
+              guessers fill a box only once the server confirms that position. */}
+          {phase === "drawing" && blankCells.length > 0 && (
+            <div className="flex flex-wrap items-center justify-center gap-1.5 py-1">
+              {blankCells.map((cell, i) =>
+                cell.kind === "fixed" ? (
+                  <span
+                    key={i}
+                    aria-hidden="true"
+                    className="w-3 text-center font-bebas text-2xl text-cream/40"
+                  >
+                    {cell.char === " " ? " " : cell.char}
+                  </span>
+                ) : (
+                  <span
+                    key={i}
+                    className={`inline-flex items-center justify-center rounded-md font-bebas text-xl tracking-wider transition-all ${
+                      cell.filled && !reduced ? "pa-pop-in" : ""
+                    }`}
+                    style={{
+                      width: "1.75rem",
+                      height: "2.25rem",
+                      background: cell.filled
+                        ? "rgba(34,197,94,0.22)"
+                        : "rgba(255,255,255,0.04)",
+                      border: cell.filled
+                        ? "1px solid rgba(34,197,94,0.6)"
+                        : "1px solid rgba(255,255,255,0.12)",
+                      color: cell.filled ? "#86EFAC" : "transparent",
+                      boxShadow: cell.filled ? "0 0 10px rgba(34,197,94,0.25)" : "none",
+                    }}
+                  >
+                    {cell.filled ? cell.char.toUpperCase() : ""}
+                  </span>
+                ),
+              )}
+            </div>
+          )}
+
           {isDrawer && phase === "drawing" && (
             <SketchToolbar
               tool={tool}
@@ -452,8 +679,11 @@ export default function SketchView({
             />
           )}
 
-          {/* Guesser chat: hidden from drawer per anti-cheat */}
-          {!isDrawer && phase === "drawing" && (
+          {/* Shared guesses panel — the WHOLE room sees every guesser's attempt
+              in real time (name + guess). Visible to the drawer too: seeing
+              guesses is just progress, and the drawer already knows the word.
+              The secret word itself is never shown to guessers here. */}
+          {phase === "drawing" && (
             <div
               className="rounded-2xl p-3 max-h-48 overflow-y-auto"
               style={{
@@ -461,8 +691,11 @@ export default function SketchView({
                 border: "1px solid rgba(255,255,255,0.06)",
               }}
             >
+              <p className="font-bebas text-[11px] tracking-[0.25em] text-cream/45 mb-1.5">
+                GUESSES
+              </p>
               <AnimatePresence initial={false}>
-                {chat.slice(-12).map((m) => (
+                {chat.slice(-14).map((m) => (
                   <motion.div
                     key={m.id}
                     initial={reduced ? false : { opacity: 0, y: 4 }}
@@ -473,11 +706,14 @@ export default function SketchView({
                   >
                     <span className="text-cream/55">{m.username ?? "Someone"}</span>
                     {m.variant === "correct" ? (
-                      <span className="text-emerald-300 font-bold"> {m.body} 🎉</span>
+                      <span className="text-emerald-300 font-bold"> got it! 🎉</span>
                     ) : m.variant === "close" ? (
-                      <span className="text-amber-300"> {m.body}</span>
+                      <span className="text-amber-300"> is close!</span>
                     ) : (
-                      <span className="text-cream/80">: {m.body}</span>
+                      <>
+                        <span className="text-cream/80">: </span>
+                        <GuessText body={m.body} matched={m.matched} />
+                      </>
                     )}
                   </motion.div>
                 ))}

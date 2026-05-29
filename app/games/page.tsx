@@ -265,6 +265,37 @@ export default function GamesPage() {
     }
   }, [roardleInput, wordLength, roardleOver, roardleGuesses, roardleWord, awardFangs]);
 
+  // ── Physical keyboard input for Roardle ────────────────────
+  // Lets the player type with their computer keyboard while Roardle is the
+  // active game and the round isn't over. Stays scoped: ignores modifier
+  // combos (Cmd/Ctrl/Alt/Meta shortcuts), ignores keystrokes aimed at a
+  // text field/editable, and tears down on unmount or when leaving the game.
+  useEffect(() => {
+    if (game !== "roardle" || roardleOver) return;
+    const handler = (e: KeyboardEvent) => {
+      // Don't hijack browser/OS shortcuts.
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      // Don't steal keys while typing in an input/textarea/contentEditable.
+      const t = e.target as HTMLElement | null;
+      if (t) {
+        const tag = t.tagName;
+        if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || t.isContentEditable) return;
+      }
+      if (e.key === "Enter") {
+        e.preventDefault();
+        submitRoardleGuess();
+      } else if (e.key === "Backspace") {
+        e.preventDefault();
+        setRoardleInput(prev => prev.slice(0, -1));
+      } else if (/^[a-zA-Z]$/.test(e.key)) {
+        e.preventDefault();
+        setRoardleInput(prev => (prev.length < wordLength ? prev + e.key.toUpperCase() : prev));
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [game, roardleOver, wordLength, submitRoardleGuess]);
+
   // ── Start Flashcards ───────────────────────────────────────
   const startFlashcards = useCallback(() => {
     const source = tab === "library" && pdfContent?.vocabulary?.length
@@ -339,18 +370,50 @@ export default function GamesPage() {
   }, []);
 
   // ── Letter feedback for Roardle ────────────────────────────
+  // Standard Wordle scoring with correct duplicate-letter handling:
+  // two passes: color greens (correct position) first, then allocate
+  // yellows only up to the count of each letter remaining in the answer
+  // after greens are accounted for. Surplus duplicate guesses go gray.
+  // The naive "target.includes(letter)" check is wrong for duplicates.
+  function getRowStatuses(guess: string, target: string): ("correct" | "present" | "absent")[] {
+    const n = guess.length;
+    const result: ("correct" | "present" | "absent")[] = new Array(n).fill("absent");
+    // Count how many of each letter remain available in the target.
+    const remaining: Record<string, number> = {};
+    for (const ch of target) remaining[ch] = (remaining[ch] ?? 0) + 1;
+    // Pass 1: greens consume their letter from the pool.
+    for (let i = 0; i < n; i++) {
+      if (guess[i] === target[i]) {
+        result[i] = "correct";
+        remaining[guess[i]] -= 1;
+      }
+    }
+    // Pass 2: yellows only while the letter still has remaining count.
+    for (let i = 0; i < n; i++) {
+      if (result[i] === "correct") continue;
+      const ch = guess[i];
+      if ((remaining[ch] ?? 0) > 0) {
+        result[i] = "present";
+        remaining[ch] -= 1;
+      }
+    }
+    return result;
+  }
+
+  // Per-letter helper kept for any single-cell callers: delegates to the
+  // duplicate-aware row scorer so individual lookups stay correct too.
   function getLetterStatus(guess: string, target: string, idx: number): "correct" | "present" | "absent" {
-    if (guess[idx] === target[idx]) return "correct";
-    if (target.includes(guess[idx])) return "present";
-    return "absent";
+    return getRowStatuses(guess, target)[idx];
   }
 
   function getKeyboardStatus(): Record<string, "correct" | "present" | "absent" | "unused"> {
     const map: Record<string, "correct" | "present" | "absent" | "unused"> = {};
     "QWERTYUIOPASDFGHJKLZXCVBNM".split("").forEach(l => map[l] = "unused");
     for (const guess of roardleGuesses) {
+      const statuses = getRowStatuses(guess, roardleWord);
       for (let i = 0; i < guess.length; i++) {
-        const s = getLetterStatus(guess, roardleWord, i);
+        const s = statuses[i];
+        // A key shows its best-known state: green > yellow > gray > unused.
         if (s === "correct") map[guess[i]] = "correct";
         else if (s === "present" && map[guess[i]] !== "correct") map[guess[i]] = "present";
         else if (s === "absent" && map[guess[i]] === "unused") map[guess[i]] = "absent";
@@ -392,20 +455,30 @@ export default function GamesPage() {
               {Array.from({ length: 6 }).map((_, row) => {
                 const guess = roardleGuesses[row] ?? "";
                 const isCurrentRow = row === roardleGuesses.length && !roardleOver;
+                // Score the whole row once (duplicate-aware) rather than per cell.
+                const rowStatuses = guess ? getRowStatuses(guess, roardleWord) : null;
                 return (
                   <div key={row} className="flex justify-center gap-1.5">
                     {Array.from({ length: wordLength }).map((_, col) => {
                       const letter = isCurrentRow ? (roardleInput[col] ?? "") : (guess[col] ?? "");
-                      const status = guess ? getLetterStatus(guess, roardleWord, col) : null;
+                      const status = rowStatuses ? rowStatuses[col] : null;
+                      // Non-color cue so feedback is not color-only (a11y).
+                      const cue = status === "correct" ? "correct position" : status === "present" ? "wrong position" : status === "absent" ? "not in word" : "";
                       return (
                         <div key={col}
-                          className="w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center font-bebas text-2xl rounded-lg border transition-all duration-300"
+                          aria-label={status ? `${letter || "blank"}, ${cue}` : undefined}
+                          className="relative w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center font-bebas text-2xl rounded-lg border transition-all duration-300"
                           style={{
                             background: status ? tileColor(status) : "var(--game-tile-bg, rgba(255,255,255,0.05))",
                             borderColor: status ? "transparent" : isCurrentRow && roardleInput[col] ? "var(--game-tile-active, rgba(255,255,255,0.3))" : "var(--game-tile-border, rgba(255,255,255,0.1))",
                             color: status ? "#fff" : "var(--game-tile-text, #EEF4FF)",
                           }}>
                           {letter}
+                          {status && (
+                            <span aria-hidden className="absolute bottom-0.5 right-1 text-[9px] leading-none font-syne opacity-80">
+                              {status === "correct" ? "●" : status === "present" ? "◐" : "○"}
+                            </span>
+                          )}
                         </div>
                       );
                     })}
