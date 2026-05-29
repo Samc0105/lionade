@@ -4,7 +4,20 @@ import { requireAuth } from "@/lib/api-auth";
 
 export const dynamic = "force-dynamic";
 
-// GET — Search users by username, excluding self + existing friends/pending
+// Relationship of a search result relative to the searching user.
+//   none     → no friendship row exists between us
+//   incoming → THEY sent ME a pending request (I can Accept)
+//   outgoing → I sent THEM a pending request (shows "Requested")
+//   friends  → accepted friendship (shows "Friends")
+type Relationship = "none" | "incoming" | "outgoing" | "friends";
+
+// GET — Search users by username.
+//
+// History: this route used to EXCLUDE every user with an existing accepted OR
+// pending friendship from results. That hid anyone who had sent you a request,
+// so searching for them returned nothing ("search doesn't work"). Now we return
+// every match (except self) with a `relationship` field so the UI can render the
+// right action (Add / Accept / Requested / Friends). Only self is excluded.
 export async function GET(req: NextRequest) {
   const auth = await requireAuth(req);
   if (auth instanceof NextResponse) return auth;
@@ -19,18 +32,33 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ users: [] });
     }
 
-    // Get IDs to exclude: existing friends + pending requests (both directions)
-    const excludeIds: string[] = [userId];
+    // Build a relationship map for every user I have a friendship row with,
+    // in either direction. Used to annotate (not exclude) search results.
+    const relById = new Map<string, { relationship: Relationship; friendshipId: string }>();
 
     const { data: friendships } = await supabaseAdmin
       .from("friendships")
-      .select("user_id, friend_id")
+      .select("id, user_id, friend_id, status")
       .or(`user_id.eq.${userId},friend_id.eq.${userId}`)
       .in("status", ["accepted", "pending"]);
 
     for (const f of friendships ?? []) {
       const otherId = f.user_id === userId ? f.friend_id : f.user_id;
-      if (!excludeIds.includes(otherId)) excludeIds.push(otherId);
+      let relationship: Relationship;
+      if (f.status === "accepted") {
+        relationship = "friends";
+      } else if (f.user_id === userId) {
+        // I am the requester → I sent them a request
+        relationship = "outgoing";
+      } else {
+        // They are the requester (friend_id === me) → they sent me a request
+        relationship = "incoming";
+      }
+      // Prefer an accepted/most-relevant row if multiple exist; "friends" wins.
+      const existing = relById.get(otherId);
+      if (!existing || relationship === "friends") {
+        relById.set(otherId, { relationship, friendshipId: f.id });
+      }
     }
 
     const { data, error } = await supabaseAdmin
@@ -44,12 +72,22 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Search failed" }, { status: 500 });
     }
 
-    const filtered = (data ?? [])
-      .filter(u => !excludeIds.includes(u.id))
+    const users = (data ?? [])
+      .filter(u => u.id !== userId) // exclude ONLY self
       .slice(0, 8)
-      .map(u => ({ ...u, arena_elo: u.arena_elo ?? 1000 }));
+      .map(u => {
+        const rel = relById.get(u.id);
+        return {
+          ...u,
+          arena_elo: u.arena_elo ?? 1000,
+          relationship: rel?.relationship ?? "none",
+          // friendshipId is only meaningful for incoming (Accept) /
+          // outgoing requests; null for none/friends.
+          friendshipId: rel?.friendshipId ?? null,
+        };
+      });
 
-    return NextResponse.json({ users: filtered });
+    return NextResponse.json({ users });
   } catch (e) {
     console.error("[social/search GET]", e);
     return NextResponse.json({ error: "Server error" }, { status: 500 });

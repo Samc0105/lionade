@@ -9,7 +9,7 @@ import { useUserStats, useStreakInfo, isStreakExpired, resetExpiredStreak, mutat
 import { formatCoins } from "@/lib/mockData";
 import { supabase } from "@/lib/supabase";
 import { cdnUrl } from "@/lib/cdn";
-import useSWR from "swr";
+import useSWR, { useSWRConfig } from "swr";
 import { apiGet, apiPatch } from "@/lib/api-client";
 import CountUp from "@/components/CountUp";
 import ClockInButton from "@/components/ClockInButton";
@@ -98,6 +98,11 @@ export default function Navbar() {
   const { user, logout } = useAuth();
   const { stats, mutate: mutateStats } = useUserStats(user?.id);
   const { plan: userPlan, isPaid } = usePlan();
+  // Global SWR mutate — used by the notifications realtime channel to also
+  // revalidate the Social page's friends/pending hook the instant a
+  // friend-request (or accept) notification lands, instead of waiting for
+  // that page's poll. Keeps the pending-requests list ~realtime.
+  const { mutate: globalMutate } = useSWRConfig();
 
   // DiceBear avatar URL — pulled from the profile row via useUserStats,
   // with a fallback to the auth user record while stats are loading.
@@ -221,18 +226,28 @@ export default function Navbar() {
     try {
       channel = supabase
         .channel(`notifs-${user.id}`)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .on("postgres_changes", {
           event: "INSERT",
           schema: "public",
           table: "notifications",
           filter: `user_id=eq.${user.id}`,
-        }, () => {
+        }, (payload: any) => {
           loadNotifications();
+          // Friend-graph notifications (a request arrived for me, or someone
+          // accepted my request) mean the Social page's friends/pending list
+          // is now stale. Invalidate its SWR key so the pending-requests list
+          // (recipient) and friends list (sender, on accept) update in ~1s
+          // instead of waiting for that page's poll interval.
+          const type = payload?.new?.type;
+          if (type === "friend_request" || type === "friend_accepted") {
+            globalMutate(`social-friends/${user.id}`);
+          }
         })
         .subscribe();
     } catch { /* ignore if table doesn't exist */ }
     return () => { channel?.unsubscribe(); };
-  }, [user?.id, loadNotifications]);
+  }, [user?.id, loadNotifications, globalMutate]);
 
   // Mark all as read when opening panel
   const openNotifPanel = useCallback(async () => {

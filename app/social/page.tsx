@@ -43,6 +43,23 @@ interface OutgoingRequest {
   sentAt: string;
 }
 
+// Relationship between the searching user and a search result. Drives which
+// action button renders in the Add-Friend search dropdown.
+//   none     → "Add friend"  (sends a request)
+//   incoming → "Accept"      (they sent ME a request — accept it)
+//   outgoing → "Requested"   (I already sent them — disabled)
+//   friends  → "Friends"     (already accepted — disabled)
+type Relationship = "none" | "incoming" | "outgoing" | "friends";
+
+interface SearchResult {
+  id: string;
+  username: string;
+  avatar_url: string | null;
+  arena_elo: number;
+  relationship: Relationship;
+  friendshipId: string | null;
+}
+
 interface Message {
   id: string;
   sender_id: string;
@@ -161,7 +178,7 @@ export default function SocialPage() {
   const [showNotifView, setShowNotifView] = useState(false);
   const [socialNotifs, setSocialNotifs] = useState<{ id: string; type: string; title: string; message: string | null; read: boolean; action_url: string | null; created_at: string }[]>([]);
   const [socialUnreadCount, setSocialUnreadCount] = useState<number | null>(null);
-  const [searchResults, setSearchResults] = useState<{ id: string; username: string; avatar_url: string | null; arena_elo: number }[]>([]);
+  const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [searchLoading, setSearchLoading] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -277,7 +294,13 @@ export default function SocialPage() {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     () => apiGet<any>("/api/social/friends"),
     {
-      refreshInterval: 10000,
+      // Poll dropped 10s → 5s as a safety net under the realtime invalidation
+      // (the Navbar notifications channel revalidates this key on a friend
+      // request/accept). revalidateOnMount forces a fresh fetch even when the
+      // persistent SWR cache holds a stale "0 pending", so a request that
+      // arrived while away can't be masked by a stale cache on re-entry.
+      refreshInterval: 5000,
+      revalidateOnMount: true,
       keepPreviousData: true,
       onSuccess: (res) => {
         if (res.ok && res.data) {
@@ -509,8 +532,7 @@ export default function SocialPage() {
     setShowDropdown(true);
 
     searchTimerRef.current = setTimeout(async () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const res = await apiGet<{ users: any[] }>(
+      const res = await apiGet<{ users: SearchResult[] }>(
         `/api/social/search?q=${encodeURIComponent(value.trim())}`,
       );
       setSearchResults(res.ok && res.data ? res.data.users ?? [] : []);
@@ -518,23 +540,47 @@ export default function SocialPage() {
     }, 300);
   }, [user?.id]);
 
-  const selectSearchResult = useCallback(async (username: string) => {
-    setAddUsername(username);
-    setShowDropdown(false);
-    setSearchResults([]);
-
+  // Send a friend request to a `none`-relationship search result.
+  const sendRequestTo = useCallback(async (username: string) => {
     if (!user?.id) return;
     setAddError("");
     setAddSuccess("");
     const res = await apiPost("/api/social/friends", { friendUsername: username });
     if (!res.ok) {
       setAddError(res.error ?? "Failed to send request");
-    } else {
-      setAddSuccess(`Request sent to ${username}!`);
-      setAddUsername("");
-      setTimeout(() => setAddSuccess(""), 3000);
+      return;
     }
-  }, [user?.id]);
+    setAddSuccess(`Request sent to ${username}!`);
+    // Reflect the new state immediately in the dropdown (none → outgoing).
+    setSearchResults(prev =>
+      prev.map(u => (u.username === username ? { ...u, relationship: "outgoing" } : u)),
+    );
+    loadFriends();
+    setTimeout(() => setAddSuccess(""), 3000);
+  }, [user?.id, loadFriends]);
+
+  // Accept an incoming request surfaced in a search result — same action as
+  // the pending-requests list. This is the key Bug-2 fix: searching for
+  // someone who sent you a request now lets you accept right there.
+  const acceptFromSearch = useCallback(async (result: SearchResult) => {
+    if (!user?.id || !result.friendshipId) return;
+    setAddError("");
+    setAddSuccess("");
+    const res = await apiPatch("/api/social/friends", {
+      friendshipId: result.friendshipId,
+      action: "accept",
+    });
+    if (!res.ok) {
+      setAddError(res.error ?? "Failed to accept request");
+      return;
+    }
+    setAddSuccess(`You and ${result.username} are now friends!`);
+    setSearchResults(prev =>
+      prev.map(u => (u.id === result.id ? { ...u, relationship: "friends" } : u)),
+    );
+    loadFriends();
+    setTimeout(() => setAddSuccess(""), 3000);
+  }, [user?.id, loadFriends]);
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -1203,20 +1249,31 @@ export default function SocialPage() {
                     </div>
                   </div>
 
-                  {/* Challenge button — opens direct-challenge modal (no /arena redirect) */}
-                  <button
-                    type="button"
-                    onClick={() => { setChallengeTarget(selectedFriend); setChallengeWager(25); }}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all active:scale-95"
-                    style={{
-                      background: "rgba(239,68,68,0.1)",
-                      border: "1px solid rgba(239,68,68,0.25)",
-                      color: "#EF4444",
-                    }}
-                  >
-                    <Sword size={14} weight="fill" aria-hidden="true" />
-                    Challenge
-                  </button>
+                  <div className="flex items-center gap-2">
+                    {/* Challenge button — opens direct-challenge modal (no /arena redirect) */}
+                    <button
+                      type="button"
+                      onClick={() => { setChallengeTarget(selectedFriend); setChallengeWager(25); }}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all active:scale-95"
+                      style={{
+                        background: "rgba(239,68,68,0.1)",
+                        border: "1px solid rgba(239,68,68,0.25)",
+                        color: "#EF4444",
+                      }}
+                    >
+                      <Sword size={14} weight="fill" aria-hidden="true" />
+                      Challenge
+                    </button>
+                    {/* Close the chat → back to the main social list (all screens) */}
+                    <button
+                      type="button"
+                      onClick={() => setSelectedFriend(null)}
+                      aria-label="Close chat"
+                      className="grid place-items-center w-8 h-8 rounded-full text-cream/40 hover:text-cream hover:bg-white/[0.06] transition-colors"
+                    >
+                      <XIcon size={16} weight="bold" />
+                    </button>
+                  </div>
                 </div>
 
                 {/* Messages area */}
@@ -1532,28 +1589,67 @@ export default function SocialPage() {
                         searchResults.map((u) => {
                           const tier = getEloTier(u.arena_elo);
                           return (
-                            <button
+                            <div
                               key={u.id}
-                              onClick={() => selectSearchResult(u.username)}
-                              aria-label={`${u.username} — open profile`}
-                              className="w-full flex items-center gap-3 px-3 py-2.5 text-left hover:bg-white/[0.06] transition-colors"
+                              className="w-full flex items-center gap-3 px-3 py-2.5 text-left"
                             >
                               <img
                                 src={avatarFor(u.username, u.avatar_url)}
                                 alt={u.username}
-                                className="w-8 h-8 rounded-full object-cover"
+                                className="w-8 h-8 rounded-full object-cover flex-shrink-0"
                               />
                               <div className="flex-1 min-w-0">
                                 <p className="text-cream text-sm font-semibold truncate">{u.username}</p>
+                                <span
+                                  className="text-[9px] font-bold inline-flex items-center gap-1"
+                                  style={{ color: tier.color }}
+                                >
+                                  <tier.Icon size={11} weight="fill" color={tier.color} aria-hidden="true" />
+                                  {tier.name}
+                                </span>
                               </div>
-                              <span
-                                className="text-[9px] font-bold px-1.5 py-0.5 rounded flex-shrink-0 inline-flex items-center gap-1"
-                                style={{ color: tier.color, background: `${tier.color}15` }}
-                              >
-                                <tier.Icon size={12} weight="fill" color={tier.color} aria-hidden="true" />
-                                {tier.name}
-                              </span>
-                            </button>
+                              {/* Action per relationship — Add / Accept / Requested / Friends */}
+                              {u.relationship === "incoming" ? (
+                                <button
+                                  type="button"
+                                  onClick={() => acceptFromSearch(u)}
+                                  aria-label={`Accept friend request from ${u.username}`}
+                                  className="flex-shrink-0 text-[10px] font-bold px-2.5 py-1.5 rounded bg-green-400/10 text-green-400 hover:bg-green-400/20 transition inline-flex items-center gap-1"
+                                >
+                                  <CheckCircle size={12} weight="fill" aria-hidden="true" />
+                                  Accept
+                                </button>
+                              ) : u.relationship === "outgoing" ? (
+                                <span
+                                  className="flex-shrink-0 text-[10px] font-bold px-2.5 py-1.5 rounded bg-white/[0.04] text-cream/45 inline-flex items-center gap-1"
+                                  aria-label={`Friend request to ${u.username} pending`}
+                                >
+                                  Requested
+                                </span>
+                              ) : u.relationship === "friends" ? (
+                                <span
+                                  className="flex-shrink-0 text-[10px] font-bold px-2.5 py-1.5 rounded bg-electric/10 text-electric inline-flex items-center gap-1"
+                                  aria-label={`Already friends with ${u.username}`}
+                                >
+                                  <CheckCircle size={12} weight="fill" aria-hidden="true" />
+                                  Friends
+                                </span>
+                              ) : (
+                                <button
+                                  type="button"
+                                  onClick={() => sendRequestTo(u.username)}
+                                  aria-label={`Add ${u.username} as a friend`}
+                                  className="flex-shrink-0 text-[10px] font-bold px-2.5 py-1.5 rounded transition inline-flex items-center gap-1 active:scale-95"
+                                  style={{
+                                    background: "linear-gradient(135deg, #FFD700 0%, #B8960C 100%)",
+                                    color: "#04080F",
+                                  }}
+                                >
+                                  <UserPlus size={12} weight="bold" aria-hidden="true" />
+                                  Add
+                                </button>
+                              )}
+                            </div>
                           );
                         })
                       )}

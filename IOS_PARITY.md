@@ -7,6 +7,15 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 
 ---
 
+## 2026-05-29 — Social/friends bug fixes (web-only, iOS paused)
+
+| Feature | Web route(s) | iOS route(s) | Web | iOS | Notes |
+|---|---|---|---|---|---|
+| **Near-realtime pending friend requests** | `/social` + `/api/social/friends` | iOS Friends/Social screen (`use-friends` hook → `socialAPI`) | ✅ | 🟡 mirror-needed | Bug 1 fix: the Navbar notifications Realtime INSERT channel (`components/Navbar.tsx`) now invalidates the `social-friends/<uid>` SWR key on a `friend_request`/`friend_accepted` notification, so the recipient's Accept option (and the sender's accepted update) appear in ~1s instead of waiting on the 10s poll; poll tightened 10s → 5s + `revalidateOnMount`. **No migration** (approach b — reuses the live notifications channel; `friendships` RLS untouched; `friendships` deliberately NOT added to `supabase_realtime`). iOS analog: when iOS resumes, mirror the pattern — invalidate the friends/pending cache when a friend-request notification arrives on the iOS notifications realtime path (no backend change needed). |
+| **Search surfaces pending-request users with an Accept action** | `/api/social/search` + `/social` search dropdown | iOS friend-search UI (`socialAPI`) | ✅ | 🟡 via-backend when iOS resumes | Bug 2 fix: `/api/social/search` no longer excludes accepted/pending users — it returns every match except self with an additive `relationship` field (`none\|incoming\|outgoing\|friends`) + `friendshipId`. Web dropdown renders Add / **Accept** / Requested / Friends per result. The new fields are **additive + backward-compatible** (existing iOS clients ignore unknown fields), so iOS can adopt the Accept-from-search states purely client-side via-backend with no schema or endpoint-shape break. |
+
+---
+
 ## 2026-05-28 — Arena IA consolidation (web-only, iOS paused)
 
 | Feature | Web route(s) | iOS route(s) | Web | iOS | Notes |
