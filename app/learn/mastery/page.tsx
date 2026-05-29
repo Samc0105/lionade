@@ -148,7 +148,7 @@ export default function MasteryLandingPage() {
       <SpaceBackground />
       <Navbar />
 
-      <main className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 pt-8 pb-24">
+      <main className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 pt-16 pb-24">
         {/* Breadcrumb — returns to the class notebook if we entered from one,
             else falls back to /learn. PRESERVED: classIdContext routing. */}
         <Link

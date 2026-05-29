@@ -437,7 +437,6 @@ function CreateClassModal({
   const [shortCode, setShortCode] = useState("");
   const [term, setTerm] = useState("");
   const [color, setColor] = useState(PRESET_COLORS[0]);
-  const [emoji, setEmoji] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -452,7 +451,6 @@ function CreateClassModal({
         shortCode: shortCode.trim() || null,
         term: term.trim() || null,
         color,
-        emoji: emoji.trim() || null,
       });
       if (!r.ok || !r.data?.classId) {
         setError(r.error || "Couldn't create class.");
@@ -527,32 +525,22 @@ function CreateClassModal({
             </Field>
           </div>
 
-          <div className="grid grid-cols-[1fr_auto] gap-3">
-            <Field label="Color">
-              <div className="flex flex-wrap gap-1.5">
-                {PRESET_COLORS.map(c => (
-                  <button
-                    key={c}
-                    type="button"
-                    onClick={() => setColor(c)}
-                    aria-label={`Color ${c}`}
-                    className={`w-7 h-7 rounded-full border-2 transition-transform ${
-                      color === c ? "scale-110 border-cream" : "border-white/[0.2] hover:border-cream/60"
-                    }`}
-                    style={{ background: c }}
-                  />
-                ))}
-              </div>
-            </Field>
-            <Field label="Emoji">
-              <input
-                value={emoji}
-                onChange={e => setEmoji(e.target.value.slice(0, 2))}
-                placeholder="🧪"
-                className="w-14 rounded-md bg-white/[0.04] border border-white/[0.1] px-2 py-2.5 text-[18px] text-center focus:outline-none focus:border-gold/60"
-              />
-            </Field>
-          </div>
+          <Field label="Color">
+            <div className="flex flex-wrap gap-1.5">
+              {PRESET_COLORS.map(c => (
+                <button
+                  key={c}
+                  type="button"
+                  onClick={() => setColor(c)}
+                  aria-label={`Color ${c}`}
+                  className={`w-7 h-7 rounded-full border-2 transition-transform ${
+                    color === c ? "scale-110 border-cream" : "border-white/[0.2] hover:border-cream/60"
+                  }`}
+                  style={{ background: c }}
+                />
+              ))}
+            </div>
+          </Field>
 
           {error && (
             <p className="text-[12px] text-red-400 font-mono">{error}</p>
