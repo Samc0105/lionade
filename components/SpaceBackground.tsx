@@ -107,15 +107,6 @@ export default function SpaceBackground() {
       <div className="shooting-star" />
       <div className="shooting-star-2" />
 
-      {/* Distant horizon glow (cool, matches the interstellar palette) */}
-      <div
-        className="absolute"
-        style={{
-          width: 800, height: 400, bottom: "-200px", left: "50%",
-          transform: "translateX(-50%)",
-          background: "radial-gradient(ellipse at center, rgba(74,144,217,0.06) 0%, transparent 70%)",
-        }}
-      />
     </div>
   );
 }

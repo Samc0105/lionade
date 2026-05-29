@@ -40,8 +40,13 @@ const STATIONS = [
   {
     id: "lofi-girl",
     label: "Lo-fi to study",
-    description: "The classic. Lofi Girl's 24/7 stream.",
-    src: EMBED("jfKfPfyJRdk"),
+    description: "Chill beats to focus to.",
+    // Was the Lofi Girl 24/7 LIVESTREAM (jfKfPfyJRdk) — YouTube livestreams
+    // refuse embed-autoplay, which is why this one never played while the
+    // other (regular-video) stations did. Swapped to a normal lofi mix.
+    // TODO(verify-in-browser): if this doesn't play, it's not embeddable —
+    // swap the ID for any regular (non-live) lofi video.
+    src: EMBED("lTRiuFIWV54"),
   },
   {
     id: "tropical-rain",
@@ -98,6 +103,19 @@ export default function FocusMusicToggle() {
       localStorage.setItem(STORAGE_KEY, JSON.stringify({ station, open }));
     } catch { /* ignore */ }
   }, [station, open]);
+
+  // Click outside the panel (and outside the trigger) closes it. The panel
+  // and trigger both carry data-focus-music so we can tell "inside" from a
+  // genuine outside click. Music keeps playing — closing only hides the box.
+  useEffect(() => {
+    if (!open) return;
+    const onDown = (e: PointerEvent) => {
+      const t = e.target as HTMLElement | null;
+      if (t && !t.closest("[data-focus-music]")) setOpen(false);
+    };
+    document.addEventListener("pointerdown", onDown);
+    return () => document.removeEventListener("pointerdown", onDown);
+  }, [open]);
 
   const currentStation = STATIONS.find(s => s.id === station) ?? null;
 
@@ -171,6 +189,7 @@ function Panel({
 }) {
   return (
     <div
+      data-focus-music
       className="fixed z-30 right-4 md:right-6 bottom-[210px] md:bottom-[180px]
         w-[280px] rounded-[12px] border border-white/[0.1] bg-navy/95 backdrop-blur-md
         shadow-2xl shadow-black/40 p-4 animate-slide-up"
@@ -262,6 +281,7 @@ function FocusMusicTrigger({
   return (
     <button
       type="button"
+      data-focus-music
       onClick={onToggle}
       aria-label={open ? "Close focus music" : "Open focus music"}
       {...bind}
