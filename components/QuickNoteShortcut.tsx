@@ -5,8 +5,12 @@ import useSWR from "swr";
 import { Note, X, Sparkle, FloppyDisk, Lightning, Tag, Minus } from "@phosphor-icons/react";
 import { apiPost, swrFetcher } from "@/lib/api-client";
 import { useAuth } from "@/lib/auth";
-import { useIdleAttention } from "@/lib/use-idle-attention";
 import { toastSuccess, toastInfo, toastError } from "@/lib/toast";
+import {
+  useOpenLauncherPanel,
+  useCloseLauncherPanel,
+  closeLauncherPanel,
+} from "@/lib/launcher-bus";
 
 /**
  * Global Quick Note shortcut — Cmd+K (or Ctrl+K on Windows/Linux) opens a
@@ -28,7 +32,20 @@ interface ClassMini {
 export default function QuickNoteShortcut() {
   const { user } = useAuth();
   const [open, setOpen] = useState(false);
-  const { attentioned, bind } = useIdleAttention(10_000);
+
+  // ── LaunchDock integration ──
+  // The standalone trigger button below is hidden; the user opens this panel
+  // via the unified LaunchDock at bottom-right. Cmd+K still works.
+  useOpenLauncherPanel("notes", () => setOpen(true));
+  useCloseLauncherPanel("notes", () => setOpen(false));
+  // Announce close to the dock when the panel closes (X click, Esc, anything).
+  const wasOpenRef = useRef(false);
+  useEffect(() => {
+    if (wasOpenRef.current && !open) {
+      closeLauncherPanel("notes");
+    }
+    wasOpenRef.current = open;
+  }, [open]);
 
   // useAuth seeds `user` from localStorage on the client, so SSR renders
   // null and the first client render can render the button — that's a
@@ -57,42 +74,10 @@ export default function QuickNoteShortcut() {
   // Also gate on mount to keep SSR HTML and first client render in sync.
   if (!mounted || !user?.id) return null;
 
-  return (
-    <>
-      {/* Floating "+" button on every page. Hidden on the smallest mobile
-          viewports because the bottom mobile nav already crowds that zone. */}
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        aria-label="Quick note (Cmd+K)"
-        {...bind}
-        style={{
-          opacity: attentioned ? 1 : 0.4,
-          filter: attentioned ? "none" : "blur(0.6px)",
-        }}
-        className="
-          fixed z-30 right-4 md:right-6
-          bottom-[112px] md:bottom-[88px]
-          hidden sm:inline-flex items-center gap-1.5
-          rounded-full px-3 py-2
-          bg-white/[0.04] hover:bg-white/[0.08]
-          border border-white/[0.1] hover:border-white/[0.2]
-          font-mono text-[10px] uppercase tracking-[0.22em] text-cream/70 hover:text-cream
-          transition-[opacity,filter,background-color,border-color] duration-500 ease-out active:scale-[0.97]
-          shadow-lg shadow-black/30
-          backdrop-blur-md
-        "
-      >
-        <Note size={12} weight="bold" />
-        <span>Quick note</span>
-        <span className="font-mono text-[9px] tracking-wider text-cream/40 border-l border-white/[0.15] pl-1.5 ml-0.5">
-          ⌘K
-        </span>
-      </button>
-
-      {open && <QuickNotePanel onClose={() => setOpen(false)} />}
-    </>
-  );
+  // Standalone trigger button removed — this panel is now opened via the
+  // unified LaunchDock at bottom-right (or Cmd+K). The dock is the single
+  // bottom-right surface for Focus Music + Lock In + Quick Note.
+  return open ? <QuickNotePanel onClose={() => setOpen(false)} /> : null;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -302,6 +287,14 @@ function QuickNotePanel({ onClose }: { onClose: () => void }) {
           <Sparkle size={13} className="text-gold" weight="fill" />
           <span id="quick-note-title" className="font-mono text-[9.5px] uppercase tracking-[0.3em] text-gold">
             Quick note
+          </span>
+          {/* Tiny side-comment that Cmd+K still pops this open — easy to miss
+              if you didn't go through the dock. */}
+          <span
+            className="font-mono text-[8.5px] tracking-[0.18em] text-cream/30 border-l border-white/[0.08] pl-2 ml-0.5 hidden sm:inline"
+            aria-label="Shortcut: Command K"
+          >
+            ⌘K to reopen
           </span>
         </div>
         <div className="flex items-center gap-1">

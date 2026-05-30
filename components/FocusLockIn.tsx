@@ -4,8 +4,12 @@ import { useEffect, useRef, useState } from "react";
 import { Lightning, X, Pause, Play, Coffee, Trophy, Coin, ShareNetwork } from "@phosphor-icons/react";
 import { apiPost } from "@/lib/api-client";
 import { useAuth } from "@/lib/auth";
-import { useIdleAttention } from "@/lib/use-idle-attention";
 import { mutateUserStats } from "@/lib/hooks";
+import {
+  useOpenLauncherPanel,
+  useCloseLauncherPanel,
+  closeLauncherPanel,
+} from "@/lib/launcher-bus";
 import { toastInfo, toastError } from "@/lib/toast";
 import Confetti from "@/components/Confetti";
 import ShareCard from "@/components/ShareCard";
@@ -40,7 +44,15 @@ export default function FocusLockIn() {
   const { user } = useAuth();
   const [open, setOpen] = useState(false);
   const [phase, setPhase] = useState<Phase>({ kind: "idle" });
-  const { attentioned, bind } = useIdleAttention(10_000);
+
+  // ── LaunchDock integration ──
+  useOpenLauncherPanel("lockin", () => setOpen(true));
+  useCloseLauncherPanel("lockin", () => setOpen(false));
+  const wasOpenRef = useRef(false);
+  useEffect(() => {
+    if (wasOpenRef.current && !open) closeLauncherPanel("lockin");
+    wasOpenRef.current = open;
+  }, [open]);
 
   // useAuth seeds `user` from localStorage on the client, so SSR renders
   // null and the first client render can render the button — that's a
@@ -50,44 +62,9 @@ export default function FocusLockIn() {
 
   if (!mounted || !user?.id) return null;
 
-  const isRunning = phase.kind === "running";
-  // Active timers stay fully visible — the user needs to see the count.
-  const dim = !attentioned && !isRunning;
-
   return (
     <>
-      {/* Floating launcher — stacks above the Quick Note pill. Hidden on
-          smallest screens to avoid crowding mobile bottom nav. */}
-      <button
-        type="button"
-        onClick={() => setOpen(o => !o)}
-        aria-label={isRunning ? "View focus timer" : "Start focus session"}
-        {...bind}
-        style={{
-          opacity: dim ? 0.4 : 1,
-          filter: dim ? "blur(0.6px)" : "none",
-        }}
-        className={`
-          fixed z-30 right-4 md:right-6
-          bottom-[210px] md:bottom-[184px]
-          hidden sm:inline-flex items-center gap-1.5
-          rounded-full px-3 py-2
-          font-mono text-[10px] uppercase tracking-[0.22em]
-          transition-[opacity,filter,background-color,border-color] duration-500 ease-out active:scale-[0.97]
-          shadow-lg shadow-black/30 backdrop-blur-md
-          ${isRunning
-            ? "bg-electric/[0.18] border border-electric/50 text-cream"
-            : "bg-white/[0.04] border border-white/[0.1] text-cream/70 hover:text-cream hover:bg-white/[0.08] hover:border-white/[0.2]"
-          }
-        `}
-      >
-        <Lightning size={12} weight={isRunning ? "fill" : "bold"} />
-        <span>
-          {isRunning
-            ? <RemainingClock startedAt={phase.startedAt} duration={phase.duration} />
-            : "Lock in"}
-        </span>
-      </button>
+      {/* Standalone trigger removed — opened via LaunchDock at bottom-right. */}
 
       {open && phase.kind === "idle" && (
         <PickerPanel

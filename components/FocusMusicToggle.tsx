@@ -1,9 +1,13 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { MusicNotes, X, Pause, Play, Headphones, ArrowsClockwise } from "@phosphor-icons/react";
+import { MusicNotes, X, Pause, Play, ArrowsClockwise } from "@phosphor-icons/react";
 import { useAuth } from "@/lib/auth";
-import { useIdleAttention } from "@/lib/use-idle-attention";
+import {
+  useOpenLauncherPanel,
+  useCloseLauncherPanel,
+  closeLauncherPanel,
+} from "@/lib/launcher-bus";
 
 /**
  * Focus Music — small floating audio player.
@@ -77,6 +81,15 @@ export default function FocusMusicToggle() {
   const [station, setStation] = useState<StationId | null>(null);
   const audioContainerRef = useRef<HTMLDivElement>(null);
 
+  // ── LaunchDock integration ──
+  useOpenLauncherPanel("music", () => setOpen(true));
+  useCloseLauncherPanel("music", () => setOpen(false));
+  const wasOpenRef = useRef(false);
+  useEffect(() => {
+    if (wasOpenRef.current && !open) closeLauncherPanel("music");
+    wasOpenRef.current = open;
+  }, [open]);
+
   // useAuth seeds `user` from localStorage on the client, so SSR renders
   // null and the first client render can render the button — that's a
   // hydration mismatch. Defer auth-driven render until after mount.
@@ -126,13 +139,7 @@ export default function FocusMusicToggle() {
 
   return (
     <>
-      {/* Floating launcher — hidden on small screens so it doesn't fight
-          the mobile bottom nav. Sits right above the QuickNote pill. */}
-      <FocusMusicTrigger
-        open={open}
-        station={station}
-        onToggle={() => setOpen(o => !o)}
-      />
+      {/* Standalone trigger removed — opened via the LaunchDock at bottom-right. */}
 
       {/* Off-screen iframe for actual playback. We do NOT use display:none /
           `hidden` here — browsers block audio + autoplay from display:none
@@ -262,49 +269,6 @@ function Panel({
   );
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Trigger pill — extracted so the idle-attention fade lives in its own scope
-// without rebuilding the whole parent on hover state changes.
-// ─────────────────────────────────────────────────────────────────────────────
-function FocusMusicTrigger({
-  open, station, onToggle,
-}: {
-  open: boolean;
-  station: StationId | null;
-  onToggle: () => void;
-}) {
-  const { attentioned, bind } = useIdleAttention(10_000);
-  // While a station is actively playing we keep the pill bright — the
-  // user needs the visual cue that audio is on.
-  const dim = !attentioned && !station;
-
-  return (
-    <button
-      type="button"
-      data-focus-music
-      onClick={onToggle}
-      aria-label={open ? "Close focus music" : "Open focus music"}
-      {...bind}
-      style={{
-        opacity: dim ? 0.4 : 1,
-        filter: dim ? "blur(0.6px)" : "none",
-      }}
-      className={`
-        fixed z-30 right-4 md:right-6
-        bottom-[160px] md:bottom-[136px]
-        hidden sm:inline-flex items-center gap-1.5
-        rounded-full px-3 py-2
-        font-mono text-[10px] uppercase tracking-[0.22em]
-        transition-[opacity,filter,background-color,border-color] duration-500 ease-out active:scale-[0.97]
-        shadow-lg shadow-black/30 backdrop-blur-md
-        ${station
-          ? "bg-[#A855F7]/[0.18] border border-[#A855F7]/40 text-cream"
-          : "bg-white/[0.04] border border-white/[0.1] text-cream/70 hover:text-cream hover:bg-white/[0.08] hover:border-white/[0.2]"
-        }
-      `}
-    >
-      <Headphones size={12} weight={station ? "fill" : "bold"} />
-      <span>{station ? "Music on" : "Focus music"}</span>
-    </button>
-  );
-}
+// (Standalone FocusMusicTrigger pill was deleted when the bottom-right surface
+//  was consolidated under LaunchDock. The Panel below is the only remaining
+//  UI; it opens via the dock or the launcher-bus open event.)

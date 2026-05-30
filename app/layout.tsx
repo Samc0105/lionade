@@ -13,6 +13,7 @@ import StructuredData from "@/components/StructuredData";
 import QuickNoteShortcut from "@/components/QuickNoteShortcut";
 import FocusMusicToggle from "@/components/FocusMusicToggle";
 import FocusLockIn from "@/components/FocusLockIn";
+import LaunchDock from "@/components/LaunchDock";
 import PageTransition from "@/components/PageTransition";
 import { SITE_URL, SITE_URL_OBJ } from "@/lib/site-config";
 
@@ -168,6 +169,7 @@ export default function RootLayout({
                   <QuickNoteShortcut />
                   <FocusMusicToggle />
                   <FocusLockIn />
+                  <LaunchDock />
                 </ToastProvider>
               </AuthProviderWrapper>
             </SwrProvider>
