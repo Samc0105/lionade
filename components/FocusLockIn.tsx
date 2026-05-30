@@ -81,7 +81,10 @@ export default function FocusLockIn() {
         <RunningTimer
           duration={phase.duration}
           startedAt={phase.startedAt}
-          visible={open}
+          // Running timer stays visible the whole session now that the
+          // standalone trigger pill (which carried the inline clock) is gone.
+          // The dock's lockin item also glows blue while a session is active.
+          visible={true}
           onMinimize={() => setOpen(false)}
           onAbort={() => { setPhase({ kind: "idle" }); setOpen(false); }}
           onComplete={async () => {
