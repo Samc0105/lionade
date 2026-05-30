@@ -150,6 +150,18 @@ export default function SketchView({
   const sawFirstCorrectRef = useRef(false); // gate so only the first correct guess fires confetti
   const [fangKey, setFangKey] = useState(0); // bumps on MY correct guess -> Fang burst
 
+  // ── Wordle-flip stagger bookkeeping ──
+  // For each letter position, the first render that sees it as `filled` gets a
+  // stagger index relative to OTHER cells that flipped in the same render batch.
+  // Subsequent renders read the cached index so the animation does not re-trigger
+  // (and doesn't re-trigger on unrelated chat updates either). Resets per round.
+  // Keyed Map: position -> { batch: number; index: number; classKey: number }
+  // batch = which "wave" of reveals (1, 2, 3...); classKey forces the React key
+  // to change exactly once when the cell becomes filled, so the CSS animation
+  // re-mounts cleanly even if React would otherwise reuse the DOM node.
+  const flipBatchRef = useRef<Map<number, { delayMs: number; classKey: number }>>(new Map());
+  const flipBatchCounterRef = useRef(0);
+
   // Toolbar state (drawer only).
   const [tool, setTool] = useState<SketchTool>("brush");
   const [color, setColor] = useState<string>(SKETCH_COLORS[0]);
@@ -181,6 +193,8 @@ export default function SketchView({
     setStrokeCount(0);
     setMask([]);
     setRevealed({});
+    flipBatchRef.current = new Map();
+    flipBatchCounterRef.current = 0;
     sawFirstCorrectRef.current = false;
     setFireFirstConfetti(false);
     pickedRef.current = false;
@@ -258,6 +272,8 @@ export default function SketchView({
       setCandidates(null);
       setMask([]);
       setRevealed({});
+      flipBatchRef.current = new Map();
+      flipBatchCounterRef.current = 0;
       sawFirstCorrectRef.current = false;
       setFireFirstConfetti(false);
       pickedRef.current = false;
@@ -677,7 +693,12 @@ export default function SketchView({
               {subjectLabel || "DRAWING"}
             </span>
             {isDrawer && lockedWord && (
-              <span className="font-bebas text-xs tracking-wider px-2.5 py-1 rounded-full bg-[#FFD700]/15 text-[#FFD700] border border-[#FFD700]/40">
+              // Keyed on the word so the stamp fires exactly when the drawer
+              // locks their pick in (single shot, not on every render).
+              <span
+                key={lockedWord}
+                className={`inline-block font-bebas text-xs tracking-wider px-2.5 py-1 rounded-full bg-[#FFD700]/15 text-[#FFD700] border border-[#FFD700]/40 ${reduced ? "" : "pa-stamp"}`}
+              >
                 {lockedWord.toUpperCase()}
               </span>
             )}
@@ -934,42 +955,89 @@ export default function SketchView({
               spaces/punctuation shown. Correct-position letters turn green as
               the room reveals them. The SECRET never reaches guesser clients;
               guessers fill a box only once the server confirms that position. */}
-          {phase === "drawing" && blankCells.length > 0 && (
-            <div className="flex flex-wrap items-center justify-center gap-1.5 py-1">
-              {blankCells.map((cell, i) =>
-                cell.kind === "fixed" ? (
-                  <span
-                    key={i}
-                    aria-hidden="true"
-                    className="w-3 text-center font-bebas text-2xl text-cream/40"
-                  >
-                    {cell.char === " " ? " " : cell.char}
-                  </span>
-                ) : (
-                  <span
-                    key={i}
-                    className={`inline-flex items-center justify-center rounded-md font-bebas text-xl tracking-wider transition-all ${
-                      cell.filled && !reduced ? "pa-pop-in" : ""
-                    }`}
-                    style={{
-                      width: "1.75rem",
-                      height: "2.25rem",
-                      background: cell.filled
-                        ? "rgba(34,197,94,0.22)"
-                        : "rgba(255,255,255,0.04)",
-                      border: cell.filled
-                        ? "1px solid rgba(34,197,94,0.6)"
-                        : "1px solid rgba(255,255,255,0.12)",
-                      color: cell.filled ? "#86EFAC" : "transparent",
-                      boxShadow: cell.filled ? "0 0 10px rgba(34,197,94,0.25)" : "none",
-                    }}
-                  >
-                    {cell.filled ? cell.char.toUpperCase() : ""}
-                  </span>
-                ),
-              )}
-            </div>
-          )}
+          {phase === "drawing" && blankCells.length > 0 && (() => {
+            // ── Wordle flip batching ──
+            // Any letter cell that just transitioned to `filled` this render and
+            // is NOT yet in flipBatchRef gets registered into a new batch and
+            // assigned a stagger delay (~70ms per cell within the batch). The
+            // batch counter bumps once per wave so the next reveal's first cell
+            // starts at delay 0 (not stacked onto the prior wave). The drawer's
+            // word lands all at once on first render -> the whole word ripples
+            // letter-by-letter in a single wave, which sells the "locked it in"
+            // beat for them too.
+            const STAGGER_MS = 70;
+            const newlyFilled: number[] = [];
+            for (let i = 0; i < blankCells.length; i++) {
+              const c = blankCells[i];
+              if (c.kind === "letter" && c.filled && !flipBatchRef.current.has(i)) {
+                newlyFilled.push(i);
+              }
+            }
+            if (newlyFilled.length > 0) {
+              flipBatchCounterRef.current += 1;
+              const classKey = flipBatchCounterRef.current;
+              newlyFilled.forEach((pos, idx) => {
+                flipBatchRef.current.set(pos, {
+                  delayMs: idx * STAGGER_MS,
+                  classKey,
+                });
+              });
+            }
+            return (
+              <div className="flex flex-wrap items-center justify-center gap-1.5 py-1">
+                {blankCells.map((cell, i) => {
+                  if (cell.kind === "fixed") {
+                    return (
+                      <span
+                        key={`fixed-${i}`}
+                        aria-hidden="true"
+                        className="w-3 text-center font-bebas text-2xl text-cream/40"
+                      >
+                        {cell.char === " " ? " " : cell.char}
+                      </span>
+                    );
+                  }
+                  const flip = flipBatchRef.current.get(i);
+                  // The `key` includes the flip-batch classKey so when a cell
+                  // first becomes filled, React remounts the span and the CSS
+                  // animation kicks off cleanly. Subsequent renders preserve
+                  // the same key so unrelated state (chat ticks) don't retrigger.
+                  const cellKey = flip ? `cell-${i}-flip${flip.classKey}` : `cell-${i}-blank`;
+                  return (
+                    <span
+                      key={cellKey}
+                      className={`inline-flex items-center justify-center rounded-md font-bebas text-xl tracking-wider ${
+                        cell.filled && !reduced ? "pa-tile-flip" : ""
+                      }`}
+                      style={{
+                        width: "1.75rem",
+                        height: "2.25rem",
+                        background: cell.filled
+                          ? "rgba(34,197,94,0.22)"
+                          : "rgba(255,255,255,0.04)",
+                        border: cell.filled
+                          ? "1px solid rgba(34,197,94,0.6)"
+                          : "1px solid rgba(255,255,255,0.12)",
+                        color: cell.filled ? "#86EFAC" : "transparent",
+                        // When the cell is mid-flip the keyframe owns its own
+                        // box-shadow. When the cell is simply filled (catch-up
+                        // fetch or reduced motion), keep the static green halo
+                        // so the row doesn't look unstyled.
+                        boxShadow:
+                          cell.filled && (!flip || reduced)
+                            ? "0 0 10px rgba(34,197,94,0.25)"
+                            : undefined,
+                        animationDelay:
+                          flip && !reduced ? `${flip.delayMs}ms` : undefined,
+                      }}
+                    >
+                      {cell.filled ? cell.char.toUpperCase() : ""}
+                    </span>
+                  );
+                })}
+              </div>
+            );
+          })()}
 
           {isDrawer && phase === "drawing" && (
             <SketchToolbar

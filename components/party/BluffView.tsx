@@ -391,7 +391,9 @@ export default function BluffView({
               }}
             >
               <p className="font-bebas text-xs tracking-[0.3em] text-cream/55 mb-1">THE TRUTH</p>
-              <p className={`font-bebas text-3xl text-emerald-300 tracking-wider inline-block ${reduced ? "" : "ca-slam"}`}>
+              {/* Use the party-block stamp so the Bluff reveal lands with the
+                  same punch as Sketchy's word-stamp and Poker Face's verdict. */}
+              <p className={`font-bebas text-3xl text-emerald-300 tracking-wider inline-block ${reduced ? "" : "pa-stamp"}`}>
                 {round.correct_answer}
               </p>
             </div>

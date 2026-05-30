@@ -4109,6 +4109,46 @@ html.light .space-bg-container { display: none; }
               0 0 0 1px var(--pa-accent-soft, rgba(168,85,247,0.45));
 }
 
+/* WORDLE TILE FLIP — the headline moment in Sketchy.
+   A Wordle-style horizontal flip on the letter cell when a position lands.
+   scaleY: 1 -> 0 (edge-on, invisible) -> 1, with a subtle green halo bloom on
+   the second half. The COLOR/BORDER swap (white outline -> green fill) happens
+   in React at the same render that adds this class, which means the swap is
+   visually invisible (it lands exactly when scaleY=0). Stagger across multi-
+   position reveals via inline animationDelay. Pure GPU (transform + box-shadow).
+   Timing tuned to ~520ms so a 4-cell wave with 70ms stagger reads as a wave,
+   not a chorus. */
+@keyframes pa-tile-flip {
+  0%   { transform: scaleY(1);    box-shadow: 0 0 0 rgba(34,197,94,0); }
+  45%  { transform: scaleY(0);    box-shadow: 0 0 0 rgba(34,197,94,0); }
+  55%  { transform: scaleY(0.04); box-shadow: 0 0 14px rgba(34,197,94,0.55); }
+  80%  { transform: scaleY(1.08); box-shadow: 0 0 16px rgba(34,197,94,0.4); }
+  100% { transform: scaleY(1);    box-shadow: 0 0 10px rgba(34,197,94,0.25); }
+}
+.pa-tile-flip {
+  will-change: transform, box-shadow;
+  transform-origin: center;
+  animation: pa-tile-flip 0.52s var(--ease-out-quart) both;
+}
+
+/* CARD-WORD 3D FLIP — the Poker Face header WORD flips on the X axis at the
+   present -> interrogate/vote phase transition. perspective is set on the
+   container; the element itself owns the rotateX. The room "sees" the card
+   close and present the claim. Single shot, ~0.7s. */
+@keyframes pa-card-flip-3d {
+  0%   { transform: rotateX(0deg);    opacity: 1; }
+  45%  { transform: rotateX(90deg);   opacity: 0.4; }
+  55%  { transform: rotateX(-90deg);  opacity: 0.4; }
+  100% { transform: rotateX(0deg);    opacity: 1; }
+}
+.pa-card-flip-3d {
+  will-change: transform, opacity;
+  transform-origin: center;
+  backface-visibility: hidden;
+  animation: pa-card-flip-3d 0.72s var(--ease-out-quart) both;
+}
+.pa-card-flip-3d-perspective { perspective: 900px; }
+
 /* The single reduced-motion guard for the WHOLE party block.
    Disables motion but leaves final visual states intact (opacity 1, no shift). */
 @media (prefers-reduced-motion: reduce) {
@@ -4116,13 +4156,15 @@ html.light .space-bg-container { display: none; }
   .pa-tool-active, .pa-guess-pop, .pa-correct-flash, .pa-confirm-pop,
   .pa-stamp, .pa-factoid-up, .pa-leader-glow, .pa-truth-glow,
   .pa-ready-sweep, .pa-ready-glow, .pa-card-selected,
-  .pa-game-card, .pa-game-card:hover {
+  .pa-game-card, .pa-game-card:hover,
+  .pa-tile-flip, .pa-card-flip-3d {
     animation: none !important;
     transition: none !important;
   }
   .pa-game-card:hover { transform: none !important; }
   .pa-ready-sweep { opacity: 0 !important; }
-  .pa-pop-in, .pa-deal-in, .pa-chip-in, .pa-guess-pop, .pa-stamp, .pa-factoid-up {
+  .pa-pop-in, .pa-deal-in, .pa-chip-in, .pa-guess-pop, .pa-stamp, .pa-factoid-up,
+  .pa-tile-flip, .pa-card-flip-3d {
     transform: none !important;
     opacity: 1 !important;
   }

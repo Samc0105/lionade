@@ -105,6 +105,30 @@ export default function PokerFaceView({
   // opening the table — nothing is typed).
   const [intent, setIntent] = useState<"truth" | "lie" | null>(null);
 
+  // ── Card-flip bookkeeping ──
+  // The card-word WORD element flips on the X axis on each phase transition
+  // WITHIN a round (present -> interrogate -> vote -> reveal). The initial
+  // mount of the round does not flip — only subsequent transitions do, so the
+  // "card lands on the table" beat is reserved for actual phase changes.
+  // cardFlipKey bumps on every transition so the keyed React element remounts
+  // and the CSS animation re-fires cleanly. Resets per round.
+  const [cardFlipKey, setCardFlipKey] = useState(0);
+  const prevPhaseRef = useRef<Phase | null>(null);
+  const flipRoundIdRef = useRef<string | null>(null);
+  useEffect(() => {
+    // New round? Reset the prevPhase tracker so the first phase of the new round
+    // counts as the baseline (no flip on initial render of a fresh round).
+    if (detail && detail.id !== flipRoundIdRef.current) {
+      flipRoundIdRef.current = detail.id;
+      prevPhaseRef.current = phase;
+      return;
+    }
+    if (prevPhaseRef.current !== null && prevPhaseRef.current !== phase) {
+      setCardFlipKey((k) => k + 1);
+    }
+    prevPhaseRef.current = phase;
+  }, [phase, detail]);
+
   // Per-GAME tally accumulated across rounds, for the end-game awards. Resets
   // naturally on remount (= a fresh game); countedRoundsRef gates double-count.
   const [tally, setTally] = useState<{ fooled: Record<string, number>; correct: Record<string, number> }>({
@@ -434,9 +458,13 @@ export default function PokerFaceView({
         </p>
       </div>
 
-      {/* Card header — the WORD everyone can see + presenter + round/phase */}
+      {/* Card header — the WORD everyone can see + presenter + round/phase.
+          The WORD itself flips on the X axis on every phase transition within a
+          round (present -> interrogate -> vote -> reveal), giving the card a
+          "being turned over" feel between beats. perspective lives on the
+          container so the rotation reads in 3D, not a flat scaleY. */}
       <div
-        className="rounded-2xl p-5"
+        className="rounded-2xl p-5 pa-card-flip-3d-perspective"
         style={{
           background: `linear-gradient(135deg, ${ACCENT}1f 0%, rgba(168,85,247,0.06) 100%)`,
           border: `1px solid ${ACCENT}59`,
@@ -444,7 +472,11 @@ export default function PokerFaceView({
         }}
       >
         <p className="font-bebas text-xs text-cream/50 tracking-[0.25em] mb-1">THE CARD</p>
-        <p className="font-bebas text-3xl sm:text-4xl tracking-wider" style={{ color: ACCENT, textShadow: `0 0 18px ${ACCENT}55` }}>
+        <p
+          key={cardFlipKey}
+          className={`font-bebas text-3xl sm:text-4xl tracking-wider inline-block ${cardFlipKey > 0 && !reduced ? "pa-card-flip-3d" : ""}`}
+          style={{ color: ACCENT, textShadow: `0 0 18px ${ACCENT}55` }}
+        >
           {round.card_word.toUpperCase()}
         </p>
         <div className="mt-3 flex items-center justify-between">
