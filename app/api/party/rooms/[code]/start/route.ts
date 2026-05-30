@@ -57,13 +57,12 @@ export async function POST(
   if (game === "sketch" && playerCount < 2) {
     return NextResponse.json({ error: "Sketchy Subjects needs at least 2 players" }, { status: 400 });
   }
-  if (game === "bluff" && playerCount < 3) {
-    return NextResponse.json({ error: "Bluff Trivia needs at least 3 players" }, { status: 400 });
+  // Bluff + Poker Face now accept 2 players (degenerate but playable for a duo).
+  if (game === "bluff" && playerCount < 2) {
+    return NextResponse.json({ error: "Bluff Trivia needs at least 2 players" }, { status: 400 });
   }
-  // Poker Face needs at least 3 (one presenter + two callers) so a bluff has a
-  // room to fool; caps at 8 like the rest of the suite.
-  if (game === "pokerface" && playerCount < 3) {
-    return NextResponse.json({ error: "Poker Face needs at least 3 players" }, { status: 400 });
+  if (game === "pokerface" && playerCount < 2) {
+    return NextResponse.json({ error: "Poker Face needs at least 2 players" }, { status: 400 });
   }
 
   // Every active player must be ready (host included).

@@ -60,8 +60,8 @@ export async function POST(req: NextRequest) {
     .is("left_at", null)
     .order("joined_at", { ascending: true });
   const seats = (activePlayers ?? []).map((p) => p.user_id);
-  if (seats.length < 3) {
-    return NextResponse.json({ error: "Poker Face needs at least 3 players" }, { status: 400 });
+  if (seats.length < 2) {
+    return NextResponse.json({ error: "Poker Face needs at least 2 players" }, { status: 400 });
   }
 
   // Round number + presenter rotation (round N -> seat (N-1) % seats.length).

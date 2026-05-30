@@ -266,6 +266,25 @@ export default function SketchView({
       setWordInfo({});
       setPhase(isMe ? "select-word" : "drawing");
       setNinnyMsg(isMe ? "Your turn! Pick a word to draw." : "Watch carefully and guess what they're drawing.");
+
+      // ── Drawer-non-host candidate fetch ──
+      // Before the fair-random drawer change, the host was always round 1's
+      // drawer and `startRound` (host-only) fetched the candidates. Now the
+      // drawer can be any player, so the drawer-non-host learns they're up
+      // ONLY via this broadcast and must fetch their own candidates here, or
+      // the picker would render blank (the "Your turn! No cards." bug).
+      if (isMe) {
+        const words = await apiGet<{ candidates: CandidateWord[] }>(
+          `/api/party/sketch/rounds/${payload.round_id}/words`,
+        );
+        if (words.ok && words.data?.candidates) {
+          setCandidates(words.data.candidates);
+        } else {
+          // Fall back to drawing phase so the round isn't stuck on a blank picker.
+          setPhase("drawing");
+          setNinnyMsg("Couldn't load your words. Someone else's turn might land in a sec.");
+        }
+      }
     });
     ch.on("broadcast", { event: SKETCH_EVENTS.WORD_SELECTED }, () => {
       setPhase("drawing");

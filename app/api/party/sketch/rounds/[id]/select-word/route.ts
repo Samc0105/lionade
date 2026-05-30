@@ -9,6 +9,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
 import { readCandidates, clearCandidates } from "@/lib/party/sketch-candidates";
+import type { WordEntry } from "@/lib/party/word-lists-stub";
 
 export async function POST(
   req: NextRequest,
@@ -25,7 +26,7 @@ export async function POST(
 
   const { data: round } = await supabaseAdmin
     .from("sketch_rounds")
-    .select("drawer_user_id, word, room_id")
+    .select("drawer_user_id, word, room_id, candidate_words")
     .eq("id", params.id)
     .maybeSingle();
   if (!round) return NextResponse.json({ error: "Round not found" }, { status: 404 });
@@ -36,7 +37,13 @@ export async function POST(
     return NextResponse.json({ error: "Word already locked" }, { status: 409 });
   }
 
-  const candidates = readCandidates(params.id) ?? [];
+  // Validate against the persisted candidate set (migration 058) — same source
+  // the /words route returned to the drawer. Fall back to the in-memory cache
+  // for any in-flight round predating the migration.
+  const fromRow: WordEntry[] | undefined = Array.isArray(round.candidate_words)
+    ? (round.candidate_words as WordEntry[])
+    : undefined;
+  const candidates = fromRow && fromRow.length > 0 ? fromRow : (readCandidates(params.id) ?? []);
   const match = candidates.find((c) => c.word === chosenWord);
   if (!match) {
     return NextResponse.json({ error: "Word not in candidate set" }, { status: 400 });

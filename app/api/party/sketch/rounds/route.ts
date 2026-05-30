@@ -156,7 +156,10 @@ export async function POST(req: NextRequest) {
     candidates = WORD_LISTS_STUB.biology.slice(0, 3);
   }
 
-  // Create the round with a placeholder word; updated in /select-word.
+  // Create the round with a placeholder word; updated in /select-word. Persist
+  // the candidate set on the row (JSONB, migration 058) so the drawer's /words
+  // fetch is reliable on Vercel serverless — the in-memory cache below is kept
+  // as a warm-path optimization but is no longer the source of truth.
   const { data: round, error } = await supabaseAdmin
     .from("sketch_rounds")
     .insert({
@@ -166,6 +169,7 @@ export async function POST(req: NextRequest) {
       word: "__pending__",
       subject,
       duration_sec: 90,
+      candidate_words: candidates,
     })
     .select()
     .single();

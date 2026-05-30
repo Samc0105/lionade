@@ -50,8 +50,8 @@ const GAME_META: Record<PartyGame, {
     short: "BLUFF TRIVIA",
     tagline: "Write fake trivia answers. Trick your friends.",
     accent: "#FFD700",
-    players: "3 to 6 players",
-    minPlayers: 3,
+    players: "2 to 6 players",
+    minPlayers: 2,
     bestPlayed: "Remote OK",
   },
   pokerface: {
@@ -59,8 +59,8 @@ const GAME_META: Record<PartyGame, {
     short: "POKER FACE",
     tagline: "Hold a secret fact. Present truth or a bluff. The room calls it.",
     accent: "#00BFFF",
-    players: "3 to 6 players",
-    minPlayers: 3,
+    players: "2 to 6 players",
+    minPlayers: 2,
     bestPlayed: "Best in person",
   },
 };
