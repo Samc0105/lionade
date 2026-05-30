@@ -7,6 +7,13 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 
 ---
 
+## 2026-05-30 — Unified fluid LaunchDock + Party animation polish (web-only, iOS paused)
+
+| Feature | Web route(s) | iOS route(s) | Web | iOS | Notes |
+|---|---|---|---|---|---|
+| **Fluid LaunchDock with blue limelight + backdrop blur** | every authed page (`app/layout.tsx`) | iOS app shell (not ported) | ✅ | ❌ paused | Single bottom-right round trigger that expands a vertical column of items (Notes / Music / Lock In) via clip-path + cubic-bezier slide. Blue limelight (#00BFFF) glow on the active item; corner dot on the collapsed trigger when something is open. Fixed-screen backdrop-filter blur(8) overlay sits between page content (z-30) and the dock + panel (z-40+). Window-event bus (`lib/launcher-bus.ts`) with open/close events + `useLauncherActivePanel`. Each widget's standalone trigger button was deleted; they listen for their own open event. Cmd+K still opens Quick Note with a "⌘K to reopen" hint in the panel header. LockIn running timer stays visible the whole session now that the trigger pill (which carried the inline clock) is gone. iOS: when iOS resumes, mirror the fluid menu with Reanimated 4 (use the same nudge-channel-style bus + a Skia limelight glow); flag for `ios-design-motion`. |
+| **Lionade Party animation polish (Wordle tile flip + Poker Face card flip + Sketchy locked-word stamp)** | `/games/party/[code]` (sketch, bluff, pokerface) | iOS Party (not built) | ✅ | ❌ paused | Sketchy: scaleY-squash Wordle flip on letter reveal (color swap at the invisible mid-flip frame), ~70ms stagger across cells in a wave, `pa-tile-flip` keyframe; locked-word gold pill `pa-stamp` on word-lock. Poker Face: true 3D rotateX `pa-card-flip-3d` on the card-word at every WITHIN-round phase transition (suppressed on initial mount). Bluff: truth reveal swapped from `ca-slam` to `pa-stamp` for party-block tonal consistency. Both new keyframes added to the single party reduced-motion guard. GPU transform+opacity only; hydration-safe. iOS counterpart needs Reanimated 4 `withSequence(scaleY)` + Skia glow for Sketchy tiles, and a `rotateX` interpolation with `perspective` for the Poker Face card; flag for `ios-design-motion` when Sketchy iOS lands. |
+
 ## 2026-05-29 — Party lobby flavor: nudge button + thinking dots (web-only, iOS paused)
 
 | Feature | Web route(s) | iOS route(s) | Web | iOS | Notes |
