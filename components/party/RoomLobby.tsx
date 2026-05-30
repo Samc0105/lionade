@@ -3,16 +3,50 @@
 // Lobby view for Lionade Party rooms.
 // Player list + ready toggle + game-select cards + Start button (host only).
 
-import { useEffect, useState } from "react";
-import { motion, useReducedMotion } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { apiPost } from "@/lib/api-client";
+import { supabase } from "@/lib/supabase";
 import RoomCodeShare from "./RoomCodeShare";
 import { SUBJECT_LABELS, SUBJECTS as ALL_SUBJECTS } from "@/lib/party/word-lists-stub";
+import { nudgeChannel, PARTY_EVENTS } from "@/lib/party/realtime-channels";
 import type { PartyPlayer, PartyRoom } from "@/lib/party/types";
 
 const MAX_PLAYERS = 6;
 
 type PartyGame = "sketch" | "bluff" | "pokerface";
+
+// ── Hurry-up nudge phrases (Gen-Z, light-hearted, family-safe, no em-dashes) ──
+// Tapped from the rotating "NUDGE THE HOST" button by non-hosts; everyone in
+// the room sees the toast. Keep it short, fun, never mean.
+const NUDGE_PHRASES = [
+  "hurry up bro",
+  "tick tock",
+  "we're growing old",
+  "any day now",
+  "let's gooo",
+  "did your wifi die?",
+  "you good?",
+  "respectfully, start the game",
+  "the suspense is killing me",
+  "i could've cooked dinner by now",
+  "starting today?",
+  "the game is waiting on you",
+  "we believe in you king",
+  "buffering?",
+  "press the button",
+  "i made coffee in the meantime",
+  "are you afk?",
+  "my battery is at 5%",
+  "the people are restless",
+  "this isn't a stream, you can start",
+];
+
+// One nudger has the button for NUDGE_WINDOW_MS, then it rotates. All clients
+// compute the same active nudger from wall-clock + the active-player list so
+// nobody needs a server arbiter for a piece of fun chrome.
+const NUDGE_WINDOW_MS = 45_000;
+const TOAST_LIFE_MS = 3_500;
 
 interface Props {
   room: PartyRoom;
@@ -75,6 +109,70 @@ export default function RoomLobby({ room, players, isHost, meUserId, onGameStart
   const [pfMode, setPfMode] = useState<"inperson" | "remote">("inperson");
   const [pfRotations, setPfRotations] = useState<number>(2);
   const [showRules, setShowRules] = useState(false);
+
+  // ── "Hurry up bro" nudge mechanic ──
+  // Rotating button among NON-HOST players: one at a time, holds it for ~45s
+  // before the next seat gets a turn. Active nudger is derived from wall clock
+  // + the non-host list so every client picks the same person without a server.
+  const nonHostPlayers = players.filter((p) => p.user_id !== room.host_user_id);
+  // Tick state forces a re-render once per second so the active-nudger derive
+  // re-evaluates as the wall-clock window rolls over.
+  const [, setNowTick] = useState(0);
+  useEffect(() => {
+    const iv = setInterval(() => setNowTick((n) => n + 1), 1000);
+    return () => clearInterval(iv);
+  }, []);
+  const nudgeWindowIdx = Math.floor(Date.now() / NUDGE_WINDOW_MS);
+  const activeNudger = nonHostPlayers.length > 0
+    ? nonHostPlayers[nudgeWindowIdx % nonHostPlayers.length]
+    : null;
+  const amActiveNudger = !!activeNudger && activeNudger.user_id === meUserId;
+  // Local "I already nudged this window" gate so the button shows a cooldown
+  // state after they tap. Resets when the window rolls over (the ref captures
+  // the window it was set for).
+  const lastNudgeWindowRef = useRef<number | null>(null);
+  const alreadyNudgedThisWindow = lastNudgeWindowRef.current === nudgeWindowIdx;
+
+  // Toast stack — visible to EVERYONE in the room when a nudge fires (it's
+  // funnier when the whole room sees Brother spam the host). Self-pruning.
+  type Toast = { id: string; phrase: string; sender: string };
+  const [nudgeToasts, setNudgeToasts] = useState<Toast[]>([]);
+  useEffect(() => {
+    const ch = supabase.channel(nudgeChannel(room.code));
+    ch.on("broadcast", { event: PARTY_EVENTS.HOST_NUDGE }, (msg: { payload?: unknown }) => {
+      const payload = (msg.payload ?? {}) as { phrase?: string; sender?: string };
+      if (!payload.phrase) return;
+      const id = `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+      const toast: Toast = { id, phrase: payload.phrase, sender: payload.sender ?? "Someone" };
+      setNudgeToasts((prev) => [...prev, toast].slice(-4));
+      setTimeout(() => {
+        setNudgeToasts((prev) => prev.filter((t) => t.id !== id));
+      }, TOAST_LIFE_MS);
+    });
+    ch.subscribe();
+    return () => {
+      supabase.removeChannel(ch);
+    };
+  }, [room.code]);
+
+  async function sendNudge() {
+    if (!amActiveNudger || alreadyNudgedThisWindow) return;
+    lastNudgeWindowRef.current = nudgeWindowIdx;
+    const phrase = NUDGE_PHRASES[Math.floor(Math.random() * NUDGE_PHRASES.length)];
+    const me = players.find((p) => p.user_id === meUserId);
+    const ch = supabase.channel(nudgeChannel(room.code));
+    await ch.send({
+      type: "broadcast",
+      event: PARTY_EVENTS.HOST_NUDGE,
+      payload: { phrase, sender: me?.username ?? "Someone" },
+    });
+    // Locally echo (supabase broadcast doesn't echo to sender).
+    const id = `local-${Date.now()}`;
+    setNudgeToasts((prev) => [...prev, { id, phrase, sender: "You" }].slice(-4));
+    setTimeout(() => {
+      setNudgeToasts((prev) => prev.filter((t) => t.id !== id));
+    }, TOAST_LIFE_MS);
+  }
 
   const me = players.find((p) => p.user_id === meUserId);
   const serverReady = !!me?.is_ready;
@@ -195,9 +293,52 @@ export default function RoomLobby({ room, players, isHost, meUserId, onGameStart
 
   return (
     <div className="space-y-7 max-w-3xl mx-auto">
+      {/* Nudge toast stack — fixed top center, visible to EVERYONE in the room
+          when any non-host taps the rotating "nudge" button. */}
+      <div
+        aria-live="polite"
+        className="fixed top-20 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center gap-2 pointer-events-none"
+      >
+        <AnimatePresence initial={false}>
+          {nudgeToasts.map((t) => (
+            <motion.div
+              key={t.id}
+              initial={reduced ? false : { opacity: 0, y: -16, scale: 0.9 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={reduced ? { opacity: 0 } : { opacity: 0, y: -8, scale: 0.95 }}
+              transition={{ type: "spring", stiffness: 380, damping: 26 }}
+              className="rounded-full px-4 py-2 max-w-[80vw] shadow-lg"
+              style={{
+                background: "linear-gradient(135deg, rgba(236,72,153,0.95) 0%, rgba(168,85,247,0.95) 100%)",
+                border: "1px solid rgba(255,255,255,0.2)",
+                boxShadow: "0 10px 28px rgba(168,85,247,0.4)",
+              }}
+            >
+              <p className="font-bebas text-white text-sm tracking-wide whitespace-nowrap overflow-hidden text-ellipsis">
+                <span className="opacity-80">{t.sender}:</span> &ldquo;{t.phrase}&rdquo;
+              </p>
+            </motion.div>
+          ))}
+        </AnimatePresence>
+      </div>
+
       {/* Code share */}
       <div className="flex flex-col items-center gap-2">
         <RoomCodeShare code={room.code} />
+        {!isHost && (
+          <p className="font-syne text-xs text-cream/45 mt-1 inline-flex items-center gap-1.5">
+            Host is setting things up
+            <span aria-hidden="true" className="inline-flex items-center gap-0.5">
+              {[0, 1, 2].map((i) => (
+                <span
+                  key={i}
+                  className={`w-1 h-1 rounded-full bg-cream/55 ${reduced ? "opacity-70" : "pa-ink-dot"}`}
+                  style={reduced ? undefined : { animationDelay: `${i * 200}ms` }}
+                />
+              ))}
+            </span>
+          </p>
+        )}
       </div>
 
       {/* Players */}
@@ -297,6 +438,30 @@ export default function RoomLobby({ room, players, isHost, meUserId, onGameStart
           {meReady ? "✓  READY · TAP TO UNREADY" : "TAP TO READY UP"}
         </button>
       </div>
+
+      {/* ── Rotating "hurry up" nudge button ──
+          Only shown to the non-host whose 45s window is active right now.
+          One person at a time so the host doesn't get spam-floored. */}
+      {amActiveNudger && (
+        <motion.button
+          onClick={sendNudge}
+          disabled={alreadyNudgedThisWindow}
+          whileTap={reduced ? undefined : { scale: 0.96 }}
+          initial={reduced ? false : { opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="w-full py-3.5 rounded-xl font-bebas text-base tracking-wider transition-all disabled:cursor-not-allowed disabled:opacity-60"
+          style={{
+            background: alreadyNudgedThisWindow
+              ? "linear-gradient(135deg, rgba(236,72,153,0.18) 0%, rgba(168,85,247,0.08) 100%)"
+              : "linear-gradient(135deg, #EC4899 0%, #A855F7 100%)",
+            border: alreadyNudgedThisWindow ? "1px solid rgba(236,72,153,0.4)" : "1px solid rgba(255,255,255,0.18)",
+            color: alreadyNudgedThisWindow ? "#FBCFE8" : "#fff",
+            boxShadow: alreadyNudgedThisWindow ? "none" : "0 4px 20px rgba(236,72,153,0.35)",
+          }}
+        >
+          {alreadyNudgedThisWindow ? "NUDGE SENT · NEXT TURN IN A SEC" : "👉 NUDGE THE HOST"}
+        </motion.button>
+      )}
 
       {/* Game select */}
       <div>

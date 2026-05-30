@@ -7,6 +7,21 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 
 ---
 
+## 2026-05-29 — Party lobby flavor: nudge button + thinking dots (web-only, iOS paused)
+
+| Feature | Web route(s) | iOS route(s) | Web | iOS | Notes |
+|---|---|---|---|---|---|
+| **Rotating "nudge the host" button** | `/games/party` lobby | iOS Party (not built) | ✅ | ❌ paused | Non-hosts get a rotating button (one at a time, 45s windows derived deterministically from wall-clock + non-host list so no server arbiter is needed). Tapping broadcasts a random phrase on a new `nudgeChannel(code)` (separate from room-state); everyone sees a fixed-top toast with sender name + phrase, springs in, self-prunes after 3.5s. 20-phrase family-safe Gen-Z list. Pure ephemeral chrome — no DB, no auth, no secrets. iOS: paused. |
+| **"Host is setting things up" thinking dots** | `/games/party` lobby (non-host view) | iOS Party (not built) | ✅ | ❌ paused | Quiet status line under the room code on non-host screens with 3 pulsing dots (reuses `pa-ink-dot`, reduced-motion guarded). iOS: paused. |
+
+## 2026-05-29 — Party 2-player triage: Sketchy + Bluff + Poker Face bug fixes (web-only, iOS paused)
+
+| Feature | Web route(s) | iOS route(s) | Web | iOS | Notes |
+|---|---|---|---|---|---|
+| **Sketchy drawer-non-host candidates fetch** | `/games/party` (sketch) + `/api/party/sketch/rounds/[id]/words` | iOS Party (not built) | ✅ | ❌ paused | After the fair-random drawer change, the drawer can be a non-host, but `SketchView`'s `ROUND_STARTED` broadcast handler never fetched the candidates — so the drawer-non-host saw "Your turn!" with no cards. Handler now fetches `/words` when `isMe=true`; falls back to drawing phase with a clear ninny line on failure. iOS: paused. |
+| **Sketchy candidates persisted to DB (Vercel cache fix)** | `/api/party/sketch/rounds/{,[id]/words,[id]/select-word}` | iOS Party (not built) | ✅ | ❌ paused | Replaced the per-lambda in-memory candidates cache (unreliable across Vercel instances) with `candidate_words JSONB` on `sketch_rounds` via **migration 058** (applied). Deal route writes; words + select-word read/validate from the row. Column inherits the existing migration-055 RLS (secret-safe). In-memory cache kept as a warm-path fallback. iOS: paused. |
+| **Bluff + Poker Face accept 2-player rooms** | `/api/party/rooms/[code]/start` + `RoomLobby.tsx` + `/api/party/pokerface/rounds` | iOS Party (not built) | ✅ | ❌ paused | Min lowered from 3 to 2 so a duo (e.g. Sam + brother on a call) can play. Degenerate at 2 (Poker Face: caller IS the interrogator) but playable. iOS: paused. |
+
 ## 2026-05-29 — Poker Face: Interrogation + call reframe + rules (web-only, iOS paused)
 
 | Feature | Web route(s) | iOS route(s) | Web | iOS | Notes |
