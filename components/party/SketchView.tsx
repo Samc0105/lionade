@@ -16,6 +16,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { supabase } from "@/lib/supabase";
+import type { RealtimeChannel } from "@supabase/supabase-js";
 import { apiGet, apiPost } from "@/lib/api-client";
 import SketchCanvas from "./SketchCanvas";
 import SketchToolbar, { SKETCH_COLORS, SKETCH_SIZES, type SketchTool } from "./SketchToolbar";
@@ -170,6 +171,33 @@ export default function SketchView({
   const undoRef = useRef<(() => void) | null>(null);
   const clearRef = useRef<(() => void) | null>(null);
 
+  // ── Single subscribed channel ref + helper ──
+  // Every send MUST go through this ref. supabase.channel().send() silently
+  // no-ops on an unsubscribed channel handle, which is what caused the missed
+  // GUESS-correct broadcast on fresh tabs / slow networks (the drawer never
+  // learned the round was won). Populated by the listener useEffect below.
+  const channelRef = useRef<RealtimeChannel | null>(null);
+  const subscribedRef = useRef(false);
+
+  const sendBroadcast = useCallback(
+    async (event: string, payload: Record<string, unknown>) => {
+      const ch = channelRef.current;
+      if (!ch || !subscribedRef.current) {
+        console.warn("[SketchView] broadcast dropped — channel not ready", event);
+        return;
+      }
+      const status = await ch.send({ type: "broadcast", event, payload });
+      if (status !== "ok") {
+        await new Promise((r) => setTimeout(r, 150));
+        const retry = await ch.send({ type: "broadcast", event, payload });
+        if (retry !== "ok") {
+          console.warn("[SketchView] broadcast retry failed", event, retry);
+        }
+      }
+    },
+    [],
+  );
+
   // ── Word-picker extras (drawer-facing only) ──
   // Countdown to auto-pick, which candidate's info popover is open, and a
   // per-word dictionary cache. pickedRef guards against the manual pick and the
@@ -228,13 +256,11 @@ export default function SketchView({
       setNinnyMsg("Watch carefully and guess what they're drawing.");
     }
     // Tell the room that a new round started so guessers re-fetch state.
-    const ch = supabase.channel(sketchChannel(room.code));
-    await ch.send({
-      type: "broadcast",
-      event: SKETCH_EVENTS.ROUND_STARTED,
-      payload: { round_id: res.data.round.id, drawer_user_id: res.data.round.drawer_user_id },
+    await sendBroadcast(SKETCH_EVENTS.ROUND_STARTED, {
+      round_id: res.data.round.id,
+      drawer_user_id: res.data.round.drawer_user_id,
     });
-  }, [room.code, meUserId]);
+  }, [room.code, meUserId, sendBroadcast]);
 
   // Host kicks off the first round automatically.
   useEffect(() => {
@@ -360,8 +386,17 @@ export default function SketchView({
         setNinnyMsg(null);
       }
     });
-    ch.subscribe();
+    ch.subscribe((status: string) => {
+      if (status === "SUBSCRIBED") {
+        subscribedRef.current = true;
+      } else if (status === "CLOSED" || status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
+        subscribedRef.current = false;
+      }
+    });
+    channelRef.current = ch;
     return () => {
+      subscribedRef.current = false;
+      channelRef.current = null;
       supabase.removeChannel(ch);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -433,14 +468,9 @@ export default function SketchView({
       setLockedWord(word);
       setPhase("drawing");
       setNinnyMsg(null);
-      const ch = supabase.channel(sketchChannel(room.code));
-      await ch.send({
-        type: "broadcast",
-        event: SKETCH_EVENTS.WORD_SELECTED,
-        payload: { round_id: round.id },
-      });
+      await sendBroadcast(SKETCH_EVENTS.WORD_SELECTED, { round_id: round.id });
     },
-    [round, room.code],
+    [round, sendBroadcast],
   );
 
   // ── Word info ("i" popover): real definition + example sentence ──
@@ -571,47 +601,33 @@ export default function SketchView({
       },
     ]);
 
-    const ch = supabase.channel(sketchChannel(room.code));
-
     // Broadcast the progressive reveal so the WHOLE room lights up the shared
     // green squares. Carries only matched positions + letters (no secret).
     if (newlyRevealed.length > 0 || matched.length > 0) {
-      await ch.send({
-        type: "broadcast",
-        event: SKETCH_EVENTS.LETTER_REVEAL,
-        payload: {
-          mask: serverMask,
-          revealed: newlyRevealed.length > 0 ? newlyRevealed : matched,
-        },
+      await sendBroadcast(SKETCH_EVENTS.LETTER_REVEAL, {
+        mask: serverMask,
+        revealed: newlyRevealed.length > 0 ? newlyRevealed : matched,
       });
     }
 
     if (data.verdict === "correct") {
       setIGotIt(true);
       setFangKey((k) => k + 1); // juice-only: Fang burst on my own correct guess
-      await ch.send({
-        type: "broadcast",
-        event: SKETCH_EVENTS.GUESS,
-        payload: {
-          user_id: meUserId,
-          username: me?.username ?? "Someone",
-          body: "got it!",
-          variant: "correct",
-          matched: matchedComparable,
-        },
+      await sendBroadcast(SKETCH_EVENTS.GUESS, {
+        user_id: meUserId,
+        username: me?.username ?? "Someone",
+        body: "got it!",
+        variant: "correct",
+        matched: matchedComparable,
       });
     } else {
-      await ch.send({
-        type: "broadcast",
-        event: SKETCH_EVENTS.GUESS,
-        payload: {
-          user_id: meUserId,
-          username: me?.username ?? "Someone",
-          // Show the guesser's actual attempt to the room (shared guesses panel).
-          body: text,
-          variant: data.was_close ? "close" : "guess",
-          matched: matchedComparable,
-        },
+      await sendBroadcast(SKETCH_EVENTS.GUESS, {
+        user_id: meUserId,
+        username: me?.username ?? "Someone",
+        // Show the guesser's actual attempt to the room (shared guesses panel).
+        body: text,
+        variant: data.was_close ? "close" : "guess",
+        matched: matchedComparable,
       });
     }
   }
@@ -629,13 +645,8 @@ export default function SketchView({
     setReveal(res.data);
     setPhase("reveal");
     setNinnyMsg(`The word was "${res.data.word}".`);
-    const ch = supabase.channel(sketchChannel(room.code));
-    await ch.send({
-      type: "broadcast",
-      event: SKETCH_EVENTS.ROUND_ENDED,
-      payload: { reveal: res.data },
-    });
-  }, [round, room.code]);
+    await sendBroadcast(SKETCH_EVENTS.ROUND_ENDED, { reveal: res.data });
+  }, [round, sendBroadcast]);
 
   // ── Render ──
   const playersForBoard = useMemo(() => players.map((p) => ({

@@ -18,6 +18,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import type { RealtimeChannel } from "@supabase/supabase-js";
 import { apiGet, apiPost } from "@/lib/api-client";
 import { sketchChannel, SKETCH_EVENTS } from "@/lib/party/realtime-channels";
 
@@ -80,6 +81,29 @@ export default function SketchCanvas({
   const [, force] = useState(0);
   const repaint = useCallback(() => force((n) => n + 1), []);
 
+  // ── Single subscribed channel ref + helper ──
+  // Must use channelRef; supabase.channel().send() silently no-ops on an
+  // unsubscribed handle, which would silently drop strokes on fresh tabs.
+  // Populated by the realtime-subscribe useEffect below.
+  const channelRef = useRef<RealtimeChannel | null>(null);
+  const subscribedRef = useRef(false);
+
+  const sendBroadcast = useCallback(
+    async (event: string, payload: Record<string, unknown>) => {
+      const ch = channelRef.current;
+      if (!ch || !subscribedRef.current) return;
+      const status = await ch.send({ type: "broadcast", event, payload });
+      if (status !== "ok") {
+        await new Promise((r) => setTimeout(r, 150));
+        const retry = await ch.send({ type: "broadcast", event, payload });
+        if (retry !== "ok") {
+          console.warn("[SketchCanvas] broadcast retry failed", event, retry);
+        }
+      }
+    },
+    [],
+  );
+
   // ── Initial late-joiner replay: fetch any persisted strokes for this round ──
   useEffect(() => {
     let cancelled = false;
@@ -125,8 +149,17 @@ export default function SketchCanvas({
       repaint();
       onStrokeCountChange?.(0);
     });
-    ch.subscribe();
+    ch.subscribe((status: string) => {
+      if (status === "SUBSCRIBED") {
+        subscribedRef.current = true;
+      } else if (status === "CLOSED" || status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
+        subscribedRef.current = false;
+      }
+    });
+    channelRef.current = ch;
     return () => {
+      subscribedRef.current = false;
+      channelRef.current = null;
       supabase.removeChannel(ch);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -223,13 +256,17 @@ export default function SketchCanvas({
   const broadcastInProgress = useCallback(async () => {
     const cur = inProgressRef.current;
     if (!cur) return;
-    const ch = supabase.channel(sketchChannel(roomCode));
+    // 30Hz mid-stroke ticks: skip the retry helper here — losing one frame is
+    // imperceptible and the final stroke broadcast in onPointerUp is the
+    // authoritative one. Keep it cheap.
+    const ch = channelRef.current;
+    if (!ch || !subscribedRef.current) return;
     await ch.send({
       type: "broadcast",
       event: SKETCH_EVENTS.STROKE,
       payload: { stroke: { ...cur, color: cur.is_eraser ? "__erase__" : cur.color } },
     });
-  }, [roomCode]);
+  }, []);
 
   const onPointerDown = useCallback(
     (e: React.PointerEvent<HTMLCanvasElement>) => {
@@ -283,17 +320,12 @@ export default function SketchCanvas({
     strokesRef.current.push(final);
     pendingPersist.current.push(final);
     // Final broadcast so guessers definitely have the completed stroke.
-    void (async () => {
-      const ch = supabase.channel(sketchChannel(roomCode));
-      await ch.send({
-        type: "broadcast",
-        event: SKETCH_EVENTS.STROKE,
-        payload: { stroke: { ...final, color: final.is_eraser ? "__erase__" : final.color } },
-      });
-    })();
+    void sendBroadcast(SKETCH_EVENTS.STROKE, {
+      stroke: { ...final, color: final.is_eraser ? "__erase__" : final.color },
+    });
     onStrokeCountChange?.(strokesRef.current.length);
     repaint();
-  }, [readonly, roomCode, onStrokeCountChange, repaint]);
+  }, [readonly, sendBroadcast, onStrokeCountChange, repaint]);
 
   // ── Imperative undo/clear handles for the parent toolbar ──
   useEffect(() => {
@@ -305,23 +337,16 @@ export default function SketchCanvas({
       // Broadcast an undo as a clear+repaint signal (lazy: send a "full strokes"
       // payload to all clients). For V1 we use clear_canvas + re-broadcast all.
       void (async () => {
-        const ch = supabase.channel(sketchChannel(roomCode));
-        await ch.send({
-          type: "broadcast",
-          event: SKETCH_EVENTS.CLEAR_CANVAS,
-          payload: {},
-        });
+        await sendBroadcast(SKETCH_EVENTS.CLEAR_CANVAS, {});
         for (const s of strokesRef.current) {
-          await ch.send({
-            type: "broadcast",
-            event: SKETCH_EVENTS.STROKE,
-            payload: { stroke: { ...s, color: s.is_eraser ? "__erase__" : s.color } },
+          await sendBroadcast(SKETCH_EVENTS.STROKE, {
+            stroke: { ...s, color: s.is_eraser ? "__erase__" : s.color },
           });
         }
       })();
       repaint();
     };
-  }, [undoRef, readonly, roomCode, onStrokeCountChange, repaint]);
+  }, [undoRef, readonly, sendBroadcast, onStrokeCountChange, repaint]);
 
   useEffect(() => {
     if (!clearRef) return;
@@ -329,17 +354,10 @@ export default function SketchCanvas({
       if (readonly) return;
       strokesRef.current = [];
       onStrokeCountChange?.(0);
-      void (async () => {
-        const ch = supabase.channel(sketchChannel(roomCode));
-        await ch.send({
-          type: "broadcast",
-          event: SKETCH_EVENTS.CLEAR_CANVAS,
-          payload: {},
-        });
-      })();
+      void sendBroadcast(SKETCH_EVENTS.CLEAR_CANVAS, {});
       repaint();
     };
-  }, [clearRef, readonly, roomCode, onStrokeCountChange, repaint]);
+  }, [clearRef, readonly, sendBroadcast, onStrokeCountChange, repaint]);
 
   const aspectStyle = useMemo(
     () => ({ aspectRatio: `${LOGICAL_W} / ${LOGICAL_H}` }),
