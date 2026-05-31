@@ -178,6 +178,8 @@ export default function SketchView({
   // learned the round was won). Populated by the listener useEffect below.
   const channelRef = useRef<RealtimeChannel | null>(null);
   const subscribedRef = useRef(false);
+  const roundIdRef = useRef<string | null>(null);
+  const completeRoundRef = useRef<() => Promise<void>>(async () => {});
 
   const sendBroadcast = useCallback(
     async (event: string, payload: Record<string, unknown>) => {
@@ -237,6 +239,7 @@ export default function SketchView({
       setNinnyMsg("Hmm, I couldn't deal a new round. Try again?");
       return;
     }
+    roundIdRef.current = res.data.round.id;
     setRound(res.data.round);
     setTimeLeft(res.data.round.duration_sec);
     if (res.data.round.drawer_user_id === meUserId) {
@@ -276,10 +279,13 @@ export default function SketchView({
     ch.on("broadcast", { event: SKETCH_EVENTS.ROUND_STARTED }, async (msg: { payload?: unknown }) => {
       const payload = (msg.payload ?? {}) as { round_id?: string; drawer_user_id?: string };
       if (!payload.round_id) return;
-      // Avoid stomping our own creation.
-      if (round?.id === payload.round_id) return;
+      // Avoid stomping our own creation. Read from the ref so the host's own
+      // ROUND_STARTED echo (which arrives AFTER setRound but before the effect
+      // re-binds) sees the freshly-set id, not the null captured at mount.
+      if (roundIdRef.current === payload.round_id) return;
       // Fetch the round (guesser view).
       const isMe = payload.drawer_user_id === meUserId;
+      roundIdRef.current = payload.round_id;
       setRound({
         id: payload.round_id,
         room_id: room.id,
@@ -434,6 +440,10 @@ export default function SketchView({
   }, [phase, round?.id, isDrawer]);
 
   // ── Timer ──
+  // Reads `completeRound` from a ref so the timer always invokes the LATEST
+  // closure (bound to the current round id), even though the effect itself only
+  // re-binds on phase/role changes. Avoids the stale-closure risk of POSTing
+  // /complete against an old round id mid-transition.
   useEffect(() => {
     if (phase !== "drawing") return;
     const iv = setInterval(() => {
@@ -441,7 +451,7 @@ export default function SketchView({
         if (t <= 1) {
           clearInterval(iv);
           if (isDrawer || isHost) {
-            void completeRound();
+            void completeRoundRef.current();
           }
           return 0;
         }
@@ -449,7 +459,6 @@ export default function SketchView({
       });
     }, 1000);
     return () => clearInterval(iv);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase, isDrawer, isHost]);
 
   // ── Drawer picks a word ──
@@ -647,6 +656,12 @@ export default function SketchView({
     setNinnyMsg(`The word was "${res.data.word}".`);
     await sendBroadcast(SKETCH_EVENTS.ROUND_ENDED, { reveal: res.data });
   }, [round, sendBroadcast]);
+
+  // Keep the timer-readable ref in sync with the latest `completeRound`
+  // closure so the timer effect's call always uses the current round id.
+  useEffect(() => {
+    completeRoundRef.current = completeRound;
+  }, [completeRound]);
 
   // ── Render ──
   const playersForBoard = useMemo(() => players.map((p) => ({

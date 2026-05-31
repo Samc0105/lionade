@@ -54,22 +54,7 @@ export async function POST(req: NextRequest) {
     const quantity = isBooster ? requestedQuantity : 1;
     const price = item.price * quantity;
 
-    // 1. Check user has enough coins
-    const { data: profile, error: profileErr } = await supabaseAdmin
-      .from("profiles")
-      .select("coins")
-      .eq("id", userId)
-      .single();
-
-    if (profileErr || !profile) {
-      return NextResponse.json({ error: "Profile not found" }, { status: 404 });
-    }
-
-    if (profile.coins < price) {
-      return NextResponse.json({ error: "Not enough coins" }, { status: 400 });
-    }
-
-    // 2. For cosmetics, check if already owned
+    // 1. For cosmetics, check if already owned BEFORE debiting
     if (!isBooster) {
       const { data: existing } = await supabaseAdmin
         .from("user_inventory")
@@ -83,55 +68,77 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // 3. Deduct coins
-    const { error: deductErr } = await supabaseAdmin
-      .from("profiles")
-      .update({ coins: profile.coins - price })
-      .eq("id", userId);
+    // 2. Atomic debit — guard prevents double-spend race across parallel tabs.
+    const { error: debitErr } = await supabaseAdmin.rpc("update_user_coins", {
+      p_user_id: userId,
+      p_delta: -price,
+      p_min_balance: 0,
+    });
 
-    if (deductErr) {
-      console.error("[shop/purchase] deduct:", deductErr.message);
+    if (debitErr) {
+      if (debitErr.code === "P0001") {
+        return NextResponse.json({ error: "Not enough coins" }, { status: 400 });
+      }
+      console.error("[shop/purchase] debit:", debitErr.message);
       return NextResponse.json({ error: "Purchase failed" }, { status: 500 });
     }
 
-    // 4. Add to inventory
-    if (isBooster) {
-      const { data: existingBooster } = await supabaseAdmin
-        .from("user_inventory")
-        .select("id, quantity")
-        .eq("user_id", userId)
-        .eq("item_id", itemId)
-        .maybeSingle();
-
-      if (existingBooster) {
-        await supabaseAdmin
+    // 3. Add to inventory — on failure, REFUND atomically and surface 500.
+    // Previously this was best-effort with console.warn, so a user could pay
+    // and receive nothing. Mirrors the refund pattern in place-bet.
+    let inventoryErr: { message: string } | null = null;
+    try {
+      if (isBooster) {
+        const { data: existingBooster } = await supabaseAdmin
           .from("user_inventory")
-          .update({ quantity: existingBooster.quantity + quantity })
-          .eq("id", existingBooster.id);
+          .select("id, quantity")
+          .eq("user_id", userId)
+          .eq("item_id", itemId)
+          .maybeSingle();
+
+        if (existingBooster) {
+          const { error: updErr } = await supabaseAdmin
+            .from("user_inventory")
+            .update({ quantity: existingBooster.quantity + quantity })
+            .eq("id", existingBooster.id);
+          if (updErr) inventoryErr = { message: updErr.message };
+        } else {
+          const { error: insErr } = await supabaseAdmin.from("user_inventory").insert({
+            user_id: userId,
+            item_id: itemId,
+            item_type: item.type,
+            quantity,
+            equipped: false,
+            rarity: item.rarity,
+          });
+          if (insErr) inventoryErr = { message: insErr.message };
+        }
       } else {
-        const { error: insertErr } = await supabaseAdmin.from("user_inventory").insert({
+        const { error: insErr } = await supabaseAdmin.from("user_inventory").insert({
           user_id: userId,
           item_id: itemId,
           item_type: item.type,
-          quantity,
+          quantity: 1,
           equipped: false,
           rarity: item.rarity,
         });
-        if (insertErr) console.warn("[shop/purchase] inventory insert:", insertErr.message);
+        if (insErr) inventoryErr = { message: insErr.message };
       }
-    } else {
-      const { error: insertErr } = await supabaseAdmin.from("user_inventory").insert({
-        user_id: userId,
-        item_id: itemId,
-        item_type: item.type,
-        quantity: 1,
-        equipped: false,
-        rarity: item.rarity,
-      });
-      if (insertErr) console.warn("[shop/purchase] inventory insert:", insertErr.message);
+    } catch (e) {
+      inventoryErr = { message: e instanceof Error ? e.message : "inventory exception" };
     }
 
-    // 5. Coin transaction log
+    if (inventoryErr) {
+      console.error("[shop/purchase] inventory write failed, refunding:", inventoryErr.message);
+      await supabaseAdmin.rpc("update_user_coins", {
+        p_user_id: userId,
+        p_delta: price,
+        p_min_balance: 0,
+      });
+      return NextResponse.json({ error: "Purchase failed, refunded" }, { status: 500 });
+    }
+
+    // 4. Coin transaction log
     try {
       await supabaseAdmin.from("coin_transactions").insert({
         user_id: userId,
@@ -141,7 +148,7 @@ export async function POST(req: NextRequest) {
       });
     } catch { /* non-fatal */ }
 
-    // 6. Purchase history
+    // 5. Purchase history
     try {
       await supabaseAdmin.from("purchase_history").insert({
         user_id: userId,

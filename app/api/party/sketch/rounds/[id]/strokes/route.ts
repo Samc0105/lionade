@@ -11,6 +11,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
+import { isRoomMember } from "@/lib/party/room-state";
 
 const MAX_BATCH = 64;
 const MAX_POINTS_PER_STROKE = 2048;
@@ -85,6 +86,17 @@ export async function GET(
 ) {
   const auth = await requireAuth(req);
   if (auth instanceof NextResponse) return auth;
+
+  // Membership check prevents leaking drawing history to non-members.
+  const { data: round } = await supabaseAdmin
+    .from("sketch_rounds")
+    .select("room_id")
+    .eq("id", params.id)
+    .maybeSingle();
+  if (!round) return NextResponse.json({ error: "Round not found" }, { status: 404 });
+  if (!(await isRoomMember(supabaseAdmin, round.room_id, auth.userId))) {
+    return NextResponse.json({ error: "Not a room member" }, { status: 403 });
+  }
 
   const { data } = await supabaseAdmin
     .from("sketch_strokes")

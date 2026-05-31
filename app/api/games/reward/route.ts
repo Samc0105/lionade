@@ -20,8 +20,14 @@ export async function POST(req: NextRequest) {
   if (auth instanceof NextResponse) return auth;
   const userId = auth.userId;
 
+  let body: { gameType?: unknown; amount?: unknown };
   try {
-    const body = await req.json();
+    body = await req.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+  }
+
+  try {
     const gameType = String(body.gameType ?? "");
     const amount = Number(body.amount ?? 0);
 

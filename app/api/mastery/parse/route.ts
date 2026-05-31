@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
 import { requireAuth } from "@/lib/api-auth";
-import { callAIForJson, LLM_MAIN } from "@/lib/ai";
+import { callAIForJson, LLM_MAIN, stripSentinels } from "@/lib/ai";
 
 /**
  * POST /api/mastery/parse
@@ -81,7 +81,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "That description is too long. Trim it under 8 KB." }, { status: 413 });
   }
 
-  const cleaned = input.trim().slice(0, MAX_INPUT_BYTES);
+  // stripSentinels() removes any `</student-goal>` (or sibling tag) that the
+  // user might have stuffed in to break out of the wrapper below.
+  const cleaned = stripSentinels(input.trim().slice(0, MAX_INPUT_BYTES));
 
   try {
     const { json: parsed, raw } = await callAIForJson<ParsedClaude>({

@@ -18,6 +18,7 @@ import type {
   TrueFalseQuestion,
   OrderingQuestion,
 } from "@lionade/core/prompts/ninny";
+import { stripSentinels } from "@/lib/ai";
 
 // Re-export types so existing imports like `import type { NinnyMode } from '@/lib/ninny'` work.
 export type {
@@ -205,17 +206,26 @@ export function buildNinnyChatSystemPrompt(material: {
 }): string {
   // Prefer raw content if available, else use the generated flashcards as a
   // condensed knowledge dump (saves tokens and stays accurate).
-  const rawContent = material.raw_content?.slice(0, 5000) ?? "";
-  const fallback = !rawContent
-    ? material.generated_content.flashcards
-        .map((f) => `${f.front}: ${f.back}`)
-        .join("\n")
-        .slice(0, 5000)
+  // stripSentinels() removes any sentinel-tag substrings (`</study-material>`
+  // etc.) the user might have embedded in their uploaded content to break out
+  // of the wrapper below.
+  const rawContent = material.raw_content
+    ? stripSentinels(material.raw_content.slice(0, 5000))
     : "";
+  const fallback = !rawContent
+    ? stripSentinels(
+        material.generated_content.flashcards
+          .map((f) => `${f.front}: ${f.back}`)
+          .join("\n")
+          .slice(0, 5000),
+      )
+    : "";
+  const safeTitle = stripSentinels(material.title).slice(0, 120);
+  const safeSubject = material.subject ? stripSentinels(material.subject).slice(0, 80) : null;
 
   return `You are Ninny, a friendly AI study companion. Right now you are helping the user understand a specific topic they generated a study set for.
 
-TOPIC: "${material.title}"${material.subject ? ` (${material.subject})` : ""}
+TOPIC: "${safeTitle}"${safeSubject ? ` (${safeSubject})` : ""}
 
 RULES:
 - Answer ONLY based on the study material below or closely related concepts.

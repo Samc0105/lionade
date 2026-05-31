@@ -7,6 +7,11 @@ export const dynamic = "force-dynamic";
 
 const MAX_MESSAGE_BYTES = 2000; // 2 KB user message cap
 const HISTORY_LIMIT = 12; // last 12 messages (6 turns) for context
+// Truncate historical assistant messages before re-sending them to OpenAI.
+// A maxed-out 400-token reply (~1.6 KB) would otherwise compound across every
+// subsequent turn and inflate input-token cost. User messages already have
+// MAX_MESSAGE_BYTES enforced server-side, so they don't need additional capping.
+const HISTORY_ASSISTANT_CHAR_CAP = 800;
 
 // ─── GET — fetch chat history for a material ────────────────────────────────
 export async function GET(req: NextRequest) {
@@ -100,10 +105,19 @@ export async function POST(req: NextRequest) {
     .order("created_at", { ascending: false })
     .limit(HISTORY_LIMIT);
 
-  // Reverse to chronological + map to OpenAI format
+  // Reverse to chronological + map to OpenAI format. Truncate historical
+  // assistant messages so we don't compound a full 400-token reply across
+  // every subsequent turn (cost-runaway protection).
   const historyMessages = (history ?? [])
     .reverse()
-    .map((m) => ({ role: m.role as "user" | "assistant", content: m.content }));
+    .map((m) => {
+      const role = m.role as "user" | "assistant";
+      const content =
+        role === "assistant" && m.content.length > HISTORY_ASSISTANT_CHAR_CAP
+          ? m.content.slice(0, HISTORY_ASSISTANT_CHAR_CAP) + "…"
+          : m.content;
+      return { role, content };
+    });
 
   const systemPrompt = buildNinnyChatSystemPrompt(material);
 

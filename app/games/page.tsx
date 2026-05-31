@@ -137,7 +137,6 @@ export default function GamesPage() {
   const [fcIdx, setFcIdx] = useState(0);
   const [fcFlipped, setFcFlipped] = useState(false);
   const [fcKnew, setFcKnew] = useState(0);
-  const [fcTotal, setFcTotal] = useState(0);
   const [fcOver, setFcOver] = useState(false);
   const [fcCards, setFcCards] = useState<{ term: string; def: string }[]>([]);
 
@@ -161,7 +160,7 @@ export default function GamesPage() {
   }, []);
 
   // ── Award Fangs ────────────────────────────────────────────
-  const awardFangs = useCallback(async (amount: number, gameType: string, _desc: string) => {
+  const awardFangs = useCallback(async (amount: number, gameType: string) => {
     if (!user?.id || amount <= 0) return;
     setFangsEarned(amount);
     await apiPost("/api/games/reward", { amount, gameType });
@@ -259,7 +258,7 @@ export default function GamesPage() {
       setRoardleOver(true);
       const baseFangs = wordLength === 4 ? 10 : wordLength === 5 ? 15 : 20;
       const bonus = Math.max(0, (6 - newGuesses.length) * 3);
-      awardFangs(baseFangs + bonus, "roardle", `Roardle win (${wordLength} letters, ${newGuesses.length} guesses)`);
+      awardFangs(baseFangs + bonus, "roardle");
     } else if (newGuesses.length >= 6) {
       setRoardleOver(true);
     }
@@ -306,7 +305,6 @@ export default function GamesPage() {
     setFcIdx(0);
     setFcFlipped(false);
     setFcKnew(0);
-    setFcTotal(0);
     setFcOver(false);
     setFangsEarned(null);
     setGame("flashcards");
@@ -314,7 +312,6 @@ export default function GamesPage() {
 
   const fcAnswer = useCallback((knew: boolean) => {
     if (knew) setFcKnew(k => k + 1);
-    setFcTotal(t => t + 1);
     setFcFlipped(false);
 
     if (fcIdx + 1 < fcCards.length) {
@@ -323,7 +320,7 @@ export default function GamesPage() {
       setFcOver(true);
       const pct = (fcKnew + (knew ? 1 : 0)) / fcCards.length;
       const fangs = Math.round(pct * 15);
-      if (fangs > 0) awardFangs(fangs, "flashcards", `Flash Cards — ${Math.round(pct * 100)}% known`);
+      if (fangs > 0) awardFangs(fangs, "flashcards");
     }
   }, [fcIdx, fcCards, fcKnew, awardFangs]);
 
@@ -351,7 +348,7 @@ export default function GamesPage() {
     });
     setTlScore(correct);
     setTlSubmitted(true);
-    if (correct > 0) awardFangs(correct * 3, "timeline", `Timeline — ${correct}/${tlEvents.length} correct`);
+    if (correct > 0) awardFangs(correct * 3, "timeline");
   }, [tlEvents, tlOrder, awardFangs]);
 
   const moveTimelineItem = useCallback((from: number, to: number) => {
@@ -398,12 +395,6 @@ export default function GamesPage() {
       }
     }
     return result;
-  }
-
-  // Per-letter helper kept for any single-cell callers: delegates to the
-  // duplicate-aware row scorer so individual lookups stay correct too.
-  function getLetterStatus(guess: string, target: string, idx: number): "correct" | "present" | "absent" {
-    return getRowStatuses(guess, target)[idx];
   }
 
   function getKeyboardStatus(): Record<string, "correct" | "present" | "absent" | "unused"> {
@@ -757,22 +748,6 @@ export default function GamesPage() {
         </div>
       );
     }
-    if (id === "party") {
-      return (
-        <div className="party-mini" aria-hidden="true">
-          <svg viewBox="0 0 80 32" width="80" height="32" fill="none">
-            <path
-              className="party-mini-stroke"
-              d="M4 22 C 14 6, 24 30, 34 16 S 54 4, 64 22 S 76 12, 76 12"
-              stroke="#EC4899"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </div>
-      );
-    }
     return null;
   };
 
@@ -1069,6 +1044,3 @@ export default function GamesPage() {
     </ProtectedRoute>
   );
 }
-
-// PARTYMINI-PROBE
-// PARTY-PROBE-DIRECT

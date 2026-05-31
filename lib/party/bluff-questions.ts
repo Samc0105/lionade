@@ -76,7 +76,7 @@ let fallbackCursor = 0;
 async function refreshCache(): Promise<void> {
   try {
     const url = "https://opentdb.com/api.php?amount=20&type=multiple";
-    const res = await fetch(url, { cache: "no-store" });
+    const res = await fetch(url, { cache: "no-store", signal: AbortSignal.timeout(8000) });
     if (!res.ok) throw new Error(`opentdb ${res.status}`);
     const data = (await res.json()) as OpenTriviaResponse;
     if (data.response_code !== 0 || !Array.isArray(data.results)) {

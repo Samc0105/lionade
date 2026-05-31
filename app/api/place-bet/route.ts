@@ -7,8 +7,14 @@ export async function POST(req: NextRequest) {
   if (auth instanceof NextResponse) return auth;
   const userId = auth.userId;
 
+  let body: { coinsStaked?: unknown; targetScore?: unknown };
   try {
-    const body = await req.json();
+    body = await req.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+  }
+
+  try {
     const coinsStaked = Math.max(1, Math.min(10000, Number(body.coinsStaked) || 0));
     const targetScore = Number(body.targetScore);
 
@@ -33,22 +39,24 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "You already have an active bet" }, { status: 400 });
     }
 
-    // Check user has enough coins
-    const { data: profile } = await supabaseAdmin
-      .from("profiles")
-      .select("coins")
-      .eq("id", userId)
-      .single();
+    // Atomic debit — guard prevents double-spend race across parallel tabs.
+    const { data: debitData, error: debitErr } = await supabaseAdmin.rpc("update_user_coins", {
+      p_user_id: userId,
+      p_delta: -coinsStaked,
+      p_min_balance: 0,
+    });
 
-    if (!profile || profile.coins < coinsStaked) {
-      return NextResponse.json({ error: "Not enough coins" }, { status: 400 });
+    if (debitErr) {
+      if (debitErr.code === "P0001") {
+        return NextResponse.json({ error: "Not enough coins" }, { status: 400 });
+      }
+      console.error("[place-bet] debit:", debitErr.message);
+      return NextResponse.json({ error: "Failed to place bet" }, { status: 500 });
     }
 
-    // Deduct coins
-    await supabaseAdmin
-      .from("profiles")
-      .update({ coins: profile.coins - coinsStaked })
-      .eq("id", userId);
+    const balanceAfterDebit: number = Array.isArray(debitData)
+      ? debitData[0]?.new_coins
+      : (debitData as { new_coins: number } | null)?.new_coins;
 
     // Create bet
     const { data: bet, error: betErr } = await supabaseAdmin
@@ -63,11 +71,12 @@ export async function POST(req: NextRequest) {
       .single();
 
     if (betErr) {
-      // Refund coins on error
-      await supabaseAdmin
-        .from("profiles")
-        .update({ coins: profile.coins })
-        .eq("id", userId);
+      // Refund coins on insert failure — atomic credit so refund itself can't race.
+      await supabaseAdmin.rpc("update_user_coins", {
+        p_user_id: userId,
+        p_delta: coinsStaked,
+        p_min_balance: 0,
+      });
       console.error("[place-bet] insert:", betErr.message);
       return NextResponse.json({ error: "Failed to place bet" }, { status: 500 });
     }
@@ -81,7 +90,7 @@ export async function POST(req: NextRequest) {
       description: `Bet: ${coinsStaked} coins on ${targetScore}/10`,
     });
 
-    return NextResponse.json({ success: true, bet });
+    return NextResponse.json({ success: true, bet, newCoins: balanceAfterDebit });
   } catch (err) {
     console.error("[place-bet]", err);
     return NextResponse.json({ error: "Server error" }, { status: 500 });

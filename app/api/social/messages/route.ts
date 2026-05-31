@@ -22,6 +22,21 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Invalid friendId" }, { status: 400 });
     }
 
+    // Verify they're friends — same check POST does. Prevents conversation-history leaks.
+    const { data: friendship } = await supabaseAdmin
+      .from("friendships")
+      .select("id")
+      .or(
+        `and(user_id.eq.${userId},friend_id.eq.${friendId}),and(user_id.eq.${friendId},friend_id.eq.${userId})`,
+      )
+      .eq("status", "accepted")
+      .limit(1)
+      .maybeSingle();
+
+    if (!friendship) {
+      return NextResponse.json({ error: "Not friends" }, { status: 403 });
+    }
+
     // Get messages between the two users.
     // Both userId (from JWT) and friendId (UUID-validated) are safe to interpolate.
     const { data: messages, error } = await supabaseAdmin

@@ -13,6 +13,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
 import { compareGuess } from "@/lib/party/levenshtein";
+import { isRoomMember } from "@/lib/party/room-state";
 import { sketchGuessPoints } from "@/lib/party/scoring";
 import { buildWordMask, matchLetterPositions } from "@/lib/party/letter-reveal";
 import { awardSketchFangs } from "@/lib/party/sketch-fangs";
@@ -44,6 +45,11 @@ export async function POST(
   }
   if (round.drawer_user_id === userId) {
     return NextResponse.json({ error: "Drawer can't guess" }, { status: 403 });
+  }
+
+  // Membership check prevents cross-room round-id leaks polluting another game.
+  if (!(await isRoomMember(supabaseAdmin, round.room_id, userId))) {
+    return NextResponse.json({ error: "Not a room member" }, { status: 403 });
   }
 
   const body = await req.json().catch(() => ({}));

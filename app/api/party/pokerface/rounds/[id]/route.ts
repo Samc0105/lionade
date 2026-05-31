@@ -26,6 +26,7 @@ import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
 import { pokerFaceRoundPoints } from "@/lib/party/scoring";
 import type { PokerFaceCall } from "@/lib/party/types";
+import { isRoomMember } from "@/lib/party/room-state";
 
 export async function GET(
   req: NextRequest,
@@ -41,6 +42,11 @@ export async function GET(
     .eq("id", params.id)
     .maybeSingle();
   if (!round) return NextResponse.json({ error: "Round not found" }, { status: 404 });
+
+  // Membership check prevents leaking card/claim/is_lie state to non-members.
+  if (!(await isRoomMember(supabaseAdmin, round.room_id, userId))) {
+    return NextResponse.json({ error: "Not a room member" }, { status: 403 });
+  }
 
   const isPresenter = round.presenter_user_id === userId;
 

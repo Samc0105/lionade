@@ -203,7 +203,7 @@ export default function Navbar() {
   // pop on first paint. Each pop has a unique id so AnimatePresence can
   // exit-animate prior chips while a fresh one mounts.
   const displayedCoins =
-    stats?.coins ?? (user?.statsLoaded ? user?.coins : user?.coins ?? null);
+    stats?.coins ?? user?.coins ?? null;
   useEffect(() => {
     if (typeof displayedCoins !== "number") return;
     const prev = prevCoinsRef.current;
@@ -246,7 +246,7 @@ export default function Navbar() {
         })
         .subscribe();
     } catch { /* ignore if table doesn't exist */ }
-    return () => { channel?.unsubscribe(); };
+    return () => { if (channel) supabase.removeChannel(channel); };
   }, [user?.id, loadNotifications, globalMutate]);
 
   // Mark all as read when opening panel
@@ -354,8 +354,8 @@ export default function Navbar() {
     });
   }, [user?.id, streakInfo, stats?.streak, streakResetDone, mutateStats, mutateStreakInfo]);
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     setShowDropdown(false);
     router.push("/");
   };

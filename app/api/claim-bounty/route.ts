@@ -44,21 +44,32 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Bounty not found" }, { status: 404 });
     }
 
-    // Award coins + xp (claim already locked above)
-    const { data: profile } = await supabaseAdmin
-      .from("profiles")
-      .select("coins, xp")
-      .eq("id", userId)
-      .single();
+    // Award coins atomically — claim already locked above, but a separate
+    // read-modify-write on coins would still race with concurrent quiz reward
+    // grants. xp is a separate UPDATE (no atomic RPC yet — lower risk surface).
+    if (bounty.coin_reward > 0) {
+      const { error: creditErr } = await supabaseAdmin.rpc("update_user_coins", {
+        p_user_id: userId,
+        p_delta: bounty.coin_reward,
+        p_min_balance: 0,
+      });
+      if (creditErr) {
+        console.error("[claim-bounty] credit:", creditErr.message);
+      }
+    }
 
-    if (profile) {
-      await supabaseAdmin
+    if (bounty.xp_reward > 0) {
+      const { data: xpProfile } = await supabaseAdmin
         .from("profiles")
-        .update({
-          coins: (profile.coins ?? 0) + bounty.coin_reward,
-          xp: (profile.xp ?? 0) + bounty.xp_reward,
-        })
-        .eq("id", userId);
+        .select("xp")
+        .eq("id", userId)
+        .single();
+      if (xpProfile) {
+        await supabaseAdmin
+          .from("profiles")
+          .update({ xp: (xpProfile.xp ?? 0) + bounty.xp_reward })
+          .eq("id", userId);
+      }
     }
 
     // Log coin transaction

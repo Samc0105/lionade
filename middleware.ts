@@ -49,6 +49,8 @@ interface RouteLimit {
   max: number;
   windowMs: number;
   keyPrefix: string;
+  /** Optional HTTP method filter (e.g. "POST"). If omitted, matches any method. */
+  method?: string;
 }
 
 const ROUTE_LIMITS: RouteLimit[] = [
@@ -64,6 +66,12 @@ const ROUTE_LIMITS: RouteLimit[] = [
     max: 20,
     windowMs: 15 * 60 * 1000,
     keyPrefix: "auth-record",
+  },
+  {
+    test: (p) => p === "/api/auth/clear-attempts",
+    max: 20,
+    windowMs: 15 * 60 * 1000,
+    keyPrefix: "auth-clear",
   },
 
   // AI endpoints — expensive, anti-abuse
@@ -158,6 +166,28 @@ const ROUTE_LIMITS: RouteLimit[] = [
     windowMs: 15 * 60 * 1000,
     keyPrefix: "email",
   },
+  // Mastery exam session-create sends a Resend email on POST, so it belongs in
+  // the email bucket (GET listings stay on the catch-all). Dynamic [id] segment
+  // matched the same way as the rest of the mastery routes above.
+  {
+    test: (p) => /^\/api\/mastery\/exams\/[^/]+\/sessions$/.test(p),
+    method: "POST",
+    max: 3,
+    windowMs: 15 * 60 * 1000,
+    keyPrefix: "email",
+  },
+
+  // Party — Sketchy stroke flush is ~120/min/drawer legit traffic (500ms
+  // batches), so the catch-all 100/min drops real strokes mid-round. Cap at
+  // 240/min/IP for 2x headroom. Other party routes stay on the catch-all
+  // until the broader party audit lands.
+  {
+    test: (p) => /^\/api\/party\/sketch\/rounds\/[^/]+\/strokes$/.test(p),
+    method: "POST",
+    max: 240,
+    windowMs: 60 * 1000,
+    keyPrefix: "party-strokes",
+  },
 
   // Currency-mutating financial routes — anti-burst
   {
@@ -235,6 +265,7 @@ export function middleware(request: NextRequest) {
 
   // Apply rate limit if any rule matches (first match wins)
   for (const rule of ROUTE_LIMITS) {
+    if (rule.method && rule.method !== request.method) continue;
     if (rule.test(pathname)) {
       const allowed = checkRateLimit(`${rule.keyPrefix}:${ip}`, rule.max, rule.windowMs);
       if (!allowed) {

@@ -394,12 +394,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { data, error } = await Promise.race([signInPromise, timeoutPromise]);
     console.log("[Auth] signInWithPassword result — error:", error?.message ?? "none", "user:", data?.user?.id ?? "none");
 
-    // Record the attempt (fire-and-forget, don't block login flow)
-    fetch("/api/auth/record-attempt", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: cleanEmail, success: !error }),
-    }).catch(() => null);
+    // Record FAILED attempts only (fire-and-forget, don't block login flow).
+    // The public record-attempt endpoint rejects success:true to stop attackers
+    // from clearing a victim's failed-attempt counter; successful logins clear
+    // their own counter via the authed /api/auth/clear-attempts route below.
+    if (error) {
+      fetch("/api/auth/record-attempt", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: cleanEmail, success: false }),
+      }).catch(() => null);
+    } else if (data?.session?.access_token) {
+      fetch("/api/auth/clear-attempts", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${data.session.access_token}`,
+        },
+      }).catch(() => null);
+    }
 
     if (error) return { error: error.message };
 

@@ -10,6 +10,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
 import { normalize } from "@/lib/party/levenshtein";
+import { isRoomMember } from "@/lib/party/room-state";
 
 const MAX_LEN = 80;
 
@@ -36,6 +37,11 @@ export async function POST(
   if (!round) return NextResponse.json({ error: "Round not found" }, { status: 404 });
   if (round.phase !== "write") {
     return NextResponse.json({ error: "Write phase has ended" }, { status: 409 });
+  }
+
+  // Membership check prevents cross-room round-id leaks polluting another game.
+  if (!(await isRoomMember(supabaseAdmin, round.room_id, userId))) {
+    return NextResponse.json({ error: "Not a room member" }, { status: 403 });
   }
 
   // Reject if the fake is the truth.

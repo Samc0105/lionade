@@ -101,20 +101,46 @@ export async function POST(req: NextRequest) {
   }
 
   // ── 5. Apply the Fangs delta ────────────────────────────────────────────
-  // Clamp so we never go negative. If a Bust would push them below 0, they
-  // just go to 0 — UI shows the honest "you only had X" message.
-  const intendedAfter = balanceBefore + fangsDelta;
-  const balanceAfter = Math.max(0, intendedAfter);
-  const actualDelta = balanceAfter - balanceBefore; // signed, possibly less negative than intended
+  // Atomic credit/debit. If a Bust would push them below 0, the first RPC
+  // call rejects with P0001 and we fall back to a clamped delta of
+  // -fresh_balance (zeroing them out). UI shows the honest "you only had X".
+  let balanceAfter: number;
+  let actualDelta: number;
+  const { data: spinData, error: spinUpdateErr } = await supabaseAdmin.rpc("update_user_coins", {
+    p_user_id: userId,
+    p_delta: fangsDelta,
+    p_min_balance: 0,
+  });
 
-  // Update profile.coins
-  const { error: updateErr } = await supabaseAdmin
-    .from("profiles")
-    .update({ coins: balanceAfter })
-    .eq("id", userId);
-  if (updateErr) {
-    console.error("[spin/roll] coin update:", updateErr.message);
+  if (spinUpdateErr && spinUpdateErr.code === "P0001") {
+    // Bust larger than balance — zero them out via a fresh re-read.
+    const { data: freshProfile } = await supabaseAdmin
+      .from("profiles")
+      .select("coins")
+      .eq("id", userId)
+      .single();
+    const freshBalance: number = freshProfile?.coins ?? 0;
+    if (freshBalance > 0) {
+      const { data: zeroData, error: zeroErr } = await supabaseAdmin.rpc("update_user_coins", {
+        p_user_id: userId,
+        p_delta: -freshBalance,
+        p_min_balance: 0,
+      });
+      if (zeroErr) {
+        console.error("[spin/roll] zero-out:", zeroErr.message);
+        return NextResponse.json({ error: "Couldn't update balance" }, { status: 500 });
+      }
+      balanceAfter = Array.isArray(zeroData) ? zeroData[0]?.new_coins : (zeroData as { new_coins: number } | null)?.new_coins ?? 0;
+    } else {
+      balanceAfter = 0;
+    }
+    actualDelta = balanceAfter - balanceBefore;
+  } else if (spinUpdateErr) {
+    console.error("[spin/roll] coin update:", spinUpdateErr.message);
     return NextResponse.json({ error: "Couldn't update balance" }, { status: 500 });
+  } else {
+    balanceAfter = Array.isArray(spinData) ? spinData[0]?.new_coins : (spinData as { new_coins: number } | null)?.new_coins ?? balanceBefore + fangsDelta;
+    actualDelta = balanceAfter - balanceBefore;
   }
 
   // ── 6. Grant side-rewards (booster, streak shield, cosmetic) ────────────

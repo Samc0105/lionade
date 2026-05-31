@@ -5,8 +5,11 @@ import { requireAuth } from "@/lib/api-auth";
 import { renderEmail, templates } from "@/lib/emails";
 import { absoluteUrl } from "@/lib/site-config";
 
-// GET — health check
-export async function GET() {
+// GET — health check (auth-gated so the profile row count isn't world-readable)
+export async function GET(req: NextRequest) {
+  const auth = await requireAuth(req);
+  if (auth instanceof NextResponse) return auth;
+
   const { count, error } = await supabaseAdmin
     .from("profiles")
     .select("id", { count: "exact", head: true });
@@ -76,11 +79,10 @@ export async function POST(req: NextRequest) {
       if (answersErr) {
         // Non-fatal: table might not exist yet
         console.warn("[save-quiz-results] Step 2 WARN (non-fatal):", answersErr.message);
-      } else {
       }
     }
 
-    // 3. Update profile: add coins and xp
+    // 3. Update profile: add coins (atomic) and xp
     const { data: profile, error: profileFetchErr } = await supabaseAdmin
       .from("profiles")
       .select("coins, xp, streak, max_streak, last_activity_at, daily_questions_completed, daily_reset_date, display_name")
@@ -92,12 +94,24 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Couldn't load profile." }, { status: 500 });
     }
 
-    const newCoins = (profile.coins ?? 0) + coinsEarned;
-    const newXp = (profile.xp ?? 0) + xpEarned;
+    // Atomic coin credit — concurrent quiz submissions from parallel tabs
+    // would otherwise read-modify-write the same `coins` value and drop a grant.
+    if (coinsEarned > 0) {
+      const { error: coinErr } = await supabaseAdmin.rpc("update_user_coins", {
+        p_user_id: userId,
+        p_delta: coinsEarned,
+        p_min_balance: 0,
+      });
+      if (coinErr) {
+        console.error("[save-quiz-results] Step 3 FAILED — coin credit:", coinErr.message);
+        return NextResponse.json({ error: "Couldn't update profile." }, { status: 500 });
+      }
+    }
 
+    const newXp = (profile.xp ?? 0) + xpEarned;
     const { error: profileUpdateErr } = await supabaseAdmin
       .from("profiles")
-      .update({ coins: newCoins, xp: newXp })
+      .update({ xp: newXp })
       .eq("id", userId);
 
     if (profileUpdateErr) {
@@ -119,18 +133,12 @@ export async function POST(req: NextRequest) {
 
       if (count > 0 && count % 3 === 0) {
         bonusFangs = 50;
-        const { data: freshProfile } = await supabaseAdmin
-          .from("profiles")
-          .select("coins")
-          .eq("id", userId)
-          .single();
-
-        if (freshProfile) {
-          await supabaseAdmin
-            .from("profiles")
-            .update({ coins: freshProfile.coins + bonusFangs })
-            .eq("id", userId);
-        }
+        // Atomic credit — see Step 3 rationale.
+        await supabaseAdmin.rpc("update_user_coins", {
+          p_user_id: userId,
+          p_delta: bonusFangs,
+          p_min_balance: 0,
+        });
 
         await supabaseAdmin.from("coin_transactions").insert({
           user_id: userId,
@@ -157,7 +165,6 @@ export async function POST(req: NextRequest) {
       if (txnErr) {
         // Non-fatal — coin_transactions might have fewer columns
         console.warn("[save-quiz-results] Step 4 WARN:", txnErr.message);
-      } else {
       }
     }
 
@@ -297,18 +304,12 @@ export async function POST(req: NextRequest) {
 
       if (!alreadyAwarded || alreadyAwarded === 0) {
         const milestoneBonus = STREAK_MILESTONES[newStreak];
-        // Award the bonus
-        const { data: milestoneProfile } = await supabaseAdmin
-          .from("profiles")
-          .select("coins")
-          .eq("id", userId)
-          .single();
-        if (milestoneProfile) {
-          await supabaseAdmin
-            .from("profiles")
-            .update({ coins: (milestoneProfile.coins ?? 0) + milestoneBonus })
-            .eq("id", userId);
-        }
+        // Atomic credit — see Step 3 rationale.
+        await supabaseAdmin.rpc("update_user_coins", {
+          p_user_id: userId,
+          p_delta: milestoneBonus,
+          p_min_balance: 0,
+        });
         await supabaseAdmin.from("coin_transactions").insert({
           user_id: userId,
           amount: milestoneBonus,
@@ -558,19 +559,12 @@ export async function POST(req: NextRequest) {
           .eq("id", activeBet.id);
 
         if (won) {
-          // Award winnings
-          const { data: betProfile } = await supabaseAdmin
-            .from("profiles")
-            .select("coins")
-            .eq("id", userId)
-            .single();
-
-          if (betProfile) {
-            await supabaseAdmin
-              .from("profiles")
-              .update({ coins: betProfile.coins + coinsWon })
-              .eq("id", userId);
-          }
+          // Atomic credit — see Step 3 rationale.
+          await supabaseAdmin.rpc("update_user_coins", {
+            p_user_id: userId,
+            p_delta: coinsWon,
+            p_min_balance: 0,
+          });
 
           await supabaseAdmin.from("coin_transactions").insert({
             user_id: userId,
@@ -603,6 +597,6 @@ export async function POST(req: NextRequest) {
     });
   } catch (err) {
     console.error("[save-quiz-results] UNEXPECTED:", err);
-    return NextResponse.json({ error: String(err) }, { status: 500 });
+    return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
 }

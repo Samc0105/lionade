@@ -15,6 +15,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
 import { buildWordMask } from "@/lib/party/letter-reveal";
+import { isRoomMember } from "@/lib/party/room-state";
 
 export async function GET(
   req: NextRequest,
@@ -25,10 +26,15 @@ export async function GET(
 
   const { data: round } = await supabaseAdmin
     .from("sketch_rounds")
-    .select("id, word, drawer_user_id, ended_at")
+    .select("id, word, drawer_user_id, ended_at, room_id")
     .eq("id", params.id)
     .maybeSingle();
   if (!round) return NextResponse.json({ error: "Round not found" }, { status: 404 });
+
+  // Membership check prevents leaking structural masks to non-members.
+  if (!(await isRoomMember(supabaseAdmin, round.room_id, auth.userId))) {
+    return NextResponse.json({ error: "Not a room member" }, { status: 403 });
+  }
 
   // Word not yet locked — no mask to give.
   if (!round.word || round.word === "__pending__") {

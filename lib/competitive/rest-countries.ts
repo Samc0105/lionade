@@ -21,7 +21,7 @@ let cacheLoadedAt = 0;
 async function refresh(): Promise<void> {
   try {
     const url = "https://restcountries.com/v3.1/all?fields=name,latlng,independent";
-    const res = await fetch(url, { cache: "no-store" });
+    const res = await fetch(url, { cache: "no-store", signal: AbortSignal.timeout(8000) });
     if (!res.ok) throw new Error(`restcountries ${res.status}`);
     const data = (await res.json()) as RestCountry[];
     cache = data

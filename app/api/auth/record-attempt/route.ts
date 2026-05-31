@@ -18,7 +18,15 @@ export async function POST(request: NextRequest) {
   const success = Boolean(body.success);
 
   if (!email) {
-    return NextResponse.json({ ok: false, reason: "missing email" });
+    return NextResponse.json({ ok: false });
+  }
+
+  // Public surface only accepts failure logging. Successful logins clear the
+  // counter through the authed /api/auth/clear-attempts route — otherwise any
+  // attacker could POST { email, success: true } to wipe another user's
+  // failed-attempt counter and bypass lockout.
+  if (success) {
+    return NextResponse.json({ ok: false }, { status: 400 });
   }
 
   const ip =
@@ -38,34 +46,22 @@ export async function POST(request: NextRequest) {
       if (error.code !== PG_UNDEFINED_TABLE) {
         console.error("[record-attempt] DB error:", error.message);
       }
-      return NextResponse.json({ ok: false, reason: "table_missing_or_error" });
+      return NextResponse.json({ ok: false });
     }
 
     // 5-failure security-alert email (best-effort, never blocking)
-    if (!success) {
-      const windowStart = new Date(Date.now() - 15 * 60 * 1000).toISOString();
-      const { count, error: countErr } = await supabaseAdmin
-        .from("login_attempts")
-        .select("id", { count: "exact", head: true })
-        .eq("email", email)
-        .eq("success", false)
-        .gte("attempted_at", windowStart);
+    const windowStart = new Date(Date.now() - 15 * 60 * 1000).toISOString();
+    const { count, error: countErr } = await supabaseAdmin
+      .from("login_attempts")
+      .select("id", { count: "exact", head: true })
+      .eq("email", email)
+      .eq("success", false)
+      .gte("attempted_at", windowStart);
 
-      if (!countErr && (count ?? 0) >= 5) {
-        await supabaseAdmin.auth.admin
-          .generateLink({ type: "recovery", email })
-          .catch(() => null);
-      }
-    }
-
-    // Clear recent failed attempts on successful login
-    if (success) {
-      await supabaseAdmin
-        .from("login_attempts")
-        .delete()
-        .eq("email", email)
-        .eq("success", false)
-        .then(() => {}, () => {}); // best-effort
+    if (!countErr && (count ?? 0) >= 5) {
+      await supabaseAdmin.auth.admin
+        .generateLink({ type: "recovery", email })
+        .catch(() => null);
     }
 
     return NextResponse.json({ ok: true });
@@ -75,6 +71,6 @@ export async function POST(request: NextRequest) {
       console.error("[record-attempt] exception:", msg);
     }
     // Fail open — login must not be blocked by our ability to log attempts.
-    return NextResponse.json({ ok: false, reason: "exception" });
+    return NextResponse.json({ ok: false });
   }
 }

@@ -46,6 +46,23 @@ interface PlanShape {
 
 const DEFAULT_DAILY_TARGET_MINUTES = 30;
 
+// ── Regenerate cooldown ────────────────────────────────────────────────────
+//
+// `?regenerate=1` bypasses the daily plan cache and burns a fresh gpt-4o-mini
+// call. Without throttling, a user (or runaway client retry loop) can spam
+// the endpoint and rack up cost. 5-min per-(user, class) cooldown is enough
+// to prevent abuse while still letting a thoughtful "I just studied a bunch,
+// re-plan" flow work.
+//
+// In-memory Map is fine for V1 — cold starts only RESET the cooldown faster
+// (cheaper for the user, no security loss). Worst case across N warm Vercel
+// instances is N regenerates per 5 min, which is bounded and acceptable.
+const REGEN_COOLDOWN_MS = 5 * 60 * 1000;
+const lastRegenAt = new Map<string, number>();
+function regenKey(userId: string, classId: string): string {
+  return `${userId}:${classId}`;
+}
+
 export async function GET(req: NextRequest, { params }: RouteCtx) {
   const auth = await requireAuth(req);
   if (auth instanceof NextResponse) return auth;
@@ -64,6 +81,20 @@ export async function GET(req: NextRequest, { params }: RouteCtx) {
       .single();
     if (!cls || cls.user_id !== userId || cls.archived) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
+    }
+
+    // Regenerate cooldown — prevents `?regenerate=1` from being spammed.
+    if (forceRegen) {
+      const k = regenKey(userId, classId);
+      const last = lastRegenAt.get(k) ?? 0;
+      const sinceMs = Date.now() - last;
+      if (sinceMs < REGEN_COOLDOWN_MS) {
+        const retryAfterSec = Math.ceil((REGEN_COOLDOWN_MS - sinceMs) / 1000);
+        return NextResponse.json(
+          { error: `Plan was regenerated recently. Try again in ${retryAfterSec}s.` },
+          { status: 429, headers: { "Retry-After": String(retryAfterSec) } },
+        );
+      }
     }
 
     // Cache check
@@ -285,6 +316,13 @@ Return EXACTLY:
         ai_model: LLM_CHEAP,
         ai_cost_micro_usd: raw.costMicroUsd,
       }, { onConflict: "user_id,class_id,plan_date" });
+
+    // Stamp the regenerate timestamp only on the regenerate path so first-of-day
+    // (cache-miss-with-no-regen-flag) calls don't lock the user out of a manual
+    // regenerate immediately after.
+    if (forceRegen) {
+      lastRegenAt.set(regenKey(userId, classId), Date.now());
+    }
 
     const generatedAt = new Date().toISOString();
     return NextResponse.json({

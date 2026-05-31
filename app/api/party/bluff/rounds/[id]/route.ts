@@ -13,6 +13,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
+import { isRoomMember } from "@/lib/party/room-state";
 
 // Deterministic shuffle keyed by round id so the vote-phase order is stable
 // across re-fetches within the same round (otherwise users would see the
@@ -54,6 +55,11 @@ export async function GET(
     .eq("id", params.id)
     .maybeSingle();
   if (!round) return NextResponse.json({ error: "Round not found" }, { status: 404 });
+
+  // Membership check prevents leaking reveal-phase secrets to non-members.
+  if (!(await isRoomMember(supabaseAdmin, round.room_id, userId))) {
+    return NextResponse.json({ error: "Not a room member" }, { status: 403 });
+  }
 
   const base = {
     id: round.id,

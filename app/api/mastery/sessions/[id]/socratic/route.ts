@@ -15,6 +15,10 @@ import { callAI, LLM_CHEAP } from "@/lib/ai";
  */
 
 const MAX_REPLY_CHARS = 800;
+// Hard ceiling on Haiku-backed socratic turns per session — caps cost runaway
+// from a user who replies endlessly. Matches the `socratic_turns_spent`
+// column already tracked on the session row.
+const MAX_SOCRATIC_TURNS_PER_SESSION = 20;
 
 type RouteCtx = { params: { id: string } };
 
@@ -45,7 +49,7 @@ export async function POST(req: NextRequest, { params }: RouteCtx) {
   try {
     const { data: session } = await supabaseAdmin
       .from("mastery_sessions")
-      .select("id, user_id, user_exam_id, status, runtime_state, current_p_pass")
+      .select("id, user_id, user_exam_id, status, runtime_state, current_p_pass, socratic_turns_spent")
       .eq("id", sessionId)
       .single();
 
@@ -54,6 +58,16 @@ export async function POST(req: NextRequest, { params }: RouteCtx) {
     }
     if (session.status !== "active") {
       return NextResponse.json({ error: "Session is not active" }, { status: 409 });
+    }
+
+    // Cost-runaway cap: a single session can only burn so many Haiku calls
+    // through the socratic path. The column already exists; we just enforce it.
+    const turnsSpent = Number((session as { socratic_turns_spent?: number }).socratic_turns_spent ?? 0);
+    if (turnsSpent >= MAX_SOCRATIC_TURNS_PER_SESSION) {
+      return NextResponse.json(
+        { error: "Socratic turn limit reached for this session" },
+        { status: 429 },
+      );
     }
 
     const runtime = session.runtime_state as {
@@ -151,10 +165,19 @@ ${cleanReply}
     runtime.pending = null;
     const nowIso = new Date().toISOString();
 
+    // Only count a turn if Haiku actually ran — fallbacks (no AI cost) shouldn't
+    // burn down the user's budget.
+    const nextTurns = haikuResult.text ? turnsSpent + 1 : turnsSpent;
+
     await Promise.all([
       supabaseAdmin
         .from("mastery_sessions")
-        .update({ runtime_state: runtime, explanations_shown: undefined, last_active_at: nowIso })
+        .update({
+          runtime_state: runtime,
+          explanations_shown: undefined,
+          last_active_at: nowIso,
+          socratic_turns_spent: nextTurns,
+        })
         .eq("id", sessionId),
       supabaseAdmin.from("mastery_events").insert({
         session_id: sessionId, user_id: userId, subtopic_id: pendingSocratic.subtopicId,

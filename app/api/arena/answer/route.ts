@@ -106,7 +106,8 @@ export async function POST(req: NextRequest) {
       });
 
     if (insertErr) {
-      return NextResponse.json({ error: insertErr.message }, { status: 500 });
+      console.error("[arena/answer] insert error:", insertErr.message);
+      return NextResponse.json({ error: "Failed to record answer" }, { status: 500 });
     }
 
     // Update match score
