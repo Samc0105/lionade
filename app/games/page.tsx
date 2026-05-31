@@ -741,6 +741,38 @@ export default function GamesPage() {
         </div>
       );
     }
+    if (id === "party") {
+      return (
+        <div className="party-mini" aria-hidden="true">
+          <svg viewBox="0 0 80 32" width="80" height="32" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path
+              className="party-mini-stroke"
+              d="M4 20 Q 18 6, 32 18 T 60 16 T 76 12"
+              stroke="#EC4899"
+              strokeWidth="3.2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </div>
+      );
+    }
+    if (id === "party") {
+      return (
+        <div className="party-mini" aria-hidden="true">
+          <svg viewBox="0 0 80 32" width="80" height="32" fill="none">
+            <path
+              className="party-mini-stroke"
+              d="M4 22 C 14 6, 24 30, 34 16 S 54 4, 64 22 S 76 12, 76 12"
+              stroke="#EC4899"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </div>
+      );
+    }
     return null;
   };
 
@@ -1037,3 +1069,6 @@ export default function GamesPage() {
     </ProtectedRoute>
   );
 }
+
+// PARTYMINI-PROBE
+// PARTY-PROBE-DIRECT

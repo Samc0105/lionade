@@ -9,9 +9,11 @@
 //   - A blue LIMELIGHT pip + ring lights up next to whichever item is currently
 //     active so you can see what's open at a glance (the 21st.dev limelight-nav
 //     idea, adapted to a vertical circular column).
-//   - When any panel is active, a fixed full-screen BACKDROP BLUR overlay sits
-//     between the page content (lower z) and the dock + panels (higher z), so
-//     the panel feels focused. The dock and the panel itself stay sharp.
+//   - The dock is a permanent utility surface, not a modal. The page behind the
+//     active panel stays sharp + interactive; we don't dim or blur the world
+//     just because Quick Note or Focus Music is open. (The avatar dropdown menu
+//     in Navbar owns the only blur-the-page treatment in the app, because that
+//     menu is a true modal surface.)
 //   - The trigger is a toggle: tap a different item to switch panels (the
 //     previous one is closed first); tap the same item to close.
 //
@@ -52,12 +54,6 @@ export default function LaunchDock() {
   const activePanel = useLauncherActivePanel();
   const rootRef = useRef<HTMLDivElement | null>(null);
 
-  // Defer the backdrop-blur overlay to client only (CSS backdrop-filter is fine
-  // SSR, but we render nothing for the overlay until mount to avoid a
-  // hydration flicker if the active panel state mismatches).
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => { setMounted(true); }, []);
-
   // Close-on-outside-click for the EXPANDED tray itself. Tapping outside
   // collapses the menu, but does NOT close the active panel — the panel has
   // its own X.
@@ -94,23 +90,6 @@ export default function LaunchDock() {
 
   return (
     <>
-      {/* ── Backdrop blur overlay ──────────────────────────────────────────
-          Mounts only when a panel is active. Sits between the page content
-          (lower z) and the dock + panels (higher z), softening the rest of
-          the screen so the open panel feels focused. The dock itself sits
-          ABOVE this overlay (z-40 vs z-30) and stays sharp + interactive. */}
-      {mounted && activePanel && (
-        <div
-          className="fixed inset-0 z-30 pointer-events-none transition-opacity duration-300"
-          style={{
-            backdropFilter: "blur(8px) saturate(0.92)",
-            WebkitBackdropFilter: "blur(8px) saturate(0.92)",
-            background: "rgba(4,6,12,0.32)",
-            opacity: 1,
-          }}
-        />
-      )}
-
       {/* ── Dock root ──────────────────────────────────────────────────────
           Bottom-right; lifted higher on mobile so it doesn't crash into the
           bottom mobile nav. Hidden below sm (mobile nav owns that zone). */}

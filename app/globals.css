@@ -2161,6 +2161,30 @@ body {
   animation: timeline-dot-travel 3s var(--ease-out-emil) infinite;
 }
 
+.party-mini {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 80px;
+  height: 32px;
+}
+
+.party-mini-stroke {
+  stroke-dasharray: 120;
+  stroke-dashoffset: 120;
+  filter: drop-shadow(0 0 6px rgba(236, 72, 153, 0.55));
+  animation: party-brush-draw 3s var(--ease-out-emil) infinite;
+}
+
+@keyframes party-brush-draw {
+  0%   { stroke-dashoffset: 120; opacity: 0; }
+  10%  { opacity: 1; }
+  45%  { stroke-dashoffset: 0;   opacity: 1; }
+  65%  { stroke-dashoffset: 0;   opacity: 1; }
+  80%  { stroke-dashoffset: 0;   opacity: 0; }
+  100% { stroke-dashoffset: 120; opacity: 0; }
+}
+
 /* Lot number label in ticket — slight reverse rotation for printed feel */
 .games-lot-number {
   font-feature-settings: "tnum" 1;
@@ -2182,9 +2206,14 @@ body {
   .roardle-tile,
   .blitz-mini,
   .flashcards-mini-inner,
-  .timeline-mini-dot {
+  .timeline-mini-dot,
+  .party-mini-stroke {
     animation: none !important;
     transform: none !important;
+  }
+  .party-mini-stroke {
+    stroke-dashoffset: 0;
+    opacity: 1;
   }
 }
 
@@ -2217,6 +2246,28 @@ body {
 }
 .dropdown-item-exit {
   animation: dropdown-item-out 0.12s ease-in forwards;
+}
+/* Profile-dropdown backdrop. The blur lives on the base class so motion
+   prefs only need to toggle the animation, not strip the visual treatment. */
+.dropdown-backdrop {
+  background: rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(8px) saturate(0.92);
+  -webkit-backdrop-filter: blur(8px) saturate(0.92);
+}
+@keyframes dropdown-backdrop-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes dropdown-backdrop-out {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+.dropdown-backdrop-enter {
+  opacity: 0;
+  animation: dropdown-backdrop-in 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+.dropdown-backdrop-exit {
+  animation: dropdown-backdrop-out 0.18s ease-in forwards;
 }
 .animate-fade-in {
   animation: fade-in 0.2s ease-out forwards;
@@ -3477,6 +3528,8 @@ html.light .space-bg-container { display: none; }
   .dropdown-menu-enter,
   .dropdown-menu-exit,
   .dropdown-item-enter,
+  .dropdown-backdrop-enter,
+  .dropdown-backdrop-exit,
   .animate-fade-in,
   .animate-fade-out,
   .dropdown-item-exit,
@@ -3631,6 +3684,13 @@ html.light .space-bg-container { display: none; }
   .clock-in-btn .coin-icon {
     animation: none !important;
     transition: none !important;
+  }
+  /* Strip the blur from the profile-dropdown backdrop; keep the dim layer so
+     the menu still reads as separated from page content. */
+  .dropdown-backdrop {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: rgba(0, 0, 0, 0.32) !important;
   }
 }
 /* ═══════════════════════════════════════════════════════════════════════════

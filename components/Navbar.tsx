@@ -647,11 +647,15 @@ export default function Navbar() {
 
                     {showDropdown && (
                       <>
-                        {/* Invisible click-catcher — closes dropdown when clicking anywhere outside.
-                            No dim/blur: a dropdown isn't a modal. Outside-click still dismisses via
-                            the existing mousedown listener on dropdownRef. */}
+                        {/* Backdrop — blurs the page behind the avatar menu so the menu reads
+                            as a focused modal surface. Click anywhere outside to dismiss.
+                            Fades in/out on the same 200ms curve as the dropdown panel itself
+                            via .dropdown-backdrop-enter / .dropdown-backdrop-exit, so they
+                            appear and leave together. prefers-reduced-motion falls back to a
+                            plain dim layer with no blur (see globals.css). */}
                         <div
-                          className="fixed inset-0 z-40"
+                          className={`fixed inset-0 z-40 dropdown-backdrop
+                            ${dropdownClosing ? "dropdown-backdrop-exit" : "dropdown-backdrop-enter"}`}
                           onClick={closeDropdown}
                           aria-hidden="true"
                         />
