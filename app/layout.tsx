@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Bebas_Neue, Syne, DM_Mono } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
 import AuthProviderWrapper from "@/components/AuthProviderWrapper";
 import SwrProvider from "@/components/SwrProvider";
 import SpaceBackground from "@/components/SpaceBackground";
@@ -165,7 +164,6 @@ export default function RootLayout({
                   <main id="main-content">
                     <PageTransition>{children}</PageTransition>
                   </main>
-                  <Footer />
                   <QuickNoteShortcut />
                   <FocusMusicToggle />
                   <FocusLockIn />
