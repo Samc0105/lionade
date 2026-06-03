@@ -39,12 +39,26 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
     return () => clearTimeout(t);
   }, [isLoading]);
 
-  // Redirect unauthenticated users to login
+  // Redirect unauthenticated users to login.
+  //
+  // Bug-fix 2026-06-03: this effect previously fired on the very first
+  // commit, before AuthProvider's onAuthStateChange listener (which seeds
+  // `user` from localStorage asynchronously) had a chance to populate the
+  // user. That made post-login navigation flicker — `window.location.assign`
+  // lands on /dashboard, AuthProvider hasn't fully resolved yet, we see
+  // `!isLoading && !user` for one frame and bounce to /login, then bounce
+  // back to /dashboard once the listener fires. By gating on `mounted` we
+  // wait at least one client-side render after hydration, AND we require
+  // `!isLoading` (no `|| timedOut` shortcut here) so the seed path is given
+  // a real chance to populate before we redirect. The 6s timedOut path is
+  // the safety net for genuinely-unauthenticated visitors below.
   useEffect(() => {
-    if ((!isLoading || timedOut) && !user) {
-      router.replace("/login");
-    }
-  }, [user, isLoading, timedOut, router]);
+    if (!mounted) return;
+    if (isLoading && !timedOut) return;
+    if (user) return;
+    console.log("[ProtectedRoute] No user after hydration — redirecting to /login", { isLoading, timedOut });
+    router.replace("/login");
+  }, [mounted, user, isLoading, timedOut, router]);
 
   // Check onboarding — runs once per session, cached at module scope.
   //

@@ -171,10 +171,22 @@ export default function LoginPage() {
   // losing the user's intent. Falls back to /dashboard; ProtectedRoute runs
   // the onboarding check there and re-routes to /onboarding if needed.
   //
-  // Fallback: if router.replace doesn't navigate within 2s (Next.js router
-  // occasionally no-ops mid-render), hard-redirect via window.location.
+  // Bug-fix 2026-06-03: the previous 2s hard-reload fallback was racing
+  // against `handleLogin`'s own `window.location.assign("/dashboard")` and
+  // against in-flight OAuth router transitions — at ~2s the user is mid-nav
+  // and a second `window.location.href = dest` cancels the in-flight nav,
+  // which feels like a reload-then-bounce. Lengthened to 6s so it only fires
+  // for the truly-stuck case (router.replace genuinely no-op'd) and never
+  // races a healthy navigation. Also skipped entirely once `postLoginLock`
+  // is set — handleLogin already drives the navigation via window.location
+  // .assign, so this effect's job is purely the OAuth-return / cached-session
+  // path where `user` arrives via the async auth listener.
   useEffect(() => {
     if (isLoading || !user) return;
+    if (postLoginLock) {
+      console.log("[Login] redirect effect skipped — postLoginLock owns navigation");
+      return;
+    }
 
     // Only allow same-origin relative paths so a hostile ?next=https://evil
     // can't ride this redirect.
@@ -188,14 +200,18 @@ export default function LoginPage() {
 
     const doRedirect = () => {
       if (cancelled) return;
+      console.log("[Login] redirect effect → router.replace", dest);
       router.replace(dest);
+      // 6s safety net (was 2s — racing healthy navs). If we're STILL on
+      // /login after 6 seconds, Next.js definitely didn't navigate and a
+      // hard reload is appropriate.
       setTimeout(() => {
         if (cancelled) return;
         if (typeof window !== "undefined" && window.location.pathname === "/login") {
-          console.warn("[Login] router.replace did not navigate — hard-redirecting");
+          console.warn("[Login] router.replace did not navigate after 6s — hard-redirecting");
           window.location.href = dest;
         }
-      }, 2000);
+      }, 6000);
     };
 
     const delay = showVerifiedBanner ? 2500 : 0;
@@ -205,7 +221,7 @@ export default function LoginPage() {
       cancelled = true;
       clearTimeout(t);
     };
-  }, [user, isLoading, router, showVerifiedBanner]);
+  }, [user, isLoading, router, showVerifiedBanner, postLoginLock]);
 
   // Force dark mode on login page
   useEffect(() => {

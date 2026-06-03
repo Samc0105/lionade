@@ -6,6 +6,7 @@ All notable changes to Lionade, newest first.
 
 ## 2026-06-03
 
+- fix(web): post-login flash to landing page + daily-claim feels-like-reload — both root-caused to [ProtectedRoute pre-hydration redirect race + login-page 2s hard-reload-fallback racing in-flight nav / SWR cascade across all useUserStats consumers]. Surgical fix per inline comment in each touched file: ProtectedRoute now gates redirect on mounted+!isLoading, login redirect-effect skips when postLoginLock owns nav and lengthens its safety hard-reload to 6s, ClockInButton uses optimistic SWR update instead of forcing cross-consumer revalidation.
 - feat(motion): Fluid V1 — universal press feedback, animated Fang counter, smooth scroll, card hover-lift, scroll-into-view reveals on Dashboard, toast/modal entrance spring physics. All GPU-only + prefers-reduced-motion safe.
 - feat(ml): first ML integration — client-side language detection (franc-min, ~50KB, zero infra) on vocab self-definition to catch English-when-should-be-Spanish cheat pattern. Soft warning, doesn't block save.
 - feat(vocab): /learn/vocab page — add word (with translation + self-definition), daily review queue (SM-2 spaced repetition cards), vocab list with search/filter, language streak pill; Learn hub entry added

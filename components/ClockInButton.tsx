@@ -3,9 +3,10 @@
 import { useEffect, useRef, useState } from "react";
 import useSWR from "swr";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { mutate as swrMutate } from "swr";
+import { cacheKeys } from "@lionade/core/cache/keys";
 import { apiPost, swrFetcher } from "@/lib/api-client";
 import { toastInfo, toastError } from "@/lib/toast";
-import { mutateUserStats } from "@/lib/hooks";
 import { useAuth } from "@/lib/auth";
 import {
   Coin, CheckCircle, Sparkle, Fire, Clock, Trophy, X, ArrowRight,
@@ -112,7 +113,33 @@ export default function ClockInButton() {
           amount: r.data.amount,
           day: r.data.consecutiveDays ?? 1,
         });
-        if (user?.id) mutateUserStats(user.id);
+        // Bug-fix 2026-06-03 (daily-claim-feels-like-reload):
+        //
+        // Previously this did `mutateUserStats(user.id)` which forces every
+        // `useUserStats` consumer (Navbar Fangs pill, Dashboard cards, etc.)
+        // to RE-FETCH from Supabase. Combined with the realtime UPDATE event
+        // firing on the same row + the local `/api/login-bonus` revalidation,
+        // a single claim kicked off 3 concurrent network requests and 3
+        // CountUp animations within ~200ms — the cascade reads as a full-
+        // page reload even though SWR's `keepPreviousData` keeps the visible
+        // values stable.
+        //
+        // Surgical fix: update the SWR cache OPTIMISTICALLY with the new
+        // coin delta. `revalidate: false` suppresses the network round-trip;
+        // the Supabase realtime channel in `useUserStats` will still
+        // reconcile from server truth within a second or two if anything
+        // drifts. Result: instant balance update, zero revalidation flicker.
+        const amount = r.data.amount;
+        const uid = user?.id;
+        if (uid) {
+          console.log("[ClockIn] optimistic +", amount, "Fangs for user", uid);
+          void swrMutate(
+            cacheKeys.userStats(uid),
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            (prev: any) => prev ? { ...prev, coins: (prev.coins ?? 0) + amount } : prev,
+            { revalidate: false },
+          );
+        }
         void mutate(); // refresh status → flips to cooldown
       } else if (r.data.reason === "on_cooldown") {
         toastInfo("Daily already claimed — come back when the timer ends.");
