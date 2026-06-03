@@ -18,6 +18,7 @@ import { cdnUrl } from "@/lib/cdn";
 import { apiPost, apiGet, swrFetcher } from "@/lib/api-client";
 import useSWR from "swr";
 import CountUp from "@/components/CountUp";
+import FluidReveal from "@/components/FluidReveal";
 import DailyDrillWidget from "@/components/DailyDrillWidget";
 import StreakReviveBanner from "@/components/StreakReviveBanner";
 import DailyReadyNudge from "@/components/DailyReadyNudge";
@@ -395,7 +396,7 @@ function DashboardContent() {
 
           {/* ═══ 2) Circular Stats Row ═══ */}
           <div className="flex justify-center sm:justify-start gap-6 sm:gap-8 mb-8 animate-slide-up" style={{ animationDelay: "0.05s" }}>
-            <Link href="/wallet">
+            <Link href="/wallet" className="press-feedback inline-block">
               <CircleStat icon={<img src={cdnUrl("/F.png")} alt="Fangs" className="w-5 h-5 object-contain mx-auto" />} value={<CountUp id="dash-coins" value={coins} format={formatCoins} />} label={`+${todayCoins} today`} color="#FFD700" />
             </Link>
             <div className="flex flex-col items-center gap-1.5 group">
@@ -413,7 +414,7 @@ function DashboardContent() {
             </div>
             <CircleStat icon={levelInfo.tier.icon} value={<>Lv.<CountUp id="dash-level" value={level} duration={400} /></>} label={levelInfo.tier.name} color={levelInfo.tier.color} />
             <CircleStat icon={<BookOpen size={20} weight="regular" color="#9B59B6" aria-hidden="true" />} value={<CountUp id="dash-subjects" value={displaySubjects.length} duration={400} />} label="subjects" color="#9B59B6" />
-            <Link href="/leaderboard">
+            <Link href="/leaderboard" className="press-feedback inline-block">
               <CircleStat icon={<Sword size={20} weight="regular" color="#E74C3C" aria-hidden="true" />} value={eloRank ? <>#<CountUp id="dash-rank" value={eloRank} duration={400} /></> : "\u2014"} label="rank" color="#E74C3C" />
             </Link>
           </div>
@@ -851,7 +852,7 @@ function DashboardContent() {
               </div>
 
               {/* ═══ 7-Day Activity Chart — sits below YOUR SUBJECTS, fills the column next to Achievements ═══ */}
-              <div className="mt-6">
+              <FluidReveal className="mt-6">
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="font-bebas text-lg text-cream tracking-wider">WEEKLY ACTIVITY</h2>
                   <div className="flex items-center gap-4 text-[10px]">
@@ -958,7 +959,7 @@ function DashboardContent() {
                     );
                   })()}
                 </div>
-              </div>
+              </FluidReveal>
 
             </div>
 

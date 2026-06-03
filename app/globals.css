@@ -6,6 +6,13 @@
 
 html {
   scroll-behavior: smooth;
+  scroll-padding-top: 72px; /* clear the fixed Navbar (h-12 = 48px + safety) */
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
 }
 
 :root {
@@ -4335,4 +4342,113 @@ html.light .space-bg-container { display: none; }
   }
   /* Hide the scan line entirely in reduced-motion (static brain reads cleaner). */
   .nt-scan-line { opacity: 0 !important; }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+ * Fluid V1 — baseline motion primitives (2026-06-03)
+ *
+ * Goal: lift the baseline feel across the app via 4 GPU-only utility classes.
+ * All four respect prefers-reduced-motion. Transform + opacity only.
+ *
+ * 1. .press-feedback — universal tap/click micro-scale
+ * 2. .fluid-card-hover — desktop-only card lift on hover
+ * 3. .fluid-reveal — opacity + slide-up reveal driven by FluidReveal.tsx
+ * 4. (smooth-scroll is set on html at the top of this file)
+ * ───────────────────────────────────────────────────────────────────────── */
+
+/* 1) Universal press feedback — subtle scale-down on active.
+   100ms ease-out-expo settled on a 4% scale (0.96). Springs back on release
+   via the same transition. NO hover treatment here — that's pattern #4. */
+.press-feedback {
+  transition: transform 100ms cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform;
+}
+.press-feedback:active {
+  transform: scale(0.96);
+}
+@media (prefers-reduced-motion: reduce) {
+  .press-feedback {
+    transition: none;
+  }
+  .press-feedback:active {
+    transform: none;
+  }
+}
+
+/* 2) Card hover-lift — desktop polish only. Mobile (no hover) sees no change.
+   Slightly lifts and deepens shadow on hover. Uses 220ms / ease-out-expo.
+   NOTE: declares background/border-color transitions too so existing
+   hover:bg-* / hover:border-* utilities still ease in. Without this, the
+   Tailwind `transition-colors` utility would clobber our transform transition
+   via the `transition:` shorthand. Single source of truth wins. */
+.fluid-card-hover {
+  transition: transform 220ms cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 220ms cubic-bezier(0.16, 1, 0.3, 1),
+              background-color 200ms cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 200ms cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform;
+}
+@media (hover: hover) {
+  .fluid-card-hover:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .fluid-card-hover {
+    transition: none;
+  }
+  .fluid-card-hover:hover {
+    transform: none;
+    box-shadow: none;
+  }
+}
+
+/* 2.5) Modal entrance — fade backdrop + scale panel.
+   Backdrop: 180ms fade-in. Panel: 220ms scale 0.95 → 1.0 + fade-in. */
+@keyframes fluid-modal-backdrop-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes fluid-modal-panel-in {
+  from { opacity: 0; transform: scale(0.95); }
+  to   { opacity: 1; transform: scale(1); }
+}
+.fluid-modal-backdrop {
+  animation: fluid-modal-backdrop-in 180ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  will-change: opacity;
+}
+.fluid-modal-panel {
+  animation: fluid-modal-panel-in 220ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  will-change: transform, opacity;
+}
+@media (prefers-reduced-motion: reduce) {
+  .fluid-modal-backdrop,
+  .fluid-modal-panel {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
+/* 3) Scroll-into-view reveal — paired with components/FluidReveal.tsx.
+   Initial state: faded + slight slide-down. .is-visible toggles the final
+   state. Hits a 400ms ease-out-expo curve. */
+.fluid-reveal {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 400ms cubic-bezier(0.16, 1, 0.3, 1),
+              transform 400ms cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+}
+.fluid-reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+@media (prefers-reduced-motion: reduce) {
+  .fluid-reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
 }

@@ -245,7 +245,7 @@ export default function LearnPage() {
           <section className="mb-10 animate-slide-up" style={{ animationDelay: "0.08s" }}>
             <Link
               href={weakestSubject ? `/quiz?subject=${encodeURIComponent(weakestSubject)}` : "/quiz"}
-              className="group block rounded-[10px] p-6 sm:p-7 transition-all duration-200 hover:-translate-y-0.5"
+              className="fluid-card-hover press-feedback group block rounded-[10px] p-6 sm:p-7"
               style={{
                 background: "linear-gradient(110deg, rgba(74,144,217,0.10) 0%, rgba(255,215,0,0.06) 60%, rgba(12,16,32,0.95) 100%)",
                 border: "1px solid rgba(255,215,0,0.22)",
@@ -374,7 +374,7 @@ export default function LearnPage() {
                         <li key={m.subject}>
                           <Link
                             href={`/quiz?subject=${encodeURIComponent(m.subject)}`}
-                            className="group grid grid-cols-[auto_1fr_auto] items-center gap-3 py-2.5 px-3 rounded-[4px] border border-transparent hover:border-white/[0.08] hover:bg-white/[0.02] transition-all"
+                            className="press-feedback group grid grid-cols-[auto_1fr_auto] items-center gap-3 py-2.5 px-3 rounded-[4px] border border-transparent hover:border-white/[0.08] hover:bg-white/[0.02] transition-all"
                           >
                             <MasteryIcon size={18} weight="regular" color={color} aria-hidden="true" />
                             <div className="min-w-0">

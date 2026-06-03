@@ -144,13 +144,13 @@ export default function ShareCard({ open, onClose, card, shareTitle = "Lionade" 
 
   return (
     <div
-      className="fixed inset-0 z-50 grid place-items-center bg-black/75 backdrop-blur-md px-4 py-8"
+      className="fluid-modal-backdrop fixed inset-0 z-50 grid place-items-center bg-black/75 backdrop-blur-md px-4 py-8"
       role="dialog"
       aria-modal="true"
       aria-label="Share your stats"
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
-      <div className="relative w-full max-w-md rounded-[16px] border border-white/[0.1] bg-gradient-to-br from-navy to-[#0a0f1d] p-5 shadow-2xl animate-slide-up">
+      <div className="fluid-modal-panel relative w-full max-w-md rounded-[16px] border border-white/[0.1] bg-gradient-to-br from-navy to-[#0a0f1d] p-5 shadow-2xl">
         <button
           type="button"
           onClick={onClose}

@@ -121,8 +121,8 @@ function ClassCard({ cls }: { cls: ClassSummary }) {
   return (
     <Link
       href={`/classes/${cls.id}`}
-      className="group relative rounded-[14px] border border-white/[0.08] bg-white/[0.03]
-        hover:bg-white/[0.05] hover:border-white/[0.15] transition-all duration-200
+      className="fluid-card-hover press-feedback group relative rounded-[14px] border border-white/[0.08] bg-white/[0.03]
+        hover:bg-white/[0.05] hover:border-white/[0.15]
         p-5 flex flex-col gap-3 overflow-hidden"
     >
       {/* Color stripe */}

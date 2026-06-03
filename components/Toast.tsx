@@ -59,8 +59,10 @@ type ToastContextValue = {
 const MAX_TOASTS = 3;
 const DEFAULT_DURATION_ERROR = 4000;
 const DEFAULT_DURATION_OTHER = 2500;
-const EXIT_DURATION_MS = 220;
-const ENTER_DURATION_MS = 400;
+const EXIT_DURATION_MS = 200;
+const ENTER_DURATION_MS = 420;
+/** Spring-overshoot cubic-bezier — 1.05 peak before settling. Used on enter only. */
+const ENTER_SPRING_EASE = "cubic-bezier(0.34, 1.56, 0.64, 1)";
 
 const COLORS: Record<ToastType, { dot: string; border: string; role: "status" | "alert" }> = {
   error: {
@@ -337,15 +339,21 @@ function ToastItem({
     onDismiss(toast.id);
   };
 
-  /** Transform / opacity drive enter + exit. transition prop changes with state. */
+  /** Transform / opacity drive enter + exit. transition prop changes with state.
+   *  Enter uses a slight spring-overshoot ease for a more "alive" arrival.
+   *  Exit stays calm (ease-out-emil) so the toast doesn't bounce on its way
+   *  out — that would distract from the next thing happening.
+   *
+   *  Mobile (full-bleed-bottom) slides up; desktop (top-right anchored) also
+   *  slides up — the difference is the viewport's flex direction handles it. */
   const show = entered && !toast.leaving;
-  const transform = show ? "translateY(0)" : "translateY(12px)";
+  const transform = show ? "translateY(0)" : "translateY(16px)";
   const opacity = show ? 1 : 0;
   const transition = reduced
     ? "none"
     : toast.leaving
     ? `transform ${EXIT_DURATION_MS}ms var(--ease-out-emil), opacity ${EXIT_DURATION_MS}ms var(--ease-out-emil)`
-    : `transform ${ENTER_DURATION_MS}ms var(--ease-out-expo), opacity ${ENTER_DURATION_MS}ms var(--ease-out-expo)`;
+    : `transform ${ENTER_DURATION_MS}ms ${ENTER_SPRING_EASE}, opacity ${ENTER_DURATION_MS}ms var(--ease-out-expo)`;
 
   return (
     <div

@@ -6,6 +6,7 @@ All notable changes to Lionade, newest first.
 
 ## 2026-06-03
 
+- feat(motion): Fluid V1 — universal press feedback, animated Fang counter, smooth scroll, card hover-lift, scroll-into-view reveals on Dashboard, toast/modal entrance spring physics. All GPU-only + prefers-reduced-motion safe.
 - feat(ml): first ML integration — client-side language detection (franc-min, ~50KB, zero infra) on vocab self-definition to catch English-when-should-be-Spanish cheat pattern. Soft warning, doesn't block save.
 - feat(vocab): /learn/vocab page — add word (with translation + self-definition), daily review queue (SM-2 spaced repetition cards), vocab list with search/filter, language streak pill; Learn hub entry added
 - feat(vocab): API routes — translate (MyMemory proxy + server cache), words CRUD, review (SM-2 spaced repetition), streak; Fangs +5 new, +10 self-define, +2 per correct review (all multiplier-aware)

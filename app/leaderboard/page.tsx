@@ -190,7 +190,7 @@ export default function LeaderboardPage() {
                   const isTop = entry.rank <= 3;
                   return (
                     <div key={entry.user_id}
-                      className={`flex items-center gap-4 p-4 rounded-xl border transition-all duration-300 hover:-translate-y-0.5
+                      className={`fluid-card-hover flex items-center gap-4 p-4 rounded-xl border
                         ${isMe ? "border-electric/50 bg-electric/10" : isTop ? "border-gold/30 bg-gold/5" : "border-electric/10 bg-navy-50 hover:border-electric/30"}`}
                       style={{ animationDelay: `${i * 50}ms` }}>
                       <div className="w-10 flex-shrink-0 text-center flex items-center justify-center">
