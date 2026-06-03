@@ -19,15 +19,25 @@
  */
 
 import { useEffect, useMemo, useState } from "react";
-import { ArrowRight, ArrowsClockwise, Translate } from "@phosphor-icons/react";
+import { ArrowRight, ArrowsClockwise, Lightbulb, Translate } from "@phosphor-icons/react";
 import { apiPost } from "@/lib/api-client";
 import { toastSuccess, toastError } from "@/lib/toast";
+import { detectLanguage, type DetectionResult } from "@/lib/ml/language-detect";
 import type { LangPair } from "./LanguageStreakPill";
 
 const LANG_LABEL: Record<LangPair, { source: string; target: string; targetName: string }> = {
   "en-es": { source: "EN", target: "ES", targetName: "Spanish" },
   "es-en": { source: "ES", target: "EN", targetName: "English" },
 };
+
+const LANG_NAME: Record<"en" | "es", string> = {
+  en: "English",
+  es: "Spanish",
+};
+
+// Confidence floor for surfacing the nudge. Below this, the signal is too
+// noisy (short text, mixed words) to risk a false-positive warning.
+const WARNING_CONFIDENCE_THRESHOLD = 0.5;
 
 const STORAGE_KEY = "vocab_lang_pair";
 const MAX_WORD_LEN = 50;
@@ -71,6 +81,28 @@ export default function AddWordForm({ onSaved }: Props) {
   const [userDefinition, setUserDefinition] = useState("");
   const [saving, setSaving] = useState(false);
 
+  // Client-side ML: detect the language of the self-definition and gently
+  // nudge if it doesn't match the target language. See lib/ml/language-detect.
+  // Debounced 500ms so we don't run trigram analysis on every keystroke.
+  const [langDetect, setLangDetect] = useState<DetectionResult | null>(null);
+  useEffect(() => {
+    // Reset detection any time the textarea clears.
+    if (userDefinition.trim().length === 0) {
+      setLangDetect(null);
+      return;
+    }
+    const t = setTimeout(() => {
+      setLangDetect(detectLanguage(userDefinition, targetLang as "en" | "es"));
+    }, 500);
+    return () => clearTimeout(t);
+  }, [userDefinition, targetLang]);
+
+  const showLangWarning =
+    langDetect !== null
+    && langDetect.code !== "unknown"
+    && langDetect.matches_target === false
+    && langDetect.confidence > WARNING_CONFIDENCE_THRESHOLD;
+
   const canTranslate = useMemo(
     () => word.trim().length > 0 && !translating,
     [word, translating],
@@ -84,6 +116,7 @@ export default function AddWordForm({ onSaved }: Props) {
     setWord("");
     setTranslation(null);
     setUserDefinition("");
+    setLangDetect(null);
   };
 
   const flipLangPair = () => {
@@ -248,6 +281,20 @@ export default function AddWordForm({ onSaved }: Props) {
               {userDefinition.length}/{MAX_DEFINITION_LEN}
             </p>
           </div>
+
+          {/* Soft language-mismatch nudge — does NOT block save. */}
+          {showLangWarning && langDetect && (
+            <div
+              role="status"
+              aria-live="polite"
+              className="mt-2 inline-flex items-start gap-2 rounded-xl px-3 py-2 border border-gold/30 bg-gold/[0.06] backdrop-blur animate-slide-up"
+            >
+              <Lightbulb size={14} weight="fill" className="text-gold mt-0.5 shrink-0" aria-hidden="true" />
+              <p className="font-syne text-xs text-gold/90 leading-snug">
+                Looks like {LANG_NAME[langDetect.code as "en" | "es"]}. Try writing in {langs.targetName}. That is how it sticks.
+              </p>
+            </div>
+          )}
 
           <button
             type="button"
