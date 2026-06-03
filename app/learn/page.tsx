@@ -12,7 +12,7 @@ import { SUBJECT_ICONS, SUBJECT_COLORS, DefaultSubjectIcon } from "@/lib/mockDat
 import { getLevelProgress } from "@/lib/levels";
 import type { Subject } from "@/types";
 import { apiGet } from "@/lib/api-client";
-import { NotePencil, Fire, BookOpen, PawPrint, ArrowRight, Target, Brain } from "@phosphor-icons/react";
+import { NotePencil, Fire, BookOpen, PawPrint, ArrowRight, Target, Brain, Translate } from "@phosphor-icons/react";
 import CountUp from "@/components/CountUp";
 
 /* ── Relative Time Helper ─────────────────────────────────── */
@@ -291,8 +291,8 @@ export default function LearnPage() {
               </div>
             </Link>
 
-            {/* Secondary actions — 3 clean rows, not cards */}
-            <div className="mt-3 grid grid-cols-1 sm:grid-cols-3 gap-2">
+            {/* Secondary actions — 4 clean rows, not cards */}
+            <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
               <button
                 type="button"
                 onClick={() => setShowSubjectsComingSoon(true)}
@@ -328,6 +328,15 @@ export default function LearnPage() {
                   <p className="text-cream/55 text-[10px] font-mono">any exam · any topic</p>
                 </div>
                 <ArrowRight size={14} weight="regular" color="rgba(238,244,255,0.3)" aria-hidden="true" className="group-hover:text-gold transition-colors" />
+              </Link>
+
+              <Link href="/learn/vocab" className="group flex items-center gap-3 px-4 py-3 rounded-[6px] border border-white/[0.06] hover:bg-white/[0.03] hover:border-[#4A90D9]/30 transition-colors text-left">
+                <Translate size={18} weight="fill" color="#4A90D9" aria-hidden="true" className="flex-shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="font-syne font-semibold text-sm text-cream leading-tight">Vocab</p>
+                  <p className="text-cream/55 text-[10px] font-mono">write your own definition</p>
+                </div>
+                <ArrowRight size={14} weight="regular" color="rgba(238,244,255,0.3)" aria-hidden="true" className="group-hover:text-electric transition-colors" />
               </Link>
             </div>
           </section>

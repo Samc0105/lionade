@@ -177,6 +177,28 @@ const ROUTE_LIMITS: RouteLimit[] = [
     keyPrefix: "email",
   },
 
+  // Vocab — MyMemory translate proxy. 30/min/IP is plenty for a real learner
+  // typing one word at a time; blocks scrapers that would burn the
+  // MyMemory free-tier quota (50k chars/day with the de=<email> bump).
+  {
+    test: (p) => p === "/api/vocab/translate",
+    method: "POST",
+    max: 30,
+    windowMs: 60 * 1000,
+    keyPrefix: "vocab-translate",
+  },
+  // Vocab writes — save a word OR submit a review. 20/min/IP bounds auto-
+  // clicker abuse of the +5 / +2 Fangs grants. Both routes share the bucket
+  // because they're both currency-mutating vocab writes.
+  {
+    test: (p) =>
+      p === "/api/vocab/words" || /^\/api\/vocab\/review\/[^/]+$/.test(p),
+    method: "POST",
+    max: 20,
+    windowMs: 60 * 1000,
+    keyPrefix: "vocab-write",
+  },
+
   // Party — Sketchy stroke flush is ~120/min/drawer legit traffic (500ms
   // batches), so the catch-all 100/min drops real strokes mid-round. Cap at
   // 240/min/IP for 2x headroom. Other party routes stay on the catch-all

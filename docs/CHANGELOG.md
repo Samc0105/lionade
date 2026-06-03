@@ -6,6 +6,9 @@ All notable changes to Lionade, newest first.
 
 ## 2026-06-03
 
+- feat(vocab): /learn/vocab page — add word (with translation + self-definition), daily review queue (SM-2 spaced repetition cards), vocab list with search/filter, language streak pill; Learn hub entry added
+- feat(vocab): API routes — translate (MyMemory proxy + server cache), words CRUD, review (SM-2 spaced repetition), streak; Fangs +5 new, +10 self-define, +2 per correct review (all multiplier-aware)
+- feat(vocab): schema for user vocab words + language streak tracking (Path A — new vocab_words + vocab_streaks tables, see 20260603090250_vocab_words.sql header for path rationale)
 - feat(mastery): thinking-state overhaul — rotating context-aware phrases (25+ in starter pool), 7 randomized thinking animations, inline notes scratchpad (localStorage V1) with session-end notes review
 
 ## 2026-06-02
