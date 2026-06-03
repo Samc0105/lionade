@@ -3,18 +3,35 @@
 
 import Stripe from "stripe";
 
-const secretKey = process.env.STRIPE_SECRET_KEY;
-if (!secretKey && process.env.NODE_ENV === "production") {
-  // Loud at boot so a missing env var on Vercel fails the deploy log.
-  console.error("[stripe] STRIPE_SECRET_KEY is not set");
+// Lazy-init proxy: the Stripe SDK constructor throws on empty key, and
+// Next.js's build-time page-data-collection imports route files (which
+// import this module). If STRIPE_SECRET_KEY isn't set at build time
+// (Vercel before env vars are wired), `new Stripe("")` crashes the build.
+// Defer construction to first runtime access; routes that need it will
+// throw at request time instead, leaving the rest of the build intact.
+let _stripe: Stripe | null = null;
+function getStripe(): Stripe {
+  if (_stripe) return _stripe;
+  const secretKey = process.env.STRIPE_SECRET_KEY;
+  if (!secretKey) {
+    throw new Error("STRIPE_SECRET_KEY is not set");
+  }
+  _stripe = new Stripe(secretKey, {
+    apiVersion: "2026-02-25.clover",
+    typescript: true,
+    // 15s per-request timeout enforced by the SDK; 2 network retries on top.
+    timeout: 15_000,
+    maxNetworkRetries: 2,
+  });
+  return _stripe;
 }
 
-export const stripe = new Stripe(secretKey ?? "", {
-  apiVersion: "2026-02-25.clover",
-  typescript: true,
-  // 15s per-request timeout enforced by the SDK; 2 network retries on top.
-  timeout: 15_000,
-  maxNetworkRetries: 2,
+export const stripe = new Proxy({} as Stripe, {
+  get(_target, prop) {
+    const inst = getStripe();
+    const value = (inst as unknown as Record<string | symbol, unknown>)[prop];
+    return typeof value === "function" ? (value as Function).bind(inst) : value;
+  },
 });
 
 export type Tier = "pro" | "platinum";
