@@ -6,6 +6,9 @@ All notable changes to Lionade, newest first.
 
 ## 2026-06-03
 
+- feat(shop): Shop V2 UI — AnimatedUsername reusable component wired into 8 visibility surfaces (Navbar / Leaderboard / Profile / Social / Party / Mastery / Dashboard), shop catalog UI extended with Identity section + live SKU previews + founder badge cap countdown + earned cosmetics in Inventory
+- feat(shop): Shop V2 catalog — 18 SKUs (6 animated usernames + 5 Fang banners + 4 cash banners + 3 founder badges + 4 earned cosmetics); auto-grant wiring on bank-create (polyglot) + clone (knowledge-sharer) + Stripe subscription (founding-scholar capped at 1000)
+- feat(shop): Shop V2 schema — founder_grants + earned_cosmetics tables, retroactive lionade_og (first 500) + beta_witness (pre-deploy users) grants, 4 RPCs for earned cosmetic grants (streak/polyglot/knowledge-sharer/mastery-medal), is_founder_cap_open helper for ongoing caps
 - feat(vocab): Word Banks V3A UI — Discover tab with sort/filter + bank preview modal + clone flow (+25 Fangs); publish toggle in bank menu with profanity + cap error handling; public/cloned visual indicators in BankSelector
 - feat(vocab): Word Banks V3A backend — Discover endpoint with top/new/cloned sort + language filter; clone POST grants +25 Fangs + deep-copies via clone_bank RPC; publish toggle gated by profanity denylist + 20-bank cap; preview endpoint for browse-before-clone
 - feat(vocab): Word Banks V3A schema — is_public + clone_count + parent attribution on vocab_banks; clone_bank RPC for one-shot deep-copy of public banks into cloner's collection

@@ -60,6 +60,8 @@ import {
   type Icon,
 } from "@phosphor-icons/react";
 import ShareCard from "@/components/ShareCard";
+import AnimatedUsername from "@/components/AnimatedUsername";
+import { useEquippedUsernameEffect } from "@/lib/use-username-effect";
 
 // ── Types ────────────────────────────────────────────
 type Section =
@@ -146,6 +148,8 @@ const NAV: { key: Section; label: string; Icon: Icon }[] = [
 export default function ProfilePage() {
   const { user, refreshUser } = useAuth();
   const { stats } = useUserStats(user?.id);
+  // Shop V2 — equipped username effect for the profile header.
+  const usernameEffect = useEquippedUsernameEffect();
   const [section, setSection] = useState<Section>("overview");
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -246,7 +250,7 @@ export default function ProfilePage() {
                       flex items-center justify-center font-bebas text-xs text-white"
                       style={{ background: "#4A90D9" }}>{level}</div>
                   </div>
-                  <p className="font-bebas text-xl text-cream tracking-wider">@{user.username}</p>
+                  <p className="font-bebas text-xl text-cream tracking-wider">@<AnimatedUsername username={user.username} effect={usernameEffect} size="md" /></p>
                   <p className="text-cream/40 text-xs mt-0.5">Level {level} · {formatCoins(coins)} coins</p>
                   <div className="mt-3 w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
                     <div className="h-full rounded-full transition-all duration-500"
@@ -339,6 +343,8 @@ const labelCls = "block text-cream/50 text-xs font-bold uppercase tracking-wides
 function OverviewSection({ user, level, progress, xpToNext, coins, streak, xp, avatarUrl, statsReady, earnedBadges, allBadges, subjectStats, quizHistory, activity, loading, accuracy, totalQuestions, totalCorrect, duelsWon, refreshUser }: SharedProps) {
   const lockedBadges = allBadges.filter(b => !earnedBadges.some((e: any) => e.id === b.id));
   const [shareOpen, setShareOpen] = useState(false);
+  // Shop V2 — equipped username effect for the overview hero header.
+  const usernameEffect = useEquippedUsernameEffect();
 
   return (
     <div className="space-y-6 animate-slide-up">
@@ -363,7 +369,9 @@ function OverviewSection({ user, level, progress, xpToNext, coins, streak, xp, a
             </div>
           </div>
           <div className="flex-1 text-center sm:text-left">
-            <h1 className="font-bebas text-4xl text-cream tracking-wider">{user.username}</h1>
+            <h1 className="font-bebas text-4xl text-cream tracking-wider">
+              <AnimatedUsername username={user.username} effect={usernameEffect} size="lg" className="font-bebas tracking-wider text-4xl" />
+            </h1>
             <p className="text-cream/40 text-sm mb-3">{user.displayName} · Level {level}</p>
             <div className="mb-4">
               <div className="flex justify-between text-xs text-cream/40 mb-1">

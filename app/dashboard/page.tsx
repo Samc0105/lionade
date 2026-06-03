@@ -24,6 +24,8 @@ import StreakReviveBanner from "@/components/StreakReviveBanner";
 import DailyReadyNudge from "@/components/DailyReadyNudge";
 import ProUpgradeNudge from "@/components/ProUpgradeNudge";
 import { toastError, toastSuccess } from "@/lib/toast";
+import AnimatedUsername from "@/components/AnimatedUsername";
+import { useEquippedUsernameEffect } from "@/lib/use-username-effect";
 import Confetti from "@/components/Confetti";
 import {
   Lock,
@@ -92,6 +94,8 @@ export default function DashboardPage() {
 function DashboardContent() {
   const { user, refreshUser } = useAuth();
   const { stats } = useUserStats(user?.id);
+  // Shop V2 — drives the "Welcome back, {name}" hero header username effect.
+  const usernameEffect = useEquippedUsernameEffect();
   // Hydration gate. useAuth + SWR seed from localStorage on the client,
   // so SSR (and the first client render commit) sees an empty cache while
   // the very next render sees populated data. Any conditional inside this
@@ -380,7 +384,9 @@ function DashboardContent() {
             <div className="flex items-start justify-between gap-4">
               <div>
                 <h1 className="font-bebas text-4xl sm:text-5xl text-cream tracking-wider leading-tight">
-                  Welcome back, <span className="shimmer-text">{user.username}</span>
+                  Welcome back, {usernameEffect === "none"
+                    ? <span className="shimmer-text">{user.username}</span>
+                    : <AnimatedUsername username={user.username} effect={usernameEffect} size="lg" className="font-bebas tracking-wider" />}
                 </h1>
                 <p className="text-cream/60 text-sm mt-1">{getGreeting()}</p>
               </div>

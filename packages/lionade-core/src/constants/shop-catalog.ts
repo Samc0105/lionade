@@ -15,7 +15,13 @@ export type ItemType =
   | "banner"
   | "booster"
   | "avatar_aura"
-  | "voice_skin";
+  | "voice_skin"
+  // Shop V2 — Identity & Status Pack (2026-06-03)
+  | "username_effect"
+  | "animated_banner"
+  | "founder_badge"
+  | "earned_medal"
+  | "profile_flair";
 export type BoosterEffect =
   | "coin_multiplier"
   | "xp_multiplier"
@@ -48,6 +54,51 @@ export interface PremiumItem {
   rarity: Rarity;
   priceUSD: number;
   icon: string;
+}
+
+/**
+ * Founder badges have an enforced grant cap. Set `cap` to the maximum number
+ * of accounts that can ever own the badge; `is_founder_cap_open(id, cap)` is
+ * the RPC the server calls before allowing a purchase or auto-grant.
+ *
+ * `purchasable` distinguishes the buy-with-cash founder bundle (e.g.
+ * Founding Scholar at $14.99) from the earned-only founder badges
+ * (Lionade OG, Beta Witness) which are NEVER for sale.
+ */
+export interface FounderBadgeItem {
+  id: string;
+  name: string;
+  description: string;
+  type: "founder_badge";
+  rarity: Rarity;
+  cap: number;
+  icon: string;
+  // Set when this is a one-time bundle purchasable through Stripe IAP.
+  priceUSD?: number;
+  // Set when the badge is granted automatically (no purchase flow).
+  autoGrant?: boolean;
+  // True when the badge is offered in the shop UI as a Stripe bundle.
+  purchasable: boolean;
+}
+
+/**
+ * Earned cosmetics — NEVER purchasable. Granted via dedicated RPCs and
+ * stored in `earned_cosmetics`. The shop UI may render these as "locked /
+ * earn it by …" cards but `/api/shop/purchase` rejects them with 400.
+ *
+ * `dynamic` items (e.g. mastery medals) have an id PREFIX in this catalog
+ * and the actual id is generated server-side per source key
+ * (e.g. `medal_mastery_subject_aws_sec_specialty`).
+ */
+export interface EarnedCosmeticItem {
+  id: string; // exact id, or prefix when dynamic=true
+  name: string;
+  description: string;
+  type: "earned_medal" | "profile_flair";
+  rarity: Rarity;
+  icon: string;
+  howToEarn: string;
+  dynamic?: boolean;
 }
 
 export const COSMETIC_ITEMS: ShopItem[] = [
@@ -100,6 +151,142 @@ export const VOICE_SKINS: ShopItem[] = [
   { id: "voice_ninny_classic", name: "Ninny Voice Skin", description: "Unlock Ninny's signature voice in chat", type: "voice_skin", rarity: "epic", price: 500, icon: "🎙️" },
 ];
 
+// 2026-06-03 — Shop V2 Identity & Status Pack: 6 animated username effects.
+// The Fangs SKUs render a static gradient version of the effect; the
+// `_premium` SKUs purchased with cash render the full WebGL or particle
+// treatment. Both grant via the same `name_fx_<theme>` family so the equip
+// flow stays simple — the renderer reads ownership and picks the highest
+// fidelity variant the user owns.
+export const USERNAME_EFFECTS: ShopItem[] = [
+  { id: "name_fx_rainbow", name: "Rainbow Shimmer", description: "Animated rainbow shimmer across your username", type: "username_effect", rarity: "rare", price: 1500, icon: "🌈" },
+  { id: "name_fx_fire", name: "Fire Effect", description: "Flickering flames trace your username", type: "username_effect", rarity: "rare", price: 2000, icon: "🔥" },
+  { id: "name_fx_holographic", name: "Holographic", description: "Iridescent holographic sweep over your username", type: "username_effect", rarity: "epic", price: 3000, icon: "🔮" },
+  { id: "name_fx_gold", name: "Gold Sheen", description: "Polished gold sheen on every letter", type: "username_effect", rarity: "epic", price: 2500, icon: "🥇" },
+  { id: "name_fx_glitch", name: "Glitch", description: "Digital glitch distortion on your username", type: "username_effect", rarity: "epic", price: 3500, icon: "📺" },
+  { id: "name_fx_galaxy", name: "Galaxy Shimmer", description: "Drifting galaxy starfield inside your letters", type: "username_effect", rarity: "legendary", price: 5000, icon: "🌌" },
+];
+
+// 2026-06-03 — Shop V2 Identity & Status Pack: 5 premium cosmetic banners
+// purchased with Fangs. These are higher-tier than the original BANNER set
+// and render with motion (particles, gradient flow, etc.).
+export const ANIMATED_BANNERS: ShopItem[] = [
+  { id: "banner_interstellar", name: "Interstellar", description: "Drifting star particles across deep space", type: "animated_banner", rarity: "epic", price: 3000, icon: "🌠" },
+  { id: "banner_aurora", name: "Aurora", description: "Northern lights gradient flowing edge to edge", type: "animated_banner", rarity: "epic", price: 3500, icon: "🌌" },
+  { id: "banner_ink_splash", name: "Ink Splash", description: "Animated ink drops blooming across the banner", type: "animated_banner", rarity: "epic", price: 4000, icon: "🖋️" },
+  { id: "banner_honeycomb", name: "Honeycomb", description: "Geometric honeycomb pattern with soft shimmer", type: "animated_banner", rarity: "epic", price: 4500, icon: "🍯" },
+  { id: "banner_tidewave", name: "Tidewave", description: "Gentle ocean wave motion across the banner", type: "animated_banner", rarity: "legendary", price: 5000, icon: "🌊" },
+];
+
+// 2026-06-03 — Shop V2 Identity & Status Pack: 3 founder badges.
+// Founding Scholar is a paid Stripe bundle (capped to 1000); the other two
+// are auto-granted by signup order or activity window and NEVER for sale.
+export const FOUNDER_BADGES: FounderBadgeItem[] = [
+  {
+    id: "badge_founding_scholar",
+    name: "Founding Scholar",
+    description: "Reserved for the first 1000 Pro subscribers. Permanent profile badge.",
+    type: "founder_badge",
+    rarity: "legendary",
+    cap: 1000,
+    priceUSD: 14.99,
+    purchasable: true,
+    icon: "🎓",
+  },
+  {
+    id: "badge_lionade_og",
+    name: "Lionade OG",
+    description: "First 500 Lionade signups. You were here before the lights came on.",
+    type: "founder_badge",
+    rarity: "legendary",
+    cap: 500,
+    autoGrant: true,
+    purchasable: false,
+    icon: "🦁",
+  },
+  {
+    id: "badge_beta_witness",
+    name: "Beta Witness",
+    description: "Active before the 2026-06-04 launch deploy.",
+    type: "founder_badge",
+    rarity: "epic",
+    cap: 100000,
+    autoGrant: true,
+    purchasable: false,
+    icon: "👁️",
+  },
+];
+
+// 2026-06-03 — Shop V2 Identity & Status Pack: earned cosmetics. NOT for sale.
+// Granted by dedicated RPCs (see lib/cosmetic-grants.ts). Mastery medals are
+// generated dynamically per exam, so the catalog entry is a PREFIX template.
+export const EARNED_COSMETICS: EarnedCosmeticItem[] = [
+  {
+    id: "emblem_streak_warrior_10",
+    name: "Streak Warrior 10",
+    description: "Earned at a 10-day streak.",
+    type: "earned_medal",
+    rarity: "rare",
+    icon: "🔥",
+    howToEarn: "Hit a 10-day login streak.",
+  },
+  {
+    id: "emblem_streak_warrior_30",
+    name: "Streak Warrior 30",
+    description: "Earned at a 30-day streak.",
+    type: "earned_medal",
+    rarity: "epic",
+    icon: "🔥",
+    howToEarn: "Hit a 30-day login streak.",
+  },
+  {
+    id: "emblem_streak_warrior_100",
+    name: "Streak Warrior 100",
+    description: "Earned at a 100-day streak.",
+    type: "earned_medal",
+    rarity: "epic",
+    icon: "🔥",
+    howToEarn: "Hit a 100-day login streak.",
+  },
+  {
+    id: "emblem_streak_warrior_365",
+    name: "Streak Warrior 365",
+    description: "Earned at a 365-day streak. A full year.",
+    type: "earned_medal",
+    rarity: "legendary",
+    icon: "🔥",
+    howToEarn: "Hit a 365-day login streak.",
+  },
+  {
+    id: "badge_polyglot",
+    name: "Polyglot",
+    description: "Maintains 3 or more language word banks.",
+    type: "earned_medal",
+    rarity: "epic",
+    icon: "🌐",
+    howToEarn: "Create 3 or more language vocab banks.",
+  },
+  {
+    id: "badge_knowledge_sharer",
+    name: "Knowledge Sharer",
+    description: "Your public vocab bank reached 10 clones.",
+    type: "earned_medal",
+    rarity: "epic",
+    icon: "🤝",
+    howToEarn: "Have one of your public banks cloned 10 or more times.",
+  },
+  {
+    // Dynamic — actual id is `medal_mastery_subject_<exam_id>`.
+    id: "medal_mastery_subject_",
+    name: "Mastery Medal",
+    description: "Awarded for completing a Mastery subject at 95% or higher.",
+    type: "earned_medal",
+    rarity: "legendary",
+    icon: "🏅",
+    howToEarn: "Finish a Mastery subject with a 95% or higher score.",
+    dynamic: true,
+  },
+];
+
 export const FEATURED_ITEMS: ShopItem[] = [
   COSMETIC_ITEMS.find((i) => i.id === "frame_golden_lion")!,
   BOOSTER_ITEMS.find((i) => i.id === "boost_coin_rush")!,
@@ -116,6 +303,17 @@ export const PREMIUM_ITEMS: PremiumItem[] = [
   { id: "prem_frame_starfield", name: "Starfield Frame", description: "Animated stars orbiting your avatar", type: "frame", rarity: "rare", priceUSD: 1.99, icon: "⭐" },
   { id: "prem_banner_lightning", name: "Thunder Strike", description: "Crackling lightning bolt banner", type: "banner", rarity: "rare", priceUSD: 2.49, icon: "⚡" },
   { id: "prem_name_fire", name: "Flame Name", description: "Burning flame text effect", type: "name_color", rarity: "rare", priceUSD: 0.99, icon: "🔥" },
+  // 2026-06-03 — Shop V2 Identity & Status Pack: cash variants of the three
+  // top-tier username effects. Same `name_fx_<theme>` family as the Fangs
+  // SKUs but render the full WebGL/particle treatment.
+  { id: "name_fx_holographic_premium", name: "Holographic (Premium)", description: "Full WebGL holographic shift on your username", type: "username_effect", rarity: "legendary", priceUSD: 1.99, icon: "🔮" },
+  { id: "name_fx_glitch_premium", name: "Glitch (Premium)", description: "Real-time particle glitch distortion on your username", type: "username_effect", rarity: "legendary", priceUSD: 1.99, icon: "📺" },
+  { id: "name_fx_galaxy_premium", name: "Galaxy Shimmer (Premium)", description: "Particle galaxy drift rendered inside your letters", type: "username_effect", rarity: "legendary", priceUSD: 2.99, icon: "🌌" },
+  // 2026-06-03 — Shop V2 Identity & Status Pack: 4 cash-only animated banners.
+  { id: "banner_premium_aurora_borealis", name: "Aurora Borealis (Premium)", description: "Hi-fi northern lights with parallax depth", type: "animated_banner", rarity: "legendary", priceUSD: 2.99, icon: "🌌" },
+  { id: "banner_premium_cosmic_drift", name: "Cosmic Drift", description: "Cinematic cosmic drift with starfield parallax", type: "animated_banner", rarity: "legendary", priceUSD: 3.99, icon: "🪐" },
+  { id: "banner_premium_liquid_gold", name: "Liquid Gold", description: "Molten gold flowing across your banner", type: "animated_banner", rarity: "legendary", priceUSD: 2.99, icon: "🥇" },
+  { id: "banner_premium_lightning", name: "Lightning Strike (Premium)", description: "Real lightning arcs across the banner", type: "animated_banner", rarity: "epic", priceUSD: 1.99, icon: "⚡" },
 ];
 
 // All purchasable Fangs items combined — used by server lookup
@@ -124,6 +322,9 @@ const ALL_FANG_ITEMS: ShopItem[] = [
   ...BOOSTER_ITEMS,
   ...AVATAR_AURAS,
   ...VOICE_SKINS,
+  // 2026-06-03 — Shop V2 additions purchasable via Fangs.
+  ...USERNAME_EFFECTS,
+  ...ANIMATED_BANNERS,
 ];
 
 /**
@@ -133,4 +334,40 @@ const ALL_FANG_ITEMS: ShopItem[] = [
  */
 export function getShopItem(id: string): ShopItem | null {
   return ALL_FANG_ITEMS.find((i) => i.id === id) ?? null;
+}
+
+/**
+ * Founder-badge lookup. Returns the canonical cap + price for SKUs in the
+ * FOUNDER_BADGES array. Use this in /api/shop/purchase + Stripe webhook
+ * before granting — pair with `is_founder_cap_open(id, cap)` RPC for the
+ * race-safe check.
+ */
+export function getFounderBadge(id: string): FounderBadgeItem | null {
+  return FOUNDER_BADGES.find((b) => b.id === id) ?? null;
+}
+
+/**
+ * Earned-cosmetic lookup. Returns either an exact match OR the dynamic
+ * prefix entry when the id starts with the catalog prefix
+ * (e.g. `medal_mastery_subject_aws_sec_specialty` resolves to the
+ * `medal_mastery_subject_` template). Use this purely for metadata
+ * (name/icon/rarity) when rendering an earned grant — these are NEVER
+ * purchasable so /api/shop/purchase should reject them outright.
+ */
+export function getEarnedCosmetic(id: string): EarnedCosmeticItem | null {
+  const exact = EARNED_COSMETICS.find((e) => e.id === id);
+  if (exact) return exact;
+  const dynamic = EARNED_COSMETICS.find(
+    (e) => e.dynamic === true && id.startsWith(e.id) && id.length > e.id.length,
+  );
+  return dynamic ?? null;
+}
+
+/**
+ * Returns true if the given id is a known earned cosmetic (exact or
+ * dynamic-prefix match). Server uses this to short-circuit purchase
+ * attempts before any DB work.
+ */
+export function isEarnedCosmeticId(id: string): boolean {
+  return getEarnedCosmetic(id) !== null;
 }

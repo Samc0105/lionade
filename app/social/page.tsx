@@ -13,6 +13,8 @@ import { apiGet, apiPost, apiPatch, apiDelete } from "@/lib/api-client";
 import { Medal, Diamond, DiamondsFour, Users, CheckCircle, Sword, Trophy, Megaphone, X as XIcon, BookOpen, Fire, Target, MedalMilitary, GameController, Coins, PushPinSimple, Crown, UserPlus, MagnifyingGlass } from "@phosphor-icons/react";
 import { toastError, toastSuccess } from "@/lib/toast";
 import CountUp from "@/components/CountUp";
+import AnimatedUsername from "@/components/AnimatedUsername";
+import { resolveRowUsernameEffect } from "@/lib/use-username-effect";
 
 // ── Types ────────────────────────────────────────────────────
 
@@ -24,6 +26,8 @@ interface Friend {
   is_online: boolean;
   last_seen: string | null;
   unreadCount: number;
+  // Shop V2 — optional. Server populates when /api/social/friends includes it.
+  equipped_username_effect?: string | null;
 }
 
 interface PendingRequest {
@@ -32,6 +36,7 @@ interface PendingRequest {
   avatar_url: string | null;
   arena_elo: number;
   friendshipId: string;
+  equipped_username_effect?: string | null;
 }
 
 interface OutgoingRequest {
@@ -787,7 +792,9 @@ export default function SocialPage() {
                         style={{ background: "rgba(255,255,255,0.03)" }}>
                         <img src={avatarFor(req.username, req.avatar_url)} alt={req.username} className="w-8 h-8 rounded-full object-cover flex-shrink-0" />
                         <div className="flex-1 min-w-0">
-                          <p className="text-cream text-xs font-semibold truncate">{req.username}</p>
+                          <p className="text-cream text-xs font-semibold truncate">
+                            <AnimatedUsername username={req.username} effect={resolveRowUsernameEffect(req.equipped_username_effect)} size="sm" />
+                          </p>
                           <p className="text-[10px] inline-flex items-center gap-1" style={{ color: tier.color }}>
                             <tier.Icon size={12} weight="fill" color={tier.color} aria-hidden="true" />
                             {tier.name}
@@ -843,7 +850,9 @@ export default function SocialPage() {
                     {/* Name + meta */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <span className="text-cream text-sm font-semibold truncate">{friend.username}</span>
+                        <span className="text-cream text-sm font-semibold truncate">
+                          <AnimatedUsername username={friend.username} effect={resolveRowUsernameEffect(friend.equipped_username_effect)} size="sm" />
+                        </span>
                         <span className="text-[9px] font-bold px-1.5 py-0.5 rounded inline-flex items-center gap-1" style={{
                           color: tier.color,
                           background: `${tier.color}15`,

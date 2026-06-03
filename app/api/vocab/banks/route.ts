@@ -12,6 +12,7 @@ import {
   validateLanguagePair,
   type BankRow,
 } from "@/lib/vocab-banks";
+import { grantPolyglotBadge } from "@/lib/cosmetic-grants";
 
 /**
  * POST /api/vocab/banks — create a new word bank
@@ -147,6 +148,32 @@ export async function POST(req: NextRequest) {
       );
     }
     return NextResponse.json({ error: "Couldn't create bank" }, { status: 500 });
+  }
+
+  // Shop V2 — Polyglot badge auto-grant. Only language banks count, and
+  // only if the user now owns 3+. Fire-and-forget: the RPC itself is the
+  // authoritative re-check and idempotent insert, so we don't need to
+  // serialize this with the POST response. Errors are logged in the helper.
+  //
+  // We deliberately query AFTER the insert so the just-created bank is
+  // included in the count. A small risk of double-counting if the user
+  // somehow has two requests racing in the same millisecond — the RPC
+  // is idempotent so the worst case is one extra no-op INSERT.
+  if (kind === "language") {
+    void (async () => {
+      const { count, error: countErr } = await supabaseAdmin
+        .from("vocab_banks")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", userId)
+        .eq("kind", "language");
+      if (countErr) {
+        console.error("[vocab/banks polyglot-count]", countErr.message);
+        return;
+      }
+      if ((count ?? 0) >= 3) {
+        await grantPolyglotBadge(supabaseAdmin, userId);
+      }
+    })();
   }
 
   return NextResponse.json({ bank: inserted });

@@ -10,6 +10,8 @@ import BackButton from "@/components/BackButton";
 import { cdnUrl } from "@/lib/cdn";
 import { avatarFor } from "@/lib/avatar";
 import { Crown, Medal, Sword, TrendUp, Trophy, Brain, Fire, Crosshair, UsersThree } from "@phosphor-icons/react";
+import AnimatedUsername from "@/components/AnimatedUsername";
+import { resolveRowUsernameEffect, useEquippedUsernameEffect } from "@/lib/use-username-effect";
 
 // Tabs: three ranked ELO ladders + Weekly Fangs. Each ELO filter maps to a
 // profiles column (IA consolidation 2026-05-28 — leaderboard now surfaces all
@@ -31,11 +33,17 @@ interface LbEntry {
   streak: number;
   coins_this_week: number;
   elo?: number;
+  // Shop V2: optional equipped username effect (server populates when the
+  // /api/leaderboard/* endpoints expose it; defaults to "none" if absent).
+  equipped_username_effect?: string | null;
 }
 
 export default function LeaderboardPage() {
   const router = useRouter();
   const { user } = useAuth();
+  // Shop V2 — own username effect, used to upgrade the "me" row even if
+  // the leaderboard endpoint hasn't started returning equipped_username_effect.
+  const myEffect = useEquippedUsernameEffect();
   const [filter, setFilter] = useState<Filter>("duel");
   const [entries, setEntries] = useState<LbEntry[]>([]);
   const [loading, setLoading] = useState(true);
@@ -152,7 +160,13 @@ export default function LeaderboardPage() {
                       style={{ boxShadow: "0 0 15px #9CA3AF40" }}>
                       <img src={avatarFor(topThree[1]?.username, topThree[1]?.avatar_url)} alt={topThree[1]?.username ?? ""} className="w-14 h-14 rounded-full object-cover" />
                     </div>
-                    <p className="text-cream text-xs font-bold text-center truncate w-full text-center">{topThree[1]?.username}</p>
+                    <p className="text-cream text-xs font-bold text-center truncate w-full text-center">
+                      <AnimatedUsername
+                        username={topThree[1]?.username}
+                        effect={topThree[1]?.user_id === user?.id ? myEffect : resolveRowUsernameEffect(topThree[1]?.equipped_username_effect)}
+                        size="sm"
+                      />
+                    </p>
                     <p className="text-gray-300 font-bebas text-lg flex items-center justify-center gap-1">{isElo ? `${(topThree[1]?.elo ?? 1000).toLocaleString()} ELO` : <><img src={cdnUrl("/F.png")} alt="Fangs" className="w-4 h-4 object-contain" /> {formatCoins(topThree[1]?.coins_this_week ?? 0)}</>}</p>
                   </div>
 
@@ -165,7 +179,13 @@ export default function LeaderboardPage() {
                         <img src={avatarFor(topThree[0]?.username, topThree[0]?.avatar_url)} alt={topThree[0]?.username ?? ""} className="w-20 h-20 rounded-full object-cover" />
                       </div>
                     </div>
-                    <p className="text-gold text-sm font-bold text-center">{topThree[0]?.username}</p>
+                    <p className="text-gold text-sm font-bold text-center">
+                      <AnimatedUsername
+                        username={topThree[0]?.username}
+                        effect={topThree[0]?.user_id === user?.id ? myEffect : resolveRowUsernameEffect(topThree[0]?.equipped_username_effect)}
+                        size="sm"
+                      />
+                    </p>
                     <p className="text-gold font-bebas text-xl glow-gold flex items-center justify-center gap-1">{isElo ? `${(topThree[0]?.elo ?? 1000).toLocaleString()} ELO` : <><img src={cdnUrl("/F.png")} alt="Fangs" className="w-5 h-5 object-contain" /> {formatCoins(topThree[0]?.coins_this_week ?? 0)}</>}</p>
                     <span className="text-xs bg-gold/15 border border-gold/30 text-gold px-2 py-0.5 rounded-full mt-1">#1 GOAT</span>
                   </div>
@@ -177,7 +197,13 @@ export default function LeaderboardPage() {
                       aria-label={topThree[2]?.username ? `${topThree[2]?.username}'s avatar` : undefined}>
                       <img src={avatarFor(topThree[2]?.username, topThree[2]?.avatar_url)} alt={topThree[2]?.username ?? ""} className="w-12 h-12 rounded-full object-cover" />
                     </div>
-                    <p className="text-cream text-xs font-bold text-center truncate w-full text-center">{topThree[2]?.username}</p>
+                    <p className="text-cream text-xs font-bold text-center truncate w-full text-center">
+                      <AnimatedUsername
+                        username={topThree[2]?.username}
+                        effect={topThree[2]?.user_id === user?.id ? myEffect : resolveRowUsernameEffect(topThree[2]?.equipped_username_effect)}
+                        size="sm"
+                      />
+                    </p>
                     <p className="text-amber-600 font-bebas text-lg flex items-center justify-center gap-1">{isElo ? `${(topThree[2]?.elo ?? 1000).toLocaleString()} ELO` : <><img src={cdnUrl("/F.png")} alt="Fangs" className="w-4 h-4 object-contain" /> {formatCoins(topThree[2]?.coins_this_week ?? 0)}</>}</p>
                   </div>
                 </div>
@@ -205,7 +231,13 @@ export default function LeaderboardPage() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
-                          <span className={`font-bold text-sm truncate ${isMe ? "text-electric" : "text-cream"}`}>{entry.username}</span>
+                          <span className={`font-bold text-sm truncate ${isMe ? "text-electric" : "text-cream"}`}>
+                            <AnimatedUsername
+                              username={entry.username}
+                              effect={isMe ? myEffect : resolveRowUsernameEffect(entry.equipped_username_effect)}
+                              size="sm"
+                            />
+                          </span>
                           {isMe && <span className="text-xs bg-electric/20 text-electric px-2 py-0.5 rounded-full border border-electric/30">You</span>}
                         </div>
                         <p className="text-xs text-cream/40 inline-flex items-center gap-1">

@@ -34,6 +34,9 @@ export interface PartyPlayer {
   left_at: string | null;
   is_ready: boolean;
   selected_subjects: string[];   // up to 2 topic picks for sketch weighting
+  // Shop V2 — optional, server-supplied. Used by AnimatedUsername in lobby /
+  // scoreboard tiles. Null/missing = no effect (free user).
+  equipped_username_effect?: string | null;
 }
 
 export interface PartyRoomState {

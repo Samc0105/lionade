@@ -14,6 +14,8 @@ import { apiGet, apiPatch } from "@/lib/api-client";
 import CountUp from "@/components/CountUp";
 import ClockInButton from "@/components/ClockInButton";
 import PlanBadge, { UpgradePill } from "@/components/PlanBadge";
+import AnimatedUsername from "@/components/AnimatedUsername";
+import { useEquippedUsernameEffect } from "@/lib/use-username-effect";
 import { usePlan } from "@/lib/use-plan";
 import {
   Bell,
@@ -98,6 +100,9 @@ export default function Navbar() {
   const { user, logout } = useAuth();
   const { stats, mutate: mutateStats } = useUserStats(user?.id);
   const { plan: userPlan, isPaid } = usePlan();
+  // Shop V2: drives the dropdown's username display. Safe if backend route
+  // /api/cosmetics/owned hasn't shipped yet — falls back to "none" silently.
+  const usernameEffect = useEquippedUsernameEffect();
   // Global SWR mutate — used by the notifications realtime channel to also
   // revalidate the Social page's friends/pending hook the instant a
   // friend-request (or accept) notification lands, instead of waiting for
@@ -694,7 +699,9 @@ export default function Navbar() {
                                 <img src={avatarUrl} alt={user.username} className="w-12 h-12 rounded-full object-cover" />
                               </div>
                               <div className="min-w-0 flex-1">
-                                <p className="text-cream font-bold text-[15px] truncate">{user.username}</p>
+                                <p className="text-cream font-bold text-[15px] truncate">
+                                  <AnimatedUsername username={user.username} effect={usernameEffect} size="md" />
+                                </p>
                                 <div className="flex items-center gap-2 mt-0.5">
                                   <span className="text-gold text-xs font-semibold">
                                     {stats ? `Level ${stats.level}` : user.statsLoaded ? `Level ${user.level}` : <StatSkeleton width="w-10" />}

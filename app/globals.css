@@ -4452,3 +4452,145 @@ html.light .space-bg-container { display: none; }
     transition: none;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Shop V2 — Animated Usernames (2026-06-03)
+   GPU-only effects (background-position + transform). All keyframes degrade
+   to a static colored variant under prefers-reduced-motion. Used by
+   components/AnimatedUsername.tsx and wired into 8 visibility surfaces.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.au-base {
+  display: inline-block;
+  font-weight: inherit;
+  letter-spacing: inherit;
+  position: relative;
+  will-change: background-position, transform;
+}
+
+/* --- rainbow (Fang banner) --- */
+.au-rainbow {
+  background: linear-gradient(90deg, #FF1493, #FF8C00, #FFD700, #00FF7F, #00BFFF, #9370DB, #FF1493);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+          background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  animation: au-name-rainbow 4s linear infinite;
+}
+@keyframes au-name-rainbow {
+  0%   { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+
+/* --- fire (Fang banner) --- */
+.au-fire {
+  background: linear-gradient(90deg, #FFD700, #FF8C00, #FF4500, #FF8C00, #FFD700);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+          background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  animation: au-name-fire-shift 3s linear infinite, au-name-fire-flicker 1.4s ease-in-out infinite;
+}
+@keyframes au-name-fire-shift {
+  0%   { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+@keyframes au-name-fire-flicker {
+  0%, 100% { transform: scale(1);      opacity: 1;   }
+  50%      { transform: scale(1.015);  opacity: 0.92; }
+}
+
+/* --- holographic (cash premium) --- */
+.au-holographic {
+  background: linear-gradient(90deg, #C0FFEE, #FF1493, #FFD700, #00BFFF, #9370DB, #C0FFEE);
+  background-size: 220% 100%;
+  -webkit-background-clip: text;
+          background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  animation: au-name-rainbow 3.5s linear infinite;
+}
+.au-holographic::before {
+  content: "✦";
+  position: absolute;
+  top: -0.2em;
+  right: -0.6em;
+  font-size: 0.55em;
+  color: #FFD700;
+  text-shadow: 0 0 6px rgba(255, 215, 0, 0.85);
+  animation: au-holo-sparkle 2.2s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes au-holo-sparkle {
+  0%, 100% { opacity: 0; transform: scale(0.6) rotate(0deg); }
+  50%      { opacity: 1; transform: scale(1)   rotate(180deg); }
+}
+
+/* --- gold (cash premium) --- */
+.au-gold {
+  background: linear-gradient(90deg, #B8860B 0%, #FFD700 40%, #FFF8DC 50%, #FFD700 60%, #B8860B 100%);
+  background-size: 250% 100%;
+  -webkit-background-clip: text;
+          background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  animation: au-name-gold-sweep 3.6s ease-in-out infinite;
+}
+@keyframes au-name-gold-sweep {
+  0%   { background-position: 0%   50%; }
+  100% { background-position: 250% 50%; }
+}
+
+/* --- glitch (cash premium) — static color, hover-only RGB-split --- */
+.au-glitch {
+  color: #EEF4FF;
+  transition: text-shadow 120ms linear, transform 120ms linear;
+}
+.au-glitch:hover {
+  animation: au-name-glitch 0.6s steps(2, end) infinite;
+}
+@keyframes au-name-glitch {
+  0%   { text-shadow:  2px 0 #FF1493, -2px 0 #00BFFF; transform: translate(0, 0); }
+  25%  { text-shadow: -2px 0 #FF1493,  2px 0 #00BFFF; transform: translate(1px, 0); }
+  50%  { text-shadow:  2px 0 #00BFFF, -2px 0 #FF1493; transform: translate(-1px, 0); }
+  100% { text-shadow:  2px 0 #FF1493, -2px 0 #00BFFF; transform: translate(0, 0); }
+}
+
+/* --- galaxy (cash premium) --- */
+.au-galaxy {
+  background: linear-gradient(90deg, #9370DB, #4A90D9, #FF69B4, #9370DB);
+  background-size: 220% 100%;
+  -webkit-background-clip: text;
+          background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  animation: au-name-rainbow 5s linear infinite;
+  /* Subtle starfield mask via repeating radial gradients — pure CSS, GPU. */
+  mask-image:
+    radial-gradient(circle at 15% 35%, rgba(0,0,0,0) 0.5px, #000 1px),
+    radial-gradient(circle at 72% 65%, rgba(0,0,0,0) 0.5px, #000 1px),
+    radial-gradient(circle at 40% 80%, rgba(0,0,0,0) 0.5px, #000 1px),
+    linear-gradient(#000, #000);
+  -webkit-mask-image:
+    radial-gradient(circle at 15% 35%, rgba(0,0,0,0) 0.5px, #000 1px),
+    radial-gradient(circle at 72% 65%, rgba(0,0,0,0) 0.5px, #000 1px),
+    radial-gradient(circle at 40% 80%, rgba(0,0,0,0) 0.5px, #000 1px),
+    linear-gradient(#000, #000);
+}
+
+/* --- prefers-reduced-motion: keep the color, kill the motion --- */
+@media (prefers-reduced-motion: reduce) {
+  .au-rainbow,
+  .au-fire,
+  .au-holographic,
+  .au-gold,
+  .au-galaxy {
+    animation: none !important;
+    background-position: 0% 50% !important;
+  }
+  .au-holographic::before { animation: none !important; opacity: 0.85; }
+  .au-glitch:hover { animation: none !important; transform: none !important; text-shadow: none !important; }
+  .au-fire { transform: none !important; }
+}

@@ -8,8 +8,9 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { formatCoins } from "@/lib/mockData";
 import { cdnUrl } from "@/lib/cdn";
 import { apiGet, apiPost } from "@/lib/api-client";
-import { toastError, toastInfo } from "@/lib/toast";
+import { toastError, toastInfo, toastSuccess } from "@/lib/toast";
 import DailySpinHero from "@/components/Shop/DailySpinHero";
+import AnimatedUsername, { type UsernameEffect } from "@/components/AnimatedUsername";
 import type { ComponentType } from "react";
 import type { IconProps } from "@phosphor-icons/react";
 import {
@@ -49,7 +50,7 @@ import {
 
 // ── Types ──
 type Rarity = "common" | "rare" | "epic" | "legendary";
-type ItemType = "frame" | "background" | "name_color" | "banner" | "booster";
+type ItemType = "frame" | "background" | "name_color" | "banner" | "booster" | "username_effect" | "animated_banner" | "founder_badge" | "earned_medal" | "profile_flair";
 type BoosterEffect = "coin_multiplier" | "xp_multiplier" | "extra_time" | "auto_correct" | "fifty_fifty" | "score_boost" | "streak_shield";
 type Tab = "featured" | "cosmetics" | "boosters" | "inventory";
 type PremiumTab = "themes" | "frames" | "name_colors" | "banners";
@@ -200,6 +201,66 @@ const AVATAR_AURAS: ShopItem[] = [
   { id: "aura_frost",   name: "Frost Aura",   description: "Crystalline frost ring",   type: "frame", rarity: "rare",      price: 250, Icon: Snowflake, iconWeight: "regular", iconColor: "#7DD3FC" },
   { id: "aura_ember",   name: "Ember Aura",   description: "Drifting ember sparks",    type: "frame", rarity: "epic",      price: 350, Icon: Flame, iconWeight: "fill", iconColor: "#F97316" },
   { id: "aura_lunar",   name: "Lunar Aura",   description: "Silver moonlight halo",    type: "frame", rarity: "legendary", price: 400, Icon: StarFour, iconWeight: "fill", iconColor: "#E8EAF2" },
+];
+
+// ══════════════════════════════════════════
+// ── Shop V2 — Identity & Status Pack (2026-06-03) ──
+// 18 new SKUs grouped by acquisition path:
+//   - 6 animated username effects (Fang-purchasable)
+//   - 5 premium Fang banners (Fang-purchasable, high price)
+//   - 4 cash-premium banners (USD only)
+//   - 3 founder badges (capped supply — server enforces)
+//   - 4 earned cosmetics (NOT in shop — surfaced in Inventory only)
+//
+// Ids match the backend canonical list in
+// packages/lionade-core/src/constants/shop-catalog.ts so /api/shop/purchase
+// resolves price + type server-side. UI-only metadata lives here.
+// ══════════════════════════════════════════
+interface UsernameEffectSKU extends ShopItem {
+  effect: UsernameEffect;
+}
+const USERNAME_EFFECTS: UsernameEffectSKU[] = [
+  { id: "name_fx_rainbow",      name: "Rainbow Shimmer", description: "Animated rainbow shimmer across your username", type: "username_effect", rarity: "rare",      price: 1500, Icon: Rainbow,    iconWeight: "fill",                          effect: "rainbow"     },
+  { id: "name_fx_fire",         name: "Fire Effect",     description: "Flickering flames trace your username",         type: "username_effect", rarity: "rare",      price: 2000, Icon: Fire,       iconWeight: "fill", iconColor: "#F97316",    effect: "fire"        },
+  { id: "name_fx_holographic",  name: "Holographic",     description: "Iridescent holographic sweep over your username", type: "username_effect", rarity: "epic",      price: 3000, Icon: Sphere,     iconWeight: "fill", iconColor: "#A855F7",    effect: "holographic" },
+  { id: "name_fx_gold",         name: "Gold Sheen",      description: "Polished gold sheen on every letter",           type: "username_effect", rarity: "epic",      price: 2500, Icon: Medal,      iconWeight: "fill", iconColor: "#FFD700",    effect: "gold"        },
+  { id: "name_fx_glitch",       name: "Glitch",          description: "Digital glitch distortion on your username",    type: "username_effect", rarity: "epic",      price: 3500, Icon: Lightning,  iconWeight: "fill", iconColor: "#60A5FA",    effect: "glitch"      },
+  { id: "name_fx_galaxy",       name: "Galaxy Shimmer",  description: "Drifting galaxy starfield inside your letters", type: "username_effect", rarity: "legendary", price: 5000, Icon: Sparkle,    iconWeight: "fill", iconColor: "#A855F7",    effect: "galaxy"      },
+];
+
+// 5 premium Fang banners (animated, high price, Fang-only). Ids match the
+// `animated_banner` entries in packages/lionade-core/src/constants/shop-catalog.ts
+// so /api/shop/purchase resolves price + type server-side.
+const PREMIUM_FANG_BANNERS: ShopItem[] = [
+  { id: "banner_interstellar", name: "Interstellar", description: "Drifting star particles across deep space",  type: "animated_banner", rarity: "epic",      price: 3000, Icon: Sparkle,    iconWeight: "fill",                       },
+  { id: "banner_aurora",       name: "Aurora",       description: "Northern lights gradient flowing edge to edge", type: "animated_banner", rarity: "epic",      price: 3500, Icon: Rainbow,    iconWeight: "fill", iconColor: "#22D3EE"  },
+  { id: "banner_ink_splash",   name: "Ink Splash",   description: "Animated ink drops blooming across the banner", type: "animated_banner", rarity: "epic",      price: 4000, Icon: CircleNotch,iconWeight: "bold", iconColor: "#94A3B8"  },
+  { id: "banner_honeycomb",    name: "Honeycomb",    description: "Geometric honeycomb pattern with soft shimmer", type: "animated_banner", rarity: "epic",      price: 4500, Icon: Diamond,    iconWeight: "fill", iconColor: "#FACC15"  },
+  { id: "banner_tidewave",     name: "Tidewave",     description: "Gentle ocean wave motion across the banner",    type: "animated_banner", rarity: "legendary", price: 5000, Icon: Heart,      iconWeight: "fill", iconColor: "#22C55E"  },
+];
+
+// 4 cash-premium banners (USD only — Stripe IAP)
+const CASH_PREMIUM_BANNERS: PremiumItem[] = [
+  { id: "prem_banner_eclipse",   name: "Eclipse",         description: "Ringed eclipse with corona shimmer",      type: "banner", rarity: "legendary", priceUSD: 5.99, Icon: Diamond,    iconWeight: "fill", iconColor: "#FFD700" },
+  { id: "prem_banner_aurora_x",  name: "Aurora Pro",      description: "High-fidelity aurora with parallax stars",type: "banner", rarity: "legendary", priceUSD: 4.99, Icon: Rainbow,    iconWeight: "fill"                       },
+  { id: "prem_banner_nebula",    name: "Nebula Drift",    description: "Drifting nebula with dust particles",     type: "banner", rarity: "epic",      priceUSD: 3.99, Icon: Sphere,     iconWeight: "fill", iconColor: "#A855F7" },
+  { id: "prem_banner_chromium",  name: "Chromium",        description: "Reactive chrome surface that catches light",type: "banner", rarity: "epic",    priceUSD: 3.49, Icon: DiamondsFour,iconWeight: "fill", iconColor: "#E8EAF2" },
+];
+
+// 3 founder badges — capped supply, server enforces remaining count.
+interface FounderBadgeSKU {
+  id: string;
+  name: string;
+  tagline: string;
+  cap: number;
+  price: number;
+  Icon: PhosphorIcon;
+  iconColor: string;
+}
+const FOUNDER_BADGES: FounderBadgeSKU[] = [
+  { id: "founder_lionade_og",    name: "Lionade OG",      tagline: "First 1,000 supporters. Forever.",      cap: 1000, price: 5000,  Icon: Crown,  iconColor: "#FFD700" },
+  { id: "founder_beta_witness",  name: "Beta Witness",    tagline: "You were here before launch.",          cap: 500,  price: 3500,  Icon: Star,   iconColor: "#A855F7" },
+  { id: "founder_day_one",       name: "Day One Pride",   tagline: "Caught the very first sunrise.",        cap: 100,  price: 10000, Icon: PawPrint, iconColor: "#FFD700" },
 ];
 
 // ── Helpers ──
@@ -452,6 +513,191 @@ function PremiumCard({ item }: { item: PremiumItem }) {
 }
 
 // ══════════════════════════════════════════════════
+// ── Shop V2 cards (2026-06-03) ──
+// ══════════════════════════════════════════════════
+
+// Animated username effect card with LIVE PREVIEW of the effect rendered on
+// the user's ACTUAL username (high-impact try-before-you-buy).
+function UsernameEffectCard({
+  item, ownUsername, owned, canAfford, onBuy,
+}: {
+  item: UsernameEffectSKU;
+  ownUsername: string;
+  owned: boolean;
+  canAfford: boolean;
+  onBuy: () => void;
+}) {
+  const r = RARITY_COLORS[item.rarity];
+  return (
+    <div className={`shop-card relative rounded-xl border ${r.border} overflow-hidden h-full flex flex-col`}
+      style={{ background: "linear-gradient(135deg, rgba(10,16,32,0.85), rgba(6,12,24,0.9))", backdropFilter: "blur(12px)" }}>
+      {item.rarity === "legendary" && <div className="shop-legendary-border" />}
+      <div className="relative p-4 flex flex-col flex-1">
+        <div className="flex items-start justify-between mb-3">
+          <span className="text-[10px] uppercase tracking-widest font-bold text-cream/50">Username effect</span>
+          <span className={`text-[9px] uppercase tracking-widest font-bold px-2 py-0.5 rounded-full ${r.badge}`}>{item.rarity}</span>
+        </div>
+        {/* LIVE preview tile — your actual username, animated. */}
+        <div className="rounded-lg px-3 py-4 mb-3 text-center border border-white/5"
+          style={{ background: "linear-gradient(135deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01))" }}>
+          <AnimatedUsername
+            username={ownUsername}
+            effect={item.effect}
+            size="lg"
+            className="font-bebas text-2xl tracking-wider"
+          />
+        </div>
+        <h4 className="font-bebas text-base text-cream tracking-wide mb-0.5">{item.name}</h4>
+        <p className="text-cream/55 text-[11px] mb-3 leading-relaxed">{item.description}</p>
+        <div className="flex items-center justify-between mt-auto pt-2 gap-3">
+          <div className="flex items-center gap-1.5 flex-shrink-0">
+            <img src={cdnUrl("/F.png")} alt="Fangs" className="w-5 h-5 object-contain" />
+            <span className="font-bebas text-lg text-gold">{formatCoins(item.price)}</span>
+          </div>
+          {owned ? (
+            <span className="flex items-center gap-1 text-green-400 text-xs font-bold flex-shrink-0">
+              <Check size={14} weight="bold" color="#22C55E" aria-hidden="true" /> Owned
+            </span>
+          ) : (
+            <button onClick={onBuy} disabled={!canAfford}
+              className={`flex-shrink-0 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${canAfford ? "gold-btn shop-btn-pulse" : "bg-gray-600/20 text-gray-500 cursor-not-allowed border border-gray-600/20"}`}>
+              {canAfford ? "Buy" : "Can't Afford"}
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Premium Fang banner card — small looping preview tile.
+function PremiumFangBannerCard({ item, owned, canAfford, onBuy }: { item: ShopItem; owned: boolean; canAfford: boolean; onBuy: () => void }) {
+  const r = RARITY_COLORS[item.rarity];
+  const Icon = item.Icon;
+  return (
+    <div className={`shop-card relative rounded-xl border ${r.border} overflow-hidden h-full flex flex-col`}
+      style={{ background: "linear-gradient(135deg, rgba(10,16,32,0.85), rgba(6,12,24,0.9))", backdropFilter: "blur(12px)" }}>
+      {item.rarity === "legendary" && <div className="shop-legendary-border" />}
+      <div className="relative p-4 flex flex-col flex-1">
+        {/* Looping preview tile (gradient swatch + icon). */}
+        <div className="h-16 rounded-lg mb-3 relative overflow-hidden border border-white/5"
+          style={{
+            background: item.rarity === "legendary"
+              ? "linear-gradient(120deg, rgba(255,215,0,0.25), rgba(168,85,247,0.15), rgba(74,144,217,0.25))"
+              : item.rarity === "epic"
+              ? "linear-gradient(120deg, rgba(168,85,247,0.20), rgba(74,144,217,0.15))"
+              : "linear-gradient(120deg, rgba(74,144,217,0.15), rgba(34,197,94,0.10))",
+            backgroundSize: "200% 100%",
+            animation: "au-name-rainbow 6s linear infinite",
+          }}>
+          <div className="absolute inset-0 flex items-center justify-center">
+            <Icon size={28} weight={item.iconWeight ?? "fill"} color={item.iconColor ?? "currentColor"} aria-hidden="true" />
+          </div>
+        </div>
+        <div className="flex items-start justify-between mb-1">
+          <h4 className="font-bebas text-base text-cream tracking-wide">{item.name}</h4>
+          <span className={`text-[9px] uppercase tracking-widest font-bold px-2 py-0.5 rounded-full ${r.badge}`}>{item.rarity}</span>
+        </div>
+        <p className="text-cream/55 text-[11px] mb-3 leading-relaxed">{item.description}</p>
+        <div className="flex items-center justify-between mt-auto pt-2 gap-3">
+          <div className="flex items-center gap-1.5 flex-shrink-0">
+            <img src={cdnUrl("/F.png")} alt="Fangs" className="w-5 h-5 object-contain" />
+            <span className="font-bebas text-lg text-gold">{formatCoins(item.price)}</span>
+          </div>
+          {owned ? (
+            <span className="flex items-center gap-1 text-green-400 text-xs font-bold flex-shrink-0">
+              <Check size={14} weight="bold" color="#22C55E" aria-hidden="true" /> Owned
+            </span>
+          ) : (
+            <button onClick={onBuy} disabled={!canAfford}
+              className={`flex-shrink-0 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${canAfford ? "gold-btn shop-btn-pulse" : "bg-gray-600/20 text-gray-500 cursor-not-allowed border border-gray-600/20"}`}>
+              {canAfford ? "Buy" : "Can't Afford"}
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Founder badge card with cap countdown + sold-out overlay.
+function FounderBadgeCard({
+  item, remaining, owned, canAfford, onBuy,
+}: {
+  item: FounderBadgeSKU;
+  remaining: number | null;
+  owned: boolean;
+  canAfford: boolean;
+  onBuy: () => void;
+}) {
+  const Icon = item.Icon;
+  const soldOut = remaining !== null && remaining <= 0;
+  return (
+    <div className="shop-card relative rounded-2xl overflow-hidden h-full flex flex-col"
+      style={{
+        background: "linear-gradient(135deg, rgba(40,28,8,0.95), rgba(8,6,16,0.95))",
+        border: `1px solid ${soldOut ? "rgba(156,163,175,0.20)" : "rgba(255,215,0,0.35)"}`,
+        backdropFilter: "blur(16px)",
+      }}>
+      {soldOut && (
+        <div className="absolute inset-0 z-10 bg-black/55 backdrop-blur-sm flex flex-col items-center justify-center">
+          <Lock size={32} weight="fill" color="#9CA3AF" aria-hidden="true" />
+          <p className="font-bebas text-xl text-cream/70 tracking-wider mt-2">SOLD OUT</p>
+          <p className="text-cream/40 text-[10px] font-mono uppercase tracking-[0.22em] mt-0.5">All {item.cap.toLocaleString()} claimed</p>
+        </div>
+      )}
+      <div className="relative p-5 flex flex-col flex-1">
+        <span className="absolute top-3 right-3 text-[9px] uppercase tracking-widest font-bold px-2 py-0.5 rounded-full bg-gold/20 text-gold border border-gold/30">
+          Founder
+        </span>
+        <div className="mb-3 flex items-center justify-center h-16">
+          <Icon size={52} weight="fill" color={item.iconColor} aria-hidden="true" />
+        </div>
+        <h4 className="font-bebas text-xl text-cream tracking-wide text-center">{item.name}</h4>
+        <p className="text-cream/55 text-xs text-center mb-3 leading-relaxed">{item.tagline}</p>
+
+        {/* FOMO counter — `1 of 1000 — 247 remaining` */}
+        <div className="text-center mb-4 py-2 rounded-lg" style={{ background: "rgba(255,215,0,0.05)", border: "1px solid rgba(255,215,0,0.12)" }}>
+          {remaining === null ? (
+            <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-cream/40">Cap of {item.cap.toLocaleString()}</p>
+          ) : (
+            <>
+              <p className="font-bebas text-xl text-gold tracking-wider leading-none">{remaining.toLocaleString()}</p>
+              <p className="font-mono text-[9px] uppercase tracking-[0.22em] text-cream/45 mt-0.5">
+                of {item.cap.toLocaleString()} remaining
+              </p>
+            </>
+          )}
+        </div>
+
+        <div className="flex items-center justify-between mt-auto pt-1 gap-3">
+          <div className="flex items-center gap-1.5 flex-shrink-0">
+            <img src={cdnUrl("/F.png")} alt="Fangs" className="w-5 h-5 object-contain" />
+            <span className="font-bebas text-lg text-gold">{formatCoins(item.price)}</span>
+          </div>
+          {owned ? (
+            <span className="flex items-center gap-1 text-green-400 text-xs font-bold flex-shrink-0">
+              <Check size={14} weight="bold" color="#22C55E" aria-hidden="true" /> Yours
+            </span>
+          ) : (
+            <button onClick={onBuy} disabled={!canAfford || soldOut}
+              className={`flex-shrink-0 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                soldOut
+                  ? "bg-gray-700/30 text-gray-500 cursor-not-allowed border border-gray-600/20"
+                  : canAfford
+                  ? "gold-btn shop-btn-pulse"
+                  : "bg-gray-600/20 text-gray-500 cursor-not-allowed border border-gray-600/20"
+              }`}>
+              {soldOut ? "Sold Out" : canAfford ? "Claim" : "Can't Afford"}
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ══════════════════════════════════════════════════
 // ── Buy Fangs section (Stripe IAP) ──
 // ══════════════════════════════════════════════════
 function BuyFangsSection({ isAuthed, onUnauthed }: { isAuthed: boolean; onUnauthed: () => void }) {
@@ -615,6 +861,27 @@ export default function ShopPage() {
   );
   const inventory: OwnedItem[] = inventoryData?.ok ? (inventoryData.data?.inventory ?? []) : [];
 
+  // Shop V2 — earned + founder cosmetics ride on a separate endpoint with
+  // `source` attribution (purchased / founder / earned). Inventory tab unions
+  // both lists so all owned cosmetics are visible in one place.
+  const cosmeticsOwnedKey = user?.id ? `cosmetics-owned/${user.id}` : null;
+  const { data: cosmeticsOwnedData, mutate: mutateCosmeticsOwned } = useSWR(
+    cosmeticsOwnedKey,
+    () => apiGet<{ items: { id: string; type: string; source: "purchased" | "founder" | "earned"; equipped?: boolean }[] }>("/api/cosmetics/owned"),
+    { dedupingInterval: 60_000, keepPreviousData: true, revalidateOnFocus: true, shouldRetryOnError: false },
+  );
+  const cosmeticsOwned = cosmeticsOwnedData?.ok ? (cosmeticsOwnedData.data?.items ?? []) : [];
+
+  // Shop V2 — founder badge cap counts. Endpoint returns remaining per id.
+  // Defaults to `null` (count unknown / cap closed unclear) if not yet shipped.
+  const founderCapsKey = user?.id ? `founder-caps/${user.id}` : null;
+  const { data: founderCapsData } = useSWR(
+    founderCapsKey,
+    () => apiGet<{ caps: Record<string, number> }>("/api/shop/founder-caps"),
+    { dedupingInterval: 30_000, keepPreviousData: true, revalidateOnFocus: true, shouldRetryOnError: false },
+  );
+  const founderCaps: Record<string, number> = founderCapsData?.ok ? (founderCapsData.data?.caps ?? {}) : {};
+
   if (isLoading) return (
     <div className="min-h-screen flex items-center justify-center">
       <div className="flex flex-col items-center gap-4">
@@ -669,10 +936,24 @@ export default function ShopPage() {
   const cosmeticTypeMap: Record<CosmeticSub, ItemType> = { frames: "frame", backgrounds: "background", name_colors: "name_color", banners: "banner" };
   const filteredCosmetics = COSMETIC_ITEMS.filter((i) => i.type === cosmeticTypeMap[cosmeticSub]);
 
-  const ownedCosmetics = inventory.filter((o) => { const item = [...COSMETIC_ITEMS, ...FEATURED_ITEMS, ...NEW_SKUS, ...AVATAR_AURAS].find((i) => i.id === o.itemId); return item && item.type !== "booster"; });
+  const ownedCosmetics = inventory.filter((o) => { const item = [...COSMETIC_ITEMS, ...FEATURED_ITEMS, ...NEW_SKUS, ...AVATAR_AURAS, ...USERNAME_EFFECTS, ...PREMIUM_FANG_BANNERS].find((i) => i.id === o.itemId); return item && item.type !== "booster"; });
   const ownedBoosters = inventory.filter((o) => { const item = [...BOOSTER_ITEMS, ...FEATURED_ITEMS, ...NEW_SKUS].find((i) => i.id === o.itemId); return item && item.type === "booster"; });
-  const allItems = [...COSMETIC_ITEMS, ...BOOSTER_ITEMS, ...FEATURED_ITEMS, ...NEW_SKUS, ...AVATAR_AURAS];
+  const allItems: ShopItem[] = [...COSMETIC_ITEMS, ...BOOSTER_ITEMS, ...FEATURED_ITEMS, ...NEW_SKUS, ...AVATAR_AURAS, ...USERNAME_EFFECTS, ...PREMIUM_FANG_BANNERS];
   const findItem = (id: string) => allItems.find((i) => i.id === id);
+
+  // Shop V2 — equip a username effect via PATCH /api/me/equip. Endpoint may
+  // not yet be live (backend follow-up flagged in the vault note). Falls back
+  // to a polite toast if the route 404s.
+  const handleEquipUsernameEffect = async (cosmeticId: string) => {
+    if (!user) return;
+    const res = await apiPost("/api/me/equip", { slot: "username_effect", cosmetic_id: cosmeticId });
+    if (!res.ok) {
+      toastError(res.error || "Equip not ready yet. Try again shortly.");
+      return;
+    }
+    toastSuccess("Equipped");
+    await Promise.all([mutateInventory(), mutateCosmeticsOwned()]);
+  };
 
   const isPremium = storeMode === "premium";
 
@@ -948,6 +1229,119 @@ export default function ShopPage() {
             {/* COSMETICS */}
             {tab === "cosmetics" && (
               <div className={`transition-all duration-700 delay-200 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`}>
+                {/* ── EXCLUSIVE: Founder badges (top of cosmetics tab) ── */}
+                {FOUNDER_BADGES.some((b) => {
+                  const r = founderCaps[b.id];
+                  return r === undefined || r > 0 || cosmeticsOwned.some((c) => c.id === b.id);
+                }) && (
+                  <section className="mb-10" aria-labelledby="founder-badges-heading">
+                    <div className="shop-banner flex items-center justify-between mb-5 px-4 py-3 rounded-xl"
+                      style={{ background: "linear-gradient(90deg, rgba(255,215,0,0.10), rgba(168,85,247,0.06))", border: "1px solid rgba(255,215,0,0.30)" }}>
+                      <div className="flex items-center gap-2">
+                        <Crown size={20} weight="fill" color="#FFD700" aria-hidden="true" />
+                        <h2 id="founder-badges-heading" className="font-bebas text-xl text-gold tracking-wider">EXCLUSIVE &middot; FOUNDER BADGES</h2>
+                      </div>
+                      <span className="text-cream/55 text-[11px] font-mono uppercase tracking-[0.2em] hidden sm:block">
+                        Capped supply &middot; once they're gone, they're gone
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+                      {FOUNDER_BADGES.map((b) => {
+                        const remaining = founderCaps[b.id] ?? null;
+                        const owned = cosmeticsOwned.some((c) => c.id === b.id);
+                        return (
+                          <FounderBadgeCard
+                            key={b.id}
+                            item={b}
+                            remaining={remaining}
+                            owned={owned}
+                            canAfford={userCoins >= b.price}
+                            onBuy={() => {
+                              if (requireLogin()) return;
+                              // Founder badges reuse the standard ConfirmModal path.
+                              setConfirmItem({
+                                item: { id: b.id, name: b.name, description: b.tagline, type: "frame", rarity: "legendary", price: b.price, Icon: b.Icon, iconWeight: "fill", iconColor: b.iconColor },
+                                quantity: 1,
+                              });
+                            }}
+                          />
+                        );
+                      })}
+                    </div>
+                  </section>
+                )}
+
+                {/* ── IDENTITY: Animated username effects (LIVE PREVIEW) ── */}
+                <section className="mb-10" aria-labelledby="identity-heading">
+                  <div className="shop-banner flex items-center justify-between mb-5 px-4 py-3 rounded-xl"
+                    style={{ background: "linear-gradient(90deg, rgba(168,85,247,0.10), rgba(74,144,217,0.08))", border: "1px solid rgba(168,85,247,0.25)" }}>
+                    <div className="flex items-center gap-2">
+                      <Rainbow size={20} weight="fill" color="#A855F7" aria-hidden="true" />
+                      <h2 id="identity-heading" className="font-bebas text-xl text-purple-300 tracking-wider">USERNAME EFFECTS</h2>
+                    </div>
+                    <span className="text-cream/55 text-[11px] font-mono uppercase tracking-[0.2em] hidden sm:block">
+                      Live preview on YOUR name
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+                    {USERNAME_EFFECTS.map((item) => (
+                      <UsernameEffectCard
+                        key={item.id}
+                        item={item}
+                        ownUsername={user?.username ?? "yourname"}
+                        owned={ownedIds.has(item.id)}
+                        canAfford={userCoins >= item.price}
+                        onBuy={() => { if (!requireLogin()) setConfirmItem({ item, quantity: 1 }); }}
+                      />
+                    ))}
+                  </div>
+                </section>
+
+                {/* ── BANNERS: Premium Fang banners ── */}
+                <section className="mb-10" aria-labelledby="premium-fang-banners-heading">
+                  <div className="shop-banner flex items-center justify-between mb-5 px-4 py-3 rounded-xl"
+                    style={{ background: "linear-gradient(90deg, rgba(74,144,217,0.10), rgba(255,215,0,0.08))", border: "1px solid rgba(74,144,217,0.25)" }}>
+                    <div className="flex items-center gap-2">
+                      <FlagBanner size={20} weight="fill" color="#4A90D9" aria-hidden="true" />
+                      <h2 id="premium-fang-banners-heading" className="font-bebas text-xl text-electric tracking-wider">PREMIUM BANNERS</h2>
+                    </div>
+                    <span className="text-cream/55 text-[11px] font-mono uppercase tracking-[0.2em] hidden sm:block">
+                      Animated &middot; Fang-purchasable
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+                    {PREMIUM_FANG_BANNERS.map((item) => (
+                      <PremiumFangBannerCard
+                        key={item.id}
+                        item={item}
+                        owned={ownedIds.has(item.id)}
+                        canAfford={userCoins >= item.price}
+                        onBuy={() => { if (!requireLogin()) setConfirmItem({ item, quantity: 1 }); }}
+                      />
+                    ))}
+                  </div>
+                </section>
+
+                {/* ── PREMIUM (cash): real-money banners called out explicitly ── */}
+                <section className="mb-10" aria-labelledby="cash-premium-banners-heading">
+                  <div className="shop-banner flex items-center justify-between mb-5 px-4 py-3 rounded-xl"
+                    style={{ background: "linear-gradient(90deg, rgba(168,85,247,0.10), rgba(168,85,247,0.04))", border: "1px solid rgba(168,85,247,0.30)" }}>
+                    <div className="flex items-center gap-2">
+                      <Diamond size={20} weight="fill" color="#A855F7" aria-hidden="true" />
+                      <h2 id="cash-premium-banners-heading" className="font-bebas text-xl text-purple-300 tracking-wider">PREMIUM &middot; REAL MONEY ONLY</h2>
+                    </div>
+                    <span className="text-cream/55 text-[11px] font-mono uppercase tracking-[0.2em] hidden sm:block">
+                      USD via Stripe &middot; not buyable with Fangs
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+                    {CASH_PREMIUM_BANNERS.map((item) => (
+                      <PremiumCard key={item.id} item={item} />
+                    ))}
+                  </div>
+                </section>
+
+                {/* ── Existing cosmetics sub-tabs (frames / name colors / banners) ── */}
                 <div className="flex items-center gap-2 mb-6 overflow-x-auto scrollbar-hide">
                   {COSMETIC_SUBS.map((s) => (
                     <button key={s.key} onClick={() => setCosmeticSub(s.key)}
@@ -1007,7 +1401,51 @@ export default function ShopPage() {
                   </div>
                 </div>
 
-                {ownedCosmetics.length === 0 && ownedBoosters.length === 0 ? (
+                {/* ── Shop V2: Identity & Status — founder + earned + purchased cosmetics
+                    unioned with source attribution (purchased / founder / earned). ── */}
+                {cosmeticsOwned.length > 0 && (
+                  <div className="mb-8">
+                    <h3 className="font-bebas text-xl text-cream/60 tracking-wider mb-4 flex items-center gap-2">
+                      <Crown size={20} weight="fill" color="#FFD700" aria-hidden="true" /> Identity &amp; Status
+                    </h3>
+                    <div className="space-y-2">
+                      {cosmeticsOwned.map((c) => {
+                        const isUsernameEffect = c.type === "username_effect";
+                        const isFounder = c.source === "founder";
+                        const isEarned = c.source === "earned";
+                        const sourceLabel = isFounder ? "Founder" : isEarned ? "Earned" : "Purchased";
+                        const sourceColor = isFounder ? "text-gold" : isEarned ? "text-electric" : "text-cream/60";
+                        const sourceBg = isFounder ? "bg-gold/15 border-gold/30" : isEarned ? "bg-electric/10 border-electric/30" : "bg-white/5 border-white/10";
+                        return (
+                          <div key={c.id} className="relative rounded-xl border border-white/10 p-4 flex items-center gap-3"
+                            style={{ background: "linear-gradient(135deg, rgba(10,16,32,0.85), rgba(6,12,24,0.9))" }}>
+                            <div className={`px-2 py-0.5 rounded-full border ${sourceBg} flex items-center gap-1 flex-shrink-0`}>
+                              <span className={`text-[9px] uppercase tracking-wider font-bold ${sourceColor}`}>{sourceLabel}</span>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="font-bebas text-base text-cream tracking-wide truncate">{c.id}</p>
+                              <p className="text-cream/50 text-[11px] capitalize">{c.type.replace(/_/g, " ")}</p>
+                            </div>
+                            {isUsernameEffect && (
+                              <button
+                                onClick={() => handleEquipUsernameEffect(c.id)}
+                                className={`flex-shrink-0 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                                  c.equipped
+                                    ? "border border-green-500/30 text-green-400 hover:bg-green-500/10"
+                                    : "border border-electric/30 text-electric hover:bg-electric/10"
+                                }`}
+                              >
+                                {c.equipped ? "Equipped" : "Equip"}
+                              </button>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {ownedCosmetics.length === 0 && ownedBoosters.length === 0 && cosmeticsOwned.length === 0 ? (
                   <div className="text-center py-12">
                     <p className="text-cream/25 text-sm">Purchase items from the shop to add them to your inventory</p>
                     <button onClick={() => setTab("featured")} className="mt-4 btn-outline px-6 py-2 rounded-xl text-sm">Browse Shop</button>

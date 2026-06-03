@@ -11,11 +11,15 @@
 
 import { motion, useReducedMotion } from "framer-motion";
 import CountUp from "@/components/CountUp";
+import AnimatedUsername from "@/components/AnimatedUsername";
+import { resolveRowUsernameEffect } from "@/lib/use-username-effect";
 
 interface Player {
   user_id: string;
   username: string | null;
   score: number;
+  // Shop V2 — server-supplied equipped username effect (optional).
+  equipped_username_effect?: string | null;
 }
 
 interface Props {
@@ -70,7 +74,11 @@ export default function PartyScoreboard({
                   {isLeader ? "👑" : i + 1}
                 </span>
                 <span className="font-syne text-sm text-cream/85 truncate">
-                  {p.username ?? "Player"}
+                  <AnimatedUsername
+                    username={p.username ?? "Player"}
+                    effect={resolveRowUsernameEffect(p.equipped_username_effect)}
+                    size="sm"
+                  />
                   {isMe && <span className="text-cream/40 text-xs"> (you)</span>}
                 </span>
                 {isDrawer && (

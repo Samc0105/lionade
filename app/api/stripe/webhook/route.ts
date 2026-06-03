@@ -3,6 +3,8 @@ import type Stripe from "stripe";
 import { supabaseAdmin } from "@/lib/supabase-server";
 import { stripe, lookupPrice } from "@/lib/stripe";
 import { FANG_PACKS, isFangPackId } from "@/lib/fang-packs";
+import { isFounderCapOpen } from "@/lib/cosmetic-grants";
+import { getFounderBadge } from "@/lib/shop-catalog";
 
 // Stripe needs the RAW request body for signature verification. Do not parse
 // JSON, do not clone, do not run anything in middleware that touches the body.
@@ -122,8 +124,11 @@ async function dispatchHandler(event: Stripe.Event): Promise<void> {
     }
 
     case "customer.subscription.created":
+      await handleSubscriptionUpsert(event.data.object as Stripe.Subscription, true);
+      return;
+
     case "customer.subscription.updated":
-      await handleSubscriptionUpsert(event.data.object as Stripe.Subscription);
+      await handleSubscriptionUpsert(event.data.object as Stripe.Subscription, false);
       return;
 
     case "customer.subscription.deleted":
@@ -154,7 +159,7 @@ async function dispatchHandler(event: Stripe.Event): Promise<void> {
   }
 }
 
-async function handleSubscriptionUpsert(sub: Stripe.Subscription) {
+async function handleSubscriptionUpsert(sub: Stripe.Subscription, isCreate: boolean) {
   const customerId = typeof sub.customer === "string" ? sub.customer : sub.customer.id;
   const item = sub.items.data[0];
   const priceId = item?.price?.id ?? null;
@@ -205,6 +210,13 @@ async function handleSubscriptionUpsert(sub: Stripe.Subscription) {
   }
 
   if (byCustomer && byCustomer.length > 0) {
+    // Tier is always 'pro' | 'platinum' here (lookupPrice returns null for
+    // unknown prices and we throw above). All resolved tiers qualify for
+    // the Founding Scholar consideration on initial subscription.
+    if (isCreate) {
+      const resolvedUserId = (byCustomer[0] as { id: string }).id;
+      await tryGrantFoundingScholar(resolvedUserId, sub.id);
+    }
     return;
   }
 
@@ -253,6 +265,59 @@ async function handleSubscriptionUpsert(sub: Stripe.Subscription) {
     metaUserId,
     customerId,
   );
+
+  if (isCreate) {
+    await tryGrantFoundingScholar(metaUserId, sub.id);
+  }
+}
+
+/**
+ * Shop V2 — fire-and-forget Founding Scholar founder-badge grant on the
+ * first 1000 paid Pro/Platinum subscriptions. Cap check uses the
+ * `is_founder_cap_open(badge_id, cap)` RPC and is race-safe at the DB
+ * level via a UNIQUE constraint on (badge_id, user_id) plus the cap RPC
+ * locking the count row.
+ *
+ * Never throws. A grant failure does NOT break the subscription upsert —
+ * the user has paid and their subscription_tier is already set. If the
+ * badge insert is skipped or errors, that's a missed perk we can backfill
+ * via the `founder_grants` table directly.
+ */
+async function tryGrantFoundingScholar(userId: string, subscriptionId: string) {
+  const badge = getFounderBadge("badge_founding_scholar");
+  if (!badge) {
+    console.error("[stripe-webhook] founding-scholar catalog miss");
+    return;
+  }
+  try {
+    const open = await isFounderCapOpen(supabaseAdmin, badge.id, badge.cap);
+    if (!open) {
+      // Cap full or RPC errored — either way, do nothing. This is the
+      // expected path for subscriber #1001 onward.
+      return;
+    }
+    const { error: grantErr } = await supabaseAdmin.from("founder_grants").insert({
+      user_id: userId,
+      badge_id: badge.id,
+      source: "stripe_subscription",
+      reference_id: subscriptionId,
+    });
+    if (grantErr) {
+      // 23505 = already owned (idempotent re-fire on Stripe retry). Anything
+      // else is logged but not surfaced — see header rationale.
+      if (grantErr.code !== "23505") {
+        console.error(
+          "[stripe-webhook] founding-scholar grant",
+          grantErr.message,
+        );
+      }
+    }
+  } catch (err) {
+    console.error(
+      "[stripe-webhook] founding-scholar grant threw",
+      err instanceof Error ? err.message : "unknown",
+    );
+  }
 }
 
 async function handleSubscriptionDeleted(sub: Stripe.Subscription) {

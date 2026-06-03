@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
 import { applyFangMultiplier } from "@/lib/mastery-plan";
+import { grantKnowledgeSharerBadge } from "@/lib/cosmetic-grants";
 
 /**
  * POST /api/vocab/banks/[id]/clone
@@ -128,6 +129,30 @@ export async function POST(req: NextRequest, ctx: RouteCtx) {
       });
     }
   }
+
+  // Shop V2 — Knowledge Sharer badge auto-grant for the SOURCE bank owner.
+  // Fire-and-forget. We re-read the source bank AFTER the RPC bumped its
+  // clone_count so the threshold check sees the new value. The RPC itself
+  // re-verifies the threshold so a race between this check and the grant
+  // can't double-grant (UNIQUE on earned_cosmetics).
+  void (async () => {
+    const { data: sourceBank, error: srcErr } = await supabaseAdmin
+      .from("vocab_banks")
+      .select("user_id, clone_count")
+      .eq("id", bankId)
+      .maybeSingle();
+    if (srcErr) {
+      console.error("[vocab/banks/clone knowledge-sharer-lookup]", srcErr.message);
+      return;
+    }
+    if (!sourceBank) return;
+    const ownerId = (sourceBank as { user_id: string | null }).user_id;
+    const cloneCount = (sourceBank as { clone_count: number | null }).clone_count ?? 0;
+    if (typeof ownerId !== "string" || ownerId.length === 0) return;
+    if (cloneCount >= 10) {
+      await grantKnowledgeSharerBadge(supabaseAdmin, ownerId);
+    }
+  })();
 
   return NextResponse.json({ bankId: newBankId, coinsAwarded });
 }

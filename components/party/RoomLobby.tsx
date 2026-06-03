@@ -11,6 +11,8 @@ import RoomCodeShare from "./RoomCodeShare";
 import { SUBJECT_LABELS, SUBJECTS as ALL_SUBJECTS } from "@/lib/party/word-lists-stub";
 import { nudgeChannel, PARTY_EVENTS } from "@/lib/party/realtime-channels";
 import type { PartyPlayer, PartyRoom } from "@/lib/party/types";
+import AnimatedUsername from "@/components/AnimatedUsername";
+import { resolveRowUsernameEffect } from "@/lib/use-username-effect";
 
 const MAX_PLAYERS = 6;
 
@@ -388,7 +390,11 @@ export default function RoomLobby({ room, players, isHost, meUserId, onGameStart
                   }}
                 />
                 <p className="font-syne text-sm text-cream/90 truncate flex-1">
-                  {p.username ?? "Player"}
+                  <AnimatedUsername
+                    username={p.username ?? "Player"}
+                    effect={resolveRowUsernameEffect(p.equipped_username_effect)}
+                    size="sm"
+                  />
                   {isMe && <span className="text-cream/40 text-xs"> (you)</span>}
                   {p.user_id === room.host_user_id && (
                     <span className="text-[#FFD700] text-xs"> ★</span>
