@@ -4229,3 +4229,110 @@ html.light .space-bg-container { display: none; }
     opacity: 1 !important;
   }
 }
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Ninny Thinking — animation set for Mastery Mode "thinking" indicator.
+   All driven by transform / opacity / stroke-dashoffset (GPU-friendly).
+   prefers-reduced-motion block at the bottom of this section freezes them.
+   ───────────────────────────────────────────────────────────────────────── */
+
+/* 1. PulsingDots — opacity stagger across 3 dots */
+@keyframes nt-dot-pulse {
+  0%, 80%, 100% { opacity: 0.25; transform: scale(0.85); }
+  40%           { opacity: 1;    transform: scale(1); }
+}
+.nt-dot { transform-origin: center; animation: nt-dot-pulse 1.2s ease-in-out infinite; }
+.nt-dot-1 { animation-delay: 0s; }
+.nt-dot-2 { animation-delay: 0.18s; }
+.nt-dot-3 { animation-delay: 0.36s; }
+
+/* 2. ScribblingPen — pen wiggle + underline draw/erase */
+@keyframes nt-pen-wiggle {
+  0%, 100% { transform: translate(0, 0) rotate(-2deg); }
+  50%      { transform: translate(2px, -1px) rotate(2deg); }
+}
+@keyframes nt-pen-line {
+  0%   { stroke-dashoffset: 18; }
+  45%  { stroke-dashoffset: 0; }
+  55%  { stroke-dashoffset: 0; }
+  100% { stroke-dashoffset: -18; }
+}
+.nt-pen-body { transform-origin: 75% 75%; animation: nt-pen-wiggle 1.2s ease-in-out infinite; }
+.nt-pen-line { stroke-dasharray: 18; animation: nt-pen-line 1.2s ease-in-out infinite; }
+
+/* 3. FlippingPages — top rectangle flips on the y-axis */
+@keyframes nt-page-flip {
+  0%   { transform: rotateY(0deg); opacity: 1; }
+  50%  { transform: rotateY(180deg); opacity: 0.55; }
+  100% { transform: rotateY(0deg); opacity: 1; }
+}
+.nt-page-flip {
+  transform-origin: left center;
+  transform-box: fill-box;
+  animation: nt-page-flip 1.4s ease-in-out infinite;
+}
+
+/* 4. LightbulbSpark — bulb pulse + radiating sparks */
+@keyframes nt-bulb-pulse {
+  0%, 100% { transform: scale(0.95); opacity: 0.85; }
+  50%      { transform: scale(1.05); opacity: 1; }
+}
+@keyframes nt-spark {
+  0%, 60% { opacity: 0; transform: scale(0.6); }
+  70%     { opacity: 1; transform: scale(1); }
+  100%    { opacity: 0; transform: scale(1.2); }
+}
+.nt-bulb { transform-origin: center; animation: nt-bulb-pulse 1.4s ease-in-out infinite; }
+.nt-spark { transform-origin: center; animation: nt-spark 1.4s ease-in-out infinite; }
+.nt-spark-1 { animation-delay: 0s; }
+.nt-spark-2 { animation-delay: 0.1s; }
+.nt-spark-3 { animation-delay: 0.2s; }
+.nt-spark-4 { animation-delay: 0.3s; }
+
+/* 5. BrainScan — scan line travels top→bottom */
+@keyframes nt-scan {
+  0%   { transform: translateY(-8px); opacity: 0; }
+  20%  { opacity: 1; }
+  80%  { opacity: 1; }
+  100% { transform: translateY(8px); opacity: 0; }
+}
+.nt-scan-line { animation: nt-scan 1.5s ease-in-out infinite; }
+
+/* 6. CardShuffle — three cards stagger out and back */
+@keyframes nt-card-1 {
+  0%, 100% { transform: translate(0, 0) rotate(-6deg); }
+  50%      { transform: translate(-4px, -1px) rotate(-10deg); }
+}
+@keyframes nt-card-2 {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  50%      { transform: translate(0, 2px) rotate(2deg); }
+}
+@keyframes nt-card-3 {
+  0%, 100% { transform: translate(0, 0) rotate(6deg); }
+  50%      { transform: translate(4px, -1px) rotate(10deg); }
+}
+.nt-card-1 { transform-origin: center; transform-box: fill-box; animation: nt-card-1 1.3s ease-in-out infinite; }
+.nt-card-2 { transform-origin: center; transform-box: fill-box; animation: nt-card-2 1.3s ease-in-out infinite; }
+.nt-card-3 { transform-origin: center; transform-box: fill-box; animation: nt-card-3 1.3s ease-in-out infinite; }
+
+/* 7. QuestionMarkDance — gentle scale + tilt */
+@keyframes nt-qmark {
+  0%, 100% { transform: scale(1) rotate(-4deg); }
+  25%      { transform: scale(1.08) rotate(0deg); }
+  50%      { transform: scale(1) rotate(4deg); }
+  75%      { transform: scale(1.08) rotate(0deg); }
+}
+.nt-qmark { transform-origin: center; transform-box: fill-box; animation: nt-qmark 1s ease-in-out infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .nt-dot, .nt-pen-body, .nt-pen-line, .nt-page-flip,
+  .nt-bulb, .nt-spark, .nt-scan-line,
+  .nt-card-1, .nt-card-2, .nt-card-3, .nt-qmark {
+    animation: none !important;
+    transform: none !important;
+    opacity: 1 !important;
+    stroke-dashoffset: 0 !important;
+  }
+  /* Hide the scan line entirely in reduced-motion (static brain reads cleaner). */
+  .nt-scan-line { opacity: 0 !important; }
+}

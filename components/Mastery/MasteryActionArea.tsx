@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { ArrowRight, PaperPlaneTilt } from "@phosphor-icons/react";
 import Confetti from "@/components/Confetti";
+import { pickThinkingPhrase } from "@/lib/mastery/thinking-phrases";
 
 /**
  * The bottom-of-chat action area. Its shape depends on what's pending on
@@ -244,8 +245,13 @@ function SocraticInput({ disabled, onSubmit }: { disabled?: boolean; onSubmit: (
 // ── Continue button ─────────────────────────────────────────────────────────
 function ContinueButton({ disabled, onContinue }: { disabled?: boolean; onContinue: () => Promise<void> | void }) {
   const [loading, setLoading] = useState(false);
+  // Pinned phrase per "loading" window — picked once when loading flips true
+  // so the button label doesn't churn through phrases on every render. New
+  // press → new phrase.
+  const phraseRef = useRef<string>("Ninny's thinking…");
   const handle = async () => {
     if (disabled || loading) return;
+    phraseRef.current = pickThinkingPhrase();
     setLoading(true);
     try { await onContinue(); }
     finally { setLoading(false); }
@@ -261,7 +267,7 @@ function ContinueButton({ disabled, onContinue }: { disabled?: boolean; onContin
           disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200
         "
       >
-        {loading ? "Ninny's thinking…" : "Continue"}
+        {loading ? phraseRef.current : "Continue"}
         <ArrowRight size={14} weight="bold" className="transition-transform group-hover:translate-x-0.5" />
       </button>
     </div>

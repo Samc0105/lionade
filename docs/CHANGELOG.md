@@ -4,6 +4,10 @@ All notable changes to Lionade, newest first.
 
 ---
 
+## 2026-06-03
+
+- feat(mastery): thinking-state overhaul — rotating context-aware phrases (25+ in starter pool), 7 randomized thinking animations, inline notes scratchpad (localStorage V1) with session-end notes review
+
 ## 2026-06-02
 
 - feat(shop): Buy Fangs section on shop page (4 IAP packs $0.99/$4.99/$19.99/$49.99) + 4 new shop SKUs rendered, success/cancel return states wired

@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import useSWR from "swr";
 import Link from "next/link";
-import { CaretLeft, CaretUp, CaretDown, Clock, DotsThree, Sparkle, ShareNetwork } from "@phosphor-icons/react";
+import { CaretLeft, CaretUp, CaretDown, Clock, Sparkle, ShareNetwork } from "@phosphor-icons/react";
 import Navbar from "@/components/Navbar";
 import SpaceBackground from "@/components/SpaceBackground";
 import Confetti from "@/components/Confetti";
@@ -15,6 +15,8 @@ import MasteryMessage, { type MessageShape } from "@/components/Mastery/MasteryM
 import MasteryActionArea, { type LiveQuestion } from "@/components/Mastery/MasteryActionArea";
 import { useActiveTime } from "@/components/Mastery/useActiveTime";
 import SessionReportFab from "@/components/Mastery/StudySheetButton";
+import NinnyThinking, { MasteryNotesFooter } from "@/components/Mastery/NinnyThinking";
+import type { ThinkingContext } from "@/lib/mastery/thinking-phrases";
 import { apiGet, apiPost, swrFetcher } from "@/lib/api-client";
 import { useAuth } from "@/lib/auth";
 import type { StudySheetInput, SubtopicSummary } from "@/components/Mastery/studySheetPdf";
@@ -247,6 +249,16 @@ export default function MasterySessionPage() {
 
   // ── Actions ──────────────────────────────────────────────────────────────
   const [busy, setBusy] = useState(false);
+
+  // Each false→true transition of `busy` is a new "Ninny is thinking" event.
+  // We bump a counter so the <NinnyThinking> below remounts (fresh phrase +
+  // animation + new scratchpad note row) per thinking window.
+  const [thinkingKey, setThinkingKey] = useState(0);
+  const prevBusyRef = useRef(false);
+  useEffect(() => {
+    if (busy && !prevBusyRef.current) setThinkingKey(k => k + 1);
+    prevBusyRef.current = busy;
+  }, [busy]);
 
   // /next response shape — kept local so we can drive optimistic updates
   // off it without going back to the server for a fresh snapshot.
@@ -481,6 +493,38 @@ export default function MasterySessionPage() {
       : null;
   const ended = data.session.status !== "active";
 
+  // Derive ThinkingContext for NinnyThinking. We walk the recent feedback
+  // messages to compute the trailing correct-streak (the SessionResponse
+  // doesn't carry a session-wide streak field — per-subtopic streaks live
+  // on `subtopics[].currentStreak`, but the "you're on a tear" voice is
+  // about overall flow, so we count across the tail).
+  const thinkingContext: ThinkingContext = (() => {
+    const msgs = data.messages;
+    let streak = 0;
+    let lastAnswerCorrect: boolean | null = null;
+    // Walk newest → oldest, count consecutive correct feedback messages,
+    // stop on the first miss. Also capture the most-recent correctness.
+    for (let i = msgs.length - 1; i >= 0; i -= 1) {
+      const m = msgs[i];
+      if (m.kind !== "feedback") continue;
+      const wasCorrect = (m.payload as { wasCorrect?: boolean } | null)?.wasCorrect;
+      if (typeof wasCorrect !== "boolean") continue;
+      if (lastAnswerCorrect === null) lastAnswerCorrect = wasCorrect;
+      if (wasCorrect) streak += 1;
+      else break;
+    }
+    // Total questions: we don't have a hard cap, but the exam has subtopics
+    // each with their own weight; for the LATE_SESSION heuristic we treat
+    // ~20 questions as a "full" session — common Mastery session length.
+    const totalQuestions = 20;
+    return {
+      questionIndex: data.session.questionsAnswered,
+      totalQuestions,
+      lastAnswerCorrect,
+      currentStreak: streak,
+    };
+  })();
+
   // Build the Study Sheet input on-demand (passed as a thunk so the PDF
   // module stays decoupled from the page's live state).
   const buildStudySheet = (): StudySheetInput | null => {
@@ -586,13 +630,14 @@ export default function MasterySessionPage() {
               {data.messages.slice(-VISIBLE_MESSAGES).map(m => (
                 <MasteryMessage key={m.id} message={m} allMessages={data.messages} />
               ))}
-              {busy && (
-                <div className="flex gap-3 items-center pl-[40px]">
-                  <DotsThree size={20} className="text-[#A855F7] animate-pulse" weight="bold" />
-                  <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-cream/40">
-                    Ninny's thinking…
-                  </span>
-                </div>
+              {busy && sessionId && (
+                <NinnyThinking
+                  key={thinkingKey}
+                  sessionId={sessionId}
+                  questionId={liveQuestion?.questionId ?? data.session.pending?.questionId ?? null}
+                  context={thinkingContext}
+                  hideScratchpad={ended}
+                />
               )}
             </div>
 
@@ -610,6 +655,7 @@ export default function MasterySessionPage() {
                   >
                     {classIdContext ? "Back to Class" : "Back to Mastery"}
                   </Link>
+                  {sessionId && <MasteryNotesFooter sessionId={sessionId} />}
                 </div>
               ) : (
                 <MasteryActionArea
