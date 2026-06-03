@@ -4,6 +4,8 @@ import { supabaseAdmin } from "@/lib/supabase-server";
 import { stripe } from "@/lib/stripe";
 import { FANG_PACKS, fangPackPriceId, isFangPackId } from "@/lib/fang-packs";
 import { SITE_URL } from "@/lib/site-config";
+import { isDemoUser } from "@/lib/demo-guard";
+import { demoBlockedResponse } from "@/lib/demo-guard-server";
 
 export const runtime = "nodejs";
 
@@ -12,6 +14,10 @@ export async function POST(req: NextRequest) {
   if (auth instanceof NextResponse) return auth;
   const userId = auth.userId;
   const email = auth.email;
+
+  // Shared demo account: same rationale as /api/stripe/checkout — no
+  // payments under the shared customer record.
+  if (isDemoUser(userId)) return demoBlockedResponse();
 
   let body: unknown;
   try {

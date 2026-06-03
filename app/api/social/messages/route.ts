@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
+import { isDemoUser } from "@/lib/demo-guard";
+import { demoBlockedResponse } from "@/lib/demo-guard-server";
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -99,6 +101,11 @@ export async function POST(req: NextRequest) {
   const auth = await requireAuth(req);
   if (auth instanceof NextResponse) return auth;
   const senderId = auth.userId;
+
+  // Shared demo account: spam-prevention. The demo user is publicly known,
+  // so leaving DM open would let any tester harass other users via the
+  // shared account.
+  if (isDemoUser(senderId)) return demoBlockedResponse();
 
   try {
     const body = await req.json();

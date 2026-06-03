@@ -1,5 +1,6 @@
 import { supabase } from "@/lib/supabase";
 import type { Subject } from "@/types";
+import { DEMO_USER_ID } from "@/lib/demo-guard";
 
 // ── Profile ───────────────────────────────────────────────────
 
@@ -346,9 +347,12 @@ export async function getLeaderboard(limit = 10): Promise<{
 
   if (error) throw error;
 
-  // Aggregate by user
+  // Aggregate by user. Skip the shared demo account so it never pollutes
+  // the public weekly ladder (it's a publicly-known account and any
+  // testing-driven volume would distort real rankings).
   const weeklyMap: Record<string, number> = {};
   for (const row of data ?? []) {
+    if (row.user_id === DEMO_USER_ID) continue;
     weeklyMap[row.user_id] = (weeklyMap[row.user_id] ?? 0) + row.amount;
   }
 
@@ -357,6 +361,7 @@ export async function getLeaderboard(limit = 10): Promise<{
     const { data: profiles } = await supabase
       .from("profiles")
       .select("id, username, avatar_url, level, streak, coins")
+      .neq("id", DEMO_USER_ID)
       .order("coins", { ascending: false })
       .limit(limit);
 
@@ -405,9 +410,11 @@ export async function getEloLeaderboard(limit = 200): Promise<{
   arena_elo: number;
   level: number;
 }[]> {
+  // Exclude the shared demo account from the public ELO ladder.
   const { data, error } = await supabase
     .from("profiles")
     .select("id, username, avatar_url, arena_elo, level, xp")
+    .neq("id", DEMO_USER_ID)
     .order("arena_elo", { ascending: false })
     .limit(limit);
 
@@ -446,9 +453,12 @@ export async function getLadderLeaderboard(
   level: number;
   streak: number;
 }[]> {
+  // Exclude the shared demo account from any of the three competitive
+  // ladders (arena_elo / competitive_elo / squad_elo).
   const { data, error } = await supabase
     .from("profiles")
     .select(`id, username, avatar_url, level, streak, ${ladder}`)
+    .neq("id", DEMO_USER_ID)
     .order(ladder, { ascending: false })
     .limit(limit);
 

@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
 import { isClean } from "@/lib/moderation";
+import { isDemoUser } from "@/lib/demo-guard";
+import { demoBlockedResponse } from "@/lib/demo-guard-server";
 import {
   normalizeBankName,
   normalizeColor,
@@ -144,6 +146,13 @@ export async function PATCH(req: NextRequest, ctx: RouteCtx) {
     patch.is_public = is_public;
     publishing = is_public === true;
   }
+
+  // Shared demo account: PUBLISHING a bank to Discover is the only
+  // mutation here that affects other users (private edits to the demo's
+  // own banks are fine — they show up in the demo). Block public-publish
+  // attempts so testers can't push abusive or pranked bank names onto the
+  // public Discover surface under the shared account.
+  if (publishing && isDemoUser(userId)) return demoBlockedResponse();
 
   if (Object.keys(patch).length === 0) {
     return NextResponse.json(

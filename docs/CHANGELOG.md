@@ -6,6 +6,7 @@ All notable changes to Lionade, newest first.
 
 ## 2026-06-03
 
+- feat(auth): shared demo account (demo@getlionade.com / LionadeDemo2026!) for tester onboarding. One-tap fill on login page; demo-mode banner reminds testers to sign up; server guards block destructive actions (username/password change, public bank publish, DM send, IAP, friend requests); demo user filtered from public leaderboards + social search.
 - feat(shop): Shop V2 UI — AnimatedUsername reusable component wired into 8 visibility surfaces (Navbar / Leaderboard / Profile / Social / Party / Mastery / Dashboard), shop catalog UI extended with Identity section + live SKU previews + founder badge cap countdown + earned cosmetics in Inventory
 - feat(shop): Shop V2 catalog — 18 SKUs (6 animated usernames + 5 Fang banners + 4 cash banners + 3 founder badges + 4 earned cosmetics); auto-grant wiring on bank-create (polyglot) + clone (knowledge-sharer) + Stripe subscription (founding-scholar capped at 1000)
 - feat(shop): Shop V2 schema — founder_grants + earned_cosmetics tables, retroactive lionade_og (first 500) + beta_witness (pre-deploy users) grants, 4 RPCs for earned cosmetic grants (streak/polyglot/knowledge-sharer/mastery-medal), is_founder_cap_open helper for ongoing caps

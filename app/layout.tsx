@@ -14,6 +14,7 @@ import FocusMusicToggle from "@/components/FocusMusicToggle";
 import FocusLockIn from "@/components/FocusLockIn";
 import LaunchDock from "@/components/LaunchDock";
 import PageTransition from "@/components/PageTransition";
+import DemoModeBanner from "@/components/DemoModeBanner";
 import { SITE_URL, SITE_URL_OBJ } from "@/lib/site-config";
 
 const bebasNeue = Bebas_Neue({
@@ -160,6 +161,7 @@ export default function RootLayout({
             <SwrProvider>
               <AuthProviderWrapper>
                 <ToastProvider>
+                  <DemoModeBanner />
                   <Navbar />
                   <main id="main-content">
                     <PageTransition>{children}</PageTransition>

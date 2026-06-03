@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
+import { DEMO_USER_ID } from "@/lib/demo-guard";
 
 /**
  * Activity feed for a user's friends — recent coin-earning events that are
@@ -57,7 +58,7 @@ export async function GET(req: NextRequest) {
 
     const friendIds = (friendships ?? [])
       .map(f => (f.user_id === userId ? f.friend_id : f.user_id))
-      .filter(Boolean);
+      .filter((id): id is string => Boolean(id) && id !== DEMO_USER_ID);
 
     if (friendIds.length === 0) {
       return NextResponse.json({ feed: [] as FeedItem[], circle: [] as CircleRank[] });

@@ -3,6 +3,8 @@ import { requireAuth } from "@/lib/api-auth";
 import { supabaseAdmin } from "@/lib/supabase-server";
 import { stripe, priceIdFor, type Tier, type Cycle } from "@/lib/stripe";
 import { SITE_URL } from "@/lib/site-config";
+import { isDemoUser } from "@/lib/demo-guard";
+import { demoBlockedResponse } from "@/lib/demo-guard-server";
 
 export const runtime = "nodejs";
 
@@ -18,6 +20,11 @@ export async function POST(req: NextRequest) {
   if (auth instanceof NextResponse) return auth;
   const userId = auth.userId;
   const email = auth.email;
+
+  // Shared demo account: don't let testers run the demo through Stripe
+  // Checkout. The shared customer record would let any tester see another
+  // tester's saved card via the Stripe Customer Portal.
+  if (isDemoUser(userId)) return demoBlockedResponse();
 
   let body: unknown;
   try {

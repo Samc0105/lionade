@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
+import { isDemoUser } from "@/lib/demo-guard";
+import { demoBlockedResponse } from "@/lib/demo-guard-server";
 
 // GET — List friends + pending requests
 //
@@ -141,6 +143,11 @@ export async function POST(req: NextRequest) {
   const auth = await requireAuth(req);
   if (auth instanceof NextResponse) return auth;
   const userId = auth.userId;
+
+  // Shared demo account: friend-request spam mitigation. Same rationale as
+  // the DM guard — the demo user is publicly known, so leaving friend
+  // requests open would let any tester spam every real user.
+  if (isDemoUser(userId)) return demoBlockedResponse();
 
   try {
     const { friendUsername } = await req.json();

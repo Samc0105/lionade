@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
+import { DEMO_USER_ID } from "@/lib/demo-guard";
 
 export const dynamic = "force-dynamic";
 
@@ -61,10 +62,15 @@ export async function GET(req: NextRequest) {
       }
     }
 
+    // Exclude the shared demo account from search results so users can't
+    // friend-add the demo (it's a publicly-known shared account; adding
+    // it to a real friend list would be a useless trophy that everybody
+    // shares).
     const { data, error } = await supabaseAdmin
       .from("profiles")
       .select("id, username, avatar_url, arena_elo")
       .ilike("username", `%${query}%`)
+      .neq("id", DEMO_USER_ID)
       .limit(10);
 
     if (error) {

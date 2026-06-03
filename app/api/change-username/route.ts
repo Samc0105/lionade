@@ -1,11 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
+import { isDemoUser } from "@/lib/demo-guard";
+import { demoBlockedResponse } from "@/lib/demo-guard-server";
 
 export async function POST(req: NextRequest) {
   const auth = await requireAuth(req);
   if (auth instanceof NextResponse) return auth;
   const userId = auth.userId;
+
+  // Shared demo account: username is fixed to 'demo' so testers always know
+  // what to expect when logging in. Block before any DB work.
+  if (isDemoUser(userId)) return demoBlockedResponse();
 
   try {
     const { newUsername } = await req.json();

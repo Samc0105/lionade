@@ -90,7 +90,13 @@ export default function LoginPage() {
   const { user, isLoading, login, signup } = useAuth();
   const router = useRouter();
 
-  const [tab, setTab] = useState<Tab>("login");
+  // Honor ?signup=true so deep links (e.g. the demo-mode banner's
+  // "Create your own account" CTA) open the Sign Up tab on mount.
+  const [tab, setTab] = useState<Tab>(() => {
+    if (typeof window === "undefined") return "login";
+    const params = new URLSearchParams(window.location.search);
+    return params.get("signup") === "true" ? "signup" : "login";
+  });
   const [step, setStep] = useState(1);
 
   // Detect email verification redirect synchronously to avoid race with auth state
@@ -106,6 +112,13 @@ export default function LoginPage() {
   // Login fields
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
+
+  // Demo account credentials — printed on the page so testers can copy
+  // manually if the auto-fill button doesn't work in their browser
+  // (e.g. some autofill managers steal the click). Also used by the
+  // "Use the demo account" button below.
+  const DEMO_EMAIL = "demo@getlionade.com";
+  const DEMO_PASSWORD = "LionadeDemo2026!";
 
   // Signup fields
   const [email, setEmail] = useState("");
@@ -396,6 +409,47 @@ export default function LoginPage() {
       setSubmitting(false);
     } else {
       setSignupSuccess(true);
+    }
+  };
+
+  // Auto-fill + auto-submit the demo credentials. Friendlier than just
+  // populating the fields because most testers click the button expecting
+  // to BE logged in, not to be one extra click closer. handleLogin's
+  // double-submit guard prevents any race if they spam the button.
+  //
+  // Decision: auto-submit (rather than just highlight Sign In). Manual
+  // copy paths still work — both creds are printed below as monospace
+  // text so testers who prefer typing/pasting can do that too.
+  const handleUseDemoAccount = async () => {
+    if (submitting || postLoginLock) return;
+    setError("");
+    setTab("login");
+    setLoginEmail(DEMO_EMAIL);
+    setLoginPassword(DEMO_PASSWORD);
+    setSubmitting(true);
+
+    let err: string | null | undefined;
+    try {
+      const result = await login(DEMO_EMAIL, DEMO_PASSWORD);
+      err = result.error;
+    } catch (thrown) {
+      console.error("[Login] demo login threw:", thrown);
+      setError("Couldn't reach the server. Check your connection and try again.");
+      setSubmitting(false);
+      return;
+    }
+
+    if (err) {
+      // Most likely cause: migration hasn't been pushed yet — surface the
+      // generic "wrong creds" message but log the real one for triage.
+      setError(err.includes("Invalid") ? "Demo account not provisioned yet. Try again later." : err);
+      setSubmitting(false);
+      return;
+    }
+
+    setPostLoginLock(true);
+    if (typeof window !== "undefined") {
+      window.location.assign("/dashboard");
     }
   };
 
@@ -828,6 +882,40 @@ export default function LoginPage() {
         <p className="text-center text-cream/55 text-xs mt-5">
           By signing up, you agree to study harder than yesterday.
         </p>
+
+        {/* Demo account CTA — only on login tab, not on signup or post-signup */}
+        {!signupSuccess && tab === "login" && (
+          <div className="mt-6">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="flex-1 h-px bg-cream/10" />
+              <span className="text-cream/40 text-[10px] font-bold uppercase tracking-[0.2em]">
+                Want to try without signing up?
+              </span>
+              <div className="flex-1 h-px bg-cream/10" />
+            </div>
+            <button
+              type="button"
+              onClick={handleUseDemoAccount}
+              disabled={submitting || postLoginLock}
+              className="w-full py-3 rounded-xl border border-electric/20 text-cream/70 text-sm font-semibold hover:text-electric hover:border-electric/50 hover:bg-electric/5 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              <span className="inline-flex items-center justify-center gap-2">
+                <Brain size={16} aria-hidden="true" />
+                Use the demo account
+              </span>
+            </button>
+            {/* Visible credentials so testers can copy manually if they
+                prefer typing/pasting. Selectable mono text. */}
+            <div className="mt-3 px-3 py-2 rounded-lg bg-white/[0.03] border border-white/5 text-center">
+              <p className="font-mono text-[11px] text-cream/55 select-all break-all leading-relaxed">
+                {DEMO_EMAIL} &middot; {DEMO_PASSWORD}
+              </p>
+            </div>
+            <p className="text-cream/40 text-[11px] text-center mt-2 leading-relaxed">
+              Shared demo account. Don&apos;t store personal data here.
+            </p>
+          </div>
+        )}
 
         {/* Demo quiz CTA */}
         {!signupSuccess && (
