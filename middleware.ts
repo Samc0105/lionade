@@ -198,6 +198,28 @@ const ROUTE_LIMITS: RouteLimit[] = [
     windowMs: 60 * 1000,
     keyPrefix: "vocab-write",
   },
+  // Vocab discover — Word Banks V3A public browse. Pure read, light query
+  // (banks + author profiles + word counts). 60/min/IP comfortably covers
+  // a user paging through Discover; blocks scrapers that would walk every
+  // public bank.
+  {
+    test: (p) => p === "/api/vocab/banks/discover",
+    method: "GET",
+    max: 60,
+    windowMs: 60 * 1000,
+    keyPrefix: "vocab-discover",
+  },
+  // Vocab clone — V3A deep-copy via clone_bank RPC. Creates a bank +
+  // potentially hundreds of word rows + a coin_transactions row. Cap
+  // tightly (5/min/IP) so a malicious client can't fill their library
+  // with cloned content or burn the +25 Fang reward in a loop.
+  {
+    test: (p) => /^\/api\/vocab\/banks\/[^/]+\/clone$/.test(p),
+    method: "POST",
+    max: 5,
+    windowMs: 60 * 1000,
+    keyPrefix: "vocab-clone",
+  },
   // Vocab define — Wikipedia (free) then OpenAI gpt-4o-mini fallback per term.
   // 20/min/IP caps the AI fallback cost in the worst case. The per-term global
   // cache means a popular term is exactly one OpenAI call across all users

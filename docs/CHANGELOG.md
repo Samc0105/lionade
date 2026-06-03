@@ -6,6 +6,9 @@ All notable changes to Lionade, newest first.
 
 ## 2026-06-03
 
+- feat(vocab): Word Banks V3A UI — Discover tab with sort/filter + bank preview modal + clone flow (+25 Fangs); publish toggle in bank menu with profanity + cap error handling; public/cloned visual indicators in BankSelector
+- feat(vocab): Word Banks V3A backend — Discover endpoint with top/new/cloned sort + language filter; clone POST grants +25 Fangs + deep-copies via clone_bank RPC; publish toggle gated by profanity denylist + 20-bank cap; preview endpoint for browse-before-clone
+- feat(vocab): Word Banks V3A schema — is_public + clone_count + parent attribution on vocab_banks; clone_bank RPC for one-shot deep-copy of public banks into cloner's collection
 - feat(vocab): Word Banks V2 UI — bank selector + create-bank modal + per-bank state; AddWordForm branches on bank.kind (language → MyMemory + franc-min check / general → Wikipedia → AI define cascade with definition source badge); all sub-components bank-scoped
 - feat(vocab): Word Banks V2 backend — /api/vocab/banks CRUD; /api/vocab/define with Wikipedia → AI gpt-4o-mini cascade (cached globally, ~$0.0005 per new term); translate route now bank-aware
 - feat(vocab): Word Banks V2 schema — vocab_banks table, kind ('language'|'general'), vocab_words now bank-scoped with term_definition for general banks, advance_vocab_streak RPC updated to bank-keyed. Existing vocab words backfilled into a default Languages bank per user.

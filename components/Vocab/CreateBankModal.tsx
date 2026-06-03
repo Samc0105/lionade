@@ -32,6 +32,14 @@ export interface VocabBank {
   color: string;
   icon: string;
   created_at: string;
+  // V3A — public + clone metadata (optional; only present once V3A migration runs)
+  is_public?: boolean;
+  published_at?: string | null;
+  clone_count?: number;
+  parent_bank_id?: string | null;
+  parent_user_id?: string | null;
+  /** Username of the original author for cloned banks — surfaced in tooltips. */
+  parent_username?: string | null;
 }
 
 interface Props {

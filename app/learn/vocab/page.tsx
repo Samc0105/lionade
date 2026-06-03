@@ -21,7 +21,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import useSWR from "swr";
-import { Plus, Cards, ListBullets, BookOpen, GlobeHemisphereWest } from "@phosphor-icons/react";
+import { Plus, Cards, ListBullets, BookOpen, GlobeHemisphereWest, Compass } from "@phosphor-icons/react";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import AddWordForm from "@/components/Vocab/AddWordForm";
 import ReviewQueue from "@/components/Vocab/ReviewQueue";
@@ -29,14 +29,16 @@ import VocabList from "@/components/Vocab/VocabList";
 import BankSelector from "@/components/Vocab/BankSelector";
 import CreateBankModal, { type VocabBank } from "@/components/Vocab/CreateBankModal";
 import BankStreakPill, { type BankStreak } from "@/components/Vocab/BankStreakPill";
+import DiscoverTab from "@/components/Vocab/DiscoverTab";
 import { swrFetcher } from "@/lib/api-client";
 
-type Tab = "add" | "review" | "list";
+type Tab = "add" | "review" | "list" | "discover";
 
 const TABS: { id: Tab; label: string; Icon: typeof Plus }[] = [
   { id: "add", label: "Add", Icon: Plus },
   { id: "review", label: "Review", Icon: Cards },
   { id: "list", label: "Your List", Icon: ListBullets },
+  { id: "discover", label: "Discover", Icon: Compass },
 ];
 
 const ACTIVE_BANK_KEY = "vocab_active_bank_slug";
@@ -222,6 +224,7 @@ export default function VocabPage() {
                 {tab === "add" && <AddWordForm bank={activeBank} />}
                 {tab === "review" && <ReviewQueue bank={activeBank} />}
                 {tab === "list" && <VocabList bank={activeBank} />}
+                {tab === "discover" && <DiscoverTab onCloned={() => mutateBanks()} />}
               </section>
             </>
           ) : null}

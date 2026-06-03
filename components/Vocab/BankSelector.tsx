@@ -16,7 +16,7 @@
  */
 
 import { useEffect, useRef, useState } from "react";
-import { Plus, DotsThreeVertical, PencilSimple, Palette, Trash, X } from "@phosphor-icons/react";
+import { Plus, DotsThreeVertical, PencilSimple, Palette, Trash, X, Globe, ArrowUUpLeft } from "@phosphor-icons/react";
 import { apiDelete, apiPatch } from "@/lib/api-client";
 import { toastError, toastSuccess } from "@/lib/toast";
 import type { VocabBank } from "./CreateBankModal";
@@ -107,6 +107,42 @@ export default function BankSelector({ banks, activeSlug, onSelect, onCreateClic
     }
   };
 
+  const handleTogglePublic = async (bank: VocabBank) => {
+    if (busy) return;
+    const nextIsPublic = !bank.is_public;
+    setBusy(true);
+    try {
+      const { ok, error } = await apiPatch(`/api/vocab/banks/${bank.id}`, { is_public: nextIsPublic });
+      if (!ok) {
+        // Backend handles profanity + 20-bank cap with a specific error string.
+        // We surface the server message verbatim (it's already shaped for users
+        // per the V3A contract): "Bank name contains language..." → friendly
+        // rewrite to the spec copy; "...up to 20 public banks..." → friendly
+        // rewrite to the spec copy. Anything else passes through.
+        const lower = (error ?? "").toLowerCase();
+        if (lower.includes("language we can't publish") || lower.includes("can't be used in public")) {
+          toastError("That name can't be used in public banks. Try something else.");
+        } else if (lower.includes("public bank") && (lower.includes("up to") || lower.includes("20"))) {
+          toastError("You have 20 public banks already. Make one private to publish another.");
+        } else {
+          toastError(error ?? (nextIsPublic ? "Couldn't publish that bank." : "Couldn't make that bank private."));
+        }
+        return;
+      }
+      toastSuccess(
+        nextIsPublic
+          ? "Bank is now public. Others can clone it."
+          : "Bank is private again.",
+      );
+      onMutated();
+      setMenuBankId(null);
+    } catch (e: unknown) {
+      toastError(e instanceof Error ? e.message : "Publish update failed.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
   const handleDelete = async (bank: VocabBank) => {
     const confirmed = window.confirm(
       `Delete "${bank.name}"? Every word inside this bank will be removed and this can't be undone.`,
@@ -155,6 +191,26 @@ export default function BankSelector({ banks, activeSlug, onSelect, onCreateClic
                 aria-pressed={isActive}
               >
                 <span aria-hidden="true" className="text-base leading-none">{bank.icon}</span>
+                {/* V3A — public + cloned indicators. Render BEFORE the name so
+                    the bank's status reads left-to-right with its identity. */}
+                {bank.is_public && (
+                  <span
+                    aria-label="Public bank — others can clone it"
+                    title="Public bank — others can clone it"
+                    className="inline-flex items-center text-cream/80"
+                  >
+                    <Globe size={11} weight="bold" aria-hidden="true" />
+                  </span>
+                )}
+                {bank.parent_bank_id && (
+                  <span
+                    aria-label={bank.parent_username ? `Cloned from ${bank.parent_username}` : "Cloned bank"}
+                    title={bank.parent_username ? `Cloned from ${bank.parent_username}` : "Cloned bank"}
+                    className="inline-flex items-center text-cream/80"
+                  >
+                    <ArrowUUpLeft size={11} weight="bold" aria-hidden="true" />
+                  </span>
+                )}
                 <span>{bank.name}</span>
                 {bank.kind === "language" && bank.source_lang && bank.target_lang && (
                   <span className="font-mono text-[9px] uppercase tracking-wider opacity-65">
@@ -215,6 +271,15 @@ export default function BankSelector({ banks, activeSlug, onSelect, onCreateClic
                         className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-syne text-cream/85 hover:bg-white/10 transition-colors text-left"
                       >
                         <Palette size={14} weight="bold" aria-hidden="true" /> Change color
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleTogglePublic(bank)}
+                        disabled={busy}
+                        className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-syne text-cream/85 hover:bg-white/10 transition-colors text-left disabled:opacity-50"
+                      >
+                        <Globe size={14} weight="bold" aria-hidden="true" />
+                        {bank.is_public ? "Make private" : "Make public"}
                       </button>
                       <button
                         type="button"
