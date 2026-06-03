@@ -462,6 +462,15 @@ export default function Navbar() {
                             ? <CountUp id="user-coins" value={user.coins} format={formatCoins} />
                             : <CountUp id="user-coins" value={user.coins ?? 0} format={formatCoins} />}
                       </span>
+                      {isPaid && (
+                        // Quiet confirmation that the marketed Fang multiplier is live on this account.
+                        <span
+                          className="ml-1 px-1.5 py-px rounded-full text-[10px] font-bebas tracking-wider leading-none bg-gold/15 text-gold/90 border border-gold/25"
+                          title={`${userPlan === "platinum" ? "2" : "1.5"}x Fang boost active`}
+                        >
+                          {userPlan === "platinum" ? "+2x" : "+1.5x"}
+                        </span>
+                      )}
                     </Link>
 
                     {/* +N pop — absolutely positioned above the pill so it

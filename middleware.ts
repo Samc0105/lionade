@@ -189,6 +189,24 @@ const ROUTE_LIMITS: RouteLimit[] = [
     keyPrefix: "party-strokes",
   },
 
+  // Stripe checkout + portal — anti-abuse (5/min/IP). Webhook is exempted
+  // below: Stripe MUST be able to hit it freely + retry on 5xx without
+  // tripping any throttle.
+  {
+    test: (p) => p === "/api/stripe/checkout",
+    method: "POST",
+    max: 5,
+    windowMs: 60 * 1000,
+    keyPrefix: "stripe-checkout",
+  },
+  {
+    test: (p) => p === "/api/stripe/portal",
+    method: "POST",
+    max: 5,
+    windowMs: 60 * 1000,
+    keyPrefix: "stripe-portal",
+  },
+
   // Currency-mutating financial routes — anti-burst
   {
     test: (p) =>
@@ -256,12 +274,21 @@ const SECURITY_HEADERS: Record<string, string> = {
 export function middleware(request: NextRequest) {
   maybePurge();
 
+  const { pathname } = request.nextUrl;
+
+  // Stripe webhook MUST pass through untouched. Stripe signs the EXACT raw
+  // bytes of the request body; any middleware that reads/clones req.body
+  // silently breaks signature verification. We also skip rate-limiting so
+  // Stripe's bursty retry behavior isn't throttled. Trailing-slash variant
+  // covered for defense-in-depth even though Stripe always sends without.
+  if (pathname === "/api/stripe/webhook" || pathname === "/api/stripe/webhook/") {
+    return NextResponse.next();
+  }
+
   const ip =
     request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
     request.headers.get("x-real-ip") ??
     "unknown";
-
-  const { pathname } = request.nextUrl;
 
   // Apply rate limit if any rule matches (first match wins)
   for (const rule of ROUTE_LIMITS) {

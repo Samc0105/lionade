@@ -1,7 +1,8 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
-import { ArrowRight, Sparkle, Crown, CheckCircle, EnvelopeSimple } from "@phosphor-icons/react";
+import { ArrowRight, Sparkle, Crown, CheckCircle } from "@phosphor-icons/react";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import BackButton from "@/components/BackButton";
 import { usePlan } from "@/lib/use-plan";
@@ -10,13 +11,14 @@ import {
   PLAN_EXAM_LIMITS,
   PLAN_FANG_MULTIPLIER,
 } from "@/lib/mastery-plan";
-import { SUPPORT_EMAIL } from "@/lib/site-config";
+import { apiPost } from "@/lib/api-client";
+import { toastError } from "@/lib/toast";
 
 /**
  * Subscription management page. Shows the user's current plan + what it
- * includes, and surfaces upgrade / cancel paths. Stripe isn't wired yet,
- * so both actions route to a support mailto until the checkout backend
- * lands.
+ * includes, and surfaces upgrade / cancel paths. Paid users get a Manage
+ * button that opens the Stripe Customer Portal for self-serve cancel,
+ * payment-method update, and invoice history.
  *
  * Accessed via the navbar dropdown's "Subscription" item.
  */
@@ -46,6 +48,24 @@ export default function SubscriptionSettingsPage() {
 
 function PlanPanel() {
   const { plan, isPaid, isLoading } = usePlan();
+  const [portalLoading, setPortalLoading] = useState(false);
+
+  async function openPortal() {
+    if (portalLoading) return;
+    setPortalLoading(true);
+    try {
+      const res = await apiPost<{ url: string }>("/api/stripe/portal", {});
+      if (!res.ok || !res.data?.url) {
+        toastError(res.error || "Couldn't open billing portal.");
+        setPortalLoading(false);
+        return;
+      }
+      window.location.href = res.data.url;
+    } catch (e) {
+      toastError((e as Error).message || "Couldn't open billing portal.");
+      setPortalLoading(false);
+    }
+  }
 
   if (isLoading) {
     return (
@@ -158,17 +178,29 @@ function PlanPanel() {
             Manage subscription
           </h3>
           <p className="text-[13px] text-cream/60 leading-relaxed mb-4">
-            Need to cancel, upgrade, downgrade, or switch billing cycle?
-            Stripe self-serve is rolling out soon — for now, email us and
-            we'll handle it within one business day.
+            Update your payment method, switch billing cycle, view invoices,
+            or cancel anytime in the Stripe Customer Portal.
           </p>
-          <a
-            href={`mailto:${SUPPORT_EMAIL}?subject=Lionade%20subscription%20change`}
-            className="inline-flex items-center gap-1.5 rounded-full border border-white/[0.15] text-cream hover:border-white/[0.3] font-mono text-[11px] uppercase tracking-[0.25em] px-4 py-2 transition-colors"
+          <button
+            type="button"
+            onClick={openPortal}
+            disabled={portalLoading}
+            className="inline-flex items-center gap-1.5 rounded-full border border-white/[0.15] text-cream hover:border-white/[0.3] font-mono text-[11px] uppercase tracking-[0.25em] px-4 py-2 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
           >
-            <EnvelopeSimple size={12} weight="bold" />
-            {SUPPORT_EMAIL}
-          </a>
+            {portalLoading ? (
+              <>
+                <span
+                  aria-hidden="true"
+                  className="w-3 h-3 rounded-full border-2 border-current border-t-transparent animate-spin"
+                />
+                Opening portal
+              </>
+            ) : (
+              <>
+                Manage in Stripe <ArrowRight size={12} weight="bold" />
+              </>
+            )}
+          </button>
         </div>
       )}
 

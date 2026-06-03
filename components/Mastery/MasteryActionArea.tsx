@@ -189,8 +189,14 @@ function SocraticInput({ disabled, onSubmit }: { disabled?: boolean; onSubmit: (
     finally { setSubmitting(false); }
   };
 
+  const canSend = !disabled && !submitting && text.trim().length > 0;
+
+  // shift+enter inserts newline; isComposing guards IME (JP/CN/KR) so Enter doesn't fire mid-composition
   const onKey = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); send(); }
+    if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) {
+      e.preventDefault();
+      if (canSend) send();
+    }
   };
 
   return (
@@ -228,7 +234,7 @@ function SocraticInput({ disabled, onSubmit }: { disabled?: boolean; onSubmit: (
       </div>
       <div className="flex items-center justify-between">
         <span className="font-mono text-[9.5px] uppercase tracking-[0.25em] text-cream/30">
-          ⌘+Enter to send · {800 - text.length} chars left
+          Enter to send · Shift+Enter for newline · {800 - text.length} chars left
         </span>
       </div>
     </div>

@@ -166,17 +166,24 @@ export default function LoginPage() {
   const pwStrong = Object.values(pwChecks).every(Boolean);
   const passwordsMatch = confirmPassword === "" || password === confirmPassword;
 
-  // Redirect if already logged in. Always go to /dashboard — ProtectedRoute
-  // runs the onboarding check there and re-routes to /onboarding if needed.
-  // Doing that query here used to hang on slow/failing profile reads,
-  // which trapped the user on the "Signing in..." spinner.
+  // Redirect if already logged in. Honors a `next=` query param so flows
+  // like "subscribe → forced through login → back to pricing" work without
+  // losing the user's intent. Falls back to /dashboard; ProtectedRoute runs
+  // the onboarding check there and re-routes to /onboarding if needed.
   //
   // Fallback: if router.replace doesn't navigate within 2s (Next.js router
   // occasionally no-ops mid-render), hard-redirect via window.location.
   useEffect(() => {
     if (isLoading || !user) return;
 
-    const dest = "/dashboard";
+    // Only allow same-origin relative paths so a hostile ?next=https://evil
+    // can't ride this redirect.
+    const nextParam = (() => {
+      if (typeof window === "undefined") return null;
+      const v = new URLSearchParams(window.location.search).get("next");
+      return v && v.startsWith("/") && !v.startsWith("//") ? v : null;
+    })();
+    const dest = nextParam ?? "/dashboard";
     let cancelled = false;
 
     const doRedirect = () => {

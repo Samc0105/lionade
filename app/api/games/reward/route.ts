@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
+import { applyFangMultiplierFromTier } from "@/lib/mastery-plan";
 
 export const dynamic = "force-dynamic";
 
@@ -44,22 +45,23 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Invalid amount" }, { status: 400 });
     }
 
-    // Get current coins
+    // Get current coins + tier in one read.
     const { data: profile } = await supabaseAdmin
       .from("profiles")
-      .select("coins")
+      .select("coins, plan, subscription_status")
       .eq("id", userId)
       .single();
 
     if (!profile) return NextResponse.json({ error: "Profile not found" }, { status: 404 });
 
-    const newCoins = (profile.coins ?? 0) + safeAmount;
+    const boostedAmount = applyFangMultiplierFromTier(safeAmount, profile.plan as string | null, profile.subscription_status as string | null);
+    const newCoins = (profile.coins ?? 0) + boostedAmount;
     await supabaseAdmin.from("profiles").update({ coins: newCoins }).eq("id", userId);
 
     // Log transaction
     await supabaseAdmin.from("coin_transactions").insert({
       user_id: userId,
-      amount: safeAmount,
+      amount: boostedAmount,
       type: "game_reward",
       description: `${gameType} game reward`,
     });

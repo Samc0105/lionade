@@ -4,6 +4,14 @@ All notable changes to Lionade, newest first.
 
 ---
 
+## 2026-06-02
+
+- feat(economy): PLAN_FANG_MULTIPLIER now applied at every Fang grant site (Pro 1.5x, Platinum 2x); past_due / canceled subscriptions revert to 1x immediately
+- fix(security): Stripe wave hardening — column-level grants instead of RLS subquery, webhook 500-on-handler-error so Stripe retries, idempotency status tracking, current_period_end read from subscription item (API 2026-02-25 schema), origin pinned to NEXT_PUBLIC_SITE_URL, customer_id persist fail-closed with metadata.user_id fallback in webhook, trial_will_end event subscribed, cancel_at field used, migration backfills existing plan='pro' users
+- feat(billing): Stripe subscriptions wired — Pro/Platinum monthly + annual + 3-day trial, webhook signature verification + idempotency, Stripe-hosted Customer Portal for self-serve cancel/update
+- feat(billing): pricing page + account subscription UI wired to Stripe Checkout + Customer Portal (3-day trial flow, success/cancel return states, tier-aware nav)
+- fix(web): Mastery — Enter sends socratic reply (Shift+Enter for newline, IME-safe); right-pad session-stats strip so the launcher dock no longer occludes the question count
+
 ## 2026-05-31
 
 - fix(security): atomic Fang mutations via update_user_coins RPC across place-bet, shop/purchase (with refund-on-inventory-failure), claim-bounty, save-quiz-results (+ GET auth gate), spin/roll; req.json 400 errors in place-bet + games/reward

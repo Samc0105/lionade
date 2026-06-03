@@ -643,7 +643,7 @@ export default function MasterySessionPage() {
         aria-label="Session stats"
         className="fixed left-0 right-0 bottom-14 md:bottom-0 z-30 bg-navy/90 backdrop-blur-md border-t border-white/[0.06]"
       >
-        <div className="max-w-[1080px] mx-auto px-4 sm:px-6 py-2 flex flex-wrap items-center gap-x-4 gap-y-1 font-mono text-[10px] uppercase tracking-[0.25em] text-cream/50">
+        <div className="max-w-[1080px] mx-auto pl-4 sm:pl-6 pr-[100px] py-2 flex flex-wrap items-center gap-x-4 gap-y-1 font-mono text-[10px] uppercase tracking-[0.25em] text-cream/50">
           <span><span className="tabular-nums text-cream/80">{data.session.questionsAnswered}</span> Qs</span>
           <span><span className="tabular-nums text-cream/80">{data.session.correctCount}</span> right</span>
           <span><span className="tabular-nums text-cream/80">{data.session.teachingPanelsShown}</span> taught</span>

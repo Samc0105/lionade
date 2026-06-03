@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
+import { applyFangMultiplierFromTier } from "@/lib/mastery-plan";
 
 export const dynamic = "force-dynamic";
 
@@ -140,17 +141,20 @@ export async function POST(req: NextRequest) {
   const wouldExtend = lastClaim
     && (Date.now() - new Date(lastClaim.created_at).getTime()) <= STREAK_WINDOW_MS;
   const newStreak = wouldExtend ? computeStreak(history) + 1 : 1;
-  const amount = BONUS_TIERS[tierForStreak(newStreak)];
+  const baseAmount = BONUS_TIERS[tierForStreak(newStreak)];
 
+  // One profile read for balance + tier (multiplier honors past_due/canceled).
   const { data: profile } = await supabaseAdmin
     .from("profiles")
-    .select("coins")
+    .select("coins, plan, subscription_status")
     .eq("id", userId)
     .single();
 
   if (!profile) {
     return NextResponse.json({ error: "Profile not found" }, { status: 404 });
   }
+
+  const amount = applyFangMultiplierFromTier(baseAmount, profile.plan as string | null, profile.subscription_status as string | null);
 
   const { error: profErr } = await supabaseAdmin
     .from("profiles")

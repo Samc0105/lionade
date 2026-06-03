@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
 import { getDailyMissions } from "@/lib/missions";
+import { applyFangMultiplierFromTier } from "@/lib/mastery-plan";
 
 export const dynamic = "force-dynamic";
 
@@ -50,25 +51,30 @@ export async function POST(req: NextRequest) {
     // Award coins + XP
     const { data: profile } = await supabaseAdmin
       .from("profiles")
-      .select("coins, xp")
+      .select("coins, xp, plan, subscription_status")
       .eq("id", userId)
       .single();
+
+    // Multiplier resolved off the same profile read — no extra round-trip.
+    const boostedCoinReward = profile
+      ? applyFangMultiplierFromTier(mission.coinReward, profile.plan as string | null, profile.subscription_status as string | null)
+      : mission.coinReward;
 
     if (profile) {
       await supabaseAdmin
         .from("profiles")
         .update({
-          coins: (profile.coins ?? 0) + mission.coinReward,
+          coins: (profile.coins ?? 0) + boostedCoinReward,
           xp: (profile.xp ?? 0) + mission.xpReward,
         })
         .eq("id", userId);
     }
 
     // Log coin transaction
-    if (mission.coinReward > 0) {
+    if (boostedCoinReward > 0) {
       await supabaseAdmin.from("coin_transactions").insert({
         user_id: userId,
-        amount: mission.coinReward,
+        amount: boostedCoinReward,
         type: "mission_reward",
         reference_id: missionId,
         description: `Mission: ${mission.title}`,
@@ -77,7 +83,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      coinsAwarded: mission.coinReward,
+      coinsAwarded: boostedCoinReward,
       xpAwarded: mission.xpReward,
     });
   } catch (err) {

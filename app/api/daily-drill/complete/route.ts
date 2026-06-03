@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
+import { applyFangMultiplierFromTier } from "@/lib/mastery-plan";
 
 /**
  * POST /api/daily-drill/complete
@@ -105,7 +106,15 @@ export async function POST(req: NextRequest) {
     const total = validResults.length;
     const perfect = correctCount === total && total >= 3;
 
-    const coinsEarned = correctCount * FANGS_PER_CORRECT + (perfect ? FANGS_PERFECT_BONUS : 0);
+    const baseCoinsEarned = correctCount * FANGS_PER_CORRECT + (perfect ? FANGS_PERFECT_BONUS : 0);
+
+    // One profile read covers both tier (for multiplier) and balance (for credit below).
+    const { data: planProfile } = await supabaseAdmin
+      .from("profiles")
+      .select("coins, plan, subscription_status")
+      .eq("id", userId)
+      .single();
+    const coinsEarned = applyFangMultiplierFromTier(baseCoinsEarned, planProfile?.plan as string | null, planProfile?.subscription_status as string | null);
 
     // Insert completion record FIRST (idempotent guard via UNIQUE).
     const { error: insErr } = await supabaseAdmin
@@ -139,14 +148,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Couldn't record drill." }, { status: 500 });
     }
 
-    // Grant Fangs.
+    // Grant Fangs (balance pre-loaded above).
     if (coinsEarned > 0) {
-      const { data: profile } = await supabaseAdmin
-        .from("profiles")
-        .select("coins")
-        .eq("id", userId)
-        .single();
-      const newBalance = ((profile as { coins?: number } | null)?.coins ?? 0) + coinsEarned;
+      const newBalance = ((planProfile as { coins?: number } | null)?.coins ?? 0) + coinsEarned;
       await Promise.all([
         supabaseAdmin.from("profiles").update({ coins: newBalance }).eq("id", userId),
         supabaseAdmin.from("coin_transactions").insert({

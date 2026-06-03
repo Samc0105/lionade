@@ -6,10 +6,10 @@ import {
   computeReward,
   canSpinNow,
   nextSpinAt,
-  spinMultiplierForPlan,
   SPIN_SLOTS,
   type SpinOutcome,
 } from "@/lib/spin";
+import { effectiveTier, multiplierForTier } from "@/lib/mastery-plan";
 
 export const dynamic = "force-dynamic";
 
@@ -58,7 +58,7 @@ export async function POST(req: NextRequest) {
   // ── 2. Load current balance + plan ──────────────────────────────────────
   const { data: profile, error: profileErr } = await supabaseAdmin
     .from("profiles")
-    .select("coins, plan")
+    .select("coins, plan, subscription_status")
     .eq("id", userId)
     .single();
   if (profileErr || !profile) {
@@ -67,7 +67,8 @@ export async function POST(req: NextRequest) {
   }
 
   const balanceBefore: number = profile.coins ?? 0;
-  const planMultiplier = spinMultiplierForPlan(profile.plan);
+  // PLAN_FANG_MULTIPLIER (1×/1.5×/2×), past_due/canceled revert to free.
+  const planMultiplier = multiplierForTier(effectiveTier(profile.plan, profile.subscription_status));
 
   // ── 3. Roll the slot ────────────────────────────────────────────────────
   const { index: slotIndex, slot } = rollSlot();

@@ -4,6 +4,7 @@ import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
 import { renderEmail, templates } from "@/lib/emails";
 import { absoluteUrl } from "@/lib/site-config";
+import { applyFangMultiplierFromTier } from "@/lib/mastery-plan";
 
 // GET — health check (auth-gated so the profile row count isn't world-readable)
 export async function GET(req: NextRequest) {
@@ -85,7 +86,7 @@ export async function POST(req: NextRequest) {
     // 3. Update profile: add coins (atomic) and xp
     const { data: profile, error: profileFetchErr } = await supabaseAdmin
       .from("profiles")
-      .select("coins, xp, streak, max_streak, last_activity_at, daily_questions_completed, daily_reset_date, display_name")
+      .select("coins, xp, streak, max_streak, last_activity_at, daily_questions_completed, daily_reset_date, display_name, plan, subscription_status")
       .eq("id", userId)
       .single();
 
@@ -94,12 +95,15 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Couldn't load profile." }, { status: 500 });
     }
 
+    // Apply plan multiplier (Pro 1.5×, Platinum 2×) honoring past_due/canceled.
+    const boostedCoinsEarned = applyFangMultiplierFromTier(coinsEarned, profile.plan as string | null, profile.subscription_status as string | null);
+
     // Atomic coin credit — concurrent quiz submissions from parallel tabs
     // would otherwise read-modify-write the same `coins` value and drop a grant.
-    if (coinsEarned > 0) {
+    if (boostedCoinsEarned > 0) {
       const { error: coinErr } = await supabaseAdmin.rpc("update_user_coins", {
         p_user_id: userId,
-        p_delta: coinsEarned,
+        p_delta: boostedCoinsEarned,
         p_min_balance: 0,
       });
       if (coinErr) {
@@ -132,7 +136,7 @@ export async function POST(req: NextRequest) {
       const count = recentCount ?? 0;
 
       if (count > 0 && count % 3 === 0) {
-        bonusFangs = 50;
+        bonusFangs = applyFangMultiplierFromTier(50, profile.plan as string | null, profile.subscription_status as string | null);
         // Atomic credit — see Step 3 rationale.
         await supabaseAdmin.rpc("update_user_coins", {
           p_user_id: userId,
@@ -153,11 +157,11 @@ export async function POST(req: NextRequest) {
       console.warn("[save-quiz-results] Step 3b WARN (non-fatal):", bonusErr);
     }
 
-    // 4. Log coin transaction
-    if (coinsEarned > 0) {
+    // 4. Log coin transaction (audit reflects ACTUAL credited amount, post-multiplier)
+    if (boostedCoinsEarned > 0) {
       const { error: txnErr } = await supabaseAdmin.from("coin_transactions").insert({
         user_id: userId,
-        amount: coinsEarned,
+        amount: boostedCoinsEarned,
         type: "quiz_reward",
         reference_id: String(session.id),
         description: `${subject} quiz — ${correctAnswers}/${totalQuestions} correct`,
@@ -184,7 +188,7 @@ export async function POST(req: NextRequest) {
         .from("daily_activity")
         .update({
           questions_answered: existingDaily.questions_answered + totalQuestions,
-          coins_earned: existingDaily.coins_earned + coinsEarned,
+          coins_earned: existingDaily.coins_earned + boostedCoinsEarned,
           streak_maintained: true,
         })
         .eq("id", existingDaily.id);
@@ -194,7 +198,7 @@ export async function POST(req: NextRequest) {
         user_id: userId,
         date: todayUTC,
         questions_answered: totalQuestions,
-        coins_earned: coinsEarned,
+        coins_earned: boostedCoinsEarned,
         streak_maintained: true,
       });
       if (dailyErr) console.warn("[save-quiz-results] Step 5 daily insert WARN:", dailyErr.message);
@@ -303,7 +307,7 @@ export async function POST(req: NextRequest) {
         .like("description", `%${newStreak}-day%`);
 
       if (!alreadyAwarded || alreadyAwarded === 0) {
-        const milestoneBonus = STREAK_MILESTONES[newStreak];
+        const milestoneBonus = applyFangMultiplierFromTier(STREAK_MILESTONES[newStreak], profile.plan as string | null, profile.subscription_status as string | null);
         // Atomic credit — see Step 3 rationale.
         await supabaseAdmin.rpc("update_user_coins", {
           p_user_id: userId,
@@ -546,7 +550,8 @@ export async function POST(req: NextRequest) {
       if (activeBet) {
         const won = correctAnswers >= activeBet.target_score;
         const multipliers: Record<number, number> = { 7: 1.5, 8: 2, 9: 3, 10: 5 };
-        const coinsWon = won ? Math.floor(activeBet.coins_staked * (multipliers[activeBet.target_score] ?? 1)) : 0;
+        const baseCoinsWon = won ? Math.floor(activeBet.coins_staked * (multipliers[activeBet.target_score] ?? 1)) : 0;
+        const coinsWon = applyFangMultiplierFromTier(baseCoinsWon, profile.plan as string | null, profile.subscription_status as string | null);
 
         await supabaseAdmin
           .from("daily_bets")

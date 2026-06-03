@@ -3,6 +3,7 @@ import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
 import { calcNinnyReward, type NinnyMode } from "@/lib/ninny";
 import { recordQuestionPerformance } from "@/lib/question-bank";
+import { applyFangMultiplierFromTier } from "@/lib/mastery-plan";
 
 export const dynamic = "force-dynamic";
 
@@ -88,9 +89,26 @@ export async function POST(req: NextRequest) {
   const score = Math.max(0, Math.min(total, Number(body.score) || 0));
 
   // 40% floor + 60% accuracy bonus, min 5 each — protects against shutout
-  const { coins: coinsEarned, xp: xpEarned } = calcNinnyReward(mode, score, total);
+  const { coins: baseCoinsEarned, xp: xpEarned } = calcNinnyReward(mode, score, total);
 
-  // 1. Insert session
+  // 2. Fetch profile (need streak fields + plan/status for multiplier)
+  const { data: profile, error: profileFetchErr } = await supabaseAdmin
+    .from("profiles")
+    .select(
+      "coins, xp, streak, max_streak, last_activity_at, daily_questions_completed, daily_reset_date, plan, subscription_status",
+    )
+    .eq("id", userId)
+    .single();
+
+  if (profileFetchErr) {
+    console.error("[ninny/complete] profile fetch:", profileFetchErr.message);
+    return NextResponse.json({ error: "Failed to fetch profile" }, { status: 500 });
+  }
+
+  // Apply plan multiplier (1.5×/2×) honoring past_due/canceled.
+  const coinsEarned = applyFangMultiplierFromTier(baseCoinsEarned, profile.plan as string | null, profile.subscription_status as string | null);
+
+  // 1. Insert session (audit reflects actual credited amount)
   const { data: session, error: sessionErr } = await supabaseAdmin
     .from("ninny_sessions")
     .insert({
@@ -108,20 +126,6 @@ export async function POST(req: NextRequest) {
   if (sessionErr) {
     console.error("[ninny/complete] session insert:", sessionErr.message);
     return NextResponse.json({ error: "Failed to save session" }, { status: 500 });
-  }
-
-  // 2. Fetch profile (need streak fields too)
-  const { data: profile, error: profileFetchErr } = await supabaseAdmin
-    .from("profiles")
-    .select(
-      "coins, xp, streak, max_streak, last_activity_at, daily_questions_completed, daily_reset_date",
-    )
-    .eq("id", userId)
-    .single();
-
-  if (profileFetchErr) {
-    console.error("[ninny/complete] profile fetch:", profileFetchErr.message);
-    return NextResponse.json({ error: "Failed to fetch profile" }, { status: 500 });
   }
 
   const newCoins = (profile.coins ?? 0) + coinsEarned;

@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { Check, X, Sparkle, Crown, CaretLeft } from "@phosphor-icons/react";
 import BackButton from "@/components/BackButton";
@@ -12,6 +13,10 @@ import {
   PLAN_ADS,
 } from "@/lib/mastery-plan";
 import { SUPPORT_EMAIL } from "@/lib/site-config";
+import { useAuth } from "@/lib/auth";
+import { usePlan } from "@/lib/use-plan";
+import { apiPost } from "@/lib/api-client";
+import { toastError, toastInfo } from "@/lib/toast";
 
 /**
  * Public pricing page. Shows the three plans (free / pro / platinum) with
@@ -19,9 +24,11 @@ import { SUPPORT_EMAIL } from "@/lib/site-config";
  * `lib/mastery-plan.ts` so marketing copy and server-side gating stay
  * in sync.
  *
- * Checkout is not wired yet — "Upgrade" CTAs point to a mailto so the
- * founder handles manual upgrades until Stripe is live. Easy swap later.
- * (Stripe self-serve lands behind the same hrefs via /settings/subscription.)
+ * Checkout flow: Pro / Platinum CTAs POST to /api/stripe/checkout
+ * (3-day trial included) and redirect to the Stripe-hosted Checkout URL.
+ * Already-subscribed users get a "Manage plan" button on their current
+ * tier that opens the Stripe Customer Portal via /api/stripe/portal.
+ * Signed-out users bounce to /login?next=/pricing.
  *
  * Visual shell only redesigned (2026-05-15): glassy cards + page-local
  * Lionade WebGL shader. Plan DATA, the cycle toggle, the annual price
@@ -151,7 +158,53 @@ const SPARKLES: ReadonlyArray<{
 ];
 
 export default function PricingPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const { user } = useAuth();
+  const { plan, isPaid } = usePlan();
   const [cycle, setCycle] = useState<Cycle>("monthly");
+  // Tier currently in-flight to /api/stripe/checkout so we can disable the
+  // exact button + show a spinner without locking the other plan's CTA.
+  const [pendingTier, setPendingTier] = useState<"pro" | "platinum" | null>(null);
+
+  // Show a polite toast if the user returned from a canceled Stripe Checkout
+  // session. Strip the query param so a back/forward navigation doesn't
+  // re-fire the toast. Runs once on mount and whenever the param changes.
+  useEffect(() => {
+    if (searchParams?.get("upgrade") !== "canceled") return;
+    toastInfo("Checkout canceled. You can subscribe anytime.");
+    router.replace("/pricing");
+  }, [searchParams, router]);
+
+  /**
+   * CTA click handler for Pro / Platinum.
+   *   - Signed-out → /login?next=/pricing
+   *   - Already on this paid tier → open Stripe Customer Portal (manage)
+   *   - Otherwise → POST /api/stripe/checkout and follow the returned URL
+   */
+  async function handleUpgrade(tier: "pro" | "platinum") {
+    if (!user) {
+      router.push("/login?next=/pricing");
+      return;
+    }
+    if (pendingTier) return;
+    setPendingTier(tier);
+    try {
+      const isManaging = isPaid && plan === tier;
+      const res = isManaging
+        ? await apiPost<{ url: string }>("/api/stripe/portal", {})
+        : await apiPost<{ url: string }>("/api/stripe/checkout", { tier, cycle });
+      if (!res.ok || !res.data?.url) {
+        toastError(res.error || "Couldn't open checkout. Try again.");
+        setPendingTier(null);
+        return;
+      }
+      window.location.href = res.data.url;
+    } catch (e) {
+      toastError((e as Error).message || "Couldn't open checkout. Try again.");
+      setPendingTier(null);
+    }
+  }
   // Returns true when the OS requests reduced motion. On the server this is
   // `null` (falsy) and on the client it resolves — but we ONLY ever use it to
   // pick animation *values*, never to add/remove DOM nodes, so the element
@@ -346,8 +399,9 @@ export default function PricingPage() {
           </div>
         </motion.div>
 
-        {/* Plan cards — staggered Framer Motion entrance. Plan DATA, prices,
-            cycle, and every CTA href are unchanged. */}
+        {/* Plan cards — staggered Framer Motion entrance. CTA copy is now
+            tier-aware: paid users get "Manage plan" on their current tier so
+            the same button opens the Stripe Customer Portal. */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-14">
           <motion.div {...reveal(0.20)}>
             <PlanCard
@@ -356,7 +410,7 @@ export default function PricingPage() {
               tagline="Grind for free. Forever. No card."
               price={0}
               reduce={!!reduce}
-              cta={{ label: "Start free", href: "/login" }}
+              cta={{ label: user ? "You're on Free" : "Start free", href: user ? "/dashboard" : "/login" }}
             />
           </motion.div>
           <motion.div {...reveal(0.30)}>
@@ -368,7 +422,12 @@ export default function PricingPage() {
               cycle={cycle}
               highlight
               reduce={!!reduce}
-              cta={{ label: "Go Pro", href: "mailto:" + SUPPORT_EMAIL + "?subject=Upgrade%20to%20Lionade%20Pro" }}
+              cta={{
+                label: plan === "pro" ? "Manage plan" : "Go Pro",
+                onClick: () => handleUpgrade("pro"),
+                loading: pendingTier === "pro",
+                disabled: pendingTier !== null,
+              }}
             />
           </motion.div>
           <motion.div {...reveal(0.40)}>
@@ -379,7 +438,12 @@ export default function PricingPage() {
               price={cycle === "monthly" ? PLAN_PRICING.platinum.monthly : PLAN_PRICING.platinum.annual}
               cycle={cycle}
               reduce={!!reduce}
-              cta={{ label: "Go Platinum", href: "mailto:" + SUPPORT_EMAIL + "?subject=Upgrade%20to%20Lionade%20Platinum" }}
+              cta={{
+                label: plan === "platinum" ? "Manage plan" : "Go Platinum",
+                onClick: () => handleUpgrade("platinum"),
+                loading: pendingTier === "platinum",
+                disabled: pendingTier !== null,
+              }}
             />
           </motion.div>
         </div>
@@ -479,6 +543,10 @@ export default function PricingPage() {
 }
 
 // ── Plan card ────────────────────────────────────────────────────────────────
+type PlanCardCta =
+  | { label: string; href: string }
+  | { label: string; onClick: () => void; loading?: boolean; disabled?: boolean };
+
 function PlanCard({
   tier, name, tagline, price, cycle, highlight, reduce, cta,
 }: {
@@ -489,7 +557,7 @@ function PlanCard({
   cycle?: Cycle;
   highlight?: boolean;
   reduce?: boolean;
-  cta: { label: string; href: string };
+  cta: PlanCardCta;
 }) {
   const isFree = tier === "free";
   const isPlatinum = tier === "platinum";
@@ -615,18 +683,45 @@ function PlanCard({
           ))}
         </ul>
 
-        <Link
-          href={cta.href}
-          className={`relative w-full text-center rounded-full font-mono text-[11px] uppercase tracking-[0.25em] py-3 transition-all duration-200 active:scale-[0.98] ${
-            highlight
-              ? "btn-gold !rounded-full !py-3"
-              : isPlatinum
-                ? "bg-gradient-to-r from-[#C0C6D6] to-[#E8EAF2] text-navy hover:brightness-110"
-                : "border border-white/15 text-cream hover:bg-white/[0.06]"
-          }`}
-        >
-          {cta.label}
-        </Link>
+        {"href" in cta ? (
+          <Link
+            href={cta.href}
+            className={`relative w-full text-center rounded-full font-mono text-[11px] uppercase tracking-[0.25em] py-3 transition-all duration-200 active:scale-[0.98] ${
+              highlight
+                ? "btn-gold !rounded-full !py-3"
+                : isPlatinum
+                  ? "bg-gradient-to-r from-[#C0C6D6] to-[#E8EAF2] text-navy hover:brightness-110"
+                  : "border border-white/15 text-cream hover:bg-white/[0.06]"
+            }`}
+          >
+            {cta.label}
+          </Link>
+        ) : (
+          <button
+            type="button"
+            onClick={cta.onClick}
+            disabled={cta.disabled || cta.loading}
+            className={`relative w-full text-center rounded-full font-mono text-[11px] uppercase tracking-[0.25em] py-3 transition-all duration-200 active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed ${
+              highlight
+                ? "btn-gold !rounded-full !py-3"
+                : isPlatinum
+                  ? "bg-gradient-to-r from-[#C0C6D6] to-[#E8EAF2] text-navy hover:brightness-110"
+                  : "border border-white/15 text-cream hover:bg-white/[0.06]"
+            }`}
+          >
+            {cta.loading ? (
+              <span className="inline-flex items-center gap-2 justify-center">
+                <span
+                  aria-hidden="true"
+                  className="w-3 h-3 rounded-full border-2 border-current border-t-transparent animate-spin"
+                />
+                Opening checkout
+              </span>
+            ) : (
+              cta.label
+            )}
+          </button>
+        )}
       </div>
     </div>
   );

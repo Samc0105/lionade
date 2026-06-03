@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
+import { applyFangMultiplier } from "@/lib/mastery-plan";
 
 export async function POST(req: NextRequest) {
   const auth = await requireAuth(req);
@@ -47,10 +48,11 @@ export async function POST(req: NextRequest) {
     // Award coins atomically — claim already locked above, but a separate
     // read-modify-write on coins would still race with concurrent quiz reward
     // grants. xp is a separate UPDATE (no atomic RPC yet — lower risk surface).
-    if (bounty.coin_reward > 0) {
+    const boostedCoinReward = await applyFangMultiplier(bounty.coin_reward, userId, supabaseAdmin);
+    if (boostedCoinReward > 0) {
       const { error: creditErr } = await supabaseAdmin.rpc("update_user_coins", {
         p_user_id: userId,
-        p_delta: bounty.coin_reward,
+        p_delta: boostedCoinReward,
         p_min_balance: 0,
       });
       if (creditErr) {
@@ -73,17 +75,17 @@ export async function POST(req: NextRequest) {
     }
 
     // Log coin transaction
-    if (bounty.coin_reward > 0) {
+    if (boostedCoinReward > 0) {
       await supabaseAdmin.from("coin_transactions").insert({
         user_id: userId,
-        amount: bounty.coin_reward,
+        amount: boostedCoinReward,
         type: "bounty_reward",
         reference_id: bountyId,
         description: `Bounty: ${bounty.title}`,
       });
     }
 
-    return NextResponse.json({ success: true, coinsAwarded: bounty.coin_reward, xpAwarded: bounty.xp_reward });
+    return NextResponse.json({ success: true, coinsAwarded: boostedCoinReward, xpAwarded: bounty.xp_reward });
   } catch (err) {
     console.error("[claim-bounty]", err);
     return NextResponse.json({ error: "Server error" }, { status: 500 });
