@@ -8,7 +8,14 @@
  */
 
 export type Rarity = "common" | "rare" | "epic" | "legendary";
-export type ItemType = "frame" | "background" | "name_color" | "banner" | "booster";
+export type ItemType =
+  | "frame"
+  | "background"
+  | "name_color"
+  | "banner"
+  | "booster"
+  | "avatar_aura"
+  | "voice_skin";
 export type BoosterEffect =
   | "coin_multiplier"
   | "xp_multiplier"
@@ -16,7 +23,8 @@ export type BoosterEffect =
   | "auto_correct"
   | "fifty_fifty"
   | "score_boost"
-  | "streak_shield";
+  | "streak_shield"
+  | "mastery_hint";
 
 export interface ShopItem {
   id: string;
@@ -66,6 +74,30 @@ export const BOOSTER_ITEMS: ShopItem[] = [
   { id: "boost_time_warp", name: "Time Warp", description: "+10 seconds per question", type: "booster", rarity: "common", price: 40, icon: "⏰", boosterEffect: "extra_time", boosterValue: 10, boosterDuration: 1 },
   { id: "boost_brain_freeze", name: "Brain Freeze", description: "50/50 — eliminate two wrong answers once", type: "booster", rarity: "epic", price: 125, icon: "🧊", boosterEffect: "fifty_fifty", boosterValue: 1, boosterDuration: 1 },
   { id: "boost_score_boost", name: "Score Boost", description: "+1 added to your final score", type: "booster", rarity: "common", price: 50, icon: "📈", boosterEffect: "score_boost", boosterValue: 1, boosterDuration: 1 },
+  // 2026-06-02 — Mastery Hint Pack (5 hints). Dollar IAP via Stripe deferred to V2.
+  { id: "boost_mastery_hint_pack", name: "Mastery Hint Pack", description: "5 hints to use in Mastery Mode sessions", type: "booster", rarity: "rare", price: 300, icon: "💡", boosterEffect: "mastery_hint", boosterValue: 5, boosterDuration: 5 },
+  // 2026-06-02 — Streak Shield 3-pack. Stacks with single shield.
+  { id: "boost_streak_shield_3pack", name: "Streak Shield 3-pack", description: "Protect your streak for 3 missed days", type: "booster", rarity: "epic", price: 400, icon: "🛡️", boosterEffect: "streak_shield", boosterValue: 0, boosterDuration: 3 },
+];
+
+// 2026-06-02 — Avatar Aura Pack: 10 cosmetic auras at 200-400 Fangs.
+// Placeholder icons; design owns final visual treatment.
+export const AVATAR_AURAS: ShopItem[] = [
+  { id: "aura_solar", name: "Solar Aura", description: "Warm solar flare around your avatar", type: "avatar_aura", rarity: "common", price: 200, icon: "☀️" },
+  { id: "aura_lunar", name: "Lunar Aura", description: "Cool moonlight halo", type: "avatar_aura", rarity: "common", price: 200, icon: "🌙" },
+  { id: "aura_emerald", name: "Emerald Aura", description: "Verdant green energy ring", type: "avatar_aura", rarity: "common", price: 220, icon: "🟢" },
+  { id: "aura_sapphire", name: "Sapphire Aura", description: "Deep sapphire shimmer", type: "avatar_aura", rarity: "rare", price: 260, icon: "🔷" },
+  { id: "aura_ruby", name: "Ruby Aura", description: "Pulsing ruby glow", type: "avatar_aura", rarity: "rare", price: 260, icon: "🔴" },
+  { id: "aura_amethyst", name: "Amethyst Aura", description: "Violet amethyst mist", type: "avatar_aura", rarity: "rare", price: 280, icon: "🟣" },
+  { id: "aura_storm", name: "Storm Aura", description: "Crackling storm cloud aura", type: "avatar_aura", rarity: "epic", price: 320, icon: "⛈️" },
+  { id: "aura_inferno", name: "Inferno Aura", description: "Roaring flame aura", type: "avatar_aura", rarity: "epic", price: 340, icon: "🔥" },
+  { id: "aura_void", name: "Void Aura", description: "Inky void with starlight motes", type: "avatar_aura", rarity: "epic", price: 380, icon: "🌌" },
+  { id: "aura_prismatic", name: "Prismatic Aura", description: "Refracting rainbow halo", type: "avatar_aura", rarity: "legendary", price: 400, icon: "🌈" },
+];
+
+// 2026-06-02 — Ninny Voice Skin (single SKU for V1; more voices follow).
+export const VOICE_SKINS: ShopItem[] = [
+  { id: "voice_ninny_classic", name: "Ninny Voice Skin", description: "Unlock Ninny's signature voice in chat", type: "voice_skin", rarity: "epic", price: 500, icon: "🎙️" },
 ];
 
 export const FEATURED_ITEMS: ShopItem[] = [
@@ -87,7 +119,12 @@ export const PREMIUM_ITEMS: PremiumItem[] = [
 ];
 
 // All purchasable Fangs items combined — used by server lookup
-const ALL_FANG_ITEMS: ShopItem[] = [...COSMETIC_ITEMS, ...BOOSTER_ITEMS];
+const ALL_FANG_ITEMS: ShopItem[] = [
+  ...COSMETIC_ITEMS,
+  ...BOOSTER_ITEMS,
+  ...AVATAR_AURAS,
+  ...VOICE_SKINS,
+];
 
 /**
  * Server-side lookup for an item by id. Returns the canonical

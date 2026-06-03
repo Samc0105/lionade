@@ -206,6 +206,13 @@ const ROUTE_LIMITS: RouteLimit[] = [
     windowMs: 60 * 1000,
     keyPrefix: "stripe-portal",
   },
+  {
+    test: (p) => p === "/api/stripe/fang-purchase",
+    method: "POST",
+    max: 10,
+    windowMs: 60 * 1000,
+    keyPrefix: "stripe-fang-purchase",
+  },
 
   // Currency-mutating financial routes — anti-burst
   {

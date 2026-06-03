@@ -73,6 +73,7 @@ export async function POST(req: NextRequest) {
       p_user_id: userId,
       p_delta: -price,
       p_min_balance: 0,
+      p_source: "spend",
     });
 
     if (debitErr) {
@@ -134,6 +135,7 @@ export async function POST(req: NextRequest) {
         p_user_id: userId,
         p_delta: price,
         p_min_balance: 0,
+        p_source: "cashable",
       });
       return NextResponse.json({ error: "Purchase failed, refunded" }, { status: 500 });
     }

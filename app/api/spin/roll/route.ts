@@ -111,6 +111,7 @@ export async function POST(req: NextRequest) {
     p_user_id: userId,
     p_delta: fangsDelta,
     p_min_balance: 0,
+    p_source: "cashable",
   });
 
   if (spinUpdateErr && spinUpdateErr.code === "P0001") {
@@ -126,6 +127,7 @@ export async function POST(req: NextRequest) {
         p_user_id: userId,
         p_delta: -freshBalance,
         p_min_balance: 0,
+        p_source: "spend",
       });
       if (zeroErr) {
         console.error("[spin/roll] zero-out:", zeroErr.message);

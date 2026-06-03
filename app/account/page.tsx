@@ -18,8 +18,10 @@ import useSWR from "swr";
 import { ArrowRight, Sparkle, Crown, CheckCircle } from "@phosphor-icons/react";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import BackButton from "@/components/BackButton";
+import { cdnUrl } from "@/lib/cdn";
 import { useAuth } from "@/lib/auth";
 import { usePlan } from "@/lib/use-plan";
+import { useUserStats, mutateUserStats } from "@/lib/hooks";
 import { supabase } from "@/lib/supabase";
 import { apiPost } from "@/lib/api-client";
 import { toastError, toastSuccess } from "@/lib/toast";
@@ -86,6 +88,7 @@ function AccountInner() {
   const searchParams = useSearchParams();
   const { user } = useAuth();
   const { plan, refresh: refreshPlan } = usePlan();
+  const { stats } = useUserStats(user?.id);
   const [portalLoading, setPortalLoading] = useState(false);
 
   const swrKey = user?.id ? `subscription/${user.id}` : null;
@@ -112,6 +115,22 @@ function AccountInner() {
     void refreshSub();
     refreshPlan();
   }, [searchParams, router, plan, refreshSub, refreshPlan]);
+
+  // Stripe Fang IAP success: Fangs are minted on the webhook side; nudge
+  // the user-stats SWR cache so the new balance appears within ~1 SWR cycle
+  // even if the webhook lands a few hundred ms behind the browser redirect.
+  // Strip the query param so a refresh / back-nav doesn't re-fire the toast.
+  useEffect(() => {
+    if (searchParams?.get("iap") !== "success") return;
+    toastSuccess(
+      "Fangs added to your wallet. Spend them in the Lion's Den anytime.",
+      { duration: 5000 },
+    );
+    router.replace("/account");
+    if (user?.id) {
+      void mutateUserStats(user.id);
+    }
+  }, [searchParams, router, user?.id]);
 
   async function openPortal() {
     if (portalLoading) return;
@@ -184,6 +203,34 @@ function AccountInner() {
           <h1 className="font-bebas text-4xl text-cream tracking-[0.06em] leading-none">
             Your plan
           </h1>
+        </div>
+
+        {/* Fang balance pill — single total from profiles.coins (the dual */}
+        {/* cashable / iap ledger is internal; users see one number). */}
+        <div
+          className="inline-flex items-center gap-2 mb-6 px-4 py-1.5 rounded-full backdrop-blur-xl"
+          style={{
+            background: "rgba(255,215,0,0.08)",
+            border: "1px solid rgba(255,215,0,0.20)",
+          }}
+        >
+          <img
+            src={cdnUrl("/F.png")}
+            alt="Fangs"
+            className="w-5 h-5 object-contain"
+          />
+          <span className="font-bebas text-xl text-gold tracking-wider tabular-nums">
+            {stats?.coins != null ? stats.coins.toLocaleString() : "—"}
+          </span>
+          <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-cream/50">
+            Fangs
+          </span>
+          <Link
+            href="/shop"
+            className="ml-2 font-mono text-[10px] uppercase tracking-[0.22em] text-cream/55 hover:text-cream transition-colors"
+          >
+            Top up
+          </Link>
         </div>
 
         {isLoading && !sub ? (

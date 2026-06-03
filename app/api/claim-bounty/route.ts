@@ -54,6 +54,7 @@ export async function POST(req: NextRequest) {
         p_user_id: userId,
         p_delta: boostedCoinReward,
         p_min_balance: 0,
+        p_source: "cashable",
       });
       if (creditErr) {
         console.error("[claim-bounty] credit:", creditErr.message);

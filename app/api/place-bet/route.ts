@@ -44,6 +44,7 @@ export async function POST(req: NextRequest) {
       p_user_id: userId,
       p_delta: -coinsStaked,
       p_min_balance: 0,
+      p_source: "spend",
     });
 
     if (debitErr) {
@@ -76,6 +77,7 @@ export async function POST(req: NextRequest) {
         p_user_id: userId,
         p_delta: coinsStaked,
         p_min_balance: 0,
+        p_source: "cashable",
       });
       console.error("[place-bet] insert:", betErr.message);
       return NextResponse.json({ error: "Failed to place bet" }, { status: 500 });

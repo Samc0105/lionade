@@ -105,6 +105,7 @@ export async function POST(req: NextRequest) {
         p_user_id: userId,
         p_delta: boostedCoinsEarned,
         p_min_balance: 0,
+        p_source: "cashable",
       });
       if (coinErr) {
         console.error("[save-quiz-results] Step 3 FAILED — coin credit:", coinErr.message);
@@ -142,6 +143,7 @@ export async function POST(req: NextRequest) {
           p_user_id: userId,
           p_delta: bonusFangs,
           p_min_balance: 0,
+          p_source: "cashable",
         });
 
         await supabaseAdmin.from("coin_transactions").insert({
@@ -313,6 +315,7 @@ export async function POST(req: NextRequest) {
           p_user_id: userId,
           p_delta: milestoneBonus,
           p_min_balance: 0,
+          p_source: "cashable",
         });
         await supabaseAdmin.from("coin_transactions").insert({
           user_id: userId,
@@ -569,6 +572,7 @@ export async function POST(req: NextRequest) {
             p_user_id: userId,
             p_delta: coinsWon,
             p_min_balance: 0,
+            p_source: "cashable",
           });
 
           await supabaseAdmin.from("coin_transactions").insert({

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import type Stripe from "stripe";
 import { supabaseAdmin } from "@/lib/supabase-server";
 import { stripe, lookupPrice } from "@/lib/stripe";
+import { FANG_PACKS, isFangPackId } from "@/lib/fang-packs";
 
 // Stripe needs the RAW request body for signature verification. Do not parse
 // JSON, do not clone, do not run anything in middleware that touches the body.
@@ -109,9 +110,16 @@ export async function POST(req: NextRequest) {
 
 async function dispatchHandler(event: Stripe.Event): Promise<void> {
   switch (event.type) {
-    case "checkout.session.completed":
-      // No-op: subscription.created fires too and carries the canonical fields.
+    case "checkout.session.completed": {
+      const session = event.data.object as Stripe.Checkout.Session;
+      if (session.mode === "payment") {
+        await handleFangIapPayment(session);
+        return;
+      }
+      // Subscription mode: no-op — subscription.created fires too and carries
+      // the canonical fields.
       return;
+    }
 
     case "customer.subscription.created":
     case "customer.subscription.updated":
@@ -291,6 +299,71 @@ async function handleInvoicePayment(
     console.error("[stripe-webhook] invoice payment matched 0 rows", customerId);
     throw new Error("invoice payment matched 0 rows");
   }
+}
+
+async function handleFangIapPayment(session: Stripe.Checkout.Session) {
+  const meta = session.metadata ?? {};
+  const userId = typeof meta.user_id === "string" ? meta.user_id : null;
+  const packId = typeof meta.pack_id === "string" ? meta.pack_id : null;
+  const fangAmountStr = typeof meta.fang_amount === "string" ? meta.fang_amount : null;
+
+  if (!userId || !packId || !fangAmountStr) {
+    console.error("[stripe-webhook] fang IAP missing metadata", session.id, meta);
+    throw new Error("fang IAP missing metadata");
+  }
+
+  if (!isFangPackId(packId)) {
+    console.error("[stripe-webhook] fang IAP unknown pack id", session.id, packId);
+    throw new Error("fang IAP unknown pack id");
+  }
+
+  const parsedFangs = Number(fangAmountStr);
+  if (!Number.isInteger(parsedFangs) || parsedFangs <= 0) {
+    console.error("[stripe-webhook] fang IAP bad fang_amount", session.id, fangAmountStr);
+    throw new Error("fang IAP bad fang_amount");
+  }
+
+  // Defense against tampered metadata — server-trusted amount comes from
+  // FANG_PACKS, not from the session metadata.
+  const expectedFangs = FANG_PACKS[packId].fangs;
+  if (parsedFangs !== expectedFangs) {
+    console.error(
+      "[stripe-webhook] fang IAP amount mismatch",
+      session.id,
+      "metadata=",
+      parsedFangs,
+      "expected=",
+      expectedFangs,
+    );
+    throw new Error("fang IAP amount mismatch");
+  }
+
+  // p_source='iap' → routes to profiles.fangs_iap (Apple 3.1.5(b) compliance,
+  // IAP fangs cannot be cashable in V2).
+  const { error: creditErr } = await supabaseAdmin.rpc("update_user_coins", {
+    p_user_id: userId,
+    p_delta: expectedFangs,
+    p_min_balance: 0,
+    p_source: "iap",
+  });
+  if (creditErr) {
+    console.error("[stripe-webhook] fang IAP credit", creditErr.message);
+    throw new Error("fang IAP credit failed");
+  }
+
+  try {
+    await supabaseAdmin.from("coin_transactions").insert({
+      user_id: userId,
+      amount: expectedFangs,
+      type: "fang_iap_purchase",
+      reference_id: session.id,
+      description: `Fang IAP: ${FANG_PACKS[packId].display_name} (${expectedFangs.toLocaleString()} Fangs)`,
+    });
+  } catch (err) {
+    console.warn("[stripe-webhook] fang IAP txn log (non-fatal):", (err as Error).message);
+  }
+
+  console.info("[stripe-webhook] fang IAP credited:", userId, packId, expectedFangs);
 }
 
 async function handleTrialWillEnd(sub: Stripe.Subscription) {

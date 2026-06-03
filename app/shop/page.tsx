@@ -4,10 +4,11 @@ import { useState, useEffect } from "react";
 import useSWR from "swr";
 import { useAuth } from "@/lib/auth";
 import { useUserStats } from "@/lib/hooks";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { formatCoins } from "@/lib/mockData";
 import { cdnUrl } from "@/lib/cdn";
 import { apiGet, apiPost } from "@/lib/api-client";
+import { toastError, toastInfo } from "@/lib/toast";
 import DailySpinHero from "@/components/Shop/DailySpinHero";
 import type { ComponentType } from "react";
 import type { IconProps } from "@phosphor-icons/react";
@@ -149,6 +150,56 @@ const PREMIUM_ITEMS: PremiumItem[] = [
   { id: "prem_frame_starfield", name: "Starfield Frame", description: "Animated stars orbiting your avatar", type: "frame", rarity: "rare", priceUSD: 1.99, Icon: StarFour, iconWeight: "fill", iconColor: "#60A5FA" },
   { id: "prem_banner_lightning", name: "Thunder Strike", description: "Crackling lightning bolt banner", type: "banner", rarity: "rare", priceUSD: 2.49, Icon: Lightning, iconWeight: "fill", iconColor: "#FACC15" },
   { id: "prem_name_fire", name: "Flame Name", description: "Burning flame text effect", type: "name_color", rarity: "rare", priceUSD: 0.99, Icon: Fire, iconWeight: "fill", iconColor: "#F97316" },
+];
+
+// ══════════════════════════════════════════
+// ── Fang IAP Packs (2026-06-02) ──
+// 4 real-money packs that mint Fangs via Stripe Checkout.
+// POST /api/stripe/fang-purchase { packId } → { url } → redirect.
+// Bonus = Fangs beyond the linear $0.99 → 5k baseline.
+// ══════════════════════════════════════════
+type FangPackId = "fangs_s" | "fangs_m" | "fangs_l" | "fangs_xl";
+interface FangPack {
+  id: FangPackId;
+  name: string;
+  fangs: number;
+  priceUSD: number;
+  bonus: number;
+  bonusLabel: string;
+  badge?: { label: string; tone: "best" | "mega" };
+  accent: "default" | "value" | "mega";
+}
+const FANG_IAP_PACKS: FangPack[] = [
+  { id: "fangs_s", name: "Starter Pack", fangs: 5_000, priceUSD: 0.99, bonus: 0, bonusLabel: "Baseline rate", accent: "default" },
+  { id: "fangs_m", name: "Hustle Pack", fangs: 30_000, priceUSD: 4.99, bonus: 5_000, bonusLabel: "+5,000 bonus", accent: "default" },
+  { id: "fangs_l", name: "Power Pack", fangs: 140_000, priceUSD: 19.99, bonus: 40_000, bonusLabel: "+40,000 bonus", badge: { label: "Best Value", tone: "best" }, accent: "value" },
+  { id: "fangs_xl", name: "Pride Pack", fangs: 400_000, priceUSD: 49.99, bonus: 150_000, bonusLabel: "+150,000 bonus", badge: { label: "Mega Pack", tone: "mega" }, accent: "mega" },
+];
+
+// ══════════════════════════════════════════
+// ── New shop SKUs (2026-06-02) ──
+// Frontend mirror of the 4 new catalog entries the backend agent is shipping.
+// Ids match the backend canonical list so /api/shop/purchase resolves price
+// server-side. UI-only metadata (Icon, color) lives here.
+// ══════════════════════════════════════════
+const NEW_SKUS: ShopItem[] = [
+  { id: "mastery_hint_pack", name: "Mastery Hint Pack", description: "5 hints to use on any Mastery question", type: "booster", rarity: "rare", price: 300, Icon: Lightning, iconWeight: "fill", iconColor: "#FACC15", boosterEffect: "fifty_fifty", boosterValue: 5, boosterDuration: 5 },
+  { id: "streak_shield_3pack", name: "Streak Shield 3-Pack", description: "Three Streak Shields. Protects three missed days.", type: "booster", rarity: "epic", price: 400, Icon: Shield, iconWeight: "fill", iconColor: "#A855F7", boosterEffect: "streak_shield", boosterValue: 0, boosterDuration: 3 },
+  { id: "ninny_voice_skin", name: "Ninny Voice Skin", description: "Unlock a fresh voice for Ninny's reads", type: "frame", rarity: "epic", price: 500, Icon: Sparkle, iconWeight: "fill", iconColor: "#A855F7" },
+];
+
+// 10 Avatar Auras rendered as a sub-grid under the "New this week" section.
+const AVATAR_AURAS: ShopItem[] = [
+  { id: "aura_solar",   name: "Solar Aura",   description: "Warm golden halo",         type: "frame", rarity: "rare",      price: 200, Icon: Sphere, iconWeight: "fill", iconColor: "#FACC15" },
+  { id: "aura_aurora",  name: "Aurora Aura",  description: "Shifting borealis ring",   type: "frame", rarity: "epic",      price: 350, Icon: Rainbow, iconWeight: "fill", iconColor: "#A855F7" },
+  { id: "aura_storm",   name: "Storm Aura",   description: "Crackling lightning ring", type: "frame", rarity: "epic",      price: 350, Icon: Lightning, iconWeight: "fill", iconColor: "#60A5FA" },
+  { id: "aura_emerald", name: "Emerald Aura", description: "Lush emerald glow",        type: "frame", rarity: "rare",      price: 200, Icon: Heart, iconWeight: "fill", iconColor: "#22C55E" },
+  { id: "aura_rose",    name: "Rose Aura",    description: "Soft rose-quartz shimmer", type: "frame", rarity: "rare",      price: 200, Icon: Heart, iconWeight: "fill", iconColor: "#FB7185" },
+  { id: "aura_void",    name: "Void Aura",    description: "Pulsing dark-matter ring", type: "frame", rarity: "legendary", price: 400, Icon: CircleNotch, iconWeight: "bold", iconColor: "#A855F7" },
+  { id: "aura_amber",   name: "Amber Aura",   description: "Slow amber pulse",         type: "frame", rarity: "rare",      price: 250, Icon: Fire, iconWeight: "fill", iconColor: "#F97316" },
+  { id: "aura_frost",   name: "Frost Aura",   description: "Crystalline frost ring",   type: "frame", rarity: "rare",      price: 250, Icon: Snowflake, iconWeight: "regular", iconColor: "#7DD3FC" },
+  { id: "aura_ember",   name: "Ember Aura",   description: "Drifting ember sparks",    type: "frame", rarity: "epic",      price: 350, Icon: Flame, iconWeight: "fill", iconColor: "#F97316" },
+  { id: "aura_lunar",   name: "Lunar Aura",   description: "Silver moonlight halo",    type: "frame", rarity: "legendary", price: 400, Icon: StarFour, iconWeight: "fill", iconColor: "#E8EAF2" },
 ];
 
 // ── Helpers ──
@@ -401,12 +452,134 @@ function PremiumCard({ item }: { item: PremiumItem }) {
 }
 
 // ══════════════════════════════════════════════════
+// ── Buy Fangs section (Stripe IAP) ──
+// ══════════════════════════════════════════════════
+function BuyFangsSection({ isAuthed, onUnauthed }: { isAuthed: boolean; onUnauthed: () => void }) {
+  const [pending, setPending] = useState<FangPackId | null>(null);
+
+  async function handleBuyPack(pack: FangPack) {
+    if (pending) return;
+    if (!isAuthed) {
+      onUnauthed();
+      return;
+    }
+    setPending(pack.id);
+    try {
+      const res = await apiPost<{ url: string }>("/api/stripe/fang-purchase", { packId: pack.id });
+      if (!res.ok || !res.data?.url) {
+        if (res.status === 401) {
+          onUnauthed();
+          setPending(null);
+          return;
+        }
+        toastError(res.error || "Couldn't open checkout. Try again.");
+        setPending(null);
+        return;
+      }
+      window.location.href = res.data.url;
+    } catch (e) {
+      toastError((e as Error).message || "Couldn't open checkout. Try again.");
+      setPending(null);
+    }
+  }
+
+  return (
+    <section className="mb-10" aria-labelledby="buy-fangs-heading">
+      <div className="shop-banner flex items-center justify-between mb-5 px-4 py-3 rounded-xl"
+        style={{ background: "linear-gradient(90deg, rgba(255,215,0,0.08), rgba(74,144,217,0.06))", border: "1px solid rgba(255,215,0,0.20)" }}>
+        <div className="flex items-center gap-2">
+          <img src={cdnUrl("/F.png")} alt="" aria-hidden="true" className="w-5 h-5 object-contain" />
+          <h2 id="buy-fangs-heading" className="font-bebas text-xl text-gold tracking-wider">BUY FANGS</h2>
+        </div>
+        <p className="text-cream/55 text-[11px] font-mono uppercase tracking-[0.2em] hidden sm:block">
+          Top up. Spend on cosmetics, boosters, anything in the den.
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        {FANG_IAP_PACKS.map((pack) => {
+          const isPending = pending === pack.id;
+          const disabled = pending !== null && !isPending;
+          const isValue = pack.accent === "value";
+          const isMega = pack.accent === "mega";
+          const cardStyle = isMega
+            ? { background: "linear-gradient(135deg, rgba(40,12,70,0.95), rgba(10,6,30,0.95))", border: "1px solid rgba(168,85,247,0.35)" }
+            : isValue
+              ? { background: "linear-gradient(135deg, rgba(20,16,8,0.95), rgba(8,12,24,0.95))", border: "1px solid rgba(255,215,0,0.30)" }
+              : { background: "linear-gradient(135deg, rgba(10,16,32,0.85), rgba(6,12,24,0.9))", border: "1px solid rgba(255,255,255,0.10)" };
+          return (
+            <div key={pack.id}
+              className="shop-card relative rounded-2xl overflow-hidden backdrop-blur-xl flex flex-col p-5"
+              style={cardStyle}>
+              {pack.badge && (
+                <span className={`absolute top-3 right-3 text-[9px] uppercase tracking-widest font-bold px-2.5 py-1 rounded-full ${
+                  pack.badge.tone === "best"
+                    ? "bg-gold/20 text-gold border border-gold/30"
+                    : "bg-purple-500/25 text-purple-200 border border-purple-400/40"
+                }`}>
+                  {pack.badge.label}
+                </span>
+              )}
+
+              <div className="flex items-center gap-3 mb-3">
+                <img src={cdnUrl("/F.png")} alt="Fangs" className={`object-contain ${isMega || isValue ? "w-14 h-14" : "w-12 h-12"}`} />
+                <div>
+                  <p className="font-bebas text-2xl text-cream tracking-wide leading-none">{pack.name}</p>
+                  <p className="text-cream/55 text-[11px] font-mono uppercase tracking-[0.18em] mt-1">{pack.bonusLabel}</p>
+                </div>
+              </div>
+
+              <div className="mt-1 mb-4">
+                <div className="flex items-baseline gap-1.5">
+                  <span className="font-bebas text-4xl text-gold tracking-wider leading-none">{formatCoins(pack.fangs)}</span>
+                  <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-cream/45">Fangs</span>
+                </div>
+                {pack.bonus > 0 && (
+                  <p className="text-[11px] text-cream/55 mt-1">
+                    Base 5,000 + <span className="text-gold/80 font-bold">{formatCoins(pack.bonus)}</span> bonus
+                  </p>
+                )}
+              </div>
+
+              <button
+                type="button"
+                onClick={() => handleBuyPack(pack)}
+                disabled={disabled || isPending}
+                className={`mt-auto inline-flex items-center justify-center gap-1.5 rounded-xl py-2.5 px-4 text-sm font-bold transition-all ${
+                  disabled
+                    ? "bg-white/[0.04] text-cream/30 border border-white/[0.06] cursor-not-allowed"
+                    : "gold-btn shop-btn-pulse"
+                } ${isPending ? "opacity-80 cursor-wait" : ""}`}
+              >
+                {isPending ? (
+                  <>
+                    <span aria-hidden="true" className="w-3.5 h-3.5 rounded-full border-2 border-current border-t-transparent animate-spin" />
+                    Opening checkout
+                  </>
+                ) : (
+                  <>${pack.priceUSD.toFixed(2)} &middot; Buy now</>
+                )}
+              </button>
+            </div>
+          );
+        })}
+      </div>
+
+      <p className="text-center font-mono text-[9.5px] uppercase tracking-[0.25em] text-cream/30 mt-4">
+        Secure checkout via Stripe &middot; USD &middot; Fangs land instantly
+      </p>
+    </section>
+  );
+}
+
+// ══════════════════════════════════════════════════
 // ── Main Shop Page ──
 // ══════════════════════════════════════════════════
 export default function ShopPage() {
   const { user, isLoading, refreshUser } = useAuth();
   const { stats } = useUserStats(user?.id);
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const [storeMode, setStoreMode] = useState<StoreMode>("coins");
   const [tab, setTab] = useState<Tab>("featured");
@@ -418,6 +591,16 @@ export default function ShopPage() {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => { setMounted(true); }, []);
+
+  // Stripe Checkout canceled return state — Stripe redirects to
+  // /shop?iap=canceled when the user closes the Checkout tab without paying.
+  // Mirror the pricing page pattern: polite toast, then strip the query param
+  // so a back/forward nav doesn't re-fire.
+  useEffect(() => {
+    if (searchParams?.get("iap") !== "canceled") return;
+    toastInfo("Purchase canceled. Try again anytime.");
+    router.replace("/shop");
+  }, [searchParams, router]);
 
   // 2026-05-25 (Phase A perf): inventory was a raw useEffect → setState fetch
   // that re-fired on every shop mount (incl. tab-switch back). Moved into the
@@ -486,9 +669,9 @@ export default function ShopPage() {
   const cosmeticTypeMap: Record<CosmeticSub, ItemType> = { frames: "frame", backgrounds: "background", name_colors: "name_color", banners: "banner" };
   const filteredCosmetics = COSMETIC_ITEMS.filter((i) => i.type === cosmeticTypeMap[cosmeticSub]);
 
-  const ownedCosmetics = inventory.filter((o) => { const item = [...COSMETIC_ITEMS, ...FEATURED_ITEMS].find((i) => i.id === o.itemId); return item && item.type !== "booster"; });
-  const ownedBoosters = inventory.filter((o) => { const item = [...BOOSTER_ITEMS, ...FEATURED_ITEMS].find((i) => i.id === o.itemId); return item && item.type === "booster"; });
-  const allItems = [...COSMETIC_ITEMS, ...BOOSTER_ITEMS, ...FEATURED_ITEMS];
+  const ownedCosmetics = inventory.filter((o) => { const item = [...COSMETIC_ITEMS, ...FEATURED_ITEMS, ...NEW_SKUS, ...AVATAR_AURAS].find((i) => i.id === o.itemId); return item && item.type !== "booster"; });
+  const ownedBoosters = inventory.filter((o) => { const item = [...BOOSTER_ITEMS, ...FEATURED_ITEMS, ...NEW_SKUS].find((i) => i.id === o.itemId); return item && item.type === "booster"; });
+  const allItems = [...COSMETIC_ITEMS, ...BOOSTER_ITEMS, ...FEATURED_ITEMS, ...NEW_SKUS, ...AVATAR_AURAS];
   const findItem = (id: string) => allItems.find((i) => i.id === id);
 
   const isPremium = storeMode === "premium";
@@ -576,6 +759,16 @@ export default function ShopPage() {
             </button>
           </div>
         </div>
+
+        {/* ══════════ BUY FANGS (Stripe IAP, coin store only) ══════════ */}
+        {!isPremium && (
+          <div className={`transition-all duration-700 delay-150 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`}>
+            <BuyFangsSection
+              isAuthed={!!user}
+              onUnauthed={() => router.push("/login?next=/shop")}
+            />
+          </div>
+        )}
 
         {/* ══════════ DAILY SPIN HERO (coin store only) ══════════ */}
         {!isPremium && <DailySpinHero />}
@@ -684,6 +877,54 @@ export default function ShopPage() {
             {/* FEATURED */}
             {tab === "featured" && (
               <div className={`transition-all duration-700 delay-200 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`}>
+                {/* ── NEW THIS WEEK (2026-06-02 SKU drop) ── */}
+                <section className="mb-10" aria-labelledby="new-this-week-heading">
+                  <div className="shop-banner flex items-center justify-between mb-5 px-4 py-3 rounded-xl"
+                    style={{ background: "linear-gradient(90deg, rgba(74,144,217,0.10), rgba(168,85,247,0.08))", border: "1px solid rgba(74,144,217,0.25)" }}>
+                    <div className="flex items-center gap-2">
+                      <Sparkle size={20} weight="fill" color="#4A90D9" aria-hidden="true" />
+                      <h2 id="new-this-week-heading" className="font-bebas text-xl text-electric tracking-wider">NEW THIS WEEK</h2>
+                    </div>
+                    <span className="text-cream/55 text-[11px] font-mono uppercase tracking-[0.2em] hidden sm:block">
+                      Fresh drops &middot; 4 new pickups
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+                    {NEW_SKUS.map((item) => (
+                      <CosmeticCard key={item.id} item={item} owned={ownedIds.has(item.id)} canAfford={userCoins >= item.price}
+                        onBuy={() => { if (!requireLogin()) setConfirmItem({ item, quantity: 1 }); }} />
+                    ))}
+                    {/* Avatar Aura Pack — surfaced as a single tile that scrolls users into the sub-grid below. */}
+                    <div className="shop-card relative rounded-xl overflow-hidden p-4 flex flex-col"
+                      style={{ background: "linear-gradient(135deg, rgba(20,8,40,0.85), rgba(6,12,24,0.9))", border: "1px solid rgba(168,85,247,0.30)" }}>
+                      <div className="flex items-start justify-between mb-3">
+                        <Sphere size={40} weight="fill" color="#A855F7" aria-hidden="true" />
+                        <span className="text-[9px] uppercase tracking-widest font-bold px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30">Pack</span>
+                      </div>
+                      <h4 className="font-bebas text-lg text-cream tracking-wide mb-0.5">Avatar Aura Pack</h4>
+                      <p className="text-cream/55 text-xs mb-4 leading-relaxed">10 cosmetic auras for your avatar</p>
+                      <div className="flex items-center justify-between mt-auto pt-2 gap-3">
+                        <div className="flex items-center gap-1.5">
+                          <img src={cdnUrl("/F.png")} alt="Fangs" className="w-5 h-5 object-contain" />
+                          <span className="font-bebas text-base text-gold">200&ndash;400</span>
+                        </div>
+                        <a href="#avatar-auras" className="px-3 py-1.5 rounded-lg text-xs font-bold border border-purple-500/40 text-purple-300 hover:bg-purple-500/10 transition-all">Browse</a>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Aura sub-grid */}
+                  <div id="avatar-auras" className="mt-6">
+                    <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-cream/45 mb-3">Avatar Auras &middot; pick your vibe</p>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+                      {AVATAR_AURAS.map((item) => (
+                        <CosmeticCard key={item.id} item={item} owned={ownedIds.has(item.id)} canAfford={userCoins >= item.price}
+                          onBuy={() => { if (!requireLogin()) setConfirmItem({ item, quantity: 1 }); }} />
+                      ))}
+                    </div>
+                  </div>
+                </section>
+
                 <div className="shop-banner flex items-center justify-between mb-6 px-4 py-3 rounded-xl"
                   style={{ background: "linear-gradient(90deg, rgba(255,215,0,0.06), rgba(168,85,247,0.06))", border: "1px solid rgba(255,215,0,0.15)" }}>
                   <div className="flex items-center gap-2">

@@ -6,6 +6,10 @@ All notable changes to Lionade, newest first.
 
 ## 2026-06-02
 
+- feat(shop): Buy Fangs section on shop page (4 IAP packs $0.99/$4.99/$19.99/$49.99) + 4 new shop SKUs rendered, success/cancel return states wired
+- feat(billing): Fang IAP via Stripe one-shot Checkout (4-tier ladder $0.99/$4.99/$19.99/$49.99) + 4 new shop SKUs (Mastery Hint Pack, Streak Shield 3-pack, Avatar Aura Pack, Ninny Voice Skin); all Fang grants now route by source ('cashable' vs 'iap' vs 'spend')
+- legal(iap): drafted TOS + Privacy Policy clauses for Fang IAP + refund template (Sam to paste into terms/privacy pages before deploying)
+- feat(economy): dual-ledger Fang schema (fangs_cashable + fangs_iap + lifetime_fangs_spent) ready for V2 cash-out; update_user_coins RPC now requires source parameter ('cashable' | 'iap' | 'spend'); existing balances backfilled as cashable
 - feat(economy): PLAN_FANG_MULTIPLIER now applied at every Fang grant site (Pro 1.5x, Platinum 2x); past_due / canceled subscriptions revert to 1x immediately
 - fix(security): Stripe wave hardening — column-level grants instead of RLS subquery, webhook 500-on-handler-error so Stripe retries, idempotency status tracking, current_period_end read from subscription item (API 2026-02-25 schema), origin pinned to NEXT_PUBLIC_SITE_URL, customer_id persist fail-closed with metadata.user_id fallback in webhook, trial_will_end event subscribed, cancel_at field used, migration backfills existing plan='pro' users
 - feat(billing): Stripe subscriptions wired — Pro/Platinum monthly + annual + 3-day trial, webhook signature verification + idempotency, Stripe-hosted Customer Portal for self-serve cancel/update
