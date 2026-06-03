@@ -4,48 +4,49 @@ import { requireAuth } from "@/lib/api-auth";
 import { applyFangMultiplier } from "@/lib/mastery-plan";
 import {
   isSupportedLang,
-  langPairKey,
   normalizeWord,
   normalizeUserDefinition,
   MAX_TRANSLATION_LEN,
 } from "@/lib/vocab";
+import {
+  isDefinitionSource,
+  normalizeTerm,
+  type BankRow,
+  type DefinitionSource,
+} from "@/lib/vocab-banks";
 
 /**
- * POST /api/vocab/words — save a new word
+ * POST /api/vocab/words — save a new word into a bank
  *
- * Body: {
- *   word: string,
- *   translation: string,
- *   source_lang: 'en'|'es',
- *   target_lang: 'en'|'es',
- *   user_definition?: string
- * }
+ * Required body shape depends on the bank's kind:
+ *
+ *   Language bank (kind='language'):
+ *     {
+ *       bank_id: string,
+ *       word: string,
+ *       translation: string,
+ *       source_lang: 'en'|'es',  // must match bank.source_lang
+ *       target_lang: 'en'|'es',  // must match bank.target_lang
+ *       user_definition?: string
+ *     }
+ *     -> stored as: word + translation. definition_source = 'mymemory'.
+ *
+ *   General bank (kind='general'):
+ *     {
+ *       bank_id: string,
+ *       term: string,
+ *       term_definition: string,           // canonical definition from Wikipedia/AI/manual
+ *       definition_source: 'wikipedia'|'ai'|'manual',
+ *       user_definition?: string           // active-recall: user's own explanation
+ *     }
+ *     -> stored as: word = term, translation = term_definition.
  *
  * Grants:
  *   +5 Fangs base for the new word
  *   +10 Fangs base if user_definition is non-empty
- *   Both apply the plan multiplier (Pro 1.5x, Platinum 2x) via applyFangMultiplier.
+ *   Multiplied by plan tier via applyFangMultiplier.
  *
- * Streak: calls advance_vocab_streak RPC after insert. The RPC counts today's
- * inserts for the pair and bumps streak_count the first time the count
- * crosses 5 today.
- *
- * Response: {
- *   word: <row>,
- *   coinsAwarded: number,
- *   streak: { langPair, count, lastDay, bumped } | null,
- *   balance: number | null
- * }
- *
- * GET /api/vocab/words — list user's words
- *
- * Query:
- *   lang=es-en          filter to a single pair (source-target)
- *   due=true            only return rows where next_review_at <= now()
- *   limit=N             default 50, max 200
- *   offset=N            default 0
- *
- * Response: { words: [...], total: number }
+ * Streak: advance_vocab_streak RPC now keyed by bank_id (was lang-pair in V1).
  */
 
 const FANG_NEW_WORD = 5;
@@ -65,73 +66,145 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
 
-  const {
-    word,
-    translation,
-    source_lang,
-    target_lang,
-    user_definition,
-  } = (body ?? {}) as Record<string, unknown>;
-
-  if (!isSupportedLang(source_lang) || !isSupportedLang(target_lang)) {
-    return NextResponse.json(
-      { error: "Unsupported language. Use 'en' or 'es'." },
-      { status: 400 },
-    );
-  }
-  if (source_lang === target_lang) {
-    return NextResponse.json(
-      { error: "Source and target must differ" },
-      { status: 400 },
-    );
+  const raw = (body ?? {}) as Record<string, unknown>;
+  const bankId = raw.bank_id;
+  if (typeof bankId !== "string" || !bankId) {
+    return NextResponse.json({ error: "bank_id is required" }, { status: 400 });
   }
 
-  const normalizedWord = normalizeWord(word);
-  if (!normalizedWord) {
-    return NextResponse.json(
-      { error: "Word must be 1 to 50 characters" },
-      { status: 400 },
-    );
-  }
+  // 1. Load + ownership-check the bank. Single source of truth for kind +
+  //    language pair — we don't trust the client to tell us which type to use.
+  const { data: bankData, error: bankErr } = await supabaseAdmin
+    .from("vocab_banks")
+    .select("id, user_id, kind, source_lang, target_lang")
+    .eq("id", bankId)
+    .eq("user_id", userId)
+    .maybeSingle();
 
-  const normalizedTranslation = normalizeWord(translation);
-  if (!normalizedTranslation) {
-    return NextResponse.json(
-      { error: "Translation must be 1 to 50 characters" },
-      { status: 400 },
-    );
+  if (bankErr) {
+    console.error("[vocab/words POST bank read]", bankErr.message);
+    return NextResponse.json({ error: "Couldn't load bank" }, { status: 500 });
   }
-  if (normalizedTranslation.display.length > MAX_TRANSLATION_LEN) {
-    return NextResponse.json(
-      { error: "Translation is too long" },
-      { status: 400 },
-    );
+  if (!bankData) {
+    return NextResponse.json({ error: "Bank not found" }, { status: 404 });
   }
+  const bank = bankData as Pick<BankRow, "id" | "kind" | "source_lang" | "target_lang">;
 
-  const userDef = normalizeUserDefinition(user_definition);
+  // 2. Per-kind validation + normalization. Both branches end with the same
+  //    insert payload shape (word, translation, source_lang, target_lang,
+  //    user_definition, definition_source, bank_id).
+  let insertPayload: {
+    user_id: string;
+    bank_id: string;
+    word: string;
+    translation: string;
+    source_lang: string | null;
+    target_lang: string | null;
+    user_definition: string | null;
+    term_definition: string;
+    definition_source: DefinitionSource;
+  };
+
+  const userDef = normalizeUserDefinition(raw.user_definition);
   const hasUserDef = userDef.length > 0;
 
-  // 1. Insert the vocab word. Initial SR state: ease 2.5, review_count 0,
-  //    next_review_at defaults to now() in the schema (due immediately).
-  //    The DB enforces UNIQUE (user_id, source_lang, target_lang, lower(word)) —
-  //    a duplicate save returns 23505 which we surface as 409.
-  const { data: inserted, error: insertErr } = await supabaseAdmin
-    .from("vocab_words")
-    .insert({
+  if (bank.kind === "language") {
+    if (!isSupportedLang(raw.source_lang) || !isSupportedLang(raw.target_lang)) {
+      return NextResponse.json(
+        { error: "Unsupported language. Use 'en' or 'es'." },
+        { status: 400 },
+      );
+    }
+    if (raw.source_lang !== bank.source_lang || raw.target_lang !== bank.target_lang) {
+      return NextResponse.json(
+        { error: "Language pair does not match this bank" },
+        { status: 400 },
+      );
+    }
+    const normalizedWord = normalizeWord(raw.word);
+    if (!normalizedWord) {
+      return NextResponse.json(
+        { error: "Word must be 1 to 50 characters" },
+        { status: 400 },
+      );
+    }
+    const normalizedTranslation = normalizeWord(raw.translation);
+    if (!normalizedTranslation) {
+      return NextResponse.json(
+        { error: "Translation must be 1 to 50 characters" },
+        { status: 400 },
+      );
+    }
+    if (normalizedTranslation.display.length > MAX_TRANSLATION_LEN) {
+      return NextResponse.json(
+        { error: "Translation is too long" },
+        { status: 400 },
+      );
+    }
+    insertPayload = {
       user_id: userId,
+      bank_id: bank.id,
       word: normalizedWord.display,
       translation: normalizedTranslation.display,
-      source_lang,
-      target_lang,
+      source_lang: bank.source_lang,
+      target_lang: bank.target_lang,
       user_definition: hasUserDef ? userDef : null,
-    })
+      term_definition: normalizedTranslation.display,
+      definition_source: "mymemory",
+    };
+  } else {
+    // General bank.
+    const normalizedTerm = normalizeTerm(raw.term);
+    if (!normalizedTerm) {
+      return NextResponse.json(
+        { error: "Term must be 1 to 80 characters" },
+        { status: 400 },
+      );
+    }
+    const termDefinitionInput =
+      typeof raw.term_definition === "string" ? raw.term_definition.trim() : "";
+    if (!termDefinitionInput) {
+      return NextResponse.json(
+        { error: "term_definition is required for general banks" },
+        { status: 400 },
+      );
+    }
+    // Cap at 1000 chars — Wikipedia + AI both well under 400; manual users
+    // get headroom for a longer pasted definition. We DON'T length-fail; we
+    // slice. Better UX than 400-ing a paste.
+    const termDefinition = termDefinitionInput.slice(0, 1000);
+
+    const defSource = raw.definition_source;
+    if (!isDefinitionSource(defSource) || defSource === "mymemory") {
+      return NextResponse.json(
+        { error: "definition_source must be wikipedia, ai, or manual" },
+        { status: 400 },
+      );
+    }
+    insertPayload = {
+      user_id: userId,
+      bank_id: bank.id,
+      word: normalizedTerm.display,
+      translation: termDefinition,
+      source_lang: null,
+      target_lang: null,
+      user_definition: hasUserDef ? userDef : null,
+      term_definition: termDefinition,
+      definition_source: defSource,
+    };
+  }
+
+  // 3. Insert. UNIQUE per (user_id, bank_id, lower(word)) — schema-enforced.
+  const { data: inserted, error: insertErr } = await supabaseAdmin
+    .from("vocab_words")
+    .insert(insertPayload)
     .select("*")
     .single();
 
   if (insertErr) {
     if (insertErr.code === "23505") {
       return NextResponse.json(
-        { error: "You already saved this word" },
+        { error: "You already saved this word in this bank" },
         { status: 409 },
       );
     }
@@ -139,9 +212,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Couldn't save word" }, { status: 500 });
   }
 
-  // 2. Grant Fangs (multiplier-aware). +5 base for the word; +10 base if the
-  //    user wrote their own definition. If the credit fails, refund the row
-  //    so we don't leave a phantom card.
+  // 4. Fang grant — same rules as V1. Refund the row if the credit call fails
+  //    so we never leave a phantom card with no balance change.
   const baseFangs = FANG_NEW_WORD + (hasUserDef ? FANG_SELF_DEFINE : 0);
   const boostedFangs = await applyFangMultiplier(baseFangs, userId, supabaseAdmin);
 
@@ -164,16 +236,15 @@ export async function POST(req: NextRequest) {
       type: "vocab_save",
       reference_id: String(inserted.id),
       description: hasUserDef
-        ? `Saved vocab: ${normalizedWord.display} (with definition)`
-        : `Saved vocab: ${normalizedWord.display}`,
+        ? `Saved vocab: ${insertPayload.word} (with definition)`
+        : `Saved vocab: ${insertPayload.word}`,
     });
   }
 
-  // 3. Streak advance via RPC. The RPC handles "is today's count >= 5" and
-  //    yesterday→today / gap rules server-side. Non-fatal: streak failure
-  //    must never break a vocab save.
+  // 5. Streak advance — RPC signature is now (p_user_id, p_bank_id). Streak
+  //    rows are bank-keyed in V2 so each bank gets its own daily 5-word habit.
   let streakOut: {
-    langPair: string;
+    bankId: string;
     count: number;
     lastDay: string | null;
     bumped: boolean;
@@ -181,11 +252,7 @@ export async function POST(req: NextRequest) {
   try {
     const { data: streakRows, error: streakErr } = await supabaseAdmin.rpc(
       "advance_vocab_streak",
-      {
-        p_user_id: userId,
-        p_source_lang: source_lang,
-        p_target_lang: target_lang,
-      },
+      { p_user_id: userId, p_bank_id: bank.id },
     );
     if (streakErr) {
       console.error("[vocab/words POST streak]", streakErr.message);
@@ -197,7 +264,7 @@ export async function POST(req: NextRequest) {
         bumped: boolean;
       };
       streakOut = {
-        langPair: langPairKey(source_lang, target_lang),
+        bankId: bank.id,
         count: row.streak_count ?? 0,
         lastDay: row.streak_last_day,
         bumped: !!row.bumped,
@@ -207,7 +274,7 @@ export async function POST(req: NextRequest) {
     console.error("[vocab/words POST streak exception]", err);
   }
 
-  // 4. Return final balance.
+  // 6. Final balance.
   const { data: profile } = await supabaseAdmin
     .from("profiles")
     .select("coins")
@@ -224,13 +291,24 @@ export async function POST(req: NextRequest) {
 
 // ── GET ──────────────────────────────────────────────────────────────────────
 
+/**
+ * GET /api/vocab/words
+ *
+ * Query:
+ *   bank_id=<uuid>    filter to a single bank (must be owned)
+ *   due=true          only return cards where next_review_at <= now()
+ *   limit=N           default 50, max 200
+ *   offset=N          default 0
+ *
+ * Response: { words: [...], total: number }
+ */
 export async function GET(req: NextRequest) {
   const auth = await requireAuth(req);
   if (auth instanceof NextResponse) return auth;
   const userId = auth.userId;
 
   const { searchParams } = new URL(req.url);
-  const lang = searchParams.get("lang");
+  const bankId = searchParams.get("bank_id");
   const due = searchParams.get("due") === "true";
   const limitRaw = Number(searchParams.get("limit") ?? 50);
   const offsetRaw = Number(searchParams.get("offset") ?? 0);
@@ -245,13 +323,24 @@ export async function GET(req: NextRequest) {
     .order(due ? "next_review_at" : "created_at", { ascending: due })
     .range(offset, offset + limit - 1);
 
-  if (lang) {
-    // Expect "source-target" e.g. "es-en"
-    const parts = lang.split("-");
-    if (parts.length !== 2 || !isSupportedLang(parts[0]) || !isSupportedLang(parts[1])) {
-      return NextResponse.json({ error: "Invalid lang filter" }, { status: 400 });
+  if (bankId) {
+    // Ownership check — confirm the bank belongs to the user before filtering,
+    // otherwise an attacker could enumerate row counts across all users by
+    // probing bank ids.
+    const { data: ownership, error: ownErr } = await supabaseAdmin
+      .from("vocab_banks")
+      .select("id")
+      .eq("id", bankId)
+      .eq("user_id", userId)
+      .maybeSingle();
+    if (ownErr) {
+      console.error("[vocab/words GET own]", ownErr.message);
+      return NextResponse.json({ error: "Couldn't load words" }, { status: 500 });
     }
-    query = query.eq("source_lang", parts[0]).eq("target_lang", parts[1]);
+    if (!ownership) {
+      return NextResponse.json({ error: "Bank not found" }, { status: 404 });
+    }
+    query = query.eq("bank_id", bankId);
   }
 
   if (due) {

@@ -3,12 +3,15 @@
 /**
  * VocabList — Tab C of /learn/vocab.
  *
- * Searchable + filterable list of every saved word. Each row shows the word,
- * its translation, the user's own definition (truncated), an accuracy badge
- * (correct / review_count), and a relative "next review" timestamp.
+ * Searchable + sortable list of saved entries in the ACTIVE bank.
+ * Each row shows the word/term, its translation/term_definition, the user's
+ * own definition (truncated), an accuracy badge, and a relative "next review"
+ * timestamp.
  *
- * Delete uses a confirm prompt (long-press is hard to discover on web; we
- * surface a small "Delete" action button next to each row instead).
+ * The new sort dropdown ("recently added / most reviewed / lowest accuracy")
+ * gives Sam a no-friction way to surface struggling terms without leaving the
+ * page. Filtering by language pair (the old top filter) is no longer needed
+ * because the list itself is already bank-scoped.
  */
 
 import { useMemo, useState } from "react";
@@ -16,15 +19,15 @@ import useSWR from "swr";
 import { MagnifyingGlass, Trash, ClockCounterClockwise } from "@phosphor-icons/react";
 import { apiDelete, swrFetcher } from "@/lib/api-client";
 import { toastError, toastSuccess } from "@/lib/toast";
-import type { LangPair } from "./LanguageStreakPill";
+import type { VocabBank } from "./CreateBankModal";
 import type { VocabWord } from "./ReviewQueue";
 
-type FilterPair = "all" | LangPair;
+type Sort = "recent" | "most_reviewed" | "lowest_accuracy";
 
-const FILTER_LABEL: Record<FilterPair, string> = {
-  all: "All",
-  "en-es": "EN to ES",
-  "es-en": "ES to EN",
+const SORT_LABEL: Record<Sort, string> = {
+  recent: "Recently added",
+  most_reviewed: "Most reviewed",
+  lowest_accuracy: "Lowest accuracy",
 };
 
 function timeUntil(iso: string): string {
@@ -38,45 +41,58 @@ function timeUntil(iso: string): string {
   return `in ${days}d`;
 }
 
-export default function VocabList() {
+interface Props {
+  bank: VocabBank;
+}
+
+export default function VocabList({ bank }: Props) {
   const { data, isLoading, mutate } = useSWR<{ words: VocabWord[] }>(
-    "/api/vocab/words",
+    `/api/vocab/words?bank_id=${encodeURIComponent(bank.id)}`,
     swrFetcher,
     { keepPreviousData: true, revalidateOnFocus: true },
   );
 
   const [query, setQuery] = useState("");
-  const [filter, setFilter] = useState<FilterPair>("all");
+  const [sort, setSort] = useState<Sort>("recent");
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const words = data?.words ?? [];
+  const isLanguageBank = bank.kind === "language";
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return words.filter(w => {
-      if (filter !== "all") {
-        const pair = `${w.source_lang}-${w.target_lang}` as LangPair;
-        if (pair !== filter) return false;
-      }
+    const list = words.filter(w => {
       if (q.length === 0) return true;
-      return (
-        w.word.toLowerCase().includes(q) ||
-        w.translation.toLowerCase().includes(q) ||
-        w.user_definition.toLowerCase().includes(q)
-      );
+      const front = (w.word ?? w.term ?? "").toLowerCase();
+      const back = (w.translation ?? w.term_definition ?? "").toLowerCase();
+      const self = w.user_definition.toLowerCase();
+      return front.includes(q) || back.includes(q) || self.includes(q);
     });
-  }, [words, query, filter]);
+    // Apply sort. We never mutate `words` — we sort a copy.
+    const sorted = [...list];
+    if (sort === "most_reviewed") {
+      sorted.sort((a, b) => b.review_count - a.review_count);
+    } else if (sort === "lowest_accuracy") {
+      sorted.sort((a, b) => {
+        const accA = a.review_count > 0 ? a.correct_count / a.review_count : 1; // unreviewed → bottom
+        const accB = b.review_count > 0 ? b.correct_count / b.review_count : 1;
+        return accA - accB;
+      });
+    }
+    // "recent" relies on the server's default ordering (created_at desc).
+    return sorted;
+  }, [words, query, sort]);
 
-  const handleDelete = async (id: string, word: string) => {
-    if (!window.confirm(`Delete "${word}" from your vocab? This can't be undone.`)) return;
+  const handleDelete = async (id: string, label: string) => {
+    if (!window.confirm(`Delete "${label}" from ${bank.name}? This can't be undone.`)) return;
     setDeletingId(id);
     try {
       const { ok, error } = await apiDelete(`/api/vocab/words/${id}`);
       if (!ok) {
-        toastError(error ?? "Couldn't delete that word.");
+        toastError(error ?? "Couldn't delete that entry.");
         return;
       }
-      toastSuccess("Word removed.");
+      toastSuccess("Entry removed.");
       mutate();
     } catch (e: unknown) {
       toastError(e instanceof Error ? e.message : "Delete failed.");
@@ -87,7 +103,7 @@ export default function VocabList() {
 
   return (
     <div className="space-y-5">
-      {/* Search + filter row */}
+      {/* Search + sort row */}
       <div className="flex flex-col sm:flex-row gap-2">
         <div className="relative flex-1 min-w-0">
           <MagnifyingGlass
@@ -100,35 +116,30 @@ export default function VocabList() {
             type="search"
             value={query}
             onChange={e => setQuery(e.target.value)}
-            placeholder="Search words, translations, or your definitions"
+            placeholder={`Search ${bank.name}`}
             className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-white/5 backdrop-blur border border-white/10 text-cream placeholder:text-cream/30 font-syne text-sm focus:outline-none focus:border-electric/60 focus:bg-white/[0.07] transition-colors"
-            aria-label="Search vocab"
+            aria-label="Search bank"
           />
         </div>
-        <div className="flex gap-1.5 flex-wrap">
-          {(Object.keys(FILTER_LABEL) as FilterPair[]).map(key => (
-            <button
-              key={key}
-              type="button"
-              onClick={() => setFilter(key)}
-              className={`px-3 py-1.5 rounded-full font-mono text-[10px] uppercase tracking-[0.2em] border transition-colors ${
-                filter === key
-                  ? "bg-electric text-navy border-electric"
-                  : "bg-white/5 text-cream/65 border-white/10 hover:bg-white/10"
-              }`}
-            >
-              {FILTER_LABEL[key]}
-            </button>
-          ))}
-        </div>
+        <label className="inline-flex items-center gap-2 rounded-xl bg-white/5 border border-white/10 px-3 py-2 text-cream/75 text-xs font-syne">
+          <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-cream/55">sort</span>
+          <select
+            value={sort}
+            onChange={e => setSort(e.target.value as Sort)}
+            className="bg-transparent text-cream font-syne text-sm focus:outline-none cursor-pointer"
+            aria-label="Sort vocab list"
+          >
+            {(Object.keys(SORT_LABEL) as Sort[]).map(k => (
+              <option key={k} value={k} className="bg-navy text-cream">{SORT_LABEL[k]}</option>
+            ))}
+          </select>
+        </label>
       </div>
 
-      {/* Result count */}
       <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-cream/55">
-        {filtered.length} {filtered.length === 1 ? "word" : "words"}
+        {filtered.length} {filtered.length === 1 ? "entry" : "entries"} in {bank.name}
       </p>
 
-      {/* List */}
       {isLoading && !data ? (
         <div className="rounded-2xl bg-white/5 backdrop-blur border border-white/10 p-10 text-center">
           <p className="font-mono text-xs uppercase tracking-[0.25em] text-cream/55">loading...</p>
@@ -137,13 +148,15 @@ export default function VocabList() {
         <div className="rounded-2xl bg-white/[0.03] backdrop-blur border border-white/[0.06] p-10 text-center">
           <p className="font-syne text-sm text-cream/65">
             {words.length === 0
-              ? "No words yet. Head to the Add tab to lock in your first one."
-              : "No words match that search."}
+              ? `No entries in ${bank.name} yet. Head to the Add tab to lock in your first one.`
+              : "Nothing matches that search."}
           </p>
         </div>
       ) : (
         <ul className="space-y-2">
           {filtered.map(w => {
+            const front = w.word ?? w.term ?? "";
+            const back = w.translation ?? w.term_definition ?? "";
             const accuracy = w.review_count > 0
               ? Math.round((w.correct_count / w.review_count) * 100)
               : null;
@@ -161,15 +174,22 @@ export default function VocabList() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-baseline gap-2 mb-1 flex-wrap">
                       <p className="font-bebas text-lg tracking-wider text-cream leading-none">
-                        {w.word}
+                        {front}
                       </p>
-                      <span className="font-mono text-[9px] uppercase tracking-wider text-cream/45">
-                        {w.source_lang} to {w.target_lang}
-                      </span>
+                      {isLanguageBank && w.source_lang && w.target_lang && (
+                        <span className="font-mono text-[9px] uppercase tracking-wider text-cream/45">
+                          {w.source_lang} to {w.target_lang}
+                        </span>
+                      )}
                     </div>
-                    <p className="font-syne text-sm text-electric/90 mb-1">
-                      {w.translation}
-                    </p>
+                    {back && (
+                      <p className={isLanguageBank
+                        ? "font-syne text-sm text-electric/90 mb-1"
+                        : "font-syne text-xs text-electric/85 mb-1 line-clamp-2"}
+                      >
+                        {back}
+                      </p>
+                    )}
                     {w.user_definition && (
                       <p className="font-syne text-xs text-cream/55 italic line-clamp-2">
                         &ldquo;{w.user_definition}&rdquo;
@@ -199,10 +219,10 @@ export default function VocabList() {
                     )}
                     <button
                       type="button"
-                      onClick={() => handleDelete(w.id, w.word)}
+                      onClick={() => handleDelete(w.id, front)}
                       disabled={deletingId === w.id}
                       className="p-1.5 rounded-md text-cream/40 hover:text-red-400 hover:bg-red-400/10 transition-colors disabled:opacity-30"
-                      aria-label={`Delete ${w.word}`}
+                      aria-label={`Delete ${front}`}
                     >
                       <Trash size={14} weight="bold" aria-hidden="true" />
                     </button>

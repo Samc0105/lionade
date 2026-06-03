@@ -1,31 +1,33 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
-import {
-  isSupportedLang,
-  normalizeWord,
-} from "@/lib/vocab";
+import { isSupportedLang, normalizeWord } from "@/lib/vocab";
+import type { BankRow } from "@/lib/vocab-banks";
 
 /**
  * POST /api/vocab/translate
  *
- * Body: { word: string, source: 'en'|'es', target: 'en'|'es' }
+ * Body: { word: string, source: 'en'|'es', target: 'en'|'es', bank_id: string }
+ *
+ * Bank-aware as of Word Banks V2:
+ *   - The bank must exist + be owned by the user.
+ *   - The bank's kind must be 'language' (general banks route to /vocab/define
+ *     instead). We surface a 400 with a hint pointing at the right endpoint
+ *     if a general bank id slips in.
+ *   - We still validate source/target against the V2 allowlist (en, es) so
+ *     a malicious client can't bypass that by reusing the bank's stored pair.
+ *     The pair MUST also match the bank's stored pair — anything else means
+ *     the client is confused.
  *
  * Proxies the free MyMemory Translation API with an aggressive server-side
  * cache so we never burn the same quota character twice.
  *
- * Quota note: MyMemory free tier is 5k chars/day per IP, bumped to 50k when
- * `de=<email>` is supplied (anonymous identifier — they don't email you).
- * Combined with the cache + 30/min IP rate limit (middleware) + 50-char input
- * cap, a single user maxing out the slider would still take ~hours of unique
- * words to hit the ceiling.
+ * Cache contract: keyed on (word_lower, source_lang='en'|'es', target_lang='en'|'es').
+ * General-bank define cache uses (term_lower, source_lang='wikipedia'|'ai',
+ * target_lang='def') — see /api/vocab/define. No collision: the source_lang
+ * column distinguishes them.
  *
  * Response: { translation: string, cached: boolean }
- * Errors:
- *   400 invalid body
- *   401 unauthenticated (requireAuth)
- *   429 rate limited (middleware)
- *   503 MyMemory timeout / upstream error
  */
 
 const MYMEMORY_TIMEOUT_MS = 5000;
@@ -39,6 +41,7 @@ interface MyMemoryResponse {
 export async function POST(req: NextRequest) {
   const auth = await requireAuth(req);
   if (auth instanceof NextResponse) return auth;
+  const userId = auth.userId;
 
   let body: unknown;
   try {
@@ -47,11 +50,16 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
 
-  const { word, source, target } = (body ?? {}) as {
+  const { word, source, target, bank_id } = (body ?? {}) as {
     word?: unknown;
     source?: unknown;
     target?: unknown;
+    bank_id?: unknown;
   };
+
+  if (typeof bank_id !== "string" || !bank_id) {
+    return NextResponse.json({ error: "bank_id is required" }, { status: 400 });
+  }
 
   if (!isSupportedLang(source) || !isSupportedLang(target)) {
     return NextResponse.json(
@@ -75,6 +83,37 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  // 0. Bank ownership + kind check.
+  const { data: bankData, error: bankErr } = await supabaseAdmin
+    .from("vocab_banks")
+    .select("id, user_id, kind, source_lang, target_lang")
+    .eq("id", bank_id)
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  if (bankErr) {
+    console.error("[vocab/translate bank read]", bankErr.message);
+    return NextResponse.json({ error: "Couldn't load bank" }, { status: 500 });
+  }
+  if (!bankData) {
+    return NextResponse.json({ error: "Bank not found" }, { status: 404 });
+  }
+  const bank = bankData as Pick<BankRow, "kind" | "source_lang" | "target_lang">;
+  if (bank.kind !== "language") {
+    return NextResponse.json(
+      { error: "This bank is a general bank. Use /api/vocab/define." },
+      { status: 400 },
+    );
+  }
+  // The bank's stored language pair MUST match the request. Prevents a
+  // client from cross-translating between unrelated banks.
+  if (bank.source_lang !== source || bank.target_lang !== target) {
+    return NextResponse.json(
+      { error: "Language pair does not match this bank" },
+      { status: 400 },
+    );
+  }
+
   // 1. Cache lookup — keyed on (word_lower, source, target).
   const { data: cached, error: cacheReadErr } = await supabaseAdmin
     .from("vocab_translations_cache")
@@ -90,10 +129,6 @@ export async function POST(req: NextRequest) {
   }
 
   if (cached?.translation) {
-    // Fire-and-forget last_hit_at bookkeeping — we don't await it because the
-    // user-visible response shouldn't wait on a metric write. We skip the
-    // hits++ counter on purpose: a read-modify-write would race other hits
-    // for the same word, and the metric isn't load-bearing.
     void supabaseAdmin
       .from("vocab_translations_cache")
       .update({ last_hit_at: new Date().toISOString() })
@@ -131,7 +166,6 @@ export async function POST(req: NextRequest) {
     const data = (await res.json()) as MyMemoryResponse;
     const text = data?.responseData?.translatedText?.trim();
 
-    // MyMemory uses 200 + a "responseStatus" inside the body for app errors.
     if (!text || (data.responseStatus && data.responseStatus !== 200)) {
       console.error("[vocab/translate] MyMemory bad payload", data.responseStatus);
       return NextResponse.json(
@@ -142,7 +176,6 @@ export async function POST(req: NextRequest) {
 
     translation = text;
   } catch (err) {
-    // Timeout or network error — never leak the exception.
     const isAbort = err instanceof Error && err.name === "TimeoutError";
     console.error("[vocab/translate]", isAbort ? "timeout" : "fetch failed");
     return NextResponse.json(

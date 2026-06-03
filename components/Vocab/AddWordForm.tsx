@@ -3,90 +3,88 @@
 /**
  * AddWordForm — Tab A of /learn/vocab.
  *
- * The "active recall move" lives here: after the server returns a translation,
- * we ask the user to type their OWN simple definition in the target language.
- * That second input is the value-add — it forces semantic engagement instead
- * of passive memorize-a-pair.
+ * Branches on the active bank's `kind`:
  *
- * Three states:
- *   1. idle           — empty input + Translate button (disabled until text)
- *   2. translating    — POSTing /api/vocab/translate
- *   3. translated     — translation card visible, self-definition input ready
+ *  • LANGUAGE bank — input a word in source_lang, hit Translate
+ *    (POST /api/vocab/translate with bank_id). Once the translation card
+ *    renders, the user writes their OWN simple definition in the target
+ *    language. franc-min runs on the textarea and surfaces a soft nudge if
+ *    the detected language doesn't match the target. Save → POST
+ *    /api/vocab/words with bank_id + word + translation + user_definition.
  *
- * Language-pair toggle persists in localStorage under `vocab_lang_pair`. Only
- * the user-facing toggle goes in localStorage — vocab words themselves are
- * server-owned.
+ *  • GENERAL bank — input a term (e.g. "SAML"), hit Define
+ *    (POST /api/vocab/define with bank_id). The server cascades Wikipedia →
+ *    AI → 404; the response carries a `source` field which we badge under
+ *    the definition. If both sources failed (404 from backend) we swap in a
+ *    manual textarea so the user can paste their own definition. Then the
+ *    user writes their own explanation. No language detection — a general
+ *    bank's explanations can be in any language the user thinks in.
+ *
+ * The "active recall move" — writing your own definition — is the same in
+ * both flows. That's the value-add.
  */
 
 import { useEffect, useMemo, useState } from "react";
-import { ArrowRight, ArrowsClockwise, Lightbulb, Translate } from "@phosphor-icons/react";
+import { ArrowRight, Lightbulb, Translate, Books, Sparkle, Pencil } from "@phosphor-icons/react";
 import { apiPost } from "@/lib/api-client";
 import { toastSuccess, toastError } from "@/lib/toast";
 import { detectLanguage, type DetectionResult } from "@/lib/ml/language-detect";
-import type { LangPair } from "./LanguageStreakPill";
+import type { VocabBank } from "./CreateBankModal";
 
-const LANG_LABEL: Record<LangPair, { source: string; target: string; targetName: string }> = {
-  "en-es": { source: "EN", target: "ES", targetName: "Spanish" },
-  "es-en": { source: "ES", target: "EN", targetName: "English" },
-};
-
-const LANG_NAME: Record<"en" | "es", string> = {
+const LANG_NAME: Record<string, string> = {
   en: "English",
   es: "Spanish",
 };
 
-// Confidence floor for surfacing the nudge. Below this, the signal is too
+// Confidence floor for the language-mismatch nudge. Below this, signal is too
 // noisy (short text, mixed words) to risk a false-positive warning.
 const WARNING_CONFIDENCE_THRESHOLD = 0.5;
-
-const STORAGE_KEY = "vocab_lang_pair";
 const MAX_WORD_LEN = 50;
 const MAX_DEFINITION_LEN = 280;
 
 interface Props {
+  bank: VocabBank;
   onSaved?: () => void;
 }
 
-export default function AddWordForm({ onSaved }: Props) {
-  // Lang pair: read from localStorage on mount, default en-es. Hydration-safe
-  // because we only set the persisted value after mount.
-  const [langPair, setLangPair] = useState<LangPair>("en-es");
-  const [hydrated, setHydrated] = useState(false);
+type DefineSource = "wikipedia" | "ai" | "manual";
 
-  useEffect(() => {
-    try {
-      const stored = window.localStorage.getItem(STORAGE_KEY);
-      if (stored === "en-es" || stored === "es-en") setLangPair(stored);
-    } catch {
-      /* localStorage unavailable (private mode, etc.) — defaults are fine */
-    }
-    setHydrated(true);
-  }, []);
+export default function AddWordForm({ bank, onSaved }: Props) {
+  const isLanguageBank = bank.kind === "language";
+  const sourceLang = bank.source_lang ?? "en";
+  const targetLang = bank.target_lang ?? "es";
 
-  useEffect(() => {
-    if (!hydrated) return;
-    try {
-      window.localStorage.setItem(STORAGE_KEY, langPair);
-    } catch { /* noop */ }
-  }, [langPair, hydrated]);
-
-  const langs = LANG_LABEL[langPair];
-  const sourceLang = langPair.split("-")[0];
-  const targetLang = langPair.split("-")[1];
-
-  // Form state
+  // Form state — shared between flows
   const [word, setWord] = useState("");
+  // Language-bank: API returns a translation. General-bank: API returns a
+  // term_definition + source. We keep them in distinct fields so save-time
+  // payloads stay typed correctly.
   const [translation, setTranslation] = useState<string | null>(null);
-  const [translating, setTranslating] = useState(false);
+  const [termDefinition, setTermDefinition] = useState<string | null>(null);
+  const [defineSource, setDefineSource] = useState<DefineSource | null>(null);
+  const [defineFailed, setDefineFailed] = useState(false);
+  const [busy, setBusy] = useState(false);
   const [userDefinition, setUserDefinition] = useState("");
   const [saving, setSaving] = useState(false);
 
-  // Client-side ML: detect the language of the self-definition and gently
-  // nudge if it doesn't match the target language. See lib/ml/language-detect.
-  // Debounced 500ms so we don't run trigram analysis on every keystroke.
+  // Reset everything when the active bank changes — the form belongs to the
+  // bank, not to the page.
+  useEffect(() => {
+    setWord("");
+    setTranslation(null);
+    setTermDefinition(null);
+    setDefineSource(null);
+    setDefineFailed(false);
+    setUserDefinition("");
+  }, [bank.id]);
+
+  // Language detect on the self-definition (LANGUAGE banks only).
   const [langDetect, setLangDetect] = useState<DetectionResult | null>(null);
   useEffect(() => {
-    // Reset detection any time the textarea clears.
+    if (!isLanguageBank) {
+      setLangDetect(null);
+      return;
+    }
     if (userDefinition.trim().length === 0) {
       setLangDetect(null);
       return;
@@ -95,80 +93,114 @@ export default function AddWordForm({ onSaved }: Props) {
       setLangDetect(detectLanguage(userDefinition, targetLang as "en" | "es"));
     }, 500);
     return () => clearTimeout(t);
-  }, [userDefinition, targetLang]);
+  }, [userDefinition, targetLang, isLanguageBank]);
 
   const showLangWarning =
-    langDetect !== null
+    isLanguageBank
+    && langDetect !== null
     && langDetect.code !== "unknown"
     && langDetect.matches_target === false
     && langDetect.confidence > WARNING_CONFIDENCE_THRESHOLD;
 
-  const canTranslate = useMemo(
-    () => word.trim().length > 0 && !translating,
-    [word, translating],
+  const canAction = useMemo(
+    () => word.trim().length > 0 && !busy,
+    [word, busy],
   );
+
+  const ready = isLanguageBank ? translation !== null : (termDefinition !== null || defineFailed);
   const canSave = useMemo(
-    () => translation !== null && userDefinition.trim().length > 0 && !saving,
-    [translation, userDefinition, saving],
+    () => ready && userDefinition.trim().length > 0 && !saving
+      && (isLanguageBank ? translation !== null : termDefinition !== null && termDefinition.trim().length > 0),
+    [ready, userDefinition, saving, isLanguageBank, translation, termDefinition],
   );
 
   const resetForm = () => {
     setWord("");
     setTranslation(null);
+    setTermDefinition(null);
+    setDefineSource(null);
+    setDefineFailed(false);
     setUserDefinition("");
     setLangDetect(null);
   };
 
-  const flipLangPair = () => {
-    setLangPair(prev => (prev === "en-es" ? "es-en" : "en-es"));
-    resetForm();
-  };
-
-  const handleTranslate = async () => {
+  const handleAction = async () => {
     const cleaned = word.trim().slice(0, MAX_WORD_LEN);
-    if (!cleaned || translating) return;
-    setTranslating(true);
+    if (!cleaned || busy) return;
+    setBusy(true);
     setTranslation(null);
+    setTermDefinition(null);
+    setDefineSource(null);
+    setDefineFailed(false);
     setUserDefinition("");
     try {
-      const { ok, data, error } = await apiPost<{ translation: string }>(
-        "/api/vocab/translate",
-        { word: cleaned, source: sourceLang, target: targetLang },
-      );
-      if (!ok || !data) {
-        toastError(error ?? "Couldn't translate that word. Try again.");
-        return;
+      if (isLanguageBank) {
+        const { ok, data, error } = await apiPost<{ translation: string }>(
+          "/api/vocab/translate",
+          { word: cleaned, source: sourceLang, target: targetLang, bank_id: bank.id },
+        );
+        if (!ok || !data) {
+          toastError(error ?? "Couldn't translate that word. Try again.");
+          return;
+        }
+        setTranslation(data.translation);
+      } else {
+        const { ok, data, error, status } = await apiPost<{ definition: string; source: DefineSource }>(
+          "/api/vocab/define",
+          { term: cleaned, bank_id: bank.id },
+        );
+        if (ok && data) {
+          setTermDefinition(data.definition);
+          setDefineSource(data.source);
+        } else if (status === 404) {
+          // Both Wikipedia + AI sources failed — drop user into manual mode.
+          setDefineFailed(true);
+          setTermDefinition("");
+          setDefineSource("manual");
+        } else {
+          toastError(error ?? "Couldn't define that term. Try again.");
+          return;
+        }
       }
-      setTranslation(data.translation);
     } catch (e: unknown) {
-      toastError(e instanceof Error ? e.message : "Translation failed.");
+      toastError(e instanceof Error ? e.message : "Lookup failed.");
     } finally {
-      setTranslating(false);
+      setBusy(false);
     }
   };
 
   const handleSave = async () => {
-    if (!translation || saving) return;
+    if (!ready || saving) return;
     const cleanedWord = word.trim().slice(0, MAX_WORD_LEN);
-    const cleanedDef = userDefinition.trim().slice(0, MAX_DEFINITION_LEN);
-    if (!cleanedWord || !cleanedDef) return;
+    const cleanedSelf = userDefinition.trim().slice(0, MAX_DEFINITION_LEN);
+    if (!cleanedWord || !cleanedSelf) return;
     setSaving(true);
     try {
+      const body: Record<string, unknown> = {
+        bank_id: bank.id,
+        user_definition: cleanedSelf,
+      };
+      if (isLanguageBank) {
+        if (!translation) return;
+        body.word = cleanedWord;
+        body.translation = translation;
+      } else {
+        if (!termDefinition || termDefinition.trim().length === 0) {
+          toastError("Add a definition before saving.");
+          return;
+        }
+        body.term = cleanedWord;
+        body.term_definition = termDefinition.trim();
+      }
       const { ok, data, error } = await apiPost<{ ok: true; fangs: number }>(
         "/api/vocab/words",
-        {
-          word: cleanedWord,
-          translation,
-          source_lang: sourceLang,
-          target_lang: targetLang,
-          user_definition: cleanedDef,
-        },
+        body,
       );
       if (!ok || !data) {
-        toastError(error ?? "Couldn't save that word. Try again.");
+        toastError(error ?? "Couldn't save. Try again.");
         return;
       }
-      toastSuccess(`+${data.fangs} Fangs! Word saved.`);
+      toastSuccess(`+${data.fangs} Fangs! Saved to ${bank.name}.`);
       resetForm();
       onSaved?.();
     } catch (e: unknown) {
@@ -178,33 +210,40 @@ export default function AddWordForm({ onSaved }: Props) {
     }
   };
 
+  const sourceLangLabel = LANG_NAME[sourceLang] ?? sourceLang.toUpperCase();
+  const targetLangLabel = LANG_NAME[targetLang] ?? targetLang.toUpperCase();
+
+  const inputLabel = isLanguageBank
+    ? `word in ${sourceLangLabel.toLowerCase()}`
+    : "term";
+  const inputPlaceholder = isLanguageBank
+    ? (sourceLang === "en" ? "e.g. window" : "e.g. ventana")
+    : "e.g. SAML, hypothesis, photosynthesis";
+  const actionLabel = isLanguageBank ? "Translate" : "Define";
+  const ActionIcon = isLanguageBank ? Translate : Books;
+
   return (
     <div className="space-y-5">
-      {/* Language pair toggle */}
-      <div className="flex items-center justify-between">
-        <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-cream/55">
-          translating from
+      {/* Bank context strip — shows what bank you're adding into */}
+      <div
+        className="flex items-center gap-2 rounded-full px-3 py-1.5 border w-fit"
+        style={{ background: `${bank.color}14`, borderColor: `${bank.color}40` }}
+      >
+        <span aria-hidden="true">{bank.icon}</span>
+        <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-cream/70">
+          adding to <span className="text-cream">{bank.name}</span>
         </p>
-        <button
-          type="button"
-          onClick={flipLangPair}
-          className="group inline-flex items-center gap-2 rounded-full px-3 py-1.5 border border-white/10 bg-white/5 backdrop-blur hover:bg-white/10 transition-colors"
-          aria-label={`Swap language pair. Currently ${langs.source} to ${langs.target}.`}
-        >
-          <span className="font-bebas text-base tracking-wider text-cream leading-none">
-            {langs.source}
+        {isLanguageBank && (
+          <span className="font-mono text-[9px] uppercase tracking-wider text-cream/55">
+            {sourceLang} → {targetLang}
           </span>
-          <ArrowsClockwise size={12} weight="bold" className="text-cream/55 group-hover:text-electric transition-colors" aria-hidden="true" />
-          <span className="font-bebas text-base tracking-wider text-gold leading-none">
-            {langs.target}
-          </span>
-        </button>
+        )}
       </div>
 
-      {/* Word input */}
+      {/* Word / term input */}
       <div>
         <label htmlFor="vocab-word-input" className="font-mono text-[10px] uppercase tracking-[0.25em] text-cream/55 block mb-2">
-          word in {langs.source === "EN" ? "english" : "spanish"}
+          {inputLabel}
         </label>
         <div className="flex items-stretch gap-2">
           <input
@@ -214,13 +253,13 @@ export default function AddWordForm({ onSaved }: Props) {
             onChange={e => setWord(e.target.value.slice(0, MAX_WORD_LEN))}
             onBlur={e => setWord(e.target.value.trim())}
             onKeyDown={e => {
-              if (e.key === "Enter" && canTranslate) {
+              if (e.key === "Enter" && canAction) {
                 e.preventDefault();
-                handleTranslate();
+                handleAction();
               }
             }}
             maxLength={MAX_WORD_LEN}
-            placeholder={langPair === "en-es" ? "e.g. window" : "e.g. ventana"}
+            placeholder={inputPlaceholder}
             className="flex-1 min-w-0 px-4 py-3 rounded-xl bg-white/5 backdrop-blur border border-white/10 text-cream placeholder:text-cream/30 font-syne text-base focus:outline-none focus:border-electric/60 focus:bg-white/[0.07] transition-colors"
             autoComplete="off"
             autoCorrect="off"
@@ -228,12 +267,12 @@ export default function AddWordForm({ onSaved }: Props) {
           />
           <button
             type="button"
-            onClick={handleTranslate}
-            disabled={!canTranslate}
+            onClick={handleAction}
+            disabled={!canAction}
             className="px-5 rounded-xl font-syne font-bold text-sm bg-electric text-navy hover:bg-electric/90 disabled:opacity-40 disabled:cursor-not-allowed transition-colors inline-flex items-center gap-2"
           >
-            <Translate size={16} weight="bold" aria-hidden="true" />
-            <span>{translating ? "..." : "Translate"}</span>
+            <ActionIcon size={16} weight="bold" aria-hidden="true" />
+            <span>{busy ? "..." : actionLabel}</span>
           </button>
         </div>
         <p className="font-mono text-[9px] uppercase tracking-wider text-cream/35 mt-1.5 text-right">
@@ -241,14 +280,14 @@ export default function AddWordForm({ onSaved }: Props) {
         </p>
       </div>
 
-      {/* Translation card — appears after translate */}
-      {translation && (
+      {/* Translation card — LANGUAGE banks */}
+      {isLanguageBank && translation && (
         <div
           className="rounded-2xl px-5 py-4 border border-electric/30 animate-slide-up"
           style={{ background: "linear-gradient(135deg, rgba(74,144,217,0.08) 0%, rgba(255,255,255,0.02) 100%)" }}
         >
           <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-electric/80 mb-1.5">
-            {langs.targetName}
+            {targetLangLabel}
           </p>
           <p className="font-bebas text-2xl tracking-wider text-cream leading-tight">
             {translation}
@@ -256,33 +295,81 @@ export default function AddWordForm({ onSaved }: Props) {
         </div>
       )}
 
-      {/* Self-definition input — appears after translate */}
-      {translation && (
+      {/* Definition card — GENERAL banks (Wikipedia / AI result) */}
+      {!isLanguageBank && termDefinition !== null && !defineFailed && (
+        <div
+          className="rounded-2xl px-5 py-4 border border-electric/30 animate-slide-up"
+          style={{ background: "linear-gradient(135deg, rgba(74,144,217,0.08) 0%, rgba(255,255,255,0.02) 100%)" }}
+        >
+          <div className="flex items-baseline justify-between mb-2 gap-2">
+            <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-electric/80">
+              definition
+            </p>
+            {defineSource && <SourceBadge source={defineSource} />}
+          </div>
+          <p className="font-syne text-sm text-cream/90 leading-relaxed">
+            {termDefinition}
+          </p>
+        </div>
+      )}
+
+      {/* Manual-definition fallback — GENERAL banks when both Wikipedia + AI failed */}
+      {!isLanguageBank && defineFailed && (
+        <div
+          className="rounded-2xl px-5 py-4 border border-gold/30 animate-slide-up"
+          style={{ background: "linear-gradient(135deg, rgba(255,215,0,0.06) 0%, rgba(255,255,255,0.02) 100%)" }}
+        >
+          <div className="flex items-baseline justify-between mb-2 gap-2">
+            <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-gold/80">
+              no auto-definition found
+            </p>
+            <SourceBadge source="manual" />
+          </div>
+          <p className="font-syne text-xs text-cream/65 mb-2">
+            Paste a definition or write your own. We'll save this as the term's reference.
+          </p>
+          <textarea
+            value={termDefinition ?? ""}
+            onChange={e => setTermDefinition(e.target.value.slice(0, MAX_DEFINITION_LEN * 2))}
+            rows={3}
+            maxLength={MAX_DEFINITION_LEN * 2}
+            placeholder="Paste a definition here..."
+            className="w-full px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-cream placeholder:text-cream/30 font-syne text-sm focus:outline-none focus:border-gold/60 resize-none"
+          />
+        </div>
+      )}
+
+      {/* Self-definition input — both flows */}
+      {ready && (
         <div className="animate-slide-up" style={{ animationDelay: "0.05s" }}>
           <label htmlFor="vocab-self-def" className="font-mono text-[10px] uppercase tracking-[0.25em] text-cream/55 block mb-2">
-            now write your own definition in {langs.targetName.toLowerCase()}
+            {isLanguageBank
+              ? `now write your own definition in ${targetLangLabel.toLowerCase()}`
+              : "explain this in your own words"}
           </label>
           <textarea
             id="vocab-self-def"
             value={userDefinition}
             onChange={e => setUserDefinition(e.target.value.slice(0, MAX_DEFINITION_LEN))}
-            placeholder={langPair === "en-es"
-              ? "Describe la palabra con palabras simples..."
-              : "Describe the word with simple words you already know..."}
+            placeholder={isLanguageBank
+              ? (sourceLang === "en"
+                ? "Describe la palabra con palabras simples..."
+                : "Describe the word with simple words you already know...")
+              : "What does this mean? Use plain language you'd use with a friend."}
             rows={3}
             maxLength={MAX_DEFINITION_LEN}
             className="w-full px-4 py-3 rounded-xl bg-white/5 backdrop-blur border border-white/10 text-cream placeholder:text-cream/30 font-syne text-sm focus:outline-none focus:border-gold/60 focus:bg-white/[0.07] transition-colors resize-none"
           />
           <div className="flex items-center justify-between mt-1.5">
             <p className="font-mono text-[9px] uppercase tracking-wider text-cream/45">
-              use simple words you already know. this is what makes it stick.
+              writing it yourself is what makes it stick.
             </p>
             <p className="font-mono text-[9px] uppercase tracking-wider text-cream/35 tabular-nums">
               {userDefinition.length}/{MAX_DEFINITION_LEN}
             </p>
           </div>
 
-          {/* Soft language-mismatch nudge — does NOT block save. */}
+          {/* Soft language-mismatch nudge — LANGUAGE banks only. Does NOT block save. */}
           {showLangWarning && langDetect && (
             <div
               role="status"
@@ -291,7 +378,7 @@ export default function AddWordForm({ onSaved }: Props) {
             >
               <Lightbulb size={14} weight="fill" className="text-gold mt-0.5 shrink-0" aria-hidden="true" />
               <p className="font-syne text-xs text-gold/90 leading-snug">
-                Looks like {LANG_NAME[langDetect.code as "en" | "es"]}. Try writing in {langs.targetName}. That is how it sticks.
+                Looks like {LANG_NAME[langDetect.code as "en" | "es"]}. Try writing in {targetLangLabel}. That is how it sticks.
               </p>
             </div>
           )}
@@ -309,16 +396,38 @@ export default function AddWordForm({ onSaved }: Props) {
       )}
 
       {/* Empty-state tip — only when nothing is happening */}
-      {!translation && !translating && word.length === 0 && (
+      {!ready && !busy && word.length === 0 && (
         <div className="mt-2 rounded-2xl p-5 bg-white/[0.03] backdrop-blur border border-white/[0.06]">
           <p className="font-bebas text-sm tracking-[0.15em] text-gold/80 mb-2">
             ACTIVE RECALL METHOD
           </p>
           <p className="font-syne text-sm text-cream/75 leading-relaxed">
-            Type a word, get the translation, then write your OWN simple definition in the target language. Writing the definition yourself is what locks the word into long-term memory.
+            {isLanguageBank
+              ? "Type a word, get the translation, then write your OWN simple definition in the target language. Writing the definition yourself is what locks the word into long-term memory."
+              : "Type a term, get the textbook definition, then re-explain it in plain words you'd use with a friend. Re-stating it in your voice is what locks it into long-term memory."}
           </p>
         </div>
       )}
     </div>
+  );
+}
+
+/* ── Source badge ──────────────────────────────────────────── */
+
+function SourceBadge({ source }: { source: DefineSource }) {
+  const meta = source === "wikipedia"
+    ? { label: "wikipedia", color: "#22C55E", Icon: Books }
+    : source === "ai"
+      ? { label: "ai", color: "#A855F7", Icon: Sparkle }
+      : { label: "manual", color: "#FFD700", Icon: Pencil };
+  const Icon = meta.Icon;
+  return (
+    <span
+      className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 border font-mono text-[9px] uppercase tracking-[0.2em]"
+      style={{ background: `${meta.color}14`, borderColor: `${meta.color}50`, color: meta.color }}
+    >
+      <Icon size={9} weight="bold" aria-hidden="true" />
+      <span>source: {meta.label}</span>
+    </span>
   );
 }

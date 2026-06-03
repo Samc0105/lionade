@@ -3,13 +3,17 @@
 /**
  * ReviewQueue — Tab B of /learn/vocab.
  *
- * Flashcard flow over the due-words list returned by GET /api/vocab/words?due=true.
- * One card at a time. Tap to flip → reveal the translation + the user's own
- * definition. Two big buttons: Got it / Need more time. Each tap POSTs the
- * review and animates the next card in.
+ * Flashcard flow over the due-words list for the ACTIVE BANK, returned by
+ * GET /api/vocab/words?bank_id=<uuid>&due=true. One card at a time. Tap to
+ * flip → reveal the back of the card. Two big buttons: Got it / Need more time.
  *
- * Streak pill renders at the top so the user sees their language streak as the
- * social proof for showing up today.
+ * Card front renders `word` OR `term` (same database field per backend
+ * contract — language banks store the source-language word; general banks
+ * store the term). Card back renders translation OR term_definition + the
+ * user's own self-definition. The component is bank-kind agnostic at render
+ * time except for the small "source / target" labels.
+ *
+ * Streak pill at the top is per-bank, sourced from /api/vocab/streak.
  */
 
 import { useEffect, useMemo, useState } from "react";
@@ -17,14 +21,21 @@ import useSWR from "swr";
 import { CheckCircle, XCircle, Confetti, ArrowClockwise } from "@phosphor-icons/react";
 import { apiPost, swrFetcher } from "@/lib/api-client";
 import { toastError } from "@/lib/toast";
-import LanguageStreakPill, { type LangPair, type LanguageStreak } from "./LanguageStreakPill";
+import BankStreakPill, { type BankStreak } from "./BankStreakPill";
+import type { VocabBank } from "./CreateBankModal";
 
 export interface VocabWord {
   id: string;
-  word: string;
-  translation: string;
-  source_lang: string;
-  target_lang: string;
+  bank_id: string;
+  /** Source-language word (language banks) or the canonical term (general banks). */
+  word?: string;
+  term?: string;
+  /** Target-language translation — language banks only. */
+  translation?: string;
+  /** Reference definition — general banks only. */
+  term_definition?: string;
+  source_lang?: string;
+  target_lang?: string;
   user_definition: string;
   review_count: number;
   correct_count: number;
@@ -32,40 +43,38 @@ export interface VocabWord {
 }
 
 interface Props {
-  /** Active lang pair from the parent — used to scope the GET and pick the right streak pill. */
-  langPair: LangPair;
+  bank: VocabBank;
 }
 
-export default function ReviewQueue({ langPair }: Props) {
+export default function ReviewQueue({ bank }: Props) {
   const { data, isLoading, mutate } = useSWR<{ words: VocabWord[] }>(
-    `/api/vocab/words?lang=${langPair}&due=true`,
+    `/api/vocab/words?bank_id=${encodeURIComponent(bank.id)}&due=true`,
     swrFetcher,
     { keepPreviousData: true, revalidateOnFocus: true },
   );
-  const { data: streakData } = useSWR<LanguageStreak[]>(
+  const { data: streakData } = useSWR<{ streaks: BankStreak[] }>(
     "/api/vocab/streak",
     swrFetcher,
     { keepPreviousData: true, revalidateOnFocus: true },
   );
 
   const queue = useMemo(() => data?.words ?? [], [data]);
-  const streak = useMemo(
-    () => streakData?.find(s => s.langPair === langPair) ?? { langPair, count: 0, lastDay: null },
-    [streakData, langPair],
-  );
+  const streak: BankStreak = useMemo(() => {
+    const found = streakData?.streaks?.find(s => s.bank_id === bank.id);
+    return found ?? { bank_id: bank.id, bank_name: bank.name, count: 0, lastDay: null };
+  }, [streakData, bank.id, bank.name]);
 
   // Index into queue. We DON'T mutate the queue itself between answers — we
   // just advance the index, so re-renders don't cause cards to jump around.
-  // On reaching the end we trigger SWR to refetch for any newly-due cards.
   const [idx, setIdx] = useState(0);
   const [revealed, setRevealed] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
-  // When the queue identity changes (lang switch, fresh fetch), reset to top.
+  // When the queue identity changes (bank switch, fresh fetch), reset to top.
   useEffect(() => {
     setIdx(0);
     setRevealed(false);
-  }, [queue.length, langPair]);
+  }, [queue.length, bank.id]);
 
   const current = queue[idx] ?? null;
   const remaining = Math.max(0, queue.length - idx);
@@ -82,8 +91,6 @@ export default function ReviewQueue({ langPair }: Props) {
         toastError(error ?? "Couldn't save that review. Try again.");
         return;
       }
-      // Advance. If we've consumed the queue, kick a refetch so newly-due
-      // cards roll in.
       const nextIdx = idx + 1;
       if (nextIdx >= queue.length) {
         mutate();
@@ -100,8 +107,13 @@ export default function ReviewQueue({ langPair }: Props) {
   return (
     <div className="space-y-6">
       {/* Streak pill — front and center */}
-      <div className="flex items-center justify-between">
-        <LanguageStreakPill streak={streak} size="md" />
+      <div className="flex items-center justify-between flex-wrap gap-2">
+        <BankStreakPill
+          streak={streak}
+          color={bank.color}
+          icon={bank.kind === "language" ? bank.icon : undefined}
+          size="md"
+        />
         {queue.length > 0 && (
           <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-cream/55 tabular-nums">
             {remaining} of {queue.length} due
@@ -117,13 +129,14 @@ export default function ReviewQueue({ langPair }: Props) {
       ) : current ? (
         <FlashCard
           word={current}
+          bank={bank}
           revealed={revealed}
           onReveal={() => setRevealed(true)}
           onAnswer={handleAnswer}
           submitting={submitting}
         />
       ) : (
-        <EmptyReviewState />
+        <EmptyReviewState bankName={bank.name} />
       )}
     </div>
   );
@@ -133,13 +146,24 @@ export default function ReviewQueue({ langPair }: Props) {
 
 interface FlashCardProps {
   word: VocabWord;
+  bank: VocabBank;
   revealed: boolean;
   onReveal: () => void;
   onAnswer: (correct: boolean) => void;
   submitting: boolean;
 }
 
-function FlashCard({ word, revealed, onReveal, onAnswer, submitting }: FlashCardProps) {
+function FlashCard({ word, bank, revealed, onReveal, onAnswer, submitting }: FlashCardProps) {
+  const isLanguageBank = bank.kind === "language";
+  const front = isLanguageBank ? (word.word ?? word.term ?? "") : (word.term ?? word.word ?? "");
+  const back = isLanguageBank ? word.translation ?? "" : word.term_definition ?? "";
+  const frontLabel = isLanguageBank
+    ? (word.source_lang === "en" ? "english" : word.source_lang === "es" ? "spanish" : word.source_lang ?? "term")
+    : "term";
+  const backLabel = isLanguageBank
+    ? (word.target_lang === "en" ? "english" : word.target_lang === "es" ? "spanish" : word.target_lang ?? "translation")
+    : "definition";
+
   return (
     <div className="space-y-4 animate-slide-up" key={word.id}>
       <button
@@ -148,22 +172,26 @@ function FlashCard({ word, revealed, onReveal, onAnswer, submitting }: FlashCard
         disabled={revealed}
         className="w-full rounded-2xl bg-white/5 backdrop-blur border border-white/10 p-8 sm:p-12 text-center hover:bg-white/[0.07] transition-colors disabled:cursor-default"
         style={{ minHeight: 220 }}
-        aria-label={revealed ? "Card revealed" : "Tap to reveal translation"}
+        aria-label={revealed ? "Card revealed" : "Tap to reveal"}
       >
         <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-cream/45 mb-3">
-          {word.source_lang === "en" ? "english" : "spanish"}
+          {frontLabel}
         </p>
         <p className="font-bebas text-4xl sm:text-5xl tracking-wider text-cream leading-none">
-          {word.word}
+          {front}
         </p>
 
         {revealed ? (
           <div className="mt-7 pt-6 border-t border-white/10 animate-slide-up">
             <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-electric/80 mb-2">
-              {word.target_lang === "en" ? "english" : "spanish"}
+              {backLabel}
             </p>
-            <p className="font-bebas text-3xl tracking-wider text-electric leading-tight">
-              {word.translation}
+            <p
+              className={isLanguageBank
+                ? "font-bebas text-3xl tracking-wider text-electric leading-tight"
+                : "font-syne text-base text-electric/95 leading-relaxed"}
+            >
+              {back}
             </p>
             {word.user_definition && (
               <div className="mt-5 px-4 py-3 rounded-xl bg-white/[0.04] border border-white/[0.06]">
@@ -183,7 +211,6 @@ function FlashCard({ word, revealed, onReveal, onAnswer, submitting }: FlashCard
         )}
       </button>
 
-      {/* Action buttons — only enabled once revealed */}
       <div className="grid grid-cols-2 gap-3">
         <button
           type="button"
@@ -210,19 +237,19 @@ function FlashCard({ word, revealed, onReveal, onAnswer, submitting }: FlashCard
 
 /* ── Empty state ───────────────────────────────────────────────────────── */
 
-function EmptyReviewState() {
+function EmptyReviewState({ bankName }: { bankName: string }) {
   return (
     <div className="rounded-2xl bg-white/5 backdrop-blur border border-gold/25 p-10 text-center">
       <Confetti size={48} weight="fill" color="#FFD700" aria-hidden="true" className="mx-auto mb-4" />
       <p className="font-bebas text-2xl tracking-wider text-cream mb-2">
-        All caught up!
+        All caught up in {bankName}!
       </p>
       <p className="font-syne text-sm text-cream/65">
-        Come back tomorrow. Add a new word in the Add tab to keep your streak alive.
+        Come back tomorrow. Add a new term in the Add tab to keep your streak alive.
       </p>
       <div className="mt-5 inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.25em] text-cream/45">
         <ArrowClockwise size={12} weight="bold" aria-hidden="true" />
-        <span>queue refreshes when new words come due</span>
+        <span>queue refreshes when new terms come due</span>
       </div>
     </div>
   );

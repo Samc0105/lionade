@@ -198,6 +198,19 @@ const ROUTE_LIMITS: RouteLimit[] = [
     windowMs: 60 * 1000,
     keyPrefix: "vocab-write",
   },
+  // Vocab define — Wikipedia (free) then OpenAI gpt-4o-mini fallback per term.
+  // 20/min/IP caps the AI fallback cost in the worst case. The per-term global
+  // cache means a popular term is exactly one OpenAI call across all users
+  // ever, so the real ceiling is "new unique terms per IP per minute" — 20
+  // already pessimistic. Combined with max_tokens: 80 (~$0.0005/call), even
+  // a sustained 20/min for an hour is ~$0.60.
+  {
+    test: (p) => p === "/api/vocab/define",
+    method: "POST",
+    max: 20,
+    windowMs: 60 * 1000,
+    keyPrefix: "vocab-define",
+  },
 
   // Party — Sketchy stroke flush is ~120/min/drawer legit traffic (500ms
   // batches), so the catch-all 100/min drops real strokes mid-round. Cap at

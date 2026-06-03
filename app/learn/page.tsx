@@ -12,7 +12,7 @@ import { SUBJECT_ICONS, SUBJECT_COLORS, DefaultSubjectIcon } from "@/lib/mockDat
 import { getLevelProgress } from "@/lib/levels";
 import type { Subject } from "@/types";
 import { apiGet } from "@/lib/api-client";
-import { NotePencil, Fire, BookOpen, PawPrint, ArrowRight, Target, Brain, Translate } from "@phosphor-icons/react";
+import { NotePencil, Fire, BookOpen, PawPrint, ArrowRight, Target, Brain, Books } from "@phosphor-icons/react";
 import CountUp from "@/components/CountUp";
 
 /* ── Relative Time Helper ─────────────────────────────────── */
@@ -331,10 +331,10 @@ export default function LearnPage() {
               </Link>
 
               <Link href="/learn/vocab" className="group flex items-center gap-3 px-4 py-3 rounded-[6px] border border-white/[0.06] hover:bg-white/[0.03] hover:border-[#4A90D9]/30 transition-colors text-left">
-                <Translate size={18} weight="fill" color="#4A90D9" aria-hidden="true" className="flex-shrink-0" />
+                <Books size={18} weight="fill" color="#4A90D9" aria-hidden="true" className="flex-shrink-0" />
                 <div className="flex-1 min-w-0">
-                  <p className="font-syne font-semibold text-sm text-cream leading-tight">Vocab</p>
-                  <p className="text-cream/55 text-[10px] font-mono">write your own definition</p>
+                  <p className="font-syne font-semibold text-sm text-cream leading-tight">Word Banks</p>
+                  <p className="text-cream/55 text-[10px] font-mono">language vocab · aws · math · anything</p>
                 </div>
                 <ArrowRight size={14} weight="regular" color="rgba(238,244,255,0.3)" aria-hidden="true" className="group-hover:text-electric transition-colors" />
               </Link>
