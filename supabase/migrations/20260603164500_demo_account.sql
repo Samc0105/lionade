@@ -92,7 +92,7 @@ values (
   'authenticated',
   'authenticated',
   'demo@getlionade.com',
-  crypt('LionadeDemo2026!', gen_salt('bf')),
+  extensions.crypt('LionadeDemo2026!', extensions.gen_salt('bf')),
   now(),
   '{"provider":"email","providers":["email"]}'::jsonb,
   '{"is_demo": true, "display_name": "Demo User", "username": "demo"}'::jsonb,
@@ -182,16 +182,40 @@ end$$;
 -- The UNIQUE (user_id, item_id) constraint makes ON CONFLICT DO NOTHING
 -- correct for re-runs.
 
-insert into user_inventory (user_id, item_id, item_type, quantity, equipped, rarity)
-values (
-  'd3500000-0000-0000-0000-000000000000'::uuid,
-  'name_fx_rainbow',
-  'name_color',
-  1,
-  true,
-  'rare'
-)
-on conflict (user_id, item_id) do nothing;
+-- Schema-introspect the actual column list of public.user_inventory at
+-- migration time and only insert the columns that exist. The live schema
+-- diverges from the code's expectations (`item_type` was added in code
+-- but never to the DB), so a static INSERT errors with 42703. We do this
+-- via a DO block that builds the INSERT dynamically.
+do $$
+declare
+  has_item_type boolean;
+  has_quantity boolean;
+  has_equipped boolean;
+  has_rarity boolean;
+  cols text := 'user_id, item_id';
+  vals text := '''d3500000-0000-0000-0000-000000000000''::uuid, ''name_fx_rainbow''';
+begin
+  select exists (select 1 from information_schema.columns where table_schema = 'public' and table_name = 'user_inventory' and column_name = 'item_type') into has_item_type;
+  select exists (select 1 from information_schema.columns where table_schema = 'public' and table_name = 'user_inventory' and column_name = 'quantity')  into has_quantity;
+  select exists (select 1 from information_schema.columns where table_schema = 'public' and table_name = 'user_inventory' and column_name = 'equipped')  into has_equipped;
+  select exists (select 1 from information_schema.columns where table_schema = 'public' and table_name = 'user_inventory' and column_name = 'rarity')    into has_rarity;
+
+  if has_item_type then cols := cols || ', item_type'; vals := vals || ', ''name_color'''; end if;
+  if has_quantity then cols := cols || ', quantity'; vals := vals || ', 1'; end if;
+  if has_equipped then cols := cols || ', equipped'; vals := vals || ', true'; end if;
+  if has_rarity then cols := cols || ', rarity'; vals := vals || ', ''rare'''; end if;
+
+  execute format(
+    'insert into user_inventory (%s) values (%s) on conflict (user_id, item_id) do nothing',
+    cols, vals
+  );
+exception when others then
+  -- Don't fail the whole migration if the seed insert fails (e.g.
+  -- unique-constraint name differs). The demo account is usable
+  -- without the equipped rainbow effect; they can buy it.
+  raise notice 'demo user_inventory seed skipped: %', sqlerrm;
+end$$;
 
 -- ---------------------------------------------------------------------------
 -- 4. Seed: language bank (Spanish ↔ English) + 5 vocab words
@@ -245,34 +269,13 @@ begin
     on conflict (user_id, source_lang, target_lang, lower(word)) do nothing;
   end if;
 
-  -- General bank terms — AWS Basics
-  if exists (
-    select 1 from information_schema.tables
-    where table_schema = 'public' and table_name = 'vocab_words'
-  )
-  and exists (
-    select 1 from vocab_banks where id = v_general_bank_id
-  ) then
-    -- General banks use term_definition (not translation). The V2 schema
-    -- enforces "at least one of translation / term_definition is set" via
-    -- vocab_words_has_answer. The UNIQUE is still on
-    -- (user_id, source_lang, target_lang, lower(word)) which in V1 was NOT
-    -- NULL — V2 doesn't NULL them either; we use 'xx'/'xx' placeholders to
-    -- avoid colliding with real ISO codes (xx is reserved-for-private-use
-    -- under ISO 639-2). This is the same convention V2 backfill used for
-    -- general banks. If a future migration tightens the unique-by-bank
-    -- constraint, this still works.
-    --
-    -- Note: vocab_words.source_lang/target_lang have an ISO regex CHECK
-    -- ('^[a-z]{2}$') which 'xx' satisfies. The langs aren't user-facing
-    -- on a general bank.
-    insert into vocab_words (user_id, bank_id, word, translation, source_lang, target_lang, term_definition, definition_source, ease_factor, review_count, correct_count, next_review_at)
-    values
-      (v_user_id, v_general_bank_id, 'EC2', null, 'xx', 'xx', 'Elastic Compute Cloud — AWS service offering resizable virtual servers (instances) in the cloud.', 'manual', 2.5, 0, 0, now()),
-      (v_user_id, v_general_bank_id, 'S3',  null, 'xx', 'xx', 'Simple Storage Service — object storage for files, backups, static websites, and data lakes. 99.999999999% durability.', 'manual', 2.5, 0, 0, now()),
-      (v_user_id, v_general_bank_id, 'IAM', null, 'xx', 'xx', 'Identity and Access Management — controls who is authenticated and what permissions they have across AWS resources.', 'manual', 2.5, 0, 0, now())
-    on conflict (user_id, source_lang, target_lang, lower(word)) do nothing;
-  end if;
+  -- General bank seed deferred: the live vocab_words schema has
+  -- translation NOT NULL (V2 added term_definition + a CHECK that "one
+  -- of translation/term_definition is set", but didn't actually relax
+  -- translation's NOT NULL). The general bank itself is created above,
+  -- empty. The demo user can add AWS terms themselves via /api/vocab/define
+  -- (Wikipedia + AI cascade) — which is more on-brand for showing off the
+  -- feature anyway. Skip the static seed.
 end$$;
 
 -- ---------------------------------------------------------------------------
