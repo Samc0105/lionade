@@ -26,6 +26,7 @@ import RoundEndOverlay from "./RoundEndOverlay";
 import Confetti from "@/components/Confetti";
 import FangBurst from "@/components/competitive/FangBurst";
 import { sketchChannel, SKETCH_EVENTS } from "@/lib/party/realtime-channels";
+import { subscribeResilient } from "@/lib/realtime-resilient";
 import { SUBJECT_LABELS, type Subject } from "@/lib/party/word-lists-stub";
 import type { PartyPlayer, PartyRoom } from "@/lib/party/types";
 
@@ -453,17 +454,20 @@ export default function SketchView({
         }
       }
     });
-    ch.subscribe((status: string) => {
-      if (status === "SUBSCRIBED") {
-        subscribedRef.current = true;
-      } else if (status === "CLOSED" || status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
-        subscribedRef.current = false;
-      }
+    // Tier 1 lifecycle (2026-06-04): wrap subscribe with exponential-backoff
+    // resubscribe so a transient WS drop doesn't silently leave the channel
+    // dead. After MAX_ATTEMPTS the wrapper surfaces a single "Connection lost"
+    // toast — see lib/realtime-resilient.ts.
+    const handle = subscribeResilient(ch, {
+      label: `sketch-room:${room.code}`,
+      onSubscribed: () => { subscribedRef.current = true; },
+      onUnsubscribed: () => { subscribedRef.current = false; },
     });
     channelRef.current = ch;
     return () => {
       subscribedRef.current = false;
       channelRef.current = null;
+      handle.cancel();
       supabase.removeChannel(ch);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps

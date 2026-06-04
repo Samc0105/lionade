@@ -9,6 +9,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
 import { isValidRoomCode, normalizeRoomCode } from "@/lib/party/room-code";
+import { clearActiveSession } from "@/lib/presence";
 
 export async function POST(
   req: NextRequest,
@@ -30,6 +31,7 @@ export async function POST(
     .neq("status", "ended")
     .maybeSingle();
   if (!room) {
+    void clearActiveSession(userId);
     return NextResponse.json({ ok: true, already_ended: true });
   }
 
@@ -39,6 +41,10 @@ export async function POST(
     .eq("room_id", room.id)
     .eq("user_id", userId)
     .is("left_at", null);
+
+  // Drop their active_session pin regardless of host-transfer outcome below.
+  // Fire-and-forget — leave response must not block on presence bookkeeping.
+  void clearActiveSession(userId);
 
   // Find remaining active players.
   const { data: remaining } = await supabaseAdmin

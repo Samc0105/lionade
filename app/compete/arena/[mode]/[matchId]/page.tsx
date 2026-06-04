@@ -20,6 +20,7 @@ import { motion, useReducedMotion } from "framer-motion";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { apiGet } from "@/lib/api-client";
 import { useAuth } from "@/lib/auth";
+import { useHeartbeat } from "@/lib/use-heartbeat";
 import { isCompetitiveMode, type CompetitiveMatchRow, type CompetitiveMode } from "@/lib/competitive/types";
 import SabotageScreen from "@/components/competitive/sabotage/SabotageScreen";
 import ZoomScreen from "@/components/competitive/zoom/ZoomScreen";
@@ -57,6 +58,12 @@ export default function CompetitiveMatchPage() {
   const matchId = String(params?.matchId ?? "");
   const [loaded, setLoaded] = useState<LoadedMatch | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  // Tier 1 lifecycle (Phase 1 — 2026-06-04). Heartbeat starts as soon as we
+  // have a matchId in the URL — we don't wait for the full match-load
+  // response because the user is committed to this match the moment the
+  // page mounts.
+  useHeartbeat(matchId ? "competitive_match" : null, matchId || null);
 
   useEffect(() => {
     if (!matchId) return;

@@ -9,6 +9,7 @@ import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
 import { fetchRoomSnapshot } from "@/lib/party/room-state";
 import { isValidRoomCode, normalizeRoomCode } from "@/lib/party/room-code";
+import { setActiveSession } from "@/lib/presence";
 
 const MAX_PLAYERS = 6;
 
@@ -27,7 +28,7 @@ export async function POST(
 
   const { data: room } = await supabaseAdmin
     .from("party_rooms")
-    .select("id, status")
+    .select("id, status, host_user_id")
     .eq("code", code)
     .neq("status", "ended")
     .maybeSingle();
@@ -52,6 +53,9 @@ export async function POST(
     .maybeSingle();
 
   if (existing && existing.left_at === null) {
+    // Refresh active_session so a re-open of the tab re-pins them to the room.
+    const reJoinRole = room.host_user_id === userId ? "host" : "player";
+    void setActiveSession(userId, "party_room", code, reJoinRole);
     const snap = await fetchRoomSnapshot(supabaseAdmin, code);
     return NextResponse.json({
       ok: true,
@@ -80,6 +84,10 @@ export async function POST(
       is_ready: false,
     });
   }
+
+  // Fire-and-forget — never block the join response on presence bookkeeping.
+  const role = room.host_user_id === userId ? "host" : "player";
+  void setActiveSession(userId, "party_room", code, role);
 
   const snap = await fetchRoomSnapshot(supabaseAdmin, code);
   return NextResponse.json({

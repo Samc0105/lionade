@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
+import { setActiveSession } from "@/lib/presence";
 
 /**
  * Daily Drill — the "Wordle of studying" daily ritual.
@@ -189,6 +190,13 @@ export async function GET(req: NextRequest) {
         examTitle: exam?.title ?? null,
         lastWrongAt: cand.lastWrongAt,
       });
+    }
+
+    // Pin the user to today's drill so the AFK reaper can clear it if they
+    // walk away mid-drill without completing. Fire-and-forget. Only pinned
+    // when we actually have questions to serve.
+    if (out.length > 0) {
+      void setActiveSession(userId, "daily_drill", today, "player");
     }
 
     return NextResponse.json({

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
 import { applyFangMultiplierFromTier } from "@/lib/mastery-plan";
+import { clearActiveSession } from "@/lib/presence";
 
 /**
  * POST /api/daily-drill/complete
@@ -55,6 +56,7 @@ export async function POST(req: NextRequest) {
       .eq("drill_date", today)
       .maybeSingle();
     if (existing) {
+      void clearActiveSession(userId);
       return NextResponse.json({
         alreadyCompleted: true,
         score: existing.score,
@@ -163,6 +165,9 @@ export async function POST(req: NextRequest) {
         }),
       ]);
     }
+
+    // Drop the active_session pin — drill is done for today.
+    void clearActiveSession(userId);
 
     return NextResponse.json({
       alreadyCompleted: false,

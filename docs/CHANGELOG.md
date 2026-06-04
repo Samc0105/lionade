@@ -6,6 +6,9 @@ All notable changes to Lionade, newest first.
 
 ## 2026-06-04
 
+- feat(lifecycle): backend wiring — /api/presence/heartbeat with ping_presence RPC, set_active_session wired into every join flow + clear on leave, /api/cron/reap-afk-presence Vercel cron at 30s, Sketchy round-end now writes DB phase, /api/party/rounds/[id]/vote + tally with 75% auto-decide threshold
+- feat(lifecycle): Tier 1 frontend UX — useActiveSession + useHeartbeat hooks, sticky ResumeBanner, per-user realtime channel for cross-game redirect, reconnect-on-mount guard, network resilience with exponential backoff on channel errors, tab-backgrounded grace period
+- feat(lifecycle): Session lifecycle schema V2 — profiles.active_session pointer + presence_heartbeats + sketch_rounds.phase/winner_user_id/celebrating_started_at + party_round_votes + mastery_session_state + daily_drill_progress + quiz_session_state. 4 RPCs: ping_presence, reap_afk_presence, set_active_session, clear_active_session.
 - feat(sketchy): round-end completion V1 — phase: "celebrating" with canvas stamp (GUESSED / TIME'S UP), green corner pulse on won rounds, full-screen RoundEndOverlay with winner avatar + word reveal, drawer input disabled during celebration, host-only play-again / lobby controls on the post-round screen
 
 ---

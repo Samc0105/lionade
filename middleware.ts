@@ -246,6 +246,27 @@ const ROUTE_LIMITS: RouteLimit[] = [
     keyPrefix: "party-strokes",
   },
 
+  // Session lifecycle — presence heartbeat fires every ~10s from every
+  // active tab. 30/min/IP gives 3x headroom for a single user + handles
+  // households on one NAT without throttling.
+  {
+    test: (p) => p === "/api/presence/heartbeat",
+    method: "POST",
+    max: 30,
+    windowMs: 60 * 1000,
+    keyPrefix: "presence-heartbeat",
+  },
+  // Post-round vote tally — both POST (cast/change) and GET (poll). 10/min
+  // covers a few "change my mind" toggles + a polling tab without
+  // tripping. Matches both URLs since GET fetches /votes and POST fires at
+  // /vote — pattern uses a non-capturing group.
+  {
+    test: (p) => /^\/api\/party\/rounds\/[^/]+\/votes?$/.test(p),
+    max: 10,
+    windowMs: 60 * 1000,
+    keyPrefix: "party-vote",
+  },
+
   // Stripe checkout + portal — anti-abuse (5/min/IP). Webhook is exempted
   // below: Stripe MUST be able to hit it freely + retry on 5xx without
   // tripping any throttle.

@@ -23,12 +23,12 @@ export async function POST(
 
   const { data: round } = await supabaseAdmin
     .from("sketch_rounds")
-    .select("id, room_id, word, factoid, drawer_user_id, started_at, ended_at, duration_sec")
+    .select("id, room_id, word, factoid, drawer_user_id, started_at, ended_at, duration_sec, phase, winner_user_id, celebrating_started_at")
     .eq("id", params.id)
     .maybeSingle();
   if (!round) return NextResponse.json({ error: "Round not found" }, { status: 404 });
   if (round.ended_at) {
-    // Already completed; return idempotent reveal.
+    // Already completed; return idempotent reveal. (Phase + winner already on the row.)
     return buildReveal(round.id, round.word, round.factoid, round.drawer_user_id, round.room_id);
   }
 
@@ -44,13 +44,18 @@ export async function POST(
     return NextResponse.json({ error: "Not authorized to complete round" }, { status: 403 });
   }
 
-  // Count correct guessers + fast guessers (within first 30s).
+  // Count correct guessers + fast guessers (within first 30s). Order by
+  // guessed_at so the FIRST correct guess identifies the round's winner.
   const { data: correctGuesses } = await supabaseAdmin
     .from("sketch_guesses")
     .select("user_id, guessed_at")
     .eq("round_id", round.id)
-    .eq("was_correct", true);
+    .eq("was_correct", true)
+    .order("guessed_at", { ascending: true });
   const correctCount = correctGuesses?.length ?? 0;
+  const winnerUserId = correctGuesses && correctGuesses.length > 0
+    ? correctGuesses[0].user_id
+    : null;
 
   const startMs = new Date(round.started_at).getTime();
   const fastCount = (correctGuesses ?? []).filter(
@@ -92,9 +97,25 @@ export async function POST(
     fangs: sketchDrawerFangs(correctCount),
   });
 
+  // Persist the round-end state in ONE update:
+  //   - ended_at           (legacy timestamp consumers still read)
+  //   - phase              ("celebrating" — UI shows the win/timeout overlay)
+  //   - winner_user_id     (first correct guesser, or NULL on timeout)
+  //   - celebrating_started_at (anchor for the 2.5s overlay window)
+  //
+  // The frontend still reads the live broadcast for the instant render, but
+  // persisting the phase means a player who refreshes during the overlay
+  // lands BACK on the celebration (sees the rest of it) rather than skipping
+  // to the reveal.
+  const nowIso = new Date().toISOString();
   await supabaseAdmin
     .from("sketch_rounds")
-    .update({ ended_at: new Date().toISOString() })
+    .update({
+      ended_at: nowIso,
+      phase: "celebrating",
+      winner_user_id: winnerUserId,
+      celebrating_started_at: nowIso,
+    })
     .eq("id", round.id);
 
   return buildReveal(round.id, round.word, round.factoid, round.drawer_user_id, round.room_id);

@@ -17,6 +17,9 @@ import { supabase } from "@/lib/supabase";
 import { roomChannel, PARTY_EVENTS } from "@/lib/party/realtime-channels";
 import { normalizeRoomCode } from "@/lib/party/room-code";
 import { useAuth } from "@/lib/auth";
+import { useHeartbeat } from "@/lib/use-heartbeat";
+import { useActiveSession } from "@/lib/active-session";
+import { useToast } from "@/components/Toast";
 import RoomLobby from "@/components/party/RoomLobby";
 import SketchView from "@/components/party/SketchView";
 import BluffView from "@/components/party/BluffView";
@@ -42,6 +45,34 @@ export default function PartyRoomPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [leaving, setLeaving] = useState(false);
+
+  // Tier 1 lifecycle hooks (Phase 1 — 2026-06-04).
+  // Heartbeat keeps the server's AFK reaper happy while the user is on this
+  // page; the reaper window is 60s so a 10s cadence has 6x safety margin.
+  useHeartbeat(code ? "party_room" : null, code || null);
+
+  // Reconnect-on-mount: if the user's active_session pointer disagrees with
+  // the URL they hit (e.g. they bookmarked an old room, or were tabbed
+  // through stale history), nudge them to the canonical room. Soft-redirect
+  // so they're not silently re-routed mid-flow — the toast gives them an
+  // out if they explicitly wanted to leave.
+  const { session: activeSession } = useActiveSession();
+  const { toast } = useToast();
+  const reconcileFiredRef = useRef(false);
+  useEffect(() => {
+    if (!activeSession || !code || reconcileFiredRef.current) return;
+    if (activeSession.type === "party_room" && activeSession.id !== code) {
+      reconcileFiredRef.current = true;
+      toast(`You're already in room ${activeSession.id}`, {
+        type: "info",
+        duration: 6000,
+        action: {
+          label: "Resume",
+          onClick: () => router.replace(`/games/party/${activeSession.id}`),
+        },
+      });
+    }
+  }, [activeSession, code, router, toast]);
 
   const refresh = useCallback(async () => {
     const res = await apiGet<Snapshot>(`/api/party/rooms/${code}`);

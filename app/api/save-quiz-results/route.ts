@@ -5,6 +5,7 @@ import { requireAuth } from "@/lib/api-auth";
 import { renderEmail, templates } from "@/lib/emails";
 import { absoluteUrl } from "@/lib/site-config";
 import { applyFangMultiplierFromTier } from "@/lib/mastery-plan";
+import { clearActiveSession } from "@/lib/presence";
 
 // GET — health check (auth-gated so the profile row count isn't world-readable)
 export async function GET(req: NextRequest) {
@@ -596,6 +597,11 @@ export async function POST(req: NextRequest) {
       .eq("id", userId)
       .single();
 
+
+    // Drop the active_session pin — quiz is done. (The quiz start path is
+    // stateless and doesn't set one, but this is a safe no-op if absent and
+    // catches any legacy/dangling pin from prior sessions.)
+    void clearActiveSession(userId);
 
     return NextResponse.json({
       success: true,

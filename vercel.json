@@ -9,5 +9,11 @@
     "app/api/ninny/chat/route.ts": {
       "maxDuration": 30
     }
-  }
+  },
+  "crons": [
+    {
+      "path": "/api/cron/reap-afk-presence",
+      "schedule": "* * * * *"
+    }
+  ]
 }

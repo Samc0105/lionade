@@ -15,6 +15,8 @@ import FocusLockIn from "@/components/FocusLockIn";
 import LaunchDock from "@/components/LaunchDock";
 import PageTransition from "@/components/PageTransition";
 import DemoModeBanner from "@/components/DemoModeBanner";
+import ResumeBanner from "@/components/ResumeBanner";
+import SessionLifecycle from "@/components/SessionLifecycle";
 import { SITE_URL, SITE_URL_OBJ } from "@/lib/site-config";
 
 const bebasNeue = Bebas_Neue({
@@ -161,6 +163,13 @@ export default function RootLayout({
             <SwrProvider>
               <AuthProviderWrapper>
                 <ToastProvider>
+                  {/* ResumeBanner is fixed-position z-[55] (above Navbar).
+                      SessionLifecycle is the per-user realtime listener — no
+                      DOM, just side effects. Both must be inside ToastProvider
+                      because SessionLifecycle calls useToast() for soft
+                      cross-game-redirect confirmations on mid-question pages. */}
+                  <SessionLifecycle />
+                  <ResumeBanner />
                   <DemoModeBanner />
                   <Navbar />
                   <main id="main-content">

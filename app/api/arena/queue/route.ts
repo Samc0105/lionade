@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
+import { setActiveSession } from "@/lib/presence";
 
 // POST — Join the matchmaking queue
 export async function POST(req: NextRequest) {
@@ -165,6 +166,11 @@ export async function GET(req: NextRequest) {
       supabaseAdmin.from("arena_queue").update({ status: "matched", match_id: match.id }).eq("id", myEntry.id),
       supabaseAdmin.from("arena_queue").update({ match_id: match.id }).eq("id", locked.id),
     ]);
+
+    // Mark both players as actively engaged in this match. Fire-and-forget;
+    // the polling client doesn't wait on presence bookkeeping.
+    void setActiveSession(userId, "arena_match", match.id, "player1");
+    void setActiveSession(opponent.user_id, "arena_match", match.id, "player2");
 
     return NextResponse.json({ status: "matched", matchId: match.id });
   } catch (e) {

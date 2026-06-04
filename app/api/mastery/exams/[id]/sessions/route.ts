@@ -5,6 +5,7 @@ import { requireAuth } from "@/lib/api-auth";
 import { pPass } from "@/lib/mastery";
 import { renderEmail, templates } from "@/lib/emails";
 import { absoluteUrl } from "@/lib/site-config";
+import { setActiveSession } from "@/lib/presence";
 
 /**
  * POST /api/mastery/exams/[id]/sessions
@@ -55,6 +56,7 @@ export async function POST(req: NextRequest, { params }: RouteCtx) {
         .from("mastery_sessions")
         .update({ last_active_at: new Date().toISOString() })
         .eq("id", existing.id);
+      void setActiveSession(userId, "mastery_session", existing.id, "player");
       return NextResponse.json({ sessionId: existing.id, resumed: true });
     }
 
@@ -183,6 +185,8 @@ export async function POST(req: NextRequest, { params }: RouteCtx) {
       // Non-fatal — never block session creation on email failure
       console.warn("[mastery/exams/:id/sessions] masteryStart email WARN:", masteryEmailErr);
     }
+
+    void setActiveSession(userId, "mastery_session", session.id, "player");
 
     return NextResponse.json({ sessionId: session.id, resumed: false });
   } catch (e) {

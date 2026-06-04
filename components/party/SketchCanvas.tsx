@@ -21,6 +21,7 @@ import { supabase } from "@/lib/supabase";
 import type { RealtimeChannel } from "@supabase/supabase-js";
 import { apiGet, apiPost } from "@/lib/api-client";
 import { sketchStrokesChannel, SKETCH_EVENTS } from "@/lib/party/realtime-channels";
+import { subscribeResilient } from "@/lib/realtime-resilient";
 
 // Logical canvas coordinate space. All strokes are stored in this space and
 // re-projected to whatever physical size the canvas is rendered at.
@@ -159,17 +160,20 @@ export default function SketchCanvas({
       repaint();
       onStrokeCountChange?.(0);
     });
-    ch.subscribe((status: string) => {
-      if (status === "SUBSCRIBED") {
-        subscribedRef.current = true;
-      } else if (status === "CLOSED" || status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
-        subscribedRef.current = false;
-      }
+    // Tier 1 lifecycle (2026-06-04): resilient subscribe — see SketchView.
+    const handle = subscribeResilient(ch, {
+      label: `sketch-strokes:${roomCode}`,
+      // Stroke channel is silent on give-up — SketchView's room channel
+      // already toasts the user once, no need to double-toast.
+      silentOnGiveUp: true,
+      onSubscribed: () => { subscribedRef.current = true; },
+      onUnsubscribed: () => { subscribedRef.current = false; },
     });
     channelRef.current = ch;
     return () => {
       subscribedRef.current = false;
       channelRef.current = null;
+      handle.cancel();
       supabase.removeChannel(ch);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps

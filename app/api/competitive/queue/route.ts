@@ -31,6 +31,7 @@ import {
 } from "@/lib/competitive/matchmaking";
 import { isValidRoomCode } from "@/lib/party/room-code";
 import { seedRoundsForMatch } from "@/lib/competitive/seed-rounds";
+import { setActiveSession } from "@/lib/presence";
 
 const DEFAULT_MODE: CompetitiveMode = "sabotage";
 
@@ -171,6 +172,15 @@ async function createMatch(args: {
 
   // Seed the per-mode rounds so the screen has content immediately.
   await seedRoundsForMatch(supabaseAdmin, match.id, args.mode);
+
+  // Pin every participant to this match for presence/AFK tracking. Roles
+  // are coarse — "team_a" / "team_b" — which is enough for the reaper.
+  for (const uid of args.teamA) {
+    void setActiveSession(uid, "competitive_match", match.id, "team_a");
+  }
+  for (const uid of args.teamB) {
+    void setActiveSession(uid, "competitive_match", match.id, "team_b");
+  }
 
   return match.id;
 }

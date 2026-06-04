@@ -19,6 +19,7 @@ import NinnyThinking, { MasteryNotesFooter } from "@/components/Mastery/NinnyThi
 import type { ThinkingContext } from "@/lib/mastery/thinking-phrases";
 import { apiGet, apiPost, swrFetcher } from "@/lib/api-client";
 import { useAuth } from "@/lib/auth";
+import { useHeartbeat } from "@/lib/use-heartbeat";
 import type { StudySheetInput, SubtopicSummary } from "@/components/Mastery/studySheetPdf";
 
 // How many chat messages stay visible. Older ones drop off the UI; the full
@@ -133,8 +134,15 @@ export default function MasterySessionPage() {
     return () => { cancelled = true; };
   }, [examId]);
 
-  // Heartbeat
+  // Heartbeat (mastery-specific elapsed-time tracker)
   useActiveTime(sessionId);
+
+  // Heartbeat (Tier 1 lifecycle — Phase 1 — 2026-06-04).
+  // Distinct from useActiveTime, which posts elapsed-seconds deltas to the
+  // mastery session table. This one posts presence pings to the universal
+  // /api/presence/heartbeat endpoint so the AFK reaper knows the user is
+  // still here.
+  useHeartbeat(sessionId ? "mastery_session" : null, sessionId);
 
   // Session snapshot — SWR keeps this fresh on focus + after each mutation
   const { data, mutate, isLoading } = useSWR<SessionResponse>(

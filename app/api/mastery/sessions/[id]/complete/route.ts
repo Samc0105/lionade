@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
+import { clearActiveSession } from "@/lib/presence";
 
 /**
  * POST /api/mastery/sessions/[id]/complete
@@ -41,6 +42,9 @@ export async function POST(req: NextRequest, { params }: RouteCtx) {
 
     // Idempotent: if already closed, just return the summary
     if (session.status !== "active") {
+      // Clear regardless — a repeated /complete call from a stale tab should
+      // still purge a lingering active_session pin.
+      void clearActiveSession(userId);
       return NextResponse.json({
         alreadyClosed: true,
         sessionId,
@@ -101,6 +105,9 @@ export async function POST(req: NextRequest, { params }: RouteCtx) {
         ]);
       }
     }
+
+    // Drop the active_session pin — the user is finished here.
+    void clearActiveSession(userId);
 
     return NextResponse.json({
       sessionId,
