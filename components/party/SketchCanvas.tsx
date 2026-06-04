@@ -20,7 +20,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import type { RealtimeChannel } from "@supabase/supabase-js";
 import { apiGet, apiPost } from "@/lib/api-client";
-import { sketchChannel, SKETCH_EVENTS } from "@/lib/party/realtime-channels";
+import { sketchStrokesChannel, SKETCH_EVENTS } from "@/lib/party/realtime-channels";
 
 // Logical canvas coordinate space. All strokes are stored in this space and
 // re-projected to whatever physical size the canvas is rendered at.
@@ -129,7 +129,7 @@ export default function SketchCanvas({
 
   // ── Realtime subscribe: live stroke updates from the drawer ──
   useEffect(() => {
-    const ch = supabase.channel(sketchChannel(roomCode));
+    const ch = supabase.channel(sketchStrokesChannel(roomCode));
     ch.on("broadcast", { event: SKETCH_EVENTS.STROKE }, (msg: { payload?: unknown }) => {
       const payload = (msg.payload ?? {}) as { stroke?: StrokePayload };
       if (!payload.stroke) return;

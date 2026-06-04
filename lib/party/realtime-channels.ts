@@ -12,6 +12,18 @@ export function sketchChannel(code: string): string {
   return `party-room-${code}-sketch`;
 }
 
+// Strokes need their OWN topic. SketchView already subscribes to the main
+// sketch channel for game-state events (ROUND_STARTED, GUESS, etc.). If
+// SketchCanvas ALSO subscribes to the same topic for strokes, Supabase's
+// JS client treats them as conflicting same-topic subscriptions from one
+// tab — sends silently drop and event delivery becomes inconsistent.
+// Drawer sees their own local paint, guessers see nothing. This separate
+// topic decouples the high-frequency stroke flood from the slower-paced
+// game-state events. See SketchCanvas.tsx for the subscriber.
+export function sketchStrokesChannel(code: string): string {
+  return `party-room-${code}-sketch-strokes`;
+}
+
 export function bluffChannel(code: string): string {
   return `party-room-${code}-bluff`;
 }
