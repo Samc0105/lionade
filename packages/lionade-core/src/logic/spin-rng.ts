@@ -39,11 +39,11 @@ export const SPIN_SLOTS: SpinSlot[] = [
   { outcome: "medium_fangs",  weight: 20,  label: "Medium Fangs",   description: "Solid pull — some real Fangs.",           color: "#22C55E" },
   { outcome: "booster",       weight: 15,  label: "Free Booster",   description: "You won a random booster.",               color: "#A855F7" },
   { outcome: "big_fangs",     weight: 12,  label: "Big Fangs",      description: "A heavy bag of Fangs.",                   color: "#0EA5E9" },
-  { outcome: "mega_fangs",    weight: 5,   label: "Mega Fangs",     description: "2,000F — hyped.",                         color: "#F59E0B" },
+  { outcome: "mega_fangs",    weight: 5,   label: "Mega Fangs",     description: "1,500F — hyped.",                         color: "#F59E0B" },
   { outcome: "streak_shield", weight: 3,   label: "Streak Shield",  description: "One free streak save — clutch.",          color: "#EF4444" },
   { outcome: "rare_cosmetic", weight: 3,   label: "Rare Cosmetic",  description: "A surprise rare item lands in your bag.", color: "#EC4899" },
   { outcome: "tax_man",       weight: 2,   label: "TAX MAN",        description: "The Tax Man cometh — you lost 33%.",      color: "#7F1D1D" },
-  { outcome: "jackpot",       weight: 2,   label: "JACKPOT",        description: "10,000 Fangs. LFG.",                      color: "#FFD700" },
+  { outcome: "jackpot",       weight: 2,   label: "JACKPOT",        description: "5,000 Fangs. LFG.",                       color: "#FFD700" },
 ];
 
 // Sanity-check: weights must sum to 100. If anyone edits the array, this

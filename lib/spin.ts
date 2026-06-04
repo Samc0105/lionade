@@ -58,13 +58,17 @@ export function computeReward(
 
   switch (outcome) {
     case "small_fangs":
-      // Random integer 50..150 inclusive
-      return { fangsDelta: positiveBoost(randomInt(50, 151)), rewardPayload: null };
+      // Random integer 50..100 (was 50..150 — Sam flagged 2026-06-04 that
+      // spin was paying out too much; expected value per pull dropped from
+      // ~440F to ~270F for Free users so the spin no longer overshadows a
+      // day's worth of regular gameplay earning).
+      return { fangsDelta: positiveBoost(randomInt(50, 101)), rewardPayload: null };
     case "bust":
       // Flat -500F, no plan softening
       return { fangsDelta: -500, rewardPayload: { kind: "bust" } };
     case "medium_fangs":
-      return { fangsDelta: positiveBoost(randomInt(200, 401)), rewardPayload: null };
+      // Was 200..400 — halved range
+      return { fangsDelta: positiveBoost(randomInt(150, 301)), rewardPayload: null };
     case "booster": {
       // Random booster id from a small curated pool
       const ids = ["boost_coin_rush", "boost_xp_surge", "boost_lucky_start"] as const;
@@ -72,9 +76,11 @@ export function computeReward(
       return { fangsDelta: 0, rewardPayload: { kind: "booster", boosterId: id } };
     }
     case "big_fangs":
-      return { fangsDelta: positiveBoost(randomInt(500, 1001)), rewardPayload: null };
+      // Was 500..1000 — halved range
+      return { fangsDelta: positiveBoost(randomInt(400, 701)), rewardPayload: null };
     case "mega_fangs":
-      return { fangsDelta: positiveBoost(2000), rewardPayload: null };
+      // Was 2000 flat — reduced to 1500
+      return { fangsDelta: positiveBoost(1500), rewardPayload: null };
     case "streak_shield":
       // Caller is responsible for granting the shield to the user's inventory.
       return { fangsDelta: 0, rewardPayload: { kind: "streak_shield", days: 1 } };
@@ -91,6 +97,8 @@ export function computeReward(
       return { fangsDelta: -loss, rewardPayload: { kind: "tax_man", percent: 33 } };
     }
     case "jackpot":
-      return { fangsDelta: positiveBoost(10000), rewardPayload: { kind: "jackpot" } };
+      // Was 10,000F — halved to 5,000F. Still a hyped LFG moment without
+      // single-handedly funding a week of subscription-multiplier earnings.
+      return { fangsDelta: positiveBoost(5000), rewardPayload: { kind: "jackpot" } };
   }
 }

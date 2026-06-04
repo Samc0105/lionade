@@ -94,17 +94,27 @@ export default function SpinWheel({
         }}
       />
 
-      <svg
-        viewBox={`0 0 ${size} ${size}`}
-        width={size}
-        height={size}
+      {/* Wrap the wheel SVG in a div and rotate THAT instead of the <svg>
+          element directly. Browsers GPU-composite div transforms via the
+          layer system; SVG-element transforms can fall back to software
+          rendering (especially with complex children — 10 segments + text
+          labels). The `translateZ(0)` + `backface-visibility` pair forces
+          a dedicated compositor layer so the spin animates at 60fps even
+          on mid-tier mobile. Removes the lag Sam reported 2026-06-04. */}
+      <div
         style={{
-          transform: `rotate(${rotation}deg)`,
+          transform: `rotate(${rotation}deg) translateZ(0)`,
           transition: spinning
             ? "transform 5s cubic-bezier(0.16, 1, 0.3, 1)"
             : "none",
           willChange: "transform",
+          backfaceVisibility: "hidden",
         }}
+      >
+      <svg
+        viewBox={`0 0 ${size} ${size}`}
+        width={size}
+        height={size}
       >
         {slots.map((slot, i) => {
           // Each segment spans `segmentAngle` degrees. Center of segment 0
@@ -164,6 +174,7 @@ export default function SpinWheel({
         <circle cx={cx} cy={cy} r={size / 14} fill="#0a1020" stroke="#FFD700" strokeWidth={3} />
         <circle cx={cx} cy={cy} r={size / 28} fill="#FFD700" />
       </svg>
+      </div>
     </div>
   );
 }
