@@ -7,6 +7,18 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 
 ---
 
+## 2026-06-04 — Shop daily-rotation polish (web)
+
+**Status:** Web ships. iOS port: ❌ missing.
+
+Shop daily-rotation polish on web. iOS port mirrors: same deterministic-by-UTC-date `todaysDrops()` algorithm (seed = `YYYYMMDD` integer, stable shuffle by `hash(seed + sku.id)`, slice 5), same `/api/shop/trending` endpoint (top 3 SKU ids by `purchase_history` count over last 7 days, empty-fallback so client picks 3 from `FEATURED_ITEMS`), same FOMO cap-countdown UI for the Limited Time strip when ported. Web also got `.fluid-card-hover` on every SKU card, a CSS-only legendary sparkle hover effect (`shop-legendary-sparkle`), and a 30ms staggered mount-in via `.shop-grid-stagger`. iOS already has Reanimated for the equivalent stagger; the legendary sparkle needs a small `Animated.View` with a translate-Y + opacity loop on hover-equivalent (long-press preview).
+
+**New files (web):**
+- `lib/shop-daily-drops.ts` — `todaysDrops(allSkus, date?, count?)` + `utcDateSeed(date?)` + `isDropEligible(sku)`. Pure functions, deterministic. iOS can copy verbatim (no DOM deps).
+- `app/api/shop/trending/route.ts` — GET-only, public read, dedupes 5 min on the client. iOS can hit the same endpoint.
+
+---
+
 ## 2026-06-04 — Solo mode resume on web (Phase 2 Tier 3)
 
 **Status:** Web ships. iOS port: ❌ missing.

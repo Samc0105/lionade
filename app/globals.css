@@ -4486,6 +4486,99 @@ html.light .space-bg-container { display: none; }
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
+   Shop daily-rotation polish (2026-06-04)
+   ─────────────────────────────────────────────────────────────────────────── */
+
+/* Staggered fade-in for grid cards on initial mount. The parent applies
+   .shop-grid-stagger; children inherit a 30ms-staggered delay via nth-child.
+   Cap at child #20 — beyond that we just snap-in to avoid late shows. */
+@keyframes shop-card-mount-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.shop-grid-stagger > * {
+  animation: shop-card-mount-in 320ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  will-change: opacity, transform;
+}
+.shop-grid-stagger > *:nth-child(1)  { animation-delay: 0ms; }
+.shop-grid-stagger > *:nth-child(2)  { animation-delay: 30ms; }
+.shop-grid-stagger > *:nth-child(3)  { animation-delay: 60ms; }
+.shop-grid-stagger > *:nth-child(4)  { animation-delay: 90ms; }
+.shop-grid-stagger > *:nth-child(5)  { animation-delay: 120ms; }
+.shop-grid-stagger > *:nth-child(6)  { animation-delay: 150ms; }
+.shop-grid-stagger > *:nth-child(7)  { animation-delay: 180ms; }
+.shop-grid-stagger > *:nth-child(8)  { animation-delay: 210ms; }
+.shop-grid-stagger > *:nth-child(9)  { animation-delay: 240ms; }
+.shop-grid-stagger > *:nth-child(10) { animation-delay: 270ms; }
+.shop-grid-stagger > *:nth-child(11) { animation-delay: 300ms; }
+.shop-grid-stagger > *:nth-child(12) { animation-delay: 330ms; }
+.shop-grid-stagger > *:nth-child(13) { animation-delay: 360ms; }
+.shop-grid-stagger > *:nth-child(14) { animation-delay: 390ms; }
+.shop-grid-stagger > *:nth-child(15) { animation-delay: 420ms; }
+.shop-grid-stagger > *:nth-child(16) { animation-delay: 450ms; }
+.shop-grid-stagger > *:nth-child(17) { animation-delay: 480ms; }
+.shop-grid-stagger > *:nth-child(18) { animation-delay: 510ms; }
+.shop-grid-stagger > *:nth-child(19) { animation-delay: 540ms; }
+.shop-grid-stagger > *:nth-child(20) { animation-delay: 570ms; }
+@media (prefers-reduced-motion: reduce) {
+  .shop-grid-stagger > * {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Legendary sparkle — a tiny ✨ that rises above the card on hover.
+   CSS-only via a ::before pseudo with a unicode glyph. Desktop hover only
+   (no-op on touch). Lifts + fades on the same 220ms curve as fluid-card-hover. */
+@keyframes shop-legendary-sparkle {
+  0%   { opacity: 0; transform: translate(-50%, 0)    scale(0.6) rotate(0deg); }
+  40%  { opacity: 1; transform: translate(-50%, -10px) scale(1.0) rotate(8deg); }
+  100% { opacity: 0; transform: translate(-50%, -22px) scale(0.85) rotate(-6deg); }
+}
+.shop-legendary-sparkle {
+  position: relative;
+}
+.shop-legendary-sparkle::before {
+  content: "\2728"; /* sparkles */
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  transform: translate(-50%, 0) scale(0.6);
+  font-size: 16px;
+  line-height: 1;
+  pointer-events: none;
+  opacity: 0;
+  z-index: 5;
+  filter: drop-shadow(0 0 6px rgba(255, 215, 0, 0.6));
+}
+@media (hover: hover) {
+  .shop-legendary-sparkle:hover::before {
+    animation: shop-legendary-sparkle 900ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .shop-legendary-sparkle::before {
+    animation: none !important;
+    opacity: 0 !important;
+  }
+}
+
+/* Today's Drops — "TODAY" tag corner ribbon. Subtle gold pulse. */
+@keyframes shop-today-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.0); }
+  50%      { box-shadow: 0 0 0 6px rgba(255, 215, 0, 0.08); }
+}
+.shop-today-tag {
+  animation: shop-today-pulse 2.4s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .shop-today-tag {
+    animation: none;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
    Shop V2 — Animated Usernames (2026-06-03)
    GPU-only effects (background-position + transform). All keyframes degrade
    to a static colored variant under prefers-reduced-motion. Used by

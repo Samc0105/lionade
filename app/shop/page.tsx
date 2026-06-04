@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import useSWR from "swr";
 import { useAuth } from "@/lib/auth";
 import { useUserStats } from "@/lib/hooks";
@@ -11,6 +11,8 @@ import { apiGet, apiPost } from "@/lib/api-client";
 import { toastError, toastInfo, toastSuccess } from "@/lib/toast";
 import DailySpinHero from "@/components/Shop/DailySpinHero";
 import AnimatedUsername, { type UsernameEffect } from "@/components/AnimatedUsername";
+import { todaysDrops as pickTodaysDrops } from "@/lib/shop-daily-drops";
+import type { ShopItem as CoreShopItem } from "@lionade/core/constants/shop-catalog";
 import type { ComponentType } from "react";
 import type { IconProps } from "@phosphor-icons/react";
 import {
@@ -338,7 +340,7 @@ function FeaturedCard({ item, owned, onBuy }: { item: ShopItem; owned: boolean; 
   const r = RARITY_COLORS[item.rarity];
   const Icon = item.Icon;
   return (
-    <div className={`shop-card shop-tilt-card relative group rounded-2xl border ${r.border} ${r.glow} overflow-hidden shop-item-float h-full flex flex-col`}
+    <div className={`fluid-card-hover shop-card shop-tilt-card relative group rounded-2xl border ${r.border} ${r.glow} ${item.rarity === "legendary" ? "shop-legendary-sparkle" : ""} overflow-hidden shop-item-float h-full flex flex-col`}
       style={{ background: "linear-gradient(135deg, rgba(10,16,32,0.9), rgba(6,12,24,0.95))", backdropFilter: "blur(20px)" }}>
       {item.rarity === "legendary" && <div className="shop-legendary-border" />}
       <div className="relative p-6 sm:p-8 flex flex-col flex-1">
@@ -371,7 +373,7 @@ function CosmeticCard({ item, owned, canAfford, onBuy }: { item: ShopItem; owned
   const r = RARITY_COLORS[item.rarity];
   const Icon = item.Icon;
   return (
-    <div className={`shop-card shop-tilt-card relative group rounded-xl border ${r.border} overflow-hidden transition-all duration-300 h-full flex flex-col`}
+    <div className={`fluid-card-hover shop-card shop-tilt-card relative group rounded-xl border ${r.border} ${item.rarity === "legendary" ? "shop-legendary-sparkle" : ""} overflow-hidden transition-all duration-300 h-full flex flex-col`}
       style={{ background: "linear-gradient(135deg, rgba(10,16,32,0.85), rgba(6,12,24,0.9))", backdropFilter: "blur(12px)" }}>
       {item.rarity === "legendary" && <div className="shop-legendary-border" />}
       <div className="relative p-4 flex flex-col flex-1">
@@ -410,7 +412,7 @@ function BoosterCard({ item, quantityOwned, canAfford, onBuy }: { item: ShopItem
   const Icon = item.Icon;
   const bulkPrice = Math.floor(item.price * 5 * 0.9);
   return (
-    <div className={`shop-card shop-tilt-card relative group rounded-xl border ${r.border} overflow-hidden transition-all duration-300`}
+    <div className={`fluid-card-hover shop-card shop-tilt-card relative group rounded-xl border ${r.border} ${item.rarity === "legendary" ? "shop-legendary-sparkle" : ""} overflow-hidden transition-all duration-300`}
       style={{ background: "linear-gradient(135deg, rgba(10,16,32,0.85), rgba(6,12,24,0.9))", backdropFilter: "blur(12px)" }}>
       <div className="relative p-4 flex items-center gap-4">
         <div className="flex-shrink-0 w-14 h-14 rounded-xl flex items-center justify-center"
@@ -488,7 +490,7 @@ function PremiumCard({ item }: { item: PremiumItem }) {
   const r = RARITY_COLORS[item.rarity];
   const Icon = item.Icon;
   return (
-    <div className={`shop-card shop-tilt-card premium-card relative group rounded-xl border ${r.border} overflow-hidden transition-all duration-300 h-full flex flex-col`}
+    <div className={`fluid-card-hover shop-card shop-tilt-card premium-card relative group rounded-xl border ${r.border} ${item.rarity === "legendary" ? "shop-legendary-sparkle" : ""} overflow-hidden transition-all duration-300 h-full flex flex-col`}
       style={{ background: "linear-gradient(135deg, rgba(20,8,40,0.9), rgba(10,6,30,0.95))", backdropFilter: "blur(12px)" }}>
       {item.rarity === "legendary" && <div className="shop-legendary-border-premium" />}
       {item.rarity === "epic" && <div className="shop-epic-border-premium" />}
@@ -529,7 +531,7 @@ function UsernameEffectCard({
 }) {
   const r = RARITY_COLORS[item.rarity];
   return (
-    <div className={`shop-card relative rounded-xl border ${r.border} overflow-hidden h-full flex flex-col`}
+    <div className={`fluid-card-hover shop-card relative rounded-xl border ${r.border} ${item.rarity === "legendary" ? "shop-legendary-sparkle" : ""} overflow-hidden h-full flex flex-col`}
       style={{ background: "linear-gradient(135deg, rgba(10,16,32,0.85), rgba(6,12,24,0.9))", backdropFilter: "blur(12px)" }}>
       {item.rarity === "legendary" && <div className="shop-legendary-border" />}
       <div className="relative p-4 flex flex-col flex-1">
@@ -575,7 +577,7 @@ function PremiumFangBannerCard({ item, owned, canAfford, onBuy }: { item: ShopIt
   const r = RARITY_COLORS[item.rarity];
   const Icon = item.Icon;
   return (
-    <div className={`shop-card relative rounded-xl border ${r.border} overflow-hidden h-full flex flex-col`}
+    <div className={`fluid-card-hover shop-card relative rounded-xl border ${r.border} ${item.rarity === "legendary" ? "shop-legendary-sparkle" : ""} overflow-hidden h-full flex flex-col`}
       style={{ background: "linear-gradient(135deg, rgba(10,16,32,0.85), rgba(6,12,24,0.9))", backdropFilter: "blur(12px)" }}>
       {item.rarity === "legendary" && <div className="shop-legendary-border" />}
       <div className="relative p-4 flex flex-col flex-1">
@@ -633,7 +635,7 @@ function FounderBadgeCard({
   const Icon = item.Icon;
   const soldOut = remaining !== null && remaining <= 0;
   return (
-    <div className="shop-card relative rounded-2xl overflow-hidden h-full flex flex-col"
+    <div className="fluid-card-hover shop-card shop-legendary-sparkle relative rounded-2xl overflow-hidden h-full flex flex-col"
       style={{
         background: "linear-gradient(135deg, rgba(40,28,8,0.95), rgba(8,6,16,0.95))",
         border: `1px solid ${soldOut ? "rgba(156,163,175,0.20)" : "rgba(255,215,0,0.35)"}`,
@@ -755,7 +757,7 @@ function BuyFangsSection({ isAuthed, onUnauthed }: { isAuthed: boolean; onUnauth
               : { background: "linear-gradient(135deg, rgba(10,16,32,0.85), rgba(6,12,24,0.9))", border: "1px solid rgba(255,255,255,0.10)" };
           return (
             <div key={pack.id}
-              className="shop-card relative rounded-2xl overflow-hidden backdrop-blur-xl flex flex-col p-5"
+              className="fluid-card-hover shop-card relative rounded-2xl overflow-hidden backdrop-blur-xl flex flex-col p-5"
               style={cardStyle}>
               {pack.badge && (
                 <span className={`absolute top-3 right-3 text-[9px] uppercase tracking-widest font-bold px-2.5 py-1 rounded-full ${
@@ -941,6 +943,60 @@ export default function ShopPage() {
   const allItems: ShopItem[] = [...COSMETIC_ITEMS, ...BOOSTER_ITEMS, ...FEATURED_ITEMS, ...NEW_SKUS, ...AVATAR_AURAS, ...USERNAME_EFFECTS, ...PREMIUM_FANG_BANNERS];
   const findItem = (id: string) => allItems.find((i) => i.id === id);
 
+  // ── Today's Drops (deterministic-by-UTC-date, rotates daily) ──
+  // Pool = every Fang-priced SKU on the page. The helper filters out founder
+  // badges + earned cosmetics. useMemo keyed by UTC-date string so the drops
+  // recompute exactly once per date boundary (the date crossing happens on
+  // the next render after midnight UTC anyway, but this keeps it cheap).
+  const utcDateKey = useMemo(() => new Date().toISOString().slice(0, 10), []);
+  const todaysDrops = useMemo<ShopItem[]>(() => {
+    // The helper signature uses the core ShopItem; the local extended
+    // ShopItem is a structural superset (adds Icon/iconColor/etc.), so we
+    // cast through CoreShopItem for the filter pass and return the matching
+    // local objects to preserve Icon/iconColor for rendering.
+    const pool = allItems as unknown as CoreShopItem[];
+    const picked = pickTodaysDrops(pool, new Date(), 5);
+    const pickedIds = new Set(picked.map((p) => p.id));
+    return allItems.filter((i) => pickedIds.has(i.id));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [utcDateKey]);
+
+  // ── Trending (top 3 by 7-day purchase velocity) ──
+  // Public endpoint, dedupe 5 minutes, fall back to a hand-picked 3 from
+  // FEATURED_ITEMS when the window has < 3 distinct purchases.
+  const { data: trendingData } = useSWR(
+    "shop-trending",
+    () => apiGet<{ trending: string[] }>("/api/shop/trending"),
+    { dedupingInterval: 5 * 60_000, keepPreviousData: true, revalidateOnFocus: true, shouldRetryOnError: false },
+  );
+  const trendingIds: string[] = trendingData?.ok ? (trendingData.data?.trending ?? []) : [];
+  const trendingItems: ShopItem[] = useMemo(() => {
+    const live = trendingIds
+      .map((id) => allItems.find((i) => i.id === id))
+      .filter((i): i is ShopItem => !!i);
+    if (live.length >= 3) return live.slice(0, 3);
+    // Early-days fallback: union live results with a hand-picked set of
+    // FEATURED_ITEMS so the section always has exactly 3 cards. De-dup by id.
+    const fallback = FEATURED_ITEMS.slice(0, 3);
+    const seen = new Set(live.map((l) => l.id));
+    for (const f of fallback) {
+      if (seen.has(f.id)) continue;
+      live.push(f);
+      seen.add(f.id);
+      if (live.length === 3) break;
+    }
+    return live.slice(0, 3);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [trendingIds.join("|")]);
+
+  // ── Limited time (founder badges with caps still open) ──
+  // V1: only the FOUNDER_BADGES set. Filter to "remaining > 0 OR remaining
+  // unknown". If everything is sold out / owned, the section hides entirely.
+  const limitedTimeBadges = FOUNDER_BADGES.filter((b) => {
+    const r = founderCaps[b.id];
+    return r === undefined || r > 0;
+  });
+
   // Shop V2 — equip a username effect via PATCH /api/me/equip. Endpoint may
   // not yet be live (backend follow-up flagged in the vault note). Falls back
   // to a polite toast if the route 404s.
@@ -1053,6 +1109,166 @@ export default function ShopPage() {
 
         {/* ══════════ DAILY SPIN HERO (coin store only) ══════════ */}
         {!isPremium && <DailySpinHero />}
+
+        {/* ══════════ TODAY'S DROPS (coin store only, above tabs) ══════════ */}
+        {/* Deterministic-by-UTC-date rotation. Same drops for every user
+            today; fresh ones tomorrow. Bigger cards (~1.5x) + TODAY tag. */}
+        {!isPremium && todaysDrops.length > 0 && (
+          <section className="mb-8" aria-labelledby="todays-drops-heading">
+            <div className="shop-banner flex items-center justify-between mb-4 px-4 py-3 rounded-xl"
+              style={{ background: "linear-gradient(90deg, rgba(255,215,0,0.10), rgba(74,144,217,0.06))", border: "1px solid rgba(255,215,0,0.22)" }}>
+              <div className="flex items-center gap-2">
+                <Sparkle size={20} weight="fill" color="#FFD700" aria-hidden="true" />
+                <h2 id="todays-drops-heading" className="font-bebas text-xl text-gold tracking-wider">TODAY&apos;S DROPS</h2>
+              </div>
+              <span className="text-cream/55 text-[11px] font-mono uppercase tracking-[0.2em] hidden sm:block">
+                Fresh picks &middot; new set tomorrow
+              </span>
+            </div>
+            {/* Horizontal scroll on mobile, grid on desktop. */}
+            <div className="flex sm:grid sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 overflow-x-auto sm:overflow-visible pb-3 sm:pb-0 scrollbar-hide shop-grid-stagger">
+              {todaysDrops.map((item) => {
+                const r = RARITY_COLORS[item.rarity];
+                const Icon = item.Icon;
+                const owned = ownedIds.has(item.id);
+                const canAfford = userCoins >= item.price;
+                return (
+                  <div key={item.id}
+                    className={`fluid-card-hover shop-card relative group rounded-2xl border ${r.border} ${item.rarity === "legendary" ? "shop-legendary-sparkle" : ""} overflow-hidden flex-shrink-0 w-[68vw] sm:w-auto`}
+                    style={{ background: "linear-gradient(135deg, rgba(10,16,32,0.9), rgba(6,12,24,0.95))", backdropFilter: "blur(16px)" }}>
+                    {item.rarity === "legendary" && <div className="shop-legendary-border" />}
+                    <span className="shop-today-tag absolute top-3 left-3 text-[9px] uppercase tracking-widest font-bold px-2 py-0.5 rounded-full bg-gold/20 text-gold border border-gold/30">
+                      Today
+                    </span>
+                    <span className={`absolute top-3 right-3 text-[9px] uppercase tracking-widest font-bold px-2 py-0.5 rounded-full ${r.badge}`}>{item.rarity}</span>
+                    <div className="relative p-5 pt-12 flex flex-col h-full">
+                      <div className="mb-3 flex items-center justify-center h-16">
+                        <Icon size={56} weight={item.iconWeight ?? "fill"} color={item.iconColor ?? "currentColor"} aria-hidden="true" />
+                      </div>
+                      <h3 className="font-bebas text-xl text-cream tracking-wide mb-0.5 text-center">{item.name}</h3>
+                      <p className="text-cream/55 text-[11px] mb-4 leading-relaxed text-center line-clamp-2">{item.description}</p>
+                      <div className="flex items-center justify-between mt-auto pt-2 gap-3">
+                        <div className="flex items-center gap-1.5 flex-shrink-0">
+                          <img src={cdnUrl("/F.png")} alt="Fangs" className="w-5 h-5 object-contain" />
+                          <span className="font-bebas text-lg text-gold">{formatCoins(item.price)}</span>
+                        </div>
+                        {owned ? (
+                          <span className="flex items-center gap-1 text-green-400 text-xs font-bold flex-shrink-0">
+                            <Check size={14} weight="bold" color="#22C55E" aria-hidden="true" /> Owned
+                          </span>
+                        ) : (
+                          <button onClick={() => { if (!requireLogin()) setConfirmItem({ item, quantity: 1 }); }}
+                            disabled={!canAfford}
+                            className={`flex-shrink-0 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${canAfford ? "gold-btn shop-btn-pulse" : "bg-gray-600/20 text-gray-500 cursor-not-allowed border border-gray-600/20"}`}>
+                            {canAfford ? "Buy" : "Can't Afford"}
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+        )}
+
+        {/* ══════════ TRENDING (top 3 by 7-day velocity) ══════════ */}
+        {!isPremium && trendingItems.length > 0 && (
+          <section className="mb-8" aria-labelledby="trending-heading">
+            <div className="shop-banner flex items-center justify-between mb-4 px-4 py-3 rounded-xl"
+              style={{ background: "linear-gradient(90deg, rgba(249,115,22,0.10), rgba(255,215,0,0.06))", border: "1px solid rgba(249,115,22,0.22)" }}>
+              <div className="flex items-center gap-2">
+                <TrendUp size={20} weight="fill" color="#F97316" aria-hidden="true" />
+                <h2 id="trending-heading" className="font-bebas text-xl tracking-wider" style={{ color: "#F97316" }}>TRENDING</h2>
+              </div>
+              <span className="text-cream/55 text-[11px] font-mono uppercase tracking-[0.2em] hidden sm:block">
+                Hottest picks &middot; last 7 days
+              </span>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 shop-grid-stagger">
+              {trendingItems.map((item, idx) => {
+                const r = RARITY_COLORS[item.rarity];
+                const Icon = item.Icon;
+                const owned = ownedIds.has(item.id);
+                const canAfford = userCoins >= item.price;
+                return (
+                  <div key={item.id}
+                    className={`fluid-card-hover shop-card relative rounded-xl border ${r.border} ${item.rarity === "legendary" ? "shop-legendary-sparkle" : ""} overflow-hidden`}
+                    style={{ background: "linear-gradient(135deg, rgba(10,16,32,0.85), rgba(6,12,24,0.9))", backdropFilter: "blur(12px)" }}>
+                    <span className="absolute top-3 left-3 text-[9px] uppercase tracking-widest font-bold px-2 py-0.5 rounded-full"
+                      style={{ background: "rgba(249,115,22,0.15)", color: "#FB923C", border: "1px solid rgba(249,115,22,0.30)" }}>
+                      #{idx + 1}
+                    </span>
+                    <span className={`absolute top-3 right-3 text-[9px] uppercase tracking-widest font-bold px-2 py-0.5 rounded-full ${r.badge}`}>{item.rarity}</span>
+                    <div className="relative p-4 pt-10 flex flex-col h-full">
+                      <div className="mb-2 flex items-center justify-center h-14">
+                        <Icon size={44} weight={item.iconWeight ?? "fill"} color={item.iconColor ?? "currentColor"} aria-hidden="true" />
+                      </div>
+                      <h4 className="font-bebas text-lg text-cream tracking-wide mb-0.5 text-center">{item.name}</h4>
+                      <p className="text-cream/55 text-[11px] mb-3 leading-relaxed text-center line-clamp-2">{item.description}</p>
+                      <div className="flex items-center justify-between mt-auto pt-1 gap-3">
+                        <div className="flex items-center gap-1.5 flex-shrink-0">
+                          <img src={cdnUrl("/F.png")} alt="Fangs" className="w-5 h-5 object-contain" />
+                          <span className="font-bebas text-base text-gold">{formatCoins(item.price)}</span>
+                        </div>
+                        {owned ? (
+                          <span className="flex items-center gap-1 text-green-400 text-xs font-bold flex-shrink-0">
+                            <Check size={14} weight="bold" color="#22C55E" aria-hidden="true" /> Owned
+                          </span>
+                        ) : (
+                          <button onClick={() => { if (!requireLogin()) setConfirmItem({ item, quantity: 1 }); }}
+                            disabled={!canAfford}
+                            className={`flex-shrink-0 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${canAfford ? "gold-btn shop-btn-pulse" : "bg-gray-600/20 text-gray-500 cursor-not-allowed border border-gray-600/20"}`}>
+                            {canAfford ? "Buy" : "Can't Afford"}
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+        )}
+
+        {/* ══════════ LIMITED TIME (founder badges still purchasable) ══════════ */}
+        {!isPremium && limitedTimeBadges.length > 0 && (
+          <section className="mb-8" aria-labelledby="limited-time-heading">
+            <div className="shop-banner flex items-center justify-between mb-4 px-4 py-3 rounded-xl"
+              style={{ background: "linear-gradient(90deg, rgba(255,215,0,0.10), rgba(168,85,247,0.06))", border: "1px solid rgba(255,215,0,0.30)" }}>
+              <div className="flex items-center gap-2">
+                <Crown size={20} weight="fill" color="#FFD700" aria-hidden="true" />
+                <h2 id="limited-time-heading" className="font-bebas text-xl text-gold tracking-wider">LIMITED TIME</h2>
+              </div>
+              <span className="text-cream/55 text-[11px] font-mono uppercase tracking-[0.2em] hidden sm:block">
+                Capped supply &middot; once they&apos;re gone, they&apos;re gone
+              </span>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 shop-grid-stagger">
+              {limitedTimeBadges.map((b) => {
+                const remaining = founderCaps[b.id] ?? null;
+                const owned = cosmeticsOwned.some((c) => c.id === b.id);
+                return (
+                  <div key={b.id} className="fluid-card-hover">
+                    <FounderBadgeCard
+                      item={b}
+                      remaining={remaining}
+                      owned={owned}
+                      canAfford={userCoins >= b.price}
+                      onBuy={() => {
+                        if (requireLogin()) return;
+                        setConfirmItem({
+                          item: { id: b.id, name: b.name, description: b.tagline, type: "frame", rarity: "legendary", price: b.price, Icon: b.Icon, iconWeight: "fill", iconColor: b.iconColor },
+                          quantity: 1,
+                        });
+                      }}
+                    />
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+        )}
 
         {/* ══════════ PREMIUM STORE ══════════ */}
         {isPremium && (
@@ -1170,7 +1386,7 @@ export default function ShopPage() {
                       Fresh drops &middot; 4 new pickups
                     </span>
                   </div>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 shop-grid-stagger">
                     {NEW_SKUS.map((item) => (
                       <CosmeticCard key={item.id} item={item} owned={ownedIds.has(item.id)} canAfford={userCoins >= item.price}
                         onBuy={() => { if (!requireLogin()) setConfirmItem({ item, quantity: 1 }); }} />
@@ -1197,7 +1413,7 @@ export default function ShopPage() {
                   {/* Aura sub-grid */}
                   <div id="avatar-auras" className="mt-6">
                     <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-cream/45 mb-3">Avatar Auras &middot; pick your vibe</p>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 shop-grid-stagger">
                       {AVATAR_AURAS.map((item) => (
                         <CosmeticCard key={item.id} item={item} owned={ownedIds.has(item.id)} canAfford={userCoins >= item.price}
                           onBuy={() => { if (!requireLogin()) setConfirmItem({ item, quantity: 1 }); }} />
@@ -1217,7 +1433,7 @@ export default function ShopPage() {
                     <span className="text-electric font-bold">{countdown.days}d {countdown.hours}h</span>
                   </div>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 shop-grid-stagger">
                   {FEATURED_ITEMS.map((item) => (
                     <FeaturedCard key={item.id} item={item} owned={ownedIds.has(item.id)}
                       onBuy={() => { if (!requireLogin()) setConfirmItem({ item, quantity: 1 }); }} />
@@ -1352,7 +1568,7 @@ export default function ShopPage() {
                     </button>
                   ))}
                 </div>
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 shop-grid-stagger">
                   {filteredCosmetics.map((item) => (
                     <CosmeticCard key={item.id} item={item} owned={ownedIds.has(item.id)} canAfford={userCoins >= item.price}
                       onBuy={() => { if (!requireLogin()) setConfirmItem({ item, quantity: 1 }); }} />
@@ -1364,7 +1580,7 @@ export default function ShopPage() {
             {/* BOOSTERS */}
             {tab === "boosters" && (
               <div className={`transition-all duration-700 delay-200 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`}>
-                <div className="space-y-3">
+                <div className="space-y-3 shop-grid-stagger">
                   {BOOSTER_ITEMS.map((item) => (
                     <BoosterCard key={item.id} item={item} quantityOwned={getQuantity(item.id)} canAfford={userCoins >= item.price}
                       onBuy={(qty) => { if (!requireLogin()) setConfirmItem({ item, quantity: qty }); }} />
