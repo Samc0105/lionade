@@ -13,7 +13,7 @@
   "crons": [
     {
       "path": "/api/cron/reap-afk-presence",
-      "schedule": "* * * * *"
+      "schedule": "0 * * * *"
     }
   ]
 }
