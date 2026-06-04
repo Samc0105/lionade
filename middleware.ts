@@ -159,6 +159,25 @@ const ROUTE_LIMITS: RouteLimit[] = [
     keyPrefix: "classes-notes",
   },
 
+  // Resume Coach — Pro-tier exclusive. /analyze does PDF parse + gpt-4o-mini
+  // (~$0.01/call); /answer is a smaller AI call per Socratic turn. Per-IP
+  // caps stack on top of the server-side Pro gate so a hijacked Pro token
+  // can't burn unbounded credit either.
+  {
+    test: (p) => p === "/api/coach/resume/analyze",
+    method: "POST",
+    max: 5,
+    windowMs: 15 * 60 * 1000,
+    keyPrefix: "coach-analyze",
+  },
+  {
+    test: (p) => p === "/api/coach/resume/answer",
+    method: "POST",
+    max: 30,
+    windowMs: 60 * 1000,
+    keyPrefix: "coach-answer",
+  },
+
   // Email-sending routes — anti-spam
   {
     test: (p) => p === "/api/contact" || p === "/api/waitlist",

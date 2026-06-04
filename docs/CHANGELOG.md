@@ -6,6 +6,8 @@ All notable changes to Lionade, newest first.
 
 ## 2026-06-04
 
+- feat(games): Lionade-Pardy templated engine — 5×5 Jeopardy board with 3 starter decks (Geography / General Knowledge / AWS Basics). Hand-authored questions; server-side answer validation; Fang rewards. Multiplayer / Final Pardy / Word-Bank-integration queued for V2.
+- feat(coach): Resume Coach — Pro-tier exclusive. PDF upload → AI critique (strengths/weaknesses/Socratic questions) → guided per-bullet rewrite via Ninny → markdown export of improved resume bullets. Cost ~$0.01/session via gpt-4o-mini.
 - feat(shop): daily-rotation polish — Today's Drops carousel (deterministic-by-UTC-date, 5 SKUs rotated daily), Trending section from 7-day purchase velocity, Limited Time strip for founder-badge caps, hover-lift on every SKU card, legendary sparkle hover effect, staggered mount-in
 - feat(solo): Phase 2 Tier 3 — refresh-resumable state for Mastery / Daily Drill / Quiz / Blitz / Roardle / Timeline via persisted server-side state with debounced autosave; ResumeBanner extended for daily_drill + quiz; useHeartbeat wired across all solo game pages
 - feat(party): Phase 2 Tier 2 — real voting UI on post-round (75% auto-decide), BluffView + PokerFaceView + room-state migrated to subscribeResilient, spectator mode for mid-round joiners, host pause/resume (V1 broadcast-only, no DB persistence), Bluff forfeit-this-round, mid-game friend invite modal

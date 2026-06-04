@@ -31,12 +31,13 @@ import {
   Calendar,
   FileText,
   PaintBrush,
+  MicrophoneStage,
   type Icon as PhosphorIcon,
 } from "@phosphor-icons/react";
 
 // ── Types ────────────────────────────────────────────────────
 
-type GameMode = "menu" | "roardle" | "flashcards" | "timeline" | "party";
+type GameMode = "menu" | "roardle" | "flashcards" | "timeline" | "party" | "pardy";
 type TabMode = "quickplay" | "library";
 
 interface PdfContent {
@@ -96,7 +97,7 @@ function incrementDailyPlays(gameType: string) {
   localStorage.setItem(key, String(current + 1));
 }
 
-const DAILY_LIMITS: Record<string, number> = { roardle: 3, flashcards: 999, timeline: 3, party: 999 };
+const DAILY_LIMITS: Record<string, number> = { roardle: 3, flashcards: 999, timeline: 3, party: 999, pardy: 999 };
 
 // ── Component ────────────────────────────────────────────────
 
@@ -802,6 +803,7 @@ export default function GamesPage() {
   const GAMES: { id: GameMode; name: string; Icon: PhosphorIcon; desc: string; fangs: string; limit: number; start: () => void; color: string; pos: string }[] = [
     { id: "roardle" as GameMode, name: "ROARDLE", Icon: TextAa, desc: "Guess the science word", fangs: `${wordLength === 4 ? 10 : wordLength === 5 ? 15 : 20}+`, limit: DAILY_LIMITS.roardle, start: startRoardle, color: "#00BFFF", pos: "top-0 left-0" },
     { id: "party" as GameMode, name: "LIONADE PARTY", Icon: PaintBrush, desc: "Sketch + Bluff with friends", fangs: "—", limit: DAILY_LIMITS.party, start: () => router.push("/games/party"), color: "#EC4899", pos: "top-0 right-0" },
+    { id: "pardy" as GameMode, name: "PARDY", Icon: MicrophoneStage, desc: "5×5 board · trivia for Fangs", fangs: "10-200", limit: DAILY_LIMITS.pardy, start: () => router.push("/games/pardy"), color: "#FFD700", pos: "middle" },
     { id: "flashcards" as GameMode, name: "FLASH CARDS", Icon: Cards, desc: "Flip, learn, repeat", fangs: "15", limit: DAILY_LIMITS.flashcards, start: startFlashcards, color: "#9B59B6", pos: "bottom-0 left-0" },
     { id: "timeline" as GameMode, name: "TIMELINE DROP", Icon: Calendar, desc: "Order events in time", fangs: "3×", limit: DAILY_LIMITS.timeline, start: startTimeline, color: "#00C851", pos: "bottom-0 right-0" },
   ];
@@ -862,6 +864,23 @@ export default function GamesPage() {
         </div>
       );
     }
+    if (id === "pardy") {
+      // Mini 3x3 grid of gold board tiles, evoking the Pardy board.
+      return (
+        <div className="grid grid-cols-3 gap-[3px]" aria-hidden="true">
+          {Array.from({ length: 9 }).map((_, i) => (
+            <span
+              key={i}
+              className="w-[14px] h-[10px] rounded-[2px]"
+              style={{
+                background: "rgba(255,215,0,0.18)",
+                border: "1px solid rgba(255,215,0,0.45)",
+              }}
+            />
+          ))}
+        </div>
+      );
+    }
     return null;
   };
 
@@ -887,6 +906,7 @@ export default function GamesPage() {
             { color: "#9B59B6", pos: "top-[48%] left-[10%]", size: 520, opacity: 0.04 },
             { color: "#00BFFF", pos: "bottom-[14%] left-[44%]", size: 440, opacity: 0.04 },
             { color: "#00C851", pos: "bottom-[22%] right-[20%]", size: 380, opacity: 0.035 },
+            { color: "#FFD700", pos: "top-[30%] left-[50%]", size: 360, opacity: 0.04 },
           ]}
         />
 

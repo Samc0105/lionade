@@ -11,6 +11,9 @@ const MAX_REWARD_BY_GAME: Record<string, number> = {
   blitz: 60, // up to 30 correct × 2 = 60
   flashcards: 20, // 100% × 15 ≈ 15, cap 20
   timeline: 25, // 8 events × 3 = 24
+  // Pardy: per-tile grant. Top tile value is 200 Fangs. /api/games/pardy/submit
+  // validates that the amount matches the tile's authored value before calling here.
+  pardy_correct: 200,
 };
 
 const VALID_GAMES = Object.keys(MAX_REWARD_BY_GAME);

@@ -12,7 +12,8 @@ import { SUBJECT_ICONS, SUBJECT_COLORS, DefaultSubjectIcon } from "@/lib/mockDat
 import { getLevelProgress } from "@/lib/levels";
 import type { Subject } from "@/types";
 import { apiGet } from "@/lib/api-client";
-import { NotePencil, Fire, BookOpen, PawPrint, ArrowRight, Target, Brain, Books } from "@phosphor-icons/react";
+import { NotePencil, Fire, BookOpen, PawPrint, ArrowRight, Target, Brain, Books, Briefcase, Crown } from "@phosphor-icons/react";
+import { usePlan } from "@/lib/use-plan";
 import CountUp from "@/components/CountUp";
 
 /* ── Relative Time Helper ─────────────────────────────────── */
@@ -59,6 +60,8 @@ export default function LearnPage() {
   const router = useRouter();
   const { user } = useAuth();
   const { stats } = useUserStats(user?.id);
+  const { plan } = usePlan();
+  const isPro = plan === "pro" || plan === "platinum";
 
   // Coming-Soon toast for the Subjects/Learning Paths CTA — auto-dismisses 3s.
   const [showSubjectsComingSoon, setShowSubjectsComingSoon] = useState(false);
@@ -291,8 +294,8 @@ export default function LearnPage() {
               </div>
             </Link>
 
-            {/* Secondary actions — 4 clean rows, not cards */}
-            <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
+            {/* Secondary actions — 5 clean rows, not cards */}
+            <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2">
               <button
                 type="button"
                 onClick={() => setShowSubjectsComingSoon(true)}
@@ -337,6 +340,27 @@ export default function LearnPage() {
                   <p className="text-cream/55 text-[10px] font-mono">language vocab · aws · math · anything</p>
                 </div>
                 <ArrowRight size={14} weight="regular" color="rgba(238,244,255,0.3)" aria-hidden="true" className="group-hover:text-electric transition-colors" />
+              </Link>
+
+              <Link
+                href="/learn/resume-coach"
+                className="group flex items-center gap-3 px-4 py-3 rounded-[6px] border border-white/[0.06] hover:bg-white/[0.03] hover:border-gold/30 transition-colors text-left"
+                aria-label={isPro ? "Resume Coach — Pro feature" : "Resume Coach — Pro feature, locked"}
+              >
+                <Briefcase size={18} weight="fill" color="#FFD700" aria-hidden="true" className="flex-shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="font-syne font-semibold text-sm text-cream leading-tight flex items-center gap-2 flex-wrap">
+                    Resume Coach
+                    {!isPro && (
+                      <span className="inline-flex items-center gap-1 text-[8px] font-mono uppercase tracking-[0.15em] px-1.5 py-0.5 rounded bg-gold/15 text-gold border border-gold/30 whitespace-nowrap">
+                        <Crown size={9} weight="fill" aria-hidden="true" />
+                        Pro
+                      </span>
+                    )}
+                  </p>
+                  <p className="text-cream/55 text-[10px] font-mono">ninny critiques your resume</p>
+                </div>
+                <ArrowRight size={14} weight="regular" color="rgba(238,244,255,0.3)" aria-hidden="true" className="group-hover:text-gold transition-colors" />
               </Link>
             </div>
           </section>

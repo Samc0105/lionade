@@ -7,6 +7,54 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 
 ---
 
+## 2026-06-04 — Lionade-Pardy V1 (web)
+
+**Status:** Web ships. iOS port: ❌ missing.
+
+Lionade-Pardy on web. iOS port: same deck schema (`lib/pardy/decks.ts` is pure TS with no DOM/Next deps — copy verbatim into `@lionade/core` or `lionade-ios/src/pardy/decks.ts`), same `/api/games/pardy/submit` endpoint (no client-side amount; server reads `tile.value` and applies the Fang multiplier server-side). Render the 5×5 board with a `FlatList` of 25 tiles in row-major order or a custom grid; modal flow is identical. Reuse the same `lib/pardy/match.ts` normalizer client-side only if you want optimistic hints — the server is the source of truth.
+
+**New files (web):**
+- `lib/pardy/decks.ts` — `PardyDeck` / `PardyCategory` / `PardyTile` types + 3 starter decks + `getDeck` / `tileId` / `parseTileId` / `getTile`.
+- `lib/pardy/match.ts` — `normalizePardyAnswer` (lowercase + diacritic-strip + prefix-strip + punctuation-strip + whitespace-collapse) + `matchPardyAnswer` (exact-equality on normalized form, NO fuzzy/Levenshtein in V1).
+- `app/api/games/pardy/submit/route.ts` — POST { tileId, answer } → { correct, correct_answer, awarded?, newCoins? }. Server-side validation + Fang grant; client never tells the server how many Fangs to award.
+- `app/games/pardy/page.tsx` — Deck picker → board → modal → Game Over. Solo V1; multiplayer + Final Pardy queued.
+
+**Modified files (web):**
+- `app/api/games/reward/route.ts` — added `pardy_correct` to MAX_REWARD_BY_GAME (cap 200, the top-tile value). Not currently used by the Pardy submit flow but kept for future client-side bulk grants if needed.
+- `app/games/page.tsx` — added 5th ticket "PARDY" routing to `/games/pardy` (gold-themed, MicrophoneStage icon, mini 3×3 gold-grid animation, gold ambient orb).
+
+**Multiplayer:** intentionally **skipped V1**. Solo is the must-ship and ships. The party room infra is reusable for V2 (host picks a tile, locks the buzz-in window, tracks per-player scores) but the V1 footprint is already large enough.
+
+**Final Pardy round:** V2. V1 ends on a Game Over screen showing the total earned.
+
+**Answer matching:** exact equality after a normalization pipeline (lowercase + Jeopardy-prefix strip + diacritic strip + article strip + period strip + non-alphanumeric-to-space + whitespace collapse). NO Levenshtein in V1 — Jeopardy rewards correctness, and authors can add explicit `alternateAnswers` to cover synonyms. The `damerau-levenshtein` package is already in node_modules so V2 can opt in per-deck.
+
+**Anti-cheat:** the client never tells the server how many Fangs to award. Server reads the authored `tile.value` and applies the user's Fang multiplier. Multi-claim on the same tile within a session is suppressed client-side (V1); V2 will persist per-user-per-deck progress in Supabase and refuse double-claims server-side.
+
+**`npx tsc --noEmit` clean.** No commit per directive. Owner: dev-frontend.
+
+---
+
+## 2026-06-04 — Resume Coach (web)
+
+**Status:** Web ships. iOS port: ❌ missing.
+
+Resume Coach on web. iOS port needs file-picker permission + multipart upload from RN (Expo's `expo-document-picker` for PDF selection, then FormData POST to `/api/coach/resume/analyze` with the same `file` field name). Same AI prompts + `resume_coach_sessions` schema. Pro gate identical (uses existing `profiles.plan` + `subscription_status` checks via the same `effectiveTier` rule). Socratic loop and final markdown export hit the existing routes — RN can `Share`-out the downloaded markdown or write it to the device's Documents directory. PDF parsing stays server-side; the iOS app only ships the PDF bytes, doesn't run pdf-parse locally.
+
+**New files (web):**
+- `app/api/coach/resume/analyze/route.ts` — multipart PDF upload, magic-byte check, pdf-parse v2, gpt-4o-mini analysis (Pro-gated).
+- `app/api/coach/resume/answer/route.ts` — per-question Socratic rewrite, appends to `analysis_json.answers[]` (Pro-gated).
+- `app/api/coach/resume/sessions/[id]/route.ts` — owner-only session read.
+- `app/api/coach/resume/sessions/[id]/export/route.ts` — markdown export with Content-Disposition: attachment.
+- `app/learn/resume-coach/page.tsx` — 4-state page (intro/analysis/socratic/final).
+- `components/Coach/ResumeUpload.tsx` — drag-drop + magic-byte client check.
+- `components/Coach/ResumeAnalysis.tsx` — three-section critique view.
+- `components/Coach/SocraticBubble.tsx` — one-question Q&A bubble with accept/counter/reject.
+- `components/Coach/FinalReview.tsx` — side-by-side ORIGINAL vs IMPROVED + markdown download.
+- `supabase/migrations/20260604120000_resume_coach.sql` — `resume_coach_sessions` table + RLS.
+
+---
+
 ## 2026-06-04 — Shop daily-rotation polish (web)
 
 **Status:** Web ships. iOS port: ❌ missing.
