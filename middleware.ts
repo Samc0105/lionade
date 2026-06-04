@@ -97,6 +97,15 @@ const ROUTE_LIMITS: RouteLimit[] = [
     windowMs: 15 * 60 * 1000,
     keyPrefix: "games-pdf",
   },
+  // Pardy submit — even with the unique-tile-claim ledger preventing
+  // replay-farming, a determined attacker could brute-force answers
+  // across all 25 tiles in seconds. Cap submission rate at 60/min/IP.
+  {
+    test: (p) => p === "/api/games/pardy/submit",
+    max: 60,
+    windowMs: 60 * 1000,
+    keyPrefix: "pardy-submit",
+  },
 
   // Mastery Mode — parse is a Claude Sonnet call, strict cap; the rest are
   // chatty but bounded. Per-user daily cost is bounded by the server-side
