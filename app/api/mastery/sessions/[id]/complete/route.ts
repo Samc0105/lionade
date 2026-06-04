@@ -106,6 +106,31 @@ export async function POST(req: NextRequest, { params }: RouteCtx) {
       }
     }
 
+    // Earned-cosmetic auto-grant: Mastery medal at 95%+ correct. Fire-and-
+    // forget — RPC is idempotent (one medal per (user, exam)) so a user who
+    // re-runs an already-mastered exam doesn't double-grant.
+    const accuracy = session.questions_answered > 0
+      ? session.correct_count / session.questions_answered
+      : 0;
+    if (accuracy >= 0.95) {
+      void supabaseAdmin
+        .from("user_exams")
+        .select("title")
+        .eq("id", session.user_exam_id)
+        .single()
+        .then(({ data }) => {
+          const examName = data?.title ?? "Mastery Exam";
+          return supabaseAdmin.rpc("grant_mastery_medal", {
+            p_user_id: userId,
+            p_exam_id: session.user_exam_id,
+            p_exam_name: examName,
+          });
+        })
+        .then((res) => {
+          if (res?.error) console.warn("[mastery/complete] grant_mastery_medal:", res.error.message);
+        });
+    }
+
     // Drop the active_session pin — the user is finished here.
     void clearActiveSession(userId);
 

@@ -360,7 +360,7 @@ export async function getLeaderboard(limit = 10): Promise<{
     // Fallback: just return top profiles by total coins
     const { data: profiles } = await supabase
       .from("profiles")
-      .select("id, username, avatar_url, level, streak, coins")
+      .select("id, username, avatar_url, level, streak, coins, equipped_username_effect")
       .neq("id", DEMO_USER_ID)
       .order("coins", { ascending: false })
       .limit(limit);
@@ -383,7 +383,7 @@ export async function getLeaderboard(limit = 10): Promise<{
 
   const { data: profiles } = await supabase
     .from("profiles")
-    .select("id, username, avatar_url, level, streak")
+    .select("id, username, avatar_url, level, streak, equipped_username_effect")
     .in("id", topUserIds);
 
   return topUserIds.map((uid, i) => {

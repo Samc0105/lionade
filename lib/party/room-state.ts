@@ -28,7 +28,7 @@ export async function fetchRoomSnapshot(
 
   const { data: players } = await supabase
     .from("party_room_players")
-    .select("user_id, score, joined_at, left_at, is_ready, selected_subjects, profiles!inner(username)")
+    .select("user_id, score, joined_at, left_at, is_ready, selected_subjects, profiles!inner(username, equipped_username_effect)")
     .eq("room_id", room.id)
     .is("left_at", null)
     .order("joined_at", { ascending: true });

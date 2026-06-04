@@ -71,7 +71,7 @@ export async function GET(req: NextRequest) {
     if (profileIds.size > 0) {
       const { data: profileRows } = await supabaseAdmin
         .from("profiles")
-        .select("id, username, avatar_url, arena_elo, is_online, last_seen")
+        .select("id, username, avatar_url, arena_elo, is_online, last_seen, equipped_username_effect")
         .in("id", Array.from(profileIds));
       for (const p of (profileRows ?? []) as Profile[]) {
         profileMap.set(p.id, p);

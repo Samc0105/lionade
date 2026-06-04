@@ -181,6 +181,15 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Couldn't log claim." }, { status: 500 });
   }
 
+  // Earned-cosmetic auto-grant: streak warrior emblem at 10/30/100/365-day
+  // milestones. Fire-and-forget — RPC is idempotent (ON CONFLICT DO NOTHING
+  // on the UNIQUE constraint) so duplicate calls at the same tier are safe.
+  void supabaseAdmin
+    .rpc("grant_streak_emblem", { p_user_id: userId, p_streak_days: newStreak })
+    .then(({ error }) => {
+      if (error) console.warn("[login-bonus] grant_streak_emblem:", error.message);
+    });
+
   return NextResponse.json({
     awarded: true,
     amount,
