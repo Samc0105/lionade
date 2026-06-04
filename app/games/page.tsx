@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import AmbientOrbs from "@/components/AmbientOrbs";
@@ -8,6 +8,7 @@ import { useAuth } from "@/lib/auth";
 import { useUserStats, mutateUserStats } from "@/lib/hooks";
 import { cdnUrl } from "@/lib/cdn";
 import { apiPost, apiGet } from "@/lib/api-client";
+import { useHeartbeat } from "@/lib/use-heartbeat";
 import {
   Brain,
   Lightning,
@@ -146,6 +147,119 @@ export default function GamesPage() {
   const [tlSubmitted, setTlSubmitted] = useState(false);
   const [tlScore, setTlScore] = useState(0);
   const [dragIdx, setDragIdx] = useState<number | null>(null);
+
+  // Tier 3 — refresh-resumable state for Roardle + Timeline. Each game gets
+  // its own slot in `quiz_session_state` (game_type='roardle' | 'timeline').
+  // We hydrate on mount, autosave on meaningful changes (debounced 500ms),
+  // and clear on game-over. Flashcards is intentionally NOT persisted — it's
+  // a quick-flip ritual where resume doesn't add value.
+  const roardleHydratedRef = useRef(false);
+  const timelineHydratedRef = useRef(false);
+  const [roardleResume, setRoardleResume] = useState<null | {
+    wordLength: number; targetWord: string; guesses: string[];
+  }>(null);
+  const [timelineResume, setTimelineResume] = useState<null | {
+    events: typeof TIMELINE_EVENTS; order: number[];
+  }>(null);
+  const roardleSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const timelineSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Heartbeat — pings while a Roardle or Timeline game is in progress. Uses
+  // user-id as the surface id (these games don't have session rows).
+  useHeartbeat(
+    (game === "roardle" || game === "timeline") && user?.id ? "quiz" : null,
+    user?.id ?? null,
+  );
+
+  // Hydrate Roardle resume state on mount. We prompt rather than auto-
+  // resume because the user might want a fresh word.
+  useEffect(() => {
+    if (!user || roardleHydratedRef.current) return;
+    roardleHydratedRef.current = true;
+    (async () => {
+      type StateResp = {
+        state: { targetWord?: string; guesses?: string[]; wordLength?: number; won?: boolean } | null;
+      };
+      const r = await apiGet<StateResp>("/api/quiz/state?game_type=roardle");
+      const s = r.ok ? r.data?.state : null;
+      if (s?.targetWord && Array.isArray(s.guesses) && !s.won && s.guesses.length < 6) {
+        setRoardleResume({
+          wordLength: s.wordLength ?? s.targetWord.length,
+          targetWord: s.targetWord,
+          guesses: s.guesses,
+        });
+      }
+    })();
+  }, [user]);
+
+  // Hydrate Timeline resume state on mount.
+  useEffect(() => {
+    if (!user || timelineHydratedRef.current) return;
+    timelineHydratedRef.current = true;
+    (async () => {
+      type StateResp = {
+        state: { events?: typeof TIMELINE_EVENTS; order?: number[]; correctlyPlacedCount?: number } | null;
+      };
+      const r = await apiGet<StateResp>("/api/quiz/state?game_type=timeline");
+      const s = r.ok ? r.data?.state : null;
+      if (s?.events && s.events.length > 0 && Array.isArray(s.order)) {
+        setTimelineResume({ events: s.events, order: s.order });
+      }
+    })();
+  }, [user]);
+
+  // Autosave Roardle while a round is live.
+  useEffect(() => {
+    if (game !== "roardle" || !roardleWord || roardleOver) return;
+    if (roardleSaveTimerRef.current) clearTimeout(roardleSaveTimerRef.current);
+    roardleSaveTimerRef.current = setTimeout(() => {
+      void apiPost("/api/quiz/state", {
+        game_type: "roardle",
+        state: {
+          wordLength,
+          targetWord: roardleWord,
+          guesses: roardleGuesses,
+          won: roardleWon,
+        },
+      });
+    }, 500);
+    return () => {
+      if (roardleSaveTimerRef.current) clearTimeout(roardleSaveTimerRef.current);
+    };
+  }, [game, roardleWord, roardleGuesses, roardleOver, roardleWon, wordLength]);
+
+  // Autosave Timeline while a round is live (unsubmitted).
+  useEffect(() => {
+    if (game !== "timeline" || tlEvents.length === 0 || tlSubmitted) return;
+    if (timelineSaveTimerRef.current) clearTimeout(timelineSaveTimerRef.current);
+    timelineSaveTimerRef.current = setTimeout(() => {
+      void apiPost("/api/quiz/state", {
+        game_type: "timeline",
+        state: {
+          events: tlEvents,
+          order: tlOrder,
+          correctlyPlacedCount: 0,  // computed only at submit time
+        },
+      });
+    }, 500);
+    return () => {
+      if (timelineSaveTimerRef.current) clearTimeout(timelineSaveTimerRef.current);
+    };
+  }, [game, tlEvents, tlOrder, tlSubmitted]);
+
+  // Clear Roardle state row when a round ends (win or out-of-guesses).
+  useEffect(() => {
+    if (game === "roardle" && roardleOver) {
+      void apiPost("/api/quiz/state", { game_type: "roardle", state: null });
+    }
+  }, [game, roardleOver]);
+
+  // Clear Timeline state row on submit.
+  useEffect(() => {
+    if (game === "timeline" && tlSubmitted) {
+      void apiPost("/api/quiz/state", { game_type: "timeline", state: null });
+    }
+  }, [game, tlSubmitted]);
 
   // Load PDF + blitz best from localStorage on mount
   useEffect(() => {
@@ -803,6 +917,84 @@ export default function GamesPage() {
               />
             </div>
           </header>
+
+          {/* Resume prompts for in-flight Roardle / Timeline (Tier 3) */}
+          {roardleResume && game === "menu" && (
+            <div className="mb-4 rounded-2xl border border-[#00BFFF]/40 bg-[#00BFFF]/[0.06] px-4 py-3 flex items-center gap-3 animate-slide-up">
+              <TextAa size={14} weight="fill" className="text-[#00BFFF] shrink-0" />
+              <div className="flex-1 min-w-0">
+                <p className="text-[13px] text-cream leading-tight">Resume your Roardle</p>
+                <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-cream/50">
+                  {6 - roardleResume.guesses.length} guesses left
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  const r = roardleResume;
+                  setRoardleResume(null);
+                  setWordLength(r.wordLength);
+                  setRoardleWord(r.targetWord);
+                  setRoardleGuesses(r.guesses);
+                  setRoardleInput("");
+                  setRoardleOver(false);
+                  setRoardleWon(false);
+                  setFangsEarned(null);
+                  setGame("roardle");
+                }}
+                className="font-mono text-[11px] uppercase tracking-[0.25em] text-navy bg-[#00BFFF] rounded-full px-3 py-1.5"
+              >
+                Resume
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setRoardleResume(null);
+                  void apiPost("/api/quiz/state", { game_type: "roardle", state: null });
+                }}
+                className="font-mono text-[10px] uppercase tracking-[0.22em] text-cream/50 hover:text-cream"
+              >
+                Start fresh
+              </button>
+            </div>
+          )}
+          {timelineResume && game === "menu" && (
+            <div className="mb-4 rounded-2xl border border-[#00C851]/40 bg-[#00C851]/[0.06] px-4 py-3 flex items-center gap-3 animate-slide-up">
+              <Calendar size={14} weight="fill" className="text-[#00C851] shrink-0" />
+              <div className="flex-1 min-w-0">
+                <p className="text-[13px] text-cream leading-tight">Resume your Timeline</p>
+                <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-cream/50">
+                  {timelineResume.events.length} events to order
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  const t = timelineResume;
+                  setTimelineResume(null);
+                  setTlEvents(t.events);
+                  setTlOrder(t.order);
+                  setTlSubmitted(false);
+                  setTlScore(0);
+                  setFangsEarned(null);
+                  setGame("timeline");
+                }}
+                className="font-mono text-[11px] uppercase tracking-[0.25em] text-navy bg-[#00C851] rounded-full px-3 py-1.5"
+              >
+                Resume
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setTimelineResume(null);
+                  void apiPost("/api/quiz/state", { game_type: "timeline", state: null });
+                }}
+                className="font-mono text-[10px] uppercase tracking-[0.22em] text-cream/50 hover:text-cream"
+              >
+                Start fresh
+              </button>
+            </div>
+          )}
 
           {/* ═══ TABS ═══ */}
           <div className="flex justify-center gap-2 mb-8 animate-slide-up" style={{ animationDelay: "0.05s" }}>

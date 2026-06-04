@@ -116,6 +116,15 @@ export default function MasterySessionPage() {
   const [headerCollapsed, setHeaderCollapsed] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
 
+  // Tier 3 refresh-resumable scratch state — restored from
+  // /api/mastery/sessions/:id/state on mount and re-saved (debounced) on
+  // every keystroke inside the socratic textarea. Only the partial draft
+  // is restored — the question + thread come from the regular session GET.
+  const [socraticInitial, setSocraticInitial] = useState<string>("");
+  const stateHydratedRef = useRef(false);
+  const partialDraftRef = useRef<string>("");
+  const stateSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   // Resolve active session on mount (idempotent)
   useEffect(() => {
     if (!examId) return;
@@ -143,6 +152,27 @@ export default function MasterySessionPage() {
   // /api/presence/heartbeat endpoint so the AFK reaper knows the user is
   // still here.
   useHeartbeat(sessionId ? "mastery_session" : null, sessionId);
+
+  // Phase 2 Tier 3 — refresh-resumable state hydration. Pull any saved
+  // partial textarea draft (only set when the user was mid-socratic on a
+  // previous tab session). One-shot per sessionId.
+  useEffect(() => {
+    if (!sessionId || stateHydratedRef.current) return;
+    let cancelled = false;
+    (async () => {
+      type StateResp = {
+        state: { currentQuestionId: string | null; partialAnswer: string | null } | null;
+      };
+      const r = await apiGet<StateResp>(`/api/mastery/sessions/${sessionId}/state`);
+      if (cancelled) return;
+      stateHydratedRef.current = true;
+      if (r.ok && r.data?.state?.partialAnswer) {
+        setSocraticInitial(r.data.state.partialAnswer);
+        partialDraftRef.current = r.data.state.partialAnswer;
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [sessionId]);
 
   // Session snapshot — SWR keeps this fresh on focus + after each mutation
   const { data, mutate, isLoading } = useSWR<SessionResponse>(
@@ -185,6 +215,37 @@ export default function MasterySessionPage() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data, sessionId]);
+
+  // Tier 3 — debounced state-save (500ms) called from MasteryActionArea on
+  // every textarea keystroke. We persist the partial draft + the current
+  // question pointer + running counts so a refresh restores. Today the
+  // session row already carries runtime_state.pending so the question
+  // survives refresh natively; the partial_answer is the value-add here.
+  const persistMasteryState = useCallback((draft: string) => {
+    partialDraftRef.current = draft;
+    if (!sessionId) return;
+    if (stateSaveTimerRef.current) clearTimeout(stateSaveTimerRef.current);
+    stateSaveTimerRef.current = setTimeout(() => {
+      const currentQuestionId = (data?.session.pending as { questionId?: string } | null)?.questionId ?? null;
+      void apiPost(`/api/mastery/sessions/${sessionId}/state`, {
+        current_question_id: currentQuestionId,
+        partial_answer: partialDraftRef.current || null,
+        answered_count: data?.session.questionsAnswered ?? 0,
+        correct_count: data?.session.correctCount ?? 0,
+      });
+    }, 500);
+  }, [sessionId, data?.session.pending, data?.session.questionsAnswered, data?.session.correctCount]);
+
+  // Flush the pending save on unmount so the last 500ms of keystrokes
+  // aren't lost when the user navigates away.
+  useEffect(() => {
+    return () => {
+      if (stateSaveTimerRef.current) {
+        clearTimeout(stateSaveTimerRef.current);
+        stateSaveTimerRef.current = null;
+      }
+    };
+  }, []);
 
   // Scroll behavior:
   //   - First render with data → leave scrollTop at 0 so the intro message's
@@ -446,6 +507,17 @@ export default function MasterySessionPage() {
     setBusy(true);
     try {
       await apiPost(`/api/mastery/sessions/${sessionId}/socratic`, { reply });
+      // Clear the persisted partial answer — the user just submitted, so the
+      // draft is no longer "in progress". We keep the row so answered_count
+      // / correct_count survive; only the textarea draft is cleared. Fire-
+      // and-forget; not critical to await.
+      partialDraftRef.current = "";
+      if (stateSaveTimerRef.current) clearTimeout(stateSaveTimerRef.current);
+      void apiPost(`/api/mastery/sessions/${sessionId}/state`, {
+        partial_answer: null,
+        answered_count: data?.session.questionsAnswered ?? 0,
+        correct_count: data?.session.correctCount ?? 0,
+      });
       await mutate();
       // Auto-advance after Ninny's socratic follow-up
       void doNext();
@@ -673,6 +745,8 @@ export default function MasterySessionPage() {
                   onContinue={doNext}
                   onAnswer={doAnswer}
                   onSocraticSubmit={doSocratic}
+                  socraticInitial={socraticInitial}
+                  onSocraticChange={persistMasteryState}
                 />
               )}
             </div>

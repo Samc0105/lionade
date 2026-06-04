@@ -20,6 +20,7 @@ import { useAuth } from "@/lib/auth";
 import { useUserStats, mutateUserStats } from "@/lib/hooks";
 import { cdnUrl } from "@/lib/cdn";
 import { apiPost, apiGet } from "@/lib/api-client";
+import { useHeartbeat } from "@/lib/use-heartbeat";
 import BlitzMode from "@/components/Ninny/BlitzMode";
 import type { MCQQuestion } from "@/lib/ninny";
 import type { NinnyWrongAnswer } from "@/components/Ninny/MultipleChoiceMode";
@@ -83,12 +84,28 @@ export default function CompeteBlitzPage() {
   const [best, setBest] = useState<number>(0);
   const [fangsEarned, setFangsEarned] = useState<number | null>(null);
 
+  // Heartbeat — fires while user is on the page so the AFK reaper doesn't
+  // mistakenly clear a blitz-in-progress active_session pin. We use the
+  // user-id as the surface id since Blitz doesn't have a session row.
+  useHeartbeat(phase === "blitz" && user?.id ? "quiz" : null, user?.id ?? null);
+
   // Load personal best from localStorage on mount.
   useEffect(() => {
     try {
       const b = localStorage.getItem("lionade_blitz_best");
       if (b) setBest(parseInt(b));
     } catch {}
+  }, []);
+
+  // Tier 3 — clear any stale Blitz state row on page mount so a previous
+  // tab's abandoned run doesn't haunt the setup screen. We can't usefully
+  // RESUME a Blitz mid-run (the timer + streak + recent[] window live
+  // inside BlitzMode's local hooks/refs — see follow-up note), so V1 is
+  // "clean slate on every visit." The state row IS still useful as a
+  // breadcrumb for the cross-tab cross-game redirect logic in
+  // ResumeBanner — that banner reads active_session, not this row.
+  useEffect(() => {
+    void apiPost("/api/quiz/state", { game_type: "blitz", state: null });
   }, []);
 
   const awardFangs = useCallback(async (amount: number) => {

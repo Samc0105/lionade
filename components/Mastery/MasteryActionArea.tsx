@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { ArrowRight, PaperPlaneTilt } from "@phosphor-icons/react";
 import Confetti from "@/components/Confetti";
@@ -39,16 +39,36 @@ interface Props {
   onContinue: () => Promise<void> | void;
   onAnswer: (selectedIndex: number) => Promise<AnswerOutcome | void> | AnswerOutcome | void;
   onSocraticSubmit: (reply: string) => Promise<void> | void;
+  /**
+   * Optional initial value for the socratic textarea. Used by the parent page
+   * to restore a partial reply persisted via /api/mastery/sessions/:id/state
+   * across a refresh. Re-applied any time the value changes (e.g. on
+   * page-mount GET resolution).
+   */
+  socraticInitial?: string;
+  /**
+   * Fires on every keystroke inside the socratic textarea. Parent debounces
+   * + POSTs to /api/mastery/sessions/:id/state so a refresh can restore.
+   */
+  onSocraticChange?: (text: string) => void;
 }
 
 export default function MasteryActionArea({
   pending, liveQuestion, disabled, onContinue, onAnswer, onSocraticSubmit,
+  socraticInitial, onSocraticChange,
 }: Props) {
   if (pending?.type === "question" && liveQuestion) {
     return <QuestionOptions q={liveQuestion} disabled={disabled} onAnswer={onAnswer} />;
   }
   if (pending?.type === "socratic") {
-    return <SocraticInput disabled={disabled} onSubmit={onSocraticSubmit} />;
+    return (
+      <SocraticInput
+        disabled={disabled}
+        onSubmit={onSocraticSubmit}
+        initialValue={socraticInitial}
+        onChange={onSocraticChange}
+      />
+    );
   }
   return <ContinueButton disabled={disabled} onContinue={onContinue} />;
 }
@@ -178,15 +198,45 @@ function QuestionOptionsBody({
 }
 
 // ── Text input for a socratic reply ─────────────────────────────────────────
-function SocraticInput({ disabled, onSubmit }: { disabled?: boolean; onSubmit: (reply: string) => Promise<void> | void }) {
-  const [text, setText] = useState("");
+function SocraticInput({
+  disabled, onSubmit, initialValue, onChange,
+}: {
+  disabled?: boolean;
+  onSubmit: (reply: string) => Promise<void> | void;
+  initialValue?: string;
+  onChange?: (text: string) => void;
+}) {
+  const [text, setText] = useState(initialValue ?? "");
   const [submitting, setSubmitting] = useState(false);
+
+  // Re-sync ONCE when an initialValue arrives async (e.g. /state GET resolved
+  // after the component mounted with `""`). We only adopt the server value
+  // when the local textarea is still empty so we never clobber whatever the
+  // user has already typed.
+  const hydratedRef = useRef(false);
+  useEffect(() => {
+    if (hydratedRef.current) return;
+    if (initialValue && text === "") {
+      hydratedRef.current = true;
+      setText(initialValue);
+    }
+  }, [initialValue, text]);
+
+  const updateText = (next: string) => {
+    const clamped = next.slice(0, 800);
+    setText(clamped);
+    onChange?.(clamped);
+  };
 
   const send = async () => {
     const trimmed = text.trim();
     if (!trimmed || disabled || submitting) return;
     setSubmitting(true);
-    try { await onSubmit(trimmed); setText(""); }
+    try {
+      await onSubmit(trimmed);
+      setText("");
+      onChange?.("");
+    }
     finally { setSubmitting(false); }
   };
 
@@ -208,7 +258,7 @@ function SocraticInput({ disabled, onSubmit }: { disabled?: boolean; onSubmit: (
       <div className="flex gap-2 items-start">
         <textarea
           value={text}
-          onChange={e => setText(e.target.value.slice(0, 800))}
+          onChange={e => updateText(e.target.value)}
           onKeyDown={onKey}
           placeholder="Why did you pick that? One sentence is fine."
           disabled={disabled || submitting}

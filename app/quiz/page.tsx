@@ -15,6 +15,7 @@ import BackButton from "@/components/BackButton";
 import { cdnUrl } from "@/lib/cdn";
 import { SITE_HOST } from "@/lib/site-config";
 import { apiGet, apiPost, apiPatch } from "@/lib/api-client";
+import { useHeartbeat } from "@/lib/use-heartbeat";
 import Confetti from "@/components/Confetti";
 import {
   Calculator,
@@ -280,10 +281,86 @@ export default function QuizPage() {
   const [autoCorrectUsed, setAutoCorrectUsed] = useState(false);
   const [autoStarted, setAutoStarted] = useState(false);
 
+  // Tier 3 — refresh-resumable state. We persist the in-flight quiz to
+  // /api/quiz/state (jsonb in quiz_session_state) and offer a tiny banner
+  // on mount if a previous unfinished quiz exists. The shape includes the
+  // questions[] array so a resume doesn't refetch (saves a DB round-trip
+  // and avoids the "new questions" feel on reload). State is cleared
+  // automatically on finishQuiz + on explicit "Start fresh".
+  const [resumePrompt, setResumePrompt] = useState<null | {
+    subject: Subject; activeTopic: string | null; difficulty: Difficulty;
+    blitzMode: boolean; questions: QuizQuestion[]; currentIndex: number;
+    answers: AnswerRecord[];
+  }>(null);
+  const stateHydratedRef = useRef(false);
+  const stateSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Heartbeat — fires only during the quiz phase. We use the user-id as the
+  // "session id" because quiz sessions aren't keyed by a row id; the
+  // active_session pointer is set elsewhere on quiz start (Phase 1).
+  useHeartbeat(phase === "quiz" && user?.id ? "quiz" : null, user?.id ?? null);
 
   useEffect(() => {
     if (!isLoading && !user) router.replace("/login");
   }, [user, isLoading, router]);
+
+  // Hydrate resume state on mount. One-shot. If a quiz is in-flight we
+  // show a banner offering Resume / Start fresh. We DON'T auto-resume
+  // because the user may have intentionally bailed.
+  useEffect(() => {
+    if (!user || stateHydratedRef.current) return;
+    stateHydratedRef.current = true;
+    (async () => {
+      type StateResp = {
+        state: {
+          subject?: Subject; activeTopic?: string | null; difficulty?: Difficulty;
+          blitzMode?: boolean; questions?: QuizQuestion[]; currentIndex?: number;
+          answers?: AnswerRecord[];
+        } | null;
+      };
+      const r = await apiGet<StateResp>("/api/quiz/state?game_type=quiz");
+      if (r.ok && r.data?.state?.questions && r.data.state.questions.length > 0
+          && typeof r.data.state.currentIndex === "number"
+          && r.data.state.currentIndex < r.data.state.questions.length
+          && r.data.state.subject) {
+        setResumePrompt({
+          subject: r.data.state.subject,
+          activeTopic: r.data.state.activeTopic ?? null,
+          difficulty: r.data.state.difficulty ?? "medium",
+          blitzMode: !!r.data.state.blitzMode,
+          questions: r.data.state.questions,
+          currentIndex: r.data.state.currentIndex,
+          answers: r.data.state.answers ?? [],
+        });
+      }
+    })();
+  }, [user]);
+
+  // Debounced autosave on every meaningful change during a live quiz.
+  // 500ms debounce matches the spec; we DON'T save while in "select" or
+  // "results" since those phases would either clobber the resume row or
+  // duplicate the clear-on-finish.
+  useEffect(() => {
+    if (phase !== "quiz" || !subject) return;
+    if (stateSaveTimerRef.current) clearTimeout(stateSaveTimerRef.current);
+    stateSaveTimerRef.current = setTimeout(() => {
+      void apiPost("/api/quiz/state", {
+        game_type: "quiz",
+        state: {
+          subject,
+          activeTopic,
+          difficulty,
+          blitzMode,
+          questions,
+          currentIndex,
+          answers,
+        },
+      });
+    }, 500);
+    return () => {
+      if (stateSaveTimerRef.current) clearTimeout(stateSaveTimerRef.current);
+    };
+  }, [phase, subject, activeTopic, difficulty, blitzMode, questions, currentIndex, answers]);
 
   useEffect(() => {
     if (!user) return;
@@ -389,6 +466,11 @@ export default function QuizPage() {
       setBonusFangs(res.data.bonusFangs ?? 0);
       setStreakMilestone((res.data as { streakMilestone?: { days: number; bonus: number } | null }).streakMilestone ?? null);
     }
+
+    // Clear refresh-resume state — the quiz is done. Fire-and-forget;
+    // re-saves elsewhere are gated by phase === "quiz" so they won't
+    // resurrect the row after this.
+    void apiPost("/api/quiz/state", { game_type: "quiz", state: null });
 
     setPhase("results");
   }
@@ -544,6 +626,47 @@ export default function QuizPage() {
       <div className="min-h-screen pt-20">
         <div className="max-w-4xl mx-auto px-4 py-12">
           <BackButton />
+          {resumePrompt && (
+            <div className="mb-6 rounded-2xl border border-electric/40 bg-electric/[0.06] px-4 py-3 flex items-center gap-3 animate-slide-up">
+              <Lightning size={14} weight="fill" className="text-electric shrink-0" aria-hidden="true" />
+              <div className="flex-1 min-w-0">
+                <p className="text-[13px] text-cream leading-tight">
+                  Resume your {resumePrompt.subject} quiz
+                </p>
+                <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-cream/50">
+                  Question {resumePrompt.currentIndex + 1} of {resumePrompt.questions.length}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  const rp = resumePrompt;
+                  setResumePrompt(null);
+                  setSubject(rp.subject);
+                  setActiveTopic(rp.activeTopic);
+                  setDifficulty(rp.difficulty);
+                  setBlitzMode(rp.blitzMode);
+                  setQuestions(rp.questions);
+                  setCurrentIndex(rp.currentIndex);
+                  setAnswers(rp.answers);
+                  setPhase("quiz");
+                }}
+                className="font-mono text-[11px] uppercase tracking-[0.25em] text-navy bg-electric rounded-full px-3 py-1.5"
+              >
+                Resume
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setResumePrompt(null);
+                  void apiPost("/api/quiz/state", { game_type: "quiz", state: null });
+                }}
+                className="font-mono text-[10px] uppercase tracking-[0.22em] text-cream/50 hover:text-cream"
+              >
+                Start fresh
+              </button>
+            </div>
+          )}
           <div className="text-center mb-8 animate-slide-up">
             <span className="inline-flex items-center gap-2 bg-electric/10 border border-electric/30 rounded-full px-4 py-1.5 text-electric text-sm font-semibold mb-6">
               <Lightning size={14} weight="fill" aria-hidden="true" className="inline mr-1.5 -mt-0.5" /> Daily Quiz

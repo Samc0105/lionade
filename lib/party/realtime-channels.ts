@@ -65,6 +65,11 @@ export const SKETCH_EVENTS = {
   // every client lights up the shared green squares in real time.
   LETTER_REVEAL: "letter_reveal",
   ROUND_ENDED: "round_ended",
+  // Phase 2 — host pause/resume. V1 is broadcast-only (no DB persistence);
+  // each client freezes/resumes its local timer + disables canvas input via
+  // a paused overlay. Payload: { paused_by: string; started_at: ISO }.
+  PAUSED: "paused",
+  RESUMED: "resumed",
 } as const;
 
 export const BLUFF_EVENTS = {

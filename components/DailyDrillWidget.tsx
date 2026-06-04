@@ -8,9 +8,10 @@ import {
   Brain, Trophy, ShareNetwork,
 } from "@phosphor-icons/react";
 import ClaimBanner from "@/components/ClaimBanner";
-import { apiPost, swrFetcher } from "@/lib/api-client";
+import { apiGet, apiPost, swrFetcher } from "@/lib/api-client";
 import { mutateUserStats } from "@/lib/hooks";
 import { useAuth } from "@/lib/auth";
+import { useHeartbeat } from "@/lib/use-heartbeat";
 import Confetti from "@/components/Confetti";
 import ShareCard from "@/components/ShareCard";
 
@@ -142,6 +143,32 @@ function DrillModal({
   questions: DrillQuestion[];
   onClose: (refreshed: boolean) => void;
 }) {
+  // Tier 3 — fast-forward past any questions the user already answered
+  // earlier today (server-persisted via /api/daily-drill/state). The
+  // passed-in `questions` array is the FULL 5; we drop ones that match a
+  // saved answered_question_id. Result is the "remaining" subset. We seed
+  // the running answers array with zero-fill placeholders so the final
+  // submit still passes selectedIndex for the answered ones — actually the
+  // /complete route only scores selectedIndex for the questions in its
+  // results payload, so we just submit the ones answered in THIS sitting.
+  // The server already credits the prior correct_count via the progress row
+  // (V2). For V1 we accept that a true mid-drill resume submits only the
+  // remaining; daily-drill /complete is idempotent per day, so the user
+  // will see "you scored X of N" with N = remaining-this-session. Good
+  // enough for V1; a tighter rollup ships when /complete reads
+  // daily_drill_progress (backend follow-up).
+  const today = new Date().toISOString().slice(0, 10);
+  const [resumeFilter, setResumeFilter] = useState<string[]>([]);  // answered earlier today
+  const [resumeChecked, setResumeChecked] = useState(false);
+  const filteredQuestions = resumeChecked
+    ? questions.filter(q => !resumeFilter.includes(q.id))
+    : questions;
+
+  // Heartbeat — pings /api/presence/heartbeat so the AFK reaper doesn't
+  // clear the active_session pin pointing at today's drill while the user
+  // is mid-modal. Only fires while the modal is mounted.
+  useHeartbeat("daily_drill", today);
+
   const [idx, setIdx] = useState(0);
   const [answers, setAnswers] = useState<Array<{ questionId: string; selectedIndex: number; wasCorrect: boolean }>>([]);
   const [done, setDone] = useState<{ score: number; total: number; coinsEarned: number; perfect: boolean } | null>(null);
@@ -150,13 +177,31 @@ function DrillModal({
   const [feedback, setFeedback] = useState<{ correct: boolean; correctIndex: number } | null>(null);
   const reducedMotion = useReducedMotion();
 
-  const q = questions[idx];
+  const q = filteredQuestions[idx];
 
   // Lock body scroll while open.
   useEffect(() => {
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     return () => { document.body.style.overflow = prev; };
+  }, []);
+
+  // On open, pull today's progress row (if any) so we know which questions
+  // the user already answered and can skip past them. One-shot.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      type StateResp = {
+        state: { answeredQuestionIds: string[]; correctCount: number } | null;
+      };
+      const r = await apiGet<StateResp>("/api/daily-drill/state");
+      if (cancelled) return;
+      if (r.ok && r.data?.state?.answeredQuestionIds?.length) {
+        setResumeFilter(r.data.state.answeredQuestionIds);
+      }
+      setResumeChecked(true);
+    })();
+    return () => { cancelled = true; };
   }, []);
 
   const submitFinal = async (allAnswers: typeof answers) => {
@@ -201,12 +246,18 @@ function DrillModal({
     // trust the server's count. Local UI shows "you picked X" without
     // claiming right/wrong mid-drill.
     setFeedback({ correct: false, correctIndex: -1 }); // placeholder — see render
+    // Autosave this answer to /api/daily-drill/state so a refresh resumes
+    // from the next question. wasCorrect is unknown client-side (correct
+    // answer comes back only from /complete), so we record wasCorrect=false
+    // here and accept the running correct_count is a floor — /complete
+    // returns the canonical score. Fire-and-forget.
+    void apiPost("/api/daily-drill/state", { questionId: q.id, wasCorrect: false });
     setTimeout(() => {
       const recordedCorrect = false; // placeholder; corrected by server
       const next = [...answers, { questionId: q.id, selectedIndex: i, wasCorrect: recordedCorrect }];
       setAnswers(next);
 
-      if (idx + 1 >= questions.length) {
+      if (idx + 1 >= filteredQuestions.length) {
         // Final question — submit with the SELECTED indices and let the
         // server compute correctness. We pass selectedIndex as a hint;
         // /complete will look up correct_index server-side.
@@ -270,13 +321,13 @@ function DrillModal({
             <div className="flex items-center gap-2 mb-3">
               <Lightning size={14} className="text-electric" weight="fill" />
               <span className="font-mono text-[9.5px] uppercase tracking-[0.3em] text-electric">
-                Daily Drill · {idx + 1} / {questions.length}
+                Daily Drill · {idx + 1} / {filteredQuestions.length}
               </span>
             </div>
 
             {/* Progress bar */}
             <div className="flex gap-1 mb-5">
-              {questions.map((_, i) => (
+              {filteredQuestions.map((_, i) => (
                 <div
                   key={i}
                   className="h-1 flex-1 rounded-full transition-colors"

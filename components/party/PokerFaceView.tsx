@@ -24,6 +24,9 @@ import { apiGet, apiPost } from "@/lib/api-client";
 import PartyScoreboard from "./PartyScoreboard";
 import NinnyHostBubble from "./NinnyHostBubble";
 import { pokerFaceChannel, POKERFACE_EVENTS } from "@/lib/party/realtime-channels";
+import { subscribeResilient } from "@/lib/realtime-resilient";
+import PostRoundVoteCard from "./PostRoundVoteCard";
+import MidGameInviteModal from "./MidGameInviteModal";
 import type { PartyPlayer, PartyRoom, PokerFaceCall } from "@/lib/party/types";
 
 interface Props {
@@ -104,6 +107,9 @@ export default function PokerFaceView({
   // Presenter's private truth/lie pick for in-person (a beat to compose before
   // opening the table — nothing is typed).
   const [intent, setIntent] = useState<"truth" | "lie" | null>(null);
+
+  // Phase 2 — mid-game invite modal (host surface).
+  const [inviteOpen, setInviteOpen] = useState(false);
 
   // ── Card-flip bookkeeping ──
   // The card-word WORD element flips on the X axis on each phase transition
@@ -205,8 +211,11 @@ export default function PokerFaceView({
     ch.on("broadcast", { event: POKERFACE_EVENTS.PRESENTED }, () => void refreshDetail());
     ch.on("broadcast", { event: POKERFACE_EVENTS.PHASE_CHANGED }, () => void refreshDetail());
     ch.on("broadcast", { event: POKERFACE_EVENTS.ROUND_ENDED }, () => void refreshDetail());
-    ch.subscribe();
+    // Phase 2: wrap with exponential-backoff resubscribe so a transient WS
+    // drop doesn't silently leave the poker face channel dead.
+    const handle = subscribeResilient(ch, { label: `pokerface-room:${room.code}` });
     return () => {
+      handle.cancel();
       supabase.removeChannel(ch);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -419,6 +428,15 @@ export default function PokerFaceView({
     () => players.map((p) => ({ user_id: p.user_id, username: p.username, score: p.score })),
     [players],
   );
+
+  // Phase 2 vote auto-decide callbacks (75% threshold). Only fire on the
+  // post-round reveal screen when the game isn't already game-over.
+  const handleAutoPlayAgain = useCallback(() => {
+    if (isHost) void startRound();
+  }, [isHost, startRound]);
+  const handleAutoBackToLobby = useCallback(() => {
+    if (isHost) onReturnToLobby();
+  }, [isHost, onReturnToLobby]);
 
   if (phase === "loading" || !detail) {
     return (
@@ -915,6 +933,19 @@ export default function PokerFaceView({
               </motion.div>
             )}
 
+            {/* Phase 2 — real post-round vote (auto-decides at 75%). Only
+                shown mid-game; the final game-over screen has its own
+                "BACK TO LOBBY · RUN IT BACK" flow. */}
+            {round.round_num < totalRounds && (
+              <PostRoundVoteCard
+                roundId={round.id}
+                roundKind="pokerface"
+                isHost={isHost}
+                onAutoPlayAgain={handleAutoPlayAgain}
+                onAutoBackToLobby={handleAutoBackToLobby}
+              />
+            )}
+
             {isHost &&
               (round.round_num >= totalRounds ? (
                 <button
@@ -967,6 +998,31 @@ export default function PokerFaceView({
       {phase !== "reveal" && (
         <PartyScoreboard players={playersForBoard} highlightUserId={meUserId} compact />
       )}
+
+      {/* Phase 2 mid-game invite (host only). */}
+      {isHost && (
+        <button
+          type="button"
+          onClick={() => setInviteOpen(true)}
+          className="fixed bottom-24 right-4 md:bottom-8 md:right-8 z-30 px-3.5 py-2 rounded-full font-bebas text-xs tracking-wider transition-all active:scale-95"
+          style={{
+            background: "rgba(16,12,26,0.9)",
+            border: `1px solid ${ACCENT}73`,
+            color: ACCENT,
+            backdropFilter: "blur(6px)",
+            boxShadow: "0 6px 20px rgba(0,0,0,0.4)",
+          }}
+          aria-label="Invite a friend mid-game"
+        >
+          <span aria-hidden="true" className="mr-1">{"\u{1F517}"}</span>
+          INVITE
+        </button>
+      )}
+      <MidGameInviteModal
+        open={inviteOpen}
+        onClose={() => setInviteOpen(false)}
+        code={room.code}
+      />
     </div>
   );
 }

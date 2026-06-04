@@ -15,6 +15,7 @@ import BackButton from "@/components/BackButton";
 import { apiGet, apiPost } from "@/lib/api-client";
 import { supabase } from "@/lib/supabase";
 import { roomChannel, PARTY_EVENTS } from "@/lib/party/realtime-channels";
+import { subscribeResilient } from "@/lib/realtime-resilient";
 import { normalizeRoomCode } from "@/lib/party/room-code";
 import { useAuth } from "@/lib/auth";
 import { useHeartbeat } from "@/lib/use-heartbeat";
@@ -177,8 +178,16 @@ export default function PartyRoomPage() {
       { event: "*", schema: "public", table: "party_room_players" },
       () => void refresh(),
     );
-    ch.subscribe();
+    // Phase 2: wrap with exponential-backoff resubscribe so a transient WS
+    // drop doesn't silently leave the room-state channel dead. silentOnGiveUp
+    // because game-channel subscribers (SketchView/BluffView/PokerFaceView)
+    // already toast on their own failure.
+    const handle = subscribeResilient(ch, {
+      label: `room-state:${code}`,
+      silentOnGiveUp: true,
+    });
     return () => {
+      handle.cancel();
       supabase.removeChannel(ch);
     };
   }, [code, refresh]);

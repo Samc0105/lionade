@@ -27,6 +27,9 @@ interface Props {
   highlightUserId?: string | null;
   drawerUserId?: string | null;
   compact?: boolean;
+  // Phase 2 spectator mode — user ids in this set get a small "spectating"
+  // badge next to their row so the room sees who joined mid-round.
+  spectatorUserIds?: Set<string>;
 }
 
 export default function PartyScoreboard({
@@ -34,6 +37,7 @@ export default function PartyScoreboard({
   highlightUserId,
   drawerUserId,
   compact = false,
+  spectatorUserIds,
 }: Props) {
   const reduced = useReducedMotion();
   const sorted = [...players].sort((a, b) => b.score - a.score);
@@ -84,6 +88,19 @@ export default function PartyScoreboard({
                 {isDrawer && (
                   <span className="font-bebas text-[9px] tracking-wider px-1.5 py-0.5 rounded-full bg-purple-500/20 text-purple-200 border border-purple-500/40">
                     DRAWING
+                  </span>
+                )}
+                {spectatorUserIds?.has(p.user_id) && !isDrawer && (
+                  <span
+                    className="font-bebas text-[9px] tracking-wider px-1.5 py-0.5 rounded-full inline-flex items-center gap-0.5"
+                    style={{
+                      background: "rgba(168,85,247,0.15)",
+                      color: "#E9D5FF",
+                      border: "1px solid rgba(168,85,247,0.35)",
+                    }}
+                    title="Joined mid-round — will play next round"
+                  >
+                    <span aria-hidden="true">{"\u{1F441}"}</span>SPECTATING
                   </span>
                 )}
               </div>

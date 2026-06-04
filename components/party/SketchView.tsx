@@ -23,6 +23,8 @@ import SketchToolbar, { SKETCH_COLORS, SKETCH_SIZES, type SketchTool } from "./S
 import PartyScoreboard from "./PartyScoreboard";
 import NinnyHostBubble from "./NinnyHostBubble";
 import RoundEndOverlay from "./RoundEndOverlay";
+import PostRoundVoteCard from "./PostRoundVoteCard";
+import MidGameInviteModal from "./MidGameInviteModal";
 import Confetti from "@/components/Confetti";
 import FangBurst from "@/components/competitive/FangBurst";
 import { sketchChannel, SKETCH_EVENTS } from "@/lib/party/realtime-channels";
@@ -198,6 +200,45 @@ export default function SketchView({
   const undoRef = useRef<(() => void) | null>(null);
   const clearRef = useRef<(() => void) | null>(null);
 
+  // ── Mid-game invite modal (host-only surface) ──
+  const [inviteOpen, setInviteOpen] = useState(false);
+
+  // ── Pause / resume (broadcast-only V1, no DB persistence) ──
+  // Host taps pause; we freeze the local round timer and disable canvas input
+  // for everyone via a `paused` overlay. On resume we account for elapsed
+  // pause time by bumping the local "paused for N seconds" offset so the
+  // remaining seconds the timer sees are preserved.
+  //
+  // V1 limitation (acknowledged): a player who refreshes mid-pause won't see
+  // the paused overlay until the next PAUSE broadcast lands; their local
+  // timer will keep counting against the round's started_at. The next round
+  // will reset state cleanly. Persisting paused_at to sketch_rounds is V3
+  // work (needs a migration + new endpoints).
+  const [pausedAt, setPausedAt] = useState<number | null>(null);
+  const [pausedByName, setPausedByName] = useState<string | null>(null);
+  const pausedOffsetMsRef = useRef(0);
+
+  // ── Spectator detection (client-derived) ──
+  // A player who joined the room AFTER the current round's started_at is a
+  // spectator for THIS round (rotation skips them, guess input replaced with
+  // a "you joined mid-round" notice, they'll play the next round).
+  // Server-side flag is the V3 path; for V1 we derive it client-side so the
+  // feature ships without an extra column. `joined_at` is already on
+  // PartyPlayer and the round's started_at is on the round snapshot.
+  const me = players.find((p) => p.user_id === meUserId);
+  const isSpectator = useMemo(() => {
+    if (!round?.started_at || !me?.joined_at) return false;
+    // The drawer can never be a spectator — they were already in the room
+    // when the round started (the server picked them).
+    if (round.drawer_user_id === meUserId) return false;
+    // Only spectate during active gameplay phases. After reveal, the next
+    // round will reset round.started_at to "now" and the player joins back.
+    if (phase !== "drawing" && phase !== "celebrating" && phase !== "reveal") {
+      return false;
+    }
+    return new Date(me.joined_at).getTime() > new Date(round.started_at).getTime();
+  }, [round?.started_at, round?.drawer_user_id, me?.joined_at, meUserId, phase]);
+
   // ── Single subscribed channel ref + helper ──
   // Every send MUST go through this ref. supabase.channel().send() silently
   // no-ops on an unsubscribed channel handle, which is what caused the missed
@@ -260,6 +301,9 @@ export default function SketchView({
     setPickSecs(PICK_SECONDS);
     setInfoWord(null);
     setWordInfo({});
+    setPausedAt(null);
+    setPausedByName(null);
+    pausedOffsetMsRef.current = 0;
     const res = await apiPost<{ round: RoundSnapshot; drawer_should_pick: boolean }>(
       "/api/party/sketch/rounds",
       { code: room.code },
@@ -343,6 +387,9 @@ export default function SketchView({
       setPickSecs(PICK_SECONDS);
       setInfoWord(null);
       setWordInfo({});
+      setPausedAt(null);
+      setPausedByName(null);
+      pausedOffsetMsRef.current = 0;
       setPhase(isMe ? "select-word" : "drawing");
       setNinnyMsg(isMe ? "Your turn! Pick a word to draw." : "Watch carefully and guess what they're drawing.");
 
@@ -421,6 +468,25 @@ export default function SketchView({
           matched: Array.isArray(payload.matched) ? payload.matched : undefined,
         },
       ]);
+    });
+    // Phase 2 pause / resume — V1 broadcast-only (no DB persistence).
+    ch.on("broadcast", { event: SKETCH_EVENTS.PAUSED }, (msg: { payload?: unknown }) => {
+      const payload = (msg.payload ?? {}) as { paused_by?: string; started_at?: string };
+      if (pausedAt) return; // already paused; ignore re-broadcasts
+      setPausedAt(Date.now());
+      setPausedByName(payload.paused_by ?? "Host");
+    });
+    ch.on("broadcast", { event: SKETCH_EVENTS.RESUMED }, () => {
+      setPausedAt((prevStart) => {
+        if (prevStart != null) {
+          // Bank the paused duration so the round timer can subtract it from
+          // the elapsed-wall-time calculation. Local-only — every client does
+          // the same accounting from the same PAUSED/RESUMED broadcasts.
+          pausedOffsetMsRef.current += Date.now() - prevStart;
+        }
+        return null;
+      });
+      setPausedByName(null);
     });
     ch.on("broadcast", { event: SKETCH_EVENTS.ROUND_ENDED }, (msg: { payload?: unknown }) => {
       // Server-pushed celebrating state — see "Server-pushed celebrating
@@ -509,9 +575,15 @@ export default function SketchView({
   // closure (bound to the current round id), even though the effect itself only
   // re-binds on phase/role changes. Avoids the stale-closure risk of POSTing
   // /complete against an old round id mid-transition.
+  //
+  // When the host pauses (pausedAt non-null) we freeze the visible countdown —
+  // the interval keeps running but skips the decrement until resume.
   useEffect(() => {
     if (phase !== "drawing") return;
     const iv = setInterval(() => {
+      // Frozen while paused — every client agrees because the PAUSED /
+      // RESUMED broadcast lands at ~the same time for everyone.
+      if (pausedAt !== null) return;
       setTimeLeft((t) => {
         if (t <= 1) {
           clearInterval(iv);
@@ -524,7 +596,7 @@ export default function SketchView({
       });
     }, 1000);
     return () => clearInterval(iv);
-  }, [phase, isDrawer, isHost]);
+  }, [phase, isDrawer, isHost, pausedAt]);
 
   // ── Drawer picks a word ──
   // pickedRef gates so the manual pick and the 10s auto-pick can't both fire
@@ -785,12 +857,62 @@ export default function SketchView({
     return () => clearTimeout(t);
   }, [phase, celebrating, reveal]);
 
+  // ── Host pause / resume actions ──
+  // V1 ships as broadcast-only (no migration). All clients agree because
+  // they react to the same PAUSED / RESUMED broadcast in lockstep.
+  const togglePause = useCallback(async () => {
+    if (!isHost || !round) return;
+    if (pausedAt === null) {
+      const meRow = players.find((p) => p.user_id === meUserId);
+      const startedAt = new Date().toISOString();
+      setPausedAt(Date.now());
+      setPausedByName(meRow?.username ?? "Host");
+      await sendBroadcast(SKETCH_EVENTS.PAUSED, {
+        paused_by: meRow?.username ?? "Host",
+        started_at: startedAt,
+      });
+    } else {
+      pausedOffsetMsRef.current += Date.now() - pausedAt;
+      setPausedAt(null);
+      setPausedByName(null);
+      await sendBroadcast(SKETCH_EVENTS.RESUMED, {});
+    }
+  }, [isHost, round, pausedAt, players, meUserId, sendBroadcast]);
+
+  // ── Vote auto-decide callbacks ──
+  // When the room hits the 75% threshold, the host's client advances on
+  // behalf of everyone. Non-host clients fire no-ops; the actual transition
+  // arrives via the room/sketch channel broadcasts.
+  const handleAutoPlayAgain = useCallback(() => {
+    if (isHost) void startRound();
+  }, [isHost, startRound]);
+  const handleAutoBackToLobby = useCallback(() => {
+    if (isHost) onReturnToLobby();
+  }, [isHost, onReturnToLobby]);
+
   // ── Render ──
   const playersForBoard = useMemo(() => players.map((p) => ({
     user_id: p.user_id,
     username: p.username,
     score: p.score,
   })), [players]);
+
+  // Spectator set across the room — for the scoreboard badge. Same derivation
+  // as `isSpectator` but for everyone: a player who joined after the current
+  // round's started_at is spectating this round. Drawer is never a spectator.
+  const spectatorUserIds = useMemo(() => {
+    const s = new Set<string>();
+    if (!round?.started_at) return s;
+    const roundStart = new Date(round.started_at).getTime();
+    if (phase !== "drawing" && phase !== "celebrating" && phase !== "reveal") {
+      return s;
+    }
+    for (const p of players) {
+      if (p.user_id === round.drawer_user_id) continue;
+      if (new Date(p.joined_at).getTime() > roundStart) s.add(p.user_id);
+    }
+    return s;
+  }, [players, round?.started_at, round?.drawer_user_id, phase]);
 
   // Per-cell display for the Wordle blanks row. For the drawer, fill every
   // letter cell from their locked word (they already know it). For guessers,
@@ -1097,7 +1219,7 @@ export default function SketchView({
               roomCode={room.code}
               roundId={round.id}
               readonly={!isDrawer || phase === "reveal"}
-              disabled={phase === "celebrating" || phase === "reveal"}
+              disabled={phase === "celebrating" || phase === "reveal" || pausedAt !== null}
               color={color}
               size={size}
               tool={tool}
@@ -1105,6 +1227,77 @@ export default function SketchView({
               undoRef={undoRef}
               clearRef={clearRef}
             />
+
+            {/* Host pause button — corner-pinned so it can't be accidentally
+                clicked during drawing. Only renders during active drawing for
+                the host. */}
+            {isHost && phase === "drawing" && (
+              <button
+                type="button"
+                onClick={togglePause}
+                className="absolute top-2 right-2 z-20 px-3 py-1.5 rounded-full font-bebas text-[11px] tracking-wider transition-all active:scale-95"
+                style={{
+                  background: pausedAt !== null
+                    ? "linear-gradient(135deg, rgba(34,197,94,0.3) 0%, rgba(22,163,74,0.15) 100%)"
+                    : "rgba(16,12,26,0.85)",
+                  border: pausedAt !== null
+                    ? "1px solid rgba(34,197,94,0.55)"
+                    : "1px solid rgba(255,255,255,0.18)",
+                  color: pausedAt !== null ? "#86EFAC" : "rgba(238,244,255,0.85)",
+                  backdropFilter: "blur(6px)",
+                }}
+                aria-label={pausedAt !== null ? "Resume the round" : "Pause the round"}
+              >
+                <span aria-hidden="true" className="mr-1">
+                  {pausedAt !== null ? "▶" : "⏸"}
+                </span>
+                {pausedAt !== null ? "RESUME" : "PAUSE"}
+              </button>
+            )}
+
+            {/* Mid-game invite (host) — sits next to pause, also corner-pinned. */}
+            {isHost && (phase === "drawing" || phase === "celebrating" || phase === "reveal") && (
+              <button
+                type="button"
+                onClick={() => setInviteOpen(true)}
+                className="absolute top-2 left-2 z-20 px-3 py-1.5 rounded-full font-bebas text-[11px] tracking-wider transition-all active:scale-95"
+                style={{
+                  background: "rgba(16,12,26,0.85)",
+                  border: "1px solid rgba(168,85,247,0.45)",
+                  color: "#E9D5FF",
+                  backdropFilter: "blur(6px)",
+                }}
+                aria-label="Invite a friend mid-game"
+              >
+                <span aria-hidden="true" className="mr-1">{"\u{1F517}"}</span>
+                INVITE
+              </button>
+            )}
+
+            {/* Paused overlay — all clients see it. Sits above the canvas with
+                pointer-events: none for the body so the host's pause/resume
+                button (placed BEFORE this overlay in the DOM and absolutely
+                pinned) keeps its click target. */}
+            {pausedAt !== null && phase === "drawing" && (
+              <div
+                aria-hidden="true"
+                className="absolute inset-0 z-10 pointer-events-none rounded-2xl flex items-center justify-center"
+                style={{ background: "rgba(4,8,15,0.55)", backdropFilter: "blur(2px)" }}
+              >
+                <div
+                  className="px-5 py-3 rounded-xl font-bebas tracking-[0.18em] text-2xl"
+                  style={{
+                    background: "rgba(16,12,26,0.92)",
+                    border: "1px solid rgba(255,215,0,0.5)",
+                    color: "#FFD700",
+                    boxShadow: "0 0 24px rgba(255,215,0,0.25)",
+                  }}
+                >
+                  <span aria-hidden="true" className="mr-2">{"⏸"}</span>
+                  PAUSED by {pausedByName ?? "host"}
+                </div>
+              </div>
+            )}
 
             {/* Canvas stamp + green corner brackets — only during celebrating.
                 The stamp sits centered on top of the canvas; the four corner
@@ -1332,8 +1525,23 @@ export default function SketchView({
             </div>
           )}
 
-          {/* Guess input (guesser only) */}
-          {!isDrawer && phase === "drawing" && !iGotIt && (
+          {/* Spectator notice — for players who joined mid-round. Replaces the
+              guess input so they understand they'll play the next round. */}
+          {!isDrawer && phase === "drawing" && isSpectator && (
+            <div
+              className="rounded-xl px-4 py-3 text-center font-syne text-sm text-cream/75"
+              style={{
+                background: "linear-gradient(135deg, rgba(168,85,247,0.12) 0%, rgba(99,102,241,0.05) 100%)",
+                border: "1px solid rgba(168,85,247,0.35)",
+              }}
+            >
+              <span aria-hidden="true" className="mr-1.5">{"\u{1F441}"}</span>
+              You joined mid-round. You&apos;ll play the next round.
+            </div>
+          )}
+
+          {/* Guess input (guesser only, not a spectator) */}
+          {!isDrawer && phase === "drawing" && !iGotIt && !isSpectator && (
             <form onSubmit={submitGuess} className="flex gap-2">
               <input
                 type="text"
@@ -1341,7 +1549,8 @@ export default function SketchView({
                 onChange={(e) => setGuessInput(e.target.value)}
                 placeholder="Type your guess..."
                 maxLength={64}
-                className="flex-1 rounded-xl px-4 py-2.5 text-sm font-syne text-cream outline-none"
+                disabled={pausedAt !== null}
+                className="flex-1 rounded-xl px-4 py-2.5 text-sm font-syne text-cream outline-none disabled:opacity-40"
                 style={{
                   background: "rgba(255,255,255,0.04)",
                   border: "1px solid rgba(255,255,255,0.1)",
@@ -1349,7 +1558,7 @@ export default function SketchView({
               />
               <button
                 type="submit"
-                disabled={!guessInput.trim()}
+                disabled={!guessInput.trim() || pausedAt !== null}
                 className="px-5 py-2.5 rounded-xl font-bebas tracking-wider text-sm transition-all active:scale-95 disabled:opacity-30"
                 style={{
                   background: "linear-gradient(135deg, #A855F7 0%, #6366F1 100%)",
@@ -1420,14 +1629,24 @@ export default function SketchView({
             }))}
             highlightUserId={meUserId}
             drawerUserId={reveal.drawer_user_id}
+            spectatorUserIds={spectatorUserIds}
           />
 
-          {/* Post-round controls — host-only V1.
-              Host sees the two big CTAs (play another round / back to lobby).
-              Non-host players see a waiting state with the 3-dot ambient
-              animation + a thumbs-up they can tap to express preference
-              (logs to console for now — actual voting is V2). */}
-          {isHost ? (
+          {/* Post-round controls — Phase 2 real voting UI.
+              Host sees the two big CTAs (play another round / back to lobby)
+              plus the live vote tally. Non-host players see the vote buttons +
+              tally. At 75% threshold the round transitions automatically. */}
+          {round && (
+            <PostRoundVoteCard
+              roundId={round.id}
+              roundKind="sketch"
+              isHost={isHost}
+              onAutoPlayAgain={handleAutoPlayAgain}
+              onAutoBackToLobby={handleAutoBackToLobby}
+            />
+          )}
+
+          {isHost && (
             <div className="flex flex-col sm:flex-row gap-3">
               <button
                 onClick={startRound}
@@ -1447,62 +1666,6 @@ export default function SketchView({
                 BACK TO LOBBY
               </button>
             </div>
-          ) : (
-            <div
-              className="flex flex-col items-center gap-3 py-4 rounded-2xl"
-              style={{
-                background: "rgba(16,12,26,0.6)",
-                border: "1px solid rgba(255,255,255,0.06)",
-              }}
-            >
-              <div className="flex items-center gap-2">
-                <span className="font-syne text-sm text-cream/70">
-                  Waiting for host to pick what&apos;s next
-                </span>
-                <span aria-hidden="true" className="inline-flex items-center gap-0.5">
-                  {[0, 1, 2].map((i) => (
-                    <span
-                      key={i}
-                      className={`w-1 h-1 rounded-full bg-cream/55 ${reduced ? "" : "pa-ink-dot"}`}
-                      style={reduced ? undefined : { animationDelay: `${i * 200}ms` }}
-                    />
-                  ))}
-                </span>
-              </div>
-              <button
-                type="button"
-                onClick={() => {
-                  // V1: thumbs-up just logs. V2 will tally votes server-side
-                  // and surface the result to the host before they pick.
-                  console.log("[Sketchy] thumbs-up: another round (V1 stub)");
-                }}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-full transition-all active:scale-95"
-                style={{
-                  background: "rgba(34,197,94,0.08)",
-                  border: "1px solid rgba(34,197,94,0.3)",
-                  color: "#86EFAC",
-                }}
-                aria-label="Vote for another round"
-              >
-                <svg
-                  viewBox="0 0 24 24"
-                  width="16"
-                  height="16"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  aria-hidden="true"
-                >
-                  <path d="M7 10v12" />
-                  <path d="M15 5.88L14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H7V10l5-9a3 3 0 0 1 3 3v1.88z" />
-                </svg>
-                <span className="font-bebas text-xs tracking-wider">
-                  ANOTHER ROUND
-                </span>
-              </button>
-            </div>
           )}
         </motion.div>
       )}
@@ -1513,6 +1676,7 @@ export default function SketchView({
           players={playersForBoard}
           highlightUserId={meUserId}
           drawerUserId={round?.drawer_user_id ?? null}
+          spectatorUserIds={spectatorUserIds}
           compact
         />
       )}
@@ -1531,6 +1695,15 @@ export default function SketchView({
           />
         )}
       </AnimatePresence>
+
+      {/* Mid-game friend invite (host only) — modal shows the full URL +
+          room code so a friend can join late. The join flow already handles
+          late joiners (they enter as spectators for the current round). */}
+      <MidGameInviteModal
+        open={inviteOpen}
+        onClose={() => setInviteOpen(false)}
+        code={room.code}
+      />
     </div>
   );
 }

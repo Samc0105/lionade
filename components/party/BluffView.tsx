@@ -18,6 +18,9 @@ import PartyScoreboard from "./PartyScoreboard";
 import NinnyHostBubble from "./NinnyHostBubble";
 import CountUp from "@/components/CountUp";
 import { bluffChannel, BLUFF_EVENTS } from "@/lib/party/realtime-channels";
+import { subscribeResilient } from "@/lib/realtime-resilient";
+import PostRoundVoteCard from "./PostRoundVoteCard";
+import MidGameInviteModal from "./MidGameInviteModal";
 import type { PartyPlayer, PartyRoom } from "@/lib/party/types";
 
 interface Props {
@@ -77,11 +80,19 @@ export default function BluffView({
   //    already in client state — nothing extra is fetched) ──
   const [confirmKey, setConfirmKey] = useState(0); // bumps on a successful submit -> button pop
 
+  // Phase 2 — mid-game invite modal (host surface).
+  const [inviteOpen, setInviteOpen] = useState(false);
+  // Forfeit-this-round: local-only flag so the button replaces itself with a
+  // "forfeited" pill immediately. The server records the sentinel answer via
+  // the existing /answer endpoint; the vote step will naturally exclude it.
+  const [forfeited, setForfeited] = useState(false);
+
   // ── Start a fresh round (host) ──
   const startRound = useCallback(async () => {
     setPhase("loading");
     setDetail(null);
     setFakeInput("");
+    setForfeited(false);
     setError(null);
     const res = await apiPost<{ round: RoundDetail["round"] }>(
       "/api/party/bluff/rounds",
@@ -119,6 +130,7 @@ export default function BluffView({
         setRoundId(payload.round_id);
         setPhase("write");
         setFakeInput("");
+        setForfeited(false);
         setDetail(null);
         setNinnyMsg("Write a fake answer that sounds real. Lie convincingly!");
       }
@@ -129,8 +141,11 @@ export default function BluffView({
     ch.on("broadcast", { event: BLUFF_EVENTS.ROUND_ENDED }, () => {
       void refreshDetail();
     });
-    ch.subscribe();
+    // Phase 2: wrap with exponential-backoff resubscribe so a transient WS
+    // drop doesn't silently leave the bluff channel dead.
+    const handle = subscribeResilient(ch, { label: `bluff-room:${room.code}` });
     return () => {
+      handle.cancel();
       supabase.removeChannel(ch);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -208,6 +223,37 @@ export default function BluffView({
     setConfirmKey((k) => k + 1); // juice-only: submit confirmation pop
     void refreshDetail();
   }
+
+  // ── Forfeit-this-round (Phase 2) ──
+  // Submits a sentinel "__forfeit__" answer via the existing endpoint so the
+  // server-side dedup + truth-check logic still applies; the vote step shows
+  // the sentinel like any other fake, and the player just doesn't earn fooling
+  // points from it. Lightweight V1 — a cleaner approach (separate /forfeit
+  // route + hidden flag) is V3 work.
+  async function forfeitRound() {
+    if (!roundId || forfeited || submitting) return;
+    setSubmitting(true);
+    setError(null);
+    setForfeited(true);
+    const res = await apiPost(`/api/party/bluff/rounds/${roundId}/answer`, {
+      text: "__forfeit__",
+    });
+    setSubmitting(false);
+    if (!res.ok) {
+      setForfeited(false);
+      setError(res.error ?? "Couldn't forfeit. Try again.");
+      return;
+    }
+    void refreshDetail();
+  }
+
+  // Phase 2 vote auto-decide callbacks (75% threshold).
+  const handleAutoPlayAgain = useCallback(() => {
+    if (isHost) void startRound();
+  }, [isHost, startRound]);
+  const handleAutoBackToLobby = useCallback(() => {
+    if (isHost) onReturnToLobby();
+  }, [isHost, onReturnToLobby]);
 
   // ── Vote ──
   async function castVote(answerId: string) {
@@ -321,7 +367,7 @@ export default function BluffView({
             <button
               key={confirmKey}
               type="submit"
-              disabled={!fakeInput.trim() || submitting}
+              disabled={!fakeInput.trim() || submitting || forfeited}
               className={`w-full py-3 rounded-xl font-bebas text-base tracking-wider transition-all active:scale-95 disabled:opacity-30 ${
                 confirmKey > 0 && !reduced ? "pa-confirm-pop" : ""
               }`}
@@ -331,8 +377,21 @@ export default function BluffView({
                 boxShadow: "0 4px 18px rgba(255,215,0,0.3)",
               }}
             >
-              {detail.has_submitted ? "UPDATE FAKE" : "SUBMIT FAKE"}
+              {forfeited ? "FORFEITED THIS ROUND" : detail.has_submitted ? "UPDATE FAKE" : "SUBMIT FAKE"}
             </button>
+            {/* Phase 2 forfeit — for stuck players who can't think of a fake.
+                Submits a sentinel answer; the existing vote logic excludes it
+                from fooling-points naturally. */}
+            {!forfeited && !detail.has_submitted && (
+              <button
+                type="button"
+                onClick={forfeitRound}
+                disabled={submitting}
+                className="w-full py-2 rounded-xl font-syne text-xs text-cream/55 hover:text-cream/85 transition-colors disabled:opacity-40"
+              >
+                I&apos;m out — skip me this round
+              </button>
+            )}
           </motion.form>
         )}
 
@@ -459,6 +518,15 @@ export default function BluffView({
 
             <PartyScoreboard players={playersForBoard} highlightUserId={meUserId} />
 
+            {/* Phase 2 — real post-round vote (auto-decides at 75%). */}
+            <PostRoundVoteCard
+              roundId={round.id}
+              roundKind="bluff"
+              isHost={isHost}
+              onAutoPlayAgain={handleAutoPlayAgain}
+              onAutoBackToLobby={handleAutoBackToLobby}
+            />
+
             {isHost && (
               <div className="flex flex-col sm:flex-row gap-3">
                 <button
@@ -498,6 +566,32 @@ export default function BluffView({
       {phase !== "reveal" && (
         <PartyScoreboard players={playersForBoard} highlightUserId={meUserId} compact />
       )}
+
+      {/* Phase 2 mid-game invite (host only). Floating in the upper right so
+          it doesn't disrupt the question card flow. */}
+      {isHost && (
+        <button
+          type="button"
+          onClick={() => setInviteOpen(true)}
+          className="fixed bottom-24 right-4 md:bottom-8 md:right-8 z-30 px-3.5 py-2 rounded-full font-bebas text-xs tracking-wider transition-all active:scale-95"
+          style={{
+            background: "rgba(16,12,26,0.9)",
+            border: "1px solid rgba(255,215,0,0.45)",
+            color: "#FFD700",
+            backdropFilter: "blur(6px)",
+            boxShadow: "0 6px 20px rgba(0,0,0,0.4)",
+          }}
+          aria-label="Invite a friend mid-game"
+        >
+          <span aria-hidden="true" className="mr-1">{"\u{1F517}"}</span>
+          INVITE
+        </button>
+      )}
+      <MidGameInviteModal
+        open={inviteOpen}
+        onClose={() => setInviteOpen(false)}
+        code={room.code}
+      />
     </div>
   );
 }

@@ -6,6 +6,8 @@ All notable changes to Lionade, newest first.
 
 ## 2026-06-04
 
+- feat(solo): Phase 2 Tier 3 — refresh-resumable state for Mastery / Daily Drill / Quiz / Blitz / Roardle / Timeline via persisted server-side state with debounced autosave; ResumeBanner extended for daily_drill + quiz; useHeartbeat wired across all solo game pages
+- feat(party): Phase 2 Tier 2 — real voting UI on post-round (75% auto-decide), BluffView + PokerFaceView + room-state migrated to subscribeResilient, spectator mode for mid-round joiners, host pause/resume (V1 broadcast-only, no DB persistence), Bluff forfeit-this-round, mid-game friend invite modal
 - feat(lifecycle): backend wiring — /api/presence/heartbeat with ping_presence RPC, set_active_session wired into every join flow + clear on leave, /api/cron/reap-afk-presence Vercel cron at 30s, Sketchy round-end now writes DB phase, /api/party/rounds/[id]/vote + tally with 75% auto-decide threshold
 - feat(lifecycle): Tier 1 frontend UX — useActiveSession + useHeartbeat hooks, sticky ResumeBanner, per-user realtime channel for cross-game redirect, reconnect-on-mount guard, network resilience with exponential backoff on channel errors, tab-backgrounded grace period
 - feat(lifecycle): Session lifecycle schema V2 — profiles.active_session pointer + presence_heartbeats + sketch_rounds.phase/winner_user_id/celebrating_started_at + party_round_votes + mastery_session_state + daily_drill_progress + quiz_session_state. 4 RPCs: ping_presence, reap_afk_presence, set_active_session, clear_active_session.

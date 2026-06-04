@@ -256,6 +256,29 @@ const ROUTE_LIMITS: RouteLimit[] = [
     windowMs: 60 * 1000,
     keyPrefix: "presence-heartbeat",
   },
+  // Phase 2 Tier 3 refresh-resumable state. Each game page debounces its
+  // autosave POSTs to 500ms — well under these ceilings. GETs are once per
+  // page mount; shared bucket. Mastery state covers the per-session
+  // textarea + current-question pointer; daily-drill state is lower-volume
+  // because it only writes once per answered question.
+  {
+    test: (p) => /^\/api\/mastery\/sessions\/[^/]+\/state$/.test(p),
+    max: 60,
+    windowMs: 60 * 1000,
+    keyPrefix: "mastery-state",
+  },
+  {
+    test: (p) => p === "/api/quiz/state",
+    max: 60,
+    windowMs: 60 * 1000,
+    keyPrefix: "quiz-state",
+  },
+  {
+    test: (p) => p === "/api/daily-drill/state",
+    max: 30,
+    windowMs: 60 * 1000,
+    keyPrefix: "daily-drill-state",
+  },
   // Post-round vote tally — both POST (cast/change) and GET (poll). 10/min
   // covers a few "change my mind" toggles + a polling tab without
   // tripping. Matches both URLs since GET fetches /votes and POST fires at
