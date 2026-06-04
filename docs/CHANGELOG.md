@@ -4,6 +4,12 @@ All notable changes to Lionade, newest first.
 
 ---
 
+## 2026-06-04
+
+- feat(sketchy): round-end completion V1 — phase: "celebrating" with canvas stamp (GUESSED / TIME'S UP), green corner pulse on won rounds, full-screen RoundEndOverlay with winner avatar + word reveal, drawer input disabled during celebration, host-only play-again / lobby controls on the post-round screen
+
+---
+
 ## 2026-06-03
 
 - feat(auth): shared demo account (demo@getlionade.com / LionadeDemo2026!) for tester onboarding. One-tap fill on login page; demo-mode banner reminds testers to sign up; server guards block destructive actions (username/password change, public bank publish, DM send, IAP, friend requests); demo user filtered from public leaderboards + social search.

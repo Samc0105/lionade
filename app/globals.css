@@ -4198,6 +4198,36 @@ html.light .space-bg-container { display: none; }
   animation: pa-tile-flip 0.52s var(--ease-out-quart) both;
 }
 
+/* SKETCH ROUND-END STAMP — big diagonal stamp slammed onto the canvas the
+   moment the round ends. Used for both "GUESSED!" (green) and "TIME'S UP"
+   (orange). Drops in oversized + rotated, scales down to settled-rotation,
+   then a small alpha decay so the canvas under it stays readable. Single
+   shot, ~0.55s. GPU-only (transform + opacity). */
+@keyframes pa-canvas-stamp {
+  0%   { transform: translate(-50%, -50%) rotate(-8deg) scale(1.45); opacity: 0; }
+  35%  { transform: translate(-50%, -50%) rotate(-8deg) scale(1.05); opacity: 1; }
+  55%  { transform: translate(-50%, -50%) rotate(-8deg) scale(0.97); opacity: 1; }
+  100% { transform: translate(-50%, -50%) rotate(-8deg) scale(1);    opacity: 0.95; }
+}
+.pa-canvas-stamp {
+  will-change: transform, opacity;
+  animation: pa-canvas-stamp 0.55s var(--ease-out-quart) both;
+}
+
+/* CANVAS CORNER PULSE — four corner brackets bloom in green on a won round.
+   Each corner grows + brightens, then settles to a low-glow steady state for
+   the rest of the celebrating window. Pure box-shadow + transform + opacity. */
+@keyframes pa-canvas-corner {
+  0%   { transform: scale(0.6); opacity: 0; box-shadow: 0 0 0 rgba(34,197,94,0); }
+  35%  { transform: scale(1.15); opacity: 1; box-shadow: 0 0 14px 2px rgba(34,197,94,0.7); }
+  70%  { transform: scale(1); opacity: 1; box-shadow: 0 0 10px 1px rgba(34,197,94,0.5); }
+  100% { transform: scale(1); opacity: 0.85; box-shadow: 0 0 6px 0 rgba(34,197,94,0.32); }
+}
+.pa-canvas-corner {
+  will-change: transform, opacity, box-shadow;
+  animation: pa-canvas-corner 0.75s var(--ease-out-quart) both;
+}
+
 /* CARD-WORD 3D FLIP — the Poker Face header WORD flips on the X axis at the
    present -> interrogate/vote phase transition. perspective is set on the
    container; the element itself owns the rotateX. The room "sees" the card
@@ -4224,14 +4254,16 @@ html.light .space-bg-container { display: none; }
   .pa-stamp, .pa-factoid-up, .pa-leader-glow, .pa-truth-glow,
   .pa-ready-sweep, .pa-ready-glow, .pa-card-selected,
   .pa-game-card, .pa-game-card:hover,
-  .pa-tile-flip, .pa-card-flip-3d {
+  .pa-tile-flip, .pa-card-flip-3d,
+  .pa-canvas-stamp, .pa-canvas-corner {
     animation: none !important;
     transition: none !important;
   }
   .pa-game-card:hover { transform: none !important; }
   .pa-ready-sweep { opacity: 0 !important; }
   .pa-pop-in, .pa-deal-in, .pa-chip-in, .pa-guess-pop, .pa-stamp, .pa-factoid-up,
-  .pa-tile-flip, .pa-card-flip-3d {
+  .pa-tile-flip, .pa-card-flip-3d,
+  .pa-canvas-stamp, .pa-canvas-corner {
     transform: none !important;
     opacity: 1 !important;
   }

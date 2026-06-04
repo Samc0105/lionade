@@ -32,6 +32,15 @@ export interface SketchCanvasProps {
   roundId: string;
   /** When true, this client cannot draw — it just renders incoming strokes. */
   readonly: boolean;
+  /**
+   * When true, the canvas is hard-blocked from drawing — input handlers no-op
+   * AND a CSS class kills pointer events. Distinct from `readonly`: a drawer
+   * is NOT readonly (they can still see their own strokes paint), but during
+   * the celebrating / reveal phases they should not be able to add new strokes
+   * after a guess lands. Set by SketchView when `phase` enters celebrating or
+   * reveal so the round-end stamp visually locks the canvas.
+   */
+  disabled?: boolean;
   /** Currently selected brush color (drawer only) */
   color?: string;
   /** Currently selected brush size (drawer only) */
@@ -57,6 +66,7 @@ export default function SketchCanvas({
   roomCode,
   roundId,
   readonly,
+  disabled = false,
   color = "#FFFFFF",
   size = 8,
   tool = "brush",
@@ -270,7 +280,7 @@ export default function SketchCanvas({
 
   const onPointerDown = useCallback(
     (e: React.PointerEvent<HTMLCanvasElement>) => {
-      if (readonly) return;
+      if (readonly || disabled) return;
       e.preventDefault();
       const [x, y] = getLogicalCoords(e.clientX, e.clientY);
       inProgressRef.current = {
@@ -292,12 +302,12 @@ export default function SketchCanvas({
       }, 33);
       repaint();
     },
-    [readonly, color, size, tool, getLogicalCoords, broadcastInProgress, repaint],
+    [readonly, disabled, color, size, tool, getLogicalCoords, broadcastInProgress, repaint],
   );
 
   const onPointerMove = useCallback(
     (e: React.PointerEvent<HTMLCanvasElement>) => {
-      if (readonly || !inProgressRef.current) return;
+      if (readonly || disabled || !inProgressRef.current) return;
       const [x, y] = getLogicalCoords(e.clientX, e.clientY);
       const cur = inProgressRef.current;
       const last = cur.points[cur.points.length - 1];
@@ -306,11 +316,11 @@ export default function SketchCanvas({
       cur.points.push([x, y]);
       repaint();
     },
-    [readonly, getLogicalCoords, repaint],
+    [readonly, disabled, getLogicalCoords, repaint],
   );
 
   const onPointerUp = useCallback(() => {
-    if (readonly || !inProgressRef.current) return;
+    if (readonly || disabled || !inProgressRef.current) return;
     if (broadcastTimer.current) {
       clearInterval(broadcastTimer.current);
       broadcastTimer.current = null;
@@ -325,7 +335,7 @@ export default function SketchCanvas({
     });
     onStrokeCountChange?.(strokesRef.current.length);
     repaint();
-  }, [readonly, sendBroadcast, onStrokeCountChange, repaint]);
+  }, [readonly, disabled, sendBroadcast, onStrokeCountChange, repaint]);
 
   // ── Imperative undo/clear handles for the parent toolbar ──
   useEffect(() => {
@@ -366,7 +376,7 @@ export default function SketchCanvas({
 
   return (
     <div
-      className="w-full rounded-2xl overflow-hidden relative"
+      className={`w-full rounded-2xl overflow-hidden relative ${disabled ? "pointer-events-none" : ""}`}
       style={{
         ...aspectStyle,
         background: "#0a0a14",
@@ -378,7 +388,10 @@ export default function SketchCanvas({
       <canvas
         ref={canvasRef}
         className="w-full h-full block"
-        style={{ cursor: readonly ? "default" : tool === "eraser" ? "cell" : "crosshair" }}
+        style={{
+          cursor:
+            readonly || disabled ? "default" : tool === "eraser" ? "cell" : "crosshair",
+        }}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}

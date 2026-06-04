@@ -22,11 +22,17 @@ import SketchCanvas from "./SketchCanvas";
 import SketchToolbar, { SKETCH_COLORS, SKETCH_SIZES, type SketchTool } from "./SketchToolbar";
 import PartyScoreboard from "./PartyScoreboard";
 import NinnyHostBubble from "./NinnyHostBubble";
+import RoundEndOverlay from "./RoundEndOverlay";
 import Confetti from "@/components/Confetti";
 import FangBurst from "@/components/competitive/FangBurst";
 import { sketchChannel, SKETCH_EVENTS } from "@/lib/party/realtime-channels";
 import { SUBJECT_LABELS, type Subject } from "@/lib/party/word-lists-stub";
 import type { PartyPlayer, PartyRoom } from "@/lib/party/types";
+
+// How long the celebrating overlay holds on screen (server-pushed phase
+// transition timing; all clients agree because they read from the same
+// ROUND_ENDED broadcast payload).
+const CELEBRATING_HOLD_MS = 2500;
 
 interface Props {
   room: PartyRoom;
@@ -125,12 +131,28 @@ export default function SketchView({
   const [candidates, setCandidates] = useState<CandidateWord[] | null>(null);
   const [lockedWord, setLockedWord] = useState<string | null>(null);
   const [timeLeft, setTimeLeft] = useState(90);
-  const [phase, setPhase] = useState<"loading" | "select-word" | "drawing" | "reveal">("loading");
+  const [phase, setPhase] = useState<"loading" | "select-word" | "drawing" | "celebrating" | "reveal">("loading");
   const [reveal, setReveal] = useState<{
     word: string;
     factoid: string | null;
     drawer_user_id: string;
     scoreboard: { user_id: string; username: string | null; score: number }[];
+  } | null>(null);
+
+  // ── Celebrating phase state ──
+  // Authoritatively populated by the ROUND_ENDED broadcast payload (server-
+  // pushed). All clients render their canvas stamp + RoundEndOverlay from
+  // these fields so the celebration shows the same winner + word everywhere.
+  // `celebratingStartedAt` is sent by the originating client (drawer/host) so
+  // every receiving client uses the same reference time for the 2.5s hold.
+  // Note: this is a CLIENT-DERIVED celebrating state (not persisted as a DB
+  // phase). The ROUND_ENDED broadcast IS the canonical event — every client
+  // who receives it enters celebrating in lockstep. See report at end of
+  // file for the "client-derived vs DB-persisted" design call.
+  const [celebrating, setCelebrating] = useState<{
+    winner: { user_id: string; username: string | null; avatar_url: string | null } | null;
+    word: string;
+    started_at: string;
   } | null>(null);
   const [chat, setChat] = useState<ChatMsg[]>([]);
   const [guessInput, setGuessInput] = useState("");
@@ -149,6 +171,10 @@ export default function SketchView({
   //    in client state — nothing is re-fetched and no secret column is read) ──
   const [fireFirstConfetti, setFireFirstConfetti] = useState(false); // FIRST correct guesser celebration
   const sawFirstCorrectRef = useRef(false); // gate so only the first correct guess fires confetti
+  // Identity of the FIRST correct guesser this round — used to attribute the
+  // round-end overlay. Captured from the GUESS broadcast (variant === "correct")
+  // since we don't otherwise carry it server-side per round. null = nobody won.
+  const firstCorrectRef = useRef<{ user_id: string; username: string | null } | null>(null);
   const [fangKey, setFangKey] = useState(0); // bumps on MY correct guess -> Fang burst
 
   // ── Wordle-flip stagger bookkeeping ──
@@ -226,6 +252,8 @@ export default function SketchView({
     flipBatchRef.current = new Map();
     flipBatchCounterRef.current = 0;
     sawFirstCorrectRef.current = false;
+    firstCorrectRef.current = null;
+    setCelebrating(null);
     setFireFirstConfetti(false);
     pickedRef.current = false;
     setPickSecs(PICK_SECONDS);
@@ -307,6 +335,8 @@ export default function SketchView({
       flipBatchRef.current = new Map();
       flipBatchCounterRef.current = 0;
       sawFirstCorrectRef.current = false;
+      firstCorrectRef.current = null;
+      setCelebrating(null);
       setFireFirstConfetti(false);
       pickedRef.current = false;
       setPickSecs(PICK_SECONDS);
@@ -370,6 +400,13 @@ export default function SketchView({
       // confetti burst. Derived from the broadcast we already receive — no fetch.
       if (payload.variant === "correct" && !sawFirstCorrectRef.current) {
         sawFirstCorrectRef.current = true;
+        // Capture the first correct guesser's identity for round-end attribution.
+        // Every client receives this broadcast at the same time, so they all
+        // resolve to the same winner without any extra round-trip.
+        firstCorrectRef.current = {
+          user_id: payload.user_id,
+          username: payload.username ?? null,
+        };
         setFireFirstConfetti(true);
       }
       setChat((prev) => [
@@ -385,11 +422,35 @@ export default function SketchView({
       ]);
     });
     ch.on("broadcast", { event: SKETCH_EVENTS.ROUND_ENDED }, (msg: { payload?: unknown }) => {
-      const payload = (msg.payload ?? {}) as { reveal?: typeof reveal };
-      if (payload.reveal) {
-        setReveal(payload.reveal);
-        setPhase("reveal");
+      // Server-pushed celebrating state — see "Server-pushed celebrating
+      // phase" header above. All clients render the same overlay from the
+      // same payload (winner / word / started_at), and then transition into
+      // the reveal screen after CELEBRATING_HOLD_MS.
+      const payload = (msg.payload ?? {}) as {
+        reveal?: typeof reveal;
+        celebrating?: {
+          winner: { user_id: string; username: string | null; avatar_url: string | null } | null;
+          word: string;
+          started_at: string;
+        };
+      };
+      if (payload.celebrating) {
+        setCelebrating(payload.celebrating);
+        setPhase("celebrating");
         setNinnyMsg(null);
+      }
+      if (payload.reveal) {
+        // Stash the reveal payload; we only flip phase to "reveal" once the
+        // celebrating hold elapses (handled by a separate effect). If the
+        // celebrating payload was missing (older clients during rollout) we
+        // skip celebrating and flip straight to reveal so the round still
+        // completes cleanly.
+        const r = payload.reveal;
+        setReveal(r);
+        if (!payload.celebrating) {
+          setPhase("reveal");
+          setNinnyMsg(null);
+        }
       }
     });
     ch.subscribe((status: string) => {
@@ -622,6 +683,16 @@ export default function SketchView({
     if (data.verdict === "correct") {
       setIGotIt(true);
       setFangKey((k) => k + 1); // juice-only: Fang burst on my own correct guess
+      // Self-capture: the broadcast doesn't echo back to the sender, so the
+      // submitter records their own first-correct identity here for round-end
+      // attribution. Every other client captures it via the GUESS handler.
+      if (!sawFirstCorrectRef.current) {
+        sawFirstCorrectRef.current = true;
+        firstCorrectRef.current = {
+          user_id: meUserId,
+          username: me?.username ?? null,
+        };
+      }
       await sendBroadcast(SKETCH_EVENTS.GUESS, {
         user_id: meUserId,
         username: me?.username ?? "Someone",
@@ -642,6 +713,11 @@ export default function SketchView({
   }
 
   // ── Round complete ──
+  // Two-phase finish: enter "celebrating" with the full-screen RoundEndOverlay
+  // for ~2.5s, then advance to "reveal". The ROUND_ENDED broadcast carries
+  // BOTH the celebrating payload (winner + word + started_at) and the reveal
+  // payload (scoreboard + factoid) so every client agrees on the winner
+  // attribution and renders the same overlay in lockstep.
   const completeRound = useCallback(async () => {
     if (!round) return;
     const res = await apiPost<{
@@ -651,17 +727,59 @@ export default function SketchView({
       scoreboard: { user_id: string; username: string | null; score: number }[];
     }>(`/api/party/sketch/rounds/${round.id}/complete`, {});
     if (!res.ok || !res.data) return;
+    const startedAt = new Date().toISOString();
+    // Resolve winner from the first-correct-guesser ref (captured live during
+    // the GUESS broadcast). Pulls avatar_url defensively from the players list
+    // if it happens to be there (it isn't on PartyPlayer today, so we send null
+    // and the overlay falls back to dicebear seeded on username).
+    const fc = firstCorrectRef.current;
+    const winner = fc
+      ? {
+          user_id: fc.user_id,
+          username: fc.username,
+          avatar_url:
+            (players.find((p) => p.user_id === fc.user_id) as { avatar_url?: string | null } | undefined)
+              ?.avatar_url ?? null,
+        }
+      : null;
+    const celebratingPayload = {
+      winner,
+      word: res.data.word,
+      started_at: startedAt,
+    };
+    // Local apply (broadcast doesn't echo to sender).
     setReveal(res.data);
-    setPhase("reveal");
-    setNinnyMsg(`The word was "${res.data.word}".`);
-    await sendBroadcast(SKETCH_EVENTS.ROUND_ENDED, { reveal: res.data });
-  }, [round, sendBroadcast]);
+    setCelebrating(celebratingPayload);
+    setPhase("celebrating");
+    setNinnyMsg(null);
+    await sendBroadcast(SKETCH_EVENTS.ROUND_ENDED, {
+      reveal: res.data,
+      celebrating: celebratingPayload,
+    });
+  }, [round, players, sendBroadcast]);
 
   // Keep the timer-readable ref in sync with the latest `completeRound`
   // closure so the timer effect's call always uses the current round id.
   useEffect(() => {
     completeRoundRef.current = completeRound;
   }, [completeRound]);
+
+  // ── Celebrating -> reveal transition ──
+  // All clients run the same timeout because they read from the same server-
+  // pushed `started_at`. Late joiners (e.g. tab unfocused when the broadcast
+  // landed) compute the REMAINING hold from the server `started_at`, not from
+  // their local effect mount time — so a viewer who joins 1.8s after the
+  // broadcast only sees the overlay for ~0.7s, matching everyone else.
+  useEffect(() => {
+    if (phase !== "celebrating" || !celebrating) return;
+    const elapsed = Math.max(0, Date.now() - new Date(celebrating.started_at).getTime());
+    const remaining = Math.max(0, CELEBRATING_HOLD_MS - elapsed);
+    const t = setTimeout(() => {
+      setPhase("reveal");
+      if (reveal) setNinnyMsg(`The word was "${reveal.word}".`);
+    }, remaining);
+    return () => clearTimeout(t);
+  }, [phase, celebrating, reveal]);
 
   // ── Render ──
   const playersForBoard = useMemo(() => players.map((p) => ({
@@ -963,19 +1081,103 @@ export default function SketchView({
       )}
 
       {/* Drawing surface */}
-      {round && (phase === "drawing" || phase === "reveal") && (
+      {round && (phase === "drawing" || phase === "celebrating" || phase === "reveal") && (
         <div className="space-y-3">
-          <SketchCanvas
-            roomCode={room.code}
-            roundId={round.id}
-            readonly={!isDrawer || phase === "reveal"}
-            color={color}
-            size={size}
-            tool={tool}
-            onStrokeCountChange={setStrokeCount}
-            undoRef={undoRef}
-            clearRef={clearRef}
-          />
+          {/* Canvas + stamp wrapper. The stamp + green-corner overlay are
+              siblings of the canvas (NOT children of it) so they never touch
+              the 30Hz stroke paint loop in SketchCanvas. They sit inside this
+              `relative` wrapper so they can be absolutely positioned over the
+              canvas. */}
+          <div className="relative">
+            <SketchCanvas
+              roomCode={room.code}
+              roundId={round.id}
+              readonly={!isDrawer || phase === "reveal"}
+              disabled={phase === "celebrating" || phase === "reveal"}
+              color={color}
+              size={size}
+              tool={tool}
+              onStrokeCountChange={setStrokeCount}
+              undoRef={undoRef}
+              clearRef={clearRef}
+            />
+
+            {/* Canvas stamp + green corner brackets — only during celebrating.
+                The stamp sits centered on top of the canvas; the four corner
+                brackets bloom in if a winner was attributed (skip them on
+                timeouts, which get the orange stamp on a dimmed canvas).
+                pointer-events: none so even if the drawer's pointer were not
+                already blocked by SketchCanvas's `disabled`, no input would
+                land on the stamp. */}
+            {phase === "celebrating" && celebrating && (
+              <>
+                {/* Dim the canvas slightly so the stamp pops on timeouts. */}
+                <div
+                  aria-hidden="true"
+                  className="absolute inset-0 pointer-events-none rounded-2xl"
+                  style={{
+                    background: celebrating.winner
+                      ? "rgba(4,8,15,0.18)"
+                      : "rgba(4,8,15,0.32)",
+                  }}
+                />
+
+                {/* Green corner brackets — only when there's a winner. */}
+                {celebrating.winner && [
+                  { top: "8px", left: "8px", borderTop: "3px solid #22C55E", borderLeft: "3px solid #22C55E" },
+                  { top: "8px", right: "8px", borderTop: "3px solid #22C55E", borderRight: "3px solid #22C55E" },
+                  { bottom: "8px", left: "8px", borderBottom: "3px solid #22C55E", borderLeft: "3px solid #22C55E" },
+                  { bottom: "8px", right: "8px", borderBottom: "3px solid #22C55E", borderRight: "3px solid #22C55E" },
+                ].map((corner, i) => (
+                  <span
+                    key={i}
+                    aria-hidden="true"
+                    className={`absolute pointer-events-none rounded-sm ${reduced ? "" : "pa-canvas-corner"}`}
+                    style={{
+                      width: "32px",
+                      height: "32px",
+                      ...corner,
+                      animationDelay: reduced ? undefined : `${i * 60}ms`,
+                    }}
+                  />
+                ))}
+
+                {/* The stamp itself — centered, rotated -8deg, large. */}
+                <div
+                  aria-hidden="true"
+                  className={`absolute pointer-events-none ${reduced ? "" : "pa-canvas-stamp"}`}
+                  style={{
+                    top: "50%",
+                    left: "50%",
+                    transform: "translate(-50%, -50%) rotate(-8deg)",
+                  }}
+                >
+                  <span
+                    className="font-bebas tracking-[0.18em] inline-block px-6 py-3 rounded-xl"
+                    style={{
+                      fontSize: "clamp(2.5rem, 8vw, 5rem)",
+                      lineHeight: 1,
+                      color: celebrating.winner ? "#22C55E" : "#F97316",
+                      background: celebrating.winner
+                        ? "rgba(34,197,94,0.12)"
+                        : "rgba(249,115,22,0.12)",
+                      border: celebrating.winner
+                        ? "3px solid rgba(34,197,94,0.85)"
+                        : "3px solid rgba(249,115,22,0.85)",
+                      boxShadow: celebrating.winner
+                        ? "0 0 24px rgba(34,197,94,0.4)"
+                        : "0 0 24px rgba(249,115,22,0.4)",
+                      textShadow: celebrating.winner
+                        ? "0 0 12px rgba(34,197,94,0.55)"
+                        : "0 0 12px rgba(249,115,22,0.55)",
+                    }}
+                  >
+                    {celebrating.winner ? "GUESSED!" : "TIME'S UP"}
+                  </span>
+                </div>
+              </>
+            )}
+          </div>
 
           {/* Wordle blanks — the word being guessed, one box per letter, with
               spaces/punctuation shown. Correct-position letters turn green as
@@ -1216,18 +1418,18 @@ export default function SketchView({
             drawerUserId={reveal.drawer_user_id}
           />
 
-          {isHost && (
+          {/* Post-round controls — host-only V1.
+              Host sees the two big CTAs (play another round / back to lobby).
+              Non-host players see a waiting state with the 3-dot ambient
+              animation + a thumbs-up they can tap to express preference
+              (logs to console for now — actual voting is V2). */}
+          {isHost ? (
             <div className="flex flex-col sm:flex-row gap-3">
               <button
                 onClick={startRound}
-                className="flex-1 py-3 rounded-xl font-bebas tracking-wider text-base transition-all active:scale-95"
-                style={{
-                  background: "linear-gradient(135deg, #A855F7 0%, #6366F1 100%)",
-                  color: "#fff",
-                  boxShadow: "0 4px 18px rgba(168,85,247,0.3)",
-                }}
+                className="flex-1 py-3 rounded-xl font-bebas tracking-wider text-base transition-all active:scale-95 btn-gold"
               >
-                NEXT ROUND
+                PLAY ANOTHER ROUND
               </button>
               <button
                 onClick={onReturnToLobby}
@@ -1239,6 +1441,62 @@ export default function SketchView({
                 }}
               >
                 BACK TO LOBBY
+              </button>
+            </div>
+          ) : (
+            <div
+              className="flex flex-col items-center gap-3 py-4 rounded-2xl"
+              style={{
+                background: "rgba(16,12,26,0.6)",
+                border: "1px solid rgba(255,255,255,0.06)",
+              }}
+            >
+              <div className="flex items-center gap-2">
+                <span className="font-syne text-sm text-cream/70">
+                  Waiting for host to pick what&apos;s next
+                </span>
+                <span aria-hidden="true" className="inline-flex items-center gap-0.5">
+                  {[0, 1, 2].map((i) => (
+                    <span
+                      key={i}
+                      className={`w-1 h-1 rounded-full bg-cream/55 ${reduced ? "" : "pa-ink-dot"}`}
+                      style={reduced ? undefined : { animationDelay: `${i * 200}ms` }}
+                    />
+                  ))}
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  // V1: thumbs-up just logs. V2 will tally votes server-side
+                  // and surface the result to the host before they pick.
+                  console.log("[Sketchy] thumbs-up: another round (V1 stub)");
+                }}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-full transition-all active:scale-95"
+                style={{
+                  background: "rgba(34,197,94,0.08)",
+                  border: "1px solid rgba(34,197,94,0.3)",
+                  color: "#86EFAC",
+                }}
+                aria-label="Vote for another round"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  width="16"
+                  height="16"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M7 10v12" />
+                  <path d="M15 5.88L14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H7V10l5-9a3 3 0 0 1 3 3v1.88z" />
+                </svg>
+                <span className="font-bebas text-xs tracking-wider">
+                  ANOTHER ROUND
+                </span>
               </button>
             </div>
           )}
@@ -1254,6 +1512,21 @@ export default function SketchView({
           compact
         />
       )}
+
+      {/* Round-end overlay — full-screen card with winner avatar + word
+          reveal, mounted at view root via AnimatePresence. Only visible when
+          server-pushed phase === "celebrating". All clients render this from
+          the same payload at the same time. */}
+      <AnimatePresence>
+        {phase === "celebrating" && celebrating && (
+          <RoundEndOverlay
+            winner={celebrating.winner}
+            word={celebrating.word}
+            startedAt={celebrating.started_at}
+            onEscape={() => setPhase("reveal")}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }
