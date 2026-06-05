@@ -3053,6 +3053,44 @@ html.light .space-bg-container { display: none; }
   animation: shop-glow-legendary-anim 2.5s ease-in-out infinite;
 }
 
+/* Whole-surface tier tint (2026-06-05) — Shop tier tinting visual upgrade.
+   Legendary cards get a slow 7s gold sweep across the card surface (similar
+   to the iOS Go-Pro pill marquee from TestFlight build 12/13). The card's
+   base background is a TWO-LAYER linear-gradient stack (tier wash + dark
+   shop base) set inline via RARITY_COLORS[r].cardBg. This class adds a
+   THIRD gradient on top (the moving gold band) and animates its position. */
+@keyframes shop-tier-sweep-legendary-anim {
+  0% { background-position: -100% 0, 0 0, 0 0; }
+  100% { background-position: 200% 0, 0 0, 0 0; }
+}
+.shop-tier-sweep-legendary {
+  /* Stack the moving gold band on TOP of whatever inline background the card has.
+     The pseudo-element approach keeps inline `style` background intact. */
+  position: relative;
+}
+.shop-tier-sweep-legendary::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    115deg,
+    transparent 0%,
+    transparent 40%,
+    rgba(255, 215, 0, 0.10) 50%,
+    rgba(255, 235, 120, 0.18) 55%,
+    rgba(255, 215, 0, 0.10) 60%,
+    transparent 70%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  background-position: -100% 0;
+  animation: shop-tier-sweep-legendary-anim 7s linear infinite;
+  border-radius: inherit;
+  z-index: 0;
+  mix-blend-mode: screen;
+}
+
 /* Shop tilt card */
 .shop-tilt-card {
   transition: transform 0.3s ease, box-shadow 0.3s ease;
@@ -3525,6 +3563,8 @@ html.light .space-bg-container { display: none; }
   .shop-item-icon,
   .shop-btn-pulse:hover,
   .shop-legendary-border,
+  .shop-tier-sweep-legendary,
+  .shop-tier-sweep-legendary::after,
   .booster-active,
   .shop-title-glow-premium,
   .shop-legendary-border-premium,

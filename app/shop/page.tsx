@@ -96,11 +96,57 @@ interface OwnedItem {
 }
 
 // ── Rarity config ──
-const RARITY_COLORS: Record<Rarity, { border: string; glow: string; bg: string; text: string; badge: string }> = {
-  common: { border: "border-gray-500/40", glow: "shop-glow-common", bg: "bg-gray-500/8", text: "text-gray-400", badge: "bg-gray-500/20 text-gray-300" },
-  rare: { border: "border-blue-500/40", glow: "shop-glow-rare", bg: "bg-blue-500/8", text: "text-blue-400", badge: "bg-blue-500/20 text-blue-300" },
-  epic: { border: "border-purple-500/40", glow: "shop-glow-epic", bg: "bg-purple-500/8", text: "text-purple-400", badge: "bg-purple-500/20 text-purple-300" },
-  legendary: { border: "border-yellow-500/40", glow: "shop-glow-legendary", bg: "bg-yellow-500/8", text: "text-yellow-400", badge: "bg-yellow-500/20 text-yellow-300" },
+// Whole-surface tier tinting (2026-06-05) — every shop card reads its tier from
+// across the room, not just from a 10px badge in the corner. Same pattern as
+// Word Banks (confidence-tinted rows) + Sketchy (difficulty-tinted picker).
+//
+// cardBg: 135° tier wash STACKED on top of the near-black card base so it still
+//   feels like a shop card, not a color card. Top-left is the bright stop, BR
+//   fades almost to base. 12% (common) → 24% (legendary).
+// cardBorder: tier color at 45→65% opacity. Replaces the old `border-{tier}-500/40`
+//   class which was effectively invisible against the new wash.
+// cardShadow: tier-colored outer glow, modest. Layered with the EXISTING pulsing
+//   `shop-glow-*` keyframe class (which animates a stronger pulse on top).
+// accentLine: 2px left-edge stripe color (Word Bank pattern) for an extra anchor.
+//
+// Legacy `border` / `glow` / `bg` / `text` / `badge` kept for back-compat at sites
+// not yet migrated (none today — all 10 sites migrated this pass).
+const RARITY_COLORS: Record<Rarity, {
+  border: string; glow: string; bg: string; text: string; badge: string;
+  cardBg: string; cardBorder: string; cardShadow: string; accentLine: string;
+}> = {
+  common: {
+    border: "border-gray-500/40", glow: "shop-glow-common", bg: "bg-gray-500/8",
+    text: "text-gray-400", badge: "bg-gray-500/20 text-gray-300",
+    cardBg: "linear-gradient(135deg, rgba(156,163,175,0.12), rgba(156,163,175,0.04)), linear-gradient(135deg, rgba(10,16,32,0.85), rgba(6,12,24,0.9))",
+    cardBorder: "rgba(156,163,175,0.45)",
+    cardShadow: "0 0 12px rgba(156,163,175,0.10)",
+    accentLine: "rgba(156,163,175,0.55)",
+  },
+  rare: {
+    border: "border-blue-500/40", glow: "shop-glow-rare", bg: "bg-blue-500/8",
+    text: "text-blue-400", badge: "bg-blue-500/20 text-blue-300",
+    cardBg: "linear-gradient(135deg, rgba(59,130,246,0.18), rgba(59,130,246,0.06)), linear-gradient(135deg, rgba(10,16,32,0.85), rgba(6,12,24,0.9))",
+    cardBorder: "rgba(59,130,246,0.55)",
+    cardShadow: "0 0 18px rgba(59,130,246,0.18)",
+    accentLine: "rgba(59,130,246,0.75)",
+  },
+  epic: {
+    border: "border-purple-500/40", glow: "shop-glow-epic", bg: "bg-purple-500/8",
+    text: "text-purple-400", badge: "bg-purple-500/20 text-purple-300",
+    cardBg: "linear-gradient(135deg, rgba(168,85,247,0.22), rgba(168,85,247,0.07)), linear-gradient(135deg, rgba(10,16,32,0.85), rgba(6,12,24,0.9))",
+    cardBorder: "rgba(168,85,247,0.60)",
+    cardShadow: "0 0 22px rgba(168,85,247,0.22)",
+    accentLine: "rgba(168,85,247,0.85)",
+  },
+  legendary: {
+    border: "border-yellow-500/40", glow: "shop-glow-legendary", bg: "bg-yellow-500/8",
+    text: "text-yellow-400", badge: "bg-yellow-500/20 text-yellow-300",
+    cardBg: "linear-gradient(135deg, rgba(255,215,0,0.24), rgba(255,165,0,0.10)), linear-gradient(135deg, rgba(10,16,32,0.85), rgba(6,12,24,0.9))",
+    cardBorder: "rgba(255,215,0,0.65)",
+    cardShadow: "0 0 28px rgba(255,215,0,0.28)",
+    accentLine: "rgba(255,215,0,0.95)",
+  },
 };
 
 // ══════════════════════════════════════════
@@ -308,8 +354,10 @@ function ConfirmModal({ item, quantity, onConfirm, onCancel, userCoins }: {
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center px-4" onClick={onCancel}>
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
-      <div className="shop-card relative w-full max-w-sm rounded-2xl border border-electric/20 p-6 animate-slide-up"
-        style={{ background: "linear-gradient(135deg, #0a1020, #060c18)" }} onClick={(e) => e.stopPropagation()}>
+      <div className="shop-card relative w-full max-w-sm rounded-2xl p-6 animate-slide-up overflow-hidden"
+        style={{ background: r.cardBg, border: `1.5px solid ${r.cardBorder}`, boxShadow: r.cardShadow }}
+        onClick={(e) => e.stopPropagation()}>
+        <div aria-hidden="true" className="absolute left-0 top-0 bottom-0 w-[2px]" style={{ background: r.accentLine }} />
         <div className="text-center mb-6">
           <div className="mb-3 flex items-center justify-center">
             <Icon size={52} weight={item.iconWeight ?? "fill"} color={item.iconColor ?? "currentColor"} aria-hidden="true" />
@@ -340,10 +388,11 @@ function FeaturedCard({ item, owned, onBuy }: { item: ShopItem; owned: boolean; 
   const r = RARITY_COLORS[item.rarity];
   const Icon = item.Icon;
   return (
-    <div className={`fluid-card-hover shop-card shop-tilt-card relative group rounded-2xl border ${r.border} ${r.glow} ${item.rarity === "legendary" ? "shop-legendary-sparkle" : ""} overflow-hidden shop-item-float h-full flex flex-col`}
-      style={{ background: "linear-gradient(135deg, rgba(10,16,32,0.9), rgba(6,12,24,0.95))", backdropFilter: "blur(20px)" }}>
+    <div className={`fluid-card-hover shop-card shop-tilt-card relative group rounded-2xl ${r.glow} ${item.rarity === "legendary" ? "shop-legendary-sparkle shop-tier-sweep-legendary" : ""} overflow-hidden shop-item-float h-full flex flex-col`}
+      style={{ background: r.cardBg, border: `1.5px solid ${r.cardBorder}`, boxShadow: r.cardShadow, backdropFilter: "blur(20px)" }}>
+      <div aria-hidden="true" className="absolute left-0 top-0 bottom-0 w-[2px] z-[1]" style={{ background: r.accentLine }} />
       {item.rarity === "legendary" && <div className="shop-legendary-border" />}
-      <div className="relative p-6 sm:p-8 flex flex-col flex-1">
+      <div className="relative z-[2] p-6 sm:p-8 flex flex-col flex-1">
         <span className={`absolute top-4 right-4 text-[10px] uppercase tracking-widest font-bold px-2.5 py-1 rounded-full ${r.badge}`}>{item.rarity}</span>
         <div className="mb-4 shop-item-icon">
           <Icon size={72} weight={item.iconWeight ?? "fill"} color={item.iconColor ?? "currentColor"} aria-hidden="true" />
@@ -373,10 +422,11 @@ function CosmeticCard({ item, owned, canAfford, onBuy }: { item: ShopItem; owned
   const r = RARITY_COLORS[item.rarity];
   const Icon = item.Icon;
   return (
-    <div className={`fluid-card-hover shop-card shop-tilt-card relative group rounded-xl border ${r.border} ${item.rarity === "legendary" ? "shop-legendary-sparkle" : ""} overflow-hidden transition-all duration-300 h-full flex flex-col`}
-      style={{ background: "linear-gradient(135deg, rgba(10,16,32,0.85), rgba(6,12,24,0.9))", backdropFilter: "blur(12px)" }}>
+    <div className={`fluid-card-hover shop-card shop-tilt-card relative group rounded-xl ${r.glow} ${item.rarity === "legendary" ? "shop-legendary-sparkle shop-tier-sweep-legendary" : ""} overflow-hidden transition-all duration-300 h-full flex flex-col`}
+      style={{ background: r.cardBg, border: `1.5px solid ${r.cardBorder}`, boxShadow: r.cardShadow, backdropFilter: "blur(12px)" }}>
+      <div aria-hidden="true" className="absolute left-0 top-0 bottom-0 w-[2px] z-[1]" style={{ background: r.accentLine }} />
       {item.rarity === "legendary" && <div className="shop-legendary-border" />}
-      <div className="relative p-4 flex flex-col flex-1">
+      <div className="relative z-[2] p-4 flex flex-col flex-1">
         <div className="flex items-start justify-between mb-3">
           <div className="shop-item-icon">
             <Icon size={40} weight={item.iconWeight ?? "fill"} color={item.iconColor ?? "currentColor"} aria-hidden="true" />
@@ -412,11 +462,12 @@ function BoosterCard({ item, quantityOwned, canAfford, onBuy }: { item: ShopItem
   const Icon = item.Icon;
   const bulkPrice = Math.floor(item.price * 5 * 0.9);
   return (
-    <div className={`fluid-card-hover shop-card shop-tilt-card relative group rounded-xl border ${r.border} ${item.rarity === "legendary" ? "shop-legendary-sparkle" : ""} overflow-hidden transition-all duration-300`}
-      style={{ background: "linear-gradient(135deg, rgba(10,16,32,0.85), rgba(6,12,24,0.9))", backdropFilter: "blur(12px)" }}>
-      <div className="relative p-4 flex items-center gap-4">
+    <div className={`fluid-card-hover shop-card shop-tilt-card relative group rounded-xl ${r.glow} ${item.rarity === "legendary" ? "shop-legendary-sparkle shop-tier-sweep-legendary" : ""} overflow-hidden transition-all duration-300`}
+      style={{ background: r.cardBg, border: `1.5px solid ${r.cardBorder}`, boxShadow: r.cardShadow, backdropFilter: "blur(12px)" }}>
+      <div aria-hidden="true" className="absolute left-0 top-0 bottom-0 w-[2px] z-[1]" style={{ background: r.accentLine }} />
+      <div className="relative z-[2] p-4 flex items-center gap-4">
         <div className="flex-shrink-0 w-14 h-14 rounded-xl flex items-center justify-center"
-          style={{ background: `linear-gradient(135deg, ${item.rarity === "common" ? "rgba(156,163,175,0.1)" : item.rarity === "rare" ? "rgba(59,130,246,0.1)" : item.rarity === "epic" ? "rgba(168,85,247,0.1)" : "rgba(255,215,0,0.1)"}, transparent)` }}>
+          style={{ background: r.cardBg, border: `1px solid ${r.cardBorder}` }}>
           <Icon size={32} weight={item.iconWeight ?? "fill"} color={item.iconColor ?? "currentColor"} aria-hidden="true" />
         </div>
         <div className="flex-1 min-w-0">
@@ -452,14 +503,15 @@ function InventoryItem({ item, owned, onEquip }: { item: ShopItem; owned: OwnedI
   const isBooster = item.type === "booster";
   const Icon = item.Icon;
   return (
-    <div className={`shop-card relative rounded-xl border ${owned.equipped ? "border-green-500/40" : r.border} p-4 transition-all duration-300`}
-      style={{ background: "linear-gradient(135deg, rgba(10,16,32,0.85), rgba(6,12,24,0.9))" }}>
+    <div className={`shop-card relative rounded-xl overflow-hidden p-4 transition-all duration-300 ${item.rarity === "legendary" ? "shop-tier-sweep-legendary" : ""}`}
+      style={{ background: r.cardBg, border: owned.equipped ? "1.5px solid rgba(34,197,94,0.55)" : `1.5px solid ${r.cardBorder}`, boxShadow: r.cardShadow }}>
+      <div aria-hidden="true" className="absolute left-0 top-0 bottom-0 w-[2px] z-[1]" style={{ background: owned.equipped ? "rgba(34,197,94,0.85)" : r.accentLine }} />
       {owned.equipped && (
-        <div className="absolute top-2 right-2 flex items-center gap-1 bg-green-500/20 border border-green-500/30 rounded-full px-2 py-0.5">
+        <div className="absolute top-2 right-2 z-[2] flex items-center gap-1 bg-green-500/20 border border-green-500/30 rounded-full px-2 py-0.5">
           <span className="text-green-400 text-[10px] font-bold uppercase tracking-wider">Equipped</span>
         </div>
       )}
-      <div className="flex items-center gap-3">
+      <div className="relative z-[2] flex items-center gap-3">
         <div className="flex-shrink-0">
           <Icon size={32} weight={item.iconWeight ?? "fill"} color={item.iconColor ?? "currentColor"} aria-hidden="true" />
         </div>
@@ -490,11 +542,20 @@ function PremiumCard({ item }: { item: PremiumItem }) {
   const r = RARITY_COLORS[item.rarity];
   const Icon = item.Icon;
   return (
-    <div className={`fluid-card-hover shop-card shop-tilt-card premium-card relative group rounded-xl border ${r.border} ${item.rarity === "legendary" ? "shop-legendary-sparkle" : ""} overflow-hidden transition-all duration-300 h-full flex flex-col`}
-      style={{ background: "linear-gradient(135deg, rgba(20,8,40,0.9), rgba(10,6,30,0.95))", backdropFilter: "blur(12px)" }}>
+    <div className={`fluid-card-hover shop-card shop-tilt-card premium-card relative group rounded-xl ${r.glow} ${item.rarity === "legendary" ? "shop-legendary-sparkle shop-tier-sweep-legendary" : ""} overflow-hidden transition-all duration-300 h-full flex flex-col`}
+      style={{
+        background: r.cardBg.replace(
+          "linear-gradient(135deg, rgba(10,16,32,0.85), rgba(6,12,24,0.9))",
+          "linear-gradient(135deg, rgba(20,8,40,0.9), rgba(10,6,30,0.95))"
+        ),
+        border: `1.5px solid ${r.cardBorder}`,
+        boxShadow: r.cardShadow,
+        backdropFilter: "blur(12px)",
+      }}>
+      <div aria-hidden="true" className="absolute left-0 top-0 bottom-0 w-[2px] z-[1]" style={{ background: r.accentLine }} />
       {item.rarity === "legendary" && <div className="shop-legendary-border-premium" />}
       {item.rarity === "epic" && <div className="shop-epic-border-premium" />}
-      <div className="relative p-5 flex flex-col flex-1">
+      <div className="relative z-[2] p-5 flex flex-col flex-1">
         <div className="flex items-start justify-between mb-3">
           <div className="shop-item-icon premium-icon-glow">
             <Icon size={52} weight={item.iconWeight ?? "fill"} color={item.iconColor ?? "currentColor"} aria-hidden="true" />
@@ -531,10 +592,11 @@ function UsernameEffectCard({
 }) {
   const r = RARITY_COLORS[item.rarity];
   return (
-    <div className={`fluid-card-hover shop-card relative rounded-xl border ${r.border} ${item.rarity === "legendary" ? "shop-legendary-sparkle" : ""} overflow-hidden h-full flex flex-col`}
-      style={{ background: "linear-gradient(135deg, rgba(10,16,32,0.85), rgba(6,12,24,0.9))", backdropFilter: "blur(12px)" }}>
+    <div className={`fluid-card-hover shop-card relative rounded-xl ${r.glow} ${item.rarity === "legendary" ? "shop-legendary-sparkle shop-tier-sweep-legendary" : ""} overflow-hidden h-full flex flex-col`}
+      style={{ background: r.cardBg, border: `1.5px solid ${r.cardBorder}`, boxShadow: r.cardShadow, backdropFilter: "blur(12px)" }}>
+      <div aria-hidden="true" className="absolute left-0 top-0 bottom-0 w-[2px] z-[1]" style={{ background: r.accentLine }} />
       {item.rarity === "legendary" && <div className="shop-legendary-border" />}
-      <div className="relative p-4 flex flex-col flex-1">
+      <div className="relative z-[2] p-4 flex flex-col flex-1">
         <div className="flex items-start justify-between mb-3">
           <span className="text-[10px] uppercase tracking-widest font-bold text-cream/50">Username effect</span>
           <span className={`text-[9px] uppercase tracking-widest font-bold px-2 py-0.5 rounded-full ${r.badge}`}>{item.rarity}</span>
@@ -577,10 +639,11 @@ function PremiumFangBannerCard({ item, owned, canAfford, onBuy }: { item: ShopIt
   const r = RARITY_COLORS[item.rarity];
   const Icon = item.Icon;
   return (
-    <div className={`fluid-card-hover shop-card relative rounded-xl border ${r.border} ${item.rarity === "legendary" ? "shop-legendary-sparkle" : ""} overflow-hidden h-full flex flex-col`}
-      style={{ background: "linear-gradient(135deg, rgba(10,16,32,0.85), rgba(6,12,24,0.9))", backdropFilter: "blur(12px)" }}>
+    <div className={`fluid-card-hover shop-card relative rounded-xl ${r.glow} ${item.rarity === "legendary" ? "shop-legendary-sparkle shop-tier-sweep-legendary" : ""} overflow-hidden h-full flex flex-col`}
+      style={{ background: r.cardBg, border: `1.5px solid ${r.cardBorder}`, boxShadow: r.cardShadow, backdropFilter: "blur(12px)" }}>
+      <div aria-hidden="true" className="absolute left-0 top-0 bottom-0 w-[2px] z-[1]" style={{ background: r.accentLine }} />
       {item.rarity === "legendary" && <div className="shop-legendary-border" />}
-      <div className="relative p-4 flex flex-col flex-1">
+      <div className="relative z-[2] p-4 flex flex-col flex-1">
         {/* Looping preview tile (gradient swatch + icon). */}
         <div className="h-16 rounded-lg mb-3 relative overflow-hidden border border-white/5"
           style={{
@@ -1134,14 +1197,15 @@ export default function ShopPage() {
                 const canAfford = userCoins >= item.price;
                 return (
                   <div key={item.id}
-                    className={`fluid-card-hover shop-card relative group rounded-2xl border ${r.border} ${item.rarity === "legendary" ? "shop-legendary-sparkle" : ""} overflow-hidden flex-shrink-0 w-[68vw] sm:w-auto`}
-                    style={{ background: "linear-gradient(135deg, rgba(10,16,32,0.9), rgba(6,12,24,0.95))", backdropFilter: "blur(16px)" }}>
+                    className={`fluid-card-hover shop-card relative group rounded-2xl ${r.glow} ${item.rarity === "legendary" ? "shop-legendary-sparkle shop-tier-sweep-legendary" : ""} overflow-hidden flex-shrink-0 w-[68vw] sm:w-auto`}
+                    style={{ background: r.cardBg, border: `1.5px solid ${r.cardBorder}`, boxShadow: r.cardShadow, backdropFilter: "blur(16px)" }}>
+                    <div aria-hidden="true" className="absolute left-0 top-0 bottom-0 w-[2px] z-[1]" style={{ background: r.accentLine }} />
                     {item.rarity === "legendary" && <div className="shop-legendary-border" />}
                     <span className="shop-today-tag absolute top-3 left-3 text-[9px] uppercase tracking-widest font-bold px-2 py-0.5 rounded-full bg-gold/20 text-gold border border-gold/30">
                       Today
                     </span>
                     <span className={`absolute top-3 right-3 text-[9px] uppercase tracking-widest font-bold px-2 py-0.5 rounded-full ${r.badge}`}>{item.rarity}</span>
-                    <div className="relative p-5 pt-12 flex flex-col h-full">
+                    <div className="relative z-[2] p-5 pt-12 flex flex-col h-full">
                       <div className="mb-3 flex items-center justify-center h-16">
                         <Icon size={56} weight={item.iconWeight ?? "fill"} color={item.iconColor ?? "currentColor"} aria-hidden="true" />
                       </div>
@@ -1193,14 +1257,15 @@ export default function ShopPage() {
                 const canAfford = userCoins >= item.price;
                 return (
                   <div key={item.id}
-                    className={`fluid-card-hover shop-card relative rounded-xl border ${r.border} ${item.rarity === "legendary" ? "shop-legendary-sparkle" : ""} overflow-hidden`}
-                    style={{ background: "linear-gradient(135deg, rgba(10,16,32,0.85), rgba(6,12,24,0.9))", backdropFilter: "blur(12px)" }}>
+                    className={`fluid-card-hover shop-card relative rounded-xl ${r.glow} ${item.rarity === "legendary" ? "shop-legendary-sparkle shop-tier-sweep-legendary" : ""} overflow-hidden`}
+                    style={{ background: r.cardBg, border: `1.5px solid ${r.cardBorder}`, boxShadow: r.cardShadow, backdropFilter: "blur(12px)" }}>
+                    <div aria-hidden="true" className="absolute left-0 top-0 bottom-0 w-[2px] z-[1]" style={{ background: r.accentLine }} />
                     <span className="absolute top-3 left-3 text-[9px] uppercase tracking-widest font-bold px-2 py-0.5 rounded-full"
                       style={{ background: "rgba(249,115,22,0.15)", color: "#FB923C", border: "1px solid rgba(249,115,22,0.30)" }}>
                       #{idx + 1}
                     </span>
                     <span className={`absolute top-3 right-3 text-[9px] uppercase tracking-widest font-bold px-2 py-0.5 rounded-full ${r.badge}`}>{item.rarity}</span>
-                    <div className="relative p-4 pt-10 flex flex-col h-full">
+                    <div className="relative z-[2] p-4 pt-10 flex flex-col h-full">
                       <div className="mb-2 flex items-center justify-center h-14">
                         <Icon size={44} weight={item.iconWeight ?? "fill"} color={item.iconColor ?? "currentColor"} aria-hidden="true" />
                       </div>

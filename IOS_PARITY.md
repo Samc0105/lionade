@@ -7,6 +7,25 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 
 ---
 
+## 2026-06-05 — Shop whole-surface tier tinting (web-only, no iOS row)
+
+**Status:** 🚫 N/A (deliberate no-row decision — pure visual polish on `app/shop/page.tsx`).
+
+Same family of work as today's [[#2026-06-05 — Sketchy word-picker polish]] (difficulty-tinted picker cards) and the [[Word Bank list redesign]] (confidence-tinted rows). The Shop card stack now reads its rarity from across the room: extended `RARITY_COLORS` with `cardBg` (two-layer 135° tier wash on dark base, 12-24% top-tint), `cardBorder` (rgba 45-65% opacity, tier color), `cardShadow` (modest outer glow, layered with the existing pulsing `shop-glow-*` class), `accentLine` (2px left-edge tier stripe). All 10 consumer sites migrated. Legendary tier additionally gets a 7s gold luminance sweep via `.shop-tier-sweep-legendary::after` — same instinct as the iOS Go-Pro pill marquee from TestFlight build 12 / 13. Reduced-motion respected.
+
+Shop on iOS already uses its own native styling (`lionade-ios/src/screens/shop/...` is a hand-built RN screen, not a port of `app/shop/page.tsx`). When `vp-ios` next touches the iOS Shop, mirror the SAME instinct — not necessarily the same CSS strings:
+- Define `RARITY_TINT` in the iOS shared layer with the same 4-stop values (common 12% gray, rare 18% blue, epic 22% purple, legendary 24% gold).
+- iOS cards already have a native shadow + border concept — apply tier color + opacity to those.
+- The 7s gold-sweep on legendary translates to a `<LinearGradient>` from `expo-linear-gradient` with a Reanimated shared value driving translateX, 7s `withRepeat(withTiming(...), -1)` with the `prefers-reduced-motion` accessibility API gate.
+
+NOT a parity row because the iOS Shop visual system is genuinely independent (not a copy-paste port). Filing as informational nudge so `vp-ios` knows the instinct exists when they take a polish pass.
+
+**Adjacency (NOT ridden along this session):** the `/badges` Earned grid uses the same common/rare/epic/legendary scale via its own `RARITY_STYLES` map in `app/badges/page.tsx`. NOT ridden along — different card shape (small grid tiles vs full-width shop cards) and different surface vibe ("achievements you already own" vs "items for sale"). Deserves its own dedicated visual pass, not a copy-paste. Flagged for a future audit follow-up.
+
+**Files touched (web):** `app/shop/page.tsx` (~120 lines diff, mostly the RARITY_COLORS extension + 10 inline style swaps), `app/globals.css` (added `@keyframes shop-tier-sweep-legendary-anim`, `.shop-tier-sweep-legendary`, `.shop-tier-sweep-legendary::after`, + appended both to the existing shop reduced-motion `animation: none !important` block).
+
+---
+
 ## 2026-06-05 — P0 trust-gap pass: server-backed Notifications + Privacy + Delete Account + Subjects gate removed (web-only-no-row)
 
 **Status:** 🚫 N/A (deliberate no-row decision — these are fixes to existing web surfaces that the iOS app already implements per its own 2026-05-23 "Profile tab → full settings hub" entry below).
