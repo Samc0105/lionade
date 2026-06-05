@@ -316,6 +316,7 @@ export async function GET(req: NextRequest) {
   const limit = Math.max(1, Math.min(200, Number.isFinite(limitRaw) ? limitRaw : 50));
   const offset = Math.max(0, Number.isFinite(offsetRaw) ? offsetRaw : 0);
 
+  // .select("*") includes self_confidence — no explicit column list needed.
   let query = supabaseAdmin
     .from("vocab_words")
     .select("*", { count: "exact" })

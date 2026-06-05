@@ -26,6 +26,10 @@
 - **Coming soon modals for unreleased features** — 2026-02-28
 - **Subjects CTA → Coming Soon block** (the `/learn/paths` Subjects card on `/learn` is now click-blocked with a "Coming Soon" gold pill on the card + a 3-second auto-dismissing toast that says "Subjects & Learning Paths — in development, coming soon"; Daily Quiz / Study with Ninny / Mastery Mode CTAs remain clickable) — 2026-05-24
 
+## Word Banks (Vocab)
+- **Word Banks V1-V3A** (add word with translation/definition, SM-2 spaced repetition review, language streak, bank kinds language/general, Discover + clone + publish, per-word translation/definition AI lookup) — 2026-06-03
+- **Excel-style list redesign** (Tab C dense view: inline-add row, 2px confidence-color left stripe, click-to-cycle confidence dot with sticky user override, per-row magnifier popover with cached AI/dictionary lookup, filter chips All/Locked in/Shaky/Struggling/New, self_confidence column + PATCH endpoint, race-safe revision counter) — 2026-06-05
+
 ## Quiz System
 - **Timed daily quiz flow with scoring** — 2026-02-27
 - **Supabase session persistence** — 2026-02-28

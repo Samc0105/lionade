@@ -4,6 +4,13 @@ All notable changes to Lionade, newest first.
 
 ---
 
+## 2026-06-05
+
+- feat(vocab): Excel-style Word Bank list redesign (Tab C of /learn/vocab). Dense inline-add row pinned at top, 2px confidence-color left stripe + subtle row wash, click confidence dot to cycle confident/shaky/struggling/auto, per-row magnifier opens a cached AI/dictionary lookup popover (translate for language banks, define for general banks). Filter chips above list: All / Locked in / Shaky / Struggling / New. Race-condition safe (revision counter on confidence PATCH).
+- feat(vocab): self_confidence column on vocab_words. New PATCH /api/vocab/words/[id] endpoint for { self_confidence: confident | shaky | struggling | null }. Migration 20260605000000_vocab_self_confidence.sql adds vocab_confidence enum + nullable column + partial index on (user_id, bank_id, self_confidence). Sticky override: user-set confidence wins over auto-derived; clearing reverts to the accuracy-based band (>=80% confident, 60-79% shaky, <60% struggling, 0 reviews = new).
+
+---
+
 ## 2026-06-04
 
 - feat(games): Lionade-Pardy templated engine — 5×5 Jeopardy board with 3 starter decks (Geography / General Knowledge / AWS Basics). Hand-authored questions; server-side answer validation; Fang rewards. Multiplayer / Final Pardy / Word-Bank-integration queued for V2.

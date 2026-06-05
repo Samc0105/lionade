@@ -40,6 +40,8 @@ export interface VocabWord {
   review_count: number;
   correct_count: number;
   next_review_at: string;
+  /** User-set confidence override. null = auto-derive from accuracy. */
+  self_confidence?: "confident" | "shaky" | "struggling" | null;
 }
 
 interface Props {
