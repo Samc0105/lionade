@@ -768,31 +768,51 @@ export default function GamesPage() {
             <h2 className="font-bebas text-3xl text-cream tracking-wider text-center mb-1">TIMELINE DROP</h2>
             <p className="text-cream/30 text-xs text-center mb-6">Drag events into chronological order (earliest first)</p>
 
-            <div className="space-y-2 mb-6">
+            <div className="space-y-2 mb-6" data-timeline-list>
               {tlOrder.map((eventIdx, pos) => {
                 const ev = tlEvents[eventIdx];
                 const isCorrect = tlSubmitted && ev.year === [...tlEvents].sort((a, b) => a.year - b.year)[pos]?.year;
+                const isDragging = dragIdx === pos;
                 return (
                   <div
                     key={eventIdx}
-                    draggable={!tlSubmitted}
-                    onDragStart={() => setDragIdx(pos)}
-                    onDragOver={e => e.preventDefault()}
-                    onDrop={() => { if (dragIdx !== null && dragIdx !== pos) moveTimelineItem(dragIdx, pos); setDragIdx(null); }}
-                    className="flex items-center gap-3 p-3 rounded-xl cursor-grab active:cursor-grabbing transition-all"
+                    data-row-pos={pos}
+                    onPointerDown={(e) => {
+                      if (tlSubmitted) return;
+                      e.currentTarget.setPointerCapture(e.pointerId);
+                      setDragIdx(pos);
+                    }}
+                    onPointerMove={(e) => {
+                      if (tlSubmitted || dragIdx === null) return;
+                      const el = document.elementFromPoint(e.clientX, e.clientY);
+                      const rowEl = el?.closest("[data-row-pos]") as HTMLElement | null;
+                      if (!rowEl) return;
+                      const targetPos = Number(rowEl.dataset.rowPos);
+                      if (Number.isNaN(targetPos) || targetPos === dragIdx) return;
+                      moveTimelineItem(dragIdx, targetPos);
+                      setDragIdx(targetPos);
+                    }}
+                    onPointerUp={(e) => {
+                      try { e.currentTarget.releasePointerCapture(e.pointerId); } catch { /* noop if not captured */ }
+                      setDragIdx(null);
+                    }}
+                    onPointerCancel={() => setDragIdx(null)}
+                    className={`flex items-center gap-3 p-3 rounded-xl transition-all select-none ${tlSubmitted ? "" : "cursor-grab active:cursor-grabbing"} ${isDragging ? "scale-[1.02] shadow-lg" : ""}`}
                     style={{
+                      touchAction: tlSubmitted ? "auto" : "none",
                       background: tlSubmitted
                         ? isCorrect ? "rgba(34,197,94,0.1)" : "rgba(239,68,68,0.1)"
-                        : "var(--game-card-bg, rgba(255,255,255,0.04))",
-                      border: `1px solid ${tlSubmitted ? (isCorrect ? "rgba(34,197,94,0.3)" : "rgba(239,68,68,0.3)") : "var(--game-card-border, rgba(255,255,255,0.08))"}`,
+                        : isDragging ? "rgba(255,215,0,0.10)" : "var(--game-card-bg, rgba(255,255,255,0.04))",
+                      border: `1px solid ${tlSubmitted ? (isCorrect ? "rgba(34,197,94,0.3)" : "rgba(239,68,68,0.3)") : isDragging ? "rgba(255,215,0,0.45)" : "var(--game-card-border, rgba(255,255,255,0.08))"}`,
+                      boxShadow: isDragging ? "0 8px 24px rgba(0,0,0,0.35)" : undefined,
                     }}>
-                    <span className="font-bebas text-lg text-cream/30 w-6">{pos + 1}</span>
-                    <div className="flex-1">
+                    <span className="font-bebas text-lg text-cream/30 w-6 pointer-events-none">{pos + 1}</span>
+                    <div className="flex-1 pointer-events-none">
                       <p className="text-cream text-sm font-semibold">{ev.event}</p>
                       {tlSubmitted && <p className="text-cream/40 text-xs mt-0.5">{ev.date}</p>}
                     </div>
                     {tlSubmitted && (
-                      <span className="text-lg flex items-center">
+                      <span className="text-lg flex items-center pointer-events-none">
                         {isCorrect ? (
                           <Check size={20} weight="bold" aria-hidden="true" />
                         ) : (
