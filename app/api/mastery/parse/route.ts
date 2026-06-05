@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
+import { z } from "zod";
 import { requireAuth } from "@/lib/api-auth";
 import { callAIForJson, LLM_MAIN, stripSentinels } from "@/lib/ai";
 
@@ -26,21 +27,30 @@ import { callAIForJson, LLM_MAIN, stripSentinels } from "@/lib/ai";
 
 const MAX_INPUT_BYTES = 8 * 1024; // 8 KB — plenty for pasted syllabi, rejects abuse
 
-interface ParsedBroad {
-  scope: "broad";
-  clarification: string;
-}
-interface ParsedSpecific {
-  scope: "specific";
-  title: string;
-  subtopics: {
-    slug: string;
-    name: string;
-    weight: number;
-    short_summary: string;
-  }[];
-}
-type ParsedClaude = ParsedBroad | ParsedSpecific;
+// Zod schema for Ninny's parse response (12-factor #4: schema-validate AI JSON
+// at the trust boundary). Discriminated on `scope` so a "broad" reply requires
+// `clarification` and a "specific" reply requires the full subtopic array.
+const ParsedBroadSchema = z.object({
+  scope: z.literal("broad"),
+  clarification: z.string().min(1),
+});
+const ParsedSpecificSchema = z.object({
+  scope: z.literal("specific"),
+  title: z.string().min(1),
+  subtopics: z.array(
+    z.object({
+      slug: z.string(),
+      name: z.string().min(1),
+      weight: z.number().min(0).max(1),
+      short_summary: z.string(),
+    }),
+  ).min(1),
+});
+const ParsedClaudeSchema = z.discriminatedUnion("scope", [
+  ParsedBroadSchema,
+  ParsedSpecificSchema,
+]);
+type ParsedClaude = z.infer<typeof ParsedClaudeSchema>;
 
 function normalizeForHash(s: string): string {
   return s.toLowerCase().trim().replace(/\s+/g, " ").replace(/[^\w\s-]/g, "");
@@ -131,7 +141,7 @@ Rules for SPECIFIC:
 <student-goal>
 ${cleaned}
 </student-goal>`,
-    });
+    }, ParsedClaudeSchema);
 
     // Validate shape defensively — Claude can drift.
     if (parsed.scope === "broad") {

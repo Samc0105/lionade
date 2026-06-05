@@ -153,13 +153,42 @@ export function extractJson<T>(text: string): T {
  * Convenience: call the model in JSON mode and return the parsed payload
  * alongside token telemetry. Used by every Mastery Mode route that expects
  * structured output.
+ *
+ * Pass a Zod schema as the second arg to validate the model's JSON before
+ * returning. Without a schema the function casts to <T> blindly — fast but
+ * trusts the model. With a schema, hallucinated/missing fields throw at the
+ * boundary instead of breaking downstream code in unhelpful ways.
+ *
+ * Inspired by 12-Factor Agents, Factor 4 (Tools Are Structured Outputs):
+ * own the parse + validate step, don't rely on TypeScript's runtime fiction.
  */
+import type { ZodType } from "zod";
+
 export async function callAIForJson<T>(
   opts: AiCallOptions,
+  schema?: ZodType<T>,
 ): Promise<{ json: T; raw: AiResult }> {
   const raw = await callAI({ ...opts, jsonMode: opts.jsonMode ?? true });
-  const json = extractJson<T>(raw.text);
-  return { json, raw };
+  const parsed = extractJson<unknown>(raw.text);
+  if (schema) {
+    const result = schema.safeParse(parsed);
+    if (!result.success) {
+      // Compact the Zod error so it's grep-able in logs without dumping the
+      // whole tree. Costs paid: still log the raw spend so the call shows up
+      // in cost tracking even though it's about to throw.
+      const issues = result.error.issues
+        .slice(0, 5)
+        .map((i) => `${i.path.join(".") || "<root>"}: ${i.message}`)
+        .join(" | ");
+      console.error(
+        "[callAIForJson] schema validation failed",
+        { model: raw.model, costMicroUsd: raw.costMicroUsd, issues },
+      );
+      throw new Error(`AI JSON schema mismatch: ${issues}`);
+    }
+    return { json: result.data, raw };
+  }
+  return { json: parsed as T, raw };
 }
 
 // ── Back-compat shims for files still importing the old names ───────────────

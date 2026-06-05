@@ -11,9 +11,33 @@
  */
 
 import crypto from "crypto";
+import { z } from "zod";
 import { supabaseAdmin } from "@/lib/supabase-server";
 import { callAIForJson, LLM_MAIN, stripSentinels } from "@/lib/ai";
 import type { Difficulty } from "@/lib/mastery";
+
+// 12-factor #4: validate AI structured output at the boundary. Both schemas
+// stay close to the consumers below so a prompt edit forces a schema update.
+const GeneratedPanelSchema = z.object({
+  title: z.string(),
+  tldr: z.string(),
+  bullets: z.array(z.string()).min(1),
+  mnemonic: z.string().nullable(),
+  commonPitfall: z.string().nullable(),
+});
+const PanelsResponseSchema = z.object({
+  panels: z.array(GeneratedPanelSchema).min(1),
+});
+const GeneratedQuestionSchema = z.object({
+  question: z.string().min(1),
+  options: z.tuple([z.string(), z.string(), z.string(), z.string()]),
+  correctIndex: z.number().int().min(0).max(3),
+  explanation: z.string(),
+  difficulty: z.enum(["easy", "medium", "hard"]),
+});
+const QuestionsResponseSchema = z.object({
+  questions: z.array(GeneratedQuestionSchema).min(1),
+});
 
 // ── Types ────────────────────────────────────────────────────────────────────
 export interface TeachingPanel {
@@ -195,7 +219,7 @@ async function generateTeachingPanels(args: {
   const safeSubtopicName = stripSentinels(args.subtopicName);
 
   try {
-    const { json, raw } = await callAIForJson<{ panels: GeneratedPanel[] }>({
+    const { json, raw } = await callAIForJson({
       model: LLM_MAIN,
       maxTokens: 2200,
       temperature: 0.5,
@@ -221,9 +245,9 @@ Return EXACTLY:
     { … }
   ]
 }`,
-    });
+    }, PanelsResponseSchema);
 
-    const panels = Array.isArray(json.panels) ? json.panels : [];
+    const panels = json.panels;
     const cleaned: GeneratedPanel[] = panels.slice(0, 3).map(p => ({
       title: String(p.title ?? "").slice(0, 100).trim() || "Untitled",
       tldr: String(p.tldr ?? "").slice(0, 240).trim(),
@@ -375,7 +399,7 @@ async function generateQuestions(args: {
   const safeSubtopicName = stripSentinels(args.subtopicName);
 
   try {
-    const { json, raw } = await callAIForJson<{ questions: GeneratedQuestion[] }>({
+    const { json, raw } = await callAIForJson({
       model: LLM_MAIN,
       maxTokens: 3500,
       temperature: 0.4,
@@ -406,9 +430,9 @@ Return EXACTLY:
     }
   ]
 }`,
-    });
+    }, QuestionsResponseSchema);
 
-    const raws = Array.isArray(json.questions) ? json.questions : [];
+    const raws = json.questions;
     const cleaned: GeneratedQuestion[] = [];
     for (const q of raws) {
       const options = Array.isArray(q.options) ? q.options.slice(0, 4).map(o => String(o ?? "")) : [];
