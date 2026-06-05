@@ -764,18 +764,54 @@ export default function PokerFaceView({
                 )}
               </>
             ) : (
-              <div className="flex flex-col items-center py-10 gap-3">
-                <p className="font-bebas text-xl text-cream/55 tracking-wider text-center">
-                  {round.presenter_username ?? "THE PRESENTER"} IS DECIDING...
+              // Cinematic "presenter is composing" state — matches the Sketchy
+              // "{drawer} is thinking" pattern with the dealing glow rings.
+              // Subtle pulse on the verb so the wait beat feels alive.
+              <div className="flex flex-col items-center py-10 gap-4 relative">
+                <div className="relative w-20 h-20 flex items-center justify-center">
+                  <span
+                    aria-hidden="true"
+                    className={`absolute inset-0 rounded-full ${reduced ? "" : "pa-deal-glow"}`}
+                    style={{
+                      background: `radial-gradient(circle, ${ACCENT}73 0%, transparent 70%)`,
+                    }}
+                  />
+                  <span
+                    aria-hidden="true"
+                    className={`absolute inset-2 rounded-full ${reduced ? "" : "pa-deal-glow"}`}
+                    style={{
+                      background: "radial-gradient(circle, rgba(168,85,247,0.35) 0%, transparent 70%)",
+                      animationDelay: "0.6s",
+                    }}
+                  />
+                  <div
+                    className="w-9 h-9 rounded-full border-2 animate-spin relative z-10"
+                    style={{ borderColor: `${ACCENT}40`, borderTopColor: ACCENT }}
+                  />
+                </div>
+                <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-cream/45">
+                  presenting next
                 </p>
-                <div
-                  className="w-10 h-10 rounded-full border-2 animate-spin"
-                  style={{ borderColor: `${ACCENT}33`, borderTopColor: ACCENT }}
-                />
-                <p className="text-cream/40 text-xs font-syne text-center max-w-xs">
+                <p className="font-bebas text-2xl text-cream tracking-wider text-center">
+                  {round.presenter_username ?? "the presenter"}{" "}
+                  <span className="text-cream/45">is composing a claim</span>
+                </p>
+                <span aria-hidden="true" className="inline-flex items-center gap-1">
+                  {[0, 1, 2].map((i) => (
+                    <span
+                      key={i}
+                      className={`w-1.5 h-1.5 rounded-full ${reduced ? "opacity-70" : "pa-ink-dot"}`}
+                      style={{
+                        background: ACCENT,
+                        animationDelay: `${i * 200}ms`,
+                      }}
+                    />
+                  ))}
+                </span>
+                <p className="text-cream/45 text-xs font-syne text-center max-w-xs italic">
                   {inperson
-                    ? "They're about to make their claim out loud. Watch their face."
-                    : "Truth or lie, you'll have to call it. Get ready."}
+                    ? "they're about to make their claim out loud. watch the face."
+                    : "truth or lie — you'll have to call it. get ready."}
                 </p>
               </div>
             )}

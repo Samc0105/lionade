@@ -509,7 +509,10 @@ export default function BluffView({
                 {detail.has_submitted ? "Submitted. You can edit until time's up." : "80 chars max."}
               </p>
               <p className="text-cream/40 text-xs font-syne">
-                {detail.submitted_count ?? 0} / {players.length} submitted
+                <span className="font-bebas text-sm text-cream/85 tabular-nums">
+                  <CountUp value={detail.submitted_count ?? 0} duration={500} />
+                </span>{" "}
+                / {players.length} submitted
               </p>
             </div>
             {/* Live "N of M answered" progress — fills as players submit */}

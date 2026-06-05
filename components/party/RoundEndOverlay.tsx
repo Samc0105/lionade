@@ -20,8 +20,9 @@
 //
 // Spec: docs/specs/sketchy-layout-design.md §2. Copy locked, no em-dashes.
 
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
+import Confetti from "@/components/Confetti";
 
 interface RoundEndOverlayProps {
   /** null = time's up (no one guessed). Object = winner attribution. */
@@ -46,6 +47,17 @@ export default function RoundEndOverlay({
 }: RoundEndOverlayProps) {
   void _startedAt; // accepted per spec; visual hold is owned upstream
   const reduced = useReducedMotion();
+  // Winner-state confetti — fires once on mount, then stays mounted as a
+  // no-op so a parent <AnimatePresence> can dismiss the overlay cleanly
+  // without canceling mid-flight particles. Time's-up state skips.
+  const [confettiTrigger, setConfettiTrigger] = useState(false);
+  useEffect(() => {
+    if (winner && !reduced) {
+      // Small delay so the avatar pop-in lands first, THEN the burst.
+      const t = setTimeout(() => setConfettiTrigger(true), 240);
+      return () => clearTimeout(t);
+    }
+  }, [winner, reduced]);
 
   // Esc to dismiss locally. Server phase still advances on its own clock —
   // this just lets a viewer pop the overlay off their screen early if they
@@ -86,6 +98,19 @@ export default function RoundEndOverlay({
       className="fixed inset-0 z-50 flex items-center justify-center bg-[#04080F]/82 backdrop-blur-md"
       style={{ pointerEvents: "auto" }}
     >
+      {/* Winner-only confetti burst, gold + purple palette, 80 particles
+          falling from the top edge. Time's-up state skips for tonal reasons. */}
+      {winner && (
+        <Confetti
+          trigger={confettiTrigger}
+          count={80}
+          origin="top"
+          duration={2200}
+          palette={["#FFD700", "#FDE68A", "#A855F7", "#E9D5FF"]}
+          onComplete={() => setConfettiTrigger(false)}
+        />
+      )}
+
       {/* Radial halo behind the card — purple for winner, orange for timeout. */}
       <div
         aria-hidden="true"
@@ -184,7 +209,10 @@ export default function RoundEndOverlay({
           {winner ? `ROUND WON BY ${winnerName.toUpperCase()}` : "TIME'S UP"}
         </motion.h2>
 
-        <motion.p
+        {/* Word reveal — each character types in with a tiny stagger so the
+            answer lands like a stamp, not a static label. Reduced motion
+            renders the full word at once. */}
+        <motion.div
           initial={reduced ? { opacity: 0 } : { opacity: 0, y: 6 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{
@@ -192,10 +220,40 @@ export default function RoundEndOverlay({
             delay: reduced ? 0 : 0.26,
             ease: [0.16, 1, 0.3, 1],
           }}
-          className="font-dm-mono text-sm text-cream/60"
+          className="font-dm-mono text-sm text-cream/60 inline-flex items-center gap-1"
+          aria-label={`word: ${word}`}
         >
-          word: {word}
-        </motion.p>
+          <span className="text-cream/40">word:</span>
+          {reduced ? (
+            <span className="font-bebas text-base tracking-[0.18em] text-cream/90">
+              {word.toUpperCase()}
+            </span>
+          ) : (
+            <span className="inline-flex items-center gap-[1px]" aria-hidden="true">
+              {Array.from(word.toUpperCase()).map((c, i) => (
+                <motion.span
+                  key={`${c}-${i}`}
+                  initial={{ opacity: 0, y: 4, scale: 0.7 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  transition={{
+                    duration: 0.18,
+                    delay: 0.32 + i * 0.06,
+                    ease: [0.16, 1, 0.3, 1],
+                  }}
+                  className="font-bebas text-base tracking-[0.05em] text-cream/95 inline-block"
+                  style={{
+                    color: winner ? "#FFD700" : "#FCA5A5",
+                    textShadow: winner
+                      ? "0 0 8px rgba(255,215,0,0.45)"
+                      : "0 0 6px rgba(252,165,165,0.35)",
+                  }}
+                >
+                  {c === " " ? " " : c}
+                </motion.span>
+              ))}
+            </span>
+          )}
+        </motion.div>
 
         {/* Footer strip with two flanking shimmer dots. */}
         <motion.div
