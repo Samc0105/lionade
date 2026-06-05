@@ -7,41 +7,50 @@
 // spec). The chosen color flows out through onColorChange — the single color
 // SOURCE; the canvas stroke-sync logic is untouched.
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export type SketchTool = "brush" | "eraser";
 
+// Quick-row swatches. 12 colors picked to read well on the dark canvas bg
+// (#0a0a14). Pure black was dropped — invisible on the canvas — and replaced
+// with a slate that still reads as "dark." Added pink, cyan, brown, light gray
+// to fill the gaps in the original 8 (the missing colors Sam called out).
 export const SKETCH_COLORS = [
   "#FFFFFF", // white
   "#F87171", // red
+  "#F472B6", // pink
   "#FB923C", // orange
   "#FACC15", // yellow
   "#4ADE80", // green
+  "#22D3EE", // cyan
   "#60A5FA", // blue
   "#A78BFA", // purple
-  "#0A0A0A", // black (for outlines on light backgrounds)
+  "#92400E", // brown
+  "#9CA3AF", // gray
+  "#475569", // slate (the dark-but-visible tier — was #0A0A0A black, unusable)
 ] as const;
 
 // Richer palette for the expanded picker — a spectrum sweep across hues plus a
-// neutral ramp, so the drawer can pick accurate colors without leaving the app.
-// Quick swatches above stay for speed; this is the "roulette" overflow.
+// neutral ramp, sized for readability on dark canvas. The deepest tier of
+// every hue was dropped (it disappeared on #0a0a14); medium and bright tiers
+// retained + extra mid-tone neutrals + a wider skin-tone ramp added.
 export const SKETCH_PALETTE = [
   // reds / pinks
-  "#FCA5A5", "#EF4444", "#B91C1C", "#F472B6", "#EC4899", "#BE185D",
+  "#FECACA", "#FCA5A5", "#EF4444", "#F472B6", "#EC4899", "#BE185D",
   // oranges / ambers
-  "#FDBA74", "#F97316", "#C2410C", "#FCD34D", "#F59E0B", "#B45309",
+  "#FED7AA", "#FDBA74", "#F97316", "#FDE68A", "#FCD34D", "#F59E0B",
   // yellows / limes
-  "#FEF08A", "#EAB308", "#A3E635", "#84CC16", "#4D7C0F", "#365314",
+  "#FEF08A", "#FACC15", "#EAB308", "#BEF264", "#A3E635", "#84CC16",
   // greens / teals
-  "#86EFAC", "#22C55E", "#15803D", "#5EEAD4", "#14B8A6", "#0F766E",
+  "#BBF7D0", "#86EFAC", "#22C55E", "#A7F3D0", "#5EEAD4", "#14B8A6",
   // blues / cyans
-  "#7DD3FC", "#0EA5E9", "#2563EB", "#1E3A8A", "#38BDF8", "#0284C7",
+  "#A5F3FC", "#22D3EE", "#0EA5E9", "#BFDBFE", "#60A5FA", "#2563EB",
   // purples / violets
-  "#C4B5FD", "#8B5CF6", "#6D28D9", "#D8B4FE", "#A855F7", "#7E22CE",
-  // browns / skin / neutrals
-  "#92400E", "#D2691E", "#E8BEAC", "#C68642", "#8D5524", "#3F2A1D",
-  // grays / mono ramp
-  "#FFFFFF", "#D1D5DB", "#9CA3AF", "#6B7280", "#374151", "#0A0A0A",
+  "#DDD6FE", "#A78BFA", "#8B5CF6", "#F0ABFC", "#D8B4FE", "#A855F7",
+  // skin tones (warm + cool ramp)
+  "#FFE4C4", "#F1C27D", "#E0AC69", "#C68642", "#8D5524", "#5C3317",
+  // grays / mono ramp (cropped to readable tiers)
+  "#FFFFFF", "#E5E7EB", "#D1D5DB", "#9CA3AF", "#6B7280", "#475569",
 ] as const;
 
 export const SKETCH_SIZES = [3, 8, 16] as const;
@@ -70,6 +79,19 @@ export default function SketchToolbar({
   canUndo,
 }: Props) {
   const [pickerOpen, setPickerOpen] = useState(false);
+  // Clear-canvas tap-to-confirm. First tap arms the button (red state + new
+  // label), second tap within 2s actually clears. Auto-disarms after 2s so
+  // a stray first tap doesn't sit primed forever. Common pattern for
+  // destructive single-tap actions on touch surfaces — a full modal would
+  // break drawing flow.
+  const [clearArmed, setClearArmed] = useState(false);
+  const clearTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => {
+    return () => {
+      if (clearTimerRef.current) clearTimeout(clearTimerRef.current);
+    };
+  }, []);
+
   const quickColors = SKETCH_COLORS as readonly string[];
   // The active brush color is "custom" when it's not one of the quick swatches.
   const isCustomColor = tool === "brush" && !quickColors.includes(color);
@@ -77,6 +99,18 @@ export default function SketchToolbar({
   function chooseColor(c: string) {
     onColorChange(c);
     onToolChange("brush");
+  }
+
+  function handleClearTap() {
+    if (!clearArmed) {
+      setClearArmed(true);
+      if (clearTimerRef.current) clearTimeout(clearTimerRef.current);
+      clearTimerRef.current = setTimeout(() => setClearArmed(false), 2000);
+      return;
+    }
+    if (clearTimerRef.current) clearTimeout(clearTimerRef.current);
+    setClearArmed(false);
+    onClear();
   }
 
   return (
@@ -89,7 +123,7 @@ export default function SketchToolbar({
       }}
     >
       {/* Quick swatches (fast path) */}
-      <div className="flex items-center gap-1.5">
+      <div className="flex items-center gap-1.5 flex-wrap">
         {SKETCH_COLORS.map((c) => {
           const active = color === c && tool === "brush";
           return (
@@ -97,11 +131,10 @@ export default function SketchToolbar({
               key={c}
               aria-label={`Color ${c}`}
               onClick={() => chooseColor(c)}
-              className={`w-7 h-7 rounded-full transition-transform active:scale-90 ${active ? "scale-110" : "hover:scale-105"}`}
+              className={`w-7 h-7 rounded-full transition-transform active:scale-90 ${active ? "scale-110 pa-active-swatch" : "hover:scale-105"}`}
               style={{
                 background: c,
                 border: active ? "2px solid #FFD700" : "1px solid rgba(255,255,255,0.2)",
-                boxShadow: active ? "0 0 10px rgba(255,215,0,0.5)" : "none",
               }}
             />
           );
@@ -114,15 +147,14 @@ export default function SketchToolbar({
           aria-label="More colors"
           aria-expanded={pickerOpen}
           onClick={() => setPickerOpen((o) => !o)}
-          className={`w-7 h-7 rounded-full flex items-center justify-center transition-transform active:scale-90 ${isCustomColor || pickerOpen ? "scale-110" : "hover:scale-105"}`}
+          className={`w-7 h-7 rounded-full flex items-center justify-center transition-transform active:scale-90 ${isCustomColor || pickerOpen ? "scale-110 pa-active-swatch" : "hover:scale-105"}`}
           style={{
             // Conic gradient = the "color wheel" hint; if a custom color is
             // active, ring it in gold and show it as the center.
             background: isCustomColor
               ? color
-              : "conic-gradient(from 0deg, #F87171, #FB923C, #FACC15, #4ADE80, #60A5FA, #A78BFA, #F472B6, #F87171)",
+              : "conic-gradient(from 0deg, #F87171, #FB923C, #FACC15, #4ADE80, #22D3EE, #60A5FA, #A78BFA, #F472B6, #F87171)",
             border: isCustomColor || pickerOpen ? "2px solid #FFD700" : "1px solid rgba(255,255,255,0.25)",
-            boxShadow: isCustomColor || pickerOpen ? "0 0 10px rgba(255,215,0,0.5)" : "none",
           }}
         >
           {!isCustomColor && (
@@ -147,7 +179,7 @@ export default function SketchToolbar({
           <p className="font-bebas text-[11px] tracking-[0.25em] text-cream/55 mb-2">
             COLOR ROULETTE
           </p>
-          <div className="grid grid-cols-8 gap-1.5">
+          <div className="grid grid-cols-6 gap-1.5">
             {SKETCH_PALETTE.map((c, i) => {
               const active = color.toLowerCase() === c.toLowerCase() && tool === "brush";
               return (
@@ -155,11 +187,10 @@ export default function SketchToolbar({
                   key={`${c}-${i}`}
                   aria-label={`Color ${c}`}
                   onClick={() => chooseColor(c)}
-                  className={`w-6 h-6 rounded-md transition-transform active:scale-90 ${active ? "scale-110" : "hover:scale-110"}`}
+                  className={`w-7 h-7 rounded-md transition-transform active:scale-90 ${active ? "scale-110 pa-active-swatch" : "hover:scale-110"}`}
                   style={{
                     background: c,
                     border: active ? "2px solid #FFD700" : "1px solid rgba(255,255,255,0.14)",
-                    boxShadow: active ? "0 0 8px rgba(255,215,0,0.55)" : "none",
                   }}
                 />
               );
@@ -241,18 +272,20 @@ export default function SketchToolbar({
         UNDO
       </button>
 
-      {/* Clear */}
+      {/* Clear — tap-to-confirm pattern. First tap arms (red + label change),
+          second tap within 2s wipes. Auto-disarms after 2s. */}
       <button
-        aria-label="Clear canvas"
-        onClick={onClear}
+        aria-label={clearArmed ? "Tap again to confirm clearing the canvas" : "Clear canvas"}
+        onClick={handleClearTap}
         className="px-3 py-1.5 rounded-lg font-bebas text-xs tracking-wider transition-all active:scale-95"
         style={{
-          background: "rgba(239,68,68,0.1)",
-          border: "1px solid rgba(239,68,68,0.3)",
-          color: "#FCA5A5",
+          background: clearArmed ? "rgba(239,68,68,0.28)" : "rgba(239,68,68,0.1)",
+          border: clearArmed ? "1px solid rgba(239,68,68,0.7)" : "1px solid rgba(239,68,68,0.3)",
+          color: clearArmed ? "#FFFFFF" : "#FCA5A5",
+          boxShadow: clearArmed ? "0 0 14px rgba(239,68,68,0.45)" : "none",
         }}
       >
-        CLEAR
+        {clearArmed ? "TAP TO CONFIRM" : "CLEAR"}
       </button>
     </div>
   );

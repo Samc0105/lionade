@@ -4326,6 +4326,15 @@ html.light .space-bg-container { display: none; }
 }
 .pa-deal-glow { animation: pa-deal-glow 1.8s ease-out infinite; }
 
+/* Active color swatch in the SketchToolbar: gentle gold halo pulse so the
+   drawer always knows which color is loaded without scanning the row.
+   ~2.4s loop, shadow-only so it doesn't fight the existing scale-110. */
+@keyframes pa-active-swatch {
+  0%, 100% { box-shadow: 0 0 8px rgba(255,215,0,0.4); }
+  50% { box-shadow: 0 0 14px rgba(255,215,0,0.75); }
+}
+.pa-active-swatch { animation: pa-active-swatch 2.4s ease-in-out infinite; }
+
 /* The single reduced-motion guard for the WHOLE party block.
    Disables motion but leaves final visual states intact (opacity 1, no shift). */
 @media (prefers-reduced-motion: reduce) {
@@ -4336,7 +4345,7 @@ html.light .space-bg-container { display: none; }
   .pa-game-card, .pa-game-card:hover,
   .pa-tile-flip, .pa-card-flip-3d,
   .pa-canvas-stamp, .pa-canvas-corner,
-  .pa-word-breathe, .pa-panic-vignette, .pa-deal-glow {
+  .pa-word-breathe, .pa-panic-vignette, .pa-deal-glow, .pa-active-swatch {
     animation: none !important;
     transition: none !important;
   }
