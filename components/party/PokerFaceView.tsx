@@ -22,7 +22,9 @@ import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { supabase } from "@/lib/supabase";
 import { apiGet, apiPost } from "@/lib/api-client";
 import PartyScoreboard from "./PartyScoreboard";
+import IntermissionCard from "./IntermissionCard";
 import NinnyHostBubble from "./NinnyHostBubble";
+import CountUp from "@/components/CountUp";
 import { pokerFaceChannel, POKERFACE_EVENTS } from "@/lib/party/realtime-channels";
 import { subscribeResilient } from "@/lib/realtime-resilient";
 import PostRoundVoteCard from "./PostRoundVoteCard";
@@ -457,6 +459,19 @@ export default function PokerFaceView({
   }, [isHost, onReturnToLobby]);
 
   if (phase === "loading" || !detail) {
+    // Intermission flavor when any player has scored — running scoreboard +
+    // intermission framing. Falls back to the first-round cinematic loader.
+    if (players.some((p) => (p.score ?? 0) > 0)) {
+      return (
+        <IntermissionCard
+          players={players}
+          meUserId={meUserId}
+          accent={ACCENT}
+          headline="NEXT ROUND IS LOADING"
+          sub="picking a presenter, shuffling the deck"
+        />
+      );
+    }
     // Cinematic loading — same template as Sketchy / Bluff, electric-blue
     // flavored to match Poker Face's ACCENT.
     return (
@@ -962,6 +977,47 @@ export default function PokerFaceView({
                 The real fact: <span className="text-cream/95">{round.reveal.card_fact}</span>
               </p>
             </div>
+
+            {/* Presenter-only verdict line — "YOU FOOLED N OF M" / "EVERYONE
+                READ YOU." Shows above the calls list so the presenter knows
+                their result at a glance before scanning the per-caller rows. */}
+            {isPresenter && (() => {
+              const total = round.reveal.calls.length;
+              const fooled = round.reveal.calls.filter((c) => !c.correct).length;
+              if (total === 0) return null;
+              const allFooled = fooled === total;
+              const noneFooled = fooled === 0;
+              return (
+                <div
+                  className={`rounded-xl px-4 py-2.5 text-center ${reduced ? "" : "pa-pop-in"}`}
+                  style={{
+                    background: allFooled
+                      ? "linear-gradient(135deg, rgba(255,215,0,0.22) 0%, rgba(184,150,12,0.08) 100%)"
+                      : noneFooled
+                        ? "linear-gradient(135deg, rgba(239,68,68,0.18) 0%, rgba(168,85,247,0.06) 100%)"
+                        : "linear-gradient(135deg, rgba(168,85,247,0.18) 0%, rgba(99,102,241,0.06) 100%)",
+                    border: allFooled
+                      ? "1px solid rgba(255,215,0,0.55)"
+                      : noneFooled
+                        ? "1px solid rgba(239,68,68,0.45)"
+                        : "1px solid rgba(168,85,247,0.4)",
+                  }}
+                >
+                  <span
+                    className="font-bebas text-base tracking-wider"
+                    style={{
+                      color: allFooled ? "#FDE68A" : noneFooled ? "#FCA5A5" : "#E9D5FF",
+                    }}
+                  >
+                    {allFooled
+                      ? `CLEAN SWEEP · FOOLED ALL ${total}`
+                      : noneFooled
+                        ? "EVERYONE READ YOU"
+                        : <>YOU FOOLED <CountUp value={fooled} duration={700} /> OF {total}</>}
+                  </span>
+                </div>
+              );
+            })()}
 
             {/* Who called what — rows deal in staggered; correct reads flash green */}
             <div className="space-y-2">

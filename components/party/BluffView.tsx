@@ -15,6 +15,7 @@ import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { supabase } from "@/lib/supabase";
 import { apiGet, apiPost } from "@/lib/api-client";
 import PartyScoreboard from "./PartyScoreboard";
+import IntermissionCard from "./IntermissionCard";
 import NinnyHostBubble from "./NinnyHostBubble";
 import CountUp from "@/components/CountUp";
 import { bluffChannel, BLUFF_EVENTS, roomChannel, PARTY_EVENTS } from "@/lib/party/realtime-channels";
@@ -315,6 +316,19 @@ export default function BluffView({
   })), [players]);
 
   if (phase === "loading" || !detail) {
+    // Intermission flavor when any player has scored — running scoreboard +
+    // intermission framing. Falls back to the first-round cinematic loader.
+    if (players.some((p) => (p.score ?? 0) > 0)) {
+      return (
+        <IntermissionCard
+          players={players}
+          meUserId={meUserId}
+          accent="#FFD700"
+          headline="NEXT ROUND IS LOADING"
+          sub="queueing trivia, brewing fakes"
+        />
+      );
+    }
     // Cinematic loading — same shape as the Sketchy intro, gold-flavored to
     // match Bluff's accent. Two pulsing radial glows (gold primary + purple
     // accent) staggered behind the spinner.

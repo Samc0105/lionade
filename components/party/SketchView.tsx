@@ -20,6 +20,7 @@ import type { RealtimeChannel } from "@supabase/supabase-js";
 import { apiGet, apiPost } from "@/lib/api-client";
 import SketchCanvas from "./SketchCanvas";
 import SketchToolbar, { SKETCH_COLORS, SKETCH_SIZES, type SketchTool } from "./SketchToolbar";
+import IntermissionCard from "./IntermissionCard";
 import PartyScoreboard from "./PartyScoreboard";
 import NinnyHostBubble from "./NinnyHostBubble";
 import RoundEndOverlay from "./RoundEndOverlay";
@@ -1086,6 +1087,21 @@ export default function SketchView({
   }, [mask, revealed, isDrawer, lockedWord]);
 
   if (phase === "loading") {
+    // Intermission flavor: if anyone has scored already, we're between rounds,
+    // not on first round — show the running scoreboard. Otherwise fall back to
+    // the cinematic first-round loader.
+    const anyScored = players.some((p) => (p.score ?? 0) > 0);
+    if (anyScored) {
+      return (
+        <IntermissionCard
+          players={players}
+          meUserId={meUserId}
+          accent="#A855F7"
+          headline="NEXT ROUND IS LOADING"
+          sub="shuffling subjects, picking a drawer"
+        />
+      );
+    }
     return (
       <div className="flex flex-col items-center py-20 gap-5 relative">
         {/* Soft purple glow pulse — replaces the bare spinner with something
