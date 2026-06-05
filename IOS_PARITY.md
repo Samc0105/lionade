@@ -7,6 +7,25 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 
 ---
 
+## 2026-06-05 — P0 trust-gap pass: server-backed Notifications + Privacy + Delete Account + Subjects gate removed (web-only-no-row)
+
+**Status:** 🚫 N/A (deliberate no-row decision — these are fixes to existing web surfaces that the iOS app already implements per its own 2026-05-23 "Profile tab → full settings hub" entry below).
+
+Per [IOS_PARITY 2026-05-23 Profile (iOS) entry], the iOS Profile tab already mirrors web's `/settings` and shares "the same Supabase `user_preferences` row + AsyncStorage keys" for notification + privacy toggles. **Verify on the next iOS sweep:** the IOS_PARITY claim was made BEFORE this web-side migration existed, so it's possible iOS was also localStorage-only (just AsyncStorage on its side) and the "shared row" claim was aspirational. When `vp-ios` next touches the Profile tab:
+
+1. Confirm iOS Profile Notifications + Privacy hit `/api/user/preferences` (GET + PATCH).
+2. Confirm iOS Privacy "Visibility: private" writes through `/api/user/profile-visibility` so iOS users also disappear from server-filtered search + leaderboard.
+3. Confirm iOS Delete Account hits `DELETE /api/user/account?confirm=<email>` (modal confirmation pattern is platform-agnostic — typed-email match against `auth.email`).
+4. Confirm iOS shop discovery + iOS leaderboard ladders also benefit from the server-side `profile_visibility != 'private'` filter (they should automatically, since both surfaces go through the same `lib/db.ts` helpers / `/api/social/search` route — but iOS reads them via the `@lionade/core` shared API client, worth a quick check).
+
+**Subjects gate removal (`/learn`)** — pure web cleanup. The iOS Learn tab doesn't (to current knowledge) have an equivalent "Coming Soon" Subjects affordance, so there's no symmetric change to make. If the iOS Learn tab later adds a Subjects row, it should `Link` to the equivalent `/learn/paths` screen directly.
+
+**Migration:** `supabase/migrations/20260605142539_trust_gaps_visibility_prefs.sql` adds the `profile_visibility` column on the remote project — iOS reads/writes through the API layer, so no native data-layer change required; the column shows up in the typed responses automatically.
+
+**Files touched (web):** `supabase/migrations/20260605142539_trust_gaps_visibility_prefs.sql`, `lib/db.ts`, `app/api/social/search/route.ts`, `app/api/user/preferences/route.ts` (new), `app/api/user/profile-visibility/route.ts` (new), `app/api/user/account/route.ts` (new), `app/profile/page.tsx`, `app/settings/page.tsx`, `app/learn/page.tsx`.
+
+---
+
 ## 2026-06-05 — Sketchy word-picker polish (web-only, no iOS row)
 
 **Status:** 🚫 N/A (deliberate no-row decision — pure visual polish on a web-only feature).

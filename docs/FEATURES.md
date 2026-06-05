@@ -82,6 +82,8 @@
 
 ## Profile & Badges
 - **Profile page** with overview, badges, stats, quiz history — 2026-02-20
+- **Profile Notifications + Privacy server-backed** — 7 notification toggles (Daily Reminder, Duel Challenges, Weekly Report, Badge Unlocked, Streak at Risk, New Features, Promotions) + 4 privacy sub-flags (Show on Leaderboard, Show Streak, Show Fangs, Allow Duels From: everyone/nobody) persist to `profiles.preferences` JSONB via PATCH `/api/user/preferences`. Profile Visibility (public/private) writes the dedicated `profiles.profile_visibility` column via PATCH `/api/user/profile-visibility`; private profiles are excluded from social search + all three leaderboard ladders server-side. — 2026-06-05
+- **Delete Account** — Profile > Security > Danger Zone. Type-your-email confirmation modal, server cascades through profiles + every FK via `supabase.auth.admin.deleteUser`. Demo account blocked. — 2026-06-05
 - **Badge collection page** — 2026-03-06
 - **Avatar picker** (Create/Emoji/Color) — 2026-03-01
 - **Username system** (unique check, one change per year) — 2026-03-01

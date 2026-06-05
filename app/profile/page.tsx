@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
+import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth";
 import { useUserStats, mutateUserStats } from "@/lib/hooks";
 import { supabase } from "@/lib/supabase";
@@ -16,7 +17,8 @@ import BackButton from "@/components/BackButton";
 import BadgeCard from "@/components/BadgeCard";
 import Link from "next/link";
 import { cdnUrl } from "@/lib/cdn";
-import { apiPost } from "@/lib/api-client";
+import { apiPost, apiPatch, apiDelete, apiGet } from "@/lib/api-client";
+import { toastError, toastSuccess } from "@/lib/toast";
 import {
   ChartBar,
   PencilSimple,
@@ -1060,19 +1062,89 @@ function PersonalizationSection({ user }: SharedProps) {
 }
 
 // ── PRIVACY ────────────────────────────────────────────
-function PrivacySection({ user, quizHistory, activity }: SharedProps) {
-  const [visibility,     setVisibility]     = useState("public");
-  const [onLeaderboard,  setOnLeaderboard]  = useState(true);
-  const [showStreak,     setShowStreak]     = useState(true);
-  const [showCoins,      setShowCoins]      = useState(true);
-  const [duelFrom,       setDuelFrom]       = useState("everyone");
-  const [saved, setSaved] = useState(false);
+// P0 trust-gap fix 2026-06-05: prefs are now server-backed.
+// - profile_visibility (public/private) writes to the dedicated column
+//   via PATCH /api/user/profile-visibility (enforced by social/search +
+//   the leaderboard ladders).
+// - The four sub-flags (show_on_leaderboard, show_streak, show_coins,
+//   duel_from) live in profiles.preferences.privacy and write through
+//   PATCH /api/user/preferences.
+// localStorage cache is kept ONLY as an optimistic-render hint so the
+// page doesn't flash defaults before the GET lands; the server is the
+// source of truth.
+const PRIVACY_CACHE_KEY = "privacySettings.v2";
 
-  const save = () => {
-    const settings = { visibility, onLeaderboard, showStreak, showCoins, duelFrom };
-    localStorage.setItem("privacySettings", JSON.stringify(settings));
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
+function PrivacySection({ user, quizHistory, activity }: SharedProps) {
+  const [visibility,    setVisibility]    = useState<"public"|"private">("public");
+  const [onLeaderboard, setOnLeaderboard] = useState(true);
+  const [showStreak,    setShowStreak]    = useState(true);
+  const [showCoins,     setShowCoins]     = useState(true);
+  const [duelFrom,      setDuelFrom]      = useState<"everyone"|"nobody">("everyone");
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [hydrated, setHydrated] = useState(false);
+
+  // Optimistic cache pre-paint, then authoritative GET from the server.
+  useEffect(() => {
+    try {
+      const raw = typeof window !== "undefined" ? localStorage.getItem(PRIVACY_CACHE_KEY) : null;
+      if (raw) {
+        const c = JSON.parse(raw);
+        if (c.visibility === "public" || c.visibility === "private") setVisibility(c.visibility);
+        if (typeof c.onLeaderboard === "boolean") setOnLeaderboard(c.onLeaderboard);
+        if (typeof c.showStreak    === "boolean") setShowStreak(c.showStreak);
+        if (typeof c.showCoins     === "boolean") setShowCoins(c.showCoins);
+        if (c.duelFrom === "everyone" || c.duelFrom === "nobody") setDuelFrom(c.duelFrom);
+      }
+    } catch { /* ignore corrupt cache */ }
+
+    let cancelled = false;
+    apiGet<{
+      profile_visibility: "public" | "private";
+      privacy: { show_on_leaderboard: boolean; show_streak: boolean; show_coins: boolean; duel_from: "everyone"|"nobody" };
+    }>("/api/user/preferences").then(res => {
+      if (cancelled || !res.ok || !res.data) return;
+      const { profile_visibility, privacy } = res.data;
+      setVisibility(profile_visibility === "private" ? "private" : "public");
+      setOnLeaderboard(privacy.show_on_leaderboard);
+      setShowStreak(privacy.show_streak);
+      setShowCoins(privacy.show_coins);
+      setDuelFrom(privacy.duel_from);
+      setHydrated(true);
+    });
+    return () => { cancelled = true; };
+  }, []);
+
+  const save = async () => {
+    setSaving(true);
+    try {
+      // Fire both updates in parallel — visibility is a column, the
+      // sub-flags are JSONB. Both endpoints are idempotent.
+      const [vRes, pRes] = await Promise.all([
+        apiPatch<{ profile_visibility: string }>("/api/user/profile-visibility", { visibility }),
+        apiPatch<{ privacy: unknown }>("/api/user/preferences", {
+          privacy: {
+            show_on_leaderboard: onLeaderboard,
+            show_streak:         showStreak,
+            show_coins:          showCoins,
+            duel_from:           duelFrom,
+          },
+        }),
+      ]);
+      if (!vRes.ok || !pRes.ok) {
+        toastError((vRes.error || pRes.error) ?? "Couldn't save your privacy settings");
+        return;
+      }
+      try {
+        localStorage.setItem(PRIVACY_CACHE_KEY, JSON.stringify({
+          visibility, onLeaderboard, showStreak, showCoins, duelFrom,
+        }));
+      } catch { /* ignore quota errors */ }
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2000);
+    } finally {
+      setSaving(false);
+    }
   };
 
   const downloadData = () => {
@@ -1097,20 +1169,25 @@ function PrivacySection({ user, quizHistory, activity }: SharedProps) {
         <div>
           <label className={labelCls}>Profile Visibility</label>
           <div className="flex gap-2">
-            {["public","friends","private"].map(v => (
+            {(["public","private"] as const).map(v => (
               <button key={v} onClick={() => setVisibility(v)}
                 className={`flex-1 py-2.5 rounded-xl border text-sm font-bold capitalize transition-all
                   ${visibility === v ? "border-electric bg-electric/20 text-electric" : "border-white/10 text-cream/50 hover:border-white/20"}`}>
-                <span className="inline-flex items-center gap-1.5">{v === "public" ? <Globe size={14} weight="regular" aria-hidden="true" /> : v === "friends" ? <Users size={14} weight="regular" aria-hidden="true" /> : <Lock size={14} weight="regular" aria-hidden="true" />} {v}</span>
+                <span className="inline-flex items-center gap-1.5">{v === "public" ? <Globe size={14} weight="regular" aria-hidden="true" /> : <Lock size={14} weight="regular" aria-hidden="true" />} {v}</span>
               </button>
             ))}
           </div>
+          <p className="text-cream/40 text-xs mt-2">
+            {visibility === "private"
+              ? "Private profiles are hidden from search and leaderboards."
+              : "Public profiles are discoverable in search and on the leaderboard."}
+          </p>
         </div>
 
         {[
           { label: "Show on Leaderboard",   sub: "Appear in public rankings",                 val: onLeaderboard,  set: setOnLeaderboard },
           { label: "Show Streak Publicly",  sub: "Others can see your streak count",          val: showStreak,     set: setShowStreak },
-          { label: "Show Coin Balance",     sub: "Others can see your total coins",           val: showCoins,      set: setShowCoins },
+          { label: "Show Fangs Balance",    sub: "Others can see your total Fangs",           val: showCoins,      set: setShowCoins },
         ].map(item => (
           <div key={item.label} className="flex items-center justify-between py-2 border-b border-electric/10 last:border-0">
             <div>
@@ -1124,7 +1201,7 @@ function PrivacySection({ user, quizHistory, activity }: SharedProps) {
         <div>
           <label className={labelCls}>Allow Duel Challenges From</label>
           <div className="flex gap-2">
-            {["everyone","nobody"].map(v => (
+            {(["everyone","nobody"] as const).map(v => (
               <button key={v} onClick={() => setDuelFrom(v)}
                 className={`flex-1 py-2.5 rounded-xl border text-sm font-bold capitalize transition-all
                   ${duelFrom === v ? "border-electric bg-electric/20 text-electric" : "border-white/10 text-cream/50 hover:border-white/20"}`}>
@@ -1136,10 +1213,13 @@ function PrivacySection({ user, quizHistory, activity }: SharedProps) {
       </Card>
 
       {saved && <SaveToast msg="Privacy settings saved!" />}
-      <button onClick={save}
-        className="w-full py-3.5 rounded-xl font-bold text-sm"
+      <button onClick={save} disabled={saving || !hydrated}
+        className="w-full py-3.5 rounded-xl font-bold text-sm disabled:opacity-60"
         style={{ background: "linear-gradient(135deg, #F0B429 0%, #B8960C 50%, #F0B429 100%)", color: "#04080F", boxShadow: "0 4px 15px rgba(240,180,41,0.3)" }}>
-        <span className="inline-flex items-center gap-2"><FloppyDisk size={16} weight="regular" aria-hidden="true" /> Save Privacy Settings</span>
+        <span className="inline-flex items-center gap-2">
+          <FloppyDisk size={16} weight="regular" aria-hidden="true" />
+          {saving ? "Saving..." : "Save Privacy Settings"}
+        </span>
       </button>
 
       <Card>
@@ -1147,7 +1227,7 @@ function PrivacySection({ user, quizHistory, activity }: SharedProps) {
         <p className="text-cream/40 text-sm mb-4">Download a copy of everything Lionade has stored about you</p>
         <button onClick={downloadData}
           className="px-6 py-2.5 rounded-xl border border-electric/40 text-electric text-sm font-bold hover:bg-electric/10 transition-all">
-          ⬇ Download My Data (JSON)
+          <span className="inline-flex items-center gap-2">Download My Data (JSON)</span>
         </button>
       </Card>
     </div>
@@ -1161,6 +1241,8 @@ function SecuritySection({ user }: SharedProps) {
   const [confirmPw, setConfirmPw] = useState("");
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState<{msg: string; err: boolean}|null>(null);
+  // P0 trust-gap fix 2026-06-05: Delete Account modal state.
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const pwChecks = {
     length:  newPw.length >= 8,
@@ -1264,10 +1346,116 @@ function SecuritySection({ user }: SharedProps) {
       <Card>
         <h3 className="font-bebas text-lg text-red-400 tracking-wider mb-2">DANGER ZONE</h3>
         <p className="text-cream/40 text-sm mb-4">These actions are permanent and cannot be undone</p>
-        <button className="px-6 py-2.5 rounded-xl border border-red-400/30 text-red-400 text-sm font-bold hover:bg-red-400/10 transition-all">
+        <button onClick={() => setShowDeleteModal(true)}
+          className="px-6 py-2.5 rounded-xl border border-red-400/30 text-red-400 text-sm font-bold hover:bg-red-400/10 transition-all">
           <span className="inline-flex items-center gap-2"><Trash size={16} weight="regular" aria-hidden="true" /> Delete Account</span>
         </button>
       </Card>
+
+      {showDeleteModal && (
+        <DeleteAccountModal
+          email={user.email ?? ""}
+          onClose={() => setShowDeleteModal(false)}
+        />
+      )}
+    </div>
+  );
+}
+
+// ── Delete-account confirmation modal ────────────────
+// P0 trust-gap fix 2026-06-05: the Delete Account button used to render
+// with no onClick. Now it opens this modal; the user must type their
+// account email to confirm, then DELETE /api/user/account fires.
+function DeleteAccountModal({ email, onClose }: { email: string; onClose: () => void }) {
+  const { logout } = useAuth();
+  const router = useRouter();
+  const [confirmText, setConfirmText] = useState("");
+  const [deleting, setDeleting] = useState(false);
+  const emailLc = email.trim().toLowerCase();
+  const matches = confirmText.trim().toLowerCase() === emailLc && emailLc.length > 0;
+
+  // Escape closes
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape" && !deleting) onClose(); };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [deleting, onClose]);
+
+  const handleDelete = async () => {
+    if (!matches) return;
+    setDeleting(true);
+    try {
+      const res = await apiDelete<{ ok: boolean }>(
+        `/api/user/account?confirm=${encodeURIComponent(emailLc)}`,
+      );
+      if (!res.ok) {
+        toastError(res.error ?? "Couldn't delete your account. Try again or contact support.");
+        setDeleting(false);
+        return;
+      }
+      toastSuccess("Your account has been deleted.");
+      // Sign out + bounce to landing. The server has already wiped the
+      // auth row, so the client session below is just for clean state.
+      try { await logout(); } catch { /* ignore — auth row is gone */ }
+      router.push("/");
+    } catch (e: any) {
+      toastError(e?.message ?? "Couldn't delete your account.");
+      setDeleting(false);
+    }
+  };
+
+  return (
+    <div
+      onClick={() => !deleting && onClose()}
+      className="fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in"
+      role="dialog" aria-modal="true" aria-labelledby="delete-account-title"
+    >
+      <div onClick={(e) => e.stopPropagation()}
+        className="w-full max-w-md rounded-2xl border border-red-400/30 p-6 animate-slide-up"
+        style={{ background: "linear-gradient(135deg, rgba(20,8,14,0.98), rgba(8,4,8,0.98))" }}
+      >
+        <div className="flex items-center gap-3 mb-3">
+          <div className="w-10 h-10 rounded-full bg-red-400/15 border border-red-400/30 flex items-center justify-center">
+            <Warning size={20} weight="fill" color="#F87171" aria-hidden="true" />
+          </div>
+          <h3 id="delete-account-title" className="font-bebas text-2xl text-red-400 tracking-wider">DELETE ACCOUNT</h3>
+        </div>
+        <p className="text-cream/80 text-sm mb-2">This permanently removes your account, profile, friends, quiz history, and any Fangs you have on hand.</p>
+        <p className="text-cream/50 text-xs mb-5">This cannot be undone. If you want to come back later you will need to sign up again.</p>
+
+        <label className="block text-cream/50 text-xs font-bold uppercase tracking-widest mb-1.5">
+          Type your email to confirm
+        </label>
+        <p className="font-mono text-cream/60 text-xs mb-2">{email}</p>
+        <input
+          type="email"
+          value={confirmText}
+          onChange={(e) => setConfirmText(e.target.value)}
+          placeholder="your-email@example.com"
+          disabled={deleting}
+          autoComplete="off"
+          autoFocus
+          className="w-full bg-white/5 border border-red-400/30 rounded-xl px-4 py-3 text-cream placeholder-cream/25 text-sm focus:outline-none focus:border-red-400 transition-all mb-4"
+        />
+
+        <div className="flex gap-2">
+          <button onClick={onClose} disabled={deleting}
+            className="flex-1 py-3 rounded-xl border border-white/10 text-cream/70 text-sm font-bold hover:bg-white/5 disabled:opacity-60 transition-all">
+            Cancel
+          </button>
+          <button onClick={handleDelete} disabled={!matches || deleting}
+            className="flex-1 py-3 rounded-xl text-sm font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+            style={{
+              background: matches && !deleting ? "linear-gradient(135deg, #DC2626 0%, #991B1B 100%)" : "rgba(220,38,38,0.2)",
+              color: matches && !deleting ? "#fff" : "#fca5a5",
+              boxShadow: matches && !deleting ? "0 4px 15px rgba(220,38,38,0.3)" : "none",
+            }}>
+            <span className="inline-flex items-center gap-2">
+              {deleting ? "Deleting..." : <><Trash size={16} weight="fill" aria-hidden="true" /> Delete Forever</>}
+            </span>
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
@@ -1362,25 +1550,88 @@ function ActivitySection({ activity, quizHistory }: SharedProps) {
 }
 
 // ── NOTIFICATIONS ──────────────────────────────────────
-function NotificationsSection() {
-  const [prefs, setPrefs] = useState({
-    dailyReminder: true,
-    duelChallenges: true,
-    weeklyReport: true,
-    badgeUnlocked: true,
-    streakAlert: true,
-    newFeatures: false,
-    marketing: false,
-  });
-  const [saved, setSaved] = useState(false);
+// P0 trust-gap fix 2026-06-05: persists to profiles.preferences.notifications
+// via PATCH /api/user/preferences. Previously localStorage-only.
+const NOTIF_CACHE_KEY = "notifPrefs.v2";
+type NotifPrefsLocal = {
+  dailyReminder:  boolean;
+  duelChallenges: boolean;
+  weeklyReport:   boolean;
+  badgeUnlocked:  boolean;
+  streakAlert:    boolean;
+  newFeatures:    boolean;
+  marketing:      boolean;
+};
+const NOTIF_DEFAULTS: NotifPrefsLocal = {
+  dailyReminder:  true,
+  duelChallenges: true,
+  weeklyReport:   true,
+  badgeUnlocked:  true,
+  streakAlert:    true,
+  newFeatures:    false,
+  marketing:      false,
+};
 
-  const toggle = (key: keyof typeof prefs) =>
+function NotificationsSection() {
+  const [prefs, setPrefs] = useState<NotifPrefsLocal>(NOTIF_DEFAULTS);
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [hydrated, setHydrated] = useState(false);
+
+  useEffect(() => {
+    try {
+      const raw = typeof window !== "undefined" ? localStorage.getItem(NOTIF_CACHE_KEY) : null;
+      if (raw) setPrefs({ ...NOTIF_DEFAULTS, ...JSON.parse(raw) });
+    } catch { /* ignore */ }
+    let cancelled = false;
+    apiGet<{ notifications: {
+      daily_reminder: boolean; duel_challenges: boolean; weekly_report: boolean;
+      badge_unlocked: boolean; streak_alert: boolean; new_features: boolean;
+      marketing: boolean; leaderboard_updates: boolean;
+    } }>("/api/user/preferences").then(res => {
+      if (cancelled || !res.ok || !res.data) return;
+      const n = res.data.notifications;
+      setPrefs({
+        dailyReminder:  n.daily_reminder,
+        duelChallenges: n.duel_challenges,
+        weeklyReport:   n.weekly_report,
+        badgeUnlocked:  n.badge_unlocked,
+        streakAlert:    n.streak_alert,
+        newFeatures:    n.new_features,
+        marketing:      n.marketing,
+      });
+      setHydrated(true);
+    });
+    return () => { cancelled = true; };
+  }, []);
+
+  const toggle = (key: keyof NotifPrefsLocal) =>
     setPrefs(p => ({ ...p, [key]: !p[key] }));
 
-  const save = () => {
-    localStorage.setItem("notifPrefs", JSON.stringify(prefs));
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
+  const save = async () => {
+    setSaving(true);
+    try {
+      const res = await apiPatch<{ notifications: unknown }>("/api/user/preferences", {
+        notifications: {
+          daily_reminder:  prefs.dailyReminder,
+          duel_challenges: prefs.duelChallenges,
+          weekly_report:   prefs.weeklyReport,
+          badge_unlocked:  prefs.badgeUnlocked,
+          streak_alert:    prefs.streakAlert,
+          new_features:    prefs.newFeatures,
+          marketing:       prefs.marketing,
+        },
+      });
+      if (!res.ok) {
+        toastError(res.error ?? "Couldn't save your notification settings");
+        return;
+      }
+      try { localStorage.setItem(NOTIF_CACHE_KEY, JSON.stringify(prefs)); } catch { /* ignore */ }
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2000);
+    } finally {
+      setSaving(false);
+    }
   };
 
   const items = [
@@ -1390,7 +1641,7 @@ function NotificationsSection() {
     { key: "badgeUnlocked",  label: "Badge Unlocked",          sub: "When you earn a new badge" },
     { key: "streakAlert",    label: "Streak at Risk",          sub: "Reminder when your streak is about to break" },
     { key: "newFeatures",    label: "New Features",            sub: "When we launch new features or updates" },
-    { key: "marketing",      label: "Promotions & Offers",     sub: "Special offers and partner promotions" },
+    { key: "marketing",      label: "Promotions and Offers",   sub: "Special offers and partner promotions" },
   ] as const;
 
   return (
@@ -1409,10 +1660,13 @@ function NotificationsSection() {
       </Card>
 
       {saved && <SaveToast msg="Notification preferences saved!" />}
-      <button onClick={save}
-        className="w-full py-3.5 rounded-xl font-bold text-sm"
+      <button onClick={save} disabled={saving || !hydrated}
+        className="w-full py-3.5 rounded-xl font-bold text-sm disabled:opacity-60"
         style={{ background: "linear-gradient(135deg, #F0B429 0%, #B8960C 50%, #F0B429 100%)", color: "#04080F", boxShadow: "0 4px 15px rgba(240,180,41,0.3)" }}>
-        <span className="inline-flex items-center gap-2"><FloppyDisk size={16} weight="regular" aria-hidden="true" /> Save Notification Settings</span>
+        <span className="inline-flex items-center gap-2">
+          <FloppyDisk size={16} weight="regular" aria-hidden="true" />
+          {saving ? "Saving..." : "Save Notification Settings"}
+        </span>
       </button>
     </div>
   );

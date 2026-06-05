@@ -29,18 +29,87 @@ export async function updateProfile(userId: string, updates: {
   return data;
 }
 
+// P0 trust-gap fix 2026-06-05: server-enforced profile visibility.
+// Reads/writes the dedicated profiles.profile_visibility column so that
+// /api/social/search and the leaderboard ladders can filter cheaply.
+export type ProfileVisibility = "public" | "private";
+
+export async function getProfileVisibility(userId: string): Promise<ProfileVisibility> {
+  const { data } = await supabase
+    .from("profiles")
+    .select("profile_visibility")
+    .eq("id", userId)
+    .single();
+  const v = (data?.profile_visibility as ProfileVisibility | null | undefined) ?? "public";
+  return v === "private" ? "private" : "public";
+}
+
+export async function updateProfileVisibility(userId: string, visibility: ProfileVisibility) {
+  const { error } = await supabase
+    .from("profiles")
+    .update({ profile_visibility: visibility })
+    .eq("id", userId);
+  if (error) throw error;
+  return visibility;
+}
+
 // ── Preferences ──────────────────────────────────────────────
+
+export type NotificationPrefs = {
+  daily_reminder: boolean;
+  duel_challenges: boolean;
+  weekly_report: boolean;
+  badge_unlocked: boolean;
+  streak_alert: boolean;
+  new_features: boolean;
+  marketing: boolean;
+  leaderboard_updates: boolean;
+};
+
+export type PrivacyPrefs = {
+  show_on_leaderboard: boolean;
+  show_streak: boolean;
+  show_coins: boolean;
+  duel_from: "everyone" | "nobody";
+};
 
 export type UserPreferences = {
   theme: "dark" | "light";
   font_size: "small" | "medium" | "large";
   preferred_subjects: string[];
+  // P0 trust-gap fix 2026-06-05: notification + privacy toggles used to
+  // be localStorage-only placebos. Now they persist server-side as
+  // sub-blobs in profiles.preferences (JSONB). Top-level visibility
+  // (public/private) lives in the dedicated profiles.profile_visibility
+  // column because the server filters on it.
+  notifications: NotificationPrefs;
+  privacy: PrivacyPrefs;
+};
+
+export const DEFAULT_NOTIFICATION_PREFS: NotificationPrefs = {
+  daily_reminder: true,
+  duel_challenges: true,
+  weekly_report: true,
+  badge_unlocked: true,
+  streak_alert: true,
+  new_features: false,
+  marketing: false,
+  leaderboard_updates: true,
+};
+
+export const DEFAULT_PRIVACY_PREFS: PrivacyPrefs = {
+  show_on_leaderboard: true,
+  show_streak: true,
+  show_coins: true,
+  duel_from: "everyone",
 };
 
 const DEFAULT_PREFERENCES: UserPreferences = {
   theme: "dark",
   font_size: "medium",
   preferred_subjects: [],
+  notifications: DEFAULT_NOTIFICATION_PREFS,
+  privacy: DEFAULT_PRIVACY_PREFS,
 };
 
 export async function getPreferences(userId: string): Promise<UserPreferences> {
@@ -50,12 +119,30 @@ export async function getPreferences(userId: string): Promise<UserPreferences> {
     .eq("id", userId)
     .single();
   if (error) throw error;
-  return { ...DEFAULT_PREFERENCES, ...(data?.preferences as Partial<UserPreferences> | null) };
+  const stored = (data?.preferences ?? {}) as Partial<UserPreferences>;
+  // Deep-merge the notifications + privacy sub-blobs so adding a new
+  // toggle in DEFAULT_NOTIFICATION_PREFS doesn't silently come back as
+  // `undefined` for users who saved their prefs before the new key
+  // existed.
+  return {
+    ...DEFAULT_PREFERENCES,
+    ...stored,
+    notifications: { ...DEFAULT_NOTIFICATION_PREFS, ...(stored.notifications ?? {}) },
+    privacy:       { ...DEFAULT_PRIVACY_PREFS,      ...(stored.privacy      ?? {}) },
+  };
 }
 
 export async function updatePreferences(userId: string, prefs: Partial<UserPreferences>) {
   const current = await getPreferences(userId);
-  const merged = { ...current, ...prefs };
+  // Deep-merge sub-blobs so a PATCH of just one toggle in `notifications`
+  // doesn't blow away every other notification flag or the entire
+  // `privacy` blob.
+  const merged: UserPreferences = {
+    ...current,
+    ...prefs,
+    notifications: { ...current.notifications, ...(prefs.notifications ?? {}) },
+    privacy:       { ...current.privacy,       ...(prefs.privacy      ?? {}) },
+  };
   const { error } = await supabase
     .from("profiles")
     .update({ preferences: merged })
@@ -362,6 +449,8 @@ export async function getLeaderboard(limit = 10): Promise<{
       .from("profiles")
       .select("id, username, avatar_url, level, streak, coins, equipped_username_effect")
       .neq("id", DEMO_USER_ID)
+      // P0 trust-gap fix 2026-06-05: exclude private profiles.
+      .neq("profile_visibility", "private")
       .order("coins", { ascending: false })
       .limit(limit);
 
@@ -383,21 +472,32 @@ export async function getLeaderboard(limit = 10): Promise<{
 
   const { data: profiles } = await supabase
     .from("profiles")
-    .select("id, username, avatar_url, level, streak, equipped_username_effect")
+    .select("id, username, avatar_url, level, streak, equipped_username_effect, profile_visibility")
     .in("id", topUserIds);
 
-  return topUserIds.map((uid, i) => {
+  // P0 trust-gap fix 2026-06-05: drop private profiles from the weekly
+  // leaderboard. We do this in JS because the weeklyMap was built off
+  // coin_transactions (no visibility column on that table) — filter
+  // against the fetched profile rows here.
+  const out: {
+    rank: number; user_id: string; username: string; avatar_url: string | null;
+    level: number; streak: number; coins_this_week: number;
+  }[] = [];
+  let rank = 1;
+  for (const uid of topUserIds) {
     const profile = profiles?.find((p: any) => p.id === uid);
-    return {
-      rank: i + 1,
+    if (profile?.profile_visibility === "private") continue;
+    out.push({
+      rank: rank++,
       user_id: uid,
       username: profile?.username ?? "Unknown",
       avatar_url: profile?.avatar_url ?? null,
       level: profile?.level ?? 1,
       streak: profile?.streak ?? 0,
       coins_this_week: weeklyMap[uid] ?? 0,
-    };
-  });
+    });
+  }
+  return out;
 }
 
 // ── ELO Leaderboard (ranked by arena_elo descending) ─────────
@@ -415,6 +515,8 @@ export async function getEloLeaderboard(limit = 200): Promise<{
     .from("profiles")
     .select("id, username, avatar_url, arena_elo, level, xp")
     .neq("id", DEMO_USER_ID)
+    // P0 trust-gap fix 2026-06-05: exclude private profiles from public ladder.
+    .neq("profile_visibility", "private")
     .order("arena_elo", { ascending: false })
     .limit(limit);
 
@@ -459,6 +561,8 @@ export async function getLadderLeaderboard(
     .from("profiles")
     .select(`id, username, avatar_url, level, streak, ${ladder}`)
     .neq("id", DEMO_USER_ID)
+    // P0 trust-gap fix 2026-06-05: exclude private profiles from public ladder.
+    .neq("profile_visibility", "private")
     .order(ladder, { ascending: false })
     .limit(limit);
 

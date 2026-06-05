@@ -71,6 +71,15 @@ export async function GET(req: NextRequest) {
       .select("id, username, avatar_url, arena_elo")
       .ilike("username", `%${query}%`)
       .neq("id", DEMO_USER_ID)
+      // P0 trust-gap fix 2026-06-05: respect server-enforced visibility.
+      // Users who set their profile to "private" must not appear in
+      // discovery — search is the primary user-finding surface. The
+      // pending-friendship relationship map (`relById`) above includes
+      // every existing friendship, so a private user with whom the
+      // searcher already has a friendship row is still annotated
+      // correctly if they ever resurface in another listing — but
+      // they don't appear in NEW search results.
+      .neq("profile_visibility", "private")
       .limit(10);
 
     if (error) {

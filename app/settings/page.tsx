@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth";
 import { getPreferences, updatePreferences } from "@/lib/db";
 import type { UserPreferences } from "@/lib/db";
+import { apiGet, apiPatch } from "@/lib/api-client";
+import { toastError } from "@/lib/toast";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import BackButton from "@/components/BackButton";
 import { Gear, Check } from "@phosphor-icons/react";
@@ -30,7 +32,10 @@ export default function SettingsPage() {
   const [prefs, setPrefs] = useState<UserPreferences | null>(null);
   const [saved, setSaved] = useState(false);
 
-  // Local toggle states (not in DB yet — placeholders for future)
+  // P0 trust-gap fix 2026-06-05: these were 5 useState placeholders
+  // explicitly commented "not in DB yet". Now they hydrate from
+  // /api/user/preferences (same backing store as the Profile page
+  // toggles) and PATCH back on each flip with optimistic update.
   const [streakReminders, setStreakReminders] = useState(true);
   const [duelNotifications, setDuelNotifications] = useState(true);
   const [leaderboardUpdates, setLeaderboardUpdates] = useState(true);
@@ -40,7 +45,26 @@ export default function SettingsPage() {
   useEffect(() => {
     if (!user) return;
     getPreferences(user.id).then(setPrefs).catch(console.error);
+    // Pull the same prefs blob the Profile page uses so the two
+    // surfaces never disagree. Hydrate the 5 server-backed toggles.
+    apiGet<{
+      notifications: { daily_reminder: boolean; duel_challenges: boolean; leaderboard_updates: boolean };
+      privacy: { show_on_leaderboard: boolean };
+      profile_visibility: "public" | "private";
+    }>("/api/user/preferences").then((res) => {
+      if (!res.ok || !res.data) return;
+      setStreakReminders(res.data.notifications.daily_reminder);
+      setDuelNotifications(res.data.notifications.duel_challenges);
+      setLeaderboardUpdates(res.data.notifications.leaderboard_updates);
+      setPublicProfile(res.data.profile_visibility === "public");
+      setShowOnLeaderboard(res.data.privacy.show_on_leaderboard);
+    });
   }, [user]);
+
+  const flashSaved = () => {
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2000);
+  };
 
   const save = async (update: Partial<UserPreferences>) => {
     if (!user) return;
@@ -48,11 +72,51 @@ export default function SettingsPage() {
     setPrefs(merged);
     try {
       await updatePreferences(user.id, update);
-      setSaved(true);
-      setTimeout(() => setSaved(false), 2000);
+      flashSaved();
     } catch (err) {
       console.error("[Settings] Save failed:", err);
     }
+  };
+
+  // PATCH a single notification flag through /api/user/preferences.
+  // Optimistic: flip the UI immediately, revert on failure.
+  const saveNotif = async (key: "daily_reminder" | "duel_challenges" | "leaderboard_updates", next: boolean) => {
+    const setter = key === "daily_reminder" ? setStreakReminders
+                 : key === "duel_challenges" ? setDuelNotifications
+                 : setLeaderboardUpdates;
+    setter(next);
+    const res = await apiPatch("/api/user/preferences", { notifications: { [key]: next } });
+    if (!res.ok) {
+      setter(!next);
+      toastError(res.error ?? "Couldn't save that change");
+      return;
+    }
+    flashSaved();
+  };
+
+  const savePrivacyFlag = async (key: "show_on_leaderboard", next: boolean) => {
+    setShowOnLeaderboard(next);
+    const res = await apiPatch("/api/user/preferences", { privacy: { [key]: next } });
+    if (!res.ok) {
+      setShowOnLeaderboard(!next);
+      toastError(res.error ?? "Couldn't save that change");
+      return;
+    }
+    flashSaved();
+  };
+
+  const saveVisibility = async (next: boolean) => {
+    // "Public Profile" toggle: true → visibility=public, false → private.
+    setPublicProfile(next);
+    const res = await apiPatch("/api/user/profile-visibility", {
+      visibility: next ? "public" : "private",
+    });
+    if (!res.ok) {
+      setPublicProfile(!next);
+      toastError(res.error ?? "Couldn't save that change");
+      return;
+    }
+    flashSaved();
   };
 
   return (
@@ -97,11 +161,11 @@ export default function SettingsPage() {
           <h2 className="font-bebas text-xl text-cream tracking-wider mb-4">NOTIFICATIONS</h2>
           <div className="divide-y divide-white/5">
             <Toggle label="Streak Reminders" description="Get notified before your streak expires"
-              enabled={streakReminders} onChange={setStreakReminders} />
+              enabled={streakReminders} onChange={(v) => saveNotif("daily_reminder", v)} />
             <Toggle label="Duel Invites" description="Receive notifications for duel challenges"
-              enabled={duelNotifications} onChange={setDuelNotifications} />
+              enabled={duelNotifications} onChange={(v) => saveNotif("duel_challenges", v)} />
             <Toggle label="Leaderboard Updates" description="Know when your ranking changes"
-              enabled={leaderboardUpdates} onChange={setLeaderboardUpdates} />
+              enabled={leaderboardUpdates} onChange={(v) => saveNotif("leaderboard_updates", v)} />
           </div>
         </div>
 
@@ -110,10 +174,10 @@ export default function SettingsPage() {
           style={{ animationDelay: "0.15s", background: "linear-gradient(135deg, rgba(13,21,40,0.5), rgba(10,16,32,0.5))" }}>
           <h2 className="font-bebas text-xl text-cream tracking-wider mb-4">PRIVACY</h2>
           <div className="divide-y divide-white/5">
-            <Toggle label="Public Profile" description="Allow other players to view your profile"
-              enabled={publicProfile} onChange={setPublicProfile} />
+            <Toggle label="Public Profile" description="Allow other players to find you in search and on the leaderboard"
+              enabled={publicProfile} onChange={(v) => saveVisibility(v)} />
             <Toggle label="Show on Leaderboard" description="Appear in the public leaderboard rankings"
-              enabled={showOnLeaderboard} onChange={setShowOnLeaderboard} />
+              enabled={showOnLeaderboard} onChange={(v) => savePrivacyFlag("show_on_leaderboard", v)} />
           </div>
         </div>
 
