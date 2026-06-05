@@ -28,6 +28,7 @@ import { apiPost } from "@/lib/api-client";
 import { MicrophoneStage, Check, X as XIcon, ArrowLeft, Crown, Lightning, Flame } from "@phosphor-icons/react";
 import { PARDY_DECKS, getDeck, tileId, type PardyDeck } from "@/lib/pardy/decks";
 import CountUp from "@/components/CountUp";
+import Confetti from "@/components/Confetti";
 
 interface TileState {
   /** Has this tile been attempted (correct or wrong)? */
@@ -327,9 +328,24 @@ export default function PardyPage() {
           : accuracy >= 50
             ? { label: "DECENT RUN", accent: "#4A90D9", Icon: Lightning, sub: "the room felt it." }
             : { label: "TOUGH ROUND", accent: "rgba(238,244,255,0.55)", Icon: Lightning, sub: "rematch the deck — your call." };
+    // Tier-themed confetti — only fires for the two top tiers. DECENT and
+    // TOUGH skip for tonal reasons (no fake celebration on a meh run).
+    const shouldConfetti = !reduced && (accuracy === 100 || accuracy >= 75);
+    const confettiPalette = accuracy === 100
+      ? ["#FFD700", "#FDE68A", "#FFFFFF", "#FFB800"]   // pure gold for PERFECT
+      : ["#FFD700", "#FDE68A", "#A855F7"];              // gold + purple for STRONG
     return (
       <ProtectedRoute>
         <div className="min-h-screen pt-16 pb-20 md:pb-8 relative" style={{ isolation: "isolate" }}>
+          {shouldConfetti && (
+            <Confetti
+              trigger={true}
+              count={accuracy === 100 ? 110 : 80}
+              origin="top"
+              duration={accuracy === 100 ? 2800 : 2200}
+              palette={confettiPalette}
+            />
+          )}
           <AmbientOrbs
             orbs={[
               { color: tier.accent, pos: "top-[20%] left-[28%]", size: 520, opacity: 0.08 },

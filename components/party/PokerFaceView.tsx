@@ -25,6 +25,7 @@ import PartyScoreboard from "./PartyScoreboard";
 import IntermissionCard from "./IntermissionCard";
 import NinnyHostBubble from "./NinnyHostBubble";
 import CountUp from "@/components/CountUp";
+import Confetti from "@/components/Confetti";
 import { pokerFaceChannel, POKERFACE_EVENTS } from "@/lib/party/realtime-channels";
 import { subscribeResilient } from "@/lib/realtime-resilient";
 import PostRoundVoteCard from "./PostRoundVoteCard";
@@ -1001,12 +1002,45 @@ export default function PokerFaceView({
               <p className="font-bebas text-xs tracking-[0.3em] text-cream/55 mb-1">
                 {round.reveal.is_lie ? "THAT WAS A LIE" : "THAT WAS THE TRUTH"}
               </p>
-              <p
-                className={`font-bebas text-3xl tracking-wider inline-block ${reduced ? "" : "pa-stamp"}`}
-                style={{ color: round.reveal.is_lie ? "#FCA5A5" : "#86EFAC" }}
-              >
-                {round.reveal.is_lie ? "BLUFFED" : "HONEST"}
-              </p>
+              {reduced ? (
+                <p
+                  className="font-bebas text-3xl tracking-wider inline-block"
+                  style={{ color: round.reveal.is_lie ? "#FCA5A5" : "#86EFAC" }}
+                >
+                  {round.reveal.is_lie ? "BLUFFED" : "HONEST"}
+                </p>
+              ) : (() => {
+                const isLie = round.reveal.is_lie;
+                const label = isLie ? "BLUFFED" : "HONEST";
+                return (
+                  <p
+                    className="font-bebas text-3xl tracking-wider inline-block"
+                    aria-label={label}
+                  >
+                    {Array.from(label).map((c, i) => (
+                      <motion.span
+                        key={`${c}-${i}`}
+                        initial={{ opacity: 0, y: 6, scale: 0.7 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        transition={{
+                          duration: 0.22,
+                          delay: 0.15 + i * 0.05,
+                          ease: [0.16, 1, 0.3, 1],
+                        }}
+                        className="inline-block"
+                        style={{
+                          color: isLie ? "#FCA5A5" : "#86EFAC",
+                          textShadow: isLie
+                            ? "0 0 8px rgba(239,68,68,0.45)"
+                            : "0 0 8px rgba(34,197,94,0.45)",
+                        }}
+                      >
+                        {c}
+                      </motion.span>
+                    ))}
+                  </p>
+                );
+              })()}
               {/* Always surface the real fact — the educational payoff lands for
                   the whole room every round, truth or lie. */}
               <p className={`text-cream/70 text-sm font-syne mt-3 max-w-md mx-auto ${reduced ? "" : "pa-factoid-up"}`}>
@@ -1016,7 +1050,8 @@ export default function PokerFaceView({
 
             {/* Presenter-only verdict line — "YOU FOOLED N OF M" / "EVERYONE
                 READ YOU." Shows above the calls list so the presenter knows
-                their result at a glance before scanning the per-caller rows. */}
+                their result at a glance before scanning the per-caller rows.
+                Gold confetti fires on CLEAN SWEEP — the rarest outcome. */}
             {isPresenter && (() => {
               const total = round.reveal.calls.length;
               const fooled = round.reveal.calls.filter((c) => !c.correct).length;
@@ -1024,7 +1059,17 @@ export default function PokerFaceView({
               const allFooled = fooled === total;
               const noneFooled = fooled === 0;
               return (
-                <div
+                <>
+                  {allFooled && (
+                    <Confetti
+                      trigger={!reduced}
+                      count={70}
+                      origin="top"
+                      duration={2000}
+                      palette={["#FFD700", "#FDE68A", "#00BFFF", "#A855F7"]}
+                    />
+                  )}
+                  <div
                   className={`rounded-xl px-4 py-2.5 text-center ${reduced ? "" : "pa-pop-in"}`}
                   style={{
                     background: allFooled
@@ -1052,6 +1097,7 @@ export default function PokerFaceView({
                         : <>YOU FOOLED <CountUp value={fooled} duration={700} /> OF {total}</>}
                   </span>
                 </div>
+                </>
               );
             })()}
 

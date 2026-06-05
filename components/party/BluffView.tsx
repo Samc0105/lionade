@@ -18,6 +18,7 @@ import PartyScoreboard from "./PartyScoreboard";
 import IntermissionCard from "./IntermissionCard";
 import NinnyHostBubble from "./NinnyHostBubble";
 import CountUp from "@/components/CountUp";
+import Confetti from "@/components/Confetti";
 import { bluffChannel, BLUFF_EVENTS, roomChannel, PARTY_EVENTS } from "@/lib/party/realtime-channels";
 import { subscribeResilient } from "@/lib/realtime-resilient";
 import PostRoundVoteCard from "./PostRoundVoteCard";
@@ -646,33 +647,71 @@ export default function BluffView({
               }}
             >
               <p className="font-bebas text-xs tracking-[0.3em] text-cream/55 mb-1">THE TRUTH</p>
-              {/* Use the party-block stamp so the Bluff reveal lands with the
-                  same punch as Sketchy's word-stamp and Poker Face's verdict. */}
-              <p className={`font-bebas text-3xl text-emerald-300 tracking-wider inline-block ${reduced ? "" : "pa-stamp"}`}>
-                {round.correct_answer}
-              </p>
+              {/* Character-stagger typewriter — same pattern shipped on
+                  RoundEndOverlay. Reduced motion renders the full string at
+                  once. Emerald glow per character to match the truth tone. */}
+              {reduced ? (
+                <p className="font-bebas text-3xl text-emerald-300 tracking-wider inline-block">
+                  {round.correct_answer}
+                </p>
+              ) : (
+                <p
+                  className="font-bebas text-3xl tracking-wider inline-block"
+                  aria-label={round.correct_answer}
+                >
+                  {Array.from(String(round.correct_answer ?? "")).map((c, i) => (
+                    <motion.span
+                      key={`${c}-${i}`}
+                      initial={{ opacity: 0, y: 6, scale: 0.7 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      transition={{
+                        duration: 0.22,
+                        delay: 0.15 + i * 0.05,
+                        ease: [0.16, 1, 0.3, 1],
+                      }}
+                      className="inline-block"
+                      style={{
+                        color: "#86EFAC",
+                        textShadow: "0 0 8px rgba(34,197,94,0.45)",
+                      }}
+                    >
+                      {c === " " ? " " : c}
+                    </motion.span>
+                  ))}
+                </p>
+              )}
             </div>
 
             {/* "You fooled N people" — sum of votes on the fakes I authored.
-                Derived from the reveal payload already in client state. */}
+                Derived from the reveal payload already in client state.
+                Per-fooler confetti burst when N >= 1. */}
             {(() => {
               const myFooledVotes = detail.answers!
                 .filter((a) => !a.is_truth && a.author_user_id === meUserId)
                 .reduce((sum, a) => sum + (a.vote_count ?? 0), 0);
               if (myFooledVotes <= 0) return null;
               return (
-                <div
-                  className={`rounded-xl px-4 py-2.5 text-center ${reduced ? "" : "pa-pop-in"}`}
-                  style={{
-                    background: "linear-gradient(135deg, rgba(168,85,247,0.18) 0%, rgba(99,102,241,0.08) 100%)",
-                    border: "1px solid rgba(168,85,247,0.4)",
-                  }}
-                >
-                  <span className="font-bebas text-base tracking-wider text-purple-200">
-                    YOU FOOLED <CountUp value={myFooledVotes} duration={800} />{" "}
-                    {myFooledVotes === 1 ? "PLAYER" : "PLAYERS"}!
-                  </span>
-                </div>
+                <>
+                  <Confetti
+                    trigger={!reduced}
+                    count={50}
+                    origin="top"
+                    duration={1800}
+                    palette={["#FFD700", "#A855F7", "#FDE68A", "#E9D5FF"]}
+                  />
+                  <div
+                    className={`rounded-xl px-4 py-2.5 text-center ${reduced ? "" : "pa-pop-in"}`}
+                    style={{
+                      background: "linear-gradient(135deg, rgba(168,85,247,0.18) 0%, rgba(99,102,241,0.08) 100%)",
+                      border: "1px solid rgba(168,85,247,0.4)",
+                    }}
+                  >
+                    <span className="font-bebas text-base tracking-wider text-purple-200">
+                      YOU FOOLED <CountUp value={myFooledVotes} duration={800} />{" "}
+                      {myFooledVotes === 1 ? "PLAYER" : "PLAYERS"}!
+                    </span>
+                  </div>
+                </>
               );
             })()}
 
