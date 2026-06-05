@@ -7,6 +7,16 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 
 ---
 
+## 2026-06-05 — Sketchy word-picker polish (web-only, no iOS row)
+
+**Status:** 🚫 N/A (deliberate no-row decision — pure visual polish on a web-only feature).
+
+Cosmetic polish on `components/party/SketchView.tsx` `select-word` phase: centered the picker in a `max-w-3xl mx-auto` column, sorted candidate cards HARD → MEDIUM → EASY left-to-right with stable secondary sort, and replaced the hardcoded purple gradient with difficulty-keyed glassmorphism tints (`DIFFICULTY_STYLE.{cardBg, cardBorder, cardGlow}` per tier — green/gold/red at 18% gradient + 55% border + 18% glow). Difficulty badge, info popover, auto-pick countdown, and `pa-deal-in` entrance preserved.
+
+Sketchy iOS isn't built yet (Lionade Party iOS port paused since 2026-05-29 — see 2026-06-04 Sketchy round-end and 2026-05-31 Sketchy realtime quick-fix entries below for the pattern). When iOS Sketchy lands, `vp-ios` should mirror: (a) port `DIFFICULTY_STYLE` (the `cardBg/cardBorder/cardGlow` strings translate 1:1 to RN style objects — `cardBg` becomes a `react-native-linear-gradient` colors array, the rest are plain `borderColor` / `shadowColor` + `shadowOpacity`); (b) port the `DIFFICULTY_RANK` sort (pure JS, no platform deps); (c) match the centered max-width (iOS uses screen-width minus padding, so wrap the picker in a `View` with `maxWidth: 720` + `alignSelf: 'center'`).
+
+---
+
 ## 2026-06-04 — Lionade-Pardy V1 (web)
 
 **Status:** Web ships. iOS port: ❌ missing.

@@ -69,11 +69,55 @@ interface WordInfo {
   notFound?: boolean;
 }
 
-const DIFFICULTY_STYLE: Record<string, { label: string; bg: string; border: string; color: string }> = {
-  easy: { label: "EASY", bg: "rgba(34,197,94,0.16)", border: "rgba(34,197,94,0.5)", color: "#86EFAC" },
-  medium: { label: "MEDIUM", bg: "rgba(245,158,11,0.16)", border: "rgba(245,158,11,0.5)", color: "#FCD34D" },
-  hard: { label: "HARD", bg: "rgba(244,63,94,0.16)", border: "rgba(244,63,94,0.5)", color: "#FDA4AF" },
+const DIFFICULTY_STYLE: Record<
+  string,
+  {
+    label: string;
+    bg: string;
+    border: string;
+    color: string;
+    /** Full-card glassmorphism tint (gradient) keyed to the difficulty hue. */
+    cardBg: string;
+    /** 1.5px card border at ~55% opacity of the difficulty hue. */
+    cardBorder: string;
+    /** Outer glow at ~18% opacity of the difficulty hue. */
+    cardGlow: string;
+  }
+> = {
+  easy: {
+    label: "EASY",
+    bg: "rgba(34,197,94,0.16)",
+    border: "rgba(34,197,94,0.5)",
+    color: "#86EFAC",
+    cardBg: "linear-gradient(135deg, rgba(34,197,94,0.18) 0%, rgba(34,197,94,0.06) 100%)",
+    cardBorder: "rgba(34,197,94,0.55)",
+    cardGlow: "0 0 20px rgba(34,197,94,0.18)",
+  },
+  medium: {
+    label: "MEDIUM",
+    bg: "rgba(245,158,11,0.16)",
+    border: "rgba(245,158,11,0.5)",
+    color: "#FCD34D",
+    cardBg: "linear-gradient(135deg, rgba(245,158,11,0.18) 0%, rgba(245,158,11,0.06) 100%)",
+    cardBorder: "rgba(245,158,11,0.55)",
+    cardGlow: "0 0 20px rgba(245,158,11,0.18)",
+  },
+  hard: {
+    label: "HARD",
+    bg: "rgba(244,63,94,0.16)",
+    border: "rgba(244,63,94,0.5)",
+    color: "#FDA4AF",
+    cardBg: "linear-gradient(135deg, rgba(244,63,94,0.18) 0%, rgba(244,63,94,0.06) 100%)",
+    cardBorder: "rgba(244,63,94,0.55)",
+    cardGlow: "0 0 20px rgba(244,63,94,0.18)",
+  },
 };
+
+// Stable hardest-first ordering for the picker. Left-to-right reads
+// HARD -> MEDIUM -> EASY for a consistent visual rhythm (red, gold, green).
+// Unknown / missing difficulties sort last. Secondary sort is by original
+// index so cards within the same tier never shuffle between renders.
+const DIFFICULTY_RANK: Record<string, number> = { hard: 0, medium: 1, easy: 2 };
 
 const PICK_SECONDS = 10;
 
@@ -1006,7 +1050,7 @@ export default function SketchView({
         <motion.div
           initial={reduced ? false : { opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
-          className="space-y-5"
+          className="space-y-5 max-w-3xl mx-auto"
         >
           {/* Header: title + subject on the left, auto-pick countdown ring on the right */}
           <div className="flex items-center justify-between gap-3">
@@ -1048,9 +1092,20 @@ export default function SketchView({
             })()}
           </div>
 
-          {/* Candidate cards: difficulty badge + word + "i" info popover */}
+          {/* Candidate cards: difficulty badge + word + "i" info popover.
+              Sorted HARD -> MEDIUM -> EASY (left-to-right) for consistent
+              visual rhythm. Secondary sort by original index keeps cards
+              within the same tier stable across renders. */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            {candidates.map((c, i) => {
+            {candidates
+              .map((c, originalIndex) => ({ c, originalIndex }))
+              .sort((a, b) => {
+                const ra = DIFFICULTY_RANK[a.c.difficulty] ?? 99;
+                const rb = DIFFICULTY_RANK[b.c.difficulty] ?? 99;
+                if (ra !== rb) return ra - rb;
+                return a.originalIndex - b.originalIndex;
+              })
+              .map(({ c }, i) => {
               const diff = DIFFICULTY_STYLE[c.difficulty] ?? DIFFICULTY_STYLE.medium;
               const info = wordInfo[c.word];
               const open = infoWord === c.word;
@@ -1064,9 +1119,9 @@ export default function SketchView({
                     onClick={() => selectWord(c.word)}
                     className="w-full rounded-2xl p-5 pt-11 text-left transition-all active:scale-95 hover:-translate-y-0.5"
                     style={{
-                      background: "linear-gradient(135deg, rgba(168,85,247,0.15) 0%, rgba(124,58,237,0.06) 100%)",
-                      border: "1px solid rgba(168,85,247,0.45)",
-                      boxShadow: "0 0 20px rgba(168,85,247,0.15)",
+                      background: diff.cardBg,
+                      border: `1.5px solid ${diff.cardBorder}`,
+                      boxShadow: diff.cardGlow,
                     }}
                   >
                     <p className="font-bebas text-3xl tracking-wider text-cream">
