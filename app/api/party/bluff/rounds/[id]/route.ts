@@ -82,16 +82,22 @@ export async function GET(
       .eq("user_id", userId)
       .eq("is_truth", false)
       .maybeSingle();
-    const { count: submittedCount } = await supabaseAdmin
+    // Roster of player ids who have already submitted a fake. Drives the
+    // live progress chip strip on the write-phase UI so the room can see
+    // who's done without waiting for the next poll. Cheap query — same
+    // table the count above hits.
+    const { data: submittedRows } = await supabaseAdmin
       .from("bluff_answers")
-      .select("id", { count: "exact", head: true })
+      .select("user_id")
       .eq("round_id", round.id)
       .eq("is_truth", false);
+    const submittedUserIds = (submittedRows ?? []).map((r) => r.user_id);
     return NextResponse.json({
       round: base,
       has_submitted: !!my,
       my_submission: my?.text ?? null,
-      submitted_count: submittedCount ?? 0,
+      submitted_count: submittedUserIds.length,
+      submitted_user_ids: submittedUserIds,
     });
   }
 
@@ -117,14 +123,19 @@ export async function GET(
     });
   }
 
-  // Reveal: include author + truth flag + vote counts.
+  // Reveal: include author + truth flag + vote counts + voter ids per answer
+  // so the UI can render "who fell for what" chips. The party-game model
+  // already accepts public-facing vote attribution at reveal.
   const { data: votes } = await supabaseAdmin
     .from("bluff_votes")
     .select("answer_id, voter_user_id")
     .eq("round_id", round.id);
   const counts: Record<string, number> = {};
+  const voters: Record<string, string[]> = {};
   (votes ?? []).forEach((v) => {
     counts[v.answer_id] = (counts[v.answer_id] ?? 0) + 1;
+    if (!voters[v.answer_id]) voters[v.answer_id] = [];
+    voters[v.answer_id].push(v.voter_user_id);
   });
 
   return NextResponse.json({
@@ -135,6 +146,7 @@ export async function GET(
       author_user_id: a.is_truth ? null : a.user_id,
       is_truth: a.is_truth,
       vote_count: counts[a.id] ?? 0,
+      voters: voters[a.id] ?? [],
     })),
   });
 }

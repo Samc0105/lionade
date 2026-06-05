@@ -51,10 +51,16 @@ interface RoundDetail {
     author_user_id?: string | null;
     is_truth?: boolean;
     vote_count?: number;
+    /** Player ids who voted for this answer. Drives the per-card "fell for it"
+     *  voter chips at reveal. Only populated during reveal phase. */
+    voters?: string[];
   }[];
   has_submitted?: boolean;
   my_submission?: string | null;
   submitted_count?: number;
+  /** Player ids who have already submitted a fake. Live ticker during write
+   *  phase. Refreshed on every poll. */
+  submitted_user_ids?: string[];
   my_vote_answer_id?: string | null;
 }
 
@@ -481,6 +487,40 @@ export default function BluffView({
                 }}
               />
             </div>
+            {/* Player-roster chip strip — one chip per active player. Dim gray
+                + initial when pending, gold + ring when their fake has landed
+                server-side. Kahoot-lobby vibe; gives the room "everyone but
+                Jordan is in" social pressure without naming holdouts loudly. */}
+            {players.length > 0 && (
+              <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                {players.map((p) => {
+                  const submitted = (detail.submitted_user_ids ?? []).includes(p.user_id);
+                  const isMe = p.user_id === meUserId;
+                  const initial = (p.username ?? "?").slice(0, 1).toUpperCase();
+                  return (
+                    <span
+                      key={p.user_id}
+                      title={`${p.username ?? "Player"}${submitted ? " · submitted" : " · still writing"}`}
+                      className={`inline-flex items-center justify-center w-7 h-7 rounded-full font-bebas text-xs transition-all ${submitted && !reduced ? "pa-pop-in" : ""}`}
+                      style={{
+                        background: submitted
+                          ? "linear-gradient(135deg, #FFD700 0%, #B8960C 100%)"
+                          : "rgba(255,255,255,0.06)",
+                        border: submitted
+                          ? "1.5px solid rgba(255,215,0,0.7)"
+                          : isMe
+                            ? "1.5px solid rgba(168,85,247,0.55)"
+                            : "1px solid rgba(255,255,255,0.14)",
+                        color: submitted ? "#04080F" : "rgba(238,244,255,0.7)",
+                        boxShadow: submitted ? "0 0 8px rgba(255,215,0,0.45)" : "none",
+                      }}
+                    >
+                      {initial}
+                    </span>
+                  );
+                })}
+              </div>
+            )}
             <button
               key={confirmKey}
               type="submit"
@@ -618,11 +658,51 @@ export default function BluffView({
                         ...(reduced ? {} : { animationDelay: `${i * 90}ms` }),
                       }}
                     >
-                      <div className="min-w-0">
+                      <div className="min-w-0 flex-1">
                         <p className="font-syne text-sm text-cream/90">{a.text}</p>
                         <p className="text-cream/40 text-[11px] font-syne mt-0.5">
                           {a.is_truth ? "TRUTH" : `by ${author?.username ?? "Someone"}`}
                         </p>
+                        {/* Voter chips — small avatar circles showing exactly
+                            who fell for this answer (or for the truth, who got
+                            it right). Stagger-deals in. ICE COLD badge when
+                            nobody picked the truth, gold-flash on the worst
+                            (most-fooling) fake. */}
+                        {(a.voters ?? []).length > 0 && (
+                          <div className="mt-2 flex flex-wrap items-center gap-1">
+                            {(a.voters ?? []).map((vId, vi) => {
+                              const voter = players.find((p) => p.user_id === vId);
+                              const initial = (voter?.username ?? "?").slice(0, 1).toUpperCase();
+                              return (
+                                <span
+                                  key={`${a.id}-v-${vId}`}
+                                  title={voter?.username ?? "Player"}
+                                  className={`inline-flex items-center justify-center w-5 h-5 rounded-full font-bebas text-[10px] ${reduced ? "" : "pa-pop-in"}`}
+                                  style={{
+                                    background: a.is_truth
+                                      ? "linear-gradient(135deg, #22C55E 0%, #15803D 100%)"
+                                      : "linear-gradient(135deg, #FFD700 0%, #B8960C 100%)",
+                                    color: "#04080F",
+                                    border: "1px solid rgba(0,0,0,0.15)",
+                                    ...(reduced ? {} : { animationDelay: `${i * 90 + vi * 60}ms` }),
+                                  }}
+                                >
+                                  {initial}
+                                </span>
+                              );
+                            })}
+                          </div>
+                        )}
+                        {a.is_truth && (a.voters ?? []).length === 0 && (
+                          <span className="mt-2 inline-flex items-center font-bebas text-[10px] tracking-[0.25em] px-2 py-0.5 rounded-full text-sky-200"
+                            style={{
+                              background: "rgba(125,211,252,0.12)",
+                              border: "1px solid rgba(125,211,252,0.4)",
+                            }}
+                          >
+                            ICE COLD · nobody believed it
+                          </span>
+                        )}
                       </div>
                       <span className="font-bebas text-lg text-cream/80 ml-3 flex-shrink-0">
                         <CountUp value={a.vote_count ?? 0} duration={700} />{" "}
