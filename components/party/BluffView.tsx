@@ -17,7 +17,7 @@ import { apiGet, apiPost } from "@/lib/api-client";
 import PartyScoreboard from "./PartyScoreboard";
 import NinnyHostBubble from "./NinnyHostBubble";
 import CountUp from "@/components/CountUp";
-import { bluffChannel, BLUFF_EVENTS } from "@/lib/party/realtime-channels";
+import { bluffChannel, BLUFF_EVENTS, roomChannel, PARTY_EVENTS } from "@/lib/party/realtime-channels";
 import { subscribeResilient } from "@/lib/realtime-resilient";
 import PostRoundVoteCard from "./PostRoundVoteCard";
 import MidGameInviteModal from "./MidGameInviteModal";
@@ -254,6 +254,24 @@ export default function BluffView({
   const handleAutoBackToLobby = useCallback(() => {
     if (isHost) onReturnToLobby();
   }, [isHost, onReturnToLobby]);
+
+  // ── Rematch CTA (Bucket C 2026-06-05) ──
+  // Host-only fresh-start: scores cleared, ready flags cleared, room → lobby.
+  // Non-host clients see a quiet "waiting for host" pill so the screen never
+  // feels abandoned post-reveal.
+  const [rematchPending, setRematchPending] = useState(false);
+  const handleRematch = useCallback(async () => {
+    if (!isHost || rematchPending) return;
+    setRematchPending(true);
+    const res = await apiPost(`/api/party/rooms/${room.code}/rematch`, {});
+    if (!res.ok) {
+      setRematchPending(false);
+      return;
+    }
+    const ch = supabase.channel(roomChannel(room.code));
+    await ch.send({ type: "broadcast", event: PARTY_EVENTS.GAME_ENDED, payload: {} });
+    setRematchPending(false);
+  }, [isHost, rematchPending, room.code]);
 
   // ── Vote ──
   async function castVote(answerId: string) {
@@ -531,30 +549,51 @@ export default function BluffView({
               onAutoBackToLobby={handleAutoBackToLobby}
             />
 
-            {isHost && (
-              <div className="flex flex-col sm:flex-row gap-3">
+            {isHost ? (
+              <div className="space-y-2">
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <button
+                    onClick={startRound}
+                    className="flex-1 py-3 rounded-xl font-bebas tracking-wider text-base transition-all active:scale-95"
+                    style={{
+                      background: "linear-gradient(135deg, #FFD700 0%, #B8960C 100%)",
+                      color: "#04080F",
+                      boxShadow: "0 4px 18px rgba(255,215,0,0.3)",
+                    }}
+                  >
+                    NEXT ROUND
+                  </button>
+                  <button
+                    onClick={onReturnToLobby}
+                    className="flex-1 py-3 rounded-xl font-bebas tracking-wider text-base transition-all active:scale-95"
+                    style={{
+                      background: "rgba(255,255,255,0.04)",
+                      border: "1px solid rgba(255,255,255,0.1)",
+                      color: "rgba(238,244,255,0.85)",
+                    }}
+                  >
+                    BACK TO LOBBY
+                  </button>
+                </div>
                 <button
-                  onClick={startRound}
-                  className="flex-1 py-3 rounded-xl font-bebas tracking-wider text-base transition-all active:scale-95"
+                  onClick={handleRematch}
+                  disabled={rematchPending}
+                  className="w-full py-2.5 rounded-xl font-bebas tracking-wider text-sm transition-all active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed"
                   style={{
-                    background: "linear-gradient(135deg, #FFD700 0%, #B8960C 100%)",
-                    color: "#04080F",
-                    boxShadow: "0 4px 18px rgba(255,215,0,0.3)",
+                    background: "linear-gradient(135deg, rgba(168,85,247,0.20) 0%, rgba(99,102,241,0.10) 100%)",
+                    border: "1px solid rgba(168,85,247,0.45)",
+                    color: "#E9D5FF",
+                    boxShadow: "0 0 16px rgba(168,85,247,0.18)",
                   }}
                 >
-                  NEXT ROUND
+                  {rematchPending ? "RESETTING..." : "REMATCH (FRESH SCORES, SAME ROSTER)"}
                 </button>
-                <button
-                  onClick={onReturnToLobby}
-                  className="flex-1 py-3 rounded-xl font-bebas tracking-wider text-base transition-all active:scale-95"
-                  style={{
-                    background: "rgba(255,255,255,0.04)",
-                    border: "1px solid rgba(255,255,255,0.1)",
-                    color: "rgba(238,244,255,0.85)",
-                  }}
-                >
-                  BACK TO LOBBY
-                </button>
+              </div>
+            ) : (
+              <div className="text-center">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bebas tracking-wider text-cream/55 bg-white/[0.04] border border-white/10">
+                  Waiting for host
+                </span>
               </div>
             )}
           </motion.div>
