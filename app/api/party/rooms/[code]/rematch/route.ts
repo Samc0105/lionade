@@ -47,7 +47,7 @@ export async function POST(
 
   const { data: room } = await supabaseAdmin
     .from("party_rooms")
-    .select("id, host_user_id, status")
+    .select("id, host_user_id, status, current_game")
     .eq("code", code)
     .neq("status", "ended")
     .maybeSingle();
@@ -88,10 +88,17 @@ export async function POST(
     .eq("room_id", room.id)
     .is("left_at", null);
 
-  // Drop the room back to lobby state.
+  // Drop the room back to lobby state. Mirror end-game's last_game write so
+  // the lobby breadcrumb survives a rematch flow too (otherwise rematch would
+  // silently wipe the "your group last played X" signal).
+  const update: { status: string; current_game: null; last_game?: string } = {
+    status: "lobby",
+    current_game: null,
+  };
+  if (room.current_game) update.last_game = room.current_game;
   await supabaseAdmin
     .from("party_rooms")
-    .update({ status: "lobby", current_game: null })
+    .update(update)
     .eq("id", room.id);
 
   return NextResponse.json({ ok: true });

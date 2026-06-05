@@ -105,7 +105,17 @@ const GAME_META: Record<PartyGame, {
 
 export default function RoomLobby({ room, players, isHost, meUserId, onGameStarted }: Props) {
   const reduced = useReducedMotion();
-  const [selectedGame, setSelectedGame] = useState<PartyGame>("sketch");
+  // Auto-suggest a fresh game when the group is returning from a finished
+  // round. If room.last_game is set, default to anything BUT that — keeps
+  // the post-game lobby feeling like a forward step instead of a rerun.
+  // (Host can still pick the same game; this just changes the default.)
+  const [selectedGame, setSelectedGame] = useState<PartyGame>(() => {
+    const last = room.last_game;
+    if (last === "sketch") return "bluff";
+    if (last === "bluff") return "pokerface";
+    if (last === "pokerface") return "sketch";
+    return "sketch";
+  });
   const [starting, setStarting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -478,7 +488,23 @@ export default function RoomLobby({ room, players, isHost, meUserId, onGameStart
 
       {/* Game select */}
       <div>
-        <p className="font-bebas text-sm text-cream/60 tracking-[0.25em] mb-3">PICK A GAME</p>
+        <div className="flex items-center justify-between mb-3 gap-3 flex-wrap">
+          <p className="font-bebas text-sm text-cream/60 tracking-[0.25em]">PICK A GAME</p>
+          {room.last_game && (
+            <span
+              className="inline-flex items-center gap-1.5 font-bebas text-[10px] tracking-[0.2em] px-2.5 py-1 rounded-full"
+              style={{
+                background: `${GAME_META[room.last_game].accent}14`,
+                border: `1px solid ${GAME_META[room.last_game].accent}40`,
+                color: GAME_META[room.last_game].accent,
+              }}
+              title={`Your group last played ${GAME_META[room.last_game].title}`}
+            >
+              <span className="opacity-70 normal-case tracking-normal text-cream/55">last played</span>
+              {GAME_META[room.last_game].short}
+            </span>
+          )}
+        </div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           {(["sketch", "bluff", "pokerface"] as const).map((g) => {
             const meta = GAME_META[g];

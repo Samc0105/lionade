@@ -33,6 +33,7 @@ import {
   House,
   BookOpen,
   Storefront,
+  Confetti,
   type Icon,
 } from "@phosphor-icons/react";
 
@@ -62,6 +63,7 @@ const NOTIF_ICONS: Record<string, Icon> = {
   arena_challenge: Sword,
   arena_result: Trophy,
   rank_up: Medal,
+  party_invite: Confetti,
 };
 
 function StatSkeleton({ width = "w-8" }: { width?: string }) {

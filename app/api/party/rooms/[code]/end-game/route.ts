@@ -23,7 +23,7 @@ export async function POST(
 
   const { data: room } = await supabaseAdmin
     .from("party_rooms")
-    .select("id, host_user_id, status")
+    .select("id, host_user_id, status, current_game")
     .eq("code", code)
     .neq("status", "ended")
     .maybeSingle();
@@ -45,9 +45,19 @@ export async function POST(
     .eq("room_id", room.id)
     .is("ended_at", null);
 
+  // Preserve current_game as last_game so the lobby can surface a
+  // "your group last played X" breadcrumb + auto-suggest a different
+  // next game. If nothing was active (e.g. host bailed pre-game), skip
+  // the write so we don't clobber an older valid breadcrumb.
+  const update: { status: string; current_game: null; last_game?: string } = {
+    status: "lobby",
+    current_game: null,
+  };
+  if (room.current_game) update.last_game = room.current_game;
+
   await supabaseAdmin
     .from("party_rooms")
-    .update({ status: "lobby", current_game: null })
+    .update(update)
     .eq("id", room.id);
 
   return NextResponse.json({ ok: true });

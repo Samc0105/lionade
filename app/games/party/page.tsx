@@ -12,7 +12,7 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import BackButton from "@/components/BackButton";
 import { apiPost } from "@/lib/api-client";
 import { normalizeRoomCode, isValidRoomCode } from "@/lib/party/room-code";
-import { PaintBrush, ChatCircleText, Sparkle, Users, ChartLineUp } from "@phosphor-icons/react";
+import { PaintBrush, ChatCircleText, Sparkle, Users, ChartLineUp, Eye } from "@phosphor-icons/react";
 
 export default function PartyLandingPage() {
   const router = useRouter();
@@ -93,7 +93,7 @@ export default function PartyLandingPage() {
               PARTY
             </h1>
             <p className="text-cream/55 text-sm sm:text-base max-w-md mx-auto font-syne">
-              Play together. Two games tonight, more coming. Bring 2 to 8 friends and a room code.
+              Play together. Three games tonight, more coming. Grab a room code and bring 2 to 6 friends.
             </p>
           </div>
 
@@ -194,7 +194,7 @@ export default function PartyLandingPage() {
                 transition={{ duration: 0.25 }}
                 className="overflow-hidden"
               >
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-3">
                   <div
                     className="rounded-2xl p-5"
                     style={{
@@ -228,14 +228,32 @@ export default function PartyLandingPage() {
                       <li>Everyone writes a fake answer to a trivia question.</li>
                       <li>Fakes are shuffled with the truth. Vote which is real.</li>
                       <li>Pick the truth, score big. Trick someone with your fake, score bigger.</li>
-                      <li>3-8 players. 5 to 7 rounds per game.</li>
+                      <li>2 to 6 players. 5 rounds default, configurable.</li>
+                    </ul>
+                  </div>
+                  <div
+                    className="rounded-2xl p-5"
+                    style={{
+                      background: "linear-gradient(135deg, rgba(0,191,255,0.12) 0%, rgba(0,123,191,0.05) 100%)",
+                      border: "1px solid rgba(0,191,255,0.3)",
+                    }}
+                  >
+                    <div className="flex items-center gap-2 mb-2">
+                      <Eye size={24} weight="fill" className="text-[#7DD3FC]" aria-hidden="true" />
+                      <p className="font-bebas text-xl tracking-wider text-[#7DD3FC]">POKER FACE</p>
+                    </div>
+                    <ul className="space-y-1.5 text-cream/75 text-sm font-syne">
+                      <li>Hold a secret fact. Present it as truth or a bluff.</li>
+                      <li>The room calls believe or doubt. Read the face and the voice.</li>
+                      <li>Best in person or on a call. A text-only mode is built in.</li>
+                      <li>2 to 6 players. 2 rotations default, configurable.</li>
                     </ul>
                   </div>
                 </div>
                 <div className="mt-3 rounded-xl px-4 py-3 flex flex-wrap items-center gap-4 text-cream/60 text-xs font-syne"
                   style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)" }}>
                   <span className="flex items-center gap-1.5">
-                    <Users size={16} weight="regular" aria-hidden="true" /> 2 to 8 players
+                    <Users size={16} weight="regular" aria-hidden="true" /> 2 to 6 players
                   </span>
                   <span className="flex items-center gap-1.5">
                     <Sparkle size={16} weight="regular" aria-hidden="true" /> No Fang stakes in V1

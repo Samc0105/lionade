@@ -9,6 +9,7 @@ export interface PartyRoom {
   host_user_id: string;
   status: RoomStatus;
   current_game: CurrentGame;
+  last_game: CurrentGame;
   settings: PartySettings;
   created_at: string;
   ended_at: string | null;
