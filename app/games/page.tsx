@@ -361,7 +361,7 @@ export default function GamesPage() {
     if (!validWords.has(guess)) {
       setRoardleError("Not in word list");
       setRoardleShakeNonce(n => n + 1);
-      setTimeout(() => setRoardleInput(""), 360);
+      setRoardleInput("");
       setTimeout(() => setRoardleError(""), 2200);
       return;
     }
