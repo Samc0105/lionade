@@ -87,7 +87,20 @@ export default function ContactPage() {
               <CheckCircle size={52} weight="fill" color="#22C55E" aria-hidden="true" />
             </div>
             <h2 className="font-bebas text-2xl text-cream tracking-wider mb-2">Message Sent!</h2>
-            <p className="text-cream/50 text-sm">We'll get back to you soon.</p>
+            <p className="text-cream/50 text-sm mb-5">We'll get back to you soon.</p>
+            <button
+              type="button"
+              onClick={() => {
+                setSent(false);
+                setError("");
+                setCategory("");
+                setSubject("");
+                setMessage("");
+              }}
+              className="font-mono text-[10px] uppercase tracking-[0.3em] text-cream/60 hover:text-cream border border-white/[0.08] hover:border-electric/40 rounded-full px-5 py-2.5 transition-all"
+            >
+              Send another
+            </button>
           </div>
         ) : (
           <div

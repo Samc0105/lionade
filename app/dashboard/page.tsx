@@ -807,7 +807,10 @@ function DashboardContent() {
             {bounties.length === 0 && (
               <div className="rounded-[20px] p-6 text-center" style={{ background: "linear-gradient(135deg, rgba(13,21,40,0.5), rgba(10,16,32,0.5))", border: "1px solid rgba(255,215,0,0.06)" }}>
                 <Target size={32} weight="regular" color="rgba(238,244,255,0.4)" className="mx-auto mb-2" aria-hidden="true" />
-                <p className="text-cream/55 text-xs">No bounties available right now. Check back soon!</p>
+                <p className="text-cream/55 text-xs mb-3">No bounties available right now. Fresh ones drop every day.</p>
+                <Link href="/quiz" className="inline-block font-syne font-semibold text-[11px] px-4 py-2 rounded-full border border-gold/30 text-gold hover:bg-gold/10 transition-all">
+                  Earn Fangs with a quiz
+                </Link>
               </div>
             )}
           </div>

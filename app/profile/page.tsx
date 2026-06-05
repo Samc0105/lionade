@@ -452,7 +452,12 @@ function OverviewSection({ user, level, progress, xpToNext, coins, streak, xp, a
         <Card>
           <h3 className="font-bebas text-xl text-cream tracking-wider mb-4">RECENT ACTIVITY</h3>
           {activity.length === 0 ? (
-            <p className="text-cream/40 text-sm text-center py-4">No activity yet</p>
+            <div className="text-center py-6">
+              <p className="text-cream/40 text-sm mb-3">No activity yet</p>
+              <Link href="/quiz" className="inline-block font-syne font-semibold text-xs px-4 py-2 rounded-full border border-electric/30 text-electric hover:bg-electric/10 transition-all">
+                Take your first quiz
+              </Link>
+            </div>
           ) : (
             <div className="space-y-2">
               {activity.slice(0, 8).map((a: any, i: number) => (
@@ -1485,7 +1490,10 @@ function ActivitySection({ activity, quizHistory }: SharedProps) {
         <div className="space-y-2">
           {activity.length === 0 ? (
             <Card className="text-center py-10">
-              <p className="text-cream/40">No activity yet. Start grinding!</p>
+              <p className="text-cream/40 mb-4">No activity yet. Start grinding.</p>
+              <Link href="/quiz" className="inline-block px-6 py-2.5 rounded-xl bg-electric text-white text-sm font-bold">
+                Take a quiz
+              </Link>
             </Card>
           ) : activity.map((a: any, i: number) => (
             <div key={i} className="flex items-center gap-3 p-4 rounded-xl border border-electric/10 hover:border-electric/30 transition-all"

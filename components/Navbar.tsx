@@ -589,8 +589,9 @@ export default function Navbar() {
                           <p className="font-bebas text-sm text-cream tracking-wider">NOTIFICATIONS</p>
                         </div>
                         {notifications.length === 0 ? (
-                          <div className="py-8 text-center">
-                            <p className="text-cream/55 text-xs">No notifications</p>
+                          <div className="py-8 text-center px-4">
+                            <p className="text-cream/55 text-xs mb-1">You're all caught up</p>
+                            <p className="text-cream/30 text-[10px]">New activity will show up here.</p>
                           </div>
                         ) : (
                           notifications.map(n => (

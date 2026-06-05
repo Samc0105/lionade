@@ -7,6 +7,26 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 
 ---
 
+## 2026-06-05 — Bucket B dead-end loopholes (web-only, no iOS row)
+
+**Status:** 🚫 N/A (deliberate no-row decision — UX trust + native-dialog cleanup on web surfaces that don't have direct iOS counterparts).
+
+Closes Bucket B from today's audit (`docs/AUDIT_2026-06-05.md`). Same family of work as today's other [[#2026-06-05 — Bucket A visual-consistency sweep]] and the morning [[trust-gaps pass]]. Surfaces touched (web):
+
+1. **3 native `window.alert()` calls** killed across `app/quiz/page.tsx` (2 calls) and `app/classes/[id]/page.tsx`, swapped to `toastError` / `toastSuccess`. iOS uses its own native alert / sheet primitives — not a parity row.
+2. **New reusable `<ConfirmModal />`** at `components/ConfirmModal.tsx` — dark-glass aesthetic, Esc + backdrop close, async-aware (parent handler can throw to surface a toast while the modal resets), destructive variant. iOS already has its own modal pattern via `@gorhom/bottom-sheet` and native Alert — not portable as-is.
+3. **2 `window.confirm()` calls in `app/classes/[id]/page.tsx`** (class archive + note archive) replaced with `<ConfirmModal />`.
+4. **`<EditClassModal />`** — wires the "Edit details" TODO menu item to PATCH `/api/classes/[id]`. iOS classes screen (`lionade-ios/src/screens/classes/...`) already has its own edit flow.
+5. **Contact form "Send another" CTA** — resets `sent` state. iOS contact form (if/when it ships) should mirror the same secondary CTA pattern.
+6. **Avatar Picker** — 10 DiceBear styles verified 200; no changes.
+7. **Empty-state sweep** — 7 high-visibility web empty surfaces gained CTAs (Profile sidebar Recent Activity, Profile Transactions, Badges page, Dashboard Bounties, Class notes, Wallet Transactions, Notifications dropdown copy). iOS should apply the same instinct on its empty states — never an empty card without a path back into the loop. Specifically: when iOS next touches its Badges grid (already shipped), Profile activity (already shipped), Wallet (if it ships), and Notifications (already shipped), audit the empty states.
+
+**Cross-platform stance for `vp-ios`:** native dialogs (Alert / Action Sheet) on iOS are perfectly idiomatic — DO NOT chase parity by building a custom `ConfirmModal` clone. Use `Alert.alert()` from `react-native` or `expo-router`'s confirm patterns. The web ConfirmModal exists because `window.confirm()` breaks the dark-glass aesthetic and reduce-motion path; iOS native alerts respect both system-theme + reduce-motion automatically. The empty-state CTA instinct DOES port: every empty list / grid on iOS should have a primary CTA back into the loop. The contact "Send another" CTA pattern ports as-is when iOS contact ships.
+
+**Files touched (web):** `components/ConfirmModal.tsx` (new), `app/classes/[id]/page.tsx` (ConfirmModal wiring + EditClassModal append + NoteCard archive flow + Notes empty CTA), `app/quiz/page.tsx` (2 alert swaps + toast imports), `app/contact/page.tsx` (Send another CTA), `app/profile/page.tsx` (Recent Activity sidebar + Transactions tab CTAs), `app/badges/page.tsx` (empty CTA + Link import), `app/dashboard/page.tsx` (bounties empty CTA), `app/wallet/page.tsx` (transactions empty CTA), `components/Navbar.tsx` (notifications empty copy), `components/Vocab/VocabList.tsx` (ride-along confirm swap), `components/Vocab/BankSelector.tsx` (ride-along confirm swap), `components/Class/GradeTracker.tsx` (ride-along confirm swap), `components/FocusLockIn.tsx` (ride-along confirm swap). `docs/CHANGELOG.md`, vault `Daily/2026-06-05.md` Section 8 appended.
+
+---
+
 ## 2026-06-05 — Bucket A visual-consistency sweep (web-only, no iOS row)
 
 **Status:** 🚫 N/A (deliberate no-row decision — pure visual polish across 5 web surfaces, no behavior or data change).

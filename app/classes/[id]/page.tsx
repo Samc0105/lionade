@@ -1,22 +1,23 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import useSWR from "swr";
 import { useParams, useRouter } from "next/navigation";
 import {
   CaretLeft, Plus, Target, Note, Calendar, Clock,
-  CheckCircle, ArrowRight, DotsThreeVertical, Trash, PencilSimple,
+  CheckCircle, ArrowRight, DotsThreeVertical, Trash, PencilSimple, X,
 } from "@phosphor-icons/react";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Navbar from "@/components/Navbar";
 import SpaceBackground from "@/components/SpaceBackground";
 import { apiDelete, apiPatch, apiPost, swrFetcher } from "@/lib/api-client";
+import ConfirmModal from "@/components/ConfirmModal";
 import MasteryProgressBar from "@/components/Mastery/MasteryProgressBar";
 import ExamCountdown from "@/components/Class/ExamCountdown";
 import ClassStreakChip from "@/components/Class/ClassStreakChip";
 import { PushPin, PushPinSlash, Brain, ArrowsClockwise, Lightning, Coffee, BookOpenText } from "@phosphor-icons/react";
-import { toastError } from "@/lib/toast";
+import { toastError, toastSuccess } from "@/lib/toast";
 import SyllabusUpload from "@/components/Class/SyllabusUpload";
 import GradeTracker from "@/components/Class/GradeTracker";
 import FlashcardStudy from "@/components/Class/FlashcardStudy";
@@ -83,6 +84,8 @@ export default function ClassNotebookPage() {
   );
 
   const [menuOpen, setMenuOpen] = useState(false);
+  const [showArchiveConfirm, setShowArchiveConfirm] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
 
   if (isLoading || !data) {
     return (
@@ -112,10 +115,14 @@ export default function ClassNotebookPage() {
   const nextExam = upcomingExams[0];
 
   const handleArchive = async () => {
-    if (!confirm(`Archive "${cls.name}"? You can restore it later.`)) return;
     const r = await apiDelete(`/api/classes/${cls.id}`);
-    if (r.ok) router.push("/classes");
-    else alert(r.error || "Couldn't archive class.");
+    if (r.ok) {
+      toastSuccess("Class archived. You can restore it later.");
+      router.push("/classes");
+    } else {
+      toastError(r.error || "Couldn't archive class.");
+      throw new Error("archive failed");
+    }
   };
 
   return (
@@ -149,14 +156,14 @@ export default function ClassNotebookPage() {
                 <div className="absolute top-full right-0 mt-1 w-44 rounded-[8px] border border-white/[0.1] bg-navy shadow-xl py-1 z-30">
                   <button
                     type="button"
-                    onClick={() => { setMenuOpen(false); /* TODO edit modal */ }}
+                    onClick={() => { setMenuOpen(false); setShowEditModal(true); }}
                     className="w-full text-left flex items-center gap-2 px-3 py-2 text-[13px] text-cream/80 hover:bg-white/[0.04]"
                   >
                     <PencilSimple size={13} /> Edit details
                   </button>
                   <button
                     type="button"
-                    onClick={() => { setMenuOpen(false); void handleArchive(); }}
+                    onClick={() => { setMenuOpen(false); setShowArchiveConfirm(true); }}
                     className="w-full text-left flex items-center gap-2 px-3 py-2 text-[13px] text-[#EF4444] hover:bg-[#EF4444]/[0.08]"
                   >
                     <Trash size={13} /> Archive class
@@ -271,6 +278,28 @@ export default function ClassNotebookPage() {
             />
             <FlashcardStudy classId={cls.id} />
           </div>
+
+          {/* Confirm + Edit modals — Bucket B dead-end fix (2026-06-05). */}
+          <ConfirmModal
+            open={showArchiveConfirm}
+            onClose={() => setShowArchiveConfirm(false)}
+            onConfirm={async () => {
+              await handleArchive();
+              setShowArchiveConfirm(false);
+            }}
+            title="Archive this class?"
+            message={`"${cls.name}" will be hidden from your list. You can restore it later.`}
+            confirmLabel="Archive"
+            destructive
+          />
+
+          {showEditModal && (
+            <EditClassModal
+              cls={cls}
+              onClose={() => setShowEditModal(false)}
+              onSaved={() => { setShowEditModal(false); void mutate(); }}
+            />
+          )}
         </main>
       </div>
     </ProtectedRoute>
@@ -366,9 +395,16 @@ function NotesSection({
           <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-cream/40 mb-1">
             No notes yet
           </p>
-          <p className="text-[12px] text-cream/40">
-            Use ⌘K from anywhere to capture a thought — Lionade files it here.
+          <p className="text-[12px] text-cream/40 mb-3">
+            Use ⌘K from anywhere to capture a thought. Lionade files it here.
           </p>
+          <button
+            type="button"
+            onClick={() => setDrafting(true)}
+            className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.25em] text-gold hover:text-gold/80 transition-colors"
+          >
+            <Plus size={11} weight="bold" /> Add your first note
+          </button>
         </div>
       ) : (
         <div className="flex flex-col gap-2">
@@ -386,6 +422,7 @@ function NoteCard({
   onChange: () => void;
 }) {
   const [busy, setBusy] = useState(false);
+  const [showArchive, setShowArchive] = useState(false);
 
   const togglePin = async () => {
     if (busy) return;
@@ -398,11 +435,13 @@ function NoteCard({
 
   const archive = async () => {
     if (busy) return;
-    if (!confirm("Archive this note? You won't see it in the list anymore.")) return;
     setBusy(true);
     const r = await apiDelete(`/api/classes/notes/${note.id}`);
     setBusy(false);
-    if (!r.ok) { toastError(r.error || "Couldn't archive."); return; }
+    if (!r.ok) {
+      toastError(r.error || "Couldn't archive.");
+      throw new Error("note archive failed");
+    }
     onChange();
   };
 
@@ -443,7 +482,7 @@ function NoteCard({
           </button>
           <button
             type="button"
-            onClick={archive}
+            onClick={() => setShowArchive(true)}
             disabled={busy}
             aria-label="Archive"
             className="grid place-items-center w-7 h-7 rounded-full hover:bg-[#EF4444]/10 text-cream/40 hover:text-[#EF4444] transition-colors"
@@ -471,6 +510,15 @@ function NoteCard({
         <span>{new Date(note.updatedAt).toLocaleDateString()}</span>
         {note.source !== "manual" && <span>· via {note.source}</span>}
       </div>
+      <ConfirmModal
+        open={showArchive}
+        onClose={() => setShowArchive(false)}
+        onConfirm={async () => { await archive(); setShowArchive(false); }}
+        title="Archive this note?"
+        message="It won't show in the list anymore. You can still find it from search later."
+        confirmLabel="Archive"
+        destructive
+      />
     </div>
   );
 }
@@ -686,4 +734,218 @@ function PlanTaskRow({
   return task.deepLink
     ? <Link href={task.deepLink} className="block">{inner}</Link>
     : <div>{inner}</div>;
+}
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Edit class modal — Bucket B dead-end fix (2026-06-05). Wires the "Edit
+// details" menu item that was a TODO. PATCHes /api/classes/[id] with name,
+// shortCode, professor, term, color, emoji.
+// ─────────────────────────────────────────────────────────────────────────────
+const EDIT_PRESET_COLORS = [
+  "#FFD700", "#4A90D9", "#A855F7", "#22C55E",
+  "#EF4444", "#F97316", "#06B6D4", "#EAB308",
+];
+
+function EditClassModal({
+  cls, onClose, onSaved,
+}: {
+  cls: ClassDetail["class"];
+  onClose: () => void;
+  onSaved: () => void;
+}) {
+  const [name, setName] = useState(cls.name);
+  const [shortCode, setShortCode] = useState(cls.shortCode ?? "");
+  const [professor, setProfessor] = useState(cls.professor ?? "");
+  const [term, setTerm] = useState(cls.term ?? "");
+  const [color, setColor] = useState(cls.color);
+  const [emoji, setEmoji] = useState(cls.emoji ?? "");
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Esc closes (when not submitting). Aligns with CreateClassModal + the
+  // Delete Account modal pattern.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && !submitting) onClose();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [submitting, onClose]);
+
+  const submit = async () => {
+    if (submitting) return;
+    const trimmedName = name.trim();
+    if (trimmedName.length < 2) {
+      setError("Class name must be at least 2 characters.");
+      return;
+    }
+    setSubmitting(true);
+    setError(null);
+    const r = await apiPatch(`/api/classes/${cls.id}`, {
+      name: trimmedName,
+      shortCode: shortCode.trim() || null,
+      professor: professor.trim() || null,
+      term: term.trim() || null,
+      color,
+      emoji: emoji.trim() || null,
+    });
+    if (!r.ok) {
+      setError(r.error || "Couldn't save changes.");
+      setSubmitting(false);
+      return;
+    }
+    toastSuccess("Class updated.");
+    onSaved();
+  };
+
+  return (
+    <div
+      className="fixed inset-0 z-[60] grid place-items-center bg-black/60 backdrop-blur-sm px-4"
+      role="dialog"
+      aria-modal="true"
+      onClick={(e) => { if (e.target === e.currentTarget && !submitting) onClose(); }}
+    >
+      <div className="relative w-full max-w-md rounded-[14px] border border-white/[0.1] bg-gradient-to-br from-navy to-[#0a0f1d] p-5 sm:p-6 shadow-2xl">
+        <button
+          type="button"
+          onClick={onClose}
+          disabled={submitting}
+          aria-label="Close"
+          className="absolute top-3 right-3 text-cream/40 hover:text-cream grid place-items-center w-7 h-7 rounded-full hover:bg-white/[0.05] disabled:opacity-40"
+        >
+          <X size={14} weight="bold" />
+        </button>
+
+        <div className="flex items-center gap-2 mb-2">
+          <PencilSimple size={14} className="text-gold" weight="bold" />
+          <span className="font-mono text-[9.5px] uppercase tracking-[0.3em] text-gold">
+            Edit class
+          </span>
+        </div>
+        <h3 className="font-bebas text-[26px] tracking-wider text-cream leading-tight mb-4">
+          Update the details
+        </h3>
+
+        <label className="block mb-3">
+          <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-cream/50 mb-1.5 block">
+            Class name *
+          </span>
+          <input
+            value={name}
+            onChange={e => setName(e.target.value.slice(0, 80))}
+            placeholder="e.g. Calculus 2"
+            className="w-full rounded-[8px] bg-white/[0.04] border border-white/[0.08]
+              focus:border-gold/40 focus:outline-none px-3 py-2.5 text-[14px] text-cream
+              placeholder:text-cream/30"
+          />
+        </label>
+
+        <div className="grid grid-cols-2 gap-3 mb-3">
+          <label className="block">
+            <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-cream/50 mb-1.5 block">
+              Code
+            </span>
+            <input
+              value={shortCode}
+              onChange={e => setShortCode(e.target.value.slice(0, 24))}
+              placeholder="MATH 2002"
+              className="w-full rounded-[8px] bg-white/[0.04] border border-white/[0.08]
+                focus:border-gold/40 focus:outline-none px-3 py-2 text-[13px] text-cream
+                placeholder:text-cream/30"
+            />
+          </label>
+          <label className="block">
+            <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-cream/50 mb-1.5 block">
+              Term
+            </span>
+            <input
+              value={term}
+              onChange={e => setTerm(e.target.value.slice(0, 32))}
+              placeholder="Spring 2026"
+              className="w-full rounded-[8px] bg-white/[0.04] border border-white/[0.08]
+                focus:border-gold/40 focus:outline-none px-3 py-2 text-[13px] text-cream
+                placeholder:text-cream/30"
+            />
+          </label>
+        </div>
+
+        <label className="block mb-3">
+          <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-cream/50 mb-1.5 block">
+            Professor
+          </span>
+          <input
+            value={professor}
+            onChange={e => setProfessor(e.target.value.slice(0, 80))}
+            placeholder="e.g. Dr. Patel"
+            className="w-full rounded-[8px] bg-white/[0.04] border border-white/[0.08]
+              focus:border-gold/40 focus:outline-none px-3 py-2 text-[13px] text-cream
+              placeholder:text-cream/30"
+          />
+        </label>
+
+        <div className="grid grid-cols-[auto_1fr] gap-3 mb-5 items-end">
+          <label className="block">
+            <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-cream/50 mb-1.5 block">
+              Emoji
+            </span>
+            <input
+              value={emoji}
+              onChange={e => setEmoji(e.target.value.slice(0, 4))}
+              placeholder="📐"
+              className="w-16 rounded-[8px] bg-white/[0.04] border border-white/[0.08]
+                focus:border-gold/40 focus:outline-none px-3 py-2 text-[16px] text-center"
+            />
+          </label>
+          <div>
+            <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-cream/50 mb-1.5 block">
+              Color
+            </span>
+            <div className="flex gap-2 flex-wrap">
+              {EDIT_PRESET_COLORS.map(c => (
+                <button
+                  key={c}
+                  type="button"
+                  onClick={() => setColor(c)}
+                  aria-label={`Pick color ${c}`}
+                  className={`w-7 h-7 rounded-full border-2 transition-transform
+                    ${color === c ? "scale-110" : "hover:scale-105"}`}
+                  style={{
+                    backgroundColor: c,
+                    borderColor: color === c ? "#ffffff80" : "#ffffff10",
+                  }}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {error && (
+          <p className="text-[12px] text-[#EF4444] mb-3">{error}</p>
+        )}
+
+        <div className="flex items-center gap-2 justify-end">
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={submitting}
+            className="font-mono text-[10px] uppercase tracking-[0.25em] text-cream/50 hover:text-cream px-3 py-2 disabled:opacity-40"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={submit}
+            disabled={submitting || name.trim().length < 2}
+            className="rounded-full bg-gold hover:bg-gold/90 text-navy
+              font-mono text-[11px] uppercase tracking-[0.25em] px-5 py-2.5
+              disabled:opacity-40 disabled:cursor-not-allowed transition-colors
+              inline-flex items-center gap-1.5"
+          >
+            {submitting ? "Saving..." : "Save changes"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 }

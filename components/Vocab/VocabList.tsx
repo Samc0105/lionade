@@ -16,6 +16,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import useSWR from "swr";
 import { MagnifyingGlass, Trash, ClockCounterClockwise } from "@phosphor-icons/react";
 import { apiDelete, apiPatch, apiPost, swrFetcher } from "@/lib/api-client";
+import ConfirmModal from "@/components/ConfirmModal";
 import { toastError, toastSuccess } from "@/lib/toast";
 import type { VocabBank } from "./CreateBankModal";
 import type { VocabWord } from "./ReviewQueue";
@@ -97,6 +98,7 @@ export default function VocabList({ bank }: Props) {
   const [sort, setSort] = useState<Sort>("recent");
   const [confidenceFilter, setConfidenceFilter] = useState<ConfidenceFilter>("all");
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [pendingDelete, setPendingDelete] = useState<{ id: string; label: string } | null>(null);
   const [lookupCache, setLookupCache] = useState<Map<string, LookupResult>>(new Map());
   const [activePopover, setActivePopover] = useState<string | null>(null);
   const cycleRevRef = useRef(0);
@@ -132,19 +134,28 @@ export default function VocabList({ bank }: Props) {
     return sorted;
   }, [words, query, sort, confidenceFilter]);
 
-  const handleDelete = async (id: string, label: string) => {
-    if (!window.confirm(`Delete "${label}" from ${bank.name}? This can't be undone.`)) return;
+  const handleDelete = (id: string, label: string) => {
+    setPendingDelete({ id, label });
+  };
+
+  const confirmDelete = async () => {
+    if (!pendingDelete) return;
+    const { id } = pendingDelete;
     setDeletingId(id);
     try {
       const { ok, error } = await apiDelete(`/api/vocab/words/${id}`);
       if (!ok) {
         toastError(error ?? "Couldn't delete that entry.");
-        return;
+        throw new Error(error ?? "delete failed");
       }
       toastSuccess("Entry removed.");
+      setPendingDelete(null);
       mutate();
     } catch (e: unknown) {
-      toastError(e instanceof Error ? e.message : "Delete failed.");
+      if (!(e instanceof Error) || !e.message.includes("delete failed")) {
+        toastError(e instanceof Error ? e.message : "Delete failed.");
+      }
+      throw e instanceof Error ? e : new Error("Delete failed.");
     } finally {
       setDeletingId(null);
     }
@@ -406,6 +417,15 @@ export default function VocabList({ bank }: Props) {
           </ul>
         </>
       )}
+      <ConfirmModal
+        open={pendingDelete !== null}
+        onClose={() => setPendingDelete(null)}
+        onConfirm={async () => { await confirmDelete(); }}
+        title="Delete this entry?"
+        message={pendingDelete ? `"${pendingDelete.label}" will be removed from ${bank.name}. This can't be undone.` : undefined}
+        confirmLabel="Delete"
+        destructive
+      />
     </div>
   );
 }

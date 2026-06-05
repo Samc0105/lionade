@@ -12,6 +12,7 @@ import {
 } from "@/lib/launcher-bus";
 import { toastInfo, toastError } from "@/lib/toast";
 import Confetti from "@/components/Confetti";
+import ConfirmModal from "@/components/ConfirmModal";
 import ShareCard from "@/components/ShareCard";
 
 /**
@@ -242,10 +243,9 @@ function RunningTimer({
 
   // Confirm before bailing — Sam doesn't want students to lose their
   // bonus by accidentally tapping "End".
+  const [showAbortConfirm, setShowAbortConfirm] = useState(false);
   const handleAbort = () => {
-    if (confirm("End the session early? You'll lose this session's Fang bonus.")) {
-      onAbort();
-    }
+    setShowAbortConfirm(true);
   };
 
   return (
@@ -255,6 +255,15 @@ function RunningTimer({
       aria-modal="true"
       aria-label="Focus session in progress"
     >
+      <ConfirmModal
+        open={showAbortConfirm}
+        onClose={() => setShowAbortConfirm(false)}
+        onConfirm={() => { setShowAbortConfirm(false); onAbort(); }}
+        title="End the session?"
+        message="You'll lose this session's Fang bonus. Your streak is safe either way."
+        confirmLabel="End session"
+        destructive
+      />
       <div className="relative w-full max-w-md rounded-[18px] border border-electric/40 bg-gradient-to-br from-navy to-[#0a0f1d] p-7 shadow-2xl shadow-electric/20 text-center">
         <div className="flex items-center justify-center gap-2 mb-3">
           <Lightning size={13} className="text-electric" weight="fill" />

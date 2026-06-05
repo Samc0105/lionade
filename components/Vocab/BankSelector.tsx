@@ -18,6 +18,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Plus, DotsThreeVertical, PencilSimple, Palette, Trash, X, Globe, ArrowUUpLeft } from "@phosphor-icons/react";
 import { apiDelete, apiPatch } from "@/lib/api-client";
+import ConfirmModal from "@/components/ConfirmModal";
 import { toastError, toastSuccess } from "@/lib/toast";
 import type { VocabBank } from "./CreateBankModal";
 
@@ -41,6 +42,7 @@ export default function BankSelector({ banks, activeSlug, onSelect, onCreateClic
   const [menuMode, setMenuMode] = useState<"actions" | "rename" | "color">("actions");
   const [renameValue, setRenameValue] = useState("");
   const [busy, setBusy] = useState(false);
+  const [pendingDelete, setPendingDelete] = useState<VocabBank | null>(null);
   const menuRef = useRef<HTMLDivElement | null>(null);
 
   // Click-outside / Escape closes the action menu.
@@ -143,23 +145,30 @@ export default function BankSelector({ banks, activeSlug, onSelect, onCreateClic
     }
   };
 
-  const handleDelete = async (bank: VocabBank) => {
-    const confirmed = window.confirm(
-      `Delete "${bank.name}"? Every word inside this bank will be removed and this can't be undone.`,
-    );
-    if (!confirmed || busy) return;
+  const handleDelete = (bank: VocabBank) => {
+    if (busy) return;
+    setPendingDelete(bank);
+  };
+
+  const confirmDelete = async () => {
+    if (!pendingDelete || busy) return;
+    const bank = pendingDelete;
     setBusy(true);
     try {
       const { ok, error } = await apiDelete(`/api/vocab/banks/${bank.id}`);
       if (!ok) {
         toastError(error ?? "Couldn't delete that bank.");
-        return;
+        throw new Error("delete failed");
       }
       toastSuccess("Bank deleted.");
+      setPendingDelete(null);
       onMutated();
       setMenuBankId(null);
     } catch (e: unknown) {
-      toastError(e instanceof Error ? e.message : "Delete failed.");
+      if (!(e instanceof Error) || !e.message.includes("delete failed")) {
+        toastError(e instanceof Error ? e.message : "Delete failed.");
+      }
+      throw e instanceof Error ? e : new Error("Delete failed.");
     } finally {
       setBusy(false);
     }
@@ -370,6 +379,15 @@ export default function BankSelector({ banks, activeSlug, onSelect, onCreateClic
           <span>New bank</span>
         </button>
       </div>
+      <ConfirmModal
+        open={pendingDelete !== null}
+        onClose={() => setPendingDelete(null)}
+        onConfirm={async () => { await confirmDelete(); }}
+        title="Delete this bank?"
+        message={pendingDelete ? `Every word inside "${pendingDelete.name}" will be removed. This can't be undone.` : undefined}
+        confirmLabel="Delete bank"
+        destructive
+      />
     </div>
   );
 }

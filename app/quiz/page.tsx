@@ -15,6 +15,7 @@ import BackButton from "@/components/BackButton";
 import { cdnUrl } from "@/lib/cdn";
 import { SITE_HOST } from "@/lib/site-config";
 import { apiGet, apiPost, apiPatch } from "@/lib/api-client";
+import { toastError, toastSuccess } from "@/lib/toast";
 import { useHeartbeat } from "@/lib/use-heartbeat";
 import Confetti from "@/components/Confetti";
 import {
@@ -490,7 +491,7 @@ export default function QuizPage() {
 
       const qs = await getQuizQuestions(s, difficulty, topicName);
       if (qs.length === 0) {
-        alert("No questions available for this subject + difficulty yet. Try another!");
+        toastError("No questions available for this subject and difficulty yet. Try another.");
         setPhase("select");
         return;
       }
@@ -1328,7 +1329,7 @@ function ResultsScreen({
                     await navigator.share({ text });
                   } else {
                     await navigator.clipboard.writeText(text);
-                    alert("Copied to clipboard!");
+                    toastSuccess("Copied to clipboard.");
                   }
                 } catch { /* user cancelled share sheet */ }
               }}

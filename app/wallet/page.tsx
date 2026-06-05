@@ -305,7 +305,10 @@ export default function WalletPage() {
                 <div className="text-center py-20">
                   <img src={cdnUrl("/F.png")} alt="Fangs" className="w-10 h-10 object-contain mx-auto mb-3 opacity-30" />
                   <p className="font-bebas text-lg text-cream/30 tracking-wider mb-1">No transactions yet</p>
-                  <p className="text-cream/20 text-xs">Earn Fangs by completing quizzes, duels, and bounties.</p>
+                  <p className="text-cream/20 text-xs mb-5">Earn Fangs by completing quizzes, duels, and bounties.</p>
+                  <Link href="/quiz" className="inline-block font-syne font-bold text-xs px-5 py-2 rounded-full border border-gold/40 text-gold hover:bg-gold/10 transition-colors">
+                    Earn your first Fangs
+                  </Link>
                 </div>
               ) : (
                 <div className="space-y-2">

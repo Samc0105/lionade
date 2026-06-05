@@ -6,6 +6,7 @@ import {
   GraduationCap, Plus, X, PencilSimple, Trash, Star, Check,
 } from "@phosphor-icons/react";
 import { apiDelete, apiPatch, apiPost, swrFetcher } from "@/lib/api-client";
+import ConfirmModal from "@/components/ConfirmModal";
 import { toastError } from "@/lib/toast";
 
 /**
@@ -142,8 +143,15 @@ export default function GradeTracker({ classId }: Props) {
     return true;
   };
 
-  const handleDelete = async (gradeId: string) => {
-    if (!confirm("Delete this grade?")) return;
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
+
+  const handleDelete = (gradeId: string) => {
+    setPendingDeleteId(gradeId);
+  };
+
+  const confirmDelete = async () => {
+    const gradeId = pendingDeleteId;
+    if (!gradeId) return;
     // Optimistic remove.
     await mutate(
       prev => prev
@@ -155,8 +163,9 @@ export default function GradeTracker({ classId }: Props) {
     if (!r.ok) {
       toastError(r.error || "Couldn't delete grade.");
       await mutate(); // re-sync on failure
-      return;
+      throw new Error("grade delete failed");
     }
+    setPendingDeleteId(null);
     await mutate();
   };
 
@@ -209,6 +218,15 @@ export default function GradeTracker({ classId }: Props) {
       {grades.length > 0 && summary && (
         <Footer summary={summary} />
       )}
+      <ConfirmModal
+        open={pendingDeleteId !== null}
+        onClose={() => setPendingDeleteId(null)}
+        onConfirm={async () => { await confirmDelete(); }}
+        title="Delete this grade?"
+        message="This row will be removed and your weighted grade will recalculate. You can add it back later."
+        confirmLabel="Delete"
+        destructive
+      />
     </section>
   );
 }
@@ -408,7 +426,7 @@ function GradesTable({
 }: {
   grades: Grade[];
   onUpdate: (id: string, patch: Partial<Grade>) => Promise<boolean>;
-  onDelete: (id: string) => Promise<void>;
+  onDelete: (id: string) => void;
 }) {
   return (
     <div className="flex flex-col gap-1.5">
@@ -424,7 +442,7 @@ function GradeRow({
 }: {
   grade: Grade;
   onUpdate: (id: string, patch: Partial<Grade>) => Promise<boolean>;
-  onDelete: (id: string) => Promise<void>;
+  onDelete: (id: string) => void;
 }) {
   const [editing, setEditing] = useState(false);
   const isPending = grade.id.startsWith("tmp_");
