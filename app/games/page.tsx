@@ -97,6 +97,34 @@ function incrementDailyPlays(gameType: string) {
   localStorage.setItem(key, String(current + 1));
 }
 
+// Walks the per-game daily-play keys backwards from today and counts the
+// consecutive-day run. Today not yet played is treated as "streak alive" so
+// the badge doesn't drop the moment a new day begins; the streak only breaks
+// when a full calendar day passes with no plays at all.
+function getArcadeStreak(): number {
+  if (typeof window === "undefined") return 0;
+  let streak = 0;
+  const d = new Date();
+  for (let i = 0; i < 30; i++) {
+    const date = d.toISOString().split("T")[0];
+    const playedThisDay = Object.keys(localStorage).some(
+      (k) =>
+        k.startsWith("lionade_plays_") &&
+        k.endsWith(`_${date}`) &&
+        parseInt(localStorage.getItem(k) ?? "0") > 0,
+    );
+    if (playedThisDay) {
+      streak++;
+    } else if (i === 0) {
+      // Today not played YET — streak preserved from yesterday-and-earlier.
+    } else {
+      break;
+    }
+    d.setDate(d.getDate() - 1);
+  }
+  return streak;
+}
+
 const DAILY_LIMITS: Record<string, number> = { roardle: 3, flashcards: 999, timeline: 3, party: 999, pardy: 999 };
 
 // ── Component ────────────────────────────────────────────────
@@ -964,9 +992,30 @@ export default function GamesPage() {
           {/* ═══ HEADER — title left, lion crest as a real right-side hero ═══ */}
           <header className="mb-10 animate-slide-up flex items-start justify-between gap-6">
             <div>
-              <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-cream/30 mb-2">
-                private ledger · est. 2026
-              </p>
+              <div className="flex flex-wrap items-center gap-3 mb-2">
+                <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-cream/30">
+                  private ledger · est. 2026
+                </p>
+                {(() => {
+                  const streak = getArcadeStreak();
+                  if (streak < 2) return null;
+                  return (
+                    <span
+                      className="inline-flex items-center gap-1 font-bebas text-[10px] tracking-[0.22em] px-2 py-0.5 rounded-full"
+                      style={{
+                        background: "linear-gradient(135deg, rgba(249,115,22,0.22) 0%, rgba(255,215,0,0.10) 100%)",
+                        border: "1px solid rgba(249,115,22,0.5)",
+                        color: "#FDBA74",
+                        boxShadow: "0 0 10px rgba(249,115,22,0.18)",
+                      }}
+                      title={`${streak} consecutive days with at least one ticket pulled`}
+                    >
+                      <span aria-hidden="true">🔥</span>
+                      {streak}-day run
+                    </span>
+                  );
+                })()}
+              </div>
               <h1 className="font-bebas text-[clamp(3.5rem,11vw,9rem)] text-cream tracking-tight leading-[0.86]">
                 THE<br />ARCADE
               </h1>
