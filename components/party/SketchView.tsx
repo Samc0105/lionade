@@ -1501,13 +1501,77 @@ export default function SketchView({
 
       {/* Drawing surface */}
       {round && (phase === "drawing" || phase === "celebrating" || phase === "reveal") && (
-        <div className="space-y-3">
+        <div className="lg:grid lg:grid-cols-[1fr_300px] lg:gap-3 space-y-3 lg:space-y-0">
+          <div className="space-y-3 min-w-0">
           {/* Canvas + stamp wrapper. The stamp + green-corner overlay are
               siblings of the canvas (NOT children of it) so they never touch
               the 30Hz stroke paint loop in SketchCanvas. They sit inside this
               `relative` wrapper so they can be absolutely positioned over the
               canvas. */}
           <div className="relative">
+            {/* Word-blanks overlay — pinned at the top of the canvas so
+                guessers see the letter slots WITHOUT scrolling past the
+                drawing. pointer-events-none so the drawer's strokes pass
+                straight through to the canvas underneath. Renders the same
+                blankCells data that used to live below the canvas. */}
+            {phase === "drawing" && blankCells.length > 0 && (
+              <div
+                className="absolute top-2 left-1/2 -translate-x-1/2 z-10 px-3 py-1.5 rounded-xl pointer-events-none flex flex-wrap items-center justify-center gap-1.5 max-w-[calc(100%-1rem)]"
+                style={{
+                  background: "rgba(8,6,16,0.72)",
+                  border: "1px solid rgba(255,255,255,0.1)",
+                  backdropFilter: "blur(8px)",
+                  WebkitBackdropFilter: "blur(8px)",
+                  boxShadow: "0 6px 24px rgba(0,0,0,0.45)",
+                }}
+              >
+                {(() => {
+                  const STAGGER_MS = 70;
+                  const newlyFilled: number[] = [];
+                  for (let i = 0; i < blankCells.length; i++) {
+                    const c = blankCells[i];
+                    if (c.kind === "letter" && c.filled && !flipBatchRef.current.has(i)) {
+                      newlyFilled.push(i);
+                    }
+                  }
+                  if (newlyFilled.length > 0) {
+                    flipBatchCounterRef.current += 1;
+                    const classKey = flipBatchCounterRef.current;
+                    newlyFilled.forEach((pos, idx) => {
+                      flipBatchRef.current.set(pos, { delayMs: idx * STAGGER_MS, classKey });
+                    });
+                  }
+                  return blankCells.map((cell, i) => {
+                    if (cell.kind === "fixed") {
+                      return (
+                        <span key={`fixed-${i}`} aria-hidden="true" className="w-2 text-center font-bebas text-lg text-cream/45">
+                          {cell.char === " " ? " " : cell.char}
+                        </span>
+                      );
+                    }
+                    const flip = flipBatchRef.current.get(i);
+                    const cellKey = flip ? `cell-${i}-flip${flip.classKey}` : `cell-${i}-blank`;
+                    return (
+                      <span
+                        key={cellKey}
+                        className={`inline-flex items-center justify-center rounded-md font-bebas text-base tracking-wider ${cell.filled && !reduced ? "pa-tile-flip" : ""}`}
+                        style={{
+                          width: "1.4rem",
+                          height: "1.75rem",
+                          background: cell.filled ? "rgba(34,197,94,0.22)" : "rgba(255,255,255,0.06)",
+                          border: cell.filled ? "1px solid rgba(34,197,94,0.6)" : "1px solid rgba(255,255,255,0.14)",
+                          color: cell.filled ? "#86EFAC" : "transparent",
+                          boxShadow: cell.filled && (!flip || reduced) ? "0 0 8px rgba(34,197,94,0.22)" : undefined,
+                          animationDelay: flip && !reduced ? `${flip.delayMs}ms` : undefined,
+                        }}
+                      >
+                        {cell.filled ? cell.char.toUpperCase() : ""}
+                      </span>
+                    );
+                  });
+                })()}
+              </div>
+            )}
             <SketchCanvas
               roomCode={room.code}
               roundId={round.id}
@@ -1669,93 +1733,6 @@ export default function SketchView({
             )}
           </div>
 
-          {/* Wordle blanks — the word being guessed, one box per letter, with
-              spaces/punctuation shown. Correct-position letters turn green as
-              the room reveals them. The SECRET never reaches guesser clients;
-              guessers fill a box only once the server confirms that position. */}
-          {phase === "drawing" && blankCells.length > 0 && (() => {
-            // ── Wordle flip batching ──
-            // Any letter cell that just transitioned to `filled` this render and
-            // is NOT yet in flipBatchRef gets registered into a new batch and
-            // assigned a stagger delay (~70ms per cell within the batch). The
-            // batch counter bumps once per wave so the next reveal's first cell
-            // starts at delay 0 (not stacked onto the prior wave). The drawer's
-            // word lands all at once on first render -> the whole word ripples
-            // letter-by-letter in a single wave, which sells the "locked it in"
-            // beat for them too.
-            const STAGGER_MS = 70;
-            const newlyFilled: number[] = [];
-            for (let i = 0; i < blankCells.length; i++) {
-              const c = blankCells[i];
-              if (c.kind === "letter" && c.filled && !flipBatchRef.current.has(i)) {
-                newlyFilled.push(i);
-              }
-            }
-            if (newlyFilled.length > 0) {
-              flipBatchCounterRef.current += 1;
-              const classKey = flipBatchCounterRef.current;
-              newlyFilled.forEach((pos, idx) => {
-                flipBatchRef.current.set(pos, {
-                  delayMs: idx * STAGGER_MS,
-                  classKey,
-                });
-              });
-            }
-            return (
-              <div className="flex flex-wrap items-center justify-center gap-1.5 py-1">
-                {blankCells.map((cell, i) => {
-                  if (cell.kind === "fixed") {
-                    return (
-                      <span
-                        key={`fixed-${i}`}
-                        aria-hidden="true"
-                        className="w-3 text-center font-bebas text-2xl text-cream/40"
-                      >
-                        {cell.char === " " ? " " : cell.char}
-                      </span>
-                    );
-                  }
-                  const flip = flipBatchRef.current.get(i);
-                  // The `key` includes the flip-batch classKey so when a cell
-                  // first becomes filled, React remounts the span and the CSS
-                  // animation kicks off cleanly. Subsequent renders preserve
-                  // the same key so unrelated state (chat ticks) don't retrigger.
-                  const cellKey = flip ? `cell-${i}-flip${flip.classKey}` : `cell-${i}-blank`;
-                  return (
-                    <span
-                      key={cellKey}
-                      className={`inline-flex items-center justify-center rounded-md font-bebas text-xl tracking-wider ${
-                        cell.filled && !reduced ? "pa-tile-flip" : ""
-                      }`}
-                      style={{
-                        width: "1.75rem",
-                        height: "2.25rem",
-                        background: cell.filled
-                          ? "rgba(34,197,94,0.22)"
-                          : "rgba(255,255,255,0.04)",
-                        border: cell.filled
-                          ? "1px solid rgba(34,197,94,0.6)"
-                          : "1px solid rgba(255,255,255,0.12)",
-                        color: cell.filled ? "#86EFAC" : "transparent",
-                        // When the cell is mid-flip the keyframe owns its own
-                        // box-shadow. When the cell is simply filled (catch-up
-                        // fetch or reduced motion), keep the static green halo
-                        // so the row doesn't look unstyled.
-                        boxShadow:
-                          cell.filled && (!flip || reduced)
-                            ? "0 0 10px rgba(34,197,94,0.25)"
-                            : undefined,
-                        animationDelay:
-                          flip && !reduced ? `${flip.delayMs}ms` : undefined,
-                      }}
-                    >
-                      {cell.filled ? cell.char.toUpperCase() : ""}
-                    </span>
-                  );
-                })}
-              </div>
-            );
-          })()}
 
           {isDrawer && phase === "drawing" && (
             <SketchToolbar
@@ -1771,14 +1748,21 @@ export default function SketchView({
               canUndo={strokeCount > 0}
             />
           )}
+          </div>{/* /left-column (canvas + toolbar) */}
+
+          {/* Right column on lg+, stacks below on mobile. Holds the guesses
+              feed + guess input / spectator notice / iGotIt confirmation so
+              everything sits next to the canvas and never requires scroll. */}
+          <div className="space-y-3 min-w-0 lg:max-h-[78vh] lg:overflow-hidden lg:flex lg:flex-col">
 
           {/* Shared guesses panel — the WHOLE room sees every guesser's attempt
               in real time (name + guess). Visible to the drawer too: seeing
               guesses is just progress, and the drawer already knows the word.
-              The secret word itself is never shown to guessers here. */}
+              The secret word itself is never shown to guessers here. On lg+
+              the panel grows to fill the column above the input. */}
           {phase === "drawing" && (
             <div
-              className="rounded-2xl p-3 max-h-48 overflow-y-auto"
+              className="rounded-2xl p-3 max-h-48 overflow-y-auto lg:max-h-none lg:flex-1"
               style={{
                 background: "rgba(16,12,26,0.6)",
                 border: "1px solid rgba(255,255,255,0.06)",
@@ -1788,28 +1772,58 @@ export default function SketchView({
                 GUESSES
               </p>
               <AnimatePresence initial={false}>
-                {chat.slice(-14).map((m) => (
-                  <motion.div
-                    key={m.id}
-                    initial={reduced ? false : { opacity: 0, y: 4 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className={`text-sm font-syne py-0.5 rounded-md px-1.5 -mx-1.5 ${
-                      reduced ? "" : "pa-guess-pop"
-                    } ${m.variant === "correct" && !reduced ? "pa-correct-flash" : ""}`}
-                  >
-                    <span className="text-cream/55">{m.username ?? "Someone"}</span>
-                    {m.variant === "correct" ? (
-                      <span className="text-emerald-300 font-bold"> got it! 🎉</span>
-                    ) : m.variant === "close" ? (
-                      <span className="text-amber-300"> is close!</span>
-                    ) : (
-                      <>
-                        <span className="text-cream/80">: </span>
-                        <GuessText body={m.body} matched={m.matched} />
-                      </>
-                    )}
-                  </motion.div>
-                ))}
+                {chat.slice(-14).map((m) => {
+                  const isFirstCorrect =
+                    m.variant === "correct" &&
+                    firstCorrectRef.current?.user_id === m.user_id;
+                  return (
+                    <motion.div
+                      key={m.id}
+                      initial={reduced ? false : { opacity: 0, y: 4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className={`text-sm font-syne py-0.5 rounded-md px-1.5 -mx-1.5 ${
+                        reduced ? "" : "pa-guess-pop"
+                      } ${m.variant === "correct" && !reduced ? "pa-correct-flash" : ""}`}
+                      style={
+                        m.variant === "close"
+                          ? {
+                              background: "rgba(245,158,11,0.10)",
+                              border: "1px solid rgba(245,158,11,0.28)",
+                            }
+                          : undefined
+                      }
+                    >
+                      <span className="text-cream/55">{m.username ?? "Someone"}</span>
+                      {m.variant === "correct" ? (
+                        <>
+                          <span className="text-emerald-300 font-bold"> got it!</span>
+                          {isFirstCorrect && (
+                            <span
+                              className="ml-2 inline-block align-middle font-bebas text-[10px] tracking-[0.18em] px-1.5 py-0.5 rounded-full"
+                              style={{
+                                background: "linear-gradient(135deg, #FFD700 0%, #B8960C 100%)",
+                                color: "#04080F",
+                                boxShadow: "0 0 12px rgba(255,215,0,0.45)",
+                              }}
+                              aria-label="First correct guess"
+                            >
+                              FIRST
+                            </span>
+                          )}
+                        </>
+                      ) : m.variant === "close" ? (
+                        <span className="text-amber-300 font-semibold">
+                          <span aria-hidden="true" className="mr-0.5">🔥</span> so close!
+                        </span>
+                      ) : (
+                        <>
+                          <span className="text-cream/80">: </span>
+                          <GuessText body={m.body} matched={m.matched} />
+                        </>
+                      )}
+                    </motion.div>
+                  );
+                })}
               </AnimatePresence>
               {chat.length === 0 && (
                 <p className="text-cream/30 text-xs font-syne italic text-center py-1">
@@ -1877,6 +1891,7 @@ export default function SketchView({
               YOU GOT IT! WAITING FOR THE ROUND TO END...
             </div>
           )}
+          </div>{/* /right-column (guesses + input) */}
         </div>
       )}
 
