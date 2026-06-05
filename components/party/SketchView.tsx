@@ -179,6 +179,13 @@ export default function SketchView({
   const [lockedWord, setLockedWord] = useState<string | null>(null);
   const [timeLeft, setTimeLeft] = useState(90);
   const [phase, setPhase] = useState<"loading" | "select-word" | "drawing" | "celebrating" | "reveal">("loading");
+  // 3-2-1 pre-round countdown. Fires ONLY on the select-word → drawing
+  // transition (not on initial load into an active round — those are
+  // mid-round joins where the countdown would be wrong). Value goes
+  // 3 → 2 → 1 → 0 (overlay hides at 0). Server-side timer still ticks
+  // during the intro — drawer loses ~3s of a 90s round, worth the moment.
+  const [countdownTicks, setCountdownTicks] = useState(0);
+  const prevPhaseRef = useRef<typeof phase>("loading");
   const [reveal, setReveal] = useState<{
     word: string;
     factoid: string | null;
@@ -282,6 +289,25 @@ export default function SketchView({
     }
     return new Date(me.joined_at).getTime() > new Date(round.started_at).getTime();
   }, [round?.started_at, round?.drawer_user_id, me?.joined_at, meUserId, phase]);
+
+  // ── 3-2-1 pre-round countdown trigger ──
+  // Fires on select-word → drawing transition only. Reduced-motion users skip
+  // the intro entirely (countdownTicks stays 0). Server-side clock still ticks
+  // during the intro window — the drawer loses ~3s of a 90s round.
+  useEffect(() => {
+    const prev = prevPhaseRef.current;
+    prevPhaseRef.current = phase;
+    if (prev === "select-word" && phase === "drawing" && !reduced) {
+      setCountdownTicks(3);
+    }
+  }, [phase, reduced]);
+
+  // Tick countdown 3 → 2 → 1 → 0. Cleared on unmount or phase change.
+  useEffect(() => {
+    if (countdownTicks <= 0) return;
+    const t = setTimeout(() => setCountdownTicks(c => c - 1), 1000);
+    return () => clearTimeout(t);
+  }, [countdownTicks]);
 
   // ── Single subscribed channel ref + helper ──
   // Every send MUST go through this ref. supabase.channel().send() silently
@@ -1042,8 +1068,68 @@ export default function SketchView({
   // disabled at the CSS level so it never intercepts canvas strokes.
   const showPanicVignette = isDrawer && phase === "drawing" && timeLeft > 0 && timeLeft < 5 && !reduced;
 
+  // 3-2-1 cinematic intro overlay. Renders during the brief window between
+  // select-word lock-in and the first stroke. Pointer-events: none so it never
+  // blocks an accidental early canvas tap (drawer's tap-to-draw is queued by
+  // SketchCanvas anyway). Full-screen blur backdrop + round-meta header + giant
+  // number that scales in per tick.
+  const drawerName = round
+    ? players.find((p) => p.user_id === round.drawer_user_id)?.username
+    : null;
+  const showCountdown = countdownTicks > 0 && phase === "drawing";
+
   return (
     <div className="space-y-4">
+      {showCountdown && (
+        <motion.div
+          key={`countdown-${countdownTicks}`}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          aria-hidden="true"
+          className="fixed inset-0 z-40 flex flex-col items-center justify-center pointer-events-none"
+          style={{
+            background: "radial-gradient(circle, rgba(8,6,16,0.78) 0%, rgba(8,6,16,0.92) 100%)",
+            backdropFilter: "blur(6px)",
+            WebkitBackdropFilter: "blur(6px)",
+          }}
+        >
+          <div className="flex flex-col items-center gap-2 mb-8">
+            <p className="font-mono text-[11px] uppercase tracking-[0.35em] text-cream/50">
+              round {round?.round_num ?? 1}
+            </p>
+            <p className="font-bebas text-3xl sm:text-4xl tracking-wider text-cream">
+              {drawerName ?? "drawer"} <span className="text-cream/45">is drawing</span>
+            </p>
+            {subjectLabel && (
+              <span
+                className="mt-1 inline-flex items-center font-bebas text-xs tracking-[0.25em] px-3 py-1 rounded-full"
+                style={{
+                  background: "rgba(168,85,247,0.18)",
+                  border: "1px solid rgba(168,85,247,0.45)",
+                  color: "#E9D5FF",
+                }}
+              >
+                {subjectLabel}
+              </span>
+            )}
+          </div>
+          <motion.p
+            key={`tick-${countdownTicks}`}
+            initial={{ scale: 0.4, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 1.6, opacity: 0 }}
+            transition={{ type: "spring", stiffness: 320, damping: 18 }}
+            className="font-bebas text-[10rem] sm:text-[14rem] leading-none tracking-wider text-[#FFD700]"
+            style={{ textShadow: "0 0 64px rgba(255,215,0,0.5)" }}
+          >
+            {countdownTicks}
+          </motion.p>
+          <p className="font-bebas text-sm tracking-[0.4em] text-cream/55 mt-6">
+            {isDrawer ? "get ready to draw" : "watch the canvas"}
+          </p>
+        </motion.div>
+      )}
       {showPanicVignette && <div aria-hidden="true" className="pa-panic-vignette" />}
       <NinnyHostBubble message={ninnyMsg} />
 
