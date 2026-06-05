@@ -4759,3 +4759,17 @@ html.light .space-bg-container { display: none; }
   .au-glitch:hover { animation: none !important; transform: none !important; text-shadow: none !important; }
   .au-fire { transform: none !important; }
 }
+
+@keyframes roardle-shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-6px); }
+  40% { transform: translateX(6px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(4px); }
+}
+.roardle-shake {
+  animation: roardle-shake 360ms cubic-bezier(.36,.07,.19,.97) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .roardle-shake { animation: none !important; }
+}

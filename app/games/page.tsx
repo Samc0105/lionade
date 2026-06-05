@@ -131,6 +131,7 @@ export default function GamesPage() {
   const [roardleGuesses, setRoardleGuesses] = useState<string[]>([]);
   const [roardleInput, setRoardleInput] = useState("");
   const [roardleError, setRoardleError] = useState("");
+  const [roardleShakeNonce, setRoardleShakeNonce] = useState(0);
   const [roardleOver, setRoardleOver] = useState(false);
   const [roardleWon, setRoardleWon] = useState(false);
 
@@ -359,8 +360,9 @@ export default function GamesPage() {
     );
     if (!validWords.has(guess)) {
       setRoardleError("Not in word list");
-      setRoardleInput("");
-      setTimeout(() => setRoardleError(""), 1500);
+      setRoardleShakeNonce(n => n + 1);
+      setTimeout(() => setRoardleInput(""), 360);
+      setTimeout(() => setRoardleError(""), 2200);
       return;
     }
 
@@ -565,7 +567,10 @@ export default function GamesPage() {
                 // Score the whole row once (duplicate-aware) rather than per cell.
                 const rowStatuses = guess ? getRowStatuses(guess, roardleWord) : null;
                 return (
-                  <div key={row} className="flex justify-center gap-1.5">
+                  <div
+                    key={isCurrentRow ? `row-${row}-shake-${roardleShakeNonce}` : `row-${row}`}
+                    className={`flex justify-center gap-1.5 ${isCurrentRow && roardleShakeNonce > 0 ? "roardle-shake" : ""}`}
+                  >
                     {Array.from({ length: wordLength }).map((_, col) => {
                       const letter = isCurrentRow ? (roardleInput[col] ?? "") : (guess[col] ?? "");
                       const status = rowStatuses ? rowStatuses[col] : null;
@@ -626,7 +631,7 @@ export default function GamesPage() {
                     return (
                       <button key={key}
                         onClick={() => { if (roardleInput.length < wordLength && !roardleOver) setRoardleInput(prev => prev + key); }}
-                        className="w-8 h-10 sm:w-9 sm:h-11 rounded-lg font-bebas text-sm transition-all"
+                        className="w-9 h-11 sm:w-10 sm:h-12 rounded-lg font-bebas text-base transition-all"
                         style={{
                           background: s === "correct" ? "#22C55E" : s === "present" ? "#EAB308" : s === "absent" ? "rgba(255,255,255,0.05)" : "var(--game-key-bg, rgba(255,255,255,0.1))",
                           color: s && s !== "unused" ? "#fff" : "var(--game-key-text, #EEF4FF)",
