@@ -76,6 +76,23 @@ export default function BluffView({
   const [timeLeft, setTimeLeft] = useState(0);
   const advanceLock = useRef(false);
 
+  // 3-2-1 pre-round countdown — fires on loading → write transition only
+  // (mirrors Sketchy's approach). Reduced-motion users skip the intro.
+  const [countdownTicks, setCountdownTicks] = useState(0);
+  const prevPhaseRef = useRef<Phase>("loading");
+  useEffect(() => {
+    const prev = prevPhaseRef.current;
+    prevPhaseRef.current = phase;
+    if (prev === "loading" && phase === "write" && !reduced) {
+      setCountdownTicks(3);
+    }
+  }, [phase, reduced]);
+  useEffect(() => {
+    if (countdownTicks <= 0) return;
+    const t = setTimeout(() => setCountdownTicks(c => c - 1), 1000);
+    return () => clearTimeout(t);
+  }, [countdownTicks]);
+
   // ── juice-only transient state (no gameplay effect, derived from `detail`
   //    already in client state — nothing extra is fetched) ──
   const [confirmKey, setConfirmKey] = useState(0); // bumps on a successful submit -> button pop
@@ -292,18 +309,96 @@ export default function BluffView({
   })), [players]);
 
   if (phase === "loading" || !detail) {
+    // Cinematic loading — same shape as the Sketchy intro, gold-flavored to
+    // match Bluff's accent. Two pulsing radial glows (gold primary + purple
+    // accent) staggered behind the spinner.
     return (
-      <div className="flex flex-col items-center py-16 gap-4">
-        <p className="font-bebas text-2xl text-cream/60 tracking-wider">DEALING ROUND...</p>
-        <div className="w-12 h-12 rounded-full border-2 border-[#FFD700]/40 border-t-[#FFD700] animate-spin" />
+      <div className="flex flex-col items-center py-20 gap-5 relative">
+        <div className="relative w-28 h-28 flex items-center justify-center">
+          <span
+            aria-hidden="true"
+            className={`absolute inset-0 rounded-full ${reduced ? "" : "pa-deal-glow"}`}
+            style={{
+              background: "radial-gradient(circle, rgba(255,215,0,0.45) 0%, transparent 70%)",
+            }}
+          />
+          <span
+            aria-hidden="true"
+            className={`absolute inset-3 rounded-full ${reduced ? "" : "pa-deal-glow"}`}
+            style={{
+              background: "radial-gradient(circle, rgba(168,85,247,0.35) 0%, transparent 70%)",
+              animationDelay: "0.6s",
+            }}
+          />
+          <div className="w-12 h-12 rounded-full border-2 border-[#FFD700]/40 border-t-[#FFD700] animate-spin relative z-10" />
+        </div>
+        <p className="font-bebas text-2xl text-cream/70 tracking-[0.3em]">DEALING ROUND</p>
+        <p className="text-cream/40 text-xs font-syne italic">queueing trivia, brewing fakes</p>
       </div>
     );
   }
 
   const round = detail.round;
+  // Time-pressure vignette — active write or vote phase under 5s, drawer-style
+  // pulse on the screen edges. pa-panic-vignette + pointer-events: none from
+  // the CSS class so it never blocks the fake input / vote tap.
+  const showPanicVignette =
+    (phase === "write" || phase === "vote") && timeLeft > 0 && timeLeft < 5 && !reduced;
+  const showCountdown = countdownTicks > 0 && phase === "write";
 
   return (
     <div className="space-y-4">
+      {showPanicVignette && <div aria-hidden="true" className="pa-panic-vignette" />}
+      {showCountdown && (
+        <motion.div
+          key={`countdown-${countdownTicks}`}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          aria-hidden="true"
+          className="fixed inset-0 z-40 flex flex-col items-center justify-center pointer-events-none"
+          style={{
+            background: "radial-gradient(circle, rgba(8,6,16,0.78) 0%, rgba(8,6,16,0.92) 100%)",
+            backdropFilter: "blur(6px)",
+            WebkitBackdropFilter: "blur(6px)",
+          }}
+        >
+          <div className="flex flex-col items-center gap-2 mb-8">
+            <p className="font-mono text-[11px] uppercase tracking-[0.35em] text-cream/50">
+              round {round.round_num}
+            </p>
+            <p className="font-bebas text-3xl sm:text-4xl tracking-wider text-cream">
+              get ready to <span className="text-[#FFD700]">bluff</span>
+            </p>
+            {round.category && (
+              <span
+                className="mt-1 inline-flex items-center font-bebas text-xs tracking-[0.25em] px-3 py-1 rounded-full"
+                style={{
+                  background: "rgba(255,215,0,0.18)",
+                  border: "1px solid rgba(255,215,0,0.45)",
+                  color: "#FDE68A",
+                }}
+              >
+                {round.category}
+              </span>
+            )}
+          </div>
+          <motion.p
+            key={`tick-${countdownTicks}`}
+            initial={{ scale: 0.4, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 1.6, opacity: 0 }}
+            transition={{ type: "spring", stiffness: 320, damping: 18 }}
+            className="font-bebas text-[10rem] sm:text-[14rem] leading-none tracking-wider text-[#FFD700]"
+            style={{ textShadow: "0 0 64px rgba(255,215,0,0.5)" }}
+          >
+            {countdownTicks}
+          </motion.p>
+          <p className="font-bebas text-sm tracking-[0.4em] text-cream/55 mt-6">
+            write a fake. fool the room.
+          </p>
+        </motion.div>
+      )}
       <NinnyHostBubble message={ninnyMsg} />
 
       {/* Question card */}
