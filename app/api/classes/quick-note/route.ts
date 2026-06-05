@@ -137,9 +137,12 @@ export async function POST(req: NextRequest) {
         .map(c => `- ${c.id}: ${c.name}${c.short_code ? ` (${c.short_code})` : ""}${c.term ? ` · ${c.term}` : ""}`)
         .join("\n");
 
-// 12-factor #2 telemetry
-      console.info(`[classes/quick-note] prompt=${QUICK_NOTE_PROMPT_VERSION}`);
       const { json } = await callAIForJson({
+        telemetry: {
+          route: "classes/quick-note",
+          promptVersion: QUICK_NOTE_PROMPT_VERSION,
+          userId,
+        },
         model: LLM_CHEAP,
         maxTokens: 350,
         temperature: 0.3,

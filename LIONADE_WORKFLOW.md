@@ -49,7 +49,7 @@ A feature is "done" only when ALL of these are true:
 - [ ] **iOS parity row added to `IOS_PARITY.md`** (status `❌ pending` is acceptable — what matters is it's tracked)
 - [ ] `design-accessibility` checked (if UI involved)
 - [ ] `security-auth-guardian` checked (if API/data involved)
-- [ ] Self-check list in `CLAUDE_AGENT.md` passes
+- [ ] Self-check list in `docs/CLAUDE_AGENT.md` passes
 
 Half-done features get a partial-status entry in `IOS_PARITY.md`, not a "skip iOS" pass.
 
@@ -76,9 +76,9 @@ iOS app reference:
 - ❌ Marking a feature done without an `IOS_PARITY.md` entry
 - ❌ Using `general-purpose` agent when a specialist exists
 - ❌ Skipping `quality-code-reviewer` because "it's just a small change"
-- ❌ Touching files in `CLAUDE_AGENT.md`'s "Do Not Touch" list without explicit user instruction
+- ❌ Touching files in `docs/CLAUDE_AGENT.md`'s "Do Not Touch" list without explicit user instruction
 - ❌ Adding features that violate the Fangs economy without `data-economist` review
-- ❌ Adding new SQL tables without RLS (see `CLAUDE_AGENT.md` § Database Changes)
+- ❌ Adding new SQL tables without RLS (see `docs/CLAUDE_AGENT.md` § Database Changes)
 
 ---
 

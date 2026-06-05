@@ -42,6 +42,15 @@ export interface AiCallOptions {
   timeoutMs?: number;
   /** If true, asks OpenAI for JSON output via response_format. Defaults true when using callAIForJson. */
   jsonMode?: boolean;
+  /** 12-factor #2 + #9 telemetry. When both are set, every call (success or
+   *  failure) writes a row to ai_call_log via supabaseAdmin. Both must be set
+   *  to opt-in; routes that don't set them keep the prior fire-and-forget
+   *  behavior so legacy callers don't break. */
+  telemetry?: {
+    route: string;             // e.g. "mastery/parse", "ninny/chat"
+    promptVersion: string;     // e.g. "v1-2026-06-05"
+    userId?: string | null;    // null for anonymous (none today)
+  };
 }
 
 export interface ChatMessage {
@@ -59,6 +68,34 @@ export interface AiResult {
   stopReason?: string | null;
 }
 
+// 12-factor telemetry — fire-and-forget insert into ai_call_log. Lazy-imports
+// supabaseAdmin so callers without telemetry options never load the server
+// client. Errors swallowed: telemetry must never break a user-facing AI call.
+async function logAiCall(
+  telemetry: NonNullable<AiCallOptions["telemetry"]>,
+  result: { model: string; inputTokens: number; outputTokens: number; costMicroUsd: number },
+  success: boolean,
+  errorShort: string | null,
+): Promise<void> {
+  try {
+    const { supabaseAdmin } = await import("@/lib/supabase-server");
+    await supabaseAdmin.from("ai_call_log").insert({
+      user_id: telemetry.userId ?? null,
+      route: telemetry.route.slice(0, 80),
+      prompt_version: telemetry.promptVersion.slice(0, 32),
+      model: result.model.slice(0, 40),
+      input_tokens: result.inputTokens,
+      output_tokens: result.outputTokens,
+      cost_micro_usd: result.costMicroUsd,
+      success,
+      error_short: errorShort ? errorShort.slice(0, 200) : null,
+    });
+  } catch (e) {
+    // Never let telemetry sink a real call. Note but don't throw.
+    console.error("[ai_call_log] insert failed:", (e as Error).message);
+  }
+}
+
 // ── Core call ────────────────────────────────────────────────────────────────
 export async function callAI(opts: AiCallOptions): Promise<AiResult> {
   const apiKey = process.env.OPENAI_API_KEY;
@@ -68,27 +105,49 @@ export async function callAI(opts: AiCallOptions): Promise<AiResult> {
     ? opts.userContent
     : [{ role: "user", content: opts.userContent }];
 
-  const res = await fetch("https://api.openai.com/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify({
-      model: opts.model,
-      max_tokens: opts.maxTokens ?? 1024,
-      temperature: opts.temperature ?? 0.7,
-      messages: [
-        { role: "system", content: opts.system },
-        ...userMessages,
-      ],
-      ...(opts.jsonMode ? { response_format: { type: "json_object" } } : {}),
-    }),
-    signal: AbortSignal.timeout(opts.timeoutMs ?? 30_000),
-  });
+  let res: Response;
+  try {
+    res = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: opts.model,
+        max_tokens: opts.maxTokens ?? 1024,
+        temperature: opts.temperature ?? 0.7,
+        messages: [
+          { role: "system", content: opts.system },
+          ...userMessages,
+        ],
+        ...(opts.jsonMode ? { response_format: { type: "json_object" } } : {}),
+      }),
+      signal: AbortSignal.timeout(opts.timeoutMs ?? 30_000),
+    });
+  } catch (e) {
+    // Network / timeout — no tokens billed, log as failure with 0 cost.
+    if (opts.telemetry) {
+      void logAiCall(
+        opts.telemetry,
+        { model: opts.model, inputTokens: 0, outputTokens: 0, costMicroUsd: 0 },
+        false,
+        `network: ${(e as Error).message}`,
+      );
+    }
+    throw e;
+  }
 
   if (!res.ok) {
     const errText = await res.text().catch(() => "");
+    if (opts.telemetry) {
+      void logAiCall(
+        opts.telemetry,
+        { model: opts.model, inputTokens: 0, outputTokens: 0, costMicroUsd: 0 },
+        false,
+        `http ${res.status}: ${errText.slice(0, 160)}`,
+      );
+    }
     throw new Error(`OpenAI API ${res.status}: ${errText.slice(0, 200)}`);
   }
 
@@ -106,7 +165,7 @@ export async function callAI(opts: AiCallOptions): Promise<AiResult> {
       )
     : 0;
 
-  return {
+  const result: AiResult = {
     text,
     inputTokens,
     outputTokens,
@@ -114,6 +173,12 @@ export async function callAI(opts: AiCallOptions): Promise<AiResult> {
     model: opts.model,
     stopReason: data?.choices?.[0]?.finish_reason ?? null,
   };
+
+  if (opts.telemetry) {
+    void logAiCall(opts.telemetry, result, true, null);
+  }
+
+  return result;
 }
 
 /**
@@ -184,6 +249,17 @@ export async function callAIForJson<T>(
         "[callAIForJson] schema validation failed",
         { model: raw.model, costMicroUsd: raw.costMicroUsd, issues },
       );
+      // Telemetry overwrite — the underlying callAI already logged this row
+      // as success (the HTTP call succeeded + tokens billed). Re-log as a
+      // schema failure so the table reflects the user-facing outcome.
+      if (opts.telemetry) {
+        void logAiCall(
+          opts.telemetry,
+          { model: raw.model, inputTokens: raw.inputTokens, outputTokens: raw.outputTokens, costMicroUsd: raw.costMicroUsd },
+          false,
+          `schema: ${issues.slice(0, 160)}`,
+        );
+      }
       throw new Error(`AI JSON schema mismatch: ${issues}`);
     }
     return { json: result.data, raw };

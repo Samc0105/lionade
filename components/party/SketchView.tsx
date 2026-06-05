@@ -244,6 +244,13 @@ export default function SketchView({
   const flipBatchRef = useRef<Map<number, { delayMs: number; classKey: number }>>(new Map());
   const flipBatchCounterRef = useRef(0);
 
+  // Stroke-arrival tracker (guesser-side). Ref holds the wall-clock time of
+  // the last remote stroke; `nowTick` is bumped every 1s while watching so
+  // the "actively sketching vs thinking" indicator re-renders. Drawer skips
+  // both — their own pen activity isn't surfaced this way.
+  const lastStrokeAtRef = useRef<number | null>(null);
+  const [nowTick, setNowTick] = useState(0);
+
   // Toolbar state (drawer only).
   const [tool, setTool] = useState<SketchTool>("brush");
   const [color, setColor] = useState<string>(SKETCH_COLORS[0]);
@@ -375,6 +382,15 @@ export default function SketchView({
 
   const isDrawer = round?.drawer_user_id === meUserId;
   const subjectLabel = round ? SUBJECT_LABELS[round.subject as Subject] ?? round.subject : "";
+
+  // Stroke-freshness ticker — drives the "is sketching" vs "is thinking"
+  // indicator on the guesser side. Cheap setInterval; tears down when not
+  // in active drawing or when isDrawer flips.
+  useEffect(() => {
+    if (isDrawer || phase !== "drawing") return;
+    const id = setInterval(() => setNowTick((n) => n + 1), 1000);
+    return () => clearInterval(id);
+  }, [isDrawer, phase]);
 
   // ── Keyboard brush/eraser size (+/-) for drawer during drawing ──
   // Cycles through SKETCH_SIZES so a power-user can adjust without leaving the
@@ -1228,22 +1244,41 @@ export default function SketchView({
                 </span>
               </span>
             )}
-            {!isDrawer && (
-              <span className="font-syne text-xs text-cream/60 italic inline-flex items-center gap-1.5">
-                {players.find((p) => p.user_id === round.drawer_user_id)?.username ?? "Someone"} is drawing
-                {/* Low-frequency ink-dot pulse — pure chrome, never touches the
-                    30Hz stroke canvas. Signals "live drawing in progress." */}
-                <span aria-hidden="true" className="inline-flex items-center gap-0.5 ml-0.5">
-                  {[0, 1, 2].map((i) => (
-                    <span
-                      key={i}
-                      className={`w-1 h-1 rounded-full bg-purple-300 ${reduced ? "opacity-70" : "pa-ink-dot"}`}
-                      style={reduced ? undefined : { animationDelay: `${i * 200}ms` }}
-                    />
-                  ))}
+            {!isDrawer && (() => {
+              // Recompute freshness once per render. nowTick is a dependency
+              // via the surrounding render — every 1s tick re-evaluates.
+              void nowTick; // satisfy lint without altering bundle
+              const delta = lastStrokeAtRef.current
+                ? Date.now() - lastStrokeAtRef.current
+                : Infinity;
+              // Active = strokes in the last 2.5s (drawer is putting ink down
+              // right now). Thinking = no strokes for 4+ seconds (pondering
+              // their next stroke). Mid-range = treated as "drawing" (idle).
+              const isActive = delta < 2500;
+              const isThinking = delta > 4000;
+              const drawerLabel = players.find((p) => p.user_id === round.drawer_user_id)?.username ?? "Someone";
+              const verb = isActive ? "is sketching" : isThinking ? "is thinking" : "is drawing";
+              return (
+                <span className={`font-syne text-xs italic inline-flex items-center gap-1.5 ${isActive ? "text-cream/85" : isThinking ? "text-cream/45" : "text-cream/60"}`}>
+                  {isActive && (
+                    <span aria-hidden="true" className="text-purple-300">✏</span>
+                  )}
+                  {drawerLabel} {verb}
+                  <span aria-hidden="true" className="inline-flex items-center gap-0.5 ml-0.5">
+                    {[0, 1, 2].map((i) => (
+                      <span
+                        key={i}
+                        className={`w-1 h-1 rounded-full ${isActive ? "bg-purple-200" : "bg-purple-300"} ${reduced ? "opacity-70" : "pa-ink-dot"}`}
+                        style={reduced ? undefined : {
+                          animationDelay: `${i * 200}ms`,
+                          animationDuration: isActive ? "0.9s" : isThinking ? "2.0s" : "1.4s",
+                        }}
+                      />
+                    ))}
+                  </span>
                 </span>
-              </span>
-            )}
+              );
+            })()}
           </div>
           <div className="flex items-center gap-2">
             <span
@@ -1597,6 +1632,7 @@ export default function SketchView({
               size={tool === "eraser" ? eraserSize : brushSize}
               tool={tool}
               onStrokeCountChange={setStrokeCount}
+              onRemoteStrokeArrived={() => { lastStrokeAtRef.current = Date.now(); }}
               undoRef={undoRef}
               clearRef={clearRef}
             />

@@ -50,6 +50,10 @@ export interface SketchCanvasProps {
   tool?: "brush" | "eraser";
   /** Called when the local user finishes a stroke, used for undo state */
   onStrokeCountChange?: (n: number) => void;
+  /** Fires every time a remote stroke arrives over the realtime channel. The
+   *  guesser side uses this to show a "drawer is sketching..." indicator that
+   *  pulses when strokes are arriving and fades when the drawer pauses. */
+  onRemoteStrokeArrived?: () => void;
   /** Imperative ref handles for parent toolbar (undo / clear) */
   undoRef?: React.MutableRefObject<(() => void) | null>;
   clearRef?: React.MutableRefObject<(() => void) | null>;
@@ -72,6 +76,7 @@ export default function SketchCanvas({
   size = 8,
   tool = "brush",
   onStrokeCountChange,
+  onRemoteStrokeArrived,
   undoRef,
   clearRef,
 }: SketchCanvasProps) {
@@ -154,6 +159,7 @@ export default function SketchCanvas({
         strokesRef.current.push(incoming);
       }
       repaint();
+      onRemoteStrokeArrived?.();
     });
     ch.on("broadcast", { event: SKETCH_EVENTS.CLEAR_CANVAS }, () => {
       strokesRef.current = [];

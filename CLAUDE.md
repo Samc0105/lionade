@@ -212,7 +212,7 @@ These are non-negotiable workflow rules that apply regardless of which VP/specia
 - **Currency:** "Fangs" (never coins/tokens/points in UI). Icon: `cdnUrl("/F.png")`.
 
 For deep context, read:
-- `~/Desktop/lionade/CLAUDE_AGENT.md` — engineering non-negotiables (no flash-of-zero, SWR config, avatar stability, etc.)
+- `~/Desktop/lionade/docs/CLAUDE_AGENT.md` — engineering non-negotiables (no flash-of-zero, SWR config, avatar stability, etc.)
 - `~/Desktop/lionade/LIONADE_WORKFLOW.md` — the web routing matrix and done-definition
 - `~/Desktop/lionade/IOS_PARITY.md` — web↔iOS drift state
 - `~/Desktop/lionade-vault/lionade/Home.md` — the vault MOC linking everything

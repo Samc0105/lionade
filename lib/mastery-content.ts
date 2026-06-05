@@ -224,9 +224,11 @@ async function generateTeachingPanels(args: {
   const safeSubtopicName = stripSentinels(args.subtopicName);
 
   try {
-// 12-factor #2 telemetry
-    console.info(`[mastery-content/panels] prompt=${MASTERY_PANELS_PROMPT_VERSION} exam="${args.examTitle}"`);
     const { json, raw } = await callAIForJson({
+      telemetry: {
+        route: "mastery-content/panels",
+        promptVersion: MASTERY_PANELS_PROMPT_VERSION,
+      },
       model: LLM_MAIN,
       maxTokens: 2200,
       temperature: 0.5,
@@ -406,9 +408,11 @@ async function generateQuestions(args: {
   const safeSubtopicName = stripSentinels(args.subtopicName);
 
   try {
-// 12-factor #2 telemetry
-    console.info(`[mastery-content/questions] prompt=${MASTERY_QUESTIONS_PROMPT_VERSION} exam="${args.examTitle}" difficulty=${args.difficulty}`);
     const { json, raw } = await callAIForJson({
+      telemetry: {
+        route: "mastery-content/questions",
+        promptVersion: MASTERY_QUESTIONS_PROMPT_VERSION,
+      },
       model: LLM_MAIN,
       maxTokens: 3500,
       temperature: 0.4,

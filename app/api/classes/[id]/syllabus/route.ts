@@ -237,9 +237,12 @@ export async function POST(req: NextRequest, { params }: RouteCtx) {
     const today = new Date().toISOString().slice(0, 10);
     let aiPayload: { topics?: unknown; exams?: unknown };
     try {
-// 12-factor #2 telemetry
-      console.info(`[classes/syllabus] prompt=${SYLLABUS_PARSE_PROMPT_VERSION} class=${params.id}`);
       const { json } = await callAIForJson({
+        telemetry: {
+          route: "classes/syllabus",
+          promptVersion: SYLLABUS_PARSE_PROMPT_VERSION,
+          userId,
+        },
         model: LLM_CHEAP,
         maxTokens: 1500,
         temperature: 0.2,
