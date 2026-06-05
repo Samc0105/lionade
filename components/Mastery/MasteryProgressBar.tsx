@@ -58,6 +58,19 @@ export default function MasteryProgressBar({
     "#EF4444";
 
   const thresholdLeft = Math.round(readyThreshold * 100);
+  // Re-key the shimmer span every time the target value increases so the
+  // pa-progress-shimmer animation re-fires. Static / decreasing values
+  // skip the shimmer (no positive-progress beat to celebrate).
+  const lastTargetRef = useRef(value);
+  const [shimmerKey, setShimmerKey] = useState(0);
+  useEffect(() => {
+    if (value > lastTargetRef.current) {
+      setShimmerKey((k) => k + 1);
+    }
+    lastTargetRef.current = value;
+  }, [value]);
+
+  const mastered = pct >= 95;
 
   return (
     <div className={`flex items-center gap-3 ${className}`}>
@@ -68,13 +81,26 @@ export default function MasteryProgressBar({
       )}
       <div className="relative flex-1 h-[6px] rounded-full bg-white/[0.06] overflow-visible">
         <div
-          className="absolute inset-y-0 left-0 rounded-full transition-[background-color] duration-700"
+          className={`absolute inset-y-0 left-0 rounded-full transition-[background-color] duration-700 overflow-hidden ${mastered ? "pa-mastery-halo" : ""}`}
           style={{
             width: `${pct}%`,
             backgroundColor: color,
-            boxShadow: pct >= 95 ? `0 0 10px ${color}` : "none",
           }}
-        />
+        >
+          {/* Diagonal gold sweep that fires on every positive-progress tick.
+              Keyed so React re-mounts the span and the animation restarts. */}
+          {shimmerKey > 0 && (
+            <span
+              key={shimmerKey}
+              aria-hidden="true"
+              className="absolute inset-0 pa-progress-shimmer pointer-events-none"
+              style={{
+                background:
+                  "linear-gradient(100deg, transparent 30%, rgba(255,255,255,0.55) 50%, transparent 70%)",
+              }}
+            />
+          )}
+        </div>
         {/* Ready-threshold notch */}
         <div
           className="absolute top-[-3px] bottom-[-3px] w-[1.5px] bg-cream/30"

@@ -4335,6 +4335,27 @@ html.light .space-bg-container { display: none; }
 }
 .pa-active-swatch { animation: pa-active-swatch 2.4s ease-in-out infinite; }
 
+/* Mastery progress-bar shimmer: a thin diagonal gold sweep that travels
+   across the filled portion of the bar each time the value increases. Fires
+   once via animation: ... 1 forwards so re-keying the span re-fires it. */
+@keyframes pa-progress-shimmer {
+  0%   { transform: translateX(-100%); opacity: 0; }
+  20%  { opacity: 1; }
+  100% { transform: translateX(120%); opacity: 0; }
+}
+.pa-progress-shimmer {
+  animation: pa-progress-shimmer 900ms ease-out 1 forwards;
+}
+
+/* Mastery progress-bar "mastered" halo — a soft gold ring loop when the
+   user has crossed the 95% mastered threshold. Subtle so the bar still
+   reads as info, not a victory screen. */
+@keyframes pa-mastery-halo {
+  0%, 100% { box-shadow: 0 0 8px rgba(255,215,0,0.45); }
+  50%      { box-shadow: 0 0 16px rgba(255,215,0,0.85); }
+}
+.pa-mastery-halo { animation: pa-mastery-halo 2.6s ease-in-out infinite; }
+
 /* The single reduced-motion guard for the WHOLE party block.
    Disables motion but leaves final visual states intact (opacity 1, no shift). */
 @media (prefers-reduced-motion: reduce) {
@@ -4345,7 +4366,8 @@ html.light .space-bg-container { display: none; }
   .pa-game-card, .pa-game-card:hover,
   .pa-tile-flip, .pa-card-flip-3d,
   .pa-canvas-stamp, .pa-canvas-corner,
-  .pa-word-breathe, .pa-panic-vignette, .pa-deal-glow, .pa-active-swatch {
+  .pa-word-breathe, .pa-panic-vignette, .pa-deal-glow, .pa-active-swatch,
+  .pa-progress-shimmer, .pa-mastery-halo {
     animation: none !important;
     transition: none !important;
   }
