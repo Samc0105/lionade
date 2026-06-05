@@ -987,81 +987,150 @@ export default function GamesPage() {
             </div>
           </header>
 
-          {/* Resume prompts for in-flight Roardle / Timeline (Tier 3) */}
+          {/* Resume prompts for in-flight Roardle / Timeline (Tier 3) — now
+              styled as "ticket in progress" stubs matching the Arcade ticket
+              aesthetic: perforated left edge, lot number column, accent
+              stripe, animated "IN PROGRESS" pulse. */}
           {roardleResume && game === "menu" && (
-            <div className="mb-4 rounded-2xl border border-[#00BFFF]/40 bg-[#00BFFF]/[0.06] px-4 py-3 flex items-center gap-3 animate-slide-up">
-              <TextAa size={14} weight="fill" className="text-[#00BFFF] shrink-0" />
-              <div className="flex-1 min-w-0">
-                <p className="text-[13px] text-cream leading-tight">Resume your Roardle</p>
-                <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-cream/50">
-                  {6 - roardleResume.guesses.length} guesses left
-                </p>
+            <div
+              className="games-ticket games-foil mb-4 relative rounded-[6px] overflow-hidden animate-slide-up"
+              style={{
+                background: `linear-gradient(90deg, ${hexToRgba("#00BFFF", 0.10)} 0%, #0c0a14 60%)`,
+                border: `1px solid ${hexToRgba("#00BFFF", 0.4)}`,
+                boxShadow: `0 8px 22px rgba(0,0,0,0.4), 0 0 18px ${hexToRgba("#00BFFF", 0.12)}`,
+              }}
+            >
+              <div className="relative z-10 flex items-stretch min-h-[60px]">
+                {/* Perforated lot stub */}
+                <div
+                  className="flex items-center justify-center w-[60px] sm:w-[88px] flex-shrink-0"
+                  style={{ background: "rgba(0,0,0,0.25)", borderRight: "1px dashed rgba(0,191,255,0.25)" }}
+                >
+                  <div className="games-lot-number font-mono text-[10px] sm:text-[12px] text-[#00BFFF]/55 font-bold uppercase tracking-[0.18em]">
+                    in play
+                  </div>
+                </div>
+                {/* Icon + content */}
+                <div className="flex items-center gap-3 flex-1 min-w-0 px-3 sm:px-4 py-2.5">
+                  <span className="inline-flex items-center justify-center w-8 h-8 rounded-sm flex-shrink-0"
+                    style={{
+                      background: hexToRgba("#00BFFF", 0.14),
+                      border: "1px solid rgba(0,191,255,0.4)",
+                    }}>
+                    <TextAa size={16} weight="fill" className="text-[#00BFFF]" />
+                  </span>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-bebas text-sm text-cream tracking-wider leading-tight">RESUME ROARDLE</p>
+                    <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-cream/50 mt-0.5">
+                      {6 - roardleResume.guesses.length} guesses left
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const r = roardleResume;
+                      setRoardleResume(null);
+                      setWordLength(r.wordLength);
+                      setRoardleWord(r.targetWord);
+                      setRoardleGuesses(r.guesses);
+                      setRoardleInput("");
+                      setRoardleOver(false);
+                      setRoardleWon(false);
+                      setFangsEarned(null);
+                      setGame("roardle");
+                    }}
+                    className="font-syne font-bold text-xs px-4 py-2 transition-all active:scale-95 inline-flex items-center gap-1.5 flex-shrink-0"
+                    style={{
+                      background: "#00BFFF",
+                      color: "#04080F",
+                      boxShadow: "0 4px 14px rgba(0,191,255,0.4), inset 0 1px 0 rgba(255,255,255,0.18)",
+                    }}
+                  >
+                    Resume
+                    <span aria-hidden="true">→</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setRoardleResume(null);
+                      void apiPost("/api/quiz/state", { game_type: "roardle", state: null });
+                    }}
+                    className="font-mono text-[9px] uppercase tracking-[0.22em] text-cream/40 hover:text-cream/85 transition-colors flex-shrink-0 hidden sm:inline"
+                  >
+                    Start fresh
+                  </button>
+                </div>
               </div>
-              <button
-                type="button"
-                onClick={() => {
-                  const r = roardleResume;
-                  setRoardleResume(null);
-                  setWordLength(r.wordLength);
-                  setRoardleWord(r.targetWord);
-                  setRoardleGuesses(r.guesses);
-                  setRoardleInput("");
-                  setRoardleOver(false);
-                  setRoardleWon(false);
-                  setFangsEarned(null);
-                  setGame("roardle");
-                }}
-                className="font-mono text-[11px] uppercase tracking-[0.25em] text-navy bg-[#00BFFF] rounded-full px-3 py-1.5"
-              >
-                Resume
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setRoardleResume(null);
-                  void apiPost("/api/quiz/state", { game_type: "roardle", state: null });
-                }}
-                className="font-mono text-[10px] uppercase tracking-[0.22em] text-cream/50 hover:text-cream"
-              >
-                Start fresh
-              </button>
+              <div className="games-ticket-perf" aria-hidden="true" />
             </div>
           )}
           {timelineResume && game === "menu" && (
-            <div className="mb-4 rounded-2xl border border-[#00C851]/40 bg-[#00C851]/[0.06] px-4 py-3 flex items-center gap-3 animate-slide-up">
-              <Calendar size={14} weight="fill" className="text-[#00C851] shrink-0" />
-              <div className="flex-1 min-w-0">
-                <p className="text-[13px] text-cream leading-tight">Resume your Timeline</p>
-                <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-cream/50">
-                  {timelineResume.events.length} events to order
-                </p>
+            <div
+              className="games-ticket games-foil mb-4 relative rounded-[6px] overflow-hidden animate-slide-up"
+              style={{
+                background: `linear-gradient(90deg, ${hexToRgba("#00C851", 0.10)} 0%, #0c0a14 60%)`,
+                border: `1px solid ${hexToRgba("#00C851", 0.4)}`,
+                boxShadow: `0 8px 22px rgba(0,0,0,0.4), 0 0 18px ${hexToRgba("#00C851", 0.12)}`,
+              }}
+            >
+              <div className="relative z-10 flex items-stretch min-h-[60px]">
+                <div
+                  className="flex items-center justify-center w-[60px] sm:w-[88px] flex-shrink-0"
+                  style={{ background: "rgba(0,0,0,0.25)", borderRight: "1px dashed rgba(0,200,81,0.25)" }}
+                >
+                  <div className="games-lot-number font-mono text-[10px] sm:text-[12px] text-[#00C851]/55 font-bold uppercase tracking-[0.18em]">
+                    in play
+                  </div>
+                </div>
+                <div className="flex items-center gap-3 flex-1 min-w-0 px-3 sm:px-4 py-2.5">
+                  <span className="inline-flex items-center justify-center w-8 h-8 rounded-sm flex-shrink-0"
+                    style={{
+                      background: hexToRgba("#00C851", 0.14),
+                      border: "1px solid rgba(0,200,81,0.4)",
+                    }}>
+                    <Calendar size={16} weight="fill" className="text-[#00C851]" />
+                  </span>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-bebas text-sm text-cream tracking-wider leading-tight">RESUME TIMELINE</p>
+                    <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-cream/50 mt-0.5">
+                      {timelineResume.events.length} events to order
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const t = timelineResume;
+                      setTimelineResume(null);
+                      setTlEvents(t.events);
+                      setTlOrder(t.order);
+                      setTlSubmitted(false);
+                      setTlScore(0);
+                      setFangsEarned(null);
+                      setGame("timeline");
+                    }}
+                    className="font-syne font-bold text-xs px-4 py-2 transition-all active:scale-95 inline-flex items-center gap-1.5 flex-shrink-0"
+                    style={{
+                      background: "#00C851",
+                      color: "#04080F",
+                      boxShadow: "0 4px 14px rgba(0,200,81,0.4), inset 0 1px 0 rgba(255,255,255,0.18)",
+                    }}
+                  >
+                    Resume
+                    <span aria-hidden="true">→</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setTimelineResume(null);
+                      void apiPost("/api/quiz/state", { game_type: "timeline", state: null });
+                    }}
+                    className="font-mono text-[9px] uppercase tracking-[0.22em] text-cream/40 hover:text-cream/85 transition-colors flex-shrink-0 hidden sm:inline"
+                  >
+                    Start fresh
+                  </button>
+                </div>
               </div>
-              <button
-                type="button"
-                onClick={() => {
-                  const t = timelineResume;
-                  setTimelineResume(null);
-                  setTlEvents(t.events);
-                  setTlOrder(t.order);
-                  setTlSubmitted(false);
-                  setTlScore(0);
-                  setFangsEarned(null);
-                  setGame("timeline");
-                }}
-                className="font-mono text-[11px] uppercase tracking-[0.25em] text-navy bg-[#00C851] rounded-full px-3 py-1.5"
-              >
-                Resume
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setTimelineResume(null);
-                  void apiPost("/api/quiz/state", { game_type: "timeline", state: null });
-                }}
-                className="font-mono text-[10px] uppercase tracking-[0.22em] text-cream/50 hover:text-cream"
-              >
-                Start fresh
-              </button>
+              <div className="games-ticket-perf" aria-hidden="true" />
             </div>
           )}
 
@@ -1095,42 +1164,98 @@ export default function GamesPage() {
             ))}
           </div>
 
-          {/* ═══ PDF Upload (Library mode) ═══ */}
+          {/* ═══ PDF Upload (Library mode) — now styled as a "blank ticket"
+              waiting to be stamped, matching the Arcade ticket aesthetic. ═══ */}
           {tab === "library" && !pdfContent && (
             <div className="mb-8 animate-slide-up" style={{ animationDelay: "0.1s" }}>
-              <div className="rounded-2xl p-8 text-center" style={{ background: "rgba(255,255,255,0.02)", border: "2px dashed rgba(255,255,255,0.1)" }}>
-                <span className="text-4xl mb-3 flex items-center justify-center">
-                  <FileText size={40} weight="fill" aria-hidden="true" />
-                </span>
-                <p className="font-bebas text-xl text-cream tracking-wider mb-2">UPLOAD YOUR STUDY MATERIAL</p>
-                <p className="text-cream/30 text-xs mb-6 font-syne">Drop a PDF to generate custom games from your notes</p>
-                <label className="btn-gold px-6 py-3 rounded-xl text-sm cursor-pointer inline-block">
-                  Choose PDF
-                  <input type="file" accept=".pdf" className="hidden" onChange={e => { if (e.target.files?.[0]) handlePdfUpload(e.target.files[0]); }} />
-                </label>
-                {pdfProcessing && (
-                  <div className="flex items-center justify-center gap-2 mt-4">
-                    <div className="w-4 h-4 rounded-full border-2 border-electric border-t-transparent animate-spin" />
-                    <span className="text-cream/40 text-xs">Processing PDF with AI...</span>
+              <label
+                className="games-ticket cursor-pointer block relative rounded-[6px] overflow-hidden"
+                style={{
+                  background: `linear-gradient(90deg, ${hexToRgba("#FFD700", 0.06)} 0%, #0c0a14 60%)`,
+                  border: "1.5px dashed rgba(255,215,0,0.45)",
+                  boxShadow: "0 8px 22px rgba(0,0,0,0.35)",
+                }}
+              >
+                <div className="relative z-10 flex items-center gap-4 sm:gap-6 px-5 sm:px-7 py-7">
+                  {/* Lot stub */}
+                  <div
+                    className="hidden sm:flex flex-col items-center justify-center w-[80px] flex-shrink-0 py-3"
+                    style={{ borderRight: "1px dashed rgba(255,215,0,0.22)" }}
+                  >
+                    <FileText size={28} weight="fill" className="text-gold/55 mb-1.5" aria-hidden="true" />
+                    <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-gold/45">
+                      blank
+                    </span>
                   </div>
-                )}
-                {pdfError && <p className="text-red-400 text-xs mt-3">{pdfError}</p>}
-              </div>
+                  <div className="flex-1 min-w-0 text-left">
+                    <p className="font-bebas text-lg sm:text-xl text-cream tracking-wider leading-tight">
+                      UPLOAD YOUR STUDY MATERIAL
+                    </p>
+                    <p className="text-cream/40 text-xs sm:text-[13px] font-syne mt-1.5">
+                      Drop a PDF to stamp this ticket — generate custom games from your notes
+                    </p>
+                    {pdfProcessing && (
+                      <div className="flex items-center gap-2 mt-3">
+                        <div className="w-3.5 h-3.5 rounded-full border-2 border-electric border-t-transparent animate-spin" />
+                        <span className="text-cream/55 text-xs font-syne">Processing PDF with AI...</span>
+                      </div>
+                    )}
+                    {pdfError && <p className="text-red-400 text-xs mt-2 font-syne">{pdfError}</p>}
+                  </div>
+                  <span
+                    className="font-syne font-bold text-xs sm:text-sm px-4 sm:px-5 py-2.5 transition-all flex-shrink-0 inline-flex items-center gap-1.5"
+                    style={{
+                      background: "linear-gradient(135deg, #FFD700 0%, #B8960C 100%)",
+                      color: "#04080F",
+                      boxShadow: "0 4px 14px rgba(255,215,0,0.4), inset 0 1px 0 rgba(255,255,255,0.18)",
+                    }}
+                  >
+                    Choose PDF
+                    <span aria-hidden="true">↑</span>
+                  </span>
+                  <input type="file" accept=".pdf" className="hidden" onChange={e => { if (e.target.files?.[0]) handlePdfUpload(e.target.files[0]); }} />
+                </div>
+                <div className="games-ticket-perf" aria-hidden="true" />
+              </label>
             </div>
           )}
 
           {tab === "library" && pdfContent && (
             <div className="mb-8 animate-slide-up" style={{ animationDelay: "0.1s" }}>
-              <div className="rounded-xl p-4 flex items-center gap-4" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(74,144,217,0.2)" }}>
-                <span className="text-2xl flex items-center">
-                  <FileText size={28} weight="regular" aria-hidden="true" />
-                </span>
-                <div className="flex-1 min-w-0">
-                  <p className="text-cream font-semibold text-sm truncate">{pdfName}</p>
-                  <p className="text-cream/30 text-[10px]">{pdfContent.vocabulary?.length ?? 0} vocab · {pdfContent.concepts?.length ?? 0} questions · {pdfContent.keyTerms?.length ?? 0} terms</p>
+              <div
+                className="games-ticket games-foil relative rounded-[6px] overflow-hidden"
+                style={{
+                  background: `linear-gradient(90deg, ${hexToRgba("#FFD700", 0.08)} 0%, #0c0a14 60%)`,
+                  border: "1px solid rgba(255,215,0,0.38)",
+                  boxShadow: "0 8px 22px rgba(0,0,0,0.4), 0 0 18px rgba(255,215,0,0.10)",
+                }}
+              >
+                <div className="relative z-10 flex items-stretch min-h-[60px]">
+                  <div
+                    className="flex items-center justify-center w-[60px] sm:w-[88px] flex-shrink-0"
+                    style={{ background: "rgba(0,0,0,0.25)", borderRight: "1px dashed rgba(255,215,0,0.22)" }}
+                  >
+                    <div className="games-lot-number font-mono text-[10px] sm:text-[12px] text-gold/55 font-bold uppercase tracking-[0.18em]">
+                      stamped
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 flex-1 min-w-0 px-3 sm:px-4 py-2.5">
+                    <FileText size={22} weight="regular" className="text-gold flex-shrink-0" aria-hidden="true" />
+                    <div className="flex-1 min-w-0">
+                      <p className="font-bebas text-sm text-cream tracking-wider leading-tight truncate">{pdfName}</p>
+                      <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-cream/45 mt-0.5">
+                        {pdfContent.vocabulary?.length ?? 0} vocab · {pdfContent.concepts?.length ?? 0} questions · {pdfContent.keyTerms?.length ?? 0} terms
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => { setPdfContent(null); setPdfName(null); if (typeof window !== "undefined") { localStorage.removeItem("lionade_pdf_content"); localStorage.removeItem("lionade_pdf_name"); } }}
+                      className="font-mono text-[9px] uppercase tracking-[0.22em] text-cream/45 hover:text-red-400 transition-colors flex-shrink-0"
+                    >
+                      Remove
+                    </button>
+                  </div>
                 </div>
-                <button onClick={() => { setPdfContent(null); setPdfName(null); if (typeof window !== "undefined") { localStorage.removeItem("lionade_pdf_content"); localStorage.removeItem("lionade_pdf_name"); } }}
-                  className="text-cream/30 text-xs hover:text-red-400 transition">Remove</button>
+                <div className="games-ticket-perf" aria-hidden="true" />
               </div>
             </div>
           )}
