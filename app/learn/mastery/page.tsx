@@ -219,8 +219,25 @@ export default function MasteryLandingPage() {
                   px-5 py-2.5 transition-all duration-200
                   disabled:opacity-40 disabled:cursor-not-allowed"
               >
-                {parsing ? "Ninny's reading…" : "Start"}
-                <ArrowRight size={14} weight="bold" className="transition-transform group-hover:translate-x-0.5" />
+                {parsing ? (
+                  <>
+                    <span>Ninny's reading</span>
+                    <span aria-hidden="true" className="inline-flex items-center gap-0.5 ml-0.5">
+                      {[0, 1, 2].map((i) => (
+                        <span
+                          key={i}
+                          className="w-1 h-1 rounded-full bg-navy pa-ink-dot"
+                          style={{ animationDelay: `${i * 200}ms` }}
+                        />
+                      ))}
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    Start
+                    <ArrowRight size={14} weight="bold" className="transition-transform group-hover:translate-x-0.5" />
+                  </>
+                )}
               </button>
             </div>
           </section>
