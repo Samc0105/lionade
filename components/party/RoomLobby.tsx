@@ -486,6 +486,63 @@ export default function RoomLobby({ room, players, isHost, meUserId, onGameStart
         </motion.button>
       )}
 
+      {/* Post-game recap — surfaces when the group is returning from a finished
+          game (room.last_game set + at least one player has a non-zero score).
+          Compact card with top-3 from the just-finished game so the lobby
+          beat feels like "intermission with results," not "fresh start."
+          Hides on rematch (scores reset to 0) and on first lobby entry. */}
+      {room.last_game && optimisticPlayers.some((p) => (p.score ?? 0) > 0) && (() => {
+        const lastMeta = GAME_META[room.last_game];
+        const recapTop = [...optimisticPlayers]
+          .sort((a, b) => (b.score ?? 0) - (a.score ?? 0))
+          .slice(0, 3)
+          .filter((p) => (p.score ?? 0) > 0);
+        return (
+          <div
+            className="rounded-2xl p-4"
+            style={{
+              background: `linear-gradient(135deg, ${lastMeta.accent}14 0%, rgba(16,12,26,0.6) 100%)`,
+              border: `1px solid ${lastMeta.accent}40`,
+              backdropFilter: "blur(10px)",
+            }}
+          >
+            <div className="flex items-center justify-between mb-2 gap-2 flex-wrap">
+              <p className="font-bebas text-[11px] tracking-[0.25em] text-cream/55">
+                LAST GAME · <span style={{ color: lastMeta.accent }}>{lastMeta.short}</span>
+              </p>
+              <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-cream/35">
+                pick the next one below
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              {recapTop.map((p, i) => {
+                const isMe = p.user_id === meUserId;
+                const medal = i === 0 ? "🥇" : i === 1 ? "🥈" : "🥉";
+                return (
+                  <span
+                    key={p.user_id}
+                    className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1"
+                    style={{
+                      background: isMe ? `${lastMeta.accent}22` : "rgba(255,255,255,0.04)",
+                      border: isMe ? `1px solid ${lastMeta.accent}59` : "1px solid rgba(255,255,255,0.1)",
+                    }}
+                  >
+                    <span className="text-sm" aria-hidden="true">{medal}</span>
+                    <span className="font-syne text-xs text-cream/85 truncate max-w-[120px]">
+                      {p.username ?? "Player"}
+                      {isMe && <span className="text-cream/45 ml-1">you</span>}
+                    </span>
+                    <span className="font-bebas text-sm tabular-nums" style={{ color: lastMeta.accent }}>
+                      {p.score ?? 0}
+                    </span>
+                  </span>
+                );
+              })}
+            </div>
+          </div>
+        );
+      })()}
+
       {/* Game select */}
       <div>
         <div className="flex items-center justify-between mb-3 gap-3 flex-wrap">
