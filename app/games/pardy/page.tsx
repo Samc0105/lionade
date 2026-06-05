@@ -17,6 +17,7 @@
  */
 
 import { useState, useCallback, useMemo, useEffect, useRef } from "react";
+import { useReducedMotion } from "framer-motion";
 import Link from "next/link";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import AmbientOrbs from "@/components/AmbientOrbs";
@@ -24,8 +25,9 @@ import { useAuth } from "@/lib/auth";
 import { mutateUserStats } from "@/lib/hooks";
 import { cdnUrl } from "@/lib/cdn";
 import { apiPost } from "@/lib/api-client";
-import { MicrophoneStage, Check, X as XIcon, ArrowLeft } from "@phosphor-icons/react";
+import { MicrophoneStage, Check, X as XIcon, ArrowLeft, Crown, Lightning, Flame } from "@phosphor-icons/react";
 import { PARDY_DECKS, getDeck, tileId, type PardyDeck } from "@/lib/pardy/decks";
+import CountUp from "@/components/CountUp";
 
 interface TileState {
   /** Has this tile been attempted (correct or wrong)? */
@@ -48,6 +50,7 @@ interface ModalState {
 }
 
 export default function PardyPage() {
+  const reduced = useReducedMotion();
   const { user } = useAuth();
 
   const [phase, setPhase] = useState<Phase>("picker");
@@ -279,12 +282,24 @@ export default function PardyPage() {
   // ══════════════════════════════════════════════════════════
   if (phase === "over" && deck) {
     const correctCount = Object.values(tiles).filter((t) => t.correct).length;
+    const accuracy = Math.round((correctCount / 25) * 100);
+    // Tier label + accent based on accuracy. Used to flavor the FINAL TALLY
+    // hero with one of four labels: PERFECT (gold crown), STRONG RUN (gold
+    // flame), DECENT (electric lightning), TOUGH ROUND (muted).
+    const tier =
+      accuracy === 100
+        ? { label: "PERFECT GAME", accent: "#FFD700", Icon: Crown, sub: "every tile cleared." }
+        : accuracy >= 75
+          ? { label: "STRONG RUN", accent: "#FFD700", Icon: Flame, sub: "well played." }
+          : accuracy >= 50
+            ? { label: "DECENT RUN", accent: "#4A90D9", Icon: Lightning, sub: "the room felt it." }
+            : { label: "TOUGH ROUND", accent: "rgba(238,244,255,0.55)", Icon: Lightning, sub: "rematch the deck — your call." };
     return (
       <ProtectedRoute>
         <div className="min-h-screen pt-16 pb-20 md:pb-8 relative" style={{ isolation: "isolate" }}>
           <AmbientOrbs
             orbs={[
-              { color: "#FFD700", pos: "top-[20%] left-[28%]", size: 520, opacity: 0.08 },
+              { color: tier.accent, pos: "top-[20%] left-[28%]", size: 520, opacity: 0.08 },
               { color: "#4A90D9", pos: "bottom-[20%] right-[24%]", size: 460, opacity: 0.05 },
             ]}
           />
@@ -293,21 +308,62 @@ export default function PardyPage() {
             <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-cream/30 mb-2">
               {deck.name}
             </p>
-            <h1 className="font-bebas text-[clamp(3.5rem,11vw,9rem)] text-cream tracking-tight leading-[0.86] mb-4">
+            <h1 className="font-bebas text-[clamp(3.5rem,11vw,9rem)] text-cream tracking-tight leading-[0.86] mb-3">
               FINAL TALLY
             </h1>
+            {/* Tier label — frames the result before the user reads the number. */}
+            <div
+              className={`inline-flex items-center gap-2 px-3 py-1 rounded-full mb-6 ${reduced ? "" : "pa-pop-in"}`}
+              style={{
+                background: `linear-gradient(135deg, ${tier.accent}1f 0%, rgba(0,0,0,0.3) 100%)`,
+                border: `1px solid ${tier.accent}66`,
+              }}
+            >
+              <tier.Icon size={14} weight="fill" style={{ color: tier.accent }} aria-hidden="true" />
+              <span className="font-bebas text-xs tracking-[0.25em]" style={{ color: tier.accent }}>
+                {tier.label}
+              </span>
+            </div>
 
-            <div className="rounded-2xl bg-white/5 backdrop-blur border border-white/10 p-8 mb-6">
-              <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-cream/40 mb-2">
-                total earned
-              </p>
-              <div className="flex items-center justify-center gap-3 mb-6">
-                <img src={cdnUrl("/F.png")} alt="Fangs" className="w-10 h-10 object-contain" />
-                <p className="font-bebas text-7xl text-gold leading-none tabular-nums">{score}</p>
+            <div className="rounded-2xl bg-white/5 backdrop-blur border border-white/10 p-8 mb-6 relative overflow-hidden">
+              {/* Soft tier-color halo behind the score */}
+              <div
+                aria-hidden="true"
+                className="absolute inset-0 pointer-events-none"
+                style={{
+                  background: `radial-gradient(circle at 50% 30%, ${tier.accent}22 0%, transparent 65%)`,
+                }}
+              />
+              <div className="relative">
+                <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-cream/40 mb-2">
+                  total earned
+                </p>
+                <div className="flex items-center justify-center gap-3 mb-4">
+                  <img src={cdnUrl("/F.png")} alt="Fangs" className="w-10 h-10 object-contain" />
+                  <p className="font-bebas text-7xl text-gold leading-none tabular-nums">
+                    <CountUp value={score} duration={1100} />
+                  </p>
+                </div>
+                <div className="flex items-center justify-center gap-4 text-sm">
+                  <span className="font-syne text-cream/60">
+                    <span className="font-bebas text-base text-cream/85 tabular-nums">
+                      <CountUp value={correctCount} duration={900} />
+                    </span>
+                    {" of 25 tiles"}
+                  </span>
+                  <span className="w-px h-4 bg-white/10" aria-hidden="true" />
+                  <span className="font-syne text-cream/60">
+                    <span
+                      className="font-bebas text-base tabular-nums"
+                      style={{ color: tier.accent }}
+                    >
+                      <CountUp value={accuracy} duration={900} />%
+                    </span>
+                    {" accuracy"}
+                  </span>
+                </div>
+                <p className="font-syne italic text-cream/45 text-xs mt-4">{tier.sub}</p>
               </div>
-              <p className="font-syne text-cream/60 text-sm">
-                {correctCount} of 25 tiles correct
-              </p>
             </div>
 
             <div className="flex flex-wrap justify-center gap-3">
@@ -427,25 +483,30 @@ export default function PardyPage() {
                           : `${cat.name}, ${tile.value} Fangs, click to play`
                       }
                     >
-                      {attempted ? (
-                        correct ? (
-                          <Check size={28} weight="bold" className="text-green-400" aria-hidden="true" />
+                      <span
+                        key={attempted ? "done" : "open"}
+                        className={`inline-flex items-center justify-center ${attempted && !reduced ? "pa-tile-flip" : ""}`}
+                      >
+                        {attempted ? (
+                          correct ? (
+                            <Check size={28} weight="bold" className="text-green-400" aria-hidden="true" />
+                          ) : (
+                            <XIcon size={28} weight="bold" className="text-red-400" aria-hidden="true" />
+                          )
                         ) : (
-                          <XIcon size={28} weight="bold" className="text-red-400" aria-hidden="true" />
-                        )
-                      ) : (
-                        <div className="flex items-center gap-1">
-                          <img
-                            src={cdnUrl("/F.png")}
-                            alt=""
-                            aria-hidden="true"
-                            className="w-3 h-3 sm:w-4 sm:h-4 object-contain opacity-70"
-                          />
-                          <span className="font-bebas text-xl sm:text-3xl md:text-4xl text-gold tabular-nums leading-none">
-                            {tile.value}
+                          <span className="flex items-center gap-1">
+                            <img
+                              src={cdnUrl("/F.png")}
+                              alt=""
+                              aria-hidden="true"
+                              className="w-3 h-3 sm:w-4 sm:h-4 object-contain opacity-70"
+                            />
+                            <span className="font-bebas text-xl sm:text-3xl md:text-4xl text-gold tabular-nums leading-none">
+                              {tile.value}
+                            </span>
                           </span>
-                        </div>
-                      )}
+                        )}
+                      </span>
                     </button>
                   );
                 })}
