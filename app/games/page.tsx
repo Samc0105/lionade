@@ -359,6 +359,7 @@ export default function GamesPage() {
     );
     if (!validWords.has(guess)) {
       setRoardleError("Not in word list");
+      setRoardleInput("");
       setTimeout(() => setRoardleError(""), 1500);
       return;
     }
