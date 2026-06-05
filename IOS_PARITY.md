@@ -17,6 +17,16 @@ Sketchy iOS isn't built yet (Lionade Party iOS port paused since 2026-05-29 — 
 
 ---
 
+## 2026-06-05 — SWR provider hydration fix (web-only, no iOS row)
+
+**Status:** 🚫 N/A (deliberate no-row decision — web-only race condition in the SWR provider boot sequence; iOS has no analogous bug).
+
+`components/SwrProvider.tsx` was mounting `swrConfigNoPersist` on first render then swapping to `swrConfig` (the persisted variant) in a post-mount `useEffect`. The swap discarded the SWR cache mid-handshake and raced with auth state flipping null→object, so `/social` painted blank on cold load and cross-nav felt like a full reload. Fix: mount `swrConfig` from the very first render — `getProvider()` returns an empty `Map` synchronously (DOM matches the server) and `readyPromise` resolves on a microtask after the first commit, so there's no hydration mismatch.
+
+iOS already gates splash-screen dismissal on `readyPromise` per the Phase B shared `createPersistedSwrProvider` contract (the iOS adapter wraps AsyncStorage, which is genuinely async — so the iOS app waits explicitly rather than rendering an empty cache on first frame). No analogous race exists on iOS, no port required.
+
+---
+
 ## 2026-06-04 — Lionade-Pardy V1 (web)
 
 **Status:** Web ships. iOS port: ❌ missing.
