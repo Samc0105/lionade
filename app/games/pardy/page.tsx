@@ -236,40 +236,73 @@ export default function PardyPage() {
             </header>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-              {PARDY_DECKS.map((d, idx) => (
-                <button
-                  key={d.id}
-                  onClick={() => pickDeck(d.id)}
-                  className="text-left rounded-2xl backdrop-blur transition-all hover:bg-white/8 active:scale-[0.99] animate-slide-up"
-                  style={{
-                    animationDelay: `${0.1 + idx * 0.08}s`,
-                    background: "rgba(255,255,255,0.05)",
-                    border: "1px solid rgba(255,255,255,0.1)",
-                    padding: "1.25rem",
-                  }}
-                >
-                  <div className="text-4xl mb-3" aria-hidden="true">{d.icon}</div>
-                  <h3 className="font-bebas text-2xl text-cream tracking-wider mb-1">{d.name}</h3>
-                  <p className="text-cream/50 text-sm font-syne leading-snug mb-4">
-                    {d.description}
-                  </p>
-                  <div className="flex items-center gap-2">
-                    <span
-                      className="font-syne font-bold text-xs px-3 py-1.5 rounded-md inline-flex items-center gap-1.5"
-                      style={{
-                        background: "rgba(255,215,0,0.12)",
-                        color: "#FFD700",
-                        border: "1px solid rgba(255,215,0,0.25)",
-                      }}
-                    >
-                      Play <span aria-hidden="true">→</span>
-                    </span>
-                    <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-cream/35">
-                      25 tiles · up to 1,400 Fangs
-                    </span>
-                  </div>
-                </button>
-              ))}
+              {PARDY_DECKS.map((d, idx) => {
+                // Cover-art slug: lowercase deck name, spaces → hyphens.
+                // Falls back to the emoji-only header if the file is missing
+                // (e.g. a newly-added deck that hasn't been art-generated).
+                const slug = d.name.toLowerCase().replace(/\s+/g, "-");
+                const coverSrc = `/pardy/${slug}.jpg`;
+                return (
+                  <button
+                    key={d.id}
+                    onClick={() => pickDeck(d.id)}
+                    className="text-left rounded-2xl backdrop-blur transition-all hover:bg-white/8 active:scale-[0.99] animate-slide-up overflow-hidden group"
+                    style={{
+                      animationDelay: `${0.1 + idx * 0.08}s`,
+                      background: "rgba(255,255,255,0.05)",
+                      border: "1px solid rgba(255,255,255,0.1)",
+                    }}
+                  >
+                    {/* Cover art — 16:10ish hero per deck. Bottom edge fades
+                        into the card body via a gradient overlay so the title
+                        reads cleanly on top. */}
+                    <div className="relative aspect-[16/11] overflow-hidden">
+                      <img
+                        src={coverSrc}
+                        alt=""
+                        aria-hidden="true"
+                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+                        loading="lazy"
+                      />
+                      <div
+                        aria-hidden="true"
+                        className="absolute inset-0"
+                        style={{
+                          background: "linear-gradient(180deg, rgba(8,6,16,0) 40%, rgba(8,6,16,0.55) 75%, rgba(8,6,16,0.9) 100%)",
+                        }}
+                      />
+                      <div
+                        aria-hidden="true"
+                        className="absolute top-3 left-3 text-2xl"
+                        style={{ textShadow: "0 2px 8px rgba(0,0,0,0.5)" }}
+                      >
+                        {d.icon}
+                      </div>
+                    </div>
+                    <div className="p-5">
+                      <h3 className="font-bebas text-2xl text-cream tracking-wider mb-1">{d.name}</h3>
+                      <p className="text-cream/50 text-sm font-syne leading-snug mb-4">
+                        {d.description}
+                      </p>
+                      <div className="flex items-center gap-2">
+                        <span
+                          className="font-syne font-bold text-xs px-3 py-1.5 rounded-md inline-flex items-center gap-1.5"
+                          style={{
+                            background: "rgba(255,215,0,0.12)",
+                            color: "#FFD700",
+                            border: "1px solid rgba(255,215,0,0.25)",
+                          }}
+                        >
+                          Play <span aria-hidden="true">→</span>
+                        </span>
+                        <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-cream/35">
+                          25 tiles · up to 1,400 Fangs
+                        </span>
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
             </div>
           </div>
         </div>

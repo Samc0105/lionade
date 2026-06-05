@@ -431,11 +431,33 @@ export default function BluffView({
           boxShadow: "0 0 24px rgba(255,215,0,0.1)",
         }}
       >
-        {round.category && (
-          <p className="font-bebas text-xs text-cream/50 tracking-[0.25em] mb-2">
-            {round.category.toUpperCase()}
-          </p>
-        )}
+        {round.category && (() => {
+          // Category icon — pulls from public/bluff/<slug>.jpg. Falls back to
+          // no-icon (just the label) when the file doesn't exist for a newly-
+          // added category. Slug = lowercase of the category name.
+          const slug = round.category.toLowerCase();
+          return (
+            <div className="flex items-center gap-2 mb-2">
+              <img
+                src={`/bluff/${slug}.jpg`}
+                alt=""
+                aria-hidden="true"
+                className="w-7 h-7 rounded-md object-cover flex-shrink-0"
+                style={{
+                  border: "1px solid rgba(255,215,0,0.35)",
+                  boxShadow: "0 0 10px rgba(255,215,0,0.18)",
+                }}
+                onError={(e) => {
+                  // Hide image on 404 so unknown categories degrade cleanly.
+                  (e.currentTarget as HTMLImageElement).style.display = "none";
+                }}
+              />
+              <p className="font-bebas text-xs text-cream/50 tracking-[0.25em]">
+                {round.category.toUpperCase()}
+              </p>
+            </div>
+          );
+        })()}
         <p className="font-syne text-lg sm:text-xl text-cream/95 leading-relaxed">
           {round.question}
         </p>
