@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
-import { buildNinnyChatSystemPrompt } from "@/lib/ninny";
+import { buildNinnyChatSystemPrompt, NINNY_CHAT_PROMPT_VERSION } from "@/lib/ninny";
 
 export const dynamic = "force-dynamic";
 
@@ -120,6 +120,10 @@ export async function POST(req: NextRequest) {
     });
 
   const systemPrompt = buildNinnyChatSystemPrompt(material);
+  // 12-factor #2 telemetry — prompt version on every call so log search can
+  // correlate quality with prompt iterations. Grep `[ninny/chat] prompt=` to
+  // bucket logs by version.
+  console.info(`[ninny/chat] prompt=${NINNY_CHAT_PROMPT_VERSION} material=${materialId}`);
 
   // Save user message FIRST so it's persisted even if OpenAI fails
   const { data: userMsgRow, error: userMsgErr } = await supabaseAdmin

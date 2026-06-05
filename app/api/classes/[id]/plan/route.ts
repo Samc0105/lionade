@@ -1,7 +1,25 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
+import { z } from "zod";
 import { callAIForJson, LLM_CHEAP } from "@/lib/ai";
+
+// 12-factor #2 — prompt version tag. Bump on every prompt edit.
+const CLASS_PLAN_PROMPT_VERSION = "v1-2026-06-05";
+
+// 12-factor #4 — schema for the daily plan AI output. Permissive fields
+// because downstream code already sanitizes/clamps; we just want the SHAPE
+// validated before that work runs.
+const PlanResponseSchema = z.object({
+  tasks: z.array(z.object({
+    kind: z.string().optional(),
+    label: z.string().optional(),
+    minutes: z.number().optional(),
+    examId: z.string().nullable().optional(),
+    why: z.string().optional(),
+  })),
+  summary: z.string().optional(),
+});
 import { displayPct } from "@/lib/mastery";
 
 /**
@@ -210,16 +228,7 @@ export async function GET(req: NextRequest, { params }: RouteCtx) {
       ? `Next exam: "${nextExamTitle}" in ${daysUntilExam} day${daysUntilExam === 1 ? "" : "s"}.`
       : "No exam date set yet for this class.";
 
-    const { json: planJson, raw } = await callAIForJson<{
-      tasks: Array<{
-        kind?: string;
-        label?: string;
-        minutes?: number;
-        examId?: string | null;
-        why?: string;
-      }>;
-      summary?: string;
-    }>({
+    const { json: planJson, raw } = await callAIForJson({
       model: LLM_CHEAP,
       maxTokens: 700,
       temperature: 0.4,
@@ -261,7 +270,7 @@ Return EXACTLY:
   ],
   "summary": "<one-line motivation, <= 100 chars>"
 }`,
-    });
+    }, PlanResponseSchema);
 
     // Validate + map AI output to our PlanTask shape with proper deepLinks
     const allowedKinds = new Set(["mastery", "review_notes", "quiz", "break"]);

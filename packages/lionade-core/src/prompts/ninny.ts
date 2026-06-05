@@ -10,6 +10,14 @@
  * they're not currently called from iOS; can migrate later.
  */
 
+/**
+ * Version tag for the Ninny generation system prompt below. Bump format
+ * `vN-YYYY-MM-DD` whenever buildNinnyPrompt's instructions change so
+ * downstream telemetry can correlate quality with prompt iterations
+ * (12-factor #2: own your prompts — and version them).
+ */
+export const NINNY_GENERATE_PROMPT_VERSION = "v1-2026-06-05";
+
 export type NinnyDifficulty = "easy" | "medium" | "hard";
 export type NinnySourceType = "pdf" | "text" | "topic";
 export type NinnyMode =

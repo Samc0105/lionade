@@ -48,6 +48,20 @@ function SubtopicRow({ item, active }: { item: SubtopicRailItem; active: boolean
   const rafRef = useRef<number | null>(null);
   const fromRef = useRef(item.displayPct);
 
+  // Subtopic-mastered celebration. Tracks the LAST known target value (not
+  // the eased display) so the threshold crossing fires exactly once when the
+  // server reports ≥95%, not on every easing tick.
+  const lastTargetRef = useRef(item.displayPct);
+  const [celebrateKey, setCelebrateKey] = useState(0);
+  useEffect(() => {
+    const prev = lastTargetRef.current;
+    const next = item.displayPct;
+    lastTargetRef.current = next;
+    if (prev < 95 && next >= 95) {
+      setCelebrateKey((k) => k + 1);
+    }
+  }, [item.displayPct]);
+
   useEffect(() => {
     fromRef.current = displayed;
     const target = item.displayPct;
@@ -66,7 +80,8 @@ function SubtopicRow({ item, active }: { item: SubtopicRailItem; active: boolean
   }, [item.displayPct]);
 
   const pct = Math.max(0, Math.min(100, displayed));
-  const barColor = pct >= 95 ? "#FFD700" : pct >= 60 ? "#4A90D9" : pct >= 30 ? "#A855F7" : "#EF4444";
+  const mastered = pct >= 95;
+  const barColor = mastered ? "#FFD700" : pct >= 60 ? "#4A90D9" : pct >= 30 ? "#A855F7" : "#EF4444";
 
   return (
     <li
@@ -74,7 +89,9 @@ function SubtopicRow({ item, active }: { item: SubtopicRailItem; active: boolean
         relative pl-3 pr-2 py-2 rounded-[6px] border transition-all duration-300
         ${active
           ? "bg-gold/[0.06] border-gold/30"
-          : "bg-white/[0.02] border-white/[0.05] hover:border-white/[0.1]"}
+          : mastered
+            ? "bg-gold/[0.04] border-gold/25"
+            : "bg-white/[0.02] border-white/[0.05] hover:border-white/[0.1]"}
       `}
     >
       {active && (
@@ -83,8 +100,33 @@ function SubtopicRow({ item, active }: { item: SubtopicRailItem; active: boolean
           aria-hidden="true"
         />
       )}
-      <div className="mb-1.5">
+      {/* One-shot celebration ring — keyed on celebrateKey so it remounts (and
+          re-fires) every time the subtopic crosses from <95% to ≥95%. The
+          parent row already has overflow visible, so the ring expands beyond
+          the card edge. */}
+      {celebrateKey > 0 && (
+        <span
+          key={`celebrate-${celebrateKey}`}
+          aria-hidden="true"
+          className="absolute inset-0 rounded-[6px] pointer-events-none pa-mastery-halo"
+          style={{ animationIterationCount: "3" }}
+        />
+      )}
+      <div className="mb-1.5 flex items-center justify-between gap-2">
         <span className="text-[13px] text-cream/90 leading-tight truncate block">{item.name}</span>
+        {mastered && (
+          <span
+            key={`badge-${celebrateKey}`}
+            className={`font-bebas text-[9px] tracking-[0.18em] px-1.5 py-0.5 rounded-full flex-shrink-0 ${celebrateKey > 0 ? "pa-pop-in" : ""}`}
+            style={{
+              background: "linear-gradient(135deg, #FFD700 0%, #B8960C 100%)",
+              color: "#04080F",
+              boxShadow: "0 0 8px rgba(255,215,0,0.45)",
+            }}
+          >
+            LOCKED
+          </span>
+        )}
       </div>
       <div className="h-[3px] rounded-full bg-white/[0.05] overflow-hidden">
         <div

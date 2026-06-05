@@ -39,6 +39,11 @@ const QuestionsResponseSchema = z.object({
   questions: z.array(GeneratedQuestionSchema).min(1),
 });
 
+// 12-factor #2 — prompt-version tags for the two inline generator prompts
+// below. Bump `vN-YYYY-MM-DD` on every edit so log queries can correlate.
+const MASTERY_PANELS_PROMPT_VERSION = "v1-2026-06-05";
+const MASTERY_QUESTIONS_PROMPT_VERSION = "v1-2026-06-05";
+
 // ── Types ────────────────────────────────────────────────────────────────────
 export interface TeachingPanel {
   id: string;

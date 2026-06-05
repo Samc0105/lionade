@@ -1,7 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
+import { z } from "zod";
 import { callAIForJson, LLM_CHEAP } from "@/lib/ai";
+
+// 12-factor #2 — prompt version tag. Bump on every prompt edit.
+const QUICK_NOTE_PROMPT_VERSION = "v1-2026-06-05";
+
+// 12-factor #4 — schema for quick-note classifier output. class_id can be
+// uuid string or literal null when the model decides no class fits.
+const QuickNoteSchema = z.object({
+  class_id: z.string().nullable(),
+  title: z.string(),
+  summary: z.string(),
+  topics: z.array(z.string()).optional().default([]),
+});
 import { bumpClassStreak } from "@/lib/class-streaks";
 
 /**
@@ -124,7 +137,7 @@ export async function POST(req: NextRequest) {
         .map(c => `- ${c.id}: ${c.name}${c.short_code ? ` (${c.short_code})` : ""}${c.term ? ` · ${c.term}` : ""}`)
         .join("\n");
 
-      const { json } = await callAIForJson<AIResponse>({
+      const { json } = await callAIForJson({
         model: LLM_CHEAP,
         maxTokens: 350,
         temperature: 0.3,
@@ -148,7 +161,7 @@ Return EXACTLY:
 <note>
 ${noteBody.slice(0, 6000)}
 </note>`,
-      });
+      }, QuickNoteSchema);
 
       // Validate AI output before trusting it.
       const candidate = typeof json.class_id === "string" ? json.class_id : null;

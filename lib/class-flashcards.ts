@@ -11,7 +11,20 @@
  */
 
 import { supabaseAdmin } from "@/lib/supabase-server";
+import { z } from "zod";
 import { callAIForJson, LLM_CHEAP } from "@/lib/ai";
+
+// 12-factor #2 — prompt version tag. Bump on every prompt edit.
+const FLASHCARD_GEN_PROMPT_VERSION = "v1-2026-06-05";
+
+// 12-factor #4 — schema for flashcard generation. cards array can be empty
+// when the model judges the note has no factual content (per the prompt).
+const FlashcardsResponseSchema = z.object({
+  cards: z.array(z.object({
+    q: z.string(),
+    a: z.string(),
+  })),
+});
 
 // ── Spaced-repetition constants (SM-2-ish) ───────────────────────────────────
 // Defaults tuned for short, fact-shaped flashcards (vs longer concept cards).
@@ -116,7 +129,7 @@ export async function generateFlashcardsForNote(args: {
 
     const promptInput = trimmed.slice(0, MAX_NOTE_BODY_FOR_PROMPT);
 
-    const { json } = await callAIForJson<{ cards: RawCard[] }>({
+    const { json } = await callAIForJson({
       model: LLM_CHEAP,
       maxTokens: 900,
       temperature: 0.4,
@@ -138,9 +151,9 @@ NOTE:
 <note>
 ${promptInput}
 </note>`,
-    });
+    }, FlashcardsResponseSchema);
 
-    const cards = Array.isArray(json?.cards) ? json.cards : [];
+    const cards = json.cards;
     const cleaned = cards
       .slice(0, MAX_CARDS_PER_NOTE)
       .map(c => ({

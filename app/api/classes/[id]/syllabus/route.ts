@@ -2,7 +2,27 @@ import { NextRequest, NextResponse } from "next/server";
 import { randomUUID } from "crypto";
 import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
+import { z } from "zod";
 import { callAIForJson, LLM_CHEAP } from "@/lib/ai";
+
+// 12-factor #2 — prompt version tag. Bump on every prompt edit.
+const SYLLABUS_PARSE_PROMPT_VERSION = "v1-2026-06-05";
+
+// 12-factor #4 — schema for syllabus extraction. Permissive on nulls because
+// not every syllabus has explicit weeks/dates/weights — the parser is allowed
+// to leave fields null rather than hallucinate.
+const SyllabusParseSchema = z.object({
+  topics: z.array(z.object({
+    topic: z.string(),
+    week_n: z.number().int().nullable().optional(),
+    est_hours: z.number().nullable().optional(),
+  })).default([]),
+  exams: z.array(z.object({
+    name: z.string(),
+    date_iso: z.string().nullable().optional(),
+    weight_pct: z.number().nullable().optional(),
+  })).default([]),
+});
 
 /**
  * GET  /api/classes/[id]/syllabus  — most-recent syllabus row for this class
@@ -217,7 +237,7 @@ export async function POST(req: NextRequest, { params }: RouteCtx) {
     const today = new Date().toISOString().slice(0, 10);
     let aiPayload: { topics?: unknown; exams?: unknown };
     try {
-      const { json } = await callAIForJson<{ topics?: unknown; exams?: unknown }>({
+      const { json } = await callAIForJson({
         model: LLM_CHEAP,
         maxTokens: 1500,
         temperature: 0.2,
@@ -251,7 +271,7 @@ Rules:
 <syllabus>
 ${rawText}
 </syllabus>`,
-      });
+      }, SyllabusParseSchema);
       aiPayload = json;
     } catch (e) {
       return fail("ai_failed", `ai call: ${(e as Error).message}`);

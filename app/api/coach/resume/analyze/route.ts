@@ -21,9 +21,25 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
 import { callAIForJson, LLM_CHEAP, stripSentinels } from "@/lib/ai";
+
+// 12-factor #2 — prompt version tag. Bump on every prompt edit.
+const RESUME_ANALYZE_PROMPT_VERSION = "v1-2026-06-05";
+
+// 12-factor #4 — schema for resume critique output. Permissive on string
+// content (the model writes the prose), strict on shape so sanitizeAnalysis()
+// below gets a real array, never a typo.
+const ResumeAnalysisSchema = z.object({
+  strengths: z.array(z.string()),
+  weaknesses: z.array(z.string()),
+  questions: z.array(z.object({
+    bullet: z.string(),
+    ask: z.string(),
+  })),
+});
 
 export const dynamic = "force-dynamic";
 // pdf-parse + AI streaming via fetch — set a generous timeout. 60s on
@@ -139,11 +155,7 @@ export async function POST(req: NextRequest) {
   let parsed: AnalysisJson;
   let costMicroUsd = 0;
   try {
-    const { json, raw } = await callAIForJson<{
-      strengths?: unknown;
-      weaknesses?: unknown;
-      questions?: unknown;
-    }>({
+    const { json, raw } = await callAIForJson({
       model: LLM_CHEAP,
       maxTokens: 1400,
       temperature: 0.4,
@@ -168,7 +180,7 @@ Rules:
 <resume>
 ${truncated}
 </resume>`,
-    });
+    }, ResumeAnalysisSchema);
 
     parsed = sanitizeAnalysis(json);
     costMicroUsd = raw.costMicroUsd;

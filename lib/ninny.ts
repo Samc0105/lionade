@@ -194,6 +194,12 @@ export interface NinnyChatMessage {
 }
 
 /**
+ * Version tag for the chat-mode system prompt below. Bump format
+ * `vN-YYYY-MM-DD` on every edit. (12-factor #2)
+ */
+export const NINNY_CHAT_PROMPT_VERSION = "v1-2026-06-05";
+
+/**
  * System prompt for chat. Scopes Ninny to the material, defends against
  * prompt injection from material content + user messages, enforces concise
  * helpful responses.

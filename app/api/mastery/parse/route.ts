@@ -27,6 +27,10 @@ import { callAIForJson, LLM_MAIN, stripSentinels } from "@/lib/ai";
 
 const MAX_INPUT_BYTES = 8 * 1024; // 8 KB — plenty for pasted syllabi, rejects abuse
 
+// 12-factor #2 — prompt version tag for the inline system prompt below.
+// Bump format `vN-YYYY-MM-DD` on every edit so logs correlate.
+const MASTERY_PARSE_PROMPT_VERSION = "v1-2026-06-05";
+
 // Zod schema for Ninny's parse response (12-factor #4: schema-validate AI JSON
 // at the trust boundary). Discriminated on `scope` so a "broad" reply requires
 // `clarification` and a "specific" reply requires the full subtopic array.

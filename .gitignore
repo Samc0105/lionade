@@ -41,3 +41,5 @@ crash.*.log
 # Local CLI config
 .terraformrc
 terraform.rc
+.claude/worktrees/
+repositories/
