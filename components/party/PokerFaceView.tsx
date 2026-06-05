@@ -93,6 +93,24 @@ export default function PokerFaceView({
   const advanceLock = useRef(false);
   const interrogateLock = useRef(false);
 
+  // 3-2-1 pre-round countdown — fires on loading → present transition only
+  // (each new round). Same mechanism as Sketchy + Bluff. Distinct ref from
+  // the card-flip prevPhaseRef below so the two phase-watchers don't fight.
+  const [countdownTicks, setCountdownTicks] = useState(0);
+  const countdownPrevPhaseRef = useRef<Phase>("loading");
+  useEffect(() => {
+    const prev = countdownPrevPhaseRef.current;
+    countdownPrevPhaseRef.current = phase;
+    if (prev === "loading" && phase === "present" && !reduced) {
+      setCountdownTicks(3);
+    }
+  }, [phase, reduced]);
+  useEffect(() => {
+    if (countdownTicks <= 0) return;
+    const t = setTimeout(() => setCountdownTicks(c => c - 1), 1000);
+    return () => clearTimeout(t);
+  }, [countdownTicks]);
+
   // ── Mode + game length (from room settings; default in-person, 2 rotations) ──
   // In-person: the claim is spoken out loud, so no claim text is shown and the
   // presenter only privately picks truth/lie. Remote: the typed-claim flow.
@@ -439,13 +457,33 @@ export default function PokerFaceView({
   }, [isHost, onReturnToLobby]);
 
   if (phase === "loading" || !detail) {
+    // Cinematic loading — same template as Sketchy / Bluff, electric-blue
+    // flavored to match Poker Face's ACCENT.
     return (
-      <div className="flex flex-col items-center py-16 gap-4">
-        <p className="font-bebas text-2xl text-cream/60 tracking-wider">DEALING THE CARD...</p>
-        <div
-          className="w-12 h-12 rounded-full border-2 animate-spin"
-          style={{ borderColor: `${ACCENT}40`, borderTopColor: ACCENT }}
-        />
+      <div className="flex flex-col items-center py-20 gap-5 relative">
+        <div className="relative w-28 h-28 flex items-center justify-center">
+          <span
+            aria-hidden="true"
+            className={`absolute inset-0 rounded-full ${reduced ? "" : "pa-deal-glow"}`}
+            style={{
+              background: `radial-gradient(circle, ${ACCENT}73 0%, transparent 70%)`,
+            }}
+          />
+          <span
+            aria-hidden="true"
+            className={`absolute inset-3 rounded-full ${reduced ? "" : "pa-deal-glow"}`}
+            style={{
+              background: "radial-gradient(circle, rgba(168,85,247,0.35) 0%, transparent 70%)",
+              animationDelay: "0.6s",
+            }}
+          />
+          <div
+            className="w-12 h-12 rounded-full border-2 animate-spin relative z-10"
+            style={{ borderColor: `${ACCENT}40`, borderTopColor: ACCENT }}
+          />
+        </div>
+        <p className="font-bebas text-2xl text-cream/70 tracking-[0.3em]">DEALING THE CARD</p>
+        <p className="text-cream/40 text-xs font-syne italic">picking a presenter, shuffling the deck</p>
       </div>
     );
   }
@@ -455,9 +493,67 @@ export default function PokerFaceView({
   const callsIn = round.call_count ?? 0;
   const callerCount = round.caller_count ?? Math.max(0, players.length - 1);
   const everyoneCalled = callerCount > 0 && callsIn >= callerCount;
+  // Time-pressure vignette during active vote or interrogate phases under 5s.
+  // Reuses pa-panic-vignette from Sketchy.
+  const showPanicVignette =
+    (phase === "vote" || phase === "interrogate") && timeLeft > 0 && timeLeft < 5 && !reduced;
+  const showCountdown = countdownTicks > 0 && phase === "present";
 
   return (
     <div className="space-y-4">
+      {showPanicVignette && <div aria-hidden="true" className="pa-panic-vignette" />}
+      {showCountdown && (
+        <motion.div
+          key={`countdown-${countdownTicks}`}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          aria-hidden="true"
+          className="fixed inset-0 z-40 flex flex-col items-center justify-center pointer-events-none"
+          style={{
+            background: "radial-gradient(circle, rgba(8,6,16,0.78) 0%, rgba(8,6,16,0.92) 100%)",
+            backdropFilter: "blur(6px)",
+            WebkitBackdropFilter: "blur(6px)",
+          }}
+        >
+          <div className="flex flex-col items-center gap-2 mb-8">
+            <p className="font-mono text-[11px] uppercase tracking-[0.35em] text-cream/50">
+              round {round.round_num} of {totalRounds}
+            </p>
+            <p className="font-bebas text-3xl sm:text-4xl tracking-wider text-cream">
+              {isPresenter
+                ? <>your turn to <span style={{ color: ACCENT }}>present</span></>
+                : <>{round.presenter_username ?? "presenter"} <span className="text-cream/45">is presenting</span></>}
+            </p>
+            {round.card_word && (
+              <span
+                className="mt-1 inline-flex items-center font-bebas text-xs tracking-[0.25em] px-3 py-1 rounded-full"
+                style={{
+                  background: `${ACCENT}2e`,
+                  border: `1px solid ${ACCENT}73`,
+                  color: ACCENT,
+                }}
+              >
+                {round.card_word.toUpperCase()}
+              </span>
+            )}
+          </div>
+          <motion.p
+            key={`tick-${countdownTicks}`}
+            initial={{ scale: 0.4, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 1.6, opacity: 0 }}
+            transition={{ type: "spring", stiffness: 320, damping: 18 }}
+            className="font-bebas text-[10rem] sm:text-[14rem] leading-none tracking-wider"
+            style={{ color: ACCENT, textShadow: `0 0 64px ${ACCENT}80` }}
+          >
+            {countdownTicks}
+          </motion.p>
+          <p className="font-bebas text-sm tracking-[0.4em] text-cream/55 mt-6">
+            {isPresenter ? "truth or lie — your call" : "read the face. call it."}
+          </p>
+        </motion.div>
+      )}
       <NinnyHostBubble message={ninnyMsg} />
 
       {/* Best-played banner — the face is the tell. */}
