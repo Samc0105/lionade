@@ -338,7 +338,12 @@ export default function GamesPage() {
       ? pdfContent.keyTerms.filter(w => w.length === wordLength)
       : WORD_BANK[wordLength] ?? WORD_BANK[5];
 
-    if (source.length === 0) { return; }
+    if (source.length === 0) {
+      // No Library words at this length — surface why instead of silent no-op.
+      setPdfError(`No ${wordLength}-letter words found in this PDF. Try a different length or upload another doc.`);
+      setTimeout(() => setPdfError(""), 4000);
+      return;
+    }
     const word = source[Math.floor(Math.random() * source.length)].toUpperCase();
     setRoardleWord(word);
     setRoardleGuesses([]);
@@ -354,10 +359,17 @@ export default function GamesPage() {
     const guess = roardleInput.toUpperCase().trim();
     if (guess.length !== wordLength || roardleOver) return;
 
-    // Validate against the word bank — only real study words are accepted
-    const validWords = new Set(
-      (WORD_BANK[wordLength] ?? []).map((w) => w.toUpperCase()),
-    );
+    // Validate against the word bank — only real study words are accepted.
+    // In Library mode, the target word is picked from pdfContent.keyTerms, so
+    // the user's correct guess must validate against THAT source too — otherwise
+    // typing the exact target word fires "Not in word list" (input-stuck class).
+    const libraryWords = tab === "library" && pdfContent?.keyTerms?.length
+      ? pdfContent.keyTerms.filter((w) => w.length === wordLength).map((w) => w.toUpperCase())
+      : [];
+    const validWords = new Set([
+      ...((WORD_BANK[wordLength] ?? []).map((w) => w.toUpperCase())),
+      ...libraryWords,
+    ]);
     if (!validWords.has(guess)) {
       setRoardleError("Not in word list");
       setRoardleShakeNonce(n => n + 1);
@@ -380,7 +392,7 @@ export default function GamesPage() {
     } else if (newGuesses.length >= 6) {
       setRoardleOver(true);
     }
-  }, [roardleInput, wordLength, roardleOver, roardleGuesses, roardleWord, awardFangs]);
+  }, [roardleInput, wordLength, roardleOver, roardleGuesses, roardleWord, awardFangs, tab, pdfContent]);
 
   // ── Physical keyboard input for Roardle ────────────────────
   // Lets the player type with their computer keyboard while Roardle is the
@@ -419,6 +431,15 @@ export default function GamesPage() {
       ? pdfContent.vocabulary.map(v => ({ term: v.term, def: v.definition }))
       : [...FLASHCARD_TERMS];
 
+    // Empty-deck guard — without this we'd land in flashcards game state with
+    // fcCards.length === 0, immediately hit divide-by-zero in fcAnswer (NaN%),
+    // and ship NaN to awardFangs.
+    if (source.length === 0) {
+      setPdfError("No vocab found in this PDF. Try a different document.");
+      setTimeout(() => setPdfError(""), 4000);
+      return;
+    }
+
     setFcCards(source.sort(() => Math.random() - 0.5).slice(0, 12));
     setFcIdx(0);
     setFcFlipped(false);
@@ -436,7 +457,9 @@ export default function GamesPage() {
       setTimeout(() => setFcIdx(i => i + 1), 200);
     } else {
       setFcOver(true);
-      const pct = (fcKnew + (knew ? 1 : 0)) / fcCards.length;
+      // Guard divide-by-zero defensively (startFlashcards refuses empty decks
+      // upstream, but this keeps Math.round(NaN * 15) out of awardFangs forever).
+      const pct = fcCards.length > 0 ? (fcKnew + (knew ? 1 : 0)) / fcCards.length : 0;
       const fangs = Math.round(pct * 15);
       if (fangs > 0) awardFangs(fangs, "flashcards");
     }
@@ -718,7 +741,7 @@ export default function GamesPage() {
             ) : (
               <div className="text-center animate-slide-up">
                 <h2 className="font-bebas text-4xl text-cream tracking-wider mb-2">COMPLETE!</h2>
-                <p className="font-bebas text-6xl text-gold mb-1">{Math.round((fcKnew / fcCards.length) * 100)}%</p>
+                <p className="font-bebas text-6xl text-gold mb-1">{fcCards.length > 0 ? Math.round((fcKnew / fcCards.length) * 100) : 0}%</p>
                 <p className="text-cream/40 text-sm mb-4">{fcKnew} / {fcCards.length} known</p>
                 {fangsEarned !== null && (
                   <div className="flex items-center justify-center gap-1.5 mb-6">

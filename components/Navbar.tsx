@@ -21,6 +21,8 @@ import {
   Bell,
   Users,
   Check,
+  Envelope,
+  EnvelopeOpen,
   Sword,
   Trophy,
   Medal,
@@ -254,15 +256,51 @@ export default function Navbar() {
     return () => { if (channel) supabase.removeChannel(channel); };
   }, [user?.id, loadNotifications, globalMutate]);
 
-  // Mark all as read when opening panel
-  const openNotifPanel = useCallback(async () => {
+  // Toggle the notification panel. Audit 2026-06-05 Bucket C #3 — the panel
+  // USED to auto-mark-everything-as-read on open. That was destructive: a user
+  // who wanted to come back to an interesting notif later would lose the unread
+  // affordance the moment they peeked at the dropdown. Now the panel opens
+  // read-only; the user marks rows individually (per-row toggle) or all at once
+  // ("Mark all read" button in the panel header).
+  const openNotifPanel = useCallback(() => {
     setShowNotifPanel(prev => !prev);
-    if (!showNotifPanel && user?.id && (unreadCount ?? 0) > 0) {
-      await apiPatch("/api/notifications");
-      setNotifications(prev => prev.map(n => ({ ...n, read: true })));
-      setUnreadCount(0);
+  }, []);
+
+  // Per-row read-state toggle (Bucket C #3). Optimistic: flip the visual
+  // immediately, fire the PATCH in the background, revert on failure. Extended
+  // /api/notifications PATCH accepts { id, read: bool }; ownership is enforced
+  // server-side by user_id scoping so a forged id can't mutate someone else's
+  // notification.
+  const toggleNotifRead = useCallback(async (id: string, nextRead: boolean) => {
+    setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: nextRead } : n));
+    setUnreadCount(prev => {
+      if (prev === null) return prev;
+      // If we just marked-read: prev - 1 (clamped). If we just marked-unread: prev + 1.
+      return nextRead ? Math.max(0, prev - 1) : prev + 1;
+    });
+    const res = await apiPatch("/api/notifications", { id, read: nextRead });
+    if (!res.ok) {
+      // Revert optimistic update.
+      setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: !nextRead } : n));
+      setUnreadCount(prev => {
+        if (prev === null) return prev;
+        return nextRead ? prev + 1 : Math.max(0, prev - 1);
+      });
     }
-  }, [showNotifPanel, user?.id, unreadCount]);
+  }, []);
+
+  // Mark-all-read button (Bucket C #3). Explicit user action — no longer
+  // auto-fired on panel open.
+  const markAllRead = useCallback(async () => {
+    if ((unreadCount ?? 0) === 0) return;
+    setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+    setUnreadCount(0);
+    const res = await apiPatch("/api/notifications", { all: true });
+    if (!res.ok) {
+      // Best-effort revert: re-fetch so the cache reflects server truth.
+      void loadNotifications();
+    }
+  }, [unreadCount, loadNotifications]);
 
   // Close notif panel on outside click
   useEffect(() => {
@@ -577,7 +615,15 @@ export default function Navbar() {
                       {(unreadCount ?? 0) > 0 ? `${unreadCount} unread notifications` : ""}
                     </span>
 
-                    {/* Notification Dropdown */}
+                    {/* Notification Dropdown
+                        Audit 2026-06-05 Bucket C #3 + Bucket A finding —
+                        Gmail/Slack model: opening the panel no longer auto-
+                        marks-all-read. Each row carries its own mark-read /
+                        mark-unread toggle on the right; a "Mark all read"
+                        button sits in the panel header. Unread rows wash gold
+                        across the full body instead of carrying a 2px left
+                        stripe (Bucket A: "read state is a 2px left stripe
+                        only"). */}
                     {showNotifPanel && (
                       <div className="absolute right-0 top-full mt-2 w-80 max-h-96 overflow-y-auto rounded-xl z-50"
                         style={{
@@ -585,24 +631,31 @@ export default function Navbar() {
                           border: "1px solid rgba(255,255,255,0.1)",
                           boxShadow: "0 12px 40px rgba(0,0,0,0.6)",
                         }}>
-                        <div className="px-4 py-3 border-b border-white/[0.06]">
+                        <div className="px-4 py-3 border-b border-white/[0.06] flex items-center justify-between gap-3">
                           <p className="font-bebas text-sm text-cream tracking-wider">NOTIFICATIONS</p>
+                          {(unreadCount ?? 0) > 0 && (
+                            <button
+                              onClick={markAllRead}
+                              className="text-[10px] font-bold text-electric hover:text-electric-light transition-colors uppercase tracking-wider"
+                              aria-label={`Mark all ${unreadCount} notifications as read`}
+                            >
+                              Mark all read
+                            </button>
+                          )}
                         </div>
                         {notifications.length === 0 ? (
                           <div className="py-8 text-center px-4">
-                            <p className="text-cream/55 text-xs mb-1">You're all caught up</p>
+                            <p className="text-cream/55 text-xs mb-1">You&apos;re all caught up</p>
                             <p className="text-cream/30 text-[10px]">New activity will show up here.</p>
                           </div>
                         ) : (
                           notifications.map(n => (
-                            <button
+                            <div
                               key={n.id}
-                              onClick={() => {
-                                setShowNotifPanel(false);
-                                if (n.action_url) router.push(n.action_url);
-                              }}
-                              className="w-full text-left px-4 py-3 flex items-start gap-3 hover:bg-white/[0.04] transition-colors"
-                              style={!n.read ? { borderLeft: "2px solid #FFD700" } : { borderLeft: "2px solid transparent" }}
+                              className="w-full px-4 py-3 flex items-start gap-3 hover:bg-white/[0.04] transition-colors group/notif"
+                              style={!n.read
+                                ? { background: "rgba(255,215,0,0.05)", borderLeft: "2px solid #FFD700" }
+                                : { borderLeft: "2px solid transparent" }}
                             >
                               {(() => {
                                 const NotifIcon = NOTIF_ICONS[n.type] ?? Megaphone;
@@ -616,7 +669,19 @@ export default function Navbar() {
                                   />
                                 );
                               })()}
-                              <div className="flex-1 min-w-0">
+                              <button
+                                onClick={() => {
+                                  setShowNotifPanel(false);
+                                  if (n.action_url) router.push(n.action_url);
+                                  // Implicitly mark-read on navigation — same
+                                  // behavior every notification UI converges
+                                  // on (you read it by going to the linked
+                                  // surface). No-ops if already read.
+                                  if (!n.read) void toggleNotifRead(n.id, true);
+                                }}
+                                className="flex-1 min-w-0 text-left"
+                                aria-label={n.title}
+                              >
                                 <p className={`text-xs font-semibold truncate ${n.read ? "text-cream/60" : "text-cream"}`}>
                                   {n.title}
                                 </p>
@@ -624,8 +689,26 @@ export default function Navbar() {
                                   <p className="text-[10px] text-cream/55 mt-0.5 truncate">{n.message}</p>
                                 )}
                                 <p className="text-[9px] text-cream/55 mt-1">{timeAgoShort(n.created_at)}</p>
-                              </div>
-                            </button>
+                              </button>
+                              {/* Per-row mark-read / mark-unread toggle. Icon
+                                  doubles as state: solid envelope = unread,
+                                  open envelope = read. Click flips. Hidden
+                                  by default on the row; revealed on row hover
+                                  so the dropdown stays calm at idle. */}
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  void toggleNotifRead(n.id, !n.read);
+                                }}
+                                className="flex-shrink-0 mt-0.5 p-1 rounded-full opacity-0 group-hover/notif:opacity-100 focus:opacity-100 hover:bg-white/10 transition-all"
+                                aria-label={n.read ? "Mark as unread" : "Mark as read"}
+                                title={n.read ? "Mark as unread" : "Mark as read"}
+                              >
+                                {n.read
+                                  ? <Envelope size={14} weight="regular" className="text-cream/55" aria-hidden="true" />
+                                  : <EnvelopeOpen size={14} weight="fill" className="text-gold" aria-hidden="true" />}
+                              </button>
+                            </div>
                           ))
                         )}
                       </div>

@@ -167,6 +167,22 @@ export default function PardyPage() {
     setModal(null);
   }, []);
 
+  // ── Skip a tile ────────────────────────────────────────────
+  // Marks the tile as attempted (incorrect, no Fang grant) and closes the
+  // modal. Without this, "Skip" would leave the tile live and the game-over
+  // trigger (totalAttempted >= 25) would be unreachable for any player who
+  // skipped even one clue.
+  const skipTile = useCallback(() => {
+    if (!deck || !modal) return;
+    const id = tileId(deck.id, modal.categoryIndex, modal.tileIndex);
+    setTiles((prev) => ({
+      ...prev,
+      [id]: { attempted: true, correct: false, awarded: 0 },
+    }));
+    if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
+    setModal(null);
+  }, [deck, modal]);
+
   // ── Restart ─────────────────────────────────────────────────
   const restart = useCallback(() => {
     setDeckId(null);
@@ -447,6 +463,7 @@ export default function PardyPage() {
             onChangeAnswer={(answer) => setModal({ ...modal, answer })}
             onSubmit={submitAnswer}
             onClose={closeModal}
+            onSkip={skipTile}
           />
         )}
       </div>
@@ -463,6 +480,7 @@ function PardyModal({
   onChangeAnswer,
   onSubmit,
   onClose,
+  onSkip,
 }: {
   categoryName: string;
   tile: { value: number; question: string; correctAnswer: string };
@@ -470,6 +488,7 @@ function PardyModal({
   onChangeAnswer: (answer: string) => void;
   onSubmit: () => void;
   onClose: () => void;
+  onSkip: () => void;
 }) {
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
   useEffect(() => {
@@ -542,15 +561,20 @@ function PardyModal({
               rows={2}
               disabled={modal.submitting}
               placeholder="Your answer"
+              autoCorrect="off"
+              autoCapitalize="off"
+              autoComplete="off"
+              spellCheck={false}
               className="w-full rounded-xl bg-navy/60 border border-white/10 text-cream font-syne text-base px-4 py-3 focus:outline-none focus:border-electric/60 transition resize-none"
               aria-label="Your answer"
             />
 
             <div className="flex items-center justify-between gap-3 mt-5">
               <button
-                onClick={onClose}
+                onClick={onSkip}
                 disabled={modal.submitting}
                 className="font-syne text-sm text-cream/50 hover:text-cream/80 transition disabled:opacity-40"
+                aria-label="Skip this clue (counts as attempted, no Fangs awarded)"
               >
                 Skip
               </button>

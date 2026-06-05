@@ -27,7 +27,7 @@ import PostRoundVoteCard from "./PostRoundVoteCard";
 import MidGameInviteModal from "./MidGameInviteModal";
 import Confetti from "@/components/Confetti";
 import FangBurst from "@/components/competitive/FangBurst";
-import { sketchChannel, SKETCH_EVENTS } from "@/lib/party/realtime-channels";
+import { sketchChannel, SKETCH_EVENTS, roomChannel, PARTY_EVENTS } from "@/lib/party/realtime-channels";
 import { subscribeResilient } from "@/lib/realtime-resilient";
 import { SUBJECT_LABELS, type Subject } from "@/lib/party/word-lists-stub";
 import type { PartyPlayer, PartyRoom } from "@/lib/party/types";
@@ -934,6 +934,28 @@ export default function SketchView({
     if (isHost) onReturnToLobby();
   }, [isHost, onReturnToLobby]);
 
+  // ── Rematch CTA (Bucket C 2026-06-05) ──
+  // Host-only: hits POST /api/party/rooms/[code]/rematch which resets scores,
+  // clears ready flags, and drops the room back to lobby state. Lighter than
+  // "back to lobby" semantically because it signals INTENT to play again — the
+  // caller's lobby view can render a small "REMATCH" pill (purely informational,
+  // not load-bearing). Non-host clients see a disabled "Waiting for host" pill.
+  const [rematchPending, setRematchPending] = useState(false);
+  const handleRematch = useCallback(async () => {
+    if (!isHost || rematchPending) return;
+    setRematchPending(true);
+    const res = await apiPost(`/api/party/rooms/${room.code}/rematch`, {});
+    if (!res.ok) {
+      setRematchPending(false);
+      return;
+    }
+    // Broadcast the same GAME_ENDED event the regular end-game flow uses so
+    // every client refreshes back to the lobby view at the same moment.
+    const ch = supabase.channel(roomChannel(room.code));
+    await ch.send({ type: "broadcast", event: PARTY_EVENTS.GAME_ENDED, payload: {} });
+    setRematchPending(false);
+  }, [isHost, rematchPending, room.code]);
+
   // ── Render ──
   const playersForBoard = useMemo(() => players.map((p) => ({
     user_id: p.user_id,
@@ -1701,25 +1723,49 @@ export default function SketchView({
             />
           )}
 
-          {isHost && (
-            <div className="flex flex-col sm:flex-row gap-3">
+          {isHost ? (
+            <div className="space-y-2">
+              <div className="flex flex-col sm:flex-row gap-3">
+                <button
+                  onClick={startRound}
+                  className="flex-1 py-3 rounded-xl font-bebas tracking-wider text-base transition-all active:scale-95 btn-gold"
+                >
+                  PLAY ANOTHER ROUND
+                </button>
+                <button
+                  onClick={onReturnToLobby}
+                  className="flex-1 py-3 rounded-xl font-bebas tracking-wider text-base transition-all active:scale-95"
+                  style={{
+                    background: "rgba(255,255,255,0.04)",
+                    border: "1px solid rgba(255,255,255,0.1)",
+                    color: "rgba(238,244,255,0.85)",
+                  }}
+                >
+                  BACK TO LOBBY
+                </button>
+              </div>
+              {/* Rematch CTA — fresh match, same roster, scores back to zero. */}
               <button
-                onClick={startRound}
-                className="flex-1 py-3 rounded-xl font-bebas tracking-wider text-base transition-all active:scale-95 btn-gold"
-              >
-                PLAY ANOTHER ROUND
-              </button>
-              <button
-                onClick={onReturnToLobby}
-                className="flex-1 py-3 rounded-xl font-bebas tracking-wider text-base transition-all active:scale-95"
+                onClick={handleRematch}
+                disabled={rematchPending}
+                className="w-full py-2.5 rounded-xl font-bebas tracking-wider text-sm transition-all active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed"
                 style={{
-                  background: "rgba(255,255,255,0.04)",
-                  border: "1px solid rgba(255,255,255,0.1)",
-                  color: "rgba(238,244,255,0.85)",
+                  background: "linear-gradient(135deg, rgba(168,85,247,0.20) 0%, rgba(99,102,241,0.10) 100%)",
+                  border: "1px solid rgba(168,85,247,0.45)",
+                  color: "#E9D5FF",
+                  boxShadow: "0 0 16px rgba(168,85,247,0.18)",
                 }}
               >
-                BACK TO LOBBY
+                {rematchPending ? "RESETTING..." : "REMATCH (FRESH SCORES, SAME ROSTER)"}
               </button>
+            </div>
+          ) : (
+            // Non-host: show a quiet "waiting on host" pill so the screen
+            // doesn't feel abandoned after the round reveal.
+            <div className="text-center">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bebas tracking-wider text-cream/55 bg-white/[0.04] border border-white/10">
+                Waiting for host
+              </span>
             </div>
           )}
         </motion.div>

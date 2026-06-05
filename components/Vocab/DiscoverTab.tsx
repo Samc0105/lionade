@@ -26,6 +26,7 @@ import {
   GlobeHemisphereWest,
   ArrowsClockwise,
 } from "@phosphor-icons/react";
+import { useAuth } from "@/lib/auth";
 import { swrFetcher } from "@/lib/api-client";
 import BankPreviewModal from "./BankPreviewModal";
 import type { DiscoverKind, DiscoverSort, PublicBankSummary } from "./types";
@@ -54,6 +55,8 @@ interface Props {
 }
 
 export default function DiscoverTab({ onCloned }: Props) {
+  const { user } = useAuth();
+  const viewerId = user?.id ?? null;
   const [sort, setSort] = useState<DiscoverSort>("top");
   const [kindFilter, setKindFilter] = useState<DiscoverKind>("all");
   const [selectedBank, setSelectedBank] = useState<PublicBankSummary | null>(null);
@@ -169,6 +172,7 @@ export default function DiscoverTab({ onCloned }: Props) {
               <DiscoverCard
                 key={bank.id}
                 bank={bank}
+                viewerId={viewerId}
                 onClick={() => handleCardClick(bank)}
                 index={idx}
               />
@@ -204,13 +208,20 @@ export default function DiscoverTab({ onCloned }: Props) {
 
 function DiscoverCard({
   bank,
+  viewerId,
   onClick,
   index,
 }: {
   bank: PublicBankSummary;
+  viewerId: string | null;
   onClick: () => void;
   index: number;
 }) {
+  // Bucket C 2026-06-05 — closes the publish→see-it-published loop. Owner
+  // sees their own bank in Discover with a "Yours" chip so they can verify
+  // it landed without having to ask another user. Clone-from-self is still
+  // blocked at the clone endpoint, so the chip is purely informational.
+  const isYours = !!viewerId && bank.author.id === viewerId;
   const KindIcon = bank.kind === "language" ? GlobeHemisphereWest : BookOpen;
   const kindLabel = bank.kind === "language"
     ? `${(bank.source_lang ?? "?").toUpperCase()}/${(bank.target_lang ?? "?").toUpperCase()}`
@@ -250,10 +261,20 @@ function DiscoverCard({
             <p className="font-bebas text-lg tracking-wider text-cream leading-tight line-clamp-2">
               {bank.name}
             </p>
-            <span className="shrink-0 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-white/5 border border-white/10 font-mono text-[9px] uppercase tracking-wider text-cream/70">
-              <KindIcon size={9} weight="bold" aria-hidden="true" />
-              {kindLabel}
-            </span>
+            <div className="shrink-0 inline-flex items-center gap-1.5">
+              {isYours && (
+                <span
+                  className="inline-flex items-center px-1.5 py-0.5 rounded-md font-mono text-[9px] uppercase tracking-wider text-electric bg-electric/15 border border-electric/40"
+                  title="This is your published bank"
+                >
+                  Yours
+                </span>
+              )}
+              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-white/5 border border-white/10 font-mono text-[9px] uppercase tracking-wider text-cream/70">
+                <KindIcon size={9} weight="bold" aria-hidden="true" />
+                {kindLabel}
+              </span>
+            </div>
           </div>
           <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-cream/55">
             <span className="text-cream/80 tabular-nums">{bank.word_count}</span> words

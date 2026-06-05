@@ -7,6 +7,50 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 
 ---
 
+## 2026-06-05 — Bucket C missing-counterparts sweep (mixed: 1 row + 6 no-row)
+
+**Status:** 🟡 partial — 1 row added (rematch CTA — applies to iOS Party when iOS Party ships); 6 web-only no-row decisions for the rest.
+
+Closes Bucket C from today's audit (`docs/AUDIT_2026-06-05.md`). Surfaces touched (web):
+
+1. **Settings Change Email modal** — `app/settings/page.tsx` (web only). Modal collects new email + current password, re-auths via `supabase.auth.signInWithPassword` before `auth.updateUser({ email })`. iOS will reach the same Supabase path through `@lionade/core` if/when an iOS Settings screen ships; the re-auth gate idiom ports as-is. **No iOS row** — Supabase JS auth flow is shared infra, not a feature delta.
+2. **Badges page filter + sort + search** — `app/badges/page.tsx` (web only). Rarity chip set (All/Common/Rare/Epic/Legendary), magnifier-glass search, sort dropdown (Recently earned / Rarest first / A→Z). iOS Badges grid (already shipped) does NOT have these yet — when `vp-ios` next touches the iOS Badges screen, apply the same instinct: chip set, native iOS search bar (`Searchbar` from NativeWind or platform-default), `ActionSheet` for sort. **No iOS row** — same instinct, separate native implementation.
+3. **Notification dropdown per-row mark-read + Mark-all** — `components/Navbar.tsx` (web) + `/api/notifications` PATCH extended. iOS notifications use the system Notification Center (not an in-app dropdown) — the Mark-all-read concept ports to iOS as a swipe-left-on-notification gesture (system-handled). **No iOS row** — different surface, different idiom. iOS app would only need to surface "Mark all read" in its own in-app notification list if/when it builds one.
+4. **Shop unequip CTA** — `app/shop/page.tsx` browse grids (web only). iOS Shop is a hand-built RN screen (not a port of the web Shop) — when `vp-ios` next does a Shop pass, mirror the same instinct on owned items: bordered green pill + Unequip button replacing the static "Owned" affordance. Username effect / banner / frame unequip via the same `/api/me/equip` (now accepts empty `cosmetic_id` to clear a slot). **No iOS row** — visual decision on each platform; backend already supports both.
+5. **Party Rematch CTA** — `components/party/SketchView.tsx` + `components/party/BluffView.tsx` + new `POST /api/party/rooms/[code]/rematch`. ✅ Web shipped. **iOS pending** — when iOS Party ships (currently scoped for V2 per `lionade-vault/lionade/Features/Party.md`), the iOS SketchView / BluffView round-reveal screens need a matching primary REMATCH button below the existing PLAY ANOTHER ROUND / BACK TO LOBBY pair. Host-only; non-host shows "Waiting for host" pill. Backend route already exists, iOS just consumes. **THIS is the actual parity row** — adds to the existing iOS Party tracking.
+6. **Party Lobby Invite Friends section** — `components/party/RoomLobby.tsx` (web only on shipped surface). iOS Party (when it ships) should mirror the section. **No iOS row** for now — falls under the iOS Party V2 umbrella.
+7. **Vocab Discover "Yours" badge** — `components/Vocab/DiscoverTab.tsx` (web only). iOS Vocab Discover (if/when ported) should render the same electric chip on owner-authored banks. **No iOS row** — same instinct ports.
+
+**Cross-platform stance for `vp-ios`:**
+- Change-email + re-auth pattern is shared Supabase infra, not a parity surface.
+- Badge filter / sort / search instinct ports to iOS when its Badges screen gets its next pass.
+- Notification per-row read in-app only matters if/when iOS builds its own in-app notification list (it uses system Notification Center today).
+- Shop unequip — backend now supports it; iOS just exposes the UI when it next touches Shop.
+- Rematch CTA — iOS Party V2 work item. Backend already shipped on web.
+- Lobby invite friends — iOS Party V2 work item.
+- Vocab "Yours" badge — iOS Vocab Discover port work item.
+
+**Files touched (web):** `app/api/notifications/route.ts` (PATCH extended for per-row + all), `app/api/party/rooms/[code]/rematch/route.ts` (new), `app/api/me/equip/route.ts` (null/empty cosmetic_id → unequip slot), `app/api/vocab/banks/discover/route.ts` (allow viewer's own banks), `app/settings/page.tsx` (Change Email modal + Change row), `app/badges/page.tsx` (rarity chips + sort + search + no-results state), `app/shop/page.tsx` (equip/unequip props on 4 card variants + isEquipped helper), `components/Navbar.tsx` (no auto-mark-all-read on open, per-row toggle, Mark-all button, unread row wash), `components/party/SketchView.tsx` (Rematch button + non-host pill), `components/party/BluffView.tsx` (Rematch button + non-host pill), `components/party/RoomLobby.tsx` (FriendInviteSection component + render slot), `components/Vocab/DiscoverTab.tsx` (Yours chip via useAuth). `docs/CHANGELOG.md`, vault `Daily/2026-06-05.md` Section 10 appended.
+
+---
+
+## 2026-06-05 — Games Shakedown P0 sweep (web-only, no iOS row)
+
+**Status:** 🚫 N/A (deliberate no-row decision — surgical web-game bug fixes + cross-game iPhone keyboard hint sweep with no behavior change at the data layer).
+
+Closes 3 of the 4 P0s from `docs/GAMES_SHAKEDOWN_2026-06-05.md` (Timeline drag-on-touch deferred — needs ~2h with a `<DraggableRow>` component shipping pointer events instead of HTML5 `draggable`). Surfaces touched (web):
+
+1. **Pardy Skip fix** — `app/games/pardy/page.tsx` Skip button now marks the tile `{ attempted: true, correct: false, awarded: 0 }` and closes (used to call `onClose` directly, leaving the tile live so the FINAL TALLY screen was unreachable for any player who skipped even one clue).
+2. **Roardle Library-mode word-source mismatch** — `app/games/page.tsx` validates against `WORD_BANK ∪ pdfContent.keyTerms` when `tab === "library"` (used to validate against `WORD_BANK` only, so the correct PDF-sourced target word fired "Not in word list").
+3. **Flashcards empty-deck guard** — `app/games/page.tsx` `startFlashcards` refuses empty Library decks with a toast; `fcAnswer` and the game-over render guard `fcCards.length > 0` defensively (prevents NaN% display + `awardFangs(NaN)`).
+4. **Cross-game autoCorrect sweep** — `autoCorrect="off" autoCapitalize="off" autoComplete="off" spellCheck={false}` added to Pardy answer textarea, Bluff fake-answer input, Resume Coach Socratic textarea, Mastery Socratic textarea, Mastery landing parse + narrow-down textareas. Sketchy guess input deferred — Bucket C agent is editing `components/party/SketchView.tsx` this session; one-line follow-up to land post-Bucket-C.
+
+**Cross-platform stance for `vp-ios`:** iOS RN `TextInput` already supports `autoCorrect={false} autoCapitalize="none" spellCheck={false}` props and the equivalent sweep should run there when `ios-qa-tester` next audits the iOS game inputs (iOS Pardy if/when it ships, iOS Mastery Socratic on `lionade-ios/src/screens/mastery/...`, iOS Resume Coach if/when it ships). The Pardy Skip fix is a pure web logic bug — iOS Pardy hasn't shipped, so when it does port, mirror the `skipTile` callback pattern (mark tile attempted+wrong, close modal). The Roardle Library-mode fix and Flashcards empty-deck guard are web-only because the iOS app doesn't yet have a PDF-upload Library mode in Roardle / Flashcards (web-exclusive feature) — when iOS ports the Library mode, port these guards alongside.
+
+**Files touched (web):** `app/games/pardy/page.tsx`, `app/games/page.tsx`, `components/party/BluffView.tsx`, `components/Coach/SocraticBubble.tsx`, `components/Mastery/MasteryActionArea.tsx`, `app/learn/mastery/page.tsx`. `docs/CHANGELOG.md`, vault `Daily/2026-06-05.md` appended.
+
+---
+
 ## 2026-06-05 — Bucket B dead-end loopholes (web-only, no iOS row)
 
 **Status:** 🚫 N/A (deliberate no-row decision — UX trust + native-dialog cleanup on web surfaces that don't have direct iOS counterparts).

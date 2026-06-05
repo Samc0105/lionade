@@ -121,6 +121,10 @@ export default function SocraticBubble({
               rows={3}
               maxLength={1500}
               placeholder="Tell Ninny what actually happened — numbers, scale, outcome…"
+              autoCorrect="off"
+              autoCapitalize="off"
+              autoComplete="off"
+              spellCheck={false}
               className="mt-1.5 w-full rounded-xl px-3 py-2.5 bg-white/[0.04] border border-white/10 text-cream font-syne text-sm placeholder:text-cream/35 focus:outline-none focus:ring-2 focus:ring-electric/60 resize-none"
               disabled={busy}
             />

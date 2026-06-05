@@ -188,6 +188,10 @@ export default function MasteryLandingPage() {
                 onChange={e => setInput(e.target.value.slice(0, 8000))}
                 disabled={parsing}
                 rows={6}
+                autoCorrect="off"
+                autoCapitalize="off"
+                autoComplete="off"
+                spellCheck={false}
                 placeholder="Examples:
 • AWS Security Specialty (SCS-C02)
 • Calculus 1 midterm: derivatives, integrals, limits, chain rule
@@ -239,6 +243,10 @@ export default function MasteryLandingPage() {
                 onChange={e => setInput(e.target.value.slice(0, 8000))}
                 disabled={parsing}
                 rows={3}
+                autoCorrect="off"
+                autoCapitalize="off"
+                autoComplete="off"
+                spellCheck={false}
                 placeholder="Narrow it down here…"
                 className="w-full resize-none rounded-[8px] bg-white/[0.03] border border-white/[0.08]
                   focus:border-gold/40 focus:outline-none px-4 py-3 text-[14px] text-cream

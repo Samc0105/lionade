@@ -339,6 +339,10 @@ export default function BluffView({
               onChange={(e) => setFakeInput(e.target.value)}
               placeholder={detail.has_submitted ? "Edit your fake..." : "Write your fake answer..."}
               maxLength={80}
+              autoCorrect="off"
+              autoCapitalize="off"
+              autoComplete="off"
+              spellCheck={false}
               className="w-full rounded-xl px-4 py-3.5 text-base font-syne text-cream outline-none"
               style={{
                 background: "rgba(255,255,255,0.04)",

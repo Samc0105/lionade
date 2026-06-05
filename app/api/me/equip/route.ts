@@ -53,13 +53,55 @@ export async function POST(req: NextRequest) {
   }
 
   const slot = typeof body.slot === "string" ? body.slot : "";
-  const cosmeticId = typeof body.cosmetic_id === "string" ? body.cosmetic_id : "";
+  // Bucket C 2026-06-05: empty string OR explicit null on cosmetic_id is now
+  // a valid "unequip this slot" signal. Backed by the new Shop unequip CTA.
+  const rawId = body.cosmetic_id;
+  const cosmeticId =
+    typeof rawId === "string" ? rawId :
+    rawId === null ? "" :
+    undefined;
 
   if (!VALID_SLOTS.includes(slot as Slot)) {
     return NextResponse.json({ error: "Invalid slot" }, { status: 400 });
   }
-  if (!cosmeticId) {
+  if (cosmeticId === undefined) {
     return NextResponse.json({ error: "Missing cosmetic_id" }, { status: 400 });
+  }
+
+  // ── Unequip path ──
+  // Empty/null cosmetic_id clears the slot. Currently only username_effect
+  // has a dedicated column on profiles; other slots clear all `equipped=true`
+  // rows of the matching item_type in user_inventory.
+  if (!cosmeticId) {
+    if (slot === "username_effect") {
+      const { error } = await supabaseAdmin
+        .from("profiles")
+        .update({ equipped_username_effect: null })
+        .eq("id", userId);
+      if (error) {
+        console.error("[me/equip] username_effect unequip:", error.message);
+        return NextResponse.json({ error: "Failed to unequip" }, { status: 500 });
+      }
+      return NextResponse.json({ ok: true, slot, cosmetic_id: null });
+    }
+    // Generic slot unequip: clear `equipped=true` rows of this item_type.
+    // Slot names map 1:1 to item_type for the simple cases.
+    const itemType = slot === "animated_banner" ? "animated_banner"
+                   : slot === "banner"          ? "banner"
+                   : slot === "frame"           ? "frame"
+                   : slot === "background"      ? "background"
+                   : slot === "name_color"      ? "name_color"
+                   : slot === "avatar_aura"     ? "frame" // auras are frame-typed in the catalog
+                   : slot === "voice_skin"      ? "frame"
+                   : null;
+    if (itemType) {
+      await supabaseAdmin
+        .from("user_inventory")
+        .update({ equipped: false })
+        .eq("user_id", userId)
+        .eq("item_type", itemType);
+    }
+    return NextResponse.json({ ok: true, slot, cosmetic_id: null });
   }
 
   // Ownership check — cosmetic must exist in one of: user_inventory,

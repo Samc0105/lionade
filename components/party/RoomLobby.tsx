@@ -3,9 +3,11 @@
 // Lobby view for Lionade Party rooms.
 // Player list + ready toggle + game-select cards + Start button (host only).
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import useSWR from "swr";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
-import { apiPost } from "@/lib/api-client";
+import { apiGet, apiPost } from "@/lib/api-client";
+import { toastError, toastSuccess } from "@/lib/toast";
 import { supabase } from "@/lib/supabase";
 import RoomCodeShare from "./RoomCodeShare";
 import { SUBJECT_LABELS, SUBJECTS as ALL_SUBJECTS } from "@/lib/party/word-lists-stub";
@@ -342,6 +344,11 @@ export default function RoomLobby({ room, players, isHost, meUserId, onGameStart
           </p>
         )}
       </div>
+
+      {/* Friend invite (Bucket C 2026-06-05): renders when the user has 1+
+          accepted friends. Code-share above is preserved as the universal
+          fallback. Section auto-hides on cold-start users (no friends). */}
+      <FriendInviteSection code={room.code} />
 
       {/* Players */}
       <div
@@ -712,6 +719,174 @@ export default function RoomLobby({ room, players, isHost, meUserId, onGameStart
           {error}
         </p>
       )}
+    </div>
+  );
+}
+
+
+// ── Friend Invite section (Bucket C 2026-06-05) ──
+// Renders inside the lobby when the user has 1+ accepted friends. Each friend
+// row exposes a one-tap "Invite" button that hits POST /api/party/rooms/[code]
+// /invite-friend; backend drops a `party_invite` notification on the friend
+// with a deep-link to the room. RoomCodeShare is preserved (this section is
+// additive, not a replacement).
+//
+// Surfacing friends as the FIRST class of invite (with code-share as fallback)
+// matches the audit ask: the friend graph is the primary social primitive,
+// the room code is the universal-fallback. We render up to 8 friends sorted
+// by online-status then last-seen so the most likely-to-accept friends bubble
+// to the top.
+interface InviteFriendsProps {
+  code: string;
+}
+interface FriendLite {
+  id: string;
+  username: string;
+  avatar_url: string | null;
+  is_online: boolean;
+}
+function FriendInviteSection({ code }: InviteFriendsProps) {
+  const { data, error, isLoading } = useSWR<{
+    friends: FriendLite[];
+  }>("/api/social/friends", async () => {
+    const res = await apiGet<{ friends: FriendLite[] }>("/api/social/friends");
+    if (!res.ok || !res.data) return { friends: [] };
+    return { friends: res.data.friends ?? [] };
+  }, {
+    dedupingInterval: 60_000,
+    revalidateOnFocus: true,
+    keepPreviousData: true,
+    shouldRetryOnError: false,
+  });
+
+  const friends = data?.friends ?? [];
+
+  // Per-friend invite state: "idle" | "sending" | "sent" | "in-room" so the
+  // button can switch labels without spamming the server. Resets after 4s.
+  const [statusById, setStatusById] = useState<Record<string, "idle" | "sending" | "sent" | "in-room">>({});
+
+  const sortedFriends = useMemo(() => {
+    // Online friends first, then offline (alphabetical within each group).
+    const copy = [...friends];
+    copy.sort((a, b) => {
+      if (a.is_online !== b.is_online) return a.is_online ? -1 : 1;
+      return (a.username ?? "").localeCompare(b.username ?? "");
+    });
+    return copy.slice(0, 8);
+  }, [friends]);
+
+  const inviteFriend = async (friendId: string) => {
+    if (statusById[friendId] === "sending" || statusById[friendId] === "sent") return;
+    setStatusById(s => ({ ...s, [friendId]: "sending" }));
+    const res = await apiPost<{ ok: true; invitedUsername: string | null }>(
+      `/api/party/rooms/${code}/invite-friend`,
+      { friendId },
+    );
+    if (!res.ok) {
+      const errMsg = res.error ?? "Couldn\'t send invite.";
+      // Receiver already in this room → "in-room" badge (not an error to surface)
+      if (errMsg.toLowerCase().includes("already in this room")) {
+        setStatusById(s => ({ ...s, [friendId]: "in-room" }));
+        setTimeout(() => setStatusById(s => ({ ...s, [friendId]: "idle" })), 4000);
+        return;
+      }
+      toastError(errMsg);
+      setStatusById(s => ({ ...s, [friendId]: "idle" }));
+      return;
+    }
+    toastSuccess(`Invite sent to ${res.data?.invitedUsername ?? "your friend"}`);
+    setStatusById(s => ({ ...s, [friendId]: "sent" }));
+    setTimeout(() => setStatusById(s => ({ ...s, [friendId]: "idle" })), 4000);
+  };
+
+  if (isLoading) {
+    return (
+      <div className="rounded-2xl p-5"
+        style={{
+          background: "linear-gradient(135deg, rgba(16,12,26,0.7) 0%, rgba(8,6,16,0.7) 100%)",
+          border: "1px solid rgba(255,255,255,0.06)",
+        }}
+      >
+        <p className="font-bebas text-sm text-cream/60 tracking-[0.25em] mb-3">INVITE FRIENDS</p>
+        <div className="grid grid-cols-2 gap-2">
+          {[0, 1, 2, 3].map(i => (
+            <div key={i} className="h-11 rounded-lg bg-white/[0.04] animate-pulse" />
+          ))}
+        </div>
+      </div>
+    );
+  }
+  if (error || friends.length === 0) {
+    // Don\'t render the section at all if the user has no friends — the
+    // room-code share above is already the universal invite path. Keeps the
+    // lobby calm for solo / cold-start users.
+    return null;
+  }
+
+  return (
+    <div className="rounded-2xl p-5"
+      style={{
+        background: "linear-gradient(135deg, rgba(16,12,26,0.7) 0%, rgba(8,6,16,0.7) 100%)",
+        border: "1px solid rgba(255,255,255,0.06)",
+      }}
+    >
+      <div className="flex items-center justify-between mb-3">
+        <p className="font-bebas text-sm text-cream/60 tracking-[0.25em]">INVITE FRIENDS</p>
+        <p className="text-cream/35 text-[10px] font-syne italic">
+          They\'ll get a notification with a one-tap join.
+        </p>
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+        {sortedFriends.map(f => {
+          const status = statusById[f.id] ?? "idle";
+          const labelText = status === "sending" ? "..."
+            : status === "sent" ? "Sent"
+            : status === "in-room" ? "In room"
+            : "Invite";
+          return (
+            <div
+              key={f.id}
+              className="rounded-lg px-3 py-2 flex items-center gap-2.5"
+              style={{
+                background: "rgba(255,255,255,0.03)",
+                border: "1px solid rgba(255,255,255,0.07)",
+              }}
+            >
+              <div className="relative shrink-0">
+                <img
+                  src={f.avatar_url ?? `https://api.dicebear.com/9.x/identicon/svg?seed=${encodeURIComponent(f.username)}`}
+                  alt=""
+                  className="w-8 h-8 rounded-full bg-white/10 object-cover"
+                />
+                {f.is_online && (
+                  <span
+                    aria-hidden="true"
+                    className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2"
+                    style={{ background: "#22C55E", borderColor: "#0a0610" }}
+                  />
+                )}
+              </div>
+              <span className="flex-1 font-syne text-sm text-cream/85 truncate">{f.username}</span>
+              <button
+                onClick={() => inviteFriend(f.id)}
+                disabled={status === "sending" || status === "sent" || status === "in-room"}
+                className={`shrink-0 px-2.5 py-1 rounded-md font-bebas text-[11px] tracking-wider transition-all ${
+                  status === "sent"
+                    ? "text-green-300 bg-green-500/15 border border-green-500/30"
+                    : status === "in-room"
+                    ? "text-cream/55 bg-white/[0.03] border border-white/10"
+                    : status === "sending"
+                    ? "text-cream/50 bg-white/[0.04] border border-white/10"
+                    : "text-electric bg-electric/10 border border-electric/30 hover:bg-electric/20"
+                }`}
+                aria-label={status === "idle" ? `Invite ${f.username}` : labelText}
+              >
+                {labelText}
+              </button>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }

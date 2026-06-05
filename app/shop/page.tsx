@@ -384,27 +384,47 @@ function ConfirmModal({ item, quantity, onConfirm, onCancel, userCoins }: {
 }
 
 // ── Featured Card ──
-function FeaturedCard({ item, owned, onBuy }: { item: ShopItem; owned: boolean; onBuy: () => void }) {
+// FeaturedCard — same equip / unequip affordance as CosmeticCard so Featured
+// behaves identically when an owned item is surfaced there (e.g. Golden Lion Frame).
+function FeaturedCard({ item, owned, equipped = false, onBuy, onEquip }: { item: ShopItem; owned: boolean; equipped?: boolean; onBuy: () => void; onEquip?: () => void }) {
   const r = RARITY_COLORS[item.rarity];
   const Icon = item.Icon;
+  const isCosmetic = item.type !== "booster";
   return (
     <div className={`fluid-card-hover shop-card shop-tilt-card relative group rounded-2xl ${r.glow} ${item.rarity === "legendary" ? "shop-legendary-sparkle shop-tier-sweep-legendary" : ""} overflow-hidden shop-item-float h-full flex flex-col`}
-      style={{ background: r.cardBg, border: `1.5px solid ${r.cardBorder}`, boxShadow: r.cardShadow, backdropFilter: "blur(20px)" }}>
-      <div aria-hidden="true" className="absolute left-0 top-0 bottom-0 w-[2px] z-[1]" style={{ background: r.accentLine }} />
+      style={{
+        background: r.cardBg,
+        border: equipped ? "1.5px solid rgba(34,197,94,0.55)" : `1.5px solid ${r.cardBorder}`,
+        boxShadow: r.cardShadow,
+        backdropFilter: "blur(20px)",
+      }}>
+      <div aria-hidden="true" className="absolute left-0 top-0 bottom-0 w-[2px] z-[1]" style={{ background: equipped ? "rgba(34,197,94,0.85)" : r.accentLine }} />
       {item.rarity === "legendary" && <div className="shop-legendary-border" />}
       <div className="relative z-[2] p-6 sm:p-8 flex flex-col flex-1">
-        <span className={`absolute top-4 right-4 text-[10px] uppercase tracking-widest font-bold px-2.5 py-1 rounded-full ${r.badge}`}>{item.rarity}</span>
+        <div className="absolute top-4 right-4 flex items-center gap-1.5">
+          {equipped && (
+            <span className="text-[10px] uppercase tracking-widest font-bold px-2 py-0.5 rounded-full bg-green-500/20 text-green-300 border border-green-500/30">Equipped</span>
+          )}
+          <span className={`text-[10px] uppercase tracking-widest font-bold px-2.5 py-1 rounded-full ${r.badge}`}>{item.rarity}</span>
+        </div>
         <div className="mb-4 shop-item-icon">
           <Icon size={72} weight={item.iconWeight ?? "fill"} color={item.iconColor ?? "currentColor"} aria-hidden="true" />
         </div>
         <h3 className="shop-card-title font-bebas text-2xl sm:text-3xl text-cream tracking-wide mb-1">{item.name}</h3>
         <p className="shop-card-desc text-cream/60 text-sm mb-5 leading-relaxed">{item.description}</p>
-        <div className="flex items-center justify-between mt-auto pt-2 gap-6">
+        <div className="flex items-center justify-between mt-auto pt-2 gap-6 flex-wrap">
           <div className="flex items-center gap-2 flex-shrink-0">
             <img src={cdnUrl("/F.png")} alt="Fangs" className="w-6 h-6 object-contain" />
             <span className="font-bebas text-2xl text-gold">{formatCoins(item.price)}</span>
           </div>
-          {owned ? (
+          {owned && isCosmetic && onEquip ? (
+            <button
+              onClick={onEquip}
+              className={`flex-shrink-0 px-5 py-2 rounded-xl text-sm font-bold transition-all ${equipped ? "border border-green-500/40 text-green-400 hover:bg-green-500/10" : "border border-electric/30 text-electric hover:bg-electric/10"}`}
+            >
+              {equipped ? "Unequip" : "Equip"}
+            </button>
+          ) : owned ? (
             <span className="flex items-center gap-1.5 text-green-400 text-sm font-bold">
               <Check size={16} weight="bold" color="#22C55E" aria-hidden="true" /> Owned
             </span>
@@ -418,29 +438,54 @@ function FeaturedCard({ item, owned, onBuy }: { item: ShopItem; owned: boolean; 
 }
 
 // ── Cosmetic Card ──
-function CosmeticCard({ item, owned, canAfford, onBuy }: { item: ShopItem; owned: boolean; canAfford: boolean; onBuy: () => void }) {
+// Bucket C 2026-06-05: equipped frames / name colors / banners now expose an
+// inline "Unequip" CTA next to the green Equipped pill so users can clear the
+// slot without going to Inventory. Owned-but-not-equipped state gets a quiet
+// "Equip" CTA so the shop also doubles as a quick re-equip surface. Callers
+// pass `equipped` + `onEquip` from the same handleEquip path that the
+// Inventory tab uses, so behavior is consistent across surfaces.
+function CosmeticCard({ item, owned, equipped = false, canAfford, onBuy, onEquip }: { item: ShopItem; owned: boolean; equipped?: boolean; canAfford: boolean; onBuy: () => void; onEquip?: () => void }) {
   const r = RARITY_COLORS[item.rarity];
   const Icon = item.Icon;
+  // Boosters are equipped-by-use, not by toggle — never show the equip CTA on them.
+  const isCosmetic = item.type !== "booster";
   return (
     <div className={`fluid-card-hover shop-card shop-tilt-card relative group rounded-xl ${r.glow} ${item.rarity === "legendary" ? "shop-legendary-sparkle shop-tier-sweep-legendary" : ""} overflow-hidden transition-all duration-300 h-full flex flex-col`}
-      style={{ background: r.cardBg, border: `1.5px solid ${r.cardBorder}`, boxShadow: r.cardShadow, backdropFilter: "blur(12px)" }}>
-      <div aria-hidden="true" className="absolute left-0 top-0 bottom-0 w-[2px] z-[1]" style={{ background: r.accentLine }} />
+      style={{
+        background: r.cardBg,
+        border: equipped ? "1.5px solid rgba(34,197,94,0.55)" : `1.5px solid ${r.cardBorder}`,
+        boxShadow: r.cardShadow,
+        backdropFilter: "blur(12px)",
+      }}>
+      <div aria-hidden="true" className="absolute left-0 top-0 bottom-0 w-[2px] z-[1]" style={{ background: equipped ? "rgba(34,197,94,0.85)" : r.accentLine }} />
       {item.rarity === "legendary" && <div className="shop-legendary-border" />}
       <div className="relative z-[2] p-4 flex flex-col flex-1">
         <div className="flex items-start justify-between mb-3">
           <div className="shop-item-icon">
             <Icon size={40} weight={item.iconWeight ?? "fill"} color={item.iconColor ?? "currentColor"} aria-hidden="true" />
           </div>
-          <span className={`text-[9px] uppercase tracking-widest font-bold px-2 py-0.5 rounded-full ${r.badge}`}>{item.rarity}</span>
+          <div className="flex items-center gap-1.5">
+            {equipped && (
+              <span className="text-[9px] uppercase tracking-widest font-bold px-2 py-0.5 rounded-full bg-green-500/20 text-green-300 border border-green-500/30">Equipped</span>
+            )}
+            <span className={`text-[9px] uppercase tracking-widest font-bold px-2 py-0.5 rounded-full ${r.badge}`}>{item.rarity}</span>
+          </div>
         </div>
         <h4 className="shop-card-title font-bebas text-lg text-cream tracking-wide mb-0.5">{item.name}</h4>
         <p className="shop-card-desc text-cream/55 text-xs mb-4 leading-relaxed">{item.description}</p>
-        <div className="flex items-center justify-between mt-auto pt-2 gap-6">
+        <div className="flex items-center justify-between mt-auto pt-2 gap-3 flex-wrap">
           <div className="flex items-center gap-1.5 flex-shrink-0">
             <img src={cdnUrl("/F.png")} alt="Fangs" className="w-5 h-5 object-contain" />
             <span className="font-bebas text-lg text-gold">{formatCoins(item.price)}</span>
           </div>
-          {owned ? (
+          {owned && isCosmetic && onEquip ? (
+            <button
+              onClick={onEquip}
+              className={`flex-shrink-0 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${equipped ? "border border-green-500/40 text-green-400 hover:bg-green-500/10" : "border border-electric/30 text-electric hover:bg-electric/10"}`}
+            >
+              {equipped ? "Unequip" : "Equip"}
+            </button>
+          ) : owned ? (
             <span className="flex items-center gap-1 text-green-400 text-xs font-bold flex-shrink-0">
               <Check size={14} weight="bold" color="#22C55E" aria-hidden="true" /> Owned
             </span>
@@ -582,15 +627,19 @@ function PremiumCard({ item }: { item: PremiumItem }) {
 // Animated username effect card with LIVE PREVIEW of the effect rendered on
 // the user's ACTUAL username (high-impact try-before-you-buy).
 function UsernameEffectCard({
-  item, ownUsername, owned, canAfford, onBuy,
+  item, ownUsername, owned, equipped = false, canAfford, onBuy, onEquip,
 }: {
   item: UsernameEffectSKU;
   ownUsername: string;
   owned: boolean;
+  equipped?: boolean;
   canAfford: boolean;
   onBuy: () => void;
+  onEquip?: () => void;
 }) {
   const r = RARITY_COLORS[item.rarity];
+  // Username effects are always cosmetic (the SKU type is "username_effect").
+  const isCosmetic = true;
   return (
     <div className={`fluid-card-hover shop-card relative rounded-xl ${r.glow} ${item.rarity === "legendary" ? "shop-legendary-sparkle shop-tier-sweep-legendary" : ""} overflow-hidden h-full flex flex-col`}
       style={{ background: r.cardBg, border: `1.5px solid ${r.cardBorder}`, boxShadow: r.cardShadow, backdropFilter: "blur(12px)" }}>
@@ -618,7 +667,14 @@ function UsernameEffectCard({
             <img src={cdnUrl("/F.png")} alt="Fangs" className="w-5 h-5 object-contain" />
             <span className="font-bebas text-lg text-gold">{formatCoins(item.price)}</span>
           </div>
-          {owned ? (
+          {owned && isCosmetic && onEquip ? (
+            <button
+              onClick={onEquip}
+              className={`flex-shrink-0 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${equipped ? "border border-green-500/40 text-green-400 hover:bg-green-500/10" : "border border-electric/30 text-electric hover:bg-electric/10"}`}
+            >
+              {equipped ? "Unequip" : "Equip"}
+            </button>
+          ) : owned ? (
             <span className="flex items-center gap-1 text-green-400 text-xs font-bold flex-shrink-0">
               <Check size={14} weight="bold" color="#22C55E" aria-hidden="true" /> Owned
             </span>
@@ -635,8 +691,10 @@ function UsernameEffectCard({
 }
 
 // Premium Fang banner card — small looping preview tile.
-function PremiumFangBannerCard({ item, owned, canAfford, onBuy }: { item: ShopItem; owned: boolean; canAfford: boolean; onBuy: () => void }) {
+function PremiumFangBannerCard({ item, owned, equipped = false, canAfford, onBuy, onEquip }: { item: ShopItem; owned: boolean; equipped?: boolean; canAfford: boolean; onBuy: () => void; onEquip?: () => void }) {
   const r = RARITY_COLORS[item.rarity];
+  // animated_banner is a cosmetic — equip CTA always available when owned.
+  const isCosmetic = item.type !== "booster";
   const Icon = item.Icon;
   return (
     <div className={`fluid-card-hover shop-card relative rounded-xl ${r.glow} ${item.rarity === "legendary" ? "shop-legendary-sparkle shop-tier-sweep-legendary" : ""} overflow-hidden h-full flex flex-col`}
@@ -669,7 +727,14 @@ function PremiumFangBannerCard({ item, owned, canAfford, onBuy }: { item: ShopIt
             <img src={cdnUrl("/F.png")} alt="Fangs" className="w-5 h-5 object-contain" />
             <span className="font-bebas text-lg text-gold">{formatCoins(item.price)}</span>
           </div>
-          {owned ? (
+          {owned && isCosmetic && onEquip ? (
+            <button
+              onClick={onEquip}
+              className={`flex-shrink-0 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${equipped ? "border border-green-500/40 text-green-400 hover:bg-green-500/10" : "border border-electric/30 text-electric hover:bg-electric/10"}`}
+            >
+              {equipped ? "Unequip" : "Equip"}
+            </button>
+          ) : owned ? (
             <span className="flex items-center gap-1 text-green-400 text-xs font-bold flex-shrink-0">
               <Check size={14} weight="bold" color="#22C55E" aria-hidden="true" /> Owned
             </span>
@@ -961,6 +1026,10 @@ export default function ShopPage() {
   const ownedIds = new Set(inventory.map((i) => i.itemId));
   const getOwned = (id: string) => inventory.find((i) => i.itemId === id);
   const getQuantity = (id: string) => getOwned(id)?.quantity ?? 0;
+  // Bucket C 2026-06-05 — equipped lookup for Shop unequip CTA. Returns false
+  // for items not in inventory so the shop browse grids can show "Equip" on
+  // owned-but-not-equipped items in one branch and "Unequip" on equipped ones.
+  const isEquipped = (id: string) => !!getOwned(id)?.equipped;
   const requireLogin = () => { if (!user) { router.push("/login"); return true; } return false; };
 
   const handlePurchase = async () => {
@@ -1453,8 +1522,9 @@ export default function ShopPage() {
                   </div>
                   <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 shop-grid-stagger">
                     {NEW_SKUS.map((item) => (
-                      <CosmeticCard key={item.id} item={item} owned={ownedIds.has(item.id)} canAfford={userCoins >= item.price}
-                        onBuy={() => { if (!requireLogin()) setConfirmItem({ item, quantity: 1 }); }} />
+                      <CosmeticCard key={item.id} item={item} owned={ownedIds.has(item.id)} equipped={isEquipped(item.id)} canAfford={userCoins >= item.price}
+                        onBuy={() => { if (!requireLogin()) setConfirmItem({ item, quantity: 1 }); }}
+                        onEquip={() => { if (!requireLogin()) void handleEquip(item.id); }} />
                     ))}
                     {/* Avatar Aura Pack — surfaced as a single tile that scrolls users into the sub-grid below. */}
                     <div className="shop-card relative rounded-xl overflow-hidden p-4 flex flex-col"
@@ -1480,8 +1550,9 @@ export default function ShopPage() {
                     <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-cream/45 mb-3">Avatar Auras &middot; pick your vibe</p>
                     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 shop-grid-stagger">
                       {AVATAR_AURAS.map((item) => (
-                        <CosmeticCard key={item.id} item={item} owned={ownedIds.has(item.id)} canAfford={userCoins >= item.price}
-                          onBuy={() => { if (!requireLogin()) setConfirmItem({ item, quantity: 1 }); }} />
+                        <CosmeticCard key={item.id} item={item} owned={ownedIds.has(item.id)} equipped={isEquipped(item.id)} canAfford={userCoins >= item.price}
+                          onBuy={() => { if (!requireLogin()) setConfirmItem({ item, quantity: 1 }); }}
+                          onEquip={() => { if (!requireLogin()) void handleEquip(item.id); }} />
                       ))}
                     </div>
                   </div>
@@ -1500,8 +1571,9 @@ export default function ShopPage() {
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 shop-grid-stagger">
                   {FEATURED_ITEMS.map((item) => (
-                    <FeaturedCard key={item.id} item={item} owned={ownedIds.has(item.id)}
-                      onBuy={() => { if (!requireLogin()) setConfirmItem({ item, quantity: 1 }); }} />
+                    <FeaturedCard key={item.id} item={item} owned={ownedIds.has(item.id)} equipped={isEquipped(item.id)}
+                      onBuy={() => { if (!requireLogin()) setConfirmItem({ item, quantity: 1 }); }}
+                      onEquip={() => { if (!requireLogin()) void handleEquip(item.id); }} />
                   ))}
                 </div>
               </div>
@@ -1571,8 +1643,18 @@ export default function ShopPage() {
                         item={item}
                         ownUsername={user?.username ?? "yourname"}
                         owned={ownedIds.has(item.id)}
+                        equipped={cosmeticsOwned.some((c) => c.id === item.id && c.equipped) || isEquipped(item.id)}
                         canAfford={userCoins >= item.price}
                         onBuy={() => { if (!requireLogin()) setConfirmItem({ item, quantity: 1 }); }}
+                        onEquip={() => {
+                          if (requireLogin()) return;
+                          // If currently equipped, unequip — pass empty id so the
+                          // /api/me/equip handler clears the slot. Otherwise equip
+                          // the cosmetic. The helper falls back to a toast if the
+                          // backend route 404s.
+                          const currentlyEquipped = cosmeticsOwned.some((c) => c.id === item.id && c.equipped) || isEquipped(item.id);
+                          void handleEquipUsernameEffect(currentlyEquipped ? "" : item.id);
+                        }}
                       />
                     ))}
                   </div>
@@ -1596,8 +1678,10 @@ export default function ShopPage() {
                         key={item.id}
                         item={item}
                         owned={ownedIds.has(item.id)}
+                        equipped={isEquipped(item.id)}
                         canAfford={userCoins >= item.price}
                         onBuy={() => { if (!requireLogin()) setConfirmItem({ item, quantity: 1 }); }}
+                        onEquip={() => { if (!requireLogin()) void handleEquip(item.id); }}
                       />
                     ))}
                   </div>

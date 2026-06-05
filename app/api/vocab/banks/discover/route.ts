@@ -7,9 +7,10 @@ import { SUPPORTED_LANGS } from "@/lib/vocab";
 /**
  * GET /api/vocab/banks/discover
  *
- * Browse PUBLIC vocab banks shared by other users. Auth-required so we can
- * exclude the requester's own banks (no self-cloning) and to keep this off
- * unauthenticated scrapers.
+ * Browse PUBLIC vocab banks. Auth-required so the response can include
+ * ownership context (the viewer's own banks render with a "Yours" badge in
+ * the UI) and to keep this off unauthenticated scrapers. Self-clone is still
+ * blocked downstream at the clone endpoint.
  *
  * Query params:
  *   - sort=top|new|cloned  (default 'top'; 'cloned' is an alias for 'top')
@@ -85,13 +86,17 @@ export async function GET(req: NextRequest) {
   // Build the main banks query. We never need user_id of the author back
   // because that's already in `author` from the joined profile, but we keep
   // it for the cap/own-bank logic and strip it before responding.
+  // Bucket C 2026-06-05 — viewer's own public banks are now INCLUDED in the
+  // Discover feed (used to be filtered out with .neq("user_id", userId)). The
+  // owner can finally see their bank in the same surface other users see it,
+  // closes the publish-feedback loop. Self-clone is still blocked at the
+  // clone endpoint, so leaving them in the feed is safe.
   let query = supabaseAdmin
     .from("vocab_banks")
     .select(
       "id, user_id, name, kind, color, icon, source_lang, target_lang, clone_count, published_at",
     )
-    .eq("is_public", true)
-    .neq("user_id", userId);
+    .eq("is_public", true);
 
   if (kind) {
     query = query.eq("kind", kind);

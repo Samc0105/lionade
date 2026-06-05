@@ -263,6 +263,10 @@ function SocraticInput({
           placeholder="Why did you pick that? One sentence is fine."
           disabled={disabled || submitting}
           rows={3}
+          autoCorrect="off"
+          autoCapitalize="off"
+          autoComplete="off"
+          spellCheck={false}
           className="
             flex-1 resize-none rounded-[8px] bg-white/[0.03] border border-white/[0.08]
             focus:border-[#A855F7]/50 focus:outline-none
