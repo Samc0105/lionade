@@ -7,6 +7,24 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 
 ---
 
+## 2026-06-05 — Bucket A visual-consistency sweep (web-only, no iOS row)
+
+**Status:** 🚫 N/A (deliberate no-row decision — pure visual polish across 5 web surfaces, no behavior or data change).
+
+Closes Bucket A from today's audit. Same family of work as the [[#2026-06-05 — Shop whole-surface tier tinting]] entry above and the Word Bank / Sketchy passes logged in `docs/CHANGELOG.md`. Surfaces touched (web):
+
+1. **`/badges` Earned + Locked grids** — `app/badges/page.tsx` swapped its own card markup for the shared `<BadgeCard />` component (which has been rarity-tinted since at least Profile page launch). Deleted ~50 lines of duplicated markup + a local `RARITY_STYLES` map.
+2. **Dashboard Bounty Board** — daily cards now gold-washed, weekly purple-washed (`app/dashboard/page.tsx` lines ~723 + ~769). Completed-unclaimed state preserved.
+3. **Dashboard Today's Missions** — idle cards now wash with `mission.color` at 8%/2% (`app/dashboard/page.tsx` lines ~489–504). Completed + claimed states preserved.
+4. **`/leaderboard` rows 4+** — tinted by Elo tier on the three Elo tabs (Quiz Duel / Competitive / Squad). Weekly Fangs tab unchanged. Helper inlined into `app/leaderboard/page.tsx` + the dead `components/LeaderboardRow.tsx` component patched for future-proofing.
+5. **Academia + Classes class cards** — card body now washes with `cls.color` at 6%/2% (`app/academia/page.tsx` ~277, `app/classes/page.tsx` ~111). Top color stripe preserved.
+
+Cross-platform stance for `vp-ios`: same instinct applies — when iOS next touches its Badges grid, Bounty cards (whenever they ship on iOS), Today's Missions cards, Leaderboard rows, or class-card surfaces, push the identity color into the card body, not just the accent stripe. Use the same opacity stops where the iOS render system allows (~8–14% for the top of the wash, ~2–6% at the bottom, ~20–35% on the border). NOT a parity row — these are independent visual decisions on each platform, not feature deltas.
+
+**Files touched (web):** `app/badges/page.tsx` (rewritten, -24 net lines), `app/dashboard/page.tsx` (mission + 2 bounty card style blocks), `app/leaderboard/page.tsx` (added ELO_TIERS + getEloTier + row style branch), `components/LeaderboardRow.tsx` (matching tier-band patch — currently dead code but kept consistent for future callers), `app/academia/page.tsx`, `app/classes/page.tsx`. `docs/CHANGELOG.md`, `docs/FEATURES.md` updated; vault `Daily/2026-06-05.md` Section 7 appended.
+
+---
+
 ## 2026-06-05 — Shop whole-surface tier tinting (web-only, no iOS row)
 
 **Status:** 🚫 N/A (deliberate no-row decision — pure visual polish on `app/shop/page.tsx`).

@@ -18,6 +18,7 @@
 - **Achievement grid with earned/locked states** — 2026-02-28
 - **Streak fire animation with motivational banner** — 2026-02-28
 - **Continue shelf with real quiz history** — 2026-02-28
+- **Bucket A visual-consistency sweep** — 5 surfaces unified to the "card body carries its own identity tint" pattern already shipped on Word Banks (2026-06-05) / Sketchy picker (2026-06-05) / Shop (2026-06-05). `/badges` Earned + Locked grids switched to the shared `<BadgeCard />` (rarity-tinted body); Dashboard bounty cards tinted gold (daily) / purple (weekly); Dashboard mission cards tinted by `mission.color` in idle state; `/leaderboard` rows 4+ tinted by Elo tier (Bronze/Silver/Gold/Platinum/Diamond); Academia + Classes class cards washed by `cls.color`. — 2026-06-05
 
 ## Learn
 - **Circle/bubble UI with 4 options** (Daily Quiz, Subjects, Practice Sets, Study With Ninny) — 2026-02-28

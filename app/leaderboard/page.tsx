@@ -79,6 +79,20 @@ export default function LeaderboardPage() {
 
   const rankBorderColor: Record<number, string> = { 1: "#FFD700", 2: "#9CA3AF", 3: "#B45309" };
 
+  // Bucket A consistency: rows 4+ tint by Elo tier so the ladder reads as a
+  // band instead of a uniform stripe. Top-3 still get their gold/silver/bronze
+  // medal treatment, so the podium pops louder. Weekly Fangs mode has no Elo
+  // and falls back to the neutral navy-50.
+  const ELO_TIERS = [
+    { name: "Bronze",   min: 0,    max: 1199, color: "#CD7F32" },
+    { name: "Silver",   min: 1200, max: 1399, color: "#C0C0C0" },
+    { name: "Gold",     min: 1400, max: 1599, color: "#FFD700" },
+    { name: "Platinum", min: 1600, max: 1799, color: "#00CED1" },
+    { name: "Diamond",  min: 1800, max: 9999, color: "#B9F2FF" },
+  ];
+  const getEloTier = (elo: number) =>
+    ELO_TIERS.find(t => elo >= t.min && elo <= t.max) ?? ELO_TIERS[0];
+
   const renderRankIcon = (rank: number, size: number) => {
     if (rank === 1) return <Crown size={size} weight="fill" color="#FFD700" aria-hidden="true" />;
     if (rank === 2) return <Medal size={size} weight="fill" color="#9CA3AF" aria-hidden="true" />;
@@ -217,8 +231,18 @@ export default function LeaderboardPage() {
                   return (
                     <div key={entry.user_id}
                       className={`fluid-card-hover flex items-center gap-4 p-4 rounded-xl border
-                        ${isMe ? "border-electric/50 bg-electric/10" : isTop ? "border-gold/30 bg-gold/5" : "border-electric/10 bg-navy-50 hover:border-electric/30"}`}
-                      style={{ animationDelay: `${i * 50}ms` }}>
+                        ${isMe ? "border-electric/50 bg-electric/10" : isTop ? "border-gold/30 bg-gold/5" : !isElo ? "border-electric/10 bg-navy-50 hover:border-electric/30" : ""}`}
+                      style={{
+                        animationDelay: `${i * 50}ms`,
+                        // Tier-tinted band for ranks 4+ on Elo modes only.
+                        ...(!isMe && !isTop && isElo ? (() => {
+                          const tier = getEloTier(entry.elo ?? 1000);
+                          return {
+                            background: `linear-gradient(135deg, ${tier.color}14, ${tier.color}06)`,
+                            borderColor: `${tier.color}33`,
+                          };
+                        })() : {}),
+                      }}>
                       <div className="w-10 flex-shrink-0 text-center flex items-center justify-center">
                         {isTop ? renderRankIcon(entry.rank, 24)
                           : <span className={`font-bebas text-2xl leading-none ${isMe ? "text-electric" : "text-cream/50"}`}>{entry.rank}</span>}

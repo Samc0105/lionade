@@ -280,9 +280,15 @@ function ClassCard({ cls }: { cls: ClassSummary }) {
   return (
     <Link
       href={`/classes/${cls.id}`}
-      className="group relative rounded-[14px] border border-white/[0.08] bg-white/[0.03]
-        hover:bg-white/[0.05] hover:border-white/[0.15] transition-all duration-200
+      className="group relative rounded-[14px] border bg-white/[0.03]
+        hover:bg-white/[0.05] transition-all duration-200
         p-5 flex flex-col gap-3 overflow-hidden"
+      style={{
+        // Bucket A consistency: class color now washes the whole card body so
+        // each class reads at a glance, beyond just the 1px top stripe.
+        background: `linear-gradient(135deg, ${cls.color}0F 0%, ${cls.color}05 100%), rgba(255,255,255,0.03)`,
+        borderColor: `${cls.color}25`,
+      }}
     >
       <span
         className="absolute top-0 left-0 right-0 h-1"

@@ -5,23 +5,9 @@ import { useAuth } from "@/lib/auth";
 import { getAllBadges, getUserBadges } from "@/lib/db";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import BackButton from "@/components/BackButton";
-import { MedalMilitary, Lock, Star } from "@phosphor-icons/react";
-
-const RARITY_STYLES: Record<string, { border: string; bg: string; text: string; glow: string }> = {
-  common:    { border: "border-gray-500/30",   bg: "bg-gray-500/10",   text: "text-gray-400",   glow: "" },
-  rare:      { border: "border-blue-500/30",   bg: "bg-blue-500/10",   text: "text-blue-400",   glow: "shadow-[0_0_12px_rgba(59,130,246,0.15)]" },
-  epic:      { border: "border-purple-500/30", bg: "bg-purple-500/10", text: "text-purple-400", glow: "shadow-[0_0_12px_rgba(168,85,247,0.15)]" },
-  legendary: { border: "border-gold/30",       bg: "bg-gold/10",       text: "text-gold",       glow: "shadow-[0_0_16px_rgba(255,215,0,0.2)]" },
-};
-
-interface Badge {
-  id: string;
-  name: string;
-  description: string | null;
-  icon: string;
-  rarity: string;
-  earnedAt?: string;
-}
+import BadgeCard from "@/components/BadgeCard";
+import type { Badge } from "@/types";
+import { MedalMilitary, Lock } from "@phosphor-icons/react";
 
 export default function BadgesPage() {
   const { user } = useAuth();
@@ -37,7 +23,17 @@ export default function BadgesPage() {
           getAllBadges(),
           getUserBadges(user.id),
         ]);
-        setAllBadges(all);
+        // Defensive: server may return description as null; BadgeCard
+        // expects string. Coerce so we don't render the literal "null".
+        const norm = (b: any): Badge => ({
+          id: b.id,
+          name: b.name,
+          description: b.description ?? "",
+          icon: b.icon,
+          rarity: b.rarity,
+          earnedAt: b.earnedAt,
+        });
+        setAllBadges(all.map(norm));
         setEarnedIds(new Set(earned.map((b: any) => b.id)));
       } catch (err) {
         console.error("[Badges] Failed to load:", err);
@@ -77,7 +73,7 @@ export default function BadgesPage() {
           </div>
         ) : (
           <>
-            {/* Earned Badges */}
+            {/* Earned Badges — rarity-tinted via shared <BadgeCard /> */}
             {earned.length > 0 && (
               <div className="mb-10 animate-slide-up" style={{ animationDelay: "0.1s" }}>
                 <h2 className="font-bebas text-2xl text-cream tracking-wider mb-4 flex items-center gap-2">
@@ -85,26 +81,15 @@ export default function BadgesPage() {
                   <span className="text-cream/30 text-base ml-1">({earned.length})</span>
                 </h2>
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-                  {earned.map(badge => {
-                    const s = RARITY_STYLES[badge.rarity] ?? RARITY_STYLES.common;
-                    return (
-                      <div key={badge.id}
-                        className={`rounded-2xl border ${s.border} ${s.glow} p-5 text-center transition-all duration-200 hover:scale-[1.03]`}
-                        style={{ background: "linear-gradient(135deg, rgba(10,16,32,0.9), rgba(6,12,24,0.95))" }}>
-                        <span className="text-4xl block mb-3">{badge.icon}</span>
-                        <p className="font-bebas text-lg text-cream tracking-wide mb-1">{badge.name}</p>
-                        <span className={`text-[10px] uppercase tracking-widest font-bold ${s.text}`}>{badge.rarity}</span>
-                        {badge.description && (
-                          <p className="text-cream/30 text-[11px] mt-2 leading-relaxed">{badge.description}</p>
-                        )}
-                      </div>
-                    );
-                  })}
+                  {earned.map(badge => (
+                    <BadgeCard key={badge.id} badge={badge} size="md" earned />
+                  ))}
                 </div>
               </div>
             )}
 
-            {/* Locked Badges */}
+            {/* Locked Badges — same component, earned=false handles the
+                desaturated/dim treatment + lock overlay. */}
             {locked.length > 0 && (
               <div className="animate-slide-up" style={{ animationDelay: "0.2s" }}>
                 <h2 className="font-bebas text-2xl text-cream/50 tracking-wider mb-4 flex items-center gap-2">
@@ -113,16 +98,7 @@ export default function BadgesPage() {
                 </h2>
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
                   {locked.map(badge => (
-                    <div key={badge.id}
-                      className="rounded-2xl border border-white/5 p-5 text-center opacity-40"
-                      style={{ background: "linear-gradient(135deg, rgba(10,16,32,0.5), rgba(6,12,24,0.5))" }}>
-                      <span className="text-4xl block mb-3 grayscale">{badge.icon}</span>
-                      <p className="font-bebas text-lg text-cream/50 tracking-wide mb-1">{badge.name}</p>
-                      <span className="text-[10px] uppercase tracking-widest font-bold text-cream/20">{badge.rarity}</span>
-                      {badge.description && (
-                        <p className="text-cream/20 text-[11px] mt-2 leading-relaxed">{badge.description}</p>
-                      )}
-                    </div>
+                    <BadgeCard key={badge.id} badge={badge} size="md" earned={false} />
                   ))}
                 </div>
               </div>

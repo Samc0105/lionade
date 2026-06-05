@@ -45,17 +45,44 @@ export default function LeaderboardRow({
   const changeIcon =
     entry.change === "up" ? "▲" : entry.change === "down" ? "▼" : "—";
 
+  // Bucket A consistency: rows 4+ tint by Elo tier when available. Falls back
+  // to the original neutral navy-50 if the entry has no Elo (legacy weekly-Fangs
+  // shape).
+  const ELO_TIERS = [
+    { min: 0,    max: 1199, color: "#CD7F32" }, // Bronze
+    { min: 1200, max: 1399, color: "#C0C0C0" }, // Silver
+    { min: 1400, max: 1599, color: "#FFD700" }, // Gold
+    { min: 1600, max: 1799, color: "#00CED1" }, // Platinum
+    { min: 1800, max: 9999, color: "#B9F2FF" }, // Diamond
+  ];
+  const elo = (entry as { elo?: number }).elo;
+  const tier = typeof elo === "number"
+    ? ELO_TIERS.find(t => elo >= t.min && elo <= t.max) ?? ELO_TIERS[0]
+    : null;
+  const isTop3 = entry.rank <= 3;
+  const showTierBand = !isCurrentUser && !isTop3 && tier !== null;
+
   return (
     <div
       className={`flex items-center gap-4 p-4 rounded-xl border transition-all duration-300
         hover:-translate-y-0.5 group animate-slide-up
         ${isCurrentUser
           ? "border-electric/50 bg-electric/10 shadow-lg shadow-electric/10"
-          : entry.rank <= 3
+          : isTop3
           ? `${rankBg[entry.rank]} `
+          : showTierBand
+          ? ""
           : "border-electric/10 bg-navy-50 hover:border-electric/30"
         }`}
-      style={{ animationDelay: `${animationDelay}ms` }}
+      style={{
+        animationDelay: `${animationDelay}ms`,
+        ...(showTierBand && tier
+          ? {
+              background: `linear-gradient(135deg, ${tier.color}14, ${tier.color}06)`,
+              borderColor: `${tier.color}33`,
+            }
+          : {}),
+      }}
     >
       {/* Rank */}
       <div className="w-10 flex-shrink-0 text-center">

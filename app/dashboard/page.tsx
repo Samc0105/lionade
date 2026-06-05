@@ -487,14 +487,21 @@ function DashboardContent() {
                 return (
                   <div key={mission.id} className={`${shapes[i]} p-4 relative overflow-hidden transition-all duration-300 hover:scale-[1.02] group`}
                     style={{
+                      // Bucket A consistency: idle missions now carry a low-opacity
+                      // wash of their own mission.color so the card's identity reads
+                      // at a glance, not only via the top accent stripe. Completed
+                      // + claimed states keep their existing brighter tints so they
+                      // still pop louder than idle.
                       background: mission.claimed
                         ? "linear-gradient(135deg, rgba(46,204,113,0.08), rgba(46,204,113,0.03))"
                         : mission.completed
                         ? "linear-gradient(135deg, rgba(255,215,0,0.1), rgba(255,165,0,0.05))"
-                        : "linear-gradient(135deg, #0d1528, #0a1020)",
+                        : `linear-gradient(135deg, ${mission.color}14, ${mission.color}05)`,
                       boxShadow: mission.completed && !mission.claimed
                         ? `0 0 0 1.5px ${mission.color}40, 0 0 20px ${mission.color}15`
-                        : "0 0 0 1px rgba(255,255,255,0.05)",
+                        : mission.claimed
+                        ? "0 0 0 1px rgba(255,255,255,0.05)"
+                        : `0 0 0 1px ${mission.color}20`,
                     }}>
                     {/* Accent line */}
                     <div className="absolute top-0 left-0 right-0 h-[2px]" style={{ background: `linear-gradient(90deg, ${mission.color}, transparent)` }} />
@@ -721,7 +728,7 @@ function DashboardContent() {
                     const claimed = ub?.claimed ?? false;
                     return (
                       <div key={bounty.id} className="rounded-[20px] p-4 relative overflow-hidden transition-all duration-200 hover:scale-[1.02]"
-                        style={{ background: "linear-gradient(135deg, #0d1528 0%, #0a1020 100%)", border: completed && !claimed ? "1px solid rgba(255,215,0,0.3)" : "1px solid rgba(255,215,0,0.1)", boxShadow: completed && !claimed ? "0 0 16px rgba(255,215,0,0.1)" : "none" }}>
+                        style={{ background: "linear-gradient(135deg, rgba(255,215,0,0.10), rgba(255,215,0,0.03))", border: completed && !claimed ? "1px solid rgba(255,215,0,0.35)" : "1px solid rgba(255,215,0,0.18)", boxShadow: completed && !claimed ? "0 0 16px rgba(255,215,0,0.12)" : "none" }}>
                         <div className="absolute top-0 left-0 right-0 h-[2px]" style={{ background: "linear-gradient(90deg, #FFD700, transparent)" }} />
                         <p className="font-semibold text-cream text-sm">{bounty.title}</p>
                         <p className="text-cream/60 text-[11px] mt-0.5 leading-relaxed">{bounty.description}</p>
@@ -767,7 +774,7 @@ function DashboardContent() {
                     const claimed = ub?.claimed ?? false;
                     return (
                       <div key={bounty.id} className="rounded-[20px] p-4 relative overflow-hidden transition-all duration-200 hover:scale-[1.02]"
-                        style={{ background: "linear-gradient(135deg, #0d1528 0%, #0a1020 100%)", border: completed && !claimed ? "1px solid rgba(155,89,182,0.3)" : "1px solid rgba(155,89,182,0.1)", boxShadow: completed && !claimed ? "0 0 16px rgba(155,89,182,0.1)" : "none" }}>
+                        style={{ background: "linear-gradient(135deg, rgba(155,89,182,0.10), rgba(155,89,182,0.03))", border: completed && !claimed ? "1px solid rgba(155,89,182,0.35)" : "1px solid rgba(155,89,182,0.20)", boxShadow: completed && !claimed ? "0 0 16px rgba(155,89,182,0.12)" : "none" }}>
                         <div className="absolute top-0 left-0 right-0 h-[2px]" style={{ background: "linear-gradient(90deg, #9B59B6, transparent)" }} />
                         <p className="font-semibold text-cream text-sm">{bounty.title}</p>
                         <p className="text-cream/60 text-[11px] mt-0.5 leading-relaxed">{bounty.description}</p>
