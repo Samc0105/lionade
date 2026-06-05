@@ -137,6 +137,8 @@ export async function POST(req: NextRequest) {
         .map(c => `- ${c.id}: ${c.name}${c.short_code ? ` (${c.short_code})` : ""}${c.term ? ` · ${c.term}` : ""}`)
         .join("\n");
 
+// 12-factor #2 telemetry
+      console.info(`[classes/quick-note] prompt=${QUICK_NOTE_PROMPT_VERSION}`);
       const { json } = await callAIForJson({
         model: LLM_CHEAP,
         maxTokens: 350,

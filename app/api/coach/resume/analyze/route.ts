@@ -155,6 +155,8 @@ export async function POST(req: NextRequest) {
   let parsed: AnalysisJson;
   let costMicroUsd = 0;
   try {
+// 12-factor #2 telemetry
+    console.info(`[coach/resume/analyze] prompt=${RESUME_ANALYZE_PROMPT_VERSION} user=${auth.userId}`);
     const { json, raw } = await callAIForJson({
       model: LLM_CHEAP,
       maxTokens: 1400,

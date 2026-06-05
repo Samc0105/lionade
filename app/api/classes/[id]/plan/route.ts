@@ -228,6 +228,8 @@ export async function GET(req: NextRequest, { params }: RouteCtx) {
       ? `Next exam: "${nextExamTitle}" in ${daysUntilExam} day${daysUntilExam === 1 ? "" : "s"}.`
       : "No exam date set yet for this class.";
 
+// 12-factor #2 telemetry
+    console.info(`[classes/plan] prompt=${CLASS_PLAN_PROMPT_VERSION} class=${params.id}`);
     const { json: planJson, raw } = await callAIForJson({
       model: LLM_CHEAP,
       maxTokens: 700,

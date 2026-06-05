@@ -129,6 +129,8 @@ export async function generateFlashcardsForNote(args: {
 
     const promptInput = trimmed.slice(0, MAX_NOTE_BODY_FOR_PROMPT);
 
+// 12-factor #2 telemetry
+    console.info(`[class-flashcards] prompt=${FLASHCARD_GEN_PROMPT_VERSION}`);
     const { json } = await callAIForJson({
       model: LLM_CHEAP,
       maxTokens: 900,

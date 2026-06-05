@@ -100,6 +100,8 @@ export async function POST(req: NextRequest) {
   const cleaned = stripSentinels(input.trim().slice(0, MAX_INPUT_BYTES));
 
   try {
+// 12-factor #2 telemetry
+    console.info(`[mastery/parse] prompt=${MASTERY_PARSE_PROMPT_VERSION} user=${auth.userId}`);
     const { json: parsed, raw } = await callAIForJson<ParsedClaude>({
       model: LLM_MAIN,
       maxTokens: 2000,
