@@ -1008,15 +1008,43 @@ export default function SketchView({
 
   if (phase === "loading") {
     return (
-      <div className="flex flex-col items-center py-16 gap-4">
-        <p className="font-bebas text-2xl text-cream/60 tracking-wider">DEALING ROUND...</p>
-        <div className="w-12 h-12 rounded-full border-2 border-purple-500/40 border-t-purple-400 animate-spin" />
+      <div className="flex flex-col items-center py-20 gap-5 relative">
+        {/* Soft purple glow pulse — replaces the bare spinner with something
+            that reads as "the round is dealing in" rather than "API call
+            stuck." Layered behind the title so text stays the focus. */}
+        <div className="relative w-28 h-28 flex items-center justify-center">
+          <span
+            aria-hidden="true"
+            className={`absolute inset-0 rounded-full ${reduced ? "" : "pa-deal-glow"}`}
+            style={{
+              background: "radial-gradient(circle, rgba(168,85,247,0.45) 0%, transparent 70%)",
+            }}
+          />
+          <span
+            aria-hidden="true"
+            className={`absolute inset-3 rounded-full ${reduced ? "" : "pa-deal-glow"}`}
+            style={{
+              background: "radial-gradient(circle, rgba(255,215,0,0.35) 0%, transparent 70%)",
+              animationDelay: "0.6s",
+            }}
+          />
+          <div className="w-12 h-12 rounded-full border-2 border-purple-500/40 border-t-purple-400 animate-spin relative z-10" />
+        </div>
+        <p className="font-bebas text-2xl text-cream/70 tracking-[0.3em]">DEALING ROUND</p>
+        <p className="text-cream/40 text-xs font-syne italic">shuffling subjects, picking a drawer</p>
       </div>
     );
   }
 
+  // Panic vignette — red screen-edge pulse when the drawer's clock drops
+  // under 5 seconds. Only renders for the drawer in active drawing phase
+  // (spectators + guessers already see their own urgency UI). Pointer-events
+  // disabled at the CSS level so it never intercepts canvas strokes.
+  const showPanicVignette = isDrawer && phase === "drawing" && timeLeft > 0 && timeLeft < 5 && !reduced;
+
   return (
     <div className="space-y-4">
+      {showPanicVignette && <div aria-hidden="true" className="pa-panic-vignette" />}
       <NinnyHostBubble message={ninnyMsg} />
 
       {/* Subject + timer + drawer pill */}
@@ -1029,13 +1057,20 @@ export default function SketchView({
               {subjectLabel || "DRAWING"}
             </span>
             {isDrawer && lockedWord && (
-              // Keyed on the word so the stamp fires exactly when the drawer
-              // locks their pick in (single shot, not on every render).
+              // Two-layer animation: pa-stamp fires once on lock-in (keyed on
+              // the word), then pa-word-breathe takes over as an ambient
+              // pulse for the rest of the round so the drawer doesn't lose
+              // track of their word mid-canvas. Inner span carries the breath
+              // so its scale doesn't fight the stamp on first paint.
               <span
                 key={lockedWord}
-                className={`inline-block font-bebas text-xs tracking-wider px-2.5 py-1 rounded-full bg-[#FFD700]/15 text-[#FFD700] border border-[#FFD700]/40 ${reduced ? "" : "pa-stamp"}`}
+                className={`inline-block ${reduced ? "" : "pa-stamp"}`}
               >
-                {lockedWord.toUpperCase()}
+                <span
+                  className={`inline-block font-bebas text-xs tracking-wider px-2.5 py-1 rounded-full bg-[#FFD700]/15 text-[#FFD700] border border-[#FFD700]/40 ${reduced ? "" : "pa-word-breathe"}`}
+                >
+                  {lockedWord.toUpperCase()}
+                </span>
               </span>
             )}
             {!isDrawer && (
@@ -1065,6 +1100,48 @@ export default function SketchView({
             </span>
           </div>
         </div>
+      )}
+
+      {/* Non-drawer waiting state during select-word phase. Previously a dead
+          screen — the candidate picker only rendered for the drawer and the
+          drawing-phase header was gated on phase==="drawing", so everyone else
+          just stared at the Ninny bubble. Now they see WHO is picking + a
+          calmer animation that reads as "this is a moment, not a hang." */}
+      {phase === "select-word" && !candidates && round && (
+        <motion.div
+          initial={reduced ? false : { opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="max-w-md mx-auto"
+        >
+          <div
+            className="rounded-2xl p-7 text-center relative overflow-hidden"
+            style={{
+              background: "linear-gradient(135deg, rgba(168,85,247,0.14) 0%, rgba(99,102,241,0.06) 100%)",
+              border: "1px solid rgba(168,85,247,0.35)",
+              boxShadow: "0 0 28px rgba(168,85,247,0.12)",
+            }}
+          >
+            <p className="font-bebas text-[11px] text-cream/55 tracking-[0.3em] mb-2">PICKING A WORD</p>
+            <p className="font-bebas text-2xl text-cream tracking-wider mb-1">
+              {players.find((p) => p.user_id === round.drawer_user_id)?.username ?? "The drawer"}
+            </p>
+            <p className="text-cream/55 text-xs font-syne italic mb-5">choosing what to sketch</p>
+            <div aria-hidden="true" className="inline-flex items-center gap-1.5">
+              {[0, 1, 2].map((i) => (
+                <span
+                  key={i}
+                  className={`w-2 h-2 rounded-full bg-purple-300 ${reduced ? "opacity-70" : "pa-ink-dot"}`}
+                  style={reduced ? undefined : { animationDelay: `${i * 200}ms` }}
+                />
+              ))}
+            </div>
+            {subjectLabel && (
+              <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-cream/35 mt-5">
+                subject · {subjectLabel}
+              </p>
+            )}
+          </div>
+        </motion.div>
       )}
 
       {/* Candidate-word picker (drawer only) */}

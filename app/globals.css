@@ -4286,6 +4286,46 @@ html.light .space-bg-container { display: none; }
 }
 .pa-card-flip-3d-perspective { perspective: 900px; }
 
+/* Drawer's locked-word breath: ambient gentle pulse so the drawer doesn't
+   forget the word mid-canvas. ~3.4s loop, subtle scale + glow. */
+@keyframes pa-word-breathe {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 rgba(255,215,0,0);
+  }
+  50% {
+    transform: scale(1.035);
+    box-shadow: 0 0 14px rgba(255,215,0,0.35);
+  }
+}
+.pa-word-breathe { animation: pa-word-breathe 3.4s ease-in-out infinite; }
+
+/* Time-running-out panic vignette — red gradient hugs the screen edges,
+   pulses ~1s. Only painted when the drawer's clock drops under 5s so the
+   stakes-feel hits when it matters. Pointer-events disabled. */
+@keyframes pa-panic-vignette {
+  0%, 100% { opacity: 0.35; }
+  50% { opacity: 0.7; }
+}
+.pa-panic-vignette {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 30;
+  background: radial-gradient(circle at center, transparent 55%, rgba(239,68,68,0.32) 100%);
+  animation: pa-panic-vignette 1s ease-in-out infinite;
+}
+
+/* Cinematic loading-screen deal: a soft glow that expands + fades.
+   Lighter touch than the spinner — reads as "the game is dealing in"
+   rather than "we're waiting on a network call". */
+@keyframes pa-deal-glow {
+  0% { transform: scale(0.7); opacity: 0; }
+  50% { opacity: 1; }
+  100% { transform: scale(1.4); opacity: 0; }
+}
+.pa-deal-glow { animation: pa-deal-glow 1.8s ease-out infinite; }
+
 /* The single reduced-motion guard for the WHOLE party block.
    Disables motion but leaves final visual states intact (opacity 1, no shift). */
 @media (prefers-reduced-motion: reduce) {
@@ -4295,7 +4335,8 @@ html.light .space-bg-container { display: none; }
   .pa-ready-sweep, .pa-ready-glow, .pa-card-selected,
   .pa-game-card, .pa-game-card:hover,
   .pa-tile-flip, .pa-card-flip-3d,
-  .pa-canvas-stamp, .pa-canvas-corner {
+  .pa-canvas-stamp, .pa-canvas-corner,
+  .pa-word-breathe, .pa-panic-vignette, .pa-deal-glow {
     animation: none !important;
     transition: none !important;
   }
