@@ -59,6 +59,9 @@ interface Props {
   tool: SketchTool;
   color: string;
   size: number;
+  /** Last 5 colors the drawer reached for, most recent first. Persisted by
+   *  the parent (localStorage) so the row survives across rounds. */
+  recents?: string[];
   onToolChange: (tool: SketchTool) => void;
   onColorChange: (color: string) => void;
   onSizeChange: (size: number) => void;
@@ -71,6 +74,7 @@ export default function SketchToolbar({
   tool,
   color,
   size,
+  recents = [],
   onToolChange,
   onColorChange,
   onSizeChange,
@@ -79,6 +83,10 @@ export default function SketchToolbar({
   canUndo,
 }: Props) {
   const [pickerOpen, setPickerOpen] = useState(false);
+  // Hovered size — when set, a preview dot at that size appears next to the
+  // size buttons. Pure visual aid so the drawer knows what they'd get before
+  // tapping. Cleared on mouseleave.
+  const [hoveredSize, setHoveredSize] = useState<number | null>(null);
   // Clear-canvas tap-to-confirm. First tap arms the button (red state + new
   // label), second tap within 2s actually clears. Auto-disarms after 2s so
   // a stray first tap doesn't sit primed forever. Common pattern for
@@ -113,13 +121,21 @@ export default function SketchToolbar({
     onClear();
   }
 
+  // Erase-mode tint — subtle purple wash on the toolbar background so the
+  // drawer always knows the eraser is loaded without scanning for the active
+  // tool button. The base glass shows through underneath.
+  const eraseActive = tool === "eraser";
+
   return (
     <div
-      className="flex flex-wrap items-center gap-3 rounded-xl px-3 py-2.5 relative"
+      className="flex flex-wrap items-center gap-3 rounded-xl px-3 py-2.5 relative transition-colors"
       style={{
-        background: "linear-gradient(135deg, rgba(16,12,26,0.85) 0%, rgba(8,6,16,0.85) 100%)",
-        border: "1px solid rgba(255,255,255,0.08)",
+        background: eraseActive
+          ? "linear-gradient(135deg, rgba(40,24,72,0.85) 0%, rgba(20,12,40,0.85) 100%)"
+          : "linear-gradient(135deg, rgba(16,12,26,0.85) 0%, rgba(8,6,16,0.85) 100%)",
+        border: eraseActive ? "1px solid rgba(168,85,247,0.4)" : "1px solid rgba(255,255,255,0.08)",
         backdropFilter: "blur(10px)",
+        boxShadow: eraseActive ? "inset 0 0 0 1px rgba(168,85,247,0.18)" : undefined,
       }}
     >
       {/* Quick swatches (fast path) */}
@@ -139,6 +155,35 @@ export default function SketchToolbar({
             />
           );
         })}
+
+        {/* Recents — last 5 colors the drawer reached for, dedup'd against the
+            quick row above so we don't waste slots showing the same swatch
+            twice. Tiny divider before the chips so it reads as a distinct
+            sub-section. Hidden when empty (cold-start drawer has nothing). */}
+        {recents.filter((c) => !quickColors.includes(c)).length > 0 && (
+          <>
+            <span aria-hidden="true" className="mx-0.5 w-px h-5 bg-white/10" />
+            {recents
+              .filter((c) => !quickColors.includes(c))
+              .slice(0, 5)
+              .map((c, i) => {
+                const active = color.toLowerCase() === c.toLowerCase() && tool === "brush";
+                return (
+                  <button
+                    key={`recent-${c}-${i}`}
+                    aria-label={`Recent color ${c}`}
+                    onClick={() => chooseColor(c)}
+                    className={`w-6 h-6 rounded-full transition-transform active:scale-90 ${active ? "scale-110 pa-active-swatch" : "hover:scale-110"}`}
+                    style={{
+                      background: c,
+                      border: active ? "2px solid #FFD700" : "1px solid rgba(255,255,255,0.18)",
+                    }}
+                    title={`Recent: ${c}`}
+                  />
+                );
+              })}
+          </>
+        )}
 
         {/* Expand / "roulette of colors" affordance. Shows the current custom
             color as the swatch face when one is active. */}
@@ -218,26 +263,84 @@ export default function SketchToolbar({
 
       <div className="w-px h-7 bg-white/10" />
 
-      {/* Sizes */}
-      <div className="flex items-center gap-1.5">
-        {SKETCH_SIZES.map((s) => (
-          <button
-            key={s}
-            aria-label={`Brush size ${s}`}
-            onClick={() => onSizeChange(s)}
-            className={`w-7 h-7 rounded-full flex items-center justify-center transition-all active:scale-90 ${size === s ? "scale-110" : "hover:scale-105"}`}
+      {/* Sizes — visual swaps based on active tool. Brush = solid dot in the
+          current color, eraser = hollow ring (reads as "no fill, just edge").
+          Hovering any size shows a live preview swatch at the right of the row
+          so the drawer can compare without committing. +/- keys on the canvas
+          also drive these (handled in SketchView). */}
+      <div
+        className="flex items-center gap-1.5 relative"
+        onMouseLeave={() => setHoveredSize(null)}
+      >
+        {SKETCH_SIZES.map((s) => {
+          const active = size === s;
+          const dotPx = Math.min(20, s + 2);
+          return (
+            <button
+              key={s}
+              aria-label={`${eraseActive ? "Eraser" : "Brush"} size ${s}`}
+              onClick={() => onSizeChange(s)}
+              onMouseEnter={() => setHoveredSize(s)}
+              className={`w-7 h-7 rounded-full flex items-center justify-center transition-all active:scale-90 ${active ? "scale-110" : "hover:scale-105"}`}
+              style={{
+                background: active ? "rgba(168,85,247,0.25)" : "rgba(255,255,255,0.04)",
+                border: active ? "1px solid rgba(168,85,247,0.6)" : "1px solid rgba(255,255,255,0.08)",
+                boxShadow: active ? "0 0 10px rgba(168,85,247,0.45)" : "none",
+              }}
+            >
+              {eraseActive ? (
+                // Hollow ring — "this is an eraser of this width."
+                <span
+                  className="rounded-full block"
+                  style={{
+                    width: dotPx,
+                    height: dotPx,
+                    border: "1.5px solid rgba(238,244,255,0.85)",
+                    background: "transparent",
+                  }}
+                />
+              ) : (
+                // Solid dot in the current brush color so the drawer sees
+                // exactly what their stroke will look like.
+                <span
+                  className="rounded-full block"
+                  style={{
+                    width: dotPx,
+                    height: dotPx,
+                    background: color,
+                    boxShadow: "inset 0 0 0 1px rgba(0,0,0,0.15)",
+                  }}
+                />
+              )}
+            </button>
+          );
+        })}
+        {/* Hover preview — appears to the right of the size row when the user
+            mouses over a size button. Shows a larger sample at the actual
+            stroke width so the drawer doesn't have to tap to see. */}
+        {hoveredSize !== null && (
+          <div
+            className="ml-2 flex items-center gap-1.5 px-2 py-1 rounded-lg pointer-events-none"
             style={{
-              background: size === s ? "rgba(168,85,247,0.25)" : "rgba(255,255,255,0.04)",
-              border: size === s ? "1px solid rgba(168,85,247,0.6)" : "1px solid rgba(255,255,255,0.08)",
-              boxShadow: size === s ? "0 0 10px rgba(168,85,247,0.45)" : "none",
+              background: "rgba(168,85,247,0.12)",
+              border: "1px solid rgba(168,85,247,0.3)",
             }}
+            aria-hidden="true"
           >
             <span
-              className="rounded-full bg-cream/80 block"
-              style={{ width: Math.min(20, s + 2), height: Math.min(20, s + 2) }}
+              className="rounded-full block"
+              style={{
+                width: hoveredSize * 1.6,
+                height: hoveredSize * 1.6,
+                background: eraseActive ? "transparent" : color,
+                border: eraseActive ? "2px solid rgba(238,244,255,0.85)" : "1px solid rgba(0,0,0,0.15)",
+              }}
             />
-          </button>
-        ))}
+            <span className="font-mono text-[9px] uppercase tracking-[0.18em] text-cream/55">
+              {hoveredSize}px
+            </span>
+          </div>
+        )}
       </div>
 
       <div className="w-px h-7 bg-white/10" />

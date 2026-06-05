@@ -246,7 +246,32 @@ export default function SketchView({
   // Toolbar state (drawer only).
   const [tool, setTool] = useState<SketchTool>("brush");
   const [color, setColor] = useState<string>(SKETCH_COLORS[0]);
-  const [size, setSize] = useState<number>(SKETCH_SIZES[1]);
+  const [brushSize, setBrushSize] = useState<number>(SKETCH_SIZES[1]);
+  const [eraserSize, setEraserSize] = useState<number>(SKETCH_SIZES[1]);
+  // Recents row — last 5 colors the drawer has reached for, deduped,
+  // most-recent first. Persists across rounds via localStorage. Loaded once
+  // on mount so the very first color tap doesn't get clobbered.
+  const [colorRecents, setColorRecents] = useState<string[]>([]);
+  const colorRecentsLoadedRef = useRef(false);
+  useEffect(() => {
+    if (colorRecentsLoadedRef.current) return;
+    colorRecentsLoadedRef.current = true;
+    try {
+      const raw = localStorage.getItem("lionade_sketch_color_recents");
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) setColorRecents(parsed.filter((c) => typeof c === "string").slice(0, 5));
+      }
+    } catch { /* localStorage disabled, keep [] */ }
+  }, []);
+  const handleColorChange = useCallback((c: string) => {
+    setColor(c);
+    setColorRecents((prev) => {
+      const next = [c, ...prev.filter((p) => p.toLowerCase() !== c.toLowerCase())].slice(0, 5);
+      try { localStorage.setItem("lionade_sketch_color_recents", JSON.stringify(next)); } catch { /* ignore quota */ }
+      return next;
+    });
+  }, []);
   const [strokeCount, setStrokeCount] = useState(0);
   const undoRef = useRef<(() => void) | null>(null);
   const clearRef = useRef<(() => void) | null>(null);
@@ -349,6 +374,34 @@ export default function SketchView({
 
   const isDrawer = round?.drawer_user_id === meUserId;
   const subjectLabel = round ? SUBJECT_LABELS[round.subject as Subject] ?? round.subject : "";
+
+  // ── Keyboard brush/eraser size (+/-) for drawer during drawing ──
+  // Cycles through SKETCH_SIZES so a power-user can adjust without leaving the
+  // canvas. Routes to the currently-active size state based on tool. Ignored
+  // when typing in an input (e.g. chat) or while a modal is open.
+  useEffect(() => {
+    if (!isDrawer || phase !== "drawing") return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      const t = e.target as HTMLElement | null;
+      if (t) {
+        const tag = t.tagName;
+        if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || t.isContentEditable) return;
+      }
+      if (e.key !== "+" && e.key !== "=" && e.key !== "-" && e.key !== "_") return;
+      e.preventDefault();
+      const up = e.key === "+" || e.key === "=";
+      const setter = tool === "eraser" ? setEraserSize : setBrushSize;
+      const current = tool === "eraser" ? eraserSize : brushSize;
+      const idx = SKETCH_SIZES.indexOf(current as typeof SKETCH_SIZES[number]);
+      const next = up
+        ? SKETCH_SIZES[Math.min(SKETCH_SIZES.length - 1, idx + 1)]
+        : SKETCH_SIZES[Math.max(0, idx - 1)];
+      setter(next);
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [isDrawer, phase, tool, brushSize, eraserSize]);
 
   // ── Round bootstrap ──
   const startRound = useCallback(async () => {
@@ -1461,7 +1514,7 @@ export default function SketchView({
               readonly={!isDrawer || phase === "reveal"}
               disabled={phase === "celebrating" || phase === "reveal" || pausedAt !== null}
               color={color}
-              size={size}
+              size={tool === "eraser" ? eraserSize : brushSize}
               tool={tool}
               onStrokeCountChange={setStrokeCount}
               undoRef={undoRef}
@@ -1708,10 +1761,11 @@ export default function SketchView({
             <SketchToolbar
               tool={tool}
               color={color}
-              size={size}
+              size={tool === "eraser" ? eraserSize : brushSize}
+              recents={colorRecents}
               onToolChange={setTool}
-              onColorChange={setColor}
-              onSizeChange={setSize}
+              onColorChange={handleColorChange}
+              onSizeChange={tool === "eraser" ? setEraserSize : setBrushSize}
               onUndo={() => undoRef.current?.()}
               onClear={() => clearRef.current?.()}
               canUndo={strokeCount > 0}
