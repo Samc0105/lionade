@@ -1145,6 +1145,8 @@ export default function GamesPage() {
               const lotNumber = String(idx + 1).padStart(3, "0");
               const GameIcon = g.Icon;
 
+              const isMaxed = g.limit < 999 && remaining <= 0;
+              const isLastPull = g.limit < 999 && remaining === 1;
               return (
                 <div
                   key={g.id}
@@ -1152,10 +1154,37 @@ export default function GamesPage() {
                   style={{
                     animationDelay: `${0.15 + idx * 0.07}s`,
                     background: `linear-gradient(90deg, ${hexToRgba(g.color, 0.08)} 0%, #0c0a14 60%)`,
-                    border: `1px solid ${hexToRgba(g.color, 0.22)}`,
+                    border: `1px solid ${hexToRgba(g.color, isMaxed ? 0.1 : 0.22)}`,
                     boxShadow: "0 10px 28px rgba(0, 0, 0, 0.4)",
+                    opacity: isMaxed ? 0.68 : 1,
                   }}
                 >
+                  {/* "MAXED TODAY" diagonal stamp — only when the daily limit
+                      is exhausted. Tilted, gold-foil-stencil vibe, pointer-
+                      events-none so the disabled Pull button still gets the
+                      hover/title for "resets at midnight" affordance. */}
+                  {isMaxed && (
+                    <div
+                      aria-hidden="true"
+                      className="absolute top-3 right-3 z-20 pointer-events-none"
+                      style={{
+                        transform: "rotate(8deg)",
+                      }}
+                    >
+                      <span
+                        className="font-bebas text-[10px] sm:text-xs tracking-[0.25em] px-2.5 py-1 rounded-sm"
+                        style={{
+                          background: "rgba(0,0,0,0.55)",
+                          color: "#FCA5A5",
+                          border: "1.5px solid rgba(252,165,165,0.65)",
+                          textShadow: "0 0 8px rgba(252,165,165,0.4)",
+                          boxShadow: "0 0 14px rgba(252,165,165,0.18), inset 0 0 8px rgba(0,0,0,0.4)",
+                        }}
+                      >
+                        MAXED TODAY
+                      </span>
+                    </div>
+                  )}
                   <div className="relative z-10 flex items-stretch min-h-[140px] sm:min-h-[160px]">
 
                     {/* ── Column 1: Lot number ── */}
@@ -1206,8 +1235,22 @@ export default function GamesPage() {
                           <span className="font-mono text-[10px] sm:text-[11px] font-bold text-gold">{g.fangs}</span>
                         </div>
                         {g.limit < 999 && (
-                          <span className="font-mono text-[10px] text-cream/40 uppercase tracking-wider">
-                            {Math.max(0, remaining)} / {g.limit} today
+                          <span
+                            className={`font-mono text-[10px] uppercase tracking-wider ${isLastPull && !isMaxed ? "pa-active-swatch inline-block px-1.5 py-0.5 rounded-md" : ""}`}
+                            style={
+                              isMaxed
+                                ? { color: "#FCA5A5" }
+                                : isLastPull
+                                  ? {
+                                      color: "#FFD700",
+                                      background: "rgba(255,215,0,0.12)",
+                                      border: "1px solid rgba(255,215,0,0.4)",
+                                    }
+                                  : { color: "rgba(238,244,255,0.4)" }
+                            }
+                            title={isMaxed ? "Resets at midnight" : isLastPull ? "Last pull of the day" : undefined}
+                          >
+                            {isMaxed ? "0 left · resets at midnight" : `${Math.max(0, remaining)} / ${g.limit} today`}
                           </span>
                         )}
                         {g.limit >= 999 && (
@@ -1254,15 +1297,28 @@ export default function GamesPage() {
                       <button
                         onClick={canPlay ? g.start : undefined}
                         disabled={!canPlay || (isPdf && !pdfContent && g.id !== "flashcards")}
-                        className="font-syne font-bold text-xs sm:text-sm px-4 sm:px-6 py-2.5 transition-all active:scale-95 disabled:opacity-20 disabled:cursor-not-allowed inline-flex items-center gap-2"
+                        title={isMaxed ? "Daily limit hit — resets at midnight" : undefined}
+                        className="font-syne font-bold text-xs sm:text-sm px-4 sm:px-6 py-2.5 transition-all active:scale-95 disabled:cursor-not-allowed inline-flex items-center gap-2"
                         style={{
-                          background: g.color,
-                          color: "#fff",
-                          boxShadow: `0 4px 14px ${hexToRgba(g.color, 0.4)}, inset 0 1px 0 rgba(255, 255, 255, 0.18)`,
+                          background: isMaxed ? "rgba(60,40,40,0.55)" : g.color,
+                          color: isMaxed ? "#FCA5A5" : "#fff",
+                          opacity: !canPlay ? (isMaxed ? 0.9 : 0.2) : 1,
+                          boxShadow: isMaxed
+                            ? "inset 0 0 0 1px rgba(252,165,165,0.4)"
+                            : `0 4px 14px ${hexToRgba(g.color, 0.4)}, inset 0 1px 0 rgba(255, 255, 255, 0.18)`,
                         }}
                       >
-                        Pull
-                        <span aria-hidden="true">→</span>
+                        {isMaxed ? (
+                          <>
+                            <span aria-hidden="true">⏱</span>
+                            Maxed
+                          </>
+                        ) : (
+                          <>
+                            Pull
+                            <span aria-hidden="true">→</span>
+                          </>
+                        )}
                       </button>
                     </div>
                   </div>
