@@ -26,7 +26,8 @@ import ProUpgradeNudge from "@/components/ProUpgradeNudge";
 import { toastError, toastSuccess } from "@/lib/toast";
 import AnimatedUsername from "@/components/AnimatedUsername";
 import { useEquippedUsernameEffect } from "@/lib/use-username-effect";
-import Confetti from "@/components/Confetti";
+import dynamic from "next/dynamic";
+const Confetti = dynamic(() => import("@/components/Confetti"), { ssr: false });
 import {
   Lock,
   Sun,

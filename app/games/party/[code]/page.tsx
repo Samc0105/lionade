@@ -22,10 +22,15 @@ import { useHeartbeat } from "@/lib/use-heartbeat";
 import { useActiveSession } from "@/lib/active-session";
 import { useToast } from "@/components/Toast";
 import RoomLobby from "@/components/party/RoomLobby";
-import SketchView from "@/components/party/SketchView";
-import BluffView from "@/components/party/BluffView";
-import PokerFaceView from "@/components/party/PokerFaceView";
+import dynamic from "next/dynamic";
 import type { CurrentGame, PartyPlayer, PartyRoom } from "@/lib/party/types";
+
+// Game views are heavy (SketchView ~2.2k LOC, PokerFaceView ~1.3k, BluffView
+// ~0.9k). At most one mounts at a time based on room.current_game, so we
+// lazy-load each. ssr:false because the room is client-state-driven.
+const SketchView = dynamic(() => import("@/components/party/SketchView"), { ssr: false });
+const BluffView = dynamic(() => import("@/components/party/BluffView"), { ssr: false });
+const PokerFaceView = dynamic(() => import("@/components/party/PokerFaceView"), { ssr: false });
 import type { ActiveRoundLite } from "@/lib/party/room-state";
 
 interface Snapshot {

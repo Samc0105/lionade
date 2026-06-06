@@ -12,8 +12,9 @@ import { apiGet, apiPost, swrFetcher } from "@/lib/api-client";
 import { mutateUserStats } from "@/lib/hooks";
 import { useAuth } from "@/lib/auth";
 import { useHeartbeat } from "@/lib/use-heartbeat";
-import Confetti from "@/components/Confetti";
-import ShareCard from "@/components/ShareCard";
+import dynamic from "next/dynamic";
+const Confetti = dynamic(() => import("@/components/Confetti"), { ssr: false });
+const ShareCard = dynamic(() => import("@/components/ShareCard"), { ssr: false });
 
 /**
  * Daily Drill — 5 questions you got wrong before, drilled in 3 minutes.

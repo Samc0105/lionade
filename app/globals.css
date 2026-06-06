@@ -2,7 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Syne:wght@400;500;600;700;800&display=swap');
+/* Fonts are loaded + self-hosted via next/font in app/layout.tsx — no Google
+   Fonts network round-trip needed. Variables on :root below pick them up. */
 
 html {
   scroll-behavior: smooth;

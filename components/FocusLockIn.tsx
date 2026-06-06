@@ -11,9 +11,10 @@ import {
   closeLauncherPanel,
 } from "@/lib/launcher-bus";
 import { toastInfo, toastError } from "@/lib/toast";
-import Confetti from "@/components/Confetti";
+import dynamic from "next/dynamic";
 import ConfirmModal from "@/components/ConfirmModal";
-import ShareCard from "@/components/ShareCard";
+const Confetti = dynamic(() => import("@/components/Confetti"), { ssr: false });
+const ShareCard = dynamic(() => import("@/components/ShareCard"), { ssr: false });
 
 /**
  * Focus Lock-In — sealed Pomodoro session.

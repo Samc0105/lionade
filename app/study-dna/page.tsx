@@ -11,7 +11,9 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import Navbar from "@/components/Navbar";
 import SpaceBackground from "@/components/SpaceBackground";
 import { swrFetcher } from "@/lib/api-client";
-import ShareCard, { type ShareCardData } from "@/components/ShareCard";
+import dynamic from "next/dynamic";
+import type { ShareCardData } from "@/components/ShareCard";
+const ShareCard = dynamic(() => import("@/components/ShareCard"), { ssr: false });
 
 /**
  * Study DNA — visualizes the user's study identity.

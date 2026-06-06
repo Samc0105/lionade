@@ -23,13 +23,18 @@ import { useRouter, useSearchParams } from "next/navigation";
 import useSWR from "swr";
 import { Plus, Cards, ListBullets, BookOpen, GlobeHemisphereWest, Compass } from "@phosphor-icons/react";
 import ProtectedRoute from "@/components/ProtectedRoute";
-import AddWordForm from "@/components/Vocab/AddWordForm";
-import ReviewQueue from "@/components/Vocab/ReviewQueue";
-import VocabList from "@/components/Vocab/VocabList";
+import dynamic from "next/dynamic";
 import BankSelector from "@/components/Vocab/BankSelector";
-import CreateBankModal, { type VocabBank } from "@/components/Vocab/CreateBankModal";
 import BankStreakPill, { type BankStreak } from "@/components/Vocab/BankStreakPill";
-import DiscoverTab from "@/components/Vocab/DiscoverTab";
+import type { VocabBank } from "@/components/Vocab/CreateBankModal";
+
+// Only one of the four Vocab tab views renders at a time (~2k LOC combined).
+// CreateBankModal is also modal-only. Lazy-load all five.
+const AddWordForm = dynamic(() => import("@/components/Vocab/AddWordForm"), { ssr: false });
+const ReviewQueue = dynamic(() => import("@/components/Vocab/ReviewQueue"), { ssr: false });
+const VocabList = dynamic(() => import("@/components/Vocab/VocabList"), { ssr: false });
+const DiscoverTab = dynamic(() => import("@/components/Vocab/DiscoverTab"), { ssr: false });
+const CreateBankModal = dynamic(() => import("@/components/Vocab/CreateBankModal"), { ssr: false });
 import { swrFetcher } from "@/lib/api-client";
 
 type Tab = "add" | "review" | "list" | "discover";

@@ -61,7 +61,8 @@ import {
   ShareNetwork,
   type Icon,
 } from "@phosphor-icons/react";
-import ShareCard from "@/components/ShareCard";
+import dynamic from "next/dynamic";
+const ShareCard = dynamic(() => import("@/components/ShareCard"), { ssr: false });
 import AnimatedUsername from "@/components/AnimatedUsername";
 import { useEquippedUsernameEffect } from "@/lib/use-username-effect";
 
