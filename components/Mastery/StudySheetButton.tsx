@@ -28,11 +28,24 @@ type Plan = "free" | "pro" | "platinum" | "unknown";
 interface Props {
   userId: string | undefined;
   buildInput: () => StudySheetInput | null;
-  /** Current overall display % for the session. FAB disables below UNLOCK_PCT. */
+  /** Current overall display % for the session. Button disables below UNLOCK_PCT. */
   overallPct: number;
+  /**
+   * Where the button is rendered.
+   * - "header" (default): inline, content-anchored. No fixed positioning.
+   *   Use this when the button lives inside a page header / toolbar row.
+   * - "floating": fixed bottom-right pill. Reserved for surfaces with no
+   *   header slot. Positioned to clear the global LaunchDock at right-6.
+   */
+  placement?: "header" | "floating";
 }
 
-export default function SessionReportFab({ userId, buildInput, overallPct }: Props) {
+export default function SessionReportFab({
+  userId,
+  buildInput,
+  overallPct,
+  placement = "header",
+}: Props) {
   const [plan, setPlan] = useState<Plan>("unknown");
   const [paywallOpen, setPaywallOpen] = useState(false);
   const [downloading, setDownloading] = useState(false);
@@ -87,12 +100,24 @@ export default function SessionReportFab({ userId, buildInput, overallPct }: Pro
     }
   };
 
+  // Position classes. "header" → inline pill, no fixed positioning, sized to
+  // sit comfortably in a header row. "floating" → original bottom-right FAB,
+  // bumped UP to clear the global LaunchDock ("+") at right-6 / bottom-24
+  // (dock is 56px tall, so its top edge is at 80px from viewport bottom;
+  // we sit the pill at bottom-[96px] desktop / bottom-[158px] mobile for
+  // breathing room above the mobile dock at bottom-[88px]).
+  const positionClasses =
+    placement === "floating"
+      ? "fixed z-40 right-4 md:right-6 bottom-[158px] md:bottom-[96px]"
+      : "";
+  // Header variant uses a slightly tighter pill so it fits the header row.
+  const sizeClasses =
+    placement === "floating"
+      ? "px-4 py-2.5 text-[10.5px]"
+      : "px-3 py-1.5 text-[10px]";
+
   return (
     <>
-      {/* Floating pill pinned above the fixed stats bar AND the mobile nav.
-          On mobile: stats bar at bottom-14 (56px up) + ~40px tall → FAB
-          needs bottom >= ~112px to fully clear. On desktop (>= md): no
-          mobile nav, stats bar at bottom-0 ~40px → bottom-14 is safe. */}
       <button
         type="button"
         onClick={handleClick}
@@ -100,11 +125,11 @@ export default function SessionReportFab({ userId, buildInput, overallPct }: Pro
         aria-label={unlocked ? "Session Report" : `Reach ${UNLOCK_PCT}% mastery to unlock Session Report`}
         title={unlocked ? undefined : `Unlocks at ${UNLOCK_PCT}% mastery`}
         className={`
-          fixed z-40 right-4 md:right-6
-          bottom-[118px] md:bottom-[56px]
+          ${positionClasses}
           inline-flex items-center gap-2 rounded-full
-          font-mono text-[10.5px] uppercase tracking-[0.25em]
-          px-4 py-2.5 transition-transform duration-200
+          font-mono uppercase tracking-[0.25em]
+          ${sizeClasses}
+          transition-transform duration-200
           disabled:cursor-not-allowed
           ${unlocked
             ? "bg-gradient-to-r from-gold to-[#F0B429] text-navy shadow-[0_8px_24px_rgba(255,215,0,0.22)] hover:scale-[1.03] active:scale-[0.98]"

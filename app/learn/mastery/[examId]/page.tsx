@@ -655,9 +655,17 @@ export default function MasterySessionPage() {
               <h1 className="font-bebas text-xl sm:text-2xl tracking-wider text-cream truncate">
                 {data.exam.title}
               </h1>
-              <div className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.25em] text-cream/50">
-                <Clock size={12} weight="bold" />
-                <span className="tabular-nums">{stats.timeLabel}</span>
+              <div className="flex items-center gap-3 shrink-0">
+                <SessionReportFab
+                  userId={user?.id}
+                  buildInput={buildStudySheet}
+                  overallPct={data.overallDisplayPct}
+                  placement="header"
+                />
+                <div className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.25em] text-cream/50">
+                  <Clock size={12} weight="bold" />
+                  <span className="tabular-nums">{stats.timeLabel}</span>
+                </div>
               </div>
             </div>
           )}
@@ -813,13 +821,10 @@ export default function MasterySessionPage() {
         }}
       />
 
-      {/* Session Report FAB — sits above the fixed stats bar. Visible to
-          everyone; locked below 33% mastery, then paywalled for free users. */}
-      <SessionReportFab
-        userId={user?.id}
-        buildInput={buildStudySheet}
-        overallPct={data.overallDisplayPct}
-      />
+      {/* Session Report pill moved into the page header (above) so it stays
+          content-anchored and clear of the global LaunchDock "+" button at
+          bottom-right. Locked below 33% mastery, then paywalled for free
+          users. */}
 
       {/* Celebration confetti on mastery — key forces remount so it re-fires */}
       <Confetti

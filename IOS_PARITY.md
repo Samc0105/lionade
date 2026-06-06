@@ -7,6 +7,20 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 
 ---
 
+## 2026-06-05 — Mastery Session Report pill moved out of FAB collision (web-only, no iOS row)
+
+**Status:** 🚫 N/A (deliberate no-row decision — web-side layout collision between two web-only floating widgets; iOS Mastery does not have the equivalent collision).
+
+The Session Report pill (`components/Mastery/StudySheetButton.tsx`, mounted on `app/learn/mastery/[examId]/page.tsx`) was a `fixed bottom-right` element at `bottom-[56px] md:bottom-[118px]` showing either "🔒 X / 33%" while locked or "Session Report" once unlocked. It overlapped vertically with the global `LaunchDock` ("+" launcher) at `right-4 md:right-6 bottom-[88px] md:bottom-[24px]`, which clipped the right side of the pill and hid the denominator in the locked progress label. Sam reported he couldn't see his quota at a glance.
+
+Fix: added a `placement` prop ("header" | "floating") to `SessionReportFab`. The Mastery session page now mounts it inline in the top header row, alongside the elapsed-time chip, where it is content-anchored and never collides with floating chrome. The `floating` variant is retained for future surfaces with no header slot, with its `bottom` offset bumped (`md:bottom-[96px]` desktop / `bottom-[158px]` mobile) so even that variant clears the global LaunchDock if reused.
+
+iOS stance: iOS Mastery (`lionade-ios/src/screens/mastery/...`) renders the equivalent Session Report affordance inline within its own header / toolbar — there is no iOS counterpart to the web `LaunchDock` global "+" button (iOS uses the tab bar + native modals for the equivalent quick-launch surfaces). The collision physically cannot occur on iOS. **No iOS row required.**
+
+**Files touched (web):** `components/Mastery/StudySheetButton.tsx` (added `placement` prop + sized variant; floating bottom values bumped to clear LaunchDock as a safety net), `app/learn/mastery/[examId]/page.tsx` (moved the SessionReportFab call from the bottom of the page into the header row next to the elapsed-time chip; removed the old fixed mount).
+
+---
+
 ## 2026-06-05 — Stale Resume banner root-cause fix (web-only, no iOS row)
 
 **Status:** 🚫 N/A (deliberate no-row decision — web-side data-flow bug; iOS reads `profiles.active_session` through `@lionade/core` but does not call `/api/daily-drill` on every dashboard mount, so the same loop does not exist there).
