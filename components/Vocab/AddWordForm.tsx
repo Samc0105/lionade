@@ -253,7 +253,7 @@ export default function AddWordForm({ bank, onSaved }: Props) {
 
       {/* Word / term input */}
       <div>
-        <label htmlFor="vocab-word-input" className="font-mono text-[10px] uppercase tracking-[0.25em] text-cream/55 block mb-2">
+        <label htmlFor="vocab-word-input" className="font-mono text-[10px] uppercase tracking-[0.28em] text-cream/55 block mb-2">
           {inputLabel}
         </label>
         <div className="flex items-stretch gap-2">
@@ -271,7 +271,7 @@ export default function AddWordForm({ bank, onSaved }: Props) {
             }}
             maxLength={MAX_WORD_LEN}
             placeholder={inputPlaceholder}
-            className="flex-1 min-w-0 px-4 py-3 rounded-xl bg-white/5 backdrop-blur border border-white/10 text-cream placeholder:text-cream/30 font-syne text-base focus:outline-none focus:border-electric/60 focus:bg-white/[0.07] transition-colors"
+            className="flex-1 min-w-0 px-4 py-3.5 rounded-xl bg-white/5 backdrop-blur border border-white/10 text-cream placeholder:text-cream/30 font-syne text-base focus:outline-none focus:border-electric/60 focus:bg-white/[0.07] transition-colors"
             autoComplete="off"
             autoCorrect="off"
             spellCheck={false}
@@ -280,13 +280,13 @@ export default function AddWordForm({ bank, onSaved }: Props) {
             type="button"
             onClick={handleAction}
             disabled={!canAction}
-            className="px-5 rounded-xl font-syne font-bold text-sm bg-electric text-navy hover:bg-electric/90 disabled:opacity-40 disabled:cursor-not-allowed transition-colors inline-flex items-center gap-2"
+            className="px-5 rounded-xl font-syne font-bold text-sm bg-gold text-navy hover:bg-gold/90 disabled:opacity-40 disabled:cursor-not-allowed transition-colors inline-flex items-center gap-2 shadow-[0_0_18px_rgba(255,215,0,0.18)]"
           >
             <ActionIcon size={16} weight="bold" aria-hidden="true" />
             <span>{busy ? "..." : actionLabel}</span>
           </button>
         </div>
-        <p className="font-mono text-[9px] uppercase tracking-wider text-cream/35 mt-1.5 text-right">
+        <p className="font-mono text-[9px] uppercase tracking-wider text-cream/35 mt-1.5 text-right tabular-nums">
           {word.length}/{MAX_WORD_LEN}
         </p>
       </div>
@@ -427,18 +427,18 @@ export default function AddWordForm({ bank, onSaved }: Props) {
 
 function SourceBadge({ source }: { source: DefineSource }) {
   const meta = source === "wikipedia"
-    ? { label: "wikipedia", color: "#22C55E", Icon: Books }
+    ? { label: "from wikipedia", color: "#22C55E", Icon: Books }
     : source === "ai"
-      ? { label: "ai", color: "#A855F7", Icon: Sparkle }
-      : { label: "manual", color: "#FFD700", Icon: Pencil };
+      ? { label: "from ai", color: "#A855F7", Icon: Sparkle }
+      : { label: "manual entry", color: "#FFD700", Icon: Pencil };
   const Icon = meta.Icon;
   return (
     <span
-      className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 border font-mono text-[9px] uppercase tracking-[0.2em]"
+      className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 border font-mono text-[9px] uppercase tracking-[0.22em]"
       style={{ background: `${meta.color}14`, borderColor: `${meta.color}50`, color: meta.color }}
     >
       <Icon size={9} weight="bold" aria-hidden="true" />
-      <span>source: {meta.label}</span>
+      <span>{meta.label}</span>
     </span>
   );
 }

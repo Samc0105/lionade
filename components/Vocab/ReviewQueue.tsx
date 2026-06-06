@@ -108,6 +108,9 @@ export default function ReviewQueue({ bank }: Props) {
     }
   };
 
+  const reviewed = queue.length > 0 ? queue.length - remaining : 0;
+  const progressPct = queue.length > 0 ? Math.min(100, (reviewed / queue.length) * 100) : 0;
+
   return (
     <div className="space-y-6">
       {/* Streak pill — front and center */}
@@ -120,10 +123,28 @@ export default function ReviewQueue({ bank }: Props) {
         />
         {queue.length > 0 && (
           <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-cream/55 tabular-nums">
-            {remaining} of {queue.length} due
+            {reviewed} of {queue.length} reviewed
           </p>
         )}
       </div>
+
+      {/* Progress bar — shows how far through today's queue */}
+      {queue.length > 0 && (
+        <div
+          className="h-1 rounded-full bg-white/[0.05] overflow-hidden"
+          aria-hidden="true"
+        >
+          <div
+            className="h-full rounded-full"
+            style={{
+              width: `${progressPct}%`,
+              background: "linear-gradient(90deg, #4A90D9 0%, #FFD700 100%)",
+              transition: "width 0.5s cubic-bezier(0.16,1,0.3,1)",
+              willChange: "width",
+            }}
+          />
+        </div>
+      )}
 
       {/* Card area */}
       {isLoading && !data ? (
@@ -174,37 +195,39 @@ function FlashCard({ word, bank, revealed, onReveal, onAnswer, submitting }: Fla
     ? (word.target_lang === "en" ? "english" : word.target_lang === "es" ? "spanish" : word.target_lang ?? "translation")
     : "definition";
 
+  const promptCopy = isLanguageBank ? "What does it mean?" : "Recall the definition.";
+
   return (
     <div className="space-y-4 animate-slide-up" key={word.id}>
       <button
         type="button"
         onClick={onReveal}
         disabled={revealed}
-        className="w-full rounded-2xl bg-white/5 backdrop-blur border border-white/10 p-8 sm:p-12 text-center hover:bg-white/[0.07] transition-colors disabled:cursor-default"
-        style={{ minHeight: 220 }}
+        className="vocab-flashcard w-full rounded-2xl bg-white/5 backdrop-blur border border-white/10 p-8 sm:p-14 text-center hover:bg-white/[0.07] hover:border-white/15 transition-[background-color,border-color] disabled:cursor-default"
+        style={{ minHeight: 240 }}
         aria-label={revealed ? "Card revealed" : "Tap to reveal"}
       >
-        <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-cream/45 mb-3">
+        <p className="font-mono text-[10px] uppercase tracking-[0.32em] text-cream/45 mb-4">
           {frontLabel}
         </p>
-        <p className="font-bebas text-4xl sm:text-5xl tracking-wider text-cream leading-none">
+        <p className="font-bebas text-5xl sm:text-6xl tracking-[0.04em] text-cream leading-[0.95]">
           {front}
         </p>
 
         {revealed ? (
-          <div className="mt-7 pt-6 border-t border-white/10 animate-slide-up">
+          <div className="mt-8 pt-6 border-t border-white/10 vocab-reveal">
             <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-electric/80 mb-2">
               {backLabel}
             </p>
             <p
               className={isLanguageBank
-                ? "font-bebas text-3xl tracking-wider text-electric leading-tight"
-                : "font-syne text-base text-electric/95 leading-relaxed"}
+                ? "font-bebas text-3xl sm:text-4xl tracking-wider text-electric leading-tight"
+                : "font-syne text-base sm:text-lg text-electric/95 leading-relaxed"}
             >
               {back}
             </p>
             {word.user_definition && (
-              <div className="mt-5 px-4 py-3 rounded-xl bg-white/[0.04] border border-white/[0.06]">
+              <div className="mt-5 px-4 py-3 rounded-xl bg-white/[0.04] border border-white/[0.06] text-left mx-auto max-w-md">
                 <p className="font-mono text-[9px] uppercase tracking-[0.25em] text-gold/70 mb-1">
                   your definition
                 </p>
@@ -215,9 +238,14 @@ function FlashCard({ word, bank, revealed, onReveal, onAnswer, submitting }: Fla
             )}
           </div>
         ) : (
-          <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-cream/40 mt-6">
-            tap to reveal
-          </p>
+          <div className="mt-7">
+            <p className="font-syne text-sm text-cream/55 italic">
+              {promptCopy}
+            </p>
+            <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-cream/35 mt-3">
+              tap to reveal
+            </p>
+          </div>
         )}
       </button>
 
@@ -226,7 +254,7 @@ function FlashCard({ word, bank, revealed, onReveal, onAnswer, submitting }: Fla
           type="button"
           onClick={() => onAnswer(false)}
           disabled={!revealed || submitting}
-          className="rounded-xl border border-red-400/40 bg-red-400/10 hover:bg-red-400/20 text-red-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors py-4 inline-flex items-center justify-center gap-2 font-syne font-bold"
+          className="rounded-xl border border-red-400/40 bg-red-400/10 hover:bg-red-400/20 hover:border-red-400/60 text-red-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors py-4 inline-flex items-center justify-center gap-2 font-syne font-bold"
         >
           <XCircle size={20} weight="fill" aria-hidden="true" />
           <span>Need more time</span>
@@ -235,12 +263,26 @@ function FlashCard({ word, bank, revealed, onReveal, onAnswer, submitting }: Fla
           type="button"
           onClick={() => onAnswer(true)}
           disabled={!revealed || submitting}
-          className="rounded-xl border border-green-400/40 bg-green-400/10 hover:bg-green-400/20 text-green-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors py-4 inline-flex items-center justify-center gap-2 font-syne font-bold"
+          className="rounded-xl border border-green-400/40 bg-green-400/10 hover:bg-green-400/20 hover:border-green-400/60 text-green-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors py-4 inline-flex items-center justify-center gap-2 font-syne font-bold"
         >
           <CheckCircle size={20} weight="fill" aria-hidden="true" />
           <span>Got it</span>
         </button>
       </div>
+
+      <style jsx>{`
+        @keyframes vocab-reveal {
+          from { opacity: 0; transform: translateY(8px) scale(0.98); }
+          to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .vocab-reveal {
+          animation: vocab-reveal 0.36s cubic-bezier(0.16,1,0.3,1) both;
+          will-change: opacity, transform;
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .vocab-reveal { animation: none; }
+        }
+      `}</style>
     </div>
   );
 }
@@ -249,13 +291,16 @@ function FlashCard({ word, bank, revealed, onReveal, onAnswer, submitting }: Fla
 
 function EmptyReviewState({ bankName }: { bankName: string }) {
   return (
-    <div className="rounded-2xl bg-white/5 backdrop-blur border border-gold/25 p-10 text-center">
-      <Confetti size={48} weight="fill" color="#FFD700" aria-hidden="true" className="mx-auto mb-4" />
-      <p className="font-bebas text-2xl tracking-wider text-cream mb-2">
-        All caught up in {bankName}!
+    <div className="rounded-2xl bg-white/5 backdrop-blur border border-gold/25 p-10 text-center animate-slide-up">
+      <Confetti size={52} weight="fill" color="#FFD700" aria-hidden="true" className="mx-auto mb-4" />
+      <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-gold/75 mb-2">
+        You are caught up
       </p>
-      <p className="font-syne text-sm text-cream/65">
-        Come back tomorrow. Add a new term in the Add tab to keep your streak alive.
+      <p className="font-bebas text-3xl tracking-[0.06em] text-cream mb-2 leading-none">
+        Nothing to review in {bankName}
+      </p>
+      <p className="font-syne text-sm text-cream/65 max-w-md mx-auto leading-relaxed">
+        Come back tomorrow. Or add a new term in the Add tab to keep your streak alive.
       </p>
       <div className="mt-5 inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.25em] text-cream/45">
         <ArrowClockwise size={12} weight="bold" aria-hidden="true" />

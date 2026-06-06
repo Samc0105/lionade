@@ -660,7 +660,7 @@ function VocabRow({
       </p>
 
       {/* Note */}
-      <p className="font-syne text-xs text-cream/55 italic truncate">{note || "—"}</p>
+      <p className="font-syne text-xs text-cream/55 italic truncate">{note || <span className="not-italic text-cream/30">no note</span>}</p>
 
       {/* Confidence dot */}
       <div className="flex justify-center">
@@ -681,7 +681,7 @@ function VocabRow({
             {accuracy}%
           </span>
         ) : (
-          <span className="text-cream/30 text-xs">—</span>
+          <span className="text-cream/30 text-xs">·</span>
         )}
       </div>
 

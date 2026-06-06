@@ -131,7 +131,15 @@ export default function VocabPage() {
           from { opacity: 0; transform: translateY(12px); }
           to { opacity: 1; transform: translateY(0); }
         }
-        .animate-slide-up { animation: slide-up 0.4s var(--ease-out-expo, cubic-bezier(0.16,1,0.3,1)) both; }
+        .animate-slide-up {
+          animation: slide-up 0.4s var(--ease-out-expo, cubic-bezier(0.16,1,0.3,1)) both;
+          will-change: opacity, transform;
+        }
+        .vocab-eyebrow-rule {
+          height: 1px;
+          background: linear-gradient(90deg, rgba(255,215,0,0.55) 0%, rgba(255,215,0,0) 100%);
+          width: 56px;
+        }
         @media (prefers-reduced-motion: reduce) {
           .animate-slide-up { animation: none; }
         }
@@ -141,15 +149,18 @@ export default function VocabPage() {
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
           {/* Header */}
-          <header className="mb-7 animate-slide-up flex items-start justify-between gap-4">
+          <header className="mb-8 animate-slide-up flex items-start justify-between gap-4">
             <div>
-              <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-cream/55 mb-2">
-                Learn / Word Banks
-              </p>
-              <h1 className="font-bebas text-3xl sm:text-4xl text-cream tracking-[0.08em] leading-none">
+              <div className="flex items-center gap-2.5 mb-3">
+                <span className="vocab-eyebrow-rule" aria-hidden="true" />
+                <p className="font-mono text-[10px] uppercase tracking-[0.32em] text-gold/75">
+                  Lock in the language
+                </p>
+              </div>
+              <h1 className="font-bebas text-4xl sm:text-5xl text-cream tracking-[0.08em] leading-[0.95]">
                 Word Banks
               </h1>
-              <p className="font-syne text-sm text-cream/65 mt-2 max-w-md">
+              <p className="font-syne text-sm text-cream/65 mt-3 max-w-md leading-relaxed">
                 Make a bank for anything. Add terms, write your own definitions, lock them in.
               </p>
             </div>
@@ -201,10 +212,10 @@ export default function VocabPage() {
                       aria-selected={isActive}
                       aria-controls={`vocab-tab-${t.id}`}
                       onClick={() => setTab(t.id)}
-                      className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-syne font-bold text-sm transition-colors border whitespace-nowrap ${
+                      className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-syne font-bold text-sm transition-[background-color,color,border-color,box-shadow] border whitespace-nowrap ${
                         isActive
-                          ? "bg-electric text-navy border-electric"
-                          : "bg-white/5 text-cream/70 border-white/10 hover:bg-white/10 hover:text-cream"
+                          ? "bg-electric text-navy border-electric shadow-[0_0_18px_rgba(74,144,217,0.35)]"
+                          : "bg-white/5 text-cream/70 border-white/10 hover:bg-white/10 hover:text-cream hover:border-white/20"
                       }`}
                     >
                       <Icon size={14} weight="bold" aria-hidden="true" />
@@ -245,11 +256,14 @@ export default function VocabPage() {
 
 function EmptyBanksState({ onCreate }: { onCreate: () => void }) {
   return (
-    <div className="rounded-2xl bg-white/5 backdrop-blur border border-white/10 p-7 sm:p-9 text-center animate-slide-up">
-      <p className="font-bebas text-2xl tracking-wider text-cream mb-2">
+    <div className="rounded-2xl bg-white/5 backdrop-blur border border-white/10 p-7 sm:p-10 text-center animate-slide-up">
+      <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-gold/75 mb-2">
+        Start here
+      </p>
+      <p className="font-bebas text-3xl tracking-[0.06em] text-cream mb-2 leading-none">
         Make your first word bank
       </p>
-      <p className="font-syne text-sm text-cream/65 mb-7 max-w-md mx-auto">
+      <p className="font-syne text-sm text-cream/65 mb-7 max-w-md mx-auto leading-relaxed">
         A bank is a focused stack of terms with their own streak. Make one per subject or per language.
       </p>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-lg mx-auto">

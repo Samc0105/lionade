@@ -184,7 +184,7 @@ export default function BankSelector({ banks, activeSlug, onSelect, onCreateClic
 
   return (
     <div className="relative">
-      <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-cream/55 mb-2">
+      <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-cream/55 mb-2">
         word banks
       </p>
       <div className="flex gap-2 overflow-x-auto pb-1.5">
