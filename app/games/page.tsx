@@ -6,8 +6,13 @@ import { useRouter } from "next/navigation";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import AmbientOrbs from "@/components/AmbientOrbs";
 import RevealText from "@/components/RevealText";
-import Confetti from "@/components/Confetti";
 import CountUp from "@/components/CountUp";
+// Confetti is dynamic-imported so the canvas particle code only ships when
+// a player actually reaches a game-over screen. Saves ~44 kB on the /games
+// landing First Load JS bundle. ssr: false because Confetti reaches into
+// window/canvas on mount.
+import dynamic from "next/dynamic";
+const Confetti = dynamic(() => import("@/components/Confetti"), { ssr: false });
 import { useAuth } from "@/lib/auth";
 import { useUserStats, mutateUserStats } from "@/lib/hooks";
 import { cdnUrl } from "@/lib/cdn";
@@ -1722,6 +1727,44 @@ export default function GamesPage() {
                         {g.limit >= 999 && (
                           <span className="font-mono text-[10px] text-cream/40 uppercase tracking-wider">unlimited</span>
                         )}
+                        {/* Per-game lifetime stat chip — only renders when
+                            there's a meaningful number to show. Roardle uses
+                            win%, Timeline uses perfect-run count, Flashcards
+                            uses lifetime known-cards. The other tickets
+                            (Party, Pardy) skip — no per-game stats yet. */}
+                        {(() => {
+                          if (g.id === "roardle") {
+                            const r = getRoardleStats();
+                            if (r.played < 2) return null;
+                            return (
+                              <span className="font-mono text-[10px] tracking-[0.18em] text-cream/55">
+                                <span className="text-cream/30">your </span>
+                                <span className="tabular-nums">{Math.round((r.won / r.played) * 100)}%</span>
+                              </span>
+                            );
+                          }
+                          if (g.id === "timeline") {
+                            const t = getTimelineStats();
+                            if (t.perfect === 0) return null;
+                            return (
+                              <span className="font-mono text-[10px] tracking-[0.18em] text-gold/75">
+                                <span className="tabular-nums">{t.perfect}</span>
+                                <span className="text-cream/30"> perfect</span>
+                              </span>
+                            );
+                          }
+                          if (g.id === "flashcards") {
+                            const f = getFlashcardsStats();
+                            if (f.totalKnown < 5) return null;
+                            return (
+                              <span className="font-mono text-[10px] tracking-[0.18em] text-cream/55">
+                                <span className="tabular-nums">{f.totalKnown}</span>
+                                <span className="text-cream/30"> known</span>
+                              </span>
+                            );
+                          }
+                          return null;
+                        })()}
                       </div>
 
                       {/* Roardle word-length selector inline with ticket */}

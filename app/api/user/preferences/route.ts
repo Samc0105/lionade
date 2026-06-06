@@ -47,6 +47,8 @@ const NOTIF_KEYS: ReadonlyArray<keyof NotificationPrefs> = [
   "new_features",
   "marketing",
   "leaderboard_updates",
+  "friend_requests",
+  "party_invites",
 ];
 
 const PRIVACY_KEYS: ReadonlyArray<keyof PrivacyPrefs> = [

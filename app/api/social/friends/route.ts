@@ -3,6 +3,7 @@ import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
 import { isDemoUser } from "@/lib/demo-guard";
 import { demoBlockedResponse } from "@/lib/demo-guard-server";
+import { shouldNotifyUser } from "@/lib/db";
 
 // GET — List friends + pending requests
 //
@@ -195,18 +196,22 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Couldn't load friends." }, { status: 500 });
     }
 
-    // Create notification for the receiver (non-blocking)
+    // Create notification for the receiver (non-blocking). Gated on the
+    // friend_requests pref — the row still creates (visible in /social
+    // pending tab); we just suppress the bell ping.
     try {
-      const { data: senderProfile } = await supabaseAdmin
-        .from("profiles").select("username").eq("id", userId).single();
-      await supabaseAdmin.from("notifications").insert({
-        user_id: friend.id,
-        type: "friend_request",
-        title: `${senderProfile?.username ?? "Someone"} sent you a friend request`,
-        message: "Accept or decline in Social",
-        action_url: "/social",
-        related_user_id: userId,
-      });
+      if (await shouldNotifyUser(friend.id, "friend_requests")) {
+        const { data: senderProfile } = await supabaseAdmin
+          .from("profiles").select("username").eq("id", userId).single();
+        await supabaseAdmin.from("notifications").insert({
+          user_id: friend.id,
+          type: "friend_request",
+          title: `${senderProfile?.username ?? "Someone"} sent you a friend request`,
+          message: "Accept or decline in Social",
+          action_url: "/social",
+          related_user_id: userId,
+        });
+      }
     } catch { /* notifications table may not exist yet */ }
 
     return NextResponse.json({ success: true, friendship: data });
@@ -244,19 +249,22 @@ export async function PATCH(req: NextRequest) {
       .update({ status: newStatus })
       .eq("id", friendshipId);
 
-    // Notify the original requester (non-blocking)
+    // Notify the original requester (non-blocking). Same friend_requests
+    // pref — accepting their request is the symmetric beat.
     if (action === "accept") {
       try {
-        const { data: acceptorProfile } = await supabaseAdmin
-          .from("profiles").select("username").eq("id", userId).single();
-        await supabaseAdmin.from("notifications").insert({
-          user_id: friendship.user_id,
-          type: "friend_accepted",
-          title: `${acceptorProfile?.username ?? "Someone"} accepted your friend request`,
-          message: "You can now chat and challenge each other",
-          action_url: "/social",
-          related_user_id: userId,
-        });
+        if (await shouldNotifyUser(friendship.user_id, "friend_requests")) {
+          const { data: acceptorProfile } = await supabaseAdmin
+            .from("profiles").select("username").eq("id", userId).single();
+          await supabaseAdmin.from("notifications").insert({
+            user_id: friendship.user_id,
+            type: "friend_accepted",
+            title: `${acceptorProfile?.username ?? "Someone"} accepted your friend request`,
+            message: "You can now chat and challenge each other",
+            action_url: "/social",
+            related_user_id: userId,
+          });
+        }
       } catch { /* notifications table may not exist yet */ }
     }
 

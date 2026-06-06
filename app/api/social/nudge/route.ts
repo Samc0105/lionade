@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
+import { shouldNotifyUser } from "@/lib/db";
 
 /**
  * Nudges — one-tap encouragement between friends.
@@ -124,19 +125,24 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Failed to record nudge" }, { status: 500 });
     }
 
-    // Fire a notification to the recipient (best-effort)
+    // Fire a notification to the recipient (best-effort). Gated on the
+    // friend_requests pref since a nudge is the same social-comm vector.
+    // (Could split into its own `nudges` pref later if users want finer
+    // control; right now the volume doesn't justify the separate toggle.)
     try {
-      const { data: senderProfile } = await supabaseAdmin
-        .from("profiles").select("username").eq("id", senderId).single();
-      const message = PRESETS[preset as PresetKey];
-      await supabaseAdmin.from("notifications").insert({
-        user_id: recipientId,
-        type: "nudge",
-        title: `${senderProfile?.username ?? "A friend"} nudged you`,
-        message,
-        action_url: "/social",
-        related_user_id: senderId,
-      });
+      if (await shouldNotifyUser(recipientId, "friend_requests")) {
+        const { data: senderProfile } = await supabaseAdmin
+          .from("profiles").select("username").eq("id", senderId).single();
+        const message = PRESETS[preset as PresetKey];
+        await supabaseAdmin.from("notifications").insert({
+          user_id: recipientId,
+          type: "nudge",
+          title: `${senderProfile?.username ?? "A friend"} nudged you`,
+          message,
+          action_url: "/social",
+          related_user_id: senderId,
+        });
+      }
     } catch {
       /* notifications table optional */
     }

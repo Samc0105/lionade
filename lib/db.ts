@@ -64,6 +64,12 @@ export type NotificationPrefs = {
   new_features: boolean;
   marketing: boolean;
   leaderboard_updates: boolean;
+  // Added 2026-06-05 to close the notification-trigger trust loop. friend_requests
+  // gates social/friends + social/nudge inserts; party_invites gates the new
+  // /api/party/rooms/[code]/invite-friend notification path. Stored alongside
+  // the existing flags in profiles.preferences JSONB — no migration needed.
+  friend_requests: boolean;
+  party_invites: boolean;
 };
 
 export type PrivacyPrefs = {
@@ -95,6 +101,10 @@ export const DEFAULT_NOTIFICATION_PREFS: NotificationPrefs = {
   new_features: false,
   marketing: false,
   leaderboard_updates: true,
+  // Sensible defaults: a user signing up wants to know when a friend tries
+  // to reach them and when they're invited to a party room.
+  friend_requests: true,
+  party_invites: true,
 };
 
 export const DEFAULT_PRIVACY_PREFS: PrivacyPrefs = {

@@ -18,6 +18,7 @@ import { requireAuth } from "@/lib/api-auth";
 import { isDemoUser } from "@/lib/demo-guard";
 import { demoBlockedResponse } from "@/lib/demo-guard-server";
 import { isValidRoomCode, normalizeRoomCode } from "@/lib/party/room-code";
+import { shouldNotifyUser } from "@/lib/db";
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -121,14 +122,19 @@ export async function POST(
   // ── Drop the notification ──
   // Deep-links to the party route — same join flow handles late joiners. The
   // notifications realtime channel in Navbar will surface this immediately.
-  await supabaseAdmin.from("notifications").insert({
-    user_id: friendId,
-    type: "party_invite",
-    title: `${senderProfile?.username ?? "A friend"} invited you to Lionade Party`,
-    message: `Tap to join room ${code}`,
-    action_url: `/games/party/${code}`,
-    related_user_id: userId,
-  });
+  // Gated on the recipient's party_invites pref. The endpoint still returns
+  // ok:true even when the notification was suppressed — the sender's UI
+  // shouldn't reveal the recipient's preference state.
+  if (await shouldNotifyUser(friendId, "party_invites")) {
+    await supabaseAdmin.from("notifications").insert({
+      user_id: friendId,
+      type: "party_invite",
+      title: `${senderProfile?.username ?? "A friend"} invited you to Lionade Party`,
+      message: `Tap to join room ${code}`,
+      action_url: `/games/party/${code}`,
+      related_user_id: userId,
+    });
+  }
 
   return NextResponse.json({
     ok: true,
