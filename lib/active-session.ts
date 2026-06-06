@@ -53,17 +53,19 @@ interface ActiveSessionRow {
  * already hold an auth client for it, and (b) adding an endpoint would
  * add a network hop without adding any auth boundary we don't have.
  */
-// Sessions older than this are treated as abandoned and ignored client-side
-// even if the server pointer is still set. Stops a stuck-mastery-pointer
-// (most common cause: user navigates away mid-session, the complete route
-// never fires) from haunting every page forever.
-//
-// 4 hours covers a realistic long study sitting; anything beyond that is
-// either a forgotten tab or a server-side leak that should have been caught
-// by a heartbeat reaper. The client treats stale pointers as null so the
-// banner disappears; a fresh real session writes a new pointer with a
-// fresh joined_at and is picked up immediately.
-const STALE_AFTER_MS = 4 * 60 * 60 * 1000;
+// Sessions older than this are treated as abandoned client-side even when
+// the server pointer still says active. Tightened from 4h to 2h after the
+// daily-drill repro: drill pointers shouldn't live this long, mastery
+// sittings rarely exceed 2h, and party rooms self-clear via leave/reaper.
+// Anything past the threshold is either a forgotten tab or a server leak
+// the lifecycle hooks missed.
+const STALE_AFTER_MS = 2 * 60 * 60 * 1000;
+
+// Track the most recent clear-attempt timestamp so a fetch storm during SWR
+// revalidation doesn't fire N parallel DELETE /api/user/active-session calls.
+// Module-level — survives across the SWR cache.
+let lastClearAttemptAt = 0;
+const CLEAR_DEDUP_MS = 30_000;
 
 async function fetchActiveSession(userId: string): Promise<ActiveSession | null> {
   const { data, error } = await supabase
@@ -79,15 +81,38 @@ async function fetchActiveSession(userId: string): Promise<ActiveSession | null>
   }
   const raw = (data as ActiveSessionRow | null)?.active_session ?? null;
   if (!raw) return null;
-  // Staleness check — treat as null if joined_at is too old. Don't try to
-  // clear the server pointer from here (fetchers are read paths and SWR
-  // dedupes them aggressively); the banner's explicit dismiss can do that.
-  if (raw.joined_at) {
+
+  // Staleness check. Treat as null when:
+  //   - joined_at is missing entirely (some legacy daily_drill writes
+  //     pre-dated the joined_at field; we can't trust them)
+  //   - joined_at is malformed (NaN on parse)
+  //   - joined_at is older than STALE_AFTER_MS
+  let isStale = false;
+  if (!raw.joined_at) {
+    isStale = true;
+  } else {
     const age = Date.now() - new Date(raw.joined_at).getTime();
-    if (Number.isFinite(age) && age > STALE_AFTER_MS) {
-      return null;
+    if (!Number.isFinite(age) || age > STALE_AFTER_MS) {
+      isStale = true;
     }
   }
+
+  if (isStale) {
+    // Auto-reap the server pointer when we detect staleness — so the
+    // problem fixes itself across every tab + every device without
+    // requiring the user to click the X. Dedup so an SWR revalidation
+    // storm doesn't fan out 10 DELETE calls.
+    const now = Date.now();
+    if (now - lastClearAttemptAt > CLEAR_DEDUP_MS && typeof window !== "undefined") {
+      lastClearAttemptAt = now;
+      try {
+        const mod = await import("@/lib/api-client");
+        void mod.apiDelete("/api/user/active-session").catch(() => { /* idempotent */ });
+      } catch { /* import or fetch failure — staleness still returns null below */ }
+    }
+    return null;
+  }
+
   return raw;
 }
 
