@@ -116,20 +116,21 @@ export default function AcademiaPage() {
 
         <main className="relative z-10 max-w-[1180px] mx-auto px-4 sm:px-6 pt-6 pb-24">
           {/* ─── Header ─── */}
-          <header className="mb-8">
-            <div className="flex items-center gap-2 mb-2">
-              <GraduationCap size={14} className="text-gold" weight="fill" />
-              <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-gold">
+          <header className="mb-10">
+            <div className="flex items-center gap-2 mb-3">
+              <span className="inline-block w-6 h-px bg-gold/70" aria-hidden="true" />
+              <GraduationCap size={13} className="text-gold" weight="fill" />
+              <p className="font-mono text-[10px] uppercase tracking-[0.32em] text-gold">
                 Academia
               </p>
             </div>
-            <div className="flex items-end justify-between gap-3 flex-wrap">
+            <div className="flex items-end justify-between gap-4 flex-wrap">
               <div>
-                <h1 className="font-bebas text-4xl sm:text-5xl tracking-[0.06em] text-cream leading-none">
+                <h1 className="font-bebas text-5xl sm:text-6xl tracking-[0.05em] text-cream leading-[0.95]">
                   your classroom
                 </h1>
-                <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-cream/50 mt-3">
-                  Classes, notes, plans — every school thing in one place.
+                <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-cream/55 mt-4">
+                  School year, sharpened. Every class, note, and plan in one place.
                 </p>
               </div>
               <button
@@ -137,7 +138,8 @@ export default function AcademiaPage() {
                 onClick={() => setShowCreate(true)}
                 className="inline-flex items-center gap-2 rounded-full bg-gold text-navy hover:bg-gold/90
                   font-mono text-[11px] uppercase tracking-[0.25em] px-4 py-2.5
-                  transition-transform duration-200 active:scale-[0.98]"
+                  transition-transform duration-200 active:scale-[0.98]
+                  shadow-[0_0_24px_rgba(255,215,0,0.18)]"
               >
                 <Plus size={12} weight="bold" /> New class
               </button>
@@ -175,11 +177,12 @@ export default function AcademiaPage() {
           <div className="grid grid-cols-1 lg:grid-cols-[1.7fr_1fr] gap-6">
             {/* Classes column */}
             <section>
-              <div className="flex items-baseline justify-between mb-3">
-                <h2 className="font-bebas text-xl text-cream tracking-wider">
+              <div className="flex items-baseline justify-between mb-4">
+                <h2 className="font-bebas text-[22px] text-cream tracking-[0.18em] flex items-center gap-2">
+                  <span className="inline-block w-1.5 h-1.5 rounded-full bg-gold" aria-hidden="true" />
                   YOUR CLASSES
                 </h2>
-                <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-cream/40">
+                <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-cream/40 tabular-nums">
                   {classes.length} {classes.length === 1 ? "class" : "classes"}
                 </span>
               </div>
@@ -202,19 +205,23 @@ export default function AcademiaPage() {
 
             {/* Recent notes column */}
             <aside>
-              <div className="flex items-baseline justify-between mb-3">
-                <h2 className="font-bebas text-xl text-cream tracking-wider">
+              <div className="flex items-baseline justify-between mb-4">
+                <h2 className="font-bebas text-[22px] text-cream tracking-[0.18em] flex items-center gap-2">
+                  <span className="inline-block w-1.5 h-1.5 rounded-full bg-electric" aria-hidden="true" />
                   RECENT NOTES
                 </h2>
-                <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-cream/40">
+                <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-cream/40 tabular-nums">
                   {notes.length}
                 </span>
               </div>
 
               {notes.length === 0 ? (
                 <div className="rounded-[14px] border border-dashed border-white/[0.08] bg-white/[0.02] p-6 text-center">
-                  <Note size={20} className="text-cream/30 mx-auto mb-2" />
-                  <p className="text-[12px] text-cream/55 leading-snug mb-3">
+                  <Note size={22} className="text-electric/60 mx-auto mb-2" />
+                  <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-cream/45 mb-2">
+                    Quiet for now
+                  </p>
+                  <p className="text-[12px] text-cream/60 leading-snug">
                     No notes yet. Hit <kbd className="font-mono text-[10px] px-1.5 py-0.5 rounded bg-white/[0.05] border border-white/[0.1]">⌘K</kbd> anywhere to drop one in.
                   </p>
                 </div>
@@ -252,18 +259,21 @@ function StatTile({
 }) {
   return (
     <div
-      className="rounded-[12px] border bg-white/[0.02] px-3 py-2.5 sm:px-4 sm:py-3"
-      style={{ borderColor: `${color}30` }}
+      className="relative rounded-[12px] border px-3 py-2.5 sm:px-4 sm:py-3 overflow-hidden"
+      style={{
+        borderColor: `${color}30`,
+        background: `linear-gradient(135deg, ${color}0C 0%, rgba(255,255,255,0.02) 100%)`,
+      }}
     >
       <div className="flex items-center gap-1.5 mb-1" style={{ color }}>
         {icon}
         <span className="font-mono text-[9px] uppercase tracking-[0.22em]">{label}</span>
       </div>
-      <p className="font-bebas text-2xl sm:text-3xl tracking-wider text-cream leading-none">
+      <p className="font-bebas text-2xl sm:text-[34px] tracking-wider text-cream leading-none tabular-nums">
         {value}
       </p>
       {sublabel && (
-        <p className="font-mono text-[9px] uppercase tracking-[0.18em] text-cream/40 mt-1 truncate">
+        <p className="font-mono text-[9px] uppercase tracking-[0.18em] text-cream/45 mt-1 truncate">
           {sublabel}
         </p>
       )}
@@ -276,39 +286,44 @@ function StatTile({
 // ─────────────────────────────────────────────────────────────────────────────
 function ClassCard({ cls }: { cls: ClassSummary }) {
   const days = cls.nextExamDate ? daysUntil(cls.nextExamDate) : null;
+  const hasPct = typeof cls.overallDisplayPct === "number" && cls.overallDisplayPct > 0;
 
   return (
     <Link
       href={`/classes/${cls.id}`}
       className="group relative rounded-[14px] border bg-white/[0.03]
         hover:bg-white/[0.05] transition-all duration-200
-        p-5 flex flex-col gap-3 overflow-hidden"
+        p-5 flex flex-col gap-3 overflow-hidden
+        will-change-transform motion-safe:hover:-translate-y-0.5"
       style={{
-        // Bucket A consistency: class color now washes the whole card body so
-        // each class reads at a glance, beyond just the 1px top stripe.
-        background: `linear-gradient(135deg, ${cls.color}0F 0%, ${cls.color}05 100%), rgba(255,255,255,0.03)`,
-        borderColor: `${cls.color}25`,
+        background: `linear-gradient(135deg, ${cls.color}10 0%, ${cls.color}05 100%), rgba(255,255,255,0.03)`,
+        borderColor: `${cls.color}28`,
       }}
     >
       <span
-        className="absolute top-0 left-0 right-0 h-1"
-        style={{ background: `linear-gradient(90deg, ${cls.color}, ${cls.color}40)` }}
+        className="absolute left-0 top-0 bottom-0 w-[3px]"
+        style={{ background: `linear-gradient(180deg, ${cls.color}, ${cls.color}40)` }}
+        aria-hidden="true"
+      />
+      <span
+        className="absolute top-0 left-0 right-0 h-px"
+        style={{ background: `linear-gradient(90deg, transparent, ${cls.color}60, transparent)` }}
         aria-hidden="true"
       />
 
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-start gap-2 min-w-0 flex-1">
           {cls.emoji && (
-            <span className="text-[24px] leading-none mt-0.5 shrink-0" aria-hidden="true">
+            <span className="text-[26px] leading-none mt-0.5 shrink-0" aria-hidden="true">
               {cls.emoji}
             </span>
           )}
           <div className="min-w-0">
-            <h3 className="font-bebas text-[24px] tracking-wider text-cream leading-tight truncate">
+            <h3 className="font-bebas text-[26px] tracking-wider text-cream leading-tight truncate">
               {cls.name}
             </h3>
             {(cls.shortCode || cls.term) && (
-              <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-cream/40 truncate">
+              <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-cream/45 truncate mt-0.5">
                 {[cls.shortCode, cls.term].filter(Boolean).join(" · ")}
               </p>
             )}
@@ -328,17 +343,25 @@ function ClassCard({ cls }: { cls: ClassSummary }) {
         )}
       </div>
 
-      <div className="flex items-center gap-4 mt-auto font-mono text-[10px] uppercase tracking-[0.2em] text-cream/45">
+      <div className="flex items-center gap-3 mt-auto font-mono text-[10px] uppercase tracking-[0.2em] text-cream/50 tabular-nums">
         <span className="flex items-center gap-1">
           <Target size={11} weight="bold" /> {cls.examCount} {cls.examCount === 1 ? "exam" : "exams"}
         </span>
         <span className="flex items-center gap-1">
           <Note size={11} weight="bold" /> {cls.noteCount} {cls.noteCount === 1 ? "note" : "notes"}
         </span>
+        {hasPct && (
+          <span
+            className="flex items-center gap-1 rounded-full border px-1.5 py-0.5 tabular-nums"
+            style={{ borderColor: `${cls.color}40`, color: cls.color }}
+          >
+            {cls.overallDisplayPct.toFixed(0)}%
+          </span>
+        )}
         <ArrowRight
           size={12}
           weight="bold"
-          className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity"
+          className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity motion-safe:group-hover:translate-x-0.5"
           style={{ color: cls.color }}
         />
       </div>
@@ -353,9 +376,10 @@ function NoteRow({ note }: { note: RecentNote }) {
   return (
     <Link
       href={`/classes/${note.classId}`}
-      className="group block rounded-[10px] border border-white/[0.06] bg-white/[0.02]
+      className="group relative block rounded-[10px] border border-white/[0.06] bg-white/[0.02]
         hover:bg-white/[0.04] hover:border-white/[0.12] transition-all duration-200
-        px-3 py-2.5"
+        px-3 py-2.5 pl-[14px] overflow-hidden"
+      style={{ boxShadow: `inset 2px 0 0 0 ${note.classColor}80` }}
     >
       <div className="flex items-center gap-1.5 mb-1">
         <span
@@ -391,23 +415,26 @@ function NoteRow({ note }: { note: RecentNote }) {
 // ─────────────────────────────────────────────────────────────────────────────
 function EmptyState({ onCreate }: { onCreate: () => void }) {
   return (
-    <div className="rounded-[14px] border border-dashed border-white/[0.1] bg-white/[0.02] p-10 text-center">
-      <BookOpen size={28} className="text-cream/40 mx-auto mb-3" />
-      <h2 className="font-bebas text-[26px] tracking-wider text-cream/90 mb-1">
+    <div className="rounded-[14px] border border-dashed border-gold/25 bg-gradient-to-br from-gold/[0.04] to-transparent p-10 text-center">
+      <BookOpen size={28} className="text-gold/70 mx-auto mb-3" />
+      <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-gold/80 mb-2">
+        Blank slate
+      </p>
+      <h2 className="font-bebas text-[30px] tracking-wider text-cream mb-2 leading-tight">
         No classes yet
       </h2>
-      <p className="text-[13px] text-cream/55 max-w-md mx-auto mb-5 leading-relaxed">
-        Create a notebook for each class you're taking. Add the exam dates and
-        Lionade builds your study plan around them.
+      <p className="text-[13px] text-cream/60 max-w-md mx-auto mb-5 leading-relaxed">
+        Spin up a notebook for each class you&apos;re taking. Drop your exam dates in and
+        Lionade builds the study plan around them.
       </p>
       <button
         type="button"
         onClick={onCreate}
         className="inline-flex items-center gap-2 rounded-full bg-gold text-navy
           font-mono text-[11px] uppercase tracking-[0.25em] px-5 py-2.5
-          hover:bg-gold/90 transition-colors"
+          hover:bg-gold/90 transition-colors shadow-[0_0_24px_rgba(255,215,0,0.22)]"
       >
-        <Plus size={12} weight="bold" /> Create first class
+        <Plus size={12} weight="bold" /> Add your first class
       </button>
     </div>
   );
@@ -418,12 +445,14 @@ function CreateTile({ onClick }: { onClick: () => void }) {
     <button
       type="button"
       onClick={onClick}
-      className="rounded-[14px] border border-dashed border-white/[0.1] bg-white/[0.01]
-        hover:bg-white/[0.03] hover:border-white/[0.2] transition-colors
-        p-5 flex flex-col items-center justify-center gap-2 text-cream/50 hover:text-cream/80
+      className="group rounded-[14px] border border-dashed border-white/[0.1] bg-white/[0.01]
+        hover:bg-gold/[0.04] hover:border-gold/40 transition-colors
+        p-5 flex flex-col items-center justify-center gap-2 text-cream/50 hover:text-gold
         min-h-[150px]"
     >
-      <Plus size={20} weight="bold" />
+      <span className="grid place-items-center w-10 h-10 rounded-full border border-current/30 group-hover:border-gold/60 transition-colors">
+        <Plus size={18} weight="bold" />
+      </span>
       <span className="font-mono text-[11px] uppercase tracking-[0.25em]">New class</span>
     </button>
   );
@@ -490,13 +519,14 @@ function CreateClassModal({
           <X size={14} weight="bold" />
         </button>
 
-        <div className="flex items-center gap-2 mb-2">
-          <Sparkle size={14} className="text-gold" weight="fill" />
-          <span className="font-mono text-[9.5px] uppercase tracking-[0.3em] text-gold">
+        <div className="flex items-center gap-2 mb-3">
+          <span className="inline-block w-5 h-px bg-gold/70" aria-hidden="true" />
+          <Sparkle size={13} className="text-gold" weight="fill" />
+          <span className="font-mono text-[9.5px] uppercase tracking-[0.32em] text-gold">
             New class
           </span>
         </div>
-        <h3 className="font-bebas text-[26px] tracking-wider text-cream leading-tight mb-4">
+        <h3 className="font-bebas text-[32px] tracking-wider text-cream leading-[0.95] mb-5">
           What are you studying?
         </h3>
 

@@ -54,7 +54,7 @@ export default function ClassStreakChip({ classId }: Props) {
         title="Add a note today to start a class streak."
       >
         <Fire size={11} weight="bold" className="text-cream/35" aria-hidden="true" />
-        Start a streak — add a note today
+        Start a streak today
       </span>
     );
   }

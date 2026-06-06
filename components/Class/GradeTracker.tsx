@@ -174,10 +174,9 @@ export default function GradeTracker({ classId }: Props) {
     <section className="bg-white/[0.03] border border-white/[0.08] rounded-2xl p-5">
       {/* Header */}
       <div className="flex items-baseline justify-between mb-4">
-        <h2 className="font-bebas text-sm text-cream/85 tracking-[0.2em]">
-          <span className="inline-flex items-center gap-2">
-            <GraduationCap size={13} weight="bold" /> GRADES
-          </span>
+        <h2 className="font-bebas text-[20px] text-cream tracking-[0.18em] flex items-center gap-2">
+          <span className="inline-block w-1.5 h-1.5 rounded-full bg-gold" aria-hidden="true" />
+          <GraduationCap size={14} weight="bold" className="text-gold" /> GRADES
         </h2>
         {!adding && (
           <button
@@ -665,16 +664,16 @@ function Footer({ summary }: { summary: Summary }) {
     <div className="mt-5 pt-4 border-t border-white/[0.06]">
       <div className="flex items-baseline justify-between gap-3 flex-wrap">
         <div>
-          <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-cream/45 mb-1">
+          <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-cream/50 mb-1">
             Current grade
           </p>
-          <p className="font-bebas text-[44px] leading-none tracking-wider text-cream tabular-nums">
+          <p className="font-bebas text-[52px] leading-none tracking-wider text-cream tabular-nums">
             {cur === null ? "—" : `${cur.toFixed(1)}%`}
-            {grade && (
-              <span className="ml-2 text-[20px] text-gold align-baseline">{grade}</span>
+            {grade && cur !== null && (
+              <span className="ml-2 text-[24px] text-gold align-baseline">{grade}</span>
             )}
           </p>
-          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-cream/40 mt-1">
+          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-cream/45 mt-1.5 tabular-nums">
             {summary.gradedCount} graded · {summary.ungradedCount} pending
           </p>
         </div>
@@ -682,7 +681,7 @@ function Footer({ summary }: { summary: Summary }) {
           <div
             className={`text-right max-w-[55%] sm:max-w-none ${needed.tone === "warn" ? "text-amber-400/90" : "text-cream/85"}`}
           >
-            <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-cream/45 mb-1">
+            <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-cream/50 mb-1">
               On the final
             </p>
             <p className="text-[14px] sm:text-[15px] font-syne leading-snug">
@@ -709,7 +708,7 @@ function Footer({ summary }: { summary: Summary }) {
       {/* When all rows ungraded */}
       {summary.gradedCount === 0 && (
         <p className="mt-3 text-[12px] text-cream/55">
-          No graded rows yet — your weighted grade will appear once you log a score.
+          No graded rows yet. Your weighted grade shows up once you log a score.
         </p>
       )}
     </div>
