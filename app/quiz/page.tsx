@@ -592,12 +592,12 @@ export default function QuizPage() {
       if (recommendations.length >= 2) break;
       const stat = getStatForSubject(topic.subject);
       if (!stat) {
-        recommendations.push({ category: cat, topic, reason: `You haven\u2019t tried ${topic.subject} yet \u2014 start with ${topic.name}!` });
+        recommendations.push({ category: cat, topic, reason: `New territory. Start with ${topic.name}.` });
         break;
       } else if (stat.questionsAnswered > 0) {
         const acc = Math.round((stat.correctAnswers / stat.questionsAnswered) * 100);
         if (acc < 60) {
-          recommendations.push({ category: cat, topic, reason: `Your ${topic.subject} accuracy is ${acc}% \u2014 try ${topic.name}!` });
+          recommendations.push({ category: cat, topic, reason: `${topic.subject} accuracy ${acc}%. Sharpen on ${topic.name}.` });
           break;
         }
       }
@@ -670,13 +670,16 @@ export default function QuizPage() {
             </div>
           )}
           <div className="text-center mb-8 animate-slide-up">
-            <span className="inline-flex items-center gap-2 bg-electric/10 border border-electric/30 rounded-full px-4 py-1.5 text-electric text-sm font-semibold mb-6">
-              <Lightning size={14} weight="fill" aria-hidden="true" className="inline mr-1.5 -mt-0.5" /> Daily Quiz
-            </span>
-            <h1 className="font-bebas text-6xl sm:text-7xl text-cream tracking-wider mb-4">
+            <p className="font-mono text-[11px] uppercase tracking-[0.35em] text-electric/80 mb-4">
+              <Lightning size={12} weight="fill" aria-hidden="true" className="inline mr-2 -mt-0.5" />
+              Earn your Fangs
+            </p>
+            <h1 className="font-bebas text-6xl sm:text-7xl text-cream tracking-wider mb-4 leading-[0.95]">
               PICK YOUR<br /><span className="shimmer-text">BATTLEFIELD</span>
             </h1>
-            <p className="text-cream/50 text-base">10 questions. Timer per question. Coins on every correct answer.</p>
+            <p className="text-cream/55 text-base max-w-md mx-auto">
+              Ten questions. Timer per question. Fangs on every correct answer.
+            </p>
           </div>
 
           {/* ── Blitz Mode Card ── */}
@@ -1327,7 +1330,7 @@ function ResultsScreen({
             <button
               onClick={async () => {
                 const text = [
-                  `${rank.icon} ${rank.label} — ${correctCount}/${correctCount + wrongCount} on ${subject ?? "a quiz"}`,
+                  `${rank.icon} ${rank.label}. ${correctCount}/${correctCount + wrongCount} on ${subject ?? "a quiz"}`,
                   `${accuracy}% accuracy | ${totalCoins} Fangs earned`,
                   `Can you beat me? ${SITE_HOST}/demo`,
                 ].join("\n");

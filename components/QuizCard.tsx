@@ -127,8 +127,12 @@ export default function QuizCard({
   };
 
   const timerPercent = (timeLeft / timeLimit) * 100;
+  // Gold = safe (normal), orange = caution, electric-red = urgent (< 10s on a
+  // 15s baseline → ~33%). Sub-5s tips into deep red for the last-stretch tell.
   const timerColor =
-    timerPercent > 50 ? "#4A90D9" : timerPercent > 25 ? "#E67E22" : "#E74C3C";
+    timeLeft > 10 ? "#FFD700"
+    : timeLeft > 5 ? "#E67E22"
+    : "#E74C3C";
 
   const difficultyLabel =
     question.difficulty === "beginner" ? "easy" :
@@ -154,19 +158,19 @@ export default function QuizCard({
 
       {/* Progress & Info Bar */}
       <div className="flex items-center justify-between mb-4">
-        <span className="text-cream/50 text-sm font-semibold">
-          Question {questionNumber} / {totalQuestions}
+        <span className="font-mono text-[11px] uppercase tracking-[0.28em] text-cream/55">
+          Q{questionNumber.toString().padStart(2, "0")} of {totalQuestions.toString().padStart(2, "0")}
         </span>
         <div className="flex items-center gap-3">
           <span
-            className={`text-xs font-bold uppercase tracking-widest px-2.5 py-1 rounded-full border
+            className={`text-[10px] font-bold uppercase tracking-[0.22em] px-2.5 py-1 rounded-full border
               ${difficultyColor[difficultyLabel] || difficultyColor[question.difficulty] || ""}`}
           >
             {difficultyLabel}
           </span>
           <div className="flex items-center gap-1.5 bg-gold/10 border border-gold/30 rounded-full px-3 py-1">
             <img src={cdnUrl("/F.png")} alt="Fangs" className="w-5 h-5 object-contain" />
-            <span className="font-bebas text-lg text-gold">+{coinReward}</span>
+            <span className="font-bebas text-lg text-gold leading-none">+{coinReward}</span>
           </div>
         </div>
       </div>
@@ -194,8 +198,16 @@ export default function QuizCard({
       </div>
 
       {/* Question */}
-      <div className="card mb-6">
-        <p className="font-syne text-lg font-semibold text-cream leading-relaxed text-center">
+      <div className="card mb-6 relative overflow-hidden">
+        <span
+          className="absolute inset-x-0 -top-px h-px"
+          style={{ background: "linear-gradient(90deg, transparent, rgba(255,215,0,0.35), transparent)" }}
+          aria-hidden="true"
+        />
+        <p className="font-mono text-[10px] uppercase tracking-[0.32em] text-gold/70 text-center mb-3">
+          {question.subject}
+        </p>
+        <p className="font-syne text-lg sm:text-xl font-semibold text-cream leading-snug text-center">
           {question.question}
         </p>
       </div>
@@ -208,11 +220,12 @@ export default function QuizCard({
 
           if (!revealed && !waiting) {
             optionClass +=
-              "border-electric/20 bg-navy-50 hover:border-electric/60 hover:bg-electric/10 hover:-translate-y-0.5 cursor-pointer";
+              "border-electric/20 bg-navy-50 hover:border-gold/60 hover:bg-gold/[0.06] hover:-translate-y-0.5 hover:shadow-[0_0_18px_rgba(255,215,0,0.18)] cursor-pointer";
           } else if (waiting && !revealed) {
-            // Waiting for server response
+            // Waiting for server response — selected pill takes the gold accent
+            // (consistency with the +N Fangs chip and the eventual reward).
             optionClass += index === selected
-              ? "border-electric/60 bg-electric/15 text-electric"
+              ? "border-gold/70 bg-gold/[0.10] text-gold shadow-[0_0_24px_rgba(255,215,0,0.22)]"
               : "border-electric/10 bg-navy-50/50 text-cream/40 cursor-not-allowed";
           } else if (revealed && result) {
             if (index === result.correctIndex) {
@@ -272,7 +285,7 @@ export default function QuizCard({
                   className={`w-8 h-8 rounded-lg flex items-center justify-center font-bebas text-lg flex-shrink-0
                     ${!revealed
                       ? index === selected && waiting
-                        ? "bg-electric/30 text-electric"
+                        ? "bg-gold/30 text-gold"
                         : "bg-electric/20 text-electric"
                       : index === result?.correctIndex
                       ? "bg-green-400/30 text-green-300"
@@ -321,9 +334,15 @@ export default function QuizCard({
       )}
 
       {revealed && (
-        <button onClick={handleSkip}
-          className="mt-4 w-full py-3 rounded-xl border border-electric/30 text-electric text-sm font-bold hover:bg-electric/10 transition-all">
-          Next →
+        <button
+          onClick={handleSkip}
+          className="quiz-next-pill mt-4 w-full py-3.5 rounded-full font-bebas tracking-[0.18em] text-base text-navy cursor-pointer"
+          style={{
+            background: "linear-gradient(135deg, #FFD700 0%, #EAB308 100%)",
+            boxShadow: "0 0 24px rgba(255,215,0,0.22), 0 4px 14px rgba(0,0,0,0.25)",
+          }}
+        >
+          NEXT QUESTION
         </button>
       )}
     </div>
