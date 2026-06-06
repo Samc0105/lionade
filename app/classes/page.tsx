@@ -68,14 +68,21 @@ export default function ClassesIndexPage() {
                 onClick={() => setShowCreate(true)}
                 className="inline-flex items-center gap-2 rounded-full bg-gold text-navy hover:bg-gold/90
                   font-mono text-[11px] uppercase tracking-[0.25em] px-4 py-2.5
-                  transition-transform duration-200 active:scale-[0.98]"
+                  transition-transform duration-200 will-change-transform active:scale-[0.98] hover:scale-[1.02]"
               >
                 <Plus size={12} weight="bold" /> New class
               </button>
             </div>
-            <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-cream/50 mt-3">
-              One notebook per class. Notes, mastery, daily plan — all in one place.
-            </p>
+            <div className="mt-3 flex items-center gap-4 flex-wrap">
+              <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-cream/50">
+                One notebook per class. Notes, mastery, daily plan, all in one place.
+              </p>
+              {classes.length > 0 && (
+                <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-cream/35 tabular-nums">
+                  · {classes.length} {classes.length === 1 ? "class" : "classes"}
+                </span>
+              )}
+            </div>
           </header>
 
           {isLoading && classes.length === 0 ? (
@@ -123,25 +130,27 @@ function ClassCard({ cls }: { cls: ClassSummary }) {
       href={`/classes/${cls.id}`}
       className="fluid-card-hover press-feedback group relative rounded-[14px] border bg-white/[0.03]
         hover:bg-white/[0.05]
-        p-5 flex flex-col gap-3 overflow-hidden"
+        p-5 flex flex-col gap-3 overflow-hidden min-h-[150px]"
       style={{
-        // Bucket A consistency: class color now washes the whole card body so
-        // each class reads at a glance, beyond just the 1px top stripe.
         background: `linear-gradient(135deg, ${cls.color}0F 0%, ${cls.color}05 100%), rgba(255,255,255,0.03)`,
         borderColor: `${cls.color}25`,
       }}
     >
-      {/* Color stripe */}
       <span
-        className="absolute top-0 left-0 right-0 h-1"
+        className="absolute top-0 left-0 right-0 h-1 transition-[height] duration-200 group-hover:h-1.5"
         style={{ background: `linear-gradient(90deg, ${cls.color}, ${cls.color}40)` }}
+        aria-hidden="true"
+      />
+      <span
+        className="pointer-events-none absolute -top-16 -right-16 w-40 h-40 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-3xl"
+        style={{ background: `${cls.color}22` }}
         aria-hidden="true"
       />
 
       <div className="flex items-start justify-between gap-3">
-        <div className="flex items-start gap-2 min-w-0 flex-1">
+        <div className="flex items-start gap-2.5 min-w-0 flex-1">
           {cls.emoji && (
-            <span className="text-[24px] leading-none mt-0.5 shrink-0" aria-hidden="true">
+            <span className="text-[26px] leading-none mt-0.5 shrink-0" aria-hidden="true">
               {cls.emoji}
             </span>
           )}
@@ -150,7 +159,7 @@ function ClassCard({ cls }: { cls: ClassSummary }) {
               {cls.name}
             </h3>
             {(cls.shortCode || cls.term) && (
-              <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-cream/40 truncate">
+              <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-cream/40 truncate mt-0.5">
                 {[cls.shortCode, cls.term].filter(Boolean).join(" · ")}
               </p>
             )}
@@ -172,17 +181,17 @@ function ClassCard({ cls }: { cls: ClassSummary }) {
         )}
       </div>
 
-      <div className="flex items-center gap-4 mt-auto font-mono text-[10px] uppercase tracking-[0.2em] text-cream/45">
-        <span className="flex items-center gap-1">
+      <div className="flex items-center gap-4 mt-auto font-mono text-[10px] uppercase tracking-[0.22em] text-cream/45">
+        <span className="flex items-center gap-1 tabular-nums">
           <Target size={11} weight="bold" /> {cls.examCount} {cls.examCount === 1 ? "exam" : "exams"}
         </span>
-        <span className="flex items-center gap-1">
+        <span className="flex items-center gap-1 tabular-nums">
           <Note size={11} weight="bold" /> {cls.noteCount} {cls.noteCount === 1 ? "note" : "notes"}
         </span>
         <ArrowRight
           size={12}
           weight="bold"
-          className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity"
+          className="ml-auto opacity-0 group-hover:opacity-100 transition-all duration-200 will-change-transform group-hover:translate-x-0.5 -translate-x-1"
           style={{ color: cls.color }}
         />
       </div>
@@ -195,21 +204,30 @@ function ClassCard({ cls }: { cls: ClassSummary }) {
 // ─────────────────────────────────────────────────────────────────────────────
 function EmptyState({ onCreate }: { onCreate: () => void }) {
   return (
-    <div className="rounded-[14px] border border-dashed border-white/[0.1] bg-white/[0.02] p-10 text-center">
-      <BookOpen size={28} className="text-cream/40 mx-auto mb-3" />
-      <h2 className="font-bebas text-[26px] tracking-wider text-cream/90 mb-1">
+    <div className="relative rounded-[16px] border border-dashed border-white/[0.1] bg-white/[0.02] p-10 sm:p-12 text-center overflow-hidden">
+      <span
+        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-gold/30 to-transparent"
+        aria-hidden="true"
+      />
+      <div className="inline-grid place-items-center w-12 h-12 rounded-2xl bg-gold/10 border border-gold/20 mx-auto mb-4">
+        <BookOpen size={22} className="text-gold" weight="bold" />
+      </div>
+      <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-gold/70 mb-2">
+        Step one
+      </p>
+      <h2 className="font-bebas text-[32px] sm:text-[36px] tracking-[0.05em] text-cream leading-none mb-2">
         No classes yet
       </h2>
       <p className="text-[13px] text-cream/55 max-w-md mx-auto mb-5 leading-relaxed">
-        Create a notebook for each class you're taking. Add the exam dates and
-        Lionade builds your study plan around them.
+        Create a notebook for each class you&apos;re taking. Drop your exam
+        dates and Lionade builds the study plan around them.
       </p>
       <button
         type="button"
         onClick={onCreate}
         className="inline-flex items-center gap-2 rounded-full bg-gold text-navy
           font-mono text-[11px] uppercase tracking-[0.25em] px-5 py-2.5
-          hover:bg-gold/90 transition-colors"
+          hover:bg-gold/90 transition-transform duration-200 will-change-transform hover:scale-[1.02] active:scale-[0.98]"
       >
         <Plus size={12} weight="bold" /> Create first class
       </button>
@@ -222,13 +240,15 @@ function CreateTile({ onClick }: { onClick: () => void }) {
     <button
       type="button"
       onClick={onClick}
-      className="rounded-[14px] border border-dashed border-white/[0.1] bg-white/[0.01]
-        hover:bg-white/[0.03] hover:border-white/[0.2] transition-colors
-        p-5 flex flex-col items-center justify-center gap-2 text-cream/50 hover:text-cream/80
-        min-h-[150px]"
+      className="group rounded-[14px] border border-dashed border-white/[0.1] bg-white/[0.01]
+        hover:bg-white/[0.03] hover:border-gold/30 transition-colors duration-200
+        p-5 flex flex-col items-center justify-center gap-2.5 text-cream/50 hover:text-cream/85
+        min-h-[150px] will-change-transform"
     >
-      <Plus size={20} weight="bold" />
-      <span className="font-mono text-[11px] uppercase tracking-[0.25em]">New class</span>
+      <span className="grid place-items-center w-9 h-9 rounded-full border border-white/[0.08] group-hover:border-gold/40 group-hover:bg-gold/10 transition-colors">
+        <Plus size={16} weight="bold" className="group-hover:text-gold transition-colors" />
+      </span>
+      <span className="font-mono text-[10px] uppercase tracking-[0.3em]">New class</span>
     </button>
   );
 }
@@ -410,8 +430,7 @@ function CreateClassModal({
           </button>
         </div>
 
-        {/* Helper note about exam dates */}
-        <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-cream/30 mt-4 flex items-center gap-1.5">
+        <p className="font-mono text-[9px] uppercase tracking-[0.22em] text-cream/30 mt-4 flex items-center gap-1.5">
           <Calendar size={10} weight="bold" />
           Add exam dates inside the class after creating it.
         </p>

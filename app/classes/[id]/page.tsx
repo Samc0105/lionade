@@ -139,9 +139,10 @@ export default function ClassNotebookPage() {
           <div className="flex items-center justify-between mb-5">
             <Link
               href="/classes"
-              className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.25em] text-cream/50 hover:text-cream transition-colors"
+              className="group inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.25em] text-cream/50 hover:text-cream transition-colors"
             >
-              <CaretLeft size={12} weight="bold" /> Classes
+              <CaretLeft size={12} weight="bold" className="transition-transform duration-200 group-hover:-translate-x-0.5" />
+              Classes
             </Link>
             <div className="relative">
               <button
@@ -174,21 +175,38 @@ export default function ClassNotebookPage() {
           </div>
 
           {/* Header — color stripe + name + per-class streak chip */}
-          <header className="relative mb-6 rounded-[16px] overflow-hidden border border-white/[0.08] bg-white/[0.02] p-5 sm:p-6">
+          <header
+            className="relative mb-6 rounded-[16px] overflow-hidden border bg-white/[0.02] p-5 sm:p-7"
+            style={{
+              borderColor: `${cls.color}28`,
+              background: `linear-gradient(180deg, ${cls.color}10 0%, ${cls.color}03 40%, rgba(255,255,255,0.02) 100%)`,
+            }}
+          >
             <span
               className="absolute top-0 left-0 right-0 h-1.5"
               style={{ background: `linear-gradient(90deg, ${cls.color}, ${cls.color}40)` }}
               aria-hidden="true"
             />
-            <div className="flex items-start gap-4">
+            <span
+              className="pointer-events-none absolute -top-24 -right-24 w-64 h-64 rounded-full blur-3xl opacity-60"
+              style={{ background: `${cls.color}22` }}
+              aria-hidden="true"
+            />
+            <p
+              className="relative font-mono text-[10px] uppercase tracking-[0.32em] mb-3"
+              style={{ color: cls.color }}
+            >
+              Class Notebook
+            </p>
+            <div className="relative flex items-start gap-4">
               {cls.emoji && (
-                <span className="text-[40px] leading-none mt-1 shrink-0" aria-hidden="true">
+                <span className="text-[44px] sm:text-[48px] leading-none mt-1 shrink-0" aria-hidden="true">
                   {cls.emoji}
                 </span>
               )}
               <div className="min-w-0 flex-1">
                 <div className="flex items-start justify-between gap-3 flex-wrap">
-                  <h1 className="font-bebas text-4xl sm:text-5xl tracking-[0.06em] text-cream leading-none mb-1">
+                  <h1 className="font-bebas text-4xl sm:text-[56px] tracking-[0.06em] text-cream leading-none mb-1.5">
                     {cls.name}
                   </h1>
                   <div className="shrink-0 mt-1">
@@ -196,7 +214,7 @@ export default function ClassNotebookPage() {
                   </div>
                 </div>
                 {(cls.shortCode || cls.term || cls.professor) && (
-                  <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-cream/45">
+                  <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-cream/55">
                     {[cls.shortCode, cls.term, cls.professor].filter(Boolean).join(" · ")}
                   </p>
                 )}
@@ -229,10 +247,13 @@ export default function ClassNotebookPage() {
           {/* Mastery targets */}
           <section className="mb-6">
             <div className="flex items-baseline justify-between mb-4">
-              <h2 className="font-bebas text-sm text-cream/85 tracking-[0.2em]">
-                <span className="inline-flex items-center gap-2">
-                  <Target size={13} weight="bold" /> EXAM TARGETS
-                </span>
+              <h2 className="font-bebas text-[15px] text-cream/90 tracking-[0.22em] inline-flex items-center gap-2.5">
+                <span
+                  className="inline-block w-1.5 h-1.5 rounded-full shrink-0"
+                  style={{ background: cls.color }}
+                  aria-hidden="true"
+                />
+                <Target size={13} weight="bold" /> EXAM TARGETS
               </h2>
               <Link
                 href={`/learn/mastery?classId=${cls.id}`}
@@ -243,15 +264,16 @@ export default function ClassNotebookPage() {
             </div>
 
             {exams.length === 0 ? (
-              <div className="rounded-[12px] border border-dashed border-white/[0.1] bg-white/[0.02] px-4 py-3 flex items-center justify-between gap-3">
-                <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-cream/50 inline-flex items-center gap-2">
+              <div className="group rounded-[12px] border border-dashed border-white/[0.1] hover:border-white/[0.2] bg-white/[0.02] px-4 py-3.5 flex items-center justify-between gap-3 transition-colors">
+                <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-cream/50 inline-flex items-center gap-2">
                   <Target size={14} className="text-cream/40" /> No exam targets yet
                 </p>
                 <Link
                   href={`/learn/mastery?classId=${cls.id}`}
                   className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.25em] text-cream/70 hover:text-cream whitespace-nowrap"
                 >
-                  Set first target <ArrowRight size={11} weight="bold" />
+                  Set first target
+                  <ArrowRight size={11} weight="bold" className="transition-transform duration-200 group-hover:translate-x-0.5" />
                 </Link>
               </div>
             ) : (
@@ -341,10 +363,12 @@ function NotesSection({
   return (
     <section>
       <div className="flex items-baseline justify-between mb-4">
-        <h2 className="font-bebas text-sm text-cream/85 tracking-[0.2em]">
-          <span className="inline-flex items-center gap-2">
-            <Note size={13} weight="bold" /> NOTES
-          </span>
+        <h2 className="font-bebas text-[15px] text-cream/90 tracking-[0.22em] inline-flex items-center gap-2.5">
+          <span
+            className="inline-block w-1.5 h-1.5 rounded-full shrink-0 bg-gold"
+            aria-hidden="true"
+          />
+          <Note size={13} weight="bold" /> NOTES
         </h2>
         {!drafting && (
           <button
@@ -390,12 +414,14 @@ function NotesSection({
       )}
 
       {notes.length === 0 && !drafting ? (
-        <div className="rounded-[12px] border border-dashed border-white/[0.08] bg-white/[0.015] p-6 text-center">
-          <Note size={18} className="text-cream/30 mx-auto mb-2" />
-          <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-cream/40 mb-1">
+        <div className="rounded-[12px] border border-dashed border-white/[0.08] bg-white/[0.015] p-7 text-center">
+          <div className="inline-grid place-items-center w-9 h-9 rounded-full bg-gold/10 border border-gold/20 mx-auto mb-3">
+            <Note size={15} className="text-gold" weight="bold" />
+          </div>
+          <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-cream/55 mb-1.5">
             No notes yet
           </p>
-          <p className="text-[12px] text-cream/40 mb-3">
+          <p className="text-[12px] text-cream/45 mb-4 leading-relaxed">
             Use ⌘K from anywhere to capture a thought. Lionade files it here.
           </p>
           <button
@@ -450,11 +476,19 @@ function NoteCard({
 
   return (
     <div
-      className={`relative rounded-[10px] border px-4 py-3 transition-colors
+      className={`group relative rounded-[10px] border px-4 py-3 transition-colors
         ${note.pinned
-          ? "border-gold/30 bg-gold/[0.04]"
-          : "border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.04]"}`}
+          ? "border-gold/30 bg-gold/[0.05]"
+          : "border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.04] hover:border-white/[0.1]"}`}
     >
+      {note.pinned && (
+        <span
+          className="absolute -top-1.5 left-3 font-mono text-[8.5px] uppercase tracking-[0.3em] text-gold bg-navy px-1.5 inline-flex items-center gap-1"
+          aria-hidden="true"
+        >
+          <PushPin size={8} weight="fill" /> Pinned
+        </span>
+      )}
       <div className="flex items-start justify-between gap-3 mb-1.5">
         <div className="min-w-0 flex-1">
           {note.title && (
@@ -468,7 +502,7 @@ function NoteCard({
             </p>
           )}
         </div>
-        <div className="flex items-center gap-1 shrink-0">
+        <div className="flex items-center gap-1 shrink-0 opacity-60 group-hover:opacity-100 transition-opacity">
           <button
             type="button"
             onClick={togglePin}
@@ -495,18 +529,18 @@ function NoteCard({
         {teaser}
       </p>
       {note.aiTopics && note.aiTopics.length > 0 && (
-        <div className="mt-2 flex flex-wrap gap-1">
+        <div className="mt-2.5 flex flex-wrap gap-1">
           {note.aiTopics.map(t => (
             <span
               key={t}
-              className="font-mono text-[9px] uppercase tracking-[0.2em] text-cream/45 border border-white/[0.06] rounded-full px-2 py-0.5"
+              className="font-mono text-[9px] uppercase tracking-[0.22em] text-cream/50 border border-white/[0.08] rounded-full px-2 py-0.5"
             >
               {t}
             </span>
           ))}
         </div>
       )}
-      <div className="mt-2 flex items-center gap-3 font-mono text-[9px] uppercase tracking-[0.2em] text-cream/30">
+      <div className="mt-2.5 flex items-center gap-3 font-mono text-[9px] uppercase tracking-[0.22em] text-cream/30 tabular-nums">
         <span>{new Date(note.updatedAt).toLocaleDateString()}</span>
         {note.source !== "manual" && <span>· via {note.source}</span>}
       </div>
@@ -542,23 +576,28 @@ function ExamRow({
     <Link
       href={`/learn/mastery/${exam.id}`}
       className="group rounded-[12px] border border-white/[0.06] hover:border-white/[0.15]
-        bg-white/[0.02] hover:bg-white/[0.04] transition-all duration-200 p-4 block"
+        bg-white/[0.02] hover:bg-white/[0.04] transition-all duration-200 p-4 block relative overflow-hidden"
     >
+      <span
+        className="pointer-events-none absolute inset-y-0 left-0 w-px opacity-0 group-hover:opacity-100 transition-opacity"
+        style={{ background: `linear-gradient(180deg, transparent, ${color}, transparent)` }}
+        aria-hidden="true"
+      />
       <div className="flex items-start justify-between gap-3 mb-3">
         <div className="min-w-0 flex-1">
-          <h3 className="font-bebas text-[20px] tracking-wider text-cream leading-tight truncate">
+          <h3 className="font-bebas text-[22px] tracking-wider text-cream leading-tight truncate">
             {exam.title}
           </h3>
-          <div className="flex items-center gap-3 font-mono text-[10px] uppercase tracking-[0.2em] text-cream/45 mt-1">
+          <div className="flex items-center gap-3 font-mono text-[10px] uppercase tracking-[0.22em] text-cream/50 mt-1.5">
             {days !== null && days >= 0 && (
-              <span className="flex items-center gap-1">
+              <span className="flex items-center gap-1 tabular-nums">
                 <Calendar size={10} weight="bold" /> {days === 0 ? "today" : `${days}d`}
               </span>
             )}
-            <span className="flex items-center gap-1">
+            <span className="flex items-center gap-1 tabular-nums">
               <Clock size={10} weight="bold" /> {timeLabel}
             </span>
-            <span>{exam.subtopicCount} subtopics</span>
+            <span className="tabular-nums">{exam.subtopicCount} subtopics</span>
             {mastered && (
               <span className="text-gold flex items-center gap-1">
                 <CheckCircle size={10} weight="fill" /> mastered
@@ -569,7 +608,7 @@ function ExamRow({
         <ArrowRight
           size={14}
           weight="bold"
-          className="opacity-30 group-hover:opacity-100 transition-opacity shrink-0 mt-1"
+          className="opacity-30 group-hover:opacity-100 transition-all duration-200 will-change-transform shrink-0 mt-1 -translate-x-1 group-hover:translate-x-0"
           style={{ color }}
         />
       </div>
@@ -640,10 +679,13 @@ function DailyPlanCard({ classId, color }: { classId: string; color: string }) {
   return (
     <section className="mb-8">
       <div className="flex items-baseline justify-between mb-4">
-        <h2 className="font-bebas text-sm text-cream/85 tracking-[0.2em]">
-          <span className="inline-flex items-center gap-2">
-            <Brain size={13} weight="bold" /> TODAY&apos;S PLAN
-          </span>
+        <h2 className="font-bebas text-[15px] text-cream/90 tracking-[0.22em] inline-flex items-center gap-2.5">
+          <span
+            className="inline-block w-1.5 h-1.5 rounded-full shrink-0"
+            style={{ background: color }}
+            aria-hidden="true"
+          />
+          <Brain size={13} weight="bold" /> TODAY&apos;S PLAN
         </h2>
         <button
           type="button"
