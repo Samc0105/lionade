@@ -130,6 +130,35 @@ function getArcadeStreak(): number {
 
 const DAILY_LIMITS: Record<string, number> = { roardle: 3, flashcards: 999, timeline: 3, party: 999, pardy: 999 };
 
+// ── Roardle lifetime stats (localStorage-only) ──────────────────────────────
+// played + won + totalTries lets us derive win rate and average tries to
+// solve. Persisted under a single key so a future "stats wipe" is one line.
+interface RoardleStats { played: number; won: number; totalTries: number }
+const ROARDLE_STATS_KEY = "lionade_roardle_stats";
+function getRoardleStats(): RoardleStats {
+  if (typeof window === "undefined") return { played: 0, won: 0, totalTries: 0 };
+  try {
+    const raw = localStorage.getItem(ROARDLE_STATS_KEY);
+    if (!raw) return { played: 0, won: 0, totalTries: 0 };
+    const parsed = JSON.parse(raw);
+    return {
+      played: Math.max(0, parseInt(String(parsed.played)) || 0),
+      won: Math.max(0, parseInt(String(parsed.won)) || 0),
+      totalTries: Math.max(0, parseInt(String(parsed.totalTries)) || 0),
+    };
+  } catch { return { played: 0, won: 0, totalTries: 0 }; }
+}
+function recordRoardleResult(won: boolean, tries: number) {
+  if (typeof window === "undefined") return;
+  const cur = getRoardleStats();
+  const next: RoardleStats = {
+    played: cur.played + 1,
+    won: cur.won + (won ? 1 : 0),
+    totalTries: cur.totalTries + (won ? tries : 0),
+  };
+  try { localStorage.setItem(ROARDLE_STATS_KEY, JSON.stringify(next)); } catch { /* quota */ }
+}
+
 // ── Component ────────────────────────────────────────────────
 
 export default function GamesPage() {
@@ -421,8 +450,10 @@ export default function GamesPage() {
       const baseFangs = wordLength === 4 ? 10 : wordLength === 5 ? 15 : 20;
       const bonus = Math.max(0, (6 - newGuesses.length) * 3);
       awardFangs(baseFangs + bonus, "roardle");
+      recordRoardleResult(true, newGuesses.length);
     } else if (newGuesses.length >= 6) {
       setRoardleOver(true);
+      recordRoardleResult(false, 6);
     }
   }, [roardleInput, wordLength, roardleOver, roardleGuesses, roardleWord, awardFangs, tab, pdfContent]);
 
@@ -630,6 +661,25 @@ export default function GamesPage() {
                 </p>
               );
             })()}
+            {/* Library-mode badge — small gold chip above the grid when the
+                target word came from a user-uploaded PDF, so the player
+                always knows "this round is from my notes." Truncated long
+                file names so the chip stays one line. */}
+            {tab === "library" && pdfContent && pdfName && (
+              <div className="flex justify-center mb-3">
+                <span
+                  className="inline-flex items-center gap-1.5 font-mono text-[9.5px] uppercase tracking-[0.22em] px-2.5 py-1 rounded-full max-w-[88%]"
+                  style={{
+                    background: "linear-gradient(135deg, rgba(255,215,0,0.14) 0%, rgba(184,150,12,0.06) 100%)",
+                    border: "1px solid rgba(255,215,0,0.35)",
+                    color: "#FDE68A",
+                  }}
+                >
+                  <span aria-hidden="true">📚</span>
+                  <span className="truncate">from {pdfName}</span>
+                </span>
+              </div>
+            )}
             {roardleError && (
               <p className="text-red-400 text-xs text-center mb-2 animate-slide-up font-syne font-semibold">
                 {roardleError}
@@ -715,6 +765,23 @@ export default function GamesPage() {
                     <span className="font-bebas text-xl text-gold">+{fangsEarned}</span>
                   </div>
                 )}
+                {/* Lifetime stats — pulled from localStorage. Hidden on the
+                    very first played round (no meaningful denominator) so a
+                    first-timer doesn't read "1/1 played · 100% won" as
+                    self-congratulatory boilerplate. */}
+                {(() => {
+                  const stats = getRoardleStats();
+                  if (stats.played < 2) return null;
+                  const winPct = Math.round((stats.won / stats.played) * 100);
+                  const avgTries = stats.won > 0 ? (stats.totalTries / stats.won).toFixed(1) : "—";
+                  return (
+                    <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-cream/45 mt-3">
+                      <span className="text-cream/70 tabular-nums">{stats.played}</span> played ·
+                      {" "}<span className="text-cream/70 tabular-nums">{winPct}%</span> won ·
+                      {" "}avg <span className="text-cream/70 tabular-nums">{avgTries}</span> tries
+                    </p>
+                  );
+                })()}
                 <button onClick={backToMenu} className="mt-4 btn-gold px-6 py-2 rounded-lg text-sm">Play Again</button>
               </div>
             )}
@@ -846,7 +913,9 @@ export default function GamesPage() {
         <div className="min-h-screen pt-16 pb-8">
           <div className="max-w-lg mx-auto px-4 py-6">
             <button onClick={backToMenu} className="text-cream/40 text-sm mb-4 hover:text-cream/60 transition">← Back</button>
-            <h2 className="font-bebas text-3xl text-cream tracking-wider text-center mb-1">TIMELINE DROP</h2>
+            <h2 className="font-bebas text-3xl text-cream tracking-wider text-center mb-1">
+              <RevealText text="TIMELINE DROP" color="#EEF4FF" charDelay={0.045} />
+            </h2>
             <p className="text-cream/30 text-xs text-center mb-6">Drag events into chronological order (earliest first)</p>
 
             <div className="space-y-2 mb-6" data-timeline-list>
@@ -908,9 +977,40 @@ export default function GamesPage() {
 
             {!tlSubmitted ? (
               <button onClick={submitTimeline} className="btn-gold w-full py-3 rounded-xl text-sm">Submit Order</button>
-            ) : (
-              <div className="text-center animate-slide-up">
-                <p className="font-bebas text-2xl text-cream mb-1">{tlScore} / {tlEvents.length} correct</p>
+            ) : (() => {
+              // Tier-themed treatment matches Pardy Final Tally: gold confetti
+              // on perfect (all correct), no celebration on a sub-50% miss.
+              const total = tlEvents.length;
+              const isPerfect = total > 0 && tlScore === total;
+              const isStrong = total > 0 && tlScore / total >= 0.75 && !isPerfect;
+              const shouldConfetti = !reduced && (isPerfect || isStrong);
+              const palette = isPerfect
+                ? ["#FFD700", "#FDE68A", "#FFFFFF", "#00C851"]  // pure-gold + green for perfect
+                : ["#FFD700", "#FDE68A", "#A855F7"];            // gold + purple for strong
+              const headline = isPerfect ? "PERFECT ORDER" : tlScore > 0 ? "TIMELINE LOCKED IN" : "TOUGH ROUND";
+              const headlineColor = isPerfect ? "#FFD700" : tlScore > 0 ? "#86EFAC" : "#FCA5A5";
+              return (
+                <div className="text-center animate-slide-up">
+                  {shouldConfetti && (
+                    <Confetti
+                      trigger={true}
+                      count={isPerfect ? 100 : 70}
+                      origin="top"
+                      duration={isPerfect ? 2600 : 2100}
+                      palette={palette}
+                    />
+                  )}
+                  <p className="font-bebas text-base tracking-[0.2em] mb-1">
+                    <RevealText
+                      text={headline}
+                      color={headlineColor}
+                      glow={isPerfect ? "0 0 8px rgba(255,215,0,0.55)" : tlScore > 0 ? "0 0 6px rgba(34,197,94,0.4)" : "0 0 6px rgba(239,68,68,0.4)"}
+                      charDelay={0.045}
+                    />
+                  </p>
+                  <p className="font-bebas text-2xl text-cream mb-1 tabular-nums">
+                    {tlScore} / {tlEvents.length} correct
+                  </p>
                 {fangsEarned !== null && (
                   <div className="flex items-center justify-center gap-1.5 mb-4">
                     <img src={cdnUrl("/F.png")} alt="Fangs" className="w-5 h-5 object-contain" />
@@ -918,8 +1018,9 @@ export default function GamesPage() {
                   </div>
                 )}
                 <button onClick={backToMenu} className="btn-gold px-6 py-2 rounded-lg text-sm">Back to Games</button>
-              </div>
-            )}
+                </div>
+              );
+            })()}
           </div>
         </div>
       </ProtectedRoute>
