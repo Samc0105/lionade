@@ -121,6 +121,20 @@ export default function CompetitiveArenaPage() {
 
           {/* Header — launcher framing */}
           <div className="text-center mb-8">
+            <div className="inline-flex items-center gap-2 mb-4 px-3.5 py-1.5 rounded-full"
+              style={{
+                background: "linear-gradient(135deg, rgba(74,144,217,0.10) 0%, rgba(74,144,217,0.03) 100%)",
+                border: "1px solid rgba(74,144,217,0.25)",
+                boxShadow: "0 0 18px rgba(74,144,217,0.06)",
+              }}>
+              <span className="relative inline-flex w-2 h-2">
+                <span className="absolute inset-0 rounded-full bg-electric/40 motion-safe:animate-ping" />
+                <span className="relative inline-block w-2 h-2 rounded-full bg-electric" />
+              </span>
+              <span className="font-bebas text-[11px] tracking-[0.28em] text-electric leading-none">
+                LIVE ARENA
+              </span>
+            </div>
             <h1 className="font-bebas text-6xl sm:text-8xl chrome-text tracking-wider leading-none">
               COMPETITIVE ARENA
             </h1>

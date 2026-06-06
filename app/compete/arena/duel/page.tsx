@@ -1270,7 +1270,7 @@ export default function ArenaPage() {
               </h1>
               <p className="text-cream/50 text-base">
                 {isDraw
-                  ? "An even match — each player keeps their Fangs"
+                  ? "An even match. Each player keeps their Fangs."
                   : iWon
                   ? `You dominated ${opponent?.username ?? "your opponent"}!`
                   : `${opponent?.username ?? "Your opponent"} got you this time.`}
@@ -1299,7 +1299,7 @@ export default function ArenaPage() {
                   <p className="text-cream/30 text-xs mt-1">{myCorrectCount}/10 correct</p>
                 </div>
 
-                <div className="font-bebas text-4xl text-cream/20">—</div>
+                <div className="font-bebas text-4xl text-cream/20 tracking-wider">VS</div>
 
                 <div className="text-center">
                   <div className="w-16 h-16 rounded-full overflow-hidden mx-auto mb-2"

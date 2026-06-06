@@ -106,7 +106,7 @@ export default function CompetePage() {
                   WEEKLY COMPETITIVE
                 </p>
                 <p className="text-cream/55 text-xs sm:text-[13px] font-syne mt-1 leading-snug">
-                  Climb the Elo ladder. Fang multipliers per tier — gold pays out the most. Live now.
+                  Climb the Elo ladder. Fang multipliers per tier. Gold pays out the most. Live now.
                 </p>
               </div>
               <Link
@@ -202,6 +202,20 @@ export default function CompetePage() {
 
           {/* ═══ 3. ARENA HEADLINE ═══ */}
           <div className="text-center mb-10 animate-slide-up" style={{ animationDelay: "0.1s" }}>
+            <div className="inline-flex items-center gap-2 mb-4 px-3.5 py-1.5 rounded-full"
+              style={{
+                background: "linear-gradient(135deg, rgba(74,144,217,0.10) 0%, rgba(74,144,217,0.03) 100%)",
+                border: "1px solid rgba(74,144,217,0.25)",
+                boxShadow: "0 0 18px rgba(74,144,217,0.06)",
+              }}>
+              <span className="relative inline-flex w-2 h-2">
+                <span className="absolute inset-0 rounded-full bg-electric/40 motion-safe:animate-ping" />
+                <span className="relative inline-block w-2 h-2 rounded-full bg-electric" />
+              </span>
+              <span className="font-bebas text-[11px] tracking-[0.28em] text-electric leading-none">
+                LIVE ARENA
+              </span>
+            </div>
             <h1 className="font-bebas text-6xl sm:text-8xl chrome-text tracking-wider leading-none">
               <Sword size={52} weight="regular" aria-hidden="true" className="inline mr-1.5 -mt-0.5" /> COMPETE
             </h1>
@@ -376,7 +390,7 @@ export default function CompetePage() {
                     </p>
                     <div className="space-y-2 mb-4">
                       {(topPlayers.length > 0 ? topPlayers : [
-                        { rank: 1, username: "—", arena_elo: 0 },
+                        { rank: 1, username: "...", arena_elo: 0 },
                       ]).map((player) => {
                         const renderMedal = () => {
                           if (player.rank === 1) {
@@ -516,7 +530,7 @@ export default function CompetePage() {
               ))}
             </div>
             <p className="text-cream/25 text-xs text-center mt-5">
-              Cash rewards go live with V2 — December 2026.
+              Cash rewards go live with V2 in December 2026.
             </p>
           </div>
 
