@@ -118,8 +118,9 @@ export default function SyllabusUpload({ classId }: Props) {
     setProgressPct(0);
 
     if (!res.ok) {
-      setError(res.error ?? "Couldn't parse syllabus.");
-      toastError(res.error ?? "Couldn't parse syllabus.");
+      console.error("[syllabus:upload] failed", res.error);
+      setError("Couldn't parse syllabus. Try again.");
+      toastError("Couldn't parse syllabus. Try again.");
       void mutate(); // pick up the failed row so we can show its state
       return;
     }

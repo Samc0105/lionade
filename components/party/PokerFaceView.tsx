@@ -41,6 +41,7 @@ interface Props {
   players: PartyPlayer[];
   isHost: boolean;
   meUserId: string;
+  activeRound?: { id: string; phase: string; started_at: string | null } | null;
   onReturnToLobby: () => void;
 }
 
@@ -86,6 +87,7 @@ export default function PokerFaceView({
   players,
   isHost,
   meUserId,
+  activeRound,
   onReturnToLobby,
 }: Props) {
   const reduced = useReducedMotion();
@@ -212,13 +214,52 @@ export default function PokerFaceView({
     });
   }, [room.code]);
 
-  // Host auto-deals the first round.
+  // ── Effective-host derivation (deadlock fallback) ──
+  // If the real host disconnects mid-round, host_user_id can keep pointing at
+  // a player who is no longer in the active set, which would freeze auto-
+  // advance for everyone. We promote the longest-connected active player as
+  // the effective host for control-flow purposes. Every client derives this
+  // from the same sorted players list (joined_at ASC, user_id tiebreak) so
+  // they all agree without an extra round-trip.
+  const effectiveHostUserId = useMemo(() => {
+    const realHostActive = players.some((p) => p.user_id === room.host_user_id);
+    if (realHostActive) return room.host_user_id;
+    const sorted = [...players].sort((a, b) => {
+      const ja = a.joined_at ?? "";
+      const jb = b.joined_at ?? "";
+      if (ja !== jb) return ja < jb ? -1 : 1;
+      return a.user_id.localeCompare(b.user_id);
+    });
+    return sorted[0]?.user_id ?? room.host_user_id;
+  }, [players, room.host_user_id]);
+  const isEffectiveHost = effectiveHostUserId === meUserId;
+
+  // Reconnect bootstrap: hydrate the round id from the page snapshot so a
+  // rejoiner's first poll lands on the in-flight round instead of waiting
+  // for the next realtime broadcast.
+  const bootstrappedActiveRef = useRef(false);
   useEffect(() => {
-    if (isHost && !roundId && phase === "loading") {
+    if (bootstrappedActiveRef.current) return;
+    if (roundId) return;
+    if (!activeRound?.id) return;
+    bootstrappedActiveRef.current = true;
+    setRoundId(activeRound.id);
+  }, [activeRound, roundId]);
+
+  // Host auto-deals the first round — only when there's no in-flight round
+  // we should bootstrap into (the rejoin path takes that role above).
+  useEffect(() => {
+    if (isEffectiveHost && !roundId && phase === "loading" && !activeRound?.id) {
       void startRound();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isHost]);
+  }, [isEffectiveHost]);
+
+  // Phase transition: clear stale error from the previous phase so e.g. a
+  // present-phase submit failure doesn't bleed into vote.
+  useEffect(() => {
+    setError(null);
+  }, [phase]);
 
   // ── Listen for round + phase broadcasts ──
   useEffect(() => {
@@ -322,7 +363,7 @@ export default function PokerFaceView({
     function tick() {
       const remain = Math.max(0, Math.ceil((targetMs - Date.now()) / 1000));
       setTimeLeft(remain);
-      if (remain === 0 && isHost && !advanceLock.current) {
+      if (remain === 0 && isEffectiveHost && !advanceLock.current) {
         advanceLock.current = true;
         void apiPost(`/api/party/pokerface/rounds/${rid}/complete`, {}).then(() => {
           advanceLock.current = false;
@@ -338,7 +379,7 @@ export default function PokerFaceView({
     tick();
     const iv = setInterval(tick, 500);
     return () => clearInterval(iv);
-  }, [detail, isHost, room.code, room.settings?.pf_vote_seconds, refreshDetail]);
+  }, [detail, isEffectiveHost, room.code, room.settings?.pf_vote_seconds, refreshDetail]);
 
   // ── Interrogation timer + auto-open-vote (host backstop) ──
   // The grill is spoken; this just bounds the beat so it can't stall. The host
@@ -350,9 +391,10 @@ export default function PokerFaceView({
     }
     const targetMs = new Date(detail.presented_at).getTime() + INTERROGATE_SECONDS * 1000;
     const rid = detail.id;
-    // Either the host OR the interrogator's client may fire the backstop (the
-    // server authorizes both), so a host-drop mid-grill can't stall the round.
-    const canAdvance = isHost || detail.interrogator_user_id === meUserId;
+    // Either the effective host OR the interrogator's client may fire the
+    // backstop (the server authorizes both), so a host-drop mid-grill can't
+    // stall the round.
+    const canAdvance = isEffectiveHost || detail.interrogator_user_id === meUserId;
     function tick() {
       const remain = Math.max(0, Math.ceil((targetMs - Date.now()) / 1000));
       setTimeLeft(remain);
@@ -372,14 +414,15 @@ export default function PokerFaceView({
     tick();
     const iv = setInterval(tick, 500);
     return () => clearInterval(iv);
-  }, [detail, isHost, meUserId, room.code, refreshDetail]);
+  }, [detail, isEffectiveHost, meUserId, room.code, refreshDetail]);
 
   // ── Open the vote (end the Interrogation) — host or interrogator ──
   async function openVote() {
     if (!roundId) return;
     const res = await apiPost(`/api/party/pokerface/rounds/${roundId}/open-vote`, {});
     if (!res.ok) {
-      setError(res.error ?? "Couldn't open the vote.");
+      console.error("[party:pokerface-open-vote] failed", res.error);
+      setError("Couldn't open the vote. Try again.");
       return;
     }
     void refreshDetail();
@@ -406,7 +449,8 @@ export default function PokerFaceView({
     });
     setSubmitting(false);
     if (!res.ok) {
-      setError(res.error ?? "Couldn't present the hand.");
+      console.error("[party:pokerface-present] failed", res.error);
+      setError("Couldn't present the hand. Try again.");
       return;
     }
     void refreshDetail();
@@ -422,7 +466,8 @@ export default function PokerFaceView({
     if (!roundId) return;
     const res = await apiPost(`/api/party/pokerface/rounds/${roundId}/call`, { call: c });
     if (!res.ok) {
-      setError(res.error ?? "Couldn't submit your call.");
+      console.error("[party:pokerface-call] failed", res.error);
+      setError("Couldn't submit your call. Try again.");
       return;
     }
     void refreshDetail();
@@ -435,10 +480,11 @@ export default function PokerFaceView({
 
   // ── Host can force the reveal once everyone has called ──
   async function revealNow() {
-    if (!roundId || !isHost) return;
+    if (!roundId || !isEffectiveHost) return;
     const res = await apiPost(`/api/party/pokerface/rounds/${roundId}/complete`, {});
     if (!res.ok) {
-      setError(res.error ?? "Couldn't reveal the round.");
+      console.error("[party:pokerface-reveal] failed", res.error);
+      setError("Couldn't reveal the round. Try again.");
       return;
     }
     void refreshDetail();
@@ -455,13 +501,14 @@ export default function PokerFaceView({
   );
 
   // Phase 2 vote auto-decide callbacks (75% threshold). Only fire on the
-  // post-round reveal screen when the game isn't already game-over.
+  // post-round reveal screen when the game isn't already game-over. Effective
+  // host so a host-disconnect can't stall the post-round transition.
   const handleAutoPlayAgain = useCallback(() => {
-    if (isHost) void startRound();
-  }, [isHost, startRound]);
+    if (isEffectiveHost) void startRound();
+  }, [isEffectiveHost, startRound]);
   const handleAutoBackToLobby = useCallback(() => {
-    if (isHost) onReturnToLobby();
-  }, [isHost, onReturnToLobby]);
+    if (isEffectiveHost) onReturnToLobby();
+  }, [isEffectiveHost, onReturnToLobby]);
 
   if (phase === "loading" || !detail) {
     // Intermission flavor when any player has scored — running scoreboard +
@@ -869,7 +916,7 @@ export default function PokerFaceView({
               )}
             </div>
 
-            {(round.interrogator_user_id === meUserId || isHost) && (
+            {(round.interrogator_user_id === meUserId || isEffectiveHost) && (
               <button
                 onClick={openVote}
                 className="w-full py-3.5 rounded-xl font-bebas text-base tracking-wider transition-all active:scale-95"
@@ -882,7 +929,7 @@ export default function PokerFaceView({
                 OPEN THE VOTE
               </button>
             )}
-            {round.interrogator_user_id !== meUserId && !isHost && (
+            {round.interrogator_user_id !== meUserId && !isEffectiveHost && (
               <p className="text-cream/40 text-xs font-syne text-center">
                 Voting opens when {round.interrogator_username ?? "the interrogator"} is done, or in {timeLeft}s.
               </p>

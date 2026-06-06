@@ -34,6 +34,7 @@ interface Props {
   players: PartyPlayer[];
   isHost: boolean;
   meUserId: string;
+  activeRound?: { id: string; phase: string; started_at: string | null } | null;
   onReturnToLobby: () => void;
 }
 
@@ -75,6 +76,7 @@ export default function BluffView({
   players,
   isHost,
   meUserId,
+  activeRound,
   onReturnToLobby,
 }: Props) {
   const reduced = useReducedMotion();
@@ -142,13 +144,46 @@ export default function BluffView({
     });
   }, [room.code]);
 
-  // Host auto-starts the first round.
+  // ── Effective-host derivation (deadlock fallback) ──
+  // If the real host disconnects mid-round, host_user_id can keep pointing at
+  // a player who is no longer in the active set, which would freeze auto-
+  // advance for everyone. We promote the longest-connected active player as
+  // the effective host for control-flow purposes. Every client derives this
+  // from the same sorted players list (joined_at ASC, user_id tiebreak) so
+  // they all agree without an extra round-trip.
+  const effectiveHostUserId = useMemo(() => {
+    const realHostActive = players.some((p) => p.user_id === room.host_user_id);
+    if (realHostActive) return room.host_user_id;
+    const sorted = [...players].sort((a, b) => {
+      const ja = a.joined_at ?? "";
+      const jb = b.joined_at ?? "";
+      if (ja !== jb) return ja < jb ? -1 : 1;
+      return a.user_id.localeCompare(b.user_id);
+    });
+    return sorted[0]?.user_id ?? room.host_user_id;
+  }, [players, room.host_user_id]);
+  const isEffectiveHost = effectiveHostUserId === meUserId;
+
+  // Reconnect bootstrap: if the page snapshot includes an in-flight round,
+  // hydrate the roundId immediately so the rejoiner's first poll lands on the
+  // live round instead of sitting on "loading" until a broadcast arrives.
+  const bootstrappedActiveRef = useRef(false);
   useEffect(() => {
-    if (isHost && !roundId && phase === "loading") {
+    if (bootstrappedActiveRef.current) return;
+    if (roundId) return;
+    if (!activeRound?.id) return;
+    bootstrappedActiveRef.current = true;
+    setRoundId(activeRound.id);
+  }, [activeRound, roundId]);
+
+  // Host auto-starts the first round — only when there's no in-flight round
+  // we should bootstrap into (the rejoin path takes that role above).
+  useEffect(() => {
+    if (isEffectiveHost && !roundId && phase === "loading" && !activeRound?.id) {
       void startRound();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isHost]);
+  }, [isEffectiveHost]);
 
   // ── Listen for round_started ──
   useEffect(() => {
@@ -217,7 +252,7 @@ export default function BluffView({
     function tick() {
       const remain = Math.max(0, Math.ceil((targetMs - Date.now()) / 1000));
       setTimeLeft(remain);
-      if (remain === 0 && isHost && !advanceLock.current && (round.phase === "write" || round.phase === "vote")) {
+      if (remain === 0 && isEffectiveHost && !advanceLock.current && (round.phase === "write" || round.phase === "vote")) {
         advanceLock.current = true;
         void apiPost(`/api/party/bluff/rounds/${round.id}/complete`, { action: "advance" }).then(() => {
           advanceLock.current = false;
@@ -233,7 +268,7 @@ export default function BluffView({
     tick();
     const iv = setInterval(tick, 500);
     return () => clearInterval(iv);
-  }, [detail, isHost, room.code, refreshDetail]);
+  }, [detail, isEffectiveHost, room.code, refreshDetail]);
 
   // ── Submit fake ──
   async function submitFake(e: React.FormEvent) {
@@ -246,7 +281,8 @@ export default function BluffView({
     });
     setSubmitting(false);
     if (!res.ok) {
-      setError(res.error ?? "Couldn't save your fake.");
+      console.error("[party:bluff-submit] failed", res.error);
+      setError("Couldn't save your fake. Try again.");
       return;
     }
     setConfirmKey((k) => k + 1); // juice-only: submit confirmation pop
@@ -270,19 +306,21 @@ export default function BluffView({
     setSubmitting(false);
     if (!res.ok) {
       setForfeited(false);
-      setError(res.error ?? "Couldn't forfeit. Try again.");
+      console.error("[party:bluff-forfeit] failed", res.error);
+      setError("Couldn't forfeit. Try again.");
       return;
     }
     void refreshDetail();
   }
 
-  // Phase 2 vote auto-decide callbacks (75% threshold).
+  // Phase 2 vote auto-decide callbacks (75% threshold). Use effective host
+  // so a host-disconnect can't stall the post-round transition.
   const handleAutoPlayAgain = useCallback(() => {
-    if (isHost) void startRound();
-  }, [isHost, startRound]);
+    if (isEffectiveHost) void startRound();
+  }, [isEffectiveHost, startRound]);
   const handleAutoBackToLobby = useCallback(() => {
-    if (isHost) onReturnToLobby();
-  }, [isHost, onReturnToLobby]);
+    if (isEffectiveHost) onReturnToLobby();
+  }, [isEffectiveHost, onReturnToLobby]);
 
   // ── Rematch CTA (Bucket C 2026-06-05) ──
   // Host-only fresh-start: scores cleared, ready flags cleared, room → lobby.
@@ -290,7 +328,7 @@ export default function BluffView({
   // feels abandoned post-reveal.
   const [rematchPending, setRematchPending] = useState(false);
   const handleRematch = useCallback(async () => {
-    if (!isHost || rematchPending) return;
+    if (!isEffectiveHost || rematchPending) return;
     setRematchPending(true);
     const res = await apiPost(`/api/party/rooms/${room.code}/rematch`, {});
     if (!res.ok) {
@@ -300,7 +338,7 @@ export default function BluffView({
     const ch = supabase.channel(roomChannel(room.code));
     await ch.send({ type: "broadcast", event: PARTY_EVENTS.GAME_ENDED, payload: {} });
     setRematchPending(false);
-  }, [isHost, rematchPending, room.code]);
+  }, [isEffectiveHost, rematchPending, room.code]);
 
   // ── Vote ──
   const [voting, setVoting] = useState(false);
@@ -311,7 +349,8 @@ export default function BluffView({
     const res = await apiPost(`/api/party/bluff/rounds/${roundId}/vote`, { answer_id: answerId });
     setVoting(false);
     if (!res.ok) {
-      setError(res.error ?? "Couldn't cast your vote.");
+      console.error("[party:bluff-vote] failed", res.error);
+      setError("Couldn't cast your vote. Try again.");
       return;
     }
     void refreshDetail();
@@ -786,12 +825,12 @@ export default function BluffView({
             <PostRoundVoteCard
               roundId={round.id}
               roundKind="bluff"
-              isHost={isHost}
+              isHost={isEffectiveHost}
               onAutoPlayAgain={handleAutoPlayAgain}
               onAutoBackToLobby={handleAutoBackToLobby}
             />
 
-            {isHost ? (
+            {isEffectiveHost ? (
               <div className="space-y-2">
                 <div className="flex flex-col sm:flex-row gap-3">
                   <button

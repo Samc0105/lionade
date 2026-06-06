@@ -26,12 +26,14 @@ import SketchView from "@/components/party/SketchView";
 import BluffView from "@/components/party/BluffView";
 import PokerFaceView from "@/components/party/PokerFaceView";
 import type { CurrentGame, PartyPlayer, PartyRoom } from "@/lib/party/types";
+import type { ActiveRoundLite } from "@/lib/party/room-state";
 
 interface Snapshot {
   room: PartyRoom;
   players: PartyPlayer[];
   meUserId: string;
   isHost: boolean;
+  activeRound?: ActiveRoundLite | null;
 }
 
 export default function PartyRoomPage() {
@@ -78,7 +80,8 @@ export default function PartyRoomPage() {
   const refresh = useCallback(async () => {
     const res = await apiGet<Snapshot>(`/api/party/rooms/${code}`);
     if (!res.ok || !res.data) {
-      setError(res.status === 404 ? "That room isn't open." : (res.error ?? "Couldn't load room."));
+      if (res.status !== 404) console.error("[party:load-room] failed", res.error);
+      setError(res.status === 404 ? "That room isn't open." : "Couldn't load room. Try again.");
       return null;
     }
     setSnap(res.data);
@@ -93,7 +96,8 @@ export default function PartyRoomPage() {
       const joinRes = await apiPost(`/api/party/rooms/${code}/join`, {});
       if (cancelled) return;
       if (!joinRes.ok) {
-        setError(joinRes.error ?? "Couldn't join the room.");
+        console.error("[party:join-room] failed", joinRes.error);
+        setError("Couldn't join the room. Try again.");
         setLoading(false);
         return;
       }
@@ -318,6 +322,7 @@ export default function PartyRoomPage() {
               players={snap.players}
               isHost={snap.isHost}
               meUserId={snap.meUserId}
+              activeRound={snap.activeRound ?? null}
               onReturnToLobby={onReturnToLobby}
             />
           )}
@@ -328,6 +333,7 @@ export default function PartyRoomPage() {
               players={snap.players}
               isHost={snap.isHost}
               meUserId={snap.meUserId}
+              activeRound={snap.activeRound ?? null}
               onReturnToLobby={onReturnToLobby}
             />
           )}
@@ -338,6 +344,7 @@ export default function PartyRoomPage() {
               players={snap.players}
               isHost={snap.isHost}
               meUserId={snap.meUserId}
+              activeRound={snap.activeRound ?? null}
               onReturnToLobby={onReturnToLobby}
             />
           )}

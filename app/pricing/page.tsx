@@ -195,13 +195,15 @@ export default function PricingPage() {
         ? await apiPost<{ url: string }>("/api/stripe/portal", {})
         : await apiPost<{ url: string }>("/api/stripe/checkout", { tier, cycle });
       if (!res.ok || !res.data?.url) {
-        toastError(res.error || "Couldn't open checkout. Try again.");
+        console.error("[pricing:checkout] failed", res.error);
+        toastError("Couldn't open checkout. Try again.");
         setPendingTier(null);
         return;
       }
       window.location.href = res.data.url;
     } catch (e) {
-      toastError((e as Error).message || "Couldn't open checkout. Try again.");
+      console.error("[pricing:checkout] threw", e);
+      toastError("Couldn't open checkout. Try again.");
       setPendingTier(null);
     }
   }

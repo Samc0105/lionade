@@ -405,7 +405,8 @@ function NinnyPageInner() {
       mode: selectedMode,
     });
     if (!res.ok || !res.data?.material) {
-      setError(res.error ?? "Generation failed");
+      console.error("[ninny:generate] failed", res.error);
+      setError("Couldn't generate that. Try again.");
       setPhase("input");
       return;
     }
@@ -484,7 +485,8 @@ function NinnyPageInner() {
           mode,
         });
         if (!res.ok || !res.data) {
-          setError(res.error ?? "Failed to unlock mode");
+          console.error("[ninny:unlock] failed", res.error);
+          setError("Couldn't unlock that mode. Try again.");
           return;
         }
         // Update the local material state with the new unlocked modes
@@ -526,7 +528,8 @@ function NinnyPageInner() {
       refreshMeta();
     } else {
       // Surface the failure so the user doesn't think it worked
-      setError(res.error ?? "Failed to delete material");
+      console.error("[ninny:delete-material] failed", res.error);
+      setError("Couldn't delete that material. Try again.");
     }
   };
 

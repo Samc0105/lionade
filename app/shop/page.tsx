@@ -853,13 +853,15 @@ function BuyFangsSection({ isAuthed, onUnauthed }: { isAuthed: boolean; onUnauth
           setPending(null);
           return;
         }
-        toastError(res.error || "Couldn't open checkout. Try again.");
+        console.error("[shop:fang-checkout] failed", res.error);
+        toastError("Couldn't open checkout. Try again.");
         setPending(null);
         return;
       }
       window.location.href = res.data.url;
     } catch (e) {
-      toastError((e as Error).message || "Couldn't open checkout. Try again.");
+      console.error("[shop:fang-checkout] threw", e);
+      toastError("Couldn't open checkout. Try again.");
       setPending(null);
     }
   }
@@ -1141,7 +1143,8 @@ export default function ShopPage() {
     if (!user) return;
     const res = await apiPost("/api/me/equip", { slot: "username_effect", cosmetic_id: cosmeticId });
     if (!res.ok) {
-      toastError(res.error || "Equip not ready yet. Try again shortly.");
+      console.error("[shop:equip-username-effect] failed", res.error);
+      toastError("Couldn't equip that yet. Try again shortly.");
       return;
     }
     toastSuccess("Equipped");

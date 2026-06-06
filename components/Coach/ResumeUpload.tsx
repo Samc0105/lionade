@@ -88,13 +88,15 @@ export default function ResumeUpload({ onAnalyzed }: Props) {
       const body = await res.json().catch(() => ({}));
 
       if (!res.ok) {
-        setError(body?.message ?? body?.error ?? "Couldn't analyze that resume.");
+        console.error("[coach:resume-analyze] failed", body);
+        setError("Couldn't analyze that resume. Try again.");
         setBusy(false);
         return;
       }
 
       if (!body?.sessionId || !body?.analysis) {
-        setError("Server returned an incomplete response.");
+        console.error("[coach:resume-analyze] incomplete response", body);
+        setError("Something glitched. Try again.");
         setBusy(false);
         return;
       }

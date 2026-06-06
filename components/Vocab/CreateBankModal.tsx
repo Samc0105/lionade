@@ -128,12 +128,14 @@ export default function CreateBankModal({ open, onClose, onCreated }: Props) {
         body,
       );
       if (!ok || !data) {
-        toastError(error ?? "Couldn't create that bank. Try again.");
+        console.error("[vocab:create-bank] failed", error);
+        toastError("Couldn't create that bank. Try again.");
         return;
       }
       onCreated(data.bank);
     } catch (e: unknown) {
-      toastError(e instanceof Error ? e.message : "Create failed.");
+      console.error("[vocab:create-bank] threw", e);
+      toastError("Couldn't create that bank. Try again.");
     } finally {
       setSaving(false);
     }

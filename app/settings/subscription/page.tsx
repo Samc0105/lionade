@@ -56,13 +56,15 @@ function PlanPanel() {
     try {
       const res = await apiPost<{ url: string }>("/api/stripe/portal", {});
       if (!res.ok || !res.data?.url) {
-        toastError(res.error || "Couldn't open billing portal.");
+        console.error("[subscription:portal] failed", res.error);
+        toastError("Couldn't open billing portal. Try again.");
         setPortalLoading(false);
         return;
       }
       window.location.href = res.data.url;
     } catch (e) {
-      toastError((e as Error).message || "Couldn't open billing portal.");
+      console.error("[subscription:portal] threw", e);
+      toastError("Couldn't open billing portal. Try again.");
       setPortalLoading(false);
     }
   }

@@ -467,7 +467,10 @@ export default function LoginPage() {
     // If the provider is mis-configured in Supabase, signInWithOAuth resolves
     // with `{ error }` instead of redirecting — surface it instead of leaving
     // the user staring at a button that did nothing.
-    if (oauthErr) setError(oauthErr.message);
+    if (oauthErr) {
+      console.error("[login:google-oauth] failed", oauthErr);
+      setError("Couldn't sign in with Google. Try again.");
+    }
   };
 
   const handleAppleAuth = async () => {
@@ -482,7 +485,10 @@ export default function LoginPage() {
       provider: "apple",
       options: redirectTo ? { redirectTo } : undefined,
     });
-    if (oauthErr) setError(oauthErr.message);
+    if (oauthErr) {
+      console.error("[login:apple-oauth] failed", oauthErr);
+      setError("Couldn't sign in with Apple. Try again.");
+    }
   };
 
   const resetSignup = () => {

@@ -78,14 +78,16 @@ export default function BankSelector({ banks, activeSlug, onSelect, onCreateClic
     try {
       const { ok, error } = await apiPatch(`/api/vocab/banks/${bank.id}`, { name: cleaned });
       if (!ok) {
-        toastError(error ?? "Couldn't rename that bank.");
+        console.error("[vocab:rename-bank] failed", error);
+        toastError("Couldn't rename that bank. Try again.");
         return;
       }
       toastSuccess("Bank renamed.");
       onMutated();
       setMenuBankId(null);
     } catch (e: unknown) {
-      toastError(e instanceof Error ? e.message : "Rename failed.");
+      console.error("[vocab:rename-bank] threw", e);
+      toastError("Couldn't rename that bank. Try again.");
     } finally {
       setBusy(false);
     }
@@ -97,13 +99,15 @@ export default function BankSelector({ banks, activeSlug, onSelect, onCreateClic
     try {
       const { ok, error } = await apiPatch(`/api/vocab/banks/${bank.id}`, { color });
       if (!ok) {
-        toastError(error ?? "Couldn't change color.");
+        console.error("[vocab:bank-color] failed", error);
+        toastError("Couldn't change color. Try again.");
         return;
       }
       onMutated();
       setMenuBankId(null);
     } catch (e: unknown) {
-      toastError(e instanceof Error ? e.message : "Color update failed.");
+      console.error("[vocab:bank-color] threw", e);
+      toastError("Couldn't change color. Try again.");
     } finally {
       setBusy(false);
     }
@@ -127,7 +131,8 @@ export default function BankSelector({ banks, activeSlug, onSelect, onCreateClic
         } else if (lower.includes("public bank") && (lower.includes("up to") || lower.includes("20"))) {
           toastError("You have 20 public banks already. Make one private to publish another.");
         } else {
-          toastError(error ?? (nextIsPublic ? "Couldn't publish that bank." : "Couldn't make that bank private."));
+          console.error("[vocab:bank-publish] failed", error);
+          toastError(nextIsPublic ? "Couldn't publish that bank. Try again." : "Couldn't make that bank private. Try again.");
         }
         return;
       }
@@ -139,7 +144,8 @@ export default function BankSelector({ banks, activeSlug, onSelect, onCreateClic
       onMutated();
       setMenuBankId(null);
     } catch (e: unknown) {
-      toastError(e instanceof Error ? e.message : "Publish update failed.");
+      console.error("[vocab:bank-publish] threw", e);
+      toastError("Couldn't update that bank. Try again.");
     } finally {
       setBusy(false);
     }
@@ -157,7 +163,8 @@ export default function BankSelector({ banks, activeSlug, onSelect, onCreateClic
     try {
       const { ok, error } = await apiDelete(`/api/vocab/banks/${bank.id}`);
       if (!ok) {
-        toastError(error ?? "Couldn't delete that bank.");
+        console.error("[vocab:delete-bank] failed", error);
+        toastError("Couldn't delete that bank. Try again.");
         throw new Error("delete failed");
       }
       toastSuccess("Bank deleted.");
@@ -166,7 +173,8 @@ export default function BankSelector({ banks, activeSlug, onSelect, onCreateClic
       setMenuBankId(null);
     } catch (e: unknown) {
       if (!(e instanceof Error) || !e.message.includes("delete failed")) {
-        toastError(e instanceof Error ? e.message : "Delete failed.");
+        console.error("[vocab:delete-bank] threw", e);
+        toastError("Couldn't delete that bank. Try again.");
       }
       throw e instanceof Error ? e : new Error("Delete failed.");
     } finally {

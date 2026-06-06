@@ -82,12 +82,14 @@ export default function MasteryLandingPage() {
     try {
       const r = await apiPost<ParsedResponse>("/api/mastery/parse", { input: cleaned });
       if (!r.ok || !r.data) {
-        setError(r.error || "Couldn't parse that.");
+        console.error("[mastery:parse] failed", r.error);
+        setError("Couldn't parse that. Try a different topic.");
       } else {
         setParsed(r.data);
       }
     } catch (e) {
-      setError((e as Error).message);
+      console.error("[mastery:parse] threw", e);
+      setError("Network's being weird. Try again.");
     } finally {
       setParsing(false);
     }
@@ -121,7 +123,8 @@ export default function MasteryLandingPage() {
         return;
       }
       if (!create.ok || !create.data?.examId) {
-        setError(create.error || "Couldn't save that target.");
+        console.error("[mastery:create-exam] failed", create.error);
+        setError("Couldn't save that target. Try again.");
         setCreating(false);
         return;
       }
@@ -129,7 +132,8 @@ export default function MasteryLandingPage() {
         `/api/mastery/exams/${create.data.examId}/sessions`, {},
       );
       if (!session.ok || !session.data?.sessionId) {
-        setError(session.error || "Couldn't start a session.");
+        console.error("[mastery:start-session] failed", session.error);
+        setError("Couldn't start a session. Try again.");
         setCreating(false);
         return;
       }

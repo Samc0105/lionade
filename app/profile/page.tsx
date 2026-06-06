@@ -1137,7 +1137,8 @@ function PrivacySection({ user, quizHistory, activity }: SharedProps) {
         }),
       ]);
       if (!vRes.ok || !pRes.ok) {
-        toastError((vRes.error || pRes.error) ?? "Couldn't save your privacy settings");
+        console.error("[profile:privacy] failed", { vRes: vRes.error, pRes: pRes.error });
+        toastError("Couldn't save your privacy settings. Try again.");
         return;
       }
       try {
@@ -1394,7 +1395,8 @@ function DeleteAccountModal({ email, onClose }: { email: string; onClose: () => 
         `/api/user/account?confirm=${encodeURIComponent(emailLc)}`,
       );
       if (!res.ok) {
-        toastError(res.error ?? "Couldn't delete your account. Try again or contact support.");
+        console.error("[profile:delete-account] failed", res.error);
+        toastError("Couldn't delete your account. Try again or contact support.");
         setDeleting(false);
         return;
       }
@@ -1404,7 +1406,8 @@ function DeleteAccountModal({ email, onClose }: { email: string; onClose: () => 
       try { await logout(); } catch { /* ignore — auth row is gone */ }
       router.push("/");
     } catch (e: any) {
-      toastError(e?.message ?? "Couldn't delete your account.");
+      console.error("[profile:delete-account] threw", e);
+      toastError("Couldn't delete your account. Try again or contact support.");
       setDeleting(false);
     }
   };
@@ -1631,7 +1634,8 @@ function NotificationsSection() {
         },
       });
       if (!res.ok) {
-        toastError(res.error ?? "Couldn't save your notification settings");
+        console.error("[profile:notifications] failed", res.error);
+        toastError("Couldn't save your notification settings. Try again.");
         return;
       }
       try { localStorage.setItem(NOTIF_CACHE_KEY, JSON.stringify(prefs)); } catch { /* ignore */ }

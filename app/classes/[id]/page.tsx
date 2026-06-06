@@ -791,7 +791,8 @@ function EditClassModal({
       emoji: emoji.trim() || null,
     });
     if (!r.ok) {
-      setError(r.error || "Couldn't save changes.");
+      console.error("[classes:edit] failed", r.error);
+      setError("Couldn't save changes. Try again.");
       setSubmitting(false);
       return;
     }

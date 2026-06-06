@@ -140,7 +140,8 @@ export default function AddWordForm({ bank, onSaved }: Props) {
           { word: cleaned, source: sourceLang, target: targetLang, bank_id: bank.id },
         );
         if (!ok || !data) {
-          toastError(error ?? "Couldn't translate that word. Try again.");
+          console.error("[vocab:translate] failed", error);
+          toastError("Couldn't translate that word. Try again.");
           return;
         }
         setTranslation(data.translation);
@@ -158,12 +159,14 @@ export default function AddWordForm({ bank, onSaved }: Props) {
           setTermDefinition("");
           setDefineSource("manual");
         } else {
-          toastError(error ?? "Couldn't define that term. Try again.");
+          console.error("[vocab:define] failed", { status, error });
+          toastError("Couldn't define that term. Try again.");
           return;
         }
       }
     } catch (e: unknown) {
-      toastError(e instanceof Error ? e.message : "Lookup failed.");
+      console.error("[vocab:lookup] threw", e);
+      toastError("Couldn't look that up. Try again.");
     } finally {
       setBusy(false);
     }
@@ -202,7 +205,8 @@ export default function AddWordForm({ bank, onSaved }: Props) {
         body,
       );
       if (!ok || !data) {
-        toastError(error ?? "Couldn't save. Try again.");
+        console.error("[vocab:save-word] failed", error);
+        toastError("Couldn't save. Try again.");
         return;
       }
       const awarded = typeof data.coinsAwarded === "number" ? data.coinsAwarded : 0;
@@ -210,7 +214,8 @@ export default function AddWordForm({ bank, onSaved }: Props) {
       resetForm();
       onSaved?.();
     } catch (e: unknown) {
-      toastError(e instanceof Error ? e.message : "Save failed.");
+      console.error("[vocab:save-word] threw", e);
+      toastError("Couldn't save. Try again.");
     } finally {
       setSaving(false);
     }

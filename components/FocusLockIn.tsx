@@ -99,7 +99,8 @@ export default function FocusLockIn() {
               setPhase({ kind: "completed", duration: phase.duration, coinsEarned });
               if (user?.id) mutateUserStats(user.id);
             } catch (e) {
-              toastError((e as Error).message);
+              console.error("[focus:complete] threw", e);
+              toastError("Couldn't claim that session. Try again.");
               setPhase({ kind: "idle" });
             }
             setOpen(true);

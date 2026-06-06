@@ -90,7 +90,8 @@ export default function SettingsPage() {
     const res = await apiPatch("/api/user/preferences", { notifications: { [key]: next } });
     if (!res.ok) {
       setter(!next);
-      toastError(res.error ?? "Couldn't save that change");
+      console.error("[settings:save] failed", res.error);
+      toastError("Couldn't save that change. Try again.");
       return;
     }
     flashSaved();
@@ -101,7 +102,8 @@ export default function SettingsPage() {
     const res = await apiPatch("/api/user/preferences", { privacy: { [key]: next } });
     if (!res.ok) {
       setShowOnLeaderboard(!next);
-      toastError(res.error ?? "Couldn't save that change");
+      console.error("[settings:save] failed", res.error);
+      toastError("Couldn't save that change. Try again.");
       return;
     }
     flashSaved();
@@ -115,7 +117,8 @@ export default function SettingsPage() {
     });
     if (!res.ok) {
       setPublicProfile(!next);
-      toastError(res.error ?? "Couldn't save that change");
+      console.error("[settings:save] failed", res.error);
+      toastError("Couldn't save that change. Try again.");
       return;
     }
     flashSaved();

@@ -145,15 +145,17 @@ export default function VocabList({ bank }: Props) {
     try {
       const { ok, error } = await apiDelete(`/api/vocab/words/${id}`);
       if (!ok) {
-        toastError(error ?? "Couldn't delete that entry.");
-        throw new Error(error ?? "delete failed");
+        console.error("[vocab:delete-word] failed", error);
+        toastError("Couldn't delete that entry. Try again.");
+        throw new Error("delete failed");
       }
       toastSuccess("Entry removed.");
       setPendingDelete(null);
       mutate();
     } catch (e: unknown) {
       if (!(e instanceof Error) || !e.message.includes("delete failed")) {
-        toastError(e instanceof Error ? e.message : "Delete failed.");
+        console.error("[vocab:delete-word] threw", e);
+        toastError("Couldn't delete that entry. Try again.");
       }
       throw e instanceof Error ? e : new Error("Delete failed.");
     } finally {

@@ -102,7 +102,8 @@ export default function ChatPanel({ materialId, materialTitle, materialSubject }
       }>("/api/ninny/chat", { materialId, message: text });
 
       if (!res.ok || !res.data) {
-        setError(res.error ?? "Ninny didn't respond. Try again.");
+        console.error("[ninny:chat] failed", res.error);
+        setError("Ninny didn't respond. Try again.");
         // Remove the optimistic message on failure
         setMessages((prev) => prev.filter((m) => m.id !== tempUserMsg.id));
       } else {

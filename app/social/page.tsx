@@ -381,7 +381,8 @@ export default function SocialPage() {
       setNudgeTarget(null);
       loadNudgeBudget();
     } else {
-      toastError(res.error ?? "Couldn't send nudge");
+      console.error("[social:nudge] failed", res.error);
+      toastError("Couldn't send nudge. Try again.");
     }
   }, [nudgeTarget, sendingNudge, loadNudgeBudget]);
 
@@ -398,7 +399,8 @@ export default function SocialPage() {
       toastSuccess(`Challenge sent to ${challengeTarget.username}`);
       setChallengeTarget(null);
     } else {
-      toastError(res.error ?? "Couldn't send challenge");
+      console.error("[social:challenge] failed", res.error);
+      toastError("Couldn't send challenge. Try again.");
     }
   }, [challengeTarget, challengeWager, sendingChallenge]);
 

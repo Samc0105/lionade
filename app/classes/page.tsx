@@ -265,14 +265,16 @@ function CreateClassModal({
         emoji: emoji.trim() || null,
       });
       if (!r.ok || !r.data?.classId) {
-        setError(r.error || "Couldn't create class.");
+        console.error("[classes:create] failed", r.error);
+        setError("Couldn't create class. Try again.");
         setSubmitting(false);
         return;
       }
       onCreated();
       router.push(`/classes/${r.data.classId}`);
     } catch (e) {
-      setError((e as Error).message);
+      console.error("[classes:create] threw", e);
+      setError("Network's being weird. Try again.");
       setSubmitting(false);
     }
   };

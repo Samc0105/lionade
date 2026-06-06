@@ -79,7 +79,8 @@ export default function BankPreviewModal({ summary, open, onClose, onCloned }: P
         {},
       );
       if (!ok || !cloneData) {
-        toastError(cloneErr ?? "Couldn't clone that bank. Try again.");
+        console.error("[vocab:clone-bank] failed", cloneErr);
+        toastError("Couldn't clone that bank. Try again.");
         return;
       }
       toastSuccess(`Cloned to your collection. +${CLONE_FANG_COST} Fangs.`);
@@ -90,7 +91,8 @@ export default function BankPreviewModal({ summary, open, onClose, onCloned }: P
       const target = cloneData.bank?.slug ?? cloneData.bank_id;
       router.push(`/learn/vocab?bank=${encodeURIComponent(target)}`);
     } catch (e: unknown) {
-      toastError(e instanceof Error ? e.message : "Clone failed.");
+      console.error("[vocab:clone-bank] threw", e);
+      toastError("Couldn't clone that bank. Try again.");
     } finally {
       setCloning(false);
     }

@@ -83,16 +83,20 @@ export default function StreakReviveBanner() {
       type R = { ok: boolean; restoredStreak?: number; coins?: number; message?: string };
       const r = await apiPost<R>("/api/streak-revive", { method });
       if (!r.ok || !r.data?.ok) {
-        toastError(r.data?.message || r.error || "Couldn't revive — try again.");
+        if (!r.data?.message) console.error("[streak:revive] failed", r.error);
+        // r.data?.message is server-curated user copy (e.g. "Need X Fangs");
+        // fall back to generic friendly copy otherwise.
+        toastError(r.data?.message || "Couldn't revive. Try again.");
         return;
       }
-      toastSuccess(`Streak restored — back to ${r.data.restoredStreak} days. Don't lose it again.`, { duration: 4000 });
+      toastSuccess(`Streak restored. Back to ${r.data.restoredStreak} days. Don't lose it again.`, { duration: 4000 });
       setCelebrate(true);
       setTimeout(() => setCelebrate(false), 2200);
       void mutate();
       mutateUserStats(user.id);
     } catch (e) {
-      toastError((e as Error).message || "Couldn't revive.");
+      console.error("[streak:revive] threw", e);
+      toastError("Couldn't revive. Try again.");
     } finally {
       setSubmitting(false);
     }

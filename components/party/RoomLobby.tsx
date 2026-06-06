@@ -261,7 +261,8 @@ export default function RoomLobby({ room, players, isHost, meUserId, onGameStart
     });
     if (!res.ok) {
       setOptimisticTopics(null);
-      setError(res.error ?? "Couldn't update topics.");
+      console.error("[party:topics] failed", res.error);
+      setError("Couldn't update topics. Try again.");
     }
   }
 
@@ -272,7 +273,8 @@ export default function RoomLobby({ room, players, isHost, meUserId, onGameStart
     const res = await apiPost(`/api/party/rooms/${room.code}/ready`, { ready: target });
     if (!res.ok) {
       setOptimisticReady(null);  // revert to server truth
-      setError(res.error ?? "Couldn't update your ready state.");
+      console.error("[party:ready] failed", res.error);
+      setError("Couldn't update your ready state. Try again.");
     }
     // Success path: the override stays until the next server snapshot
     // reflects the new value, then useEffect clears it.
@@ -299,7 +301,8 @@ export default function RoomLobby({ room, players, isHost, meUserId, onGameStart
     });
     setStarting(false);
     if (!res.ok) {
-      setError(res.error ?? "Couldn't start the game.");
+      console.error("[party:start-game] failed", res.error);
+      setError("Couldn't start the game. Try again.");
       return;
     }
     onGameStarted(selectedGame);

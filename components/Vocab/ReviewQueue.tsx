@@ -90,7 +90,8 @@ export default function ReviewQueue({ bank }: Props) {
         { correct },
       );
       if (!ok) {
-        toastError(error ?? "Couldn't save that review. Try again.");
+        console.error("[vocab:review] failed", error);
+        toastError("Couldn't save that review. Try again.");
         return;
       }
       const nextIdx = idx + 1;
@@ -100,7 +101,8 @@ export default function ReviewQueue({ bank }: Props) {
       setIdx(nextIdx);
       setRevealed(false);
     } catch (e: unknown) {
-      toastError(e instanceof Error ? e.message : "Review failed.");
+      console.error("[vocab:review] threw", e);
+      toastError("Couldn't save that review. Try again.");
     } finally {
       setSubmitting(false);
     }

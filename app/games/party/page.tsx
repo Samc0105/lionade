@@ -29,7 +29,8 @@ export default function PartyLandingPage() {
     const res = await apiPost<{ code: string }>("/api/party/rooms", {});
     setBusy("none");
     if (!res.ok || !res.data?.code) {
-      setError(res.error ?? "Couldn't create a room.");
+      console.error("[party:create-room] failed", res.error);
+      setError("Couldn't create a room. Try again.");
       return;
     }
     router.push(`/games/party/${res.data.code}`);
@@ -47,7 +48,8 @@ export default function PartyLandingPage() {
     const res = await apiPost<{ ok: boolean }>(`/api/party/rooms/${code}/join`, {});
     setBusy("none");
     if (!res.ok) {
-      setError(res.error ?? "That room isn't open right now.");
+      console.error("[party:join-room] failed", res.error);
+      setError("That room isn't open right now.");
       return;
     }
     router.push(`/games/party/${code}`);
