@@ -79,70 +79,43 @@ export default function CompetePage() {
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
-          {/* ═══ 1. PRIZE POOL BANNER ═══ */}
-          <div className="animate-slide-up mb-10" style={{ animationDelay: "0s" }}>
-            <div className="relative overflow-hidden rounded-2xl"
+          {/* ═══ 1. COMPETITIVE BANNER ═══
+              Was a 14-line "MONTHLY COIN POOL · Coming Soon · Launching V2"
+              placeholder that took the entire above-the-fold. Replaced with
+              a single honest strip that says what IS shipping (Elo ladder
+              + Fang multipliers per tier) plus a CTA to the leaderboard.
+              The full prize-pool feature still lives in the roadmap — this
+              just stops the page from leading with vapor. */}
+          <div className="animate-slide-up mb-8" style={{ animationDelay: "0s" }}>
+            <div className="relative overflow-hidden rounded-xl px-5 sm:px-7 py-4 sm:py-5 flex items-center gap-4 flex-wrap"
               style={{
-                background: "linear-gradient(160deg, #0c1020 0%, #080c18 40%, #0a0e1a 70%, #0c1020 100%)",
-                border: "1px solid rgba(255,215,0,0.12)",
-                boxShadow: "0 0 60px rgba(255,215,0,0.04), 0 0 1px rgba(255,215,0,0.15), inset 0 1px 0 rgba(255,215,0,0.06)",
+                background: "linear-gradient(90deg, rgba(255,215,0,0.06) 0%, rgba(12,10,20,0.6) 60%)",
+                border: "1px solid rgba(255,215,0,0.18)",
+                boxShadow: "0 0 32px rgba(255,215,0,0.04)",
               }}>
-              {/* Top gold accent line */}
-              <div className="absolute top-0 left-0 right-0 h-[1px]"
-                style={{ background: "linear-gradient(90deg, transparent 10%, rgba(255,215,0,0.25) 50%, transparent 90%)" }} />
-
-              {/* Subtle corner radial glows */}
-              <div className="absolute top-0 left-0 w-48 h-48 pointer-events-none"
-                style={{ background: "radial-gradient(circle at 0% 0%, rgba(255,215,0,0.04) 0%, transparent 70%)" }} />
-              <div className="absolute bottom-0 right-0 w-48 h-48 pointer-events-none"
-                style={{ background: "radial-gradient(circle at 100% 100%, rgba(255,215,0,0.03) 0%, transparent 70%)" }} />
-
-              {/* Sparkle dots */}
-              <div className="absolute inset-0 pointer-events-none overflow-hidden">
-                {[
-                  { top: "18%", left: "12%", size: 2, delay: "0s" },
-                  { top: "25%", left: "82%", size: 1.5, delay: "1.5s" },
-                  { top: "65%", left: "22%", size: 1.5, delay: "3s" },
-                  { top: "40%", left: "90%", size: 2, delay: "0.8s" },
-                  { top: "72%", left: "75%", size: 1.5, delay: "2.2s" },
-                  { top: "15%", left: "55%", size: 1, delay: "4s" },
-                ].map((s, i) => (
-                  <div key={i} className="absolute rounded-full prize-sparkle"
-                    style={{
-                      top: s.top, left: s.left,
-                      width: s.size, height: s.size,
-                      background: "#FFD700",
-                      boxShadow: "0 0 4px #FFD700, 0 0 8px rgba(255,215,0,0.4)",
-                      animationDelay: s.delay,
-                    }} />
-                ))}
+              {/* Inline coin glyph — smaller than the full hero coin */}
+              <div className="inline-flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full shrink-0"
+                style={{
+                  background: "linear-gradient(145deg, #FFD700 0%, #B8960C 50%, #FFD700 100%)",
+                  boxShadow: "0 2px 10px rgba(255,215,0,0.25), inset 0 1px 2px rgba(255,255,255,0.3)",
+                }}>
+                <span className="font-bebas text-base sm:text-lg text-[#3a2800]" style={{ textShadow: "0 1px 0 rgba(255,255,255,0.3)" }}>$</span>
               </div>
-
-              <div className="relative px-6 py-10 sm:py-14 text-center">
-                {/* Coin icon */}
-                <div className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 rounded-full mb-4 prize-coin"
-                  style={{
-                    background: "linear-gradient(145deg, #FFD700 0%, #B8960C 40%, #806515 70%, #FFD700 100%)",
-                    boxShadow: "0 4px 20px rgba(255,215,0,0.25), 0 1px 3px rgba(0,0,0,0.5), inset 0 2px 4px rgba(255,255,255,0.3), inset 0 -2px 4px rgba(0,0,0,0.2)",
-                  }}>
-                  <span className="font-bebas text-2xl sm:text-3xl text-[#3a2800]" style={{ textShadow: "0 1px 0 rgba(255,255,255,0.3)" }}>$</span>
-                </div>
-
-                <p className="font-bebas text-2xl sm:text-4xl text-cream/80 tracking-[0.2em] mt-2">
-                  MONTHLY COIN POOL
+              <div className="flex-1 min-w-0">
+                <p className="font-bebas text-base sm:text-lg text-cream/85 tracking-[0.16em] leading-none">
+                  WEEKLY COMPETITIVE
                 </p>
-                <p className="text-cream/60 text-sm mt-3 max-w-md mx-auto">
-                  Top players will compete for a monthly prize pool. Details coming soon.
-                </p>
-
-                <div className="mt-6 inline-flex items-center gap-2 px-5 py-2 rounded-full border border-gold/20 bg-gold/[0.06]">
-                  <span className="font-bebas text-gold/80 text-sm tracking-widest uppercase">Coming Soon</span>
-                </div>
-
-                <p className="text-cream/55 text-xs mt-4">
-                  Launching with ranked competitive season V2 — 2026.
+                <p className="text-cream/55 text-xs sm:text-[13px] font-syne mt-1 leading-snug">
+                  Climb the Elo ladder. Fang multipliers per tier — gold pays out the most. Live now.
                 </p>
               </div>
+              <Link
+                href="/leaderboard"
+                className="font-mono text-[10px] sm:text-[11px] uppercase tracking-[0.22em] text-gold/85 hover:text-gold transition-colors inline-flex items-center gap-1 shrink-0"
+              >
+                Leaderboard
+                <span aria-hidden="true">→</span>
+              </Link>
             </div>
           </div>
 

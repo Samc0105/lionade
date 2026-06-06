@@ -347,10 +347,15 @@ export async function POST(req: NextRequest) {
     // never break the API. Phase 1 wiring; Phase 2 will personalize via Ninny.
     try {
       const isFirstEverStreak = (profile.max_streak ?? 0) === 0 && newStreak === 1;
+      // Channel-symmetry trust gate: the firstStreakDay email is the email
+      // counterpart of the streak_milestone in-app notification, so it
+      // respects the same streak_alert pref. The in-app notification side
+      // is already gated upstream (the streak-milestone insert checks it).
       if (
         isFirstEverStreak &&
         process.env.RESEND_API_KEY &&
-        process.env.EMAIL_FROM
+        process.env.EMAIL_FROM &&
+        await shouldNotifyUser(userId, "streak_alert")
       ) {
         // Look up the user's email via auth.users (profiles doesn't store it)
         const { data: authUser } = await supabaseAdmin.auth.admin.getUserById(userId);
