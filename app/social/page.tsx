@@ -156,6 +156,9 @@ export default function SocialPage() {
   const [friends, setFriends] = useState<Friend[]>([]);
   const [pendingRequests, setPendingRequests] = useState<PendingRequest[]>([]);
   const [outgoingRequests, setOutgoingRequests] = useState<OutgoingRequest[]>([]);
+  // Track whether friends data has been hydrated (cache or fetch) so the
+  // hero pulse chips can render a soft placeholder instead of flashing "0".
+  const [friendsHydrated, setFriendsHydrated] = useState(false);
   const [selectedFriend, setSelectedFriend] = useState<Friend | null>(null);
   const [addUsername, setAddUsername] = useState("");
   const [addError, setAddError] = useState("");
@@ -235,7 +238,7 @@ export default function SocialPage() {
         circle?: CircleRank[];
         nudgeState?: typeof nudgeState;
       };
-      if (Array.isArray(c.friends)) setFriends(c.friends);
+      if (Array.isArray(c.friends)) { setFriends(c.friends); setFriendsHydrated(true); }
       if (Array.isArray(c.pendingRequests)) setPendingRequests(c.pendingRequests);
       if (Array.isArray(c.outgoingRequests)) setOutgoingRequests(c.outgoingRequests);
       if (Array.isArray(c.feed)) setFeed(c.feed);
@@ -315,6 +318,7 @@ export default function SocialPage() {
           setFriends(friends);
           setPendingRequests(pendingRequests);
           setOutgoingRequests(outgoingRequests);
+          setFriendsHydrated(true);
           cacheSocial({ friends, pendingRequests, outgoingRequests });
         }
       },
@@ -641,10 +645,20 @@ export default function SocialPage() {
     return items;
   }, [messages, arenaEvents]);
 
-  // Filtered friends
-  const filteredFriends = searchQuery
-    ? friends.filter(f => f.username.toLowerCase().includes(searchQuery.toLowerCase()))
-    : friends;
+  // Filtered + sorted friends. Online friends bubble to the top so the
+  // panel reads as "who's around right now" first, then recency by
+  // last_seen so the next-most-active are next.
+  const filteredFriends = useMemo(() => {
+    const base = searchQuery
+      ? friends.filter(f => f.username.toLowerCase().includes(searchQuery.toLowerCase()))
+      : friends.slice();
+    return base.sort((a, b) => {
+      if (a.is_online !== b.is_online) return a.is_online ? -1 : 1;
+      const aT = a.last_seen ? new Date(a.last_seen).getTime() : 0;
+      const bT = b.last_seen ? new Date(b.last_seen).getTime() : 0;
+      return bT - aT;
+    });
+  }, [friends, searchQuery]);
 
   // ── Derived circle metrics (for hero strip + showdown + squad goal) ───────
   const onlineCount = friends.filter(f => f.is_online).length;
@@ -824,10 +838,38 @@ export default function SocialPage() {
             {/* Friends List */}
             <div className="flex-1 overflow-y-auto">
               {filteredFriends.length === 0 && (
-                <div className="px-4 py-10 text-center">
-                  <p className="text-cream/55 text-sm">
-                    {searchQuery ? "No friends match your search" : "No friends yet. Tap the + icon up top to add someone."}
-                  </p>
+                <div className="px-4 py-12 text-center flex flex-col items-center gap-3">
+                  <div
+                    className="w-12 h-12 rounded-full grid place-items-center"
+                    style={{
+                      background: "linear-gradient(135deg, rgba(255,215,0,0.14) 0%, rgba(184,150,12,0.06) 100%)",
+                      border: "1px solid rgba(255,215,0,0.22)",
+                    }}
+                  >
+                    <Users size={20} weight="fill" className="text-gold/80" aria-hidden="true" />
+                  </div>
+                  {searchQuery ? (
+                    <p className="text-cream/55 text-sm">No friends match {`"${searchQuery}"`}</p>
+                  ) : (
+                    <>
+                      <p className="text-cream/80 text-sm font-semibold">Build your circle</p>
+                      <p className="font-serif italic text-cream/40 text-xs max-w-[200px]">
+                        tap the gold + up top to find someone by username
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => setShowAddFriendModal(true)}
+                        className="mt-2 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider transition-transform active:scale-95"
+                        style={{
+                          background: "linear-gradient(135deg, #FFD700 0%, #B8960C 100%)",
+                          color: "#04080F",
+                        }}
+                      >
+                        <UserPlus size={12} weight="bold" aria-hidden="true" />
+                        Find friends
+                      </button>
+                    </>
+                  )}
                 </div>
               )}
               {filteredFriends.map(friend => {
@@ -837,15 +879,26 @@ export default function SocialPage() {
                   <button
                     key={friend.id}
                     onClick={() => setSelectedFriend(friend)}
-                    className="w-full text-left px-4 py-3 flex items-center gap-3 transition-all duration-150 hover:bg-white/[0.04]"
+                    className="social-friend-row w-full text-left px-4 py-3 flex items-center gap-3 will-change-transform hover:bg-white/[0.04]"
                     style={isSelected ? {
                       background: "linear-gradient(135deg, rgba(74,144,217,0.08) 0%, rgba(74,144,217,0.03) 100%)",
                       borderLeft: "2px solid #4A90D9",
                     } : { borderLeft: "2px solid transparent" }}
                   >
-                    {/* Avatar + online dot */}
-                    <div className="relative flex-shrink-0" aria-label={`${friend.username}'s avatar`}>
-                      <img src={avatarFor(friend.username, friend.avatar_url)} alt={friend.username} className="w-10 h-10 rounded-full object-cover" />
+                    {/* Avatar in tinted circular chip — green ring when online, neutral otherwise. */}
+                    <div
+                      className="relative flex-shrink-0 grid place-items-center w-11 h-11 rounded-full"
+                      aria-label={`${friend.username}'s avatar`}
+                      style={{
+                        background: friend.is_online
+                          ? "linear-gradient(135deg, rgba(34,197,94,0.18) 0%, rgba(34,197,94,0.06) 100%)"
+                          : "rgba(255,255,255,0.04)",
+                        border: friend.is_online
+                          ? "1px solid rgba(34,197,94,0.35)"
+                          : "1px solid rgba(255,255,255,0.06)",
+                      }}
+                    >
+                      <img src={avatarFor(friend.username, friend.avatar_url)} alt={friend.username} className="w-9 h-9 rounded-full object-cover" />
                       {friend.is_online && (
                         <div className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-green-400 border-2 border-[#04080F] social-online-dot" />
                       )}
@@ -865,9 +918,9 @@ export default function SocialPage() {
                           {tier.name}
                         </span>
                       </div>
-                      <p className="text-cream/25 text-[10px] mt-0.5">
+                      <p className="font-mono text-[10px] mt-0.5 text-cream/40 truncate">
                         {friend.is_online ? (
-                          <span className="text-green-400/70">Online</span>
+                          <span className="text-green-400/80">Online now</span>
                         ) : (
                           timeAgo(friend.last_seen)
                         )}
@@ -910,18 +963,22 @@ export default function SocialPage() {
                       {[
                         {
                           label: "online now",
-                          value: <CountUp id="social-online" value={onlineCount} duration={400} />,
+                          value: friendsHydrated
+                            ? <CountUp id="social-online" value={onlineCount} duration={400} />
+                            : <span className="text-cream/30">—</span>,
                           accent: "#22C55E",
-                          pulse: onlineCount > 0,
+                          pulse: friendsHydrated && onlineCount > 0,
                         },
                         {
                           label: "requests",
-                          value: <CountUp id="social-requests" value={pendingRequests.length} duration={400} />,
+                          value: friendsHydrated
+                            ? <CountUp id="social-requests" value={pendingRequests.length} duration={400} />
+                            : <span className="text-cream/30">—</span>,
                           accent: pendingRequests.length > 0 ? "#FFD700" : "#71717A",
                         },
                         {
                           label: "your rank",
-                          value: myRank ? <>#<CountUp id="social-rank" value={myRank} duration={400} /></> : "—",
+                          value: myRank ? <>#<CountUp id="social-rank" value={myRank} duration={400} /></> : <span className="text-cream/30">—</span>,
                           accent: "#4A90D9",
                         },
                         {
@@ -1064,7 +1121,7 @@ export default function SocialPage() {
                       <p className="mt-2 font-serif italic text-cream/35 text-xs">
                         {squadPct >= 100
                           ? "goal crushed. circle unlocked a 50 Fang bonus."
-                          : `${Math.round(squadPct)}% there — every quiz counts toward the circle total`}
+                          : `${Math.round(squadPct)}% there · every quiz counts toward the circle total`}
                       </p>
                     </section>
                   )}
@@ -1089,7 +1146,7 @@ export default function SocialPage() {
                             >
                               <div
                                 className="social-polaroid w-[110px] text-center"
-                                aria-label={`${c.isMe ? "you" : c.username} — circle leaderboard polaroid`}
+                                aria-label={`${c.isMe ? "you" : c.username} on the circle leaderboard`}
                                 style={{ "--polaroid-tilt": tilts[i] } as React.CSSProperties}
                               >
                                 <div className="relative w-[102px] h-[102px] mb-2 bg-[#0a1020] overflow-hidden">
@@ -1166,7 +1223,7 @@ export default function SocialPage() {
                           board&rsquo;s empty for now
                         </p>
                         <p className="text-cream/55 text-xs">
-                          {friends.length === 0 ? "add some friends and their wins show up here" : "your circle hasn't posted anything yet — be the first"}
+                          {friends.length === 0 ? "add some friends and their wins show up here" : "your circle hasn't posted anything yet · be the first"}
                         </p>
                       </div>
                     ) : (
@@ -1255,7 +1312,7 @@ export default function SocialPage() {
                         return (
                           <p className="text-[10px] inline-flex items-center gap-1" style={{ color: tier.color }}>
                             <tier.Icon size={12} weight="fill" color={tier.color} aria-hidden="true" />
-                            {tier.name} — {selectedFriend.arena_elo} ELO
+                            {tier.name} · {selectedFriend.arena_elo} ELO
                           </p>
                         );
                       })()}
@@ -1292,9 +1349,22 @@ export default function SocialPage() {
                 {/* Messages area */}
                 <div ref={chatContainerRef} className="flex-1 overflow-y-auto px-5 py-4 space-y-3">
                   {timeline.length === 0 && (
-                    <div className="text-center py-12 flex flex-col items-center gap-2">
-                      <Megaphone size={26} weight="regular" className="text-cream/30" aria-hidden="true" />
-                      <p className="text-cream/55 text-sm">No messages yet. Say hi.</p>
+                    <div className="text-center py-14 flex flex-col items-center gap-3 social-empty-thread">
+                      <div
+                        className="w-14 h-14 rounded-full grid place-items-center"
+                        style={{
+                          background: "linear-gradient(135deg, rgba(74,144,217,0.15) 0%, rgba(168,85,247,0.10) 100%)",
+                          border: "1px solid rgba(74,144,217,0.25)",
+                        }}
+                      >
+                        <Megaphone size={24} weight="fill" className="text-electric/80" aria-hidden="true" />
+                      </div>
+                      <p className="text-cream/80 text-sm font-semibold">
+                        Say hi to {selectedFriend.username}
+                      </p>
+                      <p className="font-serif italic text-cream/40 text-xs max-w-[220px]">
+                        first messages are weird. a {`"yo"`} works.
+                      </p>
                     </div>
                   )}
 
@@ -1316,7 +1386,7 @@ export default function SocialPage() {
                               {isDraw ? "DRAW" : iWon ? "VICTORY" : "DEFEAT"}
                             </p>
                             <div className="flex items-center justify-center gap-3 text-xs text-cream/60">
-                              <span>{event.player1_score} — {event.player2_score}</span>
+                              <span className="tabular-nums">{event.player1_score} vs {event.player2_score}</span>
                               <span className="text-cream/10">|</span>
                               <span className="flex items-center gap-1">
                                 <img src={cdnUrl("/F.png")} alt="Fangs" className="w-3 h-3 object-contain" />
@@ -1332,18 +1402,18 @@ export default function SocialPage() {
                     const isMine = msg.sender_id === user?.id;
                     return (
                       <div key={`msg-${msg.id}`} className={`flex ${isMine ? "justify-end" : "justify-start"}`}>
-                        <div className="max-w-[70%] rounded-2xl px-4 py-2.5"
+                        <div className={`social-msg-bubble ${isMine ? "social-msg-mine" : "social-msg-theirs"} max-w-[70%] rounded-2xl px-4 py-2.5 will-change-transform`}
                           style={isMine ? {
-                            background: "linear-gradient(135deg, rgba(255,215,0,0.12) 0%, rgba(184,150,12,0.06) 100%)",
-                            border: "1px solid rgba(255,215,0,0.15)",
+                            background: "linear-gradient(135deg, rgba(255,215,0,0.14) 0%, rgba(184,150,12,0.06) 100%)",
+                            border: "1px solid rgba(255,215,0,0.18)",
                             borderBottomRightRadius: "4px",
                           } : {
-                            background: "rgba(255,255,255,0.04)",
-                            border: "1px solid rgba(255,255,255,0.06)",
+                            background: "rgba(255,255,255,0.05)",
+                            border: "1px solid rgba(255,255,255,0.07)",
                             borderBottomLeftRadius: "4px",
                           }}>
                           <p className="text-cream text-sm leading-relaxed">{msg.content}</p>
-                          <p className={`text-[9px] mt-1 ${isMine ? "text-gold/40 text-right" : "text-cream/55"}`}>
+                          <p className={`font-mono text-[9px] mt-1 tabular-nums ${isMine ? "text-gold/45 text-right" : "text-cream/40"}`}>
                             {new Date(msg.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                           </p>
                         </div>
@@ -1361,13 +1431,16 @@ export default function SocialPage() {
                       value={msgInput}
                       onChange={e => setMsgInput(e.target.value)}
                       onKeyDown={e => e.key === "Enter" && !e.shiftKey && sendMessage()}
-                      placeholder="Type a message..."
-                      className="flex-1 bg-white/[0.04] border border-white/[0.08] rounded-xl px-4 py-2.5 text-sm text-cream placeholder:text-cream/55 focus:outline-none focus:border-electric/30 transition"
+                      placeholder={`Message ${selectedFriend.username}`}
+                      autoComplete="off"
+                      autoCorrect="off"
+                      spellCheck={true}
+                      className="social-msg-input flex-1 bg-white/[0.04] border border-white/[0.08] rounded-xl px-4 py-2.5 text-sm text-cream placeholder:text-cream/40 focus:outline-none focus:border-electric/40 transition"
                     />
                     <button
                       onClick={sendMessage}
                       disabled={!msgInput.trim() || sending}
-                      className="px-5 py-2.5 rounded-xl font-bold text-sm transition-all active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed"
+                      className="px-5 py-2.5 rounded-xl font-bold text-sm transition-transform active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed will-change-transform"
                       style={{
                         background: "linear-gradient(135deg, #FFD700 0%, #B8960C 100%)",
                         color: "#04080F",
@@ -1405,10 +1478,10 @@ export default function SocialPage() {
 
               <div className="space-y-2 mb-5">
                 {[
-                  { key: "grind",   label: "grind time — let's go",        accent: "#F97316" },
+                  { key: "grind",   label: "grind time. let's go",        accent: "#F97316" },
                   { key: "gotthis", label: "you got this, stay locked in", accent: "#FFD700" },
                   { key: "studyup", label: "we studying? hop on",          accent: "#4A90D9" },
-                  { key: "missyou", label: "miss your grind — pull up",    accent: "#A855F7" },
+                  { key: "missyou", label: "miss your grind. pull up",     accent: "#A855F7" },
                 ].map(p => (
                   <button
                     key={p.key}
