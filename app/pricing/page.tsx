@@ -42,19 +42,19 @@ const FAQ = [
   },
   {
     q: "Why are there ads on Free?",
-    a: "AI costs real money — the adaptive exam prep runs on OpenAI. Ads on Free cover those costs so Lionade stays genuinely free for anyone who can't or doesn't want to pay. Pro removes popups; Platinum removes ads entirely.",
+    a: "AI costs real money. The adaptive exam prep runs on OpenAI, and ads on Free cover those costs so Lionade stays genuinely free for anyone who can't or doesn't want to pay. Pro removes popups; Platinum removes ads entirely.",
   },
   {
     q: "How does the annual discount work?",
-    a: "Annual plans save you about two months — Pro annual is $69.99 (vs $83.88 monthly), Platinum annual is $149.99 (vs $179.88 monthly). Billed once per year. Cancel anytime for no charge on the next cycle.",
+    a: "Annual plans save you about two months. Pro annual is $69.99 (vs $83.88 monthly), Platinum annual is $149.99 (vs $179.88 monthly). Billed once per year. Cancel anytime for no charge on the next cycle.",
   },
   {
     q: "What's a Fang multiplier?",
-    a: "Fangs are Lionade's in-app currency — you earn them for correct quiz answers, winning duels, streaks, and Clock-In bonuses. Pro earns 1.5× Fangs on everything; Platinum earns 2×. More Fangs = more shop buys and eventual cash-out.",
+    a: "Fangs are Lionade's in-app currency. You earn them for correct quiz answers, winning duels, streaks, and Clock-In bonuses. Pro earns 1.5× Fangs on everything; Platinum earns 2×. More Fangs = more shop buys and eventual cash-out.",
   },
   {
     q: "What happens to my data if I downgrade?",
-    a: "Nothing gets deleted. You keep your history, streaks, Fangs, and every exam you've created. But going from Pro (3 exams) to Free (1) means extra exams archive automatically — you can unarchive later by upgrading.",
+    a: "Nothing gets deleted. You keep your history, streaks, Fangs, and every exam you've created. But going from Pro (3 exams) to Free (1) means extra exams archive automatically. You can unarchive later by upgrading.",
   },
   {
     q: "Do you offer refunds?",
@@ -338,7 +338,7 @@ export default function PricingPage() {
             className="text-cream/60 text-[14px] max-w-lg mx-auto leading-relaxed"
             {...reveal(0.05)}
           >
-            Start free forever. Upgrade when you're ready to grind harder — every plan
+            Start free forever. Upgrade when you're ready to grind harder. Every plan
             runs on the same adaptive AI, same duels, same leaderboard.
           </motion.p>
         </header>
