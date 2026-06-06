@@ -7,6 +7,23 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 
 ---
 
+## 2026-06-06 — Pricing tier-card perks copy: strip em-dashes (web-only, no iOS row)
+
+**Status:** 🚫 N/A (deliberate no-row decision — no equivalent Pro pricing surface ships in iOS today).
+
+Three em-dashes lived inside `app/pricing/page.tsx` tier-card perk arrays — one per tier:
+- Free: `"Quizzes, duels, leaderboards — all in"` → `"Quizzes, duels, leaderboards, all in"`
+- Pro: `"Session Report PDF — unlimited"` → `"Unlimited Session Report PDFs"`
+- Platinum: `` `${PLAN_FANG_MULTIPLIER.platinum}× Fangs — the max` `` → `` `${PLAN_FANG_MULTIPLIER.platinum}× Fangs, the max` ``
+
+Em-dashes in user-facing copy are an AI-tell per standing order. Sam additionally suspected a "Popups zone" typo on the Pro card; verified the source has read `"Popups gone"` for the full life of the perks array — the screenshot rendering made the lowercase `g` look like a `z`. No code change for that line.
+
+iOS stance: `lionade-ios/` has no pricing / paywall screen at all (no `Session Report PDF`, `Popups gone`, or `Mastery target` strings present anywhere under `app/`, `components/`, `lib/`, or `packages/`). When the iOS paywall screen ships, the perks copy must mirror these final strings exactly; tag `ios-platform-bridge` to pull this perks array through `@lionade/core` so the two surfaces can never drift again. **No iOS row required today.**
+
+**Files touched (web):** `app/pricing/page.tsx` (three perk strings in `PlanCard` perks arrays). FAQ prose em-dashes (`a:` strings, lines ~45-57) and the hero subtitle line ~341 were left intact this pass — separate sweep if/when Sam scopes the whole pricing page.
+
+---
+
 ## 2026-06-05 — Bluff Trivia host vote-save failure (web-only, no iOS row)
 
 **Status:** 🚫 N/A (deliberate no-row decision — Lionade Party is web-only V1 per project memory; iOS Party has not shipped, so there is no equivalent flow to fix today).
