@@ -275,10 +275,10 @@ function DashboardContent() {
       setUserBounties(prev => prev.map(ub => ub.bounty_id === bountyId ? { ...ub, claimed: true } : ub));
       await refreshUser();
       const reward = bounty?.coin_reward ?? res.data?.coinsAwarded ?? 0;
-      toastSuccess(reward > 0 ? `Bounty claimed — +${reward} Fangs` : "Bounty claimed");
+      toastSuccess(reward > 0 ? `Bounty claimed. +${reward} Fangs` : "Bounty claimed");
       setCelebrateKey(k => k + 1);
     } else {
-      toastError("Couldn't claim bounty — please try again");
+      toastError("Couldn't claim bounty. Please try again.");
     }
   };
 
@@ -288,10 +288,10 @@ function DashboardContent() {
     if (res.ok) {
       setDailyMissions(prev => prev.map(m => m.id === missionId ? { ...m, claimed: true } : m));
       await refreshUser();
-      toastSuccess(mission ? `${mission.title} — +${mission.coinReward} Fangs` : "Mission claimed");
+      toastSuccess(mission ? `${mission.title}. +${mission.coinReward} Fangs` : "Mission claimed");
       setCelebrateKey(k => k + 1);
     } else {
-      toastError("Couldn't claim mission — please try again");
+      toastError("Couldn't claim mission. Please try again.");
     }
   };
 
@@ -306,12 +306,12 @@ function DashboardContent() {
       if (res.ok && res.data?.success) {
         setActiveBet(res.data.bet);
         await refreshUser();
-        toastSuccess(`Bet placed — ${betStake} Fangs on ${betTarget}/10`);
+        toastSuccess(`Bet placed. ${betStake} Fangs on ${betTarget}/10.`);
       } else {
-        toastError("Couldn't place bet — please try again");
+        toastError("Couldn't place bet. Please try again.");
       }
     } catch {
-      toastError("Couldn't place bet — please try again");
+      toastError("Couldn't place bet. Please try again.");
     } finally {
       setPlacingBet(false);
     }
@@ -357,6 +357,34 @@ function DashboardContent() {
         .animate-slide-up {
           animation: slide-up 0.5s ease both;
         }
+        /* Hero aurora — purely decorative, GPU-only drift */
+        @keyframes hero-aurora-drift {
+          0%   { transform: translate3d(-4%, 0, 0) scale(1); opacity: 0.55; }
+          50%  { transform: translate3d( 4%, -2%, 0) scale(1.05); opacity: 0.75; }
+          100% { transform: translate3d(-4%, 0, 0) scale(1); opacity: 0.55; }
+        }
+        .hero-aurora {
+          animation: hero-aurora-drift 14s ease-in-out infinite;
+          will-change: transform, opacity;
+        }
+        /* Daily Bet idle highlight — subtle gold halo cycle */
+        @keyframes bet-card-pulse {
+          0%, 100% { box-shadow: 0 0 24px rgba(255,215,0,0.04), inset 0 0 0 1px rgba(255,215,0,0.10); }
+          50%      { box-shadow: 0 0 30px rgba(255,215,0,0.10), inset 0 0 0 1px rgba(255,215,0,0.18); }
+        }
+        .bet-idle-pulse {
+          animation: bet-card-pulse 4.2s ease-in-out infinite;
+          will-change: box-shadow;
+        }
+        /* Lift effect for clickable tiles — transform-only */
+        .dash-lift { transition: transform 220ms cubic-bezier(.2,.7,.2,1), box-shadow 220ms ease; will-change: transform; }
+        .dash-lift:hover { transform: translate3d(0, -2px, 0); }
+        @media (prefers-reduced-motion: reduce) {
+          .animate-slide-up { animation: none !important; opacity: 1 !important; transform: none !important; }
+          .hero-aurora { animation: none !important; }
+          .bet-idle-pulse { animation: none !important; }
+          .dash-lift:hover { transform: none !important; }
+        }
       `}</style>
 
       {/* Celebration confetti on bounty/mission claim — keyed on a counter
@@ -380,19 +408,30 @@ function DashboardContent() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 relative z-10">
 
           {/* ═══ 1) Hero Header ═══ */}
-          <div className="mb-6 animate-slide-up">
-            <div className="flex items-start justify-between gap-4">
+          <div className="mb-7 animate-slide-up relative">
+            {/* Aurora glow — purely decorative, sits behind the welcome line */}
+            <div className="absolute -top-10 -left-12 w-[420px] h-[180px] pointer-events-none hero-aurora"
+              aria-hidden="true"
+              style={{
+                background: "radial-gradient(ellipse at center, rgba(74,144,217,0.18) 0%, rgba(155,89,182,0.08) 35%, transparent 70%)",
+                filter: "blur(28px)",
+              }}
+            />
+            <div className="flex items-start justify-between gap-4 relative">
               <div>
-                <h1 className="font-bebas text-4xl sm:text-5xl text-cream tracking-wider leading-tight">
+                <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-electric/55 mb-1.5">
+                  Command Bridge
+                </p>
+                <h1 className="font-bebas text-4xl sm:text-5xl text-cream tracking-wider leading-[0.95]">
                   Welcome back, {usernameEffect === "none"
                     ? <span className="shimmer-text">{user.username}</span>
                     : <AnimatedUsername username={user.username} effect={usernameEffect} size="lg" className="font-bebas tracking-wider" />}
                 </h1>
-                <p className="text-cream/60 text-sm mt-1">{getGreeting()}</p>
+                <p className="text-cream/65 text-sm mt-2 font-syne">{getGreeting()}</p>
               </div>
               <div className="hidden sm:flex flex-col items-end gap-1.5 flex-shrink-0">
-                <p className="text-cream/25 text-xs">{today}</p>
-                <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold px-3 py-1 rounded-full bg-electric/10 text-electric/80 border border-electric/15">
+                <p className="text-cream/30 text-[11px] font-mono tracking-wider uppercase">{today}</p>
+                <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold px-3 py-1 rounded-full bg-electric/10 text-electric/85 border border-electric/20">
                   <span className="w-1.5 h-1.5 rounded-full bg-electric animate-pulse" />
                   Ready to study
                 </span>
@@ -579,8 +618,11 @@ function DashboardContent() {
 
           {/* ═══ 5) Daily Bet ═══ */}
           <div className="mb-8 animate-slide-up" style={{ animationDelay: "0.16s" }}>
-            <h2 className="font-bebas text-lg text-cream tracking-wider mb-3">DAILY BET</h2>
-            <div className="rounded-tl-[28px] rounded-br-[28px] rounded-tr-[10px] rounded-bl-[10px] p-5 relative overflow-hidden"
+            <div className="flex items-baseline justify-between mb-3">
+              <h2 className="font-bebas text-xl text-cream tracking-wider">DAILY BET</h2>
+              <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-cream/30">Risk / Reward</span>
+            </div>
+            <div className={`rounded-tl-[28px] rounded-br-[28px] rounded-tr-[10px] rounded-bl-[10px] p-5 relative overflow-hidden ${!activeBet ? "bet-idle-pulse" : ""}`}
               style={{ background: "linear-gradient(135deg, #0d1528 0%, #0a1020 100%)", border: "1px solid rgba(255,215,0,0.1)", boxShadow: "0 0 24px rgba(255,215,0,0.04)" }}>
               <div className="absolute top-0 left-0 right-0 h-[2px]" style={{ background: "linear-gradient(90deg, #FFD700, #FFA500, transparent)" }} />
 
@@ -613,7 +655,7 @@ function DashboardContent() {
                       : <SmileySad size={28} weight="regular" color="rgba(238,244,255,0.5)" aria-hidden="true" />}
                     <div>
                       <p className={`text-sm font-semibold ${lastBet.won ? "text-gold" : "text-cream/50"}`}>
-                        {lastBet.won ? `YOU WON ${lastBet.coins_won} COINS!` : `Lost ${lastBet.coins_staked} coins`}
+                        {lastBet.won ? `YOU WON ${lastBet.coins_won} FANGS!` : `Lost ${lastBet.coins_staked} Fangs`}
                       </p>
                       <p className="text-cream/55 text-[10px]">Place another bet below</p>
                     </div>
@@ -654,7 +696,7 @@ function DashboardContent() {
                     <button onClick={placeBet} disabled={placingBet || coins < betStake}
                       className="mt-3 w-full py-2.5 rounded-full text-xs font-bold transition-all duration-200 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed"
                       style={{ background: coins >= betStake ? "linear-gradient(90deg, #FFD700, #FFA500)" : "rgba(255,255,255,0.06)", color: coins >= betStake ? "#0a1020" : "rgba(255,255,255,0.3)", boxShadow: coins >= betStake ? "0 0 16px rgba(255,215,0,0.2)" : "none" }}>
-                      {placingBet ? "Placing..." : coins < betStake ? "Not enough coins" : `Place Bet — ${betStake} coins`}
+                      {placingBet ? "Placing..." : coins < betStake ? "Not enough Fangs" : `Place Bet · ${betStake} Fangs`}
                     </button>
                   </div>
                 </div>
@@ -701,7 +743,7 @@ function DashboardContent() {
                   <button onClick={placeBet} disabled={placingBet || coins < betStake}
                     className="mt-3 w-full py-2.5 rounded-full text-xs font-bold transition-all duration-200 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed"
                     style={{ background: coins >= betStake ? "linear-gradient(90deg, #FFD700, #FFA500)" : "rgba(255,255,255,0.06)", color: coins >= betStake ? "#0a1020" : "rgba(255,255,255,0.3)", boxShadow: coins >= betStake ? "0 0 16px rgba(255,215,0,0.2)" : "none" }}>
-                    {placingBet ? "Placing..." : coins < betStake ? "Not enough coins" : `Place Bet — ${betStake} coins`}
+                    {placingBet ? "Placing..." : coins < betStake ? "Not enough Fangs" : `Place Bet · ${betStake} Fangs`}
                   </button>
                 </div>
               )}
@@ -710,7 +752,10 @@ function DashboardContent() {
 
           {/* ═══ 5c) Bounty Board ═══ */}
           <div className="mb-8 animate-slide-up" style={{ animationDelay: "0.17s" }}>
-            <h2 className="font-bebas text-lg text-cream tracking-wider mb-3">BOUNTY BOARD</h2>
+            <div className="flex items-baseline justify-between mb-3">
+              <h2 className="font-bebas text-xl text-cream tracking-wider">BOUNTY BOARD</h2>
+              <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-cream/30">Live targets</span>
+            </div>
 
             {/* Daily Bounties */}
             {bounties.filter(b => b.type === "daily").length > 0 && (
@@ -820,9 +865,9 @@ function DashboardContent() {
 
             {/* Left: Subjects as cards */}
             <div className="lg:col-span-2 animate-slide-up" style={{ animationDelay: "0.2s" }}>
-              <Link href="/learn" className="flex items-center justify-between mb-3 group">
-                <h2 className="font-bebas text-lg text-cream tracking-wider">YOUR SUBJECTS</h2>
-                <span className="text-cream/55 text-[10px] group-hover:text-electric transition-colors">Learn &rarr;</span>
+              <Link href="/learn" className="flex items-baseline justify-between mb-3 group">
+                <h2 className="font-bebas text-xl text-cream tracking-wider">YOUR SUBJECTS</h2>
+                <span className="text-cream/55 text-[10px] font-mono uppercase tracking-[0.2em] group-hover:text-electric transition-colors">Learn &rarr;</span>
               </Link>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {displaySubjects.slice(0, 6).map((stat, i) => {
@@ -869,8 +914,8 @@ function DashboardContent() {
 
               {/* ═══ 7-Day Activity Chart — sits below YOUR SUBJECTS, fills the column next to Achievements ═══ */}
               <FluidReveal className="mt-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="font-bebas text-lg text-cream tracking-wider">WEEKLY ACTIVITY</h2>
+                <div className="flex items-baseline justify-between mb-4">
+                  <h2 className="font-bebas text-xl text-cream tracking-wider">WEEKLY ACTIVITY</h2>
                   <div className="flex items-center gap-4 text-[10px]">
                     <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full" style={{ background: "#4A90D9" }} /> Questions</span>
                     <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full" style={{ background: "#22C55E" }} /> Correct</span>
@@ -984,11 +1029,11 @@ function DashboardContent() {
 
               {/* This Week — Leaderboard */}
               <div className="animate-slide-up" style={{ animationDelay: "0.18s" }}>
-                <Link href="/leaderboard" className="flex items-center justify-between mb-3 group">
-                  <h2 className="font-bebas text-lg text-cream tracking-wider">THIS WEEK</h2>
-                  <span className="text-cream/55 text-[10px] group-hover:text-electric transition-colors">View All &rarr;</span>
+                <Link href="/leaderboard" className="flex items-baseline justify-between mb-3 group">
+                  <h2 className="font-bebas text-xl text-cream tracking-wider">THIS WEEK</h2>
+                  <span className="text-cream/55 text-[10px] font-mono uppercase tracking-[0.2em] group-hover:text-electric transition-colors">View All &rarr;</span>
                 </Link>
-                <Link href="/leaderboard" className="block rounded-[20px] p-4 space-y-2 transition-all duration-200 hover:scale-[1.01]"
+                <Link href="/leaderboard" className="block rounded-[20px] p-4 space-y-2 dash-lift"
                   style={{ background: "linear-gradient(135deg, #0d1528 0%, #0a1020 100%)", border: "1px solid rgba(74,144,217,0.08)" }}>
                   {leaderboard.length > 0 ? (
                     <>
@@ -1022,16 +1067,21 @@ function DashboardContent() {
                       })()}
                     </>
                   ) : (
-                    <p className="text-cream/55 text-xs text-center py-2">No activity this week yet.</p>
+                    <div className="text-center py-3">
+                      <p className="text-cream/55 text-xs mb-2">No activity this week yet.</p>
+                      <span className="inline-block font-syne font-semibold text-[11px] px-3 py-1.5 rounded-full border border-gold/30 text-gold/85 bg-gold/5">
+                        Climb the board
+                      </span>
+                    </div>
                   )}
                 </Link>
               </div>
 
               {/* Recent Activity */}
               <div className="animate-slide-up" style={{ animationDelay: "0.22s" }}>
-                <Link href="/quiz" className="flex items-center justify-between mb-3 group">
-                  <h2 className="font-bebas text-lg text-cream tracking-wider">RECENT ACTIVITY</h2>
-                  <span className="text-cream/55 text-[10px] group-hover:text-electric transition-colors">Quiz &rarr;</span>
+                <Link href="/quiz" className="flex items-baseline justify-between mb-3 group">
+                  <h2 className="font-bebas text-xl text-cream tracking-wider">RECENT ACTIVITY</h2>
+                  <span className="text-cream/55 text-[10px] font-mono uppercase tracking-[0.2em] group-hover:text-electric transition-colors">Quiz &rarr;</span>
                 </Link>
                 {recentQuizzes.length > 0 ? (
                   <div className="space-y-1">
@@ -1039,13 +1089,16 @@ function DashboardContent() {
                       const RecentIcon = SUBJECT_ICONS[quiz.subject] ?? DefaultSubjectIcon;
                       const recentColor = SUBJECT_COLORS[quiz.subject as keyof typeof SUBJECT_COLORS] ?? "#4A90D9";
                       return (
-                      <Link key={quiz.id} href="/quiz" className={`flex items-center gap-3 py-2.5 px-3 transition-all duration-200 hover:bg-white/[0.03] cursor-pointer ${
+                      <Link key={quiz.id} href="/quiz" className={`flex items-center gap-3 py-2.5 px-3 dash-lift hover:bg-white/[0.03] cursor-pointer ${
                         i % 2 === 0 ? "rounded-[16px]" : "rounded-tl-[20px] rounded-br-[20px] rounded-tr-[6px] rounded-bl-[6px]"
                       }`}>
-                        <RecentIcon size={18} weight="regular" color={recentColor} aria-hidden="true" />
+                        <div className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0"
+                          style={{ background: `${recentColor}14`, border: `1px solid ${recentColor}25` }}>
+                          <RecentIcon size={16} weight="regular" color={recentColor} aria-hidden="true" />
+                        </div>
                         <div className="flex-1 min-w-0">
                           <p className="text-cream text-xs font-semibold truncate">{quiz.subject}</p>
-                          <p className="text-cream/25 text-[10px]">{timeAgo(quiz.completed_at)}</p>
+                          <p className="text-cream/40 text-[10px] font-mono tracking-wider">{timeAgo(quiz.completed_at)}</p>
                         </div>
                         <div className="flex items-center gap-2 flex-shrink-0">
                           <span className="text-xs font-mono text-cream/60">{quiz.correct_answers}/{quiz.total_questions}</span>
@@ -1070,9 +1123,9 @@ function DashboardContent() {
 
               {/* Achievements */}
               <div className="animate-slide-up" style={{ animationDelay: "0.24s" }}>
-                <Link href="/profile" className="flex items-center justify-between mb-3 group">
-                  <h2 className="font-bebas text-lg text-cream tracking-wider">ACHIEVEMENTS <span className="text-cream/25 text-xs font-mono">{achievements.length}/8</span></h2>
-                  <span className="text-cream/55 text-[10px] group-hover:text-electric transition-colors">Profile &rarr;</span>
+                <Link href="/profile" className="flex items-baseline justify-between mb-3 group">
+                  <h2 className="font-bebas text-xl text-cream tracking-wider">ACHIEVEMENTS <span className="text-cream/30 text-xs font-mono ml-1">{achievements.length}/8</span></h2>
+                  <span className="text-cream/55 text-[10px] font-mono uppercase tracking-[0.2em] group-hover:text-electric transition-colors">Profile &rarr;</span>
                 </Link>
                 <div className="grid grid-cols-4 gap-2">
                   {([
@@ -1141,7 +1194,7 @@ function DashboardContent() {
                   const best = ranked[0];
                   const worst = ranked[ranked.length - 1];
                   if (best.accuracy >= 70) {
-                    notes.push({ text: `${best.subject} is your strongest — ${best.accuracy}% accuracy. Stack Fangs while you're hot.` });
+                    notes.push({ text: `${best.subject} is your strongest, ${best.accuracy}% accuracy. Stack Fangs while you're hot.` });
                   }
                   if (worst.accuracy < 60 && worst.subject !== best.subject) {
                     notes.push({ text: `${worst.subject} accuracy is ${worst.accuracy}%. A quick round could move that fast.`, weakSubject: worst.subject });
@@ -1156,7 +1209,7 @@ function DashboardContent() {
                   if (today.questions === 0 && prev3Avg > 0) {
                     notes.push({ text: `You haven't studied yet today. A 10-question round keeps the streak safe.` });
                   } else if (today.questions > prev3Avg * 1.5 && today.questions >= 5) {
-                    notes.push({ text: `${today.questions} questions today — above your usual pace. Nice gear.` });
+                    notes.push({ text: `${today.questions} questions today, above your usual pace. Nice gear.` });
                   }
                 }
 
@@ -1170,8 +1223,8 @@ function DashboardContent() {
                 // Fallback for empty/new users
                 if (notes.length === 0) {
                   notes.push({ text: subjectStats.length === 0
-                    ? `Take your first quiz — Ninny will start spotting patterns after a few rounds.`
-                    : `Keep answering — Ninny needs a bit more data to spot patterns.`
+                    ? `Take your first quiz. Ninny will start spotting patterns after a few rounds.`
+                    : `Keep answering. Ninny needs a bit more data to spot patterns.`
                   });
                 }
 
@@ -1180,7 +1233,7 @@ function DashboardContent() {
 
                 return (
                   <div className="animate-slide-up" style={{ animationDelay: "0.26s" }}>
-                    <h2 className="font-bebas text-lg text-cream tracking-wider mb-3">NINNY&apos;S NOTES</h2>
+                    <h2 className="font-bebas text-xl text-cream tracking-wider mb-3">NINNY&apos;S NOTES</h2>
                     <div className="rounded-tl-[24px] rounded-br-[24px] rounded-tr-[8px] rounded-bl-[8px] p-4 idle-glow-ninny"
                       style={{ background: "linear-gradient(135deg, #0d1528 0%, #0a1020 100%)", border: "1px solid rgba(74,144,217,0.08)" }}>
                       <div className="space-y-2.5 mb-4">
