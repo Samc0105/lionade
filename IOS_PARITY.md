@@ -7,6 +7,35 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 
 ---
 
+## 2026-06-06 — Social polish: friends + DMs + nudges (web-only, no iOS row)
+
+**Status:** 🚫 N/A (deliberate no-row decision: visual polish pass on the existing web `/social` surface; no data-model, contract, or API change. iOS social is a separate native surface owned by `vp-ios` and is queued for its own visual pass on a separate cadence.)
+
+Single-file polish on `app/social/page.tsx` (+ `app/globals.css` for the new GPU keyframes). No new fetches, no new deps, no contract change.
+
+1. **Friends list — online-first sort.** `filteredFriends` now memo-sorts: online friends bubble to the top, then offline friends by `last_seen` recency. Panel reads as "who's around right now" first.
+2. **Friends list — tinted chip avatar.** Each avatar sits in a circular tinted chip (consistent with dashboard e106e2b pattern). Green-ring gradient + soft glow when `is_online`, neutral white/0.04 chip when offline. Green-pulse dot retained on the bottom-right corner.
+3. **Friends list — recent activity caption.** Caption lifted to mono `text-[10px]` `text-cream/40`. Online state reads "Online now" (green/80) instead of "Online" (green/70).
+4. **Friends list — GPU hover lift.** New `.social-friend-row` class: `translateY(-1px)` on hover, 180ms transition, GPU-only, reduced-motion guarded.
+5. **Friends list — empty state.** Replaced the bare "No friends yet" sentence with a gold-tinted Users icon tile + "Build your circle" headline + serif-italic helper + an explicit "Find friends" pill CTA that opens the Add-Friend modal directly.
+6. **DM thread — empty state.** Replaced "No messages yet. Say hi." with a personal "Say hi to {username}" state: electric/purple gradient Megaphone tile + "first messages are weird. a \"yo\" works." serif-italic micro-copy. Wrapped in `.social-empty-thread` keyframe for a 320ms fade-in.
+7. **DM thread — bubble entrance.** Each message bubble fades in from its side via `.social-msg-mine` / `.social-msg-theirs` keyframes (translate3d + opacity, GPU-only, 260ms, reduced-motion guarded). My bubble border bumped to gold/0.18 (was 0.15) for tighter hierarchy.
+8. **DM thread — input.** Placeholder now reads "Message {username}" (personal). `autoComplete="off"` + `autoCorrect="off"` added (no-em-dash shakedown hardening). `.social-msg-input` adds an electric 3px box-shadow ring on focus (no layout shift). Send button uses `transition-transform` only to avoid recomposite on hover.
+9. **DM thread — chat header.** Em-dash separator between ELO tier name and rating replaced with bullet (`Gold · 1450 ELO`). Arena event score separator now reads "X vs Y" with tabular-nums instead of "X — Y".
+10. **Hero pulse chips — no flash-of-zero.** New `friendsHydrated` state flag (flips on cache restore OR SWR success). Until set, the "online now" and "requests" chip values render a soft em-dash placeholder (`text-cream/30`) instead of `0`. The studying-dot pulse is also gated on hydration so the green dot doesn't pulse over a stale `0`.
+11. **Copy cleanup.** Stripped em-dashes from: nudge presets ("grind time. let's go", "miss your grind. pull up"), squad goal caption, feed empty-state, chat header tier separator, arena score, polaroid aria-label.
+12. **Motion contract.** All new keyframes use `translate3d` + `opacity` only (GPU-compositable). `prefers-reduced-motion: reduce` disables the bubble entrance, empty-thread fade, friend-row hover lift, and existing studying/polaroid animations. Hydration-safe (no `Math.random` / `Date.now` in render).
+
+iOS impact: none. iOS social is a separate native surface and is queued for its own polish pass when `vp-ios` schedules it. The online-first sort heuristic is the only behavior change worth porting; the visual treatments (tinted chips, GPU keyframes, fade-in bubbles) should map cleanly to Reanimated + Skia equivalents at that time.
+
+Files touched (web): `app/social/page.tsx`, `app/globals.css`.
+
+Bundle: `/social` 28.9 kB → 29.3 kB (+0.4).
+
+Owner: `quality-docs-writer` (web). No `vp-ios` tag.
+
+---
+
 ## 2026-06-06 — Resume Coach polish: upload, Socratic, summary (web-only, no iOS row)
 
 **Status:** 🚫 N/A (deliberate no-row decision: visual polish pass on the existing web Resume Coach surface; no data-model, contract, or API-prompt change. Resume Coach is a Pro-tier web-only surface and is not on the iOS roadmap, so no parity row is created.)
