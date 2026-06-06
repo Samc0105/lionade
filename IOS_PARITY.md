@@ -7,6 +7,32 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 
 ---
 
+## 2026-06-06 — Leaderboard live-feel polish: podium, your-row, overtake CTA, density (web-only, no iOS row)
+
+**Status:** 🚫 N/A (deliberate no-row decision — visual polish pass on the existing web Leaderboard surface; no data-model, contract, or feature change. iOS Leaderboard already mirrors the same data shape via `@lionade/core` and is queued for its own visual pass under `vp-ios` when iOS catches up to the Compete IA consolidation.)
+
+Single-file polish on `app/leaderboard/page.tsx`. No new fetches, no new deps, no contract change, no behavior change beyond visual emphasis. Goal: make the leaderboard feel like a live tournament, make rank changes hit emotionally, and put a direct competitive prompt above the fold.
+
+1. **"Live Ladder" eyebrow with pulsing dot** above the LEADERBOARD title. Uses `animate-ping` on a 2px electric dot inside the existing eyebrow pill pattern. Communicates "this updates" even when it doesn't update in-page.
+2. **Overtake hero callout.** When the user is logged in and ranked >= 2, a glassy electric-tinted card above the podium reads "Beat <name above> to take #N-1 · X ELO away" (or X Fangs on Weekly). Direct competitive prompt. On the duel tab, a primary Challenge CTA in the callout deep-links to `/compete/arena/duel?challenge=<username>`. Hidden on smaller screens to keep the row scannable.
+3. **Polished podium.** 1st/2nd/3rd now sit inside their own tier-tinted cards (gold/silver/bronze gradient + matching border) with explicit "GOLD · #1 GOAT", "SILVER · #2", "BRONZE · #3" chips. Subtle radial gold backdrop behind the podium row. The 1st-place crown keeps the existing `animate-float`.
+4. **"You" row treatment.** Stronger `border-electric/60` + `shadow-electric/15` ring + a glowing electric avatar `box-shadow`. "YOU" chip is now uppercase + tracked for badge-like presence. Off-screen "Your Position" pinned card now shows the gap-to-next-rank line too.
+5. **Empty-state copy refresh.** "Be the first on the board" + "Take a quiz, earn Fangs, and claim the #1 spot." Replaces the old "No rankings yet" + "earn coins" mismatch (we say Fangs, not coins, in UI).
+6. **GPU-only motion** throughout. `will-change-transform` added to the moving surfaces (callout card, podium avatars, hover-lift rows, challenge buttons). No new keyframes. Existing `prefers-reduced-motion` rules in `globals.css` already gate the slide-up entry.
+7. **Hydration-safe.** All randomness sources removed from the file; animation delays are deterministic from list index. No `Date.now()`/`Math.random()` in render.
+8. **No flash-of-zero.** Loading skeleton gates the podium + list + overtake callout. The callout's `myEntry`/`personAboveMe`/`gapToAbove` derivations are null-safe before render.
+
+Scope discipline: `app/dashboard/page.tsx`, `app/games/page.tsx`, `app/wallet/page.tsx`, `app/profile/page.tsx` not touched. No iOS files touched. No new package added. Time-period tabs left as the existing 4-up grid (limelight slider not retrofitted — out of scope for a polish pass).
+
+iOS stance: when iOS Leaderboard gets its visual pass, `ios-design-motion` should mirror the podium tier-card pattern (Reanimated equivalent of the gold backdrop + tier chips) and the overtake callout copy. The "Beat <name> to take #N-1" string is platform-agnostic and should move to `@lionade/core/leaderboard/copy.ts` when the iOS pass starts. Currently inlined for the web polish pass. **No iOS row required today.**
+
+**Files touched (web):**
+- `app/leaderboard/page.tsx` (single-file polish)
+
+**Verification:** `npx tsc --noEmit` clean. Owner: `dev-frontend` + `design-motion-web`.
+
+---
+
 ## 2026-06-06 — Party V1 hardening: effective-host port + phase error clear + snapshot expansion (web-only, no iOS row)
 
 **Status:** 🚫 N/A (deliberate no-row decision — Lionade Party is web-only V1 per project memory; iOS Party has not shipped, so there is no equivalent flow to harden today).
