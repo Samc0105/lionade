@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
-import { setActiveSession } from "@/lib/presence";
 
 /**
  * Daily Drill — the "Wordle of studying" daily ritual.
@@ -192,12 +191,12 @@ export async function GET(req: NextRequest) {
       });
     }
 
-    // Pin the user to today's drill so the AFK reaper can clear it if they
-    // walk away mid-drill without completing. Fire-and-forget. Only pinned
-    // when we actually have questions to serve.
-    if (out.length > 0) {
-      void setActiveSession(userId, "daily_drill", today, "player");
-    }
+    // NOTE: We intentionally do NOT setActiveSession here. This GET fires
+    // on every dashboard mount + SWR revalidation — pinning at that point
+    // means a user who just LOADS the dashboard immediately gets an
+    // active_session pointer that haunts every other tab as a "Resume your
+    // daily drill" banner. The pin is now in /api/daily-drill/state GET,
+    // which is only called when the DrillModal actually opens (real intent).
 
     return NextResponse.json({
       completed: false,

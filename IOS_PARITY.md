@@ -7,6 +7,20 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 
 ---
 
+## 2026-06-05 — Stale Resume banner root-cause fix (web-only, no iOS row)
+
+**Status:** 🚫 N/A (deliberate no-row decision — web-side data-flow bug; iOS reads `profiles.active_session` through `@lionade/core` but does not call `/api/daily-drill` on every dashboard mount, so the same loop does not exist there).
+
+Root cause of Sam's perpetually-showing "ACTIVE — Resume your daily drill. Click to rejoin" banner: `app/api/daily-drill/route.ts` GET unconditionally called `setActiveSession(userId, "daily_drill", today, "player")` whenever it returned questions. That GET fires from `components/DailyDrillWidget.tsx` on every dashboard mount + SWR revalidation, so the active_session pointer was being re-pinned (with a fresh `joined_at`) every time the user merely loaded the dashboard — even if they never opened the drill modal. Both prior fixes (8a90ed7 client staleness + 13240e2 auto-reap) were correct as far as they went, but the re-pin happened FASTER than the 2h staleness threshold could fire, so the banner came back instantly on the next dashboard load.
+
+Fix: removed the GET-side pin entirely; moved `setActiveSession` to `app/api/daily-drill/state/route.ts` GET, which the `DrillModal` calls exactly once on mount (the real "user actually started drilling" signal). The 60s server-side AFK reaper + the existing `/api/daily-drill/complete` clear path handle teardown for genuine drill sessions.
+
+iOS stance: iOS reads `profiles.active_session` via `@lionade/core` but the iOS daily-drill flow does not have the equivalent dashboard-mount fetch loop (the iOS dashboard surfaces drill via a different hook that does not call the pin-side-effect route). No iOS port required. When iOS Daily Drill ships its modal-open flow, it should call the same `/api/daily-drill/state` GET to set the pointer — that's the canonical "start a drill" signal cross-platform.
+
+**Files touched (web):** `app/api/daily-drill/route.ts` (removed `setActiveSession` import + call), `app/api/daily-drill/state/route.ts` (added `setActiveSession` import + call on GET).
+
+---
+
 ## 2026-06-05 — Bucket C missing-counterparts sweep (mixed: 1 row + 6 no-row)
 
 **Status:** 🟡 partial — 1 row added (rematch CTA — applies to iOS Party when iOS Party ships); 6 web-only no-row decisions for the rest.

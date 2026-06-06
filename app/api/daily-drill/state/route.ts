@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
+import { setActiveSession } from "@/lib/presence";
 
 /**
  * /api/daily-drill/state — per-day progress autosave.
@@ -51,6 +52,12 @@ export async function GET(req: NextRequest) {
   if (auth instanceof NextResponse) return auth;
   const userId = auth.userId;
   const today = todayUtc();
+
+  // The DrillModal calls this GET exactly once on mount — that's the real
+  // "user opened the drill" signal. Pin the active_session pointer here so
+  // the AFK reaper can clean up if they walk away mid-drill, without
+  // pinning on every dashboard load (which created the stale Resume banner).
+  void setActiveSession(userId, "daily_drill", today, "player");
 
   try {
     const { data, error } = await supabaseAdmin
