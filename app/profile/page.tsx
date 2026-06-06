@@ -342,18 +342,96 @@ const inputCls = "w-full bg-white/5 border border-electric/20 rounded-xl px-4 py
 const labelCls = "block text-cream/50 text-xs font-bold uppercase tracking-widest mb-1.5";
 
 // ── OVERVIEW ───────────────────────────────────────────
+// Rarity ranking + tier accent (mirrors /badges page tone)
+const RARITY_RANK_OVERVIEW: Record<string, number> = { legendary: 0, epic: 1, rare: 2, common: 3 };
+const RARITY_TIERS: { id: "legendary" | "epic" | "rare" | "common"; label: string; color: string }[] = [
+  { id: "legendary", label: "Legendary", color: "#FFD700" },
+  { id: "epic",      label: "Epic",      color: "#9B59B6" },
+  { id: "rare",      label: "Rare",      color: "#4A90D9" },
+  { id: "common",    label: "Common",    color: "#9CA3AF" },
+];
+
 function OverviewSection({ user, level, progress, xpToNext, coins, streak, xp, avatarUrl, statsReady, earnedBadges, allBadges, subjectStats, quizHistory, activity, loading, accuracy, totalQuestions, totalCorrect, duelsWon, refreshUser }: SharedProps) {
   const lockedBadges = allBadges.filter(b => !earnedBadges.some((e: any) => e.id === b.id));
   const [shareOpen, setShareOpen] = useState(false);
-  // Shop V2 — equipped username effect for the overview hero header.
+  // Shop V2: equipped username effect for the overview hero header.
   const usernameEffect = useEquippedUsernameEffect();
 
+  // Group badges by rarity tier for the All Badges section.
+  const earnedByTier = useMemo(() => {
+    const buckets: Record<string, any[]> = { legendary: [], epic: [], rare: [], common: [] };
+    earnedBadges.forEach((b: any) => {
+      const r = (b.rarity ?? "common") as string;
+      (buckets[r] ?? buckets.common).push(b);
+    });
+    return buckets;
+  }, [earnedBadges]);
+
+  const lockedByTier = useMemo(() => {
+    const buckets: Record<string, any[]> = { legendary: [], epic: [], rare: [], common: [] };
+    lockedBadges.forEach((b: any) => {
+      const r = (b.rarity ?? "common") as string;
+      (buckets[r] ?? buckets.common).push(b);
+    });
+    return buckets;
+  }, [lockedBadges]);
+
   return (
-    <div className="space-y-6 animate-slide-up">
+    <div className="space-y-6 animate-slide-up profile-overview">
+      {/* Scoped GPU-only animations + lift utilities */}
+      <style jsx>{`
+        .profile-overview :global(.profile-lift) {
+          transition: transform 220ms cubic-bezier(.2,.7,.2,1), box-shadow 220ms ease;
+          will-change: transform;
+        }
+        .profile-overview :global(.profile-lift:hover) {
+          transform: translate3d(0, -2px, 0);
+        }
+        .profile-overview :global(.profile-badge-lift) {
+          transition: transform 220ms cubic-bezier(.2,.7,.2,1);
+          will-change: transform;
+        }
+        .profile-overview :global(.profile-badge-lift:hover) {
+          transform: scale(1.04);
+        }
+        @keyframes profile-aurora-drift {
+          0%, 100% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.18; }
+          50%      { transform: translate3d(-12px, 8px, 0) scale(1.06); opacity: 0.28; }
+        }
+        @keyframes profile-ring-pulse {
+          0%, 100% { box-shadow: 0 0 22px rgba(74,144,217,0.35), 0 0 0 0 rgba(74,144,217,0.18); }
+          50%      { box-shadow: 0 0 32px rgba(74,144,217,0.55), 0 0 0 6px rgba(74,144,217,0.05); }
+        }
+        .profile-overview :global(.profile-aurora) {
+          animation: profile-aurora-drift 12s ease-in-out infinite;
+          will-change: transform, opacity;
+        }
+        .profile-overview :global(.profile-avatar-ring) {
+          animation: profile-ring-pulse 6s ease-in-out infinite;
+          will-change: box-shadow;
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .profile-overview :global(.profile-aurora),
+          .profile-overview :global(.profile-avatar-ring) { animation: none !important; }
+          .profile-overview :global(.profile-lift:hover),
+          .profile-overview :global(.profile-badge-lift:hover) { transform: none !important; }
+        }
+      `}</style>
+
       {/* Hero card */}
       <Card className="relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-64 h-64 rounded-full blur-3xl opacity-15 pointer-events-none"
-          style={{ background: "radial-gradient(circle, #4A90D9 0%, transparent 70%)" }} />
+        {/* Aurora glow (GPU only) */}
+        <div
+          className="profile-aurora absolute -top-16 -right-16 w-80 h-80 rounded-full blur-3xl pointer-events-none"
+          style={{ background: "radial-gradient(circle, #4A90D9 0%, transparent 70%)" }}
+          aria-hidden="true"
+        />
+        <div
+          className="profile-aurora absolute -bottom-24 -left-20 w-72 h-72 rounded-full blur-3xl pointer-events-none"
+          style={{ background: "radial-gradient(circle, #9B59B6 0%, transparent 70%)", animationDelay: "3s" }}
+          aria-hidden="true"
+        />
+
         <button
           type="button"
           onClick={() => setShareOpen(true)}
@@ -362,23 +440,61 @@ function OverviewSection({ user, level, progress, xpToNext, coins, streak, xp, a
         >
           <ShareNetwork size={11} weight="fill" /> Share
         </button>
+
         <div className="relative z-10 flex flex-col sm:flex-row items-center sm:items-start gap-6">
           <div className="flex flex-col items-center gap-2 flex-shrink-0">
-            <div className="w-24 h-24 rounded-full overflow-hidden border-4"
+            <div
+              className="profile-avatar-ring w-28 h-28 rounded-full overflow-hidden border-4 relative"
               aria-label={`${user.username}'s avatar`}
-              style={{ borderColor: "#4A90D9", boxShadow: "0 0 25px #4A90D960" }}>
-              <img src={avatarUrl} alt={user.username} className="w-24 h-24 rounded-full object-cover" />
+              style={{ borderColor: "#4A90D9" }}
+            >
+              <img src={avatarUrl} alt={user.username} className="w-full h-full object-cover" />
+            </div>
+            <div
+              className="-mt-4 px-3 py-1 rounded-full font-bebas text-sm tracking-wider text-navy"
+              style={{ background: "linear-gradient(135deg, #F0B429 0%, #B8960C 60%, #F0B429 100%)", boxShadow: "0 4px 12px rgba(240,180,41,0.35)" }}
+            >
+              LVL {level}
             </div>
           </div>
-          <div className="flex-1 text-center sm:text-left">
-            <h1 className="font-bebas text-4xl text-cream tracking-wider">
-              <AnimatedUsername username={user.username} effect={usernameEffect} size="lg" className="font-bebas tracking-wider text-4xl" />
+
+          <div className="flex-1 text-center sm:text-left min-w-0">
+            <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-cream/40 mb-1">
+              Player Profile
+            </p>
+            <h1 className="font-bebas text-5xl text-cream tracking-wider leading-none mb-1">
+              <AnimatedUsername username={user.username} effect={usernameEffect} size="lg" className="font-bebas tracking-wider text-5xl" />
             </h1>
-            <p className="text-cream/40 text-sm mb-3">{user.displayName} · Level {level}</p>
-            <div className="mb-4">
-              <div className="flex justify-between text-xs text-cream/40 mb-1">
+            {user.displayName && user.displayName !== user.username && (
+              <p className="text-cream/50 text-sm mb-3">{user.displayName}</p>
+            )}
+
+            {/* Chips row: streak + accuracy + badges */}
+            <div className="flex flex-wrap justify-center sm:justify-start gap-2 mb-4">
+              {statsReady && streak > 0 && (
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-orange-400/30 bg-orange-400/10">
+                  <Fire size={12} weight="fill" color="#FB923C" aria-hidden="true" />
+                  <span className="font-bebas text-sm text-orange-300 tracking-wider">{streak}d streak</span>
+                </span>
+              )}
+              {!loading && earnedBadges.length > 0 && (
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-gold/30 bg-gold/10">
+                  <MedalMilitary size={12} weight="fill" color="#FFD700" aria-hidden="true" />
+                  <span className="font-bebas text-sm text-gold tracking-wider">{earnedBadges.length} badges</span>
+                </span>
+              )}
+              {totalQuestions > 0 && (
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-green-400/30 bg-green-400/10">
+                  <Target size={12} weight="fill" color="#22C55E" aria-hidden="true" />
+                  <span className="font-bebas text-sm text-green-300 tracking-wider">{accuracy}% accuracy</span>
+                </span>
+              )}
+            </div>
+
+            <div className="mb-1">
+              <div className="flex justify-between text-[10px] font-mono uppercase tracking-[0.2em] text-cream/40 mb-1.5">
                 <span>Level {level}</span>
-                <span>{statsReady ? `${xpToNext} XP to Level ${level + 1}` : ""}</span>
+                <span>{statsReady ? `${xpToNext} XP to Lvl ${level + 1}` : " "}</span>
               </div>
               <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden">
                 <div className="h-full rounded-full transition-all duration-500"
@@ -405,24 +521,30 @@ function OverviewSection({ user, level, progress, xpToNext, coins, streak, xp, a
         }}
       />
 
-      {/* Stats grid */}
+      {/* Stats grid: each stat is a trophy with a tinted icon chip */}
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
         {([
-          { kind: "fang" as const, label: "Total Coins",        value: statsReady ? formatCoins(coins) : null,          color: "text-gold",         iconColor: "#FFD700" },
+          { kind: "fang" as const, label: "Total Fangs",        value: statsReady ? formatCoins(coins) : null,          color: "text-gold",         iconColor: "#FFD700" },
           { kind: "icon" as const, Icon: Fire,                  label: "Day Streak",         value: statsReady ? `${streak}` : null,                 color: "text-orange-400", iconColor: "#FB923C" },
           { kind: "icon" as const, Icon: Lightning,             label: "Total XP",           value: statsReady ? xp.toLocaleString() : null,         color: "text-electric",   iconColor: "#4A90D9" },
           { kind: "icon" as const, Icon: NotePencil,            label: "Quizzes Completed",  value: !loading ? quizHistory.length.toString() : null, color: "text-cream",      iconColor: "#EEF4FF" },
           { kind: "icon" as const, Icon: Sword,                 label: "Duels Won",          value: !loading ? duelsWon.toString() : null,           color: "text-purple-400", iconColor: "#A855F7" },
           { kind: "icon" as const, Icon: BookOpen,              label: "Subjects Mastered",  value: !loading ? subjectStats.length.toString() : null, color: "text-green-400",  iconColor: "#22C55E" },
         ]).map((s) => (
-          <Card key={s.label} className="text-center !p-4">
-            {s.kind === "fang"
-              ? <img src={cdnUrl("/F.png")} alt="Fangs" className="w-7 h-7 object-contain mx-auto mb-1" />
-              : <s.Icon size={28} weight="fill" color={s.iconColor} className="mx-auto mb-1" aria-hidden="true" />}
+          <Card key={s.label} className="text-center !p-4 profile-lift relative overflow-hidden">
+            {/* Tinted chip around icon */}
+            <div
+              className="w-11 h-11 rounded-full mx-auto mb-2 flex items-center justify-center border"
+              style={{ background: `${s.iconColor}1A`, borderColor: `${s.iconColor}33` }}
+            >
+              {s.kind === "fang"
+                ? <img src={cdnUrl("/F.png")} alt="" aria-hidden="true" className="w-6 h-6 object-contain" />
+                : <s.Icon size={22} weight="fill" color={s.iconColor} aria-hidden="true" />}
+            </div>
             {s.value !== null
-              ? <p className={`font-bebas text-2xl leading-none ${s.color}`}>{s.value}</p>
-              : <div className="w-12 h-7 bg-white/10 rounded-lg animate-pulse mx-auto" />}
-            <p className="text-cream/40 text-xs mt-1">{s.label}</p>
+              ? <p className={`font-bebas text-3xl leading-none tracking-wider ${s.color}`}>{s.value}</p>
+              : <div className="w-14 h-8 bg-white/10 rounded-lg animate-pulse mx-auto" />}
+            <p className="text-cream/50 text-[10px] font-mono uppercase tracking-[0.18em] mt-2">{s.label}</p>
           </Card>
         ))}
       </div>
@@ -432,75 +554,154 @@ function OverviewSection({ user, level, progress, xpToNext, coins, streak, xp, a
         <Card>
           <div className="flex justify-between items-center mb-4">
             <h3 className="font-bebas text-xl text-cream tracking-wider">RECENT BADGES</h3>
-            <span className="text-electric text-xs font-semibold">{earnedBadges.length} earned</span>
+            <Link href="/badges" className="text-electric text-xs font-semibold hover:text-cream transition-colors">
+              {earnedBadges.length} earned
+            </Link>
           </div>
           {earnedBadges.length === 0 ? (
-            <div className="text-center py-6">
-              <Lock size={32} weight="regular" color="rgba(238,244,255,0.4)" className="mx-auto mb-2" aria-hidden="true" />
-              <p className="text-cream/40 text-sm">Complete quizzes to earn badges</p>
+            <div className="text-center py-8">
+              <div className="w-12 h-12 mx-auto mb-3 rounded-full flex items-center justify-center border border-gold/20 bg-gold/5">
+                <Lock size={20} weight="regular" color="rgba(240,180,41,0.6)" aria-hidden="true" />
+              </div>
+              <p className="text-cream/50 text-sm mb-3">No badges yet</p>
+              <Link href="/quiz" className="inline-block font-syne font-semibold text-xs px-4 py-2 rounded-full border border-electric/30 text-electric hover:bg-electric/10 transition-colors">
+                Complete a quiz to earn one
+              </Link>
             </div>
           ) : (
             <div className="grid grid-cols-3 gap-3">
               {earnedBadges.slice(0, 6).map((b: any) => (
-                <BadgeCard key={b.id} badge={{ ...b, description: b.description ?? "", rarity: b.rarity as any, earnedAt: b.earnedAt }} size="sm" earned />
-              ))}
-            </div>
-          )}
-        </Card>
-
-        {/* Recent activity */}
-        <Card>
-          <h3 className="font-bebas text-xl text-cream tracking-wider mb-4">RECENT ACTIVITY</h3>
-          {activity.length === 0 ? (
-            <div className="text-center py-6">
-              <p className="text-cream/40 text-sm mb-3">No activity yet</p>
-              <Link href="/quiz" className="inline-block font-syne font-semibold text-xs px-4 py-2 rounded-full border border-electric/30 text-electric hover:bg-electric/10 transition-all">
-                Take your first quiz
-              </Link>
-            </div>
-          ) : (
-            <div className="space-y-2">
-              {activity.slice(0, 8).map((a: any, i: number) => (
-                <div key={i} className="flex justify-between items-center py-1.5 border-b border-electric/10 last:border-0">
-                  <div className="flex items-center gap-2">
-                    {a.type === "duel_win"
-                      ? <Sword size={16} weight="fill" color="currentColor" aria-hidden="true" />
-                      : a.type === "badge_bonus"
-                      ? <MedalMilitary size={16} weight="fill" color="currentColor" aria-hidden="true" />
-                      : <NotePencil size={16} weight="regular" color="currentColor" aria-hidden="true" />}
-                    <span className="text-cream/70 text-xs truncate max-w-[160px]">{a.description}</span>
-                  </div>
-                  <span className={`font-bebas text-sm ${a.amount > 0 ? "text-gold" : "text-cream/30"}`}>
-                    {a.amount > 0 ? `+${a.amount}` : "—"}
-                  </span>
+                <div key={b.id} className="profile-badge-lift">
+                  <BadgeCard badge={{ ...b, description: b.description ?? "", rarity: b.rarity as any, earnedAt: b.earnedAt }} size="sm" earned />
                 </div>
               ))}
             </div>
           )}
         </Card>
+
+        {/* Recent activity: tinted chip icons (matches dashboard e106e2b) */}
+        <Card>
+          <h3 className="font-bebas text-xl text-cream tracking-wider mb-4">RECENT ACTIVITY</h3>
+          {activity.length === 0 ? (
+            <div className="text-center py-8">
+              <div className="w-12 h-12 mx-auto mb-3 rounded-full flex items-center justify-center border border-electric/20 bg-electric/5">
+                <Lightning size={20} weight="regular" color="rgba(74,144,217,0.7)" aria-hidden="true" />
+              </div>
+              <p className="text-cream/50 text-sm mb-3">No activity yet</p>
+              <Link href="/quiz" className="inline-block font-syne font-semibold text-xs px-4 py-2 rounded-full border border-electric/30 text-electric hover:bg-electric/10 transition-colors">
+                Take your first quiz
+              </Link>
+            </div>
+          ) : (
+            <div className="space-y-1.5">
+              {activity.slice(0, 8).map((a: any, i: number) => {
+                const isDuel  = a.type === "duel_win";
+                const isBadge = a.type === "badge_bonus";
+                const tint    = isDuel ? "#A855F7" : isBadge ? "#FFD700" : "#4A90D9";
+                const Icon    = isDuel ? Sword : isBadge ? MedalMilitary : NotePencil;
+                return (
+                  <div key={i} className="flex justify-between items-center py-1.5 border-b border-electric/10 last:border-0">
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <div
+                        className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 border"
+                        style={{ background: `${tint}1A`, borderColor: `${tint}33` }}
+                      >
+                        <Icon size={13} weight={isBadge || isDuel ? "fill" : "regular"} color={tint} aria-hidden="true" />
+                      </div>
+                      <span className="text-cream/75 text-xs truncate">{a.description}</span>
+                    </div>
+                    <span className={`font-bebas text-sm flex-shrink-0 tracking-wider ${a.amount > 0 ? "text-gold" : "text-cream/30"}`}>
+                      {a.amount > 0 ? `+${a.amount}` : "+0"}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </Card>
       </div>
 
-      {/* Badges full section */}
+      {/* All badges, grouped by rarity tier */}
       <Card>
-        <h3 className="font-bebas text-xl text-cream tracking-wider mb-4">ALL BADGES</h3>
-        {earnedBadges.length > 0 && (
+        <div className="flex justify-between items-baseline mb-1">
+          <h3 className="font-bebas text-xl text-cream tracking-wider">BADGE COLLECTION</h3>
+          {allBadges.length > 0 && (
+            <span className="text-cream/40 text-xs font-mono uppercase tracking-[0.18em]">
+              {earnedBadges.length} / {allBadges.length}
+            </span>
+          )}
+        </div>
+        <p className="text-cream/40 text-[11px] font-mono uppercase tracking-[0.18em] mb-5">
+          Sorted by rarity
+        </p>
+
+        {earnedBadges.length === 0 && lockedBadges.length === 0 ? (
+          <div className="text-center py-8">
+            <p className="text-cream/40 text-sm">Badges will appear here as you earn them.</p>
+          </div>
+        ) : (
           <>
-            <p className="text-green-400 text-xs font-bold uppercase tracking-widest mb-3">Earned · {earnedBadges.length}</p>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-              {earnedBadges.map((b: any) => (
-                <BadgeCard key={b.id} badge={{ ...b, description: b.description ?? "", rarity: b.rarity as any, earnedAt: b.earnedAt }} size="sm" earned />
-              ))}
-            </div>
-          </>
-        )}
-        {lockedBadges.length > 0 && (
-          <>
-            <p className="text-cream/30 text-xs font-bold uppercase tracking-widest mb-3">Locked · {lockedBadges.length}</p>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              {lockedBadges.map((b: any) => (
-                <BadgeCard key={b.id} badge={{ ...b, description: b.description ?? "", rarity: b.rarity as any }} size="sm" earned={false} />
-              ))}
-            </div>
+            {/* Earned: grouped by rarity, legendary first */}
+            {earnedBadges.length > 0 && RARITY_TIERS.map(tier => {
+              const items = earnedByTier[tier.id] ?? [];
+              if (items.length === 0) return null;
+              return (
+                <div key={`earned-${tier.id}`} className="mb-5">
+                  <div className="flex items-center gap-2 mb-3">
+                    <span
+                      className="w-1.5 h-1.5 rounded-full"
+                      style={{ background: tier.color, boxShadow: `0 0 6px ${tier.color}` }}
+                    />
+                    <p
+                      className="text-[10px] font-bold uppercase tracking-[0.22em]"
+                      style={{ color: tier.color }}
+                    >
+                      {tier.label} · {items.length}
+                    </p>
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    {items.map((b: any) => (
+                      <div key={b.id} className="profile-badge-lift">
+                        <BadgeCard badge={{ ...b, description: b.description ?? "", rarity: b.rarity as any, earnedAt: b.earnedAt }} size="sm" earned />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+
+            {/* Locked: same grouping, dimmed via BadgeCard earned=false */}
+            {lockedBadges.length > 0 && (
+              <div className="border-t border-electric/10 pt-5 mt-5">
+                <p className="text-cream/35 text-[10px] font-bold uppercase tracking-[0.22em] mb-4">
+                  Locked · {lockedBadges.length}
+                </p>
+                {RARITY_TIERS.map(tier => {
+                  const items = lockedByTier[tier.id] ?? [];
+                  if (items.length === 0) return null;
+                  return (
+                    <div key={`locked-${tier.id}`} className="mb-4 last:mb-0">
+                      <div className="flex items-center gap-2 mb-3">
+                        <span
+                          className="w-1.5 h-1.5 rounded-full opacity-50"
+                          style={{ background: tier.color }}
+                        />
+                        <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-cream/35">
+                          {tier.label} · {items.length}
+                        </p>
+                      </div>
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                        {items.map((b: any) => (
+                          <div key={b.id} className="profile-badge-lift">
+                            <BadgeCard badge={{ ...b, description: b.description ?? "", rarity: b.rarity as any }} size="sm" earned={false} />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </>
         )}
       </Card>
@@ -1513,7 +1714,7 @@ function ActivitySection({ activity, quizHistory }: SharedProps) {
                 <p className="text-cream/40 text-xs">{new Date(a.created_at).toLocaleString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}</p>
               </div>
               <span className={`font-bebas text-lg flex-shrink-0 ${a.amount > 0 ? "text-gold" : "text-cream/30"}`}>
-                {a.amount > 0 ? `+${a.amount}` : "—"}
+                {a.amount > 0 ? `+${a.amount}` : "+0"}
               </span>
             </div>
           ))}
@@ -1549,7 +1750,7 @@ function ActivitySection({ activity, quizHistory }: SharedProps) {
                   <p className="text-cream/40 text-xs">{acc}%</p>
                 </div>
                 <span className={`font-bebas text-lg flex-shrink-0 ${h.coins_earned > 0 ? "text-gold" : "text-cream/30"}`}>
-                  {h.coins_earned > 0 ? `+${h.coins_earned}` : "—"}
+                  {h.coins_earned > 0 ? `+${h.coins_earned}` : "+0"}
                 </span>
               </div>
             );
@@ -1687,9 +1888,9 @@ function NotificationsSection() {
 // ── ABOUT LIONADE ─────────────────────────────────────────
 function AboutLionadeSection() {
   const sections: { title: string; Icon: Icon; body: string }[] = [
-    { title: "OUR MISSION", Icon: Target, body: "Lionade was built to give back to students. Oftentimes students work hard and burn out with little recognition. Lionade was built by students for other students. We allow all learners \u2014 novice or advanced \u2014 to be seen, valued, and acknowledged. We reward growth and achievement in a tangible way, empowering students with not just recognition but true support." },
+    { title: "OUR MISSION", Icon: Target, body: "Lionade was built to give back to students. Oftentimes students work hard and burn out with little recognition. Lionade was built by students for other students. We allow all learners, novice or advanced, to be seen, valued, and acknowledged. We reward growth and achievement in a tangible way, empowering students with not just recognition but true support." },
     { title: "ABOUT US", Icon: Handshake, body: "Created by a team of ambitious students looking for a way to revolutionize studying. Lionade is the platform we wish existed before us. We look to give back to a community that already gives so much, and further self improvement around the world." },
-    { title: "OUR VISION", Icon: Rocket, body: "Lionade aims to completely redefine the way studying is done \u2014 rewarding discipline and focus in a measurable way with active compensation for investing your time in self improvement, giving top performers real-world success." },
+    { title: "OUR VISION", Icon: Rocket, body: "Lionade aims to completely redefine the way studying is done, rewarding discipline and focus in a measurable way with active compensation for investing your time in self improvement, giving top performers real-world success." },
   ];
   return (
     <div className="space-y-6 animate-slide-up">
