@@ -3,13 +3,13 @@
  *
  * Rendered once in the root layout. Gives Google (and other crawlers) a
  * strong, structured signal that "Lionade" is a distinct organization +
- * software product — the primary lever against Google's current habit
- * of auto-correcting "lionade" → "lemonade".
+ * software product. Primary lever against Google's current habit of
+ * auto-correcting "lionade" to "lemonade".
  *
  * Why this uses React's inner-HTML prop instead of children:
  *   When you pass JSON as `<script>` children, React HTML-escapes the
  *   string on the server. Script content is CDATA-like, so the browser
- *   reads `&quot;` literally — it does NOT decode HTML entities inside
+ *   reads `&quot;` literally; it does NOT decode HTML entities inside
  *   a script tag. Crawlers reading `script.textContent` then fail to
  *   parse valid JSON. Passing the raw string via innerHTML avoids the
  *   escape and also eliminates the React hydration mismatch (which was
@@ -31,24 +31,38 @@ const SCHEMA = [
     "@context": "https://schema.org",
     "@type": "Organization",
     name: "Lionade",
-    alternateName: ["Lionade App", "Lionade Study Rewards"],
+    alternateName: ["Lionade App", "Lionade Study Rewards", "getlionade.com"],
     url: SITE_URL,
     logo: LOGO_URL,
     description:
       "Lionade is the Gen Z study-rewards app. AI-guided study sessions, duels, leaderboards, and an in-app Fangs economy.",
     email: SUPPORT_EMAIL,
-    sameAs: [] as string[],
+    // Public brand surfaces. Helps Google merge knowledge-graph entries
+    // and disambiguate "Lionade" from the lemonade autocorrect.
+    sameAs: [
+      "https://twitter.com/lionade",
+      "https://x.com/lionade",
+    ],
   },
   {
     "@context": "https://schema.org",
     "@type": "WebSite",
     name: "Lionade",
-    alternateName: "Lionade — Study Like It's Your Job",
+    alternateName: "Lionade · Study Like It's Your Job",
     url: SITE_URL,
     description:
       "Lionade: earn rewards for studying, battle friends in quiz duels, master any exam with AI.",
     inLanguage: "en",
     publisher: { "@type": "Organization", name: "Lionade" },
+    // Tells Google to show a sitelinks search box in SERP cards.
+    potentialAction: {
+      "@type": "SearchAction",
+      target: {
+        "@type": "EntryPoint",
+        urlTemplate: `${SITE_URL}/search?q={search_term_string}`,
+      },
+      "query-input": "required name=search_term_string",
+    },
   },
   {
     "@context": "https://schema.org",

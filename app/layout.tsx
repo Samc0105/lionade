@@ -41,8 +41,8 @@ const dmMono = DM_Mono({
 });
 
 // Root-level SEO + brand signal. Every field here exists to tell search
-// engines that "Lionade" is a distinct product — Google currently mis-
-// corrects "lionade" → "lemonade" because our brand signal is weak.
+// engines that "Lionade" is a distinct product. Google currently mis-
+// corrects "lionade" to "lemonade" because our brand signal is weak.
 //
 // `metadataBase` lets Next.js expand relative URLs (OG images, canonicals)
 // into absolute ones on prod.
@@ -51,12 +51,17 @@ const dmMono = DM_Mono({
 export const metadata: Metadata = {
   metadataBase: SITE_URL_OBJ,
   title: {
-    default: "Lionade — Study Like It's Your Job",
+    default: "Lionade · Study Like It's Your Job",
     template: "%s · Lionade",
   },
   applicationName: "Lionade",
   description:
-    "Stop studying for free. Earn Fangs, climb ranks, get paid.",
+    "Lionade (not lemonade) is the study-rewards app for Gen Z. Earn Fangs, climb ranks, duel friends, and master any exam with AI.",
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
   keywords: [
     "Lionade",
     "Lionade app",
@@ -81,7 +86,7 @@ export const metadata: Metadata = {
     canonical: "/",
   },
   icons: {
-    // Multi-resolution favicon set. `icon` array order matters — browsers
+    // Multi-resolution favicon set. `icon` array order matters: browsers
     // pick the first one whose declared size matches their display DPI.
     // favicon.ico is a multi-image ICO containing 16/32/48/192 so legacy
     // UAs (Chrome autofill, RSS readers, Edge pinned sites) pick the right
@@ -97,26 +102,26 @@ export const metadata: Metadata = {
     shortcut: "/favicon.ico",
   },
   openGraph: {
-    title: "Lionade — Study Like It's Your Job",
-    description: "Stop studying for free. Earn Fangs, climb ranks, get paid.",
+    title: "Lionade · Study Like It's Your Job",
+    description: "Stop studying for free. Earn Fangs, climb ranks, duel friends, and master any exam with AI.",
     url: SITE_URL,
     siteName: "Lionade",
     // Served from our CloudFront CDN so the preview card loads fast on
-    // iMessage, Slack, Discord, etc. 1200×630 is the size every major
+    // iMessage, Slack, Discord, etc. 1200x630 is the size every major
     // platform uses for its large-card layout.
     images: [{
       url: "https://d1745aj99cclbu.cloudfront.net/logo-full.png",
       width: 1200,
       height: 630,
-      alt: "Lionade — Study Like It's Your Job",
+      alt: "Lionade · Study Like It's Your Job",
     }],
     locale: "en_US",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Lionade — Study Like It's Your Job",
-    description: "Stop studying for free. Earn Fangs, climb ranks, get paid.",
+    title: "Lionade · Study Like It's Your Job",
+    description: "Stop studying for free. Earn Fangs, climb ranks, duel friends, and master any exam with AI.",
     images: ["https://d1745aj99cclbu.cloudfront.net/logo-full.png"],
     creator: "@lionade",
     site: "@lionade",
@@ -164,8 +169,8 @@ export default function RootLayout({
               <AuthProviderWrapper>
                 <ToastProvider>
                   {/* ResumeBanner is fixed-position z-[55] (above Navbar).
-                      SessionLifecycle is the per-user realtime listener — no
-                      DOM, just side effects. Both must be inside ToastProvider
+                      SessionLifecycle is the per-user realtime listener (no
+                      DOM, just side effects). Both must be inside ToastProvider
                       because SessionLifecycle calls useToast() for soft
                       cross-game-redirect confirmations on mid-question pages. */}
                   <SessionLifecycle />
