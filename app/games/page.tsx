@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
+import { useReducedMotion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import AmbientOrbs from "@/components/AmbientOrbs";
@@ -134,6 +135,7 @@ const DAILY_LIMITS: Record<string, number> = { roardle: 3, flashcards: 999, time
 export default function GamesPage() {
   const router = useRouter();
   const { user } = useAuth();
+  const reduced = useReducedMotion();
 
   // Back-compat: ?mode=blitz used to auto-open Blitz from /games. Blitz
   // now lives at /compete/blitz, so forward those links.
@@ -604,8 +606,30 @@ export default function GamesPage() {
         <div className="min-h-screen pt-16 pb-8">
           <div className="max-w-lg mx-auto px-4 py-6">
             <button onClick={backToMenu} className="text-cream/40 text-sm mb-4 hover:text-cream/60 transition">← Back</button>
-            <h2 className="font-bebas text-4xl text-cream tracking-wider text-center mb-1">ROARDLE</h2>
-            <p className="text-cream/30 text-xs text-center mb-2">{wordLength} letters · {6 - roardleGuesses.length} guesses left</p>
+            <h2 className="font-bebas text-4xl text-cream tracking-wider text-center mb-1">
+              <RevealText text="ROARDLE" color="#EEF4FF" charDelay={0.06} />
+            </h2>
+            {(() => {
+              const guessesLeft = 6 - roardleGuesses.length;
+              // Tension treatment when 1-2 guesses left and the round isn't
+              // over. The counter pulses + warms to amber/red so the player
+              // feels the runway shortening. Three-state: chill (≥3), warning
+              // (2), critical (1).
+              const tense = !roardleOver && guessesLeft <= 2 && guessesLeft > 0;
+              const critical = !roardleOver && guessesLeft === 1;
+              return (
+                <p className={`text-xs text-center mb-2 transition-colors ${critical ? "text-red-300" : tense ? "text-amber-300" : "text-cream/30"}`}>
+                  {wordLength} letters ·{" "}
+                  <span
+                    className={`font-bebas tabular-nums ${tense && !reduced ? "ca-urgent inline-block" : ""}`}
+                    style={tense ? { textShadow: critical ? "0 0 6px rgba(252,165,165,0.55)" : "0 0 5px rgba(252,211,77,0.45)" } : undefined}
+                  >
+                    {guessesLeft}
+                  </span>
+                  {" "}guesses left
+                </p>
+              );
+            })()}
             {roardleError && (
               <p className="text-red-400 text-xs text-center mb-2 animate-slide-up font-syne font-semibold">
                 {roardleError}
@@ -673,7 +697,16 @@ export default function GamesPage() {
                       charDelay={0.07}
                     />
                   ) : (
-                    <span style={{ color: "#EF4444" }}>The word was {roardleWord}</span>
+                    <span style={{ color: "#EF4444" }}>
+                      The word was{" "}
+                      <RevealText
+                        text={roardleWord.toUpperCase()}
+                        color="#FCA5A5"
+                        glow="0 0 8px rgba(239,68,68,0.45)"
+                        delay={0.2}
+                        charDelay={0.07}
+                      />
+                    </span>
                   )}
                 </p>
                 {fangsEarned !== null && (
