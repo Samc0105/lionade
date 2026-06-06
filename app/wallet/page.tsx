@@ -26,6 +26,8 @@ import {
   Coin,
   Lightning,
   TrendUp,
+  ArrowUpRight,
+  ArrowDownRight,
   type Icon,
 } from "@phosphor-icons/react";
 
@@ -50,13 +52,18 @@ const TXN_ICONS: Record<string, Icon> = {
   login_bonus:      Sun,
 };
 
-// Ninny-related types render with a purple accent rather than the default
-// green/red reward/spend coloring.
 const NINNY_TYPES = new Set(["ninny_session", "ninny_unlock", "ninny_refund", "ninny_abandon"]);
 
+// Tuned palette for the ledger rows. Income rows pop electric-green; spends
+// stay in the muted-gold family so the page reads as "trust ledger" not
+// "loss leaderboard." Ninny keeps its purple identity.
+const INCOME_ACCENT = "#00E6A3"; // electric green
+const SPEND_ACCENT  = "#C9A227"; // muted gold
+const NINNY_ACCENT  = "#A855F7";
+
 function txnAccent(txn: Transaction): string {
-  if (NINNY_TYPES.has(txn.type)) return "#A855F7"; // Ninny → purple
-  return txn.amount >= 0 ? "#22C55E" : "#EF4444";  // reward → green, spend → red
+  if (NINNY_TYPES.has(txn.type)) return NINNY_ACCENT;
+  return txn.amount >= 0 ? INCOME_ACCENT : SPEND_ACCENT;
 }
 
 interface Transaction {
@@ -79,20 +86,13 @@ function timeAgo(iso: string): string {
   return `${Math.floor(days / 7)}w ago`;
 }
 
-/* ── Balance sparkline ─────────────────────────────────────────
-   Derives a balance-over-time curve by walking the recent transactions
-   backwards from the current balance. No new data source — purely a
-   presentation of the ledger we already fetch. Falls back to a flat
-   placeholder line when there's not enough history. */
 function BalanceSparkline({ balance, txns }: { balance: number; txns: Transaction[] }) {
   const points = useMemo(() => {
-    // Oldest → newest running balance, ending at the current balance.
     const ordered = [...txns].sort(
       (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
     );
     if (ordered.length < 2) return null;
     const series: number[] = [];
-    // Reconstruct: current balance minus the sum of all txns = starting balance.
     const totalDelta = ordered.reduce((s, t) => s + t.amount, 0);
     let running = balance - totalDelta;
     series.push(running);
@@ -107,7 +107,6 @@ function BalanceSparkline({ balance, txns }: { balance: number; txns: Transactio
   const H = 32;
 
   if (!points) {
-    // Tasteful flat placeholder — a faint dashed baseline.
     return (
       <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-8" preserveAspectRatio="none" aria-hidden="true">
         <line x1="0" y1={H / 2} x2={W} y2={H / 2}
@@ -126,7 +125,6 @@ function BalanceSparkline({ balance, txns }: { balance: number; txns: Transactio
     return [x, y] as const;
   });
   const d = coords.map(([x, y], i) => `${i === 0 ? "M" : "L"}${x.toFixed(1)} ${y.toFixed(1)}`).join(" ");
-  // Approximate path length for the draw-on dash trick.
   let len = 0;
   for (let i = 1; i < coords.length; i++) {
     len += Math.hypot(coords[i][0] - coords[i - 1][0], coords[i][1] - coords[i - 1][1]);
@@ -156,21 +154,50 @@ function BalanceSparkline({ balance, txns }: { balance: number; txns: Transactio
   );
 }
 
+// Weekly delta derived purely from the already-loaded transactions. Returns
+// nulls when the ledger is empty so the UI can hide the chip entirely rather
+// than show a meaningless "+0".
+function useWeeklyDelta(txns: Transaction[]) {
+  return useMemo(() => {
+    if (!txns.length) return { earned: null as number | null, spent: null as number | null, hasData: false };
+    const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+    let earned = 0;
+    let spent = 0;
+    for (const t of txns) {
+      if (new Date(t.created_at).getTime() < weekAgo) continue;
+      if (t.amount > 0) earned += t.amount;
+      else spent += -t.amount;
+    }
+    return { earned, spent, hasData: earned > 0 || spent > 0 };
+  }, [txns]);
+}
+
+// Today-only earned chip for the hero. Hidden when zero.
+function useTodayEarned(txns: Transaction[]) {
+  return useMemo(() => {
+    if (!txns.length) return 0;
+    const dayAgo = Date.now() - 24 * 60 * 60 * 1000;
+    let earned = 0;
+    for (const t of txns) {
+      if (new Date(t.created_at).getTime() < dayAgo) continue;
+      if (t.amount > 0) earned += t.amount;
+    }
+    return earned;
+  }, [txns]);
+}
+
 export default function WalletPage() {
   const { user } = useAuth();
   const { stats } = useUserStats(user?.id);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [txnLoading, setTxnLoading] = useState(true);
 
-  // No-flash-of-zero: hold the numeric stats as null until either the shared
-  // stats hook or the auth user provide a real value.
   const coins = stats?.coins ?? user?.coins ?? null;
   const xp = stats?.xp ?? user?.xp ?? null;
   const level = stats?.level ?? user?.level ?? null;
   const streak = stats?.streak ?? user?.streak ?? null;
   const ready = coins !== null;
 
-  // Fetch recent transactions
   useEffect(() => {
     if (!user?.id) return;
     (async () => {
@@ -184,6 +211,9 @@ export default function WalletPage() {
       setTxnLoading(false);
     })();
   }, [user?.id]);
+
+  const weekly = useWeeklyDelta(transactions);
+  const todayEarned = useTodayEarned(transactions);
 
   return (
     <ProtectedRoute>
@@ -199,7 +229,7 @@ export default function WalletPage() {
         <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <BackButton />
 
-          {/* Header — left-aligned, no centered hero */}
+          {/* Header */}
           <div className="flex items-center gap-3 mb-8 animate-slide-up">
             <img src={cdnUrl("/F.png")} alt="Fangs" className="w-11 h-11 object-contain" />
             <div>
@@ -208,16 +238,37 @@ export default function WalletPage() {
             </div>
           </div>
 
-          {/* ═══ 2-COLUMN BENTO ═══ */}
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-5 items-start">
 
-            {/* ── LEFT RAIL (2/5): hero balance + stat tiles ── */}
+            {/* LEFT RAIL */}
             <div className="lg:col-span-2 space-y-5">
               {/* Hero balance card */}
-              <div className="rounded-2xl border border-gold/25 p-7 animate-slide-up"
+              <div className="wallet-hero rounded-2xl border border-gold/25 p-7 animate-slide-up relative overflow-hidden"
                 style={{ animationDelay: "0.05s", background: "var(--card-solid-bg)", boxShadow: "0 0 40px rgba(255,215,0,0.08)" }}>
-                <p className="text-cream/40 text-xs uppercase tracking-widest font-semibold mb-4">Current Balance</p>
-                <div className="flex items-center gap-3 mb-5">
+                {/* Gold-particle drift layer — revealed on hover */}
+                <div className="wallet-hero-particles" aria-hidden="true">
+                  <span className="wp wp-1" />
+                  <span className="wp wp-2" />
+                  <span className="wp wp-3" />
+                  <span className="wp wp-4" />
+                  <span className="wp wp-5" />
+                </div>
+
+                <div className="relative flex items-start justify-between gap-3 mb-4">
+                  <div>
+                    <p className="text-cream/40 text-xs uppercase tracking-widest font-semibold">Your stash</p>
+                    <p className="text-cream/25 text-[10px] uppercase tracking-widest mt-1 font-mono">Current Balance</p>
+                  </div>
+                  {ready && todayEarned > 0 && (
+                    <span className="balance-delta-chip inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-mono uppercase tracking-widest"
+                      style={{ background: `${INCOME_ACCENT}14`, border: `1px solid ${INCOME_ACCENT}40`, color: INCOME_ACCENT }}>
+                      <ArrowUpRight size={11} weight="bold" aria-hidden="true" />
+                      +{todayEarned.toLocaleString()} today
+                    </span>
+                  )}
+                </div>
+
+                <div className="relative flex items-center gap-3 mb-5">
                   <img src={cdnUrl("/F.png")} alt="Fangs" className="w-14 h-14 sm:w-16 sm:h-16 object-contain shrink-0" />
                   {ready ? (
                     <span className="font-bebas text-6xl sm:text-7xl text-gold leading-none balance-breathe">
@@ -227,9 +278,10 @@ export default function WalletPage() {
                     <div className="h-14 w-40 rounded-lg bg-white/10 animate-pulse" />
                   )}
                 </div>
-                <p className="text-cream/30 text-xs uppercase tracking-widest mb-3">Fangs</p>
-                {/* Sparkline — balance over recent activity */}
-                <div className="rounded-xl px-3 pt-3 pb-2" style={{ background: "rgba(255,215,0,0.04)", border: "1px solid rgba(255,215,0,0.10)" }}>
+                <p className="relative text-cream/30 text-xs uppercase tracking-widest mb-3">Fangs</p>
+
+                <div className="relative rounded-xl px-3 pt-3 pb-2"
+                  style={{ background: "rgba(255,215,0,0.04)", border: "1px solid rgba(255,215,0,0.10)" }}>
                   <div className="flex items-center justify-between mb-1.5">
                     <span className="text-cream/35 text-[10px] uppercase tracking-widest">Balance trend</span>
                     <span className="text-cream/25 text-[10px]">recent</span>
@@ -265,12 +317,7 @@ export default function WalletPage() {
                 })}
               </div>
 
-              {/* Spend Fangs — was a "REDEEM REWARDS · Coming Soon" panel
-                  taking the bottom half of the left rail with a dashed-border
-                  placeholder. Compressed to a focused "Spend in the Shop" CTA
-                  that's honest about what's available today (cosmetics +
-                  boosters in the Shop). Real reward-redemption flow ships
-                  with V2 — stop the placeholder until then. */}
+              {/* Spend Fangs CTA */}
               <Link href="/shop" className="block animate-slide-up" style={{ animationDelay: "0.15s" }}>
                 <div className="rounded-2xl border border-gold/25 p-4 transition-all hover:border-gold/45 hover:bg-gold/[0.04]"
                   style={{ background: "var(--card-solid-bg)" }}>
@@ -288,13 +335,45 @@ export default function WalletPage() {
               </Link>
             </div>
 
-            {/* ── RIGHT (3/5): transaction ledger filling the column ── */}
+            {/* RIGHT: transaction ledger */}
             <div className="lg:col-span-3 rounded-2xl p-6 animate-slide-up"
               style={{ animationDelay: "0.1s", background: "var(--card-solid-bg)", border: "1px solid var(--card-solid-border)", minHeight: "100%" }}>
               <div className="flex items-center justify-between mb-5">
                 <h2 className="font-bebas text-xl text-cream tracking-wider">TRANSACTION HISTORY</h2>
                 <span className="text-cream/25 text-xs uppercase tracking-widest">Last 20</span>
               </div>
+
+              {/* Weekly summary tiles — only when there's something to summarize */}
+              {!txnLoading && weekly.hasData && (
+                <div className="grid grid-cols-2 gap-3 mb-5 animate-slide-up" style={{ animationDelay: "0.18s" }}>
+                  <div className="rounded-xl border p-3 flex items-center gap-3"
+                    style={{ background: `${INCOME_ACCENT}08`, borderColor: `${INCOME_ACCENT}28` }}>
+                    <span className="w-9 h-9 rounded-full flex items-center justify-center shrink-0"
+                      style={{ background: `${INCOME_ACCENT}14`, border: `1px solid ${INCOME_ACCENT}30` }}>
+                      <ArrowUpRight size={16} weight="bold" color={INCOME_ACCENT} aria-hidden="true" />
+                    </span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-cream/45 text-[10px] uppercase tracking-widest font-mono">Earned this week</p>
+                      <p className="font-bebas text-2xl leading-none mt-0.5" style={{ color: INCOME_ACCENT }}>
+                        +{(weekly.earned ?? 0).toLocaleString()}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="rounded-xl border p-3 flex items-center gap-3"
+                    style={{ background: `${SPEND_ACCENT}08`, borderColor: `${SPEND_ACCENT}28` }}>
+                    <span className="w-9 h-9 rounded-full flex items-center justify-center shrink-0"
+                      style={{ background: `${SPEND_ACCENT}14`, border: `1px solid ${SPEND_ACCENT}30` }}>
+                      <ArrowDownRight size={16} weight="bold" color={SPEND_ACCENT} aria-hidden="true" />
+                    </span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-cream/45 text-[10px] uppercase tracking-widest font-mono">Spent this week</p>
+                      <p className="font-bebas text-2xl leading-none mt-0.5" style={{ color: SPEND_ACCENT }}>
+                        {(weekly.spent ?? 0) > 0 ? "-" : ""}{(weekly.spent ?? 0).toLocaleString()}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {txnLoading ? (
                 <div className="space-y-3">
@@ -312,37 +391,40 @@ export default function WalletPage() {
                   </Link>
                 </div>
               ) : (
-                <div className="space-y-2">
+                <div className="space-y-1.5">
                   {transactions.map((txn, i) => {
                     const isPositive = txn.amount > 0;
                     const accent = txnAccent(txn);
                     const TxnIcon = TXN_ICONS[txn.type] ?? Coin;
+                    const label = txn.description ?? txn.type.replace(/_/g, " ");
+                    const source = txn.type.replace(/_/g, " ");
                     return (
                       <div
                         key={txn.id}
                         className="txn-row flex items-center gap-3 pl-1 pr-3 py-3 rounded-xl border overflow-hidden relative animate-slide-up"
                         style={{
-                          animationDelay: `${0.15 + i * 0.04}s`,
-                          borderColor: `${accent}20`,
-                          background: "rgba(255,255,255,0.015)",
+                          animationDelay: `${0.15 + i * 0.03}s`,
+                          borderColor: `${accent}1c`,
+                          background: "rgba(255,255,255,0.012)",
                         }}
                       >
-                        {/* Left accent bar keyed to txn type */}
                         <span className="absolute left-0 top-0 bottom-0 w-[3px] rounded-full" style={{ background: accent }} />
-                        <span className="w-9 h-9 ml-2 flex items-center justify-center rounded-lg shrink-0"
-                          style={{ background: `${accent}14`, color: accent }}>
-                          <TxnIcon size={18} weight="fill" color="currentColor" aria-hidden="true" />
+                        <span
+                          className="w-9 h-9 ml-2 flex items-center justify-center rounded-full shrink-0"
+                          style={{ background: `${accent}14`, border: `1px solid ${accent}28`, color: accent }}
+                        >
+                          <TxnIcon size={17} weight="regular" color="currentColor" aria-hidden="true" />
                         </span>
                         <div className="flex-1 min-w-0">
-                          <p className="font-syne text-cream text-sm truncate capitalize">
-                            {txn.description ?? txn.type.replace(/_/g, " ")}
+                          <p className="font-syne text-cream text-sm truncate capitalize leading-tight">
+                            {label}
                           </p>
-                          <p className="text-cream/30 text-[10px] font-syne">
-                            {timeAgo(txn.created_at)}
+                          <p className="text-cream/40 text-[10px] font-mono tracking-wider mt-0.5 truncate">
+                            {source.toLowerCase()} · {timeAgo(txn.created_at)}
                           </p>
                         </div>
-                        <span className="font-bebas text-lg tracking-wider shrink-0" style={{ color: accent }}>
-                          {isPositive ? "+" : ""}{txn.amount}
+                        <span className="font-bebas text-2xl tracking-wider shrink-0 tabular-nums" style={{ color: accent }}>
+                          {isPositive ? "+" : ""}{txn.amount.toLocaleString()}
                         </span>
                       </div>
                     );

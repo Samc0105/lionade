@@ -3770,10 +3770,56 @@ html.light .space-bg-container { display: none; }
 
 /* ── Wallet: transaction-row accent bar shimmer on hover ── */
 .txn-row {
-  transition: transform 0.2s var(--ease-out-emil, ease-out), background 0.2s ease;
+  transition: transform 0.2s var(--ease-out-emil, ease-out),
+              background 0.2s ease,
+              border-color 0.2s ease;
 }
 @media (hover: hover) and (pointer: fine) {
-  .txn-row:hover { transform: translateX(2px); }
+  .txn-row:hover {
+    transform: translateX(3px) translateY(-1px);
+    background: rgba(255,255,255,0.028) !important;
+  }
+}
+
+/* ── Wallet hero: gold-particle drift, dormant until hover ── */
+.wallet-hero { position: relative; }
+.wallet-hero-particles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+.wallet-hero-particles .wp {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  border-radius: 9999px;
+  background: radial-gradient(circle, rgba(255,215,0,0.85), rgba(255,215,0,0) 70%);
+  will-change: transform, opacity;
+}
+.wallet-hero-particles .wp-1 { left: 12%; top: 78%; animation: wallet-particle-drift 6.5s ease-in-out infinite; animation-delay: 0s; }
+.wallet-hero-particles .wp-2 { left: 28%; top: 88%; animation: wallet-particle-drift 7.8s ease-in-out infinite; animation-delay: 0.6s; }
+.wallet-hero-particles .wp-3 { left: 52%; top: 82%; animation: wallet-particle-drift 6.0s ease-in-out infinite; animation-delay: 1.1s; }
+.wallet-hero-particles .wp-4 { left: 72%; top: 90%; animation: wallet-particle-drift 7.2s ease-in-out infinite; animation-delay: 1.7s; }
+.wallet-hero-particles .wp-5 { left: 88%; top: 80%; animation: wallet-particle-drift 6.8s ease-in-out infinite; animation-delay: 2.3s; }
+@keyframes wallet-particle-drift {
+  0%   { transform: translate3d(0, 0, 0) scale(0.6); opacity: 0; }
+  20%  { opacity: 0.9; }
+  100% { transform: translate3d(0, -110px, 0) scale(1); opacity: 0; }
+}
+@media (hover: hover) and (pointer: fine) {
+  .wallet-hero:hover .wallet-hero-particles { opacity: 1; }
+}
+
+/* ── Wallet hero: today-earned chip soft pop on mount ── */
+@keyframes balance-delta-pop {
+  0%   { transform: translate3d(0, 4px, 0) scale(0.92); opacity: 0; }
+  100% { transform: translate3d(0, 0, 0) scale(1); opacity: 1; }
+}
+.balance-delta-chip {
+  animation: balance-delta-pop 0.55s cubic-bezier(0.16, 1, 0.3, 1) 0.4s both;
+  will-change: transform, opacity;
 }
 
 /* ── Progress ring fill (learning-path cards) ── */
@@ -3842,6 +3888,9 @@ html.light .space-bg-container { display: none; }
   .lift-card:hover,
   .txn-row,
   .txn-row:hover,
+  .wallet-hero-particles,
+  .wallet-hero-particles .wp,
+  .balance-delta-chip,
   .mastery-focus-glow:focus-within,
   .mastery-parsing::after,
   .animate-slide-in-left {
@@ -3849,6 +3898,7 @@ html.light .space-bg-container { display: none; }
     transition: none !important;
     transform: none !important;
   }
+  .wallet-hero-particles { opacity: 0 !important; }
   .sparkline-path { stroke-dashoffset: 0 !important; }
   .path-ring { stroke-dashoffset: var(--ring-offset, 0) !important; }
 }
