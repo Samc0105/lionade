@@ -26,6 +26,7 @@ import IntermissionCard from "./IntermissionCard";
 import NinnyHostBubble from "./NinnyHostBubble";
 import CountUp from "@/components/CountUp";
 import Confetti from "@/components/Confetti";
+import RevealText from "@/components/RevealText";
 import { pokerFaceChannel, POKERFACE_EVENTS } from "@/lib/party/realtime-channels";
 import { subscribeResilient } from "@/lib/realtime-resilient";
 import PostRoundVoteCard from "./PostRoundVoteCard";
@@ -1002,45 +1003,15 @@ export default function PokerFaceView({
               <p className="font-bebas text-xs tracking-[0.3em] text-cream/55 mb-1">
                 {round.reveal.is_lie ? "THAT WAS A LIE" : "THAT WAS THE TRUTH"}
               </p>
-              {reduced ? (
-                <p
-                  className="font-bebas text-3xl tracking-wider inline-block"
-                  style={{ color: round.reveal.is_lie ? "#FCA5A5" : "#86EFAC" }}
-                >
-                  {round.reveal.is_lie ? "BLUFFED" : "HONEST"}
-                </p>
-              ) : (() => {
-                const isLie = round.reveal.is_lie;
-                const label = isLie ? "BLUFFED" : "HONEST";
-                return (
-                  <p
-                    className="font-bebas text-3xl tracking-wider inline-block"
-                    aria-label={label}
-                  >
-                    {Array.from(label).map((c, i) => (
-                      <motion.span
-                        key={`${c}-${i}`}
-                        initial={{ opacity: 0, y: 6, scale: 0.7 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        transition={{
-                          duration: 0.22,
-                          delay: 0.15 + i * 0.05,
-                          ease: [0.16, 1, 0.3, 1],
-                        }}
-                        className="inline-block"
-                        style={{
-                          color: isLie ? "#FCA5A5" : "#86EFAC",
-                          textShadow: isLie
-                            ? "0 0 8px rgba(239,68,68,0.45)"
-                            : "0 0 8px rgba(34,197,94,0.45)",
-                        }}
-                      >
-                        {c}
-                      </motion.span>
-                    ))}
-                  </p>
-                );
-              })()}
+              <p className="font-bebas text-3xl tracking-wider">
+                <RevealText
+                  text={round.reveal.is_lie ? "BLUFFED" : "HONEST"}
+                  color={round.reveal.is_lie ? "#FCA5A5" : "#86EFAC"}
+                  glow={round.reveal.is_lie
+                    ? "0 0 8px rgba(239,68,68,0.45)"
+                    : "0 0 8px rgba(34,197,94,0.45)"}
+                />
+              </p>
               {/* Always surface the real fact — the educational payoff lands for
                   the whole room every round, truth or lie. */}
               <p className={`text-cream/70 text-sm font-syne mt-3 max-w-md mx-auto ${reduced ? "" : "pa-factoid-up"}`}>

@@ -4,6 +4,8 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import AmbientOrbs from "@/components/AmbientOrbs";
+import RevealText from "@/components/RevealText";
+import Confetti from "@/components/Confetti";
 import { useAuth } from "@/lib/auth";
 import { useUserStats, mutateUserStats } from "@/lib/hooks";
 import { cdnUrl } from "@/lib/cdn";
@@ -653,8 +655,26 @@ export default function GamesPage() {
             {/* Result */}
             {roardleOver && (
               <div className="text-center mb-6 animate-slide-up">
-                <p className="font-bebas text-2xl" style={{ color: roardleWon ? "#22C55E" : "#EF4444" }}>
-                  {roardleWon ? "NICE!" : `The word was ${roardleWord}`}
+                {roardleWon && (
+                  <Confetti
+                    trigger={true}
+                    count={60}
+                    origin="top"
+                    duration={2000}
+                    palette={["#FFD700", "#FDE68A", "#22C55E", "#A855F7"]}
+                  />
+                )}
+                <p className="font-bebas text-2xl">
+                  {roardleWon ? (
+                    <RevealText
+                      text="NICE!"
+                      color="#22C55E"
+                      glow="0 0 10px rgba(34,197,94,0.55)"
+                      charDelay={0.07}
+                    />
+                  ) : (
+                    <span style={{ color: "#EF4444" }}>The word was {roardleWord}</span>
+                  )}
                 </p>
                 {fangsEarned !== null && (
                   <div className="flex items-center justify-center gap-1.5 mt-2">

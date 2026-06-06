@@ -23,6 +23,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import Confetti from "@/components/Confetti";
+import RevealText from "@/components/RevealText";
 
 interface RoundEndOverlayProps {
   /** null = time's up (no one guessed). Object = winner attribution. */
@@ -224,35 +225,15 @@ export default function RoundEndOverlay({
           aria-label={`word: ${word}`}
         >
           <span className="text-cream/40">word:</span>
-          {reduced ? (
-            <span className="font-bebas text-base tracking-[0.18em] text-cream/90">
-              {word.toUpperCase()}
-            </span>
-          ) : (
-            <span className="inline-flex items-center gap-[1px]" aria-hidden="true">
-              {Array.from(word.toUpperCase()).map((c, i) => (
-                <motion.span
-                  key={`${c}-${i}`}
-                  initial={{ opacity: 0, y: 4, scale: 0.7 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  transition={{
-                    duration: 0.18,
-                    delay: 0.32 + i * 0.06,
-                    ease: [0.16, 1, 0.3, 1],
-                  }}
-                  className="font-bebas text-base tracking-[0.05em] text-cream/95 inline-block"
-                  style={{
-                    color: winner ? "#FFD700" : "#FCA5A5",
-                    textShadow: winner
-                      ? "0 0 8px rgba(255,215,0,0.45)"
-                      : "0 0 6px rgba(252,165,165,0.35)",
-                  }}
-                >
-                  {c === " " ? " " : c}
-                </motion.span>
-              ))}
-            </span>
-          )}
+          <RevealText
+            text={word.toUpperCase()}
+            color={winner ? "#FFD700" : "#FCA5A5"}
+            glow={winner ? "0 0 8px rgba(255,215,0,0.45)" : "0 0 6px rgba(252,165,165,0.35)"}
+            delay={0.32}
+            charDelay={0.06}
+            charDuration={0.18}
+            className="font-bebas text-base tracking-[0.05em]"
+          />
         </motion.div>
 
         {/* Footer strip with two flanking shimmer dots. */}
