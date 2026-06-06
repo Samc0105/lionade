@@ -7,6 +7,29 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 
 ---
 
+## 2026-06-06 — Profile identity polish: hero, stats, badges, recent (web-only, no iOS row)
+
+**Status:** 🚫 N/A (deliberate no-row decision: visual polish pass on the existing web Profile overview surface; no data-model, contract, or feature change. iOS profile is a separate native surface owned by `vp-ios` and is queued for its own visual pass when it catches up to the web identity loop.)
+
+Single-file polish on `app/profile/page.tsx`. No new fetches, no new deps, no contract change, no behavior change beyond visual emphasis. Goal: make the Profile feel like a customized character sheet — vanity loop that pulls users back.
+
+1. **Aurora hero.** Two GPU-only radial drifts (electric + purple) behind the hero card, animated via `profile-aurora-drift` (12s ease-in-out, reduced-motion guarded). Avatar bumped to 28x28 with `profile-ring-pulse` (electric box-shadow cycle). Gold LVL chip sits below the avatar like a tier badge.
+2. **Identity chips row.** Streak / badges / accuracy each render as a rarity-tinted pill (orange / gold / green) with a Phosphor icon plus Bebas value. Mono "Player Profile" eyebrow above the username. Username is Bebas text-5xl.
+3. **Trophy stats grid.** Each stat icon now sits in a tinted circular chip (matches dashboard tinted-chip pattern from e106e2b). Bebas value bumped to text-3xl + tracking-wider; labels lifted to mono uppercase tracking-[0.18em]. `profile-lift` hover (translate3d -2px). "Total Coins" relabeled "Total Fangs" per project currency rule. Flash-of-zero gate preserved.
+4. **Recent Badges card.** Each badge wrapped in `profile-badge-lift` (scale 1.04 hover, reduced-motion guarded). "X earned" count now links to /badges. Empty state replaced: gold-tinted lock chip + CTA back into /quiz.
+5. **Recent Activity card.** Rows now use a tinted circular icon chip (purple for duel_win, gold for badge_bonus, electric for quiz). Replaces the user-facing em-dash for zero-amount rows with "+0". Empty-state CTA back into /quiz with an electric lightning chip.
+6. **Badge Collection.** Renamed "All Badges" to "Badge Collection" with X / Y progress in mono. Earned badges grouped by rarity tier (Legendary → Epic → Rare → Common), each with a colored dot + mono eyebrow. Locked badges grouped identically under a divider line.
+7. **Copy cleanup.** Stripped user-facing em-dashes (Activity History rows, Quiz History rows, About Lionade Mission + Vision copy).
+8. **Motion contract.** All animations GPU-only (transform / opacity / box-shadow). `prefers-reduced-motion: reduce` disables aurora drift, avatar ring pulse, and all hover transforms. No JS animation, no random, no Date.now in render — hydration-safe.
+
+iOS impact: none. iOS profile already has its own native HIG-aligned design surface; when `vp-ios` schedules the next iOS profile visual pass, it can mirror the rarity-tier badge grouping and the tinted-chip stat treatment via Reanimated.
+
+Files touched (web): `app/profile/page.tsx` only.
+
+Owner: `quality-docs-writer` (web). Tagged for `vp-ios` future review.
+
+---
+
 ## 2026-06-06 — Leaderboard live-feel polish: podium, your-row, overtake CTA, density (web-only, no iOS row)
 
 **Status:** 🚫 N/A (deliberate no-row decision — visual polish pass on the existing web Leaderboard surface; no data-model, contract, or feature change. iOS Leaderboard already mirrors the same data shape via `@lionade/core` and is queued for its own visual pass under `vp-ios` when iOS catches up to the Compete IA consolidation.)
