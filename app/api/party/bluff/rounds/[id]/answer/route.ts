@@ -79,17 +79,47 @@ export async function POST(
       .from("bluff_answers")
       .update({ text })
       .eq("id", existingMine.id);
-  } else {
-    const { error } = await supabaseAdmin.from("bluff_answers").insert({
-      round_id: round.id,
-      user_id: userId,
-      text,
-      is_truth: false,
-    });
-    if (error) {
-      console.error("[party/bluff/answer]", error.message);
-      return NextResponse.json({ error: "Couldn't save answer" }, { status: 500 });
+    return NextResponse.json({ ok: true });
+  }
+
+  // First fake from this user this round. The round-create endpoint stores
+  // the truth row with `user_id = creator` as a FK placeholder; on unmigrated
+  // databases this collides with the (round_id, user_id) unique key when the
+  // creator (host) tries to submit their own fake. Detect that, re-point the
+  // truth row to any other room member, then insert the host's fake.
+  const { data: truthRow } = await supabaseAdmin
+    .from("bluff_answers")
+    .select("id, user_id")
+    .eq("round_id", round.id)
+    .eq("user_id", userId)
+    .eq("is_truth", true)
+    .maybeSingle();
+
+  if (truthRow) {
+    const { data: otherMember } = await supabaseAdmin
+      .from("party_room_players")
+      .select("user_id")
+      .eq("room_id", round.room_id)
+      .neq("user_id", userId)
+      .limit(1)
+      .maybeSingle();
+    if (otherMember) {
+      await supabaseAdmin
+        .from("bluff_answers")
+        .update({ user_id: otherMember.user_id })
+        .eq("id", truthRow.id);
     }
+  }
+
+  const { error: insertErr } = await supabaseAdmin.from("bluff_answers").insert({
+    round_id: round.id,
+    user_id: userId,
+    text,
+    is_truth: false,
+  });
+  if (insertErr) {
+    console.error("[party/bluff/answer]", insertErr.message);
+    return NextResponse.json({ error: "Couldn't save answer" }, { status: 500 });
   }
 
   return NextResponse.json({ ok: true });

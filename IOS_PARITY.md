@@ -7,6 +7,24 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 
 ---
 
+## 2026-06-05 — Bluff Trivia host vote-save failure (web-only, no iOS row)
+
+**Status:** 🚫 N/A (deliberate no-row decision — Lionade Party is web-only V1 per project memory; iOS Party has not shipped, so there is no equivalent flow to fix today).
+
+Root cause: `app/api/party/bluff/rounds/route.ts` inserts the round's truth as a `bluff_answers` row with `user_id = creator` as an FK placeholder. The table has `UNIQUE (round_id, user_id)`. When the host (creator) tried to submit their own fake, `app/api/party/bluff/rounds/[id]/answer/route.ts` looked for an existing fake row (`is_truth=false`) found none, ran a fresh INSERT that collided with the truth row's `(round_id, user_id)` and returned 500 "Couldn't save answer". The host's fake never landed, write phase advanced to vote, and the stale write-phase error stayed on screen because `castVote` didn't clear `error` state on click (and there was no phase-transition cleanup). The vote itself was technically savable; the pink "Couldn't save answer" Sam saw was the bleed-through from write phase.
+
+Fix:
+1. New migration `supabase/migrations/20260605230000_bluff_answers_truth_fake_coexist.sql` drops the legacy 2-column UNIQUE and replaces it with `UNIQUE (round_id, user_id, is_truth)` so a single user can own both the truth-row placeholder and their fake in the same round.
+2. Round-create endpoint now picks a non-creator room member as the truth-row's FK placeholder when one exists, so the host's fake insert no longer collides even on un-migrated databases (Sam's live game).
+3. Answer endpoint self-heals: if the user's only existing row is the truth (host case), re-point that truth row's `user_id` to another room member before inserting the fake. Belt-and-suspenders for the deployed-before-migration window.
+4. `components/party/BluffView.tsx` clears stale `error` on phase change and at start of `castVote`, gates vote buttons behind a `voting` in-flight flag so a fail re-enables for retry without losing state.
+
+iOS stance: Lionade Party iOS port is paused. When it ships, the same UNIQUE invariant + answer-route logic + write→vote error clearing must be mirrored. **No iOS row required today.**
+
+**Files touched (web):** `supabase/migrations/20260605230000_bluff_answers_truth_fake_coexist.sql` (new), `app/api/party/bluff/rounds/route.ts` (truth-owner picks non-creator member), `app/api/party/bluff/rounds/[id]/answer/route.ts` (self-heal collision), `components/party/BluffView.tsx` (clear stale error on phase change + voting in-flight flag).
+
+---
+
 ## 2026-06-05 — Sketchy round-end deadlock unstick (web-only, no iOS row)
 
 **Status:** 🚫 N/A (deliberate no-row decision — Lionade Party is web-only V1 per project memory; iOS Party has not shipped, so there is no equivalent reveal screen to unstick).

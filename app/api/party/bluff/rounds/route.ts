@@ -81,12 +81,22 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Couldn't create round" }, { status: 500 });
   }
 
-  // Insert the truth as a bluff_answers row (is_truth=true), owned by a
-  // sentinel — use the round creator as the placeholder owner since FK
-  // requires a valid profile, but is_truth=true marks it as not a player fake.
+  // Insert the truth as a bluff_answers row (is_truth=true). The FK requires a
+  // valid profiles.id, but the user_id here is just a placeholder. Pick any
+  // non-creator member if available so the creator can still submit their own
+  // fake under the legacy `UNIQUE (round_id, user_id)` constraint. Falls back
+  // to the creator for solo-debug rooms; the answer route also self-heals.
+  const { data: otherMember } = await supabaseAdmin
+    .from("party_room_players")
+    .select("user_id")
+    .eq("room_id", room.id)
+    .neq("user_id", userId)
+    .limit(1)
+    .maybeSingle();
+  const truthOwnerId = otherMember?.user_id ?? userId;
   await supabaseAdmin.from("bluff_answers").insert({
     round_id: round.id,
-    user_id: userId, // truth is owned by no-one; we use the creator so the FK is satisfied
+    user_id: truthOwnerId,
     text: question.correct_answer,
     is_truth: true,
   });

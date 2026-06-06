@@ -303,15 +303,25 @@ export default function BluffView({
   }, [isHost, rematchPending, room.code]);
 
   // ── Vote ──
+  const [voting, setVoting] = useState(false);
   async function castVote(answerId: string) {
-    if (!roundId) return;
+    if (!roundId || voting) return;
+    setVoting(true);
+    setError(null);
     const res = await apiPost(`/api/party/bluff/rounds/${roundId}/vote`, { answer_id: answerId });
+    setVoting(false);
     if (!res.ok) {
       setError(res.error ?? "Couldn't cast your vote.");
       return;
     }
     void refreshDetail();
   }
+
+  // Phase transition: clear stale error from the previous phase so e.g. a
+  // write-phase submit failure doesn't bleed into vote.
+  useEffect(() => {
+    setError(null);
+  }, [phase]);
 
   // ── Render ──
   const playersForBoard = useMemo(() => players.map((p) => ({
@@ -611,7 +621,8 @@ export default function BluffView({
                 <button
                   key={a.id}
                   onClick={() => castVote(a.id)}
-                  className={`w-full text-left rounded-xl px-4 py-3 transition-all active:scale-[0.98] hover:-translate-y-0.5 ${reduced ? "" : "pa-deal-in"}`}
+                  disabled={voting}
+                  className={`w-full text-left rounded-xl px-4 py-3 transition-all active:scale-[0.98] hover:-translate-y-0.5 disabled:opacity-60 ${reduced ? "" : "pa-deal-in"}`}
                   style={{
                     background: isMine
                       ? "linear-gradient(135deg, rgba(168,85,247,0.22) 0%, rgba(124,58,237,0.1) 100%)"
