@@ -39,6 +39,14 @@ import type { PartyPlayer, PartyRoom } from "@/lib/party/types";
 // ROUND_ENDED broadcast payload).
 const CELEBRATING_HOLD_MS = 2500;
 
+// Auto-advance to the next round after reveal lands so the room never deadlocks
+// when the host disconnects, AFKs, or otherwise stops clicking. Visible
+// countdown gives everyone a chance to vote / skip first.
+const REVEAL_AUTO_ADVANCE_SEC = 12;
+// Window after reveal where a non-host player gets an unlock fallback button
+// (in case effective-host derivation also fails — belt + suspenders).
+const REVEAL_FALLBACK_UNLOCK_SEC = 6;
+
 interface Props {
   room: PartyRoom;
   players: PartyPlayer[];
@@ -1020,16 +1028,84 @@ export default function SketchView({
     }
   }, [isHost, round, pausedAt, players, meUserId, sendBroadcast]);
 
+  // ── Effective-host derivation (deadlock fallback) ──
+  // If the real host disconnects mid-round, host_user_id can keep pointing at
+  // a player who is no longer in the active set, which would freeze the reveal
+  // screen for everyone. We promote the longest-connected active player as the
+  // "effective host" for control-flow purposes (advancing rounds, returning to
+  // lobby). Every client derives this from the same sorted players list so
+  // they all agree on who acts, without an extra round-trip.
+  const effectiveHostUserId = useMemo(() => {
+    const realHostActive = players.some((p) => p.user_id === room.host_user_id);
+    if (realHostActive) return room.host_user_id;
+    return players[0]?.user_id ?? room.host_user_id;
+  }, [players, room.host_user_id]);
+  const isEffectiveHost = effectiveHostUserId === meUserId;
+
   // ── Vote auto-decide callbacks ──
-  // When the room hits the 75% threshold, the host's client advances on
-  // behalf of everyone. Non-host clients fire no-ops; the actual transition
-  // arrives via the room/sketch channel broadcasts.
+  // When the room hits the 75% threshold, the effective host's client advances
+  // on behalf of everyone. Non-effective-host clients fire no-ops; the actual
+  // transition arrives via the room/sketch channel broadcasts.
   const handleAutoPlayAgain = useCallback(() => {
-    if (isHost) void startRound();
-  }, [isHost, startRound]);
+    if (isEffectiveHost) void startRound();
+  }, [isEffectiveHost, startRound]);
   const handleAutoBackToLobby = useCallback(() => {
-    if (isHost) onReturnToLobby();
-  }, [isHost, onReturnToLobby]);
+    if (isEffectiveHost) onReturnToLobby();
+  }, [isEffectiveHost, onReturnToLobby]);
+
+  // ── Reveal auto-advance ──
+  // After reveal lands, run a visible countdown. When it hits zero, the
+  // effective host's client kicks off the next round so the game never sits
+  // stuck waiting for a button press. Anyone can short-circuit via the
+  // "Start next round" button; that path runs on the same advancement guard.
+  const [revealAutoSecs, setRevealAutoSecs] = useState(REVEAL_AUTO_ADVANCE_SEC);
+  const [revealEnteredAt, setRevealEnteredAt] = useState<number | null>(null);
+  const advanceFiredRef = useRef(false);
+  useEffect(() => {
+    if (phase !== "reveal") {
+      advanceFiredRef.current = false;
+      setRevealEnteredAt(null);
+      setRevealAutoSecs(REVEAL_AUTO_ADVANCE_SEC);
+      return;
+    }
+    setRevealEnteredAt(Date.now());
+    setRevealAutoSecs(REVEAL_AUTO_ADVANCE_SEC);
+  }, [phase]);
+  useEffect(() => {
+    if (phase !== "reveal") return;
+    if (revealAutoSecs <= 0) return;
+    const t = setTimeout(() => setRevealAutoSecs((s) => s - 1), 1000);
+    return () => clearTimeout(t);
+  }, [phase, revealAutoSecs]);
+  useEffect(() => {
+    if (phase !== "reveal") return;
+    if (revealAutoSecs > 0) return;
+    if (advanceFiredRef.current) return;
+    if (!isEffectiveHost) return;
+    advanceFiredRef.current = true;
+    void startRound();
+  }, [phase, revealAutoSecs, isEffectiveHost, startRound]);
+  // Tick a render every second after entry so the fallback unlock can appear.
+  const [revealNowTick, setRevealNowTick] = useState(0);
+  useEffect(() => {
+    if (phase !== "reveal") return;
+    const iv = setInterval(() => setRevealNowTick((n) => n + 1), 1000);
+    return () => clearInterval(iv);
+  }, [phase]);
+  const revealSecondsElapsed = revealEnteredAt
+    ? Math.floor((Date.now() - revealEnteredAt) / 1000)
+    : 0;
+  // After REVEAL_FALLBACK_UNLOCK_SEC seconds in reveal, non-host clients can
+  // also trigger advance (last-ditch fallback if effective-host derivation
+  // somehow disagrees across clients). Their click runs the same guard.
+  const fallbackUnlocked = revealSecondsElapsed >= REVEAL_FALLBACK_UNLOCK_SEC;
+  const triggerStartNext = useCallback(() => {
+    if (advanceFiredRef.current) return;
+    advanceFiredRef.current = true;
+    void startRound();
+  }, [startRound]);
+  // Reference the tick so React keeps re-rendering for the fallback timer.
+  void revealNowTick;
 
   // ── Rematch CTA (Bucket C 2026-06-05) ──
   // Host-only: hits POST /api/party/rooms/[code]/rematch which resets scores,
@@ -2008,11 +2084,22 @@ export default function SketchView({
             />
           )}
 
-          {isHost ? (
+          {/* Auto-advance countdown — always visible so the room can see how
+              soon the next round fires. Reads identical for every client; the
+              effective host's machine is the one that actually triggers it. */}
+          <div className="text-center">
+            <p className="font-syne text-[11px] text-cream/55 italic">
+              {revealAutoSecs > 0
+                ? `Next round in ${revealAutoSecs}s`
+                : "Starting next round..."}
+            </p>
+          </div>
+
+          {isEffectiveHost ? (
             <div className="space-y-2">
               <div className="flex flex-col sm:flex-row gap-3">
                 <button
-                  onClick={startRound}
+                  onClick={triggerStartNext}
                   className="flex-1 py-3 rounded-xl font-bebas tracking-wider text-base transition-all active:scale-95 btn-gold"
                 >
                   PLAY ANOTHER ROUND
@@ -2029,28 +2116,55 @@ export default function SketchView({
                   BACK TO LOBBY
                 </button>
               </div>
-              {/* Rematch CTA — fresh match, same roster, scores back to zero. */}
-              <button
-                onClick={handleRematch}
-                disabled={rematchPending}
-                className="w-full py-2.5 rounded-xl font-bebas tracking-wider text-sm transition-all active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed"
-                style={{
-                  background: "linear-gradient(135deg, rgba(168,85,247,0.20) 0%, rgba(99,102,241,0.10) 100%)",
-                  border: "1px solid rgba(168,85,247,0.45)",
-                  color: "#E9D5FF",
-                  boxShadow: "0 0 16px rgba(168,85,247,0.18)",
-                }}
-              >
-                {rematchPending ? "RESETTING..." : "REMATCH (FRESH SCORES, SAME ROSTER)"}
-              </button>
+              {/* Rematch CTA — fresh match, same roster, scores back to zero.
+                  Real-host-only: rematch resets the room to lobby + zeroes
+                  scores and the API guards that to host_user_id. */}
+              {isHost && (
+                <button
+                  onClick={handleRematch}
+                  disabled={rematchPending}
+                  className="w-full py-2.5 rounded-xl font-bebas tracking-wider text-sm transition-all active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed"
+                  style={{
+                    background: "linear-gradient(135deg, rgba(168,85,247,0.20) 0%, rgba(99,102,241,0.10) 100%)",
+                    border: "1px solid rgba(168,85,247,0.45)",
+                    color: "#E9D5FF",
+                    boxShadow: "0 0 16px rgba(168,85,247,0.18)",
+                  }}
+                >
+                  {rematchPending ? "RESETTING..." : "REMATCH (FRESH SCORES, SAME ROSTER)"}
+                </button>
+              )}
             </div>
           ) : (
-            // Non-host: show a quiet "waiting on host" pill so the screen
-            // doesn't feel abandoned after the round reveal.
-            <div className="text-center">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bebas tracking-wider text-cream/55 bg-white/[0.04] border border-white/10">
-                Waiting for host
-              </span>
+            // Non-effective-host: small "waiting" pill that flips to a real
+            // fallback button after a few seconds, so a stale host pointer
+            // can't deadlock the room.
+            <div className="text-center space-y-2">
+              {!fallbackUnlocked ? (
+                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bebas tracking-wider text-cream/55 bg-white/[0.04] border border-white/10">
+                  Waiting for host
+                </span>
+              ) : (
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <button
+                    onClick={triggerStartNext}
+                    className="flex-1 py-3 rounded-xl font-bebas tracking-wider text-base transition-all active:scale-95 btn-gold"
+                  >
+                    START NEXT ROUND
+                  </button>
+                  <button
+                    onClick={onReturnToLobby}
+                    className="flex-1 py-3 rounded-xl font-bebas tracking-wider text-base transition-all active:scale-95"
+                    style={{
+                      background: "rgba(255,255,255,0.04)",
+                      border: "1px solid rgba(255,255,255,0.1)",
+                      color: "rgba(238,244,255,0.85)",
+                    }}
+                  >
+                    BACK TO LOBBY
+                  </button>
+                </div>
+              )}
             </div>
           )}
         </motion.div>

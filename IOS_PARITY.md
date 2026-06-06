@@ -7,6 +7,25 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 
 ---
 
+## 2026-06-05 — Sketchy round-end deadlock unstick (web-only, no iOS row)
+
+**Status:** 🚫 N/A (deliberate no-row decision — Lionade Party is web-only V1 per project memory; iOS Party has not shipped, so there is no equivalent reveal screen to unstick).
+
+Root cause: the reveal-phase "PLAY ANOTHER ROUND" / "BACK TO LOBBY" CTAs in `components/party/SketchView.tsx` were gated on `isHost`, which is derived from `room.host_user_id === me`. If the original host disconnected (or their tab dropped the realtime WS before the `/leave` `pagehide` handler fired), `host_user_id` kept pointing at the no-longer-active user. Every remaining player saw "Waiting for host" with no way out — the round-end state had no auto-advance, the vote card only fires `onAutoPlayAgain` once 75% have voted AND that callback was also `isHost`-gated, and the next-round POST endpoint actually only requires room membership.
+
+Fix:
+1. Derived `effectiveHostUserId` from the players list — if the real `host_user_id` is not in active players, promote the longest-connected active player (deterministic across clients).
+2. Added a visible 12s auto-advance countdown on the reveal phase ("Next round in 8s") that triggers `startRound()` from the effective host's client when it hits 0.
+3. After 6s on reveal, non-effective-host clients also see a "START NEXT ROUND" fallback button as belt-and-suspenders.
+4. Re-pointed the vote auto-decide callbacks at `isEffectiveHost` so the threshold path works the moment a stale host pointer is detected.
+5. Real-host-only Rematch button stays gated on the original `isHost` (server `/rematch` requires real host).
+
+iOS stance: Lionade Party iOS port is paused per `~/Desktop/lionade-vault/lionade/Features/Party.md` and current memory. When the iOS port resumes, mirror the same instinct: derive `effectiveHostUserId` client-side from the same player list, run a visible reveal-phase countdown, fall back to a non-host advance button after a short delay. The server-side contract is unchanged — `POST /api/party/sketch/rounds` only requires `isMember`. **No iOS row required today.**
+
+**Files touched (web):** `components/party/SketchView.tsx` (effective-host derivation, reveal auto-advance + fallback unlock, render branch swap).
+
+---
+
 ## 2026-06-05 — Vocab AddWordForm "Lock it in" save fix (web-only, no iOS row)
 
 **Status:** 🚫 N/A (deliberate no-row decision — web client bug; iOS Vocab Add flow has not shipped, so there is no equivalent client payload to fix today).
