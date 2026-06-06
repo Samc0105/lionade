@@ -734,8 +734,10 @@ export default function SocialPage() {
             {showNotifView ? (
               <div className="flex-1 overflow-y-auto">
                 {socialNotifs.length === 0 ? (
-                  <div className="py-10 text-center">
-                    <p className="text-cream/55 text-sm">No notifications</p>
+                  <div className="py-12 px-6 text-center flex flex-col items-center gap-2.5">
+                    <CheckCircle size={28} weight="fill" className="text-electric/60" aria-hidden="true" />
+                    <p className="text-cream/70 text-sm font-semibold">You're all caught up</p>
+                    <p className="text-cream/40 text-xs">New activity from friends shows up here.</p>
                   </div>
                 ) : (
                   socialNotifs.map(n => (
@@ -1290,8 +1292,9 @@ export default function SocialPage() {
                 {/* Messages area */}
                 <div ref={chatContainerRef} className="flex-1 overflow-y-auto px-5 py-4 space-y-3">
                   {timeline.length === 0 && (
-                    <div className="text-center py-10">
-                      <p className="text-cream/15 text-sm">No messages yet. Say hi!</p>
+                    <div className="text-center py-12 flex flex-col items-center gap-2">
+                      <Megaphone size={26} weight="regular" className="text-cream/30" aria-hidden="true" />
+                      <p className="text-cream/55 text-sm">No messages yet. Say hi.</p>
                     </div>
                   )}
 

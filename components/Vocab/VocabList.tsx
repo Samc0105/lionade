@@ -356,8 +356,17 @@ export default function VocabList({ bank }: Props) {
       <AddWordRow bank={bank} onAdded={() => mutate()} />
 
       {isLoading && !data ? (
-        <div className="rounded-2xl bg-white/5 backdrop-blur border border-white/10 p-10 text-center">
-          <p className="font-mono text-xs uppercase tracking-[0.25em] text-cream/55">loading...</p>
+        <div className="rounded-2xl bg-white/[0.03] backdrop-blur border border-white/[0.06] overflow-hidden">
+          {[0, 1, 2, 3, 4].map((i) => (
+            <div
+              key={i}
+              className="h-14 border-b border-white/[0.04] last:border-0 px-5 flex items-center gap-4 animate-pulse"
+            >
+              <div className="h-3 w-32 rounded bg-white/[0.06]" />
+              <div className="h-3 w-48 rounded bg-white/[0.04] flex-1" />
+              <div className="h-5 w-14 rounded-full bg-white/[0.04]" />
+            </div>
+          ))}
         </div>
       ) : filtered.length === 0 ? (
         <div className="rounded-2xl bg-white/[0.03] backdrop-blur border border-white/[0.06] p-10 text-center">

@@ -127,8 +127,14 @@ export default function ReviewQueue({ bank }: Props) {
 
       {/* Card area */}
       {isLoading && !data ? (
-        <div className="rounded-2xl bg-white/5 backdrop-blur border border-white/10 p-10 text-center">
-          <p className="font-mono text-xs uppercase tracking-[0.25em] text-cream/55">loading...</p>
+        <div className="rounded-2xl bg-white/[0.03] backdrop-blur border border-white/[0.06] p-10 flex flex-col items-center gap-5 animate-pulse">
+          <div className="h-3 w-24 rounded-full bg-white/[0.05]" />
+          <div className="h-10 w-64 rounded-md bg-white/[0.07]" />
+          <div className="h-3 w-40 rounded bg-white/[0.04]" />
+          <div className="flex gap-3 mt-3">
+            <div className="h-9 w-24 rounded-full bg-white/[0.04]" />
+            <div className="h-9 w-24 rounded-full bg-white/[0.04]" />
+          </div>
         </div>
       ) : current ? (
         <FlashCard

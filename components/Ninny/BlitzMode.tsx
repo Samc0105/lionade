@@ -116,7 +116,12 @@ export default function BlitzMode({ questions, wrongAnswerCounts, playsToday, pl
   );
 
   if (!current) {
-    return <div className="text-cream/60 text-center py-12">No questions available.</div>;
+    return (
+      <div className="rounded-2xl border border-white/[0.06] bg-white/[0.02] px-6 py-10 text-center">
+        <p className="font-bebas text-lg text-cream/70 tracking-wider mb-1">BLITZ NEEDS QUESTIONS</p>
+        <p className="text-cream/45 text-xs">Add a few terms to this set and Blitz lights up.</p>
+      </div>
+    );
   }
 
   // Time-based color

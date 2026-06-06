@@ -97,7 +97,12 @@ export default function MatchMode({ pairs, wrongAnswerCounts, onComplete }: Prop
   }, [matched, round.total, score, wrongAnswers, onComplete]);
 
   if (round.total === 0) {
-    return <div className="text-cream/60 text-center py-12">No matches available.</div>;
+    return (
+      <div className="rounded-2xl border border-white/[0.06] bg-white/[0.02] px-6 py-10 text-center">
+        <p className="font-bebas text-lg text-cream/70 tracking-wider mb-1">NOT ENOUGH PAIRS YET</p>
+        <p className="text-cream/45 text-xs">Match needs at least a few terms in this set.</p>
+      </div>
+    );
   }
 
   const handleTermClick = (item: Item) => {
