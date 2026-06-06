@@ -6,14 +6,14 @@ import { supabase } from "@/lib/supabase";
 import type { StudySheetInput } from "@/components/Mastery/studySheetPdf";
 
 /**
- * "Session Report" floating action — bottom-right of the Mastery session
- * screen. Always visible so the upgrade surface stays prominent without
- * interrupting the chat flow.
+ * "Session Report" button — inline in the Mastery session header. Always
+ * visible so the upgrade surface stays prominent without interrupting the
+ * chat flow.
  *
- * - Pro / Platinum users → click → PDF downloads immediately
- * - Free users           → click → paywall modal with upgrade CTA
+ * - Pro / Platinum users  click  PDF downloads immediately
+ * - Free users            click  paywall modal with upgrade CTA
  * - If the `plan` column hasn't shipped to Supabase yet (migration 032),
- *   we treat the user as `free` — the feature is opt-in, so fail-closed is
+ *   we treat the user as `free`. The feature is opt-in, so fail-closed is
  *   the right default here.
  */
 
@@ -30,21 +30,12 @@ interface Props {
   buildInput: () => StudySheetInput | null;
   /** Current overall display % for the session. Button disables below UNLOCK_PCT. */
   overallPct: number;
-  /**
-   * Where the button is rendered.
-   * - "header" (default): inline, content-anchored. No fixed positioning.
-   *   Use this when the button lives inside a page header / toolbar row.
-   * - "floating": fixed bottom-right pill. Reserved for surfaces with no
-   *   header slot. Positioned to clear the global LaunchDock at right-6.
-   */
-  placement?: "header" | "floating";
 }
 
 export default function SessionReportFab({
   userId,
   buildInput,
   overallPct,
-  placement = "header",
 }: Props) {
   const [plan, setPlan] = useState<Plan>("unknown");
   const [paywallOpen, setPaywallOpen] = useState(false);
@@ -100,22 +91,6 @@ export default function SessionReportFab({
     }
   };
 
-  // Position classes. "header" → inline pill, no fixed positioning, sized to
-  // sit comfortably in a header row. "floating" → original bottom-right FAB,
-  // bumped UP to clear the global LaunchDock ("+") at right-6 / bottom-24
-  // (dock is 56px tall, so its top edge is at 80px from viewport bottom;
-  // we sit the pill at bottom-[96px] desktop / bottom-[158px] mobile for
-  // breathing room above the mobile dock at bottom-[88px]).
-  const positionClasses =
-    placement === "floating"
-      ? "fixed z-40 right-4 md:right-6 bottom-[158px] md:bottom-[96px]"
-      : "";
-  // Header variant uses a slightly tighter pill so it fits the header row.
-  const sizeClasses =
-    placement === "floating"
-      ? "px-4 py-2.5 text-[10.5px]"
-      : "px-3 py-1.5 text-[10px]";
-
   return (
     <>
       <button
@@ -125,10 +100,9 @@ export default function SessionReportFab({
         aria-label={unlocked ? "Session Report" : `Reach ${UNLOCK_PCT}% mastery to unlock Session Report`}
         title={unlocked ? undefined : `Unlocks at ${UNLOCK_PCT}% mastery`}
         className={`
-          ${positionClasses}
           inline-flex items-center gap-2 rounded-full
           font-mono uppercase tracking-[0.25em]
-          ${sizeClasses}
+          px-3 py-1.5 text-[10px]
           transition-transform duration-200
           disabled:cursor-not-allowed
           ${unlocked

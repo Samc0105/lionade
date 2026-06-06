@@ -660,7 +660,6 @@ export default function MasterySessionPage() {
                   userId={user?.id}
                   buildInput={buildStudySheet}
                   overallPct={data.overallDisplayPct}
-                  placement="header"
                 />
                 <div className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.25em] text-cream/50">
                   <Clock size={12} weight="bold" />
