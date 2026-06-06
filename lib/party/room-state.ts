@@ -8,9 +8,20 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { PartyPlayer, PartyRoom } from "./types";
 
+export interface ActiveRoundLite {
+  id: string;
+  phase: string;
+  started_at: string | null;
+}
+
 export interface RoomSnapshot {
   room: PartyRoom;
   players: PartyPlayer[];
+  // Bootstrap hint for a player rejoining mid-game. Only populated when the
+  // room's current_game has an in-flight (ended_at IS NULL) round. Lets the
+  // *View components hydrate immediately instead of sitting on a spinner
+  // until the next realtime broadcast lands.
+  activeRound?: ActiveRoundLite | null;
 }
 
 export async function fetchRoomSnapshot(
@@ -51,7 +62,41 @@ export async function fetchRoomSnapshot(
     selected_subjects: Array.isArray(p.selected_subjects) ? p.selected_subjects : [],
   }));
 
-  return { room: room as PartyRoom, players: shaped };
+  const typedRoom = room as PartyRoom;
+  let activeRound: ActiveRoundLite | null = null;
+  if (typedRoom.status === "playing" && typedRoom.current_game) {
+    const table =
+      typedRoom.current_game === "sketch"
+        ? "sketch_rounds"
+        : typedRoom.current_game === "bluff"
+          ? "bluff_rounds"
+          : typedRoom.current_game === "pokerface"
+            ? "party_pokerface_rounds"
+            : null;
+    if (table) {
+      const { data: r } = await supabase
+        .from(table)
+        .select("id, phase, started_at")
+        .eq("room_id", typedRoom.id)
+        .is("ended_at", null)
+        .order("started_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (r && r.id) {
+        activeRound = {
+          id: r.id as string,
+          // sketch_rounds has no DB phase column (phase is client-derived from
+          // word/strokes); we surface "drawing" as a stable hint so rejoiners
+          // land on the correct screen and the View immediately fetches the
+          // word/stroke detail to hydrate the rest.
+          phase: (r as { phase?: string }).phase ?? "drawing",
+          started_at: (r as { started_at?: string | null }).started_at ?? null,
+        };
+      }
+    }
+  }
+
+  return { room: typedRoom, players: shaped, activeRound };
 }
 
 /** Returns true if the user is the current host of an open room. */
@@ -67,6 +112,45 @@ export async function isRoomHost(
     .neq("status", "ended")
     .maybeSingle();
   return data?.host_user_id === userId;
+}
+
+/**
+ * Server-side effective-host check.
+ *
+ * Accepts host-gated actions when the caller is either:
+ *   (a) the stored host_user_id (the happy path), or
+ *   (b) the longest-connected active player (joined_at ASC, left_at IS NULL),
+ *       which is the same deterministic derivation the client uses to break
+ *       deadlocks when the real host disconnects mid-game.
+ *
+ * Only this single player gets the privilege — never "any connected player."
+ */
+export async function isEffectiveHost(
+  supabase: SupabaseClient,
+  roomId: string,
+  storedHostUserId: string,
+  userId: string,
+): Promise<boolean> {
+  if (storedHostUserId === userId) return true;
+  // Stored host still in the active roster? Then nobody else is effective host.
+  const { data: storedActive } = await supabase
+    .from("party_room_players")
+    .select("user_id")
+    .eq("room_id", roomId)
+    .eq("user_id", storedHostUserId)
+    .is("left_at", null)
+    .maybeSingle();
+  if (storedActive) return false;
+  // Stored host has dropped — promote the longest-connected active player.
+  const { data: oldest } = await supabase
+    .from("party_room_players")
+    .select("user_id")
+    .eq("room_id", roomId)
+    .is("left_at", null)
+    .order("joined_at", { ascending: true })
+    .limit(1)
+    .maybeSingle();
+  return oldest?.user_id === userId;
 }
 
 /** Returns true if the user has an active membership in the room (no left_at). */

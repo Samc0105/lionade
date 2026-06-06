@@ -1015,7 +1015,7 @@ export default function PokerFaceView({
               </>
             )}
 
-            {isHost && everyoneCalled && (
+            {isEffectiveHost && everyoneCalled && (
               <button
                 onClick={revealNow}
                 className="w-full py-3 rounded-xl font-bebas tracking-wider text-base transition-all active:scale-95"
@@ -1195,13 +1195,13 @@ export default function PokerFaceView({
               <PostRoundVoteCard
                 roundId={round.id}
                 roundKind="pokerface"
-                isHost={isHost}
+                isHost={isEffectiveHost}
                 onAutoPlayAgain={handleAutoPlayAgain}
                 onAutoBackToLobby={handleAutoBackToLobby}
               />
             )}
 
-            {isHost &&
+            {isEffectiveHost &&
               (round.round_num >= totalRounds ? (
                 <button
                   onClick={onReturnToLobby}

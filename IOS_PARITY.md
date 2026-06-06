@@ -7,6 +7,37 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 
 ---
 
+## 2026-06-06 — Party V1 hardening: effective-host port + phase error clear + snapshot expansion (web-only, no iOS row)
+
+**Status:** 🚫 N/A (deliberate no-row decision — Lionade Party is web-only V1 per project memory; iOS Party has not shipped, so there is no equivalent flow to harden today).
+
+Pattern audit on commits `873354b` (Bluff vote-save fix) and `69d3b85` (Sketchy round-end deadlock) surfaced three P0-class issues still latent in the rest of the Party stack. This pass ports the fixes everywhere they applied.
+
+1. **Effective-host gating (client)** — `components/party/BluffView.tsx` and `components/party/PokerFaceView.tsx` now derive `effectiveHostUserId` (longest-connected active player, joined_at ASC with user_id tiebreak — every client agrees deterministically) and use it for round auto-start, timer auto-advance, post-round vote auto-decide, rematch (Bluff), reveal-now (Poker Face), interrogate backstop (Poker Face), and the post-reveal NEXT ROUND / BACK TO LOBBY surfaces. The Sketchy derivation that shipped in `69d3b85` was tightened (now sorts by `joined_at` ASC with `user_id` tiebreak, instead of trusting incoming prop order). The mid-game floating INVITE button stays on raw `isHost` — host-disconnect strands the invite, not the game.
+
+2. **Server-side effective-host acceptance** — `app/api/party/bluff/rounds/[id]/complete/route.ts`, `app/api/party/pokerface/rounds/[id]/complete/route.ts`, and `app/api/party/rooms/[code]/rematch/route.ts` now accept the request when the caller is either the stored `host_user_id` OR the deterministic effective host (oldest active player). New shared helper `isEffectiveHost(supabase, roomId, storedHostUserId, userId)` in `lib/party/room-state.ts`. Never accepts "any connected player" — only the single deterministic fallback.
+
+3. **Phase-change error clear (Poker Face)** — mirrors the Bluff fix from `873354b`. `useEffect(() => setError(null), [phase])` in PokerFaceView so a present-phase submit failure doesn't bleed into vote. Sketchy has no `error` state at all, so item is N/A there (audit was off on Sketchy specifically — flagged in code review).
+
+4. **Reconnect snapshot expansion** — `lib/party/room-state.ts::fetchRoomSnapshot` now also returns `activeRound: { id, phase, started_at } | null` derived from the current_game's round table (sketch / bluff / pokerface) when one is in flight. `app/api/party/rooms/[code]/route.ts` surfaces it. All three Views accept an `activeRound` prop and bootstrap their round id immediately on mount, so a rejoiner lands on the live screen instead of sitting on a spinner until the next realtime broadcast lands. Host auto-start gate skips when `activeRound?.id` is present so the rejoin path doesn't fire a fresh round.
+
+iOS stance: when Lionade Party iOS V2 ships, `vp-ios` must mirror these patterns 1-for-1 — the host-disconnect deadlock class is intrinsic to any multiplayer room model, not web-specific. Tag `ios-shared-core` to pull the `isEffectiveHost` derivation through `@lionade/core` (server contract is shared) and the client effective-host useMemo (logic is pure JS, no platform deps). **No iOS row required today.**
+
+**Files touched (web):**
+- `components/party/SketchView.tsx` (sort tightened to joined_at + user_id; new `activeRound` prop + bootstrap effect; `activeRound?.id` guard on host auto-start)
+- `components/party/BluffView.tsx` (effective-host derivation; ported timer auto-advance, post-round vote auto-decide, rematch, NEXT ROUND surface; `activeRound` bootstrap; non-host pill switched to `!isEffectiveHost`)
+- `components/party/PokerFaceView.tsx` (effective-host derivation; ported all auto-advance + reveal + interrogate-backstop + post-round surface; `activeRound` bootstrap; phase-change error clear)
+- `app/api/party/bluff/rounds/[id]/complete/route.ts` (acceptance switched to `isEffectiveHost`)
+- `app/api/party/pokerface/rounds/[id]/complete/route.ts` (acceptance switched to `isEffectiveHost`)
+- `app/api/party/rooms/[code]/rematch/route.ts` (acceptance switched to `isEffectiveHost`)
+- `lib/party/room-state.ts` (new `ActiveRoundLite` type; snapshot returns `activeRound`; new `isEffectiveHost` server helper)
+- `app/api/party/rooms/[code]/route.ts` (snapshot response includes `activeRound`)
+- `app/games/party/[code]/page.tsx` (Snapshot type + threads `activeRound` into all three Views)
+
+No DB migrations. No new dependencies. Pure logic-only hardening.
+
+---
+
 ## 2026-06-06 — Pricing tier-card perks copy: strip em-dashes (web-only, no iOS row)
 
 **Status:** 🚫 N/A (deliberate no-row decision — no equivalent Pro pricing surface ships in iOS today).

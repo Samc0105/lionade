@@ -52,6 +52,7 @@ interface Props {
   players: PartyPlayer[];
   isHost: boolean;
   meUserId: string;
+  activeRound?: { id: string; phase: string; started_at: string | null } | null;
   onReturnToLobby: () => void;
 }
 
@@ -181,6 +182,7 @@ export default function SketchView({
   players,
   isHost,
   meUserId,
+  activeRound,
   onReturnToLobby,
 }: Props) {
   const reduced = useReducedMotion();
@@ -487,9 +489,33 @@ export default function SketchView({
     });
   }, [room.code, meUserId, sendBroadcast]);
 
+  // Reconnect bootstrap: if the page snapshot includes an in-flight round,
+  // hydrate immediately so a rejoiner lands on the live screen instead of
+  // sitting on the loading spinner until the next realtime broadcast fires.
+  // Host's own auto-start path skips when a round is already present.
+  const bootstrappedActiveRef = useRef(false);
+  useEffect(() => {
+    if (bootstrappedActiveRef.current) return;
+    if (round) return;
+    if (!activeRound?.id || !activeRound.started_at) return;
+    bootstrappedActiveRef.current = true;
+    roundIdRef.current = activeRound.id;
+    setRound({
+      id: activeRound.id,
+      room_id: room.id,
+      round_num: 0,
+      drawer_user_id: "",
+      subject: "",
+      duration_sec: 90,
+      started_at: activeRound.started_at,
+    });
+    setPhase("drawing");
+    setNinnyMsg("Watch carefully and guess what they're drawing.");
+  }, [activeRound, room.id, round]);
+
   // Host kicks off the first round automatically.
   useEffect(() => {
-    if (isHost && !round && phase === "loading") {
+    if (isHost && !round && phase === "loading" && !activeRound?.id) {
       void startRound();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -1038,7 +1064,13 @@ export default function SketchView({
   const effectiveHostUserId = useMemo(() => {
     const realHostActive = players.some((p) => p.user_id === room.host_user_id);
     if (realHostActive) return room.host_user_id;
-    return players[0]?.user_id ?? room.host_user_id;
+    const sorted = [...players].sort((a, b) => {
+      const ja = a.joined_at ?? "";
+      const jb = b.joined_at ?? "";
+      if (ja !== jb) return ja < jb ? -1 : 1;
+      return a.user_id.localeCompare(b.user_id);
+    });
+    return sorted[0]?.user_id ?? room.host_user_id;
   }, [players, room.host_user_id]);
   const isEffectiveHost = effectiveHostUserId === meUserId;
 

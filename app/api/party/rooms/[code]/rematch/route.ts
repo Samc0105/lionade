@@ -29,6 +29,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
 import { isValidRoomCode, normalizeRoomCode } from "@/lib/party/room-code";
+import { isEffectiveHost } from "@/lib/party/room-state";
 
 export const dynamic = "force-dynamic";
 
@@ -54,7 +55,10 @@ export async function POST(
   if (!room) {
     return NextResponse.json({ error: "Room not found" }, { status: 404 });
   }
-  if (room.host_user_id !== userId) {
+  // Accept the stored host OR the deterministic effective host (longest-
+  // connected active player) so a host-disconnect can't strand the room.
+  const allowed = await isEffectiveHost(supabaseAdmin, room.id, room.host_user_id, userId);
+  if (!allowed) {
     return NextResponse.json(
       { error: "Only the host can start a rematch" },
       { status: 403 },

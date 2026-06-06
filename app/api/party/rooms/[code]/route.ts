@@ -31,5 +31,6 @@ export async function GET(
     players: snapshot.players,
     meUserId: auth.userId,
     isHost: snapshot.room.host_user_id === auth.userId,
+    activeRound: snapshot.activeRound ?? null,
   });
 }

@@ -21,6 +21,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
 import { pokerFaceRoundPoints } from "@/lib/party/scoring";
+import { isEffectiveHost } from "@/lib/party/room-state";
 
 export async function POST(
   req: NextRequest,
@@ -43,7 +44,10 @@ export async function POST(
     .eq("id", round.room_id)
     .maybeSingle();
   if (!room) return NextResponse.json({ error: "Room not found" }, { status: 404 });
-  if (room.host_user_id !== userId) {
+  // Accept the stored host OR the deterministic effective host (longest-
+  // connected active player) so a host-disconnect can't deadlock the reveal.
+  const allowed = await isEffectiveHost(supabaseAdmin, round.room_id, room.host_user_id, userId);
+  if (!allowed) {
     return NextResponse.json({ error: "Only the host can reveal the round" }, { status: 403 });
   }
 
