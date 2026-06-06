@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ArrowRight, Sparkle, Crown, CheckCircle } from "@phosphor-icons/react";
+import { ArrowRight, Sparkle, Crown, CheckCircle, CaretLeft } from "@phosphor-icons/react";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import BackButton from "@/components/BackButton";
 import { usePlan } from "@/lib/use-plan";
@@ -31,6 +31,13 @@ export default function SubscriptionSettingsPage() {
           <BackButton />
 
           <div className="mb-8">
+            <Link
+              href="/settings"
+              className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.3em] text-cream/40 hover:text-cream/70 transition-colors mb-3"
+            >
+              <CaretLeft size={11} weight="bold" aria-hidden="true" />
+              All settings
+            </Link>
             <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-cream/40 mb-2">
               Settings / Subscription
             </p>
@@ -140,7 +147,7 @@ function PlanPanel() {
         </ul>
       </div>
 
-      {/* Action card — differs by plan */}
+      {/* Action card varies by plan */}
       {!isPaid && (
         <div className="rounded-[14px] border border-gold/30 bg-gradient-to-br from-gold/[0.06] to-transparent px-5 py-5 mb-4">
           <div className="flex items-center gap-2 mb-2">
