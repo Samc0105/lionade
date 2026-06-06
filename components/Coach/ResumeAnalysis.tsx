@@ -3,6 +3,7 @@
 import { CheckCircle, Warning, Question, ArrowRight } from "@phosphor-icons/react";
 import { cdnUrl } from "@/lib/cdn";
 import RevealText from "@/components/RevealText";
+import RevealList from "@/components/RevealList";
 import type { ResumeAnalysis } from "./ResumeUpload";
 
 interface Props {
@@ -49,7 +50,7 @@ export default function ResumeAnalysisView({ analysis, onStartSocratic }: Props)
               {analysis.strengths.length}
             </span>
           </div>
-          <ul className="space-y-3">
+          <RevealList as="ul" className="space-y-3" delay={0.4} itemDelay={0.08}>
             {analysis.strengths.map((s, i) => (
               <li
                 key={i}
@@ -59,7 +60,7 @@ export default function ResumeAnalysisView({ analysis, onStartSocratic }: Props)
                 <span className="flex-1">{s}</span>
               </li>
             ))}
-          </ul>
+          </RevealList>
         </section>
 
         {/* Weaknesses */}
@@ -76,7 +77,7 @@ export default function ResumeAnalysisView({ analysis, onStartSocratic }: Props)
               {analysis.weaknesses.length}
             </span>
           </div>
-          <ul className="space-y-3">
+          <RevealList as="ul" className="space-y-3" delay={0.5} itemDelay={0.08}>
             {analysis.weaknesses.map((w, i) => (
               <li
                 key={i}
@@ -86,7 +87,7 @@ export default function ResumeAnalysisView({ analysis, onStartSocratic }: Props)
                 <span className="flex-1">{w}</span>
               </li>
             ))}
-          </ul>
+          </RevealList>
         </section>
 
         {/* Questions */}

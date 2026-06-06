@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
+import { shouldNotifyUser } from "@/lib/db";
 
 // POST — Send a challenge to a friend (by username)
 export async function POST(req: NextRequest) {
@@ -76,18 +77,22 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Couldn't update challenge." }, { status: 500 });
     }
 
-    // Notify the challenged user (non-blocking)
+    // Notify the challenged user (non-blocking). Gated on their
+    // `duel_challenges` notification pref — the duel itself still creates
+    // (visible in /compete/arena/duel); we just suppress the ping.
     try {
-      const { data: challengerProfile } = await supabaseAdmin
-        .from("profiles").select("username").eq("id", challengerId).single();
-      await supabaseAdmin.from("notifications").insert({
-        user_id: challenged.id,
-        type: "arena_challenge",
-        title: `${challengerProfile?.username ?? "Someone"} challenged you to a duel!`,
-        message: `${safeWager} Fangs wager`,
-        action_url: "/social",
-        related_user_id: challengerId,
-      });
+      if (await shouldNotifyUser(challenged.id, "duel_challenges")) {
+        const { data: challengerProfile } = await supabaseAdmin
+          .from("profiles").select("username").eq("id", challengerId).single();
+        await supabaseAdmin.from("notifications").insert({
+          user_id: challenged.id,
+          type: "arena_challenge",
+          title: `${challengerProfile?.username ?? "Someone"} challenged you to a duel!`,
+          message: `${safeWager} Fangs wager`,
+          action_url: "/social",
+          related_user_id: challengerId,
+        });
+      }
     } catch { /* notifications table may not exist yet */ }
 
     return NextResponse.json({

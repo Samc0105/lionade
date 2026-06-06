@@ -132,6 +132,41 @@ export async function getPreferences(userId: string): Promise<UserPreferences> {
   };
 }
 
+/**
+ * 12-factor-style gate at the notification-trigger boundary: returns false
+ * if the recipient has opted out of this category, true otherwise. Defaults
+ * to TRUE on any read failure so a transient DB hiccup never silences a
+ * notification — under-notify is the wrong default; over-notify is recoverable
+ * by the user clicking the per-row mark-read or toggling the pref off.
+ *
+ * Use at every server-side notifications.insert call site:
+ *
+ *   if (await shouldNotifyUser(recipientId, "duel_challenges")) {
+ *     await supabaseAdmin.from("notifications").insert({ ... });
+ *   }
+ *
+ * Trust gap closed 2026-06-05: previously, the Settings/Profile pref toggles
+ * persisted (per the earlier P0 fix) but creators ignored them — flipping
+ * "Duel Challenges: off" still caused incoming duels to insert a row.
+ */
+export async function shouldNotifyUser(
+  userId: string,
+  prefKey: keyof NotificationPrefs,
+): Promise<boolean> {
+  try {
+    const { data } = await supabase
+      .from("profiles")
+      .select("preferences")
+      .eq("id", userId)
+      .single();
+    const stored = (data?.preferences ?? {}) as Partial<UserPreferences>;
+    const notif = { ...DEFAULT_NOTIFICATION_PREFS, ...(stored.notifications ?? {}) };
+    return notif[prefKey] !== false;
+  } catch {
+    return true; // fail-open — see doc comment
+  }
+}
+
 export async function updatePreferences(userId: string, prefs: Partial<UserPreferences>) {
   const current = await getPreferences(userId);
   // Deep-merge sub-blobs so a PATCH of just one toggle in `notifications`

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
 import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
+import { shouldNotifyUser } from "@/lib/db";
 import { renderEmail, templates } from "@/lib/emails";
 import { absoluteUrl } from "@/lib/site-config";
 import { applyFangMultiplierFromTier } from "@/lib/mastery-plan";
@@ -324,15 +325,18 @@ export async function POST(req: NextRequest) {
           type: "streak_milestone",
           description: `${newStreak}-day streak milestone!`,
         });
-        // Notify
+        // Notify (gated on the recipient's streak_alert pref — Bonus is
+        // still credited; the user just won't see a notification card).
         try {
-          await supabaseAdmin.from("notifications").insert({
-            user_id: userId,
-            type: "streak_milestone",
-            title: `${newStreak}-Day Streak!`,
-            message: `You earned ${milestoneBonus} bonus Fangs for your ${newStreak}-day streak!`,
-            action_url: "/dashboard",
-          });
+          if (await shouldNotifyUser(userId, "streak_alert")) {
+            await supabaseAdmin.from("notifications").insert({
+              user_id: userId,
+              type: "streak_milestone",
+              title: `${newStreak}-Day Streak!`,
+              message: `You earned ${milestoneBonus} bonus Fangs for your ${newStreak}-day streak!`,
+              action_url: "/dashboard",
+            });
+          }
         } catch { /* notifications table might not exist */ }
         streakMilestone = { days: newStreak, bonus: milestoneBonus };
       }

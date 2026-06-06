@@ -2,6 +2,7 @@
 
 import { useMemo } from "react";
 import { Brain, CheckCircle, XCircle, Lightbulb, Warning, Sparkle, Question } from "@phosphor-icons/react";
+import RevealList from "@/components/RevealList";
 
 /**
  * Renders a single message in the Mastery Mode chat thread. Dispatches on
@@ -85,14 +86,14 @@ function TeachCard({ m }: { m: MessageShape }) {
         <h4 className="font-bebas text-[22px] tracking-wider text-cream leading-tight mb-1">{p.title}</h4>
         {p.tldr && <p className="text-[13px] text-cream/75 mb-3 leading-relaxed">{p.tldr}</p>}
         {Array.isArray(p.bullets) && p.bullets.length > 0 && (
-          <ul className="flex flex-col gap-1.5 mb-3">
+          <RevealList as="ul" className="flex flex-col gap-1.5 mb-3" delay={0.12} itemDelay={0.07}>
             {p.bullets.map((b, i) => (
               <li key={i} className="flex gap-2 text-[13px] text-cream/85 leading-relaxed">
                 <span className="text-[#A855F7]/60 mt-[6px] shrink-0">•</span>
                 <span>{b}</span>
               </li>
             ))}
-          </ul>
+          </RevealList>
         )}
         {p.mnemonic && (
           <div className="flex items-start gap-2 mb-2 rounded-[6px] bg-white/[0.03] border border-white/[0.05] px-3 py-2">
