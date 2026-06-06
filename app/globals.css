@@ -1481,6 +1481,56 @@ body {
   }
 }
 
+/* ── Navbar logo link — adds a subtle gold-tinted lift on hover that layers
+   on top of the existing electric `logo-glow` breathe. Transform-only so it
+   stays cheap; reduced-motion strips the transform. ── */
+.nav-logo-link {
+  transition: transform 200ms cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform;
+}
+.nav-logo-link:hover {
+  transform: translateY(-1px);
+}
+.nav-logo-link:hover .logo-glow {
+  box-shadow: 0 0 6px rgba(255, 215, 0, 0.35), 0 0 16px rgba(255, 215, 0, 0.18);
+}
+
+/* ── Navbar bell — hover wiggle (small rotate, GPU-only). Bell uses
+   transform-origin: 50% 18% so it pivots from the cap, not the center. ── */
+@keyframes nav-bell-hover-wiggle {
+  0%   { transform: rotate(0deg); }
+  25%  { transform: rotate(-10deg); }
+  55%  { transform: rotate(8deg); }
+  80%  { transform: rotate(-4deg); }
+  100% { transform: rotate(0deg); }
+}
+.nav-bell-wiggle {
+  transform-origin: 50% 18%;
+  will-change: transform;
+}
+.nav-bell-btn:hover .nav-bell-wiggle {
+  animation: nav-bell-hover-wiggle 480ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ── Navbar avatar button — paired ring + gold halo on hover/open. The base
+   electric inner ring is always visible; hovering or opening the menu fades in
+   the gold outer halo without shifting layout (pure box-shadow). ── */
+.nav-avatar-btn {
+  box-shadow:
+    0 0 0 1px rgba(74, 144, 217, 0.45),
+    0 0 0 3px rgba(74, 144, 217, 0.08);
+  transition: transform 200ms cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 200ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.nav-avatar-btn:hover,
+.nav-avatar-btn[data-open="true"] {
+  transform: translateY(-1px);
+  box-shadow:
+    0 0 0 1px rgba(255, 215, 0, 0.55),
+    0 0 0 3px rgba(255, 215, 0, 0.12),
+    0 0 14px -4px rgba(255, 215, 0, 0.35);
+}
+
 /* ── Gemstone image breathing glow ── */
 @keyframes gem-breathe {
 
@@ -3711,8 +3761,17 @@ html.light .space-bg-container { display: none; }
   .notif-badge-pulse,
   .quiz-option-enter,
   .breathe-glow,
+  .nav-bell-btn:hover .nav-bell-wiggle,
   .progress-shimmer::after {
     animation: none !important;
+  }
+
+  /* Defence-in-depth: strip the GPU lift on the navbar logo and avatar so
+     reduced-motion users get a fully static brand row. */
+  .nav-logo-link:hover,
+  .nav-avatar-btn:hover,
+  .nav-avatar-btn[data-open="true"] {
+    transform: none !important;
   }
 
   /* Disable hover transforms for reduced-motion */

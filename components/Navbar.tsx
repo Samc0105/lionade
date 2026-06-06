@@ -424,8 +424,11 @@ export default function Navbar() {
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-12">
-            {/* Logo */}
-            <Link href="/dashboard" className="flex items-center">
+            {/* Logo — wrapper carries an extra `nav-logo-link` class so the
+                shared glow keyframe intensifies on hover (gold-tinted), and the
+                whole brand mark lifts 1px without thrashing layout (pure GPU
+                transform). prefers-reduced-motion strips the transform in CSS. */}
+            <Link href="/dashboard" className="nav-logo-link flex items-center">
               <div className="relative overflow-hidden rounded-md logo-glow sm:hidden">
                 <img src={cdnUrl("/logo-icon.png")} alt="Lionade" className="h-8 rounded-md relative z-10" />
                 <div className="logo-shimmer" />
@@ -436,7 +439,12 @@ export default function Navbar() {
               </div>
             </Link>
 
-            {/* Desktop Tabs — Dashboard | Learn | Compete */}
+            {/* Desktop Tabs — limelight slider mirrors the mobile bottom-nav
+                vocabulary: a shared-layoutId electric backdrop + thin top beam
+                travel between tabs as pathname changes. Active state is
+                pathname-driven (SSR & first client render render the same tree)
+                so layoutId animates the position between renders without any
+                DOM measurement. Reduced-motion: transitions collapse to 0. */}
             {showAppNav && (
               <div className="hidden md:flex items-center gap-1">
                 {NAV_LINKS.map((link) => {
@@ -445,14 +453,32 @@ export default function Navbar() {
                     <Link
                       key={link.href}
                       href={link.href}
-                      className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-all duration-200
+                      aria-current={active ? "page" : undefined}
+                      className={`relative px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors duration-200
                         ${active
-                          ? "bg-electric/15 text-electric"
+                          ? "text-electric"
                           : "hover:bg-white/5"
                         }`}
                       style={active ? {} : { color: "var(--nav-text)" }}
                     >
-                      {link.label}
+                      {active && (
+                        <>
+                          <motion.span
+                            layoutId="navLimelightDesktop"
+                            aria-hidden="true"
+                            className="absolute inset-0 rounded-lg bg-electric/12 border border-electric/25"
+                            style={{ boxShadow: "0 0 14px -6px rgba(74,144,217,0.55), inset 0 0 0 1px rgba(74,144,217,0.05)" }}
+                            transition={reduceMotion ? { duration: 0 } : { type: "spring", stiffness: 380, damping: 32 }}
+                          />
+                          <motion.span
+                            layoutId="navLimelightDesktopBeam"
+                            aria-hidden="true"
+                            className="absolute -bottom-px inset-x-2 h-[2px] rounded-full bg-electric shadow-[0_0_10px_-2px_rgba(74,144,217,0.7)]"
+                            transition={reduceMotion ? { duration: 0 } : { type: "spring", stiffness: 380, damping: 32 }}
+                          />
+                        </>
+                      )}
+                      <span className="relative z-10">{link.label}</span>
                     </Link>
                   );
                 })}
@@ -548,39 +574,80 @@ export default function Navbar() {
                     </div>
                   </div>
 
-                  {/* Streak Pill — same shell as Fangs, orange icon does the
-                      differentiation. Tooltip + click-to-open-modal preserved. */}
-                  <button
-                    onClick={() => setShowStreakModal(true)}
-                    aria-label={`Streak${stats?.streak ? ` — ${stats.streak} days` : ""}`}
-                    className="hidden sm:inline-flex h-8 items-center gap-1.5 rounded-full px-3
-                      bg-white/[0.04] border border-white/[0.08]
-                      cursor-pointer group relative transition-colors duration-200
-                      hover:bg-white/[0.07] hover:border-white/[0.14] active:scale-[0.97]"
-                  >
-                    <Fire size={14} weight="fill" color="#FB923C" aria-hidden="true" />
-                    <span className="font-bebas text-[15px] text-orange-400 tracking-wider leading-none tabular-nums">
-                      {stats !== null
-                        ? <CountUp id="user-streak" value={isStreakExpired(streakInfo?.lastQuizAt ?? null) ? 0 : stats.streak} duration={400} />
-                        : user.statsLoaded
-                          ? <CountUp id="user-streak" value={isStreakExpired(streakInfo?.lastQuizAt ?? null) ? 0 : user.streak} duration={400} />
-                          : <CountUp id="user-streak" value={user.streak ?? 0} duration={400} />}
-                    </span>
-                    <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 px-2 py-1 rounded bg-navy-100
-                      border border-electric/20 text-xs text-cream/70 opacity-0 group-hover:opacity-100
-                      transition-opacity duration-200 pointer-events-none whitespace-nowrap">
-                      Streak
-                    </div>
-                  </button>
+                  {/* Streak Pill — same shell as Fangs. Tier colors the flame +
+                      numeral so a glance reads the milestone: orange (default),
+                      gold (>=7), purple (>=30), electric (>=100). When the
+                      streak is "alive today" (any quiz in the 36h window) the
+                      icon picks up a subtle drop-shadow glow — pure GPU,
+                      reduced-motion safe (no keyframes, just a static filter). */}
+                  {(() => {
+                    const expired = isStreakExpired(streakInfo?.lastQuizAt ?? null);
+                    const displayedStreak = expired
+                      ? 0
+                      : (stats?.streak ?? user.streak ?? 0);
+                    const aliveToday = !!streakInfo?.lastQuizAt && !expired
+                      && (Date.now() - new Date(streakInfo.lastQuizAt).getTime()) < 24 * 60 * 60 * 1000;
+                    const tier =
+                      displayedStreak >= 100 ? "electric"
+                      : displayedStreak >= 30 ? "purple"
+                      : displayedStreak >= 7 ? "gold"
+                      : "orange";
+                    const tierColor =
+                      tier === "electric" ? "#4A90D9"
+                      : tier === "purple" ? "#A855F7"
+                      : tier === "gold" ? "#FFD700"
+                      : "#FB923C";
+                    const tierTextClass =
+                      tier === "electric" ? "text-electric"
+                      : tier === "purple" ? "text-purple-400"
+                      : tier === "gold" ? "text-gold"
+                      : "text-orange-400";
+                    return (
+                      <button
+                        onClick={() => setShowStreakModal(true)}
+                        aria-label={`Streak${displayedStreak ? ` — ${displayedStreak} days` : ""}`}
+                        className="hidden sm:inline-flex h-8 items-center gap-1.5 rounded-full px-3
+                          bg-white/[0.04] border border-white/[0.08]
+                          cursor-pointer group relative transition-colors duration-200
+                          hover:bg-white/[0.07] hover:border-white/[0.14] active:scale-[0.97]"
+                      >
+                        <Fire
+                          size={14}
+                          weight="fill"
+                          color={tierColor}
+                          aria-hidden="true"
+                          style={aliveToday && !reduceMotion
+                            ? { filter: `drop-shadow(0 0 6px ${tierColor}aa)` }
+                            : undefined}
+                        />
+                        <span className={`font-bebas text-[15px] tracking-wider leading-none tabular-nums ${tierTextClass}`}>
+                          {stats !== null
+                            ? <CountUp id="user-streak" value={displayedStreak} duration={400} />
+                            : user.statsLoaded
+                              ? <CountUp id="user-streak" value={displayedStreak} duration={400} />
+                              : <CountUp id="user-streak" value={user.streak ?? 0} duration={400} />}
+                        </span>
+                        <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 px-2 py-1 rounded bg-navy-100
+                          border border-electric/20 text-xs text-cream/70 opacity-0 group-hover:opacity-100
+                          transition-opacity duration-200 pointer-events-none whitespace-nowrap">
+                          Streak
+                        </div>
+                      </button>
+                    );
+                  })()}
 
                   {/* Notification Bell — icon-only square pill, h-8 w-8 to
                       match the row. Bell wrapped in a motion.div that bounces
-                      on each new arrival via the bellBounceKey re-mount. */}
+                      on each new arrival via the bellBounceKey re-mount. Hover
+                      adds a tiny rotate "wiggle" via `nav-bell-wiggle` (CSS
+                      keyframe, GPU-only, prefers-reduced-motion safe). Unread
+                      badge: gold-tinted pill with Bebas numeral up to 9, then
+                      collapses to a "9+" affordance to keep the pill compact. */}
                   <div className="relative hidden sm:block" ref={notifRef}>
                     <button
                       onClick={openNotifPanel}
                       aria-label={`Notifications${(unreadCount ?? 0) > 0 ? ` (${unreadCount} unread)` : ""}`}
-                      className="relative h-8 w-8 grid place-items-center rounded-full
+                      className="nav-bell-btn relative h-8 w-8 grid place-items-center rounded-full
                         bg-white/[0.04] border border-white/[0.08]
                         hover:bg-white/[0.07] hover:border-white/[0.14] transition-colors duration-200"
                     >
@@ -597,18 +664,23 @@ export default function Navbar() {
                             ? { duration: 0 }
                             : { duration: 0.25, ease: [0.34, 1.56, 0.64, 1] }
                         }
-                        className="inline-flex"
+                        className="nav-bell-wiggle inline-flex text-cream/85"
                         aria-hidden="true"
                       >
-                        <Bell size={16} weight="regular" color="currentColor" />
+                        <Bell size={16} weight={(unreadCount ?? 0) > 0 ? "fill" : "regular"} color="currentColor" />
                       </motion.div>
                       {(unreadCount ?? 0) > 0 && (
                         <span
-                          className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 rounded-full flex items-center justify-center px-1 text-[9px] font-bold notif-badge-pulse"
-                          style={{ background: "#EF4444", color: "#fff" }}
+                          className="absolute -top-1 -right-1 min-w-[16px] h-4 rounded-full flex items-center justify-center px-1
+                            font-bebas text-[10px] tracking-wider leading-none tabular-nums notif-badge-pulse"
+                          style={{
+                            background: "linear-gradient(135deg, #FFD700, #F0B429)",
+                            color: "#0a0f1d",
+                            boxShadow: "0 0 8px rgba(255,215,0,0.45)",
+                          }}
                           aria-hidden="true"
                         >
-                          {unreadCount}
+                          {(unreadCount ?? 0) > 9 ? "9+" : unreadCount}
                         </span>
                       )}
                     </button>
@@ -732,14 +804,18 @@ export default function Navbar() {
                     : <UpgradePill className="hidden lg:inline-flex" />
                   }
 
-                  {/* Avatar + Dropdown — soft border so it harmonizes with the
-                      neutral pills next to it instead of competing. */}
+                  {/* Avatar + Dropdown — paired ring: a subtle electric inner
+                      ring (always on) + a gold halo that fades in on hover or
+                      when the dropdown is open. Whole pill nudges 1px up on
+                      hover (GPU transform, reduced-motion CSS strips it). */}
                   <div className="relative" ref={dropdownRef}>
                     <button
                       onClick={toggleDropdown}
                       aria-label={`${user.username} — open menu`}
-                      className="w-8 h-8 rounded-full border border-white/[0.08] overflow-hidden
-                        hover:border-white/20 transition-colors duration-200 cursor-pointer flex-shrink-0"
+                      aria-expanded={showDropdown}
+                      data-open={showDropdown ? "true" : "false"}
+                      className="nav-avatar-btn w-8 h-8 rounded-full overflow-hidden
+                        cursor-pointer flex-shrink-0 transition-transform duration-200"
                       style={{ backgroundColor: "rgba(74, 144, 217, 0.25)" }}
                     >
                       <img src={avatarUrl} alt={user.username} className="w-8 h-8 rounded-full object-cover" />
