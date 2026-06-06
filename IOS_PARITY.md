@@ -7,6 +7,23 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 
 ---
 
+## 2026-06-05 — Vocab AddWordForm "Lock it in" save fix (web-only, no iOS row)
+
+**Status:** 🚫 N/A (deliberate no-row decision — web client bug; iOS Vocab Add flow has not shipped, so there is no equivalent client payload to fix today).
+
+Root cause: `components/Vocab/AddWordForm.tsx` `handleSave` for general banks built a payload with `term`, `term_definition`, and `user_definition`, but never included `definition_source`. The server validator (`app/api/vocab/words/route.ts`) requires `wikipedia | ai | manual` and 400s otherwise, surfaced to the user as the red toast "definition_source must be wikipedia, ai, or manual". Two adjacent bugs fell out of the same trace:
+
+1. Language-bank save was also missing `source_lang` / `target_lang` in the payload, which the route validates against the bank row — silently broken for any user who tried to save a translation.
+2. The success toast typed the response as `{ ok: true; fangs: number }` but the route returns `{ coinsAwarded }`, so the toast read "+undefined Fangs!" even on success.
+
+Fix: pass `definition_source` (state's `defineSource`, falling back to `"manual"` when the user typed their own without a Wikipedia/AI fetch), pass `source_lang` + `target_lang` on the language path, and read `coinsAwarded` from the response. Failure path already preserves user input — `resetForm` runs only on success.
+
+iOS stance: iOS Vocab Add flow is not yet implemented (`lionade-ios/` has Vocab read surfaces but no add-word screen). When `vp-ios` ports the Add flow, mirror the payload contract: general banks send `{ bank_id, term, term_definition, definition_source, user_definition? }`; language banks send `{ bank_id, word, translation, source_lang, target_lang, user_definition? }`. **No iOS row** — no iOS surface to port to yet; instinct documented for the future port.
+
+**Files touched (web):** `components/Vocab/AddWordForm.tsx` (handleSave passes `definition_source`, `source_lang`, `target_lang`; reads `coinsAwarded` from response).
+
+---
+
 ## 2026-06-05 — Mastery Session Report pill moved out of FAB collision (web-only, no iOS row)
 
 **Status:** 🚫 N/A (deliberate no-row decision — web-side layout collision between two web-only floating widgets; iOS Mastery does not have the equivalent collision).

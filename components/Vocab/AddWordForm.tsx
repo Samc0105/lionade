@@ -184,6 +184,8 @@ export default function AddWordForm({ bank, onSaved }: Props) {
         if (!translation) return;
         body.word = cleanedWord;
         body.translation = translation;
+        body.source_lang = sourceLang;
+        body.target_lang = targetLang;
       } else {
         if (!termDefinition || termDefinition.trim().length === 0) {
           toastError("Add a definition before saving.");
@@ -191,8 +193,11 @@ export default function AddWordForm({ bank, onSaved }: Props) {
         }
         body.term = cleanedWord;
         body.term_definition = termDefinition.trim();
+        // If the user typed their own canonical definition without a successful
+        // Wikipedia/AI fetch, defineSource is null — treat as manual.
+        body.definition_source = defineSource ?? "manual";
       }
-      const { ok, data, error } = await apiPost<{ ok: true; fangs: number }>(
+      const { ok, data, error } = await apiPost<{ coinsAwarded: number }>(
         "/api/vocab/words",
         body,
       );
@@ -200,7 +205,8 @@ export default function AddWordForm({ bank, onSaved }: Props) {
         toastError(error ?? "Couldn't save. Try again.");
         return;
       }
-      toastSuccess(`+${data.fangs} Fangs! Saved to ${bank.name}.`);
+      const awarded = typeof data.coinsAwarded === "number" ? data.coinsAwarded : 0;
+      toastSuccess(`+${awarded} Fangs! Saved to ${bank.name}.`);
       resetForm();
       onSaved?.();
     } catch (e: unknown) {
