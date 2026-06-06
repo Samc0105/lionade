@@ -6,6 +6,7 @@ import { SUBJECT_ICONS, SUBJECT_COLORS, DefaultSubjectIcon, formatCoins } from "
 import { getQuizQuestions, checkAnswer, getSubjectStats, getQuizHistory } from "@/lib/db";
 import QuizCard from "@/components/QuizCard";
 import { useAuth } from "@/lib/auth";
+import RevealText from "@/components/RevealText";
 import { mutateUserStats } from "@/lib/hooks";
 import { invalidateAfter } from "@/lib/cache-invalidation";
 import { mutate as swrMutate } from "swr";
@@ -1162,7 +1163,13 @@ function ResultsScreen({
             />
             <div className="text-left">
               <p className="font-bebas text-xl text-[#F97316] tracking-wider leading-none">
-                {streakMilestone.days}-DAY STREAK!
+                <RevealText
+                  text={`${streakMilestone.days}-DAY STREAK!`}
+                  color="#F97316"
+                  glow="0 0 8px rgba(249,115,22,0.5)"
+                  delay={0.18}
+                  charDelay={0.04}
+                />
               </p>
               <p className="text-cream/50 text-xs mt-0.5">
                 Milestone bonus added to your wallet
