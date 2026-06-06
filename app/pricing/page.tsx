@@ -565,7 +565,7 @@ function PlanCard({
   const perks: string[] = isFree
     ? [
         `${PLAN_EXAM_LIMITS.free} Mastery target`,
-        "Quizzes, duels, leaderboards — all in",
+        "Quizzes, duels, leaderboards, all in",
         `Daily Clock-In Fangs (${PLAN_FANG_MULTIPLIER.free}×)`,
         "Free includes popup + banner ads",
       ]
@@ -573,13 +573,13 @@ function PlanCard({
       ? [
           `${PLAN_EXAM_LIMITS.pro} Mastery targets`,
           `${PLAN_FANG_MULTIPLIER.pro}× Fangs on everything`,
-          "Session Report PDF — unlimited",
+          "Unlimited Session Report PDFs",
           "Popups gone",
           "Priority support",
         ]
       : [
           `${PLAN_EXAM_LIMITS.platinum} Mastery targets`,
-          `${PLAN_FANG_MULTIPLIER.platinum}× Fangs — the max`,
+          `${PLAN_FANG_MULTIPLIER.platinum}× Fangs, the max`,
           "Zero ads. Clean surface.",
           "Priority AI routing",
           "Early access to everything new",
