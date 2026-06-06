@@ -53,6 +53,18 @@ interface ActiveSessionRow {
  * already hold an auth client for it, and (b) adding an endpoint would
  * add a network hop without adding any auth boundary we don't have.
  */
+// Sessions older than this are treated as abandoned and ignored client-side
+// even if the server pointer is still set. Stops a stuck-mastery-pointer
+// (most common cause: user navigates away mid-session, the complete route
+// never fires) from haunting every page forever.
+//
+// 4 hours covers a realistic long study sitting; anything beyond that is
+// either a forgotten tab or a server-side leak that should have been caught
+// by a heartbeat reaper. The client treats stale pointers as null so the
+// banner disappears; a fresh real session writes a new pointer with a
+// fresh joined_at and is picked up immediately.
+const STALE_AFTER_MS = 4 * 60 * 60 * 1000;
+
 async function fetchActiveSession(userId: string): Promise<ActiveSession | null> {
   const { data, error } = await supabase
     .from("profiles")
@@ -65,7 +77,18 @@ async function fetchActiveSession(userId: string): Promise<ActiveSession | null>
     // so the UI degrades cleanly instead of toasting a scary message.
     return null;
   }
-  return (data as ActiveSessionRow | null)?.active_session ?? null;
+  const raw = (data as ActiveSessionRow | null)?.active_session ?? null;
+  if (!raw) return null;
+  // Staleness check — treat as null if joined_at is too old. Don't try to
+  // clear the server pointer from here (fetchers are read paths and SWR
+  // dedupes them aggressively); the banner's explicit dismiss can do that.
+  if (raw.joined_at) {
+    const age = Date.now() - new Date(raw.joined_at).getTime();
+    if (Number.isFinite(age) && age > STALE_AFTER_MS) {
+      return null;
+    }
+  }
+  return raw;
 }
 
 /**

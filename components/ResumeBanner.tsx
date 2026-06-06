@@ -45,11 +45,12 @@ import {
   urlForActiveSession,
   labelForActiveSession,
 } from "@/lib/active-session";
+import { apiDelete } from "@/lib/api-client";
 
 const DISMISS_KEY_PREFIX = "lionade.resume-banner-dismissed:";
 
 export default function ResumeBanner() {
-  const { session } = useActiveSession();
+  const { session, mutate } = useActiveSession();
   const router = useRouter();
   const pathname = usePathname() ?? "";
 
@@ -106,6 +107,13 @@ export default function ResumeBanner() {
       // sessionStorage can throw under strict privacy modes — we still
       // hide locally for this render. Worst case: re-shows after refresh.
     }
+    // Clear the server-side pointer too. User-driven dismiss is a strong
+    // signal that this session is finished/abandoned — without this, the
+    // banner re-appears on every new tab + every other device the user
+    // signs in on. Fire-and-forget; SWR mutate immediately so the local
+    // UI updates before the network roundtrip lands.
+    void apiDelete("/api/user/active-session").catch(() => { /* idempotent */ });
+    mutate();
   };
 
   return (
