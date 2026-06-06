@@ -65,19 +65,56 @@ export default function FinalReview({ sessionId, pairs, onStartOver }: Props) {
     }
   }
 
+  const hasPairs = pairs.length > 0;
+  const sharpenedPct = hasPairs ? Math.round((improvedCount / pairs.length) * 100) : 0;
+
   return (
     <div className="space-y-6 animate-slide-up" style={{ animationDelay: "0.04s" }}>
-      <header className="flex items-end justify-between flex-wrap gap-3">
-        <div>
-          <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-gold/80">
-            final review
-          </p>
-          <h2 className="font-bebas text-2xl text-cream tracking-[0.08em] leading-none mt-1">
-            Your bullets, sharpened
-          </h2>
-          <p className="font-syne text-xs text-cream/55 mt-2">
-            {improvedCount} of {pairs.length} bullets rewritten with Ninny
-          </p>
+      <header className="flex items-end justify-between flex-wrap gap-6">
+        <div className="flex items-end gap-5 flex-wrap">
+          {/* Hero count. Big Bebas, gold accent. Gated on hasPairs to avoid flash-of-zero. */}
+          {hasPairs && (
+            <div className="flex flex-col items-start">
+              <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-gold/80 mb-1">
+                final review
+              </p>
+              <div className="flex items-baseline gap-2 leading-none">
+                <span
+                  className="font-bebas text-[64px] sm:text-[72px] tabular-nums tracking-[0.02em]"
+                  style={{
+                    color: "#FFD700",
+                    textShadow: "0 0 22px rgba(255,215,0,0.30)",
+                    lineHeight: 0.9,
+                  }}
+                >
+                  {improvedCount}
+                </span>
+                <span className="font-bebas text-[28px] text-cream/65 tracking-[0.04em]">
+                  / {pairs.length}
+                </span>
+              </div>
+              <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-cream/55 mt-1">
+                bullets sharpened <span className="text-gold/85">· {sharpenedPct}%</span>
+              </p>
+            </div>
+          )}
+
+          {!hasPairs && (
+            <div>
+              <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-gold/80">
+                final review
+              </p>
+              <h2 className="font-bebas text-2xl text-cream tracking-[0.08em] leading-none mt-1">
+                Your bullets, sharpened
+              </h2>
+            </div>
+          )}
+
+          {hasPairs && (
+            <h2 className="font-bebas text-2xl sm:text-3xl text-cream tracking-[0.06em] leading-none pb-2">
+              Your bullets, sharpened.
+            </h2>
+          )}
         </div>
 
         <div className="flex items-center gap-2 flex-wrap">
@@ -101,6 +138,29 @@ export default function FinalReview({ sessionId, pairs, onStartOver }: Props) {
           </button>
         </div>
       </header>
+
+      {/* Sharpened progress bar. GPU-only width transition. */}
+      {hasPairs && (
+        <div
+          className="relative h-[4px] rounded-full overflow-hidden bg-white/[0.06]"
+          role="progressbar"
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={sharpenedPct}
+          aria-label="Bullets sharpened"
+        >
+          <div
+            className="absolute inset-y-0 left-0 rounded-full"
+            style={{
+              width: `${sharpenedPct}%`,
+              background: "linear-gradient(90deg, rgba(255,215,0,0.95) 0%, rgba(255,170,0,0.85) 100%)",
+              boxShadow: "0 0 14px rgba(255,215,0,0.40)",
+              transition: "width 0.7s cubic-bezier(0.16,1,0.3,1)",
+              willChange: "width",
+            }}
+          />
+        </div>
+      )}
 
       {error && (
         <div role="alert" className="rounded-xl px-4 py-3 border border-red-400/40 bg-red-500/10">

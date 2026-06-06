@@ -16,22 +16,53 @@ interface Props {
  * white/5 backdrop-blur shell. Each list is staggered for a calm reveal.
  */
 export default function ResumeAnalysisView({ analysis, onStartSocratic }: Props) {
+  const sCount = analysis.strengths.length;
+  const wCount = analysis.weaknesses.length;
+  const qCount = analysis.questions.length;
+
   return (
     <div className="space-y-6 animate-slide-up" style={{ animationDelay: "0.04s" }}>
-      {/* Header with Fangs icon — sets the tone that Ninny did the read */}
-      <div className="flex items-center gap-3">
-        <img
-          src={cdnUrl("/F.png")}
-          alt="Fangs"
-          className="w-8 h-8 object-contain"
-        />
-        <div>
-          <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-electric/80">
-            ninny&rsquo;s read
-          </p>
-          <h2 className="font-bebas text-2xl text-cream tracking-[0.08em] leading-none mt-1">
-            Here&rsquo;s where your resume stands
-          </h2>
+      {/* Header with Fangs icon. Sets the tone that Ninny did the read. */}
+      <div className="flex items-center justify-between gap-4 flex-wrap">
+        <div className="flex items-center gap-3">
+          <img
+            src={cdnUrl("/F.png")}
+            alt="Fangs"
+            className="w-8 h-8 object-contain"
+          />
+          <div>
+            <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-electric/80">
+              ninny&rsquo;s read
+            </p>
+            <h2 className="font-bebas text-2xl text-cream tracking-[0.08em] leading-none mt-1">
+              Here&rsquo;s where your resume stands
+            </h2>
+          </div>
+        </div>
+
+        {/* Tinted summary chips. Big-feel earned chips per category. */}
+        <div className="flex items-center gap-2 flex-wrap">
+          <SummaryChip
+            count={sCount}
+            label="strengths"
+            tint="rgba(34,197,94,0.85)"
+            bg="rgba(34,197,94,0.10)"
+            border="rgba(34,197,94,0.30)"
+          />
+          <SummaryChip
+            count={wCount}
+            label="to fix"
+            tint="rgba(249,115,22,0.90)"
+            bg="rgba(249,115,22,0.10)"
+            border="rgba(249,115,22,0.30)"
+          />
+          <SummaryChip
+            count={qCount}
+            label="asks"
+            tint="rgba(168,85,247,0.95)"
+            bg="rgba(168,85,247,0.10)"
+            border="rgba(168,85,247,0.30)"
+          />
         </div>
       </div>
 
@@ -136,6 +167,37 @@ export default function ResumeAnalysisView({ analysis, onStartSocratic }: Props)
           <ArrowRight size={16} weight="bold" aria-hidden="true" />
         </button>
       </div>
+    </div>
+  );
+}
+
+function SummaryChip({
+  count,
+  label,
+  tint,
+  bg,
+  border,
+}: {
+  count: number;
+  label: string;
+  tint: string;
+  bg: string;
+  border: string;
+}) {
+  return (
+    <div
+      className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full"
+      style={{ background: bg, border: `1px solid ${border}` }}
+    >
+      <span
+        className="font-bebas text-[18px] leading-none tabular-nums tracking-[0.04em]"
+        style={{ color: tint }}
+      >
+        {count}
+      </span>
+      <span className="font-mono text-[9px] uppercase tracking-[0.22em] text-cream/70">
+        {label}
+      </span>
     </div>
   );
 }

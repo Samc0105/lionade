@@ -7,6 +7,29 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 
 ---
 
+## 2026-06-06 — Resume Coach polish: upload, Socratic, summary (web-only, no iOS row)
+
+**Status:** 🚫 N/A (deliberate no-row decision: visual polish pass on the existing web Resume Coach surface; no data-model, contract, or API-prompt change. Resume Coach is a Pro-tier web-only surface and is not on the iOS roadmap, so no parity row is created.)
+
+Polish pass across the four Coach components: `ResumeUpload.tsx`, `SocraticBubble.tsx`, `ResumeAnalysis.tsx`, `FinalReview.tsx`. No new fetches, no new deps, no contract change, no behavior change beyond visual emphasis. OpenAI prompts and `/api/coach/resume/*` routes untouched.
+
+1. **Upload dropzone — gold accent on drop.** Swapped electric-blue drag-state to gold-tinted background + border + dropzone glow ring (`coach-upload-pulse` keyframe, GPU-only, reduced-motion guarded). FilePdf icon recolors to gold on drag-over. Heading swaps to "Drop to upload" on drag for explicit feedback. Sub-copy now uses bullet separators instead of em-dashes.
+2. **Socratic — per-question progress bar.** Top of each Socratic card now has a 3px gold-to-purple gradient progress bar driven by `questionIndex / total`. Communicates earned momentum across the rewrite loop. ARIA `progressbar` role with valuenow. Question counter promoted to Bebas numeral (15px) over the mono divider.
+3. **Socratic — autofocus textarea on mount.** New `useRef` + `useEffect` autofocuses the answer textarea so users can type immediately. Re-runs per question (parent already hard-resets via key). Existing `autoCorrect/autoCapitalize/autoComplete=off` + `spellCheck={false}` confirmed intact from the prior shakedown.
+4. **Socratic — copy cleanup.** Validation error and textarea placeholder em-dashes stripped in favor of period-separated phrasing.
+5. **Analysis — tinted summary chip strip.** Right side of the analysis header now shows three rarity-tinted pills (green strengths, orange to-fix, purple asks) with Bebas counts. Each card retains its inline count. Promotes the "Ninny read your resume and found X / Y / Z" summary above the fold.
+6. **Final review — Bebas hero count.** `improvedCount` promoted to a 64–72px Bebas gold numeral with `text-shadow` glow, beside a Bebas slash + total. `% sharpened` rendered under the counter in mono uppercase. Gated on `hasPairs` so empty-state never flashes zero. "Your bullets, sharpened." headline lifted to text-3xl beside the counter for a magazine-cover feel.
+7. **Final review — sharpened progress bar.** New 4px gold-gradient progress bar under the hero header with width transitioning to `sharpenedPct`. GPU-only width animation + box-shadow. ARIA `progressbar` role.
+8. **Motion contract.** All new animations GPU-only (transform / opacity / box-shadow / width). `prefers-reduced-motion: reduce` disables upload pulse + (already handled) animate-slide-up globally. No JS animation, no random, no Date.now in render.
+
+iOS impact: none. Resume Coach is a web-only Pro feature; no iOS counterpart is planned. If iOS scope ever expands to include resume tooling, this row converts to a parity row at that point.
+
+Files touched (web): `components/Coach/ResumeUpload.tsx`, `components/Coach/SocraticBubble.tsx`, `components/Coach/ResumeAnalysis.tsx`, `components/Coach/FinalReview.tsx`.
+
+Owner: `quality-docs-writer` (web). No `vp-ios` tag.
+
+---
+
 ## 2026-06-06 — Profile identity polish: hero, stats, badges, recent (web-only, no iOS row)
 
 **Status:** 🚫 N/A (deliberate no-row decision: visual polish pass on the existing web Profile overview surface; no data-model, contract, or feature change. iOS profile is a separate native surface owned by `vp-ios` and is queued for its own visual pass when it catches up to the web identity loop.)

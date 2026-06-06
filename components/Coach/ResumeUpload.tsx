@@ -125,6 +125,16 @@ export default function ResumeUpload({ onAnalyzed }: Props) {
 
   return (
     <div className="animate-slide-up" style={{ animationDelay: "0.04s" }}>
+      <style jsx>{`
+        @keyframes coach-upload-glow {
+          0%, 100% { box-shadow: 0 0 0 0 rgba(255,215,0,0.0), 0 12px 32px rgba(0,0,0,0.25); }
+          50%      { box-shadow: 0 0 0 6px rgba(255,215,0,0.10), 0 12px 32px rgba(0,0,0,0.25); }
+        }
+        .coach-upload-pulse { animation: coach-upload-glow 1.6s ease-in-out infinite; }
+        @media (prefers-reduced-motion: reduce) {
+          .coach-upload-pulse { animation: none; }
+        }
+      `}</style>
       <div
         role="button"
         tabIndex={0}
@@ -140,13 +150,13 @@ export default function ResumeUpload({ onAnalyzed }: Props) {
         onDrop={onDrop}
         aria-label="Upload your resume as a PDF"
         aria-busy={busy}
-        className="relative rounded-2xl border backdrop-blur transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-electric/60"
+        className={`relative rounded-2xl border backdrop-blur transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-gold/60 ${dragging ? "coach-upload-pulse" : ""}`}
         style={{
           background: dragging
-            ? "rgba(74,144,217,0.10)"
+            ? "rgba(255,215,0,0.08)"
             : "rgba(255,255,255,0.04)",
           borderColor: dragging
-            ? "rgba(74,144,217,0.55)"
+            ? "rgba(255,215,0,0.55)"
             : "rgba(255,255,255,0.10)",
           borderStyle: "dashed",
           borderWidth: "1.5px",
@@ -177,23 +187,26 @@ export default function ResumeUpload({ onAnalyzed }: Props) {
                   Ninny is reading your resume
                 </p>
                 <p className="font-syne text-xs text-cream/55 mt-1">
-                  {filename ?? "Working on it"} — usually 8 to 12 seconds
+                  {filename ?? "Working on it"} <span className="text-cream/35">·</span> usually 8 to 12 seconds
                 </p>
               </div>
             </>
           ) : (
             <>
               {dragging ? (
-                <FilePdf size={44} weight="duotone" color="#4A90D9" aria-hidden="true" />
+                <FilePdf size={44} weight="duotone" color="#FFD700" aria-hidden="true" />
               ) : (
                 <UploadSimple size={40} weight="bold" color="#EEF4FF" aria-hidden="true" />
               )}
               <div>
-                <p className="font-bebas text-2xl text-cream tracking-[0.08em]">
-                  Drop your resume PDF here
+                <p
+                  className="font-bebas text-2xl tracking-[0.08em] transition-colors"
+                  style={{ color: dragging ? "#FFD700" : "#EEF4FF" }}
+                >
+                  {dragging ? "Drop to upload" : "Drop your resume PDF here"}
                 </p>
                 <p className="font-syne text-xs text-cream/55 mt-1">
-                  or click to pick a file · PDF only · max 5 MB
+                  or click to pick a file <span className="text-cream/35">·</span> PDF only <span className="text-cream/35">·</span> max 5 MB
                 </p>
               </div>
             </>

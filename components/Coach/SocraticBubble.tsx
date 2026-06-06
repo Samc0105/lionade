@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ArrowRight, ArrowClockwise, Check, X, Spinner, PawPrint } from "@phosphor-icons/react";
 import { apiPost } from "@/lib/api-client";
 
@@ -20,15 +20,6 @@ interface Props {
   onSkip: () => void;
 }
 
-/**
- * One Socratic exchange:
- *   1. Show the original bullet + Ninny's question.
- *   2. User types a response → "Ask Ninny to rewrite".
- *   3. Show the improved bullet → Accept | Counter (=clear, rewrite) | Reject (skip).
- *
- * Accept fires onAccept(improved) which advances the parent through
- * the question stack. Skip advances WITHOUT recording an improvement.
- */
 export default function SocraticBubble({
   sessionId,
   questionIndex,
@@ -42,10 +33,22 @@ export default function SocraticBubble({
   const [improved, setImproved] = useState<string | null>(initialImproved ?? null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+
+  // Autofocus the textarea on mount so users can answer immediately.
+  // Re-runs per question because the parent hard-resets via key.
+  useEffect(() => {
+    if (improved == null) {
+      textareaRef.current?.focus();
+    }
+  }, [improved]);
+
+  const progressPct = total > 0 ? Math.min(100, Math.round(((questionIndex) / total) * 100)) : 0;
+  const safeTotal = total > 0;
 
   async function requestRewrite() {
     if (response.trim().length < 2) {
-      setError("Give Ninny something to work with — even a sentence is enough.");
+      setError("Give Ninny something to work with. Even a sentence is enough.");
       return;
     }
     setError(null);
@@ -78,17 +81,45 @@ export default function SocraticBubble({
       style={{ animationDelay: "0.04s" }}
     >
       {/* Header with question counter */}
-      <div className="flex items-center justify-between mb-5">
+      <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <PawPrint size={18} weight="fill" color="#A855F7" aria-hidden="true" />
           <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-[#A855F7]/80">
             ninny&rsquo;s ask
           </p>
         </div>
-        <p className="font-mono text-[11px] tabular-nums text-cream/55">
-          {questionIndex + 1} / {total}
-        </p>
+        {safeTotal && (
+          <p className="font-mono text-[11px] tabular-nums text-cream/55">
+            <span className="font-bebas text-[15px] text-cream tracking-[0.06em] mr-1">
+              {questionIndex + 1}
+            </span>
+            / {total}
+          </p>
+        )}
       </div>
+
+      {/* Per-question progress bar — communicates earned momentum. */}
+      {safeTotal && (
+        <div
+          className="relative h-[3px] mb-5 rounded-full overflow-hidden bg-white/[0.06]"
+          role="progressbar"
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={progressPct}
+          aria-label="Socratic progress"
+        >
+          <div
+            className="absolute inset-y-0 left-0 rounded-full"
+            style={{
+              width: `${progressPct}%`,
+              background: "linear-gradient(90deg, rgba(168,85,247,0.85) 0%, rgba(255,215,0,0.85) 100%)",
+              boxShadow: "0 0 10px rgba(255,215,0,0.35)",
+              transition: "width 0.5s cubic-bezier(0.16,1,0.3,1)",
+              willChange: "width",
+            }}
+          />
+        </div>
+      )}
 
       {/* Original bullet */}
       <div className="mb-4">
@@ -116,11 +147,12 @@ export default function SocraticBubble({
               your answer
             </span>
             <textarea
+              ref={textareaRef}
               value={response}
               onChange={(e) => setResponse(e.target.value)}
               rows={3}
               maxLength={1500}
-              placeholder="Tell Ninny what actually happened — numbers, scale, outcome…"
+              placeholder="Tell Ninny what actually happened. Numbers, scale, outcome."
               autoCorrect="off"
               autoCapitalize="off"
               autoComplete="off"
