@@ -104,6 +104,28 @@ function incrementDailyPlays(gameType: string) {
   const key = `lionade_plays_${gameType}_${new Date().toISOString().split("T")[0]}`;
   const current = parseInt(localStorage.getItem(key) ?? "0");
   localStorage.setItem(key, String(current + 1));
+  // Last-played-at marker drives "Continue" sort + badge on the lobby. One
+  // key per game so the lobby can read all five in O(1) without a fetch.
+  try { localStorage.setItem(`lionade_last_played_${gameType}`, String(Date.now())); } catch { /* quota */ }
+}
+
+// Reads the last-played timestamp for a game (ms epoch). Returns 0 when
+// never played so default-order sort sinks unplayed games below played ones
+// without needing a separate "is-played" flag.
+function getLastPlayedAt(gameType: string): number {
+  if (typeof window === "undefined") return 0;
+  try {
+    const raw = localStorage.getItem(`lionade_last_played_${gameType}`);
+    return raw ? parseInt(raw) || 0 : 0;
+  } catch { return 0; }
+}
+
+// Marks Party / Pardy / Flashcards as "played today" too — these games don't
+// run incrementDailyPlays (no daily limit), so without this their tickets
+// would never get a Continue badge or rise to the top of the sort.
+function markPlayedNow(gameType: string) {
+  if (typeof window === "undefined") return;
+  try { localStorage.setItem(`lionade_last_played_${gameType}`, String(Date.now())); } catch { /* quota */ }
 }
 
 // Walks the per-game daily-play keys backwards from today and counts the
@@ -566,6 +588,7 @@ export default function GamesPage() {
     setFcOver(false);
     setFangsEarned(null);
     setGame("flashcards");
+    markPlayedNow("flashcards");
   }, [tab, pdfContent]);
 
   const fcAnswer = useCallback((knew: boolean) => {
@@ -1123,13 +1146,34 @@ export default function GamesPage() {
   // MENU
   // ══════════════════════════════════════════════════════════
 
-  const GAMES: { id: GameMode; name: string; Icon: PhosphorIcon; desc: string; fangs: string; limit: number; start: () => void; color: string; pos: string }[] = [
-    { id: "roardle" as GameMode, name: "ROARDLE", Icon: TextAa, desc: "Guess the science word", fangs: `${wordLength === 4 ? 10 : wordLength === 5 ? 15 : 20}+`, limit: DAILY_LIMITS.roardle, start: startRoardle, color: "#00BFFF", pos: "top-0 left-0" },
-    { id: "party" as GameMode, name: "LIONADE PARTY", Icon: PaintBrush, desc: "Sketch + Bluff with friends", fangs: "—", limit: DAILY_LIMITS.party, start: () => router.push("/games/party"), color: "#EC4899", pos: "top-0 right-0" },
-    { id: "pardy" as GameMode, name: "PARDY", Icon: MicrophoneStage, desc: "5×5 board · trivia for Fangs", fangs: "10-200", limit: DAILY_LIMITS.pardy, start: () => router.push("/games/pardy"), color: "#FFD700", pos: "middle" },
-    { id: "flashcards" as GameMode, name: "FLASH CARDS", Icon: Cards, desc: "Flip, learn, repeat", fangs: "15", limit: DAILY_LIMITS.flashcards, start: startFlashcards, color: "#9B59B6", pos: "bottom-0 left-0" },
-    { id: "timeline" as GameMode, name: "TIMELINE DROP", Icon: Calendar, desc: "Order events in time", fangs: "3×", limit: DAILY_LIMITS.timeline, start: startTimeline, color: "#00C851", pos: "bottom-0 right-0" },
+  // Game catalog. `kind` splits multiplayer (Party / Pardy) from solo so the
+  // lobby can render a "play with friends" hero row above the solo grid. `isNew`
+  // tags games hardened in the last sprint so the lobby can paint a gold "NEW"
+  // foil chip on their ticket; flip back to false after ~2 weeks of soak.
+  const GAMES: { id: GameMode; name: string; Icon: PhosphorIcon; desc: string; fangs: string; limit: number; start: () => void; color: string; pos: string; kind: "solo" | "multi"; isNew?: boolean }[] = [
+    { id: "roardle" as GameMode, name: "ROARDLE", Icon: TextAa, desc: "Guess the science word", fangs: `${wordLength === 4 ? 10 : wordLength === 5 ? 15 : 20}+`, limit: DAILY_LIMITS.roardle, start: startRoardle, color: "#00BFFF", pos: "top-0 left-0", kind: "solo" },
+    { id: "party" as GameMode, name: "LIONADE PARTY", Icon: PaintBrush, desc: "Sketch + Bluff with friends", fangs: "—", limit: DAILY_LIMITS.party, start: () => { markPlayedNow("party"); router.push("/games/party"); }, color: "#EC4899", pos: "top-0 right-0", kind: "multi", isNew: true },
+    { id: "pardy" as GameMode, name: "PARDY", Icon: MicrophoneStage, desc: "5×5 board · trivia for Fangs", fangs: "10-200", limit: DAILY_LIMITS.pardy, start: () => { markPlayedNow("pardy"); router.push("/games/pardy"); }, color: "#FFD700", pos: "middle", kind: "multi", isNew: true },
+    { id: "flashcards" as GameMode, name: "FLASH CARDS", Icon: Cards, desc: "Flip, learn, repeat", fangs: "15", limit: DAILY_LIMITS.flashcards, start: startFlashcards, color: "#9B59B6", pos: "bottom-0 left-0", kind: "solo" },
+    { id: "timeline" as GameMode, name: "TIMELINE DROP", Icon: Calendar, desc: "Order events in time", fangs: "3×", limit: DAILY_LIMITS.timeline, start: startTimeline, color: "#00C851", pos: "bottom-0 right-0", kind: "solo" },
   ];
+
+  // Last-played sort: most recently played first, then default-order. Snapshot
+  // localStorage once per render so the comparator stays stable + cheap.
+  const lastPlayedSnapshot: Record<string, number> = GAMES.reduce((acc, g) => {
+    acc[g.id] = getLastPlayedAt(g.id);
+    return acc;
+  }, {} as Record<string, number>);
+  const byRecency = <T extends { id: GameMode }>(a: T, b: T) =>
+    (lastPlayedSnapshot[b.id] || 0) - (lastPlayedSnapshot[a.id] || 0);
+  const MULTI_GAMES = GAMES.filter(g => g.kind === "multi").sort(byRecency);
+  const SOLO_GAMES = GAMES.filter(g => g.kind === "solo").sort(byRecency);
+  // "Continue" badge fires when a game was touched within the last 36h. Long
+  // enough to bridge an overnight gap, short enough that yesterday's casual
+  // round doesn't keep claiming the badge a week later.
+  const CONTINUE_WINDOW_MS = 36 * 60 * 60 * 1000;
+  const isContinuable = (id: GameMode) =>
+    lastPlayedSnapshot[id] > 0 && Date.now() - lastPlayedSnapshot[id] < CONTINUE_WINDOW_MS;
 
   // Helper to build rgba from hex
   const hexToRgba = (hex: string, a: number) => {
@@ -1205,6 +1249,258 @@ export default function GamesPage() {
       );
     }
     return null;
+  };
+
+  // Single ticket renderer — shared by the Multiplayer cluster + the Solo
+  // grid. Lotted by absolute position (lotNumber prop), so Solo continues
+  // numbering after Multi (lot 001/002 multi, 003/004/005 solo). `featured`
+  // flag thickens the border + halo for the multiplayer block.
+  const renderTicket = (
+    g: typeof GAMES[number],
+    visualIdx: number,
+    lotNumber: string,
+    featured: boolean,
+  ) => {
+    const plays = getDailyPlays(g.id);
+    const remaining = g.limit - plays;
+    const canPlay = remaining > 0 || g.limit >= 999;
+    const isPdf = tab === "library";
+    const GameIcon = g.Icon;
+    const isMaxed = g.limit < 999 && remaining <= 0;
+    const isLastPull = g.limit < 999 && remaining === 1;
+    const continuable = isContinuable(g.id);
+
+    return (
+      <div
+        key={g.id}
+        className="games-ticket games-foil lift-card relative rounded-[6px] overflow-hidden animate-slide-up"
+        style={{
+          animationDelay: `${0.15 + visualIdx * 0.07}s`,
+          background: `linear-gradient(90deg, ${hexToRgba(g.color, featured ? 0.12 : 0.08)} 0%, #0c0a14 ${featured ? 62 : 60}%)`,
+          border: `${featured ? 1.5 : 1}px solid ${hexToRgba(g.color, isMaxed ? 0.1 : (featured ? 0.42 : 0.22))}`,
+          boxShadow: featured
+            ? `0 14px 36px rgba(0, 0, 0, 0.5), 0 0 26px ${hexToRgba(g.color, 0.10)}`
+            : "0 10px 28px rgba(0, 0, 0, 0.4)",
+          opacity: isMaxed ? 0.68 : 1,
+        }}
+      >
+        {isMaxed && (
+          <div
+            aria-hidden="true"
+            className="absolute top-3 right-3 z-20 pointer-events-none"
+            style={{ transform: "rotate(8deg)" }}
+          >
+            <span
+              className="font-bebas text-[10px] sm:text-xs tracking-[0.25em] px-2.5 py-1 rounded-sm"
+              style={{
+                background: "rgba(0,0,0,0.55)",
+                color: "#FCA5A5",
+                border: "1.5px solid rgba(252,165,165,0.65)",
+                textShadow: "0 0 8px rgba(252,165,165,0.4)",
+                boxShadow: "0 0 14px rgba(252,165,165,0.18), inset 0 0 8px rgba(0,0,0,0.4)",
+              }}
+            >
+              MAXED TODAY
+            </span>
+          </div>
+        )}
+        <div className="relative z-10 flex items-stretch min-h-[140px] sm:min-h-[160px]">
+          <div
+            className="flex items-center justify-center w-[60px] sm:w-[88px] flex-shrink-0"
+            style={{ background: "rgba(0, 0, 0, 0.25)", borderRight: "1px dashed rgba(255, 215, 0, 0.12)" }}
+          >
+            <div className="games-lot-number font-mono text-[11px] sm:text-[13px] text-cream/35 font-bold">
+              lot {lotNumber}
+            </div>
+          </div>
+          <div className="flex items-center justify-center w-14 sm:w-20 flex-shrink-0">
+            <div
+              className="w-11 h-11 sm:w-14 sm:h-14 flex items-center justify-center rounded-sm"
+              style={{
+                background: hexToRgba(g.color, 0.12),
+                border: `1px solid ${hexToRgba(g.color, 0.4)}`,
+                boxShadow: `inset 0 0 20px ${hexToRgba(g.color, 0.15)}`,
+              }}
+            >
+              <GameIcon size={24} weight="fill" style={{ color: g.color }} aria-hidden="true" />
+            </div>
+          </div>
+          <div className="flex-1 min-w-0 flex flex-col justify-center px-3 sm:px-5 py-4">
+            <div className="flex items-baseline gap-2 flex-wrap mb-1">
+              <h3
+                className="font-bebas tracking-wider leading-none"
+                style={{
+                  color: g.color,
+                  fontSize: "clamp(1.5rem, 4.5vw, 2.25rem)",
+                }}
+              >
+                {g.name}
+              </h3>
+              {g.isNew && !isMaxed && (
+                <span
+                  className="font-mono text-[9px] font-bold uppercase tracking-[0.22em] px-1.5 py-0.5 rounded-sm"
+                  style={{
+                    background: "linear-gradient(135deg, #FFD700 0%, #B8960C 100%)",
+                    color: "#04080F",
+                    boxShadow: "0 0 12px rgba(255,215,0,0.45), inset 0 1px 0 rgba(255,255,255,0.32)",
+                  }}
+                >
+                  new
+                </span>
+              )}
+              {continuable && !isMaxed && (
+                <span
+                  className="font-mono text-[9px] font-bold uppercase tracking-[0.22em] px-1.5 py-0.5 rounded-sm"
+                  style={{
+                    background: hexToRgba(g.color, 0.16),
+                    color: g.color,
+                    border: `1px solid ${hexToRgba(g.color, 0.45)}`,
+                    boxShadow: `0 0 10px ${hexToRgba(g.color, 0.18)}`,
+                  }}
+                  title="Played recently. Jump back in."
+                >
+                  continue
+                </span>
+              )}
+            </div>
+            <p className="text-cream/45 text-xs sm:text-sm font-syne italic mb-2">
+              {isPdf ? "from your PDF" : g.desc}
+            </p>
+            <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+              <div className="flex items-center gap-1.5 px-2 py-0.5" style={{ background: "rgba(255, 215, 0, 0.08)", border: "1px solid rgba(255, 215, 0, 0.22)" }}>
+                <img src={cdnUrl("/F.png")} alt="Fangs" className="w-3.5 h-3.5 object-contain" />
+                <span className="font-mono text-[10px] sm:text-[11px] font-bold text-gold">{g.fangs}</span>
+              </div>
+              {g.limit < 999 && (
+                <span
+                  className={`font-mono text-[10px] uppercase tracking-wider ${isLastPull && !isMaxed ? "pa-active-swatch inline-block px-1.5 py-0.5 rounded-md" : ""}`}
+                  style={
+                    isMaxed
+                      ? { color: "#FCA5A5" }
+                      : isLastPull
+                        ? {
+                            color: "#FFD700",
+                            background: "rgba(255,215,0,0.12)",
+                            border: "1px solid rgba(255,215,0,0.4)",
+                          }
+                        : { color: "rgba(238,244,255,0.4)" }
+                  }
+                  title={isMaxed ? "Resets at midnight" : isLastPull ? "Last pull of the day" : undefined}
+                >
+                  {isMaxed ? "0 left · resets at midnight" : `${Math.max(0, remaining)} / ${g.limit} today`}
+                </span>
+              )}
+              {g.limit >= 999 && (
+                <span className="font-mono text-[10px] text-cream/40 uppercase tracking-wider">
+                  {g.kind === "multi" ? "rooms · invite link" : "unlimited"}
+                </span>
+              )}
+              {(() => {
+                if (g.id === "roardle") {
+                  const r = getRoardleStats();
+                  if (r.played < 2) return null;
+                  return (
+                    <span className="font-mono text-[10px] tracking-[0.18em] text-cream/55">
+                      <span className="text-cream/30">your </span>
+                      <span className="tabular-nums">{Math.round((r.won / r.played) * 100)}%</span>
+                    </span>
+                  );
+                }
+                if (g.id === "timeline") {
+                  const t = getTimelineStats();
+                  if (t.perfect === 0) return null;
+                  return (
+                    <span className="font-mono text-[10px] tracking-[0.18em] text-gold/75">
+                      <span className="tabular-nums">{t.perfect}</span>
+                      <span className="text-cream/30"> perfect</span>
+                    </span>
+                  );
+                }
+                if (g.id === "flashcards") {
+                  const f = getFlashcardsStats();
+                  if (f.totalKnown < 5) return null;
+                  return (
+                    <span className="font-mono text-[10px] tracking-[0.18em] text-cream/55">
+                      <span className="tabular-nums">{f.totalKnown}</span>
+                      <span className="text-cream/30"> known</span>
+                    </span>
+                  );
+                }
+                return null;
+              })()}
+            </div>
+            {g.id === "roardle" && (
+              <div className="flex gap-2 mt-3">
+                {[4, 5, 6].map(len => (
+                  <button
+                    key={len}
+                    onClick={() => setWordLength(len)}
+                    className="transition-all duration-200 active:scale-90"
+                    style={wordLength === len ? {
+                      width: 32, height: 32,
+                      background: g.color, color: "#fff",
+                      fontSize: "12px", fontWeight: 800,
+                      border: "none",
+                      boxShadow: `0 2px 10px ${hexToRgba(g.color, 0.5)}`,
+                    } : {
+                      width: 32, height: 32,
+                      background: "rgba(255,255,255,0.04)", color: "rgba(238,244,255,0.35)",
+                      fontSize: "12px", fontWeight: 700,
+                      border: "1px solid rgba(255,255,255,0.1)",
+                    }}
+                    aria-label={`${len} letters`}
+                  >
+                    {len}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+          <div className="hidden md:flex items-center justify-center w-[110px] flex-shrink-0 pr-2">
+            <GameMini id={g.id} />
+          </div>
+          <div className="flex items-center justify-end flex-shrink-0 pr-4 sm:pr-6">
+            <button
+              onClick={canPlay ? g.start : undefined}
+              disabled={!canPlay || (isPdf && !pdfContent && g.id !== "flashcards")}
+              title={isMaxed ? "Daily limit hit — resets at midnight" : undefined}
+              className="font-syne font-bold text-xs sm:text-sm px-4 sm:px-6 py-2.5 transition-all active:scale-95 disabled:cursor-not-allowed inline-flex items-center gap-2"
+              style={{
+                background: isMaxed ? "rgba(60,40,40,0.55)" : g.color,
+                color: isMaxed ? "#FCA5A5" : "#fff",
+                opacity: !canPlay ? (isMaxed ? 0.9 : 0.2) : 1,
+                boxShadow: isMaxed
+                  ? "inset 0 0 0 1px rgba(252,165,165,0.4)"
+                  : `0 4px 14px ${hexToRgba(g.color, 0.4)}, inset 0 1px 0 rgba(255, 255, 255, 0.18)`,
+              }}
+            >
+              {isMaxed ? (
+                <>
+                  <span aria-hidden="true">{"⏱"}</span>
+                  Maxed
+                </>
+              ) : continuable ? (
+                <>
+                  Resume
+                  <span aria-hidden="true">{"→"}</span>
+                </>
+              ) : g.kind === "multi" ? (
+                <>
+                  Host
+                  <span aria-hidden="true">{"→"}</span>
+                </>
+              ) : (
+                <>
+                  Pull
+                  <span aria-hidden="true">{"→"}</span>
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+        <div className="games-ticket-perf" aria-hidden="true" />
+      </div>
+    );
   };
 
   // Today's remaining pulls across the limited games — drives the footer strip.
@@ -1606,238 +1902,77 @@ export default function GamesPage() {
             </div>
           )}
 
-          {/* ═══ TICKET GRID — 2×2 luxury tickets with foil sheen + hover lift ═══ */}
-          <div className="games-stack grid grid-cols-1 lg:grid-cols-2 gap-5">
-            {GAMES.map((g, idx) => {
-              const plays = getDailyPlays(g.id);
-              const remaining = g.limit - plays;
-              const canPlay = remaining > 0 || g.limit >= 999;
-              const isPdf = tab === "library";
-              const lotNumber = String(idx + 1).padStart(3, "0");
-              const GameIcon = g.Icon;
-
-              const isMaxed = g.limit < 999 && remaining <= 0;
-              const isLastPull = g.limit < 999 && remaining === 1;
-              return (
-                <div
-                  key={g.id}
-                  className="games-ticket games-foil lift-card relative rounded-[6px] overflow-hidden animate-slide-up"
-                  style={{
-                    animationDelay: `${0.15 + idx * 0.07}s`,
-                    background: `linear-gradient(90deg, ${hexToRgba(g.color, 0.08)} 0%, #0c0a14 60%)`,
-                    border: `1px solid ${hexToRgba(g.color, isMaxed ? 0.1 : 0.22)}`,
-                    boxShadow: "0 10px 28px rgba(0, 0, 0, 0.4)",
-                    opacity: isMaxed ? 0.68 : 1,
-                  }}
-                >
-                  {/* "MAXED TODAY" diagonal stamp — only when the daily limit
-                      is exhausted. Tilted, gold-foil-stencil vibe, pointer-
-                      events-none so the disabled Pull button still gets the
-                      hover/title for "resets at midnight" affordance. */}
-                  {isMaxed && (
-                    <div
-                      aria-hidden="true"
-                      className="absolute top-3 right-3 z-20 pointer-events-none"
-                      style={{
-                        transform: "rotate(8deg)",
-                      }}
-                    >
-                      <span
-                        className="font-bebas text-[10px] sm:text-xs tracking-[0.25em] px-2.5 py-1 rounded-sm"
-                        style={{
-                          background: "rgba(0,0,0,0.55)",
-                          color: "#FCA5A5",
-                          border: "1.5px solid rgba(252,165,165,0.65)",
-                          textShadow: "0 0 8px rgba(252,165,165,0.4)",
-                          boxShadow: "0 0 14px rgba(252,165,165,0.18), inset 0 0 8px rgba(0,0,0,0.4)",
-                        }}
-                      >
-                        MAXED TODAY
-                      </span>
-                    </div>
-                  )}
-                  <div className="relative z-10 flex items-stretch min-h-[140px] sm:min-h-[160px]">
-
-                    {/* ── Column 1: Lot number ── */}
-                    <div
-                      className="flex items-center justify-center w-[60px] sm:w-[88px] flex-shrink-0"
-                      style={{ background: "rgba(0, 0, 0, 0.25)", borderRight: "1px dashed rgba(255, 215, 0, 0.12)" }}
-                    >
-                      <div className="games-lot-number font-mono text-[11px] sm:text-[13px] text-cream/35 font-bold">
-                        lot {lotNumber}
-                      </div>
-                    </div>
-
-                    {/* ── Column 2: Icon badge ── */}
-                    <div className="flex items-center justify-center w-14 sm:w-20 flex-shrink-0">
-                      <div
-                        className="w-11 h-11 sm:w-14 sm:h-14 flex items-center justify-center rounded-sm"
-                        style={{
-                          background: hexToRgba(g.color, 0.12),
-                          border: `1px solid ${hexToRgba(g.color, 0.4)}`,
-                          boxShadow: `inset 0 0 20px ${hexToRgba(g.color, 0.15)}`,
-                        }}
-                      >
-                        <GameIcon size={24} weight="fill" style={{ color: g.color }} aria-hidden="true" />
-                      </div>
-                    </div>
-
-                    {/* ── Column 3: Title + description + meta ── */}
-                    <div className="flex-1 min-w-0 flex flex-col justify-center px-3 sm:px-5 py-4">
-                      <div className="flex items-baseline gap-2 flex-wrap mb-1">
-                        <h3
-                          className="font-bebas tracking-wider leading-none"
-                          style={{
-                            color: g.color,
-                            fontSize: "clamp(1.5rem, 4.5vw, 2.25rem)",
-                          }}
-                        >
-                          {g.name}
-                        </h3>
-                      </div>
-                      <p className="text-cream/45 text-xs sm:text-sm font-syne italic mb-2">
-                        {isPdf ? "from your PDF" : g.desc}
-                      </p>
-
-                      {/* Meta strip: fangs + daily limit */}
-                      <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
-                        <div className="flex items-center gap-1.5 px-2 py-0.5" style={{ background: "rgba(255, 215, 0, 0.08)", border: "1px solid rgba(255, 215, 0, 0.22)" }}>
-                          <img src={cdnUrl("/F.png")} alt="Fangs" className="w-3.5 h-3.5 object-contain" />
-                          <span className="font-mono text-[10px] sm:text-[11px] font-bold text-gold">{g.fangs}</span>
-                        </div>
-                        {g.limit < 999 && (
-                          <span
-                            className={`font-mono text-[10px] uppercase tracking-wider ${isLastPull && !isMaxed ? "pa-active-swatch inline-block px-1.5 py-0.5 rounded-md" : ""}`}
-                            style={
-                              isMaxed
-                                ? { color: "#FCA5A5" }
-                                : isLastPull
-                                  ? {
-                                      color: "#FFD700",
-                                      background: "rgba(255,215,0,0.12)",
-                                      border: "1px solid rgba(255,215,0,0.4)",
-                                    }
-                                  : { color: "rgba(238,244,255,0.4)" }
-                            }
-                            title={isMaxed ? "Resets at midnight" : isLastPull ? "Last pull of the day" : undefined}
-                          >
-                            {isMaxed ? "0 left · resets at midnight" : `${Math.max(0, remaining)} / ${g.limit} today`}
-                          </span>
-                        )}
-                        {g.limit >= 999 && (
-                          <span className="font-mono text-[10px] text-cream/40 uppercase tracking-wider">unlimited</span>
-                        )}
-                        {/* Per-game lifetime stat chip — only renders when
-                            there's a meaningful number to show. Roardle uses
-                            win%, Timeline uses perfect-run count, Flashcards
-                            uses lifetime known-cards. The other tickets
-                            (Party, Pardy) skip — no per-game stats yet. */}
-                        {(() => {
-                          if (g.id === "roardle") {
-                            const r = getRoardleStats();
-                            if (r.played < 2) return null;
-                            return (
-                              <span className="font-mono text-[10px] tracking-[0.18em] text-cream/55">
-                                <span className="text-cream/30">your </span>
-                                <span className="tabular-nums">{Math.round((r.won / r.played) * 100)}%</span>
-                              </span>
-                            );
-                          }
-                          if (g.id === "timeline") {
-                            const t = getTimelineStats();
-                            if (t.perfect === 0) return null;
-                            return (
-                              <span className="font-mono text-[10px] tracking-[0.18em] text-gold/75">
-                                <span className="tabular-nums">{t.perfect}</span>
-                                <span className="text-cream/30"> perfect</span>
-                              </span>
-                            );
-                          }
-                          if (g.id === "flashcards") {
-                            const f = getFlashcardsStats();
-                            if (f.totalKnown < 5) return null;
-                            return (
-                              <span className="font-mono text-[10px] tracking-[0.18em] text-cream/55">
-                                <span className="tabular-nums">{f.totalKnown}</span>
-                                <span className="text-cream/30"> known</span>
-                              </span>
-                            );
-                          }
-                          return null;
-                        })()}
-                      </div>
-
-                      {/* Roardle word-length selector inline with ticket */}
-                      {g.id === "roardle" && (
-                        <div className="flex gap-2 mt-3">
-                          {[4, 5, 6].map(len => (
-                            <button
-                              key={len}
-                              onClick={() => setWordLength(len)}
-                              className="transition-all duration-200 active:scale-90"
-                              style={wordLength === len ? {
-                                width: 32, height: 32,
-                                background: g.color, color: "#fff",
-                                fontSize: "12px", fontWeight: 800,
-                                border: "none",
-                                boxShadow: `0 2px 10px ${hexToRgba(g.color, 0.5)}`,
-                              } : {
-                                width: 32, height: 32,
-                                background: "rgba(255,255,255,0.04)", color: "rgba(238,244,255,0.35)",
-                                fontSize: "12px", fontWeight: 700,
-                                border: "1px solid rgba(255,255,255,0.1)",
-                              }}
-                              aria-label={`${len} letters`}
-                            >
-                              {len}
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-
-                    {/* ── Column 4: Mini-animation (hidden on mobile) ── */}
-                    <div className="hidden md:flex items-center justify-center w-[110px] flex-shrink-0 pr-2">
-                      <GameMini id={g.id} />
-                    </div>
-
-                    {/* ── Column 5: Play button ── */}
-                    <div className="flex items-center justify-end flex-shrink-0 pr-4 sm:pr-6">
-                      <button
-                        onClick={canPlay ? g.start : undefined}
-                        disabled={!canPlay || (isPdf && !pdfContent && g.id !== "flashcards")}
-                        title={isMaxed ? "Daily limit hit — resets at midnight" : undefined}
-                        className="font-syne font-bold text-xs sm:text-sm px-4 sm:px-6 py-2.5 transition-all active:scale-95 disabled:cursor-not-allowed inline-flex items-center gap-2"
-                        style={{
-                          background: isMaxed ? "rgba(60,40,40,0.55)" : g.color,
-                          color: isMaxed ? "#FCA5A5" : "#fff",
-                          opacity: !canPlay ? (isMaxed ? 0.9 : 0.2) : 1,
-                          boxShadow: isMaxed
-                            ? "inset 0 0 0 1px rgba(252,165,165,0.4)"
-                            : `0 4px 14px ${hexToRgba(g.color, 0.4)}, inset 0 1px 0 rgba(255, 255, 255, 0.18)`,
-                        }}
-                      >
-                        {isMaxed ? (
-                          <>
-                            <span aria-hidden="true">⏱</span>
-                            Maxed
-                          </>
-                        ) : (
-                          <>
-                            Pull
-                            <span aria-hidden="true">→</span>
-                          </>
-                        )}
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Perforated vertical line between lot column and content */}
-                  <div className="games-ticket-perf" aria-hidden="true" />
-                </div>
-              );
-            })}
+          {/* ═══ MULTIPLAYER CLUSTER — friend-first CTA above the solo grid.
+              These tickets get a chunkier border, a stronger gold ambient
+              halo, and a "PLAY TOGETHER" rubric. The reasoning: multiplayer
+              is the viral mechanic; if it's buried in a 2×2 grid alongside
+              solo flashcards it never gets clicked. ═══ */}
+          <div
+            className="mb-3 flex items-center gap-3 animate-slide-up"
+            style={{ animationDelay: "0.12s" }}
+          >
+            <span
+              className="font-mono text-[10px] uppercase tracking-[0.28em] text-gold/85 px-2.5 py-1 rounded-sm"
+              style={{
+                background: "linear-gradient(90deg, rgba(255,215,0,0.16) 0%, rgba(255,215,0,0.04) 100%)",
+                border: "1px solid rgba(255,215,0,0.35)",
+                boxShadow: "0 0 14px rgba(255,215,0,0.10)",
+              }}
+            >
+              play together
+            </span>
+            <span className="font-serif italic text-cream/35 text-xs">
+              invite friends · biggest house draws
+            </span>
+            <div
+              aria-hidden="true"
+              className="flex-1 h-px"
+              style={{
+                background: "linear-gradient(90deg, rgba(255,215,0,0.25) 0%, transparent 100%)",
+              }}
+            />
           </div>
+
+          <div className="games-stack grid grid-cols-1 lg:grid-cols-2 gap-5 mb-8">
+            {MULTI_GAMES.map((g, idx) =>
+              renderTicket(g, idx, String(idx + 1).padStart(3, "0"), true),
+            )}
+          </div>
+
+          {/* ═══ SOLO LOTS — single-player tickets. Smaller header rubric,
+              regular ticket weight. Lot numbering continues after the multi
+              block so it reads as one ledger across the page. ═══ */}
+          <div
+            className="mb-3 flex items-center gap-3 animate-slide-up"
+            style={{ animationDelay: "0.30s" }}
+          >
+            <span
+              className="font-mono text-[10px] uppercase tracking-[0.28em] text-cream/55 px-2.5 py-1 rounded-sm"
+              style={{
+                background: "rgba(255,255,255,0.03)",
+                border: "1px solid rgba(255,255,255,0.08)",
+              }}
+            >
+              solo lots
+            </span>
+            <span className="font-serif italic text-cream/30 text-xs">
+              quick pulls · daily limits · big Fang ratios
+            </span>
+            <div
+              aria-hidden="true"
+              className="flex-1 h-px"
+              style={{
+                background: "linear-gradient(90deg, rgba(255,255,255,0.10) 0%, transparent 100%)",
+              }}
+            />
+          </div>
+
+          <div className="games-stack grid grid-cols-1 lg:grid-cols-2 gap-5">
+            {SOLO_GAMES.map((g, idx) =>
+              renderTicket(g, idx, String(MULTI_GAMES.length + idx + 1).padStart(3, "0"), false),
+            )}
+          </div>
+
 
           {/* ═══ FOOTER STAT STRIP — fills the dead space below the grid ═══ */}
           <div
