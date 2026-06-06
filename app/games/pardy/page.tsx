@@ -220,7 +220,7 @@ export default function PardyPage() {
 
             <header className="mb-10 animate-slide-up">
               <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-cream/30 mb-2">
-                lionade · house quiz
+                lionade · solo subject showdown
               </p>
               <h1 className="font-bebas text-[clamp(3rem,9vw,7rem)] text-cream tracking-tight leading-[0.86] flex items-center gap-4">
                 <MicrophoneStage
@@ -231,7 +231,15 @@ export default function PardyPage() {
                 />
                 PARDY
               </h1>
-              <p className="font-serif italic text-cream/40 text-sm mt-3 max-w-xl">
+              <div
+                aria-hidden="true"
+                className="mt-4 h-px max-w-xl"
+                style={{
+                  background:
+                    "linear-gradient(90deg, rgba(255,215,0,0.55) 0%, rgba(255,215,0,0.15) 60%, transparent 100%)",
+                }}
+              />
+              <p className="font-serif italic text-cream/45 text-sm mt-3 max-w-xl">
                 Five categories, five tiles each. Bigger value, harder clue. Pick a deck and pull the curtain.
               </p>
             </header>
@@ -247,7 +255,7 @@ export default function PardyPage() {
                   <button
                     key={d.id}
                     onClick={() => pickDeck(d.id)}
-                    className="text-left rounded-2xl backdrop-blur transition-all hover:bg-white/8 active:scale-[0.99] animate-slide-up overflow-hidden group"
+                    className="pa-deck-card text-left rounded-2xl backdrop-blur transition-transform transition-shadow duration-300 ease-out animate-slide-up overflow-hidden group will-change-transform"
                     style={{
                       animationDelay: `${0.1 + idx * 0.08}s`,
                       background: "rgba(255,255,255,0.05)",
@@ -327,7 +335,7 @@ export default function PardyPage() {
           ? { label: "STRONG RUN", accent: "#FFD700", Icon: Flame, sub: "well played." }
           : accuracy >= 50
             ? { label: "DECENT RUN", accent: "#4A90D9", Icon: Lightning, sub: "the room felt it." }
-            : { label: "TOUGH ROUND", accent: "rgba(238,244,255,0.55)", Icon: Lightning, sub: "rematch the deck — your call." };
+            : { label: "TOUGH ROUND", accent: "rgba(238,244,255,0.55)", Icon: Lightning, sub: "rematch the deck, your call." };
     // Tier-themed confetti — only fires for the two top tiers. DECENT and
     // TOUGH skip for tonal reasons (no fake celebration on a meh run).
     const shouldConfetti = !reduced && (accuracy === 100 || accuracy >= 75);
@@ -509,22 +517,23 @@ export default function PardyPage() {
                       key={ti}
                       onClick={() => openTile(ci, ti)}
                       disabled={attempted}
-                      className="relative aspect-[5/3] sm:aspect-[4/3] rounded-lg sm:rounded-xl flex items-center justify-center transition-all animate-slide-up disabled:cursor-not-allowed active:scale-[0.97]"
+                      className={`pa-pardy-tile relative aspect-[5/3] sm:aspect-[4/3] rounded-lg sm:rounded-xl flex items-center justify-center animate-slide-up disabled:cursor-not-allowed will-change-transform ${attempted ? "pa-pardy-tile--done" : "pa-pardy-tile--live"}`}
                       style={{
                         animationDelay: `${0.1 + ci * 0.04 + ti * 0.02}s`,
                         background: attempted
                           ? correct
                             ? "linear-gradient(180deg, rgba(34,197,94,0.15) 0%, rgba(34,197,94,0.05) 100%)"
                             : "linear-gradient(180deg, rgba(239,68,68,0.12) 0%, rgba(239,68,68,0.04) 100%)"
-                          : "linear-gradient(180deg, rgba(255,215,0,0.08) 0%, rgba(255,255,255,0.02) 100%)",
+                          : "radial-gradient(120% 80% at 50% 0%, rgba(255,215,0,0.18) 0%, rgba(255,215,0,0.06) 45%, rgba(255,255,255,0.02) 100%)",
                         border: attempted
                           ? correct
                             ? "1px solid rgba(34,197,94,0.4)"
                             : "1px solid rgba(239,68,68,0.35)"
-                          : "1px solid rgba(255,215,0,0.25)",
+                          : "1px solid rgba(255,215,0,0.28)",
                         boxShadow: attempted
                           ? "none"
-                          : "inset 0 1px 0 rgba(255,255,255,0.06), 0 4px 12px rgba(0,0,0,0.3)",
+                          : "inset 0 1px 0 rgba(255,255,255,0.1), inset 0 -10px 18px rgba(0,0,0,0.25), 0 6px 14px rgba(0,0,0,0.35)",
+                        opacity: attempted ? 0.78 : 1,
                       }}
                       aria-label={
                         attempted
@@ -532,15 +541,26 @@ export default function PardyPage() {
                           : `${cat.name}, ${tile.value} Fangs, click to play`
                       }
                     >
+                      {/* Ghost value behind tick/X so the player still recognizes which tile this was. */}
+                      {attempted && (
+                        <span
+                          aria-hidden="true"
+                          className="absolute inset-0 flex items-center justify-center pointer-events-none"
+                        >
+                          <span className="font-bebas text-xl sm:text-2xl md:text-3xl tabular-nums leading-none text-cream/15">
+                            {tile.value}
+                          </span>
+                        </span>
+                      )}
                       <span
                         key={attempted ? "done" : "open"}
-                        className={`inline-flex items-center justify-center ${attempted && !reduced ? "pa-tile-flip" : ""}`}
+                        className={`relative inline-flex items-center justify-center ${attempted && !reduced ? "pa-tile-flip" : ""}`}
                       >
                         {attempted ? (
                           correct ? (
                             <Check size={28} weight="bold" className="text-green-400" aria-hidden="true" />
                           ) : (
-                            <XIcon size={28} weight="bold" className="text-red-400" aria-hidden="true" />
+                            <XIcon size={28} weight="bold" className="text-red-400/85" aria-hidden="true" />
                           )
                         ) : (
                           <span className="flex items-center gap-1">
@@ -548,9 +568,9 @@ export default function PardyPage() {
                               src={cdnUrl("/F.png")}
                               alt=""
                               aria-hidden="true"
-                              className="w-3 h-3 sm:w-4 sm:h-4 object-contain opacity-70"
+                              className="w-3 h-3 sm:w-4 sm:h-4 object-contain opacity-75"
                             />
-                            <span className="font-bebas text-xl sm:text-3xl md:text-4xl text-gold tabular-nums leading-none">
+                            <span className="font-bebas text-xl sm:text-3xl md:text-4xl text-gold tabular-nums leading-none drop-shadow-[0_2px_4px_rgba(0,0,0,0.4)]">
                               {tile.value}
                             </span>
                           </span>
@@ -629,19 +649,35 @@ function PardyModal({
       aria-label={`${categoryName} for ${tile.value} Fangs`}
     >
       <div
-        className="w-full max-w-xl rounded-3xl backdrop-blur border p-8 sm:p-10"
+        className="relative w-full max-w-xl rounded-3xl backdrop-blur border p-8 sm:p-10 overflow-hidden"
         style={{
-          background: "linear-gradient(180deg, rgba(74,144,217,0.18) 0%, rgba(74,144,217,0.04) 100%)",
-          borderColor: "rgba(74,144,217,0.4)",
-          boxShadow: "0 20px 60px rgba(0,0,0,0.6)",
+          background: "linear-gradient(180deg, rgba(74,144,217,0.2) 0%, rgba(74,144,217,0.04) 100%)",
+          borderColor: "rgba(74,144,217,0.45)",
+          boxShadow: "0 24px 72px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.08)",
         }}
       >
+        {/* Subtle gold halo at the top of the modal — frames the clue without
+            stealing focus from the textarea. */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-0 top-0 h-24"
+          style={{
+            background:
+              "radial-gradient(60% 100% at 50% 0%, rgba(255,215,0,0.12) 0%, transparent 75%)",
+          }}
+        />
         {/* Header strip */}
-        <div className="flex items-baseline justify-between gap-3 mb-4">
-          <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-cream/50">
+        <div className="relative flex items-baseline justify-between gap-3 mb-5">
+          <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-cream/55">
             {categoryName}
           </p>
-          <div className="flex items-center gap-1.5">
+          <div
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-md"
+            style={{
+              background: "rgba(255,215,0,0.1)",
+              border: "1px solid rgba(255,215,0,0.28)",
+            }}
+          >
             <img src={cdnUrl("/F.png")} alt="Fangs" className="w-4 h-4 object-contain" />
             <span className="font-bebas text-xl text-gold tabular-nums leading-none">
               {tile.value}
@@ -650,13 +686,13 @@ function PardyModal({
         </div>
 
         {/* Clue */}
-        <p className="font-bebas text-2xl sm:text-3xl text-cream tracking-wide leading-tight mb-6 text-center min-h-[3.5rem]">
+        <p className="relative font-bebas text-2xl sm:text-3xl text-cream tracking-wide leading-tight mb-7 text-center min-h-[3.5rem]">
           {tile.question}
         </p>
 
         {/* Answer area or result */}
         {!result ? (
-          <>
+          <div className="relative">
             <textarea
               ref={inputRef}
               value={modal.answer}
@@ -675,7 +711,7 @@ function PardyModal({
               autoCapitalize="off"
               autoComplete="off"
               spellCheck={false}
-              className="w-full rounded-xl bg-navy/60 border border-white/10 text-cream font-syne text-base px-4 py-3 focus:outline-none focus:border-electric/60 transition resize-none"
+              className="w-full rounded-xl bg-navy/60 border border-white/10 text-cream font-syne text-base px-4 py-3 focus:outline-none focus:border-electric/70 focus:ring-2 focus:ring-electric/30 transition resize-none"
               aria-label="Your answer"
             />
 
@@ -683,7 +719,7 @@ function PardyModal({
               <button
                 onClick={onSkip}
                 disabled={modal.submitting}
-                className="font-syne text-sm text-cream/50 hover:text-cream/80 transition disabled:opacity-40"
+                className="font-syne text-sm text-cream/45 hover:text-cream/80 transition disabled:opacity-40 px-3 py-2 rounded-lg hover:bg-white/5"
                 aria-label="Skip this clue (counts as attempted, no Fangs awarded)"
               >
                 Skip
@@ -691,12 +727,12 @@ function PardyModal({
               <button
                 onClick={onSubmit}
                 disabled={modal.submitting || !modal.answer.trim()}
-                className="btn-gold px-6 py-2.5 rounded-xl text-sm disabled:opacity-40 disabled:cursor-not-allowed inline-flex items-center gap-2"
+                className="btn-gold px-7 py-2.5 rounded-xl text-sm disabled:opacity-40 disabled:cursor-not-allowed inline-flex items-center gap-2"
               >
                 {modal.submitting ? "Checking..." : "Submit"}
               </button>
             </div>
-          </>
+          </div>
         ) : (
           <div className="text-center animate-slide-up">
             {correct ? (

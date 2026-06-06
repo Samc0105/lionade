@@ -4645,6 +4645,33 @@ html.light .space-bg-container { display: none; }
 }
 .pa-mastery-halo { animation: pa-mastery-halo 2.6s ease-in-out infinite; }
 
+/* PARDY DECK CARD — hover lift + gold-tinted glow on the deck picker.
+   Transform + box-shadow only, so the browser stays on the compositor. */
+.pa-deck-card {
+  transition: transform 0.35s var(--ease-out-emil), box-shadow 0.35s var(--ease-out-emil);
+}
+.pa-deck-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 18px 36px rgba(0,0,0,0.45), 0 0 0 1px rgba(255,215,0,0.25), 0 0 32px rgba(255,215,0,0.12);
+}
+.pa-deck-card:active {
+  transform: translateY(-1px) scale(0.995);
+}
+
+/* PARDY BOARD TILE — live tiles lift + gold-glow on hover; done tiles stay
+   muted and inert. Pure transform + filter (GPU). */
+.pa-pardy-tile {
+  transition: transform 0.25s var(--ease-out-quart), box-shadow 0.25s var(--ease-out-quart), filter 0.25s ease;
+}
+.pa-pardy-tile--live:hover {
+  transform: translateY(-2px);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.15), 0 12px 24px rgba(0,0,0,0.45), 0 0 0 1px rgba(255,215,0,0.45), 0 0 24px rgba(255,215,0,0.22);
+  filter: brightness(1.06);
+}
+.pa-pardy-tile--live:active {
+  transform: translateY(0) scale(0.97);
+}
+
 /* The single reduced-motion guard for the WHOLE party block.
    Disables motion but leaves final visual states intact (opacity 1, no shift). */
 @media (prefers-reduced-motion: reduce) {
@@ -4656,11 +4683,14 @@ html.light .space-bg-container { display: none; }
   .pa-tile-flip, .pa-card-flip-3d,
   .pa-canvas-stamp, .pa-canvas-corner,
   .pa-word-breathe, .pa-panic-vignette, .pa-deal-glow, .pa-active-swatch,
-  .pa-progress-shimmer, .pa-mastery-halo {
+  .pa-progress-shimmer, .pa-mastery-halo,
+  .pa-deck-card, .pa-deck-card:hover, .pa-deck-card:active,
+  .pa-pardy-tile, .pa-pardy-tile--live:hover, .pa-pardy-tile--live:active {
     animation: none !important;
     transition: none !important;
   }
   .pa-game-card:hover { transform: none !important; }
+  .pa-deck-card:hover, .pa-pardy-tile--live:hover { transform: none !important; filter: none !important; }
   .pa-ready-sweep { opacity: 0 !important; }
   .pa-pop-in, .pa-deal-in, .pa-chip-in, .pa-guess-pop, .pa-stamp, .pa-factoid-up,
   .pa-tile-flip, .pa-card-flip-3d,
