@@ -1953,6 +1953,49 @@ body {
   animation: social-studying-pulse 1.8s var(--ease-out-emil) infinite;
 }
 
+/* Friend list row — GPU lift on hover. Translate-only so paint is cheap. */
+.social-friend-row {
+  transition: transform 180ms var(--ease-out-emil),
+              background-color 180ms var(--ease-out-emil);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .social-friend-row:hover {
+    transform: translateY(-1px);
+  }
+}
+
+/* DM bubble entrance — subtle fade + 6px lift, GPU-only. */
+@keyframes social-msg-enter-mine {
+  from { opacity: 0; transform: translate3d(8px, 4px, 0); }
+  to   { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+@keyframes social-msg-enter-theirs {
+  from { opacity: 0; transform: translate3d(-8px, 4px, 0); }
+  to   { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+.social-msg-mine {
+  animation: social-msg-enter-mine 260ms var(--ease-out-emil) both;
+}
+.social-msg-theirs {
+  animation: social-msg-enter-theirs 260ms var(--ease-out-emil) both;
+}
+
+/* Empty-thread "Say hi to X" panel — gentle fade-in. */
+@keyframes social-empty-enter {
+  from { opacity: 0; transform: translate3d(0, 6px, 0); }
+  to   { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+.social-empty-thread {
+  animation: social-empty-enter 320ms var(--ease-out-emil) both;
+}
+
+/* Message input — electric focus ring (no layout shift). */
+.social-msg-input:focus {
+  box-shadow: 0 0 0 3px rgba(74, 144, 217, 0.18);
+}
+
 /* Reduced-motion overrides */
 @media (prefers-reduced-motion: reduce) {
   .social-post-a,
@@ -1964,8 +2007,18 @@ body {
     transform: none !important;
   }
 
-  .social-studying-dot {
+  .social-studying-dot,
+  .social-msg-mine,
+  .social-msg-theirs,
+  .social-empty-thread {
     animation: none !important;
+  }
+
+  .social-friend-row {
+    transition: background-color 180ms ease !important;
+  }
+  .social-friend-row:hover {
+    transform: none !important;
   }
 }
 
@@ -3880,6 +3933,59 @@ html.light .space-bg-container { display: none; }
   animation: slide-in-left 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
+.mastery-exam-card {
+  transition: transform 240ms cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 240ms ease,
+              background-color 240ms ease,
+              box-shadow 240ms ease;
+  will-change: transform;
+}
+@media (hover: hover) and (pointer: fine) {
+  .mastery-exam-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 28px -16px rgba(255, 215, 0, 0.18),
+                0 4px 12px -6px rgba(0, 0, 0, 0.35);
+  }
+}
+
+@keyframes mastery-live-pulse {
+  0%   { transform: scale(0.8); opacity: 0.6; }
+  100% { transform: scale(2.4); opacity: 0; }
+}
+.mastery-live-pulse {
+  animation: mastery-live-pulse 1.8s ease-out infinite;
+  transform-origin: center;
+}
+
+@keyframes mastery-msg-in {
+  from { transform: translateY(6px); opacity: 0; }
+  to   { transform: translateY(0); opacity: 1; }
+}
+.mastery-msg-in {
+  animation: mastery-msg-in 380ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  will-change: transform, opacity;
+}
+
+@keyframes mastery-particle-drift {
+  0%   { transform: translate3d(-20%, 0, 0); opacity: 0; }
+  20%  { opacity: 0.85; }
+  80%  { opacity: 0.85; }
+  100% { transform: translate3d(120%, 0, 0); opacity: 0; }
+}
+.mastery-particle {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 3px;
+  height: 3px;
+  margin-top: -1.5px;
+  border-radius: 9999px;
+  background: rgba(255, 215, 0, 0.85);
+  box-shadow: 0 0 6px rgba(255, 215, 0, 0.6);
+  animation: mastery-particle-drift 3.4s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .balance-breathe,
   .sparkline-path,
@@ -3893,11 +3999,17 @@ html.light .space-bg-container { display: none; }
   .balance-delta-chip,
   .mastery-focus-glow:focus-within,
   .mastery-parsing::after,
+  .mastery-exam-card,
+  .mastery-exam-card:hover,
+  .mastery-live-pulse,
+  .mastery-msg-in,
+  .mastery-particle,
   .animate-slide-in-left {
     animation: none !important;
     transition: none !important;
     transform: none !important;
   }
+  .mastery-particle { opacity: 0 !important; }
   .wallet-hero-particles { opacity: 0 !important; }
   .sparkline-path { stroke-dashoffset: 0 !important; }
   .path-ring { stroke-dashoffset: var(--ring-offset, 0) !important; }

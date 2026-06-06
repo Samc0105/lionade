@@ -673,7 +673,8 @@ export default function MasterySessionPage() {
               <MasteryProgressBar
                 value={data.overallDisplayPct}
                 readyThreshold={data.exam.readyThreshold}
-                label={data.mastered ? "Mastered" : data.ready ? "Ready" : "Progress"}
+                label={data.mastered ? "Mastery" : data.ready ? "Ready" : "Mastery"}
+                size="lg"
               />
             </div>
             <button
@@ -734,14 +735,54 @@ export default function MasterySessionPage() {
                 by the option-button card styles themselves). */}
             <div className="shrink-0 mt-4 pt-2">
               {ended ? (
-                <div className="rounded-[10px] bg-white/[0.03] border border-white/[0.06] px-4 py-4 text-center">
-                  <p className="text-[13px] text-cream/70 mb-3">Session closed. Start a new one anytime.</p>
-                  <Link
-                    href={backHref}
-                    className="inline-block rounded-full bg-gold text-navy font-mono text-[11px] uppercase tracking-[0.25em] px-5 py-2.5"
-                  >
-                    {classIdContext ? "Back to Class" : "Back to Mastery"}
-                  </Link>
+                <div className="rounded-[12px] bg-gradient-to-br from-white/[0.05] via-white/[0.02] to-transparent border border-white/[0.08] px-5 py-5">
+                  <div className="flex items-center gap-2 mb-3 justify-center">
+                    <Sparkle size={12} className="text-gold" weight="fill" />
+                    <span className="font-mono text-[9.5px] uppercase tracking-[0.3em] text-gold">
+                      Session Wrapped
+                    </span>
+                  </div>
+                  {data.session.questionsAnswered > 0 && (
+                    <div className="flex items-end justify-center gap-6 mb-4">
+                      <div className="text-center">
+                        <div className="font-bebas text-[44px] tracking-wider text-cream leading-none tabular-nums">
+                          {Math.round((data.session.correctCount / data.session.questionsAnswered) * 100)}%
+                        </div>
+                        <div className="font-mono text-[9px] uppercase tracking-[0.25em] text-cream/45 mt-1">
+                          accuracy
+                        </div>
+                      </div>
+                      <div className="w-px h-10 bg-white/[0.08]" aria-hidden="true" />
+                      <div className="text-center">
+                        <div className="font-bebas text-[44px] tracking-wider text-cream leading-none tabular-nums">
+                          {data.session.questionsAnswered}
+                        </div>
+                        <div className="font-mono text-[9px] uppercase tracking-[0.25em] text-cream/45 mt-1">
+                          questions
+                        </div>
+                      </div>
+                      <div className="w-px h-10 bg-white/[0.08]" aria-hidden="true" />
+                      <div className="text-center">
+                        <div className="font-bebas text-[44px] tracking-wider text-cream leading-none tabular-nums">
+                          {stats.sessionTime}
+                        </div>
+                        <div className="font-mono text-[9px] uppercase tracking-[0.25em] text-cream/45 mt-1">
+                          time
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  <p className="text-[12.5px] text-cream/65 mb-4 text-center">
+                    Session closed. Start a new one anytime.
+                  </p>
+                  <div className="flex justify-center">
+                    <Link
+                      href={backHref}
+                      className="inline-block rounded-full bg-gold text-navy hover:bg-gold/90 font-mono text-[11px] uppercase tracking-[0.25em] px-5 py-2.5 transition-colors"
+                    >
+                      {classIdContext ? "Back to Class" : "Back to Mastery"}
+                    </Link>
+                  </div>
                   {sessionId && <MasteryNotesFooter sessionId={sessionId} />}
                 </div>
               ) : (

@@ -164,18 +164,21 @@ export default function MasteryLandingPage() {
         </Link>
 
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center gap-2 mb-2">
+        <div className="mb-10">
+          <div className="flex items-center gap-2 mb-3">
             <Brain size={16} className="text-gold" weight="fill" />
-            <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-gold">
-              Mastery Mode
+            <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-gold">
+              Master What Counts
             </span>
           </div>
-          <h1 className="font-bebas text-4xl sm:text-5xl tracking-[0.06em] text-cream leading-none">
-            what do you want to master?
+          <h1 className="font-bebas text-5xl sm:text-6xl lg:text-7xl tracking-[0.04em] text-cream leading-[0.92]">
+            what do you<br className="hidden sm:block" />{" "}
+            <span className="bg-gradient-to-r from-gold via-[#F0B429] to-gold bg-clip-text text-transparent">
+              want to master?
+            </span>
           </h1>
-          <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-cream/50 mt-3">
-            Ninny teaches + quizzes until you're ready. Slow burn, real grind.
+          <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-cream/55 mt-4 max-w-[520px] leading-relaxed">
+            Ninny teaches and quizzes until you&apos;re ready. Slow burn. Real grind.
           </p>
         </div>
 
@@ -187,7 +190,7 @@ export default function MasteryLandingPage() {
         {/* New target form */}
         {!parsed && (
           <section>
-            <div className={`mastery-focus-glow rounded-[12px] bg-white/[0.03] border border-white/[0.08] p-4 sm:p-5 transition-shadow ${parsing ? "mastery-parsing" : ""}`}>
+            <div className={`mastery-focus-glow rounded-[14px] bg-white/[0.025] border border-white/[0.09] p-5 sm:p-6 transition-shadow ${parsing ? "mastery-parsing" : ""}`}>
               <textarea
                 value={input}
                 onChange={e => setInput(e.target.value.slice(0, 8000))}
@@ -201,7 +204,7 @@ export default function MasteryLandingPage() {
 • AWS Security Specialty (SCS-C02)
 • Calculus 1 midterm: derivatives, integrals, limits, chain rule
 • AP Chemistry unit on thermochemistry
-• Or paste your syllabus and I'll parse it."
+• Or paste your syllabus and Ninny will parse it."
                 className="relative z-10 w-full resize-none bg-transparent border-none focus:outline-none
                   text-[15px] text-cream placeholder:text-cream/30 leading-relaxed font-sans"
               />
@@ -458,7 +461,7 @@ function LimitPaywall({
           </span>
         </div>
         <h3 className="font-bebas text-[28px] tracking-wider text-cream leading-tight mb-2">
-          Focus is good — more focus is better.
+          Focus is good. More focus is better.
         </h3>
         <p className="text-[13px] text-cream/75 leading-relaxed mb-5">
           {state.message}
@@ -476,7 +479,7 @@ function LimitPaywall({
           {isFree && (
             <div className="flex items-baseline justify-between text-gold">
               <span className="font-mono text-[10px] uppercase tracking-[0.25em]">
-                pro — {nextLimit} targets
+                pro · {nextLimit} targets
               </span>
               <span className="font-bebas text-[14px] tracking-wider">$4.99 / mo</span>
             </div>
@@ -484,7 +487,7 @@ function LimitPaywall({
           {state.plan === "pro" && (
             <div className="flex items-baseline justify-between text-gold">
               <span className="font-mono text-[10px] uppercase tracking-[0.25em]">
-                platinum — {nextLimit} targets
+                platinum · {nextLimit} targets
               </span>
             </div>
           )}
@@ -512,20 +515,37 @@ function LimitPaywall({
 }
 
 // ── Exam card ────────────────────────────────────────────────────────────────
+function relativeStudied(iso: string): string | null {
+  const t = new Date(iso).getTime();
+  if (!Number.isFinite(t)) return null;
+  const diffMs = Date.now() - t;
+  if (diffMs < 0) return null;
+  const min = Math.floor(diffMs / 60000);
+  if (min < 1) return "just now";
+  if (min < 60) return `${min}m ago`;
+  const hr = Math.floor(min / 60);
+  if (hr < 24) return `${hr}h ago`;
+  const day = Math.floor(hr / 24);
+  if (day < 7) return `${day}d ago`;
+  const wk = Math.floor(day / 7);
+  return `${wk}w ago`;
+}
+
 function ExamCard({ exam }: { exam: ExamSummary }) {
   const hours = Math.floor(exam.totalActiveSeconds / 3600);
   const mins = Math.floor((exam.totalActiveSeconds % 3600) / 60);
   const timeLabel = hours > 0 ? `${hours}h ${mins}m` : `${mins}m`;
   const mastered = !!exam.reachedMasteryAt;
+  const lastStudied = relativeStudied(exam.updatedAt);
 
   return (
     <Link
       href={`/learn/mastery/${exam.id}`}
       className={`
-        group block rounded-[10px] border px-4 py-4 transition-all duration-200
+        mastery-exam-card group block rounded-[12px] border px-4 py-4
         ${mastered
-          ? "bg-gradient-to-br from-gold/[0.06] to-white/[0.02] border-gold/25 hover:border-gold/40"
-          : "bg-white/[0.03] border-white/[0.06] hover:border-white/[0.15] hover:bg-white/[0.05]"}
+          ? "bg-gradient-to-br from-gold/[0.08] via-gold/[0.03] to-white/[0.02] border-gold/30 hover:border-gold/50"
+          : "bg-white/[0.035] border-white/[0.07] hover:border-white/[0.18] hover:bg-white/[0.055]"}
       `}
     >
       <div className="flex items-start justify-between gap-2 mb-3">
@@ -535,15 +555,24 @@ function ExamCard({ exam }: { exam: ExamSummary }) {
         {mastered && <Sparkle size={14} className="text-gold shrink-0 mt-1" weight="fill" />}
       </div>
       <MasteryProgressBar value={exam.overallDisplayPct} readyThreshold={exam.readyThreshold} />
-      <div className="mt-3 flex items-center gap-3 font-mono text-[10px] uppercase tracking-[0.2em] text-cream/50">
+      <div className="mt-3 flex items-center gap-3 font-mono text-[10px] uppercase tracking-[0.2em] text-cream/55">
         <span className="flex items-center gap-1">
           <Target size={10} weight="bold" /> {exam.subtopicCount}
         </span>
         <span className="flex items-center gap-1">
           <Clock size={10} weight="bold" /> {timeLabel}
         </span>
+        {lastStudied && !exam.activeSessionId && (
+          <span className="hidden sm:inline text-cream/40">{lastStudied}</span>
+        )}
         {exam.activeSessionId && (
-          <span className="ml-auto text-gold">● live</span>
+          <span className="ml-auto inline-flex items-center gap-1.5 text-gold">
+            <span className="relative grid place-items-center">
+              <span className="absolute w-2 h-2 rounded-full bg-gold/40 mastery-live-pulse" aria-hidden="true" />
+              <span className="relative w-1.5 h-1.5 rounded-full bg-gold" />
+            </span>
+            live
+          </span>
         )}
       </div>
     </Link>

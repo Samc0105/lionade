@@ -19,12 +19,19 @@ interface Props {
   readyThreshold?: number; // 0..1, default 0.80
   label?: string;
   className?: string;
+  /**
+   * "sm" (default) renders the compact bar used in the exam list. "lg"
+   * renders a taller bar + bigger Bebas % readout for the in-session header,
+   * where progress is the centerpiece. "lg" also enables ambient gold-
+   * particle drift inside the fill once the bar is past 6%.
+   */
+  size?: "sm" | "lg";
 }
 
 const EASE = (t: number) => 1 - Math.pow(1 - t, 3);
 
 export default function MasteryProgressBar({
-  value, readyThreshold = 0.80, label, className = "",
+  value, readyThreshold = 0.80, label, className = "", size = "sm",
 }: Props) {
   const [displayed, setDisplayed] = useState(value);
   const fromRef = useRef(value);
@@ -71,15 +78,25 @@ export default function MasteryProgressBar({
   }, [value]);
 
   const mastered = pct >= 95;
+  const isLg = size === "lg";
+  const showParticles = isLg && pct > 6;
 
   return (
     <div className={`flex items-center gap-3 ${className}`}>
       {label && (
-        <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-cream/50 shrink-0">
+        <span
+          className={`font-mono uppercase tracking-[0.25em] text-cream/55 shrink-0 ${
+            isLg ? "text-[11px]" : "text-[10px] text-cream/50"
+          }`}
+        >
           {label}
         </span>
       )}
-      <div className="relative flex-1 h-[6px] rounded-full bg-white/[0.06] overflow-visible">
+      <div
+        className={`relative flex-1 rounded-full bg-white/[0.06] overflow-visible ${
+          isLg ? "h-[9px]" : "h-[6px]"
+        }`}
+      >
         <div
           className={`absolute inset-y-0 left-0 rounded-full transition-[background-color] duration-700 overflow-hidden ${mastered ? "pa-mastery-halo" : ""}`}
           style={{
@@ -100,16 +117,27 @@ export default function MasteryProgressBar({
               }}
             />
           )}
+          {showParticles && (
+            <>
+              <span aria-hidden="true" className="mastery-particle" style={{ animationDelay: "0s" }} />
+              <span aria-hidden="true" className="mastery-particle" style={{ animationDelay: "1.1s", top: "30%" }} />
+              <span aria-hidden="true" className="mastery-particle" style={{ animationDelay: "2.2s", top: "65%" }} />
+            </>
+          )}
         </div>
         {/* Ready-threshold notch */}
         <div
-          className="absolute top-[-3px] bottom-[-3px] w-[1.5px] bg-cream/30"
+          className={`absolute w-[1.5px] bg-cream/30 ${isLg ? "top-[-4px] bottom-[-4px]" : "top-[-3px] bottom-[-3px]"}`}
           style={{ left: `${thresholdLeft}%` }}
-          title={`${thresholdLeft}% — likely ready to pass`}
+          title={`${thresholdLeft}% · likely ready to pass`}
           aria-hidden="true"
         />
       </div>
-      <span className="font-bebas text-[18px] tabular-nums tracking-wider text-cream shrink-0 w-[46px] text-right">
+      <span
+        className={`font-bebas tabular-nums tracking-wider text-cream shrink-0 text-right ${
+          isLg ? "text-[26px] w-[64px] leading-none" : "text-[18px] w-[46px]"
+        }`}
+      >
         {Math.round(pct)}%
       </span>
     </div>

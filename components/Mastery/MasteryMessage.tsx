@@ -80,7 +80,7 @@ function TeachCard({ m }: { m: MessageShape }) {
         <div className="flex items-center gap-2 mb-2">
           <Brain size={14} className="text-[#A855F7]" weight="bold" />
           <span className="font-mono text-[9.5px] uppercase tracking-[0.25em] text-[#A855F7]">
-            Teach — {p.subtopicName ?? "subtopic"}
+            Teach · {p.subtopicName ?? "subtopic"}
           </span>
         </div>
         <h4 className="font-bebas text-[22px] tracking-wider text-cream leading-tight mb-1">{p.title}</h4>
@@ -243,7 +243,7 @@ function CelebrateCard({ m }: { m: MessageShape }) {
 // ── Row wrapper with role-specific alignment + avatar slot ──────────────────
 function Row({ avatar, children }: { avatar: "ninny" | "user"; children: React.ReactNode }) {
   return (
-    <div className={`flex gap-3 ${avatar === "user" ? "flex-row-reverse" : ""}`}>
+    <div className={`mastery-msg-in flex gap-3 ${avatar === "user" ? "flex-row-reverse" : ""}`}>
       <div
         className={`shrink-0 w-[28px] h-[28px] rounded-full grid place-items-center text-[10px] font-mono tracking-wider ${
           avatar === "ninny"

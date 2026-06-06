@@ -178,9 +178,9 @@ function Paywall({ onClose }: { onClose: () => void }) {
         </h3>
         <p className="text-[13.5px] text-cream/75 leading-relaxed mb-5">
           Ninny only keeps your last few messages on screen. Pro gives you the
-          full picture — every teach card, mnemonic, common-pitfall, plus a
-          subtopic-by-subtopic breakdown of where you're strong and where
-          you're shaky. Yours to print, share, or drop into your notes app.
+          full picture: every teach card, mnemonic, and common pitfall, plus a
+          subtopic-by-subtopic breakdown of where you&apos;re strong and where
+          you&apos;re shaky. Yours to print, share, or drop into your notes app.
         </p>
 
         <ul className="flex flex-col gap-1.5 mb-5 text-[12.5px] text-cream/75">
@@ -220,7 +220,7 @@ function Paywall({ onClose }: { onClose: () => void }) {
           </button>
         </div>
         <p className="font-mono text-[9px] uppercase tracking-[0.25em] text-cream/30 text-center mt-4">
-          Billing isn't live yet — reach out to upgrade today
+          Billing isn&apos;t live yet · reach out to upgrade today
         </p>
       </div>
     </div>
