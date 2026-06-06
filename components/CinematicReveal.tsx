@@ -19,8 +19,11 @@
 
 import { useEffect, useState } from "react";
 import { useReducedMotion } from "framer-motion";
+import dynamic from "next/dynamic";
 import RevealText from "@/components/RevealText";
-import Confetti from "@/components/Confetti";
+// Dynamic-imported — particle code only ships when a CinematicReveal
+// instance actually fires its burst.
+const Confetti = dynamic(() => import("@/components/Confetti"), { ssr: false });
 
 interface Props {
   /** The hero text to reveal. */

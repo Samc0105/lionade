@@ -611,8 +611,13 @@ function PremiumCard({ item }: { item: PremiumItem }) {
         <p className="shop-card-desc text-cream/55 text-xs mb-5 leading-relaxed">{item.description}</p>
         <div className="flex items-center justify-between mt-auto pt-2 gap-4">
           <span className="font-bebas text-xl text-purple-300">${item.priceUSD.toFixed(2)}</span>
-          <button disabled className="relative flex-shrink-0 px-4 py-2 rounded-lg text-xs font-bold border border-purple-500/30 bg-purple-500/10 text-purple-400/60 cursor-not-allowed overflow-hidden">
-            <span className="premium-coming-soon-pulse">Coming Soon</span>
+          {/* Disabled Notify-me state — was a dead "Coming Soon" pill that did
+              nothing. Now reads as a real future affordance; click is a no-op
+              for now (the waitlist endpoint exists but isn't wired here yet —
+              telling Sam to wire it before we make the click work, otherwise
+              the button would silently lie). */}
+          <button disabled className="relative flex-shrink-0 px-4 py-2 rounded-lg text-xs font-bold border border-purple-500/30 bg-purple-500/8 text-purple-300/60 cursor-not-allowed">
+            Notify me
           </button>
         </div>
       </div>

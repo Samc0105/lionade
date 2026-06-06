@@ -132,25 +132,17 @@ export default function StreakReviveBanner() {
             <span>{submitting ? "Reviving…" : `Revive · ${data.costFangs.toLocaleString()} Fangs`}</span>
           </button>
 
-          <button
-            type="button"
-            onClick={() => claim("cash")}
-            disabled={submitting}
-            className="group flex items-center justify-center gap-2 rounded-[10px]
-              px-4 py-3 font-syne font-semibold text-[14px]
-              bg-white/[0.05] border border-white/[0.12] text-cream
-              hover:bg-white/[0.08] hover:border-white/[0.22]
-              transition-all duration-200 active:scale-[0.98]
-              disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            <Lightning size={15} weight="fill" className="text-gold" />
-            <span>Revive · $0.99</span>
-          </button>
+          {/* Cash button hidden until the Stripe rollout actually ships.
+              Was rendering live alongside the Fangs path and firing a
+              toastInfo("Cash purchases land with our Stripe rollout") which
+              looked-live-but-isn't — a trust gap. Better to not render than
+              to render a dead affordance. The Fangs button keeps the
+              recovery flow available. */}
         </div>
 
         {!canAffordFangs && (
           <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-cream/60 mt-2">
-            Short on Fangs · cash path coming with Stripe rollout
+            Short on Fangs · cash revive path coming soon
           </p>
         )}
       </ClaimBanner>

@@ -265,26 +265,27 @@ export default function WalletPage() {
                 })}
               </div>
 
-              {/* Redeem rewards — fills the bottom of the left rail */}
-              <div className="rounded-2xl border border-purple-500/15 p-5 animate-slide-up"
-                style={{ animationDelay: "0.15s", background: "var(--card-solid-bg)" }}>
-                <div className="flex items-center gap-3 mb-3">
-                  <Gift size={26} weight="fill" color="#FFD700" aria-hidden="true" />
-                  <div>
-                    <h2 className="font-bebas text-lg text-cream tracking-wider leading-none">REDEEM REWARDS</h2>
-                    <p className="text-cream/40 text-xs mt-1">Convert your Fangs into real rewards</p>
+              {/* Spend Fangs — was a "REDEEM REWARDS · Coming Soon" panel
+                  taking the bottom half of the left rail with a dashed-border
+                  placeholder. Compressed to a focused "Spend in the Shop" CTA
+                  that's honest about what's available today (cosmetics +
+                  boosters in the Shop). Real reward-redemption flow ships
+                  with V2 — stop the placeholder until then. */}
+              <Link href="/shop" className="block animate-slide-up" style={{ animationDelay: "0.15s" }}>
+                <div className="rounded-2xl border border-gold/25 p-4 transition-all hover:border-gold/45 hover:bg-gold/[0.04]"
+                  style={{ background: "var(--card-solid-bg)" }}>
+                  <div className="flex items-center gap-3">
+                    <Gift size={22} weight="fill" color="#FFD700" aria-hidden="true" />
+                    <div className="flex-1 min-w-0">
+                      <p className="font-bebas text-base text-cream tracking-wider leading-none">SPEND YOUR FANGS</p>
+                      <p className="text-cream/45 text-xs mt-1">Cosmetics, boosters, premium SKUs</p>
+                    </div>
+                    <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-gold/85">
+                      Shop <span aria-hidden="true">→</span>
+                    </span>
                   </div>
                 </div>
-                <div className="text-center py-5 rounded-xl mb-3" style={{ background: "rgba(168,85,247,0.05)", border: "1px dashed rgba(168,85,247,0.2)" }}>
-                  <p className="text-purple-400/60 text-sm font-semibold mb-0.5">Coming Soon</p>
-                  <p className="text-cream/20 text-xs">Reward redemptions arrive in V2</p>
-                </div>
-                <Link href="/shop" className="block">
-                  <button className="w-full font-syne font-semibold text-xs px-6 py-2.5 rounded-full transition-all duration-200 active:scale-95 border border-gold/30 text-gold hover:bg-gold/10">
-                    Visit the Shop
-                  </button>
-                </Link>
-              </div>
+              </Link>
             </div>
 
             {/* ── RIGHT (3/5): transaction ledger filling the column ── */}

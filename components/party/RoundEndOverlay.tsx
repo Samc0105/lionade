@@ -22,8 +22,13 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
-import Confetti from "@/components/Confetti";
+import dynamic from "next/dynamic";
 import RevealText from "@/components/RevealText";
+
+// Confetti is dynamic-imported so the canvas particle code only lands in
+// the bundle when a round actually ends with a winner. Shrinks every
+// game-view route that uses RoundEndOverlay.
+const Confetti = dynamic(() => import("@/components/Confetti"), { ssr: false });
 
 interface RoundEndOverlayProps {
   /** null = time's up (no one guessed). Object = winner attribution. */

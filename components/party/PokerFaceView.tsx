@@ -25,8 +25,11 @@ import PartyScoreboard from "./PartyScoreboard";
 import IntermissionCard from "./IntermissionCard";
 import NinnyHostBubble from "./NinnyHostBubble";
 import CountUp from "@/components/CountUp";
-import Confetti from "@/components/Confetti";
+import dynamic from "next/dynamic";
 import RevealText from "@/components/RevealText";
+// Confetti is dynamic-imported — see RoundEndOverlay for the why. Saves
+// shipping the canvas particle code on every PokerFaceView mount.
+const Confetti = dynamic(() => import("@/components/Confetti"), { ssr: false });
 import { pokerFaceChannel, POKERFACE_EVENTS } from "@/lib/party/realtime-channels";
 import { subscribeResilient } from "@/lib/realtime-resilient";
 import PostRoundVoteCard from "./PostRoundVoteCard";
