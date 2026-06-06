@@ -660,28 +660,47 @@ function NinnyPageInner() {
       <div className="max-w-3xl mx-auto relative">
         <BackButton />
 
-        {/* Full header — input phase only */}
+        {/* Full header (input phase only) */}
         {phase === "input" && (
           <div className="flex flex-col items-center text-center mt-6 mb-8 animate-slide-up">
             <div
-              className="w-20 h-20 rounded-full flex items-center justify-center mb-4 relative"
+              className="w-24 h-24 rounded-full flex items-center justify-center mb-5 relative"
               style={{
                 background:
-                  "radial-gradient(circle at 40% 35%, #A855F740 0%, #A855F710 60%, transparent 100%)",
-                boxShadow: `0 0 50px ${NINNY_PURPLE}33, 0 0 0 1px ${NINNY_PURPLE}44, inset 0 0 20px ${NINNY_PURPLE}15`,
+                  "radial-gradient(circle at 40% 35%, #A855F75A 0%, #A855F715 55%, transparent 100%)",
+                boxShadow: `0 0 70px ${NINNY_PURPLE}44, 0 0 0 1px ${NINNY_PURPLE}55, inset 0 0 28px ${NINNY_PURPLE}1c`,
                 color: NINNY_PURPLE,
+                willChange: "transform",
               }}
             >
               <span className="relative z-10">
-                <Robot size={52} weight="regular" aria-hidden="true" />
+                <Robot size={60} weight="regular" aria-hidden="true" />
               </span>
+              {/* Inner pulse ring */}
               <div
-                className="absolute inset-0 rounded-full animate-pulse"
-                style={{ boxShadow: `0 0 0 1px ${NINNY_PURPLE}30` }}
+                className="absolute inset-0 rounded-full animate-pulse motion-reduce:animate-none"
+                style={{ boxShadow: `0 0 0 1px ${NINNY_PURPLE}40` }}
+              />
+              {/* Outer orbit ring (static, decorative) */}
+              <div
+                className="absolute -inset-3 rounded-full pointer-events-none"
+                style={{
+                  border: `1px dashed ${NINNY_PURPLE}30`,
+                  opacity: 0.7,
+                }}
               />
             </div>
 
-            <h1 className="font-bebas text-cream text-4xl sm:text-5xl tracking-wider leading-none mb-2">
+            <p
+              className="font-mono text-[10px] tracking-[0.28em] uppercase mb-2"
+              style={{ color: `${NINNY_PURPLE}AA` }}
+            >
+              Your Study Sidekick
+            </p>
+            <h1
+              className="font-bebas text-cream text-5xl sm:text-6xl tracking-wider leading-none mb-3"
+              style={{ textShadow: `0 0 30px ${NINNY_PURPLE}33` }}
+            >
               Meet Ninny
             </h1>
             <p
@@ -766,14 +785,14 @@ function NinnyPageInner() {
             <div className="flex gap-2 mb-5">
               <button
                 onClick={() => setInputMode("topic")}
-                className="flex-1 px-4 py-3 rounded-xl font-syne text-sm font-semibold transition-all duration-200"
+                className="flex-1 px-4 py-3 rounded-xl font-syne text-sm font-semibold transition-all duration-200 active:scale-[0.98]"
                 style={
                   inputMode === "topic"
                     ? {
-                        background: `${NINNY_PURPLE}20`,
-                        border: `1px solid ${NINNY_PURPLE}60`,
+                        background: `linear-gradient(135deg, ${NINNY_PURPLE}28 0%, ${NINNY_PURPLE}12 100%)`,
+                        border: `1px solid ${NINNY_PURPLE}80`,
                         color: "#EEF4FF",
-                        boxShadow: `0 0 20px ${NINNY_PURPLE}25`,
+                        boxShadow: `0 0 24px ${NINNY_PURPLE}33, 0 0 0 1px ${NINNY_PURPLE}25 inset`,
                       }
                     : {
                         background: "rgba(255,255,255,0.04)",
@@ -789,14 +808,14 @@ function NinnyPageInner() {
               </button>
               <button
                 onClick={() => setInputMode("material")}
-                className="flex-1 px-4 py-3 rounded-xl font-syne text-sm font-semibold transition-all duration-200"
+                className="flex-1 px-4 py-3 rounded-xl font-syne text-sm font-semibold transition-all duration-200 active:scale-[0.98]"
                 style={
                   inputMode === "material"
                     ? {
-                        background: `${NINNY_PURPLE}20`,
-                        border: `1px solid ${NINNY_PURPLE}60`,
+                        background: `linear-gradient(135deg, ${NINNY_PURPLE}28 0%, ${NINNY_PURPLE}12 100%)`,
+                        border: `1px solid ${NINNY_PURPLE}80`,
                         color: "#EEF4FF",
-                        boxShadow: `0 0 20px ${NINNY_PURPLE}25`,
+                        boxShadow: `0 0 24px ${NINNY_PURPLE}33, 0 0 0 1px ${NINNY_PURPLE}25 inset`,
                       }
                     : {
                         background: "rgba(255,255,255,0.04)",
@@ -866,9 +885,13 @@ function NinnyPageInner() {
                   className="relative rounded-2xl border-2 border-dashed cursor-pointer
                     transition-all duration-200 p-8 text-center group"
                   style={{
-                    borderColor: dragActive ? NINNY_PURPLE : `${NINNY_PURPLE}40`,
-                    background: dragActive ? `${NINNY_PURPLE}15` : `${NINNY_PURPLE}06`,
-                    boxShadow: dragActive ? `0 0 30px ${NINNY_PURPLE}33` : "none",
+                    borderColor: dragActive ? "#FFD700" : `${NINNY_PURPLE}40`,
+                    background: dragActive
+                      ? "linear-gradient(135deg, rgba(255,215,0,0.10) 0%, rgba(255,215,0,0.04) 100%)"
+                      : `${NINNY_PURPLE}06`,
+                    boxShadow: dragActive
+                      ? "0 0 40px rgba(255,215,0,0.30), 0 0 0 2px rgba(255,215,0,0.20) inset"
+                      : "none",
                   }}
                 >
                   <input
@@ -1192,9 +1215,14 @@ function NinnyPageInner() {
             {/* Recent materials strip */}
             {meta && meta.materials.length > 0 && (
               <div className="mt-10 animate-slide-up">
-                <p className="font-bebas text-cream/60 text-xs tracking-widest mb-3">
-                  YOUR RECENT STUDY SETS
-                </p>
+                <div className="flex items-baseline justify-between mb-3">
+                  <p className="font-mono text-cream/40 text-[10px] tracking-[0.28em] uppercase">
+                    Your Recent Study Sets
+                  </p>
+                  <p className="font-syne text-cream/30 text-[10px]">
+                    {meta.materials.length} saved
+                  </p>
+                </div>
                 <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1 scroll-smooth">
                   {meta.materials.map((m) => (
                     <div
@@ -1204,14 +1232,32 @@ function NinnyPageInner() {
                       <button
                         onClick={() => handleRestudy(m)}
                         className="w-full text-left rounded-xl border bg-white/5 backdrop-blur
-                          p-4 transition-all duration-200 hover:bg-white/10 hover:-translate-y-0.5
-                          active:scale-[0.99]"
-                        style={{ borderColor: `${NINNY_PURPLE}20` }}
+                          p-4 transition-all duration-200 hover:bg-white/[0.08] hover:-translate-y-0.5
+                          active:scale-[0.99] relative overflow-hidden"
+                        style={{
+                          borderColor: `${NINNY_PURPLE}20`,
+                          willChange: "transform",
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.borderColor = `${NINNY_PURPLE}55`;
+                          e.currentTarget.style.boxShadow = `0 0 22px ${NINNY_PURPLE}22`;
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.borderColor = `${NINNY_PURPLE}20`;
+                          e.currentTarget.style.boxShadow = "none";
+                        }}
                       >
-                        <p className="font-bebas text-cream text-sm tracking-wide truncate mb-1.5 pr-6">
+                        {/* Subject color stripe on left edge */}
+                        <div
+                          className="absolute top-0 left-0 bottom-0 w-[3px]"
+                          style={{
+                            background: `linear-gradient(180deg, ${NINNY_PURPLE} 0%, ${NINNY_PURPLE}55 100%)`,
+                          }}
+                        />
+                        <p className="font-bebas text-cream text-sm tracking-wide truncate mb-1.5 pr-6 pl-1">
                           {m.title}
                         </p>
-                        <div className="flex items-center gap-2 mb-2">
+                        <div className="flex items-center gap-2 mb-2 pl-1">
                           {m.subject && (
                             <span
                               className="px-1.5 py-0.5 rounded text-[9px] font-syne font-semibold uppercase tracking-wider"
@@ -1227,7 +1273,7 @@ function NinnyPageInner() {
                             {m.created_at ? timeAgo(m.created_at) : ""}
                           </span>
                         </div>
-                        <p className="text-cream/40 text-[10px] font-syne uppercase tracking-wider">
+                        <p className="text-cream/40 text-[10px] font-syne uppercase tracking-wider pl-1 group-hover:text-cream/70 transition-colors">
                           Tap to restudy
                         </p>
                       </button>
@@ -1260,26 +1306,42 @@ function NinnyPageInner() {
         {phase === "generating" && (
           <div className="text-center py-24 animate-slide-up">
             <div
-              className="inline-flex items-center justify-center w-20 h-20 rounded-full mb-6 relative"
+              className="inline-flex items-center justify-center w-24 h-24 rounded-full mb-6 relative"
               style={{
-                background: `radial-gradient(circle, ${NINNY_PURPLE}40 0%, transparent 70%)`,
-                boxShadow: `0 0 60px ${NINNY_PURPLE}66`,
+                background: `radial-gradient(circle, ${NINNY_PURPLE}55 0%, transparent 70%)`,
+                boxShadow: `0 0 80px ${NINNY_PURPLE}77`,
                 color: NINNY_PURPLE,
+                willChange: "transform",
               }}
             >
-              <span className="animate-pulse inline-flex">
-                <Robot size={52} weight="regular" aria-hidden="true" color="currentColor" />
+              <span className="animate-pulse motion-reduce:animate-none inline-flex">
+                <Robot size={58} weight="regular" aria-hidden="true" color="currentColor" />
               </span>
               <div
-                className="absolute inset-0 rounded-full animate-ping"
-                style={{ boxShadow: `0 0 0 2px ${NINNY_PURPLE}30` }}
+                className="absolute inset-0 rounded-full animate-ping motion-reduce:animate-none"
+                style={{ boxShadow: `0 0 0 2px ${NINNY_PURPLE}35` }}
+              />
+              <div
+                className="absolute -inset-4 rounded-full pointer-events-none"
+                style={{
+                  border: `1px dashed ${NINNY_PURPLE}30`,
+                }}
               />
             </div>
-            <p className="font-bebas text-cream text-3xl tracking-wider mb-2">
+            <p
+              className="font-mono text-[10px] tracking-[0.28em] uppercase mb-2"
+              style={{ color: `${NINNY_PURPLE}AA` }}
+            >
+              Generating
+            </p>
+            <p
+              className="font-bebas text-cream text-3xl sm:text-4xl tracking-wider mb-2"
+              style={{ textShadow: `0 0 24px ${NINNY_PURPLE}33` }}
+            >
               Ninny is thinking...
             </p>
             <p className="text-cream/50 text-sm font-syne">
-              Building 10 multiple-choice questions
+              Building your study set
             </p>
           </div>
         )}
@@ -1289,10 +1351,25 @@ function NinnyPageInner() {
           <div className="animate-slide-up">
             {/* Material header */}
             <div
-              className="rounded-2xl border bg-white/5 backdrop-blur px-5 py-4 mb-6 flex items-center gap-3 flex-wrap"
-              style={{ borderColor: `${NINNY_PURPLE}30` }}
+              className="rounded-2xl border bg-white/5 backdrop-blur px-5 py-4 mb-6 flex items-center gap-3 flex-wrap relative overflow-hidden"
+              style={{
+                borderColor: `${NINNY_PURPLE}30`,
+                boxShadow: `0 0 24px ${NINNY_PURPLE}15`,
+              }}
             >
+              <div
+                className="absolute top-0 left-0 right-0 h-px"
+                style={{
+                  background: `linear-gradient(90deg, transparent 0%, ${NINNY_PURPLE}66 50%, transparent 100%)`,
+                }}
+              />
               <div className="flex-1 min-w-0">
+                <p
+                  className="font-mono text-[9px] tracking-[0.28em] uppercase mb-1"
+                  style={{ color: `${NINNY_PURPLE}AA` }}
+                >
+                  Studying
+                </p>
                 <p className="font-bebas text-cream text-xl tracking-wide truncate">
                   {material.title}
                 </p>
@@ -1387,9 +1464,13 @@ function NinnyPageInner() {
               </div>
             </button>
 
-            <p className="font-bebas text-cream/60 text-xs tracking-widest uppercase mb-3 text-center">
-              Or Pick a Study Mode
-            </p>
+            <div className="flex items-center gap-3 mb-3">
+              <div className="flex-1 h-px bg-white/10" />
+              <p className="font-mono text-cream/40 text-[10px] tracking-[0.28em] uppercase">
+                Or Pick a Study Mode
+              </p>
+              <div className="flex-1 h-px bg-white/10" />
+            </div>
 
             {/* Inline error (e.g. insufficient Fangs) */}
             {error && (
@@ -1454,6 +1535,7 @@ function NinnyPageInner() {
                           background: unlocked ? `${m.color}20` : `${NINNY_PURPLE}15`,
                           border: `1px solid ${unlocked ? m.color + "50" : NINNY_PURPLE + "30"}`,
                           color: unlocked ? m.color : NINNY_PURPLE,
+                          willChange: "transform",
                         }}
                       >
                         <Icon size={28} weight="regular" aria-hidden="true" color="currentColor" />
@@ -1475,17 +1557,21 @@ function NinnyPageInner() {
                             </span>
                           )}
                         </div>
-                        <p className="font-syne text-cream/50 text-xs leading-snug mb-1.5">
+                        <p className="font-mono text-cream/45 text-[10px] leading-snug mb-2 tracking-wide">
                           {m.description}
                         </p>
                         {/* Price/status footer */}
                         <div className="flex items-center gap-1">
                           {unlocked ? (
                             <span
-                              className="font-bebas text-[11px] tracking-wider"
-                              style={{ color: m.color }}
+                              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full font-bebas text-[10px] tracking-wider"
+                              style={{
+                                background: "linear-gradient(135deg, #FFD700 0%, #F0C000 100%)",
+                                color: "#04080F",
+                                boxShadow: "0 0 12px rgba(255,215,0,0.30)",
+                              }}
                             >
-                              ▶ TAP TO PLAY
+                              <span aria-hidden="true">&#x25B6;</span> Play
                             </span>
                           ) : (
                             <>
@@ -1649,7 +1735,7 @@ function NinnyPageInner() {
                   <span className="font-bold" style={{ color: NINNY_PURPLE }}>
                     Practice Mode
                   </span>{" "}
-                  — drilling on the {practiceMissesKeys.size} you just missed
+                  drilling on the {practiceMissesKeys.size} you just missed
                 </span>
               </div>
             )}
@@ -1798,8 +1884,8 @@ function NinnyPageInner() {
                 {isPerfect
                   ? "PERFECT SCORE! Ninny is impressed."
                   : accuracy >= 0.7
-                  ? "Nice work — keep grinding."
-                  : "Don't sweat it — every miss is a memory."}
+                  ? "Nice work. Keep grinding."
+                  : "Don't sweat it. Every miss is a memory."}
               </p>
 
               {/* Reward chips */}

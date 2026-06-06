@@ -165,16 +165,30 @@ export default function ChatPanel({ materialId, materialTitle, materialSubject }
         ) : isEmpty ? (
           <div className="text-center py-6 sm:py-10">
             <div
-              className="w-14 h-14 rounded-full inline-flex items-center justify-center mb-4"
+              className="w-16 h-16 rounded-full inline-flex items-center justify-center mb-4 relative"
               style={{
-                background: `radial-gradient(circle, ${NINNY_PURPLE}40 0%, transparent 70%)`,
-                boxShadow: `0 0 30px ${NINNY_PURPLE}33`,
+                background: `radial-gradient(circle, ${NINNY_PURPLE}55 0%, transparent 70%)`,
+                boxShadow: `0 0 40px ${NINNY_PURPLE}44, 0 0 0 1px ${NINNY_PURPLE}55`,
                 color: NINNY_PURPLE,
+                willChange: "transform",
               }}
             >
-              <Robot size={32} weight="regular" aria-hidden="true" />
+              <Robot size={36} weight="regular" aria-hidden="true" />
+              <div
+                className="absolute -inset-2 rounded-full pointer-events-none"
+                style={{ border: `1px dashed ${NINNY_PURPLE}30` }}
+              />
             </div>
-            <p className="font-bebas text-cream text-2xl tracking-wider mb-2">
+            <p
+              className="font-mono text-[10px] tracking-[0.28em] uppercase mb-2"
+              style={{ color: `${NINNY_PURPLE}AA` }}
+            >
+              Socratic Chat
+            </p>
+            <p
+              className="font-bebas text-cream text-3xl tracking-wider mb-2"
+              style={{ textShadow: `0 0 24px ${NINNY_PURPLE}33` }}
+            >
               Ask Me Anything
             </p>
             <p
