@@ -18,6 +18,13 @@ interface CountUpProps {
    * it everywhere that number is rendered.
    */
   id?: string;
+  /**
+   * Cinematic flair — when true, every digit of the FINAL formatted value
+   * pops in with a stagger after the count-up settles. Use for reveal
+   * moments (Pardy Final Tally PERFECT GAME, Roardle big-Fang win).
+   * Default false to keep the routine navbar counter calm.
+   */
+  withDigitReveal?: boolean;
 }
 
 const defaultFormat = (n: number) => n.toLocaleString();
@@ -77,6 +84,7 @@ export default function CountUp({
   format = defaultFormat,
   className,
   id,
+  withDigitReveal = false,
 }: CountUpProps) {
   // Hydrate from cache so the first render shows the last-seen value, not 0.
   const cachedStart = id !== undefined ? valueCache.get(id) : undefined;
@@ -178,10 +186,36 @@ export default function CountUp({
     }
   }, [value, duration, delay, id]);
 
+  // Digit-reveal: once the count-up has reached the final value, re-mount
+  // each character of the formatted output via a key bumped on "reached
+  // final" so a stagger plays. Reduced motion + non-final ticks render the
+  // count-up text inline.
+  const atFinal = withDigitReveal && current === value && value !== 0;
+  const prefersReducedMotion =
+    typeof window !== "undefined" &&
+    window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+
   return (
     <>
       <span className={className} aria-hidden="true">
-        {format(current)}
+        {atFinal && !prefersReducedMotion ? (
+          <span key={`reveal-${value}`} className="inline-flex">
+            {Array.from(format(value)).map((c, i) => (
+              <span
+                key={`${c}-${i}`}
+                className="inline-block"
+                style={{
+                  animation: `count-up-digit-pop 320ms ease-out ${i * 40}ms both`,
+                  whiteSpace: c === " " ? "pre" : undefined,
+                }}
+              >
+                {c}
+              </span>
+            ))}
+          </span>
+        ) : (
+          format(current)
+        )}
       </span>
       <span className="sr-only" aria-live="polite">
         {format(value)}

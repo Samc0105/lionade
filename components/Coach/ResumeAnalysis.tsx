@@ -2,6 +2,7 @@
 
 import { CheckCircle, Warning, Question, ArrowRight } from "@phosphor-icons/react";
 import { cdnUrl } from "@/lib/cdn";
+import RevealText from "@/components/RevealText";
 import type { ResumeAnalysis } from "./ResumeUpload";
 
 interface Props {
@@ -41,7 +42,9 @@ export default function ResumeAnalysisView({ analysis, onStartSocratic }: Props)
         >
           <div className="flex items-center gap-2 mb-4">
             <CheckCircle size={18} weight="fill" color="#22C55E" aria-hidden="true" />
-            <h3 className="font-bebas text-sm text-cream tracking-[0.2em]">STRENGTHS</h3>
+            <h3 className="font-bebas text-sm text-cream tracking-[0.2em]">
+              <RevealText text="STRENGTHS" delay={0.18} charDelay={0.04} />
+            </h3>
             <span className="font-mono text-[10px] text-cream/45 ml-auto tabular-nums">
               {analysis.strengths.length}
             </span>
@@ -66,7 +69,9 @@ export default function ResumeAnalysisView({ analysis, onStartSocratic }: Props)
         >
           <div className="flex items-center gap-2 mb-4">
             <Warning size={18} weight="fill" color="#F97316" aria-hidden="true" />
-            <h3 className="font-bebas text-sm text-cream tracking-[0.2em]">NEEDS WORK</h3>
+            <h3 className="font-bebas text-sm text-cream tracking-[0.2em]">
+              <RevealText text="NEEDS WORK" delay={0.26} charDelay={0.04} />
+            </h3>
             <span className="font-mono text-[10px] text-cream/45 ml-auto tabular-nums">
               {analysis.weaknesses.length}
             </span>

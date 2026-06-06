@@ -4335,6 +4335,15 @@ html.light .space-bg-container { display: none; }
 }
 .pa-active-swatch { animation: pa-active-swatch 2.4s ease-in-out infinite; }
 
+/* CountUp digit-reveal — each formatted-output character pops in with a
+   stagger after the count-up settles at its final value. Used by
+   <CountUp withDigitReveal /> on cinematic reveal moments. */
+@keyframes count-up-digit-pop {
+  0%   { opacity: 0; transform: translateY(6px) scale(0.7); }
+  60%  { opacity: 1; transform: translateY(-1px) scale(1.05); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
 /* Mastery progress-bar shimmer: a thin diagonal gold sweep that travels
    across the filled portion of the bar each time the value increases. Fires
    once via animation: ... 1 forwards so re-keying the span re-fires it. */

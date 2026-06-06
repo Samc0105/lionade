@@ -390,7 +390,7 @@ export default function PardyPage() {
                 <div className="flex items-center justify-center gap-3 mb-4">
                   <img src={cdnUrl("/F.png")} alt="Fangs" className="w-10 h-10 object-contain" />
                   <p className="font-bebas text-7xl text-gold leading-none tabular-nums">
-                    <CountUp value={score} duration={1100} />
+                    <CountUp value={score} duration={1100} withDigitReveal />
                   </p>
                 </div>
                 <div className="flex items-center justify-center gap-4 text-sm">

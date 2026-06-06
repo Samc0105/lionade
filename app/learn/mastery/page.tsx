@@ -12,6 +12,7 @@ import {
 import { PLAN_EXAM_LIMITS } from "@/lib/mastery-plan";
 import Navbar from "@/components/Navbar";
 import SpaceBackground from "@/components/SpaceBackground";
+import RevealText from "@/components/RevealText";
 import { apiPost, swrFetcher } from "@/lib/api-client";
 import MasteryProgressBar from "@/components/Mastery/MasteryProgressBar";
 
@@ -301,7 +302,7 @@ export default function MasteryLandingPage() {
                 </span>
               </div>
               <h3 className="font-bebas text-[28px] tracking-wider text-cream leading-tight mb-1">
-                {parsed.title}
+                <RevealText text={parsed.title} delay={0.18} charDelay={0.035} />
               </h3>
               <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-cream/40 mb-4">
                 {parsed.subtopics.length} subtopics · weighted
