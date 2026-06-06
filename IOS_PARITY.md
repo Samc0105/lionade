@@ -7,6 +7,12 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 
 ---
 
+## 2026-06-06 — Shop premium boutique polish: hero drift, balance gate, copy (web-only, no iOS row)
+
+**Status:** 🚫 N/A (deliberate no-row decision: visual polish pass on the existing web `/shop` surface. No data-model, API contract, or Stripe IAP behavior changed. Touched only `app/shop/page.tsx` (hero gold-drift, flash-of-zero gate on Fang balance, em-dash sweep in user-facing copy, "Fangs" label correction) and `app/globals.css` (two new GPU-only keyframe blocks + reduced-motion allowlist). Native iOS shop is a separate surface owned by `vp-ios` with its own visual cadence.)
+
+---
+
 ## 2026-06-06 — Social polish: friends + DMs + nudges (web-only, no iOS row)
 
 **Status:** 🚫 N/A (deliberate no-row decision: visual polish pass on the existing web `/social` surface; no data-model, contract, or API change. iOS social is a separate native surface owned by `vp-ios` and is queued for its own visual pass on a separate cadence.)

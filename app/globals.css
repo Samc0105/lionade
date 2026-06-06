@@ -3041,6 +3041,63 @@ html.light .space-bg-container { display: none; }
   }
 }
 
+/* Hero gold-drift specks behind THE LION'S DEN title.
+   Slow vertical drift + soft opacity breath. GPU-only (transform + opacity).
+   Each speck uses its own animation-delay/duration set inline so the field
+   never pulses in lockstep. Hidden under prefers-reduced-motion. */
+@keyframes shop-hero-drift-anim {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+    opacity: 0;
+  }
+
+  15% {
+    opacity: 0.85;
+  }
+
+  50% {
+    transform: translate3d(0, -18px, 0) scale(1.05);
+    opacity: 1;
+  }
+
+  85% {
+    opacity: 0.7;
+  }
+
+  100% {
+    transform: translate3d(0, -36px, 0) scale(0.95);
+    opacity: 0;
+  }
+}
+
+.shop-hero-drift {
+  will-change: transform, opacity;
+  animation-name: shop-hero-drift-anim;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+}
+
+/* Balance pill skeleton — flash-of-zero gate while stats/user resolve.
+   A subtle gold-tinted shimmer; tiny so it doesn't read as a heavy loader. */
+@keyframes shop-balance-skeleton-anim {
+  0% {
+    background-position: -120px 0;
+  }
+
+  100% {
+    background-position: 120px 0;
+  }
+}
+
+.shop-balance-skeleton {
+  background: linear-gradient(90deg,
+      rgba(255, 215, 0, 0.06) 0%,
+      rgba(255, 215, 0, 0.18) 50%,
+      rgba(255, 215, 0, 0.06) 100%);
+  background-size: 240px 100%;
+  animation: shop-balance-skeleton-anim 1.4s linear infinite;
+}
+
 /* Rarity glows */
 @keyframes shop-glow-common-anim {
 
@@ -3618,6 +3675,8 @@ html.light .space-bg-container { display: none; }
   .shop-legendary-border,
   .shop-tier-sweep-legendary,
   .shop-tier-sweep-legendary::after,
+  .shop-hero-drift,
+  .shop-balance-skeleton,
   .booster-active,
   .shop-title-glow-premium,
   .shop-legendary-border-premium,

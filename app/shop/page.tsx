@@ -181,7 +181,7 @@ const BOOSTER_ITEMS: ShopItem[] = [
   { id: "boost_double_down", name: "Double Down", description: "Double coins AND XP on next quiz", type: "booster", rarity: "epic", price: 200, Icon: DiceFive, iconWeight: "regular", iconColor: "#A855F7", boosterEffect: "coin_multiplier", boosterValue: 2, boosterDuration: 1 },
   { id: "boost_lucky_start", name: "Lucky Start", description: "First question auto-correct", type: "booster", rarity: "rare", price: 100, Icon: Leaf, iconWeight: "fill", iconColor: "#22C55E", boosterEffect: "auto_correct", boosterValue: 1, boosterDuration: 1 },
   { id: "boost_time_warp", name: "Time Warp", description: "+10 seconds per question", type: "booster", rarity: "common", price: 40, Icon: CircleNotch, iconWeight: "bold", iconColor: "#94A3B8", boosterEffect: "extra_time", boosterValue: 10, boosterDuration: 1 },
-  { id: "boost_brain_freeze", name: "Brain Freeze", description: "50/50 — eliminate two wrong answers once", type: "booster", rarity: "epic", price: 125, Icon: Snowflake, iconWeight: "regular", iconColor: "#7DD3FC", boosterEffect: "fifty_fifty", boosterValue: 1, boosterDuration: 1 },
+  { id: "boost_brain_freeze", name: "Brain Freeze", description: "50/50. Eliminate two wrong answers once.", type: "booster", rarity: "epic", price: 125, Icon: Snowflake, iconWeight: "regular", iconColor: "#7DD3FC", boosterEffect: "fifty_fifty", boosterValue: 1, boosterDuration: 1 },
   { id: "boost_score_boost", name: "Score Boost", description: "+1 added to your final score", type: "booster", rarity: "common", price: 50, Icon: TrendUp, iconWeight: "regular", iconColor: "#94A3B8", boosterEffect: "score_boost", boosterValue: 1, boosterDuration: 1 },
 ];
 
@@ -321,6 +321,53 @@ function getWeeklyCountdown() {
   return { days: Math.floor(diff / 86400000), hours: Math.floor((diff % 86400000) / 3600000) };
 }
 
+// ── Hero gold-drift particles ──
+// Deterministic positions (no Math.random at render) so SSR + first client
+// paint match. GPU-only (transform + opacity), respects prefers-reduced-motion
+// via the .shop-hero-drift class in globals.css. 9 specks total — enough to
+// feel alive, light enough to ignore on dial-up.
+const HERO_DRIFT_SPECKS: Array<{ left: string; top: string; size: number; delay: string; duration: string; tone: "gold" | "purple" | "electric" }> = [
+  { left: "6%",  top: "18%", size: 4, delay: "0s",   duration: "11s", tone: "gold" },
+  { left: "14%", top: "62%", size: 3, delay: "1.3s", duration: "13s", tone: "purple" },
+  { left: "22%", top: "32%", size: 5, delay: "2.7s", duration: "10s", tone: "gold" },
+  { left: "36%", top: "78%", size: 3, delay: "0.6s", duration: "12s", tone: "electric" },
+  { left: "48%", top: "22%", size: 4, delay: "3.4s", duration: "14s", tone: "gold" },
+  { left: "62%", top: "70%", size: 3, delay: "1.9s", duration: "11s", tone: "purple" },
+  { left: "74%", top: "30%", size: 5, delay: "2.2s", duration: "13s", tone: "gold" },
+  { left: "84%", top: "60%", size: 4, delay: "0.9s", duration: "12s", tone: "electric" },
+  { left: "92%", top: "26%", size: 3, delay: "3.0s", duration: "10s", tone: "gold" },
+];
+function HeroGoldDrift() {
+  return (
+    <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
+      {HERO_DRIFT_SPECKS.map((s, i) => {
+        const color = s.tone === "gold" ? "#FFD700" : s.tone === "purple" ? "#A855F7" : "#4A90D9";
+        const glow = s.tone === "gold"
+          ? "0 0 6px rgba(255,215,0,0.85), 0 0 12px rgba(255,215,0,0.45)"
+          : s.tone === "purple"
+            ? "0 0 6px rgba(168,85,247,0.75), 0 0 12px rgba(168,85,247,0.35)"
+            : "0 0 6px rgba(74,144,217,0.75), 0 0 12px rgba(74,144,217,0.35)";
+        return (
+          <span
+            key={i}
+            className="absolute rounded-full shop-hero-drift"
+            style={{
+              left: s.left,
+              top: s.top,
+              width: `${s.size}px`,
+              height: `${s.size}px`,
+              background: color,
+              boxShadow: glow,
+              animationDelay: s.delay,
+              animationDuration: s.duration,
+            }}
+          />
+        );
+      })}
+    </div>
+  );
+}
+
 // ── Purchase particle burst ──
 function PurchaseBurst({ onDone }: { onDone: () => void }) {
   useEffect(() => { const t = setTimeout(onDone, 1200); return () => clearTimeout(t); }, [onDone]);
@@ -370,7 +417,7 @@ function ConfirmModal({ item, quantity, onConfirm, onCancel, userCoins }: {
           <span className="font-bebas text-3xl text-gold">{formatCoins(totalPrice)}</span>
           {quantity > 1 && <span className="text-cream/60 text-sm ml-1">(x{quantity})</span>}
         </div>
-        {!canAfford && <p className="text-red-400 text-xs text-center mb-4 font-semibold">Not enough coins — you need {formatCoins(totalPrice - userCoins)} more</p>}
+        {!canAfford && <p className="text-red-400 text-xs text-center mb-4 font-semibold">Not enough Fangs. You need {formatCoins(totalPrice - userCoins)} more.</p>}
         <div className="flex gap-3">
           <button onClick={onCancel} className="flex-1 py-3 rounded-xl border border-electric/20 text-cream/60 text-sm font-bold hover:bg-white/5 transition-all">Cancel</button>
           <button onClick={onConfirm} disabled={!canAfford}
@@ -1029,6 +1076,11 @@ export default function ShopPage() {
   );
 
   const userCoins = stats?.coins ?? user?.coins ?? 0;
+  // Flash-of-zero gate (CLAUDE.md non-negotiable): the header balance pill
+  // must not render "0" before stats/user resolve. Once either source has
+  // delivered a number we lock the display in; downstream affordances
+  // (canAfford / Buy disabled) keep using userCoins so the math stays honest.
+  const balanceKnown = typeof stats?.coins === "number" || typeof user?.coins === "number";
   const countdown = getWeeklyCountdown();
   const ownedIds = new Set(inventory.map((i) => i.itemId));
   const getOwned = (id: string) => inventory.find((i) => i.itemId === id);
@@ -1160,8 +1212,10 @@ export default function ShopPage() {
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
         {/* ── Header ── */}
-        <div className={`text-center mb-6 transition-all duration-700 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`}>
-          <div className="flex items-center justify-center gap-3 mb-2">
+        <div className={`relative text-center mb-6 transition-all duration-700 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`}>
+          {/* Gold-particle drift behind the title — sits below content via z-0 */}
+          {!isPremium && mounted && <HeroGoldDrift />}
+          <div className="relative z-[1] flex items-center justify-center gap-3 mb-2">
             <span className="flex items-center sm:hidden">
               {isPremium
                 ? <Diamond size={40} weight="fill" color="#A855F7" aria-hidden="true" />
@@ -1186,12 +1240,12 @@ export default function ShopPage() {
                 : <PawPrint size={52} weight="fill" color="#FFD700" aria-hidden="true" />}
             </span>
           </div>
-          <p className={`text-sm font-semibold tracking-widest uppercase ${isPremium ? "text-purple-400/60" : "text-cream/60"}`}>
+          <p className={`relative z-[1] text-sm font-semibold tracking-widest uppercase ${isPremium ? "text-purple-400/60" : "text-cream/60"}`}>
             {isPremium ? "Premium Collection" : "Premium Item Shop"}
           </p>
 
           {/* Coin balance (coin store) / info (premium) */}
-          <div className={`inline-flex items-center gap-2 mt-4 px-5 py-2 rounded-full transition-all duration-300 ${isPremium
+          <div className={`relative z-[1] inline-flex items-center gap-2 mt-4 px-5 py-2 rounded-full transition-all duration-300 ${isPremium
             ? "border border-purple-500/20"
             : ""}`}
             style={isPremium
@@ -1205,8 +1259,12 @@ export default function ShopPage() {
             ) : (
               <>
                 <img src={cdnUrl("/F.png")} alt="Fangs" className="w-8 h-8 object-contain" />
-                <span className="font-bebas text-3xl text-gold tracking-wider">{formatCoins(userCoins)}</span>
-                <span className="text-cream/55 text-xs ml-1">coins</span>
+                {balanceKnown ? (
+                  <span className="font-bebas text-3xl text-gold tracking-wider">{formatCoins(userCoins)}</span>
+                ) : (
+                  <span aria-hidden="true" className="inline-block w-16 h-7 rounded-md shop-balance-skeleton" />
+                )}
+                <span className="text-cream/55 text-xs ml-1">Fangs</span>
               </>
             )}
           </div>
@@ -1418,7 +1476,7 @@ export default function ShopPage() {
             {/* Coming soon banner */}
             <div className="shop-banner text-center mb-8 py-4 px-6 rounded-2xl mx-auto max-w-lg"
               style={{ background: "linear-gradient(135deg, rgba(168,85,247,0.08), rgba(124,58,237,0.04))", border: "1px solid rgba(168,85,247,0.15)" }}>
-              <p className="text-purple-300 text-sm font-semibold mb-1">Premium store launching soon — stay tuned</p>
+              <p className="text-purple-300 text-sm font-semibold mb-1">Premium store launching soon. Stay tuned.</p>
               <p className="text-purple-400/40 text-xs">Exclusive items purchasable with real money via Stripe</p>
             </div>
 
@@ -1460,7 +1518,7 @@ export default function ShopPage() {
                     <div className="flex items-center justify-between mb-2">
                       <div>
                         <p className="font-bebas text-xl text-cream tracking-wider">Savanna</p>
-                        <p className="text-purple-400/60 text-xs">Wild & golden — warm light theme</p>
+                        <p className="text-purple-400/60 text-xs">Wild and golden. Warm light theme.</p>
                       </div>
                       <span className="text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-400 border border-purple-500/30">
                         Epic
@@ -1546,7 +1604,7 @@ export default function ShopPage() {
                       <div className="flex items-center justify-between mt-auto pt-2 gap-3">
                         <div className="flex items-center gap-1.5">
                           <img src={cdnUrl("/F.png")} alt="Fangs" className="w-5 h-5 object-contain" />
-                          <span className="font-bebas text-base text-gold">200&ndash;400</span>
+                          <span className="font-bebas text-base text-gold">200 to 400</span>
                         </div>
                         <a href="#avatar-auras" className="px-3 py-1.5 rounded-lg text-xs font-bold border border-purple-500/40 text-purple-300 hover:bg-purple-500/10 transition-all">Browse</a>
                       </div>
