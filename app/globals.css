@@ -16,9 +16,29 @@ html {
   }
 }
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   Motion palette (source of truth — 2026-06-06)
+   ───────────────────────────────────────────────────────────────────────────
+   Durations:
+     short   180ms  → hover, press, tiny state flips
+     medium  240ms  → entrance, transitions between views
+     long    360ms  → celebration, confirmation, "you won" moments
+   Easing:
+     --ease-out-emil: cubic-bezier(0.16, 1, 0.3, 1)   → snappy outs, default
+     --ease-in-out-soft: cubic-bezier(0.4, 0, 0.2, 1)  → material-style two-way
+   Hard rules: GPU only (transform/opacity/filter/box-shadow). Every
+   keyframe respects prefers-reduced-motion. No layout properties animated.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
 :root {
   --font-bebas: 'Bebas Neue', sans-serif;
   --font-syne: 'Syne', sans-serif;
+
+  /* Motion palette tokens (use these for new transitions). */
+  --motion-short: 180ms;
+  --motion-medium: 240ms;
+  --motion-long: 360ms;
+  --ease-in-out-soft: cubic-bezier(0.4, 0, 0.2, 1);
 
   /* ── Theme variables (dark defaults) ── */
   --bg-page: #04080F;
@@ -291,11 +311,12 @@ body {
   content: '';
   position: absolute;
   top: 0;
-  left: -100%;
+  left: 0;
   width: 60%;
   height: 100%;
   background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.35), transparent);
   animation: gold-shine 2.5s ease-in-out infinite;
+  will-change: transform;
 }
 
 @keyframes gold-shift {
@@ -311,13 +332,15 @@ body {
 }
 
 @keyframes gold-shine {
+  /* GPU-only: transform instead of left positioning. The ::after layer is
+     pinned to left: 0 with width 60% inside an overflow-hidden parent. */
   0% {
-    left: -100%;
+    transform: translateX(-166%); /* -100% / 60% of width */
   }
 
   60%,
   100% {
-    left: 120%;
+    transform: translateX(200%); /* 120% / 60% */
   }
 }
 
@@ -544,6 +567,12 @@ body {
 
 .ticker-track {
   animation: ticker-scroll 20s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ticker-track {
+    animation: none;
+  }
 }
 
 /* Coming Soon page animations */
@@ -1143,12 +1172,14 @@ body {
 
 /* ── Gold shimmer on prize pool ── */
 @keyframes gold-shimmer-sweep {
+  /* GPU-only: transform instead of left. Pseudo is left:0, width:30% in an
+     overflow-hidden parent; -133% offset == old "left: -40%". skew preserved. */
   0% {
-    left: -40%;
+    transform: translateX(-133%) skewX(-20deg);
   }
 
   100% {
-    left: 140%;
+    transform: translateX(467%) skewX(-20deg);
   }
 }
 
@@ -1162,13 +1193,14 @@ body {
   content: '';
   position: absolute;
   top: 0;
-  left: -40%;
+  left: 0;
   width: 30%;
   height: 100%;
   background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
-  transform: skewX(-20deg);
+  /* skew + translate live together in the keyframe so we stay transform-only. */
   animation: gold-shimmer-sweep 3s ease-in-out infinite;
   pointer-events: none;
+  will-change: transform;
 }
 
 /* ── Gold floating particles ── */
@@ -1241,12 +1273,14 @@ body {
 
 /* ── Energy flow line connecting hex stats ── */
 @keyframes energy-particle-flow {
+  /* GPU-only. Pseudo lives inside .energy-line (48px wide), positioned at
+     left: 0; we translate by parent-width + a bit on each side. */
   0% {
-    left: -12px;
+    transform: translateX(-12px);
   }
 
   100% {
-    left: calc(100% + 12px);
+    transform: translateX(60px); /* 48px parent + 12px past edge */
   }
 }
 
@@ -1267,18 +1301,21 @@ body {
   content: '';
   position: absolute;
   top: -3px;
+  left: 0;
   width: 14px;
   height: 8px;
   border-radius: 4px;
   background: #fff;
   box-shadow: 0 0 8px #FFD700, 0 0 16px #FFD700, 0 0 28px rgba(255, 215, 0, 0.5);
   animation: energy-particle-flow 1.5s linear infinite;
+  will-change: transform;
 }
 
 .energy-line-active::before {
   content: '';
   position: absolute;
   top: -2px;
+  left: 0;
   width: 10px;
   height: 6px;
   border-radius: 3px;
@@ -1286,6 +1323,7 @@ body {
   box-shadow: 0 0 6px #FFD700, 0 0 12px #FFD700;
   animation: energy-particle-flow 1.5s linear infinite;
   animation-delay: -0.75s;
+  will-change: transform;
 }
 
 .energy-line-dim {
@@ -1555,8 +1593,9 @@ body {
 
 /* ── Tier bar shine sweep (full width, fades near end) ── */
 @keyframes tier-bar-sweep {
+  /* GPU-only. width 25%, base left: 0. -20%/25% = -80%, 90%/25% = 360%. */
   0% {
-    left: -20%;
+    transform: translateX(-80%);
     opacity: 0;
   }
 
@@ -1569,12 +1608,12 @@ body {
   }
 
   15% {
-    left: 90%;
+    transform: translateX(360%);
     opacity: 0;
   }
 
   100% {
-    left: 90%;
+    transform: translateX(360%);
     opacity: 0;
   }
 }
@@ -1584,10 +1623,11 @@ body {
   top: 0;
   bottom: 0;
   width: 25%;
-  left: -20%;
+  left: 0;
   opacity: 0;
   background: linear-gradient(90deg, transparent 0%, var(--shine-color, #FFD700)15 30%, var(--shine-color, #FFD700)30 50%, var(--shine-color, #FFD700)15 70%, transparent 100%);
   animation: tier-bar-sweep 13s ease-in-out infinite;
+  will-change: transform;
   pointer-events: none;
   z-index: 5;
   border-radius: inherit;
@@ -2256,13 +2296,18 @@ body {
 }
 
 @keyframes timeline-dot-travel {
-  0%, 100% { left: 0; }
-  50%      { left: calc(100% - 6px); }
+  /* GPU-only. translate-y stays at -50% to preserve vertical centering;
+     translate-x sweeps 0 -> calc(parent-width - dot-width). The parent
+     track is small (a games preview) so calc(100% * 0 .. 1) via CSS vars
+     would be overkill — we use a fixed pixel sweep tuned to the preview. */
+  0%, 100% { transform: translate(0, -50%); }
+  50%      { transform: translate(calc(80px - 6px), -50%); }
 }
 
 .timeline-mini-dot {
   position: absolute;
   top: 50%;
+  left: 0;
   width: 6px;
   height: 6px;
   border-radius: 50%;
@@ -2270,6 +2315,7 @@ body {
   box-shadow: 0 0 10px rgba(0, 200, 81, 0.8);
   transform: translateY(-50%);
   animation: timeline-dot-travel 3s var(--ease-out-emil) infinite;
+  will-change: transform;
 }
 
 .party-mini {
@@ -3829,12 +3875,13 @@ html.light .space-bg-container { display: none; }
   content: '';
   position: absolute;
   top: 0;
-  left: -100%;
+  left: 0;
   width: 55%;
   height: 100%;
   background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.45), transparent);
   animation: clock-in-shine 3.2s ease-in-out infinite;
   z-index: -1;
+  will-change: transform;
 }
 
 .clock-in-btn:hover {
@@ -3893,8 +3940,9 @@ html.light .space-bg-container { display: none; }
 }
 
 @keyframes clock-in-shine {
-  0%       { left: -100%; }
-  60%, 100% { left: 160%; }
+  /* GPU-only. Pseudo width is 55%, so -100% / 55% = -182%, 160% / 55% = 291%. */
+  0%        { transform: translateX(-182%); }
+  60%, 100% { transform: translateX(291%); }
 }
 
 @media (prefers-reduced-motion: reduce) {
