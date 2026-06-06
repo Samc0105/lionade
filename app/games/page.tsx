@@ -7,6 +7,7 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import AmbientOrbs from "@/components/AmbientOrbs";
 import RevealText from "@/components/RevealText";
 import Confetti from "@/components/Confetti";
+import CountUp from "@/components/CountUp";
 import { useAuth } from "@/lib/auth";
 import { useUserStats, mutateUserStats } from "@/lib/hooks";
 import { cdnUrl } from "@/lib/cdn";
@@ -157,6 +158,56 @@ function recordRoardleResult(won: boolean, tries: number) {
     totalTries: cur.totalTries + (won ? tries : 0),
   };
   try { localStorage.setItem(ROARDLE_STATS_KEY, JSON.stringify(next)); } catch { /* quota */ }
+}
+
+// ── Timeline lifetime stats ─────────────────────────────────────────────────
+interface TimelineStats { played: number; perfect: number }
+const TIMELINE_STATS_KEY = "lionade_timeline_stats";
+function getTimelineStats(): TimelineStats {
+  if (typeof window === "undefined") return { played: 0, perfect: 0 };
+  try {
+    const raw = localStorage.getItem(TIMELINE_STATS_KEY);
+    if (!raw) return { played: 0, perfect: 0 };
+    const p = JSON.parse(raw);
+    return {
+      played: Math.max(0, parseInt(String(p.played)) || 0),
+      perfect: Math.max(0, parseInt(String(p.perfect)) || 0),
+    };
+  } catch { return { played: 0, perfect: 0 }; }
+}
+function recordTimelineResult(score: number, total: number) {
+  if (typeof window === "undefined") return;
+  const cur = getTimelineStats();
+  const next: TimelineStats = {
+    played: cur.played + 1,
+    perfect: cur.perfect + (score === total && total > 0 ? 1 : 0),
+  };
+  try { localStorage.setItem(TIMELINE_STATS_KEY, JSON.stringify(next)); } catch { /* quota */ }
+}
+
+// ── Flashcards lifetime stats ───────────────────────────────────────────────
+interface FlashcardsStats { totalKnown: number; sessions: number }
+const FLASHCARDS_STATS_KEY = "lionade_flashcards_stats";
+function getFlashcardsStats(): FlashcardsStats {
+  if (typeof window === "undefined") return { totalKnown: 0, sessions: 0 };
+  try {
+    const raw = localStorage.getItem(FLASHCARDS_STATS_KEY);
+    if (!raw) return { totalKnown: 0, sessions: 0 };
+    const p = JSON.parse(raw);
+    return {
+      totalKnown: Math.max(0, parseInt(String(p.totalKnown)) || 0),
+      sessions: Math.max(0, parseInt(String(p.sessions)) || 0),
+    };
+  } catch { return { totalKnown: 0, sessions: 0 }; }
+}
+function recordFlashcardsResult(knew: number) {
+  if (typeof window === "undefined") return;
+  const cur = getFlashcardsStats();
+  const next: FlashcardsStats = {
+    totalKnown: cur.totalKnown + knew,
+    sessions: cur.sessions + 1,
+  };
+  try { localStorage.setItem(FLASHCARDS_STATS_KEY, JSON.stringify(next)); } catch { /* quota */ }
 }
 
 // ── Component ────────────────────────────────────────────────
@@ -522,9 +573,11 @@ export default function GamesPage() {
       setFcOver(true);
       // Guard divide-by-zero defensively (startFlashcards refuses empty decks
       // upstream, but this keeps Math.round(NaN * 15) out of awardFangs forever).
-      const pct = fcCards.length > 0 ? (fcKnew + (knew ? 1 : 0)) / fcCards.length : 0;
+      const finalKnew = fcKnew + (knew ? 1 : 0);
+      const pct = fcCards.length > 0 ? finalKnew / fcCards.length : 0;
       const fangs = Math.round(pct * 15);
       if (fangs > 0) awardFangs(fangs, "flashcards");
+      recordFlashcardsResult(finalKnew);
     }
   }, [fcIdx, fcCards, fcKnew, awardFangs]);
 
@@ -553,6 +606,7 @@ export default function GamesPage() {
     setTlScore(correct);
     setTlSubmitted(true);
     if (correct > 0) awardFangs(correct * 3, "timeline");
+    recordTimelineResult(correct, tlEvents.length);
   }, [tlEvents, tlOrder, awardFangs]);
 
   const moveTimelineItem = useCallback((from: number, to: number) => {
@@ -886,20 +940,53 @@ export default function GamesPage() {
                   </div>
                 )}
               </>
-            ) : (
-              <div className="text-center animate-slide-up">
-                <h2 className="font-bebas text-4xl text-cream tracking-wider mb-2">COMPLETE!</h2>
-                <p className="font-bebas text-6xl text-gold mb-1">{fcCards.length > 0 ? Math.round((fcKnew / fcCards.length) * 100) : 0}%</p>
-                <p className="text-cream/40 text-sm mb-4">{fcKnew} / {fcCards.length} known</p>
-                {fangsEarned !== null && (
-                  <div className="flex items-center justify-center gap-1.5 mb-6">
-                    <img src={cdnUrl("/F.png")} alt="Fangs" className="w-5 h-5 object-contain" />
-                    <span className="font-bebas text-xl text-gold">+{fangsEarned}</span>
-                  </div>
-                )}
-                <button onClick={backToMenu} className="btn-gold px-6 py-2 rounded-lg text-sm">Back to Games</button>
-              </div>
-            )}
+            ) : (() => {
+              const pct = fcCards.length > 0 ? Math.round((fcKnew / fcCards.length) * 100) : 0;
+              const isMastered = pct === 100;
+              const isStrong = pct >= 75 && !isMastered;
+              const shouldConfetti = !reduced && (isMastered || isStrong);
+              const palette = isMastered
+                ? ["#FFD700", "#FDE68A", "#FFFFFF", "#9B59B6"]
+                : ["#FFD700", "#FDE68A", "#9B59B6"];
+              const headline = isMastered ? "MASTERED ALL" : isStrong ? "STRONG RECALL" : pct >= 50 ? "DECENT RECALL" : "ROOM TO GROW";
+              const headlineColor = isMastered ? "#FFD700" : isStrong ? "#FDE68A" : pct >= 50 ? "#A78BFA" : "rgba(238,244,255,0.55)";
+              return (
+                <div className="text-center animate-slide-up">
+                  {shouldConfetti && (
+                    <Confetti
+                      trigger={true}
+                      count={isMastered ? 110 : 70}
+                      origin="top"
+                      duration={isMastered ? 2800 : 2100}
+                      palette={palette}
+                    />
+                  )}
+                  <h2 className="font-bebas text-4xl text-cream tracking-wider mb-2">
+                    <RevealText text="COMPLETE!" color="#EEF4FF" charDelay={0.06} />
+                  </h2>
+                  <p className="font-bebas text-base tracking-[0.2em] mb-2">
+                    <RevealText
+                      text={headline}
+                      color={headlineColor}
+                      glow={isMastered ? "0 0 8px rgba(255,215,0,0.55)" : ""}
+                      delay={0.4}
+                      charDelay={0.045}
+                    />
+                  </p>
+                  <p className="font-bebas text-6xl text-gold mb-1 tabular-nums">
+                    <CountUp value={pct} duration={900} withDigitReveal /><span>%</span>
+                  </p>
+                  <p className="text-cream/40 text-sm mb-4">{fcKnew} / {fcCards.length} known</p>
+                  {fangsEarned !== null && (
+                    <div className="flex items-center justify-center gap-1.5 mb-6">
+                      <img src={cdnUrl("/F.png")} alt="Fangs" className="w-5 h-5 object-contain" />
+                      <span className="font-bebas text-xl text-gold">+{fangsEarned}</span>
+                    </div>
+                  )}
+                  <button onClick={backToMenu} className="btn-gold px-6 py-2 rounded-lg text-sm">Back to Games</button>
+                </div>
+              );
+            })()}
           </div>
         </div>
       </ProtectedRoute>
@@ -1336,6 +1423,57 @@ export default function GamesPage() {
               <div className="games-ticket-perf" aria-hidden="true" />
             </div>
           )}
+
+          {/* ═══ CROSS-GAME STATS STRIP ═══
+              Reads localStorage stats from Roardle, Timeline, Flashcards.
+              Hidden until at least one game has been played so a cold-start
+              user doesn't see a strip of zeros. Single line, mono lowercase
+              uppercase mix to read as a ledger entry, not a leaderboard. */}
+          {(() => {
+            const r = getRoardleStats();
+            const tl = getTimelineStats();
+            const fc = getFlashcardsStats();
+            if (r.played === 0 && tl.played === 0 && fc.sessions === 0) return null;
+            return (
+              <div
+                className="mb-4 rounded-[6px] flex flex-wrap items-center gap-x-5 gap-y-1 px-4 py-2 animate-slide-up"
+                style={{
+                  animationDelay: "0.04s",
+                  background: "linear-gradient(90deg, rgba(255,215,0,0.04) 0%, rgba(12,10,20,0.45) 60%)",
+                  border: "1px solid rgba(255,215,0,0.10)",
+                }}
+              >
+                <span className="font-mono text-[9px] uppercase tracking-[0.22em] text-cream/35">your runs</span>
+                {r.played > 0 && (
+                  <span className="font-mono text-[10px] tracking-[0.18em] text-cream/65">
+                    <span className="text-cream/35">roardle </span>
+                    <span className="tabular-nums">{r.played}</span>
+                    <span className="text-cream/35"> · </span>
+                    <span className="tabular-nums">{Math.round((r.won / r.played) * 100)}%</span>
+                  </span>
+                )}
+                {tl.played > 0 && (
+                  <span className="font-mono text-[10px] tracking-[0.18em] text-cream/65">
+                    <span className="text-cream/35">timeline </span>
+                    <span className="tabular-nums">{tl.played}</span>
+                    {tl.perfect > 0 && (
+                      <>
+                        <span className="text-cream/35"> · </span>
+                        <span className="tabular-nums text-gold/75">{tl.perfect} perfect</span>
+                      </>
+                    )}
+                  </span>
+                )}
+                {fc.sessions > 0 && (
+                  <span className="font-mono text-[10px] tracking-[0.18em] text-cream/65">
+                    <span className="text-cream/35">flashcards </span>
+                    <span className="tabular-nums">{fc.totalKnown}</span>
+                    <span className="text-cream/35"> known</span>
+                  </span>
+                )}
+              </div>
+            );
+          })()}
 
           {/* ═══ TABS ═══ */}
           <div className="flex justify-center gap-2 mb-8 animate-slide-up" style={{ animationDelay: "0.05s" }}>
