@@ -277,11 +277,20 @@ export default function RoadMapPage() {
     return (
       <ProtectedRoute>
         <div className="min-h-screen pt-16 pb-20 flex items-center justify-center">
-          <div className="text-center">
-            <p className="text-cream/60 font-syne text-lg">Subject not found</p>
+          <div className="text-center px-4">
+            <p className="text-5xl mb-4" aria-hidden="true">🧭</p>
+            <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-gold/70 mb-2">
+              unknown subject
+            </p>
+            <h1 className="font-bebas text-3xl text-cream tracking-[0.08em] leading-none mb-3">
+              SUBJECT NOT FOUND
+            </h1>
+            <p className="text-cream/45 text-sm font-syne max-w-xs mx-auto mb-6 leading-relaxed">
+              That path doesn&apos;t exist yet. Head back and pick another subject.
+            </p>
             <button
               onClick={() => router.push("/learn/paths")}
-              className="btn-primary mt-4 px-6 py-2"
+              className="btn-primary px-6 py-2.5 font-syne font-semibold"
             >
               Back to Subjects
             </button>
@@ -307,23 +316,40 @@ export default function RoadMapPage() {
 
               {/* Header */}
               <div className="text-center mb-6 animate-slide-up">
-                <span className="text-5xl block mb-2 flex justify-center" style={{ color: meta.color }}>
-                  {(() => { const IconComp = meta.icon; return <IconComp size={52} weight="regular" aria-hidden="true" color="currentColor" />; })()}
+                <span
+                  className="mb-3 inline-flex w-16 h-16 items-center justify-center rounded-2xl"
+                  style={{ background: `${meta.color}18`, color: meta.color, border: `1px solid ${meta.color}35` }}
+                >
+                  {(() => { const IconComp = meta.icon; return <IconComp size={36} weight="regular" aria-hidden="true" color="currentColor" />; })()}
                 </span>
+                <p className="font-mono text-[10px] uppercase tracking-[0.3em] mb-2" style={{ color: `${meta.color}AA` }}>
+                  subject path
+                </p>
                 <h1
-                  className="font-bebas text-5xl sm:text-6xl tracking-wider"
+                  className="font-bebas text-5xl sm:text-6xl tracking-[0.08em] leading-none"
                   style={{ color: meta.color }}
                 >
                   {meta.label}
                 </h1>
-                <p className="text-cream/40 text-sm font-syne mt-1">
-                  {completedCount}/{totalCount} stages complete
-                  {totalStars > 0 && (
-                    <span className="ml-2 text-gold">
-                      {totalStars} ★
+                {totalCount > 0 && (
+                  <div className="mt-4 inline-flex items-center gap-3 font-mono text-[10px] uppercase tracking-[0.22em]">
+                    <span className="text-cream/55">
+                      <span className="text-cream/85 tabular-nums">{completedCount}</span>
+                      <span className="text-cream/35">/</span>
+                      <span className="text-cream/85 tabular-nums">{totalCount}</span>
+                      <span className="ml-1.5 text-cream/40">stages cleared</span>
                     </span>
-                  )}
-                </p>
+                    {totalStars > 0 && (
+                      <>
+                        <span className="text-cream/20">/</span>
+                        <span className="inline-flex items-center gap-1.5 text-gold/85">
+                          <span className="tabular-nums">{totalStars}</span>
+                          <span className="text-gold/55">stars</span>
+                        </span>
+                      </>
+                    )}
+                  </div>
+                )}
               </div>
 
               {/* Progress bar */}
@@ -332,7 +358,7 @@ export default function RoadMapPage() {
                 style={{ animationDelay: "0.05s" }}
               >
                 <div
-                  className="w-full h-3 rounded-full overflow-hidden"
+                  className="w-full h-2.5 rounded-full overflow-hidden"
                   style={{
                     background: "var(--progress-track)",
                     border: "1px solid var(--progress-track-border)",
@@ -342,7 +368,10 @@ export default function RoadMapPage() {
                     className="h-full rounded-full transition-all duration-700"
                     style={{
                       width: `${totalCount > 0 ? (completedCount / totalCount) * 100 : 0}%`,
-                      background: `linear-gradient(90deg, ${meta.color}80, ${meta.color})`,
+                      background:
+                        totalCount > 0 && completedCount === totalCount
+                          ? `linear-gradient(90deg, ${meta.color}, #FFD700)`
+                          : `linear-gradient(90deg, ${meta.color}80, ${meta.color})`,
                     }}
                   />
                 </div>
@@ -438,7 +467,20 @@ export default function RoadMapPage() {
                         {/* Content */}
                         <div className="flex-1 min-w-0">
                           <p
-                            className="font-bebas text-lg sm:text-xl tracking-wider truncate"
+                            className="font-mono text-[9px] uppercase tracking-[0.25em] mb-0.5"
+                            style={{
+                              color:
+                                stage.status === "completed"
+                                  ? `${meta.color}AA`
+                                  : stage.status === "available"
+                                  ? "#FFD700AA"
+                                  : "rgba(255,255,255,0.25)",
+                            }}
+                          >
+                            stage {stage.stage_number}
+                          </p>
+                          <p
+                            className="font-bebas text-lg sm:text-xl tracking-[0.06em] truncate leading-tight"
                             style={{
                               color:
                                 stage.status === "completed"
@@ -450,7 +492,7 @@ export default function RoadMapPage() {
                           >
                             {stage.stage_name}
                           </p>
-                          <p className="text-cream/30 text-xs font-syne truncate">
+                          <p className="text-cream/35 text-xs font-syne truncate mt-0.5">
                             {stage.stage_description}
                           </p>
                         </div>
@@ -458,13 +500,14 @@ export default function RoadMapPage() {
                         {/* Stars or status */}
                         <div className="flex-shrink-0 text-right">
                           {stage.status === "completed" && stage.stars > 0 ? (
-                            <div className="flex gap-0.5">
+                            <div className="flex gap-0.5" aria-label={`${stage.stars} of 3 stars`}>
                               {[1, 2, 3].map((s) => (
                                 <span
                                   key={s}
-                                  className="text-lg"
+                                  className="text-lg leading-none"
                                   style={{
                                     color: s <= stage.stars ? "#FFD700" : "rgba(255,255,255,0.15)",
+                                    filter: s <= stage.stars ? "drop-shadow(0 0 4px #FFD70035)" : "none",
                                   }}
                                 >
                                   ★
@@ -473,14 +516,15 @@ export default function RoadMapPage() {
                             </div>
                           ) : stage.status === "available" ? (
                             <span
-                              className="text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded-full"
+                              className="inline-flex items-center gap-1 font-mono text-[10px] font-bold uppercase tracking-[0.2em] px-2.5 py-1 rounded-full"
                               style={{
                                 background: "#FFD70020",
                                 color: "#FFD700",
                                 border: "1px solid #FFD70040",
                               }}
                             >
-                              Start
+                              start
+                              <span aria-hidden="true">&rarr;</span>
                             </span>
                           ) : null}
                         </div>
@@ -497,50 +541,76 @@ export default function RoadMapPage() {
             <div className="animate-slide-up">
               <button
                 onClick={backToMap}
-                className="flex items-center gap-1.5 text-cream/40 hover:text-cream/70 text-sm font-syne transition-colors mb-6"
+                className="group inline-flex items-center gap-2 text-cream/45 hover:text-cream/80 font-mono text-[10px] uppercase tracking-[0.25em] transition-colors mb-6"
               >
-                <span className="text-base leading-none">&larr;</span>
-                <span>Back to Map</span>
+                <span className="text-sm leading-none -translate-x-0 group-hover:-translate-x-0.5 transition-transform duration-200" aria-hidden="true">&larr;</span>
+                <span>back to map</span>
               </button>
 
               <div className="text-center mb-8">
-                <p className="text-cream/40 text-xs uppercase tracking-widest font-syne mb-2">
-                  Stage {activeStage.stage_number} of {activeStage.total_stages}
+                <p
+                  className="font-mono text-[10px] uppercase tracking-[0.3em] mb-2"
+                  style={{ color: `${meta.color}AA` }}
+                >
+                  stage <span className="tabular-nums">{activeStage.stage_number}</span>
+                  <span className="text-cream/30"> / </span>
+                  <span className="tabular-nums">{activeStage.total_stages}</span>
                 </p>
                 <h1
-                  className="font-bebas text-4xl sm:text-5xl tracking-wider"
+                  className="font-bebas text-4xl sm:text-5xl tracking-[0.08em] leading-none"
                   style={{ color: meta.color }}
                 >
                   {activeStage.stage_name}
                 </h1>
-                <p className="text-cream/40 text-sm font-syne mt-1">
+                <p className="text-cream/45 text-sm font-syne mt-3 max-w-md mx-auto leading-relaxed">
                   {activeStage.stage_description}
                 </p>
               </div>
 
               {/* Lesson card */}
               <div
-                className="rounded-2xl p-6 sm:p-8 mb-8"
+                className="rounded-2xl p-6 sm:p-8 mb-6"
                 style={{
                   background: "var(--card-solid-bg)",
                   border: `1px solid ${meta.color}30`,
+                  boxShadow: `0 0 24px ${meta.color}10`,
                 }}
               >
-                <p className="font-bebas text-lg tracking-wider mb-3" style={{ color: meta.color }}>
-                  LESSON
-                </p>
-                <p className="text-cream/70 text-sm sm:text-base leading-relaxed font-syne">
+                <div className="flex items-center justify-between mb-4">
+                  <p className="font-bebas text-base tracking-[0.2em] leading-none" style={{ color: meta.color }}>
+                    LESSON
+                  </p>
+                  <p className="font-mono text-[9px] uppercase tracking-[0.25em] text-cream/40">
+                    read &middot; then quiz
+                  </p>
+                </div>
+                <p className="text-cream/75 text-sm sm:text-base leading-relaxed font-syne">
                   {activeStage.lesson_text || activeStage.stage_description}
                 </p>
               </div>
 
               {/* Best score if replaying */}
               {activeStage.bestScore > 0 && (
-                <p className="text-center text-cream/30 text-xs font-syne mb-4">
-                  Your best: {activeStage.bestScore}/{activeStage.totalQuestions} correct (
-                  {"★".repeat(activeStage.stars)}
-                  {"☆".repeat(3 - activeStage.stars)})
-                </p>
+                <div className="mb-5 flex justify-center">
+                  <div
+                    className="inline-flex items-center gap-2 rounded-full px-3 py-1.5"
+                    style={{
+                      background: "rgba(255,215,0,0.06)",
+                      border: "1px solid rgba(255,215,0,0.18)",
+                    }}
+                  >
+                    <span className="font-mono text-[9px] uppercase tracking-[0.22em] text-gold/70">
+                      personal best
+                    </span>
+                    <span className="font-bebas text-sm text-cream tabular-nums tracking-wider">
+                      {activeStage.bestScore}<span className="text-cream/35">/</span>{activeStage.totalQuestions}
+                    </span>
+                    <span className="text-sm leading-none">
+                      <span style={{ color: "#FFD700" }}>{"★".repeat(activeStage.stars)}</span>
+                      <span className="text-cream/15">{"★".repeat(3 - activeStage.stars)}</span>
+                    </span>
+                  </div>
+                </div>
               )}
 
               {/* Start quiz button */}
@@ -548,7 +618,7 @@ export default function RoadMapPage() {
                 <button
                   onClick={startQuiz}
                   disabled={quizLoading}
-                  className="btn-gold px-8 py-3 text-lg font-bebas tracking-wider"
+                  className="btn-gold px-8 py-3 text-lg font-bebas tracking-[0.12em]"
                 >
                   {quizLoading
                     ? "Loading..."
@@ -556,8 +626,12 @@ export default function RoadMapPage() {
                     ? "Replay for Better Stars"
                     : "Start Quiz"}
                 </button>
-                <p className="text-cream/30 text-xs font-syne mt-3">
-                  5 questions &bull; 30s each &bull; Earn up to 3 stars
+                <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-cream/40 mt-4">
+                  <span className="text-cream/65 tabular-nums">5</span> questions
+                  <span className="mx-2 text-cream/20">/</span>
+                  <span className="text-cream/65 tabular-nums">30s</span> each
+                  <span className="mx-2 text-cream/20">/</span>
+                  earn up to <span className="text-gold/80 tabular-nums">3</span> stars
                 </p>
               </div>
             </div>
@@ -567,11 +641,18 @@ export default function RoadMapPage() {
           {phase === "quiz" && (
             <div className="animate-slide-up">
               {questions.length === 0 ? (
-                <div className="text-center py-20">
-                  <p className="text-cream/50 font-syne mb-4">
-                    No questions available for this stage yet.
+                <div className="text-center py-16">
+                  <p className="text-5xl mb-4" aria-hidden="true">📭</p>
+                  <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-gold/70 mb-2">
+                    no questions yet
                   </p>
-                  <button onClick={backToMap} className="btn-primary px-6 py-2">
+                  <h2 className="font-bebas text-3xl text-cream tracking-[0.08em] leading-none mb-3">
+                    THIS STAGE IS COMING SOON
+                  </h2>
+                  <p className="text-cream/45 text-sm font-syne max-w-sm mx-auto mb-6 leading-relaxed">
+                    We&apos;re still loading questions for this stage. Try another stage in the meantime.
+                  </p>
+                  <button onClick={backToMap} className="btn-primary px-6 py-2.5 font-syne font-semibold">
                     Back to Map
                   </button>
                 </div>
@@ -579,18 +660,23 @@ export default function RoadMapPage() {
                 <>
                   {/* Quiz header */}
                   <div className="flex items-center justify-between mb-6">
-                    <p className="text-cream/40 text-sm font-syne">
-                      Question {currentQ + 1}/{questions.length}
+                    <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-cream/55">
+                      question
+                      <span className="ml-1.5 text-cream/85 tabular-nums">{currentQ + 1}</span>
+                      <span className="text-cream/30">/</span>
+                      <span className="text-cream/85 tabular-nums">{questions.length}</span>
                     </p>
-                    <div className="flex items-center gap-3">
-                      <p className="text-cream/40 text-sm font-syne">
-                        Score: <span className="text-cream font-bold">{score}</span>
+                    <div className="flex items-center gap-4">
+                      <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-cream/55">
+                        score
+                        <span className="ml-1.5 font-bebas text-base text-cream tabular-nums tracking-wider">{score}</span>
                       </p>
                       <div
-                        className="w-10 h-10 rounded-full flex items-center justify-center font-bebas text-lg border-2"
+                        className="w-10 h-10 rounded-full flex items-center justify-center font-bebas text-lg border-2 tabular-nums"
                         style={{
                           borderColor: timer <= 10 ? "#EF4444" : `${meta.color}60`,
                           color: timer <= 10 ? "#EF4444" : meta.color,
+                          boxShadow: timer <= 10 ? "0 0 12px rgba(239,68,68,0.35)" : "none",
                         }}
                       >
                         {timer}
@@ -727,32 +813,49 @@ export default function RoadMapPage() {
                 ))}
               </div>
 
+              <p
+                className="font-mono text-[10px] uppercase tracking-[0.3em] mb-2"
+                style={{ color: `${meta.color}AA` }}
+              >
+                stage results
+              </p>
+
               <h2
-                className="font-bebas text-4xl tracking-wider mb-2"
+                className="font-bebas text-4xl tracking-[0.08em] mb-3 leading-none"
                 style={{ color: meta.color }}
               >
                 {resultStars >= 3
-                  ? "Perfect!"
+                  ? "PERFECT!"
                   : resultStars >= 2
-                  ? "Great job!"
+                  ? "GREAT JOB!"
                   : resultStars >= 1
-                  ? "Stage complete!"
-                  : "Keep trying!"}
+                  ? "STAGE COMPLETE!"
+                  : "KEEP TRYING!"}
               </h2>
 
-              <p className="text-cream/50 text-sm font-syne mb-2">
+              <p className="text-cream/50 text-sm font-syne mb-4">
                 {activeStage.stage_name}
               </p>
 
-              <p className="text-cream font-bebas text-3xl mb-1">
-                {score}/{questions.length}
+              <p className="text-cream font-bebas text-3xl tabular-nums tracking-wider mb-1 leading-none">
+                {score}<span className="text-cream/35">/</span>{questions.length}
               </p>
-              <p className="text-cream/30 text-sm font-syne mb-6">correct answers</p>
+              <p className="font-mono text-[9px] uppercase tracking-[0.25em] text-cream/40 mt-1 mb-6">
+                correct answers
+              </p>
 
               {isNewBest && (
-                <p className="text-gold text-sm font-syne font-bold mb-4">
-                  New personal best!
-                </p>
+                <div className="mb-4 flex justify-center">
+                  <span
+                    className="inline-flex items-center gap-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.22em] px-3 py-1 rounded-full text-gold"
+                    style={{
+                      background: "rgba(255,215,0,0.1)",
+                      border: "1px solid rgba(255,215,0,0.3)",
+                    }}
+                  >
+                    <span aria-hidden="true">★</span> new personal best
+                  </span>
+                </div>
               )}
 
               {/* Rewards */}

@@ -133,14 +133,42 @@ export default function SubjectSelectorPage() {
         <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <BackButton />
 
-          {/* Header — left aligned */}
+          {/* Header — eyebrow + lifted title */}
           <div className="mb-8 animate-slide-up">
-            <h1 className="font-bebas text-5xl sm:text-6xl text-cream tracking-wider leading-none">
+            <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-gold/70 mb-2">
+              Step 1 · pick a subject
+            </p>
+            <h1 className="font-bebas text-5xl sm:text-6xl text-cream tracking-[0.08em] leading-none">
               LEARNING PATHS
             </h1>
-            <p className="text-cream/40 text-sm sm:text-base mt-2 font-syne">
-              Choose a subject and master it stage by stage
+            <p className="text-cream/45 text-sm sm:text-base mt-3 font-syne max-w-xl leading-relaxed">
+              Master subjects one stage at a time. Three stars per stage is total mastery.
             </p>
+            {summary !== null && summary.totalStages > 0 && (
+              <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1.5 font-mono text-[10px] uppercase tracking-[0.22em] text-cream/50">
+                <span>
+                  <span className="text-cream/80 tabular-nums">{SUBJECT_ORDER.length}</span>
+                  <span className="ml-1.5 text-cream/40">subjects</span>
+                </span>
+                <span className="text-cream/20">/</span>
+                <span>
+                  <span className="text-cream/80 tabular-nums">{summary.completedStages}</span>
+                  <span className="text-cream/40">/</span>
+                  <span className="text-cream/80 tabular-nums">{summary.totalStages}</span>
+                  <span className="ml-1.5 text-cream/40">stages cleared</span>
+                </span>
+                {summary.totalStars > 0 && (
+                  <>
+                    <span className="text-cream/20">/</span>
+                    <span className="inline-flex items-center gap-1.5 text-gold/85">
+                      <Star size={10} weight="fill" aria-hidden="true" />
+                      <span className="tabular-nums">{summary.totalStars}</span>
+                      <span className="text-gold/55">stars</span>
+                    </span>
+                  </>
+                )}
+              </div>
+            )}
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 items-start">
@@ -163,6 +191,13 @@ export default function SubjectSelectorPage() {
                     const prog = progressMap[key] ?? { completed: 0, stars: 0 };
                     const pct = total > 0 ? (prog.completed / total) * 100 : 0;
                     const IconComp = meta.icon;
+                    const isMastered = total > 0 && prog.completed === total;
+                    const inProgress = prog.completed > 0 && !isMastered;
+                    const statusLabel = isMastered
+                      ? "mastered"
+                      : inProgress
+                      ? "in progress"
+                      : "not started";
 
                     return (
                       <button
@@ -184,7 +219,7 @@ export default function SubjectSelectorPage() {
                         }}
                       >
                         {/* Top row: icon + progress ring */}
-                        <div className="flex items-start justify-between mb-3">
+                        <div className="flex items-start justify-between mb-4">
                           <span
                             className="w-12 h-12 flex items-center justify-center rounded-xl group-hover:scale-110 transition-transform duration-300"
                             style={{ background: `${meta.color}18`, color: meta.color }}
@@ -199,29 +234,63 @@ export default function SubjectSelectorPage() {
                           </div>
                         </div>
 
-                        {/* Title */}
-                        <p className="font-bebas text-2xl tracking-wider" style={{ color: meta.color }}>
-                          {meta.label}
+                        {/* Eyebrow status */}
+                        <p
+                          className="font-mono text-[9px] uppercase tracking-[0.25em] mb-1"
+                          style={{
+                            color: isMastered
+                              ? "#FFD700CC"
+                              : inProgress
+                              ? `${meta.color}CC`
+                              : "rgba(238,244,255,0.4)",
+                          }}
+                        >
+                          {statusLabel}
                         </p>
 
-                        {/* Stage count + stars */}
-                        <div className="flex items-center gap-3 mt-1.5">
-                          <p className="text-cream/45 text-xs font-syne">
-                            {prog.completed}/{total} stages
+                        {/* Title + arrow */}
+                        <div className="flex items-center justify-between gap-2">
+                          <p className="font-bebas text-2xl tracking-[0.08em] leading-none" style={{ color: meta.color }}>
+                            {meta.label}
                           </p>
+                          <span
+                            className="font-mono text-base translate-x-0 group-hover:translate-x-1 transition-transform duration-300"
+                            style={{ color: `${meta.color}AA` }}
+                            aria-hidden="true"
+                          >
+                            &rarr;
+                          </span>
+                        </div>
+
+                        {/* Stage count + stars */}
+                        <div className="flex items-center gap-3 mt-2 font-mono text-[10px] uppercase tracking-[0.18em]">
+                          <span className="text-cream/55">
+                            <span className="text-cream/85 tabular-nums">{prog.completed}</span>
+                            <span className="text-cream/35">/</span>
+                            <span className="text-cream/85 tabular-nums">{total}</span>
+                            <span className="ml-1 text-cream/40">stages</span>
+                          </span>
                           {prog.stars > 0 && (
-                            <span className="inline-flex items-center gap-1 text-gold text-xs font-syne font-semibold">
-                              <Star size={12} weight="fill" aria-hidden="true" /> {prog.stars}
+                            <span className="inline-flex items-center gap-1 text-gold/85">
+                              <Star size={10} weight="fill" aria-hidden="true" />
+                              <span className="tabular-nums">{prog.stars}</span>
                             </span>
                           )}
                         </div>
 
-                        {/* Linear progress bar (kept for at-a-glance) */}
-                        <div className="mt-4 w-full h-1.5 rounded-full overflow-hidden"
-                          style={{ background: "var(--progress-track)", border: "1px solid var(--progress-track-border)" }}>
+                        {/* Linear progress bar */}
+                        <div
+                          className="mt-4 w-full h-1.5 rounded-full overflow-hidden"
+                          style={{ background: "var(--progress-track)", border: "1px solid var(--progress-track-border)" }}
+                        >
                           <div
                             className="h-full rounded-full transition-all duration-700"
-                            style={{ width: `${pct}%`, background: `linear-gradient(90deg, ${meta.color}80, ${meta.color})` }}
+                            style={{
+                              width: `${pct}%`,
+                              background: isMastered
+                                ? `linear-gradient(90deg, ${meta.color}, #FFD700)`
+                                : `linear-gradient(90deg, ${meta.color}80, ${meta.color})`,
+                            }}
                           />
                         </div>
                       </button>
@@ -233,11 +302,18 @@ export default function SubjectSelectorPage() {
 
             {/* ── RIGHT (1/3): overall path progress summary ── */}
             <div className="animate-slide-up" style={{ animationDelay: "0.16s" }}>
-              <div className="rounded-2xl border border-gold/20 p-6"
-                style={{ background: "var(--card-solid-bg)", boxShadow: "0 0 30px rgba(255,215,0,0.06)" }}>
-                <div className="flex items-center gap-2 mb-5">
-                  <Path size={18} weight="bold" color="#FFD700" aria-hidden="true" />
-                  <h2 className="font-bebas text-lg text-cream tracking-wider leading-none">OVERALL PROGRESS</h2>
+              <div
+                className="rounded-2xl border border-gold/25 p-6"
+                style={{ background: "var(--card-solid-bg)", boxShadow: "0 0 30px rgba(255,215,0,0.08)" }}
+              >
+                <div className="flex items-center justify-between mb-5">
+                  <div className="flex items-center gap-2">
+                    <Path size={16} weight="bold" color="#FFD700" aria-hidden="true" />
+                    <h2 className="font-bebas text-base text-cream tracking-[0.18em] leading-none">OVERALL</h2>
+                  </div>
+                  <span className="font-mono text-[9px] uppercase tracking-[0.25em] text-gold/55">
+                    your path
+                  </span>
                 </div>
 
                 {summary === null ? (
@@ -251,33 +327,54 @@ export default function SubjectSelectorPage() {
                     <div className="relative grid place-items-center mb-5">
                       <ProgressRing pct={summary.pct} color="#FFD700" size={128} />
                       <div className="absolute text-center">
-                        <p className="font-bebas text-4xl text-gold leading-none">{Math.round(summary.pct)}%</p>
-                        <p className="text-cream/35 text-[10px] uppercase tracking-widest mt-1">complete</p>
+                        <p className="font-bebas text-4xl text-gold leading-none tabular-nums">
+                          {Math.round(summary.pct)}<span className="text-2xl text-gold/60">%</span>
+                        </p>
+                        <p className="text-cream/40 text-[9px] uppercase tracking-[0.3em] mt-1.5 font-mono">
+                          complete
+                        </p>
                       </div>
                     </div>
 
                     {/* Stat rows */}
-                    <div className="space-y-2.5">
-                      <div className="flex items-center justify-between rounded-xl px-3 py-2.5"
-                        style={{ background: "rgba(255,255,255,0.025)", border: "1px solid rgba(255,255,255,0.06)" }}>
-                        <span className="text-cream/55 text-xs font-syne">Stages cleared</span>
-                        <span className="font-bebas text-lg text-cream tabular-nums">{summary.completedStages}/{summary.totalStages}</span>
-                      </div>
-                      <div className="flex items-center justify-between rounded-xl px-3 py-2.5"
-                        style={{ background: "rgba(255,215,0,0.04)", border: "1px solid rgba(255,215,0,0.12)" }}>
-                        <span className="text-cream/55 text-xs font-syne inline-flex items-center gap-1.5">
-                          <Star size={12} weight="fill" color="#FFD700" aria-hidden="true" /> Stars earned
+                    <div className="space-y-2">
+                      <div
+                        className="flex items-center justify-between rounded-xl px-3 py-2.5"
+                        style={{ background: "rgba(255,255,255,0.025)", border: "1px solid rgba(255,255,255,0.06)" }}
+                      >
+                        <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-cream/55">
+                          stages cleared
                         </span>
-                        <span className="font-bebas text-lg text-gold tabular-nums">{summary.totalStars}</span>
+                        <span className="font-bebas text-lg text-cream tabular-nums tracking-wider">
+                          {summary.completedStages}<span className="text-cream/35">/</span>{summary.totalStages}
+                        </span>
                       </div>
-                      <div className="flex items-center justify-between rounded-xl px-3 py-2.5"
-                        style={{ background: "rgba(255,255,255,0.025)", border: "1px solid rgba(255,255,255,0.06)" }}>
-                        <span className="text-cream/55 text-xs font-syne">Subjects</span>
-                        <span className="font-bebas text-lg text-cream tabular-nums">{SUBJECT_ORDER.length}</span>
+                      <div
+                        className="flex items-center justify-between rounded-xl px-3 py-2.5"
+                        style={{ background: "rgba(255,215,0,0.05)", border: "1px solid rgba(255,215,0,0.14)" }}
+                      >
+                        <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-gold/65 inline-flex items-center gap-1.5">
+                          <Star size={11} weight="fill" color="#FFD700" aria-hidden="true" />
+                          stars earned
+                        </span>
+                        <span className="font-bebas text-lg text-gold tabular-nums tracking-wider">
+                          {summary.totalStars}
+                        </span>
+                      </div>
+                      <div
+                        className="flex items-center justify-between rounded-xl px-3 py-2.5"
+                        style={{ background: "rgba(255,255,255,0.025)", border: "1px solid rgba(255,255,255,0.06)" }}
+                      >
+                        <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-cream/55">
+                          subjects
+                        </span>
+                        <span className="font-bebas text-lg text-cream tabular-nums tracking-wider">
+                          {SUBJECT_ORDER.length}
+                        </span>
                       </div>
                     </div>
 
-                    <p className="text-cream/30 text-[11px] leading-relaxed mt-4 font-syne">
+                    <p className="text-cream/35 text-[11px] leading-relaxed mt-4 font-syne">
                       Clear stages to fill the ring. Three stars per stage means total mastery.
                     </p>
                   </>
