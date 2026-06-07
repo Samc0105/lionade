@@ -7,6 +7,32 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 
 ---
 
+## 2026-06-07 — Party V2 active-game: mid-round queue + request-to-join + lobby chat + spectator (web-only, no iOS row)
+
+**Status:** 🚫 N/A (deliberate no-row decision: same rationale as the V2 foundation row below. Lionade Party is web-only V1; iOS port is queued for `vp-ios` and will adopt these flows together with the foundation.)
+
+New API:
+- `POST /api/party/rooms/[code]/request-join` (anti-spam: 1 pending per (user, room), 5-min cooldown, max 3 pending across user)
+- `GET  /api/party/rooms/[code]/request-join` (caller's latest request status, polled by the request-to-join modal)
+- `GET  /api/party/rooms/[code]/join-requests` (host-only pending list, hydrates the banner if broadcasts were missed)
+- `POST /api/party/rooms/[code]/join-requests/[id]/decide` (host approve/decline; on approve flags `is_pending_round` if room is mid-round)
+- `POST /api/party/rooms/[code]/lobby-chat` + `GET` (200-char messages, broadcasts LOBBY_CHAT)
+- `POST /api/party/rooms/[code]/spectate` (toggle `is_spectator`)
+- `POST /api/party/rooms/[code]/join` — now honors `privacy_mode`. `friends` mode auto-lets friends-of-active-members in. Other callers get `{ ok: false, requires_request: true }`. Mid-round joiners get `is_pending_round = true`.
+
+Round-creation server paths (`sketch/rounds`, `bluff/rounds`, `pokerface/rounds`) now clear `is_pending_round` for every queued joiner so they pop into the live UI on the next ROUND_STARTED tick.
+
+UI:
+- `components/party/JoiningNextRoundBanner.tsx` — spectator banner for mid-game joiners, rendered at the top of SketchView / BluffView / PokerFaceView when the caller's `is_pending_round` is true.
+- `RoomLobby.tsx` — host pending-request banner stack (top-right, up to 3, Let in / Pass), lobby-chat panel (collapsible bottom-right), spectator toggle (non-host secondary CTA under Ready), post-game "Add as friend?" tile per non-friend roommate.
+- `/games/party` — request-to-join modal (50-char note + 3s poll for host decision + auto-navigate on approve).
+
+Realtime broadcasts: JOIN_REQUEST + JOIN_DECISION + LOBBY_CHAT are sent on the existing `party-room-{code}` channel. Reuses existing event-name constants in `lib/party/realtime-channels.ts`.
+
+Owner: `quality-docs-writer` (web). `vp-ios` will pick up V2 (foundation + active-game) as a single phase when the iOS Party port begins.
+
+---
+
 ## 2026-06-07 — Party V2 foundation: Past Lobbies + named rooms + privacy mode (web-only, no iOS row)
 
 **Status:** 🚫 N/A (deliberate no-row decision: Lionade Party itself is the web-only V1 surface; per `~/.claude/projects/-Users-samc-Desktop-lionade/memory/project_lionade_party.md` the iOS port is deferred to a later phase owned by `vp-ios`. Schema additions are backward-compatible (all defaulted) so an eventual iOS client can adopt the same tables without backfill.)

@@ -101,6 +101,14 @@ export async function POST(req: NextRequest) {
     is_truth: true,
   });
 
+  // V2 — promote any queued mid-game joiners into the active roster.
+  await supabaseAdmin
+    .from("party_room_players")
+    .update({ is_pending_round: false })
+    .eq("room_id", room.id)
+    .is("left_at", null)
+    .eq("is_pending_round", true);
+
   // Public payload: question + category + phase + timer. NEVER correct_answer.
   return NextResponse.json({
     round: {

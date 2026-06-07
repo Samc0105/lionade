@@ -24,6 +24,7 @@ import { apiGet, apiPost } from "@/lib/api-client";
 import PartyScoreboard from "./PartyScoreboard";
 import IntermissionCard from "./IntermissionCard";
 import NinnyHostBubble from "./NinnyHostBubble";
+import JoiningNextRoundBanner from "./JoiningNextRoundBanner";
 import CountUp from "@/components/CountUp";
 import dynamic from "next/dynamic";
 import RevealText from "@/components/RevealText";
@@ -566,8 +567,12 @@ export default function PokerFaceView({
     (phase === "vote" || phase === "interrogate") && timeLeft > 0 && timeLeft < 5 && !reduced;
   const showCountdown = countdownTicks > 0 && phase === "present";
 
+  const mePlayer = players.find((p) => p.user_id === meUserId);
+  const isPendingJoiner = !!mePlayer?.is_pending_round;
+
   return (
     <div className="space-y-4">
+      {isPendingJoiner && <JoiningNextRoundBanner variant="pokerface" />}
       {showPanicVignette && <div aria-hidden="true" className="pa-panic-vignette" />}
       {showCountdown && (
         <motion.div

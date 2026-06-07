@@ -167,8 +167,45 @@ export default function RoomLobby({ room, players, isHost, meUserId, onGameStart
     toastSuccess("Room closed.");
     if (typeof window !== "undefined") window.location.href = "/games/party";
   }
-  // Listen for the host's broadcast on the main room channel so non-host
-  // players bail out too.
+  // ── V2 — pending join requests (host-only banner) ──
+  type JoinReq = {
+    request_id: string;
+    requester_user_id: string;
+    requester_name: string;
+    requester_avatar: string | null;
+    note?: string | null;
+  };
+  const [pendingJoins, setPendingJoins] = useState<JoinReq[]>([]);
+  const [deciding, setDeciding] = useState<Record<string, boolean>>({});
+
+  // ── V2 — lobby chat (between rounds) ──
+  type ChatMsg = { id: string; user_id: string; user_name: string | null; body: string; created_at: string };
+  const [chatMessages, setChatMessages] = useState<ChatMsg[]>([]);
+  const [chatOpen, setChatOpen] = useState(false);
+  const [chatDraft, setChatDraft] = useState("");
+  const [chatSending, setChatSending] = useState(false);
+  const [chatHydrated, setChatHydrated] = useState(false);
+
+  // ── V2 — spectator toggle ──
+  const meRow = players.find((p) => p.user_id === meUserId);
+  const isSpectator = !!meRow?.is_spectator;
+  const [specPending, setSpecPending] = useState(false);
+  async function toggleSpectator() {
+    if (specPending) return;
+    setSpecPending(true);
+    const res = await apiPost<{ ok: boolean; is_spectator: boolean }>(
+      `/api/party/rooms/${room.code}/spectate`,
+      { on: !isSpectator },
+    );
+    setSpecPending(false);
+    if (!res.ok) {
+      toastError("Couldn't update spectator mode.");
+      return;
+    }
+    toastSuccess(res.data?.is_spectator ? "Watching only." : "Playing again.");
+  }
+
+  // Listen for room-wide broadcasts: dismiss, lobby chat, join requests/decisions.
   useEffect(() => {
     const ch = supabase.channel(`party-room-${room.code}`);
     ch.on("broadcast", { event: PARTY_EVENTS.ROOM_DISMISSED }, () => {
@@ -177,11 +214,118 @@ export default function RoomLobby({ room, players, isHost, meUserId, onGameStart
         window.location.href = "/games/party";
       }
     });
+    ch.on("broadcast", { event: PARTY_EVENTS.LOBBY_CHAT }, (msg: { payload?: unknown }) => {
+      const p = (msg.payload ?? {}) as Partial<ChatMsg> & { message_id?: string };
+      if (!p.message_id || !p.body) return;
+      const m: ChatMsg = {
+        id: p.message_id,
+        user_id: p.user_id ?? "",
+        user_name: p.user_name ?? null,
+        body: p.body,
+        created_at: p.created_at ?? new Date().toISOString(),
+      };
+      setChatMessages((prev) => (prev.some((x) => x.id === m.id) ? prev : [...prev, m].slice(-50)));
+    });
+    if (isHost) {
+      ch.on("broadcast", { event: PARTY_EVENTS.JOIN_REQUEST }, (msg: { payload?: unknown }) => {
+        const p = (msg.payload ?? {}) as Partial<JoinReq>;
+        if (!p.request_id || !p.requester_user_id) return;
+        const req: JoinReq = {
+          request_id: p.request_id,
+          requester_user_id: p.requester_user_id,
+          requester_name: p.requester_name ?? "Player",
+          requester_avatar: p.requester_avatar ?? null,
+          note: p.note ?? null,
+        };
+        setPendingJoins((prev) =>
+          prev.some((r) => r.request_id === req.request_id) ? prev : [...prev, req].slice(-3),
+        );
+      });
+    }
+    ch.on("broadcast", { event: PARTY_EVENTS.JOIN_DECISION }, (msg: { payload?: unknown }) => {
+      const p = (msg.payload ?? {}) as { request_id?: string };
+      if (!p.request_id) return;
+      setPendingJoins((prev) => prev.filter((r) => r.request_id !== p.request_id));
+    });
     ch.subscribe();
     return () => {
       supabase.removeChannel(ch);
     };
-  }, [room.code]);
+  }, [room.code, isHost]);
+
+  // Hydrate the host banner from server on mount: rebroadcast misses if the
+  // host opened the lobby AFTER the requester submitted. Fetched once.
+  useEffect(() => {
+    if (!isHost) return;
+    let cancelled = false;
+    async function hydrate() {
+      const res = await apiGet<{ pending: JoinReq[] }>(
+        `/api/party/rooms/${room.code}/join-requests`,
+      );
+      if (cancelled || !res.ok || !res.data) return;
+      setPendingJoins(res.data.pending ?? []);
+    }
+    hydrate();
+    return () => {
+      cancelled = true;
+    };
+  }, [isHost, room.code]);
+
+  // Hydrate the chat panel once on open (or on mount if we want last-20 always).
+  useEffect(() => {
+    if (chatHydrated) return;
+    let cancelled = false;
+    async function load() {
+      const res = await apiGet<{ messages: ChatMsg[] }>(
+        `/api/party/rooms/${room.code}/lobby-chat`,
+      );
+      if (cancelled) return;
+      setChatHydrated(true);
+      if (res.ok && res.data?.messages) setChatMessages(res.data.messages);
+    }
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, [room.code, chatHydrated]);
+
+  async function decideJoinRequest(req: JoinReq, decision: "approve" | "decline") {
+    setDeciding((d) => ({ ...d, [req.request_id]: true }));
+    const res = await apiPost(
+      `/api/party/rooms/${room.code}/join-requests/${req.request_id}/decide`,
+      { decision },
+    );
+    setDeciding((d) => {
+      const next = { ...d };
+      delete next[req.request_id];
+      return next;
+    });
+    if (!res.ok) {
+      toastError("Couldn't decide. Try again.");
+      return;
+    }
+    setPendingJoins((prev) => prev.filter((r) => r.request_id !== req.request_id));
+  }
+
+  async function sendChat() {
+    const text = chatDraft.trim().slice(0, 200);
+    if (text.length === 0 || chatSending) return;
+    setChatSending(true);
+    const res = await apiPost<{ ok: boolean; message: ChatMsg }>(
+      `/api/party/rooms/${room.code}/lobby-chat`,
+      { body: text },
+    );
+    setChatSending(false);
+    if (!res.ok) {
+      toastError("Couldn't send.");
+      return;
+    }
+    setChatDraft("");
+    if (res.data?.message) {
+      const m = res.data.message;
+      setChatMessages((prev) => (prev.some((x) => x.id === m.id) ? prev : [...prev, m].slice(-50)));
+    }
+  }
 
   // Toast stack — visible to EVERYONE in the room when a nudge fires (it's
   // funnier when the whole room sees Brother spam the host). Self-pruning.
@@ -346,6 +490,156 @@ export default function RoomLobby({ room, players, isHost, meUserId, onGameStart
 
   return (
     <div className="space-y-7 max-w-3xl mx-auto">
+      {/* Host-only pending join requests stack (top-right). Up to 3 visible. */}
+      {isHost && pendingJoins.length > 0 && (
+        <div
+          aria-live="polite"
+          className="fixed top-24 right-4 z-40 flex flex-col items-end gap-2 max-w-[320px] pointer-events-none"
+        >
+          <AnimatePresence initial={false}>
+            {pendingJoins.map((req) => (
+              <motion.div
+                key={req.request_id}
+                initial={reduced ? false : { opacity: 0, x: 24 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={reduced ? { opacity: 0 } : { opacity: 0, x: 24 }}
+                transition={{ type: "spring", stiffness: 360, damping: 24 }}
+                className="rounded-2xl p-3 pointer-events-auto shadow-2xl w-full"
+                style={{
+                  background: "linear-gradient(135deg, rgba(16,12,26,0.96) 0%, rgba(8,6,16,0.96) 100%)",
+                  border: "1px solid rgba(255,215,0,0.45)",
+                  boxShadow: "0 12px 32px rgba(0,0,0,0.55)",
+                }}
+              >
+                <div className="flex items-start gap-2.5">
+                  <img
+                    src={req.requester_avatar ?? `https://api.dicebear.com/9.x/identicon/svg?seed=${encodeURIComponent(req.requester_name)}`}
+                    alt=""
+                    className="w-9 h-9 rounded-full bg-white/10 object-cover flex-shrink-0"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-cream text-sm font-bold truncate">{req.requester_name}</p>
+                    <p className="text-cream/55 text-[11px]">wants to join</p>
+                    {req.note && (
+                      <p className="text-cream/75 text-xs mt-1 italic line-clamp-2">
+                        &ldquo;{req.note}&rdquo;
+                      </p>
+                    )}
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 mt-2.5">
+                  <button
+                    onClick={() => decideJoinRequest(req, "approve")}
+                    disabled={!!deciding[req.request_id]}
+                    className="flex-1 px-3 py-1.5 rounded-lg text-xs font-bold tracking-wide transition-all active:scale-95 disabled:opacity-50"
+                    style={{
+                      background: "linear-gradient(135deg, #22C55E 0%, #15803D 100%)",
+                      color: "#04080F",
+                    }}
+                  >
+                    {deciding[req.request_id] ? "..." : "Let in"}
+                  </button>
+                  <button
+                    onClick={() => decideJoinRequest(req, "decline")}
+                    disabled={!!deciding[req.request_id]}
+                    className="px-3 py-1.5 rounded-lg text-xs font-bold tracking-wide text-cream/70 transition-all active:scale-95 disabled:opacity-50"
+                    style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)" }}
+                  >
+                    Pass
+                  </button>
+                </div>
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        </div>
+      )}
+
+      {/* Lobby chat — collapsible bottom panel (mobile-friendly), always
+          accessible to room members between rounds. */}
+      <div
+        className="fixed bottom-4 right-4 z-40 w-[320px] max-w-[88vw] pointer-events-auto"
+      >
+        {!chatOpen ? (
+          <button
+            type="button"
+            onClick={() => setChatOpen(true)}
+            className="ml-auto flex items-center gap-2 px-3 py-2 rounded-full text-xs font-bold tracking-wide text-cream/85 shadow-lg"
+            style={{
+              background: "linear-gradient(135deg, rgba(16,12,26,0.92) 0%, rgba(8,6,16,0.92) 100%)",
+              border: "1px solid rgba(255,255,255,0.12)",
+            }}
+          >
+            <span
+              className="inline-block w-2 h-2 rounded-full"
+              style={{ background: chatMessages.length > 0 ? "#34D399" : "rgba(255,255,255,0.3)" }}
+            />
+            Lobby chat {chatMessages.length > 0 ? `· ${chatMessages.length}` : ""}
+          </button>
+        ) : (
+          <div
+            className="rounded-2xl flex flex-col"
+            style={{
+              background: "linear-gradient(135deg, rgba(16,12,26,0.96) 0%, rgba(8,6,16,0.96) 100%)",
+              border: "1px solid rgba(255,255,255,0.1)",
+              boxShadow: "0 12px 32px rgba(0,0,0,0.55)",
+              maxHeight: "60vh",
+            }}
+          >
+            <div className="flex items-center justify-between px-3 py-2 border-b border-white/[0.06]">
+              <p className="text-cream/75 text-[11px] font-bold uppercase tracking-wider">Lobby chat</p>
+              <button
+                type="button"
+                onClick={() => setChatOpen(false)}
+                aria-label="Close chat"
+                className="text-cream/45 hover:text-cream/80 text-xs"
+              >
+                Hide
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto px-3 py-2 space-y-1.5 min-h-[120px]">
+              {chatMessages.length === 0 ? (
+                <p className="text-cream/35 text-xs italic">Say something while you wait.</p>
+              ) : (
+                chatMessages.map((m) => (
+                  <div key={m.id} className="text-xs">
+                    <span className="text-cream/55 font-semibold">{m.user_name ?? "Player"}: </span>
+                    <span className="text-cream/85">{m.body}</span>
+                  </div>
+                ))
+              )}
+            </div>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                sendChat();
+              }}
+              className="flex items-center gap-2 px-2 py-2 border-t border-white/[0.06]"
+            >
+              <input
+                type="text"
+                value={chatDraft}
+                onChange={(e) => setChatDraft(e.target.value.slice(0, 200))}
+                placeholder="say hi"
+                maxLength={200}
+                className="flex-1 rounded-lg px-2.5 py-1.5 text-xs text-cream outline-none"
+                style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)" }}
+              />
+              <button
+                type="submit"
+                disabled={chatDraft.trim().length === 0 || chatSending}
+                className="px-3 py-1.5 rounded-lg text-xs font-bold disabled:opacity-40"
+                style={{
+                  background: "linear-gradient(135deg, #A855F7 0%, #6366F1 100%)",
+                  color: "#fff",
+                }}
+              >
+                {chatSending ? "..." : "Send"}
+              </button>
+            </form>
+          </div>
+        )}
+      </div>
+
       {/* Nudge toast stack — fixed top center, visible to EVERYONE in the room
           when any non-host taps the rotating "nudge" button. */}
       <div
@@ -499,6 +793,20 @@ export default function RoomLobby({ room, players, isHost, meUserId, onGameStart
         >
           {meReady ? "✓  READY · TAP TO UNREADY" : "TAP TO READY UP"}
         </button>
+
+        {/* Spectator toggle (small, secondary). Hidden for hosts since they
+            need to drive the game. */}
+        {!isHost && (
+          <button
+            type="button"
+            onClick={toggleSpectator}
+            disabled={specPending}
+            className="mt-2 w-full py-2 rounded-lg text-xs text-cream/50 hover:text-cream/85 transition-colors disabled:opacity-40"
+            style={{ background: "rgba(255,255,255,0.02)", border: "1px dashed rgba(255,255,255,0.08)" }}
+          >
+            {isSpectator ? "Watching only · tap to play" : "Watch only (spectator)"}
+          </button>
+        )}
       </div>
 
       {/* ── Rotating "hurry up" nudge button ──
@@ -578,6 +886,7 @@ export default function RoomLobby({ room, players, isHost, meUserId, onGameStart
                 );
               })}
             </div>
+            <PostGameFriendPrompt players={optimisticPlayers} meUserId={meUserId} />
           </div>
         );
       })()}
@@ -1036,6 +1345,105 @@ function FriendInviteSection({ code }: InviteFriendsProps) {
                 {labelText}
               </button>
             </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// ── Post-Game Friend Prompt ──
+// V2 — when a game ends and players land back in the lobby, for each non-friend
+// who was in the room render a small "Add as friend?" tile. Lightweight, one
+// request per add, easy to dismiss. Skipped entirely if everyone is already
+// a friend or if the user has no email/account context.
+function PostGameFriendPrompt({ players, meUserId }: { players: PartyPlayer[]; meUserId: string }) {
+  type Status = "idle" | "sending" | "sent" | "already" | "dismissed" | "error";
+  const [byId, setById] = useState<Record<string, Status>>({});
+  const [friendIdSet, setFriendIdSet] = useState<Set<string> | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function loadFriends() {
+      const res = await apiGet<{ friends: { id: string }[] }>(`/api/social/friends`);
+      if (cancelled || !res.ok || !res.data) {
+        setFriendIdSet(new Set());
+        return;
+      }
+      setFriendIdSet(new Set(res.data.friends.map((f) => f.id)));
+    }
+    loadFriends();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const candidates = players.filter(
+    (p) => p.user_id !== meUserId && (!friendIdSet || !friendIdSet.has(p.user_id)),
+  );
+
+  if (friendIdSet === null) return null;
+  if (candidates.length === 0) return null;
+
+  async function addFriend(otherId: string, otherUsername: string | null) {
+    setById((s) => ({ ...s, [otherId]: "sending" }));
+    if (!otherUsername) {
+      setById((s) => ({ ...s, [otherId]: "error" }));
+      return;
+    }
+    const res = await apiPost<{ ok: boolean }>(`/api/social/friends`, { friendUsername: otherUsername });
+    if (!res.ok) {
+      const errMsg = (res.error ?? "").toLowerCase();
+      if (errMsg.includes("already") || errMsg.includes("pending")) {
+        setById((s) => ({ ...s, [otherId]: "already" }));
+        return;
+      }
+      setById((s) => ({ ...s, [otherId]: "error" }));
+      return;
+    }
+    setById((s) => ({ ...s, [otherId]: "sent" }));
+  }
+
+  return (
+    <div className="mt-3 pt-3 border-t border-white/[0.06]">
+      <p className="text-cream/55 text-[10px] font-bold uppercase tracking-widest mb-2">
+        Played with new faces? Add them.
+      </p>
+      <div className="flex flex-wrap gap-1.5">
+        {candidates.map((p) => {
+          const s = byId[p.user_id] ?? "idle";
+          if (s === "dismissed") return null;
+          const label =
+            s === "sending" ? "..."
+            : s === "sent" ? "Sent"
+            : s === "already" ? "Already"
+            : s === "error" ? "Try again"
+            : `+ Add ${p.username ?? "Player"}`;
+          const disabled = s === "sending" || s === "sent" || s === "already";
+          return (
+            <button
+              key={p.user_id}
+              type="button"
+              onClick={() => addFriend(p.user_id, p.username)}
+              disabled={disabled}
+              className="px-2.5 py-1 rounded-full text-[11px] font-semibold transition-all"
+              style={{
+                background:
+                  s === "sent" ? "rgba(34,197,94,0.18)"
+                  : s === "already" ? "rgba(255,255,255,0.04)"
+                  : "rgba(168,85,247,0.18)",
+                border:
+                  s === "sent" ? "1px solid rgba(34,197,94,0.45)"
+                  : s === "already" ? "1px solid rgba(255,255,255,0.08)"
+                  : "1px solid rgba(168,85,247,0.42)",
+                color:
+                  s === "sent" ? "#86EFAC"
+                  : s === "already" ? "rgba(238,244,255,0.5)"
+                  : "#E9D5FF",
+              }}
+            >
+              {label}
+            </button>
           );
         })}
       </div>

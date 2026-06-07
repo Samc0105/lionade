@@ -96,6 +96,14 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Couldn't deal a round" }, { status: 500 });
   }
 
+  // V2 — promote any queued mid-game joiners into the active roster.
+  await supabaseAdmin
+    .from("party_room_players")
+    .update({ is_pending_round: false })
+    .eq("room_id", room.id)
+    .is("left_at", null)
+    .eq("is_pending_round", true);
+
   // Public payload: round id + presenter + the WORD (not the fact, not the lie).
   return NextResponse.json({
     round: {

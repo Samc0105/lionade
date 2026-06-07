@@ -180,6 +180,17 @@ export async function POST(req: NextRequest) {
 
   setCandidates(round.id, candidates);
 
+  // V2 — promote any queued mid-game joiners into the live roster.
+  // is_pending_round was set when they came in during a previous round;
+  // clearing it here means SketchView (and equivalents) immediately drop
+  // the spectator banner on their next ROUND_STARTED broadcast.
+  await supabaseAdmin
+    .from("party_room_players")
+    .update({ is_pending_round: false })
+    .eq("room_id", room.id)
+    .is("left_at", null)
+    .eq("is_pending_round", true);
+
   // Public payload: drawer + round id + subject. No words leaked to guessers.
   return NextResponse.json({
     round: {

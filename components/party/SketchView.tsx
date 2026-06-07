@@ -23,6 +23,7 @@ import SketchToolbar, { SKETCH_COLORS, SKETCH_SIZES, type SketchTool } from "./S
 import IntermissionCard from "./IntermissionCard";
 import PartyScoreboard from "./PartyScoreboard";
 import NinnyHostBubble from "./NinnyHostBubble";
+import JoiningNextRoundBanner from "./JoiningNextRoundBanner";
 import RoundEndOverlay from "./RoundEndOverlay";
 import PostRoundVoteCard from "./PostRoundVoteCard";
 import MidGameInviteModal from "./MidGameInviteModal";
@@ -1308,8 +1309,12 @@ export default function SketchView({
     : null;
   const showCountdown = countdownTicks > 0 && phase === "drawing";
 
+  const mePlayer = players.find((p) => p.user_id === meUserId);
+  const isPendingJoiner = !!mePlayer?.is_pending_round;
+
   return (
     <div className="space-y-4">
+      {isPendingJoiner && <JoiningNextRoundBanner variant="sketch" />}
       {showCountdown && (
         <motion.div
           key={`countdown-${countdownTicks}`}
