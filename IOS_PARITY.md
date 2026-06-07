@@ -7,6 +7,14 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 
 ---
 
+## 2026-06-06 — Footer + About credibility surfaces polish (web-only, no iOS row)
+
+**Status:** 🚫 N/A (deliberate no-row decision: visual polish pass on two web-only credibility surfaces. `components/Footer.tsx` restructured into a 4-column sitemap (Product / Company / Legal / Connect) with logo, tagline, gold rule, mono eyebrows, and dual baseline. `app/about/page.tsx` rewritten with Bebas hero, three pillar cards, alternating-side timeline, "From the team" warm panel, and gold CTA pill. No data model, API, or behavior change; no new fetches, no new deps. Native iOS has its own bottom-tab + dedicated About surface owned by `vp-ios` with separate visual cadence.)
+
+Hand-written copy throughout (no LLM calls). Em-dash sweep clean across both files. Animations are GPU-only via existing `animate-slide-up` keyframe; no new motion APIs.
+
+---
+
 ## 2026-06-06 — Shop premium boutique polish: hero drift, balance gate, copy (web-only, no iOS row)
 
 **Status:** 🚫 N/A (deliberate no-row decision: visual polish pass on the existing web `/shop` surface. No data-model, API contract, or Stripe IAP behavior changed. Touched only `app/shop/page.tsx` (hero gold-drift, flash-of-zero gate on Fang balance, em-dash sweep in user-facing copy, "Fangs" label correction) and `app/globals.css` (two new GPU-only keyframe blocks + reduced-motion allowlist). Native iOS shop is a separate surface owned by `vp-ios` with its own visual cadence.)
