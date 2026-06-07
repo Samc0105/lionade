@@ -362,6 +362,11 @@ export default function SketchView({
   const subscribedRef = useRef(false);
   const roundIdRef = useRef<string | null>(null);
   const completeRoundRef = useRef<() => Promise<void>>(async () => {});
+  // Role refs read by the GUESS broadcast handler so we can gate the
+  // round-complete trigger to the drawer/host without resubscribing the
+  // channel every time isDrawer flips. Synced by an effect below.
+  const isDrawerRef = useRef(false);
+  const isHostRef = useRef(false);
 
   const sendBroadcast = useCallback(
     async (event: string, payload: Record<string, unknown>) => {
@@ -590,6 +595,12 @@ export default function SketchView({
     ch.on("broadcast", { event: SKETCH_EVENTS.WORD_SELECTED }, () => {
       setPhase("drawing");
       setNinnyMsg(null);
+      // 3-2-1 cinematic on every client when the drawer locks their word.
+      // Drawer-side ALSO fires this via the select-word -> drawing phase
+      // transition effect; guessers were already in "drawing" when the
+      // broadcast lands so they wouldn't otherwise see the intro. Reduced-
+      // motion users get the instant cut (handled by countdownTicks > 0).
+      if (!reducedRef.current) setCountdownTicks(3);
     });
     // Progressive Wordle reveal — a guess matched new letter positions. Light up
     // the shared green squares for everyone. Payload carries ONLY matched
@@ -631,6 +642,15 @@ export default function SketchView({
           username: payload.username ?? null,
         };
         setFireFirstConfetti(true);
+        // End the round the moment a guesser lands the answer. Drawer's client
+        // is the canonical caller (always authorized + on the live screen);
+        // host is the fallback if the drawer disconnected. Server is
+        // idempotent on ended_at so even a double-fire is safe. Previously
+        // only the timer-expiry path called complete, so a correct guess left
+        // the drawer stranded on the canvas while guessers saw "got it!".
+        if (isDrawerRef.current || isHostRef.current) {
+          void completeRoundRef.current();
+        }
       }
       setChat((prev) => [
         ...prev,
@@ -1015,6 +1035,22 @@ export default function SketchView({
     completeRoundRef.current = completeRound;
   }, [completeRound]);
 
+  // Role refs — read by the long-lived GUESS broadcast handler so the
+  // round-complete trigger fires only on the drawer/host (server would
+  // otherwise 403 every guesser's redundant call).
+  useEffect(() => {
+    isDrawerRef.current = isDrawer;
+  }, [isDrawer]);
+  useEffect(() => {
+    isHostRef.current = isHost;
+  }, [isHost]);
+  // Reduced-motion ref read by the WORD_SELECTED handler so guessers honor
+  // the user's prefers-reduced-motion preference for the 3-2-1 intro.
+  const reducedRef = useRef(false);
+  useEffect(() => {
+    reducedRef.current = !!reduced;
+  }, [reduced]);
+
   // ── Celebrating -> reveal transition ──
   // All clients run the same timeout because they read from the same server-
   // pushed `started_at`. Late joiners (e.g. tab unfocused when the broadcast
@@ -1290,10 +1326,19 @@ export default function SketchView({
         >
           <div className="flex flex-col items-center gap-2 mb-8">
             <p className="font-mono text-[11px] uppercase tracking-[0.35em] text-cream/50">
-              round {round?.round_num ?? 1}
+              get ready · round {round?.round_num ?? 1}
             </p>
             <p className="font-bebas text-3xl sm:text-4xl tracking-wider text-cream">
-              {drawerName ?? "drawer"} <span className="text-cream/45">is drawing</span>
+              {isDrawer && lockedWord ? (
+                <>
+                  <span className="text-cream/45">your word is</span>{" "}
+                  <span className="text-[#FFD700]">{lockedWord.toUpperCase()}</span>
+                </>
+              ) : (
+                <>
+                  {drawerName ?? "drawer"} <span className="text-cream/45">is drawing</span>
+                </>
+              )}
             </p>
             {subjectLabel && (
               <span

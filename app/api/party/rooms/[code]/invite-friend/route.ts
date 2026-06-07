@@ -18,7 +18,6 @@ import { requireAuth } from "@/lib/api-auth";
 import { isDemoUser } from "@/lib/demo-guard";
 import { demoBlockedResponse } from "@/lib/demo-guard-server";
 import { isValidRoomCode, normalizeRoomCode } from "@/lib/party/room-code";
-import { shouldNotifyUser } from "@/lib/db";
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -120,20 +119,27 @@ export async function POST(
   ]);
 
   // ── Drop the notification ──
-  // Deep-links to the party route — same join flow handles late joiners. The
-  // notifications realtime channel in Navbar will surface this immediately.
-  // Gated on the recipient's party_invites pref. The endpoint still returns
-  // ok:true even when the notification was suppressed — the sender's UI
-  // shouldn't reveal the recipient's preference state.
-  if (await shouldNotifyUser(friendId, "party_invites")) {
-    await supabaseAdmin.from("notifications").insert({
-      user_id: friendId,
-      type: "party_invite",
-      title: `${senderProfile?.username ?? "A friend"} invited you to Lionade Party`,
-      message: `Tap to join room ${code}`,
-      action_url: `/games/party/${code}`,
-      related_user_id: userId,
-    });
+  // Deep-links to the party route. Friend invites are an explicit 1:1
+  // social action between accepted friends, so the row ALWAYS persists (the
+  // friend can see it in their bell + dropdown). Suppressing the row entirely
+  // when a pref was off meant a friend who muted "marketing-style" pings would
+  // also miss real invites from their friends, which broke the social loop.
+  // Pref-driven suppression for invites is a UI-layer choice on the receiver
+  // side, not a server-side drop.
+  const { error: notifErr } = await supabaseAdmin.from("notifications").insert({
+    user_id: friendId,
+    type: "party_invite",
+    title: `${senderProfile?.username ?? "A friend"} invited you to Lionade Party`,
+    message: `Tap to join room ${code}`,
+    action_url: `/games/party/${code}`,
+    related_user_id: userId,
+  });
+  if (notifErr) {
+    console.error("[invite-friend] notification insert failed", notifErr);
+    return NextResponse.json(
+      { error: "Couldn't deliver invite" },
+      { status: 500 },
+    );
   }
 
   return NextResponse.json({
