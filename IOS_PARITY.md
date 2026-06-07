@@ -7,6 +7,20 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 
 ---
 
+## 2026-06-07 — Party V2 foundation: Past Lobbies + named rooms + privacy mode (web-only, no iOS row)
+
+**Status:** 🚫 N/A (deliberate no-row decision: Lionade Party itself is the web-only V1 surface; per `~/.claude/projects/-Users-samc-Desktop-lionade/memory/project_lionade_party.md` the iOS port is deferred to a later phase owned by `vp-ios`. Schema additions are backward-compatible (all defaulted) so an eventual iOS client can adopt the same tables without backfill.)
+
+Migration `supabase/migrations/20260607_party_v2.sql` adds `privacy_mode` (`open|friends|closed`, default `open`), nullable `display_name`, `dismissed_at` to `party_rooms`; `is_pending_round` + `is_spectator` to `party_room_players`; new tables `party_join_requests` + `party_lobby_chat` with RLS gated on host / room membership.
+
+New API: `GET /api/party/history` (three buckets: active / saved / recent), `POST /api/party/rooms/[code]/dismiss` (effective-host close + ROOM_DISMISSED broadcast), `POST /api/party/rooms/[code]/save` (placeholder, returns `deferred: true`). Create-room route accepts optional `display_name` + `privacy_mode`. New social tab `Lobbies` renders `components/social/PastLobbiesPanel.tsx`. Create modal on `/games/party` collects room name + privacy. RoomLobby gains "Close room" host action + ROOM_DISMISSED listener that bails non-host players back to `/games/party`.
+
+Animations: existing motion patterns (Framer Motion / GPU-only). No new dependencies. No em-dashes in copy. Active-game V2 (mid-round queue, request-to-join, lobby chat, spectator) lands in commit 2 of the same batch.
+
+Owner: `quality-docs-writer` (web). No `vp-ios` tag for Party V1 directly; the door is open for `ios-shared-core` to consume the new columns when the iOS port begins.
+
+---
+
 ## 2026-06-06 — Footer + About credibility surfaces polish (web-only, no iOS row)
 
 **Status:** 🚫 N/A (deliberate no-row decision: visual polish pass on two web-only credibility surfaces. `components/Footer.tsx` restructured into a 4-column sitemap (Product / Company / Legal / Connect) with logo, tagline, gold rule, mono eyebrows, and dual baseline. `app/about/page.tsx` rewritten with Bebas hero, three pillar cards, alternating-side timeline, "From the team" warm panel, and gold CTA pill. No data model, API, or behavior change; no new fetches, no new deps. Native iOS has its own bottom-tab + dedicated About surface owned by `vp-ios` with separate visual cadence.)

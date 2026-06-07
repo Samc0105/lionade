@@ -2,6 +2,7 @@
 
 export type RoomStatus = "lobby" | "playing" | "ended";
 export type CurrentGame = "sketch" | "bluff" | "pokerface" | null;
+export type RoomPrivacy = "open" | "friends" | "closed";
 
 export interface PartyRoom {
   id: string;
@@ -13,6 +14,9 @@ export interface PartyRoom {
   settings: PartySettings;
   created_at: string;
   ended_at: string | null;
+  privacy_mode?: RoomPrivacy;
+  display_name?: string | null;
+  dismissed_at?: string | null;
 }
 
 export interface PartySettings {
@@ -35,6 +39,11 @@ export interface PartyPlayer {
   left_at: string | null;
   is_ready: boolean;
   selected_subjects: string[];   // up to 2 topic picks for sketch weighting
+  // Party V2 — true while a player joined mid-round; cleared by the next
+  // ROUND_STARTED so they pop into the active UI on the very next round.
+  is_pending_round?: boolean;
+  // Party V2 — caller chose spectator mode (watch only, no submit/vote).
+  is_spectator?: boolean;
   // Shop V2 — optional, server-supplied. Used by AnimatedUsername in lobby /
   // scoreboard tiles. Null/missing = no effect (free user).
   equipped_username_effect?: string | null;

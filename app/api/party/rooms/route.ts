@@ -51,6 +51,15 @@ export async function POST(req: NextRequest) {
 
     const code = await generateUniqueRoomCode(supabaseAdmin);
 
+    const rawDisplayName = typeof body?.display_name === "string" ? body.display_name.trim() : "";
+    const displayName = rawDisplayName.length > 0 ? rawDisplayName.slice(0, 30) : null;
+    const rawPrivacy = typeof body?.privacy_mode === "string" ? body.privacy_mode : "open";
+    const privacyMode = (["open", "friends", "closed"] as const).includes(
+      rawPrivacy as "open" | "friends" | "closed",
+    )
+      ? (rawPrivacy as "open" | "friends" | "closed")
+      : "open";
+
     const { data: room, error: roomErr } = await supabaseAdmin
       .from("party_rooms")
       .insert({
@@ -58,6 +67,8 @@ export async function POST(req: NextRequest) {
         host_user_id: userId,
         status: "lobby",
         current_game: null,
+        display_name: displayName,
+        privacy_mode: privacyMode,
         settings: {
           subjects: subjects.length > 0 ? subjects : Array.from(ALLOWED_SUBJECTS),
           rounds_per_player: roundsPerPlayer,

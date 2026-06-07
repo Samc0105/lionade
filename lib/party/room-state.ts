@@ -39,7 +39,7 @@ export async function fetchRoomSnapshot(
 
   const { data: players } = await supabase
     .from("party_room_players")
-    .select("user_id, score, joined_at, left_at, is_ready, selected_subjects, profiles!inner(username, equipped_username_effect)")
+    .select("user_id, score, joined_at, left_at, is_ready, is_pending_round, is_spectator, selected_subjects, profiles!inner(username, equipped_username_effect)")
     .eq("room_id", room.id)
     .is("left_at", null)
     .order("joined_at", { ascending: true });
@@ -59,7 +59,17 @@ export async function fetchRoomSnapshot(
     joined_at: p.joined_at,
     left_at: p.left_at,
     is_ready: !!p.is_ready,
+    is_pending_round: !!(p as { is_pending_round?: boolean }).is_pending_round,
+    is_spectator: !!(p as { is_spectator?: boolean }).is_spectator,
     selected_subjects: Array.isArray(p.selected_subjects) ? p.selected_subjects : [],
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    equipped_username_effect:
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (Array.isArray((p as any).profiles)
+        ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (p as any).profiles[0]?.equipped_username_effect
+        : // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (p as any).profiles?.equipped_username_effect) ?? null,
   }));
 
   const typedRoom = room as PartyRoom;

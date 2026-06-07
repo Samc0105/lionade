@@ -52,6 +52,11 @@ export const PARTY_EVENTS = {
   // Lobby flavor: a non-host taps the rotating "nudge" button. Payload carries
   // the random phrase + sender's name; everyone in the room sees the toast.
   HOST_NUDGE: "host_nudge",
+  // V2 — request-to-join + host decision + dismiss + lobby chat.
+  JOIN_REQUEST: "join_request",
+  JOIN_DECISION: "join_decision",
+  ROOM_DISMISSED: "room_dismissed",
+  LOBBY_CHAT: "lobby_chat",
 } as const;
 
 export const SKETCH_EVENTS = {

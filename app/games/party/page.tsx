@@ -5,14 +5,14 @@
 // Two big CTAs (Create Room / Join Room) + a "How to play" expandable.
 // On create or successful join, we router.push to /games/party/[code].
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import BackButton from "@/components/BackButton";
-import { apiPost } from "@/lib/api-client";
+import { apiGet, apiPost } from "@/lib/api-client";
 import { normalizeRoomCode, isValidRoomCode } from "@/lib/party/room-code";
-import { PaintBrush, ChatCircleText, Sparkle, Users, ChartLineUp, Eye } from "@phosphor-icons/react";
+import { PaintBrush, ChatCircleText, Sparkle, Users, ChartLineUp, Eye, X as XIcon } from "@phosphor-icons/react";
 
 export default function PartyLandingPage() {
   const router = useRouter();
@@ -22,11 +22,18 @@ export default function PartyLandingPage() {
   const [joinCode, setJoinCode] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [howOpen, setHowOpen] = useState(false);
+  const [createOpen, setCreateOpen] = useState(false);
+  const [roomName, setRoomName] = useState("");
+  const [privacyMode, setPrivacyMode] = useState<"open" | "friends" | "closed">("open");
 
   async function createRoom() {
     setBusy("creating");
     setError(null);
-    const res = await apiPost<{ code: string }>("/api/party/rooms", {});
+    const trimmed = roomName.trim().slice(0, 30);
+    const res = await apiPost<{ code: string }>("/api/party/rooms", {
+      ...(trimmed.length > 0 ? { display_name: trimmed } : {}),
+      privacy_mode: privacyMode,
+    });
     setBusy("none");
     if (!res.ok || !res.data?.code) {
       console.error("[party:create-room] failed", res.error);
@@ -45,15 +52,74 @@ export default function PartyLandingPage() {
     }
     setBusy("joining");
     setError(null);
-    const res = await apiPost<{ ok: boolean }>(`/api/party/rooms/${code}/join`, {});
+    const res = await apiPost<{ ok: boolean; requires_request?: boolean }>(
+      `/api/party/rooms/${code}/join`,
+      {},
+    );
     setBusy("none");
     if (!res.ok) {
       console.error("[party:join-room] failed", res.error);
       setError("That room isn't open right now.");
       return;
     }
+    if (res.data?.requires_request) {
+      setRequestCode(code);
+      setRequestNote("");
+      setRequestOpen(true);
+      return;
+    }
     router.push(`/games/party/${code}`);
   }
+
+  // Request-to-join modal state. Sister flow to the joinRoom handler above:
+  // when the server returns requires_request, we collect an optional 50-char
+  // note and POST /request-join, then poll for the host's decision.
+  const [requestOpen, setRequestOpen] = useState(false);
+  const [requestCode, setRequestCode] = useState("");
+  const [requestNote, setRequestNote] = useState("");
+  const [requestStatus, setRequestStatus] = useState<"idle" | "sending" | "waiting" | "approved" | "declined">("idle");
+  const [requestError, setRequestError] = useState<string | null>(null);
+
+  async function sendJoinRequest() {
+    if (!requestCode) return;
+    setRequestStatus("sending");
+    setRequestError(null);
+    const res = await apiPost<{ ok: boolean; request_id?: string }>(
+      `/api/party/rooms/${requestCode}/request-join`,
+      { note: requestNote.trim().slice(0, 50) },
+    );
+    if (!res.ok) {
+      setRequestStatus("idle");
+      setRequestError(res.error ?? "Couldn't send the request. Try again.");
+      return;
+    }
+    setRequestStatus("waiting");
+  }
+
+  // Lightweight poll for the host decision. Realtime would be ideal but the
+  // landing page doesn't subscribe to the room channel; a 3s poll is fine for
+  // the ~30s typical window.
+  useEffect(() => {
+    if (requestStatus !== "waiting" || !requestCode) return;
+    let cancelled = false;
+    const iv = setInterval(async () => {
+      const res = await apiGet<{ status: string }>(
+        `/api/party/rooms/${requestCode}/request-join`,
+      );
+      if (cancelled || !res.ok) return;
+      const st = res.data?.status;
+      if (st === "approved") {
+        setRequestStatus("approved");
+        setTimeout(() => router.push(`/games/party/${requestCode}`), 700);
+      } else if (st === "declined") {
+        setRequestStatus("declined");
+      }
+    }, 3000);
+    return () => {
+      cancelled = true;
+      clearInterval(iv);
+    };
+  }, [requestStatus, requestCode, router]);
 
   return (
     <ProtectedRoute>
@@ -103,7 +169,7 @@ export default function PartyLandingPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-10">
             {/* Create */}
             <motion.button
-              onClick={createRoom}
+              onClick={() => setCreateOpen(true)}
               disabled={busy !== "none"}
               whileHover={reduced ? undefined : { y: -3 }}
               whileTap={reduced ? undefined : { scale: 0.98 }}
@@ -117,7 +183,7 @@ export default function PartyLandingPage() {
                 CREATE ROOM
               </p>
               <p className="text-white/80 text-sm font-syne">
-                {busy === "creating" ? "Generating code..." : "You'll be the host."}
+                {busy === "creating" ? "Generating code..." : "Name it, set privacy, host it."}
               </p>
             </motion.button>
 
@@ -268,6 +334,205 @@ export default function PartyLandingPage() {
             )}
           </AnimatePresence>
         </div>
+
+        {/* Create Room modal — name + privacy */}
+        <AnimatePresence>
+          {createOpen && (
+            <motion.div
+              className="fixed inset-0 z-50 grid place-items-center px-4"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              style={{ background: "rgba(2,3,8,0.7)", backdropFilter: "blur(8px)" }}
+              onClick={() => setCreateOpen(false)}
+            >
+              <motion.div
+                onClick={(e) => e.stopPropagation()}
+                initial={reduced ? false : { y: 16, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={reduced ? { opacity: 0 } : { y: 16, opacity: 0 }}
+                className="w-full max-w-md rounded-2xl p-6 relative"
+                style={{
+                  background: "linear-gradient(135deg, rgba(16,12,26,0.96) 0%, rgba(8,6,16,0.96) 100%)",
+                  border: "1px solid rgba(168,85,247,0.4)",
+                  boxShadow: "0 16px 48px rgba(0,0,0,0.6)",
+                }}
+              >
+                <button
+                  type="button"
+                  aria-label="Close"
+                  onClick={() => setCreateOpen(false)}
+                  className="absolute top-3 right-3 w-8 h-8 rounded-full grid place-items-center text-cream/55 hover:text-cream/90 transition"
+                  style={{ background: "rgba(255,255,255,0.04)" }}
+                >
+                  <XIcon size={14} weight="bold" aria-hidden="true" />
+                </button>
+                <p className="font-bebas text-3xl tracking-wider text-cream mb-1">NEW ROOM</p>
+                <p className="text-cream/55 text-xs font-syne mb-5">
+                  Optional name. Set who can drop in.
+                </p>
+
+                <label className="block text-cream/70 text-[11px] font-bold uppercase tracking-wider mb-2">
+                  Room name <span className="text-cream/30 font-normal normal-case">(optional)</span>
+                </label>
+                <input
+                  type="text"
+                  value={roomName}
+                  onChange={(e) => setRoomName(e.target.value.slice(0, 30))}
+                  placeholder="Friday night party"
+                  maxLength={30}
+                  className="w-full rounded-xl px-3 py-2.5 text-sm text-cream outline-none mb-5"
+                  style={{
+                    background: "rgba(255,255,255,0.04)",
+                    border: "1px solid rgba(255,255,255,0.1)",
+                  }}
+                />
+
+                <label className="block text-cream/70 text-[11px] font-bold uppercase tracking-wider mb-2">
+                  Who can join
+                </label>
+                <div className="grid grid-cols-3 gap-2 mb-6">
+                  {(["open", "friends", "closed"] as const).map((m) => {
+                    const label = m === "open" ? "Open" : m === "friends" ? "Friends" : "Invite";
+                    const sub = m === "open" ? "Anyone with code" : m === "friends" ? "Auto-let-in friends" : "Approval only";
+                    const on = privacyMode === m;
+                    return (
+                      <button
+                        key={m}
+                        type="button"
+                        onClick={() => setPrivacyMode(m)}
+                        className="rounded-xl px-3 py-2.5 text-left transition-all"
+                        style={{
+                          background: on
+                            ? "linear-gradient(135deg, rgba(168,85,247,0.25) 0%, rgba(99,102,241,0.18) 100%)"
+                            : "rgba(255,255,255,0.03)",
+                          border: on ? "1px solid rgba(168,85,247,0.55)" : "1px solid rgba(255,255,255,0.08)",
+                        }}
+                      >
+                        <p className="text-cream text-xs font-bold tracking-wide">{label}</p>
+                        <p className="text-cream/40 text-[10px] mt-0.5 leading-tight">{sub}</p>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => { setCreateOpen(false); createRoom(); }}
+                  disabled={busy !== "none"}
+                  className="w-full py-3 rounded-xl font-bebas text-lg tracking-wider transition-all active:scale-95 disabled:opacity-40"
+                  style={{
+                    background: "linear-gradient(135deg, #A855F7 0%, #6366F1 100%)",
+                    color: "#fff",
+                    boxShadow: "0 8px 24px rgba(168,85,247,0.35)",
+                  }}
+                >
+                  {busy === "creating" ? "CREATING..." : "CREATE ROOM"}
+                </button>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Request-to-join modal — surfaced when /join returns requires_request */}
+        <AnimatePresence>
+          {requestOpen && (
+            <motion.div
+              className="fixed inset-0 z-50 grid place-items-center px-4"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              style={{ background: "rgba(2,3,8,0.7)", backdropFilter: "blur(8px)" }}
+              onClick={() => {
+                setRequestOpen(false);
+                setRequestStatus("idle");
+              }}
+            >
+              <motion.div
+                onClick={(e) => e.stopPropagation()}
+                initial={reduced ? false : { y: 16, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={reduced ? { opacity: 0 } : { y: 16, opacity: 0 }}
+                className="w-full max-w-md rounded-2xl p-6 relative"
+                style={{
+                  background: "linear-gradient(135deg, rgba(16,12,26,0.96) 0%, rgba(8,6,16,0.96) 100%)",
+                  border: "1px solid rgba(255,215,0,0.35)",
+                  boxShadow: "0 16px 48px rgba(0,0,0,0.6)",
+                }}
+              >
+                <button
+                  type="button"
+                  aria-label="Close"
+                  onClick={() => { setRequestOpen(false); setRequestStatus("idle"); }}
+                  className="absolute top-3 right-3 w-8 h-8 rounded-full grid place-items-center text-cream/55 hover:text-cream/90 transition"
+                  style={{ background: "rgba(255,255,255,0.04)" }}
+                >
+                  <XIcon size={14} weight="bold" aria-hidden="true" />
+                </button>
+                <p className="font-bebas text-3xl tracking-wider text-cream mb-1">REQUEST TO JOIN</p>
+                <p className="text-cream/55 text-xs font-syne mb-5">
+                  Room {requestCode} needs the host's OK. Add a note if you want.
+                </p>
+
+                {requestStatus === "idle" && (
+                  <>
+                    <label className="block text-cream/70 text-[11px] font-bold uppercase tracking-wider mb-2">
+                      Note <span className="text-cream/30 font-normal normal-case">(optional, 50 chars)</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={requestNote}
+                      onChange={(e) => setRequestNote(e.target.value.slice(0, 50))}
+                      placeholder="hey it's me from class"
+                      maxLength={50}
+                      className="w-full rounded-xl px-3 py-2.5 text-sm text-cream outline-none mb-5"
+                      style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)" }}
+                    />
+                    {requestError && (
+                      <p className="text-red-400 text-xs mb-3" role="alert">{requestError}</p>
+                    )}
+                    <button
+                      type="button"
+                      onClick={sendJoinRequest}
+                      className="w-full py-3 rounded-xl font-bebas text-lg tracking-wider transition-all active:scale-95"
+                      style={{ background: "linear-gradient(135deg, #FFD700 0%, #B8960C 100%)", color: "#04080F" }}
+                    >
+                      SEND REQUEST
+                    </button>
+                  </>
+                )}
+                {requestStatus === "sending" && (
+                  <p className="text-cream/65 text-sm py-6 text-center">Sending...</p>
+                )}
+                {requestStatus === "waiting" && (
+                  <div className="py-6 text-center">
+                    <p className="text-cream text-sm font-semibold mb-1">Sent.</p>
+                    <p className="text-cream/55 text-xs">Waiting for the host. This auto-updates.</p>
+                  </div>
+                )}
+                {requestStatus === "approved" && (
+                  <p className="text-green-300 text-sm py-6 text-center font-semibold">
+                    You're in. Hopping you over...
+                  </p>
+                )}
+                {requestStatus === "declined" && (
+                  <div className="py-4 text-center">
+                    <p className="text-cream text-sm font-semibold mb-1">Host said no thanks.</p>
+                    <p className="text-cream/55 text-xs">Try a different room.</p>
+                    <button
+                      type="button"
+                      onClick={() => { setRequestOpen(false); setRequestStatus("idle"); }}
+                      className="mt-4 px-4 py-2 rounded-lg text-xs font-bold text-cream/80"
+                      style={{ background: "rgba(255,255,255,0.06)" }}
+                    >
+                      Close
+                    </button>
+                  </div>
+                )}
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </ProtectedRoute>
   );

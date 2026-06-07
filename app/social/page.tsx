@@ -15,6 +15,7 @@ import { toastError, toastSuccess } from "@/lib/toast";
 import CountUp from "@/components/CountUp";
 import AnimatedUsername from "@/components/AnimatedUsername";
 import { resolveRowUsernameEffect } from "@/lib/use-username-effect";
+import PastLobbiesPanel from "@/components/social/PastLobbiesPanel";
 
 // ── Types ────────────────────────────────────────────────────
 
@@ -183,7 +184,11 @@ export default function SocialPage() {
     return () => document.removeEventListener("keydown", onKey);
   }, [showAddFriendModal]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [showNotifView, setShowNotifView] = useState(false);
+  type SocialTab = "friends" | "notifs" | "lobbies";
+  const [activeTab, setActiveTab] = useState<SocialTab>("friends");
+  const showNotifView = activeTab === "notifs";
+  const showLobbiesView = activeTab === "lobbies";
+  const setShowNotifView = (next: boolean) => setActiveTab(next ? "notifs" : "friends");
   const [socialNotifs, setSocialNotifs] = useState<{ id: string; type: string; title: string; message: string | null; read: boolean; action_url: string | null; created_at: string }[]>([]);
   const [socialUnreadCount, setSocialUnreadCount] = useState<number | null>(null);
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
@@ -722,19 +727,25 @@ export default function SocialPage() {
               </button>
             </div>
 
-            {/* Tab toggle: Friends / Notifications */}
+            {/* Tab toggle: Friends / Lobbies / Notifications */}
             <div className="flex border-b border-white/[0.06]">
               <button
-                onClick={() => setShowNotifView(false)}
-                className={`flex-1 py-2.5 text-xs font-bold uppercase tracking-wider transition-colors ${!showNotifView ? "text-cream border-b-2 border-electric" : "text-cream/55 hover:text-cream/50"}`}
+                onClick={() => setActiveTab("friends")}
+                className={`flex-1 py-2.5 text-xs font-bold uppercase tracking-wider transition-colors ${activeTab === "friends" ? "text-cream border-b-2 border-electric" : "text-cream/55 hover:text-cream/50"}`}
               >
                 Friends
               </button>
               <button
-                onClick={() => { setShowNotifView(true); loadSocialNotifs(); }}
-                className={`flex-1 py-2.5 text-xs font-bold uppercase tracking-wider transition-colors relative ${showNotifView ? "text-cream border-b-2 border-electric" : "text-cream/55 hover:text-cream/50"}`}
+                onClick={() => setActiveTab("lobbies")}
+                className={`flex-1 py-2.5 text-xs font-bold uppercase tracking-wider transition-colors ${activeTab === "lobbies" ? "text-cream border-b-2 border-electric" : "text-cream/55 hover:text-cream/50"}`}
               >
-                Notifications
+                Lobbies
+              </button>
+              <button
+                onClick={() => { setActiveTab("notifs"); loadSocialNotifs(); }}
+                className={`flex-1 py-2.5 text-xs font-bold uppercase tracking-wider transition-colors relative ${activeTab === "notifs" ? "text-cream border-b-2 border-electric" : "text-cream/55 hover:text-cream/50"}`}
+              >
+                Notifs
                 {(socialUnreadCount ?? 0) > 0 && (
                   <span className="absolute top-1.5 ml-1 min-w-[16px] h-4 rounded-full inline-flex items-center justify-center px-1 text-[9px] font-bold"
                     style={{ background: "#EF4444", color: "#fff" }}>
@@ -793,6 +804,8 @@ export default function SocialPage() {
                   ))
                 )}
               </div>
+            ) : showLobbiesView ? (
+              <PastLobbiesPanel router={router} />
             ) : (
             <>
             {/* Pending Requests */}

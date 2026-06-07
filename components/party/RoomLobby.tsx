@@ -147,6 +147,42 @@ export default function RoomLobby({ room, players, isHost, meUserId, onGameStart
   const lastNudgeWindowRef = useRef<number | null>(null);
   const alreadyNudgedThisWindow = lastNudgeWindowRef.current === nudgeWindowIdx;
 
+  // Dismiss-room (host-only). One-tap close that ends the room for everyone
+  // and lands them back on /games/party with a ROOM_DISMISSED broadcast.
+  const [dismissing, setDismissing] = useState(false);
+  const [showDismissConfirm, setShowDismissConfirm] = useState(false);
+  function confirmDismiss() {
+    setShowDismissConfirm(true);
+  }
+  async function doDismiss() {
+    if (dismissing) return;
+    setDismissing(true);
+    const res = await apiPost(`/api/party/rooms/${room.code}/dismiss`, {});
+    setDismissing(false);
+    setShowDismissConfirm(false);
+    if (!res.ok) {
+      toastError("Couldn't close the room. Try again.");
+      return;
+    }
+    toastSuccess("Room closed.");
+    if (typeof window !== "undefined") window.location.href = "/games/party";
+  }
+  // Listen for the host's broadcast on the main room channel so non-host
+  // players bail out too.
+  useEffect(() => {
+    const ch = supabase.channel(`party-room-${room.code}`);
+    ch.on("broadcast", { event: PARTY_EVENTS.ROOM_DISMISSED }, () => {
+      if (typeof window !== "undefined") {
+        toastError("The host closed this room.");
+        window.location.href = "/games/party";
+      }
+    });
+    ch.subscribe();
+    return () => {
+      supabase.removeChannel(ch);
+    };
+  }, [room.code]);
+
   // Toast stack — visible to EVERYONE in the room when a nudge fires (it's
   // funnier when the whole room sees Brother spam the host). Self-pruning.
   type Toast = { id: string; phrase: string; sender: string };
@@ -796,6 +832,36 @@ export default function RoomLobby({ room, players, isHost, meUserId, onGameStart
               Waiting for {players.length - readyCount} player
               {players.length - readyCount === 1 ? "" : "s"} to ready up.
             </p>
+          )}
+          {!showDismissConfirm ? (
+            <button
+              onClick={confirmDismiss}
+              disabled={dismissing}
+              className="w-full py-2 rounded-lg font-syne text-xs text-cream/40 hover:text-red-300/80 transition-colors disabled:opacity-40"
+            >
+              Close room
+            </button>
+          ) : (
+            <div className="flex items-center gap-2 pt-1">
+              <p className="text-cream/60 text-xs flex-1">
+                Close the room for everyone?
+              </p>
+              <button
+                onClick={() => setShowDismissConfirm(false)}
+                className="px-3 py-1.5 rounded-lg text-xs font-bold text-cream/65"
+                style={{ background: "rgba(255,255,255,0.04)" }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={doDismiss}
+                disabled={dismissing}
+                className="px-3 py-1.5 rounded-lg text-xs font-bold text-red-200"
+                style={{ background: "rgba(239,68,68,0.18)", border: "1px solid rgba(239,68,68,0.4)" }}
+              >
+                {dismissing ? "Closing..." : "Yes, close"}
+              </button>
+            </div>
           )}
         </div>
       )}
