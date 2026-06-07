@@ -19,6 +19,7 @@ import { apiGet, apiPost, apiPatch } from "@/lib/api-client";
 import { toastError, toastSuccess } from "@/lib/toast";
 import { useHeartbeat } from "@/lib/use-heartbeat";
 import Confetti from "@/components/Confetti";
+import CelebrationOverlay, { type Celebration } from "@/components/CelebrationOverlay";
 import {
   Calculator,
   TestTube,
@@ -1103,8 +1104,62 @@ function ResultsScreen({
     return () => clearTimeout(t);
   }, []);
 
+  // Earned-moment overlay queue. Built once on first mount from the
+  // results-screen props so a remount (or state change) doesn't replay it.
+  const celebrationsRef = useRef<Celebration[] | null>(null);
+  if (celebrationsRef.current === null) {
+    const list: Celebration[] = [];
+    if (streakMilestone) {
+      const tier =
+        streakMilestone.days >= 100 ? "streak-100-day" :
+        streakMilestone.days >= 30  ? "streak-30-day"  :
+                                      "streak-7-day";
+      list.push({
+        id: `streak-${streakMilestone.days}`,
+        eyebrow: "STREAK MILESTONE",
+        headline: `${streakMilestone.days} DAYS STRONG`,
+        description: "Consistency is compounding. Keep showing up.",
+        illustration: `/illustrations/${tier}.png`,
+        fangs: streakMilestone.bonus,
+        accent: "ember",
+      });
+    }
+    if (bonusFangs > 0) {
+      list.push({
+        id: "consecutive-3",
+        eyebrow: "BONUS UNLOCKED",
+        headline: "3 IN A ROW",
+        description: "Three quizzes in an hour. The grind is paying out.",
+        illustration: "/illustrations/rank-elite.png",
+        fangs: bonusFangs,
+        accent: "gold",
+      });
+    }
+    if (accuracy === 100) {
+      list.push({
+        id: "perfect-run",
+        eyebrow: "PERFECT RUN",
+        headline: "FLAWLESS",
+        description: "Every answer correct. That deserves a moment.",
+        illustration: "/illustrations/rank-perfect.png",
+        accent: "electric",
+      });
+    }
+    celebrationsRef.current = list;
+  }
+  const [overlayDone, setOverlayDone] = useState(false);
+
   return (
     <div className="min-h-screen pt-20 relative overflow-hidden">
+      {/* Peak earned-moment overlay — fires once on mount, queues multiple
+          celebrations, then settles into the inline summaries below. */}
+      {!overlayDone && celebrationsRef.current && celebrationsRef.current.length > 0 && (
+        <CelebrationOverlay
+          celebrations={celebrationsRef.current}
+          onAllDismissed={() => setOverlayDone(true)}
+        />
+      )}
+
       {/* Celebration confetti for strong results — ELITE (80%+) or PERFECT (100%) */}
       <Confetti trigger={accuracy >= 80} count={accuracy === 100 ? 80 : 50} duration={accuracy === 100 ? 1800 : 1400} />
 
