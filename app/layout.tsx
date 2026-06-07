@@ -115,15 +115,11 @@ export const metadata: Metadata = {
     description: "Stop studying for free. Earn Fangs, climb ranks, duel friends, and master any exam with AI.",
     url: SITE_URL,
     siteName: "Lionade",
-    // Served from our CloudFront CDN so the preview card loads fast on
-    // iMessage, Slack, Discord, etc. 1200x630 is the size every major
-    // platform uses for its large-card layout.
-    images: [{
-      url: "https://d1745aj99cclbu.cloudfront.net/logo-full.png",
-      width: 1200,
-      height: 630,
-      alt: "Lionade · Study Like It's Your Job",
-    }],
+    // No explicit `images` — Next.js auto-wires `app/opengraph-image.tsx`
+    // (and per-route `app/<route>/opengraph-image.tsx`) as the share card.
+    // Setting `images` here would override that auto-wiring at the root
+    // scope and force every page back to a static CDN PNG. The dynamic
+    // edge-rendered cards are higher engagement, so we let convention win.
     locale: "en_US",
     type: "website",
   },
@@ -131,7 +127,8 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Lionade · Study Like It's Your Job",
     description: "Stop studying for free. Earn Fangs, climb ranks, duel friends, and master any exam with AI.",
-    images: ["https://d1745aj99cclbu.cloudfront.net/logo-full.png"],
+    // Same logic as openGraph above: omit `images` so `twitter-image.tsx`
+    // takes over per-route.
     creator: "@lionade",
     site: "@lionade",
   },
