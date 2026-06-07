@@ -55,6 +55,15 @@ export const metadata: Metadata = {
     template: "%s · Lionade",
   },
   applicationName: "Lionade",
+  appleWebApp: {
+    // Powers iOS "Add to Home Screen". `capable` enables standalone mode
+    // (no Safari chrome). `title` is the label under the home-screen icon.
+    // `black-translucent` lets the app paint under the status bar so the
+    // dark theme reads edge-to-edge on pinned launches.
+    capable: true,
+    title: "Lionade",
+    statusBarStyle: "black-translucent",
+  },
   description:
     "Lionade (not lemonade) is the study-rewards app for Gen Z. Earn Fangs, climb ranks, duel friends, and master any exam with AI.",
   formatDetection: {
