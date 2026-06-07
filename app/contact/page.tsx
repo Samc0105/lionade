@@ -1,17 +1,18 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useAuth } from "@/lib/auth";
 import BackButton from "@/components/BackButton";
 import { SUPPORT_EMAIL } from "@/lib/site-config";
-import { CheckCircle, Warning } from "@phosphor-icons/react";
+import { CheckCircle, Warning, EnvelopeSimple, XLogo, Lifebuoy } from "@phosphor-icons/react";
 
-const CATEGORIES = ["Bug Report", "Feature Request", "General Question", "Account Issue", "Feedback"];
+const CATEGORIES = ["Bug Report", "Feature Request", "General Question", "Account Issue", "Partnership", "Other"];
 
 const QUICK_HELP = [
-  { icon: "\uD83D\uDC1B", label: "Report a Bug", category: "Bug Report" },
-  { icon: "\uD83D\uDCA1", label: "Feature Request", category: "Feature Request" },
-  { icon: "\u2753", label: "General Question", category: "General Question" },
+  { icon: "🐛", label: "Report a Bug", category: "Bug Report", hint: "Something broken" },
+  { icon: "💡", label: "Feature Idea", category: "Feature Request", hint: "Wishlist item" },
+  { icon: "❓", label: "General Question", category: "General Question", hint: "Anything else" },
 ];
 
 export default function ContactPage() {
@@ -41,53 +42,124 @@ export default function ContactPage() {
       if (!res.ok) throw new Error();
       setSent(true);
     } catch {
-      setError(`Failed to send. Please try again or email ${SUPPORT_EMAIL} directly.`);
+      setError(`Failed to send. Please email ${SUPPORT_EMAIL} directly.`);
     }
     setSending(false);
   };
 
-  const inputCls = "w-full bg-white/5 border border-electric/20 rounded-xl px-4 py-3 text-cream placeholder-cream/25 text-sm focus:outline-none focus:border-electric transition-all";
-  const labelCls = "block text-cream/50 text-xs font-bold uppercase tracking-widest mb-1.5";
+  const inputCls =
+    "w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-4 py-3 text-cream placeholder-cream/25 text-sm focus:outline-none focus:border-electric/60 focus:bg-white/[0.05] transition-all";
+  const labelCls = "block font-mono text-[10px] uppercase tracking-[0.28em] text-cream/50 mb-2";
 
   return (
     <div className="min-h-screen pt-20 pb-16">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <BackButton />
 
-        <div className="text-center mb-10 animate-slide-up">
-          <h1 className="font-bebas text-5xl text-cream tracking-wider mb-2">How Can We Help?</h1>
-          <p className="text-cream/40 text-sm">We usually respond within 24 hours.</p>
-        </div>
+        {/* Hero */}
+        <section className="text-center mt-4 mb-12 animate-slide-up">
+          <p className="font-mono text-[11px] uppercase tracking-[0.32em] text-gold/75 mb-4">
+            We answer fast
+          </p>
+          <h1 className="font-bebas text-6xl sm:text-7xl tracking-wider leading-[0.95]">
+            <span className="bg-gradient-to-r from-electric via-[#6AABF0] to-gold bg-clip-text text-transparent">
+              GET IN TOUCH
+            </span>
+          </h1>
+          <div
+            aria-hidden
+            className="mx-auto mt-6 h-px w-24"
+            style={{ background: "linear-gradient(90deg, transparent 0%, #F0B429 50%, transparent 100%)" }}
+          />
+          <p className="mt-6 text-cream/65 text-base leading-relaxed max-w-xl mx-auto">
+            Bug reports, feedback, partnership ideas, anything. We read every message and try to respond within 24 hours.
+          </p>
+        </section>
 
-        {/* Quick help cards */}
-        <div className="grid grid-cols-3 gap-3 mb-8 animate-slide-up" style={{ animationDelay: "0.05s" }}>
-          {QUICK_HELP.map((item) => (
-            <button
-              key={item.label}
-              onClick={() => setCategory(item.category)}
-              className={`p-4 rounded-2xl border text-center transition-all duration-300 hover:-translate-y-0.5 cursor-pointer ${
-                category === item.category
-                  ? "border-electric bg-electric/10"
-                  : "border-electric/20 hover:border-electric/40"
-              }`}
-              style={{ background: category === item.category ? undefined : "linear-gradient(135deg, #0a1020 0%, #060c18 100%)" }}
-            >
-              <span className="text-3xl block mb-2">{item.icon}</span>
-              <p className="text-cream text-xs font-bold">{item.label}</p>
-            </button>
-          ))}
-        </div>
+        {/* Direct channels */}
+        <section
+          className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-10 animate-slide-up"
+          style={{ animationDelay: "0.05s" }}
+        >
+          <a
+            href={`mailto:${SUPPORT_EMAIL}`}
+            className="rounded-2xl border border-white/[0.08] p-4 hover:border-electric/40 transition-all hover:-translate-y-0.5"
+            style={{ background: "linear-gradient(135deg, rgba(10,16,32,0.7) 0%, rgba(6,12,24,0.7) 100%)" }}
+          >
+            <EnvelopeSimple size={20} weight="duotone" color="#4C96E1" aria-hidden="true" />
+            <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-cream/45 mt-2">Email</p>
+            <p className="text-cream text-sm font-semibold mt-1 break-all">{SUPPORT_EMAIL}</p>
+          </a>
+          <a
+            href="https://x.com/getlionade"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="rounded-2xl border border-white/[0.08] p-4 hover:border-electric/40 transition-all hover:-translate-y-0.5"
+            style={{ background: "linear-gradient(135deg, rgba(10,16,32,0.7) 0%, rgba(6,12,24,0.7) 100%)" }}
+          >
+            <XLogo size={20} weight="duotone" color="#F0B429" aria-hidden="true" />
+            <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-cream/45 mt-2">Follow</p>
+            <p className="text-cream text-sm font-semibold mt-1">@getlionade</p>
+          </a>
+          <Link
+            href="/about"
+            className="rounded-2xl border border-white/[0.08] p-4 hover:border-electric/40 transition-all hover:-translate-y-0.5 block"
+            style={{ background: "linear-gradient(135deg, rgba(10,16,32,0.7) 0%, rgba(6,12,24,0.7) 100%)" }}
+          >
+            <Lifebuoy size={20} weight="duotone" color="#A78BFA" aria-hidden="true" />
+            <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-cream/45 mt-2">Team</p>
+            <p className="text-cream text-sm font-semibold mt-1">About Lionade</p>
+          </Link>
+        </section>
+
+        {/* Quick category cards */}
+        {!sent && (
+          <div
+            className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6 animate-slide-up"
+            style={{ animationDelay: "0.1s" }}
+          >
+            {QUICK_HELP.map((item) => {
+              const selected = category === item.category;
+              return (
+                <button
+                  key={item.label}
+                  type="button"
+                  onClick={() => setCategory(item.category)}
+                  className={`p-4 rounded-2xl border text-left transition-all duration-300 hover:-translate-y-0.5 cursor-pointer ${
+                    selected
+                      ? "border-electric/70 bg-electric/[0.08]"
+                      : "border-white/[0.08] hover:border-electric/40"
+                  }`}
+                  style={{
+                    background: selected
+                      ? undefined
+                      : "linear-gradient(135deg, rgba(10,16,32,0.7) 0%, rgba(6,12,24,0.7) 100%)",
+                  }}
+                >
+                  <span className="text-2xl block mb-2">{item.icon}</span>
+                  <p className="text-cream text-sm font-bold">{item.label}</p>
+                  <p className="text-cream/40 text-xs mt-0.5">{item.hint}</p>
+                </button>
+              );
+            })}
+          </div>
+        )}
 
         {sent ? (
           <div
-            className="rounded-2xl border border-green-400/30 p-8 text-center animate-slide-up"
-            style={{ background: "linear-gradient(135deg, #0a1020 0%, #060c18 100%)" }}
+            className="rounded-2xl border border-green-400/30 p-10 text-center animate-slide-up"
+            style={{ background: "linear-gradient(135deg, rgba(10,16,32,0.85) 0%, rgba(6,12,24,0.85) 100%)" }}
           >
             <div className="flex justify-center mb-4">
-              <CheckCircle size={52} weight="fill" color="#22C55E" aria-hidden="true" />
+              <CheckCircle size={56} weight="fill" color="#22C55E" aria-hidden="true" />
             </div>
-            <h2 className="font-bebas text-2xl text-cream tracking-wider mb-2">Message Sent!</h2>
-            <p className="text-cream/50 text-sm mb-5">We'll get back to you soon.</p>
+            <p className="font-mono text-[11px] uppercase tracking-[0.32em] text-green-400/80 mb-3">
+              Message received
+            </p>
+            <h2 className="font-bebas text-3xl text-cream tracking-wider mb-2">We got it.</h2>
+            <p className="text-cream/55 text-sm mb-6 max-w-md mx-auto">
+              Expect a reply at <span className="text-cream/80">{email}</span> within a day. Check spam if it does not show.
+            </p>
             <button
               type="button"
               onClick={() => {
@@ -104,28 +176,51 @@ export default function ContactPage() {
           </div>
         ) : (
           <div
-            className="rounded-2xl border border-electric/20 p-6 sm:p-8 space-y-5 animate-slide-up"
-            style={{ background: "linear-gradient(135deg, #0a1020 0%, #060c18 100%)", animationDelay: "0.1s" }}
+            className="rounded-2xl border border-white/[0.08] p-6 sm:p-8 space-y-5 animate-slide-up"
+            style={{
+              background: "linear-gradient(135deg, rgba(10,16,32,0.85) 0%, rgba(6,12,24,0.85) 100%)",
+              animationDelay: "0.15s",
+            }}
           >
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               <div>
-                <label className={labelCls}>Name</label>
-                <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Your name" className={inputCls} />
+                <label htmlFor="contact-name" className={labelCls}>Name</label>
+                <input
+                  id="contact-name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="What should we call you"
+                  autoComplete="name"
+                  autoCorrect="off"
+                  spellCheck={false}
+                  className={inputCls}
+                />
               </div>
               <div>
-                <label className={labelCls}>Email</label>
-                <input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" className={inputCls} />
+                <label htmlFor="contact-email" className={labelCls}>Email</label>
+                <input
+                  id="contact-email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="you@example.com"
+                  autoComplete="email"
+                  autoCorrect="off"
+                  spellCheck={false}
+                  className={inputCls}
+                />
               </div>
             </div>
 
             <div>
-              <label className={labelCls}>Category</label>
+              <label htmlFor="contact-category" className={labelCls}>Category</label>
               <select
+                id="contact-category"
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-                className="w-full bg-[#0a1020] border border-electric/20 rounded-xl px-4 py-3 text-cream text-sm focus:outline-none focus:border-electric transition-all appearance-none"
+                className="w-full bg-[#0a1020] border border-white/[0.08] rounded-xl px-4 py-3 text-cream text-sm focus:outline-none focus:border-electric/60 transition-all appearance-none"
               >
-                <option value="">Select a category...</option>
+                <option value="">Pick one</option>
                 {CATEGORIES.map((c) => (
                   <option key={c} value={c}>{c}</option>
                 ))}
@@ -133,42 +228,57 @@ export default function ContactPage() {
             </div>
 
             <div>
-              <label className={labelCls}>Subject</label>
-              <input value={subject} onChange={(e) => setSubject(e.target.value)} placeholder="Brief summary" className={inputCls} />
+              <label htmlFor="contact-subject" className={labelCls}>Subject</label>
+              <input
+                id="contact-subject"
+                value={subject}
+                onChange={(e) => setSubject(e.target.value)}
+                placeholder="One-line summary"
+                autoCorrect="off"
+                className={inputCls}
+              />
             </div>
 
             <div>
-              <label className={labelCls}>Message</label>
+              <label htmlFor="contact-message" className={labelCls}>Message</label>
               <textarea
+                id="contact-message"
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
-                placeholder="Describe your question or issue..."
-                rows={5}
-                className={inputCls + " resize-none"}
+                placeholder="Tell us what is up. Screenshots, steps to reproduce, and rough timing all help."
+                rows={6}
+                className={inputCls + " resize-none leading-relaxed"}
               />
             </div>
 
             {error && (
               <div className="flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold bg-red-400/10 border border-red-400/30 text-red-400">
                 <Warning size={14} weight="fill" color="#EF4444" aria-hidden="true" />
-                {error}
+                <span className="flex-1">{error}</span>
+                <a
+                  href={`mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent(subject || "Lionade support")}`}
+                  className="font-mono text-[10px] uppercase tracking-[0.28em] text-red-200/90 hover:text-red-100 underline underline-offset-4"
+                >
+                  Email instead
+                </a>
               </div>
             )}
 
             <button
               onClick={handleSubmit}
               disabled={sending}
-              className="w-full py-3.5 rounded-xl font-bold text-sm disabled:opacity-60 transition-all"
+              className="w-full py-3.5 rounded-full font-bold text-sm disabled:opacity-60 transition-all hover:-translate-y-0.5"
               style={{
                 background: "linear-gradient(135deg, #F0B429 0%, #B8960C 50%, #F0B429 100%)",
                 color: "#04080F",
-                boxShadow: "0 4px 15px rgba(240,180,41,0.3)",
+                boxShadow: "0 4px 20px rgba(240,180,41,0.28)",
               }}
             >
               {sending ? "Sending..." : "Send Message"}
             </button>
-            <p className="text-cream/30 text-xs text-center mt-4 leading-relaxed">
-              Lionade requires help from the community to run smoothly, feedback on any parts of our website are greatly appreciated to help make Lionade run soundly and safely. 😊
+
+            <p className="text-cream/35 text-xs text-center leading-relaxed pt-1">
+              Real humans read these. Lionade is small, so feedback shapes what we ship next.
             </p>
           </div>
         )}
