@@ -10,7 +10,7 @@ import { getAllPosts } from "./blog/posts";
  *
  * Priority guide:
  *   1.0 = homepage (canonical landing)
- *   0.9 = demo (top-of-funnel conversion surface)
+ *   0.9 = demo + help (top-of-funnel conversion + organic-search support)
  *   0.8 = primary marketing (about, pricing)
  *   0.7 = blog index + posts (organic-search bait)
  *   0.5 = utility (contact)
@@ -25,6 +25,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   return [
     { url: absoluteUrl("/"),        lastModified: now, changeFrequency: "weekly",  priority: 1.0 },
     { url: absoluteUrl("/demo"),    lastModified: now, changeFrequency: "weekly",  priority: 0.9 },
+    { url: absoluteUrl("/help"),    lastModified: now, changeFrequency: "weekly",  priority: 0.9 },
     { url: absoluteUrl("/about"),   lastModified: now, changeFrequency: "monthly", priority: 0.8 },
     { url: absoluteUrl("/pricing"), lastModified: now, changeFrequency: "monthly", priority: 0.8 },
     { url: absoluteUrl("/blog"),    lastModified: now, changeFrequency: "weekly",  priority: 0.7 },
