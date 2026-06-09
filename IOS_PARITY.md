@@ -7,6 +7,20 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 
 ---
 
+## 2026-06-09 — Admin Console: roles + audit log + staff support tooling (web-only, no iOS row)
+
+**Status:** 🚫 N/A (deliberate no-row decision: internal back-office tool for Sam + authorized helpers, desktop-web by design. Customer-support workflows run from a desktop browser; there is no end-user surface to port. The role system itself (`profiles.role`, `admin_audit_log`, the self-promotion-guard trigger) is schema-level and platform-neutral, so if a future iOS build ever needs role awareness it reads the same column. App Store note for `ios-security-auditor`: nothing in the iOS bundle references or links to /admin, so no review exposure.)
+
+Migration `lib/migrations/057_admin_console.sql` (NOT yet applied — Sam runs it manually): `profiles.role` user|support|admin + CHECK + trigger guard against self-promotion, `admin_audit_log` (append-only, RLS staff-read/admin-write), `current_app_role()`, `admin_search_users()`, `admin_dashboard_stats()` (both service_role-only SECURITY DEFINER), `admin_adjustment` added to `coin_transactions_type_check`.
+
+New API: `GET /api/admin/me|stats|users|users/[id]|users/[id]/email|audit-log`, `POST /api/admin/users/[id]/reset-password|fangs|role|suspend`. All behind `requireRole` (lib/admin-auth.ts); support = reads + password resets with masked emails, admin = everything. Every action writes `admin_audit_log`. Rate limits 30 POST / 120 GET per minute.
+
+UI: `/admin` (overview stats), `/admin/users` (search + list), `/admin/users/[id]` (profile + audited actions with confirm modals), `/admin/audit` (admin-only viewer), `/reset-password` (recovery-link landing, also reusable by a future self-serve forgot-password flow), Navbar Admin tab rendered only for staff.
+
+Owner: `quality-docs-writer` (web).
+
+---
+
 ## 2026-06-07 — Party V2 active-game: mid-round queue + request-to-join + lobby chat + spectator (web-only, no iOS row)
 
 **Status:** 🚫 N/A (deliberate no-row decision: same rationale as the V2 foundation row below. Lionade Party is web-only V1; iOS port is queued for `vp-ios` and will adopt these flows together with the foundation.)

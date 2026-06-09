@@ -4,6 +4,12 @@ All notable changes to Lionade, newest first.
 
 ---
 
+## 2026-06-09
+
+- feat(admin): **Admin Console** — internal, staff-only support tooling at `/admin` (5 commits: migration `d68d49f`, role layer `0e5d3c0`, API routes, pages + nav, review fixes). **Roles:** `profiles.role` (user/support/admin) with a CHECK constraint, a BEFORE INSERT/UPDATE trigger that stops authenticated callers from changing `role` (the existing "update own profile" RLS would otherwise let anyone self-promote via PostgREST), and `admin_audit_log` (append-only; RLS: staff read, admin write). **Gating:** `requireRole(req, 'support'|'admin')` on every `/api/admin/*` route is the security boundary; `app/admin/layout.tsx` + the Navbar tab are UX-only gates driven by `GET /api/admin/me` (SWR key scoped by user id so a cached role can't leak across logins; `/api/admin/` keys excluded from localStorage persistence). **Pages:** overview stats (users, signups, actives, Fangs circulation), user search (email/username/uuid via SECURITY DEFINER `admin_search_users`, emails masked), user profile with actions, audit viewer (admin only, filterable). **Actions, all audited:** password reset (support+, lands on new `/reset-password` recovery page), Fang adjust (admin, required reason; credits via `update_user_coins` source `cashable`, debits via `spend` to keep the dual-ledger invariant; `coin_transactions` row type `admin_adjustment` added to the CHECK), role change (admin, no self-change), suspend/reinstate (admin, Supabase auth ban), raw-email reveal (admin; audit row written before reveal, audit failure blocks it). Rate limits: 30 POST/min + 120 GET/min on `/api/admin/*`. **Migration `lib/migrations/057_admin_console.sql` is NOT yet applied — run it in the SQL Editor, then set your own role to admin (see migration header).** Web-only by design — see `IOS_PARITY.md` no-row entry.
+
+---
+
 ## 2026-06-06
 
 - fix(ui): unhide Mastery quota pill — move out of LaunchDock collision (commit `ba8e237`). The quota pill was floating bottom-right on `/learn/mastery/[examId]` and colliding with the global LaunchDock "+" button, making it unreadable. Moved into the page header next to the elapsed-time chip.

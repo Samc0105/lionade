@@ -104,6 +104,15 @@
 - **Input sanitization** (XSS/SQL injection prevention) — 2026-02-20
 - **Security headers** (CSP, HSTS, X-Frame-Options) — 2026-02-20
 
+## Admin Console (Internal, staff-only)
+- **Role system** (`profiles.role`: user / support / admin; trigger blocks self-promotion via PostgREST; migration `lib/migrations/057_admin_console.sql` — pending manual run) — 2026-06-09
+- **Role-gated /admin surface** (layout renders nothing for non-staff + redirects; Admin nav tab appears only for support/admin via `/api/admin/me`; every `/api/admin/*` route re-verifies the role server-side via `requireRole`) — 2026-06-09
+- **Dashboard overview** (total users, signups today/week, active 24h/7d, Fangs in circulation with cashable/IAP split; single `admin_dashboard_stats` RPC) — 2026-06-09
+- **User search + support profile** (email/username/uuid search via `admin_search_users` RPC; masked emails; profile + auth meta + recent Fang transactions + per-user admin history) — 2026-06-09
+- **Audited support actions** (password reset = support+; Fang adjust with required reason, role change, suspend/reinstate via auth ban, raw-email reveal = admin only; every action writes `admin_audit_log`; confirmation modal before anything destructive) — 2026-06-09
+- **Audit log viewer** (`/admin/audit`, admin only; who did what to whom + when; action/user filters, 50-row pages) — 2026-06-09
+- **/reset-password recovery page** (landing for Supabase recovery links; new-password form via `auth.updateUser`; used by the support reset action and any future forgot-password flow) — 2026-06-09
+
 ## Other Pages
 - **About page** — 2026-02-25
 - **Contact/Help page** — 2026-02-25
