@@ -16,6 +16,11 @@ const nextConfig = {
     remotePatterns: [
       { protocol: "https", hostname: "api.dicebear.com" },
       { protocol: "https", hostname: "*.supabase.co" },
+      // CDN host behind NEXT_PUBLIC_CDN_URL — cdnUrl() builds <Image> src
+      // like https://d1745aj99cclbu.cloudfront.net/F.png. Without this,
+      // next/image throws "hostname is not configured" and 500s the page
+      // (the /admin overview's Fang icon is the first <Image> to hit it).
+      { protocol: "https", hostname: "d1745aj99cclbu.cloudfront.net" },
     ],
   },
   // IA consolidation (2026-05-28): one Arena. The bare /arena V1 duel page

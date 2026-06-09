@@ -24,6 +24,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Plus, X, Headphones, Note, Lightning } from "@phosphor-icons/react";
+import { useAuth } from "@/lib/auth";
 import {
   openLauncherPanel,
   closeLauncherPanel,
@@ -50,9 +51,19 @@ const LIMELIGHT = "#00BFFF";
 const ITEM_GAP = 64;
 
 export default function LaunchDock() {
+  const { user } = useAuth();
   const [expanded, setExpanded] = useState(false);
   const activePanel = useLauncherActivePanel();
   const rootRef = useRef<HTMLDivElement | null>(null);
+
+  // The three panel widgets (Quick Note, Focus Music, Lock In) already gate
+  // on `user?.id`, but this dock — the visible launcher — did not, so the
+  // buttons showed on the logged-out landing page and did nothing when
+  // tapped. Gate the dock the same way. useAuth seeds `user` from
+  // localStorage on the client, so defer the auth-driven render until after
+  // mount to avoid a hydration mismatch (mirrors FocusLockIn et al.).
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
 
   // Close-on-outside-click for the EXPANDED tray itself. Tapping outside
   // collapses the menu, but does NOT close the active panel — the panel has
@@ -87,6 +98,10 @@ export default function LaunchDock() {
     if (activePanel) closeLauncherPanel(activePanel);
     openLauncherPanel(key);
   }
+
+  // Logged-out (or pre-mount) — render nothing. Placed after every hook so
+  // the hook order stays stable across renders.
+  if (!mounted || !user?.id) return null;
 
   return (
     <>
