@@ -69,6 +69,18 @@ export async function requireRole(
 }
 
 /**
+ * Masks an email for display to staff: "samuel@example.com" → "s•••@e•••com".
+ * Raw email is admin-only and audited (GET /api/admin/users/[id]/email).
+ */
+export function maskEmail(email: string | null | undefined): string | null {
+  if (!email || !email.includes("@")) return null;
+  const [local, domain] = email.split("@");
+  const dot = domain.lastIndexOf(".");
+  const tld = dot > 0 ? domain.slice(dot + 1) : "";
+  return `${local.slice(0, 1)}•••@${domain.slice(0, 1)}•••${tld}`;
+}
+
+/**
  * Appends a row to admin_audit_log. Call AFTER the action succeeds so the
  * log never claims something that didn't happen. Writes go through the
  * service role (bypasses RLS); failures are surfaced to the caller so the
