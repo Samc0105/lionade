@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useAuth } from "@/lib/auth";
+import { useAdminRole } from "@/lib/use-admin-role";
 import { useUserStats, useStreakInfo, isStreakExpired, resetExpiredStreak, mutateUserStats } from "@/lib/hooks";
 import { formatCoins } from "@/lib/mockData";
 import { supabase } from "@/lib/supabase";
@@ -102,6 +103,13 @@ export default function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
   const { user, logout } = useAuth();
+  // Admin tab — renders ONLY for role support/admin (via /api/admin/me, SWR
+  // dedupes with the /admin layout). Regular users never see it; the server
+  // re-checks the role on every /api/admin call regardless.
+  const { isStaff } = useAdminRole();
+  const navLinks = isStaff
+    ? [...NAV_LINKS, { href: "/admin", label: "Admin" }]
+    : NAV_LINKS;
   const { stats, mutate: mutateStats } = useUserStats(user?.id);
   const { plan: userPlan, isPaid } = usePlan();
   // Shop V2: drives the dropdown's username display. Safe if backend route
@@ -447,7 +455,7 @@ export default function Navbar() {
                 DOM measurement. Reduced-motion: transitions collapse to 0. */}
             {showAppNav && (
               <div className="hidden md:flex items-center gap-1">
-                {NAV_LINKS.map((link) => {
+                {navLinks.map((link) => {
                   const active = isTabActive(link.href);
                   return (
                     <Link
