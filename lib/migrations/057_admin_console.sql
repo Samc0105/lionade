@@ -87,7 +87,10 @@ GRANT EXECUTE ON FUNCTION public.current_app_role() TO authenticated, service_ro
 -- ── 4. admin_audit_log ────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS admin_audit_log (
   id             uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  performed_by   uuid NOT NULL REFERENCES profiles(id) ON DELETE SET NULL,
+  -- Nullable on purpose: if a staff profile is ever deleted, their audit
+  -- rows survive with performed_by = NULL (NOT NULL + SET NULL would make
+  -- the profile delete itself fail).
+  performed_by   uuid REFERENCES profiles(id) ON DELETE SET NULL,
   action         text NOT NULL,
   target_user_id uuid REFERENCES profiles(id) ON DELETE SET NULL,
   metadata       jsonb NOT NULL DEFAULT '{}'::jsonb,
@@ -146,8 +149,11 @@ AS $$
     u.email ILIKE '%' || search || '%' OR
     p.username ILIKE '%' || search || '%' OR
     p.display_name ILIKE '%' || search || '%' OR
-    (search ~* '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
-      AND p.id = search::uuid)
+    (CASE
+      WHEN search ~* '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
+      THEN p.id = search::uuid
+      ELSE false
+    END)
   ORDER BY p.created_at DESC
   LIMIT least(greatest(max_rows, 1), 100);
 $$;
@@ -186,3 +192,18 @@ $$;
 
 REVOKE ALL ON FUNCTION public.admin_dashboard_stats() FROM anon, authenticated, public;
 GRANT EXECUTE ON FUNCTION public.admin_dashboard_stats() TO service_role;
+
+-- ── 7. allow 'admin_adjustment' in the coin_transactions ledger ──────
+-- The Adjust Fangs action writes a coin_transactions row; the existing
+-- type CHECK (last touched in migration 046) doesn't include it.
+ALTER TABLE coin_transactions DROP CONSTRAINT IF EXISTS coin_transactions_type_check;
+ALTER TABLE coin_transactions ADD CONSTRAINT coin_transactions_type_check CHECK (
+  type = ANY (ARRAY[
+    'signup_bonus', 'quiz_reward', 'duel_win', 'duel_loss', 'streak_bonus',
+    'streak_milestone', 'bounty_reward', 'bounty_stake', 'badge_bonus',
+    'game_reward', 'ninny_session', 'ninny_unlock', 'shop_purchase',
+    'shop_refund', 'daily_bonus', 'arena_win', 'arena_loss', 'mission_reward',
+    'exam_session', 'mastery_session', 'login_bonus', 'daily_drill',
+    'focus_session', 'streak_revive', 'daily_spin', 'admin_adjustment'
+  ])
+);

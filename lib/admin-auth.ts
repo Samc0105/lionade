@@ -68,6 +68,14 @@ export async function requireRole(
   return { ...user, role };
 }
 
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/** Strict UUID check — every /api/admin/users/[id] route validates with this. */
+export function isUuid(value: string): boolean {
+  return UUID_RE.test(value);
+}
+
 /**
  * Masks an email for display to staff: "samuel@example.com" → "s•••@e•••com".
  * Raw email is admin-only and audited (GET /api/admin/users/[id]/email).

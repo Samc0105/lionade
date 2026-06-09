@@ -30,8 +30,7 @@ import {
   Prohibit,
   ArrowCounterClockwise,
 } from "@phosphor-icons/react";
-
-const CARD_BG = "linear-gradient(135deg, #0a1020 0%, #060c18 100%)";
+import { CARD_BG, RoleBadge, AdminModalShell } from "@/components/admin/shared";
 
 interface AdminUserDetail {
   id: string;
@@ -57,6 +56,8 @@ interface AdminUserDetail {
   lastSignInAt: string | null;
   suspended: boolean;
   bannedUntil: string | null;
+  /** true when the auth.users lookup failed — suspension/email unknown */
+  authMetaUnavailable?: boolean;
 }
 
 interface Txn {
@@ -132,9 +133,12 @@ export default function AdminUserDetailPage() {
     `https://api.dicebear.com/7.x/avataaars/svg?seed=${u.username ?? u.id}&backgroundColor=4A90D9`;
 
   const revealEmail = async () => {
+    if (busy) return; // double-click guard — each reveal is an audited event
+    setBusy(true);
     const res = await apiGet<{ email: string | null }>(
       `/api/admin/users/${userId}/email`,
     );
+    setBusy(false);
     if (res.ok) setRevealedEmail(res.data?.email ?? "(no email)");
     else toastError("Could not reveal email");
   };
@@ -212,6 +216,13 @@ export default function AdminUserDetailPage() {
 
   return (
     <div className="space-y-5">
+      {u.authMetaUnavailable && (
+        <div className="rounded-xl border border-amber-400/30 bg-amber-400/10 text-amber-300 text-sm px-4 py-3">
+          The auth record could not be loaded. Email and suspension state are
+          unknown on this view; do not treat &quot;not suspended&quot; as fact.
+        </div>
+      )}
+
       {/* Header */}
       <div
         className="rounded-2xl border border-white/[0.08] p-6 flex items-center gap-5"
@@ -228,17 +239,7 @@ export default function AdminUserDetailPage() {
             <h1 className="font-bebas text-3xl tracking-wider text-cream truncate">
               {u.username ?? "(no username)"}
             </h1>
-            <span
-              className={`text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full ${
-                u.role === "admin"
-                  ? "bg-gold/15 text-gold border border-gold/30"
-                  : u.role === "support"
-                    ? "bg-electric/15 text-electric border border-electric/30"
-                    : "bg-white/10 text-cream/50 border border-white/10"
-              }`}
-            >
-              {u.role}
-            </span>
+            <RoleBadge role={u.role} />
             {u.suspended && (
               <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-red-400/15 text-red-400 border border-red-400/30">
                 suspended
@@ -450,21 +451,16 @@ export default function AdminUserDetailPage() {
       />
 
       {/* Adjust Fangs */}
-      {fangsOpen && (
-        <div
-          onClick={() => !busy && setFangsOpen(false)}
-          className="fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in"
-          role="dialog"
-          aria-modal="true"
-        >
-          <div
-            onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-md rounded-2xl border border-gold/25 p-6 animate-slide-up"
-            style={{ background: CARD_BG }}
-          >
-            <h3 className="font-bebas text-2xl tracking-wider text-gold mb-1">
-              Adjust Fangs
-            </h3>
+      <AdminModalShell
+        open={fangsOpen}
+        onClose={() => setFangsOpen(false)}
+        busy={busy}
+        labelId="fangs-modal-title"
+        borderClass="border-gold/25"
+      >
+        <h3 id="fangs-modal-title" className="font-bebas text-2xl tracking-wider text-gold mb-1">
+          Adjust Fangs
+        </h3>
             <p className="text-xs text-cream/50 mb-4">
               Positive adds, negative deducts. Current balance:{" "}
               {u.coins.toLocaleString()}. Logged with your reason.
@@ -511,26 +507,19 @@ export default function AdminUserDetailPage() {
                 {busy ? "Working..." : "Apply adjustment"}
               </button>
             </div>
-          </div>
-        </div>
-      )}
+      </AdminModalShell>
 
       {/* Change role */}
-      {roleOpen && (
-        <div
-          onClick={() => !busy && setRoleOpen(false)}
-          className="fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in"
-          role="dialog"
-          aria-modal="true"
-        >
-          <div
-            onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-md rounded-2xl border border-purple-400/25 p-6 animate-slide-up"
-            style={{ background: CARD_BG }}
-          >
-            <h3 className="font-bebas text-2xl tracking-wider text-purple-300 mb-1">
-              Change role
-            </h3>
+      <AdminModalShell
+        open={roleOpen}
+        onClose={() => setRoleOpen(false)}
+        busy={busy}
+        labelId="role-modal-title"
+        borderClass="border-purple-400/25"
+      >
+        <h3 id="role-modal-title" className="font-bebas text-2xl tracking-wider text-purple-300 mb-1">
+          Change role
+        </h3>
             <p className="text-xs text-cream/50 mb-4">
               support = read access + password resets. admin = full console access.
             </p>
@@ -565,36 +554,29 @@ export default function AdminUserDetailPage() {
                 {busy ? "Working..." : `Set to ${newRole}`}
               </button>
             </div>
-          </div>
-        </div>
-      )}
+      </AdminModalShell>
 
       {/* Suspend / reinstate */}
-      {suspendOpen && (
-        <div
-          onClick={() => !busy && setSuspendOpen(false)}
-          className="fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in"
-          role="dialog"
-          aria-modal="true"
+      <AdminModalShell
+        open={suspendOpen}
+        onClose={() => setSuspendOpen(false)}
+        busy={busy}
+        labelId="suspend-modal-title"
+        borderClass={u.suspended ? "border-green-400/25" : "border-red-400/30"}
+        background={
+          u.suspended
+            ? undefined
+            : "linear-gradient(135deg, rgba(20,8,14,0.98), rgba(8,4,8,0.98))"
+        }
+      >
+        <h3
+          id="suspend-modal-title"
+          className={`font-bebas text-2xl tracking-wider mb-1 ${
+            u.suspended ? "text-green-300" : "text-red-400"
+          }`}
         >
-          <div
-            onClick={(e) => e.stopPropagation()}
-            className={`w-full max-w-md rounded-2xl border p-6 animate-slide-up ${
-              u.suspended ? "border-green-400/25" : "border-red-400/30"
-            }`}
-            style={{
-              background: u.suspended
-                ? CARD_BG
-                : "linear-gradient(135deg, rgba(20,8,14,0.98), rgba(8,4,8,0.98))",
-            }}
-          >
-            <h3
-              className={`font-bebas text-2xl tracking-wider mb-1 ${
-                u.suspended ? "text-green-300" : "text-red-400"
-              }`}
-            >
-              {u.suspended ? "Reinstate account?" : "Suspend account?"}
-            </h3>
+          {u.suspended ? "Reinstate account?" : "Suspend account?"}
+        </h3>
             <p className="text-xs text-cream/50 mb-4">
               {u.suspended
                 ? "The user will be able to sign in again immediately."
@@ -638,9 +620,7 @@ export default function AdminUserDetailPage() {
                 {busy ? "Working..." : u.suspended ? "Reinstate" : "Suspend"}
               </button>
             </div>
-          </div>
-        </div>
-      )}
+      </AdminModalShell>
     </div>
   );
 }

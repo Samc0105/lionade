@@ -53,6 +53,9 @@ export async function GET(req: NextRequest, { params }: RouteCtx) {
 
   const p = profileRes.data;
   const authUser = authRes.data?.user ?? null;
+  // If the auth lookup failed we can't know the suspension state or email —
+  // flag it so the UI doesn't present "not suspended" as fact.
+  const authMetaUnavailable = Boolean(authRes.error || !authUser);
   const bannedUntil =
     (authUser as { banned_until?: string } | null)?.banned_until ?? null;
   const suspended = Boolean(bannedUntil && new Date(bannedUntil) > new Date());
@@ -82,6 +85,7 @@ export async function GET(req: NextRequest, { params }: RouteCtx) {
       lastSignInAt: authUser?.last_sign_in_at ?? null,
       suspended,
       bannedUntil: suspended ? bannedUntil : null,
+      authMetaUnavailable,
     },
     transactions: txRes.data ?? [],
     // Audit entries are staff-facing context on the profile page; the full

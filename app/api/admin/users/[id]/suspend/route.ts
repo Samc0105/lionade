@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
-import { requireRole, logAdminAction } from "@/lib/admin-auth";
+import { requireRole, logAdminAction, isUuid } from "@/lib/admin-auth";
 
 /**
  * POST /api/admin/users/[id]/suspend — suspend or reinstate an account.
@@ -20,6 +20,9 @@ export async function POST(req: NextRequest, { params }: RouteCtx) {
   const staff = await requireRole(req, "admin");
   if (staff instanceof NextResponse) return staff;
 
+  if (!isUuid(params.id)) {
+    return NextResponse.json({ error: "Invalid user id" }, { status: 400 });
+  }
   if (params.id === staff.userId) {
     return NextResponse.json(
       { error: "You cannot suspend your own account" },
@@ -34,7 +37,15 @@ export async function POST(req: NextRequest, { params }: RouteCtx) {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
 
-  const suspend = body.suspend === true;
+  // Strict boolean — a malformed body must never silently reinstate a
+  // banned account.
+  if (typeof body.suspend !== "boolean") {
+    return NextResponse.json(
+      { error: "Body must include suspend: true | false" },
+      { status: 400 },
+    );
+  }
+  const suspend = body.suspend;
   const reason =
     typeof body.reason === "string" ? body.reason.trim().slice(0, 300) : "";
 

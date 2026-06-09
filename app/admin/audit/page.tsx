@@ -15,8 +15,12 @@ import useSWR from "swr";
 import { swrFetcher } from "@/lib/api-client";
 import { useAdminRole } from "@/lib/use-admin-role";
 import { CaretLeft, CaretRight } from "@phosphor-icons/react";
+import { CARD_BG } from "@/components/admin/shared";
 
-const CARD_BG = "linear-gradient(135deg, #0a1020 0%, #060c18 100%)";
+// Same strict UUID shape the server enforces — a looser client check would
+// silently return the UNFILTERED log while the UI implies a filter applied.
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 const ACTION_OPTIONS = [
   { value: "", label: "All actions" },
@@ -56,7 +60,7 @@ export default function AdminAuditPage() {
 
   const qs = new URLSearchParams();
   if (action) qs.set("action", action);
-  if (/^[0-9a-f-]{36}$/i.test(userFilter.trim())) qs.set("user", userFilter.trim());
+  if (UUID_RE.test(userFilter.trim())) qs.set("user", userFilter.trim());
   qs.set("page", String(page));
 
   const { data, error, isLoading } = useSWR<{

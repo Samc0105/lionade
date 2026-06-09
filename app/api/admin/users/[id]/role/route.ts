@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
-import { requireRole, logAdminAction, type AppRole } from "@/lib/admin-auth";
+import { requireRole, logAdminAction, isUuid, type AppRole } from "@/lib/admin-auth";
 
 /**
  * POST /api/admin/users/[id]/role — change a user's role. ADMIN ONLY.
@@ -20,6 +20,9 @@ export async function POST(req: NextRequest, { params }: RouteCtx) {
   const staff = await requireRole(req, "admin");
   if (staff instanceof NextResponse) return staff;
 
+  if (!isUuid(params.id)) {
+    return NextResponse.json({ error: "Invalid user id" }, { status: 400 });
+  }
   if (params.id === staff.userId) {
     return NextResponse.json(
       { error: "You cannot change your own role" },

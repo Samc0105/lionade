@@ -18,8 +18,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth";
 import { useAdminRole } from "@/lib/use-admin-role";
 import { ChartBar, Users, ListMagnifyingGlass, ShieldCheck } from "@phosphor-icons/react";
-
-const CARD_BG = "linear-gradient(135deg, #0a1020 0%, #060c18 100%)";
+import { CARD_BG, RoleBadge } from "@/components/admin/shared";
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
   const router = useRouter();
@@ -60,14 +59,8 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
           <div className="flex items-center gap-2 px-2 mb-4">
             <ShieldCheck size={20} weight="fill" className="text-gold" aria-hidden="true" />
             <span className="font-bebas text-xl tracking-wider text-cream">Admin</span>
-            <span
-              className={`ml-auto text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full ${
-                isAdmin
-                  ? "bg-gold/15 text-gold border border-gold/30"
-                  : "bg-electric/15 text-electric border border-electric/30"
-              }`}
-            >
-              {role}
+            <span className="ml-auto">
+              <RoleBadge role={role} />
             </span>
           </div>
           <nav className="flex flex-col gap-1">

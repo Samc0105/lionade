@@ -22,8 +22,11 @@ export interface AdminRoleState {
 
 export function useAdminRole(): AdminRoleState {
   const { user } = useAuth();
+  // Key is scoped by user id: without it, a cached {role:"admin"} would be
+  // served to the NEXT account that signs in on the same tab (logout does
+  // not clear the SWR cache). The server ignores the query param.
   const { data, isLoading } = useSWR<{ role?: string }>(
-    user ? "/api/admin/me" : null,
+    user ? `/api/admin/me?u=${user.id}` : null,
     swrFetcher,
     {
       dedupingInterval: 5 * 60 * 1000,

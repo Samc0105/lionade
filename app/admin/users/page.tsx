@@ -13,8 +13,7 @@ import { useRouter } from "next/navigation";
 import useSWR from "swr";
 import { swrFetcher } from "@/lib/api-client";
 import { MagnifyingGlass } from "@phosphor-icons/react";
-
-const CARD_BG = "linear-gradient(135deg, #0a1020 0%, #060c18 100%)";
+import { CARD_BG, RoleBadge } from "@/components/admin/shared";
 
 interface AdminUserRow {
   id: string;
@@ -28,22 +27,6 @@ interface AdminUserRow {
   createdAt: string;
   lastSeen: string | null;
   suspended: boolean;
-}
-
-function RoleBadge({ role }: { role: string }) {
-  if (role === "user") return <span className="text-cream/40">user</span>;
-  const admin = role === "admin";
-  return (
-    <span
-      className={`text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full ${
-        admin
-          ? "bg-gold/15 text-gold border border-gold/30"
-          : "bg-electric/15 text-electric border border-electric/30"
-      }`}
-    >
-      {role}
-    </span>
-  );
 }
 
 export default function AdminUsersPage() {
@@ -139,7 +122,7 @@ export default function AdminUsersPage() {
                   {u.emailMasked ?? "—"}
                 </td>
                 <td className="px-4 py-3">
-                  <RoleBadge role={u.role} />
+                  <RoleBadge role={u.role} muted />
                 </td>
                 <td className="px-4 py-3 text-right text-cream/70">{u.level}</td>
                 <td className="px-4 py-3 text-right text-cream/70">

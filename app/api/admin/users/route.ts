@@ -14,7 +14,12 @@ export async function GET(req: NextRequest) {
   const staff = await requireRole(req, "support");
   if (staff instanceof NextResponse) return staff;
 
-  const q = (req.nextUrl.searchParams.get("q") ?? "").trim().slice(0, 100);
+  // Escape ILIKE wildcards so a literal % or _ in the query doesn't turn
+  // into a match-everything pattern.
+  const q = (req.nextUrl.searchParams.get("q") ?? "")
+    .trim()
+    .slice(0, 100)
+    .replace(/[\\%_]/g, (m) => `\\${m}`);
   const limitRaw = parseInt(req.nextUrl.searchParams.get("limit") ?? "25", 10);
   const limit = Number.isFinite(limitRaw) ? Math.min(Math.max(limitRaw, 1), 100) : 25;
 

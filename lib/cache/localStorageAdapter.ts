@@ -47,6 +47,11 @@ const PERSIST_SKIP_PREFIXES: readonly string[] = [
   // grow large quickly and the session is short-lived (user finishes within
   // minutes). Skip persistence; SWR fetches fresh on next visit.
   "mastery-session/",
+
+  // Admin console — staff-only payloads (user lists, balances, audit rows)
+  // must never persist to localStorage on a shared machine. In-memory cache
+  // only; re-fetch is cheap and the surface is internal.
+  "/api/admin/",
 ];
 
 /** Returns true if the key should NOT be written to disk. */

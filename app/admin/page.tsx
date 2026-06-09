@@ -19,8 +19,7 @@ import {
   Pulse,
   ChartLineUp,
 } from "@phosphor-icons/react";
-
-const CARD_BG = "linear-gradient(135deg, #0a1020 0%, #060c18 100%)";
+import { CARD_BG } from "@/components/admin/shared";
 
 interface Stats {
   totalUsers: number;
