@@ -1,9 +1,8 @@
 -- ============================================================
 -- Migration 057: Admin Console — roles + audit log
--- Run this in the Supabase SQL Editor (Dashboard → SQL Editor)
--- NOT yet applied — Sam runs this manually. Fully idempotent; safe to re-run.
--- Until it runs, /api/admin/me treats every user as role='user' and the
--- Admin tab stays hidden.
+-- APPLIED to production via Supabase MCP on 2026-06-09 (migrations
+-- `admin_console_roles_audit_log` + `admin_console_function_grants_hardening`).
+-- Kept in the repo as the canonical record. Fully idempotent; safe to re-run.
 -- ============================================================
 --
 -- What this migration adds:
@@ -81,8 +80,13 @@ AS $$
   SELECT coalesce((SELECT role FROM profiles WHERE id = auth.uid()), 'user');
 $$;
 
-REVOKE ALL ON FUNCTION public.current_app_role() FROM anon;
+-- Revoke from PUBLIC too — a bare "FROM anon" leaves the default PUBLIC
+-- execute grant in place and anon inherits through it.
+REVOKE ALL ON FUNCTION public.current_app_role() FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.current_app_role() TO authenticated, service_role;
+
+-- The trigger function is not meant to be callable via the RPC surface.
+REVOKE ALL ON FUNCTION public.guard_profile_role() FROM PUBLIC, anon, authenticated;
 
 -- ── 4. admin_audit_log ────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS admin_audit_log (
