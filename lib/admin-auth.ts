@@ -1,0 +1,94 @@
+// Role-gated auth for the Admin Console (/api/admin/* routes).
+//
+// Roles live on profiles.role ('user' | 'support' | 'admin', migration 057).
+// The role hierarchy is admin > support > user. Page-level gating in
+// app/admin/layout.tsx is UX only — THIS is the security boundary. Every
+// /api/admin/* route must start with:
+//
+//   const staff = await requireRole(req, "support");   // or "admin"
+//   if (staff instanceof NextResponse) return staff;    // 401 / 403
+//
+// Support staff get read access + non-destructive actions (password resets).
+// Destructive actions (Fang adjustments, role changes, suspensions, raw
+// email reveal) require "admin".
+//
+// Until migration 057 runs, the role column doesn't exist; getUserRole
+// swallows that error and reports 'user', so the console stays sealed.
+
+import { NextRequest, NextResponse } from "next/server";
+import { supabaseAdmin } from "./supabase-server";
+import { getAuthedUser } from "./api-auth";
+
+export type AppRole = "user" | "support" | "admin";
+
+export interface StaffUser {
+  userId: string;
+  email: string | null;
+  role: AppRole;
+}
+
+/** True when `role` satisfies `minRole` (admin satisfies everything). */
+export function roleSatisfies(role: AppRole, minRole: "support" | "admin"): boolean {
+  if (role === "admin") return true;
+  return role === "support" && minRole === "support";
+}
+
+/** Reads the caller's role from profiles. Fails closed to 'user'. */
+export async function getUserRole(userId: string): Promise<AppRole> {
+  try {
+    const { data, error } = await supabaseAdmin
+      .from("profiles")
+      .select("role")
+      .eq("id", userId)
+      .single();
+    if (error || !data) return "user";
+    const role = (data as { role?: string }).role;
+    return role === "admin" || role === "support" ? role : "user";
+  } catch {
+    return "user";
+  }
+}
+
+/**
+ * Returns the authenticated staff member, or a ready-to-return NextResponse
+ * (401 when unauthenticated, 403 when the role is insufficient).
+ */
+export async function requireRole(
+  req: NextRequest,
+  minRole: "support" | "admin",
+): Promise<StaffUser | NextResponse> {
+  const user = await getAuthedUser(req);
+  if (!user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  const role = await getUserRole(user.userId);
+  if (!roleSatisfies(role, minRole)) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+  return { ...user, role };
+}
+
+/**
+ * Appends a row to admin_audit_log. Call AFTER the action succeeds so the
+ * log never claims something that didn't happen. Writes go through the
+ * service role (bypasses RLS); failures are surfaced to the caller so the
+ * route can decide whether to flag them, but they never throw.
+ */
+export async function logAdminAction(entry: {
+  performedBy: string;
+  action: string;
+  targetUserId?: string | null;
+  metadata?: Record<string, unknown>;
+}): Promise<{ ok: boolean }> {
+  const { error } = await supabaseAdmin.from("admin_audit_log").insert({
+    performed_by: entry.performedBy,
+    action: entry.action,
+    target_user_id: entry.targetUserId ?? null,
+    metadata: entry.metadata ?? {},
+  });
+  if (error) {
+    console.error("[admin-audit] insert failed:", error.message, entry.action);
+    return { ok: false };
+  }
+  return { ok: true };
+}

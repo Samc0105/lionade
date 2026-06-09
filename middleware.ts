@@ -367,6 +367,22 @@ const ROUTE_LIMITS: RouteLimit[] = [
     keyPrefix: "arena",
   },
 
+  // Admin console — staff-only surface, low legitimate volume. Tighter cap
+  // for POSTs (mutations: resets, Fang adjustments, suspensions) than reads.
+  {
+    test: (p) => p.startsWith("/api/admin/"),
+    method: "POST",
+    max: 30,
+    windowMs: 60 * 1000,
+    keyPrefix: "admin-write",
+  },
+  {
+    test: (p) => p.startsWith("/api/admin/"),
+    max: 120,
+    windowMs: 60 * 1000,
+    keyPrefix: "admin-read",
+  },
+
   // Catch-all for other API routes
   {
     test: (p) => p.startsWith("/api/"),
