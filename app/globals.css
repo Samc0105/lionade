@@ -4715,6 +4715,21 @@ html.light .space-bg-container { display: none; }
 }
 .pa-deal-glow { animation: pa-deal-glow 1.8s ease-out infinite; }
 
+/* LISTENING RINGS — Poker Face caller wait beat. Thin circular borders
+   expanding + fading around the presenter's avatar while the room waits for
+   them to read their fact out loud. Transform + opacity only (compositor);
+   stagger via inline animation-delay. Reduced motion: guard below makes the
+   rings static (the component also dials their opacity down). */
+@keyframes pa-listen-ring {
+  0%   { transform: scale(1);    opacity: 0.55; }
+  70%  { opacity: 0.12; }
+  100% { transform: scale(1.65); opacity: 0; }
+}
+.pa-listen-ring {
+  will-change: transform, opacity;
+  animation: pa-listen-ring 2.2s ease-out infinite;
+}
+
 /* Active color swatch in the SketchToolbar: gentle gold halo pulse so the
    drawer always knows which color is loaded without scanning the row.
    ~2.4s loop, shadow-only so it doesn't fight the existing scale-110. */
@@ -4827,7 +4842,7 @@ html.light .space-bg-container { display: none; }
   .pa-game-card, .pa-game-card:hover,
   .pa-tile-flip, .pa-card-flip-3d,
   .pa-canvas-stamp, .pa-canvas-corner,
-  .pa-word-breathe, .pa-panic-vignette, .pa-deal-glow, .pa-active-swatch,
+  .pa-word-breathe, .pa-panic-vignette, .pa-deal-glow, .pa-listen-ring, .pa-active-swatch,
   .pa-progress-shimmer, .pa-mastery-halo,
   .pa-chat-pulse, .pa-count-tick, .pa-start-pulse,
   .pa-deck-card, .pa-deck-card:hover, .pa-deck-card:active,

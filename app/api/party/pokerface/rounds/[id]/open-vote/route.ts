@@ -3,12 +3,14 @@
 //
 // Body: {}
 //
-// The Interrogation is a live-mode beat where one caller (the seat after the
-// presenter) grills the presenter with a question out loud before calls open.
-// This route is the "done grilling, let the room call it" advance. It may be
-// fired by the HOST or by the INTERROGATOR (computed server-side, same rule the
-// GET route reports), plus a client timer fires it as a backstop so the beat
-// can never stall. Resetting presented_at = now starts the vote window fresh.
+// In the live flow this is the "read the fact out loud" beat: the presenter
+// reads their fact to the room (their TRUE/LIE pick stays secret), then taps
+// "I've read it" to open calling for everyone. This route is that advance. It
+// may be fired by the PRESENTER (the primary "I've read it" path, 2026-06-10
+// round-UX rebuild), the HOST, or the INTERROGATOR (computed server-side, same
+// rule the GET route reports — kept as the legacy/backstop authorizer), plus a
+// client timer fires it as a backstop so the beat can never stall. Resetting
+// presented_at = now starts the vote window fresh.
 //
 // Secret-safe: this only flips the public phase; no secret column is read or
 // returned. Race-guarded on phase='interrogate' so concurrent fires no-op.
@@ -59,9 +61,15 @@ export async function POST(
     ? seats[(presenterIdx + 1) % seats.length]
     : null;
 
-  if (userId !== room.host_user_id && userId !== interrogatorId) {
+  // Presenter ("I've read it"), host, or interrogator (legacy backstop) may
+  // advance. Secret-safe either way: this only flips the public phase.
+  if (
+    userId !== room.host_user_id &&
+    userId !== interrogatorId &&
+    userId !== round.presenter_user_id
+  ) {
     return NextResponse.json(
-      { error: "Only the host or the interrogator can open the vote" },
+      { error: "Only the presenter, the host, or the interrogator can open the vote" },
       { status: 403 },
     );
   }
