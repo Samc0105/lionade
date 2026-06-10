@@ -7,6 +7,21 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 
 ---
 
+## 2026-06-10: Academia calendar + agenda + assignment tracker (web)
+
+**Status:** ❌ pending. Unlike the web-only Party suite, this IS a student-facing product feature (planner, calendar, assignments) that should eventually reach iOS, so it's a real parity gap, not a deliberate no-row. Owner: `quality-docs-writer`; the iOS port itself routes to `vp-ios`.
+
+**What shipped (web, commit `a0179de`):** new `class_assignments` table (per-class to-dos, todo/doing/done status, nullable due_date, owner-only RLS); per-class assignment CRUD; a merged agenda feed combining exam target dates + assignment due dates; an Academia-hub `PlannerSection` (THIS WEEK agenda + color-coded month calendar); and a class-detail ASSIGNMENTS tracker. Migration `supabase/migrations/20260610_class_assignments.sql` applied to prod; zero API cost.
+
+**Wire contract for the iOS port** (all data-layer pieces are platform-neutral, so iOS reuses them directly):
+
+1. **New `class_assignments` table** — per-class to-dos with `status` in `todo`/`doing`/`done`, a nullable `due_date`, and owner-only RLS. An iOS client reads/writes the same table via the routes below.
+2. **Per-class assignment CRUD, all owner-scoped:** `GET`/`POST /api/classes/[id]/assignments` (list + create for a class), `PATCH`/`DELETE /api/classes/assignments/[assignmentId]` (update status/fields + delete). userId is never body-trusted; ownership is enforced server-side.
+3. **`GET /api/academia/agenda?from&to`** is the single platform-neutral planner feed: it merges exam target dates (`user_exams.target_date`) and assignment due dates into one date-sorted, user-scoped stream. Dates are YYYY-MM-DD-validated, the range is clamped to <=120 days, and the default window is today..+60. Standalone Mastery exams (null `class_id`) come back flagged for a neutral gold "Mastery" treatment. iOS consumes this exact endpoint; no new server work needed for the data layer.
+4. **UI needs native builds:** the THIS WEEK agenda (7-day grouped list with inline status toggle, exams read-only), the color-coded month calendar (per-class dots, exam ring, today ring, month nav + Today jump, tap-a-day to focus the agenda), and the class-detail ASSIGNMENTS tracker (add/list/complete/delete, due countdowns, overdue styling, optimistic mutations) all need to be rebuilt in React Native. Only the presentation layer is web-specific; the feed + CRUD are shared.
+
+---
+
 ## 2026-06-10: Party lobby/invite/Sketchy polish + Party games UX batch (web)
 
 **Status:** 🚫 N/A (deliberate no-row decision: Lionade Party is web-only V1, same rationale as the 2026-06-07 Party V2 rows below. The iOS port is deferred to `vp-ios` and will adopt this batch together with the V2 foundation + active-game work.)
