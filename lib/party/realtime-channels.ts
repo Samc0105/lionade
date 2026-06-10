@@ -82,6 +82,12 @@ export const SKETCH_EVENTS = {
   // a paused overlay. Payload: { paused_by: string; started_at: ISO }.
   PAUSED: "paused",
   RESUMED: "resumed",
+  // Round-flow V2 — the effective host taps END GAME on the reveal screen.
+  // Sketchy has no fixed round count (rotation runs until the host ends it),
+  // so this broadcast flips every client to the shared GameOverScreen podium.
+  // Empty payload; standings come from the reveal scoreboard already on each
+  // client.
+  GAME_OVER: "game_over",
 } as const;
 
 export const BLUFF_EVENTS = {

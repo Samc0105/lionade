@@ -6,8 +6,15 @@
 //   - "select-word" state: drawer is shown 3 candidate words to pick from.
 //   - "drawing" state: drawer sees canvas + toolbar (no chat per anti-cheat).
 //                      Guessers see canvas + guess input + chat feed.
-//   - "reveal" state: word + factoid + scoreboard. CTA: Next Round (host) or
-//                     Back to Lobby.
+//   - "reveal" state: word + factoid + scoreboard (staged beats). CTA: Next
+//                     Round (host) or End Game -> shared GameOverScreen.
+//
+// Round-flow V2: a fresh round opens with the shared RoundCountdown (5s,
+// "ROUND N OF M" where M = the end of the current drawer rotation — Sketchy
+// has no server-side round cap). Game end is HOST-ENDED: the effective host
+// taps END GAME on the reveal screen, which broadcasts GAME_OVER and flips
+// every client to the shared GameOverScreen (podium + Play Again -> rematch +
+// Back to Lobby -> end-game flow).
 //
 // Subscribes to the per-room sketch channel for round_started / round_ended
 // events. The parent room page tells us when current_game flips back to null
@@ -22,6 +29,8 @@ import SketchCanvas from "./SketchCanvas";
 import SketchToolbar, { SKETCH_COLORS, SKETCH_SIZES, type SketchTool } from "./SketchToolbar";
 import IntermissionCard from "./IntermissionCard";
 import PartyScoreboard from "./PartyScoreboard";
+import RoundCountdown from "./RoundCountdown";
+import GameOverScreen from "./GameOverScreen";
 import NinnyHostBubble from "./NinnyHostBubble";
 import JoiningNextRoundBanner from "./JoiningNextRoundBanner";
 import RoundEndOverlay from "./RoundEndOverlay";
@@ -134,6 +143,13 @@ const DIFFICULTY_RANK: Record<string, number> = { easy: 0, medium: 1, hard: 2 };
 
 const PICK_SECONDS = 10;
 
+// Shared between-rounds countdown length (RoundCountdown overlay), mirroring
+// Bluff Trivia + Poker Face. The word-pick clock here is CLIENT-LOCAL (it is
+// an interval, not a server-timestamp diff), so instead of padding a server
+// deadline the pick timer simply does not start until the countdown completes.
+// The guesser-side "waiting for word pick" safety timeout IS padded by this.
+const COUNTDOWN_SECONDS = 5;
+
 interface ChatMsg {
   id: string;
   user_id: string;
@@ -193,19 +209,33 @@ export default function SketchView({
   const [lockedWord, setLockedWord] = useState<string | null>(null);
   const [timeLeft, setTimeLeft] = useState(90);
   const [phase, setPhase] = useState<"loading" | "select-word" | "drawing" | "celebrating" | "reveal">("loading");
-  // 3-2-1 pre-round countdown. Fires ONLY on the select-word → drawing
-  // transition (not on initial load into an active round — those are
-  // mid-round joins where the countdown would be wrong). Value goes
-  // 3 → 2 → 1 → 0 (overlay hides at 0). Server-side timer still ticks
-  // during the intro — drawer loses ~3s of a 90s round, worth the moment.
-  const [countdownTicks, setCountdownTicks] = useState(0);
-  const prevPhaseRef = useRef<typeof phase>("loading");
+  // Broadcast handlers are bound once per channel subscription and capture
+  // stale state; they read the live phase through this ref.
+  const phaseRef = useRef(phase);
+  phaseRef.current = phase;
+  // ── Between-rounds countdown (shared RoundCountdown, 5s) ──
+  // Fires once per round id the moment a fresh round lands, mirroring Bluff /
+  // Poker Face. The drawer's picker / guessers' waiting screen render
+  // underneath the overlay; the word-pick timer is gated on completion so the
+  // countdown can't eat the pick window. The seen-set guarantees polls and
+  // broadcast echoes can never restart it; mid-round bootstrap joins pre-seed
+  // the set so rejoiners skip straight to the live canvas.
+  const [countdownRoundId, setCountdownRoundId] = useState<string | null>(null);
+  const countdownSeenRef = useRef<Set<string>>(new Set());
   const [reveal, setReveal] = useState<{
     word: string;
     factoid: string | null;
     drawer_user_id: string;
     scoreboard: { user_id: string; username: string | null; score: number }[];
   } | null>(null);
+
+  // ── Game over (host-ended; Sketchy has no fixed round count) ──
+  // The drawer rotation runs open-ended (one draw per player per rotation,
+  // fair-random least-drawn pick server-side), so "game over" is the moment
+  // the effective host taps END GAME on the reveal screen. Set locally on the
+  // host's client + broadcast (SKETCH_EVENTS.GAME_OVER) so every client flips
+  // to the shared GameOverScreen podium in lockstep. Reset on any new round.
+  const [gameOver, setGameOver] = useState(false);
 
   // ── Celebrating phase state ──
   // Authoritatively populated by the ROUND_ENDED broadcast payload (server-
@@ -336,24 +366,19 @@ export default function SketchView({
     return new Date(me.joined_at).getTime() > new Date(round.started_at).getTime();
   }, [round?.started_at, round?.drawer_user_id, me?.joined_at, meUserId, phase]);
 
-  // ── 3-2-1 pre-round countdown trigger ──
-  // Fires on select-word → drawing transition only. Reduced-motion users skip
-  // the intro entirely (countdownTicks stays 0). Server-side clock still ticks
-  // during the intro window — the drawer loses ~3s of a 90s round.
+  // ── Between-rounds countdown trigger ──
+  // Keyed ONCE per round id (seen-set), so neither the host's own creation
+  // path, the ROUND_STARTED broadcast echo, nor any poll can restart it.
+  // RoundCountdown handles reduced motion internally (static ticking numbers,
+  // no spring). Mid-round bootstrap joins never reach here — the bootstrap
+  // effect pre-seeds the seen-set with the in-flight round id.
   useEffect(() => {
-    const prev = prevPhaseRef.current;
-    prevPhaseRef.current = phase;
-    if (prev === "select-word" && phase === "drawing" && !reduced) {
-      setCountdownTicks(3);
-    }
-  }, [phase, reduced]);
-
-  // Tick countdown 3 → 2 → 1 → 0. Cleared on unmount or phase change.
-  useEffect(() => {
-    if (countdownTicks <= 0) return;
-    const t = setTimeout(() => setCountdownTicks(c => c - 1), 1000);
-    return () => clearTimeout(t);
-  }, [countdownTicks]);
+    if (!round?.id) return;
+    if (countdownSeenRef.current.has(round.id)) return;
+    countdownSeenRef.current.add(round.id);
+    setCountdownRoundId(round.id);
+  }, [round?.id]);
+  const handleCountdownDone = useCallback(() => setCountdownRoundId(null), []);
 
   // ── Single subscribed channel ref + helper ──
   // Every send MUST go through this ref. supabase.channel().send() silently
@@ -471,6 +496,7 @@ export default function SketchView({
     setWordInfo({});
     setPendingPick(null);
     setAwaitingWordPick(false);
+    setGameOver(false);
     setPausedAt(null);
     setPausedByName(null);
     pausedOffsetMsRef.current = 0;
@@ -496,6 +522,10 @@ export default function SketchView({
     void sendBroadcast(SKETCH_EVENTS.ROUND_STARTED, {
       round_id: res.data.round.id,
       drawer_user_id: res.data.round.drawer_user_id,
+      // Round-flow V2 — ride the real round number along so every client's
+      // RoundCountdown shows the right "ROUND N OF M" (receivers previously
+      // defaulted round_num to 0). Older receivers ignore unknown fields.
+      round_num: res.data.round.round_num,
     });
     if (res.data.round.drawer_user_id === meUserId) {
       if (res.data.candidate_words && res.data.candidate_words.length > 0) {
@@ -534,6 +564,9 @@ export default function SketchView({
     if (!activeRound?.id || !activeRound.started_at) return;
     bootstrappedActiveRef.current = true;
     roundIdRef.current = activeRound.id;
+    // Mid-round rejoin — never show the between-rounds countdown for a round
+    // that's already in flight.
+    countdownSeenRef.current.add(activeRound.id);
     setRound({
       id: activeRound.id,
       room_id: room.id,
@@ -559,7 +592,7 @@ export default function SketchView({
   useEffect(() => {
     const ch = supabase.channel(sketchChannel(room.code));
     ch.on("broadcast", { event: SKETCH_EVENTS.ROUND_STARTED }, async (msg: { payload?: unknown }) => {
-      const payload = (msg.payload ?? {}) as { round_id?: string; drawer_user_id?: string };
+      const payload = (msg.payload ?? {}) as { round_id?: string; drawer_user_id?: string; round_num?: number };
       if (!payload.round_id) return;
       // Avoid stomping our own creation. Read from the ref so the host's own
       // ROUND_STARTED echo (which arrives AFTER setRound but before the effect
@@ -571,7 +604,7 @@ export default function SketchView({
       setRound({
         id: payload.round_id,
         room_id: room.id,
-        round_num: 0,
+        round_num: payload.round_num ?? 0,
         drawer_user_id: payload.drawer_user_id ?? "",
         subject: "",
         duration_sec: 90,
@@ -598,6 +631,7 @@ export default function SketchView({
       setWordInfo({});
       setPendingPick(null);
       setAwaitingWordPick(!isMe);
+      setGameOver(false);
       setPausedAt(null);
       setPausedByName(null);
       pausedOffsetMsRef.current = 0;
@@ -624,15 +658,13 @@ export default function SketchView({
       }
     });
     ch.on("broadcast", { event: SKETCH_EVENTS.WORD_SELECTED }, () => {
+      // The waiting-for-pick card swaps for the live canvas here; the canvas
+      // surface's own enter transition (fade + slide, keyed per round) covers
+      // the moment, so no extra overlay fires. The shared RoundCountdown
+      // already ran at round start.
       setPhase("drawing");
       setAwaitingWordPick(false);
       setNinnyMsg(null);
-      // 3-2-1 cinematic on every client when the drawer locks their word.
-      // Drawer-side ALSO fires this via the select-word -> drawing phase
-      // transition effect; guessers were already in "drawing" when the
-      // broadcast lands so they wouldn't otherwise see the intro. Reduced-
-      // motion users get the instant cut (handled by countdownTicks > 0).
-      if (!reducedRef.current) setCountdownTicks(3);
     });
     // Progressive Wordle reveal — a guess matched new letter positions. Light up
     // the shared green squares for everyone. Payload carries ONLY matched
@@ -750,6 +782,17 @@ export default function SketchView({
         }
       }
     });
+    // Round-flow V2 — the effective host ended the game from the reveal
+    // screen. Flip to the shared GameOverScreen podium (rendered inside the
+    // reveal branch from the reveal scoreboard already on this client).
+    ch.on("broadcast", { event: SKETCH_EVENTS.GAME_OVER }, () => {
+      // Guard against late/duplicated deliveries landing mid-drawing or
+      // after a rematch's round 1 started: the podium only makes sense from
+      // the reveal screen, where the trigger lives.
+      if (phaseRef.current !== "reveal") return;
+      setGameOver(true);
+      setNinnyMsg(null);
+    });
     // Tier 1 lifecycle (2026-06-04): wrap subscribe with exponential-backoff
     // resubscribe so a transient WS drop doesn't silently leave the channel
     // dead. After MAX_ATTEMPTS the wrapper surfaces a single "Connection lost"
@@ -808,8 +851,12 @@ export default function SketchView({
   //
   // When the host pauses (pausedAt non-null) we freeze the visible countdown —
   // the interval keeps running but skips the decrement until resume.
+  //
+  // Also held while the between-rounds RoundCountdown is on screen so the
+  // visible clock doesn't tick during the intro (guessers enter "drawing"
+  // while the overlay runs; without this gate they'd silently lose 5s).
   useEffect(() => {
-    if (phase !== "drawing") return;
+    if (phase !== "drawing" || countdownRoundId !== null) return;
     const iv = setInterval(() => {
       // Frozen while paused — every client agrees because the PAUSED /
       // RESUMED broadcast lands at ~the same time for everyone.
@@ -826,14 +873,17 @@ export default function SketchView({
       });
     }, 1000);
     return () => clearInterval(iv);
-  }, [phase, isDrawer, isHost, pausedAt]);
+  }, [phase, isDrawer, isHost, pausedAt, countdownRoundId]);
 
   // ── Drawer picks a word ──
   // pickedRef gates so the manual pick and the 10s auto-pick can't both fire
   // (the server also rejects a second select-word with 409, so a race is safe).
   const selectWord = useCallback(
     async (word: string) => {
-      if (!round || pickedRef.current) return;
+      // The picker renders beneath the pointer-events-none countdown
+      // overlay; without this guard a tap during the 5s intro passes
+      // through and locks a word the drawer never read.
+      if (!round || pickedRef.current || countdownRoundId !== null) return;
       pickedRef.current = true;
       setInfoWord(null);
       // Selection feedback: picked card gets gold border + scale-up, the
@@ -850,7 +900,7 @@ export default function SketchView({
       setNinnyMsg(null);
       await sendBroadcast(SKETCH_EVENTS.WORD_SELECTED, { round_id: round.id });
     },
-    [round, sendBroadcast],
+    [round, sendBroadcast, countdownRoundId],
   );
 
   // ── Word info ("i" popover): real definition + example sentence ──
@@ -905,8 +955,13 @@ export default function SketchView({
   // ── Auto-pick countdown (drawer) ──
   // The picker can stall a round, so after PICK_SECONDS we pick a random
   // candidate for them. Runs only on the drawer's client while choosing.
+  //
+  // Held while the shared RoundCountdown is on screen — the pick window is
+  // client-local, so it simply starts AFTER the countdown completes instead
+  // of being eaten by it (the effect re-arms when countdownRoundId clears).
   useEffect(() => {
     if (phase !== "select-word" || !candidates || candidates.length === 0) return;
+    if (countdownRoundId !== null) return;
     setPickSecs(PICK_SECONDS);
     const iv = setInterval(() => {
       setPickSecs((t) => {
@@ -922,15 +977,19 @@ export default function SketchView({
       });
     }, 1000);
     return () => clearInterval(iv);
-  }, [phase, candidates, selectWord]);
+  }, [phase, candidates, selectWord, countdownRoundId]);
 
   // ── Waiting-for-word-pick safety timeout ──
-  // The drawer auto-picks after PICK_SECONDS, so the WORD_SELECTED broadcast
-  // should always land within ~12s. If it's missed (WS hiccup), drop the
+  // The drawer auto-picks after PICK_SECONDS (which itself starts after the
+  // COUNTDOWN_SECONDS intro), so the WORD_SELECTED broadcast should always
+  // land within ~PICK + COUNTDOWN + 5s. If it's missed (WS hiccup), drop the
   // waiting screen anyway so guessers aren't stranded staring at the pencil.
   useEffect(() => {
     if (!awaitingWordPick || phase !== "drawing") return;
-    const t = setTimeout(() => setAwaitingWordPick(false), (PICK_SECONDS + 5) * 1000);
+    const t = setTimeout(
+      () => setAwaitingWordPick(false),
+      (PICK_SECONDS + COUNTDOWN_SECONDS + 5) * 1000,
+    );
     return () => clearTimeout(t);
   }, [awaitingWordPick, phase]);
 
@@ -1093,12 +1152,6 @@ export default function SketchView({
   useEffect(() => {
     isHostRef.current = isHost;
   }, [isHost]);
-  // Reduced-motion ref read by the WORD_SELECTED handler so guessers honor
-  // the user's prefers-reduced-motion preference for the 3-2-1 intro.
-  const reducedRef = useRef(false);
-  useEffect(() => {
-    reducedRef.current = !!reduced;
-  }, [reduced]);
 
   // ── Celebrating -> reveal transition ──
   // All clients run the same timeout because they read from the same server-
@@ -1164,8 +1217,8 @@ export default function SketchView({
   // on behalf of everyone. Non-effective-host clients fire no-ops; the actual
   // transition arrives via the room/sketch channel broadcasts.
   const handleAutoPlayAgain = useCallback(() => {
-    if (isEffectiveHost) void startRound();
-  }, [isEffectiveHost, startRound]);
+    if (isEffectiveHost && !gameOver) void startRound();
+  }, [isEffectiveHost, gameOver, startRound]);
   const handleAutoBackToLobby = useCallback(() => {
     if (isEffectiveHost) onReturnToLobby();
   }, [isEffectiveHost, onReturnToLobby]);
@@ -1196,12 +1249,15 @@ export default function SketchView({
   }, [phase, revealAutoSecs]);
   useEffect(() => {
     if (phase !== "reveal") return;
+    // Game over parks the room on the podium — nothing auto-advances until
+    // the host picks Play Again (rematch) or Back to Lobby.
+    if (gameOver) return;
     if (revealAutoSecs > 0) return;
     if (advanceFiredRef.current) return;
     if (!isEffectiveHost) return;
     advanceFiredRef.current = true;
     void startRound();
-  }, [phase, revealAutoSecs, isEffectiveHost, startRound]);
+  }, [phase, revealAutoSecs, isEffectiveHost, startRound, gameOver]);
   // Tick a render every second after entry so the fallback unlock can appear.
   const [revealNowTick, setRevealNowTick] = useState(0);
   useEffect(() => {
@@ -1232,7 +1288,10 @@ export default function SketchView({
   // not load-bearing). Non-host clients see a disabled "Waiting for host" pill.
   const [rematchPending, setRematchPending] = useState(false);
   const handleRematch = useCallback(async () => {
-    if (!isHost || rematchPending) return;
+    // Effective-host gated (mirrors BluffView) — the rematch route accepts
+    // the stored host OR the derived effective host, so a host disconnect
+    // can't strand the room on the podium.
+    if (!isEffectiveHost || rematchPending) return;
     setRematchPending(true);
     const res = await apiPost(`/api/party/rooms/${room.code}/rematch`, {});
     if (!res.ok) {
@@ -1244,7 +1303,48 @@ export default function SketchView({
     const ch = supabase.channel(roomChannel(room.code));
     await ch.send({ type: "broadcast", event: PARTY_EVENTS.GAME_ENDED, payload: {} });
     setRematchPending(false);
-  }, [isHost, rematchPending, room.code]);
+  }, [isEffectiveHost, rematchPending, room.code]);
+
+  // ── End game (effective host) → shared GameOverScreen for everyone ──
+  // Local flip first (broadcasts don't echo to the sender), then tell the
+  // room. From the podium: Play Again -> handleRematch (rematch route +
+  // GAME_ENDED broadcast), Back to Lobby -> onReturnToLobby (existing
+  // end-game flow).
+  const triggerGameOver = useCallback(() => {
+    // Suppress the reveal auto-advance: without this, END GAME tapped in the
+    // same second the 12s auto-advance fires sends both startRound and
+    // GAME_OVER, yanking remote clients off the podium into a new round.
+    advanceFiredRef.current = true;
+    setGameOver(true);
+    setNinnyMsg(null);
+    void sendBroadcast(SKETCH_EVENTS.GAME_OVER, {});
+  }, [sendBroadcast]);
+
+  // ── Reveal staging (post-round drama beat) ──
+  // The 2.5s celebrating overlay ("GUESSED!" / "TIME'S UP" stamp +
+  // RoundEndOverlay) is the dramatic beat; the reveal content then lands in
+  // staged waves: word card immediately, factoid at +450ms, scoreboard
+  // (count-up + per-row stagger) at +900ms, controls at +1350ms. Total
+  // sequence ≈ 3.9s including the beat — tighter than Bluff's, on purpose
+  // (Sketchy rounds are faster paced). Reduced motion: everything at once.
+  const [revealStep, setRevealStep] = useState(0);
+  useEffect(() => {
+    if (phase !== "reveal") {
+      setRevealStep(0);
+      return;
+    }
+    if (reduced) {
+      setRevealStep(3);
+      return;
+    }
+    setRevealStep(0);
+    const timers = [450, 900, 1350].map((ms, i) =>
+      setTimeout(() => setRevealStep(i + 1), ms),
+    );
+    return () => {
+      for (const t of timers) clearTimeout(t);
+    };
+  }, [phase, reduced]);
 
   // ── Render ──
   const playersForBoard = useMemo(() => players.map((p) => ({
@@ -1347,15 +1447,23 @@ export default function SketchView({
   // disabled at the CSS level so it never intercepts canvas strokes.
   const showPanicVignette = isDrawer && phase === "drawing" && timeLeft > 0 && timeLeft < 5 && !reduced;
 
-  // 3-2-1 cinematic intro overlay. Renders during the brief window between
-  // select-word lock-in and the first stroke. Pointer-events: none so it never
-  // blocks an accidental early canvas tap (drawer's tap-to-draw is queued by
-  // SketchCanvas anyway). Full-screen blur backdrop + round-meta header + giant
-  // number that scales in per tick.
   const drawerName = round
     ? players.find((p) => p.user_id === round.drawer_user_id)?.username
     : null;
-  const showCountdown = countdownTicks > 0 && phase === "drawing";
+
+  // "ROUND N OF M" label data for the shared RoundCountdown. Sketchy has no
+  // server-side round cap — the rounds route rotates fair-random among the
+  // least-drawn players, i.e. one draw per player per rotation. So M is the
+  // end of the CURRENT rotation: the next multiple of the active player
+  // count at or above N (round 3 of 4 players -> "OF 4"; round 5 -> "OF 8").
+  // round_num can be 0 on a legacy broadcast without the field; in that case
+  // we show a bare "ROUND 1" with no total rather than guessing.
+  const roundsPerRotation = Math.max(2, players.length);
+  const countdownRoundNum = Math.max(1, round?.round_num ?? 1);
+  const countdownTotalRounds =
+    round && round.round_num > 0
+      ? Math.ceil(round.round_num / roundsPerRotation) * roundsPerRotation
+      : null;
 
   // Non-drawers sit in phase "drawing" while the drawer is still on the word
   // picker. While that's true we swap the canvas + guess UI for a dedicated
@@ -1369,71 +1477,46 @@ export default function SketchView({
   return (
     <div className="space-y-4">
       {isPendingJoiner && <JoiningNextRoundBanner variant="sketch" />}
-      {showCountdown && (
-        <motion.div
-          key={`countdown-${countdownTicks}`}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          aria-hidden="true"
-          className="fixed inset-0 z-40 flex flex-col items-center justify-center pointer-events-none"
-          style={{
-            background: "radial-gradient(circle, rgba(8,6,16,0.78) 0%, rgba(8,6,16,0.92) 100%)",
-            backdropFilter: "blur(6px)",
-            WebkitBackdropFilter: "blur(6px)",
-          }}
-        >
-          <div className="flex flex-col items-center gap-2 mb-8">
-            <p className="font-mono text-[11px] uppercase tracking-[0.35em] text-cream/50">
-              get ready · round {round?.round_num ?? 1}
-            </p>
-            <p className="font-bebas text-3xl sm:text-4xl tracking-wider text-cream">
-              {isDrawer && lockedWord ? (
-                <>
-                  <span className="text-cream/45">your word is</span>{" "}
-                  <span className="text-[#FFD700]">{lockedWord.toUpperCase()}</span>
-                </>
+
+      {/* ── Between-rounds countdown (shared RoundCountdown, 5s) ──
+          Mirrors Bluff / Poker Face. Keyed once per round id (seen-set in the
+          trigger effect), so polls/broadcasts can't restart it. The drawer's
+          word picker waits underneath; its auto-pick clock starts only when
+          this completes. */}
+      <AnimatePresence>
+        {round && countdownRoundId === round.id && (
+          <RoundCountdown
+            key={`countdown-${round.id}`}
+            roundNum={countdownRoundNum}
+            totalRounds={countdownTotalRounds}
+            seconds={COUNTDOWN_SECONDS}
+            accent="#A855F7"
+            headline={
+              isDrawer ? (
+                <>you <span style={{ color: "#A855F7" }}>draw</span> this round</>
               ) : (
                 <>
-                  {drawerName ?? "drawer"} <span className="text-cream/45">is drawing</span>
+                  {drawerName ?? "someone"} <span style={{ color: "#A855F7" }}>draws</span> this round
                 </>
-              )}
-            </p>
-            {subjectLabel && (
-              <span
-                className="mt-1 inline-flex items-center font-bebas text-xs tracking-[0.25em] px-3 py-1 rounded-full"
-                style={{
-                  background: "rgba(168,85,247,0.18)",
-                  border: "1px solid rgba(168,85,247,0.45)",
-                  color: "#E9D5FF",
-                }}
-              >
-                {subjectLabel}
-              </span>
-            )}
-          </div>
-          <motion.p
-            key={`tick-${countdownTicks}`}
-            initial={{ scale: 0.4, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 1.6, opacity: 0 }}
-            transition={{ type: "spring", stiffness: 320, damping: 18 }}
-            className="font-bebas text-[10rem] sm:text-[14rem] leading-none tracking-wider text-[#FFD700]"
-            style={{ textShadow: "0 0 64px rgba(255,215,0,0.5)" }}
-          >
-            {countdownTicks}
-          </motion.p>
-          <p className="font-bebas text-sm tracking-[0.4em] text-cream/55 mt-6">
-            {isDrawer ? "get ready to draw" : "watch the canvas"}
-          </p>
-        </motion.div>
-      )}
+              )
+            }
+            subline={isDrawer ? "pick a word. keep it secret." : "warm up your guessing brain"}
+            onComplete={handleCountdownDone}
+          />
+        )}
+      </AnimatePresence>
       {showPanicVignette && <div aria-hidden="true" className="pa-panic-vignette" />}
       <NinnyHostBubble message={ninnyMsg} />
 
-      {/* Subject + timer + drawer pill */}
+      {/* Subject + timer + drawer pill — fades in with the canvas surface so
+          the picker -> canvas swap reads as one motion, not a pop. */}
       {round && phase === "drawing" && !waitingForPick && (
-        <div className="flex flex-wrap items-center justify-between gap-2">
+        <motion.div
+          initial={reduced ? false : { opacity: 0, y: -6 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: reduced ? 0 : 0.25, ease: [0.16, 1, 0.3, 1] }}
+          className="flex flex-wrap items-center justify-between gap-2"
+        >
           <div className="flex items-center gap-2">
             <span
               className={`font-bebas text-xs tracking-wider px-2.5 py-1 rounded-full bg-purple-500/15 text-purple-200 border border-purple-500/40 ${reduced ? "" : "pa-spotlight"}`}
@@ -1502,7 +1585,7 @@ export default function SketchView({
               {timeLeft}s
             </span>
           </div>
-        </div>
+        </motion.div>
       )}
 
       {/* Non-drawer waiting state during select-word phase. Previously a dead
@@ -1821,9 +1904,19 @@ export default function SketchView({
         </motion.div>
       )}
 
-      {/* Drawing surface */}
+      {/* Drawing surface — keyed per round so it animates in exactly once per
+          round, at the moment it first mounts: for guessers that's the word
+          pick (waitingForPick flips false), for the drawer it's the picker ->
+          canvas swap. GPU-only fade + slide; persists through celebrating +
+          reveal without re-animating. */}
       {round && !waitingForPick && (phase === "drawing" || phase === "celebrating" || phase === "reveal") && (
-        <div className="lg:grid lg:grid-cols-[1fr_300px] lg:gap-3 space-y-3 lg:space-y-0">
+        <motion.div
+          key={`surface-${round.id}`}
+          initial={reduced ? false : { opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: reduced ? 0 : 0.3, ease: [0.16, 1, 0.3, 1] }}
+          className="lg:grid lg:grid-cols-[1fr_300px] lg:gap-3 space-y-3 lg:space-y-0"
+        >
           <div className="space-y-3 min-w-0">
           {/* Canvas + stamp wrapper. The stamp + green-corner overlay are
               siblings of the canvas (NOT children of it) so they never touch
@@ -2215,7 +2308,7 @@ export default function SketchView({
             </div>
           )}
           </div>{/* /right-column (guesses + input) */}
-        </div>
+        </motion.div>
       )}
 
       {/* Reveal */}
@@ -2243,123 +2336,180 @@ export default function SketchView({
             }}
           >
             <p className="font-bebas text-xs tracking-[0.3em] text-cream/50 mb-2">THE WORD WAS</p>
-            <p className={`font-bebas text-5xl text-[#FFD700] tracking-wider mb-3 inline-block ${reduced ? "" : "pa-stamp"}`}>
+            <p
+              className={`font-bebas text-5xl sm:text-6xl text-[#FFD700] tracking-wider mb-3 inline-block ${reduced ? "" : "pa-stamp"}`}
+              style={{ textShadow: "0 0 28px rgba(255,215,0,0.45)" }}
+            >
               {reveal.word.toUpperCase()}
             </p>
-            {reveal.factoid && (
-              <p className={`text-cream/80 text-sm font-syne italic max-w-md mx-auto ${reduced ? "" : "pa-factoid-up"}`}>
+            {/* Staged beat 1 (+450ms): factoid. Reduced motion: revealStep is
+                maxed immediately, so everything renders at once. */}
+            {reveal.factoid && revealStep >= 1 && (
+              <motion.p
+                initial={reduced ? false : { opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: reduced ? 0 : 0.3, ease: [0.16, 1, 0.3, 1] }}
+                className="text-cream/80 text-sm font-syne italic max-w-md mx-auto"
+              >
                 Did you know... {reveal.factoid}
-              </p>
+              </motion.p>
             )}
           </div>
 
-          <PartyScoreboard
-            players={reveal.scoreboard.map((s) => ({
-              user_id: s.user_id,
-              username: s.username,
-              score: s.score,
-            }))}
-            highlightUserId={meUserId}
-            drawerUserId={reveal.drawer_user_id}
-            spectatorUserIds={spectatorUserIds}
-          />
-
-          {/* Post-round controls — Phase 2 real voting UI.
-              Host sees the two big CTAs (play another round / back to lobby)
-              plus the live vote tally. Non-host players see the vote buttons +
-              tally. At 75% threshold the round transitions automatically. */}
-          {round && (
-            <PostRoundVoteCard
-              roundId={round.id}
-              roundKind="sketch"
-              isHost={isHost}
-              onAutoPlayAgain={handleAutoPlayAgain}
-              onAutoBackToLobby={handleAutoBackToLobby}
+          {gameOver ? (
+            /* ── Game over: shared GameOverScreen (podium + Play Again ->
+                rematch route + GAME_ENDED broadcast, Back to Lobby -> existing
+                end-game flow), mirroring Bluff/Poker Face. Standings come from
+                the authoritative post-round reveal scoreboard. Replaces the
+                vote card / auto-advance / CTAs; the last word card stays above
+                for context. ── */
+            <GameOverScreen
+              players={reveal.scoreboard.map((s) => ({
+                user_id: s.user_id,
+                username: s.username,
+                score: s.score,
+              }))}
+              meUserId={meUserId}
+              accent="#A855F7"
+              isHost={isEffectiveHost}
+              onPlayAgain={handleRematch}
+              onBackToLobby={onReturnToLobby}
+              playAgainPending={rematchPending}
             />
-          )}
-
-          {/* Auto-advance countdown — always visible so the room can see how
-              soon the next round fires. Reads identical for every client; the
-              effective host's machine is the one that actually triggers it. */}
-          <div className="text-center">
-            <p className="font-syne text-[11px] text-cream/55 italic">
-              {revealAutoSecs > 0
-                ? `Next round in ${revealAutoSecs}s`
-                : "Starting next round..."}
-            </p>
-          </div>
-
-          {isEffectiveHost ? (
-            <div className="space-y-2">
-              <div className="flex flex-col sm:flex-row gap-3">
-                <button
-                  onClick={triggerStartNext}
-                  className="flex-1 py-3 rounded-xl font-bebas tracking-wider text-base transition-all active:scale-95 btn-gold"
-                >
-                  PLAY ANOTHER ROUND
-                </button>
-                <button
-                  onClick={onReturnToLobby}
-                  className="flex-1 py-3 rounded-xl font-bebas tracking-wider text-base transition-all active:scale-95"
-                  style={{
-                    background: "rgba(255,255,255,0.04)",
-                    border: "1px solid rgba(255,255,255,0.1)",
-                    color: "rgba(238,244,255,0.85)",
-                  }}
-                >
-                  BACK TO LOBBY
-                </button>
-              </div>
-              {/* Rematch CTA — fresh match, same roster, scores back to zero.
-                  Real-host-only: rematch resets the room to lobby + zeroes
-                  scores and the API guards that to host_user_id. */}
-              {isHost && (
-                <button
-                  onClick={handleRematch}
-                  disabled={rematchPending}
-                  className="w-full py-2.5 rounded-xl font-bebas tracking-wider text-sm transition-all active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed"
-                  style={{
-                    background: "linear-gradient(135deg, rgba(168,85,247,0.20) 0%, rgba(99,102,241,0.10) 100%)",
-                    border: "1px solid rgba(168,85,247,0.45)",
-                    color: "#E9D5FF",
-                    boxShadow: "0 0 16px rgba(168,85,247,0.18)",
-                  }}
-                >
-                  {rematchPending ? "RESETTING..." : "REMATCH (FRESH SCORES, SAME ROSTER)"}
-                </button>
-              )}
-            </div>
           ) : (
-            // Non-effective-host: small "waiting" pill that flips to a real
-            // fallback button after a few seconds, so a stale host pointer
-            // can't deadlock the room.
-            <div className="text-center space-y-2">
-              {!fallbackUnlocked ? (
-                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bebas tracking-wider text-cream/55 bg-white/[0.04] border border-white/10">
-                  Waiting for host
-                </span>
-              ) : (
-                <div className="flex flex-col sm:flex-row gap-3">
-                  <button
-                    onClick={triggerStartNext}
-                    className="flex-1 py-3 rounded-xl font-bebas tracking-wider text-base transition-all active:scale-95 btn-gold"
-                  >
-                    START NEXT ROUND
-                  </button>
-                  <button
-                    onClick={onReturnToLobby}
-                    className="flex-1 py-3 rounded-xl font-bebas tracking-wider text-base transition-all active:scale-95"
-                    style={{
-                      background: "rgba(255,255,255,0.04)",
-                      border: "1px solid rgba(255,255,255,0.1)",
-                      color: "rgba(238,244,255,0.85)",
-                    }}
-                  >
-                    BACK TO LOBBY
-                  </button>
-                </div>
+            <>
+              {/* Staged beat 2 (+900ms): scoreboard — rows stagger in, scores
+                  count up, rank changes slide via framer layout. */}
+              {revealStep >= 2 && (
+                <motion.div
+                  initial={reduced ? false : { opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: reduced ? 0 : 0.3, ease: [0.16, 1, 0.3, 1] }}
+                >
+                  <PartyScoreboard
+                    players={reveal.scoreboard.map((s) => ({
+                      user_id: s.user_id,
+                      username: s.username,
+                      score: s.score,
+                    }))}
+                    highlightUserId={meUserId}
+                    drawerUserId={reveal.drawer_user_id}
+                    spectatorUserIds={spectatorUserIds}
+                    staggerIn
+                  />
+                </motion.div>
               )}
-            </div>
+
+              {/* Staged beat 3 (+1350ms): vote card + auto-advance + CTAs. */}
+              {revealStep >= 3 && (
+                <motion.div
+                  initial={reduced ? false : { opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: reduced ? 0 : 0.3, ease: [0.16, 1, 0.3, 1] }}
+                  className="space-y-4"
+                >
+                  {/* Post-round controls — Phase 2 real voting UI.
+                      Host sees the two big CTAs (play another round / end game)
+                      plus the live vote tally. Non-host players see the vote
+                      buttons + tally. At 75% threshold the round transitions
+                      automatically. */}
+                  {round && (
+                    <PostRoundVoteCard
+                      roundId={round.id}
+                      roundKind="sketch"
+                      isHost={isHost}
+                      onAutoPlayAgain={handleAutoPlayAgain}
+                      onAutoBackToLobby={handleAutoBackToLobby}
+                    />
+                  )}
+
+                  {/* Auto-advance countdown — always visible so the room can see
+                      how soon the next round fires. Reads identical for every
+                      client; the effective host's machine actually triggers it. */}
+                  <div className="text-center">
+                    <p className="font-syne text-[11px] text-cream/55 italic">
+                      {revealAutoSecs > 0
+                        ? `Next round in ${revealAutoSecs}s`
+                        : "Starting next round..."}
+                    </p>
+                  </div>
+
+                  {isEffectiveHost ? (
+                    <div className="space-y-2">
+                      <div className="flex flex-col sm:flex-row gap-3">
+                        <button
+                          onClick={triggerStartNext}
+                          className="flex-1 py-3 rounded-xl font-bebas tracking-wider text-base transition-all active:scale-95 btn-gold"
+                        >
+                          PLAY ANOTHER ROUND
+                        </button>
+                        {/* END GAME — Sketchy has no fixed round count, so this
+                            is the game-over trigger: broadcasts GAME_OVER and
+                            every client lands on the shared podium. */}
+                        <button
+                          onClick={triggerGameOver}
+                          className="flex-1 py-3 rounded-xl font-bebas tracking-wider text-base transition-all active:scale-95"
+                          style={{
+                            background: "rgba(255,255,255,0.04)",
+                            border: "1px solid rgba(255,255,255,0.1)",
+                            color: "rgba(238,244,255,0.85)",
+                          }}
+                        >
+                          END GAME
+                        </button>
+                      </div>
+                      {/* Rematch CTA — fresh match, same roster, scores back to
+                          zero. The rematch route accepts the stored host OR the
+                          derived effective host. */}
+                      <button
+                        onClick={handleRematch}
+                        disabled={rematchPending}
+                        className="w-full py-2.5 rounded-xl font-bebas tracking-wider text-sm transition-all active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed"
+                        style={{
+                          background: "linear-gradient(135deg, rgba(168,85,247,0.20) 0%, rgba(99,102,241,0.10) 100%)",
+                          border: "1px solid rgba(168,85,247,0.45)",
+                          color: "#E9D5FF",
+                          boxShadow: "0 0 16px rgba(168,85,247,0.18)",
+                        }}
+                      >
+                        {rematchPending ? "RESETTING..." : "REMATCH (FRESH SCORES, SAME ROSTER)"}
+                      </button>
+                    </div>
+                  ) : (
+                    // Non-effective-host: small "waiting" pill that flips to a real
+                    // fallback button after a few seconds, so a stale host pointer
+                    // can't deadlock the room.
+                    <div className="text-center space-y-2">
+                      {!fallbackUnlocked ? (
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bebas tracking-wider text-cream/55 bg-white/[0.04] border border-white/10">
+                          Waiting for host
+                        </span>
+                      ) : (
+                        <div className="flex flex-col sm:flex-row gap-3">
+                          <button
+                            onClick={triggerStartNext}
+                            className="flex-1 py-3 rounded-xl font-bebas tracking-wider text-base transition-all active:scale-95 btn-gold"
+                          >
+                            START NEXT ROUND
+                          </button>
+                          <button
+                            onClick={onReturnToLobby}
+                            className="flex-1 py-3 rounded-xl font-bebas tracking-wider text-base transition-all active:scale-95"
+                            style={{
+                              background: "rgba(255,255,255,0.04)",
+                              border: "1px solid rgba(255,255,255,0.1)",
+                              color: "rgba(238,244,255,0.85)",
+                            }}
+                          >
+                            BACK TO LOBBY
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </motion.div>
+              )}
+            </>
           )}
         </motion.div>
       )}

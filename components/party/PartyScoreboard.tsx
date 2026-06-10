@@ -30,6 +30,11 @@ interface Props {
   // Phase 2 spectator mode — user ids in this set get a small "spectating"
   // badge next to their row so the room sees who joined mid-round.
   spectatorUserIds?: Set<string>;
+  // Round-flow V2 (additive, default off) — rows slide up with a small
+  // per-row stagger on MOUNT. Used by reveal sequences (Sketchy) where the
+  // scoreboard is a staged beat. Re-sorting still animates via `layout`
+  // independently of this flag. No-op under reduced motion.
+  staggerIn?: boolean;
 }
 
 export default function PartyScoreboard({
@@ -38,6 +43,7 @@ export default function PartyScoreboard({
   drawerUserId,
   compact = false,
   spectatorUserIds,
+  staggerIn = false,
 }: Props) {
   const reduced = useReducedMotion();
   const sorted = [...players].sort((a, b) => b.score - a.score);
@@ -63,7 +69,20 @@ export default function PartyScoreboard({
             <motion.div
               key={p.user_id}
               layout={reduced ? false : "position"}
-              transition={reduced ? { duration: 0 } : { type: "spring", stiffness: 380, damping: 30 }}
+              initial={staggerIn && !reduced ? { opacity: 0, y: 6 } : false}
+              animate={staggerIn && !reduced ? { opacity: 1, y: 0 } : undefined}
+              transition={
+                reduced
+                  ? { duration: 0 }
+                  : {
+                      // Per-property: the layout spring handles re-sorts; the
+                      // mount stagger only drives opacity/y so a later rank
+                      // change is never delayed by the row's entry delay.
+                      layout: { type: "spring", stiffness: 380, damping: 30 },
+                      opacity: { duration: 0.3, delay: staggerIn ? i * 0.06 : 0, ease: [0.16, 1, 0.3, 1] },
+                      y: { duration: 0.3, delay: staggerIn ? i * 0.06 : 0, ease: [0.16, 1, 0.3, 1] },
+                    }
+              }
               className={`flex items-center justify-between rounded-lg px-3 py-1.5 ${isLeader && !reduced ? "pa-leader-glow" : ""}`}
               style={{
                 background: isMe ? "rgba(168,85,247,0.12)" : "rgba(255,255,255,0.02)",
