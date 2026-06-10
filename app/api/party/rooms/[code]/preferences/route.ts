@@ -14,6 +14,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
 import { isValidRoomCode, normalizeRoomCode } from "@/lib/party/room-code";
+import {
+  isBankToken,
+  parseBankToken,
+  bankToken,
+  filterEligibleOwnedBanks,
+} from "@/lib/party/sketch-bank-source";
 
 const ALLOWED_SUBJECTS = new Set([
   "biology",
@@ -25,6 +31,8 @@ const ALLOWED_SUBJECTS = new Set([
   "astronomy",
   "pop-culture",
 ]);
+// A player may pick up to 2 SOURCES total — curated subjects and Word Banks
+// combined. (A "bank:<uuid>" token counts the same as a bare subject.)
 const MAX_PICKS = 2;
 
 export async function POST(
@@ -57,14 +65,40 @@ export async function POST(
     /* fall through with empty raw */
   }
 
-  const cleaned = Array.from(
-    new Set(
-      raw
-        .filter((s): s is string => typeof s === "string")
-        .map((s) => s.toLowerCase())
-        .filter((s) => ALLOWED_SUBJECTS.has(s)),
-    ),
-  ).slice(0, MAX_PICKS);
+  // First pass: collect the candidate bank uuids so we can validate them all
+  // in one batch (ownership + word-count) before building the final list.
+  const bankIds: string[] = [];
+  for (const item of raw) {
+    if (typeof item === "string" && isBankToken(item)) {
+      const id = parseBankToken(item);
+      if (id) bankIds.push(id);
+    }
+  }
+
+  // Validate bank tokens: keep only banks OWNED by the caller with enough words.
+  const eligibleBanks =
+    bankIds.length > 0
+      ? await filterEligibleOwnedBanks(supabaseAdmin, userId, bankIds)
+      : new Set<string>();
+
+  // Build the cleaned list in the caller's original order, deduped, dropping
+  // disallowed subjects + ineligible bank tokens, then cap at MAX_PICKS
+  // (subjects + banks combined).
+  const cleaned: string[] = [];
+  for (const item of raw) {
+    if (typeof item !== "string") continue;
+    let tok: string | null = null;
+    if (isBankToken(item)) {
+      const id = parseBankToken(item);
+      if (id && eligibleBanks.has(id)) tok = bankToken(id);
+    } else {
+      const subj = item.toLowerCase();
+      if (ALLOWED_SUBJECTS.has(subj)) tok = subj;
+    }
+    if (!tok || cleaned.includes(tok)) continue;
+    cleaned.push(tok);
+    if (cleaned.length >= MAX_PICKS) break;
+  }
 
   // Confirm caller is in the room.
   const { data: existing } = await supabaseAdmin

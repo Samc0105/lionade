@@ -80,6 +80,11 @@ interface CandidateWord {
   word: string;
   difficulty: string;
   factoid?: string;
+  /** Word-bank candidates carry source:"bank" — rendered with a grey "Bank"
+   *  pill + the definition (factoid) as a subline instead of the difficulty
+   *  pill. Curated candidates omit it (or set "curated") and keep the existing
+   *  easy/medium/hard pill. */
+  source?: "curated" | "bank";
 }
 
 interface WordInfo {
@@ -132,6 +137,17 @@ const DIFFICULTY_STYLE: Record<
     cardBorder: "rgba(244,63,94,0.55)",
     cardGlow: "0 0 20px rgba(244,63,94,0.18)",
   },
+};
+
+// Word-bank candidate pill — a neutral grey badge that replaces the
+// difficulty pill for source:"bank" cards (their difficulty is a
+// display-irrelevant "medium" the server stamps on). Glassmorphism greys,
+// matching the rest of the dark surface.
+const BANK_PILL = {
+  label: "BANK",
+  bg: "rgba(255,255,255,0.08)",
+  border: "rgba(255,255,255,0.22)",
+  color: "rgba(238,244,255,0.7)",
 };
 
 // Stable easiest-first ordering for the picker. Left-to-right reads
@@ -227,6 +243,8 @@ export default function SketchView({
     factoid: string | null;
     drawer_user_id: string;
     scoreboard: { user_id: string; username: string | null; score: number }[];
+    /** Bank rounds set this; drives the DEFINITION vs DID YOU KNOW eyebrow. */
+    source_kind?: "curated" | "bank";
   } | null>(null);
 
   // ── Game over (host-ended; Sketchy has no fixed round count) ──
@@ -432,6 +450,16 @@ export default function SketchView({
   // missed). Mid-round joiners bootstrap straight into the live canvas, so
   // the flag stays false on that path.
   const [awaitingWordPick, setAwaitingWordPick] = useState(false);
+  // ── Word-bank reroll (drawer-only, once per round) ──
+  // The drawer can shuffle their candidate set a single time. `rerolling`
+  // gates the in-flight POST; `rerollUsed` disables the button after one use
+  // (or a 409 from the server). Reset per round in startRound / ROUND_STARTED.
+  const [rerolling, setRerolling] = useState(false);
+  const [rerollUsed, setRerollUsed] = useState(false);
+  // Whether THIS round drew from the word bank, captured at pick time (the
+  // chosen candidate's source) and/or from the reveal payload's source_kind.
+  // Drives the "DEFINITION" vs "DID YOU KNOW" eyebrow on the reveal screen.
+  const [revealIsBank, setRevealIsBank] = useState(false);
 
   const isDrawer = round?.drawer_user_id === meUserId;
   const subjectLabel = round ? SUBJECT_LABELS[round.subject as Subject] ?? round.subject : "";
@@ -496,6 +524,9 @@ export default function SketchView({
     setWordInfo({});
     setPendingPick(null);
     setAwaitingWordPick(false);
+    setRerolling(false);
+    setRerollUsed(false);
+    setRevealIsBank(false);
     setGameOver(false);
     setPausedAt(null);
     setPausedByName(null);
@@ -631,6 +662,9 @@ export default function SketchView({
       setWordInfo({});
       setPendingPick(null);
       setAwaitingWordPick(!isMe);
+      setRerolling(false);
+      setRerollUsed(false);
+      setRevealIsBank(false);
       setGameOver(false);
       setPausedAt(null);
       setPausedByName(null);
@@ -776,6 +810,10 @@ export default function SketchView({
         // completes cleanly.
         const r = payload.reveal;
         setReveal(r);
+        // Guessers never picked the word, so they learn bank-ness here (the
+        // reveal payload's source_kind). The drawer already set it at pick
+        // time; this is idempotent for them.
+        if (r.source_kind === "bank") setRevealIsBank(true);
         if (!payload.celebrating) {
           setPhase("reveal");
           setNinnyMsg(null);
@@ -895,13 +933,45 @@ export default function SketchView({
         setPendingPick(null);
         return;
       }
+      // Remember whether this was a word-bank pick so the reveal screen can
+      // label the factoid line as a DEFINITION (study moment) rather than a
+      // trivia "DID YOU KNOW". Read off the candidate the drawer locked in.
+      const chosen = candidates?.find((c) => c.word === word);
+      if (chosen?.source === "bank") setRevealIsBank(true);
       setLockedWord(word);
       setPhase("drawing");
       setNinnyMsg(null);
       await sendBroadcast(SKETCH_EVENTS.WORD_SELECTED, { round_id: round.id });
     },
-    [round, sendBroadcast, countdownRoundId],
+    [round, candidates, sendBroadcast, countdownRoundId],
   );
+
+  // ── Word-bank reroll (drawer-only, once per round) ──
+  // Swaps the entire candidate set for a fresh draw. Server enforces drawer-
+  // only + once-per-round (409 if already used). We mirror that locally so the
+  // button disables after one use; a 409 from a racing/duplicate tap also
+  // disables. Never fires while a pick is already locking in (pendingPick).
+  const rerollWords = useCallback(async () => {
+    if (!round || !isDrawer) return;
+    if (rerolling || rerollUsed || pendingPick !== null || pickedRef.current) return;
+    setRerolling(true);
+    const res = await apiPost<{ candidate_words: CandidateWord[] }>(
+      `/api/party/sketch/rounds/${round.id}/reroll`,
+      {},
+    );
+    setRerolling(false);
+    if (!res.ok) {
+      // 409 = already used (or any failure) — burn the single shuffle so the
+      // button shows the "no more shuffles" hint instead of letting them retry.
+      setRerollUsed(true);
+      return;
+    }
+    if (res.data?.candidate_words && res.data.candidate_words.length > 0) {
+      setCandidates(res.data.candidate_words);
+      setInfoWord(null);
+    }
+    setRerollUsed(true);
+  }, [round, isDrawer, rerolling, rerollUsed, pendingPick]);
 
   // ── Word info ("i" popover): real definition + example sentence ──
   // Fetched from the free Dictionary API client-side (drawer-only screen — the
@@ -1104,8 +1174,10 @@ export default function SketchView({
       factoid: string | null;
       drawer_user_id: string;
       scoreboard: { user_id: string; username: string | null; score: number }[];
+      source_kind?: "curated" | "bank";
     }>(`/api/party/sketch/rounds/${round.id}/complete`, {});
     if (!res.ok || !res.data) return;
+    if (res.data.source_kind === "bank") setRevealIsBank(true);
     const startedAt = new Date().toISOString();
     // Resolve winner from the first-correct-guesser ref (captured live during
     // the GUESS broadcast). Pulls avatar_url defensively from the players list
@@ -1691,6 +1763,7 @@ export default function SketchView({
                 return a.originalIndex - b.originalIndex;
               })
               .map(({ c }, i) => {
+              const isBank = c.source === "bank";
               const diff = DIFFICULTY_STYLE[c.difficulty] ?? DIFFICULTY_STYLE.medium;
               const info = wordInfo[c.word];
               const open = infoWord === c.word;
@@ -1713,11 +1786,17 @@ export default function SketchView({
                       pendingPick ? "" : "transition-all active:scale-95 hover:-translate-y-0.5"
                     }`}
                     style={{
-                      background: diff.cardBg,
+                      background: isBank
+                        ? "linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%)"
+                        : diff.cardBg,
                       border: isPicked
                         ? "1.5px solid rgba(255,215,0,0.9)"
-                        : `1.5px solid ${diff.cardBorder}`,
-                      boxShadow: isPicked ? "0 0 28px rgba(255,215,0,0.35)" : diff.cardGlow,
+                        : `1.5px solid ${isBank ? "rgba(255,255,255,0.18)" : diff.cardBorder}`,
+                      boxShadow: isPicked
+                        ? "0 0 28px rgba(255,215,0,0.35)"
+                        : isBank
+                          ? "0 0 18px rgba(255,255,255,0.05)"
+                          : diff.cardGlow,
                       transform: isPicked && !reduced ? "scale(1.05)" : undefined,
                       opacity: isDimmed ? 0.3 : 1,
                       transition: reduced
@@ -1728,15 +1807,31 @@ export default function SketchView({
                     <p className="font-bebas text-3xl tracking-wider text-cream">
                       {c.word.toUpperCase()}
                     </p>
-                    <p className="text-cream/35 text-[11px] font-syne mt-2">Tap to draw this</p>
+                    {/* Bank cards surface the definition right on the card so
+                        the drawer knows what to draw — critical for foreign-
+                        language / unfamiliar bank words. Curated cards keep the
+                        plain "Tap to draw this" hint. */}
+                    {isBank && c.factoid ? (
+                      <p className="text-cream/55 text-[11px] font-syne mt-2 leading-relaxed line-clamp-3">
+                        {c.factoid}
+                      </p>
+                    ) : (
+                      <p className="text-cream/35 text-[11px] font-syne mt-2">Tap to draw this</p>
+                    )}
                   </button>
 
-                  {/* Difficulty badge (top-left, color-coded) */}
+                  {/* Badge (top-left). Bank candidates get a neutral grey
+                      "Bank" pill (their difficulty is a placeholder); curated
+                      candidates keep the color-coded easy/medium/hard pill. */}
                   <span
                     className="absolute top-3 left-3 font-bebas text-[10px] tracking-[0.18em] px-2 py-0.5 rounded-full pointer-events-none"
-                    style={{ background: diff.bg, border: `1px solid ${diff.border}`, color: diff.color }}
+                    style={
+                      isBank
+                        ? { background: BANK_PILL.bg, border: `1px solid ${BANK_PILL.border}`, color: BANK_PILL.color }
+                        : { background: diff.bg, border: `1px solid ${diff.border}`, color: diff.color }
+                    }
                   >
-                    {diff.label}
+                    {isBank ? BANK_PILL.label : diff.label}
                   </span>
 
                   {/* "i" info toggle (top-right) — sibling button, stops the pick */}
@@ -1799,7 +1894,7 @@ export default function SketchView({
                             {c.factoid && (
                               <div>
                                 <p className="font-bebas text-[10px] tracking-[0.2em] text-[#FFD700]/80 mb-0.5">
-                                  DID YOU KNOW
+                                  {isBank ? "DEFINITION" : "DID YOU KNOW"}
                                 </p>
                                 <p className="font-syne text-xs text-cream/70 leading-relaxed">
                                   {c.factoid}
@@ -1820,6 +1915,30 @@ export default function SketchView({
               );
             })}
           </div>
+
+          {/* Reroll — drawer-only, once-per-round "shuffle" of the candidate
+              set. Subtle text button under the cards; disabled (with a tiny
+              hint) once used or after a server 409. Re-uses the same card grid
+              above on success, so there's no layout jump. */}
+          {isDrawer && (
+            <div className="flex items-center justify-center gap-2">
+              <button
+                type="button"
+                onClick={rerollWords}
+                disabled={rerollUsed || rerolling || pendingPick !== null}
+                className="inline-flex items-center gap-1.5 font-syne text-xs text-cream/55 px-3 py-1.5 rounded-full transition-all active:scale-95 hover:text-cream/80 disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100"
+                style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)" }}
+              >
+                <span aria-hidden="true" className={rerolling && !reduced ? "pa-charge" : ""}>
+                  {"↻"}
+                </span>
+                {rerolling ? "Shuffling..." : "Shuffle words"}
+              </button>
+              {rerollUsed && !rerolling && (
+                <span className="font-syne text-[10px] text-cream/35 italic">no more shuffles</span>
+              )}
+            </div>
+          )}
 
           {/* Waiting-to-guess strip — fills the page + shows who's ready to play.
               Each other player gets a "charging" green dot while the drawer picks. */}
@@ -2343,16 +2462,29 @@ export default function SketchView({
               {reveal.word.toUpperCase()}
             </p>
             {/* Staged beat 1 (+450ms): factoid. Reduced motion: revealStep is
-                maxed immediately, so everything renders at once. */}
+                maxed immediately, so everything renders at once. Bank rounds
+                relabel this as the word's DEFINITION (a study moment) rather
+                than a trivia "Did you know". */}
             {reveal.factoid && revealStep >= 1 && (
-              <motion.p
+              <motion.div
                 initial={reduced ? false : { opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: reduced ? 0 : 0.3, ease: [0.16, 1, 0.3, 1] }}
-                className="text-cream/80 text-sm font-syne italic max-w-md mx-auto"
+                className="max-w-md mx-auto"
               >
-                Did you know... {reveal.factoid}
-              </motion.p>
+                {revealIsBank ? (
+                  <>
+                    <p className="font-bebas text-[10px] tracking-[0.3em] text-cream/45 mb-1">
+                      DEFINITION
+                    </p>
+                    <p className="text-cream/80 text-sm font-syne">{reveal.factoid}</p>
+                  </>
+                ) : (
+                  <p className="text-cream/80 text-sm font-syne italic">
+                    Did you know... {reveal.factoid}
+                  </p>
+                )}
+              </motion.div>
             )}
           </div>
 

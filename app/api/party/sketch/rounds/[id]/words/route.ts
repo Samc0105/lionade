@@ -47,6 +47,9 @@ export async function GET(
       // drawer the factoid here — it powers the "i" info popover on the picker.
       // Guessers never hit this route, so nothing leaks.
       factoid: c.factoid,
+      // source flows through from candidate_words: "bank" for Word-Bank words,
+      // omitted for curated. The client uses it to label the source on the picker.
+      ...(c.source ? { source: c.source } : {}),
     })),
   });
 }

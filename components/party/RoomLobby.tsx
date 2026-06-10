@@ -6,11 +6,12 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import useSWR from "swr";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
-import { ChatCircleDots, Check, MaskHappy, PencilLine, PokerChip } from "@phosphor-icons/react";
+import { ArrowsClockwise, BookBookmark, ChatCircleDots, Check, MaskHappy, PencilLine, PokerChip, Vault } from "@phosphor-icons/react";
 import { apiGet, apiPost } from "@/lib/api-client";
 import { toastError, toastSuccess } from "@/lib/toast";
 import { supabase } from "@/lib/supabase";
 import RoomCodeShare from "./RoomCodeShare";
+import BottomSheet from "@/components/ui/BottomSheet";
 import { SUBJECT_LABELS, SUBJECTS as ALL_SUBJECTS } from "@/lib/party/word-lists-stub";
 import { nudgeChannel, PARTY_EVENTS } from "@/lib/party/realtime-channels";
 import type { PartyPlayer, PartyRoom } from "@/lib/party/types";
@@ -62,6 +63,24 @@ interface Props {
 }
 
 const MAX_TOPIC_PICKS = 2;
+
+// A chosen word bank rides in the SAME `selected_subjects` array as a token
+// string `bank:<uuid>`, alongside curated subject keys. The 2-pick cap is
+// shared across subjects + banks combined.
+const BANK_TOKEN_PREFIX = "bank:";
+const isBankToken = (t: string): boolean => t.startsWith(BANK_TOKEN_PREFIX);
+const bankIdFromToken = (t: string): string => t.slice(BANK_TOKEN_PREFIX.length);
+
+// Shape returned by GET /api/party/rooms/<code>/banks (caller's own banks).
+interface PartyBank {
+  id: string;
+  name: string;
+  kind: "language" | "general";
+  icon: string;
+  color: string;
+  wordCount: number;
+  eligible: boolean;
+}
 
 // Per-game lobby metadata. `bestPlayed` is the small "ideal context" glass chip
 // Sam asked for: Sketchy = Either, Bluff = Remote OK, Poker Face = Best in person
@@ -593,6 +612,42 @@ export default function RoomLobby({ room, players, isHost, meUserId, onGameStart
     }
   }, [serverTopics, optimisticTopics]);
 
+  // ── Word Bank picker (Sketchy only) ──
+  // Banks are private study lists owned by the caller. The picker sheet
+  // fetches them on open; selected banks ride in myTopics as `bank:<id>`
+  // tokens (same cap + toggle as subjects). We keep an id -> {name,icon}
+  // map so we can label the caller's OWN selected-bank chips inline. Other
+  // players' bank tokens are never labelled (privacy — see vote tally).
+  const [bankSheetOpen, setBankSheetOpen] = useState(false);
+  const [banks, setBanks] = useState<PartyBank[] | null>(null);
+  const [banksLoading, setBanksLoading] = useState(false);
+  const [banksError, setBanksError] = useState(false);
+  const bankMeta = useMemo(() => {
+    const m = new Map<string, { name: string; icon: string }>();
+    for (const b of banks ?? []) m.set(b.id, { name: b.name, icon: b.icon });
+    return m;
+  }, [banks]);
+
+  async function loadBanks() {
+    setBanksLoading(true);
+    setBanksError(false);
+    const res = await apiGet<{ banks: PartyBank[] }>(
+      `/api/party/rooms/${room.code}/banks`,
+    );
+    setBanksLoading(false);
+    if (!res.ok || !res.data) {
+      setBanksError(true);
+      return;
+    }
+    setBanks(res.data.banks ?? []);
+  }
+
+  function openBankSheet() {
+    setBankSheetOpen(true);
+    // Fetch once per session; reopening reuses the cached list.
+    if (banks === null && !banksLoading) void loadBanks();
+  }
+
   // ── Join entrance tracking ──
   // Ids present at FIRST render are seeded into the ref and never animate
   // (no whole-grid pop when the lobby loads). Any user_id that appears after
@@ -620,21 +675,33 @@ export default function RoomLobby({ room, players, isHost, meUserId, onGameStart
   const enoughPlayers = players.length >= minPlayers;
 
   // Vote counts per subject across the room (for the "voted by N" aggregate).
+  // PRIVACY: bank tokens are EXCLUDED from the per-subject tally and rolled
+  // into a single generic `bankVotes` count — we never render another player's
+  // bank name or id, only an anonymous "Word Bank ×N" indicator.
   const subjectVotes: Record<string, number> = {};
+  let bankVotes = 0;
   for (const p of optimisticPlayers) {
     for (const s of p.selected_subjects ?? []) {
+      if (isBankToken(s)) {
+        bankVotes += 1;
+        continue;
+      }
       subjectVotes[s] = (subjectVotes[s] ?? 0) + 1;
     }
   }
 
-  async function toggleTopic(s: string) {
-    const isOn = myTopics.includes(s);
+  // Toggle a single pick token in/out of myTopics. `token` is either a curated
+  // subject key (e.g. "biology") or a word-bank token ("bank:<uuid>"); both
+  // share the SAME selected_subjects array and the SAME MAX_TOPIC_PICKS cap.
+  async function toggleTopic(token: string) {
+    const isOn = myTopics.includes(token);
     let next: string[];
     if (isOn) {
-      next = myTopics.filter((t) => t !== s);
+      next = myTopics.filter((t) => t !== token);
     } else {
-      // Cap at MAX_TOPIC_PICKS — drop the oldest if we're already full.
-      next = [...myTopics, s].slice(-MAX_TOPIC_PICKS);
+      // Cap at MAX_TOPIC_PICKS (subjects + banks combined) — drop the oldest
+      // pick if we're already full.
+      next = [...myTopics, token].slice(-MAX_TOPIC_PICKS);
     }
     setOptimisticTopics(next);
     setError(null);
@@ -1412,12 +1479,199 @@ export default function RoomLobby({ room, players, isHost, meUserId, onGameStart
                 </button>
               );
             })}
+
+            {/* Caller's OWN selected word-bank chips — GREY (distinct from the
+                pink/purple subject chips). The owner is viewing, so the bank
+                name is fine to show. Tap to toggle off like a subject chip.
+                Falls back to a neutral "Word Bank" label until the /banks
+                fetch resolves the id -> name map. */}
+            {myTopics.filter(isBankToken).map((token) => {
+              const id = bankIdFromToken(token);
+              const meta = bankMeta.get(id);
+              return (
+                <button
+                  key={token}
+                  onClick={() => toggleTopic(token)}
+                  title="Word bank · tap to remove"
+                  className="px-3 py-1.5 rounded-full font-syne text-xs transition-all active:scale-95 inline-flex items-center gap-1.5"
+                  style={{
+                    background: "rgba(255,255,255,0.06)",
+                    border: "1px solid rgba(255,255,255,0.22)",
+                    color: "rgba(238,244,255,0.85)",
+                  }}
+                >
+                  <Vault size={13} weight="duotone" aria-hidden="true" style={{ color: "rgba(238,244,255,0.6)" }} />
+                  {meta?.name ?? "Word Bank"}
+                  <Check size={12} weight="bold" aria-hidden="true" style={{ color: "rgba(238,244,255,0.6)" }} />
+                </button>
+              );
+            })}
+
+            {/* Other players' banks: a single anonymous grey indicator. Never
+                shows a name or id (private study banks). Only counts banks
+                that aren't already represented by the caller's own chips
+                above — bankVotes includes everyone, so subtract my own picks. */}
+            {(() => {
+              const myBankCount = myTopics.filter(isBankToken).length;
+              const otherBankCount = Math.max(0, bankVotes - myBankCount);
+              if (otherBankCount === 0) return null;
+              return (
+                <span
+                  className="px-3 py-1.5 rounded-full font-syne text-xs inline-flex items-center gap-1.5"
+                  style={{
+                    background: "rgba(255,255,255,0.03)",
+                    border: "1px solid rgba(255,255,255,0.12)",
+                    color: "rgba(238,244,255,0.5)",
+                  }}
+                  aria-label={`${otherBankCount} other player word bank picks`}
+                >
+                  <Vault size={13} weight="duotone" aria-hidden="true" style={{ color: "rgba(238,244,255,0.4)" }} />
+                  Word Bank
+                  <span className="font-bebas text-[10px] tracking-wider opacity-80">×{otherBankCount}</span>
+                </span>
+              );
+            })()}
+
+            {/* "+ Word Bank" picker trigger — grey theme, opens the sheet. */}
+            <button
+              type="button"
+              onClick={openBankSheet}
+              className="px-3 py-1.5 rounded-full font-syne text-xs transition-all active:scale-95 inline-flex items-center gap-1.5 hover:text-cream/85"
+              style={{
+                background: "rgba(255,255,255,0.04)",
+                border: "1px solid rgba(255,255,255,0.12)",
+                color: "rgba(238,244,255,0.6)",
+              }}
+            >
+              <BookBookmark size={13} weight="duotone" aria-hidden="true" />
+              Word Bank
+            </button>
           </div>
           {myTopics.length === 0 && (
             <p className="text-cream/40 text-xs font-syne mt-3 italic">
               No picks yet. Skip to play any subject, or pick 1-2 to bias toward them.
             </p>
           )}
+
+          {/* Word Bank picker sheet */}
+          <BottomSheet
+            open={bankSheetOpen}
+            onClose={() => setBankSheetOpen(false)}
+            ariaLabel="Use a word bank"
+          >
+            <p className="font-bebas text-base text-cream/80 tracking-[0.25em] mb-1">
+              USE A WORD BANK
+            </p>
+            <p className="text-cream/45 text-xs font-syne mb-4">
+              Draw words from one of your own study banks. Banks need at least 30 words to play.
+            </p>
+
+            {banksLoading && banks === null ? (
+              <div className="space-y-2">
+                {[0, 1, 2].map((i) => (
+                  <div key={i} className="h-14 rounded-xl bg-white/[0.04] animate-pulse" />
+                ))}
+              </div>
+            ) : banksError ? (
+              <div className="rounded-2xl border border-red-400/30 bg-red-400/5 p-6 text-center">
+                <p className="font-syne text-sm text-red-300 mb-3">
+                  Couldn&apos;t load your word banks. Network hiccup, probably.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => void loadBanks()}
+                  className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full border border-white/15 bg-white/5 text-cream/80 hover:bg-white/10 hover:text-cream font-syne text-xs font-bold transition-colors"
+                >
+                  <ArrowsClockwise size={12} weight="bold" aria-hidden="true" />
+                  Try again
+                </button>
+              </div>
+            ) : (banks ?? []).length === 0 ? (
+              <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 text-center">
+                <p className="font-syne text-sm text-cream/70 mb-3">
+                  You have no word banks yet.
+                </p>
+                <a
+                  href="/learn/vocab"
+                  className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full border border-electric/30 bg-electric/10 text-electric hover:bg-electric/20 font-syne text-xs font-bold transition-colors"
+                >
+                  <BookBookmark size={12} weight="bold" aria-hidden="true" />
+                  Make one
+                </a>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {(banks ?? []).map((b) => {
+                  const token = `${BANK_TOKEN_PREFIX}${b.id}`;
+                  const selected = myTopics.includes(token);
+                  const eligible = b.eligible;
+                  return (
+                    <button
+                      key={b.id}
+                      type="button"
+                      onClick={() => eligible && toggleTopic(token)}
+                      disabled={!eligible}
+                      aria-pressed={selected}
+                      className="w-full text-left rounded-xl px-3.5 py-3 flex items-center gap-3 transition-all active:scale-[0.99] disabled:cursor-not-allowed"
+                      style={{
+                        background: selected
+                          ? "rgba(74,144,217,0.14)"
+                          : "rgba(255,255,255,0.04)",
+                        border: selected
+                          ? "1px solid rgba(74,144,217,0.5)"
+                          : "1px solid rgba(255,255,255,0.1)",
+                        opacity: eligible ? 1 : 0.5,
+                      }}
+                    >
+                      <span
+                        aria-hidden="true"
+                        className="inline-flex items-center justify-center w-9 h-9 rounded-lg shrink-0 text-base"
+                        style={{
+                          background: eligible ? `${b.color}22` : "rgba(255,255,255,0.04)",
+                          border: `1px solid ${eligible ? b.color + "44" : "rgba(255,255,255,0.1)"}`,
+                        }}
+                      >
+                        {b.icon || "📚"}
+                      </span>
+                      <span className="flex-1 min-w-0">
+                        <span className="flex items-center gap-2">
+                          <span className="font-syne text-sm text-cream/90 truncate">{b.name}</span>
+                          <span
+                            className="shrink-0 font-bebas text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded-full"
+                            style={{
+                              background: "rgba(255,255,255,0.05)",
+                              border: "1px solid rgba(255,255,255,0.12)",
+                              color: "rgba(238,244,255,0.55)",
+                            }}
+                          >
+                            {b.kind}
+                          </span>
+                        </span>
+                        <span className="block font-mono text-[10px] text-cream/40 mt-0.5">
+                          {eligible ? `${b.wordCount} words` : `${b.wordCount}/30 words`}
+                        </span>
+                      </span>
+                      {eligible ? (
+                        <span
+                          className="shrink-0 grid place-items-center w-6 h-6 rounded-full"
+                          style={{
+                            background: selected ? "rgba(74,144,217,0.85)" : "transparent",
+                            border: selected ? "none" : "1px solid rgba(255,255,255,0.18)",
+                          }}
+                        >
+                          {selected && <Check size={13} weight="bold" aria-hidden="true" style={{ color: "#04080F" }} />}
+                        </span>
+                      ) : (
+                        <span className="shrink-0 font-syne text-[10px] text-cream/45 italic">
+                          add {Math.max(0, 30 - b.wordCount)} to play
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </BottomSheet>
         </div>
       )}
 

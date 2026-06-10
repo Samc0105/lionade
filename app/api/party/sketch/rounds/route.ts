@@ -22,60 +22,47 @@ import { isRoomMember } from "@/lib/party/room-state";
 import {
   WORD_LISTS_STUB,
   SUBJECTS as STUB_SUBJECTS,
-  type Subject,
   type WordEntry,
 } from "@/lib/party/word-lists-stub";
-import { WORD_LISTS as CURATED_WORD_LISTS } from "@/lib/party/word-lists";
 import { setCandidates } from "@/lib/party/sketch-candidates";
+import { isBankToken, parseBankToken } from "@/lib/party/sketch-bank-source";
+import {
+  pickTieredCandidates,
+  pickCuratedCandidates,
+  pickBankCandidates,
+} from "@/lib/party/sketch-pick";
 
-// ── Difficulty-tiered candidate picking ──────────────────────────────
-// The drawer is always offered one EASY, one MEDIUM, and one HARD word, in
-// that order. If a subject's pool is thin on a tier, we fall back to the
-// NEAREST tier (never error): easy borrows from medium then hard; medium
-// borrows from easy then hard; hard borrows from medium then easy. Words
-// are never duplicated across the 3 slots, so a 2-word pool yields 2 cards
-// and the round still plays.
-const TIER_ORDER = ["easy", "medium", "hard"] as const;
-type Tier = (typeof TIER_ORDER)[number];
-const TIER_FALLBACKS: Record<Tier, Tier[]> = {
-  easy: ["easy", "medium", "hard"],
-  medium: ["medium", "easy", "hard"],
-  hard: ["hard", "medium", "easy"],
-};
-
-function pickTieredCandidates(pool: WordEntry[]): WordEntry[] {
-  if (pool.length === 0) return [];
-  // Bucket by tier; anything with an unknown difficulty (pre-constraint DB
-  // rows) is treated as medium so it stays pickable.
-  const byTier: Record<Tier, WordEntry[]> = { easy: [], medium: [], hard: [] };
-  for (const entry of pool) {
-    const tier: Tier = (TIER_ORDER as readonly string[]).includes(entry.difficulty)
-      ? (entry.difficulty as Tier)
-      : "medium";
-    byTier[tier].push(entry);
+// When a chosen bank can't produce a round (deleted / too few words / not
+// owned), fall back to a curated subject. Prefer a curated subject already in
+// the weighted pool (someone wanted it); otherwise pick from the fallback set.
+function pickCuratedFallback(weightedPool: string[], fallbackSubjects: string[]): string {
+  const curatedInPool = weightedPool.filter((s) => !isBankToken(s));
+  if (curatedInPool.length > 0) {
+    return curatedInPool[Math.floor(Math.random() * curatedInPool.length)];
   }
-  const used = new Set<string>();
-  const picks: WordEntry[] = [];
-  for (const tier of TIER_ORDER) {
-    for (const fallback of TIER_FALLBACKS[tier]) {
-      const available = byTier[fallback].filter((e) => !used.has(e.word));
-      if (available.length > 0) {
-        const pick = available[Math.floor(Math.random() * available.length)];
-        used.add(pick.word);
-        picks.push(pick);
-        break;
-      }
-    }
+  if (fallbackSubjects.length > 0) {
+    return fallbackSubjects[Math.floor(Math.random() * fallbackSubjects.length)];
   }
-  return picks;
+  return "biology";
 }
 
-// Prefer the curator's curated pool (90+ words per subject) when available;
-// fall back to the inline 10-word stub otherwise so things stay playable.
-function pickCandidatesForSubject(subject: Subject): WordEntry[] {
-  const curated = (CURATED_WORD_LISTS as Record<string, WordEntry[] | undefined>)[subject];
-  const pool = curated && curated.length > 0 ? curated : WORD_LISTS_STUB[subject] ?? [];
-  return pickTieredCandidates(pool);
+// Bank source: resolve "bank:<uuid>" into a round. Verifies the bank still
+// exists, is OWNED by ownerId, and still has enough words; returns the bank
+// NAME (display label) + 3 random bank candidates, or null if it can't produce
+// a round (caller then falls back to a curated subject so it never blocks).
+async function resolveBankRound(
+  bankId: string,
+  ownerId: string,
+): Promise<{ name: string; candidates: (WordEntry & { source: "bank" })[] } | null> {
+  const candidates = await pickBankCandidates(supabaseAdmin, bankId, ownerId);
+  if (!candidates) return null;
+  const { data: bank } = await supabaseAdmin
+    .from("vocab_banks")
+    .select("name")
+    .eq("id", bankId)
+    .maybeSingle();
+  if (!bank) return null;
+  return { name: bank.name as string, candidates };
 }
 
 export async function POST(req: NextRequest) {
@@ -149,15 +136,25 @@ export async function POST(req: NextRequest) {
   const drawerUserId = leastDrawn[Math.floor(Math.random() * leastDrawn.length)].user_id;
 
   // Subject pool resolution — per-player picks (weighted multiset) take
-  // priority. Each player picks up to 2 topics; a subject picked by N
+  // priority. Each player picks up to 2 sources; a source picked by N
   // players appears N times in the weighted pool, so it's N times as
-  // likely to be drawn. Players with no picks don't contribute.
+  // likely to be drawn. Players with no picks don't contribute. Tokens may
+  // be bare curated subjects ("biology") OR Word-Bank tokens ("bank:<uuid>").
   // Fallbacks: room.settings.subjects (legacy host-picked list), then all.
   const weightedPool: string[] = [];
+  // Map a bank token -> the userIds who picked it. A bank round is owned by
+  // the player who selected it (verified at draw time), NOT the drawer.
+  const bankTokenOwners = new Map<string, string[]>();
   for (const p of players) {
     if (Array.isArray(p.selected_subjects)) {
       for (const s of p.selected_subjects) {
-        if (typeof s === "string" && s.length > 0) weightedPool.push(s);
+        if (typeof s !== "string" || s.length === 0) continue;
+        weightedPool.push(s);
+        if (isBankToken(s)) {
+          const owners = bankTokenOwners.get(s) ?? [];
+          if (!owners.includes(p.user_id)) owners.push(p.user_id);
+          bankTokenOwners.set(s, owners);
+        }
       }
     }
   }
@@ -165,42 +162,62 @@ export async function POST(req: NextRequest) {
     ? room.settings.subjects
     : Array.from(STUB_SUBJECTS);
 
-  // Caller can override subject if it appears in the active pool.
+  // Caller can override the source if it appears in the active pool.
   const requestedSubject: string | undefined = body?.subject;
-  let subject: Subject;
+  let sourceToken: string;
   if (requestedSubject && (weightedPool.includes(requestedSubject) || fallbackSubjects.includes(requestedSubject))) {
-    subject = requestedSubject as Subject;
+    sourceToken = requestedSubject;
   } else if (weightedPool.length > 0) {
-    // Weighted random — multiset already encodes the per-subject weight.
-    subject = weightedPool[Math.floor(Math.random() * weightedPool.length)] as Subject;
+    // Weighted random — multiset already encodes the per-source weight.
+    sourceToken = weightedPool[Math.floor(Math.random() * weightedPool.length)];
   } else {
     // No one picked anything — uniform across the fallback set.
-    subject = fallbackSubjects[Math.floor(Math.random() * fallbackSubjects.length)] as Subject;
+    sourceToken = fallbackSubjects[Math.floor(Math.random() * fallbackSubjects.length)];
   }
 
-  // Try DB word list first; fall back to the curated/stub pools. Either way
-  // the drawer gets one easy + one medium + one hard card (in that order),
-  // with nearest-tier fallback when a subject runs thin on a tier.
+  // Resolve the chosen source into candidate words + the round's source fields.
   let candidates: WordEntry[] = [];
-  const { data: dbWords } = await supabaseAdmin
-    .from("party_word_lists")
-    .select("word, difficulty, factoid")
-    .eq("subject", subject)
-    .limit(500);
-  if (dbWords && dbWords.length >= 3) {
-    candidates = pickTieredCandidates(
-      dbWords.map((r) => ({
-        word: r.word as string,
-        difficulty: (r.difficulty ?? "medium") as WordEntry["difficulty"],
-        factoid: r.factoid as string,
-      })),
-    );
+  let subject: string; // sketch_rounds.subject — curated id OR bank display name
+  let sourceKind: "curated" | "bank" = "curated";
+  let sourceBankId: string | null = null;
+
+  const bankId = isBankToken(sourceToken) ? parseBankToken(sourceToken) : null;
+  if (bankId) {
+    // Bank round. Verify against ANY player who picked this token (the owner).
+    const owners = bankTokenOwners.get(sourceToken);
+    let resolved: Awaited<ReturnType<typeof resolveBankRound>> = null;
+    for (const ownerId of owners ?? []) {
+      resolved = await resolveBankRound(bankId, ownerId);
+      if (resolved) break;
+    }
+    if (resolved) {
+      candidates = resolved.candidates;
+      subject = resolved.name;
+      sourceKind = "bank";
+      sourceBankId = bankId;
+    } else {
+      // Bank was deleted / dropped below the play floor / no longer owned.
+      // Fall back to a curated subject from the pool (or the stub) so the
+      // round never blocks.
+      subject = pickCuratedFallback(weightedPool, fallbackSubjects);
+    }
   } else {
-    candidates = pickCandidatesForSubject(subject);
+    subject = sourceToken;
+  }
+
+  // Curated path (initial pick OR bank fallback): DB word list first, then the
+  // curated/stub pools. The drawer gets one easy + one medium + one hard card.
+  if (sourceKind === "curated") {
+    candidates = await pickCuratedCandidates(supabaseAdmin, subject);
   }
   if (candidates.length === 0) {
     // Hard fallback so we never block the round.
     candidates = pickTieredCandidates(WORD_LISTS_STUB.biology);
+    if (sourceKind === "bank") {
+      sourceKind = "curated";
+      sourceBankId = null;
+      subject = "biology";
+    }
   }
 
   // Create the round with a placeholder word; updated in /select-word. Persist
@@ -217,6 +234,8 @@ export async function POST(req: NextRequest) {
       subject,
       duration_sec: 90,
       candidate_words: candidates,
+      source_kind: sourceKind,
+      source_bank_id: sourceBankId,
     })
     .select()
     .single();
@@ -266,6 +285,7 @@ export async function POST(req: NextRequest) {
             word: c.word,
             difficulty: c.difficulty,
             factoid: c.factoid,
+            ...(c.source ? { source: c.source } : {}),
           })),
         }
       : {}),

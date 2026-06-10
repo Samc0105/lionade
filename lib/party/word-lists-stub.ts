@@ -13,6 +13,10 @@ export interface WordEntry {
   word: string;
   difficulty: "easy" | "medium" | "hard";
   factoid: string;
+  // Where the candidate came from. Curated subjects omit this (treated as
+  // "curated"); Word Bank words set source:"bank". Carried through
+  // candidate_words JSONB + the drawer payloads. See lib/party/sketch-bank-source.ts.
+  source?: "curated" | "bank";
 }
 
 export const SUBJECTS = [
