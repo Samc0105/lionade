@@ -18,6 +18,7 @@ import { contactForm } from "./templates/contact-form";
 import { welcome } from "./templates/welcome";
 import { firstStreakDay } from "./templates/first-streak-day";
 import { masteryStart } from "./templates/mastery-start";
+import { academiaWeekly } from "./templates/academia-weekly";
 
 export const templates = {
   waitlistConfirmation,
@@ -25,6 +26,7 @@ export const templates = {
   welcome,
   firstStreakDay,
   masteryStart,
+  academiaWeekly,
 } as const;
 
 export type TemplateKey = keyof typeof templates;

@@ -44,6 +44,28 @@ const SAMPLES: Record<TemplateKey, EmailSlots> = {
     ctaUrl: absoluteUrl("/learn/mastery/example-id"),
     ctaLabel: "Open Mastery",
   },
+  academiaWeekly: {
+    userName: "Sam",
+    itemCount: 3,
+    weekRangeLabel: "Jun 10 to Jun 16",
+    agendaHtml: `<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:0 0 14px 0;">
+  <tr><td style="font-size:14px;font-weight:700;color:#1B1A17;padding:0 0 8px 2px;">Tuesday, Jun 11</td></tr>
+</table>
+<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:0 0 6px 0;">
+  <tr>
+    <td style="padding:10px 14px;background:#FAF6EE;border:1px solid #E4DCC4;border-radius:8px;font-size:15px;line-height:1.5;color:#1B1A17;">
+      <span style="display:inline-block;font-size:11px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#8E6F22;margin-right:8px;">Exam</span>
+      <strong>Unit 4 Test</strong>
+      <span style="color:#615C50;font-size:13px;"> &middot; AP Biology</span>
+    </td>
+  </tr>
+  <tr><td style="height:8px;font-size:0;line-height:0;">&nbsp;</td></tr>
+</table>`,
+    agendaText: "Tuesday, Jun 11\n  - Exam: Unit 4 Test (AP Biology)",
+    ctaUrl: absoluteUrl("/academia"),
+    ctaLabel: "Open your planner",
+    prefsUrl: absoluteUrl("/settings"),
+  },
 };
 
 export default function EmailPreviewIndex({

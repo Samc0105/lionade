@@ -56,6 +56,12 @@ export type EmailSlots = {
   streakDays?: number;
   subjectName?: string;       // e.g. "AWS Sec Specialty"
   fangsEarned?: number;
+  // Academia weekly digest
+  itemCount?: number;         // # of dated items in the next-7-day window
+  weekRangeLabel?: string;    // e.g. "Jun 10 to Jun 16"
+  agendaHtml?: string;        // Pre-rendered day-grouped <table> rows (HTML-safe)
+  agendaText?: string;        // Plain-text agenda for the text fallback
+  prefsUrl?: string;          // Absolute manage-preferences URL (footer)
   // Triage (contact-form only)
   fromName?: string;
   fromEmail?: string;
