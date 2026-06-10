@@ -48,6 +48,17 @@ export default function PartyInviteToast() {
   const [invite, setInvite] = useState<ActiveInvite | null>(null);
   const [leaving, setLeaving] = useState(false);
   const lastNotifIdRef = useRef<string | null>(null);
+  // Handle of the in-flight exit timer (dismiss schedules setInvite(null)
+  // EXIT_MS out). Tracked so a new invite arriving inside that window cancels
+  // the wipe instead of being cleared 200ms after it lands.
+  const exitTimerRef = useRef<number | null>(null);
+  const clearExitTimer = useCallback(() => {
+    if (exitTimerRef.current !== null) {
+      window.clearTimeout(exitTimerRef.current);
+      exitTimerRef.current = null;
+    }
+  }, []);
+  useEffect(() => clearExitTimer, [clearExitTimer]); // unmount cleanup
 
   // Inbound invites from the Navbar's notifications channel (via the bus).
   usePartyInvite(
@@ -57,20 +68,26 @@ export default function PartyInviteToast() {
       // Dedupe: the same notification row should only toast once.
       if (detail.notificationId && detail.notificationId === lastNotifIdRef.current) return;
       lastNotifIdRef.current = detail.notificationId || null;
+      // Accepted — a pending exit from a just-dismissed banner must not wipe
+      // this replacement 200ms after it lands. (Cleared only AFTER the early
+      // returns: a suppressed invite must still let the old exit complete.)
+      clearExitTimer();
       // Newest replaces oldest — never stacks.
       setLeaving(false);
       setInvite({ ...detail, key: Date.now() });
-    }, []),
+    }, [clearExitTimer]),
   );
 
   const dismiss = useCallback(() => {
     setLeaving(true);
     const exit = prefersReducedMotion() ? 0 : EXIT_MS;
-    window.setTimeout(() => {
+    clearExitTimer();
+    exitTimerRef.current = window.setTimeout(() => {
+      exitTimerRef.current = null;
       setInvite(null);
       setLeaving(false);
     }, exit);
-  }, []);
+  }, [clearExitTimer]);
 
   // 30s auto-dismiss, restarted whenever a fresh invite lands.
   useEffect(() => {

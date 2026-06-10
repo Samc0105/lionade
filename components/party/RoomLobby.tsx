@@ -210,8 +210,48 @@ export default function RoomLobby({ room, players, isHost, meUserId, onGameStart
   const [deciding, setDeciding] = useState<Record<string, boolean>>({});
 
   // ── V2 — lobby chat (between rounds) ──
-  type ChatMsg = { id: string; user_id: string; user_name: string | null; body: string; created_at: string };
+  // `pending` — security pass 2026-06-10: client-side LOBBY_CHAT broadcasts on
+  // the public room topic carry self-reported user_id/user_name (any member
+  // could forge them). Messages arriving WITHOUT the server's
+  // `authoritative: true` flag render dimmed as pending; when the server's
+  // backstop broadcast (same message_id, server-verified identity) lands we
+  // REPLACE the pending entry with the authoritative copy. A pending message
+  // that never confirms within PENDING_EXPIRY_MS is dropped — this also clears
+  // roommates' ghost copies when the sender's REST write fails + rolls back.
+  type ChatMsg = { id: string; user_id: string; user_name: string | null; body: string; created_at: string; pending?: boolean };
+  const PENDING_EXPIRY_MS = 10_000;
   const [chatMessages, setChatMessages] = useState<ChatMsg[]>([]);
+  // Synchronous mirror of every accepted message id (hydration + broadcasts +
+  // local echo). De-dup/unread decisions happen against this Set OUTSIDE the
+  // setState updater — StrictMode double-invokes updaters, so the old "bump
+  // unread inside the updater" pattern double-counted in dev.
+  const chatIdsRef = useRef<Set<string>>(new Set());
+  // One expiry timer per pending message id; cleared on confirm/rollback.
+  const chatPendingTimersRef = useRef<Map<string, number>>(new Map());
+  function clearPendingExpiry(id: string) {
+    const handle = chatPendingTimersRef.current.get(id);
+    if (handle !== undefined) {
+      window.clearTimeout(handle);
+      chatPendingTimersRef.current.delete(id);
+    }
+  }
+  function schedulePendingExpiry(id: string) {
+    clearPendingExpiry(id);
+    const handle = window.setTimeout(() => {
+      chatPendingTimersRef.current.delete(id);
+      chatIdsRef.current.delete(id); // a late authoritative copy may re-add it
+      setChatMessages((prev) => prev.filter((m) => !(m.id === id && m.pending)));
+    }, PENDING_EXPIRY_MS);
+    chatPendingTimersRef.current.set(id, handle);
+  }
+  // Unmount: drop any in-flight pending-expiry timers.
+  useEffect(() => {
+    const timers = chatPendingTimersRef.current;
+    return () => {
+      timers.forEach((handle) => window.clearTimeout(handle));
+      timers.clear();
+    };
+  }, []);
   const [chatOpen, setChatOpen] = useState(false);
   const [chatDraft, setChatDraft] = useState("");
   const [chatSending, setChatSending] = useState(false);
@@ -266,23 +306,45 @@ export default function RoomLobby({ room, players, isHost, meUserId, onGameStart
       }
     });
     ch.on("broadcast", { event: PARTY_EVENTS.LOBBY_CHAT }, (msg: { payload?: unknown }) => {
-      const p = (msg.payload ?? {}) as Partial<ChatMsg> & { message_id?: string };
+      const p = (msg.payload ?? {}) as Partial<ChatMsg> & { message_id?: string; authoritative?: boolean };
       if (!p.message_id || !p.body) return;
+      // Only the SERVER's backstop broadcast carries `authoritative: true`
+      // (identity verified by requireAuth + membership). Client broadcasts on
+      // this public topic are unverified — render those as pending until the
+      // authoritative copy with the same id confirms (or expiry drops them).
+      const authoritative = p.authoritative === true;
       const m: ChatMsg = {
         id: p.message_id,
         user_id: p.user_id ?? "",
         user_name: p.user_name ?? null,
         body: p.body,
         created_at: p.created_at ?? new Date().toISOString(),
+        pending: !authoritative,
       };
-      setChatMessages((prev) => {
-        if (prev.some((x) => x.id === m.id)) return prev;
+      // De-dup + unread happen OUTSIDE the setState updater (StrictMode
+      // double-invokes updaters; the old inside-the-updater unread bump
+      // double-counted in dev). chatIdsRef is updated synchronously so two
+      // back-to-back broadcasts of the same id can't both count.
+      if (!chatIdsRef.current.has(m.id)) {
+        chatIdsRef.current.add(m.id);
         // New message while the panel is collapsed -> bump the unread badge.
         // (Broadcasts don't echo to the sender, and sending requires the
         // panel open anyway, so this only counts other people's messages.)
         if (!chatOpenRef.current) setChatUnread((n) => Math.min(n + 1, 99));
-        return [...prev, m].slice(-50);
-      });
+        setChatMessages((prev) =>
+          prev.some((x) => x.id === m.id) ? prev : [...prev, m].slice(-50),
+        );
+        if (!authoritative) schedulePendingExpiry(m.id);
+        return;
+      }
+      // Known id + authoritative copy -> replace the pending entry, taking
+      // identity/body from the server copy, and cancel its expiry timer.
+      if (authoritative) {
+        clearPendingExpiry(m.id);
+        setChatMessages((prev) =>
+          prev.map((x) => (x.id === m.id && x.pending ? m : x)),
+        );
+      }
     });
     if (isHost) {
       ch.on("broadcast", { event: PARTY_EVENTS.JOIN_REQUEST }, (msg: { payload?: unknown }) => {
@@ -341,7 +403,18 @@ export default function RoomLobby({ room, players, isHost, meUserId, onGameStart
       );
       if (cancelled) return;
       setChatHydrated(true);
-      if (res.ok && res.data?.messages) setChatMessages(res.data.messages);
+      if (res.ok && res.data?.messages) {
+        // GET hydration is authoritative (server-verified rows). Seed the
+        // de-dup Set, then keep any broadcast messages that landed while the
+        // fetch was in flight (they're newer, so they append after history).
+        const history = res.data.messages;
+        for (const m of history) chatIdsRef.current.add(m.id);
+        const historyIds = new Set(history.map((m) => m.id));
+        setChatMessages((prev) => [
+          ...history,
+          ...prev.filter((m) => !historyIds.has(m.id)),
+        ].slice(-50));
+      }
     }
     load();
     return () => {
@@ -377,32 +450,36 @@ export default function RoomLobby({ room, players, isHost, meUserId, onGameStart
     // the message in ~1 ws hop instead of after the full REST round-trip.
     const clientId = crypto.randomUUID();
     const meSender = players.find((p) => p.user_id === meUserId);
+    // Local echo is PENDING (dimmed) until the server confirms — either via
+    // the REST response below or the authoritative backstop broadcast.
     const optimistic: ChatMsg = {
       id: clientId,
       user_id: meUserId,
       user_name: meSender?.username ?? null,
       body: text,
       created_at: new Date().toISOString(),
+      pending: true,
     };
     setChatDraft("");
+    chatIdsRef.current.add(clientId);
     setChatMessages((prev) =>
       prev.some((x) => x.id === clientId) ? prev : [...prev, optimistic].slice(-50),
     );
-    try {
-      void roomChRef.current?.send({
-        type: "broadcast",
-        event: PARTY_EVENTS.LOBBY_CHAT,
-        payload: {
-          message_id: clientId,
-          user_id: meUserId,
-          user_name: optimistic.user_name ?? "Player",
-          body: text,
-          created_at: optimistic.created_at,
-        },
-      });
-    } catch {
-      // Broadcast is best-effort — the server's backstop broadcast covers it.
-    }
+    schedulePendingExpiry(clientId);
+    // Best-effort fast-path broadcast. `send` returns a promise — a plain
+    // try/catch can't see its rejection, so swallow it the async way (the
+    // server's backstop broadcast covers any drop).
+    void roomChRef.current?.send({
+      type: "broadcast",
+      event: PARTY_EVENTS.LOBBY_CHAT,
+      payload: {
+        message_id: clientId,
+        user_id: meUserId,
+        user_name: optimistic.user_name ?? "Player",
+        body: text,
+        created_at: optimistic.created_at,
+      },
+    }).catch(() => {});
     setChatSending(true);
     const res = await apiPost<{ ok: boolean; message: ChatMsg }>(
       `/api/party/rooms/${room.code}/lobby-chat`,
@@ -411,12 +488,26 @@ export default function RoomLobby({ room, players, isHost, meUserId, onGameStart
     setChatSending(false);
     if (!res.ok) {
       // Roll back the optimistic echo; restore the draft only if the user
-      // hasn't started typing something new in the meantime.
+      // hasn't started typing something new in the meantime. Peers drop their
+      // pending copy via expiry (no authoritative broadcast ever confirms it).
+      clearPendingExpiry(clientId);
+      chatIdsRef.current.delete(clientId);
       setChatMessages((prev) => prev.filter((m) => m.id !== clientId));
       setChatDraft((d) => (d.length > 0 ? d : text));
       toastError("Couldn't send.");
       return;
     }
+    // Persisted — confirm the local echo with the server's copy (the
+    // authoritative broadcast does the same; both paths are idempotent).
+    const serverMsg = res.data?.message;
+    clearPendingExpiry(clientId);
+    setChatMessages((prev) =>
+      prev.map((m) =>
+        m.id === clientId && m.pending
+          ? { ...(serverMsg ?? m), pending: false }
+          : m,
+      ),
+    );
   }
 
   // Toast stack — visible to EVERYONE in the room when a nudge fires (it's
@@ -563,15 +654,13 @@ export default function RoomLobby({ room, players, isHost, meUserId, onGameStart
   // replication → postgres_changes → snapshot GET. The REST write stays the
   // durable record; the table feed + 3s poll reconcile any drop.
   function broadcastReady(isReady: boolean) {
-    try {
-      void roomChRef.current?.send({
-        type: "broadcast",
-        event: PARTY_EVENTS.READY_CHANGED,
-        payload: { user_id: meUserId, is_ready: isReady },
-      });
-    } catch {
-      // Channel mid-(re)subscribe — reconciliation paths cover it.
-    }
+    // `send` returns a promise — a plain try/catch can't see its rejection.
+    // Channel mid-(re)subscribe / drop — reconciliation paths cover it.
+    void roomChRef.current?.send({
+      type: "broadcast",
+      event: PARTY_EVENTS.READY_CHANGED,
+      payload: { user_id: meUserId, is_ready: isReady },
+    }).catch(() => {});
   }
 
   async function toggleReady() {
@@ -746,9 +835,15 @@ export default function RoomLobby({ room, players, isHost, meUserId, onGameStart
                 <p className="text-cream/35 text-xs italic">Say something while you wait.</p>
               ) : (
                 chatMessages.map((m) => (
-                  <div key={m.id} className="text-xs">
+                  // Pending = identity not yet server-verified (client-side
+                  // broadcast or local echo). Dimmed until the authoritative
+                  // copy confirms; dropped if it never does (~10s).
+                  <div key={m.id} className={`text-xs${m.pending ? " opacity-60" : ""}`}>
                     <span className="text-cream/55 font-semibold">{m.user_name ?? "Player"}: </span>
                     <span className="text-cream/85">{m.body}</span>
+                    {m.pending && (
+                      <span className="text-cream/35 italic" aria-hidden="true"> · sending</span>
+                    )}
                   </div>
                 ))
               )}

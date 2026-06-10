@@ -92,14 +92,25 @@ export async function POST(
   if (insertErr || !inserted) {
     // Retry/replay with the same client_id → unique violation. The message is
     // already persisted; treat as success so the client doesn't roll back.
+    // Security: the recovery select is scoped to THIS sender + THIS room —
+    // matching on id alone would let any authed member "adopt" (and
+    // rebroadcast as their own) a foreign message row whose uuid they know.
     if (clientId && insertErr?.code === "23505") {
       const { data: existingMsg } = await supabaseAdmin
         .from("party_lobby_chat")
         .select("id, created_at, body")
         .eq("id", clientId)
+        .eq("user_id", userId)
+        .eq("room_code", code)
         .maybeSingle();
       if (existingMsg) {
         inserted = existingMsg;
+      } else {
+        // Conflicting row exists but belongs to someone else / another room.
+        return NextResponse.json(
+          { error: "Message id conflict." },
+          { status: 409 },
+        );
       }
     }
     if (!inserted) {
@@ -119,6 +130,11 @@ export async function POST(
         user_name: profile?.username ?? "Player",
         body: inserted.body,
         created_at: inserted.created_at,
+        // Identity here is server-verified (requireAuth + membership check).
+        // Client-side LOBBY_CHAT broadcasts on the public room topic carry
+        // whatever user_id/user_name the sender claims — clients render those
+        // as PENDING until this authoritative copy (same message_id) lands.
+        authoritative: true,
       },
     });
   } catch (err) {
