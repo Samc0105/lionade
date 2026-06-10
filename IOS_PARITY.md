@@ -7,6 +7,20 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 
 ---
 
+## 2026-06-09: Empty-state audit + fix sweep (web)
+
+**Status:** 🟡 partial-relevance. Most of the batch is web-specific presentation (error-state house pattern on 9 surfaces, dashboard void fixes, flash-of-zero gating, "coins" to "Fangs" copy sweep) and needs no 1:1 port. Three items DO need `vp-ios` attention:
+
+1. **Compete tier-from-ELO fix MUST be checked on iOS.** Web's `/compete` had a hardcoded `CURRENT_TIER_INDEX=8` and `TIERS` ranges keyed on win counts; the fix computes tier from real arena ELO (new users = Bronze, locked tiers above) with ELO-threshold ranges, plus live stats from `/api/me/elo-rank` + `profiles.arena_wins`. If the iOS Compete tab renders tiers, the same hardcode may exist there. Audit before any tier UI ships.
+2. **No-flash-of-zero gating should be the house pattern on iOS surfaces too.** Web now gates stat displays on a loaded flag (`statsReady` / `statsLoaded`) with neutral placeholders, so the `coins:0` auth seed and 0% accuracy never flash for loading or brand-new users. iOS screens reading the same profile seed are exposed to the same class of bug.
+3. **ReviewQueue empty-bank distinction** (true empty bank shows an onboarding state, not a confetti "all done" celebration) applies if/when Word Banks ports to iOS.
+
+Web-side bug fixes riding along (no iOS counterpart today): arena hub 45s no-opponents timeout was unreachable via stale closure (infinite SEARCHING), duel matchmaking 60s timeout + honest dead-end + dequeue, 0-question duel error card instead of blank page.
+
+Owner: `quality-docs-writer`.
+
+---
+
 ## 2026-06-09 — Admin Console: roles + audit log + staff support tooling (web-only, no iOS row)
 
 **Status:** 🚫 N/A (deliberate no-row decision: internal back-office tool for Sam + authorized helpers, desktop-web by design. Customer-support workflows run from a desktop browser; there is no end-user surface to port. The role system itself (`profiles.role`, `admin_audit_log`, the self-promotion-guard trigger) is schema-level and platform-neutral, so if a future iOS build ever needs role awareness it reads the same column. App Store note for `ios-security-auditor`: nothing in the iOS bundle references or links to /admin, so no review exposure.)
