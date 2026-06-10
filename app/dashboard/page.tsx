@@ -29,6 +29,7 @@ import { useEquippedUsernameEffect } from "@/lib/use-username-effect";
 import dynamic from "next/dynamic";
 const Confetti = dynamic(() => import("@/components/Confetti"), { ssr: false });
 import {
+  ArrowsClockwise,
   Lock,
   Sun,
   Fire,
@@ -234,7 +235,12 @@ function DashboardContent() {
   // the Quiz "Missions & Bet" float so post-answer mutate() updates both.
   const [dailyMissions, setDailyMissions] = useState<DailyMission[]>([]);
   const [missionsResetIn, setMissionsResetIn] = useState("");
-  const { data: dailyMissionsData } = useDailyMissions(uid);
+  const { data: dailyMissionsData, mutate: mutateMissions } = useDailyMissions(uid);
+  // Loading vs resolved-but-empty: the fetcher swallows API failures into an
+  // empty payload, and the server always generates daily missions for every
+  // user — so once resolved, an empty list IS the error case (retry card),
+  // while `undefined` is the only true loading state (pulse skeletons).
+  const missionsLoading = dailyMissionsData === undefined;
   useEffect(() => {
     setDailyMissions(dailyMissionsData?.missions ?? []);
     setMissionsResetIn(dailyMissionsData?.resetsIn ?? "");
@@ -345,6 +351,10 @@ function DashboardContent() {
   const currentXp = levelInfo.currentXpInLevel;
   const todayCoins = dailyProgress.coins_earned;
   const displaySubjects = subjectStats;
+  // SWR resolution flags — `undefined` means in-flight (no-flash-of-zero gate);
+  // a resolved empty array means the user genuinely has no data yet.
+  const subjectsLoading = subjectStatsData === undefined;
+  const dailyProgressReady = dailyProgressData !== undefined;
   const dailyDone = dailyProgress.questions_answered > 0;
   const today = new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
 
@@ -510,14 +520,14 @@ function DashboardContent() {
           {/* ═══ 2) Circular Stats Row ═══ */}
           <div className="flex justify-center sm:justify-start gap-6 sm:gap-8 mb-8 animate-slide-up" style={{ animationDelay: "0.05s" }}>
             <Link href="/wallet" className="press-feedback inline-block">
-              <CircleStat icon={<img src={cdnUrl("/F.png")} alt="Fangs" className="w-5 h-5 object-contain mx-auto" />} value={<CountUp id="dash-coins" value={coins} format={formatCoins} />} label={`+${todayCoins} today`} color="#FFD700" />
+              <CircleStat icon={<img src={cdnUrl("/F.png")} alt="Fangs" className="w-5 h-5 object-contain mx-auto" />} value={statsReady ? <CountUp id="dash-coins" value={coins} format={formatCoins} /> : <span className="text-cream/30">{"—"}</span>} label={dailyProgressReady ? `+${todayCoins} today` : "— today"} color="#FFD700" />
             </Link>
             <div className="flex flex-col items-center gap-1.5 group">
-              <div className={`relative rounded-full flex items-center justify-center transition-transform duration-300 group-hover:scale-105 ${streak >= 1 ? "streak-fire-glow" : ""}`}
-                style={{ width: 90, height: 90, background: `linear-gradient(135deg, #E67E2215, #E67E2208)`, border: `1.5px solid #E67E2225`, boxShadow: streak >= 1 ? `0 0 ${12 + Math.min(streak, 10) * 3}px rgba(230,126,34,${0.15 + Math.min(streak, 10) * 0.04})` : `0 0 20px #E67E2208` }}>
+              <div className={`relative rounded-full flex items-center justify-center transition-transform duration-300 group-hover:scale-105 ${statsReady && streak >= 1 ? "streak-fire-glow" : ""}`}
+                style={{ width: 90, height: 90, background: `linear-gradient(135deg, #E67E2215, #E67E2208)`, border: `1.5px solid #E67E2225`, boxShadow: statsReady && streak >= 1 ? `0 0 ${12 + Math.min(streak, 10) * 3}px rgba(230,126,34,${0.15 + Math.min(streak, 10) * 0.04})` : `0 0 20px #E67E2208` }}>
                 <div className="text-center">
                   <Fire size={16} weight="fill" color="#E67E22" className="mx-auto mb-0.5" aria-hidden="true" />
-                  <span className="font-bebas text-lg leading-none" style={{ color: "#E67E22" }}><CountUp id="dash-streak" value={streak} duration={400} /></span>
+                  <span className="font-bebas text-lg leading-none" style={{ color: "#E67E22" }}>{statsReady ? <CountUp id="dash-streak" value={streak} duration={400} /> : <span className="text-cream/30">{"—"}</span>}</span>
                 </div>
                 <div className="absolute inset-0 rounded-full" style={{ animation: "orbit-stat 8s linear infinite" }}>
                   <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full" style={{ background: "#E67E22", boxShadow: `0 0 6px #E67E22` }} />
@@ -526,7 +536,7 @@ function DashboardContent() {
               <span className="text-cream/55 text-[9px] font-mono tracking-wider uppercase">quiz streak</span>
             </div>
             <CircleStat icon={levelInfo.tier.icon} value={<>Lv.<CountUp id="dash-level" value={level} duration={400} /></>} label={levelInfo.tier.name} color={levelInfo.tier.color} />
-            <CircleStat icon={<BookOpen size={20} weight="regular" color="#9B59B6" aria-hidden="true" />} value={<CountUp id="dash-subjects" value={displaySubjects.length} duration={400} />} label="subjects" color="#9B59B6" />
+            <CircleStat icon={<BookOpen size={20} weight="regular" color="#9B59B6" aria-hidden="true" />} value={subjectsLoading ? <span className="text-cream/30">{"—"}</span> : <CountUp id="dash-subjects" value={displaySubjects.length} duration={400} />} label="subjects" color="#9B59B6" />
             <Link href="/leaderboard" className="press-feedback inline-block">
               <CircleStat icon={<Sword size={20} weight="regular" color="#E74C3C" aria-hidden="true" />} value={eloRank ? <>#<CountUp id="dash-rank" value={eloRank} duration={400} /></> : "\u2014"} label="rank" color="#E74C3C" />
             </Link>
@@ -540,6 +550,17 @@ function DashboardContent() {
 
           {/* ═══ 3) Level Progress ═══ */}
           <div className="mb-8 animate-slide-up" style={{ animationDelay: "0.08s" }}>
+            {!statsReady ? (
+              /* xp is seeded from the auth fallback — skeleton until stats resolve (no flash-of-zero) */
+              <>
+                <div className="flex items-center justify-between mb-1.5">
+                  <div className="h-4 w-44 rounded bg-white/5 animate-pulse" />
+                  <div className="h-3 w-28 rounded bg-white/5 animate-pulse" />
+                </div>
+                <div className="w-full h-3 rounded-full bg-white/[0.04] animate-pulse" />
+              </>
+            ) : (
+            <>
             <div className="flex items-center justify-between mb-1.5">
               <div className="flex items-center gap-2">
                 <span className="text-sm">{levelInfo.tier.icon}</span>
@@ -558,6 +579,8 @@ function DashboardContent() {
               <div className="h-full rounded-full xp-bar-fill"
                 style={{ width: `${Math.max(progress, 2)}%`, background: `linear-gradient(90deg, ${levelInfo.tier.color}90, ${levelInfo.tier.color})`, boxShadow: `0 0 12px ${levelInfo.tier.color}50, 0 0 24px ${levelInfo.tier.color}20`, transition: "width 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)" }} />
             </div>
+            </>
+            )}
           </div>
 
           {/* ═══ 3.3) Daily ready nudge — only renders when the daily Clock In is available ═══ */}
@@ -670,7 +693,7 @@ function DashboardContent() {
                   </div>
                 );
               })}
-              {dailyMissions.length === 0 && (
+              {dailyMissions.length === 0 && missionsLoading && (
                 <>
                   {[0, 1, 2].map(i => (
                     <div key={i} className="rounded-[16px] p-4 animate-pulse" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.04)" }}>
@@ -680,6 +703,21 @@ function DashboardContent() {
                     </div>
                   ))}
                 </>
+              )}
+              {dailyMissions.length === 0 && !missionsLoading && (
+                /* Missions exist for every user every day, so a resolved-empty
+                   payload means the fetch failed — red-glass retry card. */
+                <div className="sm:col-span-3 rounded-2xl border border-red-400/30 bg-red-400/5 p-5 text-center">
+                  <p className="font-syne text-sm text-red-300 mb-3">Missions didn&apos;t load. Give it another shot.</p>
+                  <button
+                    type="button"
+                    onClick={() => mutateMissions()}
+                    className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full border border-white/15 bg-white/5 text-cream/80 hover:bg-white/10 hover:text-cream font-syne text-xs font-bold transition-colors"
+                  >
+                    <ArrowsClockwise size={12} weight="bold" aria-hidden="true" />
+                    Retry
+                  </button>
+                </div>
               )}
             </div>
           </div>
@@ -1115,6 +1153,36 @@ function DashboardContent() {
                     </Link>
                   );
                 })}
+                {displaySubjects.length === 0 && subjectsLoading && (
+                  /* Subjects still in flight — compact pulse cards, never a void */
+                  <>
+                    {[0, 1].map(i => (
+                      <div key={i} className="rounded-[24px] p-4 animate-pulse" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.04)" }}>
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-full bg-white/5 flex-shrink-0" />
+                          <div className="flex-1 min-w-0">
+                            <div className="h-3 w-24 rounded bg-white/5 mb-2" />
+                            <div className="h-1.5 w-full rounded-full bg-white/[0.03]" />
+                          </div>
+                        </div>
+                        <div className="h-2.5 w-20 rounded bg-white/[0.03] mt-3" />
+                      </div>
+                    ))}
+                  </>
+                )}
+                {displaySubjects.length === 0 && !subjectsLoading && (
+                  /* Resolved-but-empty — intentional first-quiz invite */
+                  <div className="sm:col-span-2 rounded-[20px] p-8 text-center"
+                    style={{ background: "linear-gradient(135deg, rgba(13,21,40,0.5) 0%, rgba(10,16,32,0.5) 100%)", border: "1px solid rgba(155,89,182,0.12)" }}>
+                    <BookOpen size={32} weight="regular" color="#9B59B6" className="mx-auto mb-3" aria-hidden="true" />
+                    <p className="font-bebas text-lg text-cream/80 tracking-wider">Your subjects live here</p>
+                    <p className="text-cream/40 text-xs mt-1 mb-4 leading-relaxed">Take one quiz and Lionade starts tracking your accuracy and best scores in every subject you touch.</p>
+                    <Link href="/quiz" className="inline-block font-syne font-bold text-xs px-5 py-2.5 rounded-full text-navy transition-all duration-200 active:scale-95"
+                      style={{ background: "linear-gradient(90deg, #FFD700, #FFA500)", boxShadow: "0 0 16px rgba(255,215,0,0.25)" }}>
+                      Start your first quiz
+                    </Link>
+                  </div>
+                )}
               </div>
 
               {/* ═══ 7-Day Activity Chart — sits below YOUR SUBJECTS, fills the column next to Achievements ═══ */}
@@ -1143,6 +1211,25 @@ function DashboardContent() {
                     const totalWeek = weeklyChart.reduce((s, d) => s + d.questions, 0);
                     const totalCorrect = weeklyChart.reduce((s, d) => s + d.correct, 0);
                     const totalCoins = weeklyChart.reduce((s, d) => s + d.coins, 0);
+
+                    // Resolved week with zero activity (DB zero-fills all 7 days):
+                    // swap the zero-monument chart + punitive "0% accuracy" row for
+                    // an intentional invite. While the fetch is in flight
+                    // (weeklyChartData === undefined) keep the existing frame so we
+                    // never flash the empty state over cached data.
+                    if (weeklyChartData !== undefined && totalWeek === 0) {
+                      return (
+                        <div className="relative z-10 flex flex-col items-center justify-center text-center" style={{ minHeight: 240 }}>
+                          <Target size={32} weight="regular" color="rgba(74,144,217,0.6)" className="mb-3" aria-hidden="true" />
+                          <p className="font-bebas text-lg text-cream/80 tracking-wider">A quiet week so far</p>
+                          <p className="text-cream/40 text-xs mt-1 mb-4 leading-relaxed max-w-xs">One quiz puts your first bars on this chart and Fangs in your wallet.</p>
+                          <Link href="/quiz" className="inline-block font-syne font-bold text-xs px-5 py-2.5 rounded-full text-navy transition-all duration-200 active:scale-95"
+                            style={{ background: "linear-gradient(90deg, #FFD700, #FFA500)", boxShadow: "0 0 16px rgba(255,215,0,0.25)" }}>
+                            Take today&apos;s quiz
+                          </Link>
+                        </div>
+                      );
+                    }
 
                     return (
                       <>
