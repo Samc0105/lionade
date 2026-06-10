@@ -272,9 +272,16 @@ export async function GET(req: NextRequest) {
     // Pull profiles + their preferences blob, capped per run. We filter the
     // opt-out in app code (the toggle is nested in JSONB; treating missing as
     // "on" can't be expressed cleanly as a single SQL predicate).
+    // Stable ascending order so the cap selects a deterministic slice instead
+    // of an arbitrary first-500. NOTE: this is fairness-fragile past the cap —
+    // once the user base exceeds MAX_USERS_PER_RUN, users after the first 500
+    // (by created_at) are never reached. Before that point, add a cursor:
+    // persist a `last_digest_cursor` (created_at or id) and page from it each
+    // run with `.gt("created_at", cursor)` so every user gets covered.
     const { data: profiles, error: profErr } = await supabaseAdmin
       .from("profiles")
       .select("id, display_name, preferences")
+      .order("created_at", { ascending: true })
       .limit(MAX_USERS_PER_RUN);
 
     if (profErr) {
@@ -326,8 +333,12 @@ export async function GET(req: NextRequest) {
       }
 
       const agenda = buildAgendaHtml(items);
+      // display_name is user-authored and flows through interpolate() un-escaped
+      // into the email HTML, so escape it like every other user title/slot.
+      const rawName = (p.display_name as string | null) || "";
+      const safeName = rawName ? escapeHtml(rawName) : undefined;
       const rendered = renderEmail(templates.academiaWeekly, {
-        userName: (p.display_name as string | null) || undefined,
+        userName: safeName,
         itemCount: items.length,
         weekRangeLabel,
         agendaHtml: agenda.html,

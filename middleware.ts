@@ -168,6 +168,19 @@ const ROUTE_LIMITS: RouteLimit[] = [
     keyPrefix: "classes-notes",
   },
 
+  // Academia ICS import (PREVIEW mode) — this POST triggers an OUTBOUND fetch
+  // to a user-supplied URL (an SSRF-class surface, guarded server-side with a
+  // pinned-lookup + per-hop re-validation). Cap tighter than the generic
+  // 100/min so the outbound-fetch surface can't be hammered: 10/min/IP is
+  // plenty for a human pasting a calendar link and committing the result.
+  {
+    test: (p) => p === "/api/academia/import-ics",
+    method: "POST",
+    max: 10,
+    windowMs: 60 * 1000,
+    keyPrefix: "academia-import-ics",
+  },
+
   // Resume Coach — Pro-tier exclusive. /analyze does PDF parse + gpt-4o-mini
   // (~$0.01/call); /answer is a smaller AI call per Socratic turn. Per-IP
   // caps stack on top of the server-side Pro gate so a hijacked Pro token

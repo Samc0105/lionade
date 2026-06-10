@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import dns from "dns/promises";
+import dnsCb from "dns";
 import net from "net";
+import http from "http";
+import https from "https";
+import type { IncomingMessage } from "http";
 import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
 
@@ -23,6 +27,15 @@ import { requireAuth } from "@/lib/api-auth";
  * is opened. The fetch is size-capped, time-capped, and redirects are followed
  * manually so each hop is re-guarded. We NEVER leak the internal error, the
  * resolved IP, or the response body to the caller.
+ *
+ * The connection itself is made with node:http(s) using a CUSTOM `lookup` that
+ * resolves the host, runs EVERY returned address through isBlockedIP, and hands
+ * the socket exactly ONE pre-validated public address. There is no second,
+ * uncontrolled name resolution between validation and connect, so the address
+ * we validated IS the address we connect to — closing the DNS-rebinding TOCTOU
+ * that a global fetch() (which re-resolves on its own) would leave open. SNI /
+ * cert validation stay correct because we keep the original hostname as `host`
+ * and only override which IP the lookup returns.
  *
  * requireAuth on BOTH modes. user_id always comes from the token, never body.
  * ZERO AI. No outbound calls beyond the single calendar fetch.
@@ -137,9 +150,69 @@ async function assertSafeUrl(raw: string): Promise<void> {
 }
 
 /**
+ * Pinned DNS lookup factory. Returns a node:http(s) `lookup` implementation
+ * bound to `expectedHost` that resolves the host, runs EVERY returned address
+ * through isBlockedIP, and hands the socket exactly one pre-validated PUBLIC
+ * address. If any/all addresses are blocked (or resolution fails) it errors
+ * the callback so the socket is never opened.
+ *
+ * This is the TOCTOU closer: node connects to precisely the address this
+ * callback returns, so the address we validated IS the address we connect to.
+ * No independent re-resolution happens between validation and connect.
+ */
+type LookupCb = (
+  err: NodeJS.ErrnoException | null,
+  address: string,
+  family: number,
+) => void;
+
+function makePinnedLookup(expectedHost: string) {
+  return (
+    hostname: string,
+    _options: unknown,
+    callback: LookupCb,
+  ): void => {
+    // Guard against the agent calling lookup for some other host than the one
+    // we validated (e.g. a Host-header / connection-reuse mismatch).
+    if (hostname.toLowerCase().replace(/\.$/, "") !== expectedHost) {
+      callback(new Error("lookup host mismatch") as NodeJS.ErrnoException, "", 0);
+      return;
+    }
+    dnsCb.lookup(hostname, { all: true }, (err, addresses) => {
+      if (err || !addresses || addresses.length === 0) {
+        callback(
+          (err ?? new Error("no dns records")) as NodeJS.ErrnoException,
+          "",
+          0,
+        );
+        return;
+      }
+      // Reject if ANY resolved address is blocked — matches assertSafeUrl's
+      // posture and prevents a rebinding record set from slipping a private IP
+      // past us. Then pin to the first surviving (public) address.
+      for (const a of addresses) {
+        if (isBlockedIP(a.address)) {
+          callback(
+            new Error("resolved to blocked ip") as NodeJS.ErrnoException,
+            "",
+            0,
+          );
+          return;
+        }
+      }
+      const chosen = addresses[0];
+      callback(null, chosen.address, chosen.family);
+    });
+  };
+}
+
+/**
  * Fetch the ICS feed with the full SSRF posture: per-hop host re-validation,
  * manual redirect following (max 3), 8s timeout, 2 MB body cap. Returns the
  * raw text. Throws on any failure; caller maps to a generic 400.
+ *
+ * Uses node:http(s) with a pinned `lookup` (see makePinnedLookup) so the
+ * connected address is exactly the validated one — no DNS-rebinding gap.
  */
 async function fetchIcsSafely(startUrl: string): Promise<string> {
   let currentUrl = startUrl;
@@ -147,76 +220,115 @@ async function fetchIcsSafely(startUrl: string): Promise<string> {
   for (let hop = 0; hop <= MAX_REDIRECTS; hop++) {
     await assertSafeUrl(currentUrl); // re-guard EVERY hop, including the original
 
-    const res = await fetch(currentUrl, {
-      method: "GET",
-      redirect: "manual",
-      headers: {
-        "User-Agent": "Lionade/1.0 (support@getlionade.com)",
-        Accept: "text/calendar, text/plain;q=0.9, */*;q=0.5",
-      },
-      signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
-    });
+    const { status, location, text } = await requestPinned(currentUrl);
 
     // Manual redirect handling: re-validate the Location target through the
     // SAME guard before re-fetching. Never auto-follow.
-    if (res.status >= 300 && res.status < 400) {
-      const loc = res.headers.get("location");
-      if (!loc) throw new Error("redirect with no location");
+    if (status >= 300 && status < 400) {
+      if (!location) throw new Error("redirect with no location");
       if (hop >= MAX_REDIRECTS) throw new Error("too many redirects");
-      // Resolve relative redirects against the current URL, then re-guard.
-      currentUrl = new URL(loc, currentUrl).toString();
+      // Resolve relative redirects against the current URL, then re-guard at
+      // the top of the loop (which re-runs assertSafeUrl + a fresh pinned
+      // lookup for the new host).
+      currentUrl = new URL(location, currentUrl).toString();
       continue;
     }
 
-    if (!res.ok) throw new Error(`http ${res.status}`);
+    if (status < 200 || status >= 300) throw new Error(`http ${status}`);
 
-    // Size-cap the download. Stream so a giant body can't blow memory before
-    // we even look at Content-Length (which can lie / be absent).
-    const text = await readCapped(res, MAX_BODY_BYTES);
-
-    const head = text.trimStart().slice(0, 64).toUpperCase();
+    const head = (text ?? "").trimStart().slice(0, 64).toUpperCase();
     if (!head.startsWith("BEGIN:VCALENDAR")) {
       throw new Error("not an ics feed");
     }
-    return text;
+    return text ?? "";
   }
 
   throw new Error("redirect loop exhausted");
 }
 
-/** Read a response body, aborting if it exceeds `maxBytes`. */
-async function readCapped(res: Response, maxBytes: number): Promise<string> {
-  if (!res.body) {
-    const buf = await res.arrayBuffer();
-    if (buf.byteLength > maxBytes) throw new Error("body too large");
-    return new TextDecoder().decode(buf);
-  }
-  const reader = res.body.getReader();
-  const chunks: Uint8Array[] = [];
-  let total = 0;
-  try {
-    for (;;) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      if (value) {
-        total += value.byteLength;
-        if (total > maxBytes) {
-          await reader.cancel().catch(() => {});
-          throw new Error("body too large");
+interface PinnedResult {
+  status: number;
+  location: string | null;
+  /** Body text, only read for non-redirect 2xx responses. */
+  text: string | null;
+}
+
+/**
+ * Perform a single GET against `rawUrl` over node:http(s) with a pinned lookup,
+ * an 8s timeout, and a 2 MB streamed body cap. On a 3xx we return status +
+ * location WITHOUT reading the body (the redirect target is re-validated by the
+ * caller). Content-Length is never trusted — we count bytes off the socket.
+ */
+function requestPinned(rawUrl: string): Promise<PinnedResult> {
+  const u = new URL(rawUrl);
+  const isHttps = u.protocol === "https:";
+  const transport = isHttps ? https : http;
+  const expectedHost = u.hostname.toLowerCase().replace(/\.$/, "");
+
+  return new Promise<PinnedResult>((resolve, reject) => {
+    let settled = false;
+    const done = (fn: () => void) => {
+      if (settled) return;
+      settled = true;
+      fn();
+    };
+
+    const req = transport.request(
+      {
+        protocol: u.protocol,
+        // host = the real hostname (keeps Host header + TLS SNI / cert
+        // validation correct); the pinned lookup decides which IP we connect to.
+        host: u.hostname,
+        servername: isHttps ? u.hostname : undefined,
+        port: u.port || (isHttps ? 443 : 80),
+        path: u.pathname + u.search,
+        method: "GET",
+        headers: {
+          Host: u.host,
+          "User-Agent": "Lionade/1.0 (support@getlionade.com)",
+          Accept: "text/calendar, text/plain;q=0.9, */*;q=0.5",
+        },
+        lookup: makePinnedLookup(expectedHost),
+      },
+      (res: IncomingMessage) => {
+        const status = res.statusCode ?? 0;
+
+        // Redirect: grab Location, discard the body, let the caller re-validate.
+        if (status >= 300 && status < 400) {
+          const loc = res.headers.location ?? null;
+          res.resume(); // drain so the socket can be freed
+          done(() => resolve({ status, location: loc, text: null }));
+          return;
         }
-        chunks.push(value);
-      }
-    }
-  } finally {
-    reader.releaseLock();
-  }
-  const merged = new Uint8Array(total);
-  let off = 0;
-  for (const c of chunks) {
-    merged.set(c, off);
-    off += c.byteLength;
-  }
-  return new TextDecoder().decode(merged);
+
+        // Stream + cap. Never trust Content-Length; count actual bytes.
+        const chunks: Buffer[] = [];
+        let total = 0;
+        res.on("data", (chunk: Buffer) => {
+          total += chunk.byteLength;
+          if (total > MAX_BODY_BYTES) {
+            res.destroy();
+            req.destroy();
+            done(() => reject(new Error("body too large")));
+            return;
+          }
+          chunks.push(chunk);
+        });
+        res.on("end", () => {
+          const text = Buffer.concat(chunks).toString("utf8");
+          done(() => resolve({ status, location: null, text }));
+        });
+        res.on("error", (e) => done(() => reject(e)));
+      },
+    );
+
+    req.setTimeout(FETCH_TIMEOUT_MS, () => {
+      req.destroy();
+      done(() => reject(new Error("timeout")));
+    });
+    req.on("error", (e) => done(() => reject(e)));
+    req.end();
+  });
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
