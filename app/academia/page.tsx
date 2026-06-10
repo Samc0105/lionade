@@ -153,11 +153,6 @@ export default function AcademiaPage() {
   }
 
   const totalNotes = classes.reduce((sum, c) => sum + c.noteCount, 0);
-  const totalExams = classes.reduce((sum, c) => sum + c.examCount, 0);
-  const nextExam = classes
-    .filter(c => c.nextExamDate)
-    .sort((a, b) => (a.nextExamDate! < b.nextExamDate! ? -1 : 1))[0];
-  const daysToNextExam = nextExam ? daysUntil(nextExam.nextExamDate!) : null;
 
   return (
     <ProtectedRoute>
@@ -212,15 +207,7 @@ export default function AcademiaPage() {
                 icon={<Note size={14} weight="bold" />}
                 color="#A855F7"
               />
-              <StatTile
-                label={daysToNextExam !== null ? "Next exam" : "Exams"}
-                value={daysToNextExam !== null
-                  ? daysToNextExam <= 0 ? "Today" : `${daysToNextExam}d`
-                  : totalExams}
-                icon={<Target size={14} weight="bold" />}
-                color="#EF4444"
-                sublabel={daysToNextExam !== null && nextExam ? nextExam.name : undefined}
-              />
+              <DueThisWeekTile />
             </div>
           )}
 
@@ -230,8 +217,10 @@ export default function AcademiaPage() {
           {/* ─── This week + month calendar ─── */}
           {classes.length > 0 && <PlannerSection classes={classes} />}
 
-          {/* ─── Two-column layout: classes (2/3) | recent notes (1/3) ─── */}
-          <div className="grid grid-cols-1 lg:grid-cols-[1.7fr_1fr] gap-6">
+          {/* ─── Two-column layout: classes (2/3) | recent notes (1/3) ───
+              At zero classes the notes rail is hidden so first run is a single
+              focused "add your first class" CTA, not two stacked empty states. */}
+          <div className={`grid grid-cols-1 gap-6 ${classes.length > 0 ? "lg:grid-cols-[1.7fr_1fr]" : ""}`}>
             {/* Classes column */}
             <section>
               <div className="flex items-baseline justify-between mb-4">
@@ -267,7 +256,8 @@ export default function AcademiaPage() {
               )}
             </section>
 
-            {/* Recent notes column */}
+            {/* Recent notes column — hidden entirely on the zero-classes first run. */}
+            {classes.length > 0 && (
             <aside>
               <div className="flex items-baseline justify-between mb-4">
                 <h2 className="font-bebas text-[22px] text-cream tracking-[0.18em] flex items-center gap-2">
@@ -295,6 +285,7 @@ export default function AcademiaPage() {
                 </div>
               )}
             </aside>
+            )}
           </div>
         </main>
 
@@ -494,16 +485,12 @@ function PlannerSection({ classes }: { classes: ClassSummary[] }) {
   const todayKey = useMemo(() => toKey(new Date()), []);
 
   // Fetch range: [first of visible month, max(end of visible month, today+7)].
-  const { from, to } = useMemo(() => {
-    const monthStart = firstOfMonth(monthAnchor);
-    const monthEnd = endOfMonth(monthAnchor);
-    const weekHorizon = addDays(new Date(), 7);
-    const toDate = monthEnd.getTime() >= weekHorizon.getTime() ? monthEnd : weekHorizon;
-    return { from: toKey(monthStart), to: toKey(toDate) };
-  }, [monthAnchor]);
+  // Keyed via the shared agendaKey helper so the DueThisWeekTile fetch dedupes
+  // against this one for the current month.
+  const swrKey = useMemo(() => agendaKey(monthAnchor), [monthAnchor]);
 
   const { data, error, isLoading, mutate } = useSWR<{ items: AgendaItem[] }>(
-    `/api/academia/agenda?from=${from}&to=${to}`,
+    swrKey,
     swrFetcher,
     { keepPreviousData: true, revalidateOnFocus: true },
   );
@@ -542,10 +529,18 @@ function PlannerSection({ classes }: { classes: ClassSummary[] }) {
     }
   };
 
+  const hasData = data !== undefined;
+
   return (
     <section className="mb-10">
-      {/* Understated power affordance: pull dates from an external calendar feed. */}
-      <div className="flex justify-end mb-3">
+      {/* Unified planner header — matches the dot + bebas pattern used by
+          GRADE SNAPSHOT / YOUR CLASSES, with the Import affordance right-aligned
+          so the two sub-panels below read as one feature. */}
+      <div className="flex items-center justify-between gap-4 mb-4">
+        <h2 className="font-bebas text-[22px] text-cream tracking-[0.18em] flex items-center gap-2">
+          <span className="inline-block w-1.5 h-1.5 rounded-full bg-gold" aria-hidden="true" />
+          PLANNER
+        </h2>
         <button
           type="button"
           onClick={() => setShowImport(true)}
@@ -561,11 +556,11 @@ function PlannerSection({ classes }: { classes: ClassSummary[] }) {
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.25fr] gap-6 items-start">
         {/* THIS WEEK / selected-day agenda */}
         <div>
-          <div className="flex items-baseline justify-between mb-4">
-            <h2 className="font-bebas text-[22px] text-cream tracking-[0.18em] flex items-center gap-2">
-              <span className="inline-block w-1.5 h-1.5 rounded-full bg-gold" aria-hidden="true" />
-              {selectedDay ? dayHeading(selectedDay, todayKey).toUpperCase() : "THIS WEEK"}
-            </h2>
+          <div className="flex items-baseline justify-between mb-3 min-h-[18px]">
+            <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-cream/55 flex items-center gap-1.5">
+              <CalendarBlank size={11} weight="fill" className="text-gold" aria-hidden="true" />
+              {selectedDay ? dayHeading(selectedDay, todayKey) : "This week"}
+            </p>
             {selectedDay && (
               <button
                 type="button"
@@ -605,10 +600,13 @@ function PlannerSection({ classes }: { classes: ClassSummary[] }) {
           todayKey={todayKey}
           selectedDay={selectedDay}
           byDay={byDay}
+          loading={isLoading && !hasData}
+          errored={!!error && !hasData}
           onPrev={() => { setMonthAnchor(addMonths(monthAnchor, -1)); }}
           onNext={() => { setMonthAnchor(addMonths(monthAnchor, 1)); }}
           onToday={() => { setMonthAnchor(firstOfMonth(new Date())); setSelectedDay(todayKey); }}
           onSelectDay={(key) => setSelectedDay(prev => (prev === key ? null : key))}
+          onRetry={() => void mutate()}
         />
       </div>
 
@@ -744,8 +742,8 @@ function StatusButton({
     <button
       type="button"
       onClick={onClick}
-      aria-label={`Status: ${meta.label}. Click to advance.`}
-      title={`${meta.label} — click to advance`}
+      aria-label={`Status: ${meta.label}. Tap to advance.`}
+      title={`${meta.label}. Tap to advance`}
       className="shrink-0 inline-flex items-center gap-1 rounded-full border px-2 py-0.5 font-mono text-[9px] uppercase tracking-[0.18em] transition-colors duration-200"
       style={{
         color: active ? color : "rgba(238,244,255,0.55)",
@@ -781,32 +779,40 @@ const WEEKDAY_LABELS = ["S", "M", "T", "W", "T", "F", "S"];
 const MAX_DOTS = 3;
 
 function MonthCalendar({
-  monthAnchor, todayKey, selectedDay, byDay,
-  onPrev, onNext, onToday, onSelectDay,
+  monthAnchor, todayKey, selectedDay, byDay, loading, errored,
+  onPrev, onNext, onToday, onSelectDay, onRetry,
 }: {
   monthAnchor: Date;
   todayKey: string;
   selectedDay: string | null;
   byDay: Map<string, AgendaItem[]>;
+  loading: boolean;
+  errored: boolean;
   onPrev: () => void;
   onNext: () => void;
   onToday: () => void;
   onSelectDay: (key: string) => void;
+  onRetry: () => void;
 }) {
   // Build a 6-row x 7-col grid starting on the Sunday on/before the 1st.
   const cells = useMemo(() => buildMonthGrid(monthAnchor), [monthAnchor]);
   const monthLabel = monthAnchor.toLocaleDateString("en-US", { month: "long", year: "numeric" });
   const visibleMonth = monthAnchor.getMonth();
 
+  // While loading-with-no-data the grid dots would pop in piecemeal, and on a
+  // hard error an empty grid silently reads as "all clear". Dim the grid and
+  // float a subtle overlay in both cases; once data exists (even if empty), the
+  // normal grid renders. GPU-only opacity, reduced-motion safe.
+  const overlay = loading || errored;
+
   return (
     <div className="rounded-[16px] border border-white/[0.08] bg-white/[0.02] p-4 sm:p-5">
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2">
-          <CalendarBlank size={14} className="text-gold" weight="fill" aria-hidden="true" />
-          <span className="font-bebas text-[20px] tracking-[0.1em] text-cream leading-none">
-            {monthLabel}
-          </span>
-        </div>
+      {/* Sub-label matching the agenda panel + month name and nav controls. */}
+      <div className="flex items-center justify-between mb-3 min-h-[18px]">
+        <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-cream/55 flex items-center gap-1.5">
+          <CalendarBlank size={11} weight="fill" className="text-gold" aria-hidden="true" />
+          {monthLabel}
+        </p>
         <div className="flex items-center gap-1.5">
           <button
             type="button"
@@ -834,33 +840,63 @@ function MonthCalendar({
         </div>
       </div>
 
-      <div className="grid grid-cols-7 gap-1 mb-1">
-        {WEEKDAY_LABELS.map((d, i) => (
-          <div key={i} className="text-center font-mono text-[9px] uppercase tracking-[0.18em] text-cream/35 py-1">
-            {d}
+      <div className="relative">
+        <div className={`transition-opacity duration-200 ${overlay ? "opacity-30" : "opacity-100"}`}>
+          <div className="grid grid-cols-7 gap-1 mb-1">
+            {WEEKDAY_LABELS.map((d, i) => (
+              <div key={i} className="text-center font-mono text-[9px] uppercase tracking-[0.18em] text-cream/35 py-1">
+                {d}
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
 
-      <div className="grid grid-cols-7 gap-1">
-        {cells.map(cell => (
-          <CalendarCell
-            key={cell.key}
-            cell={cell}
-            inMonth={cell.month === visibleMonth}
-            isToday={cell.key === todayKey}
-            isSelected={cell.key === selectedDay}
-            dayItems={byDay.get(cell.key) ?? []}
-            onSelect={() => onSelectDay(cell.key)}
-          />
-        ))}
+          <div className="grid grid-cols-7 gap-1">
+            {cells.map(cell => (
+              <CalendarCell
+                key={cell.key}
+                cell={cell}
+                inMonth={cell.month === visibleMonth}
+                isToday={cell.key === todayKey}
+                isSelected={cell.key === selectedDay}
+                dayItems={byDay.get(cell.key) ?? []}
+                onSelect={() => onSelectDay(cell.key)}
+                // Disable cell interaction while the overlay is up.
+                interactive={!overlay}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* Loading: subtle spinner. Error: "Couldn't load events" + retry. Both
+            sit over the dimmed grid so the calendar never reads as "all clear"
+            when it actually failed or hasn't loaded. */}
+        {overlay && (
+          <div className="absolute inset-0 grid place-items-center" aria-live="polite">
+            {errored ? (
+              <button
+                type="button"
+                onClick={onRetry}
+                className="inline-flex items-center gap-1.5 rounded-full border border-red-400/30 bg-red-400/10 px-3 py-1.5
+                  font-mono text-[9px] uppercase tracking-[0.22em] text-red-300 hover:bg-red-400/15 transition-colors"
+              >
+                <ArrowsClockwise size={11} weight="bold" aria-hidden="true" />
+                Couldn&apos;t load events
+              </button>
+            ) : (
+              <div className="flex items-center gap-2 rounded-full border border-white/10 bg-navy/70 px-3 py-1.5 backdrop-blur-sm">
+                <span className="w-3.5 h-3.5 rounded-full border-2 border-gold border-t-transparent motion-safe:animate-spin" aria-hidden="true" />
+                <span className="font-mono text-[9px] uppercase tracking-[0.22em] text-cream/55">Loading</span>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
 }
 
 function CalendarCell({
-  cell, inMonth, isToday, isSelected, dayItems, onSelect,
+  cell, inMonth, isToday, isSelected, dayItems, onSelect, interactive = true,
 }: {
   cell: GridCell;
   inMonth: boolean;
@@ -868,6 +904,7 @@ function CalendarCell({
   isSelected: boolean;
   dayItems: AgendaItem[];
   onSelect: () => void;
+  interactive?: boolean;
 }) {
   const sorted = dayItems.slice().sort(sortItems);
   const shown = sorted.slice(0, MAX_DOTS);
@@ -878,7 +915,7 @@ function CalendarCell({
     <button
       type="button"
       onClick={onSelect}
-      disabled={!hasItems && !inMonth}
+      disabled={!interactive || (!hasItems && !inMonth)}
       aria-label={`${cell.label}${hasItems ? `, ${sorted.length} item${sorted.length === 1 ? "" : "s"}` : ""}`}
       aria-pressed={isSelected}
       className={`relative aspect-square rounded-[10px] border p-1 flex flex-col items-center justify-start gap-1
@@ -926,13 +963,14 @@ function CalendarCell({
 // Stat tile
 // ─────────────────────────────────────────────────────────────────────────────
 function StatTile({
-  label, value, icon, color, sublabel,
+  label, value, icon, color, sublabel, muted,
 }: {
   label: string;
   value: string | number;
   icon: React.ReactNode;
   color: string;
   sublabel?: string;
+  muted?: boolean;
 }) {
   return (
     <div
@@ -946,7 +984,7 @@ function StatTile({
         {icon}
         <span className="font-mono text-[9px] uppercase tracking-[0.22em]">{label}</span>
       </div>
-      <p className="font-bebas text-2xl sm:text-[34px] tracking-wider text-cream leading-none tabular-nums">
+      <p className={`font-bebas text-2xl sm:text-[34px] tracking-wider leading-none tabular-nums ${muted ? "text-cream/30" : "text-cream"}`}>
         {value}
       </p>
       {sublabel && (
@@ -955,6 +993,42 @@ function StatTile({
         </p>
       )}
     </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Due this week tile — counts agenda items (exams + assignments) falling in
+// [today, today+7]. Reuses the planner's SWR key for the current month, so the
+// two fetches dedupe (no double-heavy-fetch). Value stays a "—" placeholder in
+// the no-flash-of-zero style until the agenda fetch resolves.
+// ─────────────────────────────────────────────────────────────────────────────
+function DueThisWeekTile() {
+  const monthAnchor = useMemo(() => firstOfMonth(new Date()), []);
+  const { data, error } = useSWR<{ items: AgendaItem[] }>(
+    agendaKey(monthAnchor),
+    swrFetcher,
+    { keepPreviousData: true, revalidateOnFocus: true },
+  );
+
+  // Resolved once we have data OR a hard error (so we stop showing the
+  // placeholder rather than spinning forever on a failed fetch).
+  const resolved = data !== undefined || error !== undefined;
+
+  const count = useMemo(() => {
+    if (!data) return 0;
+    const todayKey = toKey(new Date());
+    const horizon = toKey(addDays(new Date(), 7));
+    return data.items.filter(it => it.date >= todayKey && it.date <= horizon).length;
+  }, [data]);
+
+  return (
+    <StatTile
+      label="Due this week"
+      value={resolved ? count : "—"}
+      muted={!resolved}
+      icon={<CalendarBlank size={14} weight="bold" />}
+      color="#EF4444"
+    />
   );
 }
 
@@ -1300,6 +1374,22 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 // ─────────────────────────────────────────────────────────────────────────────
 // Helpers
 // ─────────────────────────────────────────────────────────────────────────────
+// Shared agenda fetch range for a given visible month: [first of month,
+// max(end of month, today+7)]. Both the planner and the "Due this week" tile
+// derive their SWR key from this so the two fetches dedupe on the same key.
+function agendaRange(monthAnchor: Date): { from: string; to: string } {
+  const monthStart = firstOfMonth(monthAnchor);
+  const monthEnd = endOfMonth(monthAnchor);
+  const weekHorizon = addDays(new Date(), 7);
+  const toDate = monthEnd.getTime() >= weekHorizon.getTime() ? monthEnd : weekHorizon;
+  return { from: toKey(monthStart), to: toKey(toDate) };
+}
+
+function agendaKey(monthAnchor: Date): string {
+  const { from, to } = agendaRange(monthAnchor);
+  return `/api/academia/agenda?from=${from}&to=${to}`;
+}
+
 function daysUntil(dateStr: string): number {
   const today = new Date();
   today.setHours(0, 0, 0, 0);

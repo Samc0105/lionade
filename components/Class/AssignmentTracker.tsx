@@ -397,10 +397,10 @@ function AssignmentRow({
       ? "text-electric"
       : "text-cream/35 hover:text-cream/70";
   const statusLabel = isDone
-    ? "Done — mark as to-do"
+    ? "Done. Tap to reset to to-do"
     : assignment.status === "doing"
-      ? "In progress — mark as done"
-      : "To-do — mark as in progress";
+      ? "In progress. Tap to mark done"
+      : "To-do. Tap to mark in progress";
 
   return (
     <div
