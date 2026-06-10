@@ -148,6 +148,14 @@ export async function POST(
         is_pending_round: isMidRound,
       },
     });
+    // The approve path inserts a party_room_players row, so it's also a join.
+    // Mirror the join route's PLAYER_JOINED broadcast so every member's
+    // snapshot refreshes immediately (not just on the 3s safety-net poll).
+    await ch.send({
+      type: "broadcast",
+      event: PARTY_EVENTS.PLAYER_JOINED,
+      payload: { user_id: requesterId },
+    });
   } catch (err) {
     console.warn("[party/decide] broadcast warn:", err);
   } finally {

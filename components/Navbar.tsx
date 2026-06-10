@@ -18,6 +18,7 @@ import PlanBadge, { UpgradePill } from "@/components/PlanBadge";
 import AnimatedUsername from "@/components/AnimatedUsername";
 import { useEquippedUsernameEffect } from "@/lib/use-username-effect";
 import { usePlan } from "@/lib/use-plan";
+import { emitPartyInvite, fromNotificationRow } from "@/lib/party/invite-bus";
 import {
   Bell,
   Users,
@@ -259,6 +260,14 @@ export default function Navbar() {
           const type = payload?.new?.type;
           if (type === "friend_request" || type === "friend_accepted") {
             globalMutate(`social-friends/${user.id}`);
+          }
+          // Party invites get an instant global banner toast on ANY page.
+          // This channel is the app's single notifications subscription —
+          // we re-emit over the invite bus instead of letting the toast
+          // open a parallel postgres_changes channel on the same table.
+          if (type === "party_invite") {
+            const detail = fromNotificationRow(payload?.new);
+            if (detail) emitPartyInvite(detail);
           }
         })
         .subscribe();

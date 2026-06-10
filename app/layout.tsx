@@ -17,6 +17,7 @@ import PageTransition from "@/components/PageTransition";
 import DemoModeBanner from "@/components/DemoModeBanner";
 import ResumeBanner from "@/components/ResumeBanner";
 import SessionLifecycle from "@/components/SessionLifecycle";
+import PartyInviteToast from "@/components/party/PartyInviteToast";
 import { SITE_URL, SITE_URL_OBJ } from "@/lib/site-config";
 
 const bebasNeue = Bebas_Neue({
@@ -190,6 +191,11 @@ export default function RootLayout({
                   <FocusMusicToggle />
                   <FocusLockIn />
                   <LaunchDock />
+                  {/* Global party-invite banner. Listens to the invite bus
+                      (fed by Navbar's notifications Realtime channel) so an
+                      invite surfaces instantly on any page. Renders nothing
+                      while logged out or idle. */}
+                  <PartyInviteToast />
                 </ToastProvider>
               </AuthProviderWrapper>
             </SwrProvider>

@@ -21,6 +21,7 @@ import { requireAuth } from "@/lib/api-auth";
 import { fetchRoomSnapshot } from "@/lib/party/room-state";
 import { isValidRoomCode, normalizeRoomCode } from "@/lib/party/room-code";
 import { setActiveSession } from "@/lib/presence";
+import { roomChannel, PARTY_EVENTS } from "@/lib/party/realtime-channels";
 
 const MAX_PLAYERS = 6;
 
@@ -144,6 +145,26 @@ export async function POST(
   // Fire-and-forget — never block the join response on presence bookkeeping.
   const role = room.host_user_id === userId ? "host" : "player";
   void setActiveSession(userId, "party_room", code, role);
+
+  // ── Broadcast PLAYER_JOINED ──
+  // Instant-invite loop (2026-06-10): the room page already listens for this
+  // event on party-room-{code} and refreshes the snapshot, but until now only
+  // the CLIENT broadcast it for leaves — joins relied on the unfiltered
+  // postgres_changes listener + the 3s safety-net poll. Server-side broadcast
+  // (same pattern as dismiss/decide) makes the host's lobby reflect a new
+  // player immediately. Best-effort: a broadcast failure never fails the join.
+  const ch = supabaseAdmin.channel(roomChannel(code));
+  try {
+    await ch.send({
+      type: "broadcast",
+      event: PARTY_EVENTS.PLAYER_JOINED,
+      payload: { user_id: userId },
+    });
+  } catch (err) {
+    console.warn("[party/join] broadcast warn:", err);
+  } finally {
+    void supabaseAdmin.removeChannel(ch);
+  }
 
   const snap = await fetchRoomSnapshot(supabaseAdmin, code);
   return NextResponse.json({

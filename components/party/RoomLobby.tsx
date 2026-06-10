@@ -690,8 +690,10 @@ export default function RoomLobby({ room, players, isHost, meUserId, onGameStart
 
       {/* Friend invite (Bucket C 2026-06-05): renders when the user has 1+
           accepted friends. Code-share above is preserved as the universal
-          fallback. Section auto-hides on cold-start users (no friends). */}
-      <FriendInviteSection code={room.code} />
+          fallback. Section auto-hides on cold-start users (no friends).
+          Players are passed so an invited friend's row flips to "In room"
+          the moment they actually join. */}
+      <FriendInviteSection code={room.code} players={players} />
 
       {/* Players */}
       <div
@@ -1199,6 +1201,9 @@ export default function RoomLobby({ room, players, isHost, meUserId, onGameStart
 // to the top.
 interface InviteFriendsProps {
   code: string;
+  /** Live players list — an invited friend's row drops its pending state the
+   *  moment their user_id shows up here (they actually joined). */
+  players: PartyPlayer[];
 }
 interface FriendLite {
   id: string;
@@ -1206,7 +1211,7 @@ interface FriendLite {
   avatar_url: string | null;
   is_online: boolean;
 }
-function FriendInviteSection({ code }: InviteFriendsProps) {
+function FriendInviteSection({ code, players }: InviteFriendsProps) {
   const { data, error, isLoading } = useSWR<{
     friends: FriendLite[];
   }>("/api/social/friends", async () => {
@@ -1222,9 +1227,16 @@ function FriendInviteSection({ code }: InviteFriendsProps) {
 
   const friends = data?.friends ?? [];
 
-  // Per-friend invite state: "idle" | "sending" | "sent" | "in-room" so the
-  // button can switch labels without spamming the server. Resets after 4s.
-  const [statusById, setStatusById] = useState<Record<string, "idle" | "sending" | "sent" | "in-room">>({});
+  // Per-friend invite state: "idle" | "sending" | "invited" | "in-room".
+  // "invited" PERSISTS for the lobby session (no 4s reset) — the button stays
+  // dim with an "Invited" check + subtle pulse until the friend actually
+  // joins, at which point the row flips to "In room" via the live players
+  // list and the pending state drops naturally. Component state only; no DB.
+  const [statusById, setStatusById] = useState<Record<string, "idle" | "sending" | "invited" | "in-room">>({});
+
+  // user_ids currently in the room (live — refreshed by PLAYER_JOINED
+  // broadcasts + the page's 3s safety-net poll).
+  const inRoomIds = useMemo(() => new Set(players.map((p) => p.user_id)), [players]);
 
   const sortedFriends = useMemo(() => {
     // Online friends first, then offline (alphabetical within each group).
@@ -1237,7 +1249,7 @@ function FriendInviteSection({ code }: InviteFriendsProps) {
   }, [friends]);
 
   const inviteFriend = async (friendId: string) => {
-    if (statusById[friendId] === "sending" || statusById[friendId] === "sent") return;
+    if (statusById[friendId] === "sending" || statusById[friendId] === "invited") return;
     setStatusById(s => ({ ...s, [friendId]: "sending" }));
     const res = await apiPost<{ ok: true; invitedUsername: string | null }>(
       `/api/party/rooms/${code}/invite-friend`,
@@ -1248,7 +1260,6 @@ function FriendInviteSection({ code }: InviteFriendsProps) {
       // Receiver already in this room → "in-room" badge (not an error to surface)
       if (errMsg.toLowerCase().includes("already in this room")) {
         setStatusById(s => ({ ...s, [friendId]: "in-room" }));
-        setTimeout(() => setStatusById(s => ({ ...s, [friendId]: "idle" })), 4000);
         return;
       }
       toastError(errMsg);
@@ -1256,8 +1267,7 @@ function FriendInviteSection({ code }: InviteFriendsProps) {
       return;
     }
     toastSuccess(`Invite sent to ${res.data?.invitedUsername ?? "your friend"}`);
-    setStatusById(s => ({ ...s, [friendId]: "sent" }));
-    setTimeout(() => setStatusById(s => ({ ...s, [friendId]: "idle" })), 4000);
+    setStatusById(s => ({ ...s, [friendId]: "invited" }));
   };
 
   if (isLoading) {
@@ -1299,9 +1309,13 @@ function FriendInviteSection({ code }: InviteFriendsProps) {
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
         {sortedFriends.map(f => {
-          const status = statusById[f.id] ?? "idle";
+          // Live players list wins: once the friend is actually in the room,
+          // the row shows "In room" regardless of any pending invite state.
+          const status: "idle" | "sending" | "invited" | "in-room" = inRoomIds.has(f.id)
+            ? "in-room"
+            : statusById[f.id] ?? "idle";
           const labelText = status === "sending" ? "..."
-            : status === "sent" ? "Sent"
+            : status === "invited" ? "Invited"
             : status === "in-room" ? "In room"
             : "Invite";
           return (
@@ -1330,18 +1344,21 @@ function FriendInviteSection({ code }: InviteFriendsProps) {
               <span className="flex-1 font-syne text-sm text-cream/85 truncate">{f.username}</span>
               <button
                 onClick={() => inviteFriend(f.id)}
-                disabled={status === "sending" || status === "sent" || status === "in-room"}
+                disabled={status === "sending" || status === "invited" || status === "in-room"}
                 className={`shrink-0 px-2.5 py-1 rounded-md font-bebas text-[11px] tracking-wider transition-all ${
-                  status === "sent"
-                    ? "text-green-300 bg-green-500/15 border border-green-500/30"
+                  status === "invited"
+                    // Pending: dim + check + subtle pulse (motion-safe only)
+                    // until the friend's user_id appears in the players list.
+                    ? "text-cream/45 bg-white/[0.04] border border-white/10 opacity-70 motion-safe:animate-pulse"
                     : status === "in-room"
-                    ? "text-cream/55 bg-white/[0.03] border border-white/10"
+                    ? "text-green-300 bg-green-500/15 border border-green-500/30"
                     : status === "sending"
                     ? "text-cream/50 bg-white/[0.04] border border-white/10"
                     : "text-electric bg-electric/10 border border-electric/30 hover:bg-electric/20"
                 }`}
                 aria-label={status === "idle" ? `Invite ${f.username}` : labelText}
               >
+                {status === "invited" && <span aria-hidden="true">✓ </span>}
                 {labelText}
               </button>
             </div>
