@@ -21,6 +21,7 @@ import { toastError, toastSuccess } from "@/lib/toast";
 import SyllabusUpload from "@/components/Class/SyllabusUpload";
 import GradeTracker from "@/components/Class/GradeTracker";
 import AssignmentTracker from "@/components/Class/AssignmentTracker";
+import StudyPlanBuilder from "@/components/Class/StudyPlanBuilder";
 import FlashcardStudy from "@/components/Class/FlashcardStudy";
 
 /**
@@ -343,12 +344,15 @@ export default function ClassNotebookPage() {
                 />
                 <Target size={13} weight="bold" /> EXAM TARGETS
               </h2>
-              <Link
-                href={`/learn/mastery?classId=${cls.id}`}
-                className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.25em] text-gold hover:text-gold/80 transition-colors"
-              >
-                <Plus size={11} weight="bold" /> Add target
-              </Link>
+              <div className="flex items-center gap-4">
+                <StudyPlanBuilder classId={cls.id} color={cls.color} />
+                <Link
+                  href={`/learn/mastery?classId=${cls.id}`}
+                  className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.25em] text-gold hover:text-gold/80 transition-colors"
+                >
+                  <Plus size={11} weight="bold" /> Add target
+                </Link>
+              </div>
             </div>
 
             {exams.length === 0 ? (
