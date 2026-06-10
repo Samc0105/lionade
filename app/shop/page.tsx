@@ -391,11 +391,14 @@ function PurchaseBurst({ onDone }: { onDone: () => void }) {
 }
 
 // ── Confirm Modal (coin purchases) ──
-function ConfirmModal({ item, quantity, onConfirm, onCancel, userCoins }: {
-  item: ShopItem; quantity: number; onConfirm: () => void; onCancel: () => void; userCoins: number;
+function ConfirmModal({ item, quantity, onConfirm, onCancel, userCoins, balanceKnown }: {
+  item: ShopItem; quantity: number; onConfirm: () => void; onCancel: () => void; userCoins: number; balanceKnown: boolean;
 }) {
   const totalPrice = item.price * quantity;
-  const canAfford = userCoins >= totalPrice;
+  // null = balance still loading (FeaturedCard's "Buy Now" isn't affordance-
+  // gated, so this modal CAN open pre-balance) — stay neutral, never claim
+  // "Can't Afford" against a phantom 0.
+  const canAfford: boolean | null = balanceKnown ? userCoins >= totalPrice : null;
   const r = RARITY_COLORS[item.rarity];
   const Icon = item.Icon;
   return (
@@ -417,12 +420,12 @@ function ConfirmModal({ item, quantity, onConfirm, onCancel, userCoins }: {
           <span className="font-bebas text-3xl text-gold">{formatCoins(totalPrice)}</span>
           {quantity > 1 && <span className="text-cream/60 text-sm ml-1">(x{quantity})</span>}
         </div>
-        {!canAfford && <p className="text-red-400 text-xs text-center mb-4 font-semibold">Not enough Fangs. You need {formatCoins(totalPrice - userCoins)} more.</p>}
+        {canAfford === false && <p className="text-red-400 text-xs text-center mb-4 font-semibold">Not enough Fangs. You need {formatCoins(totalPrice - userCoins)} more.</p>}
         <div className="flex gap-3">
           <button onClick={onCancel} className="flex-1 py-3 rounded-xl border border-electric/20 text-cream/60 text-sm font-bold hover:bg-white/5 transition-all">Cancel</button>
-          <button onClick={onConfirm} disabled={!canAfford}
-            className={`flex-1 py-3 rounded-xl text-sm font-bold transition-all ${canAfford ? "gold-btn shop-btn-pulse cursor-pointer" : "bg-gray-600/30 text-gray-500 cursor-not-allowed border border-gray-600/20"}`}>
-            {canAfford ? "Confirm Purchase" : "Can't Afford"}
+          <button onClick={onConfirm} disabled={canAfford !== true}
+            className={`flex-1 py-3 rounded-xl text-sm font-bold transition-all ${canAfford === true ? "gold-btn shop-btn-pulse cursor-pointer" : canAfford === false ? "bg-gray-600/30 text-gray-500 cursor-not-allowed border border-gray-600/20" : "bg-white/5 text-cream/40 border border-white/10 cursor-wait"}`}>
+            {canAfford === false ? "Can't Afford" : "Confirm Purchase"}
           </button>
         </div>
       </div>
@@ -491,7 +494,9 @@ function FeaturedCard({ item, owned, equipped = false, onBuy, onEquip }: { item:
 // "Equip" CTA so the shop also doubles as a quick re-equip surface. Callers
 // pass `equipped` + `onEquip` from the same handleEquip path that the
 // Inventory tab uses, so behavior is consistent across surfaces.
-function CosmeticCard({ item, owned, equipped = false, canAfford, onBuy, onEquip }: { item: ShopItem; owned: boolean; equipped?: boolean; canAfford: boolean; onBuy: () => void; onEquip?: () => void }) {
+// `canAfford: null` = balance still loading → neutral disabled "Buy" (no
+// "Can't Afford" lie, no red/gray affordance) until the balance is known.
+function CosmeticCard({ item, owned, equipped = false, canAfford, onBuy, onEquip }: { item: ShopItem; owned: boolean; equipped?: boolean; canAfford: boolean | null; onBuy: () => void; onEquip?: () => void }) {
   const r = RARITY_COLORS[item.rarity];
   const Icon = item.Icon;
   // Boosters are equipped-by-use, not by toggle — never show the equip CTA on them.
@@ -537,9 +542,9 @@ function CosmeticCard({ item, owned, equipped = false, canAfford, onBuy, onEquip
               <Check size={14} weight="bold" color="#22C55E" aria-hidden="true" /> Owned
             </span>
           ) : (
-            <button onClick={onBuy} disabled={!canAfford}
-              className={`flex-shrink-0 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${canAfford ? "gold-btn shop-btn-pulse" : "bg-gray-600/20 text-gray-500 cursor-not-allowed border border-gray-600/20"}`}>
-              {canAfford ? "Buy" : "Can't Afford"}
+            <button onClick={onBuy} disabled={canAfford !== true}
+              className={`flex-shrink-0 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${canAfford === true ? "gold-btn shop-btn-pulse" : canAfford === false ? "bg-gray-600/20 text-gray-500 cursor-not-allowed border border-gray-600/20" : "bg-white/5 text-cream/40 border border-white/10 cursor-wait"}`}>
+              {canAfford === false ? "Can't Afford" : "Buy"}
             </button>
           )}
         </div>
@@ -549,7 +554,8 @@ function CosmeticCard({ item, owned, equipped = false, canAfford, onBuy, onEquip
 }
 
 // ── Booster Card ──
-function BoosterCard({ item, quantityOwned, canAfford, onBuy }: { item: ShopItem; quantityOwned: number; canAfford: boolean; onBuy: (qty: number) => void }) {
+// `canAfford: null` = balance loading → neutral disabled buy (label keeps the price, no "Can't Afford" lie).
+function BoosterCard({ item, quantityOwned, canAfford, onBuy }: { item: ShopItem; quantityOwned: number; canAfford: boolean | null; onBuy: (qty: number) => void }) {
   const r = RARITY_COLORS[item.rarity];
   const Icon = item.Icon;
   const bulkPrice = Math.floor(item.price * 5 * 0.9);
@@ -569,8 +575,8 @@ function BoosterCard({ item, quantityOwned, canAfford, onBuy }: { item: ShopItem
           </div>
           <p className="shop-card-desc text-cream/55 text-xs mb-3 leading-relaxed">{item.description}</p>
           <div className="flex items-center gap-2 flex-wrap">
-            <button onClick={() => onBuy(1)} disabled={!canAfford}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${canAfford ? "gold-btn shop-btn-pulse" : "bg-gray-600/20 text-gray-500 cursor-not-allowed border border-gray-600/20"}`}>
+            <button onClick={() => onBuy(1)} disabled={canAfford !== true}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${canAfford === true ? "gold-btn shop-btn-pulse" : canAfford === false ? "bg-gray-600/20 text-gray-500 cursor-not-allowed border border-gray-600/20" : "bg-white/5 text-cream/40 border border-white/10 cursor-wait"}`}>
               <img src={cdnUrl("/F.png")} alt="Fangs" className="w-5 h-5 object-contain" /> {formatCoins(item.price)} &middot; Buy x1
             </button>
             <button onClick={() => onBuy(5)}
@@ -685,7 +691,7 @@ function UsernameEffectCard({
   ownUsername: string;
   owned: boolean;
   equipped?: boolean;
-  canAfford: boolean;
+  canAfford: boolean | null;
   onBuy: () => void;
   onEquip?: () => void;
 }) {
@@ -731,9 +737,9 @@ function UsernameEffectCard({
               <Check size={14} weight="bold" color="#22C55E" aria-hidden="true" /> Owned
             </span>
           ) : (
-            <button onClick={onBuy} disabled={!canAfford}
-              className={`flex-shrink-0 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${canAfford ? "gold-btn shop-btn-pulse" : "bg-gray-600/20 text-gray-500 cursor-not-allowed border border-gray-600/20"}`}>
-              {canAfford ? "Buy" : "Can't Afford"}
+            <button onClick={onBuy} disabled={canAfford !== true}
+              className={`flex-shrink-0 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${canAfford === true ? "gold-btn shop-btn-pulse" : canAfford === false ? "bg-gray-600/20 text-gray-500 cursor-not-allowed border border-gray-600/20" : "bg-white/5 text-cream/40 border border-white/10 cursor-wait"}`}>
+              {canAfford === false ? "Can't Afford" : "Buy"}
             </button>
           )}
         </div>
@@ -743,7 +749,7 @@ function UsernameEffectCard({
 }
 
 // Premium Fang banner card — small looping preview tile.
-function PremiumFangBannerCard({ item, owned, equipped = false, canAfford, onBuy, onEquip }: { item: ShopItem; owned: boolean; equipped?: boolean; canAfford: boolean; onBuy: () => void; onEquip?: () => void }) {
+function PremiumFangBannerCard({ item, owned, equipped = false, canAfford, onBuy, onEquip }: { item: ShopItem; owned: boolean; equipped?: boolean; canAfford: boolean | null; onBuy: () => void; onEquip?: () => void }) {
   const r = RARITY_COLORS[item.rarity];
   // animated_banner is a cosmetic — equip CTA always available when owned.
   const isCosmetic = item.type !== "booster";
@@ -791,9 +797,9 @@ function PremiumFangBannerCard({ item, owned, equipped = false, canAfford, onBuy
               <Check size={14} weight="bold" color="#22C55E" aria-hidden="true" /> Owned
             </span>
           ) : (
-            <button onClick={onBuy} disabled={!canAfford}
-              className={`flex-shrink-0 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${canAfford ? "gold-btn shop-btn-pulse" : "bg-gray-600/20 text-gray-500 cursor-not-allowed border border-gray-600/20"}`}>
-              {canAfford ? "Buy" : "Can't Afford"}
+            <button onClick={onBuy} disabled={canAfford !== true}
+              className={`flex-shrink-0 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${canAfford === true ? "gold-btn shop-btn-pulse" : canAfford === false ? "bg-gray-600/20 text-gray-500 cursor-not-allowed border border-gray-600/20" : "bg-white/5 text-cream/40 border border-white/10 cursor-wait"}`}>
+              {canAfford === false ? "Can't Afford" : "Buy"}
             </button>
           )}
         </div>
@@ -809,7 +815,7 @@ function FounderBadgeCard({
   item: FounderBadgeSKU;
   remaining: number | null;
   owned: boolean;
-  canAfford: boolean;
+  canAfford: boolean | null;
   onBuy: () => void;
 }) {
   const Icon = item.Icon;
@@ -862,15 +868,17 @@ function FounderBadgeCard({
               <Check size={14} weight="bold" color="#22C55E" aria-hidden="true" /> Yours
             </span>
           ) : (
-            <button onClick={onBuy} disabled={!canAfford || soldOut}
+            <button onClick={onBuy} disabled={canAfford !== true || soldOut}
               className={`flex-shrink-0 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
                 soldOut
                   ? "bg-gray-700/30 text-gray-500 cursor-not-allowed border border-gray-600/20"
-                  : canAfford
+                  : canAfford === true
                   ? "gold-btn shop-btn-pulse"
-                  : "bg-gray-600/20 text-gray-500 cursor-not-allowed border border-gray-600/20"
+                  : canAfford === false
+                  ? "bg-gray-600/20 text-gray-500 cursor-not-allowed border border-gray-600/20"
+                  : "bg-white/5 text-cream/40 border border-white/10 cursor-wait"
               }`}>
-              {soldOut ? "Sold Out" : canAfford ? "Claim" : "Can't Afford"}
+              {soldOut ? "Sold Out" : canAfford === false ? "Can't Afford" : "Claim"}
             </button>
           )}
         </div>
@@ -1081,6 +1089,15 @@ export default function ShopPage() {
   // delivered a number we lock the display in; downstream affordances
   // (canAfford / Buy disabled) keep using userCoins so the math stays honest.
   const balanceKnown = typeof stats?.coins === "number" || typeof user?.coins === "number";
+  // Tri-state affordance: `null` while the balance is still loading so Buy
+  // buttons render a neutral disabled state instead of lying with
+  // "Can't Afford" against a phantom 0 balance. Once known, the boolean math
+  // is untouched. Logged-out visitors (isLoading already early-returned, so
+  // !user means truly signed out) genuinely have 0 Fangs — their balance is
+  // "known", keeping the pre-existing disabled-affordance behavior instead of
+  // a forever-loading neutral state.
+  const affordanceKnown = balanceKnown || !user;
+  const affords = (price: number): boolean | null => (affordanceKnown ? userCoins >= price : null);
   const countdown = getWeeklyCountdown();
   const ownedIds = new Set(inventory.map((i) => i.itemId));
   const getOwned = (id: string) => inventory.find((i) => i.itemId === id);
@@ -1208,7 +1225,7 @@ export default function ShopPage() {
   return (
     <div className={`min-h-screen pt-16 pb-24 md:pb-12 transition-colors duration-500 ${isPremium ? "premium-store-bg" : ""}`}>
       {showBurst && <PurchaseBurst onDone={() => setShowBurst(false)} />}
-      {confirmItem && <ConfirmModal item={confirmItem.item} quantity={confirmItem.quantity} onConfirm={handlePurchase} onCancel={() => setConfirmItem(null)} userCoins={userCoins} />}
+      {confirmItem && <ConfirmModal item={confirmItem.item} quantity={confirmItem.quantity} onConfirm={handlePurchase} onCancel={() => setConfirmItem(null)} userCoins={userCoins} balanceKnown={affordanceKnown} />}
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
         {/* ── Header ── */}
@@ -1329,7 +1346,7 @@ export default function ShopPage() {
                 const r = RARITY_COLORS[item.rarity];
                 const Icon = item.Icon;
                 const owned = ownedIds.has(item.id);
-                const canAfford = userCoins >= item.price;
+                const canAfford = affords(item.price);
                 return (
                   <div key={item.id}
                     className={`fluid-card-hover shop-card relative group rounded-2xl ${r.glow} ${item.rarity === "legendary" ? "shop-legendary-sparkle shop-tier-sweep-legendary" : ""} overflow-hidden flex-shrink-0 w-[68vw] sm:w-auto`}
@@ -1357,9 +1374,9 @@ export default function ShopPage() {
                           </span>
                         ) : (
                           <button onClick={() => { if (!requireLogin()) setConfirmItem({ item, quantity: 1 }); }}
-                            disabled={!canAfford}
-                            className={`flex-shrink-0 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${canAfford ? "gold-btn shop-btn-pulse" : "bg-gray-600/20 text-gray-500 cursor-not-allowed border border-gray-600/20"}`}>
-                            {canAfford ? "Buy" : "Can't Afford"}
+                            disabled={canAfford !== true}
+                            className={`flex-shrink-0 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${canAfford === true ? "gold-btn shop-btn-pulse" : canAfford === false ? "bg-gray-600/20 text-gray-500 cursor-not-allowed border border-gray-600/20" : "bg-white/5 text-cream/40 border border-white/10 cursor-wait"}`}>
+                            {canAfford === false ? "Can't Afford" : "Buy"}
                           </button>
                         )}
                       </div>
@@ -1389,7 +1406,7 @@ export default function ShopPage() {
                 const r = RARITY_COLORS[item.rarity];
                 const Icon = item.Icon;
                 const owned = ownedIds.has(item.id);
-                const canAfford = userCoins >= item.price;
+                const canAfford = affords(item.price);
                 return (
                   <div key={item.id}
                     className={`fluid-card-hover shop-card relative rounded-xl ${r.glow} ${item.rarity === "legendary" ? "shop-legendary-sparkle shop-tier-sweep-legendary" : ""} overflow-hidden`}
@@ -1417,9 +1434,9 @@ export default function ShopPage() {
                           </span>
                         ) : (
                           <button onClick={() => { if (!requireLogin()) setConfirmItem({ item, quantity: 1 }); }}
-                            disabled={!canAfford}
-                            className={`flex-shrink-0 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${canAfford ? "gold-btn shop-btn-pulse" : "bg-gray-600/20 text-gray-500 cursor-not-allowed border border-gray-600/20"}`}>
-                            {canAfford ? "Buy" : "Can't Afford"}
+                            disabled={canAfford !== true}
+                            className={`flex-shrink-0 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${canAfford === true ? "gold-btn shop-btn-pulse" : canAfford === false ? "bg-gray-600/20 text-gray-500 cursor-not-allowed border border-gray-600/20" : "bg-white/5 text-cream/40 border border-white/10 cursor-wait"}`}>
+                            {canAfford === false ? "Can't Afford" : "Buy"}
                           </button>
                         )}
                       </div>
@@ -1454,7 +1471,7 @@ export default function ShopPage() {
                       item={b}
                       remaining={remaining}
                       owned={owned}
-                      canAfford={userCoins >= b.price}
+                      canAfford={affords(b.price)}
                       onBuy={() => {
                         if (requireLogin()) return;
                         setConfirmItem({
@@ -1588,7 +1605,7 @@ export default function ShopPage() {
                   </div>
                   <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 shop-grid-stagger">
                     {NEW_SKUS.map((item) => (
-                      <CosmeticCard key={item.id} item={item} owned={ownedIds.has(item.id)} equipped={isEquipped(item.id)} canAfford={userCoins >= item.price}
+                      <CosmeticCard key={item.id} item={item} owned={ownedIds.has(item.id)} equipped={isEquipped(item.id)} canAfford={affords(item.price)}
                         onBuy={() => { if (!requireLogin()) setConfirmItem({ item, quantity: 1 }); }}
                         onEquip={() => { if (!requireLogin()) void handleEquip(item.id); }} />
                     ))}
@@ -1616,7 +1633,7 @@ export default function ShopPage() {
                     <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-cream/45 mb-3">Avatar Auras &middot; pick your vibe</p>
                     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 shop-grid-stagger">
                       {AVATAR_AURAS.map((item) => (
-                        <CosmeticCard key={item.id} item={item} owned={ownedIds.has(item.id)} equipped={isEquipped(item.id)} canAfford={userCoins >= item.price}
+                        <CosmeticCard key={item.id} item={item} owned={ownedIds.has(item.id)} equipped={isEquipped(item.id)} canAfford={affords(item.price)}
                           onBuy={() => { if (!requireLogin()) setConfirmItem({ item, quantity: 1 }); }}
                           onEquip={() => { if (!requireLogin()) void handleEquip(item.id); }} />
                       ))}
@@ -1674,7 +1691,7 @@ export default function ShopPage() {
                             item={b}
                             remaining={remaining}
                             owned={owned}
-                            canAfford={userCoins >= b.price}
+                            canAfford={affords(b.price)}
                             onBuy={() => {
                               if (requireLogin()) return;
                               // Founder badges reuse the standard ConfirmModal path.
@@ -1710,7 +1727,7 @@ export default function ShopPage() {
                         ownUsername={user?.username ?? "yourname"}
                         owned={ownedIds.has(item.id)}
                         equipped={cosmeticsOwned.some((c) => c.id === item.id && c.equipped) || isEquipped(item.id)}
-                        canAfford={userCoins >= item.price}
+                        canAfford={affords(item.price)}
                         onBuy={() => { if (!requireLogin()) setConfirmItem({ item, quantity: 1 }); }}
                         onEquip={() => {
                           if (requireLogin()) return;
@@ -1745,7 +1762,7 @@ export default function ShopPage() {
                         item={item}
                         owned={ownedIds.has(item.id)}
                         equipped={isEquipped(item.id)}
-                        canAfford={userCoins >= item.price}
+                        canAfford={affords(item.price)}
                         onBuy={() => { if (!requireLogin()) setConfirmItem({ item, quantity: 1 }); }}
                         onEquip={() => { if (!requireLogin()) void handleEquip(item.id); }}
                       />
@@ -1785,7 +1802,7 @@ export default function ShopPage() {
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 shop-grid-stagger">
                   {filteredCosmetics.map((item) => (
-                    <CosmeticCard key={item.id} item={item} owned={ownedIds.has(item.id)} canAfford={userCoins >= item.price}
+                    <CosmeticCard key={item.id} item={item} owned={ownedIds.has(item.id)} canAfford={affords(item.price)}
                       onBuy={() => { if (!requireLogin()) setConfirmItem({ item, quantity: 1 }); }} />
                   ))}
                 </div>
@@ -1797,7 +1814,7 @@ export default function ShopPage() {
               <div className={`transition-all duration-700 delay-200 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`}>
                 <div className="space-y-3 shop-grid-stagger">
                   {BOOSTER_ITEMS.map((item) => (
-                    <BoosterCard key={item.id} item={item} quantityOwned={getQuantity(item.id)} canAfford={userCoins >= item.price}
+                    <BoosterCard key={item.id} item={item} quantityOwned={getQuantity(item.id)} canAfford={affords(item.price)}
                       onBuy={(qty) => { if (!requireLogin()) setConfirmItem({ item, quantity: qty }); }} />
                   ))}
                 </div>

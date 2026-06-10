@@ -68,6 +68,19 @@ export default function StudyDnaPage() {
   );
   const [shareOpen, setShareOpen] = useState(false);
 
+  // Brand-new account: every totals cell is zero, so a strip of bare 0s reads
+  // as broken. Swap it for a single nudge card and hold the Share button until
+  // there is something worth flexing.
+  const totalsAllZero = !!data && (
+    data.totals.questionsAnswered === 0 &&
+    data.totals.examTargetsCount === 0 &&
+    data.totals.classesCount === 0 &&
+    data.totals.notesCount === 0 &&
+    data.totals.drillCompletions === 0 &&
+    data.totals.drillPerfectRuns === 0 &&
+    data.totals.focusSessionsCompleted === 0
+  );
+
   return (
     <ProtectedRoute>
       <div className="min-h-screen bg-navy text-cream pt-12">
@@ -97,7 +110,8 @@ export default function StudyDnaPage() {
             <button
               type="button"
               onClick={() => setShareOpen(true)}
-              disabled={!data}
+              disabled={!data || totalsAllZero}
+              title={totalsAllZero ? "Play first, flex after" : undefined}
               className="inline-flex items-center gap-2 rounded-full bg-gold text-navy hover:bg-gold/90
                 font-mono text-[11px] uppercase tracking-[0.25em] px-4 py-2.5
                 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 active:scale-[0.98]"
@@ -113,7 +127,7 @@ export default function StudyDnaPage() {
           ) : (
             <>
               <IdentityCard dna={data} />
-              <TotalsStrip dna={data} />
+              {totalsAllZero ? <TotalsZeroNudge /> : <TotalsStrip dna={data} />}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
                 <StrengthsList stats={data.strengths} />
                 <WeaknessesList stats={data.weaknesses} />
@@ -240,6 +254,43 @@ function TotalsStrip({ dna }: { dna: DnaResponse }) {
           </div>
         </div>
       ))}
+    </section>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Zero-state nudge — shown instead of the totals strip when every total is 0.
+// ─────────────────────────────────────────────────────────────────────────────
+function TotalsZeroNudge() {
+  return (
+    <section className="mb-8 rounded-[12px] border border-gold/25 bg-gold/[0.04] backdrop-blur p-5 sm:p-6 text-center">
+      <div className="flex justify-center mb-3">
+        <div className="grid place-items-center w-10 h-10 rounded-full bg-gold/15 text-gold">
+          <Sparkle size={16} weight="fill" />
+        </div>
+      </div>
+      <h3 className="font-bebas text-2xl tracking-[0.06em] text-cream leading-none mb-2">
+        your dna assembles after your first session
+      </h3>
+      <p className="text-[13px] text-cream/60 leading-relaxed max-w-[46ch] mx-auto mb-4">
+        Answer a few questions and these numbers come alive. Strengths, weak spots, the whole genome.
+      </p>
+      <div className="flex items-center justify-center gap-2 flex-wrap">
+        <Link
+          href="/learn/mastery"
+          className="inline-flex items-center gap-2 rounded-full bg-gold text-navy hover:bg-gold/90
+            font-mono text-[11px] uppercase tracking-[0.25em] px-4 py-2.5 transition-all duration-200 active:scale-[0.98]"
+        >
+          <Brain size={12} weight="fill" /> Start Mastery
+        </Link>
+        <Link
+          href="/quiz"
+          className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 text-cream/80 hover:bg-white/10 hover:text-cream
+            font-mono text-[11px] uppercase tracking-[0.25em] px-4 py-2.5 transition-all duration-200 active:scale-[0.98]"
+        >
+          <Lightning size={12} weight="fill" /> Take a quiz
+        </Link>
+      </div>
     </section>
   );
 }

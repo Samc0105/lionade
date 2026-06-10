@@ -11,6 +11,10 @@ interface StreakCounterProps {
 export default function StreakCounter({ streak, size = "md", showLabel = true }: StreakCounterProps) {
   const isHot = streak >= 7;
   const isOnFire = streak >= 14;
+  // Zero streak = no fire. A filled orange flame next to "0" is visually
+  // contradictory, so the zero state dims to an outline flame + muted count.
+  // Same icon size / layout, only weight + color change — no layout shift.
+  const isActive = streak > 0;
 
   const sizeClasses = {
     sm: { fire: "text-xl", number: "text-2xl", label: "text-xs", fireSize: 24 },
@@ -34,14 +38,14 @@ export default function StreakCounter({ streak, size = "md", showLabel = true }:
         <span
           className={`${classes.fire} ${isHot ? "animate-streak-fire" : ""} relative z-10 inline-flex items-center justify-center`}
         >
-          <Fire size={classes.fireSize} weight="fill" color="#FB923C" aria-hidden="true" />
+          <Fire size={classes.fireSize} weight={isActive ? "fill" : "regular"} color={isActive ? "#FB923C" : "rgba(238, 244, 255, 0.3)"} aria-hidden="true" />
         </span>
 
         {/* Streak count overlay */}
         {size !== "sm" && (
           <span
             className={`absolute -bottom-1 -right-1 font-bebas ${classes.number}
-              ${isOnFire ? "text-orange-400 glow-gold" : "text-cream"} leading-none z-20`}
+              ${isOnFire ? "text-orange-400 glow-gold" : isActive ? "text-cream" : "text-cream/30"} leading-none z-20`}
           >
             {streak}
           </span>
@@ -49,7 +53,7 @@ export default function StreakCounter({ streak, size = "md", showLabel = true }:
       </div>
 
       {size === "sm" && (
-        <span className={`font-bebas ${classes.number} text-orange-400 leading-none`}>
+        <span className={`font-bebas ${classes.number} ${isActive ? "text-orange-400" : "text-cream/30"} leading-none`}>
           {streak}
         </span>
       )}

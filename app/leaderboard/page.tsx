@@ -389,6 +389,42 @@ export default function LeaderboardPage() {
                   )}
                 </div>
               )}
+
+              {/* Pinned "you" row when the viewer isn't anywhere in the fetched
+                  board (new user with no weekly earnings, or outside the top
+                  200 on ELO tabs). Gold-tinted so it reads as your spot-in-waiting. */}
+              {user && !myEntry && (
+                <div className="mt-6 p-4 rounded-xl border border-gold/40 bg-gold/10 shadow-lg shadow-gold/10">
+                  <p className="text-gold text-[11px] font-bold uppercase tracking-[0.18em] text-center mb-3">Your Position</p>
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 flex-shrink-0 text-center">
+                      <span className="font-bebas text-2xl leading-none text-gold">&mdash;</span>
+                    </div>
+                    <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-gold flex-shrink-0"
+                      aria-label={`${user.username}'s avatar`}
+                      style={{ boxShadow: "0 0 16px rgba(255, 215, 0, 0.35)" }}>
+                      <img src={user.avatar} alt={user.username} className="w-10 h-10 rounded-full object-cover" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold text-sm truncate text-cream">
+                          <AnimatedUsername username={user.username} effect={myEffect} size="sm" />
+                        </span>
+                        <span className="text-[10px] font-bold tracking-[0.16em] bg-gold/20 text-gold px-2 py-0.5 rounded-full border border-gold/40 uppercase">You</span>
+                      </div>
+                      <p className="text-xs text-cream/40">Unranked</p>
+                    </div>
+                    <button
+                      onClick={() => router.push(isElo ? "/compete" : "/quiz")}
+                      className="flex-shrink-0 inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-gold text-navy text-xs font-bold shadow-lg shadow-gold/20 hover:brightness-110 transition-all active:scale-95 will-change-transform"
+                    >
+                      {isElo
+                        ? <><Sword size={14} weight="fill" color="currentColor" aria-hidden="true" /> Play a ranked match</>
+                        : <><Brain size={14} weight="fill" color="currentColor" aria-hidden="true" /> Take a quiz to enter the board</>}
+                    </button>
+                  </div>
+                </div>
+              )}
             </>
           )}
         </div>

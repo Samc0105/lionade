@@ -162,6 +162,10 @@ function DashboardContent() {
     { keepPreviousData: true }
   );
   const bounties: Bounty[] = bountiesData ?? [];
+  // `undefined` = SWR in flight (pulse skeletons); resolved empty array = the
+  // board is genuinely empty (show the "no bounties" card). Mirrors the
+  // missions/subjects loading-vs-empty split elsewhere on this page.
+  const bountiesLoading = bountiesData === undefined;
 
   // userBounties — locally mutated by claimBounty → keep useState, hydrate from SWR.
   const [userBounties, setUserBounties] = useState<UserBounty[]>([]);
@@ -1092,7 +1096,22 @@ function DashboardContent() {
               </div>
             )}
 
-            {bounties.length === 0 && (
+            {bounties.length === 0 && bountiesLoading && (
+              /* Bounties still in flight — pulse bounty-card silhouettes, never
+                 a flash of the empty state on cold load. */
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                {[0, 1].map(i => (
+                  <div key={i} className="rounded-[20px] p-4 animate-pulse" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.04)" }}>
+                    <div className="h-3 w-28 rounded bg-white/5 mb-2" />
+                    <div className="h-2 w-40 rounded bg-white/[0.03] mb-4" />
+                    <div className="h-2.5 w-20 rounded bg-white/[0.03] mb-3" />
+                    <div className="h-1.5 w-full rounded-full bg-white/[0.04]" />
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {bounties.length === 0 && !bountiesLoading && (
               <div className="rounded-[20px] p-6 text-center" style={{ background: "linear-gradient(135deg, rgba(13,21,40,0.5), rgba(10,16,32,0.5))", border: "1px solid rgba(255,215,0,0.06)" }}>
                 <Target size={32} weight="regular" color="rgba(238,244,255,0.4)" className="mx-auto mb-2" aria-hidden="true" />
                 <p className="text-cream/55 text-xs mb-3">No bounties available right now. Fresh ones drop every day.</p>

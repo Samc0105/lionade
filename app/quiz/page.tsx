@@ -268,6 +268,10 @@ export default function QuizPage() {
   const [difficulty, setDifficulty] = useState<Difficulty>("medium");
   const [subjectStats, setSubjectStats] = useState<SubjectStatEntry[]>([]);
   const [quizHistory, setQuizHistory] = useState<QuizHistoryEntry[]>([]);
+  // Flash-of-zero guard (CLAUDE.md non-negotiable): Quick Stats render "—"
+  // placeholders until the stats/history fetches settle (success OR failure),
+  // so veterans never see "Quizzes 0 / 0%" flash on mount.
+  const [statsLoaded, setStatsLoaded] = useState(false);
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
 
   // Anti-cheat: result comes back from server after user selects
@@ -367,8 +371,13 @@ export default function QuizPage() {
 
   useEffect(() => {
     if (!user) return;
-    getSubjectStats(user.id).then(setSubjectStats).catch(() => {});
-    getQuizHistory(user.id, 100).then(setQuizHistory).catch(() => {});
+    // allSettled keeps the old swallow-errors behavior while guaranteeing
+    // statsLoaded flips even when a fetch fails (no permanent "—" lock-up
+    // logic needed — failure just means we show whatever did load).
+    void Promise.allSettled([
+      getSubjectStats(user.id).then(setSubjectStats),
+      getQuizHistory(user.id, 100).then(setQuizHistory),
+    ]).then(() => setStatsLoaded(true));
   }, [user]);
 
   // Auto-start from query params (e.g. /quiz?subject=Test+Prep&topic=AP+Biology)
@@ -913,17 +922,20 @@ export default function QuizPage() {
             <h2 className="font-bebas text-lg text-cream tracking-wider mb-3">QUICK STATS</h2>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               {[
-                { label: "Quizzes", value: totalQuizzes.toString(), Icon: ChartBar, color: "#4A90D9" },
-                { label: "Avg Accuracy", value: `${avgAccuracy}%`, Icon: Target, color: "#22C55E" },
-                { label: "Favorite", value: favoriteSubject, Icon: Star, color: "#A855F7" },
-                { label: "Coins Earned", value: formatCoins(totalCoinsEarned), Icon: Coin, color: "#FFD700" },
+                // value === null → "—" placeholder (stats not loaded yet, or no data).
+                { label: "Quizzes", value: statsLoaded ? totalQuizzes.toString() : null, Icon: ChartBar, color: "#4A90D9" },
+                // No data isn't 0% accuracy — a fresh account shows "—" instead of a punitive 0%.
+                { label: "Avg Accuracy", value: statsLoaded && totalQuizzes > 0 ? `${avgAccuracy}%` : null, Icon: Target, color: "#22C55E" },
+                { label: "Favorite", value: statsLoaded ? favoriteSubject : null, Icon: Star, color: "#A855F7" },
+                { label: "Coins Earned", value: statsLoaded ? formatCoins(totalCoinsEarned) : null, Icon: Coin, color: "#FFD700" },
               ].map((stat) => {
                 const StatIcon = stat.Icon;
                 return (
                   <div key={stat.label} className="quiz-stat-card p-4 rounded-2xl border text-center"
                     style={{ background: `linear-gradient(135deg, ${stat.color}08 0%, #060c18 100%)`, borderColor: `${stat.color}20` }}>
                     <StatIcon size={28} weight="fill" color={stat.color} className="mx-auto mb-1" aria-hidden="true" />
-                    <p className="font-bebas text-2xl leading-none" style={{ color: stat.color }}>{stat.value}</p>
+                    <p className={`font-bebas text-2xl leading-none ${stat.value === null ? "text-cream/30" : ""}`}
+                      style={stat.value === null ? undefined : { color: stat.color }}>{stat.value ?? "—"}</p>
                     <p className="stat-label text-cream/60 text-[10px] uppercase tracking-wider mt-1">{stat.label}</p>
                   </div>
                 );

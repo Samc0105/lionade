@@ -556,10 +556,15 @@ function OverviewSection({ user, level, progress, xpToNext, coins, streak, xp, a
           <div className="flex justify-between items-center mb-4">
             <h3 className="font-bebas text-xl text-cream tracking-wider">RECENT BADGES</h3>
             <Link href="/badges" className="text-electric text-xs font-semibold hover:text-cream transition-colors">
-              {earnedBadges.length} earned
+              {loading ? <span className="text-cream/30">—</span> : `${earnedBadges.length} earned`}
             </Link>
           </div>
-          {earnedBadges.length === 0 ? (
+          {loading ? (
+            <div className="space-y-2 py-2" aria-hidden="true">
+              <div className="h-10 bg-white/10 rounded-lg animate-pulse" />
+              <div className="h-10 bg-white/10 rounded-lg animate-pulse" />
+            </div>
+          ) : earnedBadges.length === 0 ? (
             <div className="text-center py-8">
               <div className="w-12 h-12 mx-auto mb-3 rounded-full flex items-center justify-center border border-gold/20 bg-gold/5">
                 <Lock size={20} weight="regular" color="rgba(240,180,41,0.6)" aria-hidden="true" />
@@ -583,7 +588,12 @@ function OverviewSection({ user, level, progress, xpToNext, coins, streak, xp, a
         {/* Recent activity: tinted chip icons (matches dashboard e106e2b) */}
         <Card>
           <h3 className="font-bebas text-xl text-cream tracking-wider mb-4">RECENT ACTIVITY</h3>
-          {activity.length === 0 ? (
+          {loading ? (
+            <div className="space-y-2 py-2" aria-hidden="true">
+              <div className="h-10 bg-white/10 rounded-lg animate-pulse" />
+              <div className="h-10 bg-white/10 rounded-lg animate-pulse" />
+            </div>
+          ) : activity.length === 0 ? (
             <div className="text-center py-8">
               <div className="w-12 h-12 mx-auto mb-3 rounded-full flex items-center justify-center border border-electric/20 bg-electric/5">
                 <Lightning size={20} weight="regular" color="rgba(74,144,217,0.7)" aria-hidden="true" />
@@ -1671,7 +1681,7 @@ function DeleteAccountModal({ email, onClose }: { email: string; onClose: () => 
 }
 
 // ── ACTIVITY HISTORY ───────────────────────────────────
-function ActivitySection({ activity, quizHistory }: SharedProps) {
+function ActivitySection({ activity, quizHistory, loading }: SharedProps) {
   const [view, setView] = useState<"transactions"|"quizzes">("transactions");
 
   return (
@@ -1693,7 +1703,12 @@ function ActivitySection({ activity, quizHistory }: SharedProps) {
 
       {view === "transactions" && (
         <div className="space-y-2">
-          {activity.length === 0 ? (
+          {loading ? (
+            <div aria-hidden="true" className="space-y-2">
+              <div className="h-16 rounded-xl bg-white/10 animate-pulse" />
+              <div className="h-16 rounded-xl bg-white/10 animate-pulse" />
+            </div>
+          ) : activity.length === 0 ? (
             <Card className="text-center py-10">
               <p className="text-cream/40 mb-4">No activity yet. Start grinding.</p>
               <Link href="/quiz" className="inline-block px-6 py-2.5 rounded-xl bg-electric text-white text-sm font-bold">
@@ -1724,7 +1739,12 @@ function ActivitySection({ activity, quizHistory }: SharedProps) {
 
       {view === "quizzes" && (
         <div className="space-y-2">
-          {quizHistory.length === 0 ? (
+          {loading ? (
+            <div aria-hidden="true" className="space-y-2">
+              <div className="h-16 rounded-xl bg-white/10 animate-pulse" />
+              <div className="h-16 rounded-xl bg-white/10 animate-pulse" />
+            </div>
+          ) : quizHistory.length === 0 ? (
             <Card className="text-center py-10">
               <p className="text-cream/40">No quizzes yet. Take your first quiz!</p>
               <Link href="/quiz"><button className="mt-4 px-6 py-2.5 rounded-xl bg-electric text-white text-sm font-bold">Start a Quiz</button></Link>

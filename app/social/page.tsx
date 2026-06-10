@@ -190,6 +190,9 @@ export default function SocialPage() {
   const showLobbiesView = activeTab === "lobbies";
   const setShowNotifView = (next: boolean) => setActiveTab(next ? "notifs" : "friends");
   const [socialNotifs, setSocialNotifs] = useState<{ id: string; type: string; title: string; message: string | null; read: boolean; action_url: string | null; created_at: string }[]>([]);
+  // Gate the "You're all caught up" empty state behind the first resolved
+  // notifications fetch so it can't flash for a frame on cold load.
+  const [notifsHydrated, setNotifsHydrated] = useState(false);
   const [socialUnreadCount, setSocialUnreadCount] = useState<number | null>(null);
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [searchLoading, setSearchLoading] = useState(false);
@@ -200,6 +203,10 @@ export default function SocialPage() {
   // Messages
   const [messages, setMessages] = useState<Message[]>([]);
   const [arenaEvents, setArenaEvents] = useState<ArenaEvent[]>([]);
+  // Which friend's conversation the messages state currently reflects —
+  // gates the "Say hi" empty thread so it can't flash while an existing
+  // conversation is still fetching.
+  const [messagesLoadedFor, setMessagesLoadedFor] = useState<string | null>(null);
   const [msgInput, setMsgInput] = useState("");
   const [sending, setSending] = useState(false);
 
@@ -216,6 +223,9 @@ export default function SocialPage() {
   const [nudgeState, setNudgeState] = useState<{ remaining: number; limit: number; nudgedToday: string[] }>({
     remaining: 5, limit: 5, nudgedToday: [],
   });
+  // The {remaining: 5} above is a hardcoded default — gate the pulse chip on
+  // this flag (em-dash placeholder) until /api/social/nudge actually resolves.
+  const [nudgeHydrated, setNudgeHydrated] = useState(false);
   const [nudgeTarget, setNudgeTarget] = useState<{ id: string; username: string } | null>(null);
   const [sendingNudge, setSendingNudge] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -248,7 +258,7 @@ export default function SocialPage() {
       if (Array.isArray(c.outgoingRequests)) setOutgoingRequests(c.outgoingRequests);
       if (Array.isArray(c.feed)) setFeed(c.feed);
       if (Array.isArray(c.circle)) setCircle(c.circle);
-      if (c.nudgeState) setNudgeState(c.nudgeState);
+      if (c.nudgeState) { setNudgeState(c.nudgeState); setNudgeHydrated(true); }
     } catch { /* ignore — corrupt cache won't block fresh fetches */ }
   }, [user?.id]);
 
@@ -367,6 +377,7 @@ export default function SocialPage() {
       onSuccess: (res) => {
         if (res.ok && res.data) {
           setNudgeState(res.data);
+          setNudgeHydrated(true);
           cacheSocial({ nudgeState: res.data });
         }
       },
@@ -439,6 +450,7 @@ export default function SocialPage() {
         if (res.ok && res.data) {
           setSocialNotifs(res.data.notifications ?? []);
           setSocialUnreadCount(res.data.unreadCount ?? 0);
+          setNotifsHydrated(true);
         }
       },
     }
@@ -469,6 +481,7 @@ export default function SocialPage() {
           setArenaEvents(res.data.arenaEvents ?? []);
           const fid = selectedFriend?.id;
           if (fid) {
+            setMessagesLoadedFor(fid);
             setFriends(prev =>
               prev.map(f => (f.id === fid ? { ...f, unreadCount: 0 } : f))
             );
@@ -758,7 +771,14 @@ export default function SocialPage() {
             {/* Notifications Panel */}
             {showNotifView ? (
               <div className="flex-1 overflow-y-auto">
-                {socialNotifs.length === 0 ? (
+                {!notifsHydrated ? (
+                  /* Fetch hasn't resolved yet — skeleton, never the empty copy */
+                  <div className="px-4 py-4 space-y-2" aria-hidden="true">
+                    {[0, 1, 2].map(i => (
+                      <div key={i} className="h-12 rounded-lg bg-white/[0.05] animate-pulse" />
+                    ))}
+                  </div>
+                ) : socialNotifs.length === 0 ? (
                   <div className="py-12 px-6 text-center flex flex-col items-center gap-2.5">
                     <CheckCircle size={28} weight="fill" className="text-electric/60" aria-hidden="true" />
                     <p className="text-cream/70 text-sm font-semibold">You're all caught up</p>
@@ -850,7 +870,22 @@ export default function SocialPage() {
 
             {/* Friends List */}
             <div className="flex-1 overflow-y-auto">
-              {filteredFriends.length === 0 && (
+              {/* Initial fetch in flight (no cache restore yet) — skeleton rows,
+                  never the "Build your circle" empty copy. */}
+              {!friendsHydrated && filteredFriends.length === 0 && (
+                <div aria-hidden="true">
+                  {[0, 1, 2].map(i => (
+                    <div key={i} className="px-4 py-3 flex items-center gap-3">
+                      <div className="w-11 h-11 rounded-full bg-white/[0.06] animate-pulse flex-shrink-0" />
+                      <div className="flex-1 min-w-0 space-y-1.5">
+                        <div className="h-3 w-24 rounded bg-white/[0.06] animate-pulse" />
+                        <div className="h-2.5 w-16 rounded bg-white/[0.04] animate-pulse" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+              {friendsHydrated && filteredFriends.length === 0 && (
                 <div className="px-4 py-12 text-center flex flex-col items-center gap-3">
                   <div
                     className="w-12 h-12 rounded-full grid place-items-center"
@@ -996,8 +1031,10 @@ export default function SocialPage() {
                         },
                         {
                           label: "nudges left",
-                          value: <><CountUp id="social-nudges-left" value={nudgeState.remaining} duration={300} /><span className="text-cream/55">/{nudgeState.limit}</span></>,
-                          accent: nudgeState.remaining > 0 ? "#F97316" : "#71717A",
+                          value: nudgeHydrated
+                            ? <><CountUp id="social-nudges-left" value={nudgeState.remaining} duration={300} /><span className="text-cream/55">/{nudgeState.limit}</span></>
+                            : <span className="text-cream/30">—</span>,
+                          accent: nudgeHydrated && nudgeState.remaining > 0 ? "#F97316" : "#71717A",
                         },
                       ].map(chip => (
                         <div
@@ -1361,7 +1398,10 @@ export default function SocialPage() {
 
                 {/* Messages area */}
                 <div ref={chatContainerRef} className="flex-1 overflow-y-auto px-5 py-4 space-y-3">
-                  {timeline.length === 0 && (
+                  {/* "Say hi" only renders once THIS thread's fetch has resolved
+                      empty — opening an existing conversation stays blank (no
+                      flash) until the messages land. */}
+                  {timeline.length === 0 && messagesLoadedFor === selectedFriend.id && (
                     <div className="text-center py-14 flex flex-col items-center gap-3 social-empty-thread">
                       <div
                         className="w-14 h-14 rounded-full grid place-items-center"

@@ -8,7 +8,6 @@ import BackButton from "@/components/BackButton";
 import BadgeCard from "@/components/BadgeCard";
 import type { Badge } from "@/types";
 import { MedalMilitary, Lock, MagnifyingGlass, X } from "@phosphor-icons/react";
-import Link from "next/link";
 
 // Badge filter chips — same chip pattern as the Word Banks confidence filter
 // (see components/Vocab/VocabList.tsx) so cross-surface UX stays consistent.
@@ -140,7 +139,9 @@ export default function BadgesPage() {
           <MedalMilitary size={52} weight="fill" color="#FFD700" className="mx-auto mb-3" aria-hidden="true" />
           <h1 className="font-bebas text-5xl sm:text-6xl text-cream tracking-wider mb-2">BADGES</h1>
           <p className="text-cream/50 text-sm">
-            {earnedIds.size} of {allBadges.length} earned
+            {loading
+              ? <span className="text-cream/30">—</span>
+              : <>{earnedIds.size} of {allBadges.length} earned</>}
           </p>
         </div>
 
@@ -222,13 +223,19 @@ export default function BadgesPage() {
             ))}
           </div>
         ) : allBadges.length === 0 ? (
+          /* The catalog query came back empty — that's a load failure, not
+             "user has no badges" (locked badges would still render). Be
+             honest instead of nudging them toward a quiz that won't fix it. */
           <div className="text-center py-20 rounded-2xl" style={{ background: "linear-gradient(135deg, rgba(13,21,40,0.5), rgba(10,16,32,0.5))", border: "1px solid rgba(74,144,217,0.08)" }}>
-            <Lock size={40} weight="regular" color="rgba(238,244,255,0.4)" className="mx-auto mb-3" aria-hidden="true" />
-            <p className="font-bebas text-2xl text-cream/50 tracking-wider mb-1">No badges yet</p>
-            <p className="text-cream/30 text-sm mb-5">Complete quizzes and challenges to earn badges.</p>
-            <Link href="/quiz" className="inline-block px-6 py-2.5 rounded-xl bg-electric text-white text-sm font-bold hover:brightness-110 transition-all">
-              Start a quiz
-            </Link>
+            <X size={40} weight="regular" color="rgba(238,244,255,0.4)" className="mx-auto mb-3" aria-hidden="true" />
+            <p className="font-bebas text-2xl text-cream/50 tracking-wider mb-1">Badges didn&apos;t load</p>
+            <p className="text-cream/30 text-sm mb-5">Something hiccuped on our end. Refresh to try again.</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="inline-block px-6 py-2.5 rounded-xl bg-electric text-white text-sm font-bold hover:brightness-110 transition-all"
+            >
+              Refresh
+            </button>
           </div>
         ) : noResults ? (
           <div className="text-center py-16 rounded-2xl" style={{ background: "linear-gradient(135deg, rgba(13,21,40,0.5), rgba(10,16,32,0.5))", border: "1px solid rgba(74,144,217,0.08)" }}>
