@@ -7,6 +7,23 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 
 ---
 
+## 2026-06-10: Party lobby/invite/Sketchy polish (web)
+
+**Status:** 🚫 N/A (deliberate no-row decision: Lionade Party is web-only V1, same rationale as the 2026-06-07 Party V2 rows below. The iOS port is deferred to `vp-ios` and will adopt this batch together with the V2 foundation + active-game work.)
+
+**Wire-contract notes for the eventual iOS port** (flagged by the realtime agents; any iOS client speaking the `party-room-{code}` channel must honor these):
+
+1. **New READY_CHANGED broadcast event on `party-room-{code}`.** Clients now fire it in parallel with the DB write; the lobby no longer relies on an unfiltered table listener + snapshot GET (the remaining table listener is server-filtered to the room). A port must both send and consume READY_CHANGED, and tolerate the broadcast arriving before the row update commits.
+2. **LOBBY_CHAT payloads gained `authoritative: boolean` and may originate client-side with a client-generated uuid.** `POST /api/party/rooms/[code]/lobby-chat` accepts `client_id` for de-dup. Web renders client-originated messages dimmed (pending) until the server-verified copy replaces them, with a 10s expiry that drops ghosts. An iOS client must de-dup on the uuid and must never treat a non-authoritative payload as verified.
+3. **PLAYER_JOINED is now broadcast by both the join route and the host-approve route**, so host lobbies update live without polling.
+4. **`party_word_lists.difficulty` is now CHECK-constrained** (easy/medium/hard) with tiered candidate selection (one candidate per tier, nearest-tier fallback for thin pools). Migration `supabase/migrations/20260610_party_word_difficulty.sql` is NOT yet applied to prod; Sam deploys it.
+
+Batch summary (web): global `PartyInviteToast` on `party_invite` notifications (single WebSocket, Navbar re-emits via `lib/party/invite-bus.ts`), lobby join/ready animations, Sketchy tiered word picker + non-drawer waiting card, lobby polish (copy toast, real game-tile metadata, chat unread badge, READY UP/START states), realtime perf pass, chat spoof-hardening review fixes.
+
+Owner: `quality-docs-writer` (web).
+
+---
+
 ## 2026-06-09: Empty-state audit + fix sweep (web)
 
 **Status:** 🟡 partial-relevance. Most of the batch is web-specific presentation (error-state house pattern on 9 surfaces, dashboard void fixes, flash-of-zero gating, "coins" to "Fangs" copy sweep) and needs no 1:1 port. Three items DO need `vp-ios` attention:
