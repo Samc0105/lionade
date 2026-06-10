@@ -29,6 +29,13 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 7. **ICS calendar import** — `POST /api/academia/import-ics` (preview `{ url }` / commit `{ classId, events }`) is platform-neutral: the hand-rolled RFC 5545 parser + the SSRF defenses (http(s) only, DNS-resolve + block private/loopback/link-local/CGNAT/cloud-metadata incl IPv4-mapped-IPv6, `redirect: manual` per-hop re-validation, pinned lookup closing the DNS-rebinding TOCTOU, 8s timeout, 2MB cap, `BEGIN:VCALENDAR` sniff, generic errors, 10/min rate limit) all live server-side, so an iOS port reuses the endpoint with no security re-implementation. The "Import calendar" flow (paste URL → preview + per-event select + class picker → import) needs a native build.
 8. **Weekly email digest** — Monday cron `GET /api/cron/academia-digest` (CRON_SECRET bearer auth) emails opted-in users (`profiles.preferences.notifications.weekly_report != false`) their next-7-day exams + assignments via the new Resend template `academia-weekly`, capped 500/run ordered by `created_at`, scheduled in `vercel.json` for Monday 13:00 UTC. This is entirely server-side and platform-agnostic: **no iOS work**. A live send only fires on Vercel with both `CRON_SECRET` and `RESEND` configured.
 
+### Same-day Academia hub polish + heat warning (commits `bf19854`, `74cf528`)
+
+**Status:** ❌ pending iOS parity, folded into this Academia entry — both are presentation-layer work on the same hub surface already flagged above (no new endpoint, no migration), so they ride along with the existing pending port to `vp-ios` rather than getting their own row.
+
+9. **Hub polish** — calendar loading + error states (dimmed grid + spinner / "Couldn't load events" retry overlay), the "Due this week" count replacing the "Next exam" tile (derived from the deduped agenda feed, item 3 above), the unified PLANNER header, and the zero-classes first-run collapse are all native-build concerns: the data already comes from the shared `GET /api/academia/agenda` feed, so iOS only needs to mirror the loading/error/empty presentation when it rebuilds the planner UI.
+10. **Workload heat warning** — entirely client-side off the already-fetched agenda items (3-day window over the next 14 days, surfaces the densest/soonest window with `>=3` due items, gold at 3 / red at 4+). No server work for iOS; the same client computation can be ported alongside the native planner build.
+
 ---
 
 ## 2026-06-10: Party lobby/invite/Sketchy polish + Party games UX batch (web)
