@@ -6,6 +6,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import useSWR from "swr";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import { ChatCircleDots, Check, MaskHappy, PencilLine, PokerChip } from "@phosphor-icons/react";
 import { apiGet, apiPost } from "@/lib/api-client";
 import { toastError, toastSuccess } from "@/lib/toast";
 import { supabase } from "@/lib/supabase";
@@ -73,33 +74,37 @@ const GAME_META: Record<PartyGame, {
   players: string;
   minPlayers: number;
   bestPlayed: string;
+  Icon: typeof PencilLine;
 }> = {
   sketch: {
     title: "Sketchy Subjects",
     short: "SKETCHY SUBJECTS",
     tagline: "Draw subject-locked words. Others guess in chat.",
     accent: "#A855F7",
-    players: "2 to 6 players",
+    players: "2-6 players",
     minPlayers: 2,
     bestPlayed: "Either",
+    Icon: PencilLine,
   },
   bluff: {
     title: "Bluff Trivia",
     short: "BLUFF TRIVIA",
     tagline: "Write fake trivia answers. Trick your friends.",
     accent: "#FFD700",
-    players: "2 to 6 players",
+    players: "2-6 players",
     minPlayers: 2,
     bestPlayed: "Remote OK",
+    Icon: MaskHappy,
   },
   pokerface: {
     title: "Poker Face",
     short: "POKER FACE",
     tagline: "Hold a secret fact. Present truth or a bluff. The room calls it.",
     accent: "#00BFFF",
-    players: "2 to 6 players",
+    players: "2-6 players",
     minPlayers: 2,
     bestPlayed: "Best in person",
+    Icon: PokerChip,
   },
 };
 
@@ -185,6 +190,19 @@ export default function RoomLobby({ room, players, isHost, meUserId, onGameStart
   const [chatDraft, setChatDraft] = useState("");
   const [chatSending, setChatSending] = useState(false);
   const [chatHydrated, setChatHydrated] = useState(false);
+  // Unread badge: counts broadcast messages that land while the panel is
+  // COLLAPSED (history hydration doesn't count). Cleared on open. The ref
+  // mirrors chatOpen so the long-lived broadcast handler (whose effect only
+  // re-runs on room/host change) always reads the current open state.
+  const [chatUnread, setChatUnread] = useState(0);
+  const chatOpenRef = useRef(false);
+  useEffect(() => {
+    chatOpenRef.current = chatOpen;
+  }, [chatOpen]);
+  function openChat() {
+    setChatOpen(true);
+    setChatUnread(0);
+  }
 
   // ── V2 — spectator toggle ──
   const meRow = players.find((p) => p.user_id === meUserId);
@@ -224,7 +242,14 @@ export default function RoomLobby({ room, players, isHost, meUserId, onGameStart
         body: p.body,
         created_at: p.created_at ?? new Date().toISOString(),
       };
-      setChatMessages((prev) => (prev.some((x) => x.id === m.id) ? prev : [...prev, m].slice(-50)));
+      setChatMessages((prev) => {
+        if (prev.some((x) => x.id === m.id)) return prev;
+        // New message while the panel is collapsed -> bump the unread badge.
+        // (Broadcasts don't echo to the sender, and sending requires the
+        // panel open anyway, so this only counts other people's messages.)
+        if (!chatOpenRef.current) setChatUnread((n) => Math.min(n + 1, 99));
+        return [...prev, m].slice(-50);
+      });
     });
     if (isHost) {
       ch.on("broadcast", { event: PARTY_EVENTS.JOIN_REQUEST }, (msg: { payload?: unknown }) => {
@@ -573,18 +598,33 @@ export default function RoomLobby({ room, players, isHost, meUserId, onGameStart
         {!chatOpen ? (
           <button
             type="button"
-            onClick={() => setChatOpen(true)}
-            className="ml-auto flex items-center gap-2 px-3 py-2 rounded-full text-xs font-bold tracking-wide text-cream/85 shadow-lg"
+            onClick={openChat}
+            aria-label={
+              chatUnread > 0
+                ? `Open lobby chat, ${chatUnread} unread message${chatUnread === 1 ? "" : "s"}`
+                : "Open lobby chat"
+            }
+            className={`ml-auto flex items-center gap-2 px-3.5 py-2 rounded-full text-xs font-bold tracking-wide text-cream/85 shadow-lg${
+              chatUnread > 0 && !reduced ? " pa-chat-pulse" : ""
+            }`}
             style={{
               background: "linear-gradient(135deg, rgba(16,12,26,0.92) 0%, rgba(8,6,16,0.92) 100%)",
-              border: "1px solid rgba(255,255,255,0.12)",
+              border:
+                chatUnread > 0
+                  ? "1px solid rgba(168,85,247,0.55)"
+                  : "1px solid rgba(255,255,255,0.12)",
             }}
           >
-            <span
-              className="inline-block w-2 h-2 rounded-full"
-              style={{ background: chatMessages.length > 0 ? "#34D399" : "rgba(255,255,255,0.3)" }}
-            />
-            Lobby chat {chatMessages.length > 0 ? `· ${chatMessages.length}` : ""}
+            <ChatCircleDots size={16} weight="duotone" style={{ color: "#A855F7" }} aria-hidden="true" />
+            Lobby
+            {chatUnread > 0 && (
+              <span
+                className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full font-mono text-[10px] font-bold leading-none"
+                style={{ background: "#A855F7", color: "#fff" }}
+              >
+                {chatUnread > 9 ? "9+" : chatUnread}
+              </span>
+            )}
           </button>
         ) : (
           <div
@@ -718,8 +758,20 @@ export default function RoomLobby({ room, players, isHost, meUserId, onGameStart
         <div className="flex items-center justify-between mb-3">
           <p className="font-bebas text-sm text-cream/60 tracking-[0.25em]">
             PLAYERS ({players.length}/{MAX_PLAYERS})
-            <span className="text-cream/30 ml-2 normal-case tracking-normal">
-              · {readyCount}/{players.length} ready
+            <span className="ml-2 tracking-[0.15em]" aria-live="polite">
+              ·{" "}
+              {/* Keyed by the count so the tick keyframe re-fires on change.
+                  Reduced motion: class withheld -> instant swap. */}
+              <span
+                key={`rc-${readyCount}-${players.length}`}
+                className={`inline-block tabular-nums${reduced ? "" : " pa-count-tick"}`}
+                style={{ color: allReady ? "#86EFAC" : "rgba(238,244,255,0.55)" }}
+              >
+                {readyCount}/{players.length}
+              </span>{" "}
+              <span style={{ color: allReady ? "rgba(134,239,172,0.7)" : "rgba(238,244,255,0.3)" }}>
+                READY
+              </span>
             </span>
           </p>
           {isHost && (
@@ -804,21 +856,33 @@ export default function RoomLobby({ room, players, isHost, meUserId, onGameStart
             no disabled-while-loading. Server reconciliation is silent. */}
         <button
           onClick={toggleReady}
+          aria-pressed={meReady}
+          title={meReady ? "Tap to unready" : "Tap to ready up"}
           className="mt-4 w-full py-3 rounded-xl font-bebas text-base tracking-wider transition-all active:scale-95"
           style={{
+            // Ready = full green fill (the button itself transforms, not just
+            // a tint). Unready = the purple glass treatment. Toggle stays
+            // optimistic via meReady; tapping again un-readies.
             background: meReady
-              ? "linear-gradient(135deg, rgba(34,197,94,0.18) 0%, rgba(22,163,74,0.08) 100%)"
+              ? "linear-gradient(135deg, #22C55E 0%, #15803D 100%)"
               : "linear-gradient(135deg, rgba(168,85,247,0.18) 0%, rgba(99,102,241,0.08) 100%)",
             border: meReady
-              ? "1px solid rgba(34,197,94,0.55)"
+              ? "1px solid rgba(34,197,94,0.8)"
               : "1px solid rgba(168,85,247,0.55)",
-            color: meReady ? "#86EFAC" : "#E9D5FF",
+            color: meReady ? "#04080F" : "#E9D5FF",
             boxShadow: meReady
-              ? "0 0 18px rgba(34,197,94,0.18)"
+              ? "0 0 22px rgba(34,197,94,0.32)"
               : "0 0 18px rgba(168,85,247,0.18)",
           }}
         >
-          {meReady ? "✓  READY · TAP TO UNREADY" : "TAP TO READY UP"}
+          {meReady ? (
+            <span className="inline-flex items-center justify-center gap-2">
+              <Check size={18} weight="bold" aria-hidden="true" />
+              READY
+            </span>
+          ) : (
+            "TAP TO READY UP"
+          )}
         </button>
 
         {/* Spectator toggle (small, secondary). Hidden for hosts since they
@@ -942,20 +1006,29 @@ export default function RoomLobby({ room, players, isHost, meUserId, onGameStart
             const meta = GAME_META[g];
             const selected = selectedGame === g;
             const accent = meta.accent;
+            const GameIcon = meta.Icon;
             return (
               <motion.button
                 key={g}
                 onClick={() => setSelectedGame(g)}
                 disabled={!isHost}
+                aria-pressed={selected}
                 whileHover={reduced ? undefined : { y: -2 }}
                 whileTap={reduced ? undefined : { scale: 0.98 }}
                 className="text-left rounded-2xl p-5 transition-all relative overflow-hidden disabled:cursor-not-allowed"
                 style={{
+                  // Selected = gold border + gold tint (host's current pick).
+                  // Unselected = neutral glass. Game accent stays on the icon
+                  // + title for identity; gold marks SELECTION only.
                   background: selected
-                    ? `linear-gradient(135deg, ${accent}28 0%, ${accent}0a 100%)`
+                    ? "linear-gradient(135deg, rgba(255,215,0,0.16) 0%, rgba(255,215,0,0.04) 100%)"
                     : "linear-gradient(135deg, rgba(16,12,26,0.7) 0%, rgba(8,6,16,0.7) 100%)",
-                  border: selected ? `1px solid ${accent}99` : "1px solid rgba(255,255,255,0.08)",
-                  boxShadow: selected ? `0 0 28px ${accent}26, inset 0 1px 0 ${accent}26` : "none",
+                  border: selected
+                    ? "1px solid rgba(255,215,0,0.65)"
+                    : "1px solid rgba(255,255,255,0.08)",
+                  boxShadow: selected
+                    ? "0 0 28px rgba(255,215,0,0.16), inset 0 1px 0 rgba(255,215,0,0.18)"
+                    : "none",
                   opacity: isHost ? 1 : 0.85,
                 }}
               >
@@ -966,6 +1039,18 @@ export default function RoomLobby({ room, players, isHost, meUserId, onGameStart
                 >
                   {meta.bestPlayed}
                 </span>
+                {/* Game icon — accent-tinted glass square above the title */}
+                <span
+                  aria-hidden="true"
+                  className="inline-flex items-center justify-center w-9 h-9 rounded-xl mb-2.5"
+                  style={{
+                    background: `${accent}1f`,
+                    border: `1px solid ${accent}40`,
+                    color: accent,
+                  }}
+                >
+                  <GameIcon size={20} weight="duotone" />
+                </span>
                 <p
                   className="font-bebas text-2xl tracking-wider mb-1 pr-20"
                   style={{ color: accent, textShadow: `0 0 18px ${accent}55` }}
@@ -973,7 +1058,11 @@ export default function RoomLobby({ room, players, isHost, meUserId, onGameStart
                   {meta.title.toUpperCase()}
                 </p>
                 <p className="text-cream/55 text-sm font-syne leading-relaxed">{meta.tagline}</p>
-                <p className="text-cream/35 text-xs font-syne mt-3">{meta.players}</p>
+                <p className="font-mono text-[11px] mt-3 tracking-wide"
+                  style={{ color: selected ? "rgba(255,215,0,0.75)" : "rgba(238,244,255,0.35)" }}
+                >
+                  {meta.players}
+                </p>
               </motion.button>
             );
           })}
@@ -1149,7 +1238,12 @@ export default function RoomLobby({ room, players, isHost, meUserId, onGameStart
           <button
             onClick={startGame}
             disabled={starting || !enoughPlayers || !allReady}
-            className="w-full py-4 rounded-xl font-bebas text-xl tracking-wider transition-all active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed"
+            // All ready -> pulsing gold glow so the host can't miss "go time".
+            // Never auto-starts; the glow is pure invitation. Reduced motion:
+            // class withheld (CSS guard is the backstop), static accent shadow.
+            className={`w-full py-4 rounded-xl font-bebas text-xl tracking-wider transition-all active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed${
+              allReady && enoughPlayers && !starting && !reduced ? " pa-start-pulse" : ""
+            }`}
             style={{
               background: `linear-gradient(135deg, ${GAME_META[selectedGame].accent} 0%, ${GAME_META[selectedGame].accent}99 100%)`,
               color: selectedGame === "sketch" ? "#fff" : "#04080F",

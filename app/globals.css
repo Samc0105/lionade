@@ -4781,6 +4781,40 @@ html.light .space-bg-container { display: none; }
   transform: translateY(0) scale(0.97);
 }
 
+/* CHAT BUBBLE ATTENTION PULSE — the collapsed lobby-chat bubble breathes
+   (scale + purple halo) while unread > 0. Subtle, ~1.6s, GPU-only. Reduced
+   motion: component withholds the class; the badge alone carries the signal. */
+@keyframes pa-chat-pulse {
+  0%, 100% { transform: scale(1);    box-shadow: 0 0 0 0 rgba(168,85,247,0); }
+  50%      { transform: scale(1.04); box-shadow: 0 0 14px 2px rgba(168,85,247,0.4); }
+}
+.pa-chat-pulse {
+  will-change: transform, box-shadow;
+  animation: pa-chat-pulse 1.6s ease-in-out infinite;
+}
+
+/* READY-COUNT TICK — the N/M number does a tiny upward roll when the count
+   changes (re-fired via React key). Transform + opacity only, single shot.
+   Reduced motion: class withheld -> instant number swap. */
+@keyframes pa-count-tick {
+  0%   { transform: translateY(0.45em); opacity: 0; }
+  60%  { transform: translateY(-0.08em); opacity: 1; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+.pa-count-tick {
+  will-change: transform, opacity;
+  animation: pa-count-tick 0.32s var(--ease-out-quart) both;
+}
+
+/* START PULSE — pulsing GOLD glow on the host's Start button once EVERYONE
+   is ready. Box-shadow only (the animation slot overrides the static inline
+   accent shadow while it runs). Invitation, never auto-start. */
+@keyframes pa-start-pulse {
+  0%, 100% { box-shadow: 0 4px 20px rgba(255,215,0,0.30), 0 0 0 0 rgba(255,215,0,0); }
+  50%      { box-shadow: 0 4px 26px rgba(255,215,0,0.55), 0 0 22px 4px rgba(255,215,0,0.35); }
+}
+.pa-start-pulse { animation: pa-start-pulse 1.5s ease-in-out infinite; }
+
 /* The single reduced-motion guard for the WHOLE party block.
    Disables motion but leaves final visual states intact (opacity 1, no shift). */
 @media (prefers-reduced-motion: reduce) {
@@ -4795,6 +4829,7 @@ html.light .space-bg-container { display: none; }
   .pa-canvas-stamp, .pa-canvas-corner,
   .pa-word-breathe, .pa-panic-vignette, .pa-deal-glow, .pa-active-swatch,
   .pa-progress-shimmer, .pa-mastery-halo,
+  .pa-chat-pulse, .pa-count-tick, .pa-start-pulse,
   .pa-deck-card, .pa-deck-card:hover, .pa-deck-card:active,
   .pa-pardy-tile, .pa-pardy-tile--live:hover, .pa-pardy-tile--live:active {
     animation: none !important;

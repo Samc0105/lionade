@@ -1,10 +1,12 @@
 "use client";
 
 // Copy-to-clipboard + share helper for the 6-char room code.
-// Pops a tiny "Copied" pill for 1.4s on success.
+// Fires the app-standard success toast on copy; the helper line swaps its
+// copy icon for a check for 1.4s as in-place confirmation.
 
 import { useState } from "react";
-import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import { Check, CopySimple } from "@phosphor-icons/react";
+import { toastSuccess } from "@/lib/toast";
 
 interface Props {
   code: string;
@@ -12,8 +14,13 @@ interface Props {
 }
 
 export default function RoomCodeShare({ code, className = "" }: Props) {
-  const reduced = useReducedMotion();
   const [copied, setCopied] = useState(false);
+
+  function markCopied() {
+    toastSuccess("Copied!");
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1400);
+  }
 
   async function copy() {
     try {
@@ -21,14 +28,12 @@ export default function RoomCodeShare({ code, className = "" }: Props) {
         ? `${window.location.origin}/games/party/${code}`
         : `/games/party/${code}`;
       await navigator.clipboard.writeText(shareUrl);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1400);
+      markCopied();
     } catch {
       // Fallback: just copy the code.
       try {
         await navigator.clipboard.writeText(code);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 1400);
+        markCopied();
       } catch {
         /* clipboard unavailable */
       }
@@ -49,27 +54,20 @@ export default function RoomCodeShare({ code, className = "" }: Props) {
         title="Click to copy invite link"
       >
         <span className="font-bebas text-4xl sm:text-5xl tracking-[0.4em] text-[#E9D5FF]">{code}</span>
-        <AnimatePresence>
-          {copied && (
-            <motion.span
-              key="pill"
-              initial={reduced ? false : { opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -6 }}
-              transition={{ duration: 0.18 }}
-              className="absolute -top-8 left-1/2 -translate-x-1/2 px-2.5 py-1 rounded-full text-[10px] font-syne font-bold"
-              style={{
-                background: "rgba(34,197,94,0.25)",
-                border: "1px solid rgba(34,197,94,0.5)",
-                color: "#86EFAC",
-              }}
-            >
-              Copied!
-            </motion.span>
-          )}
-        </AnimatePresence>
       </button>
-      <p className="text-cream/35 text-xs font-syne">Tap to copy invite link</p>
+      <button
+        type="button"
+        onClick={copy}
+        className="inline-flex items-center gap-1.5 text-cream/35 hover:text-cream/60 text-xs font-syne transition-colors"
+        aria-label="Copy invite link"
+      >
+        {copied ? (
+          <Check size={14} weight="bold" className="text-green-400" aria-hidden="true" />
+        ) : (
+          <CopySimple size={14} weight="bold" className="text-cream/50" aria-hidden="true" />
+        )}
+        Tap to copy invite link
+      </button>
     </div>
   );
 }
