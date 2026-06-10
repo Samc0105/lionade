@@ -4449,6 +4449,22 @@ html.light .space-bg-container { display: none; }
 }
 .pa-charge { animation: pa-charge 1.3s ease-in-out infinite; }
 
+/* PENCIL WIGGLE — non-drawer "waiting for the drawer to pick a word" screen.
+   Gentle rock + tiny vertical scrawl drift, transform-only (GPU compositor).
+   Component also gates on useReducedMotion; the block guard below is the
+   CSS-level backstop. */
+@keyframes pa-pencil-write {
+  0%, 100% { transform: rotate(-6deg) translateY(0); }
+  25%      { transform: rotate(4deg) translateY(-2px); }
+  50%      { transform: rotate(-3deg) translateY(1px); }
+  75%      { transform: rotate(6deg) translateY(-1px); }
+}
+.pa-pencil-write {
+  display: inline-block;
+  will-change: transform;
+  animation: pa-pencil-write 1.6s ease-in-out infinite;
+}
+
 /* TOOL ACTIVE — selected brush/size/eraser gets a tactile glow breathe (purple) */
 @keyframes pa-tool-active {
   0%, 100% { box-shadow: 0 0 6px 0 rgba(168,85,247,0.4); }
@@ -4725,6 +4741,7 @@ html.light .space-bg-container { display: none; }
    Disables motion but leaves final visual states intact (opacity 1, no shift). */
 @media (prefers-reduced-motion: reduce) {
   .pa-pop-in, .pa-deal-in, .pa-chip-in, .pa-spotlight, .pa-ink-dot, .pa-charge,
+  .pa-pencil-write,
   .pa-tool-active, .pa-guess-pop, .pa-correct-flash, .pa-confirm-pop,
   .pa-stamp, .pa-factoid-up, .pa-leader-glow, .pa-truth-glow,
   .pa-ready-sweep, .pa-ready-glow, .pa-card-selected,

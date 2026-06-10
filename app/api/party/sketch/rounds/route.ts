@@ -28,14 +28,54 @@ import {
 import { WORD_LISTS as CURATED_WORD_LISTS } from "@/lib/party/word-lists";
 import { setCandidates } from "@/lib/party/sketch-candidates";
 
-// Prefer the curator's curated pool (50+ words per subject) when available;
+// ── Difficulty-tiered candidate picking ──────────────────────────────
+// The drawer is always offered one EASY, one MEDIUM, and one HARD word, in
+// that order. If a subject's pool is thin on a tier, we fall back to the
+// NEAREST tier (never error): easy borrows from medium then hard; medium
+// borrows from easy then hard; hard borrows from medium then easy. Words
+// are never duplicated across the 3 slots, so a 2-word pool yields 2 cards
+// and the round still plays.
+const TIER_ORDER = ["easy", "medium", "hard"] as const;
+type Tier = (typeof TIER_ORDER)[number];
+const TIER_FALLBACKS: Record<Tier, Tier[]> = {
+  easy: ["easy", "medium", "hard"],
+  medium: ["medium", "easy", "hard"],
+  hard: ["hard", "medium", "easy"],
+};
+
+function pickTieredCandidates(pool: WordEntry[]): WordEntry[] {
+  if (pool.length === 0) return [];
+  // Bucket by tier; anything with an unknown difficulty (pre-constraint DB
+  // rows) is treated as medium so it stays pickable.
+  const byTier: Record<Tier, WordEntry[]> = { easy: [], medium: [], hard: [] };
+  for (const entry of pool) {
+    const tier: Tier = (TIER_ORDER as readonly string[]).includes(entry.difficulty)
+      ? (entry.difficulty as Tier)
+      : "medium";
+    byTier[tier].push(entry);
+  }
+  const used = new Set<string>();
+  const picks: WordEntry[] = [];
+  for (const tier of TIER_ORDER) {
+    for (const fallback of TIER_FALLBACKS[tier]) {
+      const available = byTier[fallback].filter((e) => !used.has(e.word));
+      if (available.length > 0) {
+        const pick = available[Math.floor(Math.random() * available.length)];
+        used.add(pick.word);
+        picks.push(pick);
+        break;
+      }
+    }
+  }
+  return picks;
+}
+
+// Prefer the curator's curated pool (90+ words per subject) when available;
 // fall back to the inline 10-word stub otherwise so things stay playable.
-function pickCandidatesForSubject(subject: Subject, count = 3): WordEntry[] {
+function pickCandidatesForSubject(subject: Subject): WordEntry[] {
   const curated = (CURATED_WORD_LISTS as Record<string, WordEntry[] | undefined>)[subject];
   const pool = curated && curated.length > 0 ? curated : WORD_LISTS_STUB[subject] ?? [];
-  if (pool.length === 0) return [];
-  const shuffled = [...pool].sort(() => Math.random() - 0.5);
-  return shuffled.slice(0, Math.min(count, shuffled.length));
+  return pickTieredCandidates(pool);
 }
 
 export async function POST(req: NextRequest) {
@@ -134,26 +174,29 @@ export async function POST(req: NextRequest) {
     subject = fallbackSubjects[Math.floor(Math.random() * fallbackSubjects.length)] as Subject;
   }
 
-  // Try DB word list first; fall back to stub.
+  // Try DB word list first; fall back to the curated/stub pools. Either way
+  // the drawer gets one easy + one medium + one hard card (in that order),
+  // with nearest-tier fallback when a subject runs thin on a tier.
   let candidates: WordEntry[] = [];
   const { data: dbWords } = await supabaseAdmin
     .from("party_word_lists")
     .select("word, difficulty, factoid")
     .eq("subject", subject)
-    .limit(50);
+    .limit(500);
   if (dbWords && dbWords.length >= 3) {
-    const shuffled = [...dbWords].sort(() => Math.random() - 0.5).slice(0, 3);
-    candidates = shuffled.map((r) => ({
-      word: r.word as string,
-      difficulty: (r.difficulty ?? "medium") as WordEntry["difficulty"],
-      factoid: r.factoid as string,
-    }));
+    candidates = pickTieredCandidates(
+      dbWords.map((r) => ({
+        word: r.word as string,
+        difficulty: (r.difficulty ?? "medium") as WordEntry["difficulty"],
+        factoid: r.factoid as string,
+      })),
+    );
   } else {
-    candidates = pickCandidatesForSubject(subject, 3);
+    candidates = pickCandidatesForSubject(subject);
   }
   if (candidates.length === 0) {
     // Hard fallback so we never block the round.
-    candidates = WORD_LISTS_STUB.biology.slice(0, 3);
+    candidates = pickTieredCandidates(WORD_LISTS_STUB.biology);
   }
 
   // Create the round with a placeholder word; updated in /select-word. Persist

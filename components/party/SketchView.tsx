@@ -125,11 +125,12 @@ const DIFFICULTY_STYLE: Record<
   },
 };
 
-// Stable hardest-first ordering for the picker. Left-to-right reads
-// HARD -> MEDIUM -> EASY for a consistent visual rhythm (red, gold, green).
-// Unknown / missing difficulties sort last. Secondary sort is by original
-// index so cards within the same tier never shuffle between renders.
-const DIFFICULTY_RANK: Record<string, number> = { hard: 0, medium: 1, easy: 2 };
+// Stable easiest-first ordering for the picker. Left-to-right reads
+// EASY -> MEDIUM -> HARD (green, gold, red), matching the order the API
+// serves the tiered candidates in. Unknown / missing difficulties sort
+// last. Secondary sort is by original index so cards within the same tier
+// never shuffle between renders.
+const DIFFICULTY_RANK: Record<string, number> = { easy: 0, medium: 1, hard: 2 };
 
 const PICK_SECONDS = 10;
 
@@ -396,6 +397,16 @@ export default function SketchView({
   const [infoWord, setInfoWord] = useState<string | null>(null);
   const [wordInfo, setWordInfo] = useState<Record<string, WordInfo>>({});
   const pickedRef = useRef(false);
+  // Which candidate the drawer tapped — drives the gold-border + scale-up
+  // selection feedback while the select-word API call is in flight. The two
+  // unpicked cards fade to ~30% opacity. Cleared on round reset / API failure.
+  const [pendingPick, setPendingPick] = useState<string | null>(null);
+  // Non-drawer "the drawer is still picking a word" flag. Set on ROUND_STARTED
+  // for everyone except the drawer; cleared by the WORD_SELECTED broadcast
+  // (plus LETTER_REVEAL and a safety timeout, in case the broadcast is
+  // missed). Mid-round joiners bootstrap straight into the live canvas, so
+  // the flag stays false on that path.
+  const [awaitingWordPick, setAwaitingWordPick] = useState(false);
 
   const isDrawer = round?.drawer_user_id === meUserId;
   const subjectLabel = round ? SUBJECT_LABELS[round.subject as Subject] ?? round.subject : "";
@@ -458,6 +469,8 @@ export default function SketchView({
     setPickSecs(PICK_SECONDS);
     setInfoWord(null);
     setWordInfo({});
+    setPendingPick(null);
+    setAwaitingWordPick(false);
     setPausedAt(null);
     setPausedByName(null);
     pausedOffsetMsRef.current = 0;
@@ -486,6 +499,7 @@ export default function SketchView({
       }
     } else {
       setPhase("drawing");
+      setAwaitingWordPick(true);
       setNinnyMsg("Watch carefully and guess what they're drawing.");
     }
     // Tell the room that a new round started so guessers re-fetch state.
@@ -568,6 +582,8 @@ export default function SketchView({
       setPickSecs(PICK_SECONDS);
       setInfoWord(null);
       setWordInfo({});
+      setPendingPick(null);
+      setAwaitingWordPick(!isMe);
       setPausedAt(null);
       setPausedByName(null);
       pausedOffsetMsRef.current = 0;
@@ -595,6 +611,7 @@ export default function SketchView({
     });
     ch.on("broadcast", { event: SKETCH_EVENTS.WORD_SELECTED }, () => {
       setPhase("drawing");
+      setAwaitingWordPick(false);
       setNinnyMsg(null);
       // 3-2-1 cinematic on every client when the drawer locks their word.
       // Drawer-side ALSO fires this via the select-word -> drawing phase
@@ -611,6 +628,9 @@ export default function SketchView({
         mask?: MaskCell[];
         revealed?: { position: number; letter: string }[];
       };
+      // A reveal can only exist after the drawer locked a word — belt and
+      // suspenders in case the WORD_SELECTED broadcast was missed.
+      setAwaitingWordPick(false);
       if (Array.isArray(payload.mask) && payload.mask.length > 0) {
         setMask((prev) => (prev.length > 0 ? prev : payload.mask!));
       }
@@ -802,9 +822,13 @@ export default function SketchView({
       if (!round || pickedRef.current) return;
       pickedRef.current = true;
       setInfoWord(null);
+      // Selection feedback: picked card gets gold border + scale-up, the
+      // other two fade, while the API call locks the word in.
+      setPendingPick(word);
       const res = await apiPost(`/api/party/sketch/rounds/${round.id}/select-word`, { word });
       if (!res.ok) {
         pickedRef.current = false; // let them try again
+        setPendingPick(null);
         return;
       }
       setLockedWord(word);
@@ -885,6 +909,16 @@ export default function SketchView({
     }, 1000);
     return () => clearInterval(iv);
   }, [phase, candidates, selectWord]);
+
+  // ── Waiting-for-word-pick safety timeout ──
+  // The drawer auto-picks after PICK_SECONDS, so the WORD_SELECTED broadcast
+  // should always land within ~12s. If it's missed (WS hiccup), drop the
+  // waiting screen anyway so guessers aren't stranded staring at the pencil.
+  useEffect(() => {
+    if (!awaitingWordPick || phase !== "drawing") return;
+    const t = setTimeout(() => setAwaitingWordPick(false), (PICK_SECONDS + 5) * 1000);
+    return () => clearTimeout(t);
+  }, [awaitingWordPick, phase]);
 
   // ── Guess submit ──
   async function submitGuess(e: React.FormEvent) {
@@ -1309,6 +1343,12 @@ export default function SketchView({
     : null;
   const showCountdown = countdownTicks > 0 && phase === "drawing";
 
+  // Non-drawers sit in phase "drawing" while the drawer is still on the word
+  // picker. While that's true we swap the canvas + guess UI for a dedicated
+  // "waiting for [drawer] to pick a word" screen so the blank canvas doesn't
+  // read as a hang.
+  const waitingForPick = !isDrawer && phase === "drawing" && awaitingWordPick && !!round;
+
   const mePlayer = players.find((p) => p.user_id === meUserId);
   const isPendingJoiner = !!mePlayer?.is_pending_round;
 
@@ -1378,7 +1418,7 @@ export default function SketchView({
       <NinnyHostBubble message={ninnyMsg} />
 
       {/* Subject + timer + drawer pill */}
-      {round && phase === "drawing" && (
+      {round && phase === "drawing" && !waitingForPick && (
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <span
@@ -1541,9 +1581,9 @@ export default function SketchView({
           </div>
 
           {/* Candidate cards: difficulty badge + word + "i" info popover.
-              Sorted HARD -> MEDIUM -> EASY (left-to-right) for consistent
-              visual rhythm. Secondary sort by original index keeps cards
-              within the same tier stable across renders. */}
+              Sorted EASY -> MEDIUM -> HARD (left-to-right), matching the
+              tiered order the API serves. Secondary sort by original index
+              keeps cards within the same tier stable across renders. */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             {candidates
               .map((c, originalIndex) => ({ c, originalIndex }))
@@ -1557,19 +1597,35 @@ export default function SketchView({
               const diff = DIFFICULTY_STYLE[c.difficulty] ?? DIFFICULTY_STYLE.medium;
               const info = wordInfo[c.word];
               const open = infoWord === c.word;
+              // Selection feedback: the tapped card gets a gold border + a
+              // slight GPU scale-up; the other two fade to ~30% while the
+              // select-word call locks in. Reduced motion: no scale, instant
+              // state change (transition: none).
+              const isPicked = pendingPick === c.word;
+              const isDimmed = pendingPick !== null && !isPicked;
               return (
                 <div
                   key={c.word}
-                  className={`relative ${reduced ? "" : "pa-deal-in"}`}
-                  style={reduced ? undefined : { animationDelay: `${i * 90}ms` }}
+                  className={`relative ${reduced || pendingPick ? "" : "pa-deal-in"}`}
+                  style={reduced || pendingPick ? undefined : { animationDelay: `${i * 90}ms` }}
                 >
                   <button
                     onClick={() => selectWord(c.word)}
-                    className="w-full rounded-2xl p-5 pt-11 text-left transition-all active:scale-95 hover:-translate-y-0.5"
+                    disabled={pendingPick !== null}
+                    className={`w-full rounded-2xl p-5 pt-11 text-left ${
+                      pendingPick ? "" : "transition-all active:scale-95 hover:-translate-y-0.5"
+                    }`}
                     style={{
                       background: diff.cardBg,
-                      border: `1.5px solid ${diff.cardBorder}`,
-                      boxShadow: diff.cardGlow,
+                      border: isPicked
+                        ? "1.5px solid rgba(255,215,0,0.9)"
+                        : `1.5px solid ${diff.cardBorder}`,
+                      boxShadow: isPicked ? "0 0 28px rgba(255,215,0,0.35)" : diff.cardGlow,
+                      transform: isPicked && !reduced ? "scale(1.05)" : undefined,
+                      opacity: isDimmed ? 0.3 : 1,
+                      transition: reduced
+                        ? "none"
+                        : "transform 0.25s var(--ease-out-quart), opacity 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease",
                     }}
                   >
                     <p className="font-bebas text-3xl tracking-wider text-cream">
@@ -1709,8 +1765,50 @@ export default function SketchView({
         </motion.div>
       )}
 
+      {/* Non-drawer waiting screen — the drawer is still on the word picker.
+          Drawing-themed pencil wiggle (GPU transform keyframes only; static
+          icon under reduced motion). Replaces the canvas + guess UI so the
+          empty canvas never reads as a stalled round. */}
+      {waitingForPick && round && (
+        <motion.div
+          initial={reduced ? false : { opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="max-w-md mx-auto"
+        >
+          <div
+            className="rounded-2xl p-8 text-center relative overflow-hidden"
+            style={{
+              background: "linear-gradient(135deg, rgba(168,85,247,0.14) 0%, rgba(99,102,241,0.06) 100%)",
+              border: "1px solid rgba(168,85,247,0.35)",
+              boxShadow: "0 0 28px rgba(168,85,247,0.12)",
+            }}
+          >
+            <span
+              aria-hidden="true"
+              className={`inline-block text-5xl mb-4 ${reduced ? "" : "pa-pencil-write"}`}
+            >
+              {"✏️"}
+            </span>
+            <p className="font-bebas text-[11px] text-cream/55 tracking-[0.3em] mb-2">
+              PICKING A WORD
+            </p>
+            <p className="font-bebas text-2xl text-cream tracking-wider mb-1">
+              Waiting for {drawerName ?? "the drawer"} to pick a word
+            </p>
+            <p className="text-cream/55 text-xs font-syne italic">
+              sharpen your guessing brain
+            </p>
+            {subjectLabel && (
+              <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-cream/35 mt-5">
+                subject · {subjectLabel}
+              </p>
+            )}
+          </div>
+        </motion.div>
+      )}
+
       {/* Drawing surface */}
-      {round && (phase === "drawing" || phase === "celebrating" || phase === "reveal") && (
+      {round && !waitingForPick && (phase === "drawing" || phase === "celebrating" || phase === "reveal") && (
         <div className="lg:grid lg:grid-cols-[1fr_300px] lg:gap-3 space-y-3 lg:space-y-0">
           <div className="space-y-3 min-w-0">
           {/* Canvas + stamp wrapper. The stamp + green-corner overlay are
