@@ -1,16 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import useSWR from "swr";
 import {
   Plus, Target, Note, ArrowRight, BookOpen, GraduationCap,
-  PushPin, Sparkle, X, Clock, ArrowsClockwise,
+  PushPin, Sparkle, X, Clock, ArrowsClockwise, CalendarBlank,
+  CaretLeft, CaretRight, Circle, CircleDashed, CheckCircle,
 } from "@phosphor-icons/react";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Navbar from "@/components/Navbar";
 import SpaceBackground from "@/components/SpaceBackground";
-import { apiPost, swrFetcher } from "@/lib/api-client";
+import { apiPatch, apiPost, swrFetcher } from "@/lib/api-client";
 import { useRouter } from "next/navigation";
 
 /**
@@ -51,6 +52,20 @@ interface RecentNote {
   classColor: string;
   classEmoji: string | null;
   classShortCode: string | null;
+}
+
+type AssignmentStatus = "todo" | "doing" | "done";
+
+interface AgendaItem {
+  id: string;
+  kind: "exam" | "assignment";
+  date: string; // YYYY-MM-DD
+  title: string;
+  status?: AssignmentStatus;
+  classId: string;
+  className: string;
+  classColor: string;
+  classEmoji: string | null;
 }
 
 const PRESET_COLORS = [
@@ -192,6 +207,9 @@ export default function AcademiaPage() {
             </div>
           )}
 
+          {/* ─── This week + month calendar ─── */}
+          {classes.length > 0 && <PlannerSection />}
+
           {/* ─── Two-column layout: classes (2/3) | recent notes (1/3) ─── */}
           <div className="grid grid-cols-1 lg:grid-cols-[1.7fr_1fr] gap-6">
             {/* Classes column */}
@@ -288,6 +306,427 @@ function ErrorCard({ message, onRetry }: { message: string; onRetry: () => void 
         Try again
       </button>
     </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Planner — THIS WEEK agenda + month calendar. One SWR fetch keyed by the
+// visible month; the range covers the whole visible month AND at least the
+// next 7 days so the week agenda is always populated even while paging months.
+// ─────────────────────────────────────────────────────────────────────────────
+function PlannerSection() {
+  // First day of the currently-displayed calendar month (local midnight).
+  const [monthAnchor, setMonthAnchor] = useState(() => firstOfMonth(new Date()));
+  // Day selected in the calendar (drives the agenda view). null = THIS WEEK.
+  const [selectedDay, setSelectedDay] = useState<string | null>(null);
+
+  const todayKey = useMemo(() => toKey(new Date()), []);
+
+  // Fetch range: [first of visible month, max(end of visible month, today+7)].
+  const { from, to } = useMemo(() => {
+    const monthStart = firstOfMonth(monthAnchor);
+    const monthEnd = endOfMonth(monthAnchor);
+    const weekHorizon = addDays(new Date(), 7);
+    const toDate = monthEnd.getTime() >= weekHorizon.getTime() ? monthEnd : weekHorizon;
+    return { from: toKey(monthStart), to: toKey(toDate) };
+  }, [monthAnchor]);
+
+  const { data, error, isLoading, mutate } = useSWR<{ items: AgendaItem[] }>(
+    `/api/academia/agenda?from=${from}&to=${to}`,
+    swrFetcher,
+    { keepPreviousData: true, revalidateOnFocus: true },
+  );
+
+  const items = data?.items ?? [];
+
+  // Index items by day key for fast calendar-cell lookups.
+  const byDay = useMemo(() => {
+    const map = new Map<string, AgendaItem[]>();
+    for (const it of items) {
+      const arr = map.get(it.date);
+      if (arr) arr.push(it);
+      else map.set(it.date, [it]);
+    }
+    return map;
+  }, [items]);
+
+  // Optimistic status toggle for assignments, then revalidate.
+  const cycleStatus = async (item: AgendaItem) => {
+    if (item.kind !== "assignment") return;
+    const next = nextStatus(item.status ?? "todo");
+    const optimistic: { items: AgendaItem[] } = {
+      items: items.map(i => (i.id === item.id ? { ...i, status: next } : i)),
+    };
+    try {
+      await mutate(
+        async () => {
+          const r = await apiPatch(`/api/classes/assignments/${item.id}`, { status: next });
+          if (!r.ok) throw new Error(r.error ?? "patch failed");
+          return undefined; // fall through to revalidation
+        },
+        { optimisticData: optimistic, rollbackOnError: true, revalidate: true, populateCache: false },
+      );
+    } catch (e) {
+      console.error("[academia:agenda] status toggle failed", e);
+    }
+  };
+
+  return (
+    <section className="mb-10">
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.25fr] gap-6 items-start">
+        {/* THIS WEEK / selected-day agenda */}
+        <div>
+          <div className="flex items-baseline justify-between mb-4">
+            <h2 className="font-bebas text-[22px] text-cream tracking-[0.18em] flex items-center gap-2">
+              <span className="inline-block w-1.5 h-1.5 rounded-full bg-gold" aria-hidden="true" />
+              {selectedDay ? dayHeading(selectedDay, todayKey).toUpperCase() : "THIS WEEK"}
+            </h2>
+            {selectedDay && (
+              <button
+                type="button"
+                onClick={() => setSelectedDay(null)}
+                className="font-mono text-[10px] uppercase tracking-[0.22em] text-cream/45 hover:text-cream transition-colors"
+              >
+                Back to week
+              </button>
+            )}
+          </div>
+
+          {isLoading && items.length === 0 ? (
+            <div className="space-y-2.5">
+              {[0, 1, 2].map(i => (
+                <div key={i} className="h-14 rounded-[12px] bg-white/[0.03] border border-white/[0.06] animate-pulse" />
+              ))}
+            </div>
+          ) : error && items.length === 0 ? (
+            <ErrorCard
+              message="Couldn't load your agenda. Network hiccup, probably."
+              onRetry={() => void mutate()}
+            />
+          ) : (
+            <AgendaList
+              items={items}
+              todayKey={todayKey}
+              selectedDay={selectedDay}
+              byDay={byDay}
+              onCycleStatus={cycleStatus}
+            />
+          )}
+        </div>
+
+        {/* Month calendar */}
+        <MonthCalendar
+          monthAnchor={monthAnchor}
+          todayKey={todayKey}
+          selectedDay={selectedDay}
+          byDay={byDay}
+          onPrev={() => { setMonthAnchor(addMonths(monthAnchor, -1)); }}
+          onNext={() => { setMonthAnchor(addMonths(monthAnchor, 1)); }}
+          onToday={() => { setMonthAnchor(firstOfMonth(new Date())); setSelectedDay(todayKey); }}
+          onSelectDay={(key) => setSelectedDay(prev => (prev === key ? null : key))}
+        />
+      </div>
+    </section>
+  );
+}
+
+// Agenda list: when no day is selected, shows [today, today+7] grouped by day.
+// When a day is selected, shows just that day's items.
+function AgendaList({
+  items, todayKey, selectedDay, byDay, onCycleStatus,
+}: {
+  items: AgendaItem[];
+  todayKey: string;
+  selectedDay: string | null;
+  byDay: Map<string, AgendaItem[]>;
+  onCycleStatus: (item: AgendaItem) => void;
+}) {
+  if (selectedDay) {
+    const dayItems = (byDay.get(selectedDay) ?? []).slice().sort(sortItems);
+    if (dayItems.length === 0) {
+      return <AgendaEmpty selected />;
+    }
+    return (
+      <div className="space-y-2">
+        {dayItems.map(it => <AgendaRow key={it.id} item={it} onCycleStatus={onCycleStatus} />)}
+      </div>
+    );
+  }
+
+  // Week view: today .. today+7 inclusive.
+  const horizon = toKey(addDays(new Date(), 7));
+  const weekItems = items
+    .filter(it => it.date >= todayKey && it.date <= horizon)
+    .sort(sortItems);
+
+  if (weekItems.length === 0) {
+    return <AgendaEmpty />;
+  }
+
+  // Group consecutive items by day, preserving sorted order.
+  const groups: { key: string; items: AgendaItem[] }[] = [];
+  for (const it of weekItems) {
+    const last = groups[groups.length - 1];
+    if (last && last.key === it.date) last.items.push(it);
+    else groups.push({ key: it.date, items: [it] });
+  }
+
+  return (
+    <div className="space-y-4">
+      {groups.map(g => (
+        <div key={g.key}>
+          <p className="font-mono text-[9px] uppercase tracking-[0.28em] text-cream/40 mb-2">
+            {dayHeading(g.key, todayKey)}
+          </p>
+          <div className="space-y-2">
+            {g.items.map(it => <AgendaRow key={it.id} item={it} onCycleStatus={onCycleStatus} />)}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function AgendaRow({
+  item, onCycleStatus,
+}: {
+  item: AgendaItem;
+  onCycleStatus: (item: AgendaItem) => void;
+}) {
+  const isExam = item.kind === "exam";
+  const status = item.status ?? "todo";
+  const done = status === "done";
+
+  return (
+    <div
+      className="group relative flex items-center gap-3 rounded-[12px] border bg-white/[0.02]
+        hover:bg-white/[0.04] transition-colors duration-200 px-3 py-2.5 pl-[14px] overflow-hidden"
+      style={{ boxShadow: `inset 2px 0 0 0 ${item.classColor}80` }}
+    >
+      <span
+        className="inline-block w-1.5 h-1.5 rounded-full shrink-0"
+        style={{ background: item.classColor }}
+        aria-hidden="true"
+      />
+      {item.classEmoji && <span className="text-[14px] shrink-0" aria-hidden="true">{item.classEmoji}</span>}
+
+      <div className="min-w-0 flex-1">
+        <p className={`font-syne font-semibold text-[13px] leading-tight truncate ${done ? "text-cream/45 line-through" : "text-cream"}`}>
+          {item.title}
+        </p>
+        <p className="font-mono text-[9px] uppercase tracking-[0.22em] text-cream/45 truncate mt-0.5">
+          {item.className}
+        </p>
+      </div>
+
+      {isExam ? (
+        <span
+          className="shrink-0 inline-flex items-center gap-1 rounded-full border px-2 py-0.5 font-mono text-[9px] uppercase tracking-[0.18em]"
+          style={{ color: "#EF4444", borderColor: "#EF444455", backgroundColor: "#EF444412" }}
+        >
+          <Target size={10} weight="bold" /> Exam
+        </span>
+      ) : (
+        <StatusButton status={status} color={item.classColor} onClick={() => onCycleStatus(item)} />
+      )}
+    </div>
+  );
+}
+
+function StatusButton({
+  status, color, onClick,
+}: {
+  status: AssignmentStatus;
+  color: string;
+  onClick: () => void;
+}) {
+  const meta = {
+    todo: { label: "To do", Icon: Circle },
+    doing: { label: "Doing", Icon: CircleDashed },
+    done: { label: "Done", Icon: CheckCircle },
+  }[status];
+  const Icon = meta.Icon;
+  const active = status !== "todo";
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={`Status: ${meta.label}. Click to advance.`}
+      title={`${meta.label} — click to advance`}
+      className="shrink-0 inline-flex items-center gap-1 rounded-full border px-2 py-0.5 font-mono text-[9px] uppercase tracking-[0.18em] transition-colors duration-200"
+      style={{
+        color: active ? color : "rgba(238,244,255,0.55)",
+        borderColor: active ? `${color}55` : "rgba(255,255,255,0.12)",
+        backgroundColor: active ? `${color}12` : "rgba(255,255,255,0.02)",
+      }}
+    >
+      <Icon size={11} weight={status === "done" ? "fill" : "bold"} /> {meta.label}
+    </button>
+  );
+}
+
+function AgendaEmpty({ selected }: { selected?: boolean }) {
+  return (
+    <div className="rounded-[14px] border border-dashed border-white/[0.08] bg-white/[0.02] p-6 text-center">
+      <CalendarBlank size={22} className="text-gold/60 mx-auto mb-2" />
+      <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-cream/45 mb-2">
+        {selected ? "Clear day" : "All clear"}
+      </p>
+      <p className="text-[12px] text-cream/60 leading-snug">
+        {selected
+          ? "Nothing scheduled for this day."
+          : "Nothing due this week. Add an exam date or assignment to see it here."}
+      </p>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Month calendar — plain date-math grid, Sunday-first (US), GPU-only hover.
+// ─────────────────────────────────────────────────────────────────────────────
+const WEEKDAY_LABELS = ["S", "M", "T", "W", "T", "F", "S"];
+const MAX_DOTS = 3;
+
+function MonthCalendar({
+  monthAnchor, todayKey, selectedDay, byDay,
+  onPrev, onNext, onToday, onSelectDay,
+}: {
+  monthAnchor: Date;
+  todayKey: string;
+  selectedDay: string | null;
+  byDay: Map<string, AgendaItem[]>;
+  onPrev: () => void;
+  onNext: () => void;
+  onToday: () => void;
+  onSelectDay: (key: string) => void;
+}) {
+  // Build a 6-row x 7-col grid starting on the Sunday on/before the 1st.
+  const cells = useMemo(() => buildMonthGrid(monthAnchor), [monthAnchor]);
+  const monthLabel = monthAnchor.toLocaleDateString("en-US", { month: "long", year: "numeric" });
+  const visibleMonth = monthAnchor.getMonth();
+
+  return (
+    <div className="rounded-[16px] border border-white/[0.08] bg-white/[0.02] p-4 sm:p-5">
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <CalendarBlank size={14} className="text-gold" weight="fill" aria-hidden="true" />
+          <span className="font-bebas text-[20px] tracking-[0.1em] text-cream leading-none">
+            {monthLabel}
+          </span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <button
+            type="button"
+            onClick={onToday}
+            className="font-mono text-[9px] uppercase tracking-[0.22em] text-cream/55 hover:text-gold transition-colors px-2 py-1 rounded-full border border-white/[0.1] hover:border-gold/40"
+          >
+            Today
+          </button>
+          <button
+            type="button"
+            onClick={onPrev}
+            aria-label="Previous month"
+            className="grid place-items-center w-7 h-7 rounded-full border border-white/[0.1] text-cream/60 hover:text-cream hover:border-white/[0.25] transition-colors"
+          >
+            <CaretLeft size={13} weight="bold" />
+          </button>
+          <button
+            type="button"
+            onClick={onNext}
+            aria-label="Next month"
+            className="grid place-items-center w-7 h-7 rounded-full border border-white/[0.1] text-cream/60 hover:text-cream hover:border-white/[0.25] transition-colors"
+          >
+            <CaretRight size={13} weight="bold" />
+          </button>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-7 gap-1 mb-1">
+        {WEEKDAY_LABELS.map((d, i) => (
+          <div key={i} className="text-center font-mono text-[9px] uppercase tracking-[0.18em] text-cream/35 py-1">
+            {d}
+          </div>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-7 gap-1">
+        {cells.map(cell => (
+          <CalendarCell
+            key={cell.key}
+            cell={cell}
+            inMonth={cell.month === visibleMonth}
+            isToday={cell.key === todayKey}
+            isSelected={cell.key === selectedDay}
+            dayItems={byDay.get(cell.key) ?? []}
+            onSelect={() => onSelectDay(cell.key)}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function CalendarCell({
+  cell, inMonth, isToday, isSelected, dayItems, onSelect,
+}: {
+  cell: GridCell;
+  inMonth: boolean;
+  isToday: boolean;
+  isSelected: boolean;
+  dayItems: AgendaItem[];
+  onSelect: () => void;
+}) {
+  const sorted = dayItems.slice().sort(sortItems);
+  const shown = sorted.slice(0, MAX_DOTS);
+  const extra = sorted.length - shown.length;
+  const hasItems = sorted.length > 0;
+
+  return (
+    <button
+      type="button"
+      onClick={onSelect}
+      disabled={!hasItems && !inMonth}
+      aria-label={`${cell.label}${hasItems ? `, ${sorted.length} item${sorted.length === 1 ? "" : "s"}` : ""}`}
+      aria-pressed={isSelected}
+      className={`relative aspect-square rounded-[10px] border p-1 flex flex-col items-center justify-start gap-1
+        transition-colors duration-150 will-change-transform
+        ${inMonth ? "bg-white/[0.02]" : "bg-transparent opacity-40"}
+        ${isSelected ? "border-electric/70 bg-electric/[0.08]" : isToday ? "border-gold/70" : "border-white/[0.06]"}
+        ${hasItems ? "hover:bg-white/[0.06]" : "hover:bg-white/[0.03]"}
+        ${!hasItems && !inMonth ? "cursor-default" : ""}`}
+    >
+      <span
+        className={`font-mono text-[10px] tabular-nums leading-none mt-0.5
+          ${isToday ? "text-gold font-bold" : inMonth ? "text-cream/75" : "text-cream/40"}`}
+      >
+        {cell.dayOfMonth}
+      </span>
+      {hasItems && (
+        <span className="flex items-center justify-center gap-0.5 flex-wrap leading-none">
+          {shown.map(it => (
+            it.kind === "exam" ? (
+              <span
+                key={it.id}
+                className="inline-block w-1.5 h-1.5 rounded-full ring-1"
+                style={{ background: it.classColor, boxShadow: `0 0 0 1px #EF444499` }}
+                aria-hidden="true"
+              />
+            ) : (
+              <span
+                key={it.id}
+                className="inline-block w-1.5 h-1.5 rounded-full"
+                style={{ background: it.classColor, opacity: it.status === "done" ? 0.4 : 1 }}
+                aria-hidden="true"
+              />
+            )
+          ))}
+          {extra > 0 && (
+            <span className="font-mono text-[8px] text-cream/45 tabular-nums leading-none">+{extra}</span>
+          )}
+        </span>
+      )}
+    </button>
   );
 }
 
@@ -674,6 +1113,76 @@ function daysUntil(dateStr: string): number {
   today.setHours(0, 0, 0, 0);
   const target = new Date(dateStr + "T00:00:00");
   return Math.ceil((target.getTime() - today.getTime()) / 86_400_000);
+}
+
+// ── Calendar date math (all local-time, midnight-anchored) ────────────────────
+interface GridCell {
+  key: string;        // YYYY-MM-DD
+  dayOfMonth: number; // 1..31
+  month: number;      // 0..11 (used to gray out spillover days)
+  label: string;      // accessible "Mon, Jun 9"
+}
+
+function toKey(d: Date): string {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
+function firstOfMonth(d: Date): Date {
+  return new Date(d.getFullYear(), d.getMonth(), 1);
+}
+
+function endOfMonth(d: Date): Date {
+  return new Date(d.getFullYear(), d.getMonth() + 1, 0);
+}
+
+function addDays(d: Date, n: number): Date {
+  const r = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  r.setDate(r.getDate() + n);
+  return r;
+}
+
+function addMonths(d: Date, n: number): Date {
+  return new Date(d.getFullYear(), d.getMonth() + n, 1);
+}
+
+// 6x7 grid starting on the Sunday on/before the 1st of the anchor's month.
+function buildMonthGrid(anchor: Date): GridCell[] {
+  const first = firstOfMonth(anchor);
+  const start = addDays(first, -first.getDay()); // back up to Sunday
+  const cells: GridCell[] = [];
+  for (let i = 0; i < 42; i++) {
+    const d = addDays(start, i);
+    cells.push({
+      key: toKey(d),
+      dayOfMonth: d.getDate(),
+      month: d.getMonth(),
+      label: d.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" }),
+    });
+  }
+  return cells;
+}
+
+// "Today" / "Tomorrow" / "Mon, Jun 16" for an agenda day heading.
+function dayHeading(key: string, todayKey: string): string {
+  if (key === todayKey) return "Today";
+  if (key === toKey(addDays(new Date(), 1))) return "Tomorrow";
+  return new Date(key + "T00:00:00").toLocaleDateString("en-US", {
+    weekday: "short", month: "short", day: "numeric",
+  });
+}
+
+// Exams sort before assignments on a given day; otherwise by title.
+function sortItems(a: AgendaItem, b: AgendaItem): number {
+  if (a.date !== b.date) return a.date < b.date ? -1 : 1;
+  if (a.kind !== b.kind) return a.kind === "exam" ? -1 : 1;
+  return a.title.localeCompare(b.title);
+}
+
+function nextStatus(s: AssignmentStatus): AssignmentStatus {
+  return s === "todo" ? "doing" : s === "doing" ? "done" : "todo";
 }
 
 function timeAgo(dateStr: string): string {

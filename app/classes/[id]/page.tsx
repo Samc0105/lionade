@@ -20,6 +20,7 @@ import { PushPin, PushPinSlash, Brain, ArrowsClockwise, Lightning, Coffee, BookO
 import { toastError, toastSuccess } from "@/lib/toast";
 import SyllabusUpload from "@/components/Class/SyllabusUpload";
 import GradeTracker from "@/components/Class/GradeTracker";
+import AssignmentTracker from "@/components/Class/AssignmentTracker";
 import FlashcardStudy from "@/components/Class/FlashcardStudy";
 
 /**
@@ -368,6 +369,12 @@ export default function ClassNotebookPage() {
                 {exams.map(e => <ExamRow key={e.id} exam={e} color={cls.color} />)}
               </div>
             )}
+          </section>
+
+          {/* Assignments — what's due, between exam targets and grades.
+              Self-fetches its own list so it doesn't bloat the class detail call. */}
+          <section className="mb-6">
+            <AssignmentTracker classId={cls.id} />
           </section>
 
           {/* Grades — between exam targets (outcomes) and notes (inputs).
