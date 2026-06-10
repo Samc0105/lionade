@@ -2,15 +2,16 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import useSWR from "swr";
+import useSWR, { useSWRConfig } from "swr";
 import {
   Plus, Target, Note, ArrowRight, BookOpen, GraduationCap,
   PushPin, Sparkle, X, Clock, ArrowsClockwise, CalendarBlank,
-  CaretLeft, CaretRight, Circle, CircleDashed, CheckCircle,
+  CaretLeft, CaretRight, Circle, CircleDashed, CheckCircle, CalendarPlus,
 } from "@phosphor-icons/react";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Navbar from "@/components/Navbar";
 import SpaceBackground from "@/components/SpaceBackground";
+import ImportCalendarSheet from "@/components/academia/ImportCalendarSheet";
 import { apiPatch, apiPost, swrFetcher } from "@/lib/api-client";
 import { useRouter } from "next/navigation";
 
@@ -227,7 +228,7 @@ export default function AcademiaPage() {
           {classes.length > 0 && <GradeSnapshot />}
 
           {/* ─── This week + month calendar ─── */}
-          {classes.length > 0 && <PlannerSection />}
+          {classes.length > 0 && <PlannerSection classes={classes} />}
 
           {/* ─── Two-column layout: classes (2/3) | recent notes (1/3) ─── */}
           <div className="grid grid-cols-1 lg:grid-cols-[1.7fr_1fr] gap-6">
@@ -471,11 +472,24 @@ function gpaTierColor(gpa: number | null): string {
 // visible month; the range covers the whole visible month AND at least the
 // next 7 days so the week agenda is always populated even while paging months.
 // ─────────────────────────────────────────────────────────────────────────────
-function PlannerSection() {
+function PlannerSection({ classes }: { classes: ClassSummary[] }) {
   // First day of the currently-displayed calendar month (local midnight).
   const [monthAnchor, setMonthAnchor] = useState(() => firstOfMonth(new Date()));
   // Day selected in the calendar (drives the agenda view). null = THIS WEEK.
   const [selectedDay, setSelectedDay] = useState<string | null>(null);
+  const [showImport, setShowImport] = useState(false);
+
+  // Imported items can land in any month, so refresh every agenda key (not just
+  // the visible range's). swrFetcher keys are the full `/api/academia/agenda?...`
+  // strings, so match by prefix.
+  const { mutate: globalMutate } = useSWRConfig();
+  const refreshAgenda = () => {
+    void globalMutate(
+      (key) => typeof key === "string" && key.startsWith("/api/academia/agenda"),
+      undefined,
+      { revalidate: true },
+    );
+  };
 
   const todayKey = useMemo(() => toKey(new Date()), []);
 
@@ -530,6 +544,20 @@ function PlannerSection() {
 
   return (
     <section className="mb-10">
+      {/* Understated power affordance: pull dates from an external calendar feed. */}
+      <div className="flex justify-end mb-3">
+        <button
+          type="button"
+          onClick={() => setShowImport(true)}
+          className="group inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.22em]
+            text-cream/50 hover:text-gold transition-colors rounded-full border border-white/[0.08]
+            hover:border-gold/40 px-3 py-1.5"
+        >
+          <CalendarPlus size={12} weight="bold" aria-hidden="true" />
+          Import calendar
+        </button>
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.25fr] gap-6 items-start">
         {/* THIS WEEK / selected-day agenda */}
         <div>
@@ -583,6 +611,13 @@ function PlannerSection() {
           onSelectDay={(key) => setSelectedDay(prev => (prev === key ? null : key))}
         />
       </div>
+
+      <ImportCalendarSheet
+        open={showImport}
+        onClose={() => setShowImport(false)}
+        classes={classes.map(c => ({ id: c.id, name: c.name, color: c.color, emoji: c.emoji }))}
+        onImported={refreshAgenda}
+      />
     </section>
   );
 }
