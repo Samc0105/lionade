@@ -54,6 +54,22 @@ interface RecentNote {
   classShortCode: string | null;
 }
 
+interface GpaClass {
+  classId: string;
+  className: string;
+  classColor: string;
+  currentPct: number | null;
+  letter: string | null;
+  gpaPoints: number | null;
+}
+
+interface GpaSnapshot {
+  termGpa: number | null;
+  gradedClasses: number;
+  scale: "4.0";
+  classes: GpaClass[];
+}
+
 type AssignmentStatus = "todo" | "doing" | "done";
 
 interface AgendaItem {
@@ -207,6 +223,9 @@ export default function AcademiaPage() {
             </div>
           )}
 
+          {/* ─── Grade snapshot / term GPA ─── */}
+          {classes.length > 0 && <GradeSnapshot />}
+
           {/* ─── This week + month calendar ─── */}
           {classes.length > 0 && <PlannerSection />}
 
@@ -307,6 +326,144 @@ function ErrorCard({ message, onRetry }: { message: string; onRetry: () => void 
       </button>
     </div>
   );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Grade snapshot — slim full-width strip: big TERM GPA on the left, a horizontal
+// row of per-class grade chips on the right. Gated identically to the quick-stats
+// strip + PlannerSection (rendered only when classes.length > 0). Never shows a
+// fake 0.00; when nothing is graded it drops the big number for a soft prompt.
+// ─────────────────────────────────────────────────────────────────────────────
+function GradeSnapshot() {
+  const { data, error, isLoading, mutate } = useSWR<GpaSnapshot>(
+    "/api/academia/gpa", swrFetcher,
+    { keepPreviousData: true, revalidateOnFocus: true },
+  );
+
+  // Loading: skeleton matching the card's height before first data arrives.
+  if (isLoading && !data) {
+    return (
+      <section className="mb-10">
+        <div className="h-[104px] rounded-[16px] bg-white/[0.03] border border-white/[0.06] animate-pulse" />
+      </section>
+    );
+  }
+
+  // Error before first data: red-glass retry card. Stale keepPreviousData still
+  // renders the strip below on a transient refetch failure.
+  if (error && !data) {
+    return (
+      <section className="mb-10">
+        <ErrorCard
+          message="Couldn't load your grades. Network hiccup, probably."
+          onRetry={() => void mutate()}
+        />
+      </section>
+    );
+  }
+
+  if (!data) return null;
+
+  const { termGpa, classes, scale } = data;
+  const allUngraded = classes.every(c => c.currentPct === null);
+  const noGpaYet = termGpa === null && allUngraded;
+
+  return (
+    <section className="mb-10">
+      <div className="flex items-baseline justify-between mb-4">
+        <h2 className="font-bebas text-[22px] text-cream tracking-[0.18em] flex items-center gap-2">
+          <span className="inline-block w-1.5 h-1.5 rounded-full bg-gold" aria-hidden="true" />
+          GRADE SNAPSHOT
+        </h2>
+      </div>
+
+      <div className="rounded-[16px] border border-white/[0.08] bg-white/[0.02] p-4 sm:p-5">
+        <div className="flex flex-col md:flex-row md:items-center gap-5 md:gap-6">
+          {/* Term GPA — or soft empty state when nothing is graded yet */}
+          <div className="shrink-0 md:pr-6 md:border-r md:border-white/[0.08]">
+            {noGpaYet ? (
+              <div className="max-w-[240px]">
+                <p className="font-mono text-[9px] uppercase tracking-[0.28em] text-cream/40 mb-1.5">
+                  Term GPA · {scale} scale
+                </p>
+                <p className="text-[13px] text-cream/60 leading-snug">
+                  Add graded items to a class to see your GPA.
+                </p>
+              </div>
+            ) : (
+              <>
+                <p className="font-mono text-[9px] uppercase tracking-[0.28em] text-cream/45 mb-1">
+                  Term GPA · {scale} scale
+                </p>
+                <p
+                  className="font-bebas text-5xl sm:text-6xl tracking-wider leading-none tabular-nums"
+                  style={{ color: gpaTierColor(termGpa) }}
+                >
+                  {termGpa !== null ? termGpa.toFixed(2) : "—"}
+                </p>
+              </>
+            )}
+          </div>
+
+          {/* Per-class chips */}
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap gap-2">
+              {classes.map(c => <GradeChip key={c.classId} cls={c} />)}
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function GradeChip({ cls }: { cls: GpaClass }) {
+  const ungraded = cls.currentPct === null;
+  const shortName = cls.className.length > 16 ? `${cls.className.slice(0, 15)}…` : cls.className;
+
+  return (
+    <Link
+      href={`/classes/${cls.classId}`}
+      title={cls.className}
+      className="group inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1
+        transition-colors duration-200"
+      style={{
+        borderColor: ungraded ? "rgba(255,255,255,0.1)" : `${cls.classColor}45`,
+        backgroundColor: ungraded ? "rgba(255,255,255,0.02)" : `${cls.classColor}12`,
+      }}
+    >
+      <span
+        className="inline-block w-1.5 h-1.5 rounded-full shrink-0"
+        style={{ background: cls.classColor, opacity: ungraded ? 0.5 : 1 }}
+        aria-hidden="true"
+      />
+      <span
+        className="font-mono text-[10px] uppercase tracking-[0.16em] truncate max-w-[120px]"
+        style={{ color: ungraded ? "rgba(238,244,255,0.55)" : cls.classColor }}
+      >
+        {shortName}
+      </span>
+      {ungraded ? (
+        <span className="font-mono text-[9px] uppercase tracking-[0.16em] text-cream/35">
+          no grades yet
+        </span>
+      ) : (
+        <span className="font-mono text-[10px] tracking-[0.1em] text-cream/70 tabular-nums">
+          {[cls.letter, cls.currentPct !== null ? `${cls.currentPct.toFixed(0)}%` : null]
+            .filter(Boolean)
+            .map(part => `· ${part}`)
+            .join(" ")}
+        </span>
+      )}
+    </Link>
+  );
+}
+
+// GPA tier color: gold for honors-tier (>=3.7), neutral cream otherwise.
+// Kept subtle — a single accent, not a full traffic-light scale.
+function gpaTierColor(gpa: number | null): string {
+  if (gpa === null) return "rgba(238,244,255,0.85)";
+  return gpa >= 3.7 ? "#FFD700" : "#EEF4FF";
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
