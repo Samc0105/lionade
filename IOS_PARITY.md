@@ -26,9 +26,16 @@ Second batch same day ("Party games UX batch", commits `2cb52b7`, `88ec383`, `9b
 8. **Bluff `write_ends_at` now includes a 5s countdown pad** on top of the host-chosen write window (`COUNTDOWN_PAD_SECONDS` in `app/api/party/bluff/rounds/route.ts`). Clients must derive their timer purely from `write_ends_at` and must not back-compute the raw write duration from it.
 9. **ActiveSessionToast replaced the sticky ResumeBanner on web** (all 5 active-session types; party sessions get a Rejoin + room code; Dismiss is sessionStorage-scoped and no longer deletes the server `active_session` pointer). Note only: iOS has its own session-resume UX and should not port the toast, but it must honor the pointer semantics (dismiss is client-local; only leaving/finishing clears the server pointer).
 
+Third batch same day ("Sketchy round-flow parity", commit `2d1ce8c`) changed the wire contract again:
+
+10. **New GAME_OVER broadcast event on the sketch channel.** Client-sent by the effective host when ending the game from the reveal screen (END GAME CTA); it routes every client to the shared `GameOverScreen` podium and suppresses auto-advance. Receivers MUST guard on the reveal phase and ignore out-of-phase deliveries, exactly as the web handler does. An iOS Sketchy client must both send (when effective host) and consume this event.
+11. **ROUND_STARTED payloads gained `round_num`**, which drives the shared `RoundCountdown`'s ROUND N of M header. Clients should read the round number from the payload instead of recomputing it locally.
+
 Batch summary (web, batch 1): global `PartyInviteToast` on `party_invite` notifications (single WebSocket, Navbar re-emits via `lib/party/invite-bus.ts`), lobby join/ready animations, Sketchy tiered word picker + non-drawer waiting card, lobby polish (copy toast, real game-tile metadata, chat unread badge, READY UP/START states), realtime perf pass, chat spoof-hardening review fixes.
 
 Batch summary (web, batch 2): ActiveSessionToast, Poker Face both-sides UX (presenter decide beat with server-side TRUE/LIE lock + 30s window from server timestamps, sell-it screen, caller waiting screen with listen rings, BELIEVE/DOUBT 15s window, 2s pause + 3D card-flip reveal, ROUND N/M header, score ticker), shared `RoundCountdown` + `GameOverScreen` components (consumed by Poker Face and Bluff), Bluff polish (host parity audit clean, forfeit exploit fix, write/vote phase states, one-by-one reveal, count-up scoreboard, vote upsert errors surfaced).
+
+Batch summary (web, batch 3): Sketchy round-flow parity (shared `RoundCountdown` between rounds with the pick timer + drawing clock held during the 5s intro, replay-proof seen-set, `selectWord` click-through guard; host-ended GAME_OVER flow into the shared `GameOverScreen` podium; staged ~3.9s reveal with a reduced-motion all-at-once fallback; per-round canvas/header fade-slide; scoreboard staggerIn opt-in default-off so Bluff and Poker Face are unchanged).
 
 Owner: `quality-docs-writer` (web).
 
