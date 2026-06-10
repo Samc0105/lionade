@@ -15,6 +15,16 @@ import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
 import { isRoomMember } from "@/lib/party/room-state";
 
+// Forfeit sentinel — BluffView's "skip me this round" submits this literal so
+// the write-phase dedup/truth checks still apply. It must NEVER surface as a
+// votable card (a vote on it would hand the forfeiter unearned trick points),
+// so vote + reveal payloads filter it out. Scoring iterates actual votes only,
+// and no vote can target a card that was never shown, so scoring stays clean.
+const FORFEIT_SENTINEL = "__forfeit__";
+function isForfeitText(text: string | null | undefined): boolean {
+  return (text ?? "").trim().toLowerCase() === FORFEIT_SENTINEL;
+}
+
 // Deterministic shuffle keyed by round id so the vote-phase order is stable
 // across re-fetches within the same round (otherwise users would see the
 // answers rearrange between polls and lose their place).
@@ -109,17 +119,31 @@ export async function GET(
   const list = answers ?? [];
 
   if (round.phase === "vote") {
-    const shuffled = seededShuffle(list, round.id);
-    const myVote = await supabaseAdmin
+    // Forfeit sentinels are not votable — see FORFEIT_SENTINEL above.
+    const votable = list.filter((a) => !isForfeitText(a.text));
+    const shuffled = seededShuffle(votable, round.id);
+    // One votes query covers both "my locked-in vote" and the ids-only
+    // "who has voted" ticker (voted_user_ids). Vote TARGETS stay hidden for
+    // everyone else until reveal — only the voter ids leak, by design.
+    const { data: voteRows } = await supabaseAdmin
       .from("bluff_votes")
-      .select("answer_id")
-      .eq("round_id", round.id)
-      .eq("voter_user_id", userId)
-      .maybeSingle();
+      .select("voter_user_id, answer_id")
+      .eq("round_id", round.id);
+    const myVoteAnswerId =
+      (voteRows ?? []).find((v) => v.voter_user_id === userId)?.answer_id ?? null;
+    const votedUserIds = (voteRows ?? []).map((v) => v.voter_user_id);
+    // The requester's OWN fake id — lets the client gray it out (the vote
+    // route's own-fake rejection stays as the server backstop). This is the
+    // caller's own row, so it leaks nothing about anyone else (host included:
+    // the host receives the exact same shape as every player).
+    const myAnswerId =
+      list.find((a) => !a.is_truth && a.user_id === userId && !isForfeitText(a.text))?.id ?? null;
     return NextResponse.json({
       round: base,
       answers: shuffled.map((a) => ({ id: a.id, text: a.text })),
-      my_vote_answer_id: myVote.data?.answer_id ?? null,
+      my_vote_answer_id: myVoteAnswerId,
+      my_answer_id: myAnswerId,
+      voted_user_ids: votedUserIds,
     });
   }
 
@@ -140,7 +164,9 @@ export async function GET(
 
   return NextResponse.json({
     round: { ...base, correct_answer: round.correct_answer },
-    answers: list.map((a) => ({
+    // Forfeit sentinels stay hidden at reveal too — the forfeiting player
+    // simply shows up with no fake (the client renders a "sat out" line).
+    answers: list.filter((a) => !isForfeitText(a.text)).map((a) => ({
       id: a.id,
       text: a.text,
       author_user_id: a.is_truth ? null : a.user_id,

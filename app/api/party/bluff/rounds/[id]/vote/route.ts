@@ -41,7 +41,7 @@ export async function POST(
 
   const { data: answer } = await supabaseAdmin
     .from("bluff_answers")
-    .select("id, user_id, is_truth, round_id")
+    .select("id, user_id, is_truth, round_id, text")
     .eq("id", answerId)
     .maybeSingle();
   if (!answer || answer.round_id !== round.id) {
@@ -49,6 +49,12 @@ export async function POST(
   }
   if (!answer.is_truth && answer.user_id === userId) {
     return NextResponse.json({ error: "You can't vote for your own fake" }, { status: 403 });
+  }
+  // Backstop: forfeit sentinels are filtered from the vote-phase GET, so their
+  // ids should never reach a client. Reject direct POSTs anyway so a stale or
+  // crafted answer_id can't hand the forfeiter unearned trick points.
+  if (!answer.is_truth && (answer.text ?? "").trim().toLowerCase() === "__forfeit__") {
+    return NextResponse.json({ error: "That player sat out this round" }, { status: 400 });
   }
 
   // Upsert vote.

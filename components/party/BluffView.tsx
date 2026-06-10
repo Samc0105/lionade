@@ -5,10 +5,22 @@
 // Three phases:
 //   1. "write" (45s default): all players type a fake answer.
 //   2. "vote"  (30s default): server shuffles real + fakes; players vote.
-//   3. "reveal": truth revealed + scoreboard + Next Round CTA.
+//   3. "reveal": one-by-one dramatic reveal (fakes first, truth last) +
+//      per-player points breakdown + scoreboard + Next Round CTA. On the
+//      final round (settings.bluff_round_count, default 5) the shared
+//      GameOverScreen takes over with podium + Play Again / Back to Lobby.
 //
 // The server's phase value drives this component; we poll the round detail
 // endpoint every ~1.5s and also subscribe to phase_changed broadcasts.
+//
+// Timeout handling (write phase): a player who never submits is simply
+// SKIPPED — no client auto-submits a "..." placeholder. The host's timer
+// advance doesn't require all answers, the vote list is just truth + the
+// fakes that exist, and scoring iterates actual votes only, so an absent
+// fake can't corrupt anything. (Auto-POSTing "..." would race the phase
+// flip, collide with the duplicate-answer 409 when two players time out,
+// and create a votable junk card worth unearned trick points.) The reveal
+// breakdown shows a "no fake this round" line for skipped players instead.
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
@@ -28,7 +40,21 @@ import { bluffChannel, BLUFF_EVENTS, roomChannel, PARTY_EVENTS } from "@/lib/par
 import { subscribeResilient } from "@/lib/realtime-resilient";
 import PostRoundVoteCard from "./PostRoundVoteCard";
 import MidGameInviteModal from "./MidGameInviteModal";
+import RoundCountdown from "./RoundCountdown";
+import GameOverScreen from "./GameOverScreen";
+import { BLUFF_TRUTH_POINTS, BLUFF_FAKE_TRICK_POINTS } from "@/lib/party/scoring";
 import type { PartyPlayer, PartyRoom } from "@/lib/party/types";
+
+// Bluff's accent (gold) — matches the question card + CTA treatment.
+const ACCENT = "#FFD700";
+const COUNTDOWN_SECONDS = 5;
+
+// Same dicebear style Poker Face uses for the presenter; seed = username so
+// the avatar is stable across rounds without any profile fetch.
+function avatarSrcFor(username: string | null | undefined): string {
+  const seed = username && username.length > 0 ? username : "player";
+  return `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(seed)}`;
+}
 
 interface Props {
   room: PartyRoom;
@@ -70,6 +96,12 @@ interface RoundDetail {
    *  phase. Refreshed on every poll. */
   submitted_user_ids?: string[];
   my_vote_answer_id?: string | null;
+  /** Vote phase only: the id of MY OWN fake so the client can gray it out.
+   *  The server's own-fake vote rejection remains the backstop. */
+  my_answer_id?: string | null;
+  /** Vote phase only: player ids who have locked a vote in (ids only — the
+   *  vote TARGETS stay hidden until reveal). */
+  voted_user_ids?: string[];
 }
 
 export default function BluffView({
@@ -91,22 +123,24 @@ export default function BluffView({
   const [timeLeft, setTimeLeft] = useState(0);
   const advanceLock = useRef(false);
 
-  // 3-2-1 pre-round countdown — fires on loading → write transition only
-  // (mirrors Sketchy's approach). Reduced-motion users skip the intro.
-  const [countdownTicks, setCountdownTicks] = useState(0);
-  const prevPhaseRef = useRef<Phase>("loading");
+  // ── Between-rounds countdown (shared RoundCountdown, 5s) ──
+  // Fires once per round when the fresh round's detail first lands in
+  // phase='write' (mirrors PokerFaceView's wiring). RoundCountdown handles
+  // reduced motion internally (static ticking numbers, no spring).
+  const [countdownRoundId, setCountdownRoundId] = useState<string | null>(null);
+  const countdownSeenRef = useRef<Set<string>>(new Set());
   useEffect(() => {
-    const prev = prevPhaseRef.current;
-    prevPhaseRef.current = phase;
-    if (prev === "loading" && phase === "write" && !reduced) {
-      setCountdownTicks(3);
-    }
-  }, [phase, reduced]);
-  useEffect(() => {
-    if (countdownTicks <= 0) return;
-    const t = setTimeout(() => setCountdownTicks(c => c - 1), 1000);
-    return () => clearTimeout(t);
-  }, [countdownTicks]);
+    if (!detail || detail.round.phase !== "write") return;
+    if (countdownSeenRef.current.has(detail.round.id)) return;
+    countdownSeenRef.current.add(detail.round.id);
+    setCountdownRoundId(detail.round.id);
+  }, [detail]);
+  const handleCountdownDone = useCallback(() => setCountdownRoundId(null), []);
+
+  // ── Game length (from room settings; default 5 rounds) ──
+  // The reveal of round N >= total swaps the Next Round CTA for the shared
+  // GameOverScreen (podium + Play Again -> rematch + Back to Lobby).
+  const totalRounds = Math.max(1, room.settings?.bluff_round_count ?? 5);
 
   // ── juice-only transient state (no gameplay effect, derived from `detail`
   //    already in client state — nothing extra is fetched) ──
@@ -216,6 +250,15 @@ export default function BluffView({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [room.code, roundId]);
 
+  // ── One-by-one reveal sequencing ──
+  // Step counter ticks ~1.2s per answer: fakes first (least-fooling to most),
+  // truth LAST. The truth banner, points breakdown, scoreboard, and CTAs stay
+  // hidden until the whole sequence lands. Reduced motion = everything at
+  // once. Keyed per round id so the 1.5s polls don't restart the show.
+  const [revealStep, setRevealStep] = useState(0);
+  const revealRoundRef = useRef<string | null>(null);
+  const revealDoneRef = useRef<Set<string>>(new Set());
+
   // ── Poll round detail (server is source of truth) ──
   const refreshDetail = useCallback(async () => {
     if (!roundId) return;
@@ -225,7 +268,15 @@ export default function BluffView({
     const p = res.data.round.phase;
     setPhase(p);
     if (p === "vote") setNinnyMsg("Vote for the answer you think is real.");
-    if (p === "reveal") setNinnyMsg(`The truth: ${res.data.round.correct_answer}`);
+    // No truth spoiler mid-sequence: only name the answer once the one-by-one
+    // reveal has finished (the sequence-done effect below sets it too).
+    if (p === "reveal") {
+      setNinnyMsg(
+        revealDoneRef.current.has(res.data.round.id)
+          ? `The truth: ${res.data.round.correct_answer}`
+          : "Drumroll. Let's see who fooled who.",
+      );
+    }
   }, [roundId]);
 
   useEffect(() => {
@@ -270,6 +321,56 @@ export default function BluffView({
     const iv = setInterval(tick, 500);
     return () => clearInterval(iv);
   }, [detail, isEffectiveHost, room.code, refreshDetail]);
+
+  // ── Reveal order: fakes (ascending fool-count, biggest liar builds the
+  //    drama) then the truth last. Stable id tiebreak so every client and
+  //    every poll agrees on the order. ──
+  const orderedReveal = useMemo(() => {
+    if (phase !== "reveal" || !detail?.answers) return [];
+    const fakes = detail.answers
+      .filter((a) => !a.is_truth)
+      .sort((a, b) => (a.vote_count ?? 0) - (b.vote_count ?? 0) || a.id.localeCompare(b.id));
+    const truth = detail.answers.filter((a) => a.is_truth);
+    return [...fakes, ...truth];
+  }, [phase, detail]);
+
+  // Kick the sequence once per round. Reduced motion (or a rejoin into an
+  // already-revealed round we played through) shows everything immediately.
+  useEffect(() => {
+    if (phase !== "reveal" || !detail) return;
+    const rid = detail.round.id;
+    if (revealRoundRef.current === rid) return;
+    revealRoundRef.current = rid;
+    if (reduced || revealDoneRef.current.has(rid)) {
+      revealDoneRef.current.add(rid);
+      setRevealStep(Number.MAX_SAFE_INTEGER);
+      return;
+    }
+    setRevealStep(0);
+  }, [phase, detail, reduced]);
+
+  // Tick the steps: short 0.6s beat before the first card, then ~1.2s per
+  // answer, plus one final beat before the breakdown/scoreboard block.
+  useEffect(() => {
+    if (phase !== "reveal" || orderedReveal.length === 0) return;
+    const totalSteps = orderedReveal.length + 1;
+    if (revealStep >= totalSteps) return;
+    const t = setTimeout(
+      () => setRevealStep((s) => s + 1),
+      revealStep === 0 ? 600 : 1200,
+    );
+    return () => clearTimeout(t);
+  }, [phase, revealStep, orderedReveal.length]);
+
+  const revealSequenceDone =
+    phase === "reveal" && orderedReveal.length > 0 && revealStep >= orderedReveal.length + 1;
+
+  // Sequence finished: remember it (poll-proof) and let Ninny say the truth.
+  useEffect(() => {
+    if (!revealSequenceDone || !detail) return;
+    revealDoneRef.current.add(detail.round.id);
+    setNinnyMsg(`The truth: ${detail.round.correct_answer}`);
+  }, [revealSequenceDone, detail]);
 
   // ── Submit fake ──
   async function submitFake(e: React.FormEvent) {
@@ -343,8 +444,19 @@ export default function BluffView({
 
   // ── Vote ──
   const [voting, setVoting] = useState(false);
+  // Instant lock-in feedback; the server's my_vote_answer_id reconciles on
+  // the next poll. Cleared whenever a fresh round starts.
+  const [voteLocalId, setVoteLocalId] = useState<string | null>(null);
+  useEffect(() => {
+    setVoteLocalId(null);
+    // Also rewind the reveal sequence early (during write) so a stale MAX
+    // step from the previous round can't flash every card on the first
+    // paint of the next reveal before the kick effect runs.
+    setRevealStep(0);
+  }, [roundId]);
   async function castVote(answerId: string) {
     if (!roundId || voting) return;
+    if (answerId === detail?.my_answer_id) return; // own fake — server rejects too
     setVoting(true);
     setError(null);
     const res = await apiPost(`/api/party/bluff/rounds/${roundId}/vote`, { answer_id: answerId });
@@ -354,6 +466,7 @@ export default function BluffView({
       setError("Couldn't cast your vote. Try again.");
       return;
     }
+    setVoteLocalId(answerId);
     void refreshDetail();
   }
 
@@ -419,7 +532,7 @@ export default function BluffView({
   // the CSS class so it never blocks the fake input / vote tap.
   const showPanicVignette =
     (phase === "write" || phase === "vote") && timeLeft > 0 && timeLeft < 5 && !reduced;
-  const showCountdown = countdownTicks > 0 && phase === "write";
+  const isFinalRound = round.round_num >= totalRounds;
 
   const mePlayer = players.find((p) => p.user_id === meUserId);
   const isPendingJoiner = !!mePlayer?.is_pending_round;
@@ -428,56 +541,25 @@ export default function BluffView({
     <div className="space-y-4">
       {isPendingJoiner && <JoiningNextRoundBanner variant="bluff" />}
       {showPanicVignette && <div aria-hidden="true" className="pa-panic-vignette" />}
-      {showCountdown && (
-        <motion.div
-          key={`countdown-${countdownTicks}`}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          aria-hidden="true"
-          className="fixed inset-0 z-40 flex flex-col items-center justify-center pointer-events-none"
-          style={{
-            background: "radial-gradient(circle, rgba(8,6,16,0.78) 0%, rgba(8,6,16,0.92) 100%)",
-            backdropFilter: "blur(6px)",
-            WebkitBackdropFilter: "blur(6px)",
-          }}
-        >
-          <div className="flex flex-col items-center gap-2 mb-8">
-            <p className="font-mono text-[11px] uppercase tracking-[0.35em] text-cream/50">
-              round {round.round_num}
-            </p>
-            <p className="font-bebas text-3xl sm:text-4xl tracking-wider text-cream">
-              get ready to <span className="text-[#FFD700]">bluff</span>
-            </p>
-            {round.category && (
-              <span
-                className="mt-1 inline-flex items-center font-bebas text-xs tracking-[0.25em] px-3 py-1 rounded-full"
-                style={{
-                  background: "rgba(255,215,0,0.18)",
-                  border: "1px solid rgba(255,215,0,0.45)",
-                  color: "#FDE68A",
-                }}
-              >
-                {round.category}
-              </span>
-            )}
-          </div>
-          <motion.p
-            key={`tick-${countdownTicks}`}
-            initial={{ scale: 0.4, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 1.6, opacity: 0 }}
-            transition={{ type: "spring", stiffness: 320, damping: 18 }}
-            className="font-bebas text-[10rem] sm:text-[14rem] leading-none tracking-wider text-[#FFD700]"
-            style={{ textShadow: "0 0 64px rgba(255,215,0,0.5)" }}
-          >
-            {countdownTicks}
-          </motion.p>
-          <p className="font-bebas text-sm tracking-[0.4em] text-cream/55 mt-6">
-            write a fake. fool the room.
-          </p>
-        </motion.div>
-      )}
+
+      {/* ── Between-rounds countdown (shared RoundCountdown, 5s) ── */}
+      <AnimatePresence>
+        {countdownRoundId === round.id && phase === "write" && (
+          <RoundCountdown
+            key={`countdown-${round.id}`}
+            roundNum={round.round_num}
+            totalRounds={totalRounds}
+            seconds={COUNTDOWN_SECONDS}
+            accent={ACCENT}
+            headline={
+              <>get ready to <span style={{ color: ACCENT }}>bluff</span></>
+            }
+            subline="write a fake. fool the room."
+            onComplete={handleCountdownDone}
+          />
+        )}
+      </AnimatePresence>
+
       <NinnyHostBubble message={ninnyMsg} />
 
       {/* Question card */}
@@ -522,7 +604,7 @@ export default function BluffView({
         </p>
         <div className="mt-3 flex items-center justify-between">
           <span className="font-bebas text-[10px] tracking-[0.3em] text-cream/40">
-            ROUND {round.round_num} · {phase.toUpperCase()}
+            ROUND {round.round_num}/{totalRounds} · {phase.toUpperCase()}
           </span>
           {phase !== "reveal" && (
             <span
@@ -547,7 +629,14 @@ export default function BluffView({
             onSubmit={submitFake}
             className="space-y-3"
           >
+            <label
+              htmlFor="bluff-fake-input"
+              className="block font-bebas text-sm tracking-[0.2em] text-cream/75"
+            >
+              WRITE A FAKE ANSWER THAT SOUNDS REAL.
+            </label>
             <input
+              id="bluff-fake-input"
               type="text"
               value={fakeInput}
               onChange={(e) => setFakeInput(e.target.value)}
@@ -585,40 +674,18 @@ export default function BluffView({
                 }}
               />
             </div>
-            {/* Player-roster chip strip — one chip per active player. Dim gray
-                + initial when pending, gold + ring when their fake has landed
-                server-side. Kahoot-lobby vibe; gives the room "everyone but
-                Jordan is in" social pressure without naming holdouts loudly. */}
-            {players.length > 0 && (
-              <div className="flex flex-wrap items-center gap-1.5 pt-1">
-                {players.map((p) => {
-                  const submitted = (detail.submitted_user_ids ?? []).includes(p.user_id);
-                  const isMe = p.user_id === meUserId;
-                  const initial = (p.username ?? "?").slice(0, 1).toUpperCase();
-                  return (
-                    <span
-                      key={p.user_id}
-                      title={`${p.username ?? "Player"}${submitted ? " · submitted" : " · still writing"}`}
-                      className={`inline-flex items-center justify-center w-7 h-7 rounded-full font-bebas text-xs transition-all ${submitted && !reduced ? "pa-pop-in" : ""}`}
-                      style={{
-                        background: submitted
-                          ? "linear-gradient(135deg, #FFD700 0%, #B8960C 100%)"
-                          : "rgba(255,255,255,0.06)",
-                        border: submitted
-                          ? "1.5px solid rgba(255,215,0,0.7)"
-                          : isMe
-                            ? "1.5px solid rgba(168,85,247,0.55)"
-                            : "1px solid rgba(255,255,255,0.14)",
-                        color: submitted ? "#04080F" : "rgba(238,244,255,0.7)",
-                        boxShadow: submitted ? "0 0 8px rgba(255,215,0,0.45)" : "none",
-                      }}
-                    >
-                      {initial}
-                    </span>
-                  );
-                })}
-              </div>
-            )}
+            {/* Avatar roster — dim while a player is still writing, gold ring
+                + checkmark badge once their fake lands server-side (ids-only
+                from the GET; nobody's content leaks). Kahoot-lobby vibe;
+                gives the room "everyone but Jordan is in" social pressure. */}
+            <AvatarCheckRow
+              players={players}
+              doneIds={detail.submitted_user_ids ?? []}
+              meUserId={meUserId}
+              reduced={!!reduced}
+              doneTitle="submitted"
+              pendingTitle="still writing"
+            />
             <button
               key={confirmKey}
               type="submit"
@@ -650,45 +717,95 @@ export default function BluffView({
           </motion.form>
         )}
 
-        {phase === "vote" && detail.answers && (
-          <motion.div
-            key="vote"
-            initial={reduced ? false : { opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={reduced ? { opacity: 0 } : { opacity: 0, y: -8 }}
-            className="space-y-2"
-          >
-            <p className="font-bebas text-sm text-cream/60 tracking-[0.25em]">PICK THE REAL ANSWER</p>
-            {detail.answers.map((a, i) => {
-              const isMine = detail.my_vote_answer_id === a.id;
-              return (
-                <button
-                  key={a.id}
-                  onClick={() => castVote(a.id)}
-                  disabled={voting}
-                  className={`w-full text-left rounded-xl px-4 py-3 transition-all active:scale-[0.98] hover:-translate-y-0.5 disabled:opacity-60 ${reduced ? "" : "pa-deal-in"}`}
+        {phase === "vote" && detail.answers && (() => {
+          const myVoteId = voteLocalId ?? detail.my_vote_answer_id ?? null;
+          const hasVoted = !!myVoteId;
+          return (
+            <motion.div
+              key="vote"
+              initial={reduced ? false : { opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={reduced ? { opacity: 0 } : { opacity: 0, y: -8 }}
+              className="space-y-2"
+            >
+              <p className="font-bebas text-sm text-cream/60 tracking-[0.25em]">PICK THE REAL ANSWER</p>
+              {detail.answers.map((a, i) => {
+                const isMyVote = myVoteId === a.id;
+                const isOwnFake = detail.my_answer_id === a.id;
+                return (
+                  <button
+                    key={a.id}
+                    onClick={() => castVote(a.id)}
+                    disabled={voting || isOwnFake}
+                    aria-disabled={isOwnFake || undefined}
+                    className={`w-full text-left rounded-xl px-4 py-3 transition-all ${
+                      isOwnFake
+                        ? "cursor-not-allowed"
+                        : "active:scale-[0.98] hover:-translate-y-0.5 disabled:opacity-60"
+                    } ${reduced ? "" : "pa-deal-in"}`}
+                    style={{
+                      background: isMyVote
+                        ? "linear-gradient(135deg, rgba(168,85,247,0.22) 0%, rgba(124,58,237,0.1) 100%)"
+                        : isOwnFake
+                          ? "rgba(255,255,255,0.02)"
+                          : "rgba(255,255,255,0.04)",
+                      border: isMyVote
+                        ? "1px solid rgba(168,85,247,0.55)"
+                        : isOwnFake
+                          ? "1px dashed rgba(255,255,255,0.12)"
+                          : "1px solid rgba(255,255,255,0.08)",
+                      color: isOwnFake ? "rgba(238,244,255,0.4)" : "rgba(238,244,255,0.92)",
+                      opacity: isOwnFake ? 0.55 : undefined,
+                      ...(reduced ? {} : { animationDelay: `${i * 80}ms` }),
+                    }}
+                  >
+                    <span className="font-syne text-base">{a.text}</span>
+                    {isOwnFake && (
+                      <span className="ml-2 font-bebas text-[10px] tracking-wider text-cream/40">
+                        YOUR FAKE
+                      </span>
+                    )}
+                    {isMyVote && (
+                      <span className="ml-2 font-bebas text-[10px] tracking-wider text-purple-200">
+                        YOUR VOTE
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+
+              {/* Locked-in confirmation. Re-voting stays allowed server-side
+                  until the timer runs out, so say so. */}
+              {hasVoted && (
+                <div
+                  className={`rounded-xl px-4 py-2.5 text-center ${reduced ? "" : "pa-pop-in"}`}
                   style={{
-                    background: isMine
-                      ? "linear-gradient(135deg, rgba(168,85,247,0.22) 0%, rgba(124,58,237,0.1) 100%)"
-                      : "rgba(255,255,255,0.04)",
-                    border: isMine
-                      ? "1px solid rgba(168,85,247,0.55)"
-                      : "1px solid rgba(255,255,255,0.08)",
-                    color: "rgba(238,244,255,0.92)",
-                    ...(reduced ? {} : { animationDelay: `${i * 80}ms` }),
+                    background: "linear-gradient(135deg, rgba(168,85,247,0.16) 0%, rgba(99,102,241,0.08) 100%)",
+                    border: "1px solid rgba(168,85,247,0.4)",
                   }}
                 >
-                  <span className="font-syne text-base">{a.text}</span>
-                  {isMine && (
-                    <span className="ml-2 font-bebas text-[10px] tracking-wider text-purple-200">
-                      YOUR VOTE
-                    </span>
-                  )}
-                </button>
-              );
-            })}
-          </motion.div>
-        )}
+                  <p className="font-bebas text-sm tracking-wider text-purple-200">
+                    VOTE LOCKED IN
+                  </p>
+                  <p className="text-cream/45 text-[11px] font-syne">
+                    Tap a different answer to switch before time runs out.
+                  </p>
+                </div>
+              )}
+
+              {/* Who has voted — same ids-only pattern as the write roster.
+                  Targets stay secret until reveal. */}
+              <AvatarCheckRow
+                players={players}
+                doneIds={detail.voted_user_ids ?? []}
+                meUserId={meUserId}
+                reduced={!!reduced}
+                doneTitle="voted"
+                pendingTitle="still deciding"
+              />
+            </motion.div>
+          );
+        })()}
 
         {phase === "reveal" && detail.answers && (
           <motion.div
@@ -698,27 +815,152 @@ export default function BluffView({
             exit={reduced ? { opacity: 0 } : { opacity: 0, y: -8 }}
             className="space-y-4"
           >
-            <div
-              className={`rounded-2xl p-5 text-center ${reduced ? "" : "pa-pop-in"}`}
-              style={{
-                background: "linear-gradient(135deg, rgba(34,197,94,0.2) 0%, rgba(255,215,0,0.1) 100%)",
-                border: "1px solid rgba(34,197,94,0.45)",
-              }}
-            >
-              <p className="font-bebas text-xs tracking-[0.3em] text-cream/55 mb-1">THE TRUTH</p>
-              <p className="font-bebas text-3xl tracking-wider">
-                <RevealText
-                  text={String(round.correct_answer ?? "")}
-                  color="#86EFAC"
-                  glow="0 0 8px rgba(34,197,94,0.45)"
-                />
-              </p>
+            {/* ── One-by-one dramatic reveal: fakes first (least fooling to
+                most), the REAL answer last with a gold TRUTH badge. Cards
+                mount as revealStep advances (~1.2s apart), so the pa-deal-in
+                CSS animation fires on mount — no per-card delay math.
+                Reduced motion: revealStep is maxed, everything is static. ── */}
+            <div className="space-y-2" aria-live="polite">
+              {orderedReveal.map((a, i) => {
+                if (revealStep <= i) return null;
+                const author = players.find((p) => p.user_id === a.author_user_id);
+                const fooled = a.vote_count ?? 0;
+                const voterChips = (a.voters ?? []).length > 0 && (
+                  <div className="mt-2 flex flex-wrap items-center gap-1">
+                    {(a.voters ?? []).map((vId, vi) => {
+                      const voter = players.find((p) => p.user_id === vId);
+                      const initial = (voter?.username ?? "?").slice(0, 1).toUpperCase();
+                      return (
+                        <span
+                          key={`${a.id}-v-${vId}`}
+                          title={voter?.username ?? "Player"}
+                          className={`inline-flex items-center justify-center w-5 h-5 rounded-full font-bebas text-[10px] ${reduced ? "" : "pa-pop-in"}`}
+                          style={{
+                            background: a.is_truth
+                              ? "linear-gradient(135deg, #22C55E 0%, #15803D 100%)"
+                              : "linear-gradient(135deg, #FFD700 0%, #B8960C 100%)",
+                            color: "#04080F",
+                            border: "1px solid rgba(0,0,0,0.15)",
+                            ...(reduced ? {} : { animationDelay: `${300 + vi * 60}ms` }),
+                          }}
+                        >
+                          {initial}
+                        </span>
+                      );
+                    })}
+                  </div>
+                );
+
+                if (a.is_truth) {
+                  // The truth: gold badge + typewriter reveal, lands LAST.
+                  return (
+                    <div
+                      key={a.id}
+                      className={`rounded-xl px-4 py-4 ${reduced ? "" : "pa-deal-in pa-leader-glow"}`}
+                      style={{
+                        background: "linear-gradient(135deg, rgba(255,215,0,0.16) 0%, rgba(255,215,0,0.04) 100%)",
+                        border: "1px solid rgba(255,215,0,0.55)",
+                      }}
+                    >
+                      <div className="flex items-center justify-between gap-3">
+                        <span
+                          className="inline-flex items-center font-bebas text-[10px] tracking-[0.3em] px-2.5 py-0.5 rounded-full"
+                          style={{
+                            background: "linear-gradient(135deg, #FFD700 0%, #B8960C 100%)",
+                            color: "#04080F",
+                            boxShadow: "0 0 12px rgba(255,215,0,0.45)",
+                          }}
+                        >
+                          TRUTH
+                        </span>
+                        <span className="font-bebas text-lg text-cream/80 flex-shrink-0">
+                          <CountUp value={fooled} duration={700} />{" "}
+                          {fooled === 1 ? "vote" : "votes"}
+                        </span>
+                      </div>
+                      <p className="font-bebas text-2xl sm:text-3xl tracking-wider mt-1.5">
+                        <RevealText
+                          text={String(round.correct_answer ?? a.text)}
+                          color="#FFD700"
+                          glow="0 0 10px rgba(255,215,0,0.5)"
+                        />
+                      </p>
+                      {voterChips}
+                      {(a.voters ?? []).length === 0 && (
+                        <span
+                          className="mt-2 inline-flex items-center font-bebas text-[10px] tracking-[0.25em] px-2 py-0.5 rounded-full text-sky-200"
+                          style={{
+                            background: "rgba(125,211,252,0.12)",
+                            border: "1px solid rgba(125,211,252,0.4)",
+                          }}
+                        >
+                          ICE COLD · nobody believed it
+                        </span>
+                      )}
+                    </div>
+                  );
+                }
+
+                // A fake: author avatar pops in next to it + "fooled N players".
+                return (
+                  <div
+                    key={a.id}
+                    className={`rounded-xl px-4 py-3 flex items-center justify-between ${reduced ? "" : "pa-deal-in"}`}
+                    style={{
+                      background: "rgba(255,255,255,0.03)",
+                      border: "1px solid rgba(255,255,255,0.08)",
+                    }}
+                  >
+                    <div className="min-w-0 flex-1">
+                      <p className="font-syne text-sm text-cream/90">{a.text}</p>
+                      <div className="mt-1.5 flex items-center gap-1.5">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={avatarSrcFor(author?.username)}
+                          alt=""
+                          aria-hidden="true"
+                          className={`w-6 h-6 rounded-full bg-navy object-cover flex-shrink-0 ${reduced ? "" : "pa-pop-in"}`}
+                          style={{
+                            border: "1px solid rgba(255,215,0,0.4)",
+                            ...(reduced ? {} : { animationDelay: "220ms" }),
+                          }}
+                        />
+                        <p className="text-cream/50 text-[11px] font-syne truncate">
+                          <span className="text-cream/85">{author?.username ?? "Someone"}</span>{" "}
+                          {fooled === 0
+                            ? "fooled nobody"
+                            : `fooled ${fooled} ${fooled === 1 ? "player" : "players"}`}
+                        </p>
+                      </div>
+                      {voterChips}
+                    </div>
+                    <span className="font-bebas text-lg text-cream/80 ml-3 flex-shrink-0">
+                      <CountUp value={fooled} duration={700} />{" "}
+                      {fooled === 1 ? "vote" : "votes"}
+                    </span>
+                  </div>
+                );
+              })}
+
+              {/* Suspense dots while the sequence is still dealing. */}
+              {!revealSequenceDone && (
+                <div className="flex items-center justify-center gap-1.5 py-3" aria-hidden="true">
+                  {[0, 1, 2].map((i) => (
+                    <span
+                      key={i}
+                      className={`w-1.5 h-1.5 rounded-full ${reduced ? "opacity-70" : "pa-ink-dot"}`}
+                      style={{ background: ACCENT, animationDelay: `${i * 200}ms` }}
+                    />
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* "You fooled N people" — sum of votes on the fakes I authored.
                 Derived from the reveal payload already in client state.
                 Per-fooler confetti burst when N >= 1. */}
             {(() => {
+              if (!revealSequenceDone) return null;
               const myFooledVotes = detail.answers!
                 .filter((a) => !a.is_truth && a.author_user_id === meUserId)
                 .reduce((sum, a) => sum + (a.vote_count ?? 0), 0);
@@ -748,139 +990,161 @@ export default function BluffView({
               );
             })()}
 
-            <div className="space-y-2">
-              {detail.answers
-                .sort((a, b) => (b.vote_count ?? 0) - (a.vote_count ?? 0))
-                .map((a, i) => {
-                  const author = players.find((p) => p.user_id === a.author_user_id);
-                  return (
-                    <div
-                      key={a.id}
-                      className={`rounded-xl px-4 py-3 flex items-center justify-between ${
-                        reduced ? "" : "pa-deal-in"
-                      } ${a.is_truth && !reduced ? "pa-truth-glow" : ""}`}
-                      style={{
-                        background: a.is_truth
-                          ? "linear-gradient(135deg, rgba(34,197,94,0.15) 0%, rgba(34,197,94,0.05) 100%)"
-                          : "rgba(255,255,255,0.03)",
-                        border: a.is_truth
-                          ? "1px solid rgba(34,197,94,0.4)"
-                          : "1px solid rgba(255,255,255,0.08)",
-                        ...(reduced ? {} : { animationDelay: `${i * 90}ms` }),
-                      }}
-                    >
-                      <div className="min-w-0 flex-1">
-                        <p className="font-syne text-sm text-cream/90">{a.text}</p>
-                        <p className="text-cream/40 text-[11px] font-syne mt-0.5">
-                          {a.is_truth ? "TRUTH" : `by ${author?.username ?? "Someone"}`}
-                        </p>
-                        {/* Voter chips — small avatar circles showing exactly
-                            who fell for this answer (or for the truth, who got
-                            it right). Stagger-deals in. ICE COLD badge when
-                            nobody picked the truth, gold-flash on the worst
-                            (most-fooling) fake. */}
-                        {(a.voters ?? []).length > 0 && (
-                          <div className="mt-2 flex flex-wrap items-center gap-1">
-                            {(a.voters ?? []).map((vId, vi) => {
-                              const voter = players.find((p) => p.user_id === vId);
-                              const initial = (voter?.username ?? "?").slice(0, 1).toUpperCase();
-                              return (
-                                <span
-                                  key={`${a.id}-v-${vId}`}
-                                  title={voter?.username ?? "Player"}
-                                  className={`inline-flex items-center justify-center w-5 h-5 rounded-full font-bebas text-[10px] ${reduced ? "" : "pa-pop-in"}`}
-                                  style={{
-                                    background: a.is_truth
-                                      ? "linear-gradient(135deg, #22C55E 0%, #15803D 100%)"
-                                      : "linear-gradient(135deg, #FFD700 0%, #B8960C 100%)",
-                                    color: "#04080F",
-                                    border: "1px solid rgba(0,0,0,0.15)",
-                                    ...(reduced ? {} : { animationDelay: `${i * 90 + vi * 60}ms` }),
-                                  }}
-                                >
-                                  {initial}
-                                </span>
-                              );
-                            })}
-                          </div>
-                        )}
-                        {a.is_truth && (a.voters ?? []).length === 0 && (
-                          <span className="mt-2 inline-flex items-center font-bebas text-[10px] tracking-[0.25em] px-2 py-0.5 rounded-full text-sky-200"
-                            style={{
-                              background: "rgba(125,211,252,0.12)",
-                              border: "1px solid rgba(125,211,252,0.4)",
-                            }}
-                          >
-                            ICE COLD · nobody believed it
-                          </span>
-                        )}
-                      </div>
-                      <span className="font-bebas text-lg text-cream/80 ml-3 flex-shrink-0">
-                        <CountUp value={a.vote_count ?? 0} duration={700} />{" "}
-                        {(a.vote_count ?? 0) === 1 ? "vote" : "votes"}
-                      </span>
-                    </div>
+            {/* ── Points breakdown — everyone sees everyone's lines once the
+                sequence lands. Display-only mirror of the server's scoring
+                (BLUFF_TRUTH_POINTS / BLUFF_FAKE_TRICK_POINTS); the banked
+                scores stay server-authoritative. Players with no fake on the
+                board (timed out or sat out) get a quiet zero line. ── */}
+            {revealSequenceDone && (() => {
+              const truthAnswer = detail.answers!.find((x) => x.is_truth);
+              const rows = players
+                .map((p) => {
+                  const foundTruth = (truthAnswer?.voters ?? []).includes(p.user_id);
+                  const tricked = detail.answers!
+                    .filter((x) => !x.is_truth && x.author_user_id === p.user_id)
+                    .reduce((sum, x) => sum + (x.vote_count ?? 0), 0);
+                  const wroteFake = detail.answers!.some(
+                    (x) => !x.is_truth && x.author_user_id === p.user_id,
                   );
-                })}
-            </div>
-
-            <PartyScoreboard players={playersForBoard} highlightUserId={meUserId} />
-
-            {/* Phase 2 — real post-round vote (auto-decides at 75%). */}
-            <PostRoundVoteCard
-              roundId={round.id}
-              roundKind="bluff"
-              isHost={isEffectiveHost}
-              onAutoPlayAgain={handleAutoPlayAgain}
-              onAutoBackToLobby={handleAutoBackToLobby}
-            />
-
-            {isEffectiveHost ? (
-              <div className="space-y-2">
-                <div className="flex flex-col sm:flex-row gap-3">
-                  <button
-                    onClick={startRound}
-                    className="flex-1 py-3 rounded-xl font-bebas tracking-wider text-base transition-all active:scale-95"
-                    style={{
-                      background: "linear-gradient(135deg, #FFD700 0%, #B8960C 100%)",
-                      color: "#04080F",
-                      boxShadow: "0 4px 18px rgba(255,215,0,0.3)",
-                    }}
-                  >
-                    NEXT ROUND
-                  </button>
-                  <button
-                    onClick={onReturnToLobby}
-                    className="flex-1 py-3 rounded-xl font-bebas tracking-wider text-base transition-all active:scale-95"
-                    style={{
-                      background: "rgba(255,255,255,0.04)",
-                      border: "1px solid rgba(255,255,255,0.1)",
-                      color: "rgba(238,244,255,0.85)",
-                    }}
-                  >
-                    BACK TO LOBBY
-                  </button>
-                </div>
-                <button
-                  onClick={handleRematch}
-                  disabled={rematchPending}
-                  className="w-full py-2.5 rounded-xl font-bebas tracking-wider text-sm transition-all active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed"
+                  const total =
+                    (foundTruth ? BLUFF_TRUTH_POINTS : 0) + tricked * BLUFF_FAKE_TRICK_POINTS;
+                  return { p, foundTruth, tricked, wroteFake, total };
+                })
+                .sort((a, b) => b.total - a.total);
+              return (
+                <div
+                  className={`rounded-2xl p-4 ${reduced ? "" : "pa-pop-in"}`}
                   style={{
-                    background: "linear-gradient(135deg, rgba(168,85,247,0.20) 0%, rgba(99,102,241,0.10) 100%)",
-                    border: "1px solid rgba(168,85,247,0.45)",
-                    color: "#E9D5FF",
-                    boxShadow: "0 0 16px rgba(168,85,247,0.18)",
+                    background: "linear-gradient(135deg, rgba(16,12,26,0.7) 0%, rgba(8,6,16,0.7) 100%)",
+                    border: "1px solid rgba(255,255,255,0.06)",
+                    backdropFilter: "blur(12px)",
                   }}
                 >
-                  {rematchPending ? "RESETTING..." : "REMATCH (FRESH SCORES, SAME ROSTER)"}
-                </button>
-              </div>
-            ) : (
-              <div className="text-center">
-                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bebas tracking-wider text-cream/55 bg-white/[0.04] border border-white/10">
-                  Waiting for host
-                </span>
-              </div>
+                  <p className="font-bebas text-xs tracking-[0.25em] text-cream/50 mb-2.5">
+                    POINTS THIS ROUND
+                  </p>
+                  <div className="space-y-1.5">
+                    {rows.map(({ p, foundTruth, tricked, wroteFake, total }) => (
+                      <div key={p.user_id} className="flex items-start justify-between gap-3">
+                        <div className="flex items-center gap-2 min-w-0">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={avatarSrcFor(p.username)}
+                            alt=""
+                            aria-hidden="true"
+                            className="w-5 h-5 rounded-full bg-navy object-cover flex-shrink-0"
+                            style={{ border: "1px solid rgba(255,255,255,0.15)" }}
+                          />
+                          <span className="font-syne text-sm text-cream/85 truncate">
+                            {p.username ?? "Player"}
+                            {p.user_id === meUserId && (
+                              <span className="text-cream/40 text-xs"> (you)</span>
+                            )}
+                          </span>
+                        </div>
+                        <div className="text-right flex-shrink-0">
+                          {foundTruth && (
+                            <p className="font-dm-mono text-xs text-emerald-300">
+                              +{BLUFF_TRUTH_POINTS} found the truth
+                            </p>
+                          )}
+                          {tricked > 0 && (
+                            <p className="font-dm-mono text-xs" style={{ color: "#FDE68A" }}>
+                              +{tricked * BLUFF_FAKE_TRICK_POINTS} tricked {tricked}{" "}
+                              {tricked === 1 ? "player" : "players"}
+                            </p>
+                          )}
+                          {total === 0 && (
+                            <p className="font-dm-mono text-xs text-cream/35">
+                              {wroteFake ? "+0 this round" : "no fake this round · +0"}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })()}
+
+            {revealSequenceDone && (
+              <>
+                <PartyScoreboard players={playersForBoard} highlightUserId={meUserId} />
+
+                {/* ── Final round: shared GameOverScreen (podium + Play Again ->
+                    rematch + Back to Lobby), mirroring PokerFaceView. The
+                    Fang payout slot stays empty: Party V1 is zero-Fang. ── */}
+                {isFinalRound ? (
+                  <GameOverScreen
+                    players={playersForBoard}
+                    meUserId={meUserId}
+                    accent={ACCENT}
+                    isHost={isEffectiveHost}
+                    onPlayAgain={handleRematch}
+                    onBackToLobby={onReturnToLobby}
+                    playAgainPending={rematchPending}
+                  />
+                ) : (
+                  <>
+                    {/* Phase 2 — real post-round vote (auto-decides at 75%). */}
+                    <PostRoundVoteCard
+                      roundId={round.id}
+                      roundKind="bluff"
+                      isHost={isEffectiveHost}
+                      onAutoPlayAgain={handleAutoPlayAgain}
+                      onAutoBackToLobby={handleAutoBackToLobby}
+                    />
+
+                    {isEffectiveHost ? (
+                      <div className="space-y-2">
+                        <div className="flex flex-col sm:flex-row gap-3">
+                          <button
+                            onClick={startRound}
+                            className="flex-1 py-3 rounded-xl font-bebas tracking-wider text-base transition-all active:scale-95"
+                            style={{
+                              background: "linear-gradient(135deg, #FFD700 0%, #B8960C 100%)",
+                              color: "#04080F",
+                              boxShadow: "0 4px 18px rgba(255,215,0,0.3)",
+                            }}
+                          >
+                            NEXT ROUND
+                          </button>
+                          <button
+                            onClick={onReturnToLobby}
+                            className="flex-1 py-3 rounded-xl font-bebas tracking-wider text-base transition-all active:scale-95"
+                            style={{
+                              background: "rgba(255,255,255,0.04)",
+                              border: "1px solid rgba(255,255,255,0.1)",
+                              color: "rgba(238,244,255,0.85)",
+                            }}
+                          >
+                            BACK TO LOBBY
+                          </button>
+                        </div>
+                        <button
+                          onClick={handleRematch}
+                          disabled={rematchPending}
+                          className="w-full py-2.5 rounded-xl font-bebas tracking-wider text-sm transition-all active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed"
+                          style={{
+                            background: "linear-gradient(135deg, rgba(168,85,247,0.20) 0%, rgba(99,102,241,0.10) 100%)",
+                            border: "1px solid rgba(168,85,247,0.45)",
+                            color: "#E9D5FF",
+                            boxShadow: "0 0 16px rgba(168,85,247,0.18)",
+                          }}
+                        >
+                          {rematchPending ? "RESETTING..." : "REMATCH (FRESH SCORES, SAME ROSTER)"}
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="text-center">
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bebas tracking-wider text-cream/55 bg-white/[0.04] border border-white/10">
+                          Waiting for host
+                        </span>
+                      </div>
+                    )}
+                  </>
+                )}
+              </>
             )}
           </motion.div>
         )}
@@ -921,6 +1185,75 @@ export default function BluffView({
         onClose={() => setInviteOpen(false)}
         code={room.code}
       />
+    </div>
+  );
+}
+
+// ── AvatarCheckRow — "who's done" roster used by both the write phase
+// (submitted) and the vote phase (voted). Driven purely by ids-only arrays
+// from the phase-aware GET, so it can never leak content. Done players get a
+// gold ring + checkmark badge; pending players stay dim. ──
+function AvatarCheckRow({
+  players,
+  doneIds,
+  meUserId,
+  reduced,
+  doneTitle,
+  pendingTitle,
+}: {
+  players: PartyPlayer[];
+  doneIds: string[];
+  meUserId: string;
+  reduced: boolean;
+  doneTitle: string;
+  pendingTitle: string;
+}) {
+  if (players.length === 0) return null;
+  const doneSet = new Set(doneIds);
+  return (
+    <div className="flex flex-wrap items-center gap-2 pt-1">
+      {players.map((p) => {
+        const done = doneSet.has(p.user_id);
+        const isMe = p.user_id === meUserId;
+        const name = p.username ?? "Player";
+        return (
+          <span
+            key={p.user_id}
+            title={`${name} · ${done ? doneTitle : pendingTitle}`}
+            className="relative inline-flex"
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={avatarSrcFor(p.username)}
+              alt={`${name}, ${done ? doneTitle : pendingTitle}`}
+              className="w-8 h-8 rounded-full bg-navy object-cover transition-all"
+              style={{
+                border: done
+                  ? "2px solid rgba(255,215,0,0.75)"
+                  : isMe
+                    ? "2px solid rgba(168,85,247,0.55)"
+                    : "1px solid rgba(255,255,255,0.14)",
+                boxShadow: done ? "0 0 8px rgba(255,215,0,0.4)" : "none",
+                opacity: done ? 1 : 0.5,
+              }}
+            />
+            {done && (
+              <span
+                aria-hidden="true"
+                className={`absolute -bottom-0.5 -right-0.5 inline-flex items-center justify-center w-3.5 h-3.5 rounded-full ${reduced ? "" : "pa-chip-in"}`}
+                style={{
+                  background: "linear-gradient(135deg, #FFD700 0%, #B8960C 100%)",
+                  border: "1px solid rgba(4,8,15,0.6)",
+                }}
+              >
+                <svg viewBox="0 0 10 10" className="w-2 h-2" fill="none" stroke="#04080F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M1.5 5.5 4 8l4.5-6" />
+                </svg>
+              </span>
+            )}
+          </span>
+        );
+      })}
     </div>
   );
 }
