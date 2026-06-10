@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import useSWR from "swr";
 import { motion, useReducedMotion } from "framer-motion";
 import {
-  Cards, ArrowRight, X, CheckCircle, Sparkle,
+  Cards, ArrowRight, X, CheckCircle, Sparkle, ArrowsClockwise,
 } from "@phosphor-icons/react";
 import { apiPatch, swrFetcher } from "@/lib/api-client";
 import { toastError } from "@/lib/toast";
@@ -45,7 +45,7 @@ interface CardsResponse {
 const SESSION_MAX = 20;
 
 export default function FlashcardStudy({ classId }: { classId: string }) {
-  const { data, isLoading, mutate } = useSWR<CardsResponse>(
+  const { data, error, isLoading, mutate } = useSWR<CardsResponse>(
     classId ? `/api/classes/${classId}/flashcards` : null,
     swrFetcher,
     { keepPreviousData: true },
@@ -64,6 +64,35 @@ export default function FlashcardStudy({ classId }: { classId: string }) {
   const cards = data?.cards ?? [];
   const dueCount = data?.dueCount ?? 0;
   const total = cards.length;
+
+  // Fetch error with nothing cached — compact error row with retry, NOT the
+  // empty state (a network blip is not "no flashcards yet").
+  if (error && !data) {
+    return (
+      <section>
+        <div className="flex items-baseline justify-between mb-4">
+          <h2 className="font-bebas text-sm text-cream/85 tracking-[0.2em]">
+            <span className="inline-flex items-center gap-2">
+              <Cards size={13} weight="bold" /> FLASHCARDS
+            </span>
+          </h2>
+        </div>
+        <div className="flex items-center justify-between gap-3 max-w-md rounded-[10px] border border-red-400/30 bg-red-400/5 px-4 py-3">
+          <p className="font-syne text-[12px] text-red-300">
+            Couldn&apos;t load flashcards. Network hiccup, probably.
+          </p>
+          <button
+            type="button"
+            onClick={() => void mutate()}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-white/15 bg-white/5 text-cream/80 hover:bg-white/10 hover:text-cream font-syne text-[11px] font-bold transition-colors shrink-0"
+          >
+            <ArrowsClockwise size={11} weight="bold" aria-hidden="true" />
+            Retry
+          </button>
+        </div>
+      </section>
+    );
+  }
 
   // Empty state — encourage the user to add a real note.
   if (total === 0) {

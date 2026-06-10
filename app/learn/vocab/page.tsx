@@ -21,7 +21,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import useSWR from "swr";
-import { Plus, Cards, ListBullets, BookOpen, GlobeHemisphereWest, Compass } from "@phosphor-icons/react";
+import { Plus, Cards, ListBullets, BookOpen, GlobeHemisphereWest, Compass, ArrowsClockwise } from "@phosphor-icons/react";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import dynamic from "next/dynamic";
 import BankSelector from "@/components/Vocab/BankSelector";
@@ -57,7 +57,7 @@ export default function VocabPage() {
   const [showCreateModal, setShowCreateModal] = useState(false);
 
   // SWR-powered bank list — single source of truth for what banks the user owns.
-  const { data: banksData, isLoading: banksLoading, mutate: mutateBanks } = useSWR<{ banks: VocabBank[] }>(
+  const { data: banksData, error: banksError, isLoading: banksLoading, mutate: mutateBanks } = useSWR<{ banks: VocabBank[] }>(
     "/api/vocab/banks",
     swrFetcher,
     { keepPreviousData: true, revalidateOnFocus: true },
@@ -127,7 +127,14 @@ export default function VocabPage() {
     return found ?? { bank_id: activeBank.id, bank_name: activeBank.name, count: 0, lastDay: null };
   }, [streakData, activeBank]);
 
-  const noBanks = !banksLoading && banks.length === 0;
+  // Error vs genuinely-empty: a fetch failure also resolves to banks=[] with
+  // banksLoading=false, so without this split an existing user on a network
+  // blip would see the "Make your first word bank" onboarding. Only show the
+  // empty state when the fetch SUCCEEDED and returned zero banks. While SWR
+  // retries (banksLoading goes true again with error still set), the loading
+  // branch wins — checked first in the render below.
+  const banksFailed = !!banksError && banks.length === 0;
+  const noBanks = !banksLoading && !banksError && banks.length === 0;
 
   return (
     <ProtectedRoute>
@@ -179,13 +186,15 @@ export default function VocabPage() {
             )}
           </header>
 
-          {/* Empty state — zero banks */}
-          {noBanks ? (
-            <EmptyBanksState onCreate={() => setShowCreateModal(true)} />
-          ) : banksLoading && banks.length === 0 ? (
+          {/* Loading → error → genuinely empty → banks */}
+          {banksLoading && banks.length === 0 ? (
             <div className="rounded-2xl bg-white/5 backdrop-blur border border-white/10 p-10 text-center">
               <p className="font-mono text-xs uppercase tracking-[0.25em] text-cream/55">loading banks...</p>
             </div>
+          ) : banksFailed ? (
+            <BanksErrorState onRetry={() => mutateBanks()} />
+          ) : noBanks ? (
+            <EmptyBanksState onCreate={() => setShowCreateModal(true)} />
           ) : activeBank ? (
             <>
               {/* Bank selector */}
@@ -254,6 +263,32 @@ export default function VocabPage() {
         onCreated={handleBankCreated}
       />
     </ProtectedRoute>
+  );
+}
+
+/* ── Error state ───────────────────────────────────────────────────────── */
+
+// Page-level fetch-error state. Mirrors DiscoverTab's ErrorState treatment.
+// Distinct from EmptyBanksState so a network blip never reads as "you have
+// no banks."
+function BanksErrorState({ onRetry }: { onRetry: () => void }) {
+  return (
+    <div className="rounded-2xl border border-red-400/30 bg-red-400/5 p-7 sm:p-9 text-center animate-slide-up">
+      <p className="font-bebas text-xl tracking-wider text-cream mb-2">
+        Couldn&apos;t load your banks
+      </p>
+      <p className="font-syne text-sm text-cream/65 mb-4 max-w-sm mx-auto">
+        Network hiccup, probably. Your banks are safe.
+      </p>
+      <button
+        type="button"
+        onClick={onRetry}
+        className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full border border-white/15 bg-white/5 text-cream/80 hover:bg-white/10 hover:text-cream font-syne text-xs font-bold transition-colors"
+      >
+        <ArrowsClockwise size={12} weight="bold" aria-hidden="true" />
+        Try again
+      </button>
+    </div>
   );
 }
 

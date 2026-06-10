@@ -13,7 +13,7 @@ import { motion } from "framer-motion";
 import type { useRouter } from "next/navigation";
 import useSWR from "swr";
 import { apiGet } from "@/lib/api-client";
-import { GameController, PaintBrush, ChatCircleText, Eye, ArrowRight, Clock } from "@phosphor-icons/react";
+import { GameController, PaintBrush, ChatCircleText, Eye, ArrowRight, Clock, ArrowsClockwise } from "@phosphor-icons/react";
 import { toastError } from "@/lib/toast";
 
 interface HistoryRow {
@@ -72,7 +72,7 @@ interface Props {
 export default function PastLobbiesPanel({ router }: Props) {
   const [hydrated, setHydrated] = useState(false);
 
-  const { data, error, isLoading } = useSWR<HistoryResponse>(
+  const { data, error, isLoading, mutate } = useSWR<HistoryResponse>(
     "/api/party/history",
     async (url: string) => {
       const res = await apiGet<HistoryResponse>(url);
@@ -104,6 +104,28 @@ export default function PastLobbiesPanel({ router }: Props) {
             style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)", height: 56 }}
           />
         ))}
+      </div>
+    );
+  }
+
+  // Fetch error with no cached data: an error state, never the cheery empty
+  // state. A user with a live room must not be told it doesn't exist.
+  if (error && !data) {
+    return (
+      <div className="flex-1 overflow-y-auto px-4 py-6">
+        <div className="rounded-2xl border border-red-400/30 bg-red-400/5 p-6 text-center">
+          <p className="font-syne text-sm text-red-300 mb-3">
+            Couldn't load your lobbies. Your rooms are still there, this list isn't.
+          </p>
+          <button
+            type="button"
+            onClick={() => mutate()}
+            className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full border border-white/15 bg-white/5 text-cream/80 hover:bg-white/10 hover:text-cream font-syne text-xs font-bold transition-colors"
+          >
+            <ArrowsClockwise size={12} weight="bold" aria-hidden="true" />
+            Try again
+          </button>
+        </div>
       </div>
     );
   }

@@ -5,7 +5,7 @@ import Link from "next/link";
 import useSWR from "swr";
 import {
   Plus, Target, Note, ArrowRight, BookOpen, GraduationCap,
-  PushPin, Sparkle, X, Clock,
+  PushPin, Sparkle, X, Clock, ArrowsClockwise,
 } from "@phosphor-icons/react";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Navbar from "@/components/Navbar";
@@ -64,7 +64,7 @@ export default function AcademiaPage() {
   // Required onboarding gate. Hits before classes/notes load so we can
   // shortcut the redirect; SWR's deduping means there's no extra cost
   // when the user comes back through.
-  const { data: gate, isLoading: gateLoading } = useSWR<{ onboarded: boolean }>(
+  const { data: gate, error: gateError, isLoading: gateLoading, mutate: mutateGate } = useSWR<{ onboarded: boolean }>(
     "/api/academia/onboarding", swrFetcher,
     { revalidateOnFocus: false, shouldRetryOnError: false },
   );
@@ -76,7 +76,7 @@ export default function AcademiaPage() {
 
   const allowed = gate?.onboarded === true;
 
-  const { data: classData, mutate: mutateClasses, isLoading: classesLoading } = useSWR<{ classes: ClassSummary[] }>(
+  const { data: classData, error: classesError, mutate: mutateClasses, isLoading: classesLoading } = useSWR<{ classes: ClassSummary[] }>(
     allowed ? "/api/classes" : null, swrFetcher,
     { keepPreviousData: true },
   );
@@ -88,6 +88,25 @@ export default function AcademiaPage() {
   const classes = classData?.classes ?? [];
   const notes = notesData?.notes ?? [];
   const [showCreate, setShowCreate] = useState(false);
+
+  // Gate fetch failed. With shouldRetryOnError off, one transient 500 used
+  // to strand this page on an infinite spinner. Show a retry card instead.
+  // Never fail open into the hub: the gate exists to route un-onboarded
+  // users to /academia/onboarding, so on error the only way forward is retry.
+  if (gateError) {
+    return (
+      <ProtectedRoute>
+        <div className="min-h-screen bg-navy text-cream flex items-center justify-center px-4">
+          <div className="w-full max-w-sm">
+            <ErrorCard
+              message="Couldn't open your classroom. Network hiccup, probably."
+              onRetry={() => void mutateGate()}
+            />
+          </div>
+        </div>
+      </ProtectedRoute>
+    );
+  }
 
   // Hold render until the gate resolves. Avoids flashing the hub before
   // the redirect kicks in for un-onboarded users.
@@ -193,6 +212,13 @@ export default function AcademiaPage() {
                     <div key={i} className="h-44 rounded-[14px] bg-white/[0.03] border border-white/[0.06] animate-pulse" />
                   ))}
                 </div>
+              ) : classesError && classes.length === 0 ? (
+                // Error before empty: a failed fetch is not "no classes yet".
+                // Stale keepPreviousData still renders the grid below.
+                <ErrorCard
+                  message="Couldn't load your classes. Network hiccup, probably."
+                  onRetry={() => void mutateClasses()}
+                />
               ) : classes.length === 0 ? (
                 <EmptyState onCreate={() => setShowCreate(true)} />
               ) : (
@@ -242,6 +268,26 @@ export default function AcademiaPage() {
         )}
       </div>
     </ProtectedRoute>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Error card — mirrors the DiscoverTab ErrorState treatment (red glass +
+// retry pill). Used for both the onboarding gate and the classes fetch.
+// ─────────────────────────────────────────────────────────────────────────────
+function ErrorCard({ message, onRetry }: { message: string; onRetry: () => void }) {
+  return (
+    <div className="rounded-2xl border border-red-400/30 bg-red-400/5 p-6 text-center">
+      <p className="font-syne text-sm text-red-300 mb-3">{message}</p>
+      <button
+        type="button"
+        onClick={onRetry}
+        className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full border border-white/15 bg-white/5 text-cream/80 hover:bg-white/10 hover:text-cream font-syne text-xs font-bold transition-colors"
+      >
+        <ArrowsClockwise size={12} weight="bold" aria-hidden="true" />
+        Try again
+      </button>
+    </div>
   );
 }
 

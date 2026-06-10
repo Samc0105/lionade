@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { useAuth } from "@/lib/auth";
 import { useUserStats } from "@/lib/hooks";
 import { formatCoins } from "@/lib/mockData";
@@ -28,6 +28,7 @@ import {
   TrendUp,
   ArrowUpRight,
   ArrowDownRight,
+  ArrowsClockwise,
   type Icon,
 } from "@phosphor-icons/react";
 
@@ -191,6 +192,7 @@ export default function WalletPage() {
   const { stats } = useUserStats(user?.id);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [txnLoading, setTxnLoading] = useState(true);
+  const [txnError, setTxnError] = useState(false);
 
   const coins = stats?.coins ?? user?.coins ?? null;
   const xp = stats?.xp ?? user?.xp ?? null;
@@ -198,19 +200,31 @@ export default function WalletPage() {
   const streak = stats?.streak ?? user?.streak ?? null;
   const ready = coins !== null;
 
-  useEffect(() => {
+  // Manual fetch (not SWR) so the Retry button can re-invoke the exact same
+  // call. A failed query must surface as an error, never as "no transactions."
+  const fetchTransactions = useCallback(async () => {
     if (!user?.id) return;
-    (async () => {
-      const { data } = await supabase
-        .from("coin_transactions")
-        .select("id, amount, type, description, created_at")
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: false })
-        .limit(20);
-      setTransactions((data ?? []) as Transaction[]);
+    setTxnLoading(true);
+    setTxnError(false);
+    const { data, error } = await supabase
+      .from("coin_transactions")
+      .select("id, amount, type, description, created_at")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(20);
+    if (error) {
+      console.error("[wallet:transactions] fetch failed", error);
+      setTxnError(true);
       setTxnLoading(false);
-    })();
+      return;
+    }
+    setTransactions((data ?? []) as Transaction[]);
+    setTxnLoading(false);
   }, [user?.id]);
+
+  useEffect(() => {
+    fetchTransactions();
+  }, [fetchTransactions]);
 
   const weekly = useWeeklyDelta(transactions);
   const todayEarned = useTodayEarned(transactions);
@@ -380,6 +394,20 @@ export default function WalletPage() {
                   {[1, 2, 3, 4, 5, 6].map((i) => (
                     <div key={i} className="h-14 rounded-xl bg-white/5 animate-pulse" />
                   ))}
+                </div>
+              ) : txnError ? (
+                <div className="rounded-2xl border border-red-400/30 bg-red-400/5 p-6 text-center">
+                  <p className="font-syne text-sm text-red-300 mb-3">
+                    Couldn't load your ledger. Your Fangs are safe, the connection isn't.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={fetchTransactions}
+                    className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full border border-white/15 bg-white/5 text-cream/80 hover:bg-white/10 hover:text-cream font-syne text-xs font-bold transition-colors"
+                  >
+                    <ArrowsClockwise size={12} weight="bold" aria-hidden="true" />
+                    Try again
+                  </button>
                 </div>
               ) : transactions.length === 0 ? (
                 <div className="text-center py-20">

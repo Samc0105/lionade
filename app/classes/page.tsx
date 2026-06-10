@@ -5,7 +5,7 @@ import Link from "next/link";
 import useSWR from "swr";
 import {
   Plus, Target, Note, ArrowRight, BookOpen, Calendar,
-  Sparkle, X,
+  Sparkle, X, ArrowsClockwise,
 } from "@phosphor-icons/react";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Navbar from "@/components/Navbar";
@@ -41,7 +41,7 @@ const PRESET_COLORS = [
 ];
 
 export default function ClassesIndexPage() {
-  const { data, mutate, isLoading } = useSWR<{ classes: ClassSummary[] }>(
+  const { data, error, mutate, isLoading } = useSWR<{ classes: ClassSummary[] }>(
     "/api/classes", swrFetcher,
     { keepPreviousData: true },
   );
@@ -91,6 +91,11 @@ export default function ClassesIndexPage() {
                 <div key={i} className="h-44 rounded-[14px] bg-white/[0.03] border border-white/[0.06] animate-pulse" />
               ))}
             </div>
+          ) : error && classes.length === 0 ? (
+            // Error before empty: a failed fetch used to show "No classes
+            // yet" to users who have classes. Stale keepPreviousData still
+            // renders the grid below through a transient revalidate failure.
+            <LoadErrorState onRetry={() => void mutate()} />
           ) : classes.length === 0 ? (
             <EmptyState onCreate={() => setShowCreate(true)} />
           ) : (
@@ -196,6 +201,27 @@ function ClassCard({ cls }: { cls: ClassSummary }) {
         />
       </div>
     </Link>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Load error — mirrors the DiscoverTab ErrorState treatment.
+// ─────────────────────────────────────────────────────────────────────────────
+function LoadErrorState({ onRetry }: { onRetry: () => void }) {
+  return (
+    <div className="rounded-2xl border border-red-400/30 bg-red-400/5 p-6 text-center">
+      <p className="font-syne text-sm text-red-300 mb-3">
+        Couldn&apos;t load your classes. Network hiccup, probably.
+      </p>
+      <button
+        type="button"
+        onClick={onRetry}
+        className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full border border-white/15 bg-white/5 text-cream/80 hover:bg-white/10 hover:text-cream font-syne text-xs font-bold transition-colors"
+      >
+        <ArrowsClockwise size={12} weight="bold" aria-hidden="true" />
+        Try again
+      </button>
+    </div>
   );
 }
 

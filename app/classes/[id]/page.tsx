@@ -11,7 +11,7 @@ import {
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Navbar from "@/components/Navbar";
 import SpaceBackground from "@/components/SpaceBackground";
-import { apiDelete, apiPatch, apiPost, swrFetcher } from "@/lib/api-client";
+import { apiDelete, apiGet, apiPatch, apiPost, swrFetcher } from "@/lib/api-client";
 import ConfirmModal from "@/components/ConfirmModal";
 import MasteryProgressBar from "@/components/Mastery/MasteryProgressBar";
 import ExamCountdown from "@/components/Class/ExamCountdown";
@@ -72,20 +72,107 @@ function daysUntil(dateStr: string | null): number | null {
   return Math.ceil((target.getTime() - now.getTime()) / 86_400_000);
 }
 
+/**
+ * Status-aware error for the class detail fetch. The shared swrFetcher
+ * throws a plain Error with no status, which makes "class gone" (404)
+ * indistinguishable from a network blip. We keep the status so the page
+ * can render not-found vs retry.
+ */
+class ApiError extends Error {
+  status: number;
+  constructor(message: string, status: number) {
+    super(message);
+    this.name = "ApiError";
+    this.status = status;
+  }
+}
+
+async function classDetailFetcher(path: string): Promise<ClassDetail> {
+  const r = await apiGet<ClassDetail>(path);
+  if (!r.ok) throw new ApiError(r.error ?? `Request failed (${r.status})`, r.status);
+  return r.data as ClassDetail;
+}
+
 export default function ClassNotebookPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const classId = params?.id;
 
-  const { data, isLoading, mutate } = useSWR<ClassDetail>(
+  const { data, error, isLoading, mutate } = useSWR<ClassDetail>(
     classId ? `/api/classes/${classId}` : null,
-    swrFetcher,
+    classDetailFetcher,
     { keepPreviousData: true },
   );
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [showArchiveConfirm, setShowArchiveConfirm] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+
+  // Error before skeleton. A bad ID or a dead API used to leave isLoading
+  // false with no data, which rendered the skeleton forever. Checking
+  // error first also avoids painting stale keepPreviousData from a
+  // different class under this URL.
+  if (error) {
+    const notFound = error instanceof ApiError && error.status === 404;
+    return (
+      <ProtectedRoute>
+        <div className="min-h-screen bg-navy text-cream pt-12">
+          <SpaceBackground />
+          <Navbar />
+          <main className="relative z-10 max-w-[980px] mx-auto px-4 sm:px-6 pt-6 pb-24">
+            <Link
+              href="/classes"
+              className="group inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.25em] text-cream/50 hover:text-cream transition-colors"
+            >
+              <CaretLeft size={12} weight="bold" className="transition-transform duration-200 group-hover:-translate-x-0.5" />
+              Classes
+            </Link>
+            {notFound ? (
+              <div className="mt-6 rounded-2xl bg-white/5 backdrop-blur border border-white/10 p-8 sm:p-10 text-center">
+                <div className="inline-grid place-items-center w-12 h-12 rounded-2xl bg-white/[0.04] border border-white/10 mx-auto mb-4">
+                  <BookOpenText size={22} className="text-cream/50" weight="bold" />
+                </div>
+                <h1 className="font-bebas text-[32px] tracking-[0.05em] text-cream leading-none mb-2">
+                  Class not found
+                </h1>
+                <p className="font-syne text-sm text-cream/60 max-w-sm mx-auto mb-5">
+                  This class does not exist or was deleted. Head back and pick one that does.
+                </p>
+                <Link
+                  href="/classes"
+                  className="inline-flex items-center gap-2 rounded-full bg-gold text-navy hover:bg-gold/90 font-mono text-[11px] uppercase tracking-[0.25em] px-5 py-2.5 transition-colors"
+                >
+                  Back to Classes
+                </Link>
+              </div>
+            ) : (
+              <div className="mt-6 rounded-2xl border border-red-400/30 bg-red-400/5 p-8 text-center">
+                <p className="font-syne text-sm text-red-300 mb-4">
+                  Couldn&apos;t load this class. Network hiccup, probably.
+                </p>
+                <div className="flex items-center justify-center gap-4">
+                  <button
+                    type="button"
+                    onClick={() => void mutate()}
+                    className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full border border-white/15 bg-white/5 text-cream/80 hover:bg-white/10 hover:text-cream font-syne text-xs font-bold transition-colors"
+                  >
+                    <ArrowsClockwise size={12} weight="bold" aria-hidden="true" />
+                    Try again
+                  </button>
+                  <Link
+                    href="/classes"
+                    className="font-syne text-xs font-bold text-cream/60 hover:text-cream transition-colors"
+                  >
+                    Back to Classes
+                  </Link>
+                </div>
+              </div>
+            )}
+          </main>
+        </div>
+      </ProtectedRoute>
+    );
+  }
 
   if (isLoading || !data) {
     return (

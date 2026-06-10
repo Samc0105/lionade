@@ -7,7 +7,7 @@ import Link from "next/link";
 import {
   ArrowRight, Brain, Target, Clock, Sparkle,
   CaretLeft, NotePencil, Warning, X, Lock,
-  ChatCircleText, GraduationCap, ListChecks,
+  ChatCircleText, GraduationCap, ListChecks, ArrowsClockwise,
 } from "@phosphor-icons/react";
 import { PLAN_EXAM_LIMITS } from "@/lib/mastery-plan";
 import Navbar from "@/components/Navbar";
@@ -61,7 +61,9 @@ export default function MasteryLandingPage() {
   // they show up under the right notebook automatically.
   const searchParams = useSearchParams();
   const classIdContext = searchParams?.get("classId") ?? null;
-  const { data, isLoading: loadingExams } = useSWR<{ exams: ExamSummary[] }>(
+  // swrFetcher throws on non-2xx, so a failed fetch lands in `examsError`
+  // instead of silently resolving to "no exams."
+  const { data, error: examsError, isLoading: loadingExams, mutate: mutateExams } = useSWR<{ exams: ExamSummary[] }>(
     "/api/mastery/exams", swrFetcher,
     { keepPreviousData: true },
   );
@@ -360,6 +362,22 @@ export default function MasteryLandingPage() {
               {[1, 2].map(i => (
                 <div key={i} className="h-28 rounded-[10px] bg-white/[0.03] animate-pulse" />
               ))}
+            </div>
+          ) : examsError && !data ? (
+            /* Fetch failed with nothing cached. Show an error + retry instead
+               of the explainer, which would read as "you have no targets." */
+            <div className="rounded-2xl border border-red-400/30 bg-red-400/5 p-6 text-center">
+              <p className="font-syne text-sm text-red-300 mb-3">
+                Couldn't load your targets. They're still there, this page just blinked.
+              </p>
+              <button
+                type="button"
+                onClick={() => mutateExams()}
+                className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full border border-white/15 bg-white/5 text-cream/80 hover:bg-white/10 hover:text-cream font-syne text-xs font-bold transition-colors"
+              >
+                <ArrowsClockwise size={12} weight="bold" aria-hidden="true" />
+                Try again
+              </button>
             </div>
           ) : exams.length > 0 ? (
             <section>

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import useSWR from "swr";
 import {
-  GraduationCap, Plus, X, PencilSimple, Trash, Star, Check,
+  GraduationCap, Plus, X, PencilSimple, Trash, Star, Check, ArrowsClockwise,
 } from "@phosphor-icons/react";
 import { apiDelete, apiPatch, apiPost, swrFetcher } from "@/lib/api-client";
 import ConfirmModal from "@/components/ConfirmModal";
@@ -63,7 +63,7 @@ interface Props {
 // ─────────────────────────────────────────────────────────────────────────────
 export default function GradeTracker({ classId }: Props) {
   const swrKey = `/api/classes/${classId}/grades`;
-  const { data, isLoading, mutate } = useSWR<ApiShape>(swrKey, swrFetcher, {
+  const { data, error, isLoading, mutate } = useSWR<ApiShape>(swrKey, swrFetcher, {
     keepPreviousData: true,
   });
 
@@ -203,6 +203,8 @@ export default function GradeTracker({ classId }: Props) {
       {/* Body */}
       {isLoading && !data ? (
         <GradesSkeleton />
+      ) : error && grades.length === 0 ? (
+        <ErrorRow onRetry={() => mutate()} />
       ) : grades.length === 0 ? (
         <EmptyState onAdd={() => setAdding(true)} hideCta={adding} />
       ) : (
@@ -252,6 +254,27 @@ function EmptyState({ onAdd, hideCta }: { onAdd: () => void; hideCta: boolean })
           <Plus size={11} weight="bold" /> Add your first grade
         </button>
       )}
+    </div>
+  );
+}
+
+// Compact fetch-error row — embedded card context, so a single row with
+// message + retry instead of a full-page state. Mirrors DiscoverTab's
+// ErrorState visual treatment (red-tinted glass + pill retry button).
+function ErrorRow({ onRetry }: { onRetry: () => void }) {
+  return (
+    <div className="flex items-center justify-between gap-3 rounded-[10px] border border-red-400/30 bg-red-400/5 px-4 py-3">
+      <p className="font-syne text-[12px] text-red-300">
+        Couldn&apos;t load grades. Network hiccup, probably.
+      </p>
+      <button
+        type="button"
+        onClick={onRetry}
+        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-white/15 bg-white/5 text-cream/80 hover:bg-white/10 hover:text-cream font-syne text-[11px] font-bold transition-colors shrink-0"
+      >
+        <ArrowsClockwise size={11} weight="bold" aria-hidden="true" />
+        Retry
+      </button>
     </div>
   );
 }
