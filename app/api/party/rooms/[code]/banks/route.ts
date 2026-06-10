@@ -76,7 +76,9 @@ export async function GET(
       id: b.id as string,
       name: b.name as string,
       kind: b.kind as string,
-      icon: (b.icon ?? null) as string | null,
+      // vocab_banks.icon is nullable; coerce to a default so the client's
+      // PartyBank.icon: string contract holds and we never render a null.
+      icon: (b.icon as string | null) ?? "📚",
       color: b.color as string,
       wordCount,
       eligible: wordCount >= MIN_BANK_WORDS,

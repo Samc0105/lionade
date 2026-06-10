@@ -23,13 +23,13 @@ export async function POST(
 
   const { data: round } = await supabaseAdmin
     .from("sketch_rounds")
-    .select("id, room_id, word, factoid, drawer_user_id, started_at, ended_at, duration_sec, phase, winner_user_id, celebrating_started_at")
+    .select("id, room_id, word, factoid, drawer_user_id, started_at, ended_at, duration_sec, phase, winner_user_id, celebrating_started_at, source_kind")
     .eq("id", params.id)
     .maybeSingle();
   if (!round) return NextResponse.json({ error: "Round not found" }, { status: 404 });
   if (round.ended_at) {
     // Already completed; return idempotent reveal. (Phase + winner already on the row.)
-    return buildReveal(round.id, round.word, round.factoid, round.drawer_user_id, round.room_id);
+    return buildReveal(round.id, round.word, round.factoid, round.drawer_user_id, round.room_id, round.source_kind);
   }
 
   // Allow drawer OR host to complete the round (timeout case).
@@ -118,7 +118,7 @@ export async function POST(
     })
     .eq("id", round.id);
 
-  return buildReveal(round.id, round.word, round.factoid, round.drawer_user_id, round.room_id);
+  return buildReveal(round.id, round.word, round.factoid, round.drawer_user_id, round.room_id, round.source_kind);
 }
 
 async function buildReveal(
@@ -127,6 +127,7 @@ async function buildReveal(
   factoid: string | null,
   drawerUserId: string,
   roomId: string,
+  sourceKind: string | null,
 ) {
   const { data: players } = await supabaseAdmin
     .from("party_room_players")
@@ -148,6 +149,9 @@ async function buildReveal(
     round_id: roundId,
     word,
     factoid,
+    // Drives the reveal's DEFINITION eyebrow for bank rounds on EVERY client
+    // (not just the drawer who tapped the card). 'curated' for normal rounds.
+    source_kind: sourceKind ?? "curated",
     drawer_user_id: drawerUserId,
     scoreboard: scoreboard.sort((a, b) => b.score - a.score),
   });
