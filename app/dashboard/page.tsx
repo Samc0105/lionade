@@ -707,9 +707,13 @@ function DashboardContent() {
                   ))}
                 </>
               )}
-              {dailyMissions.length === 0 && !missionsLoading && (
+              {(dailyMissionsData?.missions?.length ?? 0) === 0 && !missionsLoading && (
                 /* Missions exist for every user every day, so a resolved-empty
-                   payload means the fetch failed — red-glass retry card. */
+                   payload means the fetch failed — red-glass retry card.
+                   Gated on the SWR value (not the local dailyMissions state):
+                   the local state hydrates in a useEffect AFTER the SWR data
+                   commits, so gating on it flashed this card for one frame on
+                   every successful load. */
                 <div className="sm:col-span-3 rounded-2xl border border-red-400/30 bg-red-400/5 p-5 text-center">
                   <p className="font-syne text-sm text-red-300 mb-3">Missions didn&apos;t load. Give it another shot.</p>
                   <button

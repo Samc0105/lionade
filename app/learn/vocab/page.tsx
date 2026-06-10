@@ -247,8 +247,11 @@ export default function VocabPage() {
                 style={{ animationDelay: "0.08s" }}
               >
                 {tab === "add" && <AddWordForm bank={activeBank} />}
-                {tab === "review" && <ReviewQueue bank={activeBank} />}
-                {tab === "list" && <VocabList bank={activeBank} />}
+                {/* key={activeBank.id}: remount on bank switch so SWR hook
+                    instances don't carry bank A's keepPreviousData cache into
+                    bank B's empty-state math (transient wrong empty state). */}
+                {tab === "review" && <ReviewQueue key={activeBank.id} bank={activeBank} />}
+                {tab === "list" && <VocabList key={activeBank.id} bank={activeBank} />}
                 {tab === "discover" && <DiscoverTab onCloned={() => mutateBanks()} />}
               </section>
             </>

@@ -72,7 +72,13 @@ export default function CompetePage() {
     user?.id ? `compete-elo-rank/${user.id}` : null,
     async () => {
       const r = await apiGet<{ elo: number | null; rank: number | null; totalRanked: number }>("/api/me/elo-rank");
-      return r.ok && r.data ? r.data : null;
+      // THROW on failure (don't resolve null): a resolved-null would flip
+      // `recordLoading` off and confidently render "Unranked" to a ranked
+      // user. Throwing keeps `data` undefined → the "—" placeholders stay.
+      // Global swr-config has shouldRetryOnError: false, so this surfaces
+      // once; a later focus/mount revalidation can still recover.
+      if (!r.ok || !r.data) throw new Error(r.error || "elo-rank fetch failed");
+      return r.data;
     },
     { keepPreviousData: true, revalidateOnFocus: true }
   );
@@ -80,15 +86,19 @@ export default function CompetePage() {
   const { data: arenaRecord } = useSWR(
     user?.id ? `compete-arena-record/${user.id}` : null,
     async () => {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("profiles")
         .select("arena_wins, arena_losses, arena_draws")
         .eq("id", user!.id)
         .single();
+      // THROW on failure (don't default to zeros): zeros here would render
+      // "0 wins / 0 played" to a player with a real record. Keeping `data`
+      // undefined leaves recordLoading true → honest "—" placeholders.
+      if (error || !data) throw new Error(error?.message || "arena record fetch failed");
       return {
-        wins: data?.arena_wins ?? 0,
-        losses: data?.arena_losses ?? 0,
-        draws: data?.arena_draws ?? 0,
+        wins: data.arena_wins ?? 0,
+        losses: data.arena_losses ?? 0,
+        draws: data.arena_draws ?? 0,
       };
     },
     { keepPreviousData: true, revalidateOnFocus: true }

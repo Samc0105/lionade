@@ -189,24 +189,22 @@ export default function SocialPage() {
   const showNotifView = activeTab === "notifs";
   const showLobbiesView = activeTab === "lobbies";
   const setShowNotifView = (next: boolean) => setActiveTab(next ? "notifs" : "friends");
-  const [socialNotifs, setSocialNotifs] = useState<{ id: string; type: string; title: string; message: string | null; read: boolean; action_url: string | null; created_at: string }[]>([]);
-  // Gate the "You're all caught up" empty state behind the first resolved
-  // notifications fetch so it can't flash for a frame on cold load.
-  const [notifsHydrated, setNotifsHydrated] = useState(false);
-  const [socialUnreadCount, setSocialUnreadCount] = useState<number | null>(null);
+  // socialNotifs / socialUnreadCount / notifsHydrated are DERIVED from the
+  // notifications SWR hook below (see `notifsData`) rather than mirrored into
+  // useState via onSuccess. onSuccess doesn't fire when the mount revalidation
+  // is deduped (global 60s dedupingInterval), which used to strand this panel
+  // on skeletons for up to 60s after a quick back-nav.
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [searchLoading, setSearchLoading] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Messages
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [arenaEvents, setArenaEvents] = useState<ArenaEvent[]>([]);
-  // Which friend's conversation the messages state currently reflects —
-  // gates the "Say hi" empty thread so it can't flash while an existing
-  // conversation is still fetching.
-  const [messagesLoadedFor, setMessagesLoadedFor] = useState<string | null>(null);
+  // Messages — messages / arenaEvents / messagesLoadedFor are DERIVED from
+  // the per-friend messages SWR hook below (see `messagesData`). Local state
+  // mirrors were dropped: a deduped refetch (60s global dedupingInterval)
+  // skips onSuccess, so switching threads A→C→A inside the window left
+  // friend C's messages rendered in A's chat.
   const [msgInput, setMsgInput] = useState("");
   const [sending, setSending] = useState(false);
 
@@ -219,13 +217,15 @@ export default function SocialPage() {
   const [challengeWager, setChallengeWager] = useState(25);
   const [sendingChallenge, setSendingChallenge] = useState(false);
 
-  // Nudges
-  const [nudgeState, setNudgeState] = useState<{ remaining: number; limit: number; nudgedToday: string[] }>({
+  // Nudges — sessionStorage-restored fallback for hard reloads where the SWR
+  // cache is cold. The rendered `nudgeState` / `nudgeHydrated` are derived
+  // below from the nudge SWR hook (cache wins), with this as the fallback,
+  // so a deduped mount revalidation can't strand the pulse chip on its
+  // placeholder.
+  const [nudgeStateCached, setNudgeStateCached] = useState<{ remaining: number; limit: number; nudgedToday: string[] }>({
     remaining: 5, limit: 5, nudgedToday: [],
   });
-  // The {remaining: 5} above is a hardcoded default — gate the pulse chip on
-  // this flag (em-dash placeholder) until /api/social/nudge actually resolves.
-  const [nudgeHydrated, setNudgeHydrated] = useState(false);
+  const [nudgeCacheSeeded, setNudgeCacheSeeded] = useState(false);
   const [nudgeTarget, setNudgeTarget] = useState<{ id: string; username: string } | null>(null);
   const [sendingNudge, setSendingNudge] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -251,14 +251,14 @@ export default function SocialPage() {
         outgoingRequests?: OutgoingRequest[];
         feed?: FeedItem[];
         circle?: CircleRank[];
-        nudgeState?: typeof nudgeState;
+        nudgeState?: typeof nudgeStateCached;
       };
       if (Array.isArray(c.friends)) { setFriends(c.friends); setFriendsHydrated(true); }
       if (Array.isArray(c.pendingRequests)) setPendingRequests(c.pendingRequests);
       if (Array.isArray(c.outgoingRequests)) setOutgoingRequests(c.outgoingRequests);
       if (Array.isArray(c.feed)) setFeed(c.feed);
       if (Array.isArray(c.circle)) setCircle(c.circle);
-      if (c.nudgeState) { setNudgeState(c.nudgeState); setNudgeHydrated(true); }
+      if (c.nudgeState) { setNudgeStateCached(c.nudgeState); setNudgeCacheSeeded(true); }
     } catch { /* ignore — corrupt cache won't block fresh fetches */ }
   }, [user?.id]);
 
@@ -312,7 +312,7 @@ export default function SocialPage() {
   // (cacheSocial) restore path is left untouched. loadFriends is kept as a
   // mutate-backed revalidator so every imperative loadFriends() call site
   // (post-accept, focus, etc.) works unchanged.
-  const { mutate: mutateFriends } = useSWR(
+  const { data: friendsData, mutate: mutateFriends } = useSWR(
     user?.id ? `social-friends/${user.id}` : null,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     () => apiGet<any>("/api/social/friends"),
@@ -325,20 +325,27 @@ export default function SocialPage() {
       refreshInterval: 5000,
       revalidateOnMount: true,
       keepPreviousData: true,
-      onSuccess: (res) => {
-        if (res.ok && res.data) {
-          const friends = res.data.friends ?? [];
-          const pendingRequests = res.data.pendingRequests ?? [];
-          const outgoingRequests = res.data.outgoingRequests ?? [];
-          setFriends(friends);
-          setPendingRequests(pendingRequests);
-          setOutgoingRequests(outgoingRequests);
-          setFriendsHydrated(true);
-          cacheSocial({ friends, pendingRequests, outgoingRequests });
-        }
-      },
     }
   );
+  // Sync local mirrors from `friendsData` via effect, NOT onSuccess: a mount
+  // revalidation inside the global 60s dedupingInterval is deduped (no fetch
+  // → no onSuccess), which left the panel on skeletons after a quick back-nav
+  // whenever the sessionStorage seed was missing. This effect also runs on
+  // remount-with-cached-data, closing that hole. `friends` stays useState
+  // because it's locally mutated (unread→0 on thread open, optimistic
+  // accept/remove).
+  useEffect(() => {
+    if (friendsData?.ok && friendsData.data) {
+      const friends = friendsData.data.friends ?? [];
+      const pendingRequests = friendsData.data.pendingRequests ?? [];
+      const outgoingRequests = friendsData.data.outgoingRequests ?? [];
+      setFriends(friends);
+      setPendingRequests(pendingRequests);
+      setOutgoingRequests(outgoingRequests);
+      setFriendsHydrated(true);
+      cacheSocial({ friends, pendingRequests, outgoingRequests });
+    }
+  }, [friendsData, cacheSocial]);
   const loadFriends = useCallback(async () => {
     await mutateFriends();
   }, [mutateFriends]);
@@ -368,21 +375,24 @@ export default function SocialPage() {
 
   // ── Load nudge budget for the day ──────────────────────────
   // Perf 2026-05-17: manual setInterval(60s) → SWR refreshInterval (cached).
-  const { mutate: mutateNudge } = useSWR(
+  const { data: nudgeData, mutate: mutateNudge } = useSWR(
     user?.id ? `social-nudge/${user.id}` : null,
     () => apiGet<{ remaining: number; limit: number; nudgedToday: string[] }>("/api/social/nudge"),
     {
       refreshInterval: 60000,
       keepPreviousData: true,
       onSuccess: (res) => {
-        if (res.ok && res.data) {
-          setNudgeState(res.data);
-          setNudgeHydrated(true);
-          cacheSocial({ nudgeState: res.data });
-        }
+        // sessionStorage write-through only — the displayed state is derived
+        // from `nudgeData` below, because deduped mount revalidations skip
+        // onSuccess entirely.
+        if (res.ok && res.data) cacheSocial({ nudgeState: res.data });
       },
     }
   );
+  // Cache-first derivation (same dedupe-window fix as notifs/messages): the
+  // SWR cache wins; the sessionStorage restore covers cold hard reloads.
+  const nudgeState = nudgeData?.ok && nudgeData.data ? nudgeData.data : nudgeStateCached;
+  const nudgeHydrated = nudgeData !== undefined || nudgeCacheSeeded;
   const loadNudgeBudget = useCallback(async () => {
     await mutateNudge();
   }, [mutateNudge]);
@@ -432,10 +442,11 @@ export default function SocialPage() {
   // Previously each page ran its own 15s poll on the same endpoint —
   // doubling API hits. With a shared key both pages see the same data and
   // the Navbar's realtime INSERT channel invalidates this hook too.
-  // socialNotifs/unreadCount stay useState (mutated locally on mark-read);
+  // socialNotifs/unreadCount/notifsHydrated are derived from `notifsData`
+  // (the SWR cache) — see the dedupe-window note at the state block above.
   // loadSocialNotifs kept as a mutate-backed revalidator (called imperatively
   // when the notif view opens).
-  const { mutate: mutateSocialNotifs } = useSWR(
+  const { data: notifsData, mutate: mutateSocialNotifs } = useSWR(
     user?.id ? `notifications/${user.id}` : null,
     () =>
       apiGet<{
@@ -446,15 +457,15 @@ export default function SocialPage() {
       refreshInterval: 15000,
       revalidateOnFocus: true,
       keepPreviousData: true,
-      onSuccess: (res) => {
-        if (res.ok && res.data) {
-          setSocialNotifs(res.data.notifications ?? []);
-          setSocialUnreadCount(res.data.unreadCount ?? 0);
-          setNotifsHydrated(true);
-        }
-      },
     }
   );
+  const notifsHydrated = notifsData !== undefined;
+  const socialNotifs = useMemo(
+    () => (notifsData?.ok && notifsData.data ? notifsData.data.notifications ?? [] : []),
+    [notifsData],
+  );
+  const socialUnreadCount =
+    notifsData?.ok && notifsData.data ? notifsData.data.unreadCount ?? 0 : null;
   const loadSocialNotifs = useCallback(async () => {
     await mutateSocialNotifs();
   }, [mutateSocialNotifs]);
@@ -462,26 +473,29 @@ export default function SocialPage() {
   // ── Load conversation ──────────────────────────────────────
   // Perf 2026-05-17: manual useEffect fetch → SWR keyed on the selected
   // friend, so re-opening a recent conversation is instant from the global
-  // persistent cache. messages/arenaEvents stay useState (mutated by realtime
-  // INSERT + optimistic send). The original side-effect — clearing that
-  // friend's unread badge on open — is preserved in onSuccess. loadMessages
-  // kept as a mutate-backed revalidator with the same (friendId) signature so
-  // any imperative call site is unchanged.
-  const { mutate: mutateMessages } = useSWR(
+  // persistent cache. The thread timeline is DERIVED from `messagesData`
+  // (keyed per friend) — never local state — so a deduped refetch on friend
+  // switch can't leave another thread's messages on screen. The original
+  // side-effect — clearing that friend's unread badge on open — is preserved
+  // in onSuccess. loadMessages kept as a mutate-backed revalidator with the
+  // same (friendId) signature so any imperative call site is unchanged.
+  const { data: messagesData, mutate: mutateMessages } = useSWR(
     user?.id && selectedFriend
       ? `social-messages/${user.id}/${selectedFriend.id}`
       : null,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     () => apiGet<any>(`/api/social/messages?friendId=${selectedFriend!.id}`),
     {
-      keepPreviousData: true,
+      // Override the global keepPreviousData for this hook: the key changes
+      // per friend, and keeping friend A's payload visible under friend B's
+      // key is exactly the cross-thread bleed this derivation must prevent.
+      // On switch, data resets to undefined (skeleton) until B's payload is
+      // in cache — instant if B was opened before, one fetch otherwise.
+      keepPreviousData: false,
       onSuccess: (res) => {
         if (res.ok && res.data) {
-          setMessages(res.data.messages ?? []);
-          setArenaEvents(res.data.arenaEvents ?? []);
           const fid = selectedFriend?.id;
           if (fid) {
-            setMessagesLoadedFor(fid);
             setFriends(prev =>
               prev.map(f => (f.id === fid ? { ...f, unreadCount: 0 } : f))
             );
@@ -490,12 +504,37 @@ export default function SocialPage() {
       },
     }
   );
+  const messages = useMemo<Message[]>(
+    () => (messagesData?.ok && messagesData.data ? messagesData.data.messages ?? [] : []),
+    [messagesData],
+  );
+  const arenaEvents = useMemo<ArenaEvent[]>(
+    () => (messagesData?.ok && messagesData.data ? messagesData.data.arenaEvents ?? [] : []),
+    [messagesData],
+  );
+  // Gates the "Say hi" empty state: only hydrated once THIS friend's payload
+  // exists in the cache (data is undefined across a key change because
+  // keepPreviousData is off here).
+  const messagesLoadedFor = selectedFriend && messagesData !== undefined ? selectedFriend.id : null;
   const loadMessages = useCallback(
     async (_friendId: string) => {
       await mutateMessages();
     },
     [mutateMessages]
   );
+  // Append a message to the current thread's SWR cache. Replaces the old
+  // setMessages local append — the timeline is cache-derived now, so realtime
+  // and optimistic sends write through to the keyed cache (no revalidate).
+  const appendMessage = useCallback((newMsg: Message) => {
+    mutateMessages(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (prev: any) =>
+        prev?.ok && prev.data
+          ? { ...prev, data: { ...prev.data, messages: [...(prev.data.messages ?? []), newMsg] } }
+          : prev,
+      { revalidate: false },
+    );
+  }, [mutateMessages]);
 
   // Auto-scroll to bottom
   useEffect(() => {
@@ -516,7 +555,7 @@ export default function SocialPage() {
       }, (payload: any) => {
         const newMsg = payload.new as Message;
         if (newMsg.sender_id === selectedFriend.id) {
-          setMessages(prev => [...prev, newMsg]);
+          appendMessage(newMsg);
           // Mark as read
           supabase.from("messages").update({ read: true }).eq("id", newMsg.id);
         }
@@ -524,7 +563,7 @@ export default function SocialPage() {
       .subscribe();
 
     return () => { channel.unsubscribe(); };
-  }, [user?.id, selectedFriend?.id]);
+  }, [user?.id, selectedFriend?.id, appendMessage]);
 
   // ── Send message ───────────────────────────────────────────
   const sendMessage = useCallback(async () => {
@@ -536,11 +575,11 @@ export default function SocialPage() {
       content: msgInput.trim(),
     });
     if (res.ok && res.data?.message) {
-      setMessages(prev => [...prev, res.data!.message]);
+      appendMessage(res.data.message);
       setMsgInput("");
     }
     setSending(false);
-  }, [user?.id, selectedFriend, msgInput, sending]);
+  }, [user?.id, selectedFriend, msgInput, sending, appendMessage]);
 
   // ── Debounced search for add friend autocomplete ────────────
   const handleAddUsernameChange = useCallback((value: string) => {

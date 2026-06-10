@@ -49,7 +49,7 @@ interface Props {
 }
 
 export default function ReviewQueue({ bank }: Props) {
-  const { data, isLoading, mutate } = useSWR<{ words: VocabWord[] }>(
+  const { data, error, isLoading, mutate } = useSWR<{ words: VocabWord[] }>(
     `/api/vocab/words?bank_id=${encodeURIComponent(bank.id)}&due=true`,
     swrFetcher,
     { keepPreviousData: true, revalidateOnFocus: true },
@@ -183,6 +183,23 @@ export default function ReviewQueue({ bank }: Props) {
           onAnswer={handleAnswer}
           submitting={submitting}
         />
+      ) : error && !data ? (
+        /* Fetch failed with nothing cached — without this branch the chain
+           falls through to the celebration EmptyReviewState, which lies.
+           Same red-glass retry treatment as DiscoverTab's ErrorState. */
+        <div className="rounded-2xl border border-red-400/30 bg-red-400/5 p-7 text-center animate-slide-up">
+          <p className="font-syne text-sm text-red-300 mb-3">
+            Couldn&apos;t load your review queue. Your words are safe.
+          </p>
+          <button
+            type="button"
+            onClick={() => mutate()}
+            className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full border border-white/15 bg-white/5 text-cream/80 hover:bg-white/10 hover:text-cream font-syne text-xs font-bold transition-colors"
+          >
+            <ArrowClockwise size={12} weight="bold" aria-hidden="true" />
+            Retry
+          </button>
+        </div>
       ) : bankIsEmpty ? (
         <EmptyBankState bankName={bank.name} />
       ) : (
