@@ -61,7 +61,14 @@ export async function POST(req: NextRequest) {
 
   const question = await nextBluffQuestion();
   const writeSeconds = room.settings?.write_seconds ?? DEFAULT_WRITE_SECONDS;
-  const writeEndsAt = new Date(Date.now() + writeSeconds * 1000).toISOString();
+  // +5s pad for the RoundCountdown overlay every client shows at round start,
+  // so the countdown doesn't eat write time (mirrors Poker Face's
+  // started_at + COUNTDOWN_SECONDS + DECIDE_SECONDS window). Clients derive
+  // their timer purely from write_ends_at, so they agree automatically.
+  const COUNTDOWN_PAD_SECONDS = 5;
+  const writeEndsAt = new Date(
+    Date.now() + (COUNTDOWN_PAD_SECONDS + writeSeconds) * 1000,
+  ).toISOString();
 
   const { data: round, error } = await supabaseAdmin
     .from("bluff_rounds")

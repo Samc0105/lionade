@@ -396,12 +396,15 @@ export default function PokerFaceView({
 
   // ── Presenter: commit truth or lie (locks the strategy server-side) ──
   const present = useCallback(
-    async (isLie: boolean) => {
-      if (!roundId || submitting) return;
+    // Returns true only when the lock actually committed — the decide-timer
+    // auto-lock uses this so its banner can't claim a lock that failed or
+    // lost the race to a manual pick.
+    async (isLie: boolean): Promise<boolean> => {
+      if (!roundId || submitting) return false;
       // Remote lies need typed text; in-person lies are spoken (no text required).
       if (!inperson && isLie && !lieText.trim()) {
         setError("Write the lie you want to present.");
-        return;
+        return false;
       }
       setSubmitting(true);
       setError(null);
@@ -413,7 +416,7 @@ export default function PokerFaceView({
       if (!res.ok) {
         console.error("[party:pokerface-present] failed", res.error);
         setError("Couldn't lock your play. Try again.");
-        return;
+        return false;
       }
       void refreshDetail();
       void supabase.channel(pokerFaceChannel(room.code)).send({
@@ -421,6 +424,7 @@ export default function PokerFaceView({
         event: POKERFACE_EVENTS.PRESENTED,
         payload: { round_id: roundId },
       });
+      return true;
     },
     [roundId, submitting, inperson, lieText, room.code, refreshDetail],
   );
@@ -441,8 +445,11 @@ export default function PokerFaceView({
       setDecideLeft(remain);
       if (remain === 0 && amPresenter && autoLockRoundRef.current !== rid) {
         autoLockRoundRef.current = rid;
-        setAutoLocked(true);
-        void present(false);
+        // Banner only after the lock actually commits — a failed POST or a
+        // manual pick winning the race must not show the auto-lock note.
+        void present(false).then((ok) => {
+          if (ok) setAutoLocked(true);
+        });
       }
     }
     tick();
@@ -918,7 +925,9 @@ export default function PokerFaceView({
 
         {/* ── SELL-IT BEAT (server phase: interrogate, live mode only) ──
             Presenter reads the fact out loud. NO TRUE/LIE label anywhere on
-            this screen: a shoulder-surfer learns nothing. */}
+            this screen: a shoulder-surfer learns nothing. The auto-lock
+            banner below is worded to instruct without printing the verdict,
+            preserving the invariant even in the timeout case. */}
         {phase === "interrogate" && (
           <motion.div
             key="interrogate"
@@ -956,7 +965,7 @@ export default function PokerFaceView({
                       color: "#FDE68A",
                     }}
                   >
-                    Time ran out, so TRUE was locked for you. Read it as written.
+                    Time ran out. Read the fact exactly as written. Play it straight.
                   </p>
                 )}
 

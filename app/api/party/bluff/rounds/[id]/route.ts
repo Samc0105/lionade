@@ -14,16 +14,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
 import { isRoomMember } from "@/lib/party/room-state";
-
 // Forfeit sentinel — BluffView's "skip me this round" submits this literal so
 // the write-phase dedup/truth checks still apply. It must NEVER surface as a
 // votable card (a vote on it would hand the forfeiter unearned trick points),
 // so vote + reveal payloads filter it out. Scoring iterates actual votes only,
 // and no vote can target a card that was never shown, so scoring stays clean.
-const FORFEIT_SENTINEL = "__forfeit__";
-function isForfeitText(text: string | null | undefined): boolean {
-  return (text ?? "").trim().toLowerCase() === FORFEIT_SENTINEL;
-}
+import { isForfeitText } from "@/lib/party/bluff-constants";
 
 // Deterministic shuffle keyed by round id so the vote-phase order is stable
 // across re-fetches within the same round (otherwise users would see the
@@ -93,9 +89,8 @@ export async function GET(
       .eq("is_truth", false)
       .maybeSingle();
     // Roster of player ids who have already submitted a fake. Drives the
-    // live progress chip strip on the write-phase UI so the room can see
-    // who's done without waiting for the next poll. Cheap query — same
-    // table the count above hits.
+    // write-phase avatar checkmark row so the room sees who's done. Ids
+    // only — answer bodies stay hidden until reveal.
     const { data: submittedRows } = await supabaseAdmin
       .from("bluff_answers")
       .select("user_id")

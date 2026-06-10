@@ -9,6 +9,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
 import { isRoomMember } from "@/lib/party/room-state";
+import { isForfeitText } from "@/lib/party/bluff-constants";
 
 export async function POST(
   req: NextRequest,
@@ -53,12 +54,12 @@ export async function POST(
   // Backstop: forfeit sentinels are filtered from the vote-phase GET, so their
   // ids should never reach a client. Reject direct POSTs anyway so a stale or
   // crafted answer_id can't hand the forfeiter unearned trick points.
-  if (!answer.is_truth && (answer.text ?? "").trim().toLowerCase() === "__forfeit__") {
+  if (!answer.is_truth && isForfeitText(answer.text)) {
     return NextResponse.json({ error: "That player sat out this round" }, { status: 400 });
   }
 
   // Upsert vote.
-  await supabaseAdmin
+  const { error: voteError } = await supabaseAdmin
     .from("bluff_votes")
     .upsert(
       {
@@ -68,6 +69,12 @@ export async function POST(
       },
       { onConflict: "round_id,voter_user_id" },
     );
+  if (voteError) {
+    // Without this check a failed write returned ok:true and the client
+    // rendered "VOTE LOCKED IN" with no vote recorded.
+    console.error("[bluff:vote] upsert failed", voteError);
+    return NextResponse.json({ error: "Couldn't save your vote. Try again." }, { status: 500 });
+  }
 
   return NextResponse.json({ ok: true });
 }

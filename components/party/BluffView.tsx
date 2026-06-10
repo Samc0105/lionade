@@ -43,6 +43,7 @@ import MidGameInviteModal from "./MidGameInviteModal";
 import RoundCountdown from "./RoundCountdown";
 import GameOverScreen from "./GameOverScreen";
 import { BLUFF_TRUTH_POINTS, BLUFF_FAKE_TRICK_POINTS } from "@/lib/party/scoring";
+import { FORFEIT_SENTINEL, isForfeitText } from "@/lib/party/bluff-constants";
 import type { PartyPlayer, PartyRoom } from "@/lib/party/types";
 
 // Bluff's accent (gold) — matches the question card + CTA treatment.
@@ -148,10 +149,15 @@ export default function BluffView({
 
   // Phase 2 — mid-game invite modal (host surface).
   const [inviteOpen, setInviteOpen] = useState(false);
-  // Forfeit-this-round: local-only flag so the button replaces itself with a
-  // "forfeited" pill immediately. The server records the sentinel answer via
-  // the existing /answer endpoint; the vote step will naturally exclude it.
-  const [forfeited, setForfeited] = useState(false);
+  // Forfeit-this-round: optimistic flag so the button replaces itself with a
+  // "forfeited" pill immediately; the server filters the sentinel from vote +
+  // reveal payloads. Re-derived from the poll's my_submission so a refresh
+  // mid-write doesn't show the normal edit UI to a forfeited player.
+  const [forfeitedLocal, setForfeitedLocal] = useState(false);
+  const setForfeited = setForfeitedLocal;
+  // Survives refresh: the write-phase GET returns the caller's own submission
+  // text, so a sentinel row marks them forfeited even with fresh local state.
+  const forfeited = forfeitedLocal || isForfeitText(detail?.my_submission);
 
   // ── Start a fresh round (host) ──
   const startRound = useCallback(async () => {
@@ -392,10 +398,10 @@ export default function BluffView({
   }
 
   // ── Forfeit-this-round (Phase 2) ──
-  // Submits a sentinel "__forfeit__" answer via the existing endpoint so the
-  // server-side dedup + truth-check logic still applies; the vote step shows
-  // the sentinel like any other fake, and the player just doesn't earn fooling
-  // points from it. Lightweight V1 — a cleaner approach (separate /forfeit
+  // Submits the FORFEIT_SENTINEL answer via the existing endpoint so the
+  // server-side dedup + truth-check logic still applies; the server filters
+  // the sentinel out of vote + reveal payloads so it never renders as a
+  // votable card. Lightweight V1 — a cleaner approach (separate /forfeit
   // route + hidden flag) is V3 work.
   async function forfeitRound() {
     if (!roundId || forfeited || submitting) return;
@@ -403,7 +409,7 @@ export default function BluffView({
     setError(null);
     setForfeited(true);
     const res = await apiPost(`/api/party/bluff/rounds/${roundId}/answer`, {
-      text: "__forfeit__",
+      text: FORFEIT_SENTINEL,
     });
     setSubmitting(false);
     if (!res.ok) {
@@ -711,7 +717,7 @@ export default function BluffView({
                 disabled={submitting}
                 className="w-full py-2 rounded-xl font-syne text-xs text-cream/55 hover:text-cream/85 transition-colors disabled:opacity-40"
               >
-                I&apos;m out — skip me this round
+                I&apos;m out. Skip me this round
               </button>
             )}
           </motion.form>

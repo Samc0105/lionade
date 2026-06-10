@@ -100,6 +100,10 @@ export default function ActiveSessionToast() {
   // value is missing and the toast is eligible again.
   useEffect(() => {
     setMounted(true);
+    // A new session pointer (new dismissKey) is a new toast: clear the
+    // auto-vanish suppression too, or a fresh party starting while the user
+    // sits on one page stays hidden until their next navigation.
+    setAutoHidden(false);
     if (!dismissKey) {
       setDismissed(false);
       return;
