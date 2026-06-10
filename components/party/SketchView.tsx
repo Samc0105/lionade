@@ -474,10 +474,14 @@ export default function SketchView({
     setPausedAt(null);
     setPausedByName(null);
     pausedOffsetMsRef.current = 0;
-    const res = await apiPost<{ round: RoundSnapshot; drawer_should_pick: boolean }>(
-      "/api/party/sketch/rounds",
-      { code: room.code },
-    );
+    const res = await apiPost<{
+      round: RoundSnapshot;
+      drawer_should_pick: boolean;
+      // Perf pass 2026-06-10 — when the round creator IS the drawer, the
+      // server returns the candidates inline so we skip the GET /words
+      // round-trip between Start and the pick-a-word screen.
+      candidate_words?: CandidateWord[];
+    }>("/api/party/sketch/rounds", { code: room.code });
     if (!res.ok || !res.data) {
       setNinnyMsg("Hmm, I couldn't deal a new round. Try again?");
       return;
@@ -485,28 +489,38 @@ export default function SketchView({
     roundIdRef.current = res.data.round.id;
     setRound(res.data.round);
     setTimeLeft(res.data.round.duration_sec);
+    // Tell the room a new round started BEFORE any drawer-side word fetching —
+    // guessers' clients shouldn't wait on the drawer's candidates to learn the
+    // round exists. Fire-and-forget: sendBroadcast retries internally, and
+    // blocking the drawer's picker on the ws ack would re-add latency here.
+    void sendBroadcast(SKETCH_EVENTS.ROUND_STARTED, {
+      round_id: res.data.round.id,
+      drawer_user_id: res.data.round.drawer_user_id,
+    });
     if (res.data.round.drawer_user_id === meUserId) {
-      // Drawer fetches candidate words.
-      const words = await apiGet<{ candidates: CandidateWord[] }>(
-        `/api/party/sketch/rounds/${res.data.round.id}/words`,
-      );
-      if (words.ok && words.data?.candidates) {
-        setCandidates(words.data.candidates);
+      if (res.data.candidate_words && res.data.candidate_words.length > 0) {
+        // Fast path: candidates rode in on the round-create response.
+        setCandidates(res.data.candidate_words);
         setPhase("select-word");
         setNinnyMsg("Your turn! Pick a word to draw.");
       } else {
-        setPhase("drawing");
+        // Fallback (older server payload): drawer fetches candidate words.
+        const words = await apiGet<{ candidates: CandidateWord[] }>(
+          `/api/party/sketch/rounds/${res.data.round.id}/words`,
+        );
+        if (words.ok && words.data?.candidates) {
+          setCandidates(words.data.candidates);
+          setPhase("select-word");
+          setNinnyMsg("Your turn! Pick a word to draw.");
+        } else {
+          setPhase("drawing");
+        }
       }
     } else {
       setPhase("drawing");
       setAwaitingWordPick(true);
       setNinnyMsg("Watch carefully and guess what they're drawing.");
     }
-    // Tell the room that a new round started so guessers re-fetch state.
-    await sendBroadcast(SKETCH_EVENTS.ROUND_STARTED, {
-      round_id: res.data.round.id,
-      drawer_user_id: res.data.round.drawer_user_id,
-    });
   }, [room.code, meUserId, sendBroadcast]);
 
   // Reconnect bootstrap: if the page snapshot includes an in-flight round,

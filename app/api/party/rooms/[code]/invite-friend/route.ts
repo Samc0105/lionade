@@ -51,72 +51,77 @@ export async function POST(
     return NextResponse.json({ error: "You can't invite yourself" }, { status: 400 });
   }
 
-  // ── Friendship gate ──
-  // Mirror the same accepted-status OR-check used by /api/social/messages
-  // POST. The friend graph IS the access control — we never let a non-friend
-  // get a party_invite notification from this endpoint.
-  const { data: friendship } = await supabaseAdmin
-    .from("friendships")
-    .select("id")
-    .or(
-      `and(user_id.eq.${userId},friend_id.eq.${friendId}),and(user_id.eq.${friendId},friend_id.eq.${userId})`,
-    )
-    .eq("status", "accepted")
-    .limit(1)
-    .maybeSingle();
+  // Perf pass 2026-06-10 — the five pre-insert checks were sequential
+  // round-trips (friendship → room → inRoom → alreadyIn → profiles). They
+  // collapse into two parallel batches: [friendship, room, profiles] (all
+  // independent), then [inRoom, alreadyIn] (need room.id). Same checks, same
+  // error precedence, roughly half the sender-side button latency.
+
+  // ── Batch 1: friendship gate + room lookup + username lookups ──
+  // Friendship check mirrors the accepted-status OR-check used by
+  // /api/social/messages POST. The friend graph IS the access control — we
+  // never let a non-friend get a party_invite notification from here.
+  const [{ data: friendship }, { data: room }, { data: senderProfile }, { data: receiverProfile }] =
+    await Promise.all([
+      supabaseAdmin
+        .from("friendships")
+        .select("id")
+        .or(
+          `and(user_id.eq.${userId},friend_id.eq.${friendId}),and(user_id.eq.${friendId},friend_id.eq.${userId})`,
+        )
+        .eq("status", "accepted")
+        .limit(1)
+        .maybeSingle(),
+      supabaseAdmin
+        .from("party_rooms")
+        .select("id, host_user_id, status")
+        .eq("code", code)
+        .neq("status", "ended")
+        .maybeSingle(),
+      supabaseAdmin.from("profiles").select("username").eq("id", userId).maybeSingle(),
+      supabaseAdmin.from("profiles").select("username").eq("id", friendId).maybeSingle(),
+    ]);
   if (!friendship) {
     return NextResponse.json({ error: "Not friends" }, { status: 403 });
   }
-
-  // ── Sender must be in the room ──
-  // Anyone with the code can join, but only people already in the room are
-  // allowed to summon their friends to it. This stops a code-leaker from
-  // weaponizing this endpoint for "drag random user X into room ABC123".
-  const { data: room } = await supabaseAdmin
-    .from("party_rooms")
-    .select("id, host_user_id, status")
-    .eq("code", code)
-    .neq("status", "ended")
-    .maybeSingle();
   if (!room) {
     return NextResponse.json({ error: "Room not found" }, { status: 404 });
   }
-  const { data: inRoom } = await supabaseAdmin
-    .from("party_room_players")
-    .select("id")
-    .eq("room_id", room.id)
-    .eq("user_id", userId)
-    .is("left_at", null)
-    .maybeSingle();
+
+  // ── Batch 2: sender must be in the room + receiver must not already be ──
+  // Anyone with the code can join, but only people already in the room are
+  // allowed to summon their friends to it. This stops a code-leaker from
+  // weaponizing this endpoint for "drag random user X into room ABC123".
+  // No-op invites are confusing — the receiver would see a notification for
+  // a room they're already inside, hence the 409.
+  const [{ data: inRoom }, { data: alreadyIn }] = await Promise.all([
+    supabaseAdmin
+      .from("party_room_players")
+      .select("id")
+      .eq("room_id", room.id)
+      .eq("user_id", userId)
+      .is("left_at", null)
+      .maybeSingle(),
+    supabaseAdmin
+      .from("party_room_players")
+      .select("id")
+      .eq("room_id", room.id)
+      .eq("user_id", friendId)
+      .is("left_at", null)
+      .maybeSingle(),
+  ]);
   if (!inRoom) {
     return NextResponse.json(
       { error: "Join the room before inviting friends" },
       { status: 403 },
     );
   }
-
-  // ── Receiver must not already be in this room ──
-  // No-op invites are confusing — they'd see a notification for a room they're
-  // already inside. Bail with a clear 409.
-  const { data: alreadyIn } = await supabaseAdmin
-    .from("party_room_players")
-    .select("id")
-    .eq("room_id", room.id)
-    .eq("user_id", friendId)
-    .is("left_at", null)
-    .maybeSingle();
   if (alreadyIn) {
     return NextResponse.json(
       { error: "Already in this room" },
       { status: 409 },
     );
   }
-
-  // ── Lookup sender + receiver usernames for the toast / notification body ──
-  const [{ data: senderProfile }, { data: receiverProfile }] = await Promise.all([
-    supabaseAdmin.from("profiles").select("username").eq("id", userId).single(),
-    supabaseAdmin.from("profiles").select("username").eq("id", friendId).single(),
-  ]);
 
   // ── Drop the notification ──
   // Deep-links to the party route. Friend invites are an explicit 1:1

@@ -2,9 +2,15 @@
 // GET  /api/party/rooms/[code]/lobby-chat — return last 20 messages for hydration.
 //
 // Auth: requireAuth + caller must be an active member (left_at IS NULL).
-// Body: { body: string } 1..200 chars after trim.
+// Body: { body: string, client_id?: uuid } 1..200 chars after trim.
 // Broadcasts PARTY_EVENTS.LOBBY_CHAT to the room channel with the message
 // + sender's username so other clients can render without a fresh fetch.
+//
+// Perf pass 2026-06-10 — `client_id`: the sender broadcasts the message on
+// its own open room channel BEFORE this request lands (near-zero perceived
+// latency for roommates) using a client-generated uuid. We insert with that
+// uuid as the row id so the server's backstop broadcast + the GET hydration
+// carry the SAME id and every client's de-dup-by-id keeps exactly one copy.
 
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
@@ -13,6 +19,7 @@ import { isValidRoomCode, normalizeRoomCode } from "@/lib/party/room-code";
 import { roomChannel, PARTY_EVENTS } from "@/lib/party/realtime-channels";
 
 const MAX_BODY = 200;
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export async function POST(
   req: NextRequest,
@@ -32,6 +39,12 @@ export async function POST(
   if (raw.length === 0 || raw.length > MAX_BODY) {
     return NextResponse.json({ error: "Message must be 1-200 characters." }, { status: 400 });
   }
+  // Optional client-generated id (see header comment). Ignored unless it's a
+  // well-formed uuid, so a malicious value can't poke at the insert.
+  const clientId =
+    typeof body?.client_id === "string" && UUID_RE.test(body.client_id)
+      ? body.client_id.toLowerCase()
+      : null;
 
   const { data: room } = await supabaseAdmin
     .from("party_rooms")
@@ -54,21 +67,46 @@ export async function POST(
     return NextResponse.json({ error: "You must be in the room to chat." }, { status: 403 });
   }
 
-  const { data: inserted, error: insertErr } = await supabaseAdmin
-    .from("party_lobby_chat")
-    .insert({ room_code: code, user_id: userId, body: raw })
-    .select("id, created_at, body")
-    .single();
+  // Insert + sender-profile lookup are independent — run them in parallel
+  // (each is a Supabase round-trip; sequential was ~2x the latency).
+  const [insertRes, profileRes] = await Promise.all([
+    supabaseAdmin
+      .from("party_lobby_chat")
+      .insert({
+        room_code: code,
+        user_id: userId,
+        body: raw,
+        ...(clientId ? { id: clientId } : {}),
+      })
+      .select("id, created_at, body")
+      .single(),
+    supabaseAdmin
+      .from("profiles")
+      .select("username")
+      .eq("id", userId)
+      .maybeSingle(),
+  ]);
+  let inserted = insertRes.data;
+  const insertErr = insertRes.error;
+  const profile = profileRes.data;
   if (insertErr || !inserted) {
-    console.error("[party/lobby-chat] insert", insertErr?.message);
-    return NextResponse.json({ error: "Couldn't send the message." }, { status: 500 });
+    // Retry/replay with the same client_id → unique violation. The message is
+    // already persisted; treat as success so the client doesn't roll back.
+    if (clientId && insertErr?.code === "23505") {
+      const { data: existingMsg } = await supabaseAdmin
+        .from("party_lobby_chat")
+        .select("id, created_at, body")
+        .eq("id", clientId)
+        .maybeSingle();
+      if (existingMsg) {
+        inserted = existingMsg;
+      }
+    }
+    if (!inserted) {
+      console.error("[party/lobby-chat] insert", insertErr?.message);
+      return NextResponse.json({ error: "Couldn't send the message." }, { status: 500 });
+    }
   }
-
-  const { data: profile } = await supabaseAdmin
-    .from("profiles")
-    .select("username")
-    .eq("id", userId)
-    .maybeSingle();
 
   const ch = supabaseAdmin.channel(roomChannel(code));
   try {

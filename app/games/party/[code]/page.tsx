@@ -167,6 +167,12 @@ export default function PartyRoomPage() {
   }, [code]);
 
   // ── Realtime subscribe: room-state changes ──
+  // Kept in a ref so broadcast helpers below (game start/end, leave) send on
+  // the ALREADY-SUBSCRIBED channel (fast ws push) instead of minting a fresh
+  // unsubscribed channel per send — the old pattern fell back to the slower
+  // HTTP broadcast path AND leaked one channel instance per send.
+  const roomChRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
+  const roomId = snap?.room?.id;
   useEffect(() => {
     if (!code) return;
     const ch = supabase.channel(roomChannel(code));
@@ -175,6 +181,23 @@ export default function PartyRoomPage() {
     ch.on("broadcast", { event: PARTY_EVENTS.GAME_STARTED }, () => void refresh());
     ch.on("broadcast", { event: PARTY_EVENTS.GAME_ENDED }, () => void refresh());
     ch.on("broadcast", { event: PARTY_EVENTS.ROOM_UPDATED }, () => void refresh());
+    // Fast-path ready flips: patch the player list in place from the broadcast
+    // payload (no snapshot GET round-trip). The postgres_changes feed below +
+    // the 3s poll reconcile if a broadcast was stale or dropped.
+    ch.on("broadcast", { event: PARTY_EVENTS.READY_CHANGED }, (msg: { payload?: unknown }) => {
+      const p = (msg.payload ?? {}) as { user_id?: string; is_ready?: boolean };
+      if (!p.user_id || typeof p.is_ready !== "boolean") return;
+      setSnap((prev) =>
+        prev
+          ? {
+              ...prev,
+              players: prev.players.map((pl) =>
+                pl.user_id === p.user_id ? { ...pl, is_ready: p.is_ready! } : pl,
+              ),
+            }
+          : prev,
+      );
+    });
     // Postgres changes are also wired — Supabase Realtime fires for table rows
     // in the publication. We listen for room status changes specifically.
     ch.on(
@@ -182,11 +205,18 @@ export default function PartyRoomPage() {
       { event: "UPDATE", schema: "public", table: "party_rooms", filter: `code=eq.${code}` },
       () => void refresh(),
     );
-    ch.on(
-      "postgres_changes",
-      { event: "*", schema: "public", table: "party_room_players" },
-      () => void refresh(),
-    );
+    // Player-row changes: filter SERVER-side by room_id once the snapshot has
+    // resolved it. The previous unfiltered listener meant every ready toggle
+    // in EVERY live room triggered a snapshot GET from every open room page.
+    // Before roomId resolves (one render after join), the 3s poll covers us;
+    // the effect re-subscribes once with the filter when roomId lands.
+    if (roomId) {
+      ch.on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "party_room_players", filter: `room_id=eq.${roomId}` },
+        () => void refresh(),
+      );
+    }
     // Phase 2: wrap with exponential-backoff resubscribe so a transient WS
     // drop doesn't silently leave the room-state channel dead. silentOnGiveUp
     // because game-channel subscribers (SketchView/BluffView/PokerFaceView)
@@ -195,11 +225,13 @@ export default function PartyRoomPage() {
       label: `room-state:${code}`,
       silentOnGiveUp: true,
     });
+    roomChRef.current = ch;
     return () => {
+      roomChRef.current = null;
       handle.cancel();
       supabase.removeChannel(ch);
     };
-  }, [code, refresh]);
+  }, [code, refresh, roomId]);
 
   // ── Safety-net polling: every 3s ──
   useEffect(() => {
@@ -209,12 +241,32 @@ export default function PartyRoomPage() {
   }, [snap, refresh]);
 
   // ── Broadcast helpers ──
-  const broadcastGameStarted = useCallback(
-    async (game: Exclude<CurrentGame, null>) => {
+  // All sends go through the subscribed room channel (roomChRef). Falling back
+  // to a throwaway channel keeps the send working pre-subscribe (supabase-js
+  // routes it via the HTTP broadcast endpoint) — but unlike before, the
+  // throwaway is removed after use instead of leaking for the session.
+  const sendRoomEvent = useCallback(
+    async (event: string, payload: Record<string, unknown>) => {
+      const subscribed = roomChRef.current;
+      if (subscribed) {
+        await subscribed.send({ type: "broadcast", event, payload });
+        return;
+      }
       const ch = supabase.channel(roomChannel(code));
-      await ch.send({ type: "broadcast", event: PARTY_EVENTS.GAME_STARTED, payload: { game } });
+      try {
+        await ch.send({ type: "broadcast", event, payload });
+      } finally {
+        void supabase.removeChannel(ch);
+      }
     },
     [code],
+  );
+
+  const broadcastGameStarted = useCallback(
+    async (game: Exclude<CurrentGame, null>) => {
+      await sendRoomEvent(PARTY_EVENTS.GAME_STARTED, { game });
+    },
+    [sendRoomEvent],
   );
 
   const onReturnToLobby = useCallback(async () => {
@@ -224,18 +276,16 @@ export default function PartyRoomPage() {
       return;
     }
     await apiPost(`/api/party/rooms/${code}/end-game`, {});
-    const ch = supabase.channel(roomChannel(code));
-    await ch.send({ type: "broadcast", event: PARTY_EVENTS.GAME_ENDED, payload: {} });
+    await sendRoomEvent(PARTY_EVENTS.GAME_ENDED, {});
     void refresh();
-  }, [snap?.isHost, code, refresh]);
+  }, [snap?.isHost, code, refresh, sendRoomEvent]);
 
   const leaveRoom = useCallback(async () => {
     setLeaving(true);
     await apiPost(`/api/party/rooms/${code}/leave`, {});
-    const ch = supabase.channel(roomChannel(code));
-    await ch.send({ type: "broadcast", event: PARTY_EVENTS.PLAYER_LEFT, payload: {} });
+    await sendRoomEvent(PARTY_EVENTS.PLAYER_LEFT, {});
     router.push("/games/party");
-  }, [code, router]);
+  }, [code, router, sendRoomEvent]);
 
   // ── Render ──
   if (loading) {

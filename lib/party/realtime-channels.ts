@@ -57,6 +57,13 @@ export const PARTY_EVENTS = {
   JOIN_DECISION: "join_decision",
   ROOM_DISMISSED: "room_dismissed",
   LOBBY_CHAT: "lobby_chat",
+  // Perf pass 2026-06-10 — ready toggles broadcast CLIENT-side the moment the
+  // user taps (payload: { user_id, is_ready }), in parallel with the durable
+  // REST write to party_room_players. Listeners patch their player list
+  // optimistically; the postgres_changes feed + 3s poll remain the reconciler.
+  // Without this, other clients only learned about a ready flip via
+  // DB write → replication → realtime → full snapshot GET (~500-1500ms).
+  READY_CHANGED: "ready_changed",
 } as const;
 
 export const SKETCH_EVENTS = {

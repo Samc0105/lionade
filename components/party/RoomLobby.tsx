@@ -129,6 +129,32 @@ export default function RoomLobby({ room, players, isHost, meUserId, onGameStart
   const [pfRotations, setPfRotations] = useState<number>(2);
   const [showRules, setShowRules] = useState(false);
 
+  // ── Perf pass 2026-06-10: pre-warm the Start → first-playable-frame path ──
+  // 1) Idle-prefetch the lazy game-view chunks. page.tsx mounts them via
+  //    next/dynamic only at game start; pulling the modules during lobby idle
+  //    removes the chunk download from the Start critical path for EVERY
+  //    client (lobby page-load stays light — this fires 1.2s post-mount).
+  useEffect(() => {
+    const t = setTimeout(() => {
+      void import("@/components/party/SketchView");
+      void import("@/components/party/BluffView");
+      void import("@/components/party/PokerFaceView");
+    }, 1200);
+    return () => clearTimeout(t);
+  }, []);
+  // 2) When the host has Sketchy selected, ping the rounds route once so the
+  //    serverless function (and its statically-imported curated word lists)
+  //    is warm before Start. Candidate words are picked SERVER-side at round
+  //    creation, so a client-side word-list prefetch would fetch nothing
+  //    useful — warming the function is what actually trims the wait between
+  //    Start and the pick-a-word screen.
+  const warmedSketchRef = useRef(false);
+  useEffect(() => {
+    if (!isHost || selectedGame !== "sketch" || warmedSketchRef.current) return;
+    warmedSketchRef.current = true;
+    void fetch("/api/party/sketch/rounds", { method: "GET" }).catch(() => {});
+  }, [isHost, selectedGame]);
+
   // ── "Hurry up bro" nudge mechanic ──
   // Rotating button among NON-HOST players: one at a time, holds it for ~45s
   // before the next seat gets a turn. Active nudger is derived from wall clock
@@ -223,6 +249,13 @@ export default function RoomLobby({ room, players, isHost, meUserId, onGameStart
     toastSuccess(res.data?.is_spectator ? "Watching only." : "Playing again.");
   }
 
+  // Subscribed room-channel handle, reused by toggleReady/sendChat for
+  // instant client-side broadcasts (ws push on the open socket, ~30ms).
+  // Falls back to supabase-js's HTTP broadcast path if the send happens
+  // before the subscription lands — either way the REST write + the page's
+  // postgres_changes/3s-poll reconciliation is the durable backstop.
+  const roomChRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
+
   // Listen for room-wide broadcasts: dismiss, lobby chat, join requests/decisions.
   useEffect(() => {
     const ch = supabase.channel(`party-room-${room.code}`);
@@ -273,7 +306,9 @@ export default function RoomLobby({ room, players, isHost, meUserId, onGameStart
       setPendingJoins((prev) => prev.filter((r) => r.request_id !== p.request_id));
     });
     ch.subscribe();
+    roomChRef.current = ch;
     return () => {
+      roomChRef.current = null;
       supabase.removeChannel(ch);
     };
   }, [room.code, isHost]);
@@ -335,20 +370,52 @@ export default function RoomLobby({ room, players, isHost, meUserId, onGameStart
   async function sendChat() {
     const text = chatDraft.trim().slice(0, 200);
     if (text.length === 0 || chatSending) return;
+    // Perf pass 2026-06-10 — broadcast-first send. The client generates the
+    // message id, echoes locally + broadcasts on the open room channel
+    // IMMEDIATELY, and persists via REST in parallel (server inserts with the
+    // same id, so its backstop broadcast de-dups everywhere). Roommates see
+    // the message in ~1 ws hop instead of after the full REST round-trip.
+    const clientId = crypto.randomUUID();
+    const meSender = players.find((p) => p.user_id === meUserId);
+    const optimistic: ChatMsg = {
+      id: clientId,
+      user_id: meUserId,
+      user_name: meSender?.username ?? null,
+      body: text,
+      created_at: new Date().toISOString(),
+    };
+    setChatDraft("");
+    setChatMessages((prev) =>
+      prev.some((x) => x.id === clientId) ? prev : [...prev, optimistic].slice(-50),
+    );
+    try {
+      void roomChRef.current?.send({
+        type: "broadcast",
+        event: PARTY_EVENTS.LOBBY_CHAT,
+        payload: {
+          message_id: clientId,
+          user_id: meUserId,
+          user_name: optimistic.user_name ?? "Player",
+          body: text,
+          created_at: optimistic.created_at,
+        },
+      });
+    } catch {
+      // Broadcast is best-effort — the server's backstop broadcast covers it.
+    }
     setChatSending(true);
     const res = await apiPost<{ ok: boolean; message: ChatMsg }>(
       `/api/party/rooms/${room.code}/lobby-chat`,
-      { body: text },
+      { body: text, client_id: clientId },
     );
     setChatSending(false);
     if (!res.ok) {
+      // Roll back the optimistic echo; restore the draft only if the user
+      // hasn't started typing something new in the meantime.
+      setChatMessages((prev) => prev.filter((m) => m.id !== clientId));
+      setChatDraft((d) => (d.length > 0 ? d : text));
       toastError("Couldn't send.");
       return;
-    }
-    setChatDraft("");
-    if (res.data?.message) {
-      const m = res.data.message;
-      setChatMessages((prev) => (prev.some((x) => x.id === m.id) ? prev : [...prev, m].slice(-50)));
     }
   }
 
@@ -356,6 +423,7 @@ export default function RoomLobby({ room, players, isHost, meUserId, onGameStart
   // funnier when the whole room sees Brother spam the host). Self-pruning.
   type Toast = { id: string; phrase: string; sender: string };
   const [nudgeToasts, setNudgeToasts] = useState<Toast[]>([]);
+  const nudgeChRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
   useEffect(() => {
     const ch = supabase.channel(nudgeChannel(room.code));
     ch.on("broadcast", { event: PARTY_EVENTS.HOST_NUDGE }, (msg: { payload?: unknown }) => {
@@ -369,7 +437,9 @@ export default function RoomLobby({ room, players, isHost, meUserId, onGameStart
       }, TOAST_LIFE_MS);
     });
     ch.subscribe();
+    nudgeChRef.current = ch;
     return () => {
+      nudgeChRef.current = null;
       supabase.removeChannel(ch);
     };
   }, [room.code]);
@@ -379,12 +449,17 @@ export default function RoomLobby({ room, players, isHost, meUserId, onGameStart
     lastNudgeWindowRef.current = nudgeWindowIdx;
     const phrase = NUDGE_PHRASES[Math.floor(Math.random() * NUDGE_PHRASES.length)];
     const me = players.find((p) => p.user_id === meUserId);
-    const ch = supabase.channel(nudgeChannel(room.code));
+    // Send on the already-subscribed nudge channel (fast ws push). The old
+    // pattern minted a fresh unsubscribed channel per tap — slower HTTP
+    // fallback AND a leaked channel instance every nudge.
+    const ch = nudgeChRef.current ?? supabase.channel(nudgeChannel(room.code));
     await ch.send({
       type: "broadcast",
       event: PARTY_EVENTS.HOST_NUDGE,
       payload: { phrase, sender: me?.username ?? "Someone" },
     });
+    // If we had to mint a throwaway (ref not ready), don't leak it.
+    if (ch !== nudgeChRef.current) void supabase.removeChannel(ch);
     // Locally echo (supabase broadcast doesn't echo to sender).
     const id = `local-${Date.now()}`;
     setNudgeToasts((prev) => [...prev, { id, phrase, sender: "You" }].slice(-4));
@@ -482,13 +557,32 @@ export default function RoomLobby({ room, players, isHost, meUserId, onGameStart
     }
   }
 
+  // Best-effort READY_CHANGED broadcast on the open room channel. Other
+  // clients patch their player list from the payload (page.tsx handler), so
+  // they see the flip in ~1 ws hop instead of waiting on DB write →
+  // replication → postgres_changes → snapshot GET. The REST write stays the
+  // durable record; the table feed + 3s poll reconcile any drop.
+  function broadcastReady(isReady: boolean) {
+    try {
+      void roomChRef.current?.send({
+        type: "broadcast",
+        event: PARTY_EVENTS.READY_CHANGED,
+        payload: { user_id: meUserId, is_ready: isReady },
+      });
+    } catch {
+      // Channel mid-(re)subscribe — reconciliation paths cover it.
+    }
+  }
+
   async function toggleReady() {
     const target = !meReady;
     setOptimisticReady(target);  // instant visual
+    broadcastReady(target);      // instant fan-out, parallel to the REST write
     setError(null);
     const res = await apiPost(`/api/party/rooms/${room.code}/ready`, { ready: target });
     if (!res.ok) {
       setOptimisticReady(null);  // revert to server truth
+      broadcastReady(serverReady); // un-flip the optimistic patch on other clients
       console.error("[party:ready] failed", res.error);
       setError("Couldn't update your ready state. Try again.");
     }

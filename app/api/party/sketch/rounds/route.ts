@@ -100,29 +100,33 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Room is not playing sketch" }, { status: 400 });
   }
 
-  const isMember = await isRoomMember(supabaseAdmin, room.id, userId);
+  // Perf pass 2026-06-10 — membership check, player roster, and prior-round
+  // history only need room.id and are independent of each other. Running them
+  // in parallel trims ~2 DB round-trips off EVERY round creation (this route
+  // sits on the Start → pick-a-word critical path and fires between rounds).
+  const [isMember, { data: players }, { data: priorRounds }] = await Promise.all([
+    isRoomMember(supabaseAdmin, room.id, userId),
+    // Drawer rotation + per-player topic picks. Sorted by joined_at so the
+    // rotation is deterministic.
+    supabaseAdmin
+      .from("party_room_players")
+      .select("user_id, joined_at, selected_subjects")
+      .eq("room_id", room.id)
+      .is("left_at", null)
+      .order("joined_at", { ascending: true }),
+    // All prior rounds: highest round_num for numbering + per-player draw
+    // counts for a fair-but-random drawer pick.
+    supabaseAdmin
+      .from("sketch_rounds")
+      .select("round_num, drawer_user_id")
+      .eq("room_id", room.id),
+  ]);
   if (!isMember) {
     return NextResponse.json({ error: "Not a room member" }, { status: 403 });
   }
-
-  // Determine drawer rotation + collect per-player topic picks.
-  // Players sorted by joined_at so rotation is deterministic.
-  const { data: players } = await supabaseAdmin
-    .from("party_room_players")
-    .select("user_id, joined_at, selected_subjects")
-    .eq("room_id", room.id)
-    .is("left_at", null)
-    .order("joined_at", { ascending: true });
   if (!players || players.length < 2) {
     return NextResponse.json({ error: "Not enough players" }, { status: 400 });
   }
-
-  // Pull all prior rounds: highest round_num for numbering + per-player draw
-  // counts for a fair-but-random drawer pick.
-  const { data: priorRounds } = await supabaseAdmin
-    .from("sketch_rounds")
-    .select("round_num, drawer_user_id")
-    .eq("room_id", room.id);
   const nextRoundNum =
     (priorRounds && priorRounds.length > 0
       ? Math.max(...priorRounds.map((r) => r.round_num ?? 0))
@@ -235,6 +239,14 @@ export async function POST(req: NextRequest) {
     .eq("is_pending_round", true);
 
   // Public payload: drawer + round id + subject. No words leaked to guessers.
+  //
+  // Perf pass 2026-06-10 — if the CALLER is the drawer (host got picked),
+  // include the candidates inline so the client skips the follow-up
+  // GET /rounds/[id]/words round-trip entirely. This response goes only to
+  // the round creator, so nothing leaks: non-drawer callers get no words
+  // (their drawer still fetches /words after the ROUND_STARTED broadcast),
+  // and guessers never see candidates either way.
+  const callerIsDrawer = drawerUserId === userId;
   return NextResponse.json({
     round: {
       id: round.id,
@@ -245,7 +257,26 @@ export async function POST(req: NextRequest) {
       duration_sec: round.duration_sec,
       started_at: round.started_at,
     },
-    // Indicate the drawer should GET /words next.
+    // Indicate the drawer should GET /words next (skipped when candidate_words
+    // is present — same drawer-only payload shape as the /words route).
     drawer_should_pick: true,
+    ...(callerIsDrawer
+      ? {
+          candidate_words: candidates.map((c) => ({
+            word: c.word,
+            difficulty: c.difficulty,
+            factoid: c.factoid,
+          })),
+        }
+      : {}),
   });
+}
+
+// GET /api/party/sketch/rounds — no-op warmer. The lobby pings this when the
+// host selects the Sketchy tile so the serverless function (and its
+// statically-imported curated word lists — the heavy part of this module's
+// cold start) is hot before the host hits Start. Returns no data and reads
+// nothing, so it's safe unauthenticated.
+export async function GET() {
+  return NextResponse.json({ ok: true });
 }

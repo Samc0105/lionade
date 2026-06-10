@@ -65,20 +65,21 @@ export async function POST(
     return NextResponse.json({ error: "Room not found" }, { status: 404 });
   }
 
-  // Count active (left_at IS NULL) players.
-  const { count } = await supabaseAdmin
-    .from("party_room_players")
-    .select("user_id", { count: "exact", head: true })
-    .eq("room_id", room.id)
-    .is("left_at", null);
-
-  // Check if this user already has a row.
-  const { data: existing } = await supabaseAdmin
-    .from("party_room_players")
-    .select("user_id, left_at")
-    .eq("room_id", room.id)
-    .eq("user_id", userId)
-    .maybeSingle();
+  // Count active (left_at IS NULL) players + check the caller's existing row.
+  // Independent reads — run in parallel (perf pass 2026-06-10).
+  const [{ count }, { data: existing }] = await Promise.all([
+    supabaseAdmin
+      .from("party_room_players")
+      .select("user_id", { count: "exact", head: true })
+      .eq("room_id", room.id)
+      .is("left_at", null),
+    supabaseAdmin
+      .from("party_room_players")
+      .select("user_id, left_at")
+      .eq("room_id", room.id)
+      .eq("user_id", userId)
+      .maybeSingle(),
+  ]);
 
   if (existing && existing.left_at === null) {
     // Refresh active_session so a re-open of the tab re-pins them to the room.
@@ -153,20 +154,25 @@ export async function POST(
   // postgres_changes listener + the 3s safety-net poll. Server-side broadcast
   // (same pattern as dismiss/decide) makes the host's lobby reflect a new
   // player immediately. Best-effort: a broadcast failure never fails the join.
+  //
+  // Perf pass 2026-06-10: the broadcast and the joiner's snapshot fetch are
+  // independent — run them in parallel so the broadcast no longer blocks the
+  // joiner's own response (~100-200ms off the join round-trip).
   const ch = supabaseAdmin.channel(roomChannel(code));
-  try {
-    await ch.send({
+  const broadcastP = ch
+    .send({
       type: "broadcast",
       event: PARTY_EVENTS.PLAYER_JOINED,
       payload: { user_id: userId },
+    })
+    .catch((err: unknown) => {
+      console.warn("[party/join] broadcast warn:", err);
+    })
+    .finally(() => {
+      void supabaseAdmin.removeChannel(ch);
     });
-  } catch (err) {
-    console.warn("[party/join] broadcast warn:", err);
-  } finally {
-    void supabaseAdmin.removeChannel(ch);
-  }
 
-  const snap = await fetchRoomSnapshot(supabaseAdmin, code);
+  const [snap] = await Promise.all([fetchRoomSnapshot(supabaseAdmin, code), broadcastP]);
   return NextResponse.json({
     ok: true,
     is_pending_round: isMidRound,
