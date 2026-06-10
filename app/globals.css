@@ -4546,6 +4546,50 @@ html.light .space-bg-container { display: none; }
 }
 .pa-ready-glow { animation: pa-ready-glow 1.6s ease-in-out infinite; }
 
+/* LOBBY SLOT WAVE — empty "waiting..." seats skeleton-pulse in sequence.
+   Stagger set inline per slot index (~180ms apart) so the row reads as a
+   wave, not a synchronized blink. Opacity-only (GPU). Reduced motion:
+   static dim slots (guard below + component gate). */
+@keyframes pa-slot-wave {
+  0%, 100% { opacity: 0.35; }
+  50%      { opacity: 0.9; }
+}
+.pa-slot-wave {
+  will-change: opacity;
+  animation: pa-slot-wave 1.8s ease-in-out infinite;
+}
+
+/* LOBBY JOIN — a NEW player card slides up + fades in, with a one-shot pop
+   accent as it lands: scale overshoot (1 -> 1.04 -> 1) + a brief purple
+   glow ring that blooms then fades to nothing. Single shot; the class stays
+   on the card after it runs (end state = rest state) so mid-flight
+   re-renders (e.g. the 1s nudge tick) can't cut or restart it.
+   GPU-only: transform + opacity + box-shadow. */
+@keyframes pa-join-in {
+  0%   { transform: translate3d(0, 10px, 0) scale(0.98); opacity: 0; box-shadow: 0 0 0 0 rgba(168,85,247,0); }
+  55%  { transform: translate3d(0, 0, 0) scale(1.04); opacity: 1; box-shadow: 0 0 0 1.5px rgba(168,85,247,0.55), 0 0 18px 2px rgba(168,85,247,0.35); }
+  100% { transform: translate3d(0, 0, 0) scale(1); opacity: 1; box-shadow: 0 0 0 0 rgba(168,85,247,0); }
+}
+.pa-join-in {
+  will-change: transform, opacity;
+  animation: pa-join-in 0.42s var(--ease-out-expo) both;
+}
+
+/* LOBBY READY LIT — a ready player's card lights up with the Social-tab
+   online-presence treatment: green ring + soft glow. Static base ring is
+   declared on the class itself; the keyframe only adds a gentle breathe,
+   so reduced-motion (animation: none) still keeps the lit ring.
+   Declared AFTER pa-join-in on purpose: when a card carries both classes,
+   the ready breathe wins the animation slot. */
+@keyframes pa-ready-lit {
+  0%, 100% { box-shadow: 0 0 0 1px rgba(34,197,94,0.30), 0 0 10px 0 rgba(34,197,94,0.16); }
+  50%      { box-shadow: 0 0 0 1px rgba(34,197,94,0.50), 0 0 16px 2px rgba(34,197,94,0.30); }
+}
+.pa-ready-lit {
+  box-shadow: 0 0 0 1px rgba(34,197,94,0.35), 0 0 12px 0 rgba(34,197,94,0.20);
+  animation: pa-ready-lit 2.4s ease-in-out infinite;
+}
+
 /* SELECTED GAME CARD — accent ring breathe on the chosen game (color via --pa-accent) */
 @keyframes pa-card-selected {
   0%, 100% { box-shadow: 0 0 22px -2px var(--pa-accent-soft, rgba(168,85,247,0.22)); }
@@ -4745,6 +4789,7 @@ html.light .space-bg-container { display: none; }
   .pa-tool-active, .pa-guess-pop, .pa-correct-flash, .pa-confirm-pop,
   .pa-stamp, .pa-factoid-up, .pa-leader-glow, .pa-truth-glow,
   .pa-ready-sweep, .pa-ready-glow, .pa-card-selected,
+  .pa-slot-wave, .pa-join-in, .pa-ready-lit,
   .pa-game-card, .pa-game-card:hover,
   .pa-tile-flip, .pa-card-flip-3d,
   .pa-canvas-stamp, .pa-canvas-corner,
@@ -4760,10 +4805,14 @@ html.light .space-bg-container { display: none; }
   .pa-ready-sweep { opacity: 0 !important; }
   .pa-pop-in, .pa-deal-in, .pa-chip-in, .pa-guess-pop, .pa-stamp, .pa-factoid-up,
   .pa-tile-flip, .pa-card-flip-3d,
-  .pa-canvas-stamp, .pa-canvas-corner {
+  .pa-canvas-stamp, .pa-canvas-corner,
+  .pa-join-in {
     transform: none !important;
     opacity: 1 !important;
   }
+  /* Slot wave freezes as a static dim seat; ready-lit keeps its static
+     ring (base box-shadow lives on the class, not the keyframe). */
+  .pa-slot-wave { opacity: 1 !important; }
 }
 
 /* ─────────────────────────────────────────────────────────────────────────

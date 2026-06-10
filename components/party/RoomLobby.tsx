@@ -402,6 +402,17 @@ export default function RoomLobby({ room, players, isHost, meUserId, onGameStart
     }
   }, [serverTopics, optimisticTopics]);
 
+  // ── Join entrance tracking ──
+  // Ids present at FIRST render are seeded into the ref and never animate
+  // (no whole-grid pop when the lobby loads). Any user_id that appears after
+  // mount gets the one-shot pa-join-in entrance. The class is never removed
+  // once granted (its end state IS the rest state), so the 1s nudge tick
+  // re-render can't cut the animation mid-flight, and a leave + rejoin
+  // re-fires it naturally because React remounts the keyed card.
+  const initialPlayerIdsRef = useRef<Set<string>>(
+    new Set(players.map((p) => p.user_id)),
+  );
+
   // For aggregate displays we apply both optimistic overrides locally so the
   // numbers match what the user just clicked.
   const optimisticPlayers = players.map((p) => {
@@ -722,15 +733,23 @@ export default function RoomLobby({ room, players, isHost, meUserId, onGameStart
             const isMe = p.user_id === meUserId;
             const isReady = p.is_ready;
             const accent = isReady ? "rgba(34,197,94,0.45)" : isMe ? "rgba(168,85,247,0.4)" : "rgba(255,255,255,0.06)";
+            // Ready cards get the Social-tab online treatment: green gradient
+            // fill (inline) + ring/soft glow + breathe (pa-ready-lit class).
             const bg = isReady
-              ? "rgba(34,197,94,0.08)"
+              ? "linear-gradient(135deg, rgba(34,197,94,0.16) 0%, rgba(34,197,94,0.05) 100%)"
               : isMe
                 ? "rgba(168,85,247,0.12)"
                 : "rgba(255,255,255,0.03)";
+            // Joined after mount → one-shot slide-up + glow-ring pop.
+            // Reduced motion: instant appearance (class withheld; the CSS
+            // guard in globals.css is the backstop).
+            const justJoined = !reduced && !initialPlayerIdsRef.current.has(p.user_id);
             return (
               <div
                 key={p.user_id}
-                className="rounded-lg px-3 py-2 flex items-center gap-2 truncate"
+                className={`rounded-lg px-3 py-2 flex items-center gap-2 truncate${
+                  justJoined ? " pa-join-in" : ""
+                }${isReady ? " pa-ready-lit" : ""}`}
                 style={{ background: bg, border: `1px solid ${accent}` }}
               >
                 <span
@@ -761,13 +780,19 @@ export default function RoomLobby({ room, players, isHost, meUserId, onGameStart
               </div>
             );
           })}
+          {/* Empty seats: skeleton pulse staggered per slot index so the row
+              reads as a wave (slot 1 → 2 → 3). Reduced motion: static dim
+              slots, no pulse. */}
           {Array.from({ length: Math.max(0, 3 - players.length) }).map((_, i) => (
             <div
               key={`empty-${i}`}
-              className="rounded-lg px-3 py-2 text-cream/30 text-xs font-syne italic"
+              className={`rounded-lg px-3 py-2 text-cream/30 text-xs font-syne italic${
+                reduced ? "" : " pa-slot-wave"
+              }`}
               style={{
                 background: "rgba(255,255,255,0.01)",
                 border: "1px dashed rgba(255,255,255,0.06)",
+                ...(reduced ? undefined : { animationDelay: `${i * 180}ms` }),
               }}
             >
               waiting...
