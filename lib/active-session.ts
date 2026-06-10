@@ -6,7 +6,7 @@
  * from the same cached source-of-truth instead of doing its own fetch.
  *
  * Consumers (web Tier 1):
- *   - ResumeBanner    — sticky banner above Navbar when active_session points
+ *   - ActiveSessionToast — slide-in resume toast when active_session points
  *                       to a page the user isn't currently on.
  *   - AuthProvider    — subscribes to the per-user realtime channel and
  *                       cross-references active_session on every event so
@@ -176,9 +176,9 @@ export function useActiveSession(): {
 }
 
 /**
- * Compute the canonical URL for a given active session. Used by ResumeBanner
- * (to know where to send the user) AND by the cross-game redirect path (to
- * know if the user is already at the right URL).
+ * Compute the canonical URL for a given active session. Used by
+ * ActiveSessionToast (to know where to send the user) AND by the cross-game
+ * redirect path (to know if the user is already at the right URL).
  *
  * Returns null when the type doesn't map to a stable URL — keeps the caller
  * defensive against future ActiveSessionType values that we haven't taught
@@ -210,24 +210,3 @@ export function urlForActiveSession(session: ActiveSession): string | null {
   }
 }
 
-/**
- * Human-readable label for the resume banner. Kept here so the banner copy
- * stays in lockstep with the URL mapping (one switch statement vs two).
- */
-export function labelForActiveSession(session: ActiveSession): string {
-  switch (session.type) {
-    case "party_room":
-      return "Resume your party game";
-    case "mastery_session":
-      return "Resume your Mastery session";
-    case "arena_match":
-    case "competitive_match":
-      return "Resume your arena match";
-    case "daily_drill":
-      return "Resume your daily drill";
-    case "quiz":
-      return "Resume your quiz";
-    default:
-      return "Resume your session";
-  }
-}

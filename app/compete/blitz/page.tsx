@@ -103,7 +103,7 @@ export default function CompeteBlitzPage() {
   // inside BlitzMode's local hooks/refs — see follow-up note), so V1 is
   // "clean slate on every visit." The state row IS still useful as a
   // breadcrumb for the cross-tab cross-game redirect logic in
-  // ResumeBanner — that banner reads active_session, not this row.
+  // ActiveSessionToast — that toast reads active_session, not this row.
   useEffect(() => {
     void apiPost("/api/quiz/state", { game_type: "blitz", state: null });
   }, []);

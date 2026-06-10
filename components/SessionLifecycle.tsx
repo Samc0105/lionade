@@ -95,7 +95,7 @@ export default function SessionLifecycle() {
         const payload = (msg.payload ?? {}) as { active_session?: ActiveSession | null };
         const newSession = payload.active_session ?? null;
         // Refresh the SWR-backed pointer so every other consumer
-        // (ResumeBanner, reconnect-on-mount guard) picks up the new value
+        // (ActiveSessionToast, reconnect-on-mount guard) picks up the new value
         // even if SWR's 30s poll hasn't fired.
         void mutate();
 
