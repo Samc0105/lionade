@@ -7,7 +7,7 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 
 ---
 
-## 2026-06-10: Party lobby/invite/Sketchy polish (web)
+## 2026-06-10: Party lobby/invite/Sketchy polish + Party games UX batch (web)
 
 **Status:** 🚫 N/A (deliberate no-row decision: Lionade Party is web-only V1, same rationale as the 2026-06-07 Party V2 rows below. The iOS port is deferred to `vp-ios` and will adopt this batch together with the V2 foundation + active-game work.)
 
@@ -18,7 +18,17 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 3. **PLAYER_JOINED is now broadcast by both the join route and the host-approve route**, so host lobbies update live without polling.
 4. **`party_word_lists.difficulty` is now CHECK-constrained** (easy/medium/hard) with tiered candidate selection (one candidate per tier, nearest-tier fallback for thin pools). Migration `supabase/migrations/20260610_party_word_difficulty.sql` is NOT yet applied to prod; Sam deploys it.
 
-Batch summary (web): global `PartyInviteToast` on `party_invite` notifications (single WebSocket, Navbar re-emits via `lib/party/invite-bus.ts`), lobby join/ready animations, Sketchy tiered word picker + non-drawer waiting card, lobby polish (copy toast, real game-tile metadata, chat unread badge, READY UP/START states), realtime perf pass, chat spoof-hardening review fixes.
+Second batch same day ("Party games UX batch", commits `2cb52b7`, `88ec383`, `9bddeb8`, `797a55c`) changed the wire/API contract again:
+
+5. **`POST /api/party/pokerface/rounds/[id]/open-vote` now authorizes the presenter** in addition to the host and the interrogator (it backs the presenter's I'VE READ IT button). An iOS Poker Face client must allow the presenter to call it.
+6. **Bluff round GET gained `voted_user_ids` (ids only) + `my_answer_id`**, and forfeit-sentinel answers are now filtered server-side from vote + reveal payloads (with a vote-route backstop, since the sentinel previously rendered as a votable card granting unearned +500s). Vote targets stay hidden until reveal; only "who has voted" ids are exposed.
+7. **The `FORFEIT_SENTINEL` contract lives in `lib/party/bluff-constants.ts`** (`"__forfeit__"` + the `isForfeitText` normalizer). Any iOS Bluff client must submit and recognize the same sentinel rather than inventing its own.
+8. **Bluff `write_ends_at` now includes a 5s countdown pad** on top of the host-chosen write window (`COUNTDOWN_PAD_SECONDS` in `app/api/party/bluff/rounds/route.ts`). Clients must derive their timer purely from `write_ends_at` and must not back-compute the raw write duration from it.
+9. **ActiveSessionToast replaced the sticky ResumeBanner on web** (all 5 active-session types; party sessions get a Rejoin + room code; Dismiss is sessionStorage-scoped and no longer deletes the server `active_session` pointer). Note only: iOS has its own session-resume UX and should not port the toast, but it must honor the pointer semantics (dismiss is client-local; only leaving/finishing clears the server pointer).
+
+Batch summary (web, batch 1): global `PartyInviteToast` on `party_invite` notifications (single WebSocket, Navbar re-emits via `lib/party/invite-bus.ts`), lobby join/ready animations, Sketchy tiered word picker + non-drawer waiting card, lobby polish (copy toast, real game-tile metadata, chat unread badge, READY UP/START states), realtime perf pass, chat spoof-hardening review fixes.
+
+Batch summary (web, batch 2): ActiveSessionToast, Poker Face both-sides UX (presenter decide beat with server-side TRUE/LIE lock + 30s window from server timestamps, sell-it screen, caller waiting screen with listen rings, BELIEVE/DOUBT 15s window, 2s pause + 3D card-flip reveal, ROUND N/M header, score ticker), shared `RoundCountdown` + `GameOverScreen` components (consumed by Poker Face and Bluff), Bluff polish (host parity audit clean, forfeit exploit fix, write/vote phase states, one-by-one reveal, count-up scoreboard, vote upsert errors surfaced).
 
 Owner: `quality-docs-writer` (web).
 
