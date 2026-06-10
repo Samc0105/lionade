@@ -37,6 +37,8 @@ Batch summary (web, batch 2): ActiveSessionToast, Poker Face both-sides UX (pres
 
 Batch summary (web, batch 3): Sketchy round-flow parity (shared `RoundCountdown` between rounds with the pick timer + drawing clock held during the 5s intro, replay-proof seen-set, `selectWord` click-through guard; host-ended GAME_OVER flow into the shared `GameOverScreen` podium; staged ~3.9s reveal with a reduced-motion all-at-once fallback; per-round canvas/header fade-slide; scoreboard staggerIn opt-in default-off so Bluff and Poker Face are unchanged).
 
+Batch summary (web, batch 4, content): Sketchy word bank nearly doubled, 752 to 1404 words. Pure data growth in `lib/party/word-lists.ts` + the `party_word_lists` table (re-seeded via `scripts/seed-party-words.ts`), no schema or wire change. The `difficulty` CHECK + tiered candidate picker from batch 1 are unchanged; the extra words just mean every subject now has a full easy/medium/hard spread. When the iOS port begins it reads the same `party_word_lists` rows, so no iOS-side content work is needed beyond pointing at the table.
+
 Owner: `quality-docs-writer` (web).
 
 ---
