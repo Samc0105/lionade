@@ -1,9 +1,13 @@
 "use client";
 
+import { useMemo } from "react";
+import useSWR from "swr";
 import Link from "next/link";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { useAuth } from "@/lib/auth";
 import { cdnUrl } from "@/lib/cdn";
+import { apiGet } from "@/lib/api-client";
+import { supabase } from "@/lib/supabase";
 import { useEloLeaderboard } from "@/lib/hooks";
 import {
   Medal,
@@ -25,30 +29,25 @@ import {
   Shield,
 } from "@phosphor-icons/react";
 
-/* ── Tier definitions (bottom → top) ── */
+/* ── Tier definitions (bottom → top) ──
+   2026-06-09: tiers are placed by arena ELO, not win counts. `minElo`
+   thresholds extend the duel-page getEloTier ladder (Bronze 0, then +200
+   per tier from 1200) up through the four prestige tiers. Everyone starts
+   at ELO 1000 → Bronze. */
 const TIERS = [
-  { name: "BRONZE", color: "#CD7F32", range: "0–99 wins", tagline: "Freshman", Icon: Medal, iconColor: "#CD7F32", iconWeight: "regular" as const, image: cdnUrl("/bronze.png") },
-  { name: "SILVER", color: "#C0C0C0", range: "100–249 wins", tagline: "Scholar", Icon: Medal, iconColor: "#C0C0C0", iconWeight: "regular" as const, image: cdnUrl("/silver.png") },
-  { name: "GOLD", color: "#FFD700", range: "250–499 wins", tagline: "Honor Roll", Icon: Medal, iconColor: "#FFD700", iconWeight: "regular" as const, image: cdnUrl("/gold.png") },
-  { name: "PLATINUM", color: "#00CED1", range: "500–999 wins", tagline: "Dean's List", Icon: Diamond, iconColor: "#00CED1", iconWeight: "regular" as const, image: cdnUrl("/platinum.png") },
-  { name: "DIAMOND", color: "#B9F2FF", range: "1,000–1,999 wins", tagline: "Valedictorian", Icon: DiamondsFour, iconColor: "#B9F2FF", iconWeight: "regular" as const, image: cdnUrl("/diamond.png") },
-  { name: "ONYX", color: "#1A1A2E", textColor: "#C0C0D0", glowColor: "#C0C0D0", range: "2,000–3,499 wins", tagline: "Prodigy", Icon: Heart, iconColor: "#1A1A2E", iconWeight: "fill" as const, image: cdnUrl("/onix.png") },
-  { name: "RUBY", color: "#E0115F", range: "3,500–4,999 wins", tagline: "Olympiad", Icon: Flame, iconColor: "#E0115F", iconWeight: "fill" as const, image: cdnUrl("/ruby.png") },
-  { name: "EMERALD", color: "#50C878", range: "5,000–7,499 wins", tagline: "Mastermind", Icon: Crown, iconColor: "#50C878", iconWeight: "fill" as const, image: cdnUrl("/emerald.png") },
-  { name: "LEGEND", color: "legend", range: "7,500+ wins", tagline: "Immortal", Icon: Lightning, iconColor: "#FFD700", iconWeight: "fill" as const, image: cdnUrl("/legend.png") },
+  { name: "BRONZE", minElo: 0, color: "#CD7F32", range: "0–1199 Elo", tagline: "Freshman", Icon: Medal, iconColor: "#CD7F32", iconWeight: "regular" as const, image: cdnUrl("/bronze.png") },
+  { name: "SILVER", minElo: 1200, color: "#C0C0C0", range: "1200–1399 Elo", tagline: "Scholar", Icon: Medal, iconColor: "#C0C0C0", iconWeight: "regular" as const, image: cdnUrl("/silver.png") },
+  { name: "GOLD", minElo: 1400, color: "#FFD700", range: "1400–1599 Elo", tagline: "Honor Roll", Icon: Medal, iconColor: "#FFD700", iconWeight: "regular" as const, image: cdnUrl("/gold.png") },
+  { name: "PLATINUM", minElo: 1600, color: "#00CED1", range: "1600–1799 Elo", tagline: "Dean's List", Icon: Diamond, iconColor: "#00CED1", iconWeight: "regular" as const, image: cdnUrl("/platinum.png") },
+  { name: "DIAMOND", minElo: 1800, color: "#B9F2FF", range: "1800–1999 Elo", tagline: "Valedictorian", Icon: DiamondsFour, iconColor: "#B9F2FF", iconWeight: "regular" as const, image: cdnUrl("/diamond.png") },
+  { name: "ONYX", minElo: 2000, color: "#1A1A2E", textColor: "#C0C0D0", glowColor: "#C0C0D0", range: "2000–2199 Elo", tagline: "Prodigy", Icon: Heart, iconColor: "#1A1A2E", iconWeight: "fill" as const, image: cdnUrl("/onix.png") },
+  { name: "RUBY", minElo: 2200, color: "#E0115F", range: "2200–2399 Elo", tagline: "Olympiad", Icon: Flame, iconColor: "#E0115F", iconWeight: "fill" as const, image: cdnUrl("/ruby.png") },
+  { name: "EMERALD", minElo: 2400, color: "#50C878", range: "2400–2599 Elo", tagline: "Mastermind", Icon: Crown, iconColor: "#50C878", iconWeight: "fill" as const, image: cdnUrl("/emerald.png") },
+  { name: "LEGEND", minElo: 2600, color: "#FFD700", range: "2600+ Elo", tagline: "Immortal", Icon: Lightning, iconColor: "#FFD700", iconWeight: "fill" as const, image: cdnUrl("/legend.png") },
 ];
 
 const TIER_WIDTHS = ["40%", "48%", "54%", "60%", "68%", "76%", "84%", "92%", "100%"];
 
-/* ── Hex stat config ── */
-const HEX_STATS = [
-  { label: "Your Rank", value: "Unranked", color: "#FFD700", achieved: false },
-  { label: "Wins", value: "0", color: "#22C55E", achieved: false },
-  { label: "Win Streak", value: "0", color: "#F97316", achieved: false },
-  { label: "Goal", value: "Top 10%", color: "#4A90D9", achieved: false },
-];
-
-const CURRENT_TIER_INDEX = 8;
 export default function CompetePage() {
   const { user } = useAuth();
   const DISPLAY_NAME = user?.username || "Player";
@@ -61,6 +60,93 @@ export default function CompetePage() {
   // in lib/hooks.ts with a 30s dedupe.
   const { data: topPlayersData } = useEloLeaderboard(5);
   const topPlayers: { rank: number; username: string; arena_elo: number }[] = topPlayersData ?? [];
+
+  // 2026-06-09 (bug fix): the hex stats + tier pyramid were hardcoded
+  // (everyone rendered as LEGEND with fake "Unranked / 0 wins" hexes).
+  // Wire them to the caller's real arena data instead:
+  //   - /api/me/elo-rank → { elo, rank, totalRanked } (rank = strictly-ahead count + 1)
+  //   - profiles.arena_wins/losses/draws → win count + games played
+  //     (same direct profile select the duel page uses; these arena fields
+  //      aren't on the shared useUserStats hook)
+  const { data: eloRankData } = useSWR(
+    user?.id ? `compete-elo-rank/${user.id}` : null,
+    async () => {
+      const r = await apiGet<{ elo: number | null; rank: number | null; totalRanked: number }>("/api/me/elo-rank");
+      return r.ok && r.data ? r.data : null;
+    },
+    { keepPreviousData: true, revalidateOnFocus: true }
+  );
+
+  const { data: arenaRecord } = useSWR(
+    user?.id ? `compete-arena-record/${user.id}` : null,
+    async () => {
+      const { data } = await supabase
+        .from("profiles")
+        .select("arena_wins, arena_losses, arena_draws")
+        .eq("id", user!.id)
+        .single();
+      return {
+        wins: data?.arena_wins ?? 0,
+        losses: data?.arena_losses ?? 0,
+        draws: data?.arena_draws ?? 0,
+      };
+    },
+    { keepPreviousData: true, revalidateOnFocus: true }
+  );
+
+  const myElo: number | null = eloRankData?.elo ?? null;
+  const myRank: number | null = eloRankData?.rank ?? null;
+  const totalRanked: number = eloRankData?.totalRanked ?? 0;
+  const wins: number | null = arenaRecord ? arenaRecord.wins : null;
+  const gamesPlayed: number | null = arenaRecord
+    ? arenaRecord.wins + arenaRecord.losses + arenaRecord.draws
+    : null;
+
+  // null while ELO is loading → pyramid shows Bronze unlocked with NO "YOU"
+  // badge (no flash of a wrong tier). A brand-new user (ELO 1000) lands on
+  // Bronze with everything above locked.
+  const currentTierIndex = useMemo(() => {
+    if (myElo === null) return null;
+    let idx = 0;
+    for (let i = 0; i < TIERS.length; i++) {
+      if (myElo >= TIERS[i].minElo) idx = i;
+    }
+    return idx;
+  }, [myElo]);
+  const effectiveTierIndex = currentTierIndex ?? 0;
+
+  // "Ranked" = has actually played at least one arena match. Everyone has a
+  // default arena_elo of 1000, so the rank number alone isn't enough.
+  const recordLoading = eloRankData === undefined || arenaRecord === undefined;
+  const isRanked = !recordLoading && myRank !== null && (gamesPlayed ?? 0) > 0;
+
+  // Hex stats — real data only. "Win Streak" was removed: it isn't tracked
+  // anywhere in the schema, so showing it would be fake UI.
+  const hexStats = [
+    {
+      label: "Your Rank",
+      value: recordLoading ? "—" : isRanked ? `#${myRank}` : "Unranked",
+      color: "#FFD700",
+      achieved: isRanked,
+    },
+    {
+      label: "Wins",
+      value: wins === null ? "—" : wins.toLocaleString(),
+      color: "#22C55E",
+      achieved: (wins ?? 0) > 0,
+    },
+    {
+      label: "Goal",
+      value: "Top 10%",
+      color: "#4A90D9",
+      achieved: isRanked && totalRanked > 0 && (myRank ?? Infinity) / totalRanked <= 0.1,
+    },
+  ];
+
+  // Placement progress under the rank hex: real career match count, shown
+  // until 5 matches are played. Hidden while loading (no fake "0 / 5").
+  const placementGames = gamesPlayed === null ? null : Math.min(gamesPlayed, 5);
+  const showPlacement = placementGames !== null && placementGames < 5;
 
   return (
     <ProtectedRoute>
@@ -123,7 +209,7 @@ export default function CompetePage() {
           <div className="animate-slide-up mb-10" style={{ animationDelay: "0.05s" }}>
             {/* Desktop: horizontal row with energy lines */}
             <div className="hidden sm:flex justify-center items-center gap-0">
-              {HEX_STATS.map((stat, i) => (
+              {hexStats.map((stat, i) => (
                 <div key={stat.label} className="flex items-center">
                   {i > 0 && (
                     <div className={`energy-line ${stat.achieved ? "energy-line-active" : "energy-line-dim"}`} />
@@ -150,13 +236,20 @@ export default function CompetePage() {
                         {stat.label}
                       </p>
                     </div>
-                    {i === 0 && (
+                    {i === 0 && showPlacement && (
                       <div className="mt-2 w-20">
+                        {!isRanked && (
+                          <div className="font-bebas text-[9px] tracking-widest text-center mb-0.5"
+                            style={{ color: TIERS[effectiveTierIndex].color }}>
+                            {TIERS[effectiveTierIndex].name}
+                          </div>
+                        )}
                         <div className="text-[9px] text-cream/55 text-center mb-1">Play 5 matches</div>
                         <div className="h-1.5 rounded-full bg-cream/[0.07] overflow-hidden">
-                          <div className="h-full w-0 bg-gradient-to-r from-gold/60 to-gold rounded-full" />
+                          <div className="h-full bg-gradient-to-r from-gold/60 to-gold rounded-full motion-safe:transition-all motion-safe:duration-500"
+                            style={{ width: `${(placementGames! / 5) * 100}%` }} />
                         </div>
-                        <div className="text-[9px] text-cream/55 text-center mt-0.5">0 / 5</div>
+                        <div className="text-[9px] text-cream/55 text-center mt-0.5">{placementGames} / 5</div>
                       </div>
                     )}
                   </div>
@@ -164,9 +257,9 @@ export default function CompetePage() {
               ))}
             </div>
 
-            {/* Mobile: 2x2 grid */}
-            <div className="grid grid-cols-2 gap-4 sm:hidden">
-              {HEX_STATS.map((stat, i) => (
+            {/* Mobile: centered wrap (3 stats) */}
+            <div className="flex flex-wrap justify-center gap-4 sm:hidden">
+              {hexStats.map((stat, i) => (
                 <div key={stat.label} className="flex flex-col items-center">
                   <div
                     className={`hex-clip ${i === 0 ? "w-24 h-24" : "w-20 h-20"} flex flex-col items-center justify-center
@@ -186,13 +279,20 @@ export default function CompetePage() {
                       {stat.label}
                     </p>
                   </div>
-                  {i === 0 && (
+                  {i === 0 && showPlacement && (
                     <div className="mt-1.5 w-16">
+                      {!isRanked && (
+                        <div className="font-bebas text-[8px] tracking-widest text-center mb-0.5"
+                          style={{ color: TIERS[effectiveTierIndex].color }}>
+                          {TIERS[effectiveTierIndex].name}
+                        </div>
+                      )}
                       <div className="text-[8px] text-cream/55 text-center mb-0.5">Play 5 matches</div>
                       <div className="h-1 rounded-full bg-cream/10 overflow-hidden">
-                        <div className="h-full w-0 bg-gold rounded-full" />
+                        <div className="h-full bg-gold rounded-full motion-safe:transition-all motion-safe:duration-500"
+                          style={{ width: `${(placementGames! / 5) * 100}%` }} />
                       </div>
-                      <div className="text-[8px] text-cream/55 text-center mt-0.5">0/5</div>
+                      <div className="text-[8px] text-cream/55 text-center mt-0.5">{placementGames}/5</div>
                     </div>
                   )}
                 </div>
@@ -425,7 +525,7 @@ export default function CompetePage() {
                     </div>
                     <div className="border-t border-cream/10 pt-3 mb-4">
                       <p className="text-cream/55 text-xs">
-                        Your Rank: <span className="text-cream/50 font-semibold">{user?.id && topPlayers.find(p => p.username === user.username) ? `#${topPlayers.find(p => p.username === user.username)!.rank}` : "Unranked"}</span>
+                        Your Rank: <span className="text-cream/50 font-semibold">{recordLoading ? "—" : isRanked ? `#${myRank}` : "Unranked"}</span>
                       </p>
                     </div>
                     <Link href="/leaderboard"
@@ -544,9 +644,11 @@ export default function CompetePage() {
                 const origIdx = TIERS.length - 1 - displayIdx;
                 const isLegend = tier.name === "LEGEND";
                 const isOnyx = tier.name === "ONYX";
-                const isCurrent = origIdx === CURRENT_TIER_INDEX;
-                const isLocked = origIdx > CURRENT_TIER_INDEX;
-                const isAchieved = origIdx < CURRENT_TIER_INDEX;
+                // currentTierIndex is null while ELO loads → no "YOU" badge,
+                // no achieved glow, everything above Bronze locked.
+                const isCurrent = currentTierIndex !== null && origIdx === currentTierIndex;
+                const isLocked = origIdx > effectiveTierIndex;
+                const isAchieved = currentTierIndex !== null && origIdx < currentTierIndex;
 
                 const tierColor = isLegend ? "#FFD700" : (isOnyx ? (tier.glowColor || "#C0C0D0") : tier.color);
                 const textColor = isOnyx ? (tier.textColor || "#C0C0D0") : tier.color;
@@ -652,20 +754,20 @@ export default function CompetePage() {
                 YOUR NAME IN THE ARENA
               </p>
               <p className="font-syne text-2xl font-bold mb-2"
-                style={{ color: TIERS[CURRENT_TIER_INDEX].color, textShadow: `0 0 20px ${TIERS[CURRENT_TIER_INDEX].color}40` }}>
+                style={{ color: TIERS[effectiveTierIndex].color, textShadow: `0 0 20px ${TIERS[effectiveTierIndex].color}40` }}>
                 {DISPLAY_NAME}
               </p>
-              {CURRENT_TIER_INDEX < TIERS.length - 1 && (
+              {effectiveTierIndex < TIERS.length - 1 && (
                 <div className="mt-3">
                   <p className="text-cream/25 text-[10px] uppercase tracking-widest mb-1.5">Next rank:</p>
-                  <p className={`font-syne text-xl font-bold opacity-50 ${TIERS[CURRENT_TIER_INDEX + 1].name === "LEGEND" ? "legend-text" : ""}`}
-                    style={TIERS[CURRENT_TIER_INDEX + 1].name !== "LEGEND" ? { color: TIERS[CURRENT_TIER_INDEX + 1].color } : undefined}>
+                  <p className={`font-syne text-xl font-bold opacity-50 ${TIERS[effectiveTierIndex + 1].name === "LEGEND" ? "legend-text" : ""}`}
+                    style={TIERS[effectiveTierIndex + 1].name !== "LEGEND" ? { color: TIERS[effectiveTierIndex + 1].color } : undefined}>
                     {DISPLAY_NAME}
                   </p>
                   <p className="text-cream/55 text-[10px] mt-1">
-                    {TIERS[CURRENT_TIER_INDEX + 1].range} to unlock{" "}
-                    <span style={{ color: TIERS[CURRENT_TIER_INDEX + 1].name === "LEGEND" ? "#FFD700" : TIERS[CURRENT_TIER_INDEX + 1].color }}>
-                      {TIERS[CURRENT_TIER_INDEX + 1].name}
+                    {TIERS[effectiveTierIndex + 1].range} to unlock{" "}
+                    <span style={{ color: TIERS[effectiveTierIndex + 1].name === "LEGEND" ? "#FFD700" : TIERS[effectiveTierIndex + 1].color }}>
+                      {TIERS[effectiveTierIndex + 1].name}
                     </span>
                   </p>
                 </div>

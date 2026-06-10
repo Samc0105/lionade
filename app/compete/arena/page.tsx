@@ -52,6 +52,9 @@ export default function CompetitiveArenaPage() {
   const [format, setFormat] = useState<CompetitiveFormat>("1v1");
   const [search, setSearch] = useState<SearchState>({ phase: "idle" });
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  // True while a search is in flight — mirrors `search.phase === "searching"`
+  // but readable from cleanup closures without going stale.
+  const searchingRef = useRef(false);
 
   const stopPolling = useCallback(() => {
     if (pollRef.current) {
@@ -63,6 +66,7 @@ export default function CompetitiveArenaPage() {
   const goToMatch = useCallback(
     (mode: CompetitiveMode, matchId: string) => {
       stopPolling();
+      searchingRef.current = false;
       setSearch({ phase: "idle" });
       router.push(`/compete/arena/${mode}/${matchId}`);
     },
@@ -71,13 +75,20 @@ export default function CompetitiveArenaPage() {
 
   const cancelSearch = useCallback(async () => {
     stopPolling();
+    searchingRef.current = false;
     setSearch({ phase: "idle" });
     await apiDelete("/api/competitive/queue").catch(() => {});
   }, [stopPolling]);
 
   const startSearch = useCallback(
     async (mode: CompetitiveMode) => {
-      setSearch({ phase: "searching", mode, since: Date.now() });
+      // Stable timestamp captured in this closure — NOT read back from state,
+      // which would be stale inside the interval callback (the old bug: the
+      // interval closed over `search` from before setSearch landed, so the
+      // 45s timeout never fired and the spinner ran forever).
+      const startedAt = Date.now();
+      searchingRef.current = true;
+      setSearch({ phase: "searching", mode, since: startedAt });
       const { ok, data } = await apiPost<{ status: string; matchId?: string }>(
         "/api/competitive/queue",
         { format, mode },
@@ -88,24 +99,37 @@ export default function CompetitiveArenaPage() {
       }
       // Poll for a match.
       pollRef.current = setInterval(async () => {
-        const elapsed = Date.now() - (search.phase === "searching" ? search.since : Date.now());
+        const elapsed = Date.now() - startedAt;
         const res = await apiGet<{ status: string; matchId?: string }>("/api/competitive/queue");
         if (res.ok && res.data?.status === "matched" && res.data.matchId) {
           goToMatch(mode, res.data.matchId);
           return;
         }
-        // Timeout → honest no-opponents dead-end.
+        // Timeout → honest no-opponents dead-end. Dequeue so the user can't
+        // be matched while staring at the "No opponents yet" card.
         if (elapsed > SEARCH_TIMEOUT_MS) {
           stopPolling();
-          await apiDelete("/api/competitive/queue").catch(() => {});
+          searchingRef.current = false;
           setSearch({ phase: "none", mode });
+          await apiDelete("/api/competitive/queue").catch(() => {});
         }
       }, POLL_INTERVAL_MS);
     },
-    [format, goToMatch, search, stopPolling],
+    [format, goToMatch, stopPolling],
   );
 
-  useEffect(() => () => stopPolling(), [stopPolling]);
+  // Unmount cleanup: clear the poll and, if a search was still in flight,
+  // remove our queue row so we don't get matched after leaving the page.
+  useEffect(
+    () => () => {
+      stopPolling();
+      if (searchingRef.current) {
+        searchingRef.current = false;
+        apiDelete("/api/competitive/queue").catch(() => {});
+      }
+    },
+    [stopPolling],
+  );
 
   return (
     <ProtectedRoute>

@@ -29,7 +29,15 @@ import {
 
 // ── Types ────────────────────────────────────────────────────
 
-type ArenaPhase = "lobby" | "matchmaking" | "challenge" | "prematch" | "battle" | "results";
+type ArenaPhase =
+  | "lobby"
+  | "matchmaking"
+  | "challenge"
+  | "prematch"
+  | "battle"
+  | "results"
+  | "no_opponents" // matchmaking timed out with an empty queue
+  | "match_error"; // match payload arrived broken (e.g. zero questions)
 
 interface ArenaPlayer {
   id: string;
@@ -96,6 +104,10 @@ interface IncomingChallenge {
 // ── Constants ────────────────────────────────────────────────
 
 const WAGER_OPTIONS = [10, 25, 50, 100];
+
+// Matchmaking gives up after 60s total: 30s at the normal ELO range,
+// then 30s at the expanded range (the server widens at 30s).
+const MATCHMAKING_TIMEOUT_S = 60;
 
 const ELO_TIERS: { name: string; min: number; max: number; color: string; Icon: Icon }[] = [
   { name: "Bronze", min: 0, max: 1199, color: "#CD7F32", Icon: Medal },
@@ -220,11 +232,33 @@ export default function ArenaPage() {
     // Join queue
     await apiPost("/api/arena/queue", { wager });
 
-    // Poll for match
+    // Poll for match. `elapsed` is a local captured by the interval closure
+    // (NOT read back from state) so it can't go stale between ticks.
     let elapsed = 0;
     pollRef.current = setInterval(async () => {
       elapsed += 2;
       setSearchTime(elapsed);
+
+      // Total timeout: stop polling, leave the queue (same DELETE the Cancel
+      // button uses — it only flips "waiting" rows to "cancelled", so it's a
+      // safe no-op if a match landed on the very last poll), then do one
+      // final status check so a last-second match isn't dropped.
+      if (elapsed >= MATCHMAKING_TIMEOUT_S) {
+        if (pollRef.current) clearInterval(pollRef.current);
+        pollRef.current = null;
+
+        await apiDelete("/api/arena/queue");
+
+        const last = await apiGet<{ status?: string; matchId?: string }>("/api/arena/queue");
+        if (last.ok && last.data?.status === "matched" && last.data.matchId) {
+          setMatchId(last.data.matchId);
+          loadMatch(last.data.matchId);
+          return;
+        }
+
+        setPhase("no_opponents");
+        return;
+      }
 
       const res = await apiGet<{
         eloRange?: number;
@@ -261,8 +295,19 @@ export default function ArenaPage() {
 
     if (!data.match) return;
 
+    // Malformed match: no questions means battle phase would render nothing.
+    // Bail to an error card BEFORE the prematch countdown ever starts, and
+    // never PATCH "start" so the match is left untouched (there is no
+    // abandon/forfeit API; not starting it is the cleanest exit).
+    const qs: ArenaQuestion[] = Array.isArray(data.questions) ? data.questions : [];
+    if (qs.length === 0) {
+      setMatchId(mId);
+      setPhase("match_error");
+      return;
+    }
+
     setMatchId(mId);
-    setQuestions(data.questions ?? []);
+    setQuestions(qs);
 
     const isP1 = data.match.player1_id === user?.id || data.player1?.id === user?.id;
     const meData = isP1 ? data.player1 : data.player2;
@@ -283,6 +328,11 @@ export default function ArenaPage() {
   useEffect(() => {
     if (phase !== "prematch") return;
     if (countdown <= 0) {
+      // Belt-and-braces: never enter battle with an empty question set.
+      if (questions.length === 0) {
+        setPhase("match_error");
+        return;
+      }
       setPhase("battle");
       setCurrentQ(0);
       setSelected(null);
@@ -950,6 +1000,53 @@ export default function ArenaPage() {
   }
 
   // ═══════════════════════════════════════════════════════════
+  // PHASE: NO OPPONENTS (matchmaking timed out)
+  // ═══════════════════════════════════════════════════════════
+  if (phase === "no_opponents") {
+    return (
+      <ProtectedRoute>
+        <div data-force-dark className="min-h-screen flex items-center justify-center px-4" style={{ isolation: "isolate" }}>
+          <div className="max-w-md w-full animate-slide-up">
+            <div className="rounded-2xl p-8 text-center"
+              style={{
+                background: "linear-gradient(135deg, #0c1020 0%, #080c18 100%)",
+                border: "1px solid rgba(74,144,217,0.2)",
+                boxShadow: "0 0 30px rgba(74,144,217,0.06)",
+              }}>
+              <div className="w-16 h-16 rounded-full mx-auto mb-5 flex items-center justify-center"
+                style={{ background: "rgba(74,144,217,0.1)", border: "2px solid rgba(74,144,217,0.3)" }}>
+                <Sword size={28} weight="fill" color="#4A90D9" aria-hidden="true" />
+              </div>
+
+              <h2 className="font-bebas text-4xl text-cream tracking-wider mb-3">
+                NO OPPONENTS ONLINE
+              </h2>
+              <p className="text-cream/50 text-sm font-syne leading-relaxed mb-2">
+                The arena is quiet right now. Every other duelist must be deep in a study session.
+              </p>
+              <p className="text-cream/40 text-xs font-syne mb-8 flex items-center justify-center gap-1.5">
+                <img src={cdnUrl("/F.png")} alt="Fangs" className="w-3.5 h-3.5 object-contain" />
+                Your Fangs stayed in your pocket. Nothing was wagered.
+              </p>
+
+              <div className="flex flex-col sm:flex-row gap-3">
+                <button onClick={startMatchmaking}
+                  className="btn-gold flex-1 py-3 rounded-xl">
+                  Try Again
+                </button>
+                <button onClick={() => router.push("/compete/arena")}
+                  className="btn-outline flex-1 py-3 rounded-xl">
+                  Back to Arena
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </ProtectedRoute>
+    );
+  }
+
+  // ═══════════════════════════════════════════════════════════
   // PHASE: PRE-MATCH
   // ═══════════════════════════════════════════════════════════
   if (phase === "prematch") {
@@ -1196,6 +1293,45 @@ export default function ArenaPage() {
                   </button>
                 );
               })}
+            </div>
+          </div>
+        </div>
+      </ProtectedRoute>
+    );
+  }
+
+  // ═══════════════════════════════════════════════════════════
+  // PHASE: MATCH ERROR
+  // Also catches battle-phase fallthrough (questions[currentQ] missing)
+  // so the old blank-page `return null` is unreachable mid-battle.
+  // ═══════════════════════════════════════════════════════════
+  if (phase === "match_error" || phase === "battle") {
+    return (
+      <ProtectedRoute>
+        <div data-force-dark className="min-h-screen flex items-center justify-center px-4" style={{ isolation: "isolate" }}>
+          <div className="max-w-md w-full animate-slide-up">
+            <div className="rounded-2xl p-8 text-center"
+              style={{
+                background: "linear-gradient(135deg, #1a0808 0%, #0d0404 100%)",
+                border: "1px solid rgba(239,68,68,0.25)",
+                boxShadow: "0 0 30px rgba(239,68,68,0.06)",
+              }}>
+              <div className="w-16 h-16 rounded-full mx-auto mb-5 flex items-center justify-center"
+                style={{ background: "rgba(239,68,68,0.1)", border: "2px solid rgba(239,68,68,0.3)" }}>
+                <Skull size={28} weight="fill" color="#EF4444" aria-hidden="true" />
+              </div>
+
+              <h2 className="font-bebas text-4xl text-cream tracking-wider mb-3">
+                MATCH MISFIRE
+              </h2>
+              <p className="text-cream/50 text-sm font-syne leading-relaxed mb-8">
+                Something broke loading this match. Not your fault, and not a loss on your record. Head back to the Arena and queue up a fresh duel.
+              </p>
+
+              <button onClick={() => { resetArena(); router.push("/compete/arena"); }}
+                className="btn-gold w-full py-3 rounded-xl">
+                Back to Arena
+              </button>
             </div>
           </div>
         </div>
