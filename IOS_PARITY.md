@@ -39,6 +39,17 @@ Batch summary (web, batch 3): Sketchy round-flow parity (shared `RoundCountdown`
 
 Batch summary (web, batch 4, content): Sketchy word bank nearly doubled, 752 to 1404 words. Pure data growth in `lib/party/word-lists.ts` + the `party_word_lists` table (re-seeded via `scripts/seed-party-words.ts`), no schema or wire change. The `difficulty` CHECK + tiered candidate picker from batch 1 are unchanged; the extra words just mean every subject now has a full easy/medium/hard spread. When the iOS port begins it reads the same `party_word_lists` rows, so no iOS-side content work is needed beyond pointing at the table.
 
+Fifth batch same day ("Word Bank → Sketchy V1", commits `bdbe011` + `d058687`) changed the wire/API contract again. **Status stays 🚫 N/A web-only**, but the bank reads from the platform-neutral `vocab_*` tables, so an iOS port inherits the data model. Wire-contract notes for the eventual port:
+
+12. **Bank source is encoded as a `bank:<uuid>` token inside the per-player `selected_subjects` array** (no new room column). It shares the same 2-pick cap as curated subjects, and each round draws exactly one source so banks and curated subjects interleave across rounds. An iOS client must parse the `bank:` prefix and count a bank token against the same cap.
+13. **New `GET /api/party/rooms/[code]/banks`** returns the caller's OWN Word Banks only, each with a word count + eligibility flag (eligibility = `>=30` words, `MIN_BANK_WORDS`). Under-eligible banks are returned (greyed `N/30` on web) but must not be selectable.
+14. **New `POST /api/party/rooms/[code]/sketch/rounds/[id]/reroll`** is drawer-only and allowed once per round (backed by the new `sketch_rounds.rerolled` flag).
+15. **Sketch candidate objects gained an optional `source: "curated" | "bank"`.** Bank candidates also carry the word's definition (rendered as a card subline + a grey "Bank" pill on web). Absent/`"curated"` is the default.
+16. **`sketch_rounds` gained `source_kind` / `source_bank_id` / `rerolled`** (additive, defaulted) via migration `supabase/migrations/20260610_sketch_bank_source.sql`, NOT yet applied to prod; Sam deploys it.
+17. **The complete/reveal payload gained `source_kind`**, which drives the DEFINITION eyebrow on the reveal screen for bank words. Other players' bank picks must render as an anonymous "Word Bank xN" so private bank names never leak.
+
+Batch summary (web, batch 5): Word Bank → Sketchy V1, players opt their own `/learn/vocab` Word Banks (owned + `>=30` words) into a Sketchy game as a `bank:<uuid>` word source sharing the 2-pick cap, with a picker BottomSheet, one drawer reroll per round, definition-on-reveal, and anonymized other-player bank picks. Zero API cost (reads existing `vocab_*` tables). Full spec: `docs/specs/word-bank-sketchy.md` (V1 shipped + V1.5 spec + V2 roadmap).
+
 Owner: `quality-docs-writer` (web).
 
 ---
