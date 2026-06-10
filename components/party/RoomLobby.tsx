@@ -75,6 +75,7 @@ const bankIdFromToken = (t: string): string => t.slice(BANK_TOKEN_PREFIX.length)
 interface PartyBank {
   id: string;
   name: string;
+  slug: string;
   kind: "language" | "general";
   icon: string;
   color: string;
@@ -1605,24 +1606,13 @@ export default function RoomLobby({ room, players, isHost, meUserId, onGameStart
                   const token = `${BANK_TOKEN_PREFIX}${b.id}`;
                   const selected = myTopics.includes(token);
                   const eligible = b.eligible;
-                  return (
-                    <button
-                      key={b.id}
-                      type="button"
-                      onClick={() => eligible && toggleTopic(token)}
-                      disabled={!eligible}
-                      aria-pressed={selected}
-                      className="w-full text-left rounded-xl px-3.5 py-3 flex items-center gap-3 transition-all active:scale-[0.99] disabled:cursor-not-allowed"
-                      style={{
-                        background: selected
-                          ? "rgba(74,144,217,0.14)"
-                          : "rgba(255,255,255,0.04)",
-                        border: selected
-                          ? "1px solid rgba(74,144,217,0.5)"
-                          : "1px solid rgba(255,255,255,0.1)",
-                        opacity: eligible ? 1 : 0.5,
-                      }}
-                    >
+                  const rowStyle = {
+                    background: selected ? "rgba(74,144,217,0.14)" : "rgba(255,255,255,0.04)",
+                    border: selected ? "1px solid rgba(74,144,217,0.5)" : "1px solid rgba(255,255,255,0.1)",
+                    opacity: eligible ? 1 : 0.6,
+                  } as const;
+                  const inner = (
+                    <>
                       <span
                         aria-hidden="true"
                         className="inline-flex items-center justify-center w-9 h-9 rounded-lg shrink-0 text-base"
@@ -1651,24 +1641,55 @@ export default function RoomLobby({ room, players, isHost, meUserId, onGameStart
                           {eligible ? `${b.wordCount} words` : `${b.wordCount}/30 words`}
                         </span>
                       </span>
-                      {eligible ? (
-                        <span
-                          className="shrink-0 grid place-items-center w-6 h-6 rounded-full"
-                          style={{
-                            background: selected ? "rgba(74,144,217,0.85)" : "transparent",
-                            border: selected ? "none" : "1px solid rgba(255,255,255,0.18)",
-                          }}
-                        >
-                          {selected && <Check size={13} weight="bold" aria-hidden="true" style={{ color: "#04080F" }} />}
-                        </span>
-                      ) : (
-                        <span className="shrink-0 font-syne text-[10px] text-cream/45 italic">
-                          add {Math.max(0, 30 - b.wordCount)} to play
-                        </span>
-                      )}
+                    </>
+                  );
+                  // Eligible -> toggle into the round pool. Under 30 words ->
+                  // deep-link to that exact bank in /learn/vocab so the player
+                  // can add the words it needs (no fake data, real bank).
+                  return eligible ? (
+                    <button
+                      key={b.id}
+                      type="button"
+                      onClick={() => toggleTopic(token)}
+                      aria-pressed={selected}
+                      className="w-full text-left rounded-xl px-3.5 py-3 flex items-center gap-3 transition-all active:scale-[0.99]"
+                      style={rowStyle}
+                    >
+                      {inner}
+                      <span
+                        className="shrink-0 grid place-items-center w-6 h-6 rounded-full"
+                        style={{
+                          background: selected ? "rgba(74,144,217,0.85)" : "transparent",
+                          border: selected ? "none" : "1px solid rgba(255,255,255,0.18)",
+                        }}
+                      >
+                        {selected && <Check size={13} weight="bold" aria-hidden="true" style={{ color: "#04080F" }} />}
+                      </span>
                     </button>
+                  ) : (
+                    <a
+                      key={b.id}
+                      href={`/learn/vocab?bank=${encodeURIComponent(b.slug)}`}
+                      className="w-full text-left rounded-xl px-3.5 py-3 flex items-center gap-3 transition-all active:scale-[0.99] hover:opacity-90"
+                      style={rowStyle}
+                    >
+                      {inner}
+                      <span className="shrink-0 inline-flex items-center gap-1 font-syne text-[10px] text-electric/80">
+                        add {Math.max(0, 30 - b.wordCount)}
+                        <span aria-hidden="true">→</span>
+                      </span>
+                    </a>
                   );
                 })}
+                {/* Always a path to create / add to banks, even when some are
+                    eligible. No fake banks are ever shown. */}
+                <a
+                  href="/learn/vocab"
+                  className="mt-1 w-full rounded-xl px-3.5 py-2.5 flex items-center justify-center gap-1.5 font-syne text-xs text-cream/55 hover:text-cream/80 border border-dashed border-white/12 hover:border-white/25 transition-colors"
+                >
+                  <BookBookmark size={13} weight="bold" aria-hidden="true" />
+                  Manage your word banks
+                </a>
               </div>
             )}
           </BottomSheet>

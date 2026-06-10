@@ -47,7 +47,7 @@ export async function GET(
   // Owned banks only — ownership gate in route logic (supabaseAdmin bypasses RLS).
   const { data: banks, error } = await supabaseAdmin
     .from("vocab_banks")
-    .select("id, name, kind, icon, color")
+    .select("id, name, slug, kind, icon, color")
     .eq("user_id", userId);
   if (error) {
     console.error("[party/rooms/banks]", error.message);
@@ -75,6 +75,9 @@ export async function GET(
     return {
       id: b.id as string,
       name: b.name as string,
+      // slug deep-links an under-30 bank to /learn/vocab?bank=<slug> so the
+      // player can jump straight to adding words to that exact bank.
+      slug: b.slug as string,
       kind: b.kind as string,
       // vocab_banks.icon is nullable; coerce to a default so the client's
       // PartyBank.icon: string contract holds and we never render a null.
