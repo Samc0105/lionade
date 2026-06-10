@@ -347,7 +347,6 @@ function DashboardContent() {
   const xp = stats?.xp ?? user.xp;
   const userLevel = stats?.level ?? user.level;
   const statsReady = !!stats || user.statsLoaded;
-  console.log("[Dashboard] user:", { coins, xp, streak, level: userLevel });
   const levelInfo = getLevelProgress(xp);
   const { level } = levelInfo;
   const progress = levelInfo.progressPercent;

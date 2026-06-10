@@ -18,7 +18,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import useSWR from "swr";
-import { CheckCircle, XCircle, Confetti, ArrowClockwise } from "@phosphor-icons/react";
+import { CheckCircle, XCircle, Confetti, ArrowClockwise, PlusCircle } from "@phosphor-icons/react";
 import { apiPost, swrFetcher } from "@/lib/api-client";
 import { toastError } from "@/lib/toast";
 import BankStreakPill, { type BankStreak } from "./BankStreakPill";
@@ -61,6 +61,23 @@ export default function ReviewQueue({ bank }: Props) {
   );
 
   const queue = useMemo(() => data?.words ?? [], [data]);
+
+  // An empty due-queue is ambiguous: "all reviewed" vs "this bank has no
+  // words at all" (a brand-new bank). The celebration copy is wrong for the
+  // second case, so when the due fetch resolves empty we check the bank's
+  // total word count. Same SWR key as VocabList's full fetch, so if the user
+  // has visited the List tab this resolves from cache with no extra request.
+  const dueQueueEmpty = data !== undefined && queue.length === 0;
+  const { data: allWordsData } = useSWR<{ words: VocabWord[] }>(
+    dueQueueEmpty ? `/api/vocab/words?bank_id=${encodeURIComponent(bank.id)}` : null,
+    swrFetcher,
+    { keepPreviousData: true, revalidateOnFocus: false },
+  );
+  const bankIsEmpty = dueQueueEmpty && allWordsData !== undefined && allWordsData.words.length === 0;
+  // Until the total-count check resolves we don't know WHICH empty state is
+  // right, so keep the skeleton up rather than flashing the celebration at a
+  // brand-new bank.
+  const emptyStateUnresolved = dueQueueEmpty && allWordsData === undefined;
   const streak: BankStreak = useMemo(() => {
     const found = streakData?.streaks?.find(s => s.bank_id === bank.id);
     return found ?? { bank_id: bank.id, bank_name: bank.name, count: 0, lastDay: null };
@@ -147,7 +164,7 @@ export default function ReviewQueue({ bank }: Props) {
       )}
 
       {/* Card area */}
-      {isLoading && !data ? (
+      {(isLoading && !data) || emptyStateUnresolved ? (
         <div className="rounded-2xl bg-white/[0.03] backdrop-blur border border-white/[0.06] p-10 flex flex-col items-center gap-5 animate-pulse">
           <div className="h-3 w-24 rounded-full bg-white/[0.05]" />
           <div className="h-10 w-64 rounded-md bg-white/[0.07]" />
@@ -166,6 +183,8 @@ export default function ReviewQueue({ bank }: Props) {
           onAnswer={handleAnswer}
           submitting={submitting}
         />
+      ) : bankIsEmpty ? (
+        <EmptyBankState bankName={bank.name} />
       ) : (
         <EmptyReviewState bankName={bank.name} />
       )}
@@ -288,6 +307,24 @@ function FlashCard({ word, bank, revealed, onReveal, onAnswer, submitting }: Fla
 }
 
 /* ── Empty state ───────────────────────────────────────────────────────── */
+
+/** Brand-new bank with zero words: onboarding nudge, not a celebration. */
+function EmptyBankState({ bankName }: { bankName: string }) {
+  return (
+    <div className="rounded-2xl bg-white/5 backdrop-blur border border-electric/25 p-10 text-center animate-slide-up">
+      <PlusCircle size={52} weight="fill" color="#00BFFF" aria-hidden="true" className="mx-auto mb-4" />
+      <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-electric/75 mb-2">
+        Fresh bank
+      </p>
+      <p className="font-bebas text-3xl tracking-[0.06em] text-cream mb-2 leading-none">
+        {bankName} is empty
+      </p>
+      <p className="font-syne text-sm text-cream/65 max-w-md mx-auto leading-relaxed">
+        Drop your first word in the Add tab and it lands here for review. The grind starts with one term.
+      </p>
+    </div>
+  );
+}
 
 function EmptyReviewState({ bankName }: { bankName: string }) {
   return (

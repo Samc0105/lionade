@@ -24,7 +24,7 @@ export default function StatsGrid({
       <StatCard
         icon={<img src={cdnUrl("/F.png")} alt="Fangs" className="w-6 h-6 object-contain" />}
         value={coins}
-        label="Coins"
+        label="Fangs"
         insight={coinInsight}
         accentColor="#FFD700"
       />

@@ -254,7 +254,7 @@ export default function ProfilePage() {
                       style={{ background: "#4A90D9" }}>{level}</div>
                   </div>
                   <p className="font-bebas text-xl text-cream tracking-wider">@<AnimatedUsername username={user.username} effect={usernameEffect} size="md" /></p>
-                  <p className="text-cream/40 text-xs mt-0.5">Level {level} · {formatCoins(coins)} coins</p>
+                  <p className="text-cream/40 text-xs mt-0.5">Level {level} · {formatCoins(coins)} Fangs</p>
                   <div className="mt-3 w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
                     <div className="h-full rounded-full transition-all duration-500"
                       style={{ width: statsReady ? `${progress}%` : "0%", background: "linear-gradient(90deg, #2D6BB5, #4A90D9)" }} />

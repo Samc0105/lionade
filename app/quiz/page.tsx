@@ -708,7 +708,7 @@ export default function QuizPage() {
               <Lightning size={32} weight="fill" color="#EAB308" aria-hidden="true" />
               <div className="flex-1">
                 <p className="font-bebas text-xl text-[#EAB308] tracking-wider">BLITZ MODE</p>
-                <p className="blitz-subtitle text-cream/60 text-xs font-syne">2x Coins & XP, Shorter Timer (10s)</p>
+                <p className="blitz-subtitle text-cream/60 text-xs font-syne">2x Fangs & XP, Shorter Timer (10s)</p>
               </div>
               {blitzMode && (
                 <span className="text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full bg-[#EAB308]/20 border border-[#EAB308]/40 text-[#EAB308]">
@@ -927,7 +927,7 @@ export default function QuizPage() {
                 // No data isn't 0% accuracy — a fresh account shows "—" instead of a punitive 0%.
                 { label: "Avg Accuracy", value: statsLoaded && totalQuizzes > 0 ? `${avgAccuracy}%` : null, Icon: Target, color: "#22C55E" },
                 { label: "Favorite", value: statsLoaded ? favoriteSubject : null, Icon: Star, color: "#A855F7" },
-                { label: "Coins Earned", value: statsLoaded ? formatCoins(totalCoinsEarned) : null, Icon: Coin, color: "#FFD700" },
+                { label: "Fangs Earned", value: statsLoaded ? formatCoins(totalCoinsEarned) : null, Icon: Coin, color: "#FFD700" },
               ].map((stat) => {
                 const StatIcon = stat.Icon;
                 return (
@@ -1282,7 +1282,7 @@ function ResultsScreen({
           {[
             { Icon: Check, label: "Correct", value: animCorrect, accent: "#2ECC71", isCoin: false },
             { Icon: XIcon, label: "Wrong", value: animWrong, accent: "#E74C3C", isCoin: false },
-            { Icon: Coin, label: "Coins", value: animCoins, accent: "#FFD700", isCoin: true },
+            { Icon: Coin, label: "Fangs", value: animCoins, accent: "#FFD700", isCoin: true },
             { Icon: Lightning, label: "XP", value: animXp, accent: "#4A90D9", isCoin: false },
           ].map((s) => {
             const SIcon = s.Icon;

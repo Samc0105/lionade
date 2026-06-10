@@ -1562,7 +1562,7 @@ export default function GamesPage() {
                 THE<br />ARCADE
               </h1>
               <p className="font-serif italic text-cream/40 text-sm mt-3 max-w-md">
-                four lots · two-times Fangs on strong runs · pick one, pull the ticket
+                five lots · two-times Fangs on strong runs · pick one, pull the ticket
               </p>
             </div>
             <div

@@ -329,7 +329,7 @@ function WeaknessesList({ stats }: { stats: SubjectStat[] }) {
       </div>
       {stats.length === 0 ? (
         <p className="text-cream/40 text-[12.5px]">
-          No clear weak spots yet — keep going for at least 3 attempts per subtopic.
+          No clear weak spots yet. Keep going for at least 3 attempts per subtopic.
         </p>
       ) : (
         <ul className="flex flex-col gap-2">
