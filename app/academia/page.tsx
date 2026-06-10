@@ -7,6 +7,7 @@ import {
   Plus, Target, Note, ArrowRight, BookOpen, GraduationCap,
   PushPin, Sparkle, X, Clock, ArrowsClockwise, CalendarBlank,
   CaretLeft, CaretRight, Circle, CircleDashed, CheckCircle, CalendarPlus,
+  Flame, Warning,
 } from "@phosphor-icons/react";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Navbar from "@/components/Navbar";
@@ -531,6 +532,14 @@ function PlannerSection({ classes }: { classes: ClassSummary[] }) {
 
   const hasData = data !== undefined;
 
+  // Workload heat warning — densest 3-consecutive-day window in the next ~14
+  // days. Pure client compute over the agenda items already fetched; gated on
+  // hasData so it never flashes over undefined. Renders nothing below threshold.
+  const crunch = useMemo(
+    () => (hasData ? detectCrunch(items, todayKey) : null),
+    [hasData, items, todayKey],
+  );
+
   return (
     <section className="mb-10">
       {/* Unified planner header — matches the dot + bebas pattern used by
@@ -552,6 +561,8 @@ function PlannerSection({ classes }: { classes: ClassSummary[] }) {
           Import calendar
         </button>
       </div>
+
+      {crunch && <CrunchBanner crunch={crunch} />}
 
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.25fr] gap-6 items-start">
         {/* THIS WEEK / selected-day agenda */}
@@ -617,6 +628,56 @@ function PlannerSection({ classes }: { classes: ClassSummary[] }) {
         onImported={refreshAgenda}
       />
     </section>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Crunch banner — contextual workload-heat alert. Slim, tinted by severity
+// (amber/gold at 3 items, hotter red/orange at 4+). GPU-only one-shot fade-in,
+// reduced-motion-guarded (static tint when motion is off; no pulse ever).
+// ─────────────────────────────────────────────────────────────────────────────
+function CrunchBanner({ crunch }: { crunch: CrunchWindow }) {
+  const hot = crunch.count >= 4;
+  // On-brand: gold caution at 3, red/orange heat at 4+.
+  const accent = hot ? "#EF4444" : "#FFD700";
+  const Icon = hot ? Flame : Warning;
+
+  // "Mon DD" date label; "to" between window ends (never an em-dash). Single-day
+  // windows collapse to one date.
+  const fromLabel = shortDate(crunch.from);
+  const span = crunch.from === crunch.to ? fromLabel : `${fromLabel} to ${shortDate(crunch.to)}`;
+  const noun = crunch.count === 1 ? "thing" : "things";
+
+  return (
+    <div
+      className="mb-4 flex items-center gap-3 rounded-[12px] border px-3.5 py-2.5
+        motion-safe:animate-slide-up will-change-transform"
+      role="status"
+      style={{
+        borderColor: `${accent}45`,
+        background: `linear-gradient(135deg, ${accent}14 0%, rgba(255,255,255,0.02) 100%)`,
+      }}
+    >
+      <span
+        className="grid place-items-center w-7 h-7 rounded-full shrink-0"
+        style={{ background: `${accent}1F`, color: accent }}
+        aria-hidden="true"
+      >
+        <Icon size={15} weight="fill" />
+      </span>
+      <div className="min-w-0 flex-1">
+        <p className="font-syne text-[13px] leading-snug text-cream">
+          <span className="font-bold">Heads up:</span>{" "}
+          {crunch.count} {noun} due {span}.{" "}
+          <span className="text-cream/65">Start early.</span>
+        </p>
+        {crunch.breakdown && (
+          <p className="font-mono text-[9px] uppercase tracking-[0.22em] mt-0.5" style={{ color: `${accent}` }}>
+            {crunch.breakdown}
+          </p>
+        )}
+      </div>
+    </div>
   );
 }
 
@@ -1388,6 +1449,79 @@ function agendaRange(monthAnchor: Date): { from: string; to: string } {
 function agendaKey(monthAnchor: Date): string {
   const { from, to } = agendaRange(monthAnchor);
   return `/api/academia/agenda?from=${from}&to=${to}`;
+}
+
+// ── Crunch detection ──────────────────────────────────────────────────────
+// Slide a 3-consecutive-day window across [today, today+13]. The window's count
+// is every exam/assignment whose date falls inside it. The densest window wins;
+// ties break to the soonest. A window only qualifies as a "crunch" at >= 3
+// items. Pure date-string math (YYYY-MM-DD compares lexicographically).
+interface CrunchWindow {
+  count: number;
+  from: string;       // YYYY-MM-DD window start (first day that actually has items)
+  to: string;         // YYYY-MM-DD window end   (last day that actually has items)
+  breakdown: string | null; // e.g. "2 exams + 2 assignments", or null when trivial
+}
+
+const CRUNCH_HORIZON_DAYS = 14; // look at the next ~14 days
+const CRUNCH_WINDOW_DAYS = 3;   // densest 3-consecutive-day cluster
+const CRUNCH_THRESHOLD = 3;     // >= 3 items in the window = a crunch
+
+function detectCrunch(items: AgendaItem[], todayKey: string): CrunchWindow | null {
+  const today = new Date(todayKey + "T00:00:00");
+  // Items in [today, today+13], bucketed by day key for cheap window sums.
+  const horizonKey = toKey(addDays(today, CRUNCH_HORIZON_DAYS - 1));
+  const inRange = items.filter(it => it.date >= todayKey && it.date <= horizonKey);
+  if (inRange.length < CRUNCH_THRESHOLD) return null;
+
+  const byDay = new Map<string, AgendaItem[]>();
+  for (const it of inRange) {
+    const arr = byDay.get(it.date);
+    if (arr) arr.push(it);
+    else byDay.set(it.date, [it]);
+  }
+
+  // Slide the window by its start day across the horizon. For each start, count
+  // items on [start, start+2]. Track the densest (ties -> soonest start).
+  let best: CrunchWindow | null = null;
+  for (let i = 0; i < CRUNCH_HORIZON_DAYS; i++) {
+    const windowDays: string[] = [];
+    for (let j = 0; j < CRUNCH_WINDOW_DAYS; j++) {
+      windowDays.push(toKey(addDays(today, i + j)));
+    }
+    const hits: AgendaItem[] = [];
+    for (const dk of windowDays) {
+      const arr = byDay.get(dk);
+      if (arr) hits.push(...arr);
+    }
+    if (hits.length < CRUNCH_THRESHOLD) continue;
+    if (best && hits.length <= best.count) continue; // earlier start already >= this
+
+    // Trim the reported span to the first/last days that actually carry items,
+    // so a cluster on Mon+Tue doesn't read as "Mon to Wed".
+    const hitDays = windowDays.filter(dk => byDay.has(dk));
+    const from = hitDays[0];
+    const to = hitDays[hitDays.length - 1];
+    const exams = hits.filter(h => h.kind === "exam").length;
+    const assignments = hits.length - exams;
+    best = { count: hits.length, from, to, breakdown: crunchBreakdown(exams, assignments) };
+  }
+
+  return best;
+}
+
+// "2 exams + 2 assignments" when both kinds are present; null when it'd just
+// restate the count (all one kind), to keep the line from being noise.
+function crunchBreakdown(exams: number, assignments: number): string | null {
+  if (exams === 0 || assignments === 0) return null;
+  const e = `${exams} ${exams === 1 ? "exam" : "exams"}`;
+  const a = `${assignments} ${assignments === 1 ? "assignment" : "assignments"}`;
+  return `${e} + ${a}`;
+}
+
+// "Jun 9" style label for the crunch banner span.
+function shortDate(key: string): string {
+  return new Date(key + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" });
 }
 
 function daysUntil(dateStr: string): number {
