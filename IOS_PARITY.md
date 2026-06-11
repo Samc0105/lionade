@@ -7,6 +7,22 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 
 ---
 
+## 2026-06-10: Competitive ELO-integrity + connectivity + forfeit/void (web)
+
+**Status:** ❌ pending. The competitive arena is web-only today, but this is core game logic an eventual iOS port MUST mirror: the integrity gate decides whether ELO/Fangs are written at all, so an iOS client that skips it would let players farm or grief ranked. Owner: `quality-docs-writer`; the iOS port routes to `vp-ios`. Reviewer APPROVED the web ship, no blockers.
+
+**What shipped (web, commit `ff0d373`):** the principle "you only earn ELO if you actually play against someone." A single shared settle funnel `lib/competitive/settle.ts` `settleClaimedMatch` backs `/complete`, `/forfeit`, and a new reaper; a participant-only `/forfeit` route; a `/api/cron/reap-stale-competitive` cron; migration `058` (`voided` + `forfeited` statuses + a `forfeited_by` column on `competitive_matches`, applied to prod); and a resilient match channel with Presence plus disconnect/forfeit UI.
+
+**Wire contract for the iOS port:**
+
+1. **Settle gate is platform-neutral server logic — reuse it as-is.** `settleClaimedMatch` settles ELO + Fangs ONLY when BOTH teams recorded `>=1 competitive_response`. A no-show / instant disconnect VOIDS the match (status `voided`): no `profiles` ELO/Fang write at all (`elo_after = elo_before`, zero Fang delta, no penalty to the player who showed); a mid-match quit where both played settles normally. All three settle paths funnel through this one function, so an iOS client gets the gate for free by hitting the same routes — it must NOT re-derive ELO client-side.
+2. **`POST /api/competitive/match/[id]/forfeit`** (participant-only) is platform-neutral: voids with no penalty if the opponent never engaged, else forces the caller's loss and settles, sharing the atomic `active`->`completing` claim with `/complete` so it can't double-fire. iOS reuses it directly.
+3. **`/api/cron/reap-stale-competitive`** (CRON_SECRET bearer auth, `vercel.json` every 3 min) resolves hung/AFK matches through the same gate. Server-side, no iOS work — it backstops every client.
+4. **Match status enum now includes `voided` + `forfeited`, plus a `forfeited_by` column** (migration `058`, applied). Any iOS match-result rendering must handle these two new terminal states.
+5. **UI needs native (Reanimated/RN) builds:** the resilient channel (`subscribeResilient` + Supabase Presence exposing `connection` / `opponentPresent` / `opponentLastSeen`), the Reconnecting banner, the opponent-disconnected panel (End Match which voids if the opponent never played, or Keep Waiting), the explicit Forfeit control, and the VOIDED ("no Elo or Fangs changed") + FORFEITED result states all need rebuilding natively. The gameplay protocol + the 4 mode screens are unchanged, so only this connectivity/result shell is new presentation work. Flag for `vp-ios`.
+
+---
+
 ## 2026-06-10: Academia calendar + agenda + assignment tracker (web)
 
 **Status:** ❌ pending. Unlike the web-only Party suite, this IS a student-facing product feature (planner, calendar, assignments) that should eventually reach iOS, so it's a real parity gap, not a deliberate no-row. Owner: `quality-docs-writer`; the iOS port itself routes to `vp-ios`.
