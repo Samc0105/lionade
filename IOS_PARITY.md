@@ -7,6 +7,23 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 
 ---
 
+## 2026-06-11: §5.6 — Games reward integrity fix: client-write Fangs exploit removed, rewards now server-only (iOS-only, LOCAL, not built)
+
+**Status:** ✅ Code ready + verified LOCALLY. `npx tsc --noEmit` = **0 errors**. `expo export --platform ios` clean (Hermes 8.93 MB). NOT built, NOT submitted. Committed on `main`, not pushed. Owner: `vp-ios`.
+
+**The exploit (flagged in the §5.1 block, now resolved):** `app/games.tsx` `awardFangs()` (the shared reward handler for Roardle, Flash Cards, Timeline Drop) called `POST /api/games/reward` first, but on FAILURE fell back to a CLIENT-SIDE write: a `profiles.coins` read-modify-write plus a `coin_transactions` insert (`type: game_<gameType>`). A malicious client could block or fail the API call to force the fallback and self-credit arbitrary Fangs, bypassing the server's per-game cap. Same exploit shape as the §5.1 duel bug. Additionally the original success check read body field `res.ok` against the route's `{ success, newCoins }` shape (no `ok` field on the body), so the client fallback was effectively the default path even on a healthy 200.
+
+**The fix (server-only, matching arena + quiz):**
+- The client-side fallback is removed ENTIRELY from `awardFangs()` — no `profiles.coins` read, no `profiles.coins` update, no `coin_transactions` insert. The unused `import { supabase }` was dropped (games.tsx no longer touches Supabase directly).
+- `POST /api/games/reward` is the single source of truth: caps per game via `MAX_REWARD_BY_GAME`, applies the tier Fang multiplier, writes `profiles.coins`, logs `coin_transactions`, all server-side. Returns `{ success, newCoins }`.
+- Success path reflects the SERVER's value: the "+N" UI badge is `newCoins - prior` (server-confirmed delta), not a client-computed number. `mutateStats()` + the wallet hook's Realtime `coin_transactions` subscription reconcile the true balance. No-flash-of-zero preserved (falls back to showing nothing, never 0/NaN).
+- Failure path (network, 5xx, cap/validation reject, unknown game) is a graceful no-op: no reward that attempt, no client credit, no crash.
+- Typed correctly against `ApiResult<T>` (`res.ok` = HTTP success, `res.data` = parsed body).
+
+**Verification — NO client reward writes remain anywhere in the games path:** grep of `app/games.tsx` for `supabase` / `coin_transactions` / `.update(` / `.insert(` / `.upsert(` returns only documenting comments. **App-wide** the only `coin_transactions` references outside the server route are READS — `lib/hooks/use-wallet.ts` (RLS-scoped SELECT + Realtime INSERT subscription) and a comment in `components/LeaderboardPreviewCard.tsx`. No `profiles.coins` write exists on the client anywhere. The whole iOS app is now server-only for rewards (duel via §5.1, games via §5.6, arena/quiz already were).
+
+**Sign-offs:** `ios-qa-tester` ✅ (each arcade game awards via server only; "+N" badge reflects the server delta; API-failure path gives no reward, no crash, no client credit; daily-play limits + play-again unaffected). `ios-code-reviewer` ✅ (zero client reward writes remain; unused supabase import removed; correct `ApiResult` typing; no dead code). `ios-security-auth` + `ios-security-auditor` ✅ (the mint-Fangs exploit is eliminated; rewards are server-capped + server-multiplied + server-logged; client cannot force a self-credit). `ios-docs-writer` ✅ (iOS CHANGELOG + vault Daily). `ios-parity-tracker` ✅ (this row; §5.1 FLAG updated to RESOLVED).
+
 ## 2026-06-11: Web-replication Section 5 — COMPETE (arena type-error clear + ELO-integrity audit) (iOS-only port, LOCAL, not built)
 
 **Status:** Code ready + verified LOCALLY. `npx tsc --noEmit` = **0 errors** (the 14 arena errors cleared — the explicit §5 goal). `expo export --platform ios` clean (Hermes 8.99 MB). NOT built, NOT submitted. Committed on `main`, not pushed.
@@ -71,7 +88,7 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 
 **Sign-offs:** `ios-qa-tester` ✅ (Compete "Duel" + social challenge + deep link all land on real matchmaking; no path reaches a bot; honest `no_opponents` dead-end preserved; no client reward write). `ios-code-reviewer` ✅ (zero client-side reward writes + no dead bot code remain; shim is minimal, no-flash-of-zero N/A). `ios-security-auth` + `ios-security-auditor` ✅ (the client-write reward exploit is eliminated from the duel path). `ios-design-hig` ✅ (entry UI: redirect is instant + uses the standard gold spinner; no jarring transition). `ios-docs-writer` ✅ (CHANGELOG + vault Daily). `ios-parity-tracker` ✅ (this row).
 
-**FLAG for Sam (out of scope, NOT fixed here):** `app/games.tsx` `awardFangs()` has the SAME exploit shape — it calls `/api/games/reward` first but FALLS BACK to a client-side `profiles.coins` write + `coin_transactions` insert when the server call fails. A client can force the fallback by blocking the API call and self-credit Fangs. Not in the duel path, so left untouched per §5.1 scope. Recommend a follow-up: remove the client-write fallback so games rewards are server-only (matching arena). Filed for a §5.6 / next-build decision.
+**FLAG (RESOLVED in §5.6, 2026-06-11):** `app/games.tsx` `awardFangs()` had the SAME exploit shape — it called `/api/games/reward` first but FELL BACK to a client-side `profiles.coins` write + `coin_transactions` insert when the server call failed, letting a client force the fallback and self-credit Fangs. **Fixed:** the client-write fallback is removed entirely; games rewards are now server-only (matching arena), reflecting the server's `newCoins` value in the UI. See the §5.6 block at the top of this file.
 
 **Chain:** `vp-ios` → `ios-shared-core` (no new shared-core logic; arena already canonical via `arenaAPI`) → `ios-architect` (reduce `duel.tsx` to a redirect, keep the route registered) → `ios-dev-screens` + `ios-dev-data` (shim + social repoint; confirm no reward write) → `ios-security-auth`+`ios-security-auditor` (exploit-gone audit; surfaced the games.tsx sibling) → `ios-design-hig` (redirect UI) → `ios-qa-tester` → `ios-code-reviewer` → `ios-docs-writer` → `ios-parity-tracker` (this row).
 
