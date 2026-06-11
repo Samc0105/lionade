@@ -62,8 +62,34 @@ interface Props {
   players: PartyPlayer[];
   isHost: boolean;
   meUserId: string;
-  activeRound?: { id: string; phase: string; started_at: string | null } | null;
+  /** In-flight round from the page's 3s snapshot poll. The sketch-only
+   *  hydration fields (drawer, round_num, subject, duration, word_picked)
+   *  let a client that missed the ROUND_STARTED broadcast adopt the round
+   *  fully — including the drawer landing on their own word picker. The
+   *  secret word itself never rides here. */
+  activeRound?: {
+    id: string;
+    phase: string;
+    started_at: string | null;
+    drawer_user_id?: string;
+    round_num?: number;
+    subject?: string;
+    duration_sec?: number;
+    word_picked?: boolean;
+  } | null;
   onReturnToLobby: () => void;
+}
+
+/** Everything a client needs to adopt a round it didn't create. Sourced from
+ *  either the ROUND_STARTED broadcast or the activeRound snapshot poll. */
+interface AdoptRoundInfo {
+  id: string;
+  drawer_user_id: string;
+  round_num: number;
+  subject?: string;
+  duration_sec?: number;
+  started_at?: string | null;
+  word_picked?: boolean;
 }
 
 interface RoundSnapshot {
@@ -405,6 +431,9 @@ export default function SketchView({
   // learned the round was won). Populated by the listener useEffect below.
   const channelRef = useRef<RealtimeChannel | null>(null);
   const subscribedRef = useRef(false);
+  // State mirror of subscribedRef — gates the host's auto-start so round 1's
+  // ROUND_STARTED broadcast is only sent once the channel can carry it.
+  const [channelReady, setChannelReady] = useState(false);
   const roundIdRef = useRef<string | null>(null);
   const completeRoundRef = useRef<() => Promise<void>>(async () => {});
   // Role refs read by the GUESS broadcast handler so we can gate the
@@ -501,6 +530,109 @@ export default function SketchView({
     return () => window.removeEventListener("keydown", handler);
   }, [isDrawer, phase, tool, brushSize, eraserSize]);
 
+  // ── Round adoption (round-1-dead fix 2026-06-11) ──
+  // The ONLY path by which this client takes on a round it didn't create.
+  // Mirrors BluffView's adoptRound: a seen-set lets the discovery paths
+  // (ROUND_STARTED broadcast, activeRound poll fallback, startRound's own
+  // response) race safely — first adoption wins, repeats are no-ops, and a
+  // stale snapshot can never roll the client back to an old round.
+  //
+  // Why this exists: the host's lobby START races the other clients' game-view
+  // mount + sketch-channel subscribe, so round 1's ROUND_STARTED broadcast was
+  // routinely missed. The old one-shot bootstrap adopted only the round ID
+  // (drawer_user_id: "") — if the missed client WAS round 1's fair-random
+  // drawer, nobody ever picked a word and the whole room sat out round 1.
+  // Adoption now hydrates the full round and the drawer fetches /words on
+  // EVERY adoption path, not just the broadcast.
+  const seenRoundIdsRef = useRef<Set<string>>(new Set());
+  const adoptRound = useCallback((info: AdoptRoundInfo) => {
+    if (seenRoundIdsRef.current.has(info.id)) return;
+    seenRoundIdsRef.current.add(info.id);
+    const isMe = info.drawer_user_id === meUserId;
+    const durationSec = info.duration_sec ?? 90;
+    const startedAtIso = info.started_at ?? new Date().toISOString();
+    // Fresh adoption (we learned about the round within its pick window) gets
+    // the full intro: RoundCountdown + waiting-for-pick screen. Older rounds
+    // are mid-round rejoins/refreshes — skip straight to the live canvas.
+    const ageMs = Math.max(0, Date.now() - new Date(startedAtIso).getTime());
+    const midRound = ageMs > (COUNTDOWN_SECONDS + PICK_SECONDS) * 1000;
+    if (midRound) countdownSeenRef.current.add(info.id);
+
+    roundIdRef.current = info.id;
+    setRound({
+      id: info.id,
+      room_id: room.id,
+      round_num: info.round_num,
+      drawer_user_id: info.drawer_user_id,
+      subject: info.subject ?? "",
+      duration_sec: durationSec,
+      started_at: startedAtIso,
+    });
+    // Remaining clock from the round's own start time so a late adopter never
+    // gets a fresh 90s while the rest of the room is halfway through.
+    setTimeLeft(Math.max(0, durationSec - Math.floor(ageMs / 1000)));
+    setReveal(null);
+    setIGotIt(false);
+    setChat([]);
+    setStrokeCount(0);
+    setLockedWord(null);
+    setCandidates(null);
+    setMask([]);
+    setRevealed({});
+    flipBatchRef.current = new Map();
+    flipBatchCounterRef.current = 0;
+    sawFirstCorrectRef.current = false;
+    firstCorrectRef.current = null;
+    setCelebrating(null);
+    setFireFirstConfetti(false);
+    pickedRef.current = false;
+    setPickSecs(PICK_SECONDS);
+    setInfoWord(null);
+    setWordInfo({});
+    setPendingPick(null);
+    setAwaitingWordPick(!isMe && !midRound && info.word_picked !== true);
+    setRerolling(false);
+    setRerollUsed(false);
+    setRevealIsBank(false);
+    setGameOver(false);
+    setPausedAt(null);
+    setPausedByName(null);
+    pausedOffsetMsRef.current = 0;
+    setPhase(isMe && info.word_picked !== true ? "select-word" : "drawing");
+    setNinnyMsg(isMe ? "Your turn! Pick a word to draw." : "Watch carefully and guess what they're drawing.");
+
+    // Drawer hydration — on EVERY adoption path (broadcast or poll). Handles
+    // both /words shapes: { candidates } while picking, { locked, word } when
+    // this client refreshed after locking its own word mid-draw.
+    if (isMe) {
+      void (async () => {
+        const words = await apiGet<{ candidates?: CandidateWord[]; locked?: boolean; word?: string }>(
+          `/api/party/sketch/rounds/${info.id}/words`,
+        );
+        if (roundIdRef.current !== info.id) return; // round moved on mid-flight
+        if (words.ok && words.data?.locked && words.data.word) {
+          setLockedWord(words.data.word);
+          pickedRef.current = true;
+          setPhase("drawing");
+          setNinnyMsg(null);
+        } else if (words.ok && words.data?.candidates && words.data.candidates.length > 0) {
+          setCandidates(words.data.candidates);
+          setPhase("select-word");
+        } else {
+          // Fall back to drawing phase so the round isn't stuck on a blank picker.
+          setPhase("drawing");
+          setNinnyMsg("Couldn't load your words. Someone else's turn might land in a sec.");
+        }
+      })();
+    }
+  }, [room.id, meUserId]);
+  // Ref mirror so the once-per-room channel subscription can call the latest
+  // closure without re-binding (and going deaf) on every adoptRound change.
+  const adoptRoundRef = useRef(adoptRound);
+  useEffect(() => {
+    adoptRoundRef.current = adoptRound;
+  }, [adoptRound]);
+
   // ── Round bootstrap ──
   const startRound = useCallback(async () => {
     setPhase("loading");
@@ -543,6 +675,9 @@ export default function SketchView({
       setNinnyMsg("Hmm, I couldn't deal a new round. Try again?");
       return;
     }
+    // Pre-seed the seen-set so the broadcast echo and the activeRound poll
+    // can't re-adopt (and state-reset) the round this client just created.
+    seenRoundIdsRef.current.add(res.data.round.id);
     roundIdRef.current = res.data.round.id;
     setRound(res.data.round);
     setTimeLeft(res.data.round.duration_sec);
@@ -557,6 +692,13 @@ export default function SketchView({
       // RoundCountdown shows the right "ROUND N OF M" (receivers previously
       // defaulted round_num to 0). Older receivers ignore unknown fields.
       round_num: res.data.round.round_num,
+      // Full-fidelity adoption payload (round-1-dead fix 2026-06-11) — the
+      // receiver's adoptRound computes the remaining clock from started_at
+      // and shows the real subject, instead of defaulting to a fresh 90s.
+      // Older receivers ignore unknown fields. The secret word never rides.
+      subject: res.data.round.subject,
+      duration_sec: res.data.round.duration_sec,
+      started_at: res.data.round.started_at,
     });
     if (res.data.round.drawer_user_id === meUserId) {
       if (res.data.candidate_words && res.data.candidate_words.length > 0) {
@@ -584,112 +726,83 @@ export default function SketchView({
     }
   }, [room.code, meUserId, sendBroadcast]);
 
-  // Reconnect bootstrap: if the page snapshot includes an in-flight round,
-  // hydrate immediately so a rejoiner lands on the live screen instead of
-  // sitting on the loading spinner until the next realtime broadcast fires.
-  // Host's own auto-start path skips when a round is already present.
-  const bootstrappedActiveRef = useRef(false);
+  // ── Continuous round adoption from the page's 3s snapshot poll ──
+  // Covers BOTH:
+  //   - the missed-broadcast case (lobby START races the sketch-channel
+  //     subscribe on slow clients — round 1 used to be dead for them), and
+  //   - the rejoin/refresh mount mid-round.
+  // The seen-set inside adoptRound makes this safe to run on every poll tick;
+  // a client that already knows the newest round no-ops, a client stuck on an
+  // older (or no) round adopts within ≤3s of the round existing.
   useEffect(() => {
-    if (bootstrappedActiveRef.current) return;
-    if (round) return;
-    if (!activeRound?.id || !activeRound.started_at) return;
-    bootstrappedActiveRef.current = true;
-    roundIdRef.current = activeRound.id;
-    // Mid-round rejoin — never show the between-rounds countdown for a round
-    // that's already in flight.
-    countdownSeenRef.current.add(activeRound.id);
-    setRound({
+    if (!activeRound?.id) return;
+    adoptRound({
       id: activeRound.id,
-      room_id: room.id,
-      round_num: 0,
-      drawer_user_id: "",
-      subject: "",
-      duration_sec: 90,
+      drawer_user_id: activeRound.drawer_user_id ?? "",
+      round_num: activeRound.round_num ?? 0,
+      subject: activeRound.subject,
+      duration_sec: activeRound.duration_sec,
       started_at: activeRound.started_at,
+      word_picked: activeRound.word_picked,
     });
-    setPhase("drawing");
-    setNinnyMsg("Watch carefully and guess what they're drawing.");
-  }, [activeRound, room.id, round]);
+  }, [activeRound, adoptRound]);
 
-  // Host kicks off the first round automatically.
+  // ── Host kicks off the first round automatically ──
+  // Gated on the sketch channel being SUBSCRIBED: startRound broadcasts
+  // ROUND_STARTED through sendBroadcast, which silently drops on an unready
+  // channel — on fresh mounts the round-create POST used to win that race
+  // almost every time, so NOBODY received round 1's broadcast. Other clients
+  // adopt via the poll regardless; this gate just makes the fast path fast.
+  // A 4s timeout fallback starts anyway if the WS join is stuck (the poll
+  // then carries the round to everyone, including this client's listeners).
+  const autoStartFiredRef = useRef(false);
   useEffect(() => {
-    if (isHost && !round && phase === "loading" && !activeRound?.id) {
+    if (!isHost || autoStartFiredRef.current) return;
+    if (round || phase !== "loading" || activeRound?.id) return;
+    if (channelReady) {
+      autoStartFiredRef.current = true;
       void startRound();
+      return;
     }
+    const t = setTimeout(() => {
+      if (autoStartFiredRef.current || roundIdRef.current || phaseRef.current !== "loading") return;
+      autoStartFiredRef.current = true;
+      void startRound();
+    }, 4000);
+    return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isHost]);
+  }, [isHost, channelReady, round, phase, activeRound?.id]);
 
   // ── Listen for round_started from the host ──
   useEffect(() => {
     const ch = supabase.channel(sketchChannel(room.code));
-    ch.on("broadcast", { event: SKETCH_EVENTS.ROUND_STARTED }, async (msg: { payload?: unknown }) => {
-      const payload = (msg.payload ?? {}) as { round_id?: string; drawer_user_id?: string; round_num?: number };
+    ch.on("broadcast", { event: SKETCH_EVENTS.ROUND_STARTED }, (msg: { payload?: unknown }) => {
+      const payload = (msg.payload ?? {}) as {
+        round_id?: string;
+        drawer_user_id?: string;
+        round_num?: number;
+        subject?: string;
+        duration_sec?: number;
+        started_at?: string | null;
+      };
       if (!payload.round_id) return;
-      // Avoid stomping our own creation. Read from the ref so the host's own
-      // ROUND_STARTED echo (which arrives AFTER setRound but before the effect
-      // re-binds) sees the freshly-set id, not the null captured at mount.
-      if (roundIdRef.current === payload.round_id) return;
-      // Fetch the round (guesser view).
-      const isMe = payload.drawer_user_id === meUserId;
-      roundIdRef.current = payload.round_id;
-      setRound({
+      // Delegate to the shared adoption path (round-1-dead fix 2026-06-11).
+      // adoptRound's seen-set de-dups against BOTH startRound's own echo
+      // (pre-seeded there) and the 3s activeRound poll, so the fast path
+      // (this broadcast) and the slow path can never double-reset state for
+      // the same round. It also handles the drawer's candidate fetch — the
+      // drawer-non-host learns they're up via this broadcast and must load
+      // their own words or the picker renders blank ("Your turn! No cards.").
+      // Read through the ref: this channel binds once per room, and a direct
+      // closure over adoptRound would go stale when its deps change.
+      adoptRoundRef.current({
         id: payload.round_id,
-        room_id: room.id,
-        round_num: payload.round_num ?? 0,
         drawer_user_id: payload.drawer_user_id ?? "",
-        subject: "",
-        duration_sec: 90,
-        started_at: new Date().toISOString(),
+        round_num: payload.round_num ?? 0,
+        subject: payload.subject,
+        duration_sec: payload.duration_sec,
+        started_at: payload.started_at,
       });
-      setTimeLeft(90);
-      setReveal(null);
-      setIGotIt(false);
-      setChat([]);
-      setStrokeCount(0);
-      setLockedWord(null);
-      setCandidates(null);
-      setMask([]);
-      setRevealed({});
-      flipBatchRef.current = new Map();
-      flipBatchCounterRef.current = 0;
-      sawFirstCorrectRef.current = false;
-      firstCorrectRef.current = null;
-      setCelebrating(null);
-      setFireFirstConfetti(false);
-      pickedRef.current = false;
-      setPickSecs(PICK_SECONDS);
-      setInfoWord(null);
-      setWordInfo({});
-      setPendingPick(null);
-      setAwaitingWordPick(!isMe);
-      setRerolling(false);
-      setRerollUsed(false);
-      setRevealIsBank(false);
-      setGameOver(false);
-      setPausedAt(null);
-      setPausedByName(null);
-      pausedOffsetMsRef.current = 0;
-      setPhase(isMe ? "select-word" : "drawing");
-      setNinnyMsg(isMe ? "Your turn! Pick a word to draw." : "Watch carefully and guess what they're drawing.");
-
-      // ── Drawer-non-host candidate fetch ──
-      // Before the fair-random drawer change, the host was always round 1's
-      // drawer and `startRound` (host-only) fetched the candidates. Now the
-      // drawer can be any player, so the drawer-non-host learns they're up
-      // ONLY via this broadcast and must fetch their own candidates here, or
-      // the picker would render blank (the "Your turn! No cards." bug).
-      if (isMe) {
-        const words = await apiGet<{ candidates: CandidateWord[] }>(
-          `/api/party/sketch/rounds/${payload.round_id}/words`,
-        );
-        if (words.ok && words.data?.candidates) {
-          setCandidates(words.data.candidates);
-        } else {
-          // Fall back to drawing phase so the round isn't stuck on a blank picker.
-          setPhase("drawing");
-          setNinnyMsg("Couldn't load your words. Someone else's turn might land in a sec.");
-        }
-      }
     });
     ch.on("broadcast", { event: SKETCH_EVENTS.WORD_SELECTED }, () => {
       // The waiting-for-pick card swaps for the live canvas here; the canvas
@@ -837,12 +950,13 @@ export default function SketchView({
     // toast — see lib/realtime-resilient.ts.
     const handle = subscribeResilient(ch, {
       label: `sketch-room:${room.code}`,
-      onSubscribed: () => { subscribedRef.current = true; },
-      onUnsubscribed: () => { subscribedRef.current = false; },
+      onSubscribed: () => { subscribedRef.current = true; setChannelReady(true); },
+      onUnsubscribed: () => { subscribedRef.current = false; setChannelReady(false); },
     });
     channelRef.current = ch;
     return () => {
       subscribedRef.current = false;
+      setChannelReady(false);
       channelRef.current = null;
       handle.cancel();
       supabase.removeChannel(ch);

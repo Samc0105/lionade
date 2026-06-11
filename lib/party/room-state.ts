@@ -12,6 +12,19 @@ export interface ActiveRoundLite {
   id: string;
   phase: string;
   started_at: string | null;
+  // ── Sketch-only hydration fields (round-1-dead fix 2026-06-11) ──
+  // SketchView adopts the newest active round from this snapshot whenever a
+  // ROUND_STARTED broadcast was missed (the lobby->game transition races the
+  // sketch channel subscribe). The id alone wasn't enough to land a client in
+  // a live round: without the drawer the adopting client could never show the
+  // picker (or fetch /words) when IT was the drawer, leaving round 1 dead.
+  // These are all public round facts — the secret word itself NEVER rides
+  // here, only the word_picked boolean (derived server-side).
+  drawer_user_id?: string;
+  round_num?: number;
+  subject?: string;
+  duration_sec?: number;
+  word_picked?: boolean;
 }
 
 export interface RoomSnapshot {
@@ -84,9 +97,20 @@ export async function fetchRoomSnapshot(
             ? "party_pokerface_rounds"
             : null;
     if (table) {
+      const isSketch = typedRoom.current_game === "sketch";
+      // Sketch reads `word` ONLY to derive the word_picked boolean below —
+      // the raw word must never be shaped into the snapshot (it would leak
+      // the secret to every guesser pre-reveal).
       const { data: r } = await supabase
         .from(table)
-        .select("id, phase, started_at")
+        .select(
+          // Single-literal assertion: a union of two select-string literals
+          // breaks supabase-js's type-level query parser (ParserError). The
+          // row is hand-cast below anyway, so no type fidelity is lost.
+          (isSketch
+            ? "id, phase, started_at, drawer_user_id, round_num, subject, duration_sec, word"
+            : "id, phase, started_at") as "id, phase, started_at",
+        )
         .eq("room_id", typedRoom.id)
         .is("ended_at", null)
         .order("started_at", { ascending: false })
@@ -95,13 +119,23 @@ export async function fetchRoomSnapshot(
       if (r && r.id) {
         activeRound = {
           id: r.id as string,
-          // sketch_rounds has no DB phase column (phase is client-derived from
-          // word/strokes); we surface "drawing" as a stable hint so rejoiners
-          // land on the correct screen and the View immediately fetches the
-          // word/stroke detail to hydrate the rest.
           phase: (r as { phase?: string }).phase ?? "drawing",
           started_at: (r as { started_at?: string | null }).started_at ?? null,
         };
+        if (isSketch) {
+          const sr = r as {
+            drawer_user_id?: string;
+            round_num?: number;
+            subject?: string;
+            duration_sec?: number;
+            word?: string | null;
+          };
+          activeRound.drawer_user_id = sr.drawer_user_id;
+          activeRound.round_num = sr.round_num;
+          activeRound.subject = sr.subject;
+          activeRound.duration_sec = sr.duration_sec;
+          activeRound.word_picked = !!sr.word && sr.word !== "__pending__";
+        }
       }
     }
   }

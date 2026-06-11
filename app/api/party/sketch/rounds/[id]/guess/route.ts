@@ -116,25 +116,66 @@ export async function POST(
   // We never ship the secret to the client — only the matched positions + the
   // letters the guesser already typed there. The structural mask reveals length
   // and punctuation (intended), nothing more.
-  const matched = matchLetterPositions(guess, round.word);
+  const matchedAll = matchLetterPositions(guess, round.word);
   const mask = buildWordMask(round.word);
 
-  // First guesser to land a NEW correct-position letter claims its per-letter
-  // Fang. We INSERT each matched position with ON CONFLICT DO NOTHING so only
-  // the first revealer's row sticks; the inserted count tells us what was new.
+  // ── Reveal cap (word-leak fix 2026-06-11) ──
+  // matchLetterPositions returns EVERY positionally-matching letter, so a
+  // near-miss superstring/typo guess ("tigers" vs "tiger", graded merely
+  // "close") used to match ALL positions of the secret — we inserted +
+  // returned them all, the submitter broadcast LETTER_REVEAL, and the entire
+  // word lit up green on every screen MID-ROUND. The progressive reveal is a
+  // hint faucet, not a disclosure channel: a hidden floor of letters (1/3 of
+  // the word's letter cells, minimum 1) can never be revealed by guesses, so
+  // the round-end reveal stays the first time non-drawers see the full word.
+  // The clamp is server-authoritative — positions beyond the cap are never
+  // inserted, never returned, and therefore never broadcast.
+  const letterCellCount = mask.filter((c) => c.kind === "letter").length;
+  const hiddenFloor = Math.max(1, Math.ceil(letterCellCount / 3));
+  const maxRevealable = Math.max(0, letterCellCount - hiddenFloor);
+
+  // `matched` = the positions this guess is ALLOWED to surface client-side:
+  // positions already public (revealed by any prior guess) plus new ones up
+  // to the cap, left-to-right deterministic. Drives matched_positions in the
+  // response (own-text highlight + the GUESS broadcast's highlight indices).
+  const matched: typeof matchedAll = [];
   let newlyRevealed: { position: number; letter: string }[] = [];
-  if (matched.length > 0) {
-    const rows = matched.map((m) => ({
-      round_id: round.id,
-      position: m.position,
-      letter: m.letter,
-      revealed_by: userId,
-    }));
-    const { data: insertedPositions } = await supabaseAdmin
+  if (matchedAll.length > 0 && maxRevealable > 0) {
+    const { data: existingRows } = await supabaseAdmin
       .from("sketch_revealed_positions")
-      .upsert(rows, { onConflict: "round_id,position", ignoreDuplicates: true })
-      .select("position, letter");
-    newlyRevealed = insertedPositions ?? [];
+      .select("position")
+      .eq("round_id", round.id);
+    const existing = new Set((existingRows ?? []).map((r) => r.position as number));
+    let budget = Math.max(0, maxRevealable - existing.size);
+    const toInsert: typeof matchedAll = [];
+    for (const m of [...matchedAll].sort((a, b) => a.position - b.position)) {
+      if (existing.has(m.position)) {
+        // Already public knowledge — fine to echo back for highlighting.
+        matched.push(m);
+      } else if (budget > 0) {
+        matched.push(m);
+        toInsert.push(m);
+        budget -= 1;
+      }
+      // Beyond the cap: dropped entirely. Not inserted, not returned.
+    }
+
+    // First guesser to land a NEW correct-position letter claims its per-letter
+    // Fang. We INSERT each allowed position with ON CONFLICT DO NOTHING so only
+    // the first revealer's row sticks; the inserted rows tell us what was new.
+    if (toInsert.length > 0) {
+      const rows = toInsert.map((m) => ({
+        round_id: round.id,
+        position: m.position,
+        letter: m.letter,
+        revealed_by: userId,
+      }));
+      const { data: insertedPositions } = await supabaseAdmin
+        .from("sketch_revealed_positions")
+        .upsert(rows, { onConflict: "round_id,position", ignoreDuplicates: true })
+        .select("position, letter");
+      newlyRevealed = insertedPositions ?? [];
+    }
 
     // Per-letter Fang trickle to THIS guesser for positions they revealed first,
     // capped per player per round. One ledger row per (round, user) reason so the
@@ -192,9 +233,11 @@ export async function POST(
     was_close: isClose,
     points_earned: pointsEarned,
     fangs_earned: fangsEarned,
-    // Wordle reveal payload — matched positions only, NEVER the secret word.
+    // Wordle reveal payload — matched positions only, NEVER the secret word,
+    // and clamped to the hidden-floor cap (a guess can never uncover the
+    // whole word; the floor letters stay blank until the round-end reveal).
     mask,
-    matched_positions: matched, // this guess's green squares
+    matched_positions: matched, // this guess's allowed green squares
     newly_revealed: newlyRevealed, // positions this guess revealed for the room
   });
 }
