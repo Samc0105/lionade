@@ -21,7 +21,7 @@
     },
     {
       "path": "/api/cron/reap-stale-competitive",
-      "schedule": "*/3 * * * *"
+      "schedule": "0 6 * * *"
     },
     {
       "path": "/api/cron/reap-pending-deletions",
