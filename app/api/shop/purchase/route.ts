@@ -93,6 +93,19 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Unknown item" }, { status: 404 });
     }
 
+    // Coming-soon items: these have no consumer feature yet, so block the
+    // purchase server-side (a crafted request must not be able to buy them).
+    // The frontend renders them as locked. Two cases today:
+    //   • voice_skin (voice_ninny_classic) — no Ninny voice playback yet
+    //   • boost_mastery_hint_pack — no hint consumer in Mastery Mode yet
+    const COMING_SOON_IDS = new Set(["boost_mastery_hint_pack"]);
+    if (item.type === "voice_skin" || COMING_SOON_IDS.has(item.id)) {
+      return NextResponse.json(
+        { error: "This item is coming soon" },
+        { status: 400 },
+      );
+    }
+
     const isBooster = item.type === "booster";
     const quantity = isBooster ? requestedQuantity : 1;
     const price = item.price * quantity;

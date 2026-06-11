@@ -25,6 +25,10 @@ export type ItemType =
 export type BoosterEffect =
   | "coin_multiplier"
   | "xp_multiplier"
+  // Double Down — applies BOTH coin AND xp multipliers in one effect so it
+  // does not collide with coin_multiplier / xp_multiplier in active_boosters
+  // (activate-booster rejects a second booster sharing an effect id).
+  | "coin_xp_multiplier"
   | "extra_time"
   | "auto_correct"
   | "fifty_fifty"
@@ -102,53 +106,55 @@ export interface EarnedCosmeticItem {
 }
 
 export const COSMETIC_ITEMS: ShopItem[] = [
-  { id: "frame_basic_blue", name: "Electric Blue", description: "Clean electric blue border", type: "frame", rarity: "common", price: 25, icon: "🔵" },
-  { id: "frame_fire", name: "Inferno Ring", description: "Burning ring of fire around your avatar", type: "frame", rarity: "rare", price: 100, icon: "🔥" },
-  { id: "frame_crystal", name: "Crystal Prism", description: "Refracting crystal light frame", type: "frame", rarity: "epic", price: 250, icon: "💎" },
-  { id: "frame_golden_lion", name: "Golden Lion Frame", description: "A majestic golden frame fit for a king", type: "frame", rarity: "legendary", price: 500, icon: "🦁" },
-  { id: "name_ice", name: "Ice Blue", description: "Frosty ice blue name", type: "name_color", rarity: "common", price: 20, icon: "🧊" },
-  { id: "name_emerald", name: "Emerald Green", description: "Rich emerald name color", type: "name_color", rarity: "rare", price: 90, icon: "💚" },
-  { id: "name_amethyst", name: "Amethyst Purple", description: "Deep amethyst glow", type: "name_color", rarity: "epic", price: 200, icon: "💜" },
-  { id: "name_aurora", name: "Aurora Name Color", description: "Shifting aurora borealis effect", type: "name_color", rarity: "legendary", price: 450, icon: "🌈" },
-  { id: "banner_starter", name: "Starter Banner", description: "Simple gradient banner", type: "banner", rarity: "common", price: 15, icon: "🏳️" },
-  { id: "banner_warrior", name: "Warrior Banner", description: "Battle-worn warrior flag", type: "banner", rarity: "rare", price: 120, icon: "⚔️" },
-  { id: "banner_galaxy", name: "Galaxy Banner", description: "Full galaxy panorama", type: "banner", rarity: "epic", price: 280, icon: "✨" },
-  { id: "banner_legend", name: "Legend Banner", description: "Only for the truly legendary", type: "banner", rarity: "legendary", price: 750, icon: "👑" },
+  { id: "frame_basic_blue", name: "Electric Blue", description: "Clean electric blue border", type: "frame", rarity: "common", price: 800, icon: "🔵" },
+  { id: "frame_fire", name: "Inferno Ring", description: "Burning ring of fire around your avatar", type: "frame", rarity: "rare", price: 2200, icon: "🔥" },
+  { id: "frame_crystal", name: "Crystal Prism", description: "Refracting crystal light frame", type: "frame", rarity: "epic", price: 5000, icon: "💎" },
+  { id: "frame_golden_lion", name: "Golden Lion Frame", description: "A majestic golden frame fit for a king", type: "frame", rarity: "legendary", price: 13000, icon: "🦁" },
+  { id: "name_ice", name: "Ice Blue", description: "Frosty ice blue name", type: "name_color", rarity: "common", price: 700, icon: "🧊" },
+  { id: "name_emerald", name: "Emerald Green", description: "Rich emerald name color", type: "name_color", rarity: "rare", price: 2000, icon: "💚" },
+  { id: "name_amethyst", name: "Amethyst Purple", description: "Deep amethyst glow", type: "name_color", rarity: "epic", price: 4800, icon: "💜" },
+  { id: "name_aurora", name: "Aurora Name Color", description: "Shifting aurora borealis effect", type: "name_color", rarity: "legendary", price: 12000, icon: "🌈" },
+  { id: "banner_starter", name: "Starter Banner", description: "Simple gradient banner", type: "banner", rarity: "common", price: 700, icon: "🏳️" },
+  { id: "banner_warrior", name: "Warrior Banner", description: "Battle-worn warrior flag", type: "banner", rarity: "rare", price: 2300, icon: "⚔️" },
+  { id: "banner_galaxy", name: "Galaxy Banner", description: "Full galaxy panorama", type: "banner", rarity: "epic", price: 5200, icon: "✨" },
+  { id: "banner_legend", name: "Legend Banner", description: "Only for the truly legendary", type: "banner", rarity: "legendary", price: 15000, icon: "👑" },
 ];
 
 export const BOOSTER_ITEMS: ShopItem[] = [
-  { id: "boost_coin_rush", name: "Coin Rush", description: "2x coins earned on your next quiz", type: "booster", rarity: "rare", price: 75, icon: "💰", boosterEffect: "coin_multiplier", boosterValue: 2, boosterDuration: 1 },
-  { id: "boost_xp_surge", name: "XP Surge", description: "2x XP earned on your next quiz", type: "booster", rarity: "rare", price: 75, icon: "⚡", boosterEffect: "xp_multiplier", boosterValue: 2, boosterDuration: 1 },
-  { id: "boost_streak_shield", name: "Streak Shield", description: "Protects your streak for one missed day", type: "booster", rarity: "epic", price: 150, icon: "🛡️", boosterEffect: "streak_shield", boosterValue: 0, boosterDuration: 1 },
-  { id: "boost_double_down", name: "Double Down", description: "Double coins AND XP on next quiz", type: "booster", rarity: "epic", price: 200, icon: "🎲", boosterEffect: "coin_multiplier", boosterValue: 2, boosterDuration: 1 },
-  { id: "boost_lucky_start", name: "Lucky Start", description: "First question auto-correct", type: "booster", rarity: "rare", price: 100, icon: "🍀", boosterEffect: "auto_correct", boosterValue: 1, boosterDuration: 1 },
-  { id: "boost_time_warp", name: "Time Warp", description: "+10 seconds per question", type: "booster", rarity: "common", price: 40, icon: "⏰", boosterEffect: "extra_time", boosterValue: 10, boosterDuration: 1 },
-  { id: "boost_brain_freeze", name: "Brain Freeze", description: "50/50 — eliminate two wrong answers once", type: "booster", rarity: "epic", price: 125, icon: "🧊", boosterEffect: "fifty_fifty", boosterValue: 1, boosterDuration: 1 },
-  { id: "boost_score_boost", name: "Score Boost", description: "+1 added to your final score", type: "booster", rarity: "common", price: 50, icon: "📈", boosterEffect: "score_boost", boosterValue: 1, boosterDuration: 1 },
+  { id: "boost_coin_rush", name: "Coin Rush", description: "2x coins earned on your next quiz", type: "booster", rarity: "rare", price: 300, icon: "💰", boosterEffect: "coin_multiplier", boosterValue: 2, boosterDuration: 1 },
+  { id: "boost_xp_surge", name: "XP Surge", description: "2x XP earned on your next quiz", type: "booster", rarity: "rare", price: 300, icon: "⚡", boosterEffect: "xp_multiplier", boosterValue: 2, boosterDuration: 1 },
+  { id: "boost_streak_shield", name: "Streak Shield", description: "Protects your streak for one missed day", type: "booster", rarity: "epic", price: 550, icon: "🛡️", boosterEffect: "streak_shield", boosterValue: 0, boosterDuration: 1 },
+  // Double Down uses the combined coin_xp_multiplier effect so it applies BOTH
+  // a coin AND an xp 2x multiplier without colliding with Coin Rush / XP Surge.
+  { id: "boost_double_down", name: "Double Down", description: "Double coins AND XP on next quiz", type: "booster", rarity: "epic", price: 650, icon: "🎲", boosterEffect: "coin_xp_multiplier", boosterValue: 2, boosterDuration: 1 },
+  { id: "boost_lucky_start", name: "Lucky Start", description: "First question auto-correct", type: "booster", rarity: "rare", price: 350, icon: "🍀", boosterEffect: "auto_correct", boosterValue: 1, boosterDuration: 1 },
+  { id: "boost_time_warp", name: "Time Warp", description: "+10 seconds per question", type: "booster", rarity: "common", price: 150, icon: "⏰", boosterEffect: "extra_time", boosterValue: 10, boosterDuration: 1 },
+  { id: "boost_brain_freeze", name: "Brain Freeze", description: "50/50 — eliminate two wrong answers once", type: "booster", rarity: "epic", price: 450, icon: "🧊", boosterEffect: "fifty_fifty", boosterValue: 1, boosterDuration: 1 },
+  { id: "boost_score_boost", name: "Score Boost", description: "+1 added to your final score", type: "booster", rarity: "common", price: 180, icon: "📈", boosterEffect: "score_boost", boosterValue: 1, boosterDuration: 1 },
   // 2026-06-02 — Mastery Hint Pack (5 hints). Dollar IAP via Stripe deferred to V2.
-  { id: "boost_mastery_hint_pack", name: "Mastery Hint Pack", description: "5 hints to use in Mastery Mode sessions", type: "booster", rarity: "rare", price: 300, icon: "💡", boosterEffect: "mastery_hint", boosterValue: 5, boosterDuration: 5 },
+  { id: "boost_mastery_hint_pack", name: "Mastery Hint Pack", description: "5 hints to use in Mastery Mode sessions", type: "booster", rarity: "rare", price: 900, icon: "💡", boosterEffect: "mastery_hint", boosterValue: 5, boosterDuration: 5 },
   // 2026-06-02 — Streak Shield 3-pack. Stacks with single shield.
-  { id: "boost_streak_shield_3pack", name: "Streak Shield 3-pack", description: "Protect your streak for 3 missed days", type: "booster", rarity: "epic", price: 400, icon: "🛡️", boosterEffect: "streak_shield", boosterValue: 0, boosterDuration: 3 },
+  { id: "boost_streak_shield_3pack", name: "Streak Shield 3-pack", description: "Protect your streak for 3 missed days", type: "booster", rarity: "epic", price: 1400, icon: "🛡️", boosterEffect: "streak_shield", boosterValue: 0, boosterDuration: 3 },
 ];
 
 // 2026-06-02 — Avatar Aura Pack: 10 cosmetic auras at 200-400 Fangs.
 // Placeholder icons; design owns final visual treatment.
 export const AVATAR_AURAS: ShopItem[] = [
-  { id: "aura_solar", name: "Solar Aura", description: "Warm solar flare around your avatar", type: "avatar_aura", rarity: "common", price: 200, icon: "☀️" },
-  { id: "aura_lunar", name: "Lunar Aura", description: "Cool moonlight halo", type: "avatar_aura", rarity: "common", price: 200, icon: "🌙" },
-  { id: "aura_emerald", name: "Emerald Aura", description: "Verdant green energy ring", type: "avatar_aura", rarity: "common", price: 220, icon: "🟢" },
-  { id: "aura_sapphire", name: "Sapphire Aura", description: "Deep sapphire shimmer", type: "avatar_aura", rarity: "rare", price: 260, icon: "🔷" },
-  { id: "aura_ruby", name: "Ruby Aura", description: "Pulsing ruby glow", type: "avatar_aura", rarity: "rare", price: 260, icon: "🔴" },
-  { id: "aura_amethyst", name: "Amethyst Aura", description: "Violet amethyst mist", type: "avatar_aura", rarity: "rare", price: 280, icon: "🟣" },
-  { id: "aura_storm", name: "Storm Aura", description: "Crackling storm cloud aura", type: "avatar_aura", rarity: "epic", price: 320, icon: "⛈️" },
-  { id: "aura_inferno", name: "Inferno Aura", description: "Roaring flame aura", type: "avatar_aura", rarity: "epic", price: 340, icon: "🔥" },
-  { id: "aura_void", name: "Void Aura", description: "Inky void with starlight motes", type: "avatar_aura", rarity: "epic", price: 380, icon: "🌌" },
-  { id: "aura_prismatic", name: "Prismatic Aura", description: "Refracting rainbow halo", type: "avatar_aura", rarity: "legendary", price: 400, icon: "🌈" },
+  { id: "aura_solar", name: "Solar Aura", description: "Warm solar flare around your avatar", type: "avatar_aura", rarity: "common", price: 900, icon: "☀️" },
+  { id: "aura_lunar", name: "Lunar Aura", description: "Cool moonlight halo", type: "avatar_aura", rarity: "common", price: 900, icon: "🌙" },
+  { id: "aura_emerald", name: "Emerald Aura", description: "Verdant green energy ring", type: "avatar_aura", rarity: "common", price: 1100, icon: "🟢" },
+  { id: "aura_sapphire", name: "Sapphire Aura", description: "Deep sapphire shimmer", type: "avatar_aura", rarity: "rare", price: 2000, icon: "🔷" },
+  { id: "aura_ruby", name: "Ruby Aura", description: "Pulsing ruby glow", type: "avatar_aura", rarity: "rare", price: 2100, icon: "🔴" },
+  { id: "aura_amethyst", name: "Amethyst Aura", description: "Violet amethyst mist", type: "avatar_aura", rarity: "rare", price: 2300, icon: "🟣" },
+  { id: "aura_storm", name: "Storm Aura", description: "Crackling storm cloud aura", type: "avatar_aura", rarity: "epic", price: 4400, icon: "⛈️" },
+  { id: "aura_inferno", name: "Inferno Aura", description: "Roaring flame aura", type: "avatar_aura", rarity: "epic", price: 4800, icon: "🔥" },
+  { id: "aura_void", name: "Void Aura", description: "Inky void with starlight motes", type: "avatar_aura", rarity: "epic", price: 5500, icon: "🌌" },
+  { id: "aura_prismatic", name: "Prismatic Aura", description: "Refracting rainbow halo", type: "avatar_aura", rarity: "legendary", price: 11000, icon: "🌈" },
 ];
 
 // 2026-06-02 — Ninny Voice Skin (single SKU for V1; more voices follow).
 export const VOICE_SKINS: ShopItem[] = [
-  { id: "voice_ninny_classic", name: "Ninny Voice Skin", description: "Unlock Ninny's signature voice in chat", type: "voice_skin", rarity: "epic", price: 500, icon: "🎙️" },
+  { id: "voice_ninny_classic", name: "Ninny Voice Skin", description: "Unlock Ninny's signature voice in chat", type: "voice_skin", rarity: "epic", price: 6000, icon: "🎙️" },
 ];
 
 // 2026-06-03 — Shop V2 Identity & Status Pack: 6 animated username effects.
@@ -158,23 +164,23 @@ export const VOICE_SKINS: ShopItem[] = [
 // flow stays simple — the renderer reads ownership and picks the highest
 // fidelity variant the user owns.
 export const USERNAME_EFFECTS: ShopItem[] = [
-  { id: "name_fx_rainbow", name: "Rainbow Shimmer", description: "Animated rainbow shimmer across your username", type: "username_effect", rarity: "rare", price: 1500, icon: "🌈" },
-  { id: "name_fx_fire", name: "Fire Effect", description: "Flickering flames trace your username", type: "username_effect", rarity: "rare", price: 2000, icon: "🔥" },
-  { id: "name_fx_holographic", name: "Holographic", description: "Iridescent holographic sweep over your username", type: "username_effect", rarity: "epic", price: 3000, icon: "🔮" },
-  { id: "name_fx_gold", name: "Gold Sheen", description: "Polished gold sheen on every letter", type: "username_effect", rarity: "epic", price: 2500, icon: "🥇" },
-  { id: "name_fx_glitch", name: "Glitch", description: "Digital glitch distortion on your username", type: "username_effect", rarity: "epic", price: 3500, icon: "📺" },
-  { id: "name_fx_galaxy", name: "Galaxy Shimmer", description: "Drifting galaxy starfield inside your letters", type: "username_effect", rarity: "legendary", price: 5000, icon: "🌌" },
+  { id: "name_fx_rainbow", name: "Rainbow Shimmer", description: "Animated rainbow shimmer across your username", type: "username_effect", rarity: "rare", price: 16000, icon: "🌈" },
+  { id: "name_fx_fire", name: "Fire Effect", description: "Flickering flames trace your username", type: "username_effect", rarity: "rare", price: 20000, icon: "🔥" },
+  { id: "name_fx_holographic", name: "Holographic", description: "Iridescent holographic sweep over your username", type: "username_effect", rarity: "epic", price: 28000, icon: "🔮" },
+  { id: "name_fx_gold", name: "Gold Sheen", description: "Polished gold sheen on every letter", type: "username_effect", rarity: "epic", price: 24000, icon: "🥇" },
+  { id: "name_fx_glitch", name: "Glitch", description: "Digital glitch distortion on your username", type: "username_effect", rarity: "epic", price: 32000, icon: "📺" },
+  { id: "name_fx_galaxy", name: "Galaxy Shimmer", description: "Drifting galaxy starfield inside your letters", type: "username_effect", rarity: "legendary", price: 45000, icon: "🌌" },
 ];
 
 // 2026-06-03 — Shop V2 Identity & Status Pack: 5 premium cosmetic banners
 // purchased with Fangs. These are higher-tier than the original BANNER set
 // and render with motion (particles, gradient flow, etc.).
 export const ANIMATED_BANNERS: ShopItem[] = [
-  { id: "banner_interstellar", name: "Interstellar", description: "Drifting star particles across deep space", type: "animated_banner", rarity: "epic", price: 3000, icon: "🌠" },
-  { id: "banner_aurora", name: "Aurora", description: "Northern lights gradient flowing edge to edge", type: "animated_banner", rarity: "epic", price: 3500, icon: "🌌" },
-  { id: "banner_ink_splash", name: "Ink Splash", description: "Animated ink drops blooming across the banner", type: "animated_banner", rarity: "epic", price: 4000, icon: "🖋️" },
-  { id: "banner_honeycomb", name: "Honeycomb", description: "Geometric honeycomb pattern with soft shimmer", type: "animated_banner", rarity: "epic", price: 4500, icon: "🍯" },
-  { id: "banner_tidewave", name: "Tidewave", description: "Gentle ocean wave motion across the banner", type: "animated_banner", rarity: "legendary", price: 5000, icon: "🌊" },
+  { id: "banner_interstellar", name: "Interstellar", description: "Drifting star particles across deep space", type: "animated_banner", rarity: "epic", price: 26000, icon: "🌠" },
+  { id: "banner_aurora", name: "Aurora", description: "Northern lights gradient flowing edge to edge", type: "animated_banner", rarity: "epic", price: 30000, icon: "🌌" },
+  { id: "banner_ink_splash", name: "Ink Splash", description: "Animated ink drops blooming across the banner", type: "animated_banner", rarity: "epic", price: 34000, icon: "🖋️" },
+  { id: "banner_honeycomb", name: "Honeycomb", description: "Geometric honeycomb pattern with soft shimmer", type: "animated_banner", rarity: "epic", price: 38000, icon: "🍯" },
+  { id: "banner_tidewave", name: "Tidewave", description: "Gentle ocean wave motion across the banner", type: "animated_banner", rarity: "legendary", price: 42000, icon: "🌊" },
 ];
 
 // 2026-06-03 — Shop V2 Identity & Status Pack: 3 founder badges.

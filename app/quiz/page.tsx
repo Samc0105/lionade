@@ -399,8 +399,16 @@ export default function QuizPage() {
   // Booster helpers
   const hasBooster = (effect: string) => activeBoosters.some((b) => b.booster_effect === effect);
   const getBoosterValue = (effect: string) => activeBoosters.find((b) => b.booster_effect === effect)?.booster_value ?? 0;
-  const coinMultiplier = hasBooster("coin_multiplier") ? getBoosterValue("coin_multiplier") : 1;
-  const xpMultiplier = hasBooster("xp_multiplier") ? getBoosterValue("xp_multiplier") : 1;
+  // Double Down (coin_xp_multiplier) applies to BOTH coins and XP, so it
+  // feeds whichever multiplier isn't already set by Coin Rush / XP Surge.
+  const coinMultiplier =
+    hasBooster("coin_multiplier") ? getBoosterValue("coin_multiplier")
+    : hasBooster("coin_xp_multiplier") ? getBoosterValue("coin_xp_multiplier")
+    : 1;
+  const xpMultiplier =
+    hasBooster("xp_multiplier") ? getBoosterValue("xp_multiplier")
+    : hasBooster("coin_xp_multiplier") ? getBoosterValue("coin_xp_multiplier")
+    : 1;
   const extraTime = hasBooster("extra_time") ? getBoosterValue("extra_time") : 0;
   const hasAutoCorrect = hasBooster("auto_correct") && !autoCorrectUsed;
   const hasFiftyFifty = hasBooster("fifty_fifty") && !fiftyFiftyUsed;

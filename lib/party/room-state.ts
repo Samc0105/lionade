@@ -52,22 +52,23 @@ export async function fetchRoomSnapshot(
 
   const { data: players } = await supabase
     .from("party_room_players")
-    .select("user_id, score, joined_at, left_at, is_ready, is_pending_round, is_spectator, selected_subjects, profiles!inner(username, equipped_username_effect)")
+    .select("user_id, score, joined_at, left_at, is_ready, is_pending_round, is_spectator, selected_subjects, profiles!inner(username, equipped_username_effect, equipped_frame, equipped_name_color, equipped_avatar_aura)")
     .eq("room_id", room.id)
     .is("left_at", null)
     .order("joined_at", { ascending: true });
 
+  // Supabase typed join returns the profile as either an object or array
+  // depending on the relationship; read a field defensively from either shape.
+  const profileField = (p: unknown, key: string): string | null => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const prof = (p as any).profiles;
+    const val = Array.isArray(prof) ? prof[0]?.[key] : prof?.[key];
+    return (val as string | null) ?? null;
+  };
+
   const shaped: PartyPlayer[] = (players ?? []).map((p) => ({
     user_id: p.user_id,
-    // Supabase typed join returns the profile as either an object or array
-    // depending on the relationship; we handle both shapes defensively.
-    username:
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (Array.isArray((p as any).profiles)
-        ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (p as any).profiles[0]?.username
-        : // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (p as any).profiles?.username) ?? null,
+    username: profileField(p, "username"),
     score: p.score ?? 0,
     joined_at: p.joined_at,
     left_at: p.left_at,
@@ -75,14 +76,10 @@ export async function fetchRoomSnapshot(
     is_pending_round: !!(p as { is_pending_round?: boolean }).is_pending_round,
     is_spectator: !!(p as { is_spectator?: boolean }).is_spectator,
     selected_subjects: Array.isArray(p.selected_subjects) ? p.selected_subjects : [],
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    equipped_username_effect:
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (Array.isArray((p as any).profiles)
-        ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (p as any).profiles[0]?.equipped_username_effect
-        : // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (p as any).profiles?.equipped_username_effect) ?? null,
+    equipped_username_effect: profileField(p, "equipped_username_effect"),
+    equipped_frame: profileField(p, "equipped_frame"),
+    equipped_name_color: profileField(p, "equipped_name_color"),
+    equipped_avatar_aura: profileField(p, "equipped_avatar_aura"),
   }));
 
   const typedRoom = room as PartyRoom;

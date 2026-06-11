@@ -22,7 +22,23 @@ import { requireAuth } from "@/lib/api-auth";
  * `purchased` source first, then `founder`, then `earned`, so the UI never
  * shows the same item twice.
  *
- * Response: { cosmetics: Array<{ id, type, source, acquiredAt }> }
+ * Response (stable contract for the frontend useEquippedCosmetics hook):
+ *   {
+ *     items: Array<{ itemId, itemType, equipped, acquiredAt }>,
+ *     equipped: {
+ *       effect:      string | null,  // equipped_username_effect
+ *       frame:       string | null,  // equipped_frame
+ *       name_color:  string | null,  // equipped_name_color
+ *       banner:      string | null,  // equipped_banner
+ *       avatar_aura: string | null,  // equipped_avatar_aura
+ *     },
+ *     cosmetics: Array<{ id, type, source, acquiredAt }>  // legacy readers
+ *   }
+ *
+ * `equipped` per item is derived by matching the owned item id against the
+ * user's profiles.equipped_* columns (the render source of truth, migration
+ * 063 + equipped_username_effect). The resolved `equipped` object is the most
+ * robust contract: the hook can read it directly instead of scanning items.
  *
  * Failure mode: each source query is independent. If one fails we log and
  * return what we have from the others — partial data beats a 500 here.
@@ -42,9 +58,10 @@ export async function GET(req: NextRequest) {
   if (auth instanceof NextResponse) return auth;
   const userId = auth.userId;
 
-  // Fire all three queries in parallel — they're independent and the slowest
-  // path determines the response time.
-  const [inventoryRes, founderRes, earnedRes] = await Promise.all([
+  // Fire all queries in parallel — they're independent and the slowest
+  // path determines the response time. The profiles row carries the equipped
+  // pointers (render source of truth) so each owned item can be flagged.
+  const [inventoryRes, founderRes, earnedRes, profileRes] = await Promise.all([
     supabaseAdmin
       .from("user_inventory")
       .select("item_id, item_type, created_at, acquired_at")
@@ -57,7 +74,35 @@ export async function GET(req: NextRequest) {
       .from("earned_cosmetics")
       .select("cosmetic_id, cosmetic_type, granted_at")
       .eq("user_id", userId),
+    supabaseAdmin
+      .from("profiles")
+      .select("equipped_username_effect, equipped_frame, equipped_name_color, equipped_banner, equipped_avatar_aura")
+      .eq("id", userId)
+      .maybeSingle(),
   ]);
+
+  if (profileRes.error) {
+    console.error("[cosmetics/owned profile]", profileRes.error.message);
+  }
+
+  const prof = (profileRes.data ?? {}) as {
+    equipped_username_effect?: string | null;
+    equipped_frame?: string | null;
+    equipped_name_color?: string | null;
+    equipped_banner?: string | null;
+    equipped_avatar_aura?: string | null;
+  };
+  const equipped = {
+    effect: prof.equipped_username_effect ?? null,
+    frame: prof.equipped_frame ?? null,
+    name_color: prof.equipped_name_color ?? null,
+    banner: prof.equipped_banner ?? null,
+    avatar_aura: prof.equipped_avatar_aura ?? null,
+  };
+  // Set of equipped item ids for O(1) per-item flagging.
+  const equippedIds = new Set(
+    Object.values(equipped).filter((v): v is string => typeof v === "string"),
+  );
 
   if (inventoryRes.error) {
     console.error("[cosmetics/owned inventory]", inventoryRes.error.message);
@@ -126,5 +171,14 @@ export async function GET(req: NextRequest) {
     return b.acquiredAt.localeCompare(a.acquiredAt);
   });
 
-  return NextResponse.json({ cosmetics });
+  // Frontend-facing shape: per-item itemId/itemType/equipped. `equipped` is
+  // true when the item id matches one of the profiles.equipped_* pointers.
+  const items = cosmetics.map((c) => ({
+    itemId: c.id,
+    itemType: c.type,
+    equipped: equippedIds.has(c.id),
+    acquiredAt: c.acquiredAt,
+  }));
+
+  return NextResponse.json({ items, equipped, cosmetics });
 }

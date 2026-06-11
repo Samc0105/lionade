@@ -122,6 +122,11 @@ export default function BluffView({
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [ninnyMsg, setNinnyMsg] = useState<string | null>("Get ready to bluff.");
+  // ONE dedicated live region for the reveal result. Set exactly once per round
+  // (keyed on round id via revealAnnounceRef in the sequence-done effect) so the
+  // 1.5s polls never re-announce. Cleared on round adoption.
+  const [revealAnnounce, setRevealAnnounce] = useState<string | null>(null);
+  const revealAnnounceRef = useRef<string | null>(null);
   const [timeLeft, setTimeLeft] = useState(0);
   // One advance attempt per (round id, phase), with a 4s retry window for
   // failed POSTs. Replaces the old boolean advanceLock, which released the
@@ -200,6 +205,7 @@ export default function BluffView({
     setForfeitedLocal(false);
     setDetail(null);
     setError(null);
+    setRevealAnnounce(null);
     setNinnyMsg("Write a fake answer that sounds real. Lie convincingly!");
   }, []);
 
@@ -454,7 +460,30 @@ export default function BluffView({
     if (!revealSequenceDone || !detail) return;
     revealDoneRef.current.add(detail.round.id);
     setNinnyMsg(`The truth: ${detail.round.correct_answer}`);
-  }, [revealSequenceDone, detail]);
+    // Mirror the outcome into the dedicated SR live region — fires exactly once
+    // per round (revealAnnounceRef gate). The card sequence carries NO aria-live
+    // so the 1.5s polls never spam. The visual signals (gold TRUTH badge, "fooled
+    // N", voter chips) are conveyed here for screen-reader users.
+    if (revealAnnounceRef.current !== detail.round.id) {
+      revealAnnounceRef.current = detail.round.id;
+      const answers = detail.answers ?? [];
+      const truth = answers.find((a) => a.is_truth);
+      const truthText = String(detail.round.correct_answer ?? truth?.text ?? "");
+      const iFoundTruth = (truth?.voters ?? []).includes(meUserId);
+      const myFooledVotes = answers
+        .filter((a) => !a.is_truth && a.author_user_id === meUserId)
+        .reduce((sum, a) => sum + (a.vote_count ?? 0), 0);
+      const truthPart = `The real answer was ${truthText}.`;
+      const guessPart = iFoundTruth
+        ? "You found the truth."
+        : "You did not find the truth.";
+      const fooledPart =
+        myFooledVotes > 0
+          ? ` Your fake fooled ${myFooledVotes} ${myFooledVotes === 1 ? "player" : "players"}.`
+          : " Your fake fooled nobody.";
+      setRevealAnnounce(`${truthPart} ${guessPart}${fooledPart}`);
+    }
+  }, [revealSequenceDone, detail, meUserId]);
 
   // ── Submit fake ──
   async function submitFake(e: React.FormEvent) {
@@ -663,7 +692,15 @@ export default function BluffView({
               animationDelay: "0.6s",
             }}
           />
-          <div className="w-12 h-12 rounded-full border-2 border-[#FFD700]/40 border-t-[#FFD700] animate-spin relative z-10" />
+          <div
+            className={`w-12 h-12 rounded-full border-2 relative z-10 ${reduced ? "" : "animate-spin"}`}
+            // Reduced motion: full solid gold ring (no spinning "gap" to imply motion).
+            style={
+              reduced
+                ? { borderColor: "#FFD700" }
+                : { borderColor: "rgba(255,215,0,0.4)", borderTopColor: "#FFD700" }
+            }
+          />
         </div>
         <p className="font-bebas text-2xl text-cream/70 tracking-[0.3em]">DEALING ROUND</p>
         <p className="text-cream/40 text-xs font-syne italic">queueing trivia, brewing fakes</p>
@@ -855,7 +892,7 @@ export default function BluffView({
                 type="button"
                 onClick={forfeitRound}
                 disabled={submitting}
-                className="w-full py-2 rounded-xl font-syne text-xs text-cream/55 hover:text-cream/85 transition-colors disabled:opacity-40"
+                className="w-full min-h-[44px] flex items-center justify-center py-2 rounded-xl font-syne text-xs text-cream/55 hover:text-cream/85 transition-colors disabled:opacity-40"
               >
                 I&apos;m out. Skip me this round
               </button>
@@ -961,12 +998,20 @@ export default function BluffView({
             exit={reduced ? { opacity: 0 } : { opacity: 0, y: -8 }}
             className="space-y-4"
           >
+            {/* Dedicated SR live region — announces the outcome exactly once per
+                round (revealAnnounce only changes once, keyed on round id). The
+                reveal sequence itself carries NO aria-live so the polls + the
+                per-card mounts don't spam the screen reader. */}
+            <span role="status" aria-live="assertive" className="sr-only">
+              {revealAnnounce}
+            </span>
+
             {/* ── One-by-one dramatic reveal: fakes first (least fooling to
                 most), the REAL answer last with a gold TRUTH badge. Cards
                 mount as revealStep advances (~1.2s apart), so the pa-deal-in
                 CSS animation fires on mount — no per-card delay math.
                 Reduced motion: revealStep is maxed, everything is static. ── */}
-            <div className="space-y-2" aria-live="polite">
+            <div className="space-y-2">
               {orderedReveal.map((a, i) => {
                 if (revealStep <= i) return null;
                 const author = players.find((p) => p.user_id === a.author_user_id);
@@ -1312,7 +1357,7 @@ export default function BluffView({
         <button
           type="button"
           onClick={() => setInviteOpen(true)}
-          className="fixed bottom-24 right-4 md:bottom-8 md:right-8 z-30 px-3.5 py-2 rounded-full font-bebas text-xs tracking-wider transition-all active:scale-95"
+          className="fixed bottom-24 right-4 md:bottom-8 md:right-8 z-30 inline-flex items-center min-h-[44px] px-3.5 py-2.5 rounded-full font-bebas text-xs tracking-wider transition-all active:scale-95"
           style={{
             background: "rgba(16,12,26,0.9)",
             border: "1px solid rgba(255,215,0,0.45)",

@@ -12,7 +12,16 @@ import { toastError, toastInfo, toastSuccess } from "@/lib/toast";
 import DailySpinHero from "@/components/Shop/DailySpinHero";
 import AnimatedUsername, { type UsernameEffect } from "@/components/AnimatedUsername";
 import { todaysDrops as pickTodaysDrops } from "@/lib/shop-daily-drops";
-import type { ShopItem as CoreShopItem } from "@lionade/core/constants/shop-catalog";
+import {
+  COSMETIC_ITEMS as CORE_COSMETIC_ITEMS,
+  BOOSTER_ITEMS as CORE_BOOSTER_ITEMS,
+  AVATAR_AURAS as CORE_AVATAR_AURAS,
+  VOICE_SKINS as CORE_VOICE_SKINS,
+  USERNAME_EFFECTS as CORE_USERNAME_EFFECTS,
+  ANIMATED_BANNERS as CORE_ANIMATED_BANNERS,
+  FEATURED_ITEMS as CORE_FEATURED_ITEMS,
+  type ShopItem as CoreShopItem,
+} from "@lionade/core/constants/shop-catalog";
 import type { ComponentType } from "react";
 import type { IconProps } from "@phosphor-icons/react";
 import {
@@ -52,8 +61,11 @@ import {
 
 // ── Types ──
 type Rarity = "common" | "rare" | "epic" | "legendary";
-type ItemType = "frame" | "background" | "name_color" | "banner" | "booster" | "username_effect" | "animated_banner" | "founder_badge" | "earned_medal" | "profile_flair";
-type BoosterEffect = "coin_multiplier" | "xp_multiplier" | "extra_time" | "auto_correct" | "fifty_fifty" | "score_boost" | "streak_shield";
+// Mirror of the canonical ItemType / BoosterEffect unions
+// (packages/lionade-core/src/constants/shop-catalog.ts) so items DERIVED from
+// the catalog (which now drives id/name/type/rarity/price) type-check here.
+type ItemType = "frame" | "background" | "name_color" | "banner" | "booster" | "avatar_aura" | "voice_skin" | "username_effect" | "animated_banner" | "founder_badge" | "earned_medal" | "profile_flair";
+type BoosterEffect = "coin_multiplier" | "xp_multiplier" | "coin_xp_multiplier" | "extra_time" | "auto_correct" | "fifty_fifty" | "score_boost" | "streak_shield" | "mastery_hint";
 type Tab = "featured" | "cosmetics" | "boosters" | "inventory";
 type PremiumTab = "themes" | "frames" | "name_colors" | "banners";
 type CosmeticSub = "frames" | "backgrounds" | "name_colors" | "banners";
@@ -74,6 +86,9 @@ interface ShopItem {
   boosterEffect?: BoosterEffect;
   boosterValue?: number;
   boosterDuration?: number;
+  // Shop overhaul (2026-06-09) — visible-but-locked. The renderer shows a
+  // muted "Soon" pill + disabled buy; the server also blocks the purchase.
+  comingSoon?: boolean;
 }
 
 interface PremiumItem {
@@ -150,40 +165,124 @@ const RARITY_COLORS: Record<Rarity, {
 };
 
 // ══════════════════════════════════════════
-// ── Coin Store Items ──
+// ── Coin Store Items — DERIVED FROM THE CANONICAL CATALOG ──
 // ══════════════════════════════════════════
+// 2026-06-11 data-integrity fix: this page used to carry its OWN hardcoded item
+// arrays whose prices + ids had DRIFTED from the canonical catalog at
+// packages/lionade-core/src/constants/shop-catalog.ts (the same file the server
+// reads via getShopItem). The shop showed cheap stale prices + orphan ids
+// (aura_aurora/rose/amber/frost/ember, ninny_voice_skin, mastery_hint_pack)
+// that either undercharged the user or failed server purchase outright.
+//
+// Now the catalog is the SINGLE SOURCE OF TRUTH for id/name/description/type/
+// rarity/price. The only thing that lives locally is DISPLAY CHROME — the
+// Phosphor Icon + weight + color + a comingSoon flag — which the catalog
+// (emoji-only) does not carry. We merge { ...canonicalItem, ...chromeFor(id) }
+// so the displayed price ALWAYS equals the canonical/server price.
 
-const FEATURED_ITEMS: ShopItem[] = [
-  { id: "frame_golden_lion", name: "Golden Lion Frame", description: "A majestic golden frame fit for a king", type: "frame", rarity: "legendary", price: 500, Icon: PawPrint, iconWeight: "fill", iconColor: "#FFD700" },
-  { id: "boost_coin_rush", name: "Coin Rush", description: "2x coins for your next quiz", type: "booster", rarity: "rare", price: 75, Icon: Coins, iconWeight: "fill", iconColor: "#FFD700", boosterEffect: "coin_multiplier", boosterValue: 2, boosterDuration: 1 },
-  { id: "name_aurora", name: "Aurora Name Color", description: "Shifting aurora borealis name effect", type: "name_color", rarity: "legendary", price: 450, Icon: Rainbow, iconWeight: "fill" },
-];
+// ── Per-id display chrome ──
+// Keyed by canonical item id. Anything without an explicit entry falls back to
+// a rarity-tinted generic icon (chromeFor) so nothing ever renders iconless.
+interface ItemChrome {
+  Icon: PhosphorIcon;
+  iconWeight?: IconProps["weight"];
+  iconColor?: string;
+  // visible-but-locked. Server ALSO blocks these with "This item is coming
+  // soon" (voice_ninny_classic + boost_mastery_hint_pack), so we never let the
+  // user click Buy and hit a server error.
+  comingSoon?: boolean;
+}
 
-const COSMETIC_ITEMS: ShopItem[] = [
-  { id: "frame_basic_blue", name: "Electric Blue", description: "Clean electric blue border", type: "frame", rarity: "common", price: 25, Icon: Circle, iconWeight: "fill", iconColor: "#4A90D9" },
-  { id: "frame_fire", name: "Inferno Ring", description: "Burning ring of fire around your avatar", type: "frame", rarity: "rare", price: 100, Icon: Fire, iconWeight: "fill", iconColor: "#F97316" },
-  { id: "frame_crystal", name: "Crystal Prism", description: "Refracting crystal light frame", type: "frame", rarity: "epic", price: 250, Icon: Diamond, iconWeight: "fill", iconColor: "#A855F7" },
-  { id: "frame_golden_lion", name: "Golden Lion Frame", description: "A majestic golden frame fit for a king", type: "frame", rarity: "legendary", price: 500, Icon: PawPrint, iconWeight: "fill", iconColor: "#FFD700" },
-  { id: "name_ice", name: "Ice Blue", description: "Frosty ice blue name", type: "name_color", rarity: "common", price: 20, Icon: Snowflake, iconWeight: "regular", iconColor: "#7DD3FC" },
-  { id: "name_emerald", name: "Emerald Green", description: "Rich emerald name color", type: "name_color", rarity: "rare", price: 90, Icon: Heart, iconWeight: "fill", iconColor: "#22C55E" },
-  { id: "name_amethyst", name: "Amethyst Purple", description: "Deep amethyst glow", type: "name_color", rarity: "epic", price: 200, Icon: Heart, iconWeight: "fill", iconColor: "#A855F7" },
-  { id: "name_aurora", name: "Aurora Name Color", description: "Shifting aurora borealis effect", type: "name_color", rarity: "legendary", price: 450, Icon: Rainbow, iconWeight: "fill" },
-  { id: "banner_starter", name: "Starter Banner", description: "Simple gradient banner", type: "banner", rarity: "common", price: 15, Icon: Flag, iconWeight: "regular", iconColor: "#94A3B8" },
-  { id: "banner_warrior", name: "Warrior Banner", description: "Battle-worn warrior flag", type: "banner", rarity: "rare", price: 120, Icon: Sword, iconWeight: "fill", iconColor: "#60A5FA" },
-  { id: "banner_galaxy", name: "Galaxy Banner", description: "Full galaxy panorama", type: "banner", rarity: "epic", price: 280, Icon: Sparkle, iconWeight: "fill", iconColor: "#A855F7" },
-  { id: "banner_legend", name: "Legend Banner", description: "Only for the truly legendary", type: "banner", rarity: "legendary", price: 750, Icon: Crown, iconWeight: "fill", iconColor: "#FFD700" },
-];
+const ITEM_CHROME: Record<string, ItemChrome> = {
+  // Frames
+  frame_basic_blue: { Icon: Circle, iconWeight: "fill", iconColor: "#4A90D9" },
+  frame_fire: { Icon: Fire, iconWeight: "fill", iconColor: "#F97316" },
+  frame_crystal: { Icon: Diamond, iconWeight: "fill", iconColor: "#A855F7" },
+  frame_golden_lion: { Icon: PawPrint, iconWeight: "fill", iconColor: "#FFD700" },
+  // Name colors
+  name_ice: { Icon: Snowflake, iconWeight: "regular", iconColor: "#7DD3FC" },
+  name_emerald: { Icon: Heart, iconWeight: "fill", iconColor: "#22C55E" },
+  name_amethyst: { Icon: Heart, iconWeight: "fill", iconColor: "#A855F7" },
+  name_aurora: { Icon: Rainbow, iconWeight: "fill" },
+  // Banners (original set)
+  banner_starter: { Icon: Flag, iconWeight: "regular", iconColor: "#94A3B8" },
+  banner_warrior: { Icon: Sword, iconWeight: "fill", iconColor: "#60A5FA" },
+  banner_galaxy: { Icon: Sparkle, iconWeight: "fill", iconColor: "#A855F7" },
+  banner_legend: { Icon: Crown, iconWeight: "fill", iconColor: "#FFD700" },
+  // Boosters
+  boost_coin_rush: { Icon: Coins, iconWeight: "fill", iconColor: "#FFD700" },
+  boost_xp_surge: { Icon: Lightning, iconWeight: "fill", iconColor: "#FACC15" },
+  boost_streak_shield: { Icon: Shield, iconWeight: "fill", iconColor: "#A855F7" },
+  boost_double_down: { Icon: DiceFive, iconWeight: "regular", iconColor: "#A855F7" },
+  boost_lucky_start: { Icon: Leaf, iconWeight: "fill", iconColor: "#22C55E" },
+  boost_time_warp: { Icon: CircleNotch, iconWeight: "bold", iconColor: "#94A3B8" },
+  boost_brain_freeze: { Icon: Snowflake, iconWeight: "regular", iconColor: "#7DD3FC" },
+  boost_score_boost: { Icon: TrendUp, iconWeight: "regular", iconColor: "#94A3B8" },
+  // Server blocks this one ("coming soon") — surface as locked, never buyable.
+  boost_mastery_hint_pack: { Icon: Lightning, iconWeight: "fill", iconColor: "#FACC15", comingSoon: true },
+  boost_streak_shield_3pack: { Icon: Shield, iconWeight: "fill", iconColor: "#A855F7" },
+  // Avatar auras (canonical ids)
+  aura_solar: { Icon: Sphere, iconWeight: "fill", iconColor: "#FACC15" },
+  aura_lunar: { Icon: StarFour, iconWeight: "fill", iconColor: "#E8EAF2" },
+  aura_emerald: { Icon: Heart, iconWeight: "fill", iconColor: "#22C55E" },
+  aura_sapphire: { Icon: Diamond, iconWeight: "fill", iconColor: "#3B82F6" },
+  aura_ruby: { Icon: Circle, iconWeight: "fill", iconColor: "#EF4444" },
+  aura_amethyst: { Icon: Sphere, iconWeight: "fill", iconColor: "#A855F7" },
+  aura_storm: { Icon: Lightning, iconWeight: "fill", iconColor: "#60A5FA" },
+  aura_inferno: { Icon: Flame, iconWeight: "fill", iconColor: "#F97316" },
+  aura_void: { Icon: CircleNotch, iconWeight: "bold", iconColor: "#A855F7" },
+  aura_prismatic: { Icon: Rainbow, iconWeight: "fill", iconColor: "#A855F7" },
+  // Voice skin — server blocks ("coming soon"), surface as locked.
+  voice_ninny_classic: { Icon: Sparkle, iconWeight: "fill", iconColor: "#A855F7", comingSoon: true },
+  // Username effects
+  name_fx_rainbow: { Icon: Rainbow, iconWeight: "fill" },
+  name_fx_fire: { Icon: Fire, iconWeight: "fill", iconColor: "#F97316" },
+  name_fx_holographic: { Icon: Sphere, iconWeight: "fill", iconColor: "#A855F7" },
+  name_fx_gold: { Icon: Medal, iconWeight: "fill", iconColor: "#FFD700" },
+  name_fx_glitch: { Icon: Lightning, iconWeight: "fill", iconColor: "#60A5FA" },
+  name_fx_galaxy: { Icon: Sparkle, iconWeight: "fill", iconColor: "#A855F7" },
+  // Animated banners (premium Fang banners)
+  banner_interstellar: { Icon: Sparkle, iconWeight: "fill" },
+  banner_aurora: { Icon: Rainbow, iconWeight: "fill", iconColor: "#22D3EE" },
+  banner_ink_splash: { Icon: CircleNotch, iconWeight: "bold", iconColor: "#94A3B8" },
+  banner_honeycomb: { Icon: Diamond, iconWeight: "fill", iconColor: "#FACC15" },
+  banner_tidewave: { Icon: Heart, iconWeight: "fill", iconColor: "#22C55E" },
+};
 
-const BOOSTER_ITEMS: ShopItem[] = [
-  { id: "boost_coin_rush", name: "Coin Rush", description: "2x coins earned on your next quiz", type: "booster", rarity: "rare", price: 75, Icon: Coins, iconWeight: "fill", iconColor: "#FFD700", boosterEffect: "coin_multiplier", boosterValue: 2, boosterDuration: 1 },
-  { id: "boost_xp_surge", name: "XP Surge", description: "2x XP earned on your next quiz", type: "booster", rarity: "rare", price: 75, Icon: Lightning, iconWeight: "fill", iconColor: "#FACC15", boosterEffect: "xp_multiplier", boosterValue: 2, boosterDuration: 1 },
-  { id: "boost_streak_shield", name: "Streak Shield", description: "Protects your streak for one missed day", type: "booster", rarity: "epic", price: 150, Icon: Shield, iconWeight: "fill", iconColor: "#A855F7", boosterEffect: "streak_shield", boosterValue: 0, boosterDuration: 1 },
-  { id: "boost_double_down", name: "Double Down", description: "Double coins AND XP on next quiz", type: "booster", rarity: "epic", price: 200, Icon: DiceFive, iconWeight: "regular", iconColor: "#A855F7", boosterEffect: "coin_multiplier", boosterValue: 2, boosterDuration: 1 },
-  { id: "boost_lucky_start", name: "Lucky Start", description: "First question auto-correct", type: "booster", rarity: "rare", price: 100, Icon: Leaf, iconWeight: "fill", iconColor: "#22C55E", boosterEffect: "auto_correct", boosterValue: 1, boosterDuration: 1 },
-  { id: "boost_time_warp", name: "Time Warp", description: "+10 seconds per question", type: "booster", rarity: "common", price: 40, Icon: CircleNotch, iconWeight: "bold", iconColor: "#94A3B8", boosterEffect: "extra_time", boosterValue: 10, boosterDuration: 1 },
-  { id: "boost_brain_freeze", name: "Brain Freeze", description: "50/50. Eliminate two wrong answers once.", type: "booster", rarity: "epic", price: 125, Icon: Snowflake, iconWeight: "regular", iconColor: "#7DD3FC", boosterEffect: "fifty_fifty", boosterValue: 1, boosterDuration: 1 },
-  { id: "boost_score_boost", name: "Score Boost", description: "+1 added to your final score", type: "booster", rarity: "common", price: 50, Icon: TrendUp, iconWeight: "regular", iconColor: "#94A3B8", boosterEffect: "score_boost", boosterValue: 1, boosterDuration: 1 },
-];
+// Rarity-tinted generic fallback so any catalog id without explicit chrome
+// still renders an icon (never iconless).
+const RARITY_ICON_COLOR: Record<Rarity, string> = {
+  common: "#94A3B8",
+  rare: "#60A5FA",
+  epic: "#A855F7",
+  legendary: "#FFD700",
+};
+function chromeFor(item: CoreShopItem): ItemChrome {
+  return ITEM_CHROME[item.id] ?? { Icon: Sparkle, iconWeight: "fill", iconColor: RARITY_ICON_COLOR[item.rarity] };
+}
+
+// Merge a canonical catalog item with its display chrome. id/name/description/
+// type/rarity/price + booster effect/value/duration ALL come from the catalog.
+function toShopItem(item: CoreShopItem): ShopItem {
+  return {
+    id: item.id,
+    name: item.name,
+    description: item.description,
+    type: item.type as ItemType,
+    rarity: item.rarity,
+    price: item.price,
+    boosterEffect: item.boosterEffect as BoosterEffect | undefined,
+    boosterValue: item.boosterValue,
+    boosterDuration: item.boosterDuration,
+    ...chromeFor(item),
+  };
+}
+
+const FEATURED_ITEMS: ShopItem[] = CORE_FEATURED_ITEMS.map(toShopItem);
+
+const COSMETIC_ITEMS: ShopItem[] = CORE_COSMETIC_ITEMS.map(toShopItem);
+
+const BOOSTER_ITEMS: ShopItem[] = CORE_BOOSTER_ITEMS.map(toShopItem);
 
 // ══════════════════════════════════════════
 // ── Premium Store Items ──
@@ -226,30 +325,22 @@ const FANG_IAP_PACKS: FangPack[] = [
 ];
 
 // ══════════════════════════════════════════
-// ── New shop SKUs (2026-06-02) ──
-// Frontend mirror of the 4 new catalog entries the backend agent is shipping.
-// Ids match the backend canonical list so /api/shop/purchase resolves price
-// server-side. UI-only metadata (Icon, color) lives here.
+// ── New shop SKUs — DERIVED FROM THE CANONICAL CATALOG ──
 // ══════════════════════════════════════════
+// The "New this week" row used to carry orphan ids (mastery_hint_pack,
+// streak_shield_3pack, ninny_voice_skin) that did not exist server-side. Now
+// pulled by canonical id so /api/shop/purchase resolves price + type. The
+// catalog blocks voice_ninny_classic + boost_mastery_hint_pack as "coming
+// soon" — their chrome carries comingSoon:true so the card shows the locked
+// "Soon" treatment and never reaches a server error.
 const NEW_SKUS: ShopItem[] = [
-  { id: "mastery_hint_pack", name: "Mastery Hint Pack", description: "5 hints to use on any Mastery question", type: "booster", rarity: "rare", price: 300, Icon: Lightning, iconWeight: "fill", iconColor: "#FACC15", boosterEffect: "fifty_fifty", boosterValue: 5, boosterDuration: 5 },
-  { id: "streak_shield_3pack", name: "Streak Shield 3-Pack", description: "Three Streak Shields. Protects three missed days.", type: "booster", rarity: "epic", price: 400, Icon: Shield, iconWeight: "fill", iconColor: "#A855F7", boosterEffect: "streak_shield", boosterValue: 0, boosterDuration: 3 },
-  { id: "ninny_voice_skin", name: "Ninny Voice Skin", description: "Unlock a fresh voice for Ninny's reads", type: "frame", rarity: "epic", price: 500, Icon: Sparkle, iconWeight: "fill", iconColor: "#A855F7" },
-];
+  CORE_BOOSTER_ITEMS.find((i) => i.id === "boost_mastery_hint_pack")!,
+  CORE_BOOSTER_ITEMS.find((i) => i.id === "boost_streak_shield_3pack")!,
+  CORE_VOICE_SKINS.find((i) => i.id === "voice_ninny_classic")!,
+].map(toShopItem);
 
 // 10 Avatar Auras rendered as a sub-grid under the "New this week" section.
-const AVATAR_AURAS: ShopItem[] = [
-  { id: "aura_solar",   name: "Solar Aura",   description: "Warm golden halo",         type: "frame", rarity: "rare",      price: 200, Icon: Sphere, iconWeight: "fill", iconColor: "#FACC15" },
-  { id: "aura_aurora",  name: "Aurora Aura",  description: "Shifting borealis ring",   type: "frame", rarity: "epic",      price: 350, Icon: Rainbow, iconWeight: "fill", iconColor: "#A855F7" },
-  { id: "aura_storm",   name: "Storm Aura",   description: "Crackling lightning ring", type: "frame", rarity: "epic",      price: 350, Icon: Lightning, iconWeight: "fill", iconColor: "#60A5FA" },
-  { id: "aura_emerald", name: "Emerald Aura", description: "Lush emerald glow",        type: "frame", rarity: "rare",      price: 200, Icon: Heart, iconWeight: "fill", iconColor: "#22C55E" },
-  { id: "aura_rose",    name: "Rose Aura",    description: "Soft rose-quartz shimmer", type: "frame", rarity: "rare",      price: 200, Icon: Heart, iconWeight: "fill", iconColor: "#FB7185" },
-  { id: "aura_void",    name: "Void Aura",    description: "Pulsing dark-matter ring", type: "frame", rarity: "legendary", price: 400, Icon: CircleNotch, iconWeight: "bold", iconColor: "#A855F7" },
-  { id: "aura_amber",   name: "Amber Aura",   description: "Slow amber pulse",         type: "frame", rarity: "rare",      price: 250, Icon: Fire, iconWeight: "fill", iconColor: "#F97316" },
-  { id: "aura_frost",   name: "Frost Aura",   description: "Crystalline frost ring",   type: "frame", rarity: "rare",      price: 250, Icon: Snowflake, iconWeight: "regular", iconColor: "#7DD3FC" },
-  { id: "aura_ember",   name: "Ember Aura",   description: "Drifting ember sparks",    type: "frame", rarity: "epic",      price: 350, Icon: Flame, iconWeight: "fill", iconColor: "#F97316" },
-  { id: "aura_lunar",   name: "Lunar Aura",   description: "Silver moonlight halo",    type: "frame", rarity: "legendary", price: 400, Icon: StarFour, iconWeight: "fill", iconColor: "#E8EAF2" },
-];
+const AVATAR_AURAS: ShopItem[] = CORE_AVATAR_AURAS.map(toShopItem);
 
 // ══════════════════════════════════════════
 // ── Shop V2 — Identity & Status Pack (2026-06-03) ──
@@ -267,25 +358,26 @@ const AVATAR_AURAS: ShopItem[] = [
 interface UsernameEffectSKU extends ShopItem {
   effect: UsernameEffect;
 }
-const USERNAME_EFFECTS: UsernameEffectSKU[] = [
-  { id: "name_fx_rainbow",      name: "Rainbow Shimmer", description: "Animated rainbow shimmer across your username", type: "username_effect", rarity: "rare",      price: 1500, Icon: Rainbow,    iconWeight: "fill",                          effect: "rainbow"     },
-  { id: "name_fx_fire",         name: "Fire Effect",     description: "Flickering flames trace your username",         type: "username_effect", rarity: "rare",      price: 2000, Icon: Fire,       iconWeight: "fill", iconColor: "#F97316",    effect: "fire"        },
-  { id: "name_fx_holographic",  name: "Holographic",     description: "Iridescent holographic sweep over your username", type: "username_effect", rarity: "epic",      price: 3000, Icon: Sphere,     iconWeight: "fill", iconColor: "#A855F7",    effect: "holographic" },
-  { id: "name_fx_gold",         name: "Gold Sheen",      description: "Polished gold sheen on every letter",           type: "username_effect", rarity: "epic",      price: 2500, Icon: Medal,      iconWeight: "fill", iconColor: "#FFD700",    effect: "gold"        },
-  { id: "name_fx_glitch",       name: "Glitch",          description: "Digital glitch distortion on your username",    type: "username_effect", rarity: "epic",      price: 3500, Icon: Lightning,  iconWeight: "fill", iconColor: "#60A5FA",    effect: "glitch"      },
-  { id: "name_fx_galaxy",       name: "Galaxy Shimmer",  description: "Drifting galaxy starfield inside your letters", type: "username_effect", rarity: "legendary", price: 5000, Icon: Sparkle,    iconWeight: "fill", iconColor: "#A855F7",    effect: "galaxy"      },
-];
+// The `effect` value the AnimatedUsername preview reads is derived from the
+// canonical id: every username effect is `name_fx_<effect>`. id/name/price all
+// come from the catalog.
+const USERNAME_EFFECT_MAP: Record<string, UsernameEffect> = {
+  name_fx_rainbow: "rainbow",
+  name_fx_fire: "fire",
+  name_fx_holographic: "holographic",
+  name_fx_gold: "gold",
+  name_fx_glitch: "glitch",
+  name_fx_galaxy: "galaxy",
+};
+const USERNAME_EFFECTS: UsernameEffectSKU[] = CORE_USERNAME_EFFECTS.map((i) => ({
+  ...toShopItem(i),
+  effect: USERNAME_EFFECT_MAP[i.id] ?? "none",
+}));
 
-// 5 premium Fang banners (animated, high price, Fang-only). Ids match the
-// `animated_banner` entries in packages/lionade-core/src/constants/shop-catalog.ts
-// so /api/shop/purchase resolves price + type server-side.
-const PREMIUM_FANG_BANNERS: ShopItem[] = [
-  { id: "banner_interstellar", name: "Interstellar", description: "Drifting star particles across deep space",  type: "animated_banner", rarity: "epic",      price: 3000, Icon: Sparkle,    iconWeight: "fill",                       },
-  { id: "banner_aurora",       name: "Aurora",       description: "Northern lights gradient flowing edge to edge", type: "animated_banner", rarity: "epic",      price: 3500, Icon: Rainbow,    iconWeight: "fill", iconColor: "#22D3EE"  },
-  { id: "banner_ink_splash",   name: "Ink Splash",   description: "Animated ink drops blooming across the banner", type: "animated_banner", rarity: "epic",      price: 4000, Icon: CircleNotch,iconWeight: "bold", iconColor: "#94A3B8"  },
-  { id: "banner_honeycomb",    name: "Honeycomb",    description: "Geometric honeycomb pattern with soft shimmer", type: "animated_banner", rarity: "epic",      price: 4500, Icon: Diamond,    iconWeight: "fill", iconColor: "#FACC15"  },
-  { id: "banner_tidewave",     name: "Tidewave",     description: "Gentle ocean wave motion across the banner",    type: "animated_banner", rarity: "legendary", price: 5000, Icon: Heart,      iconWeight: "fill", iconColor: "#22C55E"  },
-];
+// 5 premium Fang banners (animated, high price, Fang-only) — derived from the
+// canonical `animated_banner` entries so /api/shop/purchase resolves price +
+// type server-side.
+const PREMIUM_FANG_BANNERS: ShopItem[] = CORE_ANIMATED_BANNERS.map(toShopItem);
 
 // 4 cash-premium banners (USD only — Stripe IAP)
 const CASH_PREMIUM_BANNERS: PremiumItem[] = [
@@ -517,6 +609,9 @@ function CosmeticCard({ item, owned, equipped = false, canAfford, onBuy, onEquip
             <Icon size={40} weight={item.iconWeight ?? "fill"} color={item.iconColor ?? "currentColor"} aria-hidden="true" />
           </div>
           <div className="flex items-center gap-1.5">
+            {item.comingSoon && (
+              <span className="text-[9px] uppercase tracking-widest font-bold px-2 py-0.5 rounded-full bg-white/5 text-cream/40 border border-white/10">Soon</span>
+            )}
             {equipped && (
               <span className="text-[9px] uppercase tracking-widest font-bold px-2 py-0.5 rounded-full bg-green-500/20 text-green-300 border border-green-500/30">Equipped</span>
             )}
@@ -527,10 +622,24 @@ function CosmeticCard({ item, owned, equipped = false, canAfford, onBuy, onEquip
         <p className="shop-card-desc text-cream/55 text-xs mb-4 leading-relaxed">{item.description}</p>
         <div className="flex items-center justify-between mt-auto pt-2 gap-3 flex-wrap">
           <div className="flex items-center gap-1.5 flex-shrink-0">
-            <img src={cdnUrl("/F.png")} alt="Fangs" className="w-5 h-5 object-contain" />
-            <span className="font-bebas text-lg text-gold">{formatCoins(item.price)}</span>
+            {item.comingSoon ? (
+              <span className="font-bebas text-lg text-cream/40 tracking-wide">Soon</span>
+            ) : (
+              <>
+                <img src={cdnUrl("/F.png")} alt="Fangs" className="w-5 h-5 object-contain" />
+                <span className="font-bebas text-lg text-gold">{formatCoins(item.price)}</span>
+              </>
+            )}
           </div>
-          {owned && isCosmetic && onEquip ? (
+          {item.comingSoon ? (
+            <button
+              disabled
+              aria-disabled="true"
+              className="flex-shrink-0 px-3.5 py-1.5 rounded-lg text-xs font-bold bg-white/5 text-cream/40 border border-white/10 cursor-not-allowed"
+            >
+              Coming Soon
+            </button>
+          ) : owned && isCosmetic && onEquip ? (
             <button
               onClick={onEquip}
               className={`flex-shrink-0 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${equipped ? "border border-green-500/40 text-green-400 hover:bg-green-500/10" : "border border-electric/30 text-electric hover:bg-electric/10"}`}
@@ -574,6 +683,17 @@ function BoosterCard({ item, quantityOwned, canAfford, onBuy }: { item: ShopItem
             <span className={`text-[9px] uppercase tracking-widest font-bold px-2 py-0.5 rounded-full ${r.badge}`}>{item.rarity}</span>
           </div>
           <p className="shop-card-desc text-cream/55 text-xs mb-3 leading-relaxed">{item.description}</p>
+          {item.comingSoon ? (
+            // Server blocks this booster with "This item is coming soon" — show a
+            // locked affordance instead of a buy button that errors out.
+            <button
+              disabled
+              aria-disabled="true"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-white/5 text-cream/40 border border-white/10 cursor-not-allowed"
+            >
+              Coming Soon
+            </button>
+          ) : (
           <div className="flex items-center gap-2 flex-wrap">
             <button onClick={() => onBuy(1)} disabled={canAfford !== true}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${canAfford === true ? "gold-btn shop-btn-pulse" : canAfford === false ? "bg-gray-600/20 text-gray-500 cursor-not-allowed border border-gray-600/20" : "bg-white/5 text-cream/40 border border-white/10 cursor-wait"}`}>
@@ -584,6 +704,7 @@ function BoosterCard({ item, quantityOwned, canAfford, onBuy }: { item: ShopItem
               <img src={cdnUrl("/F.png")} alt="Fangs" className="w-5 h-5 object-contain" /> {formatCoins(bulkPrice)} &middot; Buy x5 <span className="text-green-400 text-[10px]">(save 10%)</span>
             </button>
           </div>
+          )}
         </div>
         {quantityOwned > 0 && (
           <div className="absolute top-3 right-3 flex items-center gap-1 bg-electric/10 border border-electric/20 rounded-full px-2.5 py-0.5">
@@ -1150,6 +1271,10 @@ export default function ShopPage() {
   const ownedBoosters = inventory.filter((o) => { const item = [...BOOSTER_ITEMS, ...FEATURED_ITEMS, ...NEW_SKUS].find((i) => i.id === o.itemId); return item && item.type === "booster"; });
   const allItems: ShopItem[] = [...COSMETIC_ITEMS, ...BOOSTER_ITEMS, ...FEATURED_ITEMS, ...NEW_SKUS, ...AVATAR_AURAS, ...USERNAME_EFFECTS, ...PREMIUM_FANG_BANNERS];
   const findItem = (id: string) => allItems.find((i) => i.id === id);
+  // Drops + Trending render a plain Buy button with no coming-soon gate, so
+  // exclude server-blocked items from those pools (voice_ninny_classic +
+  // boost_mastery_hint_pack). allItems itself stays complete for inventory.
+  const purchasablePool: ShopItem[] = allItems.filter((i) => !i.comingSoon);
 
   // ── Today's Drops (deterministic-by-UTC-date, rotates daily) ──
   // Pool = every Fang-priced SKU on the page. The helper filters out founder
@@ -1162,10 +1287,10 @@ export default function ShopPage() {
     // ShopItem is a structural superset (adds Icon/iconColor/etc.), so we
     // cast through CoreShopItem for the filter pass and return the matching
     // local objects to preserve Icon/iconColor for rendering.
-    const pool = allItems as unknown as CoreShopItem[];
+    const pool = purchasablePool as unknown as CoreShopItem[];
     const picked = pickTodaysDrops(pool, new Date(), 5);
     const pickedIds = new Set(picked.map((p) => p.id));
-    return allItems.filter((i) => pickedIds.has(i.id));
+    return purchasablePool.filter((i) => pickedIds.has(i.id));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [utcDateKey]);
 
@@ -1180,7 +1305,7 @@ export default function ShopPage() {
   const trendingIds: string[] = trendingData?.ok ? (trendingData.data?.trending ?? []) : [];
   const trendingItems: ShopItem[] = useMemo(() => {
     const live = trendingIds
-      .map((id) => allItems.find((i) => i.id === id))
+      .map((id) => purchasablePool.find((i) => i.id === id))
       .filter((i): i is ShopItem => !!i);
     if (live.length >= 3) return live.slice(0, 3);
     // Early-days fallback: union live results with a hand-picked set of
@@ -1621,7 +1746,7 @@ export default function ShopPage() {
                       <div className="flex items-center justify-between mt-auto pt-2 gap-3">
                         <div className="flex items-center gap-1.5">
                           <img src={cdnUrl("/F.png")} alt="Fangs" className="w-5 h-5 object-contain" />
-                          <span className="font-bebas text-base text-gold">200 to 400</span>
+                          <span className="font-bebas text-base text-gold">{formatCoins(Math.min(...AVATAR_AURAS.map((a) => a.price)))} to {formatCoins(Math.max(...AVATAR_AURAS.map((a) => a.price)))}</span>
                         </div>
                         <a href="#avatar-auras" className="px-3 py-1.5 rounded-lg text-xs font-bold border border-purple-500/40 text-purple-300 hover:bg-purple-500/10 transition-all">Browse</a>
                       </div>

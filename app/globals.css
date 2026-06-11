@@ -5316,6 +5316,164 @@ html.light .space-bg-container { display: none; }
   .au-fire { transform: none !important; }
 }
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   Shop V2 — Cosmetic Frames / Auras / Banners / Name Colors (2026-06-09)
+   GPU-only (transform / opacity / filter / background-position). Consumed by
+   components/Avatar.tsx and the profile banner strip. Visual maps live in
+   lib/cosmetics/cosmetic-styles.ts. Each family degrades to a static state
+   under the single prefers-reduced-motion guard at the bottom of this block.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* --- Frame rings (animate the ring glow / pulse via box-shadow is costly, so
+       these animate opacity / filter on the inert ring span instead) --- */
+.cos-frame-fire,
+.cos-frame-crystal,
+.cos-frame-gold,
+.cos-frame-diamond,
+.cos-frame-neon,
+.cos-frame-starfield {
+  will-change: opacity, filter;
+}
+.cos-frame-fire   { animation: cos-frame-flicker 1.6s ease-in-out infinite; }
+.cos-frame-crystal{ animation: cos-frame-breathe 4s ease-in-out infinite; }
+.cos-frame-gold   { animation: cos-frame-breathe 5s ease-in-out infinite; }
+.cos-frame-diamond{ animation: cos-frame-breathe 4.5s ease-in-out infinite; }
+.cos-frame-neon   { animation: cos-frame-pulse 2.4s ease-in-out infinite; }
+.cos-frame-starfield { animation: cos-frame-breathe 6s ease-in-out infinite; }
+
+@keyframes cos-frame-flicker {
+  0%, 100% { opacity: 1;    filter: saturate(1); }
+  45%      { opacity: 0.82; filter: saturate(1.3); }
+  70%      { opacity: 0.94; filter: saturate(1.1); }
+}
+@keyframes cos-frame-breathe {
+  0%, 100% { opacity: 0.85; }
+  50%      { opacity: 1; }
+}
+@keyframes cos-frame-pulse {
+  0%, 100% { opacity: 0.8;  filter: brightness(1); }
+  50%      { opacity: 1;    filter: brightness(1.35); }
+}
+
+/* --- Aura halos (animate transform: scale + opacity on the blurred span) --- */
+.cos-aura-pulse,
+.cos-aura-flicker,
+.cos-aura-swirl,
+.cos-aura-prismatic {
+  will-change: transform, opacity;
+}
+.cos-aura-pulse    { animation: cos-aura-pulse-kf 4.5s ease-in-out infinite; }
+.cos-aura-flicker  { animation: cos-aura-flicker-kf 1.8s ease-in-out infinite; }
+.cos-aura-swirl    { animation: cos-aura-swirl-kf 9s linear infinite; }
+.cos-aura-prismatic{ animation: cos-aura-pulse-kf 4s ease-in-out infinite, cos-aura-hue 6s linear infinite; }
+
+@keyframes cos-aura-pulse-kf {
+  0%, 100% { transform: scale(1);    opacity: 0.75; }
+  50%      { transform: scale(1.08); opacity: 1; }
+}
+@keyframes cos-aura-flicker-kf {
+  0%, 100% { transform: scale(1.02); opacity: 0.9; }
+  40%      { transform: scale(1);    opacity: 0.7; }
+  65%      { transform: scale(1.05); opacity: 1; }
+}
+@keyframes cos-aura-swirl-kf {
+  0%   { transform: rotate(0deg)   scale(1.04); opacity: 0.8; }
+  50%  { transform: rotate(180deg) scale(1.1);  opacity: 1; }
+  100% { transform: rotate(360deg) scale(1.04); opacity: 0.8; }
+}
+@keyframes cos-aura-hue {
+  0%   { filter: blur(6px) hue-rotate(0deg); }
+  100% { filter: blur(6px) hue-rotate(360deg); }
+}
+
+/* --- Banner fills (animate background-position only — GPU friendly) --- */
+.cos-banner-flow,
+.cos-banner-sheen,
+.cos-banner-drift,
+.cos-banner-bloom,
+.cos-banner-shimmer,
+.cos-banner-flicker {
+  will-change: background-position, opacity;
+}
+.cos-banner-flow    { animation: cos-banner-flow-kf 9s ease-in-out infinite; }
+.cos-banner-sheen   { animation: cos-banner-sheen-kf 6s ease-in-out infinite; }
+.cos-banner-drift   { animation: cos-banner-drift-kf 24s linear infinite; }
+.cos-banner-bloom   { animation: cos-banner-bloom-kf 8s ease-in-out infinite; }
+.cos-banner-shimmer { animation: cos-banner-shimmer-kf 7s ease-in-out infinite; }
+.cos-banner-flicker { animation: cos-banner-flicker-kf 5s ease-in-out infinite; }
+
+@keyframes cos-banner-flow-kf {
+  0%, 100% { background-position: 0% 50%; }
+  50%      { background-position: 100% 50%; }
+}
+@keyframes cos-banner-sheen-kf {
+  0%   { background-position: 0% 50%; }
+  100% { background-position: 250% 50%; }
+}
+@keyframes cos-banner-drift-kf {
+  0%   { background-position: 0% 0%, 0% 0%, 0% 0%, 0% 0%, 0% 0%; }
+  100% { background-position: 200% 0%, -200% 0%, 200% 0%, 0% 0%, 0% 0%; }
+}
+@keyframes cos-banner-bloom-kf {
+  0%, 100% { background-position: 0% 0%, 100% 100%, 0% 0%; opacity: 0.92; }
+  50%      { background-position: 100% 100%, 0% 0%, 0% 0%; opacity: 1; }
+}
+@keyframes cos-banner-shimmer-kf {
+  0%, 100% { background-position: 0px 0px, 0px 0px, 0% 0%; opacity: 0.9; }
+  50%      { background-position: 40px 40px, -40px 40px, 0% 0%; opacity: 1; }
+}
+@keyframes cos-banner-flicker-kf {
+  0%, 100% { background-position: 0% 50%;   opacity: 1; }
+  48%      { background-position: 100% 50%; opacity: 0.88; }
+  52%      { background-position: 100% 50%; opacity: 1; }
+}
+
+/* --- Name colors (gradient-clip text; animate background-position) --- */
+.cos-name-aurora,
+.cos-name-gold,
+.cos-name-fire {
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+          background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  will-change: background-position;
+}
+.cos-name-aurora { animation: cos-name-shift 5s linear infinite; }
+.cos-name-gold   { animation: cos-name-sweep 3.6s ease-in-out infinite; }
+.cos-name-fire   { animation: cos-name-shift 3s linear infinite; }
+
+@keyframes cos-name-shift {
+  0%   { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+@keyframes cos-name-sweep {
+  0%   { background-position: 0% 50%; }
+  100% { background-position: 250% 50%; }
+}
+
+/* --- prefers-reduced-motion: keep the color/ring/fill, kill the motion --- */
+@media (prefers-reduced-motion: reduce) {
+  .cos-frame-fire, .cos-frame-crystal, .cos-frame-gold,
+  .cos-frame-diamond, .cos-frame-neon, .cos-frame-starfield,
+  .cos-aura-pulse, .cos-aura-flicker, .cos-aura-swirl, .cos-aura-prismatic,
+  .cos-banner-flow, .cos-banner-sheen, .cos-banner-drift,
+  .cos-banner-bloom, .cos-banner-shimmer, .cos-banner-flicker,
+  .cos-name-aurora, .cos-name-gold, .cos-name-fire {
+    animation: none !important;
+  }
+  .cos-banner-flow, .cos-banner-sheen, .cos-banner-drift,
+  .cos-banner-bloom, .cos-banner-shimmer, .cos-banner-flicker,
+  .cos-name-aurora, .cos-name-gold, .cos-name-fire {
+    background-position: 0% 50% !important;
+  }
+  .cos-aura-pulse, .cos-aura-flicker, .cos-aura-swirl, .cos-aura-prismatic {
+    transform: none !important;
+    opacity: 0.85 !important;
+  }
+  .cos-aura-prismatic { filter: blur(6px) !important; }
+}
+
 @keyframes roardle-shake {
   0%, 100% { transform: translateX(0); }
   20% { transform: translateX(-6px); }

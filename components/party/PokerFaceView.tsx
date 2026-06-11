@@ -128,6 +128,11 @@ export default function PokerFaceView({
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [ninnyMsg, setNinnyMsg] = useState<string | null>("Read the room. Trust no face.");
+  // ONE dedicated live region for the reveal result. Set exactly once per round
+  // (keyed on round id via revealAnnounceRef in refreshDetail) so the 1.5s polls
+  // never re-announce. Cleared on round adoption.
+  const [revealAnnounce, setRevealAnnounce] = useState<string | null>(null);
+  const revealAnnounceRef = useRef<string | null>(null);
   const [timeLeft, setTimeLeft] = useState(0);
   const [decideLeft, setDecideLeft] = useState(DECIDE_SECONDS);
   // True when the presenter's decide window expired and the client auto-locked
@@ -262,6 +267,7 @@ export default function PokerFaceView({
     setAutoLocked(false);
     setMyCallLocal(null);
     setDetail(null);
+    setRevealAnnounce(null);
   }, []);
 
   // Outgoing pokerface broadcasts ride the SUBSCRIBED channel (fast ws push).
@@ -432,8 +438,41 @@ export default function PokerFaceView({
       );
     } else if (r.phase === "reveal") {
       setNinnyMsg(r.reveal?.is_lie ? "It was a LIE. Who fell for it?" : "It was the TRUTH. The doubters got played by an honest face.");
+      // Mirror the outcome into the dedicated SR live region — fires exactly
+      // once per round (revealAnnounceRef gate). The verdict card flip, the
+      // green "RIGHT" rows and the presenter sweep banner are all visual, so
+      // screen-reader users get the equivalent here: verdict, my own result,
+      // and how the presenter did.
+      if (r.reveal && revealAnnounceRef.current !== r.id) {
+        revealAnnounceRef.current = r.id;
+        const calls = r.reveal.calls;
+        const total = calls.length;
+        const fooled = calls.filter((c) => !c.correct).length;
+        const verdict = r.reveal.is_lie ? "It was a lie." : "It was true.";
+        const presenterWho = r.is_presenter ? "You" : r.presenter_username ?? "The presenter";
+        let presenterPart: string;
+        if (total === 0) {
+          presenterPart = "";
+        } else if (fooled === total) {
+          presenterPart = ` Clean sweep. ${presenterWho} fooled all ${total}.`;
+        } else if (fooled === 0) {
+          presenterPart = ` Everyone read ${r.is_presenter ? "you" : presenterWho}.`;
+        } else {
+          presenterPart = ` ${presenterWho} fooled ${fooled} of ${total}.`;
+        }
+        let myPart = "";
+        if (!r.is_presenter) {
+          const myCallRow = calls.find((c) => c.user_id === meUserId);
+          if (myCallRow) {
+            myPart = myCallRow.correct
+              ? " You called it right."
+              : " You got fooled.";
+          }
+        }
+        setRevealAnnounce(`${verdict}${myPart}${presenterPart}`.trim());
+      }
     }
-  }, [inperson]);
+  }, [inperson, meUserId]);
 
   useEffect(() => {
     if (!roundId) return;
@@ -675,8 +714,13 @@ export default function PokerFaceView({
             }}
           />
           <div
-            className="w-12 h-12 rounded-full border-2 animate-spin relative z-10"
-            style={{ borderColor: `${ACCENT}40`, borderTopColor: ACCENT }}
+            className={`w-12 h-12 rounded-full border-2 relative z-10 ${reduced ? "" : "animate-spin"}`}
+            // Reduced motion: full solid accent ring (no spinning "gap" to imply motion).
+            style={
+              reduced
+                ? { borderColor: ACCENT }
+                : { borderColor: `${ACCENT}40`, borderTopColor: ACCENT }
+            }
           />
         </div>
         <p className="font-bebas text-2xl text-cream/70 tracking-[0.3em]">DEALING THE CARD</p>
@@ -855,10 +899,13 @@ export default function PokerFaceView({
                 </div>
 
                 {/* Decide timer — 30s after the countdown clears. On expiry the
-                    client auto-locks TRUE (no server timeout exists). */}
+                    client auto-locks TRUE (no server timeout exists). No
+                    aria-live: at 500ms ticks a polite region re-announces the
+                    countdown every second (chatter). The value rides aria-label
+                    so it's queryable without spamming. */}
                 <p
                   className={`font-bebas text-sm tracking-[0.3em] text-center ${decideLeft <= 5 ? "text-red-400" : "text-cream/55"}`}
-                  aria-live="polite"
+                  aria-label={`Lock your play. ${decideLeft} seconds left.`}
                 >
                   LOCK YOUR PLAY · {decideLeft}s
                 </p>
@@ -1125,20 +1172,20 @@ export default function PokerFaceView({
             transition={{ duration: reduced ? 0 : 0.35, ease: [0.16, 1, 0.3, 1] }}
             className="space-y-4"
           >
+            {/* Dedicated SR live region — announces the outcome exactly once per
+                round (revealAnnounce only changes once, keyed on round id). The
+                verdict card below carries NO aria-live: it re-renders on the
+                1.5s poll AND mutates across the pause/flip/open stages, so a
+                live region there would re-fire the result repeatedly. */}
+            <span role="status" aria-live="assertive" className="sr-only">
+              {revealAnnounce}
+            </span>
+
             {/* The verdict card. Back face = face-down card; front face = TRUE
-                or LIE. rotateY transform only (GPU); reduced = instant swap. */}
-            <div
-              className="flex flex-col items-center gap-4 py-4"
-              role="status"
-              aria-live="polite"
-              aria-label={
-                revealStage === "pause"
-                  ? "Revealing the verdict"
-                  : round.reveal.is_lie
-                    ? "It was a lie"
-                    : "It was true"
-              }
-            >
+                or LIE. rotateY transform only (GPU); reduced = instant swap.
+                aria-hidden: the verdict glyph is decorative — the SR live
+                region above carries the spoken outcome. */}
+            <div className="flex flex-col items-center gap-4 py-4" aria-hidden="true">
               <div style={{ perspective: 900 }}>
                 {reduced ? (
                   <div
@@ -1456,7 +1503,7 @@ export default function PokerFaceView({
         <button
           type="button"
           onClick={() => setInviteOpen(true)}
-          className="fixed bottom-24 right-4 md:bottom-8 md:right-8 z-30 px-3.5 py-2 rounded-full font-bebas text-xs tracking-wider transition-all active:scale-95"
+          className="fixed bottom-24 right-4 md:bottom-8 md:right-8 z-30 inline-flex items-center min-h-[44px] px-3.5 py-2.5 rounded-full font-bebas text-xs tracking-wider transition-all active:scale-95"
           style={{
             background: "rgba(16,12,26,0.9)",
             border: `1px solid ${ACCENT}73`,

@@ -31,6 +31,20 @@ const VALID_SLOTS = [
 ] as const;
 type Slot = (typeof VALID_SLOTS)[number];
 
+// Migration 063: per-slot equipped pointers on profiles are the render
+// source of truth (mirroring equipped_username_effect). Each slot below maps
+// to a single nullable text column holding the equipped item id (null = none).
+// Equipping writes the id; unequipping writes null. animated_banner shares
+// the equipped_banner column with banner (a profile has one banner equipped).
+const SLOT_COLUMN: Partial<Record<Slot, string>> = {
+  username_effect: "equipped_username_effect",
+  frame: "equipped_frame",
+  name_color: "equipped_name_color",
+  banner: "equipped_banner",
+  animated_banner: "equipped_banner",
+  avatar_aura: "equipped_avatar_aura",
+};
+
 export const dynamic = "force-dynamic";
 
 export async function POST(req: NextRequest) {
@@ -69,30 +83,31 @@ export async function POST(req: NextRequest) {
   }
 
   // ── Unequip path ──
-  // Empty/null cosmetic_id clears the slot. Currently only username_effect
-  // has a dedicated column on profiles; other slots clear all `equipped=true`
-  // rows of the matching item_type in user_inventory.
+  // Empty/null cosmetic_id clears the slot. Column-backed slots (migration
+  // 063) write null to the matching profiles.equipped_<slot> column — that
+  // column is the render source of truth. We also clear any stale
+  // user_inventory.equipped bookkeeping for the matching item_type.
   if (!cosmeticId) {
-    if (slot === "username_effect") {
+    const column = SLOT_COLUMN[slot as Slot];
+    if (column) {
       const { error } = await supabaseAdmin
         .from("profiles")
-        .update({ equipped_username_effect: null })
+        .update({ [column]: null })
         .eq("id", userId);
       if (error) {
-        console.error("[me/equip] username_effect unequip:", error.message);
+        console.error(`[me/equip] ${slot} unequip:`, error.message);
         return NextResponse.json({ error: "Failed to unequip" }, { status: 500 });
       }
-      return NextResponse.json({ ok: true, slot, cosmetic_id: null });
     }
-    // Generic slot unequip: clear `equipped=true` rows of this item_type.
-    // Slot names map 1:1 to item_type for the simple cases.
+    // Clear `equipped=true` rows of this item_type for inventory bookkeeping.
+    // banner/animated_banner both clear their own item_type rows; the single
+    // equipped_banner column already enforces one-banner-equipped.
     const itemType = slot === "animated_banner" ? "animated_banner"
                    : slot === "banner"          ? "banner"
                    : slot === "frame"           ? "frame"
                    : slot === "background"      ? "background"
                    : slot === "name_color"      ? "name_color"
-                   : slot === "avatar_aura"     ? "frame" // auras are frame-typed in the catalog
-                   : slot === "voice_skin"      ? "frame"
+                   : slot === "avatar_aura"     ? "avatar_aura"
                    : null;
     if (itemType) {
       await supabaseAdmin
@@ -136,30 +151,27 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // Special-case the most common slot (username_effect) by writing to a
-  // dedicated profiles.equipped_username_effect column. Other slots use
-  // the user_inventory.equipped flag (existing pattern) but only when
-  // the cosmetic is in user_inventory — earned + founder badges have
-  // their own display logic on the profile page.
-  if (slot === "username_effect") {
+  // Column-backed slots (migration 063): write the equipped item id to the
+  // matching profiles.equipped_<slot> column — the single render source of
+  // truth. Writing one id implicitly unequips any prior item in that slot
+  // (the column holds a single id). We ALSO keep user_inventory.equipped
+  // bookkeeping in sync for any legacy reader.
+  const column = SLOT_COLUMN[slot as Slot];
+  if (column) {
     const { error } = await supabaseAdmin
       .from("profiles")
-      .update({ equipped_username_effect: cosmeticId })
+      .update({ [column]: cosmeticId })
       .eq("id", userId);
     if (error) {
-      console.error("[me/equip] username_effect update:", error.message);
+      console.error(`[me/equip] ${slot} update:`, error.message);
       return NextResponse.json({ error: "Failed to equip" }, { status: 500 });
     }
-    return NextResponse.json({ ok: true, slot, cosmetic_id: cosmeticId });
   }
 
-  // Generic slot — unequip everything else of the same type in inventory,
-  // then equip this one. Earned + founder cosmetics aren't tracked in
-  // user_inventory so this is a no-op for them; the equip-state for
-  // those slots will follow in a V3 schema if Sam wants per-slot equip
-  // tracking for earned items.
+  // Inventory bookkeeping — unequip other items of the same type, equip this
+  // one. Earned + founder cosmetics aren't tracked in user_inventory so this
+  // is a no-op for them; their render state comes from the profiles column.
   if (inv.data) {
-    // Find this item's type to scope the unequip
     const { data: catalogItem } = await supabaseAdmin
       .from("user_inventory")
       .select("item_type")
@@ -169,7 +181,6 @@ export async function POST(req: NextRequest) {
     const itemType = catalogItem?.item_type ?? null;
 
     if (itemType) {
-      // Unequip all other items of the same type in this user's inventory
       await supabaseAdmin
         .from("user_inventory")
         .update({ equipped: false })
@@ -177,7 +188,6 @@ export async function POST(req: NextRequest) {
         .eq("item_type", itemType)
         .neq("item_id", cosmeticId);
     }
-    // Equip this one
     await supabaseAdmin
       .from("user_inventory")
       .update({ equipped: true })

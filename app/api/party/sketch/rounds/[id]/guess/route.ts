@@ -17,6 +17,7 @@ import { isRoomMember } from "@/lib/party/room-state";
 import { sketchGuessPoints } from "@/lib/party/scoring";
 import { buildWordMask, matchLetterPositions } from "@/lib/party/letter-reveal";
 import { awardSketchFangs } from "@/lib/party/sketch-fangs";
+import { completeSketchRound, isSketchDrawingExpired } from "@/lib/party/sketch-advance";
 import {
   sketchGuessFangs,
   SKETCH_LETTER_FANGS,
@@ -35,10 +36,22 @@ export async function POST(
 
   const { data: round } = await supabaseAdmin
     .from("sketch_rounds")
-    .select("id, room_id, word, drawer_user_id, ended_at")
+    .select("id, room_id, word, drawer_user_id, ended_at, started_at, duration_sec, phase")
     .eq("id", params.id)
     .maybeSingle();
   if (!round) return NextResponse.json({ error: "Round not found" }, { status: 404 });
+
+  // Resilience backstop: if the drawing deadline (started_at + duration_sec) has
+  // already passed but the drawer AND host both backgrounded their tabs (so
+  // neither timer fired /complete), the round is stuck. A guesser is exactly the
+  // still-active player who would keep poking this route — complete it inline
+  // here (CAS-guarded, scores once) so any guess after the window self-heals the
+  // room, then reject this guess as past the deadline. Mirrors the bluff/trivia
+  // GET lazy-advance, adapted to Sketchy's broadcast-driven (no round-poll) model.
+  if (!round.ended_at && isSketchDrawingExpired(round)) {
+    await completeSketchRound(supabaseAdmin, round);
+    return NextResponse.json({ error: "Round ended" }, { status: 410 });
+  }
   if (round.ended_at) return NextResponse.json({ error: "Round ended" }, { status: 410 });
   if (!round.word || round.word === "__pending__") {
     return NextResponse.json({ error: "Drawer hasn't picked a word yet" }, { status: 409 });

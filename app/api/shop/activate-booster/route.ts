@@ -53,6 +53,11 @@ export async function POST(req: NextRequest) {
     }
     const boosterEffect = item.boosterEffect;
     const boosterValue = item.boosterValue ?? 1;
+    // uses_remaining comes from the catalog's boosterDuration so multi-use
+    // boosters (e.g. the Streak Shield 3-pack) grant the right number of uses.
+    // Single-use boosters keep duration 1. Floor at 1 so a missing/0 duration
+    // never yields a dead booster.
+    const usesRemaining = Math.max(1, item.boosterDuration ?? 1);
 
     // 1. Check inventory
     const { data: invItem, error: invErr } = await supabaseAdmin
@@ -93,7 +98,7 @@ export async function POST(req: NextRequest) {
       item_id: itemId,
       booster_effect: boosterEffect,
       booster_value: boosterValue,
-      uses_remaining: 1,
+      uses_remaining: usesRemaining,
       activated_at: new Date().toISOString(),
     });
 

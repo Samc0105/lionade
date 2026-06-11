@@ -14,7 +14,8 @@ import { Medal, Diamond, DiamondsFour, Users, CheckCircle, Sword, Trophy, Megaph
 import { toastError, toastSuccess } from "@/lib/toast";
 import CountUp from "@/components/CountUp";
 import AnimatedUsername from "@/components/AnimatedUsername";
-import { resolveRowUsernameEffect } from "@/lib/use-username-effect";
+import Avatar from "@/components/Avatar";
+import { resolveRowUsernameEffect, resolveRowNameColor } from "@/lib/use-username-effect";
 import PastLobbiesPanel from "@/components/social/PastLobbiesPanel";
 
 // ── Types ────────────────────────────────────────────────────
@@ -29,6 +30,9 @@ interface Friend {
   unreadCount: number;
   // Shop V2 — optional. Server populates when /api/social/friends includes it.
   equipped_username_effect?: string | null;
+  equipped_frame?: string | null;
+  equipped_name_color?: string | null;
+  equipped_avatar_aura?: string | null;
 }
 
 interface PendingRequest {
@@ -38,6 +42,9 @@ interface PendingRequest {
   arena_elo: number;
   friendshipId: string;
   equipped_username_effect?: string | null;
+  equipped_frame?: string | null;
+  equipped_name_color?: string | null;
+  equipped_avatar_aura?: string | null;
 }
 
 interface OutgoingRequest {
@@ -880,10 +887,10 @@ export default function SocialPage() {
                       <div key={req.friendshipId} className="flex items-center gap-3 p-2 rounded-lg"
                         aria-label={`Friend request from ${req.username}`}
                         style={{ background: "rgba(255,255,255,0.03)" }}>
-                        <img src={avatarFor(req.username, req.avatar_url)} alt={req.username} className="w-8 h-8 rounded-full object-cover flex-shrink-0" />
+                        <Avatar url={avatarFor(req.username, req.avatar_url)} alt={req.username} size="sm" frame={req.equipped_frame} aura={req.equipped_avatar_aura} />
                         <div className="flex-1 min-w-0">
                           <p className="text-cream text-xs font-semibold truncate">
-                            <AnimatedUsername username={req.username} effect={resolveRowUsernameEffect(req.equipped_username_effect)} size="sm" />
+                            <AnimatedUsername username={req.username} effect={resolveRowUsernameEffect(req.equipped_username_effect)} nameColor={resolveRowNameColor(req.equipped_name_color)} size="sm" />
                           </p>
                           <p className="text-[10px] inline-flex items-center gap-1" style={{ color: tier.color }}>
                             <tier.Icon size={12} weight="fill" color={tier.color} aria-hidden="true" />
@@ -985,9 +992,9 @@ export default function SocialPage() {
                           : "1px solid rgba(255,255,255,0.06)",
                       }}
                     >
-                      <img src={avatarFor(friend.username, friend.avatar_url)} alt={friend.username} className="w-9 h-9 rounded-full object-cover" />
+                      <Avatar url={avatarFor(friend.username, friend.avatar_url)} alt={friend.username} size="xs" frame={friend.equipped_frame} aura={friend.equipped_avatar_aura} />
                       {friend.is_online && (
-                        <div className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-green-400 border-2 border-[#04080F] social-online-dot" />
+                        <div className="absolute bottom-0 right-0 z-10 w-3 h-3 rounded-full bg-green-400 border-2 border-[#04080F] social-online-dot" />
                       )}
                     </div>
 
@@ -995,7 +1002,7 @@ export default function SocialPage() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
                         <span className="text-cream text-sm font-semibold truncate">
-                          <AnimatedUsername username={friend.username} effect={resolveRowUsernameEffect(friend.equipped_username_effect)} size="sm" />
+                          <AnimatedUsername username={friend.username} effect={resolveRowUsernameEffect(friend.equipped_username_effect)} nameColor={resolveRowNameColor(friend.equipped_name_color)} size="sm" />
                         </span>
                         <span className="text-[9px] font-bold px-1.5 py-0.5 rounded inline-flex items-center gap-1" style={{
                           color: tier.color,

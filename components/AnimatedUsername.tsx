@@ -26,6 +26,7 @@
  */
 
 import type { CSSProperties } from "react";
+import { getNameColorStyle } from "@/lib/cosmetics/cosmetic-styles";
 
 export type UsernameEffect =
   | "none"
@@ -39,6 +40,11 @@ export type UsernameEffect =
 export interface AnimatedUsernameProps {
   username: string | null | undefined;
   effect?: UsernameEffect | null;
+  /**
+   * Equipped name-color cosmetic id (Shop V2). Applied ONLY when `effect` is
+   * "none" — an equipped username effect always wins. Unknown ids are ignored.
+   */
+  nameColor?: string | null;
   size?: "sm" | "md" | "lg";
   /** Extra Tailwind / utility classes (e.g. `truncate`, `font-bebas`). */
   className?: string;
@@ -73,9 +79,19 @@ export function resolveUsernameEffect(value: unknown): UsernameEffect {
   }
 }
 
+/**
+ * Resolve a name-color value (DB column, SWR row, equipped object) into a
+ * known cosmetic id, or null for unknown / empty. Pure; safe in render.
+ */
+export function resolveNameColor(value: unknown): string | null {
+  if (typeof value !== "string" || value === "" || value === "none") return null;
+  return getNameColorStyle(value) ? value : null;
+}
+
 export default function AnimatedUsername({
   username,
   effect = "none",
+  nameColor = null,
   size = "md",
   className = "",
   style,
@@ -85,8 +101,45 @@ export default function AnimatedUsername({
   const safeEffect: UsernameEffect = effect ?? "none";
   const Tag = as;
 
-  // `none` returns a plain span — inherits parent color, zero animation cost.
+  // `none` effect → fall back to the equipped name color (if any), else plain.
   if (safeEffect === "none") {
+    const nc = resolveNameColor(nameColor);
+    const ncStyle = nc ? getNameColorStyle(nc) : null;
+
+    if (ncStyle) {
+      // Gradient name colors clip a moving gradient to the text; solid colors
+      // just set `color`. The animated class (when present) only animates
+      // background-position / is reduced-motion safe in globals.css.
+      if (ncStyle.gradient) {
+        return (
+          <Tag
+            className={`${ncStyle.animClass ?? ""} ${SIZE_CLASS[size]} ${className}`}
+            style={{
+              background: ncStyle.gradient,
+              backgroundClip: "text",
+              WebkitBackgroundClip: "text",
+              color: "transparent",
+              WebkitTextFillColor: "transparent",
+              ...style,
+            }}
+            data-name-color={nc}
+          >
+            {safeName}
+          </Tag>
+        );
+      }
+      return (
+        <Tag
+          className={`${SIZE_CLASS[size]} ${className}`}
+          style={{ color: ncStyle.color, ...style }}
+          data-name-color={nc}
+        >
+          {safeName}
+        </Tag>
+      );
+    }
+
+    // No effect, no name color → plain span, inherits parent color.
     return (
       <Tag className={`${SIZE_CLASS[size]} ${className}`} style={style}>
         {safeName}

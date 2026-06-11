@@ -1,45 +1,91 @@
 "use client";
 
 /**
- * useEquippedUsernameEffect — Shop V2 (2026-06-03)
+ * useEquippedCosmetics — Shop V2 cosmetic resolver (2026-06-09)
  *
- * Small hook + helper for resolving the user's CURRENT equipped username
- * effect. V1 reads the effect via SWR from `/api/cosmetics/owned`, filtering
- * for `type: 'username_effect'` + `equipped: true`.
+ * SWR hook for the LOGGED-IN user's CURRENTLY equipped cosmetics. Reads from
+ * `GET /api/cosmetics/owned`, which (post backend fix) returns BOTH:
+ *   - `items: [{ itemId, itemType, equipped }]`  (per-item ownership)
+ *   - `equipped: { effect, frame, name_color, banner, avatar_aura }`
+ *     (resolved equipped ids — the fast path this hook prefers)
  *
- * Fallback chain (defensive — backend may not have shipped yet):
- *   1. `/api/cosmetics/owned` response with `equipped` flag
- *   2. `profiles.equipped_username_effect` column (if it lands later)
- *   3. "none" (no animation; renders raw username)
+ * Defensive fallback chain (backend / migration may lag):
+ *   1. `data.equipped.*`            (preferred — resolved ids)
+ *   2. `data.items[].equipped`      (derive from the per-item list)
+ *   3. null / "none"                (nothing equipped — renders plain)
  *
- * For non-self renders (leaderboard rows, friends, party players) the calling
- * surface should pass `effect` directly from whatever the API returns. This
- * hook is intentionally scoped to the LOGGED-IN user — we don't fan out a
- * per-row SWR cascade. Cross-user equipped effects ride on the existing list
- * endpoints (see leaderboard / social / party fetchers) and need a small
- * backend follow-up.
+ * Scope: this is the SELF hook only. For OTHER users (leaderboard rows, party
+ * players, friends) the calling surface passes the equipped values straight
+ * from whatever the list API returns (equipped_frame / equipped_name_color /
+ * equipped_avatar_aura / equipped_username_effect). We do NOT fan out a per-row
+ * SWR cascade. Use the `resolveRow*` helpers below for those.
+ *
+ * `useEquippedUsernameEffect()` is preserved (delegates to the new hook) so all
+ * existing callers keep working unchanged.
  */
 
 import useSWR from "swr";
 import { useAuth } from "@/lib/auth";
 import { apiGet } from "@/lib/api-client";
-import { resolveUsernameEffect, type UsernameEffect } from "@/components/AnimatedUsername";
+import {
+  resolveUsernameEffect,
+  resolveNameColor,
+  type UsernameEffect,
+} from "@/components/AnimatedUsername";
 
 interface OwnedCosmetic {
-  id: string;
-  type: string;
-  source: "purchased" | "founder" | "earned";
+  // Backend uses `itemId` / `itemType`; tolerate legacy `id` / `type` too.
+  itemId?: string;
+  itemType?: string;
+  id?: string;
+  type?: string;
   equipped?: boolean;
-  // Effect-bearing cosmetics map their id 1:1 to the AnimatedUsername effect
-  // (rainbow / fire / holographic / gold / glitch / galaxy).
   effect?: string;
 }
 
-interface OwnedResponse {
-  items: OwnedCosmetic[];
+interface EquippedResolved {
+  effect?: string | null;
+  frame?: string | null;
+  name_color?: string | null;
+  banner?: string | null;
+  avatar_aura?: string | null;
 }
 
-export function useEquippedUsernameEffect(): UsernameEffect {
+interface OwnedResponse {
+  items?: OwnedCosmetic[];
+  equipped?: EquippedResolved;
+}
+
+export interface EquippedCosmetics {
+  effect: UsernameEffect;
+  nameColor: string | null;
+  frame: string | null;
+  aura: string | null;
+  banner: string | null;
+}
+
+const EMPTY: EquippedCosmetics = {
+  effect: "none",
+  nameColor: null,
+  frame: null,
+  aura: null,
+  banner: null,
+};
+
+function itemId(c: OwnedCosmetic): string {
+  return c.itemId ?? c.id ?? "";
+}
+function itemType(c: OwnedCosmetic): string {
+  return c.itemType ?? c.type ?? "";
+}
+
+/** Normalize a possibly-null id, treating "" / "none" as not-equipped. */
+function normId(v: string | null | undefined): string | null {
+  if (!v || v === "none") return null;
+  return v;
+}
+
+export function useEquippedCosmetics(): EquippedCosmetics {
   const { user } = useAuth();
   const key = user?.id ? `cosmetics-owned/${user.id}` : null;
 
@@ -50,32 +96,77 @@ export function useEquippedUsernameEffect(): UsernameEffect {
       dedupingInterval: 60_000,
       keepPreviousData: true,
       revalidateOnFocus: true,
-      // Hard-fail gracefully — if the endpoint 404s while backend is in flight,
-      // we just return "none" and nobody crashes.
+      // If the endpoint 404s while backend is in flight, return EMPTY — no crash.
       shouldRetryOnError: false,
     },
   );
 
-  if (!data?.ok || !data.data?.items) return "none";
+  if (!data?.ok || !data.data) return EMPTY;
+  const payload = data.data;
 
-  const equipped = data.data.items.find(
-    (c) => c.type === "username_effect" && c.equipped === true,
-  );
-  if (!equipped) return "none";
+  // ── Preferred path: the resolved `equipped` object ──
+  const eq = payload.equipped;
+  if (eq) {
+    const effectRaw =
+      normId(eq.effect)?.replace(/^name_fx_/, "").replace(/_premium$/, "") ?? null;
+    return {
+      effect: resolveUsernameEffect(effectRaw),
+      nameColor: resolveNameColor(normId(eq.name_color)),
+      frame: normId(eq.frame),
+      aura: normId(eq.avatar_aura),
+      banner: normId(eq.banner),
+    };
+  }
 
-  // Prefer the explicit `effect` field if backend supplies it; otherwise the
-  // cosmetic `id` (canonical `name_fx_rainbow`, optionally `_premium` suffix)
-  // encodes the effect name. Strip the `name_fx_` prefix + any `_premium`
-  // suffix so both the Fang and cash variants resolve to the same effect.
-  const raw = equipped.effect
-    ?? equipped.id.replace(/^name_fx_/, "").replace(/_premium$/, "");
-  return resolveUsernameEffect(raw);
+  // ── Fallback: derive from the per-item ownership list ──
+  if (!payload.items) return EMPTY;
+  const equippedItems = payload.items.filter((c) => c.equipped === true);
+  if (equippedItems.length === 0) return EMPTY;
+
+  const byType = (t: string) => equippedItems.find((c) => itemType(c) === t);
+
+  const effectItem = byType("username_effect");
+  const effectRaw = effectItem
+    ? (effectItem.effect ??
+        itemId(effectItem).replace(/^name_fx_/, "").replace(/_premium$/, ""))
+    : null;
+
+  const nameItem = byType("name_color");
+  // Banner can be `banner` or `animated_banner`.
+  const bannerItem =
+    byType("banner") ?? byType("animated_banner");
+  const frameItem = byType("frame");
+  const auraItem = byType("avatar_aura");
+
+  return {
+    effect: resolveUsernameEffect(effectRaw),
+    nameColor: resolveNameColor(nameItem ? itemId(nameItem) : null),
+    frame: frameItem ? normId(itemId(frameItem)) : null,
+    aura: auraItem ? normId(itemId(auraItem)) : null,
+    banner: bannerItem ? normId(itemId(bannerItem)) : null,
+  };
 }
 
 /**
- * Resolve a per-row effect supplied by a list API (leaderboard / friends /
- * party). Pure function; safe in render. Anything unrecognized → "none".
+ * Preserved legacy export — delegates to the new hook so existing callers
+ * (profile header, leaderboard self-row, etc.) keep working unchanged.
+ */
+export function useEquippedUsernameEffect(): UsernameEffect {
+  return useEquippedCosmetics().effect;
+}
+
+/**
+ * Resolve a per-row username effect supplied by a list API (leaderboard /
+ * friends / party). Pure; safe in render. Unknown → "none".
  */
 export function resolveRowUsernameEffect(value: unknown): UsernameEffect {
   return resolveUsernameEffect(value);
+}
+
+/**
+ * Resolve a per-row name-color id supplied by a list API. Pure; safe in render.
+ * Unknown / empty → null.
+ */
+export function resolveRowNameColor(value: unknown): string | null {
+  return resolveNameColor(value);
 }

@@ -11,7 +11,13 @@ import { cdnUrl } from "@/lib/cdn";
 import { avatarFor } from "@/lib/avatar";
 import { Crown, Medal, Sword, TrendUp, Trophy, Brain, Fire, Crosshair, UsersThree, ArrowUp } from "@phosphor-icons/react";
 import AnimatedUsername from "@/components/AnimatedUsername";
-import { resolveRowUsernameEffect, useEquippedUsernameEffect } from "@/lib/use-username-effect";
+import Avatar from "@/components/Avatar";
+import {
+  resolveRowUsernameEffect,
+  resolveRowNameColor,
+  useEquippedUsernameEffect,
+  useEquippedCosmetics,
+} from "@/lib/use-username-effect";
 
 type Filter = "duel" | "competitive" | "squad" | "weekly";
 
@@ -31,12 +37,17 @@ interface LbEntry {
   coins_this_week: number;
   elo?: number;
   equipped_username_effect?: string | null;
+  equipped_frame?: string | null;
+  equipped_name_color?: string | null;
+  equipped_avatar_aura?: string | null;
 }
 
 export default function LeaderboardPage() {
   const router = useRouter();
   const { user } = useAuth();
   const myEffect = useEquippedUsernameEffect();
+  // Self cosmetics — prefer live self values over the row when I appear in a list.
+  const myCosmetics = useEquippedCosmetics();
   const [filter, setFilter] = useState<Filter>("duel");
   const [entries, setEntries] = useState<LbEntry[]>([]);
   const [loading, setLoading] = useState(true);
@@ -56,6 +67,10 @@ export default function LeaderboardPage() {
           streak: d.streak,
           coins_this_week: 0,
           elo: d.elo,
+          equipped_username_effect: (d as any).equipped_username_effect ?? null,
+          equipped_frame: (d as any).equipped_frame ?? null,
+          equipped_name_color: (d as any).equipped_name_color ?? null,
+          equipped_avatar_aura: (d as any).equipped_avatar_aura ?? null,
         })));
         setLoading(false);
       }).catch(() => setLoading(false));
@@ -166,6 +181,7 @@ export default function LeaderboardPage() {
                       <AnimatedUsername
                         username={personAboveMe.username}
                         effect={resolveRowUsernameEffect(personAboveMe.equipped_username_effect)}
+                        nameColor={resolveRowNameColor(personAboveMe.equipped_name_color)}
                         size="sm"
                       />
                     </span>{" "}
@@ -224,15 +240,22 @@ export default function LeaderboardPage() {
                   <div className="relative flex flex-col items-center pt-8">
                     <div className="rounded-2xl border border-gray-400/30 bg-gradient-to-b from-gray-400/10 to-transparent w-full pt-3 pb-4 px-2 flex flex-col items-center">
                       <div className="mb-2"><Medal size={28} weight="fill" color="#9CA3AF" aria-hidden="true" /></div>
-                      <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-gray-400 mb-2 will-change-transform"
+                      <div className="mb-2 rounded-full border-2 border-gray-400 will-change-transform"
                         aria-label={topThree[1]?.username ? `${topThree[1]?.username}'s avatar` : undefined}
                         style={{ boxShadow: "0 0 18px #9CA3AF55" }}>
-                        <img src={avatarFor(topThree[1]?.username, topThree[1]?.avatar_url)} alt={topThree[1]?.username ?? ""} className="w-14 h-14 rounded-full object-cover" />
+                        <Avatar
+                          url={avatarFor(topThree[1]?.username, topThree[1]?.avatar_url)}
+                          alt={topThree[1]?.username ?? ""}
+                          size="md"
+                          frame={topThree[1]?.user_id === user?.id ? myCosmetics.frame : topThree[1]?.equipped_frame}
+                          aura={topThree[1]?.user_id === user?.id ? myCosmetics.aura : topThree[1]?.equipped_avatar_aura}
+                        />
                       </div>
                       <p className="text-cream text-xs font-bold text-center truncate w-full">
                         <AnimatedUsername
                           username={topThree[1]?.username}
                           effect={topThree[1]?.user_id === user?.id ? myEffect : resolveRowUsernameEffect(topThree[1]?.equipped_username_effect)}
+                          nameColor={topThree[1]?.user_id === user?.id ? myCosmetics.nameColor : resolveRowNameColor(topThree[1]?.equipped_name_color)}
                           size="sm"
                         />
                       </p>
@@ -250,15 +273,22 @@ export default function LeaderboardPage() {
                         <div className="absolute -top-6 left-1/2 -translate-x-1/2 animate-float will-change-transform">
                           <Crown size={40} weight="fill" color="#FFD700" aria-hidden="true" />
                         </div>
-                        <div className="w-20 h-20 rounded-full overflow-hidden border-4 border-gold mb-2 shadow-xl shadow-gold/30"
+                        <div className="rounded-full border-4 border-gold mb-2 shadow-xl shadow-gold/30"
                           aria-label={topThree[0]?.username ? `${topThree[0]?.username}'s avatar` : undefined}>
-                          <img src={avatarFor(topThree[0]?.username, topThree[0]?.avatar_url)} alt={topThree[0]?.username ?? ""} className="w-20 h-20 rounded-full object-cover" />
+                          <Avatar
+                            url={avatarFor(topThree[0]?.username, topThree[0]?.avatar_url)}
+                            alt={topThree[0]?.username ?? ""}
+                            size="lg"
+                            frame={topThree[0]?.user_id === user?.id ? myCosmetics.frame : topThree[0]?.equipped_frame}
+                            aura={topThree[0]?.user_id === user?.id ? myCosmetics.aura : topThree[0]?.equipped_avatar_aura}
+                          />
                         </div>
                       </div>
                       <p className="text-gold text-sm font-bold text-center">
                         <AnimatedUsername
                           username={topThree[0]?.username}
                           effect={topThree[0]?.user_id === user?.id ? myEffect : resolveRowUsernameEffect(topThree[0]?.equipped_username_effect)}
+                          nameColor={topThree[0]?.user_id === user?.id ? myCosmetics.nameColor : resolveRowNameColor(topThree[0]?.equipped_name_color)}
                           size="sm"
                         />
                       </p>
@@ -273,15 +303,22 @@ export default function LeaderboardPage() {
                   <div className="relative flex flex-col items-center pt-12">
                     <div className="rounded-2xl border border-amber-600/30 bg-gradient-to-b from-amber-600/10 to-transparent w-full pt-3 pb-4 px-2 flex flex-col items-center">
                       <div className="mb-2"><Medal size={26} weight="fill" color="#B45309" aria-hidden="true" /></div>
-                      <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-amber-600 mb-2 will-change-transform"
+                      <div className="mb-2 rounded-full border-2 border-amber-600 will-change-transform"
                         aria-label={topThree[2]?.username ? `${topThree[2]?.username}'s avatar` : undefined}
                         style={{ boxShadow: "0 0 14px #B4530944" }}>
-                        <img src={avatarFor(topThree[2]?.username, topThree[2]?.avatar_url)} alt={topThree[2]?.username ?? ""} className="w-12 h-12 rounded-full object-cover" />
+                        <Avatar
+                          url={avatarFor(topThree[2]?.username, topThree[2]?.avatar_url)}
+                          alt={topThree[2]?.username ?? ""}
+                          size="md"
+                          frame={topThree[2]?.user_id === user?.id ? myCosmetics.frame : topThree[2]?.equipped_frame}
+                          aura={topThree[2]?.user_id === user?.id ? myCosmetics.aura : topThree[2]?.equipped_avatar_aura}
+                        />
                       </div>
                       <p className="text-cream text-xs font-bold text-center truncate w-full">
                         <AnimatedUsername
                           username={topThree[2]?.username}
                           effect={topThree[2]?.user_id === user?.id ? myEffect : resolveRowUsernameEffect(topThree[2]?.equipped_username_effect)}
+                          nameColor={topThree[2]?.user_id === user?.id ? myCosmetics.nameColor : resolveRowNameColor(topThree[2]?.equipped_name_color)}
                           size="sm"
                         />
                       </p>
@@ -317,14 +354,20 @@ export default function LeaderboardPage() {
                         {isTop ? renderRankIcon(entry.rank, 24)
                           : <span className={`font-bebas text-2xl leading-none ${isMe ? "text-electric" : "text-cream/50"}`}>{entry.rank}</span>}
                       </div>
-                      <div className={`w-10 h-10 rounded-full overflow-hidden border-2 flex-shrink-0
+                      <div className={`rounded-full border-2 flex-shrink-0
                         ${isMe ? "border-electric" : isTop ? "" : "border-electric/20"}`}
                         aria-label={`${entry.username}'s avatar`}
                         style={{
                           borderColor: isTop && !isMe ? rankBorderColor[entry.rank] : undefined,
                           boxShadow: isMe ? "0 0 16px rgba(0, 212, 255, 0.45)" : undefined,
                         }}>
-                        <img src={avatarFor(entry.username, entry.avatar_url)} alt={entry.username} className="w-10 h-10 rounded-full object-cover" />
+                        <Avatar
+                          url={avatarFor(entry.username, entry.avatar_url)}
+                          alt={entry.username}
+                          size="xs"
+                          frame={isMe ? myCosmetics.frame : entry.equipped_frame}
+                          aura={isMe ? myCosmetics.aura : entry.equipped_avatar_aura}
+                        />
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
@@ -332,6 +375,7 @@ export default function LeaderboardPage() {
                             <AnimatedUsername
                               username={entry.username}
                               effect={isMe ? myEffect : resolveRowUsernameEffect(entry.equipped_username_effect)}
+                              nameColor={isMe ? myCosmetics.nameColor : resolveRowNameColor(entry.equipped_name_color)}
                               size="sm"
                             />
                           </span>
@@ -400,15 +444,15 @@ export default function LeaderboardPage() {
                     <div className="w-10 flex-shrink-0 text-center">
                       <span className="font-bebas text-2xl leading-none text-gold">&mdash;</span>
                     </div>
-                    <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-gold flex-shrink-0"
+                    <div className="rounded-full border-2 border-gold flex-shrink-0"
                       aria-label={`${user.username}'s avatar`}
                       style={{ boxShadow: "0 0 16px rgba(255, 215, 0, 0.35)" }}>
-                      <img src={user.avatar} alt={user.username} className="w-10 h-10 rounded-full object-cover" />
+                      <Avatar url={user.avatar} alt={user.username} size="xs" frame={myCosmetics.frame} aura={myCosmetics.aura} />
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
                         <span className="font-bold text-sm truncate text-cream">
-                          <AnimatedUsername username={user.username} effect={myEffect} size="sm" />
+                          <AnimatedUsername username={user.username} effect={myEffect} nameColor={myCosmetics.nameColor} size="sm" />
                         </span>
                         <span className="text-[10px] font-bold tracking-[0.16em] bg-gold/20 text-gold px-2 py-0.5 rounded-full border border-gold/40 uppercase">You</span>
                       </div>

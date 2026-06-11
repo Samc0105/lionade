@@ -538,7 +538,7 @@ export async function getLeaderboard(limit = 10): Promise<{
     // Fallback: just return top profiles by total coins
     const { data: profiles } = await supabase
       .from("profiles")
-      .select("id, username, avatar_url, level, streak, coins, equipped_username_effect")
+      .select("id, username, avatar_url, level, streak, coins, equipped_username_effect, equipped_frame, equipped_name_color, equipped_avatar_aura")
       .neq("id", DEMO_USER_ID)
       // Settings overhaul 2026-06-11: only PUBLIC profiles appear on public
       // surfaces. 'friends' and 'private' are both non-public, so filter to
@@ -565,7 +565,7 @@ export async function getLeaderboard(limit = 10): Promise<{
 
   const { data: profiles } = await supabase
     .from("profiles")
-    .select("id, username, avatar_url, level, streak, equipped_username_effect, profile_visibility")
+    .select("id, username, avatar_url, level, streak, equipped_username_effect, equipped_frame, equipped_name_color, equipped_avatar_aura, profile_visibility")
     .in("id", topUserIds);
 
   // P0 trust-gap fix 2026-06-05: drop private profiles from the weekly

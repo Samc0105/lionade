@@ -27,6 +27,7 @@ import { requireAuth } from "@/lib/api-auth";
 import { pokerFaceRoundPoints } from "@/lib/party/scoring";
 import type { PokerFaceCall } from "@/lib/party/types";
 import { isRoomMember } from "@/lib/party/room-state";
+import { lazyAdvancePokerFace } from "@/lib/party/pokerface-advance";
 
 export async function GET(
   req: NextRequest,
@@ -36,16 +37,48 @@ export async function GET(
   if (auth instanceof NextResponse) return auth;
   const userId = auth.userId;
 
-  const { data: round } = await supabaseAdmin
-    .from("party_pokerface_rounds")
-    .select("*")
-    .eq("id", params.id)
-    .maybeSingle();
+  let round = (
+    await supabaseAdmin
+      .from("party_pokerface_rounds")
+      .select("*")
+      .eq("id", params.id)
+      .maybeSingle()
+  ).data;
   if (!round) return NextResponse.json({ error: "Round not found" }, { status: 404 });
 
   // Membership check prevents leaking card/claim/is_lie state to non-members.
   if (!(await isRoomMember(supabaseAdmin, round.room_id, userId))) {
     return NextResponse.json({ error: "Not a room member" }, { status: 403 });
+  }
+
+  // ── Lazy phase-advance (resilience backstop) ──────────────────────────────
+  // EVERY client polls this GET ~every 1.5s. If the current phase's server-side
+  // deadline has passed (computed from started_at/presented_at + the same
+  // windows the client timers use), advance it here — CAS-guarded, scoring
+  // exactly once on ->reveal. This self-heals a round whose presenter AND host
+  // AND interrogator all have backgrounded (timer-throttled) tabs, which would
+  // otherwise freeze the room forever. The POST routes remain the fast path; a
+  // race between them and this loses harmlessly (0-row CAS update => no score).
+  if (round.phase !== "reveal") {
+    const { data: roomCfg } = await supabaseAdmin
+      .from("party_rooms")
+      .select("settings")
+      .eq("id", round.room_id)
+      .maybeSingle();
+    const inperson = (roomCfg?.settings?.pf_mode ?? "inperson") !== "remote";
+    const callSeconds: number | null | undefined = roomCfg?.settings?.pf_vote_seconds;
+    const result = await lazyAdvancePokerFace(supabaseAdmin, round, { inperson, callSeconds });
+    if (result.advanced) {
+      // Re-read so the response below reflects the freshly-advanced phase +
+      // any fields the advance wrote (is_lie / claim_text / presented_at /
+      // ended_at). Falls back to the pre-advance row if the re-read whiffs.
+      const { data: fresh } = await supabaseAdmin
+        .from("party_pokerface_rounds")
+        .select("*")
+        .eq("id", params.id)
+        .maybeSingle();
+      if (fresh) round = fresh;
+    }
   }
 
   const isPresenter = round.presenter_user_id === userId;

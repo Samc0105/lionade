@@ -50,6 +50,12 @@ export interface PartyPlayer {
   // Shop V2 — optional, server-supplied. Used by AnimatedUsername in lobby /
   // scoreboard tiles. Null/missing = no effect (free user).
   equipped_username_effect?: string | null;
+  // Shop overhaul (migration 063) — per-slot equipped cosmetic ids, supplied
+  // alongside the username effect so party renderers can show frame / name
+  // color / aura on each player tile. Null/missing = none.
+  equipped_frame?: string | null;
+  equipped_name_color?: string | null;
+  equipped_avatar_aura?: string | null;
 }
 
 export interface PartyRoomState {

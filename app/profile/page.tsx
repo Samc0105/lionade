@@ -64,7 +64,9 @@ import {
 import dynamic from "next/dynamic";
 const ShareCard = dynamic(() => import("@/components/ShareCard"), { ssr: false });
 import AnimatedUsername from "@/components/AnimatedUsername";
-import { useEquippedUsernameEffect } from "@/lib/use-username-effect";
+import Avatar from "@/components/Avatar";
+import { useEquippedUsernameEffect, useEquippedCosmetics } from "@/lib/use-username-effect";
+import { getBannerStyle } from "@/lib/cosmetics/cosmetic-styles";
 
 // ── Types ────────────────────────────────────────────
 type Section =
@@ -355,8 +357,11 @@ const RARITY_TIERS: { id: "legendary" | "epic" | "rare" | "common"; label: strin
 function OverviewSection({ user, level, progress, xpToNext, coins, streak, xp, avatarUrl, statsReady, earnedBadges, allBadges, subjectStats, quizHistory, activity, loading, accuracy, totalQuestions, totalCorrect, duelsWon, refreshUser }: SharedProps) {
   const lockedBadges = allBadges.filter(b => !earnedBadges.some((e: any) => e.id === b.id));
   const [shareOpen, setShareOpen] = useState(false);
-  // Shop V2: equipped username effect for the overview hero header.
-  const usernameEffect = useEquippedUsernameEffect();
+  // Shop V2: ALL equipped cosmetics for the overview hero (self-view money moment).
+  const cosmetics = useEquippedCosmetics();
+  const usernameEffect = cosmetics.effect;
+  // Empty banner = the intentional default ambient interstellar gradient.
+  const bannerStyle = useMemo(() => getBannerStyle(cosmetics.banner), [cosmetics.banner]);
 
   // Group badges by rarity tier for the All Badges section.
   const earnedByTier = useMemo(() => {
@@ -420,51 +425,73 @@ function OverviewSection({ user, level, progress, xpToNext, coins, streak, xp, a
       `}</style>
 
       {/* Hero card */}
-      <Card className="relative overflow-hidden">
-        {/* Aurora glow (GPU only) */}
+      <Card className="relative overflow-hidden !p-0">
+        {/* Banner strip — full-bleed, clips to the card's rounded corners.
+            96px mobile / 140px desktop. Empty = default ambient interstellar
+            gradient (never a blank box). Animated by BANNER_STYLES id. */}
         <div
-          className="profile-aurora absolute -top-16 -right-16 w-80 h-80 rounded-full blur-3xl pointer-events-none"
-          style={{ background: "radial-gradient(circle, #4A90D9 0%, transparent 70%)" }}
           aria-hidden="true"
-        />
-        <div
-          className="profile-aurora absolute -bottom-24 -left-20 w-72 h-72 rounded-full blur-3xl pointer-events-none"
-          style={{ background: "radial-gradient(circle, #9B59B6 0%, transparent 70%)", animationDelay: "3s" }}
-          aria-hidden="true"
-        />
-
-        <button
-          type="button"
-          onClick={() => setShareOpen(true)}
-          aria-label="Share profile"
-          className="absolute top-3 right-3 z-20 inline-flex items-center gap-1.5 rounded-full border border-white/[0.1] bg-white/[0.04] hover:bg-white/[0.08] px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.25em] text-cream/70 hover:text-cream transition-colors"
+          className={`relative w-full h-24 sm:h-[140px] overflow-hidden ${cosmetics.banner ? (bannerStyle.animClass ?? "") : ""}`}
+          style={{
+            background: bannerStyle.background,
+            backgroundSize: cosmetics.banner ? bannerStyle.backgroundSize : undefined,
+          }}
         >
-          <ShareNetwork size={11} weight="fill" /> Share
-        </button>
+          {/* Soft scrim at the bottom so the avatar / text read cleanly. */}
+          <div
+            className="absolute inset-x-0 bottom-0 h-2/3 pointer-events-none"
+            style={{ background: "linear-gradient(to bottom, transparent, rgba(6,12,24,0.6))" }}
+          />
+        </div>
 
-        <div className="relative z-10 flex flex-col sm:flex-row items-center sm:items-start gap-6">
-          <div className="flex flex-col items-center gap-2 flex-shrink-0">
-            <div
-              className="profile-avatar-ring w-28 h-28 rounded-full overflow-hidden border-4 relative"
-              aria-label={`${user.username}'s avatar`}
-              style={{ borderColor: "#4A90D9" }}
-            >
-              <img src={avatarUrl} alt={user.username} className="w-full h-full object-cover" />
+        <div className="relative p-5 pt-0">
+          {/* Aurora glow (GPU only) */}
+          <div
+            className="profile-aurora absolute -top-16 -right-16 w-80 h-80 rounded-full blur-3xl pointer-events-none"
+            style={{ background: "radial-gradient(circle, #4A90D9 0%, transparent 70%)" }}
+            aria-hidden="true"
+          />
+          <div
+            className="profile-aurora absolute -bottom-24 -left-20 w-72 h-72 rounded-full blur-3xl pointer-events-none"
+            style={{ background: "radial-gradient(circle, #9B59B6 0%, transparent 70%)", animationDelay: "3s" }}
+            aria-hidden="true"
+          />
+
+          <button
+            type="button"
+            onClick={() => setShareOpen(true)}
+            aria-label="Share profile"
+            className="absolute top-3 right-3 z-20 inline-flex items-center gap-1.5 rounded-full border border-white/[0.1] bg-white/[0.04] hover:bg-white/[0.08] px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.25em] text-cream/70 hover:text-cream transition-colors"
+          >
+            <ShareNetwork size={11} weight="fill" /> Share
+          </button>
+
+          <div className="relative z-10 flex flex-col sm:flex-row items-center sm:items-start gap-6">
+            <div className="flex flex-col items-center gap-2 flex-shrink-0 -mt-12 sm:-mt-14">
+              {/* Avatar half-overlaps the banner's bottom edge, with equipped
+                  frame + aura cosmetics. */}
+              <Avatar
+                url={avatarUrl}
+                alt={user.username}
+                size="xl"
+                frame={cosmetics.frame}
+                aura={cosmetics.aura}
+                className="rounded-full ring-4 ring-navy"
+              />
+              <div
+                className="-mt-3 px-3 py-1 rounded-full font-bebas text-sm tracking-wider text-navy relative z-10"
+                style={{ background: "linear-gradient(135deg, #F0B429 0%, #B8960C 60%, #F0B429 100%)", boxShadow: "0 4px 12px rgba(240,180,41,0.35)" }}
+              >
+                LVL {level}
+              </div>
             </div>
-            <div
-              className="-mt-4 px-3 py-1 rounded-full font-bebas text-sm tracking-wider text-navy"
-              style={{ background: "linear-gradient(135deg, #F0B429 0%, #B8960C 60%, #F0B429 100%)", boxShadow: "0 4px 12px rgba(240,180,41,0.35)" }}
-            >
-              LVL {level}
-            </div>
-          </div>
 
           <div className="flex-1 text-center sm:text-left min-w-0">
             <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-cream/40 mb-1">
               Player Profile
             </p>
             <h1 className="font-bebas text-5xl text-cream tracking-wider leading-none mb-1">
-              <AnimatedUsername username={user.username} effect={usernameEffect} size="lg" className="font-bebas tracking-wider text-5xl" />
+              <AnimatedUsername username={user.username} effect={usernameEffect} nameColor={cosmetics.nameColor} size="lg" className="font-bebas tracking-wider text-5xl" />
             </h1>
             {user.displayName && user.displayName !== user.username && (
               <p className="text-cream/50 text-sm mb-3">{user.displayName}</p>
@@ -502,6 +529,7 @@ function OverviewSection({ user, level, progress, xpToNext, coins, streak, xp, a
                   style={{ width: statsReady ? `${progress}%` : "0%", background: "linear-gradient(90deg, #2D6BB5, #4A90D9, #6AABF0)", boxShadow: "0 0 10px #4A90D960" }} />
               </div>
             </div>
+          </div>
           </div>
         </div>
       </Card>

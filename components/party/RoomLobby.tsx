@@ -18,7 +18,7 @@ import { subscribeResilient } from "@/lib/realtime-resilient";
 import type { RealtimeChannel } from "@supabase/supabase-js";
 import type { PartyPlayer, PartyRoom } from "@/lib/party/types";
 import AnimatedUsername from "@/components/AnimatedUsername";
-import { resolveRowUsernameEffect } from "@/lib/use-username-effect";
+import { resolveRowUsernameEffect, resolveRowNameColor } from "@/lib/use-username-effect";
 
 const MAX_PLAYERS = 6;
 
@@ -168,6 +168,13 @@ export default function RoomLobby({ room, players, isHost, meUserId, roomCh, onG
   const [pfMode, setPfMode] = useState<"inperson" | "remote">("inperson");
   const [pfRotations, setPfRotations] = useState<number>(2);
   const [showRules, setShowRules] = useState(false);
+
+  // Trivia (Lightning Round) host settings (only sent when starting trivia).
+  // Question count maps 1:1 to trivia_round_count; answer speed stores the
+  // raw second value the start route clamps (5-30). Defaults mirror the
+  // backend defaults: 10 rounds / 12s answer window.
+  const [triviaRoundCount, setTriviaRoundCount] = useState<number>(10);
+  const [triviaAnswerSeconds, setTriviaAnswerSeconds] = useState<number>(12);
 
   // ── Perf pass 2026-06-10: pre-warm the Start → first-playable-frame path ──
   // 1) Idle-prefetch the lazy game-view chunks. page.tsx mounts them via
@@ -812,6 +819,14 @@ export default function RoomLobby({ room, players, isHost, meUserId, roomCh, onG
       ...(selectedGame === "pokerface"
         ? { settings: { pf_mode: pfMode, pf_rotations: pfRotations } }
         : {}),
+      ...(selectedGame === "trivia"
+        ? {
+            settings: {
+              trivia_round_count: triviaRoundCount,
+              trivia_answer_seconds: triviaAnswerSeconds,
+            },
+          }
+        : {}),
     });
     setStarting(false);
     if (!res.ok) {
@@ -1120,6 +1135,7 @@ export default function RoomLobby({ room, players, isHost, meUserId, roomCh, onG
                   <AnimatedUsername
                     username={p.username ?? "Player"}
                     effect={resolveRowUsernameEffect(p.equipped_username_effect)}
+                    nameColor={resolveRowNameColor(p.equipped_name_color)}
                     size="sm"
                   />
                   {isMe && <span className="text-cream/40 text-xs"> (you)</span>}
@@ -1468,6 +1484,86 @@ export default function RoomLobby({ room, players, isHost, meUserId, roomCh, onG
                 </ol>
               )}
             </div>
+          </div>
+        )}
+        {/* Lightning Round setup — question count + answer speed.
+            Host-only controls; everyone else sees the chosen values read-only
+            (mirrors the Poker Face block above, with Trivia's orange accent). */}
+        {selectedGame === "trivia" && (
+          <div className="mt-4 space-y-4">
+            <div>
+              <p className="font-bebas text-sm text-cream/60 tracking-[0.25em] mb-2">
+                QUESTIONS
+                <span className="text-cream/30 ml-2 normal-case tracking-normal">
+                  · {triviaRoundCount} this game
+                </span>
+              </p>
+              <div className="flex gap-2">
+                {[5, 10, 15].map((n) => {
+                  const on = triviaRoundCount === n;
+                  return (
+                    <button
+                      key={n}
+                      onClick={() => isHost && setTriviaRoundCount(n)}
+                      disabled={!isHost}
+                      className="flex-1 py-2.5 rounded-xl font-bebas text-base tracking-wider transition-all active:scale-95 disabled:cursor-not-allowed"
+                      style={{
+                        background: on
+                          ? "linear-gradient(135deg, rgba(255,107,53,0.2) 0%, rgba(255,107,53,0.05) 100%)"
+                          : "rgba(255,255,255,0.03)",
+                        border: on ? "1px solid rgba(255,107,53,0.6)" : "1px solid rgba(255,255,255,0.08)",
+                        color: on ? "#FFB089" : "rgba(238,244,255,0.6)",
+                        opacity: isHost || on ? 1 : 0.6,
+                      }}
+                    >
+                      {n}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div>
+              <p className="font-bebas text-sm text-cream/60 tracking-[0.25em] mb-2">
+                ANSWER SPEED
+                <span className="text-cream/30 ml-2 normal-case tracking-normal">
+                  · {triviaAnswerSeconds}s per question
+                </span>
+              </p>
+              <div className="grid grid-cols-3 gap-2">
+                {([
+                  { v: 20, label: "CHILL", sub: "20s" },
+                  { v: 12, label: "NORMAL", sub: "12s" },
+                  { v: 8, label: "BLITZ", sub: "8s" },
+                ]).map((opt) => {
+                  const on = triviaAnswerSeconds === opt.v;
+                  return (
+                    <button
+                      key={opt.v}
+                      onClick={() => isHost && setTriviaAnswerSeconds(opt.v)}
+                      disabled={!isHost}
+                      className="rounded-xl py-2.5 transition-all active:scale-[0.98] disabled:cursor-not-allowed"
+                      style={{
+                        background: on
+                          ? "linear-gradient(135deg, rgba(255,107,53,0.2) 0%, rgba(255,107,53,0.05) 100%)"
+                          : "rgba(255,255,255,0.03)",
+                        border: on ? "1px solid rgba(255,107,53,0.6)" : "1px solid rgba(255,255,255,0.08)",
+                        opacity: isHost || on ? 1 : 0.6,
+                      }}
+                    >
+                      <p className="font-bebas text-sm tracking-wider" style={{ color: on ? "#FFB089" : "rgba(238,244,255,0.7)" }}>
+                        {opt.label}
+                      </p>
+                      <p className="text-cream/45 text-[11px] font-syne mt-0.5 leading-snug">{opt.sub}</p>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <p className="text-cream/45 text-xs font-syne text-center">
+              Same question hits everyone at once. Fastest right answer banks the most points.
+            </p>
           </div>
         )}
         {!isHost && (
