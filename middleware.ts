@@ -396,6 +396,36 @@ const ROUTE_LIMITS: RouteLimit[] = [
     keyPrefix: "admin-read",
   },
 
+  // Account data-export — GDPR data-portability bundle. Server-side the route is
+  // gated to ONE export per 24h via an atomic claim, but the bundle is 8 tables
+  // and the response can be a multi-MB blob, so cap the request rate hard at
+  // 3/min/IP. Matches both GET (current method) and POST (future-proof) since the
+  // rule omits a method filter.
+  {
+    test: (p) => p === "/api/user/export",
+    max: 3,
+    windowMs: 60 * 1000,
+    keyPrefix: "user-export",
+  },
+  // Account lifecycle — destructive/irreversible mutations. Hard-delete
+  // (DELETE /api/user/account) and deactivate (POST /api/user/account/deactivate)
+  // share one tight bucket at 5/min/IP. The cancel-deletion subroute stays on the
+  // catch-all (this rule matches only the two exact paths/methods below).
+  {
+    test: (p) => p === "/api/user/account",
+    method: "DELETE",
+    max: 5,
+    windowMs: 60 * 1000,
+    keyPrefix: "user-account-lifecycle",
+  },
+  {
+    test: (p) => p === "/api/user/account/deactivate",
+    method: "POST",
+    max: 5,
+    windowMs: 60 * 1000,
+    keyPrefix: "user-account-lifecycle",
+  },
+
   // Catch-all for other API routes
   {
     test: (p) => p.startsWith("/api/"),
