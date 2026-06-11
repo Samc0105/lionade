@@ -25,7 +25,7 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 - ✅ Type errors: 14 → 0. `use-arena-rank.ts` repointed to real `/api/me/elo-rank` + `ApiResult` unwrap + web tier ladder + `totalRanked`. `use-arena-matches.ts` re-typed `ArenaMatchSummary` flat (matches `MatchRow`) + `ApiResult` unwrap + honest `[]` until a web list-route exists.
 - ✅ `app/arena.tsx` already uses real `arenaAPI` against `/api/arena/*`; ELO server-settled. Correct.
 - ✅ `app/(tabs)/compete.tsx` hub at structural parity (ELO hero, tier ring, modes list, leaderboard preview).
-- 🟡 **Duel drift FLAGGED:** `app/duel.tsx` is still a fake-68%-bot screen with client coin writes (violates no-bot ELO integrity). Web's duel is real matchmaking. Fix = repoint Compete "Duel" at the real arena flow + retire the bot. Filed §5.1.
+- ✅ **Duel drift RESOLVED (§5.1, 2026-06-11):** the fake-68%-bot `app/duel.tsx` (with its client-side `profiles.coins` + `coin_transactions` write) is GONE — replaced by a redirect shim into the real `app/arena.tsx` matchmaking. No bot, no client reward write. See the §5.1 block below.
 - ❌ Competitive mode screens (sabotage/zoom/spectrum/pin) + the realtime ELO/connectivity shell — NOT ported. Heavy per-mode realtime/Skia ports (Party-suite weight). Scoped OUT, scheduled as 4 sub-items (§5.2-§5.5). Poker Face stays on Party/compliance track.
 
 **DB/tables/routes/channels TOUCHED or READ by this §5 surface (for schema verification):**
@@ -48,6 +48,32 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 3. `competitive_matches.starts_at` (migration 059) + `forfeited_by` + the `voided`/`forfeited` status values (migration 058) must be present live before the §5.2-5.5 mode ports.
 
 **Chain:** `vp-ios` → (analyze web compete + competitive) → `ios-platform-bridge` (phantom-route + duel-bot drift) → `ios-shared-core` (confirmed real route = `/api/me/elo-rank`; arena uses shared `arenaAPI`) → `ios-dev-data` (both hook rewrites) → `ios-dev-realtime` (channel/Presence/AppState scoped to per-mode ports, not §5) → `ios-design-hig`+`ios-design-accessibility` (no UI delta) → `ios-qa-tester` → `ios-code-reviewer` → `ios-docs-writer` (CHANGELOG + vault Daily/2026-06-11.md) → `ios-parity-tracker` (this row).
+
+---
+
+## 2026-06-11: §5.1 — Duel integrity fix: fake bot retired, repointed to real Arena (iOS-only, LOCAL, not built)
+
+**Status:** ✅ Code ready + verified LOCALLY. `npx tsc --noEmit` = **0 errors**. `expo export --platform ios` clean (Hermes 8.93 MB). NOT built, NOT submitted. Committed on `main`, not pushed. Owner: `vp-ios`.
+
+**The integrity bug (from the §5 audit):** `app/duel.tsx` ran a SIMULATED opponent — a 5-entry `FAKE_OPPONENTS` array + `simulateOpponent()` at a hardcoded 68% win rate — and on a human "win" it wrote the prize CLIENT-SIDE: a read-modify-write to `profiles.coins` plus a `coin_transactions` insert (`type: "duel_win"`). Two violations: (1) a bot opponent breaks the no-bot ELO-integrity rule, and (2) a client-written reward is an exploit (any client can fabricate a win and bank Fangs). Web's duel is REAL matchmaking through the arena flow.
+
+**What was removed / repointed:**
+- `app/duel.tsx` — entire bot screen DELETED and replaced with a 38-line redirect shim: `useEffect → router.replace("/arena")`. No `FAKE_OPPONENTS`, no `simulateOpponent`, no question fetch, no `duels`/`profiles`/`coin_transactions` write. The `duel` route stays REGISTERED in `app/_layout.tsx` so existing deep links (notification `action_url` like `/duel/123`) resolve into real matchmaking instead of a dead/exploitable path.
+- `app/(tabs)/social.tsx` — the friends "Challenge to duel" context-menu action was `router.push(/duel?opponent=...)` (the bot screen ignored the param anyway). Repointed to `router.push("/arena")` → real ELO-matched matchmaking; the bot-targeting `?opponent=` param dropped.
+- `app/(tabs)/compete.tsx` — already pointed "Quick Match" at `/arena` (line 106). No change needed.
+- `components/BackButton.tsx` `/duel → /(tabs)/compete` parent mapping left intact (harmless; the shim redirects before back is reachable).
+
+**Canonical 1v1 = `app/arena.tsx`** (unchanged): `@lionade/core` `arenaAPI` → `/api/arena/queue` → `/match` → `/answer` → `/complete`; ELO (K=32) + Fang transfer settled SERVER-SIDE; honest `no_opponents` dead-end; richer results screen (real ELO delta + round-by-round). Nothing from the bot's UI was worth folding in — arena's results are strictly better.
+
+**Verification — NO client-side reward writes remain in the duel path:** grep of `app/duel.tsx` + `app/(tabs)/social.tsx` for `coins` / `coin_transactions` / `duel_win` / `simulateOpponent` / `FAKE_OPP` returns NOTHING but the documenting comment in the shim. `lib/hooks/use-wallet.ts` is read-only (SELECT + realtime sub on `coin_transactions`).
+
+**Dependency check (nothing else depended on the bot):** the only live entry points into the bot were `social.tsx` (repointed) and `compete.tsx` (already on arena). Notification deep-link `/duel/*` and the registered `Stack.Screen name="duel"` now resolve to the redirect. No imports of the removed `FAKE_OPPONENTS`/`simulateOpponent`/`persistResult` exist anywhere — they were file-local.
+
+**Sign-offs:** `ios-qa-tester` ✅ (Compete "Duel" + social challenge + deep link all land on real matchmaking; no path reaches a bot; honest `no_opponents` dead-end preserved; no client reward write). `ios-code-reviewer` ✅ (zero client-side reward writes + no dead bot code remain; shim is minimal, no-flash-of-zero N/A). `ios-security-auth` + `ios-security-auditor` ✅ (the client-write reward exploit is eliminated from the duel path). `ios-design-hig` ✅ (entry UI: redirect is instant + uses the standard gold spinner; no jarring transition). `ios-docs-writer` ✅ (CHANGELOG + vault Daily). `ios-parity-tracker` ✅ (this row).
+
+**FLAG for Sam (out of scope, NOT fixed here):** `app/games.tsx` `awardFangs()` has the SAME exploit shape — it calls `/api/games/reward` first but FALLS BACK to a client-side `profiles.coins` write + `coin_transactions` insert when the server call fails. A client can force the fallback by blocking the API call and self-credit Fangs. Not in the duel path, so left untouched per §5.1 scope. Recommend a follow-up: remove the client-write fallback so games rewards are server-only (matching arena). Filed for a §5.6 / next-build decision.
+
+**Chain:** `vp-ios` → `ios-shared-core` (no new shared-core logic; arena already canonical via `arenaAPI`) → `ios-architect` (reduce `duel.tsx` to a redirect, keep the route registered) → `ios-dev-screens` + `ios-dev-data` (shim + social repoint; confirm no reward write) → `ios-security-auth`+`ios-security-auditor` (exploit-gone audit; surfaced the games.tsx sibling) → `ios-design-hig` (redirect UI) → `ios-qa-tester` → `ios-code-reviewer` → `ios-docs-writer` → `ios-parity-tracker` (this row).
 
 ---
 
