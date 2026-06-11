@@ -206,12 +206,25 @@ export default function CosmeticLocker({ username }: { username: string }) {
       return;
     }
     toastSuccess(next ? "Equipped" : "Unequipped");
-    // Revalidate against server truth (clears optimistic on next render path).
-    await mutate();
-    setOptimistic((m) => {
-      const { [slot]: _drop, ...rest } = m;
-      return rest;
-    });
+    // Revalidate against server truth, but only drop the optimistic override
+    // once the freshly-fetched payload actually reflects the new value. The
+    // equip POST can have read-after-write lag; clearing the override before
+    // the server agrees would briefly revert the card + hero. We keep the
+    // optimistic key until the revalidated payload matches, so there is no
+    // visible flicker on success. (Rollback-on-failure is handled above.)
+    const fresh = await mutate();
+    const freshEquipped = fresh?.ok ? fresh.data?.equipped : undefined;
+    const want = next || null;
+    const serverReflects = (equippedIdForSlot(freshEquipped, slot) ?? null) === (want === "" ? null : want);
+    if (serverReflects) {
+      setOptimistic((m) => {
+        const { [slot]: _drop, ...rest } = m;
+        return rest;
+      });
+    }
+    // If the server hasn't caught up yet, leave the optimistic override in
+    // place; the next revalidateOnFocus / dedupe-window refetch will converge
+    // it to the (now-matching) server truth without a revert.
     setBusySlot(null);
   };
 
@@ -223,11 +236,12 @@ export default function CosmeticLocker({ username }: { username: string }) {
         return (
           <section
             key={slot.key}
+            aria-labelledby={`locker-slot-${slot.key}`}
             className="rounded-2xl border border-electric/20 p-5"
             style={{ background: "var(--sidebar-bg)" }}
           >
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-bebas text-xl text-cream tracking-wider">{slot.label}</h3>
+              <h3 id={`locker-slot-${slot.key}`} className="font-bebas text-xl text-cream tracking-wider">{slot.label}</h3>
               {owned.length > 0 && (
                 <span className="text-cream/40 text-[11px] font-mono uppercase tracking-[0.18em]">
                   {owned.length} owned
@@ -243,13 +257,13 @@ export default function CosmeticLocker({ username }: { username: string }) {
                 <p className="text-cream/50 text-sm mb-3">None owned yet</p>
                 <Link
                   href="/shop"
-                  className="inline-flex items-center gap-1.5 font-syne font-semibold text-xs px-4 py-2 rounded-full border border-electric/30 text-electric hover:bg-electric/10 transition-colors"
+                  className="inline-flex items-center gap-1.5 min-h-[44px] font-syne font-semibold text-xs px-4 py-2.5 rounded-full border border-electric/30 text-electric hover:bg-electric/10 transition-colors"
                 >
                   <Storefront size={13} weight="fill" aria-hidden="true" /> {slot.emptyCta}
                 </Link>
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              <div role="list" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                 {owned.map((it) => {
                   const id = oId(it);
                   const meta = CATALOG_BY_ID[id];
@@ -259,6 +273,7 @@ export default function CosmeticLocker({ username }: { username: string }) {
                   return (
                     <div
                       key={id}
+                      role="listitem"
                       className="rounded-xl p-3 flex flex-col gap-3 transition-colors"
                       style={{
                         background: isEquipped
@@ -288,7 +303,9 @@ export default function CosmeticLocker({ username }: { username: string }) {
                       <button
                         onClick={() => handleToggle(slot.key, id)}
                         disabled={busy}
-                        className={`w-full py-1.5 rounded-lg text-xs font-bold transition-all disabled:opacity-50 ${
+                        aria-pressed={isEquipped}
+                        aria-label={isEquipped ? `${name} equipped, tap to unequip` : `Equip ${name}`}
+                        className={`w-full min-h-[44px] py-2.5 rounded-lg text-xs font-bold transition-all disabled:opacity-50 ${
                           isEquipped
                             ? "border border-green-500/40 text-green-400 hover:bg-green-500/10"
                             : "border border-electric/30 text-electric hover:bg-electric/10"
@@ -324,7 +341,7 @@ function LockerPreview({
     return (
       <Avatar
         url={`https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(username)}`}
-        alt="Preview"
+        alt=""
         size="md"
         frame={slot === "frame" ? itemId : null}
         aura={slot === "avatar_aura" ? itemId : null}

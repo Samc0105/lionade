@@ -750,7 +750,9 @@ function CosmeticCard({ item, owned, equipped = false, canAfford, onBuy, onEquip
           ) : owned && isCosmetic && onEquip ? (
             <button
               onClick={onEquip}
-              className={`flex-shrink-0 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${equipped ? "border border-green-500/40 text-green-400 hover:bg-green-500/10" : "border border-electric/30 text-electric hover:bg-electric/10"}`}
+              aria-pressed={equipped}
+              aria-label={equipped ? `${item.name} equipped, tap to unequip` : `Equip ${item.name}`}
+              className={`flex-shrink-0 min-h-[44px] px-3 py-2.5 rounded-lg text-xs font-bold transition-all ${equipped ? "border border-green-500/40 text-green-400 hover:bg-green-500/10" : "border border-electric/30 text-electric hover:bg-electric/10"}`}
             >
               {equipped ? "Unequip" : "Equip"}
             </button>
@@ -760,7 +762,7 @@ function CosmeticCard({ item, owned, equipped = false, canAfford, onBuy, onEquip
             </span>
           ) : (
             <button onClick={onBuy} disabled={canAfford !== true}
-              className={`flex-shrink-0 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${canAfford === true ? "gold-btn shop-btn-pulse" : canAfford === false ? "bg-gray-600/20 text-gray-500 cursor-not-allowed border border-gray-600/20" : "bg-white/5 text-cream/40 border border-white/10 cursor-wait"}`}>
+              className={`flex-shrink-0 min-h-[44px] px-3.5 py-2.5 rounded-lg text-xs font-bold transition-all ${canAfford === true ? "gold-btn shop-btn-pulse" : canAfford === false ? "bg-gray-600/20 text-gray-500 cursor-not-allowed border border-gray-600/20" : "bg-white/5 text-cream/40 border border-white/10 cursor-wait"}`}>
               {canAfford === false ? "Can't Afford" : "Buy"}
             </button>
           )}
