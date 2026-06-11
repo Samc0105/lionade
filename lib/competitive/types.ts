@@ -53,6 +53,11 @@ export interface CompetitiveMatchRow {
   fang_delta: Record<string, number>;
   wager: number;
   forfeited_by: string | null;
+  // Server-anchored round START (migration 059). The single wall-clock instant
+  // both clients anchor the pre-round 3-2-1-GO + round 1's clock to, killing the
+  // clock-skew head start. NULL on pre-migration rows → screens fall back to the
+  // local countdown sequence. Not a secret — served in the match payload.
+  starts_at: string | null;
   created_at: string;
   completed_at: string | null;
 }

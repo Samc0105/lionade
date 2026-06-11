@@ -35,6 +35,15 @@ import { setActiveSession } from "@/lib/presence";
 
 const DEFAULT_MODE: CompetitiveMode = "sabotage";
 
+// Server-anchored round START lead. When a match row is created we stamp
+// starts_at = now + this lead; BOTH clients anchor the 3-2-1-GO overlay AND
+// round 1's clock to that single timestamp, so they hit "GO!" together (modulo
+// each device's own sub-second NTP skew) instead of each running a local
+// countdown from its own mount time. The 3-2-1-GO sequence is ~3.2s of beats;
+// 4500ms reliably covers both clients loading the match screen after they're
+// matched (poll/redirect → fetch match → render) plus a small buffer.
+const COUNTDOWN_LEAD_MS = 4500;
+
 async function readMyQueueRow(userId: string): Promise<QueueRow | null> {
   const { data } = await supabaseAdmin
     .from("competitive_queue")
@@ -149,6 +158,10 @@ async function createMatch(args: {
       team_a: args.teamA,
       team_b: args.teamB,
       elo_before: eloBefore,
+      // Server-anchored round START — both clients derive the pre-round
+      // countdown + round 1's clock from this single instant (see migration
+      // 059 + Countdown.tsx). Server-derived so it never depends on a client.
+      starts_at: new Date(Date.now() + COUNTDOWN_LEAD_MS).toISOString(),
     })
     .select("id")
     .single();

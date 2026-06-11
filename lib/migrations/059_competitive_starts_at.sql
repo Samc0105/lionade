@@ -1,0 +1,33 @@
+-- Migration 059: Competitive match server-anchored round START.
+--
+-- Web-only. Kills the pre-round-countdown clock-skew head start.
+--
+-- THE PROBLEM: components/competitive/Countdown.tsx ran a purely LOCAL
+-- 3-2-1-GO at 800ms beats on mount — each client independently. Because the two
+-- players load the match screen at slightly different wall-clock moments (and
+-- their device clocks differ), they finish the countdown — and therefore START
+-- the round timer — at different instants. The player who loaded first gets a
+-- visible head start on round 1.
+--
+-- THE FIX: when the queue route creates the competitive_matches row it stamps a
+-- single server-derived `starts_at` (now + a fixed lead). BOTH clients anchor
+-- the 3-2-1-GO overlay AND round 1's clock to that one timestamp, so they hit
+-- "GO!" at the same wall-clock instant (modulo each device's own sub-second NTP
+-- skew, vs the prior multi-second mount-time skew). This is the same
+-- server-timestamp pattern the party games use (e.g. PokerFace derives its
+-- decide/read/call windows from rounds.started_at / presented_at).
+--
+-- starts_at is NULLABLE with NO default: it is set explicitly at insert time by
+-- the queue route. When NULL (e.g. a pre-migration row, or any path that didn't
+-- stamp it), the Countdown component falls back to its original local sequence,
+-- so nothing breaks if this migration has not yet been applied.
+--
+-- starts_at is NOT a secret — it ships in the /api/competitive/match/[id]
+-- payload that both participants already read.
+--
+-- DO NOT APPLY blindly: this is shipped as a file for dev-database to review and
+-- run via the normal migration path. Idempotent (add column IF NOT EXISTS).
+
+-- ── competitive_matches.starts_at — the shared wall-clock instant round 1 begins ──
+ALTER TABLE competitive_matches
+  ADD COLUMN IF NOT EXISTS starts_at timestamptz;

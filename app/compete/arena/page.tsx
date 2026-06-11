@@ -17,6 +17,7 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import BackButton from "@/components/BackButton";
 import { apiPost, apiGet, apiDelete } from "@/lib/api-client";
 import type { CompetitiveMode, CompetitiveFormat } from "@/lib/competitive/types";
+import { generateRoomCode, isValidRoomCode, normalizeRoomCode } from "@/lib/party/room-code";
 
 interface ModeCard {
   mode: CompetitiveMode;
@@ -43,6 +44,14 @@ type SearchState =
   | { phase: "searching"; mode: CompetitiveMode; since: number }
   | { phase: "none"; mode: CompetitiveMode };
 
+// Which 2v2 entry path the player has chosen. Only relevant when format is 2v2.
+//   - "solo": no code, auto-pair into a random duo (queue with partyCode null)
+//   - "create": generate + share a code, your teammate joins it
+//   - "join": enter your teammate's code
+// The duo code is purely a shared matchmaking string — both friends queuing 2v2
+// with the same code land on the same team. No server pre-registration.
+type DuoPath = "solo" | "create" | "join";
+
 const SEARCH_TIMEOUT_MS = 45_000;
 const POLL_INTERVAL_MS = 2500;
 
@@ -51,6 +60,13 @@ export default function CompetitiveArenaPage() {
   const reduce = useReducedMotion();
   const [format, setFormat] = useState<CompetitiveFormat>("1v1");
   const [search, setSearch] = useState<SearchState>({ phase: "idle" });
+  // 2v2 duo state. duoPath defaults to "solo" so 2v2 is never gated on a friend.
+  const [duoPath, setDuoPath] = useState<DuoPath>("solo");
+  // The code created by THIS player (create path). Generated once on demand.
+  const [createdCode, setCreatedCode] = useState<string | null>(null);
+  // Raw text in the join input; validated/normalized at queue time.
+  const [joinInput, setJoinInput] = useState("");
+  const [copied, setCopied] = useState(false);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   // True while a search is in flight — mirrors `search.phase === "searching"`
   // but readable from cleanup closures without going stale.
@@ -80,6 +96,19 @@ export default function CompetitiveArenaPage() {
     await apiDelete("/api/competitive/queue").catch(() => {});
   }, [stopPolling]);
 
+  // The duo matchmaking code to send with a 2v2 queue, or null for solo/1v1.
+  // create → the generated code; join → the validated/normalized input; both
+  // friends sending the same code land on the same team. 1v1 ignores this.
+  const resolveDuoCode = useCallback((): string | null => {
+    if (format !== "2v2") return null;
+    if (duoPath === "create") return createdCode;
+    if (duoPath === "join") {
+      const code = normalizeRoomCode(joinInput);
+      return isValidRoomCode(code) ? code : null;
+    }
+    return null; // solo
+  }, [format, duoPath, createdCode, joinInput]);
+
   const startSearch = useCallback(
     async (mode: CompetitiveMode) => {
       // Stable timestamp captured in this closure — NOT read back from state,
@@ -87,11 +116,14 @@ export default function CompetitiveArenaPage() {
       // interval closed over `search` from before setSearch landed, so the
       // 45s timeout never fired and the spinner ran forever).
       const startedAt = Date.now();
+      // partyCode only applies to 2v2; for 1v1 this is always null and the body
+      // is identical to before (no regression to the 1v1 flow).
+      const partyCode = resolveDuoCode();
       searchingRef.current = true;
       setSearch({ phase: "searching", mode, since: startedAt });
       const { ok, data } = await apiPost<{ status: string; matchId?: string }>(
         "/api/competitive/queue",
-        { format, mode },
+        partyCode ? { format, mode, partyCode } : { format, mode },
       );
       if (ok && data?.status === "matched" && data.matchId) {
         goToMatch(mode, data.matchId);
@@ -115,7 +147,7 @@ export default function CompetitiveArenaPage() {
         }
       }, POLL_INTERVAL_MS);
     },
-    [format, goToMatch, stopPolling],
+    [format, goToMatch, stopPolling, resolveDuoCode],
   );
 
   // Unmount cleanup: clear the poll and, if a search was still in flight,
@@ -130,6 +162,30 @@ export default function CompetitiveArenaPage() {
     },
     [stopPolling],
   );
+
+  // Lazily mint a duo code the first time the player picks "Create duo".
+  const selectCreate = useCallback(() => {
+    setDuoPath("create");
+    setCreatedCode((prev) => prev ?? generateRoomCode());
+    setCopied(false);
+  }, []);
+
+  const copyCode = useCallback(async () => {
+    if (!createdCode) return;
+    try {
+      await navigator.clipboard.writeText(createdCode);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1800);
+    } catch {
+      /* clipboard blocked — the code is visible on screen to read aloud */
+    }
+  }, [createdCode]);
+
+  // FIND MATCH is blocked only on the 2v2 "join" path until a valid 4-digit
+  // code is entered. Solo and create are always ready; 1v1 is unaffected.
+  const joinCodeValid = isValidRoomCode(normalizeRoomCode(joinInput));
+  const findMatchBlocked =
+    format === "2v2" && duoPath === "join" && !joinCodeValid;
 
   return (
     <ProtectedRoute>
@@ -193,9 +249,97 @@ export default function CompetitiveArenaPage() {
           </div>
 
           {format === "2v2" && (
-            <p className="text-center text-cream/45 text-xs mb-8 max-w-md mx-auto">
-              Squad mode pairs you with a partner. Solo-queue and we auto-pair you, or bring a friend (duo codes coming to the lobby).
-            </p>
+            <div className={`mx-auto max-w-md mb-10 ${reduce ? "" : "ca-card-reveal"}`}>
+              <p className="text-center text-cream/45 text-xs mb-4">
+                Squad mode is 2 versus 2. Solo queue and we auto-pair you, or bring a friend with a duo code.
+              </p>
+
+              {/* Path selector — three small glass segments, gold-accented when active */}
+              <div className="inline-flex w-full rounded-xl p-1 border border-cream/10 bg-cream/[0.03] mb-4">
+                {([
+                  { key: "solo", label: "SOLO QUEUE" },
+                  { key: "create", label: "CREATE DUO" },
+                  { key: "join", label: "JOIN DUO" },
+                ] as { key: DuoPath; label: string }[]).map((p) => {
+                  const active = duoPath === p.key;
+                  return (
+                    <button
+                      key={p.key}
+                      onClick={() => (p.key === "create" ? selectCreate() : setDuoPath(p.key))}
+                      disabled={search.phase === "searching"}
+                      className={`relative flex-1 px-2 py-2 rounded-lg font-bebas tracking-wider text-sm transition-colors disabled:opacity-50 ${
+                        active ? "text-[#1a1400]" : "text-cream/55 hover:text-cream/85"
+                      }`}
+                    >
+                      {active && (
+                        <motion.span
+                          layoutId="arena-duo-pill"
+                          className="absolute inset-0 rounded-lg bg-gold shadow-[0_2px_10px_rgba(255,215,0,0.25)]"
+                          transition={reduce ? { duration: 0 } : { type: "spring", stiffness: 380, damping: 30 }}
+                        />
+                      )}
+                      <span className="relative z-10">{p.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Solo — auto-pair explainer */}
+              {duoPath === "solo" && (
+                <div className="rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur p-4 text-center">
+                  <p className="text-cream/70 text-sm">We will pair you with a random teammate.</p>
+                  <p className="text-cream/40 text-xs mt-1">Pick a mode below and hit FIND MATCH.</p>
+                </div>
+              )}
+
+              {/* Create — show the big shareable code + copy */}
+              {duoPath === "create" && createdCode && (
+                <div className="rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur p-5 text-center">
+                  <p className="text-cream/45 text-xs uppercase tracking-[0.2em] mb-2">Your duo code</p>
+                  <div className="flex items-center justify-center gap-3">
+                    <span className="font-dm-mono text-5xl tracking-[0.3em] text-gold pl-[0.3em]">
+                      {createdCode}
+                    </span>
+                    <button
+                      onClick={copyCode}
+                      className="shrink-0 px-3 py-2 rounded-lg text-xs font-bebas tracking-wider border border-gold/30 bg-gold/10 text-gold hover:bg-gold/15 transition-colors active:scale-95"
+                    >
+                      {copied ? "COPIED" : "COPY"}
+                    </button>
+                  </div>
+                  <p className="text-cream/50 text-sm mt-3">Share this with your teammate.</p>
+                  <p className="text-cream/35 text-xs mt-1">
+                    Once you both queue 2v2 with this code, you are on the same team.
+                  </p>
+                </div>
+              )}
+
+              {/* Join — enter a teammate's code */}
+              {duoPath === "join" && (
+                <div className="rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur p-5">
+                  <label className="block text-cream/45 text-xs uppercase tracking-[0.2em] mb-2 text-center">
+                    Teammate's duo code
+                  </label>
+                  <input
+                    value={joinInput}
+                    onChange={(e) => setJoinInput(normalizeRoomCode(e.target.value).slice(0, 4))}
+                    inputMode="numeric"
+                    placeholder="1234"
+                    maxLength={4}
+                    className="w-full text-center font-dm-mono text-4xl tracking-[0.35em] pl-[0.35em] py-2 rounded-xl bg-navy/40 border border-white/10 text-cream placeholder:text-cream/20 focus:border-gold/40 focus:outline-none transition-colors"
+                  />
+                  <p className="text-center text-xs mt-2 h-4">
+                    {joinInput.length === 0 ? (
+                      <span className="text-cream/35">Enter the 4-digit code your teammate shared.</span>
+                    ) : joinCodeValid ? (
+                      <span className="text-[#50C878]">Ready. Pick a mode and find your match.</span>
+                    ) : (
+                      <span className="text-[#EF4444]">Codes are 4 digits.</span>
+                    )}
+                  </p>
+                </div>
+              )}
+            </div>
           )}
 
           {/* Mode grid — launcher tiles, staggered reveal + hover lift/glow */}
@@ -283,8 +427,10 @@ export default function CompetitiveArenaPage() {
                     {!busy && !dead && (
                       <button
                         onClick={() => startSearch(m.mode)}
-                        className="w-full font-bebas tracking-wider text-lg py-2.5 rounded-xl transition-all active:scale-95"
+                        disabled={findMatchBlocked}
+                        className="w-full font-bebas tracking-wider text-lg py-2.5 rounded-xl transition-all active:scale-95 disabled:opacity-40 disabled:active:scale-100 disabled:cursor-not-allowed"
                         style={{ background: `linear-gradient(135deg, ${m.accent}, ${m.accent}cc)`, color: "#0a0a14" }}
+                        title={findMatchBlocked ? "Enter your teammate's 4-digit duo code first" : undefined}
                       >
                         FIND MATCH
                       </button>
@@ -292,9 +438,18 @@ export default function CompetitiveArenaPage() {
 
                     {busy && (
                       <div className="flex flex-col gap-2">
-                        <div className="flex items-center justify-center gap-2 py-2.5 rounded-xl border border-cream/10 bg-cream/[0.03]">
-                          <span className="inline-block w-2 h-2 rounded-full animate-pulse" style={{ background: m.accent }} />
-                          <span className="font-bebas tracking-wider text-cream/70">SEARCHING...</span>
+                        <div className="flex flex-col items-center justify-center gap-1 py-2.5 rounded-xl border border-cream/10 bg-cream/[0.03]">
+                          <span className="flex items-center gap-2">
+                            <span className="inline-block w-2 h-2 rounded-full animate-pulse" style={{ background: m.accent }} />
+                            <span className="font-bebas tracking-wider text-cream/70">SEARCHING...</span>
+                          </span>
+                          {format === "2v2" && (
+                            <span className="text-cream/40 text-[11px]">
+                              {duoPath === "solo"
+                                ? "Finding your teammate and opponents"
+                                : "Waiting for your duo and opponents"}
+                            </span>
+                          )}
                         </div>
                         <button onClick={cancelSearch} className="text-cream/40 hover:text-cream/70 text-xs">
                           Cancel

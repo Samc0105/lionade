@@ -4,12 +4,13 @@
 // guess locks the round. Both players see the same images. Fuzzy match via the
 // shared Levenshtein matcher. Settles via the shared /complete endpoint.
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useMatchChannel } from "@/lib/competitive/use-match-channel";
 import { useSettle } from "../useSettle";
 import ResultCard from "../ResultCard";
 import CountUp from "@/components/CountUp";
 import FangBurst from "../FangBurst";
+import Countdown from "../Countdown";
 import { apiPost } from "@/lib/api-client";
 import { COMPETITIVE_EVENTS } from "@/lib/competitive/channels";
 import type { LoadedMatch } from "@/app/compete/arena/[mode]/[matchId]/page";
@@ -36,7 +37,19 @@ export default function ZoomScreen({ loaded, selfId }: { loaded: LoadedMatch; se
   const [guess, setGuess] = useState("");
   const [locked, setLocked] = useState(false);
   const [feedback, setFeedback] = useState<"" | "correct" | "wrong" | "close">("");
-  const [roundStart, setRoundStart] = useState(() => Date.now());
+  // Round 1's un-blur reveal clock is anchored to the server's match.starts_at
+  // so both clients reveal the image in lockstep (no clock-skew head start).
+  // Pre-migration rows have starts_at === null → fall back to local Date.now().
+  const startsAtRaw = (loaded.match as { starts_at?: string | null }).starts_at ?? null;
+  const startsAtMs = useMemo(() => {
+    if (!startsAtRaw) return null;
+    const t = new Date(startsAtRaw).getTime();
+    return Number.isNaN(t) ? null : t;
+  }, [startsAtRaw]);
+  const [roundStart, setRoundStart] = useState(() =>
+    startsAtMs !== null ? Math.max(startsAtMs, Date.now()) : Date.now(),
+  );
+  const [started, setStarted] = useState(false); // false until 3-2-1-GO clears
   const [now, setNow] = useState(Date.now());
   const [finished, setFinished] = useState(false);
   const [imgError, setImgError] = useState(false);
@@ -59,7 +72,9 @@ export default function ZoomScreen({ loaded, selfId }: { loaded: LoadedMatch; se
     return () => { off(); offFin(); };
   }, [on]);
 
-  const elapsed = now - roundStart;
+  // Hold the reveal at full blur until the pre-round countdown clears, so the
+  // image isn't un-blurring during the 3-2-1-GO beat.
+  const elapsed = started ? now - roundStart : 0;
   const blurAmount = Math.max(0, 28 * (1 - Math.min(1, elapsed / revealMs)));
 
   const advance = useCallback(() => {
@@ -74,7 +89,7 @@ export default function ZoomScreen({ loaded, selfId }: { loaded: LoadedMatch; se
   }, [idx, rounds.length, send]);
 
   const submitGuess = useCallback(async () => {
-    if (locked || !guess.trim() || finished || feedback) return;
+    if (!started || locked || !guess.trim() || finished || feedback) return;
     setLocked(true); // freeze input while the server grades the guess
     const { ok, data } = await apiPost<{ points: number; isCorrect: boolean; reveal: { answer: string } }>(
       `/api/competitive/match/${matchId}/answer`,
@@ -92,13 +107,13 @@ export default function ZoomScreen({ loaded, selfId }: { loaded: LoadedMatch; se
       setFeedback("wrong");
       setTimeout(advance, 1500);
     }
-  }, [locked, guess, round, elapsed, send, advance, finished, feedback, matchId]);
+  }, [started, locked, guess, round, elapsed, send, advance, finished, feedback, matchId]);
 
-  // round timeout
+  // round timeout (only once the round has actually started)
   useEffect(() => {
-    if (locked || finished || feedback) return;
+    if (!started || locked || finished || feedback) return;
     if (elapsed > revealMs + 2000) advance();
-  }, [elapsed, revealMs, locked, finished, feedback, advance]);
+  }, [started, elapsed, revealMs, locked, finished, feedback, advance]);
 
   useEffect(() => {
     if (!finished) return;
@@ -111,7 +126,19 @@ export default function ZoomScreen({ loaded, selfId }: { loaded: LoadedMatch; se
   if (!round) return <p className="text-cream/60 text-center flex-1 flex items-center justify-center">No rounds loaded.</p>;
 
   return (
-    <div className="flex-1 min-h-0 flex flex-col w-full px-3 sm:px-6">
+    <div className="relative flex-1 min-h-0 flex flex-col w-full px-3 sm:px-6">
+      {/* Pre-round 3-2-1-GO beat (first round only), anchored to the shared
+          server starts_at so both players reveal in lockstep. */}
+      {!started && (
+        <Countdown
+          accent="#00BFFF"
+          startsAt={startsAtRaw}
+          onDone={() => {
+            setRoundStart(startsAtMs !== null ? Math.max(startsAtMs, Date.now()) : Date.now());
+            setStarted(true);
+          }}
+        />
+      )}
       <Hud idx={idx} total={rounds.length} score={score} oppScore={oppScore} accent="#00BFFF" />
 
       {/* Image dominates the center mass, filling available height */}

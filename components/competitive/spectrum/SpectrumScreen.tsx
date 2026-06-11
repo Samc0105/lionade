@@ -8,6 +8,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useMatchChannel } from "@/lib/competitive/use-match-channel";
 import { useSettle } from "../useSettle";
 import ResultCard from "../ResultCard";
+import Countdown from "../Countdown";
 import { Hud, SettlingMsg } from "../zoom/ZoomScreen";
 import { apiPost } from "@/lib/api-client";
 import { COMPETITIVE_EVENTS } from "@/lib/competitive/channels";
@@ -44,7 +45,13 @@ export default function SpectrumScreen({ loaded, selfId }: { loaded: LoadedMatch
   const [lastPts, setLastPts] = useState(0);
   const [trueValue, setTrueValue] = useState<number | null>(null);
   const [finished, setFinished] = useState(false);
+  const [started, setStarted] = useState(false); // false until 3-2-1-GO clears
   const myScoreRef = useRef(0);
+
+  // Anchor the match START (the pre-round 3-2-1-GO) to the server's
+  // match.starts_at so both players begin round 1 together. Spectrum has no
+  // per-round timer, so the anchor only gates when the first lock-in opens.
+  const startsAtRaw = (loaded.match as { starts_at?: string | null }).starts_at ?? null;
 
   const round = rounds[idx];
 
@@ -68,7 +75,7 @@ export default function SpectrumScreen({ loaded, selfId }: { loaded: LoadedMatch
   }, [idx, rounds.length, send]);
 
   const lockIn = useCallback(async () => {
-    if (revealed || finished) return;
+    if (!started || revealed || finished) return;
     setRevealed(true); // lock the slider immediately; the server scores the guess
     const { ok, data } = await apiPost<{ points: number; reveal: { true_value: number } }>(
       `/api/competitive/match/${matchId}/answer`,
@@ -80,7 +87,7 @@ export default function SpectrumScreen({ loaded, selfId }: { loaded: LoadedMatch
     setScore((s) => { myScoreRef.current = s + pts; return s + pts; });
     send({ type: COMPETITIVE_EVENTS.PROGRESS, score: myScoreRef.current });
     setTimeout(advance, 1800);
-  }, [revealed, finished, value, round, send, advance, matchId]);
+  }, [started, revealed, finished, value, round, send, advance, matchId]);
 
   useEffect(() => {
     if (!finished) return;
@@ -110,7 +117,12 @@ export default function SpectrumScreen({ loaded, selfId }: { loaded: LoadedMatch
   })();
 
   return (
-    <div className="flex-1 min-h-0 flex flex-col w-full px-3 sm:px-6">
+    <div className="relative flex-1 min-h-0 flex flex-col w-full px-3 sm:px-6">
+      {/* Pre-round 3-2-1-GO beat (first round only), anchored to the shared
+          server starts_at so both players start together. */}
+      {!started && (
+        <Countdown accent="#A855F7" startsAt={startsAtRaw} onDone={() => setStarted(true)} />
+      )}
       <Hud idx={idx} total={rounds.length} score={score} oppScore={oppScore} accent="#A855F7" />
 
       {/* Prompt + slider command the center mass */}

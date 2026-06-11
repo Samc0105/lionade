@@ -65,7 +65,19 @@ export default function SabotageScreen({ loaded, selfId }: { loaded: LoadedMatch
   const [score, setScore] = useState(0);
   const [oppScore, setOppScore] = useState(0);
   const [meter, setMeter] = useState<MeterState>({ charge: 0, lastFiredAt: 0 });
-  const [roundStart, setRoundStart] = useState(() => Date.now());
+  // Round 1 is anchored to the server's match.starts_at so BOTH clients share
+  // the same round clock (no clock-skew head start). If starts_at is in the
+  // future we hold at it; if it's already past (slow loader) we clamp to "now".
+  // Pre-migration rows have starts_at === null → fall back to local Date.now().
+  const startsAtMs = useMemo(() => {
+    const raw = (loaded.match as { starts_at?: string | null }).starts_at;
+    if (!raw) return null;
+    const t = new Date(raw).getTime();
+    return Number.isNaN(t) ? null : t;
+  }, [loaded.match]);
+  const [roundStart, setRoundStart] = useState(() =>
+    startsAtMs !== null ? Math.max(startsAtMs, Date.now()) : Date.now(),
+  );
   const [answered, setAnswered] = useState<number | null>(null);
   const [correctIdx, setCorrectIdx] = useState<number | null>(null); // revealed post-answer
   const [now, setNow] = useState(Date.now());
@@ -244,7 +256,15 @@ export default function SabotageScreen({ loaded, selfId }: { loaded: LoadedMatch
       {!started && (
         <Countdown
           accent="#EF4444"
-          onDone={() => { setRoundStart(Date.now()); setStarted(true); }}
+          startsAt={(loaded.match as { starts_at?: string | null }).starts_at ?? null}
+          onDone={() => {
+            // Anchor round 1's clock to the SHARED server instant, not the local
+            // moment onDone fired — that's the whole point of the anchor. If the
+            // anchor is already past (we loaded late) clamp to now so we never
+            // start round 1 with negative time. Falls back to now pre-migration.
+            setRoundStart(startsAtMs !== null ? Math.max(startsAtMs, Date.now()) : Date.now());
+            setStarted(true);
+          }}
         />
       )}
 

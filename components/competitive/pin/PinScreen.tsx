@@ -9,6 +9,7 @@ import dynamic from "next/dynamic";
 import { useMatchChannel } from "@/lib/competitive/use-match-channel";
 import { useSettle } from "../useSettle";
 import ResultCard from "../ResultCard";
+import Countdown from "../Countdown";
 import { SettlingMsg } from "../zoom/ZoomScreen";
 import CountUp from "@/components/CountUp";
 import { apiPost } from "@/lib/api-client";
@@ -44,7 +45,13 @@ export default function PinScreen({ loaded, selfId }: { loaded: LoadedMatch; sel
   const [lastPts, setLastPts] = useState(0);
   const [truePoint, setTruePoint] = useState<{ lat: number; lng: number } | null>(null);
   const [finished, setFinished] = useState(false);
+  const [started, setStarted] = useState(false); // false until 3-2-1-GO clears
   const myScoreRef = useRef(0);
+
+  // Anchor the match START (the pre-round 3-2-1-GO) to the server's
+  // match.starts_at so both players begin together. Pin has no per-round timer,
+  // so the anchor only gates when the first lock-in opens.
+  const startsAtRaw = (loaded.match as { starts_at?: string | null }).starts_at ?? null;
 
   const round = rounds[idx];
 
@@ -66,7 +73,7 @@ export default function PinScreen({ loaded, selfId }: { loaded: LoadedMatch; sel
   }, [idx, rounds.length, send]);
 
   const lockIn = useCallback(async () => {
-    if (revealed || !guess || finished) return;
+    if (!started || revealed || !guess || finished) return;
     setRevealed(true); // lock the map; the server scores by haversine distance
     const { ok, data } = await apiPost<{ points: number; reveal: { true_lat: number; true_lng: number; distance_km: number } }>(
       `/api/competitive/match/${matchId}/answer`,
@@ -79,7 +86,7 @@ export default function PinScreen({ loaded, selfId }: { loaded: LoadedMatch; sel
     setScore((s) => { myScoreRef.current = s + pts; return s + pts; });
     send({ type: COMPETITIVE_EVENTS.PROGRESS, score: myScoreRef.current });
     setTimeout(advance, 2400);
-  }, [revealed, guess, finished, round, send, advance, matchId]);
+  }, [started, revealed, guess, finished, round, send, advance, matchId]);
 
   useEffect(() => {
     if (!finished) return;
@@ -96,6 +103,15 @@ export default function PinScreen({ loaded, selfId }: { loaded: LoadedMatch; sel
   // glassmorphic panels in the corners/edges.
   return (
     <div className="relative flex-1 min-h-0 w-full">
+      {/* Pre-round 3-2-1-GO beat (first round only), anchored to the shared
+          server starts_at so both players start together. Sits above the map +
+          floating panels (the panels are inert until started). */}
+      {!started && (
+        <div className="absolute inset-0 z-[600]">
+          <Countdown accent="#50C878" startsAt={startsAtRaw} onDone={() => setStarted(true)} />
+        </div>
+      )}
+
       {/* Full-bleed map */}
       <div className="absolute inset-0">
         <PinMap
