@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
+import { stripNoteImageTokens } from "@/lib/note-images";
 
 /**
  * GET /api/classes/recent-notes
@@ -53,7 +54,10 @@ export async function GET(req: NextRequest) {
     .map(r => ({
       id: r.id,
       title: r.title,
-      preview: (r.ai_summary ?? r.body).trim().slice(0, PREVIEW_CHARS),
+      // iOS embeds photos as markdown tokens in the body; collapse them to
+      // "[photo]" so previews never leak raw markdown. Token-free bodies
+      // pass through unchanged.
+      preview: stripNoteImageTokens((r.ai_summary ?? r.body).trim()).slice(0, PREVIEW_CHARS),
       pinned: r.pinned,
       updatedAt: r.updated_at,
       classId: r.classes!.id,

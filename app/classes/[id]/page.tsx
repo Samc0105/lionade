@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import useSWR from "swr";
 import { useParams, useRouter } from "next/navigation";
 import {
   CaretLeft, Plus, Target, Note, Calendar, Clock,
-  CheckCircle, ArrowRight, DotsThreeVertical, Trash, PencilSimple, X,
+  CheckCircle, ArrowRight, DotsThreeVertical, Trash, PencilSimple, X, ImageBroken,
 } from "@phosphor-icons/react";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Navbar from "@/components/Navbar";
@@ -23,6 +23,7 @@ import GradeTracker from "@/components/Class/GradeTracker";
 import AssignmentTracker from "@/components/Class/AssignmentTracker";
 import StudyPlanBuilder from "@/components/Class/StudyPlanBuilder";
 import FlashcardStudy from "@/components/Class/FlashcardStudy";
+import { parseNoteBody, getSignedNoteImageUrl } from "@/lib/note-images";
 
 /**
  * Single class notebook. Shows the class header (color-bar, name,
@@ -569,8 +570,22 @@ function NoteCard({
     onChange();
   };
 
+  // iOS embeds photos as markdown tokens (![photo](note-images/...)) inside
+  // the plain-text body. Parse them out: text renders as before (token-free
+  // bodies come back as one untouched segment, byte-identical), images
+  // render as thumbnails below the teaser. The raw token never shows.
+  const { textBody, images } = useMemo(() => {
+    const texts: string[] = [];
+    const imgs: { alt: string; objectKey: string }[] = [];
+    for (const seg of parseNoteBody(note.body)) {
+      if (seg.type === "text") texts.push(seg.text);
+      else imgs.push({ alt: seg.alt, objectKey: seg.objectKey });
+    }
+    return { textBody: texts.join("\n\n"), images: imgs };
+  }, [note.body]);
+
   // Two-line teaser of the body
-  const teaser = note.body.length > 220 ? note.body.slice(0, 220).trim() + "…" : note.body;
+  const teaser = textBody.length > 220 ? textBody.slice(0, 220).trim() + "…" : textBody;
 
   return (
     <div
@@ -623,9 +638,18 @@ function NoteCard({
           </button>
         </div>
       </div>
-      <p className="text-[13px] text-cream/75 leading-relaxed whitespace-pre-wrap">
-        {teaser}
-      </p>
+      {teaser.length > 0 && (
+        <p className="text-[13px] text-cream/75 leading-relaxed whitespace-pre-wrap">
+          {teaser}
+        </p>
+      )}
+      {images.length > 0 && (
+        <div className={`flex flex-wrap gap-2 ${teaser.length > 0 ? "mt-2.5" : ""}`}>
+          {images.map((img, i) => (
+            <NoteImage key={`${img.objectKey}-${i}`} objectKey={img.objectKey} alt={img.alt} />
+          ))}
+        </div>
+      )}
       {note.aiTopics && note.aiTopics.length > 0 && (
         <div className="mt-2.5 flex flex-wrap gap-1">
           {note.aiTopics.map(t => (
@@ -652,6 +676,105 @@ function NoteCard({
         destructive
       />
     </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Note photo thumbnail — resolves a signed URL from the private note-images
+// bucket (owner-scoped RLS, 1h in-memory cache in lib/note-images). Fixed
+// thumb box so the card never jumps while the URL resolves; click opens a
+// simple full-size lightbox overlay. Any resolve/load failure shows a quiet
+// broken-image placeholder, never the raw markdown token.
+// ─────────────────────────────────────────────────────────────────────────────
+function NoteImage({ objectKey, alt }: { objectKey: string; alt: string }) {
+  const [url, setUrl] = useState<string | null>(null);
+  const [failed, setFailed] = useState(false);
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    setUrl(null);
+    setFailed(false);
+    getSignedNoteImageUrl(objectKey)
+      .then(u => { if (!cancelled) setUrl(u); })
+      .catch(() => { if (!cancelled) setFailed(true); });
+    return () => { cancelled = true; };
+  }, [objectKey]);
+
+  // Esc closes the lightbox.
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setOpen(false); };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open]);
+
+  if (failed) {
+    return (
+      <div
+        className="grid place-items-center w-40 h-28 rounded-[10px] border border-white/[0.08] bg-white/[0.03]"
+        title="Photo unavailable"
+        aria-label="Photo unavailable"
+      >
+        <ImageBroken size={18} className="text-cream/25" weight="bold" />
+      </div>
+    );
+  }
+
+  if (!url) {
+    return (
+      <div
+        className="w-40 h-28 rounded-[10px] border border-white/[0.06] bg-white/[0.04] motion-safe:animate-pulse"
+        aria-label="Loading photo"
+      />
+    );
+  }
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        aria-label="Open photo full size"
+        className="block w-40 h-28 rounded-[10px] overflow-hidden border border-white/[0.1]
+          hover:border-white/[0.25] transition-colors cursor-zoom-in
+          focus:outline-none focus-visible:ring-1 focus-visible:ring-gold/50"
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element -- signed Supabase Storage URL, not optimizable */}
+        <img
+          src={url}
+          alt={alt}
+          loading="lazy"
+          onError={() => setFailed(true)}
+          className="w-full h-full object-cover"
+        />
+      </button>
+      {open && (
+        <div
+          className="fixed inset-0 z-[70] grid place-items-center bg-black/85 backdrop-blur-sm p-4 cursor-zoom-out"
+          role="dialog"
+          aria-modal="true"
+          aria-label={alt}
+          onClick={() => setOpen(false)}
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element -- signed Supabase Storage URL, not optimizable */}
+          <img
+            src={url}
+            alt={alt}
+            className="max-w-[92vw] max-h-[86vh] rounded-xl border border-white/[0.12] object-contain"
+          />
+          <button
+            type="button"
+            onClick={() => setOpen(false)}
+            aria-label="Close"
+            className="absolute top-4 right-4 grid place-items-center w-9 h-9 rounded-full
+              bg-white/[0.08] hover:bg-white/[0.15] text-cream transition-colors"
+          >
+            <X size={16} weight="bold" />
+          </button>
+        </div>
+      )}
+    </>
   );
 }
 

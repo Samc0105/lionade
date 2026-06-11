@@ -3,6 +3,7 @@ import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
 import { z } from "zod";
 import { callAIForJson, LLM_CHEAP } from "@/lib/ai";
+import { stripNoteImageTokens } from "@/lib/note-images";
 
 // 12-factor #2 — prompt version tag. Bump on every prompt edit.
 const QUICK_NOTE_PROMPT_VERSION = "v1-2026-06-05";
@@ -164,7 +165,7 @@ Return EXACTLY:
 }
 
 <note>
-${noteBody.slice(0, 6000)}
+${stripNoteImageTokens(noteBody).slice(0, 6000)}
 </note>`,
       }, QuickNoteSchema);
 
