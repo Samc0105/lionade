@@ -7,6 +7,50 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 
 ---
 
+## 2026-06-11: Web-replication Section 5 — COMPETE (arena type-error clear + ELO-integrity audit) (iOS-only port, LOCAL, not built)
+
+**Status:** Code ready + verified LOCALLY. `npx tsc --noEmit` = **0 errors** (the 14 arena errors cleared — the explicit §5 goal). `expo export --platform ios` clean (Hermes 8.99 MB). NOT built, NOT submitted. Committed on `main`, not pushed.
+
+**Surface:** Compete hub, Arena (1v1), Duel, ELO/connectivity shell, competitive ladders, 5 competitive modes.
+
+**Web inventory (what is actually SHIPPED vs stubbed):**
+- ✅ `/compete` hub (ELO hero hex stats, tier pyramid, duel hero, blitz, leaderboard preview, modes grid) — live.
+- ✅ `/compete/arena/duel` — REAL 1v1 via `/api/arena/queue` → `/api/arena/match` → `/answer` → `/complete`. NO bot; honest `no_opponents` dead-end. Server settles ELO (K=32) + Fang transfer.
+- ✅ `/compete/arena` — competitive-modes hub: 4 ranked modes (sabotage / zoom / spectrum / pin) via `/api/competitive/queue`. Poker Face REMOVED to Lionade Party 2026-05-28 (no ELO/Fangs).
+- 🟡 The 4 competitive mode SCREENS exist on web with the full V2 shell (resilient channel + Presence, AppState pause/resume, reconnecting banner, opponent-disconnected, forfeit, VOIDED/FORFEITED, lockstep countdown from server `starts_at`).
+- 🟡 Weekly tournament + cash-rewards = roadmap/"SOON" placeholders (V2 Dec 2026).
+- ❌ No web `/api/arena/matches` LIST route exists (only `/api/arena/match?id=` single + `/api/me/elo-rank`).
+
+**iOS state after §5:**
+- ✅ Type errors: 14 → 0. `use-arena-rank.ts` repointed to real `/api/me/elo-rank` + `ApiResult` unwrap + web tier ladder + `totalRanked`. `use-arena-matches.ts` re-typed `ArenaMatchSummary` flat (matches `MatchRow`) + `ApiResult` unwrap + honest `[]` until a web list-route exists.
+- ✅ `app/arena.tsx` already uses real `arenaAPI` against `/api/arena/*`; ELO server-settled. Correct.
+- ✅ `app/(tabs)/compete.tsx` hub at structural parity (ELO hero, tier ring, modes list, leaderboard preview).
+- 🟡 **Duel drift FLAGGED:** `app/duel.tsx` is still a fake-68%-bot screen with client coin writes (violates no-bot ELO integrity). Web's duel is real matchmaking. Fix = repoint Compete "Duel" at the real arena flow + retire the bot. Filed §5.1.
+- ❌ Competitive mode screens (sabotage/zoom/spectrum/pin) + the realtime ELO/connectivity shell — NOT ported. Heavy per-mode realtime/Skia ports (Party-suite weight). Scoped OUT, scheduled as 4 sub-items (§5.2-§5.5). Poker Face stays on Party/compliance track.
+
+**DB/tables/routes/channels TOUCHED or READ by this §5 surface (for schema verification):**
+- **Routes used by changed code:** `GET /api/me/elo-rank` (returns `{ elo, rank, totalRanked }`; reads `profiles.arena_elo`). `GET /api/arena/matches?userId=&limit=` — **DOES NOT EXIST on web** (hook resolves `[]`). 
+- **Routes the unchanged arena flow uses (parity reference):** `POST/GET/DELETE /api/arena/queue`, `GET/PATCH /api/arena/match?id=`, `POST /api/arena/answer`, `POST /api/arena/complete`, `POST/GET/PATCH /api/arena/challenge`.
+- **Competitive routes (web, NOT yet consumed by iOS):** `POST/GET/DELETE /api/competitive/queue`, `GET/PATCH /api/competitive/match/[id]`, `/answer`, `/complete`, `/forfeit`, `POST /api/competitive/sabotage/attack`, `GET /api/cron/reap-stale-competitive`.
+- **Tables/columns read or referenced:**
+  - `profiles`: `arena_elo` (read by elo-rank), `arena_wins/arena_losses/arena_draws` (read by web compete page), `competitive_elo` + `squad_elo` (default 1000; NOT touched by iOS yet).
+  - `arena_matches`: `id, question_ids[], wager, status('pending'|'active'|'completed'|'cancelled'), current_question, winner_id, created_at, started_at, completed_at` + V2 ghost cols `is_async, ghost_id, is_trainer_match, subject`.
+  - `arena_queue`, `arena_match_questions`, `arena_answers`, `arena_challenges` (parity reference only).
+  - `competitive_matches`: `id, mode, format('1v1'|'2v2'), status('queued'|'active'|'completing'|'completed'|'voided'|'forfeited'), team_a[], team_b[], winner_team, elo_before(jsonb), elo_after(jsonb), fang_delta(jsonb), wager, starts_at(nullable, lockstep anchor), forfeited_by, created_at, completed_at`.
+  - `competitive_queue`: `id, user_id, format, mode, elo, party_code, joined_at, status, match_id`.
+  - Per-mode round tables: `sabotage_rounds` (+`sabotage_attacks`), `zoom_rounds`, `spectrum_rounds`, `pin_rounds` — secret cols (`correct_index`/`answer`/`aliases`/`true_value`/`true_lat`/`true_lng`) stripped server-side until `ended_at`.
+- **Realtime channels:** NONE consumed by iOS §5 (arena 1v1 is poll-based on both platforms). The competitive `competitive_matches` channel + Presence is the V2 shell scheduled with the per-mode ports.
+- **Boosters:** §5 touches NO boosters (no `active_boosters` read/write here).
+
+**SCHEMA-SAFETY FLAGS for Sam to verify against live DB:**
+1. `/api/arena/matches` is referenced by the iOS hook but does NOT exist on web — hook is defensively `[]`. Either build the web list-route or accept iOS shows an empty recent-matches strip.
+2. Web compete page reads `profiles.arena_wins/arena_losses/arena_draws` — confirm these columns exist live (the §5 changed code does NOT read them, but the parity hub would).
+3. `competitive_matches.starts_at` (migration 059) + `forfeited_by` + the `voided`/`forfeited` status values (migration 058) must be present live before the §5.2-5.5 mode ports.
+
+**Chain:** `vp-ios` → (analyze web compete + competitive) → `ios-platform-bridge` (phantom-route + duel-bot drift) → `ios-shared-core` (confirmed real route = `/api/me/elo-rank`; arena uses shared `arenaAPI`) → `ios-dev-data` (both hook rewrites) → `ios-dev-realtime` (channel/Presence/AppState scoped to per-mode ports, not §5) → `ios-design-hig`+`ios-design-accessibility` (no UI delta) → `ios-qa-tester` → `ios-code-reviewer` → `ios-docs-writer` (CHANGELOG + vault Daily/2026-06-11.md) → `ios-parity-tracker` (this row).
+
+---
+
 ## 2026-06-11: Web-replication Section 4 — Learn / Study (quiz boosters + reward parity) (iOS-only port, LOCAL, not built)
 
 **Status:** ✅ iOS (local, not built/pushed). Owner: `vp-ios`. Committed on `main` in `~/Desktop/lionade-ios` (batched with §1 + §2 + §3 for the next build). Fourth surface in the page-by-page replication. Port-direction is web → iOS; no web change.
