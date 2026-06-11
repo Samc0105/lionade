@@ -7,6 +7,10 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 
 ---
 
+## 2026-06-11: Arcade entry point on Compete — /games orphan resolved (iOS catch-up, LOCAL, not built)
+
+**Status:** ✅ iOS parity restored. Web's "Arcade" top-level nav item (`components/Navbar.tsx` → `/games`) had no iOS counterpart: `app/games.tsx` (Roardle, Flash Cards, Timeline Drop, Fang rewards) was stack-registered with a working BackButton (→ Compete) but ZERO entry points. Fix: "Arcade" ModeRow on the Compete Modes list (`app/(tabs)/compete.tsx`, between Lionade Party and Focus Lock-In), game-controller icon, sub "Quick games · 2x Fangs on strong runs", routing to `/games`. Shared ModeRow Pressable now sets `accessibilityRole="button"` + label. tsc 0, expo export clean. Committed on iOS `main`, not pushed, no build. Sign-offs: `ios-code-reviewer`, `ios-design-hig`, `ios-docs-writer`, `ios-parity-tracker` (this row).
+
 ## 2026-06-11: Academia note photos — camera capture inline in class notes (iOS-FIRST feature, LOCAL, not built; web render-parity FLAGGED)
 
 **Status:** ✅ iOS code ready + verified LOCALLY. iOS `npx tsc --noEmit` = **0 errors**. `expo export --platform ios` clean (Hermes 9.43 MB). NOT built, NOT submitted. Committed on `main` in `~/Desktop/lionade-ios`, not pushed. NO new npm packages (expo-image-picker/expo-image/expo-file-system already installed). No user-facing em-dashes. No-flash-of-zero. Reduced-motion-safe. Owner: `vp-ios`.
