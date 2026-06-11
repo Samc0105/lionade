@@ -24,8 +24,10 @@ export async function GET(req: NextRequest) {
     .map((b: Record<string, unknown>) => ({
       id: b.id,
       item_id: b.item_id,
-      booster_effect: b.booster_effect ?? b.effect ?? "",
-      booster_value: b.booster_value ?? b.value ?? 1,
+      // Live column is boost_type/boost_value; we expose it to clients under
+      // the booster_effect/booster_value keys the web + iOS quizzes consume.
+      booster_effect: b.boost_type ?? b.booster_effect ?? b.effect ?? "",
+      booster_value: b.boost_value ?? b.booster_value ?? b.value ?? 1,
       uses_remaining: b.uses_remaining ?? 0,
       activated_at: b.activated_at ?? b.created_at ?? null,
     }));
@@ -76,7 +78,7 @@ export async function POST(req: NextRequest) {
       .from("active_boosters")
       .select("id")
       .eq("user_id", userId)
-      .eq("booster_effect", boosterEffect)
+      .eq("boost_type", boosterEffect)
       .gt("uses_remaining", 0)
       .maybeSingle();
 
@@ -96,8 +98,8 @@ export async function POST(req: NextRequest) {
     const { error: insertErr } = await supabaseAdmin.from("active_boosters").insert({
       user_id: userId,
       item_id: itemId,
-      booster_effect: boosterEffect,
-      booster_value: boosterValue,
+      boost_type: boosterEffect,
+      boost_value: boosterValue,
       uses_remaining: usesRemaining,
       activated_at: new Date().toISOString(),
     });
