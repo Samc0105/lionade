@@ -122,7 +122,25 @@ export default function BluffView({
   const [error, setError] = useState<string | null>(null);
   const [ninnyMsg, setNinnyMsg] = useState<string | null>("Get ready to bluff.");
   const [timeLeft, setTimeLeft] = useState(0);
-  const advanceLock = useRef(false);
+  // One advance attempt per (round id, phase), with a 4s retry window for
+  // failed POSTs. Replaces the old boolean advanceLock, which released the
+  // moment the POST resolved — the still-running 500ms tick (closing over the
+  // STALE phase) could re-POST "advance" before the poll flipped the local
+  // phase, and the server (re-reading the round) advanced vote→reveal
+  // instantly: the vote phase was skipped outright whenever the second tick
+  // beat the detail refresh.
+  const advanceAttemptRef = useRef<{ key: string; at: number } | null>(null);
+  // Current round id, readable from stable callbacks without re-creating them.
+  const roundIdRef = useRef<string | null>(null);
+  // Every round id this client has adopted. Guards the ROUND_STARTED broadcast
+  // AND the activeRound poll fallback against re-adopting a stale id (e.g. an
+  // out-of-order room snapshot arriving after the next round already began).
+  const seenRoundIdsRef = useRef<Set<string>>(new Set());
+  // The subscribed bluff channel (owned by the listen effect). All outgoing
+  // bluff broadcasts ride it — minting a throwaway same-topic channel per send
+  // leaked one channel instance per round and risks supabase-js same-topic
+  // subscription conflicts (see lib/party/realtime-channels.ts).
+  const bluffChRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
 
   // ── Between-rounds countdown (shared RoundCountdown, 5s) ──
   // Fires once per round when the fresh round's detail first lands in
@@ -159,12 +177,86 @@ export default function BluffView({
   // text, so a sentinel row marks them forfeited even with fresh local state.
   const forfeited = forfeitedLocal || isForfeitText(detail?.my_submission);
 
+  // ── One-by-one reveal sequencing (state/refs only — effects live below) ──
+  // Step counter ticks ~1.2s per answer: fakes first (least-fooling to most),
+  // truth LAST. Keyed per round id so the 1.5s polls don't restart the show.
+  const [revealStep, setRevealStep] = useState(0);
+  const revealRoundRef = useRef<string | null>(null);
+  const revealDoneRef = useRef<Set<string>>(new Set());
+
+  // ── Round adoption — the ONLY place roundId changes ──
+  // Resets all per-round state in one spot. The seen-set lets the three
+  // discovery paths (ROUND_STARTED broadcast, activeRound poll fallback,
+  // startRound's own response) race safely: first adoption wins, repeats are
+  // no-ops, and a stale id can never roll the client back to an old round.
+  const adoptRound = useCallback((id: string) => {
+    if (seenRoundIdsRef.current.has(id)) return;
+    seenRoundIdsRef.current.add(id);
+    roundIdRef.current = id;
+    setRoundId(id);
+    setPhase("write");
+    setFakeInput("");
+    setForfeitedLocal(false);
+    setDetail(null);
+    setError(null);
+    setNinnyMsg("Write a fake answer that sounds real. Lie convincingly!");
+  }, []);
+
+  // ── Poll round detail (server is source of truth) ──
+  // Stable callback (reads roundIdRef) so the channel effect can subscribe
+  // ONCE per room instead of tearing down + resubscribing on every round
+  // change — each resubscribe was a brief deafness window for PHASE_CHANGED /
+  // ROUND_STARTED broadcasts.
+  const refreshDetail = useCallback(async () => {
+    const rid = roundIdRef.current;
+    if (!rid) return;
+    const res = await apiGet<RoundDetail>(`/api/party/bluff/rounds/${rid}`);
+    if (!res.ok || !res.data) return;
+    // Round changed while this GET was in flight — drop the stale payload.
+    if (roundIdRef.current !== rid) return;
+    setDetail(res.data);
+    const p = res.data.round.phase;
+    setPhase(p);
+    if (p === "vote") setNinnyMsg("Vote for the answer you think is real.");
+    // No truth spoiler mid-sequence: only name the answer once the one-by-one
+    // reveal has finished (the sequence-done effect below sets it too).
+    if (p === "reveal") {
+      setNinnyMsg(
+        revealDoneRef.current.has(res.data.round.id)
+          ? `The truth: ${res.data.round.correct_answer}`
+          : "Drumroll. Let's see who fooled who.",
+      );
+    }
+  }, []);
+
+  // Outgoing bluff broadcasts ride the SUBSCRIBED channel (fast WS push). The
+  // throwaway fallback only covers the pre-subscribe window and is removed
+  // after use instead of leaking for the session.
+  const sendBluffEvent = useCallback(
+    async (event: string, payload: Record<string, unknown>) => {
+      const subscribed = bluffChRef.current;
+      if (subscribed) {
+        try {
+          await subscribed.send({ type: "broadcast", event, payload });
+        } catch {
+          // Best-effort — every client's poll reconciles within ~1.5s anyway.
+        }
+        return;
+      }
+      const ch = supabase.channel(bluffChannel(room.code));
+      try {
+        await ch.send({ type: "broadcast", event, payload });
+      } finally {
+        void supabase.removeChannel(ch);
+      }
+    },
+    [room.code],
+  );
+
   // ── Start a fresh round (host) ──
   const startRound = useCallback(async () => {
     setPhase("loading");
     setDetail(null);
-    setFakeInput("");
-    setForfeited(false);
     setError(null);
     const res = await apiPost<{ round: RoundDetail["round"] }>(
       "/api/party/bluff/rounds",
@@ -174,16 +266,13 @@ export default function BluffView({
       setError("Couldn't fetch a question. Try again.");
       return;
     }
-    setRoundId(res.data.round.id);
-    setPhase("write");
-    setNinnyMsg("Write a fake answer that sounds real. Lie convincingly!");
-    const ch = supabase.channel(bluffChannel(room.code));
-    await ch.send({
-      type: "broadcast",
-      event: BLUFF_EVENTS.ROUND_STARTED,
-      payload: { round_id: res.data.round.id },
-    });
-  }, [room.code]);
+    // The create route is idempotent: if a round was already in flight it
+    // returns THAT round, so racing creators converge on one id. adoptRound
+    // no-ops if we've already adopted it; refreshDetail re-hydrates either way.
+    adoptRound(res.data.round.id);
+    void refreshDetail();
+    void sendBluffEvent(BLUFF_EVENTS.ROUND_STARTED, { round_id: res.data.round.id });
+  }, [room.code, adoptRound, refreshDetail, sendBluffEvent]);
 
   // ── Effective-host derivation (deadlock fallback) ──
   // If the real host disconnects mid-round, host_user_id can keep pointing at
@@ -205,17 +294,19 @@ export default function BluffView({
   }, [players, room.host_user_id]);
   const isEffectiveHost = effectiveHostUserId === meUserId;
 
-  // Reconnect bootstrap: if the page snapshot includes an in-flight round,
-  // hydrate the roundId immediately so the rejoiner's first poll lands on the
-  // live round instead of sitting on "loading" until a broadcast arrives.
-  const bootstrappedActiveRef = useRef(false);
+  // Round discovery fallback (poll-driven): the page's 3s room snapshot
+  // carries the in-flight round (activeRound). Adopting from it covers BOTH
+  //   - the rejoin/mid-phase mount (hydrate immediately instead of sitting on
+  //     "loading" until a broadcast arrives), and
+  //   - ANY missed ROUND_STARTED broadcast. The old one-shot bootstrap only
+  //     ran before the first round; if a LATER round's broadcast dropped, the
+  //     client kept polling the previous round forever and froze on its
+  //     reveal screen. The seen-set in adoptRound makes this safe against
+  //     stale snapshots.
+  const activeRoundId = activeRound?.id ?? null;
   useEffect(() => {
-    if (bootstrappedActiveRef.current) return;
-    if (roundId) return;
-    if (!activeRound?.id) return;
-    bootstrappedActiveRef.current = true;
-    setRoundId(activeRound.id);
-  }, [activeRound, roundId]);
+    if (activeRoundId) adoptRound(activeRoundId);
+  }, [activeRoundId, adoptRound]);
 
   // Host auto-starts the first round — only when there's no in-flight round
   // we should bootstrap into (the rejoin path takes that role above).
@@ -226,19 +317,16 @@ export default function BluffView({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isEffectiveHost]);
 
-  // ── Listen for round_started ──
+  // ── Bluff channel: subscribe ONCE per room ──
+  // Round discovery + phase pokes. Handlers go through the stable adoptRound /
+  // refreshDetail callbacks, so this effect no longer depends on roundId (the
+  // old version tore the channel down and resubscribed on every round change —
+  // a per-round deafness window during which broadcasts were lost).
   useEffect(() => {
     const ch = supabase.channel(bluffChannel(room.code));
     ch.on("broadcast", { event: BLUFF_EVENTS.ROUND_STARTED }, (msg: { payload?: unknown }) => {
       const payload = (msg.payload ?? {}) as { round_id?: string };
-      if (payload.round_id && payload.round_id !== roundId) {
-        setRoundId(payload.round_id);
-        setPhase("write");
-        setFakeInput("");
-        setForfeited(false);
-        setDetail(null);
-        setNinnyMsg("Write a fake answer that sounds real. Lie convincingly!");
-      }
+      if (payload.round_id) adoptRound(payload.round_id);
     });
     ch.on("broadcast", { event: BLUFF_EVENTS.PHASE_CHANGED }, () => {
       void refreshDetail();
@@ -249,41 +337,13 @@ export default function BluffView({
     // Phase 2: wrap with exponential-backoff resubscribe so a transient WS
     // drop doesn't silently leave the bluff channel dead.
     const handle = subscribeResilient(ch, { label: `bluff-room:${room.code}` });
+    bluffChRef.current = ch;
     return () => {
+      bluffChRef.current = null;
       handle.cancel();
       supabase.removeChannel(ch);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [room.code, roundId]);
-
-  // ── One-by-one reveal sequencing ──
-  // Step counter ticks ~1.2s per answer: fakes first (least-fooling to most),
-  // truth LAST. The truth banner, points breakdown, scoreboard, and CTAs stay
-  // hidden until the whole sequence lands. Reduced motion = everything at
-  // once. Keyed per round id so the 1.5s polls don't restart the show.
-  const [revealStep, setRevealStep] = useState(0);
-  const revealRoundRef = useRef<string | null>(null);
-  const revealDoneRef = useRef<Set<string>>(new Set());
-
-  // ── Poll round detail (server is source of truth) ──
-  const refreshDetail = useCallback(async () => {
-    if (!roundId) return;
-    const res = await apiGet<RoundDetail>(`/api/party/bluff/rounds/${roundId}`);
-    if (!res.ok || !res.data) return;
-    setDetail(res.data);
-    const p = res.data.round.phase;
-    setPhase(p);
-    if (p === "vote") setNinnyMsg("Vote for the answer you think is real.");
-    // No truth spoiler mid-sequence: only name the answer once the one-by-one
-    // reveal has finished (the sequence-done effect below sets it too).
-    if (p === "reveal") {
-      setNinnyMsg(
-        revealDoneRef.current.has(res.data.round.id)
-          ? `The truth: ${res.data.round.correct_answer}`
-          : "Drumroll. Let's see who fooled who.",
-      );
-    }
-  }, [roundId]);
+  }, [room.code, adoptRound, refreshDetail]);
 
   useEffect(() => {
     if (!roundId) return;
@@ -292,41 +352,62 @@ export default function BluffView({
     return () => clearInterval(iv);
   }, [roundId, refreshDetail]);
 
-  // ── Phase timer + auto-advance (host) ──
+  // Deterministic per-user jitter so the non-host fallback advancers don't all
+  // fire on the exact same tick. (The server CAS makes a stampede safe anyway —
+  // this just avoids a burst of redundant POSTs.)
+  const advanceJitterMs = useMemo(() => {
+    let h = 0;
+    for (let i = 0; i < meUserId.length; i++) h = (h * 31 + meUserId.charCodeAt(i)) >>> 0;
+    return h % 1500;
+  }, [meUserId]);
+
+  // ── Phase timer + auto-advance ──
+  // The effective host advances the moment the server deadline passes. EVERY
+  // other client is a fallback: if nothing advanced by deadline + 5s (+ their
+  // jitter) — host tab backgrounded with throttled timers, host mid-reconnect —
+  // they attempt the advance themselves. The server only accepts non-host
+  // advances after the deadline + grace, CASes the phase transition, and
+  // no-ops on a stale from_phase, so racing/duplicate advancers are safe and
+  // scores can't double-apply.
   useEffect(() => {
     if (!detail) return;
     const round = detail.round;
-    const target =
-      round.phase === "write"
-        ? round.write_ends_at
-        : round.phase === "vote"
-          ? round.vote_ends_at
-          : null;
+    if (round.phase !== "write" && round.phase !== "vote") {
+      setTimeLeft(0);
+      return;
+    }
+    const target = round.phase === "write" ? round.write_ends_at : round.vote_ends_at;
     if (!target) {
       setTimeLeft(0);
       return;
     }
     const targetMs = new Date(target).getTime();
+    const myAdvanceAt = isEffectiveHost ? targetMs : targetMs + 5_000 + advanceJitterMs;
     function tick() {
-      const remain = Math.max(0, Math.ceil((targetMs - Date.now()) / 1000));
-      setTimeLeft(remain);
-      if (remain === 0 && isEffectiveHost && !advanceLock.current && (round.phase === "write" || round.phase === "vote")) {
-        advanceLock.current = true;
-        void apiPost(`/api/party/bluff/rounds/${round.id}/complete`, { action: "advance" }).then(() => {
-          advanceLock.current = false;
-          void refreshDetail();
-          void supabase.channel(bluffChannel(room.code)).send({
-            type: "broadcast",
-            event: BLUFF_EVENTS.PHASE_CHANGED,
-            payload: { round_id: round.id },
-          });
-        });
-      }
+      const now = Date.now();
+      setTimeLeft(Math.max(0, Math.ceil((targetMs - now) / 1000)));
+      if (now < myAdvanceAt) return;
+      // One attempt per (round, phase); a failed POST may retry after 4s. The
+      // key never resets on success, so the stale 500ms tick can't re-advance
+      // the round out of the NEXT phase while the poll catches up.
+      const key = `${round.id}:${round.phase}`;
+      const prev = advanceAttemptRef.current;
+      if (prev && prev.key === key && now - prev.at < 4_000) return;
+      advanceAttemptRef.current = { key, at: now };
+      void apiPost(`/api/party/bluff/rounds/${round.id}/complete`, {
+        action: "advance",
+        // Stale-intent guard: the server no-ops if the round already moved on.
+        from_phase: round.phase,
+      }).then((res) => {
+        if (!res.ok) return; // 403 pre-grace / transient failure — retry in 4s
+        void refreshDetail();
+        void sendBluffEvent(BLUFF_EVENTS.PHASE_CHANGED, { round_id: round.id });
+      });
     }
     tick();
     const iv = setInterval(tick, 500);
     return () => clearInterval(iv);
-  }, [detail, isEffectiveHost, room.code, refreshDetail]);
+  }, [detail, isEffectiveHost, advanceJitterMs, refreshDetail, sendBluffEvent]);
 
   // ── Reveal order: fakes (ascending fool-count, biggest liar builds the
   //    drama) then the truth last. Stable id tiebreak so every client and
@@ -443,8 +524,14 @@ export default function BluffView({
       setRematchPending(false);
       return;
     }
+    // Throwaway room-channel send (page.tsx owns the subscribed room channel;
+    // we can't reach it from here) — removed after use so it doesn't leak.
     const ch = supabase.channel(roomChannel(room.code));
-    await ch.send({ type: "broadcast", event: PARTY_EVENTS.GAME_ENDED, payload: {} });
+    try {
+      await ch.send({ type: "broadcast", event: PARTY_EVENTS.GAME_ENDED, payload: {} });
+    } finally {
+      void supabase.removeChannel(ch);
+    }
     setRematchPending(false);
   }, [isEffectiveHost, rematchPending, room.code]);
 
@@ -482,6 +569,24 @@ export default function BluffView({
     setError(null);
   }, [phase]);
 
+  // ── Loading-rescue ──
+  // If we sit on the spinner too long (round creation failed, or we mounted
+  // mid-reveal where there is no in-flight round to adopt), give the effective
+  // host a manual start/retry CTA instead of an infinite spinner — the old
+  // startRound failure path set an error string that the loading branch never
+  // rendered, so a failed create looked like a permanent hang. Safe to mash:
+  // the create route returns the existing in-flight round when there is one.
+  const [loadingStuck, setLoadingStuck] = useState(false);
+  const isLoadingScreen = phase === "loading" || !detail;
+  useEffect(() => {
+    if (!isLoadingScreen) {
+      setLoadingStuck(false);
+      return;
+    }
+    const t = setTimeout(() => setLoadingStuck(true), 8_000);
+    return () => clearTimeout(t);
+  }, [isLoadingScreen]);
+
   // ── Render ──
   const playersForBoard = useMemo(() => players.map((p) => ({
     user_id: p.user_id,
@@ -490,17 +595,48 @@ export default function BluffView({
   })), [players]);
 
   if (phase === "loading" || !detail) {
+    const rescue =
+      error || loadingStuck ? (
+        <div className="flex flex-col items-center gap-3 pt-1 pb-4">
+          {error && (
+            <p className="text-red-400 text-sm font-syne text-center" role="alert">
+              {error}
+            </p>
+          )}
+          {isEffectiveHost ? (
+            <button
+              type="button"
+              onClick={() => void startRound()}
+              className="px-6 py-2.5 rounded-xl font-bebas tracking-wider text-sm transition-all active:scale-95"
+              style={{
+                background: "linear-gradient(135deg, #FFD700 0%, #B8960C 100%)",
+                color: "#04080F",
+                boxShadow: "0 4px 18px rgba(255,215,0,0.3)",
+              }}
+            >
+              {error ? "TRY AGAIN" : "START THE NEXT ROUND"}
+            </button>
+          ) : (
+            <p className="text-cream/40 text-xs font-syne">
+              Syncing with the room. The next round starts when the host kicks it off.
+            </p>
+          )}
+        </div>
+      ) : null;
     // Intermission flavor when any player has scored — running scoreboard +
     // intermission framing. Falls back to the first-round cinematic loader.
     if (players.some((p) => (p.score ?? 0) > 0)) {
       return (
-        <IntermissionCard
-          players={players}
-          meUserId={meUserId}
-          accent="#FFD700"
-          headline="NEXT ROUND IS LOADING"
-          sub="queueing trivia, brewing fakes"
-        />
+        <div className="space-y-2">
+          <IntermissionCard
+            players={players}
+            meUserId={meUserId}
+            accent="#FFD700"
+            headline="NEXT ROUND IS LOADING"
+            sub="queueing trivia, brewing fakes"
+          />
+          {rescue}
+        </div>
       );
     }
     // Cinematic loading — same shape as the Sketchy intro, gold-flavored to
@@ -528,6 +664,7 @@ export default function BluffView({
         </div>
         <p className="font-bebas text-2xl text-cream/70 tracking-[0.3em]">DEALING ROUND</p>
         <p className="text-cream/40 text-xs font-syne italic">queueing trivia, brewing fakes</p>
+        {rescue}
       </div>
     );
   }

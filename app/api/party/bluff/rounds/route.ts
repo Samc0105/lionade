@@ -50,6 +50,22 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Not a room member" }, { status: 403 });
   }
 
+  // Idempotency guard — if a round is already in flight (not yet revealed +
+  // ended) for this room, hand it back instead of minting a duplicate. Covers
+  // double NEXT ROUND clicks, two clients racing the effective-host derivation,
+  // and the loading-rescue retry button in BluffView.
+  const { data: inflight } = await supabaseAdmin
+    .from("bluff_rounds")
+    .select("id, room_id, round_num, question, category, phase, started_at, write_ends_at")
+    .eq("room_id", room.id)
+    .is("ended_at", null)
+    .order("started_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (inflight) {
+    return NextResponse.json({ round: inflight });
+  }
+
   // Compute round number.
   const { data: prev } = await supabaseAdmin
     .from("bluff_rounds")
@@ -84,6 +100,18 @@ export async function POST(req: NextRequest) {
     .select()
     .single();
   if (error || !round) {
+    // 23505 on UNIQUE (room_id, round_num): a parallel create won the race in
+    // the window between the in-flight check above and our insert. Return the
+    // winner's round so both callers converge on the same round id.
+    if (error?.code === "23505") {
+      const { data: winner } = await supabaseAdmin
+        .from("bluff_rounds")
+        .select("id, room_id, round_num, question, category, phase, started_at, write_ends_at")
+        .eq("room_id", room.id)
+        .eq("round_num", nextRoundNum)
+        .maybeSingle();
+      if (winner) return NextResponse.json({ round: winner });
+    }
     console.error("[party/bluff/rounds] insert", error?.message);
     return NextResponse.json({ error: "Couldn't create round" }, { status: 500 });
   }
