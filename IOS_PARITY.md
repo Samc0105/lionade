@@ -21,6 +21,14 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 4. **Match status enum now includes `voided` + `forfeited`, plus a `forfeited_by` column** (migration `058`, applied). Any iOS match-result rendering must handle these two new terminal states.
 5. **UI needs native (Reanimated/RN) builds:** the resilient channel (`subscribeResilient` + Supabase Presence exposing `connection` / `opponentPresent` / `opponentLastSeen`), the Reconnecting banner, the opponent-disconnected panel (End Match which voids if the opponent never played, or Keep Waiting), the explicit Forfeit control, and the VOIDED ("no Elo or Fangs changed") + FORFEITED result states all need rebuilding natively. The gameplay protocol + the 4 mode screens are unchanged, so only this connectivity/result shell is new presentation work. Flag for `vp-ios`.
 
+### Same-day competitive batch — 2v2 duo UI + networked round start (commit `73e2de0`)
+
+**Status:** ❌ pending iOS. Both reuse platform-neutral backend; only the native UI/clock-anchoring is new iOS work. Reviewer APPROVED both for the web ship. Owner: `quality-docs-writer`; the iOS port routes to `vp-ios`.
+
+6. **2v2 duo create/join** — platform-neutral backend, native UI needed. Matchmaking already groups a 2v2 queue by `party_code` (a 4-digit code two friends share to land on the same team); the web ship only added the Create duo / Join duo / Solo (auto-pair) UI on the arena hub 2v2 toggle. An iOS client reuses the exact same `party_code` queue contract and rebuilds the toggle natively. The 1v1 flow is unchanged.
+7. **Networked round start (lockstep countdown)** — platform-neutral backend, native UI needed. `competitive_matches` now carries a server-set `starts_at` (= `created_at` + 4.5s lead, **migration `059`, applied to prod**); the client Countdown anchors to it and each mode screen anchors round 1's clock to `starts_at`, so both players start in lockstep instead of each running a local 3-2-1-GO on mount. An iOS client MUST anchor its countdown + round-1 clock to `starts_at`: clamp a late loader to now (disadvantages only the late player, no edge) and fall back to the local sequence when `starts_at` is null. Per-round full sync is deferred on both platforms.
+8. **Sabotage server-authoritative attacks is DEFERRED, not shipped.** A naive version was built and code-review BLOCKED + reverted it (it measured speed against seed-time `sabotage_rounds.started_at` so it wrongly rejected legit rounds 2-8; its read-check-insert wasn't atomic; and the attack effect is an unauthenticated client broadcast the server gate doesn't actually close). No iOS work until a proper fix ships web-first (deterministic shared per-round origin + atomic insert via a unique cooldown-bucket constraint + server-validated effect delivery). Tracking only.
+
 ---
 
 ## 2026-06-10: Academia calendar + agenda + assignment tracker (web)
