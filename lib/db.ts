@@ -32,7 +32,7 @@ export async function updateProfile(userId: string, updates: {
 // P0 trust-gap fix 2026-06-05: server-enforced profile visibility.
 // Reads/writes the dedicated profiles.profile_visibility column so that
 // /api/social/search and the leaderboard ladders can filter cheaply.
-export type ProfileVisibility = "public" | "private";
+export type ProfileVisibility = "public" | "friends" | "private";
 
 export async function getProfileVisibility(userId: string): Promise<ProfileVisibility> {
   const { data } = await supabase
@@ -41,7 +41,7 @@ export async function getProfileVisibility(userId: string): Promise<ProfileVisib
     .eq("id", userId)
     .single();
   const v = (data?.profile_visibility as ProfileVisibility | null | undefined) ?? "public";
-  return v === "private" ? "private" : "public";
+  return v === "private" || v === "friends" ? v : "public";
 }
 
 export async function updateProfileVisibility(userId: string, visibility: ProfileVisibility) {
@@ -70,6 +70,15 @@ export type NotificationPrefs = {
   // the existing flags in profiles.preferences JSONB — no migration needed.
   friend_requests: boolean;
   party_invites: boolean;
+  // Settings overhaul 2026-06-11: in-app/master enable per notification. The
+  // settings UI groups these — Study {daily_reminder, streak_alert,
+  // weekly_report}, Social {friend_requests, friend_accepted, duel_challenges,
+  // nudge_received, party_invites}, Rewards {badge_unlocked, bounty_completed,
+  // fangs_received}, Product {new_features, marketing}.
+  friend_accepted: boolean;
+  nudge_received: boolean;
+  bounty_completed: boolean;
+  fangs_received: boolean;
 };
 
 export type PrivacyPrefs = {
@@ -77,6 +86,10 @@ export type PrivacyPrefs = {
   show_streak: boolean;
   show_coins: boolean;
   duel_from: "everyone" | "nobody";
+  // Settings overhaul 2026-06-11.
+  online_status: boolean;
+  friend_request_from: "everyone" | "nobody";
+  show_activity_feed: boolean;
 };
 
 export type UserPreferences = {
@@ -86,10 +99,21 @@ export type UserPreferences = {
   // P0 trust-gap fix 2026-06-05: notification + privacy toggles used to
   // be localStorage-only placebos. Now they persist server-side as
   // sub-blobs in profiles.preferences (JSONB). Top-level visibility
-  // (public/private) lives in the dedicated profiles.profile_visibility
-  // column because the server filters on it.
+  // (public/friends/private) lives in the dedicated
+  // profiles.profile_visibility column because the server filters on it.
   notifications: NotificationPrefs;
   privacy: PrivacyPrefs;
+  // Settings overhaul 2026-06-11. All persisted in profiles.preferences JSONB.
+  // Per-item EMAIL toggle (opt-in). Only weekly_report defaults email-on.
+  notifications_email: Partial<Record<keyof NotificationPrefs, boolean>>;
+  // Quiet hours — suppress in-app/email delivery within a daily window.
+  // Times are 24h "HH:MM" strings.
+  quiet_hours_enabled: boolean;
+  quiet_hours_start: string;
+  quiet_hours_end: string;
+  // ISO timestamp of the user's last data export. Gates the 24h export limit.
+  // Written by the export route ONLY — never client-PATCHable.
+  last_export_at: string | null;
 };
 
 export const DEFAULT_NOTIFICATION_PREFS: NotificationPrefs = {
@@ -105,6 +129,11 @@ export const DEFAULT_NOTIFICATION_PREFS: NotificationPrefs = {
   // to reach them and when they're invited to a party room.
   friend_requests: true,
   party_invites: true,
+  // Settings overhaul 2026-06-11.
+  friend_accepted: true,
+  nudge_received: true,
+  bounty_completed: true,
+  fangs_received: false,
 };
 
 export const DEFAULT_PRIVACY_PREFS: PrivacyPrefs = {
@@ -112,6 +141,10 @@ export const DEFAULT_PRIVACY_PREFS: PrivacyPrefs = {
   show_streak: true,
   show_coins: true,
   duel_from: "everyone",
+  // Settings overhaul 2026-06-11.
+  online_status: true,
+  friend_request_from: "everyone",
+  show_activity_feed: true,
 };
 
 const DEFAULT_PREFERENCES: UserPreferences = {
@@ -120,6 +153,13 @@ const DEFAULT_PREFERENCES: UserPreferences = {
   preferred_subjects: [],
   notifications: DEFAULT_NOTIFICATION_PREFS,
   privacy: DEFAULT_PRIVACY_PREFS,
+  // Settings overhaul 2026-06-11. Email opt-in by default, except the weekly
+  // report (the one digest users expect in their inbox).
+  notifications_email: { weekly_report: true },
+  quiet_hours_enabled: false,
+  quiet_hours_start: "22:00",
+  quiet_hours_end: "08:00",
+  last_export_at: null,
 };
 
 export async function getPreferences(userId: string): Promise<UserPreferences> {
@@ -139,6 +179,9 @@ export async function getPreferences(userId: string): Promise<UserPreferences> {
     ...stored,
     notifications: { ...DEFAULT_NOTIFICATION_PREFS, ...(stored.notifications ?? {}) },
     privacy:       { ...DEFAULT_PRIVACY_PREFS,      ...(stored.privacy      ?? {}) },
+    // Settings overhaul 2026-06-11: deep-merge the per-item email map so the
+    // weekly_report email default survives a partial stored blob.
+    notifications_email: { ...DEFAULT_PREFERENCES.notifications_email, ...(stored.notifications_email ?? {}) },
   };
 }
 
@@ -187,6 +230,9 @@ export async function updatePreferences(userId: string, prefs: Partial<UserPrefe
     ...prefs,
     notifications: { ...current.notifications, ...(prefs.notifications ?? {}) },
     privacy:       { ...current.privacy,       ...(prefs.privacy      ?? {}) },
+    // Settings overhaul 2026-06-11: deep-merge the per-item email map so a
+    // PATCH of one email toggle doesn't blow away the rest.
+    notifications_email: { ...current.notifications_email, ...(prefs.notifications_email ?? {}) },
   };
   const { error } = await supabase
     .from("profiles")
@@ -494,8 +540,10 @@ export async function getLeaderboard(limit = 10): Promise<{
       .from("profiles")
       .select("id, username, avatar_url, level, streak, coins, equipped_username_effect")
       .neq("id", DEMO_USER_ID)
-      // P0 trust-gap fix 2026-06-05: exclude private profiles.
-      .neq("profile_visibility", "private")
+      // Settings overhaul 2026-06-11: only PUBLIC profiles appear on public
+      // surfaces. 'friends' and 'private' are both non-public, so filter to
+      // public rather than just excluding 'private'.
+      .eq("profile_visibility", "public")
       .order("coins", { ascending: false })
       .limit(limit);
 
@@ -531,7 +579,9 @@ export async function getLeaderboard(limit = 10): Promise<{
   let rank = 1;
   for (const uid of topUserIds) {
     const profile = profiles?.find((p: any) => p.id === uid);
-    if (profile?.profile_visibility === "private") continue;
+    // Settings overhaul 2026-06-11: only PUBLIC profiles surface on the weekly
+    // ladder. Anything not explicitly 'public' (friends/private) is dropped.
+    if (profile && profile.profile_visibility !== "public") continue;
     out.push({
       rank: rank++,
       user_id: uid,
@@ -560,8 +610,9 @@ export async function getEloLeaderboard(limit = 200): Promise<{
     .from("profiles")
     .select("id, username, avatar_url, arena_elo, level, xp")
     .neq("id", DEMO_USER_ID)
-    // P0 trust-gap fix 2026-06-05: exclude private profiles from public ladder.
-    .neq("profile_visibility", "private")
+    // Settings overhaul 2026-06-11: only PUBLIC profiles on the public ladder
+    // (friends + private are both non-public).
+    .eq("profile_visibility", "public")
     .order("arena_elo", { ascending: false })
     .limit(limit);
 
@@ -606,8 +657,9 @@ export async function getLadderLeaderboard(
     .from("profiles")
     .select(`id, username, avatar_url, level, streak, ${ladder}`)
     .neq("id", DEMO_USER_ID)
-    // P0 trust-gap fix 2026-06-05: exclude private profiles from public ladder.
-    .neq("profile_visibility", "private")
+    // Settings overhaul 2026-06-11: only PUBLIC profiles on the public ladder
+    // (friends + private are both non-public).
+    .eq("profile_visibility", "public")
     .order(ladder, { ascending: false })
     .limit(limit);
 

@@ -3,7 +3,7 @@
  *
  * P0 trust-gap fix 2026-06-05.
  *
- * Body: { visibility: "public" | "private" }
+ * Body: { visibility: "public" | "friends" | "private" }
  *
  * Writes the dedicated profiles.profile_visibility column (migration
  * 20260605142539_trust_gaps_visibility_prefs.sql). This is the column
@@ -25,7 +25,7 @@ import { supabaseAdmin } from "@/lib/supabase-server";
 
 export const dynamic = "force-dynamic";
 
-const ALLOWED = new Set(["public", "private"]);
+const ALLOWED = new Set(["public", "friends", "private"]);
 
 export async function PATCH(req: NextRequest) {
   const auth = await requireAuth(req);
@@ -41,7 +41,7 @@ export async function PATCH(req: NextRequest) {
   const v = typeof body.visibility === "string" ? body.visibility : "";
   if (!ALLOWED.has(v)) {
     return NextResponse.json(
-      { error: "visibility must be 'public' or 'private'" },
+      { error: "visibility must be 'public', 'friends', or 'private'" },
       { status: 400 },
     );
   }
