@@ -28,6 +28,14 @@ import { subscribeResilient } from "@/lib/realtime-resilient";
 const LOGICAL_W = 1000;
 const LOGICAL_H = 600;
 
+// Canvas "paper" color. Light cream (playtest 2026-06: the old near-black
+// #0a0a14 made the palette's Black / Navy / Dark Gray inks invisible — the
+// locked 16-color palette is designed for a light drawing surface). The
+// eraser repaints with this EXACT color so erases stay invisible; persisted
+// eraser strokes are stored as "__erase__" and resolve to whatever this
+// constant is at replay time, so history stays consistent with the bg.
+export const SKETCH_CANVAS_BG = "#EEF4FF";
+
 export interface SketchCanvasProps {
   roomCode: string;
   roundId: string;
@@ -72,7 +80,7 @@ export default function SketchCanvas({
   roundId,
   readonly,
   disabled = false,
-  color = "#FFFFFF",
+  color = "#000000",
   size = 8,
   tool = "brush",
   onStrokeCountChange,
@@ -227,8 +235,8 @@ export default function SketchCanvas({
         canvas.width = targetW;
         canvas.height = targetH;
       }
-      // Clear with a near-black background so eraser strokes look "erased".
-      ctx.fillStyle = "#0a0a14";
+      // Clear with the paper color so eraser strokes look "erased".
+      ctx.fillStyle = SKETCH_CANVAS_BG;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
       const scaleX = canvas.width / LOGICAL_W;
@@ -240,7 +248,7 @@ export default function SketchCanvas({
         ctx.lineCap = "round";
         ctx.lineJoin = "round";
         const isErase = s.is_eraser || s.color === "__erase__";
-        ctx.strokeStyle = isErase ? "#0a0a14" : s.color;
+        ctx.strokeStyle = isErase ? SKETCH_CANVAS_BG : s.color;
         ctx.lineWidth = (isErase ? Math.max(s.size, 14) : s.size) * Math.min(scaleX, scaleY);
         ctx.beginPath();
         const first = s.points[0];
@@ -389,8 +397,8 @@ export default function SketchCanvas({
       className={`w-full rounded-2xl overflow-hidden relative ${disabled ? "pointer-events-none" : ""}`}
       style={{
         ...aspectStyle,
-        background: "#0a0a14",
-        border: "1px solid rgba(255,255,255,0.1)",
+        background: SKETCH_CANVAS_BG,
+        border: "1px solid rgba(255,255,255,0.14)",
         boxShadow: "0 8px 32px rgba(0,0,0,0.4)",
         touchAction: "none",
       }}

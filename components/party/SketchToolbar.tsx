@@ -11,24 +11,49 @@ import { useEffect, useRef, useState } from "react";
 
 export type SketchTool = "brush" | "eraser";
 
-// Quick-row swatches. 12 colors picked to read well on the dark canvas bg
-// (#0a0a14). Pure black was dropped — invisible on the canvas — and replaced
-// with a slate that still reads as "dark." Added pink, cyan, brown, light gray
-// to fill the gaps in the original 8 (the missing colors Sam called out).
+// Quick swatches — the locked 16-color palette (playtest 2026-06), rendered
+// as a 4x4 grid. Black is BACK (the canvas now paints on a light cream
+// surface, see SKETCH_CANVAS_BG in SketchCanvas) and it's the default ink.
+// Every swatch carries a 1px white/20 border so the near-black tiers (black,
+// navy, dark gray) stay distinguishable against the dark toolbar glass.
 export const SKETCH_COLORS = [
+  "#000000", // black
   "#FFFFFF", // white
-  "#F87171", // red
-  "#F472B6", // pink
-  "#FB923C", // orange
-  "#FACC15", // yellow
-  "#4ADE80", // green
-  "#22D3EE", // cyan
-  "#60A5FA", // blue
-  "#A78BFA", // purple
-  "#92400E", // brown
-  "#9CA3AF", // gray
-  "#475569", // slate (the dark-but-visible tier — was #0A0A0A black, unusable)
+  "#FF3B3B", // red
+  "#FF8C00", // orange
+  "#FFD700", // yellow
+  "#00C853", // green
+  "#00BCD4", // teal
+  "#2979FF", // blue
+  "#AA00FF", // purple
+  "#FF4081", // pink
+  "#795548", // brown
+  "#BDBDBD", // light gray
+  "#424242", // dark gray
+  "#FFCC80", // skin
+  "#1A237E", // navy
+  "#AEEA00", // lime
 ] as const;
+
+// Human-readable names for aria-labels (screen readers should not hear hex).
+const SKETCH_COLOR_NAMES: Record<string, string> = {
+  "#000000": "Black",
+  "#FFFFFF": "White",
+  "#FF3B3B": "Red",
+  "#FF8C00": "Orange",
+  "#FFD700": "Yellow",
+  "#00C853": "Green",
+  "#00BCD4": "Teal",
+  "#2979FF": "Blue",
+  "#AA00FF": "Purple",
+  "#FF4081": "Pink",
+  "#795548": "Brown",
+  "#BDBDBD": "Light gray",
+  "#424242": "Dark gray",
+  "#FFCC80": "Skin",
+  "#1A237E": "Navy",
+  "#AEEA00": "Lime",
+};
 
 // Richer palette for the expanded picker — a spectrum sweep across hues plus a
 // neutral ramp, sized for readability on dark canvas. The deepest tier of
@@ -102,7 +127,10 @@ export default function SketchToolbar({
 
   const quickColors = SKETCH_COLORS as readonly string[];
   // The active brush color is "custom" when it's not one of the quick swatches.
-  const isCustomColor = tool === "brush" && !quickColors.includes(color);
+  // Case-insensitive: <input type="color"> returns lowercase hex.
+  const isCustomColor =
+    tool === "brush" &&
+    !quickColors.some((q) => q.toLowerCase() === color.toLowerCase());
 
   function chooseColor(c: string) {
     onColorChange(c);
@@ -128,7 +156,7 @@ export default function SketchToolbar({
 
   return (
     <div
-      className="flex flex-wrap items-center gap-3 rounded-xl px-3 py-2.5 relative transition-colors"
+      className="flex flex-wrap items-center gap-2.5 rounded-xl px-2.5 py-2 relative transition-colors"
       style={{
         background: eraseActive
           ? "linear-gradient(135deg, rgba(40,24,72,0.85) 0%, rgba(20,12,40,0.85) 100%)"
@@ -138,52 +166,32 @@ export default function SketchToolbar({
         boxShadow: eraseActive ? "inset 0 0 0 1px rgba(168,85,247,0.18)" : undefined,
       }}
     >
-      {/* Quick swatches (fast path) */}
-      <div className="flex items-center gap-1.5 flex-wrap">
+      {/* Quick swatches — 4x4 palette grid (28px tiles). The roulette toggle
+          + up to 3 recent custom colors ride along as a fifth grid row so the
+          block stays one tidy column. Selected state: 2px cream ring + slight
+          scale (static, reduced-motion safe); every tile keeps a 1px white/20
+          border so black / navy / dark gray read against the dark glass. */}
+      <div className="grid grid-cols-4 gap-1">
         {SKETCH_COLORS.map((c) => {
-          const active = color === c && tool === "brush";
+          const active = color.toLowerCase() === c.toLowerCase() && tool === "brush";
           return (
             <button
               key={c}
-              aria-label={`Color ${c}`}
+              aria-label={`Color ${SKETCH_COLOR_NAMES[c] ?? c}`}
+              aria-pressed={active}
               onClick={() => chooseColor(c)}
-              className={`w-7 h-7 rounded-full transition-transform active:scale-90 ${active ? "scale-110 pa-active-swatch" : "hover:scale-105"}`}
+              className={`w-7 h-7 rounded-lg transition-transform active:scale-90 ${active ? "scale-110" : "hover:scale-105"}`}
               style={{
                 background: c,
-                border: active ? "2px solid #FFD700" : "1px solid rgba(255,255,255,0.2)",
+                border: "1px solid rgba(255,255,255,0.2)",
+                boxShadow: active
+                  ? "0 0 0 2px #EEF4FF, 0 0 10px rgba(238,244,255,0.35)"
+                  : undefined,
               }}
+              title={SKETCH_COLOR_NAMES[c] ?? c}
             />
           );
         })}
-
-        {/* Recents — last 5 colors the drawer reached for, dedup'd against the
-            quick row above so we don't waste slots showing the same swatch
-            twice. Tiny divider before the chips so it reads as a distinct
-            sub-section. Hidden when empty (cold-start drawer has nothing). */}
-        {recents.filter((c) => !quickColors.includes(c)).length > 0 && (
-          <>
-            <span aria-hidden="true" className="mx-0.5 w-px h-5 bg-white/10" />
-            {recents
-              .filter((c) => !quickColors.includes(c))
-              .slice(0, 5)
-              .map((c, i) => {
-                const active = color.toLowerCase() === c.toLowerCase() && tool === "brush";
-                return (
-                  <button
-                    key={`recent-${c}-${i}`}
-                    aria-label={`Recent color ${c}`}
-                    onClick={() => chooseColor(c)}
-                    className={`w-6 h-6 rounded-full transition-transform active:scale-90 ${active ? "scale-110 pa-active-swatch" : "hover:scale-110"}`}
-                    style={{
-                      background: c,
-                      border: active ? "2px solid #FFD700" : "1px solid rgba(255,255,255,0.18)",
-                    }}
-                    title={`Recent: ${c}`}
-                  />
-                );
-              })}
-          </>
-        )}
 
         {/* Expand / "roulette of colors" affordance. Shows the current custom
             color as the swatch face when one is active. */}
@@ -192,14 +200,17 @@ export default function SketchToolbar({
           aria-label="More colors"
           aria-expanded={pickerOpen}
           onClick={() => setPickerOpen((o) => !o)}
-          className={`w-7 h-7 rounded-full flex items-center justify-center transition-transform active:scale-90 ${isCustomColor || pickerOpen ? "scale-110 pa-active-swatch" : "hover:scale-105"}`}
+          className={`w-7 h-7 rounded-lg flex items-center justify-center transition-transform active:scale-90 ${isCustomColor || pickerOpen ? "scale-110" : "hover:scale-105"}`}
           style={{
             // Conic gradient = the "color wheel" hint; if a custom color is
-            // active, ring it in gold and show it as the center.
+            // active, ring it in cream and show it as the center.
             background: isCustomColor
               ? color
               : "conic-gradient(from 0deg, #F87171, #FB923C, #FACC15, #4ADE80, #22D3EE, #60A5FA, #A78BFA, #F472B6, #F87171)",
-            border: isCustomColor || pickerOpen ? "2px solid #FFD700" : "1px solid rgba(255,255,255,0.25)",
+            border: "1px solid rgba(255,255,255,0.25)",
+            boxShadow: isCustomColor || pickerOpen
+              ? "0 0 0 2px #EEF4FF, 0 0 10px rgba(238,244,255,0.35)"
+              : undefined,
           }}
         >
           {!isCustomColor && (
@@ -208,6 +219,33 @@ export default function SketchToolbar({
             </span>
           )}
         </button>
+
+        {/* Recents — last custom colors the drawer reached for, dedup'd
+            against the fixed palette. Capped at 3 so they fill out the fifth
+            grid row next to the roulette toggle. */}
+        {recents
+          .filter((c) => !quickColors.some((q) => q.toLowerCase() === c.toLowerCase()))
+          .slice(0, 3)
+          .map((c, i) => {
+            const active = color.toLowerCase() === c.toLowerCase() && tool === "brush";
+            return (
+              <button
+                key={`recent-${c}-${i}`}
+                aria-label={`Recent color ${c}`}
+                aria-pressed={active}
+                onClick={() => chooseColor(c)}
+                className={`w-7 h-7 rounded-lg transition-transform active:scale-90 ${active ? "scale-110" : "hover:scale-105"}`}
+                style={{
+                  background: c,
+                  border: "1px dashed rgba(255,255,255,0.25)",
+                  boxShadow: active
+                    ? "0 0 0 2px #EEF4FF, 0 0 10px rgba(238,244,255,0.35)"
+                    : undefined,
+                }}
+                title={`Recent: ${c}`}
+              />
+            );
+          })}
       </div>
 
       {/* Expanded picker popover */}
@@ -301,14 +339,15 @@ export default function SketchToolbar({
                 />
               ) : (
                 // Solid dot in the current brush color so the drawer sees
-                // exactly what their stroke will look like.
+                // exactly what their stroke will look like. White/25 edge so
+                // black / navy / dark gray inks stay visible on the glass.
                 <span
                   className="rounded-full block"
                   style={{
                     width: dotPx,
                     height: dotPx,
                     background: color,
-                    boxShadow: "inset 0 0 0 1px rgba(0,0,0,0.15)",
+                    border: "1px solid rgba(255,255,255,0.25)",
                   }}
                 />
               )}
@@ -333,7 +372,7 @@ export default function SketchToolbar({
                 width: hoveredSize * 1.6,
                 height: hoveredSize * 1.6,
                 background: eraseActive ? "transparent" : color,
-                border: eraseActive ? "2px solid rgba(238,244,255,0.85)" : "1px solid rgba(0,0,0,0.15)",
+                border: eraseActive ? "2px solid rgba(238,244,255,0.85)" : "1px solid rgba(255,255,255,0.25)",
               }}
             />
             <span className="font-mono text-[9px] uppercase tracking-[0.18em] text-cream/55">
