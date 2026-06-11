@@ -13,6 +13,10 @@ tsconfig.tsbuildinfo
 # Vercel
 .vercel
 
+# Local dev artifacts (screenshots, Playwright MCP) — not part of the app
+/.playwright-mcp/
+/*.png
+
 # Claude — track shared agents/commands, ignore per-user local settings
 .claude/settings.local.json
 
