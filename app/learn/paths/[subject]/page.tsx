@@ -11,11 +11,11 @@ import {
   getUserStageProgress,
   getQuizQuestions,
   checkAnswer,
-  saveStageProgress,
   saveQuizSession,
   type LearningPathStage,
   type UserStageProgress,
 } from "@/lib/db";
+import { apiPost } from "@/lib/api-client";
 import { mutateUserStats } from "@/lib/hooks";
 import { cdnUrl } from "@/lib/cdn";
 import { Ruler, Dna, Bank, Flask, Check, Lock, Lightning, type Icon } from "@phosphor-icons/react";
@@ -234,25 +234,35 @@ export default function RoadMapPage() {
 
     const totalQ = questions.length;
     try {
-      // Save stage progress
-      const { stars, isNewBest: newBest } = await saveStageProgress(
-        user.id,
-        activeStage.id,
-        score,
-        totalQ
-      );
+      // Server-authoritative progress + Fang reward (2026-06-11). The route
+      // writes user_stage_progress AND pays the capped reward exactly once
+      // per stage completion — the old flow credited coins from the browser
+      // (saveStageProgress + saveQuizSession's incrementCoins), which let any
+      // client grant itself arbitrary Fangs.
+      const res = await apiPost<{
+        stars: number;
+        isNewBest: boolean;
+        fangsAwarded: number;
+      }>("/api/paths/complete-stage", {
+        stageId: activeStage.id,
+        correct: score,
+        total: totalQ,
+      });
+      if (!res.ok || !res.data) throw new Error(res.error ?? "Couldn't save progress");
+      const { stars, isNewBest: newBest } = res.data;
       setResultStars(stars);
       setIsNewBest(newBest);
 
-      // Save as quiz session too
-      const coinsEarned = score * 5 + stars * 10;
+      // Still log a quiz session for history/streak surfaces, but with
+      // coins_earned: 0 — Fangs are paid server-side above; a non-zero value
+      // here would double-pay via the client-side increment.
       const xpEarned = score * 20 + stars * 25;
       await saveQuizSession({
         user_id: user.id,
         subject: meta?.quizSubject ?? subject,
         total_questions: totalQ,
         correct_answers: score,
-        coins_earned: coinsEarned,
+        coins_earned: 0,
         xp_earned: xpEarned,
         streak_bonus: false,
       });
