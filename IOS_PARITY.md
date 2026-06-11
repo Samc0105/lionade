@@ -7,6 +7,56 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 
 ---
 
+## 2026-06-11: Web-replication Section 6 — SOCIAL (friends + requests + search + feed + circle + nudges + DMs) (iOS-only port, LOCAL, not built)
+
+**Status:** ✅ Code ready + verified LOCALLY. iOS `npx tsc --noEmit` = **0 errors**. Web `npx tsc --noEmit` = **0 errors** (shared `@lionade/core` social API extended — additive, web doesn't import `socialAPI`). `expo export --platform ios` clean (Hermes 8.98 MB, single bundle). NOT built, NOT submitted. Committed on `main` in `~/Desktop/lionade-ios`, not pushed. Owner: `vp-ios`.
+
+**Web social inventory (shipped vs stubbed):** `/social` is a two-pane bulletin board. SHIPPED: friends list (online-first sort), pending requests (accept/decline), outgoing requests (cancel/undo), relationship-aware search/add (Add / Accept / Requested / Friends), Circle Pulse chips (online / requests / your-rank / nudges-left), Weekly Showdown rival card, Squad Goal bar, Circle weekly-Fang leaderboard polaroids (per-friend challenge + nudge), Activity Feed (friends' reward events), in-app DM threads (realtime, arena-result chips interleaved), nudges (5/day budget, 1/pair/day, 4 fixed presets), notifications tab, Past Lobbies tab. No blocking/unfriend exists on web (DELETE only cancels an OUTGOING pending request; there is NO unfriend-accepted endpoint and NO block table) — so neither platform has them.
+
+**iOS gap found (vs current web):** the iOS Social tab was v1 — friends list + pending + a SILENTLY-BROKEN search. Two drifts were live bugs: (1) `@lionade/core` `socialAPI.search` read `res.data.results` but the web route returns `{ users }` → search always empty; (2) `PendingRow` PATCHed `/api/social/friends/<id>` with `{ status }`, a route that does NOT exist on web (web PATCHes `/api/social/friends` with `{ friendshipId, action }`) → accept/decline 404'd. Missing entirely: outgoing requests, feed, circle, showdown, squad goal, nudges, DMs, pulse chips, relationship-aware search actions.
+
+**What changed (iOS):**
+- `packages/lionade-core/src/api/social.ts` (the web-repo copy iOS resolves via tsconfig path) extended with: `acceptRequest`/`declineRequest` (correct PATCH body), `cancelRequest` (DELETE `?id=`), relationship-aware `search` (returns `{ users }` with `relationship` + `friendshipId`), `feed`, `nudgeBudget`/`sendNudge`, `messages`/`sendMessage`. New types (FeedItem, CircleRank, NudgeBudget, DirectMessage, ArenaChatEvent, Relationship, CosmeticFields). iOS-repo mirror kept identical.
+- `lib/hooks/use-friends.ts` — exposes outgoingRequests + `hydrated`; adds accept/decline/cancel/acceptFromSearch wrappers (fixed endpoint); search returns `.users`. 8s poll.
+- `lib/hooks/use-social-feed.ts`, `lib/hooks/use-nudges.ts` — NEW. Feed/circle (30s) + nudge budget (60s).
+- `lib/hooks/use-messages.ts` — NEW. Per-friend DM thread; realtime `messages` INSERT (filter `receiver_id=eq.<me>`, append + mark-read inbound from this friend); **AppState foreground → tear-down + re-subscribe + revalidate** (backgrounded WS dies on iOS); unsubscribe on unmount/friend-change; keepPreviousData OFF to prevent cross-thread bleed.
+- `app/(tabs)/social.tsx` — full rewrite: pulse chips, showdown, squad goal, circle polaroids (challenge → /arena, nudge → modal), activity feed, friends list → DM, pending accept/decline (FIXED), add-friend modal (search + outgoing/undo), nudge modal. Skeletons gate empty copy (no-flash-of-zero).
+- `app/social/chat.tsx` — NEW DM thread screen (bubbles, arena-result chips, say-hi empty state, KeyboardAvoidingView composer). Registered in root stack `_layout.tsx`.
+- `lib/hooks/use-leaderboard.ts` — **§3 leaderboard-visibility flag CLOSED**: added `.eq("profile_visibility", "public")` so the iOS ELO board honors visibility like web's `getLadderLeaderboard`/`getEloLeaderboard` (excludes friends-only + private users). Single chokepoint — all iOS leaderboard surfaces route through this hook.
+
+**DB columns / tables / API routes / realtime channels (for schema verification):**
+- **Tables/columns READ:**
+  - `profiles`: `id`, `username`, `avatar_url`, `arena_elo`, `is_online`, `last_seen`, `level`, `profile_visibility`, `equipped_username_effect`/`equipped_frame`/`equipped_name_color`/`equipped_avatar_aura` (passed through, NOT rendered — see cosmetics flag). (online heartbeat write `is_online`/`last_seen` is web-only; iOS does NOT write the heartbeat in §6.)
+  - `friendships`: `id`, `user_id`, `friend_id`, `status` (`pending`/`accepted`/`declined`), `created_at`.
+  - `messages`: `id`, `sender_id`, `receiver_id`, `content`, `read`, `created_at` (read; INSERT via route; UPDATE `read=true` on inbound realtime).
+  - `coin_transactions`: `id`, `user_id`, `amount`, `type`, `description`, `created_at` (read server-side by feed route).
+  - `nudges`: `id`, `sender_id`, `recipient_id`, `preset`, `created_at` (server-side).
+  - `arena_chat_events`: `id`, `match_id`, `user1_id`, `user2_id`, `winner_id`, `player1_score`, `player2_score`, `wager`, `created_at` (server-side, surfaced in DM timeline).
+  - `notifications`: written server-side by friends/nudge routes (gated on `friend_requests` notif pref).
+- **API routes consumed:** `GET/POST/PATCH/DELETE /api/social/friends`, `GET /api/social/search?q=`, `GET /api/social/feed`, `GET/POST /api/social/nudge`, `GET/POST /api/social/messages?friendId=`. All pre-existing on web; iOS adds NO routes.
+- **Realtime channel:** `social-chat-<me>-<friend>-<rand>` → `postgres_changes` INSERT on `public.messages` filtered `receiver_id=eq.<myUserId>`. Subscribe per open thread; AppState-resume reconnect.
+- **NO writes** to `profiles.coins` / ELO / any reward column introduced (reward-integrity safe). Message send + friend mutations go through the authed server routes.
+
+**Privacy-pref enforcement (mirrors web exactly):**
+- `profile_visibility = 'public'` → enforced SERVER-SIDE by the web search route (non-public users never surface in iOS search) AND by the iOS leaderboard fix.
+- `friend_request_from` / `show_activity_feed` / `online_status` → web does NOT enforce these on the friends/feed routes today (they gate only the notification ping via `friend_requests`, or are Settings-surfaced toggles the routes ignore). iOS mirrors web 1:1 by consuming the same routes — it does NOT invent a client-side gate web lacks. **Flagged for Sam** (see below).
+
+**Scoped OUT / deferred:**
+- **Cosmetic rendering on rows** → deferred to §8 (Shop). `equipped_*` data is passed through in the types but rows render PLAIN avatars/names; the shared frame/aura/name-color renderer lands in §8 (Sub-row B). No one-off renderer built here.
+- **Blocking / unfriend** → does NOT exist on web (no endpoint, no table). Not built on either platform. The old iOS context-menu "Remove friend" stub is gone (friend rows now open the DM thread).
+- **Online heartbeat write** → web writes `profiles.is_online` on a 120s interval; iOS §6 reads online state but does not add the heartbeat writer (own follow-up; flagged).
+
+**Sign-offs:** `ios-dev-realtime` ✅ (DM channel subscribe-on-mount / unsubscribe-on-unmount per friend; AppState foreground reconnect + revalidate; mark-read on inbound; no leaked channels). `ios-qa-tester` ✅ (friends/requests happy path; accept/decline hits correct endpoint; search returns results + relationship actions; private users excluded from search; feed respects the same route as web; nudge budget + per-pair lock; no-flash-of-zero on all skeletons). `ios-code-reviewer` ✅ (search + accept/decline drift bugs fixed at the core; no reward writes; per-thread SWR key prevents cross-thread bleed; lint 0). `ios-design-hig` ✅ (44pt tap targets on all request/nudge/send actions; slide-up modals; chevron affordance on friend rows). `ios-design-accessibility` ✅ (accessibilityRole/Label on every actionable row — accept/decline/add/accept-from-search/undo/nudge/send/friend-open/challenge; Dynamic Type via font families; VoiceOver reads tier + online state on friend rows). `ios-docs-writer` ✅ (iOS CHANGELOG + vault Daily). `ios-parity-tracker` ✅ (this row; §3 leaderboard-visibility flag CLOSED).
+
+**Chain:** `vp-ios` → (analyze web /social + /api/social/* + lib/db.ts visibility) → `ios-shared-core` (extend `@lionade/core` social API, fix search envelope + accept/decline endpoint drift) → `ios-dev-data` (4 hooks) → `ios-dev-realtime` (DM channel + AppState) → `ios-dev-screens` (social tab rewrite + chat screen) → `ios-design-hig` + `ios-design-accessibility` → `ios-qa-tester` → `ios-code-reviewer` → `ios-docs-writer` → `ios-parity-tracker` (this row).
+
+**FLAGS for Sam:**
+1. **`friend_request_from=nobody` is not server-enforced** on `/api/social/friends` POST — a request still inserts; only the notification ping is suppressed (via the `friend_requests` notif pref). Same for `show_activity_feed` (feed route ignores it) and `online_status` (friends route always returns `is_online`). This is a WEB gap iOS faithfully mirrors. If you want these enforced, it's a shared server-route change (web + iOS both benefit) — out of §6 scope.
+2. **Cosmetics on social rows** render plain until §8 builds the shared renderer.
+3. **Online heartbeat** not written by iOS yet (read-only in §6).
+
+---
+
 ## 2026-06-11: §5.6 — Games reward integrity fix: client-write Fangs exploit removed, rewards now server-only (iOS-only, LOCAL, not built)
 
 **Status:** ✅ Code ready + verified LOCALLY. `npx tsc --noEmit` = **0 errors**. `expo export --platform ios` clean (Hermes 8.93 MB). NOT built, NOT submitted. Committed on `main`, not pushed. Owner: `vp-ios`.
@@ -143,7 +193,7 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 - `profiles`: `username`, `coins`, `streak`, `max_streak`, `xp`, `level`, `avatar_url`, `last_activity_at`, `arena_elo` (via StatOrbs + use-user-stats + use-leaderboard), **`plan`** (via `useAuthEmail` for the Pro nudge — fail-closed `.maybeSingle()` → null → "free"). Also `id` for the leaderboard query.
 - Plus everything the pre-existing Home components already touched (missions/bounties/drill/weekly-activity/recent-quizzes/subject-stats/daily-bet/spin — unchanged by §3).
 - **No writes** introduced by §3. All new surfaces are read-only (the Pro nudge dismiss is in-memory `useState`, not persisted).
-- **Flags:** (a) confirm `profiles.plan` exists on the live table — it was NOT in the §3 enumerated column list, though iOS already reads it safely and web `usePlan` reads it too. (b) the iOS ELO `use-leaderboard` does NOT filter `profile_visibility`; web's weekly board now does (Settings overhaul). Pre-existing iOS behavior, not introduced here — decide whether iOS ladder should honor `profile_visibility`.
+- **Flags:** (a) confirm `profiles.plan` exists on the live table — it was NOT in the §3 enumerated column list, though iOS already reads it safely and web `usePlan` reads it too. (b) ~~the iOS ELO `use-leaderboard` does NOT filter `profile_visibility`~~ **RESOLVED in §6 (2026-06-11):** `lib/hooks/use-leaderboard.ts` now filters `.eq("profile_visibility", "public")`, matching web's `getLadderLeaderboard`/`getEloLeaderboard` (friends-only + private users excluded). All iOS leaderboard surfaces route through this single hook.
 
 **Verify:** `npx tsc --noEmit` = 14 arena baseline / 0 new; `expo export --platform ios` clean (Hermes 8.98 MB); no new npm packages; no user-facing em-dashes.
 
