@@ -6,7 +6,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import useSWR from "swr";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
-import { ArrowsClockwise, BookBookmark, ChatCircleDots, Check, Lightning, MaskHappy, PencilLine, PokerChip, Vault } from "@phosphor-icons/react";
+import { ArrowsClockwise, BookBookmark, ChatCircleDots, Check, Eye, Lightning, MaskHappy, PencilLine, PokerChip, Vault } from "@phosphor-icons/react";
 import { apiGet, apiPost } from "@/lib/api-client";
 import { toastError, toastSuccess } from "@/lib/toast";
 import { supabase } from "@/lib/supabase";
@@ -724,10 +724,14 @@ export default function RoomLobby({ room, players, isHost, meUserId, roomCh, onG
       selected_subjects: optimisticTopics ?? p.selected_subjects,
     };
   });
-  const allReady = optimisticPlayers.length > 0 && optimisticPlayers.every((p) => p.is_ready);
-  const readyCount = optimisticPlayers.filter((p) => p.is_ready).length;
+  // Spectators are excluded from the ready/min-player gates — they watch,
+  // they don't play, so an un-readied spectator must never block the host's
+  // Start button (mirrors the server gates in the start + ready routes).
+  const optimisticParticipants = optimisticPlayers.filter((p) => !p.is_spectator);
+  const allReady = optimisticParticipants.length > 0 && optimisticParticipants.every((p) => p.is_ready);
+  const readyCount = optimisticParticipants.filter((p) => p.is_ready).length;
   const minPlayers = GAME_META[selectedGame].minPlayers;
-  const enoughPlayers = players.length >= minPlayers;
+  const enoughPlayers = optimisticParticipants.length >= minPlayers;
 
   // Vote counts per subject across the room (for the "voted by N" aggregate).
   // PRIVACY: bank tokens are EXCLUDED from the per-subject tally and rolled
@@ -1082,11 +1086,11 @@ export default function RoomLobby({ room, players, isHost, meUserId, roomCh, onG
               {/* Keyed by the count so the tick keyframe re-fires on change.
                   Reduced motion: class withheld -> instant swap. */}
               <span
-                key={`rc-${readyCount}-${players.length}`}
+                key={`rc-${readyCount}-${optimisticParticipants.length}`}
                 className={`inline-block tabular-nums${reduced ? "" : " pa-count-tick"}`}
                 style={{ color: allReady ? "#86EFAC" : "rgba(238,244,255,0.55)" }}
               >
-                {readyCount}/{players.length}
+                {readyCount}/{optimisticParticipants.length}
               </span>{" "}
               <span style={{ color: allReady ? "rgba(134,239,172,0.7)" : "rgba(238,244,255,0.3)" }}>
                 READY
@@ -1102,7 +1106,10 @@ export default function RoomLobby({ room, players, isHost, meUserId, roomCh, onG
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
           {optimisticPlayers.map((p) => {
             const isMe = p.user_id === meUserId;
-            const isReady = p.is_ready;
+            // Spectators never read as "ready" — they get a neutral
+            // "watching" treatment instead (parity with iOS's lobby roster).
+            const isWatching = !!p.is_spectator;
+            const isReady = !isWatching && p.is_ready;
             const accent = isReady ? "rgba(34,197,94,0.45)" : isMe ? "rgba(168,85,247,0.4)" : "rgba(255,255,255,0.06)";
             // Ready cards get the Social-tab online treatment: green gradient
             // fill (inline) + ring/soft glow + breathe (pa-ready-lit class).
@@ -1144,10 +1151,19 @@ export default function RoomLobby({ room, players, isHost, meUserId, roomCh, onG
                   )}
                 </p>
                 <span
-                  className="font-bebas text-[10px] tracking-wider shrink-0"
+                  className="font-bebas text-[10px] tracking-wider shrink-0 inline-flex items-center gap-1"
                   style={{ color: isReady ? "#86EFAC" : "rgba(238,244,255,0.35)" }}
                 >
-                  {isReady ? "READY" : "..."}
+                  {isWatching ? (
+                    <>
+                      <Eye size={12} weight="bold" aria-hidden="true" />
+                      WATCHING
+                    </>
+                  ) : isReady ? (
+                    "READY"
+                  ) : (
+                    "..."
+                  )}
                 </span>
               </div>
             );
@@ -1866,8 +1882,8 @@ export default function RoomLobby({ room, players, isHost, meUserId, roomCh, onG
           )}
           {enoughPlayers && !allReady && (
             <p className="text-cream/40 text-xs font-syne text-center italic">
-              Waiting for {players.length - readyCount} player
-              {players.length - readyCount === 1 ? "" : "s"} to ready up.
+              Waiting for {optimisticParticipants.length - readyCount} player
+              {optimisticParticipants.length - readyCount === 1 ? "" : "s"} to ready up.
             </p>
           )}
           {!showDismissConfirm ? (

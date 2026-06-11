@@ -73,15 +73,18 @@ export async function POST(
     .eq("room_id", room.id)
     .eq("user_id", userId);
 
-  // Re-query the room for the aggregate ready state.
+  // Re-query the room for the aggregate ready state. Spectators are excluded
+  // from the aggregate — they don't play, so they must never hold `all_ready`
+  // false (mirrors the start route's gate).
   const { data: allRows } = await supabaseAdmin
     .from("party_room_players")
-    .select("is_ready")
+    .select("is_ready, is_spectator")
     .eq("room_id", room.id)
     .is("left_at", null);
 
-  const total = allRows?.length ?? 0;
-  const ready = (allRows ?? []).filter((r) => r.is_ready).length;
+  const participants = (allRows ?? []).filter((r) => !r.is_spectator);
+  const total = participants.length;
+  const ready = participants.filter((r) => r.is_ready).length;
 
   return NextResponse.json({
     ok: true,

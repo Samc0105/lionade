@@ -46,14 +46,19 @@ export async function POST(
     return NextResponse.json({ error: "Only the host can start a game" }, { status: 403 });
   }
 
-  // Active player count + ready check.
+  // Active player count + ready check. Spectators (is_spectator=true) are
+  // excluded from BOTH gates — they watch, they don't play, so an un-readied
+  // spectator must never block the host from starting and must not count
+  // toward the minimum. The games' own logic already excludes them from
+  // early-advance counts; this keeps the start gate consistent.
   const { data: activePlayers } = await supabaseAdmin
     .from("party_room_players")
-    .select("user_id, is_ready")
+    .select("user_id, is_ready, is_spectator")
     .eq("room_id", room.id)
     .is("left_at", null);
 
-  const playerCount = activePlayers?.length ?? 0;
+  const participants = (activePlayers ?? []).filter((p) => !p.is_spectator);
+  const playerCount = participants.length;
   if (game === "sketch" && playerCount < 2) {
     return NextResponse.json({ error: "Sketchy Subjects needs at least 2 players" }, { status: 400 });
   }
@@ -70,8 +75,8 @@ export async function POST(
     return NextResponse.json({ error: "Lightning Round needs at least 2 players" }, { status: 400 });
   }
 
-  // Every active player must be ready (host included).
-  const allReady = (activePlayers ?? []).every((p) => p.is_ready);
+  // Every active NON-SPECTATOR player must be ready (host included).
+  const allReady = participants.every((p) => p.is_ready);
   if (!allReady) {
     return NextResponse.json(
       { error: "Waiting for all players to ready up." },
