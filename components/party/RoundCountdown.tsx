@@ -20,6 +20,8 @@ interface Props {
   roundNum: number;
   /** Optional total for "ROUND N OF M". */
   totalRounds?: number | null;
+  /** The label word before the number (e.g. "ROUND", "QUESTION"). Default "ROUND". */
+  label?: string;
   /** Countdown length in seconds. Default 5. */
   seconds?: number;
   /** Accent color for the big number + chip. */
@@ -35,6 +37,7 @@ interface Props {
 export default function RoundCountdown({
   roundNum,
   totalRounds,
+  label = "ROUND",
   seconds = 5,
   accent = "#4A90D9",
   headline,
@@ -66,7 +69,7 @@ export default function RoundCountdown({
       exit={{ opacity: 0 }}
       role="status"
       aria-live="polite"
-      aria-label={`Round ${roundNum}${totalRounds ? ` of ${totalRounds}` : ""} starting in ${count}`}
+      aria-label={`${label} ${roundNum}${totalRounds ? ` of ${totalRounds}` : ""} starting in ${count}`}
       className="fixed inset-0 z-40 flex flex-col items-center justify-center pointer-events-none"
       style={{
         background: "radial-gradient(circle, rgba(8,6,16,0.78) 0%, rgba(8,6,16,0.92) 100%)",
@@ -83,7 +86,7 @@ export default function RoundCountdown({
             color: accent,
           }}
         >
-          ROUND {roundNum}
+          {label} {roundNum}
           {totalRounds ? ` OF ${totalRounds}` : ""}
         </span>
         {headline && (

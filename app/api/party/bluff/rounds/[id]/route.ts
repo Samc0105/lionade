@@ -14,6 +14,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
 import { isRoomMember } from "@/lib/party/room-state";
+import { advanceBluffPhase } from "@/lib/party/bluff-advance";
 // Forfeit sentinel — BluffView's "skip me this round" submits this literal so
 // the write-phase dedup/truth checks still apply. It must NEVER surface as a
 // votable card (a vote on it would hand the forfeiter unearned trick points),
@@ -55,7 +56,7 @@ export async function GET(
   if (auth instanceof NextResponse) return auth;
   const userId = auth.userId;
 
-  const { data: round } = await supabaseAdmin
+  let { data: round } = await supabaseAdmin
     .from("bluff_rounds")
     .select("*")
     .eq("id", params.id)
@@ -65,6 +66,44 @@ export async function GET(
   // Membership check prevents leaking reveal-phase secrets to non-members.
   if (!(await isRoomMember(supabaseAdmin, round.room_id, userId))) {
     return NextResponse.json({ error: "Not a room member" }, { status: 403 });
+  }
+
+  // ── Server-side lazy advance (RC1 self-heal) ──
+  // Phase advance is otherwise 100% client-driven, so if the (effective) host's
+  // tab is backgrounded its setTimeout fires late or never (browser throttling)
+  // and the room freezes forever. On every read, if the current phase's
+  // deadline has passed, advance ONE step inline using the SAME CAS-guarded,
+  // single-scoring helper the complete route uses, then re-read the round. The
+  // CAS (UPDATE ... WHERE phase = <from>) means that even if this GET races a
+  // client complete POST, exactly one flips + scores. The client fast path is
+  // unaffected — it's now just an optimization over this fallback.
+  if (round.ended_at == null) {
+    const deadline =
+      round.phase === "write"
+        ? round.write_ends_at
+        : round.phase === "vote"
+          ? round.vote_ends_at
+          : null;
+    if (deadline && Date.now() > new Date(deadline).getTime()) {
+      const { data: room } = await supabaseAdmin
+        .from("party_rooms")
+        .select("settings")
+        .eq("id", round.room_id)
+        .maybeSingle();
+      await advanceBluffPhase(
+        supabaseAdmin,
+        round.id,
+        round.phase as "write" | "vote",
+        room?.settings?.vote_seconds,
+      );
+      // Re-read so the response reflects the advanced phase / new deadlines.
+      const { data: fresh } = await supabaseAdmin
+        .from("bluff_rounds")
+        .select("*")
+        .eq("id", params.id)
+        .maybeSingle();
+      if (fresh) round = fresh;
+    }
   }
 
   const base = {

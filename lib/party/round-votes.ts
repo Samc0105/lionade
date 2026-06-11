@@ -7,10 +7,10 @@
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-export type RoundKind = "sketch" | "bluff" | "pokerface";
+export type RoundKind = "sketch" | "bluff" | "pokerface" | "trivia";
 export type VoteKind = "play_again" | "back_to_lobby";
 
-export const ROUND_KINDS: RoundKind[] = ["sketch", "bluff", "pokerface"];
+export const ROUND_KINDS: RoundKind[] = ["sketch", "bluff", "pokerface", "trivia"];
 export const VOTE_KINDS: VoteKind[] = ["play_again", "back_to_lobby"];
 
 export function isRoundKind(v: unknown): v is RoundKind {
@@ -25,6 +25,7 @@ const ROUND_TABLE: Record<RoundKind, string> = {
   sketch: "sketch_rounds",
   bluff: "bluff_rounds",
   pokerface: "party_pokerface_rounds",
+  trivia: "trivia_rounds",
 };
 
 /**

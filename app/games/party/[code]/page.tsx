@@ -31,6 +31,7 @@ import type { CurrentGame, PartyPlayer, PartyRoom } from "@/lib/party/types";
 const SketchView = dynamic(() => import("@/components/party/SketchView"), { ssr: false });
 const BluffView = dynamic(() => import("@/components/party/BluffView"), { ssr: false });
 const PokerFaceView = dynamic(() => import("@/components/party/PokerFaceView"), { ssr: false });
+const TriviaView = dynamic(() => import("@/components/party/TriviaView"), { ssr: false });
 import type { ActiveRoundLite } from "@/lib/party/room-state";
 
 interface Snapshot {
@@ -464,6 +465,17 @@ export default function PartyRoomPage() {
 
           {inGame && snap.room.current_game === "pokerface" && (
             <PokerFaceView
+              room={snap.room}
+              players={snap.players}
+              isHost={snap.isHost}
+              meUserId={snap.meUserId}
+              activeRound={snap.activeRound ?? null}
+              onReturnToLobby={onReturnToLobby}
+            />
+          )}
+
+          {inGame && snap.room.current_game === "trivia" && (
+            <TriviaView
               room={snap.room}
               players={snap.players}
               isHost={snap.isHost}

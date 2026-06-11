@@ -1,7 +1,7 @@
 // Shared types for Lionade Party API + UI.
 
 export type RoomStatus = "lobby" | "playing" | "ended";
-export type CurrentGame = "sketch" | "bluff" | "pokerface" | null;
+export type CurrentGame = "sketch" | "bluff" | "pokerface" | "trivia" | null;
 export type RoomPrivacy = "open" | "friends" | "closed";
 
 export interface PartyRoom {
@@ -29,6 +29,9 @@ export interface PartySettings {
   pf_rotations?: number;        // pokerface: full presenter rotations per game, default 2
   pf_mode?: "inperson" | "remote"; // pokerface: spoken (default) vs typed-claim
   pf_player_count?: number;     // pokerface: player count frozen at game start (stable game length)
+  trivia_answer_seconds?: number; // trivia: answer window, default 12
+  trivia_reveal_seconds?: number; // trivia: reveal window, default 6
+  trivia_round_count?: number;    // trivia: number of rounds, default 10
 }
 
 export interface PartyPlayer {
@@ -106,6 +109,33 @@ export interface BluffAnswerPublic {
   // We hide author + is_truth until reveal phase. The server filters these.
   author_user_id?: string;
   is_truth?: boolean;
+}
+
+// Trivia (Lightning Round) — Kahoot-style MCQ race. Two phases: 'answer'
+// (timed MCQ lock-in, options shown but correct_index hidden) and 'reveal'
+// (correct option + per-option tallies + per-player point breakdown). The
+// secret correct_index NEVER ships to the client before phase==='reveal'.
+export type TriviaPhase = "answer" | "reveal";
+
+export interface TriviaOption {
+  id: string;   // String(index) — "0".."3"
+  text: string;
+}
+
+export interface TriviaRoundView {
+  id: string;
+  room_id: string;
+  round_num: number;
+  question: string;
+  category: string | null;
+  phase: TriviaPhase;
+  started_at: string;
+  answer_ends_at: string | null;
+  reveal_ends_at: string | null;
+  ended_at: string | null;
+  options: TriviaOption[];
+  // Reveal-only: which option id was correct. Absent during the answer phase.
+  correct_option_id?: string;
 }
 
 // 'interrogate' is a live-mode-only beat between present and vote: one caller

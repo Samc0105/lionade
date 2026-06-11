@@ -44,6 +44,10 @@ export function pokerFaceChannel(code: string): string {
   return `party-room-${code}-pokerface`;
 }
 
+export function triviaChannel(code: string): string {
+  return `party-room-${code}-trivia`;
+}
+
 // Separate channel for lobby-only ephemeral fun (the "hurry up" nudges) — kept
 // off the main room channel so its handlers don't tangle with the room-state
 // lifecycle on (un)mount.
@@ -116,4 +120,13 @@ export const POKERFACE_EVENTS = {
   PHASE_CHANGED: "phase_changed",   // present -> vote -> reveal
   CALL_SUBMITTED: "call_submitted", // a caller called believe/doubt
   ROUND_ENDED: "round_ended",       // reveal + score
+} as const;
+
+// Trivia (Lightning Round — Kahoot-style MCQ race). Two phases: 'answer' then
+// 'reveal'. Mirrors the bluff channel shape.
+export const TRIVIA_EVENTS = {
+  ROUND_STARTED: "round_started",     // a fresh question was dealt
+  PHASE_CHANGED: "phase_changed",     // answer -> reveal -> next round
+  ROUND_ENDED: "round_ended",         // reveal settled + scored
+  ANSWER_SUBMITTED: "answer_submitted", // a player locked an answer
 } as const;

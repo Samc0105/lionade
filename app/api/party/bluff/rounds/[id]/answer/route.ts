@@ -45,31 +45,26 @@ export async function POST(
     return NextResponse.json({ error: "Not a room member" }, { status: 403 });
   }
 
-  // Reject if the fake is the truth.
-  if (normalize(text) === normalize(round.correct_answer)) {
+  // Reject if the fake is the truth — this stops "type the real answer as my
+  // fake" gaming. We use normalize() here ON PURPOSE: "The Moon!" should not
+  // sneak past as a fake of "the moon". This guard only compares the player's
+  // own submission to the truth, so it never blocks one player because ANOTHER
+  // player happened to submit something similar.
+  if (!isForfeitText(text) && normalize(text) === normalize(round.correct_answer)) {
     return NextResponse.json(
-      { error: "That's the real answer. Try a different fake." },
+      { error: "That answer matches the real answer. Try a different bluff." },
       { status: 400 },
     );
   }
 
-  // Reject duplicates of an existing answer in this round (case-insensitive).
-  // Forfeit sentinels are exempt: multiple players may sit the same round out,
-  // and without this exemption the SECOND forfeiter got a 409 ("Someone
-  // already submitted that") and couldn't forfeit at all.
-  if (!isForfeitText(text)) {
-    const { data: existingAnswers } = await supabaseAdmin
-      .from("bluff_answers")
-      .select("text")
-      .eq("round_id", round.id);
-    const dup = (existingAnswers ?? []).some((a) => normalize(a.text) === normalize(text));
-    if (dup) {
-      return NextResponse.json(
-        { error: "Someone already submitted that. Try a different fake." },
-        { status: 409 },
-      );
-    }
-  }
+  // NOTE: we deliberately do NOT reject a fake just because it collides with
+  // ANOTHER player's fake (RC3). In real play "the moon" vs "The Moon!" and
+  // "1912" vs "1912 AD" collide constantly under normalize(), which silently
+  // 409'd the second submitter and looked like "answers aren't saving."
+  // Fibbage explicitly merges identical fakes and splits the points; at minimum
+  // we must never block them. Per-user idempotency is enforced below via the
+  // (round_id, user_id) upsert path — a player re-submitting just edits their
+  // own row, never collides with the room.
 
   // Upsert by (round_id, user_id): submitting again replaces the previous fake.
   const { data: existingMine } = await supabaseAdmin

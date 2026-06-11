@@ -9,7 +9,7 @@ import { motion } from "framer-motion";
 import { Eye } from "@phosphor-icons/react";
 
 interface Props {
-  variant?: "sketch" | "bluff" | "pokerface";
+  variant?: "sketch" | "bluff" | "pokerface" | "trivia";
 }
 
 const COPY: Record<NonNullable<Props["variant"]>, { title: string; sub: string; accent: string }> = {
@@ -27,6 +27,11 @@ const COPY: Record<NonNullable<Props["variant"]>, { title: string; sub: string; 
     title: "You're in. Joining next round.",
     sub: "Sit out this hand. You'll be dealt in on the next presenter.",
     accent: "#00BFFF",
+  },
+  trivia: {
+    title: "You're in. Joining next round.",
+    sub: "Watch this question wrap up. You'll race on the next one.",
+    accent: "#FF6B35",
   },
 };
 

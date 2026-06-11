@@ -6,7 +6,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import useSWR from "swr";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
-import { ArrowsClockwise, BookBookmark, ChatCircleDots, Check, MaskHappy, PencilLine, PokerChip, Vault } from "@phosphor-icons/react";
+import { ArrowsClockwise, BookBookmark, ChatCircleDots, Check, Lightning, MaskHappy, PencilLine, PokerChip, Vault } from "@phosphor-icons/react";
 import { apiGet, apiPost } from "@/lib/api-client";
 import { toastError, toastSuccess } from "@/lib/toast";
 import { supabase } from "@/lib/supabase";
@@ -22,7 +22,7 @@ import { resolveRowUsernameEffect } from "@/lib/use-username-effect";
 
 const MAX_PLAYERS = 6;
 
-type PartyGame = "sketch" | "bluff" | "pokerface";
+type PartyGame = "sketch" | "bluff" | "pokerface" | "trivia";
 
 // ── Hurry-up nudge phrases (Gen-Z, light-hearted, family-safe, no em-dashes) ──
 // Tapped from the rotating "NUDGE THE HOST" button by non-hosts; everyone in
@@ -135,6 +135,16 @@ const GAME_META: Record<PartyGame, {
     bestPlayed: "Best in person",
     Icon: PokerChip,
   },
+  trivia: {
+    title: "Lightning Round",
+    short: "LIGHTNING ROUND",
+    tagline: "Same question, everyone races. Fastest right answer wins.",
+    accent: "#FF6B35",
+    players: "2-6 players",
+    minPlayers: 2,
+    bestPlayed: "Either",
+    Icon: Lightning,
+  },
 };
 
 export default function RoomLobby({ room, players, isHost, meUserId, roomCh, onGameStarted }: Props) {
@@ -147,7 +157,8 @@ export default function RoomLobby({ room, players, isHost, meUserId, roomCh, onG
     const last = room.last_game;
     if (last === "sketch") return "bluff";
     if (last === "bluff") return "pokerface";
-    if (last === "pokerface") return "sketch";
+    if (last === "pokerface") return "trivia";
+    if (last === "trivia") return "sketch";
     return "sketch";
   });
   const [starting, setStarting] = useState(false);
@@ -168,6 +179,7 @@ export default function RoomLobby({ room, players, isHost, meUserId, roomCh, onG
       void import("@/components/party/SketchView");
       void import("@/components/party/BluffView");
       void import("@/components/party/PokerFaceView");
+      void import("@/components/party/TriviaView");
     }, 1200);
     return () => clearTimeout(t);
   }, []);
@@ -1293,8 +1305,8 @@ export default function RoomLobby({ room, players, isHost, meUserId, roomCh, onG
             </span>
           )}
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          {(["sketch", "bluff", "pokerface"] as const).map((g) => {
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {(["sketch", "bluff", "pokerface", "trivia"] as const).map((g) => {
             const meta = GAME_META[g];
             const selected = selectedGame === g;
             const accent = meta.accent;

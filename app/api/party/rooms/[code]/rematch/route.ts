@@ -69,6 +69,17 @@ export async function POST(
 
   // Close any in-flight rounds so the rematch lobby is clean. Same pattern as
   // end-game — defensive against the host slamming rematch mid-round.
+  //
+  // Trivia is different: its round_num is MAX(round_num)+1 scoped by room_id, so
+  // merely stamping ended_at would NOT reset numbering — a same-room rematch would
+  // resume at round 11, instantly tripping isFinalRound (round_num >= round_count,
+  // default 10) and showing Game Over on rematch round 1. It would also leave a
+  // dangling not-ended trivia_rounds row that the create-route's in-flight
+  // idempotency hands back, polluting the next match. So for Trivia we DELETE the
+  // rows (cascades to trivia_answers via the FK) to restart numbering at 1.
+  // Per-round trivia rows are never read outside the live game flow — Past Lobbies
+  // / history aggregate from party_room_players.score, not per-round rows — so the
+  // delete is safe.
   await Promise.all([
     supabaseAdmin
       .from("sketch_rounds")
@@ -80,6 +91,10 @@ export async function POST(
       .update({ ended_at: nowIso, phase: "reveal" })
       .eq("room_id", room.id)
       .is("ended_at", null),
+    supabaseAdmin
+      .from("trivia_rounds")
+      .delete()
+      .eq("room_id", room.id),
   ]);
 
   // Reset all active players in the room to score=0, is_ready=false. We DO

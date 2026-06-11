@@ -95,7 +95,9 @@ export async function fetchRoomSnapshot(
           ? "bluff_rounds"
           : typedRoom.current_game === "pokerface"
             ? "party_pokerface_rounds"
-            : null;
+            : typedRoom.current_game === "trivia"
+              ? "trivia_rounds"
+              : null;
     if (table) {
       const isSketch = typedRoom.current_game === "sketch";
       // Sketch reads `word` ONLY to derive the word_picked boolean below —
@@ -163,9 +165,13 @@ export async function isRoomHost(
  *
  * Accepts host-gated actions when the caller is either:
  *   (a) the stored host_user_id (the happy path), or
- *   (b) the longest-connected active player (joined_at ASC, left_at IS NULL),
- *       which is the same deterministic derivation the client uses to break
- *       deadlocks when the real host disconnects mid-game.
+ *   (b) the longest-connected active player (joined_at ASC, then user_id ASC,
+ *       left_at IS NULL), which is the SAME deterministic derivation the client
+ *       uses (BluffView: joined_at then user_id.localeCompare) to break
+ *       deadlocks when the real host disconnects mid-game. The user_id tiebreak
+ *       is load-bearing: when two players share an identical joined_at, ordering
+ *       by joined_at alone let client and server elect DIFFERENT effective hosts,
+ *       so the client-elected host's advance POST got 403'd and the room stalled.
  *
  * Only this single player gets the privilege — never "any connected player."
  */
@@ -186,12 +192,17 @@ export async function isEffectiveHost(
     .maybeSingle();
   if (storedActive) return false;
   // Stored host has dropped — promote the longest-connected active player.
+  // Tiebreak by user_id ASC so this matches the client's sort exactly
+  // (BluffView sorts joined_at then user_id.localeCompare, ascending). Without
+  // the user_id tiebreak, identical joined_at timestamps let the two sides pick
+  // different hosts → the client host's advance 403'd → stall.
   const { data: oldest } = await supabase
     .from("party_room_players")
     .select("user_id")
     .eq("room_id", roomId)
     .is("left_at", null)
     .order("joined_at", { ascending: true })
+    .order("user_id", { ascending: true })
     .limit(1)
     .maybeSingle();
   return oldest?.user_id === userId;

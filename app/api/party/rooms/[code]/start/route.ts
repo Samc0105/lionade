@@ -14,7 +14,7 @@ import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
 import { isValidRoomCode, normalizeRoomCode } from "@/lib/party/room-code";
 
-const VALID_GAMES = new Set(["sketch", "bluff", "pokerface"]);
+const VALID_GAMES = new Set(["sketch", "bluff", "pokerface", "trivia"]);
 
 export async function POST(
   req: NextRequest,
@@ -64,6 +64,11 @@ export async function POST(
   if (game === "pokerface" && playerCount < 2) {
     return NextResponse.json({ error: "Poker Face needs at least 2 players" }, { status: 400 });
   }
+  // Trivia (Lightning Round) is playable solo-vs-self for testing but really
+  // wants a crowd; require 2 like the rest of the suite.
+  if (game === "trivia" && playerCount < 2) {
+    return NextResponse.json({ error: "Lightning Round needs at least 2 players" }, { status: 400 });
+  }
 
   // Every active player must be ready (host included).
   const allReady = (activePlayers ?? []).every((p) => p.is_ready);
@@ -91,6 +96,17 @@ export async function POST(
   if (typeof incoming.pf_rotations === "number") {
     merged.pf_rotations = Math.min(3, Math.max(1, Math.round(incoming.pf_rotations)));
   }
+  // Trivia settings — whitelisted + clamped so the client can't write arbitrary
+  // keys (mirrors the pokerface merge above).
+  if (typeof incoming.trivia_answer_seconds === "number") {
+    merged.trivia_answer_seconds = Math.min(30, Math.max(5, Math.round(incoming.trivia_answer_seconds)));
+  }
+  if (typeof incoming.trivia_reveal_seconds === "number") {
+    merged.trivia_reveal_seconds = Math.min(15, Math.max(3, Math.round(incoming.trivia_reveal_seconds)));
+  }
+  if (typeof incoming.trivia_round_count === "number") {
+    merged.trivia_round_count = Math.min(20, Math.max(1, Math.round(incoming.trivia_round_count)));
+  }
   // Freeze the presenter count at game start so the game length (rotations x
   // players) is stable even if someone leaves mid-game.
   if (game === "pokerface") {
@@ -101,6 +117,22 @@ export async function POST(
     .from("party_rooms")
     .update({ status: "playing", current_game: game, settings: merged })
     .eq("id", room.id);
+
+  // Defensive Trivia reset: round_num is MAX(round_num)+1 scoped by room_id, so a
+  // fresh trivia game in a room that already played one would resume at round 11
+  // and instantly hit Game Over. Rematch deletes these rows, but a host who goes
+  // start -> back to lobby -> start (no formal rematch) would skip that path. So
+  // whenever a NEW trivia game begins, clear any prior trivia_rounds for the room
+  // (cascades to trivia_answers) to restart numbering at 1. Safe: per-round trivia
+  // rows are never read outside the live game flow (history aggregates from
+  // party_room_players.score). Done after the status flip so it can't strand a
+  // half-started room if it errored.
+  if (game === "trivia") {
+    await supabaseAdmin
+      .from("trivia_rounds")
+      .delete()
+      .eq("room_id", room.id);
+  }
 
   return NextResponse.json({ ok: true, game, room_id: room.id });
 }

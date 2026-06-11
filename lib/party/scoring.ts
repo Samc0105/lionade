@@ -22,6 +22,16 @@ export function sketchDrawerPoints(correctGuessers: number, fastGuesserRatio: nu
 export const BLUFF_TRUTH_POINTS = 1000;
 export const BLUFF_FAKE_TRICK_POINTS = 500;
 
+// ── Trivia (Lightning Round — Kahoot-style MCQ race) ──
+// Correct answer: flat +500 base, plus a speed bonus up to +500 scaled by how
+// much of the answer window was still left when you locked in, plus a streak
+// bonus of +100 per consecutive correct answer beyond the first (capped at +500
+// for a 6+ streak). A wrong / missing answer scores 0 and breaks the streak.
+export const TRIVIA_BASE_POINTS = 500;
+export const TRIVIA_MAX_SPEED_POINTS = 500;
+export const TRIVIA_STREAK_STEP_POINTS = 100;
+export const TRIVIA_STREAK_MAX_STEPS = 5; // cap streak bonus at 5 steps (+500)
+
 // ── Poker Face (party) ──
 // NO ELO, NO Fang wager — pure points. The scoring matrix:
 //   Presenter scores when they FOOL a caller: each caller who calls the wrong

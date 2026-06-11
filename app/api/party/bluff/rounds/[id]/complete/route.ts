@@ -31,10 +31,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
-import { BLUFF_TRUTH_POINTS, BLUFF_FAKE_TRICK_POINTS } from "@/lib/party/scoring";
 import { isEffectiveHost, isRoomMember } from "@/lib/party/room-state";
+import { advanceBluffPhase, forceEndBluffRound } from "@/lib/party/bluff-advance";
 
-const DEFAULT_VOTE_SECONDS = 30;
 // How far past the phase deadline a NON-host member must wait before their
 // advance is accepted. Soaks up clock skew so an early client can't shorten
 // the phase for everyone.
@@ -114,109 +113,29 @@ export async function POST(
   }
 
   // ── Force-end: CAS from any non-reveal phase straight to reveal ──
+  // Scoring (if this call wins the flip) is single-sourced in bluff-advance.
   if (action === "end") {
-    const { data: flipped } = await supabaseAdmin
-      .from("bluff_rounds")
-      .update({ phase: "reveal", ended_at: new Date().toISOString() })
-      .eq("id", round.id)
-      .neq("phase", "reveal")
-      .select("id");
-    if (flipped && flipped.length > 0) {
-      // We won the transition — votes are frozen (vote route rejects when
-      // phase != 'vote'), so scoring here is applied exactly once.
-      await scoreRound(round.id);
-    }
+    await forceEndBluffRound(supabaseAdmin, round.id);
     return NextResponse.json({ ok: true, phase: "reveal" });
   }
 
-  if (round.phase === "write") {
-    const voteSeconds = room.settings?.vote_seconds ?? DEFAULT_VOTE_SECONDS;
-    const voteEndsAt = new Date(Date.now() + voteSeconds * 1000).toISOString();
-    const { data: flipped } = await supabaseAdmin
-      .from("bluff_rounds")
-      .update({ phase: "vote", vote_ends_at: voteEndsAt })
-      .eq("id", round.id)
-      .eq("phase", "write")
-      .select("id");
-    if (!flipped || flipped.length === 0) {
-      // Lost the race — report whatever the round is now.
-      const { data: now } = await supabaseAdmin
-        .from("bluff_rounds")
-        .select("phase")
-        .eq("id", round.id)
-        .maybeSingle();
-      return NextResponse.json({ ok: true, phase: now?.phase ?? "vote", advanced: false });
-    }
-    return NextResponse.json({ ok: true, phase: "vote", vote_ends_at: voteEndsAt });
-  }
-
-  if (round.phase === "vote") {
-    const { data: flipped } = await supabaseAdmin
-      .from("bluff_rounds")
-      .update({ phase: "reveal", ended_at: new Date().toISOString() })
-      .eq("id", round.id)
-      .eq("phase", "vote")
-      .select("id");
-    if (flipped && flipped.length > 0) {
-      await scoreRound(round.id);
-    }
-    return NextResponse.json({ ok: true, phase: "reveal" });
+  // ── Single-step advance (shared with the GET lazy-advance path) ──
+  // advanceBluffPhase is CAS-guarded and runs scoring exactly once on the
+  // vote->reveal flip, so it's safe to race against the GET self-heal.
+  if (round.phase === "write" || round.phase === "vote") {
+    const result = await advanceBluffPhase(
+      supabaseAdmin,
+      round.id,
+      round.phase,
+      room.settings?.vote_seconds,
+    );
+    return NextResponse.json({
+      ok: true,
+      phase: result.phase,
+      advanced: result.advanced,
+      ...(result.vote_ends_at ? { vote_ends_at: result.vote_ends_at } : {}),
+    });
   }
 
   return NextResponse.json({ ok: true, phase: round.phase });
-}
-
-/** Compute and persist score deltas for a finished bluff round.
- *  MUST only be called by the single CAS winner of the ->reveal transition —
- *  it adds deltas to running scores, so a second invocation double-counts. */
-async function scoreRound(roundId: string): Promise<void> {
-  const { data: round } = await supabaseAdmin
-    .from("bluff_rounds")
-    .select("room_id, correct_answer")
-    .eq("id", roundId)
-    .maybeSingle();
-  if (!round) return;
-
-  const { data: answers } = await supabaseAdmin
-    .from("bluff_answers")
-    .select("id, user_id, is_truth")
-    .eq("round_id", roundId);
-  const { data: votes } = await supabaseAdmin
-    .from("bluff_votes")
-    .select("answer_id, voter_user_id")
-    .eq("round_id", roundId);
-
-  const answerById = new Map<string, { user_id: string; is_truth: boolean }>();
-  (answers ?? []).forEach((a) => answerById.set(a.id, { user_id: a.user_id, is_truth: a.is_truth }));
-
-  const deltas: Map<string, number> = new Map();
-  (votes ?? []).forEach((v) => {
-    const answer = answerById.get(v.answer_id);
-    if (!answer) return;
-    if (answer.is_truth) {
-      // Voter picked the truth → +1000 for voter.
-      deltas.set(v.voter_user_id, (deltas.get(v.voter_user_id) ?? 0) + BLUFF_TRUTH_POINTS);
-    } else {
-      // Voter picked a fake → +500 for the fake's author (the bluffer).
-      deltas.set(answer.user_id, (deltas.get(answer.user_id) ?? 0) + BLUFF_FAKE_TRICK_POINTS);
-    }
-  });
-
-  // Apply deltas to party_room_players.
-  const entries = Array.from(deltas.entries());
-  for (const [uid, delta] of entries) {
-    if (delta === 0) continue;
-    const { data: row } = await supabaseAdmin
-      .from("party_room_players")
-      .select("score")
-      .eq("room_id", round.room_id)
-      .eq("user_id", uid)
-      .maybeSingle();
-    if (!row) continue;
-    await supabaseAdmin
-      .from("party_room_players")
-      .update({ score: (row.score ?? 0) + delta })
-      .eq("room_id", round.room_id)
-      .eq("user_id", uid);
-  }
 }
