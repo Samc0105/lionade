@@ -218,7 +218,7 @@ export default function OnboardingPage() {
       .from("profiles")
       .update({
         selected_subjects: selectedSubjects,
-        daily_target: dailyMinutes,
+        daily_target_minutes: dailyMinutes,
         goal_type: goalType,
         education_level: educationLevel,
         onboarding_completed: true,

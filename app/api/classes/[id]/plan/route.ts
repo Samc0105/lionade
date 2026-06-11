@@ -34,7 +34,7 @@ import { displayPct } from "@/lib/mastery";
  *   - Days until next exam in this class (if set)
  *   - Per-subtopic mastery snapshot from attached user_exams
  *   - Up to 5 recent note titles + summaries
- *   - User's daily_target minutes from profile
+ *   - User's daily_target_minutes from profile
  *
  * Output is structured JSON: a list of tasks with kind/label/minutes/
  * deepLink so the UI can render action buttons.
@@ -142,7 +142,7 @@ export async function GET(req: NextRequest, { params }: RouteCtx) {
         .eq("archived", false),
       supabaseAdmin
         .from("profiles")
-        .select("daily_target")
+        .select("daily_target_minutes")
         .eq("id", userId)
         .single(),
       supabaseAdmin
@@ -156,7 +156,7 @@ export async function GET(req: NextRequest, { params }: RouteCtx) {
     ]);
 
     const exams = examsRes.data ?? [];
-    const dailyTargetMinutes = (profileRes.data?.daily_target as number | null) || DEFAULT_DAILY_TARGET_MINUTES;
+    const dailyTargetMinutes = (profileRes.data?.daily_target_minutes as number | null) || DEFAULT_DAILY_TARGET_MINUTES;
     const notes = notesRes.data ?? [];
 
     // Per-subtopic mastery snapshot for each exam
