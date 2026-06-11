@@ -172,7 +172,7 @@ export async function lazyAdvancePokerFace(
  *  MUST only be called by the single CAS winner of the vote->reveal transition —
  *  it ADDS deltas to running scores, so a second invocation would double-count.
  *  The CAS guard in lazyAdvancePokerFace (and the /complete route) enforces this. */
-async function scorePokerFaceRound(
+export async function scorePokerFaceRound(
   supabase: SupabaseClient,
   round: Pick<RoundRow, "id" | "room_id" | "presenter_user_id" | "is_lie">,
 ): Promise<void> {

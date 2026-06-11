@@ -650,12 +650,16 @@ export async function getLadderLeaderboard(
   elo: number;
   level: number;
   streak: number;
+  equipped_username_effect?: string | null;
+  equipped_frame?: string | null;
+  equipped_name_color?: string | null;
+  equipped_avatar_aura?: string | null;
 }[]> {
   // Exclude the shared demo account from any of the three competitive
   // ladders (arena_elo / competitive_elo / squad_elo).
   const { data, error } = await supabase
     .from("profiles")
-    .select(`id, username, avatar_url, level, streak, ${ladder}`)
+    .select(`id, username, avatar_url, level, streak, equipped_username_effect, equipped_frame, equipped_name_color, equipped_avatar_aura, ${ladder}`)
     .neq("id", DEMO_USER_ID)
     // Settings overhaul 2026-06-11: only PUBLIC profiles on the public ladder
     // (friends + private are both non-public).
@@ -673,6 +677,10 @@ export async function getLadderLeaderboard(
     elo: p[ladder] ?? 1000,
     level: p.level ?? 1,
     streak: p.streak ?? 0,
+    equipped_username_effect: p.equipped_username_effect ?? null,
+    equipped_frame: p.equipped_frame ?? null,
+    equipped_name_color: p.equipped_name_color ?? null,
+    equipped_avatar_aura: p.equipped_avatar_aura ?? null,
   }));
 }
 

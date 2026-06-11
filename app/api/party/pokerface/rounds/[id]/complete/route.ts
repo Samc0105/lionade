@@ -20,7 +20,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
-import { pokerFaceRoundPoints } from "@/lib/party/scoring";
+import { scorePokerFaceRound } from "@/lib/party/pokerface-advance";
 import { isEffectiveHost } from "@/lib/party/room-state";
 
 export async function POST(
@@ -74,39 +74,11 @@ export async function POST(
   }
 
   // ── Server-authoritative scoring (shared helper — same math the reveal GET
-  // previews, so banked == displayed, including the caught-red-handed penalty) ──
-  const isLie = round.is_lie === true;
-  const { data: calls } = await supabaseAdmin
-    .from("party_pokerface_votes")
-    .select("voter_user_id, call")
-    .eq("round_id", round.id);
-
-  const deltas = pokerFaceRoundPoints(
-    isLie,
-    (calls ?? []).map((c) => ({ voter_user_id: c.voter_user_id, call: c.call as "believe" | "doubt" })),
-    round.presenter_user_id,
-  );
-
-  // Apply deltas to party_room_players.score (read-modify-write per player,
-  // matching the bluff scoring path). We do NOT floor at 0: the caught-red-handed
-  // penalty is allowed to push a presenter negative so the banked score always
-  // equals the per-round breakdown the reveal previews (no preview/score
-  // divergence), and a deep-negative score is a fitting badge of a blown bluff.
-  for (const [uid, delta] of Object.entries(deltas)) {
-    if (delta === 0) continue;
-    const { data: row } = await supabaseAdmin
-      .from("party_room_players")
-      .select("score")
-      .eq("room_id", round.room_id)
-      .eq("user_id", uid)
-      .maybeSingle();
-    if (!row) continue;
-    await supabaseAdmin
-      .from("party_room_players")
-      .update({ score: (row.score ?? 0) + delta })
-      .eq("room_id", round.room_id)
-      .eq("user_id", uid);
-  }
+  // lazy-advance uses, so banked == displayed, including the caught-red-handed
+  // penalty). Single-sourced in lib/party/pokerface-advance.ts. Only this CAS
+  // winner reaches here (the `claimed` guard above flipped phase vote->reveal),
+  // so deltas are applied exactly once — no double-count. ──
+  await scorePokerFaceRound(supabaseAdmin, round);
 
   return NextResponse.json({ ok: true, phase: "reveal" });
 }
