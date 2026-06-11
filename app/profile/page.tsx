@@ -65,6 +65,7 @@ import dynamic from "next/dynamic";
 const ShareCard = dynamic(() => import("@/components/ShareCard"), { ssr: false });
 import AnimatedUsername from "@/components/AnimatedUsername";
 import Avatar from "@/components/Avatar";
+import CosmeticLocker from "@/components/CosmeticLocker";
 import { useEquippedUsernameEffect, useEquippedCosmetics } from "@/lib/use-username-effect";
 import { getBannerStyle } from "@/lib/cosmetics/cosmetic-styles";
 
@@ -1242,6 +1243,23 @@ function PersonalizationSection({ user }: SharedProps) {
   return (
     <div className="space-y-6 animate-slide-up">
       <SectionHead title="PERSONALIZATION" sub="Customize your Lionade experience" />
+
+      {/* Cosmetic Locker — manage every owned cosmetic in one place with a live
+          preview. Equipping here updates the profile hero instantly (shared
+          cosmetics-owned SWR key). Owner-only: this whole section is the self
+          settings tab inside <ProtectedRoute>. */}
+      <div>
+        <div className="flex items-center justify-between mb-3">
+          <div>
+            <h3 className="font-bebas text-lg text-cream tracking-wider">YOUR LOCKER</h3>
+            <p className="text-cream/40 text-xs mt-0.5">Equip and swap your owned looks. Changes show on your profile instantly.</p>
+          </div>
+          <a href="/shop" className="flex-shrink-0 inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-electric/15 text-electric border border-electric/30 hover:bg-electric/25 transition-all duration-200">
+            <Storefront size={14} weight="regular" aria-hidden="true" /> Shop
+          </a>
+        </div>
+        <CosmeticLocker username={user.username} />
+      </div>
 
       <Card>
         <h3 className="font-bebas text-lg text-cream tracking-wider mb-4">THEMES UNLOCKED</h3>

@@ -10,7 +10,14 @@ import { cdnUrl } from "@/lib/cdn";
 import { apiGet, apiPost } from "@/lib/api-client";
 import { toastError, toastInfo, toastSuccess } from "@/lib/toast";
 import DailySpinHero from "@/components/Shop/DailySpinHero";
+import Avatar from "@/components/Avatar";
 import AnimatedUsername, { type UsernameEffect } from "@/components/AnimatedUsername";
+import {
+  getFrameStyle,
+  getAuraStyle,
+  getNameColorStyle,
+  BANNER_STYLES,
+} from "@/lib/cosmetics/cosmetic-styles";
 import { todaysDrops as pickTodaysDrops } from "@/lib/shop-daily-drops";
 import {
   COSMETIC_ITEMS as CORE_COSMETIC_ITEMS,
@@ -579,6 +586,92 @@ function FeaturedCard({ item, owned, equipped = false, onBuy, onEquip }: { item:
   );
 }
 
+// ── Live cosmetic preview (2026-06-11) ──
+// Shop cards used to show only a Phosphor icon + the catalog emoji. Cosmetic
+// SKUs now render the REAL effect using the SAME renderers the product uses
+// (Avatar / AnimatedUsername) + the SAME style maps from cosmetic-styles.ts —
+// never a duplicate of the style data. The slot is a FIXED 64px-tall box so
+// the card never shifts whether or not a style resolves; if a lookup returns
+// null we fall back to the card's existing Phosphor icon (no flash, no gap).
+//
+// A neutral DiceBear seed is the avatar fallback when the buyer's own avatar
+// url isn't handy (logged-out / pre-load). Same DiceBear shape as lib/auth.
+const NEUTRAL_PREVIEW_AVATAR =
+  "https://api.dicebear.com/7.x/avataaars/svg?seed=Lionade&backgroundColor=4A90D9";
+
+// Resolve the AnimatedUsername effect for a `name_fx_*` SKU id (the page's
+// existing id -> effect map). Anything unmapped degrades to "none".
+function effectForId(id: string): UsernameEffect {
+  return USERNAME_EFFECT_MAP[id] ?? "none";
+}
+
+// Fixed-height visual slot. Returns `null` (so the caller falls back to the
+// Phosphor icon) for any type without a renderer or any id whose style lookup
+// is null — keeping the no-flash / no-layout-shift contract.
+function CosmeticPreview({
+  item, avatarUrl, username,
+}: {
+  item: ShopItem;
+  avatarUrl: string;
+  username: string;
+}): JSX.Element | null {
+  // Shared fixed slot wrapper so EVERY preview type occupies the same box.
+  const wrap = (children: React.ReactNode) => (
+    <div className="h-16 flex items-center justify-center" aria-hidden="true">
+      {children}
+    </div>
+  );
+
+  switch (item.type) {
+    case "frame":
+      // Only render if the id actually resolves a frame style; else fall back.
+      if (!getFrameStyle(item.id)) return null;
+      return wrap(<Avatar url={avatarUrl} alt="" size="md" frame={item.id} />);
+    case "avatar_aura":
+      if (!getAuraStyle(item.id)) return null;
+      return wrap(<Avatar url={avatarUrl} alt="" size="md" aura={item.id} />);
+    case "name_color":
+      if (!getNameColorStyle(item.id)) return null;
+      return wrap(
+        <AnimatedUsername
+          username={username}
+          nameColor={item.id}
+          size="lg"
+          className="font-bebas text-2xl tracking-wider"
+        />,
+      );
+    case "username_effect": {
+      const effect = effectForId(item.id);
+      if (effect === "none") return null;
+      return wrap(
+        <AnimatedUsername
+          username={username}
+          effect={effect}
+          size="lg"
+          className="font-bebas text-2xl tracking-wider"
+        />,
+      );
+    }
+    case "banner":
+    case "animated_banner": {
+      // Compact banner swatch. Distinguish a REAL equipped style from the
+      // ambient default by checking the lookup map directly (getBannerStyle
+      // would return the default for an unknown id, masking the fallback).
+      const banner = BANNER_STYLES[item.id];
+      if (!banner) return null;
+      return wrap(
+        <div
+          className={`w-28 h-12 rounded-lg border border-white/5 overflow-hidden ${banner.animClass ?? ""}`}
+          style={{ background: banner.background, backgroundSize: banner.backgroundSize }}
+        />,
+      );
+    }
+    // voice_skin / booster / anything else → no preview (keep the icon).
+    default:
+      return null;
+  }
+}
+
 // ── Cosmetic Card ──
 // Bucket C 2026-06-05: equipped frames / name colors / banners now expose an
 // inline "Unequip" CTA next to the green Equipped pill so users can clear the
@@ -588,11 +681,19 @@ function FeaturedCard({ item, owned, equipped = false, onBuy, onEquip }: { item:
 // Inventory tab uses, so behavior is consistent across surfaces.
 // `canAfford: null` = balance still loading → neutral disabled "Buy" (no
 // "Can't Afford" lie, no red/gray affordance) until the balance is known.
-function CosmeticCard({ item, owned, equipped = false, canAfford, onBuy, onEquip }: { item: ShopItem; owned: boolean; equipped?: boolean; canAfford: boolean | null; onBuy: () => void; onEquip?: () => void }) {
+function CosmeticCard({ item, owned, equipped = false, canAfford, onBuy, onEquip, previewAvatarUrl, previewUsername }: { item: ShopItem; owned: boolean; equipped?: boolean; canAfford: boolean | null; onBuy: () => void; onEquip?: () => void; previewAvatarUrl?: string; previewUsername?: string }) {
   const r = RARITY_COLORS[item.rarity];
   const Icon = item.Icon;
   // Boosters are equipped-by-use, not by toggle — never show the equip CTA on them.
   const isCosmetic = item.type !== "booster";
+  // LIVE cosmetic preview — real effect via the product's own renderers. Null
+  // for any type/id without a renderable style → fall back to the Phosphor icon.
+  // Called as a plain function so we can branch on the null return.
+  const preview = CosmeticPreview({
+    item,
+    avatarUrl: previewAvatarUrl || NEUTRAL_PREVIEW_AVATAR,
+    username: previewUsername || "YourName",
+  });
   return (
     <div className={`fluid-card-hover shop-card shop-tilt-card relative group rounded-xl ${r.glow} ${item.rarity === "legendary" ? "shop-legendary-sparkle shop-tier-sweep-legendary" : ""} overflow-hidden transition-all duration-300 h-full flex flex-col`}
       style={{
@@ -605,8 +706,15 @@ function CosmeticCard({ item, owned, equipped = false, canAfford, onBuy, onEquip
       {item.rarity === "legendary" && <div className="shop-legendary-border" />}
       <div className="relative z-[2] p-4 flex flex-col flex-1">
         <div className="flex items-start justify-between mb-3">
+          {/* LIVE preview when the cosmetic resolves a renderable style; else
+              the existing Phosphor icon. Both occupy the same vertical slot so
+              there is no layout shift between previewable + fallback cards. */}
           <div className="shop-item-icon">
-            <Icon size={40} weight={item.iconWeight ?? "fill"} color={item.iconColor ?? "currentColor"} aria-hidden="true" />
+            {preview ?? (
+              <div className="h-16 flex items-center">
+                <Icon size={40} weight={item.iconWeight ?? "fill"} color={item.iconColor ?? "currentColor"} aria-hidden="true" />
+              </div>
+            )}
           </div>
           <div className="flex items-center gap-1.5">
             {item.comingSoon && (
@@ -1204,6 +1312,15 @@ export default function ShopPage() {
     </div>
   );
 
+  // LIVE cosmetic previews render against the buyer's OWN avatar + username so
+  // frame/aura/name cards show what the item looks like on THEM. Memoized so
+  // the DiceBear fallback url is stable across renders (avatar-stability rule).
+  const previewAvatarUrl = useMemo(
+    () => user?.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.username ?? "Lionade"}&backgroundColor=4A90D9`,
+    [user?.avatar, user?.username],
+  );
+  const previewUsername = user?.username ?? "YourName";
+
   const userCoins = stats?.coins ?? user?.coins ?? 0;
   // Flash-of-zero gate (CLAUDE.md non-negotiable): the header balance pill
   // must not render "0" before stats/user resolve. Once either source has
@@ -1731,6 +1848,7 @@ export default function ShopPage() {
                   <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 shop-grid-stagger">
                     {NEW_SKUS.map((item) => (
                       <CosmeticCard key={item.id} item={item} owned={ownedIds.has(item.id)} equipped={isEquipped(item.id)} canAfford={affords(item.price)}
+                        previewAvatarUrl={previewAvatarUrl} previewUsername={previewUsername}
                         onBuy={() => { if (!requireLogin()) setConfirmItem({ item, quantity: 1 }); }}
                         onEquip={() => { if (!requireLogin()) void handleEquip(item.id); }} />
                     ))}
@@ -1759,6 +1877,7 @@ export default function ShopPage() {
                     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 shop-grid-stagger">
                       {AVATAR_AURAS.map((item) => (
                         <CosmeticCard key={item.id} item={item} owned={ownedIds.has(item.id)} equipped={isEquipped(item.id)} canAfford={affords(item.price)}
+                          previewAvatarUrl={previewAvatarUrl} previewUsername={previewUsername}
                           onBuy={() => { if (!requireLogin()) setConfirmItem({ item, quantity: 1 }); }}
                           onEquip={() => { if (!requireLogin()) void handleEquip(item.id); }} />
                       ))}
@@ -1928,6 +2047,7 @@ export default function ShopPage() {
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 shop-grid-stagger">
                   {filteredCosmetics.map((item) => (
                     <CosmeticCard key={item.id} item={item} owned={ownedIds.has(item.id)} canAfford={affords(item.price)}
+                      previewAvatarUrl={previewAvatarUrl} previewUsername={previewUsername}
                       onBuy={() => { if (!requireLogin()) setConfirmItem({ item, quantity: 1 }); }} />
                   ))}
                 </div>

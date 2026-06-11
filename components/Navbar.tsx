@@ -16,7 +16,8 @@ import CountUp from "@/components/CountUp";
 import ClockInButton from "@/components/ClockInButton";
 import PlanBadge, { UpgradePill } from "@/components/PlanBadge";
 import AnimatedUsername from "@/components/AnimatedUsername";
-import { useEquippedUsernameEffect } from "@/lib/use-username-effect";
+import Avatar from "@/components/Avatar";
+import { useEquippedCosmetics } from "@/lib/use-username-effect";
 import { usePlan } from "@/lib/use-plan";
 import { emitPartyInvite, fromNotificationRow } from "@/lib/party/invite-bus";
 import {
@@ -113,9 +114,12 @@ export default function Navbar() {
     : NAV_LINKS;
   const { stats, mutate: mutateStats } = useUserStats(user?.id);
   const { plan: userPlan, isPaid } = usePlan();
-  // Shop V2: drives the dropdown's username display. Safe if backend route
-  // /api/cosmetics/owned hasn't shipped yet — falls back to "none" silently.
-  const usernameEffect = useEquippedUsernameEffect();
+  // Shop V2: drives the dropdown's username display + the navbar avatar
+  // frame / aura overlays. Safe if backend route /api/cosmetics/owned hasn't
+  // shipped yet — falls back to EMPTY (no frame / aura / effect) silently, so
+  // the avatar degrades to a plain DiceBear image with no flash or layout shift.
+  const cosmetics = useEquippedCosmetics();
+  const usernameEffect = cosmetics.effect;
   // Global SWR mutate — used by the notifications realtime channel to also
   // revalidate the Social page's friends/pending hook the instant a
   // friend-request (or accept) notification lands, instead of waiting for
@@ -844,11 +848,21 @@ export default function Navbar() {
                       aria-label={`${user.username} — open menu`}
                       aria-expanded={showDropdown}
                       data-open={showDropdown ? "true" : "false"}
-                      className="nav-avatar-btn w-8 h-8 rounded-full overflow-hidden
+                      className="nav-avatar-btn w-8 h-8 rounded-full
                         cursor-pointer flex-shrink-0 transition-transform duration-200"
                       style={{ backgroundColor: "rgba(74, 144, 217, 0.25)" }}
                     >
-                      <img src={avatarUrl} alt={user.username} className="w-8 h-8 rounded-full object-cover" />
+                      {/* Avatar wrapper preserves the EXACT memoized avatarUrl
+                          src verbatim (no re-key / cache-buster). sm size →
+                          static frame ring (no animation), correct for the nav.
+                          Frame + aura degrade to a plain avatar when null. */}
+                      <Avatar
+                        url={avatarUrl}
+                        alt={user.username}
+                        size="sm"
+                        frame={cosmetics.frame}
+                        aura={cosmetics.aura}
+                      />
                     </button>
 
                     {showDropdown && (
@@ -884,11 +898,31 @@ export default function Navbar() {
                             style={{ animationDelay: "0ms" }}
                           >
                             <div className="flex items-center gap-3.5">
+                              {/* md (48px) Avatar — same memoized avatarUrl src,
+                                  verbatim. Equipped frame ring replaces the base
+                                  electric ring; with no frame it degrades to a
+                                  plain avatar carrying just the soft electric
+                                  glow below. Aura halo renders behind. */}
                               <div
-                                className="w-12 h-12 rounded-full overflow-hidden border-2 border-electric/50 flex-shrink-0"
-                                style={{ boxShadow: "0 0 16px rgba(74,144,217,0.2)" }}
+                                className="rounded-full flex-shrink-0"
+                                style={
+                                  cosmetics.frame
+                                    ? undefined
+                                    : {
+                                        // No equipped frame → preserve the exact
+                                        // pre-cosmetics look: electric ring + glow.
+                                        boxShadow:
+                                          "0 0 0 2px rgba(74,144,217,0.5), 0 0 16px rgba(74,144,217,0.2)",
+                                      }
+                                }
                               >
-                                <img src={avatarUrl} alt={user.username} className="w-12 h-12 rounded-full object-cover" />
+                                <Avatar
+                                  url={avatarUrl}
+                                  alt={user.username}
+                                  size="md"
+                                  frame={cosmetics.frame}
+                                  aura={cosmetics.aura}
+                                />
                               </div>
                               <div className="min-w-0 flex-1">
                                 <p className="text-cream font-bold text-[15px] truncate">

@@ -34,16 +34,16 @@ export interface SpinSlot {
 
 // ── Slots (must sum to 100) ───────────────────────────────────────────────
 export const SPIN_SLOTS: SpinSlot[] = [
-  { outcome: "small_fangs",   weight: 30,  label: "Small Fangs",    description: "A modest pile of Fangs.",                 color: "#4A90D9" },
-  { outcome: "bust",          weight: 8,   label: "Bust",           description: "Better luck tomorrow — you lost 500F.",   color: "#64748B" },
-  { outcome: "medium_fangs",  weight: 20,  label: "Medium Fangs",   description: "Solid pull — some real Fangs.",           color: "#22C55E" },
+  { outcome: "small_fangs",   weight: 32,  label: "Small Fangs",    description: "A modest pile of Fangs.",                 color: "#4A90D9" },
+  { outcome: "bust",          weight: 8,   label: "Bust",           description: "Better luck tomorrow. You lost 300F.",    color: "#64748B" },
+  { outcome: "medium_fangs",  weight: 20,  label: "Medium Fangs",   description: "Solid pull, some real Fangs.",            color: "#22C55E" },
   { outcome: "booster",       weight: 15,  label: "Free Booster",   description: "You won a random booster.",               color: "#A855F7" },
-  { outcome: "big_fangs",     weight: 12,  label: "Big Fangs",      description: "A heavy bag of Fangs.",                   color: "#0EA5E9" },
-  { outcome: "mega_fangs",    weight: 5,   label: "Mega Fangs",     description: "1,500F — hyped.",                         color: "#F59E0B" },
-  { outcome: "streak_shield", weight: 3,   label: "Streak Shield",  description: "One free streak save — clutch.",          color: "#EF4444" },
+  { outcome: "big_fangs",     weight: 11,  label: "Big Fangs",      description: "A heavy bag of Fangs.",                   color: "#0EA5E9" },
+  { outcome: "mega_fangs",    weight: 5,   label: "Mega Fangs",     description: "1,000F, hyped.",                          color: "#F59E0B" },
+  { outcome: "streak_shield", weight: 3,   label: "Streak Shield",  description: "One free streak save, clutch.",           color: "#EF4444" },
   { outcome: "rare_cosmetic", weight: 3,   label: "Rare Cosmetic",  description: "A surprise rare item lands in your bag.", color: "#EC4899" },
-  { outcome: "tax_man",       weight: 2,   label: "TAX MAN",        description: "The Tax Man cometh — you lost 33%.",      color: "#7F1D1D" },
-  { outcome: "jackpot",       weight: 2,   label: "JACKPOT",        description: "5,000 Fangs. LFG.",                       color: "#FFD700" },
+  { outcome: "tax_man",       weight: 1,   label: "TAX MAN",        description: "The Tax Man cometh. You lost 25%.",       color: "#7F1D1D" },
+  { outcome: "jackpot",       weight: 2,   label: "JACKPOT",        description: "3,000 Fangs. LFG.",                       color: "#FFD700" },
 ];
 
 // Sanity-check: weights must sum to 100. If anyone edits the array, this

@@ -77,7 +77,7 @@ export async function POST(req: NextRequest) {
 
   // ── 4. Special-case: rare_cosmetic without an unowned item ─────────────
   // Pick a rare cosmetic the user doesn't already own. If they own all of
-  // them, fall back to a 1,000F payout (and adjust the outcome+payload
+  // them, fall back to an 800F payout (and adjust the outcome+payload
   // honestly so the audit row reflects what actually happened).
   if (outcome === "rare_cosmetic") {
     const RARE_POOL = ["frame_fire", "name_emerald", "banner_warrior", "boost_lucky_start"];
@@ -94,9 +94,9 @@ export async function POST(req: NextRequest) {
       const pickedId = unowned[randomInt(0, unowned.length)];
       rewardPayload = { kind: "rare_cosmetic", itemId: pickedId };
     } else {
-      // User has everything — convert to a flat 1,000F payout.
+      // User has everything, convert to a flat 800F payout.
       outcome = "big_fangs";
-      fangsDelta = Math.round(1000 * planMultiplier);
+      fangsDelta = Math.round(800 * planMultiplier);
       rewardPayload = { kind: "rare_cosmetic_fallback" };
     }
   }
