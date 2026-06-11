@@ -97,7 +97,18 @@ async function syncProfile(userId: string, email: string, metadata: Record<strin
     .eq("id", userId)
     .maybeSingle();
 
-  const upsertData: Record<string, unknown> = { id: userId, username, display_name: username };
+  // Clear any soft-deactivation on login: reaching syncProfile means the
+  // user just authenticated successfully, which reactivates the account
+  // (see POST /api/user/account/deactivate). Visibility is intentionally NOT
+  // restored here — the user chose private on the way out. We do NOT touch
+  // pending_deletion_at: a scheduled hard delete is cancelled explicitly via
+  // /api/user/account/cancel-deletion, never silently by logging in.
+  const upsertData: Record<string, unknown> = {
+    id: userId,
+    username,
+    display_name: username,
+    deactivated_at: null,
+  };
   if (!existing) {
     upsertData.onboarding_completed = false;
   }
@@ -145,6 +156,20 @@ function isSessionExpiredByInactivity(): boolean {
   const last = localStorage.getItem(LAST_ACTIVE_KEY);
   if (!last) return false;
   return Date.now() - parseInt(last, 10) > INACTIVITY_LIMIT_MS;
+}
+
+// Settings overhaul 2026-06-11 — Data & Usage > Session history.
+// Fire-and-forget after a successful sign-in so the user can see their recent
+// logins in Settings. NEVER blocks or delays login: it swallows every error
+// and is invoked without `await`. The server route dedupes a burst (skips if
+// the caller's most recent event is < 60s old), so calling this from both the
+// password-login path AND the OAuth SIGNED_IN listener writes at most one row.
+function recordLoginEvent(accessToken: string | null | undefined): void {
+  if (!accessToken || typeof window === "undefined") return;
+  void fetch("/api/user/login-event", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${accessToken}` },
+  }).catch(() => null);
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -303,6 +328,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         updateLastActive();
 
+        // Settings overhaul 2026-06-11: record the sign-in for Session history.
+        // SIGNED_IN-only so token refreshes / focus events don't log. Covers the
+        // OAuth return path (Google/Apple) where login() never runs; the server
+        // 60s dedupe collapses any overlap with the password-login path.
+        if (event === "SIGNED_IN" && sess?.access_token) {
+          recordLoginEvent(sess.access_token);
+        }
+
         // If we already have the full profile for this user (e.g. this is a
         // TOKEN_REFRESHED event fired on tab focus), don't reset `user` to the
         // basic default — that's what causes the avatar flash. Just make sure
@@ -412,6 +445,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           Authorization: `Bearer ${data.session.access_token}`,
         },
       }).catch(() => null);
+      // Log the successful sign-in for the Settings > Session history list.
+      recordLoginEvent(data.session.access_token);
     }
 
     if (error) return { error: error.message };
