@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
 import { DEMO_USER_ID } from "@/lib/demo-guard";
+import { DEFAULT_PRIVACY_PREFS, type PrivacyPrefs } from "@/lib/db";
 
 /**
  * Activity feed for a user's friends — recent coin-earning events that are
@@ -88,7 +89,7 @@ export async function GET(req: NextRequest) {
         .limit(30),
       supabaseAdmin
         .from("profiles")
-        .select("id, username, avatar_url")
+        .select("id, username, avatar_url, preferences")
         .in("id", circleIds),
       supabaseAdmin
         .from("coin_transactions")
@@ -114,6 +115,22 @@ export async function GET(req: NextRequest) {
       ]),
     );
 
+    // Privacy enforcement (2026-06-11): users with privacy.show_activity_feed
+    // set to false don't have their activity rows surfaced to friends. Prefs
+    // were batch-read in the circle profiles query above (no extra round
+    // trip). Default-merged so missing keys mean visible.
+    const hiddenActivityIds = new Set<string>(
+      (profiles ?? [])
+        .filter(p => {
+          const privacy: PrivacyPrefs = {
+            ...DEFAULT_PRIVACY_PREFS,
+            ...(((p.preferences as { privacy?: Partial<PrivacyPrefs> } | null)?.privacy) ?? {}),
+          };
+          return privacy.show_activity_feed === false;
+        })
+        .map(p => p.id),
+    );
+
     const weeklyTotals = new Map<string, number>();
     for (const t of weekTxns ?? []) {
       weeklyTotals.set(t.user_id, (weeklyTotals.get(t.user_id) ?? 0) + (t.amount ?? 0));
@@ -137,6 +154,7 @@ export async function GET(req: NextRequest) {
     // 4b. Shape feed response — drop txns whose author has disappeared (edge case)
     const feed: FeedItem[] = (txns ?? [])
       .map(t => {
+        if (hiddenActivityIds.has(t.user_id)) return null;
         const p = profileMap.get(t.user_id);
         if (!p) return null;
         return {

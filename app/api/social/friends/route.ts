@@ -3,7 +3,7 @@ import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
 import { isDemoUser } from "@/lib/demo-guard";
 import { demoBlockedResponse } from "@/lib/demo-guard-server";
-import { shouldNotifyUser } from "@/lib/db";
+import { shouldNotifyUser, DEFAULT_PRIVACY_PREFS, type PrivacyPrefs } from "@/lib/db";
 
 // GET — List friends + pending requests
 //
@@ -162,15 +162,32 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Invalid username" }, { status: 400 });
     }
 
-    // Case-insensitive lookup (wildcards already stripped above)
+    // Case-insensitive lookup (wildcards already stripped above). Pulls
+    // `preferences` in the same round trip so the privacy check below is free.
     const { data: friend } = await supabaseAdmin
       .from("profiles")
-      .select("id, username")
+      .select("id, username, preferences")
       .ilike("username", cleanUsername)
       .single();
 
     if (!friend) return NextResponse.json({ error: "User not found" }, { status: 404 });
     if (friend.id === userId) return NextResponse.json({ error: "Cannot add yourself" }, { status: 400 });
+
+    // Privacy enforcement (2026-06-11): respect the RECIPIENT's
+    // privacy.friend_request_from pref server-side. Previously only the
+    // notification was suppressed — the pending row still inserted, which
+    // made "nobody" a placebo. Merge over defaults so users who saved prefs
+    // before this key existed default to "everyone".
+    const recipientPrivacy: PrivacyPrefs = {
+      ...DEFAULT_PRIVACY_PREFS,
+      ...(((friend.preferences as { privacy?: Partial<PrivacyPrefs> } | null)?.privacy) ?? {}),
+    };
+    if (recipientPrivacy.friend_request_from === "nobody") {
+      return NextResponse.json(
+        { error: "This user isn't accepting friend requests" },
+        { status: 403 },
+      );
+    }
 
     // Check if friendship already exists
     const { data: existing } = await supabaseAdmin
