@@ -12,7 +12,13 @@ export type CompetitiveMode =
 
 export type CompetitiveFormat = "1v1" | "2v2";
 
-export type MatchStatus = "queued" | "active" | "completed";
+export type MatchStatus =
+  | "queued"
+  | "active"
+  | "completing"
+  | "completed"
+  | "voided"
+  | "forfeited";
 
 export type WinnerTeam = "a" | "b" | "draw" | null;
 
@@ -46,8 +52,16 @@ export interface CompetitiveMatchRow {
   elo_after: Record<string, number>;
   fang_delta: Record<string, number>;
   wager: number;
+  forfeited_by: string | null;
   created_at: string;
   completed_at: string | null;
+}
+
+/** Terminal statuses — a match in any of these has finished settling. */
+export const TERMINAL_STATUSES: MatchStatus[] = ["completed", "voided", "forfeited"];
+
+export function isTerminalStatus(s: string): boolean {
+  return (TERMINAL_STATUSES as string[]).includes(s);
 }
 
 /** Per-user final score the completion endpoint receives from a mode screen. */

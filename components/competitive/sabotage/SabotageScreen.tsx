@@ -54,13 +54,12 @@ interface ActiveEffect {
 export default function SabotageScreen({ loaded, selfId }: { loaded: LoadedMatch; selfId: string }) {
   const matchId = loaded.match.id;
   const rounds = loaded.rounds as unknown as Round[];
-  const { on, send } = useMatchChannel(matchId, selfId);
-  const { settle, result } = useSettle(matchId);
-
   const enemyTeam = useMemo(
     () => (loaded.match.team_a.includes(selfId) ? loaded.match.team_b : loaded.match.team_a),
     [loaded.match, selfId],
   );
+  const { on, send } = useMatchChannel(matchId, selfId, enemyTeam);
+  const { settle, result } = useSettle(matchId);
 
   const [roundIdx, setRoundIdx] = useState(0);
   const [score, setScore] = useState(0);

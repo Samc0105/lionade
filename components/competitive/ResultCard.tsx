@@ -8,6 +8,14 @@
 // A loss is dignified — no confetti, calmer entrance — but still clear. All
 // animated values come straight from the `result` already in client state;
 // nothing is re-fetched and no secret column is read.
+//
+// VOID / FORFEIT (2026-06): the result is a discriminated MatchOutcome.
+//   - "voided"    → opponent never played. Neutral card, NO confetti, no score
+//                   board, no ELO/Fang deltas (nothing changed). One way out.
+//   - "forfeited" → the player quit a match both sides had engaged in. A loss
+//                   with explicit "You forfeited" framing, otherwise identical
+//                   to a normal defeat (real ELO/Fang deltas apply).
+//   - "settled"   → the normal win/loss/draw, unchanged.
 
 import { useState } from "react";
 import Link from "next/link";
@@ -15,25 +23,60 @@ import { motion, useReducedMotion } from "framer-motion";
 import { cdnUrl } from "@/lib/cdn";
 import CountUp from "@/components/CountUp";
 import Confetti from "@/components/Confetti";
-import type { SettleResult } from "./useSettle";
+import type { MatchOutcome } from "./useSettle";
 
 export default function ResultCard({
   result,
   selfId,
   teamA,
 }: {
-  result: SettleResult;
+  result: MatchOutcome;
   selfId: string;
   teamA: string[];
 }) {
   const reduce = useReducedMotion();
-  const [fireConfetti, setFireConfetti] = useState(true);
 
+  // ── VOIDED: opponent never engaged. No win/loss, no deltas, no confetti. ──
+  if (result.kind === "voided") {
+    const color = "#9AA7BD"; // neutral slate — deliberately not a win/loss color
+    return (
+      <div className="flex-1 min-h-0 flex items-center justify-center w-full px-4">
+        <motion.div
+          initial={reduce ? false : { scale: 0.85, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={reduce ? { duration: 0 } : { type: "spring", stiffness: 200, damping: 20 }}
+          className="relative overflow-hidden rounded-2xl p-8 sm:p-10 text-center w-full max-w-lg"
+          style={{ background: "linear-gradient(135deg, #0c1020 0%, #060c18 100%)", border: `1px solid ${color}33` }}
+        >
+          <div className="absolute inset-0 pointer-events-none"
+            style={{ background: `radial-gradient(ellipse at 50% 0%, ${color}10 0%, transparent 60%)` }} />
+          <div className="relative">
+            <p className={`font-bebas text-5xl tracking-widest mb-4 ${reduce ? "" : "ca-slam"}`}
+              style={{ color, textShadow: `0 0 24px ${color}30` }}>
+              MATCH VOIDED
+            </p>
+            <p className="text-cream/65 font-syne text-sm sm:text-base leading-relaxed mb-7 max-w-sm mx-auto">
+              Your opponent never played, so no Elo or Fangs changed.
+            </p>
+            <div className="flex gap-3 justify-center">
+              <Link href="/compete/arena" className="font-bebas tracking-wider px-6 py-2.5 rounded-xl btn-gold text-sm">
+                BACK TO ARENA
+              </Link>
+            </div>
+          </div>
+        </motion.div>
+      </div>
+    );
+  }
+
+  // ── SETTLED or FORFEITED: both carry the full score payload. ──
+  const forfeited = result.kind === "forfeited";
   const onTeamA = teamA.includes(selfId);
   const youWon =
+    !forfeited &&
     result.winnerTeam !== "draw" &&
     ((result.winnerTeam === "a" && onTeamA) || (result.winnerTeam === "b" && !onTeamA));
-  const draw = result.winnerTeam === "draw";
+  const draw = !forfeited && result.winnerTeam === "draw";
 
   const eloDelta = result.eloDeltas?.[selfId] ?? 0;
   const fangDelta = result.fangDelta?.[selfId] ?? 0;
@@ -41,13 +84,14 @@ export default function ResultCard({
   const yourScore = onTeamA ? result.scoreA : result.scoreB;
   const oppScore = onTeamA ? result.scoreB : result.scoreA;
 
-  const headline = draw ? "DRAW" : youWon ? "VICTORY" : "DEFEAT";
-  const color = draw ? "#A855F7" : youWon ? "#FFD700" : "#EF4444";
+  const headline = forfeited ? "YOU FORFEITED" : draw ? "DRAW" : youWon ? "VICTORY" : "DEFEAT";
+  const color = forfeited ? "#EF4444" : draw ? "#A855F7" : youWon ? "#FFD700" : "#EF4444";
 
   return (
     <div className="flex-1 min-h-0 flex items-center justify-center w-full px-4">
-      {/* Victory celebration — Confetti is self-gating on reduced motion. */}
-      {youWon && <Confetti trigger={fireConfetti} count={64} origin="center" duration={1600} onComplete={() => setFireConfetti(false)} />}
+      {/* Victory celebration — Confetti is self-gating on reduced motion. A
+          forfeit never celebrates. */}
+      {youWon && <Confetti trigger count={64} origin="center" duration={1600} />}
 
       <motion.div
         initial={reduce ? false : { scale: 0.7, opacity: 0 }}
@@ -63,6 +107,12 @@ export default function ResultCard({
             style={{ color, textShadow: `0 0 24px ${color}40` }}>
             {headline}
           </p>
+
+          {forfeited && (
+            <p className="text-cream/55 font-syne text-xs sm:text-sm leading-relaxed -mt-1 mb-5 max-w-sm mx-auto">
+              You left the match. The loss stands.
+            </p>
+          )}
 
           <div className="flex items-center justify-center gap-8 mb-6">
             <div>

@@ -9,11 +9,21 @@
 // map; the body is ignored server-side (HIGH 5 fix). Idempotent on the server
 // (atomic claim), so a double-call from both clients just returns
 // alreadyCompleted.
+//
+// VOID / FORFEIT (2026-06): the result is now a discriminated outcome.
+//   - "settled"   → a normal win/loss/draw with ELO + Fang deltas.
+//   - "voided"    → a side never engaged; /complete returned { voided }. No
+//                   ELO/Fang change. The present player gets this when they end
+//                   a match an opponent abandoned before ever playing.
+//   - "forfeited" → the caller quit a match BOTH sides had engaged in; the
+//                   /forfeit endpoint returned { forfeited, result }. The caller
+//                   takes the loss. (A forfeit against an opponent who never
+//                   engaged comes back as { voided } instead — no penalty.)
 
 import { useState, useCallback } from "react";
 import { apiPost } from "@/lib/api-client";
 
-export interface SettleResult {
+export interface SettleScore {
   winnerTeam: "a" | "b" | "draw";
   scoreA: number;
   scoreB: number;
@@ -24,28 +34,81 @@ export interface SettleResult {
   format: string;
 }
 
+// The end-of-match outcome the screens render. A normal settle carries the full
+// score payload; a void/forfeit carries only what ResultCard needs to explain
+// the no-change (void) or the loss (forfeit) honestly.
+export type MatchOutcome =
+  | ({ kind: "settled" } & SettleScore)
+  | { kind: "voided"; reason?: string }
+  | ({ kind: "forfeited" } & SettleScore);
+
+// Back-compat alias — older imports referenced SettleResult as the score shape.
+export type SettleResult = SettleScore;
+
+// Server response shapes for the two endpoints we POST to here.
+interface CompleteResponse extends Partial<SettleScore> {
+  alreadyCompleted?: boolean;
+  voided?: boolean;
+  reason?: string;
+}
+interface ForfeitResponse {
+  ok?: boolean;
+  voided?: boolean;
+  forfeited?: boolean;
+  reason?: string;
+  result?: SettleScore;
+}
+
 export function useSettle(matchId: string) {
-  const [result, setResult] = useState<SettleResult | null>(null);
+  const [result, setResult] = useState<MatchOutcome | null>(null);
   const [settling, setSettling] = useState(false);
 
+  // Normal end-of-match settlement (rounds exhausted) AND the path the present
+  // player uses to END a match an opponent abandoned. POST /complete may now
+  // answer { voided } when a side never played — we surface that as a neutral
+  // outcome instead of silently no-oping.
   const settle = useCallback(
     async () => {
       if (settling || result) return;
       setSettling(true);
-      const { ok, data } = await apiPost<SettleResult & { alreadyCompleted?: boolean }>(
+      const { ok, data } = await apiPost<CompleteResponse>(
         `/api/competitive/match/${matchId}/complete`,
         {},
       );
       setSettling(false);
-      if (ok && data && data.winnerTeam) {
-        setResult(data as SettleResult);
-      } else if (ok && data?.alreadyCompleted) {
-        // Opponent settled first — refetch isn't necessary; mark a neutral done.
-        setResult((prev) => prev ?? null);
+      if (!ok || !data) return;
+      if (data.voided) {
+        setResult({ kind: "voided", reason: data.reason });
+      } else if (data.winnerTeam) {
+        setResult({ kind: "settled", ...(data as SettleScore) });
+      }
+      // alreadyCompleted with no payload: the opponent settled first. Leave any
+      // prior result in place; nothing to show that we don't already have.
+    },
+    [matchId, settling, result],
+  );
+
+  // The PRESENT player chooses to quit. POST /forfeit decides honestly:
+  //   - opponent never engaged → { voided } (no penalty to the caller).
+  //   - both engaged           → { forfeited, result } (caller takes the loss).
+  const forfeit = useCallback(
+    async () => {
+      if (settling || result) return;
+      setSettling(true);
+      const { ok, data } = await apiPost<ForfeitResponse>(
+        `/api/competitive/match/${matchId}/forfeit`,
+        {},
+      );
+      setSettling(false);
+      if (!ok || !data) return;
+      if (data.voided) {
+        setResult({ kind: "voided", reason: data.reason });
+      } else if (data.forfeited && data.result) {
+        setResult({ kind: "forfeited", ...data.result });
       }
     },
     [matchId, settling, result],
   );
 
-  return { settle, result, settling };
+  return { settle, forfeit, result, settling };
 }

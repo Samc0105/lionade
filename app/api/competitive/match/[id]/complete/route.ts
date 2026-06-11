@@ -1,4 +1,4 @@
-// Competitive platform — the ONE shared completion endpoint all 5 modes call.
+// Competitive platform — the ONE shared completion endpoint all 4 modes call.
 //
 // POST /api/competitive/match/[id]/complete
 // Body: {}   // NOTHING from the body is trusted for scoring (see HIGH 5 fix).
@@ -6,21 +6,16 @@
 // Behavior:
 //   1. requireAuth — only a match participant may complete.
 //   2. Atomic claim active → completing (race guard, mirrors Arena V2 trick).
-//   3. Determine winner_team from SERVER-PERSISTED scores:
-//        - all modes (sabotage/zoom/spectrum/pin): sum each team's
-//          competitive_responses.points. The /answer route scored every guess
-//          server-side against the round secret, so the body cannot influence
-//          the outcome.
-//   4. ELO: K=32 team update on the format's ladder (competitive_elo for 1v1,
-//      squad_elo for 2v2). Pool-conserved (team A gain == team B loss).
-//   5. Fang settle: locked payout table (lib/competitive/fang-payout.ts).
-//   6. Loss-cap enforcement (SHARED 24h budget across Arena + all competitive
-//      modes): if a user is already at/below their tier cap, a losing/negative
-//      delta is clamped to 0 (we stop the bleeding; we never refund).
-//   7. Persist elo_before/elo_after/fang_delta jsonb + winner_team + status.
-//
-// (Poker Face was moved to Lionade Party as a no-Fang party game on 2026-05-28;
-// there is no longer a per-hand staked-pot mode here.)
+//   3. THE ENGAGEMENT GATE (lib/competitive/settle.ts): ELO + Fangs settle ONLY
+//      when BOTH teams recorded at least one competitive_response. If one side
+//      has ZERO responses (no-show / instant disconnect / never engaged), the
+//      match is VOIDED — status 'voided', NO ELO change, NO Fang transfer, no
+//      penalty to the player who did show. A mid-match quit where BOTH sides
+//      answered at least once IS a real contest and settles normally (the
+//      quitter's unanswered rounds score 0 → they likely lose → ELO moves).
+//   4. When both engaged: winner from SERVER-PERSISTED competitive_responses
+//      points, K=32 team ELO on the format ladder, locked Fang payout table,
+//      shared 24h loss-cap clamp, persist elo_before/after/fang_delta jsonb.
 //
 // Security: userId comes ONLY from requireAuth, never the body. The match
 // outcome is computed EXCLUSIVELY from server-written rows (competitive_responses)
@@ -30,14 +25,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
-import {
-  resolveLossCapTier,
-  computeLossWindow,
-  isLossCapReached,
-} from "@/lib/competitive/loss-cap";
-import { buildEloDeltas } from "@/lib/competitive/elo";
-import { resolvePayout } from "@/lib/competitive/fang-payout";
-import { eloColumnForFormat, type CompetitiveMatchRow, type CompetitiveFormat } from "@/lib/competitive/types";
+import { settleClaimedMatch } from "@/lib/competitive/settle";
+import { type CompetitiveMatchRow, isTerminalStatus } from "@/lib/competitive/types";
 
 export async function POST(
   req: NextRequest,
@@ -49,8 +38,8 @@ export async function POST(
   const matchId = params.id;
 
   try {
-    // NOTE: the body is intentionally ignored for scoring. Any score map a
-    // client submits is discarded; the outcome is recomputed server-side.
+    // The body is intentionally ignored for scoring; the outcome is recomputed
+    // server-side from competitive_responses.
     await req.json().catch(() => ({}));
 
     const { data: matchRaw } = await supabaseAdmin
@@ -67,11 +56,14 @@ export async function POST(
     if (!participants.includes(userId)) {
       return NextResponse.json({ error: "Not a participant" }, { status: 403 });
     }
-    if (match.status === "completed") {
+    // A voided / forfeited / completed match is terminal — a second completer
+    // just gets the settled row back, never a re-settle.
+    if (isTerminalStatus(match.status)) {
       return NextResponse.json({ alreadyCompleted: true, match });
     }
 
-    // Atomic claim: active → completing.
+    // Atomic claim: active → completing. The loser of this race (and any
+    // concurrent /forfeit) re-reads the now-terminal row.
     const { data: claimed } = await supabaseAdmin
       .from("competitive_matches")
       .update({ status: "completing" })
@@ -88,136 +80,33 @@ export async function POST(
       return NextResponse.json({ alreadyCompleted: true, match: refetch });
     }
 
-    // ── Determine winner from SERVER-PERSISTED scores (never the body) ──
-    // Every mode sums its team's server-scored competitive_responses.points.
-    let scoreA = 0;
-    let scoreB = 0;
+    // The gate + ELO/Fang math live in the shared settler.
+    const result = await settleClaimedMatch(supabaseAdmin, match);
 
-    const { data: responses } = await supabaseAdmin
-      .from("competitive_responses")
-      .select("user_id, points")
-      .eq("match_id", matchId);
-    const byUser: Record<string, number> = {};
-    for (const r of responses ?? []) {
-      byUser[r.user_id] = (byUser[r.user_id] ?? 0) + (r.points ?? 0);
+    if (result.outcome === "voided") {
+      return NextResponse.json({
+        matchId,
+        voided: true,
+        reason: result.reason ?? "opponent-never-played",
+        winnerTeam: null,
+        scoreA: result.scoreA,
+        scoreB: result.scoreB,
+        mode: match.mode,
+        format: match.format,
+      });
     }
-    scoreA = match.team_a.reduce((acc, u) => acc + (byUser[u] ?? 0), 0);
-    scoreB = match.team_b.reduce((acc, u) => acc + (byUser[u] ?? 0), 0);
-
-    let winner: "a" | "b" | "draw";
-    if (scoreA > scoreB) winner = "a";
-    else if (scoreB > scoreA) winner = "b";
-    else winner = "draw";
-
-    const winnerTeam: "a" | "b" | "draw" = winner;
-
-    // ── ELO (K=32) on the format's ladder ──
-    const format: CompetitiveFormat = match.format;
-    const eloCol = eloColumnForFormat(format);
-
-    // Read current ladder ratings for all participants.
-    const { data: profiles } = await supabaseAdmin
-      .from("profiles")
-      .select(`id, coins, plan, competitive_elo, squad_elo`)
-      .in("id", participants);
-
-    const eloBefore: Record<string, number> = {};
-    const coinsBefore: Record<string, number> = {};
-    const planMap: Record<string, string | null> = {};
-    for (const p of profiles ?? []) {
-      eloBefore[p.id] = (eloCol === "squad_elo" ? p.squad_elo : p.competitive_elo) ?? 1000;
-      coinsBefore[p.id] = p.coins ?? 0;
-      planMap[p.id] = p.plan ?? null;
-    }
-
-    const { deltas: eloDeltas, eloAfter } = buildEloDeltas({
-      teamA: match.team_a,
-      teamB: match.team_b,
-      eloBefore,
-      winner,
-    });
-
-    // ── Fang settle ──
-    const payout = resolvePayout({ mode: match.mode, format });
-    const fangDelta: Record<string, number> = {};
-
-    for (const u of participants) {
-      const onTeamA = match.team_a.includes(u);
-      const isWinner =
-        winner !== "draw" && ((winner === "a" && onTeamA) || (winner === "b" && !onTeamA));
-      const isLoser = winner !== "draw" && !isWinner;
-
-      let intended: number;
-      if (winner === "draw") {
-        intended = payout.drawDelta;
-      } else if (isWinner) {
-        intended = payout.winnerDelta;
-      } else if (isLoser) {
-        intended = payout.loserDelta;
-      } else {
-        intended = 0;
-      }
-      fangDelta[u] = intended;
-    }
-
-    // ── Loss-cap enforcement (per user) + balance clamp ──
-    // For each user with a NEGATIVE intended delta, if their 24h net is already
-    // at/below the tier cap, clamp the negative portion to 0. We never refund;
-    // we stop the bleeding. Positive deltas (wins/participation) are unaffected.
-    const profileWrites: Array<PromiseLike<unknown>> = [];
-    const cappedFangDelta: Record<string, number> = {};
-
-    for (const u of participants) {
-      let delta = fangDelta[u];
-      if (delta < 0) {
-        const tier = resolveLossCapTier({ elo: eloBefore[u], isPro: planMap[u] === "pro" });
-        const lossWindow = await computeLossWindow(supabaseAdmin, u);
-        const capReached = isLossCapReached({
-          netFangsLast24h: lossWindow.netFangsLast24h,
-          tier,
-        });
-        if (capReached) delta = 0;
-      }
-      // Never let a balance go negative.
-      const newCoins = Math.max(0, coinsBefore[u] + delta);
-      // Recompute the effective delta after the floor clamp (so fang_delta and
-      // the loss-cap accounting stay consistent with what actually moved).
-      const effectiveDelta = newCoins - coinsBefore[u];
-      cappedFangDelta[u] = effectiveDelta;
-
-      const update: Record<string, unknown> = { coins: newCoins };
-      update[eloCol] = eloAfter[u];
-      profileWrites.push(
-        supabaseAdmin.from("profiles").update(update).eq("id", u),
-      );
-    }
-
-    await Promise.all(profileWrites);
-
-    // ── Persist the match row ──
-    await supabaseAdmin
-      .from("competitive_matches")
-      .update({
-        status: "completed",
-        winner_team: winnerTeam,
-        elo_before: eloBefore,
-        elo_after: eloAfter,
-        fang_delta: cappedFangDelta,
-        completed_at: new Date().toISOString(),
-      })
-      .eq("id", matchId);
 
     return NextResponse.json({
       matchId,
-      winnerTeam,
-      scoreA,
-      scoreB,
-      eloBefore,
-      eloAfter,
-      eloDeltas,
-      fangDelta: cappedFangDelta,
+      winnerTeam: result.winnerTeam,
+      scoreA: result.scoreA,
+      scoreB: result.scoreB,
+      eloBefore: result.eloBefore,
+      eloAfter: result.eloAfter,
+      eloDeltas: result.eloDeltas,
+      fangDelta: result.fangDelta,
       mode: match.mode,
-      format,
+      format: match.format,
     });
   } catch (e) {
     console.error("[competitive/complete]", e);

@@ -32,7 +32,8 @@ function fmt(v: number): string {
 export default function SpectrumScreen({ loaded, selfId }: { loaded: LoadedMatch; selfId: string }) {
   const matchId = loaded.match.id;
   const rounds = loaded.rounds as unknown as Round[];
-  const { on, send } = useMatchChannel(matchId, selfId);
+  const opponentIds = loaded.match.team_a.includes(selfId) ? loaded.match.team_b : loaded.match.team_a;
+  const { on, send } = useMatchChannel(matchId, selfId, opponentIds);
   const { settle, result } = useSettle(matchId);
 
   const [idx, setIdx] = useState(0);
