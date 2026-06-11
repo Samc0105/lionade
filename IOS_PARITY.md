@@ -7,6 +7,21 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 
 ---
 
+## 2026-06-11: Party live-playtest fixes (web)
+
+**Status:** 🚫 N/A (deliberate no-row: Lionade Party is web-only V1, consistent with every prior Party row. The iOS port is deferred to `vp-ios` and will adopt this batch with the V2 foundation + active-game work.) 6 web-only commits (`e7349f8`, `5c33917`, `4430101`, `310247c`, `1f54d22`, `dfd71e2`), no migration. These were bugs Sam found in a live playtest with real players.
+
+**Wire-contract notes for the eventual iOS port** (any iOS client speaking the Party channels/routes MUST honor these):
+
+1. **`party_room_players` has a composite PK `(room_id, user_id)` and NO `id` column.** A `.select("id")` errors in PostgREST. Membership/in-room checks must select a real column (+ `limit(1)`) and must NOT swallow the error. Fresh-join is an upsert on `(room_id, user_id)`.
+2. **The `notifs-<userId>` channel now also carries a `party_invite` broadcast** (fired after the notifications insert), in addition to the notification row itself. A client must de-dup invite delivery by notification id across the row and the broadcast.
+3. **`party-room-{code}-players` is a new dedicated `postgres_changes` topic** for player join/leave, split off the main `party-room-{code}` broadcast channel. This is because supabase-js dedupes channels BY TOPIC with an async leave, so two components sharing one topic can kill each other's channel. An iOS client must own one channel per topic, create-once, and never tear down a shared topic on a child screen's unmount.
+4. **The leave route broadcasts PLAYER_LEFT server-side** (incl. on tab-close), so other clients update without polling.
+5. **Sketchy's snapshot carries a `word_picked` boolean (never the word)** plus the other public round facts, and the word-reveal is capped server-authoritatively by a hidden floor of 1/3 of the letter cells (min 1) that guesses can never reveal — the round-end reveal must remain the first time non-drawers see the word.
+6. **Bluff, Sketchy, and Poker Face all use the compare-and-swap / `adoptRound` patterns:** phase transitions are `UPDATE ... WHERE phase = from` (only the CAS winner scores, reveal terminal), and each client continuously adopts the current round via a broadcast-fed seen-set + a 3s snapshot poll reconciler. Every game transition is a fast-path broadcast on a resilient channel with the poll as the backstop. An iOS client must adopt the same model rather than trusting a single fire-and-forget broadcast.
+
+---
+
 ## 2026-06-10: Competitive ELO-integrity + connectivity + forfeit/void (web)
 
 **Status:** ❌ pending. The competitive arena is web-only today, but this is core game logic an eventual iOS port MUST mirror: the integrity gate decides whether ELO/Fangs are written at all, so an iOS client that skips it would let players farm or grief ranked. Owner: `quality-docs-writer`; the iOS port routes to `vp-ios`. Reviewer APPROVED the web ship, no blockers.
