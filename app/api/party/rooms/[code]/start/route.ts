@@ -118,18 +118,29 @@ export async function POST(
     .update({ status: "playing", current_game: game, settings: merged })
     .eq("id", room.id);
 
-  // Defensive Trivia reset: round_num is MAX(round_num)+1 scoped by room_id, so a
-  // fresh trivia game in a room that already played one would resume at round 11
-  // and instantly hit Game Over. Rematch deletes these rows, but a host who goes
-  // start -> back to lobby -> start (no formal rematch) would skip that path. So
-  // whenever a NEW trivia game begins, clear any prior trivia_rounds for the room
-  // (cascades to trivia_answers) to restart numbering at 1. Safe: per-round trivia
-  // rows are never read outside the live game flow (history aggregates from
-  // party_room_players.score). Done after the status flip so it can't strand a
-  // half-started room if it errored.
-  if (game === "trivia") {
+  // Defensive per-game round reset: EVERY party game numbers rounds as
+  // MAX(round_num)+1 scoped by room_id, and Bluff + Poker Face (like Trivia)
+  // gate Game Over on round_num >= totalRounds. A fresh game in a room that
+  // already played one would therefore resume numbering and instantly (or
+  // prematurely) hit Game Over. Rematch only stamps ended_at on bluff/sketch
+  // rows (it never deletes them), and a host who goes start -> back to lobby
+  // -> start skips rematch entirely — so the start route is the one choke
+  // point that covers both paths. Delete the prior rounds for the game being
+  // started; ON DELETE CASCADE FKs wipe child rows (trivia_answers,
+  // bluff_answers + bluff_votes, sketch_guesses/word options, pokerface
+  // guesses). Safe: per-round rows are never read outside the live game flow
+  // (Past Lobbies / history aggregate from party_room_players.score). Done
+  // after the status flip so it can't strand a half-started room if it errors.
+  const ROUNDS_TABLE_BY_GAME: Record<string, string> = {
+    trivia: "trivia_rounds",
+    bluff: "bluff_rounds",
+    sketch: "sketch_rounds",
+    pokerface: "party_pokerface_rounds",
+  };
+  const roundsTable = ROUNDS_TABLE_BY_GAME[game];
+  if (roundsTable) {
     await supabaseAdmin
-      .from("trivia_rounds")
+      .from(roundsTable)
       .delete()
       .eq("room_id", room.id);
   }
