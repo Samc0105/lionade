@@ -463,6 +463,9 @@ export default function QuizPage() {
         correctAnswers: correctCount,
         coinsEarned: coins,
         xpEarned: xp,
+        // Server reads body.blitzMode for the blitz_score bounty — without
+        // this the bounty can never complete from web (iOS already sends it).
+        blitzMode,
         answers: finalAnswers.map((a) => ({
           questionId: a.questionId,
           selected: a.selected,
