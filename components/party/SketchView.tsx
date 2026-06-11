@@ -182,7 +182,7 @@ interface ChatMsg {
 // leaks nothing about the secret beyond which of their letters were right.
 function GuessText({ body, matched }: { body: string; matched?: number[] }) {
   if (!matched || matched.length === 0) {
-    return <span className="text-cream/80">{body}</span>;
+    return <span className="text-cream/60">{body}</span>;
   }
   const green = new Set(matched);
   let comparable = -1;
@@ -195,7 +195,7 @@ function GuessText({ body, matched }: { body: string; matched?: number[] }) {
         return (
           <span
             key={i}
-            className={hit ? "text-emerald-300 font-bold" : "text-cream/80"}
+            className={hit ? "text-emerald-300 font-bold" : "text-cream/60"}
           >
             {ch}
           </span>
@@ -2034,23 +2034,17 @@ export default function SketchView({
           initial={reduced ? false : { opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: reduced ? 0 : 0.3, ease: [0.16, 1, 0.3, 1] }}
-          className="lg:grid lg:grid-cols-[1fr_300px] lg:gap-3 space-y-3 lg:space-y-0"
+          className="lg:grid lg:grid-cols-[minmax(0,1fr)_260px] lg:gap-3 space-y-3 lg:space-y-0"
         >
           <div className="space-y-3 min-w-0">
-          {/* Canvas + stamp wrapper. The stamp + green-corner overlay are
-              siblings of the canvas (NOT children of it) so they never touch
-              the 30Hz stroke paint loop in SketchCanvas. They sit inside this
-              `relative` wrapper so they can be absolutely positioned over the
-              canvas. */}
-          <div className="relative">
-            {/* Word-blanks overlay — pinned at the top of the canvas so
-                guessers see the letter slots WITHOUT scrolling past the
-                drawing. pointer-events-none so the drawer's strokes pass
-                straight through to the canvas underneath. Renders the same
-                blankCells data that used to live below the canvas. */}
-            {phase === "drawing" && blankCells.length > 0 && (
+          {/* Word-blanks row — sits in normal flow ABOVE the canvas (playtest
+              fix 2026-06: this used to be absolutely pinned OVER the drawing,
+              so the moment the first guess created the mask a large glass
+              pill bloomed on top of the canvas and blocked the guesser's
+              view). Same blankCells data + flip animation, zero ink covered. */}
+          {phase === "drawing" && blankCells.length > 0 && (
               <div
-                className="absolute top-2 left-1/2 -translate-x-1/2 z-10 px-3 py-1.5 rounded-xl pointer-events-none flex flex-wrap items-center justify-center gap-1.5 max-w-[calc(100%-1rem)]"
+                className="mx-auto w-fit max-w-full px-3 py-1.5 rounded-xl flex flex-wrap items-center justify-center gap-1.5"
                 style={{
                   background: "rgba(8,6,16,0.72)",
                   border: "1px solid rgba(255,255,255,0.1)",
@@ -2106,6 +2100,25 @@ export default function SketchView({
                 })()}
               </div>
             )}
+
+          {/* Canvas + stamp wrapper. The stamp + green-corner overlay are
+              siblings of the canvas (NOT children of it) so they never touch
+              the 30Hz stroke paint loop in SketchCanvas. They sit inside this
+              `relative` wrapper so they can be absolutely positioned over the
+              canvas.
+
+              Sizing (playtest fix): the displayed canvas now fills the
+              available viewport height minus the surrounding chrome (header
+              row, blanks row, toolbar, compact scoreboard ≈ 310px) while
+              ALWAYS preserving the 1000:600 logical aspect ratio — width is
+              derived from the height budget via min(), so the ratio can never
+              shear and pointer-coord scaling stays uniform on every client. */}
+          <div
+            className="relative mx-auto"
+            style={{
+              width: "min(100%, max(320px, calc((100dvh - 310px) * 1.6667)))",
+            }}
+          >
             <SketchCanvas
               roomCode={room.code}
               roundId={round.id}
@@ -2288,7 +2301,7 @@ export default function SketchView({
           {/* Right column on lg+, stacks below on mobile. Holds the guesses
               feed + guess input / spectator notice / iGotIt confirmation so
               everything sits next to the canvas and never requires scroll. */}
-          <div className="space-y-3 min-w-0 lg:max-h-[78vh] lg:overflow-hidden lg:flex lg:flex-col">
+          <div className="space-y-3 min-w-0 lg:max-h-[calc(100dvh-300px)] lg:overflow-hidden lg:flex lg:flex-col">
 
           {/* Shared guesses panel — the WHOLE room sees every guesser's attempt
               in real time (name + guess). Visible to the drawer too: seeing
@@ -2316,22 +2329,32 @@ export default function SketchView({
                       key={m.id}
                       initial={reduced ? false : { opacity: 0, y: 4 }}
                       animate={{ opacity: 1, y: 0 }}
-                      className={`text-sm font-syne py-0.5 rounded-md px-1.5 -mx-1.5 ${
-                        reduced ? "" : "pa-guess-pop"
-                      } ${m.variant === "correct" && !reduced ? "pa-correct-flash" : ""}`}
+                      className={`font-syne py-0.5 rounded-md px-1.5 -mx-1.5 ${
+                        m.variant === "correct" ? "text-sm" : "text-xs"
+                      } ${reduced ? "" : "pa-guess-pop"} ${m.variant === "correct" && !reduced ? "pa-correct-flash" : ""}`}
                       style={
                         m.variant === "close"
                           ? {
                               background: "rgba(245,158,11,0.10)",
                               border: "1px solid rgba(245,158,11,0.28)",
                             }
-                          : undefined
+                          : m.variant === "correct"
+                            ? {
+                                background: "rgba(34,197,94,0.12)",
+                                border: "1px solid rgba(34,197,94,0.35)",
+                              }
+                            : undefined
                       }
                     >
-                      <span className="text-cream/55">{m.username ?? "Someone"}</span>
+                      <span className={m.variant === "correct" ? "text-emerald-200/90" : "text-cream/45"}>
+                        {m.username ?? "Someone"}
+                      </span>
                       {m.variant === "correct" ? (
                         <>
-                          <span className="text-emerald-300 font-bold"> got it!</span>
+                          {/* Redacted on purpose: the guessed word itself never
+                              renders here — non-guessers first see the word at
+                              the round-end reveal. */}
+                          <span className="text-emerald-300 font-bold"> got it! ✓</span>
                           {isFirstCorrect && (
                             <span
                               className="ml-2 inline-block align-middle font-bebas text-[10px] tracking-[0.18em] px-1.5 py-0.5 rounded-full"
@@ -2352,7 +2375,7 @@ export default function SketchView({
                         </span>
                       ) : (
                         <>
-                          <span className="text-cream/80">: </span>
+                          <span className="text-cream/45">: </span>
                           <GuessText body={m.body} matched={m.matched} />
                         </>
                       )}

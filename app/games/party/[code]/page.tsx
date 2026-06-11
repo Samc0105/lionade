@@ -364,7 +364,14 @@ export default function PartyRoomPage() {
           style={{ background: "radial-gradient(circle, #00BFFF 0%, transparent 70%)" }}
         />
 
-        <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+        {/* Sketch gameplay gets a wider container so the canvas column can
+            actually use the viewport (canvas-dominant playtest fix). Lobby +
+            other games keep the narrower reading width. */}
+        <div
+          className={`relative z-10 mx-auto px-4 sm:px-6 py-6 sm:py-8 ${
+            inGame && snap.room.current_game === "sketch" ? "max-w-7xl" : "max-w-4xl"
+          }`}
+        >
           <div className="flex items-center justify-between mb-3">
             <BackButton />
             <button
