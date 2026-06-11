@@ -22,7 +22,8 @@
  *   - Hover/focus pauses the 5s timer (two actions need reachable time).
  *
  * Anchoring / collision:
- *   - PartyInviteToast: fixed top-20, centered, z-[70].
+ *   - PartyInviteToast: fixed top-20 right-4, right-anchored, z-[70]
+ *     (restyled 2026-06-10 from its old top-center band).
  *   - Global ToastViewport: fixed bottom-right, z-[60].
  *   - This toast: fixed top-40 right-4, z-[65] — vertically below the invite
  *     toast band at every viewport width, clear of the bottom-right stack.

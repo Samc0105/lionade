@@ -8,12 +8,19 @@
 // `notifs-${user.id}` postgres_changes subscription re-emits party_invite
 // rows over lib/party/invite-bus.ts and this component just listens.
 //
-// Behavior:
+// Behavior (restyled 2026-06-10 per playtest spec — right-side, 5s):
+//   - Anchored top-right, slides in from the RIGHT (same motion pattern as
+//     ActiveSessionToast). Stacking: this toast sits in the top-20 band,
+//     ActiveSessionToast sits at top-40 directly below it, the global
+//     ToastViewport stays bottom-right — no overlap when all are visible.
 //   - Max 1 visible at a time; a newer invite replaces the current one.
-//   - Auto-dismisses after 30s with a thin draining gold progress bar.
+//   - Auto-dismisses after 5s with a thin draining gold progress bar.
 //   - "Join" (gold) routes to /games/party/<code> and marks the underlying
 //     notification read; "Dismiss" just closes the banner (the notification
 //     stays unread in the bell, so nothing is lost).
+//   - Dedupes by notification id — the same invite can arrive via BOTH the
+//     postgres_changes INSERT path and the server's direct broadcast path;
+//     it toasts once.
 //   - Suppressed when the user is already inside that exact room.
 //   - Never renders logged-out (the bus only fires from the authed Navbar
 //     channel anyway — this is defense in depth).
@@ -25,7 +32,7 @@ import { useAuth } from "@/lib/auth";
 import { apiPatch } from "@/lib/api-client";
 import { usePartyInvite, type PartyInviteDetail } from "@/lib/party/invite-bus";
 
-const AUTO_DISMISS_MS = 30_000;
+const AUTO_DISMISS_MS = 5_000;
 const EXIT_MS = 200;
 
 type ActiveInvite = PartyInviteDetail & {
@@ -89,7 +96,7 @@ export default function PartyInviteToast() {
     }, exit);
   }, [clearExitTimer]);
 
-  // 30s auto-dismiss, restarted whenever a fresh invite lands.
+  // 5s auto-dismiss, restarted whenever a fresh invite lands.
   useEffect(() => {
     if (!invite) return;
     const handle = window.setTimeout(dismiss, AUTO_DISMISS_MS);
@@ -114,7 +121,7 @@ export default function PartyInviteToast() {
 
   return (
     <div
-      className="pointer-events-none fixed top-20 left-0 right-0 z-[70] flex justify-center px-4"
+      className="pointer-events-none fixed top-20 right-4 left-4 sm:left-auto z-[70] flex justify-end"
       aria-live="polite"
     >
       <Banner
@@ -160,9 +167,9 @@ function Banner({
     };
   }, [reduced]);
 
-  // Progress drain: scaleX 1 -> 0 over 30s. Same two-frame trick — pure
-  // transform, GPU-composited, no width animation. Hidden for reduced motion
-  // (the 30s timer still dismisses).
+  // Progress drain: scaleX 1 -> 0 over the 5s auto-dismiss window. Same
+  // two-frame trick — pure transform, GPU-composited, no width animation.
+  // Hidden for reduced motion (the 5s timer still dismisses).
   const [draining, setDraining] = useState(false);
   useEffect(() => {
     if (reduced) return;
@@ -172,8 +179,9 @@ function Banner({
     return () => cancelAnimationFrame(raf);
   }, [reduced]);
 
+  // Slide-in from the RIGHT (ActiveSessionToast pattern) — GPU-only.
   const visible = entered && show;
-  const transform = visible ? "translate3d(0, 0, 0)" : "translate3d(0, -16px, 0)";
+  const transform = visible ? "translate3d(0, 0, 0)" : "translate3d(24px, 0, 0)";
   const opacity = visible ? 1 : 0;
   const transition = reduced
     ? "none"
@@ -184,7 +192,7 @@ function Banner({
   return (
     <div
       role="status"
-      className="pointer-events-auto w-full max-w-md overflow-hidden rounded-2xl shadow-2xl"
+      className="pointer-events-auto w-full max-w-sm overflow-hidden rounded-2xl shadow-2xl"
       style={{
         background: "linear-gradient(135deg, rgba(16,12,26,0.92) 0%, rgba(8,6,16,0.92) 100%)",
         border: "1px solid rgba(168,85,247,0.45)",
@@ -243,7 +251,7 @@ function Banner({
           Dismiss
         </button>
       </div>
-      {/* Thin draining progress bar — transform-only (scaleX), linear 30s. */}
+      {/* Thin draining progress bar — transform-only (scaleX), linear 5s. */}
       {!reduced && (
         <div className="h-0.5 w-full" style={{ background: "rgba(255,255,255,0.06)" }}>
           <div

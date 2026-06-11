@@ -54,12 +54,21 @@ export async function POST(
     return NextResponse.json({ error: "Invalid room code" }, { status: 400 });
   }
 
-  const { data: room } = await supabaseAdmin
+  // Most-recent non-ended room for the code. code is UNIQUE today, but
+  // order+limit keeps this robust if codes are ever recycled, and the error
+  // is logged instead of silently reading as "room not found".
+  const { data: roomRows, error: roomErr } = await supabaseAdmin
     .from("party_rooms")
-    .select("id, status, host_user_id, privacy_mode, dismissed_at, current_game")
+    .select("id, status, host_user_id, privacy_mode, dismissed_at, current_game, created_at")
     .eq("code", code)
     .neq("status", "ended")
-    .maybeSingle();
+    .order("created_at", { ascending: false })
+    .limit(1);
+  if (roomErr) {
+    console.error("[party/join] room lookup failed", roomErr.message);
+    return NextResponse.json({ error: "Couldn't join the room" }, { status: 500 });
+  }
+  const room = roomRows?.[0];
 
   if (!room || room.dismissed_at) {
     return NextResponse.json({ error: "Room not found" }, { status: 404 });
@@ -67,7 +76,15 @@ export async function POST(
 
   // Count active (left_at IS NULL) players + check the caller's existing row.
   // Independent reads — run in parallel (perf pass 2026-06-10).
-  const [{ count }, { data: existing }] = await Promise.all([
+  //
+  // Note on duplicates (invite-403 postmortem 2026-06-10): party_room_players
+  // has a composite PRIMARY KEY (room_id, user_id) — see migration
+  // 20260526230000 — so duplicate active rows for the same user+room are
+  // impossible at the DB layer and this maybeSingle can never multi-row
+  // error. We still capture + log the error instead of silently discarding
+  // it: an existing-row read failure must not fall through to the insert
+  // branch and masquerade as a fresh join.
+  const [{ count }, { data: existing, error: existingErr }] = await Promise.all([
     supabaseAdmin
       .from("party_room_players")
       .select("user_id", { count: "exact", head: true })
@@ -80,6 +97,10 @@ export async function POST(
       .eq("user_id", userId)
       .maybeSingle(),
   ]);
+  if (existingErr) {
+    console.error("[party/join] existing-row check failed", existingErr.message);
+    return NextResponse.json({ error: "Couldn't join the room" }, { status: 500 });
+  }
 
   if (existing && existing.left_at === null) {
     // Refresh active_session so a re-open of the tab re-pins them to the room.
@@ -123,7 +144,7 @@ export async function POST(
 
   if (existing) {
     // Rejoin: clear left_at, reset ready state so the host gets a fresh check.
-    await supabaseAdmin
+    const { error: rejoinErr } = await supabaseAdmin
       .from("party_room_players")
       .update({
         left_at: null,
@@ -133,14 +154,32 @@ export async function POST(
       })
       .eq("room_id", room.id)
       .eq("user_id", userId);
+    if (rejoinErr) {
+      console.error("[party/join] rejoin update failed", rejoinErr.message);
+      return NextResponse.json({ error: "Couldn't join the room" }, { status: 500 });
+    }
   } else {
-    await supabaseAdmin.from("party_room_players").insert({
-      room_id: room.id,
-      user_id: userId,
-      score: 0,
-      is_ready: false,
-      is_pending_round: isMidRound,
-    });
+    // Upsert (not bare insert): two concurrent first-joins both read
+    // existing=null and both reach this branch; with a bare insert the loser
+    // hit the (room_id, user_id) PK conflict and the error was silently
+    // swallowed. onConflict resolves the race idempotently — both writers
+    // land the same fresh-join row. The composite PK already guarantees no
+    // duplicate rows, so no follow-up migration is needed.
+    const { error: insertErr } = await supabaseAdmin.from("party_room_players").upsert(
+      {
+        room_id: room.id,
+        user_id: userId,
+        score: 0,
+        is_ready: false,
+        is_pending_round: isMidRound,
+        left_at: null,
+      },
+      { onConflict: "room_id,user_id" },
+    );
+    if (insertErr) {
+      console.error("[party/join] join insert failed", insertErr.message);
+      return NextResponse.json({ error: "Couldn't join the room" }, { status: 500 });
+    }
   }
 
   // Fire-and-forget — never block the join response on presence bookkeeping.

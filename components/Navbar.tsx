@@ -270,6 +270,19 @@ export default function Navbar() {
             if (detail) emitPartyInvite(detail);
           }
         })
+        // Direct-broadcast delivery path (2026-06-10): the invite-friend route
+        // ALSO broadcasts the freshly inserted notification row as a
+        // `party_invite` broadcast event on this same channel, because
+        // postgres_changes delivery can lag (WAL polling) or drop on
+        // reconnect. Same re-emit as the INSERT path above; when both paths
+        // deliver, PartyInviteToast dedupes by notification id so the toast
+        // shows once. loadNotifications keeps the bell count instant too.
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .on("broadcast", { event: "party_invite" }, (msg: any) => {
+          loadNotifications();
+          const detail = fromNotificationRow(msg?.payload);
+          if (detail) emitPartyInvite(detail);
+        })
         .subscribe();
     } catch { /* ignore if table doesn't exist */ }
     return () => { if (channel) supabase.removeChannel(channel); };

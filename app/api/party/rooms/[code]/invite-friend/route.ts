@@ -61,29 +61,49 @@ export async function POST(
   // Friendship check mirrors the accepted-status OR-check used by
   // /api/social/messages POST. The friend graph IS the access control — we
   // never let a non-friend get a party_invite notification from here.
-  const [{ data: friendship }, { data: room }, { data: senderProfile }, { data: receiverProfile }] =
-    await Promise.all([
-      supabaseAdmin
-        .from("friendships")
-        .select("id")
-        .or(
-          `and(user_id.eq.${userId},friend_id.eq.${friendId}),and(user_id.eq.${friendId},friend_id.eq.${userId})`,
-        )
-        .eq("status", "accepted")
-        .limit(1)
-        .maybeSingle(),
-      supabaseAdmin
-        .from("party_rooms")
-        .select("id, host_user_id, status")
-        .eq("code", code)
-        .neq("status", "ended")
-        .maybeSingle(),
-      supabaseAdmin.from("profiles").select("username").eq("id", userId).maybeSingle(),
-      supabaseAdmin.from("profiles").select("username").eq("id", friendId).maybeSingle(),
-    ]);
-  if (!friendship) {
+  //
+  // Bug fix 2026-06-10 (live playtest 403): every query error used to be
+  // silently destructured away as data:null, so a failing check read as
+  // "gate not satisfied" instead of "query broke". All errors are now
+  // captured + logged, and check queries return arrays via .limit(1) so a
+  // surprise multi-row result can never poison the result the way a bare
+  // .maybeSingle() does (maybeSingle errors on >1 row).
+  //
+  // Room lookup: party_rooms.code is UNIQUE today, but order by created_at
+  // DESC + limit(1) defends against any future code-reuse scheme — we always
+  // act on the most recent non-ended room for the code.
+  const [friendshipQ, roomQ, senderQ, receiverQ] = await Promise.all([
+    supabaseAdmin
+      .from("friendships")
+      .select("id")
+      .or(
+        `and(user_id.eq.${userId},friend_id.eq.${friendId}),and(user_id.eq.${friendId},friend_id.eq.${userId})`,
+      )
+      .eq("status", "accepted")
+      .limit(1),
+    supabaseAdmin
+      .from("party_rooms")
+      .select("id, host_user_id, status")
+      .eq("code", code)
+      .neq("status", "ended")
+      .order("created_at", { ascending: false })
+      .limit(1),
+    supabaseAdmin.from("profiles").select("username").eq("id", userId).maybeSingle(),
+    supabaseAdmin.from("profiles").select("username").eq("id", friendId).maybeSingle(),
+  ]);
+  if (friendshipQ.error || roomQ.error) {
+    if (friendshipQ.error) console.error("[invite-friend] friendship check failed", friendshipQ.error.message);
+    if (roomQ.error) console.error("[invite-friend] room lookup failed", roomQ.error.message);
+    return NextResponse.json({ error: "Couldn't send invite" }, { status: 500 });
+  }
+  if (senderQ.error) console.error("[invite-friend] sender profile lookup failed", senderQ.error.message);
+  if (receiverQ.error) console.error("[invite-friend] receiver profile lookup failed", receiverQ.error.message);
+  const senderProfile = senderQ.data;
+  const receiverProfile = receiverQ.data;
+  if (!friendshipQ.data || friendshipQ.data.length === 0) {
     return NextResponse.json({ error: "Not friends" }, { status: 403 });
   }
+  const room = roomQ.data?.[0];
   if (!room) {
     return NextResponse.json({ error: "Room not found" }, { status: 404 });
   }
@@ -94,29 +114,43 @@ export async function POST(
   // weaponizing this endpoint for "drag random user X into room ABC123".
   // No-op invites are confusing — the receiver would see a notification for
   // a room they're already inside, hence the 409.
-  const [{ data: inRoom }, { data: alreadyIn }] = await Promise.all([
+  //
+  // ROOT CAUSE of the playtest 403: these two checks selected "id" from
+  // party_room_players, but that table has NO id column (its PK is the
+  // composite (room_id, user_id) — see migration 20260526230000). PostgREST
+  // errored with "column party_room_players.id does not exist", the error was
+  // silently discarded, inRoom read as null, and EVERY invite 403'd with
+  // "Join the room before inviting friends" even for hosts standing in the
+  // lobby. Select a real column, capture errors, and 500 on query failure
+  // instead of misreporting it as a membership failure.
+  const [inRoomQ, alreadyInQ] = await Promise.all([
     supabaseAdmin
       .from("party_room_players")
-      .select("id")
+      .select("user_id")
       .eq("room_id", room.id)
       .eq("user_id", userId)
       .is("left_at", null)
-      .maybeSingle(),
+      .limit(1),
     supabaseAdmin
       .from("party_room_players")
-      .select("id")
+      .select("user_id")
       .eq("room_id", room.id)
       .eq("user_id", friendId)
       .is("left_at", null)
-      .maybeSingle(),
+      .limit(1),
   ]);
-  if (!inRoom) {
+  if (inRoomQ.error || alreadyInQ.error) {
+    if (inRoomQ.error) console.error("[invite-friend] inRoom check failed", inRoomQ.error.message);
+    if (alreadyInQ.error) console.error("[invite-friend] alreadyIn check failed", alreadyInQ.error.message);
+    return NextResponse.json({ error: "Couldn't send invite" }, { status: 500 });
+  }
+  if (!inRoomQ.data || inRoomQ.data.length === 0) {
     return NextResponse.json(
       { error: "Join the room before inviting friends" },
       { status: 403 },
     );
   }
-  if (alreadyIn) {
+  if ((alreadyInQ.data?.length ?? 0) > 0) {
     return NextResponse.json(
       { error: "Already in this room" },
       { status: 409 },
@@ -131,21 +165,44 @@ export async function POST(
   // also miss real invites from their friends, which broke the social loop.
   // Pref-driven suppression for invites is a UI-layer choice on the receiver
   // side, not a server-side drop.
-  const { error: notifErr } = await supabaseAdmin.from("notifications").insert({
-    user_id: friendId,
-    type: "party_invite",
-    title: `${senderProfile?.username ?? "A friend"} invited you to Lionade Party`,
-    message: `Tap to join room ${code}`,
-    action_url: `/games/party/${code}`,
-    related_user_id: userId,
-  });
-  if (notifErr) {
-    console.error("[invite-friend] notification insert failed", notifErr);
+  const { data: notifRow, error: notifErr } = await supabaseAdmin
+    .from("notifications")
+    .insert({
+      user_id: friendId,
+      type: "party_invite",
+      title: `${senderProfile?.username ?? "A friend"} invited you to Lionade Party`,
+      message: `Tap to join room ${code}`,
+      action_url: `/games/party/${code}`,
+      related_user_id: userId,
+    })
+    .select("id, user_id, type, title, message, action_url, related_user_id")
+    .single();
+  if (notifErr || !notifRow) {
+    console.error("[invite-friend] notification insert failed", notifErr?.message);
     return NextResponse.json(
       { error: "Couldn't deliver invite" },
       { status: 500 },
     );
   }
+
+  // ── Direct Realtime broadcast (delivery path #2, 2026-06-10) ──
+  // The INSERT above already reaches the receiver via the Navbar's
+  // postgres_changes listener on channel `notifs-${userId}`, but pg_changes
+  // delivery can lag (WAL polling) or drop under reconnect. Broadcasting the
+  // same notification row as a `party_invite` broadcast event on that SAME
+  // channel gives an instant second path; the Navbar listens for both and
+  // PartyInviteToast dedupes by notification id, so double delivery shows one
+  // toast. Best-effort: a broadcast failure never fails the invite (the
+  // notification row is the durable source of truth).
+  const ch = supabaseAdmin.channel(`notifs-${friendId}`);
+  await ch
+    .send({ type: "broadcast", event: "party_invite", payload: notifRow })
+    .catch((err: unknown) => {
+      console.warn("[invite-friend] broadcast warn:", err);
+    })
+    .finally(() => {
+      void supabaseAdmin.removeChannel(ch);
+    });
 
   return NextResponse.json({
     ok: true,

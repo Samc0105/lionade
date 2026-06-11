@@ -94,11 +94,29 @@ export default function PartyRoomPage() {
   }, [code]);
 
   // ── Bootstrap: join + first snapshot ──
+  // Idempotency guard (invite-403 postmortem 2026-06-10): this effect can fire
+  // twice for the same user+code (React StrictMode double-mount in dev, or a
+  // fast remount), which used to POST /join twice concurrently — both reads
+  // saw no existing row and both inserted. The ref caches the in-flight join
+  // promise keyed by user+code so the second run AWAITS the first join
+  // instead of firing its own; the key resets on failure so a retry/remount
+  // can join again.
+  const joinRef = useRef<{ key: string; promise: Promise<{ ok: boolean; error?: string | null }> } | null>(null);
   useEffect(() => {
     let cancelled = false;
     if (!user?.id || !code) return;
+    const joinKey = `${user.id}:${code}`;
     (async () => {
-      const joinRes = await apiPost(`/api/party/rooms/${code}/join`, {});
+      if (!joinRef.current || joinRef.current.key !== joinKey) {
+        joinRef.current = {
+          key: joinKey,
+          promise: apiPost(`/api/party/rooms/${code}/join`, {}),
+        };
+      }
+      const joinRes = await joinRef.current.promise;
+      if (!joinRes.ok && joinRef.current?.key === joinKey) {
+        joinRef.current = null; // allow a fresh attempt on retry/remount
+      }
       if (cancelled) return;
       if (!joinRes.ok) {
         console.error("[party:join-room] failed", joinRes.error);
