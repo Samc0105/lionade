@@ -1486,8 +1486,12 @@ export default function SketchView({
     }
     // Broadcast the same GAME_ENDED event the regular end-game flow uses so
     // every client refreshes back to the lobby view at the same moment.
+    // Topic-dedupe returns the page's SUBSCRIBED room channel (fast ws push).
+    // Never removeChannel — removal detaches by topic and would kill it.
     const ch = supabase.channel(roomChannel(room.code));
-    await ch.send({ type: "broadcast", event: PARTY_EVENTS.GAME_ENDED, payload: {} });
+    await ch
+      .send({ type: "broadcast", event: PARTY_EVENTS.GAME_ENDED, payload: {} })
+      .catch(() => {});
     setRematchPending(false);
   }, [isEffectiveHost, rematchPending, room.code]);
 

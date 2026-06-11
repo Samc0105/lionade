@@ -14,6 +14,8 @@ import RoomCodeShare from "./RoomCodeShare";
 import BottomSheet from "@/components/ui/BottomSheet";
 import { SUBJECT_LABELS, SUBJECTS as ALL_SUBJECTS } from "@/lib/party/word-lists-stub";
 import { nudgeChannel, PARTY_EVENTS } from "@/lib/party/realtime-channels";
+import { subscribeResilient } from "@/lib/realtime-resilient";
+import type { RealtimeChannel } from "@supabase/supabase-js";
 import type { PartyPlayer, PartyRoom } from "@/lib/party/types";
 import AnimatedUsername from "@/components/AnimatedUsername";
 import { resolveRowUsernameEffect } from "@/lib/use-username-effect";
@@ -59,6 +61,13 @@ interface Props {
   players: PartyPlayer[];
   isHost: boolean;
   meUserId: string;
+  /** The page-owned, subscribed party-room-{code} channel. RoomLobby attaches
+   *  its broadcast listeners to it and sends on it, but NEVER subscribes or
+   *  removes it — supabase-js dedupes channels by topic AND detaches by topic
+   *  on removal, so the old pattern (RoomLobby minting "its own" same-topic
+   *  channel + removeChannel on unmount) silently killed the page's room
+   *  channel the moment a game started. */
+  roomCh: RealtimeChannel | null;
   onGameStarted: (game: PartyGame) => void;
 }
 
@@ -128,7 +137,7 @@ const GAME_META: Record<PartyGame, {
   },
 };
 
-export default function RoomLobby({ room, players, isHost, meUserId, onGameStarted }: Props) {
+export default function RoomLobby({ room, players, isHost, meUserId, roomCh, onGameStarted }: Props) {
   const reduced = useReducedMotion();
   // Auto-suggest a fresh game when the group is returning from a finished
   // round. If room.last_game is set, default to anything BUT that — keeps
@@ -309,23 +318,39 @@ export default function RoomLobby({ room, players, isHost, meUserId, onGameStart
     toastSuccess(res.data?.is_spectator ? "Watching only." : "Playing again.");
   }
 
-  // Subscribed room-channel handle, reused by toggleReady/sendChat for
-  // instant client-side broadcasts (ws push on the open socket, ~30ms).
-  // Falls back to supabase-js's HTTP broadcast path if the send happens
-  // before the subscription lands — either way the REST write + the page's
-  // postgres_changes/3s-poll reconciliation is the durable backstop.
-  const roomChRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
-
   // Listen for room-wide broadcasts: dismiss, lobby chat, join requests/decisions.
+  //
+  // Connectivity audit 2026-06-11: handlers attach to the PAGE-OWNED channel
+  // (roomCh prop) instead of minting a same-topic channel here. The old
+  // version's cleanup called removeChannel on what the topic-dedupe had made
+  // the SHARED instance — unmounting the lobby (game start) or an isHost flip
+  // unsubscribed the page's room channel, leaving GAME_ENDED / PLAYER_JOINED /
+  // postgres_changes deaf (poll-only) for the rest of the session. Broadcast
+  // bindings attach fine post-join (client-side dispatch), so this effect just
+  // binds when the channel instance lands and gates everything off on cleanup.
+  // The bindings themselves stay on the instance until the page removes it —
+  // a bounded, gated leftover per lobby mount, never a second subscription.
+  //
+  // isHost rides a ref so a host promotion doesn't need a re-bind (and thus
+  // can't double-attach handlers on the same instance).
+  const isHostRef = useRef(isHost);
   useEffect(() => {
-    const ch = supabase.channel(`party-room-${room.code}`);
+    isHostRef.current = isHost;
+  }, [isHost]);
+
+  useEffect(() => {
+    if (!roomCh) return;
+    let active = true;
+    const ch = roomCh;
     ch.on("broadcast", { event: PARTY_EVENTS.ROOM_DISMISSED }, () => {
+      if (!active) return;
       if (typeof window !== "undefined") {
         toastError("The host closed this room.");
         window.location.href = "/games/party";
       }
     });
     ch.on("broadcast", { event: PARTY_EVENTS.LOBBY_CHAT }, (msg: { payload?: unknown }) => {
+      if (!active) return;
       const p = (msg.payload ?? {}) as Partial<ChatMsg> & { message_id?: string; authoritative?: boolean };
       if (!p.message_id || !p.body) return;
       // Only the SERVER's backstop broadcast carries `authoritative: true`
@@ -366,34 +391,36 @@ export default function RoomLobby({ room, players, isHost, meUserId, onGameStart
         );
       }
     });
-    if (isHost) {
-      ch.on("broadcast", { event: PARTY_EVENTS.JOIN_REQUEST }, (msg: { payload?: unknown }) => {
-        const p = (msg.payload ?? {}) as Partial<JoinReq>;
-        if (!p.request_id || !p.requester_user_id) return;
-        const req: JoinReq = {
-          request_id: p.request_id,
-          requester_user_id: p.requester_user_id,
-          requester_name: p.requester_name ?? "Player",
-          requester_avatar: p.requester_avatar ?? null,
-          note: p.note ?? null,
-        };
-        setPendingJoins((prev) =>
-          prev.some((r) => r.request_id === req.request_id) ? prev : [...prev, req].slice(-3),
-        );
-      });
-    }
+    // Always bound; gated by isHostRef so a mid-lobby host promotion starts
+    // surfacing requests without re-binding the channel.
+    ch.on("broadcast", { event: PARTY_EVENTS.JOIN_REQUEST }, (msg: { payload?: unknown }) => {
+      if (!active || !isHostRef.current) return;
+      const p = (msg.payload ?? {}) as Partial<JoinReq>;
+      if (!p.request_id || !p.requester_user_id) return;
+      const req: JoinReq = {
+        request_id: p.request_id,
+        requester_user_id: p.requester_user_id,
+        requester_name: p.requester_name ?? "Player",
+        requester_avatar: p.requester_avatar ?? null,
+        note: p.note ?? null,
+      };
+      setPendingJoins((prev) =>
+        prev.some((r) => r.request_id === req.request_id) ? prev : [...prev, req].slice(-3),
+      );
+    });
     ch.on("broadcast", { event: PARTY_EVENTS.JOIN_DECISION }, (msg: { payload?: unknown }) => {
+      if (!active) return;
       const p = (msg.payload ?? {}) as { request_id?: string };
       if (!p.request_id) return;
       setPendingJoins((prev) => prev.filter((r) => r.request_id !== p.request_id));
     });
-    ch.subscribe();
-    roomChRef.current = ch;
+    // NO subscribe / NO removeChannel — the page owns the channel lifecycle
+    // (it subscribes via subscribeResilient and removes on room change/unmount).
     return () => {
-      roomChRef.current = null;
-      supabase.removeChannel(ch);
+      active = false;
     };
-  }, [room.code, isHost]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [roomCh]);
 
   // Hydrate the host banner from server on mount: rebroadcast misses if the
   // host opened the lobby AFTER the requester submitted. Fetched once.
@@ -486,10 +513,11 @@ export default function RoomLobby({ room, players, isHost, meUserId, onGameStart
       prev.some((x) => x.id === clientId) ? prev : [...prev, optimistic].slice(-50),
     );
     schedulePendingExpiry(clientId);
-    // Best-effort fast-path broadcast. `send` returns a promise — a plain
-    // try/catch can't see its rejection, so swallow it the async way (the
-    // server's backstop broadcast covers any drop).
-    void roomChRef.current?.send({
+    // Best-effort fast-path broadcast on the page-owned subscribed channel.
+    // `send` returns a promise — a plain try/catch can't see its rejection,
+    // so swallow it the async way (the server's backstop broadcast covers
+    // any drop).
+    void roomCh?.send({
       type: "broadcast",
       event: PARTY_EVENTS.LOBBY_CHAT,
       payload: {
@@ -547,10 +575,17 @@ export default function RoomLobby({ room, players, isHost, meUserId, onGameStart
         setNudgeToasts((prev) => prev.filter((t) => t.id !== id));
       }, TOAST_LIFE_MS);
     });
-    ch.subscribe();
+    // Resilient subscribe (connectivity audit 2026-06-11) — the old bare
+    // ch.subscribe() left the channel dead after a transient WS drop. Silent
+    // on give-up: nudges are fun chrome, not worth a "Connection lost" toast.
+    const handle = subscribeResilient(ch, {
+      label: `party-nudge:${room.code}`,
+      silentOnGiveUp: true,
+    });
     nudgeChRef.current = ch;
     return () => {
       nudgeChRef.current = null;
+      handle.cancel();
       supabase.removeChannel(ch);
     };
   }, [room.code]);
@@ -560,17 +595,17 @@ export default function RoomLobby({ room, players, isHost, meUserId, onGameStart
     lastNudgeWindowRef.current = nudgeWindowIdx;
     const phrase = NUDGE_PHRASES[Math.floor(Math.random() * NUDGE_PHRASES.length)];
     const me = players.find((p) => p.user_id === meUserId);
-    // Send on the already-subscribed nudge channel (fast ws push). The old
-    // pattern minted a fresh unsubscribed channel per tap — slower HTTP
-    // fallback AND a leaked channel instance every nudge.
+    // Send on the already-subscribed nudge channel (fast ws push). The
+    // fallback rides supabase.channel()'s topic-dedupe: it returns the live
+    // instance when one exists, or one unjoined instance (HTTP broadcast
+    // path) otherwise. Never removeChannel here — removal detaches by TOPIC
+    // and would kill the live subscription if the ref was momentarily null.
     const ch = nudgeChRef.current ?? supabase.channel(nudgeChannel(room.code));
     await ch.send({
       type: "broadcast",
       event: PARTY_EVENTS.HOST_NUDGE,
       payload: { phrase, sender: me?.username ?? "Someone" },
-    });
-    // If we had to mint a throwaway (ref not ready), don't leak it.
-    if (ch !== nudgeChRef.current) void supabase.removeChannel(ch);
+    }).catch(() => {});
     // Locally echo (supabase broadcast doesn't echo to sender).
     const id = `local-${Date.now()}`;
     setNudgeToasts((prev) => [...prev, { id, phrase, sender: "You" }].slice(-4));
@@ -724,7 +759,7 @@ export default function RoomLobby({ room, players, isHost, meUserId, onGameStart
   function broadcastReady(isReady: boolean) {
     // `send` returns a promise — a plain try/catch can't see its rejection.
     // Channel mid-(re)subscribe / drop — reconciliation paths cover it.
-    void roomChRef.current?.send({
+    void roomCh?.send({
       type: "broadcast",
       event: PARTY_EVENTS.READY_CHANGED,
       payload: { user_id: meUserId, is_ready: isReady },

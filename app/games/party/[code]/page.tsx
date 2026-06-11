@@ -14,7 +14,7 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import BackButton from "@/components/BackButton";
 import { apiGet, apiPost } from "@/lib/api-client";
 import { supabase } from "@/lib/supabase";
-import { roomChannel, PARTY_EVENTS } from "@/lib/party/realtime-channels";
+import { roomChannel, roomPlayersChannel, PARTY_EVENTS } from "@/lib/party/realtime-channels";
 import { subscribeResilient } from "@/lib/realtime-resilient";
 import { normalizeRoomCode } from "@/lib/party/room-code";
 import { useAuth } from "@/lib/auth";
@@ -189,7 +189,18 @@ export default function PartyRoomPage() {
   // the ALREADY-SUBSCRIBED channel (fast ws push) instead of minting a fresh
   // unsubscribed channel per send — the old pattern fell back to the slower
   // HTTP broadcast path AND leaked one channel instance per send.
+  //
+  // OWNERSHIP (connectivity audit 2026-06-11): this page is the SOLE owner of
+  // the party-room-{code} channel. supabase-js dedupes channels by topic
+  // (client.channel() returns the existing instance) and — crucially —
+  // RealtimeClient._remove() detaches by TOPIC, so any other component that
+  // called removeChannel on "its own" same-topic channel was actually
+  // unsubscribing THIS page's channel. That is exactly what RoomLobby's old
+  // cleanup did on game start: the room channel went deaf for the rest of the
+  // game and GAME_ENDED / PLAYER_JOINED only landed via the 3s poll. RoomLobby
+  // now receives this channel as a prop (state below) and never removes it.
   const roomChRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
+  const [roomCh, setRoomCh] = useState<ReturnType<typeof supabase.channel> | null>(null);
   const roomId = snap?.room?.id;
   useEffect(() => {
     if (!code) return;
@@ -223,18 +234,6 @@ export default function PartyRoomPage() {
       { event: "UPDATE", schema: "public", table: "party_rooms", filter: `code=eq.${code}` },
       () => void refresh(),
     );
-    // Player-row changes: filter SERVER-side by room_id once the snapshot has
-    // resolved it. The previous unfiltered listener meant every ready toggle
-    // in EVERY live room triggered a snapshot GET from every open room page.
-    // Before roomId resolves (one render after join), the 3s poll covers us;
-    // the effect re-subscribes once with the filter when roomId lands.
-    if (roomId) {
-      ch.on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "party_room_players", filter: `room_id=eq.${roomId}` },
-        () => void refresh(),
-      );
-    }
     // Phase 2: wrap with exponential-backoff resubscribe so a transient WS
     // drop doesn't silently leave the room-state channel dead. silentOnGiveUp
     // because game-channel subscribers (SketchView/BluffView/PokerFaceView)
@@ -244,37 +243,79 @@ export default function PartyRoomPage() {
       silentOnGiveUp: true,
     });
     roomChRef.current = ch;
+    setRoomCh(ch);
     return () => {
       roomChRef.current = null;
+      setRoomCh(null);
       handle.cancel();
       supabase.removeChannel(ch);
     };
-  }, [code, refresh, roomId]);
+  }, [code, refresh]);
+
+  // ── Realtime subscribe: player-row changes (own topic, see helper docs) ──
+  // Filtered SERVER-side by room_id once the snapshot has resolved it (an
+  // unfiltered listener meant every ready toggle in EVERY live room triggered
+  // a snapshot GET from every open room page). Lives on its own topic because
+  // postgres_changes filters are fixed at join time and re-creating the main
+  // room topic to add the late-resolving filter raced supabase-js's async
+  // unsubscribe (see roomPlayersChannel in lib/party/realtime-channels.ts).
+  // Before roomId resolves, the 3s poll covers us.
+  useEffect(() => {
+    if (!code || !roomId) return;
+    const ch = supabase.channel(roomPlayersChannel(code));
+    ch.on(
+      "postgres_changes",
+      { event: "*", schema: "public", table: "party_room_players", filter: `room_id=eq.${roomId}` },
+      () => void refresh(),
+    );
+    const handle = subscribeResilient(ch, {
+      label: `room-players:${code}`,
+      silentOnGiveUp: true,
+    });
+    return () => {
+      handle.cancel();
+      supabase.removeChannel(ch);
+    };
+  }, [code, roomId, refresh]);
 
   // ── Safety-net polling: every 3s ──
+  // Note (connectivity audit 2026-06-11): the interval intentionally runs
+  // un-gated in hidden tabs — browsers throttle background timers themselves
+  // (Chrome aligns to >=1s immediately and ~1/min after 5min), so this never
+  // stacks requests in practice. The visibilitychange refresh below covers
+  // the wake-up: a tab that was throttled for minutes reconciles instantly
+  // on return instead of waiting up to one full poll cycle.
   useEffect(() => {
     if (!snap) return;
     const iv = setInterval(refresh, 3000);
     return () => clearInterval(iv);
   }, [snap, refresh]);
 
+  useEffect(() => {
+    const onVisible = () => {
+      if (document.visibilityState === "visible") void refresh();
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => document.removeEventListener("visibilitychange", onVisible);
+  }, [refresh]);
+
   // ── Broadcast helpers ──
-  // All sends go through the subscribed room channel (roomChRef). Falling back
-  // to a throwaway channel keeps the send working pre-subscribe (supabase-js
-  // routes it via the HTTP broadcast endpoint) — but unlike before, the
-  // throwaway is removed after use instead of leaking for the session.
+  // All sends go through the subscribed room channel (roomChRef). The
+  // fallback covers the pre-subscribe window: supabase.channel() dedupes by
+  // topic, so this either returns the live channel (ws push) or mints one
+  // unjoined instance whose send() rides the HTTP broadcast endpoint. We
+  // deliberately do NOT removeChannel here — RealtimeClient._remove()
+  // detaches by TOPIC, so removing a "throwaway" while the subscribed
+  // channel exists would leave the live channel deaf. The unjoined instance
+  // is capped at one per topic by the dedupe and is reused by the next
+  // subscribe.
   const sendRoomEvent = useCallback(
     async (event: string, payload: Record<string, unknown>) => {
-      const subscribed = roomChRef.current;
-      if (subscribed) {
-        await subscribed.send({ type: "broadcast", event, payload });
-        return;
-      }
-      const ch = supabase.channel(roomChannel(code));
+      const ch = roomChRef.current ?? supabase.channel(roomChannel(code));
       try {
         await ch.send({ type: "broadcast", event, payload });
-      } finally {
-        void supabase.removeChannel(ch);
+      } catch {
+        // Best-effort — the 3s poll reconciles within one cycle.
       }
     },
     [code],
@@ -300,10 +341,12 @@ export default function PartyRoomPage() {
 
   const leaveRoom = useCallback(async () => {
     setLeaving(true);
+    // The leave route broadcasts PLAYER_LEFT server-side (covers this path,
+    // the pagehide keepalive path, and any future reaper) — no client send
+    // needed; a second broadcast here would just double the room's refresh.
     await apiPost(`/api/party/rooms/${code}/leave`, {});
-    await sendRoomEvent(PARTY_EVENTS.PLAYER_LEFT, {});
     router.push("/games/party");
-  }, [code, router, sendRoomEvent]);
+  }, [code, router]);
 
   // ── Render ──
   if (loading) {
@@ -389,6 +432,7 @@ export default function PartyRoomPage() {
               players={snap.players}
               isHost={snap.isHost}
               meUserId={snap.meUserId}
+              roomCh={roomCh}
               onGameStarted={async (g) => {
                 await broadcastGameStarted(g);
                 void refresh();

@@ -230,24 +230,20 @@ export default function BluffView({
   }, []);
 
   // Outgoing bluff broadcasts ride the SUBSCRIBED channel (fast WS push). The
-  // throwaway fallback only covers the pre-subscribe window and is removed
-  // after use instead of leaking for the session.
+  // fallback covers the pre-subscribe window: supabase.channel() dedupes by
+  // topic, so it returns the live channel if one exists or mints ONE unjoined
+  // instance whose send() rides the HTTP broadcast endpoint. We deliberately
+  // never removeChannel here — RealtimeClient._remove() detaches by TOPIC, so
+  // the old `finally { removeChannel }` could race the listen effect (which
+  // dedupes onto the SAME instance) and unsubscribe the just-armed bluff
+  // channel, leaving this client deaf (poll-only) for the whole game.
   const sendBluffEvent = useCallback(
     async (event: string, payload: Record<string, unknown>) => {
-      const subscribed = bluffChRef.current;
-      if (subscribed) {
-        try {
-          await subscribed.send({ type: "broadcast", event, payload });
-        } catch {
-          // Best-effort — every client's poll reconciles within ~1.5s anyway.
-        }
-        return;
-      }
-      const ch = supabase.channel(bluffChannel(room.code));
+      const ch = bluffChRef.current ?? supabase.channel(bluffChannel(room.code));
       try {
         await ch.send({ type: "broadcast", event, payload });
-      } finally {
-        void supabase.removeChannel(ch);
+      } catch {
+        // Best-effort — every client's poll reconciles within ~1.5s anyway.
       }
     },
     [room.code],
@@ -524,14 +520,15 @@ export default function BluffView({
       setRematchPending(false);
       return;
     }
-    // Throwaway room-channel send (page.tsx owns the subscribed room channel;
-    // we can't reach it from here) — removed after use so it doesn't leak.
+    // Room-channel send: supabase.channel() dedupes by topic, so this returns
+    // the page's SUBSCRIBED room channel (fast ws push). Never removeChannel —
+    // removal detaches by topic, so the old `finally { removeChannel }` was
+    // unsubscribing the page's live room channel at the exact moment every
+    // client needed it to hear GAME_ENDED.
     const ch = supabase.channel(roomChannel(room.code));
-    try {
-      await ch.send({ type: "broadcast", event: PARTY_EVENTS.GAME_ENDED, payload: {} });
-    } finally {
-      void supabase.removeChannel(ch);
-    }
+    await ch
+      .send({ type: "broadcast", event: PARTY_EVENTS.GAME_ENDED, payload: {} })
+      .catch(() => {});
     setRematchPending(false);
   }, [isEffectiveHost, rematchPending, room.code]);
 

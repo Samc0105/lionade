@@ -139,6 +139,20 @@ export default function PokerFaceView({
   const advanceLock = useRef(false);
   const readLock = useRef(false);
   const autoLockRoundRef = useRef<string | null>(null);
+  // Current round id, readable from stable callbacks without re-creating them
+  // (mirrors BluffView's wiring — connectivity audit 2026-06-11).
+  const roundIdRef = useRef<string | null>(null);
+  // Every round id this client has adopted. Guards the ROUND_STARTED
+  // broadcast AND the activeRound poll fallback against re-adopting a stale
+  // id (e.g. an out-of-order room snapshot arriving after the next round
+  // already began).
+  const seenRoundIdsRef = useRef<Set<string>>(new Set());
+  // The subscribed pokerface channel (owned by the listen effect). All
+  // outgoing pokerface broadcasts ride it — the old per-send
+  // supabase.channel().send() pattern relied on topic-dedupe landing on the
+  // live channel, but during the listen effect's per-round resubscribe
+  // windows it minted detached instances instead (leak + HTTP fallback).
+  const pfChRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
 
   // ── Between-rounds countdown (shared RoundCountdown, 5s) ──
   // Fires once per round when the fresh round's detail first lands in
@@ -233,6 +247,40 @@ export default function PokerFaceView({
     };
   }, [tally, players]);
 
+  // ── Round adoption — the ONLY place roundId changes ──
+  // Resets all per-round state in one spot. The seen-set lets the three
+  // discovery paths (ROUND_STARTED broadcast, activeRound poll fallback,
+  // startRound's own response) race safely: first adoption wins, repeats are
+  // no-ops, and a stale id can never roll the client back to an old round.
+  const adoptRound = useCallback((id: string) => {
+    if (seenRoundIdsRef.current.has(id)) return;
+    seenRoundIdsRef.current.add(id);
+    roundIdRef.current = id;
+    setRoundId(id);
+    setPhase("present");
+    setLieText("");
+    setAutoLocked(false);
+    setMyCallLocal(null);
+    setDetail(null);
+  }, []);
+
+  // Outgoing pokerface broadcasts ride the SUBSCRIBED channel (fast ws push).
+  // The fallback covers the pre-subscribe window via supabase.channel()'s
+  // topic-dedupe (live channel if one exists, one unjoined HTTP-fallback
+  // instance otherwise). Never removeChannel here — removal detaches by
+  // TOPIC and would kill the live subscription.
+  const sendPokerEvent = useCallback(
+    async (event: string, payload: Record<string, unknown>) => {
+      const ch = pfChRef.current ?? supabase.channel(pokerFaceChannel(room.code));
+      try {
+        await ch.send({ type: "broadcast", event, payload });
+      } catch {
+        // Best-effort — every client's 1.5s poll reconciles anyway.
+      }
+    },
+    [room.code],
+  );
+
   // ── Start a fresh round (host) ──
   const startRound = useCallback(async () => {
     setPhase("loading");
@@ -249,15 +297,11 @@ export default function PokerFaceView({
       setError("Couldn't deal a round. Try again.");
       return;
     }
-    setRoundId(res.data.round.id);
-    setPhase("present");
-    const ch = supabase.channel(pokerFaceChannel(room.code));
-    await ch.send({
-      type: "broadcast",
-      event: POKERFACE_EVENTS.ROUND_STARTED,
-      payload: { round_id: res.data.round.id },
+    adoptRound(res.data.round.id);
+    await sendPokerEvent(POKERFACE_EVENTS.ROUND_STARTED, {
+      round_id: res.data.round.id,
     });
-  }, [room.code]);
+  }, [room.code, adoptRound, sendPokerEvent]);
 
   // ── Effective-host derivation (deadlock fallback) ──
   // If the real host disconnects mid-round, host_user_id can keep pointing at
@@ -279,17 +323,17 @@ export default function PokerFaceView({
   }, [players, room.host_user_id]);
   const isEffectiveHost = effectiveHostUserId === meUserId;
 
-  // Reconnect bootstrap: hydrate the round id from the page snapshot so a
-  // rejoiner's first poll lands on the in-flight round instead of waiting
-  // for the next realtime broadcast.
-  const bootstrappedActiveRef = useRef(false);
+  // Round discovery fallback (poll-driven): the page's 3s room snapshot
+  // carries the in-flight round (activeRound). Adopting from it covers BOTH
+  // the rejoin/mid-phase mount AND any missed ROUND_STARTED broadcast — the
+  // old one-shot bootstrap only ran before the first round, so a later
+  // round's dropped broadcast left this client polling the previous round
+  // forever, frozen on its reveal screen. The seen-set in adoptRound makes
+  // this safe against stale snapshots.
+  const activeRoundId = activeRound?.id ?? null;
   useEffect(() => {
-    if (bootstrappedActiveRef.current) return;
-    if (roundId) return;
-    if (!activeRound?.id) return;
-    bootstrappedActiveRef.current = true;
-    setRoundId(activeRound.id);
-  }, [activeRound, roundId]);
+    if (activeRoundId) adoptRound(activeRoundId);
+  }, [activeRoundId, adoptRound]);
 
   // Host auto-deals the first round — only when there's no in-flight round
   // we should bootstrap into (the rejoin path takes that role above).
@@ -306,19 +350,16 @@ export default function PokerFaceView({
     setError(null);
   }, [phase]);
 
-  // ── Listen for round + phase broadcasts ──
+  // ── Pokerface channel: subscribe ONCE per room ──
+  // Round discovery + phase pokes. Handlers go through the stable adoptRound /
+  // refreshDetail callbacks, so this effect no longer depends on roundId (the
+  // old version tore the channel down and resubscribed on every round change —
+  // a per-round deafness window during which broadcasts were lost).
   useEffect(() => {
     const ch = supabase.channel(pokerFaceChannel(room.code));
     ch.on("broadcast", { event: POKERFACE_EVENTS.ROUND_STARTED }, (msg: { payload?: unknown }) => {
       const payload = (msg.payload ?? {}) as { round_id?: string };
-      if (payload.round_id && payload.round_id !== roundId) {
-        setRoundId(payload.round_id);
-        setPhase("present");
-        setLieText("");
-        setAutoLocked(false);
-        setMyCallLocal(null);
-        setDetail(null);
-      }
+      if (payload.round_id) adoptRound(payload.round_id);
     });
     ch.on("broadcast", { event: POKERFACE_EVENTS.PRESENTED }, () => void refreshDetail());
     ch.on("broadcast", { event: POKERFACE_EVENTS.PHASE_CHANGED }, () => void refreshDetail());
@@ -326,18 +367,25 @@ export default function PokerFaceView({
     // Phase 2: wrap with exponential-backoff resubscribe so a transient WS
     // drop doesn't silently leave the poker face channel dead.
     const handle = subscribeResilient(ch, { label: `pokerface-room:${room.code}` });
+    pfChRef.current = ch;
     return () => {
+      pfChRef.current = null;
       handle.cancel();
       supabase.removeChannel(ch);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [room.code, roundId]);
+  }, [room.code, adoptRound]);
 
   // ── Poll round detail (server is the source of truth) ──
+  // Stable callback (reads roundIdRef) so the channel effect above binds once
+  // per room instead of resubscribing per round.
   const refreshDetail = useCallback(async () => {
-    if (!roundId) return;
-    const res = await apiGet<RoundDetail>(`/api/party/pokerface/rounds/${roundId}`);
+    const rid = roundIdRef.current;
+    if (!rid) return;
+    const res = await apiGet<RoundDetail>(`/api/party/pokerface/rounds/${rid}`);
     if (!res.ok || !res.data) return;
+    // Round changed while this GET was in flight — drop the stale payload.
+    if (roundIdRef.current !== rid) return;
     const r = res.data.round;
     setDetail(r);
     setPhase(r.phase);
@@ -385,7 +433,7 @@ export default function PokerFaceView({
     } else if (r.phase === "reveal") {
       setNinnyMsg(r.reveal?.is_lie ? "It was a LIE. Who fell for it?" : "It was the TRUTH. The doubters got played by an honest face.");
     }
-  }, [roundId, inperson]);
+  }, [inperson]);
 
   useEffect(() => {
     if (!roundId) return;
@@ -419,14 +467,10 @@ export default function PokerFaceView({
         return false;
       }
       void refreshDetail();
-      void supabase.channel(pokerFaceChannel(room.code)).send({
-        type: "broadcast",
-        event: POKERFACE_EVENTS.PRESENTED,
-        payload: { round_id: roundId },
-      });
+      void sendPokerEvent(POKERFACE_EVENTS.PRESENTED, { round_id: roundId });
       return true;
     },
-    [roundId, submitting, inperson, lieText, room.code, refreshDetail],
+    [roundId, submitting, inperson, lieText, sendPokerEvent, refreshDetail],
   );
 
   // ── Decide timer (present phase) ──
@@ -477,18 +521,14 @@ export default function PokerFaceView({
         void apiPost(`/api/party/pokerface/rounds/${rid}/open-vote`, {}).then(() => {
           readLock.current = false;
           void refreshDetail();
-          void supabase.channel(pokerFaceChannel(room.code)).send({
-            type: "broadcast",
-            event: POKERFACE_EVENTS.PHASE_CHANGED,
-            payload: { round_id: rid },
-          });
+          void sendPokerEvent(POKERFACE_EVENTS.PHASE_CHANGED, { round_id: rid });
         });
       }
     }
     tick();
     const iv = setInterval(tick, 500);
     return () => clearInterval(iv);
-  }, [detail, isEffectiveHost, meUserId, room.code, refreshDetail]);
+  }, [detail, isEffectiveHost, meUserId, sendPokerEvent, refreshDetail]);
 
   // ── Call timer (vote phase) + auto-complete (host) ──
   useEffect(() => {
@@ -506,18 +546,14 @@ export default function PokerFaceView({
         void apiPost(`/api/party/pokerface/rounds/${rid}/complete`, {}).then(() => {
           advanceLock.current = false;
           void refreshDetail();
-          void supabase.channel(pokerFaceChannel(room.code)).send({
-            type: "broadcast",
-            event: POKERFACE_EVENTS.PHASE_CHANGED,
-            payload: { round_id: rid },
-          });
+          void sendPokerEvent(POKERFACE_EVENTS.PHASE_CHANGED, { round_id: rid });
         });
       }
     }
     tick();
     const iv = setInterval(tick, 500);
     return () => clearInterval(iv);
-  }, [detail, isEffectiveHost, room.code, room.settings?.pf_vote_seconds, refreshDetail]);
+  }, [detail, isEffectiveHost, sendPokerEvent, room.settings?.pf_vote_seconds, refreshDetail]);
 
   // ── "I've read it" — presenter opens calling for everyone ──
   async function openVote() {
@@ -529,11 +565,7 @@ export default function PokerFaceView({
       return;
     }
     void refreshDetail();
-    void supabase.channel(pokerFaceChannel(room.code)).send({
-      type: "broadcast",
-      event: POKERFACE_EVENTS.PHASE_CHANGED,
-      payload: { round_id: roundId },
-    });
+    void sendPokerEvent(POKERFACE_EVENTS.PHASE_CHANGED, { round_id: roundId });
   }
 
   // ── Caller: call believe / doubt (one pick, locked in) ──
@@ -548,11 +580,7 @@ export default function PokerFaceView({
       return;
     }
     void refreshDetail();
-    void supabase.channel(pokerFaceChannel(room.code)).send({
-      type: "broadcast",
-      event: POKERFACE_EVENTS.CALL_SUBMITTED,
-      payload: { round_id: roundId },
-    });
+    void sendPokerEvent(POKERFACE_EVENTS.CALL_SUBMITTED, { round_id: roundId });
   }
 
   // ── Host can force the reveal once everyone has called ──
@@ -565,11 +593,7 @@ export default function PokerFaceView({
       return;
     }
     void refreshDetail();
-    void supabase.channel(pokerFaceChannel(room.code)).send({
-      type: "broadcast",
-      event: POKERFACE_EVENTS.PHASE_CHANGED,
-      payload: { round_id: roundId },
-    });
+    void sendPokerEvent(POKERFACE_EVENTS.PHASE_CHANGED, { round_id: roundId });
   }
 
   // ── Rematch (game-over Play Again) — host resets scores + room -> lobby ──
@@ -584,8 +608,12 @@ export default function PokerFaceView({
       setRematchPending(false);
       return;
     }
+    // Topic-dedupe returns the page's SUBSCRIBED room channel (fast ws push).
+    // Never removeChannel — removal detaches by topic and would kill it.
     const ch = supabase.channel(roomChannel(room.code));
-    await ch.send({ type: "broadcast", event: PARTY_EVENTS.GAME_ENDED, payload: {} });
+    await ch
+      .send({ type: "broadcast", event: PARTY_EVENTS.GAME_ENDED, payload: {} })
+      .catch(() => {});
     setRematchPending(false);
   }, [isEffectiveHost, rematchPending, room.code]);
 

@@ -8,6 +8,18 @@ export function roomChannel(code: string): string {
   return `party-room-${code}`;
 }
 
+// Dedicated topic for the room_id-FILTERED party_room_players postgres_changes
+// feed. It can't ride the main room channel: postgres_changes filters are
+// fixed at join time, and the room_id only resolves one snapshot after mount.
+// Tearing down + recreating the main topic to add the filter hit a supabase-js
+// race (unsubscribe of a joined channel is async; channel() returns the
+// still-leaving instance, whose subscribe() silently no-ops), which left the
+// recreated room channel permanently dead. A separate topic joins once, late,
+// with the filter baked in — the main room channel is created exactly once.
+export function roomPlayersChannel(code: string): string {
+  return `party-room-${code}-players`;
+}
+
 export function sketchChannel(code: string): string {
   return `party-room-${code}-sketch`;
 }

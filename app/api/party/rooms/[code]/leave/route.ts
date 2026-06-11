@@ -10,6 +10,7 @@ import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
 import { isValidRoomCode, normalizeRoomCode } from "@/lib/party/room-code";
 import { clearActiveSession } from "@/lib/presence";
+import { roomChannel, PARTY_EVENTS } from "@/lib/party/realtime-channels";
 
 export async function POST(
   req: NextRequest,
@@ -70,6 +71,27 @@ export async function POST(
       .from("party_rooms")
       .update({ host_user_id: newHost })
       .eq("id", room.id);
+  }
+
+  // ── Broadcast PLAYER_LEFT (server-side, join-route pattern) ──
+  // Connectivity audit 2026-06-11: the explicit leave button used to be the
+  // ONLY path that broadcast (client-side, from the leaving tab). The two
+  // other leave paths — tab-close (pagehide fetch keepalive hits this route
+  // with no JS left alive to broadcast) and any future server-side reap —
+  // were poll-only, so the room learned about a departure up to 3s late.
+  // Broadcasting here covers every caller. Best-effort: a broadcast failure
+  // never fails the leave; the page's 3s poll stays the reconciler.
+  const ch = supabaseAdmin.channel(roomChannel(code));
+  try {
+    await ch.send({
+      type: "broadcast",
+      event: PARTY_EVENTS.PLAYER_LEFT,
+      payload: { user_id: userId },
+    });
+  } catch (err: unknown) {
+    console.warn("[party/leave] broadcast warn:", err);
+  } finally {
+    void supabaseAdmin.removeChannel(ch);
   }
 
   return NextResponse.json({ ok: true });
