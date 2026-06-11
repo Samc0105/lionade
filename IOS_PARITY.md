@@ -7,6 +7,28 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 
 ---
 
+## 2026-06-11: Settings Overhaul — 6-section IA + immediate-save + lifecycle (web-only this ship, iOS port pending)
+
+**Status:** 🟡 → ❌ pending iOS. This is the single largest Settings parity gap to date. Web rebuilt `/settings` into a 6-section route-based hub; the current iOS settings surface (per the 2026-05-23 build-11 "Profile tab → full settings hub" entry) is a much simpler one-page list and does NOT have the new IA, the immediate-save UX, the expanded preference keys, or any of the account-lifecycle features. Several of these are **shared `@lionade/core` preference-contract changes** that iOS inherits the moment it consumes the updated core — but the screens, save UX, and lifecycle flows are all native rebuilds. Owner: `quality-docs-writer` flagged this row; the iOS port routes to `vp-ios`. This entry **supersedes the open verification items on the 2026-06-05 P0 trust-gap row** (server-backed Notifications/Privacy/Delete) — those surfaces are now the seed of this overhaul.
+
+**Migration NOT yet applied:** `lib/migrations/060_settings_overhaul.sql` adds `profiles.deactivated_at`, `profiles.pending_deletion_at`, widens the `profile_visibility` CHECK to 3 options, and creates the `user_login_events` table. Sam runs it manually. The 24h scheduled-delete reaper cron depends on this. iOS reads/writes these through the API layer, so the columns surface in typed responses automatically once applied — no native data-layer change for the column adds themselves.
+
+**Grouped sub-rows for the iOS port** (web shipped each; iOS status ❌ until ported):
+
+1. **6-section route-based IA** ❌ — `app/settings/[section]/` with a shared layout, sections: **Account · Privacy · Notifications · Data & Usage · Subscription · Danger Zone**. iOS rebuilds this natively (expo-router section routes or a sectioned scroll); the iOS Subscription section stays a **StoreKit deep-link** per Apple anti-steering (existing 🚫 precedent — do NOT port the web subscription-management surface 1:1).
+2. **Immediate-save toggle UX** ❌ — every toggle persists on change with a "Saved ✓" confirmation (no explicit Save button). Platform-neutral UX pattern; iOS rebuilds with native controls + the same optimistic-write-then-confirm semantics. Backed by `PATCH /api/user/preferences` (existing route, expanded payload).
+3. **Expanded `profiles.preferences` JSONB contract** ❌ — **this is the shared `@lionade/core` piece.** New/widened keys: notification keys + per-channel `notifications_email`, **quiet hours**, widened privacy keys (3-option profile visibility **Public / Friends / Private**, `online_status`, `friend_request_from`, `show_activity_feed`). When the preference-contract type lands in `@lionade/core` (`ios-shared-core` owns the iOS side), iOS must adopt the same key names + the 3-value visibility enum so toggles round-trip against the same `profiles.preferences` row. Until then, iOS's existing notification/privacy toggles write a narrower subset — flag any key-name drift to `ios-shared-core`.
+4. **Account-lifecycle: deactivate** ❌ — reversible deactivation via `profiles.deactivated_at`. Native flow + confirm. Server contract is platform-neutral.
+5. **Account-lifecycle: scheduled delete + cancel** ❌ — sets `profiles.pending_deletion_at`; a **24h reaper cron** hard-deletes after the window; user can cancel before then. The cron is server-side and platform-agnostic (backstops every client). iOS rebuilds the schedule + cancel UI; reuses the same routes. Distinct from the existing immediate `DELETE /api/user/account?confirm=<email>` typed-email path.
+6. **Active-session / login history** ❌ — new `user_login_events` table surfaced as a session list. iOS rebuilds the list natively against the same table/route.
+7. **Data export** ❌ — `GET /api/user/export`. Platform-neutral endpoint; iOS adds a native "export my data" affordance (likely a share sheet / file download) hitting the same route.
+8. **Connected-accounts management** ❌ — manage linked OAuth providers. iOS rebuilds natively (Apple/Google link state lives in Supabase auth identities, shared).
+9. **Avatar editor** ❌ — in-settings avatar editor. iOS already has an Edit Profile avatar path + the DiceBear SVG→PNG resolution (2026-05-22 build-10); the iOS port reconciles the web editor's options against the existing native edit-profile surface rather than duplicating it. Note the existing **DiceBear SVG→PNG divergence** still applies — iOS must keep resolving `/svg`→`/png`.
+
+**Reconciliation note:** the 2026-05-23 build-11 claim that iOS "shares the same Supabase `user_preferences` row" predates this contract expansion. When `vp-ios` next touches settings, confirm iOS writes the NEW key set (per-channel email, quiet hours, 3-option visibility) and not just the older boolean subset — otherwise iOS users silently can't set the new preferences even though the column accepts them.
+
+---
+
 ## 2026-06-11: Party live-playtest fixes (web)
 
 **Status:** 🚫 N/A (deliberate no-row: Lionade Party is web-only V1, consistent with every prior Party row. The iOS port is deferred to `vp-ios` and will adopt this batch with the V2 foundation + active-game work.) 6 web-only commits (`e7349f8`, `5c33917`, `4430101`, `310247c`, `1f54d22`, `dfd71e2`), no migration. These were bugs Sam found in a live playtest with real players.
@@ -1022,7 +1044,7 @@ Deliberate no-row decision. Added 8-second `AbortSignal.timeout()` on the three 
 | Social | ✅ | 🟡 | iOS missing friend DM |
 | Identity (Profile, Badges, Study-DNA) | ✅ | 🟡 | iOS missing Study-DNA |
 | Economy (Shop, Wallet, Daily Spin) | ✅ | 🟡 | iOS shop cosmetics/boosters stubbed |
-| Settings | ✅ | ✅ | none (iOS subscription routes to StoreKit) |
+| Settings | ✅ | 🟡 | iOS has a simpler one-page settings list; web's 2026-06-11 6-section overhaul (immediate-save, expanded prefs, account lifecycle, session history, data export) is iOS-pending. Subscription stays StoreKit deep-link by design. |
 | Gamification (Games) | ✅ | ❌ | iOS missing |
 | System / Legal | ✅ | 🚫 | iOS uses native modals (by design) |
 
@@ -1074,7 +1096,7 @@ Deliberate no-row decision. Added 8-second `AbortSignal.timeout()` on the three 
 | Daily Spin | `app/api/spin/roll` + UI | `Shop/DailySpinHero` + `SpinResultModal` + `SpinWheel` | ✅ | ✅ | **Shared-core wired** — first canary feature, uses `spinAPI` + `SPIN_SLOTS` from `@lionade/core` |
 | Wallet | `/wallet` | `/wallet` | ✅ | ✅ | balance + lifetime + transaction history |
 | **Settings** | | | | | |
-| Settings | `/settings` | `/settings` | ✅ | ✅ | **Apple HIG rebuild + Account/Security/Permissions sections 2026-05-14**. Profile card → `/edit-profile`. New Account section: Edit profile · Security · Permissions. Appearance now includes App icon picker (Pro/Platinum perk). Plus existing: Subscription, Appearance, Notifications, Privacy, Support, About, Sign out, Delete account. Primitives extracted to `components/SettingsPrimitives.tsx`. |
+| Settings | `app/settings/[section]/` (6-section route-based hub, immediate-save) | `/settings` (single-page list) | ✅ | 🟡 | **Web 6-section overhaul 2026-06-11** (Account · Privacy · Notifications · Data & Usage · Subscription · Danger Zone; immediate-save "Saved ✓"; expanded `profiles.preferences` contract; deactivate / scheduled-delete + cancel / session history / data export / connected accounts / avatar editor; migration `060` pending). iOS still on its 2026-05-14 Apple-HIG one-page list + 2026-05-23 build-11 hub. **iOS port pending — see the dated 2026-06-11 entry for the grouped sub-rows.** The preference-contract changes are shared via `@lionade/core` (`ios-shared-core`); the screens + lifecycle flows are native rebuilds. |
 | App Icon picker | (web-only N/A) | `app/app-icon.tsx` | 🚫 | ✅ | **NEW iOS shipped 2026-05-14** — Pro/Platinum tier perk. 5 variants (Default/Midnight/Wildfire/Platinum/Void). AsyncStorage persistence, Pro-lock upgrade Alert routing to /pricing. Native switch stubbed (applies on next EAS rebuild with `react-native-change-icon`). |
 | Security | (web-only, distributed) | `app/security.tsx` | 🟡 | ✅ | **NEW iOS shipped 2026-05-14** — 941 lines. Sign-in method detection (Email/Apple via app_metadata.provider). Change Password modal (current/new/confirm + strength meter + show/hide). Biometric lock (Face ID/Touch ID via expo-local-authentication, only renders if hardware+enrolled). Active sessions: this device + Sign out everywhere (supabase.auth.signOut({ scope: 'global' })). 2FA stub. Data export → POST /api/account/export with 404-graceful fallback. |
 | Edit Profile | `/profile` (mixed) | `app/edit-profile.tsx` | 🟡 | ✅ | **NEW iOS shipped 2026-05-14** — 1202 lines. Avatar picker (library upload via expo-image-picker → Supabase Storage avatars/${userId}.jpg, regenerate DiceBear, remove). Username with 365-day cooldown via `profileAPI.changeUsername`. Display name (1-50). Bio (0-150, graceful degrade if bio column missing). Debounced availability check. Sticky save bar. Dirty-state confirm-discard. |
