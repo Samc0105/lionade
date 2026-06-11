@@ -47,18 +47,32 @@ export default function SpinResultModal({
     return () => document.removeEventListener("keydown", onKey);
   }, [onClose]);
 
-  // Honest "you only had X" message when Bust clamped
+  // Read the real awarded values off the server payload so this screen can
+  // never drift from the reward table again. intendedDelta is the pre-clamp
+  // amount the table tried to charge; fangsDelta is what actually landed.
+  const taxPercent =
+    typeof result.rewardPayload?.percent === "number"
+      ? (result.rewardPayload.percent as number)
+      : null;
+  const rareFallbackFangs =
+    typeof result.rewardPayload?.fangs === "number"
+      ? (result.rewardPayload.fangs as number)
+      : result.fangsDelta;
+
+  // Honest "you only had X" message when Bust clamped. Render the real
+  // intended delta rather than a hardcoded number.
   const clampedNote =
     result.outcome === "bust" && result.intendedDelta < result.fangsDelta
-      ? `You only had ${formatCoins(result.balanceBefore)} Fangs, so you went to 0 instead of −500.`
+      ? `You only had ${formatCoins(result.balanceBefore)} Fangs, so you went to 0 instead of ${formatCoins(result.intendedDelta)}.`
       : null;
 
   // Description per outcome
   let description: React.ReactNode = "";
   if (result.outcome === "bust") {
-    description = clampedNote ?? "Better luck tomorrow — you lost 500 Fangs.";
+    description = clampedNote ?? `Better luck tomorrow, you lost ${formatCoins(Math.abs(result.fangsDelta))} Fangs.`;
   } else if (result.outcome === "tax_man") {
-    description = `The Tax Man took 33% of your stash — ${formatCoins(Math.abs(result.fangsDelta))} Fangs gone.`;
+    const pct = taxPercent !== null ? `${taxPercent}%` : "a cut";
+    description = `The Tax Man took ${pct} of your stash, ${formatCoins(Math.abs(result.fangsDelta))} Fangs gone.`;
   } else if (result.outcome === "jackpot") {
     description = `You hit the jackpot. ${formatCoins(result.fangsDelta)} Fangs.`;
   } else if (result.outcome === "booster") {
@@ -67,7 +81,7 @@ export default function SpinResultModal({
     description = "A 1-day Streak Shield is now in your inventory.";
   } else if (result.outcome === "rare_cosmetic") {
     description = result.rewardPayload?.kind === "rare_cosmetic_fallback"
-      ? "You already own all rare cosmetics — converted to 1,000 Fangs."
+      ? `You already own all rare cosmetics, converted to ${formatCoins(rareFallbackFangs)} Fangs.`
       : "A surprise rare item has been added to your inventory.";
   } else if (result.fangsDelta > 0) {
     description = `You won ${formatCoins(result.fangsDelta)} Fangs.`;
