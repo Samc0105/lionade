@@ -41,6 +41,12 @@ export interface SaveQuizResultsPayload {
   xpEarned: number;
   /** Per-question answers — optional; if omitted the server skips the user_answers insert. */
   answers?: QuizAnswerRow[];
+  /**
+   * Blitz Mode — 10s question timer + 2x Fangs and XP. The server reads this
+   * for the `blitz_score` bounty check in save-quiz-results. Optional so
+   * older clients stay compatible.
+   */
+  blitzMode?: boolean;
 }
 
 // ── Response shape ────────────────────────────────────────────────────────

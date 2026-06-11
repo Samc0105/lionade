@@ -366,6 +366,27 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 
 ---
 
+## 2026-06-11: Web-replication Section 4 TAIL — Quiz per-question TIMER + BLITZ MODE (iOS-only port, LOCAL, not built)
+
+**Status:** ✅ iOS (local, not built/pushed). Owner: `vp-ios`. Committed on `main` in `~/Desktop/lionade-ios` (batched for the next build). Closes §4 deliberate-divergence flag (1): the `extra_time` (Time Warp) booster was fetched + consumed on iOS but had zero effect because iOS had no timer. Port-direction web → iOS; the only web-repo change is a shared-core type addition (below).
+
+**Web model replicated (from `app/quiz/page.tsx` + `components/QuizCard.tsx`):** `timerLimit = (blitzMode ? 10 : 15) + extra_time` seconds per question. 1s countdown pauses while an answer is in flight or revealed; resets per question. At 0 the question is submitted as answer index `-1` → counts as WRONG (web's Lucky Start `auto_correct` still rescues a Q1 timeout — matched). Urgency colors at absolute thresholds: gold above 10s, orange above 5s, red at 5s and under. Blitz is a toggle at quiz start; `blitzMult = 2` multiplies BOTH Fangs and XP per correct. Web has NO tab-blur handling (the countdown keeps elapsing while blurred) — the safe reading.
+
+**iOS implementation:**
+- `QuestionTimer` (in `app/quiz.tsx`): deadline-anchored (wall-clock `Date.now()` deadline, 200ms reconcile tick), so **backgrounding never grants extra thinking time** — RN suspends JS timers in background, but an `AppState` listener forces a reconcile on foreground and fires the timeout immediately if the window closed while away. Keyed per question; freezes on answer (web parity). No-flash-of-zero: first paint shows the full window.
+- **Timeout path:** `onPick(-1)` flows through the exact existing pipeline (server `checkAnswer`, wrong, reveal correct answer, manual Next button — iOS keeps its manual-advance pattern instead of web's auto-advance delay; deliberate iOS design-language adaptation). A red "Time's up" pill marks the timeout. A synchronous per-question ref latch (`answeredQRef`) dedupes the tap-vs-timeout race.
+- **Urgency treatment:** web's exact color thresholds on bar + Bebas numeral; ONE warning haptic + ONE VoiceOver announcement ("5 seconds left") at the 5s crossing (no per-second announce spam); sustained number pulse via Reanimated `withRepeat`, fully skipped under Reduce Motion (`useReducedMotion`). Timer container is focusable with a live `Time remaining` label (no live region).
+- **Blitz Mode:** toggle card on the difficulty screen (gold `#EAB308`, custom snap switch, `accessibilityRole="switch"`), 10s questions, x2 on both Fangs and XP via `computeRewardWithBoosters(..., blitz)`, "Blitz 2x" chip in the playing booster strip + results screen, and `blitzMode: true` in the save payload.
+- **Time Warp (`extra_time`):** `quizTimerSeconds(blitz, effects)` adds the booster's seconds to every question window. The booster now does something on iOS.
+
+**Shared-core change (`ios-shared-core`):** `SaveQuizResultsPayload.blitzMode?: boolean` added to BOTH copies of `packages/lionade-core/src/api/quiz.ts` (canonical web repo + iOS-vendored). The server (`app/api/save-quiz-results/route.ts`) already reads `body.blitzMode` for the `blitz_score` bounty. **FLAG for `admin` (web):** web's own `finishQuiz` save call does NOT send `blitzMode`, so the `blitz_score` bounty can never complete from web — latent web gap; iOS is now the first client that actually sends it.
+
+**Files (iOS):** `app/quiz.tsx` (QuestionTimer, blitz toggle + chips, timeout path, race latch), `lib/quiz.ts` (`QUIZ_TIMER_SECONDS`/`BLITZ_TIMER_SECONDS`/`BLITZ_MULTIPLIER`, `quizTimerSeconds`, blitz factor in `computeRewardWithBoosters`), `packages/lionade-core/src/api/quiz.ts` (payload type). **Files (web repo):** `packages/lionade-core/src/api/quiz.ts` (canonical type, same edit), this file.
+
+**Verify:** `npx tsc --noEmit` = 0 errors. `expo export --platform ios` clean (Hermes 9.4 MB). No new packages. No build/submit (build-on-command standing order).
+
+---
+
 ## 2026-06-11: Web-replication Section 4 — Learn / Study (quiz boosters + reward parity) (iOS-only port, LOCAL, not built)
 
 **Status:** ✅ iOS (local, not built/pushed). Owner: `vp-ios`. Committed on `main` in `~/Desktop/lionade-ios` (batched with §1 + §2 + §3 for the next build). Fourth surface in the page-by-page replication. Port-direction is web → iOS; no web change.
@@ -376,7 +397,7 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 
 **Gap closed — quiz boosters + bonus surfacing:** The iOS quiz had ZERO booster handling (no fetch, no apply, no consume) and never surfaced the server-returned `bonusFangs` / `streakMilestone`. **This corrects the prior Sub-row C claim** (2026-06-11 shop overhaul) that iOS "inherits booster behavior via the shared catalog, no iOS-side booster code" — the catalog is shared, but the quiz must actively read/apply/consume `active_boosters` rows. Now iOS quiz: fetches `active_boosters` on start, applies `auto_correct` (Q1 once), `fifty_fifty` (eliminate-two affordance, once), `score_boost` (+N to correct, clamped), `coin_multiplier` / `xp_multiplier` / Double Down `coin_xp_multiplier` (reward factors with the same fallback resolution as web), and CONSUMES every booster via `PATCH /api/shop/activate-booster` on finish — exactly like web `finishQuiz`. Results screen shows the active-booster chip strip + streak-milestone + 3-in-a-row banners.
 
-**Deliberate divergences (NOT drift):** (1) **No per-question timer on iOS quiz** (pre-existing) — so `extra_time` (Time Warp) is fetched + consumed but has no visible effect until an iOS timer ships; flagged. (2) iOS reward base (5/8/12 coins, 4/6/10 xp) differs from web's base x difficulty-multiplier — cosmetic only, since `save-quiz-results` server-clamps + is authoritative. (3) **iOS shop does not yet sell boosters** — the quiz still honors any web-activated/earned `active_boosters` row, so cross-platform users never lose a paid booster; the iOS shop booster-purchase UI is a separate open item.
+**Deliberate divergences (NOT drift):** (1) ~~**No per-question timer on iOS quiz**~~ **CLOSED 2026-06-11** by the §4-tail timer + Blitz entry above — `extra_time` (Time Warp) now adds its seconds to every question window. (2) iOS reward base (5/8/12 coins, 4/6/10 xp) differs from web's base x difficulty-multiplier — cosmetic only, since `save-quiz-results` server-clamps + is authoritative. (3) **iOS shop does not yet sell boosters** — the quiz still honors any web-activated/earned `active_boosters` row, so cross-platform users never lose a paid booster; the iOS shop booster-purchase UI is a separate open item.
 
 **Files (iOS):** `lib/quiz.ts` (booster layer: `ActiveBooster`, `deriveBoosterEffects`, `computeRewardWithBoosters`, `fiftyFiftyDimmed`), `app/quiz.tsx` (full wiring + chip strip + bonus banners + a11y labels).
 
