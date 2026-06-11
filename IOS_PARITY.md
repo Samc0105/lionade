@@ -7,6 +7,63 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 
 ---
 
+## 2026-06-11: Web-replication Section 4 — Learn / Study (quiz boosters + reward parity) (iOS-only port, LOCAL, not built)
+
+**Status:** ✅ iOS (local, not built/pushed). Owner: `vp-ios`. Committed on `main` in `~/Desktop/lionade-ios` (batched with §1 + §2 + §3 for the next build). Fourth surface in the page-by-page replication. Port-direction is web → iOS; no web change.
+
+**Scope:** The core study loop — Learn hub, Quiz flow + the full BOOSTER set, results + rewards, Mastery Mode.
+
+**Already at parity (verified, no change):** Learn hub (`app/(tabs)/learn.tsx`) and Mastery Mode (`app/mastery/[examId].tsx`). Mastery is the chat-first Ninny tutor and calls the shared, server-owned `@lionade/core/api/mastery` routes (`/next`, `/answer`, `/socratic`); NO client AI keys.
+
+**Gap closed — quiz boosters + bonus surfacing:** The iOS quiz had ZERO booster handling (no fetch, no apply, no consume) and never surfaced the server-returned `bonusFangs` / `streakMilestone`. **This corrects the prior Sub-row C claim** (2026-06-11 shop overhaul) that iOS "inherits booster behavior via the shared catalog, no iOS-side booster code" — the catalog is shared, but the quiz must actively read/apply/consume `active_boosters` rows. Now iOS quiz: fetches `active_boosters` on start, applies `auto_correct` (Q1 once), `fifty_fifty` (eliminate-two affordance, once), `score_boost` (+N to correct, clamped), `coin_multiplier` / `xp_multiplier` / Double Down `coin_xp_multiplier` (reward factors with the same fallback resolution as web), and CONSUMES every booster via `PATCH /api/shop/activate-booster` on finish — exactly like web `finishQuiz`. Results screen shows the active-booster chip strip + streak-milestone + 3-in-a-row banners.
+
+**Deliberate divergences (NOT drift):** (1) **No per-question timer on iOS quiz** (pre-existing) — so `extra_time` (Time Warp) is fetched + consumed but has no visible effect until an iOS timer ships; flagged. (2) iOS reward base (5/8/12 coins, 4/6/10 xp) differs from web's base x difficulty-multiplier — cosmetic only, since `save-quiz-results` server-clamps + is authoritative. (3) **iOS shop does not yet sell boosters** — the quiz still honors any web-activated/earned `active_boosters` row, so cross-platform users never lose a paid booster; the iOS shop booster-purchase UI is a separate open item.
+
+**Files (iOS):** `lib/quiz.ts` (booster layer: `ActiveBooster`, `deriveBoosterEffects`, `computeRewardWithBoosters`, `fiftyFiftyDimmed`), `app/quiz.tsx` (full wiring + chip strip + bonus banners + a11y labels).
+
+**DB tables/columns this surface reads/writes (for schema verification):**
+- READ `active_boosters` (id, item_id, booster_effect, booster_value, uses_remaining, user_id) via `GET /api/shop/activate-booster`; consume via `PATCH` (decrement `uses_remaining`, delete at 0).
+- READ `questions` (id, subject, question, options, difficulty, correct_answer, explanation) + `question_bank` (id, subject, question, options, difficulty, correct_index, explanation, status, topic) via the quiz question fetch + per-pick `checkAnswer`.
+- WRITE via `POST /api/save-quiz-results` (server-side, unchanged): `quiz_sessions` (insert), `user_answers` (insert, non-fatal), `profiles` (coins via `update_user_coins` RPC, xp, streak, max_streak, last_activity_at, daily_questions_completed, daily_reset_date), `coin_transactions`, `daily_activity`, `bounties`/`user_bounties`, `daily_bets`, `achievements`, `notifications`. iOS does NOT write any of these directly — all go through the existing shared API route.
+- Mastery (already-parity): reads `mastery_exams` / `mastery_sessions` (+ subtopics, messages, pending state) through the server routes; no direct iOS table writes.
+
+**Verify:** `npx tsc --noEmit` = 14 (arena baseline, 0 new). `expo export --platform ios` clean (Hermes 8.99 MB). All Ionicons glyphs validated against the glyphmap.
+
+---
+
+## 2026-06-11: Web-replication Section 3 — Dashboard / Home parity (iOS-only port, LOCAL, not built)
+
+**Status:** ✅ iOS (local, not built/pushed). Owner: `vp-ios`. Committed on `main` in `~/Desktop/lionade-ios` (batched with §1 + §2 for the next build). Third surface in the page-by-page replication (§1 = auth, §2 = onboarding). Port-direction is web → iOS; no web change.
+
+**Method:** analyze web `/dashboard` (`app/dashboard/page.tsx`), copy the feature set to the iOS Home tab (`app/(tabs)/index.tsx`), bring to parity.
+
+**Web element + data inventory:** hero greeting; 5 circular stat orbs (Fangs/streak/level/subjects/rank); on-fire streak pill (streak ≥ 3); level bar; DailyReadyNudge; StreakReviveBanner; ProUpgradeNudge (free-tier only); YourClassesRow; DailyDrillWidget; Today's Missions (claim); Daily Bet; Today's Bounties (claim); WeeklyChart; subject stats; achievements grid; THIS WEEK leaderboard preview (top 3 + my-rank anchor, ranked by weekly Fang earnings from `coin_transactions`); Recent Activity. Confetti on claim + bet-win.
+
+**iOS gap found (vs current web):** the iOS Home (build 20) already had HeaderGreeting, StatOrbs (all 5 orbs incl. rank), LevelProgressBar, DailyReadyNudge, StreakReviveBanner, DailyDrillCard, MissionsCard, BountiesCard, WeeklyChart, SubjectStatsCard, RecentActivityCard. MISSING: (1) on-fire streak pill, (2) free→Pro upgrade nudge, (3) Daily Spin entry (the `DailySpinTeaser` component existed but was never mounted on Home), (4) leaderboard preview.
+
+**What shipped (local):**
+- `components/OnFireStreakPill.tsx` — renders only when quiz streak ≥ 3. No-flash-of-zero (undefined stats → streak 0 < 3 → nothing renders).
+- `components/ProUpgradeNudge.tsx` — free-tier-only purple nudge, web copy (1.5× Fangs / 3 Mastery exams / no popup ads / $6.99/mo), plan via existing `useAuthEmail` (reads `profiles.plan`, fail-closed). 4 hide conditions = web. CTA → in-app `/pricing` (StoreKit), NOT a web URL (App Store anti-steering). 44pt targets.
+- `components/LeaderboardPreviewCard.tsx` — top 3 + my-rank anchor, reusing existing iOS `use-leaderboard` (ELO). Skeleton while loading (no 0-players flash). Tap → Compete tab.
+- Mounted the dormant `DailySpinTeaser` into the Today band.
+- `app/(tabs)/index.tsx` wires all four + adds `useLeaderboard` to pull-to-refresh.
+
+**Deliberate divergences (platform-bridge, not drift):**
+1. **Daily Bet stays on the Compete tab on iOS** (moved 2026-05-13), not on Home. Web keeps it on the dashboard. Documented in `index.tsx`. NOT a parity gap.
+2. **Leaderboard preview metric.** Web ranks the preview by weekly Fang earnings via a server-side `coin_transactions` aggregation that has NO API route iOS can call; building that client-side is schema-risky. iOS reuses the ELO ladder it already trusts and labels the card "RANKED LADDER" (not "THIS WEEK") so the copy matches the data. Honest divergence.
+
+**DB columns / tables this surface reads (for schema verification):**
+- `profiles`: `username`, `coins`, `streak`, `max_streak`, `xp`, `level`, `avatar_url`, `last_activity_at`, `arena_elo` (via StatOrbs + use-user-stats + use-leaderboard), **`plan`** (via `useAuthEmail` for the Pro nudge — fail-closed `.maybeSingle()` → null → "free"). Also `id` for the leaderboard query.
+- Plus everything the pre-existing Home components already touched (missions/bounties/drill/weekly-activity/recent-quizzes/subject-stats/daily-bet/spin — unchanged by §3).
+- **No writes** introduced by §3. All new surfaces are read-only (the Pro nudge dismiss is in-memory `useState`, not persisted).
+- **Flags:** (a) confirm `profiles.plan` exists on the live table — it was NOT in the §3 enumerated column list, though iOS already reads it safely and web `usePlan` reads it too. (b) the iOS ELO `use-leaderboard` does NOT filter `profile_visibility`; web's weekly board now does (Settings overhaul). Pre-existing iOS behavior, not introduced here — decide whether iOS ladder should honor `profile_visibility`.
+
+**Verify:** `npx tsc --noEmit` = 14 arena baseline / 0 new; `expo export --platform ios` clean (Hermes 8.98 MB); no new npm packages; no user-facing em-dashes.
+
+**Done-definition:** `ios-qa-tester` (claim happy path + already-claimed + streak→pill + no-flash-of-zero on all new surfaces + resume-session unaffected + each CTA navigates) ✅; `ios-code-reviewer` (0 new tsc errors, no dead code, no user-facing dashes, 44pt fix applied) ✅; `ios-design-hig` + `ios-design-accessibility` (VoiceOver labels on ladder rows / on-fire pill / nudge, Dynamic Type, 44pt, no new motion so reduced-motion-safe by construction) ✅; `ios-docs-writer` (iOS CHANGELOG + vault Daily) ✅.
+
+---
+
 ## 2026-06-11: Web-replication Section 2 — Onboarding parity (iOS-only port, LOCAL, not built)
 
 **Status:** ✅ iOS (local, not built/pushed). Owner: `vp-ios`. iOS commit `5eebd30` (+ schema-correctness fix `4bc23ed`) on `main` in `~/Desktop/lionade-ios` (§1 + §2 batched on main for the next build). **Correctness fix 2026-06-11:** the original finish() upsert wrote four columns that do NOT exist on the live `profiles` table — `first_name`, `date_of_birth`, `referral_source`, `daily_target` — which made PostgREST REJECT the upsert so onboarding could not complete on a real build. Fixed: upsert now writes only the 11 live columns; `first_name`/`date_of_birth` route to auth `user_metadata` (matching web's `signUp` options.data) + mirror into `preferences` JSONB; `referral_source` stays in `preferences` JSONB; daily target writes `daily_target_minutes` only (legacy `daily_target` mirror deleted). Second surface in the page-by-page replication (Section 1 = auth, shipped). This is a **port-direction-reversed** row: web already had both a signup wizard and an onboarding; iOS is catching up by collecting BOTH field sets in one native flow. No web change.
