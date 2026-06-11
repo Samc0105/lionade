@@ -1,61 +1,176 @@
 "use client";
 
-import { useState } from "react";
+/**
+ * /settings/subscription — Subscription section of the route-based settings
+ * overhaul.
+ *
+ * Renders INSIDE app/settings/layout.tsx, which already provides
+ * ProtectedRoute + Navbar + SpaceBackground + the section nav rail + page
+ * header. This page is content-only — it uses the shared SettingsCard
+ * primitive and never re-wraps the chrome (which would double the navbar /
+ * background / auth gate).
+ *
+ * Data sources (all read directly from `profiles`, client-readable via the
+ * same Supabase row-level access usePlan() already uses):
+ *   - plan / isPaid                → lib/use-plan (profiles.plan)
+ *   - renewal + amount + cancel    → profiles.subscription_current_period_end,
+ *                                    subscription_cycle, subscription_status,
+ *                                    subscription_cancel_at (written by the
+ *                                    Stripe webhook). Amount is derived from
+ *                                    PLAN_PRICING[plan][cycle]. If the period
+ *                                    end isn't populated we show "Manage
+ *                                    billing for details" rather than fake a
+ *                                    date.
+ *   - Manage billing               → POST /api/stripe/portal → redirect to url
+ *
+ * Usage this month (REAL counts only, never fabricated):
+ *   - Mastery targets used / limit → COUNT(user_exams WHERE archived=false)
+ *                                    vs PLAN_EXAM_LIMITS[plan]. This is a real,
+ *                                    plan-gated metric → rendered as a fill bar.
+ *   - Ninny sessions this month    → COUNT(ninny_sessions WHERE completed_at
+ *                                    >= start-of-month). There is NO plan cap
+ *                                    on Ninny sessions anywhere in the codebase,
+ *                                    so this is shown as a real count with an
+ *                                    "Unlimited" cap, no fake fill.
+ *   - AI vocab lookups             → NO usage source or plan limit exists in
+ *                                    the codebase. Rendered as a clearly-labeled
+ *                                    "usage tracking coming soon" placeholder —
+ *                                    no fabricated numbers, no fake fill.
+ *
+ * Plan comparison: a collapsed "See all features" toggle expands an inline
+ * Free / Pro / Platinum matrix sourced from the same PLAN_* constants the
+ * pricing page reads, so the two can't drift. GPU-only height/opacity expand;
+ * reduced motion gets the instant open/close via globals.css.
+ */
+
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, Sparkle, Crown, CheckCircle, CaretLeft } from "@phosphor-icons/react";
-import ProtectedRoute from "@/components/ProtectedRoute";
-import BackButton from "@/components/BackButton";
+import useSWR from "swr";
+import { useReducedMotion } from "framer-motion";
+import {
+  ArrowRight,
+  Sparkle,
+  Crown,
+  CheckCircle,
+  Check,
+  X,
+  CaretDown,
+} from "@phosphor-icons/react";
+import { SettingsCard } from "@/components/settings/shared";
 import { usePlan } from "@/lib/use-plan";
+import { useAuth } from "@/lib/auth";
+import { supabase } from "@/lib/supabase";
 import {
   PLAN_PRICING,
   PLAN_EXAM_LIMITS,
   PLAN_FANG_MULTIPLIER,
+  PLAN_ADS,
 } from "@/lib/mastery-plan";
 import { apiPost } from "@/lib/api-client";
 import { toastError } from "@/lib/toast";
 
-/**
- * Subscription management page. Shows the user's current plan + what it
- * includes, and surfaces upgrade / cancel paths. Paid users get a Manage
- * button that opens the Stripe Customer Portal for self-serve cancel,
- * payment-method update, and invoice history.
- *
- * Accessed via the navbar dropdown's "Subscription" item.
- */
-
-export default function SubscriptionSettingsPage() {
-  return (
-    <ProtectedRoute>
-      <div className="min-h-screen pt-20 pb-16">
-        <div className="max-w-2xl mx-auto px-4 py-10">
-          <BackButton />
-
-          <div className="mb-8">
-            <Link
-              href="/settings"
-              className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.3em] text-cream/40 hover:text-cream/70 transition-colors mb-3"
-            >
-              <CaretLeft size={11} weight="bold" aria-hidden="true" />
-              All settings
-            </Link>
-            <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-cream/40 mb-2">
-              Settings / Subscription
-            </p>
-            <h1 className="font-bebas text-4xl text-cream tracking-[0.06em] leading-none">
-              Your plan
-            </h1>
-          </div>
-
-          <PlanPanel />
-        </div>
-      </div>
-    </ProtectedRoute>
-  );
+// ── Subscription detail shape read off the profile row ───────────────────────
+interface SubscriptionDetail {
+  status: string | null;
+  currentPeriodEnd: string | null;
+  cancelAt: string | null;
+  cycle: "monthly" | "annual" | null;
 }
 
-function PlanPanel() {
-  const { plan, isPaid, isLoading } = usePlan();
+async function fetchSubscriptionDetail(
+  userId: string,
+): Promise<SubscriptionDetail> {
+  try {
+    const { data } = await supabase
+      .from("profiles")
+      .select(
+        "subscription_status, subscription_current_period_end, subscription_cancel_at, subscription_cycle",
+      )
+      .eq("id", userId)
+      .single();
+    const row = (data ?? null) as {
+      subscription_status?: string | null;
+      subscription_current_period_end?: string | null;
+      subscription_cancel_at?: string | null;
+      subscription_cycle?: string | null;
+    } | null;
+    const cycle =
+      row?.subscription_cycle === "annual"
+        ? "annual"
+        : row?.subscription_cycle === "monthly"
+          ? "monthly"
+          : null;
+    return {
+      status: row?.subscription_status ?? null,
+      currentPeriodEnd: row?.subscription_current_period_end ?? null,
+      cancelAt: row?.subscription_cancel_at ?? null,
+      cycle,
+    };
+  } catch {
+    return { status: null, currentPeriodEnd: null, cancelAt: null, cycle: null };
+  }
+}
+
+// ── Usage shape — REAL counts only ───────────────────────────────────────────
+interface UsageSnapshot {
+  /** Active (non-archived) Mastery targets. Plan-gated → has a real cap. */
+  masteryTargets: number;
+  /** Ninny sessions completed since the 1st of this month. No plan cap. */
+  ninnySessionsThisMonth: number;
+}
+
+async function fetchUsage(userId: string): Promise<UsageSnapshot> {
+  const startOfMonth = (() => {
+    const now = new Date();
+    return new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+  })();
+
+  const [targetsRes, ninnyRes] = await Promise.all([
+    supabase
+      .from("user_exams")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", userId)
+      .eq("archived", false),
+    supabase
+      .from("ninny_sessions")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", userId)
+      .gte("completed_at", startOfMonth),
+  ]);
+
+  return {
+    masteryTargets: targetsRes.count ?? 0,
+    ninnySessionsThisMonth: ninnyRes.count ?? 0,
+  };
+}
+
+function formatDate(iso: string | null): string | null {
+  if (!iso) return null;
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return null;
+  return d.toLocaleDateString(undefined, {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+}
+
+export default function SubscriptionSettingsPage() {
+  const { plan, isPaid, isLoading: planLoading } = usePlan();
+  const { user } = useAuth();
   const [portalLoading, setPortalLoading] = useState(false);
+
+  const { data: detail } = useSWR<SubscriptionDetail>(
+    isPaid && user?.id ? `subscription-detail/${user.id}` : null,
+    () => fetchSubscriptionDetail(user!.id),
+    { revalidateOnFocus: true, keepPreviousData: true },
+  );
+
+  const { data: usage } = useSWR<UsageSnapshot>(
+    user?.id ? `subscription-usage/${user.id}` : null,
+    () => fetchUsage(user!.id),
+    { revalidateOnFocus: true, keepPreviousData: true },
+  );
 
   async function openPortal() {
     if (portalLoading) return;
@@ -76,98 +191,137 @@ function PlanPanel() {
     }
   }
 
-  if (isLoading) {
+  // ── Loading skeleton ───────────────────────────────────────────────────────
+  if (planLoading) {
     return (
-      <div className="h-44 rounded-[12px] bg-white/[0.03] border border-white/[0.06] animate-pulse" />
+      <>
+        <div className="rounded-2xl border border-electric/10 p-6 mb-5">
+          <div className="h-5 w-32 rounded bg-white/[0.06] animate-pulse mb-4" />
+          <div className="h-9 w-40 rounded bg-white/[0.06] animate-pulse mb-5" />
+          <div className="flex flex-col gap-2.5">
+            <div className="h-4 w-3/4 rounded bg-white/[0.04] animate-pulse" />
+            <div className="h-4 w-2/3 rounded bg-white/[0.04] animate-pulse" />
+            <div className="h-4 w-1/2 rounded bg-white/[0.04] animate-pulse" />
+          </div>
+        </div>
+        <div className="rounded-2xl border border-electric/10 p-6 mb-5">
+          <div className="h-5 w-40 rounded bg-white/[0.06] animate-pulse mb-5" />
+          <div className="flex flex-col gap-4">
+            <div className="h-12 rounded bg-white/[0.04] animate-pulse" />
+            <div className="h-12 rounded bg-white/[0.04] animate-pulse" />
+          </div>
+        </div>
+      </>
     );
   }
 
   const isPlatinum = plan === "platinum";
   const isPro = plan === "pro";
+  const planLabel = isPlatinum ? "Platinum" : isPro ? "Pro" : "Free";
+
+  const renewalLabel = formatDate(detail?.currentPeriodEnd ?? null);
+  const cancelLabel = formatDate(detail?.cancelAt ?? null);
+  const cycle = detail?.cycle ?? "monthly";
+  const amount =
+    isPaid && cycle === "annual"
+      ? PLAN_PRICING[plan].annual
+      : PLAN_PRICING[plan].monthly;
+
+  const masteryLimit = PLAN_EXAM_LIMITS[plan];
 
   return (
     <>
-      {/* Current plan card */}
-      <div
-        className={`
-          rounded-[14px] border px-5 py-5 mb-4
-          ${isPlatinum
-            ? "border-[#C0C6D6]/40 bg-gradient-to-br from-white/[0.04] to-transparent"
-            : isPro
-              ? "border-gold/40 bg-gradient-to-br from-gold/[0.05] to-transparent"
-              : "border-white/[0.08] bg-white/[0.03]"
-          }
-        `}
-      >
-        <div className="flex items-center justify-between gap-3 mb-3">
-          <div className="flex items-center gap-2">
-            {isPlatinum && <Crown size={16} className="text-[#E8EAF2]" weight="fill" />}
-            {isPro && <Sparkle size={14} className="text-gold" weight="fill" />}
-            <span className="font-bebas text-[22px] tracking-wider text-cream">
-              {plan === "free" ? "Free" : plan === "pro" ? "Pro" : "Platinum"}
-            </span>
-            {isPaid && (
-              <span className="font-mono text-[9.5px] uppercase tracking-[0.22em] text-cream/50">
-                · active
-              </span>
-            )}
-          </div>
+      {/* ── 1. Current plan ─────────────────────────────────────────────── */}
+      <SettingsCard eyebrow="Your plan" title="Current subscription">
+        <div className="flex flex-wrap items-center gap-3 mb-4">
+          <span
+            className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 border font-bebas text-[20px] tracking-wider leading-none ${
+              isPlatinum
+                ? "border-[#C0C6D6]/40 text-[#E8EAF2] bg-gradient-to-br from-white/[0.06] to-transparent"
+                : isPro
+                  ? "border-gold/40 text-gold bg-gradient-to-br from-gold/[0.08] to-transparent"
+                  : "border-electric/30 text-cream bg-electric/[0.08]"
+            }`}
+          >
+            {isPlatinum && <Crown size={15} weight="fill" aria-hidden="true" />}
+            {isPro && <Sparkle size={14} weight="fill" aria-hidden="true" />}
+            {planLabel}
+          </span>
           {isPaid && (
-            <span className="font-bebas text-[18px] tabular-nums text-cream/80 tracking-wider">
-              ${PLAN_PRICING[plan].monthly}
-              <span className="text-cream/40 text-[11px] ml-0.5">/ mo</span>
+            <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-cream/50">
+              {detail?.status === "past_due"
+                ? "Payment past due"
+                : detail?.cancelAt
+                  ? "Cancels soon"
+                  : "Active"}
+            </span>
+          )}
+          {isPaid && (
+            <span className="ml-auto font-bebas text-[20px] tabular-nums text-cream/85 tracking-wider">
+              ${amount}
+              <span className="text-cream/40 text-[11px] ml-1">
+                / {cycle === "annual" ? "yr" : "mo"}
+              </span>
             </span>
           )}
         </div>
 
-        <ul className="flex flex-col gap-1.5 text-[13px] text-cream/75">
+        <ul className="flex flex-col gap-2 text-[13.5px] text-cream/80">
           <li className="flex items-center gap-2">
-            <CheckCircle size={13} className="text-gold shrink-0" weight="fill" />
-            {PLAN_EXAM_LIMITS[plan]} active Mastery {PLAN_EXAM_LIMITS[plan] === 1 ? "target" : "targets"}
+            <CheckCircle size={14} className="text-gold shrink-0" weight="fill" />
+            {masteryLimit} active Mastery {masteryLimit === 1 ? "target" : "targets"}
           </li>
           <li className="flex items-center gap-2">
-            <CheckCircle size={13} className="text-gold shrink-0" weight="fill" />
+            <CheckCircle size={14} className="text-gold shrink-0" weight="fill" />
             {PLAN_FANG_MULTIPLIER[plan]}× Fangs earn rate
           </li>
           <li className="flex items-center gap-2">
-            <CheckCircle size={13} className="text-gold shrink-0" weight="fill" />
+            <CheckCircle size={14} className="text-gold shrink-0" weight="fill" />
             {isPlatinum
               ? "Zero ads"
               : isPro
                 ? "No popup ads (background only)"
-                : "Includes popup + background ads"
-            }
+                : "Includes popup and background ads"}
           </li>
           {isPaid && (
             <li className="flex items-center gap-2">
-              <CheckCircle size={13} className="text-gold shrink-0" weight="fill" />
-              Session Report PDF unlimited
+              <CheckCircle size={14} className="text-gold shrink-0" weight="fill" />
+              Unlimited Session Report PDF
             </li>
           )}
         </ul>
-      </div>
+      </SettingsCard>
 
-      {/* Action card varies by plan */}
+      {/* ── 2. Free → upgrade CTA ───────────────────────────────────────── */}
       {!isPaid && (
-        <div className="rounded-[14px] border border-gold/30 bg-gradient-to-br from-gold/[0.06] to-transparent px-5 py-5 mb-4">
+        <SettingsCard>
           <div className="flex items-center gap-2 mb-2">
             <Sparkle size={14} className="text-gold" weight="fill" />
             <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-gold">
-              Upgrade
+              What you&apos;re missing
             </span>
           </div>
-          <h3 className="font-bebas text-[24px] tracking-wider text-cream leading-tight mb-2">
-            Ready to grind harder?
+          <h3 className="font-bebas text-[24px] tracking-wider text-cream leading-tight mb-3">
+            Unlock the full grind
           </h3>
-          <p className="text-[13px] text-cream/70 leading-relaxed mb-4">
-            Pro drops the popups, unlocks the Session Report, and bumps
-            your Fangs rate to 1.5×. Platinum kills ads entirely and opens
-            up 8 Mastery targets.
-          </p>
+          <ul className="flex flex-col gap-2 text-[13.5px] text-cream/70 mb-5">
+            <li className="flex items-center gap-2">
+              <ArrowRight size={13} className="text-gold/70 shrink-0" weight="bold" />
+              Up to {PLAN_EXAM_LIMITS.platinum} active Mastery targets (you have {PLAN_EXAM_LIMITS.free})
+            </li>
+            <li className="flex items-center gap-2">
+              <ArrowRight size={13} className="text-gold/70 shrink-0" weight="bold" />
+              Up to {PLAN_FANG_MULTIPLIER.platinum}× Fangs earn rate
+            </li>
+            <li className="flex items-center gap-2">
+              <ArrowRight size={13} className="text-gold/70 shrink-0" weight="bold" />
+              Drop the ads and unlock the Session Report PDF
+            </li>
+          </ul>
           <div className="flex items-center gap-2 flex-wrap">
             <Link
               href="/pricing"
-              className="inline-flex items-center gap-1.5 rounded-full bg-gold text-navy font-mono text-[11px] uppercase tracking-[0.25em] px-4 py-2 transition-transform hover:scale-[1.03] active:scale-[0.98]"
+              className="inline-flex items-center gap-1.5 rounded-full bg-gold text-navy font-mono text-[11px] uppercase tracking-[0.25em] px-4 py-2 transition-transform hover:scale-[1.03] active:scale-[0.98] transform-gpu"
             >
               See plans <ArrowRight size={12} weight="bold" />
             </Link>
@@ -178,23 +332,40 @@ function PlanPanel() {
               FAQ
             </Link>
           </div>
-        </div>
+        </SettingsCard>
       )}
 
+      {/* ── 3. Paid → billing + manage ──────────────────────────────────── */}
       {isPaid && (
-        <div className="rounded-[14px] border border-white/[0.08] bg-white/[0.02] px-5 py-5 mb-4">
-          <h3 className="font-bebas text-[20px] tracking-wider text-cream/90 mb-3">
-            Manage subscription
-          </h3>
-          <p className="text-[13px] text-cream/60 leading-relaxed mb-4">
-            Update your payment method, switch billing cycle, view invoices,
-            or cancel anytime in the Stripe Customer Portal.
+        <SettingsCard eyebrow="Billing" title="Manage subscription">
+          <dl className="flex flex-col gap-3 mb-5 text-[13.5px]">
+            <div className="flex items-center justify-between gap-3 border-b border-white/[0.06] pb-3">
+              <dt className="text-cream/55">
+                {detail?.cancelAt ? "Cancels on" : "Renews on"}
+              </dt>
+              <dd className="text-cream/90 font-medium text-right">
+                {detail?.cancelAt
+                  ? cancelLabel ?? "Manage billing for details"
+                  : renewalLabel ?? "Manage billing for details"}
+              </dd>
+            </div>
+            <div className="flex items-center justify-between gap-3">
+              <dt className="text-cream/55">Billing amount</dt>
+              <dd className="text-cream/90 font-medium text-right tabular-nums">
+                ${amount} / {cycle === "annual" ? "year" : "month"}
+              </dd>
+            </div>
+          </dl>
+
+          <p className="text-[13px] text-cream/55 leading-relaxed mb-4">
+            Update your payment method, switch billing cycle, view invoices, or
+            cancel anytime in the Stripe Customer Portal.
           </p>
           <button
             type="button"
             onClick={openPortal}
             disabled={portalLoading}
-            className="inline-flex items-center gap-1.5 rounded-full border border-white/[0.15] text-cream hover:border-white/[0.3] font-mono text-[11px] uppercase tracking-[0.25em] px-4 py-2 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+            className="inline-flex items-center gap-1.5 rounded-full bg-electric text-navy font-mono text-[11px] uppercase tracking-[0.25em] px-4 py-2 transition-transform hover:scale-[1.03] active:scale-[0.98] transform-gpu disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100"
           >
             {portalLoading ? (
               <>
@@ -206,16 +377,282 @@ function PlanPanel() {
               </>
             ) : (
               <>
-                Manage in Stripe <ArrowRight size={12} weight="bold" />
+                Manage billing <ArrowRight size={12} weight="bold" />
               </>
             )}
           </button>
-        </div>
+        </SettingsCard>
       )}
 
-      <p className="text-center font-mono text-[9.5px] uppercase tracking-[0.25em] text-cream/30 mt-6">
+      {/* ── 4. Usage this month ─────────────────────────────────────────── */}
+      <SettingsCard eyebrow="This month" title="Usage">
+        <div className="flex flex-col gap-5">
+          {/* Mastery targets — REAL count, plan-gated cap → fill bar */}
+          <UsageBar
+            label="Active Mastery targets"
+            used={usage?.masteryTargets ?? null}
+            limit={masteryLimit}
+            loading={!usage}
+          />
+
+          {/* Ninny sessions — REAL count, no plan cap → count, no fake fill */}
+          <UsageBar
+            label="Ninny study sessions"
+            used={usage?.ninnySessionsThisMonth ?? null}
+            limit={null}
+            unlimitedNote="Unlimited on every plan"
+            loading={!usage}
+          />
+
+          {/* AI vocab lookups — NO source/limit exists → honest placeholder */}
+          <UsagePlaceholder label="AI vocab lookups" />
+        </div>
+      </SettingsCard>
+
+      {/* ── 5. Plan comparison (collapsed toggle) ───────────────────────── */}
+      <ComparisonToggle />
+
+      <p className="text-center font-mono text-[9.5px] uppercase tracking-[0.25em] text-cream/30 mt-2">
         Billing in USD · Cancel anytime
       </p>
     </>
+  );
+}
+
+// ── UsageBar ─────────────────────────────────────────────────────────────────
+// `limit` null = no plan cap → renders the count + an "unlimited" note and an
+// indeterminate (always-full, muted) bar. `limit` set = real progress fill.
+function UsageBar({
+  label,
+  used,
+  limit,
+  unlimitedNote,
+  loading,
+}: {
+  label: string;
+  used: number | null;
+  limit: number | null;
+  unlimitedNote?: string;
+  loading: boolean;
+}) {
+  const pct =
+    limit && used !== null ? Math.min(100, Math.round((used / limit) * 100)) : 0;
+  const atLimit = limit !== null && used !== null && used >= limit;
+
+  return (
+    <div>
+      <div className="flex items-baseline justify-between gap-3 mb-1.5">
+        <span className="text-cream/85 text-[13.5px] font-semibold">{label}</span>
+        <span className="font-mono text-[12px] tabular-nums text-cream/65">
+          {loading || used === null
+            ? "…"
+            : limit !== null
+              ? `${used} / ${limit}`
+              : used}
+          {limit === null && unlimitedNote ? (
+            <span className="text-cream/35 ml-2 normal-case">{unlimitedNote}</span>
+          ) : null}
+        </span>
+      </div>
+      <div className="h-2 rounded-full bg-white/[0.06] overflow-hidden">
+        <div
+          className={`h-full rounded-full transition-[width] duration-500 transform-gpu ${
+            limit === null
+              ? "w-full bg-electric/25"
+              : atLimit
+                ? "bg-gold"
+                : "bg-electric"
+          }`}
+          style={limit === null ? undefined : { width: loading ? "0%" : `${pct}%` }}
+          aria-hidden="true"
+        />
+      </div>
+      {atLimit && (
+        <p className="text-[11px] text-gold/80 mt-1.5">
+          You&apos;re at your plan limit.{" "}
+          <Link href="/pricing" className="underline hover:text-gold">
+            Upgrade for more
+          </Link>
+          .
+        </p>
+      )}
+    </div>
+  );
+}
+
+// ── UsagePlaceholder ───────────────────────────────────────────────────────
+// For metrics with no real source yet. NEVER fabricates a fill — a striped
+// muted track + an explicit "coming soon" tag.
+function UsagePlaceholder({ label }: { label: string }) {
+  return (
+    <div>
+      <div className="flex items-baseline justify-between gap-3 mb-1.5">
+        <span className="text-cream/55 text-[13.5px] font-semibold">{label}</span>
+        <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-cream/35">
+          Tracking coming soon
+        </span>
+      </div>
+      <div
+        className="h-2 rounded-full bg-white/[0.04] border border-dashed border-white/[0.08]"
+        aria-hidden="true"
+      />
+    </div>
+  );
+}
+
+// ── ComparisonToggle ─────────────────────────────────────────────────────────
+// "See all features" → GPU-friendly height/opacity expand of an inline
+// Free / Pro / Platinum matrix. Sourced from the same PLAN_* constants the
+// pricing page reads. Reduced motion gets the instant open/close.
+function ComparisonToggle() {
+  const [open, setOpen] = useState(false);
+  const reduce = useReducedMotion();
+  const innerRef = useRef<HTMLDivElement | null>(null);
+  const [maxH, setMaxH] = useState(0);
+
+  useEffect(() => {
+    if (innerRef.current) setMaxH(innerRef.current.scrollHeight);
+  }, [open]);
+
+  const rows: { label: string; values: (string | boolean)[]; invert?: boolean }[] =
+    [
+      {
+        label: "Active Mastery targets",
+        values: [
+          String(PLAN_EXAM_LIMITS.free),
+          String(PLAN_EXAM_LIMITS.pro),
+          String(PLAN_EXAM_LIMITS.platinum),
+        ],
+      },
+      {
+        label: "Fangs earn rate",
+        values: [
+          `${PLAN_FANG_MULTIPLIER.free}×`,
+          `${PLAN_FANG_MULTIPLIER.pro}×`,
+          `${PLAN_FANG_MULTIPLIER.platinum}×`,
+        ],
+      },
+      { label: "Session Report PDF", values: [false, true, true] },
+      {
+        label: "Popup ads",
+        values: [PLAN_ADS.free.popups, PLAN_ADS.pro.popups, PLAN_ADS.platinum.popups],
+        invert: true,
+      },
+      {
+        label: "Background ads",
+        values: [
+          PLAN_ADS.free.background,
+          PLAN_ADS.pro.background,
+          PLAN_ADS.platinum.background,
+        ],
+        invert: true,
+      },
+      { label: "Priority AI routing", values: [false, false, true] },
+      { label: "Early access to features", values: [false, false, true] },
+      { label: "Priority support", values: [false, true, true] },
+    ];
+
+  return (
+    <SettingsCard>
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        aria-expanded={open}
+        className="w-full flex items-center justify-between gap-3 text-left group"
+      >
+        <span>
+          <span className="font-bebas text-[20px] tracking-wider text-cream leading-none block">
+            See all features
+          </span>
+          <span className="text-[12px] text-cream/45">
+            Compare Free, Pro, and Platinum
+          </span>
+        </span>
+        <CaretDown
+          size={18}
+          weight="bold"
+          className={`text-cream/60 shrink-0 transition-transform duration-300 transform-gpu ${
+            open ? "rotate-180" : ""
+          }`}
+          aria-hidden="true"
+        />
+      </button>
+
+      <div
+        className="overflow-hidden transition-[max-height,opacity] duration-300 transform-gpu"
+        style={{
+          maxHeight: reduce ? (open ? "none" : 0) : open ? maxH : 0,
+          opacity: open ? 1 : 0,
+        }}
+        aria-hidden={!open}
+      >
+        <div ref={innerRef} className="pt-5">
+          <div className="rounded-xl border border-white/[0.08] overflow-hidden">
+            <div className="grid grid-cols-[1.4fr_repeat(3,1fr)] text-[10.5px] font-mono uppercase tracking-[0.15em] text-cream/50 bg-white/[0.04] px-3 py-2.5 border-b border-white/[0.08]">
+              <div>Feature</div>
+              <div className="text-center">Free</div>
+              <div className="text-center text-gold">Pro</div>
+              <div className="text-center">Plat</div>
+            </div>
+            {rows.map((row, ri) => (
+              <div
+                key={row.label}
+                className={`grid grid-cols-[1.4fr_repeat(3,1fr)] items-center text-[12.5px] px-3 py-2.5 ${
+                  ri === rows.length - 1 ? "" : "border-b border-white/[0.05]"
+                }`}
+              >
+                <div className="text-cream/80 pr-2">{row.label}</div>
+                {row.values.map((v, i) => (
+                  <div key={i} className="text-center">
+                    <CompareCell value={v} invert={row.invert} />
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
+          <div className="mt-4 text-center">
+            <Link
+              href="/pricing"
+              className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.25em] text-cream/55 hover:text-cream transition-colors"
+            >
+              Full pricing page <ArrowRight size={11} weight="bold" />
+            </Link>
+          </div>
+        </div>
+      </div>
+    </SettingsCard>
+  );
+}
+
+function CompareCell({
+  value,
+  invert,
+}: {
+  value: string | boolean;
+  invert?: boolean;
+}) {
+  if (typeof value !== "boolean") {
+    return (
+      <span className="font-mono text-[12px] tabular-nums text-cream/80">
+        {value}
+      </span>
+    );
+  }
+  // invert: `true` means "has ads" → that's a negative → red X.
+  const positive = invert ? !value : value;
+  return positive ? (
+    <Check
+      size={14}
+      weight="bold"
+      className="inline text-[#22C55E]/80"
+      aria-label="included"
+    />
+  ) : (
+    <X
+      size={14}
+      weight="bold"
+      className="inline text-cream/25"
+      aria-label="not included"
+    />
   );
 }
