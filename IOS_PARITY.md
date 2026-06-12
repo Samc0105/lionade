@@ -7,6 +7,20 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 
 ---
 
+## 2026-06-11: Push notification tap routing + the push payload contract (iOS, LOCAL, not built; next-build stack)
+
+**Status:** ✅ iOS code ready + verified LOCALLY. `npx tsc --noEmit` = **0 errors**. eslint 0 errors on touched files (pre-existing `_layout.tsx` `import/first` warnings only). `expo export --platform ios` clean (Hermes 9.46 MB). Pure JS, OTA-eligible, but NOT built / NOT submitted / NO `eas update` (build-on-command). Committed on iOS `main`, not pushed. NO new npm packages. No em-dashes. Owner: `vp-ios`.
+
+**The gap:** the iOS push client registered tokens (`profiles.expo_push_token`) and presented foreground banners but had NO notification-response listener; tapping a push opened the app and went nowhere. Web has no equivalent surface (browser pushes are not wired), so this row is iOS-led.
+
+**📜 PUSH PAYLOAD CONTRACT (binding on FUTURE WEB/SERVER SENDERS — read before building any push dispatcher):** when POSTing to `https://exp.host/--/api/v2/push/send`, set the message `data` field to `{ "action_url": "<web-shaped path>" }` — the EXACT string the server writes to `notifications.action_url` for the in-app inbox (e.g. `/dashboard`, `/games/party/{code}`, `/social`). `url` is accepted as a fallback key; `action_url` is canonical. Senders NEVER pre-translate paths for iOS: the client owns the web→native mapping (shared `lib/notification-routing.ts` `mapActionUrl`: `/dashboard`→`/`, `/games/party/{code}`→`/party/{code}`, passthrough set, web-only paths dropped), so inbox taps and push taps can never drift. Missing/garbage `data` is safe (tap opens the app, no crash, no navigation). Contract is documented in-code in `~/Desktop/lionade-ios/lib/notification-routing.ts`.
+
+**What shipped (iOS):** `lib/notification-routing.ts` (NEW; `mapActionUrl` extracted from `app/notifications.tsx` + defensive `pushTargetFromResponse`) and `<PushTapRouter />` in `app/_layout.tsx`: `addNotificationResponseReceivedListener` (warm + foreground taps) + `getLastNotificationResponseAsync` then `clearLastNotificationResponseAsync` (cold start, replay-proof across JS/OTA reloads) + request-identifier dedupe. Auth-gated queue: target held until auth resolves; signed-out or un-onboarded users get the link DROPPED (RouteGuard owns /login//onboarding; no protected navigation around the auth wall); onboarded users get `router.push` on the next tick after RouteGuard settles. Sign-offs: `ios-qa-tester` (6-case plan in iOS `docs/CHANGELOG.md`; device pass rides the next APNs-signed build), `ios-code-reviewer` (caught + fixed a timer-cleanup race that silently dropped the navigation), `ios-docs-writer`, `ios-parity-tracker` (this row).
+
+**Web counterpart:** 🚫 none needed today (web has no push). WHEN web/server gains a push dispatcher (streak warnings, friend nudges, daily reminders per the `lib/push-notifications.ts` lifecycle note), it MUST follow the contract above — flag `admin`/`dev-backend` to read this row first.
+
+---
+
 ## 2026-06-11: Post-build-21 improvement batch — 4 tails (iOS, LOCAL, not built; next-build stack)
 
 **Status:** ✅ All 4 items code-ready + verified LOCALLY. iOS `npx tsc --noEmit` = **0 errors** per item. `expo export --platform ios` clean (Hermes 9.46 MB). NOT built, NOT submitted (build-on-command standing order; these stack on `main` for the NEXT build after 21). 4 separate commits on iOS `main` (`fd4d689` chat, `6e035de` note detail, `db9987a` paths anti-cheat, `4236628` mono weights), not pushed. NO new npm packages. No em-dashes. No-flash-of-zero. Reduced-motion-safe. Owner: `vp-ios`.
