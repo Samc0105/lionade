@@ -22,6 +22,11 @@ import { fetchRoomSnapshot } from "@/lib/party/room-state";
 import { isValidRoomCode, normalizeRoomCode } from "@/lib/party/room-code";
 import { setActiveSession } from "@/lib/presence";
 import { roomChannel, PARTY_EVENTS } from "@/lib/party/realtime-channels";
+import {
+  checkLobbyExpired,
+  expireLobby,
+  PARTY_LOBBY_EXPIRED_MESSAGE,
+} from "@/lib/party/lobby-expiry";
 
 const MAX_PLAYERS = 6;
 
@@ -59,7 +64,7 @@ export async function POST(
   // is logged instead of silently reading as "room not found".
   const { data: roomRows, error: roomErr } = await supabaseAdmin
     .from("party_rooms")
-    .select("id, status, host_user_id, privacy_mode, dismissed_at, current_game, created_at")
+    .select("id, status, host_user_id, privacy_mode, dismissed_at, current_game, last_game, created_at")
     .eq("code", code)
     .neq("status", "ended")
     .order("created_at", { ascending: false })
@@ -72,6 +77,21 @@ export async function POST(
 
   if (!room || room.dismissed_at) {
     return NextResponse.json({ error: "Room not found" }, { status: 404 });
+  }
+
+  // ── Lazy lobby expiry (2026-06-12) ──
+  // A never-played lobby with no join activity for 5+ hours is dead: flip it
+  // to the existing terminal status ('ended', status-guarded so a concurrent
+  // game start wins) and tell the caller. Runs BEFORE the membership /
+  // capacity / privacy checks so even an old member re-opening the tab gets
+  // the expired answer instead of resurrecting the lobby. The check itself is
+  // free for playing rooms and post-game lobbies (early return, no query).
+  if (await checkLobbyExpired(supabaseAdmin, room)) {
+    await expireLobby(supabaseAdmin, room.id);
+    return NextResponse.json(
+      { error: PARTY_LOBBY_EXPIRED_MESSAGE, expired: true },
+      { status: 410 },
+    );
   }
 
   // Count active (left_at IS NULL) players + check the caller's existing row.

@@ -8,6 +8,11 @@ import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
 import { fetchRoomSnapshot } from "@/lib/party/room-state";
 import { isValidRoomCode, normalizeRoomCode } from "@/lib/party/room-code";
+import {
+  checkLobbyExpired,
+  expireLobby,
+  PARTY_LOBBY_EXPIRED_MESSAGE,
+} from "@/lib/party/lobby-expiry";
 
 export async function GET(
   req: NextRequest,
@@ -24,6 +29,18 @@ export async function GET(
   const snapshot = await fetchRoomSnapshot(supabaseAdmin, code);
   if (!snapshot) {
     return NextResponse.json({ error: "Room not found" }, { status: 404 });
+  }
+
+  // ── Lazy lobby expiry (2026-06-12) ──
+  // A deep link into a never-played lobby abandoned for 5+ hours resolves to
+  // the terminal state, not a live lobby. Same rule + cleanup as /join; free
+  // for playing rooms and post-game lobbies (early return inside the check).
+  if (await checkLobbyExpired(supabaseAdmin, snapshot.room)) {
+    await expireLobby(supabaseAdmin, snapshot.room.id);
+    return NextResponse.json(
+      { error: PARTY_LOBBY_EXPIRED_MESSAGE, expired: true },
+      { status: 410 },
+    );
   }
 
   return NextResponse.json({
