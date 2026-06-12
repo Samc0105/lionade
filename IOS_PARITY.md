@@ -7,6 +7,20 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 
 ---
 
+## 2026-06-11: JUICE PASS: celebration moments + ONE haptic vocabulary (iOS catch-up to web's celebration language, LOCAL, not built; next-build stack)
+
+**Status:** ✅ iOS code ready + verified LOCALLY. `npx tsc --noEmit` = **0 errors**. `expo export --platform ios` clean (Hermes 9.48 MB, +0.02 MB). NOT built / NOT submitted / NO `eas update` (build-on-command). One commit on iOS `main` (`df2ba51`), not pushed. No new packages (Reanimated + expo-haptics already installed). No em-dashes. Owner: `vp-ios`.
+
+**Web vocabulary analyzed first:** `components/Confetti.tsx` (trigger-edge API, prefers-reduced-motion skip, gold-led palette) fires at dashboard daily-claim + bet-win (`app/dashboard/page.tsx`), quiz >=80% results (`app/quiz/page.tsx`), Sketchy FIRST-correct (`components/party/SketchView.tsx`), Daily Drill complete. iOS had celebration only on quiz-perfect + the two global overlays.
+
+**What shipped (iOS):** (A) NEW `components/CelebrationBurst.tsx`, the web-Confetti counterpart: Reanimated gold-Fang particle burst, ~1s, transform/opacity only (GPU), `trigger` edge API, reduce-motion = static gold glow (opacity-only) via useReducedMotion + AccessibilityInfo listener. Mounted at daily-claim toast (`ClockInToast`), Sketchy first-correct over the canvas (guesser locally + drawer/others via the GUESS broadcast gate), quiz results when the streak-milestone or 3-in-a-row banner shows, Trivia reveal on correct+speed-bonus, and `LevelUpOverlay`. (B) NEW `lib/haptics.ts`: tap (impact Light) / success (impact Medium) / milestone (notification Success) / warning / error; all 252 raw expo-haptics call sites across ~70 files normalized to the five verbs (`app/onboarding.tsx` + `app/edit-profile.tsx` deliberately skipped, agent-owned right now). (C) Reduce-motion debt paid: `StreakMilestoneOverlay` halo+flames (doc claimed gating, code never had it), quiz perfect halo+particles, `LevelUpOverlay` halo now gate.
+
+**Web counterpart:** ✅ web already celebrates at all five moments (that is what iOS just matched). 🚫 haptic vocabulary is native-only by definition (no web counterpart; web's equivalent feedback is the motion itself). One web nudge for `admin`/`design-motion-web`: web's Trivia (party) reveal has no correct+fast confetti, iOS now celebrates a moment web does not; consider mirroring.
+
+**Sign-offs:** `ios-design-motion` (burst spec, palette, haptic scale) · `ios-design-accessibility` (reduce-motion paths, pointerEvents none, SR announcements untouched) · `ios-qa-tester` (8-case plan in iOS `docs/CHANGELOG.md`; device pass rides the next build) · `ios-code-reviewer` (stash-compare lint baseline = 0 new findings; 10 ternary haptic sites hand-mapped) · `ios-docs-writer` (iOS CHANGELOG + vault Daily) · `ios-parity-tracker` (this row).
+
+---
+
 ## 2026-06-11: BROKEN-EDGES bundle: avatar upload + native DOB wheel + onboarding prefill (iOS, LOCAL, not built; next-build stack)
 
 **Status:** ✅ iOS code ready + verified LOCALLY. `npx tsc --noEmit` = **0 errors** after each fix. `expo export --platform ios` clean (Hermes 9.5 MB, single bundle). NOT built / NOT submitted / NO `eas update` (build-on-command). Three commits on iOS `main` (`afe33ca` avatar upload, `8065297` DOB wheel, `5051b99` prefill), not pushed. **ONE approved new package: `@react-native-community/datetimepicker` 8.4.4, a NATIVE MODULE that requires the NEXT binary build** (config plugin auto-added to `app.json`; older dev clients cannot render onboarding step 2 after `8065297`). No em-dashes. Owner: `vp-ios`.
