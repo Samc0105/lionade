@@ -7,6 +7,16 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 
 ---
 
+## 2026-06-11: STATES SWEEP: empty/loading/error kit + honest offline behavior (iOS-only polish, LOCAL, not built)
+
+**Status:** ✅ iOS code ready + verified LOCALLY. `npx tsc --noEmit` = **0 errors**. `expo export --platform ios` clean (Hermes 9.49 MB, single bundle). NOT built / NOT submitted / NO `eas update` (build-on-command). Three commits on iOS `main` (`a3bb04d` kit, `8e1929e` sweep, `8751cdc` docs), not pushed. NO new packages. No em-dashes in user-facing copy. Owner: `vp-ios`. Polish item 2/5.
+
+**What:** Shared state kit at `components/states/` (SkeletonBlock with reduce-motion-safe pulse, ErrorState with 44pt Retry wired to SWR `mutate`, existing EmptyState upgraded with a `compact` variant + CTA button role). Sweep killed the cold-cache offline-lie class: leaderboard ("no one's on the board yet"), notifications ("All caught up"), wallet ("no activity yet"), social (skeleton-forever via the `hydrated` gate), academia ("add your first class"), mastery; each now distinguishes loading vs error vs genuinely empty. New-user dashboard gets a FirstQuizCard ("Take a quiz" CTA) where RecentActivityCard used to render null.
+
+**Web counterpart:** 🚫 no port needed (iOS-side hardening of surfaces web already handles per-page). **Web NUDGE for `admin`, informational:** worth a one-time web audit of the same lie class: any web surface whose SWR error + cold cache falls into "empty" copy (web has the same `shouldRetryOnError`-style risk on first-load failures).
+
+**Offline gap, on the record:** `@react-native-community/netinfo` NOT installed (native module, would need a binary build + package approval). iOS offline handling is fetch-failure-driven ErrorStates over cached-data persistence, not a proactive offline banner. Revisit at the next binary build window if Sam wants the banner.
+
 ## 2026-06-11: JUICE PASS: celebration moments + ONE haptic vocabulary (iOS catch-up to web's celebration language, LOCAL, not built; next-build stack)
 
 **Status:** ✅ iOS code ready + verified LOCALLY. `npx tsc --noEmit` = **0 errors**. `expo export --platform ios` clean (Hermes 9.48 MB, +0.02 MB). NOT built / NOT submitted / NO `eas update` (build-on-command). One commit on iOS `main` (`df2ba51`), not pushed. No new packages (Reanimated + expo-haptics already installed). No em-dashes. Owner: `vp-ios`.
