@@ -12,7 +12,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import BackButton from "@/components/BackButton";
-import { apiGet, apiPost } from "@/lib/api-client";
+import { apiGet, apiPost, type ApiResult } from "@/lib/api-client";
 import { supabase } from "@/lib/supabase";
 import { roomChannel, roomPlayersChannel, PARTY_EVENTS } from "@/lib/party/realtime-channels";
 import { subscribeResilient } from "@/lib/realtime-resilient";
@@ -52,6 +52,10 @@ export default function PartyRoomPage() {
 
   const [snap, setSnap] = useState<Snapshot | null>(null);
   const [error, setError] = useState<string | null>(null);
+  // Lobby-expiry (server returns 410 + expired:true for lobbies idle 5+ hours).
+  // Tracked separately from `error` so the error screen can swap its CTA to
+  // "Start a new lobby" — branch on status/flag, never the message string.
+  const [expired, setExpired] = useState(false);
   const [loading, setLoading] = useState(true);
   const [leaving, setLeaving] = useState(false);
 
@@ -84,10 +88,20 @@ export default function PartyRoomPage() {
   }, [activeSession, code, router, toast]);
 
   const refresh = useCallback(async () => {
-    const res = await apiGet<Snapshot>(`/api/party/rooms/${code}`);
+    const res = await apiGet<Snapshot & { expired?: boolean }>(`/api/party/rooms/${code}`);
     if (!res.ok || !res.data) {
-      if (res.status !== 404) console.error("[party:load-room] failed", res.error);
-      setError(res.status === 404 ? "That room isn't open." : "Couldn't load room. Try again.");
+      // 410 + expired:true is the lobby-expiry case — expected, like 404, so
+      // skip the error log and render the server's copy verbatim.
+      const isExpired = res.status === 410 || res.data?.expired === true;
+      if (res.status !== 404 && !isExpired) console.error("[party:load-room] failed", res.error);
+      if (isExpired) setExpired(true);
+      setError(
+        isExpired
+          ? res.error ?? "This lobby expired. Start a new one."
+          : res.status === 404
+            ? "That room isn't open."
+            : "Couldn't load room. Try again.",
+      );
       return null;
     }
     setSnap(res.data);
@@ -102,7 +116,7 @@ export default function PartyRoomPage() {
   // promise keyed by user+code so the second run AWAITS the first join
   // instead of firing its own; the key resets on failure so a retry/remount
   // can join again.
-  const joinRef = useRef<{ key: string; promise: Promise<{ ok: boolean; error?: string | null }> } | null>(null);
+  const joinRef = useRef<{ key: string; promise: Promise<ApiResult<{ expired?: boolean }>> } | null>(null);
   useEffect(() => {
     let cancelled = false;
     if (!user?.id || !code) return;
@@ -111,7 +125,7 @@ export default function PartyRoomPage() {
       if (!joinRef.current || joinRef.current.key !== joinKey) {
         joinRef.current = {
           key: joinKey,
-          promise: apiPost(`/api/party/rooms/${code}/join`, {}),
+          promise: apiPost<{ expired?: boolean }>(`/api/party/rooms/${code}/join`, {}),
         };
       }
       const joinRes = await joinRef.current.promise;
@@ -120,8 +134,16 @@ export default function PartyRoomPage() {
       }
       if (cancelled) return;
       if (!joinRes.ok) {
-        console.error("[party:join-room] failed", joinRes.error);
-        setError("Couldn't join the room. Try again.");
+        // Lobby-expiry (410 + expired:true) is expected — render the server's
+        // copy and skip the error log. Branch on status/flag, never the string.
+        const isExpired = joinRes.status === 410 || joinRes.data?.expired === true;
+        if (!isExpired) console.error("[party:join-room] failed", joinRes.error);
+        if (isExpired) setExpired(true);
+        setError(
+          isExpired
+            ? joinRes.error ?? "This lobby expired. Start a new one."
+            : "Couldn't join the room. Try again.",
+        );
         setLoading(false);
         return;
       }
@@ -376,13 +398,21 @@ export default function PartyRoomPage() {
             <button
               onClick={() => router.push("/games/party")}
               className="px-5 py-2.5 rounded-xl font-bebas tracking-wider text-sm transition-all active:scale-95"
-              style={{
-                background: "linear-gradient(135deg, #A855F7 0%, #6366F1 100%)",
-                color: "#fff",
-                boxShadow: "0 4px 16px rgba(168,85,247,0.3)",
-              }}
+              style={
+                expired
+                  ? {
+                      background: "linear-gradient(135deg, #FFD700 0%, #B8960C 100%)",
+                      color: "#04080F",
+                      boxShadow: "0 4px 16px rgba(255,215,0,0.25)",
+                    }
+                  : {
+                      background: "linear-gradient(135deg, #A855F7 0%, #6366F1 100%)",
+                      color: "#fff",
+                      boxShadow: "0 4px 16px rgba(168,85,247,0.3)",
+                    }
+              }
             >
-              BACK TO PARTY
+              {expired ? "START A NEW LOBBY" : "BACK TO PARTY"}
             </button>
           </div>
         </div>

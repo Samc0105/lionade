@@ -52,14 +52,22 @@ export default function PartyLandingPage() {
     }
     setBusy("joining");
     setError(null);
-    const res = await apiPost<{ ok: boolean; requires_request?: boolean }>(
+    const res = await apiPost<{ ok: boolean; requires_request?: boolean; expired?: boolean }>(
       `/api/party/rooms/${code}/join`,
       {},
     );
     setBusy("none");
     if (!res.ok) {
       console.error("[party:join-room] failed", res.error);
-      setError("That room isn't open right now.");
+      // Lobby-expiry (410 + expired:true) carries its own server copy — render
+      // it verbatim instead of the generic line. Branch on status/flag, never
+      // the message string.
+      const isExpired = res.status === 410 || res.data?.expired === true;
+      setError(
+        isExpired
+          ? res.error ?? "This lobby expired. Start a new one."
+          : "That room isn't open right now.",
+      );
       return;
     }
     if (res.data?.requires_request) {
