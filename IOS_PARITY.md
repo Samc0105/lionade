@@ -7,6 +7,18 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 
 ---
 
+## 2026-06-11: BROKEN-EDGES bundle: avatar upload + native DOB wheel + onboarding prefill (iOS, LOCAL, not built; next-build stack)
+
+**Status:** ✅ iOS code ready + verified LOCALLY. `npx tsc --noEmit` = **0 errors** after each fix. `expo export --platform ios` clean (Hermes 9.5 MB, single bundle). NOT built / NOT submitted / NO `eas update` (build-on-command). Three commits on iOS `main` (`afe33ca` avatar upload, `8065297` DOB wheel, `5051b99` prefill), not pushed. **ONE approved new package: `@react-native-community/datetimepicker` 8.4.4, a NATIVE MODULE that requires the NEXT binary build** (config plugin auto-added to `app.json`; older dev clients cannot render onboarding step 2 after `8065297`). No em-dashes. Owner: `vp-ios`.
+
+**What shipped (iOS):** (A) `app/edit-profile.tsx` avatar upload now works against the live `avatars` bucket (public-read, 5MB, jpeg/png/webp, owner-folder RLS): object path moved to `avatars/${userId}/avatar.<ext>` to satisfy the owner-folder policy, bytes via `arrayBuffer` instead of the RN Blob polyfill (0-byte-upload trap), contentType from the picker's `mimeType` normalized to the bucket allow-list, distinct graceful-failure toasts (unreadable / >5MB / bucket missing / RLS rejection / network), stale-extension cleanup on re-upload, and "Remove photo" now clears the storage object. (B) `app/onboarding.tsx` step 2: typed YYYY-MM-DD field replaced with the native iOS date wheel (spinner, dark, max = today, seeded ~16y ago); >=13 gate + persistence (auth `user_metadata` + `profiles.preferences`) unchanged. (C) onboarding resume/prefill no longer SELECTs the dead `profiles.first_name` column; name/DOB/referral read back from auth metadata + `preferences` JSONB, so resumed onboarding round-trips them.
+
+**Web counterpart:** (A) web's avatar upload (profile page) targets the same `avatars` bucket: 🟡 **web team must verify its object path starts with `${userId}/` too**, or web uploads hit the same RLS rejection iOS just fixed. Flag for `admin`/`dev-frontend`. (B) 🚫 native wheel is iOS-native UX; web keeps its date input. (C) web onboarding does not read `profiles.first_name` (web writes name/DOB to auth metadata at signUp); no web change.
+
+**Sign-offs:** `ios-security-auth` + `ios-security-auditor` (owner-folder path enforced; live bucket probe; no user-controllable path segments - PASS) · `ios-design-hig` + `ios-design-accessibility` (native wheel is the HIG control; UIPickerView VoiceOver-native) · `ios-qa-tester` (7-case plan in iOS `docs/CHANGELOG.md`; wheel device pass rides the next build) · `ios-code-reviewer` (PASS; caught a toISOString timezone day-shift, fixed via local toYMD) · `ios-docs-writer` (iOS CHANGELOG `d34940b` + vault Daily) · `ios-parity-tracker` (this row).
+
+---
+
 ## 2026-06-11: OTA "update ready" toast + app icon badge hygiene (iOS-only, LOCAL, not built; next-build stack)
 
 **Status:** ✅ iOS code ready + verified LOCALLY. `npx tsc --noEmit` = **0 errors**. eslint 0 errors on touched files (pre-existing `_layout.tsx` `import/first` warnings only). `expo export --platform ios` clean (Hermes 9.49 MB). Pure JS, but the toast itself only becomes observable once a TestFlight build + a published EAS Update exist (OTA is disabled in dev by design). NOT built / NOT submitted / NO `eas update` (build-on-command). Committed on iOS `main`, not pushed. NO new npm packages (expo-updates + expo-notifications were already installed). No em-dashes. Owner: `vp-ios`.
