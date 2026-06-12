@@ -7,6 +7,20 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 
 ---
 
+## 2026-06-11: OTA "update ready" toast + app icon badge hygiene (iOS-only, LOCAL, not built; next-build stack)
+
+**Status:** ✅ iOS code ready + verified LOCALLY. `npx tsc --noEmit` = **0 errors**. eslint 0 errors on touched files (pre-existing `_layout.tsx` `import/first` warnings only). `expo export --platform ios` clean (Hermes 9.49 MB). Pure JS, but the toast itself only becomes observable once a TestFlight build + a published EAS Update exist (OTA is disabled in dev by design). NOT built / NOT submitted / NO `eas update` (build-on-command). Committed on iOS `main`, not pushed. NO new npm packages (expo-updates + expo-notifications were already installed). No em-dashes. Owner: `vp-ios`.
+
+**The gaps (both iOS-only by nature):** (1) published EAS Updates applied only on the next cold launch; an active tester could run a stale JS bundle for days. (2) `shouldSetBadge: true` let pushes mark the app icon but nothing ever cleared it; the badge stuck forever once set.
+
+**What shipped (iOS):** `lib/ota-updates.ts` (NEW `useOtaUpdateReady()`: check on cold start + every AppState "active" with 60s throttle + in-flight guard; hard no-op in `__DEV__` / `Updates.isEnabled === false` since the check throws there; background `fetchUpdateAsync` BEFORE surfacing so Restart is instant; module-level once-per-session token consumed by dismiss/restart, never by suppression) + `components/OtaUpdateBanner.tsx` (NEW small non-blocking top toast, ClockInToast visual language: "Update ready / Restart to apply", 44pt Restart -> `Updates.reloadAsync()`, dismiss at 46pt effective, VoiceOver announce + labeled buttons, reduce-motion = pure fades, no auto-dismiss). **Live-game suppression:** route watch via `useSegments()` holds the banner on `/quiz`, `/party/[code]`, `/duel`, `/arena`; it appears when the user leaves the live surface. Badge: NEW `clearBadge()` in `lib/push-notifications.ts` + `<BadgeHygiene />` in `app/_layout.tsx` clearing on cold start, every foreground, and when the route hits `notifications` (inbox screen file untouched). In-app unread logic (server read flags) unaffected.
+
+**Web counterpart:** 🚫 none. Web is a server-rendered Next.js app (deploys are live on refresh) and has no app-icon badge; both mechanics are native-platform concerns by definition. No web row needed.
+
+**Sign-offs:** `ios-design-hig` + `ios-design-motion` + `ios-design-accessibility` (44pt targets, fades under reduce-motion, VoiceOver announce - PASS) · `ios-qa-tester` (7-case plan in iOS `docs/CHANGELOG.md`; device pass rides the next TestFlight build + first published update) · `ios-code-reviewer` (PASS) · `ios-docs-writer` (iOS CHANGELOG + vault Daily) · `ios-parity-tracker` (this row).
+
+---
+
 ## 2026-06-11: Push notification tap routing + the push payload contract (iOS, LOCAL, not built; next-build stack)
 
 **Status:** ✅ iOS code ready + verified LOCALLY. `npx tsc --noEmit` = **0 errors**. eslint 0 errors on touched files (pre-existing `_layout.tsx` `import/first` warnings only). `expo export --platform ios` clean (Hermes 9.46 MB). Pure JS, OTA-eligible, but NOT built / NOT submitted / NO `eas update` (build-on-command). Committed on iOS `main`, not pushed. NO new npm packages. No em-dashes. Owner: `vp-ios`.
