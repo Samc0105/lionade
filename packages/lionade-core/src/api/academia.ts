@@ -107,6 +107,34 @@ export interface UpdateAssignmentPayload {
   status?: AssignmentStatus;
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Study plan — propose + commit study blocks for the soonest future exam
+// (zero AI; pure date math server-side). Frozen contract per web's
+// components/Class/StudyPlanBuilder.tsx.
+// ─────────────────────────────────────────────────────────────────────────────
+
+export interface StudyPlanBlock {
+  /** YYYY-MM-DD */
+  date: string;
+  /** e.g. "Study: IAM policy boundaries" */
+  title: string;
+  /** Subtopic the block targets; null on generic (no-subtopic) blocks. */
+  subtopicId: string | null;
+}
+
+/**
+ * GET /api/classes/[id]/study-plan. `exam: null` (with empty blocks) when the
+ * class has no future-dated exam target to plan toward.
+ */
+export interface StudyPlanProposal {
+  exam: { id: string; title: string; targetDate: string } | null;
+  blocks: StudyPlanBlock[];
+}
+
+export interface CommitStudyPlanResponse {
+  created: number;
+}
+
 export const academiaAPI = {
   /**
    * Unified calendar feed. from/to are optional YYYY-MM-DD; server defaults to
@@ -184,6 +212,36 @@ export const academiaAPI = {
   ): Promise<ApiResult<{ ok: true }>> {
     return client.delete<{ ok: true }>(
       `/api/classes/assignments/${assignmentId}`,
+    );
+  },
+
+  /**
+   * GET /api/classes/[id]/study-plan — PROPOSE study blocks (nothing saved).
+   * Weakest-first distribution over the days before the soonest future exam.
+   */
+  getStudyPlan(
+    client: ApiClient,
+    classId: string,
+  ): Promise<ApiResult<StudyPlanProposal>> {
+    return client.get<StudyPlanProposal>(
+      `/api/classes/${classId}/study-plan`,
+    );
+  },
+
+  /**
+   * POST /api/classes/[id]/study-plan — save the chosen blocks as
+   * class_assignments rows (status 'todo', due_date = study day). Server
+   * accepts only { date, title } per block (max 30); invalid blocks are
+   * skipped, not 500'd.
+   */
+  commitStudyPlan(
+    client: ApiClient,
+    classId: string,
+    blocks: Array<{ date: string; title: string }>,
+  ): Promise<ApiResult<CommitStudyPlanResponse>> {
+    return client.post<CommitStudyPlanResponse>(
+      `/api/classes/${classId}/study-plan`,
+      { blocks },
     );
   },
 } as const;

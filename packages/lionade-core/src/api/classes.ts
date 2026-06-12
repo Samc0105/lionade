@@ -42,6 +42,58 @@ export interface CreateClassResponse {
   classId: string;
 }
 
+/** PATCH /api/classes/[id] — all fields optional; only sent fields are updated. */
+export interface UpdateClassPayload {
+  /** >= 2 chars after trim; sliced to 80. */
+  name?: string;
+  shortCode?: string | null;
+  professor?: string | null;
+  term?: string | null;
+  /** #RRGGBB only — silently ignored when malformed. */
+  color?: string;
+  emoji?: string | null;
+  position?: number;
+}
+
+export interface UpdateClassResponse {
+  ok: true;
+  /** Present (true) when the patch contained no editable fields. */
+  noop?: boolean;
+}
+
+/**
+ * GET /api/classes/[id]/streak — per-class study streak.
+ * `alive` = last activity within the 36h grace window.
+ */
+export interface ClassStreakResponse {
+  streak: number;
+  longest: number;
+  lastActivityAt: string | null;
+  alive: boolean;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// AI daily plan — GET /api/classes/[id]/plan (cached per user/class/day)
+// ─────────────────────────────────────────────────────────────────────────────
+
+export interface ClassPlanTask {
+  kind: "mastery" | "review_notes" | "quiz" | "break";
+  label: string;
+  minutes: number;
+  /** Web-style path like /learn/mastery/<examId>; null when no destination. */
+  deepLink: string | null;
+  /** Optional one-line "why this task" — tooltip / expanded view. */
+  why?: string;
+}
+
+export interface ClassDailyPlan {
+  tasks: ClassPlanTask[];
+  totalMinutes: number;
+  summary: string;
+  generatedAt: string;
+  fromCache: boolean;
+}
+
 export interface RecentNote {
   id: string;
   title: string | null;
@@ -209,6 +261,39 @@ export const classesAPI = {
     payload: CreateClassPayload,
   ): Promise<ApiResult<CreateClassResponse>> {
     return client.post<CreateClassResponse>("/api/classes", payload);
+  },
+  /** PATCH /api/classes/[id] — edit name / color / emoji / term / position / etc. */
+  update(
+    client: ApiClient,
+    classId: string,
+    payload: UpdateClassPayload,
+  ): Promise<ApiResult<UpdateClassResponse>> {
+    return client.patch<UpdateClassResponse>(`/api/classes/${classId}`, payload);
+  },
+  /**
+   * GET /api/classes/[id]/streak — per-class streak chip data. Returns the
+   * zero-state shape (streak 0, alive false) when no streak row exists yet.
+   */
+  getStreak(
+    client: ApiClient,
+    classId: string,
+  ): Promise<ApiResult<ClassStreakResponse>> {
+    return client.get<ClassStreakResponse>(`/api/classes/${classId}/streak`);
+  },
+  /**
+   * GET /api/classes/[id]/plan — today's AI daily plan, cached server-side
+   * per (user, class, day). Pass regenerate to force a fresh AI call —
+   * throttled to one per 5 min per (user, class); 429 inside the cooldown.
+   */
+  getPlan(
+    client: ApiClient,
+    classId: string,
+    options?: { regenerate?: boolean },
+  ): Promise<ApiResult<{ plan: ClassDailyPlan }>> {
+    const suffix = options?.regenerate ? "?regenerate=1" : "";
+    return client.get<{ plan: ClassDailyPlan }>(
+      `/api/classes/${classId}/plan${suffix}`,
+    );
   },
   recentNotes(
     client: ApiClient,
