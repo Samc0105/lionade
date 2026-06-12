@@ -7,6 +7,20 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 
 ---
 
+## 2026-06-11: DYNAMIC TYPE + VOICEOVER PASS: final polish wave 5/5 (iOS-only polish, LOCAL, not built; next-build stack)
+
+**Status:** ✅ iOS code ready + verified LOCALLY. `npx tsc --noEmit` = **0 errors**. `expo export --platform ios` clean (Hermes 9.5 MB). NOT built / NOT submitted / NO `eas update` (build-on-command). One commit on iOS `main` (`d2b7461`), not pushed. NO new packages. No em-dashes. Owner: `vp-ios`. Closes the 5-item polish wave (juice `df2ba51`, broken-edges, OTA `00970db`, states `a3bb04d`/`8e1929e`, this).
+
+**Dynamic Type policy (implemented):** the app never disables font scaling, so content text (questions, notes, chat, settings labels, body copy) scales freely with the OS setting; layout-critical text inside fixed chrome is capped at `maxFontSizeMultiplier` 1.2 (stat orbs, tab-bar labels, wallet 64pt hero balance, leaderboard rank column, level-up/streak hero numerals, quiz difficulty letter, all live round timers) and 1.4 on settings segment pills. Target: usable and unbroken at 1.4x; max accessibility sizes deliberately not chased on fixed chrome.
+
+**VoiceOver:** settings ToggleRow = ONE switch (role + checked state + activate action; sighted tap behavior unchanged) and every settings save toast is announced; SketchCanvas announces it is a LIVE drawing + who is drawing; Sketchy word-progress blanks, party lobby roster rows, leaderboard rows + podium stands, and arena match-history rows all grouped into single composed elements (were letter-soup); quiz/arena/Daily Drill answer options get role + state + reveal feedback ("Correct answer" / "Incorrect" / "Eliminated by Brain Freeze"); celebrations split decorative-vs-announced (CelebrationBurst + FangPop hidden from the tree; LevelUpOverlay/StreakMilestoneOverlay/ClockInToast announce + labeled dismiss); 14 icon-only Pressables labeled repo-wide (password eyes, Timeline chevrons, nudge/revive dismissals, NotificationBell with unread count, modal closes, SegmentedControl selected state).
+
+**Web counterpart:** 🚫 no port needed (native accessibility semantics; web has its own aria pass). **Web NUDGE for `admin`, informational:** the grouped-row pattern (leaderboard/match/friend rows as one labeled element) and the announced save-toast are worth a one-time web aria-live/role audit on the same surfaces.
+
+**Device QA debt, on the record:** VoiceOver + 1.4x walkthroughs need a physical device; the 6-case plan is in iOS `docs/CHANGELOG.md` and rides the next build. ToggleRow's accessibility activate action is the one item to verify first on-device.
+
+**Sign-offs:** `ios-design-accessibility` (LEAD: policy + audit + label spec - PASS) · `ios-dev-components` + `ios-dev-screens` (35 files, labels/roles/caps only, zero visual change at default text size - PASS) · `ios-design-motion` (reduce-motion paths untouched: burst static-flash, skeleton pulse, OTA fades, tab limelight - PASS) · `ios-qa-tester` (6-case device plan; stash-compare lint baseline = 0 new errors, 2 new hook-deps warnings fixed) · `ios-code-reviewer` (caught + fixed a "Close results" label on the in-quiz close; PASS) · `ios-docs-writer` (iOS CHANGELOG + vault Daily) · `ios-parity-tracker` (this row).
+
 ## 2026-06-11: STATES SWEEP: empty/loading/error kit + honest offline behavior (iOS-only polish, LOCAL, not built)
 
 **Status:** ✅ iOS code ready + verified LOCALLY. `npx tsc --noEmit` = **0 errors**. `expo export --platform ios` clean (Hermes 9.49 MB, single bundle). NOT built / NOT submitted / NO `eas update` (build-on-command). Three commits on iOS `main` (`a3bb04d` kit, `8e1929e` sweep, `8751cdc` docs), not pushed. NO new packages. No em-dashes in user-facing copy. Owner: `vp-ios`. Polish item 2/5.
