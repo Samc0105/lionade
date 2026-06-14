@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
 import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
-import { shouldNotifyUser } from "@/lib/db";
+import { notifyUser, emailEnabled } from "@/lib/db";
 import { renderEmail, templates } from "@/lib/emails";
 import { absoluteUrl } from "@/lib/site-config";
 import { applyFangMultiplierFromTier } from "@/lib/mastery-plan";
@@ -325,19 +325,17 @@ export async function POST(req: NextRequest) {
           type: "streak_milestone",
           description: `${newStreak}-day streak milestone!`,
         });
-        // Notify (gated on the recipient's streak_alert pref — Bonus is
-        // still credited; the user just won't see a notification card).
-        try {
-          if (await shouldNotifyUser(userId, "streak_alert")) {
-            await supabaseAdmin.from("notifications").insert({
-              user_id: userId,
-              type: "streak_milestone",
-              title: `${newStreak}-Day Streak!`,
-              message: `You earned ${milestoneBonus} bonus Fangs for your ${newStreak}-day streak!`,
-              action_url: "/dashboard",
-            });
-          }
-        } catch { /* notifications table might not exist */ }
+        // Notify via the central notifyUser helper (gates on streak_alert pref
+        // AND quiet hours). Bonus is still credited; the user just won't see a
+        // notification card if they opted out or are inside quiet hours.
+        await notifyUser({
+          userId,
+          prefKey: "streak_alert",
+          type: "streak_milestone",
+          title: `${newStreak}-Day Streak!`,
+          message: `You earned ${milestoneBonus} bonus Fangs for your ${newStreak}-day streak!`,
+          action_url: "/dashboard",
+        });
         streakMilestone = { days: newStreak, bonus: milestoneBonus };
       }
     }
@@ -347,15 +345,20 @@ export async function POST(req: NextRequest) {
     // never break the API. Phase 1 wiring; Phase 2 will personalize via Ninny.
     try {
       const isFirstEverStreak = (profile.max_streak ?? 0) === 0 && newStreak === 1;
-      // Channel-symmetry trust gate: the firstStreakDay email is the email
-      // counterpart of the streak_milestone in-app notification, so it
-      // respects the same streak_alert pref. The in-app notification side
-      // is already gated upstream (the streak-milestone insert checks it).
+      // Channel-consistency trust gate: the firstStreakDay email is the EMAIL
+      // counterpart of the streak_milestone in-app notification. It must be
+      // gated on the EMAIL channel pref (emailEnabled), NOT the in-app pref
+      // (shouldNotifyUser) — the in-app streak_milestone card is already gated
+      // upstream on shouldNotifyUser(streak_alert). streak_alert is seeded
+      // email-on-by-default (see lib/db DEFAULT_PREFERENCES.notifications_email),
+      // so default behavior is unchanged: both the in-app card and this email
+      // still fire. Now the Email checkbox governs the email and the In-app
+      // checkbox governs the card, independently.
       if (
         isFirstEverStreak &&
         process.env.RESEND_API_KEY &&
         process.env.EMAIL_FROM &&
-        await shouldNotifyUser(userId, "streak_alert")
+        await emailEnabled(userId, "streak_alert")
       ) {
         // Look up the user's email via auth.users (profiles doesn't store it)
         const { data: authUser } = await supabaseAdmin.auth.admin.getUserById(userId);

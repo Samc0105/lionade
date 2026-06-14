@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
-import { shouldNotifyUser } from "@/lib/db";
+import { notifyUser } from "@/lib/db";
 
 // POST — Send a challenge to a friend (by username)
 export async function POST(req: NextRequest) {
@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
     // Look up challenged user (use eq, not ilike, to prevent wildcard injection)
     const { data: challenged } = await supabaseAdmin
       .from("profiles")
-      .select("id, username, coins")
+      .select("id, username, coins, preferences")
       .eq("username", cleanUsername)
       .single();
 
@@ -37,6 +37,19 @@ export async function POST(req: NextRequest) {
 
     if (challenged.id === challengerId) {
       return NextResponse.json({ error: "Cannot challenge yourself" }, { status: 400 });
+    }
+
+    // Privacy enforcement (Settings overhaul 2026-06-11): honor the target's
+    // "Accept duels from" toggle. When set to 'nobody', refuse BEFORE inserting
+    // the arena_challenge so the duel never even reaches their inbox. Default
+    // (absent) is 'everyone', so missing prefs still allow challenges.
+    const duelFrom = (challenged.preferences as { privacy?: { duel_from?: unknown } } | null)
+      ?.privacy?.duel_from;
+    if (duelFrom === "nobody") {
+      return NextResponse.json(
+        { error: "This user isn't accepting duel challenges" },
+        { status: 403 },
+      );
     }
 
     // Check both players have enough Fangs
@@ -77,23 +90,21 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Couldn't update challenge." }, { status: 500 });
     }
 
-    // Notify the challenged user (non-blocking). Gated on their
-    // `duel_challenges` notification pref — the duel itself still creates
-    // (visible in /compete/arena/duel); we just suppress the ping.
-    try {
-      if (await shouldNotifyUser(challenged.id, "duel_challenges")) {
-        const { data: challengerProfile } = await supabaseAdmin
-          .from("profiles").select("username").eq("id", challengerId).single();
-        await supabaseAdmin.from("notifications").insert({
-          user_id: challenged.id,
-          type: "arena_challenge",
-          title: `${challengerProfile?.username ?? "Someone"} challenged you to a duel!`,
-          message: `${safeWager} Fangs wager`,
-          action_url: "/social",
-          related_user_id: challengerId,
-        });
-      }
-    } catch { /* notifications table may not exist yet */ }
+    // Notify the challenged user (non-blocking). Routed through the central
+    // notifyUser helper, which gates on their `duel_challenges` pref AND quiet
+    // hours. The duel itself still creates (visible in /compete/arena/duel);
+    // we only suppress the ping.
+    const { data: challengerProfile } = await supabaseAdmin
+      .from("profiles").select("username").eq("id", challengerId).single();
+    await notifyUser({
+      userId: challenged.id,
+      prefKey: "duel_challenges",
+      type: "arena_challenge",
+      title: `${challengerProfile?.username ?? "Someone"} challenged you to a duel!`,
+      message: `${safeWager} Fangs wager`,
+      action_url: "/social",
+      related_user_id: challengerId,
+    });
 
     return NextResponse.json({
       challenge: data,

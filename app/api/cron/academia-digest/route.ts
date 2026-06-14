@@ -12,13 +12,17 @@
 // is unset (failure-closed), 401 on mismatch.
 //
 // --- Eligibility ----------------------------------------------------------
-// We send to a user when `profiles.preferences.notifications.weekly_report`
-// is true OR absent. The system default for weekly_report is `true`
-// (DEFAULT_NOTIFICATION_PREFS in lib/db.ts), and that's the value the user
-// sees in their settings UI before they ever touch the toggle. So "missing"
-// must mean "on" to match what the user believes is true. We skip ONLY when
-// the toggle is explicitly `false`. Users with zero dated items in the
-// 7-day window are skipped too (no empty digests).
+// EMAIL CHANNEL FIX (Settings overhaul 2026-06-11): this is an EMAIL, so it
+// is governed by the EMAIL toggle — `preferences.notifications_email
+// .weekly_report` — NOT the in-app `notifications.weekly_report` key (which
+// only governs the in-app card). They are independent channels now. The
+// weekly_report email defaults ON (DEFAULT_PREFERENCES.notifications_email
+// seeds weekly_report:true), so "missing" still means "send" to match what
+// the user sees in settings before touching the toggle. We skip ONLY when the
+// EMAIL toggle is explicitly `false`. This mirrors the emailEnabled() helper
+// in lib/db.ts; we read the already-loaded blob inline here to avoid an extra
+// per-user round trip inside the batch loop. Users with zero dated items in
+// the 7-day window are skipped too (no empty digests).
 //
 // --- Recipient email ------------------------------------------------------
 // Resolved server-side via supabaseAdmin.auth.admin.getUserById(userId),
@@ -293,14 +297,16 @@ export async function GET(req: NextRequest) {
     const fromAddr = process.env.EMAIL_FROM;
 
     for (const p of profiles ?? []) {
-      // Opt-out check: send when weekly_report is true OR absent; skip only
-      // when explicitly false. (Default is true; missing means user hasn't
-      // changed the on-by-default toggle.)
+      // EMAIL opt-out check: send when the EMAIL toggle weekly_report is true
+      // OR absent; skip only when explicitly false. (Email default for
+      // weekly_report is true; missing means the user hasn't changed the
+      // on-by-default toggle.) This reads notifications_email — NOT the in-app
+      // notifications map — so the In-app and Email checkboxes are independent.
       const prefs = (p.preferences ?? {}) as {
-        notifications?: { weekly_report?: unknown };
+        notifications_email?: { weekly_report?: unknown };
       };
-      const wr = prefs.notifications?.weekly_report;
-      if (wr === false) {
+      const wrEmail = prefs.notifications_email?.weekly_report;
+      if (wrEmail === false) {
         skippedOptOut++;
         continue;
       }

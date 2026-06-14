@@ -153,9 +153,11 @@ const DEFAULT_PREFERENCES: UserPreferences = {
   preferred_subjects: [],
   notifications: DEFAULT_NOTIFICATION_PREFS,
   privacy: DEFAULT_PRIVACY_PREFS,
-  // Settings overhaul 2026-06-11. Email opt-in by default, except the weekly
-  // report (the one digest users expect in their inbox).
-  notifications_email: { weekly_report: true },
+  // Settings overhaul 2026-06-11. Email opt-in by default, except the two
+  // digests users expect in their inbox: the weekly report and the
+  // first-streak-day email (the email counterpart of the streak_alert in-app
+  // card). These are the ONLY email-on-by-default keys.
+  notifications_email: { weekly_report: true, streak_alert: true },
   quiet_hours_enabled: false,
   quiet_hours_start: "22:00",
   quiet_hours_end: "08:00",
@@ -217,6 +219,190 @@ export async function shouldNotifyUser(
     return notif[prefKey] !== false;
   } catch {
     return true; // fail-open — see doc comment
+  }
+}
+
+/**
+ * EMAIL-channel counterpart of shouldNotifyUser. Reads the SEPARATE
+ * preferences.notifications_email[key] map so the In-app checkbox and the
+ * Email checkbox govern their channels independently (Settings overhaul
+ * 2026-06-11). A user can keep the in-app weekly_report card while muting the
+ * weekly email, or vice versa.
+ *
+ * Defaults: email is opt-IN, so an absent key returns FALSE — EXCEPT
+ * weekly_report and streak_alert, which ship email-on by default
+ * (DEFAULT_PREFERENCES.notifications_email seeds both :true and getPreferences
+ * deep-merges them in). These are the only two email-on-by-default keys. Fails
+ * CLOSED on read error for the same opt-in reason: we never want to email
+ * someone who never opted in just because a read hiccuped.
+ *
+ * Use at every server-side email send site (Resend, etc.):
+ *
+ *   if (await emailEnabled(recipientId, "weekly_report")) {
+ *     await resend.emails.send({ ... });
+ *   }
+ */
+export async function emailEnabled(
+  userId: string,
+  prefKey: keyof NotificationPrefs,
+): Promise<boolean> {
+  try {
+    const { data } = await supabase
+      .from("profiles")
+      .select("preferences")
+      .eq("id", userId)
+      .single();
+    const stored = (data?.preferences ?? {}) as Partial<UserPreferences>;
+    const emailMap = {
+      ...DEFAULT_PREFERENCES.notifications_email,
+      ...(stored.notifications_email ?? {}),
+    };
+    return emailMap[prefKey] === true;
+  } catch {
+    return false; // fail-closed — email is opt-in, see doc comment
+  }
+}
+
+/**
+ * Quiet-hours gate (Settings overhaul 2026-06-11). Returns true when the
+ * current instant falls INSIDE the user's configured quiet window, in which
+ * case in-app notification inserts should be suppressed.
+ *
+ * Times are stored as 24h "HH:MM" strings in the user's local wall-clock and
+ * compared minute-of-day. Windows that wrap past midnight (e.g. 22:00 → 08:00)
+ * are handled. We compute "now" in the user's IANA timezone when one is stored
+ * in the preferences blob (preferences.timezone), falling back to the server
+ * clock otherwise — a missing tz only shifts the window, it never silences a
+ * notification outright. We deliberately read tz from the JSONB blob rather
+ * than a dedicated column so this never depends on a column that may not exist.
+ *
+ * Fails OPEN (returns false = "not quiet") on any read/parse error so a bad
+ * blob never permanently mutes a user.
+ */
+export async function isInQuietHours(userId: string): Promise<boolean> {
+  try {
+    const { data } = await supabase
+      .from("profiles")
+      .select("preferences")
+      .eq("id", userId)
+      .single();
+    const stored = (data?.preferences ?? {}) as Partial<UserPreferences> & { timezone?: unknown };
+    const enabled = stored.quiet_hours_enabled ?? DEFAULT_PREFERENCES.quiet_hours_enabled;
+    if (!enabled) return false;
+
+    const start = parseHHMM(stored.quiet_hours_start ?? DEFAULT_PREFERENCES.quiet_hours_start);
+    const end = parseHHMM(stored.quiet_hours_end ?? DEFAULT_PREFERENCES.quiet_hours_end);
+    if (start === null || end === null) return false;
+    if (start === end) return false; // zero-width window = never quiet
+
+    const tz = typeof stored.timezone === "string" ? stored.timezone : null;
+    const nowMin = minuteOfDayInTz(tz);
+    if (nowMin === null) return false;
+
+    // Non-wrapping window (e.g. 01:00 → 06:00): quiet iff start <= now < end.
+    if (start < end) return nowMin >= start && nowMin < end;
+    // Wrapping window (e.g. 22:00 → 08:00): quiet iff now >= start OR now < end.
+    return nowMin >= start || nowMin < end;
+  } catch {
+    return false; // fail-open — never permanently mute on a bad read
+  }
+}
+
+/** Parse "HH:MM" → minute-of-day (0..1439), or null if malformed. */
+function parseHHMM(v: string | undefined): number | null {
+  if (typeof v !== "string") return null;
+  const m = /^(\d{1,2}):(\d{2})$/.exec(v.trim());
+  if (!m) return null;
+  const h = Number(m[1]);
+  const min = Number(m[2]);
+  if (h < 0 || h > 23 || min < 0 || min > 59) return null;
+  return h * 60 + min;
+}
+
+/** Current minute-of-day in an IANA tz (or server-local if tz is null/invalid). */
+function minuteOfDayInTz(tz: string | null): number | null {
+  try {
+    const now = new Date();
+    if (tz) {
+      const parts = new Intl.DateTimeFormat("en-US", {
+        timeZone: tz,
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+      }).formatToParts(now);
+      const hh = Number(parts.find((p) => p.type === "hour")?.value);
+      const mm = Number(parts.find((p) => p.type === "minute")?.value);
+      if (Number.isFinite(hh) && Number.isFinite(mm)) {
+        // Intl may emit "24" for midnight in some runtimes; normalize.
+        return ((hh % 24) * 60 + mm);
+      }
+    }
+    return now.getHours() * 60 + now.getMinutes();
+  } catch {
+    const now = new Date();
+    return now.getHours() * 60 + now.getMinutes();
+  }
+}
+
+export type NotificationInsert = {
+  /** Recipient. */
+  userId: string;
+  /** Pref key this notification belongs to — gates delivery via shouldNotifyUser. */
+  prefKey: keyof NotificationPrefs;
+  /** notifications.type tag (e.g. "friend_request", "arena_challenge"). */
+  type: string;
+  title: string;
+  message?: string;
+  action_url?: string;
+  related_user_id?: string;
+  /**
+   * When true, bypass the quiet-hours suppression (NOT the per-key opt-out).
+   * Reserved for genuinely time-sensitive pings; unused today. Per-key opt-out
+   * is always honored.
+   */
+  ignoreQuietHours?: boolean;
+};
+
+/**
+ * CENTRAL in-app notification creator (Settings overhaul 2026-06-11).
+ *
+ * Single choke point for `notifications` inserts so per-key opt-out AND quiet
+ * hours are enforced in ONE place instead of being re-implemented (or
+ * forgotten) at each call site. Returns true if a row was inserted, false if
+ * it was suppressed by a pref / quiet hours / insert error.
+ *
+ * Gating order:
+ *   1. Per-key opt-out  — shouldNotifyUser(userId, prefKey). Hard mute.
+ *   2. Quiet hours      — isInQuietHours(userId). Soft, time-boxed suppression.
+ *
+ * Best-effort: the notifications table may not exist in every environment, so
+ * insert failures are swallowed (logged) and never bubble into the caller's
+ * response. Uses the service-role client via a lazy import so importing other
+ * lib/db helpers from a client bundle never pulls in the secret key.
+ */
+export async function notifyUser(n: NotificationInsert): Promise<boolean> {
+  try {
+    if (!(await shouldNotifyUser(n.userId, n.prefKey))) return false;
+    if (!n.ignoreQuietHours && (await isInQuietHours(n.userId))) return false;
+
+    const { supabaseAdmin } = await import("@/lib/supabase-server");
+    const { error } = await supabaseAdmin.from("notifications").insert({
+      user_id: n.userId,
+      type: n.type,
+      title: n.title,
+      message: n.message ?? null,
+      action_url: n.action_url ?? null,
+      related_user_id: n.related_user_id ?? null,
+    });
+    if (error) {
+      console.error("[notifyUser]", error.message);
+      return false;
+    }
+    return true;
+  } catch (err) {
+    // Table may not exist yet / transient — never break the calling mutation.
+    console.error("[notifyUser]", err instanceof Error ? err.message : "insert failed");
+    return false;
   }
 }
 
@@ -504,6 +690,20 @@ async function upsertDailyActivity(userId: string, coinsEarned: number, question
 
 // ── Leaderboard ───────────────────────────────────────────────
 
+/**
+ * Returns true when a fetched profile row has explicitly opted OUT of the
+ * leaderboards via preferences.privacy.show_on_leaderboard (Settings overhaul
+ * 2026-06-11). Tolerates the value being a boolean `false` or the string
+ * "false". Treats absent/true as opted-in (default is on). Used to post-filter
+ * ladder rows in JS, mirroring how the weekly ladder already drops non-public
+ * profiles — the toggle lives in JSONB and can't be a cheap SQL predicate.
+ */
+function isLeaderboardOptedOut(prefsBlob: unknown): boolean {
+  const prefs = (prefsBlob ?? {}) as { privacy?: { show_on_leaderboard?: unknown } };
+  const v = prefs.privacy?.show_on_leaderboard;
+  return v === false || v === "false";
+}
+
 export async function getLeaderboard(limit = 10): Promise<{
   rank: number;
   user_id: string;
@@ -538,24 +738,30 @@ export async function getLeaderboard(limit = 10): Promise<{
     // Fallback: just return top profiles by total coins
     const { data: profiles } = await supabase
       .from("profiles")
-      .select("id, username, avatar_url, level, streak, coins, equipped_username_effect, equipped_frame, equipped_name_color, equipped_avatar_aura")
+      .select("id, username, avatar_url, level, streak, coins, preferences, equipped_username_effect, equipped_frame, equipped_name_color, equipped_avatar_aura")
       .neq("id", DEMO_USER_ID)
       // Settings overhaul 2026-06-11: only PUBLIC profiles appear on public
       // surfaces. 'friends' and 'private' are both non-public, so filter to
       // public rather than just excluding 'private'.
       .eq("profile_visibility", "public")
       .order("coins", { ascending: false })
-      .limit(limit);
+      // Over-fetch so the JS opt-out filter below still yields up to `limit`.
+      .limit(limit * 3 + 10);
 
-    return (profiles ?? []).map((p: any, i: number) => ({
-      rank: i + 1,
-      user_id: p.id,
-      username: p.username,
-      avatar_url: p.avatar_url,
-      level: p.level,
-      streak: p.streak,
-      coins_this_week: p.coins,
-    }));
+    return (profiles ?? [])
+      // Settings overhaul 2026-06-11: drop users who toggled "appear on
+      // leaderboards" off (preferences.privacy.show_on_leaderboard).
+      .filter((p: any) => !isLeaderboardOptedOut(p.preferences))
+      .slice(0, limit)
+      .map((p: any, i: number) => ({
+        rank: i + 1,
+        user_id: p.id,
+        username: p.username,
+        avatar_url: p.avatar_url,
+        level: p.level,
+        streak: p.streak,
+        coins_this_week: p.coins,
+      }));
   }
 
   const topUserIds = Object.entries(weeklyMap)
@@ -565,7 +771,7 @@ export async function getLeaderboard(limit = 10): Promise<{
 
   const { data: profiles } = await supabase
     .from("profiles")
-    .select("id, username, avatar_url, level, streak, equipped_username_effect, equipped_frame, equipped_name_color, equipped_avatar_aura, profile_visibility")
+    .select("id, username, avatar_url, level, streak, equipped_username_effect, equipped_frame, equipped_name_color, equipped_avatar_aura, profile_visibility, preferences")
     .in("id", topUserIds);
 
   // P0 trust-gap fix 2026-06-05: drop private profiles from the weekly
@@ -582,6 +788,9 @@ export async function getLeaderboard(limit = 10): Promise<{
     // Settings overhaul 2026-06-11: only PUBLIC profiles surface on the weekly
     // ladder. Anything not explicitly 'public' (friends/private) is dropped.
     if (profile && profile.profile_visibility !== "public") continue;
+    // Settings overhaul 2026-06-11: also drop users who toggled "appear on
+    // leaderboards" off (preferences.privacy.show_on_leaderboard).
+    if (profile && isLeaderboardOptedOut(profile.preferences)) continue;
     out.push({
       rank: rank++,
       user_id: uid,
@@ -608,24 +817,30 @@ export async function getEloLeaderboard(limit = 200): Promise<{
   // Exclude the shared demo account from the public ELO ladder.
   const { data, error } = await supabase
     .from("profiles")
-    .select("id, username, avatar_url, arena_elo, level, xp")
+    .select("id, username, avatar_url, arena_elo, level, xp, preferences")
     .neq("id", DEMO_USER_ID)
     // Settings overhaul 2026-06-11: only PUBLIC profiles on the public ladder
     // (friends + private are both non-public).
     .eq("profile_visibility", "public")
     .order("arena_elo", { ascending: false })
-    .limit(limit);
+    // Over-fetch so the JS opt-out filter below still yields up to `limit`.
+    .limit(limit * 2 + 10);
 
   if (error) throw error;
 
-  return (data ?? []).map((p: any, i: number) => ({
-    rank: i + 1,
-    user_id: p.id,
-    username: p.username ?? "Unknown",
-    avatar_url: p.avatar_url ?? null,
-    arena_elo: p.arena_elo ?? 1000,
-    level: p.level ?? 1,
-  }));
+  return (data ?? [])
+    // Settings overhaul 2026-06-11: drop "appear on leaderboards" opt-outs
+    // (preferences.privacy.show_on_leaderboard).
+    .filter((p: any) => !isLeaderboardOptedOut(p.preferences))
+    .slice(0, limit)
+    .map((p: any, i: number) => ({
+      rank: i + 1,
+      user_id: p.id,
+      username: p.username ?? "Unknown",
+      avatar_url: p.avatar_url ?? null,
+      arena_elo: p.arena_elo ?? 1000,
+      level: p.level ?? 1,
+    }));
 }
 
 // ── Multi-ladder ELO Leaderboard ─────────────────────────────
@@ -659,29 +874,35 @@ export async function getLadderLeaderboard(
   // ladders (arena_elo / competitive_elo / squad_elo).
   const { data, error } = await supabase
     .from("profiles")
-    .select(`id, username, avatar_url, level, streak, equipped_username_effect, equipped_frame, equipped_name_color, equipped_avatar_aura, ${ladder}`)
+    .select(`id, username, avatar_url, level, streak, preferences, equipped_username_effect, equipped_frame, equipped_name_color, equipped_avatar_aura, ${ladder}`)
     .neq("id", DEMO_USER_ID)
     // Settings overhaul 2026-06-11: only PUBLIC profiles on the public ladder
     // (friends + private are both non-public).
     .eq("profile_visibility", "public")
     .order(ladder, { ascending: false })
-    .limit(limit);
+    // Over-fetch so the JS opt-out filter below still yields up to `limit`.
+    .limit(limit * 2 + 10);
 
   if (error) throw error;
 
-  return (data ?? []).map((p: any, i: number) => ({
-    rank: i + 1,
-    user_id: p.id,
-    username: p.username ?? "Unknown",
-    avatar_url: p.avatar_url ?? null,
-    elo: p[ladder] ?? 1000,
-    level: p.level ?? 1,
-    streak: p.streak ?? 0,
-    equipped_username_effect: p.equipped_username_effect ?? null,
-    equipped_frame: p.equipped_frame ?? null,
-    equipped_name_color: p.equipped_name_color ?? null,
-    equipped_avatar_aura: p.equipped_avatar_aura ?? null,
-  }));
+  return (data ?? [])
+    // Settings overhaul 2026-06-11: drop "appear on leaderboards" opt-outs
+    // (preferences.privacy.show_on_leaderboard).
+    .filter((p: any) => !isLeaderboardOptedOut(p.preferences))
+    .slice(0, limit)
+    .map((p: any, i: number) => ({
+      rank: i + 1,
+      user_id: p.id,
+      username: p.username ?? "Unknown",
+      avatar_url: p.avatar_url ?? null,
+      elo: p[ladder] ?? 1000,
+      level: p.level ?? 1,
+      streak: p.streak ?? 0,
+      equipped_username_effect: p.equipped_username_effect ?? null,
+      equipped_frame: p.equipped_frame ?? null,
+      equipped_name_color: p.equipped_name_color ?? null,
+      equipped_avatar_aura: p.equipped_avatar_aura ?? null,
+    }));
 }
 
 // ── Weekly Activity Chart Data ────────────────────────────────
