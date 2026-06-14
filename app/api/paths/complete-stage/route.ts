@@ -32,6 +32,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
 import { applyFangMultiplierFromTier } from "@/lib/mastery-plan";
+import { recordDailyActivity } from "@/lib/daily-activity-server";
 
 export const dynamic = "force-dynamic";
 
@@ -220,6 +221,47 @@ export async function POST(req: NextRequest) {
       if (txnErr) {
         console.error("[paths/complete-stage] coin_transactions", txnErr.message);
       }
+    }
+
+    // ── Session log + XP + daily activity (Phase 2: moved off the browser) ──
+    // The old flow ran lib/db.saveQuizSession from the CLIENT here, writing
+    // profiles.xp + streak via the anon client. Migration 078 phase 2 guards
+    // those columns, so we do it server-side. Runs on EVERY attempt (matching
+    // the old per-call behavior); XP is DERIVED from the validated score (the
+    // client used score*20 + stars*25), never client-supplied. Best-effort —
+    // a failure here must not fail the already-committed progress/reward.
+    const xpEarned = correct * 20 + finalStars * 25;
+    try {
+      await supabaseAdmin.from("quiz_sessions").insert({
+        user_id: userId,
+        subject: stage.subject,
+        total_questions: total,
+        correct_answers: correct,
+        coins_earned: 0, // Fangs paid above via the RPC; don't double-count here
+        xp_earned: xpEarned,
+        streak_bonus: false,
+      });
+
+      if (xpEarned > 0) {
+        // Server-side XP grant (on_profile_xp_change recomputes level). Raw
+        // read-modify-write mirrors the old incrementXP; the XP lost-update
+        // race is a pre-existing low-impact item tracked separately.
+        const { data: xpRow } = await supabaseAdmin
+          .from("profiles")
+          .select("xp")
+          .eq("id", userId)
+          .single();
+        if (xpRow) {
+          await supabaseAdmin
+            .from("profiles")
+            .update({ xp: (xpRow.xp ?? 0) + xpEarned })
+            .eq("id", userId);
+        }
+      }
+
+      await recordDailyActivity(supabaseAdmin, userId, total);
+    } catch (e) {
+      console.error("[paths/complete-stage] session/xp/activity", e);
     }
 
     return NextResponse.json({

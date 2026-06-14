@@ -6,12 +6,12 @@ import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useAuth } from "@/lib/auth";
 import { useAdminRole } from "@/lib/use-admin-role";
-import { useUserStats, useStreakInfo, isStreakExpired, resetExpiredStreak, mutateUserStats } from "@/lib/hooks";
+import { useUserStats, useStreakInfo, isStreakExpired, mutateUserStats } from "@/lib/hooks";
 import { formatCoins } from "@/lib/mockData";
 import { supabase } from "@/lib/supabase";
 import { cdnUrl } from "@/lib/cdn";
 import useSWR, { useSWRConfig } from "swr";
-import { apiGet, apiPatch } from "@/lib/api-client";
+import { apiGet, apiPatch, apiPost } from "@/lib/api-client";
 import CountUp from "@/components/CountUp";
 import ClockInButton from "@/components/ClockInButton";
 import PlanBadge, { UpgradePill } from "@/components/PlanBadge";
@@ -425,7 +425,9 @@ export default function Navbar() {
       return;
     }
     setStreakResetDone(true);
-    resetExpiredStreak(user.id).then(() => {
+    // Server-authoritative reset (the streak columns are guarded from client
+    // writes by migration 078 phase 2). The route re-validates expiry itself.
+    apiPost("/api/streak/expire", {}).then(() => {
       // Revalidate both caches so UI shows 0 everywhere
       mutateStats();
       mutateStreakInfo();
@@ -1050,7 +1052,7 @@ export default function Navbar() {
                   <>
                     {streak >= 7 ? (
                       <img
-                        src={`/illustrations/${streak >= 100 ? "streak-100-day" : streak >= 30 ? "streak-30-day" : "streak-7-day"}.png`}
+                        src={cdnUrl(`/illustrations/${streak >= 100 ? "streak-100-day" : streak >= 30 ? "streak-30-day" : "streak-7-day"}.png`)}
                         alt=""
                         width={96}
                         height={96}

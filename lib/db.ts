@@ -545,6 +545,14 @@ export async function getQuestions(subject: Subject): Promise<{
 
 // ── Quiz Sessions ─────────────────────────────────────────────
 
+/**
+ * @deprecated DEAD as of migration 078 phase 2. This + its helpers
+ * (incrementCoins, incrementXP, upsertDailyActivity below) wrote coins/xp/streak
+ * from the BROWSER; those columns are now guarded against client writes, so a
+ * call here would silently fail the guard. The only caller (Learning Paths) now
+ * does this server-side in /api/paths/complete-stage. Do NOT call. A follow-up
+ * deletes this cluster; left in place this pass to keep the diff focused.
+ */
 export async function saveQuizSession(session: {
   user_id: string;
   subject: string;

@@ -11,7 +11,6 @@ import {
   getUserStageProgress,
   getQuizQuestions,
   checkAnswer,
-  saveQuizSession,
   type LearningPathStage,
   type UserStageProgress,
 } from "@/lib/db";
@@ -253,20 +252,10 @@ export default function RoadMapPage() {
       setResultStars(stars);
       setIsNewBest(newBest);
 
-      // Still log a quiz session for history/streak surfaces, but with
-      // coins_earned: 0 — Fangs are paid server-side above; a non-zero value
-      // here would double-pay via the client-side increment.
-      const xpEarned = score * 20 + stars * 25;
-      await saveQuizSession({
-        user_id: user.id,
-        subject: meta?.quizSubject ?? subject,
-        total_questions: totalQ,
-        correct_answers: score,
-        coins_earned: 0,
-        xp_earned: xpEarned,
-        streak_bonus: false,
-      });
-
+      // The quiz-session log, XP grant, and daily-activity/streak update are now
+      // done SERVER-SIDE inside /api/paths/complete-stage (Phase 2 of migration
+      // 078 — those profiles columns are guarded against client writes). The old
+      // client-side saveQuizSession call is gone.
       mutateUserStats(user.id);
     } catch {
       setResultStars(0);
