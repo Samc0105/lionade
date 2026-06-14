@@ -15,6 +15,7 @@ import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
 import { generateUniqueRoomCode } from "@/lib/party/room-code";
 import { fetchRoomSnapshot } from "@/lib/party/room-state";
+import { moderateText, logFlagged } from "@/lib/moderation-ugc";
 
 const ALLOWED_SUBJECTS = new Set([
   "biology",
@@ -53,6 +54,19 @@ export async function POST(req: NextRequest) {
 
     const rawDisplayName = typeof body?.display_name === "string" ? body.display_name.trim() : "";
     const displayName = rawDisplayName.length > 0 ? rawDisplayName.slice(0, 30) : null;
+
+    // Moderate the room name — it surfaces to other players in the join /
+    // discovery flow. Block + audit on a flag; fail-safe to the denylist floor.
+    if (displayName) {
+      const mod = await moderateText(displayName);
+      if (!mod.ok) {
+        void logFlagged(userId, "room_name", displayName, mod);
+        return NextResponse.json(
+          { error: "That room name isn't allowed. Try another." },
+          { status: 400 },
+        );
+      }
+    }
     const rawPrivacy = typeof body?.privacy_mode === "string" ? body.privacy_mode : "open";
     const privacyMode = (["open", "friends", "closed"] as const).includes(
       rawPrivacy as "open" | "friends" | "closed",
