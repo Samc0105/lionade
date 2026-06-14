@@ -137,6 +137,22 @@ export async function POST(req: NextRequest) {
     }
   }
 
+  // Atomic race-guard (24h rolling): the read-check above is advisory; this
+  // serializes concurrent claims so two can't both pass it and double-pay.
+  const { data: loginClaimed } = await supabaseAdmin.rpc("claim_cooldown", {
+    p_user_id: userId,
+    p_kind: "login_bonus",
+    p_cooldown_seconds: Math.floor(COOLDOWN_MS / 1000),
+  });
+  if (loginClaimed !== true) {
+    return NextResponse.json({
+      awarded: false,
+      reason: "on_cooldown",
+      msUntilAvailable: COOLDOWN_MS,
+      nextAvailableAt: new Date(Date.now() + COOLDOWN_MS).toISOString(),
+    });
+  }
+
   // Tier from the streak that this new claim would create.
   const wouldExtend = lastClaim
     && (Date.now() - new Date(lastClaim.created_at).getTime()) <= STREAK_WINDOW_MS;
@@ -156,12 +172,16 @@ export async function POST(req: NextRequest) {
 
   const amount = applyFangMultiplierFromTier(baseAmount, profile.plan as string | null, profile.subscription_status as string | null);
 
-  const { error: profErr } = await supabaseAdmin
-    .from("profiles")
-    .update({ coins: (profile.coins ?? 0) + amount })
-    .eq("id", userId);
-  if (profErr) {
-    console.error("[login-bonus POST] coin add:", profErr.message);
+  // Atomic credit via the RPC (cashable bucket) — no raw read-modify-write, and
+  // no stale-coins rollback that could clobber a concurrent balance change.
+  const { error: creditErr } = await supabaseAdmin.rpc("update_user_coins", {
+    p_user_id: userId,
+    p_delta: amount,
+    p_min_balance: 0,
+    p_source: "cashable",
+  });
+  if (creditErr) {
+    console.error("[login-bonus POST] credit:", creditErr.message);
     return NextResponse.json({ error: "Couldn't credit Fangs." }, { status: 500 });
   }
 
@@ -171,15 +191,10 @@ export async function POST(req: NextRequest) {
     type: "login_bonus",
     description: `Day ${newStreak} login bonus`,
   });
-  if (txErr) {
-    // Roll back the coin add to keep audit + balance in sync.
-    await supabaseAdmin
-      .from("profiles")
-      .update({ coins: profile.coins ?? 0 })
-      .eq("id", userId);
-    console.error("[login-bonus POST] tx insert:", txErr.message);
-    return NextResponse.json({ error: "Couldn't log claim." }, { status: 500 });
-  }
+  // Non-fatal: the credit + the claim_cooldown row already succeeded, so the
+  // cooldown is enforced and the balance is correct; a missing audit row only
+  // affects the streak/tier display.
+  if (txErr) console.warn("[login-bonus POST] tx insert:", txErr.message);
 
   // Earned-cosmetic auto-grant: streak warrior emblem at 10/30/100/365-day
   // milestones. Fire-and-forget — RPC is idempotent (ON CONFLICT DO NOTHING

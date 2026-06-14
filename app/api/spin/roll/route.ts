@@ -7,6 +7,7 @@ import {
   canSpinNow,
   nextSpinAt,
   SPIN_SLOTS,
+  SPIN_COOLDOWN_MS,
   type SpinOutcome,
 } from "@/lib/spin";
 import { effectiveTier, multiplierForTier } from "@/lib/mastery-plan";
@@ -51,6 +52,21 @@ export async function POST(req: NextRequest) {
         error: "Cooldown active",
         nextSpinAt: nextSpinAt(lastSpunAt)?.toISOString() ?? null,
       },
+      { status: 429 },
+    );
+  }
+
+  // Atomic race-guard: the read-check above is advisory; this serializes
+  // concurrent spins so two can't both pass it and double-pay (up to 800F + a
+  // rare cosmetic). claim_cooldown is the authoritative gate.
+  const { data: spinClaimed } = await supabaseAdmin.rpc("claim_cooldown", {
+    p_user_id: userId,
+    p_kind: "spin",
+    p_cooldown_seconds: Math.floor(SPIN_COOLDOWN_MS / 1000),
+  });
+  if (spinClaimed !== true) {
+    return NextResponse.json(
+      { error: "Cooldown active", nextSpinAt: nextSpinAt(lastSpunAt)?.toISOString() ?? null },
       { status: 429 },
     );
   }

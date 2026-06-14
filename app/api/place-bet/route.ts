@@ -72,13 +72,18 @@ export async function POST(req: NextRequest) {
       .single();
 
     if (betErr) {
-      // Refund coins on insert failure — atomic credit so refund itself can't race.
+      // Refund the debit — the bet didn't get created.
       await supabaseAdmin.rpc("update_user_coins", {
         p_user_id: userId,
         p_delta: coinsStaked,
         p_min_balance: 0,
         p_source: "cashable",
       });
+      // 23505 = the one-active-bet partial UNIQUE: a concurrent request already
+      // created an active bet. Surface the friendly message, not a 500.
+      if (betErr.code === "23505") {
+        return NextResponse.json({ error: "You already have an active bet" }, { status: 400 });
+      }
       console.error("[place-bet] insert:", betErr.message);
       return NextResponse.json({ error: "Failed to place bet" }, { status: 500 });
     }
