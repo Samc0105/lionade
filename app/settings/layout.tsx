@@ -25,6 +25,7 @@ import {
   Bell,
   ChartBar,
   Crown,
+  Palette,
   Warning,
   type Icon,
 } from "@phosphor-icons/react";
@@ -36,6 +37,7 @@ import { toastError, toastSuccess } from "@/lib/toast";
 
 const SECTIONS: { href: string; label: string; Icon: Icon; danger?: boolean }[] = [
   { href: "/settings/account", label: "Account", Icon: UserIcon },
+  { href: "/settings/appearance", label: "Appearance", Icon: Palette },
   { href: "/settings/privacy", label: "Privacy", Icon: Lock },
   { href: "/settings/notifications", label: "Notifications", Icon: Bell },
   { href: "/settings/data", label: "Data & Usage", Icon: ChartBar },
@@ -174,11 +176,14 @@ function SettingsNav() {
                     <motion.span
                       layoutId="settingsNavLimelight"
                       aria-hidden="true"
-                      className={`absolute inset-0 rounded-lg border ${
-                        s.danger
-                          ? "bg-red-500/10 border-red-500/25"
-                          : "bg-electric/12 border-electric/25"
-                      }`}
+                      className="settings-limelight absolute inset-0 rounded-lg"
+                      style={
+                        {
+                          // Accent injected per-row: red ONLY on Danger, so the
+                          // red glow can never bleed onto a non-danger section.
+                          "--limelight": s.danger ? "239, 68, 68" : "74, 144, 217",
+                        } as React.CSSProperties
+                      }
                       transition={
                         reduceMotion
                           ? { duration: 0 }
@@ -213,22 +218,45 @@ function SettingsNav() {
                 <Link
                   href={s.href}
                   aria-current={active ? "page" : undefined}
-                  className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-full text-[12.5px] font-semibold whitespace-nowrap border transition-colors duration-200 transform-gpu ${
+                  className={`relative inline-flex items-center gap-2 px-3.5 py-2 rounded-full text-[12.5px] font-semibold whitespace-nowrap transition-colors duration-200 transform-gpu ${
                     active
                       ? s.danger
-                        ? "bg-red-500/15 border-red-500/30 text-red-200"
-                        : "bg-electric/15 border-electric/30 text-cream"
+                        ? "text-red-200"
+                        : "text-cream"
                       : s.danger
-                        ? "bg-white/[0.03] border-white/[0.06] text-red-300/60"
-                        : "bg-white/[0.03] border-white/[0.06] text-cream/55"
+                        ? "text-red-300/60 hover:text-red-300/85"
+                        : "text-cream/55 hover:text-cream/85"
                   }`}
                 >
+                  {active ? (
+                    <motion.span
+                      layoutId="settingsNavLimelightPill"
+                      aria-hidden="true"
+                      className="settings-limelight-pill absolute inset-0 rounded-full"
+                      style={
+                        {
+                          "--limelight": s.danger ? "239, 68, 68" : "74, 144, 217",
+                        } as React.CSSProperties
+                      }
+                      transition={
+                        reduceMotion
+                          ? { duration: 0 }
+                          : { type: "spring", stiffness: 420, damping: 34 }
+                      }
+                    />
+                  ) : (
+                    <span
+                      aria-hidden="true"
+                      className="absolute inset-0 rounded-full bg-white/[0.03] border border-white/[0.06]"
+                    />
+                  )}
                   <s.Icon
                     size={14}
                     weight={active ? "fill" : "regular"}
                     aria-hidden="true"
+                    className="relative z-10"
                   />
-                  {s.label}
+                  <span className="relative z-10">{s.label}</span>
                 </Link>
               </li>
             );

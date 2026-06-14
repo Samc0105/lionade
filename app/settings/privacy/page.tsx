@@ -55,12 +55,10 @@ interface PreferencesResponse {
 // actually edit. null = not yet loaded (no flash-of-default).
 interface PrivacyState {
   profile_visibility: ProfileVisibility;
-  online_status: boolean;
   duel_from: PrivacyPrefs["duel_from"];
   friend_request_from: PrivacyPrefs["friend_request_from"];
   show_on_leaderboard: boolean;
   show_activity_feed: boolean;
-  show_coins: boolean;
 }
 
 // ── Page ─────────────────────────────────────────────────────────────────────
@@ -83,12 +81,10 @@ export default function PrivacySettingsPage() {
       const { privacy, profile_visibility } = res.data;
       setState({
         profile_visibility: profile_visibility ?? "public",
-        online_status: privacy.online_status,
         duel_from: privacy.duel_from,
         friend_request_from: privacy.friend_request_from,
         show_on_leaderboard: privacy.show_on_leaderboard,
         show_activity_feed: privacy.show_activity_feed,
-        show_coins: privacy.show_coins,
       });
     })();
     return () => {
@@ -116,12 +112,10 @@ function PrivacyControls({ initial }: { initial: PrivacyState }) {
 
   // One SavedTick per control so each flashes independently.
   const visibilitySaved = useSavedConfirm();
-  const onlineSaved = useSavedConfirm();
   const duelSaved = useSavedConfirm();
   const friendReqSaved = useSavedConfirm();
   const leaderboardSaved = useSavedConfirm();
   const activitySaved = useSavedConfirm();
-  const coinsSaved = useSavedConfirm();
 
   // ── Profile visibility → PATCH /api/user/profile-visibility ───────────────
   const saveVisibility = useCallback(
@@ -212,26 +206,6 @@ function PrivacyControls({ initial }: { initial: PrivacyState }) {
 
       {/* ── Presence & contact ──────────────────────────────────────────── */}
       <SettingsCard eyebrow="Presence & contact" title="Who can reach you">
-        <SettingRow
-          label="Show online status"
-          description="When off, you always appear offline to others."
-        >
-          <div className="flex items-center gap-2.5">
-            <SavedTick show={onlineSaved.saved} />
-            <Toggle
-              label="Show online status"
-              checked={state.online_status}
-              onChange={(next) =>
-                savePrivacy(
-                  { online_status: next },
-                  { online_status: next },
-                  onlineSaved.flash,
-                )
-              }
-            />
-          </div>
-        </SettingRow>
-
         <SettingRow label="Who can send duel challenges">
           <div className="flex items-center gap-2.5">
             <SavedTick show={duelSaved.saved} />
@@ -316,26 +290,6 @@ function PrivacyControls({ initial }: { initial: PrivacyState }) {
             />
           </div>
         </SettingRow>
-
-        <SettingRow
-          label="Show Fang balance on profile"
-          description="When off, your balance is hidden from your public profile."
-        >
-          <div className="flex items-center gap-2.5">
-            <SavedTick show={coinsSaved.saved} />
-            <Toggle
-              label="Show Fang balance on profile"
-              checked={state.show_coins}
-              onChange={(next) =>
-                savePrivacy(
-                  { show_coins: next },
-                  { show_coins: next },
-                  coinsSaved.flash,
-                )
-              }
-            />
-          </div>
-        </SettingRow>
       </SettingsCard>
     </div>
   );
@@ -346,7 +300,7 @@ function PrivacyControls({ initial }: { initial: PrivacyState }) {
 function PrivacySkeleton() {
   return (
     <div aria-busy="true" aria-label="Loading privacy settings">
-      {[3, 3, 3].map((rows, i) => (
+      {[1, 2, 2].map((rows, i) => (
         <div
           key={i}
           className="rounded-2xl border border-electric/10 p-6 mb-5 animate-pulse transform-gpu"

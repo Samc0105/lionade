@@ -43,7 +43,6 @@ import {
   Sparkle,
   DiceFive,
   Storefront,
-  Planet,
   Globe,
   Users,
   Prohibit,
@@ -59,6 +58,8 @@ import {
   Handshake,
   Rocket,
   ShareNetwork,
+  Moon,
+  Sun,
   type Icon,
 } from "@phosphor-icons/react";
 import dynamic from "next/dynamic";
@@ -1262,28 +1263,26 @@ function PersonalizationSection({ user }: SharedProps) {
       </div>
 
       <Card>
-        <h3 className="font-bebas text-lg text-cream tracking-wider mb-4">THEMES UNLOCKED</h3>
-        <div className="text-center py-6">
-          <Palette size={40} weight="regular" color="currentColor" className="mx-auto mb-3" aria-hidden="true" />
-          <p className="text-cream/50 text-sm mb-1">No themes unlocked yet</p>
-          <p className="text-cream/30 text-xs mb-4">Visit the Shop to unlock new looks for your app</p>
-          <a href="/shop" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold
-            bg-electric/15 text-electric border border-electric/30 hover:bg-electric/25 transition-all duration-200">
-            <Storefront size={16} weight="regular" aria-hidden="true" /> Browse Themes
-          </a>
-        </div>
-        <div className="border-t border-white/5 pt-3 mt-2">
-          <div className="flex items-center gap-3 px-2 py-2 rounded-xl bg-white/[0.03]">
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center"
-              style={{ background: "linear-gradient(135deg, #1e293b, #0f172a)", border: "1px solid rgba(59,130,246,0.2)" }}>
-              <Planet size={16} weight="regular" color="currentColor" aria-hidden="true" />
-            </div>
-            <div className="flex-1">
-              <p className="text-cream text-sm font-semibold">Interstellar</p>
-              <p className="text-cream/30 text-[11px]">Default theme</p>
-            </div>
-            <span className="text-electric text-xs font-bold">Active</span>
-          </div>
+        <h3 className="font-bebas text-lg text-cream tracking-wider mb-1">THEME</h3>
+        <p className="text-cream/40 text-xs mb-4">Switch the whole app between dark and light. Applies instantly.</p>
+        <div className="flex gap-3" role="radiogroup" aria-label="Theme">
+          {([
+            { id: "dark" as const, label: "Dark", Icon: Moon, swatch: "linear-gradient(135deg, #0D1528, #04080F)" },
+            { id: "light" as const, label: "Light", Icon: Sun, swatch: "linear-gradient(135deg, #FFFFFF, #F1ECDF)" },
+          ]).map(t => {
+            const active = theme === t.id;
+            return (
+              <button key={t.id} type="button" role="radio" aria-checked={active}
+                onClick={() => autoSave({ theme: t.id })}
+                className={`flex-1 flex items-center gap-3 text-left p-3.5 rounded-xl border font-bold transition-all
+                  ${active ? "border-electric bg-electric/20 text-electric" : "border-white/10 text-cream/50 hover:border-white/20"}`}>
+                <span aria-hidden="true" className="w-9 h-9 rounded-lg shrink-0 flex items-center justify-center border border-white/15" style={{ background: t.swatch }}>
+                  <t.Icon size={18} weight={active ? "fill" : "regular"} className={t.id === "light" ? "text-navy/70" : "text-cream"} />
+                </span>
+                <span>{t.label}</span>
+              </button>
+            );
+          })}
         </div>
       </Card>
 

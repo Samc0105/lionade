@@ -5487,3 +5487,54 @@ html.light .space-bg-container { display: none; }
 @media (prefers-reduced-motion: reduce) {
   .roardle-shake { animation: none !important; }
 }
+
+/* ── Settings nav limelight ──────────────────────────────────────────────────
+   GPU-only active-section indicator for the /settings/* nav rail + mobile pill
+   row. The framer-motion <motion.span layoutId> slides the element between
+   rows; this class supplies the LOOK: a soft accent glow halo (box-shadow,
+   never a hard fill) plus an inset hairline so the active row reads as "lit"
+   without the flat electric/12 block that previously color-bled onto Danger.
+
+   Accent is injected per-row via the --limelight CSS var (electric for normal
+   rows, red for Danger), so the red glow only ever appears on the Danger row.
+   box-shadow + opacity only → no layout, GPU-composited, reduced-motion safe.
+   A very slow breathing pulse adds life; reduced-motion freezes it static. */
+.settings-limelight {
+  /* Fallback accent = electric. Each row overrides --limelight inline. */
+  --limelight: 74, 144, 217;
+  background: rgba(var(--limelight), 0.10);
+  box-shadow:
+    0 0 24px 4px rgba(var(--limelight), 0.20),
+    inset 0 0 0 1px rgba(var(--limelight), 0.30);
+  animation: settings-limelight-breathe 3.2s ease-in-out infinite;
+}
+
+/* Mobile pill variant: tighter halo to suit the smaller rounded-full chip. */
+.settings-limelight-pill {
+  --limelight: 74, 144, 217;
+  background: rgba(var(--limelight), 0.12);
+  box-shadow:
+    0 0 18px 2px rgba(var(--limelight), 0.22),
+    inset 0 0 0 1px rgba(var(--limelight), 0.34);
+  animation: settings-limelight-breathe 3.2s ease-in-out infinite;
+}
+
+@keyframes settings-limelight-breathe {
+  0%, 100% {
+    box-shadow:
+      0 0 24px 4px rgba(var(--limelight), 0.20),
+      inset 0 0 0 1px rgba(var(--limelight), 0.30);
+  }
+  50% {
+    box-shadow:
+      0 0 30px 6px rgba(var(--limelight), 0.30),
+      inset 0 0 0 1px rgba(var(--limelight), 0.38);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .settings-limelight,
+  .settings-limelight-pill {
+    animation: none !important;
+  }
+}

@@ -22,7 +22,7 @@
  * transform) and reduced-motion safe via the globals.css blanket rule.
  */
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Check } from "@phosphor-icons/react";
 import {
   SettingsCard,
@@ -239,36 +239,33 @@ export default function NotificationsPage() {
 function NotificationsForm({ initial }: { initial: PrefsState }) {
   const [prefs, setPrefs] = useState<PrefsState>(initial);
 
-  // Per-control "Saved ✓" affordances. One tick per category card (it sits in
-  // the card header) plus one for the quiet-hours card.
-  const studyTick = useSavedConfirm();
-  const socialTick = useSavedConfirm();
-  const rewardsTick = useSavedConfirm();
-  const productTick = useSavedConfirm();
-  const quietTick = useSavedConfirm();
+  // Per-ROW "Saved ✓" affordance. Each notification row owns one tick (it
+  // covers either channel of that row). We track the single row id that most
+  // recently saved so the tick renders inline on exactly that row, never on a
+  // sibling. A ref to the pending clear timer means a fresh save on another row
+  // immediately reassigns the tick instead of leaving a stale flash behind.
+  const [savedRow, setSavedRow] = useState<NotifKey | null>(null);
+  const savedTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const tickFor = (title: string) => {
-    switch (title) {
-      case "Study":
-        return studyTick;
-      case "Social":
-        return socialTick;
-      case "Rewards":
-        return rewardsTick;
-      default:
-        return productTick;
-    }
-  };
+  const flashRow = useCallback((key: NotifKey) => {
+    if (savedTimer.current) clearTimeout(savedTimer.current);
+    setSavedRow(key);
+    savedTimer.current = setTimeout(() => setSavedRow(null), 2000);
+  }, []);
+
+  // Clear any pending timer on unmount so we never setState after teardown.
+  useEffect(() => {
+    return () => {
+      if (savedTimer.current) clearTimeout(savedTimer.current);
+    };
+  }, []);
+
+  const quietTick = useSavedConfirm();
 
   // Toggle one channel of one notification. Optimistic, then PATCH the single
   // changed key under the right sub-object (the route merges partials).
   const toggleChannel = useCallback(
-    async (
-      key: NotifKey,
-      channel: Channel,
-      next: boolean,
-      flash: () => void,
-    ) => {
+    async (key: NotifKey, channel: Channel, next: boolean) => {
       const prev = prefs;
       const optimistic: PrefsState =
         channel === "in_app"
@@ -296,9 +293,9 @@ function NotificationsForm({ initial }: { initial: PrefsState }) {
         toastError("Couldn't save that change. Try again.");
         return;
       }
-      flash();
+      flashRow(key);
     },
-    [prefs],
+    [prefs, flashRow],
   );
 
   // Quiet-hours master enable.
@@ -343,30 +340,23 @@ function NotificationsForm({ initial }: { initial: PrefsState }) {
 
   return (
     <div>
-      {CATEGORIES.map((cat) => {
-        const tick = tickFor(cat.title);
-        return (
-          <SettingsCard
-            key={cat.title}
-            eyebrow={cat.eyebrow}
-            title={cat.title}
-          >
-            {/* Saved confirmation, right-aligned beneath the card header. */}
-            <div className="flex items-center justify-end h-3 -mt-2 mb-1">
-              <SavedTick show={tick.saved} />
-            </div>
-
-            <div className="divide-y divide-white/[0.06]">
-              {cat.items.map((item) => {
-                const inApp = prefs.notifications[item.key] ?? false;
-                const email = prefs.notifications_email[item.key] ?? false;
-                return (
-                  <SettingRow key={item.key} label={item.label}>
+      {CATEGORIES.map((cat) => (
+        <SettingsCard key={cat.title} eyebrow={cat.eyebrow} title={cat.title}>
+          <div className="divide-y divide-white/[0.06]">
+            {cat.items.map((item) => {
+              const inApp = prefs.notifications[item.key] ?? false;
+              const email = prefs.notifications_email[item.key] ?? false;
+              return (
+                <SettingRow key={item.key} label={item.label}>
+                  <div className="flex items-center gap-4">
+                    {/* Inline, per-row tick: fires only for THIS row's save,
+                        so the confirmation can never misattribute. */}
+                    <SavedTick show={savedRow === item.key} />
                     <div className="flex items-center gap-5">
                       <Checkbox
                         checked={inApp}
                         onChange={(v) =>
-                          void toggleChannel(item.key, "in_app", v, tick.flash)
+                          void toggleChannel(item.key, "in_app", v)
                         }
                         label="In-app"
                         ariaLabel={`${item.label} in-app notification`}
@@ -374,19 +364,19 @@ function NotificationsForm({ initial }: { initial: PrefsState }) {
                       <Checkbox
                         checked={email}
                         onChange={(v) =>
-                          void toggleChannel(item.key, "email", v, tick.flash)
+                          void toggleChannel(item.key, "email", v)
                         }
                         label="Email"
                         ariaLabel={`${item.label} email notification`}
                       />
                     </div>
-                  </SettingRow>
-                );
-              })}
-            </div>
-          </SettingsCard>
-        );
-      })}
+                  </div>
+                </SettingRow>
+              );
+            })}
+          </div>
+        </SettingsCard>
+      ))}
 
       {/* ── Quiet Hours ──────────────────────────────────────────────────── */}
       <SettingsCard eyebrow="Do not disturb" title="Quiet hours">
