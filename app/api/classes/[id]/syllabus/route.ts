@@ -4,6 +4,7 @@ import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
 import { z } from "zod";
 import { callAIForJson, LLM_CHEAP } from "@/lib/ai";
+import { neutralizeTag } from "@/lib/prompt-safety";
 
 // 12-factor #2 — prompt version tag. Bump on every prompt edit.
 const SYLLABUS_PARSE_PROMPT_VERSION = "v1-2026-06-05";
@@ -301,7 +302,7 @@ Rules:
   - If a section has no topics or exams, return an empty array — never omit the key.
 
 <syllabus>
-${rawText}
+${neutralizeTag(rawText, "syllabus")}
 </syllabus>`,
       }, SyllabusParseSchema);
       aiPayload = json;

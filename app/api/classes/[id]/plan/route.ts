@@ -4,6 +4,7 @@ import { requireAuth } from "@/lib/api-auth";
 import { z } from "zod";
 import { callAIForJson, LLM_CHEAP } from "@/lib/ai";
 import { stripNoteImageTokens } from "@/lib/note-images";
+import { inlineSafe } from "@/lib/prompt-safety";
 
 // 12-factor #2 — prompt version tag. Bump on every prompt edit.
 const CLASS_PLAN_PROMPT_VERSION = "v1-2026-06-05";
@@ -224,7 +225,7 @@ export async function GET(req: NextRequest, { params }: RouteCtx) {
     const notesLines = notes.length
       // stripNoteImageTokens: iOS photo tokens would otherwise leak raw
       // markdown into the prompt and possibly echo into task labels.
-      ? notes.slice(0, 5).map(n => `  - ${n.title || (n.ai_summary || stripNoteImageTokens(n.body).slice(0, 80))}${n.ai_topics?.length ? ` [${n.ai_topics.join(", ")}]` : ""}`).join("\n")
+      ? notes.slice(0, 5).map(n => `  - ${inlineSafe(n.title || (n.ai_summary || stripNoteImageTokens(n.body).slice(0, 80)))}${n.ai_topics?.length ? ` [${inlineSafe(n.ai_topics.join(", "))}]` : ""}`).join("\n")
       : "  (no notes yet)";
 
     const examLine = nextExamTitle && daysUntilExam !== null

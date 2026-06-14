@@ -4,6 +4,7 @@ import { requireAuth } from "@/lib/api-auth";
 import { z } from "zod";
 import { callAIForJson, LLM_CHEAP } from "@/lib/ai";
 import { stripNoteImageTokens } from "@/lib/note-images";
+import { neutralizeTag } from "@/lib/prompt-safety";
 
 // 12-factor #2 — prompt version tag. Bump on every prompt edit.
 const QUICK_NOTE_PROMPT_VERSION = "v1-2026-06-05";
@@ -165,7 +166,7 @@ Return EXACTLY:
 }
 
 <note>
-${stripNoteImageTokens(noteBody).slice(0, 6000)}
+${neutralizeTag(stripNoteImageTokens(noteBody).slice(0, 6000), "note")}
 </note>`,
       }, QuickNoteSchema);
 
