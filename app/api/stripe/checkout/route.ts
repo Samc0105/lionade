@@ -99,7 +99,10 @@ export async function POST(req: NextRequest) {
         metadata: { user_id: userId, tier, cycle },
       },
       allow_promotion_codes: true,
-      automatic_tax: { enabled: true },
+      // Off by default so checkout works without Stripe Tax configured (which
+      // otherwise fails session creation). Flip STRIPE_AUTOMATIC_TAX=true once
+      // Stripe Tax (origin address + registrations) is set up. See stripe-setup.md.
+      automatic_tax: { enabled: process.env.STRIPE_AUTOMATIC_TAX === "true" },
       success_url: `${SITE_URL}/account?upgrade=success&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${SITE_URL}/pricing?upgrade=canceled`,
     });

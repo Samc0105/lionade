@@ -92,7 +92,9 @@ export async function POST(req: NextRequest) {
           fang_amount: String(pack.fangs),
         },
       },
-      automatic_tax: { enabled: true },
+      // Off by default (see /api/stripe/checkout). Flip STRIPE_AUTOMATIC_TAX=true
+      // once Stripe Tax is configured.
+      automatic_tax: { enabled: process.env.STRIPE_AUTOMATIC_TAX === "true" },
       success_url: `${SITE_URL}/account?iap=success&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${SITE_URL}/shop?iap=canceled`,
     });

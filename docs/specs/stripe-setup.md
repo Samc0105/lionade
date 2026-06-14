@@ -82,8 +82,8 @@ Dashboard → Settings → Payments → Payment methods:
 
 ### Tax ⚠️ (the #1 go-live blocker)
 Both `/api/stripe/checkout` AND `/api/stripe/fang-purchase` set `automatic_tax: { enabled: true }`. **If Stripe Tax is not configured, EVERY checkout session creation fails** ("Could not create checkout session") — the buttons will look broken with no obvious cause. So either:
-- **(A) Configure Stripe Tax** — Dashboard → Settings → Tax: enable **Stripe Tax**, add the origin address (Lionade business address), confirm registrations (US sales tax / EU VAT as applicable). Then `automatic_tax` works. OR
-- **(B) Launch without tax for now** — tell me and I'll env-gate `automatic_tax` behind a `STRIPE_AUTOMATIC_TAX=true` flag (defaults off) so checkout works immediately and you turn tax on later. Recommended if you just want to start charging today.
+- **(B) Launch without tax now — DONE (2026-06-14).** Both routes now read `automatic_tax: { enabled: process.env.STRIPE_AUTOMATIC_TAX === "true" }`, which **defaults OFF**, so checkout works the moment you set the keys/price IDs — no Stripe Tax needed today. ✅ This is the default; do nothing.
+- **(A) Turn tax ON later** — once you configure Stripe Tax (Dashboard → Settings → Tax: enable Stripe Tax, add the origin address, confirm US sales-tax / EU-VAT registrations), set `STRIPE_AUTOMATIC_TAX=true` in Vercel and redeploy. No code change.
 
 ### Email receipts
 Dashboard → Settings → Emails:
