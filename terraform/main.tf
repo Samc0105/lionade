@@ -390,6 +390,110 @@ resource "aws_cloudwatch_metric_alarm" "cron_heartbeat" {
   tags                = { Project = "Lionade", ManagedBy = "Terraform" }
 }
 
+# ═══════════════════════════════════════════════════════════════════════════
+# Cost-allocation tags + a Cost Category + a staging budget. Makes spend
+# SLICEABLE (by service area + by environment) BEFORE Bedrock lands, so "what is
+# AI costing me" and "staging vs prod" become answerable instead of one lump.
+#
+# 🔴 MANUAL STEP (Terraform genuinely cannot do this on a standalone account):
+# Billing console > Cost allocation tags > activate Project, Environment,
+# ManagedBy as user-defined cost-allocation tags. ~24-48h backfill. Do this
+# FIRST; the Environment tag filter below stays empty until activation
+# propagates. The tags are already stamped on every resource in this file.
+# ═══════════════════════════════════════════════════════════════════════════
+
+# Group spend by service area so the bill reads in Lionade terms — Bedrock (AI)
+# is isolated from day one, the rest split Storage / CDN / State / Monitoring.
+resource "aws_ce_cost_category" "area" {
+  name         = "LionadeArea"
+  rule_version = "CostCategoryExpression.v1"
+
+  rule {
+    value = "Storage"
+    type  = "REGULAR"
+    rule {
+      dimension {
+        key           = "SERVICE"
+        values        = ["Amazon Simple Storage Service"]
+        match_options = ["EQUALS"]
+      }
+    }
+  }
+
+  rule {
+    value = "CDN"
+    type  = "REGULAR"
+    rule {
+      dimension {
+        key           = "SERVICE"
+        values        = ["Amazon CloudFront"]
+        match_options = ["EQUALS"]
+      }
+    }
+  }
+
+  rule {
+    value = "AI"
+    type  = "REGULAR"
+    rule {
+      dimension {
+        key           = "SERVICE"
+        values        = ["Amazon Bedrock"]
+        match_options = ["EQUALS"]
+      }
+    }
+  }
+
+  rule {
+    value = "State + Locks"
+    type  = "REGULAR"
+    rule {
+      dimension {
+        key           = "SERVICE"
+        values        = ["Amazon DynamoDB"]
+        match_options = ["EQUALS"]
+      }
+    }
+  }
+
+  rule {
+    value = "Monitoring"
+    type  = "REGULAR"
+    rule {
+      dimension {
+        key           = "SERVICE"
+        values        = ["AmazonCloudWatch", "Amazon Simple Notification Service"]
+        match_options = ["EQUALS"]
+      }
+    }
+  }
+
+  default_value = "Other"
+}
+
+# Staging gets its own trip-wire so a runaway staging experiment is visible
+# apart from prod. Empty until the Environment tag is activated (manual step).
+resource "aws_budgets_budget" "staging" {
+  name         = "lionade-staging"
+  budget_type  = "COST"
+  limit_amount = "10"
+  limit_unit   = "USD"
+  time_unit    = "MONTHLY"
+
+  cost_filter {
+    name   = "TagKeyValue"
+    values = ["user:Environment$staging"]
+  }
+
+  notification {
+    comparison_operator        = "GREATER_THAN"
+    threshold                  = 100
+    threshold_type             = "PERCENTAGE"
+    notification_type          = "ACTUAL"
+    subscriber_email_addresses = [var.alert_email]
+  }
+}
+
 # ─── Outputs — set the role ARNs as Vercel env to activate each feature ────
 output "user_uploads_bucket" {
   value       = aws_s3_bucket.user_uploads.id
