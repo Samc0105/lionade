@@ -17,6 +17,7 @@ import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
 import { isValidRoomCode, normalizeRoomCode } from "@/lib/party/room-code";
 import { roomChannel, PARTY_EVENTS } from "@/lib/party/realtime-channels";
+import { moderateText, logFlagged } from "@/lib/moderation-ugc";
 
 const MAX_BODY = 200;
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -65,6 +66,17 @@ export async function POST(
     .maybeSingle();
   if (!member) {
     return NextResponse.json({ error: "You must be in the room to chat." }, { status: 403 });
+  }
+
+  // Moderate before persisting + broadcasting to the room (lobby chat fans out
+  // live to every member). Block + audit on a flag; fail-safe to the denylist.
+  const mod = await moderateText(raw);
+  if (!mod.ok) {
+    void logFlagged(userId, "lobby_chat", raw, mod);
+    return NextResponse.json(
+      { error: "That message can't be sent. Keep it respectful." },
+      { status: 400 },
+    );
   }
 
   // Insert + sender-profile lookup are independent — run them in parallel

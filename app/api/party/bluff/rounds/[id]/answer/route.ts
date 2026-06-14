@@ -12,6 +12,7 @@ import { requireAuth } from "@/lib/api-auth";
 import { normalize } from "@/lib/party/levenshtein";
 import { isRoomMember } from "@/lib/party/room-state";
 import { isForfeitText } from "@/lib/party/bluff-constants";
+import { moderateText, logFlagged } from "@/lib/moderation-ugc";
 
 const MAX_LEN = 80;
 
@@ -55,6 +56,21 @@ export async function POST(
       { error: "That answer matches the real answer. Try a different bluff." },
       { status: 400 },
     );
+  }
+
+  // Moderate the fake before it's stored — every player sees it as a decoy in
+  // the guess phase, so a slur typed as a "bluff" would broadcast to the room.
+  // Forfeit markers are a fixed constant, not free text, so skip them. Block +
+  // audit on a flag; fail-safe to the denylist floor inside moderateText.
+  if (!isForfeitText(text)) {
+    const mod = await moderateText(text);
+    if (!mod.ok) {
+      void logFlagged(userId, "bluff_answer", text, mod);
+      return NextResponse.json(
+        { error: "That answer can't be used. Try a different bluff." },
+        { status: 400 },
+      );
+    }
   }
 
   // NOTE: we deliberately do NOT reject a fake just because it collides with

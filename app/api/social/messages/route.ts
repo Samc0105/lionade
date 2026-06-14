@@ -3,6 +3,7 @@ import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
 import { isDemoUser } from "@/lib/demo-guard";
 import { demoBlockedResponse } from "@/lib/demo-guard-server";
+import { moderateText, logFlagged } from "@/lib/moderation-ugc";
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -132,6 +133,18 @@ export async function POST(req: NextRequest) {
 
     if (!friendship) {
       return NextResponse.json({ error: "Not friends" }, { status: 403 });
+    }
+
+    // Moderate the DM before it's persisted + delivered (a private message is
+    // still a direct-harassment surface on a 13+ minor-facing app). Block +
+    // audit on a flag; fail-safe to the denylist floor inside moderateText.
+    const mod = await moderateText(cleanContent);
+    if (!mod.ok) {
+      void logFlagged(senderId, "dm", cleanContent, mod);
+      return NextResponse.json(
+        { error: "That message can't be sent. Keep it respectful." },
+        { status: 400 },
+      );
     }
 
     const { data, error } = await supabaseAdmin
