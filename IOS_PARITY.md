@@ -7,6 +7,24 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 
 ---
 
+## 2026-06-13 (sixth pass): PROFILE DRAWER + QUIZ PLAY REDESIGN + ROARDLE DAILY (iOS, LOCAL, not built; BUILD 24 PENDING)
+
+**Status:** ✅ iOS code ready + verified LOCALLY. `npx tsc --noEmit` clean; `@lionade/core` sync check clean. NOT built / NOT submitted / NO `eas update` (build-on-command; **build 24 is the pending target, HELD for explicit CEO go**). Three commits on iOS `main` (`9863cc9` profile drawer, `481a845` quiz play redesign, `faa6486` Roardle Daily), not pushed. NO new packages (Reanimated + Skia + `react-native-gesture-handler` already installed). No em-dashes. Owner: `vp-ios`. Canonical detail in `lionade-ios/docs/CHANGELOG.md` (2026-06-13 sixth pass) + vault `Daily/2026-06-13.md`.
+
+| Surface | Web | iOS |
+|---|---|---|
+| Profile / account menu | ✅ web lays out its profile + account per its own desktop design | ✅ NEW `9863cc9` — slide-in **LEFT drawer** REPLACES the AvatarMenuSheet bottom sheet: ranked-tier ring (pulse while open, reduce-motion static), identity pills with count-up, seamless flowing tri-color Go Pro (→ Manage Plan when paid), even 5-icon shortcuts row, featured Study DNA, options grid, footer; spring + backdrop + swipe-close via an in-modal `GestureHandlerRootView`; VoiceOver focus trap + open-announce; fresh Supabase stats on open behind an in-flight guard; Rate row gated until a real App Store ID exists. iOS-native presentation, no contract change |
+| Quiz Play surface (in-quiz) | ✅ web has its own quiz play layout | ✅ NEW `481a845` — premium gradient timer with a breathing draining-edge glow + smooth depletion + urgency chip, cohesive glowing progress dots, the shared `lib/motion/verdict.ts` VerdictPunch juice on answer (ONE haptic), a live correct-streak chip. **Timer LOGIC untouched** (depletion math / per-question duration / Blitz path unchanged); all reduce-motion safe. iOS-native juice, no logic or contract change |
+| Roardle Daily mode | 🚫 N/A (no web Roardle daily mode) | ✅ NEW `faa6486` — three **date-seeded daily puzzles** (4 / 5 / 6 letters; same words for every player on a given day), **one play per mode per day** (the per-day lock IS the once-per-day reward gate), a daily streak, a come-back-tomorrow state + a spoiler-free **shareable grid**, backed by word banks of ~70 words per length. In-game animations + all other games untouched. iOS-side game mode |
+
+**Supersede note (on the 2026-06-13 follow-on AvatarMenuSheet block below):** the AvatarMenuSheet bottom sheet is **RETIRED / SUPERSEDED** by the profile drawer above. The membership tier shimmer (`2c77822`), the glance-stats strip (`2c77822`), and the bottom-sheet Go Pro liquid-gold flow (`a0637d1`) lived only on that sheet and go with it; their intent is carried forward by the drawer's ranked-tier ring, identity pills, and the flowing tri-color Go Pro. Future "match the avatar menu" parity thinking should track the profile DRAWER, not the retired sheet.
+
+**Web counterpart:** 🚫 no port needed (the drawer + Quiz Play redesign are iOS-native presentation/juice; Roardle Daily has no web counterpart). **Informational nudges (NOT asks):** for `design-motion-web`, the breathing-edge gradient timer + the daily-puzzle loop (date-seeded, once-per-day, streak, shareable grid) are patterns web could adopt if it ever wants the same time-pressure juice or a Roardle daily ritual. No web code touched; no web-side gap opened.
+
+**Chain:** `ios-dev-native-modules` (in-modal gesture-handler swipe-close + spring/backdrop + ranked-tier ring pulse + flowing Go Pro Skia fill + Quiz Play gradient timer / edge-glow / dots, reduce-motion safe) + `ios-dev-screens` (drawer layout + count-up pills + 5-icon row + Study DNA + options grid + footer + Manage-Plan/Rate gating + fresh-stats in-flight guard + VoiceOver focus trap; Quiz Play verdict-punch + streak chip; Roardle Daily date-seeded puzzles + per-day lock + streak + shareable grid + ~70-word banks) -> `ios-code-reviewer` + `ios-design-accessibility` + `ios-qa-tester` -> `ios-docs-writer` (iOS CHANGELOG + vault Daily) -> `ios-parity-tracker` (these rows + the supersede note).
+
+---
+
 ## 2026-06-13: SETTINGS TRUTHFULNESS PASS: every control does what it says (web + iOS)
 
 **Status:** Web committed not pushed (zero AI cost, no migration). iOS code ready + verified LOCALLY, committed NOT pushed, NOT built, NO `eas update` (build-on-command; **build 22 still HELD**). No new packages. No em-dashes. Owners: `admin` (web) + `vp-ios` (iOS).
