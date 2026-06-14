@@ -356,7 +356,11 @@ const ROUTE_LIMITS: RouteLimit[] = [
     keyPrefix: "stripe-fang-purchase",
   },
 
-  // Currency-mutating financial routes — anti-burst
+  // Currency-mutating financial routes — anti-burst. Every route that mints or
+  // spends Fangs lives here at 60/min so the anti-burst envelope is uniform.
+  // (Each also has its own server-side idempotency/daily cap — this is the
+  // secondary, IP-level defense.) The earn routes below previously fell only to
+  // the 100/min catch-all; they belong in this tighter bucket.
   {
     test: (p) =>
       p === "/api/save-quiz-results" ||
@@ -366,7 +370,13 @@ const ROUTE_LIMITS: RouteLimit[] = [
       p.startsWith("/api/shop/") ||
       p === "/api/ninny/complete" ||
       p === "/api/ninny/abandon" ||
-      p === "/api/ninny/unlock",
+      p === "/api/ninny/unlock" ||
+      p === "/api/missions/claim" ||
+      p === "/api/focus-session" ||
+      p === "/api/daily-drill/complete" ||
+      p === "/api/spin/roll" ||
+      p === "/api/login-bonus" ||
+      /^\/api\/mastery\/sessions\/[^/]+\/complete$/.test(p),
     max: 60,
     windowMs: 60 * 1000,
     keyPrefix: "fin",
