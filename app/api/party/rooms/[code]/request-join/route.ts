@@ -15,6 +15,7 @@ import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
 import { isValidRoomCode, normalizeRoomCode } from "@/lib/party/room-code";
 import { roomChannel, PARTY_EVENTS } from "@/lib/party/realtime-channels";
+import { moderateText, logFlagged } from "@/lib/moderation-ugc";
 
 const REQUEST_COOLDOWN_MS = 5 * 60 * 1000;
 const MAX_PENDING_PER_USER = 3;
@@ -35,6 +36,19 @@ export async function POST(
   const body = await req.json().catch(() => ({}));
   const rawNote = typeof body?.note === "string" ? body.note.trim() : "";
   const note = rawNote.length > 0 ? rawNote.slice(0, 50) : null;
+
+  // Moderate the optional note — it's broadcast to the room host's accept/
+  // decline banner. Block + audit on a flag (mirrors lobby-chat).
+  if (note) {
+    const mod = await moderateText(note);
+    if (!mod.ok) {
+      void logFlagged(userId, "join_request_note", note, mod);
+      return NextResponse.json(
+        { error: "That message can't be sent. Keep it respectful." },
+        { status: 400 },
+      );
+    }
+  }
 
   const { data: room } = await supabaseAdmin
     .from("party_rooms")

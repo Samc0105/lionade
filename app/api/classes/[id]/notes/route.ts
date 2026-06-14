@@ -3,6 +3,7 @@ import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
 import { bumpClassStreak } from "@/lib/class-streaks";
 import { generateFlashcardsForNote } from "@/lib/class-flashcards";
+import { moderateText, logFlagged } from "@/lib/moderation-ugc";
 
 /**
  * GET  /api/classes/[id]/notes  — list active notes for a class
@@ -95,6 +96,15 @@ export async function POST(req: NextRequest, { params }: RouteCtx) {
   }
 
   const title = body.title ? String(body.title).trim().slice(0, MAX_TITLE_CHARS) : null;
+  // Moderate the note title (the body stays unmoderated — it's user-private and
+  // only the owner reads it; the title is the label shown in note lists).
+  if (title) {
+    const titleMod = await moderateText(title);
+    if (!titleMod.ok) {
+      void logFlagged(userId, "class_note_title", title, titleMod);
+      return NextResponse.json({ error: "That note title isn't allowed. Try another." }, { status: 400 });
+    }
+  }
   const source = body.source && ["manual", "quick", "paste", "upload"].includes(body.source)
     ? body.source : "manual";
   const pinned = !!body.pinned;

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
+import { moderateText, logFlagged } from "@/lib/moderation-ugc";
 
 /**
  * GET  /api/classes  — list the caller's active classes with summary
@@ -144,6 +145,15 @@ export async function POST(req: NextRequest) {
   const name = String(body.name ?? "").trim().slice(0, 80);
   if (name.length < 2) {
     return NextResponse.json({ error: "Class name must be at least 2 characters." }, { status: 400 });
+  }
+
+  // Moderate the class name. Classes are user-private, but the name is the
+  // primary label (and can flow into AI-generated summaries), so we hold it to
+  // the same UGC standard. Block + audit on a flag.
+  const nameMod = await moderateText(name);
+  if (!nameMod.ok) {
+    void logFlagged(userId, "class_name", name, nameMod);
+    return NextResponse.json({ error: "That class name isn't allowed. Try another." }, { status: 400 });
   }
 
   // Sanitize optional fields. Hex color must match the strict pattern; fall back to gold otherwise.

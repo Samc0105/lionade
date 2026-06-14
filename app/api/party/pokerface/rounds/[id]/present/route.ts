@@ -17,6 +17,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
+import { moderateText, logFlagged } from "@/lib/moderation-ugc";
 
 const MAX_CLAIM_LEN = 280;
 
@@ -68,6 +69,16 @@ export async function POST(
     if (!claimText) {
       return NextResponse.json(
         { error: "Write the lie you want to present." },
+        { status: 400 },
+      );
+    }
+    // Moderate the player-authored lie — it's shown to every voter at the vote
+    // phase. Block + audit on a flag (mirrors the Bluff fake-answer pattern).
+    const mod = await moderateText(claimText);
+    if (!mod.ok) {
+      void logFlagged(userId, "pokerface_lie", claimText, mod);
+      return NextResponse.json(
+        { error: "That claim can't be used. Try a different one." },
         { status: 400 },
       );
     }

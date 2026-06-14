@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
 import { applyFangMultiplier } from "@/lib/mastery-plan";
+import { moderateText, logFlagged } from "@/lib/moderation-ugc";
 import {
   isSupportedLang,
   normalizeWord,
@@ -107,6 +108,19 @@ export async function POST(req: NextRequest) {
 
   const userDef = normalizeUserDefinition(raw.user_definition);
   const hasUserDef = userDef.length > 0;
+
+  // Moderate the user-authored definition — it surfaces to other users in
+  // public bank previews (/api/vocab/banks/[id]/preview). Block + audit on a flag.
+  if (hasUserDef) {
+    const defMod = await moderateText(userDef);
+    if (!defMod.ok) {
+      void logFlagged(userId, "vocab_definition", userDef, defMod);
+      return NextResponse.json(
+        { error: "That definition isn't allowed. Try a different one." },
+        { status: 400 },
+      );
+    }
+  }
 
   if (bank.kind === "language") {
     if (!isSupportedLang(raw.source_lang) || !isSupportedLang(raw.target_lang)) {
