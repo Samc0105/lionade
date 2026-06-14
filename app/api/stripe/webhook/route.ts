@@ -36,67 +36,71 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
   }
 
-  // Idempotency: only mark an event as processed AFTER the handler succeeds.
-  // The 'errored' status path lets Stripe (and us) re-attempt without
-  // double-applying the work — the handlers themselves are written to be
-  // safe to re-run (UPDATE-by-customer is naturally idempotent).
-  const { data: existing, error: lookupErr } = await supabaseAdmin
-    .from("stripe_webhook_events")
-    .select("event_id, status")
-    .eq("event_id", event.id)
-    .maybeSingle();
-
-  if (lookupErr) {
-    console.error("[stripe-webhook] idempotency lookup", lookupErr.message);
-    // Fail closed: return 500 so Stripe retries. The alternative (process
-    // anyway) risks double-applying on a transient DB blip.
-    return NextResponse.json({ error: "Idempotency check failed" }, { status: 500 });
+  // Idempotency + concurrency: atomically CLAIM the event before processing.
+  // claim_stripe_event INSERTs a 'processing' lock (or re-claims an 'errored' /
+  // stale-'processing' one) and reports whether THIS request won it:
+  //   'claimed'     → we own the lock, run the handler
+  //   'duplicate'   → already processed, short-circuit
+  //   'in_progress' → another delivery holds a fresh lock, let it finish
+  // This closes the race where two concurrent Stripe deliveries both passed a
+  // read-only lookup and ran the handler twice (e.g. crediting a Fang IAP twice
+  // for one payment). The 'errored' + stale-'processing' re-claim preserves the
+  // previous behavior where Stripe's retry re-attempts a failed event.
+  const { data: claimRaw, error: claimErr } = await supabaseAdmin.rpc("claim_stripe_event", {
+    p_event_id: event.id,
+  });
+  if (claimErr) {
+    console.error("[stripe-webhook] claim", claimErr.message);
+    // Fail closed: 500 so Stripe retries rather than risk processing twice.
+    return NextResponse.json({ error: "Idempotency claim failed" }, { status: 500 });
   }
+  const claim = typeof claimRaw === "string" ? claimRaw : "in_progress";
 
-  if (existing?.status === "processed") {
-    // Already done — short-circuit so Stripe stops retrying.
+  if (claim === "duplicate") {
     return NextResponse.json({ received: true, duplicate: true });
   }
-  // existing with status='errored' → fall through to retry the handler.
+  if (claim === "in_progress") {
+    // Another delivery is actively handling this event. 200 so Stripe stops
+    // hammering; that delivery marks it processed/errored. If it crashes, the
+    // lock goes stale (>5 min) and the next Stripe retry re-claims it.
+    return NextResponse.json({ received: true, inProgress: true });
+  }
+  // claim === "claimed" — we own the processing lock.
 
   try {
     await dispatchHandler(event);
 
-    // Mark as processed (upsert handles both first-time insert and the
-    // 'errored' → 'processed' transition on a retry that finally succeeded).
-    const { error: upsertErr } = await supabaseAdmin
+    // Flip the lock we own from 'processing' to 'processed'.
+    const { error: doneErr } = await supabaseAdmin
       .from("stripe_webhook_events")
-      .upsert({
-        event_id: event.id,
+      .update({
         status: "processed",
         error_message: null,
         processed_at: new Date().toISOString(),
-      });
-    if (upsertErr) {
-      // The handler ran successfully but we couldn't record it. Returning
-      // 500 makes Stripe retry; the handler is idempotent so the retry will
-      // re-apply the same write and try to upsert again. Better than
-      // silently 200-ing and risking infinite Stripe retries on the NEXT
-      // event because the row is missing.
-      console.error("[stripe-webhook] processed upsert", upsertErr.message);
+      })
+      .eq("event_id", event.id);
+    if (doneErr) {
+      // The handler ran but we couldn't record success. 500 so Stripe retries;
+      // the idempotent handler re-runs and the (now-stale or errored) lock is
+      // re-claimable. Better than 200-ing with the row stuck in 'processing'.
+      console.error("[stripe-webhook] processed update", doneErr.message);
       return NextResponse.json({ error: "Idempotency write failed" }, { status: 500 });
     }
 
     return NextResponse.json({ received: true });
   } catch (err) {
-    // Record the failure for visibility + future retries. Note we upsert
-    // 'errored' rather than skip — that way Sam can grep the table for
-    // sticky failures and the next Stripe retry knows to re-process.
+    // Flip our lock to 'errored' so Sam can grep stuck events and the next
+    // Stripe retry re-claims + re-processes.
     const errorTail =
       err instanceof Error ? err.message.slice(0, 500) : "Unknown error".slice(0, 500);
     await supabaseAdmin
       .from("stripe_webhook_events")
-      .upsert({
-        event_id: event.id,
+      .update({
         status: "errored",
         error_message: errorTail,
         processed_at: new Date().toISOString(),
-      });
+      })
+      .eq("event_id", event.id);
 
     console.error(
       "[stripe-webhook] handler failed:",
@@ -104,9 +108,7 @@ export async function POST(req: NextRequest) {
       event.id,
       (err as Error).message,
     );
-    // 500 makes Stripe retry per its exponential-backoff schedule (up to 3
-    // days). Combined with the 'errored' status row above, Sam has both a
-    // log signal (Vercel) and a queryable signal (stripe_webhook_events).
+    // 500 makes Stripe retry per its exponential-backoff schedule.
     return NextResponse.json({ error: "Handler failed" }, { status: 500 });
   }
 }
