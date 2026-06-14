@@ -212,17 +212,15 @@ export async function POST(
             { round_id: round.id, user_id: userId, reason: "letters", fangs: priorLetterFangs + grant },
             { onConflict: "round_id,user_id,reason" },
           );
-        const { data: prof } = await supabaseAdmin
-          .from("profiles")
-          .select("coins")
-          .eq("id", userId)
-          .maybeSingle();
-        if (prof) {
-          await supabaseAdmin
-            .from("profiles")
-            .update({ coins: (prof.coins ?? 0) + grant })
-            .eq("id", userId);
-        }
+        // Credit the delta through the atomic RPC (keeps fangs_cashable in sync;
+        // the cumulative unique-reason row above is the idempotency ledger).
+        const { error: grantErr } = await supabaseAdmin.rpc("update_user_coins", {
+          p_user_id: userId,
+          p_delta: grant,
+          p_min_balance: 0,
+          p_source: "cashable",
+        });
+        if (grantErr) console.error("[sketch/guess] letter grant:", grantErr.message);
         fangsEarned += grant;
       }
     }

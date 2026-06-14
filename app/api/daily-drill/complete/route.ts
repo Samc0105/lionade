@@ -110,10 +110,10 @@ export async function POST(req: NextRequest) {
 
     const baseCoinsEarned = correctCount * FANGS_PER_CORRECT + (perfect ? FANGS_PERFECT_BONUS : 0);
 
-    // One profile read covers both tier (for multiplier) and balance (for credit below).
+    // Profile read for the tier multiplier only — the credit RPC reads balance.
     const { data: planProfile } = await supabaseAdmin
       .from("profiles")
-      .select("coins, plan, subscription_status")
+      .select("plan, subscription_status")
       .eq("id", userId)
       .single();
     const coinsEarned = applyFangMultiplierFromTier(baseCoinsEarned, planProfile?.plan as string | null, planProfile?.subscription_status as string | null);
@@ -150,20 +150,29 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Couldn't record drill." }, { status: 500 });
     }
 
-    // Grant Fangs (balance pre-loaded above).
+    // Grant Fangs. The completion row inserted above is the idempotency gate,
+    // so credit through the atomic update_user_coins RPC (no lost-update race +
+    // keeps fangs_cashable in sync); the audit row is a separate insert.
     if (coinsEarned > 0) {
-      const newBalance = ((planProfile as { coins?: number } | null)?.coins ?? 0) + coinsEarned;
-      await Promise.all([
-        supabaseAdmin.from("profiles").update({ coins: newBalance }).eq("id", userId),
-        supabaseAdmin.from("coin_transactions").insert({
+      const { error: creditErr } = await supabaseAdmin.rpc("update_user_coins", {
+        p_user_id: userId,
+        p_delta: coinsEarned,
+        p_min_balance: 0,
+        p_source: "cashable",
+      });
+      if (creditErr) {
+        // Completion is already recorded (can't re-credit on retry); log loudly.
+        console.error("[daily-drill POST] credit:", creditErr.message);
+      } else {
+        await supabaseAdmin.from("coin_transactions").insert({
           user_id: userId,
           amount: coinsEarned,
           type: "daily_drill",
           description: perfect
             ? `Daily Drill — perfect ${correctCount}/${total}`
             : `Daily Drill — ${correctCount}/${total}`,
-        }),
-      ]);
+        });
+      }
     }
 
     // Drop the active_session pin — drill is done for today.

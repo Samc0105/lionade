@@ -39,20 +39,18 @@ export async function awardSketchFangs(
   // No row returned => the (round,user,reason) award already existed. Skip mint.
   if (!inserted || inserted.length === 0) return 0;
 
-  // Credit the balance server-side (service role bypasses RLS).
-  const { data: prof } = await admin
-    .from("profiles")
-    .select("coins")
-    .eq("id", userId)
-    .maybeSingle();
-  if (!prof) return 0;
-  const newCoins = (prof.coins ?? 0) + fangs;
-  const { error: updErr } = await admin
-    .from("profiles")
-    .update({ coins: newCoins })
-    .eq("id", userId);
+  // Credit the balance through the atomic update_user_coins RPC (service role).
+  // The ledger row above is the idempotency gate; the RPC keeps coins +
+  // fangs_cashable in sync and can't lose a concurrent grant the way a raw
+  // read-modify-write could.
+  const { error: updErr } = await admin.rpc("update_user_coins", {
+    p_user_id: userId,
+    p_delta: fangs,
+    p_min_balance: 0,
+    p_source: "cashable",
+  });
   if (updErr) {
-    console.error("[awardSketchFangs] coins update", updErr.message);
+    console.error("[awardSketchFangs] coins credit", updErr.message);
     return 0;
   }
   return fangs;

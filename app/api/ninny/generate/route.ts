@@ -198,16 +198,28 @@ export async function POST(req: NextRequest) {
       );
     }
     const beforeCharge = profile.coins ?? 0;
-    coinsBeforeCharge = beforeCharge;
-    // Deduct now; refund below if generation fails
-    const { error: chargeErr } = await supabaseAdmin
-      .from("profiles")
-      .update({ coins: beforeCharge - fangCost })
-      .eq("id", userId);
+    // Deduct now (refund below if generation fails) through the atomic RPC, so
+    // the charge can't lose a concurrent grant or desync the dual ledger. P0001
+    // = balance dropped below cost since the pre-check (a race) → friendly 402.
+    const { error: chargeErr } = await supabaseAdmin.rpc("update_user_coins", {
+      p_user_id: userId,
+      p_delta: -fangCost,
+      p_min_balance: 0,
+      p_source: "spend",
+    });
     if (chargeErr) {
+      if (chargeErr.code === "P0001") {
+        return NextResponse.json(
+          { error: `Not enough Fangs. Need ${fangCost}.`, fangCost, insufficientFangs: true },
+          { status: 402 },
+        );
+      }
       console.error("[ninny/generate] charge:", chargeErr.message);
       return NextResponse.json({ error: "Charge failed" }, { status: 500 });
     }
+    // Mark "charged" so refundOnFailure runs (value itself is unused now — the
+    // refund applies a +fangCost delta via the RPC, not an absolute write).
+    coinsBeforeCharge = beforeCharge;
     // Log the spend
     await supabaseAdmin.from("coin_transactions").insert({
       user_id: userId,
@@ -220,10 +232,13 @@ export async function POST(req: NextRequest) {
   // Helper to refund the user if anything below this point fails
   const refundOnFailure = async (reason: string) => {
     if (isFree || coinsBeforeCharge === null) return;
-    await supabaseAdmin
-      .from("profiles")
-      .update({ coins: coinsBeforeCharge + fangCost })
-      .eq("id", userId);
+    // spend_refund reverses the spend (credits cashable + unwinds lifetime).
+    await supabaseAdmin.rpc("update_user_coins", {
+      p_user_id: userId,
+      p_delta: fangCost,
+      p_min_balance: 0,
+      p_source: "spend_refund",
+    });
     await supabaseAdmin.from("coin_transactions").insert({
       user_id: userId,
       amount: fangCost,

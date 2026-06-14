@@ -84,25 +84,27 @@ export async function POST(req: NextRequest, { params }: RouteCtx) {
       })
       .eq("id", sessionId);
 
-    // Grant Fangs if earned. Match the shape of other reward inserts in the codebase.
+    // Grant Fangs if earned. The session is already closed above (the
+    // idempotency gate), so credit through the atomic update_user_coins RPC
+    // (no lost-update race + keeps fangs_cashable in sync); the audit row is a
+    // separate insert since the RPC only touches the balance columns.
     if (coinsEarned > 0) {
-      const { data: profile } = await supabaseAdmin
-        .from("profiles")
-        .select("coins")
-        .eq("id", userId)
-        .single();
-
-      if (profile) {
-        const newBalance = (profile.coins ?? 0) + coinsEarned;
-        await Promise.all([
-          supabaseAdmin.from("profiles").update({ coins: newBalance }).eq("id", userId),
-          supabaseAdmin.from("coin_transactions").insert({
-            user_id: userId,
-            amount: coinsEarned,
-            type: "mastery_session",
-            description: `Mastery session (${session.correct_count}/${session.questions_answered} correct)`,
-          }),
-        ]);
+      const { error: creditErr } = await supabaseAdmin.rpc("update_user_coins", {
+        p_user_id: userId,
+        p_delta: coinsEarned,
+        p_min_balance: 0,
+        p_source: "cashable",
+      });
+      if (creditErr) {
+        // Session is already closed (can't retry the grant); log loudly.
+        console.error("[mastery/complete] credit:", creditErr.message);
+      } else {
+        await supabaseAdmin.from("coin_transactions").insert({
+          user_id: userId,
+          amount: coinsEarned,
+          type: "mastery_session",
+          description: `Mastery session (${session.correct_count}/${session.questions_answered} correct)`,
+        });
       }
     }
 

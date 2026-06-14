@@ -95,30 +95,34 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // Atomic deduct via optimistic concurrency control: only update if the
-  // coins value still matches what we read. If a concurrent request beat us
-  // to it, the update will affect 0 rows and we know to fail safely without
-  // double-charging.
-  const { data: chargeRow, error: chargeErr } = await supabaseAdmin
-    .from("profiles")
-    .update({ coins: before - cost })
-    .eq("id", userId)
-    .eq("coins", before)
-    .select("id")
-    .maybeSingle();
+  // Atomic deduct through the RPC: it checks `coins - cost >= 0` and updates
+  // coins + fangs_cashable + lifetime_fangs_spent in one statement, so it can't
+  // lose a concurrent grant or desync the dual ledger. P0001 = the balance
+  // dropped below cost since our pre-check (a race) — surface the friendly 402.
+  const { data: debitData, error: chargeErr } = await supabaseAdmin.rpc("update_user_coins", {
+    p_user_id: userId,
+    p_delta: -cost,
+    p_min_balance: 0,
+    p_source: "spend",
+  });
 
   if (chargeErr) {
+    if (chargeErr.code === "P0001") {
+      return NextResponse.json(
+        {
+          error: `Need ${cost} Fangs to unlock ${mode}.`,
+          cost,
+          insufficientFangs: true,
+        },
+        { status: 402 },
+      );
+    }
     console.error("[ninny/unlock] charge:", chargeErr.message);
     return NextResponse.json({ error: "Charge failed" }, { status: 500 });
   }
-  if (!chargeRow) {
-    // Either balance changed since we read it (race) or row was deleted.
-    // Don't double-charge — return a 409 so the client can retry.
-    return NextResponse.json(
-      { error: "Balance changed, please try again" },
-      { status: 409 },
-    );
-  }
+  const afterCharge: number = Array.isArray(debitData)
+    ? (debitData[0]?.new_coins ?? before - cost)
+    : ((debitData as { new_coins: number } | null)?.new_coins ?? before - cost);
 
   // Atomic array append: only update if unlocked_modes is still what we read.
   // Prevents losing a concurrent unlock for a different mode.
@@ -133,11 +137,14 @@ export async function POST(req: NextRequest) {
 
   if (updateErr || !updateRow) {
     // Refund the charge — the update failed or another mode was unlocked
-    // concurrently. The user should retry; their balance is intact.
-    await supabaseAdmin
-      .from("profiles")
-      .update({ coins: before })
-      .eq("id", userId);
+    // concurrently. spend_refund reverses the spend (credits cashable + unwinds
+    // lifetime_fangs_spent). The user should retry; their balance is intact.
+    await supabaseAdmin.rpc("update_user_coins", {
+      p_user_id: userId,
+      p_delta: cost,
+      p_min_balance: 0,
+      p_source: "spend_refund",
+    });
     if (updateErr) console.error("[ninny/unlock] update:", updateErr.message);
     return NextResponse.json(
       { error: "Failed to unlock mode, balance refunded" },
@@ -156,6 +163,6 @@ export async function POST(req: NextRequest) {
   return NextResponse.json({
     success: true,
     unlockedModes: newUnlockedModes,
-    userCoins: before - cost,
+    userCoins: afterCharge,
   });
 }

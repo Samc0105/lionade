@@ -74,22 +74,28 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    const { data: profile } = await supabaseAdmin
-      .from("profiles")
-      .select("coins")
-      .eq("id", userId)
-      .single();
-    const newBalance = ((profile as { coins?: number } | null)?.coins ?? 0) + reward;
+    // Atomic credit (no lost-update race; keeps fangs_cashable in sync). The
+    // audit row is a separate insert — the RPC only touches the balance columns.
+    const { data: creditData, error: creditErr } = await supabaseAdmin.rpc("update_user_coins", {
+      p_user_id: userId,
+      p_delta: reward,
+      p_min_balance: 0,
+      p_source: "cashable",
+    });
+    if (creditErr) {
+      console.error("[focus-session POST] credit:", creditErr.message);
+      return NextResponse.json({ error: "Couldn't record session." }, { status: 500 });
+    }
+    const newBalance: number = Array.isArray(creditData)
+      ? (creditData[0]?.new_coins ?? 0)
+      : ((creditData as { new_coins: number } | null)?.new_coins ?? 0);
 
-    await Promise.all([
-      supabaseAdmin.from("profiles").update({ coins: newBalance }).eq("id", userId),
-      supabaseAdmin.from("coin_transactions").insert({
-        user_id: userId,
-        amount: reward,
-        type: "focus_session",
-        description: `Focus Lock-In (${duration} min)`,
-      }),
-    ]);
+    await supabaseAdmin.from("coin_transactions").insert({
+      user_id: userId,
+      amount: reward,
+      type: "focus_session",
+      description: `Focus Lock-In (${duration} min)`,
+    });
 
     return NextResponse.json({
       ok: true,

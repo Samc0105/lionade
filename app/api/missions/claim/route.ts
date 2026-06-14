@@ -48,10 +48,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Mission not claimable (incomplete or already claimed)" }, { status: 400 });
     }
 
-    // Award coins + XP
+    // Read tier (for the multiplier) + xp. Balance is no longer read here —
+    // the credit goes through the atomic update_user_coins RPC, which reads and
+    // writes coins itself and keeps the dual ledger (fangs_cashable) in sync.
     const { data: profile } = await supabaseAdmin
       .from("profiles")
-      .select("coins, xp, plan, subscription_status")
+      .select("xp, plan, subscription_status")
       .eq("id", userId)
       .single();
 
@@ -60,17 +62,36 @@ export async function POST(req: NextRequest) {
       ? applyFangMultiplierFromTier(mission.coinReward, profile.plan as string | null, profile.subscription_status as string | null)
       : mission.coinReward;
 
-    if (profile) {
+    // Atomic credit (no lost-update race with concurrent quiz/bet grants).
+    if (boostedCoinReward > 0) {
+      const { error: creditErr } = await supabaseAdmin.rpc("update_user_coins", {
+        p_user_id: userId,
+        p_delta: boostedCoinReward,
+        p_min_balance: 0,
+        p_source: "cashable",
+      });
+      if (creditErr) {
+        // Release the claim so a retry can pay — the reward was never granted.
+        await supabaseAdmin
+          .from("user_daily_missions")
+          .update({ claimed: false, claimed_at: null })
+          .eq("user_id", userId)
+          .eq("mission_date", todayDate)
+          .eq("mission_id", missionId);
+        console.error("[missions/claim] credit:", creditErr.message);
+        return NextResponse.json({ error: "Claim failed" }, { status: 500 });
+      }
+    }
+
+    // XP is not dual-ledger, so it stays a plain read-modify-write.
+    if (profile && mission.xpReward > 0) {
       await supabaseAdmin
         .from("profiles")
-        .update({
-          coins: (profile.coins ?? 0) + boostedCoinReward,
-          xp: (profile.xp ?? 0) + mission.xpReward,
-        })
+        .update({ xp: (profile.xp ?? 0) + mission.xpReward })
         .eq("id", userId);
     }
 
-    // Log coin transaction
+    // Log coin transaction (the RPC updates balance only, not the ledger).
     if (boostedCoinReward > 0) {
       await supabaseAdmin.from("coin_transactions").insert({
         user_id: userId,
