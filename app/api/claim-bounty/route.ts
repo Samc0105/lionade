@@ -68,10 +68,11 @@ export async function POST(req: NextRequest) {
         .eq("id", userId)
         .single();
       if (xpProfile) {
-        await supabaseAdmin
+        const { error: xpErr } = await supabaseAdmin
           .from("profiles")
           .update({ xp: (xpProfile.xp ?? 0) + bounty.xp_reward })
           .eq("id", userId);
+        if (xpErr) console.error("[claim-bounty] xp update:", xpErr.message);
       }
     }
 

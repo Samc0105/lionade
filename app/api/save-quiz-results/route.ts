@@ -176,22 +176,29 @@ export async function POST(req: NextRequest) {
 
       if (count > 0 && count % 3 === 0) {
         bonusFangs = applyFangMultiplierFromTier(50, profile.plan as string | null, profile.subscription_status as string | null);
-        // Atomic credit — see Step 3 rationale.
-        await supabaseAdmin.rpc("update_user_coins", {
+        // Atomic credit — see Step 3 rationale. Check the RPC error BEFORE
+        // logging the audit row + reporting the bonus: a silent failure here
+        // would write a phantom coin_transactions row (ledger divergence) and
+        // tell the user they earned a bonus that was never credited.
+        const { error: bonusRpcErr } = await supabaseAdmin.rpc("update_user_coins", {
           p_user_id: userId,
           p_delta: bonusFangs,
           p_min_balance: 0,
           p_source: "cashable",
         });
-
-        await supabaseAdmin.from("coin_transactions").insert({
-          user_id: userId,
-          amount: bonusFangs,
-          type: "streak_bonus",
-          reference_id: String(session.id),
-          description: `${count} quizzes in a row bonus!`,
-        });
-
+        if (bonusRpcErr) {
+          console.warn("[save-quiz-results] Step 3b credit WARN (non-fatal):", bonusRpcErr.message);
+          bonusFangs = 0; // don't claim a bonus that wasn't credited
+        } else {
+          const { error: bonusTxnErr } = await supabaseAdmin.from("coin_transactions").insert({
+            user_id: userId,
+            amount: bonusFangs,
+            type: "streak_bonus",
+            reference_id: String(session.id),
+            description: `${count} quizzes in a row bonus!`,
+          });
+          if (bonusTxnErr) console.warn("[save-quiz-results] Step 3b log WARN:", bonusTxnErr.message);
+        }
       }
     } catch (bonusErr) {
       console.warn("[save-quiz-results] Step 3b WARN (non-fatal):", bonusErr);
@@ -348,31 +355,37 @@ export async function POST(req: NextRequest) {
 
       if (!alreadyAwarded || alreadyAwarded === 0) {
         const milestoneBonus = applyFangMultiplierFromTier(STREAK_MILESTONES[newStreak], profile.plan as string | null, profile.subscription_status as string | null);
-        // Atomic credit — see Step 3 rationale.
-        await supabaseAdmin.rpc("update_user_coins", {
+        // Atomic credit — see Step 3 rationale. Check the error before the audit
+        // row / notification / response so a failed credit can't claim a
+        // milestone bonus that was never paid (ledger + UX divergence).
+        const { error: milestoneErr } = await supabaseAdmin.rpc("update_user_coins", {
           p_user_id: userId,
           p_delta: milestoneBonus,
           p_min_balance: 0,
           p_source: "cashable",
         });
-        await supabaseAdmin.from("coin_transactions").insert({
-          user_id: userId,
-          amount: milestoneBonus,
-          type: "streak_milestone",
-          description: `${newStreak}-day streak milestone!`,
-        });
-        // Notify via the central notifyUser helper (gates on streak_alert pref
-        // AND quiet hours). Bonus is still credited; the user just won't see a
-        // notification card if they opted out or are inside quiet hours.
-        await notifyUser({
-          userId,
-          prefKey: "streak_alert",
-          type: "streak_milestone",
-          title: `${newStreak}-Day Streak!`,
-          message: `You earned ${milestoneBonus} bonus Fangs for your ${newStreak}-day streak!`,
-          action_url: "/dashboard",
-        });
-        streakMilestone = { days: newStreak, bonus: milestoneBonus };
+        if (milestoneErr) {
+          console.warn("[save-quiz-results] Step 5b milestone credit WARN:", milestoneErr.message);
+        } else {
+          await supabaseAdmin.from("coin_transactions").insert({
+            user_id: userId,
+            amount: milestoneBonus,
+            type: "streak_milestone",
+            description: `${newStreak}-day streak milestone!`,
+          });
+          // Notify via the central notifyUser helper (gates on streak_alert pref
+          // AND quiet hours). Bonus is still credited; the user just won't see a
+          // notification card if they opted out or are inside quiet hours.
+          await notifyUser({
+            userId,
+            prefKey: "streak_alert",
+            type: "streak_milestone",
+            title: `${newStreak}-Day Streak!`,
+            message: `You earned ${milestoneBonus} bonus Fangs for your ${newStreak}-day streak!`,
+            action_url: "/dashboard",
+          });
+          streakMilestone = { days: newStreak, bonus: milestoneBonus };
+        }
       }
     }
 
@@ -623,21 +636,27 @@ export async function POST(req: NextRequest) {
         const claimedBet = (betClaim?.length ?? 0) > 0;
 
         if (won && claimedBet) {
-          // Atomic credit — see Step 3 rationale.
-          await supabaseAdmin.rpc("update_user_coins", {
+          // Atomic credit — see Step 3 rationale. Check the error before the
+          // audit row: the bet is already resolved (can't retry), so a silent
+          // credit failure would log a phantom payout. Log LOUDLY for manual
+          // reconciliation instead of writing a ledger row for Fangs never paid.
+          const { error: betCreditErr } = await supabaseAdmin.rpc("update_user_coins", {
             p_user_id: userId,
             p_delta: coinsWon,
             p_min_balance: 0,
             p_source: "cashable",
           });
-
-          await supabaseAdmin.from("coin_transactions").insert({
-            user_id: userId,
-            amount: coinsWon,
-            type: "bet_won",
-            reference_id: activeBet.id,
-            description: `Won bet: ${correctAnswers}/${totalQuestions} (target ${activeBet.target_score})`,
-          });
+          if (betCreditErr) {
+            console.error("[save-quiz-results] Step 8 bet payout FAILED after claim — needs reconciliation:", activeBet.id, betCreditErr.message);
+          } else {
+            await supabaseAdmin.from("coin_transactions").insert({
+              user_id: userId,
+              amount: coinsWon,
+              type: "bet_won",
+              reference_id: activeBet.id,
+              description: `Won bet: ${correctAnswers}/${totalQuestions} (target ${activeBet.target_score})`,
+            });
+          }
         }
 
       }

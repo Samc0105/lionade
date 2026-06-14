@@ -187,11 +187,15 @@ export async function POST(req: NextRequest) {
 
     if (inventoryErr) {
       console.error("[shop/purchase] inventory write failed, refunding:", inventoryErr.message);
+      // spend_refund (NOT cashable) so the refund symmetrically reverses the
+      // 'spend' debit above — it credits cashable AND unwinds lifetime_fangs_spent.
+      // Plain 'cashable' would leave lifetime_fangs_spent inflated, corrupting the
+      // V2 60%-spend cash-out gate.
       await supabaseAdmin.rpc("update_user_coins", {
         p_user_id: userId,
         p_delta: price,
         p_min_balance: 0,
-        p_source: "cashable",
+        p_source: "spend_refund",
       });
       return NextResponse.json({ error: "Purchase failed, refunded" }, { status: 500 });
     }

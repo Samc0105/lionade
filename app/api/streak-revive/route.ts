@@ -259,13 +259,15 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Couldn't restore streak." }, { status: 500 });
     }
 
-    // Audit (best-effort).
-    void supabaseAdmin.from("coin_transactions").insert({
+    // Audit (best-effort) — awaited so a failed insert is logged, not silently
+    // dropped (matches save-quiz-results / place-bet / login-bonus).
+    const { error: reviveTxErr } = await supabaseAdmin.from("coin_transactions").insert({
       user_id: userId,
       amount: -REVIVE_COST_FANGS,
       type: "streak_revive",
       description: `Revived ${revive.previous_streak}-day streak`,
     });
+    if (reviveTxErr) console.warn("[streak-revive POST] audit log WARN:", reviveTxErr.message);
 
     return NextResponse.json({
       ok: true,

@@ -136,19 +136,47 @@ export async function POST(req: NextRequest) {
       p2Updates.arena_draws = (p2Profile?.arena_draws ?? 0) + 1;
     }
 
-    // Transfer Fangs
+    // Apply ELO + win/loss/draw counters (non-ledger columns — a raw update is
+    // correct here; coins are handled separately through the atomic RPC below).
+    await Promise.all([
+      supabaseAdmin.from("profiles").update(p1Updates).eq("id", match.player1_id),
+      supabaseAdmin.from("profiles").update(p2Updates).eq("id", match.player2_id),
+    ]);
+
+    // Transfer Fangs through the atomic update_user_coins RPC (a raw
+    // read-modify-write on coins, as this route used to do, loses a concurrent
+    // grant AND drifts the dual ledger coins != fangs_cashable + fangs_iap that
+    // the V2 cash-out gate depends on). BOTH sides use source 'cashable': the
+    // winner's gain is cashable, and a wager LOSS must NOT inflate
+    // lifetime_fangs_spent (the 60%-spend gate) — matching lib/competitive/
+    // settle.ts. The loser debit is clamped to their balance (from the read
+    // above, like settle.ts) so they never go negative; a rare concurrent drop
+    // logs P0001 and skips that one debit rather than failing the match.
     const wager = match.wager ?? 10;
     if (winnerId) {
       const loserId = winnerId === match.player1_id ? match.player2_id : match.player1_id;
       const loserProfile = loserId === match.player1_id ? p1Profile : p2Profile;
-      const winnerProfile = winnerId === match.player1_id ? p1Profile : p2Profile;
-      const winnerUpdates = winnerId === match.player1_id ? p1Updates : p2Updates;
-      const loserUpdates = loserId === match.player1_id ? p1Updates : p2Updates;
+      const loserDebit = Math.min(wager, loserProfile?.coins ?? 0);
 
-      winnerUpdates.coins = (winnerProfile?.coins ?? 0) + wager;
-      loserUpdates.coins = Math.max(0, (loserProfile?.coins ?? 0) - wager);
+      const { error: winErr } = await supabaseAdmin.rpc("update_user_coins", {
+        p_user_id: winnerId,
+        p_delta: wager,
+        p_min_balance: 0,
+        p_source: "cashable",
+      });
+      if (winErr) console.error("[arena/complete] winner credit:", winErr.message);
 
-      // Log transactions
+      if (loserDebit > 0) {
+        const { error: loseErr } = await supabaseAdmin.rpc("update_user_coins", {
+          p_user_id: loserId,
+          p_delta: -loserDebit,
+          p_min_balance: 0,
+          p_source: "cashable",
+        });
+        if (loseErr) console.error("[arena/complete] loser debit:", loseErr.message);
+      }
+
+      // Audit rows reflect the EFFECTIVE amounts (loser debit may be clamped).
       await Promise.all([
         supabaseAdmin.from("coin_transactions").insert({
           user_id: winnerId,
@@ -159,20 +187,14 @@ export async function POST(req: NextRequest) {
         }),
         supabaseAdmin.from("coin_transactions").insert({
           user_id: loserId,
-          amount: -wager,
+          amount: -loserDebit,
           type: "duel_loss",
           reference_id: matchId,
-          description: `Arena duel defeat — lost ${wager} Fangs`,
+          description: `Arena duel defeat — lost ${loserDebit} Fangs`,
         }),
       ]);
     }
-    // Draw: no Fang transfer
-
-    // Apply profile updates
-    await Promise.all([
-      supabaseAdmin.from("profiles").update(p1Updates).eq("id", match.player1_id),
-      supabaseAdmin.from("profiles").update(p2Updates).eq("id", match.player2_id),
-    ]);
+    // Draw: no Fang transfer.
 
     return NextResponse.json({
       winnerId,
