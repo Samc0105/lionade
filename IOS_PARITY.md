@@ -7,6 +7,26 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 
 ---
 
+## 2026-06-14: ADMIN PRO/PLATINUM GRANTS, time-boxed, revocable, audited (web-only; NO iOS work needed, granted tier is inherited)
+
+**Status:** Web shipped (committed + pushed 2026-06-14, zero AI cost). Migration `065_plan_grants.sql` applied to production 2026-06-14. Three client/route contract bugs from the first build (missing GET handler, response key and camelCase mismatches) were fixed before ship; `npx tsc --noEmit` clean. No new packages. No em-dashes. Owner: `admin`.
+
+**What shipped (web):** an internal staff tool to grant a paid tier without Stripe and without clobbering a real Stripe tier. New `plan_grants` table + `lib/plan-grants.ts` `recomputeEffectivePlan` resolver that folds Stripe baseline + highest active grant into `profiles.plan` (`max(stripe tier when status='active', active grant tier)`, platinum > pro > free). New `components/admin/SubscriptionGrantCard.tsx` on `/admin/users/[id]`, `POST /api/admin/users/[id]/grant-plan` + `/revoke-plan` (admin-only, audited), `GET grant-plan` for the card, and a daily `GET /api/cron/expire-grants` downgrade sweep. The Stripe webhook now recomputes instead of force-writing `profiles.plan`, so an active grant survives a Stripe event. RLS SELECT-own + no write policy prevents self-grant.
+
+| Surface | Web | iOS |
+|---|---|---|
+| Admin grant/revoke console | ✅ NEW `SubscriptionGrantCard` on `/admin/users/[id]`: grant Pro/Platinum for 1mo/3mo/6mo/1yr/Lifetime with a logged reason, or revoke; effective-plan + active-grant readout | 🚫 N/A (there is no iOS admin console; admin is a web-only surface) |
+| `plan_grants` + resolver | ✅ NEW table (migration `065`, applied) + `recomputeEffectivePlan` single write path into `profiles.plan` | 🚫 N/A (server-side; iOS does not read `plan_grants`) |
+| Effective paid tier (Pro/Platinum) | ✅ resolved server-side into `profiles.plan` | ✅ **inherited automatically**: iOS reads the same `profiles.plan` that gates `isPaid` / paid features, so a granted tier shows as Pro/Platinum on iOS with NO iOS code change |
+| Stripe webhook respecting grants | ✅ writes baseline columns then recomputes; never downgrades an active grant, higher real tier still wins | 🚫 N/A (server-side, single source for both platforms) |
+| Expiry downgrade cron | ✅ daily `expire-grants` recomputes lapsed-grant users | 🚫 N/A (server-side; the downgrade lands in the shared `profiles.plan`) |
+
+**Why no iOS row beyond inheritance:** this is a backend + web-admin entitlement system. The user-facing effect (a comped Pro/Platinum) is delivered through `profiles.plan`, which is the SAME plan column iOS already reads for paid gating. No iOS port is needed and no iOS gap is opened; granting on web is reflected on iOS automatically on the next plan read.
+
+**Chain:** `dev-database` (`065` table + RLS + indexes) -> `dev-backend` (`recomputeEffectivePlan` resolver + grant/revoke routes + webhook recompute + expiry cron) + `dev-frontend` (`SubscriptionGrantCard`) -> `security-auth-guardian` (RLS no-self-grant + admin-only routes + audit) + `quality-code-reviewer` -> `quality-docs-writer` (CHANGELOG + FEATURES + this row).
+
+---
+
 ## 2026-06-13 (sixth pass): PROFILE DRAWER + QUIZ PLAY REDESIGN + ROARDLE DAILY (iOS, LOCAL, not built; BUILD 24 PENDING)
 
 **Status:** ✅ iOS code ready + verified LOCALLY. `npx tsc --noEmit` clean; `@lionade/core` sync check clean. NOT built / NOT submitted / NO `eas update` (build-on-command; **build 24 is the pending target, HELD for explicit CEO go**). Three commits on iOS `main` (`9863cc9` profile drawer, `481a845` quiz play redesign, `faa6486` Roardle Daily), not pushed. NO new packages (Reanimated + Skia + `react-native-gesture-handler` already installed). No em-dashes. Owner: `vp-ios`. Canonical detail in `lionade-ios/docs/CHANGELOG.md` (2026-06-13 sixth pass) + vault `Daily/2026-06-13.md`.

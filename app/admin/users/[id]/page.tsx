@@ -31,6 +31,7 @@ import {
   ArrowCounterClockwise,
 } from "@phosphor-icons/react";
 import { CARD_BG, RoleBadge, AdminModalShell } from "@/components/admin/shared";
+import SubscriptionGrantCard from "@/components/admin/SubscriptionGrantCard";
 
 interface AdminUserDetail {
   id: string;
@@ -366,6 +367,15 @@ export default function AdminUserDetailPage() {
           )}
         </div>
       </div>
+
+      {/* Subscription grant (admin only — issuing a paid tier has economic value) */}
+      {isAdmin && (
+        <SubscriptionGrantCard
+          userId={userId}
+          plan={u.plan}
+          onChanged={() => void mutate()}
+        />
+      )}
 
       {/* Recent Fang transactions */}
       <div

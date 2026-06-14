@@ -5,6 +5,7 @@ import { stripe, lookupPrice } from "@/lib/stripe";
 import { FANG_PACKS, isFangPackId } from "@/lib/fang-packs";
 import { isFounderCapOpen } from "@/lib/cosmetic-grants";
 import { getFounderBadge } from "@/lib/shop-catalog";
+import { recomputeEffectivePlan } from "@/lib/plan-grants";
 
 // Stripe needs the RAW request body for signature verification. Do not parse
 // JSON, do not clone, do not run anything in middleware that touches the body.
@@ -192,9 +193,11 @@ async function handleSubscriptionUpsert(sub: Stripe.Subscription, isCreate: bool
     subscription_current_period_end: periodEnd,
     subscription_cancel_at: cancelAt,
     subscription_cycle: lookup.cycle,
-    // Mirror to legacy `plan` so the existing usePlan() hook + every server
-    // gate that reads profiles.plan keeps working with zero callsite churn.
-    plan: lookup.tier,
+    // NOTE: profiles.plan is the EFFECTIVE plan and is NO LONGER written here.
+    // We set the Stripe baseline columns above, then route the effective-plan
+    // write through recomputeEffectivePlan(userId) below so an active admin
+    // grant is never downgraded by a Stripe event (and a higher real Stripe
+    // tier still wins). See lib/plan-grants.ts.
   };
 
   // First: lookup by stripe_customer_id (the normal happy path).
@@ -210,11 +213,14 @@ async function handleSubscriptionUpsert(sub: Stripe.Subscription, isCreate: bool
   }
 
   if (byCustomer && byCustomer.length > 0) {
+    const resolvedUserId = (byCustomer[0] as { id: string }).id;
+    // Reconcile the effective plan from the just-written Stripe baseline vs any
+    // active admin/promo grant. Higher tier wins; an active grant is preserved.
+    await recomputeEffectivePlan(resolvedUserId);
     // Tier is always 'pro' | 'platinum' here (lookupPrice returns null for
     // unknown prices and we throw above). All resolved tiers qualify for
     // the Founding Scholar consideration on initial subscription.
     if (isCreate) {
-      const resolvedUserId = (byCustomer[0] as { id: string }).id;
       await tryGrantFoundingScholar(resolvedUserId, sub.id);
     }
     return;
@@ -265,6 +271,9 @@ async function handleSubscriptionUpsert(sub: Stripe.Subscription, isCreate: bool
     metaUserId,
     customerId,
   );
+
+  // Same effective-plan reconciliation as the happy path above.
+  await recomputeEffectivePlan(metaUserId);
 
   if (isCreate) {
     await tryGrantFoundingScholar(metaUserId, sub.id);
@@ -330,7 +339,10 @@ async function handleSubscriptionDeleted(sub: Stripe.Subscription) {
       stripe_subscription_id: null,
       subscription_cancel_at: null,
       subscription_cycle: null,
-      plan: "free",
+      // profiles.plan is NOT force-set to 'free' here. A user with an active
+      // admin/promo grant must keep their granted tier even after their Stripe
+      // subscription is deleted. recomputeEffectivePlan drops them to 'free'
+      // only when no active grant remains.
     })
     .eq("stripe_customer_id", customerId)
     .select("id");
@@ -342,6 +354,7 @@ async function handleSubscriptionDeleted(sub: Stripe.Subscription) {
     console.error("[stripe-webhook] subscription.deleted matched 0 rows", customerId);
     throw new Error("subscription.deleted matched 0 rows");
   }
+  await recomputeEffectivePlan((data[0] as { id: string }).id);
 }
 
 async function handleInvoicePayment(
@@ -364,6 +377,11 @@ async function handleInvoicePayment(
     console.error("[stripe-webhook] invoice payment matched 0 rows", customerId);
     throw new Error("invoice payment matched 0 rows");
   }
+  // The subscription_status we just wrote is part of the Stripe baseline (only
+  // 'active' elevates). A flip to 'past_due' must drop profiles.plan to the
+  // baseline unless an active grant still covers the user; a flip back to
+  // 'active' must restore it. Recompute to keep the effective plan in sync.
+  await recomputeEffectivePlan((data[0] as { id: string }).id);
 }
 
 async function handleFangIapPayment(session: Stripe.Checkout.Session) {

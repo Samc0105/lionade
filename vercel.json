@@ -26,6 +26,10 @@
     {
       "path": "/api/cron/reap-pending-deletions",
       "schedule": "0 5 * * *"
+    },
+    {
+      "path": "/api/cron/expire-grants",
+      "schedule": "0 7 * * *"
     }
   ]
 }
