@@ -1355,53 +1355,6 @@ export async function getUserStageProgress(userId: string, subject?: string): Pr
   }));
 }
 
-export async function saveStageProgress(
-  userId: string,
-  stageId: string,
-  score: number,
-  totalQuestions: number
-): Promise<{ stars: number; isNewBest: boolean }> {
-  const pct = totalQuestions > 0 ? score / totalQuestions : 0;
-  const stars = pct >= 0.9 ? 3 : pct >= 0.7 ? 2 : pct >= 0.5 ? 1 : 0;
-
-  // Check existing progress
-  const { data: existing } = await supabase
-    .from("user_stage_progress")
-    .select("id, best_score, stars, attempts, completed_at")
-    .eq("user_id", userId)
-    .eq("stage_id", stageId)
-    .maybeSingle();
-
-  if (existing) {
-    const isNewBest = score > existing.best_score;
-    const newStars = Math.max(stars, existing.stars);
-    await supabase
-      .from("user_stage_progress")
-      .update({
-        stars: newStars,
-        completed: stars > 0 || existing.best_score > 0,
-        best_score: isNewBest ? score : existing.best_score,
-        total_questions: totalQuestions,
-        attempts: existing.attempts + 1,
-        completed_at: stars > 0 ? new Date().toISOString() : existing.completed_at,
-      })
-      .eq("id", existing.id);
-    return { stars: newStars, isNewBest };
-  } else {
-    await supabase.from("user_stage_progress").insert({
-      user_id: userId,
-      stage_id: stageId,
-      stars,
-      completed: stars > 0,
-      best_score: score,
-      total_questions: totalQuestions,
-      attempts: 1,
-      completed_at: stars > 0 ? new Date().toISOString() : null,
-    });
-    return { stars, isNewBest: true };
-  }
-}
-
 export async function incrementXP(userId: string, amount: number) {
   const { data, error: fetchErr } = await supabase
     .from("profiles")
