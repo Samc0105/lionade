@@ -38,6 +38,13 @@ const SAMPLES: Record<TemplateKey, EmailSlots> = {
     ctaUrl: absoluteUrl("/dashboard"),
     ctaLabel: "Keep the streak alive",
   },
+  streakReminder: {
+    userName: "Sam",
+    streakDays: 12,
+    ctaUrl: absoluteUrl("/quiz"),
+    ctaLabel: "Save my streak",
+    prefsUrl: absoluteUrl("/settings"),
+  },
   masteryStart: {
     userName: "Sam",
     subjectName: "AWS Sec Specialty",

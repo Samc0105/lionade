@@ -17,6 +17,7 @@ import { waitlistConfirmation } from "./templates/waitlist-confirmation";
 import { contactForm } from "./templates/contact-form";
 import { welcome } from "./templates/welcome";
 import { firstStreakDay } from "./templates/first-streak-day";
+import { streakReminder } from "./templates/streak-reminder";
 import { masteryStart } from "./templates/mastery-start";
 import { academiaWeekly } from "./templates/academia-weekly";
 
@@ -25,6 +26,7 @@ export const templates = {
   contactForm,
   welcome,
   firstStreakDay,
+  streakReminder,
   masteryStart,
   academiaWeekly,
 } as const;
