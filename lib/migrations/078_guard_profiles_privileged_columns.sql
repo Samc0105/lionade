@@ -1,13 +1,11 @@
 -- ============================================================
 -- Migration 078: BEFORE UPDATE trigger guarding privileged profile columns.
--- STATUS: *** READY, NOT YET APPLIED — awaiting Sam's explicit go. ***
--- This closes a LIVE, CRITICAL exploit (see WHY). It is a trigger on the core
--- profiles table (high blast radius), so the auto-apply classifier correctly
--- held it for an explicit decision. The fix CANNOT live in app code — the
--- exploit is direct DB access via the browser anon key that bypasses the app.
--- Verified safe: NO client code writes any guarded column (audited all 6 client
--- profiles.update sites + the db.ts helpers). Idempotent (CREATE OR REPLACE +
--- DROP/CREATE). APPLY ASAP via the Supabase SQL editor or MCP.
+-- STATUS: APPLIED to production 2026-06-14 (Sam's explicit go). Verified
+-- functionally: an authenticated user's coins self-grant is BLOCKED; a legit
+-- display_name edit still ALLOWED; service-role server writes unaffected (same
+-- auth.role()='service_role' check update_user_coins relies on). No conflict
+-- with the existing on_profile_xp_change / guard_profile_role triggers.
+-- Idempotent (CREATE OR REPLACE + DROP/CREATE).
 -- ============================================================
 --
 -- WHY (CRITICAL): the profiles RLS policy "Users can update own profile"

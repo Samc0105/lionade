@@ -1,8 +1,10 @@
 -- ============================================================
 -- Migration 079: revoke client WRITE access on server-managed gameplay/economy
 -- tables (the systemic sibling of 078's profiles fix).
--- STATUS: *** READY, NOT YET APPLIED — awaiting Sam's explicit go. ***
--- Idempotent (drop-if-exists before every create).
+-- STATUS: APPLIED to production 2026-06-14 (Sam's explicit go). Verified: all
+-- 13 tables now expose SELECT-own only (0 client write policies); server writes
+-- via supabaseAdmin bypass RLS, unaffected. Idempotent (drop-if-exists before
+-- every create).
 -- ============================================================
 --
 -- WHY: the same class of hole 078 fixed on `profiles` exists across the
