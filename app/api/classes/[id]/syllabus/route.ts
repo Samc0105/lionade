@@ -121,6 +121,8 @@ interface PostBody {
   storagePath?: string;
   filename?: string;
   fileSizeBytes?: number;
+  /** Photo path: text OCR'd from a syllabus photo on the client (no PDF). */
+  rawText?: string;
 }
 
 export async function POST(req: NextRequest, { params }: RouteCtx) {
@@ -134,20 +136,36 @@ export async function POST(req: NextRequest, { params }: RouteCtx) {
   try { body = await req.json(); }
   catch { return NextResponse.json({ error: "Invalid JSON" }, { status: 400 }); }
 
-  const storagePath = String(body.storagePath ?? "").trim();
-  const filename = String(body.filename ?? "").trim().slice(0, 200);
-  const fileSizeBytes = Math.floor(Number(body.fileSizeBytes) || 0);
+  // Two input modes: a PDF uploaded to Storage (storagePath), or text OCR'd
+  // from a photo on the client (rawText). The photo path skips the download +
+  // pdf-extract and feeds the text straight to the same AI parser.
+  const photoText = typeof body.rawText === "string" ? body.rawText.trim() : "";
+  const isPhotoMode = photoText.length > 0;
 
-  if (!storagePath || !filename) {
-    return NextResponse.json({ error: "Missing storagePath or filename." }, { status: 400 });
-  }
-  if (fileSizeBytes <= 0 || fileSizeBytes > MAX_FILE_SIZE_BYTES) {
-    return NextResponse.json({ error: "File must be between 1 byte and 5 MB." }, { status: 413 });
-  }
-  // Path discipline: must be inside this user's namespace, this class's folder.
-  const expectedPrefix = `${userId}/${classId}/`;
-  if (!storagePath.startsWith(expectedPrefix) || !storagePath.toLowerCase().endsWith(".pdf")) {
-    return NextResponse.json({ error: "Bad storage path." }, { status: 400 });
+  let filename = String(body.filename ?? "").trim().slice(0, 200);
+  let storagePath = "";
+  let fileSizeBytes = 0;
+
+  if (isPhotoMode) {
+    if (photoText.length > MAX_RAW_TEXT_CHARS + 2000) {
+      return NextResponse.json({ error: "That text is too long." }, { status: 413 });
+    }
+    if (!filename) filename = "Photographed syllabus";
+  } else {
+    storagePath = String(body.storagePath ?? "").trim();
+    fileSizeBytes = Math.floor(Number(body.fileSizeBytes) || 0);
+
+    if (!storagePath || !filename) {
+      return NextResponse.json({ error: "Missing storagePath or filename." }, { status: 400 });
+    }
+    if (fileSizeBytes <= 0 || fileSizeBytes > MAX_FILE_SIZE_BYTES) {
+      return NextResponse.json({ error: "File must be between 1 byte and 5 MB." }, { status: 413 });
+    }
+    // Path discipline: must be inside this user's namespace, this class's folder.
+    const expectedPrefix = `${userId}/${classId}/`;
+    if (!storagePath.startsWith(expectedPrefix) || !storagePath.toLowerCase().endsWith(".pdf")) {
+      return NextResponse.json({ error: "Bad storage path." }, { status: 400 });
+    }
   }
 
   // ── 2. Ownership — fail fast BEFORE any AI spend ─────────────────────────────
@@ -166,9 +184,9 @@ export async function POST(req: NextRequest, { params }: RouteCtx) {
     .insert({
       user_id: userId,
       class_id: classId,
-      storage_path: storagePath,
+      storage_path: isPhotoMode ? null : storagePath,
       filename,
-      file_size_bytes: fileSizeBytes,
+      file_size_bytes: isPhotoMode ? Buffer.byteLength(photoText, "utf8") : fileSizeBytes,
       status: "uploaded",
     })
     .select("id")
@@ -197,40 +215,49 @@ export async function POST(req: NextRequest, { params }: RouteCtx) {
       .update({ status: "parsing" })
       .eq("id", syllabusId);
 
-    // ── 4. Download the PDF from Storage ─────────────────────────────────────
-    const dl = await supabaseAdmin.storage.from(STORAGE_BUCKET).download(storagePath);
-    if (dl.error || !dl.data) {
-      return fail("download_failed", `storage download: ${dl.error?.message ?? "no data"}`);
-    }
-    const buf = Buffer.from(await dl.data.arrayBuffer());
-    if (buf.byteLength > MAX_FILE_SIZE_BYTES) {
-      return fail("file_too_large", `file size ${buf.byteLength} exceeds limit`);
-    }
-    // Defense in depth: the bucket is configured PDF-only but verify the magic.
-    if (buf.byteLength < 5 || buf.subarray(0, 4).toString() !== "%PDF") {
-      return fail("not_a_pdf", "missing %PDF header");
-    }
-
-    // ── 5. Extract text via pdf-parse v2 ─────────────────────────────────────
+    // ── 4-5. Get the raw text: from the OCR'd photo, or by downloading +
+    // extracting the PDF. ────────────────────────────────────────────────────
     let rawText = "";
-    try {
-      // Dynamic import — pdf-parse pulls in pdfjs which is heavy at boot.
-      const mod = await import("pdf-parse");
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const PDFParse = (mod as any).PDFParse ?? (mod as any).default?.PDFParse;
-      if (!PDFParse) {
-        return fail("parser_unavailable", "pdf-parse PDFParse export missing");
+    if (isPhotoMode) {
+      rawText = photoText.slice(0, MAX_RAW_TEXT_CHARS).trim();
+      if (rawText.length < 50) {
+        return fail("not_enough_text", `photo OCR only ${rawText.length} chars`);
       }
-      const parser = new PDFParse({ data: buf });
-      const result = await parser.getText();
-      rawText = String(result?.text ?? "").replace(/\r\n/g, "\n");
-    } catch (e) {
-      return fail("pdf_extract_failed", `pdf-parse: ${(e as Error).message}`);
-    }
+    } else {
+      // Download the PDF from Storage.
+      const dl = await supabaseAdmin.storage.from(STORAGE_BUCKET).download(storagePath);
+      if (dl.error || !dl.data) {
+        return fail("download_failed", `storage download: ${dl.error?.message ?? "no data"}`);
+      }
+      const buf = Buffer.from(await dl.data.arrayBuffer());
+      if (buf.byteLength > MAX_FILE_SIZE_BYTES) {
+        return fail("file_too_large", `file size ${buf.byteLength} exceeds limit`);
+      }
+      // Defense in depth: the bucket is configured PDF-only but verify the magic.
+      if (buf.byteLength < 5 || buf.subarray(0, 4).toString() !== "%PDF") {
+        return fail("not_a_pdf", "missing %PDF header");
+      }
 
-    rawText = rawText.slice(0, MAX_RAW_TEXT_CHARS).trim();
-    if (rawText.length < 100) {
-      return fail("not_enough_text", `only ${rawText.length} chars extracted`);
+      // Extract text via pdf-parse v2.
+      try {
+        // Dynamic import — pdf-parse pulls in pdfjs which is heavy at boot.
+        const mod = await import("pdf-parse");
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const PDFParse = (mod as any).PDFParse ?? (mod as any).default?.PDFParse;
+        if (!PDFParse) {
+          return fail("parser_unavailable", "pdf-parse PDFParse export missing");
+        }
+        const parser = new PDFParse({ data: buf });
+        const result = await parser.getText();
+        rawText = String(result?.text ?? "").replace(/\r\n/g, "\n");
+      } catch (e) {
+        return fail("pdf_extract_failed", `pdf-parse: ${(e as Error).message}`);
+      }
+
+      rawText = rawText.slice(0, MAX_RAW_TEXT_CHARS).trim();
+      if (rawText.length < 100) {
+        return fail("not_enough_text", `only ${rawText.length} chars extracted`);
+      }
     }
 
     // ── 6. AI extraction — strict JSON ──────────────────────────────────────

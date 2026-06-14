@@ -7,6 +7,18 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 
 ---
 
+## 2026-06-14: PHOTOGRAPH YOUR SYLLABUS extended to Academia (web shipped; iOS gap tracked)
+
+**Status:** Web committed 2026-06-14. The Mastery photo-OCR component is now shared (`components/PhotoImport.tsx`) and wired into Academia's syllabus upload. `/api/classes/[id]/syllabus` gained a `rawText` mode (photo OCR text feeds the same AI parser as the PDF path). $0 OCR (on-device). Reviewed sound. Owner: `admin`.
+
+| Surface | Web | iOS |
+|---|---|---|
+| Photo to syllabus (OCR a class syllabus photo into topics/exams/plans) | ✅ NEW on `SyllabusUpload` beside the PDF drop zone; on-device tesseract.js -> `rawText` POST -> shared parser | ❌ MISSING. iOS `SyllabusUploadSheet` is PDF/image-pick today; the OCR-to-text port would use on-device Apple Vision / ML Kit feeding the same `rawText` route. Roadmapped, NOT built. |
+| Shared `PhotoImport` component | ✅ `components/PhotoImport.tsx` (Mastery + Academia) | 🚫 N/A (web component; iOS uses native OCR) |
+| Syllabus parser `rawText` mode | ✅ server-side, shared by both platforms once iOS sends `rawText` | 🚫 N/A (server-side) |
+
+---
+
 ## 2026-06-14: GDPR STORAGE-ERASURE FIX (live) + S3 UPLOAD PILOT PHASE A (web/infra, dormant)
 
 **Status:** Web committed 2026-06-14. GDPR fix is LIVE (changes the account-deletion reaper). S3 pilot is DORMANT (Phase A web/infra only; needs a manual `terraform apply` + Vercel env + iOS Phase B to activate). tsc clean; terraform validates. Hardened via two adversarial review passes. $0 today; S3 storage + egress flagged for go-live. Owner: `admin` + `ops-terraform`.

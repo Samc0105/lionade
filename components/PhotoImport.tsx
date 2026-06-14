@@ -1,14 +1,16 @@
 "use client";
 
 /**
- * MasteryPhotoImport — "photograph your syllabus" input mode.
+ * PhotoImport — "photograph it instead of typing/uploading" input mode.
  *
  * Lets a student point a photo / screenshot / scan of a syllabus, worksheet, or
- * textbook page at Mastery Mode instead of typing it. The image is OCR'd
- * ENTIRELY ON THE DEVICE with Tesseract.js (WebAssembly), and the recognized
- * text is handed back via `onExtract` so the parent drops it into the same
- * textarea that already feeds /api/mastery/parse. Nothing about the parse / AI
- * pipeline changes — this is just a second way to fill the box.
+ * textbook page at a feature instead of typing or uploading a PDF. The image is
+ * OCR'd ENTIRELY ON THE DEVICE with Tesseract.js (WebAssembly); the recognized
+ * text is handed back via `onExtract` so the parent decides what to do with it
+ * (drop it in a textarea, POST it to a parser, etc.).
+ *
+ * Used by Mastery Mode (/learn/mastery, fills the goal textarea) and Academia
+ * (SyllabusUpload, POSTs the text to the syllabus parser).
  *
  * COST: $0. No AWS Textract, no server compute, no per-use API call. The OCR
  * engine (worker + WASM core + the English model) is SELF-HOSTED under
@@ -26,9 +28,7 @@ import { Camera, CheckCircle, Warning, X } from "@phosphor-icons/react";
 import type { Worker as TesseractWorker } from "tesseract.js";
 
 const MAX_IMAGE_BYTES = 10 * 1024 * 1024; // 10 MB — rejects giant uploads
-// Stays under the parse route's 8192-char (8 KB) cap AND matches the mastery
-// page's textarea limit + the visible "/ 8000 chars" counter, so the two agree.
-const MAX_OUTPUT_CHARS = 8000;
+const DEFAULT_MAX_OUTPUT_CHARS = 8000; // Mastery's textarea/parse cap
 const OCR_TIMEOUT_MS = 90_000; // a stuck load/read fails cleanly instead of hanging
 
 // Self-hosted engine paths (see /public/tess). Pinned to the SIMD+LSTM core,
@@ -42,13 +42,22 @@ const TESS_OPTS = {
 
 type Phase = "idle" | "preparing" | "reading" | "done" | "error";
 
-export default function MasteryPhotoImport({
+export default function PhotoImport({
   onExtract,
   disabled = false,
+  label = "Scan a photo of your syllabus",
+  doneLabel = "Added below. Review and edit, then start.",
+  maxChars = DEFAULT_MAX_OUTPUT_CHARS,
 }: {
   /** Called with the OCR'd text once a photo has been read. */
   onExtract: (text: string) => void;
   disabled?: boolean;
+  /** Idle button label. */
+  label?: string;
+  /** Success message shown after a successful read. */
+  doneLabel?: string;
+  /** Cap the returned text length (match the consuming parser's input limit). */
+  maxChars?: number;
 }) {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [phase, setPhase] = useState<Phase>("idle");
@@ -112,7 +121,7 @@ export default function MasteryPhotoImport({
       } catch (e) {
         clearTimeout(timer);
         if (worker) void worker.terminate().catch(() => {});
-        console.error("[mastery:ocr:load]", e);
+        console.error("[ocr:load]", e);
         setPhase("error");
         setError(
           timedOut
@@ -136,10 +145,10 @@ export default function MasteryPhotoImport({
           return;
         }
 
-        onExtract(text.slice(0, MAX_OUTPUT_CHARS));
+        onExtract(text.slice(0, maxChars));
         setPhase("done");
       } catch (e) {
-        console.error("[mastery:ocr:read]", e);
+        console.error("[ocr:read]", e);
         setPhase("error");
         setError(
           timedOut
@@ -157,7 +166,7 @@ export default function MasteryPhotoImport({
         }
       }
     },
-    [onExtract],
+    [onExtract, maxChars],
   );
 
   const onPick = () => {
@@ -179,7 +188,7 @@ export default function MasteryPhotoImport({
       : phase === "reading"
         ? "Reading your photo"
         : phase === "done"
-          ? "Photo read. Text added below for review."
+          ? "Photo read."
           : phase === "error"
             ? error ?? "Could not read the photo."
             : "";
@@ -232,7 +241,7 @@ export default function MasteryPhotoImport({
         ) : (
           <>
             <Camera size={13} weight="bold" aria-hidden="true" />
-            {phase === "done" ? "Scan another photo" : "Scan a photo of your syllabus"}
+            {phase === "done" ? "Scan another photo" : label}
           </>
         )}
       </button>
@@ -240,7 +249,7 @@ export default function MasteryPhotoImport({
       {phase === "done" && (
         <p className="mt-2 flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.2em] text-[#22C55E]/90">
           <CheckCircle size={12} weight="fill" aria-hidden="true" />
-          Added below. Review and edit, then start.
+          {doneLabel}
         </p>
       )}
 

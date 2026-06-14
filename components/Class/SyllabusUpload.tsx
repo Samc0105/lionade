@@ -6,6 +6,7 @@ import { FilePdf, UploadSimple, CheckCircle, Spinner, Warning, ArrowsClockwise }
 import { supabase } from "@/lib/supabase";
 import { apiPost, swrFetcher } from "@/lib/api-client";
 import { toastError } from "@/lib/toast";
+import PhotoImport from "@/components/PhotoImport";
 
 /**
  * Drop a syllabus PDF on a class. Uploads directly to the
@@ -122,6 +123,26 @@ export default function SyllabusUpload({ classId }: Props) {
       setError("Couldn't parse syllabus. Try again.");
       toastError("Couldn't parse syllabus. Try again.");
       void mutate(); // pick up the failed row so we can show its state
+      return;
+    }
+    void mutate();
+  }, [classId, mutate]);
+
+  // Photo path: a syllabus photo OCR'd on the client (PhotoImport), then the
+  // text POSTed to the same parser that handles PDFs (route accepts rawText).
+  const handleOcrText = useCallback(async (text: string) => {
+    setError(null);
+    setPhase("parsing");
+    const res = await apiPost<{ ok: boolean }>(
+      `/api/classes/${classId}/syllabus`,
+      { rawText: text, filename: "Photographed syllabus" },
+    );
+    setPhase("idle");
+    if (!res.ok) {
+      const msg = "Couldn't read that photo into a syllabus. Try a clearer shot, or upload a PDF.";
+      setError(msg);
+      toastError(msg);
+      void mutate();
       return;
     }
     void mutate();
@@ -255,6 +276,15 @@ export default function SyllabusUpload({ classId }: Props) {
           </p>
         </div>
       )}
+
+      {/* No PDF? Photograph the syllabus — client-side OCR (on-device, $0) feeds
+          the same parser. */}
+      <PhotoImport
+        onExtract={handleOcrText}
+        label="Or scan a photo of your syllabus"
+        doneLabel="Reading your syllabus…"
+        maxChars={80_000}
+      />
 
       <input
         ref={inputRef}

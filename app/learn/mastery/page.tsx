@@ -15,7 +15,7 @@ import SpaceBackground from "@/components/SpaceBackground";
 import RevealText from "@/components/RevealText";
 import { apiPost, swrFetcher } from "@/lib/api-client";
 import MasteryProgressBar from "@/components/Mastery/MasteryProgressBar";
-import MasteryPhotoImport from "@/components/Mastery/PhotoImport";
+import PhotoImport from "@/components/PhotoImport";
 
 /**
  * Mastery Mode landing page.
@@ -224,7 +224,7 @@ export default function MasteryLandingPage() {
                   text-[15px] text-cream placeholder:text-cream/30 leading-relaxed font-sans"
               />
             </div>
-            <MasteryPhotoImport onExtract={handleOcrExtract} disabled={parsing} />
+            <PhotoImport onExtract={handleOcrExtract} disabled={parsing} />
             {error && (
               <div className="mt-3 flex items-start gap-2 text-[12px] text-[#EF4444]">
                 <Warning size={14} weight="fill" className="mt-0.5 shrink-0" />
