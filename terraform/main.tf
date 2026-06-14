@@ -243,3 +243,140 @@ output "uploads_reaper_secret_access_key" {
   description = "UPLOADS_REAPER_SECRET_ACCESS_KEY (cron purge)"
   sensitive   = true
 }
+
+# ═══════════════════════════════════════════════════════════════════════════
+# AWS roadmap STEP 1 — cost guardrails (Budgets + Cost Anomaly Detection).
+# Free (first 2 budgets + anomaly detection cost nothing). Do this BEFORE
+# turning on anything billable. NOTE: the account must have Cost Explorer
+# enabled once in the Billing console for budgets/anomaly data to populate,
+# and Free Tier usage alerts are a separate one-time Billing-console toggle
+# (Billing > Billing preferences > "Receive Free Tier Usage Alerts").
+# ═══════════════════════════════════════════════════════════════════════════
+
+variable "alert_email" {
+  type        = string
+  default     = "samuelcasasramirez@gmail.com"
+  description = "Where cost + anomaly alerts are sent"
+}
+
+# Monthly trip-wire: forecast >80% and actual >100% both email Sam.
+resource "aws_budgets_budget" "monthly" {
+  name         = "lionade-monthly"
+  budget_type  = "COST"
+  limit_amount = "25"
+  limit_unit   = "USD"
+  time_unit    = "MONTHLY"
+
+  notification {
+    comparison_operator        = "GREATER_THAN"
+    threshold                  = 80
+    threshold_type             = "PERCENTAGE"
+    notification_type          = "FORECASTED"
+    subscriber_email_addresses = [var.alert_email]
+  }
+
+  notification {
+    comparison_operator        = "GREATER_THAN"
+    threshold                  = 100
+    threshold_type             = "PERCENTAGE"
+    notification_type          = "ACTUAL"
+    subscriber_email_addresses = [var.alert_email]
+  }
+}
+
+# ML anomaly detection across the whole account — catches the unknowns a fixed
+# budget can't (a Bedrock token loop, an idle endpoint, a CloudFront egress
+# spike). Alerts on >= $10 of anomalous spend.
+resource "aws_ce_anomaly_monitor" "account" {
+  name              = "lionade-account-monitor"
+  monitor_type      = "DIMENSIONAL"
+  monitor_dimension = "SERVICE"
+}
+
+resource "aws_ce_anomaly_subscription" "account" {
+  name             = "lionade-anomaly-alerts"
+  frequency        = "DAILY"
+  monitor_arn_list = [aws_ce_anomaly_monitor.account.arn]
+
+  subscriber {
+    type    = "EMAIL"
+    address = var.alert_email
+  }
+
+  threshold_expression {
+    dimension {
+      key           = "ANOMALY_TOTAL_IMPACT_ABSOLUTE"
+      match_options = ["GREATER_THAN_OR_EQUAL"]
+      values        = ["10"]
+    }
+  }
+}
+
+# ═══════════════════════════════════════════════════════════════════════════
+# AWS roadmap STEP 2 — remote Terraform state (S3 + DynamoDB lock). Closes the
+# ops-terraform TODO: state moves off the local laptop disk into a versioned,
+# encrypted S3 bucket with a DynamoDB lock table, so a lost machine or a
+# concurrent apply can't corrupt the source of truth. Effectively free.
+#
+# BOOTSTRAP ORDER (one-time): these resources are created FIRST with local
+# state, THEN the backend block (backend.tf) is enabled and state migrated.
+# See backend.tf for the exact runbook — do NOT enable the backend before the
+# first apply creates this bucket + table.
+# ═══════════════════════════════════════════════════════════════════════════
+
+resource "aws_s3_bucket" "tf_state" {
+  bucket = "lionade-tf-state"
+  tags   = { Project = "Lionade", ManagedBy = "Terraform" }
+}
+
+resource "aws_s3_bucket_public_access_block" "tf_state" {
+  bucket                  = aws_s3_bucket.tf_state.id
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
+
+resource "aws_s3_bucket_server_side_encryption_configuration" "tf_state" {
+  bucket = aws_s3_bucket.tf_state.id
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm = "AES256"
+    }
+  }
+}
+
+resource "aws_s3_bucket_versioning" "tf_state" {
+  bucket = aws_s3_bucket.tf_state.id
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
+
+# Keep a recovery window of old state versions, then expire so they don't
+# accumulate forever (90d is generous for state; pennies either way).
+resource "aws_s3_bucket_lifecycle_configuration" "tf_state" {
+  bucket = aws_s3_bucket.tf_state.id
+
+  rule {
+    id     = "expire-noncurrent-state"
+    status = "Enabled"
+    filter {}
+    noncurrent_version_expiration {
+      noncurrent_days = 90
+    }
+  }
+}
+
+resource "aws_dynamodb_table" "tf_locks" {
+  name         = "lionade-tf-locks"
+  billing_mode = "PAY_PER_REQUEST"
+  hash_key     = "LockID"
+
+  attribute {
+    name = "LockID"
+    type = "S"
+  }
+
+  tags = { Project = "Lionade", ManagedBy = "Terraform" }
+}
