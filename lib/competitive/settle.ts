@@ -225,6 +225,26 @@ export async function settleClaimedMatch(
             p_source: "cashable",
           });
           if (coinErr) console.error("[settle] coin write", u, coinErr.message);
+
+          // Audit row — competitive Fang movements were never recorded in
+          // coin_transactions (only on the match row), so they were missing
+          // from the user's Fang history + any ledger sum. settle runs once per
+          // match (active->completing claim), so this logs once per user.
+          // Best-effort: a failed log never claws back the settled balance.
+          const onTeamA = match.team_a.includes(u);
+          const isWin =
+            winnerTeam !== "draw" &&
+            winnerTeam !== null &&
+            ((winnerTeam === "a" && onTeamA) || (winnerTeam === "b" && !onTeamA));
+          const label = winnerTeam === "draw" ? "draw" : isWin ? "win" : "loss";
+          const { error: txnErr } = await supabase.from("coin_transactions").insert({
+            user_id: u,
+            amount: effectiveDelta,
+            type: "competitive_match",
+            reference_id: match.id,
+            description: `Competitive ${label} (${match.mode})`,
+          });
+          if (txnErr) console.error("[settle] ledger log", u, txnErr.message);
         }
         const { error: eloErr } = await supabase
           .from("profiles")
