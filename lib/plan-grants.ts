@@ -12,7 +12,7 @@
 //   tier order: platinum > pro > free
 //
 // where:
-//   stripe_baseline   = (subscription_status === 'active') ? subscription_tier : 'free'
+//   stripe_baseline   = (subscription_status in ('active','trialing')) ? subscription_tier : 'free'
 //   active grant      = revoked_at IS NULL AND (expires_at IS NULL OR expires_at > now())
 //
 // recomputeEffectivePlan(userId) MUST be called after every grant create,
@@ -172,8 +172,16 @@ export async function recomputeEffectivePlan(userId: string): Promise<EffectiveP
     subscription_tier: string | null;
   };
 
+  // 'trialing' is an ENTITLED status — the user has a real Stripe subscription
+  // in its trial window and should get full paid-tier benefits (Mastery limits,
+  // Fang multiplier, no ads). Treating it as 'free' silently denied paying trial
+  // users everything they signed up for. (past_due / canceled / incomplete still
+  // revert to free, handled in effectiveTier for the multiplier path.)
+  const ENTITLED_SUB_STATUSES = new Set(["active", "trialing"]);
   const stripeBaseline: EffectivePlan =
-    p.subscription_status === "active" ? asPlan(p.subscription_tier) : "free";
+    p.subscription_status && ENTITLED_SUB_STATUSES.has(p.subscription_status)
+      ? asPlan(p.subscription_tier)
+      : "free";
 
   // 2. Highest active grant.
   const grant = await getActiveGrant(userId);

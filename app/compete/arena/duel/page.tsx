@@ -142,6 +142,12 @@ export default function ArenaPage() {
   const [searchTime, setSearchTime] = useState(0);
   const [eloRange, setEloRange] = useState(200);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  // Separate pollers that previously leaked (uncancelled on unmount / cancel):
+  // the per-question opponent-answer poll and the challenge-accepted poll + its
+  // 5-minute expiry timeout. Tracked in refs so unmount + restart clear them.
+  const opponentPollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const challengePollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const challengeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Challenge
   const [challengeUsername, setChallengeUsername] = useState("");
@@ -439,6 +445,8 @@ export default function ArenaPage() {
     const maxPolls = 30; // 30s max wait
     let polls = 0;
 
+    // Clear any prior opponent poll before starting a new one (avoids stacking).
+    if (opponentPollRef.current) clearInterval(opponentPollRef.current);
     const iv = setInterval(async () => {
       polls++;
       if (polls > maxPolls) {
@@ -465,6 +473,7 @@ export default function ArenaPage() {
         recordAndAdvance(myResult, myTimeMs, opAns);
       }
     }, 1000);
+    opponentPollRef.current = iv;
   }, [matchId, user?.id, questions, currentQ, me?.id]);
 
   // Record question result and move to next
@@ -536,18 +545,23 @@ export default function ArenaPage() {
   }, [user?.id, challengeUsername, wager]);
 
   const pollChallengeAccepted = useCallback(() => {
+    // Clear any prior challenge poll + expiry before starting a new one.
+    if (challengePollRef.current) clearInterval(challengePollRef.current);
+    if (challengeTimeoutRef.current) clearTimeout(challengeTimeoutRef.current);
     const iv = setInterval(async () => {
       const res = await apiGet<{ acceptedChallenge: { matchId: string } | null }>(
         "/api/arena/challenge",
       );
       if (res.ok && res.data?.acceptedChallenge?.matchId) {
         clearInterval(iv);
+        if (challengeTimeoutRef.current) clearTimeout(challengeTimeoutRef.current);
         setMatchId(res.data.acceptedChallenge.matchId);
         loadMatch(res.data.acceptedChallenge.matchId);
       }
     }, 2000);
+    challengePollRef.current = iv;
 
-    setTimeout(() => {
+    challengeTimeoutRef.current = setTimeout(() => {
       clearInterval(iv);
       if (phase === "challenge") {
         setChallengeError("Challenge expired");
@@ -599,10 +613,14 @@ export default function ArenaPage() {
     answerLocked.current = false;
   }, []);
 
-  // Cleanup on unmount
+  // Cleanup on unmount — clear ALL timers (matchmaking + opponent + challenge
+  // poll + challenge expiry) so none fire setState on an unmounted component.
   useEffect(() => {
     return () => {
       if (pollRef.current) clearInterval(pollRef.current);
+      if (opponentPollRef.current) clearInterval(opponentPollRef.current);
+      if (challengePollRef.current) clearInterval(challengePollRef.current);
+      if (challengeTimeoutRef.current) clearTimeout(challengeTimeoutRef.current);
       channelRef.current?.unsubscribe();
     };
   }, []);
@@ -935,7 +953,11 @@ export default function ArenaPage() {
                   <p className="text-cream/60 text-sm mb-1">Challenge sent to</p>
                   <p className="text-electric font-bold text-lg mb-4">{challengeUsername}</p>
                   <p className="text-cream/30 text-xs mb-6">Waiting for them to accept...</p>
-                  <button onClick={() => { setChallengeSent(false); setPhase("lobby"); }}
+                  <button onClick={() => {
+                    if (challengePollRef.current) clearInterval(challengePollRef.current);
+                    if (challengeTimeoutRef.current) clearTimeout(challengeTimeoutRef.current);
+                    setChallengeSent(false); setPhase("lobby");
+                  }}
                     className="btn-outline px-6 py-3 rounded-xl">
                     Cancel
                   </button>
