@@ -7,6 +7,18 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 
 ---
 
+## 2026-06-14: PROFILE display_name/bio MODERATION — iOS PARITY SHIPPED (held for build)
+
+**Status:** Web shipped the moderated `/api/user/profile-update` route; iOS now uses it. Both committed 2026-06-14 (iOS held for the next batched EAS build). Closes the last unmoderated public-text surface on both platforms. Also relevant to the two READY security migrations 078/079: iOS was audited and writes NONE of the guarded columns/tables, so applying 078/079 is safe for iOS and closes the same latent self-grant exploit there. Owner: `admin` + `vp-ios`.
+
+| Surface | Web | iOS |
+|---|---|---|
+| display_name + bio moderation | ✅ profile edit calls `/api/user/profile-update` (moderateText server-side) | ✅ `edit-profile.tsx` now calls `profileAPI.updateProfile` -> same route (was a direct anon `supabase.update`, unmoderated) |
+| `profileAPI.updateProfile` in `@lionade/core` | ✅ canonical added | ✅ synced via `sync-core.sh` |
+| profiles column guard (078) + 13-table write lock (079) | 🟡 READY, awaiting Sam's apply | ✅ inherited (same Supabase); iOS verified to write no guarded column/table, zero breakage |
+
+---
+
 ## 2026-06-14: PHOTOGRAPH YOUR SYLLABUS extended to Academia (web shipped; iOS gap tracked)
 
 **Status:** Web committed 2026-06-14. The Mastery photo-OCR component is now shared (`components/PhotoImport.tsx`) and wired into Academia's syllabus upload. `/api/classes/[id]/syllabus` gained a `rawText` mode (photo OCR text feeds the same AI parser as the PDF path). $0 OCR (on-device). Reviewed sound. Owner: `admin`.
