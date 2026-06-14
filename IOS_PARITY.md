@@ -7,6 +7,34 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 
 ---
 
+## 2026-06-13: SETTINGS TRUTHFULNESS PASS: every control does what it says (web + iOS)
+
+**Status:** Web committed not pushed (zero AI cost, no migration). iOS code ready + verified LOCALLY, committed NOT pushed, NOT built, NO `eas update` (build-on-command; **build 22 still HELD**). No new packages. No em-dashes. Owners: `admin` (web) + `vp-ios` (iOS).
+
+**Principle:** a settings control that persists a value nothing reads, or shows a toggle with no system behind it, is a lie. This pass wires the survivors to real enforcement and deletes the placebos on BOTH platforms.
+
+| Control | Web | iOS |
+|---|---|---|
+| Appear on leaderboards | ✅ enforced — off removes the user from every public ladder (`getLeaderboard`/`getLadderLeaderboard` + weekly Fangs filter to `profile_visibility="public"` then post-filter `show_on_leaderboard=false`) | 🚫 N/A (iOS reads the same web ladders; no iOS-side control) |
+| Duel-from = Nobody | ✅ 403 in `app/api/arena/challenge/route.ts` before insert | ✅ inherited via the shared API |
+| Weekly-report EMAIL | ✅ digest cron reads `notifications_email.weekly_report` (was reading the wrong in-app key) | ✅ inherited (server-side) |
+| Notification delivery | ✅ `notifyUser` gates per-key (`shouldNotifyUser`) + quiet hours (`isInQuietHours`) | ✅ inherited (server-side) |
+| Online-status toggle | ✅ DELETED (no presence system) | ❌ STILL PRESENT on `app/settings/privacy.tsx` ("Show online status", `privacy.online_status`) — web removed it as a placebo, iOS did not in this pass. Drift; remove on the next iOS settings touch |
+| Show-Fang-balance toggle | ✅ DELETED (nothing gated on it) | ❌ STILL PRESENT on `app/settings/privacy.tsx` ("Show Fang balance on profile", `privacy.show_coins`) — same drift as above |
+| Duel / friend-request control | ✅ collapsed 3-option -> Everyone/Nobody (matches the persisted contract) | ✅ same 2-option on the iOS privacy screen |
+| Theme Dark/Light | ✅ FIXED — new `/settings/appearance` Theme card rides the real DOM+localStorage+`themechange`+`updatePreferences` pipeline, applies app-wide + survives reload | 🟡 honest disabled info row "dark-only for now" (light mode not shipped; `_layout` hardcodes the dark palette) |
+| Sound-effects toggle | 🚫 N/A | ✅ DELETED (no audio system / no expo-av behind it) |
+| Haptics toggle | 🚫 N/A (no web haptics) | ✅ REAL — flips `lib/haptics.ts` `enabled` via `setHapticsEnabled()`, off = all five verbs no-op; persisted to AsyncStorage + rehydrated at boot |
+| Saved toast | ✅ per-control "Saved ✓" only on real writes | ✅ fires ONLY for the one genuine write (haptics), not the removed placebos |
+| Per-material delete | ✅ already had it | ✅ ADDED to `app/settings/data.tsx` (DELETE `/api/ninny/materials?id=X`) for real Storage parity |
+| Font size | ✅ `/settings/appearance` Font size card | 🚫 DEFERRED to OS Dynamic Type (per the 2026-06-11 Dynamic Type policy; no duplicate in-app control) |
+
+**Web-only extras (no iOS counterpart):** new `app/settings/appearance/page.tsx` Appearance section added to the nav rail (2nd, Palette icon); the settings nav rail **limelight redesign** (framer-motion shared-`layoutId` pill, per-row `--limelight` accent electric vs red-on-Danger-only, reduced-motion collapses the spring).
+
+**Chain:** `dev-backend` + `dev-frontend` (web) + `ios-dev-data` (iOS) -> `quality-code-reviewer` + `security-auth-guardian` + `ios-code-reviewer` -> `quality-docs-writer` + `ios-docs-writer` (CHANGELOGs + vault Daily) -> `ios-parity-tracker` (this row).
+
+---
+
 ## 2026-06-11: DYNAMIC TYPE + VOICEOVER PASS: final polish wave 5/5 (iOS-only polish, LOCAL, not built; next-build stack)
 
 **Status:** ✅ iOS code ready + verified LOCALLY. `npx tsc --noEmit` = **0 errors**. `expo export --platform ios` clean (Hermes 9.5 MB). NOT built / NOT submitted / NO `eas update` (build-on-command). One commit on iOS `main` (`d2b7461`), not pushed. NO new packages. No em-dashes. Owner: `vp-ios`. Closes the 5-item polish wave (juice `df2ba51`, broken-edges, OTA `00970db`, states `a3bb04d`/`8e1929e`, this).
