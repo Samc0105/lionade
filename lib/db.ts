@@ -716,25 +716,22 @@ export async function getLeaderboard(limit = 10): Promise<{
   const weekAgo = new Date();
   weekAgo.setDate(weekAgo.getDate() - 7);
 
-  // Get weekly coins via coin_transactions
-  const { data, error } = await supabase
-    .from("coin_transactions")
-    .select("user_id, amount")
-    .gte("created_at", weekAgo.toISOString())
-    .eq("type", "quiz_reward");
+  // Bounded server-side aggregation (was: fetch ALL weekly quiz_reward rows then
+  // aggregate in Node — a sequential scan growing with platform activity). The
+  // RPC returns the top users by summed quiz_reward Fangs, demo account excluded;
+  // we over-fetch so the visibility / opt-out filter below still yields `limit`.
+  const { data: weekly, error } = await supabase.rpc("weekly_quiz_leaderboard", {
+    p_since: weekAgo.toISOString(),
+    p_limit: limit * 3 + 10,
+    p_exclude: DEMO_USER_ID,
+  });
 
   if (error) throw error;
 
-  // Aggregate by user. Skip the shared demo account so it never pollutes
-  // the public weekly ladder (it's a publicly-known account and any
-  // testing-driven volume would distort real rankings).
-  const weeklyMap: Record<string, number> = {};
-  for (const row of data ?? []) {
-    if (row.user_id === DEMO_USER_ID) continue;
-    weeklyMap[row.user_id] = (weeklyMap[row.user_id] ?? 0) + row.amount;
-  }
+  const weeklyRows = (weekly ?? []) as { user_id: string; coins_this_week: number }[];
+  const coinsByUser = new Map(weeklyRows.map((r) => [r.user_id, Number(r.coins_this_week)]));
 
-  if (Object.keys(weeklyMap).length === 0) {
+  if (weeklyRows.length === 0) {
     // Fallback: just return top profiles by total coins
     const { data: profiles } = await supabase
       .from("profiles")
@@ -764,10 +761,8 @@ export async function getLeaderboard(limit = 10): Promise<{
       }));
   }
 
-  const topUserIds = Object.entries(weeklyMap)
-    .sort(([, a], [, b]) => b - a)
-    .slice(0, limit)
-    .map(([id]) => id);
+  // Already sorted desc + bounded by the RPC.
+  const topUserIds = weeklyRows.map((r) => r.user_id);
 
   const { data: profiles } = await supabase
     .from("profiles")
@@ -784,6 +779,7 @@ export async function getLeaderboard(limit = 10): Promise<{
   }[] = [];
   let rank = 1;
   for (const uid of topUserIds) {
+    if (out.length >= limit) break; // over-fetched; stop once we have `limit`
     const profile = profiles?.find((p: any) => p.id === uid);
     // Settings overhaul 2026-06-11: only PUBLIC profiles surface on the weekly
     // ladder. Anything not explicitly 'public' (friends/private) is dropped.
@@ -798,7 +794,7 @@ export async function getLeaderboard(limit = 10): Promise<{
       avatar_url: profile?.avatar_url ?? null,
       level: profile?.level ?? 1,
       streak: profile?.streak ?? 0,
-      coins_this_week: weeklyMap[uid] ?? 0,
+      coins_this_week: coinsByUser.get(uid) ?? 0,
     });
   }
   return out;
