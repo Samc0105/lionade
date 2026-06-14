@@ -423,32 +423,27 @@ async function handleFangIapPayment(session: Stripe.Checkout.Session) {
     throw new Error("fang IAP amount mismatch");
   }
 
-  // p_source='iap' → routes to profiles.fangs_iap (Apple 3.1.5(b) compliance,
-  // IAP fangs cannot be cashable in V2).
-  const { error: creditErr } = await supabaseAdmin.rpc("update_user_coins", {
+  // Atomic + idempotent: credit_fang_iap inserts the dedup/audit row (partial
+  // UNIQUE on the Stripe session id) AND credits the iap bucket in ONE
+  // transaction. A webhook re-run (e.g. the 5-min stale-lock self-heal) returns
+  // false here and credits nothing; a mid-function crash rolls back cleanly so a
+  // Stripe retry re-credits. p_source='iap' equivalent → profiles.fangs_iap
+  // (Apple 3.1.5(b): IAP fangs are non-cashable in V2).
+  const { data: creditedRaw, error: creditErr } = await supabaseAdmin.rpc("credit_fang_iap", {
     p_user_id: userId,
-    p_delta: expectedFangs,
-    p_min_balance: 0,
-    p_source: "iap",
+    p_amount: expectedFangs,
+    p_session_id: session.id,
+    p_description: `Fang IAP: ${FANG_PACKS[packId].display_name} (${expectedFangs.toLocaleString()} Fangs)`,
   });
   if (creditErr) {
     console.error("[stripe-webhook] fang IAP credit", creditErr.message);
     throw new Error("fang IAP credit failed");
   }
-
-  try {
-    await supabaseAdmin.from("coin_transactions").insert({
-      user_id: userId,
-      amount: expectedFangs,
-      type: "fang_iap_purchase",
-      reference_id: session.id,
-      description: `Fang IAP: ${FANG_PACKS[packId].display_name} (${expectedFangs.toLocaleString()} Fangs)`,
-    });
-  } catch (err) {
-    console.warn("[stripe-webhook] fang IAP txn log (non-fatal):", (err as Error).message);
+  if (creditedRaw === false) {
+    console.info("[stripe-webhook] fang IAP already credited (idempotent):", session.id);
+  } else {
+    console.info("[stripe-webhook] fang IAP credited:", userId, packId, expectedFangs);
   }
-
-  console.info("[stripe-webhook] fang IAP credited:", userId, packId, expectedFangs);
 }
 
 async function handleTrialWillEnd(sub: Stripe.Subscription) {
