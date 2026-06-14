@@ -7,6 +7,22 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 
 ---
 
+## 2026-06-14: GDPR STORAGE-ERASURE FIX (live) + S3 UPLOAD PILOT PHASE A (web/infra, dormant)
+
+**Status:** Web committed 2026-06-14. GDPR fix is LIVE (changes the account-deletion reaper). S3 pilot is DORMANT (Phase A web/infra only; needs a manual `terraform apply` + Vercel env + iOS Phase B to activate). tsc clean; terraform validates. Hardened via two adversarial review passes. $0 today; S3 storage + egress flagged for go-live. Owner: `admin` + `ops-terraform`.
+
+**GDPR fix (applies to BOTH platforms' uploads):** account deletion now purges Supabase Storage (`note-images` + `class-syllabi`) before the auth cascade, fail-closed. This closes a pre-existing erasure leak that affected iOS uploads too (iOS is the writer of note-images), with NO iOS code change needed.
+
+| Surface | Web | iOS |
+|---|---|---|
+| GDPR storage purge on account delete | ✅ reaper purges Supabase buckets + (dormant) S3, fail-closed | ✅ inherited (server-side reaper; iOS uploads to the same buckets are now erased on delete) |
+| S3 presigned upload pilot | ✅ Phase A: presign + sign-read routes, dual-backend resolver, Terraform bucket + split IAM (dormant) | ❌ Phase B NOT built: swap the iOS note-image upload from `supabase.storage.upload` to `/api/note-images/presign` -> POST to S3 -> write the `user-uploads/` token. Roadmapped. |
+| note-image read resolver | ✅ routes BOTH `note-images/` (Supabase) + `user-uploads/` (S3) tokens | ❌ iOS `lib/note-images.ts` mirror needs the same TOKEN_RE + S3 read routing in Phase B |
+
+**Phase B (vp-ios) prerequisites:** Sam runs `terraform apply` + sets Vercel env first (Phase A is inert until then); then iOS swaps the upload path + mirrors the resolver. Privacy Policy edits (spec §8.5) gate go-live.
+
+---
+
 ## 2026-06-14: PHOTOGRAPH YOUR SYLLABUS, client-side OCR for Mastery Mode (web shipped; iOS gap tracked)
 
 **Status:** Web committed 2026-06-14 (zero AI / zero API cost). New `components/Mastery/PhotoImport.tsx` + a one-line wire-in on `/learn/mastery`. tesseract.js@7 self-hosted under `/public/tess` (worker + SIMD-LSTM core + eng model, ~17 MB, served same-origin so the existing CSP needs no widening). `npx tsc --noEmit` clean; route compiles; all four engine assets verified serving 200 with correct MIME. In-browser OCR scan pending Sam's manual device check. Reviewed across code/QA/a11y/cost via a 4-lens adversarial pass (13 findings fixed). No em-dashes in user copy. Owner: `admin`.

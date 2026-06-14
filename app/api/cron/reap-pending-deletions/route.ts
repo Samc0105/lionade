@@ -8,6 +8,14 @@
 // cascades through every FK (profiles, friendships, coin_transactions, etc.)
 // the schema configured ON DELETE CASCADE.
 //
+// GDPR Art. 17: the cascade does NOT remove Supabase Storage objects (there is
+// no auth.users -> storage.objects cascade), so the user's uploaded files (note
+// photos, syllabus PDFs) would be orphaned forever. We therefore PURGE those
+// files FIRST (while we can still enumerate the owner-folder prefix) and only
+// then cascade-delete the auth user. The purge is FAIL-CLOSED: if it errors we
+// skip the hard delete so the account stays scheduled and retries, never
+// leaving PII with no pointer. Covers Supabase Storage + (dormant) S3 uploads.
+//
 // Runs daily (vercel.json). A user who clicks "Cancel deletion" before the
 // window elapses clears pending_deletion_at, so they're skipped here.
 //
@@ -19,6 +27,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { timingSafeEqual } from "node:crypto";
 import { supabaseAdmin } from "@/lib/supabase-server";
+import { purgeUserSupabaseStorage } from "@/lib/storage-purge";
+import { purgeUserS3Uploads } from "@/lib/s3";
 
 export const dynamic = "force-dynamic";
 
@@ -60,7 +70,26 @@ export async function GET(req: NextRequest) {
 
   let reaped = 0;
   let failed = 0;
+  let purgedSupabaseFiles = 0;
+  let purgedS3Files = 0;
   for (const row of due) {
+    // Purge uploaded files FIRST, fail-closed (see header). The S3 purge is a
+    // no-op until the upload pilot is configured, so it never blocks deletion
+    // (but it throws, fail-closed, in the half-configured state — see lib/s3.ts).
+    try {
+      purgedSupabaseFiles += await purgeUserSupabaseStorage(row.id);
+      const s3 = await purgeUserS3Uploads(row.id);
+      purgedS3Files += s3.removed;
+    } catch (purgeErr) {
+      console.error(
+        "[cron/reap-pending-deletions] storage purge",
+        row.id,
+        purgeErr instanceof Error ? purgeErr.message : "unknown",
+      );
+      failed += 1;
+      continue; // leave pending_deletion_at set; the row retries next run
+    }
+
     const { error: delError } = await supabaseAdmin.auth.admin.deleteUser(row.id);
     if (delError) {
       // Log and continue — one stuck row must not block the rest of the batch.
@@ -72,5 +101,5 @@ export async function GET(req: NextRequest) {
     reaped += 1;
   }
 
-  return NextResponse.json({ ok: true, reaped, failed });
+  return NextResponse.json({ ok: true, reaped, failed, purgedSupabaseFiles, purgedS3Files });
 }

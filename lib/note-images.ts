@@ -22,7 +22,11 @@ export const NOTE_IMAGES_BUCKET = "note-images";
 
 // ── Token format ─────────────────────────────────────────────────────────────
 
-const TOKEN_RE = /!\[([^\]]*)\]\(note-images\/([^)\s]+)\)/g;
+// Matches BOTH the legacy Supabase token (`note-images/<key>`) and the new
+// S3-pilot token (`user-uploads/<uid>/<uuid>.<ext>`). Group 1 = alt text,
+// group 2 = backend prefix, group 3 = the rest of the key. `objectKey` carries
+// the FULL token (prefix included) so the resolver routes to the right backend.
+const TOKEN_RE = /!\[([^\]]*)\]\((note-images|user-uploads)\/([^)\s]+)\)/g;
 
 function hasToken(body: string): boolean {
   TOKEN_RE.lastIndex = 0;
@@ -47,7 +51,9 @@ export function parseNoteBody(body: string): NoteBodySegment[] {
   for (let m = TOKEN_RE.exec(body); m !== null; m = TOKEN_RE.exec(body)) {
     const before = body.slice(last, m.index).replace(/\n{3,}/g, "\n\n").trim();
     if (before.length > 0) segments.push({ type: "text", text: before });
-    segments.push({ type: "image", alt: m[1] || "photo", objectKey: m[2] });
+    // objectKey is the FULL token (prefix + key), e.g. `note-images/<uid>/x.jpg`
+    // or `user-uploads/<uid>/x.jpg`, so getSignedNoteImageUrl can route it.
+    segments.push({ type: "image", alt: m[1] || "photo", objectKey: `${m[2]}/${m[3]}` });
     last = m.index + m[0].length;
   }
   const tail = body.slice(last).replace(/\n{3,}/g, "\n\n").trim();
@@ -75,24 +81,56 @@ const REFRESH_MARGIN_MS = 5 * 60 * 1000;
 const signedUrlCache = new Map<string, { url: string; expiresAt: number }>();
 
 /**
- * Resolve a signed URL for an object in the note-images bucket. Cached
- * in-memory for the TTL so a notes list never storms the storage API.
- * RLS (owner-folder select) authorizes the signing server-side.
+ * Resolve a signed view URL for a note photo, routing by token prefix. Cached
+ * in-memory (keyed by the full token, which embeds the userId) for the TTL so a
+ * notes list never storms the backend.
+ *
+ *   `note-images/<key>`     -> legacy Supabase Storage. Signed via the
+ *                              RLS-respecting anon client; owner-folder RLS is
+ *                              the boundary (never swap to the admin client).
+ *   `user-uploads/<key>`    -> new S3 pilot. Our API mints a presigned GET after
+ *                              an ownership check (the client holds no AWS creds).
  */
 export async function getSignedNoteImageUrl(objectKey: string): Promise<string> {
   const hit = signedUrlCache.get(objectKey);
   if (hit && hit.expiresAt - Date.now() > REFRESH_MARGIN_MS) return hit.url;
 
-  const { supabase } = await import("@/lib/supabase");
-  const { data, error } = await supabase.storage
-    .from(NOTE_IMAGES_BUCKET)
-    .createSignedUrl(objectKey, SIGNED_TTL_SECONDS);
-  if (error || !data?.signedUrl) {
-    throw new Error(error?.message ?? "Couldn't load photo.");
+  let url: string;
+
+  if (objectKey.startsWith("user-uploads/")) {
+    // S3-hosted photo (pilot). The server checks ownership before signing.
+    const { apiGet } = await import("@/lib/api-client");
+    const res = await apiGet<{ url: string }>(
+      `/api/note-images/sign-read?key=${encodeURIComponent(objectKey)}`,
+    );
+    if (!res.ok || !res.data?.url) {
+      throw new Error(res.error ?? "Couldn't load photo.");
+    }
+    url = res.data.url;
+  } else {
+    // Legacy Supabase-hosted photo. Strip the bucket prefix the token carries
+    // and sign via the RLS client (owner-folder RLS authorizes server-side).
+    const supabaseKey = objectKey.replace(/^note-images\//, "");
+    // Defense-in-depth: the token comes from user-editable class_notes.body, so
+    // reject anything that isn't the owner-foldered `<uuid>/<file>.<img>` shape
+    // before it reaches storage. RLS is still the real boundary; this refuses
+    // traversal/garbage early and mirrors the strict KEY_RE in lib/s3.ts.
+    if (!/^[0-9a-f-]{36}\/[^/]+\.(jpe?g|png|webp|heic)$/i.test(supabaseKey)) {
+      throw new Error("Couldn't load photo.");
+    }
+    const { supabase } = await import("@/lib/supabase");
+    const { data, error } = await supabase.storage
+      .from(NOTE_IMAGES_BUCKET)
+      .createSignedUrl(supabaseKey, SIGNED_TTL_SECONDS);
+    if (error || !data?.signedUrl) {
+      throw new Error(error?.message ?? "Couldn't load photo.");
+    }
+    url = data.signedUrl;
   }
+
   signedUrlCache.set(objectKey, {
-    url: data.signedUrl,
+    url,
     expiresAt: Date.now() + SIGNED_TTL_SECONDS * 1000,
   });
-  return data.signedUrl;
+  return url;
 }
