@@ -151,7 +151,7 @@ Mirror the existing `terraform/main.tf` `staging_assets` pattern. New resources 
   ```
   Rationale: a leaked request-path key (the one in env, most exposed) then **cannot list every user's keys or delete anything** — it can only put/get its own server-chosen keys. No `*` actions, no other bucket. Tag everything `Project=Lionade, Environment, ManagedBy=Terraform`.
 
-**Credentials → Vercel env:** `AWS_REGION=us-east-1`, `USER_UPLOADS_BUCKET`, the request-path key pair (`AWS_ACCESS_KEY_ID`/`AWS_SECRET_ACCESS_KEY`), and the reaper key pair under distinct names (`UPLOADS_REAPER_ACCESS_KEY_ID`/`_SECRET`). ⚠️ Both are **long-lived keys** — acceptable for a pilot, but the roadmap's **Vercel→AWS OIDC** item should replace them so no static AWS key lives in env. Track that as the security follow-up.
+**Credentials → Vercel env:** ✅ **UPDATED 2026-06-14 — the static-key plan was superseded before any key existed.** The two IAM users are now **IAM roles assumed via Vercel OIDC** (`@vercel/functions/oidc`, see `lib/aws-creds.ts` + the Terraform OIDC provider). Vercel env is `AWS_REGION=us-east-1`, `USER_UPLOADS_BUCKET`, `UPLOADS_WEB_ROLE_ARN`, `UPLOADS_REAPER_ROLE_ARN` (role ARNs, not keys). No static AWS key lives in env. This closed the "long-lived keys" follow-up as part of activation rather than as a later rotation.
 
 **SDK (server-only):** `@aws-sdk/client-s3`, `@aws-sdk/s3-presigned-post`, `@aws-sdk/s3-request-presigner`.
 

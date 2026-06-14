@@ -25,6 +25,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { timingSafeEqual } from "node:crypto";
 import { supabaseAdmin } from "@/lib/supabase-server";
 import { recomputeEffectivePlan } from "@/lib/plan-grants";
+import { putCronHeartbeat } from "@/lib/cloudwatch";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
@@ -117,6 +118,7 @@ export async function GET(req: NextRequest) {
       failed,
     };
     console.log("[cron/expire-grants] done", JSON.stringify(summary));
+    await putCronHeartbeat("expire-grants");
     return NextResponse.json(summary);
   } catch (e) {
     console.error(

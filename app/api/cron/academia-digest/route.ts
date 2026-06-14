@@ -48,6 +48,7 @@ import { Resend } from "resend";
 import { supabaseAdmin } from "@/lib/supabase-server";
 import { renderEmail, templates, BRAND } from "@/lib/emails";
 import { absoluteUrl } from "@/lib/site-config";
+import { putCronHeartbeat } from "@/lib/cloudwatch";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
@@ -386,6 +387,7 @@ export async function GET(req: NextRequest) {
       failed,
     };
     console.log("[cron/academia-digest] done", JSON.stringify(summary));
+    await putCronHeartbeat("academia-digest");
     return NextResponse.json(summary);
   } catch (e) {
     console.error("[cron/academia-digest] unexpected", e);

@@ -1,11 +1,18 @@
 # ─────────────────────────────────────────────────────────────────────────
 # main.tf — Lionade infrastructure as code
 #
-# Manages: the staging assets bucket, and the private user-uploads bucket +
-# split IAM principals for the note-images upload pilot
-# (docs/specs/note-images-s3-pilot.md). Run `terraform plan` to preview,
-# `terraform apply` to create. NOTE: applying creates real AWS resources and
-# emits IAM access keys (sensitive outputs) to copy into Vercel env.
+# Manages: the staging assets bucket; the private user-uploads bucket (note-
+# images pilot); AWS cost guardrails + remote Terraform state; and the cron
+# dead-man's-switch (CloudWatch alarms -> SNS). AWS access is KEYLESS: the app
+# assumes scoped IAM roles via Vercel OIDC, so no static AWS key lives in env.
+#
+# Activation is staged + variable-gated so steps can apply independently:
+#   - vercel_team_slug = ""  -> OIDC provider + roles are skipped (apply the
+#     cost guardrails / state / buckets without Vercel details).
+#   - set vercel_team_slug   -> creates the OIDC provider + the 3 roles.
+#   - enable_cron_alarms = true -> creates the alarms (ONLY after heartbeats are
+#     confirmed flowing, else treat_missing_data=breaching fires immediately).
+# Run `terraform plan` to preview, `terraform apply` to create.
 # ─────────────────────────────────────────────────────────────────────────
 
 terraform {
@@ -14,6 +21,10 @@ terraform {
     aws = {
       source  = "hashicorp/aws"
       version = "~> 5.0"
+    }
+    tls = {
+      source  = "hashicorp/tls"
+      version = "~> 4.0"
     }
   }
 }
@@ -157,17 +168,94 @@ resource "aws_s3_bucket_cors_configuration" "user_uploads" {
   }
 }
 
-# ─── IAM: request-path principal — PutObject + GetObject ONLY ──────────────
-# Keys live in Vercel env and serve the presign / sign-read routes. A leak of
-# these (the most-exposed keys) cannot list or delete anyone's objects.
-resource "aws_iam_user" "uploads_web" {
-  name = "lionade-user-uploads-web"
-  tags = { Project = "Lionade", ManagedBy = "Terraform" }
+# ═══════════════════════════════════════════════════════════════════════════
+# Keyless AWS access via Vercel OIDC. The app assumes scoped IAM ROLES using the
+# runtime OIDC token Vercel injects (no static keys in env). One OIDC provider;
+# three least-privilege roles (uploads-web, uploads-reaper, cron-heartbeat).
+#
+# RUNBOOK: set var.vercel_team_slug (+ project/env) to create these. Confirm the
+# aud/sub format in Vercel > Project > Settings > OIDC matches the assume-role
+# conditions below (Vercel uses aud=https://vercel.com/<team>,
+# sub=owner:<team>:project:<project>:environment:<env>). Enable OIDC for the
+# project, then set each role-ARN output as a Vercel env var to activate that
+# feature. The live OIDC handshake is validated by Sam at activation.
+# ═══════════════════════════════════════════════════════════════════════════
+
+variable "vercel_team_slug" {
+  type        = string
+  default     = ""
+  description = "Vercel team slug (from the dashboard URL). Empty = skip OIDC roles."
 }
 
-resource "aws_iam_user_policy" "uploads_web" {
-  name = "user-uploads-web"
-  user = aws_iam_user.uploads_web.name
+variable "vercel_project_name" {
+  type        = string
+  default     = "lionade"
+  description = "Vercel project name, used in the OIDC sub-claim scope."
+}
+
+variable "oidc_environment" {
+  type        = string
+  default     = "production"
+  description = "Vercel environment the roles trust (production|preview|development)."
+}
+
+locals {
+  oidc_enabled = var.vercel_team_slug != ""
+}
+
+# Fetch the OIDC issuer's CA thumbprint dynamically (don't hardcode it).
+data "tls_certificate" "vercel_oidc" {
+  count = local.oidc_enabled ? 1 : 0
+  url   = "https://oidc.vercel.com/${var.vercel_team_slug}/.well-known/openid-configuration"
+}
+
+resource "aws_iam_openid_connect_provider" "vercel" {
+  count           = local.oidc_enabled ? 1 : 0
+  url             = "https://oidc.vercel.com/${var.vercel_team_slug}"
+  client_id_list  = ["https://vercel.com/${var.vercel_team_slug}"]
+  thumbprint_list = [data.tls_certificate.vercel_oidc[0].certificates[0].sha1_fingerprint]
+  tags            = { Project = "Lionade", ManagedBy = "Terraform" }
+}
+
+# Shared trust: only the Lionade Vercel project + environment may assume the roles.
+data "aws_iam_policy_document" "vercel_assume" {
+  count = local.oidc_enabled ? 1 : 0
+
+  statement {
+    effect  = "Allow"
+    actions = ["sts:AssumeRoleWithWebIdentity"]
+
+    principals {
+      type        = "Federated"
+      identifiers = [aws_iam_openid_connect_provider.vercel[0].arn]
+    }
+
+    condition {
+      test     = "StringEquals"
+      variable = "oidc.vercel.com/${var.vercel_team_slug}:aud"
+      values   = ["https://vercel.com/${var.vercel_team_slug}"]
+    }
+
+    condition {
+      test     = "StringEquals"
+      variable = "oidc.vercel.com/${var.vercel_team_slug}:sub"
+      values   = ["owner:${var.vercel_team_slug}:project:${var.vercel_project_name}:environment:${var.oidc_environment}"]
+    }
+  }
+}
+
+# ─── Role: request-path — PutObject + GetObject ONLY ───────────────────────
+resource "aws_iam_role" "uploads_web" {
+  count              = local.oidc_enabled ? 1 : 0
+  name               = "lionade-uploads-web"
+  assume_role_policy = data.aws_iam_policy_document.vercel_assume[0].json
+  tags               = { Project = "Lionade", ManagedBy = "Terraform" }
+}
+
+resource "aws_iam_role_policy" "uploads_web" {
+  count = local.oidc_enabled ? 1 : 0
+  name  = "user-uploads-web"
+  role  = aws_iam_role.uploads_web[0].id
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
@@ -179,20 +267,18 @@ resource "aws_iam_user_policy" "uploads_web" {
   })
 }
 
-resource "aws_iam_access_key" "uploads_web" {
-  user = aws_iam_user.uploads_web.name
+# ─── Role: reaper — ListBucket + DeleteObject (cron purge only) ────────────
+resource "aws_iam_role" "uploads_reaper" {
+  count              = local.oidc_enabled ? 1 : 0
+  name               = "lionade-uploads-reaper"
+  assume_role_policy = data.aws_iam_policy_document.vercel_assume[0].json
+  tags               = { Project = "Lionade", ManagedBy = "Terraform" }
 }
 
-# ─── IAM: reaper principal — ListBucket + DeleteObject (+ versions) ────────
-# Used ONLY by the account-deletion cron to purge a deleted user's prefix.
-resource "aws_iam_user" "uploads_reaper" {
-  name = "lionade-user-uploads-reaper"
-  tags = { Project = "Lionade", ManagedBy = "Terraform" }
-}
-
-resource "aws_iam_user_policy" "uploads_reaper" {
-  name = "user-uploads-reaper"
-  user = aws_iam_user.uploads_reaper.name
+resource "aws_iam_role_policy" "uploads_reaper" {
+  count = local.oidc_enabled ? 1 : 0
+  name  = "user-uploads-reaper"
+  role  = aws_iam_role.uploads_reaper[0].id
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -212,36 +298,122 @@ resource "aws_iam_user_policy" "uploads_reaper" {
   })
 }
 
-resource "aws_iam_access_key" "uploads_reaper" {
-  user = aws_iam_user.uploads_reaper.name
+# ─── Role: cron heartbeat — cloudwatch:PutMetricData (one namespace) ───────
+resource "aws_iam_role" "cron_heartbeat" {
+  count              = local.oidc_enabled ? 1 : 0
+  name               = "lionade-cron-heartbeat"
+  assume_role_policy = data.aws_iam_policy_document.vercel_assume[0].json
+  tags               = { Project = "Lionade", ManagedBy = "Terraform" }
 }
 
-# ─── Outputs — copy into Vercel env after apply (secrets are sensitive) ────
+resource "aws_iam_role_policy" "cron_heartbeat" {
+  count = local.oidc_enabled ? 1 : 0
+  name  = "cron-heartbeat"
+  role  = aws_iam_role.cron_heartbeat[0].id
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Sid      = "PutCronHeartbeat"
+      Effect   = "Allow"
+      Action   = "cloudwatch:PutMetricData"
+      Resource = "*"
+      Condition = {
+        StringEquals = { "cloudwatch:namespace" = "Lionade/Crons" }
+      }
+    }]
+  })
+}
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Cron dead-man's-switch. Each Vercel cron emits Lionade/Crons -> Heartbeat on a
+# successful run (lib/cloudwatch.ts). Alarms fire to SNS when a heartbeat goes
+# missing (treat_missing_data = breaching), surfacing a silently-failing cron
+# (the GDPR purge, plan-grant expiry, ...). The SNS topic is created up front;
+# the ALARMS are gated on enable_cron_alarms so they're only created AFTER
+# heartbeats are confirmed flowing (else they'd fire immediately).
+# ═══════════════════════════════════════════════════════════════════════════
+
+variable "enable_cron_alarms" {
+  type        = bool
+  default     = false
+  description = "Create the cron alarms. Turn on ONLY after you have confirmed at least one Lionade/Crons Heartbeat datapoint for EVERY job in the trailing 8 days (CloudWatch console, namespace Lionade/Crons). The weekly academia-digest needs one Monday run to exist first; a daily cron emitting does NOT populate the weekly dimension. Flipping early makes that one alarm fire breaching on apply (auto-resolves next Monday). treat_missing_data=breaching fires immediately on any missing dimension."
+}
+
+resource "aws_sns_topic" "ops_alerts" {
+  name = "lionade-ops-alerts"
+  tags = { Project = "Lionade", ManagedBy = "Terraform" }
+}
+
+# RUNBOOK (one-time, on FIRST apply): AWS SNS email subscriptions are double
+# opt-in. This resource creates in "PendingConfirmation" and delivers NOTHING
+# until you click the confirm link AWS emails to alert_email (check spam; the
+# link expires in ~3 days). Unlike the Budgets / Cost-Anomaly emails above
+# (which need no confirmation), an unconfirmed topic means every alarm action
+# silently no-ops, so the dead-man's switch would itself fail silently. Confirm
+# in the SNS console > Subscriptions at first apply, BEFORE enable_cron_alarms.
+resource "aws_sns_topic_subscription" "ops_alerts_email" {
+  topic_arn = aws_sns_topic.ops_alerts.arn
+  protocol  = "email"
+  endpoint  = var.alert_email
+}
+
+# evaluation_periods are 1-DAY periods. Daily crons alarm after ~2 silent days;
+# the weekly academia-digest after ~8 (an 8-day window always spans a Monday, so
+# one healthy weekly run keeps it green).
+locals {
+  cron_alarms = var.enable_cron_alarms ? {
+    "reap-afk-presence"      = 2
+    "reap-stale-competitive" = 2
+    "reap-pending-deletions" = 2
+    "expire-grants"          = 2
+    "academia-digest"        = 8
+  } : {}
+}
+
+resource "aws_cloudwatch_metric_alarm" "cron_heartbeat" {
+  for_each = local.cron_alarms
+
+  alarm_name          = "lionade-cron-missing-${each.key}"
+  namespace           = "Lionade/Crons"
+  metric_name         = "Heartbeat"
+  dimensions          = { Job = each.key }
+  statistic           = "Sum"
+  period              = 86400
+  evaluation_periods  = each.value
+  datapoints_to_alarm = each.value
+  threshold           = 1
+  comparison_operator = "LessThanThreshold"
+  treat_missing_data  = "breaching"
+  alarm_description   = "No heartbeat from the ${each.key} cron; it may be failing silently."
+  alarm_actions       = [aws_sns_topic.ops_alerts.arn]
+  ok_actions          = [aws_sns_topic.ops_alerts.arn]
+  tags                = { Project = "Lionade", ManagedBy = "Terraform" }
+}
+
+# ─── Outputs — set the role ARNs as Vercel env to activate each feature ────
 output "user_uploads_bucket" {
   value       = aws_s3_bucket.user_uploads.id
   description = "USER_UPLOADS_BUCKET"
 }
 
-output "uploads_web_access_key_id" {
-  value       = aws_iam_access_key.uploads_web.id
-  description = "AWS_ACCESS_KEY_ID (request-path: presign + sign-read)"
+output "uploads_web_role_arn" {
+  value       = local.oidc_enabled ? aws_iam_role.uploads_web[0].arn : "(set vercel_team_slug to create)"
+  description = "UPLOADS_WEB_ROLE_ARN (presign + sign-read)"
 }
 
-output "uploads_web_secret_access_key" {
-  value       = aws_iam_access_key.uploads_web.secret
-  description = "AWS_SECRET_ACCESS_KEY (request-path)"
-  sensitive   = true
+output "uploads_reaper_role_arn" {
+  value       = local.oidc_enabled ? aws_iam_role.uploads_reaper[0].arn : "(set vercel_team_slug to create)"
+  description = "UPLOADS_REAPER_ROLE_ARN (cron purge)"
 }
 
-output "uploads_reaper_access_key_id" {
-  value       = aws_iam_access_key.uploads_reaper.id
-  description = "UPLOADS_REAPER_ACCESS_KEY_ID (cron purge)"
+output "cloudwatch_role_arn" {
+  value       = local.oidc_enabled ? aws_iam_role.cron_heartbeat[0].arn : "(set vercel_team_slug to create)"
+  description = "CLOUDWATCH_ROLE_ARN (cron heartbeat)"
 }
 
-output "uploads_reaper_secret_access_key" {
-  value       = aws_iam_access_key.uploads_reaper.secret
-  description = "UPLOADS_REAPER_SECRET_ACCESS_KEY (cron purge)"
-  sensitive   = true
+output "ops_alerts_topic_arn" {
+  value       = aws_sns_topic.ops_alerts.arn
+  description = "SNS topic ARN for cron/ops alerts"
 }
 
 # ═══════════════════════════════════════════════════════════════════════════

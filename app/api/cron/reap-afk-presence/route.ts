@@ -1,6 +1,6 @@
 // GET /api/cron/reap-afk-presence — Vercel cron entry point.
 //
-// Called every 60 seconds by the schedule in `vercel.json`. Vercel sends
+// Called once daily (`0 4 * * *`) by the schedule in `vercel.json`. Vercel sends
 // the cron secret as `Authorization: Bearer $CRON_SECRET`; we reject
 // anything that doesn't match `process.env.CRON_SECRET` so this can't be
 // invoked by anyone else.
@@ -19,6 +19,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { timingSafeEqual } from "node:crypto";
 import { supabaseAdmin } from "@/lib/supabase-server";
+import { putCronHeartbeat } from "@/lib/cloudwatch";
 
 export async function GET(req: NextRequest) {
   const secret = process.env.CRON_SECRET;
@@ -44,6 +45,7 @@ export async function GET(req: NextRequest) {
     }
     // RPC returns the number of rows reaped (int). Defensive coalesce.
     const reaped = typeof data === "number" ? data : 0;
+    await putCronHeartbeat("reap-afk-presence");
     return NextResponse.json({ ok: true, reaped });
   } catch (e) {
     console.error("[cron/reap-afk-presence] unexpected", e);

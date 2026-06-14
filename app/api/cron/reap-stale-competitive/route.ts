@@ -26,6 +26,7 @@ import { timingSafeEqual } from "node:crypto";
 import { supabaseAdmin } from "@/lib/supabase-server";
 import { settleClaimedMatch } from "@/lib/competitive/settle";
 import type { CompetitiveMatchRow } from "@/lib/competitive/types";
+import { putCronHeartbeat } from "@/lib/cloudwatch";
 
 // Tuneable staleness windows.
 const RESPONSE_STALE_MS = 3 * 60 * 1000; // 3 min since the last answer
@@ -56,13 +57,20 @@ export async function GET(req: NextRequest) {
     // Candidate set: still-active matches at least RESPONSE_STALE_MS old. We
     // pull a bounded window of the oldest-active rows, then decide staleness
     // per-row using their last response timestamp.
-    const { data: actives } = await supabaseAdmin
+    const { data: actives, error: activesErr } = await supabaseAdmin
       .from("competitive_matches")
       .select("*")
       .eq("status", "active")
       .lt("created_at", new Date(responseCutoffTs).toISOString())
       .order("created_at", { ascending: true })
       .limit(MAX_PER_RUN);
+
+    // Guard the candidate fetch BEFORE the success heartbeat — else a silent DB
+    // read failure would emit a green heartbeat and blind the dead-man's switch.
+    if (activesErr) {
+      console.error("[cron/reap-stale-competitive]", activesErr.message);
+      return NextResponse.json({ error: "Reap failed" }, { status: 500 });
+    }
 
     let voided = 0;
     let settled = 0;
@@ -111,6 +119,7 @@ export async function GET(req: NextRequest) {
       else settled += 1;
     }
 
+    await putCronHeartbeat("reap-stale-competitive");
     return NextResponse.json({ ok: true, voided, settled, skipped });
   } catch (e) {
     console.error("[cron/reap-stale-competitive]", e);

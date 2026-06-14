@@ -25,9 +25,14 @@ import {
 } from "@aws-sdk/client-s3";
 import { createPresignedPost, type PresignedPost } from "@aws-sdk/s3-presigned-post";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { roleCredentials } from "@/lib/aws-creds";
 
 const REGION = process.env.AWS_REGION ?? "us-east-1";
 const BUCKET = process.env.USER_UPLOADS_BUCKET ?? "";
+// Vercel-OIDC role ARNs (no static keys). Two principals: request-path (put/get)
+// vs reaper (list/delete). Each gates its feature dormant until its ARN is set.
+const WEB_ROLE_ARN = process.env.UPLOADS_WEB_ROLE_ARN;
+const REAPER_ROLE_ARN = process.env.UPLOADS_REAPER_ROLE_ARN;
 
 export const UPLOAD_PREFIX = "user-uploads";
 const MAX_BYTES = 10 * 1024 * 1024; // 10 MB, matches the Supabase bucket limit
@@ -47,42 +52,32 @@ export function extForContentType(contentType: string): string | null {
   return ALLOWED_TYPES.get(contentType) ?? null;
 }
 
-/** True only when the request-path S3 credentials + bucket are configured. */
+/** True only when the request-path role + bucket are configured. */
 export function isS3Configured(): boolean {
-  return Boolean(
-    BUCKET && process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY,
-  );
+  return Boolean(BUCKET && WEB_ROLE_ARN);
 }
 
-/** True only when the separate reaper (list/delete) credentials are configured. */
+/** True only when the separate reaper (list/delete) role is configured. */
 export function isS3PurgeConfigured(): boolean {
-  return Boolean(
-    BUCKET &&
-      process.env.UPLOADS_REAPER_ACCESS_KEY_ID &&
-      process.env.UPLOADS_REAPER_SECRET_ACCESS_KEY,
-  );
+  return Boolean(BUCKET && REAPER_ROLE_ARN);
 }
 
-// ── clients (two principals, least-privilege per the IAM split) ──────────────
+// ── clients (two principals, least-privilege per the IAM split, Vercel OIDC) ──
 
 let _requestClient: S3Client | null = null;
-/** Request-path client: PutObject + GetObject only (keys from default env). */
+/** Request-path client: PutObject + GetObject only, via the OIDC web role. */
 function requestS3(): S3Client {
-  if (!_requestClient) _requestClient = new S3Client({ region: REGION });
+  if (!_requestClient) {
+    _requestClient = new S3Client({ region: REGION, credentials: roleCredentials(WEB_ROLE_ARN) });
+  }
   return _requestClient;
 }
 
 let _reaperClient: S3Client | null = null;
-/** Reaper client: ListBucket + DeleteObject, distinct creds, used only by the cron. */
+/** Reaper client: ListBucket + DeleteObject, via the OIDC reaper role (cron only). */
 function reaperS3(): S3Client {
   if (!_reaperClient) {
-    _reaperClient = new S3Client({
-      region: REGION,
-      credentials: {
-        accessKeyId: process.env.UPLOADS_REAPER_ACCESS_KEY_ID ?? "",
-        secretAccessKey: process.env.UPLOADS_REAPER_SECRET_ACCESS_KEY ?? "",
-      },
-    });
+    _reaperClient = new S3Client({ region: REGION, credentials: roleCredentials(REAPER_ROLE_ARN) });
   }
   return _reaperClient;
 }

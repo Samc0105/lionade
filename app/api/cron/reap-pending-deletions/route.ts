@@ -29,6 +29,7 @@ import { timingSafeEqual } from "node:crypto";
 import { supabaseAdmin } from "@/lib/supabase-server";
 import { purgeUserSupabaseStorage } from "@/lib/storage-purge";
 import { purgeUserS3Uploads } from "@/lib/s3";
+import { putCronHeartbeat } from "@/lib/cloudwatch";
 
 export const dynamic = "force-dynamic";
 
@@ -65,6 +66,7 @@ export async function GET(req: NextRequest) {
   }
 
   if (!due || due.length === 0) {
+    await putCronHeartbeat("reap-pending-deletions");
     return NextResponse.json({ ok: true, reaped: 0 });
   }
 
@@ -101,5 +103,6 @@ export async function GET(req: NextRequest) {
     reaped += 1;
   }
 
+  await putCronHeartbeat("reap-pending-deletions");
   return NextResponse.json({ ok: true, reaped, failed, purgedSupabaseFiles, purgedS3Files });
 }
