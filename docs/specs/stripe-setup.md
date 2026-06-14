@@ -12,7 +12,13 @@ Status: code shipped 2026-06-02. Production go-live blocked on Sam completing th
 | `STRIPE_PRICE_ID_PRO_ANNUAL` | Dashboard → Products → Pro → Annual price | Format `price_...` |
 | `STRIPE_PRICE_ID_PLATINUM_MONTHLY` | Dashboard → Products → Platinum → Monthly price | Format `price_...` |
 | `STRIPE_PRICE_ID_PLATINUM_ANNUAL` | Dashboard → Products → Platinum → Annual price | Format `price_...` |
+| `STRIPE_PRICE_ID_FANGS_S` | Dashboard → Products → Small Fang Pouch → price | One-time price, `price_...` |
+| `STRIPE_PRICE_ID_FANGS_M` | Dashboard → Products → Medium Fang Sack → price | One-time price, `price_...` |
+| `STRIPE_PRICE_ID_FANGS_L` | Dashboard → Products → Large Fang Chest → price | One-time price, `price_...` |
+| `STRIPE_PRICE_ID_FANGS_XL` | Dashboard → Products → Whale Fang Vault → price | One-time price, `price_...` |
 | `NEXT_PUBLIC_SITE_URL` | Your production URL (`https://getlionade.com`); Preview uses the preview URL | Already required by the email program; checkout / portal now pin `success_url` / `cancel_url` / `return_url` to this value instead of trusting the request `Origin` header (open-redirect hardening) |
+
+**Total: 11 Stripe env vars** (`STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, 4 subscription price IDs, 4 Fang-pack price IDs) + `NEXT_PUBLIC_SITE_URL`. Until each price ID is set, that product silently 500s at checkout (`priceIdFor` / `fangPackPriceId` return null and the route returns "Plan unavailable" / "Pack unavailable").
 
 `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` is NOT required for this implementation. We redirect to Stripe-hosted Checkout via `session.url`, so the publishable key only matters if we add Elements / Payment Element in the browser later.
 
@@ -29,6 +35,21 @@ Create 2 products, each with 2 recurring prices.
    - Annual: `$149.99 USD` recurring yearly
 
 Copy the 4 `price_...` ids into the env vars above. **Do NOT change prices in code without updating Stripe** — the price IDs are the source of truth at checkout.
+
+### Fang packs (one-time IAP — also fully coded, route `/api/stripe/fang-purchase`, `mode: 'payment'`)
+Create 4 products, each with a single **one-time** price (NOT recurring). The Fang amounts live in code (`lib/fang-packs.ts`); only the dollar price + the `price_...` id matter to Stripe. The amounts MUST match the code:
+
+| Product | Price (USD, one-time) | Grants | Env var |
+|---|---|---|---|
+| Small Fang Pouch | `$0.99` | 5,000 Fangs | `STRIPE_PRICE_ID_FANGS_S` |
+| Medium Fang Sack | `$4.99` | 30,000 Fangs | `STRIPE_PRICE_ID_FANGS_M` |
+| Large Fang Chest | `$19.99` | 140,000 Fangs | `STRIPE_PRICE_ID_FANGS_L` |
+| Whale Fang Vault | `$49.99` | 400,000 Fangs | `STRIPE_PRICE_ID_FANGS_XL` |
+
+The webhook credits Fangs idempotently via `credit_fang_iap` (migration 070) on `checkout.session.completed` for `mode='payment'`. The Shop page (`/shop`) already has the buy UI.
+
+### ⚠️ iOS / App Store — Apple IAP, NOT Stripe (do NOT skip)
+Stripe is for the **WEB** only. Apple's App Store rules (3.1.1) require digital goods consumed in the app — both the Pro/Platinum subscription AND the Fang packs — to be sold through **Apple In-App Purchase**, not Stripe, on iOS. Shipping Stripe checkout inside the iOS app (or even linking out to it for digital goods) risks rejection under the anti-steering rules. So: web monetization = Stripe (this doc); iOS monetization = a separate StoreKit / `expo-in-app-purchases` (or RevenueCat) integration with matching product IDs, reconciled to the same `profiles.plan` / Fang ledger server-side. That iOS IAP work is NOT built yet — keep the iOS app's paywall buttons either hidden or routed to Apple IAP before submitting a build that exposes them. (See `vp-business` + `business-legal-compliance`; this is the App Store anti-steering item in memory.)
 
 ### Customer Portal
 Dashboard → Settings → Billing → Customer Portal:
@@ -59,32 +80,35 @@ Dashboard → Settings → Payments → Payment methods:
 - Google Pay: enable
 - Link: enable (one-click for returning Stripe customers)
 
-### Tax
-Dashboard → Settings → Tax:
-- Enable **Stripe Tax**
-- Add origin address (Lionade business address)
-- Confirm tax registrations (US sales tax, EU VAT if applicable). `automatic_tax: { enabled: true }` is already on in the Checkout Session.
+### Tax ⚠️ (the #1 go-live blocker)
+Both `/api/stripe/checkout` AND `/api/stripe/fang-purchase` set `automatic_tax: { enabled: true }`. **If Stripe Tax is not configured, EVERY checkout session creation fails** ("Could not create checkout session") — the buttons will look broken with no obvious cause. So either:
+- **(A) Configure Stripe Tax** — Dashboard → Settings → Tax: enable **Stripe Tax**, add the origin address (Lionade business address), confirm registrations (US sales tax / EU VAT as applicable). Then `automatic_tax` works. OR
+- **(B) Launch without tax for now** — tell me and I'll env-gate `automatic_tax` behind a `STRIPE_AUTOMATIC_TAX=true` flag (defaults off) so checkout works immediately and you turn tax on later. Recommended if you just want to start charging today.
 
 ### Email receipts
 Dashboard → Settings → Emails:
 - Enable **Successful payments** and **Refunds** receipt emails
 - Set the from-name to "Lionade"
 
-## 3. DB migration
+## 3. DB migrations (already applied to prod)
 
-Run from local repo root before the first webhook fires:
-```
-npx supabase db push
-```
-This applies `supabase/migrations/20260603010601_stripe_subscriptions.sql`.
+The Stripe-related schema is already live in production: the subscription columns
+(`stripe_customer_id`, `stripe_subscription_id`, `subscription_tier`,
+`subscription_status`, `subscription_*`), the `stripe_webhook_events` dedup table
+(+ migration 068's `claim_stripe_event` claim), the Fang-IAP idempotency
+(migration 070 `credit_fang_iap`), and the admin/effective-plan resolver
+(`plan_grants` migration 065 + `recomputeEffectivePlan`). Nothing to run here for
+go-live — this is config-only. (Migrations are applied via the Supabase MCP, not
+`supabase db push`.)
 
 ## 4. Smoke test (test mode)
 
 1. Set Vercel Preview env to test keys + test price IDs.
 2. Run `stripe listen --forward-to <preview-url>/api/stripe/webhook` locally to grab a test signing secret.
 3. Hit `/pricing` on the preview URL, click Go Pro, complete checkout with `4242 4242 4242 4242`.
-4. Verify in Supabase: `select stripe_customer_id, subscription_tier, subscription_status, plan from profiles where id = '<your-user-id>';` → should show `subscription_status = 'trialing'` and `plan = 'pro'`.
+4. Verify in Supabase: `select stripe_customer_id, subscription_tier, subscription_status, plan from profiles where id = '<your-user-id>';` → should show `subscription_status = 'trialing'` and `plan = 'pro'` (the 2026-06-14 fix makes `trialing` grant paid access).
 5. From the Stripe Dashboard, cancel the test subscription → verify webhook fires and `plan` drops back to `free`.
+6. **Fang pack test:** on `/shop`, buy the Small Fang Pouch with `4242 4242 4242 4242` → after the webhook, verify `coins` increased by 5,000 and a `coin_transactions` row of type `fang_iap_purchase` exists. Buy the SAME session twice (replay the webhook from the Dashboard) → verify it does NOT double-credit (migration 070 idempotency).
 
 ## 5. Go-live
 
