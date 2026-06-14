@@ -72,12 +72,13 @@ export async function POST(req: NextRequest) {
       .single();
 
     if (betErr) {
-      // Refund the debit — the bet didn't get created.
+      // Refund the debit — the bet didn't get created. spend_refund reverses the
+      // 'spend' above (credits cashable + unwinds lifetime_fangs_spent).
       await supabaseAdmin.rpc("update_user_coins", {
         p_user_id: userId,
         p_delta: coinsStaked,
         p_min_balance: 0,
-        p_source: "cashable",
+        p_source: "spend_refund",
       });
       // 23505 = the one-active-bet partial UNIQUE: a concurrent request already
       // created an active bet. Surface the friendly message, not a 500.

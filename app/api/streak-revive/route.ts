@@ -178,25 +178,39 @@ export async function POST(req: NextRequest) {
       }, { status: 402 });
     }
 
-    const newBalance = coins - REVIVE_COST_FANGS;
     const nowIso = new Date().toISOString();
 
-    // Update profile: spend Fangs + restore streak + bump last_activity_at.
-    const { error: profErr } = await supabaseAdmin
-      .from("profiles")
-      .update({
-        coins: newBalance,
-        streak: revive.previous_streak,
-        last_activity_at: nowIso,
-      })
-      .eq("id", userId);
-    if (profErr) {
-      console.error("[streak-revive POST] profile:", profErr.message);
+    // 1. Spend the Fangs atomically. The RPC is the real guard (the pre-check
+    //    above is only for the friendly message); it never goes below 0.
+    const { data: spendData, error: spendErr } = await supabaseAdmin.rpc("update_user_coins", {
+      p_user_id: userId,
+      p_delta: -REVIVE_COST_FANGS,
+      p_min_balance: 0,
+      p_source: "spend",
+    });
+    if (spendErr) {
+      if (spendErr.code === "P0001") {
+        return NextResponse.json({
+          ok: false,
+          reason: "not_enough_fangs",
+          costFangs: REVIVE_COST_FANGS,
+          coins,
+          message: `Need ${REVIVE_COST_FANGS} Fangs (you have ${coins}).`,
+        }, { status: 402 });
+      }
+      console.error("[streak-revive POST] spend:", spendErr.message);
       return NextResponse.json({ error: "Couldn't restore streak." }, { status: 500 });
     }
+    const newBalance = Array.isArray(spendData)
+      ? (spendData[0]?.new_coins ?? coins - REVIVE_COST_FANGS)
+      : ((spendData as { new_coins?: number } | null)?.new_coins ?? coins - REVIVE_COST_FANGS);
 
-    // Mark the revive claimed.
-    const { error: claimErr } = await supabaseAdmin
+    // 2. Conditionally claim the revive BEFORE touching the streak. The
+    //    `.eq('status','open').select()` makes this atomic: only the first
+    //    claimer wins; a concurrent double-spend that loses here refunds.
+    //    (The old code set streak:0/last_activity:null on failure here, nuking
+    //    the very streak the user paid 5000 Fangs to revive.)
+    const { data: claimRows, error: claimErr } = await supabaseAdmin
       .from("streak_revives")
       .update({
         status: "claimed",
@@ -204,15 +218,45 @@ export async function POST(req: NextRequest) {
         claim_method: "fangs",
         fangs_spent: REVIVE_COST_FANGS,
       })
-      .eq("id", revive.id);
+      .eq("id", revive.id)
+      .eq("status", "open")
+      .select("id");
     if (claimErr) {
-      // Refund Fangs + revert streak if the claim row update fails.
       console.error("[streak-revive POST] claim:", claimErr.message);
-      await supabaseAdmin
-        .from("profiles")
-        .update({ coins, streak: 0, last_activity_at: null })
-        .eq("id", userId);
+      await supabaseAdmin.rpc("update_user_coins", {
+        p_user_id: userId, p_delta: REVIVE_COST_FANGS, p_min_balance: 0, p_source: "spend_refund",
+      });
       return NextResponse.json({ error: "Couldn't finalize revive." }, { status: 500 });
+    }
+    if (!claimRows || claimRows.length === 0) {
+      // A concurrent request already claimed this revive — refund our spend.
+      await supabaseAdmin.rpc("update_user_coins", {
+        p_user_id: userId, p_delta: REVIVE_COST_FANGS, p_min_balance: 0, p_source: "spend_refund",
+      });
+      return NextResponse.json({
+        ok: false,
+        reason: "already_claimed",
+        message: "This streak was just revived.",
+      }, { status: 409 });
+    }
+
+    // 3. Restore the streak (the deliverable). On failure: refund + re-open the
+    //    revive so the user can retry. The streak was never set, so there is
+    //    nothing to revert and nothing to nuke.
+    const { error: streakErr } = await supabaseAdmin
+      .from("profiles")
+      .update({ streak: revive.previous_streak, last_activity_at: nowIso })
+      .eq("id", userId);
+    if (streakErr) {
+      console.error("[streak-revive POST] streak restore:", streakErr.message);
+      await supabaseAdmin.rpc("update_user_coins", {
+        p_user_id: userId, p_delta: REVIVE_COST_FANGS, p_min_balance: 0, p_source: "spend_refund",
+      });
+      await supabaseAdmin
+        .from("streak_revives")
+        .update({ status: "open", claimed_at: null, claim_method: null, fangs_spent: null })
+        .eq("id", revive.id);
+      return NextResponse.json({ error: "Couldn't restore streak." }, { status: 500 });
     }
 
     // Audit (best-effort).
