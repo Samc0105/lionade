@@ -7,6 +7,22 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 
 ---
 
+## 2026-06-14: PHOTOGRAPH YOUR SYLLABUS, client-side OCR for Mastery Mode (web shipped; iOS gap tracked)
+
+**Status:** Web committed 2026-06-14 (zero AI / zero API cost). New `components/Mastery/PhotoImport.tsx` + a one-line wire-in on `/learn/mastery`. tesseract.js@7 self-hosted under `/public/tess` (worker + SIMD-LSTM core + eng model, ~17 MB, served same-origin so the existing CSP needs no widening). `npx tsc --noEmit` clean; route compiles; all four engine assets verified serving 200 with correct MIME. In-browser OCR scan pending Sam's manual device check. Reviewed across code/QA/a11y/cost via a 4-lens adversarial pass (13 findings fixed). No em-dashes in user copy. Owner: `admin`.
+
+**What shipped (web):** the Mastery create funnel gained a "Scan a photo of your syllabus" button next to the textarea. A photo / screenshot / scan is OCR'd ENTIRELY IN THE BROWSER (tesseract.js WASM), and the recognized text is dropped into the same textarea that already feeds `/api/mastery/parse`. No new API route, no server compute, no AWS Textract, no per-use cost. The photo never leaves the device; only the (cached) model is downloaded inbound, same-origin.
+
+| Surface | Web | iOS |
+|---|---|---|
+| Photo to study-set (OCR a syllabus photo into Mastery) | ✅ NEW `PhotoImport` on `/learn/mastery`, browser-side tesseract.js, feeds the existing parse route | ❌ MISSING. iOS has `expo-image-picker` capture surfaces but no OCR to Mastery yet. Port = on-device Apple Vision / ML Kit text recognition (also $0, on-device), feeding the same `/api/mastery/parse`. Roadmapped, NOT built. |
+| Parse / AI pipeline | ✅ unchanged (`/api/mastery/parse`) | 🚫 N/A (server-side, shared by both platforms once iOS adds capture) |
+| Engine hosting | ✅ self-hosted `/public/tess`, same-origin, CSP-clean | 🚫 N/A (iOS would use the native on-device OCR framework, no model to host) |
+
+**Why this is a tracked GAP, not N/A:** the user-facing capability (photograph instead of type) genuinely does not exist on iOS yet. The iOS implementation diverges by engine (native Vision/ML Kit vs WASM) but lands the same outcome and reuses the same parse route. Flagged for `vp-ios` when iOS work resumes.
+
+---
+
 ## 2026-06-14: ADMIN PRO/PLATINUM GRANTS, time-boxed, revocable, audited (web-only; NO iOS work needed, granted tier is inherited)
 
 **Status:** Web shipped (committed + pushed 2026-06-14, zero AI cost). Migration `065_plan_grants.sql` applied to production 2026-06-14. Three client/route contract bugs from the first build (missing GET handler, response key and camelCase mismatches) were fixed before ship; `npx tsc --noEmit` clean. No new packages. No em-dashes. Owner: `admin`.

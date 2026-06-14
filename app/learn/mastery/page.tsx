@@ -15,6 +15,7 @@ import SpaceBackground from "@/components/SpaceBackground";
 import RevealText from "@/components/RevealText";
 import { apiPost, swrFetcher } from "@/lib/api-client";
 import MasteryProgressBar from "@/components/Mastery/MasteryProgressBar";
+import MasteryPhotoImport from "@/components/Mastery/PhotoImport";
 
 /**
  * Mastery Mode landing page.
@@ -75,6 +76,18 @@ export default function MasteryLandingPage() {
   const [error, setError] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
   const [limitHit, setLimitHit] = useState<null | { plan: string; limit: number; current: number; message: string }>(null);
+
+  // Photo import (client-side OCR) drops its recognized text into the same
+  // input the textarea feeds, so the existing parse flow handles it unchanged.
+  // Appends to whatever's already typed rather than clobbering it.
+  const handleOcrExtract = (text: string) => {
+    setError(null);
+    setInput((prev) => {
+      const base = prev.trim();
+      const merged = base ? `${base}\n${text}` : text;
+      return merged.slice(0, 8000);
+    });
+  };
 
   const submit = async () => {
     const cleaned = input.trim();
@@ -211,6 +224,7 @@ export default function MasteryLandingPage() {
                   text-[15px] text-cream placeholder:text-cream/30 leading-relaxed font-sans"
               />
             </div>
+            <MasteryPhotoImport onExtract={handleOcrExtract} disabled={parsing} />
             {error && (
               <div className="mt-3 flex items-start gap-2 text-[12px] text-[#EF4444]">
                 <Warning size={14} weight="fill" className="mt-0.5 shrink-0" />
