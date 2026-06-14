@@ -41,6 +41,17 @@ export async function POST(req: NextRequest) {
     if (!subject || typeof subject !== "string") {
       return NextResponse.json({ error: "Missing subject" }, { status: 400 });
     }
+
+    // Idempotency key: a stable per-attempt UUID from the client. A replay of
+    // the same attempt (network retry, double-submit) hits the partial UNIQUE
+    // (user_id, attempt_id) below and returns the prior result without
+    // re-crediting. Optional — an old client omitting it stores NULL (not
+    // deduped), so this is backward-compatible.
+    const attemptId =
+      typeof body.attemptId === "string" &&
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(body.attemptId)
+        ? body.attemptId
+        : null;
     // Sanity-clamp client-supplied values to prevent self-grant exploits.
     // These shadow the body values everywhere downstream.
     const totalQuestions = Math.max(1, Math.min(100, Number(body.totalQuestions) || 0));
@@ -60,11 +71,36 @@ export async function POST(req: NextRequest) {
         coins_earned: coinsEarned,
         xp_earned: xpEarned,
         streak_bonus: false,
+        attempt_id: attemptId,
       })
       .select("id")
       .single();
 
     if (sessionErr) {
+      // Idempotent replay: the insert hit the partial UNIQUE(user_id,attempt_id).
+      // Return the prior result WITHOUT re-crediting (credits were applied on
+      // the first call). This is the replay guard for the core earn path.
+      if (sessionErr.code === "23505" && attemptId) {
+        const { data: prior } = await supabaseAdmin
+          .from("quiz_sessions")
+          .select("id")
+          .eq("user_id", userId)
+          .eq("attempt_id", attemptId)
+          .maybeSingle();
+        const { data: priorProfile } = await supabaseAdmin
+          .from("profiles")
+          .select("coins, xp, streak, level")
+          .eq("id", userId)
+          .single();
+        return NextResponse.json({
+          success: true,
+          duplicate: true,
+          sessionId: prior?.id ?? null,
+          profile: priorProfile ?? null,
+          bonusFangs: 0,
+          streakMilestone: null,
+        });
+      }
       console.error("[save-quiz-results] FAILED quiz_sessions:", sessionErr.message, sessionErr.details, sessionErr.hint);
       return NextResponse.json({ error: "Couldn't save quiz results." }, { status: 500 });
     }
@@ -569,7 +605,10 @@ export async function POST(req: NextRequest) {
         const baseCoinsWon = won ? Math.floor(activeBet.coins_staked * (multipliers[activeBet.target_score] ?? 1)) : 0;
         const coinsWon = applyFangMultiplierFromTier(baseCoinsWon, profile.plan as string | null, profile.subscription_status as string | null);
 
-        await supabaseAdmin
+        // Conditional claim: only the FIRST submit whose UPDATE still sees
+        // resolved_at IS NULL wins the bet. Concurrent submits match 0 rows and
+        // must NOT credit — otherwise the payout double-credits (up to 5x stake).
+        const { data: betClaim } = await supabaseAdmin
           .from("daily_bets")
           .update({
             actual_score: correctAnswers,
@@ -577,9 +616,13 @@ export async function POST(req: NextRequest) {
             coins_won: coinsWon,
             resolved_at: new Date().toISOString(),
           })
-          .eq("id", activeBet.id);
+          .eq("id", activeBet.id)
+          .is("resolved_at", null)
+          .select("id");
 
-        if (won) {
+        const claimedBet = (betClaim?.length ?? 0) > 0;
+
+        if (won && claimedBet) {
           // Atomic credit — see Step 3 rationale.
           await supabaseAdmin.rpc("update_user_coins", {
             p_user_id: userId,

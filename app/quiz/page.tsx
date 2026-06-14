@@ -455,9 +455,13 @@ export default function QuizPage() {
     setTotalCoins(coins);
     setTotalXp(xp);
 
+    // Stable idempotency key for this attempt — a network retry of this submit
+    // reuses it so the server dedups instead of double-crediting.
+    const attemptId = crypto.randomUUID();
     const res = await apiPost<{ success: boolean; bonusFangs?: number }>(
       "/api/save-quiz-results",
       {
+        attemptId,
         subject: subject!,
         totalQuestions: questions.length,
         correctAnswers: correctCount,
@@ -1142,7 +1146,7 @@ function ResultsScreen({
         eyebrow: "STREAK MILESTONE",
         headline: `${streakMilestone.days} DAYS STRONG`,
         description: "Consistency is compounding. Keep showing up.",
-        illustration: `/illustrations/${tier}.png`,
+        illustration: cdnUrl(`/illustrations/${tier}.png`),
         fangs: streakMilestone.bonus,
         accent: "ember",
       });
@@ -1153,7 +1157,7 @@ function ResultsScreen({
         eyebrow: "BONUS UNLOCKED",
         headline: "3 IN A ROW",
         description: "Three quizzes in an hour. The grind is paying out.",
-        illustration: "/illustrations/rank-elite.png",
+        illustration: cdnUrl("/illustrations/rank-elite.png"),
         fangs: bonusFangs,
         accent: "gold",
       });
@@ -1164,7 +1168,7 @@ function ResultsScreen({
         eyebrow: "PERFECT RUN",
         headline: "FLAWLESS",
         description: "Every answer correct. That deserves a moment.",
-        illustration: "/illustrations/rank-perfect.png",
+        illustration: cdnUrl("/illustrations/rank-perfect.png"),
         accent: "electric",
       });
     }
@@ -1198,7 +1202,7 @@ function ResultsScreen({
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center mb-4 animate-slide-up">
             <img
-              src={`/illustrations/${rank.illustration}.png`}
+              src={cdnUrl(`/illustrations/${rank.illustration}.png`)}
               alt=""
               width={120}
               height={120}
@@ -1235,7 +1239,7 @@ function ResultsScreen({
             }}
           >
             <img
-              src={`/illustrations/${tier}.png`}
+              src={cdnUrl(`/illustrations/${tier}.png`)}
               alt=""
               width={44}
               height={44}
