@@ -1,12 +1,12 @@
 -- ============================================================
 -- Migration 076: lock down SECURITY DEFINER functions + pin mutable search_path.
 -- Hardening surfaced by the Supabase database linter (security advisors).
--- STATUS: NOT YET APPLIED. This changes live function permissions on shared
--- prod infra, so it is held for Sam's explicit go (the auto-apply classifier
--- correctly blocked an unattended permission change). Idempotent (REVOKE /
--- ALTER ... SET are safe to re-run), so apply once approved via the Supabase
--- SQL editor or MCP. All call sites were verified server-only before writing
--- the REVOKEs (see PART A note) so applying this does NOT break the app.
+-- STATUS: APPLIED to production 2026-06-14 (after Sam's explicit go). Idempotent
+-- (REVOKE / ALTER ... SET are safe to re-run). All call sites were verified
+-- server-only before the REVOKEs (see PART A note), so this does NOT break the
+-- app. NOTE: guard_profile_equipped is a trigger function whose EXECUTE was held
+-- via the implicit PUBLIC role, so its revoke includes `public` (the others had
+-- explicit anon/authenticated grants).
 -- ============================================================
 --
 -- PART A — Revoke public EXECUTE on server-only SECURITY DEFINER functions.
@@ -28,7 +28,7 @@ revoke execute on function public.reap_afk_presence() from anon, authenticated;
 revoke execute on function public.set_active_session(p_user_id uuid, p_type text, p_id text, p_role text) from anon, authenticated;
 revoke execute on function public.clear_active_session(p_user_id uuid) from anon, authenticated;
 revoke execute on function public.ping_presence(p_user_id uuid, p_type text, p_id text) from anon, authenticated;
-revoke execute on function public.guard_profile_equipped() from anon, authenticated;
+revoke execute on function public.guard_profile_equipped() from public, anon, authenticated;
 
 -- NOT revoked (deliberately): current_app_role(), clone_bank(...), and
 -- weekly_quiz_leaderboard(...) may be intentionally client-callable (role

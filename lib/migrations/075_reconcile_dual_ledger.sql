@@ -1,10 +1,8 @@
 -- ============================================================
 -- Migration 075: one-time reconciliation of the dual Fang ledger.
--- STATUS: NOT YET APPLIED. This rewrites live user balance-ledger columns, so
--- it is held for Sam's explicit go (the auto-apply classifier correctly blocked
--- an unattended prod balance mutation). Idempotent (re-running is a no-op once
--- the invariant holds), so it is safe to apply once approved. To apply:
---   run this file's UPDATE against prod (Supabase SQL editor or MCP apply).
+-- STATUS: APPLIED to production 2026-06-14 (after Sam's explicit go). Verified:
+-- 8 drifted rows reconciled, 0 remaining, total coins unchanged (7572 == 7572).
+-- Idempotent (re-running is a no-op once the invariant holds).
 -- ============================================================
 --
 -- WHY: the dual ledger invariant is `coins = fangs_cashable + fangs_iap` (the
