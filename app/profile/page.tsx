@@ -833,16 +833,18 @@ function EditProfileSection({ user, refreshUser }: SharedProps) {
       }
     }
 
-    // Save other profile fields (excluding username — handled above)
-    const updates: Record<string, string> = {
+    // Save other profile fields via the moderated server route (display_name +
+    // bio are public, user-authored UGC and must be moderated; the old direct
+    // client update bypassed that). Username is handled above via its own route.
+    const updates = {
       display_name: firstName.trim(),
       bio: bio.trim(),
       education_level: education,
       study_goal: studyGoal,
     };
-    const { error } = await supabase.from("profiles").update(updates).eq("id", user.id);
-    if (error) {
-      setToast({ msg: error.message, err: true });
+    const saveRes = await apiPost<{ success: boolean }>("/api/user/profile-update", updates);
+    if (!saveRes.ok) {
+      setToast({ msg: saveRes.error ?? "Failed to save profile", err: true });
     } else {
       await supabase.auth.updateUser({ data: { display_name: updates.display_name } });
       await refreshUser();
