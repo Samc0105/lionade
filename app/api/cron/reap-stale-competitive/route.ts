@@ -72,23 +72,33 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Reap failed" }, { status: 500 });
     }
 
+    // Batch the last-activity lookup into ONE query (was N+1 — a separate
+    // SELECT per active match, paying the network round-trip tax 50x). Pull
+    // every candidate match's responses newest-first and keep the first
+    // submitted_at seen per match_id (= its latest response).
+    const candidateIds = (actives ?? []).map((m) => m.id);
+    const lastRespByMatch = new Map<string, string>();
+    if (candidateIds.length > 0) {
+      const { data: resps } = await supabaseAdmin
+        .from("competitive_responses")
+        .select("match_id, submitted_at")
+        .in("match_id", candidateIds)
+        .order("submitted_at", { ascending: false });
+      for (const r of (resps ?? []) as Array<{ match_id: string; submitted_at: string }>) {
+        if (!lastRespByMatch.has(r.match_id)) lastRespByMatch.set(r.match_id, r.submitted_at);
+      }
+    }
+
     let voided = 0;
     let settled = 0;
     let skipped = 0;
 
     for (const row of (actives ?? []) as CompetitiveMatchRow[]) {
-      // Determine last activity for this match.
-      const { data: lastResp } = await supabaseAdmin
-        .from("competitive_responses")
-        .select("submitted_at")
-        .eq("match_id", row.id)
-        .order("submitted_at", { ascending: false })
-        .limit(1)
-        .maybeSingle();
-
-      const hasResponses = !!lastResp?.submitted_at;
+      // Last activity for this match, from the batched map above.
+      const lastSubmittedAt = lastRespByMatch.get(row.id) ?? null;
+      const hasResponses = !!lastSubmittedAt;
       const lastActivityMs = hasResponses
-        ? new Date(lastResp.submitted_at as string).getTime()
+        ? new Date(lastSubmittedAt).getTime()
         : new Date(row.created_at).getTime();
 
       const isStale = hasResponses

@@ -436,6 +436,26 @@ const ROUTE_LIMITS: RouteLimit[] = [
     keyPrefix: "user-account-lifecycle",
   },
 
+  // Social fan-out routes — anti-spam. Both already enforce server-side caps
+  // (friends: a UNIQUE constraint + existing-friendship check; request-join: a
+  // 3-pending-total cap + 5-min per-room cooldown), so this is the IP-level
+  // anti-burst layer on top: a hijacked account can't blast hundreds of distinct
+  // targets/rooms per minute. POST-only so the GET status polls stay unthrottled.
+  {
+    test: (p) => p === "/api/social/friends",
+    method: "POST",
+    max: 20,
+    windowMs: 60 * 1000,
+    keyPrefix: "social-friend-req",
+  },
+  {
+    test: (p) => /^\/api\/party\/rooms\/[^/]+\/request-join$/.test(p),
+    method: "POST",
+    max: 20,
+    windowMs: 60 * 1000,
+    keyPrefix: "party-request-join",
+  },
+
   // Catch-all for other API routes
   {
     test: (p) => p.startsWith("/api/"),
