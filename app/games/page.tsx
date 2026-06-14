@@ -417,8 +417,12 @@ export default function GamesPage() {
   // ── Award Fangs ────────────────────────────────────────────
   const awardFangs = useCallback(async (amount: number, gameType: string) => {
     if (!user?.id || amount <= 0) return;
-    setFangsEarned(amount);
-    await apiPost("/api/games/reward", { amount, gameType });
+    setFangsEarned(amount); // optimistic
+    const res = await apiPost<{ awarded?: number }>("/api/games/reward", { amount, gameType });
+    // Honor the server's actual award — each game pays at most once per day.
+    if (res.ok && typeof res.data?.awarded === "number" && res.data.awarded !== amount) {
+      setFangsEarned(res.data.awarded);
+    }
     mutateUserStats(user.id);
     mutateStats?.();
   }, [user?.id, mutateStats]);
@@ -1570,7 +1574,7 @@ export default function GamesPage() {
               aria-hidden="true"
             >
               <img
-                src="/image-name.png"
+                src={cdnUrl("/image-name.png")}
                 alt=""
                 className="w-full h-full object-contain"
                 style={{ filter: "drop-shadow(0 0 32px rgba(255,215,0,0.40))" }}

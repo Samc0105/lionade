@@ -110,8 +110,12 @@ export default function CompeteBlitzPage() {
 
   const awardFangs = useCallback(async (amount: number) => {
     if (!user?.id || amount <= 0) return;
-    setFangsEarned(amount);
-    await apiPost("/api/games/reward", { amount, gameType: "blitz" });
+    setFangsEarned(amount); // optimistic
+    const res = await apiPost<{ awarded?: number }>("/api/games/reward", { amount, gameType: "blitz" });
+    // Honor the server's actual award — blitz pays at most once per day.
+    if (res.ok && typeof res.data?.awarded === "number" && res.data.awarded !== amount) {
+      setFangsEarned(res.data.awarded);
+    }
     mutateUserStats(user.id);
     mutateStats?.();
   }, [user?.id, mutateStats]);
