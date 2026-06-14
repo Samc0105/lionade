@@ -345,19 +345,22 @@ export async function POST(req: NextRequest) {
     let streakMilestone: { days: number; bonus: number } | null = null;
     const STREAK_MILESTONES: Record<number, number> = { 3: 50, 7: 150, 14: 500, 30: 2000 };
     if (newStreak in STREAK_MILESTONES) {
-      // Check we haven't already awarded this milestone (prevents duplicate on replay)
-      const { count: alreadyAwarded } = await supabaseAdmin
-        .from("coin_transactions")
-        .select("id", { count: "exact", head: true })
-        .eq("user_id", userId)
-        .eq("type", "streak_milestone")
-        .like("description", `%${newStreak}-day%`);
+      // Atomic idempotency: INSERT the (user_id, milestone_day) claim FIRST. The
+      // PK (migration 077) is the lock — only the submit whose insert actually
+      // creates the row credits the bonus. The old guard was a COUNT-then-credit
+      // read on coin_transactions: two legitimate concurrent submits (two tabs,
+      // distinct attempt_ids) both saw 0 and BOTH credited, double-paying up to
+      // 2000 Fangs. A 23505 conflict here = already awarded OR a concurrent
+      // submit won the claim → skip.
+      const { data: milestoneClaim, error: claimErr } = await supabaseAdmin
+        .from("user_milestone_awards")
+        .insert({ user_id: userId, milestone_day: newStreak })
+        .select("user_id");
+      const claimedMilestone = !claimErr && (milestoneClaim?.length ?? 0) > 0;
 
-      if (!alreadyAwarded || alreadyAwarded === 0) {
+      if (claimedMilestone) {
         const milestoneBonus = applyFangMultiplierFromTier(STREAK_MILESTONES[newStreak], profile.plan as string | null, profile.subscription_status as string | null);
-        // Atomic credit — see Step 3 rationale. Check the error before the audit
-        // row / notification / response so a failed credit can't claim a
-        // milestone bonus that was never paid (ledger + UX divergence).
+        // Atomic credit — see Step 3 rationale.
         const { error: milestoneErr } = await supabaseAdmin.rpc("update_user_coins", {
           p_user_id: userId,
           p_delta: milestoneBonus,
@@ -365,7 +368,14 @@ export async function POST(req: NextRequest) {
           p_source: "cashable",
         });
         if (milestoneErr) {
-          console.warn("[save-quiz-results] Step 5b milestone credit WARN:", milestoneErr.message);
+          // Credit failed AFTER claiming — release the claim so a later quiz can
+          // re-award (compensating delete), and don't write a phantom audit row.
+          console.warn("[save-quiz-results] Step 5b milestone credit WARN — releasing claim:", milestoneErr.message);
+          await supabaseAdmin
+            .from("user_milestone_awards")
+            .delete()
+            .eq("user_id", userId)
+            .eq("milestone_day", newStreak);
         } else {
           await supabaseAdmin.from("coin_transactions").insert({
             user_id: userId,
