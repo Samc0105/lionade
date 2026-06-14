@@ -187,7 +187,17 @@ export async function settleClaimedMatch(
   }
 
   // ── Loss-cap enforcement (per user) + balance clamp ──
-  const profileWrites: Array<PromiseLike<unknown>> = [];
+  // Coins go through the atomic update_user_coins RPC (keeps fangs_cashable in
+  // sync with coins — a raw write would drift the dual ledger and corrupt the
+  // V2 cash-out accounting). We use source 'cashable' for BOTH signs: a win
+  // credits cashable, and a loss DEBITS cashable WITHOUT touching
+  // lifetime_fangs_spent — a wager loss is not a cash-out "spend", so it must
+  // not count toward the 60%-spend gate. (Service role may pass a negative
+  // 'cashable' delta; the RPC clamps cashable at 0.) ELO is a separate,
+  // non-ledger column written plainly. A rare concurrent balance drop can make
+  // a debit exceed live coins -> P0001; we log and skip that one coin write
+  // (the loss simply isn't applied — never a crash or a negative balance).
+  const profileWrites: Array<Promise<void>> = [];
   const cappedFangDelta: Record<string, number> = {};
 
   for (const u of participants) {
@@ -205,9 +215,24 @@ export async function settleClaimedMatch(
     const effectiveDelta = newCoins - coinsBefore[u];
     cappedFangDelta[u] = effectiveDelta;
 
-    const update: Record<string, unknown> = { coins: newCoins };
-    update[eloCol] = eloAfter[u];
-    profileWrites.push(supabase.from("profiles").update(update).eq("id", u));
+    profileWrites.push(
+      (async () => {
+        if (effectiveDelta !== 0) {
+          const { error: coinErr } = await supabase.rpc("update_user_coins", {
+            p_user_id: u,
+            p_delta: effectiveDelta,
+            p_min_balance: 0,
+            p_source: "cashable",
+          });
+          if (coinErr) console.error("[settle] coin write", u, coinErr.message);
+        }
+        const { error: eloErr } = await supabase
+          .from("profiles")
+          .update({ [eloCol]: eloAfter[u] })
+          .eq("id", u);
+        if (eloErr) console.error("[settle] elo write", u, eloErr.message);
+      })(),
+    );
   }
 
   await Promise.all(profileWrites);
