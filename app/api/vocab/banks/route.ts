@@ -13,6 +13,7 @@ import {
   type BankRow,
 } from "@/lib/vocab-banks";
 import { grantPolyglotBadge } from "@/lib/cosmetic-grants";
+import { moderateText, logFlagged } from "@/lib/moderation-ugc";
 
 /**
  * POST /api/vocab/banks — create a new word bank
@@ -75,6 +76,17 @@ export async function POST(req: NextRequest) {
   if (!normalizedName) {
     return NextResponse.json(
       { error: "Name must be 1 to 50 characters" },
+      { status: 400 },
+    );
+  }
+
+  // Moderate the bank name — it surfaces publicly in Discover. (Bank CREATE had
+  // NO moderation; only rename did.) Block + audit on a flag.
+  const nameMod = await moderateText(normalizedName.display);
+  if (!nameMod.ok) {
+    void logFlagged(userId, "bank_name", normalizedName.display, nameMod);
+    return NextResponse.json(
+      { error: "That name isn't allowed. Try a different one." },
       { status: 400 },
     );
   }

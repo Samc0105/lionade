@@ -3,6 +3,7 @@ import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
 import { isDemoUser } from "@/lib/demo-guard";
 import { demoBlockedResponse } from "@/lib/demo-guard-server";
+import { moderateText, logFlagged } from "@/lib/moderation-ugc";
 
 export async function POST(req: NextRequest) {
   const auth = await requireAuth(req);
@@ -22,6 +23,13 @@ export async function POST(req: NextRequest) {
     const clean = newUsername.trim().toLowerCase().replace(/[^a-z0-9_]/g, "");
     if (clean.length < 3 || clean.length > 20) {
       return NextResponse.json({ error: "Username must be 3-20 characters" }, { status: 400 });
+    }
+
+    // Moderate the public username — block + audit a slur/abusive handle.
+    const mod = await moderateText(clean);
+    if (!mod.ok) {
+      void logFlagged(userId, "username", clean, mod);
+      return NextResponse.json({ error: "That username isn't allowed. Try another." }, { status: 400 });
     }
 
     // Get current profile
