@@ -14,9 +14,16 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 | Section | Web | iOS |
 |---|---|---|
 | AP Exams topic picker (`/quiz/ap-exams`) | ✅ 10-subject Test-Prep grid → quiz | ✅ NEW `app/quiz/ap-exams.tsx` (Phosphor→Ionicons, same colors); "Test Prep" subject card now routes here (mirrors web "AP Exams" card) → deep-links `/quiz?subject=Test Prep` |
-| Leaderboard ladder tabs (Duel/Competitive/Squad/Weekly) | ✅ 4 ladders (`getLadderLeaderboard` + weekly RPC) | 🟡 3 of 4 shipped — Duel/Competitive/Squad ELO tabs (`useLeaderboard(ladder)`); **Weekly Fangs tab is a follow-up** (needs the weekly RPC + Fangs row display + opt-out filtering) |
+| Leaderboard ladder tabs (Duel/Competitive/Squad/Weekly) | ✅ 4 ladders (`getLadderLeaderboard` + weekly RPC) | ✅ 4/4 — Duel/Ranked/Squad ELO tabs (`useLeaderboard(ladder)`) + **Weekly Fangs** (`useWeeklyLeaderboard` — same RPC + enrichment + opt-out filter; Row/Podium take a `metric` prop for the Fangs display) |
+| Party room privacy | ✅ open / friends / closed | ✅ 3-mode selector (was a binary public/private Switch) |
 
-**Roadmap (remaining, ordered):** Tier 1 quick-wins — Ninny PDF upload, Social feed, party 'Closed' privacy, Academia add-assignment, Weekly-Fangs leaderboard tab. Tier 2 — mid-game invite modal, visit other profiles, Ninny practice-misses, edit-profile cosmetics, compete-hub UI. Tier 3 (large / 💲API-flagged) — Resume Coach 💲, Ninny chat 💲, Mastery Socratic 💲, photo-OCR, Map Pin Drop, 2v2 Squad, Poker Face.
+**Audit calibration:** the 5-area parity map (48 raw gaps) OVER-reported — several flagged "gaps" are already on iOS (Social feed via `useSocialFeed`, Academia `AddAssignmentSheet`, etc.). VERIFY each gap against the iOS code before porting. After harvesting the genuine clean quick-wins (above), the real remaining backlog is the LARGER items:
+
+**Remaining (ordered, need scoping/decisions):**
+- 💲**API-cost — need Sam's go before building:** Resume Coach (large, OpenAI), Ninny chat-with-material (large, OpenAI streaming), Mastery Socratic follow-ups (OpenAI).
+- **Native-module:** syllabus/Mastery photo-OCR (Apple Vision / ML Kit), Ninny PDF upload (PDF text extraction lib).
+- **Large game ports:** Map Pin Drop competitive mode (map component), 2v2 Squad format (duo codes + format param), Poker Face party game.
+- **Medium UI:** mid-game invite modal, Ninny practice-your-misses (spaced repetition), compete-hub rich UI / tier pyramid, profile cosmetics-locker live preview.
 
 ---
 
