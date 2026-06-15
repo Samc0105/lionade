@@ -7,6 +7,19 @@ Legend: ✅ shipped · 🟡 partial · ❌ missing · 🚫 N/A (web-only by desi
 
 ---
 
+## 2026-06-14: WEB→iOS PARITY SPRINT (sectioned port; commits held for next build)
+
+**Status:** Ongoing section-by-section port closing web↔iOS feature gaps (driven by a 5-area parity audit, 48 gaps found). iOS commits held for the next batched EAS build. Each section: full port, `tsc` clean, committed. Owner: `vp-ios` + `admin`.
+
+| Section | Web | iOS |
+|---|---|---|
+| AP Exams topic picker (`/quiz/ap-exams`) | ✅ 10-subject Test-Prep grid → quiz | ✅ NEW `app/quiz/ap-exams.tsx` (Phosphor→Ionicons, same colors); "Test Prep" subject card now routes here (mirrors web "AP Exams" card) → deep-links `/quiz?subject=Test Prep` |
+| Leaderboard ladder tabs (Duel/Competitive/Squad/Weekly) | ✅ 4 ladders (`getLadderLeaderboard` + weekly RPC) | 🟡 3 of 4 shipped — Duel/Competitive/Squad ELO tabs (`useLeaderboard(ladder)`); **Weekly Fangs tab is a follow-up** (needs the weekly RPC + Fangs row display + opt-out filtering) |
+
+**Roadmap (remaining, ordered):** Tier 1 quick-wins — Ninny PDF upload, Social feed, party 'Closed' privacy, Academia add-assignment, Weekly-Fangs leaderboard tab. Tier 2 — mid-game invite modal, visit other profiles, Ninny practice-misses, edit-profile cosmetics, compete-hub UI. Tier 3 (large / 💲API-flagged) — Resume Coach 💲, Ninny chat 💲, Mastery Socratic 💲, photo-OCR, Map Pin Drop, 2v2 Squad, Poker Face.
+
+---
+
 ## 2026-06-14: PROFILE display_name/bio MODERATION — iOS PARITY SHIPPED (held for build)
 
 **Status:** Web shipped the moderated `/api/user/profile-update` route; iOS now uses it. Both committed 2026-06-14 (iOS held for the next batched EAS build). Closes the last unmoderated public-text surface on both platforms. Also relevant to the two READY security migrations 078/079: iOS was audited and writes NONE of the guarded columns/tables, so applying 078/079 is safe for iOS and closes the same latent self-grant exploit there. Owner: `admin` + `vp-ios`.
