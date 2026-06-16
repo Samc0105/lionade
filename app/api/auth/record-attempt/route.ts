@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
+import { recordSecurityEvent } from "@/lib/admin-auth";
 
 /**
  * Records one login attempt (success or failure) into `login_attempts` so
@@ -33,6 +34,17 @@ export async function POST(request: NextRequest) {
     request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
     request.headers.get("x-real-ip") ??
     null;
+
+  // Fire-and-forget brute-force telemetry for the security dashboard. This is
+  // a confirmed failed-credentials attempt (success returns 400 above). Never
+  // logs the attempted email/password; never awaited; never blocks the login.
+  recordSecurityEvent({
+    ip: ip ?? "unknown",
+    category: "bruteforce",
+    severity: 2,
+    path: request.nextUrl.pathname,
+    method: request.method,
+  });
 
   try {
     const { error } = await supabaseAdmin.from("login_attempts").insert({

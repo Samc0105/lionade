@@ -18,8 +18,53 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "./supabase-server";
 import { getAuthedUser } from "./api-auth";
+import type { SecurityEventInput } from "./security/signatures";
 
 export type AppRole = "user" | "support" | "admin";
+
+/** Extracts the client IP from proxy headers (x-forwarded-for / x-real-ip). */
+function clientIp(req: NextRequest): string | null {
+  return (
+    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
+    req.headers.get("x-real-ip") ??
+    null
+  );
+}
+
+/**
+ * Fire-and-forget write to security_events. Feeds the security dashboard's
+ * brute-force / admin-probe view with the 401/403 signals the edge middleware
+ * structurally cannot observe (those decisions happen inside node handlers).
+ *
+ * MUST NEVER throw and MUST NEVER be awaited on a happy path — call it only on
+ * a failure branch and let the promise settle in the background. Swallows all
+ * errors (telemetry must never affect the request's outcome or latency).
+ *
+ * Untyped .from() insert — the security_events table is not yet in the
+ * generated Supabase types (migration 20260616140000_security_monitoring.sql,
+ * applied manually). Columns match that table exactly. This is the one
+ * documented Supabase-type gap.
+ */
+export function recordSecurityEvent(input: SecurityEventInput): void {
+  const row = {
+    ip: input.ip,
+    category: input.category,
+    severity: input.severity ?? 1,
+    path: input.path ?? null,
+    method: input.method ?? null,
+    user_agent: input.user_agent ?? null,
+    detail: input.detail ?? {},
+  };
+  void supabaseAdmin
+    .from("security_events")
+    .insert(row)
+    .then(({ error }) => {
+      if (error) console.error("[security-event]", error.message);
+    })
+    .then(undefined, () => {
+      // Network / unexpected rejection — telemetry is best-effort only.
+    });
+}
 
 export interface StaffUser {
   userId: string;
@@ -63,6 +108,17 @@ export async function requireRole(
   }
   const role = await getUserRole(user.userId);
   if (!roleSatisfies(role, minRole)) {
+    // Authenticated user reaching an admin surface they lack the role for is a
+    // probe signal middleware can't see. Fire-and-forget only on this failure
+    // branch; never awaited, never blocks the 403, never throws.
+    recordSecurityEvent({
+      ip: clientIp(req) ?? "unknown",
+      category: "admin_probe",
+      severity: 2,
+      path: req.nextUrl.pathname,
+      method: req.method,
+      detail: { required_role: minRole },
+    });
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
   return { ...user, role };

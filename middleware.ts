@@ -1,5 +1,13 @@
 import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
+import type { NextRequest, NextFetchEvent } from "next/server";
+import {
+  matchBadPath,
+  isSuspiciousUserAgent,
+  isScannerUserAgent,
+  pathGroup,
+  type TelemetryRollupRow,
+  type SecurityEventInput,
+} from "@/lib/security/signatures";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Rate limiting + security headers middleware
@@ -8,6 +16,12 @@ import type { NextRequest } from "next/server";
 // For Vercel multi-region production, swap for Upstash Redis:
 //   npm install @upstash/ratelimit @upstash/redis
 //   Then read UPSTASH_REDIS_REST_URL + UPSTASH_REDIS_REST_TOKEN from env.
+//
+// THE EDGE INVARIANT: this file runs on the Edge runtime. It must NOT import
+// supabaseAdmin, the service role, node 'crypto'/'fs', or anything node-only.
+// All Supabase work (telemetry ingest + denylist read) is delegated to the two
+// internal NODE routes, reached over plain fetch through event.waitUntil so the
+// request path is never blocked on network IO.
 // ─────────────────────────────────────────────────────────────────────────────
 
 interface RateLimitRecord {
@@ -16,11 +30,29 @@ interface RateLimitRecord {
 }
 
 const store = new Map<string, RateLimitRecord>();
+// Hard cap so a distributed flood (many distinct source IPs) cannot bloat the
+// Map between purge cycles. When over cap we evict the single soonest-to-expire
+// record (it is closest to being purged anyway), keeping the store bounded
+// regardless of incoming IP cardinality. maybePurge() still sweeps expired keys.
+const STORE_CAP = 20_000;
+
+function evictOldestRecord(): void {
+  let oldestKey: string | null = null;
+  let oldestResetAt = Infinity;
+  store.forEach((rec, key) => {
+    if (rec.resetAt < oldestResetAt) {
+      oldestResetAt = rec.resetAt;
+      oldestKey = key;
+    }
+  });
+  if (oldestKey !== null) store.delete(oldestKey);
+}
 
 function checkRateLimit(key: string, max: number, windowMs: number): boolean {
   const now = Date.now();
   const record = store.get(key);
   if (!record || now > record.resetAt) {
+    if (!record && store.size >= STORE_CAP) evictOldestRecord();
     store.set(key, { count: 1, resetAt: now + windowMs });
     return true;
   }
@@ -38,6 +70,215 @@ function maybePurge() {
   store.forEach((rec, key) => {
     if (now > rec.resetAt) store.delete(key);
   });
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// DDoS-safe telemetry + IP-denylist enforcement (feature-gated, fire-and-forget)
+//
+// Everything below is dormant unless INTERNAL_TELEMETRY_SECRET is set. When it
+// is, the middleware:
+//   1. Enforces an IP denylist refreshed off a 60s TTL (serve stale during
+//      refresh, never block the request on the fetch).
+//   2. Aggregates per-minute rollup counters (low cardinality: minute x prefix
+//      x decision) plus a BOUNDED top-offender map and a BOUNDED event queue,
+//      then flushes to the node ingest route at most ~6 times/min/instance no
+//      matter how much traffic arrives. This is the property that keeps the DB
+//      write rate flat under a flood.
+//
+// All network IO runs through event.waitUntil so request latency is unchanged.
+// ─────────────────────────────────────────────────────────────────────────────
+
+type Decision = "allow" | "block" | "denylist";
+
+// --- IP denylist cache -------------------------------------------------------
+let denylistSet = new Set<string>();
+let lastDenylistFetchAt = 0;
+let denylistRefreshInFlight = false;
+const DENYLIST_TTL_MS = 60 * 1000;
+
+// --- Rollup + offender + event buffers ---------------------------------------
+// rollupBuckets key: `${minuteISO}|${keyPrefix}|${decision}` -> count
+const rollupBuckets = new Map<string, number>();
+// ipCounts: bounded top-offender tracker (request volume per IP this window)
+const ipCounts = new Map<string, number>();
+const IP_COUNTS_CAP = 200;
+// pendingEvents: bounded discrete security events (scanner/bot/probe hits)
+const pendingEvents: SecurityEventInput[] = [];
+const PENDING_EVENTS_CAP = 100;
+let lastFlushAt = 0;
+const FLUSH_INTERVAL_MS = 10 * 1000;
+// Offender -> 'flood' event threshold: only IPs over this count in a flush
+// window are escalated, and only the loudest ~20 are emitted.
+const OFFENDER_FLOOD_THRESHOLD = 120;
+const OFFENDER_TOP_N = 20;
+
+function internalSecret(): string {
+  // Read at call time so the feature can be enabled without a redeploy of the
+  // edge bundle picking up a stale empty value. Never logged, never shipped to
+  // the browser (not NEXT_PUBLIC_).
+  return process.env.INTERNAL_TELEMETRY_SECRET ?? "";
+}
+
+function minuteIso(now: number): string {
+  // Floor to the minute so all counts in a wall-clock minute share a bucket.
+  return new Date(Math.floor(now / 60000) * 60000).toISOString();
+}
+
+function bumpRollup(minute: string, keyPrefix: string, decision: Decision): void {
+  const key = `${minute}|${keyPrefix}|${decision}`;
+  rollupBuckets.set(key, (rollupBuckets.get(key) ?? 0) + 1);
+}
+
+function bumpIp(ip: string): void {
+  const next = (ipCounts.get(ip) ?? 0) + 1;
+  ipCounts.set(ip, next);
+  // Evict the lowest-count entry when over cap so the map stays bounded under a
+  // distributed flood (many distinct source IPs). The loudest offenders survive.
+  if (ipCounts.size > IP_COUNTS_CAP) {
+    let minIp: string | null = null;
+    let minCount = Infinity;
+    ipCounts.forEach((v, k) => {
+      if (v < minCount) {
+        minCount = v;
+        minIp = k;
+      }
+    });
+    if (minIp !== null && minIp !== ip) ipCounts.delete(minIp);
+  }
+}
+
+function pushEvent(evt: SecurityEventInput): void {
+  // Drop on the floor when full: an event queue that grows unbounded under a
+  // flood would defeat the whole DDoS-safe design.
+  if (pendingEvents.length >= PENDING_EVENTS_CAP) return;
+  pendingEvents.push(evt);
+}
+
+/**
+ * Refresh the denylist from the internal node route on a TTL. Fire-and-forget:
+ * the current request always serves the (possibly stale) in-memory Set. Runs
+ * inside event.waitUntil so it never adds latency.
+ */
+async function refreshDenylist(origin: string, secret: string): Promise<void> {
+  if (denylistRefreshInFlight) return;
+  denylistRefreshInFlight = true;
+  try {
+    const res = await fetch(`${origin}/api/internal/denylist`, {
+      method: "GET",
+      headers: { "x-internal-secret": secret },
+      // Bounded so a hung node route can't pin an edge connection open.
+      signal: AbortSignal.timeout(5000),
+    });
+    if (!res.ok) return;
+    const body: unknown = await res.json();
+    if (
+      body !== null &&
+      typeof body === "object" &&
+      Array.isArray((body as { ips?: unknown }).ips)
+    ) {
+      const ips = (body as { ips: unknown[] }).ips.filter(
+        (x): x is string => typeof x === "string",
+      );
+      denylistSet = new Set(ips);
+      lastDenylistFetchAt = Date.now();
+    }
+  } catch (err) {
+    // Network/transport failure: keep serving the stale Set. Detail to console
+    // only, never echoed. Reset the timestamp would hot-loop; leave it so the
+    // next request re-attempts after the TTL elapses naturally.
+    console.error(
+      "[middleware/denylist]",
+      err instanceof Error ? err.message : "refresh failed",
+    );
+  } finally {
+    denylistRefreshInFlight = false;
+  }
+}
+
+/**
+ * Snapshot + clear the rollup/offender/event buffers and POST them to the node
+ * ingest route. Called at most once per FLUSH_INTERVAL_MS. Fire-and-forget via
+ * event.waitUntil. Under a sustained flood this caps DB writes at ~6/min per
+ * edge instance regardless of incoming request volume.
+ */
+async function flushTelemetry(origin: string, secret: string): Promise<void> {
+  // Snapshot then clear synchronously so concurrent requests start a fresh
+  // window while this batch is in flight. Each rollup key encodes its own
+  // minute (`${minuteISO}|${keyPrefix}|${decision}`); the ingest route stamps
+  // bucket_minute from the body's bucketMinute, so we group rows by minute and
+  // send one POST per distinct minute. A flush that straddles a minute boundary
+  // therefore preserves per-minute accuracy (almost always exactly one minute).
+  const byMinute = new Map<string, TelemetryRollupRow[]>();
+  rollupBuckets.forEach((count, key) => {
+    const firstSep = key.indexOf("|");
+    const sep = key.lastIndexOf("|");
+    if (firstSep < 0 || sep <= firstSep) return;
+    const minute = key.slice(0, firstSep);
+    const keyPrefix = key.slice(firstSep + 1, sep);
+    const decisionRaw = key.slice(sep + 1);
+    if (
+      decisionRaw !== "allow" &&
+      decisionRaw !== "block" &&
+      decisionRaw !== "denylist"
+    ) {
+      return;
+    }
+    const arr = byMinute.get(minute) ?? [];
+    arr.push({ key_prefix: keyPrefix, decision: decisionRaw, count });
+    byMinute.set(minute, arr);
+  });
+
+  // Derive flood/bruteforce offender events from the bounded ipCounts map.
+  const offenders = Array.from(ipCounts.entries())
+    .filter((entry) => entry[1] >= OFFENDER_FLOOD_THRESHOLD)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, OFFENDER_TOP_N);
+
+  const offenderEvents: SecurityEventInput[] = offenders.map((entry) => ({
+    ip: entry[0],
+    category: "flood",
+    severity: entry[1] >= OFFENDER_FLOOD_THRESHOLD * 4 ? 5 : 3,
+    detail: { requests_in_window: entry[1], window_ms: FLUSH_INTERVAL_MS },
+  }));
+
+  const events = pendingEvents.concat(offenderEvents);
+
+  // Clear buffers now (fresh window for concurrent/next requests).
+  rollupBuckets.clear();
+  ipCounts.clear();
+  pendingEvents.length = 0;
+
+  if (byMinute.size === 0 && events.length === 0) return;
+
+  try {
+    // One POST per distinct minute in the snapshot (almost always exactly one).
+    const minutes =
+      byMinute.size > 0 ? Array.from(byMinute.keys()) : [minuteIso(Date.now())];
+    for (let i = 0; i < minutes.length; i++) {
+      const minute = minutes[i];
+      const rows = byMinute.get(minute) ?? [];
+      // Attach the discrete events to the first request only so they aren't
+      // duplicated across multi-minute flushes.
+      const body = JSON.stringify({
+        bucketMinute: minute,
+        rollups: rows,
+        events: i === 0 ? events : [],
+      });
+      await fetch(`${origin}/api/internal/telemetry`, {
+        method: "POST",
+        headers: { "content-type": "application/json", "x-internal-secret": secret },
+        body,
+        signal: AbortSignal.timeout(5000),
+      });
+    }
+  } catch (err) {
+    // Telemetry is best-effort. A failed flush drops one window of counts; it
+    // must never affect request handling. Detail to console only.
+    console.error(
+      "[middleware/telemetry]",
+      err instanceof Error ? err.message : "flush failed",
+    );
+  }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -483,6 +724,18 @@ const ROUTE_LIMITS: RouteLimit[] = [
     keyPrefix: "party-request-join",
   },
 
+  // Blitz questions — static JSON pool, but returns up to 50 full MCQs WITH
+  // correct_answer + explanation per call. On the catch-all (100/min) one account
+  // could pull ~5k answered Qs/min; 20/min/IP covers a human starting many rounds
+  // and blocks casual scraping of the finite Blitz pool.
+  {
+    test: (p) => p === "/api/games/blitz/questions",
+    method: "GET",
+    max: 20,
+    windowMs: 60 * 1000,
+    keyPrefix: "blitz-questions",
+  },
+
   // Catch-all for other API routes
   {
     test: (p) => p.startsWith("/api/"),
@@ -523,7 +776,7 @@ const SECURITY_HEADERS: Record<string, string> = {
 // Middleware entry
 // ─────────────────────────────────────────────────────────────────────────────
 
-export function middleware(request: NextRequest) {
+export function middleware(request: NextRequest, event: NextFetchEvent) {
   maybePurge();
 
   const { pathname } = request.nextUrl;
@@ -533,22 +786,81 @@ export function middleware(request: NextRequest) {
   // silently breaks signature verification. We also skip rate-limiting so
   // Stripe's bursty retry behavior isn't throttled. Trailing-slash variant
   // covered for defense-in-depth even though Stripe always sends without.
+  // (Telemetry is also skipped here so the webhook path stays pristine.)
   if (pathname === "/api/stripe/webhook" || pathname === "/api/stripe/webhook/") {
     return NextResponse.next();
   }
 
+  // Internal telemetry/denylist routes are called BY this middleware itself
+  // (same-origin, via event.waitUntil). Exempt them like the webhook so the
+  // pipeline's own flush/refresh traffic can never trip the catch-all rate
+  // limit (which would silently drop telemetry during a flood, exactly when we
+  // need it) and never self-feeds the rollup. They are gated by x-internal-secret.
+  if (pathname.startsWith("/api/internal/")) {
+    return NextResponse.next();
+  }
+
+  // Prefer the platform-trusted client IP (request.ip, set by Vercel's edge
+  // from the verified connection) over the spoofable forwarded headers; fall
+  // back to the leftmost x-forwarded-for hop, then x-real-ip, then 'unknown'.
   const ip =
+    request.ip ??
     request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
     request.headers.get("x-real-ip") ??
     "unknown";
 
-  // Apply rate limit if any rule matches (first match wins)
+  // Telemetry + denylist are entirely dormant unless the secret is configured.
+  const secret = internalSecret();
+  const telemetryEnabled = secret !== "";
+  const origin = request.nextUrl.origin;
+  const now = Date.now();
+  const minute = minuteIso(now);
+  const ua = request.headers.get("user-agent");
+
+  // ── IP denylist enforcement (before the rate-limit loop) ──────────────────
+  if (telemetryEnabled) {
+    // Schedule a TTL refresh as fire-and-forget; serve the stale Set meanwhile.
+    if (now - lastDenylistFetchAt > DENYLIST_TTL_MS && !denylistRefreshInFlight) {
+      event.waitUntil(refreshDenylist(origin, secret));
+    }
+
+    if (ip !== "unknown" && denylistSet.has(ip)) {
+      // Record the denylist decision in the rollup + a discrete hit event, then
+      // reject early with a generic body. No rate-limit state is touched.
+      bumpRollup(minute, "denylist", "denylist");
+      bumpIp(ip);
+      pushEvent({
+        ip,
+        category: "denylist_hit",
+        severity: 4,
+        path: pathname,
+        method: request.method,
+        user_agent: ua ?? undefined,
+      });
+      maybeFlush(event, origin, secret, now);
+      return new NextResponse(JSON.stringify({ error: "Forbidden" }), {
+        status: 403,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+  }
+
+  // ── Rate-limit loop (UNCHANGED semantics: first match wins, then break) ────
+  // We track the matched keyPrefix + whether the request was blocked, purely to
+  // feed telemetry. The allow/block decision and the 429 response are byte-for-
+  // byte identical to the previous behavior.
+  let matchedPrefix: string | null = null;
+  let blocked = false;
+  let rateLimitResponse: NextResponse | null = null;
+
   for (const rule of ROUTE_LIMITS) {
     if (rule.method && rule.method !== request.method) continue;
     if (rule.test(pathname)) {
+      matchedPrefix = rule.keyPrefix;
       const allowed = checkRateLimit(`${rule.keyPrefix}:${ip}`, rule.max, rule.windowMs);
       if (!allowed) {
-        return new NextResponse(
+        blocked = true;
+        rateLimitResponse = new NextResponse(
           JSON.stringify({ error: "Too many requests. Try again shortly." }),
           {
             status: 429,
@@ -563,6 +875,46 @@ export function middleware(request: NextRequest) {
     }
   }
 
+  // ── Telemetry aggregation (fire-and-forget; never affects the response) ────
+  if (telemetryEnabled) {
+    const keyPrefix = matchedPrefix ?? pathGroup(pathname);
+    const decision: Decision = blocked ? "block" : "allow";
+    bumpRollup(minute, keyPrefix, decision);
+    // Count the request once, then a second time when it tripped a 429 so the
+    // top-offender ranking weights throttle-tripping IPs above merely chatty
+    // ones when escalating to flood/bruteforce events at flush time.
+    bumpIp(ip);
+    if (blocked) bumpIp(ip);
+
+    // Vuln-scanner / config-exfil probe hit on the path.
+    const badPath = matchBadPath(pathname);
+    if (badPath.hit) {
+      pushEvent({
+        ip,
+        category: badPath.category,
+        severity: badPath.category === "scanner" ? 4 : 2,
+        path: pathname,
+        method: request.method,
+        user_agent: ua ?? undefined,
+      });
+    } else if (pathname.startsWith("/api/") && isSuspiciousUserAgent(ua)) {
+      // Non-browser client hitting an API surface. Scanner tooling outranks a
+      // bare HTTP-library UA, so split the severity.
+      pushEvent({
+        ip,
+        category: "bot",
+        severity: isScannerUserAgent(ua) ? 4 : 1,
+        path: pathname,
+        method: request.method,
+        user_agent: ua ?? undefined,
+      });
+    }
+
+    maybeFlush(event, origin, secret, now);
+  }
+
+  if (rateLimitResponse) return rateLimitResponse;
+
   const response = NextResponse.next();
   for (const [key, value] of Object.entries(SECURITY_HEADERS)) {
     response.headers.set(key, value);
@@ -570,7 +922,43 @@ export function middleware(request: NextRequest) {
   return response;
 }
 
+/**
+ * Schedule a telemetry flush when the flush interval has elapsed. Synchronous
+ * gate (lastFlushAt is advanced before the async work starts) so concurrent
+ * requests do not each schedule a duplicate flush. The actual POST runs inside
+ * event.waitUntil so it never blocks the response.
+ */
+function maybeFlush(
+  event: NextFetchEvent,
+  origin: string,
+  secret: string,
+  now: number,
+): void {
+  if (now - lastFlushAt <= FLUSH_INTERVAL_MS) return;
+  lastFlushAt = now;
+  event.waitUntil(flushTelemetry(origin, secret));
+}
+
 export const config = {
-  // Apply to all routes except Next.js internals and static files
-  matcher: ["/((?!_next/|favicon\\.ico|.*\\..*).*)"],
+  // Apply to all routes except Next.js internals and static files. The primary
+  // entry is kept intact; the additional entries below opt specific vuln-probe
+  // paths (which the `.*\..*` rule would otherwise exclude as "static") BACK in
+  // so they can be observed + denylist-blocked. We deliberately do NOT enable
+  // middleware on real static assets.
+  matcher: [
+    "/((?!_next/|favicon\\.ico|.*\\..*).*)",
+    // Dot-file / config-exfil probes that contain a dot and would be skipped.
+    "/.env/:path*",
+    "/.env",
+    "/.git/:path*",
+    "/.git",
+    "/.aws/:path*",
+    "/.ssh/:path*",
+    "/.svn/:path*",
+    "/config.json",
+    "/wp-config.php",
+    "/wp-login.php",
+    "/xmlrpc.php",
+    "/adminer.php",
+  ],
 };
