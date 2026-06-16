@@ -522,6 +522,7 @@ function DashboardContent() {
           </div>
 
           {/* ═══ 2) Circular Stats Row ═══ */}
+          <FeatureGate feature="dashboard.circular_stats" compact>
           <div className="flex justify-center sm:justify-start gap-6 sm:gap-8 mb-8 animate-slide-up" style={{ animationDelay: "0.05s" }}>
             <Link href="/wallet" className="press-feedback inline-block">
               <CircleStat icon={<img src={cdnUrl("/F.png")} alt="Fangs" className="w-5 h-5 object-contain mx-auto" />} value={statsReady ? <CountUp id="dash-coins" value={coins} format={formatCoins} /> : <span className="text-cream/30">{"—"}</span>} label={dailyProgressReady ? `+${todayCoins} today` : "— today"} color="#FFD700" />
@@ -545,6 +546,7 @@ function DashboardContent() {
               <CircleStat icon={<Sword size={20} weight="regular" color="#E74C3C" aria-hidden="true" />} value={eloRank ? <>#<CountUp id="dash-rank" value={eloRank} duration={400} /></> : "\u2014"} label="rank" color="#E74C3C" />
             </Link>
           </div>
+          </FeatureGate>
           {mounted && statsReady && streak >= 3 && (
             <div className="mb-6 animate-slide-up flex items-center gap-2 px-4 py-2.5 rounded-full w-fit mx-auto sm:mx-0" style={{ background: "linear-gradient(135deg, rgba(230,126,34,0.12), rgba(255,215,0,0.08))", border: "1px solid rgba(230,126,34,0.2)" }}>
               <Fire size={18} weight="fill" color="#E67E22" className="streak-fire-glow" aria-hidden="true" />
@@ -553,6 +555,7 @@ function DashboardContent() {
           )}
 
           {/* ═══ 3) Level Progress ═══ */}
+          <FeatureGate feature="dashboard.level_progress" compact>
           <div className="mb-8 animate-slide-up" style={{ animationDelay: "0.08s" }}>
             {!statsReady ? (
               /* xp is seeded from the auth fallback — skeleton until stats resolve (no flash-of-zero) */
@@ -586,6 +589,7 @@ function DashboardContent() {
             </>
             )}
           </div>
+          </FeatureGate>
 
           {/* ═══ 3.3) Daily ready nudge — only renders when the daily Clock In is available ═══ */}
           <DailyReadyNudge />
@@ -1137,6 +1141,7 @@ function DashboardContent() {
 
             {/* Left: Subjects as cards */}
             <div className="lg:col-span-2 animate-slide-up" style={{ animationDelay: "0.2s" }}>
+              <FeatureGate feature="dashboard.subject_stats" compact>
               <Link href="/learn" className="flex items-baseline justify-between mb-3 group">
                 <h2 className="font-bebas text-xl text-cream tracking-wider">YOUR SUBJECTS</h2>
                 <span className="text-cream/55 text-[10px] font-mono uppercase tracking-[0.2em] group-hover:text-electric transition-colors">Learn &rarr;</span>
@@ -1213,6 +1218,7 @@ function DashboardContent() {
                   </div>
                 )}
               </div>
+              </FeatureGate>
 
               {/* ═══ 7-Day Activity Chart — sits below YOUR SUBJECTS, fills the column next to Achievements ═══ */}
               <FluidReveal className="mt-6">
@@ -1349,6 +1355,7 @@ function DashboardContent() {
             <div className="space-y-5">
 
               {/* This Week — Leaderboard */}
+              <FeatureGate feature="dashboard.leaderboard_preview" compact>
               <div className="animate-slide-up" style={{ animationDelay: "0.18s" }}>
                 <Link href="/leaderboard" className="flex items-baseline justify-between mb-3 group">
                   <h2 className="font-bebas text-xl text-cream tracking-wider">THIS WEEK</h2>
@@ -1397,8 +1404,10 @@ function DashboardContent() {
                   )}
                 </Link>
               </div>
+              </FeatureGate>
 
               {/* Recent Activity */}
+              <FeatureGate feature="dashboard.recent_quizzes" compact>
               <div className="animate-slide-up" style={{ animationDelay: "0.22s" }}>
                 <Link href="/quiz" className="flex items-baseline justify-between mb-3 group">
                   <h2 className="font-bebas text-xl text-cream tracking-wider">RECENT ACTIVITY</h2>
@@ -1441,6 +1450,7 @@ function DashboardContent() {
                   </div>
                 )}
               </div>
+              </FeatureGate>
 
               {/* Achievements */}
               <div className="animate-slide-up" style={{ animationDelay: "0.24s" }}>

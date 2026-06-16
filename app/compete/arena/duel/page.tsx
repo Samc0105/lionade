@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import FeatureGate from "@/components/FeatureGate";
 import BackButton from "@/components/BackButton";
 import { useAuth } from "@/lib/auth";
 import { useUserStats, mutateUserStats } from "@/lib/hooks";
@@ -123,7 +124,20 @@ function getEloTier(elo: number) {
 
 // ── Component ────────────────────────────────────────────────
 
-export default function ArenaPage() {
+// The Duel Arena runs as an 8-phase state machine with one ProtectedRoute per
+// phase return, so rather than thread a FeatureGate through every branch we gate
+// the whole page once here. The dot-path chain resolves "compete" too, so
+// maintenance on either replaces the surface for non-staff; a warning shows the
+// dismissible known-issue banner above the live page.
+export default function ArenaPageGated() {
+  return (
+    <FeatureGate feature="compete.duel">
+      <ArenaPage />
+    </FeatureGate>
+  );
+}
+
+function ArenaPage() {
   const router = useRouter();
   const { user } = useAuth();
   const { stats, mutate: mutateStats } = useUserStats(user?.id);

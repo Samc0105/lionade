@@ -16,6 +16,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import FeatureGate from "@/components/FeatureGate";
 import { useAuth } from "@/lib/auth";
 import { useUserStats, mutateUserStats } from "@/lib/hooks";
 import { cdnUrl } from "@/lib/cdn";
@@ -160,6 +161,7 @@ export default function CompeteBlitzPage() {
 
     return (
       <ProtectedRoute>
+        <FeatureGate feature="compete.blitz">
         <div className="min-h-screen pt-16 pb-8 overflow-hidden">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6">
             <Link
@@ -373,6 +375,7 @@ export default function CompeteBlitzPage() {
             </div>
           </div>
         </div>
+        </FeatureGate>
       </ProtectedRoute>
     );
   }
@@ -381,6 +384,7 @@ export default function CompeteBlitzPage() {
   if (phase === "blitz") {
     return (
       <ProtectedRoute>
+        <FeatureGate feature="compete.blitz">
         <div className="min-h-screen pt-16 pb-8">
           <div className="max-w-2xl mx-auto px-4 py-6">
             <BlitzMode
@@ -391,6 +395,7 @@ export default function CompeteBlitzPage() {
             />
           </div>
         </div>
+        </FeatureGate>
       </ProtectedRoute>
     );
   }
@@ -404,6 +409,7 @@ export default function CompeteBlitzPage() {
 
     return (
       <ProtectedRoute>
+        <FeatureGate feature="compete.blitz">
         <div className="min-h-screen pt-16 pb-8">
           <div className="max-w-lg mx-auto px-4 py-6">
             <div className="text-center mb-8 animate-slide-up">
@@ -509,6 +515,7 @@ export default function CompeteBlitzPage() {
             </div>
           </div>
         </div>
+        </FeatureGate>
       </ProtectedRoute>
     );
   }

@@ -1,14 +1,24 @@
 /**
- * /api/admin/features  — admin-only feature kill-switch management.
+ * /api/admin/features  — admin-only feature kill-switch management (v2).
  * ============================================================================
- *   GET  — return the full catalog plus every stored flag, so the admin UI can
- *          render the hierarchy and current state in one shot:
- *            { catalog: FeatureNode[], flags: { <key>: { status, message, eta, updatedAt } } }
- *   POST — upsert one flag (flip a feature live/maintenance, optionally with a
- *          user-facing message + eta), audit it with verb feature_flag_change,
- *          and invalidate the server cache so reads pick it up promptly.
- *            body: { key, status: 'live'|'maintenance', message?, eta? }
+ *   GET  — return the full catalog plus every stored RAW flag, so the admin UI
+ *          can render the hierarchy AND edit scheduling in one shot:
+ *            { catalog: FeatureNode[],
+ *              flags: { <key>: { status, message, eta, startsAt, endsAt, updatedAt } } }
+ *          Unlike the public endpoint, this returns RAW rows (no window
+ *          pre-resolution) so an operator can see and edit the schedule.
+ *   POST — upsert one flag (set live / warning / maintenance, optionally with a
+ *          user-facing message + eta and a scheduling window), audit it with
+ *          verb feature_flag_change, and invalidate the server cache so reads
+ *          pick it up promptly.
+ *            body: { key, status: 'live'|'warning'|'maintenance',
+ *                    message?, eta?, startsAt?: ISO|null, endsAt?: ISO|null }
  *            -> { ok: true }
+ *
+ * v2 status model: 'live' (normal), 'warning' (usable + dismissible banner, API
+ * not blocked), 'maintenance' (maintenance screen + API 503s). The scheduling
+ * window (startsAt/endsAt) is stored RAW; effective status is computed at read
+ * time (window-aware) by the consumers, never stored here.
  *
  * SAFETY: the POST key MUST exist in FEATURE_CATALOG. The catalog excludes all
  * recovery surfaces (/admin/*, /login, /signup, /onboard/*, /settings/*, the
@@ -40,17 +50,41 @@ function isObject(v: unknown): v is Record<string, unknown> {
   return typeof v === "object" && v !== null;
 }
 
+// Sentinel distinguishing "valid but null" from "invalid input" for a window
+// bound — null is a legitimate value (open-ended), so we cannot use it to also
+// signal a parse failure.
+const INVALID_BOUND = Symbol("invalid-window-bound");
+
+/**
+ * Normalize a window-bound input to a stored value:
+ *   - undefined / null / empty string  -> null  (open-ended bound).
+ *   - a parseable date string          -> its canonical ISO string.
+ *   - anything else                    -> INVALID_BOUND (caller returns 400).
+ * Canonicalizing to ISO keeps stored timestamps consistent regardless of the
+ * exact input format the admin UI sends.
+ */
+function parseWindowBound(value: unknown): string | null | typeof INVALID_BOUND {
+  if (value === undefined || value === null) return null;
+  if (typeof value !== "string") return INVALID_BOUND;
+  const trimmed = value.trim();
+  if (trimmed === "") return null;
+  const ms = Date.parse(trimmed);
+  if (Number.isNaN(ms)) return INVALID_BOUND;
+  return new Date(ms).toISOString();
+}
+
 export async function GET(req: NextRequest): Promise<NextResponse> {
   const staff = await requireRole(req, "admin");
   if (staff instanceof NextResponse) return staff;
 
   try {
     // NOTE (documented Supabase-type gap): untyped .from() — the feature_flags
-    // table is applied manually (20260616150000_feature_flags.sql) and is not
-    // in the generated Supabase types. Columns match that migration exactly.
+    // table is applied manually (20260616150000_feature_flags.sql +
+    // 20260616160000_feature_flags_v2.sql) and is not in the generated Supabase
+    // types. Columns match those migrations exactly.
     const { data, error } = await supabaseAdmin
       .from("feature_flags")
-      .select("key, status, message, eta, updated_at");
+      .select("key, status, message, eta, starts_at, ends_at, updated_at");
 
     if (error) {
       console.error(`[${ROUTE_TAG}] list`, error.message);
@@ -59,20 +93,35 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 
     const flags: Record<
       string,
-      { status: string; message: string | null; eta: string | null; updatedAt: string | null }
+      {
+        status: string;
+        message: string | null;
+        eta: string | null;
+        startsAt: string | null;
+        endsAt: string | null;
+        updatedAt: string | null;
+      }
     > = {};
     for (const row of (data ?? []) as Array<{
       key?: unknown;
       status?: unknown;
       message?: unknown;
       eta?: unknown;
+      starts_at?: unknown;
+      ends_at?: unknown;
       updated_at?: unknown;
     }>) {
       if (typeof row.key !== "string") continue;
+      const rawStatus =
+        row.status === "maintenance" || row.status === "warning"
+          ? row.status
+          : "live";
       flags[row.key] = {
-        status: row.status === "maintenance" ? "maintenance" : "live",
+        status: rawStatus,
         message: typeof row.message === "string" ? row.message : null,
         eta: typeof row.eta === "string" ? row.eta : null,
+        startsAt: typeof row.starts_at === "string" ? row.starts_at : null,
+        endsAt: typeof row.ends_at === "string" ? row.ends_at : null,
         updatedAt: typeof row.updated_at === "string" ? row.updated_at : null,
       };
     }
@@ -116,9 +165,9 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   }
 
   const status = body.status;
-  if (status !== "live" && status !== "maintenance") {
+  if (status !== "live" && status !== "warning" && status !== "maintenance") {
     return NextResponse.json(
-      { error: "status must be 'live' or 'maintenance'" },
+      { error: "status must be 'live', 'warning' or 'maintenance'" },
       { status: 400 },
     );
   }
@@ -132,16 +181,49 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       ? body.eta.trim().slice(0, MAX_ETA_LEN)
       : null;
 
+  // Scheduling window. Each bound is an ISO timestamp string or null
+  // (open-ended). null clears the bound; an absent field is also treated as
+  // null. A non-empty string that is not a valid date is a 400 — we never store
+  // a malformed window. When both bounds are set, ends_at must be after
+  // starts_at.
+  const startsAt = parseWindowBound(body.startsAt);
+  if (startsAt === INVALID_BOUND) {
+    return NextResponse.json(
+      { error: "startsAt must be an ISO timestamp or null" },
+      { status: 400 },
+    );
+  }
+  const endsAt = parseWindowBound(body.endsAt);
+  if (endsAt === INVALID_BOUND) {
+    return NextResponse.json(
+      { error: "endsAt must be an ISO timestamp or null" },
+      { status: 400 },
+    );
+  }
+  if (
+    startsAt !== null &&
+    endsAt !== null &&
+    Date.parse(endsAt) <= Date.parse(startsAt)
+  ) {
+    return NextResponse.json(
+      { error: "endsAt must be after startsAt" },
+      { status: 400 },
+    );
+  }
+
   try {
     // NOTE (documented Supabase-type gap): untyped .from() upsert — columns
-    // match the feature_flags table exactly. updated_at is maintained by the
-    // DB trigger on update; on insert it defaults to now().
+    // match the feature_flags table exactly (incl. v2 starts_at / ends_at).
+    // updated_at is maintained by the DB trigger on update; on insert it
+    // defaults to now().
     const { error } = await supabaseAdmin.from("feature_flags").upsert(
       {
         key,
         status,
         message,
         eta,
+        starts_at: startsAt,
+        ends_at: endsAt,
         updated_by: staff.userId,
         updated_at: new Date().toISOString(),
       },
@@ -157,7 +239,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     await writeTeamAudit(supabaseAdmin, {
       performedBy: staff.userId,
       action: "feature_flag_change",
-      metadata: { key, to: status, message, eta },
+      metadata: { key, to: status, message, eta, startsAt, endsAt },
     });
 
     // Drop the in-process cache so the public read and assertFeatureLive pick up

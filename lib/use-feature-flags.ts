@@ -16,7 +16,12 @@ import useSWR from "swr";
 import { featureChain } from "@/lib/features/catalog";
 
 export interface FeatureFlag {
-  status: "live" | "maintenance";
+  // The public /api/feature-flags endpoint PRE-RESOLVES scheduling windows
+  // (starts_at / ends_at), so by the time a status reaches the client it is
+  // already the effective status. The client never recomputes windows.
+  // 'live' rows are omitted from the map entirely (a missing key = live), but
+  // the type keeps it for completeness.
+  status: "live" | "warning" | "maintenance";
   message: string | null;
   eta: string | null;
 }
@@ -39,7 +44,9 @@ async function barePublicFetcher(url: string): Promise<{ flags: FeatureFlagMap }
 }
 
 /**
- * Live map of every key currently in maintenance (plus any explicit live rows).
+ * Live map of every key currently in effective warning or maintenance. The
+ * public endpoint omits 'live' keys and has already pre-resolved scheduling
+ * windows, so a present row is always an active warning/maintenance state.
  * Returns {} when there is no data (fail-open). Polls every 45s so a lift/drop
  * propagates to open tabs without a refresh.
  */
@@ -63,22 +70,50 @@ export interface FeatureStatus {
   down: boolean;
   /** the nearest key in the chain that is down (self wins over ancestor) */
   downKey: string | null;
-  /** the flag that caused `down` (or null when live) */
+  /**
+   * true when this key OR any ancestor is in warning AND nothing in the chain
+   * is in maintenance. Maintenance always beats warning, so `warn` is never
+   * true at the same time as `down`.
+   */
+  warn: boolean;
+  /** the nearest key in the chain that is in warning (only when warn) */
+  warnKey: string | null;
+  /**
+   * the flag that drives the status: the maintenance flag when `down`, else the
+   * warning flag when `warn`, else null when live.
+   */
   flag: FeatureFlag | null;
 }
 
 /**
- * Resolve the effective maintenance status for a feature key. Walks
- * featureChain(key) = [key, ...ancestors] nearest-first; the first member in
- * maintenance wins (so a sub-feature's own row beats its parent's).
+ * Resolve the effective status for a feature key. The public endpoint has
+ * already pre-resolved scheduling windows, so the client only walks the chain.
+ *
+ * Walks featureChain(key) = [key, ...ancestors] nearest-first. Maintenance
+ * anywhere in the chain wins (so the surface is replaced); otherwise the
+ * nearest warning wins (the surface stays usable with a known-issue banner).
+ * The nearest member of each kind is preferred so a sub-feature's own row beats
+ * its parent's.
  */
 export function useFeatureStatus(key: string): FeatureStatus {
   const flags = useFeatureFlags();
-  for (const k of featureChain(key)) {
+  const chain = featureChain(key);
+
+  // Pass 1: maintenance always wins, nearest-first.
+  for (const k of chain) {
     const flag = flags[k];
     if (flag && flag.status === "maintenance") {
-      return { down: true, downKey: k, flag };
+      return { down: true, downKey: k, warn: false, warnKey: null, flag };
     }
   }
-  return { down: false, downKey: null, flag: null };
+
+  // Pass 2: no maintenance in the chain, so the nearest warning (if any) wins.
+  for (const k of chain) {
+    const flag = flags[k];
+    if (flag && flag.status === "warning") {
+      return { down: false, downKey: null, warn: true, warnKey: k, flag };
+    }
+  }
+
+  return { down: false, downKey: null, warn: false, warnKey: null, flag: null };
 }

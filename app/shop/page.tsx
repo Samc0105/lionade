@@ -1560,16 +1560,22 @@ export default function ShopPage() {
 
         {/* ══════════ BUY FANGS (Stripe IAP, coin store only) ══════════ */}
         {!isPremium && (
-          <div className={`transition-all duration-700 delay-150 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`}>
-            <BuyFangsSection
-              isAuthed={!!user}
-              onUnauthed={() => router.push("/login?next=/shop")}
-            />
-          </div>
+          <FeatureGate feature="shop.fang_iap" compact>
+            <div className={`transition-all duration-700 delay-150 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`}>
+              <BuyFangsSection
+                isAuthed={!!user}
+                onUnauthed={() => router.push("/login?next=/shop")}
+              />
+            </div>
+          </FeatureGate>
         )}
 
         {/* ══════════ DAILY SPIN HERO (coin store only) ══════════ */}
-        {!isPremium && <DailySpinHero />}
+        {!isPremium && (
+          <FeatureGate feature="shop.daily_spin" compact>
+            <DailySpinHero />
+          </FeatureGate>
+        )}
 
         {/* ══════════ TODAY'S DROPS (coin store only, above tabs) ══════════ */}
         {/* Deterministic-by-UTC-date rotation. Same drops for every user
@@ -1696,6 +1702,7 @@ export default function ShopPage() {
 
         {/* ══════════ LIMITED TIME (founder badges still purchasable) ══════════ */}
         {!isPremium && limitedTimeBadges.length > 0 && (
+          <FeatureGate feature="shop.founder_badges" compact>
           <section className="mb-8" aria-labelledby="limited-time-heading">
             <div className="shop-banner flex items-center justify-between mb-4 px-4 py-3 rounded-xl"
               style={{ background: "linear-gradient(90deg, rgba(255,215,0,0.10), rgba(168,85,247,0.06))", border: "1px solid rgba(255,215,0,0.30)" }}>
@@ -1731,10 +1738,12 @@ export default function ShopPage() {
               })}
             </div>
           </section>
+          </FeatureGate>
         )}
 
         {/* ══════════ PREMIUM STORE ══════════ */}
         {isPremium && (
+          <FeatureGate feature="shop.premium_cosmetics" compact>
           <div className={`transition-all duration-700 delay-200 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`}>
             {/* Coming soon banner */}
             <div className="shop-banner text-center mb-8 py-4 px-6 rounded-2xl mx-auto max-w-lg"
@@ -1814,6 +1823,7 @@ export default function ShopPage() {
               </div>
             )}
           </div>
+          </FeatureGate>
         )}
 
         {/* ══════════ COIN STORE ══════════ */}
@@ -1836,6 +1846,7 @@ export default function ShopPage() {
 
             {/* FEATURED */}
             {tab === "featured" && (
+              <FeatureGate feature="shop.featured" compact>
               <div className={`transition-all duration-700 delay-200 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`}>
                 {/* ── NEW THIS WEEK (2026-06-02 SKU drop) ── */}
                 <section className="mb-10" aria-labelledby="new-this-week-heading">
@@ -1908,16 +1919,19 @@ export default function ShopPage() {
                   ))}
                 </div>
               </div>
+              </FeatureGate>
             )}
 
             {/* COSMETICS */}
             {tab === "cosmetics" && (
+              <FeatureGate feature="shop.cosmetics" compact>
               <div className={`transition-all duration-700 delay-200 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`}>
                 {/* ── EXCLUSIVE: Founder badges (top of cosmetics tab) ── */}
                 {FOUNDER_BADGES.some((b) => {
                   const r = founderCaps[b.id];
                   return r === undefined || r > 0 || cosmeticsOwned.some((c) => c.id === b.id);
                 }) && (
+                  <FeatureGate feature="shop.founder_badges" compact>
                   <section className="mb-10" aria-labelledby="founder-badges-heading">
                     <div className="shop-banner flex items-center justify-between mb-5 px-4 py-3 rounded-xl"
                       style={{ background: "linear-gradient(90deg, rgba(255,215,0,0.10), rgba(168,85,247,0.06))", border: "1px solid rgba(255,215,0,0.30)" }}>
@@ -1953,6 +1967,7 @@ export default function ShopPage() {
                       })}
                     </div>
                   </section>
+                  </FeatureGate>
                 )}
 
                 {/* ── IDENTITY: Animated username effects (LIVE PREVIEW) ── */}
@@ -2019,6 +2034,7 @@ export default function ShopPage() {
                 </section>
 
                 {/* ── PREMIUM (cash): real-money banners called out explicitly ── */}
+                <FeatureGate feature="shop.premium_cosmetics" compact>
                 <section className="mb-10" aria-labelledby="cash-premium-banners-heading">
                   <div className="shop-banner flex items-center justify-between mb-5 px-4 py-3 rounded-xl"
                     style={{ background: "linear-gradient(90deg, rgba(168,85,247,0.10), rgba(168,85,247,0.04))", border: "1px solid rgba(168,85,247,0.30)" }}>
@@ -2036,6 +2052,7 @@ export default function ShopPage() {
                     ))}
                   </div>
                 </section>
+                </FeatureGate>
 
                 {/* ── Existing cosmetics sub-tabs (frames / name colors / banners) ── */}
                 <div className="flex items-center gap-2 mb-6 overflow-x-auto scrollbar-hide">
@@ -2056,10 +2073,12 @@ export default function ShopPage() {
                   ))}
                 </div>
               </div>
+              </FeatureGate>
             )}
 
             {/* BOOSTERS */}
             {tab === "boosters" && (
+              <FeatureGate feature="shop.boosters" compact>
               <div className={`transition-all duration-700 delay-200 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`}>
                 <div className="space-y-3 shop-grid-stagger">
                   {BOOSTER_ITEMS.map((item) => (
@@ -2068,10 +2087,12 @@ export default function ShopPage() {
                   ))}
                 </div>
               </div>
+              </FeatureGate>
             )}
 
             {/* INVENTORY */}
             {tab === "inventory" && (
+              <FeatureGate feature="shop.inventory" compact>
               <div className={`transition-all duration-700 delay-200 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`}>
                 {/* Themes — always show Interstellar as owned */}
                 <div className="mb-8">
@@ -2178,6 +2199,7 @@ export default function ShopPage() {
                   </>
                 )}
               </div>
+              </FeatureGate>
             )}
           </>
         )}

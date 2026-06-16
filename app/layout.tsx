@@ -19,6 +19,7 @@ import ActiveSessionToast from "@/components/ActiveSessionToast";
 import SessionLifecycle from "@/components/SessionLifecycle";
 import TeamGate from "@/components/TeamGate";
 import MaintenanceGate from "@/components/MaintenanceGate";
+import MaintenanceStatusBanner from "@/components/MaintenanceStatusBanner";
 import PartyInviteToast from "@/components/party/PartyInviteToast";
 import { SITE_URL, SITE_URL_OBJ } from "@/lib/site-config";
 
@@ -192,6 +193,12 @@ export default function RootLayout({
                   <DemoModeBanner />
                   <Navbar />
                   <main id="main-content">
+                    {/* Global status banner. Slim, dismissible, informational
+                        bar that lists ANY feature in effective warning /
+                        maintenance on every normal page. Sits ABOVE the
+                        MaintenanceGate body so it shows on live pages; it never
+                        blocks. Fail-open (renders nothing when no flags). */}
+                    <MaintenanceStatusBanner />
                     {/* Site-wide kill-switch. Reads the "site" feature flag
                         and, when in maintenance, swaps the page body for the
                         brand MaintenanceState for non-staff. Staff bypass so an

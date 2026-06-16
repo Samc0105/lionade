@@ -31,6 +31,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
+import { assertFeatureLive } from "@/lib/feature-flags";
 import { applyFangMultiplierFromTier } from "@/lib/mastery-plan";
 import { recordDailyActivity } from "@/lib/daily-activity-server";
 
@@ -43,6 +44,12 @@ export async function POST(req: NextRequest) {
   const auth = await requireAuth(req);
   if (auth instanceof NextResponse) return auth;
   const userId = auth.userId;
+
+  // Kill-switch: 503 the stage-completion + reward when Learning Paths (or an
+  // ancestor) is in maintenance. A 'warning' state is NOT blocked here. Placed
+  // before any progress/reward side effect. Fail-open on an unreadable flag.
+  const gate = await assertFeatureLive("learn.paths");
+  if (gate) return gate;
 
   let body: { stageId?: unknown; correct?: unknown; total?: unknown };
   try {

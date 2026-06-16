@@ -274,40 +274,44 @@ export default function LearnPage() {
               </div>
 
               {/* Daily goal progress bar — embedded in the CTA */}
-              <div className="mt-5 h-1 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.06)" }}>
-                <div
-                  className={`h-full ${dailyProgressPct > 0 && dailyProgressPct < 100 ? "progress-shimmer" : ""}`}
-                  style={{
-                    width: `${dailyProgressPct}%`,
-                    background: dailyProgressPct >= 100
-                      ? "linear-gradient(90deg, #22C55E 0%, #FFD700 100%)"
-                      : "linear-gradient(90deg, #4A90D9 0%, #FFD700 100%)",
-                    transition: "width 900ms var(--ease-out-emil)",
-                  }}
-                />
-              </div>
-              <div className="flex items-center justify-between mt-1.5">
-                <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-cream/55">daily goal</p>
-                <p className="font-mono text-[10px] tabular-nums text-cream/50">
-                  {Math.min(todayCount, dailyGoal)} / {dailyGoal}
-                </p>
-              </div>
+              <FeatureGate feature="learn.daily_goal" compact>
+                <div className="mt-5 h-1 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.06)" }}>
+                  <div
+                    className={`h-full ${dailyProgressPct > 0 && dailyProgressPct < 100 ? "progress-shimmer" : ""}`}
+                    style={{
+                      width: `${dailyProgressPct}%`,
+                      background: dailyProgressPct >= 100
+                        ? "linear-gradient(90deg, #22C55E 0%, #FFD700 100%)"
+                        : "linear-gradient(90deg, #4A90D9 0%, #FFD700 100%)",
+                      transition: "width 900ms var(--ease-out-emil)",
+                    }}
+                  />
+                </div>
+                <div className="flex items-center justify-between mt-1.5">
+                  <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-cream/55">daily goal</p>
+                  <p className="font-mono text-[10px] tabular-nums text-cream/50">
+                    {Math.min(todayCount, dailyGoal)} / {dailyGoal}
+                  </p>
+                </div>
+              </FeatureGate>
             </Link>
 
             {/* Secondary actions — 5 clean rows, not cards */}
             <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2">
-              <Link
-                href="/learn/paths"
-                className="group flex items-center gap-3 px-4 py-3 rounded-[6px] border border-white/[0.06] hover:bg-white/[0.03] hover:border-gold/30 transition-colors text-left"
-                aria-label="Subjects — learning paths"
-              >
-                <BookOpen size={18} weight="regular" color="#3B82F6" aria-hidden="true" className="flex-shrink-0" />
-                <div className="flex-1 min-w-0">
-                  <p className="font-syne font-semibold text-sm text-cream leading-tight">Subjects</p>
-                  <p className="text-cream/55 text-[10px] font-mono">7 learning paths</p>
-                </div>
-                <ArrowRight size={14} weight="regular" color="rgba(238,244,255,0.3)" aria-hidden="true" className="group-hover:text-gold/60 transition-colors" />
-              </Link>
+              <FeatureGate feature="learn.paths" compact>
+                <Link
+                  href="/learn/paths"
+                  className="group flex items-center gap-3 px-4 py-3 rounded-[6px] border border-white/[0.06] hover:bg-white/[0.03] hover:border-gold/30 transition-colors text-left"
+                  aria-label="Subjects — learning paths"
+                >
+                  <BookOpen size={18} weight="regular" color="#3B82F6" aria-hidden="true" className="flex-shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <p className="font-syne font-semibold text-sm text-cream leading-tight">Subjects</p>
+                    <p className="text-cream/55 text-[10px] font-mono">7 learning paths</p>
+                  </div>
+                  <ArrowRight size={14} weight="regular" color="rgba(238,244,255,0.3)" aria-hidden="true" className="group-hover:text-gold/60 transition-colors" />
+                </Link>
+              </FeatureGate>
 
               <Link href="/learn/ninny" className="group flex items-center gap-3 px-4 py-3 rounded-[6px] border border-white/[0.06] hover:bg-white/[0.03] hover:border-[#A855F7]/30 transition-colors">
                 <PawPrint size={18} weight="fill" color="#A855F7" aria-hidden="true" className="flex-shrink-0" />
@@ -327,14 +331,16 @@ export default function LearnPage() {
                 <ArrowRight size={14} weight="regular" color="rgba(238,244,255,0.3)" aria-hidden="true" className="group-hover:text-gold transition-colors" />
               </Link>
 
-              <Link href="/learn/vocab" className="group flex items-center gap-3 px-4 py-3 rounded-[6px] border border-white/[0.06] hover:bg-white/[0.03] hover:border-[#4A90D9]/30 transition-colors text-left">
-                <Books size={18} weight="fill" color="#4A90D9" aria-hidden="true" className="flex-shrink-0" />
-                <div className="flex-1 min-w-0">
-                  <p className="font-syne font-semibold text-sm text-cream leading-tight">Word Banks</p>
-                  <p className="text-cream/55 text-[10px] font-mono">language vocab · aws · math · anything</p>
-                </div>
-                <ArrowRight size={14} weight="regular" color="rgba(238,244,255,0.3)" aria-hidden="true" className="group-hover:text-electric transition-colors" />
-              </Link>
+              <FeatureGate feature="learn.vocab" compact>
+                <Link href="/learn/vocab" className="group flex items-center gap-3 px-4 py-3 rounded-[6px] border border-white/[0.06] hover:bg-white/[0.03] hover:border-[#4A90D9]/30 transition-colors text-left">
+                  <Books size={18} weight="fill" color="#4A90D9" aria-hidden="true" className="flex-shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <p className="font-syne font-semibold text-sm text-cream leading-tight">Word Banks</p>
+                    <p className="text-cream/55 text-[10px] font-mono">language vocab · aws · math · anything</p>
+                  </div>
+                  <ArrowRight size={14} weight="regular" color="rgba(238,244,255,0.3)" aria-hidden="true" className="group-hover:text-electric transition-colors" />
+                </Link>
+              </FeatureGate>
 
               <Link
                 href="/learn/resume-coach"
@@ -366,6 +372,7 @@ export default function LearnPage() {
             <div className="lg:col-span-3 space-y-10">
 
               {/* SUBJECT MASTERY */}
+              <FeatureGate feature="learn.subject_mastery" compact>
               <section className="animate-slide-up" style={{ animationDelay: "0.12s" }}>
                 <div className="flex items-baseline justify-between mb-4">
                   <h2 className="font-bebas text-sm text-cream tracking-[0.2em]">MASTERY</h2>
@@ -427,6 +434,7 @@ export default function LearnPage() {
                   </ul>
                 )}
               </section>
+              </FeatureGate>
 
               {/* TODAY'S MISSIONS */}
               {missions.length > 0 && (
@@ -494,6 +502,7 @@ export default function LearnPage() {
             <div className="lg:col-span-2 space-y-10">
 
               {/* 7-DAY HEATMAP */}
+              <FeatureGate feature="learn.study_heatmap" compact>
               <section className="animate-slide-up" style={{ animationDelay: "0.12s" }}>
                 <div className="flex items-baseline justify-between mb-4">
                   <h2 className="font-bebas text-sm text-cream tracking-[0.2em]">7-DAY ACTIVITY</h2>
@@ -546,8 +555,10 @@ export default function LearnPage() {
                   <span className="font-mono text-[9px] uppercase tracking-wider text-cream/55">more</span>
                 </div>
               </section>
+              </FeatureGate>
 
               {/* RECENT LOG — clean list */}
+              <FeatureGate feature="learn.recent_activity" compact>
               <section className="animate-slide-up" style={{ animationDelay: "0.18s" }}>
                 <div className="flex items-baseline justify-between mb-4">
                   <h2 className="font-bebas text-sm text-cream tracking-[0.2em]">RECENT</h2>
@@ -591,6 +602,7 @@ export default function LearnPage() {
                   </ul>
                 )}
               </section>
+              </FeatureGate>
 
             </div>
           </div>

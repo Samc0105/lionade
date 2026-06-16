@@ -818,6 +818,7 @@ export default function SocialPage() {
 
             {/* Notifications Panel */}
             {showNotifView ? (
+              <FeatureGate feature="social.notifications" compact>
               <div className="flex-1 overflow-y-auto">
                 {!notifsHydrated ? (
                   /* Fetch hasn't resolved yet — skeleton, never the empty copy */
@@ -872,9 +873,13 @@ export default function SocialPage() {
                   ))
                 )}
               </div>
+              </FeatureGate>
             ) : showLobbiesView ? (
-              <PastLobbiesPanel router={router} />
+              <FeatureGate feature="social.lobbies" compact>
+                <PastLobbiesPanel router={router} />
+              </FeatureGate>
             ) : (
+            <FeatureGate feature="social.friend_list" compact>
             <>
             {/* Pending Requests */}
             {pendingRequests.length > 0 && (
@@ -1038,6 +1043,7 @@ export default function SocialPage() {
               })}
             </div>
             </>
+            </FeatureGate>
             )}
           </div>
 
@@ -1051,6 +1057,7 @@ export default function SocialPage() {
                 <div className="max-w-3xl mx-auto px-5 sm:px-8 py-8">
 
                   {/* ═══ Circle Pulse — 4 live-stat chips replace the old hero ═══ */}
+                  <FeatureGate feature="social.circle_pulse" compact>
                   <header className="mb-8">
                     <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-cream/55 mb-3">
                       circle pulse &nbsp;&middot;&nbsp; {new Date().toLocaleDateString(undefined, { weekday: "long" }).toLowerCase()}
@@ -1110,8 +1117,10 @@ export default function SocialPage() {
                       ))}
                     </div>
                   </header>
+                  </FeatureGate>
 
                   {/* ═══ Weekly Showdown — auto-picked rival ═══ */}
+                  <FeatureGate feature="social.showdown" compact>
                   {rival && (
                     <section
                       className="mb-8 rounded-[8px] p-5 relative overflow-hidden"
@@ -1191,8 +1200,10 @@ export default function SocialPage() {
                       </div>
                     </section>
                   )}
+                  </FeatureGate>
 
                   {/* ═══ Squad Goal — collective weekly target ═══ */}
+                  <FeatureGate feature="social.squad_goal" compact>
                   {circle.length > 0 && (
                     <section className="mb-10">
                       <div className="flex items-baseline justify-between mb-3">
@@ -1223,6 +1234,7 @@ export default function SocialPage() {
                       </p>
                     </section>
                   )}
+                  </FeatureGate>
 
                   {/* Circle weekly leaderboard — polaroids */}
                   {circle.length > 0 && (
@@ -1306,6 +1318,7 @@ export default function SocialPage() {
                   )}
 
                   {/* Activity feed */}
+                  <FeatureGate feature="social.activity_feed" compact>
                   <section className="relative">
                     <div className="flex items-baseline justify-between mb-5">
                       <h2 className="font-bebas text-lg text-cream tracking-[0.15em]">FEED</h2>
@@ -1380,6 +1393,7 @@ export default function SocialPage() {
                       </div>
                     )}
                   </section>
+                  </FeatureGate>
 
                   {friends.length > 0 && (
                     <p className="text-cream/55 text-[10px] italic font-serif text-center mt-10">
@@ -1389,6 +1403,7 @@ export default function SocialPage() {
                 </div>
               </div>
             ) : (
+              <FeatureGate feature="social.chat_thread" compact>
               <>
                 {/* Chat header */}
                 <div className="flex items-center justify-between px-5 py-3 border-b border-white/[0.06] flex-shrink-0">
@@ -1551,6 +1566,7 @@ export default function SocialPage() {
                   </div>
                 </div>
               </>
+              </FeatureGate>
             )}
           </div>
         </div>

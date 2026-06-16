@@ -23,8 +23,10 @@ edge firewall. Read "Honest scope" below before trusting it for anything.
 | Admin threats API | Node | `app/api/admin/security/threats/route.ts` |
 | Admin denylist list / block | Node | `app/api/admin/security/denylist/route.ts` |
 | Admin denylist unblock | Node | `app/api/admin/security/denylist/remove/route.ts` |
+| SOC alert cron (every 10 min) | Node | `app/api/cron/security-alerts/route.ts` |
 | Console UI | Client | `app/admin/security/page.tsx` |
 | Tables + RPC | Postgres | `lib/migrations/20260616140000_security_monitoring.sql` |
+| Alert dedup ledger | Postgres | `lib/migrations/20260616160000_feature_flags_v2.sql` (`security_alerts_sent`) |
 
 ---
 
@@ -218,6 +220,88 @@ through a URL path segment, so the IP travels in the JSON body.
 
 ---
 
+## SOC alerts (push, not just pull)
+
+The console is a *pull* surface: it shows what the telemetry sees only while
+someone has it open. `app/api/cron/security-alerts/route.ts` adds a *push* path
+so an attack does not sit unseen until someone happens to look. It is a **Vercel
+cron that runs every 10 minutes** (`*/10 * * * *` in `vercel.json`), reads the
+same telemetry tables, and emails `support@` (via `SUPPORT_EMAIL`) when one of
+two detectors trips. It is a pure read-and-email job: it **never mutates app
+state, never blocks a request path, and never touches the feature-flag tables.**
+
+### The two detectors
+
+1. **High-threat IP.** Sums `security_events.count` per IP over the last 60
+   minutes, counting only the serious categories `scanner`, `bruteforce`,
+   `admin_probe`, and `enumeration` (the tame `bot` / `flood` / `auth_failure` /
+   `denylist_hit` signals are deliberately excluded so a noisy-but-benign
+   crawler does not page anyone). An IP whose summed count clears
+   `THREAT_MIN_TOTAL` (20) is alerted. Row scan is bounded by
+   `THREAT_MAX_EVENTS_SCANNED` (5000); PostgREST cannot `GROUP BY`, so the
+   per-IP fold happens in JS over that bounded set.
+2. **Traffic spike.** From the IP-free `request_telemetry_rollup`, sums total
+   requests per minute over a ~31-minute trailing window, ignores the current
+   (still-filling) minute, and flags the newest *complete* minute when it clears
+   an **absolute floor** (`SPIKE_MIN_TOTAL`, 200) **AND** is at least
+   `SPIKE_MULTIPLE` (5x) the trailing median of the other minutes. Both guards
+   together stop low-traffic noise (a 1 -> 6 blip) from paging. When the
+   baseline median is 0, only the absolute floor applies. Row scan is bounded by
+   `SPIKE_MAX_ROWS_SCANNED` (5000).
+
+Both detectors run on every pass via `Promise.all`, each independently
+**fail-open**: a read error is logged generically and that detector contributes
+zero alerts while the other still runs.
+
+### Dedup so a sustained attack does not re-email every 10 minutes
+
+Each potential alert has a `dedup_key`, checked against the
+`public.security_alerts_sent` ledger (created in
+`lib/migrations/20260616160000_feature_flags_v2.sql`) **before** sending and
+inserted only **after** a confirmed send:
+
+- high-threat IP -> `threat:<ip>:<UTC date+hour>` (so a given IP pages at most
+  once per hour),
+- traffic spike -> `spike:<spiking minute ISO>` (so a given minute pages once).
+
+`alreadySent()` **fails CLOSED** on a read error (treats the key as already
+sent, skipping the email): a missed alert is recoverable, an email storm to
+`support@` is not. `markSent()` failing is non-fatal — at worst the same alert
+re-sends on the next pass, which is the safe direction. The cron writes only to
+`security_alerts_sent`; it produces **no** `admin_audit_log` rows because it is
+an automated job, not an admin action.
+
+### Auth, email config, and secret handling
+
+- **Auth:** header-only `Bearer CRON_SECRET`, compared in constant time
+  (`timingSafeEqual`, length-checked first), matching the sibling crons. Unset
+  secret fails **closed** with a generic `500`; a mismatch returns `401`. The
+  secret is never logged or echoed.
+- **Email config gate:** if `RESEND_API_KEY` or `EMAIL_FROM` is unset the job
+  still runs the detectors but **skips sending silently** (returns `{ ok: true }`
+  with zero sends) rather than 500-ing. Email failures are logged generically;
+  bodies are dash-free, name the concrete signal, carry **no secrets**, and link
+  to `/admin/security`.
+- **Last-resort guard:** the whole `GET` body is wrapped so it never throws out
+  of the cron; an unexpected error logs generically and still returns
+  `{ ok: true }`. It also writes a `putCronHeartbeat("security-alerts")` for the
+  watchdog.
+
+### Honest about the same lossy limit
+
+These alerts inherit the **in-memory aggregation is lossy** caveat below
+verbatim. `security_events` and `request_telemetry_rollup` are summed across
+short-lived per-instance edge buffers via the atomic RPC, so both detectors run
+on a **strong directional signal, not exact accounting**. A flood that recycles
+its edge instance before a flush loses that partial window, so the spike
+detector can under-count a real burst, and the threat sum is approximate. The
+thresholds (20 offender events, 200 req/min floor + 5x median) are set
+deliberately high so the noise floor does not page; the trade is that a
+small-but-genuine probe under those bounds will not alert. This is a heads-up
+layer on top of an approximate signal, not a precise IDS.
+
+---
+
 ## Honest scope
 
 **This is L7 (application-layer) monitoring only.** It sees requests that
@@ -260,12 +344,18 @@ wired today (no new npm packages, no per-request external IO).
 
 The feature is dormant by default. To enable it:
 
-1. **Run the migration manually** (Sam, via the Supabase SQL editor):
-   `lib/migrations/20260616140000_security_monitoring.sql`. It is idempotent and
-   safe to re-run. It creates the three tables, the `ingest_telemetry_rollup`
-   RPC, and admin-only RLS. It references `public.current_app_role()` from
-   migration 057 and does not redefine it. The read APIs tolerate the tables
-   being absent until it runs (the console shows a "run the migration" note).
+1. **Run the migrations manually** (Sam, via the Supabase SQL editor), both
+   idempotent and safe to re-run:
+   - `lib/migrations/20260616140000_security_monitoring.sql` — the three
+     telemetry tables, the `ingest_telemetry_rollup` RPC, and admin-only RLS. It
+     references `public.current_app_role()` from migration 057 and does not
+     redefine it. The read APIs tolerate the tables being absent until it runs
+     (the console shows a "run the migration" note).
+   - `lib/migrations/20260616160000_feature_flags_v2.sql` — adds
+     `security_alerts_sent`, the dedup ledger the SOC alert cron needs. The cron
+     fails safe if it is absent: `alreadySent()` fails closed on the read error
+     and the alert is skipped rather than re-sent. (This migration is shared
+     with the feature kill-switch; see `lib/features/README.md`.)
 2. **Set `INTERNAL_TELEMETRY_SECRET`** in Vercel for **Production and Preview**.
    Use a long random value. This single secret authenticates the middleware to
    both internal node routes.
@@ -278,6 +368,12 @@ The feature is dormant by default. To enable it:
 3. Redeploy. With the secret set, the middleware begins enforcing the denylist
    and flushing telemetry; the `/admin/security` console (admin-gated) starts
    populating.
+4. **For the SOC alert cron** (optional, but recommended once telemetry is on):
+   - `CRON_SECRET` must be set (shared with the other crons) so Vercel can
+     authenticate the every-10-min invocation. Unset fails closed.
+   - `RESEND_API_KEY` + `EMAIL_FROM` must be set for emails to actually send;
+     without them the cron runs the detectors and skips sending silently. Alerts
+     go to `SUPPORT_EMAIL` (`support@getlionade.com`).
 
 ### Secret handling rules honored here
 
@@ -291,22 +387,24 @@ The feature is dormant by default. To enable it:
 
 ## RLS, audit, and the type gap
 
-- **RLS** is enabled on all three tables. Read is admin-only
-  (`public.current_app_role() = 'admin'` `FOR SELECT`); `anon` is fully
-  revoked; the service role bypasses RLS for writes. There are no client
-  INSERT/UPDATE/DELETE policies, because every write path holds the service
-  role from a node route.
+- **RLS** is enabled on all three telemetry tables plus `security_alerts_sent`.
+  Read is admin-only (`public.current_app_role() = 'admin'` `FOR SELECT`);
+  `anon` is fully revoked; the service role bypasses RLS for writes. There are
+  no client INSERT/UPDATE/DELETE policies, because every write path holds the
+  service role from a node route (the alert cron included).
 - **Audit verbs** introduced by this subsystem: `security_ip_block` and
   `security_ip_unblock`, written via `writeTeamAudit()` after the mutation
   succeeds. `admin_audit_log.action` is free text; these are documented in the
-  migration header, not constrained by a check.
+  migration header, not constrained by a check. The alert cron writes **no**
+  audit rows (it is an automated job, not an admin action) — only the
+  `security_alerts_sent` dedup ledger.
 - **Documented Supabase-type gap:** `supabaseAdmin` is constructed without a
   generated `Database` generic, so `.rpc("ingest_telemetry_rollup", ...)` and
-  `.from("security_events" | "ip_denylist" | "request_telemetry_rollup")`
-  selects/inserts are untyped. Every such call site carries a `NOTE (documented
-  Supabase-type gap)` comment, and the column shapes are pinned to match this
-  migration exactly. This is the only place `any`-shaped Supabase access is
-  accepted in the subsystem.
+  `.from("security_events" | "ip_denylist" | "request_telemetry_rollup" |
+  "security_alerts_sent")` selects/inserts are untyped. Every such call site
+  carries a `NOTE (documented Supabase-type gap)` comment, and the column shapes
+  are pinned to match the migrations exactly. This is the only place
+  `any`-shaped Supabase access is accepted in the subsystem.
 
 ---
 
@@ -325,3 +423,5 @@ The feature is dormant by default. To enable it:
 | Service-role key leaking to the browser/edge | N/A | Edge invariant: service role lives only in node internal routes; secret is non-public env | Enforced by code review of edge imports |
 | Stripe webhook breakage from middleware | N/A | `/api/stripe/webhook` short-circuits before any telemetry/rate-limit logic | None |
 | Telemetry outage cascading into an app outage | Yes | All telemetry is best-effort, fire-and-forget, 5s-timeout, never throws to the caller | A telemetry failure silently drops one window of data |
+| Attack unseen between console checks | Yes | SOC alert cron (every 10 min) emails `support@` on a high-threat IP or traffic spike, deduped via `security_alerts_sent` | Runs on the same lossy aggregate; thresholds set high so a small probe under them will not page |
+| SOC alert system spamming support@ | Yes | Dedup keyed per IP+hour / per minute; `alreadySent()` fails closed on read error; email-config-off skips silently | A dedup-insert failure can re-send one alert next pass (bounded) |

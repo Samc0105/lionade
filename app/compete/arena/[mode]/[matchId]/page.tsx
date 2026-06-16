@@ -30,6 +30,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState, useMemo } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import FeatureGate from "@/components/FeatureGate";
 import { apiGet } from "@/lib/api-client";
 import { useAuth } from "@/lib/auth";
 import { useHeartbeat } from "@/lib/use-heartbeat";
@@ -101,15 +102,23 @@ export default function CompetitiveMatchPage() {
   }, [matchId]);
 
   if (!isCompetitiveMode(mode)) {
+    // Mode not statically known -> gate the parent Arena surface.
     return (
       <ProtectedRoute>
-        <Shell mode="sabotage"><p className="text-cream/60">Unknown mode.</p></Shell>
+        <FeatureGate feature="compete.arena">
+          <Shell mode="sabotage"><p className="text-cream/60">Unknown mode.</p></Shell>
+        </FeatureGate>
       </ProtectedRoute>
     );
   }
 
+  // Gate the live match view on the per-mode flag (e.g. "compete.arena.sabotage").
+  // The dot-path chain auto-resolves the "compete.arena" + "compete" ancestors,
+  // so maintenance on any of them replaces the surface for non-staff. `mode` is
+  // narrowed to a CompetitiveMode by the isCompetitiveMode guard above.
   return (
     <ProtectedRoute>
+      <FeatureGate feature={`compete.arena.${mode}`}>
       <Shell mode={mode} loaded={loaded} selfId={user?.id ?? null}>
         {error && (
           <div className="flex-1 flex flex-col items-center justify-center text-center px-6">
@@ -132,6 +141,7 @@ export default function CompetitiveMatchPage() {
           </>
         )}
       </Shell>
+      </FeatureGate>
     </ProtectedRoute>
   );
 }

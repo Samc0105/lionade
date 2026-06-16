@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
+import { assertFeatureLive } from "@/lib/feature-flags";
 import { applyFangMultiplier } from "@/lib/mastery-plan";
 import { moderateText, logFlagged } from "@/lib/moderation-ugc";
 import {
@@ -59,6 +60,12 @@ export async function POST(req: NextRequest) {
   const auth = await requireAuth(req);
   if (auth instanceof NextResponse) return auth;
   const userId = auth.userId;
+
+  // Kill-switch: 503 the save when Vocabulary (or an ancestor) is in
+  // maintenance. A 'warning' state is NOT blocked here; the surface stays
+  // usable with a banner. Fail-open: an unreadable flag service => allowed.
+  const gate = await assertFeatureLive("learn.vocab");
+  if (gate) return gate;
 
   let body: unknown;
   try {
