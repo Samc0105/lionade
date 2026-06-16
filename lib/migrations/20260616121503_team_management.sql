@@ -100,9 +100,10 @@ create trigger trg_admin_audit_log_immutable
 
 -- New action values used by the team feature (action is free text — documented,
 -- not constrained, so existing inserts with other action values keep working):
---   team_provision, team_offboard, team_role_change, team_password_reset, team_offboard_hard
+--   team_provision, team_offboard, team_role_change, team_password_reset,
+--   team_offboard_hard, team_mfa_autosuspend (written by the MFA-enforcement cron)
 comment on column public.admin_audit_log.action is
-  'Admin action type (free text). Team values: team_provision, team_offboard, team_role_change, team_password_reset, team_offboard_hard.';
+  'Admin action type (free text). Team values: team_provision, team_offboard, team_role_change, team_password_reset, team_offboard_hard, team_mfa_autosuspend.';
 
 -- ─────────────────────────────────────────────────────────────────────────
 -- 5. profiles.role gains 'former_team' (set on soft-offboard). Name-agnostic

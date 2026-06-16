@@ -390,6 +390,33 @@ const ROUTE_LIMITS: RouteLimit[] = [
     keyPrefix: "arena",
   },
 
+  // Admin team management — privileged IAM mutations (provision, offboard,
+  // reactivate, suspend, reset-password). Each creates or alters a staff
+  // identity, so cap tighter than the generic admin-write bucket: 15/min/IP is
+  // ample for a human running team ops and blocks a hijacked admin token from
+  // mass-provisioning accounts. Must precede the broad /api/admin/ rules below
+  // (first match wins) so it actually takes effect.
+  {
+    test: (p) => p.startsWith("/api/admin/team/"),
+    method: "POST",
+    max: 15,
+    windowMs: 60 * 1000,
+    keyPrefix: "admin-team-write",
+  },
+  // Admin credential vault — per-credential ops at /api/admin/vault/<id>:
+  // reveal (POST, returns a decrypted secret), update (PATCH), and delete
+  // (DELETE). No method filter so all three mutating verbs get the same tight
+  // 30/min/IP cap (a POST-only filter would let PATCH/DELETE fall through to
+  // the looser admin-read bucket). The list GET / create POST live at
+  // /api/admin/vault (no trailing slash) and intentionally do not match here.
+  // Placed above the broad /api/admin/ rules (first match wins).
+  {
+    test: (p) => p.startsWith("/api/admin/vault/"),
+    max: 30,
+    windowMs: 60 * 1000,
+    keyPrefix: "admin-vault",
+  },
+
   // Admin console — staff-only surface, low legitimate volume. Tighter cap
   // for POSTs (mutations: resets, Fang adjustments, suspensions) than reads.
   {
