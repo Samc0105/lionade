@@ -152,28 +152,111 @@ CREDENTIAL_ENCRYPTION_KEY`); they never crash at import time.
 
 ## Key rotation
 
-Rotating `CREDENTIAL_ENCRYPTION_KEY` is the honest limitation today. There is no
-built-in rotation. Because every row is sealed under the current key, swapping the
-env var alone would make every existing secret fail to decrypt (GCM would throw
-on the wrong key).
+Rotating `CREDENTIAL_ENCRYPTION_KEY` is a two-phase, zero-downtime operation. It
+is wired end to end: a decrypt fallback in `crypto.ts` and an admin-only re-seal
+route. You never have to take reveals offline to rotate.
 
-The migration path is decrypt-with-old, re-encrypt-with-new: hold both keys
-transiently, walk every `shared_credentials` row, `decryptSecret` with the old
-key and `encryptSecret` with the new one, write the new ciphertext/IV/tag, then
-retire the old key. This is flagged as future work. Per-row rotation of an
-individual secret is already supported today through `PATCH
-/api/admin/vault/[id]` with a new `secret`, which re-seals that one row under the
-current key.
+**How it works in the code:**
+
+- `decryptSecretFlexible` (in `crypto.ts`) tries the **active** key
+  (`CREDENTIAL_ENCRYPTION_KEY`) first. If that GCM check throws and a valid
+  **previous** key (`CREDENTIAL_ENCRYPTION_KEY_PREVIOUS`) is configured, it
+  retries with the previous key. So while both vars are live, every reveal keeps
+  working regardless of which key a given row is still sealed under.
+- `encryptSecret` always uses the **active** key only. New writes never touch the
+  previous key, so anything created or re-sealed during the window is already on
+  the new key.
+- `POST /api/admin/vault/rotate` (admin only) walks every `shared_credentials`
+  row, decrypts it with `decryptSecretFlexible` (active first, previous as
+  fallback), and re-encrypts it with the active key. It is **per-row safe**: a
+  single unopenable or un-writable row is collected into `failedIds` and the loop
+  continues. It is **re-runnable / idempotent**: an already-rotated row simply
+  decrypts under the active key and is re-sealed under the same key, so re-running
+  retries only the rows that previously failed. The route refuses with a 400 when
+  `CREDENTIAL_ENCRYPTION_KEY_PREVIOUS` is unset, because there would be nothing to
+  rotate from. The rotation is audited as `vault_rotate` with `{ total, rotated,
+  failed_ids }` only. The response returns 200 when every row re-sealed, 207 when
+  some `failedIds` remain. Decrypted plaintext never leaves the server, never gets
+  logged, and never appears in the audit metadata or the response.
+
+**Operator runbook:**
+
+1. **Generate a new key:**
+
+   ```
+   openssl rand -base64 32
+   ```
+
+2. **Stage both keys in Vercel (Production AND Preview):**
+   - Move the existing `CREDENTIAL_ENCRYPTION_KEY` value into a new var
+     `CREDENTIAL_ENCRYPTION_KEY_PREVIOUS`.
+   - Set `CREDENTIAL_ENCRYPTION_KEY` to the freshly generated key.
+   - Redeploy so both vars are live in the running server. Reveals keep working
+     throughout because of the previous-key fallback.
+
+3. **Run the rotation** from `/admin/vault` (the button that calls
+   `POST /api/admin/vault/rotate`). Confirm the result re-sealed every row. If any
+   `failedIds` come back, run it again; the re-run only retries those rows.
+
+4. **Retire the old key:** once the rotation reports zero `failedIds`, remove
+   `CREDENTIAL_ENCRYPTION_KEY_PREVIOUS` from Vercel (Production AND Preview) and
+   redeploy. The old key is now out of the environment and every row is sealed
+   under the new key.
+
+**Honest limits:**
+
+- Both vars are plain Vercel env values; this is not KMS-backed envelope
+  encryption, so during the window the prior key lives in the environment until
+  you remove it in step 4. The previous-key value is held to the same secrecy bar
+  as the active key (never logged, never echoed).
+- Per-row rotation of a single secret is still available outside this flow via
+  `PATCH /api/admin/vault/[id]` with a new `secret`, which re-seals that one row
+  under the active key.
+
+---
+
+## Onboarding gate
+
+Provisioned team members are forced through onboarding before they can use the
+product, which is what makes the 7-day MFA-enforcement cron safe to run.
+
+`POST /api/admin/team/provision` sets two flags on the new account's auth
+`user_metadata`: `must_change_password` and (for the enforced-MFA role set:
+founder / engineer / support) `mfa_required`. `TeamGate` (mounted globally in
+`app/layout.tsx`) reads those flags and redirects:
+
+1. `must_change_password === true` routes to `/onboard/password`.
+2. `mfa_required === true` with no verified TOTP factor routes to `/onboard/mfa`.
+
+`TeamGate` reads both flags straight off `user_metadata`, so it is zero-network
+for normal (non-staff) users, and only an `mfa_required` account ever calls
+`mfa.listFactors()`. Exempt paths (`/onboard/*`, `/reset-password`, `/login`,
+`/signup`, `/logout`) are never redirected, so the onboarding destinations are
+self-exempt and there are no redirect loops.
+
+Because provisioning forces a privileged member into TOTP enrollment up front,
+the `GET /api/cron/team-mfa-enforce` daily sweep is a backstop rather than a
+surprise. It only acts on members past a 7-day grace window (`GRACE_DAYS = 7`,
+measured from `activated_at`, falling back to `invited_at`) who still have no
+verified TOTP factor, and then bans the auth account and flips the membership to
+`suspended`, audited as `team_mfa_autosuspend`. A compliant or dormant member who
+already enrolled simply passes the check.
+
+**Honest limit:** `TeamGate` is a client-side redirect, not a server-side
+authorization gate. It nudges staff into onboarding but is not the security
+boundary on its own. The actual enforcement is the cron (which bans accounts that
+miss the grace window) plus the per-route `requireRole` checks. `TeamGate` also
+fails open on a `listFactors` read fault, deferring to the cron as the backstop.
 
 ---
 
 ## Current limitations
 
-- **No key rotation tooling** (see above). A full key change requires a one-off
-  re-encryption pass that does not yet exist.
-- **Single key, no envelope encryption.** The key is a single env value, not a
-  per-secret data key wrapped by a KMS master key. A KMS-backed envelope scheme
-  would add per-secret keys, managed rotation, and an external audit of key use.
+- **Single key, no envelope encryption.** The at-rest key is a single env value
+  (plus an optional second one during a rotation window), not a per-secret data
+  key wrapped by a KMS master key. Key rotation is supported (see above), but a
+  KMS-backed envelope scheme would add per-secret keys, automated rotation, and an
+  external audit of key use.
 - **Reveal is the trust boundary.** Any admin can reveal any secret; the control
   is that the reveal is audited, not that it is restricted per credential. There
   is no per-credential ACL or approval step.

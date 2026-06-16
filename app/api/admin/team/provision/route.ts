@@ -55,6 +55,11 @@ const VALID_ROLES: readonly TeamRole[] = [
 
 const VALID_ACCESS: readonly LionadeAccess[] = ["none", "viewer", "editor", "admin"];
 
+// Roles in the enforced-MFA set. Mirrors app/api/cron/team-mfa-enforce and
+// /api/team/me. Combined with lionade_access <> 'none' below, these decide the
+// user_metadata.mfa_required flag that lets TeamGate stay zero-network.
+const ENFORCED_MFA_ROLES: readonly TeamRole[] = ["founder", "engineer", "support"];
+
 // Mirrors the DB CHECK on team_members.username: ^[a-z][a-z0-9.-]{2,30}$.
 const USERNAME_RE = /^[a-z][a-z0-9.-]{2,30}$/;
 
@@ -256,6 +261,12 @@ export async function POST(req: NextRequest) {
   // 9) Optionally create the real Supabase auth account.
   let authUserId: string | null = null;
   if (lionadeAccessGranted) {
+    // mfa_required mirrors the enforced-MFA set (role in founder/engineer/
+    // support AND lionade_access <> 'none'). Writing it onto user_metadata at
+    // creation lets TeamGate be zero-network for normal users: only members
+    // whose metadata carries mfa_required:true ever call mfa.listFactors().
+    // lionadeAccessGranted already encodes lionade_access !== 'none' here.
+    const mfaRequired = ENFORCED_MFA_ROLES.includes(role) && lionadeAccessGranted;
     const { data: created, error: createError } =
       await supabaseAdmin.auth.admin.createUser({
         email: personalEmail,
@@ -263,6 +274,7 @@ export async function POST(req: NextRequest) {
         password: tempPassword,
         user_metadata: {
           must_change_password: true,
+          mfa_required: mfaRequired,
           role,
           full_name: fullName,
         },

@@ -329,6 +329,30 @@ export async function POST(req: NextRequest) {
     console.error("[team/reset-password]", updateErr.message);
   }
 
+  // Also re-arm user_metadata.must_change_password so the onboarding gate
+  // (TeamGate, zero-network) re-triggers after an admin reset. Best-effort:
+  // the row flag above plus the recovery link are the source of truth, so a
+  // metadata write failure here must NEVER fail the request. Preserve the
+  // rest of the metadata by reading the current user first.
+  try {
+    const { data: userRes } = await supabaseAdmin.auth.admin.getUserById(row.user_id);
+    if (userRes?.user) {
+      const existingMeta = (userRes.user.user_metadata ?? {}) as Record<string, unknown>;
+      const { error: metaErr } = await supabaseAdmin.auth.admin.updateUserById(
+        row.user_id,
+        { user_metadata: { ...existingMeta, must_change_password: true } },
+      );
+      if (metaErr) {
+        console.error("[team/reset-password] metadata re-arm:", metaErr.message);
+      }
+    }
+  } catch (metaEx) {
+    console.error(
+      "[team/reset-password] metadata re-arm threw:",
+      metaEx instanceof Error ? metaEx.message : "unknown",
+    );
+  }
+
   // --- 9. Audit (NEVER the link or any password) ---------------------------
   await writeTeamAudit(supabaseAdmin, {
     performedBy: staff.userId,

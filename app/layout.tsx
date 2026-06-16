@@ -17,6 +17,7 @@ import PageTransition from "@/components/PageTransition";
 import DemoModeBanner from "@/components/DemoModeBanner";
 import ActiveSessionToast from "@/components/ActiveSessionToast";
 import SessionLifecycle from "@/components/SessionLifecycle";
+import TeamGate from "@/components/TeamGate";
 import PartyInviteToast from "@/components/party/PartyInviteToast";
 import { SITE_URL, SITE_URL_OBJ } from "@/lib/site-config";
 
@@ -180,6 +181,13 @@ export default function RootLayout({
                       because it calls useToast() for soft cross-game-redirect
                       confirmations on mid-question pages. */}
                   <SessionLifecycle />
+                  {/* TeamGate forces staff through the password / TOTP
+                      onboarding flow. Zero-network for normal users (reads
+                      session user_metadata); only mfa_required accounts ever
+                      call listFactors, cached once per session. Renders
+                      nothing. Sits beside SessionLifecycle, inside the auth
+                      provider so it has useAuth(). */}
+                  <TeamGate />
                   <DemoModeBanner />
                   <Navbar />
                   <main id="main-content">

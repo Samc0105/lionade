@@ -27,7 +27,7 @@ import {
   assertTrustedOrigin,
   UntrustedOriginError,
 } from "@/lib/team/origin-check";
-import { decryptSecret, isVaultConfigured } from "@/lib/vault/crypto";
+import { decryptSecretFlexible, isVaultConfigured } from "@/lib/vault/crypto";
 
 type RouteCtx = { params: { id: string } };
 
@@ -88,15 +88,18 @@ export async function POST(req: NextRequest, { params }: RouteCtx) {
     return NextResponse.json({ error: "Credential not found" }, { status: 404 });
   }
 
-  // 6) Decrypt. On any failure (tamper, wrong key) GCM final() throws; we log a
-  //    detail-free line and return a generic error. Never echo the crypto error.
+  // 6) Decrypt. decryptSecretFlexible tries the active key first, then the
+  //    previous key during a rotation window, so reveals keep working while
+  //    /api/admin/vault/rotate re-seals rows. On any failure (tamper, both keys
+  //    wrong) it throws; we log a detail-free line and return a generic error.
+  //    Never echo the crypto error. usedPreviousKey is intentionally not surfaced.
   let secret: string;
   try {
-    secret = decryptSecret({
+    secret = decryptSecretFlexible({
       ciphertext: row.secret_ciphertext,
       iv: row.secret_iv,
       authTag: row.secret_auth_tag,
-    });
+    }).plaintext;
   } catch {
     console.error("[admin/vault/reveal] decrypt failed");
     return NextResponse.json(

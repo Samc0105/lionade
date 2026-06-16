@@ -38,6 +38,8 @@ import {
   PencilSimple,
   Trash,
   LinkSimple,
+  Key,
+  Warning,
 } from "@phosphor-icons/react";
 
 // The fields an admin can type into the add / edit forms. `secret` is split out
@@ -95,6 +97,13 @@ export default function AdminVaultPage() {
   // whenever the list is re-fetched.
   const [revealed, setRevealed] = useState<Record<string, string>>({});
   const [revealBusy, setRevealBusy] = useState<string | null>(null);
+
+  // ── key-rotation state (admin / danger area) ──────────────────────
+  // Rotation re-seals every stored secret under the active encryption key.
+  // It assumes the operator has already swapped the env keys (see the modal
+  // copy). It is safe to re-run; already-rotated rows simply re-seal.
+  const [rotateOpen, setRotateOpen] = useState(false);
+  const [rotateBusy, setRotateBusy] = useState(false);
 
   if (!isAdmin) {
     return (
@@ -247,6 +256,40 @@ export default function AdminVaultPage() {
       toastSuccess("Copied to clipboard");
     } catch {
       toastError("Could not copy. Copy it manually.");
+    }
+  };
+
+  // Re-encrypt every stored secret under the active key. The server reads the
+  // new key from CREDENTIAL_ENCRYPTION_KEY and the old key from
+  // CREDENTIAL_ENCRYPTION_KEY_PREVIOUS; the operator must set both before
+  // confirming. A revealed value is invalidated because the underlying
+  // ciphertext changes, so we clear any open reveals on success.
+  const confirmRotate = async () => {
+    setRotateBusy(true);
+    const res = await apiPost<{ ok: boolean; rotatedCount: number; failedIds: string[] }>(
+      "/api/admin/vault/rotate",
+      {},
+    );
+    setRotateBusy(false);
+    if (res.ok) {
+      const rotatedCount = res.data?.rotatedCount ?? 0;
+      const failedIds = res.data?.failedIds ?? [];
+      if (failedIds.length > 0) {
+        toastError(
+          `Rotated ${rotatedCount}, but ${failedIds.length} could not be re-encrypted. Re-run rotation after checking the keys.`,
+        );
+      } else {
+        toastSuccess(
+          rotatedCount === 1
+            ? "Re-encrypted 1 credential under the new key."
+            : `Re-encrypted ${rotatedCount} credentials under the new key.`,
+        );
+      }
+      setRotateOpen(false);
+      setRevealed({});
+      void mutate();
+    } else {
+      toastError(res.error ?? "Could not rotate the encryption key");
     }
   };
 
@@ -429,6 +472,31 @@ export default function AdminVaultPage() {
         </div>
       )}
 
+      {/* ── Admin / danger area: encryption-key rotation ── */}
+      <div
+        className="mt-8 rounded-2xl border border-gold/20 p-5"
+        style={{ background: CARD_BG }}
+      >
+        <div className="flex items-start justify-between gap-4 flex-wrap">
+          <div className="min-w-0">
+            <h2 className="font-bebas text-xl tracking-wider text-gold flex items-center gap-2">
+              <Key size={20} weight="fill" className="text-gold" aria-hidden="true" />
+              Rotate encryption key
+            </h2>
+            <p className="text-xs text-cream/50 mt-1 max-w-2xl">
+              Re-encrypts every stored secret under a new encryption key. Set the
+              environment first, then run rotation here. Safe to re-run.
+            </p>
+          </div>
+          <button
+            onClick={() => setRotateOpen(true)}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-gold/30 text-gold bg-gold/10 text-sm font-bold shrink-0 transition-all hover:brightness-110"
+          >
+            <Key size={15} weight="bold" aria-hidden="true" /> Rotate encryption key
+          </button>
+        </div>
+      </div>
+
       {/* ── Add / Edit modal (one shell, switched by addOpen / editId) ── */}
       <AdminModalShell
         open={addOpen || editId !== null}
@@ -556,6 +624,84 @@ export default function AdminVaultPage() {
         confirmLabel="Delete credential"
         destructive
       />
+
+      {/* ── Rotate encryption key (rich explanation + confirm) ── */}
+      <AdminModalShell
+        open={rotateOpen}
+        onClose={() => setRotateOpen(false)}
+        busy={rotateBusy}
+        labelId="vault-rotate-title"
+        borderClass="border-gold/25"
+      >
+        <h3
+          id="vault-rotate-title"
+          className="font-bebas text-2xl tracking-wider text-gold mb-1 flex items-center gap-2"
+        >
+          <Key size={22} weight="fill" className="text-gold" aria-hidden="true" />
+          Rotate encryption key
+        </h3>
+        <p className="text-sm text-cream/60 mb-4">
+          This re-encrypts every stored credential under the new key. Do the two
+          steps in order.
+        </p>
+
+        <ol className="space-y-3 mb-4">
+          <li className="rounded-xl border border-white/10 bg-white/[0.04] p-3">
+            <div className="text-[11px] uppercase tracking-wider text-gold font-bold mb-1">
+              Step 1: set the environment
+            </div>
+            <p className="text-sm text-cream/70">
+              Set{" "}
+              <code className="font-mono text-cream/90 px-1.5 py-0.5 rounded bg-white/[0.06] border border-white/10 break-all">
+                CREDENTIAL_ENCRYPTION_KEY
+              </code>{" "}
+              to the new key and{" "}
+              <code className="font-mono text-cream/90 px-1.5 py-0.5 rounded bg-white/[0.06] border border-white/10 break-all">
+                CREDENTIAL_ENCRYPTION_KEY_PREVIOUS
+              </code>{" "}
+              to the old key. Both must be present before you run rotation.
+            </p>
+          </li>
+          <li className="rounded-xl border border-white/10 bg-white/[0.04] p-3">
+            <div className="text-[11px] uppercase tracking-wider text-gold font-bold mb-1">
+              Step 2: run rotation
+            </div>
+            <p className="text-sm text-cream/70">
+              Confirm below. Every secret is decrypted with whichever key still
+              works, then re-encrypted under the new key.
+            </p>
+          </li>
+        </ol>
+
+        <div className="rounded-xl border border-electric/25 bg-electric/[0.08] p-3 mb-5 flex gap-2.5">
+          <Warning size={18} weight="fill" className="text-electric shrink-0 mt-0.5" aria-hidden="true" />
+          <p className="text-xs text-cream/70">
+            Safe to re-run. If any rows fail, fix the keys and run it again. No
+            secrets are shown or logged during rotation.
+          </p>
+        </div>
+
+        <div className="flex gap-2">
+          <button
+            onClick={() => setRotateOpen(false)}
+            disabled={rotateBusy}
+            className="flex-1 py-3 rounded-xl border border-white/10 text-cream/70 text-sm font-bold hover:bg-white/5 disabled:opacity-60"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={confirmRotate}
+            disabled={rotateBusy}
+            className="flex-1 py-3 rounded-xl text-sm font-bold disabled:opacity-60"
+            style={{
+              background: "linear-gradient(135deg, #F0B429 0%, #B8960C 50%, #F0B429 100%)",
+              color: "#04080F",
+            }}
+          >
+            {rotateBusy ? "Rotating..." : "Rotate now"}
+          </button>
+        </div>
+      </AdminModalShell>
     </div>
   );
 }

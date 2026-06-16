@@ -17,6 +17,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { apiPost } from "@/lib/api-client";
 import { toastSuccess, toastError } from "@/lib/toast";
 
 const CARD_BG = "linear-gradient(135deg, #0a1020 0%, #060c18 100%)";
@@ -67,8 +68,19 @@ export default function ResetPasswordPage() {
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (password.length < 8) {
-      toastError("Password must be at least 8 characters");
+    // Mirror the forced-onboarding strength policy (/onboard/password) so a
+    // team member who arrives via the emailed recovery link cannot set a weaker
+    // password than the gate would otherwise require.
+    const strongEnough =
+      password.length >= 8 &&
+      /[a-z]/.test(password) &&
+      /[A-Z]/.test(password) &&
+      /[0-9]/.test(password) &&
+      /[^A-Za-z0-9]/.test(password);
+    if (!strongEnough) {
+      toastError(
+        "Use at least 8 characters with upper and lower case, a number, and a symbol",
+      );
       return;
     }
     if (password !== confirm) {
@@ -79,9 +91,23 @@ export default function ResetPasswordPage() {
     const { error } = await supabase.auth.updateUser({ password });
     setBusy(false);
     if (error) {
-      toastError(error.message);
+      // Generic copy, consistent with the rest of the product (no raw Supabase
+      // error text surfaced to the user).
+      toastError("Could not update your password. Try again or request a fresh link.");
       return;
     }
+
+    // Best-effort: if a team member used the emailed recovery link to set a
+    // new password, clear the forced-change flag (column + metadata) on their
+    // own account so TeamGate does not re-prompt them at /onboard/password.
+    // Non-team users have no row and the route is idempotently a no-op for
+    // them, so we ignore any failure here.
+    try {
+      await apiPost("/api/team/me/clear-password-flag", {});
+    } catch {
+      // ignore — non-team users have nothing to clear
+    }
+
     setPhase("done");
     toastSuccess("Password updated");
     setTimeout(() => router.replace("/dashboard"), 1200);
