@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { useReducedMotion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import FeatureGate from "@/components/FeatureGate";
 import AmbientOrbs from "@/components/AmbientOrbs";
 import RevealText from "@/components/RevealText";
 import CountUp from "@/components/CountUp";
@@ -720,6 +721,7 @@ export default function GamesPage() {
 
     return (
       <ProtectedRoute>
+        <FeatureGate feature="games.roardle" compact>
         <div className="min-h-screen pt-16 pb-8">
           <div className="max-w-lg mx-auto px-4 py-6">
             <button onClick={backToMenu} className="text-cream/40 text-sm mb-4 hover:text-cream/60 transition">← Back</button>
@@ -909,6 +911,7 @@ export default function GamesPage() {
             </div>
           </div>
         </div>
+        </FeatureGate>
       </ProtectedRoute>
     );
   }
@@ -918,6 +921,7 @@ export default function GamesPage() {
     const card = fcCards[fcIdx];
     return (
       <ProtectedRoute>
+        <FeatureGate feature="games.flashcards" compact>
         <div className="min-h-screen pt-16 pb-8">
           <div className="max-w-lg mx-auto px-4 py-6">
             <button onClick={backToMenu} className="text-cream/40 text-sm mb-4 hover:text-cream/60 transition">← Back</button>
@@ -1021,6 +1025,7 @@ export default function GamesPage() {
             })()}
           </div>
         </div>
+        </FeatureGate>
       </ProtectedRoute>
     );
   }
@@ -1029,6 +1034,7 @@ export default function GamesPage() {
   if (game === "timeline") {
     return (
       <ProtectedRoute>
+        <FeatureGate feature="games.timeline" compact>
         <div className="min-h-screen pt-16 pb-8">
           <div className="max-w-lg mx-auto px-4 py-6">
             <button onClick={backToMenu} className="text-cream/40 text-sm mb-4 hover:text-cream/60 transition">← Back</button>
@@ -1142,6 +1148,7 @@ export default function GamesPage() {
             })()}
           </div>
         </div>
+        </FeatureGate>
       </ProtectedRoute>
     );
   }
@@ -1521,6 +1528,7 @@ export default function GamesPage() {
 
   return (
     <ProtectedRoute>
+      <FeatureGate feature="games">
       <div className="min-h-screen pt-16 pb-20 md:pb-8 overflow-hidden relative" style={{ isolation: "isolate" }}>
         {/* Faint orbs keyed to the four game accents — intentional depth */}
         <AmbientOrbs
@@ -2006,6 +2014,7 @@ export default function GamesPage() {
           </div>
         </div>
       </div>
+      </FeatureGate>
     </ProtectedRoute>
   );
 }

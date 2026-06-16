@@ -14,6 +14,7 @@ import {
   DefaultSubjectIcon,
 } from "@/lib/mockData";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import FeatureGate from "@/components/FeatureGate";
 import { cdnUrl } from "@/lib/cdn";
 import { apiPost, apiGet, swrFetcher } from "@/lib/api-client";
 import useSWR from "swr";
@@ -602,6 +603,7 @@ function DashboardContent() {
           <DailyDrillWidget />
 
           {/* ═══ 4) Today's Missions ═══ */}
+          <FeatureGate feature="dashboard.missions" compact>
           <div className="mb-8 animate-slide-up" style={{ animationDelay: "0.1s" }}>
             <div className="flex items-center justify-between mb-4">
               <h2 className="font-bebas text-xl text-cream tracking-wider">TODAY&apos;S MISSIONS</h2>
@@ -728,8 +730,10 @@ function DashboardContent() {
               )}
             </div>
           </div>
+          </FeatureGate>
 
           {/* ═══ 5) Daily Bet ═══ */}
+          <FeatureGate feature="dashboard.daily_bet" compact>
           <div className="mb-8 animate-slide-up" style={{ animationDelay: "0.16s" }}>
             <div className="flex items-baseline justify-between mb-3">
               <h2 className="font-bebas text-xl text-cream tracking-wider">DAILY BET</h2>
@@ -999,8 +1003,10 @@ function DashboardContent() {
               );
             })()}
           </div>
+          </FeatureGate>
 
           {/* ═══ 5c) Bounty Board ═══ */}
+          <FeatureGate feature="dashboard.bounties" compact>
           <div className="mb-8 animate-slide-up" style={{ animationDelay: "0.17s" }}>
             <div className="flex items-baseline justify-between mb-3">
               <h2 className="font-bebas text-xl text-cream tracking-wider">BOUNTY BOARD</h2>
@@ -1124,6 +1130,7 @@ function DashboardContent() {
               </div>
             )}
           </div>
+          </FeatureGate>
 
           {/* ═══ 6) Two-Column Lower ═══ */}
           <div className="grid lg:grid-cols-3 gap-6">

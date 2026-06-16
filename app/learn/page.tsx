@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useAuth } from "@/lib/auth";
 import { useUserStats } from "@/lib/hooks";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import FeatureGate from "@/components/FeatureGate";
 import { useQuizHistory } from "@/lib/hooks";
 import useSWR from "swr";
 import { SUBJECT_ICONS, SUBJECT_COLORS, DefaultSubjectIcon } from "@/lib/mockData";
@@ -194,6 +195,7 @@ export default function LearnPage() {
         .animate-slide-up { animation: slide-up 0.45s var(--ease-out-expo, cubic-bezier(0.16,1,0.3,1)) both; }
       `}</style>
 
+      <FeatureGate feature="learn">
       <div className="min-h-screen pt-16 pb-20 md:pb-8">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
@@ -595,6 +597,7 @@ export default function LearnPage() {
 
         </div>
       </div>
+      </FeatureGate>
 
     </ProtectedRoute>
   );

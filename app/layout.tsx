@@ -18,6 +18,7 @@ import DemoModeBanner from "@/components/DemoModeBanner";
 import ActiveSessionToast from "@/components/ActiveSessionToast";
 import SessionLifecycle from "@/components/SessionLifecycle";
 import TeamGate from "@/components/TeamGate";
+import MaintenanceGate from "@/components/MaintenanceGate";
 import PartyInviteToast from "@/components/party/PartyInviteToast";
 import { SITE_URL, SITE_URL_OBJ } from "@/lib/site-config";
 
@@ -191,7 +192,15 @@ export default function RootLayout({
                   <DemoModeBanner />
                   <Navbar />
                   <main id="main-content">
-                    <PageTransition>{children}</PageTransition>
+                    {/* Site-wide kill-switch. Reads the "site" feature flag
+                        and, when in maintenance, swaps the page body for the
+                        brand MaintenanceState for non-staff. Staff bypass so an
+                        admin can still reach /admin to lift the flag. Sits
+                        inside ToastProvider and OUTSIDE the Navbar so the nav
+                        (a recovery surface) is never hidden. Fail-open. */}
+                    <MaintenanceGate>
+                      <PageTransition>{children}</PageTransition>
+                    </MaintenanceGate>
                   </main>
                   <QuickNoteShortcut />
                   <FocusMusicToggle />

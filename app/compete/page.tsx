@@ -4,6 +4,7 @@ import { useMemo } from "react";
 import useSWR from "swr";
 import Link from "next/link";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import FeatureGate from "@/components/FeatureGate";
 import { useAuth } from "@/lib/auth";
 import { cdnUrl } from "@/lib/cdn";
 import { apiGet } from "@/lib/api-client";
@@ -160,6 +161,7 @@ export default function CompetePage() {
 
   return (
     <ProtectedRoute>
+      <FeatureGate feature="compete">
       <div
         data-force-dark
         className="relative min-h-screen pt-16 pb-20 md:pb-8 overflow-hidden"
@@ -808,6 +810,7 @@ export default function CompetePage() {
 
         </div>
       </div>
+      </FeatureGate>
     </ProtectedRoute>
   );
 }

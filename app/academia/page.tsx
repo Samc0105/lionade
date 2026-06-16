@@ -10,6 +10,7 @@ import {
   Flame, Warning,
 } from "@phosphor-icons/react";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import FeatureGate from "@/components/FeatureGate";
 import Navbar from "@/components/Navbar";
 import SpaceBackground from "@/components/SpaceBackground";
 import ImportCalendarSheet from "@/components/academia/ImportCalendarSheet";
@@ -161,6 +162,7 @@ export default function AcademiaPage() {
         <SpaceBackground />
         <Navbar />
 
+        <FeatureGate feature="academia">
         <main className="relative z-10 max-w-[1180px] mx-auto px-4 sm:px-6 pt-6 pb-24">
           {/* ─── Header ─── */}
           <header className="mb-10">
@@ -289,6 +291,7 @@ export default function AcademiaPage() {
             )}
           </div>
         </main>
+        </FeatureGate>
 
         {showCreate && (
           <CreateClassModal

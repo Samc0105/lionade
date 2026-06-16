@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
+import { assertFeatureLive } from "@/lib/feature-flags";
 import {
   rollSlot,
   computeReward,
@@ -35,6 +36,9 @@ export async function POST(req: NextRequest) {
   const auth = await requireAuth(req);
   if (auth instanceof NextResponse) return auth;
   const userId = auth.userId;
+
+  const m = await assertFeatureLive("shop.daily_spin");
+  if (m) return m;
 
   // ── 1. Cooldown re-check ────────────────────────────────────────────────
   const { data: lastSpin } = await supabaseAdmin

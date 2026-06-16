@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import FeatureGate from "@/components/FeatureGate";
 import { useAuth } from "@/lib/auth";
 import { useUserStats } from "@/lib/hooks";
 import useSWR from "swr";
@@ -756,6 +757,7 @@ export default function SocialPage() {
   // ══════════════════════════════════════════════════════════
   return (
     <ProtectedRoute>
+      <FeatureGate feature="social">
       <div data-force-dark className="relative min-h-screen pt-16 pb-0 overflow-hidden" style={{ isolation: "isolate" }}>
         <div className="relative z-10 h-[calc(100vh-64px)] flex max-w-7xl mx-auto">
 
@@ -1900,6 +1902,7 @@ export default function SocialPage() {
           </div>
         )}
       </div>
+      </FeatureGate>
     </ProtectedRoute>
   );
 }

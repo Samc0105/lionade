@@ -10,6 +10,7 @@ import { cdnUrl } from "@/lib/cdn";
 import { apiGet, apiPost } from "@/lib/api-client";
 import { toastError, toastInfo, toastSuccess } from "@/lib/toast";
 import DailySpinHero from "@/components/Shop/DailySpinHero";
+import FeatureGate from "@/components/FeatureGate";
 import Avatar from "@/components/Avatar";
 import AnimatedUsername, { type UsernameEffect } from "@/components/AnimatedUsername";
 import {
@@ -1467,6 +1468,7 @@ export default function ShopPage() {
   const isPremium = storeMode === "premium";
 
   return (
+    <FeatureGate feature="shop">
     <div className={`min-h-screen pt-16 pb-24 md:pb-12 transition-colors duration-500 ${isPremium ? "premium-store-bg" : ""}`}>
       {showBurst && <PurchaseBurst onDone={() => setShowBurst(false)} />}
       {confirmItem && <ConfirmModal item={confirmItem.item} quantity={confirmItem.quantity} onConfirm={handlePurchase} onCancel={() => setConfirmItem(null)} userCoins={userCoins} balanceKnown={affordanceKnown} />}
@@ -2181,5 +2183,6 @@ export default function ShopPage() {
         )}
       </div>
     </div>
+    </FeatureGate>
   );
 }

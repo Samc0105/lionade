@@ -20,6 +20,7 @@ import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { useReducedMotion } from "framer-motion";
 import Link from "next/link";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import FeatureGate from "@/components/FeatureGate";
 import AmbientOrbs from "@/components/AmbientOrbs";
 import { useAuth } from "@/lib/auth";
 import { mutateUserStats } from "@/lib/hooks";
@@ -202,6 +203,7 @@ export default function PardyPage() {
   if (phase === "picker") {
     return (
       <ProtectedRoute>
+        <FeatureGate feature="games.pardy">
         <div className="min-h-screen pt-16 pb-20 md:pb-8 relative" style={{ isolation: "isolate" }}>
           <AmbientOrbs
             orbs={[
@@ -315,6 +317,7 @@ export default function PardyPage() {
             </div>
           </div>
         </div>
+        </FeatureGate>
       </ProtectedRoute>
     );
   }
@@ -344,6 +347,7 @@ export default function PardyPage() {
       : ["#FFD700", "#FDE68A", "#A855F7"];              // gold + purple for STRONG
     return (
       <ProtectedRoute>
+        <FeatureGate feature="games.pardy">
         <div className="min-h-screen pt-16 pb-20 md:pb-8 relative" style={{ isolation: "isolate" }}>
           {shouldConfetti && (
             <Confetti
@@ -439,6 +443,7 @@ export default function PardyPage() {
             </div>
           </div>
         </div>
+        </FeatureGate>
       </ProtectedRoute>
     );
   }
@@ -450,6 +455,7 @@ export default function PardyPage() {
 
   return (
     <ProtectedRoute>
+      <FeatureGate feature="games.pardy">
       <div className="min-h-screen pt-16 pb-20 md:pb-8 relative" style={{ isolation: "isolate" }}>
         <AmbientOrbs
           orbs={[
@@ -597,6 +603,7 @@ export default function PardyPage() {
           />
         )}
       </div>
+      </FeatureGate>
     </ProtectedRoute>
   );
 }

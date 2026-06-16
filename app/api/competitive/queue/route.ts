@@ -16,6 +16,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
+import { assertFeatureLive } from "@/lib/feature-flags";
 import {
   isFormat,
   isCompetitiveMode,
@@ -207,6 +208,15 @@ export async function POST(req: NextRequest) {
     const body = await req.json().catch(() => ({}));
     const format: CompetitiveFormat = isFormat(body?.format) ? body.format : "1v1";
     const mode: CompetitiveMode | null = isCompetitiveMode(body?.mode) ? body.mode : null;
+
+    // Feature kill-switch — gate the whole arena, and the specific mode when one
+    // is known at queue time (compete.arena.<mode>). featureChain still bubbles
+    // an arena-wide maintenance flag up from the per-mode key, so checking the
+    // narrower key when present covers both. Placed before the first side effect
+    // (the queue upsert below). Fail-open if flags are unreadable.
+    const gated = await assertFeatureLive(mode ? `compete.arena.${mode}` : "compete.arena");
+    if (gated) return gated;
+
     const partyCode: string | null =
       typeof body?.partyCode === "string" && isValidRoomCode(body.partyCode)
         ? body.partyCode

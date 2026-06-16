@@ -22,6 +22,7 @@ import { useHeartbeat } from "@/lib/use-heartbeat";
 import { useActiveSession } from "@/lib/active-session";
 import { useToast } from "@/components/Toast";
 import RoomLobby from "@/components/party/RoomLobby";
+import FeatureGate from "@/components/FeatureGate";
 import dynamic from "next/dynamic";
 import type { CurrentGame, PartyPlayer, PartyRoom } from "@/lib/party/types";
 
@@ -457,63 +458,78 @@ export default function PartyRoomPage() {
             </button>
           </div>
 
-          {!inGame && (
-            <RoomLobby
-              room={snap.room}
-              players={snap.players}
-              isHost={snap.isHost}
-              meUserId={snap.meUserId}
-              roomCh={roomCh}
-              onGameStarted={async (g) => {
-                await broadcastGameStarted(g);
-                void refresh();
-              }}
-            />
-          )}
+          {/* The whole party can be taken down at once via the "games.party"
+              flag; each mode below is independently gateable so a single buggy
+              game can be parked without darkening the rest. The BackButton +
+              leave-room controls above stay OUTSIDE the gate so a player is
+              never trapped in a maintenance'd room. */}
+          <FeatureGate feature="games.party">
+            {!inGame && (
+              <RoomLobby
+                room={snap.room}
+                players={snap.players}
+                isHost={snap.isHost}
+                meUserId={snap.meUserId}
+                roomCh={roomCh}
+                onGameStarted={async (g) => {
+                  await broadcastGameStarted(g);
+                  void refresh();
+                }}
+              />
+            )}
 
-          {inGame && snap.room.current_game === "sketch" && (
-            <SketchView
-              room={snap.room}
-              players={snap.players}
-              isHost={snap.isHost}
-              meUserId={snap.meUserId}
-              activeRound={snap.activeRound ?? null}
-              onReturnToLobby={onReturnToLobby}
-            />
-          )}
+            {inGame && snap.room.current_game === "sketch" && (
+              <FeatureGate feature="games.party.sketch" compact>
+                <SketchView
+                  room={snap.room}
+                  players={snap.players}
+                  isHost={snap.isHost}
+                  meUserId={snap.meUserId}
+                  activeRound={snap.activeRound ?? null}
+                  onReturnToLobby={onReturnToLobby}
+                />
+              </FeatureGate>
+            )}
 
-          {inGame && snap.room.current_game === "bluff" && (
-            <BluffView
-              room={snap.room}
-              players={snap.players}
-              isHost={snap.isHost}
-              meUserId={snap.meUserId}
-              activeRound={snap.activeRound ?? null}
-              onReturnToLobby={onReturnToLobby}
-            />
-          )}
+            {inGame && snap.room.current_game === "bluff" && (
+              <FeatureGate feature="games.party.bluff" compact>
+                <BluffView
+                  room={snap.room}
+                  players={snap.players}
+                  isHost={snap.isHost}
+                  meUserId={snap.meUserId}
+                  activeRound={snap.activeRound ?? null}
+                  onReturnToLobby={onReturnToLobby}
+                />
+              </FeatureGate>
+            )}
 
-          {inGame && snap.room.current_game === "pokerface" && (
-            <PokerFaceView
-              room={snap.room}
-              players={snap.players}
-              isHost={snap.isHost}
-              meUserId={snap.meUserId}
-              activeRound={snap.activeRound ?? null}
-              onReturnToLobby={onReturnToLobby}
-            />
-          )}
+            {inGame && snap.room.current_game === "pokerface" && (
+              <FeatureGate feature="games.party.pokerface" compact>
+                <PokerFaceView
+                  room={snap.room}
+                  players={snap.players}
+                  isHost={snap.isHost}
+                  meUserId={snap.meUserId}
+                  activeRound={snap.activeRound ?? null}
+                  onReturnToLobby={onReturnToLobby}
+                />
+              </FeatureGate>
+            )}
 
-          {inGame && snap.room.current_game === "trivia" && (
-            <TriviaView
-              room={snap.room}
-              players={snap.players}
-              isHost={snap.isHost}
-              meUserId={snap.meUserId}
-              activeRound={snap.activeRound ?? null}
-              onReturnToLobby={onReturnToLobby}
-            />
-          )}
+            {inGame && snap.room.current_game === "trivia" && (
+              <FeatureGate feature="games.party.trivia" compact>
+                <TriviaView
+                  room={snap.room}
+                  players={snap.players}
+                  isHost={snap.isHost}
+                  meUserId={snap.meUserId}
+                  activeRound={snap.activeRound ?? null}
+                  onReturnToLobby={onReturnToLobby}
+                />
+              </FeatureGate>
+            )}
+          </FeatureGate>
         </div>
       </div>
     </ProtectedRoute>

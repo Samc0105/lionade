@@ -13,6 +13,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
+import { assertFeatureLive } from "@/lib/feature-flags";
 import { generateUniqueRoomCode } from "@/lib/party/room-code";
 import { fetchRoomSnapshot } from "@/lib/party/room-state";
 import { moderateText, logFlagged } from "@/lib/moderation-ugc";
@@ -32,6 +33,9 @@ export async function POST(req: NextRequest) {
   const auth = await requireAuth(req);
   if (auth instanceof NextResponse) return auth;
   const userId = auth.userId;
+
+  const m = await assertFeatureLive("games.party");
+  if (m) return m;
 
   try {
     const body = await req.json().catch(() => ({}));

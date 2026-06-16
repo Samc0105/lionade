@@ -1,11 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
+import { assertFeatureLive } from "@/lib/feature-flags";
 
 export async function POST(req: NextRequest) {
   const auth = await requireAuth(req);
   if (auth instanceof NextResponse) return auth;
   const userId = auth.userId;
+
+  const m = await assertFeatureLive("dashboard.daily_bet");
+  if (m) return m;
 
   let body: { coinsStaked?: unknown; targetScore?: unknown };
   try {

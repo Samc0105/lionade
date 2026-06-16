@@ -21,6 +21,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
+import { assertFeatureLive } from "@/lib/feature-flags";
 import { drawRandomCard } from "@/lib/party/pokerface-cards";
 import { isValidRoomCode, normalizeRoomCode } from "@/lib/party/room-code";
 import { isRoomMember } from "@/lib/party/room-state";
@@ -29,6 +30,9 @@ export async function POST(req: NextRequest) {
   const auth = await requireAuth(req);
   if (auth instanceof NextResponse) return auth;
   const userId = auth.userId;
+
+  const m = await assertFeatureLive("games.party.pokerface");
+  if (m) return m;
 
   const body = await req.json().catch(() => ({}));
   const code = normalizeRoomCode(body?.code ?? "");

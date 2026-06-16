@@ -6,6 +6,7 @@ import { useAuth } from "@/lib/auth";
 import { getLeaderboard, getLadderLeaderboard, type EloLadder } from "@/lib/db";
 import { formatCoins } from "@/lib/mockData";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import FeatureGate from "@/components/FeatureGate";
 import BackButton from "@/components/BackButton";
 import { cdnUrl } from "@/lib/cdn";
 import { avatarFor } from "@/lib/avatar";
@@ -121,6 +122,7 @@ export default function LeaderboardPage() {
 
   return (
     <ProtectedRoute>
+      <FeatureGate feature="leaderboard">
       <div className="min-h-screen pt-20">
         <div className="max-w-3xl mx-auto px-4 py-10">
           <BackButton />
@@ -473,6 +475,7 @@ export default function LeaderboardPage() {
           )}
         </div>
       </div>
+      </FeatureGate>
     </ProtectedRoute>
   );
 }
