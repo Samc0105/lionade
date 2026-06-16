@@ -17,6 +17,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
 import { assertFeatureLive } from "@/lib/feature-flags";
+import { recordFeatureError } from "@/lib/feature-health";
 import {
   isFormat,
   isCompetitiveMode,
@@ -204,6 +205,9 @@ export async function POST(req: NextRequest) {
   if (auth instanceof NextResponse) return auth;
   const userId = auth.userId;
 
+  // The gated key (hoisted so the 500 catch records the SAME key it gates).
+  let gatedKey = "compete.arena";
+
   try {
     const body = await req.json().catch(() => ({}));
     const format: CompetitiveFormat = isFormat(body?.format) ? body.format : "1v1";
@@ -214,7 +218,8 @@ export async function POST(req: NextRequest) {
     // an arena-wide maintenance flag up from the per-mode key, so checking the
     // narrower key when present covers both. Placed before the first side effect
     // (the queue upsert below). Fail-open if flags are unreadable.
-    const gated = await assertFeatureLive(mode ? `compete.arena.${mode}` : "compete.arena");
+    gatedKey = mode ? `compete.arena.${mode}` : "compete.arena";
+    const gated = await assertFeatureLive(gatedKey);
     if (gated) return gated;
 
     const partyCode: string | null =
@@ -250,6 +255,7 @@ export async function POST(req: NextRequest) {
 
     const myRow = await readMyQueueRow(userId);
     if (!myRow) {
+      recordFeatureError(gatedKey);
       return NextResponse.json({ error: "Queue join failed" }, { status: 500 });
     }
 
@@ -259,6 +265,7 @@ export async function POST(req: NextRequest) {
     }
     return NextResponse.json({ status: "waiting" });
   } catch (e) {
+    recordFeatureError(gatedKey);
     console.error("[competitive/queue POST]", e);
     return NextResponse.json({ error: "Server error" }, { status: 500 });
   }

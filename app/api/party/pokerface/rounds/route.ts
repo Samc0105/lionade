@@ -22,6 +22,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
 import { assertFeatureLive } from "@/lib/feature-flags";
+import { recordFeatureError } from "@/lib/feature-health";
 import { drawRandomCard } from "@/lib/party/pokerface-cards";
 import { isValidRoomCode, normalizeRoomCode } from "@/lib/party/room-code";
 import { isRoomMember } from "@/lib/party/room-state";
@@ -96,6 +97,7 @@ export async function POST(req: NextRequest) {
     .select("id, room_id, round_num, presenter_user_id, card_word, phase, started_at")
     .single();
   if (error || !round) {
+    recordFeatureError("games.party.pokerface");
     console.error("[party/pokerface/rounds] insert", error?.message);
     return NextResponse.json({ error: "Couldn't deal a round" }, { status: 500 });
   }

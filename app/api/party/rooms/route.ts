@@ -14,6 +14,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
 import { assertFeatureLive } from "@/lib/feature-flags";
+import { recordFeatureError } from "@/lib/feature-health";
 import { generateUniqueRoomCode } from "@/lib/party/room-code";
 import { fetchRoomSnapshot } from "@/lib/party/room-state";
 import { moderateText, logFlagged } from "@/lib/moderation-ugc";
@@ -118,6 +119,7 @@ export async function POST(req: NextRequest) {
       players: snapshot?.players ?? [],
     });
   } catch (e) {
+    recordFeatureError("games.party");
     console.error("[party/rooms]", e);
     return NextResponse.json({ error: "Server error" }, { status: 500 });
   }

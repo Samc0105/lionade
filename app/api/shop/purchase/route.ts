@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
 import { assertFeatureLive } from "@/lib/feature-flags";
+import { recordFeatureError } from "@/lib/feature-health";
 import {
   getShopItem,
   getFounderBadge,
@@ -229,6 +230,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (err) {
+    recordFeatureError("shop");
     console.error("[shop/purchase POST]", err);
     return NextResponse.json({ error: "Server error" }, { status: 500 });
   }

@@ -353,6 +353,168 @@ the table or the v2 columns being absent: until both migrations are run, every
 read fails open and the admin UI shows a "run the migrations first" notice while
 everything stays live.
 
+A third migration extends this into a self-observing status system (v3):
+
+- `lib/migrations/20260616170000_status_incidents_health.sql` adds the
+  `feature_flags.auto` provenance column (default `false` = human override),
+  creates the `public.incidents` timeline and the `public.feature_health_events`
+  firehose, and enables admin-only-SELECT RLS on both new tables (`anon`
+  revoked; service role bypasses for the privileged writes). It references
+  `public.current_app_role()` from migration 057 and does not redefine it. Run
+  manually, idempotent, safe to re-run. See "Status page + auto-maintenance"
+  below.
+
+## Status page + auto-maintenance (v3)
+
+The kill-switch describes *intent* (an admin or the evaluator decides a surface
+is degraded). The status system describes *visibility and self-healing*: a
+public page that shows the same effective state to anyone, an incident timeline
+that mirrors flag history, and a cron that auto-flags a struggling feature into
+`warning` without a human. All of it is the same fail-open contract: it can
+report or set `warning`, it can never set `maintenance`, and it can never take
+the site down or block a request path.
+
+### The public `/status` page + `GET /api/status`
+
+`app/status/page.tsx` is a PUBLIC, logged-out-reachable status page. It has no
+`ProtectedRoute` and polls `GET /api/status` every ~45s with a **bare public
+fetch** (no auth token, never the `swrFetcher`) so it works for anonymous
+visitors and never varies by session.
+
+`GET /api/status` (`app/api/status/route.ts`) is an unauthenticated recovery
+surface. It reads everything through the **service role** (`anon` is revoked on
+the underlying tables) and returns SAFE FIELDS ONLY (no `auto` flag, no
+`updated_by`, no raw status, no window bounds):
+
+```jsonc
+{
+  "overall": "operational" | "degraded",
+  "degraded": [{ "key", "label", "status": "warning"|"maintenance", "message", "since" }],
+  "recent":   [{ "key", "label", "kind", "message", "startedAt", "endedAt" }]
+}
+```
+
+- `degraded` is built from the **same window-resolved `effectiveStatus`** the
+  gate uses (from `lib/feature-flags.ts`), so a scheduled or self-expiring flag
+  appears here iff it would actually gate; `overall` is `degraded` iff that list
+  is non-empty. Maintenance is sorted before warnings.
+- `recent` is the last ~20 **resolved** incidents (`ended_at` set), newest
+  first. Open incidents are represented by the `degraded` list, not here.
+
+**Always reachable, even under a `site` maintenance flag.** `MaintenanceGate`
+exempts the path: it renders children unconditionally when `pathname === "/status"`
+or starts with `/status/`, *before* any maintenance/warning decision, so neither
+the takeover screen nor the warning bar ever wraps it (matched exactly so
+`/statusboard` is not exempted). The data path is exempt too: `/api/status` is
+unauthenticated and service-role-only, so a `site` flag never gates it.
+
+**Fail-open the whole way down.** `/api/status` returns
+`{ overall:"operational", degraded:[], recent:[] }` on ANY error (a status page
+that reported an outage of the status system itself would be worse than
+useless); `getFeatureFlagsCached` already never throws, and the incidents read
+is wrapped so a failure just drops the history. The page keeps the last-good
+snapshot on a missed poll and shows a "Checking status" loading state rather
+than flashing a wrong "operational".
+
+### The `incidents` table (the timeline)
+
+`public.incidents` (`feature_key`, `kind` `warning`|`maintenance`, `message`,
+`source` `manual`|`auto`, `started_at`, `ended_at`, `created_at`) is an
+append-mostly timeline that mirrors flag history so `/status` can show recent
+history. One OPEN row (`ended_at` null) per degraded `feature_key`; it is
+**closed** (`ended_at` stamped) when the feature returns to live. A partial
+index on `(feature_key) WHERE ended_at IS NULL` keeps the "is one open?"
+idempotency check cheap.
+
+Incidents open and close on flag changes, from both sources:
+
+- **Manual.** `POST /api/admin/features` calls `openIncident(key, status, message, "manual")`
+  when an admin flips a key to `warning`/`maintenance`, and `closeOpenIncidents(key)`
+  when they flip it back to `live`. These run after the already-committed flag
+  write and never throw, so they cannot fail the change.
+- **Auto.** The evaluator (below) calls `openIncident(key, "warning", msg, "auto")`
+  on an auto-flag and `closeOpenIncidents(key)` on auto-recovery.
+
+`openIncident` is **idempotent**: it no-ops when an open incident already exists
+for the key, so re-extending an auto-warning never spawns a duplicate row. It
+returns `true` only when a NEW row was inserted (the email dedup keys off this).
+All three helpers live in `lib/feature-health.ts` and swallow every error.
+
+### The auto-maintenance evaluator: `GET /api/cron/feature-health`
+
+A Vercel cron (`*/5 * * * *`, every 5 minutes, in `vercel.json`) that turns the
+5xx firehose into automatic, self-expiring `warning` flags and recovers its own
+flags once errors subside. Auth is header-only `Bearer CRON_SECRET`,
+constant-time compared, fail-closed on unset (generic `500`); the secret is
+never logged. It writes a `putCronHeartbeat("feature-health")` for the watchdog.
+
+**The firehose.** `feature_health_events` is one row per about-to-be-5xx for a
+guarded feature, written **fire-and-forget** by `recordFeatureError(key)` in
+the guarded routes' 500-class catch paths (`shop`, `place-bet`, `games.reward`,
+`spin`, `vocab`, `paths`, `party.*` rooms/rounds, `competitive.queue`, ...).
+`recordFeatureError` does NOT await, never reads, never throws, and never blocks
+the caller's response; a failed insert is a non-event. Only 5xx are recorded;
+4xx / validation are not.
+
+**Auto-flag.** Each pass reads the per-`feature_key` error count over the last
+`HEALTH_WINDOW_MS` (10 minutes) via `getErrorCountsSince`. For any key whose
+count is `>= ERROR_THRESHOLD` (10), it loads the RAW `feature_flags` row and
+upserts ONLY when the row is **not a human override**, i.e. raw status is `live`
+(no human touched it) OR it is already an `auto=true` `warning` (its own prior
+flag, which it re-extends):
+
+```
+status     = 'warning'   (USABLE + banner; the API is NEVER blocked)
+auto       = true        (provenance: the evaluator set this)
+message    = "Auto-flagged: elevated errors, our team is on it"
+starts_at  = null        (active immediately)
+ends_at    = now + 20 min  (SELF-EXPIRING via the v2 read-time window)
+updated_by = null        (no human actor)
+```
+
+The `ends_at` window makes the flag **self-expiring**: it returns to live on the
+next read once errors stop, even if the cron never runs again. No recovery cron
+is strictly required; the explicit recovery below just makes it prompt.
+
+**Recover.** For each RAW row that is `status='warning' AND auto=true` whose
+recent count drops `< RECOVER_THRESHOLD` (2, lower than the flag threshold so it
+does not flap on the boundary — hysteresis), it flips the row back to
+`status='live', auto=false, ends_at=null` and calls `closeOpenIncidents(key)`,
+making the recovery explicit in the stored row and closing the incident timeline
+promptly.
+
+**Never `maintenance`, never a human override.** The evaluator sets only
+`warning`. It NEVER sets `maintenance` (that stays a deliberate human action),
+and it NEVER touches an `auto=false` warning/maintenance row (a human override
+is left strictly alone — that is the entire purpose of the `auto` column).
+
+**Email once per outage.** It emails `support@` (via `SUPPORT_EMAIL`) ONCE per
+newly auto-flagged feature, never on a re-extend. The dedup is **structural**,
+not a ledger: before writing the auto-flag it checks `hasOpenIncident(key)`, and
+emails only for keys that had NO open incident before this pass. A sustained
+outage re-extends the 20-min window every 5 minutes but emails exactly once
+until it recovers and the incident closes; a fresh outage later re-opens and
+re-emails. The email is dash-free, names the concrete feature + count, carries
+no secrets, and links to `/admin/security`. If `RESEND_API_KEY` / `EMAIL_FROM`
+are unset the job still runs the detectors and skips sending silently.
+
+**Fail-open.** Every read/write is wrapped: a failure logs generically and
+contributes nothing, and the pass still returns `{ ok: true }`. If the tables /
+columns are absent the reads return empty and the pass is a no-op. The whole
+`GET` body is wrapped so it never throws out of the cron.
+
+### Honest about the trigger: it is error-COUNT, not a true rate
+
+The auto-flag trigger is the **count of 5xx in the trailing 10 minutes**, not a
+true error *rate*. We deliberately do not capture per-feature success totals, so
+there is no denominator and the evaluator cannot compute "errors / requests". A
+feature that serves 12 requests in 10 minutes and fails 10 of them, and a
+feature that serves 10,000 and fails 10 of them, both clear `ERROR_THRESHOLD`.
+This is honest about what the signal is: a coarse "this surface is throwing a
+lot lately" heuristic, tuned to flag into the SAFE `warning` state (still
+usable) rather than `maintenance`, so a false positive only adds a banner and
+self-clears in 20 minutes.
+
 ## Honest about the limits
 
 - **The client gate is UX, not a boundary.** `FeatureGate` and `MaintenanceGate`

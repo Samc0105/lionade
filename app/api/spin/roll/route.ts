@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
 import { assertFeatureLive } from "@/lib/feature-flags";
+import { recordFeatureError } from "@/lib/feature-health";
 import {
   rollSlot,
   computeReward,
@@ -82,6 +83,7 @@ export async function POST(req: NextRequest) {
     .eq("id", userId)
     .single();
   if (profileErr || !profile) {
+    recordFeatureError("shop.daily_spin");
     console.error("[spin/roll] profile load:", profileErr?.message);
     return NextResponse.json({ error: "Profile not found" }, { status: 500 });
   }
@@ -150,6 +152,7 @@ export async function POST(req: NextRequest) {
         p_source: "spend",
       });
       if (zeroErr) {
+        recordFeatureError("shop.daily_spin");
         console.error("[spin/roll] zero-out:", zeroErr.message);
         return NextResponse.json({ error: "Couldn't update balance" }, { status: 500 });
       }
@@ -159,6 +162,7 @@ export async function POST(req: NextRequest) {
     }
     actualDelta = balanceAfter - balanceBefore;
   } else if (spinUpdateErr) {
+    recordFeatureError("shop.daily_spin");
     console.error("[spin/roll] coin update:", spinUpdateErr.message);
     return NextResponse.json({ error: "Couldn't update balance" }, { status: 500 });
   } else {

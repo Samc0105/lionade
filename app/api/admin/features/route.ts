@@ -37,6 +37,7 @@ import { writeTeamAudit } from "@/lib/team/audit";
 import { assertTrustedOrigin, UntrustedOriginError } from "@/lib/team/origin-check";
 import { invalidateFeatureFlagCache } from "@/lib/feature-flags";
 import { FEATURE_CATALOG, getFeature } from "@/lib/features/catalog";
+import { openIncident, closeOpenIncidents } from "@/lib/feature-health";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -213,9 +214,13 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
   try {
     // NOTE (documented Supabase-type gap): untyped .from() upsert — columns
-    // match the feature_flags table exactly (incl. v2 starts_at / ends_at).
-    // updated_at is maintained by the DB trigger on update; on insert it
-    // defaults to now().
+    // match the feature_flags table exactly (incl. v2 starts_at / ends_at and
+    // the status-incidents auto column). updated_at is maintained by the DB
+    // trigger on update; on insert it defaults to now().
+    //
+    // auto=false marks this as a HUMAN change. The auto-maintenance evaluator
+    // (/api/cron/feature-health) NEVER touches an auto=false warning/maintenance
+    // row, so a manual override here is protected from being auto-reverted.
     const { error } = await supabaseAdmin.from("feature_flags").upsert(
       {
         key,
@@ -224,6 +229,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         eta,
         starts_at: startsAt,
         ends_at: endsAt,
+        auto: false,
         updated_by: staff.userId,
         updated_at: new Date().toISOString(),
       },
@@ -241,6 +247,18 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       action: "feature_flag_change",
       metadata: { key, to: status, message, eta, startsAt, endsAt },
     });
+
+    // Mirror the flag change into the incident timeline so /status shows a
+    // history that matches what operators did. A 'warning'/'maintenance' change
+    // opens an incident (idempotent — no duplicate if one is already open); a
+    // return to 'live' closes any open incident for the key. source='manual'
+    // distinguishes operator actions from the auto-maintenance evaluator. These
+    // helpers never throw, so they cannot fail the already-committed change.
+    if (status === "warning" || status === "maintenance") {
+      await openIncident(key, status, message, "manual");
+    } else {
+      await closeOpenIncidents(key);
+    }
 
     // Drop the in-process cache so the public read and assertFeatureLive pick up
     // the change without waiting out the TTL.

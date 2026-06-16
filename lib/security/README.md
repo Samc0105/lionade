@@ -24,6 +24,7 @@ edge firewall. Read "Honest scope" below before trusting it for anything.
 | Admin denylist list / block | Node | `app/api/admin/security/denylist/route.ts` |
 | Admin denylist unblock | Node | `app/api/admin/security/denylist/remove/route.ts` |
 | SOC alert cron (every 10 min) | Node | `app/api/cron/security-alerts/route.ts` |
+| Auto-maintenance evaluator (every 5 min) | Node | `app/api/cron/feature-health/route.ts` |
 | Console UI | Client | `app/admin/security/page.tsx` |
 | Tables + RPC | Postgres | `lib/migrations/20260616140000_security_monitoring.sql` |
 | Alert dedup ledger | Postgres | `lib/migrations/20260616160000_feature_flags_v2.sql` (`security_alerts_sent`) |
@@ -301,6 +302,26 @@ small-but-genuine probe under those bounds will not alert. This is a heads-up
 layer on top of an approximate signal, not a precise IDS.
 
 ---
+
+## Auto-maintenance evaluator (sibling cron)
+
+A second push job lives next to the SOC alert cron but belongs to the **feature
+kill-switch**, not this SOC subsystem: `app/api/cron/feature-health/route.ts`, a
+Vercel cron on `*/5 * * * *`. It reads the `feature_health_events` 5xx firehose
+(written fire-and-forget by `recordFeatureError` in guarded routes' 500 paths),
+and when a feature clears 10 errors in 10 minutes it auto-flips that LIVE
+feature into a self-expiring 20-minute `warning` (usable + banner), opens an
+auto incident, and emails `support@` once. It recovers its own flags when the
+errors subside. It sets ONLY `warning`, **never `maintenance`**, and never
+touches a human override. It shares the same `Bearer CRON_SECRET` auth,
+fail-open contract, and Resend email-config gate as the SOC alert cron, and it
+emails into `support@` the same way, which is why it sits in this table.
+
+It is **not** a security detector and produces no `security_events`. Its full
+contract, the incidents timeline, and the honest "error-count not a true rate"
+caveat live in **`lib/features/README.md`** (the kill-switch doc). Cross-listed
+here only because it is a `support@`-paging cron that operators will look for
+alongside the SOC alerts.
 
 ## Honest scope
 

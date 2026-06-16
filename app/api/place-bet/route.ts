@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
 import { assertFeatureLive } from "@/lib/feature-flags";
+import { recordFeatureError } from "@/lib/feature-health";
 
 export async function POST(req: NextRequest) {
   const auth = await requireAuth(req);
@@ -104,6 +105,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ success: true, bet, newCoins: balanceAfterDebit });
   } catch (err) {
+    recordFeatureError("dashboard.daily_bet");
     console.error("[place-bet]", err);
     return NextResponse.json({ error: "Server error" }, { status: 500 });
   }

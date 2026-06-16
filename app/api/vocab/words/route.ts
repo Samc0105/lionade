@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
 import { assertFeatureLive } from "@/lib/feature-flags";
+import { recordFeatureError } from "@/lib/feature-health";
 import { applyFangMultiplier } from "@/lib/mastery-plan";
 import { moderateText, logFlagged } from "@/lib/moderation-ugc";
 import {
@@ -90,6 +91,7 @@ export async function POST(req: NextRequest) {
     .maybeSingle();
 
   if (bankErr) {
+    recordFeatureError("learn.vocab");
     console.error("[vocab/words POST bank read]", bankErr.message);
     return NextResponse.json({ error: "Couldn't load bank" }, { status: 500 });
   }
@@ -229,6 +231,7 @@ export async function POST(req: NextRequest) {
         { status: 409 },
       );
     }
+    recordFeatureError("learn.vocab");
     console.error("[vocab/words POST insert]", insertErr.message);
     return NextResponse.json({ error: "Couldn't save word" }, { status: 500 });
   }
@@ -246,6 +249,7 @@ export async function POST(req: NextRequest) {
       p_source: "cashable",
     });
     if (creditErr) {
+      recordFeatureError("learn.vocab");
       console.error("[vocab/words POST credit]", creditErr.message);
       await supabaseAdmin.from("vocab_words").delete().eq("id", inserted.id);
       return NextResponse.json({ error: "Couldn't update balance" }, { status: 500 });

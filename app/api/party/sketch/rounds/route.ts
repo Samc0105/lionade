@@ -18,6 +18,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
 import { assertFeatureLive } from "@/lib/feature-flags";
+import { recordFeatureError } from "@/lib/feature-health";
 import { isValidRoomCode, normalizeRoomCode } from "@/lib/party/room-code";
 import { isRoomMember } from "@/lib/party/room-state";
 import {
@@ -244,6 +245,7 @@ export async function POST(req: NextRequest) {
     .select()
     .single();
   if (error || !round) {
+    recordFeatureError("games.party.sketch");
     console.error("[party/sketch/rounds] insert", error?.message);
     return NextResponse.json({ error: "Couldn't create round" }, { status: 500 });
   }

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-server";
 import { requireAuth } from "@/lib/api-auth";
 import { assertFeatureLive } from "@/lib/feature-flags";
+import { recordFeatureError } from "@/lib/feature-health";
 import { applyFangMultiplierFromTier } from "@/lib/mastery-plan";
 
 export const dynamic = "force-dynamic";
@@ -135,6 +136,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ success: true, awarded: boostedAmount, newCoins });
   } catch (e) {
+    recordFeatureError("games");
     console.error("[games/reward POST]", e);
     return NextResponse.json({ error: "Server error" }, { status: 500 });
   }

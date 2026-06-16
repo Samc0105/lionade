@@ -38,6 +38,10 @@
     {
       "path": "/api/cron/security-alerts",
       "schedule": "*/10 * * * *"
+    },
+    {
+      "path": "/api/cron/feature-health",
+      "schedule": "*/5 * * * *"
     }
   ]
 }
