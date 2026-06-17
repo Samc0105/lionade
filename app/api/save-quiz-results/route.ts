@@ -7,6 +7,78 @@ import { renderEmail, templates } from "@/lib/emails";
 import { absoluteUrl } from "@/lib/site-config";
 import { applyFangMultiplierFromTier } from "@/lib/mastery-plan";
 import { clearActiveSession } from "@/lib/presence";
+import { BOOSTER_ITEMS } from "@/lib/shop-catalog";
+
+// ── Server-authoritative reward derivation ─────────────────────────────────
+// The base per-correct-answer reward (BEFORE the plan multiplier) used to be
+// computed on the client and trusted by this route (clamped to [0,500]). A
+// crafted client could self-grant the full clamp every quiz. We now derive the
+// reward server-side on the v2 path (body.deriveReward === true), replicating
+// the EXACT live client formula from app/quiz/page.tsx finishQuiz:
+//   per correct coin = Math.round(1  * diffMult * blitzMult * coinMultiplier)
+//   per correct xp   = Math.round(10 * diffMult * blitzMult * xpMultiplier)
+// summed over correct answers (round-per-answer, then × count — NOT round of
+// the total), then a flat +5 coin perfect bonus for a clean 10/10.
+const DIFFICULTY_MULTIPLIER: Record<string, number> = { easy: 1, medium: 1.5, hard: 2 };
+
+// Largest reward multiplier in the live shop catalog, derived (not hardcoded)
+// from the coin/xp/coin_xp multiplier boosters. Used for the LEGACY-path
+// ceiling so iOS legit play (which still derives client-side) is never
+// under-paid. score_boost is additive (+correct answers), not a multiplier,
+// so it is excluded here and handled separately in the ceiling.
+const MAX_BOOSTER_MULT = Math.max(
+  1,
+  ...BOOSTER_ITEMS
+    .filter(
+      (b) =>
+        b.boosterEffect === "coin_multiplier" ||
+        b.boosterEffect === "xp_multiplier" ||
+        b.boosterEffect === "coin_xp_multiplier",
+    )
+    .map((b) => b.boosterValue ?? 1),
+);
+
+// Largest additive score_boost value in the catalog (extra "correct" answers
+// credited beyond what the player actually got right). Folded into the legacy
+// ceiling so a legit Score Boost run is never clamped below its real reward.
+const MAX_SCORE_BOOST = Math.max(
+  0,
+  0,
+  ...BOOSTER_ITEMS
+    .filter((b) => b.boosterEffect === "score_boost")
+    .map((b) => b.boosterValue ?? 0),
+);
+
+type ActiveBoosterRow = { id: string; effect: string; value: number; usesRemaining: number };
+
+// Map an active_boosters row to a normalized shape, mirroring the field
+// fallback the /api/shop/activate-booster GET handler uses. The live column is
+// boost_type/boost_value (see migration 039 index + activate-booster writes),
+// but the original shop-tables.sql shipped booster_effect/booster_value and
+// some readers still query that name — so we accept either to stay robust to
+// whichever physical column the row carries.
+function normalizeBooster(b: Record<string, unknown>): ActiveBoosterRow {
+  return {
+    id: String(b.id),
+    effect: String((b.boost_type ?? b.booster_effect ?? b.effect ?? "") as string),
+    value: Number((b.boost_value ?? b.booster_value ?? b.value ?? 1) as number),
+    usesRemaining: Number((b.uses_remaining ?? 0) as number),
+  };
+}
+
+// display_name is stored after moderateText() (which does NOT strip < or >), and
+// renderEmail() interpolates slots without escaping — so a display_name like
+// "<b>x</b>" would inject into the email HTML. Escape it here, mirroring the
+// streak-reminder + academia-digest senders. (Self-XSS only — the email goes to
+// the user's own inbox — but kept consistent so every sender is safe.)
+function escapeHtml(input: string): string {
+  return input
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
 
 // GET — health check (auth-gated so the profile row count isn't world-readable)
 export async function GET(req: NextRequest) {
@@ -52,12 +124,131 @@ export async function POST(req: NextRequest) {
       /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(body.attemptId)
         ? body.attemptId
         : null;
-    // Sanity-clamp client-supplied values to prevent self-grant exploits.
-    // These shadow the body values everywhere downstream.
+    // Sanity-clamp the structural client values (these shadow the body values
+    // everywhere downstream). totalQuestions/correctAnswers are still
+    // client-reported but bounded; correctAnswers can never exceed
+    // totalQuestions, and each answer was already server-verified via
+    // /api/quiz/check-answer during play.
     const totalQuestions = Math.max(1, Math.min(100, Number(body.totalQuestions) || 0));
-    const correctAnswers = Math.max(0, Math.min(totalQuestions, Number(body.correctAnswers) || 0));
-    const coinsEarned = Math.max(0, Math.min(500, Number(body.coinsEarned) || 0));
-    const xpEarned = Math.max(0, Math.min(500, Number(body.xpEarned) || 0));
+    const validatedCorrectAnswers = Math.max(0, Math.min(totalQuestions, Number(body.correctAnswers) || 0));
+
+    // Difficulty governs the reward multiplier — validate it server-side
+    // (default "medium" when missing/invalid) so a bogus value can't inflate
+    // the derivation or the ceiling.
+    const difficulty =
+      body.difficulty === "easy" || body.difficulty === "medium" || body.difficulty === "hard"
+        ? (body.difficulty as "easy" | "medium" | "hard")
+        : "medium";
+    const blitzMode = body.blitzMode === true;
+    const deriveReward = body.deriveReward === true;
+
+    // ── v2 path: server-authoritative reward derivation ──────────────────────
+    // Read the user's active boosters BEFORE any consume, derive coins/xp from
+    // the validated structural fields + the boosters, and IGNORE the
+    // client-supplied coinsEarned/xpEarned entirely. The boosters that actually
+    // contributed are consumed AFTER the session insert succeeds (so an
+    // idempotent attemptId replay — which short-circuits at the insert — never
+    // double-consumes). On the legacy path (current iOS) we keep trusting the
+    // client value but replace the flat [0,500] clamp with a derived ceiling.
+    let correctAnswers = validatedCorrectAnswers;
+    let coinsEarned: number;
+    let xpEarned: number;
+    // Boosters whose effect contributed to THIS reward — consumed post-insert.
+    const boostersToConsume: ActiveBoosterRow[] = [];
+
+    if (deriveReward) {
+      const { data: rawBoosters } = await supabaseAdmin
+        .from("active_boosters")
+        .select("*")
+        .eq("user_id", userId);
+
+      const active = (rawBoosters ?? [])
+        .map((b) => normalizeBooster(b as Record<string, unknown>))
+        .filter((b) => b.usesRemaining > 0);
+
+      const find = (effect: string) => active.find((b) => b.effect === effect);
+      // Double Down (coin_xp_multiplier) feeds whichever multiplier isn't
+      // already set by Coin Rush / XP Surge — mirrors app/quiz/page.tsx L404-415.
+      const coinMul = find("coin_multiplier") ?? find("coin_xp_multiplier");
+      const xpMul = find("xp_multiplier") ?? find("coin_xp_multiplier");
+      const scoreBoostB = find("score_boost");
+      const coinMultiplier = coinMul ? coinMul.value : 1;
+      const xpMultiplier = xpMul ? xpMul.value : 1;
+      const scoreBoost = scoreBoostB ? scoreBoostB.value : 0;
+
+      const diffMult = DIFFICULTY_MULTIPLIER[difficulty];
+      const blitzMult = blitzMode ? 2 : 1;
+
+      // The derive-path client (app/quiz/page.tsx) now sends the RAW correct
+      // count (finalAnswers.filter(a=>a.correct).length), NOT the boosted
+      // count. score_boost is applied here, server-side, exactly once.
+      //   rawCorrect     = the validated raw correct answers.
+      //   boostedCorrect = min(rawCorrect + score_boost, total). This is the
+      //                    stored count and the value every downstream score
+      //                    comparison must use, so behavior is unchanged from
+      //                    when the client sent the boosted count.
+      // The client computes coins/xp by reduce()-ing over the RAW correct
+      // answers only. score_boost adds NO coin/xp term; it only (a) gates the
+      // perfect bonus and (b) becomes the stored correct_answers. We replicate
+      // that: per-answer reward times rawCorrect, score_boost folded only into
+      // boostedCorrect.
+      const rawCorrect = validatedCorrectAnswers;
+      const boostedCorrect = Math.min(rawCorrect + scoreBoost, totalQuestions);
+      // correctAnswers (the shared downstream var) becomes boostedCorrect on
+      // the derive path. It is stored as correct_answers/score AND drives every
+      // score comparison (bounties, achievements, daily-bet target) below.
+      correctAnswers = boostedCorrect;
+
+      // Round PER answer, then multiply by the RAW correct count (the
+      // per-answer term is constant). This reproduces the client's
+      // reduce()-over-finalAnswers exactly. score_boost does NOT multiply in.
+      const perCoin = Math.round(1 * diffMult * blitzMult * coinMultiplier);
+      const perXp = Math.round(10 * diffMult * blitzMult * xpMultiplier);
+      let derivedCoins = rawCorrect * perCoin;
+      const derivedXp = rawCorrect * perXp;
+
+      // Perfect bonus: only a clean 10/10 (matches client; uses boostedCorrect,
+      // so a 9-correct run pushed to 10 by score_boost DOES earn the +5).
+      if (boostedCorrect === totalQuestions && totalQuestions === 10) {
+        derivedCoins += 5;
+      }
+
+      coinsEarned = Math.max(0, derivedCoins);
+      xpEarned = Math.max(0, derivedXp);
+
+      // Consume only the boosters that actually contributed to the reward: the
+      // coin/xp/coin_xp multiplier(s) and the score_boost. De-dupe by booster id
+      // (Double Down is one row feeding both coin AND xp, so it consumes once).
+      const seen = new Set<string>();
+      for (const b of [coinMul, xpMul, scoreBoostB]) {
+        if (b && !seen.has(b.id)) {
+          seen.add(b.id);
+          boostersToConsume.push(b);
+        }
+      }
+    } else {
+      // ── Legacy path (current iOS): trust client coinsEarned/xpEarned, but
+      // clamp to a SERVER-DERIVED ceiling instead of the old flat 500. The
+      // ceiling is the maximum a legit run could possibly earn:
+      //   correctAnswers * MAX_DIFF(2) * MAX_BLITZ(2) * MAX_BOOSTER_MULT
+      //   + score_boost headroom (extra credited answers at the same rate)
+      //   + perfect bonus (5).
+      // MAX_BOOSTER_MULT is derived from the shop catalog (currently 2). This is
+      // always >= any legit reward, so iOS legit play is never under-paid; it
+      // only caps an absurd self-grant. We do NOT read or consume boosters here
+      // (iOS still does its own PATCH consume).
+      const MAX_DIFF = 2;
+      const MAX_BLITZ = 2;
+      const perfectBonus =
+        validatedCorrectAnswers === totalQuestions && totalQuestions === 10 ? 5 : 0;
+      const coinCeiling =
+        (validatedCorrectAnswers + MAX_SCORE_BOOST) * MAX_DIFF * MAX_BLITZ * MAX_BOOSTER_MULT +
+        perfectBonus;
+      const xpCeiling =
+        (validatedCorrectAnswers + MAX_SCORE_BOOST) * 10 * MAX_DIFF * MAX_BLITZ * MAX_BOOSTER_MULT;
+      coinsEarned = Math.max(0, Math.min(coinCeiling, Number(body.coinsEarned) || 0));
+      xpEarned = Math.max(0, Math.min(xpCeiling, Number(body.xpEarned) || 0));
+    }
 
     // 1. Insert quiz session
     const { data: session, error: sessionErr } = await supabaseAdmin
@@ -103,6 +294,68 @@ export async function POST(req: NextRequest) {
       }
       console.error("[save-quiz-results] FAILED quiz_sessions:", sessionErr.message, sessionErr.details, sessionErr.hint);
       return NextResponse.json({ error: "Couldn't save quiz results." }, { status: 500 });
+    }
+
+    // 1b. Consume the boosters that fed this reward (v2 derive path only).
+    // Placed AFTER the session insert + replay guard: an idempotent attemptId
+    // retry hits the 23505 conflict above and returns early, so it never
+    // reaches here. The boosters are consumed exactly once, on the first
+    // submit that actually creates the session row.
+    //
+    // ATOMIC conditional decrement (was read-modify-write, which let two
+    // concurrent submits each read uses_remaining=1 and both decrement, double-
+    // spending a single-use booster). We now decrement in a single statement
+    // guarded by `uses_remaining > 0` and scoped to the owner:
+    //   UPDATE active_boosters
+    //      SET uses_remaining = uses_remaining - 1
+    //    WHERE id = :id AND user_id = :userId AND uses_remaining > 0
+    //   RETURNING uses_remaining;
+    // expressed via PostgREST as the matched-filter update below
+    // (.eq id + .eq user_id + .gt uses_remaining 0, .select() to read back).
+    // Only one of two racing submits matches the >0 row and gets the
+    // decrement; the loser matches 0 rows. When the new value hits 0 we delete
+    // the row to mirror the activate-booster PATCH consume behavior.
+    //
+    // KNOWN RESIDUAL RACE (follow-up): two DISTINCT attempts (different
+    // attempt_ids, e.g. two real quiz submits from two tabs) both READ the
+    // booster pre-consume in the derive block above and can both derive a
+    // boosted reward off the same single-use booster before either reaches
+    // this consume. The atomic decrement here prevents double-CONSUME (the
+    // second decrement matches 0 rows), but does NOT prevent both rewards from
+    // being credited. Fully serializing distinct concurrent attempts requires a
+    // transactional RPC (derive + consume in one SECURITY DEFINER function
+    // under row lock). Tracked as a follow-up; the practical window is tiny
+    // (both submits in flight before either consumes) and is non-financial
+    // beyond one extra boosted quiz reward.
+    //
+    // Best-effort: a consume failure must not 500 a successfully recorded quiz
+    // (the reward derivation already happened off a fresh read).
+    if (boostersToConsume.length > 0) {
+      for (const b of boostersToConsume) {
+        try {
+          const { data: decremented } = await supabaseAdmin
+            .from("active_boosters")
+            .update({ uses_remaining: b.usesRemaining - 1 })
+            .eq("id", b.id)
+            .eq("user_id", userId)
+            .gt("uses_remaining", 0)
+            .select("id, uses_remaining")
+            .maybeSingle();
+          // Delete the row when the atomic decrement drove it to 0 (mirrors the
+          // activate-booster PATCH). `decremented` is null if this submit lost
+          // the race (0 rows matched); in that case there is nothing to clean
+          // up, the winner already handled it.
+          if (decremented && (decremented.uses_remaining ?? 0) <= 0) {
+            await supabaseAdmin
+              .from("active_boosters")
+              .delete()
+              .eq("id", b.id)
+              .eq("user_id", userId);
+          }
+        } catch (consumeErr) {
+          console.warn("[save-quiz-results] Step 1b booster consume WARN (non-fatal):", consumeErr);
+        }
+      }
     }
 
     // 2. Save individual answers (skip if user_answers table doesn't exist)
@@ -287,27 +540,39 @@ export async function POST(req: NextRequest) {
           // Next-day-equivalent — increment streak
           newStreak = (profile.streak ?? 0) + 1;
         } else {
-          // 2+ days gap — check for streak shield
+          // 2+ days gap — check for streak shield.
+          // FIX: the live column is boost_type (see /api/shop/activate-booster
+          // writes + migration 039); there is NO booster_effect column, so the
+          // old `.eq("booster_effect", "streak_shield")` matched nothing and
+          // streak shields were NEVER consumed here. Query boost_type so the
+          // shield actually matches and decrements.
           const { data: shield } = await supabaseAdmin
             .from("active_boosters")
             .select("id, uses_remaining")
             .eq("user_id", userId)
-            .eq("booster_effect", "streak_shield")
+            .eq("boost_type", "streak_shield")
+            .gt("uses_remaining", 0)
             .limit(1)
             .maybeSingle();
 
           if (shield && gapMs <= SHIELD_MAX_GAP_MS) {
-            // Shield protects for 1 missed day
-            if (shield.uses_remaining && shield.uses_remaining > 1) {
-              await supabaseAdmin
-                .from("active_boosters")
-                .update({ uses_remaining: shield.uses_remaining - 1 })
-                .eq("id", shield.id);
-            } else {
+            // Shield protects for 1 missed day. Atomic conditional decrement
+            // scoped to the owner (mirrors Step 1b) so a concurrent submit
+            // can't double-spend the shield.
+            const { data: shieldDec } = await supabaseAdmin
+              .from("active_boosters")
+              .update({ uses_remaining: shield.uses_remaining - 1 })
+              .eq("id", shield.id)
+              .eq("user_id", userId)
+              .gt("uses_remaining", 0)
+              .select("id, uses_remaining")
+              .maybeSingle();
+            if (shieldDec && (shieldDec.uses_remaining ?? 0) <= 0) {
               await supabaseAdmin
                 .from("active_boosters")
                 .delete()
-                .eq("id", shield.id);
+                .eq("id", shield.id)
+                .eq("user_id", userId);
             }
             newStreak = (profile.streak ?? 0) + 1;
           } else {
@@ -425,7 +690,9 @@ export async function POST(req: NextRequest) {
         if (toEmail) {
           const resend = new Resend(process.env.RESEND_API_KEY);
           const rendered = renderEmail(templates.firstStreakDay, {
-            userName: (profile.display_name as string | null) || undefined,
+            userName: profile.display_name
+              ? escapeHtml(profile.display_name as string)
+              : undefined,
             fangsEarned: coinsEarned,
             ctaUrl: absoluteUrl("/dashboard"),
             ctaLabel: "Keep the streak alive",
@@ -687,12 +954,24 @@ export async function POST(req: NextRequest) {
     // catches any legacy/dangling pin from prior sessions.)
     void clearActiveSession(userId);
 
+    // Authoritative reward echo. The web v2 client (deriveReward) reconciles
+    // its optimistic display to these server numbers:
+    //   reward.coinsEarned  — pre-plan-multiplier BASE coins (matches the
+    //                         per-quiz "Fangs" total the client computes)
+    //   reward.xpEarned     — XP credited (plan multiplier does not apply to XP)
+    //   reward.coinsCredited — coins ACTUALLY added to the wallet (post plan
+    //                         multiplier). Equals coinsEarned for free users.
     return NextResponse.json({
       success: true,
       sessionId: session.id,
       profile: finalProfile,
       bonusFangs,
       streakMilestone,
+      reward: {
+        coinsEarned,
+        xpEarned,
+        coinsCredited: boostedCoinsEarned,
+      },
     });
   } catch (err) {
     console.error("[save-quiz-results] UNEXPECTED:", err);

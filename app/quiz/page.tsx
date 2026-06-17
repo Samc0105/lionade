@@ -15,7 +15,7 @@ import { useRouter } from "next/navigation";
 import BackButton from "@/components/BackButton";
 import { cdnUrl } from "@/lib/cdn";
 import { SITE_HOST } from "@/lib/site-config";
-import { apiGet, apiPost, apiPatch } from "@/lib/api-client";
+import { apiGet, apiPost } from "@/lib/api-client";
 import { toastError, toastSuccess } from "@/lib/toast";
 import { useHeartbeat } from "@/lib/use-heartbeat";
 import Confetti from "@/components/Confetti";
@@ -448,27 +448,40 @@ export default function QuizPage() {
       coins += 5;
     }
 
-    for (const booster of activeBoosters) {
-      await apiPatch("/api/shop/activate-booster", { boosterId: booster.id });
-    }
-
+    // Optimistic paint — show the locally computed reward instantly. The
+    // SERVER is now authoritative (it re-derives coins/xp from the validated
+    // answers + boosters and consumes the boosters itself), so we reconcile to
+    // its returned numbers below. We no longer PATCH-consume boosters here; the
+    // server consumes the ones that fed the reward on the derive path.
     setTotalCoins(coins);
     setTotalXp(xp);
 
     // Stable idempotency key for this attempt — a network retry of this submit
     // reuses it so the server dedups instead of double-crediting.
     const attemptId = crypto.randomUUID();
-    const res = await apiPost<{ success: boolean; bonusFangs?: number }>(
+    const res = await apiPost<{
+      success: boolean;
+      bonusFangs?: number;
+      reward?: { coinsEarned: number; xpEarned: number; coinsCredited: number };
+    }>(
       "/api/save-quiz-results",
       {
         attemptId,
         subject: subject!,
         totalQuestions: questions.length,
-        correctAnswers: correctCount,
-        coinsEarned: coins,
-        xpEarned: xp,
-        // Server reads body.blitzMode for the blitz_score bounty — without
-        // this the bounty can never complete from web (iOS already sends it).
+        // Send the RAW correct count (NOT correctCount, which folds in
+        // score_boost). The server derives coins/xp over the raw correct
+        // answers and re-applies score_boost itself from the user's active
+        // boosters, so sending the boosted count here would double-count the
+        // boost. The server stores the boosted count for the session row.
+        correctAnswers: finalAnswers.filter((a) => a.correct).length,
+        // deriveReward: the server ignores any client coinsEarned/xpEarned and
+        // computes the authoritative reward from the validated correct count +
+        // difficulty + blitz + the user's active boosters (read pre-consume).
+        deriveReward: true,
+        // difficulty + blitzMode drive the server's reward derivation AND the
+        // blitz_score / advanced_quiz bounties.
+        difficulty,
         blitzMode,
         answers: finalAnswers.map((a) => ({
           questionId: a.questionId,
@@ -480,6 +493,14 @@ export default function QuizPage() {
     );
 
     if (res.ok && res.data?.success) {
+      // Reconcile the displayed reward to the server's authoritative numbers.
+      // coinsEarned is the pre-plan-multiplier base (what this quiz "earned");
+      // the post-multiplier wallet credit is reward.coinsCredited and is
+      // reflected by refreshUser() updating the global Fang balance.
+      if (res.data.reward) {
+        setTotalCoins(res.data.reward.coinsEarned);
+        setTotalXp(res.data.reward.xpEarned);
+      }
       await refreshUser();
       if (user?.id) {
         mutateUserStats(user.id);
