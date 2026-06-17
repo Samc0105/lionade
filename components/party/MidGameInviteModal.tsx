@@ -10,7 +10,7 @@
 // alone) plus a copy button + the code in big type as a fallback for verbal
 // sharing. Nothing here hits the server; rendering is purely client.
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 
 interface Props {
@@ -23,6 +23,11 @@ export default function MidGameInviteModal({ open, onClose, code }: Props) {
   const reduced = useReducedMotion();
   const [copied, setCopied] = useState(false);
   const [origin, setOrigin] = useState("");
+  const closeBtnRef = useRef<HTMLButtonElement | null>(null);
+  const dialogRef = useRef<HTMLDivElement | null>(null);
+  // The element focused before the modal opened, so we can restore focus to it
+  // (the trigger) on close.
+  const restoreFocusRef = useRef<HTMLElement | null>(null);
 
   // Capture origin on mount so the URL render is SSR-safe.
   useEffect(() => {
@@ -38,6 +43,46 @@ export default function MidGameInviteModal({ open, onClose, code }: Props) {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [open, onClose]);
+
+  // Focus management: remember the trigger, move focus to the Close button on
+  // open, and restore focus to the trigger when the modal closes. The rAF
+  // avoids a layout race with the entrance animation.
+  useEffect(() => {
+    if (!open) return;
+    restoreFocusRef.current = (document.activeElement as HTMLElement) ?? null;
+    const id = requestAnimationFrame(() => closeBtnRef.current?.focus());
+    return () => {
+      cancelAnimationFrame(id);
+      restoreFocusRef.current?.focus?.();
+    };
+  }, [open]);
+
+  // Trap Tab focus within the dialog so keyboard users can't tab out to the
+  // game behind the modal.
+  useEffect(() => {
+    if (!open) return;
+    function onKey(e: KeyboardEvent) {
+      if (e.key !== "Tab") return;
+      const root = dialogRef.current;
+      if (!root) return;
+      const focusable = root.querySelectorAll<HTMLElement>(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+      );
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      const active = document.activeElement;
+      if (e.shiftKey && active === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && active === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open]);
 
   const inviteUrl = origin ? `${origin}/games/party/${code}` : `/games/party/${code}`;
 
@@ -67,6 +112,7 @@ export default function MidGameInviteModal({ open, onClose, code }: Props) {
         >
           <motion.div
             key="modal"
+            ref={dialogRef}
             initial={reduced ? { opacity: 0 } : { opacity: 0, y: 10, scale: 0.97 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={reduced ? { opacity: 0 } : { opacity: 0, y: 6, scale: 0.98 }}
@@ -83,6 +129,7 @@ export default function MidGameInviteModal({ open, onClose, code }: Props) {
             aria-label="Invite a friend to this party"
           >
             <button
+              ref={closeBtnRef}
               onClick={onClose}
               className="absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center text-cream/55 hover:text-cream transition-colors"
               aria-label="Close"

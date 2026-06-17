@@ -28,6 +28,7 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState, useMemo } from "react";
+import dynamic from "next/dynamic";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import FeatureGate from "@/components/FeatureGate";
@@ -38,10 +39,18 @@ import { useMatchChannel } from "@/lib/competitive/use-match-channel";
 import { useSettle } from "@/components/competitive/useSettle";
 import ResultCard from "@/components/competitive/ResultCard";
 import { isCompetitiveMode, type CompetitiveMatchRow, type CompetitiveMode } from "@/lib/competitive/types";
-import SabotageScreen from "@/components/competitive/sabotage/SabotageScreen";
-import ZoomScreen from "@/components/competitive/zoom/ZoomScreen";
-import SpectrumScreen from "@/components/competitive/spectrum/SpectrumScreen";
-import PinScreen from "@/components/competitive/pin/PinScreen";
+
+// Only one mode screen renders per match, so we code-split them: each mode's
+// gameplay loop (and PinScreen's internal Leaflet lazy-load) only ships when
+// that mode is actually played. ssr:false because these are fully client-side
+// realtime surfaces — there's nothing meaningful to render server-side.
+type ModeScreenProps = { loaded: LoadedMatch; selfId: string };
+const MODE_SCREENS: Record<CompetitiveMode, React.ComponentType<ModeScreenProps>> = {
+  sabotage: dynamic(() => import("@/components/competitive/sabotage/SabotageScreen"), { ssr: false }),
+  zoom: dynamic(() => import("@/components/competitive/zoom/ZoomScreen"), { ssr: false }),
+  spectrum: dynamic(() => import("@/components/competitive/spectrum/SpectrumScreen"), { ssr: false }),
+  pin: dynamic(() => import("@/components/competitive/pin/PinScreen"), { ssr: false }),
+};
 
 export interface MatchPlayer {
   id: string;
@@ -132,14 +141,10 @@ export default function CompetitiveMatchPage() {
             <p className="text-cream/50 mt-3 font-bebas tracking-wider">LOADING MATCH...</p>
           </div>
         )}
-        {!error && loaded && user && (
-          <>
-            {mode === "sabotage" && <SabotageScreen loaded={loaded} selfId={user.id} />}
-            {mode === "zoom" && <ZoomScreen loaded={loaded} selfId={user.id} />}
-            {mode === "spectrum" && <SpectrumScreen loaded={loaded} selfId={user.id} />}
-            {mode === "pin" && <PinScreen loaded={loaded} selfId={user.id} />}
-          </>
-        )}
+        {!error && loaded && user && (() => {
+          const ModeScreen = MODE_SCREENS[mode];
+          return <ModeScreen loaded={loaded} selfId={user.id} />;
+        })()}
       </Shell>
       </FeatureGate>
     </ProtectedRoute>

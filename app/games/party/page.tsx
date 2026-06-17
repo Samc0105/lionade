@@ -5,7 +5,7 @@
 // Two big CTAs (Create Room / Join Room) + a "How to play" expandable.
 // On create or successful join, we router.push to /games/party/[code].
 
-import { useEffect, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import ProtectedRoute from "@/components/ProtectedRoute";
@@ -88,6 +88,89 @@ export default function PartyLandingPage() {
   const [requestStatus, setRequestStatus] = useState<"idle" | "sending" | "waiting" | "approved" | "declined">("idle");
   const [requestError, setRequestError] = useState<string | null>(null);
 
+  // ── Modal a11y: stable heading IDs + label ids, focus management refs. ──
+  const createTitleId = useId();
+  const createNameId = useId();
+  const requestTitleId = useId();
+  const requestNoteId = useId();
+
+  const createDialogRef = useRef<HTMLDivElement | null>(null);
+  const createFirstFieldRef = useRef<HTMLInputElement | null>(null);
+  const createTriggerRef = useRef<HTMLButtonElement | null>(null);
+
+  const requestDialogRef = useRef<HTMLDivElement | null>(null);
+  const requestNoteRef = useRef<HTMLInputElement | null>(null);
+  // The element focused before the request modal opened (the JOIN form submit
+  // button), restored on close.
+  const requestRestoreRef = useRef<HTMLElement | null>(null);
+
+  function closeCreate() {
+    setCreateOpen(false);
+  }
+  function closeRequest() {
+    setRequestOpen(false);
+    setRequestStatus("idle");
+  }
+
+  // Create modal: focus the name field on open, restore focus to the Create
+  // trigger on close, Escape closes.
+  useEffect(() => {
+    if (!createOpen) return;
+    const id = requestAnimationFrame(() => createFirstFieldRef.current?.focus());
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") closeCreate();
+    }
+    window.addEventListener("keydown", onKey);
+    return () => {
+      cancelAnimationFrame(id);
+      window.removeEventListener("keydown", onKey);
+      createTriggerRef.current?.focus?.();
+    };
+  }, [createOpen]);
+
+  // Request modal: remember the trigger, focus the note field on open, restore
+  // focus on close, Escape closes.
+  useEffect(() => {
+    if (!requestOpen) return;
+    requestRestoreRef.current = (document.activeElement as HTMLElement) ?? null;
+    const id = requestAnimationFrame(() => requestNoteRef.current?.focus());
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") closeRequest();
+    }
+    window.addEventListener("keydown", onKey);
+    return () => {
+      cancelAnimationFrame(id);
+      window.removeEventListener("keydown", onKey);
+      requestRestoreRef.current?.focus?.();
+    };
+  }, [requestOpen]);
+
+  // Shared Tab-trap: keeps keyboard focus inside whichever modal is open.
+  useEffect(() => {
+    if (!createOpen && !requestOpen) return;
+    function onKey(e: KeyboardEvent) {
+      if (e.key !== "Tab") return;
+      const root = createOpen ? createDialogRef.current : requestDialogRef.current;
+      if (!root) return;
+      const focusable = root.querySelectorAll<HTMLElement>(
+        'button:not([disabled]), [href], input:not([disabled]), select, textarea, [tabindex]:not([tabindex="-1"])',
+      );
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      const active = document.activeElement;
+      if (e.shiftKey && active === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && active === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [createOpen, requestOpen]);
+
   async function sendJoinRequest() {
     if (!requestCode) return;
     setRequestStatus("sending");
@@ -169,7 +252,7 @@ export default function PartyLandingPage() {
               PARTY
             </h1>
             <p className="text-cream/55 text-sm sm:text-base max-w-md mx-auto font-syne">
-              Play together. Three games tonight, more coming. Grab a room code and bring 2 to 6 friends.
+              Play together. Three games, more coming. Grab a room code and bring 2 to 6 friends.
             </p>
           </div>
 
@@ -177,20 +260,21 @@ export default function PartyLandingPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-10">
             {/* Create */}
             <motion.button
+              ref={createTriggerRef}
               onClick={() => setCreateOpen(true)}
               disabled={busy !== "none"}
               whileHover={reduced ? undefined : { y: -3 }}
               whileTap={reduced ? undefined : { scale: 0.98 }}
-              className="relative rounded-2xl p-6 text-left overflow-hidden transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              className="relative rounded-2xl p-6 text-left overflow-hidden border border-[#A855F7]/40 backdrop-blur transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               style={{
-                background: "linear-gradient(135deg, #A855F7 0%, #6366F1 100%)",
-                boxShadow: "0 8px 32px rgba(168,85,247,0.35)",
+                background: "rgba(168,85,247,0.18)",
+                boxShadow: "0 8px 32px rgba(168,85,247,0.12)",
               }}
             >
-              <p className="font-bebas text-3xl tracking-wider text-white mb-1">
+              <p className="font-bebas text-3xl tracking-wider text-[#E9D5FF] mb-1">
                 CREATE ROOM
               </p>
-              <p className="text-white/80 text-sm font-syne">
+              <p className="text-cream/70 text-sm font-syne">
                 {busy === "creating" ? "Generating code..." : "Name it, set privacy, host it."}
               </p>
             </motion.button>
@@ -215,6 +299,7 @@ export default function PartyLandingPage() {
                 type="text"
                 inputMode="numeric"
                 pattern="[0-9]*"
+                aria-label="Room code"
                 value={joinCode}
                 onChange={(e) => setJoinCode(e.target.value.replace(/[^0-9]/g, "").slice(0, 4))}
                 placeholder="1234"
@@ -352,9 +437,13 @@ export default function PartyLandingPage() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               style={{ background: "rgba(2,3,8,0.7)", backdropFilter: "blur(8px)" }}
-              onClick={() => setCreateOpen(false)}
+              onClick={closeCreate}
             >
               <motion.div
+                ref={createDialogRef}
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby={createTitleId}
                 onClick={(e) => e.stopPropagation()}
                 initial={reduced ? false : { y: 16, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
@@ -369,21 +458,23 @@ export default function PartyLandingPage() {
                 <button
                   type="button"
                   aria-label="Close"
-                  onClick={() => setCreateOpen(false)}
+                  onClick={closeCreate}
                   className="absolute top-3 right-3 w-8 h-8 rounded-full grid place-items-center text-cream/55 hover:text-cream/90 transition"
                   style={{ background: "rgba(255,255,255,0.04)" }}
                 >
                   <XIcon size={14} weight="bold" aria-hidden="true" />
                 </button>
-                <p className="font-bebas text-3xl tracking-wider text-cream mb-1">NEW ROOM</p>
+                <p id={createTitleId} className="font-bebas text-3xl tracking-wider text-cream mb-1">NEW ROOM</p>
                 <p className="text-cream/55 text-xs font-syne mb-5">
                   Optional name. Set who can drop in.
                 </p>
 
-                <label className="block text-cream/70 text-[11px] font-bold uppercase tracking-wider mb-2">
+                <label htmlFor={createNameId} className="block text-cream/70 text-[11px] font-bold uppercase tracking-wider mb-2">
                   Room name <span className="text-cream/30 font-normal normal-case">(optional)</span>
                 </label>
                 <input
+                  id={createNameId}
+                  ref={createFirstFieldRef}
                   type="text"
                   value={roomName}
                   onChange={(e) => setRoomName(e.target.value.slice(0, 30))}
@@ -396,10 +487,14 @@ export default function PartyLandingPage() {
                   }}
                 />
 
-                <label className="block text-cream/70 text-[11px] font-bold uppercase tracking-wider mb-2">
+                <p className="block text-cream/70 text-[11px] font-bold uppercase tracking-wider mb-2" id={`${createTitleId}-privacy`}>
                   Who can join
-                </label>
-                <div className="grid grid-cols-3 gap-2 mb-6">
+                </p>
+                <div
+                  className="grid grid-cols-3 gap-2 mb-6"
+                  role="radiogroup"
+                  aria-labelledby={`${createTitleId}-privacy`}
+                >
                   {(["open", "friends", "closed"] as const).map((m) => {
                     const label = m === "open" ? "Open" : m === "friends" ? "Friends" : "Invite";
                     const sub = m === "open" ? "Anyone with code" : m === "friends" ? "Auto-let-in friends" : "Approval only";
@@ -408,6 +503,9 @@ export default function PartyLandingPage() {
                       <button
                         key={m}
                         type="button"
+                        role="radio"
+                        aria-checked={on}
+                        aria-label={`${label}. ${sub}`}
                         onClick={() => setPrivacyMode(m)}
                         className="rounded-xl px-3 py-2.5 text-left transition-all"
                         style={{
@@ -451,12 +549,13 @@ export default function PartyLandingPage() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               style={{ background: "rgba(2,3,8,0.7)", backdropFilter: "blur(8px)" }}
-              onClick={() => {
-                setRequestOpen(false);
-                setRequestStatus("idle");
-              }}
+              onClick={closeRequest}
             >
               <motion.div
+                ref={requestDialogRef}
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby={requestTitleId}
                 onClick={(e) => e.stopPropagation()}
                 initial={reduced ? false : { y: 16, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
@@ -471,23 +570,25 @@ export default function PartyLandingPage() {
                 <button
                   type="button"
                   aria-label="Close"
-                  onClick={() => { setRequestOpen(false); setRequestStatus("idle"); }}
+                  onClick={closeRequest}
                   className="absolute top-3 right-3 w-8 h-8 rounded-full grid place-items-center text-cream/55 hover:text-cream/90 transition"
                   style={{ background: "rgba(255,255,255,0.04)" }}
                 >
                   <XIcon size={14} weight="bold" aria-hidden="true" />
                 </button>
-                <p className="font-bebas text-3xl tracking-wider text-cream mb-1">REQUEST TO JOIN</p>
+                <p id={requestTitleId} className="font-bebas text-3xl tracking-wider text-cream mb-1">REQUEST TO JOIN</p>
                 <p className="text-cream/55 text-xs font-syne mb-5">
                   Room {requestCode} needs the host's OK. Add a note if you want.
                 </p>
 
                 {requestStatus === "idle" && (
                   <>
-                    <label className="block text-cream/70 text-[11px] font-bold uppercase tracking-wider mb-2">
+                    <label htmlFor={requestNoteId} className="block text-cream/70 text-[11px] font-bold uppercase tracking-wider mb-2">
                       Note <span className="text-cream/30 font-normal normal-case">(optional, 50 chars)</span>
                     </label>
                     <input
+                      id={requestNoteId}
+                      ref={requestNoteRef}
                       type="text"
                       value={requestNote}
                       onChange={(e) => setRequestNote(e.target.value.slice(0, 50))}
@@ -529,7 +630,7 @@ export default function PartyLandingPage() {
                     <p className="text-cream/55 text-xs">Try a different room.</p>
                     <button
                       type="button"
-                      onClick={() => { setRequestOpen(false); setRequestStatus("idle"); }}
+                      onClick={closeRequest}
                       className="mt-4 px-4 py-2 rounded-lg text-xs font-bold text-cream/80"
                       style={{ background: "rgba(255,255,255,0.06)" }}
                     >

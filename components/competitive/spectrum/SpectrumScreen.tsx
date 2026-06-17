@@ -134,6 +134,7 @@ export default function SpectrumScreen({ loaded, selfId }: { loaded: LoadedMatch
             type="range" min={0} max={100} step={0.1} value={pct}
             disabled={revealed}
             aria-label="Estimate slider"
+            aria-valuetext={`${fmt(value)}${round.unit ? ` ${round.unit}` : ""}`}
             onChange={(e) => setPct(parseFloat(e.target.value))}
             className="w-full accent-[#A855F7] h-3"
           />

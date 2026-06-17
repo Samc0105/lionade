@@ -157,7 +157,7 @@ export default function ZoomScreen({ loaded, selfId }: { loaded: LoadedMatch; se
           ) : (
             <div className="w-full h-full flex items-center justify-center">
               <button onClick={advance} className="font-bebas tracking-wider text-cream/50 px-4 py-2 rounded-lg border border-cream/15">
-                Image unavailable — skip round
+                Image unavailable. Skip round
               </button>
             </div>
           )}
@@ -192,6 +192,7 @@ export default function ZoomScreen({ loaded, selfId }: { loaded: LoadedMatch; se
             onChange={(e) => setGuess(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && submitGuess()}
             disabled={locked || !!feedback}
+            aria-label="Your guess"
             placeholder="What is this? Guess anytime..."
             className="flex-1 px-4 py-3.5 rounded-xl bg-cream/[0.04] border border-cream/10 text-cream/90 placeholder-cream/30 focus:border-[#00BFFF]/50 outline-none text-base"
           />

@@ -10,6 +10,7 @@ import { useUserStats, mutateUserStats } from "@/lib/hooks";
 import { supabase } from "@/lib/supabase";
 import { cdnUrl } from "@/lib/cdn";
 import { apiGet, apiPost, apiPatch, apiDelete } from "@/lib/api-client";
+import { avatarFor } from "@/lib/avatar";
 import Confetti from "@/components/Confetti";
 import {
   Medal,
@@ -185,6 +186,10 @@ function ArenaPage() {
   const questionStartTime = useRef(0);
   const answerLocked = useRef(false);
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
+  // The post-result "brief pause then advance" timer in recordAndAdvance. Held
+  // in a ref so unmount + resetArena can clear it; otherwise it could fire
+  // setState (advance / completeMatch) on an unmounted or reset component.
+  const advanceTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Prematch countdown
   const [countdown, setCountdown] = useState(3);
@@ -192,10 +197,12 @@ function ArenaPage() {
   // Results
   const [matchResult, setMatchResult] = useState<MatchResult | null>(null);
 
-  // DiceBear avatar URLs for the arena scoreboard / pre-match. Falls
-  // through to the user-stats SWR cache; both default to "" if missing.
-  const myAvatarUrl = me?.avatarUrl ?? stats?.avatar ?? "";
-  const opAvatarUrl = opponent?.avatarUrl ?? "";
+  // DiceBear avatar URLs for the arena scoreboard / pre-match. We resolve via
+  // avatarFor() so a null avatar_url falls back to the deterministic DiceBear
+  // avatar (seeded on username) instead of an empty src that re-requests the
+  // page URL and renders as a broken image.
+  const myAvatarUrl = avatarFor(me?.username ?? user?.username, me?.avatarUrl ?? stats?.avatar);
+  const opAvatarUrl = avatarFor(opponent?.username, opponent?.avatarUrl);
 
   // ── Load ELO on mount ──────────────────────────────────────
   useEffect(() => {
@@ -508,8 +515,10 @@ function ArenaPage() {
       },
     ]);
 
-    // Brief pause then advance
-    setTimeout(() => {
+    // Brief pause then advance. Tracked in a ref so it's clearable on unmount
+    // / reset (clear any prior pending one first to avoid stacking).
+    if (advanceTimeoutRef.current) clearTimeout(advanceTimeoutRef.current);
+    advanceTimeoutRef.current = setTimeout(() => {
       const nextQ = currentQ + 1;
       if (nextQ >= questions.length) {
         completeMatch();
@@ -625,6 +634,10 @@ function ArenaPage() {
     setChallengeUsername("");
     setChallengeError("");
     answerLocked.current = false;
+    if (advanceTimeoutRef.current) {
+      clearTimeout(advanceTimeoutRef.current);
+      advanceTimeoutRef.current = null;
+    }
   }, []);
 
   // Cleanup on unmount — clear ALL timers (matchmaking + opponent + challenge
@@ -635,6 +648,7 @@ function ArenaPage() {
       if (opponentPollRef.current) clearInterval(opponentPollRef.current);
       if (challengePollRef.current) clearInterval(challengePollRef.current);
       if (challengeTimeoutRef.current) clearTimeout(challengeTimeoutRef.current);
+      if (advanceTimeoutRef.current) clearTimeout(advanceTimeoutRef.current);
       channelRef.current?.unsubscribe();
     };
   }, []);

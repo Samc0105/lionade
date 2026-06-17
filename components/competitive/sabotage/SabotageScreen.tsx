@@ -368,7 +368,7 @@ export default function SabotageScreen({ loaded, selfId }: { loaded: LoadedMatch
       <div className="flex-none w-full max-w-5xl mx-auto rounded-2xl p-3 sm:p-4 mt-auto"
         style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(168,85,247,0.18)" }}>
         <div className="flex items-center justify-between mb-2.5">
-          <span className="font-bebas text-sm tracking-wider text-[#A855F7]">ATTACK METER{anyAttackReady ? " — READY" : ""}</span>
+          <span className="font-bebas text-sm tracking-wider text-[#A855F7]">ATTACK METER{anyAttackReady ? " READY" : ""}</span>
           <span className="text-cream/40 text-xs">{Math.round(meter.charge)} / {METER_MAX}</span>
         </div>
         <div className={`h-2 rounded-full bg-cream/[0.07] overflow-hidden mb-3 ${anyAttackReady ? "ca-charge-ready" : ""}`}>
@@ -385,10 +385,11 @@ export default function SabotageScreen({ loaded, selfId }: { loaded: LoadedMatch
                 onClick={() => fireAttack(kind)}
                 disabled={!affordable}
                 title={ATTACK_META[kind].desc}
+                aria-label={ATTACK_META[kind].label}
                 className={`flex flex-col items-center gap-0.5 py-2 rounded-lg border text-center transition-all
                   ${affordable ? "border-[#A855F7]/40 bg-[#A855F7]/10 hover:bg-[#A855F7]/20 active:scale-95" : "border-cream/5 bg-cream/[0.02] opacity-40"}`}
               >
-                <span className="text-lg leading-none">{ATTACK_META[kind].icon}</span>
+                <span className="text-lg leading-none" aria-hidden="true">{ATTACK_META[kind].icon}</span>
                 <span className="text-[9px] text-cream/70 font-bebas tracking-wide">{ATTACK_META[kind].label}</span>
                 <span className="text-[8px] text-cream/40">{cost}</span>
               </button>

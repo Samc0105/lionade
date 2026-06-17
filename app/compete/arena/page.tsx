@@ -13,6 +13,7 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion, useReducedMotion } from "framer-motion";
+import { Sword, MagnifyingGlass, Sliders, MapPin, type Icon } from "@phosphor-icons/react";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import BackButton from "@/components/BackButton";
 import { apiPost, apiGet, apiDelete } from "@/lib/api-client";
@@ -25,7 +26,8 @@ interface ModeCard {
   verb: string;
   blurb: string;
   accent: string;
-  icon: string;
+  /** Phosphor icon component, tinted with the mode accent at render. */
+  icon: Icon;
   /** Ideal-context badge shown on the card. All ranked modes play fine remotely. */
   bestPlayed: string;
 }
@@ -33,10 +35,10 @@ interface ModeCard {
 // Poker Face was moved to Lionade Party (no ELO, no Fangs) on 2026-05-28, so the
 // ranked arena is now 4 modes — all of which play fine over the internet.
 const MODES: ModeCard[] = [
-  { mode: "sabotage", name: "Sabotage Trivia", verb: "Fight", blurb: "Real-time trivia duel. Answer fast to charge attacks, then blur, scramble, and freeze your rival.", accent: "#EF4444", icon: "⚔️", bestPlayed: "Remote OK" },
-  { mode: "zoom", name: "Zoom Reveal", verb: "Nerve", blurb: "An image un-blurs over time. Guess early to score big, but a wrong guess locks the round.", accent: "#00BFFF", icon: "🔍", bestPlayed: "Remote OK" },
-  { mode: "spectrum", name: "Spectrum Slider", verb: "Feel", blurb: "Slide to estimate a value. Closest to the truth scores the most, with partial credit for near misses.", accent: "#A855F7", icon: "🎚️", bestPlayed: "Remote OK" },
-  { mode: "pin", name: "Map Pin Drop", verb: "Spatial", blurb: "Drop a pin on the world map. The closer to the real spot, the more points you bank.", accent: "#50C878", icon: "📍", bestPlayed: "Remote OK" },
+  { mode: "sabotage", name: "Sabotage Trivia", verb: "Fight", blurb: "Real-time trivia duel. Answer fast to charge attacks, then blur, scramble, and freeze your rival.", accent: "#EF4444", icon: Sword, bestPlayed: "Remote OK" },
+  { mode: "zoom", name: "Zoom Reveal", verb: "Nerve", blurb: "An image un-blurs over time. Guess early to score big, but a wrong guess locks the round.", accent: "#00BFFF", icon: MagnifyingGlass, bestPlayed: "Remote OK" },
+  { mode: "spectrum", name: "Spectrum Slider", verb: "Feel", blurb: "Slide to estimate a value. Closest to the truth scores the most, with partial credit for near misses.", accent: "#A855F7", icon: Sliders, bestPlayed: "Remote OK" },
+  { mode: "pin", name: "Map Pin Drop", verb: "Spatial", blurb: "Drop a pin on the world map. The closer to the real spot, the more points you bank.", accent: "#50C878", icon: MapPin, bestPlayed: "Remote OK" },
 ];
 
 type SearchState =
@@ -219,7 +221,7 @@ export default function CompetitiveArenaPage() {
               COMPETITIVE ARENA
             </h1>
             <p className="text-cream/60 text-sm sm:text-base mt-3 max-w-xl mx-auto">
-              Five ranked modes. Earn Elo and Fangs on the ranked ladders. Pick a format, pick a mode.
+              Five ways to compete. Earn Elo and Fangs on the ranked ladders. Pick a format, pick a mode.
             </p>
           </div>
 
@@ -406,7 +408,7 @@ export default function CompetitiveArenaPage() {
                     style={{ background: `radial-gradient(ellipse at 30% 20%, ${m.accent}10 0%, transparent 60%)` }} />
                   <div className="relative">
                     <div className="flex items-center gap-2 mb-2">
-                      <span className="text-4xl">{m.icon}</span>
+                      <m.icon size={36} weight="duotone" color={m.accent} aria-hidden="true" />
                       <span className="text-[10px] font-bold uppercase tracking-[0.2em] px-2 py-0.5 rounded-md"
                         style={{ color: m.accent, background: `${m.accent}15` }}>
                         {m.verb}
