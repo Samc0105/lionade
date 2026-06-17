@@ -48,6 +48,11 @@ export default function PinScreen({ loaded, selfId }: { loaded: LoadedMatch; sel
   const [started, setStarted] = useState(false); // false until 3-2-1-GO clears
   const myScoreRef = useRef(0);
 
+  // The post-lock-in round-advance timeout is fire-and-forget; track it so an
+  // unmount (navigate away, forfeit, settle) clears any pending advance and
+  // can't setState on a dead component.
+  const advanceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   // Anchor the match START (the pre-round 3-2-1-GO) to the server's
   // match.starts_at so both players begin together. Pin has no per-round timer,
   // so the anchor only gates when the first lock-in opens.
@@ -62,7 +67,14 @@ export default function PinScreen({ loaded, selfId }: { loaded: LoadedMatch; sel
     return () => off();
   }, [on]);
 
+  useEffect(() => () => {
+    if (advanceTimerRef.current) clearTimeout(advanceTimerRef.current);
+  }, []);
+
   const advance = useCallback(() => {
+    // Guard a stale deferred fire: bail if the match already finished while
+    // this advance was queued.
+    if (finished) return;
     setGuess(null); setRevealed(false); setLastDist(0); setLastPts(0); setTruePoint(null);
     if (idx + 1 >= rounds.length) {
       setFinished(true);
@@ -70,7 +82,7 @@ export default function PinScreen({ loaded, selfId }: { loaded: LoadedMatch; sel
       return;
     }
     setIdx((i) => i + 1);
-  }, [idx, rounds.length, send]);
+  }, [idx, rounds.length, send, finished]);
 
   const lockIn = useCallback(async () => {
     if (!started || revealed || !guess || finished) return;
@@ -85,7 +97,10 @@ export default function PinScreen({ loaded, selfId }: { loaded: LoadedMatch; sel
     setLastDist(dist); setLastPts(pts);
     setScore((s) => { myScoreRef.current = s + pts; return s + pts; });
     send({ type: COMPETITIVE_EVENTS.PROGRESS, score: myScoreRef.current });
-    setTimeout(advance, 2400);
+    advanceTimerRef.current = setTimeout(() => {
+      advanceTimerRef.current = null;
+      advance();
+    }, 2400);
   }, [started, revealed, guess, finished, round, send, advance, matchId]);
 
   useEffect(() => {

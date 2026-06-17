@@ -85,7 +85,7 @@ export default function PartyLandingPage() {
   const [requestOpen, setRequestOpen] = useState(false);
   const [requestCode, setRequestCode] = useState("");
   const [requestNote, setRequestNote] = useState("");
-  const [requestStatus, setRequestStatus] = useState<"idle" | "sending" | "waiting" | "approved" | "declined">("idle");
+  const [requestStatus, setRequestStatus] = useState<"idle" | "sending" | "waiting" | "approved" | "declined" | "timeout">("idle");
   const [requestError, setRequestError] = useState<string | null>(null);
 
   // ── Modal a11y: stable heading IDs + label ids, focus management refs. ──
@@ -189,11 +189,20 @@ export default function PartyLandingPage() {
 
   // Lightweight poll for the host decision. Realtime would be ideal but the
   // landing page doesn't subscribe to the room channel; a 3s poll is fine for
-  // the ~30s typical window.
+  // the ~30s typical window. A 3-minute hard cap stops the poll from running
+  // forever on an idle modal the host never answers — past the deadline we
+  // flip to a "timed out, try again" state and clear the interval.
+  const REQUEST_MAX_WAIT_MS = 3 * 60 * 1000;
   useEffect(() => {
     if (requestStatus !== "waiting" || !requestCode) return;
     let cancelled = false;
+    const deadline = Date.now() + REQUEST_MAX_WAIT_MS;
     const iv = setInterval(async () => {
+      if (Date.now() >= deadline) {
+        if (!cancelled) setRequestStatus("timeout");
+        clearInterval(iv);
+        return;
+      }
       const res = await apiGet<{ status: string }>(
         `/api/party/rooms/${requestCode}/request-join`,
       );
@@ -210,7 +219,7 @@ export default function PartyLandingPage() {
       cancelled = true;
       clearInterval(iv);
     };
-  }, [requestStatus, requestCode, router]);
+  }, [requestStatus, requestCode, router, REQUEST_MAX_WAIT_MS]);
 
   return (
     <ProtectedRoute>
@@ -636,6 +645,30 @@ export default function PartyLandingPage() {
                     >
                       Close
                     </button>
+                  </div>
+                )}
+                {requestStatus === "timeout" && (
+                  <div className="py-4 text-center">
+                    <p className="text-cream text-sm font-semibold mb-1">Request timed out.</p>
+                    <p className="text-cream/55 text-xs">The host never answered. Try again.</p>
+                    <div className="mt-4 flex items-center justify-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => { setRequestStatus("idle"); setRequestError(null); }}
+                        className="px-4 py-2 rounded-lg text-xs font-bold"
+                        style={{ background: "linear-gradient(135deg, #FFD700 0%, #B8960C 100%)", color: "#04080F" }}
+                      >
+                        Try again
+                      </button>
+                      <button
+                        type="button"
+                        onClick={closeRequest}
+                        className="px-4 py-2 rounded-lg text-xs font-bold text-cream/80"
+                        style={{ background: "rgba(255,255,255,0.06)" }}
+                      >
+                        Close
+                      </button>
+                    </div>
                   </div>
                 )}
               </motion.div>

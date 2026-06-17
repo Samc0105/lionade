@@ -96,6 +96,21 @@ export default function SabotageScreen({ loaded, selfId }: { loaded: LoadedMatch
   const projIdRef = useRef(0);
   const [started, setStarted] = useState(false); // false until the 3-2-1-GO countdown finishes
 
+  // Deferred-work cleanup: the round-advance timeout and the per-projectile
+  // cleanup timeouts are fire-and-forget. Track them so an unmount (navigate
+  // away, forfeit, settle) clears any pending fire and can't setState on a
+  // dead component.
+  const advanceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const projTimersRef = useRef<Set<ReturnType<typeof setTimeout>>>(new Set());
+  useEffect(() => {
+    const projTimers = projTimersRef.current;
+    return () => {
+      if (advanceTimerRef.current) clearTimeout(advanceTimerRef.current);
+      projTimers.forEach((t) => clearTimeout(t));
+      projTimers.clear();
+    };
+  }, []);
+
   const round = rounds[roundIdx];
 
   // ── tick ──
@@ -153,7 +168,11 @@ export default function SabotageScreen({ loaded, selfId }: { loaded: LoadedMatch
       // Juice-only: launch a projectile from the tray toward the rival's HUD.
       const pid = ++projIdRef.current;
       setProjectiles((p) => [...p, { id: pid, kind }]);
-      setTimeout(() => setProjectiles((p) => p.filter((x) => x.id !== pid)), 700);
+      const projTimer = setTimeout(() => {
+        projTimersRef.current.delete(projTimer);
+        setProjectiles((p) => p.filter((x) => x.id !== pid));
+      }, 700);
+      projTimersRef.current.add(projTimer);
       send({ type: SABOTAGE_EVENTS.ATTACK, kind, attacker_id: selfId, target_id: target });
       apiPost("/api/competitive/sabotage/attack", { matchId, targetId: target, kind }).catch(() => {});
     },
@@ -161,6 +180,9 @@ export default function SabotageScreen({ loaded, selfId }: { loaded: LoadedMatch
   );
 
   const advance = useCallback(() => {
+    // Guard a stale deferred fire: if the duel already finished while this
+    // advance was queued, do nothing (no setState on a settled/dead round).
+    if (finished) return;
     setAnswered(null);
     setCorrectIdx(null);
     setAnswerFx("");
@@ -172,7 +194,7 @@ export default function SabotageScreen({ loaded, selfId }: { loaded: LoadedMatch
     }
     setRoundIdx((i) => i + 1);
     setRoundStart(Date.now());
-  }, [roundIdx, rounds.length, send]);
+  }, [roundIdx, rounds.length, send, finished]);
 
   const answer = useCallback(
     async (idx: number) => {
@@ -192,7 +214,10 @@ export default function SabotageScreen({ loaded, selfId }: { loaded: LoadedMatch
         setMeter((m) => applyCharge(m, charge));
       }
       send({ type: SABOTAGE_EVENTS.ANSWERED, correct });
-      setTimeout(advance, 1100);
+      advanceTimerRef.current = setTimeout(() => {
+        advanceTimerRef.current = null;
+        advance();
+      }, 1100);
     },
     [started, answered, round, elapsed, send, advance, finished, matchId],
   );

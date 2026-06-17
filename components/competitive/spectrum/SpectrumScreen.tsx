@@ -48,6 +48,11 @@ export default function SpectrumScreen({ loaded, selfId }: { loaded: LoadedMatch
   const [started, setStarted] = useState(false); // false until 3-2-1-GO clears
   const myScoreRef = useRef(0);
 
+  // The post-lock-in round-advance timeout is fire-and-forget; track it so an
+  // unmount (navigate away, forfeit, settle) clears any pending advance and
+  // can't setState on a dead component.
+  const advanceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   // Anchor the match START (the pre-round 3-2-1-GO) to the server's
   // match.starts_at so both players begin round 1 together. Spectrum has no
   // per-round timer, so the anchor only gates when the first lock-in opens.
@@ -62,9 +67,16 @@ export default function SpectrumScreen({ loaded, selfId }: { loaded: LoadedMatch
     return () => off();
   }, [on]);
 
+  useEffect(() => () => {
+    if (advanceTimerRef.current) clearTimeout(advanceTimerRef.current);
+  }, []);
+
   const value = round ? round.min_value + (pct / 100) * (round.max_value - round.min_value) : 0;
 
   const advance = useCallback(() => {
+    // Guard a stale deferred fire: bail if the match already finished while
+    // this advance was queued.
+    if (finished) return;
     setRevealed(false); setPct(50); setLastPts(0); setTrueValue(null);
     if (idx + 1 >= rounds.length) {
       setFinished(true);
@@ -72,7 +84,7 @@ export default function SpectrumScreen({ loaded, selfId }: { loaded: LoadedMatch
       return;
     }
     setIdx((i) => i + 1);
-  }, [idx, rounds.length, send]);
+  }, [idx, rounds.length, send, finished]);
 
   const lockIn = useCallback(async () => {
     if (!started || revealed || finished) return;
@@ -86,7 +98,10 @@ export default function SpectrumScreen({ loaded, selfId }: { loaded: LoadedMatch
     setLastPts(pts);
     setScore((s) => { myScoreRef.current = s + pts; return s + pts; });
     send({ type: COMPETITIVE_EVENTS.PROGRESS, score: myScoreRef.current });
-    setTimeout(advance, 1800);
+    advanceTimerRef.current = setTimeout(() => {
+      advanceTimerRef.current = null;
+      advance();
+    }, 1800);
   }, [started, revealed, finished, value, round, send, advance, matchId]);
 
   useEffect(() => {

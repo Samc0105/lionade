@@ -18,7 +18,7 @@
  * state in place of the tabs.
  */
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import useSWR from "swr";
 import { Plus, Cards, ListBullets, BookOpen, GlobeHemisphereWest, Compass, ArrowsClockwise } from "@phosphor-icons/react";
@@ -55,6 +55,38 @@ export default function VocabPage() {
 
   const [tab, setTab] = useState<Tab>("add");
   const [showCreateModal, setShowCreateModal] = useState(false);
+
+  // WAI-ARIA APG tablist: roving tabindex (active tab tabIndex=0, the rest -1)
+  // with arrow/Home/End focus management. tabRefs holds the button nodes so
+  // arrow keys can move focus + activate (automatic-activation pattern).
+  const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const onTabKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLButtonElement>, currentIdx: number) => {
+      let nextIdx: number | null = null;
+      switch (e.key) {
+        case "ArrowRight":
+        case "ArrowDown":
+          nextIdx = (currentIdx + 1) % TABS.length;
+          break;
+        case "ArrowLeft":
+        case "ArrowUp":
+          nextIdx = (currentIdx - 1 + TABS.length) % TABS.length;
+          break;
+        case "Home":
+          nextIdx = 0;
+          break;
+        case "End":
+          nextIdx = TABS.length - 1;
+          break;
+        default:
+          return;
+      }
+      e.preventDefault();
+      setTab(TABS[nextIdx].id);
+      tabRefs.current[nextIdx]?.focus();
+    },
+    [],
+  );
 
   // SWR-powered bank list — single source of truth for what banks the user owns.
   const { data: banksData, error: banksError, isLoading: banksLoading, mutate: mutateBanks } = useSWR<{ banks: VocabBank[] }>(
@@ -232,18 +264,21 @@ export default function VocabPage() {
                 role="tablist"
                 aria-label="Vocab sections"
               >
-                {TABS.map(t => {
+                {TABS.map((t, i) => {
                   const isActive = tab === t.id;
                   const Icon = t.Icon;
                   return (
                     <button
                       key={t.id}
                       id={`vocab-tab-btn-${t.id}`}
+                      ref={(el) => { tabRefs.current[i] = el; }}
                       type="button"
                       role="tab"
                       aria-selected={isActive}
                       aria-controls="vocab-tabpanel"
+                      tabIndex={isActive ? 0 : -1}
                       onClick={() => setTab(t.id)}
+                      onKeyDown={(e) => onTabKeyDown(e, i)}
                       className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-syne font-bold text-sm transition-[background-color,color,border-color,box-shadow] border whitespace-nowrap ${
                         isActive
                           ? "bg-electric text-navy border-electric shadow-[0_0_18px_rgba(74,144,217,0.35)]"

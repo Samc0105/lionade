@@ -59,9 +59,18 @@ export default function ZoomScreen({ loaded, selfId }: { loaded: LoadedMatch; se
   const round = rounds[idx];
   const revealMs = (round?.reveal_sec ?? 15) * 1000;
 
+  // The post-guess round-advance timeout is fire-and-forget; track it so an
+  // unmount (navigate away, forfeit, settle) clears any pending advance and
+  // can't setState on a dead component.
+  const advanceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   useEffect(() => {
     const t = setInterval(() => setNow(Date.now()), 100);
     return () => clearInterval(t);
+  }, []);
+
+  useEffect(() => () => {
+    if (advanceTimerRef.current) clearTimeout(advanceTimerRef.current);
   }, []);
 
   useEffect(() => {
@@ -78,6 +87,9 @@ export default function ZoomScreen({ loaded, selfId }: { loaded: LoadedMatch; se
   const blurAmount = Math.max(0, 28 * (1 - Math.min(1, elapsed / revealMs)));
 
   const advance = useCallback(() => {
+    // Guard a stale deferred fire: bail if the match already finished while
+    // this advance was queued.
+    if (finished) return;
     setGuess(""); setLocked(false); setFeedback(""); setImgError(false); setRevealAnswer("");
     if (idx + 1 >= rounds.length) {
       setFinished(true);
@@ -86,7 +98,7 @@ export default function ZoomScreen({ loaded, selfId }: { loaded: LoadedMatch; se
     }
     setIdx((i) => i + 1);
     setRoundStart(Date.now());
-  }, [idx, rounds.length, send]);
+  }, [idx, rounds.length, send, finished]);
 
   const submitGuess = useCallback(async () => {
     if (!started || locked || !guess.trim() || finished || feedback) return;
@@ -101,11 +113,17 @@ export default function ZoomScreen({ loaded, selfId }: { loaded: LoadedMatch; se
       setRevealAnswer(data.reveal.answer);
       setFeedback("correct");
       send({ type: COMPETITIVE_EVENTS.PROGRESS, score: myScoreRef.current });
-      setTimeout(advance, 1300);
+      advanceTimerRef.current = setTimeout(() => {
+        advanceTimerRef.current = null;
+        advance();
+      }, 1300);
     } else {
       // Wrong (or alias/close not accepted) — Zoom locks the round on a miss.
       setFeedback("wrong");
-      setTimeout(advance, 1500);
+      advanceTimerRef.current = setTimeout(() => {
+        advanceTimerRef.current = null;
+        advance();
+      }, 1500);
     }
   }, [started, locked, guess, round, elapsed, send, advance, finished, feedback, matchId]);
 
