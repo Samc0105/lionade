@@ -38,12 +38,9 @@ const SCHEMA = [
     description:
       "Lionade is the Gen Z study-rewards app. AI-guided study sessions, duels, leaderboards, and an in-app Fangs economy.",
     email: SUPPORT_EMAIL,
-    // Public brand surfaces. Helps Google merge knowledge-graph entries
-    // and disambiguate "Lionade" from the lemonade autocorrect.
-    sameAs: [
-      "https://twitter.com/lionade",
-      "https://x.com/lionade",
-    ],
+    // No social sameAs yet — there is no live X/social account, so we omit it
+    // rather than point Google's knowledge graph at a dead profile. Add back
+    // when an account exists.
   },
   {
     "@context": "https://schema.org",

@@ -29,7 +29,6 @@ const LEGAL: FooterLink[] = [
 ];
 
 const CONNECT: FooterLink[] = [
-  { href: "https://x.com/lionade", label: "X / Twitter", external: true },
   { href: "mailto:support@getlionade.com", label: "Email Support", external: true },
 ];
 

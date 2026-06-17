@@ -128,13 +128,14 @@ export const metadata: Metadata = {
     type: "website",
   },
   twitter: {
+    // Keep the large-image card so link previews still render on X, but omit
+    // creator/site @handles — there is no live account yet, and a dead handle
+    // attribution hurts more than it helps. Add back when an account exists.
     card: "summary_large_image",
     title: "Lionade · Study Like It's Your Job",
     description: "Stop studying for free. Earn Fangs, climb ranks, duel friends, and master any exam with AI.",
     // Same logic as openGraph above: omit `images` so `twitter-image.tsx`
     // takes over per-route.
-    creator: "@lionade",
-    site: "@lionade",
   },
   robots: {
     index: true,

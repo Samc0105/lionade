@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useAuth } from "@/lib/auth";
 import BackButton from "@/components/BackButton";
 import { SUPPORT_EMAIL } from "@/lib/site-config";
-import { CheckCircle, Warning, EnvelopeSimple, XLogo, Lifebuoy } from "@phosphor-icons/react";
+import { CheckCircle, Warning, EnvelopeSimple, Lifebuoy } from "@phosphor-icons/react";
 
 const CATEGORIES = ["Bug Report", "Feature Request", "General Question", "Account Issue", "Partnership", "Other"];
 
@@ -89,17 +89,6 @@ export default function ContactPage() {
             <EnvelopeSimple size={20} weight="duotone" color="#4C96E1" aria-hidden="true" />
             <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-cream/55 mt-2">Email</p>
             <p className="text-cream text-sm font-semibold mt-1 break-all">{SUPPORT_EMAIL}</p>
-          </a>
-          <a
-            href="https://x.com/getlionade"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="rounded-2xl border border-white/[0.08] p-4 hover:border-electric/40 transition-all hover:-translate-y-0.5"
-            style={{ background: "linear-gradient(135deg, rgba(10,16,32,0.7) 0%, rgba(6,12,24,0.7) 100%)" }}
-          >
-            <XLogo size={20} weight="duotone" color="#F0B429" aria-hidden="true" />
-            <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-cream/55 mt-2">Follow</p>
-            <p className="text-cream text-sm font-semibold mt-1">@getlionade</p>
           </a>
           <Link
             href="/about"
