@@ -244,6 +244,19 @@ const FALLBACK_TOPICS = [
   "Cellular respiration",
 ];
 
+// Playful, on-brand reassurance lines shown one at a time during generation
+// so a slow AI call never looks frozen. Rotated every ~2.5s. Dashless.
+const GENERATING_MESSAGES = [
+  "Reading your material...",
+  "Writing your questions...",
+  "Mixing up the answers...",
+  "Almost there...",
+];
+
+// How long (ms) before we swap to the "taking longer than usual" soft-timeout
+// state with a Cancel button. Generation usually resolves well under this.
+const GENERATING_SOFT_TIMEOUT_MS = 30000;
+
 // Map subject categories → suggested study prompts
 const SUBJECT_TOPIC_HINTS: Record<string, string[]> = {
   Math: ["Quadratic equations", "Derivatives intro"],
@@ -292,6 +305,16 @@ function NinnyPageInner() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [phase, setPhase] = useState<Phase>("input");
+  // Generating-phase UX: a rotating reassurance line + a soft-timeout flag.
+  // genMsgIdx cycles through GENERATING_MESSAGES every ~2.5s; genTimedOut flips
+  // true after ~30s so we can swap to a "taking longer" line + Cancel button.
+  const [genMsgIdx, setGenMsgIdx] = useState(0);
+  const [genTimedOut, setGenTimedOut] = useState(false);
+  // Cancellation token for the in-flight /generate request. The shared
+  // apiPost helper doesn't accept an AbortSignal, so we can't abort the fetch
+  // itself — instead we bump this counter on Cancel and ignore any result
+  // whose token no longer matches (the user has already left "generating").
+  const generateTokenRef = useRef(0);
   const [inputMode, setInputMode] = useState<InputMode>("topic");
   const [topic, setTopic] = useState("");
   const [text, setText] = useState("");
@@ -514,12 +537,20 @@ function NinnyPageInner() {
     setError(null);
     setPhase("generating");
 
+    // Bump + capture the cancellation token for this run. If the user hits
+    // Cancel (soft-timeout), the token advances and we drop the stale result.
+    const token = ++generateTokenRef.current;
+
     const res = await apiPost<{ material: Material }>("/api/ninny/generate", {
       sourceType,
       content,
       difficulty,
       mode: selectedMode,
     });
+
+    // User cancelled while this was in flight — ignore the late result.
+    if (generateTokenRef.current !== token) return;
+
     if (!res.ok || !res.data?.material) {
       console.error("[ninny:generate] failed", res.error);
       setError("My bad, that didn't cook. Hit generate again?");
@@ -533,6 +564,16 @@ function NinnyPageInner() {
     setActiveMode(selectedMode);
     setPracticeMissesKeys(null);
     setPhase("play");
+  };
+
+  // Cancel an in-flight generation from the soft-timeout state. Advances the
+  // cancellation token so handleGenerate's late result is dropped, then returns
+  // the user to the input phase (their topic/material + selections are intact).
+  const handleCancelGenerate = () => {
+    generateTokenRef.current++;
+    setGenTimedOut(false);
+    setError(null);
+    setPhase("input");
   };
 
   const handleRestudy = (m: Material) => {
@@ -577,6 +618,27 @@ function NinnyPageInner() {
       refreshWrongAnswers(material.id);
     }
   }, [phase, material, refreshWrongAnswers]);
+
+  // Generating-phase reassurance + soft timeout. While in "generating": rotate
+  // the message every ~2.5s and arm a ~30s timer that flips genTimedOut so we
+  // can offer a Cancel. Both timers are cleared on phase-leave/unmount (the
+  // cleanup runs on every dependency change), so there's no leak. Resetting
+  // genMsgIdx/genTimedOut on entry keeps a re-generation starting fresh.
+  useEffect(() => {
+    if (phase !== "generating") return;
+    setGenMsgIdx(0);
+    setGenTimedOut(false);
+    const rotate = setInterval(() => {
+      setGenMsgIdx((i) => (i + 1) % GENERATING_MESSAGES.length);
+    }, 2500);
+    const softTimeout = setTimeout(() => {
+      setGenTimedOut(true);
+    }, GENERATING_SOFT_TIMEOUT_MS);
+    return () => {
+      clearInterval(rotate);
+      clearTimeout(softTimeout);
+    };
+  }, [phase]);
 
   // Pick a mode from the post-generation picker. If the mode is already
   // unlocked for this material, play it free. Otherwise charge the mode's
@@ -1285,6 +1347,19 @@ function NinnyPageInner() {
                               color: "rgba(238,244,255,0.4)",
                             }
                       }
+                      // Subtle hover border lift toward this level's accent so
+                      // inactive options have feedback before selection. No-op
+                      // while active (its border + glow already convey state).
+                      onMouseEnter={(e) => {
+                        if (isActive) return;
+                        e.currentTarget.style.borderColor = c.border;
+                        e.currentTarget.style.color = c.text;
+                      }}
+                      onMouseLeave={(e) => {
+                        if (isActive) return;
+                        e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)";
+                        e.currentTarget.style.color = "rgba(238,244,255,0.4)";
+                      }}
                     >
                       {d}
                     </button>
@@ -1617,9 +1692,35 @@ function NinnyPageInner() {
             >
               Ninny is thinking...
             </p>
-            <p className="text-cream/50 text-sm font-syne">
-              Building your study set
+            {/* Rotating reassurance line so a slow generation never looks
+                frozen. aria-live announces each new line to screen readers. */}
+            <p
+              key={genMsgIdx}
+              aria-live="polite"
+              className="text-cream/50 text-sm font-syne animate-fade-in"
+            >
+              {GENERATING_MESSAGES[genMsgIdx]}
             </p>
+
+            {/* Soft timeout (~30s): reassure + offer a way out without
+                trapping the user behind a spinner that may never resolve. */}
+            {genTimedOut && (
+              <div className="mt-7 flex flex-col items-center gap-3 animate-slide-up">
+                <p className="text-cream/60 text-sm font-syne max-w-xs leading-relaxed">
+                  This is taking longer than usual. Bigger material takes Ninny
+                  a sec. Hang tight or bail and try again.
+                </p>
+                <button
+                  type="button"
+                  onClick={handleCancelGenerate}
+                  className="font-syne text-sm font-semibold px-5 py-2.5 rounded-xl
+                    border border-white/10 bg-white/5 text-cream/70
+                    hover:bg-white/10 hover:text-cream transition-all active:scale-[0.98]"
+                >
+                  Cancel
+                </button>
+              </div>
+            )}
           </div>
         )}
 
@@ -1777,7 +1878,7 @@ function NinnyPageInner() {
                     key={m.key}
                     onClick={() => !blocked && handlePickMode(m.key)}
                     disabled={blocked}
-                    className="group text-left rounded-2xl border-2 backdrop-blur p-5
+                    className="group text-left rounded-2xl border backdrop-blur p-5
                       transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.99]
                       disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
                     style={{
@@ -2029,83 +2130,126 @@ function NinnyPageInner() {
                 return filtered.length > 0 ? filtered : items;
               };
 
+              const wrongCounts = isPractice ? undefined : wrongAnswerCounts;
+              const gc = material.generated_content;
+
+              // Empty-content guard: a malformed/partial generation can leave a
+              // mode's items array empty. Mounting a mode component with nothing
+              // strands the user on a blank screen, so render a recovery card
+              // that routes back to the picker instead. (?? [] also covers a
+              // missing key on older saved materials.)
+              const emptyFallback = (
+                <div className="max-w-md mx-auto mt-4 animate-slide-up">
+                  <div
+                    className="rounded-2xl border bg-white/5 backdrop-blur p-6 text-center"
+                    style={{ borderColor: `${NINNY_PURPLE}30` }}
+                  >
+                    <div
+                      className="w-12 h-12 rounded-full inline-flex items-center justify-center mb-3"
+                      style={{
+                        background: `${NINNY_PURPLE}18`,
+                        color: NINNY_PURPLE,
+                      }}
+                    >
+                      <Robot size={26} weight="regular" aria-hidden="true" color="currentColor" />
+                    </div>
+                    <p className="font-bebas text-cream text-xl tracking-wide mb-1.5">
+                      Ninny couldn&apos;t build this mode
+                    </p>
+                    <p className="font-syne text-cream/55 text-sm mb-5 leading-relaxed">
+                      Looks like there wasn&apos;t enough here for this one. Try
+                      another mode.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={handleTryAnotherMode}
+                      className="font-bebas text-base tracking-wider px-6 py-3 rounded-xl
+                        transition-all duration-200 active:scale-[0.99] hover:brightness-110"
+                      style={{
+                        background: `${NINNY_PURPLE}25`,
+                        border: `1px solid ${NINNY_PURPLE}60`,
+                        color: "#EEF4FF",
+                      }}
+                    >
+                      Try Another Mode
+                    </button>
+                  </div>
+                </div>
+              );
+
               if (activeMode === "mcq") {
+                const items = filterIfPractice(gc.multipleChoice ?? [], (q) => q.question);
+                if (items.length === 0) return emptyFallback;
                 return (
                   <MultipleChoiceMode
-                    questions={filterIfPractice(
-                      material.generated_content.multipleChoice,
-                      (q) => q.question,
-                    )}
-                    wrongAnswerCounts={isPractice ? undefined : wrongAnswerCounts}
+                    questions={items}
+                    wrongAnswerCounts={wrongCounts}
                     onComplete={handleComplete}
                   />
                 );
               }
               if (activeMode === "flashcards") {
+                const items = filterIfPractice(gc.flashcards ?? [], (c) => c.front);
+                if (items.length === 0) return emptyFallback;
                 return (
                   <FlashcardsMode
-                    cards={filterIfPractice(
-                      material.generated_content.flashcards,
-                      (c) => c.front,
-                    )}
-                    wrongAnswerCounts={isPractice ? undefined : wrongAnswerCounts}
+                    cards={items}
+                    wrongAnswerCounts={wrongCounts}
                     onComplete={handleComplete}
                   />
                 );
               }
               if (activeMode === "match") {
+                const items = filterIfPractice(gc.match ?? [], (p) => p.term);
+                if (items.length === 0) return emptyFallback;
                 return (
                   <MatchMode
-                    pairs={filterIfPractice(material.generated_content.match, (p) => p.term)}
-                    wrongAnswerCounts={isPractice ? undefined : wrongAnswerCounts}
+                    pairs={items}
+                    wrongAnswerCounts={wrongCounts}
                     onComplete={handleComplete}
                   />
                 );
               }
               if (activeMode === "fill") {
+                const items = filterIfPractice(gc.fillBlank ?? [], (q) => q.sentence);
+                if (items.length === 0) return emptyFallback;
                 return (
                   <FillBlankMode
-                    questions={filterIfPractice(
-                      material.generated_content.fillBlank,
-                      (q) => q.sentence,
-                    )}
-                    wrongAnswerCounts={isPractice ? undefined : wrongAnswerCounts}
+                    questions={items}
+                    wrongAnswerCounts={wrongCounts}
                     onComplete={handleComplete}
                   />
                 );
               }
               if (activeMode === "tf") {
+                const items = filterIfPractice(gc.trueFalse ?? [], (q) => q.statement);
+                if (items.length === 0) return emptyFallback;
                 return (
                   <TrueFalseMode
-                    questions={filterIfPractice(
-                      material.generated_content.trueFalse,
-                      (q) => q.statement,
-                    )}
-                    wrongAnswerCounts={isPractice ? undefined : wrongAnswerCounts}
+                    questions={items}
+                    wrongAnswerCounts={wrongCounts}
                     onComplete={handleComplete}
                   />
                 );
               }
               if (activeMode === "ordering") {
+                const items = filterIfPractice(gc.ordering ?? [], (q) => q.prompt);
+                if (items.length === 0) return emptyFallback;
                 return (
                   <OrderingMode
-                    questions={filterIfPractice(
-                      material.generated_content.ordering,
-                      (q) => q.prompt,
-                    )}
-                    wrongAnswerCounts={isPractice ? undefined : wrongAnswerCounts}
+                    questions={items}
+                    wrongAnswerCounts={wrongCounts}
                     onComplete={handleComplete}
                   />
                 );
               }
               if (activeMode === "blitz") {
+                const items = filterIfPractice(gc.blitz ?? [], (q) => q.question);
+                if (items.length === 0) return emptyFallback;
                 return (
                   <BlitzMode
-                    questions={filterIfPractice(
-                      material.generated_content.blitz,
-                      (q) => q.question,
-                    )}
-                    wrongAnswerCounts={isPractice ? undefined : wrongAnswerCounts}
+                    questions={items}
+                    wrongAnswerCounts={wrongCounts}
                     onComplete={handleComplete}
                   />
                 );
