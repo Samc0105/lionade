@@ -17,7 +17,7 @@ import {
 import { apiPost } from "@/lib/api-client";
 import { mutateUserStats } from "@/lib/hooks";
 import { cdnUrl } from "@/lib/cdn";
-import { Ruler, Dna, Bank, Flask, Check, Lock, Lightning, type Icon } from "@phosphor-icons/react";
+import { Ruler, Dna, Bank, Flask, Check, Lock, Lightning, Tray, Compass, type Icon } from "@phosphor-icons/react";
 
 /* ── Subject config ───────────────────────────────────────── */
 
@@ -74,6 +74,8 @@ export default function RoadMapPage() {
   const [showingFeedback, setShowingFeedback] = useState(false);
   const [resultStars, setResultStars] = useState(0);
   const [isNewBest, setIsNewBest] = useState(false);
+  const [fangsAwarded, setFangsAwarded] = useState<number | null>(null);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const [quizLoading, setQuizLoading] = useState(false);
   const [timer, setTimer] = useState(30);
 
@@ -229,6 +231,8 @@ export default function RoadMapPage() {
 
   async function finishQuiz() {
     if (!activeStage || !user) return;
+    setSaveError(null);
+    setFangsAwarded(null);
     setPhase("results");
 
     const totalQ = questions.length;
@@ -248,18 +252,27 @@ export default function RoadMapPage() {
         total: totalQ,
       });
       if (!res.ok || !res.data) throw new Error(res.error ?? "Couldn't save progress");
-      const { stars, isNewBest: newBest } = res.data;
+      const { stars, isNewBest: newBest, fangsAwarded: awarded } = res.data;
       setResultStars(stars);
       setIsNewBest(newBest);
+      // Server is authoritative for the Fang reward — render exactly what the
+      // route paid out rather than recomputing it client-side.
+      setFangsAwarded(awarded);
 
       // The quiz-session log, XP grant, and daily-activity/streak update are now
       // done SERVER-SIDE inside /api/paths/complete-stage (Phase 2 of migration
       // 078 — those profiles columns are guarded against client writes). The old
       // client-side saveQuizSession call is gone.
       mutateUserStats(user.id);
-    } catch {
+    } catch (err) {
+      // Surface the failure on the results screen and suppress reward chips for
+      // this unsaved run — showing a 0-star "result" as if it counted is a lie.
       setResultStars(0);
       setIsNewBest(false);
+      setFangsAwarded(null);
+      setSaveError(
+        err instanceof Error && err.message ? err.message : "Couldn't save your progress"
+      );
     }
   }
 
@@ -277,7 +290,9 @@ export default function RoadMapPage() {
       <ProtectedRoute>
         <div className="min-h-screen pt-16 pb-20 flex items-center justify-center">
           <div className="text-center px-4">
-            <p className="text-5xl mb-4" aria-hidden="true">🧭</p>
+            <div className="mb-4 flex justify-center" aria-hidden="true">
+              <Compass size={48} weight="regular" color="#FFD700" />
+            </div>
             <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-gold/70 mb-2">
               unknown subject
             </p>
@@ -641,7 +656,9 @@ export default function RoadMapPage() {
             <div className="animate-slide-up">
               {questions.length === 0 ? (
                 <div className="text-center py-16">
-                  <p className="text-5xl mb-4" aria-hidden="true">📭</p>
+                  <div className="mb-4 flex justify-center" aria-hidden="true">
+                    <Tray size={48} weight="regular" color={meta.color} />
+                  </div>
                   <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-gold/70 mb-2">
                     no questions yet
                   </p>
@@ -671,6 +688,8 @@ export default function RoadMapPage() {
                         <span className="ml-1.5 font-bebas text-base text-cream tabular-nums tracking-wider">{score}</span>
                       </p>
                       <div
+                        role="timer"
+                        aria-label={`${timer} ${timer === 1 ? "second" : "seconds"} left`}
                         className="w-10 h-10 rounded-full flex items-center justify-center font-bebas text-lg border-2 tabular-nums"
                         style={{
                           borderColor: timer <= 10 ? "#EF4444" : `${meta.color}60`,
@@ -794,7 +813,7 @@ export default function RoadMapPage() {
 
           {/* ── RESULTS PHASE ──────────────────────────────── */}
           {phase === "results" && activeStage && (
-            <div className="animate-slide-up text-center py-8">
+            <div className="animate-slide-up text-center py-8" role="status">
               {/* Stars display */}
               <div className="flex justify-center gap-3 mb-6">
                 {[1, 2, 3].map((s) => (
@@ -857,29 +876,51 @@ export default function RoadMapPage() {
                 </div>
               )}
 
-              {/* Rewards */}
-              <div
-                className="inline-flex items-center gap-6 px-6 py-3 rounded-2xl mb-8"
-                style={{
-                  background: "var(--card-solid-bg)",
-                  border: "1px solid var(--card-solid-border)",
-                }}
-              >
-                <div className="flex items-center gap-2">
-                  <img src={cdnUrl("/F.png")} alt="Fangs" className="w-5 h-5 object-contain" />
-                  <span className="font-bebas text-xl text-gold">
-                    +{score * 5 + resultStars * 10}
-                  </span>
+              {/* Save failure — this run did not count. Suppress the reward
+                  chips so we never imply Fangs/XP were granted for an unsaved
+                  attempt, and let the user retry. */}
+              {saveError ? (
+                <div
+                  className="mb-8 mx-auto max-w-sm rounded-2xl border border-red-400/30 bg-red-400/5 p-5 text-center"
+                  role="alert"
+                >
+                  <p className="font-bebas text-lg tracking-wider text-red-300 mb-1">
+                    Couldn&apos;t save this run
+                  </p>
+                  <p className="text-cream/55 text-sm font-syne leading-relaxed">
+                    Your progress and rewards weren&apos;t recorded. Check your connection and try the stage again.
+                  </p>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-lg text-electric">
-                    <Lightning size={20} weight="regular" aria-hidden="true" color="currentColor" />
-                  </span>
-                  <span className="font-bebas text-xl text-electric">
-                    +{score * 20 + resultStars * 25} XP
-                  </span>
+              ) : (
+                /* Rewards */
+                <div
+                  className="inline-flex items-center gap-6 px-6 py-3 rounded-2xl mb-8"
+                  style={{
+                    background: "var(--card-solid-bg)",
+                    border: "1px solid var(--card-solid-border)",
+                  }}
+                >
+                  <div className="flex items-center gap-2">
+                    <img src={cdnUrl("/F.png")} alt="Fangs" className="w-5 h-5 object-contain" />
+                    {/* Server-authoritative Fang payout from /api/paths/complete-stage. */}
+                    <span className="font-bebas text-xl text-gold">
+                      +{fangsAwarded ?? 0}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg text-electric">
+                      <Lightning size={20} weight="regular" aria-hidden="true" color="currentColor" />
+                    </span>
+                    {/* TODO: switch to a server-authoritative XP value once
+                        /api/paths/complete-stage returns one. It currently grants
+                        xpEarned = correct*20 + stars*25 server-side but does not
+                        echo it in the response, so we mirror that formula here. */}
+                    <span className="font-bebas text-xl text-electric">
+                      +{score * 20 + resultStars * 25} XP
+                    </span>
+                  </div>
                 </div>
-              </div>
+              )}
 
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
                 {resultStars < 3 && (

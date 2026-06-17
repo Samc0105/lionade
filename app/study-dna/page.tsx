@@ -5,7 +5,7 @@ import Link from "next/link";
 import useSWR from "swr";
 import {
   CaretLeft, ShareNetwork, Fire, Sparkle, TrendUp, TrendDown, Trophy,
-  Target, BookOpen, Clock, Coin, Brain, Lightning,
+  Target, BookOpen, Clock, Coin, Brain, Lightning, ArrowsClockwise,
 } from "@phosphor-icons/react";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Navbar from "@/components/Navbar";
@@ -62,7 +62,7 @@ interface DnaResponse {
 }
 
 export default function StudyDnaPage() {
-  const { data, isLoading } = useSWR<DnaResponse>(
+  const { data, isLoading, mutate } = useSWR<DnaResponse>(
     "/api/study-dna", swrFetcher,
     { keepPreviousData: true },
   );
@@ -123,7 +123,22 @@ export default function StudyDnaPage() {
           {isLoading && !data ? (
             <DnaSkeleton />
           ) : !data ? (
-            <p className="text-cream/50 text-[14px]">Couldn&apos;t load your DNA right now.</p>
+            <div className="border border-red-400/30 bg-red-400/5 rounded-2xl p-6 text-center" role="alert">
+              <p className="font-bebas text-2xl tracking-[0.06em] text-cream leading-none mb-2">
+                couldn&apos;t load your dna
+              </p>
+              <p className="text-cream/55 text-[13px] leading-relaxed max-w-[40ch] mx-auto mb-5">
+                Something went wrong pulling your study identity. Give it another shot.
+              </p>
+              <button
+                type="button"
+                onClick={() => mutate()}
+                className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 text-cream/80 hover:bg-white/10 hover:text-cream
+                  font-mono text-[11px] uppercase tracking-[0.25em] px-4 py-2.5 transition-all duration-200 active:scale-[0.98]"
+              >
+                <ArrowsClockwise size={12} weight="bold" /> Try again
+              </button>
+            </div>
           ) : (
             <>
               <IdentityCard dna={data} />
@@ -176,8 +191,12 @@ function buildShareCardFromDna(dna: DnaResponse): ShareCardData {
 function IdentityCard({ dna }: { dna: DnaResponse }) {
   const { identity, totals } = dna;
   return (
-    <section className="mb-6 rounded-[14px] overflow-hidden border border-gold/30 bg-gradient-to-br from-gold/[0.06] via-transparent to-transparent">
-      <div className="absolute h-1 left-0 right-0 top-0" />
+    <section className="relative mb-6 rounded-[14px] overflow-hidden border border-gold/30 bg-gradient-to-br from-gold/[0.06] via-transparent to-transparent">
+      <div
+        className="absolute h-1 left-0 right-0 top-0"
+        aria-hidden="true"
+        style={{ background: "linear-gradient(90deg, transparent, #FFD70066, transparent)" }}
+      />
       <div className="p-5 sm:p-6">
         <div className="flex items-center gap-2 mb-2">
           <Sparkle size={13} className="text-gold" weight="fill" />
@@ -385,6 +404,10 @@ function Heatmap({ heatmap }: { heatmap: Array<{ date: string; value: number }> 
   // chronologically, to keep it readable on mobile.
   const cells = heatmap;
 
+  // Brand-new / dormant accounts have every cell at 0, which renders as 30 dead
+  // squares that read as broken. Overlay a faint nudge in that case.
+  const allZero = cells.length === 0 || cells.every((c) => c.value === 0);
+
   return (
     <section className="rounded-[12px] border border-white/[0.08] bg-white/[0.02] p-5">
       <div className="flex items-baseline justify-between mb-3">
@@ -395,17 +418,32 @@ function Heatmap({ heatmap }: { heatmap: Array<{ date: string; value: number }> 
           {cells.filter(c => c.value > 0).length} active days
         </span>
       </div>
-      <div className="grid grid-cols-15 gap-[5px]" style={{ gridTemplateColumns: "repeat(15, 1fr)" }}>
-        {cells.map((c) => (
-          <div
-            key={c.date}
-            title={`${c.date}: ${c.value} action${c.value === 1 ? "" : "s"}`}
-            className="aspect-square rounded-[3px]"
-            style={{
-              background: cellColor(intensity(c.value)),
-            }}
-          />
-        ))}
+      <div className="relative">
+        <div
+          className="grid gap-[5px]"
+          style={{ gridTemplateColumns: "repeat(15, 1fr)" }}
+          aria-hidden={allZero || undefined}
+        >
+          {cells.map((c) => (
+            <div
+              key={c.date}
+              role="img"
+              aria-label={`${c.date}: ${c.value} action${c.value === 1 ? "" : "s"}`}
+              title={`${c.date}: ${c.value} action${c.value === 1 ? "" : "s"}`}
+              className="aspect-square rounded-[3px]"
+              style={{
+                background: cellColor(intensity(c.value)),
+              }}
+            />
+          ))}
+        </div>
+        {allZero && (
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-cream/45 text-center px-4">
+              Your activity map fills in as you study
+            </p>
+          </div>
+        )}
       </div>
       <div className="flex items-center justify-end gap-1.5 mt-3">
         <span className="font-mono text-[8.5px] uppercase tracking-[0.22em] text-cream/35">less</span>

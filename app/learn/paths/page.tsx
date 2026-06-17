@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth";
 import ProtectedRoute from "@/components/ProtectedRoute";
@@ -78,29 +78,45 @@ export default function SubjectSelectorPage() {
   const [progressMap, setProgressMap] = useState<
     Record<string, { completed: number; stars: number }>
   >({});
+  // Separate the "your progress didn't load" failure from a genuine empty
+  // result. Collapsing both into setSubjects([]) rendered every subject at 0%
+  // as if that were real data. When this is true we surface a retry banner and
+  // still draw the static subject cards (their copy is meaningful at 0%).
+  const [progressError, setProgressError] = useState(false);
 
-  useEffect(() => {
-    getAllSubjectPaths()
-      .then(setSubjects)
-      .catch(() => setSubjects([]));
-  }, []);
+  const loadProgress = useCallback(async () => {
+    setProgressError(false);
+    try {
+      const pathStages = await getAllSubjectPaths();
+      setSubjects(pathStages);
+    } catch {
+      // Render the static subject cards gracefully (no DB-backed totals).
+      setSubjects([]);
+      setProgressError(true);
+    }
 
-  useEffect(() => {
     if (!user) return;
-    getUserStageProgress(user.id)
-      .then((progress) => {
-        const map: Record<string, { completed: number; stars: number }> = {};
-        for (const p of progress) {
-          const subj = p.stage?.subject;
-          if (!subj) continue;
-          if (!map[subj]) map[subj] = { completed: 0, stars: 0 };
-          if (p.completed) map[subj].completed++;
-          map[subj].stars += p.stars;
-        }
-        setProgressMap(map);
-      })
-      .catch(() => {});
+    try {
+      const progress = await getUserStageProgress(user.id);
+      const map: Record<string, { completed: number; stars: number }> = {};
+      for (const p of progress) {
+        const subj = p.stage?.subject;
+        if (!subj) continue;
+        if (!map[subj]) map[subj] = { completed: 0, stars: 0 };
+        if (p.completed) map[subj].completed++;
+        map[subj].stars += p.stars;
+      }
+      setProgressMap(map);
+    } catch {
+      // A swallowed failure here would show 0/total stages as if the user had
+      // cleared none — flag it instead so the banner + retry can recover.
+      setProgressError(true);
+    }
   }, [user]);
+
+  useEffect(() => {
+    loadProgress();
+  }, [loadProgress]);
 
   // Overall rollup for the right-side summary widget.
   const summary = useMemo(() => {
@@ -170,6 +186,24 @@ export default function SubjectSelectorPage() {
               </div>
             )}
           </div>
+
+          {progressError && (
+            <div
+              className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-red-400/30 bg-red-400/5 px-4 py-3 animate-slide-up"
+              role="alert"
+            >
+              <p className="text-cream/70 text-sm font-syne">
+                Couldn&apos;t load your progress. Your stage counts may be out of date.
+              </p>
+              <button
+                type="button"
+                onClick={loadProgress}
+                className="inline-flex items-center gap-1.5 rounded-full border border-red-400/40 bg-red-400/10 px-4 py-1.5 font-mono text-[10px] uppercase tracking-[0.22em] text-red-200 hover:bg-red-400/20 transition-colors"
+              >
+                Retry
+              </button>
+            </div>
+          )}
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 items-start">
 
