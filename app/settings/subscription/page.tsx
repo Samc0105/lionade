@@ -248,7 +248,7 @@ export default function SubscriptionSettingsPage() {
             {planLabel}
           </span>
           {isPaid && (
-            <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-cream/50">
+            <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-cream/65">
               {detail?.status === "past_due"
                 ? "Payment past due"
                 : detail?.cancelAt
@@ -259,7 +259,7 @@ export default function SubscriptionSettingsPage() {
           {isPaid && (
             <span className="ml-auto font-bebas text-[20px] tabular-nums text-cream/85 tracking-wider">
               ${amount}
-              <span className="text-cream/40 text-[11px] ml-1">
+              <span className="text-cream/55 text-[11px] ml-1">
                 / {cycle === "annual" ? "yr" : "mo"}
               </span>
             </span>
@@ -268,15 +268,15 @@ export default function SubscriptionSettingsPage() {
 
         <ul className="flex flex-col gap-2 text-[13.5px] text-cream/80">
           <li className="flex items-center gap-2">
-            <CheckCircle size={14} className="text-gold shrink-0" weight="fill" />
+            <CheckCircle size={14} className="text-gold shrink-0" weight="fill" aria-hidden="true" />
             {masteryLimit} active Mastery {masteryLimit === 1 ? "target" : "targets"}
           </li>
           <li className="flex items-center gap-2">
-            <CheckCircle size={14} className="text-gold shrink-0" weight="fill" />
+            <CheckCircle size={14} className="text-gold shrink-0" weight="fill" aria-hidden="true" />
             {PLAN_FANG_MULTIPLIER[plan]}× Fangs earn rate
           </li>
           <li className="flex items-center gap-2">
-            <CheckCircle size={14} className="text-gold shrink-0" weight="fill" />
+            <CheckCircle size={14} className="text-gold shrink-0" weight="fill" aria-hidden="true" />
             {isPlatinum
               ? "Zero ads"
               : isPro
@@ -285,7 +285,7 @@ export default function SubscriptionSettingsPage() {
           </li>
           {isPaid && (
             <li className="flex items-center gap-2">
-              <CheckCircle size={14} className="text-gold shrink-0" weight="fill" />
+              <CheckCircle size={14} className="text-gold shrink-0" weight="fill" aria-hidden="true" />
               Unlimited Session Report PDF
             </li>
           )}
@@ -296,7 +296,7 @@ export default function SubscriptionSettingsPage() {
       {!isPaid && (
         <SettingsCard>
           <div className="flex items-center gap-2 mb-2">
-            <Sparkle size={14} className="text-gold" weight="fill" />
+            <Sparkle size={14} className="text-gold" weight="fill" aria-hidden="true" />
             <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-gold">
               What you&apos;re missing
             </span>
@@ -306,28 +306,28 @@ export default function SubscriptionSettingsPage() {
           </h3>
           <ul className="flex flex-col gap-2 text-[13.5px] text-cream/70 mb-5">
             <li className="flex items-center gap-2">
-              <ArrowRight size={13} className="text-gold/70 shrink-0" weight="bold" />
+              <ArrowRight size={13} className="text-gold/70 shrink-0" weight="bold" aria-hidden="true" />
               Up to {PLAN_EXAM_LIMITS.platinum} active Mastery targets (you have {PLAN_EXAM_LIMITS.free})
             </li>
             <li className="flex items-center gap-2">
-              <ArrowRight size={13} className="text-gold/70 shrink-0" weight="bold" />
+              <ArrowRight size={13} className="text-gold/70 shrink-0" weight="bold" aria-hidden="true" />
               Up to {PLAN_FANG_MULTIPLIER.platinum}× Fangs earn rate
             </li>
             <li className="flex items-center gap-2">
-              <ArrowRight size={13} className="text-gold/70 shrink-0" weight="bold" />
+              <ArrowRight size={13} className="text-gold/70 shrink-0" weight="bold" aria-hidden="true" />
               Drop the ads and unlock the Session Report PDF
             </li>
           </ul>
           <div className="flex items-center gap-2 flex-wrap">
             <Link
               href="/pricing"
-              className="inline-flex items-center gap-1.5 rounded-full bg-gold text-navy font-mono text-[11px] uppercase tracking-[0.25em] px-4 py-2 transition-transform hover:scale-[1.03] active:scale-[0.98] transform-gpu"
+              className="inline-flex items-center gap-1.5 rounded-full bg-gold text-navy font-mono text-[11px] uppercase tracking-[0.25em] px-4 py-2 transition-transform hover:scale-[1.03] active:scale-[0.98] transform-gpu motion-reduce:transform-none focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/60 focus-visible:ring-offset-2 focus-visible:ring-offset-navy"
             >
-              See plans <ArrowRight size={12} weight="bold" />
+              See plans <ArrowRight size={12} weight="bold" aria-hidden="true" />
             </Link>
             <Link
               href="/pricing#faq"
-              className="inline-flex items-center gap-1.5 rounded-full border border-white/[0.1] text-cream/70 hover:text-cream hover:border-white/[0.2] font-mono text-[11px] uppercase tracking-[0.25em] px-4 py-2 transition-colors"
+              className="inline-flex items-center gap-1.5 rounded-full border border-white/[0.1] text-cream/80 hover:text-cream hover:border-white/[0.2] font-mono text-[11px] uppercase tracking-[0.25em] px-4 py-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-electric/40"
             >
               FAQ
             </Link>
@@ -365,7 +365,7 @@ export default function SubscriptionSettingsPage() {
             type="button"
             onClick={openPortal}
             disabled={portalLoading}
-            className="inline-flex items-center gap-1.5 rounded-full bg-electric text-navy font-mono text-[11px] uppercase tracking-[0.25em] px-4 py-2 transition-transform hover:scale-[1.03] active:scale-[0.98] transform-gpu disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100"
+            className="inline-flex items-center gap-1.5 rounded-full bg-electric text-navy font-mono text-[11px] uppercase tracking-[0.25em] px-4 py-2 transition-transform hover:scale-[1.03] active:scale-[0.98] transform-gpu motion-reduce:transform-none disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-electric/50 focus-visible:ring-offset-2 focus-visible:ring-offset-navy"
           >
             {portalLoading ? (
               <>
@@ -412,7 +412,7 @@ export default function SubscriptionSettingsPage() {
       {/* ── 5. Plan comparison (collapsed toggle) ───────────────────────── */}
       <ComparisonToggle />
 
-      <p className="text-center font-mono text-[9.5px] uppercase tracking-[0.25em] text-cream/30 mt-2">
+      <p className="text-center font-mono text-[9.5px] uppercase tracking-[0.25em] text-cream/55 mt-2">
         Billing in USD · Cancel anytime
       </p>
     </>
@@ -450,7 +450,7 @@ function UsageBar({
               ? `${used} / ${limit}`
               : used}
           {limit === null && unlimitedNote ? (
-            <span className="text-cream/35 ml-2 normal-case">{unlimitedNote}</span>
+            <span className="text-cream/55 ml-2 normal-case">{unlimitedNote}</span>
           ) : null}
         </span>
       </div>
@@ -488,7 +488,7 @@ function UsagePlaceholder({ label }: { label: string }) {
     <div>
       <div className="flex items-baseline justify-between gap-3 mb-1.5">
         <span className="text-cream/55 text-[13.5px] font-semibold">{label}</span>
-        <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-cream/35">
+        <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-cream/55">
           Tracking coming soon
         </span>
       </div>
@@ -558,20 +558,20 @@ function ComparisonToggle() {
         type="button"
         onClick={() => setOpen((o) => !o)}
         aria-expanded={open}
-        className="w-full flex items-center justify-between gap-3 text-left group"
+        className="w-full flex items-center justify-between gap-3 text-left group rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-electric/40 focus-visible:ring-offset-2 focus-visible:ring-offset-navy"
       >
         <span>
           <span className="font-bebas text-[20px] tracking-wider text-cream leading-none block">
             See all features
           </span>
-          <span className="text-[12px] text-cream/45">
+          <span className="text-[12px] text-cream/60">
             Compare Free, Pro, and Platinum
           </span>
         </span>
         <CaretDown
           size={18}
           weight="bold"
-          className={`text-cream/60 shrink-0 transition-transform duration-300 transform-gpu ${
+          className={`text-cream/70 shrink-0 transition-transform duration-300 transform-gpu motion-reduce:transition-none ${
             open ? "rotate-180" : ""
           }`}
           aria-hidden="true"
@@ -579,7 +579,7 @@ function ComparisonToggle() {
       </button>
 
       <div
-        className="overflow-hidden transition-[max-height,opacity] duration-300 transform-gpu"
+        className="overflow-hidden transition-[max-height,opacity] duration-300 transform-gpu motion-reduce:transition-none"
         style={{
           maxHeight: reduce ? (open ? "none" : 0) : open ? maxH : 0,
           opacity: open ? 1 : 0,
@@ -588,7 +588,7 @@ function ComparisonToggle() {
       >
         <div ref={innerRef} className="pt-5">
           <div className="rounded-xl border border-white/[0.08] overflow-hidden">
-            <div className="grid grid-cols-[1.4fr_repeat(3,1fr)] text-[10.5px] font-mono uppercase tracking-[0.15em] text-cream/50 bg-white/[0.04] px-3 py-2.5 border-b border-white/[0.08]">
+            <div className="grid grid-cols-[1.4fr_repeat(3,1fr)] text-[10.5px] font-mono uppercase tracking-[0.15em] text-cream/65 bg-white/[0.04] px-3 py-2.5 border-b border-white/[0.08]">
               <div>Feature</div>
               <div className="text-center">Free</div>
               <div className="text-center text-gold">Pro</div>
@@ -613,9 +613,9 @@ function ComparisonToggle() {
           <div className="mt-4 text-center">
             <Link
               href="/pricing"
-              className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.25em] text-cream/55 hover:text-cream transition-colors"
+              className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.25em] text-cream/65 hover:text-cream transition-colors rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-electric/40"
             >
-              Full pricing page <ArrowRight size={11} weight="bold" />
+              Full pricing page <ArrowRight size={11} weight="bold" aria-hidden="true" />
             </Link>
           </div>
         </div>

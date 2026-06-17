@@ -33,7 +33,6 @@ import {
   useCallback,
   useEffect,
   useMemo,
-  useRef,
   useState,
 } from "react";
 import useSWR from "swr";
@@ -58,10 +57,10 @@ import { toastError, toastSuccess } from "@/lib/toast";
 // ── small shared bits ─────────────────────────────────────────────────────
 
 const inputClass =
-  "w-full px-3 py-2.5 rounded-lg bg-white/[0.04] border border-white/[0.08] text-cream text-sm placeholder:text-cream/30 focus:outline-none focus:border-electric/50 focus:bg-white/[0.06] transition-colors";
+  "w-full px-3 py-2.5 rounded-lg bg-white/[0.04] border border-white/[0.08] text-cream text-sm placeholder:text-cream/40 focus:outline-none focus:border-electric/50 focus:bg-white/[0.06] focus-visible:ring-2 focus-visible:ring-electric/40 transition-colors";
 
 const labelClass =
-  "block text-cream/45 text-[10px] font-mono uppercase tracking-[0.18em] mb-1.5";
+  "block text-cream/60 text-[10px] font-mono uppercase tracking-[0.18em] mb-1.5";
 
 function PrimaryButton({
   children,
@@ -91,10 +90,10 @@ function PrimaryButton({
   );
 }
 
-function FieldError({ message }: { message: string | null }) {
+function FieldError({ message, id }: { message: string | null; id?: string }) {
   if (!message) return null;
   return (
-    <p role="alert" className="text-red-300 text-xs mt-2 leading-snug">
+    <p id={id} role="alert" className="text-red-300 text-xs mt-2 leading-snug">
       {message}
     </p>
   );
@@ -204,7 +203,7 @@ function UsernameCard() {
               <p className="text-cream/80 text-sm font-semibold leading-tight">
                 Username changes are locked
               </p>
-              <p className="text-cream/45 text-xs mt-1 leading-snug">
+              <p className="text-cream/60 text-xs mt-1 leading-snug">
                 You can change your username once a year. Next change available on {unlockLabel}.
               </p>
             </div>
@@ -235,7 +234,10 @@ function UsernameCard() {
                   disabled={busy || loadingLock}
                   maxLength={20}
                   className={`${inputClass} pl-9`}
-                  aria-describedby="acct-username-hint"
+                  aria-invalid={!!err}
+                  aria-describedby={
+                    err ? "acct-username-hint acct-username-error" : "acct-username-hint"
+                  }
                 />
               </div>
               <PrimaryButton busy={busy} disabled={!canSubmit} onClick={submit}>
@@ -243,7 +245,7 @@ function UsernameCard() {
               </PrimaryButton>
             </div>
             <div className="flex items-center justify-between mt-2 gap-3">
-              <p id="acct-username-hint" className="text-cream/40 text-xs leading-snug">
+              <p id="acct-username-hint" className="text-cream/55 text-xs leading-snug">
                 3 to 20 characters. Letters, numbers, and underscores. You can change it once a year.
               </p>
               <SavedTick show={saved} />
@@ -251,7 +253,7 @@ function UsernameCard() {
           </>
         )}
 
-        <FieldError message={err} />
+        <FieldError message={err} id="acct-username-error" />
       </div>
     </SettingsCard>
   );
@@ -335,6 +337,8 @@ function PasswordCard() {
             autoComplete="current-password"
             disabled={busy}
             className={inputClass}
+            aria-invalid={!!err}
+            aria-describedby={err ? "acct-pw-error" : undefined}
           />
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
@@ -351,6 +355,7 @@ function PasswordCard() {
               disabled={busy}
               className={inputClass}
               aria-invalid={tooShort}
+              aria-describedby={`acct-pw-hint${tooShort ? " acct-pw-tooshort-error" : ""}`}
             />
           </div>
           <div>
@@ -366,17 +371,25 @@ function PasswordCard() {
               disabled={busy}
               className={inputClass}
               aria-invalid={mismatch}
+              aria-describedby={mismatch ? "acct-pw-mismatch-error" : undefined}
             />
           </div>
         </div>
 
-        <p className="text-cream/40 text-xs leading-snug">
+        <p id="acct-pw-hint" className="text-cream/55 text-xs leading-snug">
           Use at least 8 characters.
         </p>
 
-        {tooShort && <FieldError message="New password must be at least 8 characters." />}
-        {mismatch && <FieldError message="Passwords don't match." />}
-        <FieldError message={err} />
+        {tooShort && (
+          <FieldError
+            id="acct-pw-tooshort-error"
+            message="New password must be at least 8 characters."
+          />
+        )}
+        {mismatch && (
+          <FieldError id="acct-pw-mismatch-error" message="Passwords don't match." />
+        )}
+        <FieldError id="acct-pw-error" message={err} />
 
         <div className="flex items-center justify-between gap-3 pt-1">
           <SavedTick show={saved} />
@@ -477,6 +490,8 @@ function EmailCard() {
                 spellCheck={false}
                 disabled={busy}
                 className={`${inputClass} pl-9`}
+                aria-invalid={!!err}
+                aria-describedby={err ? "acct-email-error" : undefined}
               />
             </div>
           </div>
@@ -492,6 +507,8 @@ function EmailCard() {
               autoComplete="current-password"
               disabled={busy}
               className={inputClass}
+              aria-invalid={!!err}
+              aria-describedby={err ? "acct-email-error" : undefined}
             />
           </div>
         </div>
@@ -506,7 +523,7 @@ function EmailCard() {
           </p>
         )}
 
-        <FieldError message={err} />
+        <FieldError message={err} id="acct-email-error" />
 
         <div className="flex justify-end pt-1">
           <PrimaryButton type="submit" busy={busy} disabled={!canSubmit}>
@@ -611,7 +628,7 @@ function ConnectedAccountsCard() {
   return (
     <SettingsCard eyebrow="Sign-in" title="Connected accounts">
       {identities === null ? (
-        <div className="flex items-center gap-2 text-cream/45 text-sm py-3">
+        <div className="flex items-center gap-2 text-cream/60 text-sm py-3">
           <Spinner size={15} weight="bold" className="animate-spin" aria-hidden="true" />
           Loading connected accounts...
         </div>
@@ -643,7 +660,7 @@ function ConnectedAccountsCard() {
                         title={
                           guardBlocks ? "You need at least one login method." : undefined
                         }
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors transform-gpu disabled:opacity-40 disabled:cursor-not-allowed border-white/[0.1] bg-white/[0.03] text-cream/70 hover:text-cream hover:bg-white/[0.07]"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors transform-gpu disabled:opacity-40 disabled:cursor-not-allowed border-white/[0.1] bg-white/[0.03] text-cream/80 hover:text-cream hover:bg-white/[0.07] focus:outline-none focus-visible:ring-2 focus-visible:ring-electric/40"
                       >
                         {busy && (
                           <Spinner size={13} weight="bold" className="animate-spin" aria-hidden="true" />
@@ -656,7 +673,7 @@ function ConnectedAccountsCard() {
                       type="button"
                       onClick={() => connect(id)}
                       disabled={busy}
-                      className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold bg-electric text-navy hover:opacity-90 transition-opacity transform-gpu disabled:opacity-50"
+                      className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold bg-electric text-navy hover:opacity-90 transition-opacity transform-gpu disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-electric/50 focus-visible:ring-offset-1 focus-visible:ring-offset-navy"
                     >
                       {busy ? (
                         <Spinner size={13} weight="bold" className="animate-spin" aria-hidden="true" />
@@ -729,12 +746,12 @@ function ActiveSessionsCard() {
   return (
     <SettingsCard eyebrow="Devices" title="Active sessions">
       {isLoading && sessions.length === 0 ? (
-        <div className="flex items-center gap-2 text-cream/45 text-sm py-3">
+        <div className="flex items-center gap-2 text-cream/60 text-sm py-3">
           <Spinner size={15} weight="bold" className="animate-spin" aria-hidden="true" />
           Loading sessions...
         </div>
       ) : sessions.length === 0 ? (
-        <p className="text-cream/45 text-sm py-3 leading-snug">
+        <p className="text-cream/60 text-sm py-3 leading-snug">
           No other active sessions. You're only signed in on this device.
         </p>
       ) : (
@@ -751,7 +768,7 @@ function ActiveSessionsCard() {
                 <p className="text-cream text-sm font-semibold leading-tight truncate">
                   {s.device || "Unknown device"}
                 </p>
-                <p className="text-cream/45 text-xs mt-0.5 leading-snug truncate">
+                <p className="text-cream/60 text-xs mt-0.5 leading-snug truncate">
                   {[s.browser, fmtDate(s.created_at)].filter(Boolean).join(" · ")}
                 </p>
               </div>
@@ -765,7 +782,7 @@ function ActiveSessionsCard() {
           type="button"
           onClick={signOutOthers}
           disabled={signingOut}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold text-red-100 bg-red-500/15 border border-red-400/30 hover:bg-red-500/25 hover:border-red-400/50 transition-colors transform-gpu disabled:opacity-50"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold text-red-100 bg-red-500/15 border border-red-400/30 hover:bg-red-500/25 hover:border-red-400/50 transition-colors transform-gpu disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-400/50 focus-visible:ring-offset-1 focus-visible:ring-offset-navy"
         >
           {signingOut ? (
             <Spinner size={13} weight="bold" className="animate-spin" aria-hidden="true" />
@@ -857,7 +874,7 @@ function AvatarCard() {
               className="w-full h-full object-cover"
             />
           </div>
-          <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-cream/40">
+          <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-cream/55">
             {hasChange ? "Preview" : "Current"}
           </span>
         </div>
@@ -887,12 +904,12 @@ function AvatarCard() {
                 onClick={() => setSeed(randomSeed())}
                 disabled={busy}
                 aria-label="Randomize seed"
-                className="inline-flex items-center justify-center px-3 rounded-lg border border-white/[0.1] bg-white/[0.04] text-cream/70 hover:text-cream hover:bg-white/[0.08] transition-colors transform-gpu disabled:opacity-50 shrink-0"
+                className="inline-flex items-center justify-center px-3 rounded-lg border border-white/[0.1] bg-white/[0.04] text-cream/80 hover:text-cream hover:bg-white/[0.08] transition-colors transform-gpu disabled:opacity-50 shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-electric/40"
               >
                 <DiceFive size={18} weight="regular" aria-hidden="true" />
               </button>
             </div>
-            <p className="text-cream/40 text-xs mt-1.5 leading-snug">
+            <p className="text-cream/55 text-xs mt-1.5 leading-snug">
               Same seed always makes the same face. Change it for a new look.
             </p>
           </div>

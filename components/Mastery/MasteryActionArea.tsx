@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { ArrowRight, PaperPlaneTilt } from "@phosphor-icons/react";
 import Confetti from "@/components/Confetti";
@@ -154,17 +154,27 @@ function QuestionOptionsBody({
             ? "text-[#EF4444]"
             : isPicked
               ? "text-gold"
-              : "text-cream/40";
+              : "text-cream/60";
+
+        const letter = String.fromCharCode(65 + i);
+        const revealSuffix = isCorrectReveal || isCorrectIndexReveal
+          ? " (correct answer)"
+          : isWrongReveal
+            ? " (your answer, incorrect)"
+            : "";
 
         return (
           <motion.button
             key={i}
+            type="button"
             onClick={() => onPick(i)}
             disabled={disabled || picked !== null}
+            aria-label={`Option ${letter}: ${opt}${revealSuffix}`}
             className={`
-              group relative flex items-start gap-3 text-left w-full
+              group relative flex items-start gap-3 text-left w-full min-h-[44px]
               rounded-[8px] border px-4 py-3 text-[14px] leading-relaxed
               transition-colors duration-200
+              focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/70 focus-visible:ring-offset-1 focus-visible:ring-offset-navy
               ${stateClasses}
               disabled:cursor-not-allowed
             `}
@@ -172,18 +182,27 @@ function QuestionOptionsBody({
             transition={transitionProps}
             {...interactiveAnims}
           >
-            <span className={`
+            <span aria-hidden="true" className={`
               font-mono text-[10px] uppercase tracking-wider mt-0.5 shrink-0
               ${labelClass}
             `}>
-              {String.fromCharCode(65 + i)}
+              {letter}
             </span>
             <span className="flex-1">{opt}</span>
           </motion.button>
         );
       })}
 
-      {outcome?.wasCorrect && (
+      {/* Screen-reader announcement of the result the instant /answer resolves. */}
+      <span aria-live="assertive" className="sr-only">
+        {outcome
+          ? outcome.wasCorrect
+            ? "Correct."
+            : `Incorrect. The correct answer was option ${String.fromCharCode(65 + outcome.correctIndex)}.`
+          : ""}
+      </span>
+
+      {outcome?.wasCorrect && !reducedMotion && (
         <Confetti
           key={`mastery-correct-${q.questionId}`}
           trigger={true}
@@ -208,6 +227,8 @@ function SocraticInput({
 }) {
   const [text, setText] = useState(initialValue ?? "");
   const [submitting, setSubmitting] = useState(false);
+  const fieldId = useId();
+  const hintId = useId();
 
   // Re-sync ONCE when an initialValue arrives async (e.g. /state GET resolved
   // after the component mounted with `""`). We only adopt the server value
@@ -252,11 +273,15 @@ function SocraticInput({
 
   return (
     <div className="flex flex-col gap-2">
-      <label className="font-mono text-[9.5px] uppercase tracking-[0.25em] text-[#A855F7]/80">
+      <label
+        htmlFor={fieldId}
+        className="font-mono text-[9.5px] uppercase tracking-[0.25em] text-[#A855F7]"
+      >
         Your reasoning
       </label>
       <div className="flex gap-2 items-start">
         <textarea
+          id={fieldId}
           value={text}
           onChange={e => updateText(e.target.value)}
           onKeyDown={onKey}
@@ -267,28 +292,31 @@ function SocraticInput({
           autoCapitalize="off"
           autoComplete="off"
           spellCheck={false}
+          aria-describedby={hintId}
           className="
             flex-1 resize-none rounded-[8px] bg-white/[0.03] border border-white/[0.08]
-            focus:border-[#A855F7]/50 focus:outline-none
-            px-4 py-3 text-[14px] text-cream placeholder:text-cream/30 leading-relaxed
+            focus:border-[#A855F7]/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#A855F7]/60
+            px-4 py-3 text-[14px] text-cream placeholder:text-cream/45 leading-relaxed
           "
         />
         <button
+          type="button"
           onClick={send}
           disabled={disabled || submitting || !text.trim()}
           className="
-            shrink-0 rounded-[8px] bg-[#A855F7] hover:bg-[#A855F7]/90
+            shrink-0 min-h-[44px] rounded-[8px] bg-[#A855F7] hover:bg-[#A855F7]/90
             text-white px-4 py-3 font-mono text-[11px] uppercase tracking-[0.2em]
             disabled:opacity-40 disabled:cursor-not-allowed
-            transition-colors flex items-center gap-2 h-fit
+            transition-colors flex items-center gap-2
+            focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#A855F7]/70 focus-visible:ring-offset-1 focus-visible:ring-offset-navy
           "
         >
-          <PaperPlaneTilt size={14} weight="fill" />
+          <PaperPlaneTilt size={14} weight="fill" aria-hidden="true" />
           Send
         </button>
       </div>
       <div className="flex items-center justify-between">
-        <span className="font-mono text-[9.5px] uppercase tracking-[0.25em] text-cream/30">
+        <span id={hintId} className="font-mono text-[9.5px] uppercase tracking-[0.25em] text-cream/55">
           Enter to send · Shift+Enter for newline · {800 - text.length} chars left
         </span>
       </div>
@@ -313,16 +341,20 @@ function ContinueButton({ disabled, onContinue }: { disabled?: boolean; onContin
   return (
     <div className="flex justify-center">
       <button
+        type="button"
         onClick={handle}
         disabled={disabled || loading}
+        aria-busy={loading}
+        aria-label={loading ? "Ninny is thinking" : "Continue"}
         className="
-          group flex items-center gap-2 px-6 py-3 rounded-full
+          group flex items-center gap-2 min-h-[44px] px-6 py-3 rounded-full
           bg-gold hover:bg-gold/90 text-navy font-mono text-[11px] uppercase tracking-[0.25em]
           disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200
+          focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/70 focus-visible:ring-offset-2 focus-visible:ring-offset-navy
         "
       >
         {loading ? phraseRef.current : "Continue"}
-        <ArrowRight size={14} weight="bold" className="transition-transform group-hover:translate-x-0.5" />
+        <ArrowRight size={14} weight="bold" aria-hidden="true" className="transition-transform group-hover:translate-x-0.5" />
       </button>
     </div>
   );

@@ -76,11 +76,14 @@ function incrementDailyPlays() {
 export default function CompeteBlitzPage() {
   const router = useRouter();
   const { user } = useAuth();
-  const { stats, mutate: mutateStats } = useUserStats(user?.id);
+  const { stats, isLoading: statsLoading, mutate: mutateStats } = useUserStats(user?.id);
 
   const [phase, setPhase] = useState<Phase>("setup");
   const [questions, setQuestions] = useState<MCQQuestion[]>([]);
   const [loading, setLoading] = useState(false);
+  // Surfaces a question-fetch failure on the setup screen instead of
+  // silently leaving the user on a dead START button.
+  const [launchError, setLaunchError] = useState<string | null>(null);
   const [result, setResult] = useState<{ score: number; total: number; wrongAnswers: NinnyWrongAnswer[]; longestStreak: number } | null>(null);
   const [best, setBest] = useState<number>(0);
   const [fangsEarned, setFangsEarned] = useState<number | null>(null);
@@ -123,6 +126,7 @@ export default function CompeteBlitzPage() {
 
   const launchBlitz = useCallback(async () => {
     setLoading(true);
+    setLaunchError(null);
     const res = await apiGet<{ questions: MCQQuestion[] }>("/api/games/blitz/questions");
     if (res.ok && res.data?.questions?.length) {
       setQuestions(res.data.questions);
@@ -131,7 +135,10 @@ export default function CompeteBlitzPage() {
       setPhase("blitz");
       incrementDailyPlays();
     } else {
+      // Don't drop the user into an empty game with no explanation — keep
+      // them on setup and tell them what happened so they can retry.
       setQuestions([]);
+      setLaunchError(res.error || "Could not load questions. Check your connection and try again.");
     }
     setLoading(false);
   }, []);
@@ -166,9 +173,9 @@ export default function CompeteBlitzPage() {
           <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6">
             <Link
               href="/compete"
-              className="inline-flex items-center gap-1.5 text-cream/30 text-xs mb-4 hover:text-cream/50 transition"
+              className="inline-flex items-center gap-1.5 text-cream/60 text-xs mb-4 rounded-md hover:text-cream transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/60 focus-visible:ring-offset-2 focus-visible:ring-offset-navy"
             >
-              <CaretLeft size={12} weight="bold" /> Back to Compete
+              <CaretLeft size={12} weight="bold" aria-hidden="true" /> Back to Compete
             </Link>
 
             <div className="grid grid-cols-1 lg:grid-cols-[1fr_420px_1fr] gap-6 items-center min-h-[calc(100vh-180px)]">
@@ -178,7 +185,7 @@ export default function CompeteBlitzPage() {
                   background: "linear-gradient(145deg, rgba(255,107,0,0.06) 0%, rgba(255,255,255,0.01) 100%)",
                   border: "1px solid rgba(255,107,0,0.12)",
                 }}>
-                  <p className="font-bebas text-sm tracking-widest text-cream/30 uppercase mb-4">How It Works</p>
+                  <p className="font-bebas text-sm tracking-widest text-cream/60 uppercase mb-4">How It Works</p>
                   <div className="space-y-3">
                     {[
                       { step: "01", text: "Questions from all subjects appear randomly" },
@@ -187,8 +194,8 @@ export default function CompeteBlitzPage() {
                       { step: "04", text: "When time's up, you earn 2 Fangs per correct answer" },
                     ].map((s, i) => (
                       <div key={i} className="flex items-start gap-3">
-                        <span className="font-bebas text-lg tracking-wider shrink-0" style={{ color: "rgba(255,107,0,0.4)" }}>{s.step}</span>
-                        <p className="text-cream/40 text-xs font-syne leading-relaxed">{s.text}</p>
+                        <span className="font-bebas text-lg tracking-wider shrink-0" style={{ color: "rgba(255,140,40,0.85)" }} aria-hidden="true">{s.step}</span>
+                        <p className="text-cream/60 text-xs font-syne leading-relaxed">{s.text}</p>
                       </div>
                     ))}
                   </div>
@@ -198,7 +205,7 @@ export default function CompeteBlitzPage() {
                   background: "linear-gradient(145deg, rgba(255,215,0,0.04) 0%, rgba(255,255,255,0.01) 100%)",
                   border: "1px solid rgba(255,215,0,0.1)",
                 }}>
-                  <p className="font-bebas text-sm tracking-widest text-cream/30 uppercase mb-3">Pro Tips</p>
+                  <p className="font-bebas text-sm tracking-widest text-cream/60 uppercase mb-3">Pro Tips</p>
                   <div className="space-y-2">
                     {[
                       { Icon: Target, text: "Speed matters. Don't overthink it" },
@@ -207,7 +214,7 @@ export default function CompeteBlitzPage() {
                     ].map((tip, i) => {
                       const TipIcon = tip.Icon;
                       return (
-                        <p key={i} className="text-cream/30 text-xs font-syne">
+                        <p key={i} className="text-cream/60 text-xs font-syne">
                           <TipIcon size={14} weight="regular" aria-hidden="true" className="inline mr-1.5 -mt-0.5" />
                           {tip.text}
                         </p>
@@ -227,8 +234,8 @@ export default function CompeteBlitzPage() {
                   border: "1px solid rgba(255,107,0,0.2)",
                   boxShadow: "0 0 60px rgba(255,107,0,0.08), inset 0 1px 0 rgba(255,255,255,0.04)",
                 }}>
-                  <div className="absolute left-1/2 top-12 -translate-x-1/2 w-48 h-48 rounded-full pointer-events-none"
-                    style={{ background: "radial-gradient(circle, rgba(255,107,0,0.12) 0%, transparent 70%)", animation: "pulse 3s ease-in-out infinite" }} />
+                  <div className="absolute left-1/2 top-12 -translate-x-1/2 w-48 h-48 rounded-full pointer-events-none motion-safe:animate-pulse"
+                    style={{ background: "radial-gradient(circle, rgba(255,107,0,0.12) 0%, transparent 70%)" }} aria-hidden="true" />
 
                   <div className="relative">
                     <p className="text-8xl mb-3 flex items-center justify-center" style={{ filter: "drop-shadow(0 0 25px rgba(255,107,0,0.6))" }}>
@@ -243,7 +250,7 @@ export default function CompeteBlitzPage() {
                       }}>
                       BLITZ SPRINT
                     </h1>
-                    <p className="text-cream/30 text-sm font-syne mb-8">How many can you get right?</p>
+                    <p className="text-cream/60 text-sm font-syne mb-8">How many can you get right?</p>
 
                     {/* Rules row */}
                     <div className="grid grid-cols-3 gap-2 mb-8">
@@ -254,15 +261,15 @@ export default function CompeteBlitzPage() {
                             background: "rgba(255,255,255,0.03)",
                             border: "1px solid rgba(255,107,0,0.1)",
                           }}>
-                            <p className="text-xl mb-0.5 flex items-center justify-center">
+                            <p className="text-xl mb-0.5 flex items-center justify-center" aria-hidden="true">
                               {RuleIcon ? (
-                                <RuleIcon size={24} weight="regular" aria-hidden="true" />
+                                <RuleIcon size={24} weight="regular" />
                               ) : (
                                 rule.icon
                               )}
                             </p>
-                            <p className="font-bebas text-[11px] tracking-wider text-cream/70">{rule.label}</p>
-                            <p className="text-cream/20 text-[8px] font-syne">{rule.desc}</p>
+                            <p className="font-bebas text-[11px] tracking-wider text-cream/80">{rule.label}</p>
+                            <p className="text-cream/55 text-[8px] font-syne">{rule.desc}</p>
                           </div>
                         );
                       })}
@@ -279,26 +286,34 @@ export default function CompeteBlitzPage() {
                     )}
 
                     <button
+                      type="button"
                       onClick={canPlay ? launchBlitz : undefined}
                       disabled={!canPlay || loading}
-                      className="relative w-full font-bebas text-3xl tracking-widest py-5 rounded-2xl transition-all active:scale-[0.97] disabled:opacity-30 disabled:cursor-not-allowed group"
+                      aria-busy={loading}
+                      aria-label={loading ? "Loading questions" : canPlay ? "Start Blitz Sprint" : "No plays left today"}
+                      className="relative w-full font-bebas text-3xl tracking-widest py-5 rounded-2xl transition-all motion-safe:active:scale-[0.97] disabled:opacity-30 disabled:cursor-not-allowed group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-navy"
                       style={{
                         background: "linear-gradient(135deg, #FF6B00 0%, #FF8C00 50%, #FFD700 100%)",
                         color: "#fff",
                         boxShadow: canPlay ? "0 0 40px rgba(255,107,0,0.35), 0 8px 30px rgba(0,0,0,0.4)" : undefined,
                       }}>
                       <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                        style={{ boxShadow: "0 0 40px rgba(255,107,0,0.5), inset 0 0 20px rgba(255,255,255,0.08)" }} />
+                        style={{ boxShadow: "0 0 40px rgba(255,107,0,0.5), inset 0 0 20px rgba(255,255,255,0.08)" }} aria-hidden="true" />
                       {loading ? (
                         <span className="flex items-center justify-center gap-3 relative z-10">
-                          <div className="w-6 h-6 rounded-full border-2 border-white border-t-transparent animate-spin" />
+                          <div className="w-6 h-6 rounded-full border-2 border-white border-t-transparent motion-safe:animate-spin" aria-hidden="true" />
                           LOADING...
                         </span>
                       ) : <span className="relative z-10">START</span>}
                     </button>
-                    <p className="text-cream/15 text-[10px] mt-3 font-syne">
+                    <p className="text-cream/55 text-[10px] mt-3 font-syne">
                       {!canPlay ? "No plays left today" : `${remaining} play${remaining !== 1 ? "s" : ""} left today`}
                     </p>
+                    {launchError && (
+                      <p role="alert" aria-live="assertive" className="text-red-300 text-xs mt-3 font-syne">
+                        {launchError}
+                      </p>
+                    )}
                   </div>
                 </div>
               </div>
@@ -309,7 +324,7 @@ export default function CompeteBlitzPage() {
                   background: "linear-gradient(145deg, rgba(255,215,0,0.06) 0%, rgba(255,255,255,0.01) 100%)",
                   border: "1px solid rgba(255,215,0,0.12)",
                 }}>
-                  <p className="font-bebas text-sm tracking-widest text-cream/30 uppercase mb-4">Rewards</p>
+                  <p className="font-bebas text-sm tracking-widest text-cream/60 uppercase mb-4">Rewards</p>
                   <div className="space-y-3">
                     {[
                       { label: "Per correct answer", value: "2", icon: cdnUrl("/F.png") },
@@ -317,10 +332,10 @@ export default function CompeteBlitzPage() {
                       { label: "Daily plays", value: String(DAILY_LIMIT), icon: null },
                     ].map((r, i) => (
                       <div key={i} className="flex items-center justify-between">
-                        <span className="text-cream/35 text-xs font-syne">{r.label}</span>
+                        <span className="text-cream/60 text-xs font-syne">{r.label}</span>
                         <div className="flex items-center gap-1">
-                          {r.icon && <img src={r.icon} alt="" className="w-3.5 h-3.5 object-contain" />}
-                          <span className="font-bebas text-base tracking-wider text-gold/70">{r.value}</span>
+                          {r.icon && <img src={r.icon} alt="" aria-hidden="true" className="w-3.5 h-3.5 object-contain" />}
+                          <span className="font-bebas text-base tracking-wider text-gold">{r.value}</span>
                         </div>
                       </div>
                     ))}
@@ -331,7 +346,7 @@ export default function CompeteBlitzPage() {
                   background: "linear-gradient(145deg, rgba(74,144,217,0.05) 0%, rgba(255,255,255,0.01) 100%)",
                   border: "1px solid rgba(74,144,217,0.1)",
                 }}>
-                  <p className="font-bebas text-sm tracking-widest text-cream/30 uppercase mb-3">Subjects Mixed</p>
+                  <p className="font-bebas text-sm tracking-widest text-cream/60 uppercase mb-3">Subjects Mixed</p>
                   <div className="flex flex-wrap gap-2">
                     {([
                       { label: "Biology", Icon: Dna, weight: "regular" as const },
@@ -345,7 +360,7 @@ export default function CompeteBlitzPage() {
                     ]).map((s, i) => {
                       const SubjectIcon = s.Icon;
                       return (
-                        <span key={i} className="flex items-center gap-1 text-[10px] text-cream/30 font-syne px-2 py-1 rounded-full"
+                        <span key={i} className="flex items-center gap-1 text-[10px] text-cream/60 font-syne px-2 py-1 rounded-full"
                           style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}>
                           <SubjectIcon size={14} weight={s.weight} aria-hidden="true" />
                           {s.label}
@@ -359,15 +374,24 @@ export default function CompeteBlitzPage() {
                   background: "linear-gradient(145deg, rgba(168,85,247,0.05) 0%, rgba(255,255,255,0.01) 100%)",
                   border: "1px solid rgba(168,85,247,0.1)",
                 }}>
-                  <p className="font-bebas text-sm tracking-widest text-cream/30 uppercase mb-3">Your Stats</p>
+                  <p className="font-bebas text-sm tracking-widest text-cream/60 uppercase mb-3">Your Stats</p>
                   <div className="grid grid-cols-2 gap-3">
+                    {/* No flash-of-zero: render a skeleton dash until stats resolve. */}
                     <div className="text-center">
-                      <p className="font-bebas text-2xl text-cream/60">{stats?.coins ?? 0}</p>
-                      <p className="text-cream/20 text-[9px] font-syne">Total Fangs</p>
+                      {statsLoading && stats === null ? (
+                        <div className="mx-auto h-7 w-12 rounded-md bg-cream/10 motion-safe:animate-pulse" aria-hidden="true" />
+                      ) : (
+                        <p className="font-bebas text-2xl text-cream/80">{(stats?.coins ?? 0).toLocaleString()}</p>
+                      )}
+                      <p className="text-cream/55 text-[9px] font-syne mt-1">Total Fangs</p>
                     </div>
                     <div className="text-center">
-                      <p className="font-bebas text-2xl text-cream/60">{stats?.streak ?? 0}</p>
-                      <p className="text-cream/20 text-[9px] font-syne">Day Streak</p>
+                      {statsLoading && stats === null ? (
+                        <div className="mx-auto h-7 w-12 rounded-md bg-cream/10 motion-safe:animate-pulse" aria-hidden="true" />
+                      ) : (
+                        <p className="font-bebas text-2xl text-cream/80">{stats?.streak ?? 0}</p>
+                      )}
+                      <p className="text-cream/55 text-[9px] font-syne mt-1">Day Streak</p>
                     </div>
                   </div>
                 </div>
@@ -412,11 +436,14 @@ export default function CompeteBlitzPage() {
         <FeatureGate feature="compete.blitz">
         <div className="min-h-screen pt-16 pb-8">
           <div className="max-w-lg mx-auto px-4 py-6">
-            <div className="text-center mb-8 animate-slide-up">
-              <span className="text-5xl mb-3 flex items-center justify-center">
-                <Lightning size={52} weight="fill" aria-hidden="true" />
+            <div className="text-center mb-8 animate-slide-up" role="status" aria-live="polite">
+              <span className="text-5xl mb-3 flex items-center justify-center" aria-hidden="true">
+                <Lightning size={52} weight="fill" />
               </span>
               <h2 className="font-bebas text-5xl text-cream tracking-wider mb-1">TIME&apos;S UP!</h2>
+              <p className="sr-only">
+                Blitz finished. {result.score} correct out of {result.total}, {accuracy} percent accuracy.
+              </p>
               {isNewBest && (
                 <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full mb-3"
                   style={{ background: "rgba(255,215,0,0.15)", border: "1px solid rgba(255,215,0,0.3)" }}>
@@ -428,15 +455,15 @@ export default function CompeteBlitzPage() {
             <div className="grid grid-cols-3 gap-3 mb-4 animate-slide-up" style={{ animationDelay: "0.1s" }}>
               <div className="rounded-xl p-4 text-center" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,215,0,0.2)" }}>
                 <p className="font-bebas text-4xl text-gold">{result.score}</p>
-                <p className="text-cream/30 text-[10px] uppercase tracking-wider">Correct</p>
+                <p className="text-cream/60 text-[10px] uppercase tracking-wider">Correct</p>
               </div>
               <div className="rounded-xl p-4 text-center" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
                 <p className="font-bebas text-4xl text-cream">{result.total}</p>
-                <p className="text-cream/30 text-[10px] uppercase tracking-wider">Attempted</p>
+                <p className="text-cream/60 text-[10px] uppercase tracking-wider">Attempted</p>
               </div>
               <div className="rounded-xl p-4 text-center" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
                 <p className="font-bebas text-4xl" style={{ color: accuracy >= 80 ? "#22C55E" : accuracy >= 50 ? "#FBBF24" : "#EF4444" }}>{accuracy}%</p>
-                <p className="text-cream/30 text-[10px] uppercase tracking-wider">Accuracy</p>
+                <p className="text-cream/60 text-[10px] uppercase tracking-wider">Accuracy</p>
               </div>
             </div>
 
@@ -454,46 +481,46 @@ export default function CompeteBlitzPage() {
                   </span>
                 </p>
               ) : (
-                <p className="font-bebas text-base tracking-wider text-cream/40">
+                <p className="font-bebas text-base tracking-wider text-cream/60">
                   First run. Beat <span className="text-gold">{result.score}</span> next time.
                 </p>
               )}
             </div>
 
-            <div className="flex items-center justify-center gap-4 mb-6 animate-slide-up text-[11px] font-bebas tracking-widest uppercase text-cream/40" style={{ animationDelay: "0.14s" }}>
+            <div className="flex items-center justify-center gap-4 mb-6 animate-slide-up text-[11px] font-bebas tracking-widest uppercase text-cream/60" style={{ animationDelay: "0.14s" }}>
               <span className="inline-flex items-center gap-1.5">
                 <Fire size={11} weight="fill" aria-hidden="true" color="#A855F7" />
-                <span>Longest streak <span className="text-cream/70 ml-1">{result.longestStreak}</span></span>
+                <span>Longest streak <span className="text-cream/80 ml-1">{result.longestStreak}</span></span>
               </span>
-              <span className="text-cream/15">|</span>
-              <span>Plays today <span className="text-cream/70 ml-1">{getDailyPlays()}/{DAILY_LIMIT}</span></span>
+              <span className="text-cream/30" aria-hidden="true">|</span>
+              <span>Plays today <span className="text-cream/80 ml-1">{getDailyPlays()}/{DAILY_LIMIT}</span></span>
             </div>
 
             {fangsEarned !== null && fangsEarned > 0 && (
-              <div className="flex items-center justify-center gap-2 mb-6 animate-slide-up" style={{ animationDelay: "0.15s" }}>
+              <div role="status" aria-live="polite" className="flex items-center justify-center gap-2 mb-6 animate-slide-up" style={{ animationDelay: "0.15s" }}>
                 <div className="flex items-center gap-2 px-5 py-2.5 rounded-xl" style={{ background: "rgba(255,215,0,0.1)", border: "1px solid rgba(255,215,0,0.25)" }}>
                   <img src={cdnUrl("/F.png")} alt="Fangs" className="w-6 h-6 object-contain" />
                   <span className="font-bebas text-2xl text-gold tracking-wider">+{fangsEarned}</span>
-                  <span className="text-gold/40 text-xs ml-1">earned</span>
+                  <span className="text-gold/70 text-xs ml-1">earned</span>
                 </div>
               </div>
             )}
 
             {result.wrongAnswers.length > 0 && (
               <div className="mb-6 animate-slide-up" style={{ animationDelay: "0.2s" }}>
-                <p className="font-bebas text-sm text-cream/40 tracking-widest uppercase mb-3">
+                <h3 className="font-bebas text-sm text-cream/60 tracking-widest uppercase mb-3">
                   Review Mistakes ({result.wrongAnswers.length})
-                </p>
+                </h3>
                 <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1">
                   {result.wrongAnswers.map((wa, i) => (
                     <div key={i} className="rounded-xl p-3" style={{ background: "rgba(239,68,68,0.06)", border: "1px solid rgba(239,68,68,0.15)" }}>
                       <p className="text-cream text-xs font-semibold mb-1.5">{wa.question}</p>
                       <div className="flex flex-wrap gap-2 text-[10px]">
-                        <span className="text-red-400">Your answer: {wa.userAnswer}</span>
-                        <span className="text-green-400">Correct: {wa.correctAnswer}</span>
+                        <span className="text-red-300">Your answer: {wa.userAnswer}</span>
+                        <span className="text-green-300">Correct: {wa.correctAnswer}</span>
                       </div>
                       {wa.explanation && (
-                        <p className="text-cream/25 text-[10px] mt-1">{wa.explanation}</p>
+                        <p className="text-cream/55 text-[10px] mt-1">{wa.explanation}</p>
                       )}
                     </div>
                   ))}
@@ -502,14 +529,14 @@ export default function CompeteBlitzPage() {
             )}
 
             <div className="flex gap-3 justify-center animate-slide-up" style={{ animationDelay: "0.25s" }}>
-              <button onClick={playAgain}
-                className="font-bebas text-lg tracking-wider px-8 py-3 rounded-xl transition-all active:scale-95"
+              <button type="button" onClick={playAgain}
+                className="font-bebas text-lg tracking-wider px-8 py-3 rounded-xl transition-all motion-safe:active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-navy"
                 style={{ background: "linear-gradient(135deg, #FF6B00 0%, #FF8C00 100%)", color: "#fff" }}>
                 Play Again
               </button>
-              <button onClick={() => router.push("/compete")}
-                className="font-bebas text-lg tracking-wider px-8 py-3 rounded-xl transition-all active:scale-95"
-                style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "rgba(238,244,255,0.5)" }}>
+              <button type="button" onClick={() => router.push("/compete")}
+                className="font-bebas text-lg tracking-wider px-8 py-3 rounded-xl transition-all motion-safe:active:scale-95 text-cream/80 hover:text-cream focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cream/40 focus-visible:ring-offset-2 focus-visible:ring-offset-navy"
+                style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)" }}>
                 Back to Compete
               </button>
             </div>

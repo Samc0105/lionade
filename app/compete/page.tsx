@@ -61,6 +61,10 @@ export default function CompetePage() {
   // in lib/hooks.ts with a 30s dedupe.
   const { data: topPlayersData } = useEloLeaderboard(5);
   const topPlayers: { rank: number; username: string; arena_elo: number }[] = topPlayersData ?? [];
+  // Distinguish "still loading" (undefined) from "resolved, no ranked players"
+  // ([]). Drives the leaderboard-preview skeleton vs the genuine empty state,
+  // so we never flash a fake "rank #1 · 0 Elo" placeholder row.
+  const leaderboardLoading = topPlayersData === undefined;
 
   // 2026-06-09 (bug fix): the hex stats + tier pyramid were hardcoded
   // (everyone rendered as LEGEND with fake "Unranked / 0 wins" hexes).
@@ -395,8 +399,8 @@ export default function CompetePage() {
             <p className="text-cream/55 text-sm text-center mb-6 max-w-lg mx-auto">
               Five ranked modes in one Arena. Every match earns Elo and Fangs on the ranked ladders. Play 1v1 or squad up 2v2.
             </p>
-            <Link href="/compete/arena" className="block glow-purple rounded-2xl tilt-card group">
-              <div className="relative overflow-hidden rounded-2xl transition-all duration-300 group-hover:-translate-y-1"
+            <Link href="/compete/arena" aria-label="Enter the Competitive Arena, five ranked modes" className="block glow-purple rounded-2xl tilt-card group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#A855F7] focus-visible:ring-offset-2 focus-visible:ring-offset-navy">
+              <div className="relative overflow-hidden rounded-2xl transition-all duration-300 motion-safe:group-hover:-translate-y-1"
                 style={{
                   background: "linear-gradient(135deg, #120a1f 0%, #0a0618 35%, #060c18 100%)",
                   border: "1px solid rgba(168,85,247,0.3)",
@@ -418,15 +422,15 @@ export default function CompetePage() {
                     ].map((m) => (
                       <div key={m.name} className="rounded-xl py-3 px-2 text-center"
                         style={{ background: "rgba(255,255,255,0.03)", border: `1px solid ${m.accent}22` }}>
-                        <p className="text-2xl mb-1">{m.icon}</p>
+                        <p className="text-2xl mb-1" aria-hidden="true">{m.icon}</p>
                         <p className="font-bebas text-[11px] tracking-wider" style={{ color: m.accent }}>{m.name.toUpperCase()}</p>
-                        <p className="text-cream/30 text-[9px] font-syne">{m.tag}</p>
+                        <p className="text-cream/55 text-[9px] font-syne">{m.tag}</p>
                       </div>
                     ))}
                   </div>
                   <span className="inline-flex items-center gap-2 font-bebas text-lg tracking-wider px-7 py-2.5 rounded-xl"
                     style={{ background: "linear-gradient(135deg, #A855F7 0%, #8b3fd6 100%)", color: "#0a0a14" }}>
-                    ENTER ARENA <span className="text-base">&rarr;</span>
+                    ENTER ARENA <span className="text-base" aria-hidden="true">&rarr;</span>
                   </span>
                 </div>
               </div>
@@ -437,8 +441,8 @@ export default function CompetePage() {
           <div className="animate-slide-up mb-10" style={{ animationDelay: "0.2s" }}>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               {/* Blitz */}
-              <Link href="/compete/blitz" className="block glow-yellow rounded-2xl tilt-card group cursor-pointer">
-                <div className="relative overflow-hidden h-full rounded-2xl clip-angled-br transition-all duration-300 group-hover:-translate-y-1"
+              <Link href="/compete/blitz" aria-label="Play Blitz Mode, 60 second speed round" className="block glow-yellow rounded-2xl tilt-card group cursor-pointer rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#EAB308] focus-visible:ring-offset-2 focus-visible:ring-offset-navy">
+                <div className="relative overflow-hidden h-full rounded-2xl clip-angled-br transition-all duration-300 motion-safe:group-hover:-translate-y-1"
                   style={{
                     background: "linear-gradient(135deg, #1a1400 0%, #0f0a00 30%, #080600 50%, #060c18 100%)",
                     border: "1px solid rgba(234,179,8,0.25)",
@@ -452,7 +456,7 @@ export default function CompetePage() {
                       style={{ textShadow: "0 0 15px rgba(234,179,8,0.2)" }}>
                       BLITZ MODE
                     </p>
-                    <p className="text-cream/50 text-sm leading-relaxed mb-4">
+                    <p className="text-cream/60 text-sm leading-relaxed mb-4">
                       Pure speed. No penalties.
                     </p>
 
@@ -461,26 +465,30 @@ export default function CompetePage() {
                         style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,107,0,0.12)" }}>
                         <Clock size={20} weight="regular" aria-hidden="true" className="mx-auto mb-1 text-cream/70" />
                         <p className="font-bebas text-[11px] tracking-wider text-cream/80">60 SECONDS</p>
-                        <p className="text-cream/30 text-[9px] font-syne">race the clock</p>
+                        <p className="text-cream/55 text-[9px] font-syne">race the clock</p>
                       </div>
                       <div className="rounded-xl py-2.5 px-2 text-center"
                         style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,107,0,0.12)" }}>
                         <Brain size={20} weight="regular" aria-hidden="true" className="mx-auto mb-1 text-cream/70" />
                         <p className="font-bebas text-[11px] tracking-wider text-cream/80">ALL SUBJECTS</p>
-                        <p className="text-cream/30 text-[9px] font-syne">random mix</p>
+                        <p className="text-cream/55 text-[9px] font-syne">random mix</p>
                       </div>
                       <div className="rounded-xl py-2.5 px-2 text-center"
                         style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,107,0,0.12)" }}>
-                        <img src={cdnUrl("/F.png")} alt="" className="w-5 h-5 object-contain mx-auto mb-1" />
+                        <img src={cdnUrl("/F.png")} alt="" aria-hidden="true" className="w-5 h-5 object-contain mx-auto mb-1" />
                         <p className="font-bebas text-[11px] tracking-wider text-cream/80">2x FANGS</p>
-                        <p className="text-cream/30 text-[9px] font-syne">per correct</p>
+                        <p className="text-cream/55 text-[9px] font-syne">per correct</p>
                       </div>
                     </div>
 
-                    <button className="font-bebas text-lg tracking-wider px-8 py-2.5 rounded-xl transition-all active:scale-95"
+                    {/* Styled as the card's call-to-action, but NOT a real
+                        <button> — the whole card is one <Link>, so a nested
+                        interactive control would be invalid + an extra tab
+                        stop. This is a presentational span. */}
+                    <span className="inline-block font-bebas text-lg tracking-wider px-8 py-2.5 rounded-xl transition-transform motion-safe:group-active:scale-95"
                       style={{ background: "linear-gradient(135deg, #FF6B00 0%, #FF8C00 100%)", color: "#fff", boxShadow: "0 4px 16px rgba(255,107,0,0.3)" }}>
                       PLAY NOW
-                    </button>
+                    </span>
                   </div>
                 </div>
               </Link>
@@ -501,48 +509,70 @@ export default function CompetePage() {
                       LEADERBOARD
                     </p>
                     <div className="space-y-2 mb-4">
-                      {(topPlayers.length > 0 ? topPlayers : [
-                        { rank: 1, username: "...", arena_elo: 0 },
-                      ]).map((player) => {
-                        const renderMedal = () => {
-                          if (player.rank === 1) {
-                            return <Crown size={14} weight="fill" aria-hidden="true" className="inline mr-1 -mt-0.5" color="#FFD700" />;
-                          }
-                          if (player.rank === 2) {
-                            return <Medal size={14} weight="regular" aria-hidden="true" className="inline mr-1 -mt-0.5" color="#C0C0C0" />;
-                          }
-                          if (player.rank === 3) {
-                            return <Medal size={14} weight="regular" aria-hidden="true" className="inline mr-1 -mt-0.5" color="#CD7F32" />;
-                          }
-                          return null;
-                        };
-                        return (
-                          <div key={player.rank}
-                            className="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors"
-                            style={{
-                              background: player.rank <= 3
-                                ? "linear-gradient(135deg, rgba(168,85,247,0.08) 0%, rgba(168,85,247,0.02) 100%)"
-                                : "rgba(255,255,255,0.02)",
-                              border: "1px solid rgba(168,85,247,0.1)",
-                            }}>
-                            <span className="font-bebas text-sm text-cream/60 w-5">#{player.rank}</span>
-                            <span className="text-cream/60 text-xs flex-1 font-medium">
-                              {renderMedal()}
-                              {player.username}
-                            </span>
-                            <span className="font-bebas text-xs text-cream/55">{player.arena_elo.toLocaleString()} Elo</span>
+                      {leaderboardLoading ? (
+                        // Skeleton rows while the Elo leaderboard loads — no
+                        // flash of a fabricated placeholder player.
+                        Array.from({ length: 3 }).map((_, i) => (
+                          <div key={i}
+                            className="flex items-center gap-3 px-3 py-2 rounded-lg"
+                            style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(168,85,247,0.1)" }}
+                            aria-hidden="true">
+                            <span className="h-3 w-4 rounded bg-cream/10 motion-safe:animate-pulse" />
+                            <span className="h-3 flex-1 rounded bg-cream/10 motion-safe:animate-pulse" />
+                            <span className="h-3 w-12 rounded bg-cream/10 motion-safe:animate-pulse" />
                           </div>
-                        );
-                      })}
+                        ))
+                      ) : topPlayers.length === 0 ? (
+                        <p className="text-cream/55 text-xs font-syne px-3 py-4 text-center">
+                          No ranked players yet. Win an Arena match to claim the top spot.
+                        </p>
+                      ) : (
+                        topPlayers.map((player) => {
+                          const renderMedal = () => {
+                            if (player.rank === 1) {
+                              return <Crown size={14} weight="fill" aria-hidden="true" className="inline mr-1 -mt-0.5" color="#FFD700" />;
+                            }
+                            if (player.rank === 2) {
+                              return <Medal size={14} weight="regular" aria-hidden="true" className="inline mr-1 -mt-0.5" color="#C0C0C0" />;
+                            }
+                            if (player.rank === 3) {
+                              return <Medal size={14} weight="regular" aria-hidden="true" className="inline mr-1 -mt-0.5" color="#CD7F32" />;
+                            }
+                            return null;
+                          };
+                          return (
+                            <div key={player.rank}
+                              className="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors"
+                              style={{
+                                background: player.rank <= 3
+                                  ? "linear-gradient(135deg, rgba(168,85,247,0.08) 0%, rgba(168,85,247,0.02) 100%)"
+                                  : "rgba(255,255,255,0.02)",
+                                border: "1px solid rgba(168,85,247,0.1)",
+                              }}>
+                              <span className="font-bebas text-sm text-cream/70 w-5">#{player.rank}</span>
+                              <span className="text-cream/75 text-xs flex-1 font-medium">
+                                {renderMedal()}
+                                {player.username}
+                              </span>
+                              <span className="font-bebas text-xs text-cream/70">{player.arena_elo.toLocaleString()} Elo</span>
+                            </div>
+                          );
+                        })
+                      )}
                     </div>
                     <div className="border-t border-cream/10 pt-3 mb-4">
-                      <p className="text-cream/55 text-xs">
-                        Your Rank: <span className="text-cream/50 font-semibold">{recordLoading ? "—" : isRanked ? `#${myRank}` : "Unranked"}</span>
+                      <p className="text-cream/60 text-xs">
+                        Your Rank:{" "}
+                        {recordLoading ? (
+                          <span className="inline-block align-middle h-3 w-10 rounded bg-cream/10 motion-safe:animate-pulse" aria-hidden="true" />
+                        ) : (
+                          <span className="text-cream/85 font-semibold">{isRanked ? `#${myRank}` : "Unranked"}</span>
+                        )}
                       </p>
                     </div>
                     <Link href="/leaderboard"
-                      className="text-[#A855F7] text-sm font-semibold hover:text-[#C084FC] transition-colors inline-flex items-center gap-1">
-                      View Full Leaderboard <span className="text-base">&rarr;</span>
+                      className="text-[#C084FC] text-sm font-semibold hover:text-[#D8B4FE] transition-colors inline-flex items-center gap-1 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#A855F7]/70 focus-visible:ring-offset-2 focus-visible:ring-offset-navy">
+                      View Full Leaderboard <span className="text-base" aria-hidden="true">&rarr;</span>
                     </Link>
                   </div>
                 </div>
@@ -566,13 +596,13 @@ export default function CompetePage() {
                     style={{ textShadow: "0 0 15px rgba(59,130,246,0.2)" }}>
                     <Trophy size={32} weight="regular" aria-hidden="true" className="inline mr-1.5 -mt-0.5" /> WEEKLY TOURNAMENT
                   </p>
-                  <p className="text-cream/50 text-sm sm:text-base leading-relaxed mb-6 max-w-xl">
+                  <p className="text-cream/60 text-sm sm:text-base leading-relaxed mb-6 max-w-xl">
                     Squad up with friends. Compete in a week-long bracket. Top 3 earn exclusive badges and coin prizes.
                   </p>
 
                   {/* Bracket SVG */}
                   <div className="flex justify-center mb-6">
-                    <svg width="300" height="110" viewBox="0 0 300 110" fill="none" className="opacity-60">
+                    <svg width="300" height="110" viewBox="0 0 300 110" fill="none" className="opacity-60" aria-hidden="true" role="presentation">
                       {/* Round 1 — 8 slots */}
                       <rect x="0" y="2" width="44" height="18" rx="4" fill="rgba(59,130,246,0.15)" stroke="rgba(59,130,246,0.3)" strokeWidth="0.5" />
                       <rect x="0" y="26" width="44" height="18" rx="4" fill="rgba(59,130,246,0.15)" stroke="rgba(59,130,246,0.3)" strokeWidth="0.5" />
@@ -641,7 +671,7 @@ export default function CompetePage() {
                 </div>
               ))}
             </div>
-            <p className="text-cream/25 text-xs text-center mt-5">
+            <p className="text-cream/55 text-xs text-center mt-5">
               Cash rewards go live with V2 in December 2026.
             </p>
           </div>
@@ -671,7 +701,7 @@ export default function CompetePage() {
                     style={{ animationDelay: `${staggerDelay}s` }}>
                     <div className="relative flex items-center" style={{ width: widthsTopDown[displayIdx] }}>
                       {isCurrent && (
-                        <div className="absolute -left-8 top-1/2 -translate-y-1/2 text-cream/60 text-sm font-bold animate-pulse">
+                        <div className="absolute -left-8 top-1/2 -translate-y-1/2 text-cream/60 text-sm font-bold animate-pulse" aria-hidden="true">
                           ▶
                         </div>
                       )}
@@ -762,7 +792,7 @@ export default function CompetePage() {
                 background: "linear-gradient(135deg, #0c1020 0%, #080c18 50%, #060c18 100%)",
                 border: "1px solid rgba(74,144,217,0.15)",
               }}>
-              <p className="font-bebas text-xl tracking-wider text-cream/50 mb-4">
+              <p className="font-bebas text-xl tracking-wider text-cream/60 mb-4">
                 YOUR NAME IN THE ARENA
               </p>
               <p className="font-syne text-2xl font-bold mb-2"
@@ -771,7 +801,7 @@ export default function CompetePage() {
               </p>
               {effectiveTierIndex < TIERS.length - 1 && (
                 <div className="mt-3">
-                  <p className="text-cream/25 text-[10px] uppercase tracking-widest mb-1.5">Next rank:</p>
+                  <p className="text-cream/55 text-[10px] uppercase tracking-widest mb-1.5">Next rank:</p>
                   <p className={`font-syne text-xl font-bold opacity-50 ${TIERS[effectiveTierIndex + 1].name === "LEGEND" ? "legend-text" : ""}`}
                     style={TIERS[effectiveTierIndex + 1].name !== "LEGEND" ? { color: TIERS[effectiveTierIndex + 1].color } : undefined}>
                     {DISPLAY_NAME}

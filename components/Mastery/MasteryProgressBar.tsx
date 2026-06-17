@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useReducedMotion } from "framer-motion";
 
 /**
  * Thin horizontal progress bar pinned to the top of the Mastery Mode view.
@@ -33,12 +34,21 @@ const EASE = (t: number) => 1 - Math.pow(1 - t, 3);
 export default function MasteryProgressBar({
   value, readyThreshold = 0.80, label, className = "", size = "sm",
 }: Props) {
+  // The slow-fill tween is presentation-only sugar. For reduced-motion users
+  // we keep the bar fully functional but snap it straight to the real value —
+  // the animation must never be a barrier to reading current progress.
+  const reducedMotion = useReducedMotion();
   const [displayed, setDisplayed] = useState(value);
   const fromRef = useRef(value);
   const toRef = useRef(value);
   const rafRef = useRef<number | null>(null);
 
   useEffect(() => {
+    if (reducedMotion) {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      setDisplayed(value);
+      return;
+    }
     fromRef.current = displayed;
     toRef.current = value;
     const start = performance.now();
@@ -54,7 +64,7 @@ export default function MasteryProgressBar({
     rafRef.current = requestAnimationFrame(tick);
     return () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [value]);
+  }, [value, reducedMotion]);
 
   const pct = Math.max(0, Math.min(100, displayed));
   const color =
@@ -79,20 +89,38 @@ export default function MasteryProgressBar({
 
   const mastered = pct >= 95;
   const isLg = size === "lg";
-  const showParticles = isLg && pct > 6;
+  const showParticles = isLg && pct > 6 && !reducedMotion;
+
+  // Round to the real target value (not the mid-tween display) for the
+  // accessible value so assistive tech announces the true number, and build a
+  // text label that names the milestone instead of relying on bar color alone.
+  const ariaNow = Math.round(Math.max(0, Math.min(100, value)));
+  const thresholdPct = Math.round(readyThreshold * 100);
+  const milestone = ariaNow >= 95 ? "mastered" : ariaNow >= thresholdPct ? "likely ready to pass" : "in progress";
+  const ariaText = `${label ? `${label}: ` : "Mastery progress: "}${ariaNow} percent, ${milestone}. Ready-to-pass threshold is ${thresholdPct} percent.`;
 
   return (
-    <div className={`flex items-center gap-3 ${className}`}>
+    <div
+      className={`flex items-center gap-3 ${className}`}
+      role="progressbar"
+      aria-valuemin={0}
+      aria-valuemax={100}
+      aria-valuenow={ariaNow}
+      aria-valuetext={ariaText}
+      aria-label={label ? `${label} progress` : "Mastery progress"}
+    >
       {label && (
         <span
+          aria-hidden="true"
           className={`font-mono uppercase tracking-[0.25em] text-cream/55 shrink-0 ${
-            isLg ? "text-[11px]" : "text-[10px] text-cream/50"
+            isLg ? "text-[11px]" : "text-[10px]"
           }`}
         >
           {label}
         </span>
       )}
       <div
+        aria-hidden="true"
         className={`relative flex-1 rounded-full bg-white/[0.06] overflow-visible ${
           isLg ? "h-[9px]" : "h-[6px]"
         }`}
@@ -134,6 +162,7 @@ export default function MasteryProgressBar({
         />
       </div>
       <span
+        aria-hidden="true"
         className={`font-bebas tabular-nums tracking-wider text-cream shrink-0 text-right ${
           isLg ? "text-[26px] w-[64px] leading-none" : "text-[18px] w-[46px]"
         }`}

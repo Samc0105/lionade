@@ -137,7 +137,7 @@ function Checkbox({
       </span>
       <span
         className={`font-mono text-[10px] uppercase tracking-[0.14em] transition-colors duration-200 ${
-          checked ? "text-cream/75" : "text-cream/40 group-hover:text-cream/55"
+          checked ? "text-cream/85" : "text-cream/60 group-hover:text-cream/80"
         }`}
       >
         {label}
@@ -189,7 +189,7 @@ function ErrorCard({ onRetry }: { onRetry: () => void }) {
       <button
         type="button"
         onClick={onRetry}
-        className="inline-flex items-center px-4 py-2 rounded-lg text-xs font-bold bg-electric text-navy hover:bg-electric/90 transition-colors transform-gpu"
+        className="inline-flex items-center px-4 py-2 rounded-lg text-xs font-bold bg-electric text-navy hover:bg-electric/90 transition-colors transform-gpu focus:outline-none focus-visible:ring-2 focus-visible:ring-electric/50 focus-visible:ring-offset-2 focus-visible:ring-offset-navy"
       >
         Retry
       </button>
@@ -400,7 +400,7 @@ function NotificationsForm({ initial }: { initial: PrefsState }) {
           }`}
         >
           <label className="flex items-center gap-2.5">
-            <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-cream/45 w-10">
+            <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-cream/65 w-10">
               From
             </span>
             <input
@@ -413,7 +413,7 @@ function NotificationsForm({ initial }: { initial: PrefsState }) {
             />
           </label>
           <label className="flex items-center gap-2.5">
-            <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-cream/45 w-10">
+            <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-cream/65 w-10">
               To
             </span>
             <input

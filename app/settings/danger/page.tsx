@@ -28,7 +28,7 @@
  * All copy is em-dash-free.
  */
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import useSWR from "swr";
 import { Warning, Trash, MoonStars } from "@phosphor-icons/react";
@@ -150,7 +150,7 @@ export default function DangerZonePage() {
               <p className="text-red-200 text-sm font-semibold leading-tight">
                 Your account is scheduled for deletion on {formatWindow(pendingAt)}.
               </p>
-              <p className="text-red-200/60 text-xs mt-2 leading-relaxed">
+              <p className="text-red-200/80 text-xs mt-2 leading-relaxed">
                 Until then nothing is gone. Cancel before the window closes to
                 keep your account, profile, friends, history, and Fangs. After
                 that everything is permanently removed and cannot be recovered.
@@ -161,7 +161,7 @@ export default function DangerZonePage() {
             type="button"
             onClick={handleCancelDeletion}
             disabled={cancelling}
-            className="mt-5 inline-flex items-center px-4 py-2.5 rounded-lg text-xs font-bold text-red-100 bg-red-500/20 border border-red-400/40 hover:bg-red-500/30 hover:border-red-400/60 disabled:opacity-50 transition-colors transform-gpu"
+            className="mt-5 inline-flex items-center px-4 py-2.5 rounded-lg text-xs font-bold text-red-100 bg-red-500/20 border border-red-400/40 hover:bg-red-500/30 hover:border-red-400/60 disabled:opacity-50 transition-colors transform-gpu focus:outline-none focus-visible:ring-2 focus-visible:ring-red-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-navy"
           >
             {cancelling ? "Cancelling..." : "Cancel deletion"}
           </button>
@@ -199,7 +199,7 @@ export default function DangerZonePage() {
             <button
               type="button"
               onClick={() => setConfirmingDeactivate(true)}
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-xs font-bold text-red-100 bg-red-500/15 border border-red-400/30 hover:bg-red-500/25 hover:border-red-400/50 transition-colors transform-gpu"
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-xs font-bold text-red-100 bg-red-500/15 border border-red-400/30 hover:bg-red-500/25 hover:border-red-400/50 transition-colors transform-gpu focus:outline-none focus-visible:ring-2 focus-visible:ring-red-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-navy"
             >
               <MoonStars size={15} weight="fill" aria-hidden="true" />
               Deactivate account
@@ -210,7 +210,7 @@ export default function DangerZonePage() {
                 type="button"
                 onClick={() => setConfirmingDeactivate(false)}
                 disabled={deactivating}
-                className="px-4 py-2.5 rounded-lg text-xs font-bold text-cream/70 border border-white/10 hover:bg-white/5 disabled:opacity-50 transition-colors transform-gpu"
+                className="px-4 py-2.5 rounded-lg text-xs font-bold text-cream/80 border border-white/10 hover:bg-white/5 disabled:opacity-50 transition-colors transform-gpu focus:outline-none focus-visible:ring-2 focus-visible:ring-cream/30"
               >
                 Keep my account active
               </button>
@@ -218,7 +218,7 @@ export default function DangerZonePage() {
                 type="button"
                 onClick={handleDeactivate}
                 disabled={deactivating}
-                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-xs font-bold text-red-100 bg-red-500/25 border border-red-400/50 hover:bg-red-500/35 disabled:opacity-50 transition-colors transform-gpu"
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-xs font-bold text-red-100 bg-red-500/25 border border-red-400/50 hover:bg-red-500/35 disabled:opacity-50 transition-colors transform-gpu focus:outline-none focus-visible:ring-2 focus-visible:ring-red-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-navy"
               >
                 {deactivating ? "Deactivating..." : "Yes, deactivate"}
               </button>
@@ -252,7 +252,7 @@ export default function DangerZonePage() {
           <button
             type="button"
             onClick={() => setShowDeleteModal(true)}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-xs font-bold text-white bg-red-600/80 border border-red-500/60 hover:bg-red-600 transition-colors transform-gpu"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-xs font-bold text-white bg-red-600/80 border border-red-500/60 hover:bg-red-600 transition-colors transform-gpu focus:outline-none focus-visible:ring-2 focus-visible:ring-red-400/70 focus-visible:ring-offset-2 focus-visible:ring-offset-navy"
           >
             <Trash size={15} weight="fill" aria-hidden="true" />
             Delete account
@@ -302,13 +302,59 @@ function DeleteAccountModal({
   const emailLc = email.trim().toLowerCase();
   const matches = confirmText.trim().toLowerCase() === emailLc && emailLc.length > 0;
 
+  const dialogRef = useRef<HTMLDivElement | null>(null);
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  // Remember whatever was focused before the dialog opened so we can restore it
+  // on close (focus-restore, WCAG 2.4.3).
+  const restoreFocusRef = useRef<HTMLElement | null>(null);
+
+  // Latest scheduling/onClose, read inside the keydown handler so it never goes
+  // stale without forcing the mount-once focus effect to re-run.
+  const schedulingRef = useRef(scheduling);
+  schedulingRef.current = scheduling;
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
+
+  // Mount-once: save the trigger, focus the input first, restore focus on close,
+  // and install the keydown handler (Escape + Tab trap). The handler reads the
+  // refs above so it never goes stale.
   useEffect(() => {
+    restoreFocusRef.current =
+      document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    // Focus the confirm input first (the primary action the user must take).
+    const focusTimer = setTimeout(() => inputRef.current?.focus(), 0);
+
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && !scheduling) onClose();
+      if (e.key === "Escape" && !schedulingRef.current) {
+        onCloseRef.current();
+        return;
+      }
+      // Tab trap: keep focus inside the dialog.
+      if (e.key === "Tab" && dialogRef.current) {
+        const focusables = dialogRef.current.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])',
+        );
+        if (focusables.length === 0) return;
+        const first = focusables[0];
+        const last = focusables[focusables.length - 1];
+        const active = document.activeElement as HTMLElement | null;
+        if (e.shiftKey && active === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && active === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
     };
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [scheduling, onClose]);
+    return () => {
+      clearTimeout(focusTimer);
+      window.removeEventListener("keydown", onKey);
+      // Restore focus to the trigger when the dialog tears down.
+      restoreFocusRef.current?.focus?.();
+    };
+  }, []);
 
   const handleSchedule = async () => {
     if (!matches) return;
@@ -341,12 +387,14 @@ function DeleteAccountModal({
     <div
       onClick={() => !scheduling && onClose()}
       className="fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="delete-account-title"
     >
       <div
+        ref={dialogRef}
         onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="delete-account-title"
+        aria-describedby="delete-account-desc"
         className="w-full max-w-md rounded-2xl border border-red-400/30 p-6 animate-slide-up"
         style={{
           background:
@@ -364,43 +412,52 @@ function DeleteAccountModal({
             DELETE ACCOUNT
           </h3>
         </div>
-        <p className="text-cream/80 text-sm mb-2">
+        <p id="delete-account-desc" className="text-cream/80 text-sm mb-2">
           This schedules permanent removal of your account, profile, friends,
           quiz history, and any Fangs you have on hand.
         </p>
-        <p className="text-cream/50 text-xs mb-5">
+        <p className="text-cream/65 text-xs mb-5">
           Deletion happens 24 hours from now. You can cancel any time before
           then. After the window closes this cannot be undone, and coming back
           means signing up again.
         </p>
 
-        <label className="block text-cream/50 text-xs font-bold uppercase tracking-widest mb-1.5">
+        <label
+          htmlFor="delete-account-confirm"
+          className="block text-cream/70 text-xs font-bold uppercase tracking-widest mb-1.5"
+        >
           Type your email to confirm
         </label>
-        <p className="font-mono text-cream/60 text-xs mb-2">{email}</p>
+        <p id="delete-account-confirm-hint" className="font-mono text-cream/70 text-xs mb-2">
+          {email}
+        </p>
         <input
+          id="delete-account-confirm"
+          ref={inputRef}
           type="email"
           value={confirmText}
           onChange={(e) => setConfirmText(e.target.value)}
           placeholder="your-email@example.com"
           disabled={scheduling}
           autoComplete="off"
-          autoFocus
-          className="w-full bg-white/5 border border-red-400/30 rounded-xl px-4 py-3 text-cream placeholder-cream/25 text-sm focus:outline-none focus:border-red-400 transition-all mb-4"
+          aria-describedby="delete-account-confirm-hint"
+          className="w-full bg-white/5 border border-red-400/30 rounded-xl px-4 py-3 text-cream placeholder-cream/40 text-sm focus:outline-none focus:border-red-400 focus-visible:ring-2 focus-visible:ring-red-400/50 transition-all mb-4"
         />
 
         <div className="flex gap-2">
           <button
+            type="button"
             onClick={onClose}
             disabled={scheduling}
-            className="flex-1 py-3 rounded-xl border border-white/10 text-cream/70 text-sm font-bold hover:bg-white/5 disabled:opacity-60 transition-all"
+            className="flex-1 py-3 rounded-xl border border-white/10 text-cream/80 text-sm font-bold hover:bg-white/5 disabled:opacity-60 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-cream/30"
           >
             Cancel
           </button>
           <button
+            type="button"
             onClick={handleSchedule}
             disabled={!matches || scheduling}
-            className="flex-1 py-3 rounded-xl text-sm font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+            className="flex-1 py-3 rounded-xl text-sm font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-red-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#140810]"
             style={{
               background:
                 matches && !scheduling

@@ -343,7 +343,7 @@ function ErrorCard({
       <button
         type="button"
         onClick={onRetry}
-        className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full border border-white/15 bg-white/5 text-cream/80 hover:bg-white/10 hover:text-cream font-syne text-xs font-bold transition-colors transform-gpu"
+        className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full border border-white/15 bg-white/5 text-cream/80 hover:bg-white/10 hover:text-cream font-syne text-xs font-bold transition-colors transform-gpu focus:outline-none focus-visible:ring-2 focus-visible:ring-electric/40"
       >
         <ArrowsClockwise size={12} weight="bold" aria-hidden="true" />
         Try again

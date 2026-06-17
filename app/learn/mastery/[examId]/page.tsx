@@ -536,8 +536,8 @@ export default function MasterySessionPage() {
         <Navbar />
         <main className="max-w-[720px] mx-auto px-6 py-24 text-center">
           <h1 className="font-bebas text-3xl tracking-wider mb-3">Couldn't load this session</h1>
-          <p className="text-[14px] text-cream/60 mb-6">{bootError}</p>
-          <Link href={backHref} className="font-mono text-[11px] uppercase tracking-[0.25em] text-gold hover:underline">
+          <p className="text-[14px] text-cream/70 mb-6">{bootError}</p>
+          <Link href={backHref} className="inline-block rounded-md font-mono text-[11px] uppercase tracking-[0.25em] text-gold hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/70 focus-visible:ring-offset-2 focus-visible:ring-offset-navy">
             {classIdContext ? "Back to Class" : "Back to Mastery Mode"}
           </Link>
         </main>
@@ -649,9 +649,9 @@ export default function MasterySessionPage() {
             <div className="flex items-center justify-between gap-3 mb-2">
               <Link
                 href={backHref}
-                className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.25em] text-cream/50 hover:text-cream transition-colors"
+                className="inline-flex items-center gap-1.5 rounded-md font-mono text-[10px] uppercase tracking-[0.25em] text-cream/55 hover:text-cream transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/60 focus-visible:ring-offset-2 focus-visible:ring-offset-navy"
               >
-                <CaretLeft size={12} weight="bold" /> {backLabel}
+                <CaretLeft size={12} weight="bold" aria-hidden="true" /> {backLabel}
               </Link>
               <h1 className="font-bebas text-xl sm:text-2xl tracking-wider text-cream truncate">
                 {data.exam.title}
@@ -662,9 +662,9 @@ export default function MasterySessionPage() {
                   buildInput={buildStudySheet}
                   overallPct={data.overallDisplayPct}
                 />
-                <div className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.25em] text-cream/50">
-                  <Clock size={12} weight="bold" />
-                  <span className="tabular-nums">{stats.timeLabel}</span>
+                <div className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.25em] text-cream/55">
+                  <Clock size={12} weight="bold" aria-hidden="true" />
+                  <span className="tabular-nums" aria-label={`Total study time: ${stats.timeLabel}`}>{stats.timeLabel}</span>
                 </div>
               </div>
             </div>
@@ -681,13 +681,13 @@ export default function MasterySessionPage() {
             <button
               type="button"
               onClick={() => setHeaderCollapsed(c => !c)}
-              aria-label={headerCollapsed ? "Expand header" : "Collapse header"}
+              aria-label={headerCollapsed ? "Expand session header" : "Collapse session header"}
               aria-expanded={!headerCollapsed}
-              className="shrink-0 grid place-items-center w-7 h-7 rounded-full border border-white/[0.08] text-cream/50 hover:text-cream hover:border-white/[0.2] transition-colors"
+              className="shrink-0 grid place-items-center w-9 h-9 rounded-full border border-white/[0.08] text-cream/55 hover:text-cream hover:border-white/[0.2] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/60 focus-visible:ring-offset-2 focus-visible:ring-offset-navy"
             >
               {headerCollapsed
-                ? <CaretDown size={12} weight="bold" />
-                : <CaretUp size={12} weight="bold" />}
+                ? <CaretDown size={14} weight="bold" aria-hidden="true" />
+                : <CaretUp size={14} weight="bold" aria-hidden="true" />}
             </button>
           </div>
         </div>
@@ -699,9 +699,13 @@ export default function MasterySessionPage() {
       <main className="flex-1 min-h-0 relative z-10 w-full max-w-[1080px] mx-auto px-4 sm:px-6 pt-4 pb-3 flex flex-col">
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_260px] gap-6 flex-1 min-h-0">
           {/* Chat column */}
-          <section className="flex flex-col min-h-0">
+          <section className="flex flex-col min-h-0" aria-label="Tutoring conversation with Ninny">
             <div
               ref={scrollRef}
+              role="log"
+              aria-live="polite"
+              aria-relevant="additions text"
+              aria-label="Lesson and question thread"
               className="flex-1 min-h-0 space-y-4 pt-2 pr-1 overflow-y-auto"
             >
               {/* Only render the tail of the thread — keeps the session
@@ -711,7 +715,7 @@ export default function MasterySessionPage() {
                   with its (possibly older) answer + feedback records. */}
               {data.messages.length > VISIBLE_MESSAGES && (
                 <div className="pl-[40px]">
-                  <span className="font-mono text-[9.5px] uppercase tracking-[0.25em] text-cream/30">
+                  <span className="font-mono text-[9.5px] uppercase tracking-[0.25em] text-cream/55">
                     {data.messages.length - VISIBLE_MESSAGES} earlier · full thread in Session Report
                   </span>
                 </div>
@@ -738,10 +742,10 @@ export default function MasterySessionPage() {
               {ended ? (
                 <div className="rounded-[12px] bg-gradient-to-br from-white/[0.05] via-white/[0.02] to-transparent border border-white/[0.08] px-5 py-5">
                   <div className="flex items-center gap-2 mb-3 justify-center">
-                    <Sparkle size={12} className="text-gold" weight="fill" />
-                    <span className="font-mono text-[9.5px] uppercase tracking-[0.3em] text-gold">
+                    <Sparkle size={12} className="text-gold" weight="fill" aria-hidden="true" />
+                    <h2 className="font-mono text-[9.5px] uppercase tracking-[0.3em] text-gold">
                       Session Wrapped
-                    </span>
+                    </h2>
                   </div>
                   {data.session.questionsAnswered > 0 && (
                     <div className="flex items-end justify-center gap-6 mb-4">
@@ -749,7 +753,7 @@ export default function MasterySessionPage() {
                         <div className="font-bebas text-[44px] tracking-wider text-cream leading-none tabular-nums">
                           {Math.round((data.session.correctCount / data.session.questionsAnswered) * 100)}%
                         </div>
-                        <div className="font-mono text-[9px] uppercase tracking-[0.25em] text-cream/45 mt-1">
+                        <div className="font-mono text-[9px] uppercase tracking-[0.25em] text-cream/55 mt-1">
                           accuracy
                         </div>
                       </div>
@@ -758,7 +762,7 @@ export default function MasterySessionPage() {
                         <div className="font-bebas text-[44px] tracking-wider text-cream leading-none tabular-nums">
                           {data.session.questionsAnswered}
                         </div>
-                        <div className="font-mono text-[9px] uppercase tracking-[0.25em] text-cream/45 mt-1">
+                        <div className="font-mono text-[9px] uppercase tracking-[0.25em] text-cream/55 mt-1">
                           questions
                         </div>
                       </div>
@@ -767,19 +771,19 @@ export default function MasterySessionPage() {
                         <div className="font-bebas text-[44px] tracking-wider text-cream leading-none tabular-nums">
                           {stats.sessionTime}
                         </div>
-                        <div className="font-mono text-[9px] uppercase tracking-[0.25em] text-cream/45 mt-1">
+                        <div className="font-mono text-[9px] uppercase tracking-[0.25em] text-cream/55 mt-1">
                           time
                         </div>
                       </div>
                     </div>
                   )}
-                  <p className="text-[12.5px] text-cream/65 mb-4 text-center">
+                  <p className="text-[12.5px] text-cream/70 mb-4 text-center">
                     Session closed. Start a new one anytime.
                   </p>
                   <div className="flex justify-center">
                     <Link
                       href={backHref}
-                      className="inline-block rounded-full bg-gold text-navy hover:bg-gold/90 font-mono text-[11px] uppercase tracking-[0.25em] px-5 py-2.5 transition-colors"
+                      className="inline-block rounded-full bg-gold text-navy hover:bg-gold/90 font-mono text-[11px] uppercase tracking-[0.25em] px-5 py-2.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/70 focus-visible:ring-offset-2 focus-visible:ring-offset-navy"
                     >
                       {classIdContext ? "Back to Class" : "Back to Mastery"}
                     </Link>
@@ -820,24 +824,24 @@ export default function MasterySessionPage() {
         aria-label="Session stats"
         className="fixed left-0 right-0 bottom-14 md:bottom-0 z-30 bg-navy/90 backdrop-blur-md border-t border-white/[0.06]"
       >
-        <div className="max-w-[1080px] mx-auto pl-4 sm:pl-6 pr-[100px] py-2 flex flex-wrap items-center gap-x-4 gap-y-1 font-mono text-[10px] uppercase tracking-[0.25em] text-cream/50">
-          <span><span className="tabular-nums text-cream/80">{data.session.questionsAnswered}</span> Qs</span>
-          <span><span className="tabular-nums text-cream/80">{data.session.correctCount}</span> right</span>
-          <span><span className="tabular-nums text-cream/80">{data.session.teachingPanelsShown}</span> taught</span>
-          <span><span className="tabular-nums text-cream/80">{stats.sessionTime}</span> this session</span>
+        <div className="max-w-[1080px] mx-auto pl-4 sm:pl-6 pr-[100px] py-2 flex flex-wrap items-center gap-x-4 gap-y-1 font-mono text-[10px] uppercase tracking-[0.25em] text-cream/55">
+          <span><span className="tabular-nums text-cream/85">{data.session.questionsAnswered}</span> Qs</span>
+          <span><span className="tabular-nums text-cream/85">{data.session.correctCount}</span> right</span>
+          <span><span className="tabular-nums text-cream/85">{data.session.teachingPanelsShown}</span> taught</span>
+          <span><span className="tabular-nums text-cream/85">{stats.sessionTime}</span> this session</span>
           {data.session.reachedMasteryAt && (
             <span className="text-gold flex items-center gap-1">
-              <Sparkle size={10} weight="fill" /> Mastered
+              <Sparkle size={10} weight="fill" aria-hidden="true" /> Mastered
             </span>
           )}
           {(data.mastered || data.ready) && (
             <button
               type="button"
               onClick={() => setShareOpen(true)}
-              className="ml-auto inline-flex items-center gap-1.5 rounded-full border border-gold/40 bg-gold/10 hover:bg-gold/20 px-3 py-1 text-gold transition-colors"
+              className="ml-auto inline-flex items-center gap-1.5 min-h-[32px] rounded-full border border-gold/40 bg-gold/10 hover:bg-gold/20 px-3 py-1 text-gold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/70 focus-visible:ring-offset-2 focus-visible:ring-offset-navy"
               aria-label="Share milestone"
             >
-              <ShareNetwork size={10} weight="fill" /> Share
+              <ShareNetwork size={10} weight="fill" aria-hidden="true" /> Share
             </button>
           )}
         </div>

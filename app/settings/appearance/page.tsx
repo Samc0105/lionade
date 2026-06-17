@@ -132,7 +132,7 @@ function ThemeCard() {
     <>
       <SettingsCard eyebrow="Personalization" title="Theme">
         <div className="flex items-center justify-between mb-3">
-          <p className="text-cream/45 text-xs leading-snug">
+          <p className="text-cream/60 text-xs leading-snug">
             Pick how Lionade looks. Applies instantly across the whole app.
           </p>
           <SavedTick show={saved} />
@@ -176,7 +176,7 @@ function ThemeCard() {
                   >
                     {opt.label}
                   </span>
-                  <span className="block text-cream/45 text-xs mt-0.5 leading-snug">
+                  <span className="block text-cream/60 text-xs mt-0.5 leading-snug">
                     {opt.description}
                   </span>
                 </span>
@@ -188,7 +188,7 @@ function ThemeCard() {
 
       <SettingsCard eyebrow="Readability" title="Font size">
         <div className="flex items-center justify-between mb-3">
-          <p className="text-cream/45 text-xs leading-snug">
+          <p className="text-cream/60 text-xs leading-snug">
             Scale every text size up or down to taste.
           </p>
           <SavedTick show={saved} />
@@ -212,7 +212,7 @@ function ThemeCard() {
                 className={`flex-1 py-3 rounded-xl border font-bold transition-colors transform-gpu focus:outline-none focus-visible:ring-2 focus-visible:ring-electric/40 ${
                   active
                     ? "border-electric bg-electric/20 text-electric"
-                    : "border-white/10 text-cream/50 hover:border-white/20"
+                    : "border-white/10 text-cream/65 hover:border-white/20 hover:text-cream/85"
                 }`}
               >
                 <span className={f.size} aria-hidden="true">
@@ -238,7 +238,7 @@ function ProfileLinkCard() {
     <SettingsCard eyebrow="More looks" title="Cosmetics and identity">
       <Link
         href="/profile"
-        className="group flex items-center gap-3.5 p-3.5 rounded-xl border border-white/10 bg-white/[0.03] hover:border-electric/30 hover:bg-electric/[0.06] transition-colors transform-gpu"
+        className="group flex items-center gap-3.5 p-3.5 rounded-xl border border-white/10 bg-white/[0.03] hover:border-electric/30 hover:bg-electric/[0.06] transition-colors transform-gpu focus:outline-none focus-visible:ring-2 focus-visible:ring-electric/40 focus-visible:ring-offset-2 focus-visible:ring-offset-navy"
       >
         <span
           aria-hidden="true"
@@ -250,7 +250,7 @@ function ProfileLinkCard() {
           <span className="block text-cream text-sm font-bold leading-tight">
             Manage your cosmetics and identity
           </span>
-          <span className="block text-cream/45 text-xs mt-0.5 leading-snug">
+          <span className="block text-cream/60 text-xs mt-0.5 leading-snug">
             Equip owned looks, set your avatar, and pick preferred subjects on your profile.
           </span>
         </span>

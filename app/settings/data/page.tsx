@@ -363,7 +363,7 @@ export default function DataSettingsPage() {
                     <p className="text-cream text-sm font-semibold truncate">
                       {m.title || "Untitled material"}
                     </p>
-                    <p className="text-cream/45 text-xs mt-0.5">
+                    <p className="text-cream/60 text-xs mt-0.5">
                       {[m.subject, formatDate(m.created_at), formatBytes(estimateBytes(m))]
                         .filter(Boolean)
                         .join(" · ")}
@@ -403,7 +403,7 @@ export default function DataSettingsPage() {
             <div className="mt-4 border-t border-white/[0.06] pt-3.5">
               <a
                 href="/profile"
-                className="inline-flex items-center gap-1.5 text-electric text-xs font-bold hover:text-electric/80 transition-colors"
+                className="inline-flex items-center gap-1.5 text-electric text-xs font-bold hover:text-electric/80 transition-colors rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-electric/40"
               >
                 View full quiz history
                 <span aria-hidden="true">&#8594;</span>
@@ -425,7 +425,7 @@ export default function DataSettingsPage() {
             >
               <span className="font-bebas text-2xl tracking-wider text-cream">
                 {todayCount}
-                <span className="text-cream/40"> / {dailyLimit}</span>
+                <span className="text-cream/55"> / {dailyLimit}</span>
               </span>
             </SettingRow>
             <div
@@ -441,7 +441,7 @@ export default function DataSettingsPage() {
                 style={{ width: `${usagePct}%`, willChange: "width" }}
               />
             </div>
-            <p className="text-cream/45 text-xs mt-2 leading-snug">
+            <p className="text-cream/60 text-xs mt-2 leading-snug">
               {materials.dailyRemaining > 0
                 ? `${materials.dailyRemaining} ${materials.dailyRemaining === 1 ? "generation" : "generations"} left today.`
                 : "You've hit today's generation cap. It resets at midnight UTC."}
@@ -482,11 +482,11 @@ export default function DataSettingsPage() {
               <span className="text-cream/80 font-semibold">{exportCountdown}</span>.
             </p>
           ) : lastExportAt ? (
-            <p className="text-cream/45 text-xs leading-snug">
+            <p className="text-cream/60 text-xs leading-snug">
               Last export: {formatDateTime(lastExportAt)}
             </p>
           ) : (
-            <p className="text-cream/45 text-xs leading-snug">
+            <p className="text-cream/60 text-xs leading-snug">
               You haven&apos;t exported your data yet.
             </p>
           )}
@@ -522,7 +522,7 @@ export default function DataSettingsPage() {
                     <p className="text-cream text-sm font-semibold leading-tight">
                       {s.browser} on {s.device}
                     </p>
-                    <p className="text-cream/45 text-xs mt-0.5">{formatDateTime(s.created_at)}</p>
+                    <p className="text-cream/60 text-xs mt-0.5">{formatDateTime(s.created_at)}</p>
                   </div>
                 </li>
               );
@@ -531,7 +531,7 @@ export default function DataSettingsPage() {
         )}
 
         <div className="border-t border-white/[0.06] pt-4 mt-2 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <p className="text-cream/45 text-xs leading-snug">
+          <p className="text-cream/60 text-xs leading-snug">
             Signing out other sessions keeps you signed in here but ends every other device.
           </p>
           <button
@@ -575,7 +575,7 @@ function Stat({
     <div className="rounded-xl bg-white/[0.03] border border-white/[0.06] p-3.5">
       <IconCmp size={16} className="text-electric mb-2" aria-hidden={true} />
       <p className="font-bebas text-2xl tracking-wider text-cream leading-none">{value}</p>
-      <p className="text-cream/45 text-[11px] uppercase tracking-wider font-mono mt-1.5">{label}</p>
+      <p className="text-cream/60 text-[11px] uppercase tracking-wider font-mono mt-1.5">{label}</p>
     </div>
   );
 }
@@ -615,7 +615,7 @@ function InlineError({ message, onRetry }: { message: string; onRetry: () => voi
       <button
         type="button"
         onClick={onRetry}
-        className="flex-shrink-0 self-start inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-white/15 bg-white/5 text-cream/80 hover:bg-white/10 hover:text-cream text-xs font-bold transition-colors transform-gpu"
+        className="flex-shrink-0 self-start inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-white/15 bg-white/5 text-cream/80 hover:bg-white/10 hover:text-cream text-xs font-bold transition-colors transform-gpu focus:outline-none focus-visible:ring-2 focus-visible:ring-electric/40"
       >
         <ArrowsClockwise size={12} weight="bold" aria-hidden="true" />
         Try again

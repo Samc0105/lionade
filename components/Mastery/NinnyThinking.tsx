@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   pickThinkingAnimation,
   type AnimationProps,
@@ -43,9 +43,9 @@ export default function NinnyThinking({
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="flex gap-3 items-center pl-[40px]">
+      <div className="flex gap-3 items-center pl-[40px]" role="status">
         <AnimationFrame Animation={Animation} />
-        <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-cream/40">
+        <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-cream/55">
           {phrase}
         </span>
       </div>
@@ -119,6 +119,45 @@ function NotesModal({
     return Array.from(map.entries());
   }, [notes]);
 
+  const panelRef = useRef<HTMLDivElement>(null);
+  const closeBtnRef = useRef<HTMLButtonElement>(null);
+
+  // Focus-first + Tab trap + Escape + focus restore.
+  useEffect(() => {
+    const previouslyFocused = document.activeElement as HTMLElement | null;
+    closeBtnRef.current?.focus();
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        onClose();
+        return;
+      }
+      if (e.key !== "Tab") return;
+      const panel = panelRef.current;
+      if (!panel) return;
+      const focusables = panel.querySelectorAll<HTMLElement>(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+      );
+      if (focusables.length === 0) return;
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      previouslyFocused?.focus?.();
+    };
+  }, [onClose]);
+
   return (
     <div
       role="dialog"
@@ -128,6 +167,7 @@ function NotesModal({
       onClick={onClose}
     >
       <div
+        ref={panelRef}
         onClick={e => e.stopPropagation()}
         className="
           relative w-full max-w-[520px] max-h-[80vh] overflow-y-auto
@@ -138,30 +178,31 @@ function NotesModal({
         <div className="flex items-center justify-between mb-4">
           <h2 className="font-bebas text-2xl tracking-wider text-cream">Your notes</h2>
           <button
+            ref={closeBtnRef}
             type="button"
             onClick={onClose}
             aria-label="Close notes"
-            className="text-cream/60 hover:text-cream transition-colors"
+            className="grid place-items-center w-9 h-9 rounded-full text-cream/60 hover:text-cream hover:bg-white/[0.05] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/70"
           >
-            <X size={20} weight="bold" />
+            <X size={20} weight="bold" aria-hidden="true" />
           </button>
         </div>
 
-        <p className="font-mono text-[9.5px] uppercase tracking-[0.25em] text-cream/40 mb-4">
+        <p className="font-mono text-[9.5px] uppercase tracking-[0.25em] text-cream/55 mb-4">
           Session {sessionId.slice(0, 8)} · {notes.length} {notes.length === 1 ? "note" : "notes"}
         </p>
 
         <div className="space-y-4">
           {groups.map(([key, entries]) => (
             <div key={key} className="rounded-[10px] bg-white/[0.03] border border-white/[0.06] p-3">
-              <div className="font-mono text-[9.5px] uppercase tracking-[0.25em] text-[#A855F7]/80 mb-2">
+              <div className="font-mono text-[9.5px] uppercase tracking-[0.25em] text-[#A855F7] mb-2">
                 {key === "general" ? "General" : `Question ${key.slice(0, 8)}`}
               </div>
               <ul className="space-y-2">
                 {entries.map((n, i) => (
                   <li key={`${n.at}-${i}`} className="text-[13px] text-cream/85 leading-relaxed whitespace-pre-wrap">
                     {n.text}
-                    <div className="font-mono text-[9px] uppercase tracking-[0.2em] text-cream/30 mt-1">
+                    <div className="font-mono text-[9px] uppercase tracking-[0.2em] text-cream/55 mt-1">
                       {new Date(n.at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                     </div>
                   </li>

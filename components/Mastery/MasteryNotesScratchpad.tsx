@@ -131,8 +131,8 @@ export default function MasteryNotesScratchpad({ sessionId, questionId }: Props)
         placeholder="Quick note about that one... (saved for end of session)"
         className="
           w-full resize-none bg-transparent outline-none
-          text-[12px] leading-[1.5] text-cream/85 placeholder:text-cream/35
-          font-syne
+          text-[12px] leading-[1.5] text-cream/85 placeholder:text-cream/55
+          font-syne rounded-[4px] focus-visible:ring-2 focus-visible:ring-[#A855F7]/50
         "
         style={{ maxHeight: 96, overflowY: "auto" }}
         // Explicitly opt out of mount-time focus stealing — the parent's

@@ -121,7 +121,7 @@ function PendingDeletionBanner() {
           <p className="text-red-200 text-sm font-semibold leading-tight">
             Your account is scheduled for deletion on {dateLabel}.
           </p>
-          <p className="text-red-200/55 text-xs mt-1 leading-snug">
+          <p className="text-red-200/80 text-xs mt-1 leading-snug">
             Cancel any time before then to keep your account and all your data.
           </p>
         </div>
@@ -129,7 +129,7 @@ function PendingDeletionBanner() {
       <button
         type="button"
         onClick={cancelDeletion}
-        className="flex-shrink-0 self-start sm:self-center inline-flex items-center px-4 py-2 rounded-lg text-xs font-bold text-red-100 bg-red-500/20 border border-red-400/40 hover:bg-red-500/30 hover:border-red-400/60 transition-colors transform-gpu"
+        className="flex-shrink-0 self-start sm:self-center inline-flex items-center px-4 py-2 rounded-lg text-xs font-bold text-red-100 bg-red-500/20 border border-red-400/40 hover:bg-red-500/30 hover:border-red-400/60 transition-colors transform-gpu focus:outline-none focus-visible:ring-2 focus-visible:ring-red-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-navy"
       >
         Cancel deletion
       </button>
@@ -151,7 +151,7 @@ function SettingsNav() {
         aria-label="Settings sections"
         className="hidden lg:block sticky top-20 self-start"
       >
-        <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-cream/35 mb-3 pl-3">
+        <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-cream/55 mb-3 pl-3">
           Settings
         </p>
         <ul className="flex flex-col gap-0.5">
@@ -162,14 +162,14 @@ function SettingsNav() {
                 <Link
                   href={s.href}
                   aria-current={active ? "page" : undefined}
-                  className={`relative flex items-center gap-2.5 pl-3 pr-4 py-2 text-[13px] font-semibold rounded-lg transition-colors duration-200 ${
+                  className={`relative flex items-center gap-2.5 pl-3 pr-4 py-2 text-[13px] font-semibold rounded-lg transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-electric/40 ${
                     active
                       ? s.danger
                         ? "text-red-200"
                         : "text-cream"
                       : s.danger
-                        ? "text-red-300/55 hover:text-red-300/80"
-                        : "text-cream/45 hover:text-cream/80"
+                        ? "text-red-300/70 hover:text-red-300/90"
+                        : "text-cream/60 hover:text-cream/90"
                   }`}
                 >
                   {active && (
@@ -218,14 +218,14 @@ function SettingsNav() {
                 <Link
                   href={s.href}
                   aria-current={active ? "page" : undefined}
-                  className={`relative inline-flex items-center gap-2 px-3.5 py-2 rounded-full text-[12.5px] font-semibold whitespace-nowrap transition-colors duration-200 transform-gpu ${
+                  className={`relative inline-flex items-center gap-2 px-3.5 py-2 rounded-full text-[12.5px] font-semibold whitespace-nowrap transition-colors duration-200 transform-gpu focus:outline-none focus-visible:ring-2 focus-visible:ring-electric/40 ${
                     active
                       ? s.danger
                         ? "text-red-200"
                         : "text-cream"
                       : s.danger
-                        ? "text-red-300/60 hover:text-red-300/85"
-                        : "text-cream/55 hover:text-cream/85"
+                        ? "text-red-300/70 hover:text-red-300/90"
+                        : "text-cream/60 hover:text-cream/90"
                   }`}
                 >
                   {active ? (
@@ -286,7 +286,7 @@ export default function SettingsLayout({
                 className="inline-block w-6 h-px bg-gold/70"
                 aria-hidden="true"
               />
-              <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-cream/45 leading-none">
+              <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-cream/60 leading-none">
                 Your control panel
               </p>
             </div>

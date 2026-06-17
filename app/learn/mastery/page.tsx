@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import useSWR from "swr";
 import Link from "next/link";
 import {
@@ -75,6 +75,8 @@ export default function MasteryLandingPage() {
   const [parsed, setParsed] = useState<ParsedResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
+  const inputFieldId = useId();
+  const inputErrorId = useId();
   const [limitHit, setLimitHit] = useState<null | { plan: string; limit: number; current: number; message: string }>(null);
 
   // Photo import (client-side OCR) drops its recognized text into the same
@@ -173,15 +175,15 @@ export default function MasteryLandingPage() {
             else falls back to /learn. PRESERVED: classIdContext routing. */}
         <Link
           href={classIdContext ? `/classes/${classIdContext}` : "/learn"}
-          className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.25em] text-cream/50 hover:text-cream mb-4 transition-colors"
+          className="inline-flex items-center gap-1.5 rounded-md font-mono text-[10px] uppercase tracking-[0.25em] text-cream/55 hover:text-cream mb-4 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/60 focus-visible:ring-offset-2 focus-visible:ring-offset-navy"
         >
-          <CaretLeft size={12} weight="bold" /> {classIdContext ? "Class" : "Learn"}
+          <CaretLeft size={12} weight="bold" aria-hidden="true" /> {classIdContext ? "Class" : "Learn"}
         </Link>
 
         {/* Header */}
         <div className="mb-10">
           <div className="flex items-center gap-2 mb-3">
-            <Brain size={16} className="text-gold" weight="fill" />
+            <Brain size={16} className="text-gold" weight="fill" aria-hidden="true" />
             <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-gold">
               Master What Counts
             </span>
@@ -205,8 +207,12 @@ export default function MasteryLandingPage() {
         {/* New target form */}
         {!parsed && (
           <section>
+            <label htmlFor={inputFieldId} className="sr-only">
+              What do you want to master? Name an exam, a unit, or paste a syllabus.
+            </label>
             <div className={`mastery-focus-glow rounded-[14px] bg-white/[0.025] border border-white/[0.09] p-5 sm:p-6 transition-shadow ${parsing ? "mastery-parsing" : ""}`}>
               <textarea
+                id={inputFieldId}
                 value={input}
                 onChange={e => setInput(e.target.value.slice(0, 8000))}
                 disabled={parsing}
@@ -215,33 +221,38 @@ export default function MasteryLandingPage() {
                 autoCapitalize="off"
                 autoComplete="off"
                 spellCheck={false}
+                aria-invalid={error ? true : undefined}
+                aria-describedby={error ? inputErrorId : undefined}
                 placeholder="Examples:
 • AWS Security Specialty (SCS-C02)
 • Calculus 1 midterm: derivatives, integrals, limits, chain rule
 • AP Chemistry unit on thermochemistry
 • Or paste your syllabus and Ninny will parse it."
                 className="relative z-10 w-full resize-none bg-transparent border-none focus:outline-none
-                  text-[15px] text-cream placeholder:text-cream/30 leading-relaxed font-sans"
+                  text-[15px] text-cream placeholder:text-cream/45 leading-relaxed font-sans"
               />
             </div>
             <PhotoImport onExtract={handleOcrExtract} disabled={parsing} />
             {error && (
-              <div className="mt-3 flex items-start gap-2 text-[12px] text-[#EF4444]">
-                <Warning size={14} weight="fill" className="mt-0.5 shrink-0" />
+              <div id={inputErrorId} role="alert" className="mt-3 flex items-start gap-2 text-[12px] text-[#FCA5A5]">
+                <Warning size={14} weight="fill" className="mt-0.5 shrink-0" aria-hidden="true" />
                 <span>{error}</span>
               </div>
             )}
             <div className="mt-4 flex items-center justify-between gap-4">
-              <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-cream/40">
+              <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-cream/55" aria-hidden="true">
                 {input.length} / 8000 chars
               </span>
               <button
+                type="button"
                 onClick={submit}
                 disabled={parsing || input.trim().length < 3}
-                className="group flex items-center gap-2 rounded-full bg-gold hover:bg-gold/90
+                aria-busy={parsing}
+                className="group flex items-center gap-2 min-h-[44px] rounded-full bg-gold hover:bg-gold/90
                   text-navy font-mono text-[11px] uppercase tracking-[0.25em]
                   px-5 py-2.5 transition-all duration-200
-                  disabled:opacity-40 disabled:cursor-not-allowed"
+                  disabled:opacity-40 disabled:cursor-not-allowed
+                  focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/70 focus-visible:ring-offset-2 focus-visible:ring-offset-navy"
               >
                 {parsing ? (
                   <>
@@ -259,7 +270,7 @@ export default function MasteryLandingPage() {
                 ) : (
                   <>
                     Start
-                    <ArrowRight size={14} weight="bold" className="transition-transform group-hover:translate-x-0.5" />
+                    <ArrowRight size={14} weight="bold" aria-hidden="true" className="transition-transform group-hover:translate-x-0.5" />
                   </>
                 )}
               </button>
@@ -271,15 +282,17 @@ export default function MasteryLandingPage() {
         {parsed && parsed.scope === "broad" && (
           <section className="animate-slide-in-left">
             <div className="flex gap-3">
-              <div className="shrink-0 w-[28px] h-[28px] rounded-full grid place-items-center text-[10px] font-mono tracking-wider bg-[#A855F7]/[0.15] border border-[#A855F7]/30 text-[#A855F7]">
+              <div aria-hidden="true" className="shrink-0 w-[28px] h-[28px] rounded-full grid place-items-center text-[10px] font-mono tracking-wider bg-[#A855F7]/[0.15] border border-[#A855F7]/30 text-[#A855F7]">
                 N
               </div>
-              <div className="max-w-[580px] rounded-[10px] rounded-tl-[2px] bg-white/[0.04] border border-white/[0.06] px-4 py-3 text-[14px] leading-relaxed text-cream/90">
+              <div role="status" className="max-w-[580px] rounded-[10px] rounded-tl-[2px] bg-white/[0.04] border border-white/[0.06] px-4 py-3 text-[14px] leading-relaxed text-cream/90">
                 {parsed.clarification}
               </div>
             </div>
             <div className="mt-4 pl-[40px] flex flex-col gap-2">
+              <label htmlFor={`${inputFieldId}-narrow`} className="sr-only">Narrow down your topic</label>
               <textarea
+                id={`${inputFieldId}-narrow`}
                 value={input}
                 onChange={e => setInput(e.target.value.slice(0, 8000))}
                 disabled={parsing}
@@ -290,21 +303,25 @@ export default function MasteryLandingPage() {
                 spellCheck={false}
                 placeholder="Narrow it down here…"
                 className="w-full resize-none rounded-[8px] bg-white/[0.03] border border-white/[0.08]
-                  focus:border-gold/40 focus:outline-none px-4 py-3 text-[14px] text-cream
-                  placeholder:text-cream/30 leading-relaxed"
+                  focus:border-gold/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/60 px-4 py-3 text-[14px] text-cream
+                  placeholder:text-cream/45 leading-relaxed"
               />
               <div className="flex items-center justify-end gap-2">
                 <button
+                  type="button"
                   onClick={() => { setParsed(null); setError(null); }}
-                  className="font-mono text-[10px] uppercase tracking-[0.25em] text-cream/50 hover:text-cream px-3 py-2"
+                  className="min-h-[44px] rounded-md font-mono text-[10px] uppercase tracking-[0.25em] text-cream/55 hover:text-cream px-3 py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/60 focus-visible:ring-offset-2 focus-visible:ring-offset-navy"
                 >
                   Start over
                 </button>
                 <button
+                  type="button"
                   onClick={submit}
                   disabled={parsing || input.trim().length < 3}
-                  className="rounded-full bg-gold hover:bg-gold/90 text-navy font-mono text-[11px] uppercase tracking-[0.25em]
-                    px-5 py-2.5 disabled:opacity-40 disabled:cursor-not-allowed"
+                  aria-busy={parsing}
+                  className="min-h-[44px] rounded-full bg-gold hover:bg-gold/90 text-navy font-mono text-[11px] uppercase tracking-[0.25em]
+                    px-5 py-2.5 disabled:opacity-40 disabled:cursor-not-allowed
+                    focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/70 focus-visible:ring-offset-2 focus-visible:ring-offset-navy"
                 >
                   {parsing ? "Ninny's reading…" : "Submit"}
                 </button>
@@ -319,7 +336,7 @@ export default function MasteryLandingPage() {
             <div className="rounded-[12px] bg-gradient-to-br from-[#A855F7]/[0.08] via-gold/[0.05] to-white/[0.02] border border-[#A855F7]/30 p-5"
               style={{ boxShadow: "0 0 30px rgba(168,85,247,0.08)" }}>
               <div className="flex items-center gap-2 mb-2">
-                <Sparkle size={14} className="text-[#A855F7]" weight="fill" />
+                <Sparkle size={14} className="text-[#A855F7]" weight="fill" aria-hidden="true" />
                 <span className="font-mono text-[9.5px] uppercase tracking-[0.25em] text-[#A855F7]">
                   Ninny locked your target
                 </span>
@@ -327,7 +344,7 @@ export default function MasteryLandingPage() {
               <h3 className="font-bebas text-[28px] tracking-wider text-cream leading-tight mb-1">
                 <RevealText text={parsed.title} delay={0.18} charDelay={0.035} />
               </h3>
-              <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-cream/40 mb-4">
+              <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-cream/55 mb-4">
                 {parsed.subtopics.length} subtopics · weighted
               </p>
               <ul className="flex flex-col gap-2 mb-5">
@@ -345,22 +362,35 @@ export default function MasteryLandingPage() {
                   </li>
                 ))}
               </ul>
+              {/* confirmAndStart sets `error` on failure; surface it here so a
+                  failed create/start isn't silent (the funnel-view error block
+                  is hidden once we're in the parsed/specific state). */}
+              {error && (
+                <div role="alert" className="mb-3 flex items-start gap-2 text-[12px] text-[#FCA5A5]">
+                  <Warning size={14} weight="fill" className="mt-0.5 shrink-0" aria-hidden="true" />
+                  <span>{error}</span>
+                </div>
+              )}
               <div className="flex items-center justify-end gap-2">
                 <button
+                  type="button"
                   onClick={() => { setParsed(null); setError(null); }}
-                  className="font-mono text-[10px] uppercase tracking-[0.25em] text-cream/50 hover:text-cream px-3 py-2"
+                  className="min-h-[44px] rounded-md font-mono text-[10px] uppercase tracking-[0.25em] text-cream/55 hover:text-cream px-3 py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/60 focus-visible:ring-offset-2 focus-visible:ring-offset-navy"
                 >
                   Back
                 </button>
                 <button
+                  type="button"
                   onClick={confirmAndStart}
                   disabled={creating}
-                  className="group flex items-center gap-2 rounded-full bg-gold hover:bg-gold/90
+                  aria-busy={creating}
+                  className="group flex items-center gap-2 min-h-[44px] rounded-full bg-gold hover:bg-gold/90
                     text-navy font-mono text-[11px] uppercase tracking-[0.25em]
-                    px-5 py-2.5 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200"
+                    px-5 py-2.5 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200
+                    focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/70 focus-visible:ring-offset-2 focus-visible:ring-offset-navy"
                 >
                   {creating ? "Starting session…" : "Start session"}
-                  <ArrowRight size={14} weight="bold" className="transition-transform group-hover:translate-x-0.5" />
+                  <ArrowRight size={14} weight="bold" aria-hidden="true" className="transition-transform group-hover:translate-x-0.5" />
                 </button>
               </div>
             </div>
@@ -380,14 +410,14 @@ export default function MasteryLandingPage() {
           ) : examsError && !data ? (
             /* Fetch failed with nothing cached. Show an error + retry instead
                of the explainer, which would read as "you have no targets." */
-            <div className="rounded-2xl border border-red-400/30 bg-red-400/5 p-6 text-center">
+            <div role="alert" className="rounded-2xl border border-red-400/30 bg-red-400/5 p-6 text-center">
               <p className="font-syne text-sm text-red-300 mb-3">
                 Couldn't load your targets. They're still there, this page just blinked.
               </p>
               <button
                 type="button"
                 onClick={() => mutateExams()}
-                className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full border border-white/15 bg-white/5 text-cream/80 hover:bg-white/10 hover:text-cream font-syne text-xs font-bold transition-colors"
+                className="inline-flex items-center gap-1.5 min-h-[44px] px-4 py-1.5 rounded-full border border-white/15 bg-white/5 text-cream/80 hover:bg-white/10 hover:text-cream font-syne text-xs font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/60 focus-visible:ring-offset-2 focus-visible:ring-offset-navy"
               >
                 <ArrowsClockwise size={12} weight="bold" aria-hidden="true" />
                 Try again
@@ -414,7 +444,7 @@ export default function MasteryLandingPage() {
               }}
             >
               <div className="flex items-center gap-2 mb-5">
-                <Brain size={16} className="text-[#A855F7]" weight="fill" />
+                <Brain size={16} className="text-[#A855F7]" weight="fill" aria-hidden="true" />
                 <h2 className="font-bebas text-sm text-cream tracking-[0.2em]">HOW MASTERY WORKS</h2>
               </div>
               <ol className="space-y-4">
@@ -434,15 +464,15 @@ export default function MasteryLandingPage() {
                         <p className="font-bebas text-base text-cream tracking-wider leading-none mb-1">
                           <span className="text-[#A855F7] mr-1.5">{i + 1}.</span>{step.title}
                         </p>
-                        <p className="text-cream/55 text-[12.5px] leading-relaxed font-sans">{step.body}</p>
+                        <p className="text-cream/60 text-[12.5px] leading-relaxed font-sans">{step.body}</p>
                       </div>
                     </li>
                   );
                 })}
               </ol>
               <div className="mt-5 pt-4 border-t border-white/[0.06] flex items-center gap-2">
-                <ListChecks size={14} className="text-cream/40" weight="bold" aria-hidden="true" />
-                <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-cream/45">
+                <ListChecks size={14} className="text-cream/55" weight="bold" aria-hidden="true" />
+                <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-cream/60">
                   Describe your first target to begin
                 </p>
               </div>
@@ -469,39 +499,82 @@ function LimitPaywall({
   const upgradeTo = isFree ? "pro" : "platinum";
   const nextLimit = PLAN_EXAM_LIMITS[upgradeTo as "pro" | "platinum"];
 
+  const titleId = useId();
+  const panelRef = useRef<HTMLDivElement>(null);
+  const closeBtnRef = useRef<HTMLButtonElement>(null);
+
+  // Focus management: remember the trigger, focus the close button on open,
+  // restore focus on unmount. Escape closes; Tab is trapped within the panel.
+  useEffect(() => {
+    const previouslyFocused = document.activeElement as HTMLElement | null;
+    closeBtnRef.current?.focus();
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        onClose();
+        return;
+      }
+      if (e.key !== "Tab") return;
+      const panel = panelRef.current;
+      if (!panel) return;
+      const focusables = panel.querySelectorAll<HTMLElement>(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+      );
+      if (focusables.length === 0) return;
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      previouslyFocused?.focus?.();
+    };
+  }, [onClose]);
+
   return (
     <div
       className="fixed inset-0 z-50 grid place-items-center bg-black/60 backdrop-blur-sm px-4"
       role="dialog"
       aria-modal="true"
+      aria-labelledby={titleId}
       onClick={e => { if (e.target === e.currentTarget) onClose(); }}
     >
-      <div className="relative w-full max-w-md rounded-[14px] border border-gold/30 bg-gradient-to-br from-navy to-[#0a0f1d] p-6 shadow-2xl">
+      <div ref={panelRef} className="relative w-full max-w-md rounded-[14px] border border-gold/30 bg-gradient-to-br from-navy to-[#0a0f1d] p-6 shadow-2xl">
         <button
+          ref={closeBtnRef}
           type="button"
           onClick={onClose}
-          aria-label="Close"
-          className="absolute top-3 right-3 text-cream/40 hover:text-cream grid place-items-center w-7 h-7 rounded-full hover:bg-white/[0.05]"
+          aria-label="Close mastery limit dialog"
+          className="absolute top-3 right-3 text-cream/55 hover:text-cream grid place-items-center w-9 h-9 rounded-full hover:bg-white/[0.05] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/70"
         >
-          <X size={14} weight="bold" />
+          <X size={14} weight="bold" aria-hidden="true" />
         </button>
 
         <div className="flex items-center gap-2 mb-2">
-          <Lock size={14} className="text-gold" weight="fill" />
+          <Lock size={14} className="text-gold" weight="fill" aria-hidden="true" />
           <span className="font-mono text-[9.5px] uppercase tracking-[0.3em] text-gold">
             Mastery limit reached
           </span>
         </div>
-        <h3 className="font-bebas text-[28px] tracking-wider text-cream leading-tight mb-2">
+        <h3 id={titleId} className="font-bebas text-[28px] tracking-wider text-cream leading-tight mb-2">
           Focus is good. More focus is better.
         </h3>
-        <p className="text-[13px] text-cream/75 leading-relaxed mb-5">
+        <p className="text-[13px] text-cream/80 leading-relaxed mb-5">
           {state.message}
         </p>
 
         <div className="rounded-[10px] bg-white/[0.03] border border-white/[0.06] p-3 mb-5">
           <div className="flex items-baseline justify-between mb-1">
-            <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-cream/50">
+            <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-cream/55">
               {state.plan}
             </span>
             <span className="font-bebas text-[22px] tracking-wider text-cream tabular-nums">
@@ -529,14 +602,14 @@ function LimitPaywall({
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 rounded-full border border-white/[0.1] text-cream/70 hover:text-cream hover:border-white/[0.25] font-mono text-[11px] uppercase tracking-[0.25em] py-2.5 transition-colors"
+            className="flex-1 min-h-[44px] rounded-full border border-white/[0.1] text-cream/75 hover:text-cream hover:border-white/[0.25] font-mono text-[11px] uppercase tracking-[0.25em] py-2.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/60 focus-visible:ring-offset-2 focus-visible:ring-offset-navy"
           >
             Archive an old one
           </button>
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 rounded-full bg-gold text-navy hover:bg-gold/90 font-mono text-[11px] uppercase tracking-[0.25em] py-2.5 transition-colors"
+            className="flex-1 min-h-[44px] rounded-full bg-gold text-navy hover:bg-gold/90 font-mono text-[11px] uppercase tracking-[0.25em] py-2.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/70 focus-visible:ring-offset-2 focus-visible:ring-offset-navy"
           >
             Upgrade
           </button>
@@ -573,8 +646,10 @@ function ExamCard({ exam }: { exam: ExamSummary }) {
   return (
     <Link
       href={`/learn/mastery/${exam.id}`}
+      aria-label={`${exam.title}, ${Math.round(exam.overallDisplayPct)} percent mastered${exam.activeSessionId ? ", session live now" : ""}`}
       className={`
         mastery-exam-card group block rounded-[12px] border px-4 py-4
+        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/60 focus-visible:ring-offset-2 focus-visible:ring-offset-navy
         ${mastered
           ? "bg-gradient-to-br from-gold/[0.08] via-gold/[0.03] to-white/[0.02] border-gold/30 hover:border-gold/50"
           : "bg-white/[0.035] border-white/[0.07] hover:border-white/[0.18] hover:bg-white/[0.055]"}
@@ -584,23 +659,23 @@ function ExamCard({ exam }: { exam: ExamSummary }) {
         <h3 className="font-bebas text-[22px] tracking-wider text-cream leading-tight">
           {exam.title}
         </h3>
-        {mastered && <Sparkle size={14} className="text-gold shrink-0 mt-1" weight="fill" />}
+        {mastered && <Sparkle size={14} className="text-gold shrink-0 mt-1" weight="fill" aria-hidden="true" />}
       </div>
       <MasteryProgressBar value={exam.overallDisplayPct} readyThreshold={exam.readyThreshold} />
       <div className="mt-3 flex items-center gap-3 font-mono text-[10px] uppercase tracking-[0.2em] text-cream/55">
         <span className="flex items-center gap-1">
-          <Target size={10} weight="bold" /> {exam.subtopicCount}
+          <Target size={10} weight="bold" aria-hidden="true" /> <span aria-label={`${exam.subtopicCount} subtopics`}>{exam.subtopicCount}</span>
         </span>
         <span className="flex items-center gap-1">
-          <Clock size={10} weight="bold" /> {timeLabel}
+          <Clock size={10} weight="bold" aria-hidden="true" /> <span aria-label={`${timeLabel} studied`}>{timeLabel}</span>
         </span>
         {lastStudied && !exam.activeSessionId && (
-          <span className="hidden sm:inline text-cream/40">{lastStudied}</span>
+          <span className="hidden sm:inline text-cream/55">{lastStudied}</span>
         )}
         {exam.activeSessionId && (
           <span className="ml-auto inline-flex items-center gap-1.5 text-gold">
-            <span className="relative grid place-items-center">
-              <span className="absolute w-2 h-2 rounded-full bg-gold/40 mastery-live-pulse" aria-hidden="true" />
+            <span className="relative grid place-items-center" aria-hidden="true">
+              <span className="absolute w-2 h-2 rounded-full bg-gold/40 mastery-live-pulse" />
               <span className="relative w-1.5 h-1.5 rounded-full bg-gold" />
             </span>
             live

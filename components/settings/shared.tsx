@@ -17,7 +17,7 @@
  * Dependency-light: only React + phosphor's Check icon.
  */
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Check } from "@phosphor-icons/react";
 
 // ── SettingsCard ────────────────────────────────────────────────────────────
@@ -54,7 +54,7 @@ export function SettingsCard({
                 className="inline-block w-6 h-px bg-gold/70"
                 aria-hidden="true"
               />
-              <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-cream/45 leading-none">
+              <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-cream/60 leading-none">
                 {eyebrow}
               </p>
             </div>
@@ -94,7 +94,7 @@ export function SettingRow({
       <div className="min-w-0">
         <p className="text-cream text-sm font-semibold leading-tight">{label}</p>
         {description && (
-          <p className="text-cream/45 text-xs mt-1 leading-snug">{description}</p>
+          <p className="text-cream/60 text-xs mt-1 leading-snug">{description}</p>
         )}
       </div>
       {children && <div className="flex-shrink-0">{children}</div>}
@@ -189,10 +189,10 @@ export function Segmented<T extends string>({
             aria-checked={isActive}
             disabled={disabled}
             onClick={() => !disabled && onChange(opt.value)}
-            className={`px-3 py-1.5 rounded-lg text-[11px] font-bold transition-colors duration-200 transform-gpu focus:outline-none focus-visible:ring-2 focus-visible:ring-electric/40 ${
+            className={`px-3 py-1.5 rounded-lg text-[11px] font-bold transition-colors duration-200 transform-gpu focus:outline-none focus-visible:ring-2 focus-visible:ring-electric/50 focus-visible:ring-offset-1 focus-visible:ring-offset-navy ${
               isActive
-                ? "bg-electric text-white"
-                : "text-cream/55 hover:text-cream hover:bg-white/10"
+                ? "bg-electric text-navy"
+                : "text-cream/70 hover:text-cream hover:bg-white/10"
             } ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
           >
             {opt.label}
@@ -219,10 +219,19 @@ export function Segmented<T extends string>({
 //
 export function useSavedConfirm(): { saved: boolean; flash: () => void } {
   const [saved, setSaved] = useState(false);
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const flash = useCallback(() => {
+    if (timer.current) clearTimeout(timer.current);
     setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
+    timer.current = setTimeout(() => setSaved(false), 2000);
   }, []);
+  // Clear any pending timer on unmount so we never setState after teardown.
+  useEffect(
+    () => () => {
+      if (timer.current) clearTimeout(timer.current);
+    },
+    [],
+  );
   return { saved, flash };
 }
 

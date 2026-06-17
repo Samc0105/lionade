@@ -78,7 +78,7 @@ function TeachCard({ m }: { m: MessageShape }) {
     <Row avatar="ninny">
       <div className="max-w-[560px] rounded-[12px] rounded-tl-[2px] bg-gradient-to-br from-[#A855F7]/[0.07] to-white/[0.03] border border-[#A855F7]/30 px-4 py-4">
         <div className="flex items-center gap-2 mb-2">
-          <Brain size={14} className="text-[#A855F7]" weight="bold" />
+          <Brain size={14} className="text-[#A855F7]" weight="bold" aria-hidden="true" />
           <span className="font-mono text-[9.5px] uppercase tracking-[0.25em] text-[#A855F7]">
             Teach · {p.subtopicName ?? "subtopic"}
           </span>
@@ -97,13 +97,13 @@ function TeachCard({ m }: { m: MessageShape }) {
         )}
         {p.mnemonic && (
           <div className="flex items-start gap-2 mb-2 rounded-[6px] bg-white/[0.03] border border-white/[0.05] px-3 py-2">
-            <Lightbulb size={14} className="text-gold mt-0.5 shrink-0" weight="fill" />
+            <Lightbulb size={14} className="text-gold mt-0.5 shrink-0" weight="fill" aria-hidden="true" />
             <span className="text-[12px] text-cream/80 italic">{p.mnemonic}</span>
           </div>
         )}
         {p.commonPitfall && (
           <div className="flex items-start gap-2 rounded-[6px] bg-white/[0.03] border border-white/[0.05] px-3 py-2">
-            <Warning size={14} className="text-[#EF4444] mt-0.5 shrink-0" weight="fill" />
+            <Warning size={14} className="text-[#EF4444] mt-0.5 shrink-0" weight="fill" aria-hidden="true" />
             <span className="text-[12px] text-cream/80">{p.commonPitfall}</span>
           </div>
         )}
@@ -145,10 +145,10 @@ function HistoricalQuestion({ m, allMessages }: { m: MessageShape; allMessages: 
     <Row avatar="ninny">
       <div className="max-w-[560px] rounded-[12px] rounded-tl-[2px] bg-white/[0.04] border border-white/[0.08] px-4 py-4">
         <div className="flex items-center gap-2 mb-2">
-          <Question size={14} className="text-cream/60" weight="bold" />
+          <Question size={14} className="text-cream/60" weight="bold" aria-hidden="true" />
           {/* Intentionally no subtopic name — lets the user figure out where
               this question fits from the scenario itself, not a headline. */}
-          <span className="font-mono text-[9.5px] uppercase tracking-[0.25em] text-cream/50">
+          <span className="font-mono text-[9.5px] uppercase tracking-[0.25em] text-cream/60">
             Question · {p.difficulty ?? "medium"}
           </span>
         </div>
@@ -168,12 +168,12 @@ function HistoricalQuestion({ m, allMessages }: { m: MessageShape; allMessages: 
                   key={i}
                   className={`flex items-start gap-2 rounded-[6px] border px-3 py-2 text-[13px] ${cls}`}
                 >
-                  <span className="font-mono text-[10px] uppercase tracking-wider mt-0.5 text-cream/40 shrink-0">
+                  <span aria-hidden="true" className="font-mono text-[10px] uppercase tracking-wider mt-0.5 text-cream/55 shrink-0">
                     {String.fromCharCode(65 + i)}
                   </span>
                   <span className="flex-1">{opt}</span>
-                  {isCorrect && <CheckCircle size={14} className="text-[#22C55E] shrink-0 mt-0.5" weight="fill" />}
-                  {isUser && !isCorrect && <XCircle size={14} className="text-[#EF4444] shrink-0 mt-0.5" weight="fill" />}
+                  {isCorrect && <CheckCircle size={14} className="text-[#22C55E] shrink-0 mt-0.5" weight="fill" aria-label="Correct answer" />}
+                  {isUser && !isCorrect && <XCircle size={14} className="text-[#EF4444] shrink-0 mt-0.5" weight="fill" aria-label="Your answer, incorrect" />}
                 </div>
               );
             })}
@@ -200,8 +200,8 @@ function FeedbackBubble({ m }: { m: MessageShape }) {
         }`}
       >
         <div className="flex items-center gap-2 mb-1">
-          {wasCorrect === true && <CheckCircle size={14} className="text-[#22C55E]" weight="fill" />}
-          {wasCorrect === false && <XCircle size={14} className="text-[#EF4444]" weight="fill" />}
+          {wasCorrect === true && <CheckCircle size={14} className="text-[#22C55E]" weight="fill" aria-hidden="true" />}
+          {wasCorrect === false && <XCircle size={14} className="text-[#EF4444]" weight="fill" aria-hidden="true" />}
           <span className="font-mono text-[9.5px] uppercase tracking-[0.25em] text-cream/60">
             {wasCorrect === true ? "Right" : wasCorrect === false ? "Miss" : "Ninny"}
           </span>
@@ -230,7 +230,7 @@ function CelebrateCard({ m }: { m: MessageShape }) {
     <Row avatar="ninny">
       <div className="max-w-[560px] rounded-[12px] rounded-tl-[2px] bg-gradient-to-br from-gold/[0.12] to-white/[0.03] border border-gold/40 px-4 py-4">
         <div className="flex items-center gap-2 mb-2">
-          <Sparkle size={14} className="text-gold" weight="fill" />
+          <Sparkle size={14} className="text-gold" weight="fill" aria-hidden="true" />
           <span className="font-mono text-[9.5px] uppercase tracking-[0.25em] text-gold">Mastery</span>
         </div>
         <h4 className="font-bebas text-[26px] tracking-wider text-cream leading-tight mb-1">You've got it.</h4>
@@ -245,6 +245,7 @@ function Row({ avatar, children }: { avatar: "ninny" | "user"; children: React.R
   return (
     <div className={`mastery-msg-in flex gap-3 ${avatar === "user" ? "flex-row-reverse" : ""}`}>
       <div
+        aria-hidden="true"
         className={`shrink-0 w-[28px] h-[28px] rounded-full grid place-items-center text-[10px] font-mono tracking-wider ${
           avatar === "ninny"
             ? "bg-[#A855F7]/[0.15] border border-[#A855F7]/30 text-[#A855F7]"

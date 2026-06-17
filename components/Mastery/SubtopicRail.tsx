@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useReducedMotion } from "framer-motion";
 
 /**
  * Right-rail list of subtopic mastery bars. Each row shows the subtopic
@@ -44,6 +45,7 @@ export default function SubtopicRail({ items, activeSubtopicId, className = "" }
 }
 
 function SubtopicRow({ item, active }: { item: SubtopicRailItem; active: boolean }) {
+  const reducedMotion = useReducedMotion();
   const [displayed, setDisplayed] = useState(item.displayPct);
   const rafRef = useRef<number | null>(null);
   const fromRef = useRef(item.displayPct);
@@ -63,6 +65,12 @@ function SubtopicRow({ item, active }: { item: SubtopicRailItem; active: boolean
   }, [item.displayPct]);
 
   useEffect(() => {
+    // Reduced motion: snap to the real value, no rAF tween.
+    if (reducedMotion) {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      setDisplayed(item.displayPct);
+      return;
+    }
     fromRef.current = displayed;
     const target = item.displayPct;
     const start = performance.now();
@@ -77,11 +85,12 @@ function SubtopicRow({ item, active }: { item: SubtopicRailItem; active: boolean
     rafRef.current = requestAnimationFrame(tick);
     return () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [item.displayPct]);
+  }, [item.displayPct, reducedMotion]);
 
   const pct = Math.max(0, Math.min(100, displayed));
   const mastered = pct >= 95;
   const barColor = mastered ? "#FFD700" : pct >= 60 ? "#4A90D9" : pct >= 30 ? "#A855F7" : "#EF4444";
+  const realPct = Math.round(Math.max(0, Math.min(100, item.displayPct)));
 
   return (
     <li
@@ -114,7 +123,7 @@ function SubtopicRow({ item, active }: { item: SubtopicRailItem; active: boolean
       )}
       <div className="mb-1.5 flex items-center justify-between gap-2">
         <span className="text-[13px] text-cream/90 leading-tight truncate block">{item.name}</span>
-        {mastered && (
+        {mastered ? (
           <span
             key={`badge-${celebrateKey}`}
             className={`font-bebas text-[9px] tracking-[0.18em] px-1.5 py-0.5 rounded-full flex-shrink-0 ${celebrateKey > 0 ? "pa-pop-in" : ""}`}
@@ -126,10 +135,26 @@ function SubtopicRow({ item, active }: { item: SubtopicRailItem; active: boolean
           >
             LOCKED
           </span>
+        ) : (
+          <span
+            aria-hidden="true"
+            className="font-mono text-[10px] tabular-nums text-cream/55 flex-shrink-0"
+          >
+            {realPct}%
+          </span>
         )}
       </div>
-      <div className="h-[3px] rounded-full bg-white/[0.05] overflow-hidden">
+      <div
+        role="progressbar"
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={realPct}
+        aria-label={`${item.name} mastery${active ? " (currently drilling)" : ""}`}
+        aria-valuetext={`${realPct} percent${mastered ? ", mastered" : ""}`}
+        className="h-[3px] rounded-full bg-white/[0.05] overflow-hidden"
+      >
         <div
+          aria-hidden="true"
           className="h-full rounded-full transition-[background-color] duration-500"
           style={{ width: `${pct}%`, backgroundColor: barColor }}
         />

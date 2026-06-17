@@ -100,22 +100,23 @@ export default function SessionReportFab({
         aria-label={unlocked ? "Session Report" : `Reach ${UNLOCK_PCT}% mastery to unlock Session Report`}
         title={unlocked ? undefined : `Unlocks at ${UNLOCK_PCT}% mastery`}
         className={`
-          inline-flex items-center gap-2 rounded-full
+          inline-flex items-center gap-2 min-h-[36px] rounded-full
           font-mono uppercase tracking-[0.25em]
           px-3 py-1.5 text-[10px]
-          transition-transform duration-200
+          transition-transform duration-200 motion-reduce:transition-none
           disabled:cursor-not-allowed
+          focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/70 focus-visible:ring-offset-2 focus-visible:ring-offset-navy
           ${unlocked
-            ? "bg-gradient-to-r from-gold to-[#F0B429] text-navy shadow-[0_8px_24px_rgba(255,215,0,0.22)] hover:scale-[1.03] active:scale-[0.98]"
+            ? "bg-gradient-to-r from-gold to-[#F0B429] text-navy shadow-[0_8px_24px_rgba(255,215,0,0.22)] hover:scale-[1.03] active:scale-[0.98] motion-reduce:hover:scale-100 motion-reduce:active:scale-100"
             : "bg-white/[0.05] border border-white/[0.1] text-cream/55 cursor-not-allowed"
           }
         `}
       >
         {!unlocked
-          ? <Lock size={12} weight="fill" />
+          ? <Lock size={12} weight="fill" aria-hidden="true" />
           : isPaid
-            ? <FileText size={14} weight="fill" />
-            : <Lock size={12} weight="fill" />
+            ? <FileText size={14} weight="fill" aria-hidden="true" />
+            : <Lock size={12} weight="fill" aria-hidden="true" />
         }
         <span>
           {downloading
@@ -138,11 +139,35 @@ export default function SessionReportFab({
 // ── Paywall modal ────────────────────────────────────────────────────────────
 function Paywall({ onClose }: { onClose: () => void }) {
   const overlayRef = useRef<HTMLDivElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const closeBtnRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    const previouslyFocused = document.activeElement as HTMLElement | null;
+    closeBtnRef.current?.focus();
+
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") { e.preventDefault(); onClose(); return; }
+      if (e.key !== "Tab") return;
+      const panel = panelRef.current;
+      if (!panel) return;
+      const focusables = panel.querySelectorAll<HTMLElement>(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+      );
+      if (focusables.length === 0) return;
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault(); last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault(); first.focus();
+      }
+    };
     document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      previouslyFocused?.focus?.();
+    };
   }, [onClose]);
 
   return (
@@ -154,18 +179,19 @@ function Paywall({ onClose }: { onClose: () => void }) {
       aria-modal="true"
       aria-labelledby="paywall-title"
     >
-      <div className="relative w-full max-w-md rounded-[14px] border border-gold/30 bg-gradient-to-br from-navy to-[#0a0f1d] p-6 shadow-2xl animate-slide-up">
+      <div ref={panelRef} className="relative w-full max-w-md rounded-[14px] border border-gold/30 bg-gradient-to-br from-navy to-[#0a0f1d] p-6 shadow-2xl animate-slide-up">
         <button
+          ref={closeBtnRef}
           type="button"
           onClick={onClose}
-          aria-label="Close"
-          className="absolute top-3 right-3 text-cream/40 hover:text-cream grid place-items-center w-7 h-7 rounded-full hover:bg-white/[0.05]"
+          aria-label="Close Session Report upgrade dialog"
+          className="absolute top-3 right-3 text-cream/55 hover:text-cream grid place-items-center w-9 h-9 rounded-full hover:bg-white/[0.05] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/70"
         >
-          <X size={14} weight="bold" />
+          <X size={14} weight="bold" aria-hidden="true" />
         </button>
 
         <div className="flex items-center gap-2 mb-2">
-          <Sparkle size={14} className="text-gold" weight="fill" />
+          <Sparkle size={14} className="text-gold" weight="fill" aria-hidden="true" />
           <span className="font-mono text-[9.5px] uppercase tracking-[0.3em] text-gold">
             Pro feature
           </span>
@@ -200,26 +226,26 @@ function Paywall({ onClose }: { onClose: () => void }) {
 
         <div className="flex items-baseline gap-2 mb-5">
           <span className="font-bebas text-[36px] tracking-wider text-gold leading-none tabular-nums">$4.99</span>
-          <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-cream/50">/ month</span>
+          <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-cream/55">/ month</span>
         </div>
 
         <div className="flex gap-2">
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 rounded-full border border-white/[0.1] text-cream/70 hover:text-cream hover:border-white/[0.25] font-mono text-[11px] uppercase tracking-[0.25em] py-2.5 transition-colors"
+            className="flex-1 min-h-[44px] rounded-full border border-white/[0.1] text-cream/75 hover:text-cream hover:border-white/[0.25] font-mono text-[11px] uppercase tracking-[0.25em] py-2.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/60 focus-visible:ring-offset-2 focus-visible:ring-offset-navy"
           >
             Maybe later
           </button>
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 rounded-full bg-gold text-navy hover:bg-gold/90 font-mono text-[11px] uppercase tracking-[0.25em] py-2.5 transition-colors"
+            className="flex-1 min-h-[44px] rounded-full bg-gold text-navy hover:bg-gold/90 font-mono text-[11px] uppercase tracking-[0.25em] py-2.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/70 focus-visible:ring-offset-2 focus-visible:ring-offset-navy"
           >
             Upgrade to Pro
           </button>
         </div>
-        <p className="font-mono text-[9px] uppercase tracking-[0.25em] text-cream/30 text-center mt-4">
+        <p className="font-mono text-[9px] uppercase tracking-[0.25em] text-cream/55 text-center mt-4">
           Billing isn&apos;t live yet · reach out to upgrade today
         </p>
       </div>
