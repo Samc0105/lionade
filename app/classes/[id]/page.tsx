@@ -122,7 +122,7 @@ export default function ClassNotebookPage() {
         <div className="min-h-screen bg-navy text-cream pt-12">
           <SpaceBackground />
           <Navbar />
-          <main className="relative z-10 max-w-[980px] mx-auto px-4 sm:px-6 pt-6 pb-24">
+          <div className="relative z-10 max-w-[980px] mx-auto px-4 sm:px-6 pt-6 pb-24">
             <Link
               href="/classes"
               className="group inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.25em] text-cream/50 hover:text-cream transition-colors"
@@ -171,7 +171,7 @@ export default function ClassNotebookPage() {
                 </div>
               </div>
             )}
-          </main>
+          </div>
         </div>
       </ProtectedRoute>
     );
@@ -183,7 +183,7 @@ export default function ClassNotebookPage() {
         <div className="min-h-screen bg-navy text-cream pt-12">
           <SpaceBackground />
           <Navbar />
-          <main className="max-w-[980px] mx-auto px-4 sm:px-6 pt-6 pb-24">
+          <div className="max-w-[980px] mx-auto px-4 sm:px-6 pt-6 pb-24">
             <div className="h-5 w-24 bg-white/[0.06] rounded-full mb-5 animate-pulse" />
             <div className="h-12 w-72 bg-white/[0.06] rounded-md mb-3 animate-pulse" />
             <div className="h-4 w-48 bg-white/[0.04] rounded mb-8 animate-pulse" />
@@ -192,7 +192,7 @@ export default function ClassNotebookPage() {
                 <div key={i} className="h-24 w-full bg-white/[0.04] rounded-[12px] animate-pulse" />
               ))}
             </div>
-          </main>
+          </div>
         </div>
       </ProtectedRoute>
     );
@@ -221,7 +221,7 @@ export default function ClassNotebookPage() {
         <SpaceBackground />
         <Navbar />
 
-        <main
+        <div
           className="relative z-10 max-w-[980px] mx-auto px-4 sm:px-6 pt-6 pb-12"
           style={{ ["--accent" as string]: cls.color }}
         >
@@ -421,7 +421,7 @@ export default function ClassNotebookPage() {
               onSaved={() => { setShowEditModal(false); void mutate(); }}
             />
           )}
-        </main>
+        </div>
       </div>
     </ProtectedRoute>
   );

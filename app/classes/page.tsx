@@ -54,7 +54,7 @@ export default function ClassesIndexPage() {
         <SpaceBackground />
         <Navbar />
 
-        <main className="relative z-10 max-w-[980px] mx-auto px-4 sm:px-6 pt-6 pb-24">
+        <div className="relative z-10 max-w-[980px] mx-auto px-4 sm:px-6 pt-6 pb-24">
           <header className="mb-8">
             <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-gold mb-2">
               Class Notebook
@@ -104,7 +104,7 @@ export default function ClassesIndexPage() {
               <CreateTile onClick={() => setShowCreate(true)} />
             </div>
           )}
-        </main>
+        </div>
 
         {showCreate && (
           <CreateClassModal

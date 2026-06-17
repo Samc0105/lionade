@@ -167,7 +167,7 @@ export default function AcademiaPage() {
         <Navbar />
 
         <FeatureGate feature="academia">
-        <main className="relative z-10 max-w-[1180px] mx-auto px-4 sm:px-6 pt-6 pb-24">
+        <div className="relative z-10 max-w-[1180px] mx-auto px-4 sm:px-6 pt-6 pb-24">
           {/* ─── Header ─── */}
           <header className="mb-10">
             <div className="flex items-center gap-2 mb-3">
@@ -295,7 +295,7 @@ export default function AcademiaPage() {
             </aside>
             )}
           </div>
-        </main>
+        </div>
         </FeatureGate>
 
         {showCreate && (

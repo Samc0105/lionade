@@ -302,7 +302,7 @@ export default function ProfilePage() {
             </aside>
 
             {/* ── Main content ── */}
-            <main className="flex-1 min-w-0">
+            <div className="flex-1 min-w-0">
               {section === "overview"        && <OverviewSection {...sharedProps} />}
               {section === "edit-profile"    && <EditProfileSection {...sharedProps} />}
               {section === "avatar"          && <AvatarSection {...sharedProps} />}
@@ -312,7 +312,7 @@ export default function ProfilePage() {
               {section === "activity"        && <ActivitySection {...sharedProps} />}
               {section === "notifications"   && <NotificationsSection />}
               {section === "about"           && <AboutLionadeSection />}
-            </main>
+            </div>
           </div>
         </div>
       </div>
@@ -970,18 +970,19 @@ function EditProfileSection({ user, refreshUser }: SharedProps) {
       <Card>
         <div className="space-y-5">
           <div>
-            <label className={labelCls}>First Name / Display Name</label>
-            <input value={firstName} onChange={e => setFirstName(e.target.value)}
+            <label htmlFor="profile-firstname" className={labelCls}>First Name / Display Name</label>
+            <input id="profile-firstname" value={firstName} onChange={e => setFirstName(e.target.value)}
               placeholder="Your name" className={inputCls} />
           </div>
 
           <div>
-            <label className={labelCls}>Username</label>
+            <label htmlFor="profile-username" className={labelCls}>Username</label>
             <div className="relative">
-              <input value={username}
+              <input id="profile-username" value={username}
                 onChange={e => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ""))}
                 placeholder="your_handle"
                 disabled={usernameLocked}
+                aria-describedby="profile-username-hint"
                 className={inputCls + " pr-28" + (usernameLocked ? " opacity-50 cursor-not-allowed" : "")} />
               <span role="status" aria-live="polite">
                 {!usernameLocked && usernameStatus === "checking" && <span className="absolute right-3 top-1/2 -translate-y-1/2 text-cream/55 text-xs">Checking...</span>}
@@ -990,22 +991,22 @@ function EditProfileSection({ user, refreshUser }: SharedProps) {
               </span>
             </div>
             {usernameLocked && usernameUnlockDate ? (
-              <p className="text-amber-300 text-xs mt-1">You can change your username again on {usernameUnlockDate}</p>
+              <p id="profile-username-hint" className="text-amber-300 text-xs mt-1">You can change your username again on {usernameUnlockDate}</p>
             ) : (
-              <p className="text-cream/55 text-xs mt-1">Usernames can only be changed once per year</p>
+              <p id="profile-username-hint" className="text-cream/55 text-xs mt-1">Usernames can only be changed once per year</p>
             )}
           </div>
 
           <div>
-            <label className={labelCls}>Bio <span className={`normal-case font-normal ${bio.length >= 140 ? "text-red-300" : "text-cream/55"}`}>({bio.length}/150)</span></label>
-            <textarea value={bio} onChange={e => setBio(e.target.value.slice(0, 150))}
+            <label htmlFor="profile-bio" className={labelCls}>Bio <span className={`normal-case font-normal ${bio.length >= 140 ? "text-red-300" : "text-cream/55"}`}>({bio.length}/150)</span></label>
+            <textarea id="profile-bio" value={bio} onChange={e => setBio(e.target.value.slice(0, 150))}
               placeholder="Tell the world who you are..." rows={3}
               className={inputCls + " resize-none"} />
           </div>
 
           <div>
-            <label className={labelCls}>Education Level</label>
-            <select value={education} onChange={e => setEducation(e.target.value)}
+            <label htmlFor="profile-education" className={labelCls}>Education Level</label>
+            <select id="profile-education" value={education} onChange={e => setEducation(e.target.value)}
               className="w-full bg-[#0a1020] border border-electric/20 rounded-xl px-4 py-3 text-cream text-sm focus:outline-none focus:border-electric transition-all appearance-none">
               <option value="">Select...</option>
               {EDUCATION_LEVELS.map(l => <option key={l} value={l}>{l}</option>)}
@@ -1013,8 +1014,8 @@ function EditProfileSection({ user, refreshUser }: SharedProps) {
           </div>
 
           <div>
-            <label className={labelCls}>Primary Study Goal</label>
-            <select value={studyGoal} onChange={e => setStudyGoal(e.target.value)}
+            <label htmlFor="profile-studygoal" className={labelCls}>Primary Study Goal</label>
+            <select id="profile-studygoal" value={studyGoal} onChange={e => setStudyGoal(e.target.value)}
               className="w-full bg-[#0a1020] border border-electric/20 rounded-xl px-4 py-3 text-cream text-sm focus:outline-none focus:border-electric transition-all appearance-none">
               <option value="">Select...</option>
               {STUDY_GOALS.map(g => <option key={g} value={g}>{g}</option>)}
@@ -1634,13 +1635,13 @@ function SecuritySection({ user }: SharedProps) {
         <h3 className="font-bebas text-lg text-cream tracking-wider mb-5">CHANGE PASSWORD</h3>
         <div className="space-y-4">
           <div>
-            <label className={labelCls}>Current Password</label>
-            <input type="password" value={currentPw} onChange={e => setCurrentPw(e.target.value)}
+            <label htmlFor="profile-current-pw" className={labelCls}>Current Password</label>
+            <input id="profile-current-pw" type="password" autoComplete="current-password" value={currentPw} onChange={e => setCurrentPw(e.target.value)}
               placeholder="••••••••" className={inputCls} />
           </div>
           <div>
-            <label className={labelCls}>New Password</label>
-            <input type="password" value={newPw} onChange={e => setNewPw(e.target.value)}
+            <label htmlFor="profile-new-pw" className={labelCls}>New Password</label>
+            <input id="profile-new-pw" type="password" autoComplete="new-password" value={newPw} onChange={e => setNewPw(e.target.value)}
               placeholder="Min. 8 characters" className={inputCls} />
             {newPw.length > 0 && (
               <div className="mt-2 space-y-1 px-1">
@@ -1659,8 +1660,8 @@ function SecuritySection({ user }: SharedProps) {
             )}
           </div>
           <div>
-            <label className={labelCls}>Confirm New Password</label>
-            <input type="password" value={confirmPw} onChange={e => setConfirmPw(e.target.value)}
+            <label htmlFor="profile-confirm-pw" className={labelCls}>Confirm New Password</label>
+            <input id="profile-confirm-pw" type="password" autoComplete="new-password" value={confirmPw} onChange={e => setConfirmPw(e.target.value)}
               placeholder="Re-enter new password" className={inputCls} />
             {confirmPw.length > 0 && (
               <p role="status" aria-live="polite" className={`text-xs font-semibold mt-1 ${pwMatch ? "text-green-300" : "text-red-300"}`}>
@@ -1787,11 +1788,12 @@ function DeleteAccountModal({ email, onClose }: { email: string; onClose: () => 
         <p className="text-cream/80 text-sm mb-2">This permanently removes your account, profile, friends, quiz history, and any Fangs you have on hand.</p>
         <p className="text-cream/60 text-xs mb-5">This cannot be undone. If you want to come back later you will need to sign up again.</p>
 
-        <label className="block text-cream/60 text-xs font-bold uppercase tracking-widest mb-1.5">
+        <label htmlFor="delete-confirm-email" className="block text-cream/60 text-xs font-bold uppercase tracking-widest mb-1.5">
           Type your email to confirm
         </label>
         <p className="font-mono text-cream/60 text-xs mb-2">{email}</p>
         <input
+          id="delete-confirm-email"
           type="email"
           value={confirmText}
           onChange={(e) => setConfirmText(e.target.value)}

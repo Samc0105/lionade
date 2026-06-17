@@ -176,7 +176,7 @@ function FormShell() {
       </header>
 
       {/* Form body */}
-      <main className="relative z-10 flex-1 flex items-start sm:items-center justify-center px-6 py-10">
+      <div className="relative z-10 flex-1 flex items-start sm:items-center justify-center px-6 py-10">
         <div className="w-full max-w-md">
           {step === 1 && (
             <Step
@@ -346,7 +346,7 @@ function FormShell() {
             Required to access Academia
           </p>
         </div>
-      </main>
+      </div>
     </div>
   );
 }

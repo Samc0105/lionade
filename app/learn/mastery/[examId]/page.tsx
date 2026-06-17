@@ -534,13 +534,13 @@ export default function MasterySessionPage() {
     return (
       <div className="min-h-screen bg-navy text-cream pt-12">
         <Navbar />
-        <main className="max-w-[720px] mx-auto px-6 py-24 text-center">
+        <div className="max-w-[720px] mx-auto px-6 py-24 text-center">
           <h1 className="font-bebas text-3xl tracking-wider mb-3">Couldn't load this session</h1>
           <p className="text-[14px] text-cream/70 mb-6">{bootError}</p>
           <Link href={backHref} className="inline-block rounded-md font-mono text-[11px] uppercase tracking-[0.25em] text-gold hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/70 focus-visible:ring-offset-2 focus-visible:ring-offset-navy">
             {classIdContext ? "Back to Class" : "Back to Mastery Mode"}
           </Link>
-        </main>
+        </div>
       </div>
     );
   }
@@ -550,14 +550,14 @@ export default function MasterySessionPage() {
       <div className="min-h-screen bg-navy text-cream pt-12">
         <SpaceBackground />
         <Navbar />
-        <main className="max-w-[980px] mx-auto px-6 py-10">
+        <div className="max-w-[980px] mx-auto px-6 py-10">
           <div className="h-5 w-28 bg-white/[0.06] rounded-full mb-5 animate-pulse" />
           <div className="h-12 w-80 bg-white/[0.06] rounded-md mb-4 animate-pulse" />
           <div className="h-[6px] w-full bg-white/[0.06] rounded-full mb-8 animate-pulse" />
           <div className="space-y-3">
             {[0,1,2].map(i => <div key={i} className="h-16 w-full bg-white/[0.04] rounded-lg animate-pulse" />)}
           </div>
-        </main>
+        </div>
       </div>
     );
   }
@@ -696,7 +696,7 @@ export default function MasterySessionPage() {
       {/* Main fills remaining vertical space. min-h-0 on every flex-chain
           parent is essential for flex-1 children to actually constrain their
           height (otherwise flex-grow items can overflow). */}
-      <main className="flex-1 min-h-0 relative z-10 w-full max-w-[1080px] mx-auto px-4 sm:px-6 pt-4 pb-3 flex flex-col">
+      <div className="flex-1 min-h-0 relative z-10 w-full max-w-[1080px] mx-auto px-4 sm:px-6 pt-4 pb-3 flex flex-col">
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_260px] gap-6 flex-1 min-h-0">
           {/* Chat column */}
           <section className="flex flex-col min-h-0" aria-label="Tutoring conversation with Ninny">
@@ -814,7 +814,7 @@ export default function MasterySessionPage() {
             className="hidden lg:flex lg:min-h-0 lg:overflow-y-auto lg:self-start lg:max-h-full"
           />
         </div>
-      </main>
+      </div>
 
       {/* Fixed bottom session-stats bar. Sits ABOVE the mobile nav on phones
           (bottom-14) and at bottom-0 on desktop. The outer h-screen flex

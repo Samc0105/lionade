@@ -177,18 +177,18 @@ export default function LearnPage() {
   const primaryCtaTitle = goalRemaining > 0
     ? (todayCount === 0 ? "Start today's quiz" : "Finish today's goal")
     : goalMetReturning
-    ? "Welcome back — ready for round 2?"
-    : "You're done for today — push further?";
+    ? "Welcome back. Ready for round 2?"
+    : "You're done for today. Push further?";
   const primaryCtaSub = goalRemaining > 0
     ? (todayCount === 0
         ? `${dailyGoal} questions keeps your streak alive`
         : `${goalRemaining} more question${goalRemaining === 1 ? "" : "s"} to hit your goal`)
     : goalMetReturning
     ? (weakestSubject
-        ? `You crushed today's goal earlier — keep the momentum on ${weakestSubject}`
-        : "You crushed today's goal earlier — keep the momentum going")
+        ? `You crushed today's goal earlier. Keep the momentum on ${weakestSubject}`
+        : "You crushed today's goal earlier. Keep the momentum going")
     : weakestSubject
-    ? `Sharpen up — your weakest subject is ${weakestSubject}`
+    ? `Sharpen up. Your weakest subject is ${weakestSubject}`
     : "Daily goal hit. Try a harder difficulty or a new subject.";
 
   // Stagger helper: returns the entrance delay only when motion is allowed.
@@ -354,7 +354,7 @@ export default function LearnPage() {
                 <Link
                   href="/learn/paths"
                   className="group flex items-center gap-3 px-4 py-3 min-h-[44px] rounded-[6px] border border-white/[0.06] hover:bg-white/[0.03] hover:border-gold/30 transition-colors text-left"
-                  aria-label="Subjects — learning paths"
+                  aria-label="Subjects, learning paths"
                 >
                   <BookOpen size={18} weight="regular" color="#3B82F6" aria-hidden="true" className="flex-shrink-0" />
                   <div className="flex-1 min-w-0">
@@ -397,7 +397,7 @@ export default function LearnPage() {
               <Link
                 href="/learn/resume-coach"
                 className="group flex items-center gap-3 px-4 py-3 min-h-[44px] rounded-[6px] border border-white/[0.06] hover:bg-white/[0.03] hover:border-gold/30 transition-colors text-left"
-                aria-label={isPro ? "Resume Coach — Pro feature" : "Resume Coach — Pro feature, locked"}
+                aria-label={isPro ? "Resume Coach, Pro feature" : "Resume Coach, Pro feature, locked"}
               >
                 <Briefcase size={18} weight="fill" color="#FFD700" aria-hidden="true" className="flex-shrink-0" />
                 <div className="flex-1 min-w-0">

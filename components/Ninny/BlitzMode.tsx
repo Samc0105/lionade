@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
+import { useReducedMotion } from "framer-motion";
 import { cdnUrl } from "@/lib/cdn";
 import { weightedShuffle, type MCQQuestion } from "@/lib/ninny";
 import type { NinnyWrongAnswer } from "./MultipleChoiceMode";
@@ -26,6 +27,7 @@ const NINNY_PURPLE = "#A855F7";
 const RECENT_WINDOW = 5;
 
 export default function BlitzMode({ questions, wrongAnswerCounts, playsToday, playsLimit, onComplete }: Props) {
+  const reduceMotion = useReducedMotion();
   // Spaced-repetition shuffle, looped infinitely (deck can repeat in 60s)
   const deck = useMemo(() => {
     if (wrongAnswerCounts && wrongAnswerCounts.size > 0) {
@@ -129,6 +131,15 @@ export default function BlitzMode({ questions, wrongAnswerCounts, playsToday, pl
     secondsLeft <= 10 ? "#EF4444" : secondsLeft <= 20 ? "#FBBF24" : "#FFD700";
   const timePct = (secondsLeft / BLITZ_DURATION_SEC) * 100;
 
+  // Coarse, threshold-only announcement for screen readers. Announcing every
+  // second would flood the SR queue, so we only speak at meaningful marks.
+  const timeAnnouncement = useMemo(() => {
+    if (secondsLeft === 30) return "30 seconds remaining";
+    if (secondsLeft === 10) return "10 seconds remaining";
+    if (secondsLeft === 5) return "5 seconds remaining";
+    return "";
+  }, [secondsLeft]);
+
   return (
     <div className="w-full max-w-2xl mx-auto animate-slide-up">
       {/* HUD: timer, score, streak */}
@@ -145,13 +156,22 @@ export default function BlitzMode({ questions, wrongAnswerCounts, playsToday, pl
           </p>
           <p
             className="font-bebas text-2xl tracking-wider"
+            role="timer"
+            aria-live="off"
+            aria-label={`${secondsLeft} seconds remaining`}
             style={{
               color: timeColor,
-              animation: secondsLeft <= 10 ? "pulse 1s ease-in-out infinite" : undefined,
+              animation:
+                secondsLeft <= 10 && !reduceMotion
+                  ? "pulse 1s ease-in-out infinite"
+                  : undefined,
             }}
           >
             {secondsLeft}s
           </p>
+          <span className="sr-only" role="status" aria-live="assertive">
+            {timeAnnouncement}
+          </span>
         </div>
 
         {/* Score */}
@@ -231,8 +251,8 @@ export default function BlitzMode({ questions, wrongAnswerCounts, playsToday, pl
             onClick={() => handleAnswer(i)}
             disabled={feedback !== null}
             className="text-left px-4 py-3 rounded-xl border font-syne text-sm
-              bg-white/5 hover:bg-white/10 hover:border-gold/40 active:scale-[0.98]
-              transition-all duration-150 text-cream"
+              bg-white/5 hover:bg-white/10 hover:border-gold/40 motion-safe:active:scale-[0.98]
+              transition-all duration-150 text-cream disabled:cursor-not-allowed"
             style={{ borderColor: "rgba(255,255,255,0.10)" }}
           >
             <span className="font-bebas text-gold mr-2 tracking-wider">

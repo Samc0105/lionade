@@ -278,7 +278,7 @@ export default function SettingsLayout({
         <SpaceBackground />
         <Navbar />
 
-        <main className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 pt-8 pb-24">
+        <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 pt-8 pb-24">
           {/* Header */}
           <header className="mb-8 animate-slide-up transform-gpu">
             <div className="flex items-center gap-2 mb-2">
@@ -303,7 +303,7 @@ export default function SettingsLayout({
               {children}
             </div>
           </div>
-        </main>
+        </div>
       </div>
     </ProtectedRoute>
   );

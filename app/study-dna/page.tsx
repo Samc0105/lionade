@@ -87,7 +87,7 @@ export default function StudyDnaPage() {
         <SpaceBackground />
         <Navbar />
 
-        <main className="relative z-10 max-w-[1080px] mx-auto px-4 sm:px-6 pt-6 pb-24">
+        <div className="relative z-10 max-w-[1080px] mx-auto px-4 sm:px-6 pt-6 pb-24">
           <Link
             href="/dashboard"
             className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.25em] text-cream/50 hover:text-cream transition-colors mb-4"
@@ -135,7 +135,7 @@ export default function StudyDnaPage() {
               <Heatmap heatmap={data.heatmap} />
             </>
           )}
-        </main>
+        </div>
 
         {data && (
           <ShareCard
