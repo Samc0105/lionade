@@ -14,6 +14,18 @@ html {
   html {
     scroll-behavior: auto;
   }
+
+  /* Hero username shimmer runs an infinite loop — freeze it (WCAG 2.3.3). */
+  .shimmer-text {
+    animation: none;
+  }
+
+  /* Tailwind ships animate-pulse / animate-spin without a reduced-motion
+     gate. A static spinner/pulse is the correct motion-sensitive behavior. */
+  .animate-pulse,
+  .animate-spin {
+    animation: none !important;
+  }
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -2189,6 +2201,14 @@ body {
     opacity: 0.45;
     filter: saturate(0.6);
   }
+}
+
+/* Keyboard parity: a focused ticket gets the same lift + halo as on hover.
+   Outside the hover media query so it applies to keyboard users on any
+   pointer type. */
+.games-ticket:focus-within {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 44px rgba(0, 0, 0, 0.55);
 }
 
 /* ─── Roardle: 3 letter tiles flip on loop with staggered delay ─── */

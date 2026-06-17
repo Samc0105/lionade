@@ -91,7 +91,7 @@ export default function ApExamsPage() {
               <h1 className="font-bebas text-4xl sm:text-5xl tracking-wider" style={{ color: "#EC4899" }}>
                 AP EXAMS
               </h1>
-              <p className="text-cream/40 text-sm font-syne">10 AP subjects available</p>
+              <p className="text-cream/55 text-sm font-syne">10 AP subjects available</p>
             </div>
           </div>
 
@@ -142,7 +142,7 @@ export default function ApExamsPage() {
                       </>
                     ) : best ? (
                       <>
-                        <p className="text-cream/50 text-[11px]">
+                        <p className="text-cream/55 text-[11px]">
                           Best: <span className="font-bold text-cream/70">{best.correct}/{best.total}</span>
                         </p>
                         <div className="w-full h-1.5 bg-white/5 rounded-full mt-1.5 overflow-hidden">
@@ -153,7 +153,7 @@ export default function ApExamsPage() {
                         </div>
                       </>
                     ) : (
-                      <p className="text-cream/45 text-[11px]">Not attempted yet</p>
+                      <p className="text-cream/55 text-[11px]">Not attempted yet</p>
                     )}
                   </div>
                 </button>

@@ -1053,7 +1053,7 @@ export default function GamesPage() {
             <h2 className="font-bebas text-3xl text-cream tracking-wider text-center mb-1">
               <RevealText text="TIMELINE DROP" color="#EEF4FF" charDelay={0.045} />
             </h2>
-            <p className="text-cream/55 text-xs text-center mb-6 font-syne">Drag events into chronological order (earliest first)</p>
+            <p className="text-cream/55 text-xs text-center mb-6 font-syne">Drag events into chronological order, earliest first. Or use the move buttons on each row to reorder with the keyboard.</p>
 
             <ol className="space-y-2 mb-6" data-timeline-list aria-label="Events to order, earliest first">
               {tlOrder.map((eventIdx, pos) => {
@@ -1099,6 +1099,39 @@ export default function GamesPage() {
                       <p className="text-cream text-sm font-semibold">{ev.event}</p>
                       {tlSubmitted && <p className="text-cream/55 text-xs mt-0.5">{ev.date}</p>}
                     </div>
+                    {/* Keyboard/SR reorder controls. The row reorders by pointer
+                        drag, which a keyboard-only or screen-reader user can't
+                        use (WCAG 2.1.1 Keyboard, level A). These real buttons
+                        give the same move-earlier / move-later affordance, are
+                        disabled at the ends, and stop pointer-down from also
+                        starting a drag on the parent <li>. Hidden once the round
+                        is submitted (the order is locked). */}
+                    {!tlSubmitted && (
+                      <div className="flex items-center gap-1" style={{ pointerEvents: "auto" }}>
+                        <button
+                          type="button"
+                          aria-label={`Move ${ev.event} earlier`}
+                          disabled={pos === 0}
+                          onPointerDown={(e) => e.stopPropagation()}
+                          onClick={() => moveTimelineItem(pos, pos - 1)}
+                          className="w-11 h-11 flex items-center justify-center rounded-lg text-cream/70 transition-all active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-navy"
+                          style={{ background: "var(--game-key-bg, rgba(255,255,255,0.06))" }}
+                        >
+                          <span aria-hidden="true" className="text-base leading-none">↑</span>
+                        </button>
+                        <button
+                          type="button"
+                          aria-label={`Move ${ev.event} later`}
+                          disabled={pos === tlOrder.length - 1}
+                          onPointerDown={(e) => e.stopPropagation()}
+                          onClick={() => moveTimelineItem(pos, pos + 1)}
+                          className="w-11 h-11 flex items-center justify-center rounded-lg text-cream/70 transition-all active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-navy"
+                          style={{ background: "var(--game-key-bg, rgba(255,255,255,0.06))" }}
+                        >
+                          <span aria-hidden="true" className="text-base leading-none">↓</span>
+                        </button>
+                      </div>
+                    )}
                     {tlSubmitted && (
                       <span className="text-lg flex items-center pointer-events-none" style={{ color: isCorrect ? "#86EFAC" : "#FCA5A5" }}>
                         {isCorrect ? (
@@ -1959,8 +1992,8 @@ export default function GamesPage() {
             className="mb-3 flex items-center gap-3 animate-slide-up"
             style={{ animationDelay: "0.12s" }}
           >
-            <span
-              className="font-mono text-[10px] uppercase tracking-[0.28em] text-gold/85 px-2.5 py-1 rounded-sm"
+            <h2
+              className="font-mono text-[10px] uppercase tracking-[0.28em] text-gold/85 px-2.5 py-1 rounded-sm m-0"
               style={{
                 background: "linear-gradient(90deg, rgba(255,215,0,0.16) 0%, rgba(255,215,0,0.04) 100%)",
                 border: "1px solid rgba(255,215,0,0.35)",
@@ -1968,7 +2001,7 @@ export default function GamesPage() {
               }}
             >
               play together
-            </span>
+            </h2>
             <span className="font-serif italic text-cream/35 text-xs">
               invite friends · biggest house draws
             </span>
@@ -1994,15 +2027,15 @@ export default function GamesPage() {
             className="mb-3 flex items-center gap-3 animate-slide-up"
             style={{ animationDelay: "0.30s" }}
           >
-            <span
-              className="font-mono text-[10px] uppercase tracking-[0.28em] text-cream/55 px-2.5 py-1 rounded-sm"
+            <h2
+              className="font-mono text-[10px] uppercase tracking-[0.28em] text-cream/55 px-2.5 py-1 rounded-sm m-0"
               style={{
                 background: "rgba(255,255,255,0.03)",
                 border: "1px solid rgba(255,255,255,0.08)",
               }}
             >
               solo lots
-            </span>
+            </h2>
             <span className="font-serif italic text-cream/30 text-xs">
               quick pulls · daily limits · big Fang ratios
             </span>

@@ -663,7 +663,7 @@ export default function QuizPage() {
                 <p className="text-[13px] text-cream leading-tight">
                   Resume your {resumePrompt.subject} quiz
                 </p>
-                <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-cream/50">
+                <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-cream/55">
                   Question {resumePrompt.currentIndex + 1} of {resumePrompt.questions.length}
                 </p>
               </div>
@@ -691,7 +691,7 @@ export default function QuizPage() {
                   setResumePrompt(null);
                   void apiPost("/api/quiz/state", { game_type: "quiz", state: null });
                 }}
-                className="font-mono text-[10px] uppercase tracking-[0.22em] text-cream/50 hover:text-cream"
+                className="font-mono text-[10px] uppercase tracking-[0.22em] text-cream/55 hover:text-cream"
               >
                 Start fresh
               </button>
@@ -925,7 +925,7 @@ export default function QuizPage() {
                       <div className="pt-3 border-t border-white/5">
                         {bestScore ? (
                           <>
-                            <p className="text-cream/50 text-[11px]">Best: <span className="font-bold text-cream/70">{bestScore.correct}/{bestScore.total}</span></p>
+                            <p className="text-cream/55 text-[11px]">Best: <span className="font-bold text-cream/70">{bestScore.correct}/{bestScore.total}</span></p>
                             <div className="w-full h-1.5 bg-white/5 rounded-full mt-1.5 overflow-hidden">
                               <div className="h-full rounded-full transition-all duration-500" style={{ width: `${subjectAccuracy}%`, background: color }} />
                             </div>
@@ -1313,7 +1313,7 @@ function ResultsScreen({
                   charDelay={0.04}
                 />
               </p>
-              <p className="text-cream/50 text-xs mt-0.5">
+              <p className="text-cream/55 text-xs mt-0.5">
                 Milestone bonus added to your wallet
               </p>
             </div>
@@ -1338,7 +1338,7 @@ function ResultsScreen({
             <Fire size={28} weight="fill" color="#FFD700" aria-hidden="true" />
             <div className="text-left">
               <p className="font-bebas text-lg text-[#FFD700] tracking-wider leading-none">3 QUIZZES IN A ROW!</p>
-              <p className="text-cream/50 text-xs mt-0.5">Bonus +{bonusFangs} fangs added to your wallet</p>
+              <p className="text-cream/55 text-xs mt-0.5">Bonus +{bonusFangs} fangs added to your wallet</p>
             </div>
             <span className="font-bebas text-2xl text-[#FFD700] ml-auto inline-flex items-center gap-1">+{bonusFangs} <Coin size={20} weight="fill" aria-hidden="true" /></span>
           </div>
@@ -1378,7 +1378,7 @@ function ResultsScreen({
                 <p className="font-bebas text-4xl leading-none" style={{ color: s.accent }}>
                   {s.isCoin ? `+${s.value}` : s.value}
                 </p>
-                <p className="text-cream/35 text-[11px] uppercase tracking-wider mt-1.5">{s.label}</p>
+                <p className="text-cream/55 text-[11px] uppercase tracking-wider mt-1.5">{s.label}</p>
               </div>
             );
           })}
@@ -1508,7 +1508,7 @@ function ResultsScreen({
             >
               <Check size={40} weight="bold" color="#2ECC71" aria-hidden="true" className="mb-3" />
               <h2 className="font-bebas text-2xl text-cream tracking-wider mb-1">FLAWLESS RUN</h2>
-              <p className="text-cream/50 text-sm leading-relaxed max-w-xs">
+              <p className="text-cream/55 text-sm leading-relaxed max-w-xs">
                 No mistakes to review. Every answer landed. Keep the streak going.
               </p>
             </div>
@@ -1552,7 +1552,7 @@ function ResultsScreen({
                       const isCorrectOpt = oi === m.correctIndex;
                       let bg = "rgba(255,255,255,0.02)";
                       let border = "rgba(255,255,255,0.06)";
-                      let textColor = "rgba(238,244,255,0.35)";
+                      let textColor = "rgba(238,244,255,0.55)";
                       if (isCorrectOpt) { bg = "rgba(46,204,113,0.10)"; border = "rgba(46,204,113,0.30)"; textColor = "#2ECC71"; }
                       else if (isUserPick) { bg = "rgba(231,76,60,0.10)"; border = "rgba(231,76,60,0.30)"; textColor = "#E74C3C"; }
                       return (

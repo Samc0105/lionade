@@ -152,6 +152,88 @@ function timeAgo(dateStr: string | null): string {
   return `${days}d ago`;
 }
 
+// Selector for the tabbable controls inside a dialog. Disabled controls and
+// elements pulled out of the tab order (tabindex=-1) are excluded so the trap
+// only cycles real stops.
+const FOCUSABLE_SELECTOR = [
+  "a[href]",
+  "button:not([disabled])",
+  "input:not([disabled])",
+  "select:not([disabled])",
+  "textarea:not([disabled])",
+  '[tabindex]:not([tabindex="-1"])',
+].join(",");
+
+// Modal focus management — used by the Nudge, Challenge, and Add-Friend
+// dialogs. When `active` flips true it: (1) remembers the element that had
+// focus (the triggering control), (2) optionally moves focus to the first
+// interactive control inside the dialog, and (3) traps Tab / Shift+Tab so
+// focus can't escape to the page behind the modal. When `active` flips false
+// it restores focus to the triggering control. Escape handling stays in the
+// existing per-modal effects.
+function useDialogFocus(
+  ref: React.RefObject<HTMLElement | null>,
+  active: boolean,
+  autoFocusFirst: boolean,
+) {
+  // Remember the trigger across the open lifetime without re-running the
+  // open effect when it changes.
+  const triggerRef = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    if (!active) return;
+    const container = ref.current;
+    if (!container) return;
+
+    triggerRef.current = document.activeElement as HTMLElement | null;
+
+    if (autoFocusFirst) {
+      const first = container.querySelector<HTMLElement>(FOCUSABLE_SELECTOR);
+      // Defer to next frame so the slide-up animation has mounted children.
+      requestAnimationFrame(() => first?.focus());
+    }
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== "Tab") return;
+      const nodes = container.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR);
+      if (nodes.length === 0) {
+        e.preventDefault();
+        return;
+      }
+      const firstEl = nodes[0];
+      const lastEl = nodes[nodes.length - 1];
+      const activeEl = document.activeElement as HTMLElement | null;
+
+      // Focus sitting outside the dialog (or on the dialog itself) — pull it
+      // back to the appropriate edge.
+      if (!activeEl || !container.contains(activeEl)) {
+        e.preventDefault();
+        (e.shiftKey ? lastEl : firstEl).focus();
+        return;
+      }
+      if (e.shiftKey && activeEl === firstEl) {
+        e.preventDefault();
+        lastEl.focus();
+      } else if (!e.shiftKey && activeEl === lastEl) {
+        e.preventDefault();
+        firstEl.focus();
+      }
+    };
+
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      // Restore focus to the trigger on close. Guard against a stale node
+      // (e.g. the trigger unmounted) by checking it's still connected.
+      const trigger = triggerRef.current;
+      if (trigger && trigger.isConnected) trigger.focus();
+      triggerRef.current = null;
+    };
+    // ref is a stable ref object; depend on the open flag + autofocus choice.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [active, autoFocusFirst]);
+}
+
 // ── Component ────────────────────────────────────────────────
 
 export default function SocialPage() {
@@ -242,6 +324,14 @@ export default function SocialPage() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const msgInputRef = useRef<HTMLInputElement>(null);
+
+  // Dialog containers — focus trap + focus restore (a11y). Each modal moves
+  // focus to its first control on open, traps Tab while open, and restores
+  // focus to its triggering control on close. Add-Friend keeps its own input
+  // autoFocus, so the hook there only traps + restores (autoFocusFirst=false).
+  const nudgeDialogRef = useRef<HTMLDivElement>(null);
+  const challengeDialogRef = useRef<HTMLDivElement>(null);
+  const addFriendDialogRef = useRef<HTMLDivElement>(null);
 
   // userStats is fetched purely so the navbar/dashboard SWR cache stays
   // hot. The social page itself doesn't currently render the viewer's own
@@ -788,6 +878,14 @@ export default function SocialPage() {
   const squadProgress = circle.reduce((s, c) => s + c.coinsThisWeek, 0);
   const squadPct = Math.min(100, (squadProgress / squadTarget) * 100);
 
+  // ── Dialog focus management ────────────────────────────────
+  // Nudge + Challenge auto-focus their first control; Add-Friend keeps its
+  // own input autoFocus (so we don't double-focus / fight it) and only traps
+  // + restores. All three restore focus to the trigger on close.
+  useDialogFocus(nudgeDialogRef, !!nudgeTarget, true);
+  useDialogFocus(challengeDialogRef, !!challengeTarget, true);
+  useDialogFocus(addFriendDialogRef, showAddFriendModal, false);
+
   // ══════════════════════════════════════════════════════════
   // RENDER
   // ══════════════════════════════════════════════════════════
@@ -809,7 +907,7 @@ export default function SocialPage() {
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
                 placeholder="Search friends..."
-                className="flex-1 min-w-0 bg-white/[0.03] border border-white/[0.06] rounded-lg px-3 py-2 text-sm text-cream placeholder:text-cream/45 focus:outline-none focus:border-electric/40 focus-visible:ring-2 focus-visible:ring-electric/30 transition"
+                className="flex-1 min-w-0 bg-white/[0.03] border border-white/[0.06] rounded-lg px-3 py-2 text-sm text-cream placeholder:text-cream/55 focus:outline-none focus:border-electric/40 focus-visible:ring-2 focus-visible:ring-electric/30 transition"
               />
               <button
                 type="button"
@@ -878,7 +976,7 @@ export default function SocialPage() {
                   <div className="py-12 px-6 text-center flex flex-col items-center gap-2.5">
                     <CheckCircle size={28} weight="fill" className="text-electric/60" aria-hidden="true" />
                     <p className="text-cream/70 text-sm font-semibold">You're all caught up</p>
-                    <p className="text-cream/40 text-xs">New activity from friends shows up here.</p>
+                    <p className="text-cream/55 text-xs">New activity from friends shows up here.</p>
                   </div>
                 ) : (
                   socialNotifs.map(n => (
@@ -904,8 +1002,8 @@ export default function SocialPage() {
                         <p className={`text-xs font-semibold ${n.read ? "text-cream/50" : "text-cream"}`}>
                           {n.title}
                         </p>
-                        {n.message && <p className="text-[10px] text-cream/45 mt-0.5 truncate">{n.message}</p>}
-                        <p className="text-[9px] text-cream/35 mt-1">
+                        {n.message && <p className="text-[10px] text-cream/55 mt-0.5 truncate">{n.message}</p>}
+                        <p className="text-[9px] text-cream/55 mt-1">
                           {(() => {
                             const diff = Date.now() - new Date(n.created_at).getTime();
                             const mins = Math.floor(diff / 60000);
@@ -1004,7 +1102,7 @@ export default function SocialPage() {
                   ) : (
                     <>
                       <p className="text-cream/80 text-sm font-semibold">Build your circle</p>
-                      <p className="font-serif italic text-cream/40 text-xs max-w-[200px]">
+                      <p className="font-serif italic text-cream/55 text-xs max-w-[200px]">
                         tap the gold + up top to find someone by username
                       </p>
                       <button
@@ -1069,7 +1167,7 @@ export default function SocialPage() {
                           {tier.name}
                         </span>
                       </div>
-                      <p className="font-mono text-[10px] mt-0.5 text-cream/40 truncate">
+                      <p className="font-mono text-[10px] mt-0.5 text-cream/55 truncate">
                         {friend.is_online ? (
                           <span className="text-green-400/80">Online now</span>
                         ) : (
@@ -1158,7 +1256,7 @@ export default function SocialPage() {
                               aria-hidden="true"
                             />
                           )}
-                          <p className="font-mono text-[9px] uppercase tracking-[0.25em] text-cream/45">
+                          <p className="font-mono text-[9px] uppercase tracking-[0.25em] text-cream/55">
                             {chip.label}
                           </p>
                           <p className="font-bebas text-2xl tabular-nums mt-0.5" style={{ color: chip.accent }}>
@@ -1279,7 +1377,7 @@ export default function SocialPage() {
                           }}
                         />
                       </div>
-                      <p className="mt-2 font-serif italic text-cream/35 text-xs">
+                      <p className="mt-2 font-serif italic text-cream/55 text-xs">
                         {squadPct >= 100
                           ? "goal crushed. circle unlocked a 50 Fang bonus."
                           : `${Math.round(squadPct)}% there · every quiz counts toward the circle total`}
@@ -1453,7 +1551,7 @@ export default function SocialPage() {
                                       <span className="text-cream">{item.friendUsername}</span>
                                       <span className="text-cream/60 font-normal"> {item.description ?? `earned Fangs from ${meta.label}`}</span>
                                     </p>
-                                    <p className="text-cream/40 text-[10px] mt-1 font-mono uppercase tracking-wider">
+                                    <p className="text-cream/55 text-[10px] mt-1 font-mono uppercase tracking-wider">
                                       {meta.label} · {timeAgo(item.createdAt)}
                                     </p>
                                   </div>
@@ -1571,7 +1669,7 @@ export default function SocialPage() {
                       <p className="text-cream/80 text-sm font-semibold">
                         Say hi to {selectedFriend.username}
                       </p>
-                      <p className="font-serif italic text-cream/40 text-xs max-w-[220px]">
+                      <p className="font-serif italic text-cream/55 text-xs max-w-[220px]">
                         first messages are weird. a {`"yo"`} works.
                       </p>
                     </div>
@@ -1622,7 +1720,7 @@ export default function SocialPage() {
                             borderBottomLeftRadius: "4px",
                           }}>
                           <p className="text-cream text-sm leading-relaxed">{msg.content}</p>
-                          <p className={`font-mono text-[9px] mt-1 tabular-nums ${isMine ? "text-gold/45 text-right" : "text-cream/40"}`}>
+                          <p className={`font-mono text-[9px] mt-1 tabular-nums ${isMine ? "text-gold/60 text-right" : "text-cream/55"}`}>
                             {new Date(msg.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                           </p>
                         </div>
@@ -1652,7 +1750,7 @@ export default function SocialPage() {
                       autoComplete="off"
                       autoCorrect="off"
                       spellCheck={true}
-                      className="social-msg-input flex-1 min-w-0 bg-white/[0.04] border border-white/[0.08] rounded-xl px-4 py-2.5 text-sm text-cream placeholder:text-cream/40 focus:outline-none focus:border-electric/40 transition"
+                      className="social-msg-input flex-1 min-w-0 bg-white/[0.04] border border-white/[0.08] rounded-xl px-4 py-2.5 text-sm text-cream placeholder:text-cream/55 focus:outline-none focus:border-electric/40 transition"
                     />
                     <button
                       type="submit"
@@ -1681,6 +1779,7 @@ export default function SocialPage() {
           >
             <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" aria-hidden="true" />
             <div
+              ref={nudgeDialogRef}
               role="dialog"
               aria-modal="true"
               aria-label={`Nudge ${nudgeTarget.username}`}
@@ -1743,6 +1842,7 @@ export default function SocialPage() {
           >
             <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" aria-hidden="true" />
             <div
+              ref={challengeDialogRef}
               role="dialog"
               aria-modal="true"
               aria-label={`Challenge ${challengeTarget.username} to an arena match`}
@@ -1811,6 +1911,7 @@ export default function SocialPage() {
         {/* ═══ Add-Friend Modal ═══ */}
         {showAddFriendModal && (
           <div
+            ref={addFriendDialogRef}
             className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-slide-up"
             role="dialog"
             aria-modal="true"
@@ -1951,7 +2052,7 @@ export default function SocialPage() {
                                 </button>
                               ) : u.relationship === "outgoing" ? (
                                 <span
-                                  className="flex-shrink-0 text-[10px] font-bold px-2.5 py-1.5 rounded bg-white/[0.04] text-cream/45 inline-flex items-center gap-1"
+                                  className="flex-shrink-0 text-[10px] font-bold px-2.5 py-1.5 rounded bg-white/[0.04] text-cream/55 inline-flex items-center gap-1"
                                   aria-label={`Friend request to ${u.username} pending`}
                                 >
                                   Requested
@@ -1994,14 +2095,14 @@ export default function SocialPage() {
               <div className="px-5 pt-5 pb-5">
                 <p className="text-cream/60 text-[10px] font-bold uppercase tracking-widest mb-3 inline-flex items-center gap-2">
                   Sent Requests
-                  <span className="text-cream/40 font-mono normal-case tracking-normal text-[10px]">
+                  <span className="text-cream/55 font-mono normal-case tracking-normal text-[10px]">
                     ({outgoingRequests.length})
                   </span>
                 </p>
                 {outgoingRequests.length === 0 ? (
                   <div className="py-6 text-center rounded-lg" style={{ background: "rgba(255,255,255,0.02)" }}>
-                    <p className="text-cream/45 text-xs">No pending requests</p>
-                    <p className="text-cream/30 text-[10px] mt-1 font-mono">Search above to add a friend</p>
+                    <p className="text-cream/55 text-xs">No pending requests</p>
+                    <p className="text-cream/55 text-[10px] mt-1 font-mono">Search above to add a friend</p>
                   </div>
                 ) : (
                   <div className="space-y-2 max-h-72 overflow-y-auto">
@@ -2023,7 +2124,7 @@ export default function SocialPage() {
                             <p className="text-cream text-xs font-semibold truncate">{req.username}</p>
                             <p className="text-[10px] inline-flex items-center gap-1" style={{ color: tier.color }}>
                               <tier.Icon size={10} weight="fill" color={tier.color} aria-hidden="true" />
-                              {tier.name} &middot; <span className="text-cream/45">Pending</span>
+                              {tier.name} &middot; <span className="text-cream/55">Pending</span>
                             </p>
                           </div>
                           <button

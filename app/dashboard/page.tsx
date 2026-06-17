@@ -77,7 +77,7 @@ function CircleStat({ value, label, icon, color, size = 90 }: {
           <span className="font-bebas text-lg leading-none" style={{ color }}>{value}</span>
         </div>
         {/* Orbiting dot */}
-        <div className="absolute inset-0 rounded-full" style={{ animation: "orbit-stat 8s linear infinite" }}>
+        <div className="orbit-stat-dot absolute inset-0 rounded-full" style={{ animation: "orbit-stat 8s linear infinite" }}>
           <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full" style={{ background: color, boxShadow: `0 0 6px ${color}` }} />
         </div>
       </div>
@@ -465,6 +465,7 @@ function DashboardContent() {
           .bet-win-numeral { animation: none !important; transform: none !important; opacity: 1 !important; filter: none !important; }
           .bet-loss-rise { animation: none !important; opacity: 1 !important; transform: none !important; }
           .dash-lift:hover { transform: none !important; }
+          .orbit-stat-dot { animation: none !important; }
         }
       `}</style>
 
@@ -503,7 +504,7 @@ function DashboardContent() {
             />
             <div className="flex items-start justify-between gap-4 relative">
               <div>
-                <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-electric/55 mb-1.5">
+                <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-electric mb-1.5">
                   Command Bridge
                 </p>
                 <h1 className="font-bebas text-4xl sm:text-5xl text-cream tracking-wider leading-[0.95]">
@@ -516,7 +517,7 @@ function DashboardContent() {
               <div className="hidden sm:flex flex-col items-end gap-1.5 flex-shrink-0">
                 <p className="text-cream/30 text-[11px] font-mono tracking-wider uppercase">{today}</p>
                 <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold px-3 py-1 rounded-full bg-electric/10 text-electric/85 border border-electric/20">
-                  <span className="w-1.5 h-1.5 rounded-full bg-electric animate-pulse" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-electric motion-safe:animate-pulse" aria-hidden="true" />
                   Ready to study
                 </span>
               </div>
@@ -536,7 +537,7 @@ function DashboardContent() {
                   <Fire size={16} weight="fill" color="#E67E22" className="mx-auto mb-0.5" aria-hidden="true" />
                   <span className="font-bebas text-lg leading-none" style={{ color: "#E67E22" }}>{statsReady ? <CountUp id="dash-streak" value={streak} duration={400} /> : <span className="text-cream/30">{"—"}</span>}</span>
                 </div>
-                <div className="absolute inset-0 rounded-full" style={{ animation: "orbit-stat 8s linear infinite" }}>
+                <div className="orbit-stat-dot absolute inset-0 rounded-full" style={{ animation: "orbit-stat 8s linear infinite" }}>
                   <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full" style={{ background: "#E67E22", boxShadow: `0 0 6px #E67E22` }} />
                 </div>
               </div>
@@ -906,10 +907,12 @@ function DashboardContent() {
                         <span className="font-mono text-cream/45 text-[9px] uppercase tracking-[0.22em] block mb-1.5">Stake</span>
                         <div className="flex gap-1.5" role="group" aria-label="Choose stake amount">
                           {[10, 25, 50].map(amt => (
-                            <button key={amt} onClick={() => setBetStake(amt)}
-                              className={`px-3 py-1.5 rounded-full text-[11px] font-bold transition-all duration-200 ${betStake === amt ? "text-navy" : "text-cream/50 hover:text-cream/70"}`}
+                            <button key={amt} type="button" onClick={() => setBetStake(amt)}
+                              aria-pressed={betStake === amt}
+                              aria-label={`Stake ${amt} Fangs`}
+                              className={`px-3 py-1.5 rounded-full text-[11px] font-bold transition-all duration-200 active:scale-95 ${betStake === amt ? "text-navy" : "text-cream/50 hover:text-cream/80 hover:bg-white/[0.1]"}`}
                               style={betStake === amt ? { background: "linear-gradient(90deg, #FFD700, #FFA500)", boxShadow: "0 0 8px rgba(255,215,0,0.3)" } : { background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)" }}>
-                              {amt} <img src={cdnUrl("/F.png")} alt="Fangs" className="w-4 h-4 object-contain inline" />
+                              {amt} <img src={cdnUrl("/F.png")} alt="" aria-hidden="true" className="w-4 h-4 object-contain inline" />
                             </button>
                           ))}
                         </div>
@@ -918,11 +921,13 @@ function DashboardContent() {
                         <span className="font-mono text-cream/45 text-[9px] uppercase tracking-[0.22em] block mb-1.5">Target</span>
                         <div className="flex gap-1.5" role="group" aria-label="Choose target score">
                           {[7, 8, 9, 10].map(t => (
-                            <button key={t} onClick={() => setBetTarget(t)}
-                              className={`flex flex-col items-center gap-0.5 px-2.5 py-1.5 rounded-2xl text-[11px] font-bold transition-all duration-200 ${betTarget === t ? "text-navy" : "text-cream/50 hover:text-cream/70"}`}
+                            <button key={t} type="button" onClick={() => setBetTarget(t)}
+                              aria-pressed={betTarget === t}
+                              aria-label={`Target ${t} out of 10, ${BET_MULTIPLIERS[t]} times payout`}
+                              className={`flex flex-col items-center gap-0.5 px-2.5 py-1.5 rounded-2xl text-[11px] font-bold transition-all duration-200 active:scale-95 ${betTarget === t ? "text-navy" : "text-cream/50 hover:text-cream/80 hover:bg-white/[0.1]"}`}
                               style={betTarget === t ? { background: "linear-gradient(90deg, #4A90D9, #6AABF0)", boxShadow: "0 0 8px rgba(74,144,217,0.3)" } : { background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)" }}>
-                              <span className="leading-none">{t}/10</span>
-                              <span className={`font-mono leading-none text-[8.5px] tracking-[0.18em] uppercase ${betTarget === t ? "text-navy/70" : "text-gold/70"}`}>
+                              <span className="leading-none" aria-hidden="true">{t}/10</span>
+                              <span className={`font-mono leading-none text-[8.5px] tracking-[0.18em] uppercase ${betTarget === t ? "text-navy/70" : "text-gold/70"}`} aria-hidden="true">
                                 {BET_MULTIPLIERS[t]}x
                               </span>
                             </button>
@@ -1670,11 +1675,11 @@ function DashboardContent() {
                       <div className="flex flex-wrap gap-2">
                         <Link
                           href={weakSubject ? `/quiz?subject=${encodeURIComponent(weakSubject)}` : "/learn"}
-                          className="text-[11px] font-semibold py-1.5 px-3 rounded-full border border-electric/20 text-electric/60 bg-electric/5 hover:bg-electric/10 transition-colors"
+                          className="text-[11px] font-semibold py-1.5 px-3 rounded-full border border-electric/20 text-electric bg-electric/5 hover:bg-electric/10 transition-colors"
                         >
                           {weakSubject ? `Drill ${weakSubject}` : "Pick a Subject"}
                         </Link>
-                        <Link href="/learn" className="text-[11px] font-semibold py-1.5 px-3 rounded-full border border-electric/20 text-electric/60 bg-electric/5 hover:bg-electric/10 transition-colors">
+                        <Link href="/learn" className="text-[11px] font-semibold py-1.5 px-3 rounded-full border border-electric/20 text-electric bg-electric/5 hover:bg-electric/10 transition-colors">
                           Daily Quiz
                         </Link>
                       </div>

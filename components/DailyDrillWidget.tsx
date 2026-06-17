@@ -180,12 +180,67 @@ function DrillModal({
 
   const q = filteredQuestions[idx];
 
+  // ── A11y (WCAG 2.1.2 / 2.4.3) — focus management for the modal dialog.
+  // dialogRef scopes the focus trap; triggerRef remembers what had focus when
+  // the modal opened so we can restore it on close.
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLElement | null>(null);
+
   // Lock body scroll while open.
   useEffect(() => {
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     return () => { document.body.style.overflow = prev; };
   }, []);
+
+  // Remember the trigger, move focus into the dialog on open, and restore
+  // focus to the trigger on close.
+  useEffect(() => {
+    triggerRef.current = (document.activeElement as HTMLElement) ?? null;
+    const focusables = dialogRef.current?.querySelectorAll<HTMLElement>(
+      'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+    );
+    // Prefer the first interactive control that isn't the close button so the
+    // drill itself receives focus; fall back to the close button.
+    const first = focusables && focusables.length > 1 ? focusables[1] : focusables?.[0];
+    first?.focus();
+    return () => {
+      triggerRef.current?.focus?.();
+    };
+  }, []);
+
+  // Trap Tab within the dialog and wire Escape to close.
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        onClose(false);
+        return;
+      }
+      if (e.key !== "Tab") return;
+      const focusables = dialogRef.current?.querySelectorAll<HTMLElement>(
+        'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+      );
+      if (!focusables || focusables.length === 0) return;
+      const list = Array.from(focusables);
+      const firstEl = list[0];
+      const lastEl = list[list.length - 1];
+      const active = document.activeElement as HTMLElement | null;
+      if (e.shiftKey) {
+        if (active === firstEl || !dialogRef.current?.contains(active)) {
+          e.preventDefault();
+          lastEl.focus();
+        }
+      } else {
+        if (active === lastEl || !dialogRef.current?.contains(active)) {
+          e.preventDefault();
+          firstEl.focus();
+        }
+      }
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [onClose]);
 
   // On open, pull today's progress row (if any) so we know which questions
   // the user already answered and can skip past them. One-shot.
@@ -303,9 +358,11 @@ function DrillModal({
 
   return (
     <div
+      ref={dialogRef}
       className="fluid-modal-backdrop fixed inset-0 z-50 grid place-items-center bg-black/70 backdrop-blur-sm px-4"
       role="dialog"
       aria-modal="true"
+      aria-label="Daily Drill"
     >
       <div className="relative w-full max-w-xl rounded-[14px] border border-electric/30 bg-gradient-to-br from-navy to-[#0a0f1d] p-5 sm:p-6 shadow-2xl animate-slide-up">
         <button
