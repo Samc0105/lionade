@@ -1338,10 +1338,18 @@ export async function getAllSubjectPaths(): Promise<{ subject: string; total_sta
   return Array.from(seen.entries()).map(([subject, total_stages]) => ({ subject, total_stages }));
 }
 
-export async function getUserStageProgress(userId: string, subject?: string): Promise<(UserStageProgress & { stage: LearningPathStage })[]> {
+export async function getUserStageProgress(userId: string, subject?: string): Promise<(UserStageProgress & { stage: Pick<LearningPathStage, "id" | "subject" | "stage_number" | "total_stages"> })[]> {
   let query = supabase
     .from("user_stage_progress")
-    .select("*, stage:learning_paths!stage_id(id, subject, stage_number, stage_name, stage_description, lesson_text, total_stages)")
+    // Projection trimmed to the columns the two callers actually read:
+    //   /learn/paths        -> p.completed, p.stars, p.stage.subject
+    //   /learn/paths/[subj] -> p.stage_id, p.completed, p.stars,
+    //                          p.best_score, p.total_questions
+    // The stage join no longer pulls lesson_text / stage_name /
+    // stage_description (large, never used here) — only the small id /
+    // subject / stage_number / total_stages fields. Behavior is identical;
+    // the stage objects in this result were only ever read for `subject`.
+    .select("id, user_id, stage_id, stars, completed, best_score, total_questions, attempts, completed_at, stage:learning_paths!stage_id(id, subject, stage_number, total_stages)")
     .eq("user_id", userId);
 
   if (subject) {

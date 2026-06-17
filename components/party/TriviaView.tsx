@@ -144,6 +144,45 @@ interface RoundDetail {
   };
 }
 
+// ── Redundant-poll guard ──
+// The 1.5s safety poll re-fetches the round every cycle. Writing a fresh object
+// into `detail` each time tears down + re-creates the 500ms phase-timer interval
+// (its effect depends on [detail]) and re-renders this large component twice a
+// second even when nothing changed. We compare the fields the render + timers
+// actually read and bail out of the state write when they're equivalent.
+// Legitimate phase / round / answer-count / reveal changes are inside the
+// compared subset, so transitions still flow through.
+function triviaDetailEqual(a: RoundDetail | null, b: RoundDetail): boolean {
+  if (!a) return false;
+  const ar = a.round;
+  const br = b.round;
+  if (
+    ar.id !== br.id ||
+    ar.phase !== br.phase ||
+    ar.round_num !== br.round_num ||
+    ar.question !== br.question ||
+    (ar.category ?? null) !== (br.category ?? null) ||
+    ar.started_at !== br.started_at ||
+    (ar.answer_ends_at ?? null) !== (br.answer_ends_at ?? null) ||
+    (ar.reveal_ends_at ?? null) !== (br.reveal_ends_at ?? null) ||
+    (ar.ended_at ?? null) !== (br.ended_at ?? null) ||
+    (ar.correct_option_id ?? null) !== (br.correct_option_id ?? null)
+  ) {
+    return false;
+  }
+  if (
+    (a.my_answer_option_id ?? null) !== (b.my_answer_option_id ?? null) ||
+    (a.answered_count ?? null) !== (b.answered_count ?? null)
+  ) {
+    return false;
+  }
+  return (
+    JSON.stringify(ar.options) === JSON.stringify(br.options) &&
+    JSON.stringify(a.answered_user_ids ?? null) === JSON.stringify(b.answered_user_ids ?? null) &&
+    JSON.stringify(a.reveal ?? null) === JSON.stringify(b.reveal ?? null)
+  );
+}
+
 export default function TriviaView({
   room,
   players,
@@ -237,7 +276,12 @@ export default function TriviaView({
     if (!res.ok || !res.data) return;
     // Round changed while this GET was in flight — drop the stale payload.
     if (roundIdRef.current !== rid) return;
-    setDetail(res.data);
+    // Functional updater + equality gate: skip the state write (and the
+    // re-render + phase-timer teardown) when this poll's payload matches
+    // what's already in state. setPhase below already no-ops an unchanged
+    // primitive phase.
+    const next = res.data;
+    setDetail((prev) => (triviaDetailEqual(prev, next) ? prev : next));
     setPhase(res.data.round.phase);
   }, []);
 

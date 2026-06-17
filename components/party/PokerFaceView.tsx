@@ -112,6 +112,48 @@ interface RoundDetail {
   };
 }
 
+// ── Redundant-poll guard ──
+// The 1.5s safety poll re-fetches the round every cycle. When nothing the UI
+// or the countdown timers read has changed, writing a fresh object into
+// `detail` would tear down + re-create the 500ms timer intervals (their effects
+// depend on [detail]) and re-render this 50-70KB component twice a second for
+// no reason. We compare the exact fields the render + timers consume and bail
+// out of the state write when they're equivalent — legitimate phase / round /
+// presented_at / score transitions still flow through because they're in the
+// compared subset. The reveal payload is serialized only when present (it
+// arrives once, then is stable).
+type PFRound = RoundDetail["round"];
+function pokerRoundEqual(a: PFRound | null, b: PFRound): boolean {
+  if (!a) return false;
+  if (
+    a.id !== b.id ||
+    a.phase !== b.phase ||
+    a.round_num !== b.round_num ||
+    a.presenter_user_id !== b.presenter_user_id ||
+    a.presenter_username !== b.presenter_username ||
+    a.card_word !== b.card_word ||
+    a.started_at !== b.started_at ||
+    a.presented_at !== b.presented_at ||
+    a.ended_at !== b.ended_at ||
+    a.is_presenter !== b.is_presenter ||
+    (a.interrogator_user_id ?? null) !== (b.interrogator_user_id ?? null) ||
+    (a.interrogator_username ?? null) !== (b.interrogator_username ?? null) ||
+    (a.my_call ?? null) !== (b.my_call ?? null) ||
+    (a.caller_count ?? null) !== (b.caller_count ?? null) ||
+    (a.call_count ?? null) !== (b.call_count ?? null) ||
+    (a.claim_text ?? null) !== (b.claim_text ?? null) ||
+    (a.card_fact ?? null) !== (b.card_fact ?? null) ||
+    (a.is_lie ?? null) !== (b.is_lie ?? null)
+  ) {
+    return false;
+  }
+  // reveal is the only nested object; once it lands it never mutates, so a
+  // presence check + JSON compare (cheap — a handful of calls) is enough.
+  if (!a.reveal && !b.reveal) return true;
+  if (!a.reveal || !b.reveal) return false;
+  return JSON.stringify(a.reveal) === JSON.stringify(b.reveal);
+}
+
 export default function PokerFaceView({
   room,
   players,
@@ -393,7 +435,11 @@ export default function PokerFaceView({
     // Round changed while this GET was in flight — drop the stale payload.
     if (roundIdRef.current !== rid) return;
     const r = res.data.round;
-    setDetail(r);
+    // Functional updater + equality gate: skip the state write (and the
+    // resulting re-render + timer-effect teardown) when this poll's payload
+    // matches what's already in state. setPhase below is a primitive setter,
+    // so React already no-ops an unchanged phase.
+    setDetail((prev) => (pokerRoundEqual(prev, r) ? prev : r));
     setPhase(r.phase);
 
     // Accumulate the per-game tally exactly once per round when its reveal lands

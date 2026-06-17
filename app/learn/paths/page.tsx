@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import useSWR from "swr";
 import { useAuth } from "@/lib/auth";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import BackButton from "@/components/BackButton";
@@ -72,51 +73,66 @@ function ProgressRing({ pct, color, size = 48 }: { pct: number; color: string; s
 export default function SubjectSelectorPage() {
   const router = useRouter();
   const { user } = useAuth();
-  const [subjects, setSubjects] = useState<
-    { subject: string; total_stages: number }[] | null
-  >(null);
-  const [progressMap, setProgressMap] = useState<
-    Record<string, { completed: number; stars: number }>
-  >({});
-  // Separate the "your progress didn't load" failure from a genuine empty
-  // result. Collapsing both into setSubjects([]) rendered every subject at 0%
-  // as if that were real data. When this is true we surface a retry banner and
-  // still draw the static subject cards (their copy is meaningful at 0%).
-  const [progressError, setProgressError] = useState(false);
 
-  const loadProgress = useCallback(async () => {
-    setProgressError(false);
-    try {
-      const pathStages = await getAllSubjectPaths();
-      setSubjects(pathStages);
-    } catch {
-      // Render the static subject cards gracefully (no DB-backed totals).
-      setSubjects([]);
-      setProgressError(true);
+  // ── Subject paths (DB-backed stage totals) ──
+  // SWR with keepPreviousData (matches /app/classes, /app/learn/vocab,
+  // /app/study-dna). The fetcher wraps the existing lib/db helper instead of an
+  // API route. `data === undefined` while loading keeps the existing skeleton
+  // gate (no flash-of-zero); an error maps to [] so the static subject cards
+  // still render (their copy is meaningful at 0%) and the retry banner shows.
+  const {
+    data: subjectsData,
+    error: subjectsError,
+    mutate: mutateSubjects,
+  } = useSWR<{ subject: string; total_stages: number }[]>(
+    "learn:subject-paths",
+    () => getAllSubjectPaths(),
+    { keepPreviousData: true },
+  );
+
+  // ── Per-user stage progress ──
+  // Keyed on the user id; null key (logged-out) means SWR skips the fetch.
+  const {
+    data: progressData,
+    error: progressFetchError,
+    mutate: mutateProgress,
+  } = useSWR(
+    user ? ["learn:stage-progress", user.id] : null,
+    ([, uid]: [string, string]) => getUserStageProgress(uid),
+    { keepPreviousData: true },
+  );
+
+  // Subjects: undefined while loading -> null (skeleton). On error fall back to
+  // [] so the static cards render alongside the retry banner.
+  const subjects = useMemo<{ subject: string; total_stages: number }[] | null>(
+    () => (subjectsError ? [] : subjectsData ?? null),
+    [subjectsData, subjectsError],
+  );
+
+  // Roll the raw progress rows into the per-subject { completed, stars } map the
+  // cards + summary read. Identical reduction to the old loadProgress body.
+  const progressMap = useMemo<Record<string, { completed: number; stars: number }>>(() => {
+    const map: Record<string, { completed: number; stars: number }> = {};
+    for (const p of progressData ?? []) {
+      const subj = p.stage?.subject;
+      if (!subj) continue;
+      if (!map[subj]) map[subj] = { completed: 0, stars: 0 };
+      if (p.completed) map[subj].completed++;
+      map[subj].stars += p.stars;
     }
+    return map;
+  }, [progressData]);
 
-    if (!user) return;
-    try {
-      const progress = await getUserStageProgress(user.id);
-      const map: Record<string, { completed: number; stars: number }> = {};
-      for (const p of progress) {
-        const subj = p.stage?.subject;
-        if (!subj) continue;
-        if (!map[subj]) map[subj] = { completed: 0, stars: 0 };
-        if (p.completed) map[subj].completed++;
-        map[subj].stars += p.stars;
-      }
-      setProgressMap(map);
-    } catch {
-      // A swallowed failure here would show 0/total stages as if the user had
-      // cleared none — flag it instead so the banner + retry can recover.
-      setProgressError(true);
-    }
-  }, [user]);
+  // Surface the retry banner when EITHER fetch failed (preserves the original
+  // "your stage counts may be out of date" affordance). Wired to SWR error.
+  const progressError = !!subjectsError || !!progressFetchError;
 
-  useEffect(() => {
-    loadProgress();
-  }, [loadProgress]);
+  // Retry banner handler — revalidate both keys (replaces the old loadProgress
+  // re-run). SWR keepPreviousData holds the last good data through the refetch.
+  const loadProgress = useCallback(() => {
+    void mutateSubjects();
+    void mutateProgress();
+  }, [mutateSubjects, mutateProgress]);
 
   // Overall rollup for the right-side summary widget.
   const summary = useMemo(() => {

@@ -106,6 +106,47 @@ interface RoundDetail {
   voted_user_ids?: string[];
 }
 
+// ── Redundant-poll guard ──
+// The 1.5s safety poll re-fetches the round every cycle. Writing a fresh object
+// into `detail` each time tears down + re-creates the 500ms phase-timer interval
+// (its effect depends on [detail]) and re-renders this large component twice a
+// second even when nothing changed. We compare the fields the render + timers
+// actually read and bail out of the state write when they're equivalent.
+// Legitimate phase / round / submission / vote / reveal changes are all inside
+// the compared subset, so transitions still flow through. The answers + id
+// arrays are small, so a scoped JSON compare is cheap.
+function bluffDetailEqual(a: RoundDetail | null, b: RoundDetail): boolean {
+  if (!a) return false;
+  const ar = a.round;
+  const br = b.round;
+  if (
+    ar.id !== br.id ||
+    ar.phase !== br.phase ||
+    ar.round_num !== br.round_num ||
+    ar.question !== br.question ||
+    (ar.category ?? null) !== (br.category ?? null) ||
+    (ar.write_ends_at ?? null) !== (br.write_ends_at ?? null) ||
+    (ar.vote_ends_at ?? null) !== (br.vote_ends_at ?? null) ||
+    (ar.correct_answer ?? null) !== (br.correct_answer ?? null)
+  ) {
+    return false;
+  }
+  if (
+    (a.has_submitted ?? null) !== (b.has_submitted ?? null) ||
+    (a.my_submission ?? null) !== (b.my_submission ?? null) ||
+    (a.submitted_count ?? null) !== (b.submitted_count ?? null) ||
+    (a.my_vote_answer_id ?? null) !== (b.my_vote_answer_id ?? null) ||
+    (a.my_answer_id ?? null) !== (b.my_answer_id ?? null)
+  ) {
+    return false;
+  }
+  return (
+    JSON.stringify(a.answers ?? null) === JSON.stringify(b.answers ?? null) &&
+    JSON.stringify(a.submitted_user_ids ?? null) === JSON.stringify(b.submitted_user_ids ?? null) &&
+    JSON.stringify(a.voted_user_ids ?? null) === JSON.stringify(b.voted_user_ids ?? null)
+  );
+}
+
 export default function BluffView({
   room,
   players,
@@ -221,7 +262,12 @@ export default function BluffView({
     if (!res.ok || !res.data) return;
     // Round changed while this GET was in flight — drop the stale payload.
     if (roundIdRef.current !== rid) return;
-    setDetail(res.data);
+    // Functional updater + equality gate: skip the state write (and the
+    // re-render + phase-timer teardown) when this poll's payload matches
+    // what's already in state. setPhase below already no-ops an unchanged
+    // primitive phase.
+    const next = res.data;
+    setDetail((prev) => (bluffDetailEqual(prev, next) ? prev : next));
     const p = res.data.round.phase;
     setPhase(p);
     if (p === "vote") setNinnyMsg("Vote for the answer you think is real.");
