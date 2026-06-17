@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
+import { useReducedMotion } from "framer-motion";
 import { Crown, Cards, Coins, Lightning, Skull, Shield, Diamond, X } from "@phosphor-icons/react";
 import { cdnUrl } from "@/lib/cdn";
 import { formatCoins } from "@/lib/mockData";
@@ -39,10 +40,34 @@ export default function SpinResultModal({
 }) {
   const visual = OUTCOME_VISUALS[result.outcome] ?? OUTCOME_VISUALS.small_fangs;
   const Icon = visual.Icon;
+  const reduce = useReducedMotion();
+  const cardRef = useRef<HTMLDivElement | null>(null);
+  const ctaRef = useRef<HTMLButtonElement | null>(null);
 
-  // ESC closes
+  // Focus the primary CTA on open, restore focus to the trigger on close.
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    const trigger = document.activeElement as HTMLElement | null;
+    const id = requestAnimationFrame(() => ctaRef.current?.focus());
+    return () => { cancelAnimationFrame(id); trigger?.focus?.(); };
+  }, []);
+
+  // ESC closes; Tab is trapped within the card.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") { e.preventDefault(); onClose(); return; }
+      if (e.key !== "Tab") return;
+      const root = cardRef.current;
+      if (!root) return;
+      const focusables = Array.from(
+        root.querySelectorAll<HTMLElement>('button:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])'),
+      ).filter((el) => el.offsetParent !== null);
+      if (focusables.length === 0) return;
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      const active = document.activeElement as HTMLElement | null;
+      if (e.shiftKey && active === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && active === last) { e.preventDefault(); first.focus(); }
+    };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
   }, [onClose]);
@@ -93,26 +118,30 @@ export default function SpinResultModal({
       role="dialog"
       aria-modal="true"
       aria-labelledby="spin-result-title"
-      onClick={onClose}
     >
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/75 backdrop-blur-sm" />
+      <button
+        type="button"
+        aria-label="Close"
+        onClick={onClose}
+        className="absolute inset-0 bg-black/75 backdrop-blur-sm cursor-default"
+      />
 
       {/* Card */}
       <div
-        onClick={(e) => e.stopPropagation()}
-        className="relative w-full max-w-md rounded-2xl border border-white/10 overflow-hidden animate-spin-result-pop"
+        ref={cardRef}
+        className={`relative w-full max-w-md rounded-2xl border border-white/10 overflow-hidden ${reduce ? "" : "animate-spin-result-pop"}`}
         style={{
           background: "linear-gradient(135deg, #0a1020 0%, #060c18 100%)",
           boxShadow: "0 30px 80px rgba(0, 0, 0, 0.6)",
         }}
       >
         {/* Vibe-tinted background wash */}
-        <div className={`absolute inset-0 bg-gradient-to-br ${visual.gradient} pointer-events-none`} />
+        <div aria-hidden="true" className={`absolute inset-0 bg-gradient-to-br ${visual.gradient} pointer-events-none`} />
 
         {/* Jackpot sparkle layer */}
-        {visual.vibe === "jackpot" && (
-          <div className="absolute inset-0 pointer-events-none">
+        {visual.vibe === "jackpot" && !reduce && (
+          <div aria-hidden="true" className="absolute inset-0 pointer-events-none">
             {Array.from({ length: 12 }).map((_, i) => (
               <span
                 key={i}
@@ -129,11 +158,12 @@ export default function SpinResultModal({
 
         {/* Close button */}
         <button
+          type="button"
           onClick={onClose}
-          className="absolute top-3 right-3 z-10 grid place-items-center w-8 h-8 rounded-full bg-white/[0.05] hover:bg-white/[0.1] text-cream/60 hover:text-cream transition-colors"
-          aria-label="Close"
+          className="absolute top-3 right-3 z-10 grid place-items-center w-9 h-9 rounded-full bg-white/[0.05] hover:bg-white/[0.1] text-cream/70 hover:text-cream transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cream/70 focus-visible:ring-offset-2 focus-visible:ring-offset-navy"
+          aria-label="Close result"
         >
-          <X size={14} weight="bold" />
+          <X size={14} weight="bold" aria-hidden="true" />
         </button>
 
         <div className="relative px-8 py-10 text-center">
@@ -177,7 +207,7 @@ export default function SpinResultModal({
           <p className="text-cream/70 text-sm leading-relaxed mb-6">{description}</p>
 
           {/* New balance */}
-          <div className="text-cream/40 text-xs font-mono uppercase tracking-[0.25em]">
+          <div className="text-cream/55 text-xs font-mono uppercase tracking-[0.25em]">
             new balance
           </div>
           <div className="flex items-center justify-center gap-2 mt-1.5 mb-6">
@@ -189,8 +219,10 @@ export default function SpinResultModal({
 
           {/* CTA */}
           <button
+            ref={ctaRef}
+            type="button"
             onClick={onClose}
-            className="w-full py-3 rounded-xl font-semibold text-sm tracking-wide bg-gold text-navy hover:bg-gold/90 transition-colors"
+            className="w-full min-h-[44px] py-3 rounded-xl font-semibold text-sm tracking-wide bg-gold text-navy hover:bg-gold/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-navy"
           >
             Got it
           </button>

@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useMemo } from "react";
 import Link from "next/link";
+import { useReducedMotion } from "framer-motion";
 import { useAuth } from "@/lib/auth";
 import { useUserStats } from "@/lib/hooks";
 import ProtectedRoute from "@/components/ProtectedRoute";
@@ -13,7 +13,7 @@ import { SUBJECT_ICONS, SUBJECT_COLORS, DefaultSubjectIcon } from "@/lib/mockDat
 import { getLevelProgress } from "@/lib/levels";
 import type { Subject } from "@/types";
 import { apiGet } from "@/lib/api-client";
-import { NotePencil, Fire, BookOpen, PawPrint, ArrowRight, Target, Brain, Books, Briefcase, Crown } from "@phosphor-icons/react";
+import { Fire, BookOpen, PawPrint, ArrowRight, Target, Brain, Books, Briefcase, Crown } from "@phosphor-icons/react";
 import { usePlan } from "@/lib/use-plan";
 import CountUp from "@/components/CountUp";
 
@@ -58,11 +58,11 @@ interface Mission {
 /* ── Page ───────────────────────────────────────────────────── */
 
 export default function LearnPage() {
-  const router = useRouter();
   const { user } = useAuth();
-  const { stats } = useUserStats(user?.id);
+  const { stats, isLoading: statsLoading } = useUserStats(user?.id);
   const { plan } = usePlan();
   const isPro = plan === "pro" || plan === "platinum";
+  const reduceMotion = useReducedMotion();
 
   // P0 trust-gap fix 2026-06-05: the Subjects/Learning Paths CTA used to
   // fire a "Coming Soon" toast even though /learn/paths and
@@ -78,13 +78,19 @@ export default function LearnPage() {
   // byte-for-byte. 60 still covers the 7-day heatmap + subject-mastery since
   // DAILY_QUESTION_LIMIT caps per-day contributions anyway.
   const { data: historyData } = useQuizHistory(user?.id, 60);
+  // No-flash-of-zero gate: while the quiz-history SWR is resolving its FIRST
+  // value (`undefined`, before keepPreviousData has anything to keep) every
+  // derived metric below — heatmap, streak week-total, mastery, today's count —
+  // would compute from an empty array and paint real zeros. We render
+  // skeletons until this resolves so the heatmap/streak never flash 0.
+  const historyLoading = historyData === undefined;
   const quizHistory: QuizHistoryEntry[] =
     (historyData as QuizHistoryEntry[] | undefined) ?? [];
   const todayCount = (() => {
     const today = new Date().toISOString().split("T")[0];
     return quizHistory
-      .filter((h: any) => h.completed_at?.startsWith(today))
-      .reduce((sum: number, h: any) => sum + h.total_questions, 0);
+      .filter(h => h.completed_at?.startsWith(today))
+      .reduce((sum, h) => sum + h.total_questions, 0);
   })();
   const { data: missionsData } = useSWR(
     user?.id ? `learn-missions/${user.id}` : null,
@@ -185,6 +191,11 @@ export default function LearnPage() {
     ? `Sharpen up — your weakest subject is ${weakestSubject}`
     : "Daily goal hit. Try a harder difficulty or a new subject.";
 
+  // Stagger helper: returns the entrance delay only when motion is allowed.
+  // Under prefers-reduced-motion the local @media rule already disables the
+  // animation; nulling the delay keeps the inline style from re-triggering it.
+  const delay = (d: string) => (reduceMotion ? undefined : { animationDelay: d });
+
   return (
     <ProtectedRoute>
       <style jsx>{`
@@ -193,6 +204,24 @@ export default function LearnPage() {
           to { opacity: 1; transform: translateY(0); }
         }
         .animate-slide-up { animation: slide-up 0.45s var(--ease-out-expo, cubic-bezier(0.16,1,0.3,1)) both; }
+        /* Reduced-motion: drop the entrance translate/animation entirely so
+           content appears instantly at full opacity. Belt-and-suspenders with
+           the useReducedMotion() gate that strips animationDelay below. */
+        @media (prefers-reduced-motion: reduce) {
+          .animate-slide-up { animation: none; }
+        }
+        .skeleton-shimmer {
+          background: linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.08) 37%, rgba(255,255,255,0.04) 63%);
+          background-size: 400% 100%;
+          animation: skeleton-shimmer 1.4s ease-in-out infinite;
+        }
+        @keyframes skeleton-shimmer {
+          0% { background-position: 100% 50%; }
+          100% { background-position: 0% 50%; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .skeleton-shimmer { animation: none; }
+        }
       `}</style>
 
       <FeatureGate feature="learn">
@@ -210,12 +239,12 @@ export default function LearnPage() {
           </header>
 
           {/* ═══ 2. STAT ROW — 4 real metrics ═══ */}
-          <section className="mb-7 grid grid-cols-2 sm:grid-cols-4 gap-2 animate-slide-up" style={{ animationDelay: "0.04s" }}>
+          <section className="mb-7 grid grid-cols-2 sm:grid-cols-4 gap-2 animate-slide-up" style={delay("0.04s")}>
             {([
-              { label: "streak",        value: stats?.streak ?? user?.streak ?? 0,  suffix: "day",  Icon: Fire,      color: "#F97316" },
-              { label: "level",         value: li.level,                             suffix: null,   Icon: null,      color: li.tier.color, extra: li.tier.name.toLowerCase() },
-              { label: "today",         value: todayCount,                           suffix: `/ ${dailyGoal}`, Icon: Target, color: "#4A90D9" },
-              { label: "this week",     value: weekTotal,                            suffix: "q",    Icon: BookOpen,  color: "#22C55E" },
+              { label: "streak",        value: stats?.streak ?? user?.streak ?? 0,  suffix: "day",  Icon: Fire,      color: "#F97316", loading: statsLoading && stats == null && user?.streak == null },
+              { label: "level",         value: li.level,                             suffix: null,   Icon: null,      color: li.tier.color, extra: li.tier.name.toLowerCase(), loading: statsLoading && stats == null && user?.xp == null },
+              { label: "today",         value: todayCount,                           suffix: `/ ${dailyGoal}`, Icon: Target, color: "#4A90D9", loading: historyLoading },
+              { label: "this week",     value: weekTotal,                            suffix: "q",    Icon: BookOpen,  color: "#22C55E", loading: historyLoading },
             ] as const).map(chip => {
               const ChipIcon = chip.Icon;
               const displayValue = typeof chip.value === "number" ? chip.value : 0;
@@ -227,17 +256,23 @@ export default function LearnPage() {
                     border: `1px solid ${chip.color}22`,
                   }}>
                   <div className="flex items-center justify-between mb-1">
-                    <p className="font-mono text-[9px] uppercase tracking-[0.25em] text-cream/45">
+                    <p className="font-mono text-[9px] uppercase tracking-[0.25em] text-cream/60">
                       {chip.label}
                     </p>
                     {ChipIcon && <ChipIcon size={12} weight="fill" color={chip.color} aria-hidden="true" />}
                   </div>
-                  <p className="font-bebas text-[26px] tabular-nums leading-none" style={{ color: chip.color }}>
-                    <CountUp id={`learn-chip-${chip.label}`} value={displayValue} duration={600} />
-                    {chip.suffix && <span className="text-cream/55 text-sm ml-1.5">{chip.suffix}</span>}
-                  </p>
-                  {"extra" in chip && chip.extra && (
-                    <p className="text-cream/35 text-[10px] mt-0.5 font-mono lowercase truncate">{chip.extra}</p>
+                  {/* No-flash-of-zero: a loading chip shows a shimmer bar, never a
+                      hard 0, until its data source resolves. */}
+                  {chip.loading ? (
+                    <div className="skeleton-shimmer rounded h-[26px] w-3/4" aria-hidden="true" />
+                  ) : (
+                    <p className="font-bebas text-[26px] tabular-nums leading-none" style={{ color: chip.color }}>
+                      <CountUp id={`learn-chip-${chip.label}`} value={displayValue} duration={600} />
+                      {chip.suffix && <span className="text-cream/55 text-sm ml-1.5">{chip.suffix}</span>}
+                    </p>
+                  )}
+                  {"extra" in chip && chip.extra && !chip.loading && (
+                    <p className="text-cream/60 text-[10px] mt-0.5 font-mono lowercase truncate">{chip.extra}</p>
                   )}
                 </div>
               );
@@ -245,7 +280,7 @@ export default function LearnPage() {
           </section>
 
           {/* ═══ 3. PRIMARY START CTA — context-aware ═══ */}
-          <section className="mb-10 animate-slide-up" style={{ animationDelay: "0.08s" }}>
+          <section className="mb-10 animate-slide-up" style={delay("0.08s")}>
             <Link
               href={weakestSubject ? `/quiz?subject=${encodeURIComponent(weakestSubject)}` : "/quiz"}
               className="fluid-card-hover press-feedback group block rounded-[10px] p-6 sm:p-7"
@@ -257,13 +292,13 @@ export default function LearnPage() {
             >
               <div className="flex items-center justify-between gap-4">
                 <div className="flex-1 min-w-0">
-                  <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-gold/70 mb-2">
+                  <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-gold/80 mb-2">
                     next up
                   </p>
                   <p className="font-bebas text-2xl sm:text-3xl text-cream tracking-wider leading-tight">
                     {primaryCtaTitle}
                   </p>
-                  <p className="text-cream/50 text-xs sm:text-sm mt-1.5">
+                  <p className="text-cream/70 text-xs sm:text-sm mt-1.5">
                     {primaryCtaSub}
                   </p>
                 </div>
@@ -275,23 +310,40 @@ export default function LearnPage() {
 
               {/* Daily goal progress bar — embedded in the CTA */}
               <FeatureGate feature="learn.daily_goal" compact>
-                <div className="mt-5 h-1 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.06)" }}>
-                  <div
-                    className={`h-full ${dailyProgressPct > 0 && dailyProgressPct < 100 ? "progress-shimmer" : ""}`}
-                    style={{
-                      width: `${dailyProgressPct}%`,
-                      background: dailyProgressPct >= 100
-                        ? "linear-gradient(90deg, #22C55E 0%, #FFD700 100%)"
-                        : "linear-gradient(90deg, #4A90D9 0%, #FFD700 100%)",
-                      transition: "width 900ms var(--ease-out-emil)",
-                    }}
-                  />
+                <div
+                  className="mt-5 h-1 rounded-full overflow-hidden"
+                  style={{ background: "rgba(255,255,255,0.06)" }}
+                  role="progressbar"
+                  aria-label="Daily goal progress"
+                  aria-valuemin={0}
+                  aria-valuemax={dailyGoal}
+                  aria-valuenow={historyLoading ? undefined : Math.min(todayCount, dailyGoal)}
+                  aria-valuetext={historyLoading ? "Loading" : `${Math.min(todayCount, dailyGoal)} of ${dailyGoal} questions today`}
+                >
+                  {/* No-flash: keep the fill at 0 width while loading rather than
+                      letting it compute a real 0% from an empty history array. */}
+                  {!historyLoading && (
+                    <div
+                      className={`h-full ${dailyProgressPct > 0 && dailyProgressPct < 100 ? "progress-shimmer" : ""}`}
+                      style={{
+                        width: `${dailyProgressPct}%`,
+                        background: dailyProgressPct >= 100
+                          ? "linear-gradient(90deg, #22C55E 0%, #FFD700 100%)"
+                          : "linear-gradient(90deg, #4A90D9 0%, #FFD700 100%)",
+                        transition: reduceMotion ? "none" : "width 900ms var(--ease-out-emil)",
+                      }}
+                    />
+                  )}
                 </div>
                 <div className="flex items-center justify-between mt-1.5">
-                  <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-cream/55">daily goal</p>
-                  <p className="font-mono text-[10px] tabular-nums text-cream/50">
-                    {Math.min(todayCount, dailyGoal)} / {dailyGoal}
-                  </p>
+                  <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-cream/60">daily goal</p>
+                  {historyLoading ? (
+                    <span className="skeleton-shimmer rounded h-[10px] w-10 inline-block" aria-hidden="true" />
+                  ) : (
+                    <p className="font-mono text-[10px] tabular-nums text-cream/70">
+                      {Math.min(todayCount, dailyGoal)} / {dailyGoal}
+                    </p>
+                  )}
                 </div>
               </FeatureGate>
             </Link>
@@ -301,7 +353,7 @@ export default function LearnPage() {
               <FeatureGate feature="learn.paths" compact>
                 <Link
                   href="/learn/paths"
-                  className="group flex items-center gap-3 px-4 py-3 rounded-[6px] border border-white/[0.06] hover:bg-white/[0.03] hover:border-gold/30 transition-colors text-left"
+                  className="group flex items-center gap-3 px-4 py-3 min-h-[44px] rounded-[6px] border border-white/[0.06] hover:bg-white/[0.03] hover:border-gold/30 transition-colors text-left"
                   aria-label="Subjects — learning paths"
                 >
                   <BookOpen size={18} weight="regular" color="#3B82F6" aria-hidden="true" className="flex-shrink-0" />
@@ -309,42 +361,42 @@ export default function LearnPage() {
                     <p className="font-syne font-semibold text-sm text-cream leading-tight">Subjects</p>
                     <p className="text-cream/55 text-[10px] font-mono">7 learning paths</p>
                   </div>
-                  <ArrowRight size={14} weight="regular" color="rgba(238,244,255,0.3)" aria-hidden="true" className="group-hover:text-gold/60 transition-colors" />
+                  <ArrowRight size={14} weight="regular" aria-hidden="true" className="text-cream/40 group-hover:text-gold transition-colors" />
                 </Link>
               </FeatureGate>
 
-              <Link href="/learn/ninny" className="group flex items-center gap-3 px-4 py-3 rounded-[6px] border border-white/[0.06] hover:bg-white/[0.03] hover:border-[#A855F7]/30 transition-colors">
+              <Link href="/learn/ninny" className="group flex items-center gap-3 px-4 py-3 min-h-[44px] rounded-[6px] border border-white/[0.06] hover:bg-white/[0.03] hover:border-[#A855F7]/30 transition-colors">
                 <PawPrint size={18} weight="fill" color="#A855F7" aria-hidden="true" className="flex-shrink-0" />
                 <div className="flex-1 min-w-0">
                   <p className="font-syne font-semibold text-sm text-cream leading-tight">Study with Ninny</p>
                   <p className="text-cream/55 text-[10px] font-mono">ai tutor</p>
                 </div>
-                <ArrowRight size={14} weight="regular" color="rgba(238,244,255,0.3)" aria-hidden="true" className="group-hover:text-[#A855F7] transition-colors" />
+                <ArrowRight size={14} weight="regular" aria-hidden="true" className="text-cream/40 group-hover:text-[#A855F7] transition-colors" />
               </Link>
 
-              <Link href="/learn/mastery" className="group flex items-center gap-3 px-4 py-3 rounded-[6px] border border-white/[0.06] hover:bg-white/[0.03] hover:border-gold/30 transition-colors text-left">
+              <Link href="/learn/mastery" className="group flex items-center gap-3 px-4 py-3 min-h-[44px] rounded-[6px] border border-white/[0.06] hover:bg-white/[0.03] hover:border-gold/30 transition-colors text-left">
                 <Brain size={18} weight="fill" color="#FFD700" aria-hidden="true" className="flex-shrink-0" />
                 <div className="flex-1 min-w-0">
                   <p className="font-syne font-semibold text-sm text-cream leading-tight">Mastery Mode</p>
                   <p className="text-cream/55 text-[10px] font-mono">any exam · any topic</p>
                 </div>
-                <ArrowRight size={14} weight="regular" color="rgba(238,244,255,0.3)" aria-hidden="true" className="group-hover:text-gold transition-colors" />
+                <ArrowRight size={14} weight="regular" aria-hidden="true" className="text-cream/40 group-hover:text-gold transition-colors" />
               </Link>
 
               <FeatureGate feature="learn.vocab" compact>
-                <Link href="/learn/vocab" className="group flex items-center gap-3 px-4 py-3 rounded-[6px] border border-white/[0.06] hover:bg-white/[0.03] hover:border-[#4A90D9]/30 transition-colors text-left">
+                <Link href="/learn/vocab" className="group flex items-center gap-3 px-4 py-3 min-h-[44px] rounded-[6px] border border-white/[0.06] hover:bg-white/[0.03] hover:border-[#4A90D9]/30 transition-colors text-left">
                   <Books size={18} weight="fill" color="#4A90D9" aria-hidden="true" className="flex-shrink-0" />
                   <div className="flex-1 min-w-0">
                     <p className="font-syne font-semibold text-sm text-cream leading-tight">Word Banks</p>
                     <p className="text-cream/55 text-[10px] font-mono">language vocab · aws · math · anything</p>
                   </div>
-                  <ArrowRight size={14} weight="regular" color="rgba(238,244,255,0.3)" aria-hidden="true" className="group-hover:text-electric transition-colors" />
+                  <ArrowRight size={14} weight="regular" aria-hidden="true" className="text-cream/40 group-hover:text-electric transition-colors" />
                 </Link>
               </FeatureGate>
 
               <Link
                 href="/learn/resume-coach"
-                className="group flex items-center gap-3 px-4 py-3 rounded-[6px] border border-white/[0.06] hover:bg-white/[0.03] hover:border-gold/30 transition-colors text-left"
+                className="group flex items-center gap-3 px-4 py-3 min-h-[44px] rounded-[6px] border border-white/[0.06] hover:bg-white/[0.03] hover:border-gold/30 transition-colors text-left"
                 aria-label={isPro ? "Resume Coach — Pro feature" : "Resume Coach — Pro feature, locked"}
               >
                 <Briefcase size={18} weight="fill" color="#FFD700" aria-hidden="true" className="flex-shrink-0" />
@@ -360,7 +412,7 @@ export default function LearnPage() {
                   </p>
                   <p className="text-cream/55 text-[10px] font-mono">ninny critiques your resume</p>
                 </div>
-                <ArrowRight size={14} weight="regular" color="rgba(238,244,255,0.3)" aria-hidden="true" className="group-hover:text-gold transition-colors" />
+                <ArrowRight size={14} weight="regular" aria-hidden="true" className="text-cream/40 group-hover:text-gold transition-colors" />
               </Link>
             </div>
           </section>
@@ -373,7 +425,7 @@ export default function LearnPage() {
 
               {/* SUBJECT MASTERY */}
               <FeatureGate feature="learn.subject_mastery" compact>
-              <section className="animate-slide-up" style={{ animationDelay: "0.12s" }}>
+              <section className="animate-slide-up" style={delay("0.12s")}>
                 <div className="flex items-baseline justify-between mb-4">
                   <h2 className="font-bebas text-sm text-cream tracking-[0.2em]">MASTERY</h2>
                   <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-cream/55">
@@ -381,10 +433,25 @@ export default function LearnPage() {
                   </p>
                 </div>
 
-                {mastery.length === 0 ? (
+                {historyLoading ? (
+                  /* No-flash: skeleton rows while history resolves so we never
+                     show "No data yet" to a returning user mid-fetch. */
+                  <ul className="space-y-2.5" aria-hidden="true">
+                    {[0, 1, 2].map(i => (
+                      <li key={i} className="grid grid-cols-[auto_1fr_auto] items-center gap-3 py-2.5 px-3">
+                        <span className="skeleton-shimmer rounded-full w-[18px] h-[18px]" />
+                        <div className="min-w-0 space-y-1.5">
+                          <span className="skeleton-shimmer rounded h-3 w-24 block" />
+                          <span className="skeleton-shimmer rounded-full h-1 w-full block" />
+                        </div>
+                        <span className="skeleton-shimmer rounded h-5 w-9" />
+                      </li>
+                    ))}
+                  </ul>
+                ) : mastery.length === 0 ? (
                   <div className="py-8 border-y border-white/[0.04] text-center">
-                    <p className="text-cream/60 text-sm mb-3">No data yet. One quiz and this fills in.</p>
-                    <Link href="/quiz" className="inline-block font-syne font-bold text-xs px-5 py-2 rounded-full border border-electric/40 text-electric hover:bg-electric/10 transition-colors">
+                    <p className="text-cream/70 text-sm mb-3">No data yet. One quiz and this fills in.</p>
+                    <Link href="/quiz" className="inline-block font-syne font-bold text-xs px-5 py-2 min-h-[44px] inline-flex items-center justify-center rounded-full border border-electric/50 text-electric hover:bg-electric/10 transition-colors">
                       Start a quiz
                     </Link>
                   </div>
@@ -399,33 +466,34 @@ export default function LearnPage() {
                         <li key={m.subject}>
                           <Link
                             href={`/quiz?subject=${encodeURIComponent(m.subject)}`}
-                            className="press-feedback group grid grid-cols-[auto_1fr_auto] items-center gap-3 py-2.5 px-3 rounded-[4px] border border-transparent hover:border-white/[0.08] hover:bg-white/[0.02] transition-all"
+                            className="press-feedback group grid grid-cols-[auto_1fr_auto] items-center gap-3 py-2.5 px-3 min-h-[44px] rounded-[4px] border border-transparent hover:border-white/[0.08] hover:bg-white/[0.02] transition-all"
+                            aria-label={`${m.subject}: ${m.accuracy}% accuracy, ${m.correct} of ${m.answered} correct${isWeak ? ", weak subject" : ""}. Practice ${m.subject}.`}
                           >
                             <MasteryIcon size={18} weight="regular" color={color} aria-hidden="true" />
                             <div className="min-w-0">
                               <div className="flex items-center gap-2 mb-1.5">
                                 <p className="font-syne font-semibold text-sm text-cream truncate">{m.subject}</p>
                                 {isWeak && (
-                                  <span className="font-mono text-[9px] uppercase tracking-wider text-red-400/80">weak</span>
+                                  <span className="font-mono text-[9px] uppercase tracking-wider text-red-400" aria-hidden="true">weak</span>
                                 )}
-                                <span className="font-mono text-[9px] text-cream/55 ml-auto tabular-nums">
+                                <span className="font-mono text-[9px] text-cream/60 ml-auto tabular-nums" aria-hidden="true">
                                   {m.correct}/{m.answered}
                                 </span>
                               </div>
-                              {/* Accuracy bar */}
-                              <div className="h-1 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.05)" }}>
+                              {/* Accuracy bar — decorative; the row aria-label carries the numbers */}
+                              <div className="h-1 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.05)" }} aria-hidden="true">
                                 <div
                                   className="h-full"
                                   style={{
                                     width: `${m.accuracy}%`,
                                     background: `linear-gradient(90deg, ${color}70, ${color})`,
-                                    transition: "width 900ms var(--ease-out-emil)",
+                                    transition: reduceMotion ? "none" : "width 900ms var(--ease-out-emil)",
                                   }}
                                 />
                               </div>
                             </div>
-                            <p className="font-bebas text-xl tabular-nums" style={{ color }}>
-                              {m.accuracy}<span className="text-cream/55 text-xs">%</span>
+                            <p className="font-bebas text-xl tabular-nums" style={{ color }} aria-hidden="true">
+                              {m.accuracy}<span className="text-cream/60 text-xs">%</span>
                             </p>
                           </Link>
                         </li>
@@ -438,7 +506,7 @@ export default function LearnPage() {
 
               {/* TODAY'S MISSIONS */}
               {missions.length > 0 && (
-                <section className="animate-slide-up" style={{ animationDelay: "0.16s" }}>
+                <section className="animate-slide-up" style={delay("0.16s")}>
                   <div className="flex items-baseline justify-between mb-4">
                     <h2 className="font-bebas text-sm text-cream tracking-[0.2em]">TODAY&rsquo;S MISSIONS</h2>
                     <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-cream/55">resets 00:00</p>
@@ -447,6 +515,7 @@ export default function LearnPage() {
                   <ul className="space-y-2">
                     {missions.map(m => {
                       const pct = Math.min((m.progress / m.target) * 100, 100);
+                      const statusLabel = m.claimed ? "claimed" : m.completed ? "ready to claim" : "in progress";
                       return (
                         <li
                           key={m.id}
@@ -459,6 +528,7 @@ export default function LearnPage() {
                               ? `1px solid ${m.color}40`
                               : "1px solid rgba(255,255,255,0.05)",
                           }}
+                          aria-label={`${m.title}: ${m.progress} of ${m.target}, ${statusLabel}. Reward ${m.coinReward} Fangs.`}
                         >
                           {/* Accent bar on the left edge — 2px, not a stripe; contained within border-radius */}
                           <div className="flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center" style={{ background: `${m.color}14`, border: `1px solid ${m.color}35` }}>
@@ -468,26 +538,26 @@ export default function LearnPage() {
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 mb-1.5">
                               <p className="font-syne font-semibold text-sm text-cream truncate">{m.title}</p>
-                              {m.claimed && <span className="font-mono text-[9px] uppercase tracking-wider text-green-400/80">claimed</span>}
-                              {m.completed && !m.claimed && <span className="font-mono text-[9px] uppercase tracking-wider" style={{ color: m.color }}>ready</span>}
+                              {m.claimed && <span className="font-mono text-[9px] uppercase tracking-wider text-green-400" aria-hidden="true">claimed</span>}
+                              {m.completed && !m.claimed && <span className="font-mono text-[9px] uppercase tracking-wider" style={{ color: m.color }} aria-hidden="true">ready</span>}
                             </div>
-                            <div className="h-1 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.05)" }}>
+                            <div className="h-1 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.05)" }} aria-hidden="true">
                               <div
                                 className={`h-full ${pct > 0 && pct < 100 && !m.claimed ? "progress-shimmer" : ""}`}
                                 style={{
                                   width: `${pct}%`,
                                   background: `linear-gradient(90deg, ${m.color}70, ${m.color})`,
-                                  transition: "width 800ms var(--ease-out-emil)",
+                                  transition: reduceMotion ? "none" : "width 800ms var(--ease-out-emil)",
                                 }}
                               />
                             </div>
                           </div>
 
-                          <div className="flex-shrink-0 text-right">
+                          <div className="flex-shrink-0 text-right" aria-hidden="true">
                             <p className="font-bebas text-sm tabular-nums" style={{ color: m.color }}>
-                              {m.progress}<span className="text-cream/55 text-xs">/{m.target}</span>
+                              {m.progress}<span className="text-cream/60 text-xs">/{m.target}</span>
                             </p>
-                            <p className="font-mono text-[9px] text-gold/70">+{m.coinReward}</p>
+                            <p className="font-mono text-[9px] text-gold">+{m.coinReward}</p>
                           </div>
                         </li>
                       );
@@ -503,63 +573,84 @@ export default function LearnPage() {
 
               {/* 7-DAY HEATMAP */}
               <FeatureGate feature="learn.study_heatmap" compact>
-              <section className="animate-slide-up" style={{ animationDelay: "0.12s" }}>
+              <section className="animate-slide-up" style={delay("0.12s")}>
                 <div className="flex items-baseline justify-between mb-4">
                   <h2 className="font-bebas text-sm text-cream tracking-[0.2em]">7-DAY ACTIVITY</h2>
-                  <p className="font-mono text-[10px] tabular-nums text-cream/55">{weekTotal} questions</p>
+                  {historyLoading ? (
+                    <span className="skeleton-shimmer rounded h-[10px] w-16 inline-block" aria-hidden="true" />
+                  ) : (
+                    <p className="font-mono text-[10px] tabular-nums text-cream/60">{weekTotal} questions</p>
+                  )}
                 </div>
 
-                <div className="grid grid-cols-7 gap-1.5">
-                  {heatmap.map(d => {
-                    // Intensity buckets: 0 → bg/5, 1-4 → 15%, 5-9 → 40%, 10-19 → 70%, 20+ → 100%
-                    const intensity =
-                      d.count === 0 ? 0 :
-                      d.count < 5   ? 0.18 :
-                      d.count < 10  ? 0.42 :
-                      d.count < 20  ? 0.72 :
-                                      1;
-                    return (
-                      <div
-                        key={d.date}
-                        className="aspect-square rounded-[3px] flex flex-col items-center justify-center transition-all hover:scale-110"
-                        style={{
-                          background: intensity === 0
-                            ? "rgba(255, 255, 255, 0.04)"
-                            : `rgba(34, 197, 94, ${intensity})`,
-                          border: d.isToday ? "1px solid rgba(255, 215, 0, 0.7)" : "1px solid rgba(255,255,255,0.04)",
-                          boxShadow: d.isToday ? "0 0 8px rgba(255, 215, 0, 0.35)" : "none",
-                        }}
-                        title={`${d.label} · ${d.count} question${d.count === 1 ? "" : "s"}`}
-                      >
-                        <span className="font-mono text-[9px] leading-none" style={{ color: intensity > 0.5 ? "rgba(255,255,255,0.8)" : "rgba(238,244,255,0.4)" }}>
-                          {d.dow}
-                        </span>
-                        {d.count > 0 && (
-                          <span className="font-bebas text-xs tabular-nums leading-none mt-0.5" style={{ color: intensity > 0.5 ? "#fff" : "rgba(238,244,255,0.6)" }}>
-                            {d.count}
+                {historyLoading ? (
+                  /* No-flash: skeleton cells while history resolves so the
+                     heatmap never paints a row of misleading zeros. */
+                  <div className="grid grid-cols-7 gap-1.5" aria-hidden="true">
+                    {Array.from({ length: 7 }).map((_, i) => (
+                      <div key={i} className="aspect-square rounded-[3px] skeleton-shimmer" />
+                    ))}
+                  </div>
+                ) : (
+                  /* Color intensity alone fails SR + colorblind users, so the
+                     grid is exposed as a single image with a full text summary,
+                     and every cell carries its own date + count aria-label. */
+                  <div
+                    className="grid grid-cols-7 gap-1.5"
+                    role="img"
+                    aria-label={`Study activity, last 7 days: ${weekTotal} question${weekTotal === 1 ? "" : "s"} total. ${heatmap.map(d => `${d.label}${d.isToday ? " (today)" : ""}, ${d.count} question${d.count === 1 ? "" : "s"}`).join("; ")}.`}
+                  >
+                    {heatmap.map(d => {
+                      // Intensity buckets: 0 → bg/5, 1-4 → 15%, 5-9 → 40%, 10-19 → 70%, 20+ → 100%
+                      const intensity =
+                        d.count === 0 ? 0 :
+                        d.count < 5   ? 0.18 :
+                        d.count < 10  ? 0.42 :
+                        d.count < 20  ? 0.72 :
+                                        1;
+                      return (
+                        <div
+                          key={d.date}
+                          className={`aspect-square rounded-[3px] flex flex-col items-center justify-center transition-transform ${reduceMotion ? "" : "hover:scale-110"}`}
+                          style={{
+                            background: intensity === 0
+                              ? "rgba(255, 255, 255, 0.04)"
+                              : `rgba(34, 197, 94, ${intensity})`,
+                            border: d.isToday ? "1px solid rgba(255, 215, 0, 0.7)" : "1px solid rgba(255,255,255,0.04)",
+                            boxShadow: d.isToday ? "0 0 8px rgba(255, 215, 0, 0.35)" : "none",
+                          }}
+                          title={`${d.label} · ${d.count} question${d.count === 1 ? "" : "s"}`}
+                        >
+                          <span className="font-mono text-[9px] leading-none" style={{ color: intensity > 0.5 ? "#fff" : "rgba(238,244,255,0.6)" }}>
+                            {d.dow}
                           </span>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
+                          {d.count > 0 && (
+                            <span className="font-bebas text-xs tabular-nums leading-none mt-0.5" style={{ color: intensity > 0.5 ? "#fff" : "rgba(238,244,255,0.85)" }}>
+                              {d.count}
+                            </span>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
 
-                {/* Heatmap legend */}
-                <div className="flex items-center justify-end gap-1.5 mt-3">
-                  <span className="font-mono text-[9px] uppercase tracking-wider text-cream/55">less</span>
+                {/* Heatmap legend — decorative scale key */}
+                <div className="flex items-center justify-end gap-1.5 mt-3" aria-hidden="true">
+                  <span className="font-mono text-[9px] uppercase tracking-wider text-cream/60">less</span>
                   {[0.04, 0.18, 0.42, 0.72, 1].map((o, i) => (
                     <span key={i} className="w-2.5 h-2.5 rounded-[2px]" style={{
                       background: o < 0.1 ? "rgba(255, 255, 255, 0.04)" : `rgba(34, 197, 94, ${o})`,
                     }} />
                   ))}
-                  <span className="font-mono text-[9px] uppercase tracking-wider text-cream/55">more</span>
+                  <span className="font-mono text-[9px] uppercase tracking-wider text-cream/60">more</span>
                 </div>
               </section>
               </FeatureGate>
 
               {/* RECENT LOG — clean list */}
               <FeatureGate feature="learn.recent_activity" compact>
-              <section className="animate-slide-up" style={{ animationDelay: "0.18s" }}>
+              <section className="animate-slide-up" style={delay("0.18s")}>
                 <div className="flex items-baseline justify-between mb-4">
                   <h2 className="font-bebas text-sm text-cream tracking-[0.2em]">RECENT</h2>
                   <Link href="/quiz" className="font-mono text-[10px] uppercase tracking-[0.2em] text-cream/60 hover:text-electric transition-colors">
@@ -567,10 +658,25 @@ export default function LearnPage() {
                   </Link>
                 </div>
 
-                {recentActivity.length === 0 ? (
+                {historyLoading ? (
+                  /* No-flash: skeleton rows so we never show "No quizzes yet"
+                     to a user who has history while the fetch is in flight. */
+                  <ul className="divide-y divide-white/[0.04]" aria-hidden="true">
+                    {[0, 1, 2].map(i => (
+                      <li key={i} className="flex items-center gap-3 py-3 -mx-2 px-2">
+                        <span className="skeleton-shimmer rounded-full w-4 h-4" />
+                        <div className="flex-1 min-w-0 space-y-1.5">
+                          <span className="skeleton-shimmer rounded h-3 w-20 block" />
+                          <span className="skeleton-shimmer rounded h-2 w-12 block" />
+                        </div>
+                        <span className="skeleton-shimmer rounded h-4 w-8" />
+                      </li>
+                    ))}
+                  </ul>
+                ) : recentActivity.length === 0 ? (
                   <div className="py-8 text-center border-y border-white/[0.04]">
-                    <p className="text-cream/55 text-xs mb-3">No quizzes yet</p>
-                    <Link href="/quiz" className="inline-block font-syne font-bold text-xs px-4 py-2 rounded-full border border-electric/40 text-electric hover:bg-electric/10 transition-colors">
+                    <p className="text-cream/70 text-xs mb-3">No quizzes yet</p>
+                    <Link href="/quiz" className="inline-block font-syne font-bold text-xs px-4 py-2 min-h-[44px] inline-flex items-center justify-center rounded-full border border-electric/50 text-electric hover:bg-electric/10 transition-colors">
                       Start
                     </Link>
                   </div>
@@ -583,17 +689,21 @@ export default function LearnPage() {
                       const pct = entry.total_questions > 0 ? Math.round((entry.correct_answers / entry.total_questions) * 100) : 0;
                       return (
                         <li key={entry.id}>
-                          <Link href="/quiz" className="flex items-center gap-3 py-3 hover:bg-white/[0.02] transition-colors -mx-2 px-2 rounded-[4px]">
+                          <Link
+                            href={`/quiz?subject=${encodeURIComponent(entry.subject)}`}
+                            className="flex items-center gap-3 py-3 min-h-[44px] hover:bg-white/[0.02] transition-colors -mx-2 px-2 rounded-[4px]"
+                            aria-label={`${entry.subject}, ${pct}% accuracy, ${timeAgo(entry.completed_at)}, earned ${entry.coins_earned} Fangs. Practice ${entry.subject}.`}
+                          >
                             <RecentIcon size={16} weight="regular" color={color} aria-hidden="true" />
-                            <div className="flex-1 min-w-0">
+                            <div className="flex-1 min-w-0" aria-hidden="true">
                               <p className="text-cream text-xs font-semibold truncate">{entry.subject}</p>
-                              <p className="text-cream/55 text-[10px] font-mono">{timeAgo(entry.completed_at)}</p>
+                              <p className="text-cream/60 text-[10px] font-mono">{timeAgo(entry.completed_at)}</p>
                             </div>
-                            <div className="text-right">
+                            <div className="text-right" aria-hidden="true">
                               <p className="font-bebas text-sm tabular-nums" style={{ color }}>
-                                {pct}<span className="text-cream/55 text-[10px]">%</span>
+                                {pct}<span className="text-cream/60 text-[10px]">%</span>
                               </p>
-                              <p className="font-mono text-[9px] text-gold/70">+{entry.coins_earned}</p>
+                              <p className="font-mono text-[9px] text-gold">+{entry.coins_earned}</p>
                             </div>
                           </Link>
                         </li>

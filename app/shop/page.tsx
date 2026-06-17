@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
+import { useReducedMotion } from "framer-motion";
 import useSWR from "swr";
 import { useAuth } from "@/lib/auth";
 import { useUserStats } from "@/lib/hooks";
@@ -470,14 +471,18 @@ function HeroGoldDrift() {
 
 // ── Purchase particle burst ──
 function PurchaseBurst({ onDone }: { onDone: () => void }) {
-  useEffect(() => { const t = setTimeout(onDone, 1200); return () => clearTimeout(t); }, [onDone]);
+  const reduce = useReducedMotion();
+  // Reduced motion: skip the particle layer entirely but still settle state
+  // promptly so the parent flag clears.
+  useEffect(() => { const t = setTimeout(onDone, reduce ? 150 : 1200); return () => clearTimeout(t); }, [onDone, reduce]);
   const particles = Array.from({ length: 16 }, (_, i) => {
     const angle = (i / 16) * 360;
     const dist = 40 + Math.random() * 60;
     return { id: i, dx: Math.cos((angle * Math.PI) / 180) * dist, dy: Math.sin((angle * Math.PI) / 180) * dist, delay: Math.random() * 0.15, size: 3 + Math.random() * 4 };
   });
+  if (reduce) return null;
   return (
-    <div className="fixed inset-0 z-[200] pointer-events-none flex items-center justify-center">
+    <div aria-hidden="true" className="fixed inset-0 z-[200] pointer-events-none flex items-center justify-center">
       {particles.map((p) => (
         <div key={p.id} className="absolute rounded-full coin-burst-particle"
           style={{
@@ -491,8 +496,11 @@ function PurchaseBurst({ onDone }: { onDone: () => void }) {
 }
 
 // ── Confirm Modal (coin purchases) ──
-function ConfirmModal({ item, quantity, onConfirm, onCancel, userCoins, balanceKnown }: {
-  item: ShopItem; quantity: number; onConfirm: () => void; onCancel: () => void; userCoins: number; balanceKnown: boolean;
+// Accessible dialog: role="dialog" + aria-modal + aria-labelledby, focuses the
+// primary control on open, traps Tab within the card, Escape closes, and
+// restores focus to the element that opened it on unmount.
+function ConfirmModal({ item, quantity, busy, onConfirm, onCancel, userCoins, balanceKnown }: {
+  item: ShopItem; quantity: number; busy: boolean; onConfirm: () => void; onCancel: () => void; userCoins: number; balanceKnown: boolean;
 }) {
   const totalPrice = item.price * quantity;
   // null = balance still loading (FeaturedCard's "Buy Now" isn't affordance-
@@ -501,31 +509,88 @@ function ConfirmModal({ item, quantity, onConfirm, onCancel, userCoins, balanceK
   const canAfford: boolean | null = balanceKnown ? userCoins >= totalPrice : null;
   const r = RARITY_COLORS[item.rarity];
   const Icon = item.Icon;
+  const cardRef = useRef<HTMLDivElement | null>(null);
+  const confirmRef = useRef<HTMLButtonElement | null>(null);
+  const cancelRef = useRef<HTMLButtonElement | null>(null);
+  const reduce = useReducedMotion();
+
+  // Restore focus to the trigger when the dialog unmounts.
+  useEffect(() => {
+    const trigger = document.activeElement as HTMLElement | null;
+    return () => { trigger?.focus?.(); };
+  }, []);
+
+  // Focus the primary actionable control on open (the confirm button when it's
+  // enabled, otherwise Cancel) so keyboard / SR users land on the action.
+  useEffect(() => {
+    const id = requestAnimationFrame(() => {
+      if (canAfford === true) confirmRef.current?.focus();
+      else cancelRef.current?.focus();
+    });
+    return () => cancelAnimationFrame(id);
+    // run once on mount — affordance can resolve after open but we don't want
+    // to yank focus away mid-interaction.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Escape closes; Tab is trapped within the card.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && !busy) { e.preventDefault(); onCancel(); return; }
+      if (e.key !== "Tab") return;
+      const root = cardRef.current;
+      if (!root) return;
+      const focusables = Array.from(
+        root.querySelectorAll<HTMLElement>('button:not([disabled]), a[href], input, [tabindex]:not([tabindex="-1"])'),
+      ).filter((el) => el.offsetParent !== null);
+      if (focusables.length === 0) return;
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      const active = document.activeElement as HTMLElement | null;
+      if (e.shiftKey && active === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && active === last) { e.preventDefault(); first.focus(); }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [busy, onCancel]);
+
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center px-4" onClick={onCancel}>
-      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
-      <div className="shop-card relative w-full max-w-sm rounded-2xl p-6 animate-slide-up overflow-hidden"
-        style={{ background: r.cardBg, border: `1.5px solid ${r.cardBorder}`, boxShadow: r.cardShadow }}
-        onClick={(e) => e.stopPropagation()}>
+    <div className="fixed inset-0 z-[100] flex items-center justify-center px-4" role="dialog" aria-modal="true" aria-labelledby="shop-confirm-title">
+      <button
+        type="button"
+        aria-label="Cancel purchase"
+        onClick={() => !busy && onCancel()}
+        className="absolute inset-0 bg-black/70 backdrop-blur-sm cursor-default"
+      />
+      <div ref={cardRef} className={`shop-card relative w-full max-w-sm rounded-2xl p-6 overflow-hidden ${reduce ? "" : "animate-slide-up"}`}
+        style={{ background: r.cardBg, border: `1.5px solid ${r.cardBorder}`, boxShadow: r.cardShadow }}>
         <div aria-hidden="true" className="absolute left-0 top-0 bottom-0 w-[2px]" style={{ background: r.accentLine }} />
         <div className="text-center mb-6">
           <div className="mb-3 flex items-center justify-center">
             <Icon size={52} weight={item.iconWeight ?? "fill"} color={item.iconColor ?? "currentColor"} aria-hidden="true" />
           </div>
-          <h3 className="font-bebas text-2xl text-cream tracking-wide">{item.name}</h3>
+          <h3 id="shop-confirm-title" className="font-bebas text-2xl text-cream tracking-wide">{item.name}</h3>
           <span className={`inline-block mt-1 text-[10px] uppercase tracking-widest font-bold px-2.5 py-0.5 rounded-full ${r.badge}`}>{item.rarity}</span>
         </div>
         <div className="flex items-center justify-center gap-2 mb-6 py-3 rounded-xl" style={{ background: "rgba(255,215,0,0.06)", border: "1px solid rgba(255,215,0,0.15)" }}>
           <img src={cdnUrl("/F.png")} alt="Fangs" className="w-6 h-6 object-contain" />
           <span className="font-bebas text-3xl text-gold">{formatCoins(totalPrice)}</span>
-          {quantity > 1 && <span className="text-cream/60 text-sm ml-1">(x{quantity})</span>}
+          {quantity > 1 && <span className="text-cream/70 text-sm ml-1">(x{quantity})</span>}
         </div>
-        {canAfford === false && <p className="text-red-400 text-xs text-center mb-4 font-semibold">Not enough Fangs. You need {formatCoins(totalPrice - userCoins)} more.</p>}
+        {canAfford === false && (
+          <p role="alert" className="text-red-400 text-xs text-center mb-4 font-semibold">
+            Not enough Fangs. You need {formatCoins(totalPrice - userCoins)} more.
+          </p>
+        )}
         <div className="flex gap-3">
-          <button onClick={onCancel} className="flex-1 py-3 rounded-xl border border-electric/20 text-cream/60 text-sm font-bold hover:bg-white/5 transition-all">Cancel</button>
-          <button onClick={onConfirm} disabled={canAfford !== true}
-            className={`flex-1 py-3 rounded-xl text-sm font-bold transition-all ${canAfford === true ? "gold-btn shop-btn-pulse cursor-pointer" : canAfford === false ? "bg-gray-600/30 text-gray-500 cursor-not-allowed border border-gray-600/20" : "bg-white/5 text-cream/40 border border-white/10 cursor-wait"}`}>
-            {canAfford === false ? "Can't Afford" : "Confirm Purchase"}
+          <button ref={cancelRef} type="button" onClick={onCancel} disabled={busy}
+            className="flex-1 min-h-[44px] py-3 rounded-xl border border-electric/30 text-cream/70 text-sm font-bold hover:bg-white/5 disabled:opacity-50 disabled:cursor-not-allowed transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cream/70 focus-visible:ring-offset-2 focus-visible:ring-offset-navy">
+            Cancel
+          </button>
+          <button ref={confirmRef} type="button" onClick={onConfirm} disabled={canAfford !== true || busy}
+            aria-label={canAfford === false ? `Not enough Fangs for ${item.name}` : `Confirm purchase of ${item.name} for ${formatCoins(totalPrice)} Fangs`}
+            className={`flex-1 min-h-[44px] py-3 rounded-xl text-sm font-bold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-navy ${canAfford === true ? "gold-btn shop-btn-pulse cursor-pointer focus-visible:ring-gold" : canAfford === false ? "bg-gray-600/30 text-gray-400 cursor-not-allowed border border-gray-600/20 focus-visible:ring-cream/50" : "bg-white/5 text-cream/55 border border-white/10 cursor-wait focus-visible:ring-cream/50"}`}>
+            {busy ? "Working..." : canAfford === false ? "Can't Afford" : "Confirm Purchase"}
           </button>
         </div>
       </div>
@@ -569,8 +634,11 @@ function FeaturedCard({ item, owned, equipped = false, onBuy, onEquip }: { item:
           </div>
           {owned && isCosmetic && onEquip ? (
             <button
+              type="button"
               onClick={onEquip}
-              className={`flex-shrink-0 px-5 py-2 rounded-xl text-sm font-bold transition-all ${equipped ? "border border-green-500/40 text-green-400 hover:bg-green-500/10" : "border border-electric/30 text-electric hover:bg-electric/10"}`}
+              aria-pressed={equipped}
+              aria-label={equipped ? `${item.name} equipped, activate to unequip` : `Equip ${item.name}`}
+              className={`flex-shrink-0 min-h-[44px] px-5 py-2.5 rounded-xl text-sm font-bold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-navy ${equipped ? "border border-green-500/40 text-green-400 hover:bg-green-500/10 focus-visible:ring-green-400" : "border border-electric/40 text-electric hover:bg-electric/10 focus-visible:ring-electric"}`}
             >
               {equipped ? "Unequip" : "Equip"}
             </button>
@@ -579,7 +647,7 @@ function FeaturedCard({ item, owned, equipped = false, onBuy, onEquip }: { item:
               <Check size={16} weight="bold" color="#22C55E" aria-hidden="true" /> Owned
             </span>
           ) : (
-            <button onClick={onBuy} className="gold-btn shop-btn-pulse px-5 py-2 rounded-xl text-sm font-bold flex-shrink-0">Buy Now</button>
+            <button type="button" onClick={onBuy} aria-label={`Buy ${item.name} for ${formatCoins(item.price)} Fangs`} className="gold-btn shop-btn-pulse min-h-[44px] px-5 py-2.5 rounded-xl text-sm font-bold flex-shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-navy">Buy Now</button>
           )}
         </div>
       </div>
@@ -719,7 +787,7 @@ function CosmeticCard({ item, owned, equipped = false, canAfford, onBuy, onEquip
           </div>
           <div className="flex items-center gap-1.5">
             {item.comingSoon && (
-              <span className="text-[9px] uppercase tracking-widest font-bold px-2 py-0.5 rounded-full bg-white/5 text-cream/40 border border-white/10">Soon</span>
+              <span className="text-[9px] uppercase tracking-widest font-bold px-2 py-0.5 rounded-full bg-white/5 text-cream/60 border border-white/10">Soon</span>
             )}
             {equipped && (
               <span className="text-[9px] uppercase tracking-widest font-bold px-2 py-0.5 rounded-full bg-green-500/20 text-green-300 border border-green-500/30">Equipped</span>
@@ -732,7 +800,7 @@ function CosmeticCard({ item, owned, equipped = false, canAfford, onBuy, onEquip
         <div className="flex items-center justify-between mt-auto pt-2 gap-3 flex-wrap">
           <div className="flex items-center gap-1.5 flex-shrink-0">
             {item.comingSoon ? (
-              <span className="font-bebas text-lg text-cream/40 tracking-wide">Soon</span>
+              <span className="font-bebas text-lg text-cream/60 tracking-wide">Soon</span>
             ) : (
               <>
                 <img src={cdnUrl("/F.png")} alt="Fangs" className="w-5 h-5 object-contain" />
@@ -742,18 +810,21 @@ function CosmeticCard({ item, owned, equipped = false, canAfford, onBuy, onEquip
           </div>
           {item.comingSoon ? (
             <button
+              type="button"
               disabled
               aria-disabled="true"
-              className="flex-shrink-0 px-3.5 py-1.5 rounded-lg text-xs font-bold bg-white/5 text-cream/40 border border-white/10 cursor-not-allowed"
+              aria-label={`${item.name} is coming soon`}
+              className="flex-shrink-0 min-h-[44px] px-3.5 py-2.5 rounded-lg text-xs font-bold bg-white/5 text-cream/55 border border-white/10 cursor-not-allowed"
             >
               Coming Soon
             </button>
           ) : owned && isCosmetic && onEquip ? (
             <button
+              type="button"
               onClick={onEquip}
               aria-pressed={equipped}
-              aria-label={equipped ? `${item.name} equipped, tap to unequip` : `Equip ${item.name}`}
-              className={`flex-shrink-0 min-h-[44px] px-3 py-2.5 rounded-lg text-xs font-bold transition-all ${equipped ? "border border-green-500/40 text-green-400 hover:bg-green-500/10" : "border border-electric/30 text-electric hover:bg-electric/10"}`}
+              aria-label={equipped ? `${item.name} equipped, activate to unequip` : `Equip ${item.name}`}
+              className={`flex-shrink-0 min-h-[44px] px-3 py-2.5 rounded-lg text-xs font-bold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-navy ${equipped ? "border border-green-500/40 text-green-400 hover:bg-green-500/10 focus-visible:ring-green-400" : "border border-electric/40 text-electric hover:bg-electric/10 focus-visible:ring-electric"}`}
             >
               {equipped ? "Unequip" : "Equip"}
             </button>
@@ -762,8 +833,9 @@ function CosmeticCard({ item, owned, equipped = false, canAfford, onBuy, onEquip
               <Check size={14} weight="bold" color="#22C55E" aria-hidden="true" /> Owned
             </span>
           ) : (
-            <button onClick={onBuy} disabled={canAfford !== true}
-              className={`flex-shrink-0 min-h-[44px] px-3.5 py-2.5 rounded-lg text-xs font-bold transition-all ${canAfford === true ? "gold-btn shop-btn-pulse" : canAfford === false ? "bg-gray-600/20 text-gray-500 cursor-not-allowed border border-gray-600/20" : "bg-white/5 text-cream/40 border border-white/10 cursor-wait"}`}>
+            <button type="button" onClick={onBuy} disabled={canAfford !== true}
+              aria-label={canAfford === false ? `Not enough Fangs for ${item.name}` : `Buy ${item.name} for ${formatCoins(item.price)} Fangs`}
+              className={`flex-shrink-0 min-h-[44px] px-3.5 py-2.5 rounded-lg text-xs font-bold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-navy ${canAfford === true ? "gold-btn shop-btn-pulse focus-visible:ring-gold" : canAfford === false ? "bg-gray-600/20 text-gray-400 cursor-not-allowed border border-gray-600/20 focus-visible:ring-cream/50" : "bg-white/5 text-cream/55 border border-white/10 cursor-wait focus-visible:ring-cream/50"}`}>
               {canAfford === false ? "Can't Afford" : "Buy"}
             </button>
           )}
@@ -798,21 +870,25 @@ function BoosterCard({ item, quantityOwned, canAfford, onBuy }: { item: ShopItem
             // Server blocks this booster with "This item is coming soon" — show a
             // locked affordance instead of a buy button that errors out.
             <button
+              type="button"
               disabled
               aria-disabled="true"
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-white/5 text-cream/40 border border-white/10 cursor-not-allowed"
+              aria-label={`${item.name} is coming soon`}
+              className="flex items-center gap-1.5 min-h-[44px] px-3 py-2.5 rounded-lg text-xs font-bold bg-white/5 text-cream/55 border border-white/10 cursor-not-allowed"
             >
               Coming Soon
             </button>
           ) : (
           <div className="flex items-center gap-2 flex-wrap">
-            <button onClick={() => onBuy(1)} disabled={canAfford !== true}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${canAfford === true ? "gold-btn shop-btn-pulse" : canAfford === false ? "bg-gray-600/20 text-gray-500 cursor-not-allowed border border-gray-600/20" : "bg-white/5 text-cream/40 border border-white/10 cursor-wait"}`}>
+            <button type="button" onClick={() => onBuy(1)} disabled={canAfford !== true}
+              aria-label={canAfford === false ? `Not enough Fangs for ${item.name}` : `Buy one ${item.name} for ${formatCoins(item.price)} Fangs`}
+              className={`flex items-center gap-1.5 min-h-[44px] px-3 py-2.5 rounded-lg text-xs font-bold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-navy ${canAfford === true ? "gold-btn shop-btn-pulse focus-visible:ring-gold" : canAfford === false ? "bg-gray-600/20 text-gray-400 cursor-not-allowed border border-gray-600/20 focus-visible:ring-cream/50" : "bg-white/5 text-cream/55 border border-white/10 cursor-wait focus-visible:ring-cream/50"}`}>
               <img src={cdnUrl("/F.png")} alt="Fangs" className="w-5 h-5 object-contain" /> {formatCoins(item.price)} &middot; Buy x1
             </button>
-            <button onClick={() => onBuy(5)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all border border-electric/30 text-electric hover:bg-electric/10">
-              <img src={cdnUrl("/F.png")} alt="Fangs" className="w-5 h-5 object-contain" /> {formatCoins(bulkPrice)} &middot; Buy x5 <span className="text-green-400 text-[10px]">(save 10%)</span>
+            <button type="button" onClick={() => onBuy(5)} disabled={canAfford === false}
+              aria-label={`Buy five ${item.name} for ${formatCoins(bulkPrice)} Fangs, save 10 percent`}
+              className={`flex items-center gap-1.5 min-h-[44px] px-3 py-2.5 rounded-lg text-xs font-bold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-electric focus-visible:ring-offset-2 focus-visible:ring-offset-navy ${canAfford === false ? "border border-gray-600/20 text-gray-400 cursor-not-allowed" : "border border-electric/40 text-electric hover:bg-electric/10"}`}>
+              <img src={cdnUrl("/F.png")} alt="Fangs" className="w-5 h-5 object-contain" /> {formatCoins(bulkPrice)} &middot; Buy x5 <span className={`text-[10px] ${canAfford === false ? "text-gray-400" : "text-green-400"}`}>(save 10%)</span>
             </button>
           </div>
           )}
@@ -857,8 +933,10 @@ function InventoryItem({ item, owned, onEquip }: { item: ShopItem; owned: OwnedI
           )}
         </div>
         {!isBooster && (
-          <button onClick={onEquip}
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${owned.equipped ? "border border-green-500/30 text-green-400 hover:bg-green-500/10" : "border border-electric/30 text-electric hover:bg-electric/10"}`}>
+          <button type="button" onClick={onEquip}
+            aria-pressed={owned.equipped}
+            aria-label={owned.equipped ? `${item.name} equipped, activate to unequip` : `Equip ${item.name}`}
+            className={`flex-shrink-0 min-h-[44px] px-3 py-2.5 rounded-lg text-xs font-bold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-navy ${owned.equipped ? "border border-green-500/40 text-green-400 hover:bg-green-500/10 focus-visible:ring-green-400" : "border border-electric/40 text-electric hover:bg-electric/10 focus-visible:ring-electric"}`}>
             {owned.equipped ? "Unequip" : "Equip"}
           </button>
         )}
@@ -901,7 +979,7 @@ function PremiumCard({ item }: { item: PremiumItem }) {
               for now (the waitlist endpoint exists but isn't wired here yet —
               telling Sam to wire it before we make the click work, otherwise
               the button would silently lie). */}
-          <button disabled className="relative flex-shrink-0 px-4 py-2 rounded-lg text-xs font-bold border border-purple-500/30 bg-purple-500/8 text-purple-300/60 cursor-not-allowed">
+          <button type="button" disabled aria-disabled="true" aria-label={`Notify me when ${item.name} launches`} className="relative flex-shrink-0 min-h-[44px] px-4 py-2.5 rounded-lg text-xs font-bold border border-purple-500/30 bg-purple-500/8 text-purple-200/80 cursor-not-allowed">
             Notify me
           </button>
         </div>
@@ -959,8 +1037,11 @@ function UsernameEffectCard({
           </div>
           {owned && isCosmetic && onEquip ? (
             <button
+              type="button"
               onClick={onEquip}
-              className={`flex-shrink-0 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${equipped ? "border border-green-500/40 text-green-400 hover:bg-green-500/10" : "border border-electric/30 text-electric hover:bg-electric/10"}`}
+              aria-pressed={equipped}
+              aria-label={equipped ? `${item.name} equipped, activate to unequip` : `Equip ${item.name}`}
+              className={`flex-shrink-0 min-h-[44px] px-3 py-2.5 rounded-lg text-xs font-bold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-navy ${equipped ? "border border-green-500/40 text-green-400 hover:bg-green-500/10 focus-visible:ring-green-400" : "border border-electric/40 text-electric hover:bg-electric/10 focus-visible:ring-electric"}`}
             >
               {equipped ? "Unequip" : "Equip"}
             </button>
@@ -969,8 +1050,9 @@ function UsernameEffectCard({
               <Check size={14} weight="bold" color="#22C55E" aria-hidden="true" /> Owned
             </span>
           ) : (
-            <button onClick={onBuy} disabled={canAfford !== true}
-              className={`flex-shrink-0 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${canAfford === true ? "gold-btn shop-btn-pulse" : canAfford === false ? "bg-gray-600/20 text-gray-500 cursor-not-allowed border border-gray-600/20" : "bg-white/5 text-cream/40 border border-white/10 cursor-wait"}`}>
+            <button type="button" onClick={onBuy} disabled={canAfford !== true}
+              aria-label={canAfford === false ? `Not enough Fangs for ${item.name}` : `Buy ${item.name} for ${formatCoins(item.price)} Fangs`}
+              className={`flex-shrink-0 min-h-[44px] px-3.5 py-2.5 rounded-lg text-xs font-bold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-navy ${canAfford === true ? "gold-btn shop-btn-pulse focus-visible:ring-gold" : canAfford === false ? "bg-gray-600/20 text-gray-400 cursor-not-allowed border border-gray-600/20 focus-visible:ring-cream/50" : "bg-white/5 text-cream/55 border border-white/10 cursor-wait focus-visible:ring-cream/50"}`}>
               {canAfford === false ? "Can't Afford" : "Buy"}
             </button>
           )}
@@ -986,14 +1068,16 @@ function PremiumFangBannerCard({ item, owned, equipped = false, canAfford, onBuy
   // animated_banner is a cosmetic — equip CTA always available when owned.
   const isCosmetic = item.type !== "booster";
   const Icon = item.Icon;
+  const reduce = useReducedMotion();
   return (
     <div className={`fluid-card-hover shop-card relative rounded-xl ${r.glow} ${item.rarity === "legendary" ? "shop-legendary-sparkle shop-tier-sweep-legendary" : ""} overflow-hidden h-full flex flex-col`}
       style={{ background: r.cardBg, border: `1.5px solid ${r.cardBorder}`, boxShadow: r.cardShadow, backdropFilter: "blur(12px)" }}>
       <div aria-hidden="true" className="absolute left-0 top-0 bottom-0 w-[2px] z-[1]" style={{ background: r.accentLine }} />
       {item.rarity === "legendary" && <div className="shop-legendary-border" />}
       <div className="relative z-[2] p-4 flex flex-col flex-1">
-        {/* Looping preview tile (gradient swatch + icon). */}
-        <div className="h-16 rounded-lg mb-3 relative overflow-hidden border border-white/5"
+        {/* Looping preview tile (gradient swatch + icon). Inline animation is
+            gated on reduced-motion (it bypasses the global CSS guard). */}
+        <div aria-hidden="true" className="h-16 rounded-lg mb-3 relative overflow-hidden border border-white/5"
           style={{
             background: item.rarity === "legendary"
               ? "linear-gradient(120deg, rgba(255,215,0,0.25), rgba(168,85,247,0.15), rgba(74,144,217,0.25))"
@@ -1001,7 +1085,7 @@ function PremiumFangBannerCard({ item, owned, equipped = false, canAfford, onBuy
               ? "linear-gradient(120deg, rgba(168,85,247,0.20), rgba(74,144,217,0.15))"
               : "linear-gradient(120deg, rgba(74,144,217,0.15), rgba(34,197,94,0.10))",
             backgroundSize: "200% 100%",
-            animation: "au-name-rainbow 6s linear infinite",
+            animation: reduce ? undefined : "au-name-rainbow 6s linear infinite",
           }}>
           <div className="absolute inset-0 flex items-center justify-center">
             <Icon size={28} weight={item.iconWeight ?? "fill"} color={item.iconColor ?? "currentColor"} aria-hidden="true" />
@@ -1019,8 +1103,11 @@ function PremiumFangBannerCard({ item, owned, equipped = false, canAfford, onBuy
           </div>
           {owned && isCosmetic && onEquip ? (
             <button
+              type="button"
               onClick={onEquip}
-              className={`flex-shrink-0 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${equipped ? "border border-green-500/40 text-green-400 hover:bg-green-500/10" : "border border-electric/30 text-electric hover:bg-electric/10"}`}
+              aria-pressed={equipped}
+              aria-label={equipped ? `${item.name} equipped, activate to unequip` : `Equip ${item.name}`}
+              className={`flex-shrink-0 min-h-[44px] px-3 py-2.5 rounded-lg text-xs font-bold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-navy ${equipped ? "border border-green-500/40 text-green-400 hover:bg-green-500/10 focus-visible:ring-green-400" : "border border-electric/40 text-electric hover:bg-electric/10 focus-visible:ring-electric"}`}
             >
               {equipped ? "Unequip" : "Equip"}
             </button>
@@ -1029,8 +1116,9 @@ function PremiumFangBannerCard({ item, owned, equipped = false, canAfford, onBuy
               <Check size={14} weight="bold" color="#22C55E" aria-hidden="true" /> Owned
             </span>
           ) : (
-            <button onClick={onBuy} disabled={canAfford !== true}
-              className={`flex-shrink-0 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${canAfford === true ? "gold-btn shop-btn-pulse" : canAfford === false ? "bg-gray-600/20 text-gray-500 cursor-not-allowed border border-gray-600/20" : "bg-white/5 text-cream/40 border border-white/10 cursor-wait"}`}>
+            <button type="button" onClick={onBuy} disabled={canAfford !== true}
+              aria-label={canAfford === false ? `Not enough Fangs for ${item.name}` : `Buy ${item.name} for ${formatCoins(item.price)} Fangs`}
+              className={`flex-shrink-0 min-h-[44px] px-3.5 py-2.5 rounded-lg text-xs font-bold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-navy ${canAfford === true ? "gold-btn shop-btn-pulse focus-visible:ring-gold" : canAfford === false ? "bg-gray-600/20 text-gray-400 cursor-not-allowed border border-gray-600/20 focus-visible:ring-cream/50" : "bg-white/5 text-cream/55 border border-white/10 cursor-wait focus-visible:ring-cream/50"}`}>
               {canAfford === false ? "Can't Afford" : "Buy"}
             </button>
           )}
@@ -1062,8 +1150,8 @@ function FounderBadgeCard({
       {soldOut && (
         <div className="absolute inset-0 z-10 bg-black/55 backdrop-blur-sm flex flex-col items-center justify-center">
           <Lock size={32} weight="fill" color="#9CA3AF" aria-hidden="true" />
-          <p className="font-bebas text-xl text-cream/70 tracking-wider mt-2">SOLD OUT</p>
-          <p className="text-cream/40 text-[10px] font-mono uppercase tracking-[0.22em] mt-0.5">All {item.cap.toLocaleString()} claimed</p>
+          <p className="font-bebas text-xl text-cream/80 tracking-wider mt-2">SOLD OUT</p>
+          <p className="text-cream/60 text-[10px] font-mono uppercase tracking-[0.22em] mt-0.5">All {item.cap.toLocaleString()} claimed</p>
         </div>
       )}
       <div className="relative p-5 flex flex-col flex-1">
@@ -1079,11 +1167,11 @@ function FounderBadgeCard({
         {/* FOMO counter — `1 of 1000 — 247 remaining` */}
         <div className="text-center mb-4 py-2 rounded-lg" style={{ background: "rgba(255,215,0,0.05)", border: "1px solid rgba(255,215,0,0.12)" }}>
           {remaining === null ? (
-            <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-cream/40">Cap of {item.cap.toLocaleString()}</p>
+            <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-cream/60">Cap of {item.cap.toLocaleString()}</p>
           ) : (
             <>
               <p className="font-bebas text-xl text-gold tracking-wider leading-none">{remaining.toLocaleString()}</p>
-              <p className="font-mono text-[9px] uppercase tracking-[0.22em] text-cream/45 mt-0.5">
+              <p className="font-mono text-[9px] uppercase tracking-[0.22em] text-cream/60 mt-0.5">
                 of {item.cap.toLocaleString()} remaining
               </p>
             </>
@@ -1100,15 +1188,16 @@ function FounderBadgeCard({
               <Check size={14} weight="bold" color="#22C55E" aria-hidden="true" /> Yours
             </span>
           ) : (
-            <button onClick={onBuy} disabled={canAfford !== true || soldOut}
-              className={`flex-shrink-0 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
+            <button type="button" onClick={onBuy} disabled={canAfford !== true || soldOut}
+              aria-label={soldOut ? `${item.name} is sold out` : canAfford === false ? `Not enough Fangs for ${item.name}` : `Claim ${item.name} for ${formatCoins(item.price)} Fangs`}
+              className={`flex-shrink-0 min-h-[44px] px-3.5 py-2.5 rounded-lg text-xs font-bold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-navy ${
                 soldOut
-                  ? "bg-gray-700/30 text-gray-500 cursor-not-allowed border border-gray-600/20"
+                  ? "bg-gray-700/30 text-gray-400 cursor-not-allowed border border-gray-600/20"
                   : canAfford === true
-                  ? "gold-btn shop-btn-pulse"
+                  ? "gold-btn shop-btn-pulse focus-visible:ring-gold"
                   : canAfford === false
-                  ? "bg-gray-600/20 text-gray-500 cursor-not-allowed border border-gray-600/20"
-                  : "bg-white/5 text-cream/40 border border-white/10 cursor-wait"
+                  ? "bg-gray-600/20 text-gray-400 cursor-not-allowed border border-gray-600/20 focus-visible:ring-cream/50"
+                  : "bg-white/5 text-cream/55 border border-white/10 cursor-wait focus-visible:ring-cream/50"
               }`}>
               {soldOut ? "Sold Out" : canAfford === false ? "Can't Afford" : "Claim"}
             </button>
@@ -1215,15 +1304,17 @@ function BuyFangsSection({ isAuthed, onUnauthed }: { isAuthed: boolean; onUnauth
                 type="button"
                 onClick={() => handleBuyPack(pack)}
                 disabled={disabled || isPending}
-                className={`mt-auto inline-flex items-center justify-center gap-1.5 rounded-xl py-2.5 px-4 text-sm font-bold transition-all ${
+                aria-label={`Buy ${pack.name}: ${formatCoins(pack.fangs)} Fangs for $${pack.priceUSD.toFixed(2)}`}
+                aria-busy={isPending}
+                className={`mt-auto inline-flex items-center justify-center gap-1.5 min-h-[44px] rounded-xl py-2.5 px-4 text-sm font-bold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-navy ${
                   disabled
-                    ? "bg-white/[0.04] text-cream/30 border border-white/[0.06] cursor-not-allowed"
+                    ? "bg-white/[0.06] text-cream/55 border border-white/[0.08] cursor-not-allowed"
                     : "gold-btn shop-btn-pulse"
                 } ${isPending ? "opacity-80 cursor-wait" : ""}`}
               >
                 {isPending ? (
                   <>
-                    <span aria-hidden="true" className="w-3.5 h-3.5 rounded-full border-2 border-current border-t-transparent animate-spin" />
+                    <span aria-hidden="true" className="w-3.5 h-3.5 rounded-full border-2 border-current border-t-transparent motion-safe:animate-spin" />
                     Opening checkout
                   </>
                 ) : (
@@ -1235,7 +1326,7 @@ function BuyFangsSection({ isAuthed, onUnauthed }: { isAuthed: boolean; onUnauth
         })}
       </div>
 
-      <p className="text-center font-mono text-[9.5px] uppercase tracking-[0.25em] text-cream/30 mt-4">
+      <p className="text-center font-mono text-[9.5px] uppercase tracking-[0.25em] text-cream/55 mt-4">
         Secure checkout via Stripe &middot; USD &middot; Fangs land instantly
       </p>
     </section>
@@ -1259,6 +1350,9 @@ export default function ShopPage() {
   const [showBurst, setShowBurst] = useState(false);
   const [purchasing, setPurchasing] = useState(false);
   const [mounted, setMounted] = useState(false);
+  // Polite live-region message announced to AT on async purchase / equip
+  // outcomes (visual toasts aren't surfaced to screen readers here).
+  const [announce, setAnnounce] = useState("");
 
   useEffect(() => { setMounted(true); }, []);
 
@@ -1284,6 +1378,13 @@ export default function ShopPage() {
     { dedupingInterval: 60_000, keepPreviousData: true },
   );
   const inventory: OwnedItem[] = inventoryData?.ok ? (inventoryData.data?.inventory ?? []) : [];
+  // Flash-of-ownership gate: SWR `data` is `undefined` until the first inventory
+  // fetch resolves. Treating that as "owns nothing" would briefly render a
+  // clickable "Buy" on items the user actually owns, then flip to "Owned".
+  // For a signed-in user we hold the buy affordances neutral until the
+  // inventory has resolved at least once. Logged-out visitors never fetch
+  // (key is null) so we treat them as "known" to avoid a permanent loading state.
+  const inventoryKnown = !user?.id || inventoryData !== undefined;
 
   // Shop V2 — earned + founder cosmetics ride on a separate endpoint with
   // `source` attribution (purchased / founder / earned). Inventory tab unions
@@ -1306,10 +1407,14 @@ export default function ShopPage() {
   );
   const founderCaps: Record<string, number> = founderCapsData?.ok ? (founderCapsData.data?.caps ?? {}) : {};
 
+  // Page-level reduced-motion preference. Declared before any early return so
+  // the hook order stays stable. Gates the one-shot mount entrance transitions.
+  const reduce = useReducedMotion();
+
   if (isLoading) return (
-    <div className="min-h-screen flex items-center justify-center">
+    <div className="min-h-screen flex items-center justify-center" role="status" aria-live="polite">
       <div className="flex flex-col items-center gap-4">
-        <div className="w-12 h-12 rounded-full border-2 border-electric border-t-transparent animate-spin" />
+        <div aria-hidden="true" className="w-12 h-12 rounded-full border-2 border-electric border-t-transparent motion-safe:animate-spin" />
         <p className="font-bebas text-2xl text-electric tracking-widest">LOADING...</p>
       </div>
     </div>
@@ -1337,7 +1442,11 @@ export default function ShopPage() {
   // !user means truly signed out) genuinely have 0 Fangs — their balance is
   // "known", keeping the pre-existing disabled-affordance behavior instead of
   // a forever-loading neutral state.
-  const affordanceKnown = balanceKnown || !user;
+  // Affordance is "known" once BOTH the balance and the inventory have resolved
+  // for a signed-in user (so we never flash a clickable Buy on an owned item or
+  // lie about affordability against a phantom 0). Logged-out visitors genuinely
+  // have 0 Fangs and no inventory to wait on.
+  const affordanceKnown = (balanceKnown && inventoryKnown) || !user;
   const affords = (price: number): boolean | null => (affordanceKnown ? userCoins >= price : null);
   const countdown = getWeeklyCountdown();
   const ownedIds = new Set(inventory.map((i) => i.itemId));
@@ -1351,25 +1460,72 @@ export default function ShopPage() {
 
   const handlePurchase = async () => {
     if (!confirmItem || purchasing || !user) return;
+    const itemName = confirmItem.item.name;
     setPurchasing(true);
-    // Server reads price from the catalog — we only send itemId + quantity
-    const res = await apiPost("/api/shop/purchase", {
-      itemId: confirmItem.item.id,
-      quantity: confirmItem.quantity,
-    });
-    if (res.ok) {
-      setShowBurst(true);
-      await refreshUser();
-      await mutateInventory();
+    try {
+      // Server reads price from the catalog — we only send itemId + quantity
+      const res = await apiPost("/api/shop/purchase", {
+        itemId: confirmItem.item.id,
+        quantity: confirmItem.quantity,
+      });
+      if (res.ok) {
+        setShowBurst(true);
+        toastSuccess(`${itemName} added to your inventory.`);
+        setAnnounce(`Purchased ${itemName}.`);
+        await refreshUser();
+        await mutateInventory();
+      } else {
+        // Surface the failure instead of silently closing the modal.
+        console.error("[shop:purchase] failed", res.error);
+        toastError("Purchase didn't go through. Try again.");
+        setAnnounce("Purchase failed. Try again.");
+      }
+    } catch (e) {
+      console.error("[shop:purchase] threw", e);
+      toastError("Purchase didn't go through. Try again.");
+      setAnnounce("Purchase failed. Try again.");
+    } finally {
+      setPurchasing(false);
+      setConfirmItem(null);
     }
-    setPurchasing(false);
-    setConfirmItem(null);
   };
 
   const handleEquip = async (itemId: string) => {
     if (!user) return;
-    await apiPost("/api/shop/equip", { itemId });
-    await mutateInventory();
+    try {
+      const res = await apiPost("/api/shop/equip", { itemId });
+      if (!res.ok) {
+        console.error("[shop:equip] failed", res.error);
+        toastError("Couldn't update that item. Try again.");
+        return;
+      }
+      await mutateInventory();
+    } catch (e) {
+      console.error("[shop:equip] threw", e);
+      toastError("Couldn't update that item. Try again.");
+    }
+  };
+
+  // Roving-tabindex keyboard nav for any ARIA tablist: Left/Right (and Up/Down)
+  // move focus + select the adjacent tab, Home/End jump to the ends. Operates on
+  // the [role="tab"] children of the activated tab's tablist so one handler
+  // serves every tab group on the page without per-list ref arrays.
+  const handleTabKeys = (e: React.KeyboardEvent<HTMLButtonElement>, select: (i: number) => void) => {
+    const key = e.key;
+    if (!["ArrowRight", "ArrowLeft", "ArrowUp", "ArrowDown", "Home", "End"].includes(key)) return;
+    const list = e.currentTarget.closest('[role="tablist"]');
+    if (!list) return;
+    const tabs = Array.from(list.querySelectorAll<HTMLButtonElement>('[role="tab"]'));
+    const current = tabs.indexOf(e.currentTarget);
+    if (current === -1) return;
+    e.preventDefault();
+    let next = current;
+    if (key === "ArrowRight" || key === "ArrowDown") next = (current + 1) % tabs.length;
+    else if (key === "ArrowLeft" || key === "ArrowUp") next = (current - 1 + tabs.length) % tabs.length;
+    else if (key === "Home") next = 0;
+    else if (key === "End") next = tabs.length - 1;
+    select(next);
+    tabs[next]?.focus();
   };
 
   const TABS: { key: Tab; label: string; Icon: PhosphorIcon; iconWeight?: IconProps["weight"] }[] = [
@@ -1391,6 +1547,16 @@ export default function ShopPage() {
   const ownedBoosters = inventory.filter((o) => { const item = [...BOOSTER_ITEMS, ...FEATURED_ITEMS, ...NEW_SKUS].find((i) => i.id === o.itemId); return item && item.type === "booster"; });
   const allItems: ShopItem[] = [...COSMETIC_ITEMS, ...BOOSTER_ITEMS, ...FEATURED_ITEMS, ...NEW_SKUS, ...AVATAR_AURAS, ...USERNAME_EFFECTS, ...PREMIUM_FANG_BANNERS];
   const findItem = (id: string) => allItems.find((i) => i.id === id);
+  // Human label for an owned cosmetic id (Identity & Status rows). Tries the
+  // catalog + founder set, then falls back to a Title-Cased id so a row never
+  // renders a raw snake_case identifier.
+  const displayNameForCosmetic = (id: string): string => {
+    const fromCatalog = findItem(id)?.name;
+    if (fromCatalog) return fromCatalog;
+    const founder = FOUNDER_BADGES.find((b) => b.id === id)?.name;
+    if (founder) return founder;
+    return id.replace(/_/g, " ").replace(/\b\w/g, (m) => m.toUpperCase());
+  };
   // Drops + Trending render a plain Buy button with no coming-soon gate, so
   // exclude server-blocked items from those pools (voice_ninny_classic +
   // boost_mastery_hint_pack). allItems itself stays complete for inventory.
@@ -1459,9 +1625,11 @@ export default function ShopPage() {
     if (!res.ok) {
       console.error("[shop:equip-username-effect] failed", res.error);
       toastError("Couldn't equip that yet. Try again shortly.");
+      setAnnounce("Couldn't equip that yet.");
       return;
     }
     toastSuccess("Equipped");
+    setAnnounce("Equipped.");
     await Promise.all([mutateInventory(), mutateCosmeticsOwned()]);
   };
 
@@ -1471,11 +1639,14 @@ export default function ShopPage() {
     <FeatureGate feature="shop">
     <div className={`min-h-screen pt-16 pb-24 md:pb-12 transition-colors duration-500 ${isPremium ? "premium-store-bg" : ""}`}>
       {showBurst && <PurchaseBurst onDone={() => setShowBurst(false)} />}
-      {confirmItem && <ConfirmModal item={confirmItem.item} quantity={confirmItem.quantity} onConfirm={handlePurchase} onCancel={() => setConfirmItem(null)} userCoins={userCoins} balanceKnown={affordanceKnown} />}
+      {confirmItem && <ConfirmModal item={confirmItem.item} quantity={confirmItem.quantity} busy={purchasing} onConfirm={handlePurchase} onCancel={() => { if (!purchasing) setConfirmItem(null); }} userCoins={userCoins} balanceKnown={affordanceKnown} />}
+
+      {/* Polite live region for async purchase / equip outcomes. */}
+      <p role="status" aria-live="polite" className="sr-only">{announce}</p>
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
         {/* ── Header ── */}
-        <div className={`relative text-center mb-6 transition-all duration-700 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`}>
+        <div className={`relative text-center mb-6 ${reduce ? "" : "transition-all duration-700"} ${mounted || reduce ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`}>
           {/* Gold-particle drift behind the title — sits below content via z-0 */}
           {!isPremium && mounted && <HeroGoldDrift />}
           <div className="relative z-[1] flex items-center justify-center gap-3 mb-2">
@@ -1534,10 +1705,10 @@ export default function ShopPage() {
         </div>
 
         {/* ── Store Mode Toggle ── */}
-        <div className={`flex items-center justify-center mb-8 transition-all duration-700 delay-75 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`}>
-          <div className="shop-toggle relative flex items-center rounded-full p-1" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
+        <div className={`flex items-center justify-center mb-8 ${reduce ? "" : "transition-all duration-700 delay-75"} ${mounted || reduce ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`}>
+          <div role="tablist" aria-label="Store mode" className="shop-toggle relative flex items-center rounded-full p-1" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
             {/* Sliding indicator */}
-            <div className="absolute top-1 bottom-1 rounded-full transition-all duration-300 ease-out"
+            <div aria-hidden="true" className={`absolute top-1 bottom-1 rounded-full ${reduce ? "" : "transition-all duration-300 ease-out"}`}
               style={{
                 width: "calc(50% - 4px)",
                 left: isPremium ? "calc(50% + 2px)" : "4px",
@@ -1547,12 +1718,16 @@ export default function ShopPage() {
                 border: isPremium ? "1px solid rgba(168,85,247,0.3)" : "1px solid rgba(255,215,0,0.25)",
               }} />
 
-            <button onClick={() => setStoreMode("coins")}
-              className={`relative z-10 flex items-center gap-2 px-5 sm:px-7 py-2.5 rounded-full text-sm font-bold transition-all duration-200 ${!isPremium ? "text-gold" : "text-cream/60 hover:text-cream/60"}`}>
+            <button type="button" role="tab" id="store-tab-coins" aria-selected={!isPremium} aria-controls="store-panel-coins" tabIndex={!isPremium ? 0 : -1}
+              onClick={() => setStoreMode("coins")}
+              onKeyDown={(e) => handleTabKeys(e, (i) => setStoreMode(i === 0 ? "coins" : "premium"))}
+              className={`relative z-10 flex items-center gap-2 min-h-[44px] px-5 sm:px-7 py-2.5 rounded-full text-sm font-bold transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-navy ${!isPremium ? "text-gold" : "text-cream/60 hover:text-cream"}`}>
               <img src={cdnUrl("/F.png")} alt="Fangs" className="w-5 h-5 object-contain" /> Coin Store
             </button>
-            <button onClick={() => setStoreMode("premium")}
-              className={`relative z-10 flex items-center gap-2 px-5 sm:px-7 py-2.5 rounded-full text-sm font-bold transition-all duration-200 ${isPremium ? "text-purple-300" : "text-cream/60 hover:text-cream/60"}`}>
+            <button type="button" role="tab" id="store-tab-premium" aria-selected={isPremium} aria-controls="store-panel-premium" tabIndex={isPremium ? 0 : -1}
+              onClick={() => setStoreMode("premium")}
+              onKeyDown={(e) => handleTabKeys(e, (i) => setStoreMode(i === 0 ? "coins" : "premium"))}
+              className={`relative z-10 flex items-center gap-2 min-h-[44px] px-5 sm:px-7 py-2.5 rounded-full text-sm font-bold transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-400 focus-visible:ring-offset-2 focus-visible:ring-offset-navy ${isPremium ? "text-purple-300" : "text-cream/60 hover:text-cream"}`}>
               <Diamond size={18} weight="fill" color={isPremium ? "#D8B4FE" : "currentColor"} aria-hidden="true" /> Premium Store
             </button>
           </div>
@@ -1561,7 +1736,7 @@ export default function ShopPage() {
         {/* ══════════ BUY FANGS (Stripe IAP, coin store only) ══════════ */}
         {!isPremium && (
           <FeatureGate feature="shop.fang_iap" compact>
-            <div className={`transition-all duration-700 delay-150 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`}>
+            <div className={`${reduce ? "" : "transition-all duration-700 delay-150"} ${mounted || reduce ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`}>
               <BuyFangsSection
                 isAuthed={!!user}
                 onUnauthed={() => router.push("/login?next=/shop")}
@@ -1625,9 +1800,10 @@ export default function ShopPage() {
                             <Check size={14} weight="bold" color="#22C55E" aria-hidden="true" /> Owned
                           </span>
                         ) : (
-                          <button onClick={() => { if (!requireLogin()) setConfirmItem({ item, quantity: 1 }); }}
+                          <button type="button" onClick={() => { if (!requireLogin()) setConfirmItem({ item, quantity: 1 }); }}
                             disabled={canAfford !== true}
-                            className={`flex-shrink-0 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${canAfford === true ? "gold-btn shop-btn-pulse" : canAfford === false ? "bg-gray-600/20 text-gray-500 cursor-not-allowed border border-gray-600/20" : "bg-white/5 text-cream/40 border border-white/10 cursor-wait"}`}>
+                            aria-label={canAfford === false ? `Not enough Fangs for ${item.name}` : `Buy ${item.name} for ${formatCoins(item.price)} Fangs`}
+                            className={`flex-shrink-0 min-h-[44px] px-3.5 py-2.5 rounded-lg text-xs font-bold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-navy ${canAfford === true ? "gold-btn shop-btn-pulse focus-visible:ring-gold" : canAfford === false ? "bg-gray-600/20 text-gray-400 cursor-not-allowed border border-gray-600/20 focus-visible:ring-cream/50" : "bg-white/5 text-cream/55 border border-white/10 cursor-wait focus-visible:ring-cream/50"}`}>
                             {canAfford === false ? "Can't Afford" : "Buy"}
                           </button>
                         )}
@@ -1685,9 +1861,10 @@ export default function ShopPage() {
                             <Check size={14} weight="bold" color="#22C55E" aria-hidden="true" /> Owned
                           </span>
                         ) : (
-                          <button onClick={() => { if (!requireLogin()) setConfirmItem({ item, quantity: 1 }); }}
+                          <button type="button" onClick={() => { if (!requireLogin()) setConfirmItem({ item, quantity: 1 }); }}
                             disabled={canAfford !== true}
-                            className={`flex-shrink-0 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${canAfford === true ? "gold-btn shop-btn-pulse" : canAfford === false ? "bg-gray-600/20 text-gray-500 cursor-not-allowed border border-gray-600/20" : "bg-white/5 text-cream/40 border border-white/10 cursor-wait"}`}>
+                            aria-label={canAfford === false ? `Not enough Fangs for ${item.name}` : `Buy ${item.name} for ${formatCoins(item.price)} Fangs`}
+                            className={`flex-shrink-0 min-h-[44px] px-3 py-2.5 rounded-lg text-xs font-bold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-navy ${canAfford === true ? "gold-btn shop-btn-pulse focus-visible:ring-gold" : canAfford === false ? "bg-gray-600/20 text-gray-400 cursor-not-allowed border border-gray-600/20 focus-visible:ring-cream/50" : "bg-white/5 text-cream/55 border border-white/10 cursor-wait focus-visible:ring-cream/50"}`}>
                             {canAfford === false ? "Can't Afford" : "Buy"}
                           </button>
                         )}
@@ -1744,39 +1921,50 @@ export default function ShopPage() {
         {/* ══════════ PREMIUM STORE ══════════ */}
         {isPremium && (
           <FeatureGate feature="shop.premium_cosmetics" compact>
-          <div className={`transition-all duration-700 delay-200 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`}>
+          <div id="store-panel-premium" role="tabpanel" aria-labelledby="store-tab-premium" className={`${reduce ? "" : "transition-all duration-700 delay-200"} ${mounted || reduce ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`}>
             {/* Coming soon banner */}
             <div className="shop-banner text-center mb-8 py-4 px-6 rounded-2xl mx-auto max-w-lg"
               style={{ background: "linear-gradient(135deg, rgba(168,85,247,0.08), rgba(124,58,237,0.04))", border: "1px solid rgba(168,85,247,0.15)" }}>
               <p className="text-purple-300 text-sm font-semibold mb-1">Premium store launching soon. Stay tuned.</p>
-              <p className="text-purple-400/40 text-xs">Exclusive items purchasable with real money via Stripe</p>
+              <p className="text-purple-200/70 text-xs">Exclusive items purchasable with real money via Stripe</p>
             </div>
 
             {/* Premium tabs */}
-            {/* Premium tabs */}
-            <div className="flex items-center justify-center gap-1 sm:gap-2 mb-8">
-              {([
-                { key: "themes" as PremiumTab, label: "Themes", Icon: Palette, iconWeight: "regular" as IconProps["weight"] },
-                { key: "frames" as PremiumTab, label: "Frames", Icon: ImageIcon, iconWeight: "regular" as IconProps["weight"] },
-                { key: "name_colors" as PremiumTab, label: "Name Colors", Icon: Rainbow, iconWeight: "fill" as IconProps["weight"] },
-                { key: "banners" as PremiumTab, label: "Banners", Icon: FlagBanner, iconWeight: "fill" as IconProps["weight"] },
-              ]).map((t) => {
-                const TabIcon = t.Icon;
-                return (
-                  <button key={t.key} onClick={() => setPremiumTab(t.key)}
-                    className={`flex items-center gap-1.5 px-3 sm:px-5 py-2 rounded-xl text-sm font-bold transition-all duration-200
-                      ${premiumTab === t.key ? "bg-purple-500/15 text-purple-300 border border-purple-500/30" : "text-cream/60 hover:text-cream hover:bg-white/5 border border-transparent"}`}>
-                    <TabIcon size={16} weight={t.iconWeight} color="currentColor" aria-hidden="true" />
-                    <span className="hidden sm:inline">{t.label}</span>
-                  </button>
-                );
-              })}
-            </div>
+            {(() => {
+              const PREMIUM_TABS: { key: PremiumTab; label: string; Icon: PhosphorIcon; iconWeight: IconProps["weight"] }[] = [
+                { key: "themes", label: "Themes", Icon: Palette, iconWeight: "regular" },
+                { key: "frames", label: "Frames", Icon: ImageIcon, iconWeight: "regular" },
+                { key: "name_colors", label: "Name Colors", Icon: Rainbow, iconWeight: "fill" },
+                { key: "banners", label: "Banners", Icon: FlagBanner, iconWeight: "fill" },
+              ];
+              return (
+                <div role="tablist" aria-label="Premium categories" className="flex items-center justify-center gap-1 sm:gap-2 mb-8">
+                  {PREMIUM_TABS.map((t) => {
+                    const TabIcon = t.Icon;
+                    const selected = premiumTab === t.key;
+                    return (
+                      <button key={t.key} type="button" role="tab"
+                        id={`premium-tab-${t.key}`} aria-selected={selected} aria-controls="premium-tabpanel"
+                        tabIndex={selected ? 0 : -1}
+                        onClick={() => setPremiumTab(t.key)}
+                        onKeyDown={(e) => handleTabKeys(e, (i) => setPremiumTab(PREMIUM_TABS[i].key))}
+                        className={`flex items-center gap-1.5 min-h-[44px] px-3 sm:px-5 py-2 rounded-xl text-sm font-bold transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-400 focus-visible:ring-offset-2 focus-visible:ring-offset-navy
+                          ${selected ? "bg-purple-500/15 text-purple-300 border border-purple-500/30" : "text-cream/60 hover:text-cream hover:bg-white/5 border border-transparent"}`}>
+                        <TabIcon size={16} weight={t.iconWeight} color="currentColor" aria-hidden="true" />
+                        <span className="hidden sm:inline">{t.label}</span>
+                        <span className="sm:hidden sr-only">{t.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              );
+            })()}
 
+            <div id="premium-tabpanel" role="tabpanel" aria-labelledby={`premium-tab-${premiumTab}`}>
             {/* Themes tab */}
             {premiumTab === "themes" && (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                <div className="rounded-2xl overflow-hidden border border-purple-500/20 transition-all duration-300 hover:-translate-y-1 h-full flex flex-col"
+                <div className={`rounded-2xl overflow-hidden border border-purple-500/20 h-full flex flex-col ${reduce ? "" : "transition-transform duration-300 hover:-translate-y-1"}`}
                   style={{ background: "linear-gradient(135deg, rgba(20,8,40,0.9), rgba(10,6,30,0.95))" }}>
                   <div className="h-36 relative overflow-hidden">
                     <img src={cdnUrl("/savannah.png")} alt="Savanna theme preview" className="absolute inset-0 w-full h-full object-cover grayscale-[60%] brightness-75" />
@@ -1790,15 +1978,15 @@ export default function ShopPage() {
                     <div className="flex items-center justify-between mb-2">
                       <div>
                         <p className="font-bebas text-xl text-cream tracking-wider">Savanna</p>
-                        <p className="text-purple-400/60 text-xs">Wild and golden. Warm light theme.</p>
+                        <p className="text-purple-200/70 text-xs">Wild and golden. Warm light theme.</p>
                       </div>
-                      <span className="text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-400 border border-purple-500/30">
+                      <span className="text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-200 border border-purple-500/30">
                         Epic
                       </span>
                     </div>
                     <div className="flex items-center justify-between mt-auto pt-2 gap-6">
                       <span className="font-bebas text-xl text-purple-300 flex-shrink-0">$2.99</span>
-                      <button disabled className="relative flex-shrink-0 px-4 py-2 rounded-lg text-xs font-bold border border-purple-500/30 bg-purple-500/10 text-purple-400/60 cursor-not-allowed overflow-hidden">
+                      <button type="button" disabled aria-disabled="true" aria-label="Savanna theme is coming soon" className="relative flex-shrink-0 min-h-[44px] px-4 py-2 rounded-lg text-xs font-bold border border-purple-500/30 bg-purple-500/10 text-purple-200/80 cursor-not-allowed overflow-hidden">
                         <span className="premium-coming-soon-pulse">Coming Soon</span>
                       </button>
                     </div>
@@ -1822,23 +2010,35 @@ export default function ShopPage() {
                   ))}
               </div>
             )}
+            </div>
           </div>
           </FeatureGate>
         )}
 
         {/* ══════════ COIN STORE ══════════ */}
         {!isPremium && (
-          <>
+          <div id="store-panel-coins" role="tabpanel" aria-labelledby="store-tab-coins">
             {/* ── Tabs ── */}
-            <div className={`flex items-center justify-center gap-1 sm:gap-2 mb-8 transition-all duration-700 delay-100 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`}>
-              {TABS.map((t) => {
+            <div role="tablist" aria-label="Coin store categories" className={`flex items-center justify-center gap-1 sm:gap-2 mb-8 ${reduce ? "" : "transition-all duration-700 delay-100"} ${mounted || reduce ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`}>
+              {TABS.map((t, idx) => {
                 const TabIcon = t.Icon;
+                const selected = tab === t.key;
                 return (
-                  <button key={t.key} onClick={() => setTab(t.key)}
-                    className={`flex items-center gap-1.5 px-3 sm:px-5 py-2 rounded-xl text-sm font-bold transition-all duration-200
-                      ${tab === t.key ? "bg-electric/15 text-electric border border-electric/30" : "text-cream/60 hover:text-cream hover:bg-white/5 border border-transparent"}`}>
+                  <button key={t.key} type="button" role="tab"
+                    id={`coin-tab-${t.key}`} aria-selected={selected} aria-controls={`coin-tabpanel-${t.key}`}
+                    tabIndex={selected ? 0 : -1}
+                    onClick={() => setTab(t.key)}
+                    onKeyDown={(e) => handleTabKeys(e, (i) => setTab(TABS[i].key))}
+                    className={`flex items-center gap-1.5 min-h-[44px] px-3 sm:px-5 py-2 rounded-xl text-sm font-bold transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-electric focus-visible:ring-offset-2 focus-visible:ring-offset-navy
+                      ${selected ? "bg-electric/15 text-electric border border-electric/30" : "text-cream/60 hover:text-cream hover:bg-white/5 border border-transparent"}`}>
                     <TabIcon size={16} weight={t.iconWeight} color="currentColor" aria-hidden="true" />
                     <span className="hidden sm:inline">{t.label}</span>
+                    <span className="sm:hidden sr-only">{t.label}</span>
+                    {idx === 3 && inventoryKnown && ownedCosmetics.length + ownedBoosters.length + cosmeticsOwned.length > 0 && (
+                      <span aria-hidden="true" className="ml-0.5 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-electric/20 text-electric text-[10px] font-bold border border-electric/30">
+                        {ownedCosmetics.length + ownedBoosters.length + cosmeticsOwned.length}
+                      </span>
+                    )}
                   </button>
                 );
               })}
@@ -1847,7 +2047,7 @@ export default function ShopPage() {
             {/* FEATURED */}
             {tab === "featured" && (
               <FeatureGate feature="shop.featured" compact>
-              <div className={`transition-all duration-700 delay-200 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`}>
+              <div id="coin-tabpanel-featured" role="tabpanel" aria-labelledby="coin-tab-featured" className={`${reduce ? "" : "transition-all duration-700 delay-200"} ${mounted || reduce ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`}>
                 {/* ── NEW THIS WEEK (2026-06-02 SKU drop) ── */}
                 <section className="mb-10" aria-labelledby="new-this-week-heading">
                   <div className="shop-banner flex items-center justify-between mb-5 px-4 py-3 rounded-xl"
@@ -1881,14 +2081,14 @@ export default function ShopPage() {
                           <img src={cdnUrl("/F.png")} alt="Fangs" className="w-5 h-5 object-contain" />
                           <span className="font-bebas text-base text-gold">{formatCoins(Math.min(...AVATAR_AURAS.map((a) => a.price)))} to {formatCoins(Math.max(...AVATAR_AURAS.map((a) => a.price)))}</span>
                         </div>
-                        <a href="#avatar-auras" className="px-3 py-1.5 rounded-lg text-xs font-bold border border-purple-500/40 text-purple-300 hover:bg-purple-500/10 transition-all">Browse</a>
+                        <a href="#avatar-auras" aria-label="Browse avatar auras below" className="inline-flex items-center min-h-[44px] px-3 py-2.5 rounded-lg text-xs font-bold border border-purple-500/40 text-purple-300 hover:bg-purple-500/10 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-400 focus-visible:ring-offset-2 focus-visible:ring-offset-navy">Browse</a>
                       </div>
                     </div>
                   </div>
 
                   {/* Aura sub-grid */}
                   <div id="avatar-auras" className="mt-6">
-                    <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-cream/45 mb-3">Avatar Auras &middot; pick your vibe</p>
+                    <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-cream/60 mb-3">Avatar Auras &middot; pick your vibe</p>
                     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 shop-grid-stagger">
                       {AVATAR_AURAS.map((item) => (
                         <CosmeticCard key={item.id} item={item} owned={ownedIds.has(item.id)} equipped={isEquipped(item.id)} canAfford={affords(item.price)}
@@ -1925,7 +2125,7 @@ export default function ShopPage() {
             {/* COSMETICS */}
             {tab === "cosmetics" && (
               <FeatureGate feature="shop.cosmetics" compact>
-              <div className={`transition-all duration-700 delay-200 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`}>
+              <div id="coin-tabpanel-cosmetics" role="tabpanel" aria-labelledby="coin-tab-cosmetics" className={`${reduce ? "" : "transition-all duration-700 delay-200"} ${mounted || reduce ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`}>
                 {/* ── EXCLUSIVE: Founder badges (top of cosmetics tab) ── */}
                 {FOUNDER_BADGES.some((b) => {
                   const r = founderCaps[b.id];
@@ -2055,22 +2255,33 @@ export default function ShopPage() {
                 </FeatureGate>
 
                 {/* ── Existing cosmetics sub-tabs (frames / name colors / banners) ── */}
-                <div className="flex items-center gap-2 mb-6 overflow-x-auto scrollbar-hide">
-                  {COSMETIC_SUBS.map((s) => (
-                    <button key={s.key} onClick={() => setCosmeticSub(s.key)}
-                      className={`px-4 py-1.5 rounded-full text-sm font-bold whitespace-nowrap transition-all ${cosmeticSub === s.key
-                        ? "bg-electric/15 text-electric border border-electric/30"
-                        : "text-cream/60 hover:text-cream border border-transparent hover:border-white/10"}`}>
-                      {s.label}
-                    </button>
-                  ))}
+                <div role="tablist" aria-label="Cosmetic type" className="flex items-center gap-2 mb-6 overflow-x-auto scrollbar-hide">
+                  {COSMETIC_SUBS.map((s) => {
+                    const selected = cosmeticSub === s.key;
+                    return (
+                      <button key={s.key} type="button" role="tab"
+                        id={`cosmetic-sub-${s.key}`} aria-selected={selected} aria-controls="cosmetic-sub-panel"
+                        tabIndex={selected ? 0 : -1}
+                        onClick={() => setCosmeticSub(s.key)}
+                        onKeyDown={(e) => handleTabKeys(e, (i) => setCosmeticSub(COSMETIC_SUBS[i].key))}
+                        className={`min-h-[44px] px-4 py-1.5 rounded-full text-sm font-bold whitespace-nowrap transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-electric focus-visible:ring-offset-2 focus-visible:ring-offset-navy ${selected
+                          ? "bg-electric/15 text-electric border border-electric/30"
+                          : "text-cream/60 hover:text-cream border border-transparent hover:border-white/10"}`}>
+                        {s.label}
+                      </button>
+                    );
+                  })}
                 </div>
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 shop-grid-stagger">
+                <div id="cosmetic-sub-panel" role="tabpanel" aria-labelledby={`cosmetic-sub-${cosmeticSub}`} className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 shop-grid-stagger">
                   {filteredCosmetics.map((item) => (
-                    <CosmeticCard key={item.id} item={item} owned={ownedIds.has(item.id)} canAfford={affords(item.price)}
+                    <CosmeticCard key={item.id} item={item} owned={ownedIds.has(item.id)} equipped={isEquipped(item.id)} canAfford={affords(item.price)}
                       previewAvatarUrl={previewAvatarUrl} previewUsername={previewUsername}
-                      onBuy={() => { if (!requireLogin()) setConfirmItem({ item, quantity: 1 }); }} />
+                      onBuy={() => { if (!requireLogin()) setConfirmItem({ item, quantity: 1 }); }}
+                      onEquip={() => { if (!requireLogin()) void handleEquip(item.id); }} />
                   ))}
+                  {filteredCosmetics.length === 0 && (
+                    <p className="col-span-full text-center text-cream/55 text-sm py-8">No items in this category yet.</p>
+                  )}
                 </div>
               </div>
               </FeatureGate>
@@ -2079,7 +2290,7 @@ export default function ShopPage() {
             {/* BOOSTERS */}
             {tab === "boosters" && (
               <FeatureGate feature="shop.boosters" compact>
-              <div className={`transition-all duration-700 delay-200 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`}>
+              <div id="coin-tabpanel-boosters" role="tabpanel" aria-labelledby="coin-tab-boosters" className={`${reduce ? "" : "transition-all duration-700 delay-200"} ${mounted || reduce ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`}>
                 <div className="space-y-3 shop-grid-stagger">
                   {BOOSTER_ITEMS.map((item) => (
                     <BoosterCard key={item.id} item={item} quantityOwned={getQuantity(item.id)} canAfford={affords(item.price)}
@@ -2093,14 +2304,25 @@ export default function ShopPage() {
             {/* INVENTORY */}
             {tab === "inventory" && (
               <FeatureGate feature="shop.inventory" compact>
-              <div className={`transition-all duration-700 delay-200 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`}>
+              <div id="coin-tabpanel-inventory" role="tabpanel" aria-labelledby="coin-tab-inventory" className={`${reduce ? "" : "transition-all duration-700 delay-200"} ${mounted || reduce ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`}>
+                {/* Inventory loading skeleton — gate on the SWR data being
+                    undefined so we never flash the empty state before the
+                    first fetch resolves. */}
+                {user && !inventoryKnown && (
+                  <div role="status" aria-live="polite" className="space-y-3 mb-8">
+                    <span className="sr-only">Loading your inventory</span>
+                    {[0, 1, 2].map((i) => (
+                      <div key={i} aria-hidden="true" className="h-[72px] rounded-xl border border-white/10 bg-white/5 motion-safe:animate-pulse" />
+                    ))}
+                  </div>
+                )}
                 {/* Themes — always show Interstellar as owned */}
                 <div className="mb-8">
-                  <h3 className="font-bebas text-xl text-cream/60 tracking-wider mb-4 flex items-center gap-2">
+                  <h3 className="font-bebas text-xl text-cream/70 tracking-wider mb-4 flex items-center gap-2">
                     <Palette size={20} weight="regular" color="currentColor" aria-hidden="true" /> Themes
                   </h3>
                   <div className="space-y-2">
-                    <div className="relative rounded-xl border border-green-500/40 p-4 transition-all duration-300 flex items-center gap-4"
+                    <div className="relative rounded-xl border border-green-500/40 p-4 flex items-center gap-4"
                       style={{ background: "linear-gradient(135deg, rgba(10,16,32,0.85), rgba(6,12,24,0.9))" }}>
                       <div className="absolute top-2 right-2 flex items-center gap-1 bg-green-500/20 border border-green-500/30 rounded-full px-2 py-0.5">
                         <span className="text-green-400 text-[10px] font-bold uppercase tracking-wider">Active</span>
@@ -2123,7 +2345,7 @@ export default function ShopPage() {
                     unioned with source attribution (purchased / founder / earned). ── */}
                 {cosmeticsOwned.length > 0 && (
                   <div className="mb-8">
-                    <h3 className="font-bebas text-xl text-cream/60 tracking-wider mb-4 flex items-center gap-2">
+                    <h3 className="font-bebas text-xl text-cream/70 tracking-wider mb-4 flex items-center gap-2">
                       <Crown size={20} weight="fill" color="#FFD700" aria-hidden="true" /> Identity &amp; Status
                     </h3>
                     <div className="space-y-2">
@@ -2132,8 +2354,12 @@ export default function ShopPage() {
                         const isFounder = c.source === "founder";
                         const isEarned = c.source === "earned";
                         const sourceLabel = isFounder ? "Founder" : isEarned ? "Earned" : "Purchased";
-                        const sourceColor = isFounder ? "text-gold" : isEarned ? "text-electric" : "text-cream/60";
+                        const sourceColor = isFounder ? "text-gold" : isEarned ? "text-electric" : "text-cream/70";
                         const sourceBg = isFounder ? "bg-gold/15 border-gold/30" : isEarned ? "bg-electric/10 border-electric/30" : "bg-white/5 border-white/10";
+                        // Resolve a human label from the catalog / founder set;
+                        // fall back to a Title-Cased version of the raw id so the
+                        // row never shows an ugly snake_case identifier.
+                        const displayName = displayNameForCosmetic(c.id);
                         return (
                           <div key={c.id} className="relative rounded-xl border border-white/10 p-4 flex items-center gap-3"
                             style={{ background: "linear-gradient(135deg, rgba(10,16,32,0.85), rgba(6,12,24,0.9))" }}>
@@ -2141,16 +2367,19 @@ export default function ShopPage() {
                               <span className={`text-[9px] uppercase tracking-wider font-bold ${sourceColor}`}>{sourceLabel}</span>
                             </div>
                             <div className="flex-1 min-w-0">
-                              <p className="font-bebas text-base text-cream tracking-wide truncate">{c.id}</p>
-                              <p className="text-cream/50 text-[11px] capitalize">{c.type.replace(/_/g, " ")}</p>
+                              <p className="font-bebas text-base text-cream tracking-wide truncate">{displayName}</p>
+                              <p className="text-cream/55 text-[11px] capitalize">{c.type.replace(/_/g, " ")}</p>
                             </div>
                             {isUsernameEffect && (
                               <button
-                                onClick={() => handleEquipUsernameEffect(c.id)}
-                                className={`flex-shrink-0 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                                type="button"
+                                onClick={() => handleEquipUsernameEffect(c.equipped ? "" : c.id)}
+                                aria-pressed={c.equipped}
+                                aria-label={c.equipped ? `${displayName} equipped, activate to unequip` : `Equip ${displayName}`}
+                                className={`flex-shrink-0 min-h-[44px] px-3 py-2.5 rounded-lg text-xs font-bold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-navy ${
                                   c.equipped
-                                    ? "border border-green-500/30 text-green-400 hover:bg-green-500/10"
-                                    : "border border-electric/30 text-electric hover:bg-electric/10"
+                                    ? "border border-green-500/40 text-green-400 hover:bg-green-500/10 focus-visible:ring-green-400"
+                                    : "border border-electric/40 text-electric hover:bg-electric/10 focus-visible:ring-electric"
                                 }`}
                               >
                                 {c.equipped ? "Equipped" : "Equip"}
@@ -2163,16 +2392,18 @@ export default function ShopPage() {
                   </div>
                 )}
 
-                {ownedCosmetics.length === 0 && ownedBoosters.length === 0 && cosmeticsOwned.length === 0 ? (
+                {/* Genuine empty state — only after inventory has resolved (never
+                    flash it while the first fetch is in flight). */}
+                {inventoryKnown && ownedCosmetics.length === 0 && ownedBoosters.length === 0 && cosmeticsOwned.length === 0 ? (
                   <div className="text-center py-12">
-                    <p className="text-cream/25 text-sm">Purchase items from the shop to add them to your inventory</p>
-                    <button onClick={() => setTab("featured")} className="mt-4 btn-outline px-6 py-2 rounded-xl text-sm">Browse Shop</button>
+                    <p className="text-cream/55 text-sm">Purchase items from the shop to add them to your inventory.</p>
+                    <button type="button" onClick={() => setTab("featured")} className="mt-4 btn-outline min-h-[44px] px-6 py-2.5 rounded-xl text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-electric focus-visible:ring-offset-2 focus-visible:ring-offset-navy">Browse Shop</button>
                   </div>
                 ) : (
                   <>
                     {ownedCosmetics.length > 0 && (
                       <div className="mb-8">
-                        <h3 className="font-bebas text-xl text-cream/60 tracking-wider mb-4 flex items-center gap-2">
+                        <h3 className="font-bebas text-xl text-cream/70 tracking-wider mb-4 flex items-center gap-2">
                           <Palette size={20} weight="regular" color="currentColor" aria-hidden="true" /> Cosmetics
                         </h3>
                         <div className="space-y-2">
@@ -2185,7 +2416,7 @@ export default function ShopPage() {
                     )}
                     {ownedBoosters.length > 0 && (
                       <div>
-                        <h3 className="font-bebas text-xl text-cream/60 tracking-wider mb-4 flex items-center gap-2">
+                        <h3 className="font-bebas text-xl text-cream/70 tracking-wider mb-4 flex items-center gap-2">
                           <Rocket size={20} weight="regular" color="currentColor" aria-hidden="true" /> Boosters
                         </h3>
                         <div className="space-y-2">
@@ -2201,7 +2432,7 @@ export default function ShopPage() {
               </div>
               </FeatureGate>
             )}
-          </>
+          </div>
         )}
       </div>
     </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import useSWR from "swr";
 import { apiPost, swrFetcher } from "@/lib/api-client";
 import { mutateUserStats } from "@/lib/hooks";
@@ -141,7 +141,8 @@ export default function DailySpinHero() {
     return (
       <div className="mb-8">
         <div
-          className="relative rounded-2xl overflow-hidden border border-gold/25 h-[280px] animate-pulse"
+          aria-hidden="true"
+          className="relative rounded-2xl overflow-hidden border border-gold/25 h-[280px] motion-safe:animate-pulse"
           style={{
             background: "linear-gradient(135deg, #150f08 0%, #0d0a06 35%, #060c18 100%)",
           }}
@@ -192,23 +193,26 @@ export default function DailySpinHero() {
 
             {status?.canSpin ? (
               <button
+                type="button"
                 onClick={handleSpin}
                 disabled={spinning}
-                className="group inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-full font-bold text-sm tracking-wide bg-gold text-navy hover:bg-gold/90 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-gold/30"
+                aria-busy={spinning}
+                aria-label={spinning ? "Spinning the wheel" : "Spin the wheel now"}
+                className="group inline-flex items-center justify-center gap-2 min-h-[44px] px-7 py-3.5 rounded-full font-bold text-sm tracking-wide bg-gold text-navy hover:bg-gold/90 motion-safe:active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-gold/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-navy"
               >
                 <Sparkle
                   size={16}
                   weight="fill"
-                  className="group-hover:rotate-12 transition-transform"
+                  className="motion-safe:group-hover:rotate-12 transition-transform"
                   aria-hidden="true"
                 />
-                {spinning ? "Spinning…" : "Spin Now"}
+                {spinning ? "Spinning..." : "Spin Now"}
               </button>
             ) : (
               <div className="inline-flex items-center gap-3 px-5 py-3 rounded-full bg-white/[0.04] border border-white/[0.08]">
                 <Lock size={14} weight="fill" color="#94a3b8" aria-hidden="true" />
                 <div>
-                  <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-cream/40 leading-none">
+                  <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-cream/60 leading-none">
                     Next spin in
                   </p>
                   <p className="font-bebas text-2xl text-cream tracking-wider tabular-nums leading-tight mt-0.5">
@@ -235,10 +239,15 @@ export default function DailySpinHero() {
           type="button"
           onClick={() => setShowInfo(true)}
           aria-label="How the wheel works"
-          className="absolute bottom-3 right-3 z-10 grid place-items-center w-8 h-8 rounded-full bg-white/[0.05] hover:bg-white/[0.1] text-cream/50 hover:text-cream transition-colors"
+          className="absolute bottom-3 right-3 z-10 grid place-items-center w-9 h-9 rounded-full bg-white/[0.05] hover:bg-white/[0.1] text-cream/70 hover:text-cream transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cream/70 focus-visible:ring-offset-2 focus-visible:ring-offset-navy"
         >
-          <Info size={14} weight="bold" />
+          <Info size={14} weight="bold" aria-hidden="true" />
         </button>
+
+        {/* Polite live region announcing the spin lifecycle to AT. */}
+        <span role="status" aria-live="polite" className="sr-only">
+          {spinning ? "Spinning the wheel" : ""}
+        </span>
       </div>
 
       {showInfo && <SpinInfoModal onClose={() => setShowInfo(false)} />}
@@ -263,8 +272,33 @@ const INFO_ROWS: { color: string; chance: string; label: string; desc: string; t
 ];
 
 function SpinInfoModal({ onClose }: { onClose: () => void }) {
+  const cardRef = useRef<HTMLDivElement | null>(null);
+  const closeRef = useRef<HTMLButtonElement | null>(null);
+
+  // Focus the close control on open, restore focus to the trigger on close.
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    const trigger = document.activeElement as HTMLElement | null;
+    const id = requestAnimationFrame(() => closeRef.current?.focus());
+    return () => { cancelAnimationFrame(id); trigger?.focus?.(); };
+  }, []);
+
+  // Escape closes; Tab is trapped within the card.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") { e.preventDefault(); onClose(); return; }
+      if (e.key !== "Tab") return;
+      const root = cardRef.current;
+      if (!root) return;
+      const focusables = Array.from(
+        root.querySelectorAll<HTMLElement>('button:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])'),
+      ).filter((el) => el.offsetParent !== null);
+      if (focusables.length === 0) return;
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      const active = document.activeElement as HTMLElement | null;
+      if (e.shiftKey && active === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && active === last) { e.preventDefault(); first.focus(); }
+    };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
   }, [onClose]);
@@ -275,13 +309,17 @@ function SpinInfoModal({ onClose }: { onClose: () => void }) {
       role="dialog"
       aria-modal="true"
       aria-labelledby="spin-info-title"
-      onClick={onClose}
     >
       {/* Blurred backdrop */}
-      <div className="absolute inset-0 bg-black/70 backdrop-blur-md" />
+      <button
+        type="button"
+        aria-label="Close"
+        onClick={onClose}
+        className="absolute inset-0 bg-black/70 backdrop-blur-md cursor-default"
+      />
 
       <div
-        onClick={(e) => e.stopPropagation()}
+        ref={cardRef}
         className="relative w-full max-w-lg rounded-2xl border border-gold/25 overflow-hidden max-h-[85vh] flex flex-col"
         style={{
           background: "linear-gradient(135deg, #0a1020 0%, #060c18 100%)",
@@ -299,12 +337,13 @@ function SpinInfoModal({ onClose }: { onClose: () => void }) {
             </h3>
           </div>
           <button
+            ref={closeRef}
             type="button"
             onClick={onClose}
             aria-label="Close"
-            className="grid place-items-center w-8 h-8 rounded-full bg-white/[0.05] hover:bg-white/[0.1] text-cream/60 hover:text-cream transition-colors"
+            className="grid place-items-center w-9 h-9 rounded-full bg-white/[0.05] hover:bg-white/[0.1] text-cream/70 hover:text-cream transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cream/70 focus-visible:ring-offset-2 focus-visible:ring-offset-navy"
           >
-            <X size={14} weight="bold" />
+            <X size={14} weight="bold" aria-hidden="true" />
           </button>
         </div>
 
@@ -335,7 +374,7 @@ function SpinInfoModal({ onClose }: { onClose: () => void }) {
                     >
                       {row.label}
                     </span>
-                    <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-cream/40">
+                    <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-cream/60">
                       {row.chance}
                     </span>
                   </div>
@@ -364,7 +403,7 @@ function SpinInfoModal({ onClose }: { onClose: () => void }) {
           <button
             type="button"
             onClick={onClose}
-            className="w-full py-2.5 rounded-xl font-semibold text-sm tracking-wide bg-gold text-navy hover:bg-gold/90 transition-colors"
+            className="w-full min-h-[44px] py-2.5 rounded-xl font-semibold text-sm tracking-wide bg-gold text-navy hover:bg-gold/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-navy"
           >
             Got it
           </button>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useReducedMotion } from "framer-motion";
 
 /**
  * SpinWheel — animated SVG wheel.
@@ -37,16 +38,18 @@ export default function SpinWheel({
   const segmentAngle = 360 / slots.length;
   const [rotation, setRotation] = useState(0);
   const animatingRef = useRef(false);
+  const reduce = useReducedMotion();
 
   useEffect(() => {
     if (!spinning || landingIndex == null || animatingRef.current) return;
     animatingRef.current = true;
 
     // Compute target rotation:
-    //   - 6 full turns (suspense)
+    //   - 6 full turns (suspense) — skipped under reduced motion so the wheel
+    //     snaps near-instantly to the result with no spinning animation
     //   - then land such that the chosen slot is at the top (12 o'clock)
     //   - subtract a tiny random jitter inside the segment so it never feels rigged
-    const baseTurns = 6 * 360;
+    const baseTurns = reduce ? 0 : 6 * 360;
     // Slot 0 is at the top by default (we draw the wheel that way). So the
     // wheel must rotate so that slot `landingIndex` ends up at the top —
     // which means rotating by `-landingIndex * segmentAngle` (clockwise).
@@ -57,12 +60,13 @@ export default function SpinWheel({
     setRotation(target);
 
     // Match the CSS transition duration. Clear the animating flag at the end.
+    // Reduced motion resolves quickly since there is no long spin to await.
     const t = setTimeout(() => {
       animatingRef.current = false;
       onLanded?.();
-    }, 5200);
+    }, reduce ? 200 : 5200);
     return () => clearTimeout(t);
-  }, [spinning, landingIndex, segmentAngle, onLanded]);
+  }, [spinning, landingIndex, segmentAngle, onLanded, reduce]);
 
   const cx = size / 2;
   const cy = size / 2;
@@ -104,7 +108,7 @@ export default function SpinWheel({
       <div
         style={{
           transform: `rotate(${rotation}deg) translateZ(0)`,
-          transition: spinning
+          transition: spinning && !reduce
             ? "transform 5s cubic-bezier(0.16, 1, 0.3, 1)"
             : "none",
           willChange: "transform",
