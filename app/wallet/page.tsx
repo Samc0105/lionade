@@ -270,8 +270,8 @@ export default function WalletPage() {
 
                 <div className="relative flex items-start justify-between gap-3 mb-4">
                   <div>
-                    <p className="text-cream/40 text-xs uppercase tracking-widest font-semibold">Your stash</p>
-                    <p className="text-cream/25 text-[10px] uppercase tracking-widest mt-1 font-mono">Current Balance</p>
+                    <p className="text-cream/70 text-xs uppercase tracking-widest font-semibold">Your stash</p>
+                    <p className="text-cream/55 text-[10px] uppercase tracking-widest mt-1 font-mono">Current Balance</p>
                   </div>
                   {ready && todayEarned > 0 && (
                     <span className="balance-delta-chip inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-mono uppercase tracking-widest"
@@ -292,13 +292,13 @@ export default function WalletPage() {
                     <div className="h-14 w-40 rounded-lg bg-white/10 animate-pulse" />
                   )}
                 </div>
-                <p className="relative text-cream/30 text-xs uppercase tracking-widest mb-3">Fangs</p>
+                <p className="relative text-cream/55 text-xs uppercase tracking-widest mb-3">Fangs</p>
 
                 <div className="relative rounded-xl px-3 pt-3 pb-2"
                   style={{ background: "rgba(255,215,0,0.04)", border: "1px solid rgba(255,215,0,0.10)" }}>
                   <div className="flex items-center justify-between mb-1.5">
-                    <span className="text-cream/35 text-[10px] uppercase tracking-widest">Balance trend</span>
-                    <span className="text-cream/25 text-[10px]">recent</span>
+                    <span className="text-cream/60 text-[10px] uppercase tracking-widest">Balance trend</span>
+                    <span className="text-cream/55 text-[10px]">recent</span>
                   </div>
                   {ready ? (
                     <BalanceSparkline balance={coins} txns={transactions} />
@@ -354,7 +354,7 @@ export default function WalletPage() {
               style={{ animationDelay: "0.1s", background: "var(--card-solid-bg)", border: "1px solid var(--card-solid-border)", minHeight: "100%" }}>
               <div className="flex items-center justify-between mb-5">
                 <h2 className="font-bebas text-xl text-cream tracking-wider">TRANSACTION HISTORY</h2>
-                <span className="text-cream/25 text-xs uppercase tracking-widest">Last 20</span>
+                <span className="text-cream/55 text-xs uppercase tracking-widest">Last 20</span>
               </div>
 
               {/* Weekly summary tiles — only when there's something to summarize */}
@@ -412,9 +412,17 @@ export default function WalletPage() {
               ) : transactions.length === 0 ? (
                 <div className="text-center py-20">
                   <img src={cdnUrl("/F.png")} alt="Fangs" className="w-10 h-10 object-contain mx-auto mb-3 opacity-30" />
-                  <p className="font-bebas text-lg text-cream/30 tracking-wider mb-1">No transactions yet</p>
-                  <p className="text-cream/20 text-xs mb-5">Earn Fangs by completing quizzes, duels, and bounties.</p>
-                  <Link href="/quiz" className="inline-block font-syne font-bold text-xs px-5 py-2 rounded-full border border-gold/40 text-gold hover:bg-gold/10 transition-colors">
+                  <p className="font-bebas text-lg text-cream/60 tracking-wider mb-1">No transactions yet</p>
+                  <p className="text-cream/55 text-xs mb-5">Earn Fangs by completing quizzes, duels, and bounties.</p>
+                  <Link
+                    href="/quiz"
+                    className="inline-block font-syne font-bold text-xs px-5 py-2 rounded-full transition-all duration-200 hover:brightness-110 active:scale-[0.98]"
+                    style={{
+                      background: "linear-gradient(135deg, #FFD700 0%, #F0C000 100%)",
+                      color: "#04080F",
+                      boxShadow: "0 4px 15px rgba(255,215,0,0.3)",
+                    }}
+                  >
                     Earn your first Fangs
                   </Link>
                 </div>

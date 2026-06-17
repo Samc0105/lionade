@@ -161,7 +161,7 @@ export default function PricingPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user } = useAuth();
-  const { plan, isPaid } = usePlan();
+  const { plan, isPaid, isLoading: planLoading } = usePlan();
   const [cycle, setCycle] = useState<Cycle>("monthly");
   // Tier currently in-flight to /api/stripe/checkout so we can disable the
   // exact button + show a spinner without locking the other plan's CTA.
@@ -395,7 +395,7 @@ export default function PricingPage() {
               )}
               <span className="relative z-10">Annual</span>
               <span className="absolute -top-2.5 -right-2.5 z-20 bg-gold text-navy font-mono text-[8.5px] px-1.5 py-0.5 rounded-full tracking-wider shadow-[0_0_12px_-2px_rgba(255,215,0,0.6)]">
-                Save ~17%
+                Save 2 months
               </span>
             </button>
           </div>
@@ -425,10 +425,11 @@ export default function PricingPage() {
               highlight
               reduce={!!reduce}
               cta={{
-                label: plan === "pro" ? "Manage plan" : "Go Pro",
+                label: planLoading ? "" : plan === "pro" ? "Manage plan" : "Go Pro",
                 onClick: () => handleUpgrade("pro"),
                 loading: pendingTier === "pro",
-                disabled: pendingTier !== null,
+                pending: planLoading,
+                disabled: pendingTier !== null || planLoading,
               }}
             />
           </motion.div>
@@ -441,10 +442,11 @@ export default function PricingPage() {
               cycle={cycle}
               reduce={!!reduce}
               cta={{
-                label: plan === "platinum" ? "Manage plan" : "Go Platinum",
+                label: planLoading ? "" : plan === "platinum" ? "Manage plan" : "Go Platinum",
                 onClick: () => handleUpgrade("platinum"),
                 loading: pendingTier === "platinum",
-                disabled: pendingTier !== null,
+                pending: planLoading,
+                disabled: pendingTier !== null || planLoading,
               }}
             />
           </motion.div>
@@ -547,7 +549,15 @@ export default function PricingPage() {
 // ── Plan card ────────────────────────────────────────────────────────────────
 type PlanCardCta =
   | { label: string; href: string }
-  | { label: string; onClick: () => void; loading?: boolean; disabled?: boolean };
+  | {
+      label: string;
+      onClick: () => void;
+      /** Checkout / portal request in flight — shows the "Opening checkout" spinner. */
+      loading?: boolean;
+      /** Plan/auth still resolving — shows a neutral pulse so we don't flash "Go Pro" at a subscriber. */
+      pending?: boolean;
+      disabled?: boolean;
+    };
 
 function PlanCard({
   tier, name, tagline, price, cycle, highlight, reduce, cta,
@@ -566,21 +576,21 @@ function PlanCard({
 
   const perks: string[] = isFree
     ? [
-        `${PLAN_EXAM_LIMITS.free} Mastery target`,
+        `${PLAN_EXAM_LIMITS.free} active Mastery Mode target`,
         "Quizzes, duels, leaderboards, all in",
         `Daily Clock-In Fangs (${PLAN_FANG_MULTIPLIER.free}×)`,
         "Free includes popup + banner ads",
       ]
     : tier === "pro"
       ? [
-          `${PLAN_EXAM_LIMITS.pro} Mastery targets`,
+          `${PLAN_EXAM_LIMITS.pro} active Mastery Mode targets`,
           `${PLAN_FANG_MULTIPLIER.pro}× Fangs on everything`,
           "Unlimited Session Report PDFs",
           "Popups gone",
           "Priority support",
         ]
       : [
-          `${PLAN_EXAM_LIMITS.platinum} Mastery targets`,
+          `${PLAN_EXAM_LIMITS.platinum} active Mastery Mode targets`,
           `${PLAN_FANG_MULTIPLIER.platinum}× Fangs, the max`,
           "Zero ads. Clean surface.",
           "Priority AI routing",
@@ -711,7 +721,15 @@ function PlanCard({
                   : "border border-white/15 text-cream hover:bg-white/[0.06]"
             }`}
           >
-            {cta.loading ? (
+            {cta.pending ? (
+              <span className="inline-flex items-center justify-center" aria-label="Loading your plan">
+                <span
+                  aria-hidden="true"
+                  className="inline-block w-12 h-2.5 rounded-full bg-current animate-pulse"
+                  style={{ opacity: 0.4 }}
+                />
+              </span>
+            ) : cta.loading ? (
               <span className="inline-flex items-center gap-2 justify-center">
                 <span
                   aria-hidden="true"

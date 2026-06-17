@@ -188,8 +188,25 @@ export default function VocabPage() {
 
           {/* Loading → error → genuinely empty → banks */}
           {banksLoading && banks.length === 0 ? (
-            <div className="rounded-2xl bg-white/5 backdrop-blur border border-white/10 p-10 text-center">
-              <p className="font-mono text-xs uppercase tracking-[0.25em] text-cream/55">loading banks...</p>
+            <div className="animate-slide-up" aria-busy="true" aria-label="Loading your word banks">
+              {/* Bank-selector row placeholder */}
+              <div className="mb-5 flex gap-2 overflow-hidden">
+                <div className="h-11 w-40 rounded-xl bg-white/5 animate-pulse shrink-0" />
+                <div className="h-11 w-32 rounded-xl bg-white/5 animate-pulse shrink-0" />
+                <div className="h-11 w-11 rounded-xl bg-white/5 animate-pulse shrink-0" />
+              </div>
+              {/* Tab-row placeholder */}
+              <div className="mb-6 flex gap-1.5 overflow-hidden">
+                {[0, 1, 2, 3].map(i => (
+                  <div key={i} className="h-10 w-24 rounded-xl bg-white/5 animate-pulse shrink-0" />
+                ))}
+              </div>
+              {/* Panel placeholder */}
+              <div className="rounded-2xl bg-white/5 backdrop-blur border border-white/10 p-6 space-y-3">
+                <div className="h-5 w-1/2 rounded bg-white/5 animate-pulse" />
+                <div className="h-12 w-full rounded-xl bg-white/5 animate-pulse" />
+                <div className="h-12 w-full rounded-xl bg-white/5 animate-pulse" />
+              </div>
             </div>
           ) : banksFailed ? (
             <BanksErrorState onRetry={() => mutateBanks()} />
@@ -221,10 +238,11 @@ export default function VocabPage() {
                   return (
                     <button
                       key={t.id}
+                      id={`vocab-tab-btn-${t.id}`}
                       type="button"
                       role="tab"
                       aria-selected={isActive}
-                      aria-controls={`vocab-tab-${t.id}`}
+                      aria-controls="vocab-tabpanel"
                       onClick={() => setTab(t.id)}
                       className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-syne font-bold text-sm transition-[background-color,color,border-color,box-shadow] border whitespace-nowrap ${
                         isActive
@@ -241,8 +259,10 @@ export default function VocabPage() {
 
               {/* Tab panels */}
               <section
-                id={`vocab-tab-${tab}`}
+                id="vocab-tabpanel"
                 role="tabpanel"
+                tabIndex={0}
+                aria-labelledby={`vocab-tab-btn-${tab}`}
                 className="animate-slide-up"
                 style={{ animationDelay: "0.08s" }}
               >

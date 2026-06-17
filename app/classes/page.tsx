@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import useSWR from "swr";
 import {
@@ -297,6 +297,64 @@ function CreateClassModal({
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Focus management (mirrors components/ConfirmModal.tsx): trap Tab inside the
+  // dialog, focus the name input on open, Escape closes (when not mid-submit),
+  // and focus restores to whatever opened the modal (the "New class" trigger).
+  const dialogRef = useRef<HTMLDivElement | null>(null);
+  const nameInputRef = useRef<HTMLInputElement | null>(null);
+  const triggerRef = useRef<HTMLElement | null>(null);
+
+  // Remember the trigger on mount and restore focus to it on unmount.
+  useEffect(() => {
+    triggerRef.current = document.activeElement as HTMLElement | null;
+    return () => {
+      triggerRef.current?.focus?.();
+    };
+  }, []);
+
+  // Focus the class-name input on open. rAF avoids racing the entrance paint.
+  useEffect(() => {
+    const id = requestAnimationFrame(() => nameInputRef.current?.focus());
+    return () => cancelAnimationFrame(id);
+  }, []);
+
+  // Esc closes (only when not submitting — don't orphan an in-flight create).
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && !submitting) {
+        e.preventDefault();
+        onClose();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [submitting, onClose]);
+
+  // Tab focus-trap: keep keyboard focus cycling within the dialog.
+  const onTrapKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (e.key !== "Tab") return;
+    const root = dialogRef.current;
+    if (!root) return;
+    const focusable = root.querySelectorAll<HTMLElement>(
+      'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+    );
+    if (focusable.length === 0) return;
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    const active = document.activeElement as HTMLElement | null;
+    if (e.shiftKey) {
+      if (active === first || !root.contains(active)) {
+        e.preventDefault();
+        last.focus();
+      }
+    } else {
+      if (active === last || !root.contains(active)) {
+        e.preventDefault();
+        first.focus();
+      }
+    }
+  }, []);
+
   const submit = async () => {
     if (submitting) return;
     if (name.trim().length < 2) { setError("Class name must be at least 2 characters."); return; }
@@ -330,9 +388,14 @@ function CreateClassModal({
       className="fixed inset-0 z-50 grid place-items-center bg-black/60 backdrop-blur-sm px-4"
       role="dialog"
       aria-modal="true"
+      aria-labelledby="create-class-title"
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+      onKeyDown={onTrapKeyDown}
     >
-      <div className="relative w-full max-w-md rounded-[14px] border border-white/[0.1] bg-gradient-to-br from-navy to-[#0a0f1d] p-5 sm:p-6 shadow-2xl">
+      <div
+        ref={dialogRef}
+        className="relative w-full max-w-md rounded-[14px] border border-white/[0.1] bg-gradient-to-br from-navy to-[#0a0f1d] p-5 sm:p-6 shadow-2xl"
+      >
         <button
           type="button"
           onClick={onClose}
@@ -348,7 +411,7 @@ function CreateClassModal({
             New class
           </span>
         </div>
-        <h3 className="font-bebas text-[26px] tracking-wider text-cream leading-tight mb-4">
+        <h3 id="create-class-title" className="font-bebas text-[26px] tracking-wider text-cream leading-tight mb-4">
           What are you studying?
         </h3>
 
@@ -357,6 +420,7 @@ function CreateClassModal({
             Class name *
           </span>
           <input
+            ref={nameInputRef}
             value={name}
             onChange={e => setName(e.target.value.slice(0, 80))}
             placeholder="e.g. Calculus 2"
