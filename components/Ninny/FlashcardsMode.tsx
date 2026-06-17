@@ -31,7 +31,7 @@ export default function FlashcardsMode({ cards, wrongAnswerCounts, onComplete }:
     return (
       <div className="rounded-2xl border border-white/[0.06] bg-white/[0.02] px-6 py-10 text-center">
         <p className="font-bebas text-lg text-cream/70 tracking-wider mb-1">NO FLASHCARDS HERE YET</p>
-        <p className="text-cream/45 text-xs">Add a few terms in this set and they'll show up here.</p>
+        <p className="text-cream/60 text-xs">Add a few terms in this set and they'll show up here.</p>
       </div>
     );
   }
@@ -105,8 +105,10 @@ export default function FlashcardsMode({ cards, wrongAnswerCounts, onComplete }:
         <button
           type="button"
           onClick={() => setFlipped((f) => !f)}
-          className="block w-full h-72 sm:h-80 cursor-pointer focus:outline-none"
+          className="block w-full h-72 sm:h-80 cursor-pointer rounded-2xl
+            focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
           style={{ transformStyle: "preserve-3d" }}
+          aria-pressed={flipped}
           aria-label={flipped ? "Show front of card" : "Show back of card"}
         >
           <div

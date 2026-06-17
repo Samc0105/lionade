@@ -67,23 +67,41 @@ export default function ConfirmModal({
 }: ConfirmModalProps) {
   const [busy, setBusy] = useState(false);
   const confirmRef = useRef<HTMLButtonElement | null>(null);
+  const panelRef = useRef<HTMLDivElement | null>(null);
 
-  // Esc to close (only when not busy — avoid orphaning an in-flight mutation).
+  // Esc to close (only when not busy — avoid orphaning an in-flight mutation)
+  // + Tab focus-trap so keyboard/SR users can't tab into the page behind an
+  // aria-modal dialog (WCAG 2.1.2 / 2.4.3).
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && !busy) onClose();
+      if (e.key === "Escape" && !busy) { onClose(); return; }
+      if (e.key !== "Tab" || !panelRef.current) return;
+      const items = Array.from(
+        panelRef.current.querySelectorAll<HTMLElement>(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+        ),
+      ).filter((el) => !el.hasAttribute("disabled"));
+      if (items.length === 0) return;
+      const first = items[0], last = items[items.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [open, busy, onClose]);
 
   // Focus the primary button on open so keyboard / SR users land where the
-  // action is. Wrapping in rAF avoids a layout race with the entrance anim.
+  // action is, and restore focus to the trigger on close. Wrapping in rAF
+  // avoids a layout race with the entrance anim.
   useEffect(() => {
     if (!open) return;
+    const restoreTo = document.activeElement as HTMLElement | null;
     const id = requestAnimationFrame(() => confirmRef.current?.focus());
-    return () => cancelAnimationFrame(id);
+    return () => {
+      cancelAnimationFrame(id);
+      restoreTo?.focus?.();
+    };
   }, [open]);
 
   // Reset busy whenever the modal hides — protects against state leaking
@@ -117,6 +135,7 @@ export default function ConfirmModal({
       aria-labelledby="confirm-modal-title"
     >
       <div
+        ref={panelRef}
         onClick={(e) => e.stopPropagation()}
         className={`w-full max-w-md rounded-2xl border p-6 animate-slide-up ${
           destructive ? "border-red-400/30" : "border-white/[0.1]"

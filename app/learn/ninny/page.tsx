@@ -2,21 +2,17 @@
 
 import { useState, useCallback, useRef, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import dynamic from "next/dynamic";
 import useSWR from "swr";
 import { useAuth } from "@/lib/auth";
 import { mutateUserStats, useUserStats } from "@/lib/hooks";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import BackButton from "@/components/BackButton";
-import MultipleChoiceMode, {
-  type NinnyWrongAnswer,
-} from "@/components/Ninny/MultipleChoiceMode";
-import FlashcardsMode from "@/components/Ninny/FlashcardsMode";
-import MatchMode from "@/components/Ninny/MatchMode";
-import FillBlankMode from "@/components/Ninny/FillBlankMode";
-import TrueFalseMode from "@/components/Ninny/TrueFalseMode";
-import OrderingMode from "@/components/Ninny/OrderingMode";
-import BlitzMode from "@/components/Ninny/BlitzMode";
-import ChatPanel from "@/components/Ninny/ChatPanel";
+import ConfirmModal from "@/components/ConfirmModal";
+// NinnyWrongAnswer is a type-only import (erased at compile time, no bundle
+// cost). The mode components themselves are lazy-loaded below — only one
+// renders at a time, so static-importing all 8 bloated the page bundle.
+import { type NinnyWrongAnswer } from "@/components/Ninny/MultipleChoiceMode";
 import { cdnUrl } from "@/lib/cdn";
 import {
   NINNY_DAILY_LIMIT,
@@ -49,6 +45,63 @@ import {
 } from "@phosphor-icons/react";
 import type { IconProps } from "@phosphor-icons/react";
 import type { ComponentType } from "react";
+
+const NINNY_PURPLE = "#A855F7";
+
+// Lightweight skeleton shown while a lazy-loaded mode component streams in.
+// Matches the page's purple chrome so the swap is visually quiet. The spinner
+// uses animate-spin (globally reduced-motion-safe via globals.css).
+function ModeLoading() {
+  return (
+    <div className="w-full max-w-2xl mx-auto py-20 flex flex-col items-center justify-center gap-4">
+      <div
+        className="w-10 h-10 rounded-full border-2 animate-spin"
+        style={{
+          borderColor: `${NINNY_PURPLE}30`,
+          borderTopColor: NINNY_PURPLE,
+        }}
+      />
+      <p className="font-syne text-cream/40 text-xs tracking-wide">Loading mode...</p>
+    </div>
+  );
+}
+
+// Mode components are lazy-loaded: only one renders at a time (the switch in
+// the play phase), so static-importing all of them inflated the initial
+// bundle. ssr:false because every mode is client-state-driven (shuffles,
+// timers, local score) and never needs server HTML.
+const MultipleChoiceMode = dynamic(
+  () => import("@/components/Ninny/MultipleChoiceMode"),
+  { ssr: false, loading: ModeLoading },
+);
+const FlashcardsMode = dynamic(() => import("@/components/Ninny/FlashcardsMode"), {
+  ssr: false,
+  loading: ModeLoading,
+});
+const MatchMode = dynamic(() => import("@/components/Ninny/MatchMode"), {
+  ssr: false,
+  loading: ModeLoading,
+});
+const FillBlankMode = dynamic(() => import("@/components/Ninny/FillBlankMode"), {
+  ssr: false,
+  loading: ModeLoading,
+});
+const TrueFalseMode = dynamic(() => import("@/components/Ninny/TrueFalseMode"), {
+  ssr: false,
+  loading: ModeLoading,
+});
+const OrderingMode = dynamic(() => import("@/components/Ninny/OrderingMode"), {
+  ssr: false,
+  loading: ModeLoading,
+});
+const BlitzMode = dynamic(() => import("@/components/Ninny/BlitzMode"), {
+  ssr: false,
+  loading: ModeLoading,
+});
+const ChatPanel = dynamic(() => import("@/components/Ninny/ChatPanel"), {
+  ssr: false,
+  loading: ModeLoading,
+});
 
 type Phase = "input" | "generating" | "modePicker" | "play" | "results" | "chat";
 type InputMode = "topic" | "material";
@@ -88,7 +141,6 @@ interface MaterialsResponse {
   selectedSubjects: string[];
 }
 
-const NINNY_PURPLE = "#A855F7";
 const TEXT_LIMIT = 12000;
 
 // All 7 study modes — Phase 2 wires up the rest
@@ -267,9 +319,68 @@ function NinnyPageInner() {
   // double-clicks. useRef instead of state so we can read+set synchronously
   // without waiting for a re-render.
   const unlockInFlightRef = useRef(false);
+  // Set when a failed run save bounces the user back to modePicker WITH an
+  // error to display. The modePicker effect clears stale errors on entry, so
+  // this flag tells it to preserve the freshly-set save-failed message once.
+  const preserveErrorOnModePickerRef = useRef(false);
   // Pull streak from shared SWR hook for the header chip
   const { stats } = useUserStats(user?.id);
   const [comingSoonToast, setComingSoonToast] = useState<string | null>(null);
+
+  // ── In-app confirm modals (replaces native window.confirm) ──────────────
+  // Unlock-for-Fangs: stash which mode + its cost so the modal can show the
+  // Fang icon, the price, and the user's current balance.
+  const [unlockConfirm, setUnlockConfirm] = useState<{
+    mode: NinnyMode;
+    cost: number;
+  } | null>(null);
+  // Focus management for the bespoke unlock modal (the shared ConfirmModal
+  // handles delete/exit; this one has custom Fang-balance body content).
+  const unlockPanelRef = useRef<HTMLDivElement | null>(null);
+  // Delete-set: stash id + title so the modal can name the set.
+  const [deleteConfirm, setDeleteConfirm] = useState<{
+    id: string;
+    title: string;
+  } | null>(null);
+  // Exit-early penalty: stash whether the exit penalizes + the amount.
+  const [exitConfirm, setExitConfirm] = useState<{
+    willPenalize: boolean;
+    penaltyAmount: number;
+  } | null>(null);
+
+  // Escape + Tab focus-trap + focus-restore for the bespoke unlock modal
+  // (WCAG 2.1.2 / 2.4.3). Mirrors the shared ConfirmModal behavior.
+  useEffect(() => {
+    if (!unlockConfirm) return;
+    const restoreTo = document.activeElement as HTMLElement | null;
+    const raf = requestAnimationFrame(() => {
+      unlockPanelRef.current
+        ?.querySelector<HTMLElement>("button")
+        ?.focus();
+    });
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        if (!unlockInFlightRef.current) setUnlockConfirm(null);
+        return;
+      }
+      if (e.key !== "Tab" || !unlockPanelRef.current) return;
+      const items = Array.from(
+        unlockPanelRef.current.querySelectorAll<HTMLElement>(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+        ),
+      ).filter((el) => !el.hasAttribute("disabled"));
+      if (items.length === 0) return;
+      const first = items[0], last = items[items.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener("keydown", onKey);
+      restoreTo?.focus?.();
+    };
+  }, [unlockConfirm]);
 
   // Fetch recent materials, daily count, and user's selected subjects
   const { data: meta, mutate: refreshMeta } = useSWR<MaterialsResponse>(
@@ -283,6 +394,11 @@ function NinnyPageInner() {
   const userCoins = meta?.userCoins ?? 0;
   const modeCosts = meta?.modeCosts ?? NINNY_MODE_COSTS;
   const dailyCapReached = dailyRemaining <= 0;
+  // Cold-load gate: SWR meta is undefined on the very first fetch. We show a
+  // pulse placeholder for the balance + daily-counter so the user never sees a
+  // fake 0 / full-quota frame flash before the real numbers resolve.
+  // (keepPreviousData keeps meta defined on every subsequent revalidation.)
+  const metaResolved = meta !== undefined;
 
   // Determine the source type the user is about to generate with
   const currentSourceType: NinnySourceType =
@@ -406,7 +522,7 @@ function NinnyPageInner() {
     });
     if (!res.ok || !res.data?.material) {
       console.error("[ninny:generate] failed", res.error);
-      setError("Couldn't generate that. Try again.");
+      setError("My bad, that didn't cook. Hit generate again?");
       setPhase("input");
       return;
     }
@@ -451,7 +567,13 @@ function NinnyPageInner() {
   useEffect(() => {
     if (phase === "modePicker" && material) {
       setWrongAnswerCounts(new Map());
-      setError(null);
+      // Preserve a save-failed error that was just set on the way in; clear
+      // any other stale (e.g. unlock-attempt) error.
+      if (preserveErrorOnModePickerRef.current) {
+        preserveErrorOnModePickerRef.current = false;
+      } else {
+        setError(null);
+      }
       refreshWrongAnswers(material.id);
     }
   }, [phase, material, refreshWrongAnswers]);
@@ -472,29 +594,10 @@ function NinnyPageInner() {
         setError(`Need ${cost} Fangs to unlock ${mode}. You have ${userCoins}.`);
         return;
       }
-      if (
-        typeof window !== "undefined" &&
-        !window.confirm(`Unlock ${STUDY_MODES.find(m => m.key === mode)?.label} for ${cost} Fangs?`)
-      ) {
-        return;
-      }
-      unlockInFlightRef.current = true;
-      try {
-        const res = await apiPost<{ unlockedModes: NinnyMode[] }>("/api/ninny/unlock", {
-          materialId: material.id,
-          mode,
-        });
-        if (!res.ok || !res.data) {
-          console.error("[ninny:unlock] failed", res.error);
-          setError("Couldn't unlock that mode. Try again.");
-          return;
-        }
-        // Update the local material state with the new unlocked modes
-        setMaterial({ ...material, unlocked_modes: res.data.unlockedModes });
-        refreshMeta();
-      } finally {
-        unlockInFlightRef.current = false;
-      }
+      // Open the in-app confirm modal. The actual unlock + play transition
+      // runs in confirmUnlock once the user accepts.
+      setUnlockConfirm({ mode, cost });
+      return;
     }
 
     setError(null);
@@ -502,6 +605,38 @@ function NinnyPageInner() {
     setResult(null);
     setPracticeMissesKeys(null);
     setPhase("play");
+  };
+
+  // Runs when the user confirms the unlock-for-Fangs modal. Identical economy
+  // call + state transition as the old inline window.confirm path.
+  const confirmUnlock = async () => {
+    if (!material || !user?.id || !unlockConfirm) return;
+    if (unlockInFlightRef.current) return;
+    const { mode } = unlockConfirm;
+    unlockInFlightRef.current = true;
+    try {
+      const res = await apiPost<{ unlockedModes: NinnyMode[] }>("/api/ninny/unlock", {
+        materialId: material.id,
+        mode,
+      });
+      if (!res.ok || !res.data) {
+        console.error("[ninny:unlock] failed", res.error);
+        setError("That unlock didn't go through. Try again?");
+        setUnlockConfirm(null);
+        return;
+      }
+      // Update the local material state with the new unlocked modes
+      setMaterial({ ...material, unlocked_modes: res.data.unlockedModes });
+      refreshMeta();
+      setUnlockConfirm(null);
+      setError(null);
+      setActiveMode(mode);
+      setResult(null);
+      setPracticeMissesKeys(null);
+      setPhase("play");
+    } finally {
+      unlockInFlightRef.current = false;
+    }
   };
 
   // FIXED: keep activeMode (was hardcoded to MCQ — broken for other modes).
@@ -519,11 +654,18 @@ function NinnyPageInner() {
     setPhase("play");
   };
 
-  const handleDeleteMaterial = async (id: string, title: string) => {
-    if (typeof window !== "undefined" && !window.confirm(`Delete "${title}"? This cannot be undone.`)) {
-      return;
-    }
+  const handleDeleteMaterial = (id: string, title: string) => {
+    // Open the in-app confirm modal; the delete runs in confirmDelete.
+    setDeleteConfirm({ id, title });
+  };
+
+  // Runs when the user confirms the delete-set modal. Identical server call as
+  // the old inline window.confirm path.
+  const confirmDelete = async () => {
+    if (!deleteConfirm) return;
+    const { id } = deleteConfirm;
     const res = await apiDelete(`/api/ninny/materials?id=${id}`);
+    setDeleteConfirm(null);
     if (res.ok) {
       refreshMeta();
     } else {
@@ -563,16 +705,18 @@ function NinnyPageInner() {
         wrongAnswers: r.wrongAnswers,
       });
       mutateUserStats(user.id);
+      setPhase("results");
     } else {
-      setResult({
-        score: r.score,
-        total: r.total,
-        coinsEarned: 0,
-        xpEarned: 0,
-        wrongAnswers: r.wrongAnswers,
-      });
+      // Save failed — don't fake a results screen showing +0 Fangs/+0 XP.
+      // Surface the page's error state and keep the user on the mode picker
+      // so they can retake. They keep their progress mentally; nothing was
+      // charged or rewarded.
+      console.error("[ninny:complete] failed", res.error);
+      setResult(null);
+      preserveErrorOnModePickerRef.current = true;
+      setError("Couldn't save that run, so no Fangs or XP this time. Give it another go?");
+      setPhase("modePicker");
     }
-    setPhase("results");
   };
 
   const handleRestart = () => {
@@ -598,20 +742,22 @@ function NinnyPageInner() {
     setPhase("play");
   };
 
-  const handleExitQuiz = async () => {
+  const handleExitQuiz = () => {
     // Practice mode doesn't penalize — the user already paid for the
     // original session, this is just bonus drilling.
     const isPractice = practiceMissesKeys !== null;
     const willPenalize = !isPractice && userCoins > 0;
     const penaltyAmount = Math.min(NINNY_ABANDON_PENALTY, userCoins);
+    // Open the in-app confirm modal; the abandon call runs in confirmExit.
+    setExitConfirm({ willPenalize, penaltyAmount });
+  };
 
-    const message = willPenalize
-      ? `Exit early? You'll lose ${penaltyAmount} Fangs as an early-exit penalty.`
-      : "Exit this study set? Your progress will be lost.";
-
-    if (typeof window !== "undefined" && !window.confirm(message)) {
-      return;
-    }
+  // Runs when the user confirms the exit-early modal. Identical abandon call +
+  // state transition as the old inline window.confirm path.
+  const confirmExit = async () => {
+    if (!exitConfirm) return;
+    const { willPenalize } = exitConfirm;
+    setExitConfirm(null);
 
     if (willPenalize) {
       const res = await apiPost<{ penalty: number; balance: number }>(
@@ -656,6 +802,115 @@ function NinnyPageInner() {
           </p>
         </div>
       )}
+
+      {/* Unlock-for-Fangs confirm — custom (shows Fang icon + cost + balance).
+          Mirrors ConfirmModal's dark-glass structure + Esc/backdrop behavior. */}
+      {unlockConfirm && (
+        <div
+          onClick={() => {
+            if (!unlockInFlightRef.current) setUnlockConfirm(null);
+          }}
+          className="fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="ninny-unlock-title"
+        >
+          <div
+            ref={unlockPanelRef}
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-md rounded-2xl border p-6 animate-slide-up"
+            style={{
+              background:
+                "linear-gradient(135deg, rgba(10,16,32,0.98), rgba(6,12,24,0.98))",
+              borderColor: `${NINNY_PURPLE}30`,
+            }}
+          >
+            <h3
+              id="ninny-unlock-title"
+              className="font-bebas text-2xl tracking-wider text-cream mb-3"
+            >
+              Unlock{" "}
+              {STUDY_MODES.find((m) => m.key === unlockConfirm.mode)?.label}?
+            </h3>
+            <div className="flex items-center gap-2 mb-2">
+              <img
+                src={cdnUrl("/F.png")}
+                alt="Fangs"
+                className="w-5 h-5 object-contain"
+              />
+              <span className="font-bebas text-gold text-xl tracking-wider">
+                {unlockConfirm.cost}
+              </span>
+              <span className="text-cream/60 text-sm font-syne">
+                to unlock this mode
+              </span>
+            </div>
+            <p className="text-cream/60 text-sm mb-5 font-syne leading-relaxed">
+              You have{" "}
+              <span className="text-cream font-semibold">
+                {userCoins.toLocaleString()}
+              </span>{" "}
+              Fangs. After this you&apos;ll have{" "}
+              <span className="text-cream font-semibold">
+                {(userCoins - unlockConfirm.cost).toLocaleString()}
+              </span>
+              .
+            </p>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setUnlockConfirm(null)}
+                className="flex-1 py-3 rounded-xl border border-white/10 text-cream/70 text-sm font-bold hover:bg-white/5 transition-all"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={confirmUnlock}
+                className="flex-1 py-3 rounded-xl text-sm font-bold transition-all"
+                style={{
+                  background:
+                    "linear-gradient(135deg, #F0B429 0%, #B8960C 50%, #F0B429 100%)",
+                  color: "#04080F",
+                  boxShadow: "0 4px 15px rgba(240,180,41,0.3)",
+                }}
+              >
+                Unlock
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete-set confirm */}
+      <ConfirmModal
+        open={deleteConfirm !== null}
+        onClose={() => setDeleteConfirm(null)}
+        onConfirm={confirmDelete}
+        title="Delete this study set?"
+        message={
+          deleteConfirm
+            ? `"${deleteConfirm.title}" will be gone for good. This can't be undone.`
+            : undefined
+        }
+        confirmLabel="Delete"
+        destructive
+      />
+
+      {/* Exit-early penalty confirm */}
+      <ConfirmModal
+        open={exitConfirm !== null}
+        onClose={() => setExitConfirm(null)}
+        onConfirm={confirmExit}
+        title="Exit this set?"
+        message={
+          exitConfirm?.willPenalize
+            ? `You'll lose ${exitConfirm.penaltyAmount} Fangs as an early-exit penalty. Your progress won't be saved.`
+            : "Your progress will be lost."
+        }
+        confirmLabel="Exit"
+        destructive
+      />
 
       <div className="max-w-3xl mx-auto relative">
         <BackButton />
@@ -842,6 +1097,7 @@ function NinnyPageInner() {
                     type="text"
                     value={topic}
                     onChange={(e) => setTopic(e.target.value)}
+                    aria-label="Topic to study"
                     placeholder="e.g. The American Revolution, photosynthesis, recursion..."
                     className="w-full bg-transparent text-cream placeholder:text-cream/30 font-syne text-base focus:outline-none"
                   />
@@ -934,6 +1190,7 @@ function NinnyPageInner() {
                           e.stopPropagation();
                           setUploadedFile(null);
                         }}
+                        aria-label="Remove file"
                         className="ml-2 w-7 h-7 rounded-full bg-white/10 hover:bg-white/20
                           flex items-center justify-center text-cream/60 hover:text-cream
                           transition-all"
@@ -976,6 +1233,7 @@ function NinnyPageInner() {
                       <textarea
                         value={text}
                         onChange={(e) => setText(e.target.value.slice(0, TEXT_LIMIT))}
+                        aria-label="Paste study material"
                         placeholder="Paste your textbook chapter, notes, or anything you want to study..."
                         rows={6}
                         className="w-full bg-transparent text-cream placeholder:text-cream/30 font-syne text-sm resize-none focus:outline-none"
@@ -1145,24 +1403,43 @@ function NinnyPageInner() {
               </div>
             </div>
 
-            {/* Compact balance + daily counter — prices are on each mode chip */}
+            {/* Compact balance + daily counter — prices are on each mode chip.
+                Both gate on metaResolved to avoid a flash-of-zero / fake-quota
+                frame on cold load. */}
             <div className="flex items-center justify-between mb-4 px-1 text-xs font-syne">
               <div className="flex items-center gap-1.5">
                 <img src={cdnUrl("/F.png")} alt="" className="w-3.5 h-3.5 object-contain" />
-                <span className="text-cream/80 font-bold">{userCoins.toLocaleString()}</span>
-                <span className="text-cream/40">balance</span>
+                {metaResolved ? (
+                  <>
+                    <span className="text-cream/80 font-bold">{userCoins.toLocaleString()}</span>
+                    <span className="text-cream/40">balance</span>
+                  </>
+                ) : (
+                  <span
+                    className="inline-block h-3 w-16 rounded bg-white/10 animate-pulse"
+                    aria-hidden="true"
+                  />
+                )}
               </div>
-              <span className="text-cream/40">
-                {dailyCapReached
-                  ? "Daily cap reached"
-                  : isFreeNow
-                  ? (<span className="inline-flex items-center gap-1.5"><Gift size={14} weight="fill" aria-hidden="true" /> First generation free today</span>)
-                  : `${dailyRemaining} of ${meta?.dailyLimit ?? NINNY_DAILY_LIMIT} left today`}
-              </span>
+              {metaResolved ? (
+                <span className="text-cream/40">
+                  {dailyCapReached
+                    ? "Daily cap reached"
+                    : isFreeNow
+                    ? (<span className="inline-flex items-center gap-1.5"><Gift size={14} weight="fill" aria-hidden="true" /> First generation free today</span>)
+                    : `${dailyRemaining} of ${meta?.dailyLimit ?? NINNY_DAILY_LIMIT} left today`}
+                </span>
+              ) : (
+                <span
+                  className="inline-block h-3 w-24 rounded bg-white/10 animate-pulse"
+                  aria-hidden="true"
+                />
+              )}
             </div>
 
             {error && (
               <div
+                role="alert"
                 className="rounded-xl border px-4 py-3 mb-4 animate-slide-up"
                 style={{
                   background: "rgba(239,68,68,0.08)",
@@ -1475,6 +1752,7 @@ function NinnyPageInner() {
             {/* Inline error (e.g. insufficient Fangs) */}
             {error && (
               <div
+                role="alert"
                 className="rounded-xl border px-4 py-3 mb-4 animate-slide-up"
                 style={{
                   background: "rgba(239,68,68,0.08)",
@@ -1865,7 +2143,7 @@ function NinnyPageInner() {
                 </span>
                 {isPerfect && (
                   <div
-                    className="absolute inset-0 rounded-full animate-ping"
+                    className="absolute inset-0 rounded-full motion-safe:animate-ping"
                     style={{ boxShadow: "0 0 0 3px rgba(255,215,0,0.5)" }}
                   />
                 )}

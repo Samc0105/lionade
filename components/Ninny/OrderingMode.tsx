@@ -56,7 +56,7 @@ export default function OrderingMode({ questions, wrongAnswerCounts, onComplete 
     return (
       <div className="rounded-2xl border border-white/[0.06] bg-white/[0.02] px-6 py-10 text-center">
         <p className="font-bebas text-lg text-cream/70 tracking-wider mb-1">ORDERING NEEDS TERMS</p>
-        <p className="text-cream/45 text-xs">Add some entries to this set to unlock this mode.</p>
+        <p className="text-cream/60 text-xs">Add some entries to this set to unlock this mode.</p>
       </div>
     );
   }
@@ -170,7 +170,7 @@ export default function OrderingMode({ questions, wrongAnswerCounts, onComplete 
         </p>
       </div>
 
-      <p className="font-syne text-cream/40 text-xs text-center mb-4">
+      <p className="font-syne text-cream/60 text-xs text-center mb-4">
         Tap two items to swap their positions
       </p>
 

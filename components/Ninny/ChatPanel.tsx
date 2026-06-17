@@ -215,7 +215,7 @@ export default function ChatPanel({ materialId, materialTitle, materialSubject }
             </div>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-4" aria-live="polite" role="log">
             {messages.map((msg) => (
               <ChatBubble key={msg.id} role={msg.role} content={msg.content} />
             ))}
@@ -226,6 +226,7 @@ export default function ChatPanel({ materialId, materialTitle, materialSubject }
 
       {error && (
         <div
+          role="alert"
           className="rounded-xl border px-4 py-2.5 mb-2 animate-slide-up"
           style={{
             background: "rgba(239,68,68,0.08)",

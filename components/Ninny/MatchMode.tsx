@@ -100,7 +100,7 @@ export default function MatchMode({ pairs, wrongAnswerCounts, onComplete }: Prop
     return (
       <div className="rounded-2xl border border-white/[0.06] bg-white/[0.02] px-6 py-10 text-center">
         <p className="font-bebas text-lg text-cream/70 tracking-wider mb-1">NOT ENOUGH PAIRS YET</p>
-        <p className="text-cream/45 text-xs">Match needs at least a few terms in this set.</p>
+        <p className="text-cream/60 text-xs">Match needs at least a few terms in this set.</p>
       </div>
     );
   }
@@ -178,7 +178,7 @@ export default function MatchMode({ pairs, wrongAnswerCounts, onComplete }: Prop
         />
       </div>
 
-      <p className="font-syne text-cream/40 text-xs text-center mb-5">
+      <p className="font-syne text-cream/60 text-xs text-center mb-5">
         Tap a term, then tap its definition
       </p>
 
