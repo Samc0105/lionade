@@ -93,11 +93,17 @@ export default function BackButton({ href, label }: Props) {
 
   return (
     <button
+      type="button"
       onClick={() => router.push(parentPath)}
-      className="inline-flex items-center gap-1.5 text-cream/40 hover:text-cream/80
-        text-sm font-syne transition-colors mb-4 group"
+      className="inline-flex items-center gap-1.5 text-cream/60 hover:text-cream
+        text-sm font-syne transition-colors mb-4 group rounded
+        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cream/70
+        focus-visible:ring-offset-2 focus-visible:ring-offset-navy"
     >
-      <span className="text-base leading-none transition-transform group-hover:-translate-x-0.5">
+      <span
+        aria-hidden="true"
+        className="text-base leading-none transition-transform motion-safe:group-hover:-translate-x-0.5"
+      >
         &larr;
       </span>
       <span>Back to {buttonLabel}</span>
