@@ -153,8 +153,15 @@ export async function POST(req: NextRequest) {
     let correctAnswers = validatedCorrectAnswers;
     let coinsEarned: number;
     let xpEarned: number;
-    // Boosters whose effect contributed to THIS reward — consumed post-insert.
+    // Boosters whose effect contributed to THIS reward, consumed post-insert
+    // by the LEGACY atomic-decrement path (Step 1b). Left EMPTY when the
+    // transactional RPC already consumed up-front (see rpcConsumed below), so
+    // Step 1b never double-consumes.
     const boostersToConsume: ActiveBoosterRow[] = [];
+    // Set to true once the serialized RPC has consumed (and recorded its own
+    // attempt-scoped ledger). Signals Step 1b to skip: the RPC is the
+    // authoritative consume on this path.
+    let rpcConsumed = false;
 
     if (deriveReward) {
       const { data: rawBoosters } = await supabaseAdmin
@@ -172,9 +179,122 @@ export async function POST(req: NextRequest) {
       const coinMul = find("coin_multiplier") ?? find("coin_xp_multiplier");
       const xpMul = find("xp_multiplier") ?? find("coin_xp_multiplier");
       const scoreBoostB = find("score_boost");
-      const coinMultiplier = coinMul ? coinMul.value : 1;
-      const xpMultiplier = xpMul ? xpMul.value : 1;
-      const scoreBoost = scoreBoostB ? scoreBoostB.value : 0;
+
+      // ── Serialized derive-from-consume (transactional RPC) ─────────────────
+      // The pre-read above (coinMul/xpMul/scoreBoostB) only tells us WHICH
+      // effects are candidates. To close the concurrent-distinct-attempt race
+      // (two attempts both deriving the same single-use booster before either
+      // decrements), we let the RPC consume the contending rows under row lock
+      // (FOR UPDATE SKIP LOCKED) and DERIVE the multipliers from the set it
+      // ACTUALLY consumed. We need a non-null attemptId for the RPC's
+      // attempt-scoped idempotency ledger; an old client that omits attemptId
+      // falls through to the legacy read-derive + atomic-decrement path below.
+      //
+      // Candidate effects: de-duped, priority-ordered. coin_multiplier /
+      // xp_multiplier take precedence over coin_xp_multiplier (Double Down),
+      // matching the find() priority. We pass the EFFECT each candidate booster
+      // actually carries (coinMul.effect etc.) so the RPC consumes the same row
+      // the route's find() picked: e.g. when only Double Down is active, both
+      // coinMul and xpMul resolve to the coin_xp_multiplier row and the RPC
+      // sees one 'coin_xp_multiplier' effect (de-duped) and consumes it once.
+      const candidateEffects: string[] = [];
+      const seenEffect = new Set<string>();
+      for (const b of [coinMul, xpMul, scoreBoostB]) {
+        if (b && !seenEffect.has(b.effect)) {
+          seenEffect.add(b.effect);
+          candidateEffects.push(b.effect);
+        }
+      }
+
+      // Multipliers/score-boost we will actually apply. Default to "no booster"
+      // and overwrite from whichever source (RPC or legacy read) wins.
+      let coinMultiplier = 1;
+      let xpMultiplier = 1;
+      let scoreBoost = 0;
+
+      let usedRpc = false;
+      if (attemptId && candidateEffects.length > 0) {
+        try {
+          const { data: rpcData, error: rpcErr } = await supabaseAdmin.rpc(
+            "consume_quiz_boosters",
+            {
+              p_user_id: userId,
+              p_attempt_id: attemptId,
+              p_effects: candidateEffects,
+            },
+          );
+          if (rpcErr) throw rpcErr;
+
+          // The RPC returns the boosters it ACTUALLY consumed (and recorded in
+          // its attempt-scoped ledger). Derive multipliers from THAT set, using
+          // the same priority as the read-side find(): an explicit
+          // coin_multiplier beats coin_xp_multiplier for coins; explicit
+          // xp_multiplier beats coin_xp_multiplier for xp.
+          const consumed = Array.isArray(rpcData)
+            ? (rpcData as Array<{ effect?: string; value?: number; booster_id?: string }>)
+            : [];
+          const consumedFind = (effect: string) =>
+            consumed.find((c) => c?.effect === effect);
+          const cCoin = consumedFind("coin_multiplier") ?? consumedFind("coin_xp_multiplier");
+          const cXp = consumedFind("xp_multiplier") ?? consumedFind("coin_xp_multiplier");
+          const cScore = consumedFind("score_boost");
+          coinMultiplier = cCoin ? Number(cCoin.value ?? 1) : 1;
+          xpMultiplier = cXp ? Number(cXp.value ?? 1) : 1;
+          scoreBoost = cScore ? Number(cScore.value ?? 0) : 0;
+          usedRpc = true;
+          rpcConsumed = true;
+        } catch (rpcCatch) {
+          const e = rpcCatch as { code?: string; message?: string };
+          // Is this "the function does not exist" (migration not applied yet)?
+          // Postgres raises 42883 (undefined_function); PostgREST surfaces a
+          // missing RPC as code PGRST202 with a "Could not find the function ...
+          // in the schema cache" message.
+          const missingFn =
+            e?.code === "42883" ||
+            e?.code === "PGRST202" ||
+            (typeof e?.message === "string" &&
+              (e.message.includes("consume_quiz_boosters") ||
+                e.message.toLowerCase().includes("does not exist") ||
+                e.message.toLowerCase().includes("could not find the function")));
+          if (missingFn) {
+            // Migration not applied yet → fall back to the legacy read-derive +
+            // atomic-decrement consume path (proven safe, byte-identical to the
+            // route's prior behavior). This is the ONLY case we fall back.
+            console.warn(
+              "[save-quiz-results] consume_quiz_boosters RPC unavailable, falling back to atomic-decrement consume (apply migration 20260617180000 to enable the serialized path)",
+            );
+            usedRpc = false;
+            rpcConsumed = false;
+          } else {
+            // The function EXISTS but errored (deadlock / timeout / transient).
+            // It is transactional, so it rolled back and consumed NOTHING. Do
+            // NOT fall back to the legacy consume — that would reopen the
+            // double-derive race and, for any future multi-use booster, risk a
+            // double-consume. Fail CLOSED: award the BASE reward (no booster
+            // multiplier), consume nothing, leave the booster intact for the
+            // user's next quiz.
+            console.warn(
+              "[save-quiz-results] consume_quiz_boosters RPC errored (applied); failing closed to base reward, no booster consumed:",
+              e?.message ?? "unknown",
+            );
+            coinMultiplier = 1;
+            xpMultiplier = 1;
+            scoreBoost = 0;
+            usedRpc = true; // skip the legacy read-derive block (keep base multipliers)
+            rpcConsumed = true; // skip Step 1b consume (nothing was consumed)
+          }
+        }
+      }
+
+      if (!usedRpc) {
+        // ── LEGACY read-derive path (fallback) ───────────────────────────────
+        // Derive from the pre-read and let Step 1b consume via the existing
+        // owner-scoped atomic conditional decrement. Byte-identical to the
+        // route's prior behavior.
+        coinMultiplier = coinMul ? coinMul.value : 1;
+        xpMultiplier = xpMul ? xpMul.value : 1;
+        scoreBoost = scoreBoostB ? scoreBoostB.value : 0;
+      }
 
       const diffMult = DIFFICULTY_MULTIPLIER[difficulty];
       const blitzMult = blitzMode ? 2 : 1;
@@ -219,11 +339,16 @@ export async function POST(req: NextRequest) {
       // Consume only the boosters that actually contributed to the reward: the
       // coin/xp/coin_xp multiplier(s) and the score_boost. De-dupe by booster id
       // (Double Down is one row feeding both coin AND xp, so it consumes once).
-      const seen = new Set<string>();
-      for (const b of [coinMul, xpMul, scoreBoostB]) {
-        if (b && !seen.has(b.id)) {
-          seen.add(b.id);
-          boostersToConsume.push(b);
+      // ONLY when the serialized RPC did NOT already consume. When rpcConsumed
+      // is true the RPC is the authoritative consume and Step 1b must skip, or
+      // we would double-consume.
+      if (!rpcConsumed) {
+        const seen = new Set<string>();
+        for (const b of [coinMul, xpMul, scoreBoostB]) {
+          if (b && !seen.has(b.id)) {
+            seen.add(b.id);
+            boostersToConsume.push(b);
+          }
         }
       }
     } else {
@@ -296,7 +421,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Couldn't save quiz results." }, { status: 500 });
     }
 
-    // 1b. Consume the boosters that fed this reward (v2 derive path only).
+    // 1b. Consume the boosters that fed this reward. LEGACY FALLBACK ONLY.
+    // boostersToConsume is populated ONLY when the serialized
+    // consume_quiz_boosters RPC was NOT used (RPC missing/unapplied, an
+    // unexpected RPC error, or an old client that omits attemptId). When the
+    // RPC ran (rpcConsumed === true) it already consumed under row lock and
+    // recorded its attempt-scoped ledger, so boostersToConsume is empty here
+    // and this block is a no-op, never a double-consume.
+    //
     // Placed AFTER the session insert + replay guard: an idempotent attemptId
     // retry hits the 23505 conflict above and returns early, so it never
     // reaches here. The boosters are consumed exactly once, on the first
@@ -304,7 +436,7 @@ export async function POST(req: NextRequest) {
     //
     // ATOMIC conditional decrement (was read-modify-write, which let two
     // concurrent submits each read uses_remaining=1 and both decrement, double-
-    // spending a single-use booster). We now decrement in a single statement
+    // spending a single-use booster). We decrement in a single statement
     // guarded by `uses_remaining > 0` and scoped to the owner:
     //   UPDATE active_boosters
     //      SET uses_remaining = uses_remaining - 1
@@ -316,17 +448,14 @@ export async function POST(req: NextRequest) {
     // decrement; the loser matches 0 rows. When the new value hits 0 we delete
     // the row to mirror the activate-booster PATCH consume behavior.
     //
-    // KNOWN RESIDUAL RACE (follow-up): two DISTINCT attempts (different
-    // attempt_ids, e.g. two real quiz submits from two tabs) both READ the
-    // booster pre-consume in the derive block above and can both derive a
-    // boosted reward off the same single-use booster before either reaches
-    // this consume. The atomic decrement here prevents double-CONSUME (the
-    // second decrement matches 0 rows), but does NOT prevent both rewards from
-    // being credited. Fully serializing distinct concurrent attempts requires a
-    // transactional RPC (derive + consume in one SECURITY DEFINER function
-    // under row lock). Tracked as a follow-up; the practical window is tiny
-    // (both submits in flight before either consumes) and is non-financial
-    // beyond one extra boosted quiz reward.
+    // RESIDUAL DOUBLE-DERIVE RACE — CLOSED on the RPC path. Two DISTINCT
+    // attempts both reading a single-use booster and both deriving its
+    // multiplier before either consumes is prevented by deriving FROM the RPC's
+    // FOR UPDATE SKIP LOCKED consume (derive block above): the loser skips the
+    // locked row and derives no multiplier for that effect. This legacy block
+    // still carries the OLD residual (double-derive possible) and is therefore
+    // ONLY a fallback for when the migration is unapplied; the route prefers
+    // the serialized RPC whenever it exists.
     //
     // Best-effort: a consume failure must not 500 a successfully recorded quiz
     // (the reward derivation already happened off a fresh read).
