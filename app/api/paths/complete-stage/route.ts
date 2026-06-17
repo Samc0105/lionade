@@ -21,8 +21,11 @@
 //
 // Response 200:
 //   { success: true, stars, isNewBest, completed, firstCompletion,
-//     fangsAwarded, newCoins }
+//     fangsAwarded, xpEarned, newCoins }
 //   fangsAwarded is 0 (and newCoins null) on replays/non-completions.
+//   xpEarned is the authoritative XP this attempt granted (correct*20 +
+//     stars*25, granted on EVERY attempt) — echoed so the UI displays the
+//     server value rather than recomputing it.
 //
 // Ledger type is "quiz_reward" — the same type the old client path logged for
 // path stages (and the one the live coin_transactions_type_check allows);
@@ -279,6 +282,7 @@ export async function POST(req: NextRequest) {
       completed,
       firstCompletion,
       fangsAwarded,
+      xpEarned,
       newCoins,
     });
   } catch (e) {

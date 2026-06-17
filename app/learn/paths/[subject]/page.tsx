@@ -75,6 +75,7 @@ export default function RoadMapPage() {
   const [resultStars, setResultStars] = useState(0);
   const [isNewBest, setIsNewBest] = useState(false);
   const [fangsAwarded, setFangsAwarded] = useState<number | null>(null);
+  const [xpEarned, setXpEarned] = useState<number | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [quizLoading, setQuizLoading] = useState(false);
   const [timer, setTimer] = useState(30);
@@ -233,6 +234,7 @@ export default function RoadMapPage() {
     if (!activeStage || !user) return;
     setSaveError(null);
     setFangsAwarded(null);
+    setXpEarned(null);
     setPhase("results");
 
     const totalQ = questions.length;
@@ -246,18 +248,20 @@ export default function RoadMapPage() {
         stars: number;
         isNewBest: boolean;
         fangsAwarded: number;
+        xpEarned: number;
       }>("/api/paths/complete-stage", {
         stageId: activeStage.id,
         correct: score,
         total: totalQ,
       });
       if (!res.ok || !res.data) throw new Error(res.error ?? "Couldn't save progress");
-      const { stars, isNewBest: newBest, fangsAwarded: awarded } = res.data;
+      const { stars, isNewBest: newBest, fangsAwarded: awarded, xpEarned: xp } = res.data;
       setResultStars(stars);
       setIsNewBest(newBest);
-      // Server is authoritative for the Fang reward — render exactly what the
-      // route paid out rather than recomputing it client-side.
+      // Server is authoritative for both rewards — render exactly what the
+      // route paid out rather than recomputing them client-side.
       setFangsAwarded(awarded);
+      setXpEarned(xp);
 
       // The quiz-session log, XP grant, and daily-activity/streak update are now
       // done SERVER-SIDE inside /api/paths/complete-stage (Phase 2 of migration
@@ -270,6 +274,7 @@ export default function RoadMapPage() {
       setResultStars(0);
       setIsNewBest(false);
       setFangsAwarded(null);
+      setXpEarned(null);
       setSaveError(
         err instanceof Error && err.message ? err.message : "Couldn't save your progress"
       );
@@ -911,12 +916,9 @@ export default function RoadMapPage() {
                     <span className="text-lg text-electric">
                       <Lightning size={20} weight="regular" aria-hidden="true" color="currentColor" />
                     </span>
-                    {/* TODO: switch to a server-authoritative XP value once
-                        /api/paths/complete-stage returns one. It currently grants
-                        xpEarned = correct*20 + stars*25 server-side but does not
-                        echo it in the response, so we mirror that formula here. */}
+                    {/* Server-authoritative XP payout from /api/paths/complete-stage. */}
                     <span className="font-bebas text-xl text-electric">
-                      +{score * 20 + resultStars * 25} XP
+                      +{xpEarned ?? 0} XP
                     </span>
                   </div>
                 </div>
